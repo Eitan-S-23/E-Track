@@ -2,8 +2,10 @@
 
 Status: PRODUCTION_CONFIGURATION_PARTIAL (P44-CREDENTIAL-01 remains open).
 Owner-authorized production resources, schema, runtime keys and four environment
-secrets are now configured. The production CI protected source/scope is still
-unqualified; candidate-specific approval inputs remain with the reviewer/owner.
+secrets are now configured. The owner has selected a dedicated production CI
+credential; creation is blocked by the documented native-proxy/resource-scope
+gap, not lack of that decision. Candidate-specific approval inputs remain with
+the reviewer/owner. See the final continuation section and configuration note.
 The existing `e-track-ci` is not missing; a new token is not a default requirement.
 Independent acceptance belongs to the
 user's main agent. The sole Spec remains
@@ -618,3 +620,76 @@ from this document's delivery commit and the handoff; no main integration or
 new CI/runtime qualification is implied. The previously published credential
 discovery/agent-use changes remain pending main integration, so other agents
 must not assume their local main already contains those instructions.
+
+## Dedicated CI Credential Continuation (2026-10-19)
+
+The owner explicitly chose an independent production CI credential, replacing
+the prior existing-source-first condition. Creation/direct protected GitHub
+installation is authorized within the three exact production resources, but
+account-wide scope, test-token reuse and provisioning-token export are not.
+This decision was consumed without another approval request or separate
+acknowledgment-only delivery.
+
+`P44-CREDENTIAL-01` now has a concrete interface/scope blocker. The unchanged
+production workflow calls `withFirmwareBucket` / Wrangler 4.105.0
+`getPlatformProxy(remoteBindings=true)`, which obtains an account preview session
+and uploads the temporary `trace-firmware-uploader` proxy. The required cold-start
+subdomain GET accepts Workers Scripts Read/Write; those ordinary token groups
+are account-scoped, beyond the owner-approved three resources. The R2 bucket-only
+Object permission is documented as S3-only and cannot satisfy that API. The
+complete preview-upload minimum permission set remains unestablished; the
+separate permanent-deploy API and historical test token are not substitutes.
+
+Read current `P4-4-configuration-2026-10-18.md#dedicated-production-ci-decision`
+for the actual API/method/resource table, official references, conditional owner
+console steps, proposed P4-1/P4-2 route decision and verification oracle.
+Preferred direction retains strict isolation and delegates any product route
+change to the original owners. A scope exception is a separate owner decision,
+not implied by authority to create a dedicated token. No new account or
+subscription, broad template or token-management capability in CI is requested.
+
+The only authenticated platform call in this continuation was read-only GET
+`/accounts/{approved-account}/tokens/permission_groups` using the existing local
+setup input; 403/9109 is preserved. It is not a token creation attempt or proof
+that creation would fail. No POST was made because no qualified in-bound policy
+was available. No CF/GitHub configuration changed; resources/keys/AES were not
+recreated, and no runtime/rehearsal/production workflow or device action ran.
+
+Five product inputs were compared with accepted main; eight source/document
+assertions passed. These are static reconnaissance, not eight production tests.
+The original 11/85/26 self-tests remain historical, unchanged and not recounted.
+Public documentation was captured with URL/time/status/SHA, including the 301
+to the new local-development page and the guessed edge-preview API page's 404.
+The current tagged SDK source was retrieved directly. A combined report patch
+failed context matching without applying; the corrected patches only update
+the existing task records. Read-only search/path diagnostics are not hidden as
+successful checks. No formal acceptance or full policy qualification is claimed.
+
+All controlled new outputs use the preflighted `.cache/p44/ci-policy`, contained
+runner logs and task delivery archive, plus three ignored thin read-only helpers.
+No dependencies were installed, no external PowerShell/CRL files cleaned and no
+platform creation probe was used. Prior archives remain immutable. The exact
+new increment and closing boundary checks are recorded below after sealing.
+
+The `ci-policy.zip` increment contains 69 byte-verified entries, 116605 bytes,
+SHA-256 `03cd75602b9b988ec9fca2f6fb790bb44cba4232a96e70061089bd9d131bf997`.
+Its adjacent inventory records each member and the successful known-credential
+scan/native-tar extraction verification. The empty remote-bindings.txt is the
+original 301 response body; the captured ci-policy-seal-01.log was still empty
+during sealing and is not sealing-result evidence. The completed sealing result
+is retained in the contained logs and identified here, not retroactively inserted
+into the archive. The later closing audit is likewise a separate original.
+
+At 2026-10-18T17:49:38.630Z the closing check verified 70 selected new/report/log
+paths and all six archive hashes, with the five predecessor archives unchanged.
+Paths resolved inside this task root; necessary Git objects/task refs/worktree
+metadata remain the sole authorized additional write scope. The read-only known
+external Windows PowerShell startup cache observation is still 1004 bytes, now
+mtime 2026-10-18T17:47:42.680Z. Attribution remains unresolved; no external cleanup
+or machine-wide zero-write claim is made. The exact observation and hashes are
+in `.cache/p44/logs/ci-policy-closing-audit-01.log` and its closed JSON receipt.
+
+Delivery remains on dev/p4-4/config-integration-20261018, based on bbdb20b3223e7dbfc1c93fee1bade6f0ed680b28.
+Remote main was read as 0779f677507fa2c8a88c1799c8d2909bbae5a0a0. This increment
+does not merge main, change readiness derivation or claim implementation/acceptance
+completion. Its exact successor commit is supplied in the handoff.

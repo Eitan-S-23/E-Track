@@ -1,0 +1,364 @@
+{
+  "createdAt": "2026-10-18T17:48:23.544Z",
+  "nature": "P4-4 implementation observations, not independent acceptance",
+  "archive": {
+    "path": "docs/ota-exec-notes/P4-4-integration-2026-10-18/ci-policy.zip",
+    "sizeBytes": 116605,
+    "sha256": "03cd75602b9b988ec9fca2f6fb790bb44cba4232a96e70061089bd9d131bf997"
+  },
+  "entries": [
+    {
+      "path": ".cache/p44-run.cjs",
+      "sizeBytes": 5072,
+      "sha256": "51b9b6c153f0520fffda4ecdb81cc8a10f8880acb0607173e7be3d121466d5f8"
+    },
+    {
+      "path": ".cache/p44-platform.cjs",
+      "sizeBytes": 17726,
+      "sha256": "f08927b9fa258d0e04d6a0a89d3c4d5234a89eac52c00d0dbe9802599c1d3c95"
+    },
+    {
+      "path": ".cache/p44-github-config.cjs",
+      "sizeBytes": 4820,
+      "sha256": "444f6a6c1b392205b54ac0d4886faf2c7c65876e56de3b48e9a810f65cd643b0"
+    },
+    {
+      "path": ".cache/p44-seal.cjs",
+      "sizeBytes": 6022,
+      "sha256": "5487385d3078022d31603327ea5fe5b3c882b4ac015b9691908dd649a893b4f2"
+    },
+    {
+      "path": ".cache/p44-audit.cjs",
+      "sizeBytes": 5739,
+      "sha256": "7046ad89bf27fe66ee4780f1e6a94b7019c51d3ae521729f8de044001474342e"
+    },
+    {
+      "path": ".cache/p44-ci-policy.cjs",
+      "sizeBytes": 2656,
+      "sha256": "d666990558d5b57bca4e86885ba2a862731562d3b2fd46a107998be9ae034e59"
+    },
+    {
+      "path": ".cache/p44-ci-catalog.cjs",
+      "sizeBytes": 2910,
+      "sha256": "d9b8599bfdd7b1adfa036060379021014720acefe2d7ba23866125930f1ca6b0"
+    },
+    {
+      "path": ".cache/p44-ci-analysis.cjs",
+      "sizeBytes": 4770,
+      "sha256": "6d6d83b7e445d3bf9b39a93f732606b17b116753b831051b3305407e47f69390"
+    },
+    {
+      "path": ".cache/p44/ci-policy/account-permission-groups.json",
+      "sizeBytes": 484,
+      "sha256": "6197b9d307347cef6bae2d1d51b233551ba886a06dca743284661bc879ffe2cb"
+    },
+    {
+      "path": ".cache/p44/ci-policy/account-tokens.json",
+      "sizeBytes": 392,
+      "sha256": "74c901e4e48dd14add8b16e47d2211b1fdfdd6a8ba1f0a9ede77f425a8cdd86d"
+    },
+    {
+      "path": ".cache/p44/ci-policy/account-tokens.txt",
+      "sizeBytes": 6189,
+      "sha256": "78aa0dac12131a55c1b26a11195896aa8fc0638e81a8b7bbb0435a4cc607036d"
+    },
+    {
+      "path": ".cache/p44/ci-policy/create-via-api.json",
+      "sizeBytes": 382,
+      "sha256": "0afb3db1db5d8cef1ea7f2ee934d5fe3121b28e05c15262d8ad593b0c89389e1"
+    },
+    {
+      "path": ".cache/p44/ci-policy/create-via-api.txt",
+      "sizeBytes": 13741,
+      "sha256": "dfbc75aa6b1ab309b1fe8319b4622c5d6ca75561b2d746c92c07e7cd55b714ea"
+    },
+    {
+      "path": ".cache/p44/ci-policy/d1-query-api.json",
+      "sizeBytes": 396,
+      "sha256": "191aa2457823a3d4be4151c47d2c4d3ace929a52ec5e396c6c873c2dc0c1b740"
+    },
+    {
+      "path": ".cache/p44/ci-policy/d1-query-api.txt",
+      "sizeBytes": 15142,
+      "sha256": "c8901fc1962341ad1a81df1eca19237bfcac895b77a82c684713009ed39be548"
+    },
+    {
+      "path": ".cache/p44/ci-policy/local-development.json",
+      "sizeBytes": 369,
+      "sha256": "ebdc07ae1e07a15fe7ef5f36a1742e47788ab8eea0961a783f0df5b10f234113"
+    },
+    {
+      "path": ".cache/p44/ci-policy/local-development.txt",
+      "sizeBytes": 31310,
+      "sha256": "cf15a44eaa92323e4fe56d14a03dc7a0177ba6509ebda5ded07b67be1b7d9896"
+    },
+    {
+      "path": ".cache/p44/ci-policy/permissions.json",
+      "sizeBytes": 382,
+      "sha256": "9ae9b33ba82d7c9ffb45b8b246dfa62bfc2285fece89dac9c8b847bf17b78c1d"
+    },
+    {
+      "path": ".cache/p44/ci-policy/permissions.txt",
+      "sizeBytes": 73137,
+      "sha256": "64d247bf75f8e521e73f775218e72a8d5b1c5ceebf3b4126463efd4da94d4408"
+    },
+    {
+      "path": ".cache/p44/ci-policy/preview-source.json",
+      "sizeBytes": 429,
+      "sha256": "6d1ee7550c9baa95d3323c94f57535a735bfa94c8cbaa2365f0582fcb4a70541"
+    },
+    {
+      "path": ".cache/p44/ci-policy/preview-source.txt",
+      "sizeBytes": 8625,
+      "sha256": "775b00855d56827aecd3a2b6176c663e489cd883ef67791ea0d48c2c9f57fdf6"
+    },
+    {
+      "path": ".cache/p44/ci-policy/r2-tokens.json",
+      "sizeBytes": 357,
+      "sha256": "b4e8c9be2f78540b95712c8349104fa67dafbaf2e3029d2051381a7a627324db"
+    },
+    {
+      "path": ".cache/p44/ci-policy/r2-tokens.txt",
+      "sizeBytes": 10670,
+      "sha256": "80a22d05cdc014b799f987f5678707b0bfd137f586ae8a94ef11cb1d16e881cb"
+    },
+    {
+      "path": ".cache/p44/ci-policy/remote-bindings.json",
+      "sizeBytes": 389,
+      "sha256": "73a15775e08e17d1b40eee7bf2eb6330a481cd29f8755d5a9b249e9fdce642b1"
+    },
+    {
+      "path": ".cache/p44/ci-policy/remote-bindings.txt",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p44/ci-policy/roles.json",
+      "sizeBytes": 377,
+      "sha256": "99a0a5bd8604d1962a33c05ec5b98e074fc68f52cd7acf48377ce6101df6a50f"
+    },
+    {
+      "path": ".cache/p44/ci-policy/roles.txt",
+      "sizeBytes": 24927,
+      "sha256": "310054343500b05155f10a0c8f70bc012e673cf6658ca1c1a1b9e7ae426cc304"
+    },
+    {
+      "path": ".cache/p44/ci-policy/source-analysis.json",
+      "sizeBytes": 10086,
+      "sha256": "c2cd8c6d95ea77d9e60484c2f1d98204d6f0285359f286cff29f0a3bc3240294"
+    },
+    {
+      "path": ".cache/p44/ci-policy/worker-preview-api.json",
+      "sizeBytes": 420,
+      "sha256": "a7817db64311cd0e9ab223f531b7cba737cd5452efaf956d7730339aacf48f1a"
+    },
+    {
+      "path": ".cache/p44/ci-policy/worker-preview-api.txt",
+      "sizeBytes": 9,
+      "sha256": "0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5"
+    },
+    {
+      "path": ".cache/p44/ci-policy/worker-subdomain-api.json",
+      "sizeBytes": 400,
+      "sha256": "e4abbe13afed20915174a963f0d928b18ef1330ade9ce2d301af4aab1dd09656"
+    },
+    {
+      "path": ".cache/p44/ci-policy/worker-subdomain-api.txt",
+      "sizeBytes": 6441,
+      "sha256": "9baaf12a74fe0b3ad00c9bba47c0204c1087801a27b1b61a8d45c0dd989c2f45"
+    },
+    {
+      "path": ".cache/p44/ci-policy/worker-upload-api.json",
+      "sizeBytes": 402,
+      "sha256": "939d22c4cb62341ac74442759798841bfa64e89c07ce9493a4e54eb0f0c3ffc8"
+    },
+    {
+      "path": ".cache/p44/ci-policy/worker-upload-api.txt",
+      "sizeBytes": 252097,
+      "sha256": "91d36601cb296535ae054ad5e4cc3fab41697be2e4b4a9806cdd9a88a676e98e"
+    },
+    {
+      "path": ".cache/p44/ci-policy/wrangler-api.json",
+      "sizeBytes": 364,
+      "sha256": "f7d86120fd7981acfac95a86c252ebf041d0002670c3604aec6460670ebe5161"
+    },
+    {
+      "path": ".cache/p44/ci-policy/wrangler-api.txt",
+      "sizeBytes": 30640,
+      "sha256": "f25cd2b8e3bef3d1980e6d811b9c31e0b6a5995e0e3bd92253d79cf61fa9bc33"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-account-catalog-01.json",
+      "sizeBytes": 434,
+      "sha256": "ad72ce1f88dcd4f70200e8c07024d92db7c43b26e5d7f76d43ff9a68f1c25c95"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-account-catalog-01.log",
+      "sizeBytes": 484,
+      "sha256": "6197b9d307347cef6bae2d1d51b233551ba886a06dca743284661bc879ffe2cb"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-doc-account-tokens-01.json",
+      "sizeBytes": 553,
+      "sha256": "54db8a971dcc5e3bc3fb412cee0e0a3b38b49531acdfc1bc6918c4b12bca54f6"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-doc-account-tokens-01.log",
+      "sizeBytes": 355,
+      "sha256": "30bb7094adb41177651abb184c550557da621f2f29150a399e5598178c5ec4a9"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-doc-create-01.json",
+      "sizeBytes": 526,
+      "sha256": "d33b668a0e38ff215b5dd5fae8aa504fab2ff3a25ab101497a99157adf1b2749"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-doc-create-01.log",
+      "sizeBytes": 345,
+      "sha256": "87cfc787a24c21a83fba618e6eaff5a81c4291d68593dcaeb7883630e0a9a66a"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-doc-d1-api-01.json",
+      "sizeBytes": 538,
+      "sha256": "58aefce95c1ce0ad6baa278be4125a5d519375d413eb125b018d06d10f998066"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-doc-d1-api-01.log",
+      "sizeBytes": 359,
+      "sha256": "cbb24a589766ddd0af52387ecb97a16c4d2e8d3a355f820ece07d19a14ac02d4"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-doc-local-01.json",
+      "sizeBytes": 514,
+      "sha256": "c334bb51142fdcd0b78c031e88709b9658ac40b02b873954a0f7fb89d2af0ca3"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-doc-local-01.log",
+      "sizeBytes": 332,
+      "sha256": "1a50ff4724ecca32e1dd87e72c8910ad563cca64829a19640acfcafa1ae8febd"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-doc-permissions-01.json",
+      "sizeBytes": 533,
+      "sha256": "60e6f772b48797d9817fbd8149548ae1cd5ddaf13086cc5ac291ebfde1753c6b"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-doc-permissions-01.log",
+      "sizeBytes": 345,
+      "sha256": "3821c41eec8ac8400c1dc2649655d585fa3549ffac75400f84eb582992521f92"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-doc-preview-api-01.json",
+      "sizeBytes": 585,
+      "sha256": "60e4b76bc1aeee24ea3fe184b4edff17b806aa25c1be52407f809855557104eb"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-doc-preview-api-01.log",
+      "sizeBytes": 383,
+      "sha256": "0e6482d991bc37c901fd2d3f9ca2e5cdc26369b7f31f42882f6ea60ef6fab868"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-doc-proxy-api-01.json",
+      "sizeBytes": 512,
+      "sha256": "67ece0b1a249329fc717e74720da744a91a174eab21e354ce17831ff2972b568"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-doc-proxy-api-01.log",
+      "sizeBytes": 327,
+      "sha256": "1ce3b076881cadd631e90519a2b9843bdfa7bf378a28e937e83e405ce7c45364"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-doc-r2-01.json",
+      "sizeBytes": 488,
+      "sha256": "f82a2584d5c757d98ab1fbbca346802b089aef457df8f4234a72855cb0b70f24"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-doc-r2-01.log",
+      "sizeBytes": 320,
+      "sha256": "d18a3ddcbdf06ddbde7cf4db4bb2e0ebfd0c2dc966d8d1518dd5a3e339ada30f"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-doc-remote-01.json",
+      "sizeBytes": 526,
+      "sha256": "31ee235e7c0a198fa3645e6eab433aee50e5ba9390c91675aec7cc092271063f"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-doc-remote-01.log",
+      "sizeBytes": 352,
+      "sha256": "dc911d6128dae1fb4e379fa7513b5b9483f6380695d18b1d684343c97e09bb3a"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-doc-roles-01.json",
+      "sizeBytes": 510,
+      "sha256": "e2e7c7cf3cba3fd146853f7ecb443b246a3bf2c41731fdb5c31a3dc335eab0c2"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-doc-roles-01.log",
+      "sizeBytes": 340,
+      "sha256": "c6f41e73ba4705d527b458c46b02260e60ed005c66a3d507c9abdb03144f7aa8"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-doc-script-api-01.json",
+      "sizeBytes": 556,
+      "sha256": "d9d57dd302ea030b62a3ea6d767ac6959f473a115c1c1325c8ddbce43f78f9fa"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-doc-script-api-01.log",
+      "sizeBytes": 365,
+      "sha256": "070a374bff4d59723b57c6beafa09b7c9ce66d81b9a3fc662bee16afa01a3faf"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-doc-source-01.json",
+      "sizeBytes": 577,
+      "sha256": "f962b5777588b411d9f6f4ba32dfb49de866ca3c5690ec72bda4a87308c1d21b"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-doc-source-01.log",
+      "sizeBytes": 392,
+      "sha256": "5ce0b63cfffa6fdcd2ac7cee0aac97c8e71fbfb5201940268b89af8538c5bf69"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-doc-subdomain-api-01.json",
+      "sizeBytes": 565,
+      "sha256": "3ac04da2e5d372dcba29d74d80cdffdceafa27da8e8333175d2ce1733ac54561"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-doc-subdomain-api-01.log",
+      "sizeBytes": 363,
+      "sha256": "7d7f27e260436f5efacabf6f5466868ef14c1e9381350dacd997018f630ece0e"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-remote-before-01.json",
+      "sizeBytes": 512,
+      "sha256": "06e03f455120f478bc81797f2ad0d39fa175ed8729585096e9d52648a57c2bb7"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-remote-before-01.log",
+      "sizeBytes": 146,
+      "sha256": "3ca078fbc7099871a86023aefc3f16d1f4b7956587fcb04b2f7d9702cb4faef7"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-seal-01.log",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-static-analysis-01.json",
+      "sizeBytes": 435,
+      "sha256": "5ded3596f6f08317f8e9d5a7a948a909c4f1d5a167ec6afab8a1fc97e17d65fc"
+    },
+    {
+      "path": ".cache/p44/logs/ci-policy-static-analysis-01.log",
+      "sizeBytes": 90,
+      "sha256": "c656f8eac994a99b1038f051373f52be6e6c621933dd32b125e8329245674dc6"
+    }
+  ],
+  "credentialsScanned": true,
+  "extractionVerified": true,
+  "excludes": [
+    "Private inputs/credentials",
+    "Historical frozen bundles",
+    "Pre-worktree host transcript",
+    "This archive creation receipt"
+  ]
+}

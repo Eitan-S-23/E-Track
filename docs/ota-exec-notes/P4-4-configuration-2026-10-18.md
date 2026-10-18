@@ -10,8 +10,11 @@ Updated after the owner's explicit target/key authorization, with final readback
 at 2026-10-18 16:09:03 UTC (2026-10-19 local). E8 below is the current production
 state. Earlier E1/E6 tables are retained as historical inventories, not assertions
 that production is still empty. P44-TARGET-01 is implemented; P44-CREDENTIAL-01
-now concerns only the unqualified production CI protected source/scope. Existing
-e-track-ci remains available and is not requested again.
+now concerns the production CI protected source/scope. Existing e-track-ci remains
+available and is not requested again. The owner's 2026-10-19 dedicated-token
+choice supersedes the earlier existing-source-first condition. The current
+blocker is the native-proxy/resource-scope gap under `Dedicated Production CI
+Decision`, not another request to choose a token.
 
 | Configuration | Platform / scope / type | Presence / latest relevant UTC observation | Binding and evidence | Owner / remaining action |
 | --- | --- | --- | --- | --- |
@@ -20,7 +23,7 @@ e-track-ci remains available and is not requested again.
 | RELEASES_BUCKET | Worker binding / R2 | Present; created 2026-10-18 15:26:13 | e-track-firmware-production-releases, distinct from both test buckets; E8 | O1; no firmware object was uploaded. |
 | Production public origin | Worker / HTTPS origin | 200/prod final health at 16:10 | https://e-track-firmware-production.tangjichentudou.workers.dev; E8 | O1; health is not upload/register qualification. |
 | CLOUDFLARE_ACCOUNT_ID | GitHub / firmware-production / secret | Present; updated 15:50:24 | Confirmed existing account; E8 metadata/secure input receipt | Configured; no account value in evidence. |
-| CLOUDFLARE_API_TOKEN | GitHub / firmware-production / secret | Absent | Known private production slot and named environment inputs empty; token catalog GET 403/9109; E8 | P44-CREDENTIAL-01: O1 selects/provides qualified protected source/policy, or creates only if none qualifies. No automatic reuse of test/setup tokens. |
+| CLOUDFLARE_API_TOKEN | GitHub / firmware-production / secret | Absent at E8; no later write attempted | Dedicated-token choice authorized; required cold-session Scripts permission is account-scoped; E9 | P44-CREDENTIAL-01: owner decides the scope/interface gap below. No test/setup-token reuse, broad-policy creation or claimed creation failure. |
 | TRACE_UPDATE_SERVICE_URL | GitHub / firmware-production / secret | Present; updated 15:50:29 | Exact new HTTPS origin; E8 | Configured; downstream candidate/runtime checks remain. |
 | TRACE_DEPLOY_TOKEN | GitHub / firmware-production / secret | Present; updated 15:50:32 | Newly generated independent value, paired locally with Worker digest; E8 | O1 rotation/revocation; actual valid-token registration NOT_RUN. |
 | OTA_AES_KEY | GitHub / firmware-production / secret | Present; updated 15:50:34 | Existing approved p41-rehearsal-ota-key.json source, original key identity/integrity verified; E8 | Not generated/rotated. O2 evaluates candidate App/packer applicability. |
@@ -46,7 +49,8 @@ It inherits an SU-only ACL. AES continues to use the already registered protecte
 P4-1 source; no new AES entry or rotation exists. Credential metadata/pairing
 checks are not proof of a completed production release.
 
-No qualified production CI source was found in the known registered/local
+Historical E8 discovery, superseded as an action request by the dedicated-token
+decision below: no qualified production CI source was found in the known registered/local
 entries, named process environment or production environment secret list. The
 account token catalog is unreadable through the existing setup credential, so
 this is not an exhaustive claim that no other token exists. No creation POST or
@@ -77,6 +81,7 @@ superseded by the current production matrix above, not rewritten as old successe
 | E6 | `.cache/p44/evidence/targets-01.json`, 2026-10-18 14:21:51..14:22:54 UTC; `r2-targets-02.json`, 14:24:59..14:25:04 UTC | Existing e-track-ci reads actual Worker/D1/R2 metadata; nine GitHub configuration GETs. Initial R2 ECONNRESET and Pages 403 remain recorded. The R2-only retry succeeded; no token-management probe, provisioning-token use or configuration mutation. |
 | E7 | `.cache/p44/evidence/auth-negative-01.json`, 2026-10-18 14:29:47..14:29:53 UTC | Two real test-Worker POST denials, missing/wrong deploy token, empty metadata, both 401/TOKEN_INVALID with exact requestId echoes. Not an upload, successful registration, approval rejection or production test. |
 | E8 | `.cache/p44/evidence/production-*.json` and `P4-4-integration-2026-10-18/production.zip` | Owner-authorized create/schema/deploy/key/GitHub results, final current-source readback-02 and smoke-02; includes failed import, superseded deployments, source mismatch, dependency failure and their bounded repairs. Current configuration, not formal acceptance. |
+| E9 | `.cache/p44/ci-policy/` and `P4-4-integration-2026-10-18/ci-policy.zip` | Official permission/API docs, tagged SDK source, five unchanged product inputs/eight static checks, account permission-group GET 403/9109. No token creation, secret write or runtime session. |
 
 O1 = existing repository owner `Eitan-S-23`, configuration/key lifecycle owner.
 O2 = user-assigned main agent, independent OTA reviewer, not this implementer.
@@ -279,3 +284,108 @@ start. These paragraphs are the implementation agent's later record of that
 relayed decision, not a new independent verdict. P4-1 originals remain cross-task
 inputs for independent evaluation, never a direct P4-4 REUSED entry or a reason
 to repeat successful rehearsal. Gate=false and post-P5 production gates remain.
+
+## Dedicated Production CI Decision
+
+On 2026-10-19 the owner explicitly chose a new independent production CI token.
+That replaces the condition to prove no qualified existing source first. This
+is an isolation/lifecycle decision, not an inference from any 403. Creation and
+direct protected installation into firmware-production/CLOUDFLARE_API_TOKEN are
+authorized only within the three approved production resources. Scope expansion,
+test-token reuse, provisioning-token export, publication and product edits remain
+outside this delegation.
+
+`P44-CREDENTIAL-01`: unresolved. The dedicated-token choice is DECIDED. The
+documented ordinary-token/native-proxy route needs a broader resource permission,
+so no creation POST was sent. Creation was NOT observed to fail. This does not
+claim that every possible Cloudflare access mechanism is impossible or that the
+complete preview permission set has been established.
+
+### Source And Permission Reconciliation
+
+Five product inputs match main 0779f677507fa2c8a88c1799c8d2909bbae5a0a0 after
+CRLF normalization. Locked/installed Wrangler is 4.105.0. E9 source-analysis.json
+binds hashes and SDK excerpts; the official matching tagged preview source was
+retrieved without credentials.
+
+| Required operation | Target / business capability | Documented scope and disposition |
+| --- | --- | --- |
+| `getPlatformProxy(remoteBindings=true)` | `withFirmwareBucket` configures `trace-firmware-uploader` plus remote R2/D1 bindings | Not an S3 client or exclusively a call to the production Worker. SDK uploads a temporary proxy, not a permanent application deployment here. |
+| Cold-session `GET /accounts/{account}/workers/subdomain` | SDK `createPreviewSession` calls `getWorkersDevSubdomain` | Official API accepts Workers Scripts Read or Write. Ordinary token documentation scopes these groups to the account, not a script name. Even the read grant covers the account's scripts beyond the three targets. This required capability is enough to stop policy creation. |
+| `GET /accounts/{account}/workers/subdomain/edge-preview`; `POST /accounts/{account}/workers/scripts/trace-firmware-uploader/edge-preview` | Obtain session and upload temporary R2/D1 proxy with minimal_mode | Methods/paths are source-observed. Full permission minimum is NOT_ESTABLISHED: guessed public edge-preview reference returned 404. The distinct permanent-module PUT API is not proof that Scripts Write is necessary/sufficient for preview. |
+| R2 `head`, conditional `put` with `etagDoesNotMatch: "*"`, `get` | Only e-track-firmware-production-releases; no deletion requested | Bucket-scoped Workers R2 Storage Bucket Item Write / Object Read & Write is documented as S3-only, not Cloudflare REST. Current code uses native bindings, not S3 keys. A bucket token alone cannot satisfy account subdomain/preview APIs. No account-wide R2 Write added. |
+| Three D1 SELECT preflight queries | Only 1cd5db26-6bbd-4595-abef-72ff51ecdaf3 intended | Current code uses the proxy, not public D1 REST. Public query API documents D1 Read/Write with ordinary account scope; moving to REST alone does not establish database-only isolation. D1 Edit is not a business requirement for SELECTs. |
+| `/healthz`, `/api/ci/firmware/releases` | Exact production origin; registration uses existing TRACE_DEPLOY_TOKEN | No CF control-plane token permission needed for these application calls. Neither was replayed here. |
+
+The module-upload API lists `Individual Workers Admin/Editor` as alternatives.
+That is not a qualified ordinary-token resource policy or authorization for the
+separate account-subdomain/preview APIs. Captured member-role/token documentation
+does not establish that route. No new role or guessed resource key was applied.
+Any granular mechanism needs its exact supported policy and API qualification.
+
+The new GET `/accounts/{approved-account}/tokens/permission_groups` via the
+authorized local setup input returned 403/9109 at 2026-10-18T17:37:27.997Z,
+cfRay a4c94fa48ce1a0ee-NRT. This is distinct from the old `/user/tokens` GET and
+proves only this catalog read was denied. Creation remains unprobed because no
+in-bound policy was available to submit; no existing token was expanded.
+
+### Official Sources
+
+- Policies and provisioning requirements: https://developers.cloudflare.com/fundamentals/api/how-to/create-via-api/
+- Permission scopes: https://developers.cloudflare.com/fundamentals/api/reference/permissions/
+- Mandatory subdomain API: https://developers.cloudflare.com/api/resources/workers/subresources/subdomains/methods/get/
+- Bucket scope/S3-only Object permissions: https://developers.cloudflare.com/r2/api/tokens/
+- Account token UI: https://developers.cloudflare.com/fundamentals/api/get-started/account-owned-tokens/
+- Pinned preview source: https://raw.githubusercontent.com/cloudflare/workers-sdk/wrangler@4.105.0/packages/wrangler/src/dev/create-worker-preview.ts
+
+E9 preserves response bytes, timestamps/status/hashes, the documentation redirect
+and 404. Official documentation's example credentials are vendor examples, not
+project secrets; archive scanning also checks actual known project values.
+
+### Owner Console Steps And Next Decision
+
+There is no honest click-through compliant-token recipe for the current route
+under the unchanged strict boundary. The precise UI route for owner inspection,
+or subsequent use after a compliant policy/explicit scope decision:
+
+1. Cloudflare dashboard: select the existing account, **Manage account > Account
+   API tokens > Create Token**. Creator needs Super Administrator or API Token
+   Provisioning and can grant only their allowed subset. Suggested separate name:
+   `e-track-production-ci`. No new member/account is requested.
+2. Inspect permissions/resources. **Workers Scripts Read** is the documented
+   lower bound for the subdomain call, NOT the complete release policy. If scope
+   is account-wide, stop before creation: the current authorization excludes it.
+   Do not choose Workers Platform Admin, token-management permissions, global
+   account access or a broad Edit template for this CI token.
+3. For a future approved S3 route only: **R2 Object Storage > Overview > Account
+   Details > API Tokens > Manage > Create Account API token**; **Object Read &
+   Write**, specific bucket `e-track-firmware-production-releases`. This cannot
+   replace the current native consumer by itself; do not create it just to fill
+   a secret name. No existing credentials or permissions should be changed.
+4. After a complete compliant policy is qualified, or its broader scope separately
+   approved: **Continue to summary > Create Token**. Keep the one-time value in
+   the secure owner flow. GitHub: **Eitan-S-23/E-Track > Settings > Environments >
+   firmware-production > Environment secrets > Add environment secret**, name
+   `CLOUDFLARE_API_TOKEN`. Return only redacted policy/creation/expiry metadata;
+   never place the value in chat, variables, rehearsal settings or evidence.
+
+Preferred direction preserves strict isolation: main coordinates a bounded
+P4-1/P4-2 interface decision rather than granting account-wide CI control. Evaluate
+bucket-scoped S3 with conditional put/readback and target-authenticated preflight
+for the existing three D1 queries. Do not drop monotonic/legacy checks or edit
+accepted products here. This is a repair direction, not a new implementation Spec.
+The alternative is a separately explicit owner exception for account-read/proxy
+scope after the remaining preview permissions are identified, not a default fix.
+P41's test-only same-account exception is not extended; no new subscription is
+requested.
+
+Oracle for the chosen route: gate=false, exact policy/consumer, real authorized
+target readback and outside-target denial; preserve object identity, monotonic/
+legacy preflight, value-free logs and environment separation. Coordinate any
+negative probe with main before accessing other resources. No full rehearsal or
+production publication is required to settle this interface decision.
+
+Executed: eight static source/document assertions. Historical 11/85/26 tests keep
+their original attribution, not rerun or relabelled. Token creation, secret write,
+new-token runtime validation, CI dispatch and formal acceptance are NOT_RUN.
+Existing production resources, AES, deploy/HMAC, old evidence and gate unchanged.
