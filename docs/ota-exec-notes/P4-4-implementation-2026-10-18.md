@@ -303,3 +303,29 @@ agents to reload it. Until integration, read
 and the same commit's contract/AGENTS/index. A branch push does not update main
 or other agents' loaded instructions. No whole-card P4-4 acceptance, production
 approval/execution, gate unlock or repeated successful staging operation occurred.
+
+### Project-Wide Token Users Clarification
+
+On 2026-10-18 the user explicitly authorized any E-Track agent to use the existing
+token. Previously the documents routed all agents to discovery but did not state
+project-wide credential-use authority explicitly. Commit
+`875c3cad17b6993a63fcf1831540b540d082d73e` adds that standing authorization to both
+AGENTS entries, the collaboration contract and CF-CI-01, with a regression guard.
+Agent/role/task/worktree changes alone require neither a replacement token nor
+another token-use approval. Task-specific operations and production gates are
+still separate; this does not authorize every API the token technically permits.
+
+The affected local suite passes 49/49. Checks-only Governance run `39134866166`
+passes all three jobs at that exact source, retaining Node.js deprecation warnings
+and the Ubuntu runner migration notices. Original local test and CI-watch output
+and closed receipts are copied, byte-verified, to
+`P4-4-integration-2026-10-18/credential-users-{tests,ci}.{log,json}`.
+No token value was read, copied or changed for this documentation clarification.
+All controlled outputs remain within the authorized worktree plus task Git
+metadata; the three previous archive hashes are unchanged and existing external
+cache attribution remains unresolved. No external cleanup was performed.
+
+The clarification is pushed on `dev/p4-4/config-integration-20261018`, still
+pending main integration. Select both reusable governance commits `7e838c3` and
+`875c3ca` for independent review/integration; neither requires the intervening
+P4-4 board/configuration changes. Reload active agents after delivery to main.
