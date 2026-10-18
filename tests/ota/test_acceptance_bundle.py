@@ -1505,6 +1505,22 @@ class GovernancePromptScopeTests(unittest.TestCase):
         contract = (ROOT / "docs/agent-collaboration-contract.md").read_text(encoding="utf-8")
         self.assertIn("[credential registry](agent-collaboration/credential-registry.md)", contract)
 
+    def test_existing_token_is_authorized_for_all_project_agents(self):
+        for path in ("AGENTS.md", "app/bluetooth_flutter_Trace/AGENTS.md",
+                     "docs/agent-collaboration-contract.md",
+                     "docs/agent-collaboration/credential-registry.md"):
+            text = " ".join((ROOT / path).read_text(encoding="utf-8").split())
+            with self.subTest(path=path):
+                self.assertIn("2026-10-18", text)
+                self.assertIn("any E-Track agent may use", text)
+                self.assertIn("for authorized project work, across tasks, roles and worktrees", text)
+        contract = " ".join((ROOT / "docs/agent-collaboration-contract.md")
+                            .read_text(encoding="utf-8").split())
+        self.assertIn("not exclusive to P4-1, P4-3 or P4-4", contract)
+        self.assertIn("Do not request token-use permission or a replacement solely because", contract)
+        self.assertIn("not every operation the token might technically permit", contract)
+        self.assertIn("task-specific approvals are not inherited by another task", contract)
+
     def test_existing_ci_identity_is_distinct_from_provisioning_input(self):
         registry = " ".join((ROOT / "docs/agent-collaboration/credential-registry.md")
                             .read_text(encoding="utf-8").split())

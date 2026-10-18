@@ -156,8 +156,20 @@ document it. The motivating incident is recorded as
 Applies to all agents before declaring a credential absent, requesting another
 token, creating/rotating one or requesting wider permissions. Read the
 [credential registry](agent-collaboration/credential-registry.md) and its original
-owner decisions first. This is a discovery rule, not a secret store, permission
-grant or replacement for the task's frozen security contract.
+owner decisions first. This is a discovery rule, not a secret store or replacement
+for the task's frozen security contract. Credential-use authority recorded below
+does not by itself authorize new platform operations.
+
+User standing authorization (2026-10-18), `CF-CI-01`: any E-Track agent may use
+the existing `e-track-ci` (alias `e-track-p41-ci`) for authorized project work,
+across tasks, roles and worktrees. This is not exclusive to P4-1, P4-3 or P4-4.
+Do not request token-use permission or a replacement solely because the agent,
+role, task or worktree changed. Use the existing protected input without exposing
+the value. This authorizes credential reuse, not every operation the token might
+technically permit: the current task's platform/write boundaries, explicit
+production approval and gate requirements, no provisioning-token export and
+owner-controlled permission changes/rotation/revocation remain in force. Existing
+task-specific approvals are not inherited by another task through this token.
 
 1. Reconcile canonical name, historical aliases, platform secret name, protected
    locator, owner, source revision and dated observations. Inspect only the named

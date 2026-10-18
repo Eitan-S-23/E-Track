@@ -13,13 +13,14 @@ overwriting old failures or widening authority.
 | --- | --- |
 | Canonical name | `e-track-ci` |
 | Historical alias | `e-track-p41-ci`; the user explicitly confirmed these are the same token |
+| Authorized users | User standing authorization, 2026-10-18: any E-Track agent may use this existing token for authorized project work, across tasks, roles and worktrees; not exclusive to the original agent or task. Do not request token-use permission again merely because the agent changed. |
 | Kind / platform | Dedicated Cloudflare API token; distinct from local provisioning credentials |
 | Owner | Existing Cloudflare credential owner / user; repository configuration owner `Eitan-S-23`. The GitHub name is not proof of a Cloudflare identity or Admin role. |
 | Protected local input | `D:/github/my/E-Track/.cache/p41-dev-20261015/.cache/cf-auth-input/p41-ci-token.txt` |
 | GitHub consumer | Secret `FIRMWARE_REHEARSAL_CLOUDFLARE_API_TOKEN` in `firmware-rehearsal`; workflow maps it to `CLOUDFLARE_API_TOKEN` |
 | Other protected input, NOT interchangeable | `D:/github/my/E-Track/.cache/p41-dev-20261015/.cache/cf-auth-input/token.txt` is the local provisioning credential, not the dedicated CI token and not for CI export |
 | Known secret metadata | Rehearsal secret `updated_at=2026-10-16T06:11:27Z`, observed 2026-10-18; metadata does not expose or verify stored bytes |
-| Scope basis | `P41-CF-CREDENTIAL-02` permits the existing-account dedicated token for the exact P4-1 test Worker/D1/R2; P4-4 consumes that same test configuration |
+| Historical OTA test scope | `P41-CF-CREDENTIAL-02` permits the existing-account dedicated token for the exact P4-1 test Worker/D1/R2; P4-4 consumes that same test configuration. This test-resource exception is distinct from the project-wide agent-use authorization above. |
 | Production boundary | Existing test authority does not authorize production use. Same-account capability is not hard production permission isolation. A production-use/isolation decision is not automatically a requirement for a new token. |
 | Rotation / emergency revocation | Credential owner controls Cloudflare rotation/revocation; configuration owner coordinates affected protected consumers, records new metadata and assesses evidence applicability. No automated rotation or deletion is authorized by this record. |
 
@@ -28,6 +29,13 @@ portable dependency or permission to write into that completed worktree. If it
 is unavailable, first reconcile the existing platform secret/protected route
 with its owner. Do not create an empty replacement and then report the original
 credential missing. Do not read/display `token.txt` as a fallback CI credential.
+
+The user explicitly confirmed project-wide agent use in the 2026-10-18 follow-up
+to this registry. No per-agent token or repeat token-use approval is required.
+The recorded authorization is implemented in the collaboration contract linked
+above. It does not approve every technically available API operation, inherit a
+different task's approvals, authorize permission expansion/rotation, or remove
+production gates. Token values stay in protected inputs, never in chat or evidence.
 
 ### Provenance And Observed Capabilities
 

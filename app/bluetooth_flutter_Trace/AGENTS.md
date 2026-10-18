@@ -18,6 +18,10 @@ This project must not be built locally.
   `e-track-ci` / `e-track-p41-ci` names refer to the same dedicated token; check
   the recorded protected route and operation-specific evidence first. Existence
   is not production authority; never export the local provisioning credential.
+  User standing authorization (2026-10-18): any E-Track agent may use this
+  existing token for authorized project work, across tasks, roles and worktrees.
+  Changing agents is not a reason to request token-use permission again; it does
+  not grant new platform operations or bypass task/production gates.
 - Before debugging, installing an approved APK or collecting OTA observations,
   read `../../.agents/skills/e-track-flutter-debug/SKILL.md`. It covers contained
   host tooling, real APK/device identity, finished logs and batch experiments.

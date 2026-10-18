@@ -19,6 +19,10 @@ promote AC5 artifacts to OTA or CI release artifacts.
   input and actual operation before asking for another token. A management API
   403 is not proof that a publishing credential is missing. The registry is not
   permission to use a test credential in production or export provisioning tokens.
+  User standing authorization (2026-10-18): any E-Track agent may use this
+  existing token for authorized project work, across tasks, roles and worktrees.
+  Do not ask again for token-use permission solely because the agent changed;
+  task operations, production gates and credential confidentiality still apply.
 - When using cc-connect, a manual real @mention is only for a necessary,
   already-authorized action outside chat while the current execution stays open,
   such as reinserting an SD card or handling a phone dialog, without sending a
