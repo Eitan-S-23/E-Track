@@ -1469,7 +1469,8 @@ class GovernancePromptScopeTests(unittest.TestCase):
 
     def test_shared_activity_does_not_invalidate_acceptance_inputs(self):
         records = {"docs/agent-collaboration/index.md",
-                   "docs/agent-collaboration/project-workflow.md"}
+                   "docs/agent-collaboration/project-workflow.md",
+                   "docs/agent-collaboration/credential-registry.md"}
         for path in records:
             self.assertTrue((ROOT / path).is_file(), path)
         for profile in VALIDATOR.PROFILE_DEFINITIONS:
@@ -1486,6 +1487,93 @@ class GovernancePromptScopeTests(unittest.TestCase):
                                  (ROOT / entry).parent.joinpath(prefix + path).resolve())
         for entry in ("CLAUDE.md", "app/bluetooth_flutter_Trace/CLAUDE.md"):
             self.assertIn("@AGENTS.md", (ROOT / entry).read_text(encoding="utf-8-sig"))
+
+    def test_credential_registry_is_reachable_from_agent_entries(self):
+        registry = "docs/agent-collaboration/credential-registry.md"
+        for entry, prefix in (("AGENTS.md", ""),
+                              ("app/bluetooth_flutter_Trace/AGENTS.md", "../../")):
+            text = " ".join((ROOT / entry).read_text(encoding="utf-8").split())
+            with self.subTest(entry=entry):
+                self.assertIn("`" + prefix + registry + "`", text)
+                self.assertIn("Reuse Before Requesting Credentials", text)
+                self.assertIn("`e-track-ci`", text)
+                self.assertIn("`e-track-p41-ci`", text)
+                self.assertEqual((ROOT / registry).resolve(),
+                                 (ROOT / entry).parent.joinpath(prefix + registry).resolve())
+        index = (ROOT / "docs/agent-collaboration/index.md").read_text(encoding="utf-8")
+        self.assertEqual(1, index.count("[Credential registry](credential-registry.md)"))
+        contract = (ROOT / "docs/agent-collaboration-contract.md").read_text(encoding="utf-8")
+        self.assertIn("[credential registry](agent-collaboration/credential-registry.md)", contract)
+
+    def test_existing_ci_identity_is_distinct_from_provisioning_input(self):
+        registry = " ".join((ROOT / "docs/agent-collaboration/credential-registry.md")
+                            .read_text(encoding="utf-8").split())
+        for fact in (
+            "CF-CI-01", "`e-track-ci`", "`e-track-p41-ci`",
+            "the user explicitly confirmed these are the same token",
+            "D:/github/my/E-Track/.cache/p41-dev-20261015/.cache/cf-auth-input/p41-ci-token.txt",
+            "D:/github/my/E-Track/.cache/p41-dev-20261015/.cache/cf-auth-input/token.txt",
+            "not the dedicated CI token and not for CI export",
+            "FIRMWARE_REHEARSAL_CLOUDFLARE_API_TOKEN", "`firmware-rehearsal`",
+            "Existing test authority does not authorize production use",
+            "not automatically a requirement for a new token",
+        ):
+            with self.subTest(fact=fact):
+                self.assertIn(fact, registry)
+
+    def test_credential_registry_preserves_dated_provenance_and_uncertainty(self):
+        registry = " ".join((ROOT / "docs/agent-collaboration/credential-registry.md")
+                            .read_text(encoding="utf-8").split())
+        for fact in (
+            "2026-10-18", "updated_at=2026-10-16T06:11:27Z",
+            "P4-3-implementation-2026-10-17.md#updated-e-track-ci-authorization",
+            "0779f677507fa2c8a88c1799c8d2909bbae5a0a0", "P41-CF-CREDENTIAL-02",
+            "7f136c07505f56582640761944ab5add093252e4", "38946949709/1",
+            "1e28caf350de7e02a7961350a10018bb5e566e51", "403/9109", "403/10000",
+            "metadata does not expose or verify stored bytes",
+            "not perpetual validity claims", "Credential owner controls Cloudflare rotation/revocation",
+            "unconditional new-token request is superseded, not its underlying 403 receipts",
+        ):
+            with self.subTest(fact=fact):
+                self.assertIn(fact, registry)
+
+    def test_credential_discovery_does_not_grant_new_authority(self):
+        contract = (ROOT / "docs/agent-collaboration-contract.md").read_text(encoding="utf-8")
+        heading = "## Reuse Before Requesting Credentials"
+        self.assertEqual(1, contract.count(heading))
+        section = " ".join(contract.split(heading, 1)[1].split("\n## ", 1)[0].split())
+        for rule in (
+            "before declaring a credential absent", "No secret values in chat, argv",
+            "existence, operation-specific capability and current authorization separately",
+            "smallest authorized read-only check", "use an unapproved mutation as a capability probe",
+            "request token-management access merely to discover a display name",
+            "an unknown capability stays unknown", "consolidate one request",
+            "A new token is an owner decision justified by an actual gap",
+            "Do not export the local provisioning token to CI",
+            "P41-CF-CREDENTIAL-02", "not hard production permission isolation",
+            "reassessment of affected evidence", "Preserve superseded conclusions and failures",
+            "Deliver the rule/index/record to `main`", "Never update a frozen bundle",
+        ):
+            with self.subTest(rule=rule):
+                self.assertIn(rule, section)
+
+    def test_credential_error_matrix_rejects_unsupported_inferences(self):
+        contract = (ROOT / "docs/agent-collaboration-contract.md").read_text(encoding="utf-8")
+        section = contract.split("## Reuse Before Requesting Credentials", 1)[1].split("\n## ", 1)[0]
+        scenarios = {
+            "Token-management GET returns 403": "That management read is denied; token existence and publishing capability are not disproved. Check the required API, not a new token by default.",
+            "Named local input is unavailable": "This host route is unavailable; platform secret absence is unproved. Use the existing protected route or ask its owner, not for plaintext in chat.",
+            "Token verify succeeds or secret name exists": "Existence/status only; value correctness, target capability, isolation and current authorization need their own evidence.",
+            "Exact publishing API returns 401/403": "Stop the affected operation and preserve its target-specific denial; reconcile binding/scope with the owner before any change.",
+            "Timeout, TLS or proxy failure": "Transport failure, not a permission diagnosis. Use an already-authorized transport; do not rotate credentials to repair connectivity.",
+            "Old run passed but key/token/binding changed": "Old runtime evidence does not qualify the changed configuration; identify the minimum affected verification.",
+            "Test credential exists but production scope is undecided": "Preserve the production-use decision; neither silently reuse it nor demand a new token without an evidenced requirement.",
+        }
+        rows = [line for line in section.splitlines() if line.startswith("| ")][2:]
+        self.assertEqual(len(scenarios), len(rows))
+        for observation, conclusion in scenarios.items():
+            with self.subTest(observation=observation):
+                self.assertIn(f"| {observation} | {conclusion} |", rows)
 
     def test_jlink_candidate_installation_lesson_is_routed(self):
         entry = (ROOT / "AGENTS.md").read_text(encoding="utf-8-sig")

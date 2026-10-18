@@ -12,6 +12,12 @@ This project must not be built locally.
 
 ### Development Validation Before Acceptance
 
+- Before requesting credentials for Cloudflare or CI, follow **Reuse Before
+  Requesting Credentials** in `../../docs/agent-collaboration-contract.md` and
+  read `../../docs/agent-collaboration/credential-registry.md`. The existing
+  `e-track-ci` / `e-track-p41-ci` names refer to the same dedicated token; check
+  the recorded protected route and operation-specific evidence first. Existence
+  is not production authority; never export the local provisioning credential.
 - Before debugging, installing an approved APK or collecting OTA observations,
   read `../../.agents/skills/e-track-flutter-debug/SKILL.md`. It covers contained
   host tooling, real APK/device identity, finished logs and batch experiments.
