@@ -1,0 +1,933 @@
+{
+  "createdAt": "2026-10-18T04:59:16.754Z",
+  "source": "0067b6c3caa9ee263c53ae372fdc63cc7f74250f",
+  "runId": "39098302062",
+  "nature": "P43-ACCEPT-02 implementation self-test/CI increment. Not independent acceptance or deployment.",
+  "summary": {
+    "source": "0067b6c3caa9ee263c53ae372fdc63cc7f74250f",
+    "runId": "39098302062",
+    "conclusion": "success",
+    "files": [
+      {
+        "path": "public/_routes.json",
+        "sizeBytes": 124,
+        "sha256": "5e6709f7f844688026950a719cb30e514a4e9d4c546a418b6b914672ab866247"
+      },
+      {
+        "path": "public/_worker.js/index.js",
+        "sizeBytes": 107859,
+        "sha256": "ba966cfd178dce339de9d211e631da78663503b5c7ae0dd463c62163bed18d90"
+      },
+      {
+        "path": "public/index.html",
+        "sizeBytes": 266118,
+        "sha256": "1a5feb4ffb04bf164c139cc1f221baabee3296ca51caf6f02f4e3c13411a0a58"
+      }
+    ],
+    "nativeWorker": {
+      "passed": 270,
+      "failed": 0,
+      "skipped": 0
+    },
+    "mockUi": {
+      "passed": 36,
+      "failed": 0,
+      "skipped": 0
+    },
+    "compiledRouterSmoke": {
+      "tests": 3,
+      "pass": 3,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "nodeVersions": [
+      "v24.21.0"
+    ],
+    "diagnostics": [
+      {
+        "name": "0_Admin Deployment Input (No Cloud Writes).txt",
+        "githubWarningAnnotations": 1,
+        "nativeExpectedExceptionLines": 0,
+        "npmWarnings": 6,
+        "auditSummaries": [
+          "2026-10-18T04:50:31.8612157Z 4 high severity vulnerabilities"
+        ]
+      },
+      {
+        "name": "1_Worker Typecheck and Invariants.txt",
+        "githubWarningAnnotations": 0,
+        "nativeExpectedExceptionLines": 4,
+        "npmWarnings": 6,
+        "auditSummaries": [
+          "2026-10-18T04:47:48.1019143Z 11 vulnerabilities (3 moderate, 8 high)"
+        ]
+      },
+      {
+        "name": "2_Admin Typecheck and Mock UI.txt",
+        "githubWarningAnnotations": 1,
+        "nativeExpectedExceptionLines": 0,
+        "npmWarnings": 6,
+        "auditSummaries": [
+          "2026-10-18T04:47:41.7512942Z 4 high severity vulnerabilities"
+        ]
+      },
+      {
+        "name": "3_Public Pages Typecheck.txt",
+        "githubWarningAnnotations": 0,
+        "nativeExpectedExceptionLines": 0,
+        "npmWarnings": 6,
+        "auditSummaries": [
+          "2026-10-18T04:47:44.9347987Z 4 high severity vulnerabilities"
+        ]
+      }
+    ],
+    "verified": true,
+    "deployed": false
+  },
+  "preservedArchives": [
+    {
+      "path": "originals.zip",
+      "sizeBytes": 32034177,
+      "sha256": "4233f1b5ed8f3254c2f5380acfafd8a90aa5bd0cce27072ad001ca9bc9576a94",
+      "entries": 182
+    },
+    {
+      "path": "continuation-01.zip",
+      "sizeBytes": 17673827,
+      "sha256": "0b63d44c60fe0c6bf0a6294da23c400ee67eaec1026571c676e6985de13ba79e",
+      "entries": 135
+    },
+    {
+      "path": "live-preparation-01.zip",
+      "sizeBytes": 109261,
+      "sha256": "91ddaca28bf8abd4a0b1d19dd293fb6d68b19744b096abceb925a9ffec9eec10",
+      "entries": 132
+    },
+    {
+      "path": "live-preparation-02.zip",
+      "sizeBytes": 76514,
+      "sha256": "dd41696aab400cf09f2baee8012176dcb6594e12e7038ae38a82d51c742dead5",
+      "entries": 80
+    },
+    {
+      "path": "live-preparation-03.zip",
+      "sizeBytes": 158860,
+      "sha256": "673fe9b91329ef9108f1b3b31dd6003c37d5d9cbbec12b561d7caccb46aff8d1",
+      "entries": 85
+    },
+    {
+      "path": "live-preparation-04.zip",
+      "sizeBytes": 25197295,
+      "sha256": "865730da8d32bba4de6cab9cc821639c8b41638f8e119928e3cd4f0eadef942b",
+      "entries": 585
+    }
+  ],
+  "archive": {
+    "path": "accept02-01.zip",
+    "entries": 158,
+    "sizeBytes": 42197684,
+    "sha256": "751c8c7b989a913a4dda9212da81ba8a6103c86459ce702d4e716b53dc7d845d"
+  },
+  "checks": {
+    "listingSizeAndEveryExtractedByteVerified": true,
+    "credentialPatternScan": "PASS"
+  },
+  "exclusions": [
+    "Historical six archives and reviewer originals remain unchanged",
+    "Private credentials/browser state and unrelated caches"
+  ],
+  "actualCloudBusinessRequests": 0,
+  "entries": [
+    {
+      "path": ".cache/p43-acceptance-20261018/ui-reconcile-probe.cjs",
+      "sizeBytes": 6471,
+      "sha256": "a90152a6c9edaffeb215742cbcdd86aafe1ec4527cec514fe8032c58ea728523"
+    },
+    {
+      "path": ".cache/p43-audit.cjs",
+      "sizeBytes": 6207,
+      "sha256": "23dcdbfc57cf05599120baed4c43f5105ece3263472c589b38a74a522d47a195"
+    },
+    {
+      "path": ".cache/p43-evidence.cjs",
+      "sizeBytes": 34914,
+      "sha256": "bfb0909fd40b133f0ebde4f9921ea65240dffb9f3b696dfd4d553ebf245ece69"
+    },
+    {
+      "path": ".cache/p43-run.cjs",
+      "sizeBytes": 6607,
+      "sha256": "70e427a21290886ce56b83f3650471e0828d1d340b3e17821f4b8feeb5385397"
+    },
+    {
+      "path": ".cache/p43/ci/artifacts-39098302062/admin-bundle-diagnostics-39098302062-1/build.log",
+      "sizeBytes": 120,
+      "sha256": "f726c1d22b8fe93e0921f0d5a6a65c3b8f1a4503504f0683e18779a9675718a7"
+    },
+    {
+      "path": ".cache/p43/ci/artifacts-39098302062/admin-bundle-diagnostics-39098302062-1/native-smoke.log",
+      "sizeBytes": 394,
+      "sha256": "bba5d1df5156c5da0777693d9d5080fd52bb2e578598c07a22b1c375648b1190"
+    },
+    {
+      "path": ".cache/p43/ci/artifacts-39098302062/admin-bundle-diagnostics-39098302062-1/wrangler.log",
+      "sizeBytes": 3563,
+      "sha256": "50666dcef481f0552a4d085075eb3f7798848919049a460d9d09f3af76ffa2c0"
+    },
+    {
+      "path": ".cache/p43/ci/artifacts-39098302062/admin-deployment-input-0067b6c3caa9ee263c53ae372fdc63cc7f74250f/SHA256SUMS",
+      "sizeBytes": 263,
+      "sha256": "90d118577a384a8353cfc7aaeac7ed84df68b02b3647ab3b26937add631ab5f9"
+    },
+    {
+      "path": ".cache/p43/ci/artifacts-39098302062/admin-deployment-input-0067b6c3caa9ee263c53ae372fdc63cc7f74250f/bundle-meta.json",
+      "sizeBytes": 49587,
+      "sha256": "435303466d576de0d680773d1084252b2863b36b02b7ef0cadd566c30df0c68b"
+    },
+    {
+      "path": ".cache/p43/ci/artifacts-39098302062/admin-deployment-input-0067b6c3caa9ee263c53ae372fdc63cc7f74250f/public/_routes.json",
+      "sizeBytes": 124,
+      "sha256": "5e6709f7f844688026950a719cb30e514a4e9d4c546a418b6b914672ab866247"
+    },
+    {
+      "path": ".cache/p43/ci/artifacts-39098302062/admin-deployment-input-0067b6c3caa9ee263c53ae372fdc63cc7f74250f/public/_worker.js/index.js",
+      "sizeBytes": 107859,
+      "sha256": "ba966cfd178dce339de9d211e631da78663503b5c7ae0dd463c62163bed18d90"
+    },
+    {
+      "path": ".cache/p43/ci/artifacts-39098302062/admin-deployment-input-0067b6c3caa9ee263c53ae372fdc63cc7f74250f/public/index.html",
+      "sizeBytes": 266118,
+      "sha256": "1a5feb4ffb04bf164c139cc1f221baabee3296ca51caf6f02f4e3c13411a0a58"
+    },
+    {
+      "path": ".cache/p43/ci/artifacts-39098302062/admin-deployment-input-0067b6c3caa9ee263c53ae372fdc63cc7f74250f/purpose.txt",
+      "sizeBytes": 188,
+      "sha256": "ea7a03ad8958ac063a92c53217c118368f01ccb075171480f18f1ca7ad6922b7"
+    },
+    {
+      "path": ".cache/p43/ci/artifacts-39098302062/admin-deployment-input-0067b6c3caa9ee263c53ae372fdc63cc7f74250f/source-commit.txt",
+      "sizeBytes": 41,
+      "sha256": "f7f8969818bafc72aa0bcf86ac333f26397d87ad283d00d9eaaa3a57e2cdbee0"
+    },
+    {
+      "path": ".cache/p43/ci/artifacts-39098302062/admin-deployment-input-0067b6c3caa9ee263c53ae372fdc63cc7f74250f/source-run.txt",
+      "sizeBytes": 14,
+      "sha256": "79e618fef0025e52f1169d4df827cac67fb62bee9b9bbfbd32f02c24c9dd8c2d"
+    },
+    {
+      "path": ".cache/p43/ci/artifacts-39098302062/admin-mock-ui-39098302062-1/checkout-sha.txt",
+      "sizeBytes": 41,
+      "sha256": "f7f8969818bafc72aa0bcf86ac333f26397d87ad283d00d9eaaa3a57e2cdbee0"
+    },
+    {
+      "path": ".cache/p43/ci/artifacts-39098302062/admin-mock-ui-39098302062-1/playwright.log",
+      "sizeBytes": 4680,
+      "sha256": "727362ce08efa3894ebd1a61078ca2dae9524052b7ebe9839cab775e84286aa9"
+    },
+    {
+      "path": ".cache/p43/ci/artifacts-39098302062/admin-mock-ui-39098302062-1/results/.last-run.json",
+      "sizeBytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": ".cache/p43/ci/artifacts-39098302062/admin-mock-ui-39098302062-1/results/firmware-ui-en-CAS-refresh-never-replays-an-old-intent/en-mock-conflict.png",
+      "sizeBytes": 788540,
+      "sha256": "ef4e77b714fdd23154ef631d768a4cdbdaadc9a467c9a2d7d866eeab78193e72"
+    },
+    {
+      "path": ".cache/p43/ci/artifacts-39098302062/admin-mock-ui-39098302062-1/results/firmware-ui-en-retract-bou-c2206-ncel-and-fresh-confirmation/en-mock-cancel.png",
+      "sizeBytes": 1007195,
+      "sha256": "b0f85db97c1b67a973ad24cfb3f8291558a7f3429e9c72383f349448f47f15d7"
+    },
+    {
+      "path": ".cache/p43/ci/artifacts-39098302062/admin-mock-ui-39098302062-1/results/firmware-ui-en-retract-bou-c2206-ncel-and-fresh-confirmation/en-mock-confirm.png",
+      "sizeBytes": 786790,
+      "sha256": "856f4d5e6ffebf50cf7bb95063a4c33b0b0934e385181e7003be807fa9399e73"
+    },
+    {
+      "path": ".cache/p43/ci/artifacts-39098302062/admin-mock-ui-39098302062-1/results/firmware-ui-en-retract-bou-c2206-ncel-and-fresh-confirmation/en-mock-overview.png",
+      "sizeBytes": 1003911,
+      "sha256": "e2f1ea70c862696e21c59e793c3d3affb13d567a962ee6ac1ebf5fb4ac68e900"
+    },
+    {
+      "path": ".cache/p43/ci/artifacts-39098302062/admin-mock-ui-39098302062-1/results/firmware-ui-en-retract-bou-c2206-ncel-and-fresh-confirmation/en-mock-success.png",
+      "sizeBytes": 787542,
+      "sha256": "781bbb2490fe86a49407d2ea7378d56d7fe3752661a631e4f2a9ef56f3c9eece"
+    },
+    {
+      "path": ".cache/p43/ci/artifacts-39098302062/admin-mock-ui-39098302062-1/results/firmware-ui-mobile-firmwar-76636-nfirmation-fit-the-viewport/zh-mobile-mock-confirm.png",
+      "sizeBytes": 537076,
+      "sha256": "b2bde5336bfa550dd398f638d7fb3798f49c70db20d9d848be525f1a19ab379f"
+    },
+    {
+      "path": ".cache/p43/ci/artifacts-39098302062/admin-mock-ui-39098302062-1/results/firmware-ui-zh-CAS-refresh-never-replays-an-old-intent/zh-mock-conflict.png",
+      "sizeBytes": 654016,
+      "sha256": "4d9f53e058867807c17a559d7e22916b418cf427b722cb57c431d80cc528e0a7"
+    },
+    {
+      "path": ".cache/p43/ci/artifacts-39098302062/admin-mock-ui-39098302062-1/results/firmware-ui-zh-retract-bou-c1c23-ncel-and-fresh-confirmation/zh-mock-cancel.png",
+      "sizeBytes": 836629,
+      "sha256": "592e396a8f67bbae17a05a21cdad5da73853ad78f11539e8309cf3788156b3fd"
+    },
+    {
+      "path": ".cache/p43/ci/artifacts-39098302062/admin-mock-ui-39098302062-1/results/firmware-ui-zh-retract-bou-c1c23-ncel-and-fresh-confirmation/zh-mock-confirm.png",
+      "sizeBytes": 640269,
+      "sha256": "9c7ae85a9d9794ec366f15c469035dcfbdbd25d02257216ee5e6b31534e9b382"
+    },
+    {
+      "path": ".cache/p43/ci/artifacts-39098302062/admin-mock-ui-39098302062-1/results/firmware-ui-zh-retract-bou-c1c23-ncel-and-fresh-confirmation/zh-mock-overview.png",
+      "sizeBytes": 833947,
+      "sha256": "df8f1b9dc06327cd2a10f3476be7c96832e927aa7c0e835387ca3e81dc6909dc"
+    },
+    {
+      "path": ".cache/p43/ci/artifacts-39098302062/admin-mock-ui-39098302062-1/results/firmware-ui-zh-retract-bou-c1c23-ncel-and-fresh-confirmation/zh-mock-success.png",
+      "sizeBytes": 660072,
+      "sha256": "fc87b71b640ca97a2a62c5090da48ce31438f091c2e82b3e8cd7680699e473db"
+    },
+    {
+      "path": ".cache/p43/ci/logs-39098302062.zip",
+      "sizeBytes": 81893,
+      "sha256": "ab3d61e79a90fb366bd0b1efeba48a8287c0ccad80c73ba42af0d239d01dc80f"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-admin-check-01.json",
+      "sizeBytes": 503,
+      "sha256": "8177dbf87de5950fbb9f132b63c5498b51ded0710d1b0f4b76582fa58523a886"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-admin-check-01.log",
+      "sizeBytes": 59,
+      "sha256": "30d025b2566c08ff37943b0d131ca3a1a837db3cf6a3310dd15380a722b18a1c"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-admin-check-02.json",
+      "sizeBytes": 503,
+      "sha256": "ac2d1058097a4291bccbf3930f4a2e586d9ed03d76b3246885df92abc0b1ac0a"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-admin-check-02.log",
+      "sizeBytes": 59,
+      "sha256": "30d025b2566c08ff37943b0d131ca3a1a837db3cf6a3310dd15380a722b18a1c"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-ci-artifacts.json",
+      "sizeBytes": 487,
+      "sha256": "b10f16e7bfe0bcae791af22633c99d3f430ea8c8ae777443d3eeb5e4b5c0bbf6"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-ci-artifacts.log",
+      "sizeBytes": 2236,
+      "sha256": "75f759bba394e1b1f87af60530d243be5ed0f963af4934cb3ab525079adc171c"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-ci-dispatch.json",
+      "sizeBytes": 572,
+      "sha256": "c94ea544514779a87fd4a5f3ef9ab669cf7decbbcc39d8fbdb7f059e46dd27c5"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-ci-dispatch.log",
+      "sizeBytes": 63,
+      "sha256": "93baa7dd9bcb5852fe88c2c337bffde4f1175de8642a200ec7c962bd2d3245ec"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-ci-download.json",
+      "sizeBytes": 509,
+      "sha256": "4f07110c5cbec2388fefd19ecaa0e603e06a3e5cea1a38d8df2c9ff5898a4967"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-ci-download.log",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-ci-list-01.json",
+      "sizeBytes": 746,
+      "sha256": "923bff29c1201eea3ddd05e32c08f35528c0f7f49d3b444914fa62b37f8305cf"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-ci-list-01.log",
+      "sizeBytes": 268,
+      "sha256": "a023569f63f636610151e67438dbf521c32e95ae936f01acbf000358b3bb7362"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-ci-log-zip.json",
+      "sizeBytes": 596,
+      "sha256": "36f8c8e3441b90d80dc666119c3b1f9371c0f8b38977c24303bc1c48577f7f65"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-ci-log-zip.log",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-ci-status-01.json",
+      "sizeBytes": 535,
+      "sha256": "c5fe557fd315190dd944c258ca011c118c80c27dc82c7176d653b51598682fe8"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-ci-status-01.log",
+      "sizeBytes": 8253,
+      "sha256": "6667ed4726a245d8f112057e9c8545569fec629838065f85faf0960507d968a9"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-ci-verify-01.json",
+      "sizeBytes": 543,
+      "sha256": "3e865000834fadcde54b2f518753155e8ec8407033cd417717bb96f4a1cf0d30"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-ci-verify-01.log",
+      "sizeBytes": 2083,
+      "sha256": "41eb957be6bfbeca758455773ad280cfea51ecc538275aa524567f19f39483b8"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-host-audit.json",
+      "sizeBytes": 483,
+      "sha256": "7960f0a1afad442eac320da22fef054d26601b6b80f78f51456d85774b5a3744"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-host-audit.log",
+      "sizeBytes": 16224,
+      "sha256": "52050c09127e68b031dc756d1c24d2721b48c7755693f9d1fbcfdd40a8fdb109"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-preserved-inputs.json",
+      "sizeBytes": 728,
+      "sha256": "9f0cb8ee3fcb0be46782a86a9e6649201bdcbea17c2664544598b0445c49c443"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-preserved-inputs.log",
+      "sizeBytes": 398,
+      "sha256": "5439139956e5f849ebb366c8324aba5094b6cf55e5b0a42b033a4abf76ee5909"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-probe-green-01.json",
+      "sizeBytes": 476,
+      "sha256": "228d319341dfdeeee5ef8fd73d9cc8f8c6e9e577219ec97a87cafc73ddff2bd4"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-probe-green-01.log",
+      "sizeBytes": 3079,
+      "sha256": "23790acf6778a1f6ab114a9e07806117a343ff0649549beb9bc0e719efad919f"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-probe-red-01.json",
+      "sizeBytes": 472,
+      "sha256": "fe0251ea65f658efec3999b88a53b502e4f87821ace6bf6b04c219664a6be3a7"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-probe-red-01.log",
+      "sizeBytes": 3091,
+      "sha256": "ed3cbfe4ce31724a05ec6de4705e2a3c99f0e38698941d0d7e06a7fdb4d200b8"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-probe-source-bound.json",
+      "sizeBytes": 484,
+      "sha256": "04e3fd10df4de14c58d5ab96bbde24cbaebbd7bf096368871bd82e41145c7ac8"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-probe-source-bound.log",
+      "sizeBytes": 3079,
+      "sha256": "23790acf6778a1f6ab114a9e07806117a343ff0649549beb9bc0e719efad919f"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-remote-source-01.json",
+      "sizeBytes": 538,
+      "sha256": "12e368ec25b335ae624614eab5efcbf53476d5c362d050593b205937287ac6bc"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-remote-source-01.log",
+      "sizeBytes": 41,
+      "sha256": "9824062258960cee1dc6b872d51b58abb68c5c3c335878d653fe86385b56ea14"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-source-commit.json",
+      "sizeBytes": 482,
+      "sha256": "86ef90911422986ed2529fda53504773784f5fe6f2b721a96be378044c9f55c4"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-source-commit.log",
+      "sizeBytes": 204,
+      "sha256": "cafae6ff6fc5e1db38e79041df50e60f8003ae4a94e02ef0e9d5539477556808"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-source-push.json",
+      "sizeBytes": 664,
+      "sha256": "a88df931859e40689af553e99b16f8ea566b36832bb5feaf00a88ba11ea637db"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-source-push.log",
+      "sizeBytes": 107,
+      "sha256": "ab1a9ca24f79f36f23c415ac84afb946c5248a4dbf23ce6b4228e8a4d7d19b1f"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-source-stage.json",
+      "sizeBytes": 608,
+      "sha256": "5968699f0bb5d8360ed02cf853d0adafa618648c29d04a32dc5682b9690cedc9"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-source-stage.log",
+      "sizeBytes": 347,
+      "sha256": "8405b884a42e9e2b40e08a39147feffdefe6a3446312ecd1fc4f3d88e2067f3e"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-ui-01-source.json",
+      "sizeBytes": 636,
+      "sha256": "8860185e8cd7aa0fd0779ab52484fd5b076a40e846bcd662456d3a92edc87fce"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-ui-01-source.log",
+      "sizeBytes": 11199,
+      "sha256": "d480f56b1c1e5e9e1ad5f261ad0672acb00e8c7738f8fbd834d0753e9d69f346"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-ui-01.json",
+      "sizeBytes": 487,
+      "sha256": "0780981a72828c5d2dafd3fa1fb1fb5bb9430a2432ec9312abd14950bf7150be"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-ui-01.log",
+      "sizeBytes": 68946,
+      "sha256": "edd90efa2358b987d9e3a4d6b7434fdab1936a9348a1d3688509d057d11635df"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-ui-02.json",
+      "sizeBytes": 487,
+      "sha256": "8b142ae21cab4e354b5b7f29132aefc0628baf9e1ebd1b8b7d30959acd71525a"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-ui-02.log",
+      "sizeBytes": 8258,
+      "sha256": "c5cd6c04460bd110dfa0417a5b2de77a1abf861c345527bf4c5de4e51ecbbaae"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-ui-03.json",
+      "sizeBytes": 578,
+      "sha256": "85728cf58af9c58d3940b2a33fedfa21b95f471e923e7de18bc04e24aa7a305d"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-ui-03.log",
+      "sizeBytes": 435,
+      "sha256": "a9c1da15afe44423905c62440d14d43209a68efd0513e340e943e585d23d5c48"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-ui-04.json",
+      "sizeBytes": 606,
+      "sha256": "f46c3728ce824bd61267ff0d27e871bec09beac600b1bc9c011c120fbbafe13a"
+    },
+    {
+      "path": ".cache/p43/logs/accept02-ui-04.log",
+      "sizeBytes": 499,
+      "sha256": "4d291310434499cad009d6fea2d5c494cec979bf62ad1e6f39628fd0dc77804d"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/.last-run.json",
+      "sizeBytes": 1223,
+      "sha256": "cb95c99065ea4e8ff458f0afb692006fe8cc2207bf4ad88223d53ff889cf3a0f"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-a-first-defini-2350c-separately-confirmed-intent/error-context.md",
+      "sizeBytes": 11923,
+      "sha256": "4ca8776fa682186f0bf849865e3ab107578a59d177a366cdcc2981841436e986"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-a-first-defini-2350c-separately-confirmed-intent/test-failed-1.png",
+      "sizeBytes": 421839,
+      "sha256": "45b36dd93261e48fbaaf36272804e4615e919bb61ae388ed1bbace442e97014c"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-a-first-defini-534f0-separately-confirmed-intent/error-context.md",
+      "sizeBytes": 11922,
+      "sha256": "b22644dbcbb9642d1469c4711bcc74cc736fb340f3b8ea9c7f6576c8c1964f08"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-a-first-defini-534f0-separately-confirmed-intent/test-failed-1.png",
+      "sizeBytes": 430139,
+      "sha256": "082fdde159d13f128b75d859b85fbbf1cbee9b2aa07c9bef18a4e4d15346f1c1"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-a-first-defini-db7b8-separately-confirmed-intent/error-context.md",
+      "sizeBytes": 11925,
+      "sha256": "ffcdb5d0da8355f2e151bce8c3ed727ec8ad7f2b3013a09a6a705acf973e007d"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-a-first-defini-db7b8-separately-confirmed-intent/test-failed-1.png",
+      "sizeBytes": 431438,
+      "sha256": "27c7dbb6293f69d0dde70ca5d9d59ac1ddd35566f496a57de84d598c49b5b5af"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-a-first-defini-f2653-separately-confirmed-intent/error-context.md",
+      "sizeBytes": 11929,
+      "sha256": "ed210b599bb64a37c54ffd9bcb77be0e82ba7659915935f71e30d69b1027cd11"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-a-first-defini-f2653-separately-confirmed-intent/test-failed-1.png",
+      "sizeBytes": 431211,
+      "sha256": "69311fb7a0f291d37a11f4727a0d8ce5bc54d78a773bafc8ff0572a805ed80b5"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-disable-interr-1e080--IDEMPOTENCY-CONFLICT-valid/error-context.md",
+      "sizeBytes": 14212,
+      "sha256": "258cf9be4c4917cfed8b5fc0c2a3456b5963f98e8123650ff7641df435897438"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-disable-interr-1e080--IDEMPOTENCY-CONFLICT-valid/test-failed-1.png",
+      "sizeBytes": 426027,
+      "sha256": "b8edde9ea094c42ba80edaa676ad5e25a1ad240e67b8f7d9bec294fd1e5ff67b"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-disable-interr-3b3f8-NCY-RESULT-EXPIRED-mismatch/error-context.md",
+      "sizeBytes": 14226,
+      "sha256": "23f28b46e4f4f0bba1c9c66d617eed80c45e1314ff39a4f82f63dfb84b959f86"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-disable-interr-3b3f8-NCY-RESULT-EXPIRED-mismatch/test-failed-1.png",
+      "sizeBytes": 431056,
+      "sha256": "cb8bc2f99c219cd8ab8701bda762e9f9f24c8e3cd75b720a960a60f4beb9bff8"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-disable-interr-45fb6--410-RELEASE-DISABLED-valid/error-context.md",
+      "sizeBytes": 14213,
+      "sha256": "69ae0c1b8e9ae6d4eb97dcd36816708cec9e64798d74dfc3f9fd26e097bdd896"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-disable-interr-45fb6--410-RELEASE-DISABLED-valid/test-failed-1.png",
+      "sizeBytes": 425303,
+      "sha256": "b5daeeb089ede9b68f0639c0b14b5c159c1fb4c6c9e58026d70f94d29df86415"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-disable-interr-a023d-OTENCY-RESULT-EXPIRED-valid/error-context.md",
+      "sizeBytes": 14218,
+      "sha256": "c34dad3c62ff15c931a4c31c2488248446b98e6a07f0849d434eacaa60b0ac70"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-disable-interr-a023d-OTENCY-RESULT-EXPIRED-valid/test-failed-1.png",
+      "sizeBytes": 427168,
+      "sha256": "b8d3f9b664929315a0fd2a28a27a0cbc0a428db4fab592f13e999e8a68af0ccc"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-disable-interr-a0c36-3-BACKEND-UNAVAILABLE-valid/error-context.md",
+      "sizeBytes": 14211,
+      "sha256": "a537c14a6bbc9fb326c65df0eaa1d376a5d8a6e1a8eba9514b57cb3351170401"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-disable-interr-a0c36-3-BACKEND-UNAVAILABLE-valid/test-failed-1.png",
+      "sizeBytes": 428307,
+      "sha256": "e8864d37ae4ea3b70c4e48adb364523d12132a94c37bf88c4a8fa8979b2c7795"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-disable-interr-b3594-fter-429-RATE-LIMITED-valid/error-context.md",
+      "sizeBytes": 14209,
+      "sha256": "4d3d9ec6b01e9855d1a11c58014dbf84ff5d997758632833b96d35d8cfd387d0"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-disable-interr-b3594-fter-429-RATE-LIMITED-valid/test-failed-1.png",
+      "sizeBytes": 423966,
+      "sha256": "26bd0a7ccd29a749610bc80af99c63298142875eb472ff8deed17a76b53145d4"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-disable-interr-c6d7e-fter-403-CSRF-INVALID-valid/error-context.md",
+      "sizeBytes": 14204,
+      "sha256": "53ff566ca9c415dfaf55e85a7881a8c4d2c535065c234dc8fa098de07ed65a07"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-disable-interr-c6d7e-fter-403-CSRF-INVALID-valid/test-failed-1.png",
+      "sizeBytes": 425015,
+      "sha256": "fd576416da80cf245ffc207e19c6f2b5ba82ee9a4c811448e90c4e96a38cec75"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-disable-interr-d7de9-er-403-ROLE-FORBIDDEN-valid/error-context.md",
+      "sizeBytes": 14206,
+      "sha256": "37009b0fd08d3f193abb13f3f50258c087b0c4fefd15f1c820c01e0c23765eea"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-disable-interr-d7de9-er-403-ROLE-FORBIDDEN-valid/test-failed-1.png",
+      "sizeBytes": 425109,
+      "sha256": "bfd3a2b58a8ad9f1333b219a89b8a384c57fec1abdd7c2ef6e20839454574387"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-disable-interr-ed73f-ter-401-TOKEN-EXPIRED-valid/error-context.md",
+      "sizeBytes": 14205,
+      "sha256": "b34d9cad6b272a6b345aa3533c2c5ebb36fd7cc7027b95b4178cec6c5e167cc5"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-disable-interr-ed73f-ter-401-TOKEN-EXPIRED-valid/test-failed-1.png",
+      "sizeBytes": 425217,
+      "sha256": "d15922d90a4fe91a804ceaa404c7cb161c678221dc008102f5be9bedba9b03b9"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-disable-interr-fc3be-ENCY-RESULT-EXPIRED-missing/error-context.md",
+      "sizeBytes": 14225,
+      "sha256": "a8d132e0fa8ae3ceba09e304f9f439475fbacc48f6939698cfadcba5410e17de"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-disable-interr-fc3be-ENCY-RESULT-EXPIRED-missing/test-failed-1.png",
+      "sizeBytes": 431070,
+      "sha256": "a6d193f1e36aff7cf880069d5fae9b03de227ddc0ef9c4a604281f6efd2a17b8"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-en-CAS-refresh-never-replays-an-old-intent/en-mock-conflict.png",
+      "sizeBytes": 869658,
+      "sha256": "89c877e259c0fd15c8f11cfe23ba951d3dc19107e53f4121ee91a58cd1be0723"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-en-retract-bou-c2206-ncel-and-fresh-confirmation/en-mock-cancel.png",
+      "sizeBytes": 982270,
+      "sha256": "933c36bada333e27d36d1832f1d28fa31dfb6411e8a692a7eb89cdaeccddbb85"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-en-retract-bou-c2206-ncel-and-fresh-confirmation/en-mock-confirm.png",
+      "sizeBytes": 783436,
+      "sha256": "962168a0707a5eb2c41af0ffa8dcef016e15c23a6f02a6294374b5572b08d14c"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-en-retract-bou-c2206-ncel-and-fresh-confirmation/en-mock-overview.png",
+      "sizeBytes": 984688,
+      "sha256": "1d88861ff6fd2fde3b603877368b40e5de0d29c50b02dd120e5be6390ce2cd5b"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-en-retract-bou-c2206-ncel-and-fresh-confirmation/en-mock-success.png",
+      "sizeBytes": 768652,
+      "sha256": "07d332fae374dbfc3eb0004529c73badf4690dd4751847f408aa28fb38ae96b4"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-mobile-firmwar-76636-nfirmation-fit-the-viewport/zh-mobile-mock-confirm.png",
+      "sizeBytes": 612444,
+      "sha256": "fb1389075949857ddffec15a425f5f0ffbe56167c5b026bc9c1e4fc7fe84aae3"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-recovery-downl-34d8a-fter-429-RATE-LIMITED-valid/error-context.md",
+      "sizeBytes": 14214,
+      "sha256": "7219fe762d6d71b2bd1de1c57ba731781bebf99e23ef596ee048d5579b7f3526"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-recovery-downl-34d8a-fter-429-RATE-LIMITED-valid/test-failed-1.png",
+      "sizeBytes": 423864,
+      "sha256": "297b3f14bc47c85505391c9f240bf647fd0b806524113be0df797cf3877c042f"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-recovery-downl-5df3f-NCY-RESULT-EXPIRED-mismatch/error-context.md",
+      "sizeBytes": 14236,
+      "sha256": "29aa66aedeecda8f20233261925d95aa1b374f89c32940f6dd61beaf63579fa5"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-recovery-downl-5df3f-NCY-RESULT-EXPIRED-mismatch/test-failed-1.png",
+      "sizeBytes": 431123,
+      "sha256": "5cf98c0e19b56877b136aa6acf32e27b86ab9fe9f0397ca62701d585c765b4e6"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-recovery-downl-719a4-ter-401-TOKEN-EXPIRED-valid/error-context.md",
+      "sizeBytes": 14215,
+      "sha256": "379f7ece065f68f6ff82a21de035d29e4afc71a84c5e94a886660a21fae117b0"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-recovery-downl-719a4-ter-401-TOKEN-EXPIRED-valid/test-failed-1.png",
+      "sizeBytes": 425136,
+      "sha256": "01c2b609512c325f5d788b26f73bf2443d0ad6c276eee73dae4dc1fdef79f527"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-recovery-downl-76070--410-RELEASE-DISABLED-valid/error-context.md",
+      "sizeBytes": 14218,
+      "sha256": "406634f624925049f218b9ed54fd8978121eed812fa5d0ab119e37220a6ad69d"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-recovery-downl-76070--410-RELEASE-DISABLED-valid/test-failed-1.png",
+      "sizeBytes": 425360,
+      "sha256": "131ebe652f50057a3f951b0ee44b0fd119e4d83b009cc64dfd4f95095363c85e"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-recovery-downl-8f68c--IDEMPOTENCY-CONFLICT-valid/error-context.md",
+      "sizeBytes": 14222,
+      "sha256": "b4077b2212a17db3c7e2990a4f17cb9ecb22eb49c60db2162d048166aa7093d3"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-recovery-downl-8f68c--IDEMPOTENCY-CONFLICT-valid/test-failed-1.png",
+      "sizeBytes": 426213,
+      "sha256": "1e0d10b2833d574ca35ea2e2b79cc1cf43cccf262153d2b3ae4d8994094eea28"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-recovery-downl-a6c5d-OTENCY-RESULT-EXPIRED-valid/error-context.md",
+      "sizeBytes": 14228,
+      "sha256": "be53dd0113d99114a1f803fc7f0d6276c9f62c14c269cd702cb8e11a11a98b67"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-recovery-downl-a6c5d-OTENCY-RESULT-EXPIRED-valid/test-failed-1.png",
+      "sizeBytes": 427367,
+      "sha256": "7d5689a8c4826d6650ceb08d6d9cdd41b3cd3d55297c8ffdfd6b86aaec8e29f2"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-recovery-downl-aecf8-er-403-ROLE-FORBIDDEN-valid/error-context.md",
+      "sizeBytes": 14221,
+      "sha256": "35b1cf95cb6073580a740bb4843705d5b2320a276031652053a1177d651e7635"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-recovery-downl-aecf8-er-403-ROLE-FORBIDDEN-valid/test-failed-1.png",
+      "sizeBytes": 424923,
+      "sha256": "5b7b337ab0b3f15fcd639959580106f63d1524e60589bcb27af8af094f1304e3"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-recovery-downl-c54b5-fter-403-CSRF-INVALID-valid/error-context.md",
+      "sizeBytes": 14219,
+      "sha256": "8da618702108fd6e4420d15b7628afc3f799feeaa92ba74a1a4478266973d263"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-recovery-downl-c54b5-fter-403-CSRF-INVALID-valid/test-failed-1.png",
+      "sizeBytes": 425053,
+      "sha256": "5c4d94e8d12aecaca1b41b6083a4934810050831a8b3402c2845400e05d320e7"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-recovery-downl-f07ff-ENCY-RESULT-EXPIRED-missing/error-context.md",
+      "sizeBytes": 14230,
+      "sha256": "6da94de651889ef7e398230e353d99adc6238f125d8520506ad49f2d4fb11c07"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-recovery-downl-f07ff-ENCY-RESULT-EXPIRED-missing/test-failed-1.png",
+      "sizeBytes": 431096,
+      "sha256": "38edc1a20af43d0a743edd2747de468ba9fe9de49db28a93cf18c2cde515698b"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-recovery-downl-fc491-3-BACKEND-UNAVAILABLE-valid/error-context.md",
+      "sizeBytes": 14221,
+      "sha256": "f90d35c4c9ee9dc4381bc3397e32a7ce7a915c77b92726fba68284df30bb9fec"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-recovery-downl-fc491-3-BACKEND-UNAVAILABLE-valid/test-failed-1.png",
+      "sizeBytes": 428207,
+      "sha256": "d48138a2ec792d95926a4248ed21be56fe5f5b1eb43492eed57a4fa2739fe4c0"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-zh-CAS-refresh-never-replays-an-old-intent/zh-mock-conflict.png",
+      "sizeBytes": 906329,
+      "sha256": "f14cc49bed68642c8d9a34dbbab525e232b3a3c242b2d753b1f4ad8fe0553308"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-zh-retract-bou-c1c23-ncel-and-fresh-confirmation/zh-mock-cancel.png",
+      "sizeBytes": 930657,
+      "sha256": "dabb12dadc69783d6dab79e3a992f0d4b369d2462da735821fb0f4a1973956cf"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-zh-retract-bou-c1c23-ncel-and-fresh-confirmation/zh-mock-confirm.png",
+      "sizeBytes": 758506,
+      "sha256": "175cba6d0162d06582a5cf22fc8ba26d6c6d0e880d9ab9d93b2e90d5a168de4b"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-zh-retract-bou-c1c23-ncel-and-fresh-confirmation/zh-mock-overview.png",
+      "sizeBytes": 930489,
+      "sha256": "1b18ffe6e6911c8c3a74099a6ce20ca5a1bc96cfd786345168eb0d1eb88842fb"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-01/firmware-ui-zh-retract-bou-c1c23-ncel-and-fresh-confirmation/zh-mock-success.png",
+      "sizeBytes": 768153,
+      "sha256": "621d52dde01ee4f1876b98537856d2285b7c9ebf8e752aead98000647670651d"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-02/.last-run.json",
+      "sizeBytes": 145,
+      "sha256": "2a44b0e99afae19cb11dbd91b3d4fc4831a56f7f21cb46298c3b7bab8d81869b"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-02/firmware-ui-disable-interr-a023d-OTENCY-RESULT-EXPIRED-valid/error-context.md",
+      "sizeBytes": 27263,
+      "sha256": "10ab04b4f7e0d52ddcb3a7b9267815a3cdc5f7a542569cff46977c6db6800d90"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-02/firmware-ui-disable-interr-a023d-OTENCY-RESULT-EXPIRED-valid/test-failed-1.png",
+      "sizeBytes": 431356,
+      "sha256": "9ef8199ebd0f30b256cfe2c85d41c62c35dad725abf452852371b2c9514b7c6c"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-02/firmware-ui-en-CAS-refresh-never-replays-an-old-intent/en-mock-conflict.png",
+      "sizeBytes": 866636,
+      "sha256": "3778269cb1fc851922a14ad115a5a4c1e89318a6d169efb7a7c57faa733e1c35"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-02/firmware-ui-en-retract-bou-c2206-ncel-and-fresh-confirmation/en-mock-cancel.png",
+      "sizeBytes": 978868,
+      "sha256": "201f9b3684d0a10c3634a8a7ba753790a17b77d198cf48197c15297539596771"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-02/firmware-ui-en-retract-bou-c2206-ncel-and-fresh-confirmation/en-mock-confirm.png",
+      "sizeBytes": 849183,
+      "sha256": "59eac0c4cc0d379e9027659e7c87f907d9aae2e271251207a2eb530d67a4224b"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-02/firmware-ui-en-retract-bou-c2206-ncel-and-fresh-confirmation/en-mock-overview.png",
+      "sizeBytes": 980217,
+      "sha256": "48630c9e6a595f39ab07b6af5cf2ba14138f4dee3c3ee5f50880d39494a74690"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-02/firmware-ui-en-retract-bou-c2206-ncel-and-fresh-confirmation/en-mock-success.png",
+      "sizeBytes": 828776,
+      "sha256": "3f780c274f5ea3a2aca20fa82873497a4e6bbfeac37829a93ace01f993047db4"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-02/firmware-ui-en-retract-bou-c2206-ncel-and-fresh-confirmation/error-context.md",
+      "sizeBytes": 10716,
+      "sha256": "cf1ac7a0a804feef7db7e3e87fcf1085208873848f8224befe956cf0d596ceaf"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-02/firmware-ui-en-retract-bou-c2206-ncel-and-fresh-confirmation/test-failed-1.png",
+      "sizeBytes": 390917,
+      "sha256": "dd28e1da3ec08379ea41500509cbb75e83d85e575e796bf1b55e6996ac73d422"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-02/firmware-ui-mobile-firmwar-76636-nfirmation-fit-the-viewport/zh-mobile-mock-confirm.png",
+      "sizeBytes": 612586,
+      "sha256": "899e26390633802447d9d5ada079765506fc91deaee93fe6657917ca2c3f4b49"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-02/firmware-ui-zh-CAS-refresh-never-replays-an-old-intent/zh-mock-conflict.png",
+      "sizeBytes": 773147,
+      "sha256": "7aa2a6f6077ed901027b500adf1202071fb726eea438fd5de1a01863d9ef419d"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-02/firmware-ui-zh-retract-bou-c1c23-ncel-and-fresh-confirmation/zh-mock-cancel.png",
+      "sizeBytes": 925930,
+      "sha256": "d6d09a8de493052f139bfaa51ff2a0830e84ae066cd06c8e02d3274ccd177c53"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-02/firmware-ui-zh-retract-bou-c1c23-ncel-and-fresh-confirmation/zh-mock-confirm.png",
+      "sizeBytes": 822682,
+      "sha256": "ed4f10c21635a809d7de0d665d0fa168d75f6aa7cf02bd687ed4b3fbc26bec73"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-02/firmware-ui-zh-retract-bou-c1c23-ncel-and-fresh-confirmation/zh-mock-overview.png",
+      "sizeBytes": 928808,
+      "sha256": "69b076388512ee495dd24433cffd9f888bb4712b21b9cc87e013f3fe2a28a890"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-02/firmware-ui-zh-retract-bou-c1c23-ncel-and-fresh-confirmation/zh-mock-success.png",
+      "sizeBytes": 825801,
+      "sha256": "08a1aba1da35b8e8645584fe75c71370e1555cd87d7d6ec49c326c2b7e933672"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-03/.last-run.json",
+      "sizeBytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-03/firmware-ui-en-retract-bou-c2206-ncel-and-fresh-confirmation/en-mock-cancel.png",
+      "sizeBytes": 978409,
+      "sha256": "b63b17ed9b46a4da483ac3d848cbc99b5b19ec3607bec31e99d17d40b5becfb9"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-03/firmware-ui-en-retract-bou-c2206-ncel-and-fresh-confirmation/en-mock-confirm.png",
+      "sizeBytes": 847292,
+      "sha256": "7ed7476189b92b2845e5e8d1375e6675fd59052cbe0e0e95d7ca05d11824c4f5"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-03/firmware-ui-en-retract-bou-c2206-ncel-and-fresh-confirmation/en-mock-overview.png",
+      "sizeBytes": 978325,
+      "sha256": "a19e77a8323699ce6a3a7c995b4757009cfb97975ea9c9b59997715db4e25ccd"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-03/firmware-ui-en-retract-bou-c2206-ncel-and-fresh-confirmation/en-mock-success.png",
+      "sizeBytes": 839858,
+      "sha256": "5a3a09292a90b97ee293b21ff2fa16278725b7a97324ff365c3b738b0ba6b4c2"
+    },
+    {
+      "path": ".cache/p43/ui/accept02-ui-04/.last-run.json",
+      "sizeBytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    }
+  ]
+}

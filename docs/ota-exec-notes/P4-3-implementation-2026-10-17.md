@@ -1,7 +1,8 @@
 # P4-3 Implementation And Development Handoff
 
-Status: DEVELOPMENT_SELF_TESTS_PASSED; REQUIRED_ADMIN_EXERCISE_EXECUTED;
-INDEPENDENT_ACCEPTANCE_PENDING.
+Status: P43_ACCEPT02_IMPLEMENTATION_REMEDIATED; SOURCE_BOUND_CI_PASSED;
+MAIN_AGENT_REVIEW_PENDING. The 2026-10-18 pre-review finding remains open until
+the user-assigned main agent evaluates this remediation; see the final section.
 The remaining real exercise completed in drill-06 after the P43-CSRF-01 repair.
 Original successful, failed and interrupted observations remain distinct. The
 complete batch is now ready for independent offline evaluation, not an automatic
@@ -1279,3 +1280,155 @@ secrets, signed URLs and JWTs before packaging. Private cookies, signing inputs,
 raw capability URLs and user-browser state are excluded, not silently published.
 This is development evidence for independent evaluation, not the final
 acceptance verdict itself.
+
+## P43-ACCEPT-02 Implementation Remediation
+
+Disposition: READY_FOR_MAIN_AGENT_REVIEW, development self-tests complete; not independent
+acceptance or a whole-card PASS. The user-assigned main agent owns re-review,
+formal admission and final acceptance. The original concentrated pre-review,
+its four failing cases and all six historical development archives remain intact.
+
+Source: `0067b6c3caa9ee263c53ae372fdc63cc7f74250f`, branch
+`dev/p4-3/admin-controls-20261017`, parent
+`08277242b3326541b27f306aee16233cd344ea95`. The scoped push delivered this repair
+and the previously local-only ancestor 0827724; it did not merge main. This
+source commit changes only `admin/public/index.html` and
+`admin/test/firmware-ui.spec.ts` beneath the update-service package.
+
+### Repair And Invariants
+
+`runFirmwareReleaseAction` no longer interprets an interrupted reconciliation's
+4xx response as proof that its original request did not commit. The original
+actor, path, body and UUIDv4 key remain pending through repeated 401/403/429,
+backend, conflict and state-error responses, including successful intervening
+GET refreshes. Unrelated channel/release writes stay locked. An explicitly
+confirmed same-key replay, not an automatic POST, resolves the original request.
+
+A first request's definitive 4xx rejection still permits a separately confirmed
+new intent. A correlated HTTP 409 `IDEMPOTENCY_RESULT_EXPIRED` also releases the
+old intent as required by `OTA-XC-ADMIN-IDEMPOTENCY`. The error must belong to the
+pending request's path. `api` now validates firmware error envelope fields and
+the body/header requestId correlation before exposing a terminal code. Missing
+or mismatched correlation and an expiry code carried by HTTP 403 do not unlock
+an unresolved request. Validated success still clears pending state before GET
+refresh; a later refresh failure does not recreate an already confirmed intent.
+
+No Access/CSRF/role gate, API endpoint, server idempotency/tombstone, channel CAS,
+release state, asset identity or frozen contract was changed. No new key is
+generated automatically and no result is inferred from a successful GET.
+
+### Local Development Evidence
+
+All labels below identify original `.cache/p43/logs/<label>.{log,json}` files
+created by the existing contained execution adapter. Host: Windows, Node
+`v24.13.0`, project-local Playwright Chromium, no local build or cloud operation.
+
+| Label | Actual result |
+| --- | --- |
+| `accept02-probe-red-01` | Before product edit: unchanged reviewer source-reading probe, 4 FAIL / 2 PASS controls, exit 1 |
+| `accept02-probe-green-01` | After repair: same unchanged probe, 6/6, exit 0 |
+| `accept02-probe-source-bound` | Same 6/6 against committed repair, exit 0 |
+| `accept02-ui-01` | 12 PASS / 24 FAIL, exit 1; the added tests expected `Firmware operation unconfirmed` instead of the existing `Firmware operation not confirmed` |
+| `accept02-ui-01-source` | Preserves the exact pre-correction source/test diff against 0827724, including both incorrect test strings |
+| `accept02-ui-02` | Corrected assertions: 34 PASS / 2 timeouts, exit 1, unchanged 30-second whole-test limit |
+| `accept02-ui-03` | Only the timed-out English retract/cancel test, 1/1 in 13.9s, 60-second bound, exit 0 |
+| `accept02-ui-04` | Only the timed-out disable/403-expiry interrupted-replay test, 1/1 in 15.9s, 60-second bound, exit 0 |
+| `accept02-admin-check-01`, `accept02-admin-check-02` | `npm run check` / `tsc --noEmit`, exit 0 |
+
+The 24 added browser cases comprise both actions across ten interrupted-replay
+responses, plus four first-request rejection controls. They require two explicit
+failed replays and manual refreshes to retain the exact request, restore service
+and explicitly obtain the original requestId/URL, with one durable mock effect.
+Existing expiry/new-intent, changed-actor, CAS, cancellation, role, refresh-lock,
+bilingual and mobile controls remain. Mock URLs/identities are not live Access.
+
+The two timeout originals remain failures, not a claimed 36/36 Windows full run.
+The exact host delay was not instrumented; one case reached the final page and
+the other timed out while closing a result dialog. Only the local targeted
+command's deadline changed; assertions, production code and the CI 30-second
+configuration were not weakened. The probe's hardcoded word `Independent`
+describes its original author, not this implementation-owned execution.
+
+### Source-Bound CI And Handoff
+
+Dispatched `.github/workflows/cloudflare-update-service.yml`, run
+`39098302062/1`, with `prepare_admin_bundle=true` on the exact repaired source.
+All four jobs completed successfully on Ubuntu / Node `v24.21.0`: Worker
+270/270, mock UI 36/36 with the unchanged 30-second test bound, compiled routing
+3/3, and Admin/Public typechecks. The UI checkout marker, run/branch/commit,
+checked input source/run markers and every serving SHA-256 match. The CI HTML
+is byte-identical to Git source, SHA-256
+`1a5feb4ffb04bf164c139cc1f221baabee3296ca51caf6f02f4e3c13411a0a58`.
+The local checkout's line endings account for its different raw probe digest;
+no historical file was normalized or rewritten for this comparison.
+
+Run: https://github.com/Eitan-S-23/E-Track/actions/runs/39098302062
+
+Original CI log ZIP: `.cache/p43/ci/logs-39098302062.zip`; retrieved artifacts:
+`.cache/p43/ci/artifacts-39098302062/`; direct source/count/hash assertions
+performed as an implementation self-test: `accept02-ci-verify-01`.
+Artifact IDs are `12125955776` (checked input), `12125786483` (build diagnostics)
+and `12125034754` (mock UI), all bound to this source/run and expiring on
+2026-11-01. Their API metadata and downloaded contents are preserved in the
+increment, rather than relying on retention. This is not a deployed build.
+
+CI is not warning-free: 24 npm warning lines, two Actions warning annotations
+and four expected native negative-test exception lines are retained. Existing
+Admin/Public dependency reports still have four high findings each; Worker has
+eight high and three moderate. No dependency was changed or risk waived.
+
+No live recovery issuance, CAS/disable operation, D1/R2 mutation, deployment or
+device operation was performed for this remediation. The last deployed source
+remains 972e74c; this repair is a development candidate, not a claim of a live fix.
+Existing cloud observations remain tied to their original source/date, and the
+main agent decides applicability without replaying the completed campaign.
+
+The real publisher/viewer session gap, inherited dependency advisories and the
+historical Cryptnet exception remain disclosed. Read-only timestamp checks saw
+the ABD Cryptnet metadata at `2026-10-18T04:04:08.651Z` and
+`C:/Users/SU/AppData/Local/Microsoft/Windows/PowerShell/StartupProfileData-NonInteractive`
+at `2026-10-18T04:40:20.977Z`, plus activity in the user-owned Chrome profile.
+Those timestamps do not identify the writer. This remediation used cmd.exe,
+contained Chromium and Git/OpenSSL, not PowerShell, installed user browsers or
+native curl/Schannel. No external cache was cleaned, moved or overwritten.
+No machine-wide zero-external-write or exclusive-causation claim is made.
+
+### Increment, Prevention And Next Owner
+
+Development increment: `P4-3-dev-2026-10-17/accept02-01.zip`, with
+`accept02-01.inventory.json`: 158 entries, 42,197,684 bytes, SHA-256
+`751c8c7b989a913a4dda9212da81ba8a6103c86459ce702d4e716b53dc7d845d`.
+The archive listing, sizes and every extracted entry's digest were checked.
+All six preceding archive hashes still match their inventories. The original
+review archive remains `81efe70aaf1c35c70584c882ec5fbd84feefc390ef7154484bfcda5f0dc85092`;
+`accept02-preserved-inputs` also binds the unchanged review report and board.
+This increment includes original failed runs, screenshots, successful targeted
+reruns, CI outputs and the exact diagnostic sources, not just summary claims.
+
+Root cause was an implicit lifecycle assumption plus a coverage gap: rejecting
+the latest attempt does not determine whether an earlier attempt committed.
+The previous happy replay/503/expiry tests did not exercise intervening 4xx
+failures. Both release actions now share the repaired rule and interrupted
+sequence tests, including malformed correlation and wrong-status expiry. This
+lesson is captured here without creating a competing Spec or editing frozen
+contracts; no `.trellis` guide/template tree exists in this worktree.
+
+Chosen outputs stay in this exclusive worktree: product/test files, this note,
+the new archive/inventory, and `.cache/p43*` tooling/logs/CI/UI/temp/cache paths.
+Only the separately authorized shared `.git` branch/index/object/log metadata
+is written outside it. Directory/reparse guards, contained process environments
+and the recorded host audit were used; no owned UI collector remained. Existing
+project-local caches and all external exceptions were preserved, not cleaned.
+
+The reviewer's new issue-table row, board changes, acceptance report and its
+originals remain unstaged and are not appropriated into this implementation
+commit. Only this note's implementation-owned status/append and the new
+development archive/inventory are staged for evidence delivery.
+
+Next owner: the user-assigned main agent reviews `0067b6c` plus this increment,
+checks the original P43-ACCEPT-02 oracle and decides formal admission. There is
+no remaining implementation operation awaiting that agent's execution. The
+finding is not independently closed by this self-test report. Formal acceptance,
+main integration and any deployment decision remain separate; do not rerun the
+old live collector, re-enable the low release or issue additional recovery URLs
+merely to review this UI repair.
