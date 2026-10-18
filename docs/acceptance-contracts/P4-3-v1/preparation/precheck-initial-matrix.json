@@ -1,0 +1,99 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P4-3-v1",
+  "contract_sha256": "5517f3d4778c702b251985c38df81bc904569be53f8764bc3e7b9ecf65c10858",
+  "round_id": "P43-20261018-01",
+  "overall_result": "NOT_RUN",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "P43-API",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "First formal round; prior pre-reviews and implementation runs are not formal REUSED origins."
+    },
+    {
+      "id": "P43-CHANNEL",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "First formal round; prior pre-reviews and implementation runs are not formal REUSED origins."
+    },
+    {
+      "id": "P43-PUBLIC",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "First formal round; prior pre-reviews and implementation runs are not formal REUSED origins."
+    },
+    {
+      "id": "P43-RELEASE",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "First formal round; prior pre-reviews and implementation runs are not formal REUSED origins."
+    },
+    {
+      "id": "P43-UI",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "First formal round; prior pre-reviews and implementation runs are not formal REUSED origins."
+    },
+    {
+      "id": "P43-RETENTION",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "First formal round; prior pre-reviews and implementation runs are not formal REUSED origins."
+    },
+    {
+      "id": "P43-GOVERNANCE",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "First formal round; prior pre-reviews and implementation runs are not formal REUSED origins."
+    }
+  ],
+  "evidence_hashes": {},
+  "commands": [],
+  "artifacts": []
+}

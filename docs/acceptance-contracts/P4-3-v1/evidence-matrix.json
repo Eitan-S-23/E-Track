@@ -1,0 +1,196 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P4-3-v1",
+  "contract_sha256": "5517F3D4778C702B251985C38DF81BC904569BE53F8764BC3E7B9ECF65C10858",
+  "round_id": "P43-20261018-01",
+  "overall_result": "PASS",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "P43-API",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": true,
+      "evidence": [
+        "evidence/formal-ci.log"
+      ],
+      "notes": "The frozen offline evaluator ran in this round. Historical CI/cloud originals are external inputs, not new CI/cloud executions. Role/deployment/dependency/private retrieval limitations remain in the acceptance report."
+    },
+    {
+      "id": "P43-CHANNEL",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": true,
+      "evidence": [
+        "evidence/formal-ci.log",
+        "evidence/formal-live.log"
+      ],
+      "notes": "The frozen offline evaluator ran in this round. Historical CI/cloud originals are external inputs, not new CI/cloud executions. Role/deployment/dependency/private retrieval limitations remain in the acceptance report."
+    },
+    {
+      "id": "P43-PUBLIC",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": true,
+      "evidence": [
+        "evidence/formal-ci.log",
+        "evidence/formal-live.log"
+      ],
+      "notes": "The frozen offline evaluator ran in this round. Historical CI/cloud originals are external inputs, not new CI/cloud executions. Role/deployment/dependency/private retrieval limitations remain in the acceptance report."
+    },
+    {
+      "id": "P43-RELEASE",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": true,
+      "evidence": [
+        "evidence/formal-ci.log",
+        "evidence/formal-live.log",
+        "evidence/formal-ui.log"
+      ],
+      "notes": "The frozen offline evaluator ran in this round. Historical CI/cloud originals are external inputs, not new CI/cloud executions. Role/deployment/dependency/private retrieval limitations remain in the acceptance report."
+    },
+    {
+      "id": "P43-UI",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": true,
+      "evidence": [
+        "evidence/formal-ci.log",
+        "evidence/formal-live.log",
+        "evidence/formal-ui.log"
+      ],
+      "notes": "The frozen offline evaluator ran in this round. Historical CI/cloud originals are external inputs, not new CI/cloud executions. Role/deployment/dependency/private retrieval limitations remain in the acceptance report."
+    },
+    {
+      "id": "P43-RETENTION",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": true,
+      "evidence": [
+        "evidence/formal-ci.log",
+        "evidence/formal-live.log"
+      ],
+      "notes": "The frozen offline evaluator ran in this round. Historical CI/cloud originals are external inputs, not new CI/cloud executions. Role/deployment/dependency/private retrieval limitations remain in the acceptance report."
+    },
+    {
+      "id": "P43-GOVERNANCE",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": true,
+      "evidence": [
+        "evidence/formal-governance.log"
+      ],
+      "notes": "The frozen offline evaluator ran in this round. Historical CI/cloud originals are external inputs, not new CI/cloud executions. Role/deployment/dependency/private retrieval limitations remain in the acceptance report."
+    }
+  ],
+  "evidence_hashes": {
+    "evidence/formal-ci.json": "39ac90303a7d4f96b5edbc7536beb8791170d1da56a135dcc5cf7ab4d16d37c5",
+    "evidence/formal-ci.log": "3d662ded1fdec6c4c9dffd844764cf88a140928d4ef7be1b98ce99a13981f696",
+    "evidence/formal-governance.json": "ac17d6a7a9ae68163a2cf611a1de99d63c907b17b7d41aa344304d705cad736e",
+    "evidence/formal-governance.log": "ec100303a33ee4b91aeea25b440736f29d9f9c00d7d12af1004963dcf7ff3546",
+    "evidence/formal-live.json": "fad23a0e096949f246c37b052044ae733db95d26abdbc0abf302e27c744ce48c",
+    "evidence/formal-live.log": "feea00c7242d270a8a34e7811c8b94cbcd3282c493e2ea6a446ff5afe79e46cc",
+    "evidence/formal-ui.json": "b3f6ada9001c85bf801b0c87a7438450a7204c2294846144163ade5e97eae8df",
+    "evidence/formal-ui.log": "d445672de4c93ce59fd23f27853e7d56a9b9503ad0334a1f1d0fd581793c4723",
+    "inputs/governance-jobs.json": "a05c5cffd908854980d6c2e8f001d5d496fe12a98539cc1bb5e976c1885734c9",
+    "inputs/governance-logs.zip": "5e1b95737be9b85a191945ab5d034ed148ab08c38b96114d54db68ac3eeee2b9",
+    "inputs/governance.json": "bea9e8f5d47e7df61624bde2b6e14d482c0bfd22bf900418370fe919efca2d0b",
+    "inputs/host.json": "694d5ef3724265531deaf5bd547e81dcf31f7ec04db5228f845bb1bbc2fb759f",
+    "inputs/live-originals.zip": "865730da8d32bba4de6cab9cc821639c8b41638f8e119928e3cd4f0eadef942b",
+    "inputs/live.inventory.json": "05eb05ea0306104dce94a30e36db6d94e5dad37cd474d83e80b25f85b0107e37",
+    "inputs/private-originals.json": "407eb75a2e8c520f1077e8c7acaf9d854f9f8f27f7c02747c7128b1f1b692af9",
+    "inputs/repair-originals.zip": "751c8c7b989a913a4dda9212da81ba8a6103c86459ce702d4e716b53dc7d845d",
+    "inputs/repair.inventory.json": "e928043375044c0e3c82add955fd816b1e97abada7b50379a07076f51ea8bbca"
+  },
+  "commands": [
+    {
+      "id": "formal-ci",
+      "command": "node docs/acceptance-contracts/P4-3-v1/tools/run.cjs formal-ci node docs/acceptance-contracts/P4-3-v1/tools/inspect-ci.cjs",
+      "exit_code": 0,
+      "output_evidence": "evidence/formal-ci.log",
+      "started_at": "2026-10-18T08:31:37.975Z",
+      "ended_at": "2026-10-18T08:32:19.350Z"
+    },
+    {
+      "id": "formal-live",
+      "command": "node docs/acceptance-contracts/P4-3-v1/tools/run.cjs formal-live node docs/acceptance-contracts/P4-3-v1/tools/inspect-live.cjs",
+      "exit_code": 0,
+      "output_evidence": "evidence/formal-live.log",
+      "started_at": "2026-10-18T08:38:00.073Z",
+      "ended_at": "2026-10-18T08:38:12.301Z"
+    },
+    {
+      "id": "formal-ui",
+      "command": "node docs/acceptance-contracts/P4-3-v1/tools/run.cjs formal-ui node docs/acceptance-contracts/P4-3-v1/tools/ui-reconcile-probe.cjs",
+      "exit_code": 0,
+      "output_evidence": "evidence/formal-ui.log",
+      "started_at": "2026-10-18T08:39:21.441Z",
+      "ended_at": "2026-10-18T08:39:21.684Z"
+    },
+    {
+      "id": "formal-governance",
+      "command": "node docs/acceptance-contracts/P4-3-v1/tools/run.cjs formal-governance node docs/acceptance-contracts/P4-3-v1/tools/inspect-ci.cjs governance",
+      "exit_code": 0,
+      "output_evidence": "evidence/formal-governance.log",
+      "started_at": "2026-10-18T08:47:31.518Z",
+      "ended_at": "2026-10-18T08:47:32.060Z"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "formal-ci-result",
+      "path": "evidence/formal-ci.log",
+      "size": 4762,
+      "sha256": "3d662ded1fdec6c4c9dffd844764cf88a140928d4ef7be1b98ce99a13981f696"
+    },
+    {
+      "id": "formal-live-result",
+      "path": "evidence/formal-live.log",
+      "size": 4444,
+      "sha256": "feea00c7242d270a8a34e7811c8b94cbcd3282c493e2ea6a446ff5afe79e46cc"
+    },
+    {
+      "id": "formal-ui-result",
+      "path": "evidence/formal-ui.log",
+      "size": 3075,
+      "sha256": "d445672de4c93ce59fd23f27853e7d56a9b9503ad0334a1f1d0fd581793c4723"
+    },
+    {
+      "id": "formal-governance-result",
+      "path": "evidence/formal-governance.log",
+      "size": 306,
+      "sha256": "ec100303a33ee4b91aeea25b440736f29d9f9c00d7d12af1004963dcf7ff3546"
+    }
+  ]
+}

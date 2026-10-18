@@ -1,4 +1,11 @@
-# P4-3 Independent Acceptance Pre-Review
+# P4-3 Independent Acceptance
+
+Latest result: **formal PASS**, contract `P4-3-v1`, round
+`P43-20261018-01`, all seven required criteria satisfied. Input freeze:
+`1ddd948bbf7d0dc2097c14d87def767314342f8f`; product source remains 0067b6c.
+See the final formal-result section and `docs/acceptance-contracts/P4-3-v1/`.
+The pre-review/NOT_RUN statements below are dated history, not the latest result.
+No new deployment, main merge or production-role certification is claimed.
 
 Latest review: **P43-ACCEPT-02 CLOSED / remediation re-review PASS** on
 `0067b6c3caa9ee263c53ae372fdc63cc7f74250f`, delivery
@@ -430,3 +437,60 @@ message and contains hook temporary paths. No global Git configuration is
 changed. The forthcoming input commit is confined to this task's acceptance
 tools, profile/attributes, prepared originals, reviewer records and existing
 task board. Product source remains 0067b6c.
+
+## P43-20261018-01: Formal Result
+
+**DECIDED PASS: P4-3 independent implementation acceptance.** The original
+implementation owner is preserved. P43-ACCEPT-02 is closed; no additional required
+product remediation was identified. This completes this card's approved scope,
+not deployment/main integration or the retained P4-4/P5/production obligations.
+
+| Binding | Value |
+| --- | --- |
+| Contract | `docs/acceptance-contracts/P4-3-v1.contract.json`, unchanged after freeze |
+| Input commit | `1ddd948bbf7d0dc2097c14d87def767314342f8f` |
+| Input tree | `855c15853c572b83d9684235dbf69a247d4968b2` |
+| Contract SHA-256 | `5517F3D4778C702B251985C38DF81BC904569BE53F8764BC3E7B9ECF65C10858` |
+| Final matrix | `docs/acceptance-contracts/P4-3-v1/evidence-matrix.json` |
+| New governance CI | `39110429390/1`, exact input commit, all three jobs successful |
+| Formal commands | `formal-ci`, `formal-live`, `formal-ui`, `formal-governance`: four independent offline executions, each exit 0 |
+| Final validation | `VALIDATION=PASS contract=P4-3-v1 round=P43-20261018-01 overall=PASS` |
+
+The seven PASS criteria are API contracts/security/atomicity, both channel
+operations and CAS, public selection/download stop semantics, release-action
+idempotency/disable/recovery, bilingual UI/reconciliation, asset retention, and
+acceptance governance. Their exact gates, command dependencies and original
+evidence hashes are in the frozen contract and final matrix. This round has zero
+formal REUSED entries: previous implementation and review observations are
+external original inputs, not forged previous EXECUTED PASS anchors.
+
+The formal evaluators independently checked all 743 public archive entries and
+all 186 required private originals. Original effects remain 24 channel updates,
+three recovery issuances and one disable; both channel chains and all six asset
+rows agree. The current-source probe is 6/6, the source-bound product CI remains
+270/36/3, and the repaired UI/server applicability checks pass. Historical
+933b790 data is justified by the exact session-cookie-only server delta to
+972e74c; the latter's server executable is unchanged at 0067b6c. The formal
+governance evaluation finds eight successful suites (323 tests), plus the two
+17-test host-helper results and the original adapter/spec-probe outcomes in the
+three successful jobs. New governance logs contain three warning annotations
+and zero error annotations; prior product-CI warnings/advisories remain as above.
+
+The first formal precheck failed only because the helper emitted a lowercase
+matrix contract hash and this validator compares that field to uppercase hex.
+The failed output and initial NOT_RUN matrix are preserved. The mutable matrix
+field is normalized at the packaging boundary; the existing helper's lowercase
+input/output convention is not mistaken for a different digest. The unchanged
+contract, frozen runners and criteria were not rewritten. `formal-precheck-02`
+then passed with NOT_RUN before the four commands; final validation passed after
+them. No passed observation was repeated for this formatting correction.
+
+The bundle README records the exact limitations and controlled private-original
+retrieval requirement. Its native/Windows failures, pre-review failure, adapter
+failure and first-precheck failure are preserved alongside successes. Source/CI
+verification of 0067b6c is not an assertion that it is deployed: the recorded
+deployment remains 972e74c. Real publisher/viewer sessions, inherited dependency
+advisories and external-cache attribution are not silently closed or waived.
+The subsequent closeout commit registers the separate bundle commit and updates
+only this card; no main merge, new secret, cloud mutation, device action or
+external cleanup is part of this acceptance.

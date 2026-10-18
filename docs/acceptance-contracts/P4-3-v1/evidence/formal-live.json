@@ -1,0 +1,15 @@
+{
+  "label": "formal-live",
+  "command": "node",
+  "args": [
+    "docs/acceptance-contracts/P4-3-v1/tools/inspect-live.cjs"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-3-implementation-20261017",
+  "started": "2026-10-18T08:38:00.073Z",
+  "ended": "2026-10-18T08:38:12.301Z",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "node": "v24.13.0",
+  "logPath": "D:\\github\\my\\E-Track\\.cache\\p4-3-implementation-20261017\\docs\\acceptance-contracts\\P4-3-v1\\evidence\\formal-live.log"
+}

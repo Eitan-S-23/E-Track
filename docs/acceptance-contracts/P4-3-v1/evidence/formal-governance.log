@@ -1,0 +1,9 @@
+{
+  "nature": "Independent original governance CI evaluation",
+  "runId": "39110429390",
+  "source": "1ddd948bbf7d0dc2097c14d87def767314342f8f",
+  "successfulJobs": 3,
+  "regressionSuites": 8,
+  "originalLogsSha256": "5e1b95737be9b85a191945ab5d034ed148ab08c38b96114d54db68ac3eeee2b9",
+  "verified": true
+}
