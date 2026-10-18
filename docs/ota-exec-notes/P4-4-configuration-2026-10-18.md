@@ -179,10 +179,41 @@ recognized and will not be requested again.
 | --- | --- | --- |
 | P44-TARGET-01 | O1 confirms the actual production Worker/D1/R2 target and public origin | Prefer a new, empty E-Track namespace: Worker/D1 e-track-firmware-production and R2 e-track-firmware-production-releases, in the existing account; origin based on that confirmed Worker. This would create new resources and deploy the accepted Worker, not publish firmware or touch old Trace. If an existing target is intended, supply its exact identity instead. Empty-database setup is distinct from P42-EXT-02 legacy/backfill, which remains with O3. |
 | P44-CREDENTIAL-01 | O1 specifies the protected production workflow credential source/isolation decision, device AES key source and deploy/HMAC provisioning route | Existing e-track-ci remains available for authorized configuration. Do not assume it must be replaced, but do not silently make a test credential a production CI credential. Prefer the already approved device AES key to preserve package identity; new deploy/HMAC values need protected owner provisioning or explicit generation authority. An existing protected file locator or direct platform configuration is enough; no plaintext in chat. |
-| P44-EVID-01 | O1/O2 selects the actor/route for one actual rehearsal-environment rejection observation, plus candidate/descriptor approval binding | The task-scoped P4-1-only delegation does not authorize P4-4 agent approval. A denial-only observation must not execute the release steps or repeat a successful rehearsal. Do not widen the exact P4-1 branch policy merely to run a probe; root/reviewer must bind the minimum safe route. Production approval/execution remains after P5. |
+| P44-EVID-01 | NEED_EVIDENCE: O2 organizes the minimum formal rejection observation on an authorized exact workflow/ref, with the existing reviewer | Preserve waiting state, actual rejection actor/receipt and unexecuted release steps from the same run/attempt. A 401, cancellation or timeout is not reviewer rejection. No P4-1 delegation, branch-rule relaxation or gate bypass. If waiting cannot be reached, retain the gap. This belongs in the formal acceptance plan, not an implementation prerequisite to obtain independent PASS. Production approval/execution remains after P5. |
 
-Once these decisions are available, implement only the selected missing settings,
-read them back, run affected host checks and assess evidence invalidation before
-any necessary minimum runtime observation. Real publisher/viewer sessions, the
+Once O1 decides P44-TARGET-01 and P44-CREDENTIAL-01, implement only the selected
+missing settings, read them back, run affected host checks and assess evidence
+invalidation, then deliver a stable batch. O2 may plan P44-EVID-01 as the minimum
+formal observation; the implementer need not obtain independent PASS beforehand.
+Real publisher/viewer sessions, the
 unexercised admin-bypass route and inherited dependency/cache limitations are
 still explicit; nothing here reopens P4-1/P4-2/P4-3 acceptance or completes P4-4.
+
+### Main Review Disposition
+
+The user relayed the main reviewer's DECIDED response to progress commit
+`9f7acdebcfebe2f3164f08ac0462403d7cef48b9`. It accepts the submission as progress
+and a configuration-decision request, not a formal acceptance handoff or P4-4
+PASS. The reviewer reports read-only inspection of the 85/26-test originals and
+both 401 receipts. They remain implementation self-tests and test-Worker denial
+observations, not production qualification or reviewer rejection evidence.
+
+- P44-TARGET-01: OUT_OF_SCOPE means outside the main reviewer's authority to
+  authorize on the owner's behalf, not rejection of the technical direction.
+  The independent namespace is recommended; O1 must confirm account, resources,
+  public origin and create/deploy scope. No legacy/backfill is included.
+- P44-CREDENTIAL-01: OUT_OF_SCOPE for the same owner-authority reason. No new
+  generic token request or default new-token requirement. O1 decides production
+  CI protected source/use boundary and key lifecycle. Prefer the approved
+  App/packer-matched AES key; new deploy/HMAC values require secure owner setup
+  or explicit generation delegation. No provisioning-token export to CI.
+- P44-EVID-01: NEED_EVIDENCE, owned by O2 as set out in the updated row above.
+  This corrects any earlier implication that the implementer must first obtain
+  formal independent rejection evidence before handing over a stable batch.
+
+This response grants no target, credential, key-generation or platform-operation
+authority. The reviewer reported no file/platform changes or formal acceptance
+start. These paragraphs are the implementation agent's later record of that
+relayed decision, not a new independent verdict. P4-1 originals remain cross-task
+inputs for independent evaluation, never a direct P4-4 REUSED entry or a reason
+to repeat successful rehearsal. Gate=false and post-P5 production gates remain.

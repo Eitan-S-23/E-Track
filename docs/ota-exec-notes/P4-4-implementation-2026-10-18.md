@@ -409,3 +409,34 @@ tar listing/extraction checks passed. No earlier ZIP or frozen evidence changed.
 This is an implementation-progress/owner-decision handoff, not a claim that the
 whole card is ready for independent acceptance. The same branch receives this
 record-only increment; main remains untouched.
+
+## Main Review Decision Received
+
+The user relayed the main reviewer's disposition of progress commit
+`9f7acdebcfebe2f3164f08ac0462403d7cef48b9`: received as progress/configuration
+decisions, not a formal acceptance handoff; P4-4 is not PASS. The reported
+read-only review of 85/26-test originals and two 401 receipts does not turn those
+self-tests into production qualification or an observed approval rejection.
+
+The configuration note retains the same three IDs and records the dispositions:
+P44-TARGET-01 and P44-CREDENTIAL-01 are OUT_OF_SCOPE only for the main reviewer's
+ability to substitute for owner authorization. Actual owner decisions remain
+pending; the response is not permission to create/deploy resources or select,
+generate or expand production credentials. Existing e-track-ci use is unchanged.
+
+P44-EVID-01 is NEED_EVIDENCE owned by the main reviewer, who organizes the minimum
+formal observation on an authorized exact workflow/ref with the existing
+reviewer. Waiting, rejection actor/receipt and release-step nonexecution must
+share the same run/attempt. Cancellation, timeout and Worker 401 are not
+substitutes. No branch/gate relaxation or inherited P4-1 approval delegation.
+The implementation agent is not required to obtain independent PASS in advance:
+after owner decisions, implement the authorized missing configuration, perform
+redacted readback and affected self-tests, and return the stable batch with this
+formal observation explicitly planned. No successful rehearsal replay.
+
+This receipt updates only these two task records. It grants no additional
+operating scope, changes no task completion/readiness or frozen evidence, and
+does not start formal acceptance. Production approval/execution remains after
+P5 and OTA_BOOT_CHAIN_READY remains false. No Cloudflare/environment operation or
+runtime probe is needed to record this decision; previous tests remain attributed to their
+actual source and execution, not rerun or counted again.
