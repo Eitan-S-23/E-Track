@@ -2596,7 +2596,7 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
                 declared_types = re.findall(r"(?m)^`([A-Z_]+)`$", type_section)
                 self.assertEqual([row["type"]], declared_types, f"{target.name} 任务类型与 readiness 不一致")
         self.assertEqual(
-            {"P3-1", "P3-2", "P3-3", "P3-4", "P3-6", "P3-7", "P3-8", "P4-1", "P4-2", "P4-3"},
+            {"P3-1", "P3-2", "P3-3", "P3-4", "P3-6", "P3-7", "P3-8", "P4-1", "P4-2", "P4-3", "P4-4"},
             dispatchable,
             "可派单集合必须精确受控：历次解锁及 OTA-DEC-014 新增 P3-8 均须同批登记 §9，不能用子集比较放宽",
         )
@@ -2608,6 +2608,19 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
         self.assertIn("P4-2", row["blocking_dependencies"])
         self.assertIn("P42-EXT-03B", row["blocking_dependencies"])
         self.assertIn("P43-DISPATCH-20261017", self.board)
+
+    def test_p44_dispatch_reconciles_interfaces_without_reopening_completed_cards(self):
+        row = next(item for item in self.readiness_rows() if item["task_id"] == "P4-4")
+        self.assertEqual("INTEGRATION", row["type"])
+        self.assertEqual("SATISFIED", row["dependency_state"])
+        self.assertEqual("DISPATCHABLE", row["dispatch_eligibility"])
+        for reference in ("P4-1", "P4-2", "P4-1-v4", "P44-DISPATCH-20261018"):
+            self.assertIn(reference, row["blocking_dependencies"])
+        card = self.board.split("#### P4-4 ", 1)[1].split("## 8.", 1)[0]
+        self.assertIn("不等待 P4-1", card)
+        self.assertIn("不能为证明配置而提前生产发布", card)
+        self.assertIn("配置变化影响的证据另作最小验证", card)
+        self.assertIn("P4-4-implementation-2026-10-18.md", card)
 
     def test_ble_performance_policy_preserves_measurement_and_link_boundaries(self):
         section = self.contract.split("### OTA-XC-BLE-PERFORMANCE", 1)[1].split("### ", 1)[0]
@@ -2849,7 +2862,7 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
                 self.assertIn(token, section)
         for row in self.readiness_rows():
             if row["task_id"] in {"P4-1", "P4-4"}:
-                self.assertEqual("DISPATCHABLE" if row["task_id"] == "P4-1" else "NOT_DISPATCHABLE", row["dispatch_eligibility"])
+                self.assertEqual("DISPATCHABLE", row["dispatch_eligibility"])
                 self.assertIn("OTA-XC-BOOTSTRAP-BASE", row["contract_refs"])
         self.assertIn("1和2我都不清楚，你不知道吗？全权授权给你", self.decisions)
         self.assertIn("### 记录 15", self.decisions)

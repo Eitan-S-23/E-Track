@@ -783,10 +783,10 @@
 - 证据: `docs/ota-exec-notes/P4-3-acceptance-2026-10-18.md`、`docs/acceptance-contracts/P4-3-v1.contract.json`、`docs/acceptance-contracts/P4-3-v1/evidence-matrix.json`、`docs/acceptance-contracts/FREEZE-INDEX.md`，新增 `P4-3-acceptance-2026-10-18/delivery.inventory.json` 及 87 条交付归档；实施报告和旧冻结增量不变。正式验收、main 集成及隔离部署现均完成；真实 publisher/viewer 会话、依赖告警及缓存归因限制保留，不代表 P4-4/P5/生产门槛已满足。
 
 #### P4-4 Secrets 与 environment 配置
-状态: 待办 ｜ 认领: — ｜ 更新: — ｜ **需用户操作**
+状态: 阻塞 ｜ 认领: Codex P4-4 实施/配置集成 agent / 2026-10-18 ｜ 更新: 2026-10-18(P44-CREDENTIAL-01：生产独立 CI 凭据/策略缺失；已完成准入对账、production 保护配置与 26/85 项宿主检查；本卡操作授权已具备，不是 P4-3 未完成，正式验收由主 agent 执行)
 - 目标: 用户配置 `CLOUDFLARE_ACCOUNT_ID/API_TOKEN`、`TRACE_UPDATE_SERVICE_URL/DEPLOY_TOKEN`、R2 bucket 变量、`firmware-production` environment 审批人;AES 生产 key 入 CI Secrets(P0-2 打包器读取)。
 - 验收: 配置准备可消费 P4-1 已交付的工作流接口和 P4-2 环境，不等待 P4-1 先用这些配置完成验收；随后共用同一次隔离 rehearsal 验证权限与注册。不能为证明配置而提前生产发布，配置变化影响的证据另作最小验证。
-- 证据: —
+- 证据: `docs/ota-exec-notes/P4-4-implementation-2026-10-18.md`；复核 P4-1-v4 原件和 P4-3 已完成交付，不复制为本卡正式 PASS。生产设置、审批拒绝与角色覆盖按实际结果记录，gate=false，不重做成功演练。
 
 ---
 
@@ -818,7 +818,7 @@
 <!-- post-p2-6-readiness:start -->
 ## 8.1 P2-6 后 OTA Spec readiness 矩阵
 
-本矩阵是 P2-6 后任务派单就绪状态的唯一来源，不代替任务卡的执行状态，已完成卡不得因此重开。`prompt_path` 与 `spec_block_reason` 严格二选一。共享条款为 `FROZEN`，其中 `OTA-DEC-017` 按 P41-GOV-ENTRY-01 在待合并分支冻结，主线交付仍待获权收口。P3/P4 内容为 `READY`，P5 为 `DEFERRED_ACCEPTANCE`。派单资格由内容、规范成熟度和实际依赖共同派生；当前可派单集合精确为 `P3-1`、`P3-2`、`P3-3`、`P3-4`、`P3-6`、`P3-7`、`P3-8`、`P4-1`、`P4-2`、`P4-3`（历次变化及本次边界见 §9；已完成卡不重开）。P4-1 的实现派单资格不等于受保护配置、真实目标/descriptor 审批、运行时资格或正式执行型验收已具备。开发、自测和专属分支交付继续；不以整个 P4-1 先合并 main 作为验收前置。P4-3 仅承接已交付的 P4-2 实现，真实 Access/Admin 演练另行取证。P4-4 未启动；生产/P5/设备权限不变。
+本矩阵是 P2-6 后任务派单就绪状态的唯一来源，不代替任务卡的执行状态，已完成卡不得因此重开。`prompt_path` 与 `spec_block_reason` 严格二选一。共享条款为 `FROZEN`，其中 `OTA-DEC-017` 按 P41-GOV-ENTRY-01 冻结，已随 P4-1 交付 main。P3/P4 内容为 `READY`，P5 为 `DEFERRED_ACCEPTANCE`。派单资格由内容、规范成熟度和实际依赖共同派生；当前可派单集合精确为 `P3-1`、`P3-2`、`P3-3`、`P3-4`、`P3-6`、`P3-7`、`P3-8`、`P4-1`、`P4-2`、`P4-3`、`P4-4`（历次变化及本次边界见 §9；已完成卡不重开）。P4-1 的实现派单资格不等于受保护配置、真实目标/descriptor 审批、运行时资格或正式执行型验收已具备。开发、自测和专属分支交付继续；不以整个 P4-1 先合并 main 作为验收前置。P4-3 已完成独立验收、main 集成与隔离 Admin 部署。P4-4 按 P44-DISPATCH-20261018 完成接口/隔离环境交接对账后进入配置实施；生产缺项属于本卡工作，不是 P4-3 未完成；生产/P5/设备门槛不变。
 
 依赖方向统一解释为“前置任务 -> 后置任务”。用户裁定固定新增 `P4-2 -> P4-1`、`P4-2 -> P3-5`；P4-1 与 P3-5 之间无自动依赖，P4-2 不依赖 P4-1。
 
@@ -835,7 +835,7 @@
 | 9 | P4-1 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-1-implementation.md |  | `OTA-XC-RELEASE-CLI`, `OTA-XC-BOOTSTRAP-BASE`, `OTA-XC-ASSET-NAMING`, `OTA-XC-R2-UPLOAD`, `OTA-XC-HTTP-REGISTER`, `OTA-XC-RELEASE-GATE`, `OTA-XC-SCHEMA-FIXTURE` | READY | FROZEN | SATISFIED | 既有产品依赖已完成；来源/桶修订按 P41-GOV-ENTRY-01 在待合并分支冻结；实现继续，真实配置/目标审批/执行冻结仍须另行具备 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
 | 10 | P4-2 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-2-implementation.md |  | `OTA-XC-D1-RELEASE`, `OTA-XC-D1-ASSET`, `OTA-XC-D1-CHANNEL`, `OTA-XC-D1-AUDIT`, `OTA-XC-D1-MIGRATION`, `OTA-XC-HTTP-ADMIN`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-HTTP-REGISTER`, `OTA-XC-ASSET-SELECTION`, `OTA-XC-SCHEMA-FIXTURE` | READY | FROZEN | SATISFIED | P0 阶段门槛已完成；明确不依赖 P4-1 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
 | 11 | P4-3 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-3-implementation.md |  | `OTA-XC-HTTP-ADMIN`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-ADMIN-RETRACT`, `OTA-XC-ADMIN-STOP`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-D1-CHANNEL`, `OTA-XC-D1-AUDIT`, `OTA-XC-D1-RETENTION` | READY | FROZEN | SATISFIED | P4-2 已独立实现验收并交付 main；P42-EXT-03B 真实 Access/Admin 演练仍按本卡单独取证 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
-| 12 | P4-4 | INTEGRATION | docs/ota-prompts/prompt-P4-4-integration.md |  | `OTA-XC-SECRETS`, `OTA-XC-RELEASE-GATE`, `OTA-XC-BOOTSTRAP-BASE` | READY | FROZEN | BLOCKED_BY_DEPENDENCY | P4-1 工作流接口与 P4-2 目标环境的实际配置交接仍需确认；具备后共用同一次 rehearsal，不等 P4-1 先完成该演练；本卡未启动 | NOT_DISPATCHABLE | BLOCKED_BY_DEPENDENCY: P4-1 interface and P4-2 environment handoff |
+| 12 | P4-4 | INTEGRATION | docs/ota-prompts/prompt-P4-4-integration.md |  | `OTA-XC-SECRETS`, `OTA-XC-RELEASE-GATE`, `OTA-XC-BOOTSTRAP-BASE` | READY | FROZEN | SATISFIED | P4-1 已交付工作流接口、P4-2 隔离 Worker/D1/R2 环境及 P4-1-v4 原件已按 P44-DISPATCH-20261018 对账；P4-3 交付完成；生产配置与审批/角色缺口由本卡承接，不重复成功 rehearsal | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
 | 13 | P5-1 | ACCEPTANCE | docs/ota-prompts/prompt-P5-1-acceptance.md |  | `OTA-XC-IMAGE-IDENTITY`, `OTA-XC-HTTP-LATEST`, `OTA-XC-ASSET-SELECTION`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-TEST-VECTORS`, `OTA-XC-BLE-TUNING` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | P1-P4 适用候选/rehearsal阶段完成（当前仍有未完成卡） | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: P1-P4 incomplete |
 | 14 | P5-2 | ACCEPTANCE | docs/ota-prompts/prompt-P5-2-acceptance.md |  | `OTA-XC-CANCEL-RECOVERY`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-HTTP-ADMIN`, `OTA-XC-ADMIN-STOP`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-TEST-VECTORS` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | P1-P4 适用阶段完成，并具备 P5-1 主路径 | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: P1-P4 and P5-1 incomplete |
 | 15 | P5-3 | ACCEPTANCE | docs/ota-prompts/prompt-P5-3-acceptance.md |  | `OTA-XC-SCOPE`, `OTA-XC-D1-RETENTION`, `OTA-XC-SECRETS` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | P1-P4 适用阶段完成，并取得 P5-1/P5-2 结论 | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: P1-P4 and P5-1/P5-2 incomplete |
@@ -910,7 +910,11 @@
 
 | 2026-10-17 | P4-3 / Codex 实现 agent / `P43-DISPATCH-20261017` | P4-2 已独立实现验收并交付 main，但 P4-3 仍记旧依赖阻塞 | 仅修正 P4-3 行、派单摘要与精确集合相等断言，并登记本卡认领和开发记录；不改派生规则，不删除集合断言，不启动其他卡 | 用户明确派单，并批准独占 worktree/分支及本卡 Git/开发 CI 范围；基线 a96aa03 包含 P4-1/P4-2 交付。真实环境和独立验收义务不因实现依赖满足而关闭 | 已对账/开发中 |
 
+| 2026-10-18 | P4-4 / Codex 实施 agent / `P44-DISPATCH-20261018` | P4-1 接口、P4-2 隔离环境及已交付原件均已对账，readiness 仍保留旧交接阻塞 | 同批同步 P4-4 行、派单摘要与精确集合相等断言；生产配置/真实审批缺口属于卡内实施与独立验收，不回改派生规则或重开 P4-3 | 用户本轮全权授权推进实施至交独立验收；独占 worktree 从 main 0779f67 建立。保留 OTA_BOOT_CHAIN_READY=false、原件来源、角色/权限限制和 P5 后生产门槛 | 已对账/配置实施中 |
+
 ## 10. 会话日志(每会话一行:日期 ｜ agent ｜ 动了哪些卡 ｜ 一句话结果)
+
+- 2026-10-18 | Codex P4-4 implementation/configuration integration | P4-4 only, protected-input BLOCKED | P44-DISPATCH-20261018 reconciled interfaces/environment and synchronized readiness/exact-set assertions. Four GitHub protection/false-gate writes read back; 26 readiness and 85 workflow/configuration host tests pass. P44-CREDENTIAL-01 requires a separate production CI credential/policy, not another general authorization; existing test/provisioning credentials are not substituted. 31 archived originals preserve failures; no product/frozen-evidence change, successful rehearsal replay, production release or device action. Independent acceptance remains main-agent-owned and NOT_RUN.
 
 - 2026-10-18 | Codex P4-3 root acceptance, authorized delivery follow-up | P4-3 only, COMPLETE including main integration and isolated deployment | PR #28 merged as ebe6c16 with freeze/bundle ancestry preserved. Accepted 0067b6c artifact deployed once as ed9c6a39 to the isolated Admin; timed-out CLI retained, successful platform and authenticated readback reconciled without redeployment. PR/main CI 270/36 and governance pass; served HTML hash, Access policy, bindings and channel/release state agree. 87 public delivery entries and 35 private originals recorded, frozen bundle still validates. No product correction, business mutation, device action, production unlock or external cleanup; real-role/dependency/cache limits remain. See P43-DELIVERY-20261018 in the existing acceptance report.
 
