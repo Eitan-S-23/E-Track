@@ -5,10 +5,11 @@ Latest result: **formal PASS**, contract `P4-3-v1`, round
 `1ddd948bbf7d0dc2097c14d87def767314342f8f`; product source remains 0067b6c.
 See the final formal-result section and `docs/acceptance-contracts/P4-3-v1/`.
 The pre-review/NOT_RUN statements below are dated history, not the latest result.
-Delivery follow-up is now authorized and IN_PROGRESS under P43-DELIVERY-20261018
-below. Formal PASS is unchanged; main integration and isolated deployment are
-not complete until their independent readbacks are recorded. No production-role
-certification is claimed.
+Delivery result: **COMPLETE** under P43-DELIVERY-20261018 below. PR #28 merged
+the accepted history into main as ebe6c16. Isolated Admin deployment ed9c6a39
+serves the accepted 0067b6c HTML, with independent authenticated readback PASS.
+Formal acceptance, main integration and isolated deployment are all complete;
+this does not certify production roles or complete P4-4/P5.
 
 Latest review: **P43-ACCEPT-02 CLOSED / remediation re-review PASS** on
 `0067b6c3caa9ee263c53ae372fdc63cc7f74250f`, delivery
@@ -578,4 +579,122 @@ Formal contract, matrix, frozen runners and original archives stay immutable.
 Real publisher/viewer sessions, inherited dependency advisories and external
 cache attribution remain explicit limits. This grant does not start P4-4/P5,
 unlock production, change credentials/scopes or business data, operate devices,
-or authorize project-external cleanup. Current delivery result: IN_PROGRESS.
+or authorize project-external cleanup. Entry delivery result was IN_PROGRESS;
+the completed outcome follows.
+
+### Delivery Result And Main Integration
+
+**DECIDED COMPLETE for the authorized P4-3 delivery.** No implementation-agent
+remediation was needed. Formal P4-3-v1 PASS is unchanged; this closes the separate
+main-integration and isolated-deployment items that were previously outstanding.
+
+| Delivery gate | Verified result |
+| --- | --- |
+| Accepted product source | `0067b6c3caa9ee263c53ae372fdc63cc7f74250f` |
+| Main integration | PR #28, merge commit `ebe6c16b87fce20467e8a17ccd96c070b65400ec`, merged at `2026-10-18T10:29:13Z` |
+| Exact merged head | `89e58a670e61104015fad7d6a08060a3be897fb9`, which only appends delivery authority after bbcaf0b |
+| Merge integrity | The merge tree equals its reviewed head; the Cloudflare source subtree equals 0067b6c; freeze 1ddd948 and bundle 7e11e96 remain ancestors |
+| PR integration checks | Cloudflare `39118954124`, governance `39118954141`, app path detection `39118954153`: successful |
+| Main checks | Cloudflare `39119436825`, governance `39119436832`, app path detection `39119436843`: successful; existing notification `39119436882` also completed |
+| Deployment | `ed9c6a39-97ea-43c9-972b-86a021f790b2`, source 0067b6c, platform success at `2026-10-18T10:45:37.562889Z` |
+| Target | `https://e-track-firmware-p43-admin-test.pages.dev`, no other deployment target |
+| Independent final readback | Eight GETs at `2026-10-18T10:51:24Z` through `10:51:57Z`: all expected statuses and invariants PASS |
+| Frozen-bundle integrity | Final validation remains `VALIDATION=PASS contract=P4-3-v1 round=P43-20261018-01 overall=PASS` |
+
+The PR and main Cloudflare logs each contain actual Worker 270/270 and UI 36/36
+successes. They have one warning annotation, zero error annotations, 18 npm
+warning lines and four expected negative-test exception lines per run. Package
+audit summaries remain 11 vulnerabilities (3 moderate, 8 high), and two separate
+4-high summaries. Main governance has three warning annotations and zero error
+annotations. These are retained diagnostics, not new dependency remediation or
+waivers. APK, EXE, GitHub Pages, GitHub Release and build-only Admin-bundle jobs
+were skipped for the relevant non-dispatch paths. No release workflow was
+dispatched and no production gate was changed.
+
+### Deployment, Authentication And State
+
+The artifact was reused from accepted CI `39098302062/1`, not rebuilt. Its three
+serving files retain the original manifest hashes. Independent authenticated GET
+of the canonical origin returns 266,118 bytes with SHA-256
+`1a5feb4ffb04bf164c139cc1f221baabee3296ca51caf6f02f4e3c13411a0a58`, exactly the
+accepted new HTML. The platform identifies source 0067b6c and successful deployment
+ed9c6a39. The GET `/api/admin/session` verifies the same established owner; the
+unauthenticated origin still redirects to the configured Access issuer.
+
+Exactly one deployment command was sent. The CLI timed out with null exit code
+and SIGTERM, but its subsequent platform GET and a separate readback invocation
+both confirm the successful deployment. The failed CLI receipt is preserved;
+there was no second deployment, rollback or repeated successful cloud exercise.
+
+The first deployment precheck retained an expired application session and stopped
+before any deployment. Its organization SSO was still valid. The official
+cloudflared `exchangeOrgToken` HEAD/redirect sequence was read from upstream and
+executed over the already-qualified Node/OpenSSL transport, limited to the known
+issuer and application origins. Three HEAD responses renewed the same identity's
+application session without a browser, OTP request, new login, credential-scope
+change or Access-policy modification. The original cookie files remain unchanged;
+the renewed cookie and raw authenticated responses stay in the local private
+delivery directory. API authentication, not decoded claims, establishes the owner.
+The next precheck stopped on an ECONNRESET while reading policy metadata. That
+failure is also retained. The final precheck and post-deployment checks passed;
+only idempotent GET/HEAD transport failures are eligible for one bounded retry.
+
+Before/after project deployment configurations are deeply equal, with configuration
+SHA-256 `0d9466e5d41518f63e827c52e6b165139a9cdda0cea609743ad42b32bf4cf9dd`.
+Both test bindings, signing configuration, Access application and allowlist are
+unchanged. GET-only channel/release projections, excluding their requestIds, are
+also deeply equal, SHA-256
+`a7de9990d3e089e65c3d1abceaf92490e3cfdb7195916030062ed47ed89c39ba`:
+
+- Stable and beta still select ready 3.2.8, at revisions 13 and 11 respectively.
+- Both channels retain `disableLatest=true` and `disableDownloads=true`.
+- Release 2.8.1 remains disabled; each release still has three asset records.
+- This follow-up sent zero cloud business mutations and zero device operations.
+
+These are fresh deployment/state observations, not another CAS, recovery,
+disable, signed-download or publisher/viewer campaign. The original formal
+criterion results and historical raw inputs retain their original identities.
+
+### Evidence And Final Boundary
+
+The delivery increment is
+`P4-3-acceptance-2026-10-18/delivery-originals.zip`: 87 entries, 252,272 bytes,
+SHA-256 `c8cfa3da0948e4720be7a0865eb18041c99b54c2305badcae3358f67ffe1b1a3`.
+`delivery.inventory.json` binds every entry and 35 private original files.
+The standard tar listing and every extracted entry's size/SHA-256 were checked;
+known-credential and token-shape scans passed, including nested CI logs. It
+contains the new public observations, exact command receipts, PR/main CI logs,
+source-bound inspection and scoped adapters. No frozen evidence was replaced.
+The packaging receipt and later documentation-delivery receipts remain in
+`.cache/p43/logs/delivery-*`; they are not claimed to be inside their own archive.
+
+The two local no-staged-change commit attempts remain in their original receipts;
+the serialized scoped add/commit succeeded as 89e58a6. One GitHub identity/read
+probe failed before the command logger was opened; the read-only retry confirmed
+the already successful PR merge. Neither incident caused another merge/deployment
+request or any product change. They are host/transport history, not product-test
+failures or falsely recorded successes.
+
+The bounded audit at `2026-10-18T10:53:55Z` checks 146 selected files/namespaces
+and finds no remaining owned deployment process. All chosen outputs are in the
+active worktree, plus its expressly authorized shared Git objects/index/refs.
+The shared root is observed on `archive/p34-root-before-delivery-20261014`, HEAD
+cb317af, with unrelated dirty files; this session did not modify or synchronize
+that worktree. It did not assume that a previously recorded local main/head was
+still checked out there. Only the task's remote-tracking main ref was refreshed.
+
+The four recorded Cryptnet files retain their earlier sizes/timestamps. The
+68,032-byte PowerShell cache remains at `2026-10-17T08:37:13.169Z`; the 1,004-byte
+`C:/Users/SU/AppData/Local/Microsoft/Windows/PowerShell/StartupProfileData-NonInteractive`
+is now observed at `2026-10-18T10:40:20.120Z`. Its writer is not established.
+Selected commands use cmd/Node and contained tool outputs; no PowerShell,
+native Schannel request, browser profile export or external cleanup was performed.
+This is not a machine-wide no-write claim. Attribution and the original CRL
+exception remain documented rather than silently cleared.
+
+This delivery record, inventory and archive are integrated through a separate
+documentation-only follow-up PR, again using a merge commit. Final remote
+ancestry, task-worktree cleanliness and the final selected-output audit are
+checked before reporting completion. Real publisher/viewer coverage, production
+configuration, P4-4/P5 readiness and inherited dependency treatment remain their
+own explicit work, not unfinished P4-3 implementation or deployment.
