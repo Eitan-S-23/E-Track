@@ -535,6 +535,77 @@ describe("P4-2 existing Access Pages facade", () => {
       ASSETS: { fetch: async () => new Response() } },
       data: {}, functionPath: "/api/admin", next: async () => new Response(), waitUntil() {}, passThroughOnException() {} } as Parameters<typeof onRequest>[0]);
   }
+  it("keeps a session CSRF token usable when another tab reads the session", async () => {
+    const first = await page("unused", { route: ["session"], method: "GET", header: { Cookie: "" } });
+    const initial = await first.json<any>();
+    expect(first.status).toBe(200);
+    expect(initial.csrfToken).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+    const cookie = first.headers.get("Set-Cookie")!;
+    expect(cookie).toBe(`trace_admin_csrf=${initial.csrfToken}; Path=/api/admin; HttpOnly; Secure; SameSite=Strict; Max-Age=3600`);
+    expect(first.headers.get("Cache-Control")).toBe("no-store");
+    const second = await page("unused", { route: ["session"], method: "GET", header: { Cookie: cookie.split(";")[0] } });
+    expect(await second.json()).toMatchObject({ csrfToken: initial.csrfToken, role: "owner" });
+    expect(second.headers.get("Set-Cookie")).toBe(cookie);
+    const independent = await page("unused", { route: ["session"], method: "GET", header: { Cookie: "" } });
+    expect((await independent.json<any>()).csrfToken).not.toBe(initial.csrfToken);
+  });
+  it.each(["", "csrf-fixture", "00000000-0000-0000-0000-000000000000", "a".repeat(512)])(
+    "replaces an absent or malformed session CSRF cookie (%s)", async value => {
+      const response = await page("unused", { route: ["session"], method: "GET", header: { Cookie: `trace_admin_csrf=${value}` } });
+      expect(response.status).toBe(200);
+      const body = await response.json<any>();
+      expect(body.csrfToken).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+      expect(body.csrfToken).not.toBe(value);
+      expect(response.headers.get("Set-Cookie")).toContain(`trace_admin_csrf=${body.csrfToken};`);
+    });
+  it("does not expose or renew a session CSRF token without Access authentication", async () => {
+    const response = await page("unused", { route: ["session"], method: "GET", token: null,
+      header: { Cookie: `trace_admin_csrf=${crypto.randomUUID()}` } });
+    expect(response.status).toBe(401);
+    expect(response.headers.get("Set-Cookie")).toBeNull();
+    expect(await response.json()).not.toHaveProperty("csrfToken");
+  });
+  it.each(["stable", "beta"])("reaches %s CAS after a second tab and winner refresh read the session", async channel => {
+    await freshChannel(channel);
+    const before = (await channelRow(channel))!;
+    const first = await page("unused", { route: ["session"], method: "GET", header: { Cookie: "" } });
+    const firstToken = (await first.json<any>()).csrfToken;
+    const second = await page("unused", { route: ["session"], method: "GET",
+      header: { Cookie: first.headers.get("Set-Cookie")!.split(";")[0] } });
+    const secondToken = (await second.json<any>()).csrfToken;
+    const route = ["firmware", "channels", channel, "stop-latest"];
+    const winnerId = crypto.randomUUID();
+    const winner = await page("unused", { route, header: { Cookie: second.headers.get("Set-Cookie")!.split(";")[0],
+      "X-CSRF-Token": secondToken, "X-Request-Id": winnerId },
+      body: { ...firmwareScope, expectedRevision: before.revision, reason: "winning tab intent" } });
+    expect(winner.status).toBe(200);
+    const won = await channelRow(channel);
+    expect(won!.revision).toBe(before.revision + 1);
+    const refresh = await page("unused", { route: ["session"], method: "GET",
+      header: { Cookie: second.headers.get("Set-Cookie")!.split(";")[0] } });
+    const loserId = crypto.randomUUID();
+    const loser = await page("unused", { route, header: { Cookie: refresh.headers.get("Set-Cookie")!.split(";")[0],
+      "X-CSRF-Token": firstToken, "X-Request-Id": loserId },
+      body: { ...firmwareScope, expectedRevision: before.revision, reason: "stale tab intent" } });
+    expect(loser.status).toBe(409);
+    expect(await loser.json()).toMatchObject({ errorCode: "CAS_CONFLICT", requestId: loserId });
+    expect(await channelRow(channel)).toEqual(won);
+    expect(await count("SELECT count(*) AS n FROM audit_logs WHERE request_id=?", winnerId)).toBe(1);
+    expect(await count("SELECT count(*) AS n FROM audit_logs WHERE request_id=?", loserId)).toBe(0);
+  });
+  it.each(["missing cookie", "missing header", "mismatched header"])("retains session CSRF rejection for %s", async kind => {
+    await freshChannel(); const before = (await channelRow("stable"))!;
+    const token = crypto.randomUUID(); const requestId = crypto.randomUUID();
+    const response = await page("unused", { route: ["firmware", "channels", "stable", "stop-latest"],
+      header: { Cookie: kind === "missing cookie" ? "" : `trace_admin_csrf=${token}`,
+        "X-CSRF-Token": kind === "missing header" ? "" : kind === "mismatched header" ? crypto.randomUUID() : token,
+        "X-Request-Id": requestId },
+      body: { ...firmwareScope, expectedRevision: before.revision, reason: "CSRF rejection" } });
+    expect(response.status).toBe(403);
+    expect(await response.json()).toMatchObject({ errorCode: "CSRF_INVALID", requestId });
+    expect(await channelRow("stable")).toEqual(before);
+    expect(await count("SELECT count(*) AS n FROM audit_logs WHERE request_id=?", requestId)).toBe(0);
+  });
   it("validates a real test JWT and preserves original requestId in replay JSON and header", async () => {
     const { releaseId } = await registered(false); const key = crypto.randomUUID();
     const first = await page(releaseId, { key });

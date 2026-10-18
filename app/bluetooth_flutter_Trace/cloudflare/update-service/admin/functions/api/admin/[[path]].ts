@@ -178,7 +178,10 @@ async function routeAdminRequest(
   }
 
   if (method === "GET" && route.length === 1 && route[0] === "session") {
-    const csrfToken = crypto.randomUUID();
+    const existingCsrf = cookieValue(context.request.headers.get("Cookie"), "trace_admin_csrf");
+    // Another tab's session read must not invalidate an already-confirmed request.
+    const csrfToken = existingCsrf && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(existingCsrf)
+      ? existingCsrf : crypto.randomUUID();
     return json(
       {
         ok: true,
