@@ -118,7 +118,7 @@ P44-CREDENTIAL-01（2026-10-19 owner 裁定）将本入口同步到标准 S3/Wor
     node .github/scripts/firmware-bindings-check.mjs --output .cache/bindings-check/result.json
 
 - job 使用 Linux 和 `firmware-rehearsal` environment，运行前必须已具备受保护的环境、经核验隔离的凭据及变量；禁止借 dispatch 自动创建无保护 environment。
-- 复用现有测试 Worker/D1/R2，改用仅测试桶的 S3 凭据和该 Worker 既有 deploy token；P41-CF-CREDENTIAL-02 保留为旧链例外，不扩大到生产，也不再把控制面 API token 作为新链门槛。不得转存 provisioning token，不要求开户，不免除源码/人工审批或生产零副作用证据。
+- 复用现有测试 Worker/D1/R2，改用仅测试桶的 S3 凭据和该 Worker 既有 deploy token；P41-CF-CREDENTIAL-02 保留为旧链例外，不扩大到生产，也不再把控制面 API token 作为新链门槛。不转存本地 provisioning token，不要求开户，不免除源码/人工审批或生产零副作用证据。
 - `FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT` 必须等于实际 `GITHUB_SHA`；repository、run/attempt、三个显式模式输入和 `OTA_BOOT_CHAIN_READY=false` 均须校验。它只批准固定源码的开发检查，不是首发 descriptor 或发布批准。
 - 实际检查步骤仅接收 FIRMWARE_REHEARSAL_ 前缀的 `CLOUDFLARE_ACCOUNT_ID`、`TRACE_R2_ACCESS_KEY_ID`、`TRACE_R2_SECRET_ACCESS_KEY`、`TRACE_UPDATE_SERVICE_URL`、`TRACE_DEPLOY_TOKEN` secrets 和 R2 bucket 变量。安装依赖和普通 build/checks 不接触这些凭据。无 AES、GitHub 写 token 或注册动作；deploy token 仅用于固定只读预检。
 - 固定输入为已提交 `P4-1-r2-registration-qualification-2026-10-15/operations/verified-metadata.json` 的三个既有 synthetic 对象；通过原 uploader 的 `verifyStoredFirmwareAsset(metadata, fileName, bucket)` 复用全字节/长度/条件 ETag 校验，缺失即失败，绝不补传。

@@ -1,6 +1,13 @@
 # P4-4 Configuration Integration
 
-Status: PRODUCTION_CONFIGURATION_PARTIAL (P44-CREDENTIAL-01 remains open).
+Status: S3_INTERFACE_REMEDIATION_DELIVERED_FOR_REVIEW; platform qualification
+and independent acceptance remain pending. Current entry:
+P4-4-s3-interface-2026-10-19.md. The owner reassigned the bounded P4-1/P4-2
+interface delta to this implementer; source de36215 removes the old control-plane
+token dependency. Earlier production-configuration/scope findings below are
+historical, not a repeated request for that obsolete token.
+
+Historical production configuration result:
 Owner-authorized production resources, schema, runtime keys and four environment
 secrets are now configured. The owner has selected a dedicated production CI
 credential; creation is blocked by the documented native-proxy/resource-scope

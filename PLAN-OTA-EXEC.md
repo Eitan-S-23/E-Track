@@ -783,11 +783,12 @@
 - 证据: `docs/ota-exec-notes/P4-3-acceptance-2026-10-18.md`、`docs/acceptance-contracts/P4-3-v1.contract.json`、`docs/acceptance-contracts/P4-3-v1/evidence-matrix.json`、`docs/acceptance-contracts/FREEZE-INDEX.md`，新增 `P4-3-acceptance-2026-10-18/delivery.inventory.json` 及 87 条交付归档；实施报告和旧冻结增量不变。正式验收、main 集成及隔离部署现均完成；真实 publisher/viewer 会话、依赖告警及缓存归因限制保留，不代表 P4-4/P5/生产门槛已满足。
 
 #### P4-4 Secrets 与 environment 配置
-状态: 阻塞 ｜ 认领: Codex P4-4 实施/配置集成 agent / 2026-10-18 ｜ 更新: 2026-10-19(生产 Worker/D1/R2、schema、运行密钥及 4 secrets/5 variables 已配置；owner 已选择独立生产 CI token，P44-CREDENTIAL-01 当前阻塞为现有 Wrangler 预览链所需账户级权限与三资源限定的冲突，不再待选择 token；官方文档/5 个原源码输入/8 项静态断言已核对，未创建越界凭据或把目录 403 写成创建失败；原 11/85/26 自测保留，P44-EVID-01 仍由主验收组织；gate=false，本卡未完成、未正式验收)
-- 目标: 用户配置 `CLOUDFLARE_ACCOUNT_ID/API_TOKEN`、`TRACE_UPDATE_SERVICE_URL/DEPLOY_TOKEN`、R2 bucket 变量、`firmware-production` environment 审批人;AES 生产 key 入 CI Secrets(P0-2 打包器读取)。
+状态: 进行中 ｜ 认领: Codex P4-4 实施/配置集成 agent / 2026-10-18 ｜ 更新: 2026-10-19(P44-CREDENTIAL-01 已按 owner 裁定实施标准 S3 桶凭据/Worker 鉴权只读预检；不是 e-track-ci 缺失或必须新建 token，新链不再消费 CLOUDFLARE_API_TOKEN；实现 de36215 的宿主及非发布 CI 39157945995 通过，原生 283 项、发布管线 131 项；实际凭据配置、部署、新链 staging 与拒绝观测按主验收计划执行，旧冻结原件不变；gate=false，本卡未正式验收)
+- 目标: 配置 `CLOUDFLARE_ACCOUNT_ID`、桶限定 `TRACE_R2_ACCESS_KEY_ID/TRACE_R2_SECRET_ACCESS_KEY`、`TRACE_UPDATE_SERVICE_URL/DEPLOY_TOKEN`、R2 bucket 变量及 `firmware-production` 审批人；沿用批准的 AES；不要求旧控制面 token 或客户端 D1 绑定参数。
 - 验收: 配置准备可消费 P4-1 已交付的工作流接口和 P4-2 环境，不等待 P4-1 先用这些配置完成验收；随后共用同一次隔离 rehearsal 验证权限与注册。不能为证明配置而提前生产发布，配置变化影响的证据另作最小验证。
 - 证据: `docs/ota-exec-notes/P4-4-implementation-2026-10-18.md`；复核 P4-1-v4 原件和 P4-3 已完成交付，不复制为本卡正式 PASS。生产设置、审批拒绝与角色覆盖按实际结果记录，gate=false，不重做成功演练。
 - 凭据入口: `docs/agent-collaboration/credential-registry.md`，`e-track-ci` = `e-track-p41-ci`；先复用已知受保护入口及操作级证据，管理 GET 403 不能推出发布权限不足或必须新增 token；不把测试授权扩展为生产授权。
+- 当前整改入口: `docs/ota-exec-notes/P4-4-s3-interface-2026-10-19.md`。新链不能直接沿用旧链 rehearsal 背书；主验收按真实依赖冻结必要新观测，不把既有“不重复成功演练”解释为新链免测。P4-1/P4-2 历史完成态和认领不变。
 
 ---
 

@@ -2729,6 +2729,22 @@ class PostP26SpecGovernanceTests(unittest.TestCase):
         self.assertIn("docs/agent-collaboration/credential-registry.md", card)
         self.assertIn("不把测试授权扩展为生产授权", card)
 
+    def test_p44_scoped_s3_chain_replaces_control_plane_without_weakening_gates(self):
+        for name in ("TRACE_R2_ACCESS_KEY_ID", "TRACE_R2_SECRET_ACCESS_KEY",
+                     "s3-worker-preflight-v1", "/api/ci/firmware/preflight",
+                     "If-None-Match", "If-Match", "P41-CF-CREDENTIAL-02"):
+            self.assertIn(name, self.contract)
+        root = self.PROMPT_ROOT.parents[1]
+        workflow = (root / ".github/workflows/firmware-build.yml").read_text(encoding="utf-8")
+        self.assertNotIn("secrets.CLOUDFLARE_API_TOKEN", workflow)
+        self.assertNotIn("secrets.FIRMWARE_REHEARSAL_CLOUDFLARE_API_TOKEN", workflow)
+        for prefix in ("", "FIRMWARE_REHEARSAL_"):
+            for name in ("TRACE_R2_ACCESS_KEY_ID", "TRACE_R2_SECRET_ACCESS_KEY"):
+                self.assertIn("secrets." + prefix + name, workflow)
+        uploader = (root / "app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/upload-firmware-r2-asset.mjs").read_text(encoding="utf-8")
+        self.assertNotIn("getPlatformProxy", uploader)
+        self.assertIn("createFirmwareS3Bucket", uploader)
+
     def test_ble_performance_policy_preserves_measurement_and_link_boundaries(self):
         section = self.contract.split("### OTA-XC-BLE-PERFORMANCE", 1)[1].split("### ", 1)[0]
         for token in (

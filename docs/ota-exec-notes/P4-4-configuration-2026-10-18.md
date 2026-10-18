@@ -4,7 +4,31 @@ This is a timestamped implementation inventory, not a new Spec or acceptance
 matrix. Evidence E1/E2/E3 refers to the unchanged JSON receipts in the evidence
 archive accompanying this note. Secret presence never implies value correctness.
 
-## Current Production Matrix
+## Current Consumer After Interface Remediation
+
+2026-10-19 P44-CREDENTIAL-01 route decision supersedes the old token-scope
+blocker: candidate de362151bda72c0dd1c19ab1293e99838fb8976e uses standard S3
+and authenticated Worker preflight for both environments. No control-plane
+token or client D1 selector is consumed; no placeholder is required. Existing
+e-track-ci authority and historical token receipts remain valid for their scope.
+
+| Current consumer configuration | Platform / scope / type | This batch's state / next owner |
+| --- | --- | --- |
+| TRACE_R2_ACCESS_KEY_ID / TRACE_R2_SECRET_ACCESS_KEY | GitHub firmware-production secrets | New code wired; this batch did not create/install/read back the pair. Main's explicit platform plan qualifies the sole production bucket capability. |
+| FIRMWARE_REHEARSAL_TRACE_R2_ACCESS_KEY_ID / FIRMWARE_REHEARSAL_TRACE_R2_SECRET_ACCESS_KEY | GitHub firmware-rehearsal secrets | New code wired; independently scoped test-bucket pair to be configured/qualified under main's plan, not copied from production. |
+| CLOUDFLARE_ACCOUNT_ID and rehearsal-prefixed counterpart | Existing GitHub environment secrets | Still used to construct the S3 HTTPS endpoint; not control-plane authority. |
+| TRACE_UPDATE_SERVICE_URL / TRACE_DEPLOY_TOKEN and rehearsal-prefixed counterparts | Existing environment secrets | Also consumed by the fixed read-only preflight endpoint; original values not rotated or rewritten. |
+| CLOUDFLARE_API_TOKEN and TRACE_D1_DATABASE_ID/NAME | Historical platform entries | Not mapped by new workflow; nonempty legacy client configuration is rejected. No platform deletion or overwrite performed. |
+| Worker POST /api/ci/firmware/preflight | New code only on the task branch | Native development CI passed; NOT_DEPLOYED. Auth precedes the three fixed queries. Main verifies actual deployment/bindings. |
+| AES / deploy-HMAC pairs / approved resources / reviewer / gate | Existing platform configuration | No mutation in this remediation; gate=false. Configuration and old runtime evidence are not new-chain qualification. |
+
+The implementation/validation entry is P4-4-s3-interface-2026-10-19.md. Creation,
+deployment, live bucket/Worker capability checks, candidate approval and actual
+reviewer rejection are now planned main-review activities, not a request to find
+an impossible resource-scoped control-plane token. Earlier inventories below
+retain their original timestamps; no fresh platform-state claim is inferred.
+
+## Production Matrix At E8
 
 Updated after the owner's explicit target/key authorization, with final readback
 at 2026-10-18 16:09:03 UTC (2026-10-19 local). E8 below is the current production
