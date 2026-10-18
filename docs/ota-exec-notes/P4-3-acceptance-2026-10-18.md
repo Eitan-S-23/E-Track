@@ -494,3 +494,29 @@ advisories and external-cache attribution are not silently closed or waived.
 The subsequent closeout commit registers the separate bundle commit and updates
 only this card; no main merge, new secret, cloud mutation, device action or
 external cleanup is part of this acceptance.
+
+### Bundle Registration
+
+The independent evidence bundle is committed separately as
+`7e11e96c4acb2735710d626682a6d1a018efadf6`, after input commit 1ddd948.
+It self-validates at that exact bundle HEAD with overall PASS; the raw command
+and result are retained in `P4-3-acceptance-2026-10-18/closeout-bundle-check.*`.
+The following closeout commit adds the P4-3-v1 FREEZE-INDEX row and completes
+only the P4-3 card, preserving its implementation owner. It does not modify the
+frozen contract, matrix, input profiles, runner bytes or original archives.
+
+The seven-criterion decision and retained limits apply to the task branch
+`dev/p4-3/admin-controls-20261017`. Main integration remains separate and must
+preserve the input/bundle commit ancestry, not squash or rebase it. No extra
+implementation correction is required by this acceptance. Future deployment,
+real publisher/viewer configuration and inherited dependency treatment belong to
+their explicit follow-up scope; no CRL/cache cleanup or deliberate modification
+was performed.
+
+All selected output namespaces remain the active worktree's acceptance/report
+directories and `.cache/p43*`, plus the expressly authorized task Git index,
+objects and task-branch refs/reflogs under the shared `.git`. Raw CRLF logs are
+preserved using only a scoped `cr-at-eol` whitespace attribute, not by rewriting
+the evidence. Final post-commit validation, branch readback and bounded path/cache
+audit are performed before the session handoff; this is not a claim of a
+machine-wide filesystem trace or attribution of unrelated cache timestamp changes.

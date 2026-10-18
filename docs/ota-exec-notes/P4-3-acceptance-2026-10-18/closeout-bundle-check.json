@@ -1,0 +1,26 @@
+{
+  "label": "control-bundle-check",
+  "command": "python",
+  "args": [
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "Tools/acceptance/validate_bundle.py",
+    "--contract",
+    "docs/acceptance-contracts/P4-3-v1.contract.json",
+    "--matrix",
+    "docs/acceptance-contracts/P4-3-v1/evidence-matrix.json",
+    "--repo-root",
+    "."
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-3-implementation-20261017",
+  "started": "2026-10-18T09:13:57.616Z",
+  "ended": "2026-10-18T09:14:03.421Z",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "node": "v24.13.0",
+  "logPath": "D:\\github\\my\\E-Track\\.cache\\p4-3-implementation-20261017\\.cache\\p43-formal\\development\\control-bundle-check.log"
+}
