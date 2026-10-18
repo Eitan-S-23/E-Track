@@ -1,0 +1,15 @@
+{
+  "label": "dev-ci-01",
+  "command": "node",
+  "args": [
+    "docs/acceptance-contracts/P4-3-v1/tools/inspect-ci.cjs"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-3-implementation-20261017",
+  "started": "2026-10-18T07:22:55.685Z",
+  "ended": "2026-10-18T07:22:57.156Z",
+  "exitCode": 1,
+  "signal": null,
+  "error": null,
+  "node": "v24.13.0",
+  "logPath": "D:\\github\\my\\E-Track\\.cache\\p4-3-implementation-20261017\\.cache\\p43-formal\\development\\dev-ci-01.log"
+}

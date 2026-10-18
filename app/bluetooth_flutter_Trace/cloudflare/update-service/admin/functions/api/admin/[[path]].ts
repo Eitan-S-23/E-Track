@@ -1,6 +1,6 @@
 import { ApiError } from "../../../../worker/src/errors";
-import { firmwareReleaseAction, listFirmware, publishFirmware } from "../../../../worker/src/firmware_admin";
-import { requireFirmwareJsonHeaders } from "../../../../worker/src/firmware";
+import { FIRMWARE_CHANNEL_ACTIONS, firmwareReleaseAction, listFirmware, mutateFirmwareChannel } from "../../../../worker/src/firmware_admin";
+import { readFirmwareJson, requireFirmwareJsonHeaders } from "../../../../worker/src/firmware";
 
 type Platform = "android" | "windows";
 type ChannelName = "stable" | "beta";
@@ -159,6 +159,9 @@ async function routeAdminRequest(
   const route = routeSegments(context.params.path);
   if (route[0] === "firmware") {
     if (url.protocol !== "https:") throw new AdminError("INVALID_PARAMETER", "HTTPS required", 400);
+    if (!["GET", "POST"].includes(method) || url.pathname.endsWith("/") || url.pathname.includes("//")) {
+      throw new AdminError("INVALID_PARAMETER", "Unsupported firmware method or path", 400);
+    }
     if (method === "POST") {
       requireFirmwareJsonHeaders(context.request);
       if (url.search || url.pathname.endsWith("/")) throw new AdminError("INVALID_PARAMETER", "Invalid firmware mutation path", 400);
@@ -175,7 +178,10 @@ async function routeAdminRequest(
   }
 
   if (method === "GET" && route.length === 1 && route[0] === "session") {
-    const csrfToken = crypto.randomUUID();
+    const existingCsrf = cookieValue(context.request.headers.get("Cookie"), "trace_admin_csrf");
+    // Another tab's session read must not invalidate an already-confirmed request.
+    const csrfToken = existingCsrf && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(existingCsrf)
+      ? existingCsrf : crypto.randomUUID();
     return json(
       {
         ok: true,
@@ -291,13 +297,16 @@ async function routeAdminRequest(
     method === "POST" &&
     route.length === 4 &&
     route[0] === "firmware" &&
-    route[1] === "channels" &&
-    route[3] === "publish"
+    route[1] === "channels"
   ) {
-    const channel = parseChannel(route[2]);
+    if (!["stable", "beta"].includes(route[2]) || !Object.prototype.hasOwnProperty.call(FIRMWARE_CHANNEL_ACTIONS, route[3])) {
+      throw new AdminError("INVALID_PARAMETER", "Invalid firmware channel action", 400);
+    }
+    const channel = route[2];
     requireRole(actor, channel === "stable" ? "owner" : "publisher");
-    const body = await requestJson(context.request);
-    return publishFirmware(context.env, actor, channel, body);
+    const body = await readFirmwareJson(context.request);
+    const action = FIRMWARE_CHANNEL_ACTIONS[route[3] as keyof typeof FIRMWARE_CHANNEL_ACTIONS];
+    return mutateFirmwareChannel(context.env, actor, channel, action, body);
   }
 
   if (
@@ -311,6 +320,7 @@ async function routeAdminRequest(
     return firmwareReleaseAction(context.request, context.env, actor, route[2], route[3]);
   }
 
+  if (route[0] === "firmware") throw new AdminError("INVALID_PARAMETER", "Unsupported firmware endpoint or method", 400);
   throw new AdminError("NOT_FOUND", "Admin route not found", 404);
 }
 
@@ -998,11 +1008,17 @@ async function requireAccessActor(
   }
 
   const nowSeconds = Math.floor(Date.now() / 1000);
-  if (typeof payload.exp !== "number" || payload.exp <= nowSeconds) {
+  if (typeof payload.exp !== "number" || !Number.isFinite(payload.exp)) {
+    throw new AdminError("TOKEN_INVALID", "Cloudflare Access JWT expiration is invalid", 401);
+  }
+  if (payload.exp <= nowSeconds) {
     throw new AdminError("TOKEN_EXPIRED", "Cloudflare Access JWT expired", 401);
   }
-  if (typeof payload.nbf === "number" && payload.nbf > nowSeconds) {
-    throw new AdminError("TOKEN_INVALID", "Cloudflare Access JWT is not valid yet", 401);
+  for (const claim of ["nbf", "iat"]) {
+    const value = payload[claim];
+    if (value !== undefined && (typeof value !== "number" || !Number.isFinite(value) || value > nowSeconds)) {
+      throw new AdminError("TOKEN_INVALID", "Cloudflare Access JWT time claim is invalid", 401);
+    }
   }
   if (payload.iss !== env.ACCESS_JWT_ISSUER) {
     throw new AdminError("TOKEN_INVALID", "Cloudflare Access JWT issuer is invalid", 401);

@@ -15,7 +15,49 @@ The root page loads the current Access session, Android channels, and Android re
 - `POST /api/admin/releases/:releaseId/notes`
 - `POST /api/admin/releases/:releaseId/disable`
 
-`stable` publish/rollback and disable require `owner`. `beta` publish/rollback and release note edits require `publisher` or `owner`. Read-only endpoints allow `viewer`.
+For the Android API above, `stable` publish/rollback and disable require `owner`.
+`beta` publish/rollback and release note edits require `publisher` or `owner`.
+Read-only endpoints allow `viewer`.
+
+## Firmware Controls
+
+The firmware tab consumes the multi-asset DTOs defined by
+`OTA-XC-HTTP-ADMIN` in `docs/ota-cross-system-contracts.md`. Its fixed routes are:
+
+- `GET /api/admin/firmware/releases?appId=trace&deviceModel=e-track-at32f435`
+- `GET /api/admin/firmware/channels?appId=trace&deviceModel=e-track-at32f435`
+- `POST /api/admin/firmware/channels/{stable|beta}/{publish|retract|stop-latest|resume-latest|stop-downloads|resume-downloads}`
+- `POST /api/admin/firmware/releases/{releaseId}/{disable|recovery-download}`
+
+All channel mutations require a nonblank `reason` and an `expectedRevision`.
+Stable requires owner; beta requires publisher or owner. Publish advances the
+version. Retract selects a ready release without changing its identity, state,
+hashes or assets. It only affects devices that have not upgraded: upgraded
+devices do not downgrade and need a fix with a higher `versionCode`.
+
+Latest and download switches are independent. Download stop blocks subsequent
+uses of previously signed public URLs, not just new issuance. Token v2 does not
+carry channel identity, so a stopped channel also blocks public downloads of
+the same release referenced by another channel. Resume cannot bypass ready/R2
+checks or clear the other stop flag. An unchanged switch/message with a current
+revision is a no-op, with no new revision or audit.
+
+Release disable is owner-only and rejects any channel reference. Recovery is
+owner-only, never an automatic OTA path. Both actions use the existing canonical
+UUIDv4 `Idempotency-Key`, actor scope, RFC 8785 fingerprint and permanent
+tombstones. No URL, signature or raw key is copied into ordinary audit/logs.
+
+The UI reads state again after success, CAS conflict or an unknown network
+outcome. It never automatically repeats a channel write. A failed read locks
+further writes until reconciliation succeeds. An unknown release result retains
+its exact key/body in page memory; the operator must re-read and explicitly
+confirm replay as the same actor. An expired result requires a newly confirmed
+action, not an automatic new key. A page reload loses that in-memory request;
+read state and reconcile the original operation before starting another action.
+
+The migration and security prerequisites from P4-2 still apply. Local tests or
+mock screenshots do not establish a real Access owner session, deployment, or
+the P42-EXT-03B Admin exercise. Those require separately authorized real evidence.
 
 Every mutation requires:
 
@@ -62,10 +104,44 @@ Remove-Item Env:CLOUDFLARE_API_TOKEN -ErrorAction SilentlyContinue
 
 ## Local Checks
 
-```powershell
-Set-Location D:\github\my\bluetooth_flutter_Trace\cloudflare\update-service\admin
+Run from this admin directory with caches and temporary directories contained
+in the active worktree (Windows: use `cmd.exe`, not uncontained PowerShell):
+
+```text
 npm ci
 npm run check
+npm exec -- playwright install chromium --only-shell
+npm run test:ui
 ```
 
-These are non-build checks.
+Set `PLAYWRIGHT_BROWSERS_PATH` to a worktree-local browser directory, `PW_OUTPUT_DIR`
+to a fresh worktree-local evidence directory, and npm/TEMP/TMP/TMPDIR/home/cache
+overrides before running locally. Windows dependency installation must use
+`npm ci --ignore-scripts` on hosts where workerd is unavailable. Do not retry
+native Windows workerd there: run the worker host suite and the existing Linux
+`cloudflare-update-service.yml` workflow instead.
+
+The browser suite serves the real HTML behind intercepted synthetic API routes.
+Every screenshot says `MOCK UI / NO REAL ACCESS OR D1`; external requests are
+blocked. It covers bilingual confirmation/cancel/conflict, role controls,
+independent switches, unknown results, same-key recovery replay, actor changes,
+failed reads and mobile layout. CI preserves screenshots, raw UI output and the
+checkout SHA for 14 days. These are development checks, not independent acceptance.
+
+## Source-Bound Deployment Input
+
+For a separately authorized real exercise, dispatch the existing
+`cloudflare-update-service.yml` at the intended source commit with
+`prepare_admin_bundle=true`. After all three check jobs pass, Linux builds Pages
+Functions with the pinned Wrangler and copies the unchanged static UI. A native
+workerd smoke check exercises the compiled router and unauthenticated rejection.
+The artifact includes source SHA/run, per-file SHA-256 and a build-only notice;
+it includes no deployment configuration or credential. This does not deploy or
+establish a real Access session.
+
+Do not blindly run the historical staging deploy command for P4-3. The tracked
+`admin/wrangler.jsonc` still names the protected old Trace staging database and
+bucket. `--project-name` alone does not rebind them. The approved isolated target,
+actual D1/R2 bindings, matching Access issuer/audience/owner, firmware download
+origin/signing configuration and ready fixtures must be reconciled first.
+Do not modify the old service or import another task's operation authorization.

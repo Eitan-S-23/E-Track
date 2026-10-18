@@ -1,0 +1,16 @@
+{
+  "label": "control-finalize-01",
+  "command": "node",
+  "args": [
+    "docs/acceptance-contracts/P4-3-v1/tools/bundle.cjs",
+    "finalize"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-3-implementation-20261017",
+  "started": "2026-10-18T08:49:19.600Z",
+  "ended": "2026-10-18T08:49:20.989Z",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "node": "v24.13.0",
+  "logPath": "D:\\github\\my\\E-Track\\.cache\\p4-3-implementation-20261017\\.cache\\p43-formal\\development\\control-finalize-01.log"
+}

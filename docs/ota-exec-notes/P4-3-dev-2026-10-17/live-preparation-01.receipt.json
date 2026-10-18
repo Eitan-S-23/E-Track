@@ -1,0 +1,45 @@
+{
+  "purpose": "Completed archive creation receipt, captured after the archive's own output snapshot",
+  "runnerReceipt": {
+    "label": "live-preparation-archive-01",
+    "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-3-implementation-20261017",
+    "command": "node",
+    "args": [
+      ".cache\\p43-evidence.cjs",
+      "archive-live"
+    ],
+    "started": "2026-10-17T11:32:12.283Z",
+    "ended": "2026-10-17T11:32:21.429Z",
+    "exitCode": 0,
+    "signal": null,
+    "node": "v24.13.0",
+    "logPath": "D:\\github\\my\\E-Track\\.cache\\p4-3-implementation-20261017\\.cache\\p43\\logs\\live-preparation-archive-01.log"
+  },
+  "output": {
+    "archive": {
+      "path": "live-preparation-01.zip",
+      "sizeBytes": 109261,
+      "sha256": "91ddaca28bf8abd4a0b1d19dd293fb6d68b19744b096abceb925a9ffec9eec10",
+      "entries": 132
+    },
+    "checks": {
+      "entryListingAndEveryExtractedByteVerified": true,
+      "knownSecretsScan": "PASS",
+      "authorizedUrlScan": "PASS"
+    },
+    "observations": {
+      "closedToolReceipts": 22,
+      "collectorExitCodes": {
+        "0": 13,
+        "1": 8,
+        "28": 1
+      },
+      "httpReceipts": 28,
+      "httpStatusCounts": {
+        "200": 24,
+        "403": 4
+      },
+      "interruptedCollectorWithoutExit": "original-capabilities-01"
+    }
+  }
+}

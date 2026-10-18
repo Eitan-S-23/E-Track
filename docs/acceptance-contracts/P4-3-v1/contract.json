@@ -1,0 +1,483 @@
+{
+  "schema": "etrack-acceptance-contract-v3",
+  "contract_id": "P4-3-v1",
+  "version": 1,
+  "task_id": "P4-3",
+  "parent_contract_sha256": null,
+  "status": "FROZEN",
+  "approved_by": "Codex independent root acceptance; explicit user delegation P43-AUTH-20261018",
+  "approved_at": "2026-10-18T08:21:40.004Z",
+  "implementation_ref": "0067b6c3caa9ee263c53ae372fdc63cc7f74250f",
+  "freeze_commit": "1ddd948bbf7d0dc2097c14d87def767314342f8f",
+  "freeze_tree": "855c15853c572b83d9684235dbf69a247d4968b2",
+  "profile_config_blob": "5eca679e9862dfba31a623b40216e5c5f5f1724c",
+  "result_taxonomy": [
+    "PASS",
+    "PRODUCT_FAIL",
+    "HARNESS_FAIL",
+    "EVIDENCE_GAP",
+    "ENV_BLOCKED"
+  ],
+  "invalidation_policy": "docs/acceptance-execution-contract.md",
+  "input_groups": [
+    {
+      "id": "production",
+      "profile": "Production",
+      "category": "production_source"
+    },
+    {
+      "id": "validation",
+      "profile": "Validation",
+      "category": "validation_inputs"
+    },
+    {
+      "id": "governance",
+      "profile": "Governance",
+      "category": "governance_inputs"
+    },
+    {
+      "id": "cloudflare",
+      "profile": "Cloudflare",
+      "category": "production_source"
+    },
+    {
+      "id": "evaluation",
+      "profile": "P43Evaluation",
+      "category": "validation_inputs"
+    },
+    {
+      "id": "evidence",
+      "profile": "Evidence",
+      "category": "validation_inputs"
+    }
+  ],
+  "external_inputs": [
+    {
+      "id": "live-archive",
+      "category": "fixture",
+      "description": "Hash-bound original live-archive; source/date/operator remain in original metadata. Offline assessment, not a repeated operation.",
+      "fingerprint": "sha256:865730da8d32bba4de6cab9cc821639c8b41638f8e119928e3cd4f0eadef942b",
+      "evidence_path": "inputs/live-originals.zip",
+      "evidence_sha256": "865730da8d32bba4de6cab9cc821639c8b41638f8e119928e3cd4f0eadef942b"
+    },
+    {
+      "id": "live-index",
+      "category": "fixture",
+      "description": "Hash-bound original live-index; source/date/operator remain in original metadata. Offline assessment, not a repeated operation.",
+      "fingerprint": "sha256:05eb05ea0306104dce94a30e36db6d94e5dad37cd474d83e80b25f85b0107e37",
+      "evidence_path": "inputs/live.inventory.json",
+      "evidence_sha256": "05eb05ea0306104dce94a30e36db6d94e5dad37cd474d83e80b25f85b0107e37"
+    },
+    {
+      "id": "repair-archive",
+      "category": "fixture",
+      "description": "Hash-bound original repair-archive; source/date/operator remain in original metadata. Offline assessment, not a repeated operation.",
+      "fingerprint": "sha256:751c8c7b989a913a4dda9212da81ba8a6103c86459ce702d4e716b53dc7d845d",
+      "evidence_path": "inputs/repair-originals.zip",
+      "evidence_sha256": "751c8c7b989a913a4dda9212da81ba8a6103c86459ce702d4e716b53dc7d845d"
+    },
+    {
+      "id": "repair-index",
+      "category": "fixture",
+      "description": "Hash-bound original repair-index; source/date/operator remain in original metadata. Offline assessment, not a repeated operation.",
+      "fingerprint": "sha256:e928043375044c0e3c82add955fd816b1e97abada7b50379a07076f51ea8bbca",
+      "evidence_path": "inputs/repair.inventory.json",
+      "evidence_sha256": "e928043375044c0e3c82add955fd816b1e97abada7b50379a07076f51ea8bbca"
+    },
+    {
+      "id": "private-originals",
+      "category": "fixture",
+      "description": "Exact local sensitive original registry; bytes remain private, independently checked against archived public receipts/projections. Missing or changed originals fail closed.",
+      "fingerprint": "sha256:407eb75a2e8c520f1077e8c7acaf9d854f9f8f27f7c02747c7128b1f1b692af9",
+      "evidence_path": "inputs/private-originals.json",
+      "evidence_sha256": "407eb75a2e8c520f1077e8c7acaf9d854f9f8f27f7c02747c7128b1f1b692af9"
+    },
+    {
+      "id": "host",
+      "category": "environment",
+      "description": "Hash-bound original host; source/date/operator remain in original metadata. Offline assessment, not a repeated operation.",
+      "fingerprint": "sha256:694d5ef3724265531deaf5bd547e81dcf31f7ec04db5228f845bb1bbc2fb759f",
+      "evidence_path": "inputs/host.json",
+      "evidence_sha256": "694d5ef3724265531deaf5bd547e81dcf31f7ec04db5228f845bb1bbc2fb759f"
+    },
+    {
+      "id": "governance-run",
+      "category": "fixture",
+      "description": "Hash-bound original governance-run; source/date/operator remain in original metadata. Offline assessment, not a repeated operation.",
+      "fingerprint": "sha256:bea9e8f5d47e7df61624bde2b6e14d482c0bfd22bf900418370fe919efca2d0b",
+      "evidence_path": "inputs/governance.json",
+      "evidence_sha256": "bea9e8f5d47e7df61624bde2b6e14d482c0bfd22bf900418370fe919efca2d0b"
+    },
+    {
+      "id": "governance-jobs",
+      "category": "fixture",
+      "description": "Hash-bound original governance-jobs; source/date/operator remain in original metadata. Offline assessment, not a repeated operation.",
+      "fingerprint": "sha256:a05c5cffd908854980d6c2e8f001d5d496fe12a98539cc1bb5e976c1885734c9",
+      "evidence_path": "inputs/governance-jobs.json",
+      "evidence_sha256": "a05c5cffd908854980d6c2e8f001d5d496fe12a98539cc1bb5e976c1885734c9"
+    },
+    {
+      "id": "governance-logs",
+      "category": "fixture",
+      "description": "Hash-bound original governance-logs; source/date/operator remain in original metadata. Offline assessment, not a repeated operation.",
+      "fingerprint": "sha256:5e1b95737be9b85a191945ab5d034ed148ab08c38b96114d54db68ac3eeee2b9",
+      "evidence_path": "inputs/governance-logs.zip",
+      "evidence_sha256": "5e1b95737be9b85a191945ab5d034ed148ab08c38b96114d54db68ac3eeee2b9"
+    }
+  ],
+  "commands": [
+    {
+      "id": "formal-ci",
+      "description": "evidence: after frozen-input precheck, independently evaluate retained originals/current source with no cloud or device action; one execution, 15-minute timeout. Preserve failures; source/harness changes require a successor contract and minimal rerun plan.",
+      "command": "node docs/acceptance-contracts/P4-3-v1/tools/run.cjs formal-ci node docs/acceptance-contracts/P4-3-v1/tools/inspect-ci.cjs",
+      "input_groups": [
+        "cloudflare",
+        "evaluation"
+      ],
+      "runner_paths": [
+        "docs/acceptance-contracts/P4-3-v1/tools/run.cjs",
+        "docs/acceptance-contracts/P4-3-v1/tools/io.cjs",
+        "docs/acceptance-contracts/P4-3-v1/tools/inspect-ci.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-live",
+      "description": "evidence: after frozen-input precheck, independently evaluate retained originals/current source with no cloud or device action; one execution, 15-minute timeout. Preserve failures; source/harness changes require a successor contract and minimal rerun plan.",
+      "command": "node docs/acceptance-contracts/P4-3-v1/tools/run.cjs formal-live node docs/acceptance-contracts/P4-3-v1/tools/inspect-live.cjs",
+      "input_groups": [
+        "cloudflare",
+        "evaluation"
+      ],
+      "runner_paths": [
+        "docs/acceptance-contracts/P4-3-v1/tools/run.cjs",
+        "docs/acceptance-contracts/P4-3-v1/tools/io.cjs",
+        "docs/acceptance-contracts/P4-3-v1/tools/inspect-live.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-ui",
+      "description": "evidence: after frozen-input precheck, independently evaluate retained originals/current source with no cloud or device action; one execution, 15-minute timeout. Preserve failures; source/harness changes require a successor contract and minimal rerun plan.",
+      "command": "node docs/acceptance-contracts/P4-3-v1/tools/run.cjs formal-ui node docs/acceptance-contracts/P4-3-v1/tools/ui-reconcile-probe.cjs",
+      "input_groups": [
+        "cloudflare",
+        "evaluation"
+      ],
+      "runner_paths": [
+        "docs/acceptance-contracts/P4-3-v1/tools/run.cjs",
+        "docs/acceptance-contracts/P4-3-v1/tools/io.cjs",
+        "docs/acceptance-contracts/P4-3-v1/tools/ui-reconcile-probe.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-governance",
+      "description": "evidence: after frozen-input precheck, independently evaluate retained originals/current source with no cloud or device action; one execution, 15-minute timeout. Preserve failures; source/harness changes require a successor contract and minimal rerun plan.",
+      "command": "node docs/acceptance-contracts/P4-3-v1/tools/run.cjs formal-governance node docs/acceptance-contracts/P4-3-v1/tools/inspect-ci.cjs governance",
+      "input_groups": [
+        "governance",
+        "evidence",
+        "evaluation"
+      ],
+      "runner_paths": [
+        "docs/acceptance-contracts/P4-3-v1/tools/run.cjs",
+        "docs/acceptance-contracts/P4-3-v1/tools/io.cjs",
+        "docs/acceptance-contracts/P4-3-v1/tools/inspect-ci.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "formal-ci-result",
+      "description": "Original stdout/stderr from the independently executed evaluator.",
+      "path": "evidence/formal-ci.log"
+    },
+    {
+      "id": "formal-live-result",
+      "description": "Original stdout/stderr from the independently executed evaluator.",
+      "path": "evidence/formal-live.log"
+    },
+    {
+      "id": "formal-ui-result",
+      "description": "Original stdout/stderr from the independently executed evaluator.",
+      "path": "evidence/formal-ui.log"
+    },
+    {
+      "id": "formal-governance-result",
+      "description": "Original stdout/stderr from the independently executed evaluator.",
+      "path": "evidence/formal-governance.log"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "P43-API",
+      "description": "Fixed endpoints/envelopes, reason, role/Access/origin/CSRF errors, ready gates, version rules, CAS and atomic audit; source-bound native 270/270 and compiled router 3/3.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log"
+      ],
+      "input_groups": [
+        "cloudflare",
+        "evaluation"
+      ],
+      "dependency_rationale": "Cloudflare supplies the unchanged server and repaired UI/config inputs; P43Evaluation supplies Worker tests and frozen source/original-data evaluators with their contained command capture. Historical collector source is bound inside external original archives, not executed again.",
+      "external_inputs": [
+        "live-archive",
+        "live-index",
+        "repair-archive",
+        "repair-index",
+        "host"
+      ],
+      "command_ids": [
+        "formal-ci"
+      ],
+      "artifact_ids": [
+        "formal-ci-result"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P43-CHANNEL",
+      "description": "Original stable/beta publish/retract/stop/resume and repaired stale-tab CAS: continuous revision/audit chains, one winner, no loser mutation and unchanged cancellation state.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log"
+      ],
+      "input_groups": [
+        "cloudflare",
+        "evaluation"
+      ],
+      "dependency_rationale": "Cloudflare supplies the unchanged server and repaired UI/config inputs; P43Evaluation supplies Worker tests and frozen source/original-data evaluators with their contained command capture. Historical collector source is bound inside external original archives, not executed again.",
+      "external_inputs": [
+        "live-archive",
+        "live-index",
+        "repair-archive",
+        "repair-index",
+        "host",
+        "private-originals"
+      ],
+      "command_ids": [
+        "formal-ci",
+        "formal-live"
+      ],
+      "artifact_ids": [
+        "formal-ci-result",
+        "formal-live-result"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P43-PUBLIC",
+      "description": "Retracted low release is offered only to older clients; upgraded clients receive NO_UPDATE. Independent latest/download switches govern the exact original signed URL and verified binary bytes.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log"
+      ],
+      "input_groups": [
+        "cloudflare",
+        "evaluation"
+      ],
+      "dependency_rationale": "Cloudflare supplies the unchanged server and repaired UI/config inputs; P43Evaluation supplies Worker tests and frozen source/original-data evaluators with their contained command capture. Historical collector source is bound inside external original archives, not executed again.",
+      "external_inputs": [
+        "live-archive",
+        "live-index",
+        "repair-archive",
+        "repair-index",
+        "host",
+        "private-originals"
+      ],
+      "command_ids": [
+        "formal-ci",
+        "formal-live"
+      ],
+      "artifact_ids": [
+        "formal-ci-result",
+        "formal-live-result"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P43-RELEASE",
+      "description": "Ready/owner/reason/reference protection, conditional disable and recovery capability; same-key replay, conflict/tombstone boundaries, real expiry and one-effect audit; no new recovery issuance.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log"
+      ],
+      "input_groups": [
+        "cloudflare",
+        "evaluation"
+      ],
+      "dependency_rationale": "Cloudflare supplies the unchanged server and repaired UI/config inputs; P43Evaluation supplies Worker tests and frozen source/original-data evaluators with their contained command capture. Historical collector source is bound inside external original archives, not executed again.",
+      "external_inputs": [
+        "live-archive",
+        "live-index",
+        "repair-archive",
+        "repair-index",
+        "host",
+        "private-originals"
+      ],
+      "command_ids": [
+        "formal-ci",
+        "formal-live",
+        "formal-ui"
+      ],
+      "artifact_ids": [
+        "formal-ci-result",
+        "formal-live-result",
+        "formal-ui-result"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P43-UI",
+      "description": "Bilingual retract boundary and fresh confirmation/cancel/conflict UI, 36 source-bound browser cases, original screenshots and unchanged-source six-case interrupted-reconciliation probe.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log"
+      ],
+      "input_groups": [
+        "cloudflare",
+        "evaluation"
+      ],
+      "dependency_rationale": "Cloudflare supplies the unchanged server and repaired UI/config inputs; P43Evaluation supplies Worker tests and frozen source/original-data evaluators with their contained command capture. Historical collector source is bound inside external original archives, not executed again.",
+      "external_inputs": [
+        "live-archive",
+        "live-index",
+        "repair-archive",
+        "repair-index",
+        "host",
+        "private-originals"
+      ],
+      "command_ids": [
+        "formal-ci",
+        "formal-live",
+        "formal-ui"
+      ],
+      "artifact_ids": [
+        "formal-ci-result",
+        "formal-live-result",
+        "formal-ui-result"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P43-RETENTION",
+      "description": "Retract/stop never changes release identity or deletes assets. Original six asset rows and high release stay unchanged; low disable is preceded by the original dependency/reference check.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log"
+      ],
+      "input_groups": [
+        "cloudflare",
+        "evaluation"
+      ],
+      "dependency_rationale": "Cloudflare supplies the unchanged server and repaired UI/config inputs; P43Evaluation supplies Worker tests and frozen source/original-data evaluators with their contained command capture. Historical collector source is bound inside external original archives, not executed again.",
+      "external_inputs": [
+        "live-archive",
+        "live-index",
+        "repair-archive",
+        "repair-index",
+        "host",
+        "private-originals"
+      ],
+      "command_ids": [
+        "formal-ci",
+        "formal-live"
+      ],
+      "artifact_ids": [
+        "formal-ci-result",
+        "formal-live-result"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P43-GOVERNANCE",
+      "description": "Actual source-bound governance CI, original failures preserved, profile and runner registration and contract validation route; no hardware/production readiness or real publisher/viewer coverage is implied.",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "raw_log"
+      ],
+      "input_groups": [
+        "governance",
+        "evidence",
+        "evaluation"
+      ],
+      "dependency_rationale": "Governance supplies task/authority rules; Evidence supplies actual validator/profile/workflow inputs; P43Evaluation supplies original CI interpretation and contained command capture.",
+      "external_inputs": [
+        "governance-run",
+        "governance-jobs",
+        "governance-logs",
+        "host"
+      ],
+      "command_ids": [
+        "formal-governance"
+      ],
+      "artifact_ids": [
+        "formal-governance-result"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    }
+  ],
+  "performance_gates": []
+}

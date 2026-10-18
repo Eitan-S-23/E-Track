@@ -1,0 +1,153 @@
+{
+  "nature": "Independent offline evaluation, not a new product CI or deployment",
+  "previous": {
+    "source": "972e74c43cd36b7a308e457296aaf7bb06120e78",
+    "runId": "39084376785",
+    "worker": 270,
+    "ui": 12,
+    "router": {
+      "tests": 3,
+      "pass": 3,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "files": [
+      {
+        "path": "public/_routes.json",
+        "sizeBytes": 124,
+        "sha256": "5e6709f7f844688026950a719cb30e514a4e9d4c546a418b6b914672ab866247"
+      },
+      {
+        "path": "public/_worker.js/index.js",
+        "sizeBytes": 107858,
+        "sha256": "b0eb4d01e862343b06ad2dcc7aadee3748ce107d6c240c1b5f835f7550e0bf24"
+      },
+      {
+        "path": "public/index.html",
+        "sizeBytes": 265348,
+        "sha256": "94a3337689719a2cc93eeb5820db15926b60abe701b13e5e560869bc39bf9d8c"
+      }
+    ],
+    "diagnostics": [
+      {
+        "name": "0_Admin Deployment Input (No Cloud Writes).txt",
+        "npmWarnings": 6,
+        "warningAnnotations": 1,
+        "expectedNativeExceptions": 0,
+        "auditSummaries": [
+          "2026-10-18T00:54:04.2996478Z 4 high severity vulnerabilities"
+        ]
+      },
+      {
+        "name": "1_Worker Typecheck and Invariants.txt",
+        "npmWarnings": 6,
+        "warningAnnotations": 0,
+        "expectedNativeExceptions": 4,
+        "auditSummaries": [
+          "2026-10-18T00:52:59.0869647Z 11 vulnerabilities (3 moderate, 8 high)"
+        ]
+      },
+      {
+        "name": "2_Admin Typecheck and Mock UI.txt",
+        "npmWarnings": 6,
+        "warningAnnotations": 1,
+        "expectedNativeExceptions": 0,
+        "auditSummaries": [
+          "2026-10-18T00:52:57.3052300Z 4 high severity vulnerabilities"
+        ]
+      },
+      {
+        "name": "3_Public Pages Typecheck.txt",
+        "npmWarnings": 6,
+        "warningAnnotations": 0,
+        "expectedNativeExceptions": 0,
+        "auditSummaries": [
+          "2026-10-18T00:52:58.9753906Z 4 high severity vulnerabilities"
+        ]
+      }
+    ],
+    "input": ".cache/p43/ci/artifacts-39084376785/admin-deployment-input-972e74c43cd36b7a308e457296aaf7bb06120e78"
+  },
+  "repaired": {
+    "source": "0067b6c3caa9ee263c53ae372fdc63cc7f74250f",
+    "runId": "39098302062",
+    "worker": 270,
+    "ui": 36,
+    "router": {
+      "tests": 3,
+      "pass": 3,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "files": [
+      {
+        "path": "public/_routes.json",
+        "sizeBytes": 124,
+        "sha256": "5e6709f7f844688026950a719cb30e514a4e9d4c546a418b6b914672ab866247"
+      },
+      {
+        "path": "public/_worker.js/index.js",
+        "sizeBytes": 107859,
+        "sha256": "ba966cfd178dce339de9d211e631da78663503b5c7ae0dd463c62163bed18d90"
+      },
+      {
+        "path": "public/index.html",
+        "sizeBytes": 266118,
+        "sha256": "1a5feb4ffb04bf164c139cc1f221baabee3296ca51caf6f02f4e3c13411a0a58"
+      }
+    ],
+    "diagnostics": [
+      {
+        "name": "0_Admin Deployment Input (No Cloud Writes).txt",
+        "npmWarnings": 6,
+        "warningAnnotations": 1,
+        "expectedNativeExceptions": 0,
+        "auditSummaries": [
+          "2026-10-18T04:50:31.8612157Z 4 high severity vulnerabilities"
+        ]
+      },
+      {
+        "name": "1_Worker Typecheck and Invariants.txt",
+        "npmWarnings": 6,
+        "warningAnnotations": 0,
+        "expectedNativeExceptions": 4,
+        "auditSummaries": [
+          "2026-10-18T04:47:48.1019143Z 11 vulnerabilities (3 moderate, 8 high)"
+        ]
+      },
+      {
+        "name": "2_Admin Typecheck and Mock UI.txt",
+        "npmWarnings": 6,
+        "warningAnnotations": 1,
+        "expectedNativeExceptions": 0,
+        "auditSummaries": [
+          "2026-10-18T04:47:41.7512942Z 4 high severity vulnerabilities"
+        ]
+      },
+      {
+        "name": "3_Public Pages Typecheck.txt",
+        "npmWarnings": 6,
+        "warningAnnotations": 0,
+        "expectedNativeExceptions": 0,
+        "auditSummaries": [
+          "2026-10-18T04:47:44.9347987Z 4 high severity vulnerabilities"
+        ]
+      }
+    ],
+    "input": ".cache/p43/ci/artifacts-39098302062/admin-deployment-input-0067b6c3caa9ee263c53ae372fdc63cc7f74250f"
+  },
+  "archiveEntries": {
+    "live": 585,
+    "repair": 158
+  },
+  "serverInputsUnchanged": true,
+  "routerBytesUnchanged": true,
+  "executableFacadeUnchanged": true,
+  "uiOutsideRepairUnchanged": true,
+  "headProductScopeMatchesRepair": true,
+  "negativeOraclesRejected": 6,
+  "newCloudBusinessRequests": 0,
+  "productVerdict": true
+}

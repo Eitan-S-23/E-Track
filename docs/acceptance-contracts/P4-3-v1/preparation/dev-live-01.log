@@ -1,0 +1,178 @@
+{
+  "nature": "Independent offline review of historical implementation originals; no new cloud execution",
+  "counts": {
+    "d1Originals": 55,
+    "snapshotProjections": 53,
+    "httpOriginals": 54,
+    "publicBodies": 18,
+    "screenshots": 21
+  },
+  "privateOriginalsRead": 186,
+  "identityAndBindingsVerified": true,
+  "originalBatches": [
+    {
+      "batch": "probe-01",
+      "originalResult": "FAIL",
+      "originalCounts": {
+        "passed": 0,
+        "failed": 1,
+        "skipped": 0,
+        "warnings": 0,
+        "errors": 0
+      },
+      "productSource": "933b790e69e04ee551ad255398e08f12a1b2a107",
+      "failedChecks": [
+        "LIVE-02-real-session"
+      ]
+    },
+    {
+      "batch": "probe-02",
+      "originalResult": "FAIL",
+      "originalCounts": {
+        "passed": 1,
+        "failed": 1,
+        "skipped": 0,
+        "warnings": 0,
+        "errors": 0
+      },
+      "productSource": "933b790e69e04ee551ad255398e08f12a1b2a107",
+      "failedChecks": [
+        "LIVE-00-current-state"
+      ]
+    },
+    {
+      "batch": "probe-03",
+      "originalResult": "PASS",
+      "originalCounts": {
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0,
+        "warnings": 0,
+        "errors": 0
+      },
+      "productSource": "933b790e69e04ee551ad255398e08f12a1b2a107",
+      "failedChecks": []
+    },
+    {
+      "batch": "drill-01",
+      "originalResult": "FAIL",
+      "originalCounts": {
+        "passed": 9,
+        "failed": 1,
+        "skipped": 0,
+        "warnings": 0,
+        "errors": 1
+      },
+      "productSource": "933b790e69e04ee551ad255398e08f12a1b2a107",
+      "failedChecks": [
+        "LIVE-04-beta-publish-high"
+      ]
+    },
+    {
+      "batch": "drill-02",
+      "originalResult": "FAIL",
+      "originalCounts": {
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "warnings": 0,
+        "errors": 0
+      },
+      "productSource": "933b790e69e04ee551ad255398e08f12a1b2a107",
+      "failedChecks": []
+    },
+    {
+      "batch": "drill-03",
+      "originalResult": "FAIL",
+      "originalCounts": {
+        "passed": 3,
+        "failed": 1,
+        "skipped": 0,
+        "warnings": 0,
+        "errors": 0,
+        "requestFailures": 0
+      },
+      "productSource": "933b790e69e04ee551ad255398e08f12a1b2a107",
+      "failedChecks": [
+        "LIVE-09-ui-recovery-and-exact-replay"
+      ]
+    },
+    {
+      "batch": "drill-04",
+      "originalResult": "FAIL",
+      "originalCounts": {
+        "passed": 3,
+        "failed": 1,
+        "skipped": 0,
+        "warnings": 0,
+        "errors": 0,
+        "requestFailures": 0
+      },
+      "productSource": "933b790e69e04ee551ad255398e08f12a1b2a107",
+      "failedChecks": [
+        "LIVE-09-authorized-second-issuance-ui-concurrency-replay"
+      ]
+    },
+    {
+      "batch": "drill-05",
+      "originalResult": "FAIL",
+      "originalCounts": {
+        "passed": 26,
+        "failed": 1,
+        "skipped": 0,
+        "warnings": 0,
+        "errors": 1,
+        "requestFailures": 0
+      },
+      "productSource": "933b790e69e04ee551ad255398e08f12a1b2a107",
+      "failedChecks": [
+        "LIVE-06-stable-real-cas-fresh-confirmation"
+      ]
+    },
+    {
+      "batch": "drill-06",
+      "originalResult": "PASS",
+      "originalCounts": {
+        "passed": 8,
+        "failed": 0,
+        "skipped": 0,
+        "warnings": 0,
+        "errors": 2,
+        "requestFailures": 0
+      },
+      "productSource": "972e74c43cd36b7a308e457296aaf7bb06120e78",
+      "failedChecks": []
+    }
+  ],
+  "additionalCloudWrites": 0,
+  "effectsCorrelated": {
+    "channel": 24,
+    "recovery": 3,
+    "disable": 1
+  },
+  "finalChannels": [
+    {
+      "name": "beta",
+      "revision": 11,
+      "currentReleaseId": "fw_12367eee317a0774a7271cf982ee7f933c6b089336645f9e607501105e72bf0c",
+      "disableLatest": 1,
+      "disableDownloads": 1
+    },
+    {
+      "name": "stable",
+      "revision": 13,
+      "currentReleaseId": "fw_12367eee317a0774a7271cf982ee7f933c6b089336645f9e607501105e72bf0c",
+      "disableLatest": 1,
+      "disableDownloads": 1
+    }
+  ],
+  "preservedAssets": 6,
+  "lowState": "disabled",
+  "privateOriginalsVerifiedWithoutPublication": true,
+  "semanticTamperControlsRejected": 2,
+  "limits": [
+    "Real publisher/viewer sessions absent",
+    "Historical observations, not a fresh cloud state claim",
+    "Repaired UI is evaluated separately; the historical deployment was not changed"
+  ]
+}

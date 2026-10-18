@@ -2537,7 +2537,8 @@
         text-transform: uppercase;
       }
 
-      .confirm-input-wrap input {
+      .confirm-input-wrap input,
+      .confirm-input-wrap textarea {
         min-height: 46px;
         border: 1px solid rgba(67, 164, 255, 0.32);
         border-radius: 13px;
@@ -2547,7 +2548,14 @@
         outline: 0;
       }
 
-      .confirm-input-wrap input:focus {
+      .confirm-input-wrap textarea { padding: 12px 13px; resize: vertical; font: inherit; }
+      .confirm-detail { white-space: pre-line; }
+      .confirm-dialog { max-height: calc(100dvh - 40px); overflow: auto; }
+      .firmware-notice { margin: 0 0 20px; }
+      .firmware-notice[hidden], #confirmDownload[hidden] { display: none; }
+
+      .confirm-input-wrap input:focus,
+      .confirm-input-wrap textarea:focus {
         border-color: rgba(26, 167, 255, 0.72);
         box-shadow: 0 0 24px rgba(26, 167, 255, 0.16);
       }
@@ -3320,6 +3328,15 @@
           <label for="confirmInput" id="confirmInputLabel">Type to confirm</label>
           <input id="confirmInput" type="text" autocomplete="off" />
         </div>
+        <div class="confirm-input-wrap" id="confirmReasonWrap" hidden>
+          <label for="confirmReason" data-i18n="firmware.reason">Operator reason (required)</label>
+          <textarea id="confirmReason" rows="3" autocomplete="off"></textarea>
+        </div>
+        <div class="confirm-input-wrap" id="confirmMaintenanceWrap" hidden>
+          <label for="confirmMaintenance" data-i18n="firmware.maintenance">Maintenance message (optional)</label>
+          <input id="confirmMaintenance" type="text" autocomplete="off" />
+        </div>
+        <a id="confirmDownload" class="pill-button primary" target="_blank" rel="noopener noreferrer" hidden></a>
         <div class="confirm-actions">
           <button type="button" class="confirm-button" id="confirmCancel" data-i18n="dialog.cancel">Cancel</button>
           <button type="button" class="confirm-button primary" id="confirmAccept" data-i18n="dialog.confirm">Confirm</button>
@@ -3577,6 +3594,7 @@
             </div>
           </section>
 
+          <div class="firmware-help firmware-notice" id="firmwareNotice" role="status" hidden></div>
           <section class="firmware-grid" aria-label="MCU firmware releases" data-i18n-aria-label="firmware.planLabel">
             <section class="panel firmware-panel">
               <div class="panel-heading">
@@ -3599,6 +3617,7 @@
               <div class="firmware-help">
                 <strong data-i18n="firmware.flowTitle">Current flow</strong>
                 <p data-i18n="firmware.flowText">GitHub Actions uploads firmware to R2 and registers a candidate. After publishing here, the code table page can query Cloudflare and download the binary without VPN.</p>
+                <p data-i18n="firmware.noDowngrade">Retraction only affects devices that have not upgraded. Upgraded devices will not downgrade; publish a fix with a higher versionCode.</p>
               </div>
             </section>
           </section>
@@ -3662,6 +3681,8 @@
         announcementsError: null,
         firmwareChannels: [],
         firmwareReleases: [],
+        firmwareReconcileRequired: false,
+        firmwarePendingAction: null,
         storage: null,
         storageError: null,
         selectedReleaseId: null,
@@ -3807,7 +3828,7 @@
           "help.releaseMessage": "Click a version in the timeline to open its focused release panel.",
           "help.releaseDetail": "The panel keeps publishing controls, release notes, asset checks, gates, and channel state in one place. On mobile, tap a version card directly to publish to Beta or Stable, disable, or delete when your role allows it.",
           "firmware.title": "MCU Firmware Management",
-          "firmware.subtitle": "Track R2-ready MCU firmware candidates and publish them to the app-visible stable or beta channel.",
+          "firmware.subtitle": "Publish ready MCU releases, retract channel pointers and control distribution independently.",
           "firmware.r2ReadyCount": "R2-ready firmware versions",
           "firmware.downloadHint": "The app downloads only published firmware through Cloudflare.",
           "firmware.planLabel": "MCU firmware releases",
@@ -3816,8 +3837,52 @@
           "firmware.channelEyebrow": "App visibility",
           "firmware.channelsTitle": "Firmware Channels",
           "firmware.flowTitle": "Current flow",
-          "firmware.flowText": "GitHub Actions uploads firmware to R2 and registers a candidate. After publishing here, the code table page can query Cloudflare and download the binary without VPN.",
-          "firmware.noReleases": "No R2-ready firmware versions have been registered yet.",
+          "firmware.flowText": "Publish/retract changes channel visibility, not release identity. Latest and download switches are independent. Stopping a channel blocks downloads of a release shared with another channel too.",
+          "firmware.noReleases": "No firmware releases have been registered yet.",
+          "firmware.noDowngrade": "Retraction only affects devices that have not upgraded. Upgraded devices will not downgrade; publish a fix with a higher versionCode.",
+          "firmware.reason": "Operator reason (required)",
+          "firmware.maintenance": "Maintenance message (optional)",
+          "firmware.revision": "Revision",
+          "firmware.latestSwitch": "New update checks",
+          "firmware.downloadsSwitch": "Asset downloads",
+          "firmware.enabled": "Enabled",
+          "firmware.stopped": "Stopped",
+          "firmware.assets": "Assets",
+          "firmware.rawSha": "Target raw image SHA-256",
+          "firmware.selectedTarget": "Selected retraction target",
+          "firmware.state.ready": "Ready",
+          "firmware.state.draft": "Draft",
+          "firmware.state.disabled": "Disabled",
+          "firmware.state.archived": "Archived",
+          "firmware.retractStable": "Retract stable",
+          "firmware.retractBeta": "Retract beta",
+          "firmware.action.publish": "Publish",
+          "firmware.action.retract": "Retract",
+          "firmware.action.stop-latest": "Stop latest",
+          "firmware.action.resume-latest": "Resume latest",
+          "firmware.action.stop-downloads": "Stop downloads",
+          "firmware.action.resume-downloads": "Resume downloads",
+          "firmware.action.disable": "Disable release",
+          "firmware.action.recovery-download": "Recovery download",
+          "firmware.actionConfirm": "{action}: {channel}, revision {revision}. Target: {tag}.",
+          "firmware.releaseConfirm": "{action}: {tag}.",
+          "firmware.disableDetail": "Disable permanently prevents this release from being published or downloaded. A channel-referenced release cannot be disabled. This is not channel retraction.",
+          "firmware.recoveryDetail": "Owner-only recovery asset, never an automatic OTA package. The download link expires after 300 seconds.",
+          "firmware.downloadRecovery": "Download recovery asset",
+          "firmware.expired": "This link has expired. Confirm a new recovery download operation to obtain another link.",
+          "firmware.actionComplete": "Firmware operation confirmed",
+          "firmware.actionUnconfirmed": "Firmware operation not confirmed",
+          "firmware.conflict": "The channel changed. Fresh state was read; review it and confirm again. The old intent was not replayed.",
+          "firmware.unknown": "The network result is unknown. Read current state before deciding what to do next; no automatic write retry was made.",
+          "firmware.rechecked": "Current firmware state was read. Any further operation requires another confirmation.",
+          "firmware.confirmedRefreshFailed": "The operation returned success, but state refresh failed. Refresh before another operation.",
+          "firmware.reconcileRequired": "Current firmware state must be read before another write.",
+          "firmware.pendingAction": "A release action has an unknown result. Reconcile it with the original request before starting another action.",
+          "firmware.retryAction": "Reconcile original request",
+          "firmware.retryDetail": "Read current state, then use the original reason and Idempotency-Key to retrieve the original result. No new intent or key is created.",
+          "firmware.actorChanged": "Return to the original owner session to reconcile this request.",
+          "firmware.refresh": "Refresh firmware state",
+          "firmware.invalidResponse": "Invalid firmware response; current state must be reconciled.",
           "firmware.noChannels": "No firmware channels have been registered yet.",
           "firmware.model": "Model",
           "firmware.version": "Version",
@@ -4102,7 +4167,7 @@
           "help.releaseMessage": "点击版本时间线中的具体版本，即可打开该版本的聚焦发布面板。",
           "help.releaseDetail": "发布面板会集中显示发布操作、发布说明、资源检查、发布门禁和通道状态。手机端可直接点击版本卡片，在权限允许时执行发布 Beta、发布 Stable、禁用或删除。",
           "firmware.title": "单片机固件管理",
-          "firmware.subtitle": "管理已经上传到 R2 的单片机固件候选版本，并发布到 App 可见的 stable 或 beta 通道。",
+          "firmware.subtitle": "发布 ready 固件、撤回通道指针，并分别控制新版本查询和资产下载。",
           "firmware.r2ReadyCount": "个 R2 可用固件版本",
           "firmware.downloadHint": "App 只会通过 Cloudflare 下载已发布固件。",
           "firmware.planLabel": "单片机固件版本",
@@ -4111,8 +4176,52 @@
           "firmware.channelEyebrow": "App 可见性",
           "firmware.channelsTitle": "固件通道",
           "firmware.flowTitle": "当前流程",
-          "firmware.flowText": "GitHub Actions 将固件上传到 R2 并注册候选版本。在这里发布后，码表页面即可查询 Cloudflare 并免 VPN 下载固件。",
-          "firmware.noReleases": "还没有已注册且 R2 可用的固件版本。",
+          "firmware.flowText": "发布和撤回只改变通道可见性，不改变版本或资产。查询与下载开关独立生效。多个通道引用同一版本时，任一通道停发下载都会阻断该版本的下载。",
+          "firmware.noReleases": "还没有已注册的固件版本。",
+          "firmware.noDowngrade": "撤回仅影响未升级设备；已升级设备不会降级。救治方式是发布更高 versionCode 的修复版。",
+          "firmware.reason": "操作原因（必填）",
+          "firmware.maintenance": "维护说明（选填）",
+          "firmware.revision": "修订号",
+          "firmware.latestSwitch": "新版本查询",
+          "firmware.downloadsSwitch": "资产下载",
+          "firmware.enabled": "已开启",
+          "firmware.stopped": "已停发",
+          "firmware.assets": "资产",
+          "firmware.rawSha": "目标原始镜像 SHA-256",
+          "firmware.selectedTarget": "当前选择的撤回目标",
+          "firmware.state.ready": "就绪",
+          "firmware.state.draft": "草稿",
+          "firmware.state.disabled": "已禁用",
+          "firmware.state.archived": "已归档",
+          "firmware.retractStable": "撤回 stable",
+          "firmware.retractBeta": "撤回 beta",
+          "firmware.action.publish": "发布",
+          "firmware.action.retract": "撤回",
+          "firmware.action.stop-latest": "停发查询",
+          "firmware.action.resume-latest": "恢复查询",
+          "firmware.action.stop-downloads": "停发下载",
+          "firmware.action.resume-downloads": "恢复下载",
+          "firmware.action.disable": "禁用版本",
+          "firmware.action.recovery-download": "恢复镜像下载",
+          "firmware.actionConfirm": "{action}：{channel}，修订号 {revision}。目标：{tag}。",
+          "firmware.releaseConfirm": "{action}：{tag}。",
+          "firmware.disableDetail": "禁用后此版本不可再发布或下载；仍被通道引用的版本不能禁用。这不是通道撤回。",
+          "firmware.recoveryDetail": "仅 owner 可获取恢复镜像，不是自动 OTA 包。下载链接在 300 秒后到期。",
+          "firmware.downloadRecovery": "下载恢复镜像",
+          "firmware.expired": "链接已到期。请重新确认一次恢复镜像下载操作以获取新链接。",
+          "firmware.actionComplete": "固件操作已确认",
+          "firmware.actionUnconfirmed": "固件操作未确认",
+          "firmware.conflict": "通道已变化，已重新读取状态。请检查并再次确认；旧操作意图没有自动重放。",
+          "firmware.unknown": "网络结果未知。先读取当前状态再决定下一步，未自动重试写入。",
+          "firmware.rechecked": "已重新读取固件状态。后续操作必须再次确认。",
+          "firmware.confirmedRefreshFailed": "操作已返回成功，但状态刷新失败。继续操作前请先刷新。",
+          "firmware.reconcileRequired": "必须重新读取固件状态后才能继续写入。",
+          "firmware.pendingAction": "有一笔版本操作结果未知。开始新操作前，请用原请求对账。",
+          "firmware.retryAction": "核对原请求结果",
+          "firmware.retryDetail": "先读取当前状态，再用原原因和原 Idempotency-Key 查询首次结果，不创建新意图或新 key。",
+          "firmware.actorChanged": "请回到原 owner 会话核对这笔请求。",
+          "firmware.refresh": "刷新固件状态",
+          "firmware.invalidResponse": "固件响应格式无效，必须先核对当前状态。",
           "firmware.noChannels": "还没有固件通道记录。",
           "firmware.model": "型号",
           "firmware.version": "版本",
@@ -4322,6 +4431,11 @@
         confirmInputWrap: document.querySelector("#confirmInputWrap"),
         confirmInputLabel: document.querySelector("#confirmInputLabel"),
         confirmInput: document.querySelector("#confirmInput"),
+        confirmReasonWrap: document.querySelector("#confirmReasonWrap"),
+        confirmReason: document.querySelector("#confirmReason"),
+        confirmMaintenanceWrap: document.querySelector("#confirmMaintenanceWrap"),
+        confirmMaintenance: document.querySelector("#confirmMaintenance"),
+        confirmDownload: document.querySelector("#confirmDownload"),
         confirmCancel: document.querySelector("#confirmCancel"),
         confirmAccept: document.querySelector("#confirmAccept"),
         resourceFloat: document.querySelector("#storage"),
@@ -4373,6 +4487,7 @@
         topSession: document.querySelector("#topSession"),
         systemPill: document.querySelector("#systemPill"),
         firmwareCount: document.querySelector("#firmwareCount"),
+        firmwareNotice: document.querySelector("#firmwareNotice"),
         firmwareReleaseList: document.querySelector("#firmwareReleaseList"),
         firmwareChannelList: document.querySelector("#firmwareChannelList"),
         counts: {
@@ -4407,6 +4522,15 @@
         els.confirmCancel.addEventListener("click", () => closeConfirmDialog(false));
         els.confirmAccept.addEventListener("click", () => closeConfirmDialog(true));
         els.confirmInput.addEventListener("input", updateConfirmDialogState);
+        els.confirmReason.addEventListener("input", updateConfirmDialogState);
+        els.confirmDownload.addEventListener("click", (event) => {
+          if (Math.floor(Date.now() / 1000) >= Number(els.confirmDownload.dataset.expiresAt)) {
+            event.preventDefault();
+            els.confirmDownload.removeAttribute("href");
+            els.confirmDownload.hidden = true;
+            setStatus("firmware.expired", "warn");
+          }
+        });
         els.resourceOrb.addEventListener("click", (event) => {
           if (resourceDrag.suppressClick) {
             event.preventDefault();
@@ -4502,15 +4626,15 @@
           if (!els.sortMenu.contains(target)) setSortMenuOpen(false);
           const firmwareButton = target.closest("button[data-firmware-action]");
           if (firmwareButton) {
+            if (firmwareButton.disabled || state.busy || activeConfirmDialog) return;
             const firmwareId = firmwareButton.dataset.firmwareId ?? state.selectedFirmwareId;
             if (firmwareId) selectFirmware(firmwareId);
-            if (firmwareButton.dataset.firmwareAction === "select") return;
-            if (firmwareButton.dataset.firmwareAction === "publish") {
-              publishFirmware(firmwareButton.dataset.channel, firmwareId);
-            }
-            if (firmwareButton.dataset.firmwareAction === "disable") {
-              disableFirmware(firmwareId);
-            }
+            const action = firmwareButton.dataset.firmwareAction;
+            if (action === "select") return;
+            if (action === "refresh") { refreshFirmwareState(); return; }
+            if (action === "retry-release") { runFirmwareReleaseAction(null, null, true); return; }
+            if (["disable", "recovery-download"].includes(action)) runFirmwareReleaseAction(firmwareId, action);
+            else runFirmwareChannelAction(firmwareButton.dataset.channel, action, firmwareId);
             return;
           }
           const button = target.closest("button[data-action]");
@@ -4840,8 +4964,8 @@
             api("/api/admin/releases?appId=trace&platform=android"),
             api("/api/admin/storage?appId=trace&platform=android").catch((error) => ({ error })),
             api("/api/admin/announcements?appId=trace").catch((error) => ({ error })),
-            api("/api/admin/firmware/releases?appId=trace"),
-            api("/api/admin/firmware/channels?appId=trace")
+            api("/api/admin/firmware/releases?appId=trace&deviceModel=e-track-at32f435"),
+            api("/api/admin/firmware/channels?appId=trace&deviceModel=e-track-at32f435")
           ]);
           state.channels = channels.channels ?? [];
           state.releases = releases.releases ?? [];
@@ -4849,18 +4973,15 @@
           state.storageError = storage.error ?? null;
           state.announcements = announcements.error ? [] : announcements.announcements ?? [];
           state.announcementsError = announcements.error ?? null;
-          state.firmwareReleases = firmwareReleases.firmwareReleases ?? [];
-          state.firmwareChannels = firmwareChannels.firmwareChannels ?? [];
+          setFirmwareData(firmwareReleases, firmwareChannels);
           if (!state.selectedReleaseId || !state.releases.some((release) => release.id === state.selectedReleaseId)) {
             state.selectedReleaseId = defaultSelectedRelease()?.id ?? null;
             state.detailsOpen = false;
           }
-          if (!state.selectedFirmwareId || !state.firmwareReleases.some((release) => release.id === state.selectedFirmwareId)) {
-            state.selectedFirmwareId = state.firmwareReleases[0]?.id ?? null;
-          }
           render();
           setStatus("status.operational", "ok");
         } catch (error) {
+          state.firmwareReconcileRequired = true;
           renderError(error);
           setStatus(error.message, "error");
         } finally {
@@ -4942,99 +5063,160 @@
         }
       }
 
-      async function publishFirmware(channel, firmwareId) {
-        const release = state.firmwareReleases.find((item) => item.id === firmwareId);
-        if (!release || !channel) return;
-        const channelRow = firmwareChannelFor(release, channel);
-        if (!channelRow) return;
-        const channelText = channelLabel(channel);
-        const confirmed = await openConfirmDialog({
-          tone: channel === "stable" ? "stable" : "default",
-          icon: channel === "stable" ? "i-stable" : "i-beta",
-          title: channel === "stable" ? t("firmware.publishStable") : t("firmware.publishBeta"),
-          message: t("confirm.publishFirmware", { tag: release.release_tag, channel: channelText }),
-          detail: t("firmware.flowText"),
-          confirmLabel: channel === "stable" ? t("firmware.publishStable") : t("firmware.publishBeta"),
-          confirmClass: channel === "stable" ? "stable" : "primary",
-          requiredText: channel === "stable" ? "stable" : ""
-        });
-        if (!confirmed) return;
-        if (channel === "stable" && confirmed.value !== "stable") return;
-        setBusy(true, "status.publishing", { tag: release.release_tag, channel: channelText });
-        renderFirmware();
-        try {
-          await mutate(`/api/admin/firmware/channels/${channel}/publish`, {
-            appId: "trace",
-            deviceModel: release.device_model,
-            releaseId: firmwareId,
-            expectedRevision: Number(channelRow.revision),
-            rollback: false
-          });
-          await loadAll();
-          await openResultDialog({
-            tone: channel === "stable" ? "stable" : "success",
-            icon: channel === "stable" ? "i-stable" : "i-beta",
-            title: t("result.firmwarePublished"),
-            message: t("result.firmwarePublishedDetail", { tag: release.release_tag, channel: channelText }),
-            detail: t("firmware.downloadHint"),
-            confirmClass: channel === "stable" ? "stable" : "primary"
-          });
-        } catch (error) {
-          setStatus(error.message, "error");
-          await openResultDialog({
-            tone: "danger",
-            icon: channel === "stable" ? "i-stable" : "i-beta",
-            title: t("result.publishFailureTitle"),
-            message: t("result.publishFailure", { tag: release.release_tag, channel: channelText }),
-            detail: error.message,
-            confirmClass: "danger"
-          });
-        } finally {
-          setBusy(false);
-          renderFirmware();
+      function setFirmwareData(releases, channels) {
+        const validScope = (item) => item?.appId === "trace" && item.deviceModel === "e-track-at32f435";
+        if (!Array.isArray(releases.firmwareReleases) || !Array.isArray(channels.firmwareChannels)
+          || releases.firmwareReleases.some((r) => !validScope(r) || typeof r.releaseId !== "string"
+            || !Number.isSafeInteger(r.versionCode) || typeof r.versionName !== "string" || typeof r.releaseTag !== "string"
+            || typeof r.releaseNotes !== "string" || typeof r.targetImageSha256 !== "string"
+            || !["draft", "ready", "disabled"].includes(r.state) || typeof r.archived !== "boolean"
+            || !Array.isArray(r.publishedChannels) || r.publishedChannels.some((c) => !["stable", "beta"].includes(c))
+            || !Array.isArray(r.assets) || r.assets.some((a) => typeof a.assetId !== "string" || typeof a.fileName !== "string"
+              || typeof a.sha256 !== "string" || !Number.isSafeInteger(a.sizeBytes) || a.sizeBytes <= 0
+              || !["full", "patch", "recovery"].includes(a.kind) || !["available", "not_uploaded", "archived", "r2_deleted"].includes(a.r2State)))
+          || channels.firmwareChannels.some((c) => !validScope(c) || !["stable", "beta"].includes(c.channel)
+            || !Number.isSafeInteger(c.revision) || c.revision < 0 || typeof c.disableLatest !== "boolean"
+            || typeof c.disableDownloads !== "boolean" || (c.currentReleaseId !== null && typeof c.currentReleaseId !== "string")
+            || (c.maintenanceMessage !== null && typeof c.maintenanceMessage !== "string"))) {
+          throw new Error(t("firmware.invalidResponse"));
         }
+        state.firmwareReleases = releases.firmwareReleases;
+        state.firmwareChannels = channels.firmwareChannels;
+        if (!state.firmwareReleases.some((r) => r.releaseId === state.selectedFirmwareId)) {
+          state.selectedFirmwareId = state.firmwareReleases[0]?.releaseId ?? null;
+        }
+        state.firmwareReconcileRequired = false;
       }
 
-      async function disableFirmware(firmwareId) {
-        const release = state.firmwareReleases.find((item) => item.id === firmwareId);
-        if (!release) return;
+      async function refreshFirmware() {
+        state.firmwareReconcileRequired = true;
+        state.session = await api("/api/admin/session");
+        const [releases, channels] = await Promise.all([
+          api("/api/admin/firmware/releases?appId=trace&deviceModel=e-track-at32f435"),
+          api("/api/admin/firmware/channels?appId=trace&deviceModel=e-track-at32f435")
+        ]);
+        setFirmwareData(releases, channels);
+        renderFirmware();
+        renderSessions();
+      }
+
+      async function refreshFirmwareState() {
+        if (state.busy) return;
+        setBusy(true);
+        try { await refreshFirmware(); setStatus("firmware.rechecked", "ok"); }
+        catch (error) { setStatus(error.message, "error"); }
+        finally { setBusy(false); renderFirmware(); }
+      }
+
+      async function firmwareFailure(error, committed = false, reconcile = true) {
+        state.firmwareReconcileRequired = true;
+        let message = committed ? t("firmware.confirmedRefreshFailed")
+          : error.code === "CAS_CONFLICT" ? t("firmware.conflict")
+          : !error.status || error.status >= 500 ? t("firmware.unknown") : t("firmware.actionUnconfirmed");
+        let detail = error.message;
+        if (reconcile) {
+          try { await refreshFirmware(); detail += `\n${t("firmware.rechecked")}`; }
+          catch (readError) { detail += `\n${t("firmware.reconcileRequired")} ${readError.message}`; }
+        }
+        if (state.firmwareReconcileRequired && error.code === "CAS_CONFLICT") message = t("firmware.reconcileRequired");
+        setStatus(message, "warn");
+        await openResultDialog({ tone: "danger", title: t("firmware.actionUnconfirmed"), message, detail, confirmClass: "danger" });
+      }
+
+      async function runFirmwareChannelAction(channel, action, firmwareId) {
+        if (state.busy || activeConfirmDialog || state.firmwareReconcileRequired || state.firmwarePendingAction) return;
+        if (!["publish", "retract", "stop-latest", "resume-latest", "stop-downloads", "resume-downloads"].includes(action)) return;
+        const row = state.firmwareChannels.find((c) => c.channel === channel);
+        if (!row || !canRole(channel === "stable" ? "owner" : "publisher")) return;
+        const pointer = action === "publish" || action === "retract";
+        const release = state.firmwareReleases.find((r) => r.releaseId === (pointer ? firmwareId : row.currentReleaseId));
+        if (pointer && !firmwareReady(release)) return;
+        const label = t(`firmware.action.${action}`);
         const confirmed = await openConfirmDialog({
-          tone: "danger",
-          icon: "i-block",
-          title: t("firmware.disable"),
-          message: t("confirm.disableFirmware", { tag: release.release_tag }),
-          detail: t("result.firmwareDisabledDetail", { tag: release.release_tag }),
-          confirmLabel: t("firmware.disable"),
-          confirmClass: "danger"
+          tone: channel === "stable" ? "stable" : "default", icon: "i-stable", title: `${label} ${channelLabel(channel)}`,
+          message: t("firmware.actionConfirm", { action: label, channel: channelLabel(channel), revision: row.revision,
+            tag: release?.releaseTag ?? t("firmware.channelEmpty") }),
+          detail: action === "retract" ? t("firmware.noDowngrade") : t("firmware.flowText"),
+          confirmLabel: label, confirmClass: channel === "stable" ? "stable" : "primary",
+          requiredText: channel === "stable" ? "stable" : "", reasonRequired: true, maintenance: action.startsWith("stop-")
         });
         if (!confirmed) return;
-        setBusy(true, "status.disabling", { tag: release.release_tag });
-        renderFirmware();
+        const body = { appId: row.appId, deviceModel: row.deviceModel, expectedRevision: row.revision, reason: confirmed.reason };
+        if (pointer) body.releaseId = release.releaseId;
+        if (action.startsWith("stop-") && confirmed.maintenanceMessage) body.maintenanceMessage = confirmed.maintenanceMessage;
+        setBusy(true); state.firmwareReconcileRequired = true; renderFirmware();
+        let committed = false;
         try {
-          await mutate(`/api/admin/firmware/releases/${encodeURIComponent(firmwareId)}/disable`, {});
-          await loadAll();
-          await openResultDialog({
-            tone: "success",
-            icon: "i-block",
-            title: t("result.firmwareDisabled"),
-            message: t("result.firmwareDisabledDetail", { tag: release.release_tag }),
-            detail: "",
-            confirmClass: "primary"
-          });
-        } catch (error) {
-          setStatus(error.message, "error");
-          await openResultDialog({
-            tone: "danger",
-            icon: "i-block",
-            title: t("result.disableFailureTitle"),
-            message: t("result.disableFailure", { tag: release.release_tag }),
-            detail: error.message,
-            confirmClass: "danger"
-          });
-        } finally {
-          setBusy(false);
-          renderFirmware();
+          const result = await mutate(`/api/admin/firmware/channels/${channel}/${action}`, body);
+          if (result.action !== action.replaceAll("-", "_") || result.channel !== channel || !Number.isSafeInteger(result.revision)
+            || typeof result.idempotent !== "boolean" || result.revision !== row.revision + (result.idempotent ? 0 : 1)) {
+            throw new Error(t("firmware.invalidResponse"));
+          }
+          committed = true;
+          await refreshFirmware();
+          setStatus("firmware.actionComplete", "ok");
+          await openResultDialog({ tone: "success", title: t("firmware.actionComplete"), message: `${label} ${channelLabel(channel)}`,
+            detail: `${t("firmware.revision")}: ${result.revision}\nRequest ID: ${result.requestId}` });
+        } catch (error) { await firmwareFailure(error, committed); }
+        finally { setBusy(false); renderFirmware(); }
+      }
+
+      async function runFirmwareReleaseAction(firmwareId, action, retry = false) {
+        if (state.busy || activeConfirmDialog || !canRole("owner")) return;
+        let pending = state.firmwarePendingAction;
+        if (retry) {
+          if (!pending) return;
+          setBusy(true); renderFirmware();
+          try { await refreshFirmware(); }
+          catch (error) { await firmwareFailure(error, false, false); return; }
+          finally { setBusy(false); renderFirmware(); }
+          if (!canRole("owner") || pending.actor !== state.session.actor) { setStatus("firmware.actorChanged", "error"); return; }
+          const confirmed = await openConfirmDialog({ tone: "danger", title: t("firmware.retryAction"),
+            message: t("firmware.releaseConfirm", { action: t(`firmware.action.${pending.action}`), tag: pending.tag }),
+            detail: `${t("firmware.retryDetail")}\n${t("firmware.reason")}: ${pending.body.reason}` });
+          if (!confirmed) return;
+        } else {
+          if (pending || state.firmwareReconcileRequired || !["disable", "recovery-download"].includes(action)) return;
+          const release = state.firmwareReleases.find((r) => r.releaseId === firmwareId);
+          if (!release || release.archived || release.state === "disabled"
+            || (action === "disable" && firmwarePublishedChannels(release).length)
+            || (action === "recovery-download" && !firmwareReady(release))) return;
+          const confirmed = await openConfirmDialog({ tone: action === "disable" ? "danger" : "default", icon: "i-block",
+            title: t(`firmware.action.${action}`), message: t("firmware.releaseConfirm", { action: t(`firmware.action.${action}`), tag: release.releaseTag }),
+            detail: t(action === "disable" ? "firmware.disableDetail" : "firmware.recoveryDetail"), reasonRequired: true });
+          if (!confirmed) return;
+          pending = { action, releaseId: release.releaseId, tag: release.releaseTag, actor: state.session.actor,
+            path: `/api/admin/firmware/releases/${encodeURIComponent(release.releaseId)}/${action}`,
+            key: crypto.randomUUID(), body: { appId: release.appId, deviceModel: release.deviceModel, reason: confirmed.reason } };
         }
+        state.firmwarePendingAction = pending;
+        state.firmwareReconcileRequired = true; setBusy(true); renderFirmware();
+        let committed = false;
+        try {
+          const result = await mutate(pending.path, pending.body, { "Idempotency-Key": pending.key });
+          const expected = pending.action === "disable" ? "disable_release" : "issue_recovery_download";
+          if (result.action !== expected || result.releaseId !== pending.releaseId || typeof result.idempotent !== "boolean"
+            || (pending.action === "disable" && result.state !== "disabled")) throw new Error(t("firmware.invalidResponse"));
+          let download;
+          if (pending.action === "recovery-download") {
+            const url = new URL(result.downloadUrl);
+            if (url.protocol !== "https:" || url.pathname !== "/api/public/firmware/download" || result.kind !== "recovery"
+              || url.searchParams.get("purpose") !== "admin-recovery" || url.searchParams.get("tokenVersion") !== "2"
+              || url.searchParams.get("releaseId") !== result.releaseId || url.searchParams.get("assetId") !== result.assetId
+              || !Number.isSafeInteger(result.expiresAt) || typeof result.fileName !== "string") throw new Error(t("firmware.invalidResponse"));
+            download = { url: result.downloadUrl, fileName: result.fileName, expiresAt: result.expiresAt };
+          }
+          committed = true; state.firmwarePendingAction = null;
+          await refreshFirmware();
+          setStatus("firmware.actionComplete", "ok");
+          await openResultDialog({ tone: "success", title: t("firmware.actionComplete"), message: pending.tag,
+            detail: `Request ID: ${result.requestId}${download ? `\n${t("firmware.recoveryDetail")}` : ""}`, download });
+        } catch (error) {
+          // A replay rejection does not resolve an earlier unknown commit.
+          if (error.responsePath === pending.path && ((!retry && error.status >= 400 && error.status < 500)
+            || (error.status === 409 && error.code === "IDEMPOTENCY_RESULT_EXPIRED"))) state.firmwarePendingAction = null;
+          await firmwareFailure(error, committed);
+        } finally { setBusy(false); renderFirmware(); }
       }
 
       async function saveNotes(releaseId) {
@@ -5260,7 +5442,7 @@
         }
       }
 
-      async function mutate(path, body) {
+      async function mutate(path, body, headers = {}) {
         if (!state.session?.csrfToken) {
           state.session = await api("/api/admin/session");
         }
@@ -5268,7 +5450,8 @@
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-CSRF-Token": state.session.csrfToken
+            "X-CSRF-Token": state.session.csrfToken,
+            ...headers
           },
           body: JSON.stringify(body)
         });
@@ -5277,7 +5460,8 @@
       async function api(path, options = {}) {
         const response = await fetch(path, {
           credentials: "include",
-          ...options
+          ...options,
+          headers: { Accept: "application/json", ...options.headers }
         });
         const text = await response.text();
         let payload;
@@ -5286,7 +5470,15 @@
         } catch {
           throw new Error(t("status.expectedJson", { path, status: response.status }));
         }
+        const firmwareRequest = path.startsWith("/api/admin/firmware/");
+        if (firmwareRequest && (!payload || typeof payload !== "object" || Array.isArray(payload)
+          || typeof payload.requestId !== "string" || !payload.requestId.trim()
+          || payload.requestId !== response.headers.get("X-Request-Id"))) throw new Error(t("firmware.invalidResponse"));
         if (!response.ok || payload.ok === false) {
+          if (firmwareRequest && (typeof payload.errorCode !== "string" || !payload.errorCode.trim()
+            || typeof payload.message !== "string" || !payload.message.trim() || payload.ok === true)) {
+            throw new Error(t("firmware.invalidResponse"));
+          }
           const messageParts = [
             `${payload.errorCode ?? response.status}: ${payload.message ?? t("status.requestFailed")}`
           ];
@@ -5296,8 +5488,14 @@
           if (payload.requestId) {
             messageParts.push(`Request ID: ${payload.requestId}`);
           }
-          throw new Error(messageParts.join(" | "));
+          const error = new Error(messageParts.join(" | "));
+          error.code = payload.errorCode;
+          error.status = response.status;
+          error.requestId = payload.requestId;
+          error.responsePath = path;
+          throw error;
         }
+        if (firmwareRequest && payload.ok !== true) throw new Error(t("firmware.invalidResponse"));
         return payload;
       }
 
@@ -5746,7 +5944,12 @@
       }
 
       function renderFirmware() {
-        els.firmwareCount.textContent = String(state.firmwareReleases.length);
+        els.firmwareCount.textContent = String(state.firmwareReleases.filter(firmwareReady).length);
+        els.firmwareNotice.hidden = !state.firmwareReconcileRequired && !state.firmwarePendingAction;
+        els.firmwareNotice.innerHTML = `
+          <p>${escapeHtml(t(state.firmwarePendingAction ? "firmware.pendingAction" : "firmware.reconcileRequired"))}</p>
+          <button type="button" class="pill-button" data-firmware-action="refresh" ${state.busy ? "disabled" : ""}>${escapeHtml(t("firmware.refresh"))}</button>
+          ${state.firmwarePendingAction ? `<button type="button" class="pill-button primary" data-firmware-action="retry-release" ${state.busy || !canRole("owner") ? "disabled" : ""}>${escapeHtml(t("firmware.retryAction"))}</button>` : ""}`;
         if (state.firmwareReleases.length === 0) {
           els.firmwareReleaseList.innerHTML = `<div class="empty">${escapeHtml(t("firmware.noReleases"))}</div>`;
         } else {
@@ -5766,63 +5969,78 @@
 
       function firmwareReleaseCard(release) {
         const published = firmwarePublishedChannels(release);
-        const active = release.id === state.selectedFirmwareId;
-        const status = release.state === "disabled" ? "disabled" : published.length ? "published" : "candidate";
+        const active = release.releaseId === state.selectedFirmwareId;
+        const status = release.archived ? "archived" : release.state;
         const stableChannel = firmwareChannelFor(release, "stable");
         const betaChannel = firmwareChannelFor(release, "beta");
-        const canPublishStable = !state.busy && canRole("owner") && release.state !== "disabled" && stableChannel;
-        const canPublishBeta = !state.busy && canRole("publisher") && release.state !== "disabled" && betaChannel;
-        const canDisable = !state.busy && canRole("owner") && release.state !== "disabled" && published.length === 0;
+        const unlocked = !state.busy && !state.firmwareReconcileRequired && !state.firmwarePendingAction;
+        const advances = (channel) => channel && release.versionCode > (state.firmwareReleases.find((r) => r.releaseId === channel.currentReleaseId)?.versionCode ?? -1);
+        const canPublishStable = unlocked && canRole("owner") && firmwareReady(release) && advances(stableChannel);
+        const canPublishBeta = unlocked && canRole("publisher") && firmwareReady(release) && advances(betaChannel);
+        const canDisable = unlocked && canRole("owner") && !release.archived && release.state !== "disabled" && published.length === 0;
+        const canRecover = unlocked && canRole("owner") && firmwareReady(release) && release.assets.filter((a) => a.kind === "recovery").length === 1;
         return `
-          <article class="firmware-release-card ${active ? "active" : ""}">
+          <article class="firmware-release-card ${active ? "active" : ""}" data-release-id="${escapeHtml(release.releaseId)}">
             <div class="firmware-card-top">
-              <button type="button" class="text-button" data-firmware-action="select" data-firmware-id="${escapeHtml(release.id)}">
-                <h3>${escapeHtml(release.release_tag)}</h3>
-                <p>${escapeHtml(release.device_model)}</p>
+              <button type="button" class="text-button" data-firmware-action="select" data-firmware-id="${escapeHtml(release.releaseId)}">
+                <h3>${escapeHtml(release.releaseTag)}</h3>
+                <p>${escapeHtml(release.deviceModel)}</p>
               </button>
-              <span class="tag ${status}">${escapeHtml(statusLabel(status))}</span>
+              <span class="tag ${status}">${escapeHtml(t(`firmware.state.${status}`))}</span>
             </div>
             <div class="version-tags">
               ${published.length ? published.map((channel) => `<span class="tag ${escapeHtml(channel)}">${escapeHtml(channelLabel(channel))}</span>`).join("") : `<span class="tag">${escapeHtml(t("firmware.unpublished"))}</span>`}
             </div>
             <div class="firmware-meta-grid">
-              ${firmwareMeta(t("firmware.version"), release.version_name)}
-              ${firmwareMeta(t("firmware.versionCode"), release.version_code)}
-              ${firmwareMeta(t("metrics.buildTime"), formatBuildTime(release.created_at))}
-              ${firmwareMeta(t("firmware.size"), formatBytes(release.size_bytes ?? 0))}
-              ${firmwareMeta(t("firmware.transport"), release.transport ?? "ble")}
-              ${firmwareMeta(t("firmware.file"), release.file_name)}
-              ${firmwareMeta(t("firmware.hardware"), release.target_hardware ?? "--")}
-              ${firmwareMeta(t("firmware.sha"), release.sha256)}
-              ${firmwareMeta("R2", release.r2_state)}
+              ${firmwareMeta(t("firmware.version"), release.versionName)}
+              ${firmwareMeta(t("firmware.versionCode"), release.versionCode)}
+              ${firmwareMeta(t("firmware.size"), formatBytes(release.assets.reduce((size, asset) => size + asset.sizeBytes, 0)))}
+              ${firmwareMeta(t("firmware.rawSha"), release.targetImageSha256)}
             </div>
+            <details><summary>${escapeHtml(t("firmware.assets"))} (${release.assets.length})</summary>
+              ${release.assets.map((asset) => `<div class="firmware-meta-grid">
+                ${firmwareMeta(asset.kind, asset.fileName)}${firmwareMeta(t("firmware.size"), formatBytes(asset.sizeBytes))}
+                ${firmwareMeta(t("firmware.sha"), asset.sha256)}${firmwareMeta("R2", asset.r2State)}</div>`).join("")}
+            </details>
             <div class="firmware-actions">
-              <button type="button" class="pill-button primary" data-firmware-action="publish" data-channel="beta" data-firmware-id="${escapeHtml(release.id)}" ${canPublishBeta ? "" : "disabled"}>${escapeHtml(t("firmware.publishBeta"))}</button>
-              <button type="button" class="pill-button primary" data-firmware-action="publish" data-channel="stable" data-firmware-id="${escapeHtml(release.id)}" ${canPublishStable ? "" : "disabled"}>${escapeHtml(t("firmware.publishStable"))}</button>
-              <button type="button" class="pill-button danger" data-firmware-action="disable" data-firmware-id="${escapeHtml(release.id)}" ${canDisable ? "" : "disabled"}>${escapeHtml(t("firmware.disable"))}</button>
+              <button type="button" class="pill-button primary" data-firmware-action="publish" data-channel="beta" data-firmware-id="${escapeHtml(release.releaseId)}" ${canPublishBeta ? "" : "disabled"}>${escapeHtml(t("firmware.publishBeta"))}</button>
+              <button type="button" class="pill-button primary" data-firmware-action="publish" data-channel="stable" data-firmware-id="${escapeHtml(release.releaseId)}" ${canPublishStable ? "" : "disabled"}>${escapeHtml(t("firmware.publishStable"))}</button>
+              <button type="button" class="pill-button danger" data-firmware-action="disable" data-firmware-id="${escapeHtml(release.releaseId)}" ${canDisable ? "" : "disabled"}>${escapeHtml(t("firmware.disable"))}</button>
+              <button type="button" class="pill-button" data-firmware-action="recovery-download" data-firmware-id="${escapeHtml(release.releaseId)}" ${canRecover ? "" : "disabled"}>${escapeHtml(t("firmware.action.recovery-download"))}</button>
             </div>
           </article>
         `;
       }
 
       function firmwareChannelCard(channel) {
-        const release = channel.current_release_id
-          ? state.firmwareReleases.find((item) => item.id === channel.current_release_id)
-          : null;
+        const release = state.firmwareReleases.find((r) => r.releaseId === channel.currentReleaseId);
+        const selected = state.firmwareReleases.find((r) => r.releaseId === state.selectedFirmwareId);
+        const unlocked = !state.busy && !state.firmwareReconcileRequired && !state.firmwarePendingAction
+          && canRole(channel.channel === "stable" ? "owner" : "publisher");
+        const canRetract = unlocked && firmwareReady(selected) && selected.releaseId !== channel.currentReleaseId;
+        const latestAction = channel.disableLatest ? "resume-latest" : "stop-latest";
+        const downloadsAction = channel.disableDownloads ? "resume-downloads" : "stop-downloads";
         return `
-          <article class="firmware-channel-card">
+          <article class="firmware-channel-card" data-channel="${escapeHtml(channel.channel)}">
             <div class="firmware-card-top">
               <div>
-                <h3>${escapeHtml(channel.device_model)}</h3>
-                <p>${escapeHtml(channelLabel(channel.name))}</p>
+                <h3>${escapeHtml(channelLabel(channel.channel))}</h3>
+                <p>${escapeHtml(channel.deviceModel)}</p>
               </div>
-              <span class="tag ${escapeHtml(channel.name)}">${escapeHtml(channel.revision ?? 0)}</span>
+              <span class="tag ${escapeHtml(channel.channel)}">${escapeHtml(t("firmware.revision"))} ${escapeHtml(channel.revision)}</span>
             </div>
             <div class="firmware-meta-grid">
-              ${firmwareMeta(t("firmware.version"), release?.version_name ?? channel.version_name ?? "--")}
-              ${firmwareMeta(t("firmware.versionCode"), release?.version_code ?? channel.version_code ?? "--")}
-              ${firmwareMeta(t("firmware.file"), release?.file_name ?? "--")}
-              ${firmwareMeta(t("firmware.current"), channel.release_tag ?? t("firmware.channelEmpty"))}
+              ${firmwareMeta(t("firmware.current"), release?.releaseTag ?? t("firmware.channelEmpty"))}
+              ${firmwareMeta(t("firmware.versionCode"), release?.versionCode ?? "--")}
+              ${firmwareMeta(t("firmware.latestSwitch"), t(channel.disableLatest ? "firmware.stopped" : "firmware.enabled"))}
+              ${firmwareMeta(t("firmware.downloadsSwitch"), t(channel.disableDownloads ? "firmware.stopped" : "firmware.enabled"))}
+              ${firmwareMeta(t("firmware.selectedTarget"), selected?.releaseTag ?? "--")}
+            </div>
+            ${channel.maintenanceMessage ? `<p>${escapeHtml(channel.maintenanceMessage)}</p>` : ""}
+            <div class="firmware-actions">
+              <button type="button" class="pill-button" data-firmware-action="retract" data-channel="${escapeHtml(channel.channel)}" data-firmware-id="${escapeHtml(selected?.releaseId ?? "")}" ${canRetract ? "" : "disabled"}>${escapeHtml(t(channel.channel === "stable" ? "firmware.retractStable" : "firmware.retractBeta"))}</button>
+              <button type="button" class="pill-button" data-firmware-action="${latestAction}" data-channel="${escapeHtml(channel.channel)}" ${unlocked && (!channel.disableLatest || firmwareReady(release)) ? "" : "disabled"}>${escapeHtml(t(`firmware.action.${latestAction}`))}</button>
+              <button type="button" class="pill-button" data-firmware-action="${downloadsAction}" data-channel="${escapeHtml(channel.channel)}" ${unlocked && (!channel.disableDownloads || firmwareReady(release)) ? "" : "disabled"}>${escapeHtml(t(`firmware.action.${downloadsAction}`))}</button>
             </div>
           </article>
         `;
@@ -5838,21 +6056,22 @@
       }
 
       function firmwarePublishedChannels(release) {
-        if (!release?.published_channels) return [];
-        return String(release.published_channels)
-          .split(",")
-          .map((channel) => channel.trim())
-          .filter(Boolean);
+        return release?.publishedChannels ?? [];
+      }
+
+      function firmwareReady(release) {
+        return Boolean(release && release.state === "ready" && !release.archived
+          && release.assets.filter((a) => a.kind === "full").length === 1 && release.assets.every((a) => a.r2State === "available"));
       }
 
       function firmwareChannelFor(release, channelName) {
         return state.firmwareChannels.find(
-          (channel) => channel.device_model === release.device_model && channel.name === channelName
+          (channel) => channel.appId === release.appId && channel.deviceModel === release.deviceModel && channel.channel === channelName
         );
       }
 
       function selectFirmware(firmwareId) {
-        if (!state.firmwareReleases.some((release) => release.id === firmwareId)) return;
+        if (!state.firmwareReleases.some((release) => release.releaseId === firmwareId)) return;
         state.selectedFirmwareId = firmwareId;
         renderFirmware();
       }
@@ -6132,6 +6351,19 @@
         els.confirmInputWrap.hidden = !requiredText;
         els.confirmInputLabel.textContent = options.inputLabel ?? t("dialog.typeToConfirm");
         els.confirmInput.placeholder = requiredText ? t("dialog.requiredPhrase", { phrase: requiredText }) : "";
+        els.confirmReason.value = "";
+        els.confirmReasonWrap.hidden = !options.reasonRequired;
+        els.confirmMaintenance.value = "";
+        els.confirmMaintenanceWrap.hidden = !options.maintenance;
+        els.confirmDownload.hidden = true;
+        els.confirmDownload.removeAttribute("href");
+        if (options.download && Math.floor(Date.now() / 1000) < options.download.expiresAt) {
+          els.confirmDownload.href = options.download.url;
+          els.confirmDownload.download = options.download.fileName;
+          els.confirmDownload.dataset.expiresAt = String(options.download.expiresAt);
+          els.confirmDownload.textContent = t("firmware.downloadRecovery");
+          els.confirmDownload.hidden = false;
+        }
         els.confirmCancel.textContent = options.cancelLabel ?? t("dialog.cancel");
         els.confirmCancel.hidden = Boolean(options.hideCancel);
         els.confirmAccept.textContent = options.confirmLabel ?? t("dialog.confirm");
@@ -6140,6 +6372,7 @@
         els.confirmDialog.hidden = false;
         activeConfirmDialog = {
           requiredText,
+          reasonRequired: Boolean(options.reasonRequired),
           resolve: null
         };
         updateConfirmDialogState();
@@ -6147,7 +6380,7 @@
           activeConfirmDialog.resolve = resolve;
           requestAnimationFrame(() => {
             els.body.classList.add("confirm-open");
-            (requiredText ? els.confirmInput : els.confirmAccept).focus({ preventScroll: true });
+            (requiredText ? els.confirmInput : options.reasonRequired ? els.confirmReason : els.confirmAccept).focus({ preventScroll: true });
           });
         });
       }
@@ -6163,8 +6396,11 @@
 
       function closeConfirmDialog(confirmed) {
         if (!activeConfirmDialog) return;
+        if (confirmed && els.confirmAccept.disabled) return;
         const dialog = activeConfirmDialog;
         activeConfirmDialog = null;
+        els.confirmDownload.removeAttribute("href");
+        els.confirmDownload.hidden = true;
         els.body.classList.remove("confirm-open");
         window.setTimeout(() => {
           if (activeConfirmDialog) return;
@@ -6175,7 +6411,9 @@
           confirmed
             ? {
                 confirmed: true,
-                value: els.confirmInput.value.trim()
+                value: els.confirmInput.value.trim(),
+                reason: els.confirmReason.value,
+                maintenanceMessage: els.confirmMaintenance.value
               }
             : false
         );
@@ -6184,7 +6422,8 @@
       function updateConfirmDialogState() {
         if (!activeConfirmDialog) return;
         const requiredText = activeConfirmDialog.requiredText;
-        els.confirmAccept.disabled = Boolean(requiredText) && els.confirmInput.value.trim() !== requiredText;
+        els.confirmAccept.disabled = (Boolean(requiredText) && els.confirmInput.value.trim() !== requiredText)
+          || (activeConfirmDialog.reasonRequired && !els.confirmReason.value.trim());
       }
 
       function setBusy(isBusy, message, values = {}) {
@@ -6192,6 +6431,7 @@
         els.refreshButton.disabled = isBusy;
         if (message) setStatus(message, "info", { values });
         renderActionLocks(activeReleaseForAction());
+        renderFirmware();
         setAnnouncementEditorEnabled(!state.announcementsError);
       }
 
