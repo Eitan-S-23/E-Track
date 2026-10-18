@@ -165,3 +165,45 @@ validation under the user's full implementation delegation; main integration
 and formal acceptance are not being performed. Exact source and CI results are
 recorded separately after those operations, without claiming that production
 configuration is complete.
+
+### Source-Bound CI
+
+Implementation/configuration record commit:
+`28bb6fd29033e0e3a37e1ceec2e9d00350e41585`, pushed only to
+`dev/p4-4/config-integration-20261018`.
+Acceptance Governance run `39129620356` completed successfully at that exact
+commit: all three jobs passed, eight governance suites contain 324 tests, and
+the Windows/Linux helper suites each contain 17 tests. The original CI output
+contains three warning annotations and zero error annotations. These are
+checks-only CI results, not independent acceptance or production qualification.
+No firmware/rehearsal/production workflow was dispatched. The new parser tests
+are the separately recorded 85/85 local run, not silently counted as this CI.
+
+CI dispatch, source/run identity, full CLI log output and final scoped audit are
+retained in the separate `ci.zip` increment and per-entry inventory. Initial
+archive bytes are unchanged. Later documentation-only commit(s) record these
+results; they do not claim that CI ran on a future commit.
+The CI increment contains 30 byte-verified entries, 50382 bytes, SHA-256
+`ea105cae9bf8a8c39ee572d4117340e3e367f99b39f5fe0a73363271f00874d4`.
+
+### Final Controlled-Output Audit
+
+At 2026-10-18 13:04:46 UTC, the bounded audit checked 292 files and 199
+directories under the declared task namespaces. All resolved inside the task
+worktree; the private token input remained empty, and the tracked worktree was
+clean at 28bb6fd. No product/workflow/`.github/scripts` delta exists against main
+0779f67. Subsequent CI-archive/doc commits use the same guarded output boundary.
+Necessary shared Git writes are limited to task worktree metadata, task refs,
+remote-tracking task refs and objects, not the shared parent index/main worktree.
+
+The read-only known-cache check observed
+`C:/Users/SU/AppData/Local/Microsoft/Windows/PowerShell/StartupProfileData-NonInteractive`
+at 1004 bytes / `2026-10-18T12:55:22.312Z`, newer than the earlier P4-3 record.
+Writer attribution is unresolved. Selected commands used cmd/Node, with contained
+TEMP/home/cache outputs; this is not a machine-wide trace or a no-external-write
+claim. No cache was cleaned, moved or overwritten. The other PowerShell cache
+remains 68032 bytes / `2026-10-17T08:37:13.169Z`. The observed Cryptnet ABD pair
+timestamps are `2026-10-18T05:11:29.717Z`, predating this task's command activity;
+the B6E pair remains at `2026-10-18T01:03:00.875Z`. Exact paths are in the audit
+original. Host attribution belongs to a separately scoped investigation, not
+unapproved cleanup or a reason to hide these observations.

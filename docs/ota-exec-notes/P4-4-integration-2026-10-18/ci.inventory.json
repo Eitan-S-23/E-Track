@@ -1,0 +1,169 @@
+{
+  "createdAt": "2026-10-18T13:07:18.760Z",
+  "nature": "P4-4 implementation observations, not independent acceptance",
+  "archive": {
+    "path": "docs/ota-exec-notes/P4-4-integration-2026-10-18/ci.zip",
+    "sizeBytes": 50382,
+    "sha256": "ea105cae9bf8a8c39ee572d4117340e3e367f99b39f5fe0a73363271f00874d4"
+  },
+  "entries": [
+    {
+      "path": ".cache/p44-run.cjs",
+      "sizeBytes": 5072,
+      "sha256": "51b9b6c153f0520fffda4ecdb81cc8a10f8880acb0607173e7be3d121466d5f8"
+    },
+    {
+      "path": ".cache/p44-platform.cjs",
+      "sizeBytes": 10387,
+      "sha256": "b6cce96fa8da445f101a037d2af9192886dd05d7c750488b4e65bce0f0efc577"
+    },
+    {
+      "path": ".cache/p44-github-config.cjs",
+      "sizeBytes": 4820,
+      "sha256": "444f6a6c1b392205b54ac0d4886faf2c7c65876e56de3b48e9a810f65cd643b0"
+    },
+    {
+      "path": ".cache/p44-seal.cjs",
+      "sizeBytes": 4129,
+      "sha256": "1b944c6850a6e55bef994c26609db0e34798729dbd76531cd3c4abb4f8d00e5d"
+    },
+    {
+      "path": ".cache/p44-audit.cjs",
+      "sizeBytes": 3854,
+      "sha256": "d79acd28bec59dfc03f45ea0bdc09e9d44f435afd3722d53ea4da389d0e3acdc"
+    },
+    {
+      "path": ".cache/p44/evidence/final-audit-01.json",
+      "sizeBytes": 2031,
+      "sha256": "5f95d883210cbcdd3fc722ee2adf4a6c6f336f1f3ec6c6409b92bffd95958727"
+    },
+    {
+      "path": ".cache/p44/logs/diff-check-02.json",
+      "sizeBytes": 397,
+      "sha256": "ae2c268ffad1e879cc4f05ed9a343574d1527215e4ce397625c6489b6921d249"
+    },
+    {
+      "path": ".cache/p44/logs/diff-check-02.log",
+      "sizeBytes": 257,
+      "sha256": "8ebb2cd2260985813e49a210b2f484fafca913c372b417ca6ec1db05b6e4673c"
+    },
+    {
+      "path": ".cache/p44/logs/final-audit-01.json",
+      "sizeBytes": 401,
+      "sha256": "d7fbc124a830a6a1231925cbed42663635494106f5f7857b183cd1006550b5c3"
+    },
+    {
+      "path": ".cache/p44/logs/final-audit-01.log",
+      "sizeBytes": 2031,
+      "sha256": "5f95d883210cbcdd3fc722ee2adf4a6c6f336f1f3ec6c6409b92bffd95958727"
+    },
+    {
+      "path": ".cache/p44/logs/governance-dispatch-01.json",
+      "sizeBytes": 504,
+      "sha256": "b45dfc33bb6f87750435d37cb39257a8a052600b25d1b86a84b0a32f1182c307"
+    },
+    {
+      "path": ".cache/p44/logs/governance-dispatch-01.log",
+      "sizeBytes": 63,
+      "sha256": "90de8386184ca762f620720d4fd4f6baad8bb8861c0c50b764f080770cf10fbf"
+    },
+    {
+      "path": ".cache/p44/logs/governance-identify-01.json",
+      "sizeBytes": 613,
+      "sha256": "12240a2996f86993ee80e55e9fec4368bec77413efb569179ffdccaa8ece2240"
+    },
+    {
+      "path": ".cache/p44/logs/governance-identify-01.log",
+      "sizeBytes": 220,
+      "sha256": "d996e19ed371f9fd4d271385864528cb6b1e0b6cc6d708a15e0f1cb38801ff79"
+    },
+    {
+      "path": ".cache/p44/logs/governance-log-01.json",
+      "sizeBytes": 432,
+      "sha256": "64b9109bcf3236b6dfca0fcf6c18e6b6d4559b5e83ee3260a6c33c2002677037"
+    },
+    {
+      "path": ".cache/p44/logs/governance-log-01.log",
+      "sizeBytes": 168163,
+      "sha256": "8c04c31fe47fa9f259ceaf011c93848d4f6108570e81c208a40fcd6dbde24e73"
+    },
+    {
+      "path": ".cache/p44/logs/governance-status-01.json",
+      "sizeBytes": 492,
+      "sha256": "67eac3f3c27a27c962715cff6aae26868c4234020268451bef39b451909f4f1f"
+    },
+    {
+      "path": ".cache/p44/logs/governance-status-01.log",
+      "sizeBytes": 5397,
+      "sha256": "17a97094d9b6f8c58a829656a626d41c86a432d5b335ac705e9b764633efbdb5"
+    },
+    {
+      "path": ".cache/p44/logs/remote-branch-check-01.json",
+      "sizeBytes": 481,
+      "sha256": "debeb95e550d34de9a909393561bdd2720750f78c153fdc3f8defd209ca69c8f"
+    },
+    {
+      "path": ".cache/p44/logs/remote-branch-check-01.log",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p44/logs/scoped-add-01.json",
+      "sizeBytes": 678,
+      "sha256": "715f02ed9632f980c013368043336093e3b4895e88d7f1fc5c928530a7c85b84"
+    },
+    {
+      "path": ".cache/p44/logs/scoped-add-01.log",
+      "sizeBytes": 711,
+      "sha256": "b1710766a630b33ded393389c76a0190a67f30391cd6fdca2a86af37545118c3"
+    },
+    {
+      "path": ".cache/p44/logs/scoped-commit-01.json",
+      "sizeBytes": 458,
+      "sha256": "046975866588d6dfad4faefcd90ad73f3721931dc7044e2ad665a738e511d06b"
+    },
+    {
+      "path": ".cache/p44/logs/scoped-commit-01.log",
+      "sizeBytes": 507,
+      "sha256": "8ffe4e1bfc5719b1d57e717e1f8d78199eb7d901000870e8200e72807f262f2a"
+    },
+    {
+      "path": ".cache/p44/logs/scoped-push-01.json",
+      "sizeBytes": 475,
+      "sha256": "8eadf153fd746794c0fef555fb69c718e5a6d114388f2ba935cd6aa0da0715cb"
+    },
+    {
+      "path": ".cache/p44/logs/scoped-push-01.log",
+      "sizeBytes": 447,
+      "sha256": "b1763f89867a3a75f963dd69c04877e4d289c7fe65bbd999e31dcb823b3d8eb9"
+    },
+    {
+      "path": ".cache/p44/logs/seal-initial-02.json",
+      "sizeBytes": 402,
+      "sha256": "d38e17e7fbe024928e09c40b9e0d4c8ab2e6c528a51aa75827f12888d89d3407"
+    },
+    {
+      "path": ".cache/p44/logs/seal-initial-02.log",
+      "sizeBytes": 230,
+      "sha256": "e6463a95e9c2a0c425faae293405efade386170c51f79402d448cb4338580d95"
+    },
+    {
+      "path": ".cache/p44/logs/syntax-check-01.json",
+      "sizeBytes": 434,
+      "sha256": "f04f9e26a17267d86591740476cd3851bf129fc07e3c2680d0d730c26df0e829"
+    },
+    {
+      "path": ".cache/p44/logs/syntax-check-01.log",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "credentialsScanned": true,
+  "extractionVerified": true,
+  "excludes": [
+    "Private inputs/credentials",
+    "Historical frozen bundles",
+    "Pre-worktree host transcript",
+    "This archive creation receipt"
+  ]
+}
