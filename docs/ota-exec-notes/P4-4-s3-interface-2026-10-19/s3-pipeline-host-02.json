@@ -1,0 +1,19 @@
+{
+  "label": "s3-pipeline-host-02",
+  "command": "node",
+  "args": [
+    "D:/install/nvm/nodejs/node_modules/npm/bin/npm-cli.js",
+    "test",
+    "--prefix",
+    "app/bluetooth_flutter_Trace/cloudflare/update-service/worker",
+    "--",
+    "--config",
+    "../../../../../.github/scripts/p41-host.config.mjs"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "startedAt": "2026-10-18T18:54:33.737Z",
+  "endedAt": "2026-10-18T18:54:44.898Z",
+  "exitCode": 1,
+  "signal": null,
+  "logPath": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-pipeline-host-02.log"
+}
