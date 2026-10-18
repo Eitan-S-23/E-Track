@@ -244,3 +244,62 @@ external input or old cache has been deleted to conceal the earlier mistake.
 Production settings and real rejection/role/runtime gaps remain as recorded in
 the corrected matrix. This corrective batch can be independently reviewed;
 the whole P4-4 card is not being declared complete or formally accepted.
+
+### Corrective Batch Verification And Handoff
+
+- Reusable governance commit: `7e838c367c22e6902e1d2a1fdc96b352ede7153d`.
+  Six files only: both AGENTS entries, collaboration contract/index, credential
+  registry and five regression tests. Root may review/select this commit without
+  integrating the unfinished P4-4 configuration work.
+- P4-4 interpretation/card correction: `547b777a9e3c4449c83d9e6c304a2f8c8e73be37`.
+  Branch `dev/p4-4/config-integration-20261018`; both commits pushed successfully.
+  The repeated affected 48-test host command passed at the final source bytes.
+- Exact-source [Acceptance Governance run 39133684928](https://github.com/Eitan-S-23/E-Track/actions/runs/39133684928)
+  succeeded at 547b777: all three jobs, eight governance suites / 329 tests, plus
+  Windows/Linux host helpers with 17 tests each. All eight spec probes passed.
+  Raw logs retain three Node.js 20 action-deprecation warnings and zero error
+  annotations. No runtime credential or production qualification is inferred.
+- `P4-4-integration-2026-10-18/registry.zip` contains 44 original entries,
+  57953 bytes, SHA-256
+  `1d692a7a205994d2187835f44bfecc5334ddb9bc37c32976e4f5f2ab7796050d`.
+  Adjacent `registry.inventory.json` binds every member's size/hash. Standard
+  tar listing/extraction verified every byte; known-credential scans passed.
+  It preserves both 48-test results, CI source/logs, command receipts and the
+  failed then corrected audit. Old `initial.zip` and `ci.zip` hashes still match.
+
+The corrective audit first failed because a new zero-byte assertion did not
+match the historical input slot's one whitespace byte. Metadata readback showed
+mtime `2026-10-18T12:45:41.479Z` and whitespace-only content, not a new credential.
+The corrected semantic-empty check passed; the file was not changed or deleted.
+An inline tool attempt lacked TextEncoder, an rg command had cmd quoting failure,
+and one apply_patch batch was atomically rejected for an unmatched line. Those
+original diagnostics remain in the conversation/tool transcript, not fabricated
+as file receipts or counted as tests. No partial source edit from the rejected
+batch remained; the corrected patch and diff checks passed. Git's LF/CRLF
+advisories are retained in the command logs.
+
+At `2026-10-18T14:02:33.266Z`, the completed audit checked 350 files and 199
+directories under the declared namespaces and touched source paths. Controlled
+outputs remain in the exclusive worktree, with only the approved task Git
+metadata exception. No product/workflow code changed; the nested AGENTS change
+is governance, explicitly distinguished from product code. Archive creation and
+this later report-only commit use the same preflighted paths. The historical
+empty slot remains unused, and no CF secret/token/permission change occurred.
+
+The known external Windows PowerShell cache is still 1004 bytes, now observed
+at `2026-10-18T13:55:21.111Z`; attribution remains unresolved. Other recorded
+PowerShell/CRL metadata is unchanged. No external cleanup or agent-selected
+external output was performed; this is not a machine-wide zero-write trace.
+The existing dependency/role/cache limits
+remain open, not implicitly resolved by the corrective audit.
+
+Independent-review entry: review `1e28caf..547b777`, the registry, current
+P44-CREDENTIAL-01 interpretation and the above original checks. Main was read
+back as `0779f677507fa2c8a88c1799c8d2909bbae5a0a0`; main integration is PENDING,
+not performed by this implementation handoff. Root owns independent adjudication
+and integration of the selected governance commit, then notification to active
+agents to reload it. Until integration, read
+`git show 7e838c367c22e6902e1d2a1fdc96b352ede7153d:docs/agent-collaboration/credential-registry.md`
+and the same commit's contract/AGENTS/index. A branch push does not update main
+or other agents' loaded instructions. No whole-card P4-4 acceptance, production
+approval/execution, gate unlock or repeated successful staging operation occurred.

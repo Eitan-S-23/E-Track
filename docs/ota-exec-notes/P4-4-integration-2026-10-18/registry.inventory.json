@@ -1,0 +1,239 @@
+{
+  "createdAt": "2026-10-18T14:04:05.396Z",
+  "nature": "P4-4 implementation observations, not independent acceptance",
+  "archive": {
+    "path": "docs/ota-exec-notes/P4-4-integration-2026-10-18/registry.zip",
+    "sizeBytes": 57953,
+    "sha256": "1d692a7a205994d2187835f44bfecc5334ddb9bc37c32976e4f5f2ab7796050d"
+  },
+  "entries": [
+    {
+      "path": ".cache/p44-run.cjs",
+      "sizeBytes": 5072,
+      "sha256": "51b9b6c153f0520fffda4ecdb81cc8a10f8880acb0607173e7be3d121466d5f8"
+    },
+    {
+      "path": ".cache/p44-platform.cjs",
+      "sizeBytes": 10387,
+      "sha256": "b6cce96fa8da445f101a037d2af9192886dd05d7c750488b4e65bce0f0efc577"
+    },
+    {
+      "path": ".cache/p44-github-config.cjs",
+      "sizeBytes": 4820,
+      "sha256": "444f6a6c1b392205b54ac0d4886faf2c7c65876e56de3b48e9a810f65cd643b0"
+    },
+    {
+      "path": ".cache/p44-seal.cjs",
+      "sizeBytes": 4337,
+      "sha256": "4b9f4c2f68b4e1a138601b62e4b4343fbf6ec7ae8d9dc85209d008623a335b5b"
+    },
+    {
+      "path": ".cache/p44-audit.cjs",
+      "sizeBytes": 4697,
+      "sha256": "6b730403e3e26a56b8353823d3e09cf96c7d70f8eb63e2a92060180c25a59b60"
+    },
+    {
+      "path": ".cache/p44/evidence/registry-audit-01.json",
+      "sizeBytes": 2325,
+      "sha256": "1f9a9661bda91b411a8c2065b764cdcf7151ccde18338c41e7c5842713517cd1"
+    },
+    {
+      "path": ".cache/p44/logs/registry-audit-01.json",
+      "sizeBytes": 423,
+      "sha256": "7abb99ee0915c473b9729e7977856bd0094c84e2ae7a8c884f11e89e120f5aa2"
+    },
+    {
+      "path": ".cache/p44/logs/registry-audit-01.log",
+      "sizeBytes": 965,
+      "sha256": "5258fde148471c0689598919d3914fc36853fb0c62cb8a296e6e6334d1550e3e"
+    },
+    {
+      "path": ".cache/p44/logs/registry-audit-02.json",
+      "sizeBytes": 423,
+      "sha256": "58ee5698bfdfd7953b98f39cdb84726fff7b004f56895909fa661c6084ce05fb"
+    },
+    {
+      "path": ".cache/p44/logs/registry-audit-02.log",
+      "sizeBytes": 2325,
+      "sha256": "1f9a9661bda91b411a8c2065b764cdcf7151ccde18338c41e7c5842713517cd1"
+    },
+    {
+      "path": ".cache/p44/logs/registry-ci-dispatch-01.json",
+      "sizeBytes": 506,
+      "sha256": "563e2ef39a022c27ef7a478194561a7e6acaf8a16b282af10072d096e02a0376"
+    },
+    {
+      "path": ".cache/p44/logs/registry-ci-dispatch-01.log",
+      "sizeBytes": 63,
+      "sha256": "72bc58bbf454886d25cf6f72c2f635a7c37c18c3c1e155cb8e487dac51b81983"
+    },
+    {
+      "path": ".cache/p44/logs/registry-ci-logs-01.json",
+      "sizeBytes": 436,
+      "sha256": "e17c914e4e3af5285edd8f7879550a1ac55584ec67c295c43f323db3185cc187"
+    },
+    {
+      "path": ".cache/p44/logs/registry-ci-logs-01.log",
+      "sizeBytes": 168645,
+      "sha256": "6cce6064fab0e185887b5c9d1370693857d32a21569f7a0bac8519d2d5025322"
+    },
+    {
+      "path": ".cache/p44/logs/registry-ci-status-01.json",
+      "sizeBytes": 505,
+      "sha256": "4701365be85605daca3fadcb62307de0b872e30d8917e63c206ebdbb6917152f"
+    },
+    {
+      "path": ".cache/p44/logs/registry-ci-status-01.log",
+      "sizeBytes": 5449,
+      "sha256": "f18468bd1280b9f39d6660e3dd3ec73e0a876c0c2bb5c00484543e4673dd569e"
+    },
+    {
+      "path": ".cache/p44/logs/registry-ci-summary-01.json",
+      "sizeBytes": 1377,
+      "sha256": "faf1d3351cc6e3159779f4c5c70ca20941e4794385d0566f2bf45e860a95aff3"
+    },
+    {
+      "path": ".cache/p44/logs/registry-ci-summary-01.log",
+      "sizeBytes": 2365,
+      "sha256": "9c3741eb952115e678f330d90798d4405cf7e106fe7cc41b93a0b4a566522c79"
+    },
+    {
+      "path": ".cache/p44/logs/registry-commit-01.json",
+      "sizeBytes": 471,
+      "sha256": "f9f8c33632aa5ed88e650780fe23e64812a631670b5b02265704a8b0428bd529"
+    },
+    {
+      "path": ".cache/p44/logs/registry-commit-01.log",
+      "sizeBytes": 265,
+      "sha256": "fffbc08e80eb1b4f262fc7da73379ddfef099e88db682e0c135ef9993cb9b18c"
+    },
+    {
+      "path": ".cache/p44/logs/registry-correction-commit-01.json",
+      "sizeBytes": 479,
+      "sha256": "f732e2e6ab5ac8866f49d84ef219f29e5083cce07473e502b5083730de794b6b"
+    },
+    {
+      "path": ".cache/p44/logs/registry-correction-commit-01.log",
+      "sizeBytes": 184,
+      "sha256": "e4486bedbf11cbcd8cc196495a86f3c5f3d600e768be526bb6013b0d135ca747"
+    },
+    {
+      "path": ".cache/p44/logs/registry-correction-diff-01.json",
+      "sizeBytes": 425,
+      "sha256": "5fdf47dae47a76f243364d56099dc86ccc32baaf1e80f5401912ab63d6420225"
+    },
+    {
+      "path": ".cache/p44/logs/registry-correction-diff-01.log",
+      "sizeBytes": 419,
+      "sha256": "900badec21706e893705332f043e898d0c850762b2013d67e44aed2331bbc881"
+    },
+    {
+      "path": ".cache/p44/logs/registry-correction-stage-01.json",
+      "sizeBytes": 609,
+      "sha256": "f72639f0faec60d2e1e497ded17e5fa1d1285050ab141b01d4f96e1380652169"
+    },
+    {
+      "path": ".cache/p44/logs/registry-correction-stage-01.log",
+      "sizeBytes": 419,
+      "sha256": "900badec21706e893705332f043e898d0c850762b2013d67e44aed2331bbc881"
+    },
+    {
+      "path": ".cache/p44/logs/registry-diff-check-01.json",
+      "sizeBytes": 415,
+      "sha256": "e3ef5f352a7f011f8c3042c64699aa3eb056d48d1d141ef098bd2fc5e30df6c6"
+    },
+    {
+      "path": ".cache/p44/logs/registry-diff-check-01.log",
+      "sizeBytes": 513,
+      "sha256": "c82523f4173b48676d187a3ca058243742c2fb96bf199c5af8d3a767f706cfde"
+    },
+    {
+      "path": ".cache/p44/logs/registry-helpers-check-01.json",
+      "sizeBytes": 438,
+      "sha256": "cfc436bb8ee722b188676ad08c3b23e2c68a60aaa2b4ad51253d2bdd8d6c457c"
+    },
+    {
+      "path": ".cache/p44/logs/registry-helpers-check-01.log",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p44/logs/registry-helpers-check-02.json",
+      "sizeBytes": 437,
+      "sha256": "3dc956a7680d192030dd6487d40018dec0c8ca2236762d00ecaf33db056c715b"
+    },
+    {
+      "path": ".cache/p44/logs/registry-helpers-check-02.log",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p44/logs/registry-main-read-01.json",
+      "sizeBytes": 447,
+      "sha256": "774d7e20cf27a3a7ce95d34bc784628f6efefa8e132f40c700ba8f301a6506c1"
+    },
+    {
+      "path": ".cache/p44/logs/registry-main-read-01.log",
+      "sizeBytes": 57,
+      "sha256": "a958c9c155cc871c57f1e1863791afa90bc6a014e2cbeca6aca7fe3842166ec5"
+    },
+    {
+      "path": ".cache/p44/logs/registry-push-01.json",
+      "sizeBytes": 469,
+      "sha256": "62b006a288141aab1b4c55dde29baf4ff192029ec392d52a8272da29bc9c6734"
+    },
+    {
+      "path": ".cache/p44/logs/registry-push-01.log",
+      "sizeBytes": 111,
+      "sha256": "97610ceb7e95215fdf6f921a304fcc6341ccf8678fa5c4211ec76530932a7c70"
+    },
+    {
+      "path": ".cache/p44/logs/registry-slot-metadata-01.json",
+      "sizeBytes": 943,
+      "sha256": "042abd7a03cb8cb6e6a35792647179bebbf62fbd89bf92e970bdf4f2e9cd3a70"
+    },
+    {
+      "path": ".cache/p44/logs/registry-slot-metadata-01.log",
+      "sizeBytes": 120,
+      "sha256": "15f8edddcdc1f8850917e58e66b85b7912349107c11ef4f55e7c69048b4d2b4f"
+    },
+    {
+      "path": ".cache/p44/logs/registry-stage-01.json",
+      "sizeBytes": 644,
+      "sha256": "8f33cbf04f0d612fac5c0219af198490de0128d7e9b2788bb12f02cbdf1a630b"
+    },
+    {
+      "path": ".cache/p44/logs/registry-stage-01.log",
+      "sizeBytes": 653,
+      "sha256": "7d95fabea0e7b162dd938d0885f93fc037b247a3eb504a2e366083f11ab98cb5"
+    },
+    {
+      "path": ".cache/p44/logs/registry-tests-01.json",
+      "sizeBytes": 524,
+      "sha256": "536c5af6b82c7fa89f24b3dbda56c5229291ef94401a650c896fc5d5a32e6728"
+    },
+    {
+      "path": ".cache/p44/logs/registry-tests-01.log",
+      "sizeBytes": 152,
+      "sha256": "7f45c3ab57c89afd19bf5ee06d5bf11f99f21a424ea015ae2bdfff4a1957e971"
+    },
+    {
+      "path": ".cache/p44/logs/registry-tests-02.json",
+      "sizeBytes": 524,
+      "sha256": "85ca2560ae535260cf641dab23852b2ef3df3de13d483a79cebb3c46371e46cc"
+    },
+    {
+      "path": ".cache/p44/logs/registry-tests-02.log",
+      "sizeBytes": 152,
+      "sha256": "2a8f2ce4c511700078775c22861cfffc27b3485d71523837174c85e1f5dbcafd"
+    }
+  ],
+  "credentialsScanned": true,
+  "extractionVerified": true,
+  "excludes": [
+    "Private inputs/credentials",
+    "Historical frozen bundles",
+    "Pre-worktree host transcript",
+    "This archive creation receipt"
+  ]
+}
