@@ -1,8 +1,10 @@
 # P4-4 Configuration Integration
 
-Status: BLOCKED_BY_OWNER_CONFIGURATION (P44-CREDENTIAL-01, corrected below).
+Status: PRODUCTION_CONFIGURATION_PARTIAL (P44-CREDENTIAL-01 remains open).
+Owner-authorized production resources, schema, runtime keys and four environment
+secrets are now configured. The production CI protected source/scope is still
+unqualified; candidate-specific approval inputs remain with the reviewer/owner.
 The existing `e-track-ci` is not missing; a new token is not a default requirement.
-Production target/credential-use scope and absent configuration remain unresolved.
 Independent acceptance belongs to the
 user's main agent. The sole Spec remains
 `docs/ota-prompts/prompt-P4-4-integration.md`; this is an execution record, not a
@@ -440,3 +442,179 @@ does not start formal acceptance. Production approval/execution remains after
 P5 and OTA_BOOT_CHAIN_READY remains false. No Cloudflare/environment operation or
 runtime probe is needed to record this decision; previous tests remain attributed to their
 actual source and execution, not rerun or counted again.
+
+## Owner-Authorized Production Configuration
+
+The owner subsequently confirmed P44-TARGET-01 for the existing account and exact
+new Worker/D1 `e-track-firmware-production`, R2
+`e-track-firmware-production-releases`, empty-schema initialization and accepted
+Worker deployment. P44-CREDENTIAL-01 now permits independent deploy/HMAC
+generation, reuse of the approved AES source, and a new minimum-scope CI credential
+only after no qualified existing source is found. It does not permit expanding
+e-track-ci, exporting provisioning credentials to CI or guessing a policy.
+P44-EVID-01 remains the main reviewer's minimum formal rejection observation.
+This authority is recorded here with actual results, not as a separate receipt-only
+delivery or a claim that remaining inputs are ready.
+
+### Actual Result
+
+- Conflict checks found no existing exact-name targets. Created D1
+  `1cd5db26-6bbd-4595-abef-72ff51ecdaf3` and the named R2 bucket, then deployed
+  only the owned new Worker. No old Trace/test binding, schema, key or service was
+  changed. The existing local setup token was used only for authorized local
+  provisioning/CLI operations, never sent to GitHub or installed as a CI secret.
+- Initialized accepted migrations 0001..0005 on the independently observed empty
+  database. All 120 sqlite_master objects (including D1's internal table) match
+  the local accepted SQL after CRLF normalization; foreign-key check is empty.
+  Final read-only counts for firmware releases/assets/channels/legacy releases
+  and audit rows are all zero. This is fresh empty-schema setup, not backfill.
+- Final Worker input matches accepted main
+  `0779f677507fa2c8a88c1799c8d2909bbae5a0a0`: 15 project sources compared through
+  the generated source map; all 18 used dependency sources match the existing
+  pinned installation. Bundle: 147514 bytes, SHA-256
+  `ba2d5b526f2a423426ec985844a5ca89233506f9225bf5dbf56b03f19cddf5f8`.
+  Final version `d4ecbdc7-f097-4ced-b55c-b2f6dfe4c451`, deployment
+  `f1db5e07-3d09-434f-b977-370d7e452cf1`, read back at 100 percent.
+- Origin: `https://e-track-firmware-production.tangjichentudou.workers.dev`.
+  Final health readback is 200/prod. Direct Worker Admin remains disabled, fixed
+  cutover remains 1792039926, download TTL=300, key version=p44-prod-1, query-string
+  redaction=true. The configured target is firmware-only: DB/R2 plus the existing
+  idempotency-cleanup cron. No additional KV/DO or legacy Trace App route setup
+  was included; those legacy routes and production Admin roles are not qualified.
+- Generated independent deploy/HMAC values only in the SU-only inherited-ACL
+  private file `.cache/p44/private/production-secrets.json`. Installed Worker
+  `DEPLOY_TOKEN_SHA256` and `DOWNLOAD_HMAC_KEY_CURRENT`; no previous pair exists
+  for this initial key version. The AES source is the unchanged protected
+  `p41-rehearsal-ota-key.json`, with its original 2026-10-16 identity/hash verified.
+- Added only the absent production secrets `CLOUDFLARE_ACCOUNT_ID`,
+  `TRACE_UPDATE_SERVICE_URL`, `TRACE_DEPLOY_TOKEN`, `OTA_AES_KEY` and five variables
+  (R2 bucket, D1 ID/name, minimum App version 0 and protocol 1). Values went through
+  in-memory API bodies or gh stdin, not argv, logs, Git or evidence. GitHub names
+  and timestamps are readbacks, not proof of runtime value correctness.
+- Repo, rehearsal and production OTA_BOOT_CHAIN_READY remain false. Existing
+  reviewer Eitan-S-23, prevent_self_review=true and main-only production branch
+  restriction are unchanged. No production job, Release/prerelease, promotion,
+  device action or repeat successful staging rehearsal was executed.
+
+### Preserved Failures And Repairs
+
+1. The first schema import uploaded its SQL then returned a transport error.
+   A fresh SELECT proved the database still contained only `_cf_KV`; only then
+   was the same byte-checked import retried. The second import succeeded with
+   106 queries, including the standard migration-tracking table initialization.
+   No partial schema was hand-patched and the failed receipt remains.
+2. P44-PACK-01: the first no-bundle deployment also attached an unintended SQL
+   text module from the entry directory. It contained no secret. After verifying
+   the owned deployment, an isolated module directory removed that extra input;
+   no database initialization was replayed. Both deployments remain recorded.
+3. P44-BUNDLE-01: the old accepted P4-1 bundle matched its historical hash but
+   differed from current accepted main in two source files. Its old source-commit
+   marker was not reachable in Git; those failed lookups and the actual source-map
+   comparison are preserved. It is not used as the final current-source artifact.
+   A bounded Worker-only dry-run build from unchanged main inputs replaced it;
+   no P4-1/P4-2/P4-3 product code or MCU firmware was edited or rebuilt.
+4. npm ci failed with ECONNRESET and a project-local cleanup EPERM. The Worker
+   build had been started before that install receipt closed, which was an
+   orchestration error; the partial install is not called successful. The actual
+   build reused the already installed pinned Wrangler, and every dependency
+   source used by its output was then independently compared with the complete
+   known installation (18/18 equal) before deployment. No blind reinstall or
+   external cleanup was used to hide the failure.
+5. Wrangler deployment reset query redaction, so its supported script-settings
+   PATCH was applied/read back after the final code upload, before final health
+   checks. Key values were not regenerated or reinstalled during this correction.
+   Proxy notices, Wrangler update notices and Node SQLite's experimental warning
+   remain visible; the package-install error is not hidden by later passing tests.
+
+### Validation And Remaining Gap
+
+Final configuration self-tests: 11/11 (the earlier 10/10 intermediate run remains
+historical and is not added). Actual workflow/parser/shell suite: 85/85. The final
+health/schema readback is bound to the current Worker deployment. These are
+implementation checks, not a complete production upload/registration, new real-key
+rehearsal or independent acceptance. No new CI was dispatched solely for these
+configuration/record changes; prior CI cannot prove the new platform settings.
+
+P44-CREDENTIAL-01 remains a concrete protected-source/policy gap. Production has
+no CLOUDFLARE_API_TOKEN, the known private production slot is empty, and the
+registered CI token is the test consumer, not silently promoted. The existing
+local setup credential receives 403/9109 on GET /user/tokens. That proves catalog
+access denial, NOT that a creation POST would fail or that a new token is always
+needed. Because qualified existing sources and a valid minimum-scope policy
+cannot be established through that route, no token creation or scope expansion
+was attempted. The native-preview route's minimum policy for this production
+target is not established; a working P4-1 token or a broader Workers Scripts Edit
+policy is not proof of necessary least privilege or hard production isolation.
+
+Minimum owner operation: in the existing Cloudflare account, identify a qualified
+existing production CI token and provide its redacted resource/operation policy;
+if none exists, create only a policy meeting the approved target boundary. Enter
+it directly into Eitan-S-23/E-Track environment firmware-production secret
+CLOUDFLARE_API_TOKEN, or supply a named protected input path, never plaintext in
+chat. If the native route requires a broader policy than permitted, do not grant
+that policy: return the exact API/permission gap to the main agent for the P4-1
+owner's bounded route decision. Do not expand the existing token or export the
+local provisioning token as a shortcut.
+
+Candidate-specific OTA_PREVIOUS_RELEASE_JSON, bootstrap digest and the four
+OTA_APPROVED_REHEARSAL_* inputs were not fabricated/copied as new approvals.
+Their exact source/run/attempt/digests and existing evidence applicability belong
+to the main reviewer/owner. P44-EVID-01 can be planned formally after the stable
+configuration batch; this implementer does not need advance independent PASS.
+New production keys/targets are not qualified by the old staging run. Its actual
+upload/registration observations remain cross-task inputs for independent review,
+not automatic P4-4 REUSED/PASS. Existing role/session, admin-bypass, dependency and
+external-cache limitations remain disclosed.
+
+### Production Batch Audit And Delivery
+
+The final readiness regression passes 26/26 with the exact dispatch set and
+derivation unchanged. Checks are therefore reported separately as 11 final
+configuration cases, 85 workflow cases and 26 readiness cases, not independent
+acceptance or a sum including intermediate runs.
+
+The first output audit failed because the generated worker/node_modules directory
+was absent after the failed install. It did not prove an escaped output or a
+successful installation. The corrected audit records that absent generated scope
+and checks each descendant directory once, retaining actual-path and reparse
+checks instead of repeatedly checking every common ancestor. At
+2026-10-18T16:31:10.089Z it checked 1554 files / 721 directories in the declared
+namespaces. The known Windows PowerShell startup cache is 1004 bytes with mtime
+2026-10-18T15:55:21.473Z; attribution remains unresolved. Other recorded external
+cache/CRL metadata is unchanged. No external cleanup or machine-wide zero-write
+claim is made. The two new helper paths and final delivery outputs receive the
+same task-root preflight/closing checks; shared Git writes remain task-scoped.
+
+All four prior archive hashes are unchanged. New deployment/build/schema
+originals, failed attempts, final source map/module, host tests and the audit are
+retained in the production increment. Private keys, credential inputs, raw
+configuration containing the account ID, node_modules/npm caches and raw Wrangler
+debug files are excluded. The archived helpers are invocation/evidence copies,
+not permission to replay platform operations. All selected log/evidence files
+were scanned against existing and newly generated credential values.
+
+This stable configuration batch is a handoff with explicit remaining inputs,
+not a P4-4 completion/PASS declaration. P44-TARGET-01 and the authorized runtime
+key setup are implemented; P44-CREDENTIAL-01 remains open as described above.
+P44-EVID-01, candidate-specific approval binding and formal adjudication remain
+with the main reviewer/owner. The branch remains
+dev/p4-4/config-integration-20261018; no main merge or production firmware release
+is part of this delivery.
+
+The sealed `P4-4-integration-2026-10-18/production.zip` contains 103 entries,
+239368 bytes, SHA-256
+`0d657f1b29c6fbdd2d756d02e274772b8712944b22441eb655c2032281ca1e6d`.
+Its adjacent `production.inventory.json` records per-entry byte counts and
+SHA-256. Credential scanning and native-tar extraction/byte verification passed.
+The two standalone production helpers, private input path, report paths and
+final archive/inventory received a further successful task-root/reparse preflight
+after sealing; both private input files remain ignored by Git.
+
+The delivery's pre-commit remote read confirms main is still
+`0779f677507fa2c8a88c1799c8d2909bbae5a0a0` and the task branch is based on
+`0f2b8d0717316affdf56201238a1d11ea66b236b`. Only this board/notes/production
+increment is staged for the successor task commit. Obtain its exact identity
+from this document's delivery commit and the handoff; no main integration or
+new CI/runtime qualification is implied. The previously published credential
+discovery/agent-use changes remain pending main integration, so other agents
+must not assume their local main already contains those instructions.

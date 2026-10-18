@@ -783,7 +783,7 @@
 - 证据: `docs/ota-exec-notes/P4-3-acceptance-2026-10-18.md`、`docs/acceptance-contracts/P4-3-v1.contract.json`、`docs/acceptance-contracts/P4-3-v1/evidence-matrix.json`、`docs/acceptance-contracts/FREEZE-INDEX.md`，新增 `P4-3-acceptance-2026-10-18/delivery.inventory.json` 及 87 条交付归档；实施报告和旧冻结增量不变。正式验收、main 集成及隔离部署现均完成；真实 publisher/viewer 会话、依赖告警及缓存归因限制保留，不代表 P4-4/P5/生产门槛已满足。
 
 #### P4-4 Secrets 与 environment 配置
-状态: 阻塞 ｜ 认领: Codex P4-4 实施/配置集成 agent / 2026-10-18 ｜ 更新: 2026-10-18(P44-CREDENTIAL-01 已纠正为生产目标/凭据使用范围及配置待 owner 确认，不是 e-track-ci 缺失或必须新建 token；已完成准入对账、production 保护配置与原 26/85 项宿主检查；本卡操作授权已具备，不是 P4-3 未完成，正式验收由主 agent 执行)
+状态: 阻塞 ｜ 认领: Codex P4-4 实施/配置集成 agent / 2026-10-18 ｜ 更新: 2026-10-19(owner 已授权并完成独立生产 Worker/D1/R2、schema、运行密钥及 4 secrets/5 variables 的配置；P44-CREDENTIAL-01 仅余生产 CI 受保护来源/限权资格，不是 e-track-ci 缺失或必须新建 token；最终 11 项配置自测及 85 项工作流检查通过；P44-EVID-01 由主验收组织，不要求实现侧提前独立 PASS；gate=false，本卡未完成、未正式验收)
 - 目标: 用户配置 `CLOUDFLARE_ACCOUNT_ID/API_TOKEN`、`TRACE_UPDATE_SERVICE_URL/DEPLOY_TOKEN`、R2 bucket 变量、`firmware-production` environment 审批人;AES 生产 key 入 CI Secrets(P0-2 打包器读取)。
 - 验收: 配置准备可消费 P4-1 已交付的工作流接口和 P4-2 环境，不等待 P4-1 先用这些配置完成验收；随后共用同一次隔离 rehearsal 验证权限与注册。不能为证明配置而提前生产发布，配置变化影响的证据另作最小验证。
 - 证据: `docs/ota-exec-notes/P4-4-implementation-2026-10-18.md`；复核 P4-1-v4 原件和 P4-3 已完成交付，不复制为本卡正式 PASS。生产设置、审批拒绝与角色覆盖按实际结果记录，gate=false，不重做成功演练。

@@ -4,10 +4,66 @@ This is a timestamped implementation inventory, not a new Spec or acceptance
 matrix. Evidence E1/E2/E3 refers to the unchanged JSON receipts in the evidence
 archive accompanying this note. Secret presence never implies value correctness.
 
-Current interpretation (2026-10-18 correction): CF-CI-01 / `e-track-ci` exists.
-`P44-CREDENTIAL-01` is an unresolved production-use/target/configuration decision,
-not a missing-token observation or unconditional new-token requirement. See
-`docs/agent-collaboration/credential-registry.md` before any credential request.
+## Current Production Matrix
+
+Updated after the owner's explicit target/key authorization, with final readback
+at 2026-10-18 16:09:03 UTC (2026-10-19 local). E8 below is the current production
+state. Earlier E1/E6 tables are retained as historical inventories, not assertions
+that production is still empty. P44-TARGET-01 is implemented; P44-CREDENTIAL-01
+now concerns only the unqualified production CI protected source/scope. Existing
+e-track-ci remains available and is not requested again.
+
+| Configuration | Platform / scope / type | Presence / latest relevant UTC observation | Binding and evidence | Owner / remaining action |
+| --- | --- | --- | --- | --- |
+| e-track-firmware-production | Cloudflare / owner-confirmed account / Worker | Deployed, final code upload 2026-10-18 16:07 | Version d4ecbdc7-f097-4ced-b55c-b2f6dfe4c451; E8 | O1 lifecycle; firmware-only DB/R2 service, not legacy Trace App or production Admin qualification. |
+| DB | Worker binding / D1 | Present; UUID 1cd5db26-6bbd-4595-abef-72ff51ecdaf3 | New e-track-firmware-production DB, accepted five migrations; E8 schema/SELECT originals | O1; no legacy/backfill. O3 ownership is unchanged for any future legacy work. |
+| RELEASES_BUCKET | Worker binding / R2 | Present; created 2026-10-18 15:26:13 | e-track-firmware-production-releases, distinct from both test buckets; E8 | O1; no firmware object was uploaded. |
+| Production public origin | Worker / HTTPS origin | 200/prod final health at 16:10 | https://e-track-firmware-production.tangjichentudou.workers.dev; E8 | O1; health is not upload/register qualification. |
+| CLOUDFLARE_ACCOUNT_ID | GitHub / firmware-production / secret | Present; updated 15:50:24 | Confirmed existing account; E8 metadata/secure input receipt | Configured; no account value in evidence. |
+| CLOUDFLARE_API_TOKEN | GitHub / firmware-production / secret | Absent | Known private production slot and named environment inputs empty; token catalog GET 403/9109; E8 | P44-CREDENTIAL-01: O1 selects/provides qualified protected source/policy, or creates only if none qualifies. No automatic reuse of test/setup tokens. |
+| TRACE_UPDATE_SERVICE_URL | GitHub / firmware-production / secret | Present; updated 15:50:29 | Exact new HTTPS origin; E8 | Configured; downstream candidate/runtime checks remain. |
+| TRACE_DEPLOY_TOKEN | GitHub / firmware-production / secret | Present; updated 15:50:32 | Newly generated independent value, paired locally with Worker digest; E8 | O1 rotation/revocation; actual valid-token registration NOT_RUN. |
+| OTA_AES_KEY | GitHub / firmware-production / secret | Present; updated 15:50:34 | Existing approved p41-rehearsal-ota-key.json source, original key identity/integrity verified; E8 | Not generated/rotated. O2 evaluates candidate App/packer applicability. |
+| TRACE_R2_BUCKET | GitHub / firmware-production / variable | Present; updated 15:50:38 | e-track-firmware-production-releases; E8 | Configured. |
+| TRACE_D1_DATABASE_NAME | GitHub / firmware-production / variable | Present; updated 15:50:39 | e-track-firmware-production; E8 | Configured. |
+| TRACE_D1_DATABASE_ID | GitHub / firmware-production / variable | Present; updated 15:50:42 | 1cd5db26-6bbd-4595-abef-72ff51ecdaf3; E8 | Configured. |
+| TRACE_FIRMWARE_MIN_APP_VERSION_CODE | GitHub / firmware-production / variable | Present, 0; updated 15:50:45 | Existing approved metadata value, not a new compatibility claim; E8 | O2 verifies the selected candidate. |
+| TRACE_FIRMWARE_MIN_PROTOCOL_VERSION | GitHub / firmware-production / variable | Present, 1; updated 15:50:47 | Existing protocol value; E8 | O2 verifies the selected candidate. |
+| DEPLOY_TOKEN_SHA256 | Cloudflare / new Worker / secret_text | Present; written 15:47:36 | Digest of the new production deploy token; local pair check, names-only platform readback; E8 | O1; no secret readback or valid production registration claimed. |
+| DOWNLOAD_HMAC_KEY_CURRENT | Cloudflare / new Worker / secret_text | Present; written 15:47:40 | New independent production HMAC, not copied from testing; E8 | O1; production Admin signer pairing is not configured in this Worker-only scope. |
+| DOWNLOAD_TOKEN_KEY_VERSION | Cloudflare / new Worker / plain_text | p44-prod-1 | Initial current pair; no previous pair required; E8 | O1 preserves unique version on rotation. |
+| DOWNLOAD_TOKEN_TTL_SECONDS | Cloudflare / new Worker / plain_text | 300 | E8 | Preserve bounded lifetime. |
+| FIRMWARE_V2_CUTOVER_EPOCH | Cloudflare / new Worker / plain_text | 1792039926 | Existing fixed parameter, not rewritten to deployment time; fresh empty DB; E8 | O1/O3 retain fixed/auditable semantics. |
+| observability.redact_query_string | Cloudflare / new Worker / setting | true, reverified after final upload | E8 scoped PATCH/readback; no signed capability was issued | No assumption that a later deployment preserves it. |
+| OTA_BOOT_CHAIN_READY | GitHub / repository, rehearsal, production / variables | false at all three scopes | E8; no unlock or setting rewrite | O1; P5 and existing approvals remain mandatory. |
+| firmware-production protection | GitHub / environment / rules | Reviewer Eitan-S-23, prevent_self_review=true, main branch only | Unchanged E2/E8; can_admins_bypass=true remains disclosed | Real production approval/execution only after P5. |
+| OTA_PREVIOUS_RELEASE_JSON / OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256 | GitHub / firmware-production / variables | Absent | Candidate-specific descriptor/digest not guessed or copied as fresh approval | O1/O2 select and independently validate exact applicable original. |
+| OTA_APPROVED_REHEARSAL_RUN_ID / OTA_APPROVED_REHEARSAL_ATTEMPT / OTA_APPROVED_REHEARSAL_METADATA_SHA256 / OTA_APPROVED_REHEARSAL_EVIDENCE_SHA256 | GitHub / firmware-production / variables | Absent | No new candidate approval manufactured | O1/O2 own exact binding; old staging success is not a new production approval. |
+
+Runtime key locator, private and excluded from evidence:
+`D:/github/my/E-Track/.cache/p4-4-integration-20261018/.cache/p44/private/production-secrets.json`.
+It inherits an SU-only ACL. AES continues to use the already registered protected
+P4-1 source; no new AES entry or rotation exists. Credential metadata/pairing
+checks are not proof of a completed production release.
+
+No qualified production CI source was found in the known registered/local
+entries, named process environment or production environment secret list. The
+account token catalog is unreadable through the existing setup credential, so
+this is not an exhaustive claim that no other token exists. No creation POST or
+scope expansion was attempted with an unverified policy. The precise remaining
+owner operation is to select/verify an existing source in the Cloudflare owner
+interface (or create a qualified scoped one if none exists), provide a redacted
+resource/operation policy, and place the value in firmware-production's
+CLOUDFLARE_API_TOKEN or a named protected file. Do not send plaintext in chat.
+If native preview requires permissions exceeding the allowed production boundary,
+stop and return that concrete interface gap to the main/P4-1 owner; do not solve
+it by granting account-wide access. Catalog 403 does not prove creation denial.
+
+## Historical Inventory Before Owner Deployment
+
+The following timestamped E1..E7 observations and decision history are preserved.
+Their former pending owner decisions and absent production resources are
+superseded by the current production matrix above, not rewritten as old successes.
 
 ## Evidence And Owners
 
@@ -20,6 +76,7 @@ not a missing-token observation or unconditional new-token requirement. See
 | E5 | P43-DELIVERY-20261018, delivery inventory/archive on main 0779f67 | Exact deployment ed9c6a39, source 0067b6c, public origin/cutover/signing and owner observations. Private originals stay at their published controlled locations. |
 | E6 | `.cache/p44/evidence/targets-01.json`, 2026-10-18 14:21:51..14:22:54 UTC; `r2-targets-02.json`, 14:24:59..14:25:04 UTC | Existing e-track-ci reads actual Worker/D1/R2 metadata; nine GitHub configuration GETs. Initial R2 ECONNRESET and Pages 403 remain recorded. The R2-only retry succeeded; no token-management probe, provisioning-token use or configuration mutation. |
 | E7 | `.cache/p44/evidence/auth-negative-01.json`, 2026-10-18 14:29:47..14:29:53 UTC | Two real test-Worker POST denials, missing/wrong deploy token, empty metadata, both 401/TOKEN_INVALID with exact requestId echoes. Not an upload, successful registration, approval rejection or production test. |
+| E8 | `.cache/p44/evidence/production-*.json` and `P4-4-integration-2026-10-18/production.zip` | Owner-authorized create/schema/deploy/key/GitHub results, final current-source readback-02 and smoke-02; includes failed import, superseded deployments, source mismatch, dependency failure and their bounded repairs. Current configuration, not formal acceptance. |
 
 O1 = existing repository owner `Eitan-S-23`, configuration/key lifecycle owner.
 O2 = user-assigned main agent, independent OTA reviewer, not this implementer.
@@ -144,7 +201,7 @@ This matrix is not acceptance-ready while these required production rows remain
 absent. Real environment rejection and the stated role/runtime gaps must be
 honestly adjudicated by O2; production job execution remains after P5.
 
-## Current Live Reconciliation
+## Pre-Deployment Live Reconciliation
 
 E6 supersedes only the observation time, not old receipts. The protected test
 settings are unchanged; no write was needed. Worker settings still bind the
@@ -170,6 +227,11 @@ the current configuration task; it does not silently select a production CI
 consumer or amend the frozen staging/production credential boundary.
 
 ## Consolidated Owner Decisions
+
+Historical decision packet: the later owner granted the target, provisioning and
+key-generation scopes. Their actual implementation is in the current matrix
+above. No repeat target/AES authorization is requested; production CI source/scope
+and the main reviewer's candidate/evidence work remain explicit.
 
 This is the precise remaining decision packet, not a request for another token
 by default. Earlier generic authority and project-wide agent use are already
