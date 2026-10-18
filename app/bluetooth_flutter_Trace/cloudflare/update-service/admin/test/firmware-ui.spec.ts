@@ -5,6 +5,7 @@ const origin = "https://p43-admin.test";
 const html = readFileSync(new URL("../public/index.html", import.meta.url), "utf8").replace(/<body([^>]*)>/,
   '<body$1><div id="mock-evidence-label" style="position:fixed;bottom:8px;left:12px;z-index:10000;padding:6px 12px;background:#fff2b0;color:#161616;font:12px monospace;pointer-events:none">MOCK UI / NO REAL ACCESS OR D1</div>');
 const scope = { appId: "trace", deviceModel: "e-track-at32f435" };
+type ReleaseFailure = { status: number; code: string; correlation?: "missing" | "mismatch" };
 function release(id: string, versionCode: number) {
   return { ...scope, releaseId: id, versionCode, versionName: `2.8.${versionCode - 20800}`,
     releaseTag: `mcu-e-track-at32f435-v2.8.${versionCode - 20800}`, state: "ready", archived: false,
@@ -17,6 +18,7 @@ function release(id: string, versionCode: number) {
 async function mockAdmin(page: Page, language = "en", role = "owner") {
   const data = {
     role, actor: `${role}@example.test`, mode: "normal", failReads: false, expireReplay: false,
+    releaseFailure: null as ReleaseFailure | null,
     releases: [release("fw-new", 20803), release("fw-current", 20802), release("fw-old", 20801)],
     channels: ["stable", "beta"].map((channel, index) => ({ ...scope, channel, currentReleaseId: "fw-current",
       revision: 7 + index, disableLatest: false, disableDownloads: false, maintenanceMessage: null as string | null })),
@@ -86,6 +88,13 @@ async function mockAdmin(page: Page, language = "en", role = "owner") {
     const key = request.headers()["idempotency-key"];
     expect(key).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
     const fingerprint = JSON.stringify({ path: url.pathname, body });
+    if (data.releaseFailure) {
+      const failure = data.releaseFailure;
+      await reply({ errorCode: failure.code, message: `Mock ${failure.code}`,
+        ...(failure.correlation === "missing" ? {} : { requestId }) }, failure.status,
+      failure.correlation === "mismatch" ? "mismatched-error-request" : requestId);
+      return;
+    }
     const existing = data.results.get(key);
     if (existing) {
       if (existing.fingerprint !== fingerprint) { await fail("IDEMPOTENCY_CONFLICT", 409); return; }
@@ -256,6 +265,76 @@ test("an expired original key requires a newly confirmed operation, not an autom
   await expect(page.locator("#confirmTitle")).toHaveText("Firmware operation confirmed");
   expect(data.writes[2].key).not.toBe(data.writes[0].key);
 });
+
+const interruptedReplayFailures: ReleaseFailure[] = [
+  { status: 401, code: "TOKEN_EXPIRED" },
+  { status: 403, code: "CSRF_INVALID" },
+  { status: 403, code: "ROLE_FORBIDDEN" },
+  { status: 429, code: "RATE_LIMITED" },
+  { status: 503, code: "BACKEND_UNAVAILABLE" },
+  { status: 409, code: "IDEMPOTENCY_CONFLICT" },
+  { status: 410, code: "RELEASE_DISABLED" },
+  { status: 409, code: "IDEMPOTENCY_RESULT_EXPIRED", correlation: "missing" },
+  { status: 409, code: "IDEMPOTENCY_RESULT_EXPIRED", correlation: "mismatch" },
+  { status: 403, code: "IDEMPOTENCY_RESULT_EXPIRED" }
+];
+for (const action of ["recovery-download", "disable"]) for (const failure of interruptedReplayFailures) {
+  test(`${action}: interrupted reconciliation preserves intent after ${failure.status}/${failure.code}/${failure.correlation ?? "valid"}`, async ({ page }) => {
+    const data = await mockAdmin(page); data.mode = "unknown-release";
+    await releaseButton(page, "fw-new", action).click(); await fillConfirmation(page, "original unresolved intent");
+    await expect(page.locator("#confirmMessage")).toContainText("network result is unknown"); await closeResult(page);
+    const original = data.writes[0]; const result = data.results.get(original.key!)!.result;
+    expect(data.mutations).toBe(1);
+    data.releaseFailure = failure;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const events = data.events.length; const writes = data.writes.length;
+      await page.locator('[data-firmware-action="retry-release"]').click();
+      await expect(page.locator("#confirmDetail")).toContainText("original unresolved intent");
+      expect(data.events.slice(events).every(event => event.startsWith("GET "))).toBe(true);
+      expect(data.writes).toHaveLength(writes);
+      await fillConfirmation(page);
+      await expect(page.locator("#confirmTitle")).toHaveText("Firmware operation not confirmed");
+      await expect(page.locator("#confirmDownload")).toBeHidden(); await closeResult(page);
+      expect(data.writes.at(-1)).toEqual(original); expect(data.mutations).toBe(1);
+      await expect(page.locator('[data-firmware-action="retry-release"]')).toBeVisible();
+      await expect(channelButton(page, "beta", "stop-latest")).toBeDisabled();
+      await expect(releaseButton(page, "fw-old", "recovery-download")).toBeDisabled();
+      await expect(releaseButton(page, "fw-old", "disable")).toBeDisabled();
+      await page.locator("#refreshButton").click(); await expect(page.locator("#refreshButton")).toBeEnabled();
+      await expect(page.locator('[data-firmware-action="retry-release"]')).toBeVisible();
+      await expect(releaseButton(page, "fw-old", "recovery-download")).toBeDisabled();
+      expect(data.writes).toHaveLength(writes + 1); expect(data.results.size).toBe(1);
+    }
+    data.releaseFailure = null;
+    await page.locator('[data-firmware-action="retry-release"]').click();
+    expect(data.writes).toHaveLength(3); await fillConfirmation(page);
+    await expect(page.locator("#confirmTitle")).toHaveText("Firmware operation confirmed");
+    await expect(page.locator("#confirmDetail")).toContainText(String(result.requestId));
+    if (action === "recovery-download") await expect(page.locator("#confirmDownload")).toHaveAttribute("href", String(result.downloadUrl));
+    expect(data.writes).toHaveLength(4); expect(data.writes[3]).toEqual(original);
+    expect(data.mutations).toBe(1); expect(data.results.size).toBe(1);
+    await closeResult(page);
+    await expect(page.locator('[data-firmware-action="retry-release"]')).toBeHidden();
+    await expect(channelButton(page, "beta", "stop-latest")).toBeEnabled();
+  });
+}
+
+for (const failure of interruptedReplayFailures.slice(0, 4)) {
+  test(`a first definitive ${failure.status}/${failure.code} rejection permits a separately confirmed intent`, async ({ page }) => {
+    const data = await mockAdmin(page); data.releaseFailure = failure;
+    await releaseButton(page, "fw-new", "recovery-download").click(); await fillConfirmation(page, "rejected first intent");
+    await expect(page.locator("#confirmTitle")).toHaveText("Firmware operation not confirmed"); await closeResult(page);
+    expect(data.writes).toHaveLength(1); expect(data.mutations).toBe(0); expect(data.results.size).toBe(0);
+    await expect(page.locator('[data-firmware-action="retry-release"]')).toBeHidden();
+    await expect(releaseButton(page, "fw-new", "recovery-download")).toBeEnabled();
+    data.releaseFailure = null;
+    await releaseButton(page, "fw-new", "recovery-download").click();
+    expect(data.writes).toHaveLength(1); await fillConfirmation(page, "new confirmed intent after restoring access");
+    await expect(page.locator("#confirmTitle")).toHaveText("Firmware operation confirmed");
+    expect(data.writes).toHaveLength(2); expect(data.writes[1].key).not.toBe(data.writes[0].key);
+    expect(data.mutations).toBe(1);
+  });
+}
 
 test("owner identity changes cannot replay a pending request in another actor scope", async ({ page }) => {
   const data = await mockAdmin(page); data.mode = "unknown-release";

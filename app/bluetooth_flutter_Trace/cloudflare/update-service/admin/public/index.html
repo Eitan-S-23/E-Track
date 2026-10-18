@@ -5212,7 +5212,9 @@
           await openResultDialog({ tone: "success", title: t("firmware.actionComplete"), message: pending.tag,
             detail: `Request ID: ${result.requestId}${download ? `\n${t("firmware.recoveryDetail")}` : ""}`, download });
         } catch (error) {
-          if (error.status && error.status < 500) state.firmwarePendingAction = null;
+          // A replay rejection does not resolve an earlier unknown commit.
+          if (error.responsePath === pending.path && ((!retry && error.status >= 400 && error.status < 500)
+            || (error.status === 409 && error.code === "IDEMPOTENCY_RESULT_EXPIRED"))) state.firmwarePendingAction = null;
           await firmwareFailure(error, committed);
         } finally { setBusy(false); renderFirmware(); }
       }
@@ -5468,7 +5470,15 @@
         } catch {
           throw new Error(t("status.expectedJson", { path, status: response.status }));
         }
+        const firmwareRequest = path.startsWith("/api/admin/firmware/");
+        if (firmwareRequest && (!payload || typeof payload !== "object" || Array.isArray(payload)
+          || typeof payload.requestId !== "string" || !payload.requestId.trim()
+          || payload.requestId !== response.headers.get("X-Request-Id"))) throw new Error(t("firmware.invalidResponse"));
         if (!response.ok || payload.ok === false) {
+          if (firmwareRequest && (typeof payload.errorCode !== "string" || !payload.errorCode.trim()
+            || typeof payload.message !== "string" || !payload.message.trim() || payload.ok === true)) {
+            throw new Error(t("firmware.invalidResponse"));
+          }
           const messageParts = [
             `${payload.errorCode ?? response.status}: ${payload.message ?? t("status.requestFailed")}`
           ];
@@ -5482,10 +5492,10 @@
           error.code = payload.errorCode;
           error.status = response.status;
           error.requestId = payload.requestId;
+          error.responsePath = path;
           throw error;
         }
-        if (path.startsWith("/api/admin/firmware/") && (payload.ok !== true || typeof payload.requestId !== "string"
-          || payload.requestId !== response.headers.get("X-Request-Id"))) throw new Error(t("firmware.invalidResponse"));
+        if (firmwareRequest && payload.ok !== true) throw new Error(t("firmware.invalidResponse"));
         return payload;
       }
 
