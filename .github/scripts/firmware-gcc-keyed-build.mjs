@@ -31,7 +31,8 @@ export async function buildKeyedFirmware({ root, buildDir, evidenceDir, versionN
   versionCodeFor(versionName);
   if (!/^[0-9a-f]{40}$/.test(commitSha) || commitSha !== env.GITHUB_SHA || !Number.isSafeInteger(buildTimestamp)
     || buildTimestamp < 0 || buildTimestamp > 0xffffffff) throw new CliError("Invalid key-bound build source identity");
-  if (env.CLOUDFLARE_API_TOKEN || env.TRACE_DEPLOY_TOKEN || env.GITHUB_TOKEN) throw new CliError("Key-bound compilation must not receive cloud or publishing credentials");
+  if (env.CLOUDFLARE_API_TOKEN || env.TRACE_DEPLOY_TOKEN || env.GITHUB_TOKEN
+    || env.TRACE_R2_ACCESS_KEY_ID || env.TRACE_R2_SECRET_ACCESS_KEY) throw new CliError("Key-bound compilation must not receive cloud or publishing credentials");
   let key, keyBinding;
   if (development) {
     if (env.OTA_AES_KEY) throw new CliError("Development compilation must not receive release key configuration");

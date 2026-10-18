@@ -6,6 +6,7 @@ import { signFirmwareDownload, streamFirmwareObject, verifyFirmwareDownload, ver
 import { APP_VERSION_MAX, FIRMWARE_MODEL, FirmwareSchemaError, U32_MAX, canonicalJson,
   parseFirmwareRegistration } from "../../scripts/firmware-schema.mjs";
 import type { FirmwareRegistration } from "../../scripts/firmware-schema.mjs";
+import { verifyMonotonic, FirmwareMonotonicError } from "../../scripts/firmware-monotonic.mjs";
 import type { FirmwareAssetRow, FirmwareChannelRow, FirmwareReleaseRow, WorkerEnv } from "./types";
 
 const QUERY = ["appId", "deviceModel", "channel", "currentVersionCode", "currentImageSha",
@@ -177,11 +178,43 @@ export function handleFirmwareDownload(request: Request, env: WorkerEnv, request
   });
 }
 
+async function requireFirmwareCiToken(request: Request, env: WorkerEnv): Promise<void> {
+  const authorization = request.headers.get("Authorization");
+  const token = authorization && /^Bearer [^\s,]+$/.test(authorization) ? authorization.slice(7) : null;
+  if (!await verifyBearerToken(token, env.DEPLOY_TOKEN_SHA256)) throw new ApiError("TOKEN_INVALID", "Invalid CI token", 401);
+}
+
+export function handleFirmwarePreflight(request: Request, env: WorkerEnv, requestId: string): Promise<Response> {
+  return firmwareOperation(async () => {
+    await requireFirmwareCiToken(request, env);
+    requireFirmwareJsonHeaders(request);
+    const value = await readFirmwareJson(request);
+    if (!value || typeof value !== "object" || Array.isArray(value)) throw invalidParameter("Invalid preflight envelope");
+    const envelope = value as Record<string, unknown>;
+    if (Object.keys(envelope).sort().join(",") !== "environment,metadata,schemaVersion" || envelope.schemaVersion !== 1) {
+      throw invalidParameter("Invalid preflight fields");
+    }
+    if (!["staging", "prod"].includes(env.ENVIRONMENT) || envelope.environment !== env.ENVIRONMENT) {
+      throw new ApiError("RELEASE_CONFLICT", "Preflight environment mismatch", 409);
+    }
+    const input = parseFirmwareRegistration(envelope.metadata, `${env.GITHUB_OWNER}/${env.GITHUB_REPO}`, false);
+    let summary;
+    try { summary = await verifyMonotonic(env.DB, input); }
+    catch (error) {
+      if (error instanceof FirmwareMonotonicError) {
+        throw new ApiError("RELEASE_CONFLICT", error.message, 409);
+      }
+      throw error;
+    }
+    const projected = { ...input, assets: input.assets.map(asset => ({ ...asset, r2Verified: true })) };
+    return json({ ok: true, schemaVersion: 1, requestId, environment: env.ENVIRONMENT,
+      metadataSha256: await sha256Hex(canonicalJson(projected) + "\n"), ...summary });
+  });
+}
+
 export function handleRegisterFirmwareRelease(request: Request, env: WorkerEnv, requestId: string): Promise<Response> {
   return firmwareOperation(async () => {
-    const authorization = request.headers.get("Authorization");
-    const token = authorization && /^Bearer [^\s,]+$/.test(authorization) ? authorization.slice(7) : null;
-    if (!await verifyBearerToken(token, env.DEPLOY_TOKEN_SHA256)) throw new ApiError("TOKEN_INVALID", "Invalid CI token", 401);
+    await requireFirmwareCiToken(request, env);
     requireFirmwareJsonHeaders(request);
     const input = parseFirmwareRegistration(await readFirmwareJson(request), `${env.GITHUB_OWNER}/${env.GITHUB_REPO}`);
     const canonical = canonicalJson(input);

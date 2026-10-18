@@ -24,9 +24,8 @@ const p44Fixture = () => ({
   FIRMWARE_RELEASE_MODE: "rehearsal", GITHUB_EVENT_NAME: "workflow_dispatch",
   INPUT_REHEARSAL: "true", INPUT_PUBLISH: "false", INPUT_CHECK_BINDINGS: "false",
   OTA_BOOT_CHAIN_READY: "false", CLOUDFLARE_ACCOUNT_ID: "a".repeat(32),
-  CLOUDFLARE_API_TOKEN: "p44-noncredential-fixture", TRACE_DEPLOY_TOKEN: "p44-noncredential-deploy",
+  TRACE_R2_ACCESS_KEY_ID: "a".repeat(32), TRACE_R2_SECRET_ACCESS_KEY: "b".repeat(64), TRACE_DEPLOY_TOKEN: "p44-noncredential-deploy",
   TRACE_UPDATE_SERVICE_URL: "https://p44-fixture.invalid", TRACE_R2_BUCKET: "e-track-firmware-p41-test-releases",
-  TRACE_D1_DATABASE_ID: "11111111-1111-1111-1111-111111111111", TRACE_D1_DATABASE_NAME: "p44-fixture",
   OTA_AES_KEY: "bc".repeat(16), GITHUB_TOKEN: "p44-noncredential-github", GITHUB_REPOSITORY: "Eitan-S-23/E-Track",
   GITHUB_SHA: "a".repeat(40), GITHUB_RUN_ID: "123", GITHUB_RUN_ATTEMPT: "1",
   OTA_PREVIOUS_RELEASE_JSON: "{}", TRACE_FIRMWARE_MIN_APP_VERSION_CODE: "0", TRACE_FIRMWARE_MIN_PROTOCOL_VERSION: "1",
@@ -36,8 +35,8 @@ test("P4-4 actual configuration parser admits its isolated host-only control", (
   assert.equal(releaseConfig(p44Fixture()).mode, "rehearsal");
 });
 
-for (const name of ["CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_API_TOKEN", "TRACE_UPDATE_SERVICE_URL", "TRACE_DEPLOY_TOKEN",
-  "TRACE_R2_BUCKET", "TRACE_D1_DATABASE_ID", "TRACE_D1_DATABASE_NAME", "OTA_AES_KEY", "GITHUB_TOKEN",
+for (const name of ["CLOUDFLARE_ACCOUNT_ID", "TRACE_R2_ACCESS_KEY_ID", "TRACE_R2_SECRET_ACCESS_KEY", "TRACE_UPDATE_SERVICE_URL", "TRACE_DEPLOY_TOKEN",
+  "TRACE_R2_BUCKET", "OTA_AES_KEY", "GITHUB_TOKEN",
   "GITHUB_REPOSITORY", "GITHUB_SHA", "GITHUB_RUN_ID", "GITHUB_RUN_ATTEMPT", "OTA_PREVIOUS_RELEASE_JSON",
   "TRACE_FIRMWARE_MIN_APP_VERSION_CODE", "TRACE_FIRMWARE_MIN_PROTOCOL_VERSION"]) {
   test(`P4-4 missing ${name} fails by name without credential disclosure`, () => {
@@ -45,7 +44,7 @@ for (const name of ["CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_API_TOKEN", "TRACE_UPDA
     assert.throws(() => releaseConfig(env), error => {
       assert.equal(error.exitCode, 2);
       assert.equal(error.message, `Missing release configuration: ${name}`);
-      for (const field of ["CLOUDFLARE_API_TOKEN", "TRACE_DEPLOY_TOKEN", "GITHUB_TOKEN", "OTA_AES_KEY"]) {
+      for (const field of ["TRACE_R2_ACCESS_KEY_ID", "TRACE_R2_SECRET_ACCESS_KEY", "TRACE_DEPLOY_TOKEN", "GITHUB_TOKEN", "OTA_AES_KEY"]) {
         assert.ok(!error.message.includes(p44Fixture()[field]));
       }
       return true;
@@ -58,7 +57,8 @@ for (const [name, value] of [
   ["TRACE_UPDATE_SERVICE_URL", "https://p44-fixture.invalid/path"],
   ["TRACE_UPDATE_SERVICE_URL", "https://p44-fixture.invalid/?token=p44-query-fixture"],
   ["TRACE_UPDATE_SERVICE_URL", "https://p44-user:p44-password@p44-fixture.invalid"],
-  ["CLOUDFLARE_API_TOKEN", "p44 invalid fixture"], ["TRACE_DEPLOY_TOKEN", "p44 invalid fixture"],
+  ["CLOUDFLARE_API_TOKEN", "control-plane-not-accepted"], ["TRACE_R2_ACCESS_KEY_ID", "p44 invalid fixture"],
+  ["TRACE_R2_SECRET_ACCESS_KEY", "bad-s3-secret"], ["TRACE_DEPLOY_TOKEN", "p44 invalid fixture"],
   ["TRACE_R2_BUCKET", "trace-update-staging-releases"], ["TRACE_D1_DATABASE_ID", "p44-invalid-id"],
   ["GITHUB_SHA", "p44-invalid-source"], ["INPUT_CHECK_BINDINGS", "true"], ["INPUT_PUBLISH", "true"],
 ]) {
@@ -122,7 +122,8 @@ test("binding check credentials are confined to readback after dependency instal
   assert.equal(run.env.FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT, "${{ vars.FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT }}");
   assert.equal(bindings.steps.filter(step => JSON.stringify(step.env ?? {}).includes("secrets.")).length, 1);
   for (const value of Object.values(run.env)) if (value.includes("secrets.")) assert.match(value, /secrets\.FIRMWARE_REHEARSAL_/);
-  assert.doesNotMatch(JSON.stringify(bindings), /OTA_AES_KEY|TRACE_DEPLOY_TOKEN|OTA_PREVIOUS_RELEASE_JSON|OTA_APPROVED_BOOTSTRAP|firmware-release\.mjs execute|contents.*write/);
+  assert.doesNotMatch(JSON.stringify(bindings), /OTA_AES_KEY|CLOUDFLARE_API_TOKEN|TRACE_D1_DATABASE|OTA_PREVIOUS_RELEASE_JSON|OTA_APPROVED_BOOTSTRAP|firmware-release\.mjs execute|contents.*write/);
+  assert.equal(run.env.TRACE_DEPLOY_TOKEN, "${{ secrets.FIRMWARE_REHEARSAL_TRACE_DEPLOY_TOKEN }}");
   const artifact = bindings.steps.find(step => step.uses === "actions/upload-artifact@v4");
   assert.equal(artifact.with["if-no-files-found"], "error");
   assert.equal(artifact.with["retention-days"], "14");

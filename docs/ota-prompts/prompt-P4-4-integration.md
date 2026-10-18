@@ -49,7 +49,7 @@ task_id: P4-4
 ## 输入输出与调用方向
 
 - 用户输入 secret/variable 到平台配置界面；agent 只验证名称存在性、权限结果和工作流脱敏输出。
-- workflow 读取 GitHub secrets/variables，Wrangler 调 Cloudflare，register client 调 Worker。
+- 2026-10-19 P44-CREDENTIAL-01 owner 裁定：workflow 使用标准 S3 SDK 和独立桶限定凭据，固定鉴权只读预检及 register client 调既有 Worker；不再要求 CLOUDFLARE_API_TOKEN 或向客户端暴露 D1 选择参数。当前接线以 OTA-XC-SECRETS/OTA-XC-R2-UPLOAD 的修订为准，旧冻结包不改写。
 - 首发配置须消费 `OTA-XC-BOOTSTRAP-BASE` 的非正式 descriptor/审批摘要，演练桶改名不能让旧 Trace 桶进入 production；不得自行回退或修改旧服务。接口允许按精确已提交的待合并分支审查和冻结，不要求整个 P4-1 先合并 main。这只是交付接口传播，不启动本卡或授予配置操作。
 - 输出为平台侧配置清单（只含名称/是否存在/权限范围描述）、environment 审批证据和 P4-1 run 结果。
 

@@ -983,7 +983,7 @@ fixture 最低覆盖：完整 full/patch/recovery 注册成功、完全相同 ca
 
 裁定依据：`OTA-DEC-006`、`OTA-DEC-008`。
 
-P4-1 继续通过 CI uploader 调用 Wrangler/R2 对象写入，不新增 public 上传端点。对下游稳定的是 uploader 的输入、R2 HTTP metadata、机器结果和退出码；Wrangler 的人类可读 stdout 不是合同。
+P44-CREDENTIAL-01 的 2026-10-19 owner 裁定将当前发布链改为标准 S3 SDK 与桶限定凭据，不再启动 Wrangler remote preview，不新增 public 上传端点。生产与 rehearsal 共用同一条新链，仅切换独立凭据及目标。对下游稳定的是 uploader 输入、R2 metadata、机器结果和退出码；SDK/CLI 人类可读 stdout 不是合同。旧 P4-1 冻结实现与原件保持不变，仅证明其旧输入；新链真实能力由主验收重新冻结必要观测。
 
 每个 asset 上传输入必须来自 `OTA-XC-RELEASE-METADATA` 同一数组项，并满足：
 
@@ -994,6 +994,16 @@ P4-1 继续通过 CI uploader 调用 Wrangler/R2 对象写入，不新增 public
 - `Cache-Control` 只有在 key 不可变规则成立时才为 `public, max-age=31536000, immutable`；`Content-Disposition` 的文件名必须与 metadata `fileName` 一致并完成控制字符转义。
 
 上传器必须先 HEAD：key 不存在时写入；key 已存在且 content length、custom metadata SHA-256 和实际 readback digest 全部一致时不得重写，返回 `ALREADY_PRESENT`；任一身份不同时返回 `R2_OBJECT_CONFLICT`。任何底层 2xx、Wrangler 退出码 0 或 HEAD metadata 都不能单独构成成功，必须完成全字节 readback 摘要和长度核对。
+
+当前 S3 适配必须在 PutObject 上发送原子 `If-None-Match: *`，不能用 HEAD/PUT 两步替代条件创建。412 后仅回读获胜对象并按相同身份规则判定；409、鉴权、网络或读回失败不得降级为无条件 PUT。GetObject 必须携带 HEAD 的 `If-Match`，完整校验长度和 SHA-256。S3 metadata 保存 `sha256`、`kind`、RFC 9530 `content-digest`，下载服务继续按既有合同生成 HTTP Content-Digest。新发布证据标记 `publicationProtocol=s3-worker-preflight-v1`；生产晋升拒绝缺少此标记/匹配预检摘要的旧链 rehearsal 原件。
+
+#### 鉴权只读发布预检
+
+`POST /api/ci/firmware/preflight` 是既有 Worker 的 CI 业务接口，不是上传、管理代理或任意 SQL 接口。它使用同一环境的 `TRACE_DEPLOY_TOKEN` / `DEPLOY_TOKEN_SHA256`，必须先鉴权，再检查 HTTPS/JSON、严格字段和环境，最后才读 DB。请求仅包含 `schemaVersion:1`、`environment:staging|prod`、v2 `metadata`，不接受 account、database、bucket、SQL 或其他字段。
+
+Worker 固定复用 verifyMonotonic 三项 SELECT：未解决 legacy 指针必须为零；legacy 最大版本必须小于目标；当前最大版本不得高于目标，等版本必须与 canonical registration 完全一致。比较时 r2Verified=true 只是最终身份投影，不证明尚未上传的资产已验证。响应绑定 requestId（头/体一致）、environment、metadataSha256 和三个摘要字段；客户端拒绝错摘要/环境/状态、过大响应及失败结果，在任何生产 GitHub/R2 写入之前停止。预检不创建 release/channel/audit、不写 D1 或 R2，不削弱注册端的原有验证和约束。
+
+客户端不持有 D1 凭据或数据库选择参数。物理 Worker/D1/R2 绑定由独立部署读回核验；预检响应不能冒充控制面绑定证明或全业务零副作用快照。check_bindings 入口保留精确源码/gate/environment 条件，改为现有对象只读 S3 回读和两次固定预检摘要比较，不再读取控制面 settings 或启动临时 Worker。部署、真实能力和 reviewer 拒绝由主验收的明确计划安排。
 
 成功时进程退出码为 0，并向 stdout 输出恰一个 `R2AssetUploadResult` JSON object：
 
@@ -1271,10 +1281,12 @@ P4-4 配置面：
 
 | 名称 | 类型 | 使用方 | 规则 |
 |---|---|---|---|
-| `CLOUDFLARE_ACCOUNT_ID` | GitHub secret | Wrangler/R2 | 必填，不输出 |
-| `CLOUDFLARE_API_TOKEN` | GitHub secret | Wrangler/R2 | 最小权限，必填，不输出 |
-| `TRACE_UPDATE_SERVICE_URL` | GitHub secret | register client | HTTPS origin，不含 token |
-| `TRACE_DEPLOY_TOKEN` | GitHub secret | register client | Bearer，日志脱敏 |
+| `CLOUDFLARE_ACCOUNT_ID` | GitHub secret | S3 endpoint | 必填，不输出；只用于拼接固定 HTTPS R2 endpoint，不授予控制面权限 |
+| `TRACE_R2_ACCESS_KEY_ID` | GitHub environment secret | S3 SDK | 必填，R2 access key ID，不输出 |
+| `TRACE_R2_SECRET_ACCESS_KEY` | GitHub environment secret | S3 SDK | 必填，仅目标桶的 Object Read & Write，不输出；不得复用测试/生产凭据 |
+| `CLOUDFLARE_API_TOKEN` | 旧链 secret，当前不消费 | 历史 Wrangler 链 | 不再是新链配置门槛；不得填占位值或转存 provisioning token；当前发布消费者拒绝混入非空控制面凭据 |
+| `TRACE_UPDATE_SERVICE_URL` | GitHub secret | preflight/register client | HTTPS origin，不含 token |
+| `TRACE_DEPLOY_TOKEN` | GitHub secret | preflight/register client | 同环境 Bearer，日志脱敏；鉴权失败在查询前拒绝 |
 | `OTA_AES_KEY` | GitHub secret | `Tools/etu_pack.py` | 32 hex；正式链缺失必须硬失败，禁止开发示例 key |
 | `TRACE_R2_BUCKET` | GitHub variable | uploader | production 明确生产 bucket且拒绝新旧两个测试桶；rehearsal 固定 `e-track-firmware-p41-test-releases`，保留旧 Trace 桶，不共享凭据；见 `OTA-DEC-017` |
 | `OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256` | GitHub environment variable | release base client | 仅首发例外必填；精确绑定经独立审阅的 descriptor，见 `OTA-XC-BOOTSTRAP-BASE`；不得作为任意 CI 基版的默认批准 |
@@ -1282,7 +1294,11 @@ P4-4 配置面：
 | `firmware-rehearsal` | GitHub environment | rehearsal job | 独立 staging Worker/D1/R2 bindings，不复用 production 凭据；同账户专用 Token 仅限下述 P41-CF-CREDENTIAL-02，不允许 production 副作用 |
 | `firmware-production` | GitHub environment | release job | 至少一名独立审批人，job 必须声明 environment |
 
+生产新链只接受 `e-track-firmware-production-releases`；演练仍只接受 `e-track-firmware-p41-test-releases`。生产使用上述不带前缀 secrets；演练对应 `FIRMWARE_REHEARSAL_TRACE_R2_ACCESS_KEY_ID`、`FIRMWARE_REHEARSAL_TRACE_R2_SECRET_ACCESS_KEY` 及既有 FIRMWARE_REHEARSAL_ account/origin/deploy/AES。拒绝回退到 SDK 默认凭据链、OAuth、旧 API token 或跨环境桶。旧 `TRACE_D1_DATABASE_ID/NAME` 不再接入工作流，客户端非空指定数据库必须拒绝；实际部署绑定记录仍保留。旧平台配置不要求为实现整改删除或重写，任何平台变更按主验收计划执行。
+
 #### P41-CF-CREDENTIAL-02 同账户专用 CI Token
+
+以下为旧 P4-1 链路的保留授权/证据边界。2026-10-19 P44-CREDENTIAL-01 当前接口修订不撤销既有 e-track-ci 使用授权，也不改旧完成态/冻结包；新发布链不再消费该控制面 token，不以旧原生演练替代新链资格。
 
 2026-10-16 用户在获知同账户 Workers 编辑权限可能通过绑定访问其他 R2/D1 后，明确选择
 现有 CF 账户并提供单独的 CI Token，原话见 `docs/ota-spec-decisions.md` 记录 16。

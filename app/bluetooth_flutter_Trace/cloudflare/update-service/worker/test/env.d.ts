@@ -6,6 +6,7 @@ declare module "cloudflare:test" {
 
 declare module "cloudflare:workers" {
   interface ProvidedEnv extends WorkerEnv {
+    PREFLIGHT_LEGACY_DB: D1Database;
     TEST_MIGRATIONS: import("cloudflare:test").D1Migration[];
   }
 }
@@ -13,6 +14,7 @@ declare module "cloudflare:workers" {
 declare global {
   namespace Cloudflare {
     interface Env extends WorkerEnv {
+      PREFLIGHT_LEGACY_DB: D1Database;
       TEST_MIGRATIONS: import("cloudflare:test").D1Migration[];
     }
   }

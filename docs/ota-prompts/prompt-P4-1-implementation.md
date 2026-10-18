@@ -112,22 +112,22 @@ P3-5/P5 的设备 owner 负责实际 key provisioning/INFO 身份和 full 或精
 
 ### 开发运行时资格检查
 
-本入口只为验证原生 Wrangler 绑定能力，不生成目标制包或代替后续唯一 canonical rehearsal。
+P44-CREDENTIAL-01（2026-10-19 owner 裁定）将本入口同步到标准 S3/Worker 鉴权预检链，不生成目标制包或代替 canonical rehearsal。此前 P4-1 已验收的原生 Wrangler 源码及冻结原件保持其历史身份，不证明新链资格。
 现有 workflow 的 `workflow_dispatch(check_bindings=true, publish=false, rehearsal=false)` 调用：
 
     node .github/scripts/firmware-bindings-check.mjs --output .cache/bindings-check/result.json
 
 - job 使用 Linux 和 `firmware-rehearsal` environment，运行前必须已具备受保护的环境、经核验隔离的凭据及变量；禁止借 dispatch 自动创建无保护 environment。
-- 同账户凭据仅按 `OTA-XC-SECRETS` 的 `P41-CF-CREDENTIAL-02` 用户例外：复用现有测试 Worker/D1/R2 和专用 CI Token，不要求开户；不声明硬性的生产权限隔离，不转存本地 provisioning token，不免除精确源码/人工审批或生产零副作用证据。
+- 复用现有测试 Worker/D1/R2，改用仅测试桶的 S3 凭据和该 Worker 既有 deploy token；P41-CF-CREDENTIAL-02 保留为旧链例外，不扩大到生产，也不再把控制面 API token 作为新链门槛。不得转存 provisioning token，不要求开户，不免除源码/人工审批或生产零副作用证据。
 - `FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT` 必须等于实际 `GITHUB_SHA`；repository、run/attempt、三个显式模式输入和 `OTA_BOOT_CHAIN_READY=false` 均须校验。它只批准固定源码的开发检查，不是首发 descriptor 或发布批准。
-- 实际检查步骤仅接收 `FIRMWARE_REHEARSAL_CLOUDFLARE_ACCOUNT_ID`、`FIRMWARE_REHEARSAL_CLOUDFLARE_API_TOKEN`、`FIRMWARE_REHEARSAL_TRACE_UPDATE_SERVICE_URL` 三个 secret，以及对应 R2/D1 变量；安装依赖和普通 build/checks 不接触这些凭据。没有 AES key、deploy token、GitHub 写 token 或注册动作。
+- 实际检查步骤仅接收 FIRMWARE_REHEARSAL_ 前缀的 `CLOUDFLARE_ACCOUNT_ID`、`TRACE_R2_ACCESS_KEY_ID`、`TRACE_R2_SECRET_ACCESS_KEY`、`TRACE_UPDATE_SERVICE_URL`、`TRACE_DEPLOY_TOKEN` secrets 和 R2 bucket 变量。安装依赖和普通 build/checks 不接触这些凭据。无 AES、GitHub 写 token 或注册动作；deploy token 仅用于固定只读预检。
 - 固定输入为已提交 `P4-1-r2-registration-qualification-2026-10-15/operations/verified-metadata.json` 的三个既有 synthetic 对象；通过原 uploader 的 `verifyStoredFirmwareAsset(metadata, fileName, bucket)` 复用全字节/长度/条件 ETag 校验，缺失即失败，绝不补传。
-- `withFirmwareBucket` 保持原生 Wrangler 路径；Windows 10 在创建 runtime 目录前拒绝，Windows 11 按 build 22000 判别而非 kernel major。此检查不保证其他平台的全部先决条件，真实 runtime 资格仍须实测。
-- Worker health/配置 GET 验证精确隔离目标，D1 只运行固定表的 count 和有界 channel SELECT 并比对前后结果；job/检查 step 分别限制 10/5 分钟，结束由原 adapter dispose。Wrangler remote bindings 会建立临时远端 preview session，所以只声明无 R2/D1 业务写请求，不能声明全局零远端写入或完整生产零副作用。
+- `withFirmwareBucket` 使用标准 S3 SDK，只接受显式桶凭据，无默认身份/OAuth/旧 API token 回退。它不启动 Wrangler/workerd；旧 Windows 11 uploader 限制不再适用，原生 Worker 开发回归仍在支持的 CI 宿主执行。
+- 通过目标 Worker `/api/ci/firmware/preflight` 比较两次固定三项单调性摘要及 requestId/环境/metadata SHA，S3 仅回读既有对象；不接受 SQL/DB 参数，不调用控制面 settings。job/step 仍限制 10/5 分钟。只声明无业务写请求，不冒充物理绑定证明、完整 D1 快照或生产零副作用；这些由主验收部署/观测计划单独核验。
 
 | 输入/结果 | 判定与负例 |
 | --- | --- |
-| 已批准提交、明确锁定 gate、隔离绑定且三对象完整 | 返回 `RUNTIME_BINDING_QUALIFICATION` 及实际读回摘要，rehearsal/独立验收仍未执行 |
+| 已批准提交、明确锁定 gate、隔离目标且三对象完整 | 返回 `READ_ONLY_RELEASE_PATH_QUALIFICATION` 及实际读回/预检摘要，rehearsal/独立验收仍未执行 |
 | 普通 CI、缺配置、错提交、混合 publish/rehearsal/check | exit 2，在网络调用前失败；两个正式 job 也拒绝混合 check 模式 |
 | 对象缺失、错误 metadata/字节、条件 GET 失败 | exit 1，不 PUT、不 register，不写成功结果 |
 | Worker 绑定不符、查询失败、前后 D1 状态变化 | exit 1，保留失败日志，不报告资格通过 |

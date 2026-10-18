@@ -7,6 +7,7 @@ import { handleDownload } from "./downloads";
 import {
   handleFirmwareDownload,
   handleFirmwareLatest,
+  handleFirmwarePreflight,
   handleRegisterFirmwareRelease
 } from "./firmware";
 import { handleLatest } from "./latest";
@@ -65,6 +66,10 @@ app.post("/api/ci/releases", async (c) =>
 
 app.post("/api/ci/firmware/releases", async (c) =>
   handleRegisterFirmwareRelease(c.req.raw, c.env, c.get("requestId"))
+);
+
+app.post("/api/ci/firmware/preflight", async (c) =>
+  handleFirmwarePreflight(c.req.raw, c.env, c.get("requestId"))
 );
 
 app.all("/api/admin/*", () => {

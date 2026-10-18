@@ -1,9 +1,8 @@
 import { createHash } from "node:crypto";
-import { readFile, mkdir } from "node:fs/promises";
-import { createRequire } from "node:module";
-import { release as osRelease } from "node:os";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { pathToFileURL } from "node:url";
+import { createFirmwareS3Bucket, s3Credentials } from "./firmware-s3.mjs";
 import { canonicalJson, contentDigest, parseFirmwareRegistration } from "./firmware-schema.mjs";
 import { args, CliError, failure, outputPath, projectRoot, required, writeOutput } from "./firmware-cli.mjs";
 
@@ -26,17 +25,9 @@ async function readback(bucket, asset, head, uploaded) {
       if (size > asset.sizeBytes) throw mismatch();
       hash.update(part.value);
     }
-  } finally { await reader.cancel(); }
+  } catch { throw mismatch(); }
+  finally { await reader.cancel().catch(() => {}); }
   if (size !== asset.sizeBytes || hash.digest("hex") !== asset.sha256) throw mismatch();
-}
-
-export function assertFirmwareRuntime(platform = process.platform, release = osRelease()) {
-  if (platform !== "win32") return;
-  const version = /^(\d+)\.(\d+)\.(\d+)(?:\.\d+)?$/.exec(release);
-  // Windows 11 still reports kernel major 10. Wrangler requires build 22000+.
-  if (!version || Number(version[1]) < 10 || (Number(version[1]) === 10 && Number(version[3]) < 22000)) {
-    throw new CliError("Wrangler firmware bindings require Windows 11 or a supported Linux CI host; use the protected check_bindings dispatch instead of retrying this host");
-  }
 }
 
 export async function verifyStoredFirmwareAsset(metadata, fileName, bucket) {
@@ -76,39 +67,15 @@ export async function uploadFirmwareAsset(metadata, fileName, bytes, bucket, req
     sha256: asset.sha256, sizeBytes: asset.sizeBytes, contentDigest: contentDigest(asset.sha256) };
 }
 
-export async function withFirmwareBucket({ bucketName, accountId, root = projectRoot(), wranglerCwd, databaseId, databaseName }, operation) {
-  // Never fall back to an interactive or cached developer OAuth identity.
-  required({}, "api-token", "CLOUDFLARE_API_TOKEN");
-  if (!/^[0-9a-f]{32}$/.test(accountId) || !/^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/.test(bucketName)) throw new CliError("Invalid account/bucket configuration");
-  if ((databaseId || databaseName) && (!/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(databaseId ?? "")
-    || !/^[a-zA-Z0-9_-]+$/.test(databaseName ?? ""))) throw new CliError("Invalid explicit D1 binding");
-  assertFirmwareRuntime();
-  const temp = outputPath(root, path.join(root, ".cache", "firmware-uploader", crypto.randomUUID()));
-  const configPath = outputPath(root, path.join(temp, "wrangler.json"));
-  const controls = { TEMP: "tmp", TMP: "tmp", TMPDIR: "tmp", HOME: "home", USERPROFILE: "home",
-    APPDATA: "appdata", LOCALAPPDATA: "localappdata", XDG_CACHE_HOME: "cache", XDG_CONFIG_HOME: "config", WRANGLER_LOG_PATH: "logs" };
-  for (const dir of Object.values(controls)) outputPath(root, path.join(temp, dir));
-  for (const [key, dir] of Object.entries(controls)) {
-    await mkdir(path.join(temp, dir), { recursive: true });
-    process.env[key] = path.join(temp, dir);
-  }
-  process.env.WRANGLER_SEND_METRICS = "false";
-  process.env.WRANGLER_LOG = "none";
-  await writeOutput(root, configPath, JSON.stringify({ name: "trace-firmware-uploader", account_id: accountId,
-    compatibility_date: "2026-06-28", compatibility_flags: ["nodejs_compat"],
-    r2_buckets: [{ binding: "ASSET_BUCKET", bucket_name: bucketName, remote: true }],
-    ...(databaseId ? { d1_databases: [{ binding: "RELEASE_DB", database_id: databaseId, database_name: databaseName, remote: true }] } : {}) }));
-  const cwd = path.resolve(wranglerCwd ?? fileURLToPath(new URL("../worker/", import.meta.url)));
-  const require = createRequire(path.join(cwd, "package.json"));
-  const { getPlatformProxy } = await import(pathToFileURL(require.resolve("wrangler")).href);
-  const platform = await getPlatformProxy({ configPath, envFiles: [], persist: false, remoteBindings: true });
-  try { return await operation(platform.env.ASSET_BUCKET, platform.env.RELEASE_DB); }
-  finally { await platform.dispose(); }
+export async function withFirmwareBucket({ bucketName, accountId, env = process.env, signal }, operation) {
+  const platform = createFirmwareS3Bucket({ bucketName, accountId, credentials: s3Credentials(env), signal });
+  try { return await operation(platform.bucket); }
+  finally { platform.dispose(); }
 }
 
 async function main() {
   const options = args(process.argv.slice(2), ["metadata", "assets-dir", "asset", "bucket", "account-id",
-    "wrangler-cwd", "output", "remote", "dry-run"], ["remote", "dry-run"]);
+    "output", "remote", "dry-run"], ["remote", "dry-run"]);
   const metadataPath = path.resolve(required(options, "metadata", "TRACE_FIRMWARE_METADATA_JSON"));
   const assetsDir = path.resolve(required(options, "assets-dir", "TRACE_FIRMWARE_ASSETS_DIR"));
   const fileName = required(options, "asset");
@@ -128,7 +95,7 @@ async function main() {
   const root = projectRoot();
   const output = outputPath(root, options.output ?? metadataPath);
   await withFirmwareBucket({ root, bucketName: required(options, "bucket", "TRACE_R2_BUCKET"),
-    accountId: required(options, "account-id", "CLOUDFLARE_ACCOUNT_ID"), wranglerCwd: options["wrangler-cwd"] }, async bucket => {
+    accountId: required(options, "account-id", "CLOUDFLARE_ACCOUNT_ID") }, async bucket => {
     let timeout;
     const result = await Promise.race([
       uploadFirmwareAsset(metadata, fileName, bytesByName.get(fileName), bucket),
