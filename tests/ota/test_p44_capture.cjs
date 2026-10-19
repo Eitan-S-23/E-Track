@@ -56,8 +56,9 @@ const currentBytes = s.fs.readFileSync(s.path.join(s.root,
 const current = JSON.parse(currentBytes);
 const approvedPrevious = c._test.approvedPredecessorTarget();
 const approvedV1 = JSON.parse(s.fs.readFileSync(s.path.join(s.root, 'docs/acceptance-contracts/P4-4-v1/evidence/target.json')));
+const approvedV2 = JSON.parse(s.fs.readFileSync(s.path.join(s.root, 'docs/acceptance-contracts/P4-4-v2/evidence/target.json')));
 const approvedP41 = JSON.parse(s.fs.readFileSync(s.path.join(s.root, 'docs/acceptance-contracts/P4-1-v2/evidence/formal/target.json')));
-check('approved v2 target is hash-bound to C2', () => assert.equal(approvedPrevious.commitSha, '70193ce7fb7cc4e426029d07cf7b50c1fcbfef1c'));
+check('approved v3 target is hash-bound to C3', () => assert.equal(approvedPrevious.commitSha, 'ba952497948a03c40cbd8baebbfc9228621fb44b'));
 const currentTables = {
   firmware_releases: [{ app_id: current.appId, device_model: current.deviceModel, version_code: current.versionCode,
     registration_json: currentBytes.toString('utf8').trimEnd() }],
@@ -102,19 +103,24 @@ c._test.setPrivateCapture((label, bytes) => {
   assert(!privateOutputs.has(label), 'PRIVATE_ORIGINAL_EXISTS');
   if (bytes === undefined) return;
   privateOutputs.set(label, Buffer.from(bytes));
-  return { path: '.cache/p44/private/capture-failures/P4-4-v3/' + label + '.wire.body',
+  return { path: '.cache/p44/private/capture-failures/P4-4-v4/' + label + '.wire.body',
     size_bytes: bytes.length, sha256: s.sha256(bytes) };
 });
 const response = (body, headers = {}, status = 200) => ({ status, headers, bytes: Buffer.from(typeof body === 'string' ? body : JSON.stringify(body)) });
-const predecessorName = 'inputs/predecessor-before.json', predecessorRoot = 'inputs/predecessor-before';
-const ancestorRoot = predecessorRoot + '/' + predecessorRoot;
-function predecessorFixture(records, transform = () => {}, recent = []) {
+const predecessorName = 'inputs/predecessor-before.json', predecessorRoot = 'p';
+const inheritedRootName = 'inputs/predecessor-before', inheritedRoot = predecessorRoot + '/' + inheritedRootName;
+const ancestorRoot = inheritedRoot + '/' + inheritedRootName;
+function predecessorFixture(records, transform = () => {}, recent = [], latest = []) {
   for (const name of [...outputs.keys()]) if (name.startsWith('inputs/predecessor-before')
+    || name.startsWith(predecessorRoot + '/')
     || name.startsWith('snapshots/before/') || name.startsWith('snapshots/after/')) outputs.delete(name);
-  const files = [], inheritedFiles = [];
+  const files = [], middleFiles = [], inheritedFiles = [];
+  const layers = [{ root: predecessorRoot, files }, { root: inheritedRoot, files: middleFiles }];
   const original = (root, list, name, value, include = true) => {
     const reference = { ...s.write(root + '/' + name, value), path: name };
-    if (root === ancestorRoot) files.push({ ...reference, path: predecessorRoot + '/' + name });
+    for (const parent of layers) if (root.startsWith(parent.root + '/')) {
+      parent.files.push({ ...reference, path: root.slice(parent.root.length + 1) + '/' + name });
+    }
     if (include) list.push(reference);
     return reference;
   };
@@ -125,38 +131,56 @@ function predecessorFixture(records, transform = () => {}, recent = []) {
     const started = '2026-10-19T11:00:00Z', ended = '2026-10-19T11:00:01Z';
     original(root, list, label + '-reservation.json', { method, origin, path, started, ...(request ? { request } : {}) });
     const completed = record.completed !== false;
-    const body = original(root, list, label + (completed ? '.body' : '.partial.body'), record.body || {
+    const payload = record.body || {
       success: true, result: [{ success: true, meta: { rows_written: 0, changed_db: false }, results: record.rows || [] }],
-    });
-    const envelope = { method, path, started, ended, status: record.status || 200,
-      response_headers: { 'content-type': 'application/json' }, completed, body,
-      ...(request ? { request } : {}), ...(!completed ? { error_code: 23 } : {}), ...record.envelope };
+    };
+    const decoded = Buffer.isBuffer(payload) ? payload : Buffer.from(JSON.stringify(payload));
+    const wire = record.gzip ? gzipSync(decoded) : payload;
+    const body = record.noResponse ? undefined : original(root, list, label + (completed ? '.body' : '.partial.body'), wire);
+    const sidecar = record.gzip && completed ? original(root, list, label + '.decoded.body', record.decodedBody || decoded) : undefined;
+    const envelope = { method, path, started, ended, completed,
+      ...(!record.noResponse ? { status: record.status || 200, body,
+        response_headers: { 'content-type': 'application/json', ...(record.gzip ? { 'content-encoding': 'gzip', 'content-length': String(wire.length) } : {}) } } : {}),
+      ...(sidecar ? { decoded_body: sidecar } : {}),
+      ...(request ? { request } : {}), ...(!completed ? { error_code: record.noResponse ? 'ECONNRESET' : 23 } : {}), ...record.envelope };
     original(root, list, label + '.http.json', envelope);
   } };
   recordOriginals(ancestorRoot, inheritedFiles, records);
-  recordOriginals(predecessorRoot, files, recent);
+  recordOriginals(inheritedRoot, middleFiles, recent);
+  recordOriginals(predecessorRoot, files, latest);
   const ancestor = { status: 'FROZEN', contract_id: 'P4-4-v1', freeze_commit: '08afb97ddae316b3b305354f1582afdb836d7633' };
   const ancestorContract = original(ancestorRoot, inheritedFiles, 'predecessor.contract.json', ancestor, false);
   const ancestorMatrix = original(ancestorRoot, inheritedFiles, 'predecessor.final-evidence-matrix.json', {
     contract_id: ancestor.contract_id, contract_sha256: ancestorContract.sha256, overall_result: 'EVIDENCE_GAP' }, false);
-  const inherited = original(predecessorRoot, files, predecessorName, { schema: 'p44-predecessor-before-v1',
-    source_evidence_root: predecessorRoot, source_commit: ancestor.freeze_commit,
+  const ancestorManifest = original(inheritedRoot, middleFiles, predecessorName, { schema: 'p44-predecessor-before-v1',
+    source_evidence_root: inheritedRootName, source_commit: ancestor.freeze_commit,
     source_bundle_commit: 'e5994fb28466e46c99a1f247494473e6cba9cc03', predecessor_contract_id: ancestor.contract_id,
     predecessor_contract_sha256: ancestorContract.sha256, predecessor_contract: ancestorContract,
     predecessor_final_matrix: ancestorMatrix, files: inheritedFiles });
-  const previous = { status: 'FROZEN', contract_id: 'P4-4-v2', freeze_commit: '70193ce7fb7cc4e426029d07cf7b50c1fcbfef1c',
+  const middle = { status: 'FROZEN', contract_id: 'P4-4-v2', freeze_commit: '70193ce7fb7cc4e426029d07cf7b50c1fcbfef1c',
+    external_inputs: [{ id: 'predecessor-before', evidence_path: 'evidence/' + predecessorName,
+      evidence_sha256: ancestorManifest.sha256, fingerprint: 'sha256:' + ancestorManifest.sha256 }] };
+  const middleContract = original(inheritedRoot, middleFiles, 'predecessor.contract.json', middle, false);
+  const middleMatrix = original(inheritedRoot, middleFiles, 'predecessor.final-evidence-matrix.json', { contract_id: middle.contract_id,
+    contract_sha256: middleContract.sha256, overall_result: 'EVIDENCE_GAP' }, false);
+  const inherited = original(predecessorRoot, files, predecessorName, { schema: 'p44-predecessor-before-v1',
+    source_evidence_root: inheritedRootName, source_commit: middle.freeze_commit,
+    source_bundle_commit: '84268ac2ad34727b76250ff944211b7efba1cfb3', predecessor_contract_id: middle.contract_id,
+    predecessor_contract_sha256: middleContract.sha256, predecessor_contract: middleContract,
+    predecessor_final_matrix: middleMatrix, inherited_predecessor: ancestorManifest, files: middleFiles });
+  const previous = { status: 'FROZEN', contract_id: 'P4-4-v3', freeze_commit: 'ba952497948a03c40cbd8baebbfc9228621fb44b',
     external_inputs: [{ id: 'predecessor-before', evidence_path: 'evidence/' + predecessorName,
       evidence_sha256: inherited.sha256, fingerprint: 'sha256:' + inherited.sha256 }] };
   const contractRef = original(predecessorRoot, files, 'predecessor.contract.json', previous, false);
   const matrixRef = original(predecessorRoot, files, 'predecessor.final-evidence-matrix.json', { contract_id: previous.contract_id,
     contract_sha256: contractRef.sha256, overall_result: 'EVIDENCE_GAP' }, false);
   const manifest = { schema: 'p44-predecessor-before-v1', source_evidence_root: predecessorRoot,
-    source_commit: previous.freeze_commit, source_bundle_commit: '84268ac2ad34727b76250ff944211b7efba1cfb3',
+    source_commit: previous.freeze_commit, source_bundle_commit: '20febda2ac2e05e5f4b761a9f365091b177516b6',
     predecessor_contract_id: previous.contract_id, predecessor_contract_sha256: contractRef.sha256,
     predecessor_contract: contractRef, predecessor_final_matrix: matrixRef, inherited_predecessor: inherited, files };
   transform(manifest);
   const manifestRef = s.write(predecessorName, manifest);
-  return { status: 'FROZEN', contract_id: 'P4-4-v3', external_inputs: [{ id: 'predecessor-before',
+  return { status: 'FROZEN', contract_id: 'P4-4-v4', external_inputs: [{ id: 'predecessor-before',
     evidence_path: 'evidence/' + predecessorName, evidence_sha256: manifestRef.sha256, fingerprint: 'sha256:' + manifestRef.sha256 }] };
 }
 function streamed(wire, headers, width = 113) {
@@ -279,8 +303,168 @@ async function strictTransport() {
     assert.throws(() => c._test.stagingSnapshotAdmission(tables), /HTTP_DECODED_MISMATCH/));
   page.decoded_body = originalDecoded;
 }
+async function requestRetries() {
+  const undici = require(s.path.join(s.root, 'app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/undici'));
+  const reset = () => Object.assign(new Error(fixtureValue), { code: 'ECONNRESET' });
+  const d1Route = '/accounts/[ACCOUNT]/d1/database/' + c.resources.protected.db + '/query';
+  const sql = 'SELECT COUNT(*) AS count FROM "apps"';
+  c._test.setTransport(undefined);
+  for (const [label, origin, route, method, body] of [
+    ['retry-native-get', 'https://api.github.com', prefix + '/releases', 'GET', undefined],
+    ['retry-native-d1', 'https://api.cloudflare.com', d1Route, 'POST', { sql }],
+  ]) {
+    const agent = new undici.MockAgent(); agent.disableNetConnect();
+    const pool = agent.get(origin);
+    const endpoint = origin === 'https://api.cloudflare.com' ? '/client/v4' + route.replace('[ACCOUNT]', '1'.repeat(32)) : route;
+    const requestBytes = body ? Buffer.from(JSON.stringify(body)) : undefined;
+    const matcher = { path: endpoint, method, ...(body ? {
+      body: bytes => bytes instanceof Uint8Array && Buffer.from(bytes).equals(requestBytes),
+    } : {}) };
+    pool.intercept(matcher).replyWithError(reset());
+    const decoded = Buffer.from(JSON.stringify(body ? { success: true, result: [{ success: true,
+      meta: { rows_written: 0, changed_db: false }, results: [{ count: 1 }] }] } : []));
+    const wire = body ? gzipSync(decoded) : decoded;
+    pool.intercept(matcher).reply(200, wire, { headers: body
+      ? { 'content-encoding': 'gzip', 'content-length': String(wire.length) } : {} });
+    c._test.setHttp({ request: undici.request, ProxyAgent: class extends undici.Dispatcher {
+      dispatch(options, handler) { return agent.dispatch(options, handler); }
+      async destroy() { await agent.close(); }
+    } });
+    const got = await c._test.capture(label, origin, route, { method, ...(body ? { body } : {}) });
+    agent.assertNoPendingInterceptors();
+    check('real installed Undici MockAgent retries exact read once ' + method, () => {
+      assert.equal(got.envelope.request_attempts, 2); assert.equal(got.envelope.request_failures.length, 1);
+      assert(got.bytes.equals(decoded));
+      const first = got.envelope.request_failures[0], failure = s.read(first.path);
+      assert.equal(s.sha256(s.readBytes(first.path)), first.sha256); assert.equal(failure.error_code, 'ECONNRESET');
+      assert.equal(failure.attempt, 1); assert.equal(failure.final_response_received, false);
+      assert.equal(failure.informational_seen, false); assert.equal(failure.received_body_bytes, 0);
+      assert.deepEqual(s.read(got.envelope.retry_reservation.path).first_failure, first);
+      if (body) assert.deepEqual(failure.request, got.envelope.request);
+      assert(!s.readBytes(first.path).includes(Buffer.from(fixtureValue)));
+      assert(!outputs.has(label + '-request-failure-2.json'));
+    });
+  }
+
+  let calls = 0, closes = 0, handler;
+  const install = fn => {
+    calls = 0; closes = 0; handler = fn;
+    c._test.setHttp({ request: async (...args) => { calls++; return handler(...args); },
+      ProxyAgent: class { async destroy() { closes++; } } });
+  };
+  install(async () => { throw reset(); });
+  await assert.rejects(c._test.capture('retry-twice-failed', 'https://api.github.com', prefix + '/releases')); checks++;
+  check('second pre-response failure stops and preserves both originals', () => {
+    const envelope = s.read('retry-twice-failed.http.json');
+    assert.equal(calls, 2); assert.equal(closes, 1); assert.equal(envelope.request_attempts, 2);
+    assert.equal(envelope.request_failures.length, 2); assert(envelope.retry_reservation);
+    assert.equal(envelope.completed, false);
+    for (const reference of envelope.request_failures) assert.equal(s.sha256(s.readBytes(reference.path)), reference.sha256);
+  });
+  for (const [label, origin, route, method, body] of [
+    ['retry-no-dispatch', 'https://api.github.com', prefix + '/actions/workflows/firmware-build.yml/dispatches', 'POST', { ref: 'test' }],
+    ['retry-no-patch', 'https://api.github.com', envRoute + '/variables/OTA_PREVIOUS_RELEASE_JSON', 'PATCH', { name: 'test', value: 'test' }],
+    ['retry-no-business-post', c.resources.staging.worker, '/api/ci/firmware/preflight', 'POST', {}],
+  ]) {
+    install(async () => { throw reset(); });
+    await assert.rejects(c._test.capture(label, origin, route, { method, body })); checks++;
+    check('write or business request has no extra attempt ' + label, () => {
+      assert.equal(calls, 1); assert.equal(s.read(label + '.http.json').request_attempts, 1);
+      assert(!outputs.has(label + '-retry-2-reservation.json'));
+    });
+  }
+  check('arbitrary SQL and GET payload are not retry-authorized', () => {
+    assert(!c._test.retryableCapture('https://api.cloudflare.com', 'POST', d1Route, { sql: 'DELETE FROM apps' }));
+    assert(!c._test.retryableCapture('https://api.github.com', 'GET', prefix + '/releases', {}));
+    assert(c._test.retryableCapture('s3', 'GET', '/' + c.resources.staging.bucket + '/?list-type=2&max-keys=1000'));
+  });
+  install(async () => { throw reset(); });
+  await assert.rejects(c._test.transport('https://offline.invalid/private-verify', 'GET', {})); checks++;
+  check('direct private verify transport retains one-attempt behavior', () => assert.equal(calls, 1));
+  for (const code of ['ECONNREFUSED', 'ENOTFOUND', 'UND_ERR_SOCKET', 'ABORT_ERR']) {
+    install(async () => { throw Object.assign(new Error(fixtureValue), { code }); });
+    const label = 'retry-no-code-' + code.toLowerCase();
+    await assert.rejects(c._test.capture(label, 'https://api.github.com', prefix + '/releases')); checks++;
+    check('unapproved error is not retried ' + code, () => assert.equal(calls, 1));
+  }
+  for (const status of [401, 403, 500]) {
+    install(async () => ({ ...streamed(Buffer.from('{"observed":true}'), {}), statusCode: status }));
+    const label = 'retry-no-http-' + status;
+    await assert.rejects(c._test.capture(label, 'https://api.github.com', prefix + '/releases')); checks++;
+    check('HTTP response is retained without retry ' + status, () => {
+      assert.equal(calls, 1); assert.equal(s.read(label + '.http.json').status, status);
+      assert.equal(s.read(label + '.http.json').request_failures.length, 0); assert(outputs.has(label + '.body'));
+    });
+  }
+  install(async (_url, options) => {
+    options.onInfo({ statusCode: 103, headers: { private_header: fixtureValue } }); throw reset();
+  });
+  await assert.rejects(c._test.capture('retry-no-informational', 'https://api.github.com', prefix + '/releases')); checks++;
+  check('1xx blocks retry and is not recorded as no response at all', () => {
+    const first = s.read('retry-no-informational-request-failure-1.json');
+    assert.equal(calls, 1); assert.equal(first.informational_seen, true); assert.equal(first.first_information.status, 103);
+    assert.equal(first.informational_count, 1); assert(!outputs.get('retry-no-informational-request-failure-1.json').includes(Buffer.from(fixtureValue)));
+  });
+  install(async () => {
+    const body = new Readable({ read() { this.push(Buffer.from('{"ok":true}')); this.destroy(reset()); } });
+    return { statusCode: 200, headers: {}, body };
+  });
+  await assert.rejects(c._test.capture('retry-no-body-reset', 'https://api.github.com', prefix + '/releases')); checks++;
+  check('ECONNRESET after final headers does not enter request retry boundary', () => {
+    assert.equal(calls, 1); assert.equal(s.read('retry-no-body-reset.http.json').status, 200);
+    assert.equal(s.read('retry-no-body-reset.http.json').request_failures.length, 0);
+  });
+  const brokenGzip = gzipSync(Buffer.from('{"ok":true}')).subarray(0, -1);
+  install(async () => streamed(brokenGzip, { 'content-encoding': 'gzip' }));
+  await assert.rejects(c._test.capture('retry-no-gzip', 'https://api.cloudflare.com', d1Route, { method: 'POST', body: { sql } })); checks++;
+  check('gzip failure remains private and does not retry a fulfilled request', () => {
+    assert.equal(calls, 1); assert(privateOutputs.get('retry-no-gzip').equals(brokenGzip));
+    assert.equal(s.read('retry-no-gzip.http.json').request_failures.length, 0);
+  });
+
+  const originalWrite = s.write;
+  for (const suffix of ['-request-failure-1.json', '-retry-2-reservation.json']) {
+    const label = suffix.includes('failure') ? 'retry-audit-failed' : 'retry-reservation-failed';
+    s.write = (name, value) => { if (name === label + suffix) throw Error('OFFLINE_AUDIT_FAILURE'); return originalWrite(name, value); };
+    install(async () => { throw reset(); });
+    try { await assert.rejects(c._test.capture(label, 'https://api.github.com', prefix + '/releases')); checks++; }
+    finally { s.write = originalWrite; }
+    check('audit failure prevents an unrecorded extra request ' + suffix, () => assert.equal(calls, 1));
+  }
+  const originalTimeout = AbortSignal.timeout;
+  const controller = new AbortController(), durations = []; let timer;
+  AbortSignal.timeout = value => { durations.push(value); return controller.signal; };
+  install(async () => { timer = setTimeout(() => controller.abort(), 25); throw reset(); });
+  try {
+    await assert.rejects(c._test.capture('retry-aborted-backoff', 'https://api.github.com', prefix + '/releases')); checks++;
+    check('same 60s signal aborts backoff before a second request', () => {
+      assert.deepEqual(durations, [60000]); assert.equal(calls, 1);
+      assert(!outputs.has('retry-aborted-backoff-retry-2-reservation.json'));
+      assert.equal(s.read('retry-aborted-backoff.http.json').request_failures.length, 1);
+    });
+  } finally { clearTimeout(timer); AbortSignal.timeout = originalTimeout; }
+  let now = 0;
+  c._test.setMonotonic(() => now);
+  s.write = (name, value) => {
+    const reference = originalWrite(name, value);
+    if (name === 'retry-sync-deadline-retry-2-reservation.json') now = 60001;
+    return reference;
+  };
+  install(async () => { throw reset(); });
+  try {
+    await assert.rejects(c._test.capture('retry-sync-deadline', 'https://api.github.com', prefix + '/releases'),
+      { code: 'REQUEST_DEADLINE_EXCEEDED' }); checks++;
+    check('synchronous reservation crossing deadline cannot send second request', () => {
+      const record = s.read('retry-sync-deadline.http.json');
+      assert.equal(calls, 1); assert.equal(record.request_attempts, 1); assert(record.retry_reservation);
+      assert.equal(record.request_failures.length, 1);
+    });
+  } finally { s.write = originalWrite; c._test.setMonotonic(undefined); }
+  c._test.setHttp(undefined);
+}
 async function main() {
   await strictTransport();
+  await requestRetries();
   let requests = 0;
   c._test.setTransport(async (url, method, headers, body) => {
     requests++; assert.equal(method, 'POST'); assert(outputs.has('dispatch-reservation.json'));
@@ -583,8 +767,42 @@ async function main() {
     fixture = predecessorFixture([{ label: oldLabel, sql: oldSql, rows: rows(1) }], transform);
     check('missing or skipped V2/V1 lineage is rejected', () => assert.throws(() => c._test.loadBeforePredecessor(predecessorName, fixture)));
   }
+  const completedV3 = [32, 40, 48, 56, 64].map(offset => ({
+    label: 'snapshots/before/protected-channel_history-rows8-' + offset,
+    sql: 'SELECT * FROM "channel_history" ORDER BY rowid LIMIT 8 OFFSET ' + offset,
+    rows: rows(65).slice(offset, offset + 8), gzip: true,
+  }));
+  const failedV3 = { label: 'snapshots/before/protected-patches-rows8-0',
+    sql: 'SELECT * FROM "patches" ORDER BY rowid LIMIT 8 OFFSET 0', completed: false, noResponse: true };
+  fixture = predecessorFixture([{ label: oldLabel, sql: oldSql, rows: rows(65), completed: false }], () => {},
+    recentPages, [...completedV3, failedV3]);
+  network = 0; c._test.setTransport(noNetwork);
+  const allHistory = await c._test.withBeforePredecessor(predecessorName, fixture,
+    () => c._test.tablePages('snapshots/before', 'protected', 'channel_history', 65));
+  check('V4 reuses complete gzip pages across three generations without requests', () => {
+    assert.equal(network, 0); assert.deepEqual(allHistory.flatMap(page => c._test.d1Document(page).result[0].results), rows(65));
+    assert.equal(allHistory[4].predecessor_origin.contract_id, 'P4-4-v3');
+    assert(allHistory[4].decoded_body.path.startsWith('p/snapshots/before/'));
+    assert(allHistory[0].body.path.startsWith('p/inputs/predecessor-before/snapshots/before/'));
+  });
+  c._test.setTransport(async (_url, _method, headers, body) => {
+    network++; assert.equal(JSON.parse(body).sql, failedV3.sql); assert.equal(headers['accept-encoding'], 'gzip');
+    return decodedResponse(gzipSync(Buffer.from(JSON.stringify({ success: true, result: [{ success: true,
+      meta: { rows_written: 0, changed_db: false }, results: rows(3) }] }))), { 'content-encoding': 'gzip' });
+  });
+  await c._test.withBeforePredecessor(predecessorName, fixture,
+    () => c._test.tablePages('snapshots/before', 'protected', 'patches', 3));
+  check('V4 resumes missing patches read, not earlier successful gzip pages', () => {
+    assert.equal(network, 1); assert.equal(s.read('p/' + failedV3.label + '.http.json').completed, false);
+  });
+  fixture = predecessorFixture([{ label: oldLabel, sql: oldSql, rows: rows(65), completed: false }], () => {}, recentPages,
+    [{ ...completedV3[0], decodedBody: Buffer.from('{}') }]);
+  c._test.setTransport(noNetwork);
+  await assert.rejects(c._test.withBeforePredecessor(predecessorName, fixture,
+    () => c._test.d1(completedV3[0].label, 'protected', completedV3[0].sql, true)), /HTTP_DECODED_MISMATCH/); checks++;
+  check('self-consistent inherited sidecar hashes cannot replace wire truth', () => assert.equal(network, 1));
 
-  // V3 recognizes only the approved C2 descriptor, not the superseded C1 pair.
+  // V4 recognizes only the approved C3 descriptor, not older accepted pairs.
   s.cp.spawnSync = spawnSync;
   for (const name of [...outputs.keys()]) if (name.startsWith('configure') || name === 'configured.json') outputs.delete(name);
   const stagingValues = { OTA_PREVIOUS_RELEASE_JSON: c.canonical(approvedPrevious.descriptor),
@@ -607,22 +825,23 @@ async function main() {
     if (endpoint.endsWith('/environments/firmware-' + (production ? 'production' : 'rehearsal'))) return response({
       deployment_branch_policy: { protected_branches: false, custom_branch_policies: true }, protection_rules: [{ type: 'required_reviewers',
         prevent_self_review: production, reviewers: [{ type: 'User', reviewer: { login: 'Eitan-S-23', id: 204050265 } }] }] });
-    throw Error('UNKNOWN_V3_CONFIGURATION_ROUTE');
+    throw Error('UNKNOWN_V4_CONFIGURATION_ROUTE');
   });
   await c._test.configure(); checks++;
-  check('C2 to C3 changes only descriptor and hash', () => assert.deepEqual(patches.sort(), ['OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256', 'OTA_PREVIOUS_RELEASE_JSON']));
-  check('C2 to C3 never recreates existing branch rule', () => assert.equal(branchPosts, 0));
+  check('C3 to C4 changes only descriptor and hash', () => assert.deepEqual(patches.sort(), ['OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256', 'OTA_PREVIOUS_RELEASE_JSON']));
+  check('C3 to C4 never recreates existing branch rule', () => assert.equal(branchPosts, 0));
   const resetConfiguration = () => {
     for (const name of [...outputs.keys()]) if (name.startsWith('configure') || name === 'configured.json') outputs.delete(name);
     patches.length = 0; branchPosts = 0;
   };
   resetConfiguration();
   await c._test.configure(); checks++;
-  check('complete C3 pair is zero mutation no-op', () => assert.equal(patches.length + branchPosts, 0));
+  check('complete C4 pair is zero mutation no-op', () => assert.equal(patches.length + branchPosts, 0));
   for (const pair of [
     { OTA_PREVIOUS_RELEASE_JSON: c.canonical(approvedPrevious.descriptor), OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256: target.descriptorSha256 },
     { OTA_PREVIOUS_RELEASE_JSON: c.canonical(target.descriptor), OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256: approvedPrevious.descriptorSha256 },
     { OTA_PREVIOUS_RELEASE_JSON: c.canonical(approvedV1.descriptor), OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256: approvedV1.descriptorSha256 },
+    { OTA_PREVIOUS_RELEASE_JSON: c.canonical(approvedV2.descriptor), OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256: approvedV2.descriptorSha256 },
     { OTA_PREVIOUS_RELEASE_JSON: c.canonical(approvedP41.descriptor), OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256: approvedP41.descriptorSha256 },
   ]) {
     resetConfiguration(); Object.assign(stagingValues, pair);
@@ -643,32 +862,43 @@ async function realPredecessor() {
   }
   const makeAnchor = value => {
     const bytes = Buffer.from(JSON.stringify(value)); outputs.set(predecessorName, bytes);
-    return { status: 'FROZEN', contract_id: 'P4-4-v3', external_inputs: [{ id: 'predecessor-before',
+    return { status: 'FROZEN', contract_id: 'P4-4-v4', external_inputs: [{ id: 'predecessor-before',
       evidence_path: 'evidence/' + predecessorName, evidence_sha256: s.sha256(bytes), fingerprint: 'sha256:' + s.sha256(bytes) }] };
   };
   const previousMatrix = JSON.parse(outputs.get(predecessorRoot + '/' + packet.manifest.predecessor_final_matrix.path));
-  const inheritedManifest = JSON.parse(outputs.get(predecessorRoot + '/' + packet.manifest.inherited_predecessor.path));
+  const middleManifest = JSON.parse(outputs.get(predecessorRoot + '/' + packet.manifest.inherited_predecessor.path));
+  const inheritedManifest = JSON.parse(outputs.get(inheritedRoot + '/' + middleManifest.inherited_predecessor.path));
   const inheritedMatrix = JSON.parse(outputs.get(ancestorRoot + '/' + inheritedManifest.predecessor_final_matrix.path));
   assert(/[A-F]/.test(inheritedManifest.predecessor_contract_sha256));
   assert(/[A-F]/.test(inheritedMatrix.contract_sha256));
-  let requests = 0, complete = 0, incomplete = 0;
+  const inventory = c._test.loadBeforePredecessor(predecessorName, makeAnchor(packet.manifest));
+  assert.equal(inventory.layers.length, 3); assert.equal(inventory.incomplete.size, 3);
+  let requests = 0, complete = 0, incomplete = 0, gzipComplete = 0;
   c._test.setTransport(async () => { requests++; throw Error('REAL_FIXTURE_MUST_BE_OFFLINE'); });
   await c._test.withBeforePredecessor(predecessorName, makeAnchor(packet.manifest), async () => {
-    for (const [root, manifest] of [[predecessorRoot, packet.manifest], [ancestorRoot, inheritedManifest]]) {
+    for (const [root, manifest] of [[predecessorRoot, packet.manifest], [inheritedRoot, middleManifest], [ancestorRoot, inheritedManifest]]) {
       for (const file of manifest.files.filter(item => item.path.startsWith('snapshots/before/') && item.path.endsWith('.http.json'))) {
         const label = file.path.slice(0, -'.http.json'.length), envelope = JSON.parse(outputs.get(root + '/' + file.path));
         const reservation = JSON.parse(outputs.get(root + '/' + label + '-reservation.json'));
         const body = envelope.request ? JSON.parse(outputs.get(root + '/' + envelope.request.path)) : undefined;
-        const restored = c._test.predecessorCapture(label, reservation.origin, envelope.path, { method: envelope.method, body });
         if (envelope.completed) {
-          assert(restored && restored.bytes.equals(outputs.get(root + '/' + envelope.body.path)));
+          const restored = c._test.predecessorCapture(label, reservation.origin, envelope.path, { method: envelope.method, body });
+          assert(restored && restored.wireBytes.equals(outputs.get(root + '/' + envelope.body.path)));
+          assert(restored.bytes.equals(outputs.get(root + '/' + (envelope.decoded_body || envelope.body).path)));
+          if (envelope.decoded_body) {
+            gzipComplete++;
+            assert.deepEqual(restored.json(), JSON.parse(outputs.get(root + '/' + envelope.decoded_body.path)));
+            assert.equal(restored.envelope.decoded_body.path, root + '/' + envelope.decoded_body.path);
+          }
           assert.equal(restored.envelope.started, envelope.started); assert.equal(restored.envelope.ended, envelope.ended);
           assert.equal(restored.envelope.predecessor_origin.contract_id, manifest.predecessor_contract_id); complete++;
-        } else { assert.equal(restored, null); incomplete++; }
+        } else {
+          assert.throws(() => c._test.d1Document(envelope), /D1_DOCUMENT_BINDING/); incomplete++;
+        }
       }
     }
   });
-  assert.equal(complete, 35); assert.equal(incomplete, 2); assert.equal(requests, 0);
+  assert.equal(complete, 47); assert.equal(incomplete, 3); assert.equal(gzipComplete, 12); assert.equal(requests, 0);
   const wrong = structuredClone(packet.manifest); wrong.predecessor_contract_sha256 = 'F'.repeat(64);
   assert.throws(() => c._test.loadBeforePredecessor(predecessorName, makeAnchor(wrong)), /PREDECESSOR_CONTRACT_HASH/);
   wrong.predecessor_contract_sha256 = 'G'.repeat(64);
@@ -682,13 +912,27 @@ async function realPredecessor() {
   outputs.set(matrixPath, changedMatrix);
   assert.throws(() => c._test.loadBeforePredecessor(predecessorName, makeAnchor(changedManifest)), /PREDECESSOR_MATRIX_BINDING/);
   outputs.set(matrixPath, originalMatrixBytes);
+  const gzipFile = packet.manifest.files.find(item => item.path.startsWith('snapshots/before/') && item.path.endsWith('.http.json')
+    && JSON.parse(outputs.get(predecessorRoot + '/' + item.path)).decoded_body);
+  const gzipEnvelope = JSON.parse(outputs.get(predecessorRoot + '/' + gzipFile.path));
+  const decodedPath = predecessorRoot + '/' + gzipEnvelope.decoded_body.path, originalDecoded = outputs.get(decodedPath);
+  outputs.set(decodedPath, Buffer.from('{}'));
+  assert.throws(() => c._test.loadBeforePredecessor(predecessorName, makeAnchor(packet.manifest)), /PREDECESSOR_BYTES/);
+  outputs.set(decodedPath, originalDecoded);
   console.log(JSON.stringify({ ok: true, source: packet.scope, complete_old_reads: complete, incomplete_old_reads: incomplete,
+    gzip_old_reads: gzipComplete, inherited_sidecar_tamper_rejected: true,
+    failed_original_inventory: inventory.incomplete.size,
     uppercase_originals_accepted: true, wrong_digest_rejected: true, wrong_matrix_digest_rejected: true,
     malformed_digest_rejected: true, network_requests: requests,
     filesystem_writes: 0 }));
 }
-(process.argv[2] === '--predecessor-stdin' ? realPredecessor() : main()).catch(error => { console.error(JSON.stringify({ ok: false, assertions: checks, error_code: error.code || 'OFFLINE_TEST_FAILED' })); process.exitCode = 1; })
+(process.argv[2] === '--predecessor-stdin' ? realPredecessor()
+  : process.argv[2] === '--retry-only' ? requestRetries() : main()).catch(error => {
+    console.error(JSON.stringify({ ok: false, assertions: checks, error_code: error.code || 'OFFLINE_TEST_FAILED',
+      error_name: error.name, source_location: error.stack?.match(/(?:test_p44_capture\.cjs|capture\.cjs):[0-9]+:[0-9]+/)?.[0] }));
+    process.exitCode = 1;
+  })
   .finally(() => { Object.assign(s, saved); c._test.setContext(undefined); c._test.setTransport(undefined);
     s.fs.existsSync = exists; s.cp.spawnSync = spawnSync;
-    c._test.setHttp(undefined); c._test.setPrivateCapture(undefined);
+    c._test.setHttp(undefined); c._test.setPrivateCapture(undefined); c._test.setMonotonic(undefined);
     c._test.setFrozen(undefined); c._test.setSleep(undefined); });

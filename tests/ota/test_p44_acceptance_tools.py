@@ -25,6 +25,7 @@ SPEC = importlib.util.spec_from_file_location("p44_acceptance_tools", ENTRY)
 p44 = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(p44)
 OUTPUT = None
+WINDOWS_FIXTURE = None
 
 
 def raw(value):
@@ -639,10 +640,56 @@ class P44ToolsTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         observed = json.loads(result.stdout)
         self.assertEqual(observed["source"], "bundle.predecessor_plan")
-        self.assertEqual((observed["complete_old_reads"], observed["incomplete_old_reads"]), (35, 2))
+        self.assertEqual((observed["complete_old_reads"], observed["incomplete_old_reads"]), (47, 3))
+        self.assertEqual(observed["gzip_old_reads"], 12)
+        self.assertTrue(observed["inherited_sidecar_tamper_rejected"])
         self.assertTrue(observed["uppercase_originals_accepted"] and observed["wrong_digest_rejected"]
                         and observed["wrong_matrix_digest_rejected"])
         self.assertEqual(observed["network_requests"], 0)
+
+    def test_real_windows_three_layer_guard_and_file_reference(self):
+        specification = importlib.util.spec_from_file_location("p44_windows_path_plan", ROOT / "Tools/acceptance/p44/bundle.py")
+        bundle = importlib.util.module_from_spec(specification)
+        specification.loader.exec_module(bundle)
+        planned, manifest = bundle.predecessor_plan()
+        self.assertEqual(manifest["source_evidence_root"], "p")
+        longest = max(len(str(target)) for _, target in planned)
+        if WINDOWS_FIXTURE is not None:
+            path = p44.guarded_path(ROOT, WINDOWS_FIXTURE)
+            self.assertTrue(path.is_file())
+        else:
+            base = ROOT / ".cache/p44/v4-paths" / OUTPUT.name
+            tail = Path("p/inputs/predecessor-before/inputs/predecessor-before/snapshots/before/"
+                        "production-firmware_admin_idempotency_tombstones-count-reservation.json")
+            padding = longest - len(str(base / tail)) - 1
+            self.assertGreater(padding, 0)
+            path = p44.guarded_path(ROOT, base / ("w" * padding) / tail)
+            path.parent.mkdir(parents=True)
+            p44.guarded_path(ROOT, path)
+            with path.open("xb") as stream:
+                stream.write(b'{"scope":"WINDOWS_PATH_FIXTURE_NOT_A_PLATFORM_OBSERVATION"}\n')
+        self.assertEqual(len(str(path)), longest)
+        original = path.read_bytes()
+        reference = {"path": str(path), "size_bytes": len(original), "sha256": p44.digest(original)}
+        self.save({"scope": "REAL_WINDOWS_GUARD_AND_FILEREF", "reference": reference, "absolute_length": longest,
+                   "reused_existing_fixture": WINDOWS_FIXTURE is not None})
+        self.assertEqual(self.ctx.read(reference), original)
+        env = os.environ.copy()
+        for name in ("TEMP", "TMP", "TMPDIR", "HOME", "USERPROFILE", "APPDATA", "LOCALAPPDATA",
+                     "XDG_CONFIG_HOME", "XDG_CACHE_HOME", "XDG_DATA_HOME"):
+            env[name] = str(self.directory)
+        for name in ("NODE_OPTIONS", "NODE_V8_COVERAGE", "NODE_COMPILE_CACHE", "SSLKEYLOGFILE"):
+            env.pop(name, None)
+        expression = ("const s=require('./Tools/acceptance/p44/run.cjs');"
+                      "const p=s.guard(process.argv[1]);const b=s.fs.readFileSync(p);"
+                      "process.stdout.write(JSON.stringify({absolute_length:p.length,size_bytes:b.length,sha256:s.sha256(b)}));")
+        result = subprocess.run(["node", "-e", expression, str(path)], cwd=ROOT, env=env,
+                                capture_output=True, timeout=30, check=False)
+        self.save(result.stdout)
+        self.save(result.stderr)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        observed = json.loads(result.stdout)
+        self.assertEqual(observed, {"absolute_length": longest, "size_bytes": reference["size_bytes"], "sha256": reference["sha256"]})
 
     def test_real_migrations_support_rowid_selects_and_audit_fields(self):
         database = sqlite3.connect(":memory:")
@@ -929,14 +976,16 @@ class P44ToolsTests(unittest.TestCase):
 
 
 def main():
-    global OUTPUT
+    global OUTPUT, WINDOWS_FIXTURE
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--windows-fixture-file", type=Path)
     args = parser.parse_args()
     OUTPUT = p44.guarded_path(ROOT, args.output_dir)
+    WINDOWS_FIXTURE = p44.guarded_path(ROOT, args.windows_fixture_file) if args.windows_fixture_file else None
     if OUTPUT.exists():
         raise SystemExit("Use a new output label; earlier test evidence is immutable")
-    allowed = ROOT / ".cache/p44-runner-tests-20261019"
+    allowed = ROOT / ".cache/p44-runner-tests-20261020"
     try:
         OUTPUT.relative_to(allowed)
     except ValueError:

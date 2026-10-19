@@ -15,20 +15,35 @@ import sys
 import zipfile
 
 ROOT = Path(__file__).absolute().parents[3]
-PACKAGE = ROOT / "docs/acceptance-contracts/P4-4-v3"
+PACKAGE = ROOT / "docs/acceptance-contracts/P4-4-v4"
 DATA = PACKAGE / "evidence"
-CONTRACT = ROOT / "docs/acceptance-contracts/P4-4-v3.contract.json"
-PREVIOUS = ROOT / "docs/acceptance-contracts/P4-4-v2"
-PREVIOUS_CONTRACT = ROOT / "docs/acceptance-contracts/P4-4-v2.contract.json"
+CONTRACT = ROOT / "docs/acceptance-contracts/P4-4-v4.contract.json"
+PREVIOUS = ROOT / "docs/acceptance-contracts/P4-4-v3"
+PREVIOUS_CONTRACT = ROOT / "docs/acceptance-contracts/P4-4-v3.contract.json"
 PREVIOUS_MATRIX = PREVIOUS / "final-evidence-matrix.json"
-PREVIOUS_SHA256 = "CFFF5E841B6FBE6F251A8A931C450907B477B678E890DCD6B00C2081E07D719A"
-PREVIOUS_MATRIX_SHA256 = "C335006F0B166535CE957C345ADF579440E087B6B980239BACA96500F019A46C"
-PREVIOUS_SOURCE = "70193ce7fb7cc4e426029d07cf7b50c1fcbfef1c"
-PREVIOUS_BUNDLE = "84268ac2ad34727b76250ff944211b7efba1cfb3"
+PREVIOUS_SHA256 = "4FC05662F1BB9CA829BB8E769754229F6BEBC41CBB99A3ED38099DB1E5D7E2CD"
+PREVIOUS_MATRIX_SHA256 = "41C328859FE3289567FFFF409375766148D826D76F79918CF34ED14740413895"
+PREVIOUS_SOURCE = "ba952497948a03c40cbd8baebbfc9228621fb44b"
+PREVIOUS_BUNDLE = "20febda2ac2e05e5f4b761a9f365091b177516b6"
 PREDECESSOR = "inputs/predecessor-before.json"
+PREDECESSOR_ROOT = "p"
+HISTORY = {
+    "P4-4-v3": {"source_commit": PREVIOUS_SOURCE, "source_bundle_commit": PREVIOUS_BUNDLE,
+                "contract_sha256": PREVIOUS_SHA256, "matrix_sha256": PREVIOUS_MATRIX_SHA256, "root": PREDECESSOR_ROOT},
+    "P4-4-v2": {"source_commit": "70193ce7fb7cc4e426029d07cf7b50c1fcbfef1c",
+                "source_bundle_commit": "84268ac2ad34727b76250ff944211b7efba1cfb3",
+                "contract_sha256": "CFFF5E841B6FBE6F251A8A931C450907B477B678E890DCD6B00C2081E07D719A",
+                "matrix_sha256": "C335006F0B166535CE957C345ADF579440E087B6B980239BACA96500F019A46C",
+                "root": "inputs/predecessor-before"},
+    "P4-4-v1": {"source_commit": "08afb97ddae316b3b305354f1582afdb836d7633",
+                "source_bundle_commit": "e5994fb28466e46c99a1f247494473e6cba9cc03",
+                "contract_sha256": "5EDFE3AA67DB573730F0D095A72E8EAD3F9E49E5D2457B2982480F8FC068BDB9",
+                "matrix_sha256": "021346D79CF0E01848C09ACC33A7D5854400B2DDB82BA10E1ADDF0DF049DCA0E",
+                "root": "inputs/predecessor-before"},
+}
 SOURCE = "b56534d7b6c993c0795010d0404fb8a81f7eeb9d"
 TOOLS = "Tools/acceptance/p44/"
-DATA_REL = "docs/acceptance-contracts/P4-4-v3/evidence/"
+DATA_REL = "docs/acceptance-contracts/P4-4-v4/evidence/"
 
 
 def guard(value, root=ROOT):
@@ -105,13 +120,16 @@ def definitions():
         before_description = ""
         if mode == "before":
             args.append(PREDECESSOR)
-            before_description = ("Review the direct v2 and inherited v1 originals: consume 35 complete, exactly matching read-only responses "
+            before_description = ("Review the direct v3 and inherited v2/v1 originals: consume 47 complete, exactly matching read-only responses "
                                   "without network replay, including legacy LIMIT 500 and LIMIT 8 pages. "
-                                  "Retain both partial responses as failures; collect only unfinished rows with LIMIT 8. ")
+                                  "Retain both partial responses and the pre-response connection failure; collect only unfinished rows with LIMIT 8. ")
         return command(name, "node", args, groups or ["cloudflare", "capture"],
                        [TOOLS + "capture.cjs"], "Raw capture under the fixed P4-4 plan; one invocation; Undici HTTP <=60s, standard gh archive <=180s, wrapper watchdog <=60 minutes; "
                        "complete bounded pages; fixed D1 POST queries use standard gzip negotiation and strictly bounded decoding, preserving wire and decoded originals, "
                        "with unsafe/incomplete new compressed wire retained privately and publicly identified only by hash/size. "
+                       "Only capture-admitted GET and fixed D1 SELECT POST may retry request() pre-response ECONNRESET once, "
+                       "after an abortable 500ms wait within the same 60s signal; retain each failure and retry reservation. "
+                       "No retry after an HTTP response, during body collection, for other errors, private verification or business writes. "
                        + before_description + "Only two planned staging dispatches; never approve/reject by API, "
                        "publish, register directly, upload/delete objects, migrate, unlock gates or operate devices. "
                        "Waiting/discovery reads are bounded, not repeated business operations. Uncertain mutations are not retried.")
@@ -177,12 +195,14 @@ def definitions():
     after = capture("formal-after", "after")
     criterion("P44-RAW-STATE", [before, negatives, after],
               ["snapshots/before.json", "negatives.json", "snapshots/after.json"],
-              "Bounded original three-resource SELECT/list captures. Before independently reviews 35 complete v1/v2 originals "
+              "Bounded original three-resource SELECT/list captures. Before independently reviews 47 complete v1/v2/v3 originals "
               "(legacy LIMIT 500 and LIMIT 8 pages) with no network replay, then collects unfinished rows with fixed LIMIT 8 pages; "
               "after uses entirely new LIMIT 8 pages. Standard gzip, bounded wire/decoded originals and the unchanged 60-second deadline "
               "address the documented large-response transport failure; a public gzip probe is not D1 acceptance. "
+              "Capture-admitted read-only pre-response ECONNRESET has at most one recorded retry after 500ms abortable wait "
+              "under the original 60s signal; response/body errors and mutations are never retried. "
               "Three actual missing/cross-Worker 401s and two cross-bucket 403s. "
-              "No production object write, register, channel mutation, Release or device action; neither failed predecessor criterion is REUSED.",
+              "No production object write, register, channel mutation, Release or device action; no incomplete predecessor criterion is REUSED.",
               external=("target", "host", "predecessor-before"))
     criterion("P44-RAW-READBACK", [readbacks, production], ["readbacks.json", "production-preflight-result.json"],
               "Three immutable GET bodies and one correct production SELECT-only preflight use the validated artifact metadata. "
@@ -211,7 +231,7 @@ def definitions():
 def base_contract():
     value = read(ROOT / "docs/acceptance-contracts/template.contract.json")
     commands, artifacts, criteria = definitions()
-    value.update(contract_id="P4-4-v3", version=3, task_id="P4-4", parent_contract_sha256=PREVIOUS_SHA256,
+    value.update(contract_id="P4-4-v4", version=4, task_id="P4-4", parent_contract_sha256=PREVIOUS_SHA256,
                  commands=commands, artifacts=artifacts, criteria=criteria)
     value["input_groups"] += [{"id": name, "profile": profile, "category": category} for name, profile, category in [
         ("firmware", "Firmware", "production_source"), ("release", "P41Release", "production_source"),
@@ -230,13 +250,62 @@ def inventory_selection(inventory, role, expected=None):
     return rows
 
 
+def history_reference(root, reference):
+    assert set(reference) == {"path", "size_bytes", "sha256"}, "INHERITED_REFERENCE"
+    file = guard(root / reference["path"], root)
+    assert reference["path"] == file.relative_to(root).as_posix(), "INHERITED_REFERENCE_PATH"
+    raw = file.read_bytes()
+    assert len(raw) == reference["size_bytes"] and sha(raw) == reference["sha256"], "INHERITED_REFERENCE_BYTES"
+    return raw
+
+
+def history_layers(contract, data):
+    assert contract["version"] in (2, 3, 4) and contract["contract_id"] == "P4-4-v" + str(contract["version"]), "HISTORY_SCOPE"
+    rules, frames, container, current, link = validator(), [], guard(data), contract, None
+    for version in range(contract["version"] - 1, 0, -1):
+        identity = "P4-4-v" + str(version)
+        expected = HISTORY[identity]
+        manifest_file = guard(container / PREDECESSOR, container)
+        raw = manifest_file.read_bytes()
+        anchors = [item for item in current["external_inputs"] if item["id"] == "predecessor-before"]
+        assert len(anchors) == 1 and anchors[0]["evidence_path"] == "evidence/" + PREDECESSOR, "INHERITED_ANCHOR"
+        assert anchors[0]["evidence_sha256"].upper() == sha(raw).upper(), "INHERITED_ANCHOR_HASH"
+        assert anchors[0]["fingerprint"] == "sha256:" + sha(raw), "INHERITED_FINGERPRINT"
+        if link is not None:
+            assert link["path"] == PREDECESSOR and history_reference(container, link) == raw, "INHERITED_MANIFEST_LINK"
+        manifest = json.loads(raw)
+        assert manifest["schema"] == "p44-predecessor-before-v1" and manifest["predecessor_contract_id"] == identity, "INHERITED_IDENTITY"
+        assert manifest["source_evidence_root"] == expected["root"], "INHERITED_ROOT"
+        assert all(manifest[field] == expected[field] for field in ("source_commit", "source_bundle_commit")), "INHERITED_SOURCE"
+        root = guard(container / expected["root"], container)
+        ancestor_raw = history_reference(root, manifest["predecessor_contract"])
+        matrix_raw = history_reference(root, manifest["predecessor_final_matrix"])
+        assert sha(ancestor_raw).upper() == expected["contract_sha256"] == current["parent_contract_sha256"].upper(), "INHERITED_PARENT_HASH"
+        assert manifest["predecessor_contract_sha256"].upper() == expected["contract_sha256"], "INHERITED_CONTRACT_HASH"
+        assert sha(matrix_raw).upper() == expected["matrix_sha256"], "INHERITED_MATRIX_HASH"
+        ancestor, matrix = json.loads(ancestor_raw), json.loads(matrix_raw)
+        assert ancestor["contract_id"] == identity and ancestor["freeze_commit"] == expected["source_commit"], "INHERITED_SOURCE"
+        assert not rules.validate_contract(ancestor), "INHERITED_CONTRACT_INVALID"
+        assert not rules.validate_matrix(matrix, ancestor, expected["contract_sha256"]), "INHERITED_MATRIX_INVALID"
+        assert matrix["overall_result"] == "EVIDENCE_GAP", "INHERITED_RESULT_CHANGED"
+        git("merge-base", "--is-ancestor", expected["source_commit"], expected["source_bundle_commit"])
+        git("merge-base", "--is-ancestor", expected["source_bundle_commit"], current["freeze_commit"])
+        for reference in manifest["files"]:
+            history_reference(root, reference)
+        frames.append({"root": root, "manifest": manifest, "contract": ancestor})
+        link = manifest.get("inherited_predecessor")
+        assert (link is None) == (version == 1), "INHERITED_DEPTH"
+        container, current = root, ancestor
+    return frames
+
+
 def predecessor_plan():
     previous_raw = guard(PREVIOUS_CONTRACT).read_bytes()
     matrix_raw = guard(PREVIOUS_MATRIX).read_bytes()
     assert sha(previous_raw).upper() == PREVIOUS_SHA256, "PREDECESSOR_CONTRACT_CHANGED"
     assert sha(matrix_raw).upper() == PREVIOUS_MATRIX_SHA256, "PREDECESSOR_MATRIX_CHANGED"
     previous, matrix = json.loads(previous_raw), json.loads(matrix_raw)
-    assert previous["contract_id"] == "P4-4-v2" and previous["freeze_commit"] == PREVIOUS_SOURCE
+    assert previous["contract_id"] == "P4-4-v3" and previous["freeze_commit"] == PREVIOUS_SOURCE
     assert matrix["overall_result"] == "EVIDENCE_GAP", "PREDECESSOR_RESULT_CHANGED"
     rules = validator()
     assert not rules.validate_contract(previous), "PREDECESSOR_CONTRACT_INVALID"
@@ -250,33 +319,7 @@ def predecessor_plan():
     assert files, "PREDECESSOR_SNAPSHOTS_MISSING"
     files += [base / "commands/formal-before.json", base / "commands/formal-before.log", base / "failure-report.json"]
     inherited_file = guard(base / PREDECESSOR)
-    inherited_raw = inherited_file.read_bytes()
-    anchors = [item for item in previous["external_inputs"] if item["id"] == "predecessor-before"]
-    assert len(anchors) == 1 and anchors[0]["evidence_path"] == "evidence/" + PREDECESSOR, "INHERITED_ANCHOR"
-    assert anchors[0]["evidence_sha256"].upper() == sha(inherited_raw).upper(), "INHERITED_ANCHOR_HASH"
-    assert anchors[0]["fingerprint"] == "sha256:" + sha(inherited_raw), "INHERITED_FINGERPRINT"
-    inherited = json.loads(inherited_raw)
-    assert inherited["schema"] == "p44-predecessor-before-v1" and inherited["predecessor_contract_id"] == "P4-4-v1"
-    assert inherited["source_evidence_root"] == "inputs/predecessor-before" and "inherited_predecessor" not in inherited, "INHERITED_DEPTH"
-    inherited_root = guard(base / inherited["source_evidence_root"])
-
-    def inherited_bytes(reference):
-        assert set(reference) == {"path", "size_bytes", "sha256"}, "INHERITED_REFERENCE"
-        raw = guard(inherited_root / reference["path"], inherited_root).read_bytes()
-        assert len(raw) == reference["size_bytes"] and sha(raw) == reference["sha256"], "INHERITED_REFERENCE_BYTES"
-        return raw
-
-    ancestor_raw = inherited_bytes(inherited["predecessor_contract"])
-    ancestor_matrix_raw = inherited_bytes(inherited["predecessor_final_matrix"])
-    ancestor, ancestor_matrix = json.loads(ancestor_raw), json.loads(ancestor_matrix_raw)
-    assert sha(ancestor_raw).upper() == previous["parent_contract_sha256"].upper() == inherited["predecessor_contract_sha256"].upper(), "INHERITED_PARENT_HASH"
-    assert ancestor["contract_id"] == "P4-4-v1" and ancestor["freeze_commit"] == inherited["source_commit"], "INHERITED_SOURCE"
-    assert not rules.validate_contract(ancestor), "INHERITED_CONTRACT_INVALID"
-    assert not rules.validate_matrix(ancestor_matrix, ancestor, sha(ancestor_raw).upper()), "INHERITED_MATRIX_INVALID"
-    git("merge-base", "--is-ancestor", inherited["source_commit"], inherited["source_bundle_commit"])
-    git("merge-base", "--is-ancestor", inherited["source_bundle_commit"], PREVIOUS_SOURCE)
-    for reference in inherited["files"]:
-        inherited_bytes(reference)
+    inherited_root = history_layers(previous, base)[0]["root"]
     files += [inherited_file, *sorted(file for file in inherited_root.rglob("*") if file.is_file())]
     references = []
     for file in files:
@@ -285,13 +328,13 @@ def predecessor_plan():
         references.append(item)
     receipt = read(base / "commands/formal-before.json")
     assert receipt["label"] == "formal-before" and receipt["exitCode"] == 1 and receipt["process_closed"] is True
-    target = DATA / "inputs/predecessor-before"
+    target = DATA / PREDECESSOR_ROOT
     planned = [(source, target / source.relative_to(base)) for source in files]
     planned += [(PREVIOUS_CONTRACT, target / "predecessor.contract.json"),
                 (PREVIOUS_MATRIX, target / "predecessor.final-evidence-matrix.json")]
-    manifest = {"schema": "p44-predecessor-before-v1", "predecessor_contract_id": "P4-4-v2",
+    manifest = {"schema": "p44-predecessor-before-v1", "predecessor_contract_id": "P4-4-v3",
                 "predecessor_contract_sha256": PREVIOUS_SHA256, "source_commit": PREVIOUS_SOURCE,
-                "source_bundle_commit": PREVIOUS_BUNDLE, "source_evidence_root": "inputs/predecessor-before",
+                "source_bundle_commit": PREVIOUS_BUNDLE, "source_evidence_root": PREDECESSOR_ROOT,
                 "predecessor_contract": {"path": "predecessor.contract.json", "size_bytes": len(previous_raw), "sha256": sha(previous_raw)},
                 "predecessor_final_matrix": {"path": "predecessor.final-evidence-matrix.json", "size_bytes": len(matrix_raw), "sha256": sha(matrix_raw)},
                 "inherited_predecessor": ref(inherited_file, base),
@@ -302,9 +345,9 @@ def predecessor_plan():
 def initial_matrix(contract, digest):
     matrix = read(ROOT / "docs/acceptance-contracts/template.evidence-matrix.json")
     template = matrix["criteria"][0]
-    matrix.update(contract_id=contract["contract_id"], contract_sha256=digest.upper(), round_id="P44-20261019-03",
+    matrix.update(contract_id=contract["contract_id"], contract_sha256=digest.upper(), round_id="P44-20261020-04",
                   criteria=[{**copy.deepcopy(template), "id": item["id"],
-                             "notes": "NOT_RUN under the v3 plan; both actual predecessor failures remain recorded; no PASS or reviewer action inferred"}
+                             "notes": "NOT_RUN under the v4 plan; all three actual predecessor failures remain recorded; history and quotas are not reset by the date change"}
                             for item in contract["criteria"]])
     return matrix
 
@@ -432,6 +475,22 @@ def public_d1_decoded(record, inspection, context):
     return context.response(record, "POST", record["path"], status=record["status"])
 
 
+def privacy_contexts(inspection, contract, data):
+    roots = [guard(data), *(frame["root"] for frame in history_layers(contract, data))]
+    return {root: inspection.Context(ROOT, root / "manifest.json") for root in roots}
+
+
+def select_privacy_context(file, contexts):
+    file = guard(file)
+    for root in sorted(contexts, key=lambda value: len(value.parts), reverse=True):
+        try:
+            file.relative_to(root)
+        except ValueError:
+            continue
+        return contexts[root]
+    raise AssertionError("PRIVACY_CONTEXT_OUTSIDE_BOUND_ROOTS")
+
+
 def privacy():
     project = ROOT.parents[1]
     needles = set()
@@ -475,7 +534,7 @@ def privacy():
     assert lifecycle["operator_review_rotation_deadline"] == {"production": "2027-01-17T07:40:38Z", "rehearsal": "2027-01-17T07:40:50Z"}
     assert all(lifecycle[key] for key in ("decision_author", "rotation", "emergency", "temporary_management"))
     inspection = inspector()
-    context = inspection.Context(ROOT, DATA / "manifest.json")
+    contexts = privacy_contexts(inspection, read(CONTRACT), DATA)
     files, members, decoded_d1, failures = 0, 0, 0, []
     excluded = {DATA / "commands/formal-privacy.log", DATA / "commands/formal-privacy.json", DATA / "privacy-result.json"}
     for file in sorted(DATA.rglob("*")):
@@ -486,7 +545,7 @@ def privacy():
         if contains_secret(file.read_bytes(), needles):
             failures.append(file.relative_to(DATA).as_posix())
         if file.name.endswith(".http.json"):
-            decoded = public_d1_decoded(read(file), inspection, context)
+            decoded = public_d1_decoded(read(file), inspection, select_privacy_context(file, contexts))
             if decoded is not None:
                 decoded_d1 += 1
                 if contains_secret(decoded, needles):
@@ -544,7 +603,7 @@ def assess():
                     notes="Independent original-byte adjudication; no production release/P5/gate unlock. Human reviewer provenance separately witnessed by root.")
         if item["id"] == "P44-RAW-STATE":
             item["evidence"].append("rerun-plan.json")
-            item["notes"] += " The actual v2 and inherited v1 EVIDENCE_GAP rounds and both incomplete streams remain bound by predecessor-before; this is not a REUSED criterion."
+            item["notes"] += " The actual v3 and inherited v2/v1 EVIDENCE_GAP rounds, both incomplete streams and the connection failure remain bound by predecessor-before; this is not a REUSED criterion."
     matrix["evidence_hashes"] = {file.relative_to(PACKAGE).as_posix(): sha(guard(file).read_bytes()) for file in DATA.rglob("*") if file.is_file()}
     matrix["evidence_hashes"]["rerun-plan.json"] = sha(guard(PACKAGE / "rerun-plan.json").read_bytes())
     matrix["overall_result"] = "PASS"
@@ -570,7 +629,7 @@ def selftest():
     invalid = copy.deepcopy(value)
     invalid["criteria"][0]["input_groups"].remove("evidence")
     assert rules.validate_contract(invalid, allow_draft=True), "OMITTED_DEPENDENCY_ACCEPTED"
-    digest = sha(b"v3 contract fixture")
+    digest = sha(b"v4 contract fixture")
     matrix = initial_matrix(value, digest)
     assert not rules.validate_matrix(matrix, value, digest.upper()), "MATRIX_UPPERCASE_REJECTED"
     invalid_matrix = copy.deepcopy(matrix)
@@ -641,13 +700,15 @@ def selftest():
     assert rejected, "MISSING_DEPLOYMENT_ORIGINAL_ACCEPTED"
     predecessor_files, predecessor = predecessor_plan()
     envelopes = [read(source) for source, _ in predecessor_files if source.name.endswith(".http.json")]
-    assert len(envelopes) == 37 and sum(item.get("completed") is True for item in envelopes) == 35
-    assert sum(item.get("completed") is False for item in envelopes) == 2, "PARTIAL_PREDECESSOR_LOST"
+    assert len(envelopes) == 50 and sum(item.get("completed") is True for item in envelopes) == 47
+    assert sum(item.get("completed") is False for item in envelopes) == 3, "FAILED_PREDECESSOR_LOST"
     assert predecessor["inherited_predecessor"]["path"] == PREDECESSOR, "INHERITED_MANIFEST_PATH"
+    assert predecessor["source_evidence_root"] == PREDECESSOR_ROOT == "p", "PREDECESSOR_PATH_SCOPE"
+    assert max(len(str(destination)) for _, destination in predecessor_files) == 239, "PREDECESSOR_PATH_LENGTH"
     previous, previous_matrix = read(PREVIOUS_CONTRACT), read(PREVIOUS_MATRIX)
     previous_errors = rules._physical_errors(previous, previous_matrix, PREVIOUS, ROOT)
     assert not previous_errors, "PREDECESSOR_PHYSICAL_VALIDATION"
-    # Preview only: the real C3 freeze/precheck recomputes profile changes after source commit.
+    # Preview only: the real C4 freeze/precheck recomputes profile changes after source commit.
     preview = copy.deepcopy(value)
     preview.update(status="FROZEN", freeze_commit=git("rev-parse", "HEAD"), freeze_tree=git("rev-parse", "HEAD^{tree}"),
                    profile_config_blob=git("rev-parse", "HEAD:Tools/provenance/manifest_profiles.json"))
@@ -657,10 +718,52 @@ def selftest():
     assert not plan["reusable_criteria"] and len(plan["rerun_criteria"]) == 9 and len(plan["required_commands"]) == 17
     assert plan["previous_round_id"] == previous_matrix["round_id"] and plan["previous_matrix_sha256"] == PREVIOUS_MATRIX_SHA256
     assert not rules.validate_planned_execution(matrix, preview, plan), "PREVIEW_PLAN_INVALID"
+    fixture = guard(ROOT / ".cache/p44/tmp/p44-v4-bundle-fixturexxxxxx")
+    assert len(str(fixture)) == len(str(DATA)), "PATH_FIXTURE_BASE_LENGTH"
+    copies = [(guard(fixture / destination.relative_to(DATA)), guard(source).read_bytes())
+              for source, destination in predecessor_files]
+    manifest_raw = (json.dumps(predecessor, indent=2, ensure_ascii=True) + "\n").encode()
+    copies.append((guard(fixture / PREDECESSOR), manifest_raw))
+    for destination, data in copies:
+        if destination.exists():
+            assert destination.read_bytes() == data, "EXISTING_FIXTURE_CHANGED"
+    for destination, data in copies:
+        if not destination.exists():
+            write(destination, data)
+        assert guard(destination).read_bytes() == data, "PATH_FIXTURE_READBACK"
+    current = copy.deepcopy(preview)
+    anchor = next(item for item in current["external_inputs"] if item["id"] == "predecessor-before")
+    anchor.update(evidence_path="evidence/" + PREDECESSOR, evidence_sha256=sha(manifest_raw), fingerprint="sha256:" + sha(manifest_raw))
+    contexts = privacy_contexts(inspection, current, fixture)
+    assert [root.relative_to(fixture).as_posix() for root in contexts] == [".", "p", "p/inputs/predecessor-before",
+                                                                          "p/inputs/predecessor-before/inputs/predecessor-before"]
+    assert select_privacy_context(fixture / "p-other/untracked.http.json", contexts).base == fixture, "CONTEXT_PREFIX_COLLISION"
+    decoded_originals, gzip_record, gzip_context = 0, None, None
+    for destination, _ in copies:
+        if destination.name.endswith(".http.json"):
+            record = read(destination)
+            context = select_privacy_context(destination, contexts)
+            decoded = public_d1_decoded(record, inspection, context)
+            if decoded is not None:
+                assert context.base == fixture / "p", "INHERITED_GZIP_CONTEXT"
+                decoded_originals += 1
+                gzip_record, gzip_context = record, context
+    assert decoded_originals == 12, "INHERITED_GZIP_SKIPPED"
+    wrong = copy.deepcopy(gzip_record)
+    wrong["decoded_body"] = wrong["body"]
+    rejected = False
+    try:
+        public_d1_decoded(wrong, inspection, gzip_context)
+    except inspection.EvidenceError:
+        rejected = True
+    assert rejected, "INHERITED_GZIP_SIDECAR_MISMATCH_ACCEPTED"
     print(json.dumps({"ok": True, "schema_positive": 1, "dependency_negative": 1, "privacy_checks": 5,
                       "compressed_privacy_checks": 5,
                       "matrix_checks": 3, "previous_parameter_checks": 3, "predecessor_source_bundle": predecessor["source_bundle_commit"],
-                      "predecessor_files": len(predecessor_files), "predecessor_complete_responses": 35, "predecessor_incomplete_responses": 2,
+                      "predecessor_files": len(predecessor_files), "predecessor_complete_responses": 47, "predecessor_incomplete_responses": 3,
+                      "path_fixture": str(fixture), "path_fixture_files": len(copies), "longest_path_written_and_read": 239,
+                      "privacy_contexts": len(contexts), "inherited_gzip_originals": decoded_originals,
+                      "context_boundary_checks": 1, "inherited_gzip_negative_checks": 1,
                       "previous_physical_validation": True, "plan_preview_rerun_criteria": len(plan["rerun_criteria"]),
                       "plan_preview_required_commands": len(plan["required_commands"]), "preview_is_formal_admission": False,
                       "absolute_root_commands": len(offline_commands),

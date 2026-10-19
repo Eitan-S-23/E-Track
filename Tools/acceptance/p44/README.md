@@ -228,7 +228,7 @@ terminal update. Copies of pre-run snapshots cannot stand in for after-state.
 
 ## V2 Before-Snapshot Recovery
 
-This section describes the sealed V2 attempt. The current runner uses the V3
+This section describes the sealed V2 attempt. The current runner uses the V4
 successor below; it does not rewrite V1/V2 sources, matrices or originals.
 
 V1 retained a 60-second truncated response to a LIMIT 500 query: 65
@@ -280,6 +280,9 @@ contract/matrix digests are validated as 64 hexadecimal characters before
 case-insensitive comparison; their original uppercase bytes remain unchanged.
 
 ## V3 Strict Gzip And Two-Round Recovery
+
+The following V3 behavior and failure history remain preserved. V4 retains
+strict gzip handling and adds only the bounded request-boundary policy below.
 
 V2 retained four complete eight-row channel-history pages and an incomplete
 HTTP 200 at offset 32. That page declared 4746278 wire bytes; its retained
@@ -357,6 +360,92 @@ a zero-PATCH no-op. Mixed pairs, superseded C1/P4-1 pairs and missing existing
 branch rules fail before mutations. Gates, reviewer identity, business routes
 and production/device restrictions remain unchanged.
 
+## V4 One Pre-Response Retry
+
+Round `P44-20261020-04` uses the actual V3 parent. Its source is C3
+`ba952497948a03c40cbd8baebbfc9228621fb44b`, with bundle B3
+`20febda2ac2e05e5f4b761a9f365091b177516b6`. The old 2026-10-19 filenames,
+dates, contracts, matrices, 47 complete observations and three failures are
+not renamed or rewritten. Reviewer runs A/B remain unspent, not reset.
+
+V3 completed another 12 gzip D1 reads, then its patches read failed with
+ECONNRESET in 7.087 seconds before a final HTTP response. Installed Undici
+RetryAgent was evaluated but not adopted: its default retry count, status
+policy and partial Range continuation would require unnecessary interception.
+The existing `request` Promise already provides the smaller boundary. Once
+final headers have fulfilled that Promise, later errors belong to its body
+Readable rather than rejecting the original request.
+
+V4 therefore uses two explicit request call sites, not a loop/controller.
+Only an already-allowlisted capture GET without a request body, or a fixed D1
+POST whose sole own body field is an approved SELECT `sql`, may make one extra
+attempt after ECONNRESET. The same immutable request identity is used. Native
+`onInfo` records informational responses; any 1xx prevents that extra attempt.
+PATCH, dispatch, other business POSTs, other error codes, HTTP 401/403/5xx,
+and the direct private verification route remain one-attempt operations.
+
+One AbortSignal covers both requests, the cancellable 500ms backoff and the
+existing strict body pipeline. The original 60 seconds and separate 16-MiB
+wire/decoded bounds do not increase. A single monotonic absolute deadline is
+also checked after synchronous audit I/O and immediately before the second
+request, so a pending timeout callback cannot permit a late retry. Body,
+decompression, CRC, size and interrupted-stream failures are outside the
+request retry catch and never enter this policy.
+
+The existing reservation still precedes the logical capture. The additional
+exclusive-created audit originals are:
+
+```text
+LABEL-request-failure-1.json
+LABEL-retry-2-reservation.json
+LABEL-request-failure-2.json   only if the second request call actually fails
+```
+
+Failure records bind method, redacted path, original request File reference,
+attempt number, start/end, fixed error code, informational-response facts and
+the absence of a final response/body. Only the first informational status/time
+and a count are retained, never response/authentication headers or exception
+text. The first failure must be stored before the backoff/retry. The second
+reservation binds that first failure and precedes the actual second call.
+Audit failure, cancellation or deadline exhaustion prevents further calls.
+An unspent reservation is not proof that a second call happened.
+
+The final successful or failed envelope adds `request_attempts`,
+`request_failures: File[]` and, when created, `retry_reservation: File`.
+Success does not turn its preceding failure record into PASS. Existing file
+reservations reject another invocation of the same label, rather than granting
+another retry allowance. This policy grants no additional business action,
+does not erase previous consumption, and adds no formal command IDs.
+
+The V4 predecessor entry stays `inputs/predecessor-before.json`, but only its
+new `source_evidence_root` is shortened to `p`. The three fixed roots are
+`p`, `inputs/predecessor-before`, `inputs/predecessor-before`, with identities
+C3/B3, C2/B2 and C1/B1 respectively. Both inherited manifests retain their
+original bytes and paths. The three-layer maximum path is 239 characters in
+this worktree instead of 263 with another long outer prefix; no external
+short directory, alias or generic path migration is needed.
+
+All 47 complete records are reused without requests, including C3's 12 gzip
+records. Every inherited wire, request and decoded File reference is verified
+and relocated under its actual layer. The existing strict `d1Document` oracle
+recomputes gzip and compares its sidecar before returning decoded bytes/JSON;
+an inherited sidecar is not independently trusted. The three failed originals
+stay failed. Only missing observations, beginning with the patches page, are
+new reads. A/B approval and production/device restrictions are unchanged.
+
+V4 configuration accepts only the intact approved C3 pair or intact C4 pair;
+older/mixed pairs fail before mutation. The encoded-failure private namespace
+is `.cache/p44/private/capture-failures/P4-4-v4/`, subject to root's formal
+preflight. Development tests use an in-memory private sink and do not create it.
+
+The affected host batch uses the real installed Undici MockAgent with network
+connections disabled, request/body/error boundary cases, audit/deadline
+negatives, and actual B3-plan-to-loader checks (47 complete, three incomplete,
+12 gzip, zero requests). The Windows path test calls the real Node guard and
+Python File-reference reader on an existing, explicitly supplied 239-character
+fixture. It can otherwise create one bounded equivalent beneath
+`.cache/p44/v4-paths/`. It never creates a formal evidence/private fixture.
+
 ## Frozen Runner Paths
 
 The root acceptance contract must declare the actual transitive paths:
@@ -374,7 +463,7 @@ this adapter does not waive them. `README.md` is a schema guide, not a new
 acceptance criterion. Offline tests are development checks only:
 
 ```text
-python -I -S -B tests/ota/test_p44_acceptance_tools.py --output-dir ABSOLUTE_ROOT/.cache/p44-runner-tests-20261019/UNUSED_LABEL
+python -I -S -B tests/ota/test_p44_acceptance_tools.py --output-dir ABSOLUTE_ROOT/.cache/p44-runner-tests-20261020/UNUSED_LABEL --windows-fixture-file EXISTING_PROJECT_LOCAL_LONGEST_FIXTURE
 ```
 
 ## Root Capture And Sealing
@@ -401,7 +490,7 @@ logs with `logs-a/b LABEL` or missing B artifact with `collect-b LABEL`.
 Already-completed final/log/artifact captures are rejected before a new GET.
 No recovery command grants another business operation or rewrites a success.
 
-`bundle.py` prepares and freezes the v3 contract and assesses completed evidence.
+`bundle.py` prepares and freezes the P4-4-v4 contract (execution schema v3) and assesses completed evidence.
 Its initial matrix stays NOT_RUN; its final matrix is a different file.
 Run `assess` and the final physical validator with logs outside the bundle's
 `evidence/` directory, not through formal `run.cjs`, so an active log cannot

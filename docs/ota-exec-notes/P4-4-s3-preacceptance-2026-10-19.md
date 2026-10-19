@@ -1226,3 +1226,101 @@ complete observations and all three failures. Gzip predecessor sidecars and
 actual Windows path handling are part of the same review. Sources remain held
 until V3 bundle/index delivery; no retry policy has yet been executed or frozen.
 Gate=false, reviewer ownership and the unspent A/B plan remain unchanged.
+
+### V3 Delivery And V4 Source Release (2026-10-20)
+
+V3 bundle B3 is 20febda2ac2e05e5f4b761a9f365091b177516b6. The separate index
+commit I3 is 738b2badb861ae3d3902bffa5bec2fe830707beb. Both are pushed only to
+the task branch. The final staged audit verified all 389 blobs byte-exact,
+all 384 bound evidence files and five ZIP members, with no known credential
+match. This includes the sealing metadata generated after formal privacy.
+The root index still has its recorded unchanged SHA-256. Index reachability
+and board/readiness checks passed (two tests, 18.465 seconds).
+
+Only after this delivery did root release the next bounded source batch.
+The source_bundle_commit input must name B3, not I3. The successor preserves
+the actual V3 parent, 47 complete observations, three failures and the same
+17 command/nine criterion identities. Its local-date round is planned as
+P44-20261020-04; that date does not restart lineage or action accounting.
+
+The installed Undici API was inspected before choosing the repair. RetryAgent
+defaults to five retries and supports post-header Range recovery; matching the
+required scope would need additional observers and policy overrides. The
+smaller selected route retains request() and adds a single conditional retry
+only around its pre-response rejection. After final headers, the native API
+resolves the request and sends later errors to the body stream; responseBytes
+therefore stays outside this retry boundary. Native onInfo marks informational
+responses, which also prevent retry. No new controller, package or deprecated
+observer dependency is needed.
+
+Only already-admitted capture GETs and fixed D1 SELECT POSTs may receive one
+additional pre-response ECONNRESET attempt. Both requests, the abortable
+500-ms delay and decoding share the original 60-second signal. The first
+failure must be exclusive-written and hash-bound before any second attempt;
+failure to retain it or cancellation prevents retry. Mutations, other POSTs,
+private verification, other error codes and every received HTTP response or
+body failure remain single-attempt. All previous unsuccessful attempts remain
+failures even if the new bounded read eventually succeeds.
+
+The same batch includes gzip predecessor body/request/decoded references and
+strict byte comparison, plus privacy Context selection for each bound source
+root. Only the new fixture root changes to p: existing manifest bytes and
+relative paths remain unchanged. This lowers the longest planned inherited
+path from 263 to 239 characters. The existing 237-character path was checked
+read-only; a real contained Windows fixture must still validate the new path
+shape before admission. These are development obligations, not newly observed
+product results. No new formal command, platform configuration or approval
+action is authorized until the stable batch is reviewed and frozen.
+
+### Concentrated V4 Collector Review
+
+The bounded P44-SNAPSHOT-02 development batch is now stable. The final Node
+run passed 246 assertions; the Python run passed 106 tests with zero failures,
+errors or skips, from 2026-10-19T18:33:19.065131Z through
+2026-10-19T18:33:53.238280Z. Both actual processes closed with exit 0. The
+real B3-plan-to-Node-loader integration consumed 47 complete observations,
+retained all three failures and checked 12 inherited gzip representations,
+with zero network requests. Hash, matrix, sidecar and malformed-input negatives
+remain strict. The actual 239-character Windows file was read through both
+Python File references and the Node guard, with identical bytes and SHA-256;
+the existing fixture was not copied again.
+
+The first two Node attempts and the diagnostic attempt remain failed originals.
+They exposed test-only Undici adapter mismatches: MockAgent closes through
+close(), while the real ProxyAgent implements destroy(); a string body matcher
+also cannot equal the actual Buffer request. The final test uses a public
+Dispatcher delegating to disabled-network MockAgent dispatch/close and an exact
+byte predicate. Production cleanup, Buffer request identity, permissions and
+the bounded retry policy were not weakened to make these tests pass. Their
+post-execution receipts identify the actual tool completion; uncollected process
+times remain null. No successful test was repeated just to obtain a receipt.
+
+Root independently recomputed all six source hashes and ten author-artifact
+hashes, checked the actual successful receipts, and verified the unchanged root
+index. The original result is .cache/p44/logs/p44-v4-root-review-01.{log,json}.
+The separate successful bundle selftest retains its own earlier source/time;
+it was not rerun. Existing product CI, deployments, credentials and the three
+previous frozen bundles remain unchanged. LF-to-CRLF Git notices are retained,
+not hidden as zero warnings.
+
+The v4 development archive contains 31 byte-verified original members in 37173
+ZIP bytes, including all failed/final Node outputs, Python caller/path results,
+source/receipt audits, the root review and the actual V3 final-validator and
+index-check outputs. Its inventory is under
+P4-4-acceptance-preparation-2026-10-19/v4/. Generated fixtures remain in ignored
+cache. These development results do not constitute live read recovery or P4-4
+PASS. The next source commit precedes target preparation, the two rehearsal
+descriptor/hash changes, freeze and real V3-bound precheck/rerun-plan execution.
+Runs A/B remain unspent; gates stay false, and the earlier external-cache
+attribution remains unresolved.
+
+Independent p44_originals_evaluator then adjudicated this exact six-file batch
+REVIEW PASS with no unresolved required finding. It independently recomputed
+the stable source hashes and reviewed the actual Node/Python completion receipts,
+retry exclusions/audit ordering, all three predecessor generations, privacy
+boundaries and real Windows File-reference result. That review was read-only:
+no test replay, network request or platform action. Root's pre-delivery privacy
+scan checked the nine changed/new files and all 31 archive members with no
+known-value or token-shape match. This closes source review only; the real
+NOT_RUN precheck, V3-bound rerun plan and missing runtime observations remain
+required after C4 is committed.
