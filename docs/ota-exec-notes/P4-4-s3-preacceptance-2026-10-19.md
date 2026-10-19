@@ -930,3 +930,77 @@ not overall=PASS; original output is .cache/p44/logs/p44-v1-final-check-01.log
 The failure-report.json, initial NOT_RUN matrix, failed precheck and incomplete
 HTTP body remain unchanged. Root will deliver this failed bundle and a separate
 index commit before releasing the bounded v2 source changes.
+
+### V1 Delivery And Bounded V2 Continuation
+
+The failed V1 bundle was committed as
+e5994fb28466e46c99a1f247494473e6cba9cc03 (B1), then indexed by the separate
+9ca520de2c2e3ec9f915feac0ab389db4e86dd21 (I1). Both are pushed only to
+dev/p4-4/config-integration-20261018. The staged-byte audit checked 299 files,
+including all 295 matrix-bound evidence files, with no profile input staged.
+The two commits change no Tools/tests/product/workflow source. The shared root
+index remains SHA-256
+2907ee569cb8415877c8c688b3e09b5948a789d6430796eab99ae3ad43f3a3dd.
+The stock freeze-index reachability and readiness/board checks passed (2 tests;
+.cache/p44/logs/p44-v1-index-check-01.log). This verifies bundle delivery,
+not the unobserved P4-4 criteria.
+
+Only after B1/I1 delivery did root release the bounded V2 source batch. Its
+predecessor provenance must name B1 as source_bundle_commit, not the later
+index commit. It retains the same 17 command IDs and nine criterion IDs,
+the real V1 contract/final matrix, and a computed rerun plan. Complete exact
+readonly responses may be imported with original timestamps; failed/partial
+responses remain failures. New D1 row requests use LIMIT 8 with actual consumed
+row offsets, never a replay of the failed LIMIT 500 page. Current GitHub
+configuration and protected credential verification stay fresh, and all after
+snapshots are fresh. No mutation participates in this reuse path.
+
+The next source commit will precede the new target/descriptor binding and V2
+freeze. Only the two approved descriptor/hash variables need a scoped update;
+the already-added branch policy is checked, not created again. The source
+branch must then remain unchanged between the actual rejected run A and the
+separate approved run B. Both require personal actions by Eitan-S-23 with an
+owner response or genuine root witness; no agent API action substitutes for
+that provenance. The two observations remain unspent, and all three gates
+remain false. No Worker redeployment, credential recreation, production
+publication, Release mutation or device action is added by this continuation.
+
+P44-V2-BIND-01 was found during the concentrated V2 review, before any V2
+platform observation. The predecessor generator and actual V1 matrix carry
+uppercase contract digests, while the first loader compared them to lowercase
+hash output. The final loader validates the 64-hex shape before comparing
+normalized values; the archived V1 bytes are not changed. The same batch
+restricts configure to an intact approved C1 descriptor/hash pair, or the
+complete C2 pair with zero PATCH. Old P4-1 values and mixed pairs fail before
+any mutation; the existing branch rule is required and never recreated.
+
+Final development results are 156 capture assertions and 93 offline evaluator
+tests with zero failures/errors/skips. The latter ran in 25.902 seconds. Its
+test_capture_consumes_real_bundle_predecessor_plan case calls the actual
+bundle.predecessor_plan, then loads the real B1 contract, final matrix and 32
+HTTP originals through the Node loader: 31 complete responses are retained,
+one incomplete response is not reused, original times stay intact, and wrong
+or malformed digests remain rejected with zero network requests. The earlier
+148-assertion synthetic run is retained and is not presented as proving this
+real-input integration. The separate bundle selftest validates the stock
+matrix interface, actual V1 originals and a 9-criterion/17-command plan preview;
+that preview is not C2 formal admission.
+
+The source hashes of all five capture/evaluator/test/README files match the
+author's stable handoff (.cache/p44/logs/p44-v2-source-check-01.log). The final
+capture stdout is p44-v2-capture-02.log, and evaluator originals are under
+.cache/p44-runner-tests-20261019/selftest-v2-01/. Development originals are
+appended under P4-4-acceptance-preparation-2026-10-19/v2/, leaving the first
+archive unchanged. Whitespace checks passed; LF-to-CRLF notices are preserved.
+The parser validates row offsets/counts but does not implement a second
+predecessor provenance controller: the frozen collector's fixed entry points,
+hash-bound predecessor manifest and real-input regression enforce old-only
+LIMIT 500 reuse and fresh LIMIT 8 collection. No product, workflow, validator,
+credential or frozen V1 file changed in this batch.
+
+The independent originals reviewer inspected the stable diff and existing
+selftest originals without rerunning them, and reported no unresolved blocker.
+The appended development ZIP contains 20 byte-verified entries (20428 bytes).
+The pre-delivery scan checked all 10 changed delivery files and 20 ZIP members
+against known credentials/encodings and token shapes with zero matches. These
+are preparation results, not a P4-4 PASS or proof of live LIMIT 8 collection.

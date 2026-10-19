@@ -578,6 +578,71 @@ class P44ToolsTests(unittest.TestCase):
         record = self.d1([], p44.SCHEMA_SQL, written=1)
         self.assert_bad("D1_UNEXPECTED_WRITE", lambda: p44.d1_rows(self.ctx, record, p44.RESOURCES["staging"][0], p44.SCHEMA_SQL))
 
+    def d1_page_fixture(self, count, specifications):
+        schema = [{"name": "apps", "type": "table", "sql": "CREATE TABLE apps(id TEXT)"}]
+        pages = []
+        for limit, offset, length in specifications:
+            query = 'SELECT * FROM "apps" ORDER BY rowid LIMIT ' + str(limit) + ' OFFSET ' + str(offset)
+            pages.append(self.d1([{"id": value} for value in range(offset, offset + length)], query))
+        return {"schema": self.d1(schema, p44.SCHEMA_SQL), "tables": {"apps": {
+            "count": self.d1([{"count": count}], 'SELECT COUNT(*) AS count FROM "apps"'), "pages": pages}}}
+
+    def test_eight_row_pages_cover_original_count_in_order(self):
+        item = self.d1_page_fixture(17, [(8, 0, 8), (8, 8, 8), (8, 16, 1)])
+        result = p44.database_snapshot(self.ctx, item, "staging")
+        self.assertEqual(result["tables"]["apps"], [{"id": value} for value in range(17)])
+
+    def test_mixed_old_500_and_new_eight_pages_preserve_order(self):
+        item = self.d1_page_fixture(510, [(500, 0, 500), (8, 500, 8), (8, 508, 2)])
+        result = p44.database_snapshot(self.ctx, item, "staging")
+        self.assertEqual(result["tables"]["apps"], [{"id": value} for value in range(510)])
+
+    def test_eight_row_page_missing_final_page(self):
+        item = self.d1_page_fixture(17, [(8, 0, 8), (8, 8, 8)])
+        self.assert_bad("D1_PAGINATION_INCOMPLETE", lambda: p44.database_snapshot(self.ctx, item, "staging"))
+
+    def test_eight_row_page_gap_rejected(self):
+        item = self.d1_page_fixture(17, [(8, 0, 8), (8, 16, 1)])
+        self.assert_bad("D1_PAGE_OFFSET_MISMATCH", lambda: p44.database_snapshot(self.ctx, item, "staging"))
+
+    def test_eight_row_duplicate_offset_rejected(self):
+        item = self.d1_page_fixture(17, [(8, 0, 8), (8, 0, 8), (8, 16, 1)])
+        self.assert_bad("D1_PAGE_OFFSET_MISMATCH", lambda: p44.database_snapshot(self.ctx, item, "staging"))
+
+    def test_large_body_cannot_claim_eight_row_limit(self):
+        item = self.d1_page_fixture(501, [(8, 0, 500), (8, 500, 1)])
+        self.assert_bad("D1_PAGE_COUNT_MISMATCH", lambda: p44.database_snapshot(self.ctx, item, "staging"))
+
+    def test_unapproved_page_width_rejected(self):
+        item = self.d1_page_fixture(17, [(16, 0, 16), (8, 16, 1)])
+        self.assert_bad("D1_QUERY_BINDING", lambda: p44.database_snapshot(self.ctx, item, "staging"))
+
+    def test_capture_consumes_real_bundle_predecessor_plan(self):
+        specification = importlib.util.spec_from_file_location("p44_real_predecessor_plan", ROOT / "Tools/acceptance/p44/bundle.py")
+        bundle = importlib.util.module_from_spec(specification)
+        specification.loader.exec_module(bundle)
+        planned, manifest = bundle.predecessor_plan()
+        packet = {"scope": "bundle.predecessor_plan", "manifest": manifest,
+                  "originals": [{"path": target.relative_to(bundle.DATA).as_posix(), "source": str(source)} for source, target in planned]}
+        self.save(packet)
+        env = os.environ.copy()
+        for name in ("TEMP", "TMP", "TMPDIR", "HOME", "USERPROFILE", "APPDATA", "LOCALAPPDATA",
+                     "XDG_CONFIG_HOME", "XDG_CACHE_HOME", "XDG_DATA_HOME"):
+            env[name] = str(self.directory)
+        for name in ("NODE_OPTIONS", "NODE_V8_COVERAGE", "NODE_COMPILE_CACHE", "SSLKEYLOGFILE"):
+            env.pop(name, None)
+        result = subprocess.run(["node", str(ROOT / "tests/ota/test_p44_capture.cjs"), "--predecessor-stdin"],
+                                input=raw(packet), cwd=ROOT, env=env, capture_output=True, timeout=60, check=False)
+        self.save(result.stdout)
+        self.save(result.stderr)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        observed = json.loads(result.stdout)
+        self.assertEqual(observed["source"], "bundle.predecessor_plan")
+        self.assertEqual((observed["complete_old_reads"], observed["incomplete_old_reads"]), (31, 1))
+        self.assertTrue(observed["uppercase_originals_accepted"] and observed["wrong_digest_rejected"]
+                        and observed["wrong_matrix_digest_rejected"])
+        self.assertEqual(observed["network_requests"], 0)
+
     def test_real_migrations_support_rowid_selects_and_audit_fields(self):
         database = sqlite3.connect(":memory:")
         migrations = ROOT / "app/bluetooth_flutter_Trace/cloudflare/update-service/migrations"

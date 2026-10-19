@@ -197,12 +197,15 @@ D1 request JSON must contain only `sql`, using these exact SELECT shapes:
 ```text
 SELECT name,type,sql FROM sqlite_master ORDER BY type,name
 SELECT COUNT(*) AS count FROM "TABLE_NAME"
+SELECT * FROM "TABLE_NAME" ORDER BY rowid LIMIT 8 OFFSET N
 SELECT * FROM "TABLE_NAME" ORDER BY rowid LIMIT 500 OFFSET N
 ```
 
 Schema table names (excluding SQLite and `_cf_` internals) determine the exact
-table set. Counts must be integers from 0 to 20000, and full 500-row pages
-must cover the observed count. Zero-row tables have no row pages. Every raw
+table set. Counts must be integers from 0 to 20000. Each raw page must have
+LIMIT 8 or 500, OFFSET equal to the preceding accumulated row count, and exactly
+min(LIMIT, remaining count) rows. Mixed widths preserve original row order;
+the final accumulated count must match. Zero-row tables have no row pages. Every raw
 D1 result must report success, zero rows written and `changed_db: false`.
 Counts, contents, schema and channel rows are compared, not summary hashes
 selected by a collector. These multi-request snapshots are not a transaction
@@ -222,6 +225,56 @@ captured complete R2 GET bodies must match the candidate bytes/digests.
 Every before-snapshot capture must finish before run B is created; every
 after-snapshot capture and independent asset GET must begin after run B's
 terminal update. Copies of pre-run snapshots cannot stand in for after-state.
+
+## V2 Before-Snapshot Recovery
+
+V1 retained a 60-second truncated response to a LIMIT 500 query: 65
+channel_history rows would have been 9631314 bytes. V2 does not repeat that
+large request or extend the 60-second/16-MiB transport bounds. All new row
+queries, including every after-snapshot page, use LIMIT 8 and distinct
+`ROLE-TABLE-rows8-OFFSET` labels.
+
+The one explicit recovery entry is:
+
+```text
+node Tools/acceptance/p44/capture.cjs before inputs/predecessor-before.json
+```
+
+The frozen P4-4-v2 contract must hash-bind external input `predecessor-before`.
+The manifest schema is `p44-predecessor-before-v1`; `source_evidence_root` is
+`inputs/predecessor-before`. `source_commit` and `source_bundle_commit` pin
+the original C1/B1 objects. `predecessor_contract_id` and
+`predecessor_contract_sha256` bind the original frozen contract;
+`predecessor_contract` and `predecessor_final_matrix` are File references
+relative to that root. `files` contains the unchanged original before captures,
+formal-before receipts/log, and failure-report references, using original v1
+evidence-relative paths. The original matrix's EVIDENCE_GAP/NOT_OBSERVED is not
+rewritten as a FAIL or a successful REUSED criterion.
+
+Only exact same-label D1 SELECT and R2 listing records with completed=true,
+expected status, hash-verified reservation/request/body and identical request
+bytes may be consumed without network access. Original response bytes and
+timestamps stay intact; returned File paths are relocated beneath the fixture
+root with explicit predecessor provenance. A completed=false response remains
+failed even if its partial body parses. Binding mismatches fail closed rather
+than becoming cache misses. Configuration/GitHub reads and the protected-pair
+identity check remain fresh. This recovery state exists only during `before`;
+it cannot restore a dispatch, configuration mutation, registration or approval.
+
+For each table, the collector first checks the old `ROLE-TABLE-OFFSET` LIMIT
+500 record. A valid complete page advances by its actual row count. A failed
+or absent old page instead results in one new LIMIT 8 query under its distinct
+rows8 label; it never sends a new LIMIT 500 request. Subsequent offsets follow
+the actual cumulative rows. Old failures are preserved, new failures are not
+automatically retried, and after-state is entirely new observation.
+
+V2 configuration accepts only the complete hash-bound approved C1
+descriptor/hash pair or the complete new C2 pair. A C2 pair is a zero-PATCH
+no-op; mixed C1/C2 values or the old P4-1 pair fail before any PATCH. The
+existing P4-4 branch rule is required; configuration only updates the
+descriptor/hash variables and never recreates that branch rule. Historical
+contract/matrix digests are validated as 64 hexadecimal characters before
+case-insensitive comparison; their original uppercase bytes remain unchanged.
 
 ## Frozen Runner Paths
 

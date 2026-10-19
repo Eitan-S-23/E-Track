@@ -540,13 +540,22 @@ def database_snapshot(ctx, item, role):
                 and integer(counted[0]["count"]) and counted[0]["count"] <= 20000, "D1_COUNT_BOUND")
         count = counted[0]["count"]
         pages = tables[name].get("pages")
-        require(isinstance(pages, list) and len(pages) == (count + 499) // 500, "D1_PAGINATION_INCOMPLETE")
+        require(isinstance(pages, list) and len(pages) <= (count + 7) // 8, "D1_PAGINATION_INCOMPLETE")
         rows = []
-        for number, record in enumerate(pages):
-            query = 'SELECT * FROM "' + name + '" ORDER BY rowid LIMIT 500 OFFSET ' + str(number * 500)
+        for record in pages:
+            request = ctx.document(record["request"])
+            require(isinstance(request, dict) and set(request) == {"sql"} and isinstance(request["sql"], str),
+                    "D1_QUERY_BINDING")
+            query = request["sql"]
+            match = re.fullmatch(r'SELECT \* FROM "' + re.escape(name)
+                                 + r'" ORDER BY rowid LIMIT (8|500) OFFSET (0|[1-9][0-9]*)', query)
+            require(match is not None, "D1_QUERY_BINDING")
+            limit, offset = int(match[1]), int(match[2])
+            require(offset == len(rows) and offset < count, "D1_PAGE_OFFSET_MISMATCH")
             page = d1_rows(ctx, record, database, query)
-            require(len(page) == min(500, count - len(rows)), "D1_PAGE_COUNT_MISMATCH")
+            require(len(page) == min(limit, count - offset), "D1_PAGE_COUNT_MISMATCH")
             rows.extend(page)
+        require(len(rows) == count, "D1_PAGINATION_INCOMPLETE")
         contents[name] = rows
     return {"schema": schema, "tables": contents}
 

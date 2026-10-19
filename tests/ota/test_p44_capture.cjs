@@ -34,9 +34,11 @@ route('https://api.cloudflare.com', 'POST', '/accounts/[ACCOUNT]/tokens', false)
 route('https://api.cloudflare.com', 'POST', '/accounts/[ACCOUNT]/d1/database/other/query', false);
 for (const sql of ['SELECT name,type,sql FROM sqlite_master ORDER BY type,name',
   'SELECT COUNT(*) AS count FROM "firmware_releases"', 'SELECT * FROM "audit_logs" ORDER BY rowid LIMIT 500 OFFSET 0',
-  'SELECT * FROM "audit_logs" ORDER BY rowid LIMIT 500 OFFSET 500']) check(sql, () => assert(c.sqlAllowed(sql)));
+  'SELECT * FROM "audit_logs" ORDER BY rowid LIMIT 500 OFFSET 500',
+  'SELECT * FROM "audit_logs" ORDER BY rowid LIMIT 8 OFFSET 0', 'SELECT * FROM "audit_logs" ORDER BY rowid LIMIT 8 OFFSET 8']) check(sql, () => assert(c.sqlAllowed(sql)));
 for (const sql of ['SELECT 1; DELETE FROM firmware_releases', 'DROP TABLE audit_logs', 'PRAGMA table_info(audit_logs)',
-  'SELECT * FROM "audit_logs" ORDER BY rowid LIMIT 501 OFFSET 0', 'SELECT * FROM "audit_logs" ORDER BY rowid LIMIT 500 OFFSET -1',
+  'SELECT * FROM "audit_logs" ORDER BY rowid LIMIT 501 OFFSET 0', 'SELECT * FROM "audit_logs" ORDER BY rowid LIMIT 16 OFFSET 0',
+  'SELECT * FROM "audit_logs" ORDER BY rowid LIMIT 500 OFFSET -1',
   'SELECT COUNT(*) AS count FROM "bad;name"']) check(sql, () => assert(!c.sqlAllowed(sql)));
 check('private headers excluded', () => assert.deepEqual(c.publicHeaders({ link: 'pages', 'set-cookie': 'private', location: 'signed', date: 'now' }), { link: 'pages', date: 'now' }));
 check('next link', () => assert.equal(c.nextLink({ link: '<https://api.github.com/next>; rel="next", <last>; rel="last"' }), 'https://api.github.com/next'));
@@ -50,6 +52,9 @@ for (const [key, value] of [['run_attempt', 2], ['head_sha', 'b'.repeat(40)], ['
 const currentBytes = s.fs.readFileSync(s.path.join(s.root,
   'docs/ota-exec-notes/P4-4-root-review-2026-10-19/preparation/verification-inputs/current.json'));
 const current = JSON.parse(currentBytes);
+const approvedV1 = c._test.approvedPredecessorTarget();
+const approvedP41 = JSON.parse(s.fs.readFileSync(s.path.join(s.root, 'docs/acceptance-contracts/P4-1-v2/evidence/formal/target.json')));
+check('approved v1 target is hash-bound to C1', () => assert.equal(approvedV1.commitSha, '08afb97ddae316b3b305354f1582afdb836d7633'));
 const currentTables = {
   firmware_releases: [{ app_id: current.appId, device_model: current.deviceModel, version_code: current.versionCode,
     registration_json: currentBytes.toString('utf8').trimEnd() }],
@@ -83,9 +88,51 @@ s.write = (name, value) => {
 };
 s.read = name => JSON.parse(outputs.get(name));
 s.readBytes = name => outputs.get(name);
+s.fileRef = name => {
+  const bytes = outputs.get(name); assert(Buffer.isBuffer(bytes));
+  return { path: name, size_bytes: bytes.length, sha256: s.sha256(bytes) };
+};
 const fixtureValue = 'OFFLINE_FIXTURE_NOT_A_REAL_CREDENTIAL';
 c._test.setContext({ account: '1'.repeat(32), local: fixtureValue, gh: fixtureValue, sensitive: [fixtureValue] });
 const response = (body, headers = {}, status = 200) => ({ status, headers, bytes: Buffer.from(typeof body === 'string' ? body : JSON.stringify(body)) });
+const predecessorName = 'inputs/predecessor-before.json', predecessorRoot = 'inputs/predecessor-before';
+function predecessorFixture(records, transform = () => {}) {
+  for (const name of [...outputs.keys()]) if (name.startsWith('inputs/predecessor-before')
+    || name.startsWith('snapshots/before/') || name.startsWith('snapshots/after/')) outputs.delete(name);
+  const files = [];
+  const original = (name, value, include = true) => {
+    const reference = { ...s.write(predecessorRoot + '/' + name, value), path: name };
+    if (include) files.push(reference);
+    return reference;
+  };
+  for (const record of records) {
+    const label = record.label, method = record.method || 'POST', origin = record.origin || 'https://api.cloudflare.com';
+    const path = record.path || '/accounts/[ACCOUNT]/d1/database/' + c.resources.protected.db + '/query';
+    const request = method === 'POST' ? original(label + '.request.json', Buffer.from(JSON.stringify({ sql: record.sql }))) : undefined;
+    const started = '2026-10-19T11:00:00Z', ended = '2026-10-19T11:00:01Z';
+    original(label + '-reservation.json', { method, origin, path, started, ...(request ? { request } : {}) });
+    const completed = record.completed !== false;
+    const body = original(label + (completed ? '.body' : '.partial.body'), record.body || {
+      success: true, result: [{ success: true, meta: { rows_written: 0, changed_db: false }, results: record.rows || [] }],
+    });
+    const envelope = { method, path, started, ended, status: record.status || 200,
+      response_headers: { 'content-type': 'application/json' }, completed, body,
+      ...(request ? { request } : {}), ...(!completed ? { error_code: 23 } : {}), ...record.envelope };
+    original(label + '.http.json', envelope);
+  }
+  const previous = { status: 'FROZEN', contract_id: 'P4-4-v1', freeze_commit: '08afb97ddae316b3b305354f1582afdb836d7633' };
+  const contractRef = original('predecessor.contract.json', previous, false);
+  const matrixRef = original('predecessor.final-evidence-matrix.json', { contract_id: 'P4-4-v1',
+    contract_sha256: contractRef.sha256, overall_result: 'EVIDENCE_GAP' }, false);
+  const manifest = { schema: 'p44-predecessor-before-v1', source_evidence_root: predecessorRoot,
+    source_commit: previous.freeze_commit, source_bundle_commit: 'e5994fb28466e46c99a1f247494473e6cba9cc03',
+    predecessor_contract_id: 'P4-4-v1', predecessor_contract_sha256: contractRef.sha256,
+    predecessor_contract: contractRef, predecessor_final_matrix: matrixRef, files };
+  transform(manifest);
+  const manifestRef = s.write(predecessorName, manifest);
+  return { status: 'FROZEN', contract_id: 'P4-4-v2', external_inputs: [{ id: 'predecessor-before',
+    evidence_path: 'evidence/' + predecessorName, evidence_sha256: manifestRef.sha256, fingerprint: 'sha256:' + manifestRef.sha256 }] };
+}
 async function main() {
   let requests = 0;
   c._test.setTransport(async (url, method, headers, body) => {
@@ -257,10 +304,204 @@ async function main() {
   check('lost discovery recovery is GET-only', () => assert.equal(recoveryPosts, 0));
   check('failed discovery preserved', () => assert.equal(s.read('run-a/discovery-1-1.http.json').completed, false));
   check('recovery binds same intent source', () => assert.equal(s.read('run-a/identity.json').run_id, 123));
+
+  const oldLabel = 'snapshots/before/protected-channel_history-0';
+  const oldSql = 'SELECT * FROM "channel_history" ORDER BY rowid LIMIT 500 OFFSET 0';
+  const rows = count => Array.from({ length: count }, (_, id) => ({ id }));
+  let network = 0;
+  const noNetwork = async () => { network++; throw Error('UNEXPECTED_NETWORK'); };
+  c._test.setTransport(noNetwork);
+  let fixture = predecessorFixture([{ label: oldLabel, sql: oldSql, rows: rows(500) }]);
+  const savedEnvelope = Buffer.from(outputs.get(predecessorRoot + '/' + oldLabel + '.http.json'));
+  const priorPages = await c._test.withBeforePredecessor(predecessorName, fixture,
+    () => c._test.tablePages('snapshots/before', 'protected', 'channel_history', 500));
+  check('complete old 500 page uses zero network requests', () => assert.equal(network, 0));
+  check('old page reference relocated without changing original envelope', () => {
+    assert.equal(priorPages[0].body.path, predecessorRoot + '/' + oldLabel + '.body');
+    assert(outputs.get(predecessorRoot + '/' + oldLabel + '.http.json').equals(savedEnvelope));
+    assert.equal(priorPages[0].started, '2026-10-19T11:00:00Z');
+    assert.equal(priorPages[0].predecessor_origin.source_bundle_commit, 'e5994fb28466e46c99a1f247494473e6cba9cc03');
+  });
+  fixture = predecessorFixture([{ label: oldLabel, sql: oldSql, rows: rows(17), completed: false }]);
+  const failed = Buffer.from(outputs.get(predecessorRoot + '/' + oldLabel + '.http.json'));
+  const offsets = [];
+  c._test.setTransport(async (_url, method, _headers, body) => {
+    network++; assert.equal(method, 'POST');
+    const sql = JSON.parse(body).sql, match = sql.match(/^SELECT \* FROM "channel_history" ORDER BY rowid LIMIT 8 OFFSET ([0-9]+)$/);
+    assert(match, 'NEW_PAGE_MUST_BE_EIGHT'); const offset = Number(match[1]); offsets.push(offset);
+    return response({ success: true, result: [{ success: true, meta: { rows_written: 0, changed_db: false }, results: rows(17).slice(offset, offset + 8) }] });
+  });
+  const small = await c._test.withBeforePredecessor(predecessorName, fixture,
+    () => c._test.tablePages('snapshots/before', 'protected', 'channel_history', 17));
+  check('incomplete large page replaced by exactly three small requests', () => assert.deepEqual(offsets, [0, 8, 16]));
+  check('failed large original stays incomplete byte-for-byte', () => assert(outputs.get(predecessorRoot + '/' + oldLabel + '.http.json').equals(failed)));
+  check('fresh small labels cannot alias failed large label', () => {
+    assert.deepEqual(small.map(page => page.body.path), [0, 8, 16].map(offset => 'snapshots/before/protected-channel_history-rows8-' + offset + '.body'));
+    assert(!outputs.has(oldLabel + '.http.json'));
+  });
+  await assert.rejects(c._test.tablePages('snapshots/before', 'protected', 'channel_history', 17)); checks++;
+  check('repeat small-page entry refused before network', () => assert.equal(network, 3));
+  network = 0; offsets.length = 0;
+  fixture = predecessorFixture([{ label: oldLabel, sql: oldSql, rows: rows(500) }]);
+  c._test.setTransport(async (_url, _method, _headers, body) => {
+    network++; const match = JSON.parse(body).sql.match(/LIMIT 8 OFFSET ([0-9]+)$/); assert(match);
+    const offset = Number(match[1]); offsets.push(offset);
+    return response({ success: true, result: [{ success: true, meta: { rows_written: 0, changed_db: false }, results: rows(510).slice(offset, offset + 8) }] });
+  });
+  const mixed = await c._test.withBeforePredecessor(predecessorName, fixture,
+    () => c._test.tablePages('snapshots/before', 'protected', 'channel_history', 510));
+  check('mixed width restoration fetches only missing rows', () => assert.deepEqual(offsets, [500, 508]));
+  check('mixed width restoration preserves exact row order', () => assert.deepEqual(mixed.flatMap(page => JSON.parse(s.readBytes(page.body.path)).result[0].results), rows(510)));
+  network = 0; c._test.setTransport(noNetwork);
+  for (const mutation of [
+    { sql: oldSql.replace('LIMIT 500', 'LIMIT 8') },
+    { envelope: { method: 'GET' } },
+    { envelope: { path: '/accounts/[ACCOUNT]/d1/database/wrong/query' } },
+    { envelope: { completed: undefined } },
+  ]) {
+    fixture = predecessorFixture([{ label: oldLabel, sql: oldSql, rows: rows(500), ...mutation }]);
+    await assert.rejects(c._test.withBeforePredecessor(predecessorName, fixture,
+      () => c._test.tablePages('snapshots/before', 'protected', 'channel_history', 500))); checks++;
+  }
+  check('binding errors never fall back to a network request', () => assert.equal(network, 0));
+  fixture = predecessorFixture([{ label: oldLabel, sql: oldSql, rows: rows(500) }]);
+  outputs.set(predecessorRoot + '/' + oldLabel + '.body', Buffer.from('{}'));
+  check('tampered predecessor bytes rejected', () => assert.throws(() => c._test.loadBeforePredecessor(predecessorName, fixture)));
+  fixture = predecessorFixture([{ label: oldLabel, sql: oldSql, rows: rows(500) }], value => { value.source_bundle_commit = 'b'.repeat(40); });
+  check('wrong predecessor bundle identity rejected', () => assert.throws(() => c._test.loadBeforePredecessor(predecessorName, fixture)));
+  fixture = predecessorFixture([{ label: oldLabel, sql: oldSql, rows: rows(500) }]);
+  fixture.external_inputs[0].evidence_sha256 = '0'.repeat(64);
+  check('current frozen anchor mismatch rejected', () => assert.throws(() => c._test.loadBeforePredecessor(predecessorName, fixture)));
+  fixture = predecessorFixture([{ label: oldLabel, sql: oldSql, rows: rows(500) }]);
+  for (const [origin, method, path, body] of [
+    ['https://api.github.com', 'POST', prefix + '/actions/workflows/firmware-build.yml/dispatches', { ref: target.branch }],
+    ['https://api.github.com', 'PATCH', envRoute + '/variables/OTA_PREVIOUS_RELEASE_JSON', { value: 'unreviewed' }],
+    [c.resources.staging.worker, 'POST', '/api/ci/firmware/preflight', {}],
+  ]) {
+    await assert.rejects(c._test.withBeforePredecessor(predecessorName, fixture,
+      () => c._test.capture('snapshots/before/forbidden-mutation', origin, path, { method, body }))); checks++;
+  }
+  check('predecessor context cannot authorize mutations', () => assert.equal(network, 0));
+  offsets.length = 0;
+  c._test.setTransport(async (_url, _method, _headers, body) => {
+    network++; const match = JSON.parse(body).sql.match(/LIMIT 8 OFFSET ([0-9]+)$/); assert(match);
+    const offset = Number(match[1]); offsets.push(offset);
+    return response({ success: true, result: [{ success: true, meta: { rows_written: 0, changed_db: false }, results: rows(17).slice(offset, offset + 8) }] });
+  });
+  await c._test.tablePages('snapshots/after', 'protected', 'channel_history', 17);
+  check('after uses fresh eight-row pages despite available predecessor', () => assert.deepEqual(offsets, [0, 8, 16]));
+  await assert.rejects(c._test.snapshot('after', predecessorName)); checks++;
+  check('after cannot activate predecessor fixture', () => assert.equal(network, 3));
+  network = 0;
+  fixture = predecessorFixture([{ label: oldLabel, sql: oldSql, rows: rows(17), completed: false }]);
+  c._test.setTransport(async () => { network++; throw Object.assign(new Error('interrupted'), {
+    code: 'MOCK_SMALL_PAGE_TIMEOUT', partial: response({ complete_json_not_complete_transport: true }) }); });
+  await assert.rejects(c._test.withBeforePredecessor(predecessorName, fixture,
+    () => c._test.tablePages('snapshots/before', 'protected', 'channel_history', 17))); checks++;
+  check('new small-page failure is not retried or skipped', () => {
+    assert.equal(network, 1);
+    assert.equal(s.read('snapshots/before/protected-channel_history-rows8-0.http.json').completed, false);
+    assert(!outputs.has('snapshots/before/protected-channel_history-rows8-8-reservation.json'));
+  });
+
+  // V2 recognizes the approved C1 descriptor without recreating its branch rule.
+  s.cp.spawnSync = spawnSync;
+  for (const name of [...outputs.keys()]) if (name.startsWith('configure') || name === 'configured.json') outputs.delete(name);
+  const stagingValues = { OTA_PREVIOUS_RELEASE_JSON: c.canonical(approvedV1.descriptor),
+    OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256: approvedV1.descriptorSha256 };
+  const patches = []; let branchPosts = 0;
+  c._test.setTransport(async (url, method, _headers, body) => {
+    const endpoint = new URL(url).pathname, production = endpoint.includes('firmware-production');
+    const keyPrefix = production ? '' : 'FIRMWARE_REHEARSAL_';
+    if (method === 'PATCH') { const value = JSON.parse(body); patches.push(value.name); stagingValues[value.name] = value.value; return response('', {}, 204); }
+    if (method === 'POST') { branchPosts++; throw Error('BRANCH_RECREATION_FORBIDDEN'); }
+    if (endpoint.includes('/git/ref/heads/')) return response({ object: { sha: target.commitSha } });
+    if (endpoint.endsWith('/actions/variables/OTA_BOOT_CHAIN_READY')) return response({ value: 'false' });
+    if (endpoint.endsWith('/secrets')) return response({ total_count: names.length, secrets: names.map(name => ({ name: keyPrefix + name })) });
+    if (endpoint.endsWith('/variables')) {
+      const values = { OTA_BOOT_CHAIN_READY: 'false', TRACE_FIRMWARE_MIN_APP_VERSION_CODE: '0', TRACE_FIRMWARE_MIN_PROTOCOL_VERSION: '1',
+        [keyPrefix + 'TRACE_R2_BUCKET']: c.resources[production ? 'production' : 'staging'].bucket, ...stagingValues };
+      return response({ total_count: Object.keys(values).length, variables: Object.entries(values).map(([name, value]) => ({ name, value })) });
+    }
+    if (endpoint.endsWith('/deployment-branch-policies')) return response({ total_count: 1, branch_policies: [{ name: production ? 'main' : target.branch, type: 'branch' }] });
+    if (endpoint.endsWith('/environments/firmware-' + (production ? 'production' : 'rehearsal'))) return response({
+      deployment_branch_policy: { protected_branches: false, custom_branch_policies: true }, protection_rules: [{ type: 'required_reviewers',
+        prevent_self_review: production, reviewers: [{ type: 'User', reviewer: { login: 'Eitan-S-23', id: 204050265 } }] }] });
+    throw Error('UNKNOWN_V2_CONFIGURATION_ROUTE');
+  });
+  await c._test.configure(); checks++;
+  check('C1 to C2 changes only descriptor and hash', () => assert.deepEqual(patches.sort(), ['OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256', 'OTA_PREVIOUS_RELEASE_JSON']));
+  check('C1 to C2 never recreates existing branch rule', () => assert.equal(branchPosts, 0));
+  const resetConfiguration = () => {
+    for (const name of [...outputs.keys()]) if (name.startsWith('configure') || name === 'configured.json') outputs.delete(name);
+    patches.length = 0; branchPosts = 0;
+  };
+  resetConfiguration();
+  await c._test.configure(); checks++;
+  check('complete C2 pair is zero mutation no-op', () => assert.equal(patches.length + branchPosts, 0));
+  for (const pair of [
+    { OTA_PREVIOUS_RELEASE_JSON: c.canonical(approvedV1.descriptor), OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256: target.descriptorSha256 },
+    { OTA_PREVIOUS_RELEASE_JSON: c.canonical(target.descriptor), OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256: approvedV1.descriptorSha256 },
+    { OTA_PREVIOUS_RELEASE_JSON: c.canonical(approvedP41.descriptor), OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256: approvedP41.descriptorSha256 },
+  ]) {
+    resetConfiguration(); Object.assign(stagingValues, pair);
+    await assert.rejects(c._test.configure(), /UNEXPECTED_BASELINE_PAIR/); checks++;
+    check('mixed or old pair rejected before mutations', () => assert.equal(patches.length + branchPosts, 0));
+  }
   console.log(JSON.stringify({ ok: true, assertions: checks, cloud_operations: 0, filesystem_writes: 0,
     standard_signer: '@smithy/signature-v4', capture_bodies: [...outputs.keys()].filter(k => k.endsWith('.body')).length }));
 }
-main().catch(error => { console.error(JSON.stringify({ ok: false, assertions: checks, error_code: error.code || 'OFFLINE_TEST_FAILED' })); process.exitCode = 1; })
+async function realPredecessor() {
+  const packet = JSON.parse(s.fs.readFileSync(0, 'utf8'));
+  assert.equal(packet.scope, 'bundle.predecessor_plan');
+  for (const item of packet.originals) {
+    assert(item.path.startsWith(predecessorRoot + '/') && !item.path.split('/').includes('..'));
+    const source = s.path.resolve(item.source), relative = s.path.relative(s.root, source);
+    assert(relative && relative !== '..' && !relative.startsWith('..' + s.path.sep) && !s.path.isAbsolute(relative));
+    outputs.set(item.path, s.fs.readFileSync(source));
+  }
+  const makeAnchor = value => {
+    const bytes = Buffer.from(JSON.stringify(value)); outputs.set(predecessorName, bytes);
+    return { status: 'FROZEN', contract_id: 'P4-4-v2', external_inputs: [{ id: 'predecessor-before',
+      evidence_path: 'evidence/' + predecessorName, evidence_sha256: s.sha256(bytes), fingerprint: 'sha256:' + s.sha256(bytes) }] };
+  };
+  assert(/[A-F]/.test(packet.manifest.predecessor_contract_sha256));
+  const previousMatrix = JSON.parse(outputs.get(predecessorRoot + '/' + packet.manifest.predecessor_final_matrix.path));
+  assert(/[A-F]/.test(previousMatrix.contract_sha256));
+  let requests = 0, complete = 0, incomplete = 0;
+  c._test.setTransport(async () => { requests++; throw Error('REAL_FIXTURE_MUST_BE_OFFLINE'); });
+  await c._test.withBeforePredecessor(predecessorName, makeAnchor(packet.manifest), async () => {
+    for (const file of packet.manifest.files.filter(item => item.path.endsWith('.http.json'))) {
+      const label = file.path.slice(0, -'.http.json'.length), envelope = JSON.parse(outputs.get(predecessorRoot + '/' + file.path));
+      const reservation = JSON.parse(outputs.get(predecessorRoot + '/' + label + '-reservation.json'));
+      const body = envelope.request ? JSON.parse(outputs.get(predecessorRoot + '/' + envelope.request.path)) : undefined;
+      const restored = c._test.predecessorCapture(label, reservation.origin, envelope.path, { method: envelope.method, body });
+      if (envelope.completed) {
+        assert(restored && restored.bytes.equals(outputs.get(predecessorRoot + '/' + envelope.body.path)));
+        assert.equal(restored.envelope.started, envelope.started); assert.equal(restored.envelope.ended, envelope.ended); complete++;
+      } else { assert.equal(restored, null); incomplete++; }
+    }
+  });
+  assert.equal(complete, 31); assert.equal(incomplete, 1); assert.equal(requests, 0);
+  const wrong = structuredClone(packet.manifest); wrong.predecessor_contract_sha256 = 'F'.repeat(64);
+  assert.throws(() => c._test.loadBeforePredecessor(predecessorName, makeAnchor(wrong)), /PREDECESSOR_CONTRACT_HASH/);
+  wrong.predecessor_contract_sha256 = 'G'.repeat(64);
+  assert.throws(() => c._test.loadBeforePredecessor(predecessorName, makeAnchor(wrong)));
+  const matrixPath = predecessorRoot + '/' + packet.manifest.predecessor_final_matrix.path;
+  const originalMatrixBytes = outputs.get(matrixPath);
+  const changedMatrix = Buffer.from(JSON.stringify({ ...previousMatrix, contract_sha256: '0'.repeat(64) }));
+  const changedManifest = structuredClone(packet.manifest);
+  changedManifest.predecessor_final_matrix = { ...changedManifest.predecessor_final_matrix,
+    size_bytes: changedMatrix.length, sha256: s.sha256(changedMatrix) };
+  outputs.set(matrixPath, changedMatrix);
+  assert.throws(() => c._test.loadBeforePredecessor(predecessorName, makeAnchor(changedManifest)), /PREDECESSOR_MATRIX_BINDING/);
+  outputs.set(matrixPath, originalMatrixBytes);
+  console.log(JSON.stringify({ ok: true, source: packet.scope, complete_old_reads: complete, incomplete_old_reads: incomplete,
+    uppercase_originals_accepted: true, wrong_digest_rejected: true, wrong_matrix_digest_rejected: true,
+    malformed_digest_rejected: true, network_requests: requests,
+    filesystem_writes: 0 }));
+}
+(process.argv[2] === '--predecessor-stdin' ? realPredecessor() : main()).catch(error => { console.error(JSON.stringify({ ok: false, assertions: checks, error_code: error.code || 'OFFLINE_TEST_FAILED' })); process.exitCode = 1; })
   .finally(() => { Object.assign(s, saved); c._test.setContext(undefined); c._test.setTransport(undefined);
     s.fs.existsSync = exists; s.cp.spawnSync = spawnSync;
     c._test.setFrozen(undefined); c._test.setSleep(undefined); });

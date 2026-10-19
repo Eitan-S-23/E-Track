@@ -5,7 +5,12 @@ const repository = 'Eitan-S-23/E-Track';
 const branch = 'dev/p4-4/config-integration-20261018';
 const prefix = '/repos/' + repository;
 const envRoute = prefix + '/environments/firmware-rehearsal';
-const contractPath = 'docs/acceptance-contracts/P4-4-v1.contract.json';
+const contractPath = 'docs/acceptance-contracts/P4-4-v2.contract.json';
+const predecessorSource = '08afb97ddae316b3b305354f1582afdb836d7633';
+const predecessorBundle = 'e5994fb28466e46c99a1f247494473e6cba9cc03';
+const predecessorName = 'inputs/predecessor-before.json';
+const predecessorRoot = 'inputs/predecessor-before';
+const rowLimit = 8;
 const project = path.resolve(s.root, '../..');
 const modules = path.join(s.root, 'app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules');
 const resources = {
@@ -19,7 +24,7 @@ const sort = value => Array.isArray(value) ? value.map(sort) : value && typeof v
   ? Object.fromEntries(Object.keys(value).sort().map(key => [key, sort(value[key])])) : value;
 const canonical = value => JSON.stringify(sort(value));
 const privateRead = relative => fs.readFileSync(s.guard(path.join(project, relative), project), 'utf8').trim();
-let context, transportOverride, frozenOverride, sleepOverride;
+let context, transportOverride, frozenOverride, sleepOverride, beforePredecessor;
 const sleep = ms => sleepOverride ? sleepOverride(ms) : new Promise(resolve => setTimeout(resolve, ms));
 function secrets() {
   if (context) return context;
@@ -67,6 +72,111 @@ function publicHeaders(headers) {
   return Object.fromEntries(Object.entries(headers).filter(([name]) =>
     !['set-cookie', 'location', 'authorization', 'proxy-authorization', 'cookie'].includes(name.toLowerCase())));
 }
+function relativeInput(value) {
+  assert(typeof value === 'string' && /^[a-zA-Z0-9_./-]+$/.test(value)
+    && value.split('/').every(part => part && part !== '.' && part !== '..'), 'PREDECESSOR_PATH');
+  return value;
+}
+function verifiedReference(reference, root = '') {
+  assert(reference && typeof reference === 'object' && !Array.isArray(reference), 'PREDECESSOR_REFERENCE');
+  assert.deepEqual(Object.keys(reference).sort(), ['path', 'sha256', 'size_bytes'], 'PREDECESSOR_REFERENCE');
+  assert(Number.isSafeInteger(reference.size_bytes) && reference.size_bytes >= 0 && reference.size_bytes <= 256 * 1024 * 1024,
+    'PREDECESSOR_SIZE');
+  assert.match(reference.sha256, /^[0-9a-f]{64}$/);
+  const name = (root ? relativeInput(root) + '/' : '') + relativeInput(reference.path);
+  const bytes = s.readBytes(name);
+  assert(Buffer.isBuffer(bytes) && bytes.length === reference.size_bytes && s.sha256(bytes) === reference.sha256,
+    'PREDECESSOR_BYTES');
+  return bytes;
+}
+function loadBeforePredecessor(name, contract) {
+  assert.equal(name, predecessorName, 'PREDECESSOR_MANIFEST_NAME');
+  assert(contract.status === 'FROZEN' && contract.contract_id === 'P4-4-v2', 'PREDECESSOR_CURRENT_CONTRACT');
+  const anchors = contract.external_inputs.filter(item => item.id === 'predecessor-before');
+  assert.equal(anchors.length, 1, 'PREDECESSOR_ANCHOR');
+  const bytes = s.readBytes(name), hash = s.sha256(bytes);
+  assert.equal(anchors[0].evidence_path, 'evidence/' + name, 'PREDECESSOR_ANCHOR_PATH');
+  assert.equal(anchors[0].evidence_sha256, hash, 'PREDECESSOR_ANCHOR_HASH');
+  assert.equal(anchors[0].fingerprint, 'sha256:' + hash, 'PREDECESSOR_ANCHOR_HASH');
+  const manifest = JSON.parse(bytes);
+  assert.equal(manifest.schema, 'p44-predecessor-before-v1', 'PREDECESSOR_SCHEMA');
+  assert.equal(manifest.source_evidence_root, predecessorRoot, 'PREDECESSOR_ROOT');
+  assert.equal(manifest.source_commit, predecessorSource, 'PREDECESSOR_SOURCE');
+  assert.equal(manifest.source_bundle_commit, predecessorBundle, 'PREDECESSOR_BUNDLE');
+  assert.equal(manifest.predecessor_contract_id, 'P4-4-v1', 'PREDECESSOR_CONTRACT');
+  const contractBytes = verifiedReference(manifest.predecessor_contract, predecessorRoot);
+  assert.match(manifest.predecessor_contract_sha256, /^[0-9a-fA-F]{64}$/);
+  assert.equal(s.sha256(contractBytes), manifest.predecessor_contract_sha256.toLowerCase(), 'PREDECESSOR_CONTRACT_HASH');
+  const previous = JSON.parse(contractBytes);
+  assert(previous.status === 'FROZEN' && previous.contract_id === 'P4-4-v1'
+    && previous.freeze_commit === predecessorSource, 'PREDECESSOR_CONTRACT_BINDING');
+  const matrix = JSON.parse(verifiedReference(manifest.predecessor_final_matrix, predecessorRoot));
+  assert.match(matrix.contract_sha256, /^[0-9a-fA-F]{64}$/);
+  assert(matrix.contract_id === previous.contract_id && matrix.contract_sha256.toLowerCase() === s.sha256(contractBytes)
+    && ['EVIDENCE_GAP', 'ENV_BLOCKED', 'HARNESS_FAIL', 'PRODUCT_FAIL'].includes(matrix.overall_result), 'PREDECESSOR_MATRIX_BINDING');
+  assert(Array.isArray(manifest.files) && manifest.files.length > 0 && manifest.files.length <= 2048, 'PREDECESSOR_FILES');
+  const files = new Map(), folded = new Set();
+  for (const reference of manifest.files) {
+    relativeInput(reference.path);
+    assert(!folded.has(reference.path.toLowerCase()), 'PREDECESSOR_DUPLICATE_FILE');
+    folded.add(reference.path.toLowerCase());
+    verifiedReference(reference, predecessorRoot);
+    files.set(reference.path, reference);
+  }
+  return { manifest: { path: name, size_bytes: bytes.length, sha256: hash }, files, reused: new Set(), incomplete: new Set() };
+}
+async function withBeforePredecessor(name, contract, operation) {
+  assert(!beforePredecessor, 'PREDECESSOR_SCOPE_ALREADY_ACTIVE');
+  beforePredecessor = loadBeforePredecessor(name, contract);
+  try { return await operation(); } finally { beforePredecessor = undefined; }
+}
+function predecessorCapture(label, origin, route, { method = 'GET', body, expected = 200 } = {}) {
+  if (!beforePredecessor) return null;
+  assert(label.startsWith('snapshots/before/'), 'PREDECESSOR_OUTSIDE_BEFORE');
+  const select = origin === 'https://api.cloudflare.com' && method === 'POST' && body && Object.keys(body).length === 1
+    && typeof body.sql === 'string' && sqlAllowed(body.sql);
+  assert(method === 'GET' || select, 'PREDECESSOR_MUTATION_FORBIDDEN');
+  // Only unchanged business reads are eligible; current GitHub/configuration reads stay fresh.
+  const eligible = select || (origin === 's3' && method === 'GET' && route.includes('?list-type=2&max-keys=1000'));
+  if (!eligible) return null;
+  const state = beforePredecessor, reference = state.files.get(label + '.http.json');
+  if (!reference) return null;
+  assert(!state.reused.has(label), 'PREDECESSOR_READ_ALREADY_CONSUMED');
+  const readFile = name => {
+    const item = state.files.get(name); assert(item, 'PREDECESSOR_FILE_MISSING');
+    return verifiedReference(item, predecessorRoot);
+  };
+  const readReference = item => {
+    assert(item && state.files.has(item.path), 'PREDECESSOR_FILE_MISSING');
+    assert.deepEqual(item, state.files.get(item.path), 'PREDECESSOR_REFERENCE_BINDING');
+    return readFile(item.path);
+  };
+  const original = JSON.parse(readFile(reference.path));
+  const reservation = JSON.parse(readFile(label + '-reservation.json'));
+  assert(original.method === method && original.path === route && reservation.method === method
+    && reservation.origin === origin && reservation.path === route, 'PREDECESSOR_REQUEST_BINDING');
+  if (body === undefined) assert(original.request === undefined && reservation.request === undefined, 'PREDECESSOR_REQUEST_BODY');
+  else {
+    assert.equal(original.request?.path, label + '.request.json', 'PREDECESSOR_REQUEST_PATH');
+    assert.deepEqual(reservation.request, original.request, 'PREDECESSOR_REQUEST_BINDING');
+    assert(readReference(original.request).equals(Buffer.from(JSON.stringify(body))), 'PREDECESSOR_REQUEST_BYTES');
+  }
+  const response = original.body ? readReference(original.body) : undefined;
+  assert(typeof original.completed === 'boolean', 'PREDECESSOR_COMPLETION_REQUIRED');
+  if (!original.completed || !(Array.isArray(expected) ? expected : [expected]).includes(original.status)) {
+    state.incomplete.add(label); return null;
+  }
+  assert(response && original.body.path === label + '.body' && original.error_code === undefined, 'PREDECESSOR_RESPONSE_BINDING');
+  assert(Number.isFinite(Date.parse(original.started)) && Number.isFinite(Date.parse(original.ended))
+    && Date.parse(original.started) <= Date.parse(original.ended), 'PREDECESSOR_TIME');
+  const envelope = structuredClone(original);
+  envelope.body.path = predecessorRoot + '/' + original.body.path;
+  if (envelope.request) envelope.request.path = predecessorRoot + '/' + original.request.path;
+  envelope.predecessor_origin = { contract_id: 'P4-4-v1', source_commit: predecessorSource, source_bundle_commit: predecessorBundle,
+    original_envelope: { ...reference, path: predecessorRoot + '/' + reference.path } };
+  state.reused.add(label);
+  return { envelope, bytes: response, json: () => JSON.parse(response) };
+}
 function routeAllowed(origin, method, route) {
   if (typeof route !== 'string' || /[\r\n#\\]/.test(route) || route.split(/[/?]/).some(part => part === '.' || part === '..')) return false;
   if (origin === 'https://api.github.com') {
@@ -105,6 +215,8 @@ async function transport(url, method, headers, body, maxBytes = 16 * 1024 * 1024
 }
 async function capture(label, origin, route, { method = 'GET', body, headers = {}, expected = 200 } = {}) {
   assert(routeAllowed(origin, method, route), 'UNAPPROVED_ROUTE');
+  const prior = predecessorCapture(label, origin, route, { method, body, expected });
+  if (prior) return prior;
   const c = secrets(), stem = label;
   for (const suffix of ['-reservation.json', '.body', '.http.json', ...(body === undefined ? [] : ['.request.json'])]) {
     assert(!fs.existsSync(s.destination(stem + suffix)), 'REQUEST_ALREADY_CAPTURED');
@@ -194,7 +306,7 @@ function target() {
 function frozen() {
   if (frozenOverride) return frozenOverride();
   const t = target(), contract = JSON.parse(fs.readFileSync(s.guard(path.join(s.root, contractPath))));
-  assert.equal(contract.status, 'FROZEN'); assert.equal(contract.contract_id, 'P4-4-v1');
+  assert.equal(contract.status, 'FROZEN'); assert.equal(contract.contract_id, 'P4-4-v2');
   assert.equal(contract.freeze_commit, t.commitSha); assert.equal(s.git(['rev-parse', 'HEAD']), t.commitSha);
   assert.equal(s.git(['branch', '--show-current']), branch);
   assert.equal(s.read('commands/formal-precheck.json').exitCode, 0);
@@ -258,31 +370,65 @@ async function configuration(label, checkTarget) {
 }
 async function configure() {
   const t = target(), before = await configuration('configure-before', false);
-  const prior = JSON.parse(fs.readFileSync(s.guard(path.join(s.root, 'docs/acceptance-contracts/P4-1-v2/evidence/formal/target.json'))));
+  const v1 = approvedPredecessorTarget();
   const changes = { OTA_PREVIOUS_RELEASE_JSON: canonical(t.descriptor), OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256: t.descriptorSha256 };
-  const oldValues = { OTA_PREVIOUS_RELEASE_JSON: canonical(prior.descriptor), OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256: prior.descriptorSha256 };
-  for (const [name, value] of Object.entries(changes)) assert([oldValues[name], value].includes(before.rehearsal.values[name]), 'UNEXPECTED_BASELINE');
+  const v1Values = { OTA_PREVIOUS_RELEASE_JSON: canonical(v1.descriptor), OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256: v1.descriptorSha256 };
+  assert([v1Values, changes].some(pair => Object.entries(pair).every(([name, value]) => before.rehearsal.values[name] === value)),
+    'UNEXPECTED_BASELINE_PAIR');
+  assert(before.rehearsal.rules.some(r => r.name === branch && r.type === 'branch'), 'EXISTING_P44_BRANCH_REQUIRED');
   s.write('configure-plan.json', { target: s.fileRef('target.json'), branch, changes, gate_changes: 0, reviewer_changes: 0 });
-  if (!before.rehearsal.rules.some(r => r.name === branch)) await gh('configure-branch', envRoute + '/deployment-branch-policies', {
-    method: 'POST', body: { name: branch, type: 'branch' } });
   for (const [name, value] of Object.entries(changes)) if (before.rehearsal.values[name] !== value) {
     await gh('configure-' + name.toLowerCase(), envRoute + '/variables/' + name, { method: 'PATCH', body: { name, value }, expected: 204 });
   }
   s.write('configured.json', { before, after: await configuration('configure-after', true) });
 }
+function approvedPredecessorTarget() {
+  const contract = JSON.parse(fs.readFileSync(s.guard(path.join(s.root, 'docs/acceptance-contracts/P4-4-v1.contract.json'))));
+  const bytes = fs.readFileSync(s.guard(path.join(s.root, 'docs/acceptance-contracts/P4-4-v1/evidence/target.json')));
+  const anchors = contract.external_inputs.filter(item => item.id === 'target');
+  assert(contract.status === 'FROZEN' && contract.contract_id === 'P4-4-v1'
+    && contract.freeze_commit === predecessorSource && anchors.length === 1, 'PREDECESSOR_TARGET_CONTRACT');
+  assert.equal(anchors[0].evidence_path, 'evidence/target.json', 'PREDECESSOR_TARGET_PATH');
+  assert.equal(anchors[0].evidence_sha256, s.sha256(bytes), 'PREDECESSOR_TARGET_HASH');
+  const value = JSON.parse(bytes);
+  assert(value.repository === repository && value.branch === branch && value.commitSha === predecessorSource
+    && value.versionName === '3.2.9' && value.descriptor.targetCommitSha === predecessorSource
+    && value.descriptor.targetVersionName === value.versionName, 'PREDECESSOR_TARGET_BINDING');
+  assert.equal(s.sha256(canonical(value.descriptor)), value.descriptorSha256, 'PREDECESSOR_TARGET_DESCRIPTOR');
+  return value;
+}
 function sqlAllowed(sql) {
   return sql === 'SELECT name,type,sql FROM sqlite_master ORDER BY type,name'
     || /^SELECT COUNT\(\*\) AS count FROM "[a-z_][a-z0-9_]*"$/i.test(sql)
-    || /^SELECT \* FROM "[a-z_][a-z0-9_]*" ORDER BY rowid LIMIT 500 OFFSET (0|[1-9][0-9]*)$/i.test(sql);
+    || /^SELECT \* FROM "[a-z_][a-z0-9_]*" ORDER BY rowid LIMIT (8|500) OFFSET (0|[1-9][0-9]*)$/i.test(sql);
 }
-async function d1(label, role, sql) {
+async function d1(label, role, sql, predecessorOnly = false) {
   assert(sqlAllowed(sql), 'UNAPPROVED_SQL');
-  const result = await capture(label, 'https://api.cloudflare.com', '/accounts/[ACCOUNT]/d1/database/' + resources[role].db + '/query', {
-    method: 'POST', body: { sql } });
+  const route = '/accounts/[ACCOUNT]/d1/database/' + resources[role].db + '/query';
+  const options = { method: 'POST', body: { sql } };
+  const result = predecessorOnly ? predecessorCapture(label, 'https://api.cloudflare.com', route, options)
+    : await capture(label, 'https://api.cloudflare.com', route, options);
+  if (!result) return null;
   const data = result.json();
   assert(data.success && data.result.length === 1, 'D1_RESPONSE');
   assert(data.result[0].success && data.result[0].meta.rows_written === 0 && data.result[0].meta.changed_db === false, 'D1_READ_ONLY');
   return { envelope: result.envelope, rows: data.result[0].results };
+}
+async function tablePages(stem, role, name, total) {
+  assert(/^snapshots\/(before|after)$/.test(stem) && /^[a-z_][a-z0-9_]*$/i.test(name), 'TABLE_SNAPSHOT_SCOPE');
+  assert(Number.isSafeInteger(total) && total >= 0 && total <= 20000, 'D1_SIZE_LIMIT');
+  const records = [];
+  for (let offset = 0; offset < total;) {
+    const oldLabel = stem + '/' + role + '-' + name + '-' + offset;
+    const oldSql = 'SELECT * FROM "' + name + '" ORDER BY rowid LIMIT 500 OFFSET ' + offset;
+    const old = stem === 'snapshots/before' && beforePredecessor ? await d1(oldLabel, role, oldSql, true) : null;
+    const limit = old ? 500 : rowLimit;
+    const data = old || await d1(stem + '/' + role + '-' + name + '-rows8-' + offset, role,
+      'SELECT * FROM "' + name + '" ORDER BY rowid LIMIT ' + rowLimit + ' OFFSET ' + offset);
+    assert(Array.isArray(data.rows) && data.rows.length === Math.min(limit, total - offset), 'D1_PAGE_COUNT');
+    records.push(data.envelope); offset += data.rows.length;
+  }
+  return records;
 }
 async function protectedPair(label) {
   const c = secrets(), started = new Date().toISOString();
@@ -335,8 +481,17 @@ function stagingAdmission(tables) {
   assert(!tables.firmware_channels.filter(relevant).some(row => row.legacy_current_release_id != null), 'UNRESOLVED_LEGACY_CHANNEL');
   assert(tables.firmware_releases_legacy.filter(relevant).every(row => Number.isSafeInteger(row.version_code) && row.version_code < 30209), 'STAGING_LEGACY_VERSION_DRIFT');
 }
-async function snapshot(phase) {
+async function snapshot(phase, fixture) {
   frozen(); assert(['before', 'after'].includes(phase));
+  if (fixture !== undefined) {
+    assert.equal(phase, 'before', 'PREDECESSOR_ONLY_BEFORE');
+    const contract = JSON.parse(fs.readFileSync(s.guard(path.join(s.root, contractPath))));
+    return withBeforePredecessor(fixture, contract, () => snapshotContents(phase));
+  }
+  assert(!beforePredecessor, 'PREDECESSOR_SCOPE_ALREADY_ACTIVE');
+  return snapshotContents(phase);
+}
+async function snapshotContents(phase) {
   const result = { databases: {}, buckets: {}, github: {} }, stem = 'snapshots/' + phase;
   const localPair = await protectedPair(stem);
   for (const [role, resource] of Object.entries(resources)) {
@@ -347,13 +502,8 @@ async function snapshot(phase) {
       const count = await d1(stem + '/' + role + '-' + table.name + '-count', role, 'SELECT COUNT(*) AS count FROM "' + table.name + '"');
       const total = count.rows[0].count;
       assert(Number.isSafeInteger(total) && total >= 0 && total <= 20000, 'D1_SIZE_LIMIT');
-      const records = []; let rows = 0;
-      for (let offset = 0; offset < total; offset += 500) {
-        const data = await d1(stem + '/' + role + '-' + table.name + '-' + offset, role,
-          'SELECT * FROM "' + table.name + '" ORDER BY rowid LIMIT 500 OFFSET ' + offset);
-        records.push(data.envelope); rows += data.rows.length;
-      }
-      assert.equal(rows, total, 'D1_PAGE_COUNT'); tables[table.name] = { count: count.envelope, pages: records };
+      const records = await tablePages(stem, role, table.name, total);
+      tables[table.name] = { count: count.envelope, pages: records };
     }
     result.databases[role] = { schema: schema.envelope, tables };
     const records = []; let continuation;
@@ -393,6 +543,10 @@ async function snapshot(phase) {
       .map(([name, value]) => [name, value.pages.flatMap(page => document(page.body).result[0].results)]));
     stagingAdmission(tables);
   }
+  if (beforePredecessor) result.predecessor_reads = { manifest: beforePredecessor.manifest,
+    source_commit: predecessorSource, source_bundle_commit: predecessorBundle,
+    complete_original_labels: [...beforePredecessor.reused], incomplete_original_labels: [...beforePredecessor.incomplete],
+    interpretation: 'Hash-bound predecessor observations; not same-criterion REUSED or new network requests.' };
   s.write(stem + '.json', result);
   console.log(JSON.stringify({ snapshot: phase, complete: true, roles: 3, releases: releases.items.length }));
 }
@@ -629,7 +783,9 @@ async function productionPreflight() {
     effect: 'Authenticated fixed SELECT-only endpoint; not production workflow consumption, registration or publication.' });
 }
 module.exports = { canonical, routeAllowed, sqlAllowed, nextLink, publicHeaders, resources, runIdentity, stagingAdmission,
-  _test: { capture, pages, d1, s3, configuration, dispatch, waitForPending, recover, rejectedAdmission, finish, collectArtifact, collectLogs,
+  _test: { capture, pages, d1, s3, configuration, configure, approvedPredecessorTarget, tablePages, snapshot,
+    loadBeforePredecessor, withBeforePredecessor, predecessorCapture,
+    dispatch, waitForPending, recover, rejectedAdmission, finish, collectArtifact, collectLogs,
     setContext(value) { assert(require.main !== module); context = value; },
     setFrozen(value) { assert(require.main !== module); frozenOverride = value; },
     setSleep(value) { assert(require.main !== module); sleepOverride = value; },
@@ -639,7 +795,7 @@ if (require.main === module) {
   Promise.resolve().then(async () => {
     if (mode === 'target') return prepareTarget();
     if (mode === 'configure') return configure();
-    if (['before', 'after'].includes(mode)) return snapshot(mode);
+    if (['before', 'after'].includes(mode)) return snapshot(mode, label);
     if (mode === 'dispatch-a' || mode === 'dispatch-b') return dispatch(mode.slice(-1));
     if (mode === 'finish-a' || mode === 'finish-b') return finish(mode.slice(-1));
     if (mode === 'recover-a' || mode === 'recover-b') return recover(mode.slice(-1), label);

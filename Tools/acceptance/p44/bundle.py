@@ -15,12 +15,20 @@ import sys
 import zipfile
 
 ROOT = Path(__file__).absolute().parents[3]
-PACKAGE = ROOT / "docs/acceptance-contracts/P4-4-v1"
+PACKAGE = ROOT / "docs/acceptance-contracts/P4-4-v2"
 DATA = PACKAGE / "evidence"
-CONTRACT = ROOT / "docs/acceptance-contracts/P4-4-v1.contract.json"
+CONTRACT = ROOT / "docs/acceptance-contracts/P4-4-v2.contract.json"
+PREVIOUS = ROOT / "docs/acceptance-contracts/P4-4-v1"
+PREVIOUS_CONTRACT = ROOT / "docs/acceptance-contracts/P4-4-v1.contract.json"
+PREVIOUS_MATRIX = PREVIOUS / "final-evidence-matrix.json"
+PREVIOUS_SHA256 = "5EDFE3AA67DB573730F0D095A72E8EAD3F9E49E5D2457B2982480F8FC068BDB9"
+PREVIOUS_MATRIX_SHA256 = "021346D79CF0E01848C09ACC33A7D5854400B2DDB82BA10E1ADDF0DF049DCA0E"
+PREVIOUS_SOURCE = "08afb97ddae316b3b305354f1582afdb836d7633"
+PREVIOUS_BUNDLE = "e5994fb28466e46c99a1f247494473e6cba9cc03"
+PREDECESSOR = "inputs/predecessor-before.json"
 SOURCE = "b56534d7b6c993c0795010d0404fb8a81f7eeb9d"
 TOOLS = "Tools/acceptance/p44/"
-DATA_REL = "docs/acceptance-contracts/P4-4-v1/evidence/"
+DATA_REL = "docs/acceptance-contracts/P4-4-v2/evidence/"
 
 
 def guard(value, root=ROOT):
@@ -59,8 +67,13 @@ def ref(file, base=DATA):
     return {"path": file.relative_to(base).as_posix(), "size_bytes": len(data), "sha256": sha(data)}
 
 
+def git_bytes(*args):
+    env = dict(os.environ, GIT_NO_LAZY_FETCH="1", GIT_OPTIONAL_LOCKS="0", GIT_TERMINAL_PROMPT="0")
+    return subprocess.check_output(["git", "--no-optional-locks", "-c", "core.fsmonitor=false", *args], cwd=ROOT, env=env)
+
+
 def git(*args):
-    return subprocess.check_output(["git", "--no-optional-locks", "-c", "core.fsmonitor=false", *args], cwd=ROOT).decode().strip()
+    return git_bytes(*args).decode().strip()
 
 
 def validator():
@@ -81,9 +94,16 @@ def definitions():
         return name
 
     def capture(name, mode, groups=None):
-        return command(name, "node", [TOOLS + "capture.cjs", mode], groups or ["cloudflare", "capture"],
+        args = [TOOLS + "capture.cjs", mode]
+        before_description = ""
+        if mode == "before":
+            args.append(PREDECESSOR)
+            before_description = ("Review and consume only complete, exactly matching v1 read-only originals; "
+                                  "retain complete LIMIT 500 pages without replay and repair failed/uncollected rows with LIMIT 8 pages. "
+                                  "The partial v1 response is retained, never consumed as complete. ")
+        return command(name, "node", args, groups or ["cloudflare", "capture"],
                        [TOOLS + "capture.cjs"], "Raw capture under the fixed P4-4 plan; one invocation; Undici HTTP <=60s, standard gh archive <=180s, wrapper watchdog <=60 minutes; "
-                       "complete bounded pages. Only two planned staging dispatches; never approve/reject by API, "
+                       "complete bounded pages. " + before_description + "Only two planned staging dispatches; never approve/reject by API, "
                        "publish, register directly, upload/delete objects, migrate, unlock gates or operate devices. "
                        "Waiting/discovery reads are bounded, not repeated business operations. Uncertain mutations are not retried.")
 
@@ -148,8 +168,12 @@ def definitions():
     after = capture("formal-after", "after")
     criterion("P44-RAW-STATE", [before, negatives, after],
               ["snapshots/before.json", "negatives.json", "snapshots/after.json"],
-              "Bounded original three-resource SELECT/list captures; three actual missing/cross-Worker 401s and two cross-bucket 403s. "
-              "No production object write, register, channel mutation, Release or device action.")
+              "Bounded original three-resource SELECT/list captures. Before independently reviews complete v1 originals "
+              "(including old LIMIT 500 pages), then collects failed/uncollected rows with fixed LIMIT 8 pages; "
+              "after uses entirely new LIMIT 8 pages. The 60-second stream deadline is unchanged. "
+              "Three actual missing/cross-Worker 401s and two cross-bucket 403s. "
+              "No production object write, register, channel mutation, Release or device action; the failed v1 criterion is not REUSED.",
+              external=("target", "host", "predecessor-before"))
     criterion("P44-RAW-READBACK", [readbacks, production], ["readbacks.json", "production-preflight-result.json"],
               "Three immutable GET bodies and one correct production SELECT-only preflight use the validated artifact metadata. "
               "Evidence dependency reflects the actual parser-produced metadata; any affected recapture remains read-only, not another workflow.")
@@ -175,7 +199,7 @@ def definitions():
 def base_contract():
     value = read(ROOT / "docs/acceptance-contracts/template.contract.json")
     commands, artifacts, criteria = definitions()
-    value.update(contract_id="P4-4-v1", version=1, task_id="P4-4", parent_contract_sha256=None,
+    value.update(contract_id="P4-4-v2", version=2, task_id="P4-4", parent_contract_sha256=PREVIOUS_SHA256,
                  commands=commands, artifacts=artifacts, criteria=criteria)
     value["input_groups"] += [{"id": name, "profile": profile, "category": category} for name, profile, category in [
         ("firmware", "Firmware", "production_source"), ("release", "P41Release", "production_source"),
@@ -192,6 +216,73 @@ def inventory_selection(inventory, role, expected=None):
         rows = [item for item in rows if item["path"] in expected]
         assert len(rows) == len(expected) and {item["path"] for item in rows} == expected, "INVENTORY_SELECTION"
     return rows
+
+
+def predecessor_plan():
+    previous_raw = guard(PREVIOUS_CONTRACT).read_bytes()
+    matrix_raw = guard(PREVIOUS_MATRIX).read_bytes()
+    assert sha(previous_raw).upper() == PREVIOUS_SHA256, "PREDECESSOR_CONTRACT_CHANGED"
+    assert sha(matrix_raw).upper() == PREVIOUS_MATRIX_SHA256, "PREDECESSOR_MATRIX_CHANGED"
+    previous, matrix = json.loads(previous_raw), json.loads(matrix_raw)
+    assert previous["contract_id"] == "P4-4-v1" and previous["freeze_commit"] == PREVIOUS_SOURCE
+    assert matrix["overall_result"] == "EVIDENCE_GAP", "PREDECESSOR_RESULT_CHANGED"
+    rules = validator()
+    assert not rules.validate_contract(previous), "PREDECESSOR_CONTRACT_INVALID"
+    assert not rules.validate_matrix(matrix, previous, PREVIOUS_SHA256), "PREDECESSOR_MATRIX_INVALID"
+    git("merge-base", "--is-ancestor", PREVIOUS_SOURCE, PREVIOUS_BUNDLE)
+    git("merge-base", "--is-ancestor", PREVIOUS_BUNDLE, "HEAD")
+    for file, raw in ((PREVIOUS_CONTRACT, previous_raw), (PREVIOUS_MATRIX, matrix_raw)):
+        assert git_bytes("show", PREVIOUS_BUNDLE + ":" + file.relative_to(ROOT).as_posix()) == raw, "PREDECESSOR_GIT_BYTES"
+    base = PREVIOUS / "evidence"
+    files = sorted(file for file in guard(base / "snapshots/before").rglob("*") if file.is_file())
+    assert files, "PREDECESSOR_SNAPSHOTS_MISSING"
+    files += [base / "commands/formal-before.json", base / "commands/formal-before.log", base / "failure-report.json"]
+    references = []
+    for file in files:
+        item = ref(file, base)
+        assert matrix["evidence_hashes"]["evidence/" + item["path"]].upper() == item["sha256"].upper(), "PREDECESSOR_EVIDENCE_CHANGED"
+        references.append(item)
+    receipt = read(base / "commands/formal-before.json")
+    assert receipt["label"] == "formal-before" and receipt["exitCode"] == 1 and receipt["process_closed"] is True
+    target = DATA / "inputs/predecessor-before"
+    planned = [(source, target / source.relative_to(base)) for source in files]
+    planned += [(PREVIOUS_CONTRACT, target / "predecessor.contract.json"),
+                (PREVIOUS_MATRIX, target / "predecessor.final-evidence-matrix.json")]
+    manifest = {"schema": "p44-predecessor-before-v1", "predecessor_contract_id": "P4-4-v1",
+                "predecessor_contract_sha256": PREVIOUS_SHA256, "source_commit": PREVIOUS_SOURCE,
+                "source_bundle_commit": PREVIOUS_BUNDLE, "source_evidence_root": "inputs/predecessor-before",
+                "predecessor_contract": {"path": "predecessor.contract.json", "size_bytes": len(previous_raw), "sha256": sha(previous_raw)},
+                "predecessor_final_matrix": {"path": "predecessor.final-evidence-matrix.json", "size_bytes": len(matrix_raw), "sha256": sha(matrix_raw)},
+                "files": references}
+    return planned, manifest
+
+
+def initial_matrix(contract, digest):
+    matrix = read(ROOT / "docs/acceptance-contracts/template.evidence-matrix.json")
+    template = matrix["criteria"][0]
+    matrix.update(contract_id=contract["contract_id"], contract_sha256=digest.upper(), round_id="P44-20261019-02",
+                  criteria=[{**copy.deepcopy(template), "id": item["id"],
+                             "notes": "NOT_RUN under the v2 plan; the actual v1 failure remains recorded; no PASS or reviewer action inferred"}
+                            for item in contract["criteria"]])
+    return matrix
+
+
+def validation_commands():
+    common = ["python", "-I", "-S", "-B", "Tools/acceptance/validate_bundle.py", "--contract", CONTRACT.relative_to(ROOT).as_posix(),
+              "--repo-root", ROOT.as_posix(), "--previous-contract", PREVIOUS_CONTRACT.relative_to(ROOT).as_posix(),
+              "--previous-matrix", PREVIOUS_MATRIX.relative_to(ROOT).as_posix()]
+    initial = [*common, "--matrix", (PACKAGE / "evidence-matrix.json").relative_to(ROOT).as_posix()]
+    final = [*common, "--matrix", (PACKAGE / "final-evidence-matrix.json").relative_to(ROOT).as_posix()]
+    return {"precheck": " ".join(initial), "plan": " ".join([*initial, "--write-rerun-plan", "rerun-plan.json"]),
+            "final": " ".join(final)}
+
+
+def computed_plan(contract, matrix):
+    return validator().compute_rerun_plan(
+        contract, read(PREVIOUS_CONTRACT), read(PREVIOUS_MATRIX),
+        current_contract_sha256=sha(guard(CONTRACT).read_bytes()).upper(),
+        previous_contract_sha256=PREVIOUS_SHA256, previous_matrix_sha256=PREVIOUS_MATRIX_SHA256,
+        current_round_id=matrix["round_id"], repo_root=ROOT)
 
 
 def prepare():
@@ -213,12 +304,17 @@ def prepare():
         planned += [(source / item["path"], target / item["path"]) for item in selected]
     for name in ("app-final.bin", "provenance.json"):
         planned.append((ROOT / "docs/ota-exec-notes/P4-1-bootstrap-baseline-2026-10-15" / name, DATA / "inputs/bootstrap" / name))
+    assert len(planned) == 67, "ORIGINAL_INPUT_SCOPE"
+    predecessor_files, predecessor = predecessor_plan()
+    planned += predecessor_files
     for source, output in planned:
         guard(source); guard(output); assert source.is_file() and not output.exists()
     for name in ("originals.json", "lifecycle.json", "host.json"):
         assert not guard(DATA / "inputs" / name).exists()
+    assert not guard(DATA / PREDECESSOR).exists()
     for source, output in planned:
         write(output, source.read_bytes())
+    write(DATA / PREDECESSOR, predecessor)
     manifest = {"schema": "p44-originals-v1", "source_commit": SOURCE, "candidate_commit": git("rev-parse", "HEAD")}
     for role, inventory in inventories.items():
         manifest[role] = {"inventory": ref(inventory, DATA / "inputs")}
@@ -241,7 +337,7 @@ def prepare():
           "node": subprocess.check_output(["node", "--version"], cwd=ROOT).decode().strip(), "packages": packages,
           "transport": "Existing bounded Undici/OpenSSL proxy and standard AWS SigV4; no Schannel HTTP", "outputs": str(PACKAGE),
           "external_write_limit": "Selected-command/output audit only; prior external PowerShell/Schannel cache attribution remains unresolved"})
-    print(json.dumps({"copied_files": len(planned), "platform_operations": 0}))
+    print(json.dumps({"copied_files": len(planned), "original_inputs": 67, "predecessor_files": len(predecessor_files), "platform_operations": 0}))
 
 
 def freeze():
@@ -249,6 +345,7 @@ def freeze():
     assert read(DATA / "target.json")["commitSha"] == commit
     assert read(DATA / "inputs/originals.json")["candidate_commit"] == commit
     read(DATA / "configured.json")
+    assert read(DATA / PREDECESSOR) == predecessor_plan()[1], "PREDECESSOR_MANIFEST_CHANGED"
     value = base_contract()
     value.update(status="FROZEN", approved_by="Independent Codex root; explicit owner delegation to finish P4-4 autonomously",
                  approved_at=datetime.now(timezone.utc).isoformat(), implementation_ref=SOURCE,
@@ -256,7 +353,8 @@ def freeze():
                  profile_config_blob=git("rev-parse", "HEAD:Tools/provenance/manifest_profiles.json"))
     for name, relative in [("target", "target.json"), ("originals", "inputs/originals.json"),
                            ("lifecycle", "inputs/lifecycle.json"), ("bootstrap-app", "inputs/bootstrap/app-final.bin"),
-                           ("bootstrap-proof", "inputs/bootstrap/provenance.json"), ("host", "inputs/host.json")]:
+                           ("bootstrap-proof", "inputs/bootstrap/provenance.json"), ("host", "inputs/host.json"),
+                           ("predecessor-before", PREDECESSOR)]:
         fingerprint = sha(guard(DATA / relative).read_bytes())
         value["external_inputs"].append({"id": name, "category": "environment" if name == "host" else "fixture",
             "description": "Hash-bound " + name + "; historical operations retain their original date/operator/source and limitations; no replay implied",
@@ -264,13 +362,13 @@ def freeze():
     errors = validator().validate_contract(value)
     assert not errors, "CONTRACT_SCHEMA"
     raw = write(CONTRACT, value)
-    matrix = read(ROOT / "docs/acceptance-contracts/template.evidence-matrix.json")
-    template = matrix["criteria"][0]
-    matrix.update(contract_id="P4-4-v1", contract_sha256=sha(raw), round_id="P44-20261019-01",
-                  criteria=[{**template, "id": item["id"], "notes": "NOT_RUN under the frozen plan; no P4-4 PASS or reviewer action inferred"} for item in value["criteria"]])
+    matrix = initial_matrix(value, sha(raw))
+    assert not validator().validate_matrix(matrix, value, sha(raw).upper()), "MATRIX_SCHEMA"
     write(PACKAGE / "evidence-matrix.json", matrix)
-    print(json.dumps({"contract_sha256": sha(raw), "freeze_commit": commit, "formal_executions": 0,
-                      "commands": len(value["commands"]), "criteria": len(value["criteria"])}))
+    print(json.dumps({"contract_sha256": sha(raw).upper(), "freeze_commit": commit, "formal_executions": 0,
+                      "commands": len(value["commands"]), "criteria": len(value["criteria"]),
+                      "validation_commands": validation_commands(),
+                      "sealing_logs": "Run assess/final validation through the existing .cache/p44-run.cjs adapter, outside evidence DATA"}))
 
 
 def contains_secret(data, needles):
@@ -348,6 +446,14 @@ def privacy():
 def assess():
     contract, matrix = read(CONTRACT), read(PACKAGE / "evidence-matrix.json")
     assert matrix["overall_result"] == "NOT_RUN", "FINAL_RESULT_IMMUTABLE"
+    rules = validator()
+    digest = sha(guard(CONTRACT).read_bytes()).upper()
+    assert not rules.validate_matrix(matrix, contract, digest), "INITIAL_MATRIX_INVALID"
+    assert read(DATA / PREDECESSOR) == predecessor_plan()[1], "PREDECESSOR_MANIFEST_CHANGED"
+    plan = read(PACKAGE / "rerun-plan.json")
+    assert plan == computed_plan(contract, matrix), "RERUN_PLAN_MISMATCH"
+    assert not plan["reusable_criteria"], "UNEXPECTED_REUSE_REQUIRES_ADJUDICATION"
+    assert set(plan["required_commands"]) == {item["id"] for item in contract["commands"]}, "COMMAND_PLAN_MISMATCH"
     results = {"P44-HISTORY": read(DATA / "history-result.json")["ok"],
                "P44-CONFIGURATION": read(DATA / "configuration-result.json")["ok"],
                "P44-REHEARSAL": read(DATA / "rehearsal-result.json")["ok"],
@@ -372,27 +478,51 @@ def assess():
         item.update(result="PASS", observed=True, failure_owner=None,
                     evidence=[artifact["path"] for artifact in contract["artifacts"] if artifact["id"] in next(c for c in contract["criteria"] if c["id"] == item["id"])["artifact_ids"]],
                     notes="Independent original-byte adjudication; no production release/P5/gate unlock. Human reviewer provenance separately witnessed by root.")
+        if item["id"] == "P44-RAW-STATE":
+            item["evidence"].append("rerun-plan.json")
+            item["notes"] += " The actual v1 EVIDENCE_GAP round and incomplete stream remain bound by predecessor-before; this is not a REUSED criterion."
     matrix["evidence_hashes"] = {file.relative_to(PACKAGE).as_posix(): sha(guard(file).read_bytes()) for file in DATA.rglob("*") if file.is_file()}
+    matrix["evidence_hashes"]["rerun-plan.json"] = sha(guard(PACKAGE / "rerun-plan.json").read_bytes())
     matrix["overall_result"] = "PASS"
+    assert all(matrix[field] is None for field in ("previous_matrix_sha256", "rerun_plan_path", "rerun_plan_sha256")), "NONREUSE_BINDING_FIELDS"
+    assert not rules.validate_matrix(matrix, contract, digest), "FINAL_MATRIX_INVALID"
+    assert not rules.validate_planned_execution(matrix, contract, plan), "UNPLANNED_EXECUTION"
     write(PACKAGE / "final-evidence-matrix.json", matrix)
-    print(json.dumps({"overall_result": "PASS", "criteria": len(results)}))
+    print(json.dumps({"overall_result": "PASS", "criteria": len(results), "previous_contract_sha256": PREVIOUS_SHA256,
+                      "previous_matrix_sha256": PREVIOUS_MATRIX_SHA256, "rerun_plan_sha256": matrix["evidence_hashes"]["rerun-plan.json"],
+                      "final_validation_command": validation_commands()["final"], "final_validation_log": "Outside evidence DATA"}))
 
 
 def selftest():
     value = base_contract()
     value["external_inputs"] = [{"id": name, "category": "fixture", "description": "Offline schema fixture", "fingerprint": "sha256:" + "0" * 64,
                                  "evidence_path": name + ".json", "evidence_sha256": "0" * 64}
-                                for name in ("target", "originals", "lifecycle", "bootstrap-app", "bootstrap-proof", "host")]
-    errors = validator().validate_contract(value, allow_draft=True)
+                                for name in ("target", "originals", "lifecycle", "bootstrap-app", "bootstrap-proof", "host", "predecessor-before")]
+    rules = validator()
+    errors = rules.validate_contract(value, allow_draft=True)
     assert not errors, "CONTRACT_SCHEMA"
     invalid = copy.deepcopy(value)
     invalid["criteria"][0]["input_groups"].remove("evidence")
-    assert validator().validate_contract(invalid, allow_draft=True), "OMITTED_DEPENDENCY_ACCEPTED"
+    assert rules.validate_contract(invalid, allow_draft=True), "OMITTED_DEPENDENCY_ACCEPTED"
+    digest = sha(b"v2 contract fixture")
+    matrix = initial_matrix(value, digest)
+    assert not rules.validate_matrix(matrix, value, digest.upper()), "MATRIX_UPPERCASE_REJECTED"
+    invalid_matrix = copy.deepcopy(matrix)
+    invalid_matrix["contract_sha256"] = digest.lower()
+    assert rules.validate_matrix(invalid_matrix, value, digest.upper()) == ["matrix.contract_sha256 does not match the contract file"], "LOWERCASE_REGRESSION_NOT_REPRODUCED"
+    invalid_matrix["contract_sha256"] = "0" * 64
+    assert rules.validate_matrix(invalid_matrix, value, digest.upper()), "WRONG_MATRIX_DIGEST_ACCEPTED"
     assert contains_secret(b"fixture-secret", {b"fixture-secret"}) and not contains_secret(b"clean", {b"fixture-secret"})
     assert contains_secret(b"https://example.invalid/?X-Amz-Signature=signed", set())
     assert contains_secret(b"ghs_" + b"A" * 36, set()) and not contains_secret(b"ghs_ token type", set())
     offline_commands = [item for item in value["commands"] if "--repo-root" in item["command"]]
     assert len(offline_commands) == 5 and all("--repo-root " + ROOT.as_posix() + " " in item["command"] for item in offline_commands)
+    assert len(value["commands"]) == 17 and len(value["criteria"]) == 9, "FORMAL_SCOPE_CHANGED"
+    assert next(item for item in value["commands"] if item["id"] == "formal-before")["command"].endswith(" before " + PREDECESSOR)
+    assert [item["id"] for item in value["criteria"] if "predecessor-before" in item["external_inputs"]] == ["P44-RAW-STATE"]
+    for command in validation_commands().values():
+        assert "--previous-contract " + PREVIOUS_CONTRACT.relative_to(ROOT).as_posix() in command
+        assert "--previous-matrix " + PREVIOUS_MATRIX.relative_to(ROOT).as_posix() in command
     fixture = [{"path": "selected"}, {"path": "not-selected"}]
     assert inventory_selection({"files": fixture}, "history") == fixture
     assert inventory_selection({"entries": fixture}, "deployment", {"selected"}) == fixture[:1]
@@ -402,7 +532,28 @@ def selftest():
     except AssertionError:
         rejected = True
     assert rejected, "MISSING_DEPLOYMENT_ORIGINAL_ACCEPTED"
+    predecessor_files, predecessor = predecessor_plan()
+    envelopes = [read(source) for source, _ in predecessor_files if source.name.endswith(".http.json")]
+    assert len(envelopes) == 32 and sum(item.get("completed") is True for item in envelopes) == 31
+    assert sum(item.get("completed") is False for item in envelopes) == 1, "PARTIAL_PREDECESSOR_LOST"
+    previous, previous_matrix = read(PREVIOUS_CONTRACT), read(PREVIOUS_MATRIX)
+    previous_errors = rules._physical_errors(previous, previous_matrix, PREVIOUS, ROOT)
+    assert not previous_errors, "PREDECESSOR_PHYSICAL_VALIDATION"
+    # Preview only: the real C2 freeze/precheck recomputes profile changes after source commit.
+    preview = copy.deepcopy(value)
+    preview.update(status="FROZEN", freeze_commit=git("rev-parse", "HEAD"), freeze_tree=git("rev-parse", "HEAD^{tree}"),
+                   profile_config_blob=git("rev-parse", "HEAD:Tools/provenance/manifest_profiles.json"))
+    plan = rules.compute_rerun_plan(preview, previous, previous_matrix,
+                                   current_contract_sha256=digest.upper(), previous_contract_sha256=PREVIOUS_SHA256,
+                                   previous_matrix_sha256=PREVIOUS_MATRIX_SHA256, current_round_id=matrix["round_id"], repo_root=ROOT)
+    assert not plan["reusable_criteria"] and len(plan["rerun_criteria"]) == 9 and len(plan["required_commands"]) == 17
+    assert plan["previous_round_id"] == previous_matrix["round_id"] and plan["previous_matrix_sha256"] == PREVIOUS_MATRIX_SHA256
+    assert not rules.validate_planned_execution(matrix, preview, plan), "PREVIEW_PLAN_INVALID"
     print(json.dumps({"ok": True, "schema_positive": 1, "dependency_negative": 1, "privacy_checks": 5,
+                      "matrix_checks": 3, "previous_parameter_checks": 3, "predecessor_source_bundle": predecessor["source_bundle_commit"],
+                      "predecessor_files": len(predecessor_files), "predecessor_complete_responses": 31, "predecessor_incomplete_responses": 1,
+                      "previous_physical_validation": True, "plan_preview_rerun_criteria": len(plan["rerun_criteria"]),
+                      "plan_preview_required_commands": len(plan["required_commands"]), "preview_is_formal_admission": False,
                       "absolute_root_commands": len(offline_commands),
                       "inventory_schema_checks": 3,
                       "commands": len(value["commands"]), "criteria": len(value["criteria"]), "platform_operations": 0}))
@@ -410,11 +561,13 @@ def selftest():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=("prepare", "freeze", "privacy", "assess", "selftest", "commands"))
+    parser.add_argument("mode", choices=("prepare", "freeze", "privacy", "assess", "selftest", "commands", "validation-commands"))
     mode = parser.parse_args().mode
     assert Path.cwd().absolute() == ROOT and sys.flags.optimize == 0, "EXECUTION_CONTEXT"
     if mode == "commands":
         print("\n".join(item["command"] for item in definitions()[0]))
+    elif mode == "validation-commands":
+        print(json.dumps(validation_commands(), indent=2))
     else:
         globals()[mode]()
 

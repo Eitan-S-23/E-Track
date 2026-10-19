@@ -5,7 +5,7 @@ const crypto = require('node:crypto');
 const cp = require('node:child_process');
 const assert = require('node:assert/strict');
 const root = path.resolve(__dirname, '../../..');
-const base = path.join(root, 'docs/acceptance-contracts/P4-4-v1/evidence');
+const base = path.join(root, 'docs/acceptance-contracts/P4-4-v2/evidence');
 const sha256 = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 
 function guard(target, boundary = root) {
