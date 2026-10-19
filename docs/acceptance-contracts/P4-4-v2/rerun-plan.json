@@ -1,0 +1,157 @@
+{
+  "schema": "etrack-rerun-plan-v1",
+  "current_contract_id": "P4-4-v2",
+  "current_contract_sha256": "CFFF5E841B6FBE6F251A8A931C450907B477B678E890DCD6B00C2081E07D719A",
+  "previous_contract_id": "P4-4-v1",
+  "previous_contract_sha256": "5EDFE3AA67DB573730F0D095A72E8EAD3F9E49E5D2457B2982480F8FC068BDB9",
+  "contract_lineage": "direct_successor",
+  "current_round_id": "P44-20261019-02",
+  "previous_round_id": "P44-20261019-01",
+  "previous_matrix_sha256": "021346D79CF0E01848C09ACC33A7D5854400B2DDB82BA10E1ADDF0DF049DCA0E",
+  "changed_input_groups": [
+    "capture",
+    "evidence",
+    "validation"
+  ],
+  "changed_external_inputs": [
+    "host",
+    "originals",
+    "predecessor-before",
+    "target"
+  ],
+  "rerun_criteria": [
+    {
+      "id": "P44-HISTORY",
+      "reasons": [
+        "command_definition_changed:formal-history",
+        "external_input_changed:host",
+        "external_input_changed:originals",
+        "input_group_changed:evidence",
+        "input_group_changed:validation"
+      ]
+    },
+    {
+      "id": "P44-CONFIGURATION",
+      "reasons": [
+        "command_definition_changed:formal-configuration",
+        "external_input_changed:host",
+        "external_input_changed:originals",
+        "input_group_changed:evidence"
+      ]
+    },
+    {
+      "id": "P44-RAW-RUNS",
+      "reasons": [
+        "external_input_changed:host",
+        "external_input_changed:target",
+        "input_group_changed:capture",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P44-REHEARSAL",
+      "reasons": [
+        "command_definition_changed:formal-rehearsal",
+        "external_input_changed:host",
+        "external_input_changed:target",
+        "input_group_changed:evidence",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P44-RAW-STATE",
+      "reasons": [
+        "artifact_definition_changed:P44-RAW-STATE-1",
+        "artifact_definition_changed:P44-RAW-STATE-2",
+        "artifact_definition_changed:P44-RAW-STATE-3",
+        "command_definition_changed:formal-before",
+        "criterion_definition_changed",
+        "external_input_changed:host",
+        "external_input_changed:predecessor-before",
+        "external_input_changed:target",
+        "input_group_changed:capture",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P44-RAW-READBACK",
+      "reasons": [
+        "external_input_changed:host",
+        "external_input_changed:target",
+        "input_group_changed:capture",
+        "input_group_changed:evidence",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P44-APPROVALS",
+      "reasons": [
+        "command_definition_changed:formal-approvals",
+        "external_input_changed:host",
+        "external_input_changed:target",
+        "input_group_changed:evidence",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P44-ISOLATION",
+      "reasons": [
+        "command_definition_changed:formal-states",
+        "external_input_changed:host",
+        "external_input_changed:target",
+        "input_group_changed:evidence",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P44-HYGIENE",
+      "reasons": [
+        "external_input_changed:host",
+        "external_input_changed:originals",
+        "input_group_changed:evidence"
+      ]
+    }
+  ],
+  "reusable_criteria": [],
+  "reuse_origins": {},
+  "required_commands": [
+    "formal-after",
+    "formal-approvals",
+    "formal-assemble-complete",
+    "formal-assemble-rehearsal",
+    "formal-before",
+    "formal-configuration",
+    "formal-dispatch-a",
+    "formal-dispatch-b",
+    "formal-finish-a",
+    "formal-finish-b",
+    "formal-history",
+    "formal-negatives",
+    "formal-privacy",
+    "formal-production-preflight",
+    "formal-readbacks",
+    "formal-rehearsal",
+    "formal-states"
+  ],
+  "required_artifacts": [
+    "P44-APPROVALS-1",
+    "P44-APPROVALS-2",
+    "P44-CONFIGURATION-1",
+    "P44-HISTORY-1",
+    "P44-HYGIENE-1",
+    "P44-HYGIENE-2",
+    "P44-ISOLATION-1",
+    "P44-RAW-READBACK-1",
+    "P44-RAW-READBACK-2",
+    "P44-RAW-RUNS-1",
+    "P44-RAW-RUNS-2",
+    "P44-RAW-RUNS-3",
+    "P44-RAW-RUNS-4",
+    "P44-RAW-RUNS-5",
+    "P44-RAW-STATE-1",
+    "P44-RAW-STATE-2",
+    "P44-RAW-STATE-3",
+    "P44-REHEARSAL-1",
+    "P44-REHEARSAL-2"
+  ]
+}

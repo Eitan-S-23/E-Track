@@ -1,0 +1,12 @@
+{
+  "method": "PATCH",
+  "origin": "https://api.github.com",
+  "path": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/variables/OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256",
+  "started": "2026-10-19T13:20:03.700Z",
+  "request": {
+    "path": "configure-ota_approved_bootstrap_baseline_sha256.request.json",
+    "size_bytes": 124,
+    "sha256": "8f4707fccf3b30c4c0a8efa9e7f71d36c5f83cc48606e0fdeb5e8d035ecfbb80"
+  },
+  "note": "Reserved before request; a lost response is not permission to replay a mutation."
+}

@@ -1,0 +1,278 @@
+{
+  "startedAt": "2026-10-18T23:33:28.114Z",
+  "mode": "deploy",
+  "role": "staging",
+  "target": {
+    "name": "e-track-firmware-p41-test",
+    "bucket": "e-track-firmware-p41-test-releases",
+    "d1": "2617e1e1-956f-42ce-a465-da56d84abf06",
+    "environment": "staging",
+    "originalConfig": "D:/github/my/E-Track/.cache/p41-dev-20261015/.cache/cf-firmware-setup-20261015/d1-edit-r2/wrangler.json",
+    "version": "db7d28f6-453d-439b-b37e-ef98361e56d9"
+  },
+  "sourceCommit": "b56534d7b6c993c0795010d0404fb8a81f7eeb9d",
+  "runtimeSha256": "1ad919d795a2354cd4c7d9617f3e3c9805f831967d1a2cdd5930ba61e4c3303f",
+  "artifactId": 12154675551,
+  "requests": [
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/actions/variables/OTA_BOOT_CHAIN_READY",
+      "startedAt": "2026-10-18T23:33:33.405Z",
+      "status": 200,
+      "bytes": 119,
+      "sha256": "e2602c11ef14c5dc58477e0fd4c70c556358ec082d57d26e330a1122b27d801e",
+      "requestId": "B9DF:257DD3:FFABDB:115283D:6AD5574E",
+      "endedAt": "2026-10-18T23:33:34.701Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/variables/OTA_BOOT_CHAIN_READY",
+      "startedAt": "2026-10-18T23:33:34.840Z",
+      "status": 200,
+      "bytes": 119,
+      "sha256": "c67a2c5718dfe8bbc233f1fa5248867bad6307774afb3f5fc6da15e635f9c929",
+      "requestId": "E89B:7A8CD:F6101A:10B9638:6AD5574F",
+      "endedAt": "2026-10-18T23:33:36.280Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/environments/firmware-production/variables/OTA_BOOT_CHAIN_READY",
+      "startedAt": "2026-10-18T23:33:36.281Z",
+      "status": 200,
+      "bytes": 119,
+      "sha256": "b7b368b94ebf50c0a1a3823d1c50a1e70cc2fac4f6ada24a28e27c633848826f",
+      "requestId": "519B:8F68:F3B0DD:1092DF4:6AD55751",
+      "endedAt": "2026-10-18T23:33:38.451Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/workers/scripts/e-track-firmware-p41-test/settings",
+      "startedAt": "2026-10-18T23:33:38.453Z",
+      "status": 200,
+      "bytes": 2797,
+      "sha256": "cbc4213ef5c253aa70f59a4322bac360f588d1baf707ba2eeaecbc7120891e21",
+      "requestId": "a4cb596f5a855ebe-NRT",
+      "endedAt": "2026-10-18T23:33:40.513Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/workers/scripts/e-track-firmware-p41-test/deployments",
+      "startedAt": "2026-10-18T23:33:40.514Z",
+      "status": 200,
+      "bytes": 1227,
+      "sha256": "ac412563a85a72a8c4a92118da1f25884682e7e1197e4d78e9bc0b5e9e41fda9",
+      "requestId": "a4cb597dafca47f7-NRT",
+      "endedAt": "2026-10-18T23:33:42.583Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/workers/scripts/e-track-firmware-p41-test/schedules",
+      "startedAt": "2026-10-18T23:33:42.583Z",
+      "status": 200,
+      "bytes": 251,
+      "sha256": "2eb51061e442d1609dda0c15ad027ef75958fa2691ea69a563355a03288a931b",
+      "requestId": "a4cb59919bb8a0de-NRT",
+      "endedAt": "2026-10-18T23:33:45.830Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/workers/scripts/e-track-firmware-p41-test/settings",
+      "startedAt": "2026-10-18T23:34:10.656Z",
+      "status": 200,
+      "bytes": 2953,
+      "sha256": "ab691136e49230cd54532ceb78c8fa5738c4898b69ba5624a35c459dd6ed4374",
+      "requestId": "a4cb5a362f78611a-NRT",
+      "endedAt": "2026-10-18T23:34:12.594Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/workers/scripts/e-track-firmware-p41-test/deployments",
+      "startedAt": "2026-10-18T23:34:12.595Z",
+      "status": 200,
+      "bytes": 1703,
+      "sha256": "8641d8ddde281aa3203bb2ab579cf7019acf85bdac46b8437312ef6bdc8f6b9c",
+      "requestId": "a4cb5a41dadbe38d-NRT",
+      "endedAt": "2026-10-18T23:34:13.960Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/workers/scripts/e-track-firmware-p41-test/schedules",
+      "startedAt": "2026-10-18T23:34:13.961Z",
+      "status": 200,
+      "bytes": 251,
+      "sha256": "2eb51061e442d1609dda0c15ad027ef75958fa2691ea69a563355a03288a931b",
+      "requestId": "a4cb5a4a1fc9d4f7-NRT",
+      "endedAt": "2026-10-18T23:34:15.388Z"
+    }
+  ],
+  "businessDataWrites": "NONE_REQUESTED",
+  "formalAcceptance": "NOT_RUN",
+  "purpose": "Owner-authorized Worker configuration preparation; no release or device operation",
+  "gates": [
+    {
+      "route": "actions/variables/OTA_BOOT_CHAIN_READY",
+      "value": "false"
+    },
+    {
+      "route": "environments/firmware-rehearsal/variables/OTA_BOOT_CHAIN_READY",
+      "value": "false"
+    },
+    {
+      "route": "environments/firmware-production/variables/OTA_BOOT_CHAIN_READY",
+      "value": "false"
+    }
+  ],
+  "before": {
+    "settings": {
+      "placement": {},
+      "compatibility_date": "2026-06-28",
+      "compatibility_flags": [
+        "nodejs_compat"
+      ],
+      "usage_model": "standard",
+      "tags": [],
+      "tail_consumers": [],
+      "logpush": false,
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1,
+        "redact_query_string": true,
+        "logs": {
+          "enabled": true,
+          "head_sampling_rate": 1,
+          "persist": true,
+          "invocation_logs": true
+        },
+        "traces": {
+          "enabled": false,
+          "persist": true,
+          "head_sampling_rate": 1
+        }
+      },
+      "annotations": {
+        "workers/triggered_by": "secret"
+      },
+      "bindings": [
+        {
+          "name": "APP_ID",
+          "text": "trace",
+          "type": "plain_text"
+        },
+        {
+          "database_id": "2617e1e1-956f-42ce-a465-da56d84abf06",
+          "id": "2617e1e1-956f-42ce-a465-da56d84abf06",
+          "name": "DB",
+          "type": "d1"
+        },
+        {
+          "name": "DEPLOY_TOKEN_SHA256",
+          "type": "secret_text"
+        },
+        {
+          "name": "DOWNLOAD_HMAC_KEY_CURRENT",
+          "type": "secret_text"
+        },
+        {
+          "name": "DOWNLOAD_TOKEN_KEY_VERSION",
+          "text": "p41-test-1",
+          "type": "plain_text"
+        },
+        {
+          "name": "DOWNLOAD_TOKEN_TTL_SECONDS",
+          "text": "300",
+          "type": "plain_text"
+        },
+        {
+          "name": "ENABLE_DIRECT_ADMIN_API",
+          "text": "false",
+          "type": "plain_text"
+        },
+        {
+          "name": "ENVIRONMENT",
+          "text": "staging",
+          "type": "plain_text"
+        },
+        {
+          "name": "FIRMWARE_V2_CUTOVER_EPOCH",
+          "text": "1792039926",
+          "type": "plain_text"
+        },
+        {
+          "name": "GITHUB_OWNER",
+          "text": "Eitan-S-23",
+          "type": "plain_text"
+        },
+        {
+          "name": "GITHUB_REPO",
+          "text": "E-Track",
+          "type": "plain_text"
+        },
+        {
+          "name": "MANIFEST_CACHE",
+          "namespace_id": "9581ef5b95154abaa7d441fd07c2f220",
+          "type": "kv_namespace"
+        },
+        {
+          "name": "MANIFEST_CACHE_TTL_SECONDS",
+          "text": "60",
+          "type": "plain_text"
+        },
+        {
+          "class_name": "RateLimiter",
+          "name": "RATE_LIMITER",
+          "namespace_id": "51fbc6056abd4797bf28feb2f8863307",
+          "type": "durable_object_namespace"
+        },
+        {
+          "name": "RATE_LIMIT_MAX_REQUESTS",
+          "text": "60",
+          "type": "plain_text"
+        },
+        {
+          "name": "RATE_LIMIT_WINDOW_SECONDS",
+          "text": "60",
+          "type": "plain_text"
+        },
+        {
+          "bucket_name": "e-track-firmware-p41-test-releases",
+          "name": "RELEASES_BUCKET",
+          "type": "r2_bucket"
+        }
+      ]
+    },
+    "version": "db7d28f6-453d-439b-b37e-ef98361e56d9",
+    "deploymentId": "b937481c-0aa4-4c66-9b10-94c7be4700d6",
+    "crons": [
+      "0 * * * *"
+    ]
+  },
+  "command": {
+    "executable": "D:\\install\\nvm\\nodejs\\node.exe",
+    "args": [
+      "D:/github/my/E-Track/.cache/p4-4-integration-20261018/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/wrangler/bin/wrangler.js",
+      "deploy",
+      "--no-bundle",
+      "--keep-vars",
+      "--config",
+      "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\private\\deploy-staging.json"
+    ],
+    "cwd": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019",
+    "startedAt": "2026-10-18T23:33:47.758Z",
+    "endedAt": "2026-10-18T23:34:10.655Z",
+    "exitCode": 0,
+    "signal": null,
+    "consolePath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\deploy\\staging\\deploy-console.log",
+    "warningLines": 2
+  },
+  "error": "Preserve query redaction atomically\n\nfalse !== true\n",
+  "endedAt": "2026-10-18T23:34:15.391Z"
+}

@@ -1004,3 +1004,93 @@ The appended development ZIP contains 20 byte-verified entries (20428 bytes).
 The pre-delivery scan checked all 10 changed delivery files and 20 ZIP members
 against known credentials/encodings and token shapes with zero matches. These
 are preparation results, not a P4-4 PASS or proof of live LIMIT 8 collection.
+
+### V2 Frozen Admission
+
+C2 is 70193ce7fb7cc4e426029d07cf7b50c1fcbfef1c, pushed to the existing task
+branch only. Its frozen tree is e97e9b44d4e06efc9133add82502a55241c9af55 and
+profile configuration blob is 5ef97ae98674373c3cf641676c16ff7baf1b617f.
+P4-4-v2.contract.json has SHA-256
+cfff5e841b6fbe6f251a8a931c450907b477b678e890dcd6b00c2081e07d719a
+and retains the actual V1 parent. The reviewed target remains 3.2.9; its C2
+descriptor SHA-256 is
+d2cf8f96c7551b9bd3e646f2bb8bd1eb6bb82fc8969023afaf32362a0fe7f893.
+
+Preparation copied 67 original inputs plus 132 predecessor files. The only
+platform writes were the two approved descriptor/hash variable PATCHes, both
+completed HTTP 204. Readback confirms all three gates false; no branch rule
+was created, secret replaced or Worker redeployed. Receipts are retained under
+the V2 evidence configure-before/configure-after paths and the two top-level
+configure-*.http.json files; helper stdout is in .cache/p44/logs/p44-v2-*.log.
+
+The actual formal-precheck returned VALIDATION=PASS, overall=NOT_RUN for round
+P44-20261019-02. Both it and the real rerun-plan command supplied the V1 contract
+and final matrix. The generated plan names nine affected criteria and the
+existing 17 command IDs, with zero reusable criteria. The before collector's
+old-response adoption is independent original-evidence evaluation, not reuse
+of the failed V1 RAW-STATE criterion. Plan generation reports
+FINAL_VALIDATION=NOT_RUN and is not final acceptance.
+
+The admitted history and configuration commands independently passed against
+the retained originals, without rerunning CI or deployment. Their output
+hashes are a5883f8cd2cb01b3cca0a31b20829f01bea23de4b5e9b6c0bf523314ec63b6da
+and 192e193e8e7a42150d43ea6dcbd35cec1291e9f7e4a827938e5b48c3b33380a0.
+Root then started the single planned before snapshot with the frozen
+predecessor fixture. A/B remain undispatched pending its actual completion and
+the required negative probes. P4-4 remains IN_PROGRESS, not PASS.
+
+### P44-SNAPSHOT-01: V2 Byte-Size Correction
+
+V2 before stopped with a closed exit 1 at channel_history rows8 OFFSET 32.
+Its HTTP 200 response declared 4746278 bytes; only 1441765 bytes arrived in
+64684 ms. The original is completed=false with error_code=23, not a permission
+denial or complete JSON. The preceding four new pages (offsets 0/8/16/24)
+completed with 19398/91934/7016/1264686 bytes. They and the 31 complete V1
+responses remain valid originals; neither partial response is a successful page.
+
+The earlier row-count repair did not bound response bytes. Independent offline
+inspection found no complete row in the V2 partial: it stops within row 32's
+before_json. The retained V1 partial already contains that field's closed
+1740978-byte serialized string and an incomplete after_json of at least
+1091442 bytes; the row's serialized lower bound is 2832753 bytes. Therefore
+LIMIT 1 is not an evidenced size guarantee. This is a collection/data-size
+issue, not proof of a product publication failure or a need for new credentials.
+
+Standard in-memory gzip of the four complete pages produced
+1775/3250/1058/26973 bytes. The V2 partial compresses to 29319 bytes and the V1
+partial to 87797 bytes; these are partial-only diagnostics, not complete result
+sizes. A separate single unauthenticated GET of the public Cloudflare /ips API
+with Accept-Encoding: gzip returned HTTP 200/gzip, 277 wire bytes and 505 decoded
+bytes. Its originals are .cache/p44/diagnostics/gzip-public-api-01.{body,json};
+this proves that API host can negotiate gzip, not that the D1 capture passed.
+
+Root's bounded successor direction retains Undici request/ProxyAgent, TLS,
+LIMIT 8 and the same 60-second deadline. Only D1 SELECT requests negotiate
+gzip; standard strict zlib decoding and separate 16 MiB wire/decoded limits
+must preserve original headers/wire bytes and a hash-bound decoded derivative.
+The offline evaluator must strictly recompute decoding. Truncation, CRC faults,
+unsupported encoding and size overflow fail; decoded bytes must be included in
+the sensitive-value scan. Unsafe-to-decode failed wire is privately retained,
+not blindly published. The existing .cache/p44/private ACL was read back as
+current-user-only (inheritable full control), without changing it. No generic
+SQL fragmentation controller, permissive fetch decompression, larger timeout,
+credential change or repeat of a complete page is authorized by this decision.
+
+V2 is closed as EVIDENCE_GAP: HISTORY/CONFIGURATION/HYGIENE PASS, six other
+criteria NOT_OBSERVED; actual command exits are 0/0/1/0. Privacy checked 307
+files, five ZIP members and 34 known-sensitive forms with zero matches. The
+final matrix binds 312 evidence files and has SHA-256
+c335006f0b166535ce957c345adf579440e087b6b980239baca96500f019a46c.
+Standard final validation included the actual V1 predecessor and returned
+VALIDATION=PASS, overall=EVIDENCE_GAP; log
+.cache/p44/logs/p44-v2-final-check-01.log has SHA-256
+efbad04c92c567e104a055ac5218242db8f03dde0a480041fbc60922ac6240a3.
+The rerun plan remains
+8587c8b637c5d0acc725eb2bb118e6ed1080f6528d9cfc4dd36d578e6cc2b67f.
+
+Source edits remain held until root commits the V2 failure bundle and its
+separate index. V3 must directly bind V2/C2/B2, then the retained V2 manifest's
+V1/C1/B1 ancestry. It must consume the 35 complete observations without network
+replay and retain both failed originals. The planned rejection/approval runs
+remain unspent; no production publication, registration, R2 write or device
+operation occurred. P4-4 is not PASS and all gates remain false.

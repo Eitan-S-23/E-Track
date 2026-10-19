@@ -1,0 +1,43 @@
+{
+  "method": "PATCH",
+  "path": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/variables/OTA_PREVIOUS_RELEASE_JSON",
+  "started": "2026-10-19T13:19:55.781Z",
+  "request": {
+    "path": "configure-ota_previous_release_json.request.json",
+    "size_bytes": 1168,
+    "sha256": "b1579cb58cec5bb5f16eeef45a128920518e9b58e1eeb47e597198bfcfde482e"
+  },
+  "status": 204,
+  "response_headers": {
+    "date": "Mon, 19 Oct 2026 13:19:58 GMT",
+    "x-oauth-scopes": "gist, read:org, repo, user, workflow",
+    "x-accepted-oauth-scopes": "",
+    "x-oauth-client-id": "178c6fc778ccc68e1d6a",
+    "x-github-media-type": "github.v3; format=json",
+    "x-github-api-version-selected": "2022-11-28",
+    "access-control-expose-headers": "ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset, Warning",
+    "access-control-allow-origin": "*",
+    "strict-transport-security": "max-age=31536000; includeSubdomains; preload",
+    "x-frame-options": "deny",
+    "x-content-type-options": "nosniff",
+    "x-xss-protection": "0",
+    "referrer-policy": "origin-when-cross-origin, strict-origin-when-cross-origin",
+    "content-security-policy": "default-src 'none'",
+    "vary": "Accept-Encoding, Accept, X-Requested-With",
+    "server": "github.com",
+    "x-ratelimit-limit": "5000",
+    "x-ratelimit-remaining": "4992",
+    "x-ratelimit-reset": "1792419529",
+    "x-ratelimit-used": "8",
+    "x-ratelimit-resource": "core",
+    "x-github-request-id": "32FF:1DAF7:102755:117AE2:6AD618FE",
+    "x-github-edge-region": "westus3"
+  },
+  "body": {
+    "path": "configure-ota_previous_release_json.body",
+    "size_bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "completed": true,
+  "ended": "2026-10-19T13:19:59.689Z"
+}

@@ -1,0 +1,178 @@
+{
+  "schema": "p44-original-evaluation-v1",
+  "mode": "configuration",
+  "started": "2026-10-19T13:27:07.154811+00:00",
+  "platform_actions": 0,
+  "manifest_sha256": "212cef4bc1703afb56ab13b5f1d96d563a9ff468405413c1ad1f5f9c95037144",
+  "observed": {
+    "original_files": 8,
+    "successful_gets": 15,
+    "original_collector_assertions": 28,
+    "source_management_id_sha256": "ec3e3b40801a2af2676d699686429cc49d1fea95afb328d8efb9ac519b31d666",
+    "old_management_id_sha256": "0c22488a9bee1355603d8d61faca06fcacbdafccfed8a4ba7dc490af7cacdedc",
+    "source_changed": true,
+    "exact_single_bucket_two_item_groups": true,
+    "directory_names": [
+      "Track",
+      "e-track-firmware-production-s3-ci-20261019",
+      "e-track-firmware-rehearsal-s3-ci-20261019"
+    ],
+    "github_secret_names": [
+      "TRACE_R2_ACCESS_KEY_ID",
+      "TRACE_R2_SECRET_ACCESS_KEY",
+      "FIRMWARE_REHEARSAL_TRACE_R2_ACCESS_KEY_ID",
+      "FIRMWARE_REHEARSAL_TRACE_R2_SECRET_ACCESS_KEY"
+    ],
+    "provider_expiration": {
+      "production": null,
+      "rehearsal": null
+    },
+    "expiration_scope": "Provider fields absent or null; no 90-day expiry was applied",
+    "gates_false": 3,
+    "historical_environment_policies_verified": true,
+    "existing_sigv4_listobjects_http_200": 2,
+    "acl": {
+      "targets": 7,
+      "current_user_only_after_receipts": 7,
+      "broad_before_receipts": 2,
+      "content_unchanged": "Recorded by the hash-bound collector's before/after SHA256 comparisons; private bytes not reopened",
+      "limitation": "An exposure window existed; receipts neither prove access nor establish never exposed"
+    },
+    "private_original_registry": [
+      {
+        "ordinal": 1,
+        "size_bytes": 184,
+        "sha256": "b8b9bf68fb93805f66f940abe038216caf3d44d27594489f4de82c7bc5fc834b"
+      },
+      {
+        "ordinal": 2,
+        "size_bytes": 97458,
+        "sha256": "4d4a60f67bc581638c811f6347004063c14dc004f935c8faebc57c6c8462ff18"
+      },
+      {
+        "ordinal": 3,
+        "size_bytes": 3625,
+        "sha256": "022bbb7f4ad1783becc09148cbb3d395f952d3d3e416d4208133fa7aaff72de4"
+      },
+      {
+        "ordinal": 4,
+        "size_bytes": 708,
+        "sha256": "d91a234331d76a6a4bc9ff10f9f772cf0611087afd717717cb21f6302998bbe5"
+      },
+      {
+        "ordinal": 5,
+        "size_bytes": 705,
+        "sha256": "1912ab9154d3a06a628ade3a9fa25b963c3696b17820b84cfb7b5ad50c50207b"
+      },
+      {
+        "ordinal": 6,
+        "size_bytes": 1661,
+        "sha256": "2a5e615177b0aaa517bebaf7f51c1b183b53d0b24b159aa395f69a48e38f48b5"
+      },
+      {
+        "ordinal": 7,
+        "size_bytes": 655,
+        "sha256": "7fec3d2735b62f1e617c2deda87a71ab13971c409fda96c1d0e77617f611b2c7"
+      },
+      {
+        "ordinal": 8,
+        "size_bytes": 854,
+        "sha256": "3b864ec847fd20fa67836e662addaa975f48378e2f5c2563181c76c9ed760548"
+      },
+      {
+        "ordinal": 9,
+        "size_bytes": 136,
+        "sha256": "da1f8f67f9fa1ec6dd6efd7135d5daa5cc5e747535fead87a5e75e215400d3a0"
+      },
+      {
+        "ordinal": 10,
+        "size_bytes": 1659,
+        "sha256": "389b239fd13aea1bb302c7518caa3cd13b331df93d53450465f5989e9fab16a1"
+      },
+      {
+        "ordinal": 11,
+        "size_bytes": 892,
+        "sha256": "550bee3583903b34da5ffd7375584af184435877a8021b360e2b27ab88ef0356"
+      },
+      {
+        "ordinal": 12,
+        "size_bytes": 2520,
+        "sha256": "fb40827bf62ed8525657951258cd82ff2bfca51a8887d2ee6b4281b3543bf5cf"
+      },
+      {
+        "ordinal": 13,
+        "size_bytes": 160,
+        "sha256": "d8658cd9c160a2a9dc49d2025f5e6a54f1c777c4866e9b732d91aea9b5b93c13"
+      },
+      {
+        "ordinal": 14,
+        "size_bytes": 119,
+        "sha256": "e2602c11ef14c5dc58477e0fd4c70c556358ec082d57d26e330a1122b27d801e"
+      },
+      {
+        "ordinal": 15,
+        "size_bytes": 334,
+        "sha256": "64f3208a632f52eb2dba906be6417d3f7fbe87a82c34d8451267296745b1e6c7"
+      }
+    ],
+    "limitations": [
+      "Declared sanitized HTTP projections evaluated; private original bodies only hash-bound, not reopened",
+      "Secret names do not prove stored values or workflow consumption",
+      "Two prior ListObjectsV2 successes prove listing authentication, not PUT, conflicts, or full byte readback",
+      "No original initial HTTP 400 receipt or historical GitHub secret-write receipt was supplied",
+      "Historical environment policies precede the planned P4-4 branch addition and reviewer observation",
+      "Source comparison and unchanged credential bytes consume reviewed collector results, not fresh private reads",
+      "Phase-limited owner rotation and revocation decisions are recorded separately from provider metadata"
+    ],
+    "declared_projections": 4,
+    "deployment": {
+      "source_commit": "b56534d7b6c993c0795010d0404fb8a81f7eeb9d",
+      "ci_run_id": 39175549010,
+      "artifact_id": 12154675551,
+      "archive_sha256": "7bee78195841780046c3333d4dc6c0b3ec9d442f8a99399051d204844a7e2f6f",
+      "source_map_git_paths": 16,
+      "selected_files": 16,
+      "declared_projections": 4,
+      "workers": {
+        "staging": {
+          "worker": "e-track-firmware-p41-test",
+          "deployment_id": "88983ae0-75b1-487b-af0d-788b6cf976ec",
+          "version_id": "bb3d44fd-4a84-489e-9e04-6adfc54a458e",
+          "database_id": "2617e1e1-956f-42ce-a465-da56d84abf06",
+          "bucket": "e-track-firmware-p41-test-releases",
+          "environment": "staging",
+          "module_bytes": 149013,
+          "module_sha256": "1ad919d795a2354cd4c7d9617f3e3c9805f831967d1a2cdd5930ba61e4c3303f",
+          "direct_admin": false,
+          "query_redaction": true,
+          "observed_from": "2026-10-18T23:41:02.377Z",
+          "observed_to": "2026-10-18T23:41:26.594Z"
+        },
+        "production": {
+          "worker": "e-track-firmware-production",
+          "deployment_id": "b76395f1-f2bf-4adb-b936-0a291edf6e45",
+          "version_id": "e1653d60-03cb-4397-b154-78efd681ebbc",
+          "database_id": "1cd5db26-6bbd-4595-abef-72ff51ecdaf3",
+          "bucket": "e-track-firmware-production-releases",
+          "environment": "prod",
+          "module_bytes": 149013,
+          "module_sha256": "1ad919d795a2354cd4c7d9617f3e3c9805f831967d1a2cdd5930ba61e4c3303f",
+          "direct_admin": false,
+          "query_redaction": true,
+          "observed_from": "2026-10-19T00:19:10.463Z",
+          "observed_to": "2026-10-19T00:20:19.684Z"
+        }
+      },
+      "preserved_failures": [
+        "worker-input-01 source-path assumption",
+        "staging query-redaction regression",
+        "staging recovery ECONNRESET",
+        "production deploy-03 Wrangler exit 1"
+      ],
+      "scope": "Bounded historical deployment readbacks, not continuous or current unchanged-state monitoring"
+    }
+  },
+  "ok": true,
+  "files_verified": 26,
+  "ended": "2026-10-19T13:27:08.827570+00:00"
+}
