@@ -1,0 +1,123 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P4-4-v1",
+  "contract_sha256": "5EDFE3AA67DB573730F0D095A72E8EAD3F9E49E5D2457B2982480F8FC068BDB9",
+  "round_id": "P44-20261019-01",
+  "overall_result": "NOT_RUN",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "P44-HISTORY",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN under the frozen plan; no P4-4 PASS or reviewer action inferred"
+    },
+    {
+      "id": "P44-CONFIGURATION",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN under the frozen plan; no P4-4 PASS or reviewer action inferred"
+    },
+    {
+      "id": "P44-RAW-RUNS",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN under the frozen plan; no P4-4 PASS or reviewer action inferred"
+    },
+    {
+      "id": "P44-REHEARSAL",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN under the frozen plan; no P4-4 PASS or reviewer action inferred"
+    },
+    {
+      "id": "P44-RAW-STATE",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN under the frozen plan; no P4-4 PASS or reviewer action inferred"
+    },
+    {
+      "id": "P44-RAW-READBACK",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN under the frozen plan; no P4-4 PASS or reviewer action inferred"
+    },
+    {
+      "id": "P44-APPROVALS",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN under the frozen plan; no P4-4 PASS or reviewer action inferred"
+    },
+    {
+      "id": "P44-ISOLATION",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN under the frozen plan; no P4-4 PASS or reviewer action inferred"
+    },
+    {
+      "id": "P44-HYGIENE",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN under the frozen plan; no P4-4 PASS or reviewer action inferred"
+    }
+  ],
+  "evidence_hashes": {},
+  "commands": [],
+  "artifacts": []
+}

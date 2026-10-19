@@ -1,0 +1,29 @@
+{
+  "method": "POST",
+  "path": "/accounts/[ACCOUNT]/d1/database/1cd5db26-6bbd-4595-abef-72ff51ecdaf3/query",
+  "started": "2026-10-19T11:29:41.024Z",
+  "request": {
+    "path": "snapshots/before/production-firmware_admin_idempotency_tombstones-count.request.json",
+    "size_bytes": 81,
+    "sha256": "e806fdadbfb624debb0c96067fb37a06f5c8b0b21206bbdf359283295ad57fd4"
+  },
+  "status": 200,
+  "response_headers": {
+    "date": "Mon, 19 Oct 2026 11:29:44 GMT",
+    "content-type": "application/json",
+    "content-length": "371",
+    "connection": "keep-alive",
+    "cache-control": "no-store",
+    "api-version": "2026-10-01.epoch",
+    "cf-auditlog-id": "01a153ec-b5cf-7538-8390-010fc83dc999",
+    "server": "cloudflare",
+    "cf-ray": "a4cf725c4fb07361-NRT"
+  },
+  "body": {
+    "path": "snapshots/before/production-firmware_admin_idempotency_tombstones-count.body",
+    "size_bytes": 371,
+    "sha256": "7c9ce5e34c3e8e90552e9a9b836929c82789cb3583d8ad9bb55031a1ef6025a1"
+  },
+  "completed": true,
+  "ended": "2026-10-19T11:29:45.462Z"
+}

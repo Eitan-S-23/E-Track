@@ -1,0 +1,28 @@
+{
+  "classification": "HARNESS_FAIL",
+  "scope": "Precheck metadata only; no formal commands executed",
+  "contract_sha256": "5edfe3aa67db573730f0d095a72e8ead3f9e49e5d2457b2982480f8fc068bdb9",
+  "records": [
+    {
+      "operation": "matrix",
+      "original_path": "docs/acceptance-contracts/P4-4-v1/evidence-matrix.json",
+      "retained_path": "precheck-failures/hash-case-01/evidence-matrix.json",
+      "size_bytes": 3783,
+      "sha256": "63f88727005c5dde93b6107f0b5d1cf5c8d02e03f9da7d71ed9e3d7043a3f39b"
+    },
+    {
+      "operation": "move",
+      "original_path": "docs/acceptance-contracts/P4-4-v1/evidence/commands/formal-precheck.log",
+      "retained_path": "precheck-failures/hash-case-01/commands/formal-precheck.log",
+      "size_bytes": 90,
+      "sha256": "7db0d643472db510f0a2aefe13b8da6f71ac4cecbd5316bb7c85e7f3842923d1"
+    },
+    {
+      "operation": "move",
+      "original_path": "docs/acceptance-contracts/P4-4-v1/evidence/commands/formal-precheck.json",
+      "retained_path": "precheck-failures/hash-case-01/commands/formal-precheck.json",
+      "size_bytes": 702,
+      "sha256": "ae78a6837912a79608ccdb63bf78b170533dbb73d5434f928e483b53d27f5d07"
+    }
+  ]
+}

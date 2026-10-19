@@ -1,0 +1,15 @@
+{
+  "method": "GET",
+  "path": "/user/tokens/verify",
+  "status": 200,
+  "started": "2026-10-19T11:27:46.718Z",
+  "ended": "2026-10-19T11:27:52.604Z",
+  "original_sha256": "a7545ba668a31ec6a3b2b489f92e7342138d6454176206080539d18d8511f525",
+  "original_size_bytes": 184,
+  "response_projection": {
+    "success": true,
+    "status": "active",
+    "id_sha256": "0c22488a9bee1355603d8d61faca06fcacbdafccfed8a4ba7dc490af7cacdedc"
+  },
+  "omitted_original": "Access Key identifier used only in memory; this is an auxiliary projection, not a raw response body."
+}

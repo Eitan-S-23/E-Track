@@ -1,0 +1,2 @@
+ERROR: matrix.contract_sha256 does not match the contract file
+VALIDATION=FAIL errors=1

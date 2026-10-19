@@ -823,3 +823,110 @@ The failed receipt remains `.cache/p44/logs/p44-index-bytes-01.json` and its log
 Unscoped diff whitespace checking also flags original CRLF, empty HTTP header
 values and terminating blank lines in the archives. These bytes are retained,
 not reformatted; manual source/record whitespace checks are scoped separately.
+
+## First Formal Admission
+
+The scoped preparation commit was pushed as
+08afb97ddae316b3b305354f1582afdb836d7633. The secret hook remained enabled and
+passed; final staged privacy checked 64 files and 31 archive members. All 51
+staged evidence files matched the original worktree bytes, and manual
+source/record whitespace checks passed. Main remains outside this delivery.
+
+The original plan is frozen as P4-4-v1 / P44-20261019-01, with 17 commands and
+nine criteria. The unchanged contract's raw SHA-256 is
+5EDFE3AA67DB573730F0D095A72E8EAD3F9E49E5D2457B2982480F8FC068BDB9.
+Preparation copied 67 original files and bound version 3.2.9 to that exact C;
+descriptor SHA-256 is
+98e6a3d23d019b77732d2855366592008e25fd1441284473d1e8302e321be71d.
+The exact rehearsal branch rule was added (HTTP 200), and the descriptor/hash
+variables updated (two HTTP 204 responses), with original before/after reads.
+The old rehearsal rule remains; production remains main-only, reviewers and
+prevent_self_review are unchanged, and all three gates remain false. No secrets
+were recreated/rewritten and neither Worker was redeployed.
+
+P44-PREFLIGHT-01 is a retained HARNESS_FAIL at admission, not a product failure
+or an extra formal round. The first NOT_RUN precheck rejected a lowercase
+contract_sha256 because the stock validator loads the same digest in uppercase
+and compares that field case-sensitively. Other evidence digest comparisons
+normalize case. The digest value and frozen contract bytes were never different.
+The independent reviewer approved the minimal metadata repair: retain the first
+matrix and failed log/receipt byte-exact in
+P4-4-v1/evidence/precheck-failures/hash-case-01/ with transfer.json, then change
+only that field's hexadecimal case. No source/profile/criterion/contract was
+changed and freeze/configure were not repeated.
+
+The separately identified formal-precheck-02 passed the unchanged contract and
+NOT_RUN matrix. The frozen capture adapter expects a fixed admission receipt
+path, so commands/formal-precheck.json is a byte-exact compatibility copy of
+the actual precheck-02 receipt: its internal label and log reference still name
+formal-precheck-02. It is not a rewritten successful first attempt. resolution.json
+binds this copy, the actual passed receipt and the metadata-only repair.
+The validator's case inconsistency is recorded, not patched during this freeze.
+
+The first two formal offline commands completed successfully: formal-history
+independently evaluated the original implementation/CI evidence against C;
+formal-configuration evaluated the credential originals plus actual deployed
+modules/versions/bindings. Their result SHA-256 values are respectively
+b6e5f0f6bf73628c438fc0dab930796652e888facd01d62e21e980c820dbb914
+and 0a31bc61cd9baab434cf49fc3614bfe3569c0a87f1c489fbaa0593376aabdef0.
+This does not make the remaining criteria or P4-4 PASS. Snapshot capture and
+the planned real reviewer observations follow; source C must remain fixed.
+
+### P44-SNAPSHOT-01: Bounded Large-Page Failure
+
+The first formal-before ended with exit 1 before any dispatch. Its protected
+Trace channel_history page received HTTP 200 but did not complete within the
+60-second transport budget: content-length 9631314, received 4214365 bytes,
+65 rows from the prior count, elapsed 63453 ms, error_code 23. The retained
+partial body is not valid complete JSON. It remains completed=false and is
+not admissible merely because the HTTP status is 200. Thirty-one preceding
+complete HTTP responses remain intact; they are not discarded or automatically
+retried. The actual failing request and complete original command receipt are
+under P4-4-v1/evidence/snapshots/before/ and evidence/commands/formal-before.*.
+
+This is an environment-stage response-stream failure, not evidence of a token
+permission problem or a product publication failure. The fixed 500-row SELECT
+page was too large for the observed transport/time budget. Root retains that
+failed page and the 60-second limit; the successor collector will fetch new row
+pages of eight rows, with distinct labels, rather than retrying the same 9.6 MB
+body or silently accepting a truncated response.
+
+V1-MATRIX-STATUS: RAW-STATE also requires negatives and after, neither of which
+was executed. The stock validator requires all commands of a PASS/FAIL
+criterion, so the honest aggregate disposition is NOT_OBSERVED with the actual
+formal-before exit 1 and environmental failure retained in notes/evidence;
+overall is EVIDENCE_GAP, not a fabricated set of failed or executed downstream
+commands. This is still the actual first attempted formal round. The next
+contract must cite it and its final matrix, not restart the history at v2.
+
+Before changing profile sources, root is sealing v1 with its real completed
+history/configuration results and a bounded final privacy scan. Only after that
+bundle and its separate index commit may v2 source edits begin. V2 will import
+the hash-bound old collector/source/failed-round provenance, independently
+consume complete matching readonly originals, and fetch only failed or missing
+data using fixed LIMIT 8. Existing successful LIMIT 500 pages remain original;
+the evaluator must verify each page's actual limit, contiguous offset and exact
+row count. After-state is entirely fresh. No incomplete page can become a reused
+success, and no mutation uses the readonly reuse mechanism.
+
+There have still been zero A/B dispatches, firmware publications, registrations,
+R2 object writes or device operations in this formal attempt. The same legitimate
+3.2.9 version remains selected; it is not raised to bypass a conflict. A successor
+source/descriptor binding will be explicit. The two planned reviewer-controlled
+runs remain unspent; gate=false and all existing approvals are preserved.
+
+V1 is now closed as EVIDENCE_GAP. HISTORY, CONFIGURATION and HYGIENE have actual
+EXECUTED PASS results; six aggregate criteria remain NOT_OBSERVED. The four
+recorded command exits are history=0, configuration=0, before=1, privacy=0.
+Privacy scanned 291 files and five ZIP members with 34 known-sensitive forms,
+zero matches and the recorded lifecycle decision. No downstream observation
+was invented to satisfy a grouped criterion.
+
+The final matrix binds 295 evidence files and has SHA-256
+021346d79cf0e01848c09acc33a7d5854400b2ddb82ba10e1addf0df049dca0e.
+The stock physical validator completed successfully with overall=EVIDENCE_GAP,
+not overall=PASS; original output is .cache/p44/logs/p44-v1-final-check-01.log
+(SHA-256 8eff8e922cf9cb95f7d6da908a11fcdc52149836ede3f1ee898e9dbcf6c17b61).
+The failure-report.json, initial NOT_RUN matrix, failed precheck and incomplete
+HTTP body remain unchanged. Root will deliver this failed bundle and a separate
+index commit before releasing the bounded v2 source changes.

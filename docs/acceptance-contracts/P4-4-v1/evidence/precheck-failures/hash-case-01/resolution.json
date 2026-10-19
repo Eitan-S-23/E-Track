@@ -1,0 +1,18 @@
+{
+  "classification": "PRECHECK_METADATA_REPAIRED",
+  "change": "Only contract_sha256 hexadecimal letter case",
+  "contract_unchanged": true,
+  "runner_unchanged": true,
+  "formal_commands_before_repair": 0,
+  "actual_passed_attempt": {
+    "path": "commands/formal-precheck-02.json",
+    "size_bytes": 708,
+    "sha256": "bc721906626bfe5531c61da01931088d1c0af0c884838d1716a42ddf55ffa553"
+  },
+  "compatibility_receipt": {
+    "path": "commands/formal-precheck.json",
+    "size_bytes": 708,
+    "sha256": "bc721906626bfe5531c61da01931088d1c0af0c884838d1716a42ddf55ffa553"
+  },
+  "note": "Byte-exact selector for the existing frozen admission path; receipt identity remains formal-precheck-02. Original failed attempt retained separately."
+}
