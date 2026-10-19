@@ -1,0 +1,1 @@
+{"sql":"SELECT COUNT(*) AS count FROM \"firmware_backfill_manifests\""}

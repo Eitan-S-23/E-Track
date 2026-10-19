@@ -783,7 +783,7 @@
 - 证据: `docs/ota-exec-notes/P4-3-acceptance-2026-10-18.md`、`docs/acceptance-contracts/P4-3-v1.contract.json`、`docs/acceptance-contracts/P4-3-v1/evidence-matrix.json`、`docs/acceptance-contracts/FREEZE-INDEX.md`，新增 `P4-3-acceptance-2026-10-18/delivery.inventory.json` 及 87 条交付归档；实施报告和旧冻结增量不变。正式验收、main 集成及隔离部署现均完成；真实 publisher/viewer 会话、依赖告警及缓存归因限制保留，不代表 P4-4/P5/生产门槛已满足。
 
 #### P4-4 Secrets 与 environment 配置
-状态: 进行中 ｜ 认领: Codex P4-4 实施/配置集成 agent / 2026-10-18 ｜ 更新: 2026-10-19(凭据与两 Worker 部署已独立核验，70193ce 已推送；V1/V2 均诚实保留 EVIDENCE_GAP。V2 新增4份完整8行页，但OFFSET32的8行达4.75MB，60s流中断；单行下界2.8MB证明行数不是字节上限。累计35份完整原件保留，后继采用标准严格gzip及wire/decoded双上限，不重采完整页、不增超时。A/B仍0，gate=false，非PASS，未做主线集成)
+状态: 进行中 ｜ 认领: Codex P4-4 实施/配置集成 agent / 2026-10-18 ｜ 更新: 2026-10-19(凭据与两 Worker 部署已独立核验，ba95249 已推送；V1/V2/V3 均诚实保留 EVIDENCE_GAP。V3 的4.75MB大页以90146字节gzip完整取得，新增12份完整只读原件；后续patches读取在响应头前发生ECONNRESET，非权限或gzip失败。累计47份完整原件与3份失败保留，正在集中审查标准SDK有界只读恢复，不重采成功、不扩权限或60s上限。A/B仍0，gate=false，非PASS，未做主线集成)
 - 目标: 配置 `CLOUDFLARE_ACCOUNT_ID`、桶限定 `TRACE_R2_ACCESS_KEY_ID/TRACE_R2_SECRET_ACCESS_KEY`、`TRACE_UPDATE_SERVICE_URL/DEPLOY_TOKEN`、R2 bucket 变量及 `firmware-production` 审批人；沿用批准的 AES；不要求旧控制面 token 或客户端 D1 绑定参数。
 - 验收: 配置准备可消费 P4-1 已交付的工作流接口和 P4-2 环境，不等待 P4-1 先用这些配置完成验收；随后共用同一次隔离 rehearsal 验证权限与注册。不能为证明配置而提前生产发布，配置变化影响的证据另作最小验证。
 - 证据: `docs/ota-exec-notes/P4-4-implementation-2026-10-18.md`；复核 P4-1-v4 原件和 P4-3 已完成交付，不复制为本卡正式 PASS。生产设置、审批拒绝与角色覆盖按实际结果记录，gate=false，不重做成功演练。

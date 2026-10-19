@@ -7,8 +7,9 @@ missing-pair/configuration blocker is RESOLVED by the later agent handoff and
 root's independent 15-GET / 28-assertion readback. The successful provisioning
 source differs from the previously denied local token; it is not evidence that
 the old token's 403 became 200. Formal P4-4 remains IN_PROGRESS, not PASS:
-V1 and V2 are closed EVIDENCE_GAP rounds, and the reviewed V3 collector batch
-is ready for source delivery and admission. Historical failures remain below;
+V1, V2 and V3 are closed EVIDENCE_GAP rounds. V3's large gzip pages completed,
+but a later read reset before HTTP headers; bounded recovery is under review.
+Historical failures remain below;
 see Independent Credential Handoff for the source, protection and lifecycle
 limits, and the final continuation sections for current execution state.
 
@@ -1164,3 +1165,64 @@ planned runs remain unspent and require personal reviewer actions in order:
 Reject A, then Approve a distinct B on identical source and inputs. Production
 publication, gate unlock, device work and main integration remain outside this
 execution plan. Earlier external-cache attribution remains unresolved.
+
+### V3 Admission And Original Results
+
+C3 is ba952497948a03c40cbd8baebbfc9228621fb44b, pushed only to the task branch.
+All ten staged blobs matched their reviewed bytes; the 25 archive members and
+all staged files passed the known-value/token-shape privacy scan. The frozen
+tree is 5427f4728cfc0e6a3b4760548fb6e03385922c6b and the contract SHA-256 is
+4fc05662f1bb9ca829bb8e769754229f6bebc41cbb99a3ed38099db1e5d7e2cd.
+Target 3.2.9 has descriptor SHA-256
+81904c875eb58cd241dde54d11f7e48e0722d11491a3cdd3f0208a55b432423b.
+
+Preparation copied 67 original inputs and 158 predecessor files. Configuration
+returned 22 complete responses, including exactly two descriptor/hash PATCHes
+with HTTP 204. All three gates remained false. The actual formal-precheck
+passed with overall=NOT_RUN; the separate plan used the actual V2 contract and
+final matrix and reported nine criteria, 17 commands and zero REUSED criteria.
+History/configuration independently passed on original bytes, not new CI or
+Worker deployments.
+
+P44-SNAPSHOT-01's gzip remedy now has real D1 evidence. The formerly failing
+channel_history OFFSET 32 page completed at 90146 wire / 4746278 decoded bytes;
+OFFSET 40 completed at 64997 / 3488749 bytes. All five remaining channel-history
+pages and seven following SELECT responses completed with strictly verified
+wire/decoded pairs and zero reported database writes. Those 12 new responses,
+the 35 earlier complete responses and their original timestamps remain intact.
+
+### P44-SNAPSHOT-02: Pre-Response Connection Reset
+
+The same formal-before then stopped at protected-patches-rows8-0. Its original
+reservation/request/envelope records 2026-10-19T15:27:27.071Z through
+15:27:34.158Z, ECONNRESET and completed=false, with no observed HTTP status,
+headers or body. Elapsed envelope time was 7087 ms, not a 60-second truncation.
+The command closed with exit 1 at 15:27:35.620Z. This is a separate transport
+failure, not evidence of bad credentials, gzip corruption or a product release
+failure. No second attempt or A/B dispatch was made.
+
+V3 is closed honestly as EVIDENCE_GAP. HISTORY/CONFIGURATION/HYGIENE passed;
+six aggregate criteria remain NOT_OBSERVED. Actual command exits are
+history=0, configuration=0, before=1 and privacy=0. The formal privacy scan
+covered 377 then-present files, five ZIP members and all 12 decoded D1 bodies.
+Later generated sealing metadata and final matrices are also checked by the
+scoped staged-byte privacy audit; the completed formal scan is not replayed.
+The frozen sources, initial matrix and all previous originals were preserved.
+
+The final matrix SHA-256 is
+41c328859fe3289567ffff409375766148d826d76f79918cf34ed14740413895 and it binds
+384 evidence files. Actual standard validation, with the V2 predecessor
+arguments, returned VALIDATION=PASS, overall=EVIDENCE_GAP in
+.cache/p44/logs/p44-v3-final-check-01.log. This validates the failed bundle,
+not P4-4. The one-off sealer source and precise failure report are retained
+inside the bundle; no product observation was repeated for packaging.
+
+Root is reviewing the installed Undici retry/observer APIs before extending
+the thin adapter. The proposed scope is one additional pre-header ECONNRESET
+attempt for explicitly allowed read-only captures, within the same 60-second
+signal and size limits. It must retain every failure, never retry a mutation,
+completed/header-bearing response or permission denial, and preserve all 47
+complete observations and all three failures. Gzip predecessor sidecars and
+actual Windows path handling are part of the same review. Sources remain held
+until V3 bundle/index delivery; no retry policy has yet been executed or frozen.
+Gate=false, reviewer ownership and the unspent A/B plan remain unchanged.

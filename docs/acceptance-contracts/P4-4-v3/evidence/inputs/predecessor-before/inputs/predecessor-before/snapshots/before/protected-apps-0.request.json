@@ -1,0 +1,1 @@
+{"sql":"SELECT * FROM \"apps\" ORDER BY rowid LIMIT 500 OFFSET 0"}

@@ -1,0 +1,42 @@
+{
+  "method": "GET",
+  "path": "/repos/Eitan-S-23/E-Track/actions/variables/OTA_BOOT_CHAIN_READY",
+  "started": "2026-10-19T15:14:09.637Z",
+  "status": 200,
+  "response_headers": {
+    "date": "Mon, 19 Oct 2026 15:14:12 GMT",
+    "content-type": "application/json; charset=utf-8",
+    "content-length": "119",
+    "cache-control": "private, max-age=60, s-maxage=60",
+    "vary": "Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With",
+    "etag": "\"789f6af4b6c4495f74515141f53b1b5a7ee2a597b3e6434261458c58bf948275\"",
+    "x-oauth-scopes": "gist, read:org, repo, user, workflow",
+    "x-accepted-oauth-scopes": "",
+    "x-oauth-client-id": "178c6fc778ccc68e1d6a",
+    "x-github-media-type": "github.v3; format=json",
+    "x-github-api-version-selected": "2022-11-28",
+    "access-control-expose-headers": "ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset, Warning",
+    "access-control-allow-origin": "*",
+    "strict-transport-security": "max-age=31536000; includeSubdomains; preload",
+    "x-frame-options": "deny",
+    "x-content-type-options": "nosniff",
+    "x-xss-protection": "0",
+    "referrer-policy": "origin-when-cross-origin, strict-origin-when-cross-origin",
+    "content-security-policy": "default-src 'none'",
+    "server": "github.com",
+    "x-ratelimit-limit": "5000",
+    "x-ratelimit-remaining": "4984",
+    "x-ratelimit-reset": "1792426276",
+    "x-ratelimit-used": "16",
+    "x-ratelimit-resource": "core",
+    "x-github-request-id": "F421:189B0C:2802CA:2AD096:6AD633C4",
+    "x-github-edge-region": "westus3"
+  },
+  "body": {
+    "path": "configure-after/repository-gate.body",
+    "size_bytes": 119,
+    "sha256": "e2602c11ef14c5dc58477e0fd4c70c556358ec082d57d26e330a1122b27d801e"
+  },
+  "completed": true,
+  "ended": "2026-10-19T15:14:13.631Z"
+}

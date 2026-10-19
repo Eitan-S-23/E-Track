@@ -1,0 +1,14 @@
+{
+  "python": "3.13.12 (tags/v3.13.12:1cbe481, Feb  3 2026, 18:22:25) [MSC v.1944 64 bit (AMD64)]",
+  "python_executable": "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+  "node": "v24.13.0",
+  "packages": {
+    "undici": "7.28.0",
+    "@smithy/core": "3.36.0",
+    "@smithy/signature-v4": "5.7.4",
+    "@aws-sdk/client-s3": "3.1152.0"
+  },
+  "transport": "Existing bounded Undici/OpenSSL proxy, standard gzip with strict bounded decoding, and AWS SigV4; no Schannel HTTP",
+  "outputs": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\acceptance-contracts\\P4-4-v3",
+  "external_write_limit": "Selected-command/output audit only; prior external PowerShell/Schannel cache attribution remains unresolved"
+}

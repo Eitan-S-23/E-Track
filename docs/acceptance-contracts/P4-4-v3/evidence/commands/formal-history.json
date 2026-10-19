@@ -1,0 +1,28 @@
+{
+  "label": "formal-history",
+  "command": "python",
+  "args": [
+    "-I",
+    "-S",
+    "-B",
+    "Tools/acceptance/p44/origins.py",
+    "history",
+    "--repo-root",
+    "D:/github/my/E-Track/.cache/p4-4-integration-20261018",
+    "--input",
+    "docs/acceptance-contracts/P4-4-v3/evidence/inputs/originals.json",
+    "--output",
+    "docs/acceptance-contracts/P4-4-v3/evidence/history-result.json"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "started": "2026-10-19T15:17:55.729Z",
+  "ended": "2026-10-19T15:17:58.657Z",
+  "exitCode": 0,
+  "signal": null,
+  "process_closed": true,
+  "output": {
+    "path": "commands/formal-history.log",
+    "size_bytes": 207,
+    "sha256": "e919bf3e8a74962cf21a5039b327a618f5e263cd569e1bf8975564f9895179a8"
+  }
+}
