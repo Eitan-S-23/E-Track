@@ -1,0 +1,40 @@
+{
+  "nature": "Independent offline reproduction; injected DB and stream ports; no network or file writes",
+  "delivery": "546d8b39a5697ba1b018720b120608de52a511d2",
+  "fixtureVersion": 20801,
+  "qualification": [
+    {
+      "currentVersion": null,
+      "posts": 2,
+      "queries": 6,
+      "connects": 1,
+      "reads": 3,
+      "result": true
+    },
+    {
+      "currentVersion": 30208,
+      "posts": 1,
+      "queries": 3,
+      "connects": 0,
+      "reads": 0,
+      "errorCode": "RELEASE_CONFLICT",
+      "message": "Preflight rejected: HTTP 409"
+    }
+  ],
+  "streamResults": [
+    {
+      "mode": "valid",
+      "ok": true
+    },
+    {
+      "mode": "transport-error",
+      "errorCode": "R2_OBJECT_CONFLICT",
+      "message": "Existing R2 object has different byte identity"
+    },
+    {
+      "mode": "different-bytes",
+      "errorCode": "R2_OBJECT_CONFLICT",
+      "message": "Existing R2 object has different byte identity"
+    }
+  ]
+}

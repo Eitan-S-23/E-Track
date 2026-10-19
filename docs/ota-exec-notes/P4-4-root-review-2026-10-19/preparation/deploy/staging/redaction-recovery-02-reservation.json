@@ -1,0 +1,22 @@
+{
+  "scope": "staging script-settings.observability only",
+  "version": "bb3d44fd-4a84-489e-9e04-6adfc54a458e",
+  "observedAt": "2026-10-18T23:41:10.414Z",
+  "expected": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+    "redact_query_string": true,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "persist": true,
+      "invocation_logs": true
+    },
+    "traces": {
+      "enabled": false,
+      "persist": true,
+      "head_sampling_rate": 1
+    }
+  },
+  "automaticRetry": false
+}

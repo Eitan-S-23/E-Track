@@ -1,0 +1,297 @@
+{
+  "startedAt": "2026-10-18T22:43:18.490Z",
+  "kind": "CONFIGURATION_PREPARATION_FIXED_D1_READS",
+  "formalAcceptance": "NOT_RUN",
+  "businessMutations": "NONE_REQUESTED",
+  "requests": [
+    {
+      "method": "POST",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/d1/database/1cd5db26-6bbd-4595-abef-72ff51ecdaf3/query",
+      "startedAt": "2026-10-18T22:43:18.502Z",
+      "status": 200,
+      "bytes": 371,
+      "sha256": "249cd6ae8a2488370943a858bcd933eedae9644521ae0fcb620291fbbe539098",
+      "requestId": "a4cb0fb10d30e1a3-NRT",
+      "endedAt": "2026-10-18T22:43:19.903Z"
+    },
+    {
+      "method": "POST",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/d1/database/1cd5db26-6bbd-4595-abef-72ff51ecdaf3/query",
+      "startedAt": "2026-10-18T22:43:19.906Z",
+      "status": 200,
+      "bytes": 379,
+      "sha256": "af2eeb271b9bcd0990fdc8139f4a64f50283a58674cae7d11b0c9d2e4de9d7b8",
+      "requestId": "a4cb0fba6e90c63d-NRT",
+      "endedAt": "2026-10-18T22:43:21.169Z"
+    },
+    {
+      "method": "POST",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/d1/database/1cd5db26-6bbd-4595-abef-72ff51ecdaf3/query",
+      "startedAt": "2026-10-18T22:43:21.170Z",
+      "status": 200,
+      "bytes": 360,
+      "sha256": "5f2398fbae3cfcfae7920f910154b2c96f086f906c5a206a3e46df8e0e48103e",
+      "requestId": "a4cb0fc36a4ae383-NRT",
+      "endedAt": "2026-10-18T22:43:23.354Z"
+    },
+    {
+      "method": "POST",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "startedAt": "2026-10-18T22:43:23.355Z",
+      "status": 200,
+      "bytes": 371,
+      "sha256": "46b480d7e81883046575454d95e5e0b6c6d13bb704a4a288fe381ce8237dd217",
+      "requestId": "a4cb0fcf788de395-NRT",
+      "endedAt": "2026-10-18T22:43:24.922Z"
+    },
+    {
+      "method": "POST",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "startedAt": "2026-10-18T22:43:24.923Z",
+      "status": 200,
+      "bytes": 381,
+      "sha256": "60b71d7198f55fa237f5a07f25b7e420f786724240ca1d6bd572cbd5ec44d870",
+      "requestId": "a4cb0fdccbb8cb50-NRT",
+      "endedAt": "2026-10-18T22:43:26.759Z"
+    },
+    {
+      "method": "POST",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+      "startedAt": "2026-10-18T22:43:26.760Z",
+      "status": 200,
+      "bytes": 2598,
+      "sha256": "043840854b42b63eced0ad241170197b6cedf963c6da25730d95087f57707161",
+      "requestId": "a4cb0fe51d23d789-NRT",
+      "endedAt": "2026-10-18T22:43:28.070Z"
+    }
+  ],
+  "databases": [
+    {
+      "name": "e-track-firmware-production",
+      "id": "1cd5db26-6bbd-4595-abef-72ff51ecdaf3",
+      "observations": [
+        {
+          "id": "unresolved",
+          "sql": "SELECT COUNT(*) AS count FROM firmware_channels WHERE app_id=? AND device_model=? AND legacy_current_release_id IS NOT NULL",
+          "params": [
+            "trace",
+            "e-track-at32f435"
+          ],
+          "result": [
+            {
+              "results": [
+                {
+                  "count": 0
+                }
+              ],
+              "success": true,
+              "meta": {
+                "served_by": "v3-prod",
+                "served_by_region": "APAC",
+                "served_by_colo": "NRT",
+                "served_by_primary": true,
+                "timings": {
+                  "sql_duration_ms": 0.4365
+                },
+                "duration": 0.4365,
+                "changes": 0,
+                "last_row_id": 0,
+                "changed_db": false,
+                "size_after": 368640,
+                "rows_read": 0,
+                "rows_written": 0,
+                "total_attempts": 1
+              }
+            }
+          ]
+        },
+        {
+          "id": "legacy",
+          "sql": "SELECT MAX(version_code) AS version_code FROM firmware_releases_legacy WHERE app_id=? AND device_model=?",
+          "params": [
+            "trace",
+            "e-track-at32f435"
+          ],
+          "result": [
+            {
+              "results": [
+                {
+                  "version_code": null
+                }
+              ],
+              "success": true,
+              "meta": {
+                "served_by": "v3-prod",
+                "served_by_region": "APAC",
+                "served_by_colo": "NRT",
+                "served_by_primary": true,
+                "timings": {
+                  "sql_duration_ms": 0.428
+                },
+                "duration": 0.428,
+                "changes": 0,
+                "last_row_id": 0,
+                "changed_db": false,
+                "size_after": 368640,
+                "rows_read": 0,
+                "rows_written": 0,
+                "total_attempts": 1
+              }
+            }
+          ]
+        },
+        {
+          "id": "latest",
+          "sql": "SELECT version_code,registration_json FROM firmware_releases WHERE app_id=? AND device_model=? ORDER BY version_code DESC LIMIT 1",
+          "params": [
+            "trace",
+            "e-track-at32f435"
+          ],
+          "result": [
+            {
+              "results": [],
+              "success": true,
+              "meta": {
+                "served_by": "v3-prod",
+                "served_by_region": "APAC",
+                "served_by_colo": "NRT",
+                "served_by_primary": true,
+                "timings": {
+                  "sql_duration_ms": 0.2867
+                },
+                "duration": 0.2867,
+                "changes": 0,
+                "last_row_id": 0,
+                "changed_db": false,
+                "size_after": 368640,
+                "rows_read": 0,
+                "rows_written": 0,
+                "total_attempts": 1
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "e-track-firmware-p41-test",
+      "id": "2617e1e1-956f-42ce-a465-da56d84abf06",
+      "observations": [
+        {
+          "id": "unresolved",
+          "sql": "SELECT COUNT(*) AS count FROM firmware_channels WHERE app_id=? AND device_model=? AND legacy_current_release_id IS NOT NULL",
+          "params": [
+            "trace",
+            "e-track-at32f435"
+          ],
+          "result": [
+            {
+              "results": [
+                {
+                  "count": 0
+                }
+              ],
+              "success": true,
+              "meta": {
+                "served_by": "v3-prod",
+                "served_by_region": "WNAM",
+                "served_by_colo": "LAX",
+                "served_by_primary": true,
+                "timings": {
+                  "sql_duration_ms": 0.4305
+                },
+                "duration": 0.4305,
+                "changes": 0,
+                "last_row_id": 0,
+                "changed_db": false,
+                "size_after": 397312,
+                "rows_read": 2,
+                "rows_written": 0,
+                "total_attempts": 1
+              }
+            }
+          ]
+        },
+        {
+          "id": "legacy",
+          "sql": "SELECT MAX(version_code) AS version_code FROM firmware_releases_legacy WHERE app_id=? AND device_model=?",
+          "params": [
+            "trace",
+            "e-track-at32f435"
+          ],
+          "result": [
+            {
+              "results": [
+                {
+                  "version_code": null
+                }
+              ],
+              "success": true,
+              "meta": {
+                "served_by": "v3-prod",
+                "served_by_region": "WNAM",
+                "served_by_colo": "LAX",
+                "served_by_primary": true,
+                "timings": {
+                  "sql_duration_ms": 0.4124
+                },
+                "duration": 0.4124,
+                "changes": 0,
+                "last_row_id": 0,
+                "changed_db": false,
+                "size_after": 397312,
+                "rows_read": 0,
+                "rows_written": 0,
+                "total_attempts": 1
+              }
+            }
+          ]
+        },
+        {
+          "id": "latest",
+          "sql": "SELECT version_code,registration_json FROM firmware_releases WHERE app_id=? AND device_model=? ORDER BY version_code DESC LIMIT 1",
+          "params": [
+            "trace",
+            "e-track-at32f435"
+          ],
+          "result": [
+            {
+              "results": [
+                {
+                  "version_code": 30208,
+                  "registration_json": "{\"appId\":\"trace\",\"assets\":[{\"baseImageSha256\":\"\",\"baseVersionCode\":0,\"fileName\":\"e-track-at32f435-v3.2.8-full.etu\",\"githubUrl\":\"https://github.com/Eitan-S-23/E-Track/releases/download/mcu-e-track-at32f435-v3.2.8/e-track-at32f435-v3.2.8-full.etu\",\"kind\":\"full\",\"r2Key\":\"trace/firmware/e-track-at32f435/30208-mcu-e-track-at32f435-v3.2.8/e-track-at32f435-v3.2.8-full.etu\",\"r2Verified\":true,\"sha256\":\"0dee20c0467abac391cdedd8d1d77d9ff1b13fb2d8936729fd3b7687694ed127\",\"sizeBytes\":285794},{\"baseImageSha256\":\"aaf5ccdb047ef8b3ff4ae0837f9593ceca857d90c98ea0bc09360e411bf4196f\",\"baseVersionCode\":30207,\"fileName\":\"e-track-at32f435-v3.2.7-to-v3.2.8-patch.etu\",\"githubUrl\":\"https://github.com/Eitan-S-23/E-Track/releases/download/mcu-e-track-at32f435-v3.2.8/e-track-at32f435-v3.2.7-to-v3.2.8-patch.etu\",\"kind\":\"patch\",\"r2Key\":\"trace/firmware/e-track-at32f435/30208-mcu-e-track-at32f435-v3.2.8/e-track-at32f435-v3.2.7-to-v3.2.8-patch.etu\",\"r2Verified\":true,\"sha256\":\"5d3b33b85ceaef262c022683ac4d97ec82d52a0a0e900754966a28c293b7cb05\",\"sizeBytes\":379},{\"baseImageSha256\":\"\",\"baseVersionCode\":0,\"fileName\":\"recovery-v3.2.8.bin\",\"githubUrl\":\"https://github.com/Eitan-S-23/E-Track/releases/download/mcu-e-track-at32f435-v3.2.8/recovery-v3.2.8.bin\",\"kind\":\"recovery\",\"r2Key\":\"trace/firmware/e-track-at32f435/30208-mcu-e-track-at32f435-v3.2.8/recovery-v3.2.8.bin\",\"r2Verified\":true,\"sha256\":\"45eda4d7fcf8a59f5e489262f5b19c4463f4bc80183e2180c61862dd8ce5c1c3\",\"sizeBytes\":605080}],\"commitSha\":\"b9d7d18c76e6495fbebf6758df6e4427e79e97b5\",\"deviceModel\":\"e-track-at32f435\",\"hardwareRevision\":1,\"isFormalRelease\":true,\"layoutId\":1,\"minAppVersionCode\":0,\"minBootVersion\":1,\"minProtocolVersion\":1,\"releaseNotes\":\"P4-1 v2 repair-bound staging after P41-NATIVE-01; v1 failure retained; not a production release.\",\"releaseTag\":\"mcu-e-track-at32f435-v3.2.8\",\"runId\":\"38946949709\",\"schemaVersion\":2,\"targetHardware\":\"AT32F435RGT7\",\"targetImageSha256\":\"a94bca52f7e84064aac4d063273bc69f90e220cbbeaded8d0137e731dd5d99c6\",\"transport\":\"ble\",\"versionCode\":30208,\"versionName\":\"3.2.8\"}"
+                }
+              ],
+              "success": true,
+              "meta": {
+                "served_by": "v3-prod",
+                "served_by_region": "WNAM",
+                "served_by_colo": "LAX",
+                "served_by_primary": true,
+                "timings": {
+                  "sql_duration_ms": 0.5248
+                },
+                "duration": 0.5248,
+                "changes": 0,
+                "last_row_id": 0,
+                "changed_db": false,
+                "size_after": 397312,
+                "rows_read": 1,
+                "rows_written": 0,
+                "total_attempts": 1
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "complete": true,
+  "endedAt": "2026-10-18T22:43:28.075Z"
+}

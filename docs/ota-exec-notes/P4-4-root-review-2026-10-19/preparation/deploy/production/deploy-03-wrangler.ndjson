@@ -1,0 +1,2 @@
+{"type":"wrangler-session","version":1,"wrangler_version":"4.105.0","command_line_args":["deploy","--no-bundle","--keep-vars","--config","D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\private\\deploy-production.json"],"log_file_path":"D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\deploy\\production\\deploy-03-wrangler.log","timestamp":"2026-10-18T23:52:38.837Z"}
+{"type":"command-failed","version":1,"message":"fetch failed","timestamp":"2026-10-18T23:52:49.559Z"}

@@ -1,45 +1,72 @@
 # P4-4 Redacted Configuration Matrix
 
-This is a timestamped implementation inventory, not a new Spec or acceptance
-matrix. Evidence E1/E2/E3 refers to the unchanged JSON receipts in the evidence
-archive accompanying this note. Secret presence never implies value correctness.
+This is a timestamped configuration inventory, not a new Spec or acceptance
+matrix. The current section includes the independent root preparation update;
+E1..E9 below retain their historical observations. Secret presence never implies
+value correctness. Formal P4-4 acceptance remains NOT_RUN, gate=false.
 
 ## Current Consumer After Interface Remediation
 
-2026-10-19 P44-CREDENTIAL-01 route decision supersedes the old token-scope
-blocker: candidate de362151bda72c0dd1c19ab1293e99838fb8976e uses standard S3
-and authenticated Worker preflight for both environments. No control-plane
-token or client D1 selector is consumed; no placeholder is required. Existing
-e-track-ci authority and historical token receipts remain valid for their scope.
+2026-10-19 P44-CREDENTIAL-01 route decision supersedes the old native-proxy
+scope conflict. Product b56534d7b6c993c0795010d0404fb8a81f7eeb9d and evidence
+15be25e593405396d8db8fb0011fc62e42d6d27d use standard S3 and authenticated
+Worker preflight for both environments. No control-plane token or client D1
+selector is consumed; no placeholder is required. Existing e-track-ci authority
+and historical token receipts remain valid for their scope, not production CI.
+
+Root completed the two-finding batch review, independently verified ten offline
+successor cases and the source-bound CI originals, and deployed the verified CI
+Worker module to both approved targets. All four required S3 secret names remain
+absent in the successful ten-GET refresh at 2026-10-19T00:58:42.120Z. Actual strict
+token creation through both account-owned and user-owned endpoints returned
+403/code 9109; this is a management-write denial, not the old catalog-GET inference.
+No token/key pair or GitHub secret was created. The required external input is
+still missing, and no formal P4-4 round has started.
 
 | Current consumer configuration | Platform / scope / type | This batch's state / next owner |
 | --- | --- | --- |
-| TRACE_R2_ACCESS_KEY_ID / TRACE_R2_SECRET_ACCESS_KEY | GitHub firmware-production secrets | New code wired; this batch did not create/install/read back the pair. Main's explicit platform plan qualifies the sole production bucket capability. |
-| FIRMWARE_REHEARSAL_TRACE_R2_ACCESS_KEY_ID / FIRMWARE_REHEARSAL_TRACE_R2_SECRET_ACCESS_KEY | GitHub firmware-rehearsal secrets | New code wired; independently scoped test-bucket pair to be configured/qualified under main's plan, not copied from production. |
+| TRACE_R2_ACCESS_KEY_ID / TRACE_R2_SECRET_ACCESS_KEY | GitHub firmware-production secrets | Absent at the final refresh. O1 supplies an Object Read and Write pair limited to e-track-firmware-production-releases, directly in these secrets or through a protected project-local input, with redacted scope/source/lifetime evidence. |
+| FIRMWARE_REHEARSAL_TRACE_R2_ACCESS_KEY_ID / FIRMWARE_REHEARSAL_TRACE_R2_SECRET_ACCESS_KEY | GitHub firmware-rehearsal secrets | Absent at the final refresh. O1 supplies a distinct pair limited to e-track-firmware-p41-test-releases; no production/test pair reuse. |
 | CLOUDFLARE_ACCOUNT_ID and rehearsal-prefixed counterpart | Existing GitHub environment secrets | Still used to construct the S3 HTTPS endpoint; not control-plane authority. |
 | TRACE_UPDATE_SERVICE_URL / TRACE_DEPLOY_TOKEN and rehearsal-prefixed counterparts | Existing environment secrets | Also consumed by the fixed read-only preflight endpoint; original values not rotated or rewritten. |
 | CLOUDFLARE_API_TOKEN and TRACE_D1_DATABASE_ID/NAME | Historical platform entries | Not mapped by new workflow; nonempty legacy client configuration is rejected. No platform deletion or overwrite performed. |
-| Worker POST /api/ci/firmware/preflight | New code only on the task branch | Native development CI passed; NOT_DEPLOYED. Auth precedes the three fixed queries. Main verifies actual deployment/bindings. |
+| Worker POST /api/ci/firmware/preflight | Both approved target Workers, verified CI source b56534d | Deployed and downloaded bytes independently matched. Staging version bb3d44fd-4a84-489e-9e04-6adfc54a458e; production e1653d60-03cb-4397-b154-78efd681ebbc. Auth precedes the three fixed queries; actual endpoint authentication/S3/rehearsal qualification remains NOT_RUN. |
 | FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_PATH / FIRMWARE_REHEARSAL_BINDINGS_CHECK_METADATA_SHA256 | GitHub firmware-rehearsal variables, check-only entry | P44-REVIEW-01 remediation adds explicit reviewed preflight JSON path/raw-byte digest. NOT_CONFIGURED by this code batch. Main binds a real candidate or exact current registration, separately from the old 2.8.1 object fixture and from the qualification source commit. Not required by ordinary rehearsal/production. |
-| AES / deploy-HMAC pairs / approved resources / reviewer / gate | Existing platform configuration | No mutation in this remediation; gate=false. Configuration and old runtime evidence are not new-chain qualification. |
+| AES / deploy-HMAC pairs / approved resources / reviewer / gate | Existing platform configuration | No key, reviewer, branch-rule or gate mutation. All three gates read false; settings/binding and module readbacks do not prove new-chain runtime qualification. |
+| observability.redact_query_string | Both approved Worker settings | true in final readbacks. P44-DEPLOY-01 preserves staging's unintended false interval and bounded restoration; production used the corrected top-level plus upload-metadata configuration. |
 
-The implementation/validation entry is P4-4-s3-interface-2026-10-19.md. Creation,
-deployment, live bucket/Worker capability checks, candidate approval and actual
-reviewer rejection are now planned main-review activities, not a request to find
-an impossible resource-scoped control-plane token. Earlier inventories below
-retain their original timestamps; no fresh platform-state claim is inferred.
+The implementation entry is P4-4-s3-interface-2026-10-19.md. Independent review,
+deployment identities, original failures, policy limits and the exact owner
+packet are in P4-4-s3-preacceptance-2026-10-19.md and its
+P4-4-root-review-2026-10-19/ archive. Runtime module SHA-256 for both Workers is
+1ad919d795a2354cd4c7d9617f3e3c9805f831967d1a2cdd5930ba61e4c3303f.
 
-## Production Matrix At E8
+Object Read and Write includes DELETE capability at Cloudflare's policy
+granularity; the application never issues DELETE, but this is not hard put-only
+IAM. Do not widen to account-level control-plane permissions or export the
+provisioning token. Owner input can use the already protected project directory
+D:/github/my/E-Track/.cache/p44-root-acceptance-20261019/private/; never send
+plaintext in chat. The real reviewer Eitan-S-23 still owns the designated rejection
+and approval after root binds the candidate, runner, frozen plan and NOT_RUN
+precheck. The historical P4-1 delegation is not a P4-4 approval authority.
+
+The following E1..E9 observations and old decision packets are historical, not
+current action requests. They must not resurrect CLOUDFLARE_API_TOKEN as a
+required S3 consumer, claim Worker NOT_DEPLOYED now, or erase the later actual
+POST denials. No firmware publication, rehearsal, registration, R2 object write,
+channel mutation, migration or device operation was performed in root's update.
+
+## Historical Production Matrix At E8
 
 Updated after the owner's explicit target/key authorization, with final readback
-at 2026-10-18 16:09:03 UTC (2026-10-19 local). E8 below is the current production
-state. Earlier E1/E6 tables are retained as historical inventories, not assertions
-that production is still empty. P44-TARGET-01 is implemented; P44-CREDENTIAL-01
-now concerns the production CI protected source/scope. Existing e-track-ci remains
-available and is not requested again. The owner's 2026-10-19 dedicated-token
-choice supersedes the earlier existing-source-first condition. The current
-blocker is the native-proxy/resource-scope gap under `Dedicated Production CI
-Decision`, not another request to choose a token.
+at 2026-10-18 16:09:03 UTC (2026-10-19 local). E8 below was the production
+state at that observation. Earlier E1/E6 tables are retained as historical inventories, not assertions
+that production is still empty. P44-TARGET-01 was implemented; P44-CREDENTIAL-01
+then concerned the production CI protected source/scope. Existing e-track-ci
+remains available and is not requested again. The owner's dedicated-token choice
+superseded the earlier existing-source-first condition. The native-proxy scope
+gap recorded under `Dedicated Production CI Decision` was the blocker at that
+stage; the current S3 consumer and actual creation denial supersede that route.
 
 | Configuration | Platform / scope / type | Presence / latest relevant UTC observation | Binding and evidence | Owner / remaining action |
 | --- | --- | --- | --- | --- |
@@ -209,7 +236,7 @@ do not authorize this implementer to impersonate a reviewer or edit old evidence
    response. Do not delete firmware assets, rewrite audits, re-enable channels,
    issue recovery capabilities or perform device operations as a cleanup shortcut.
 
-## Remaining Owner Configuration
+## Historical Remaining Owner Configuration
 
 `P44-CREDENTIAL-01` previously requested a separate production token because
 self-policy/catalog reads failed. That inference is SUPERSEDED: those 403s only
@@ -231,7 +258,7 @@ This matrix is not acceptance-ready while these required production rows remain
 absent. Real environment rejection and the stated role/runtime gaps must be
 honestly adjudicated by O2; production job execution remains after P5.
 
-## Pre-Deployment Live Reconciliation
+## Historical Pre-Deployment Live Reconciliation
 
 E6 supersedes only the observation time, not old receipts. The protected test
 settings are unchanged; no write was needed. Worker settings still bind the
@@ -311,6 +338,10 @@ inputs for independent evaluation, never a direct P4-4 REUSED entry or a reason
 to repeat successful rehearsal. Gate=false and post-P5 production gates remain.
 
 ## Dedicated Production CI Decision
+
+Historical native-proxy decision and console steps follow. The current S3
+consumer and exact two-pair owner action are at the top of this note; the old
+CLOUDFLARE_API_TOKEN steps below are no longer the current implementation route.
 
 On 2026-10-19 the owner explicitly chose a new independent production CI token.
 That replaces the condition to prove no qualified existing source first. This

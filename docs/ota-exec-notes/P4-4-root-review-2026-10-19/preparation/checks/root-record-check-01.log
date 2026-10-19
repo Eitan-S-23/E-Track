@@ -1,0 +1,8 @@
+test_readiness_matrix_mirrors_board_order_and_derives_dispatch (__main__.PostP26SpecGovernanceTests.test_readiness_matrix_mirrors_board_order_and_derives_dispatch) ... ok
+test_p44_dispatch_reconciles_interfaces_without_reopening_completed_cards (__main__.PostP26SpecGovernanceTests.test_p44_dispatch_reconciles_interfaces_without_reopening_completed_cards) ... ok
+test_p44_scoped_s3_chain_replaces_control_plane_without_weakening_gates (__main__.PostP26SpecGovernanceTests.test_p44_scoped_s3_chain_replaces_control_plane_without_weakening_gates) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.047s
+
+OK

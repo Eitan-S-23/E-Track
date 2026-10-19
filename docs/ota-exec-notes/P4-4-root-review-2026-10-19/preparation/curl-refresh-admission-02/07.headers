@@ -1,0 +1,31 @@
+HTTP/1.1 200 Connection established
+
+HTTP/1.1 200 OK
+Date: Mon, 19 Oct 2026 00:58:24 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 2520
+Cache-Control: private, max-age=60, s-maxage=60
+Vary: Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With
+ETag: "273317afe7530844362df2f3c59cbc9d465b9fb4c7a251cf253d4ad46723fbef"
+X-OAuth-Scopes: gist, read:org, repo, user, workflow
+X-Accepted-OAuth-Scopes: 
+x-oauth-client-id: 178c6fc778ccc68e1d6a
+X-GitHub-Media-Type: github.v3; format=json
+x-github-api-version-selected: 2022-11-28
+Access-Control-Expose-Headers: ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset, Warning
+Access-Control-Allow-Origin: *
+Strict-Transport-Security: max-age=31536000; includeSubdomains; preload
+X-Frame-Options: deny
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Referrer-Policy: origin-when-cross-origin, strict-origin-when-cross-origin
+Content-Security-Policy: default-src 'none'
+Server: github.com
+X-RateLimit-Limit: 5000
+X-RateLimit-Remaining: 4995
+X-RateLimit-Reset: 1792375068
+X-RateLimit-Used: 5
+X-RateLimit-Resource: core
+X-GitHub-Request-Id: 1769:71B5D:1152CD2:12BC914:6AD56B2C
+x-github-edge-region: westus3
+

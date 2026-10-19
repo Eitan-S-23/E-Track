@@ -783,12 +783,14 @@
 - 证据: `docs/ota-exec-notes/P4-3-acceptance-2026-10-18.md`、`docs/acceptance-contracts/P4-3-v1.contract.json`、`docs/acceptance-contracts/P4-3-v1/evidence-matrix.json`、`docs/acceptance-contracts/FREEZE-INDEX.md`，新增 `P4-3-acceptance-2026-10-18/delivery.inventory.json` 及 87 条交付归档；实施报告和旧冻结增量不变。正式验收、main 集成及隔离部署现均完成；真实 publisher/viewer 会话、依赖告警及缓存归因限制保留，不代表 P4-4/P5/生产门槛已满足。
 
 #### P4-4 Secrets 与 environment 配置
-状态: 进行中 ｜ 认领: Codex P4-4 实施/配置集成 agent / 2026-10-18 ｜ 更新: 2026-10-19(P44-CREDENTIAL-01 已按 owner 裁定实施标准 S3 桶凭据/Worker 鉴权只读预检；不是 e-track-ci 缺失或必须新建 token，新链不再消费 CLOUDFLARE_API_TOKEN；实现 de36215 的宿主及非发布 CI 39157945995 通过，原生 283 项、发布管线 131 项；实际凭据配置、部署、新链 staging 与拒绝观测按主验收计划执行，旧冻结原件不变；gate=false，本卡未正式验收)
+状态: 阻塞 ｜ 认领: Codex P4-4 实施/配置集成 agent / 2026-10-18 ｜ 更新: 2026-10-19(两项产品整改 b56534d 已交付 15be25e；主验收独立复核 10/10、两条源码绑定开发 CI 通过，生产/演练 Worker 已部署并核对实际模块；P44-CREDENTIAL-01 两种真实 token 创建 POST 均 403/9109，最新只读核对仍缺四个 S3 secrets，属必需外部依赖缺失；gate=false，正式轮次为零，非 PASS，主线未集成)
 - 目标: 配置 `CLOUDFLARE_ACCOUNT_ID`、桶限定 `TRACE_R2_ACCESS_KEY_ID/TRACE_R2_SECRET_ACCESS_KEY`、`TRACE_UPDATE_SERVICE_URL/DEPLOY_TOKEN`、R2 bucket 变量及 `firmware-production` 审批人；沿用批准的 AES；不要求旧控制面 token 或客户端 D1 绑定参数。
 - 验收: 配置准备可消费 P4-1 已交付的工作流接口和 P4-2 环境，不等待 P4-1 先用这些配置完成验收；随后共用同一次隔离 rehearsal 验证权限与注册。不能为证明配置而提前生产发布，配置变化影响的证据另作最小验证。
 - 证据: `docs/ota-exec-notes/P4-4-implementation-2026-10-18.md`；复核 P4-1-v4 原件和 P4-3 已完成交付，不复制为本卡正式 PASS。生产设置、审批拒绝与角色覆盖按实际结果记录，gate=false，不重做成功演练。
-- 凭据入口: `docs/agent-collaboration/credential-registry.md`，`e-track-ci` = `e-track-p41-ci`；先复用已知受保护入口及操作级证据，管理 GET 403 不能推出发布权限不足或必须新增 token；不把测试授权扩展为生产授权。
+- 凭据入口: `docs/agent-collaboration/credential-registry.md`，`e-track-ci` = `e-track-p41-ci`；旧管理 GET 403 不是 e-track-ci 缺失或必须新建 token 的依据，也不能推出发布权限不足。本次阻塞另由严格 S3 pair 创建 POST 403 及两套凭据缺失确认；先复用已知受保护入口及操作级证据，不把测试授权扩展为生产授权。
 - 当前整改入口: `docs/ota-exec-notes/P4-4-s3-interface-2026-10-19.md`。新链不能直接沿用旧链 rehearsal 背书；主验收按真实依赖冻结必要新观测，不把既有“不重复成功演练”解释为新链免测。P4-1/P4-2 历史完成态和认领不变。
+- 独立预审与配置交付: Codex root；`docs/ota-exec-notes/P4-4-s3-preacceptance-2026-10-19.md` 及 `P4-4-root-review-2026-10-19/`。P44-REVIEW-01/02 已关闭；P44-DEPLOY-01 的 staging 查询脱敏误关闭与恢复、11 项依赖告警及外部缓存归因未决均保留。两次 Worker 代码部署不是生产固件发布；未执行新链 rehearsal、注册、R2 写入或设备操作。
+- 阻塞记录: P44-CREDENTIAL-01，当前受保护配置凭据无法创建账户级或用户级 token（两次实际 POST 均 403/9109，非 GET 推断）；2026-10-19T00:58:42.120Z 复核仍缺 production 与 rehearsal 的两套独立桶限定 S3 凭据。O1 直接配置对应 environment secrets 或提供项目内受保护入口及脱敏权限/来源/有效期，不发送明文、不扩大权限。补齐后由 root 绑定真实候选/descriptor、提交冻结 runner 与 NOT_RUN 前检，再组织新链正式观测；现有 reviewer 执行真实拒绝/批准，不沿用 P4-1 代批授权。readiness 派生规则与旧冻结证据不变。
 
 ---
 
@@ -914,7 +916,11 @@
 
 | 2026-10-18 | P4-4 / Codex 实施 agent / `P44-DISPATCH-20261018` | P4-1 接口、P4-2 隔离环境及已交付原件均已对账，readiness 仍保留旧交接阻塞 | 同批同步 P4-4 行、派单摘要与精确集合相等断言；生产配置/真实审批缺口属于卡内实施与独立验收，不回改派生规则或重开 P4-3 | 用户本轮全权授权推进实施至交独立验收；独占 worktree 从 main 0779f67 建立。保留 OTA_BOOT_CHAIN_READY=false、原件来源、角色/权限限制和 P5 后生产门槛 | 已对账/配置实施中 |
 
+| 2026-10-19 | P4-4 / Codex root / `P44-CREDENTIAL-01` | 新链两项产品整改与 Worker 部署已完成，但严格桶凭据的 account-owned/user-owned 创建 POST 均返回 403/9109，最终十项只读核对仍缺四个 S3 secrets | 保持两套独立桶限定 Object Read and Write，不替换旧 CI/provisioning token、不扩大权限；由 O1 直接配置或提供受保护来源与脱敏范围/有效期 | 按 §0.6 必需外部依赖缺失置阻塞；独立预审 10/10 和非发布 CI 通过不等于正式 PASS。保留实际部署异常/恢复和外部缓存未决；root 待凭据后冻结并组织新链/真实 reviewer 观测，gate=false，正式轮次零，未改 main | 已登记/外部凭据阻塞 |
+
 ## 10. 会话日志(每会话一行:日期 ｜ agent ｜ 动了哪些卡 ｜ 一句话结果)
+
+- 2026-10-19 | Codex P4-4 root independent review and configuration preparation | P4-4 only, BLOCKED on required external credentials; zero formal rounds | Consolidated P44-REVIEW-01/02 repairs b56534d and evidence 15be25e independently verified (10 successor cases, 38 successor originals); source-bound development CI 39175549010/39175558187 passed. Both approved Workers contain the verified CI module. Actual account/user token creation returned 403/9109; final ten-GET refresh still finds four S3 secrets absent and all gates false. P44-DEPLOY-01 restoration, warnings, dependency debt and unresolved external-cache attribution are retained in P4-4-s3-preacceptance-2026-10-19.md and P4-4-root-review-2026-10-19/. Owner must supply the two protected bucket pairs; root owns formal admission and the existing reviewer owns real rejection/approval. No new-chain rehearsal, firmware publication, registration, R2 object write, device action, main integration or P4-4 PASS.
 
 - 2026-10-18 | Codex P4-4 implementation/configuration integration | P4-4 only, protected-input BLOCKED | P44-DISPATCH-20261018 reconciled interfaces/environment and synchronized readiness/exact-set assertions. Four GitHub protection/false-gate writes read back; 26 readiness and 85 workflow/configuration host tests pass. P44-CREDENTIAL-01 requires a separate production CI credential/policy, not another general authorization; existing test/provisioning credentials are not substituted. 31 archived originals preserve failures; no product/frozen-evidence change, successful rehearsal replay, production release or device action. Independent acceptance remains main-agent-owned and NOT_RUN.
 

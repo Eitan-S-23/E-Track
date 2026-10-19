@@ -1,0 +1,37 @@
+{
+  "startedAt": "2026-10-18T22:59:33.201Z",
+  "purpose": "Owner-delegated strict bucket S3 credential provisioning",
+  "role": "production",
+  "environmentName": "firmware-production",
+  "bucket": "e-track-firmware-production-releases",
+  "name": "e-track-firmware-production-s3-ci-20261019",
+  "permissionGroup": {
+    "id": "2efd5506f9c8494dacb1fa10a3e7d5b6",
+    "name": "Workers R2 Storage Bucket Item Write"
+  },
+  "requests": [],
+  "attempts": [],
+  "configuredToGitHub": false,
+  "policyEvidence": "Two public Cloudflare-provider issue examples corroborate ID; service response must independently resolve the name.",
+  "policySources": [
+    "https://github.com/cloudflare/terraform-provider-cloudflare/issues/5967",
+    "https://github.com/cloudflare/terraform-provider-cloudflare/issues/3227",
+    "https://developers.cloudflare.com/r2/api/tokens/",
+    "https://developers.cloudflare.com/fundamentals/api/how-to/create-via-api/"
+  ],
+  "scopeLimit": "One exact bucket, Object Read and Write; platform granularity includes object deletion. No account/Worker/D1/token-management grants.",
+  "automaticRetry": false,
+  "formalAcceptance": "NOT_RUN",
+  "privateOutput": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\private\\production-s3-20261019.json",
+    "currentUserOnly": true,
+    "aclExitCode": 0
+  },
+  "expiresOnRequested": "2027-01-16T22:59:36.610Z",
+  "status": "RESERVED_BEFORE_POST",
+  "permittedRoutes": [
+    "account-owned",
+    "user-owned-only-after-definite-account-403"
+  ],
+  "credentialSource": "Existing local provisioning token; never exported"
+}
