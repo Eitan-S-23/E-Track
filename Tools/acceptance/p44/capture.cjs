@@ -1,16 +1,24 @@
 // Thin platform capture: standard HTTP/SigV4, two explicit dispatches, no reviewer API.
 const s = require('./run.cjs');
 const { fs, path, assert } = s;
+const { Transform, Writable } = require('node:stream');
+const { pipeline } = require('node:stream/promises');
+const { createGunzip, gunzipSync } = require('node:zlib');
 const repository = 'Eitan-S-23/E-Track';
 const branch = 'dev/p4-4/config-integration-20261018';
 const prefix = '/repos/' + repository;
 const envRoute = prefix + '/environments/firmware-rehearsal';
-const contractPath = 'docs/acceptance-contracts/P4-4-v2.contract.json';
-const predecessorSource = '08afb97ddae316b3b305354f1582afdb836d7633';
-const predecessorBundle = 'e5994fb28466e46c99a1f247494473e6cba9cc03';
+const contractPath = 'docs/acceptance-contracts/P4-4-v3.contract.json';
+const predecessorSource = '70193ce7fb7cc4e426029d07cf7b50c1fcbfef1c';
+const predecessorBundle = '84268ac2ad34727b76250ff944211b7efba1cfb3';
+const predecessorIdentities = [
+  { contract: 'P4-4-v2', source: predecessorSource, bundle: predecessorBundle },
+  { contract: 'P4-4-v1', source: '08afb97ddae316b3b305354f1582afdb836d7633', bundle: 'e5994fb28466e46c99a1f247494473e6cba9cc03' },
+];
 const predecessorName = 'inputs/predecessor-before.json';
 const predecessorRoot = 'inputs/predecessor-before';
 const rowLimit = 8;
+const httpMaxBytes = 16 * 1024 * 1024;
 const project = path.resolve(s.root, '../..');
 const modules = path.join(s.root, 'app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules');
 const resources = {
@@ -24,7 +32,7 @@ const sort = value => Array.isArray(value) ? value.map(sort) : value && typeof v
   ? Object.fromEntries(Object.keys(value).sort().map(key => [key, sort(value[key])])) : value;
 const canonical = value => JSON.stringify(sort(value));
 const privateRead = relative => fs.readFileSync(s.guard(path.join(project, relative), project), 'utf8').trim();
-let context, transportOverride, frozenOverride, sleepOverride, beforePredecessor;
+let context, transportOverride, httpOverride, privateCaptureOverride, frozenOverride, sleepOverride, beforePredecessor;
 const sleep = ms => sleepOverride ? sleepOverride(ms) : new Promise(resolve => setTimeout(resolve, ms));
 function secrets() {
   if (context) return context;
@@ -91,39 +99,51 @@ function verifiedReference(reference, root = '') {
 }
 function loadBeforePredecessor(name, contract) {
   assert.equal(name, predecessorName, 'PREDECESSOR_MANIFEST_NAME');
-  assert(contract.status === 'FROZEN' && contract.contract_id === 'P4-4-v2', 'PREDECESSOR_CURRENT_CONTRACT');
-  const anchors = contract.external_inputs.filter(item => item.id === 'predecessor-before');
-  assert.equal(anchors.length, 1, 'PREDECESSOR_ANCHOR');
-  const bytes = s.readBytes(name), hash = s.sha256(bytes);
-  assert.equal(anchors[0].evidence_path, 'evidence/' + name, 'PREDECESSOR_ANCHOR_PATH');
-  assert.equal(anchors[0].evidence_sha256, hash, 'PREDECESSOR_ANCHOR_HASH');
-  assert.equal(anchors[0].fingerprint, 'sha256:' + hash, 'PREDECESSOR_ANCHOR_HASH');
-  const manifest = JSON.parse(bytes);
-  assert.equal(manifest.schema, 'p44-predecessor-before-v1', 'PREDECESSOR_SCHEMA');
-  assert.equal(manifest.source_evidence_root, predecessorRoot, 'PREDECESSOR_ROOT');
-  assert.equal(manifest.source_commit, predecessorSource, 'PREDECESSOR_SOURCE');
-  assert.equal(manifest.source_bundle_commit, predecessorBundle, 'PREDECESSOR_BUNDLE');
-  assert.equal(manifest.predecessor_contract_id, 'P4-4-v1', 'PREDECESSOR_CONTRACT');
-  const contractBytes = verifiedReference(manifest.predecessor_contract, predecessorRoot);
-  assert.match(manifest.predecessor_contract_sha256, /^[0-9a-fA-F]{64}$/);
-  assert.equal(s.sha256(contractBytes), manifest.predecessor_contract_sha256.toLowerCase(), 'PREDECESSOR_CONTRACT_HASH');
-  const previous = JSON.parse(contractBytes);
-  assert(previous.status === 'FROZEN' && previous.contract_id === 'P4-4-v1'
-    && previous.freeze_commit === predecessorSource, 'PREDECESSOR_CONTRACT_BINDING');
-  const matrix = JSON.parse(verifiedReference(manifest.predecessor_final_matrix, predecessorRoot));
-  assert.match(matrix.contract_sha256, /^[0-9a-fA-F]{64}$/);
-  assert(matrix.contract_id === previous.contract_id && matrix.contract_sha256.toLowerCase() === s.sha256(contractBytes)
-    && ['EVIDENCE_GAP', 'ENV_BLOCKED', 'HARNESS_FAIL', 'PRODUCT_FAIL'].includes(matrix.overall_result), 'PREDECESSOR_MATRIX_BINDING');
-  assert(Array.isArray(manifest.files) && manifest.files.length > 0 && manifest.files.length <= 2048, 'PREDECESSOR_FILES');
-  const files = new Map(), folded = new Set();
-  for (const reference of manifest.files) {
-    relativeInput(reference.path);
-    assert(!folded.has(reference.path.toLowerCase()), 'PREDECESSOR_DUPLICATE_FILE');
-    folded.add(reference.path.toLowerCase());
-    verifiedReference(reference, predecessorRoot);
-    files.set(reference.path, reference);
+  assert(contract.status === 'FROZEN' && contract.contract_id === 'P4-4-v3', 'PREDECESSOR_CURRENT_CONTRACT');
+  const layers = [];
+  let base = '', current = contract, topReference;
+  for (const [depth, identity] of predecessorIdentities.entries()) {
+    const anchors = current.external_inputs.filter(item => item.id === 'predecessor-before');
+    assert.equal(anchors.length, 1, 'PREDECESSOR_ANCHOR');
+    const manifestPath = base + name, bytes = s.readBytes(manifestPath), hash = s.sha256(bytes);
+    assert.equal(anchors[0].evidence_path, 'evidence/' + name, 'PREDECESSOR_ANCHOR_PATH');
+    assert.equal(anchors[0].evidence_sha256, hash, 'PREDECESSOR_ANCHOR_HASH');
+    assert.equal(anchors[0].fingerprint, 'sha256:' + hash, 'PREDECESSOR_ANCHOR_HASH');
+    if (depth === 0) topReference = { path: manifestPath, size_bytes: bytes.length, sha256: hash };
+    const manifest = JSON.parse(bytes), root = base + predecessorRoot;
+    assert.equal(manifest.schema, 'p44-predecessor-before-v1', 'PREDECESSOR_SCHEMA');
+    assert.equal(manifest.source_evidence_root, predecessorRoot, 'PREDECESSOR_ROOT');
+    assert.equal(manifest.source_commit, identity.source, 'PREDECESSOR_SOURCE');
+    assert.equal(manifest.source_bundle_commit, identity.bundle, 'PREDECESSOR_BUNDLE');
+    assert.equal(manifest.predecessor_contract_id, identity.contract, 'PREDECESSOR_CONTRACT');
+    const contractBytes = verifiedReference(manifest.predecessor_contract, root);
+    assert.match(manifest.predecessor_contract_sha256, /^[0-9a-fA-F]{64}$/);
+    assert.equal(s.sha256(contractBytes), manifest.predecessor_contract_sha256.toLowerCase(), 'PREDECESSOR_CONTRACT_HASH');
+    const previous = JSON.parse(contractBytes);
+    assert(previous.status === 'FROZEN' && previous.contract_id === identity.contract
+      && previous.freeze_commit === identity.source, 'PREDECESSOR_CONTRACT_BINDING');
+    const matrix = JSON.parse(verifiedReference(manifest.predecessor_final_matrix, root));
+    assert.match(matrix.contract_sha256, /^[0-9a-fA-F]{64}$/);
+    assert(matrix.contract_id === previous.contract_id && matrix.contract_sha256.toLowerCase() === s.sha256(contractBytes)
+      && ['EVIDENCE_GAP', 'ENV_BLOCKED', 'HARNESS_FAIL', 'PRODUCT_FAIL'].includes(matrix.overall_result), 'PREDECESSOR_MATRIX_BINDING');
+    assert(Array.isArray(manifest.files) && manifest.files.length > 0 && manifest.files.length <= 2048, 'PREDECESSOR_FILES');
+    const files = new Map(), folded = new Set();
+    for (const reference of manifest.files) {
+      relativeInput(reference.path);
+      assert(!folded.has(reference.path.toLowerCase()), 'PREDECESSOR_DUPLICATE_FILE');
+      folded.add(reference.path.toLowerCase());
+      verifiedReference(reference, root);
+      files.set(reference.path, reference);
+    }
+    layers.push({ root, files, identity });
+    if (depth === 0) {
+      assert.equal(manifest.inherited_predecessor?.path, predecessorName, 'PREDECESSOR_INHERITED_REQUIRED');
+      assert.deepEqual(manifest.inherited_predecessor, files.get(predecessorName), 'PREDECESSOR_INHERITED_BINDING');
+      verifiedReference(manifest.inherited_predecessor, root);
+    } else assert(manifest.inherited_predecessor === undefined, 'PREDECESSOR_DEPTH');
+    base = root + '/'; current = previous;
   }
-  return { manifest: { path: name, size_bytes: bytes.length, sha256: hash }, files, reused: new Set(), incomplete: new Set() };
+  return { manifest: topReference, layers, reused: new Set(), incomplete: new Set() };
 }
 async function withBeforePredecessor(name, contract, operation) {
   assert(!beforePredecessor, 'PREDECESSOR_SCOPE_ALREADY_ACTIVE');
@@ -139,16 +159,17 @@ function predecessorCapture(label, origin, route, { method = 'GET', body, expect
   // Only unchanged business reads are eligible; current GitHub/configuration reads stay fresh.
   const eligible = select || (origin === 's3' && method === 'GET' && route.includes('?list-type=2&max-keys=1000'));
   if (!eligible) return null;
-  const state = beforePredecessor, reference = state.files.get(label + '.http.json');
-  if (!reference) return null;
-  assert(!state.reused.has(label), 'PREDECESSOR_READ_ALREADY_CONSUMED');
+  const state = beforePredecessor, layer = state.layers.find(item => item.files.has(label + '.http.json'));
+  if (!layer) return null;
+  const { files, root, identity } = layer, reference = files.get(label + '.http.json'), key = root + '/' + label;
+  assert(!state.reused.has(key), 'PREDECESSOR_READ_ALREADY_CONSUMED');
   const readFile = name => {
-    const item = state.files.get(name); assert(item, 'PREDECESSOR_FILE_MISSING');
-    return verifiedReference(item, predecessorRoot);
+    const item = files.get(name); assert(item, 'PREDECESSOR_FILE_MISSING');
+    return verifiedReference(item, root);
   };
   const readReference = item => {
-    assert(item && state.files.has(item.path), 'PREDECESSOR_FILE_MISSING');
-    assert.deepEqual(item, state.files.get(item.path), 'PREDECESSOR_REFERENCE_BINDING');
+    assert(item && files.has(item.path), 'PREDECESSOR_FILE_MISSING');
+    assert.deepEqual(item, files.get(item.path), 'PREDECESSOR_REFERENCE_BINDING');
     return readFile(item.path);
   };
   const original = JSON.parse(readFile(reference.path));
@@ -164,17 +185,17 @@ function predecessorCapture(label, origin, route, { method = 'GET', body, expect
   const response = original.body ? readReference(original.body) : undefined;
   assert(typeof original.completed === 'boolean', 'PREDECESSOR_COMPLETION_REQUIRED');
   if (!original.completed || !(Array.isArray(expected) ? expected : [expected]).includes(original.status)) {
-    state.incomplete.add(label); return null;
+    state.incomplete.add(key); return null;
   }
   assert(response && original.body.path === label + '.body' && original.error_code === undefined, 'PREDECESSOR_RESPONSE_BINDING');
   assert(Number.isFinite(Date.parse(original.started)) && Number.isFinite(Date.parse(original.ended))
     && Date.parse(original.started) <= Date.parse(original.ended), 'PREDECESSOR_TIME');
   const envelope = structuredClone(original);
-  envelope.body.path = predecessorRoot + '/' + original.body.path;
-  if (envelope.request) envelope.request.path = predecessorRoot + '/' + original.request.path;
-  envelope.predecessor_origin = { contract_id: 'P4-4-v1', source_commit: predecessorSource, source_bundle_commit: predecessorBundle,
-    original_envelope: { ...reference, path: predecessorRoot + '/' + reference.path } };
-  state.reused.add(label);
+  envelope.body.path = root + '/' + original.body.path;
+  if (envelope.request) envelope.request.path = root + '/' + original.request.path;
+  envelope.predecessor_origin = { contract_id: identity.contract, source_commit: identity.source, source_bundle_commit: identity.bundle,
+    original_envelope: { ...reference, path: root + '/' + reference.path } };
+  state.reused.add(key);
   return { envelope, bytes: response, json: () => JSON.parse(response) };
 }
 function routeAllowed(origin, method, route) {
@@ -196,39 +217,92 @@ function routeAllowed(origin, method, route) {
   }
   return Object.values(resources).some(r => r.worker === origin) && method === 'POST' && route === '/api/ci/firmware/preflight';
 }
-async function transport(url, method, headers, body, maxBytes = 16 * 1024 * 1024) {
-  if (transportOverride) return transportOverride(url, method, headers, body, maxBytes);
-  const { request, ProxyAgent } = require(path.join(modules, 'undici'));
-  const proxy = new ProxyAgent({ uri: 'http://127.0.0.1:7897', allowH2: false, requestTls: { rejectUnauthorized: true } });
-  let response;
-  const chunks = [];
+const httpError = code => Object.assign(new Error(code), { code });
+function httpEncoding(headers) {
+  const values = Object.entries(headers).filter(([name]) => name.toLowerCase() === 'content-encoding');
+  if (!values.length) return 'identity';
+  if (values.length !== 1 || typeof values[0][1] !== 'string') return 'unsupported';
+  const value = values[0][1].trim().toLowerCase();
+  return ['identity', 'gzip'].includes(value) ? value : 'unsupported';
+}
+function wireLength(headers, size) {
+  const values = Object.entries(headers).filter(([name]) => name.toLowerCase() === 'content-length');
+  if (!values.length) return;
+  if (values.length !== 1 || typeof values[0][1] !== 'string' || !/^(0|[1-9][0-9]*)$/.test(values[0][1])
+    || !Number.isSafeInteger(Number(values[0][1])) || Number(values[0][1]) !== size) throw httpError('HTTP_WIRE_LENGTH');
+}
+async function responseBytes(response, decodeD1, maxBytes, signal) {
+  assert(Number.isSafeInteger(maxBytes) && maxBytes > 0 && maxBytes <= httpMaxBytes, 'HTTP_SIZE_BOUND');
+  const wire = [], decoded = [], encoding = decodeD1 ? httpEncoding(response.headers) : 'identity';
+  let wireSize = 0, decodedSize = 0;
+  const source = new Transform({ transform(chunk, _encoding, done) {
+    const remaining = Math.max(0, maxBytes - wireSize);
+    wireSize += chunk.length;
+    if (remaining) wire.push(Buffer.from(chunk.subarray(0, remaining)));
+    done(wireSize > maxBytes ? httpError('HTTP_WIRE_SIZE_LIMIT') : null, chunk);
+  } });
+  const sink = new Writable({ write(chunk, _encoding, done) {
+    const remaining = Math.max(0, maxBytes - decodedSize);
+    decodedSize += chunk.length;
+    if (remaining) decoded.push(Buffer.from(chunk.subarray(0, remaining)));
+    done(decodedSize > maxBytes ? httpError('HTTP_DECODED_SIZE_LIMIT') : null);
+  } });
   try {
-    response = await request(url, { method, headers, body, dispatcher: proxy, maxRedirections: 0,
-      headersTimeout: 30000, bodyTimeout: 30000, signal: AbortSignal.timeout(60000) });
-    let size = 0;
-    for await (const chunk of response.body) { size += chunk.length; assert(size <= maxBytes, 'HTTP_SIZE_LIMIT'); chunks.push(chunk); }
-    return { status: response.statusCode, headers: publicHeaders(response.headers), bytes: Buffer.concat(chunks) };
+    // Default Z_FINISH validates the gzip trailer; fetch's Z_SYNC_FLUSH does not.
+    const streams = [response.body, source, ...(encoding === 'gzip' ? [createGunzip()] : []), sink];
+    await pipeline(streams, { signal });
+    signal.throwIfAborted();
+    if (encoding === 'unsupported') throw httpError('HTTP_ENCODING_UNSUPPORTED');
+    if (decodeD1) wireLength(response.headers, wireSize);
+    return { status: response.statusCode, headers: publicHeaders(response.headers), wireBytes: Buffer.concat(wire),
+      bytes: Buffer.concat(decoded), decodedVerified: true };
   } catch (error) {
-    if (response) error.partial = { status: response.statusCode, headers: publicHeaders(response.headers), bytes: Buffer.concat(chunks) };
+    error.partial = { status: response.statusCode, headers: publicHeaders(response.headers), bytes: Buffer.concat(wire),
+      decodedBytes: Buffer.concat(decoded), decodedVerified: false, wire_received_size_bytes: wireSize };
     throw error;
+  }
+}
+function privateCapture(label, bytes) {
+  if (privateCaptureOverride) return privateCaptureOverride(label, bytes);
+  relativeInput(label);
+  const file = s.guard(path.join(s.root, '.cache/p44/private/capture-failures/P4-4-v3', label + '.wire.body'));
+  assert(!fs.existsSync(file), 'PRIVATE_ORIGINAL_EXISTS');
+  if (bytes === undefined) return;
+  assert(Buffer.isBuffer(bytes) && bytes.length <= httpMaxBytes, 'PRIVATE_WIRE_BOUND');
+  fs.mkdirSync(s.guard(path.dirname(file)), { recursive: true }); s.guard(file);
+  fs.writeFileSync(file, bytes, { flag: 'wx' });
+  return { path: path.relative(s.root, file).replaceAll('\\', '/'), size_bytes: bytes.length, sha256: s.sha256(bytes) };
+}
+async function transport(url, method, headers, body, maxBytes = httpMaxBytes) {
+  if (transportOverride) return transportOverride(url, method, headers, body, maxBytes);
+  const { request, ProxyAgent } = httpOverride || require(path.join(modules, 'undici'));
+  const signal = AbortSignal.timeout(60000);
+  const proxy = new ProxyAgent({ uri: 'http://127.0.0.1:7897', allowH2: false, requestTls: { rejectUnauthorized: true } });
+  try {
+    const response = await request(url, { method, headers, body, dispatcher: proxy, maxRedirections: 0,
+      headersTimeout: 30000, bodyTimeout: 30000, signal });
+    return await responseBytes(response, headers['accept-encoding'] === 'gzip', maxBytes, signal);
   } finally { await proxy.destroy(); }
 }
 async function capture(label, origin, route, { method = 'GET', body, headers = {}, expected = 200 } = {}) {
   assert(routeAllowed(origin, method, route), 'UNAPPROVED_ROUTE');
   const prior = predecessorCapture(label, origin, route, { method, body, expected });
   if (prior) return prior;
-  const c = secrets(), stem = label;
-  for (const suffix of ['-reservation.json', '.body', '.http.json', ...(body === undefined ? [] : ['.request.json'])]) {
+  const c = secrets(), stem = label, decodeD1 = origin === 'https://api.cloudflare.com' && method === 'POST';
+  for (const suffix of ['-reservation.json', '.body', '.decoded.body', '.partial.body', '.http.json', ...(body === undefined ? [] : ['.request.json'])]) {
     assert(!fs.existsSync(s.destination(stem + suffix)), 'REQUEST_ALREADY_CAPTURED');
   }
+  if (decodeD1) privateCapture(stem);
   let requestBody;
   if (body !== undefined) requestBody = Buffer.from(JSON.stringify(body));
   if (requestBody) for (const value of c.sensitive) assert(!requestBody.includes(Buffer.from(value)), 'SENSITIVE_REQUEST_BODY');
   const requestRef = requestBody ? s.write(stem + '.request.json', requestBody) : undefined;
   const started = new Date().toISOString();
-  s.write(stem + '-reservation.json', { method, origin, path: route, started, request: requestRef,
+  const requestHeaders = decodeD1 ? { 'accept-encoding': 'gzip' } : undefined;
+  s.write(stem + '-reservation.json', { method, origin, path: route, started, request: requestRef, request_headers: requestHeaders,
     note: 'Reserved before request; a lost response is not permission to replay a mutation.' });
-  const envelope = { method, path: route, started, ...(requestRef ? { request: requestRef } : {}) };
+  const envelope = { method, path: route, started, ...(requestRef ? { request: requestRef } : {}),
+    ...(requestHeaders ? { request_headers: requestHeaders } : {}) };
   let url;
   if (origin === 'https://api.github.com') {
     url = origin + route;
@@ -236,18 +310,24 @@ async function capture(label, origin, route, { method = 'GET', body, headers = {
       'x-github-api-version': '2022-11-28', 'user-agent': 'E-Track-P44', ...headers };
   } else if (origin === 'https://api.cloudflare.com') {
     url = origin + '/client/v4' + route.replace('[ACCOUNT]', c.account);
-    headers = { authorization: 'Bearer ' + c.local, ...headers };
+    headers = { authorization: 'Bearer ' + c.local, ...headers, ...requestHeaders };
   } else if (origin === 's3') url = 'https://' + c.account + '.r2.cloudflarestorage.com' + route;
   else { url = origin + route; headers = { accept: 'application/json', ...headers }; }
   if (requestBody) headers['content-type'] = 'application/json';
+  let response;
   try {
-    const response = await transport(url, method, headers, requestBody);
-    // Decisive bodies are byte-exact. A credential-bearing response stops capture.
+    response = await transport(url, method, headers, requestBody);
+    const wire = response.wireBytes || response.bytes, encoding = decodeD1 ? httpEncoding(response.headers) : 'identity';
+    if (encoding === 'unsupported') throw httpError('HTTP_ENCODING_UNSUPPORTED');
+    if (encoding === 'gzip') assert(response.decodedVerified && Buffer.isBuffer(response.wireBytes), 'HTTP_GZIP_UNVERIFIED');
+    // Scan decoded content before publishing even its compressed representation.
     const headerBytes = Buffer.from(JSON.stringify(response.headers));
-    for (const value of c.sensitive) assert(!response.bytes.includes(Buffer.from(value)) && !headerBytes.includes(Buffer.from(value)), 'SENSITIVE_RESPONSE');
+    for (const value of c.sensitive) assert(!wire.includes(Buffer.from(value)) && !response.bytes.includes(Buffer.from(value))
+      && !headerBytes.includes(Buffer.from(value)), 'SENSITIVE_RESPONSE');
     envelope.status = response.status;
     envelope.response_headers = response.headers;
-    envelope.body = s.write(stem + '.body', response.bytes);
+    envelope.body = s.write(stem + '.body', wire);
+    if (encoding === 'gzip') envelope.decoded_body = s.write(stem + '.decoded.body', response.bytes);
     envelope.completed = true;
     envelope.ended = new Date().toISOString();
     s.write(stem + '.http.json', envelope);
@@ -255,14 +335,20 @@ async function capture(label, origin, route, { method = 'GET', body, headers = {
     return { envelope, bytes: response.bytes, json: () => JSON.parse(response.bytes) };
   } catch (error) {
     if (!fs.existsSync(s.destination(stem + '.http.json'))) {
-      const partial = error.partial;
+      const partial = error.partial || response;
       if (partial) {
+        const wire = partial.wireBytes || partial.bytes;
         envelope.status = partial.status;
-        envelope.partial_body_sha256 = s.sha256(partial.bytes);
-        envelope.partial_body_size_bytes = partial.bytes.length;
-        const safe = c.sensitive.every(value => !partial.bytes.includes(Buffer.from(value))
+        envelope.partial_body_sha256 = s.sha256(wire);
+        envelope.partial_body_size_bytes = wire.length;
+        const safe = c.sensitive.every(value => !wire.includes(Buffer.from(value))
           && !JSON.stringify(partial.headers).includes(value));
-        if (safe) { envelope.response_headers = partial.headers; envelope.body = s.write(stem + '.partial.body', partial.bytes); }
+        if (decodeD1 && httpEncoding(partial.headers) !== 'identity') {
+          envelope.private_wire = privateCapture(stem, wire);
+          envelope.partial_projection = 'Encoded failure retained privately; public hash/length/location only';
+          if (partial.wire_received_size_bytes !== undefined) envelope.wire_received_size_bytes = partial.wire_received_size_bytes;
+          if (c.sensitive.every(value => !JSON.stringify(partial.headers).includes(value))) envelope.response_headers = partial.headers;
+        } else if (safe) { envelope.response_headers = partial.headers; envelope.body = s.write(stem + '.partial.body', wire); }
         else envelope.partial_projection = 'Known sensitive value: original hash/length only, no public plaintext copy';
       }
       s.write(stem + '.http.json', { ...envelope, ended: new Date().toISOString(),
@@ -306,7 +392,7 @@ function target() {
 function frozen() {
   if (frozenOverride) return frozenOverride();
   const t = target(), contract = JSON.parse(fs.readFileSync(s.guard(path.join(s.root, contractPath))));
-  assert.equal(contract.status, 'FROZEN'); assert.equal(contract.contract_id, 'P4-4-v2');
+  assert.equal(contract.status, 'FROZEN'); assert.equal(contract.contract_id, 'P4-4-v3');
   assert.equal(contract.freeze_commit, t.commitSha); assert.equal(s.git(['rev-parse', 'HEAD']), t.commitSha);
   assert.equal(s.git(['branch', '--show-current']), branch);
   assert.equal(s.read('commands/formal-precheck.json').exitCode, 0);
@@ -370,10 +456,10 @@ async function configuration(label, checkTarget) {
 }
 async function configure() {
   const t = target(), before = await configuration('configure-before', false);
-  const v1 = approvedPredecessorTarget();
+  const previous = approvedPredecessorTarget();
   const changes = { OTA_PREVIOUS_RELEASE_JSON: canonical(t.descriptor), OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256: t.descriptorSha256 };
-  const v1Values = { OTA_PREVIOUS_RELEASE_JSON: canonical(v1.descriptor), OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256: v1.descriptorSha256 };
-  assert([v1Values, changes].some(pair => Object.entries(pair).every(([name, value]) => before.rehearsal.values[name] === value)),
+  const previousValues = { OTA_PREVIOUS_RELEASE_JSON: canonical(previous.descriptor), OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256: previous.descriptorSha256 };
+  assert([previousValues, changes].some(pair => Object.entries(pair).every(([name, value]) => before.rehearsal.values[name] === value)),
     'UNEXPECTED_BASELINE_PAIR');
   assert(before.rehearsal.rules.some(r => r.name === branch && r.type === 'branch'), 'EXISTING_P44_BRANCH_REQUIRED');
   s.write('configure-plan.json', { target: s.fileRef('target.json'), branch, changes, gate_changes: 0, reviewer_changes: 0 });
@@ -383,10 +469,10 @@ async function configure() {
   s.write('configured.json', { before, after: await configuration('configure-after', true) });
 }
 function approvedPredecessorTarget() {
-  const contract = JSON.parse(fs.readFileSync(s.guard(path.join(s.root, 'docs/acceptance-contracts/P4-4-v1.contract.json'))));
-  const bytes = fs.readFileSync(s.guard(path.join(s.root, 'docs/acceptance-contracts/P4-4-v1/evidence/target.json')));
+  const contract = JSON.parse(fs.readFileSync(s.guard(path.join(s.root, 'docs/acceptance-contracts/P4-4-v2.contract.json'))));
+  const bytes = fs.readFileSync(s.guard(path.join(s.root, 'docs/acceptance-contracts/P4-4-v2/evidence/target.json')));
   const anchors = contract.external_inputs.filter(item => item.id === 'target');
-  assert(contract.status === 'FROZEN' && contract.contract_id === 'P4-4-v1'
+  assert(contract.status === 'FROZEN' && contract.contract_id === 'P4-4-v2'
     && contract.freeze_commit === predecessorSource && anchors.length === 1, 'PREDECESSOR_TARGET_CONTRACT');
   assert.equal(anchors[0].evidence_path, 'evidence/target.json', 'PREDECESSOR_TARGET_PATH');
   assert.equal(anchors[0].evidence_sha256, s.sha256(bytes), 'PREDECESSOR_TARGET_HASH');
@@ -481,6 +567,25 @@ function stagingAdmission(tables) {
   assert(!tables.firmware_channels.filter(relevant).some(row => row.legacy_current_release_id != null), 'UNRESOLVED_LEGACY_CHANNEL');
   assert(tables.firmware_releases_legacy.filter(relevant).every(row => Number.isSafeInteger(row.version_code) && row.version_code < 30209), 'STAGING_LEGACY_VERSION_DRIFT');
 }
+function d1Document(record) {
+  assert(record.completed === true && record.method === 'POST'
+    && routeAllowed('https://api.cloudflare.com', 'POST', record.path), 'D1_DOCUMENT_BINDING');
+  assert(record.body.size_bytes <= httpMaxBytes, 'HTTP_WIRE_SIZE_LIMIT');
+  const wire = verifiedReference(record.body), encoding = httpEncoding(record.response_headers);
+  wireLength(record.response_headers, wire.length);
+  assert(encoding !== 'unsupported', 'HTTP_ENCODING_UNSUPPORTED');
+  let decoded = wire;
+  if (encoding === 'gzip') {
+    decoded = gunzipSync(wire, { maxOutputLength: httpMaxBytes });
+    assert(record.decoded_body && record.decoded_body.size_bytes <= httpMaxBytes, 'HTTP_DECODED_REFERENCE');
+    assert(decoded.equals(verifiedReference(record.decoded_body)), 'HTTP_DECODED_MISMATCH');
+  } else assert(record.decoded_body === undefined, 'HTTP_UNEXPECTED_DECODED');
+  return JSON.parse(decoded);
+}
+function stagingSnapshotAdmission(tables) {
+  stagingAdmission(Object.fromEntries(Object.entries(tables)
+    .map(([name, value]) => [name, value.pages.flatMap(page => d1Document(page).result[0].results)])));
+}
 async function snapshot(phase, fixture) {
   frozen(); assert(['before', 'after'].includes(phase));
   if (fixture !== undefined) {
@@ -538,11 +643,7 @@ async function snapshotContents(phase) {
   for (const release of releases.items) result.github.assets[release.id] = (await pages(stem + '/assets-' + release.id,
     prefix + '/releases/' + release.id + '/assets')).records;
   result.protected_configuration = await configuration(stem + '/config', true);
-  if (phase === 'before') {
-    const tables = Object.fromEntries(Object.entries(result.databases.staging.tables)
-      .map(([name, value]) => [name, value.pages.flatMap(page => document(page.body).result[0].results)]));
-    stagingAdmission(tables);
-  }
+  if (phase === 'before') stagingSnapshotAdmission(result.databases.staging.tables);
   if (beforePredecessor) result.predecessor_reads = { manifest: beforePredecessor.manifest,
     source_commit: predecessorSource, source_bundle_commit: predecessorBundle,
     complete_original_labels: [...beforePredecessor.reused], incomplete_original_labels: [...beforePredecessor.incomplete],
@@ -784,11 +885,14 @@ async function productionPreflight() {
 }
 module.exports = { canonical, routeAllowed, sqlAllowed, nextLink, publicHeaders, resources, runIdentity, stagingAdmission,
   _test: { capture, pages, d1, s3, configuration, configure, approvedPredecessorTarget, tablePages, snapshot,
-    loadBeforePredecessor, withBeforePredecessor, predecessorCapture,
+    loadBeforePredecessor, withBeforePredecessor, predecessorCapture, d1Document, stagingSnapshotAdmission,
+    responseBytes, transport, httpMaxBytes,
     dispatch, waitForPending, recover, rejectedAdmission, finish, collectArtifact, collectLogs,
     setContext(value) { assert(require.main !== module); context = value; },
     setFrozen(value) { assert(require.main !== module); frozenOverride = value; },
     setSleep(value) { assert(require.main !== module); sleepOverride = value; },
+    setHttp(value) { assert(require.main !== module); httpOverride = value; },
+    setPrivateCapture(value) { assert(require.main !== module); privateCaptureOverride = value; },
     setTransport(value) { assert(require.main !== module); transportOverride = value; } } };
 if (require.main === module) {
   const [mode, label] = process.argv.slice(2);

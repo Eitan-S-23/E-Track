@@ -6,9 +6,11 @@ Both target Workers now contain the verified new module. P44-CREDENTIAL-01's
 missing-pair/configuration blocker is RESOLVED by the later agent handoff and
 root's independent 15-GET / 28-assertion readback. The successful provisioning
 source differs from the previously denied local token; it is not evidence that
-the old token's 403 became 200. Formal P4-4 acceptance remains NOT_RUN, not PASS.
-Historical failures remain below; see Independent Credential Handoff below for
-the current source, protection, lifecycle and evidence limits.
+the old token's 403 became 200. Formal P4-4 remains IN_PROGRESS, not PASS:
+V1 and V2 are closed EVIDENCE_GAP rounds, and the reviewed V3 collector batch
+is ready for source delivery and admission. Historical failures remain below;
+see Independent Credential Handoff for the source, protection and lifecycle
+limits, and the final continuation sections for current execution state.
 
 ## Historical Initial Review: Source And Scope
 
@@ -1094,3 +1096,71 @@ V1/C1/B1 ancestry. It must consume the 35 complete observations without network
 replay and retain both failed originals. The planned rejection/approval runs
 remain unspent; no production publication, registration, R2 write or device
 operation occurred. P4-4 is not PASS and all gates remain false.
+
+V2 was then delivered as bundle B2
+84268ac2ad34727b76250ff944211b7efba1cfb3 and the separate index commit I2
+5b6b5a02ebe56dfa9981e49697c3055d69670967, both on the task branch only. The
+staged-byte audit verified 316 staged files and all 312 bound evidence files,
+with no profile source staged. Freeze-index reachability and board/readiness
+checks passed again for this new index row (2 tests, 19.046 seconds). Only after
+those commits were delivered did root release the bounded V3 source changes;
+source_bundle_commit refers to B2, not I2. Existing product, credentials,
+Workers, reviewer authority and the unspent A/B observations are unchanged.
+
+### Concentrated V3 Collector Review
+
+P44-SNAPSHOT-01 is DECIDED as a bounded collector repair, not a product or
+credential change. The stable batch uses standard strict gzip only for the
+fixed D1 SELECT POSTs, retaining the same 60-second request/pipeline signal,
+LIMIT 8 and independent 16-MiB wire/decoded limits. Original wire and headers
+remain distinct from the verified decoded derivative. The actual staging
+admission caller now consumes that verified representation; S3 object bytes
+and the release/authentication paths retain their previous semantics.
+
+Root and the independent originals reviewer completed one consolidated review
+of capture, parsing, privacy, predecessor provenance, configuration and their
+actual callers. No unresolved blocking finding remains in this source batch.
+The private failure destination was rechecked before delivery: all existing
+parents passed the reparse guard and .cache/p44/private has only the current
+user's inheritable full-control ACL. The formal V3 failure namespace does not
+yet exist. Tests use an in-memory private sink; they did not write a formal
+private capture or invoke Cloudflare.
+
+The final development results are 199 Node capture assertions and 105 Python
+tests, with zero failures/errors/skips. The Python suite took 29.202 seconds.
+Its actual bundle.predecessor_plan -> Node loader case consumed the real B2
+inputs: 37 HTTP originals, 35 complete and two incomplete, with zero network
+requests. Wrong/malformed digests remain rejected. The same batch exercises
+CRC/EOF/encoding/length/size failures, the real staging caller and a correctly
+hashed but substituted decoded sidecar. The bundle selftest checks the actual
+V2 physical evidence, five compressed-privacy cases and the 17-command /
+nine-criterion preview; none of these is a live D1 observation or formal PASS.
+
+The Node test used exclusive command redirection rather than formal run.cjs.
+Its receipt explicitly transcribes the actual tool completion (exit 0,
+6.519 seconds, no remaining session), binds the original log and leaves the
+uncollected wall-clock start/end null. It was not rerun to manufacture a
+different receipt. The independent reviewer and root each recomputed the five
+author-owned source hashes. Root's original review is retained as
+.cache/p44/logs/p44-v3-root-review-01.{log,json}; V1/V2 bundles, the stock
+validator, profile configuration, workflow/product paths and shared root index
+were unchanged.
+
+The existing preparation archive now has a separate v3/development.zip and
+inventory under P4-4-acceptance-preparation-2026-10-19/. Its 25 entries (29542
+ZIP bytes) were individually compared with their originals. It includes both
+bundle selftests, the final capture receipt/log, source audit, Python output
+and result, the three actual B2 integration originals, the independent root
+review and the earlier public gzip probe. Generated fixture trees remain in
+ignored cache; no historical archive or failure was rewritten. Current source
+hashes are declared without retroactively rebinding earlier tests.
+
+Next, root delivers C3 before preparing a target or freezing V3. The real V2
+contract/final matrix remain mandatory for the NOT_RUN precheck, rerun plan
+and final physical validation. Thirty-five complete observations must not be
+replayed; only missing before-state reads resume with the changed transport.
+Only the existing rehearsal descriptor/hash pair may be updated for C3. Both
+planned runs remain unspent and require personal reviewer actions in order:
+Reject A, then Approve a distinct B on identical source and inputs. Production
+publication, gate unlock, device work and main integration remain outside this
+execution plan. Earlier external-cache attribution remains unresolved.

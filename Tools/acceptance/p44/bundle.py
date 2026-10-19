@@ -15,20 +15,20 @@ import sys
 import zipfile
 
 ROOT = Path(__file__).absolute().parents[3]
-PACKAGE = ROOT / "docs/acceptance-contracts/P4-4-v2"
+PACKAGE = ROOT / "docs/acceptance-contracts/P4-4-v3"
 DATA = PACKAGE / "evidence"
-CONTRACT = ROOT / "docs/acceptance-contracts/P4-4-v2.contract.json"
-PREVIOUS = ROOT / "docs/acceptance-contracts/P4-4-v1"
-PREVIOUS_CONTRACT = ROOT / "docs/acceptance-contracts/P4-4-v1.contract.json"
+CONTRACT = ROOT / "docs/acceptance-contracts/P4-4-v3.contract.json"
+PREVIOUS = ROOT / "docs/acceptance-contracts/P4-4-v2"
+PREVIOUS_CONTRACT = ROOT / "docs/acceptance-contracts/P4-4-v2.contract.json"
 PREVIOUS_MATRIX = PREVIOUS / "final-evidence-matrix.json"
-PREVIOUS_SHA256 = "5EDFE3AA67DB573730F0D095A72E8EAD3F9E49E5D2457B2982480F8FC068BDB9"
-PREVIOUS_MATRIX_SHA256 = "021346D79CF0E01848C09ACC33A7D5854400B2DDB82BA10E1ADDF0DF049DCA0E"
-PREVIOUS_SOURCE = "08afb97ddae316b3b305354f1582afdb836d7633"
-PREVIOUS_BUNDLE = "e5994fb28466e46c99a1f247494473e6cba9cc03"
+PREVIOUS_SHA256 = "CFFF5E841B6FBE6F251A8A931C450907B477B678E890DCD6B00C2081E07D719A"
+PREVIOUS_MATRIX_SHA256 = "C335006F0B166535CE957C345ADF579440E087B6B980239BACA96500F019A46C"
+PREVIOUS_SOURCE = "70193ce7fb7cc4e426029d07cf7b50c1fcbfef1c"
+PREVIOUS_BUNDLE = "84268ac2ad34727b76250ff944211b7efba1cfb3"
 PREDECESSOR = "inputs/predecessor-before.json"
 SOURCE = "b56534d7b6c993c0795010d0404fb8a81f7eeb9d"
 TOOLS = "Tools/acceptance/p44/"
-DATA_REL = "docs/acceptance-contracts/P4-4-v2/evidence/"
+DATA_REL = "docs/acceptance-contracts/P4-4-v3/evidence/"
 
 
 def guard(value, root=ROOT):
@@ -83,6 +83,13 @@ def validator():
     return module
 
 
+def inspector():
+    spec = importlib.util.spec_from_file_location("p44_privacy_inspector", ROOT / TOOLS / "inspect.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def definitions():
     commands, artifacts, criteria = [], [], []
 
@@ -98,12 +105,14 @@ def definitions():
         before_description = ""
         if mode == "before":
             args.append(PREDECESSOR)
-            before_description = ("Review and consume only complete, exactly matching v1 read-only originals; "
-                                  "retain complete LIMIT 500 pages without replay and repair failed/uncollected rows with LIMIT 8 pages. "
-                                  "The partial v1 response is retained, never consumed as complete. ")
+            before_description = ("Review the direct v2 and inherited v1 originals: consume 35 complete, exactly matching read-only responses "
+                                  "without network replay, including legacy LIMIT 500 and LIMIT 8 pages. "
+                                  "Retain both partial responses as failures; collect only unfinished rows with LIMIT 8. ")
         return command(name, "node", args, groups or ["cloudflare", "capture"],
                        [TOOLS + "capture.cjs"], "Raw capture under the fixed P4-4 plan; one invocation; Undici HTTP <=60s, standard gh archive <=180s, wrapper watchdog <=60 minutes; "
-                       "complete bounded pages. " + before_description + "Only two planned staging dispatches; never approve/reject by API, "
+                       "complete bounded pages; fixed D1 POST queries use standard gzip negotiation and strictly bounded decoding, preserving wire and decoded originals, "
+                       "with unsafe/incomplete new compressed wire retained privately and publicly identified only by hash/size. "
+                       + before_description + "Only two planned staging dispatches; never approve/reject by API, "
                        "publish, register directly, upload/delete objects, migrate, unlock gates or operate devices. "
                        "Waiting/discovery reads are bounded, not repeated business operations. Uncertain mutations are not retried.")
 
@@ -168,11 +177,12 @@ def definitions():
     after = capture("formal-after", "after")
     criterion("P44-RAW-STATE", [before, negatives, after],
               ["snapshots/before.json", "negatives.json", "snapshots/after.json"],
-              "Bounded original three-resource SELECT/list captures. Before independently reviews complete v1 originals "
-              "(including old LIMIT 500 pages), then collects failed/uncollected rows with fixed LIMIT 8 pages; "
-              "after uses entirely new LIMIT 8 pages. The 60-second stream deadline is unchanged. "
+              "Bounded original three-resource SELECT/list captures. Before independently reviews 35 complete v1/v2 originals "
+              "(legacy LIMIT 500 and LIMIT 8 pages) with no network replay, then collects unfinished rows with fixed LIMIT 8 pages; "
+              "after uses entirely new LIMIT 8 pages. Standard gzip, bounded wire/decoded originals and the unchanged 60-second deadline "
+              "address the documented large-response transport failure; a public gzip probe is not D1 acceptance. "
               "Three actual missing/cross-Worker 401s and two cross-bucket 403s. "
-              "No production object write, register, channel mutation, Release or device action; the failed v1 criterion is not REUSED.",
+              "No production object write, register, channel mutation, Release or device action; neither failed predecessor criterion is REUSED.",
               external=("target", "host", "predecessor-before"))
     criterion("P44-RAW-READBACK", [readbacks, production], ["readbacks.json", "production-preflight-result.json"],
               "Three immutable GET bodies and one correct production SELECT-only preflight use the validated artifact metadata. "
@@ -187,8 +197,10 @@ def definitions():
               "Production and protected Trace D1/schema/channel/R2 and GitHub Releases/assets unchanged; staging adds only this candidate, "
               "three assets/objects and one exact registration audit. Complete byte readbacks match; before/after times bracket B, not continuous monitoring.")
     privacy = command("formal-privacy", "python", ["-I", "-S", "-B", TOOLS + "bundle.py", "privacy"],
-                      ["evidence", "governance"], [TOOLS + "bundle.py"],
-                      "Offline exact-known-secret and signed-URL scan of public bundle text and ZIP members, plus explicit ownership/rotation/revocation record. No key generation or rotation.")
+                      ["evidence", "governance"], [TOOLS + "bundle.py", TOOLS + "inspect.py"],
+                      "Offline exact-known-secret and signed-URL scan of public bundle text and ZIP members; compressed D1 wire/decoded pairs "
+                      "use the same strict inspection oracle before decoded-byte scanning. Incomplete compressed wire stays private. "
+                      "Explicit ownership/rotation/revocation record; no key generation or rotation.")
     criterion("P44-HYGIENE", [privacy], ["privacy-result.json", "inputs/lifecycle.json"],
               "No known credential values in public outputs; no claim of never-exposed local ACLs. Owner, operator-enforced deadline, "
               "safe replacement/revocation and temporary-management-source identity are recorded; no provider TTL or automation is fabricated.", "process")
@@ -199,7 +211,7 @@ def definitions():
 def base_contract():
     value = read(ROOT / "docs/acceptance-contracts/template.contract.json")
     commands, artifacts, criteria = definitions()
-    value.update(contract_id="P4-4-v2", version=2, task_id="P4-4", parent_contract_sha256=PREVIOUS_SHA256,
+    value.update(contract_id="P4-4-v3", version=3, task_id="P4-4", parent_contract_sha256=PREVIOUS_SHA256,
                  commands=commands, artifacts=artifacts, criteria=criteria)
     value["input_groups"] += [{"id": name, "profile": profile, "category": category} for name, profile, category in [
         ("firmware", "Firmware", "production_source"), ("release", "P41Release", "production_source"),
@@ -224,7 +236,7 @@ def predecessor_plan():
     assert sha(previous_raw).upper() == PREVIOUS_SHA256, "PREDECESSOR_CONTRACT_CHANGED"
     assert sha(matrix_raw).upper() == PREVIOUS_MATRIX_SHA256, "PREDECESSOR_MATRIX_CHANGED"
     previous, matrix = json.loads(previous_raw), json.loads(matrix_raw)
-    assert previous["contract_id"] == "P4-4-v1" and previous["freeze_commit"] == PREVIOUS_SOURCE
+    assert previous["contract_id"] == "P4-4-v2" and previous["freeze_commit"] == PREVIOUS_SOURCE
     assert matrix["overall_result"] == "EVIDENCE_GAP", "PREDECESSOR_RESULT_CHANGED"
     rules = validator()
     assert not rules.validate_contract(previous), "PREDECESSOR_CONTRACT_INVALID"
@@ -237,6 +249,35 @@ def predecessor_plan():
     files = sorted(file for file in guard(base / "snapshots/before").rglob("*") if file.is_file())
     assert files, "PREDECESSOR_SNAPSHOTS_MISSING"
     files += [base / "commands/formal-before.json", base / "commands/formal-before.log", base / "failure-report.json"]
+    inherited_file = guard(base / PREDECESSOR)
+    inherited_raw = inherited_file.read_bytes()
+    anchors = [item for item in previous["external_inputs"] if item["id"] == "predecessor-before"]
+    assert len(anchors) == 1 and anchors[0]["evidence_path"] == "evidence/" + PREDECESSOR, "INHERITED_ANCHOR"
+    assert anchors[0]["evidence_sha256"].upper() == sha(inherited_raw).upper(), "INHERITED_ANCHOR_HASH"
+    assert anchors[0]["fingerprint"] == "sha256:" + sha(inherited_raw), "INHERITED_FINGERPRINT"
+    inherited = json.loads(inherited_raw)
+    assert inherited["schema"] == "p44-predecessor-before-v1" and inherited["predecessor_contract_id"] == "P4-4-v1"
+    assert inherited["source_evidence_root"] == "inputs/predecessor-before" and "inherited_predecessor" not in inherited, "INHERITED_DEPTH"
+    inherited_root = guard(base / inherited["source_evidence_root"])
+
+    def inherited_bytes(reference):
+        assert set(reference) == {"path", "size_bytes", "sha256"}, "INHERITED_REFERENCE"
+        raw = guard(inherited_root / reference["path"], inherited_root).read_bytes()
+        assert len(raw) == reference["size_bytes"] and sha(raw) == reference["sha256"], "INHERITED_REFERENCE_BYTES"
+        return raw
+
+    ancestor_raw = inherited_bytes(inherited["predecessor_contract"])
+    ancestor_matrix_raw = inherited_bytes(inherited["predecessor_final_matrix"])
+    ancestor, ancestor_matrix = json.loads(ancestor_raw), json.loads(ancestor_matrix_raw)
+    assert sha(ancestor_raw).upper() == previous["parent_contract_sha256"].upper() == inherited["predecessor_contract_sha256"].upper(), "INHERITED_PARENT_HASH"
+    assert ancestor["contract_id"] == "P4-4-v1" and ancestor["freeze_commit"] == inherited["source_commit"], "INHERITED_SOURCE"
+    assert not rules.validate_contract(ancestor), "INHERITED_CONTRACT_INVALID"
+    assert not rules.validate_matrix(ancestor_matrix, ancestor, sha(ancestor_raw).upper()), "INHERITED_MATRIX_INVALID"
+    git("merge-base", "--is-ancestor", inherited["source_commit"], inherited["source_bundle_commit"])
+    git("merge-base", "--is-ancestor", inherited["source_bundle_commit"], PREVIOUS_SOURCE)
+    for reference in inherited["files"]:
+        inherited_bytes(reference)
+    files += [inherited_file, *sorted(file for file in inherited_root.rglob("*") if file.is_file())]
     references = []
     for file in files:
         item = ref(file, base)
@@ -248,11 +289,12 @@ def predecessor_plan():
     planned = [(source, target / source.relative_to(base)) for source in files]
     planned += [(PREVIOUS_CONTRACT, target / "predecessor.contract.json"),
                 (PREVIOUS_MATRIX, target / "predecessor.final-evidence-matrix.json")]
-    manifest = {"schema": "p44-predecessor-before-v1", "predecessor_contract_id": "P4-4-v1",
+    manifest = {"schema": "p44-predecessor-before-v1", "predecessor_contract_id": "P4-4-v2",
                 "predecessor_contract_sha256": PREVIOUS_SHA256, "source_commit": PREVIOUS_SOURCE,
                 "source_bundle_commit": PREVIOUS_BUNDLE, "source_evidence_root": "inputs/predecessor-before",
                 "predecessor_contract": {"path": "predecessor.contract.json", "size_bytes": len(previous_raw), "sha256": sha(previous_raw)},
                 "predecessor_final_matrix": {"path": "predecessor.final-evidence-matrix.json", "size_bytes": len(matrix_raw), "sha256": sha(matrix_raw)},
+                "inherited_predecessor": ref(inherited_file, base),
                 "files": references}
     return planned, manifest
 
@@ -260,9 +302,9 @@ def predecessor_plan():
 def initial_matrix(contract, digest):
     matrix = read(ROOT / "docs/acceptance-contracts/template.evidence-matrix.json")
     template = matrix["criteria"][0]
-    matrix.update(contract_id=contract["contract_id"], contract_sha256=digest.upper(), round_id="P44-20261019-02",
+    matrix.update(contract_id=contract["contract_id"], contract_sha256=digest.upper(), round_id="P44-20261019-03",
                   criteria=[{**copy.deepcopy(template), "id": item["id"],
-                             "notes": "NOT_RUN under the v2 plan; the actual v1 failure remains recorded; no PASS or reviewer action inferred"}
+                             "notes": "NOT_RUN under the v3 plan; both actual predecessor failures remain recorded; no PASS or reviewer action inferred"}
                             for item in contract["criteria"]])
     return matrix
 
@@ -335,7 +377,7 @@ def prepare():
     packages = {name: read(modules / name / "package.json")["version"] for name in ("undici", "@smithy/core", "@smithy/signature-v4", "@aws-sdk/client-s3")}
     write(DATA / "inputs/host.json", {"python": sys.version, "python_executable": sys.executable,
           "node": subprocess.check_output(["node", "--version"], cwd=ROOT).decode().strip(), "packages": packages,
-          "transport": "Existing bounded Undici/OpenSSL proxy and standard AWS SigV4; no Schannel HTTP", "outputs": str(PACKAGE),
+          "transport": "Existing bounded Undici/OpenSSL proxy, standard gzip with strict bounded decoding, and AWS SigV4; no Schannel HTTP", "outputs": str(PACKAGE),
           "external_write_limit": "Selected-command/output audit only; prior external PowerShell/Schannel cache attribution remains unresolved"})
     print(json.dumps({"copied_files": len(planned), "original_inputs": 67, "predecessor_files": len(predecessor_files), "platform_operations": 0}))
 
@@ -374,6 +416,20 @@ def freeze():
 def contains_secret(data, needles):
     return any(value and value in data for value in needles) or bool(re.search(
         rb"(?:gh[posur]_|github_pat_)[A-Za-z0-9_]{20,}|https://[^\s\"<>]+[?&](?:X-Amz-Signature|token|signature|jwt)=[^\s\"<>]+", data))
+
+
+def public_d1_decoded(record, inspection, context):
+    routes = {"/accounts/[ACCOUNT]/d1/database/" + database + "/query" for database, _ in inspection.RESOURCES.values()}
+    if record.get("method") != "POST" or record.get("path") not in routes:
+        return None
+    headers = record.get("response_headers", {})
+    encodings = [value.strip().lower() for name, value in headers.items() if name.lower() == "content-encoding"]
+    if record.get("decoded_body") is None and (not encodings or encodings == ["identity"]):
+        return None
+    if record.get("completed") is False:
+        assert record.get("body") is None and record.get("decoded_body") is None, "COMPRESSED_FAILURE_MUST_BE_PRIVATE"
+        return None
+    return context.response(record, "POST", record["path"], status=record["status"])
 
 
 def privacy():
@@ -418,7 +474,9 @@ def privacy():
     assert lifecycle["provider_ttl_configured"] is False and lifecycle["automatic_job_configured"] is False
     assert lifecycle["operator_review_rotation_deadline"] == {"production": "2027-01-17T07:40:38Z", "rehearsal": "2027-01-17T07:40:50Z"}
     assert all(lifecycle[key] for key in ("decision_author", "rotation", "emergency", "temporary_management"))
-    files, members, failures = 0, 0, []
+    inspection = inspector()
+    context = inspection.Context(ROOT, DATA / "manifest.json")
+    files, members, decoded_d1, failures = 0, 0, 0, []
     excluded = {DATA / "commands/formal-privacy.log", DATA / "commands/formal-privacy.json", DATA / "privacy-result.json"}
     for file in sorted(DATA.rglob("*")):
         guard(file)
@@ -427,6 +485,12 @@ def privacy():
         files += 1
         if contains_secret(file.read_bytes(), needles):
             failures.append(file.relative_to(DATA).as_posix())
+        if file.name.endswith(".http.json"):
+            decoded = public_d1_decoded(read(file), inspection, context)
+            if decoded is not None:
+                decoded_d1 += 1
+                if contains_secret(decoded, needles):
+                    failures.append(file.relative_to(DATA).as_posix() + "::decoded_body")
         if file.suffix == ".zip":
             with zipfile.ZipFile(file) as archive:
                 assert len(archive.infolist()) <= 1024 and sum(item.file_size for item in archive.infolist()) <= 256 * 1024 * 1024
@@ -435,12 +499,12 @@ def privacy():
                         members += 1
                         if contains_secret(archive.read(item), needles):
                             failures.append(file.relative_to(DATA).as_posix() + "::" + item.filename)
-    result = {"ok": not failures, "files_scanned": files, "zip_members_scanned": members, "known_secret_forms": len(needles),
+    result = {"ok": not failures, "files_scanned": files, "zip_members_scanned": members, "decoded_d1_scanned": decoded_d1, "known_secret_forms": len(needles),
               "failed_paths": failures, "lifecycle_checked": True, "platform_operations": 0,
-              "limits": "Known values/encodings and signed-URL patterns; not proof of never-exposure or arbitrary unknown-secret detection"}
+              "limits": "Known values/encodings, verified compressed D1 decoded bytes and signed-URL patterns; private failed wire is not published or scanned here; not proof of never-exposure or arbitrary unknown-secret detection"}
     write(DATA / "privacy-result.json", result)
     assert result["ok"], "PUBLIC_SECRET_FOUND"
-    print(json.dumps({key: result[key] for key in ("ok", "files_scanned", "zip_members_scanned", "lifecycle_checked")}))
+    print(json.dumps({key: result[key] for key in ("ok", "files_scanned", "zip_members_scanned", "decoded_d1_scanned", "lifecycle_checked")}))
 
 
 def assess():
@@ -480,7 +544,7 @@ def assess():
                     notes="Independent original-byte adjudication; no production release/P5/gate unlock. Human reviewer provenance separately witnessed by root.")
         if item["id"] == "P44-RAW-STATE":
             item["evidence"].append("rerun-plan.json")
-            item["notes"] += " The actual v1 EVIDENCE_GAP round and incomplete stream remain bound by predecessor-before; this is not a REUSED criterion."
+            item["notes"] += " The actual v2 and inherited v1 EVIDENCE_GAP rounds and both incomplete streams remain bound by predecessor-before; this is not a REUSED criterion."
     matrix["evidence_hashes"] = {file.relative_to(PACKAGE).as_posix(): sha(guard(file).read_bytes()) for file in DATA.rglob("*") if file.is_file()}
     matrix["evidence_hashes"]["rerun-plan.json"] = sha(guard(PACKAGE / "rerun-plan.json").read_bytes())
     matrix["overall_result"] = "PASS"
@@ -494,6 +558,8 @@ def assess():
 
 
 def selftest():
+    import gzip
+
     value = base_contract()
     value["external_inputs"] = [{"id": name, "category": "fixture", "description": "Offline schema fixture", "fingerprint": "sha256:" + "0" * 64,
                                  "evidence_path": name + ".json", "evidence_sha256": "0" * 64}
@@ -504,7 +570,7 @@ def selftest():
     invalid = copy.deepcopy(value)
     invalid["criteria"][0]["input_groups"].remove("evidence")
     assert rules.validate_contract(invalid, allow_draft=True), "OMITTED_DEPENDENCY_ACCEPTED"
-    digest = sha(b"v2 contract fixture")
+    digest = sha(b"v3 contract fixture")
     matrix = initial_matrix(value, digest)
     assert not rules.validate_matrix(matrix, value, digest.upper()), "MATRIX_UPPERCASE_REJECTED"
     invalid_matrix = copy.deepcopy(matrix)
@@ -515,11 +581,52 @@ def selftest():
     assert contains_secret(b"fixture-secret", {b"fixture-secret"}) and not contains_secret(b"clean", {b"fixture-secret"})
     assert contains_secret(b"https://example.invalid/?X-Amz-Signature=signed", set())
     assert contains_secret(b"ghs_" + b"A" * 36, set()) and not contains_secret(b"ghs_ token type", set())
+    inspection = inspector()
+    context = inspection.Context(ROOT, ROOT / ".cache/p44/privacy-memory.json")
+    plain = b'{"message":"fixture-secret"}'
+    memory = {"wire.body": gzip.compress(plain, mtime=0), "decoded.body": plain, "wrong.body": b'{"message":"wrong"}'}
+
+    def memory_ref(name):
+        return {"path": name, "size_bytes": len(memory[name]), "sha256": sha(memory[name])}
+
+    def memory_read(reference):
+        data = memory[reference["path"]]
+        assert reference == memory_ref(reference["path"])
+        return data
+
+    context.read = memory_read
+    record = {"method": "POST", "path": "/accounts/[ACCOUNT]/d1/database/" + inspection.RESOURCES["production"][0] + "/query",
+              "status": 200, "completed": True, "started": "2026-10-19T08:00:00Z", "ended": "2026-10-19T08:00:01Z",
+              "response_headers": {"content-encoding": "gzip", "content-length": str(len(memory["wire.body"]))},
+              "body": memory_ref("wire.body"), "decoded_body": memory_ref("decoded.body")}
+    decoded = public_d1_decoded(record, inspection, context)
+    assert decoded == plain, "PRIVACY_GZIP_NOT_DECODED"
+    assert contains_secret(decoded, {b"fixture-secret"}), "COMPRESSED_SECRET_IGNORED"
+    wrong = copy.deepcopy(record)
+    wrong["decoded_body"] = memory_ref("wrong.body")
+    rejected = False
+    try:
+        public_d1_decoded(wrong, inspection, context)
+    except inspection.EvidenceError:
+        rejected = True
+    assert rejected, "PRIVACY_SIDECAR_MISMATCH_ACCEPTED"
+    partial = copy.deepcopy(record)
+    partial["completed"] = False
+    rejected = False
+    try:
+        public_d1_decoded(partial, inspection, context)
+    except AssertionError:
+        rejected = True
+    assert rejected, "PUBLIC_PARTIAL_COMPRESSED_WIRE_ACCEPTED"
+    partial.pop("body")
+    partial.pop("decoded_body")
+    assert public_d1_decoded(partial, inspection, context) is None, "PRIVATE_PARTIAL_REFERENCE_READ"
     offline_commands = [item for item in value["commands"] if "--repo-root" in item["command"]]
     assert len(offline_commands) == 5 and all("--repo-root " + ROOT.as_posix() + " " in item["command"] for item in offline_commands)
     assert len(value["commands"]) == 17 and len(value["criteria"]) == 9, "FORMAL_SCOPE_CHANGED"
     assert next(item for item in value["commands"] if item["id"] == "formal-before")["command"].endswith(" before " + PREDECESSOR)
     assert [item["id"] for item in value["criteria"] if "predecessor-before" in item["external_inputs"]] == ["P44-RAW-STATE"]
+    assert TOOLS + "inspect.py" in next(item for item in value["commands"] if item["id"] == "formal-privacy")["runner_paths"]
     for command in validation_commands().values():
         assert "--previous-contract " + PREVIOUS_CONTRACT.relative_to(ROOT).as_posix() in command
         assert "--previous-matrix " + PREVIOUS_MATRIX.relative_to(ROOT).as_posix() in command
@@ -534,12 +641,13 @@ def selftest():
     assert rejected, "MISSING_DEPLOYMENT_ORIGINAL_ACCEPTED"
     predecessor_files, predecessor = predecessor_plan()
     envelopes = [read(source) for source, _ in predecessor_files if source.name.endswith(".http.json")]
-    assert len(envelopes) == 32 and sum(item.get("completed") is True for item in envelopes) == 31
-    assert sum(item.get("completed") is False for item in envelopes) == 1, "PARTIAL_PREDECESSOR_LOST"
+    assert len(envelopes) == 37 and sum(item.get("completed") is True for item in envelopes) == 35
+    assert sum(item.get("completed") is False for item in envelopes) == 2, "PARTIAL_PREDECESSOR_LOST"
+    assert predecessor["inherited_predecessor"]["path"] == PREDECESSOR, "INHERITED_MANIFEST_PATH"
     previous, previous_matrix = read(PREVIOUS_CONTRACT), read(PREVIOUS_MATRIX)
     previous_errors = rules._physical_errors(previous, previous_matrix, PREVIOUS, ROOT)
     assert not previous_errors, "PREDECESSOR_PHYSICAL_VALIDATION"
-    # Preview only: the real C2 freeze/precheck recomputes profile changes after source commit.
+    # Preview only: the real C3 freeze/precheck recomputes profile changes after source commit.
     preview = copy.deepcopy(value)
     preview.update(status="FROZEN", freeze_commit=git("rev-parse", "HEAD"), freeze_tree=git("rev-parse", "HEAD^{tree}"),
                    profile_config_blob=git("rev-parse", "HEAD:Tools/provenance/manifest_profiles.json"))
@@ -550,8 +658,9 @@ def selftest():
     assert plan["previous_round_id"] == previous_matrix["round_id"] and plan["previous_matrix_sha256"] == PREVIOUS_MATRIX_SHA256
     assert not rules.validate_planned_execution(matrix, preview, plan), "PREVIEW_PLAN_INVALID"
     print(json.dumps({"ok": True, "schema_positive": 1, "dependency_negative": 1, "privacy_checks": 5,
+                      "compressed_privacy_checks": 5,
                       "matrix_checks": 3, "previous_parameter_checks": 3, "predecessor_source_bundle": predecessor["source_bundle_commit"],
-                      "predecessor_files": len(predecessor_files), "predecessor_complete_responses": 31, "predecessor_incomplete_responses": 1,
+                      "predecessor_files": len(predecessor_files), "predecessor_complete_responses": 35, "predecessor_incomplete_responses": 2,
                       "previous_physical_validation": True, "plan_preview_rerun_criteria": len(plan["rerun_criteria"]),
                       "plan_preview_required_commands": len(plan["required_commands"]), "preview_is_formal_admission": False,
                       "absolute_root_commands": len(offline_commands),

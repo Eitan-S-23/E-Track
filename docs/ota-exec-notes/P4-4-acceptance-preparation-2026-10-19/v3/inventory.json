@@ -1,0 +1,175 @@
+{
+  "schema": "p44-preparation-inventory-v1",
+  "created_at": "2026-10-19T15:00:14.621Z",
+  "nature": "Bounded v3 development checks and declared preparation probes; no repeated historical CI/deployment",
+  "predecessor_bundle_commit": "84268ac2ad34727b76250ff944211b7efba1cfb3",
+  "archive": {
+    "path": "development.zip",
+    "size_bytes": 29542,
+    "sha256": "c1a80a646570905854072de58accd87612d9c416ea81b6ecb6c6c292c4593386"
+  },
+  "entries": [
+    {
+      "path": ".cache/p44-v2-preparation-archive.cjs",
+      "size_bytes": 4492,
+      "sha256": "9b40d9b7f55505297d28b7e4ce940a59bd884fe59ca71aa5de16f60d684eac26"
+    },
+    {
+      "path": ".cache/p44-runner-tests-20261019/selftest-v3-01/unittest-original.txt",
+      "size_bytes": 11779,
+      "sha256": "ecd59b4df6b39b70fd38cd07e0f3c54025ccc2449763323b140b8cff066c2729"
+    },
+    {
+      "path": ".cache/p44-runner-tests-20261019/selftest-v3-01/result.json",
+      "size_bytes": 277,
+      "sha256": "65067ff67c021661743362949bf98325a7d77e8c57feb878a035ddc8c7628a79"
+    },
+    {
+      "path": ".cache/p44-runner-tests-20261019/selftest-v3-01/test_capture_consumes_real_bundle_predecessor_plan/1.original",
+      "size_bytes": 79275,
+      "sha256": "e3d8a0e3be33a804551da85f46298c1a319078d73942ce4e04b6d4776db35e51"
+    },
+    {
+      "path": ".cache/p44-runner-tests-20261019/selftest-v3-01/test_capture_consumes_real_bundle_predecessor_plan/2.original",
+      "size_bytes": 273,
+      "sha256": "b2355a4ac16275a487303cb2edcb848c82778c643d246c616ff6dc2b871a554b"
+    },
+    {
+      "path": ".cache/p44-runner-tests-20261019/selftest-v3-01/test_capture_consumes_real_bundle_predecessor_plan/3.original",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p44/diagnostics/gzip-public-api-01.body",
+      "size_bytes": 277,
+      "sha256": "52f205fb93255c50c2deec601791f03df71227a99441d4ddd9fdacfefbacf390"
+    },
+    {
+      "path": ".cache/p44/diagnostics/gzip-public-api-01.json",
+      "size_bytes": 480,
+      "sha256": "a0139dfbf03c9e0b77afc569f02b3db7e3b379401baa7c4823cf072f739bf49b"
+    },
+    {
+      "path": ".cache/p44/logs/p44-gzip-public-api-01.log",
+      "size_bytes": 435,
+      "sha256": "2e65706ecedf28cc5a79b15223991a05380f357166454572c0e69923cd451a62"
+    },
+    {
+      "path": ".cache/p44/logs/p44-gzip-public-api-01.json",
+      "size_bytes": 7291,
+      "sha256": "53d96a82fa38cdde004b52d9bbe37a6c5efcacb1c956ec561ad510184ad1acc0"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v2-index-check-01.json",
+      "size_bytes": 683,
+      "sha256": "d032526ae865121996a8a3c681c1d9adbd71835443030370c67d5dad3a3a2ed1"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v2-index-check-01.log",
+      "size_bytes": 436,
+      "sha256": "31127225449003ac67a7bf3c9971f845b62c0b69dd71c04303583d1b498d8a9e"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v3-bundle-diff-01.json",
+      "size_bytes": 524,
+      "sha256": "17dbce7cc632a54799dd10f8ca5091daf0470059587d4857bfb18085b61b6a45"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v3-bundle-diff-01.log",
+      "size_bytes": 244,
+      "sha256": "a5f9a75b394aa9e1d12a83a3e48749b3a6f05d496ea5f37a9162c90b7a69fc0e"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v3-bundle-selftest-01.json",
+      "size_bytes": 481,
+      "sha256": "ac0b630ff5073cda3a53c9e533908dd18047c785b899a3219a1ffef2d41ad0eb"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v3-bundle-selftest-01.log",
+      "size_bytes": 574,
+      "sha256": "f574fd901ce232543d8313a8a8ab84b14db102734b2359b9d25b236bb6155828"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v3-bundle-selftest-02.json",
+      "size_bytes": 481,
+      "sha256": "7757d0908c291801a461a549a86cbfd8ca941998ed579db17f05c6682d7492a1"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v3-bundle-selftest-02.log",
+      "size_bytes": 606,
+      "sha256": "9e5b25f5883f71e424e451b4da02506c90692b042875721080cefd937693936c"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v3-capture-01.json",
+      "size_bytes": 1153,
+      "sha256": "cd2a950f4359f097199d978571bcefb7d18dba8daac92e0bfa25ae1d0bec2efe"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v3-capture-01.log",
+      "size_bytes": 133,
+      "sha256": "15e047470ada55e4e2b18e5b0d816ee4b34cf5ee4c64ff8702e5d46579bb7886"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v3-root-review-01.json",
+      "size_bytes": 7677,
+      "sha256": "222445d7052e3187e1016d942beb2c020f60a3549f6371d896a23eb9d412cad7"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v3-root-review-01.log",
+      "size_bytes": 1214,
+      "sha256": "47f1e98b26e7ec896608f3e4e16ad213091654d1c3adb109b20ec058cc19bf04"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v3-run-syntax-01.json",
+      "size_bytes": 436,
+      "sha256": "a84b1464ff6aa7f03c2040768a3b3426be54794061e777e82af7465775498bac"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v3-run-syntax-01.log",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v3-source-01.json",
+      "size_bytes": 3547,
+      "sha256": "a6b00cad0c566f77943fe32fbfe07d6fb9fb6ec897f3f6c5870bd0f9c050a001"
+    }
+  ],
+  "source_hashes_at_archive_time": [
+    {
+      "path": "Tools/acceptance/p44/run.cjs",
+      "sha256": "adc23fb14cf32892e32a1c22d2918014a92b9e577859f3715ae3c9458eac4c29"
+    },
+    {
+      "path": "Tools/acceptance/p44/capture.cjs",
+      "sha256": "2b5d508f98b7e29b4e43a7fe6f254a0641e20c6996e4142e12930f5a57cb043a"
+    },
+    {
+      "path": "Tools/acceptance/p44/bundle.py",
+      "sha256": "5c434f993d0d6b5e507ecc0938e3df709669701f045445f97b02f532a2b9c872"
+    },
+    {
+      "path": "Tools/acceptance/p44/inspect.py",
+      "sha256": "600924572e507024635fcb03a93a55bf83b368359e9510ec5a218024f4b9a73e"
+    },
+    {
+      "path": "Tools/acceptance/p44/README.md",
+      "sha256": "8a1986cbfe7cdc7b28b11cca67fc6b9c9908c24ff34c6a24e236ee69d0e27e22"
+    },
+    {
+      "path": "tests/ota/test_p44_capture.cjs",
+      "sha256": "e9a1896b19cbf7b9046f57a63e68e1e59f47d9d240bf03386bd4176e908fe9a4"
+    },
+    {
+      "path": "tests/ota/test_p44_acceptance_tools.py",
+      "sha256": "96b9eb98f92c655c2aee7a71b2924f9c31326c1203499a0176d6b8e3b0afa7ef"
+    }
+  ],
+  "source_note": "Earlier results retain their own source/time; final source hashes do not retroactively bind earlier tests",
+  "preserved_limits": [
+    "Generated test fixtures remain in ignored cache; original stdout/results and committed test source are retained",
+    "Earlier mock success does not prove actual predecessor integration or live D1 compression",
+    "The public gzip probe used no credentials and does not constitute a D1 snapshot or product acceptance"
+  ],
+  "byte_exact_member_check": true
+}

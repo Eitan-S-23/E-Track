@@ -1,6 +1,8 @@
 // Offline transport mocks: no credentials, HTTP, cloud mutation or filesystem output.
 const assert = require('node:assert/strict');
 const crypto = require('node:crypto');
+const { Readable } = require('node:stream');
+const { gzipSync } = require('node:zlib');
 const s = require('../../Tools/acceptance/p44/run.cjs');
 const c = require('../../Tools/acceptance/p44/capture.cjs');
 const prefix = '/repos/Eitan-S-23/E-Track';
@@ -52,9 +54,10 @@ for (const [key, value] of [['run_attempt', 2], ['head_sha', 'b'.repeat(40)], ['
 const currentBytes = s.fs.readFileSync(s.path.join(s.root,
   'docs/ota-exec-notes/P4-4-root-review-2026-10-19/preparation/verification-inputs/current.json'));
 const current = JSON.parse(currentBytes);
-const approvedV1 = c._test.approvedPredecessorTarget();
+const approvedPrevious = c._test.approvedPredecessorTarget();
+const approvedV1 = JSON.parse(s.fs.readFileSync(s.path.join(s.root, 'docs/acceptance-contracts/P4-4-v1/evidence/target.json')));
 const approvedP41 = JSON.parse(s.fs.readFileSync(s.path.join(s.root, 'docs/acceptance-contracts/P4-1-v2/evidence/formal/target.json')));
-check('approved v1 target is hash-bound to C1', () => assert.equal(approvedV1.commitSha, '08afb97ddae316b3b305354f1582afdb836d7633'));
+check('approved v2 target is hash-bound to C2', () => assert.equal(approvedPrevious.commitSha, '70193ce7fb7cc4e426029d07cf7b50c1fcbfef1c'));
 const currentTables = {
   firmware_releases: [{ app_id: current.appId, device_model: current.deviceModel, version_code: current.versionCode,
     registration_json: currentBytes.toString('utf8').trimEnd() }],
@@ -94,46 +97,190 @@ s.fileRef = name => {
 };
 const fixtureValue = 'OFFLINE_FIXTURE_NOT_A_REAL_CREDENTIAL';
 c._test.setContext({ account: '1'.repeat(32), local: fixtureValue, gh: fixtureValue, sensitive: [fixtureValue] });
+const privateOutputs = new Map();
+c._test.setPrivateCapture((label, bytes) => {
+  assert(!privateOutputs.has(label), 'PRIVATE_ORIGINAL_EXISTS');
+  if (bytes === undefined) return;
+  privateOutputs.set(label, Buffer.from(bytes));
+  return { path: '.cache/p44/private/capture-failures/P4-4-v3/' + label + '.wire.body',
+    size_bytes: bytes.length, sha256: s.sha256(bytes) };
+});
 const response = (body, headers = {}, status = 200) => ({ status, headers, bytes: Buffer.from(typeof body === 'string' ? body : JSON.stringify(body)) });
 const predecessorName = 'inputs/predecessor-before.json', predecessorRoot = 'inputs/predecessor-before';
-function predecessorFixture(records, transform = () => {}) {
+const ancestorRoot = predecessorRoot + '/' + predecessorRoot;
+function predecessorFixture(records, transform = () => {}, recent = []) {
   for (const name of [...outputs.keys()]) if (name.startsWith('inputs/predecessor-before')
     || name.startsWith('snapshots/before/') || name.startsWith('snapshots/after/')) outputs.delete(name);
-  const files = [];
-  const original = (name, value, include = true) => {
-    const reference = { ...s.write(predecessorRoot + '/' + name, value), path: name };
-    if (include) files.push(reference);
+  const files = [], inheritedFiles = [];
+  const original = (root, list, name, value, include = true) => {
+    const reference = { ...s.write(root + '/' + name, value), path: name };
+    if (root === ancestorRoot) files.push({ ...reference, path: predecessorRoot + '/' + name });
+    if (include) list.push(reference);
     return reference;
   };
-  for (const record of records) {
+  const recordOriginals = (root, list, items) => { for (const record of items) {
     const label = record.label, method = record.method || 'POST', origin = record.origin || 'https://api.cloudflare.com';
     const path = record.path || '/accounts/[ACCOUNT]/d1/database/' + c.resources.protected.db + '/query';
-    const request = method === 'POST' ? original(label + '.request.json', Buffer.from(JSON.stringify({ sql: record.sql }))) : undefined;
+    const request = method === 'POST' ? original(root, list, label + '.request.json', Buffer.from(JSON.stringify({ sql: record.sql }))) : undefined;
     const started = '2026-10-19T11:00:00Z', ended = '2026-10-19T11:00:01Z';
-    original(label + '-reservation.json', { method, origin, path, started, ...(request ? { request } : {}) });
+    original(root, list, label + '-reservation.json', { method, origin, path, started, ...(request ? { request } : {}) });
     const completed = record.completed !== false;
-    const body = original(label + (completed ? '.body' : '.partial.body'), record.body || {
+    const body = original(root, list, label + (completed ? '.body' : '.partial.body'), record.body || {
       success: true, result: [{ success: true, meta: { rows_written: 0, changed_db: false }, results: record.rows || [] }],
     });
     const envelope = { method, path, started, ended, status: record.status || 200,
       response_headers: { 'content-type': 'application/json' }, completed, body,
       ...(request ? { request } : {}), ...(!completed ? { error_code: 23 } : {}), ...record.envelope };
-    original(label + '.http.json', envelope);
-  }
-  const previous = { status: 'FROZEN', contract_id: 'P4-4-v1', freeze_commit: '08afb97ddae316b3b305354f1582afdb836d7633' };
-  const contractRef = original('predecessor.contract.json', previous, false);
-  const matrixRef = original('predecessor.final-evidence-matrix.json', { contract_id: 'P4-4-v1',
+    original(root, list, label + '.http.json', envelope);
+  } };
+  recordOriginals(ancestorRoot, inheritedFiles, records);
+  recordOriginals(predecessorRoot, files, recent);
+  const ancestor = { status: 'FROZEN', contract_id: 'P4-4-v1', freeze_commit: '08afb97ddae316b3b305354f1582afdb836d7633' };
+  const ancestorContract = original(ancestorRoot, inheritedFiles, 'predecessor.contract.json', ancestor, false);
+  const ancestorMatrix = original(ancestorRoot, inheritedFiles, 'predecessor.final-evidence-matrix.json', {
+    contract_id: ancestor.contract_id, contract_sha256: ancestorContract.sha256, overall_result: 'EVIDENCE_GAP' }, false);
+  const inherited = original(predecessorRoot, files, predecessorName, { schema: 'p44-predecessor-before-v1',
+    source_evidence_root: predecessorRoot, source_commit: ancestor.freeze_commit,
+    source_bundle_commit: 'e5994fb28466e46c99a1f247494473e6cba9cc03', predecessor_contract_id: ancestor.contract_id,
+    predecessor_contract_sha256: ancestorContract.sha256, predecessor_contract: ancestorContract,
+    predecessor_final_matrix: ancestorMatrix, files: inheritedFiles });
+  const previous = { status: 'FROZEN', contract_id: 'P4-4-v2', freeze_commit: '70193ce7fb7cc4e426029d07cf7b50c1fcbfef1c',
+    external_inputs: [{ id: 'predecessor-before', evidence_path: 'evidence/' + predecessorName,
+      evidence_sha256: inherited.sha256, fingerprint: 'sha256:' + inherited.sha256 }] };
+  const contractRef = original(predecessorRoot, files, 'predecessor.contract.json', previous, false);
+  const matrixRef = original(predecessorRoot, files, 'predecessor.final-evidence-matrix.json', { contract_id: previous.contract_id,
     contract_sha256: contractRef.sha256, overall_result: 'EVIDENCE_GAP' }, false);
   const manifest = { schema: 'p44-predecessor-before-v1', source_evidence_root: predecessorRoot,
-    source_commit: previous.freeze_commit, source_bundle_commit: 'e5994fb28466e46c99a1f247494473e6cba9cc03',
-    predecessor_contract_id: 'P4-4-v1', predecessor_contract_sha256: contractRef.sha256,
-    predecessor_contract: contractRef, predecessor_final_matrix: matrixRef, files };
+    source_commit: previous.freeze_commit, source_bundle_commit: '84268ac2ad34727b76250ff944211b7efba1cfb3',
+    predecessor_contract_id: previous.contract_id, predecessor_contract_sha256: contractRef.sha256,
+    predecessor_contract: contractRef, predecessor_final_matrix: matrixRef, inherited_predecessor: inherited, files };
   transform(manifest);
   const manifestRef = s.write(predecessorName, manifest);
-  return { status: 'FROZEN', contract_id: 'P4-4-v2', external_inputs: [{ id: 'predecessor-before',
+  return { status: 'FROZEN', contract_id: 'P4-4-v3', external_inputs: [{ id: 'predecessor-before',
     evidence_path: 'evidence/' + predecessorName, evidence_sha256: manifestRef.sha256, fingerprint: 'sha256:' + manifestRef.sha256 }] };
 }
+function streamed(wire, headers, width = 113) {
+  const chunks = [];
+  for (let offset = 0; offset < wire.length; offset += width) chunks.push(wire.subarray(offset, offset + width));
+  return { statusCode: 200, headers, body: Readable.from(chunks) };
+}
+const decodedResponse = (wire, headers, decodeD1 = true, limit = c._test.httpMaxBytes, width) =>
+  c._test.responseBytes(streamed(wire, headers, width), decodeD1, limit, new AbortController().signal);
+async function strictTransport() {
+  const original = s.fs.readFileSync(s.path.join(s.root,
+    'docs/acceptance-contracts/P4-4-v2/evidence/snapshots/before/protected-channel_history-rows8-24.body'));
+  for (const bytes of [original, Buffer.from(JSON.stringify({ before_json: 'x'.repeat(2 * 1024 * 1024 + 17),
+    after_json: '\u4e2d\u6587-\u00e9-\ud83d\ude80' }))]) {
+    const wire = gzipSync(bytes), headers = { 'content-encoding': 'gzip', 'content-length': String(wire.length) };
+    const compressed = await decodedResponse(wire, headers, true, c._test.httpMaxBytes, 3);
+    const identity = await decodedResponse(bytes, { 'content-length': String(bytes.length) }, true, c._test.httpMaxBytes, 65536);
+    check('large streamed gzip preserves distinct wire and decoded bytes', () => {
+      assert(compressed.wireBytes.equals(wire)); assert(compressed.bytes.equals(bytes));
+      assert(identity.bytes.equals(bytes)); assert.deepEqual(compressed.headers, headers);
+      assert(compressed.decodedVerified); assert.notEqual(s.sha256(compressed.wireBytes), s.sha256(compressed.bytes));
+    });
+  }
+  const bytes = Buffer.from('{"ok":true}'), wire = gzipSync(bytes);
+  const crc = Buffer.from(wire); crc[crc.length - 8] ^= 1;
+  const isize = Buffer.from(wire); isize[isize.length - 4] ^= 1;
+  for (const [name, input, encoding] of [
+    ['truncated-header', wire.subarray(0, 5), 'gzip'], ['truncated-trailer', wire.subarray(0, -1), 'gzip'],
+    ['bad-crc', crc, 'gzip'], ['bad-size', isize, 'gzip'], ['not-gzip', bytes, 'gzip'],
+    ['unsupported', wire, 'br'], ['compound', wire, 'gzip, deflate'], ['empty-encoding', wire, ''],
+  ]) {
+    const source = streamed(input, { 'content-encoding': encoding }, 3);
+    await assert.rejects(c._test.responseBytes(source, true, 1024, new AbortController().signal), error => {
+      assert(error.partial.bytes.equals(input)); assert.equal(error.partial.decodedVerified, false); return true;
+    }); checks++;
+    check(name + ' destroys source after failure', () => assert(source.body.destroyed));
+  }
+  await assert.rejects(decodedResponse(wire, { 'content-encoding': 'gzip', 'content-length': String(bytes.length) }),
+    { code: 'HTTP_WIRE_LENGTH' }); checks++;
+  await assert.rejects(decodedResponse(wire, { 'content-encoding': 'gzip', 'Content-Encoding': 'gzip' }),
+    { code: 'HTTP_ENCODING_UNSUPPORTED' }); checks++;
+  const trailerSource = streamed(wire.subarray(0, -1), { 'content-encoding': 'gzip' });
+  await assert.rejects(c._test.responseBytes(trailerSource, true, 1024, new AbortController().signal), error => {
+    assert.deepEqual(JSON.parse(error.partial.decodedBytes), { ok: true });
+    assert.equal(error.partial.decodedVerified, false); return true;
+  }); checks++;
+  await assert.rejects(decodedResponse(Buffer.alloc(1025, 1), {}, true, 1024), error => {
+    assert.equal(error.code, 'HTTP_WIRE_SIZE_LIMIT'); assert.equal(error.partial.bytes.length, 1024); return true;
+  }); checks++;
+  await assert.rejects(decodedResponse(gzipSync(Buffer.alloc(4096, 1)), { 'content-encoding': 'gzip' }, true, 1024), error => {
+    assert.equal(error.code, 'HTTP_DECODED_SIZE_LIMIT'); assert.equal(error.partial.decodedBytes.length, 1024); return true;
+  }); checks++;
+  await assert.rejects(decodedResponse(wire, {}, true, c._test.httpMaxBytes + 1)); checks++;
+  const s3 = await decodedResponse(wire, { 'content-encoding': 'gzip' }, false);
+  check('S3 stored content encoding does not transform object bytes', () => assert(s3.bytes.equals(wire)));
+
+  const originalTimeout = AbortSignal.timeout, requestedDeadlines = [];
+  const controller = new AbortController(); let timer, requests = 0, closes = 0, source, requestSignal;
+  AbortSignal.timeout = milliseconds => {
+    requestedDeadlines.push(milliseconds); timer = setTimeout(() => controller.abort(), 30); return controller.signal;
+  };
+  c._test.setTransport(undefined);
+  c._test.setHttp({ ProxyAgent: class {
+    constructor(options) { assert.equal(options.requestTls.rejectUnauthorized, true); assert.equal(options.allowH2, false); }
+    async destroy() { closes++; }
+  }, request: async (_url, options) => {
+    requests++; requestSignal = options.signal;
+    assert.equal(options.maxRedirections, 0); assert.equal(options.headersTimeout, 30000); assert.equal(options.bodyTimeout, 30000);
+    source = new Readable({ read() {} }); source.push(wire.subarray(0, 5));
+    return { statusCode: 200, headers: { 'content-encoding': 'gzip' }, body: source };
+  } });
+  try {
+    await assert.rejects(c._test.transport('https://offline.invalid/query', 'POST', { 'accept-encoding': 'gzip' }, bytes),
+      { code: 'ABORT_ERR' }); checks++;
+    check('one absolute deadline covers request and stalled decoding without retry', () => {
+      assert.deepEqual(requestedDeadlines, [60000]); assert.equal(requestSignal, controller.signal);
+      assert.equal(requests, 1); assert.equal(closes, 1); assert(source.destroyed);
+    });
+  } finally { clearTimeout(timer); AbortSignal.timeout = originalTimeout; c._test.setHttp(undefined); }
+
+  const d1Route = '/accounts/[ACCOUNT]/d1/database/' + c.resources.staging.db + '/query';
+  const secretBytes = Buffer.from(JSON.stringify({ accidentally_leaked: fixtureValue })), secretWire = gzipSync(secretBytes);
+  check('sensitive fixture is visible only after decompression', () => assert(!secretWire.includes(Buffer.from(fixtureValue))));
+  c._test.setTransport(async () => decodedResponse(secretWire, { 'content-encoding': 'gzip' }));
+  await assert.rejects(c._test.capture('gzip-secret', 'https://api.cloudflare.com', d1Route,
+    { method: 'POST', body: { sql: 'SELECT COUNT(*) AS count FROM "apps"' } })); checks++;
+  check('decoded-only secret retains wire privately, never publicly', () => {
+    assert(privateOutputs.get('gzip-secret').equals(secretWire));
+    assert(!outputs.has('gzip-secret.body')); assert(!outputs.has('gzip-secret.decoded.body'));
+    assert(!outputs.has('gzip-secret.partial.body')); assert.equal(s.read('gzip-secret.http.json').completed, false);
+    assert(!outputs.get('gzip-secret.http.json').includes(Buffer.from(fixtureValue)));
+  });
+  c._test.setTransport(async () => decodedResponse(wire.subarray(0, -1), { 'content-encoding': 'gzip' }));
+  await assert.rejects(c._test.capture('gzip-truncated', 'https://api.cloudflare.com', d1Route,
+    { method: 'POST', body: { sql: 'SELECT COUNT(*) AS count FROM "apps"' } })); checks++;
+  check('truncated gzip is private despite complete decoded JSON prefix', () => {
+    assert(privateOutputs.get('gzip-truncated').equals(wire.subarray(0, -1)));
+    assert(!outputs.has('gzip-truncated.partial.body')); assert(!s.read('gzip-truncated.http.json').body);
+  });
+
+  const tables = {};
+  for (const [name, rows] of Object.entries(currentTables)) {
+    c._test.setTransport(async (_url, method, headers) => {
+      assert.equal(method, 'POST'); assert.equal(headers['accept-encoding'], 'gzip');
+      const payload = Buffer.from(JSON.stringify({ success: true, result: [{ success: true,
+        meta: { rows_written: 0, changed_db: false }, results: rows }] }));
+      const compressed = gzipSync(payload);
+      return decodedResponse(compressed, { 'content-encoding': 'gzip', 'content-length': String(compressed.length) });
+    });
+    tables[name] = { pages: await c._test.tablePages('snapshots/before', 'staging', name, rows.length) };
+  }
+  check('actual gzip tablePages output reaches staging admission', () => c._test.stagingSnapshotAdmission(tables));
+  const page = tables.firmware_releases.pages[0], originalDecoded = page.decoded_body;
+  check('D1 request negotiation and separate original representations are bound', () => {
+    assert.equal(page.request_headers['accept-encoding'], 'gzip'); assert(page.body.path.endsWith('.body'));
+    assert(page.decoded_body.path.endsWith('.decoded.body')); assert.notEqual(page.body.sha256, page.decoded_body.sha256);
+  });
+  page.decoded_body = s.write('wrong-decoded-fixture.body', Buffer.from('{}'));
+  check('staging admission rejects valid-hash decoded substitution', () =>
+    assert.throws(() => c._test.stagingSnapshotAdmission(tables), /HTTP_DECODED_MISMATCH/));
+  page.decoded_body = originalDecoded;
+}
 async function main() {
+  await strictTransport();
   let requests = 0;
   c._test.setTransport(async (url, method, headers, body) => {
     requests++; assert.equal(method, 'POST'); assert(outputs.has('dispatch-reservation.json'));
@@ -312,18 +459,18 @@ async function main() {
   const noNetwork = async () => { network++; throw Error('UNEXPECTED_NETWORK'); };
   c._test.setTransport(noNetwork);
   let fixture = predecessorFixture([{ label: oldLabel, sql: oldSql, rows: rows(500) }]);
-  const savedEnvelope = Buffer.from(outputs.get(predecessorRoot + '/' + oldLabel + '.http.json'));
+  const savedEnvelope = Buffer.from(outputs.get(ancestorRoot + '/' + oldLabel + '.http.json'));
   const priorPages = await c._test.withBeforePredecessor(predecessorName, fixture,
     () => c._test.tablePages('snapshots/before', 'protected', 'channel_history', 500));
   check('complete old 500 page uses zero network requests', () => assert.equal(network, 0));
   check('old page reference relocated without changing original envelope', () => {
-    assert.equal(priorPages[0].body.path, predecessorRoot + '/' + oldLabel + '.body');
-    assert(outputs.get(predecessorRoot + '/' + oldLabel + '.http.json').equals(savedEnvelope));
+    assert.equal(priorPages[0].body.path, ancestorRoot + '/' + oldLabel + '.body');
+    assert(outputs.get(ancestorRoot + '/' + oldLabel + '.http.json').equals(savedEnvelope));
     assert.equal(priorPages[0].started, '2026-10-19T11:00:00Z');
     assert.equal(priorPages[0].predecessor_origin.source_bundle_commit, 'e5994fb28466e46c99a1f247494473e6cba9cc03');
   });
   fixture = predecessorFixture([{ label: oldLabel, sql: oldSql, rows: rows(17), completed: false }]);
-  const failed = Buffer.from(outputs.get(predecessorRoot + '/' + oldLabel + '.http.json'));
+  const failed = Buffer.from(outputs.get(ancestorRoot + '/' + oldLabel + '.http.json'));
   const offsets = [];
   c._test.setTransport(async (_url, method, _headers, body) => {
     network++; assert.equal(method, 'POST');
@@ -334,7 +481,7 @@ async function main() {
   const small = await c._test.withBeforePredecessor(predecessorName, fixture,
     () => c._test.tablePages('snapshots/before', 'protected', 'channel_history', 17));
   check('incomplete large page replaced by exactly three small requests', () => assert.deepEqual(offsets, [0, 8, 16]));
-  check('failed large original stays incomplete byte-for-byte', () => assert(outputs.get(predecessorRoot + '/' + oldLabel + '.http.json').equals(failed)));
+  check('failed large original stays incomplete byte-for-byte', () => assert(outputs.get(ancestorRoot + '/' + oldLabel + '.http.json').equals(failed)));
   check('fresh small labels cannot alias failed large label', () => {
     assert.deepEqual(small.map(page => page.body.path), [0, 8, 16].map(offset => 'snapshots/before/protected-channel_history-rows8-' + offset + '.body'));
     assert(!outputs.has(oldLabel + '.http.json'));
@@ -365,7 +512,7 @@ async function main() {
   }
   check('binding errors never fall back to a network request', () => assert.equal(network, 0));
   fixture = predecessorFixture([{ label: oldLabel, sql: oldSql, rows: rows(500) }]);
-  outputs.set(predecessorRoot + '/' + oldLabel + '.body', Buffer.from('{}'));
+  outputs.set(ancestorRoot + '/' + oldLabel + '.body', Buffer.from('{}'));
   check('tampered predecessor bytes rejected', () => assert.throws(() => c._test.loadBeforePredecessor(predecessorName, fixture)));
   fixture = predecessorFixture([{ label: oldLabel, sql: oldSql, rows: rows(500) }], value => { value.source_bundle_commit = 'b'.repeat(40); });
   check('wrong predecessor bundle identity rejected', () => assert.throws(() => c._test.loadBeforePredecessor(predecessorName, fixture)));
@@ -404,11 +551,44 @@ async function main() {
     assert(!outputs.has('snapshots/before/protected-channel_history-rows8-8-reservation.json'));
   });
 
-  // V2 recognizes the approved C1 descriptor without recreating its branch rule.
+  const recentPages = [0, 8, 16, 24, 32].map(offset => ({
+    label: 'snapshots/before/protected-channel_history-rows8-' + offset,
+    sql: 'SELECT * FROM "channel_history" ORDER BY rowid LIMIT 8 OFFSET ' + offset,
+    rows: rows(65).slice(offset, offset + 8), completed: offset !== 32,
+  }));
+  fixture = predecessorFixture([{ label: oldLabel, sql: oldSql, rows: rows(65), completed: false }], () => {}, recentPages);
+  const retained = new Map([...outputs].filter(([name]) => name.startsWith(predecessorRoot + '/'))
+    .map(([name, bytes]) => [name, Buffer.from(bytes)]));
+  offsets.length = 0; network = 0;
+  c._test.setTransport(async (_url, method, headers, body) => {
+    network++; assert.equal(method, 'POST'); assert.equal(headers['accept-encoding'], 'gzip');
+    const match = JSON.parse(body).sql.match(/LIMIT 8 OFFSET ([0-9]+)$/); assert(match);
+    const offset = Number(match[1]); offsets.push(offset);
+    const payload = Buffer.from(JSON.stringify({ success: true, result: [{ success: true,
+      meta: { rows_written: 0, changed_db: false }, results: rows(65).slice(offset, offset + 8) }] }));
+    return decodedResponse(gzipSync(payload), { 'content-encoding': 'gzip' });
+  });
+  const recovered = await c._test.withBeforePredecessor(predecessorName, fixture,
+    () => c._test.tablePages('snapshots/before', 'protected', 'channel_history', 65));
+  check('V3 resumes first missing V2 page, never replays four complete pages', () => assert.deepEqual(offsets, [32, 40, 48, 56, 64]));
+  check('two-layer originals and both failures remain unchanged', () => {
+    for (const [name, bytes] of retained) assert(outputs.get(name).equals(bytes));
+    assert.equal(recovered[0].predecessor_origin.contract_id, 'P4-4-v2');
+    assert.deepEqual(recovered.flatMap(page => c._test.d1Document(page).result[0].results), rows(65));
+  });
+  for (const transform of [value => { delete value.inherited_predecessor; },
+    value => { value.inherited_predecessor.sha256 = '0'.repeat(64); },
+    value => { value.predecessor_contract_id = 'P4-4-v1'; },
+    value => { value.source_commit = approvedV1.commitSha; }]) {
+    fixture = predecessorFixture([{ label: oldLabel, sql: oldSql, rows: rows(1) }], transform);
+    check('missing or skipped V2/V1 lineage is rejected', () => assert.throws(() => c._test.loadBeforePredecessor(predecessorName, fixture)));
+  }
+
+  // V3 recognizes only the approved C2 descriptor, not the superseded C1 pair.
   s.cp.spawnSync = spawnSync;
   for (const name of [...outputs.keys()]) if (name.startsWith('configure') || name === 'configured.json') outputs.delete(name);
-  const stagingValues = { OTA_PREVIOUS_RELEASE_JSON: c.canonical(approvedV1.descriptor),
-    OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256: approvedV1.descriptorSha256 };
+  const stagingValues = { OTA_PREVIOUS_RELEASE_JSON: c.canonical(approvedPrevious.descriptor),
+    OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256: approvedPrevious.descriptorSha256 };
   const patches = []; let branchPosts = 0;
   c._test.setTransport(async (url, method, _headers, body) => {
     const endpoint = new URL(url).pathname, production = endpoint.includes('firmware-production');
@@ -427,21 +607,22 @@ async function main() {
     if (endpoint.endsWith('/environments/firmware-' + (production ? 'production' : 'rehearsal'))) return response({
       deployment_branch_policy: { protected_branches: false, custom_branch_policies: true }, protection_rules: [{ type: 'required_reviewers',
         prevent_self_review: production, reviewers: [{ type: 'User', reviewer: { login: 'Eitan-S-23', id: 204050265 } }] }] });
-    throw Error('UNKNOWN_V2_CONFIGURATION_ROUTE');
+    throw Error('UNKNOWN_V3_CONFIGURATION_ROUTE');
   });
   await c._test.configure(); checks++;
-  check('C1 to C2 changes only descriptor and hash', () => assert.deepEqual(patches.sort(), ['OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256', 'OTA_PREVIOUS_RELEASE_JSON']));
-  check('C1 to C2 never recreates existing branch rule', () => assert.equal(branchPosts, 0));
+  check('C2 to C3 changes only descriptor and hash', () => assert.deepEqual(patches.sort(), ['OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256', 'OTA_PREVIOUS_RELEASE_JSON']));
+  check('C2 to C3 never recreates existing branch rule', () => assert.equal(branchPosts, 0));
   const resetConfiguration = () => {
     for (const name of [...outputs.keys()]) if (name.startsWith('configure') || name === 'configured.json') outputs.delete(name);
     patches.length = 0; branchPosts = 0;
   };
   resetConfiguration();
   await c._test.configure(); checks++;
-  check('complete C2 pair is zero mutation no-op', () => assert.equal(patches.length + branchPosts, 0));
+  check('complete C3 pair is zero mutation no-op', () => assert.equal(patches.length + branchPosts, 0));
   for (const pair of [
-    { OTA_PREVIOUS_RELEASE_JSON: c.canonical(approvedV1.descriptor), OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256: target.descriptorSha256 },
-    { OTA_PREVIOUS_RELEASE_JSON: c.canonical(target.descriptor), OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256: approvedV1.descriptorSha256 },
+    { OTA_PREVIOUS_RELEASE_JSON: c.canonical(approvedPrevious.descriptor), OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256: target.descriptorSha256 },
+    { OTA_PREVIOUS_RELEASE_JSON: c.canonical(target.descriptor), OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256: approvedPrevious.descriptorSha256 },
+    { OTA_PREVIOUS_RELEASE_JSON: c.canonical(approvedV1.descriptor), OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256: approvedV1.descriptorSha256 },
     { OTA_PREVIOUS_RELEASE_JSON: c.canonical(approvedP41.descriptor), OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256: approvedP41.descriptorSha256 },
   ]) {
     resetConfiguration(); Object.assign(stagingValues, pair);
@@ -462,27 +643,32 @@ async function realPredecessor() {
   }
   const makeAnchor = value => {
     const bytes = Buffer.from(JSON.stringify(value)); outputs.set(predecessorName, bytes);
-    return { status: 'FROZEN', contract_id: 'P4-4-v2', external_inputs: [{ id: 'predecessor-before',
+    return { status: 'FROZEN', contract_id: 'P4-4-v3', external_inputs: [{ id: 'predecessor-before',
       evidence_path: 'evidence/' + predecessorName, evidence_sha256: s.sha256(bytes), fingerprint: 'sha256:' + s.sha256(bytes) }] };
   };
-  assert(/[A-F]/.test(packet.manifest.predecessor_contract_sha256));
   const previousMatrix = JSON.parse(outputs.get(predecessorRoot + '/' + packet.manifest.predecessor_final_matrix.path));
-  assert(/[A-F]/.test(previousMatrix.contract_sha256));
+  const inheritedManifest = JSON.parse(outputs.get(predecessorRoot + '/' + packet.manifest.inherited_predecessor.path));
+  const inheritedMatrix = JSON.parse(outputs.get(ancestorRoot + '/' + inheritedManifest.predecessor_final_matrix.path));
+  assert(/[A-F]/.test(inheritedManifest.predecessor_contract_sha256));
+  assert(/[A-F]/.test(inheritedMatrix.contract_sha256));
   let requests = 0, complete = 0, incomplete = 0;
   c._test.setTransport(async () => { requests++; throw Error('REAL_FIXTURE_MUST_BE_OFFLINE'); });
   await c._test.withBeforePredecessor(predecessorName, makeAnchor(packet.manifest), async () => {
-    for (const file of packet.manifest.files.filter(item => item.path.endsWith('.http.json'))) {
-      const label = file.path.slice(0, -'.http.json'.length), envelope = JSON.parse(outputs.get(predecessorRoot + '/' + file.path));
-      const reservation = JSON.parse(outputs.get(predecessorRoot + '/' + label + '-reservation.json'));
-      const body = envelope.request ? JSON.parse(outputs.get(predecessorRoot + '/' + envelope.request.path)) : undefined;
-      const restored = c._test.predecessorCapture(label, reservation.origin, envelope.path, { method: envelope.method, body });
-      if (envelope.completed) {
-        assert(restored && restored.bytes.equals(outputs.get(predecessorRoot + '/' + envelope.body.path)));
-        assert.equal(restored.envelope.started, envelope.started); assert.equal(restored.envelope.ended, envelope.ended); complete++;
-      } else { assert.equal(restored, null); incomplete++; }
+    for (const [root, manifest] of [[predecessorRoot, packet.manifest], [ancestorRoot, inheritedManifest]]) {
+      for (const file of manifest.files.filter(item => item.path.startsWith('snapshots/before/') && item.path.endsWith('.http.json'))) {
+        const label = file.path.slice(0, -'.http.json'.length), envelope = JSON.parse(outputs.get(root + '/' + file.path));
+        const reservation = JSON.parse(outputs.get(root + '/' + label + '-reservation.json'));
+        const body = envelope.request ? JSON.parse(outputs.get(root + '/' + envelope.request.path)) : undefined;
+        const restored = c._test.predecessorCapture(label, reservation.origin, envelope.path, { method: envelope.method, body });
+        if (envelope.completed) {
+          assert(restored && restored.bytes.equals(outputs.get(root + '/' + envelope.body.path)));
+          assert.equal(restored.envelope.started, envelope.started); assert.equal(restored.envelope.ended, envelope.ended);
+          assert.equal(restored.envelope.predecessor_origin.contract_id, manifest.predecessor_contract_id); complete++;
+        } else { assert.equal(restored, null); incomplete++; }
+      }
     }
   });
-  assert.equal(complete, 31); assert.equal(incomplete, 1); assert.equal(requests, 0);
+  assert.equal(complete, 35); assert.equal(incomplete, 2); assert.equal(requests, 0);
   const wrong = structuredClone(packet.manifest); wrong.predecessor_contract_sha256 = 'F'.repeat(64);
   assert.throws(() => c._test.loadBeforePredecessor(predecessorName, makeAnchor(wrong)), /PREDECESSOR_CONTRACT_HASH/);
   wrong.predecessor_contract_sha256 = 'G'.repeat(64);
@@ -504,4 +690,5 @@ async function realPredecessor() {
 (process.argv[2] === '--predecessor-stdin' ? realPredecessor() : main()).catch(error => { console.error(JSON.stringify({ ok: false, assertions: checks, error_code: error.code || 'OFFLINE_TEST_FAILED' })); process.exitCode = 1; })
   .finally(() => { Object.assign(s, saved); c._test.setContext(undefined); c._test.setTransport(undefined);
     s.fs.existsSync = exists; s.cp.spawnSync = spawnSync;
+    c._test.setHttp(undefined); c._test.setPrivateCapture(undefined);
     c._test.setFrozen(undefined); c._test.setSleep(undefined); });

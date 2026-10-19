@@ -228,6 +228,9 @@ terminal update. Copies of pre-run snapshots cannot stand in for after-state.
 
 ## V2 Before-Snapshot Recovery
 
+This section describes the sealed V2 attempt. The current runner uses the V3
+successor below; it does not rewrite V1/V2 sources, matrices or originals.
+
 V1 retained a 60-second truncated response to a LIMIT 500 query: 65
 channel_history rows would have been 9631314 bytes. V2 does not repeat that
 large request or extend the 60-second/16-MiB transport bounds. All new row
@@ -275,6 +278,84 @@ existing P4-4 branch rule is required; configuration only updates the
 descriptor/hash variables and never recreates that branch rule. Historical
 contract/matrix digests are validated as 64 hexadecimal characters before
 case-insensitive comparison; their original uppercase bytes remain unchanged.
+
+## V3 Strict Gzip And Two-Round Recovery
+
+V2 retained four complete eight-row channel-history pages and an incomplete
+HTTP 200 at offset 32. That page declared 4746278 wire bytes; its retained
+1441765-byte prefix did not even contain one complete row. LIMIT 1 is therefore
+not a justified remedy. V3 keeps LIMIT 8 and the same 60-second deadline and
+separate 16-MiB wire/decoded bounds. No new SQL, retry controller or wider
+permission is introduced.
+
+Only fixed D1 POST reads send `Accept-Encoding: gzip`. Installed Undici
+`request` retains the original encoded body. Standard Node `pipeline` and
+`createGunzip` use the same absolute AbortSignal as the HTTP request, with
+default strict trailer/CRC validation. Unsupported or compound content codings,
+truncation, CRC/size errors, wire-length mismatches and either size overflow
+fail closed. An identity response remains subject to the existing bounds; it
+does not trigger a retry. S3 object readbacks are never HTTP-decoded by this
+adapter, including objects carrying Content-Encoding metadata.
+
+Successful gzip D1 records use these two distinct File references:
+
+```text
+body: LABEL.body                 original HTTP content-coded wire bytes
+decoded_body: LABEL.decoded.body derived decoded representation
+response_headers:               original wire headers, including Content-Length
+request_headers:                {"accept-encoding":"gzip"}
+```
+
+Each representation has its own length and SHA-256. Content-Length describes
+the wire body, never the decoded sidecar. Both the wire and decoded bytes are
+checked for known sensitive values before either public file is written.
+The capture-side staging admission rereads both references, strictly decodes
+the wire and compares the sidecar; it does not parse `body` as plain JSON.
+The offline `decode_d1_wire(wire, headers)` oracle uses a standard in-memory
+GzipFile bounded read, not unbounded `gzip.decompress` or a `flush(length)`
+allocation assumption. `Context.response` recomputes and compares gzip D1
+sidecars before any D1/state interpretation. Non-D1 responses keep their raw
+semantics and cannot substitute a decoded sidecar.
+
+An encoded failure is never written as a public partial body, even when its
+decoded prefix happens to be valid JSON. Its original wire prefix is retained
+exclusively beneath the already-approved, user-only-ACL directory:
+
+```text
+.cache/p44/private/capture-failures/P4-4-v3/LABEL.wire.body
+```
+
+The public incomplete envelope contains only safe headers, fixed error code,
+hash/length and `private_wire` location metadata. That location is relative to
+the worktree, not a public bundle File input. It is not read or exported by
+offline acceptance. Private destinations are checked before the request and
+exclusive-created after the failure; tests inject an in-memory sink so they
+never populate formal private capture names.
+
+V3's predecessor manifest still uses `p44-predecessor-before-v1` and
+`source_evidence_root: inputs/predecessor-before`. Its direct source is
+C2 `70193ce7fb7cc4e426029d07cf7b50c1fcbfef1c`, bundle
+B2 `84268ac2ad34727b76250ff944211b7efba1cfb3`, and the actual P4-4-v2 final
+matrix. Its required `inherited_predecessor` File points to
+`inputs/predecessor-before.json` relative to that source root: the unchanged
+V2-era manifest of C1/B1 originals. The associated `inputs/predecessor-before/`
+subtree is copied byte-for-byte. The loader admits exactly these two pinned
+generations, verifies both frozen external anchors and all File references,
+and preserves both failed responses. It cannot skip V2, recurse further or
+turn a failed newer observation into an older successful one.
+
+The before collector consumes 35 complete originals: V1's 31 and V2's four
+new pages. It resumes the first missing logical page at offset 32 using the
+changed gzip transport; no successful page, upload or rehearsal is replayed.
+After-state remains new observation under its existing plan. The real B2
+`bundle.predecessor_plan()` integration test checks 35 complete plus two
+incomplete observations, original hashes/timestamps and zero network requests.
+
+Configuration now accepts only the intact approved C2 descriptor/hash pair
+or the intact C3 target pair. C2-to-C3 changes only those two variables; C3 is
+a zero-PATCH no-op. Mixed pairs, superseded C1/P4-1 pairs and missing existing
+branch rules fail before mutations. Gates, reviewer identity, business routes
+and production/device restrictions remain unchanged.
 
 ## Frozen Runner Paths
 

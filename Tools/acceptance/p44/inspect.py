@@ -5,8 +5,10 @@ from __future__ import annotations
 import argparse
 import collections
 from datetime import datetime, timedelta, timezone
+import gzip
 import hashlib
 import importlib.util
+import io
 import json
 import os
 from pathlib import Path
@@ -16,6 +18,7 @@ import sys
 from urllib.parse import parse_qs, quote, urlsplit
 import xml.etree.ElementTree as ET
 import zipfile
+import zlib
 
 sys.dont_write_bytecode = True
 
@@ -49,6 +52,7 @@ RECOVERY_OWNER = "Tools/jlink/prepare-bootstrap-app.py"
 HASH = re.compile(r"[0-9a-f]{64}\Z")
 UUID = re.compile(r"[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\Z")
 MAX_FILE_BYTES = 256 * 1024 * 1024
+MAX_HTTP_BYTES = 16 * 1024 * 1024
 
 
 class EvidenceError(ValueError):
@@ -99,6 +103,30 @@ def timestamp(value):
         raise EvidenceError("INVALID_TIMESTAMP") from None
     require(parsed.tzinfo is not None, "INVALID_TIMESTAMP")
     return parsed.astimezone(timezone.utc)
+
+
+def decode_d1_wire(wire, headers):
+    """Recompute a D1 representation from its bounded, original HTTP body."""
+    require(isinstance(wire, bytes) and len(wire) <= MAX_HTTP_BYTES, "HTTP_WIRE_SIZE_LIMIT")
+    require(isinstance(headers, dict) and all(isinstance(k, str) and isinstance(v, str)
+                                            for k, v in headers.items()), "INVALID_HTTP_HEADERS")
+    normalized = {name.lower(): value for name, value in headers.items()}
+    require(len(normalized) == len(headers), "DUPLICATE_HTTP_HEADER")
+    encoding = normalized.get("content-encoding", "identity").strip().lower()
+    require(encoding in ("identity", "gzip"), "HTTP_ENCODING_UNSUPPORTED")
+    length = normalized.get("content-length")
+    require(length is None or length == str(len(wire)), "HTTP_WIRE_LENGTH")
+    if encoding == "identity":
+        return wire
+    require(wire.startswith(b"\x1f\x8b"), "HTTP_GZIP_INVALID")
+    try:
+        # GzipFile checks CRC/EOF and limits each underlying decompress call.
+        with gzip.GzipFile(fileobj=io.BytesIO(wire), mode="rb") as stream:
+            decoded = stream.read(MAX_HTTP_BYTES + 1)
+    except (OSError, EOFError, zlib.error):
+        raise EvidenceError("HTTP_GZIP_INVALID") from None
+    require(len(decoded) <= MAX_HTTP_BYTES, "HTTP_DECODED_SIZE_LIMIT")
+    return decoded
 
 
 def guarded_path(root, value, base=None):
@@ -166,7 +194,24 @@ class Context:
         require(len({name.lower() for name in headers}) == len(headers), "DUPLICATE_HTTP_HEADER")
         require(not ({name.lower() for name in headers} & {"authorization", "set-cookie", "cookie"}),
                 "SENSITIVE_HTTP_HEADER")
-        return self.read(record["body"])
+        d1 = method == "POST" and path in {
+            "/accounts/[ACCOUNT]/d1/database/" + database + "/query" for database, _ in RESOURCES.values()}
+        if d1:
+            require(isinstance(record.get("body"), dict) and integer(record["body"].get("size_bytes"))
+                    and record["body"]["size_bytes"] <= MAX_HTTP_BYTES, "HTTP_WIRE_SIZE_LIMIT")
+        wire = self.read(record["body"])
+        if not d1:
+            require("decoded_body" not in record, "HTTP_UNEXPECTED_DECODED")
+            return wire
+        decoded = decode_d1_wire(wire, headers)
+        if header(record, "content-encoding") is not None and header(record, "content-encoding").strip().lower() == "gzip":
+            reference = record.get("decoded_body")
+            require(isinstance(reference, dict) and integer(reference.get("size_bytes"))
+                    and reference["size_bytes"] <= MAX_HTTP_BYTES, "HTTP_DECODED_REFERENCE")
+            require(self.read(reference) == decoded, "HTTP_DECODED_MISMATCH")
+        else:
+            require("decoded_body" not in record, "HTTP_UNEXPECTED_DECODED")
+        return decoded
 
 
 def header(record, name):

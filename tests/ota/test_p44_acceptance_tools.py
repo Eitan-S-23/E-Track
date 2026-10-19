@@ -3,6 +3,7 @@
 import argparse
 import copy
 from datetime import datetime, timezone
+import gzip
 import importlib.util
 import io
 import json
@@ -638,7 +639,7 @@ class P44ToolsTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         observed = json.loads(result.stdout)
         self.assertEqual(observed["source"], "bundle.predecessor_plan")
-        self.assertEqual((observed["complete_old_reads"], observed["incomplete_old_reads"]), (31, 1))
+        self.assertEqual((observed["complete_old_reads"], observed["incomplete_old_reads"]), (35, 2))
         self.assertTrue(observed["uppercase_originals_accepted"] and observed["wrong_digest_rejected"]
                         and observed["wrong_matrix_digest_rejected"])
         self.assertEqual(observed["network_requests"], 0)
@@ -688,6 +689,93 @@ class P44ToolsTests(unittest.TestCase):
             with self.subTest(completed=value):
                 record["completed"] = value
                 self.assert_bad("HTTP_TRANSPORT_INCOMPLETE", lambda: self.ctx.response(record, "GET", route))
+
+    def gzip_http(self, record):
+        decoded = self.ctx.read(record["body"])
+        wire = gzip.compress(decoded, mtime=0)
+        record.update(body=self.save(wire), decoded_body=self.save(decoded), completed=True,
+                      request_headers={"accept-encoding": "gzip"})
+        record["response_headers"].update({"content-encoding": "gzip", "content-length": str(len(wire))})
+        return record
+
+    def test_d1_gzip_recomputes_real_large_page_and_separate_hashes(self):
+        original = ROOT / "docs/acceptance-contracts/P4-4-v2/evidence/snapshots/before/protected-channel_history-rows8-24.body"
+        decoded = original.read_bytes()
+        path = "/accounts/[ACCOUNT]/d1/database/" + p44.RESOURCES["protected"][0] + "/query"
+        record = self.gzip_http(self.http(decoded, path, method="POST"))
+        self.assertEqual(self.ctx.response(record, "POST", path), decoded)
+        self.assertNotEqual(record["body"]["sha256"], record["decoded_body"]["sha256"])
+        self.assertEqual(record["response_headers"]["content-length"], str(record["body"]["size_bytes"]))
+
+    def test_d1_gzip_single_large_row_remains_byte_exact(self):
+        rows = [{"before_json": "x" * (2 * 1024 * 1024 + 17), "after_json": "\u4e2d\u6587-\u00e9-\U0001f680"}]
+        query = 'SELECT * FROM "channel_history" ORDER BY rowid LIMIT 8 OFFSET 0'
+        record = self.gzip_http(self.d1(rows, query))
+        self.assertEqual(p44.d1_rows(self.ctx, record, p44.RESOURCES["staging"][0], query), rows)
+
+    def test_d1_gzip_rejects_truncation_crc_size_and_garbage(self):
+        wire = gzip.compress(b'{"ok":true}', mtime=0)
+        crc, size = bytearray(wire), bytearray(wire)
+        crc[-8] ^= 1
+        size[-4] ^= 1
+        for damaged in (b"", wire[:5], wire[:-1], bytes(crc), bytes(size), b"not-gzip", wire + b"garbage"):
+            with self.subTest(length=len(damaged)):
+                self.assert_bad("HTTP_GZIP_INVALID", lambda: p44.decode_d1_wire(damaged, {"content-encoding": "gzip"}))
+
+    def test_d1_gzip_missing_trailer_cannot_use_valid_json_sidecar(self):
+        record = self.gzip_http(self.d1([], p44.SCHEMA_SQL))
+        wire = self.ctx.read(record["body"])[:-1]
+        record["body"] = self.save(wire)
+        record["response_headers"]["content-length"] = str(len(wire))
+        self.assert_bad("HTTP_GZIP_INVALID", lambda: self.ctx.response(record, "POST", record["path"]))
+
+    def test_d1_gzip_valid_hash_decoded_substitution_is_rejected(self):
+        record = self.gzip_http(self.d1([], p44.SCHEMA_SQL))
+        record["decoded_body"] = self.save(b"{}")
+        self.assert_bad("HTTP_DECODED_MISMATCH", lambda: self.ctx.response(record, "POST", record["path"]))
+
+    def test_d1_gzip_requires_decoded_reference_and_original_wire_length(self):
+        record = self.gzip_http(self.d1([], p44.SCHEMA_SQL))
+        del record["decoded_body"]
+        self.assert_bad("HTTP_DECODED_REFERENCE", lambda: self.ctx.response(record, "POST", record["path"]))
+        record["response_headers"]["content-length"] = "0"
+        self.assert_bad("HTTP_WIRE_LENGTH", lambda: self.ctx.response(record, "POST", record["path"]))
+
+    def test_d1_gzip_rejects_unknown_compound_and_ambiguous_headers(self):
+        for encoding in ("br", "gzip, deflate", "gzip, gzip", ""):
+            with self.subTest(encoding=encoding):
+                self.assert_bad("HTTP_ENCODING_UNSUPPORTED",
+                                lambda: p44.decode_d1_wire(b"", {"content-encoding": encoding}))
+        self.assert_bad("DUPLICATE_HTTP_HEADER", lambda: p44.decode_d1_wire(
+            b"", {"content-encoding": "gzip", "Content-Encoding": "gzip"}))
+
+    def test_d1_wire_and_decoded_have_independent_16_mib_bounds(self):
+        self.assertEqual(p44.MAX_HTTP_BYTES, 16 * 1024 * 1024)
+        excessive = b"x" * (p44.MAX_HTTP_BYTES + 1)
+        self.assert_bad("HTTP_WIRE_SIZE_LIMIT", lambda: p44.decode_d1_wire(excessive, {}))
+        wire = gzip.compress(excessive, mtime=0)
+        self.assertLess(len(wire), p44.MAX_HTTP_BYTES)
+        self.assert_bad("HTTP_DECODED_SIZE_LIMIT", lambda: p44.decode_d1_wire(wire, {"content-encoding": "gzip"}))
+
+    def test_d1_oversize_file_reference_is_refused_before_read(self):
+        record = self.d1([], p44.SCHEMA_SQL)
+        record["body"]["size_bytes"] = p44.MAX_HTTP_BYTES + 1
+        with mock.patch.object(self.ctx, "read", side_effect=AssertionError("UNBOUNDED_READ")):
+            self.assert_bad("HTTP_WIRE_SIZE_LIMIT", lambda: self.ctx.response(record, "POST", record["path"]))
+
+    def test_identity_d1_and_s3_do_not_accept_decoded_substitution(self):
+        record = self.d1([], p44.SCHEMA_SQL)
+        record["decoded_body"] = self.save(b"{}")
+        self.assert_bad("HTTP_UNEXPECTED_DECODED", lambda: self.ctx.response(record, "POST", record["path"]))
+        wire = gzip.compress(b"original-object-bytes", mtime=0)
+        record = self.http(wire, "/bucket/key", headers={"content-encoding": "gzip"})
+        self.assertEqual(self.ctx.response(record, "GET", record["path"]), wire)
+        record["decoded_body"] = self.save(b"original-object-bytes")
+        self.assert_bad("HTTP_UNEXPECTED_DECODED", lambda: self.ctx.response(record, "GET", record["path"]))
+
+    def test_standard_gzip_members_and_case_normalization(self):
+        wire = gzip.compress(b'{"ok":', mtime=0) + gzip.compress(b'true}', mtime=0)
+        self.assertEqual(p44.decode_d1_wire(wire, {"Content-Encoding": " GZIP "}), b'{"ok":true}')
 
     def test_approval_rejects_interrupted_valid_review_response(self):
         manifest = self.manifest()
@@ -807,6 +895,18 @@ class P44ToolsTests(unittest.TestCase):
 
     def test_complete_states_raw_capture_success(self):
         manifest = self.complete_states()
+        result = p44.states(self.ctx, manifest, self.target)
+        self.assertEqual(result["independent_r2_byte_readbacks"], 3)
+
+    def test_complete_states_d1_gzip_and_s3_raw_success(self):
+        manifest = self.complete_states()
+        for snapshot in manifest["snapshots"].values():
+            for database in snapshot["databases"].values():
+                self.gzip_http(database["schema"])
+                for table in database["tables"].values():
+                    self.gzip_http(table["count"])
+                    for page in table["pages"]:
+                        self.gzip_http(page)
         result = p44.states(self.ctx, manifest, self.target)
         self.assertEqual(result["independent_r2_byte_readbacks"], 3)
 
