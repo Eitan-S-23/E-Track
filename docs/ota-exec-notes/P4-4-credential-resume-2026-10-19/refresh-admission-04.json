@@ -1,0 +1,375 @@
+{
+  "startedAt": "2026-10-19T04:35:01.069Z",
+  "kind": "READ_ONLY_ADMISSION_REFRESH",
+  "formalAcceptance": "NOT_RUN",
+  "requests": [
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/environments/firmware-production",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-19T04:35:02.079Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-refresh-admission-04\\01.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-refresh-admission-04\\01.headers",
+      "endedAt": "2026-10-19T04:35:04.450Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 200,
+      "bytes": 1661,
+      "sha256": "2a5e615177b0aaa517bebaf7f51c1b183b53d0b24b159aa395f69a48e38f48b5",
+      "stderr": "",
+      "requestId": "5AEB:1A74C:7E78C2:19EEFEE:6AD59DF7"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/environments/firmware-production/secrets",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-19T04:35:05.654Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-refresh-admission-04\\02.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-refresh-admission-04\\02.headers",
+      "endedAt": "2026-10-19T04:35:07.214Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 200,
+      "bytes": 439,
+      "sha256": "297d1adae3f86622a5438ba6de12959c4a6f3154f8f9217910d0ab011b1e0a35",
+      "stderr": "",
+      "requestId": "EC17:3BFD3:74C680:17F6794:6AD59DFA"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/environments/firmware-production/variables",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-19T04:35:08.320Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-refresh-admission-04\\03.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-refresh-admission-04\\03.headers",
+      "endedAt": "2026-10-19T04:35:10.201Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 200,
+      "bytes": 854,
+      "sha256": "3b864ec847fd20fa67836e662addaa975f48378e2f5c2563181c76c9ed760548",
+      "stderr": "",
+      "requestId": "3E11:E19D7:86EBB5:1BC2A02:6AD59DFD"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/environments/firmware-production/deployment-branch-policies",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-19T04:35:11.243Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-refresh-admission-04\\04.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-refresh-admission-04\\04.headers",
+      "endedAt": "2026-10-19T04:35:14.066Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 200,
+      "bytes": 136,
+      "sha256": "da1f8f67f9fa1ec6dd6efd7135d5daa5cc5e747535fead87a5e75e215400d3a0",
+      "stderr": "",
+      "requestId": "9FA1:1D041A:7E78CE:19ECB26:6AD59E00"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-19T04:35:15.105Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-refresh-admission-04\\05.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-refresh-admission-04\\05.headers",
+      "endedAt": "2026-10-19T04:35:17.536Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 200,
+      "bytes": 1659,
+      "sha256": "389b239fd13aea1bb302c7518caa3cd13b331df93d53450465f5989e9fab16a1",
+      "stderr": "",
+      "requestId": "3F57:17CAF5:82A70D:1AD17D7:6AD59E04"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/secrets",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-19T04:35:18.575Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-refresh-admission-04\\06.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-refresh-admission-04\\06.headers",
+      "endedAt": "2026-10-19T04:35:20.043Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 200,
+      "bytes": 638,
+      "sha256": "52bafd611b54e3598f032fba5603b1b4a441d3907aa677a528be12811d5aa78b",
+      "stderr": "",
+      "requestId": "6679:766CA:5110786:106E8AFE:6AD59E07"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/variables",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-19T04:35:21.076Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-refresh-admission-04\\07.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-refresh-admission-04\\07.headers",
+      "endedAt": "2026-10-19T04:35:22.620Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 200,
+      "bytes": 2520,
+      "sha256": "fb40827bf62ed8525657951258cd82ff2bfca51a8887d2ee6b4281b3543bf5cf",
+      "stderr": "",
+      "requestId": "D40F:12464C:64987DF:1471C15A:6AD59E0A"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/deployment-branch-policies",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-19T04:35:23.675Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-refresh-admission-04\\08.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-refresh-admission-04\\08.headers",
+      "endedAt": "2026-10-19T04:35:26.221Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 200,
+      "bytes": 160,
+      "sha256": "d8658cd9c160a2a9dc49d2025f5e6a54f1c777c4866e9b732d91aea9b5b93c13",
+      "stderr": "",
+      "requestId": "7161:1EFDC5:5111C03:1077427C:6AD59E0D"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/actions/variables/OTA_BOOT_CHAIN_READY",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-19T04:35:27.265Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-refresh-admission-04\\09.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-refresh-admission-04\\09.headers",
+      "endedAt": "2026-10-19T04:35:28.697Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 200,
+      "bytes": 119,
+      "sha256": "e2602c11ef14c5dc58477e0fd4c70c556358ec082d57d26e330a1122b27d801e",
+      "stderr": "",
+      "requestId": "7197:1CF023:4B262C7:F4B0531:6AD59E10"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/git/ref/heads/main",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-19T04:35:29.749Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-refresh-admission-04\\10.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-refresh-admission-04\\10.headers",
+      "endedAt": "2026-10-19T04:35:30.504Z",
+      "exitCode": 35,
+      "signal": null,
+      "status": 0,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "curl: (35) schannel: failed to receive handshake, SSL/TLS connection failed\r\n"
+    }
+  ],
+  "environments": {
+    "firmware-production": {
+      "id": 24631238191,
+      "updatedAt": "2026-10-18T12:37:40Z",
+      "canAdminsBypass": true,
+      "protectionRules": [
+        {
+          "type": "required_reviewers",
+          "preventSelfReview": true,
+          "reviewers": [
+            {
+              "type": "User",
+              "login": "Eitan-S-23",
+              "id": 204050265
+            }
+          ]
+        },
+        {
+          "type": "branch_policy"
+        }
+      ],
+      "branchPolicy": {
+        "protected_branches": false,
+        "custom_branch_policies": true
+      },
+      "branchRules": [
+        {
+          "id": 63466803,
+          "node_id": "MDE2OkdhdGVCcmFuY2hQb2xpY3k2MzQ2NjgwMw==",
+          "name": "main",
+          "type": "branch"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "CLOUDFLARE_ACCOUNT_ID",
+          "updatedAt": "2026-10-18T15:50:24Z"
+        },
+        {
+          "name": "OTA_AES_KEY",
+          "updatedAt": "2026-10-18T15:50:34Z"
+        },
+        {
+          "name": "TRACE_DEPLOY_TOKEN",
+          "updatedAt": "2026-10-18T15:50:32Z"
+        },
+        {
+          "name": "TRACE_UPDATE_SERVICE_URL",
+          "updatedAt": "2026-10-18T15:50:29Z"
+        }
+      ],
+      "variables": [
+        {
+          "name": "OTA_BOOT_CHAIN_READY",
+          "updatedAt": "2026-10-18T12:37:46Z",
+          "value": "false"
+        },
+        {
+          "name": "TRACE_D1_DATABASE_ID",
+          "updatedAt": "2026-10-18T15:50:42Z"
+        },
+        {
+          "name": "TRACE_D1_DATABASE_NAME",
+          "updatedAt": "2026-10-18T15:50:39Z"
+        },
+        {
+          "name": "TRACE_FIRMWARE_MIN_APP_VERSION_CODE",
+          "updatedAt": "2026-10-18T15:50:45Z"
+        },
+        {
+          "name": "TRACE_FIRMWARE_MIN_PROTOCOL_VERSION",
+          "updatedAt": "2026-10-18T15:50:47Z"
+        },
+        {
+          "name": "TRACE_R2_BUCKET",
+          "updatedAt": "2026-10-18T15:50:38Z",
+          "value": "e-track-firmware-production-releases"
+        }
+      ],
+      "requiredS3Secrets": [
+        "TRACE_R2_ACCESS_KEY_ID",
+        "TRACE_R2_SECRET_ACCESS_KEY"
+      ],
+      "missingS3Secrets": [
+        "TRACE_R2_ACCESS_KEY_ID",
+        "TRACE_R2_SECRET_ACCESS_KEY"
+      ]
+    },
+    "firmware-rehearsal": {
+      "id": 24458272742,
+      "updatedAt": "2026-10-16T04:24:26Z",
+      "canAdminsBypass": true,
+      "protectionRules": [
+        {
+          "type": "required_reviewers",
+          "preventSelfReview": false,
+          "reviewers": [
+            {
+              "type": "User",
+              "login": "Eitan-S-23",
+              "id": 204050265
+            }
+          ]
+        },
+        {
+          "type": "branch_policy"
+        }
+      ],
+      "branchPolicy": {
+        "protected_branches": false,
+        "custom_branch_policies": true
+      },
+      "branchRules": [
+        {
+          "id": 63231554,
+          "node_id": "MDE2OkdhdGVCcmFuY2hQb2xpY3k2MzIzMTU1NA==",
+          "name": "dev/p4-1/unattended-20261015",
+          "type": "branch"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "FIRMWARE_REHEARSAL_CLOUDFLARE_ACCOUNT_ID",
+          "updatedAt": "2026-10-16T06:11:25Z"
+        },
+        {
+          "name": "FIRMWARE_REHEARSAL_CLOUDFLARE_API_TOKEN",
+          "updatedAt": "2026-10-16T06:11:27Z"
+        },
+        {
+          "name": "FIRMWARE_REHEARSAL_OTA_AES_KEY",
+          "updatedAt": "2026-10-16T04:24:34Z"
+        },
+        {
+          "name": "FIRMWARE_REHEARSAL_TRACE_DEPLOY_TOKEN",
+          "updatedAt": "2026-10-16T06:54:34Z"
+        },
+        {
+          "name": "FIRMWARE_REHEARSAL_TRACE_UPDATE_SERVICE_URL",
+          "updatedAt": "2026-10-16T06:11:31Z"
+        }
+      ],
+      "variables": [
+        {
+          "name": "FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT",
+          "updatedAt": "2026-10-16T06:11:22Z"
+        },
+        {
+          "name": "FIRMWARE_REHEARSAL_TRACE_D1_DATABASE_ID",
+          "updatedAt": "2026-10-16T06:11:21Z"
+        },
+        {
+          "name": "FIRMWARE_REHEARSAL_TRACE_D1_DATABASE_NAME",
+          "updatedAt": "2026-10-16T04:24:30Z"
+        },
+        {
+          "name": "FIRMWARE_REHEARSAL_TRACE_R2_BUCKET",
+          "updatedAt": "2026-10-16T04:24:29Z",
+          "value": "e-track-firmware-p41-test-releases"
+        },
+        {
+          "name": "OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256",
+          "updatedAt": "2026-10-16T17:56:25Z"
+        },
+        {
+          "name": "OTA_BOOT_CHAIN_READY",
+          "updatedAt": "2026-10-16T04:24:28Z",
+          "value": "false"
+        },
+        {
+          "name": "OTA_PREVIOUS_RELEASE_JSON",
+          "updatedAt": "2026-10-16T17:56:24Z"
+        },
+        {
+          "name": "TRACE_FIRMWARE_MIN_APP_VERSION_CODE",
+          "updatedAt": "2026-10-16T11:00:49Z"
+        },
+        {
+          "name": "TRACE_FIRMWARE_MIN_PROTOCOL_VERSION",
+          "updatedAt": "2026-10-16T11:00:50Z"
+        }
+      ],
+      "requiredS3Secrets": [
+        "FIRMWARE_REHEARSAL_TRACE_R2_ACCESS_KEY_ID",
+        "FIRMWARE_REHEARSAL_TRACE_R2_SECRET_ACCESS_KEY"
+      ],
+      "missingS3Secrets": [
+        "FIRMWARE_REHEARSAL_TRACE_R2_ACCESS_KEY_ID",
+        "FIRMWARE_REHEARSAL_TRACE_R2_SECRET_ACCESS_KEY"
+      ]
+    }
+  },
+  "repositoryGate": {
+    "name": "OTA_BOOT_CHAIN_READY",
+    "value": "false",
+    "updatedAt": "2026-10-18T12:37:50Z"
+  },
+  "error": "Curl transport failed; retain output and reconcile without write retry",
+  "endedAt": "2026-10-19T04:35:30.510Z"
+}

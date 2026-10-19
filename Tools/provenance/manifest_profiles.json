@@ -261,6 +261,13 @@
         "docs/acceptance-contracts/P4-3-v1/tools/bundle.cjs"
       ]
     },
+    "P44Capture": {
+      "category": "validation_inputs",
+      "root_patterns": [],
+      "top_files": ["Tools/acceptance/p44/run.cjs", "Tools/acceptance/p44/capture.cjs"],
+      "exclude_prefixes": [],
+      "required_paths": ["Tools/acceptance/p44/run.cjs", "Tools/acceptance/p44/capture.cjs"]
+    },
     "Evidence": {
       "category": "validation_inputs",
       "root_patterns": ["Tools/acceptance/"],

@@ -1,0 +1,22 @@
+HTTP/1.1 200 Connection established
+
+HTTP/1.1 403 Forbidden
+Date: Mon, 19 Oct 2026 04:40:55 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+Connection: keep-alive
+set-cookie: [REDACTED_COOKIE]
+set-cookie: [REDACTED_COOKIE]
+CF-Ray: a4cd1b82fd05afb7-NRT
+CF-Cache-Status: DYNAMIC
+Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+api-version: 2026-10-01.epoch
+Expires: Sun, 25 Jan 1981 05:00:00 GMT
+Server: cloudflare
+cf-auditlog-id: 01a15276-6de6-7384-929b-888b4fd841aa
+Strict-Transport-Security: max-age=31536000
+Vary: Accept-Encoding
+Pragma: no-cache
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+

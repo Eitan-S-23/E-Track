@@ -2,10 +2,13 @@
 
 Current disposition: P44-REVIEW-01 and P44-REVIEW-02 are RESOLVED on b56534d;
 independent successor review is 10/10 and both source-bound development CIs pass.
-Both target Workers now contain the verified new module. P44-CREDENTIAL-01 is
-ENV_BLOCKED by actual token-create 403 responses. Formal P4-4 acceptance remains
-NOT_RUN, not PASS. The historical sections below retain the original findings
-and preparation failures; see the closing section for current actions.
+Both target Workers now contain the verified new module. P44-CREDENTIAL-01's
+missing-pair/configuration blocker is RESOLVED by the later agent handoff and
+root's independent 15-GET / 28-assertion readback. The successful provisioning
+source differs from the previously denied local token; it is not evidence that
+the old token's 403 became 200. Formal P4-4 acceptance remains NOT_RUN, not PASS.
+Historical failures remain below; see Independent Credential Handoff below for
+the current source, protection, lifecycle and evidence limits.
 
 ## Historical Initial Review: Source And Scope
 
@@ -530,3 +533,293 @@ debugging code. Only GIT_NO_DEBUG_CHECK is scoped to the evidence commit after
 the explicit byte/secret checks; conflict and secret hooks stay active. Explicit
 commit-message input avoids the global AI-message hook, and the contained
 runner disables webhook notifications. No global hook/configuration is edited.
+
+## Owner Permission Update: Fresh Verification
+
+P44-CREDENTIAL-01 remains an external credential blocker, not a new product
+finding or a request to choose the interface again. The owner reported that
+permissions had been updated. Root therefore tested the current protected
+local provisioning input instead of reusing the historical rejection as proof
+of the new state. The new entry is P4-4-credential-resume-2026-10-19/; its inventory
+binds originals and explicit public projections. Existing archives are unchanged.
+
+- verify-permissions-02.json and -03.json confirm the local token is active.
+  User/account permission catalogs and self-metadata GETs return 403/9109.
+  These reads do not prove creation failure or reveal the current policy/name.
+- The existing CI account permission catalog also returns 403/9109. There is no
+  evidence that the added management permission reached e-track-ci, but this
+  single denied endpoint is not a complete audit of its grants.
+- refresh-admission-04.json preserves nine successful GitHub reads: the four
+  S3 names remain absent, all three gates are false, reviewer/branch settings
+  are unchanged. Its tenth main-ref GET failed at TLS; this is a partial refresh,
+  not ten successful reads, not a main change and not an authorization denial.
+- After a pre-POST reservation and a verified current-user-only private output
+  ACL, root made one new production account-token POST. The policy requested
+  exactly e-track-firmware-production-releases and the documented Object Read
+  and Write group, with 90-day expiry. It returned a definite 403/9109, no token
+  ID or value, at 2026-10-19T04:41:00.445Z (request a4cd1b9f4ac38685-NRT).
+  The 124-byte denial is retained byte-exact as account-create-denial.json.
+- No pair was created or written to GitHub. No staging create, user-token
+  fallback, scope expansion or retry of the denied POST followed. The first
+  local permission probe and the later transport interruption are retained,
+  not converted to successful permission checks.
+
+The next owner input is the name and redacted Permissions / Account Resources
+view of the token actually edited. Root cannot infer whether the cause is the
+selected token, account scope, underlying membership/grants, or a newly issued
+value that has not replaced the existing protected input. Do not ask the owner
+to send the token value in chat. If the owner created/rolled a replacement, its
+value must reach the already protected local input before another permitted
+state-change check. The source currently consumed is project-relative
+.cache/p41-dev-20261015/.cache/cf-auth-input/token.txt, never the CI token file.
+
+### Consolidated Remaining Formal Plan
+
+The read-only p44_acceptance_plan child reviewed the complete remaining scope
+on 231932f. It found no new evidenced product repair. Root retains the following
+single plan rather than discovering these preparation gaps one at a time:
+
+1. Obtain and verify both bucket pairs; complete scope/lifetime/name/type and
+   false-gate/reviewer/branch readbacks without a production object write.
+2. Independently review the actual new staging candidate and bootstrap target,
+   then commit the bounded runner and freeze P4-4-v1 with a NOT_RUN precheck.
+   3.2.9 remains a proposal, not an approved candidate or an artificial version
+   used only to satisfy qualification. Cached helpers are not formal runners.
+3. Plan two new workflow dispatches on the same reviewed inputs: run A waits
+   for Eitan-S-23 to actually Reject; after A terminates, new run B starts at
+   attempt=1 and that reviewer actually Approves the sole new-chain staging
+   observation. Do not rerun A: attempt>1 requires an artifact absent after
+   rejection. The old campaign's P4-1 proxy-approval code must not be reused.
+4. Do not add a third check_bindings run by default. Its two metadata variables
+   are explicitly not ordinary rehearsal/production prerequisites. If an actual
+   safety need justifies that extra run, bind canonical 3.2.8 raw JSON separately
+   from the historical 2.8.1 storage fixture and count its run/reviewer action.
+5. Reuse the original offline byte evaluator with absolute artifact/target paths;
+   add only new-protocol/preflight, real-reviewer and current-production snapshot
+   checks. Before/after snapshots include production D1/schema/channel, complete
+   R2 listings, GitHub Releases/assets, and the protected old Trace resources.
+   The pipeline's existing register/replay is one shared observation, not a
+   reason to repeat a successful workflow.
+6. Evaluate existing CI/remediation/deployment originals without rerunning them;
+   finish the matrix, terminal validator, immutable bundle and later freeze-index
+   entry only after all required observations. Preserve dependency debt, warning
+   occurrences, P44-DEPLOY-01 and external-cache attribution limits. Production
+   promotion bindings must use exact successful artifact hashes, never a summary.
+
+No candidate/branch variable, formal runner, frozen contract, approval, business request,
+release or device operation was executed by this plan review. Formal rounds stay
+zero and gate remains false. Actual reviewer clicks still require the existing
+reviewer; the owner need not grant generic delegation again.
+
+### Continuation Checks And Write Audit
+
+The three affected record/readiness/S3 contract regressions passed (3 tests,
+0.068 seconds); original output and exit 0 are in
+.cache/p44/logs/root-permission-record-check-01.{log,json}. git diff --check also
+passed, retaining the existing LF-to-CRLF warnings. No full product suite or CI
+was repeated. The read-only child independently reconciled this record batch
+and all 36 original/published file hashes: 32 byte-exact, four declared
+projections, 83894 bytes; no additional fact correction was required.
+
+.cache/p44-root-acceptance-20261019/permission-write-audit-01.json (project-root
+relative) inspected 100 selected paths, verified all 36 archive/source pairs,
+confirmed the unchanged root shared index and unchanged product/frozen inputs.
+Only the three task records, new task-local evidence and contained preparation
+outputs were selected for writing. This continuation has no commit/push or main
+integration; its records/evidence are local modifications on the existing task
+branch, whose published baseline remains 231932f. The present audit note was
+appended afterward on its separately rechecked existing task-record path.
+
+The audit is not a machine-wide trace. These external files had timestamps
+inside this continuation's selected-write window; their contents were not read
+and the timestamp alone does not establish the writer or whether a file is new:
+
+| Exact external path | Bytes | Observed UTC mtime |
+| --- | --- | --- |
+| C:/Users/SU/AppData/Local/Microsoft/Windows/PowerShell/StartupProfileData-NonInteractive | 1004 | 2026-10-19T04:40:22.379Z |
+| C:/Users/SU/AppData/LocalLow/Microsoft/CryptnetUrlCache/Content/5F1978C76A118CE692CF538FB0B323EA | 310 | 2026-10-19T04:41:18.925Z |
+| C:/Users/SU/AppData/LocalLow/Microsoft/CryptnetUrlCache/MetaData/1B1495DD322A24490E2BF2FAABAE1C61 | 192 | 2026-10-19T04:37:50.022Z |
+| C:/Users/SU/AppData/LocalLow/Microsoft/CryptnetUrlCache/MetaData/22D536C4B4AD2CEF7AC6B7789FD235E3 | 192 | 2026-10-19T04:37:47.334Z |
+| C:/Users/SU/AppData/LocalLow/Microsoft/CryptnetUrlCache/MetaData/5F1978C76A118CE692CF538FB0B323EA | 192 | 2026-10-19T04:41:18.926Z |
+| C:/Users/SU/AppData/LocalLow/Microsoft/CryptnetUrlCache/MetaData/77EC63BDA74BD0D0E0426DC8F8008506 | 330 | 2026-10-19T04:37:50.791Z |
+
+No PowerShell command or deliberate external-cache write was invoked by root
+or the child. The existing curl adapter uses Schannel, which is relevant to
+investigation, but no causal attribution is proved for these observations.
+Do not claim zero external writes. Preserve these files; do not move, overwrite
+or clean them without path-specific permission. Before further use of any
+route capable of such writes, establish containment or the applicable exact
+authorization; correlate host/process records before asserting a root cause.
+
+## Independent Credential Handoff
+
+Root and a read-only independent child reconciled the owner's later agent
+handoff rather than repeating its successful creates or S3 lists. The archive
+P4-4-credential-handoff-2026-10-19-v2/inventory.json binds eight supplied/readback
+files (four byte-exact, four declared sanitized projections; 268533 bytes).
+The original agent note came from the root worktree; this task-worktree note
+remains the canonical current record. Earlier histories were not overwritten.
+
+P44-CREDENTIAL-01 is DECIDED, configuration blocker resolved:
+
+- The actual provisioning source was the protected project input
+  app/bluetooth_flutter_Trace/cloudflare/update-service/.github-actions-secrets.staging.local.json,
+  not token.txt or p41-ci-token.txt. In-memory comparisons and current verify
+  metadata establish different values and a different management ID from the
+  previously denied local token, on the same approved account. Its management
+  ID SHA-256 is ec3e3b40801a2af2676d699686429cc49d1fea95afb328d8efb9ac519b31d666.
+  Later removal of temporary management authority must address this source,
+  not the old local token or e-track-ci. No management token was exported to CI.
+- The current account directory contains exactly the original Track and the
+  two new active tokens. Each new token has exactly one allow policy, one
+  account_default_bucket resource with value "*", exactly Bucket Item Read
+  and Bucket Item Write, and no conditions or Worker/D1/management grants.
+  Production and rehearsal keys differ; each matches its four protected
+  input files and its own approved bucket. Cloudflare's Item Write includes
+  delete capability; the application does not issue DELETE.
+- Both S3 names are present in firmware-production and both prefixed names in
+  firmware-rehearsal. Secret metadata proves presence, not the stored values;
+  the new-chain workflow must still prove actual consumption. Existing
+  reviewer settings and all three false gates are unchanged. Remote main was
+  0779f677507fa2c8a88c1799c8d2909bbae5a0a0 at the independent readback.
+- The claimed private ACL was initially inherited too broadly. Root removed
+  inheritance and retained only the current user's explicit access on the
+  private directory, its five files and the newly consumed source input.
+  credential-protection-01.json records all seven repairs and unchanged bytes.
+  This establishes an exposure window, not proof of another reader or a claim
+  of never being exposed. No automatic recreation/rotation was performed.
+- The supplied machine result records two creation HTTP 200 and two actual
+  SigV4 ListObjectsV2 HTTP 200. It lacks raw response bodies and historical gh
+  set/list receipts; no raw receipt for the reported initial 400 was supplied.
+  The earlier final-create-probe-01 403 is not that 400. Current readback closes
+  current scope/presence questions, not these historical capture gaps.
+- create_s3_02.py is retained as an executed, non-reentrant historical input.
+  Its incomplete scope assertion and deferred private save are disclosed; do
+  not rerun it. Root's fail-closed current checks determine the actual policy.
+  An initial offline archive attempt rejected an empty redaction sentinel
+  before writing; excluding empty sentinels fixed that archive-only failure.
+- Independent preparation review then found the original Track token ID was
+  still visible in the first projection and had entered a child's tool output.
+  No token value or S3 secret was printed. The v2 projection additionally masks
+  all token directory IDs, without masking permission-group IDs. The complete
+  first candidate projection (ten files including inventory/attributes) was
+  moved byte-exact to .cache/p44/credential-handoff-projection-01/ inside this
+  worktree, not committed or deleted. Original provisioning/readback inputs
+  remain unchanged; identifier redaction is not a reason to rotate credentials.
+
+### Lifecycle Decision Under Existing Owner Delegation
+
+Both provider metadata records have expires_on=null and not_before=null. The
+older proposed 90-day provider expiry was NOT applied. Root accepts these
+exact already-created pairs for the bounded configuration/rehearsal stage,
+not an indefinite unattended production grant. O1 / Eitan-S-23 retains secret
+ownership, with operator-enforced rotation/review no later than
+2027-01-17T07:40:38Z (production) and 2027-01-17T07:40:50Z (rehearsal).
+This is a recorded operating deadline, not a configured Cloudflare TTL or an
+automatic scheduled job. Before P5 production promotion, recheck active scope,
+age and ownership. No extra owner choice is needed for this bounded decision.
+
+Rotate one environment at a time: create a replacement with the same exact
+bucket/two-group policy, install both fields through the protected environment
+secret route, verify new scope and an authorized new run, then revoke the old
+token by its verified management identity. A changed pair invalidates affected
+runtime evidence; old success does not validate its replacement. Emergency
+revocation disables the identified token and leaves gate=false; preserve
+evidence and firmware objects. Do not use asset deletion, wider scope or old
+P4-1 proxy approval as recovery. Existing AES and deploy/HMAC lifecycle rules
+in the configuration matrix remain unchanged.
+
+### Minimal Formal Preparation
+
+No new formal observation has occurred. The independent evaluator and thin
+capture adapter are preparation work, using the existing byte evaluator,
+standard AWS SigV4 implementation and bounded HTTP transport. The old campaign
+has fixed P4-1 branch/version/history and a proxy-approval path; the old cloud
+collector omits production and uses Schannel with unresolved external-cache
+attribution. Therefore a small data-capture adapter is necessary, not a new
+release protocol. It must have no approval/rejection API or business-write
+interface, except the two explicitly planned shared-workflow dispatches.
+Offline mocks qualify the adapter before its source/profile commit and freeze.
+
+Root continues with the existing consolidated formal plan. Actual reviewer
+actions, new-chain upload/register/readback and unchanged-resource snapshots
+remain to be observed. Production publication, devices and gate unlocking are
+out of scope; P4-4 is IN_PROGRESS, not PASS.
+
+### Concentrated Formal Tooling Review
+
+This is one preparation/remediation batch, not another product review round or
+an independent P4-4 PASS. Root authored the thin capture/sealing adapter; the
+two bounded children authored the offline evaluators, and the credential
+reviewer independently checked deployment coverage and bundle dependencies.
+No P4-1/P4-2 product implementation changed in this batch.
+
+| ID | Finding and bounded disposition | Verification / owner |
+| --- | --- | --- |
+| P44-RUNNER-01 | Completed transport is mandatory even if an HTTP 200 partial body already parses; absent markers retain old-original compatibility, non-boolean markers fail. Fixed. | Offline evaluator 85/85; original stdout/result in selftest-03. |
+| P44-CAPTURE-01 | Separate mutation intent and HTTP reservation; persist partial response identity, redact known values in bodies/headers/requests, require actual pending state and real owner action before B. Fixed. | Capture mocks use installed standard SigV4; no cloud operation or filesystem fixture output. |
+| P44-CAPTURE-02 | Bind the exact staging registration and monotonic candidate, resolve an existing bare/annotated target tag, consume observed.metadata, capture full Actions logs, and reject already-complete recovery before GET. Fixed. | Capture 115 assertions; existing 3.2.8 JSON fixture plus baseline/legacy negatives and zero-request recovery guards. |
+| P44-BUNDLE-01 | Known-value scans alone miss a new Actions installation token. Added ghs_/other GitHub token shapes without claiming arbitrary-secret detection. | Five positive/negative privacy checks, including ghs_ fixture. |
+| P44-BUNDLE-02 | State interpretation consumes release identities; parser-fed readbacks must declare Evidence. Fixed minimal dependencies; raw A/B remains in exact P44Capture profile. | Schema/dependency negative passes; parser edits do not grant new dispatches. |
+| P44-BUNDLE-03 | Assess must not hash a still-growing log in its own evidence tree. Keep initial NOT_RUN and final matrices separate. | Execution constraint: assess/final-validator logs use the existing contained cache wrapper outside DATA. |
+| P44-BUNDLE-04 | Frozen timeout text must describe actual limits, not a shorter unimplemented bound. Fixed. | Undici 60 seconds, standard gh archive 180 seconds, wrapper 60 minutes. |
+| P44-BUNDLE-05 | Credential/CI evidence alone omitted the independently deployed module/version/binding originals. Fixed in this same batch. | Original evaluator 90/90, including 21 deployment cases; root-review inventory plus 16 selected originals retain failure history without repeated deployment. |
+| P44-BUNDLE-06 | Generated offline commands used relative --repo-root although originals CLI requires an absolute task root. Fixed before freeze. | All five generated offline commands bind the exact absolute ROOT; schema selftest passes. |
+| P44-TOOLS-INTERFACE-01 | The deployment inventory uses entries, unlike the two existing files inventories. Fixed the shared selection helper before any prepare copy. | Positive checks for both schemas and rejection of a missing selected original; preserve the inventory bytes. |
+
+The raw deployment subset preserves public and original digests separately:
+email/cookie projections must not be presented as byte-exact responses. The
+selected CI ZIP and both original multipart bodies, not reported module hashes
+alone, bind the accepted source. Historical configuration observations do not
+claim continuous state monitoring; formal before/after isolation is still due.
+
+The plan has 17 formal commands and nine criteria. Source and all new runners
+must be committed first. Preparation then binds reviewed 3.2.9 to that exact C,
+retaining the already-verified 3.2.7 bootstrap bytes; it does not substitute the
+current staging 3.2.8 registration as bootstrap. Only the exact rehearsal branch
+policy and descriptor/hash may change. All three gates, existing reviewers,
+production main-only policy and production prevent_self_review remain intact.
+
+Remote pre-delivery readback still reports task HEAD
+231932fdd554af1504c1465117d1470cf4a0dc22 and main
+0779f677507fa2c8a88c1799c8d2909bbae5a0a0. The task branch must not advance between
+the two same-input runs. A must reach waiting and be personally rejected by
+Eitan-S-23; only then may B be dispatched and personally approved. Root records
+the actual owner response or genuinely witnessed action, not just the API login.
+No extra check_bindings run, old proxy approval, production firmware publish,
+channel mutation, R2 object write outside rehearsal, or device action is granted.
+
+Development stdout/results and source hashes are sealed separately under
+P4-4-acceptance-preparation-2026-10-19/. Earlier successful checks and failures
+remain visible; only changed tools are retested. The original-evaluator's early
+BOM/multiline parsing failures exist in tool receipts 02e541 and 172087 and were
+not repaired by repeating the original CI. Existing compiler warnings and 11
+dependency advisories remain disclosed.
+
+Final development results are evaluator 85/85, original/deployment evaluator
+90/90, capture 115 assertions, three targeted board/profile/S3-contract checks,
+and the bundle schema/dependency/privacy/absolute-root/inventory checks (17
+commands, nine criteria). The final original-evaluator stdout is
+.cache/p44-original-tests-20261019/bundle05-originals-tests-02.log, SHA-256
+3fa15ce240a1ca282a2adf6ff57d722d15157a4ecbe5c05691819654ec2877ff.
+These are development observations, not the pending formal P4-4 results.
+
+Git delivery uses this exclusive task index only. The reviewed CLI console
+output needs the scoped GIT_NO_DEBUG_CHECK=1 hook exception; the secret check
+stays enabled, an explicit commit message avoids AI hook generation, and the
+contained environment disables webhook notifications. The shared root index
+SHA-256 before delivery is
+2907ee569cb8415877c8c688b3e09b5948a789d6430796eab99ae3ad43f3a3dd;
+it is not part of staging. Private inputs, the first identifier-leaking archive,
+and generated fixture trees remain untracked/ignored. No external cache cleanup
+is authorized; earlier PowerShell/Cryptnet attribution remains unresolved.
+
+P44-DELIVERY-01: the first staged-byte audit failed because Git had normalized
+CRLF in twelve credential-resume HTTP header files before that directory gained
+its byte-preserving attributes. The worktree originals were unchanged. Root
+added a directory-local `* -text` rule and reapplied the reviewed worktree bytes
+to this task's index with scoped `git add --renormalize`; no original was edited.
+The failed receipt remains `.cache/p44/logs/p44-index-bytes-01.json` and its log.
+Unscoped diff whitespace checking also flags original CRLF, empty HTTP header
+values and terminating blank lines in the archives. These bytes are retained,
+not reformatted; manual source/record whitespace checks are scoped separately.

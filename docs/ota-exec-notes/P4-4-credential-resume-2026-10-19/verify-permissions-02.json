@@ -1,0 +1,48 @@
+{
+  "startedAt": "2026-10-19T04:31:16.387Z",
+  "kind": "READ_ONLY_PERMISSION_REFRESH_AFTER_OWNER_UPDATE",
+  "formalAcceptance": "NOT_RUN",
+  "requests": [
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/user/tokens/verify",
+      "startedAt": "2026-10-19T04:31:16.394Z",
+      "status": 200,
+      "bytes": 184,
+      "sha256": "a7545ba668a31ec6a3b2b489f92e7342138d6454176206080539d18d8511f525",
+      "requestId": "a4cd0d874857005d-NRT",
+      "endedAt": "2026-10-19T04:31:23.172Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/tokens/permission_groups",
+      "startedAt": "2026-10-19T04:31:23.179Z",
+      "status": 403,
+      "bytes": 124,
+      "sha256": "bc484b5271bfb57d45898e53524ade34de83b5b97ebf37577b8c69f54eb16cbe",
+      "requestId": "a4cd0da98c8025ea-NRT",
+      "endedAt": "2026-10-19T04:31:28.158Z"
+    }
+  ],
+  "checks": {
+    "localTokenActive": {
+      "status": 200,
+      "success": true,
+      "errorCodes": [],
+      "tokenIdSha256": "0c22488a9bee1355603d8d61faca06fcacbdafccfed8a4ba7dc490af7cacdedc"
+    },
+    "localAccountPermissionCatalog": {
+      "status": 403,
+      "success": false,
+      "errorCodes": [
+        9109
+      ]
+    }
+  },
+  "writesRequested": 0,
+  "error": "Updated local account-token permission is not effective\n\n403 !== 200\n",
+  "disposition": "READ_CHECK_STOPPED_NO_MUTATION",
+  "endedAt": "2026-10-19T04:31:28.161Z"
+}

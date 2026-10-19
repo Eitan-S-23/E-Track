@@ -16,17 +16,38 @@ and historical token receipts remain valid for their scope, not production CI.
 
 Root completed the two-finding batch review, independently verified ten offline
 successor cases and the source-bound CI originals, and deployed the verified CI
-Worker module to both approved targets. All four required S3 secret names remain
+Worker module to both approved targets. Historically all four required S3 names were
 absent in the successful ten-GET refresh at 2026-10-19T00:58:42.120Z. Actual strict
 token creation through both account-owned and user-owned endpoints returned
 403/code 9109; this is a management-write denial, not the old catalog-GET inference.
-No token/key pair or GitHub secret was created. The required external input is
-still missing, and no formal P4-4 round has started.
+No token/key pair or GitHub secret was created in that historical batch.
+
+After the owner reported a permission update, root verified the protected local
+token as active and made one fresh account-token POST with the same exact
+production-bucket Object Read and Write scope. The response at
+2026-10-19T04:41:00.445Z was again 403/9109, with no ID/value returned. The current
+policy/name cannot be read, so the cause is not guessed. Both local and existing
+CI account catalog reads were denied; neither proves the full granted policy.
+The latest GitHub refresh retains nine successful environment/gate reads with
+four S3 secrets absent and all gates false; its main-ref GET failed at TLS.
+P4-4-credential-resume-2026-10-19/ preserves 36 selected files, 32 byte-exact and
+four declared projections (83894 bytes), including the actual POST denial.
+
+The later owner-agent handoff resolves the missing-pair blocker. Root's
+2026-10-19T08:08:31Z..08:09:13Z readback has 15 successful GETs and 28 assertions:
+two active exact single-bucket/two-Item-group policies, exactly three directory
+entries including the original Track, all four correct environment secret
+names, preserved reviewers and all three gates=false. Its actual source is
+the protected .github-actions-secrets.staging.local.json, a different value and
+management ID from the old token.txt; do not describe the old 403 as now 200.
+P4-4-credential-handoff-2026-10-19-v2/ retains originals and explicit projections,
+including the corrected masking of the old Track token ID.
+Formal observations remain NOT_RUN, not PASS.
 
 | Current consumer configuration | Platform / scope / type | This batch's state / next owner |
 | --- | --- | --- |
-| TRACE_R2_ACCESS_KEY_ID / TRACE_R2_SECRET_ACCESS_KEY | GitHub firmware-production secrets | Absent at the final refresh. O1 supplies an Object Read and Write pair limited to e-track-firmware-production-releases, directly in these secrets or through a protected project-local input, with redacted scope/source/lifetime evidence. |
-| FIRMWARE_REHEARSAL_TRACE_R2_ACCESS_KEY_ID / FIRMWARE_REHEARSAL_TRACE_R2_SECRET_ACCESS_KEY | GitHub firmware-rehearsal secrets | Absent at the final refresh. O1 supplies a distinct pair limited to e-track-firmware-p41-test-releases; no production/test pair reuse. |
+| TRACE_R2_ACCESS_KEY_ID / TRACE_R2_SECRET_ACCESS_KEY | GitHub firmware-production secrets | Both present, updated 07:41:55Z / 07:41:58Z. Active e-track-firmware-production-s3-ci-20261019 is limited to e-track-firmware-production-releases; current metadata and supplied private inputs verified. Production workflow consumption remains post-P5, not claimed here. |
+| FIRMWARE_REHEARSAL_TRACE_R2_ACCESS_KEY_ID / FIRMWARE_REHEARSAL_TRACE_R2_SECRET_ACCESS_KEY | GitHub firmware-rehearsal secrets | Both present, updated 07:42:00Z / 07:42:03Z. Distinct active e-track-firmware-rehearsal-s3-ci-20261019 is limited to e-track-firmware-p41-test-releases. Actual new-chain consumption remains the planned formal observation. |
 | CLOUDFLARE_ACCOUNT_ID and rehearsal-prefixed counterpart | Existing GitHub environment secrets | Still used to construct the S3 HTTPS endpoint; not control-plane authority. |
 | TRACE_UPDATE_SERVICE_URL / TRACE_DEPLOY_TOKEN and rehearsal-prefixed counterparts | Existing environment secrets | Also consumed by the fixed read-only preflight endpoint; original values not rotated or rewritten. |
 | CLOUDFLARE_API_TOKEN and TRACE_D1_DATABASE_ID/NAME | Historical platform entries | Not mapped by new workflow; nonempty legacy client configuration is rejected. No platform deletion or overwrite performed. |
@@ -43,12 +64,22 @@ P4-4-root-review-2026-10-19/ archive. Runtime module SHA-256 for both Workers is
 
 Object Read and Write includes DELETE capability at Cloudflare's policy
 granularity; the application never issues DELETE, but this is not hard put-only
-IAM. Do not widen to account-level control-plane permissions or export the
-provisioning token. Owner input can use the already protected project directory
+IAM. Do not grant account-level control-plane permissions to CI or export the
+local provisioning token. The owner's temporary local token-management grant
+does not enlarge the two bucket policies. Owner input can use the already protected project directory
 D:/github/my/E-Track/.cache/p44-root-acceptance-20261019/private/; never send
 plaintext in chat. The real reviewer Eitan-S-23 still owns the designated rejection
 and approval after root binds the candidate, runner, frozen plan and NOT_RUN
 precheck. The historical P4-1 delegation is not a P4-4 approval authority.
+No further generic credential-source choice is pending. Both provider expiries
+are null, not the older proposed 90-day TTL. Under the existing delegation root
+records operator-enforced rotation/review by 2027-01-17T07:40:38Z/07:40:50Z,
+owner Eitan-S-23, exact-bucket replacement and emergency revoke-by-verified-ID.
+The complete lifecycle and seven current-user-only ACL repairs are recorded in
+P4-4-s3-preacceptance-2026-10-19.md#independent-credential-handoff. A broad prior
+ACL is an exposure window, not proof of a reader; original bytes were preserved.
+The consolidated plan is one genuinely rejected run followed by a new approved
+attempt=1 run; an extra check_bindings run is not a default requirement.
 
 The following E1..E9 observations and old decision packets are historical, not
 current action requests. They must not resurrect CLOUDFLARE_API_TOKEN as a

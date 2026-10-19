@@ -1,0 +1,104 @@
+{
+  "startedAt": "2026-10-19T04:36:21.156Z",
+  "purpose": "Discriminate updated credential scopes without treating catalog denial as create failure",
+  "formalAcceptance": "NOT_RUN",
+  "requests": [
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/user/tokens/verify",
+      "startedAt": "2026-10-19T04:36:21.166Z",
+      "status": 200,
+      "bytes": 184,
+      "sha256": "a7545ba668a31ec6a3b2b489f92e7342138d6454176206080539d18d8511f525",
+      "requestId": "a4cd14db0e7aeb92-NRT",
+      "endedAt": "2026-10-19T04:36:26.109Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/user/tokens/permission_groups",
+      "startedAt": "2026-10-19T04:36:26.115Z",
+      "status": 403,
+      "bytes": 124,
+      "sha256": "bc484b5271bfb57d45898e53524ade34de83b5b97ebf37577b8c69f54eb16cbe",
+      "requestId": "a4cd14f919a5e39b-NRT",
+      "endedAt": "2026-10-19T04:36:27.550Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/tokens/permission_groups",
+      "startedAt": "2026-10-19T04:36:27.551Z",
+      "status": 403,
+      "bytes": 124,
+      "sha256": "bc484b5271bfb57d45898e53524ade34de83b5b97ebf37577b8c69f54eb16cbe",
+      "requestId": "a4cd1501f8a0b748-NRT",
+      "endedAt": "2026-10-19T04:36:28.918Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/user/tokens/[REDACTED]",
+      "startedAt": "2026-10-19T04:36:28.919Z",
+      "status": 403,
+      "bytes": 124,
+      "sha256": "bc484b5271bfb57d45898e53524ade34de83b5b97ebf37577b8c69f54eb16cbe",
+      "requestId": "a4cd1510b822293d-NRT",
+      "endedAt": "2026-10-19T04:36:31.332Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/user/tokens/verify",
+      "startedAt": "2026-10-19T04:36:31.333Z",
+      "errorClass": "UND_ERR_CONNECT_TIMEOUT",
+      "endedAt": "2026-10-19T04:36:41.824Z"
+    }
+  ],
+  "credentials": {
+    "provisioning": {
+      "verify": {
+        "status": 200,
+        "success": true,
+        "errors": [],
+        "active": true,
+        "idSha256": "0c22488a9bee1355603d8d61faca06fcacbdafccfed8a4ba7dc490af7cacdedc"
+      },
+      "userPermissionCatalog": {
+        "status": 403,
+        "success": false,
+        "errors": [
+          {
+            "code": 9109,
+            "message": "Unauthorized to access requested resource"
+          }
+        ]
+      },
+      "accountPermissionCatalog": {
+        "status": 403,
+        "success": false,
+        "errors": [
+          {
+            "code": 9109,
+            "message": "Unauthorized to access requested resource"
+          }
+        ]
+      },
+      "selfMetadata": {
+        "status": 403,
+        "success": false,
+        "errors": [
+          {
+            "code": 9109,
+            "message": "Unauthorized to access requested resource"
+          }
+        ]
+      }
+    },
+    "existingCi": {}
+  },
+  "mutations": 0,
+  "error": "Bounded HTTP operation failed; see the sanitized receipt",
+  "endedAt": "2026-10-19T04:36:41.826Z"
+}

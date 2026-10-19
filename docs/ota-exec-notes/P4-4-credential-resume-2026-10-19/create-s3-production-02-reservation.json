@@ -1,0 +1,86 @@
+{
+  "startedAt": "2026-10-19T04:40:46.249Z",
+  "role": "production",
+  "environmentName": "firmware-production",
+  "bucket": "e-track-firmware-production-releases",
+  "tokenName": "e-track-firmware-production-s3-ci-20261019",
+  "ownerStateChange": "Owner reports local Account API Tokens Edit updated; verify actual account POST, not catalog inference",
+  "formalAcceptance": "NOT_RUN",
+  "configuredToGitHub": false,
+  "created": "NOT_ATTEMPTED",
+  "requests": [
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/tokens/permission_groups",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-19T04:40:47.400Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-create-s3-production-02-precheck\\01.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-create-s3-production-02-precheck\\01.headers",
+      "endedAt": "2026-10-19T04:40:51.896Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 403,
+      "bytes": 124,
+      "sha256": "bc484b5271bfb57d45898e53524ade34de83b5b97ebf37577b8c69f54eb16cbe",
+      "stderr": "",
+      "requestId": "a4cd1b6cdd5b6836-NRT"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/tokens",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-19T04:40:52.943Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-create-s3-production-02-precheck\\02.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-create-s3-production-02-precheck\\02.headers",
+      "endedAt": "2026-10-19T04:40:57.383Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 403,
+      "bytes": 124,
+      "sha256": "bc484b5271bfb57d45898e53524ade34de83b5b97ebf37577b8c69f54eb16cbe",
+      "stderr": "",
+      "requestId": "a4cd1b82fd05afb7-NRT"
+    }
+  ],
+  "permissionGroup": {
+    "id": "2efd5506f9c8494dacb1fa10a3e7d5b6",
+    "name": "Workers R2 Storage Bucket Item Write"
+  },
+  "credentialSource": "Existing local provisioning credential, not e-track-ci",
+  "scope": "One exact bucket, Object Read and Write; includes DELETE capability at platform granularity, never used by this application",
+  "policyBasis": "Public documented single-bucket syntax and corroborated group ID; require service-resolved exact group and independent GET before consumption",
+  "automaticWriteRetry": false,
+  "route": "account-owned-only",
+  "privateOutput": {
+    "directory": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\private",
+    "currentUserOnly": true,
+    "rawResponse": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\private\\create-s3-production-02-response.json",
+    "privatePair": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\private\\create-s3-production-02-pair.json"
+  },
+  "existingCiManagementCatalog": {
+    "status": 403,
+    "success": false,
+    "errors": [
+      {
+        "code": 9109,
+        "message": "Unauthorized to access requested resource"
+      }
+    ]
+  },
+  "directoryCheck": {
+    "status": 403,
+    "success": false,
+    "errors": [
+      {
+        "code": 9109,
+        "message": "Unauthorized to access requested resource"
+      }
+    ]
+  },
+  "directoryLimit": "Read denied; no earlier ambiguous or successful create. One exact account POST follows reported permission change.",
+  "expiresOnRequested": "2027-01-17T04:40:57Z",
+  "status": "RESERVED_BEFORE_POST",
+  "permittedPosts": 1
+}
