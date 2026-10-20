@@ -1556,3 +1556,11 @@ labels the earlier no-rehearsal statement as its historical preparation stage;
 no frozen evidence or criterion changes. The failed original is retained at
 .cache/p44/logs/p44-v4-board-check-01.json. This document-only correction receives
 a targeted regression and incremental staged review, not another live campaign.
+
+V4 evidence was committed separately as B4
+da37711799a21c4eb2c5d082dab1a7b81d028511 on the task branch; its frozen source
+remains C4, not the bundle commit. The subsequent index records that exact
+freeze-to-bundle ancestry. The corrected P4-4 card and readiness tests passed
+2/2; the incremental staged review verified both document bytes, unchanged
+final matrix and shared-root index. The secret pre-commit hook stayed enabled.
+Source changes for after-only recovery start only after B4/index delivery.
