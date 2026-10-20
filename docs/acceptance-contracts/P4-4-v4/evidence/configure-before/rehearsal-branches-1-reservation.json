@@ -1,0 +1,7 @@
+{
+  "method": "GET",
+  "origin": "https://api.github.com",
+  "path": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/deployment-branch-policies?per_page=100&page=1",
+  "started": "2026-10-19T19:02:19.891Z",
+  "note": "Reserved before request; a lost response is not permission to replay a mutation."
+}

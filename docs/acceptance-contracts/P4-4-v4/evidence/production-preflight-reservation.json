@@ -1,0 +1,12 @@
+{
+  "method": "POST",
+  "origin": "https://e-track-firmware-production.tangjichentudou.workers.dev",
+  "path": "/api/ci/firmware/preflight",
+  "started": "2026-10-20T01:28:37.133Z",
+  "request": {
+    "path": "production-preflight.request.json",
+    "size_bytes": 2100,
+    "sha256": "23c98392a2047f8179791e71babc3346e470618ecbfa893751e05d82774aa3f1"
+  },
+  "note": "Reserved before request; a lost response is not permission to replay a mutation."
+}

@@ -1,0 +1,40 @@
+{
+  "method": "POST",
+  "path": "/accounts/[ACCOUNT]/d1/database/1cd5db26-6bbd-4595-abef-72ff51ecdaf3/query",
+  "started": "2026-10-20T01:31:40.320Z",
+  "request": {
+    "path": "snapshots/after/production-channel_history-count.request.json",
+    "size_bytes": 59,
+    "sha256": "75097da2346d9e9238582b4da3ea9cb3e8833237cb59dc5b0bf839ccdf8b4bdb"
+  },
+  "request_headers": {
+    "accept-encoding": "gzip"
+  },
+  "request_attempts": 1,
+  "request_failures": [],
+  "status": 200,
+  "response_headers": {
+    "date": "Tue, 20 Oct 2026 01:31:43 GMT",
+    "content-type": "application/json",
+    "transfer-encoding": "chunked",
+    "connection": "keep-alive",
+    "cache-control": "no-store",
+    "api-version": "2026-10-01.epoch",
+    "cf-auditlog-id": "01a156ef-93b2-716a-8ccf-55c6554b970c",
+    "content-encoding": "gzip",
+    "server": "cloudflare",
+    "cf-ray": "a4d443bf7f4d99e9-NRT"
+  },
+  "body": {
+    "path": "snapshots/after/production-channel_history-count.body",
+    "size_bytes": 244,
+    "sha256": "a825f505ead1ecb5818d93fdecbbbc36eb3ce7132d7cd6214035da128d1e8f78"
+  },
+  "decoded_body": {
+    "path": "snapshots/after/production-channel_history-count.decoded.body",
+    "size_bytes": 371,
+    "sha256": "65772400bf0037dfa5bb727976f7baa653e3584ac77df08c46f4d774b3e687c7"
+  },
+  "completed": true,
+  "ended": "2026-10-20T01:31:45.840Z"
+}

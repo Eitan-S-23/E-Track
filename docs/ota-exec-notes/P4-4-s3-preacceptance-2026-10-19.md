@@ -1324,3 +1324,235 @@ scan checked the nine changed/new files and all 31 archive members with no
 known-value or token-shape match. This closes source review only; the real
 NOT_RUN precheck, V3-bound rerun plan and missing runtime observations remain
 required after C4 is committed.
+
+### V4 Admission And Runtime Observation
+
+C4 is 2756ca95e26ec636216313271708b3304d61a5cc, pushed to the task branch only.
+All nine staged files matched their reviewed bytes and passed the staged privacy
+scan. Its tree is 77549b4b756f1e88de8b854b4673857021a65783, with unchanged
+profile blob 5ef97ae98674373c3cf641676c16ff7baf1b617f. V4 contract SHA-256 is
+86764fa47b8c52d748bf93b83c5735352ceab69519d8ffcc4c6bfc706f8939b5.
+
+Preparation copied 67 original inputs and 227 predecessor files. Target 3.2.9
+is bound to C4 and descriptor SHA-256
+d08b8b36f2b0dab9066491ccbd4e2c98109c5b15cbd0e7b839922d5254fd373b.
+Configuration retained 22 complete responses and exactly two single-attempt
+descriptor/hash PATCHes returning 204. Production/rehearsal/repository gates
+were all read back as false; reviewer, secrets and Worker deployment were not
+changed. The private parent ACL still grants only the current user inheritable
+full control, and the controlled output paths passed the reparse guard.
+
+The actual NOT_RUN precheck passed. The separately executed rerun-plan command
+uses the real V3 contract/final matrix and admits the same 17 commands and nine
+criteria, with zero REUSED criteria. Its plan-only result is not final validation.
+Formal history and configuration independently passed on the retained originals,
+without repeating CI or deployment. The one admitted formal-before invocation
+then completed with exit 0: all three D1/R2 roles, an empty GitHub Release list,
+47 unchanged complete predecessor observations and all three historical failures
+were retained. It added 64 complete before responses, with no new incomplete
+response. The previously interrupted patches page returned 200 on its first
+attempt; this does not retroactively establish the source of V3's connection
+reset or imply that a retry was needed for that page.
+
+Formal negatives also completed with exit 0. Three missing/cross-Worker
+authentication probes returned 401/TOKEN_INVALID, and both cross-bucket S3
+listings returned 403/AccessDenied. All five were complete single-attempt
+responses; none was a registration, upload or production mutation. Only after
+these results did root start the admitted A dispatch command, including its
+fresh environment/branch/gate checks. B remains unspent; A must reach an
+observed waiting state before requesting the real reviewer's Reject action.
+
+### A Waiting: Required Human Rejection
+
+The one A dispatch is now run 39313672925, attempt 1, on C4
+2756ca95e26ec636216313271708b3304d61a5cc:
+https://github.com/Eitan-S-23/E-Track/actions/runs/39313672925
+
+Original run/pending-deployment responses in run-a/waiting.json show status
+waiting and exactly firmware-rehearsal, environment ID 24458272742. The waiting
+run response ended at 2026-10-19T19:47:34.537Z. The capture process closed with
+exit 0; root independently checked the original run ID, attempt, source,
+environment and closed receipt without another request. Its result is
+.cache/p44/logs/p44-v4-waiting-review-01.{log,json}. The root index remains
+unchanged. A is consumed once; B has not been dispatched.
+
+Next owner is the existing human reviewer Eitan-S-23: personally select Review
+deployments, firmware-rehearsal, then Reject and confirm that human action in
+the main conversation. Cancel, Rerun, Approve and an agent acting through the
+same account are not substitutes. No rejection or owner attestation is claimed
+yet. After the actual rejection is captured, root may continue with distinct B
+under the unchanged source/inputs; B requires its own personal Approve action.
+No branch advancement, extra check_bindings run, production firmware release,
+device action or gate unlock is authorized. P4-4 remains not PASS.
+
+Selected writes in this resumed batch are the reviewed task-worktree sources,
+task note, development archive, guarded local cache and V4 evidence, plus the
+already-authorized task-branch Git metadata. No deletion or selected external
+output was performed. This is not a machine-wide zero-write claim: the earlier
+PowerShell/Cryptnet cache attribution remains unresolved and those paths were
+not cleaned or modified by this batch.
+
+On the next owner request to continue unfinished P4-4, root used the existing
+read-only recover-a route with label resume-20261020-01. The preserved response
+and run-a/recover-resume-20261020-01-result.json still report run 39313672925 as
+waiting; the command closed with exit 0 and zero platform mutations. No run
+was redispatched, no successful observation was repeated and B remains unspent.
+The pending human Reject requirement is unchanged. This continuation request
+is not an attestation that the reviewer personally performed that action.
+Selected writes were limited to guarded task-local recovery evidence, cache
+receipts and this note; prior outputs and frozen sources were not rewritten.
+
+### A Rejection Observed; B Admission Started
+
+The owner subsequently confirmed personally rejecting A in the root conversation.
+The exact message is preserved as ASCII-escaped JSON in
+evidence/owner-reject-a-response.json, explicitly labeled a root transcription
+with no invented message timestamp. Its 982 bytes have SHA-256
+16973493cb831c772ad6fc095be5600e515ae8914d6b20016f3532a655deabec.
+reviewer-action-a.json binds that response to A, attempt 1 and the existing
+reviewer; it does not substitute the response for a platform review event.
+
+Formal finish-a completed with exit 0. The original GitHub run is completed /
+failure, terminal update 2026-10-20T00:46:00Z, with exactly one rejected event
+from Eitan-S-23 (204050265) for firmware-rehearsal (24458272742). Both nongated
+development/build jobs succeeded. The rejected rehearsal has no executed steps,
+and production/binding-qualification jobs were skipped. This failure conclusion
+is the planned rejection result, not a failed release execution.
+
+The original A log archive is run-a/logs.zip, 173214 bytes, SHA-256
+fd4523eac301fb277809faebb8bddf74b599ee7103fc375b4d4fa80b6a90f7bf.
+Root ran the existing rejectedAdmission oracle against these hash-bound originals
+and the owner-response witness; it passed without a new platform request.
+Its receipt is .cache/p44/logs/p44-v4-rejection-review-01.{log,json}.
+
+Only then did root start formal-dispatch-b under unchanged C4 and identical
+dispatch inputs. No A rerun, source advancement, gate change, production
+publication or device operation occurred. The owner's question about repository
+review permissions is answered by the existing Spec, line 61: repository code
+review authority does not replace the required personal environment-reviewer
+observation. The frozen B approval must still be performed by that reviewer;
+all other currently authorized follow-up capture/evaluation remains root-owned.
+
+### B Waiting: Required Human Approval
+
+B is run 39351100037, attempt 1, on unchanged C4:
+https://github.com/Eitan-S-23/E-Track/actions/runs/39351100037
+
+The run and pending-deployment originals show waiting on firmware-rehearsal
+(24458272742); the waiting run response ended at
+2026-10-20T01:03:35.317Z. Formal-dispatch-b closed with exit 0. B was created
+after A's terminal update, and their dispatch request bytes are identical,
+SHA-256 b636165e193b6e9d9c7322138b55e2e3a68c2657fc901573b0b0d4ca0a57040b.
+Root also verified A's actual ZIP bytes and the unchanged root index in
+.cache/p44/logs/p44-v4-b-waiting-review-01.{log,json}. A and B have each been
+dispatched once; neither may be rerun to substitute another observation.
+
+The next necessary action is Eitan-S-23 personally selecting Review deployments,
+firmware-rehearsal and Approve for B, then confirming that action in the root
+conversation. No B approval, upload, registration or successful rehearsal is
+claimed yet. After the actual approval, root continues terminal/log/artifact
+capture, byte/readback/preflight checks, fresh after-state, independent
+approval/isolation/privacy evaluation and final physical validation. Gate=false,
+production/device restrictions and the pending main-integration boundary remain.
+
+This turn's selected writes are only guarded task-local A/B evidence, two owner
+witness files, cache receipts and this note. There was no source commit/push,
+external selected output or deletion; earlier cache-attribution limits remain
+unchanged. No owned capture process remains running at this handoff.
+
+### B Success And V4 After-State Evidence Gap
+
+The owner personally approved B and confirmed that action in this root
+conversation. This supersedes the preceding waiting state, not its original
+record. B 39351100037/1 completed successfully at 2026-10-20T01:13:20Z on
+unchanged C4. The platform review original records approved by Eitan-S-23
+(204050265), firmware-rehearsal (24458272742). A remains the distinct rejected
+run 39313672925/1, terminal failure at 2026-10-20T00:46:00Z, with no executed
+rehearsal steps. Both production jobs were skipped. Their dispatch bytes are
+identical; neither workflow was rerun, and no approval was performed by an agent.
+
+The independent byte evaluation of B passed, including protected-key GCC input,
+full/patch/recovery bytes, the new S3/preflight chain, three immutable uploads,
+full readbacks, ready registration and the required single idempotent replay.
+Root's three additional independent S3 GET bodies matched the expected hashes
+and sizes: 285646, 380 and 605080 bytes. Production's authenticated fixed
+SELECT-only preflight also passed; this was not production workflow execution
+or firmware publication. The actual B logs ZIP is 463831 bytes, SHA-256
+5ee501c3b4bbdaed420ba9ecc53bfac8a991e06f4543569172b3aa34266d38ca.
+The rehearsal ZIP is 4154078 bytes, SHA-256
+5233b85d80d36e4e42249768f64f2abf25ee7dc7cebefa5a7997ec632a98f098,
+artifact 12233374226. Independent review checked archive CRC/hashes, raw run
+identities, reviewer events/owner provenance, chronology and skipped production.
+The two root-transcribed owner responses remain labelled as transcriptions with
+unknown original message timestamps; they are not platform exports.
+
+Formal-after then retained 31 complete original responses before the protected
+audit_logs page at LIMIT 8 OFFSET 16 failed with UND_ERR_CONNECT_TIMEOUT. Its
+single request ran 2026-10-20T01:38:31.684Z..01:38:42.184Z (10500 ms); the
+envelope ran 01:38:30.236Z..01:38:44.107Z (13871 ms). No informational/final
+HTTP headers or body were received, no retry was made, and the command closed
+at 01:38:45.696Z with exit 1. The failed envelope SHA-256 is
+d3e047b1375d4399b505ec4c9adcfc559d8e845b3642364562223af8470452c5.
+This is not a credential denial, proven D1 error or gzip failure. All 31 complete
+after observations follow B's terminal success; they do not establish the
+missing remainder or continuous monitoring. snapshots/after.json, manifest.json,
+approvals-result.json and states-result.json were not produced.
+
+One already-authorized unauthenticated GET of Cloudflare /client/v4/ips later
+returned 200/505 bytes in 4082 ms on its first attempt, at
+2026-10-20T01:53:26.962Z..01:53:31.044Z. Its original receipt is
+.cache/p44/logs/p44-v4-connectivity-probe-01.json. This establishes recovered
+connectivity at that time, not a retrospective root cause or successful D1
+after-state capture. It was not repeated. Separately, B waiting poll 2 used only
+C4's admitted single pre-response ECONNRESET retry; its first failure and retry
+reservation remain original evidence, not an unreported extra business run.
+
+The V4 gap sealer source is archived in evidence/sealing/p44-v4-gap-close.py,
+SHA-256 94860e763859fe1f53fabe37e45b032d35cc082b720d50e5d03d95a6b6c91c4e.
+The actual formal privacy command then passed over 1149 files, 132 ZIP members
+and 102 decoded D1 representations; no DATA files were added after that scan.
+The final matrix SHA-256 is
+25d71ccb7707c83a62ace11e6662b2bdeab5e85df45faa557326010219f038d7.
+It records 14 actual command receipts, only formal-after exiting 1. HISTORY,
+CONFIGURATION, RAW-RUNS, REHEARSAL, RAW-READBACK and HYGIENE are PASS; RAW-STATE,
+APPROVALS and ISOLATION are NOT_OBSERVED. The human review facts are real, but
+the aggregate approval assembly/evaluation was not executed and is not invented.
+The stock final validator, with the actual V3 contract/final matrix, passed with
+overall=EVIDENCE_GAP; the result is not P4-4 PASS.
+
+Root and the separate read-only scope reviewer retain the following minimal
+recovery direction. Deliver the immutable V4 gap bundle and its later index
+first. Then freeze a successor for missing after observations only: preserve C4
+3.2.9 as the product target, all A/B/byte/readback/preflight/before evidence,
+all 31 complete after responses and every failed original. Prefer one isolated
+Tools/ota entry using the existing capture/evaluation primitives, with explicit
+tooling-freeze versus product-target identity. Do not change the C4 capture,
+run, inspect, bundle or profile inputs merely to move the evidence namespace.
+The installed Undici 7.28.0 passes proxyTls and requestTls into its native
+connectors; their default timeout is 10 seconds. A reviewed 30000-ms setting on
+both, retaining the 60-second total deadline and original strict body/gzip
+bounds, is the proposed repair, not yet an observed successful recovery.
+UND_ERR_CONNECT_TIMEOUT is not silently added to C4's ECONNRESET retry rule.
+No further owner action, token creation, descriptor/secret change, Worker
+deployment, workflow dispatch, upload or registration is required or authorized
+by this evidence recovery. Gates remain false; main and devices remain untouched.
+
+Retained build output has 640 GCC warnings and zero errors: 246 -W warnings,
+385 wchar_t-size notices, eight newlib unimplemented notices and one RWX notice.
+There are 11 distinct dependency advisories, three moderate and eight high,
+not 33 and not fixed or proven exploitable by this work. The original build
+stdout hash is 77da8a0494274a9dca1326a67b79583e5d42db51d20a78bc0e8a7dd9621cd272.
+All selected new writes are in this guarded task worktree or the previously
+authorized shared Git metadata. One disclosed accidental task-root empty file
+from cmd redirection was verified as a regular zero-byte file and removed only
+by apply_patch. Earlier PowerShell/Cryptnet cache attribution remains unresolved;
+no external cleanup or machine-wide zero-write claim is made.
+
+The staged-byte audit passed for all 1158 files, 1154 bound evidence files and
+132 ZIP members, with the shared-root index unchanged. A separate targeted
+board regression then exposed two previously omitted credential-boundary
+sentences. Only the operational board restores those existing meanings and
+labels the earlier no-rehearsal statement as its historical preparation stage;
+no frozen evidence or criterion changes. The failed original is retained at
+.cache/p44/logs/p44-v4-board-check-01.json. This document-only correction receives
+a targeted regression and incremental staged review, not another live campaign.

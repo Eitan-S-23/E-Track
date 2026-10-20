@@ -1,0 +1,84 @@
+{
+  "schema": "p44-credential-handoff-inventory-v1",
+  "created_at": "2026-10-19T09:08:33.722Z",
+  "purpose": "Independent current readback plus declared sanitized historical projections; not formal PASS",
+  "retired_non_reentrant_operation": "create_s3_02.py; retained as historical input, never execute again",
+  "omissions": [
+    "No original 400 receipt was supplied",
+    "No historical gh secret set/list receipt was supplied"
+  ],
+  "files": [
+    {
+      "path": "create-s3-02.json",
+      "original_path": ".cache/p44-cred-20261019/create-s3-02.json",
+      "original_size_bytes": 1555,
+      "original_sha256": "f28f1726b395a351aee74616d85a26f30606b56bdba4b680998fe8d8a05fd203",
+      "size_bytes": 1453,
+      "sha256": "606a560b9cd7f6e7af2884046cfc79798f7713e897c5b81b84052296d0e724ad",
+      "projection": true
+    },
+    {
+      "path": "verify-perm-01.json",
+      "original_path": ".cache/p44-cred-20261019/verify-perm-01.json",
+      "original_size_bytes": 1245,
+      "original_sha256": "f591351bc52f8f3ff1d66edda7487090c92de4b9ed87ef0c9c377d8cad94e459",
+      "size_bytes": 1223,
+      "sha256": "4c2844ea45d34f1c6dd507fe98441b39933607ea7c1ad0216bf4786ff55a7ecb",
+      "projection": true
+    },
+    {
+      "path": "create_s3_02.py",
+      "original_path": ".cache/p44-cred-20261019/create_s3_02.py",
+      "original_size_bytes": 8336,
+      "original_sha256": "c7757d1788d43f3c4838933eefc3c6dee03f55a80b932f4fcc70ee501950ec2d",
+      "size_bytes": 8336,
+      "sha256": "c7757d1788d43f3c4838933eefc3c6dee03f55a80b932f4fcc70ee501950ec2d",
+      "projection": false
+    },
+    {
+      "path": "agent-handoff.md",
+      "original_path": "docs/ota-exec-notes/P4-4-s3-preacceptance-2026-10-19.md",
+      "original_size_bytes": 31222,
+      "original_sha256": "af3179fc07ac0c4f7fa263706ddcdb6624c16423f62bc5595d19a8286f881cab",
+      "size_bytes": 31178,
+      "sha256": "7e84151a8eb54dab2c8432777d215c4b57313618ea0c4187f1b55337ee3c70be",
+      "projection": true
+    },
+    {
+      "path": "credential-readback-01.json",
+      "original_path": ".cache/p44-root-acceptance-20261019/credential-readback-01.json",
+      "original_size_bytes": 202732,
+      "original_sha256": "bfc9172dc23241b658d389dc2831947f1601227245df7c65ee39477940754037",
+      "size_bytes": 202710,
+      "sha256": "7e75fc6ef583ac0153cfb8f62854b729ed23414430848478e1b190285edf45ef",
+      "projection": true
+    },
+    {
+      "path": "credential-readback.cjs",
+      "original_path": ".cache/p44-root-acceptance-20261019/credential-readback.cjs",
+      "original_size_bytes": 9389,
+      "original_sha256": "59bce0fb6b8bd68b1cd4a4d29261e658141c0103fe9b9676f0a0cf6374706c32",
+      "size_bytes": 9389,
+      "sha256": "59bce0fb6b8bd68b1cd4a4d29261e658141c0103fe9b9676f0a0cf6374706c32",
+      "projection": false
+    },
+    {
+      "path": "credential-protection-01.json",
+      "original_path": ".cache/p44-root-acceptance-20261019/credential-protection-01.json",
+      "original_size_bytes": 11012,
+      "original_sha256": "8d7ae885a8d990e4e7573b8d0652033b79e7652ff0708bd63b72b540074370aa",
+      "size_bytes": 11012,
+      "sha256": "8d7ae885a8d990e4e7573b8d0652033b79e7652ff0708bd63b72b540074370aa",
+      "projection": false
+    },
+    {
+      "path": "protect-credential-inputs.cjs",
+      "original_path": ".cache/p44-root-acceptance-20261019/protect-credential-inputs.cjs",
+      "original_size_bytes": 3232,
+      "original_sha256": "26564647d88012764181a5695d8c233d52bdfd0d6e04cba0054044cbc6aea165",
+      "size_bytes": 3232,
+      "sha256": "26564647d88012764181a5695d8c233d52bdfd0d6e04cba0054044cbc6aea165",
+      "projection": false
+    }
+  ]
+}

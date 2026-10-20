@@ -783,14 +783,14 @@
 - 证据: `docs/ota-exec-notes/P4-3-acceptance-2026-10-18.md`、`docs/acceptance-contracts/P4-3-v1.contract.json`、`docs/acceptance-contracts/P4-3-v1/evidence-matrix.json`、`docs/acceptance-contracts/FREEZE-INDEX.md`，新增 `P4-3-acceptance-2026-10-18/delivery.inventory.json` 及 87 条交付归档；实施报告和旧冻结增量不变。正式验收、main 集成及隔离部署现均完成；真实 publisher/viewer 会话、依赖告警及缓存归因限制保留，不代表 P4-4/P5/生产门槛已满足。
 
 #### P4-4 Secrets 与 environment 配置
-状态: 进行中 ｜ 认领: Codex P4-4 实施/配置集成 agent / 2026-10-18 ｜ 更新: 2026-10-19(凭据与两 Worker 部署已独立核验，ba95249 已推送；V1/V2/V3 均诚实保留 EVIDENCE_GAP。V3 的4.75MB大页以90146字节gzip完整取得，新增12份完整只读原件；后续patches读取在响应头前发生ECONNRESET，非权限或gzip失败。累计47份完整原件与3份失败保留，正在集中审查标准SDK有界只读恢复，不重采成功、不扩权限或60s上限。A/B仍0，gate=false，非PASS，未做主线集成)
+状态: 进行中 ｜ 认领: Codex P4-4 实施/配置集成 agent / 2026-10-18 ｜ 更新: 2026-10-20(C4=2756ca9；A=39313672925 已由 owner 亲自拒绝，B=39351100037 已亲自批准并成功，新 S3/preflight 链、字节核验、三份独立回读及生产只读预检通过。V4 后置快照31份完整后发生响应前连接超时，终检诚实记 EVIDENCE_GAP：6项PASS、3项NOT_OBSERVED。原失败全部保留，只补缺失只读证据，不重跑A/B或成功业务；gate=false，非整卡PASS，未做主线集成)
 - 目标: 配置 `CLOUDFLARE_ACCOUNT_ID`、桶限定 `TRACE_R2_ACCESS_KEY_ID/TRACE_R2_SECRET_ACCESS_KEY`、`TRACE_UPDATE_SERVICE_URL/DEPLOY_TOKEN`、R2 bucket 变量及 `firmware-production` 审批人；沿用批准的 AES；不要求旧控制面 token 或客户端 D1 绑定参数。
 - 验收: 配置准备可消费 P4-1 已交付的工作流接口和 P4-2 环境，不等待 P4-1 先用这些配置完成验收；随后共用同一次隔离 rehearsal 验证权限与注册。不能为证明配置而提前生产发布，配置变化影响的证据另作最小验证。
 - 证据: `docs/ota-exec-notes/P4-4-implementation-2026-10-18.md`；复核 P4-1-v4 原件和 P4-3 已完成交付，不复制为本卡正式 PASS。生产设置、审批拒绝与角色覆盖按实际结果记录，gate=false，不重做成功演练。
-- 凭据入口: `docs/agent-collaboration/credential-registry.md`，`e-track-ci` = `e-track-p41-ci`；旧管理 GET/POST 403 保留原义。后续成功消费另一份受保护 `.github-actions-secrets.staging.local.json`，未扩大旧测试 CI 用途。独立核对见 `P4-4-credential-handoff-2026-10-19-v2/inventory.json`；不再要求 owner 重选来源，也不重建已成功凭据。首版投影遗漏旧 Track 标识符遮蔽已修正，原字节移入忽略缓存保留。
+- 凭据入口: `docs/agent-collaboration/credential-registry.md`，`e-track-ci` = `e-track-p41-ci`；旧管理 GET/POST 403 保留原义，不是 e-track-ci 缺失或必须新建 token，也不把测试授权扩展为生产授权。后续成功消费另一份受保护 `.github-actions-secrets.staging.local.json`，未扩大旧测试 CI 用途。独立核对见 `P4-4-credential-handoff-2026-10-19-v2/inventory.json`；不再要求 owner 重选来源，也不重建已成功凭据。首版投影遗漏旧 Track 标识符遮蔽已修正，原字节移入忽略缓存保留。
 - 当前整改入口: `docs/ota-exec-notes/P4-4-s3-interface-2026-10-19.md`。新链不能直接沿用旧链 rehearsal 背书；主验收按真实依赖冻结必要新观测，不把既有“不重复成功演练”解释为新链免测。P4-1/P4-2 历史完成态和认领不变。
-- 独立预审与配置交付: Codex root；`docs/ota-exec-notes/P4-4-s3-preacceptance-2026-10-19.md` 及 `P4-4-root-review-2026-10-19/`。P44-REVIEW-01/02 已关闭；P44-DEPLOY-01 的 staging 查询脱敏误关闭与恢复、11 项依赖告警及外部缓存归因未决均保留。两次 Worker 代码部署不是生产固件发布；未执行新链 rehearsal、注册、R2 写入或设备操作。
-- 当前行动: P44-CREDENTIAL-01 的缺失配置阻塞已解决，旧 account/user POST 拒绝及两次成功创建/S3 List 原件保留，后者不重复。root 继续绑定真实候选/descriptor、提交冻结 runner 与 NOT_RUN 前检；现有 reviewer 真拒绝 run A 后，以相同输入新建 attempt=1 的 run B 真批准，不代批、不 rerun 被拒 run、不默认另加 check_bindings。secret 名称存在不等于值已由新链消费，生产工作流执行仍在 P5 后。readiness 派生规则与旧冻结证据不变。
+- 历史独立预审与配置交付: Codex root；`docs/ota-exec-notes/P4-4-s3-preacceptance-2026-10-19.md` 及 `P4-4-root-review-2026-10-19/`。P44-REVIEW-01/02 已关闭；P44-DEPLOY-01 的 staging 查询脱敏误关闭与恢复、11 项依赖告警及外部缓存归因未决均保留。两次 Worker 代码部署不是生产固件发布；该准备阶段尚未执行新链 rehearsal、注册、R2 写入或设备操作，后续 A/B 实绩见当前状态。
+- 当前行动: P44-CREDENTIAL-01 已解决；两次真实 reviewer 动作及新链成功原件已独立核验，不再要求 owner 重做。先封存 V4 缺口包/索引，再对后置快照缺页冻结最小恢复；产品仍为 C4/3.2.9，工具冻结与产品身份分开。不重建凭据、不改 descriptor/Worker、不重跑工作流/上传/注册；APPROVALS 与 ISOLATION 的正式离线汇总仍待完整后置证据。生产工作流执行仍在 P5 后，readiness 派生规则、旧冻结证据及原认领不变。
 
 ---
 
