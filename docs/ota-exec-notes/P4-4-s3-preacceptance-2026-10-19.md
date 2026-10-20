@@ -1750,3 +1750,24 @@ production release, main merge or device action occurred. New outputs are in
 the guarded task worktree or previously authorized shared Git metadata; the
 shared-root index remains unchanged. Earlier PowerShell/Cryptnet attribution
 remains unresolved, with no external cleanup or machine-wide zero-write claim.
+
+### V5 Bundle Delivery
+
+B5 is 21fa17f7da91a0d336ae1f1a7f1a93910beb2ab7. Independent review checked
+all 1185 DATA files, 16 artifacts, 14 command records and their actual results;
+the four original reuse anchors and unknown HTTP phase remain intact. The
+separate staged scan passed for 1191 files, all 1187 bound evidence references
+and 132 archive members, with exact staged/worktree bytes and the unchanged
+shared-root index. Readiness and the P4-4 card checks separately passed 1/1 each.
+The first commit attempt failed only the global debug-statement heuristic on
+console examples in retained deployment HTTP originals. Its closed failure is
+preserved in .cache/p44/logs/p44-v5-bundle-commit-01.json. The second attempt
+disabled only that debug heuristic for this command; the secret hook remained
+enabled and passed. No evidence bytes were edited to make the hook pass.
+
+Full-evidence git diff --check also reported preserved CRLF/trailing whitespace;
+the scoped check of manually changed documents, contract/matrices/plan and the
+archived sealer passed. Raw logs and original provider output stay byte-exact.
+This later index commit records B5 separately from its C5 input freeze. The
+task-branch push must finish before C6 source edits; this is still a gap closure,
+not whole-card PASS, production authority or main integration.
