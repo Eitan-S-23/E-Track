@@ -1,0 +1,9 @@
+{
+  "run_id": 39351100037,
+  "attempt": 1,
+  "artifact": {
+    "path": "run-b/logs.zip",
+    "size_bytes": 463831,
+    "sha256": "5ee501c3b4bbdaed420ba9ecc53bfac8a991e06f4543569172b3aa34266d38ca"
+  }
+}

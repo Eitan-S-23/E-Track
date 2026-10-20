@@ -1839,3 +1839,424 @@ the actual C6 freeze/precheck/plan still precede any missing after observation.
 Expected four C4 reuses and eight required command IDs are not promoted to an
 executed formal plan from unit tests. No new workflow, upload, registration,
 production preflight, gate unlock, main merge or device action occurred.
+
+### C6 Successor Independent Review And Execution
+
+On 2026-10-20 the owner transferred execution to the successor Codex root and
+expressly authorized delivery of the eight already-staged files, C6 freezing,
+missing-after observation and final evidence/index delivery on the existing
+task branch. New tool remediation still requires owner agreement. The active
+output boundary is this task worktree; shared Git metadata under
+`D:/github/my/E-Track/.git` is authorized only for this scoped delivery.
+
+The successor reviewer did not implement or change either recovery tool. It
+reviewed the four source/test diffs, matched all four working and staged hashes
+to the completed Node 121-group and Python 55-test originals, verified all 81
+development archive inputs and the archive hash, and checked all 39 Node/Python
+interop files against their producer receipt. Existing self-tests were not
+rerun or promoted to newly executed tests. No required source remediation was
+identified in this bounded review.
+
+C6 is `6fffaa25442bdcd863f3a3f4e93e20ebe180a2c1`, successfully pushed only to
+`dev/p4-4/config-integration-20261018`. Source commit/push receipts are
+`.cache/p44/logs/p44-v6-root-source-commit-01.json` and
+`.cache/p44/logs/p44-v6-root-source-push-01.json`. The secret hook remained
+enabled; only the debug-statement check was excluded for normal tool output.
+
+Preparation preserved 1187 predecessor files and generated the new descriptor,
+SHA-256 `673b18612e00f77a850f1b3be8f3ee48e3330d8394163c92239819e0f00b79ff`.
+The actual frozen contract SHA-256 is
+`dbb6bf4bf986b320dfe91a7a3b6817cd4031a156be310b9f87bbad51e65120a9`.
+The closed formal precheck passed with overall NOT_RUN. The actual formal plan
+retains C5 as predecessor and C4 as the original EXECUTED PASS source for
+CONFIGURATION, RAW-RUNS, REHEARSAL and RAW-READBACK. Its eight required command
+IDs are history, before, negatives, after, assemble-complete, approvals, states
+and privacy, each with the existing `formal-` prefix.
+
+History, complete before and five original authentication negatives passed
+their new offline evaluations with actual exit 0. The after command started at
+2026-10-20T11:39:28.585Z. Offline identity evaluation reports zero verify requests
+and does not claim a new active-token observation. The former missing
+`protected-audit_logs-rows8-16` response completed HTTP 200 at
+2026-10-20T11:43:42.672Z. This is execution progress, not a final isolation or
+whole-card PASS. The 31 complete C4 after responses retain their original times
+and bytes; no successful A/B, upload, registration or readback is repeated.
+
+#### P44-C6-TRANSPORT-01: Incomplete After Tail
+
+The actual after process closed exit 1 at 2026-10-20T11:55:31.813Z, after
+preserving 39 new complete HTTP 200 responses. Together with the unchanged C4
+prefix, 70 complete after responses are available; they are not a complete
+snapshot. The failing SELECT is `protected-patches-rows8-16`, with original
+`evidence/snapshots/after-tail-v6/protected-patches-rows8-16.http.json` and its
+`-request-failure-1.json` record. The latter explicitly records one attempt,
+`UND_ERR_SOCKET`, no final response, zero body bytes and no informational
+response. This establishes the receive phase, not the network fault's cause or
+a product defect. The closed `formal-after.json` receipt binds the failure log
+SHA-256 `3905175dfdac979c90a7e5387e8f7fca9605626c29a6c709f6ddb245b1cc957e`.
+
+The unchanged frozen transport permits retry only for pre-response ECONNRESET;
+it correctly did not retry this different error. The current after adapter is
+fixed to the 31-response C4 prefix and rejects an existing after reservation.
+There is no admitted CLI route to resume these 39 new responses. Do not delete
+the reservation, relabel the socket error, replay successful pages, or change
+the frozen source to force continuation.
+
+The independent `formal-privacy` command subsequently closed exit 0: 1411 files,
+141 decoded D1 responses and 132 ZIP members checked; lifecycle checks passed.
+No after aggregate, complete manifest, approvals/states result or final matrix
+was produced. C6 remains an incomplete evidence collection, not PASS. The
+current C6 originals and this note remain local pending disposition; only the
+C6 source/development commit has been pushed.
+
+Owner decision is required before new collector remediation, as explicitly
+requested in this successor session. The preferred direction is bounded
+continuation of existing verified pages with truthful per-attempt failures,
+not another product run or a new general-purpose controller. Any change to
+retry conditions, frozen inputs or evidence lineage must first be reviewed
+against its actual dependencies. Successor root retains independent acceptance
+ownership; the existing gates, historical failures and original card owner
+remain unchanged.
+
+### Collector Remediation Takeover (2026-10-21)
+
+The owner requested that the reviewing root take over implementation. This
+session is now the implementation owner, not the independent acceptor of these
+changes. The only writable root remains `.cache/p4-4-integration-20261018`.
+No commit, push, freeze, platform observation or frozen-evidence change is
+authorized by this takeover. A different reviewer must accept the repaired tools.
+
+The bounded repair retains the existing collector and HTTP leaf. C6 provides
+39 successful originals plus its failed request; C4 provides 31 successes and
+its failure. Resuming verified prefixes is needed because the old collector
+cannot consume the C6 tail. No new transport, retry policy or controller is needed.
+
+| ID | Required repair | Development oracle |
+| --- | --- | --- |
+| R1 | Build failed attempt summaries from persisted HTTP originals | Persisted socket failure reloads unchanged; next invocation starts at its missing label |
+| R2 | Correct identity initialization, Map frontier and attempt summaries | Complete capture reloads and assembles; two interrupted attempts resume without source edits |
+| R3 | Align Node/Python per-invocation recovery semantics and order | Both complete and multi-attempt Node outputs pass the actual Python verifier with explicit synthetic Git identity |
+| R4 | Remove cached write-path trust | Recheck ancestors before writes; replaced/reparse paths are rejected |
+| R5 | Restore executable regression feedback | Targeted tests first, then both existing suites and negative cases; no formal PASS from self-tests |
+
+Development output stays under `.cache/p44-v6-development`. Tests reuse real
+C4/C6 bytes in memory and simulate missing responses only. Cross-language
+fixtures are explicitly synthetic; tool identity is resolved by a test-only
+Git mock with real producer bytes, never by weakening production hash checks.
+The exit condition is runnable complete/reload/interrupted-resume/interop tests
+plus both affected suites, not another network attempt or a new frozen bundle.
+
+#### Recovery Adapter Contract And Regression Notes
+
+Scope: the development `Tools/ota/p44-after-*` adapters only. No historical
+contract, original, profile or acceptance runner is reinterpreted or rewritten.
+The existing C6 formal CLI admission is not authority to use dirty tooling or
+restart its failed command. The successor contract, C6 gap matrix and additional
+observation allowance remain independent-acceptance responsibilities.
+
+Signatures and ordering:
+
+- `await validatePrefix(ctx)` is asynchronous. A complete-prefix check also
+  validates the recorded tool ref, so the CLI must call `admit(...)` to establish
+  `ctx.toolCommit` before prefix validation. Unit fixtures set that identity
+  explicitly; this does not grant real admission.
+- `attemptResult(ctx, ok, error)` rescans persisted HTTP records before closing
+  the attempt. The HTTP leaf writes the failure original and then throws; the
+  caller must not use only records returned by successful awaits.
+- `verify_after_recovery(contract, descriptor, ctx)` verifies Node's actual
+  snapshot, attempt records, reservations and final result. `_plan_records`
+  derives traversal from raw schema/release responses and binds each label to
+  its exact snapshot record, rather than trusting dictionary/file enumeration.
+
+Field contracts:
+
+- An attempt result's `new_reads` includes its complete and failed HTTP record
+  references. `complete_labels` and `failure_labels` are sorted; `failures`
+  retains every request-failure reference, including both failures when the
+  original permitted retry also fails. Original error codes are not relabeled.
+- Final `recovery.reused_complete`, `reused_records` and `reused_failures`
+  describe all observations present before the final invocation, not always
+  C4+C6 alone. `recovery.new_reads` describes only that invocation's complete
+  records, in traversal order, with exact `label/kind/role/record` fields.
+- `recovery.first_missing` is the final invocation's starting frontier;
+  `after-result.first_missing` is null only after completing the plan.
+  `first_new` is the first newly captured label. These are not the C4 frontier.
+- Attempt end times include terminal failures. A retry reservation's start is
+  at or after its first failure's end and no later than the enclosing HTTP
+  record's end; it is not equal to the initial request's start.
+- An attempt summary is derived exactly once. `Map.size`, not
+  `Object.keys(map).length`, determines complete-prefix coverage.
+- Every physical write reuses the existing uncached `s.guard` before creation
+  and again before opening the destination. Positive path checks are not
+  persistent authorization if an ancestor changes.
+
+| Case | Required behavior / assertion |
+| --- | --- |
+| Base C4+C6 prefix | Reuse 31+39 complete records; retain both failures; collect 72 missing records in the fixture |
+| Two further disconnects | Preserve one then two new successes and both failures; final invocation reuses 73 and collects 69; four attempts remain visible |
+| Full prefix reloaded | No network replay; identity/frontier validation and `assemble` succeed |
+| Failed request persisted before throw | Final failure code and references match disk; next missing label is data-derived |
+| Reordered snapshot dictionaries | Raw schema/release traversal, not object insertion order, defines labels |
+| Changed body, SQL, resource, duplicate rows or washed failure | Reject before new collection; no output from prefix validation |
+| Wrong tool bytes or changed failure/frontier summary | Python rejects; synthetic Git resolution does not bypass hashing |
+| Pre-response ECONNRESET then success / socket failure | Native Undici MockAgent produces both traces; both parsers preserve the 500ms retry reservation and original codes |
+| Previously checked ancestor becomes a link | Next write fails `REPARSE_PATH`; no destination is created |
+
+Wrong: extending collectors until the happy-path probe finishes, then testing
+the consumer later. Correct: first run persisted-disconnect and full-reload
+regressions, then consume producer output with the actual Python verifier.
+The prior failures combined asynchronous API propagation, inconsistent
+cross-language field definitions and an untested assumption that an awaited
+HTTP call returns its failure evidence. The regression boundary is the durable
+record and its consumer, not only the in-memory successful call count.
+
+The existing test files remain the only test entry points. Node accepts
+`--output-dir <fresh project-local directory> [resume|all]`; `all` is the
+default. Python accepts `--node-fixture <that Node output directory>` before
+normal unittest selectors. Cross-language packets bind producer source hashes
+and every exported byte. Python materializes them only in its guarded
+development batch directory, and mocks only the synthetic Git object lookup.
+Real source-identity failures still reject. No uncommitted production tool is
+passed off as a real Git object or formal observation.
+
+The first targeted run (`remediation-red01.log`) failed R1 and R2 as intended.
+After the Node fixes, `remediation-python-red01.log` reproduced the actual
+`AFTER_ATTEMPT_PREVIOUS` mismatch in both single and repeated-resume fixtures.
+`remediation-python02.log` then passed all five targeted producer/consumer and
+negative tests. These are development red/green results, not formal rounds.
+
+#### Final Development Verification
+
+All R1-R5 development oracles passed. The final consistency check also binds
+configuration values/rules/secret metadata to the original paginated responses
+and before snapshot, checks environment/page/tag routes, and binds final tool
+identity to the contract and final attempt. Neither hash validation nor any
+formal criterion was relaxed. Git source/fixture hashes below describe these
+uncommitted working bytes, not a new frozen tool commit.
+
+Commands ran from this worktree using `cmd.exe`, with controllable host/cache/
+temporary locations set by `containedEnvironment` under
+`.cache/p44-v6-development/remediation-host`. Python was isolated with `-I -S -B`.
+
+    node tests/ota/test_p44_after_recovery.cjs --output-dir .cache/p44-v6-development/remediation-node04
+    python -I -S -B tests/ota/test_p44_after_bundle.py --node-fixture .cache/p44-v6-development/remediation-node04
+
+The Node command closed exit 0 with 145 assertion groups, including native
+Undici retry traces and the physical contained command-wrapper check. Its result
+binds the current Node source/test hashes. The final Python command closed exit
+0 with 61 tests in 311.738 seconds, including the actual complete and four-attempt
+Node outputs. Both suites verified unchanged formal evidence; Node also checked
+all 1185 original C5 evidence files. These are implementation self-tests only.
+Both Node syntax checks, Python AST checks and `git diff --check` passed; Git
+reported normal LF-to-CRLF checkout advisories, not hidden test failures.
+
+| Current file | SHA-256 |
+| --- | --- |
+| `Tools/ota/p44-after-recovery.cjs` | `26c6cd93c2a048bf3137f13af8c3ec5815bc83ac6dd942ac38e6ac0b0816f578` |
+| `Tools/ota/p44-after-bundle.py` | `4c4a2f7175538eea903c2b74ea5d67209718e85cfda338c106c624b18213c9b3` |
+| `tests/ota/test_p44_after_recovery.cjs` | `11faced2b35376e63f33b5b1e953317108aa47e76256dda68dddeb66cdae1e19` |
+| `tests/ota/test_p44_after_bundle.py` | `93547b772e9723a3940d583268d50e0a199d5c61f95f326f1a9d482bde04ffa2` |
+
+Final originals under `.cache/p44-v6-development/`:
+
+| Evidence | SHA-256 |
+| --- | --- |
+| `remediation-node04.log` | `4d01949e8ceb9e751a70c74ba08994ff88ff541e2a996ec9ec616c5d8ce84315` |
+| `remediation-node04/result.json` | `3988d27f592b0c238aadb792134d440b43aaf1ae887c7fbe42d09f10fe9dc63c` |
+| `remediation-python05.log` | `2217db6a42878b03e8154caa6c6a6b40487e32c8ffe0899ee4100b21407efb70` |
+
+Final interchange packets remain in `remediation-node04/`; their evaluated
+copies are in `python/batch-8/`. All red/green logs and Node result records are
+retained. Only this session's duplicate intermediate interchange packets in
+`remediation-node02/` and `remediation-node03/`, and its materialized
+`python/batch-4` through `python/batch-7`, were removed after checking exact
+resolved targets and descendants. No older agent cache or formal original was
+cleaned. All actively selected writes/deletions are within this worktree;
+no external output, commit, push, network business request or new freeze occurred.
+
+The developer batch is ready for another independent review, not formal P4-4
+acceptance or immediate execution of the old C6 command. The next owner must
+retain C6's actual failed round and C4's original PASS sources, arrange any
+authorized source delivery, and provide the approved successor admission and
+remaining observation allowance. Do not rewrite C6, treat synthetic Git IDs as
+real commits, grant retry authority from these tests, or replay successful pages.
+
+### P44-C6-TRANSPORT-02: Post-Response Body Failure (2026-10-21)
+
+Independent review rejected the preceding developer batch: the failure parsers
+assumed every failed capture was a failed `request()` call. The HTTP leaf already
+preserves a response-body failure with `status`, partial hash/size and zero (or
+one prior retry) request-failure documents. Calling the complete-body decoder on
+these bytes, demanding one more request-failure document, and enumerating
+`.body` instead of `.partial.body` prevented attempt closeout and reload.
+
+Required repair stays in the two adapters and their tests. Distinguish
+pre-response failure from post-response failure using the retained response
+status and partial evidence; validate the correct request-failure count and
+terminal record. Preserve public partial bytes, private encoded originals and
+intentional privacy-only hash projections without promoting any to a complete
+page. No body retry, deadline extension, invented request-failure file, new
+network operation or edit to `Tools/acceptance` is permitted.
+
+The regression uses the real HTTP leaf and body pipeline, with only the HTTP
+request/body source and private filesystem replaced in memory. Cases cover
+plain, gzip/private, empty, a prior ECONNRESET retry followed by body failure,
+and sensitive plaintext projection. Each must write a failed attempt result,
+reload to the same gap, retain all originals, and allow only a separately
+invoked synthetic continuation. Node output is consumed by the real Python
+verification path, with explicit synthetic Git and private-byte resolution.
+The reviewer retains independence and owns disposition of this finding.
+
+#### TRANSPORT-02 Implementation And Verification
+
+Implemented; independent closure remains pending. The preceding 145/61 test
+results remain historical development results and did not cover this phase.
+The new red run failed `POST_RESPONSE_ATTEMPT_RESULT_MISSING` against those
+exact Node bytes before the repair. No independent finding is self-closed here.
+
+The two parsers now use these matching contracts:
+
+| Retained capture | Request-failure count | Storage / result behavior |
+| --- | --- | --- |
+| Failed before a response (`status` absent) | `request_attempts` | Last request-failure code must match; partial fields/body are forbidden |
+| Failed after a response (`status` present) | `request_attempts - 1` | Valid HTTP status and partial hash/size required; the terminal HTTP record is also in attempt `failures` |
+| Public unencoded partial body | As above | Exact `<label>.partial.body`; verify its actual hash/length, not advertised full Content-Length |
+| Encoded D1 partial body | As above | Exact project-local private wire path, required original bytes/hash/length, no public or decoded body |
+| Sensitive plaintext projection | As above | Preserve the original hash/size and exact privacy projection; missing plaintext is intentional, not a complete observation |
+| Complete response | `request_attempts - 1` | Partial/private markers are rejected; existing complete-body decoding and semantic checks remain required |
+
+Private paths are constrained to the existing capture namespace plus the exact
+attempt/label stem before reading. Missing, altered or redirected private
+originals fail closed. Both implementations reject a public gzip D1 partial,
+injected decoded sidecar, incorrect partial path/hash/size, negative received
+length, response-status removal and a changed completion flag. Private partial
+bytes are not decompressed. The original HTTP leaf, retries and deadlines are
+unchanged; each body failure uses one request, except the case with the already
+permitted pre-response ECONNRESET retry, which uses exactly two.
+
+The fixture retains C4+C6's 70 complete responses through five new failed
+invocations. Each reload reaches the same gap without promoting partial bytes;
+one explicitly invoked mock continuation adds the 72 missing complete responses.
+Python verifies all seven attempts and 142 complete records. `private_files` in
+the development interchange packet contains only synthetic wire bytes from the
+mock pipeline; tests resolve those in memory and still execute real hash checks.
+It is not a public export of any real private capture.
+
+Commands (same contained host environment as the preceding batch):
+
+    node tests/ota/test_p44_after_recovery.cjs --output-dir .cache/p44-v6-development/transport02-red01 body
+    node tests/ota/test_p44_after_recovery.cjs --output-dir .cache/p44-v6-development/transport02-node03
+    python -I -S -B tests/ota/test_p44_after_bundle.py --node-fixture .cache/p44-v6-development/transport02-node03
+
+Red exit 1 was expected and retained. Final Node exit 0: 175 assertion groups.
+Final Python exit 0: 65 tests, 333.954 seconds. The four targeted Python tests
+also passed beforehand (`transport02-python01.log`). Final fixture directory:
+`.cache/p44-v6-development/transport02-node03`; Python materialization:
+`.cache/p44-v6-development/python/batch-5`. Both suites retained their formal
+evidence immutability checks. No C6 original, transport leaf, product source,
+release workflow, gate, profile or frozen contract was changed.
+
+| Current source | SHA-256 |
+| --- | --- |
+| `Tools/ota/p44-after-recovery.cjs` | `7a8a31d4c49356b57991480cb055e84df23af5821630ccb61001f318a60f6b06` |
+| `Tools/ota/p44-after-bundle.py` | `5671d16d66a8c37e3f60eaf6d645d31c88bc6f45b06d7e22d5177cf482aae157` |
+| `tests/ota/test_p44_after_recovery.cjs` | `caa7f8a8b1b082ddd28a793fe31758b178ee228f0f1b5596a2f0518700b8f950` |
+| `tests/ota/test_p44_after_bundle.py` | `c004d02ea81d8df3adc4077a41195f17796f5f56921b742a3b22b305aa0201ff` |
+
+| Log / result under `.cache/p44-v6-development/` | SHA-256 |
+| --- | --- |
+| `transport02-red01.log` | `912d47775906fa82837b7fb6f865d1874e8c6a478e373cf064f0267f131d368b` |
+| `transport02-node03.log` | `029a364e963ea71bbb6e5e331d2c0061c4ea14b6333b8699e428b59fd9baa604` |
+| `transport02-node03/result.json` | `3c3f6062a056966565e606be21599700797dd677a02257815417954cb110871e` |
+| `transport02-python02.log` | `4ee550e44d10c3e9a539fced62c05080bf286b27fed3df10550fdd7a5bdb162f` |
+
+All outputs remain in the authorized worktree; this follow-up deletes no older
+artifact. No real HTTP request, commit, push, PR, freeze or index registration
+was performed. The next owner is the existing independent reviewer for
+P44-C6-TRANSPORT-02, not a new formal collection or automatic retry.
+
+#### TRANSPORT-02 Independent Closure (2026-10-21)
+
+Disposition: CLOSED for the bounded tool finding. The independent reviewer did
+not author or modify either adapter or test. The four current source hashes
+and four red/green evidence hashes match the preceding implementation tables.
+The original Node 175-group and Python 65-test results were reviewed, not rerun
+or relabeled as new independent test-suite executions.
+
+The reviewer independently exercised the actual HTTP capture/body pipeline
+with synthetic HTTP responses and memory-only output storage. Plain body
+disconnect and gzip/private disconnect each used one request; a pre-response
+ECONNRESET followed by body disconnect used exactly two. Every case retained
+UND_ERR_SOCKET, wrote an unsuccessful attempt result, kept the partial response
+incomplete, and reloaded 70 complete originals at the unchanged
+protected-patches-rows8-16 frontier. No body retry occurred. An initial gzip
+probe referenced an unexported constant in the reviewer fixture; correcting
+that memory-only private-path fixture made the gzip and retry probes pass,
+without any adapter change or filesystem output.
+
+The Python partial-storage/count branches and terminal-failure references were
+checked against these capture shapes and the source-bound interoperability and
+tampering-test originals. No remaining required fix was found in TRANSPORT-02.
+All 1411 C6 files bound by its privacy inventory still match; its contract hash
+remains dbb6bf4bf986b320dfe91a7a3b6817cd4031a156be310b9f87bbad51e65120a9.
+The HTTP leaf, profile, product source and workflow remain unchanged.
+
+This closes only the repair finding, not P4-4. Source delivery, C6 failure
+disposition, successor admission and the remaining real observations still
+belong to the main acceptor. Do not rerun the old C6 command with dirty tools,
+rewrite its originals, replay A/B or open a production gate. This review only
+appends this closure record; it performs no commit, push, freeze or cloud read.
+
+#### C6 Gap Seal And Successor Boundary (2026-10-21)
+
+The independent root sealed the actual C6 result as EVIDENCE_GAP, not P4-4
+PASS. C6 completed 39 new HTTP 200 responses in 40 single-attempt read-only
+requests. The last request, protected-patches-rows8-16, failed with
+UND_ERR_SOCKET before any informational/final response or body byte. Its
+formal-after command exited 1 and closed. All 31 complete C4 after responses,
+the 39 complete C6 responses, both historical after failures and the C5 private
+verification failure remain intact. No business operation was replayed.
+
+The matrix contains 14 command records: nine original C4 records supporting
+four direct REUSED PASS criteria and five actual C6 executions. HISTORY and
+HYGIENE are EXECUTED PASS; RAW-STATE, APPROVALS and ISOLATION remain
+NOT_OBSERVED. Complete after/manifest/approval/isolation outputs do not exist
+and were not fabricated. All 1411 files in the closed C6 privacy inventory
+still match; its 141 decoded D1 responses and 132 ZIP members remain bound.
+New closeout metadata lives outside evidence/ and is covered separately by
+the staged delivery privacy audit, rather than changing the closed scan.
+
+| Item | SHA-256 |
+| --- | --- |
+| P4-4-v6.contract.json, unchanged | dbb6bf4bf986b320dfe91a7a3b6817cd4031a156be310b9f87bbad51e65120a9 |
+| P4-4-v6/final-evidence-matrix.json, 215879 bytes | 7dfa85be4a70858a38468839f4a888b12c7cf4109f2afcb107e8997b6e5bb414 |
+| P4-4-v6/closeout/failure-report.json | 97390331b9953354f908e05eb820e7ce03d8626e1e38ceb6a8deceb1dc5ed724 |
+| .cache/p44/logs/c6-final-validation02.log | 2ba3a518f022686d1aab73594c12bd6ebfa26d1e6aa3beaac63fcb2bd120f94d |
+| .cache/p44/logs/c6-final-validation02.json | 6604b066e67f7b7831fd36bc0059f4f096dbe82a52fc2e644bde728bff2b4a97 |
+
+The stock final CLI returned exit 0 and
+`VALIDATION=PASS contract=P4-4-v6 round=P44-20261020-06 overall=EVIDENCE_GAP`.
+It ran from a native detached C6 worktree under
+.cache/p44-c6-verification with byte-exact C6 package copies, the actual C5
+previous pair and the original C4 reuse pair. Only the needed paths were
+checked out. No current dirty tool was reverted or used to certify C6.
+An initial copy-only verification attempt could not find the unchecked-out
+validator; its exit-2 Python output remains in c6-final-validation01.log.
+Initializing that new worktree's sparse checkout fixed the setup without
+editing any evidence or source. This was a local verification setup issue,
+not a new product observation or a hidden successful test.
+
+The authorized successor implementation is delegated to gpt-6-astra because
+the preferred gpt-6.1-sol invocation failed at encrypted-context hydration.
+Root remains the non-implementing reviewer/acceptor. P44-SUCCESSOR-01 uses a
+pinned project-local package specification and the actual C6 B/I lineage;
+it retains original criterion/command IDs and C4 PASS origins. At most two
+after invocation slots are admitted, with no automatic continuation. A
+second slot requires root adjudication, a closed previous failure, unchanged
+source/frontier and concrete repair or external-state-change evidence. Every
+failed receipt stays bound; command text and observation budgets cannot be
+reset. Shared capture transport/retry policy, profiles and product stay
+unchanged. Stable source delivery, successor freeze, actual precheck/rerun
+plan and only the missing SELECT/list observations still precede final P4-4
+adjudication. No production release, main merge, gate unlock or device work
+is authorized by this closeout.

@@ -1,0 +1,123 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P4-4-v6",
+  "contract_sha256": "DBB6BF4BF986B320DFE91A7A3B6817CD4031A156BE310B9F87BBAD51E65120A9",
+  "round_id": "P44-20261020-06",
+  "overall_result": "NOT_RUN",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "P44-HISTORY",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN: C6 offline-identity recovery; actual predecessor C5 and original C4 PASS remain bound."
+    },
+    {
+      "id": "P44-CONFIGURATION",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN: C6 offline-identity recovery; actual predecessor C5 and original C4 PASS remain bound."
+    },
+    {
+      "id": "P44-RAW-RUNS",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN: C6 offline-identity recovery; actual predecessor C5 and original C4 PASS remain bound."
+    },
+    {
+      "id": "P44-REHEARSAL",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN: C6 offline-identity recovery; actual predecessor C5 and original C4 PASS remain bound."
+    },
+    {
+      "id": "P44-RAW-STATE",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN: C6 offline-identity recovery; actual predecessor C5 and original C4 PASS remain bound."
+    },
+    {
+      "id": "P44-RAW-READBACK",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN: C6 offline-identity recovery; actual predecessor C5 and original C4 PASS remain bound."
+    },
+    {
+      "id": "P44-APPROVALS",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN: C6 offline-identity recovery; actual predecessor C5 and original C4 PASS remain bound."
+    },
+    {
+      "id": "P44-ISOLATION",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN: C6 offline-identity recovery; actual predecessor C5 and original C4 PASS remain bound."
+    },
+    {
+      "id": "P44-HYGIENE",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN: C6 offline-identity recovery; actual predecessor C5 and original C4 PASS remain bound."
+    }
+  ],
+  "evidence_hashes": {},
+  "commands": [],
+  "artifacts": []
+}

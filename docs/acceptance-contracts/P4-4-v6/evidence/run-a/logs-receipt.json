@@ -1,0 +1,16 @@
+{
+  "method": "GITHUB_CLI_GET",
+  "path": "/repos/Eitan-S-23/E-Track/actions/runs/39313672925/attempts/1/logs",
+  "exit_code": 0,
+  "signal": null,
+  "process_closed": true,
+  "ended": "2026-10-20T00:54:22.867Z",
+  "artifact": {
+    "path": "run-a/logs.zip",
+    "size_bytes": 173214,
+    "sha256": "fd4523eac301fb277809faebb8bddf74b599ee7103fc375b4d4fa80b6a90f7bf"
+  },
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_size_bytes": 0,
+  "stderr_projection": ""
+}

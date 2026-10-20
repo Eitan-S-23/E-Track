@@ -1,0 +1,150 @@
+{
+  "observedAt": "2026-10-18T23:29:36.320Z",
+  "mode": "delivery",
+  "root": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "head": "b56534d7b6c993c0795010d0404fb8a81f7eeb9d",
+  "branch": "dev/p4-4/config-integration-20261018",
+  "status": "M docs/ota-exec-notes/P4-4-s3-interface-2026-10-19.md",
+  "inputs": [
+    {
+      "path": ".github/scripts/firmware-bindings-check.mjs",
+      "sizeBytes": 6400,
+      "sha256": "b11a5a99c4ff6053262b1934fe2eba0e58d1e6e671cddb8e92bafaa229364354"
+    },
+    {
+      "path": ".github/workflows/firmware-build.yml",
+      "sizeBytes": 47855,
+      "sha256": "4184f8bd9fbe3faf443ae17385816c8abb1c4abce953794d16bb39f3e207d866"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/upload-firmware-r2-asset.mjs",
+      "sizeBytes": 6571,
+      "sha256": "5a0774dcb9683898e70c930a41f7381d707cac0991a3cced2919fd7781099dc9"
+    },
+    {
+      "path": "tests/ota/firmware-pipeline.host.test.ts",
+      "sizeBytes": 70288,
+      "sha256": "8ccb8c73f80799937b24f1b6aa2477c6e421427937955b626e61c8553acd31e5"
+    },
+    {
+      "path": "tests/ota/test_firmware_s3.mjs",
+      "sizeBytes": 11130,
+      "sha256": "6c281b3fe8df6725b16af9afd9d8022957b84632e3c3b2e54805a8ac26e7b3c0"
+    },
+    {
+      "path": "tests/ota/test_firmware_workflow.mjs",
+      "sizeBytes": 25486,
+      "sha256": "ed74a6ea72de4ecdd22a5693e465463dc8b383687639ffb73281563a335b8ddd"
+    },
+    {
+      "path": "tests/ota/test_acceptance_bundle.py",
+      "sizeBytes": 184575,
+      "sha256": "bdd19a47d27d42c77cfc53b03466752ddc61b73b13d9ec7c97474b7533705e21"
+    },
+    {
+      "path": "docs/ota-cross-system-contracts.md",
+      "sizeBytes": 132308,
+      "sha256": "0e90c25cf2f05214ab0b0dafd522b7ac4dd1f116f9d4f69f51fe5661a8fbb35e"
+    },
+    {
+      "path": "docs/ota-prompts/prompt-P4-1-implementation.md",
+      "sizeBytes": 17837,
+      "sha256": "e0e1a27289208e0ecadc445292d0c8417e0d13fd84c5ad57155aefffda56276b"
+    },
+    {
+      "path": "docs/ota-prompts/prompt-P4-4-integration.md",
+      "sizeBytes": 7591,
+      "sha256": "1f613c11ec18bd9cad93a95ef63a1b6b4676ac463b1d0e4461c82e3fccff4069"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-interface-2026-10-19.md",
+      "sizeBytes": 20499,
+      "sha256": "1a89c6cf7369f313f6acd8ee8d94e0c71a6c276ea3a38e3b563a30bd9db0d661"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-configuration-2026-10-18.md",
+      "sizeBytes": 42814,
+      "sha256": "a9f5797a22ccb3155065ef563eff126c64ba4c3fe3067f7556617e137ace834e"
+    },
+    {
+      "path": ".cache/p44-run.cjs",
+      "sizeBytes": 5269,
+      "sha256": "602fff00207be77d20ab7e21fdb1af591126772191719418f9433c241b59b6e5"
+    },
+    {
+      "path": ".cache/p44-remediation-audit.cjs",
+      "sizeBytes": 7846,
+      "sha256": "d555cd00144b526b469f47d7fc5e91e39b6ce3cb8cf034d61e75567c8976fe6a"
+    }
+  ],
+  "scopes": [
+    ".cache/p44",
+    ".cache/firmware-key-build-tests",
+    ".cache/firmware-pipeline-tests",
+    ".cache/firmware-workflow-tests",
+    "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/.vite",
+    "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/.vite-temp"
+  ],
+  "missingScopes": [],
+  "checked": {
+    "files": 3388,
+    "directories": 1592,
+    "bytes": 142837177
+  },
+  "gitTargets": [
+    "worktrees/p4-4-integration-20261018/index",
+    "worktrees/p4-4-integration-20261018/index.lock",
+    "worktrees/p4-4-integration-20261018/HEAD",
+    "worktrees/p4-4-integration-20261018/HEAD.lock",
+    "worktrees/p4-4-integration-20261018/COMMIT_EDITMSG",
+    "worktrees/p4-4-integration-20261018/logs/HEAD",
+    "refs/heads/dev/p4-4/config-integration-20261018",
+    "refs/heads/dev/p4-4/config-integration-20261018.lock",
+    "logs/refs/heads/dev/p4-4/config-integration-20261018",
+    "refs/remotes/origin/dev/p4-4/config-integration-20261018",
+    "refs/remotes/origin/dev/p4-4/config-integration-20261018.lock",
+    "logs/refs/remotes/origin/dev/p4-4/config-integration-20261018",
+    "objects"
+  ],
+  "immutableInputsUnchanged": true,
+  "externalCleanup": false,
+  "scope": "Selected controlled output paths and inspected commands; not a machine-wide trace",
+  "externalReadOnlyObservations": [
+    {
+      "path": "C:/Users/SU/AppData/LocalLow/Microsoft/CryptnetUrlCache/Content/ABD721CDC3648033BA8C827AF15A4543",
+      "exists": true,
+      "sizeBytes": 309,
+      "mtime": "2026-10-18T05:11:29.717Z"
+    },
+    {
+      "path": "C:/Users/SU/AppData/LocalLow/Microsoft/CryptnetUrlCache/MetaData/ABD721CDC3648033BA8C827AF15A4543",
+      "exists": true,
+      "sizeBytes": 192,
+      "mtime": "2026-10-18T05:11:29.717Z"
+    },
+    {
+      "path": "C:/Users/SU/AppData/LocalLow/Microsoft/CryptnetUrlCache/Content/B6E4D06BF128A1673A8DAFB4E25B990D",
+      "exists": true,
+      "sizeBytes": 309,
+      "mtime": "2026-10-18T22:07:24.836Z"
+    },
+    {
+      "path": "C:/Users/SU/AppData/LocalLow/Microsoft/CryptnetUrlCache/MetaData/B6E4D06BF128A1673A8DAFB4E25B990D",
+      "exists": true,
+      "sizeBytes": 192,
+      "mtime": "2026-10-18T23:11:19.003Z"
+    },
+    {
+      "path": "C:/Users/SU/AppData/Local/Microsoft/PowerShell/StartupProfileData-NonInteractive",
+      "exists": true,
+      "sizeBytes": 68032,
+      "mtime": "2026-10-17T08:37:13.169Z"
+    },
+    {
+      "path": "C:/Users/SU/AppData/Local/Microsoft/Windows/PowerShell/StartupProfileData-NonInteractive",
+      "exists": true,
+      "sizeBytes": 1004,
+      "mtime": "2026-10-18T23:25:22.222Z"
+    }
+  ]
+}
