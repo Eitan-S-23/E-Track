@@ -7,8 +7,11 @@ missing-pair/configuration blocker is RESOLVED by the later agent handoff and
 root's independent 15-GET / 28-assertion readback. The successful provisioning
 source differs from the previously denied local token; it is not evidence that
 the old token's 403 became 200. Formal P4-4 remains IN_PROGRESS, not PASS:
-V1, V2 and V3 are closed EVIDENCE_GAP rounds. V3's large gzip pages completed,
-but a later read reset before HTTP headers; bounded recovery is under review.
+V1 through V4 are closed EVIDENCE_GAP rounds. In V4 the owner personally rejected
+A and approved B; B's new-chain rehearsal, independent bytes/readbacks and
+production read-only preflight passed. The after-state collector retained 31
+complete responses before a connection timeout. Only missing after evidence and
+offline aggregate decisions remain, with C4/3.2.9 preserved as the product target.
 Historical failures remain below;
 see Independent Credential Handoff for the source, protection and lifecycle
 limits, and the final continuation sections for current execution state.
@@ -1510,7 +1513,9 @@ reservation remain original evidence, not an unreported extra business run.
 The V4 gap sealer source is archived in evidence/sealing/p44-v4-gap-close.py,
 SHA-256 94860e763859fe1f53fabe37e45b032d35cc082b720d50e5d03d95a6b6c91c4e.
 The actual formal privacy command then passed over 1149 files, 132 ZIP members
-and 102 decoded D1 representations; no DATA files were added after that scan.
+and 102 decoded D1 representations. No DATA files were added after the formal
+privacy command closed; its log, receipt and result were the three excluded
+self-outputs and were covered by the subsequent staged-byte audit.
 The final matrix SHA-256 is
 25d71ccb7707c83a62ace11e6662b2bdeab5e85df45faa557326010219f038d7.
 It records 14 actual command receipts, only formal-after exiting 1. HISTORY,
@@ -1539,8 +1544,9 @@ by this evidence recovery. Gates remain false; main and devices remain untouched
 
 Retained build output has 640 GCC warnings and zero errors: 246 -W warnings,
 385 wchar_t-size notices, eight newlib unimplemented notices and one RWX notice.
-There are 11 distinct dependency advisories, three moderate and eight high,
-not 33 and not fixed or proven exploitable by this work. The original build
+npm reported 11 vulnerabilities (three moderate and eight high), not 33 by
+adding duplicate run summaries. Structured advisory IDs were not independently
+deduplicated; this work neither fixed nor established exploitability. The original build
 stdout hash is 77da8a0494274a9dca1326a67b79583e5d42db51d20a78bc0e8a7dd9621cd272.
 All selected new writes are in this guarded task worktree or the previously
 authorized shared Git metadata. One disclosed accidental task-root empty file
@@ -1564,3 +1570,89 @@ freeze-to-bundle ancestry. The corrected P4-4 card and readiness tests passed
 2/2; the incremental staged review verified both document bytes, unchanged
 final matrix and shared-root index. The secret pre-commit hook stayed enabled.
 Source changes for after-only recovery start only after B4/index delivery.
+
+### V4 Delivery And After-Only Development
+
+I4 is 7168568489ab0eb67a9e7a05106f245e7243421e. The first push returned HTTP 408
+and exit 1; its message "Everything up-to-date" was not accepted as delivery.
+One subsequent native Git ls-remote confirmed the task ref still at C4. The
+same authorized push then used standard HTTP/1.1 and a 512-MiB in-memory
+postBuffer, without changing Git configuration on disk, and completed with
+exit 0 at I4. The original failure, outcome check and successful push are in
+.cache/p44/logs/p44-v4-delivery-push-01.json,
+p44-v4-push-outcome-01.json and p44-v4-delivery-push-buffered-01.json.
+No force push, amended commit, main merge or platform configuration change
+occurred. B4 and I4 were independently reviewed as truthful EVIDENCE_GAP records.
+
+The Node recovery and Python packaging owners are now implementing only two
+Tools/ota leaves and their two targeted tests. The separate reviewer checks the
+same stable batch, including source identity, path/secret boundaries, inherited
+originals, eight required command IDs and four expected direct C4 reuses.
+The entire Tools/acceptance tree and profile configuration stay unchanged.
+The above expected reuse is not a formal plan until the actual new tooling
+commit is frozen and the stock planner runs against the real C4 final matrix.
+
+This operational note also corrects the earlier advisory-count wording and
+privacy self-output explanation following independent feedback. Frozen B4
+DATA, matrix and index bytes remain unchanged. The correction does not reopen
+successful A/B or require another whole-bundle scan.
+
+### Concentrated C5 Development Review
+
+The independent reviewer has closed P44-C5-REVIEW-01 through 06 on the stable
+four-file batch. Network admission consumes the exact C5 contract/initial
+matrix/real predecessor plan and original-file inventory; the Node caller
+checks the Python admission identity. All three complete schemas are checked
+before network activity. Old after data is never presented as a fresh response,
+and the first missing D1 page remains protected audit_logs OFFSET 16. After
+configuration checks compare secret names and created_at/updated_at, variables,
+review policies and the still-C4 descriptor; only the tooling branch ref may
+advance to C5. New capture/assembly results bind exact file references and
+C4/B4/C5 identities. Four reusable criterion/command/artifact/external signatures
+remain unchanged; only the five affected criteria and their eight command IDs
+are adapted.
+
+Review of actual originals found one pre-existing interpretation defect before
+formal C5 execution: the old inspector rejects Cloudflare's internal _cf_KV
+WITHOUT ROWID table before excluding internal tables from business pagination.
+The new Python leaf adapts only that database-snapshot interpretation. Original
+schema bytes and the complete schema remain in the final delta comparison;
+only enumerated business tables receive the rowid-pagination restriction.
+Business WITHOUT ROWID, changed internal schema, malformed pages and incorrect
+identities still fail. The original inspector is unchanged on disk, and the
+local function substitution is restored in finally. No D1 observation was
+repeated to repair this parser issue.
+
+Node's final self-test passed 69 assertion groups from
+2026-10-20T04:12:25.781Z to 04:12:44.599Z, with a closed exit-0 receipt. It binds
+source 719a49f9f05f908dd984ba399e8f22568335f5dee8a78e8f6797df420a5ddd28
+and test 93f7197da54243e85b549d5611798a62a2699ff2a240c352142442fd8e6f6cfc.
+Python's final self-test passed 34 tests, its wrapper closed at
+2026-10-20T04:13:15.068Z with exit 0. It binds source
+ed786eede5cdd2d4afa029351db822a9a28cde51d134e522db92837ea3588d1c and test
+8c251a65428154a000d4133a78eee9009039e2a54d2d0a9881942ccf4e93f758.
+The first Python batch remains failed (13 passed, seven errors: six prospective
+Git-fixture errors and the real internal-table issue); the subsequent 29-test
+success and Node's earlier 49-group success retain their own inputs and dates.
+They are not overwritten or relabelled as final-source results.
+
+The stable tests also cover single-attempt CONNECT_TIMEOUT, native double
+30000-ms connector settings with the original 60000-ms total signal, strict
+interpreter arguments, duplicate rows, source/receipt drift, the actual protected
+S3 derived key and base64 scan, and preserving an already-present formal
+contract during later test execution. Actual before/negative originals were
+evaluated without cloud operations. The original approval leaf additionally
+passed one read-only independent check of 18 files; human-action provenance
+still relies on root's actual saved owner confirmations. That preparation is
+not a C4 or C5 formal aggregate PASS and is not repeated for a new receipt.
+
+Root separately matched all four source hashes, actual final test logs/receipts
+and the unchanged shared-root index. The development archive uses the retained
+standard-tar route and includes original failed/successful tests, V4 delivery
+failure/outcome/success, final-validator outputs and byte-exact member checks.
+Current private-parent ACL readback still shows only the current user's
+inheritable full control; no ACL mutation or claim of never-exposure follows.
+All new outputs remain task-local. Entire Tools/acceptance, profile definitions
+and V1-V4 frozen evidence are unchanged. Source review is complete; actual C5
+freeze, precheck, planner and missing after observations are the next steps,
+not results inferred from these development tests.
