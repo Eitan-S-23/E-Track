@@ -790,7 +790,7 @@
 - 凭据入口: `docs/agent-collaboration/credential-registry.md`，`e-track-ci` = `e-track-p41-ci`；旧管理 GET/POST 403 保留原义，不是 e-track-ci 缺失或必须新建 token，也不把测试授权扩展为生产授权。后续成功消费另一份受保护 `.github-actions-secrets.staging.local.json`，未扩大旧测试 CI 用途。独立核对见 `P4-4-credential-handoff-2026-10-19-v2/inventory.json`；不再要求 owner 重选来源，也不重建已成功凭据。首版投影遗漏旧 Track 标识符遮蔽已修正，原字节移入忽略缓存保留。
 - 当前整改入口: `docs/ota-exec-notes/P4-4-s3-interface-2026-10-19.md`。新链不能直接沿用旧链 rehearsal 背书；主验收按真实依赖冻结必要新观测，不把既有“不重复成功演练”解释为新链免测。P4-1/P4-2 历史完成态和认领不变。
 - 历史独立预审与配置交付: Codex root；`docs/ota-exec-notes/P4-4-s3-preacceptance-2026-10-19.md` 及 `P4-4-root-review-2026-10-19/`。P44-REVIEW-01/02 已关闭；P44-DEPLOY-01 的 staging 查询脱敏误关闭与恢复、11 项依赖告警及外部缓存归因未决均保留。两次 Worker 代码部署不是生产固件发布；该准备阶段尚未执行新链 rehearsal、注册、R2 写入或设备操作，后续 A/B 实绩见当前状态。
-- 当前行动: P44-CREDENTIAL-01 已解决；两次真实 reviewer 动作及新链成功原件已独立核验，不再要求 owner 重做。先交付 V5 缺口包/索引，再以 C5 为实际前驱、C4 为原始 PASS 源冻结最小补证；原始 token ID 已离线匹配，不重做辅助 verify，不增加权限或重建凭据。产品仍为 C4/3.2.9，工具冻结与产品身份分开；不改 descriptor/Worker、不重跑工作流/上传/注册，APPROVALS 与 ISOLATION 的正式离线汇总仍待完整后置证据。生产工作流执行仍在 P5 后，readiness 派生规则、旧冻结证据及原认领不变。
+- 当前行动: P44-CREDENTIAL-01 已解决；owner 无需重做 A/B。V5 缺口包 B5=21fa17f 与索引 I5=7ae9112 已推送，C6 离线身份整改自测 Node 121 组、Python 55 项通过，首批夹具失败保留。主验收完成整批独立复核后，以 C5 为实际前驱、C4 为原始 PASS 源冻结最小补证；不重做辅助 verify、不增加权限或重建凭据。产品仍为 C4/3.2.9，工具冻结与产品身份分开；不改 descriptor/Worker、不重跑工作流/上传/注册，APPROVALS 与 ISOLATION 的正式离线汇总仍待完整后置证据。生产工作流执行仍在 P5 后，readiness 派生规则、旧冻结证据及原认领不变。
 
 ---
 

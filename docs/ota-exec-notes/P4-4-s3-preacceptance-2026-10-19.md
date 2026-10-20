@@ -1771,3 +1771,71 @@ archived sealer passed. Raw logs and original provider output stay byte-exact.
 This later index commit records B5 separately from its C5 input freeze. The
 task-branch push must finish before C6 source edits; this is still a gap closure,
 not whole-card PASS, production authority or main integration.
+
+### V5 Delivered And C6 Development Batch
+
+I5 is 7ae9112dcb8a910a541005df3421ed75fe8be3cb. The task-branch push closed
+exit 0, moving its remote ref from C5 to I5 without changing main. Its original
+is .cache/p44/logs/p44-v5-delivery-push-01.json. The later optional GitHub run-list
+lookup failed with a TLS handshake timeout; p44-v5-ci-status-01.json/log preserve
+that failure. It was not retried, is not a credential denial or a workflow
+failure, and supplies no new CI-status conclusion.
+
+Only the existing Node/Python recovery leaves and their two tests changed for
+C6. The entire Tools/acceptance tree, profile and C1-C5 frozen bundles remain
+unchanged. The implementation now reads the fixed historical identity offline,
+without verify or fallback, separates C4 product/origin from the C5 predecessor,
+preserves all 1185 C5 DATA files and uses independent v6 namespaces. Copy targets
+are deduplicated before writes; existing recovery/c4.* is not copied twice.
+Actual planner/reuse calls and all validator command strings carry C5 previous
+arguments plus explicit C4 reuse-source. Precheck/plan receipts must reference
+their own exact recovery-commands-v6 log, not another valid output.
+
+The same batch fixes a discovered privacy error path: hashing a file containing
+only the local token yields the derived S3 secret. A failed scan must not emit
+that value through file_hashes. The scanner now omits sensitive failed digests
+while retaining independent scan counts and failed paths; successful complete
+hash mapping is unchanged. Synthetic raw-ID, derived-key, base64 and token-only
+cases cover the serialized report. This is a demonstrated error-path risk, not
+evidence that an actual token was exposed. The separate v6 staged scanner adds
+the same fixed raw-ID sentinel and uses boolean digest comparisons so a failed
+assertion does not print actual data digests. Old executed scanners are unchanged.
+
+Node's actual self-test passed 121 assertion groups, closed exit 0, from
+2026-10-20T07:35:16.604Z to 07:37:32.238Z. Source SHA-256 is
+373d15c32507b10b05247bcae4c078bc1766b579ab88ea691a75e6addf1bf6f9;
+test SHA-256 is
+577f49e11734e36cfc5b4970c500cb04cf306628851645bf2486f325b53a9df0.
+Originals are .cache/p44-v6-development/node-01.json/log and
+selftest-01/result.json. Its actual mock after()/assemble() output is labelled
+OFFLINE_CROSS_LANGUAGE_SYNTHETIC, not a cloud observation. The interop receipt
+f9a08abda69e75a9c06f6b02db48264916869b2f50ffa6221084f9b8bf820e1c
+binds 39 files, which the Python positive and mismatch cases consume unchanged.
+
+Python's early core run passed 8/8 under its recorded earlier source. The first
+full run passed 54/55: the missing-file fixture raised a bare uppercase string
+that matched the safe error-code grammar instead of a real OSError shape. Only
+that fixture was corrected to include errno and a path, retaining checks for
+redaction, fixed-file access and zero fallback. The original failed log is
+.cache/p44/logs/p44-v6-python-tests-01.log, SHA-256
+cbc9284639a0848cad3b18d0c9439c6a36599aa34aa9c19a7a31a92824bb291e.
+The final full run passed 55/55 in 149.403 seconds and closed exit 0 at
+2026-10-20T08:03:49.745Z. Its log SHA-256 is
+f4dda15a878b0154182e5ec132d007b55a2454fdff51a5b69125e2579de61f93,
+receipt SHA-256
+4b99622976b7824483a680cdbe0e300f5b489de88bb59bb0a3b29cffdb00c736.
+Final Python source is
+31230e4afc350f684ecf7b7501cd765a901ed8fb8df3f9577544c3665d205c97;
+test is bd50db4394d09022e4ed4cffcdbd83b4f2597ff53fa5d137e569ff0573bd771f.
+No earlier pass is relabelled as a final-source result, and Node was not rerun
+to supply the Python interop cases.
+
+Root independently matched all four current source hashes and read the closed
+test receipts. Manual-file diff checks pass with four LF/CRLF notices; those
+notices are not new GCC warnings. The Node owner's 46 outputs and Python owner's
+90 fixture paths are task-local, and no formal C6 package was created by them.
+Independent batch review, compact development archival, source delivery and
+the actual C6 freeze/precheck/plan still precede any missing after observation.
+Expected four C4 reuses and eight required command IDs are not promoted to an
+executed formal plan from unit tests. No new workflow, upload, registration,
+production preflight, gate unlock, main merge or device action occurred.

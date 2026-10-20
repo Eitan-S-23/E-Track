@@ -4,20 +4,33 @@ const capture = require('../acceptance/p44/capture.cjs');
 const leaf = capture._test;
 const { fs, path, assert, cp } = s;
 const { gunzipSync } = require('node:zlib');
-const DATA = path.join(s.root, 'docs/acceptance-contracts/P4-4-v5/evidence');
-const CONTRACT = path.join(s.root, 'docs/acceptance-contracts/P4-4-v5.contract.json');
+const DATA = path.join(s.root, 'docs/acceptance-contracts/P4-4-v6/evidence');
+const CONTRACT = path.join(s.root, 'docs/acceptance-contracts/P4-4-v6.contract.json');
 const SELF = 'Tools/ota/p44-after-recovery.cjs';
 const C4 = '2756ca95e26ec636216313271708b3304d61a5cc';
 const B4 = 'da37711799a21c4eb2c5d082dab1a7b81d028511';
 const I4 = '7168568489ab0eb67a9e7a05106f245e7243421e';
+const C5 = '9bfc48573a5eed190583411ac465bd847424a286';
+const B5 = '21fa17f7da91a0d336ae1f1a7f1a93910beb2ab7';
+const I5 = '7ae9112dcb8a910a541005df3421ed75fe8be3cb';
+const C5_CONTRACT_SHA = 'ac95899a5dfdc8010dfc26ff350a2ffd94a72328412dd7a56705f72a99d83687';
+const C5_MATRIX_SHA = '0c79b01bbb97d276aa2fce322c0ab7f4aa5be65bc183a1457c75ca69f4c1f5dc';
+const PREDECESSOR = Object.freeze({ predecessor_commit: C5, predecessor_bundle_commit: B5, predecessor_index_commit: I5 });
 const BRANCH = 'dev/p4-4/config-integration-20261018';
 const REPO = '/repos/Eitan-S-23/E-Track';
-const FIXTURE = 'inputs/after-recovery.json';
+const FIXTURE = 'inputs/after-recovery-v6.json';
+const RECOVERY = 'recovery-v6/';
+const COMMANDS = 'recovery-commands-v6/';
 const OLD = 'snapshots/after/';
-const TAIL = 'snapshots/after-tail/';
+const TAIL = 'snapshots/after-tail-v6/';
 const GAP = 'protected-audit_logs-rows8-16';
 const SCHEMA_SQL = 'SELECT name,type,sql FROM sqlite_master ORDER BY type,name';
 const TOKEN_ID_SHA = '0c22488a9bee1355603d8d61faca06fcacbdafccfed8a4ba7dc490af7cacdedc';
+const OFFLINE_IDENTITY = Object.freeze({
+  source_path: '.cache/p41-dev-20261015/.cache/cf-readonly-20261015-r1/token-status.json',
+  size_bytes: 483, sha256: '693ac971c7473e03f2fe526d117efe8b295cd403d24f8f66961ecb31ca563afa',
+  id_pointer: '/body/result/id', id_sha256: TOKEN_ID_SHA, mode: 'offline-no-fallback',
+});
 const roles = Object.keys(capture.resources);
 const moduleRoot = path.join(s.root, 'app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules');
 const canonical = capture.canonical;
@@ -70,7 +83,7 @@ async function withLeaves(io, operation, options = {}) {
   for (const key of Object.keys(old)) s[key] = io[key];
   leaf.setHttp(configureHttp(options.http));
   leaf.setPrivateCapture((label, bytes) => {
-    const directory = options.privateRoot || path.join(s.root, '.cache/p44/private/capture-failures/P4-4-v5');
+    const directory = options.privateRoot || path.join(s.root, '.cache/p44/private/capture-failures/P4-4-v6');
     const file = s.guard(path.join(directory, relative(label) + '.wire.body'));
     assert(!fs.existsSync(file), 'PRIVATE_ORIGINAL_EXISTS');
     if (bytes === undefined) return;
@@ -84,22 +97,43 @@ async function withLeaves(io, operation, options = {}) {
 }
 function loadRecovery(io) {
   const input = io.read(FIXTURE);
-  assert.equal(input.schema, 'p44-after-recovery-v1', 'RECOVERY_SCHEMA');
+  assert.equal(input.schema, 'p44-after-recovery-v2', 'RECOVERY_SCHEMA');
   assert.equal(input.source_commit, C4); assert.equal(input.source_bundle_commit, B4); assert.equal(input.source_index_commit, I4);
+  for (const [key, value] of Object.entries(PREDECESSOR)) assert.equal(input[key], value, 'RECOVERY_PREDECESSOR');
+  assert.deepEqual(input.offline_identity, OFFLINE_IDENTITY, 'RECOVERY_OFFLINE_SOURCE');
+  assert.equal(input.source_contract.path, 'recovery/c4.contract.json');
+  assert.equal(input.source_matrix.path, 'recovery/c4.final-evidence-matrix.json');
   const contract = JSON.parse(reference(io, input.source_contract));
   const matrix = JSON.parse(reference(io, input.source_matrix));
   assert.equal(contract.contract_id, 'P4-4-v4'); assert.equal(contract.freeze_commit, C4); assert.equal(contract.status, 'FROZEN');
   assert.equal(matrix.contract_id, contract.contract_id); assert.equal(matrix.contract_sha256.toLowerCase(), s.sha256(reference(io, input.source_contract)));
   assert.equal(matrix.overall_result, 'EVIDENCE_GAP');
-  for (const id of ['P44-RAW-RUNS', 'P44-REHEARSAL', 'P44-RAW-READBACK']) {
+  assert.equal(input.predecessor_contract.path, RECOVERY + 'c5.contract.json');
+  assert.equal(input.predecessor_matrix.path, RECOVERY + 'c5.final-evidence-matrix.json');
+  const previousContractBytes = reference(io, input.predecessor_contract), previousMatrixBytes = reference(io, input.predecessor_matrix);
+  assert.equal(s.sha256(previousContractBytes), C5_CONTRACT_SHA, 'RECOVERY_PREDECESSOR_CONTRACT');
+  assert.equal(previousMatrixBytes.length, 182214); assert.equal(s.sha256(previousMatrixBytes), C5_MATRIX_SHA, 'RECOVERY_PREDECESSOR_MATRIX');
+  const previousContract = JSON.parse(previousContractBytes), previousMatrix = JSON.parse(previousMatrixBytes);
+  assert.equal(previousContract.contract_id, 'P4-4-v5'); assert.equal(previousContract.freeze_commit, C5);
+  assert.equal(previousMatrix.contract_id, 'P4-4-v5'); assert.equal(previousMatrix.contract_sha256.toLowerCase(), C5_CONTRACT_SHA);
+  assert.equal(previousMatrix.overall_result, 'EVIDENCE_GAP');
+  for (const id of ['P44-CONFIGURATION', 'P44-RAW-RUNS', 'P44-REHEARSAL', 'P44-RAW-READBACK']) {
     const rows = matrix.criteria.filter(item => item.id === id);
     assert.equal(rows.length, 1); assert.equal(rows[0].result, 'PASS'); assert.equal(rows[0].execution, 'EXECUTED');
+    const prior = previousMatrix.criteria.filter(item => item.id === id);
+    assert.equal(prior.length, 1); assert.equal(prior[0].result, 'PASS'); assert.equal(prior[0].execution, 'REUSED');
+    assert.equal(prior[0].origin_contract_sha256.toLowerCase(), s.sha256(reference(io, input.source_contract)));
+    assert.equal(prior[0].origin_matrix_sha256.toLowerCase(), s.sha256(reference(io, input.source_matrix)));
   }
   assert(Array.isArray(input.files));
   const files = new Map();
   for (const ref of input.files) { relative(ref.path); assert(!files.has(ref.path), 'RECOVERY_DUPLICATE_FILE'); files.set(ref.path, ref); }
   const original = ref => { assert.deepEqual(files.get(ref.path), ref, 'RECOVERY_SOURCE_REFERENCE'); return reference(io, ref); };
   const document = ref => JSON.parse(original(ref));
+  assert.equal(input.private_verify_failure.path, 'recovery/private-verify-failure.json');
+  const privateFailure = document(input.private_verify_failure);
+  assert.equal(privateFailure.error_code, 'ECONNRESET'); assert.equal(privateFailure.attempts, 1);
+  assert(!Object.hasOwn(privateFailure, 'status') && !Object.hasOwn(privateFailure, 'body'), 'RECOVERY_PRIVATE_PHASE_UNKNOWN');
   for (const [key, name] of Object.entries({ target: 'target.json', before: 'snapshots/before.json', negatives: 'negatives.json',
     run_a: 'run-a/final.json', run_b: 'run-b/final.json', reviewer_attestation: 'reviewer-attestation.json' })) {
     assert.equal(input[key].path, name); original(input[key]);
@@ -212,20 +246,22 @@ function validatePrefix(ctx) {
   assert.equal(ctx.old.size, visited.size); return ctx;
 }
 function admit(ctx, contract, head, report, contractHash) {
-  assert.equal(contract.contract_id, 'P4-4-v5'); assert.equal(contract.status, 'FROZEN');
+  assert.equal(contract.contract_id, 'P4-4-v6'); assert.equal(contract.status, 'FROZEN');
   assert.match(contract.freeze_commit, /^[0-9a-f]{40}$/); assert.notEqual(contract.freeze_commit, C4);
   assert.equal(head, contract.freeze_commit, 'RECOVERY_TOOL_HEAD');
   assert.equal(report?.schema, 'p44-after-admission-v1', 'RECOVERY_ADMISSION'); assert.equal(report.ok, true);
   assert.equal(report.freeze_commit, contract.freeze_commit); assert.equal(report.source_commit, C4); assert.equal(report.source_bundle_commit, B4);
+  for (const [key, value] of Object.entries(PREDECESSOR)) assert.equal(report[key], value, 'RECOVERY_ADMISSION_PREDECESSOR');
   assert.match(contractHash, /^[0-9a-f]{64}$/);
   assert.equal(report.contract_sha256.toLowerCase(), contractHash, 'RECOVERY_ADMISSION_CONTRACT');
   const external = contract.external_inputs.filter(item => item.evidence_path === 'evidence/' + FIXTURE);
   assert.equal(external.length, 1); assert.equal(external[0].evidence_sha256.toLowerCase(), s.sha256(ctx.io.readBytes(FIXTURE)));
-  assert.equal(ctx.io.read('recovery-commands/formal-precheck.json').exitCode, 0, 'RECOVERY_PRECHECK');
+  assert.equal(ctx.io.read(COMMANDS + 'formal-precheck.json').exitCode, 0, 'RECOVERY_PRECHECK');
   for (const kind of ['before', 'negatives']) {
-    const result = ctx.io.read('recovery/' + kind + '-result.json');
+    const result = ctx.io.read(RECOVERY + kind + '-result.json');
     assert.equal(result.schema, 'p44-after-existing-v1'); assert.equal(result.ok, true); assert.equal(result.kind, kind);
-    assert.deepEqual(result.source, ctx.input[kind]); assert.equal(result.source_bundle_commit, B4); assert.equal(result.platform_operations, 0);
+    assert.deepEqual(result.source, ctx.input[kind]); assert.equal(result.source_commit, C4); assert.equal(result.source_bundle_commit, B4); assert.equal(result.platform_operations, 0);
+    for (const [key, value] of Object.entries(PREDECESSOR)) assert.equal(result[key], value, 'RECOVERY_EXISTING_PREDECESSOR');
   }
   ctx.toolCommit = contract.freeze_commit; return ctx;
 }
@@ -255,32 +291,31 @@ async function d1Read(ctx, label, role, sql, api = leaf) {
   const result = await api.d1(TAIL + label, role, sql);
   response(ctx, result.envelope, 'POST', d1Route(role), 200, sql); return result;
 }
-async function protectedPair(ctx) {
+function identityFromOriginal(raw, expected) {
+  assert(Buffer.isBuffer(raw) && raw.length === expected.size_bytes, 'RECOVERY_OFFLINE_SIZE');
+  assert.equal(s.sha256(raw), expected.sha256, 'RECOVERY_OFFLINE_DIGEST');
+  assert.equal(expected.id_pointer, '/body/result/id', 'RECOVERY_OFFLINE_POINTER');
+  const value = JSON.parse(raw), id = value?.body?.result?.id;
+  assert.equal(value.status, 200); assert.equal(value.body.success, true); assert.equal(value.body.result.status, 'active');
+  assert(typeof id === 'string' && /^[0-9a-f]{32}$/.test(id), 'RECOVERY_OFFLINE_ID');
+  assert.equal(s.sha256(id), expected.id_sha256, 'RECOVERY_OFFLINE_ID_DIGEST');
+  return id;
+}
+function offlinePair(ctx, readPrivate = fs.readFileSync) {
+  assert.deepEqual(ctx.input.offline_identity, OFFLINE_IDENTITY, 'RECOVERY_OFFLINE_SOURCE');
   const project = path.resolve(s.root, '../..');
-  const token = fs.readFileSync(s.guard(path.join(project, '.cache/p41-dev-20261015/.cache/cf-auth-input/token.txt'), project), 'utf8').trim();
+  const source = s.guard(path.join(project, OFFLINE_IDENTITY.source_path), project);
+  assert.equal(fs.statSync(source).size, OFFLINE_IDENTITY.size_bytes, 'RECOVERY_OFFLINE_SIZE');
+  const raw = readPrivate(source), id = identityFromOriginal(raw, OFFLINE_IDENTITY);
+  const token = readPrivate(s.guard(path.join(project, '.cache/p41-dev-20261015/.cache/cf-auth-input/token.txt'), project)).toString('utf8').trim();
   assert(token, 'RECOVERY_LOCAL_TOKEN');
-  const label = 'recovery/private-verify';
-  const started = new Date().toISOString();
-  ctx.io.write(label + '-reservation.json', { method: 'GET', path: '/user/tokens/verify', started, attempts_allowed: 1 });
-  let raw;
-  try {
-    raw = await leaf.transport('https://api.cloudflare.com/client/v4/user/tokens/verify', 'GET', { authorization: 'Bearer ' + token });
-    const data = JSON.parse(raw.bytes);
-    assert.equal(raw.status, 200); assert.equal(data.success, true); assert.equal(data.result.status, 'active');
-    assert.match(data.result.id, /^[0-9a-f]{32}$/); assert.equal(s.sha256(data.result.id), TOKEN_ID_SHA, 'RECOVERY_TOKEN_ID');
-    const pair = { accessKeyId: data.result.id, secretAccessKey: s.sha256(token) };
-    ctx.io.addSensitive(pair.accessKeyId); ctx.io.addSensitive(pair.secretAccessKey);
-    ctx.io.write(label + '.json', { ok: true, method: 'GET', path: '/user/tokens/verify', status: raw.status, started,
-      ended: new Date().toISOString(), attempts: 1, original_sha256: s.sha256(raw.bytes), original_size_bytes: raw.bytes.length,
-      response_projection: { success: true, status: 'active', id_sha256: TOKEN_ID_SHA },
-      omitted_original: 'Private authentication input; token ID stays in memory. Not a business snapshot response.' });
-    return pair;
-  } catch (error) {
-    ctx.io.write(label + '-failure.json', { ok: false, started, ended: new Date().toISOString(), attempts: 1,
-      error_code: /^[A-Z0-9_]+$/.test(error.code || '') ? error.code : 'PRIVATE_VERIFY_FAILED',
-      ...(raw ? { status: raw.status, original_sha256: s.sha256(raw.bytes), original_size_bytes: raw.bytes.length } : {}) });
-    throw error;
-  }
+  const pair = { accessKeyId: id, secretAccessKey: s.sha256(token) }, historical = JSON.parse(raw);
+  for (const value of [token, pair.accessKeyId, pair.secretAccessKey]) ctx.io.addSensitive(value);
+  ctx.io.write(RECOVERY + 'offline-identity.json', { schema: 'p44-offline-token-identity-v1', ok: true,
+    ...OFFLINE_IDENTITY, verify_requests: 0, current_active_observed: false, evaluated_at: new Date().toISOString(),
+    historical: { started: historical.started, finished: historical.finished, status: historical.status },
+    interpretation: 'Fixed historical identity read offline; not a fresh active-status check. No network fallback.' });
+  return pair;
 }
 function stagingPair() {
   const project = path.resolve(s.root, '../..');
@@ -340,10 +375,10 @@ async function afterConfiguration(ctx, api = leaf) {
   result.repository_gate = gate.envelope; result.tool_ref = remote.envelope;
   result.product_commit = C4; result.tool_commit = ctx.toolCommit; return result;
 }
-async function after(ctx, api = leaf, getPair = protectedPair, getStagingPair = stagingPair) {
+async function after(ctx, api = leaf, getPair = offlinePair, getStagingPair = stagingPair) {
   assert(ctx.toolCommit && ctx.old.size === 31, 'RECOVERY_NOT_ADMITTED');
-  for (const name of ['recovery/after-reservation.json', 'snapshots/after.json', 'recovery/after-result.json']) assert(!ctx.io.exists(name), 'RECOVERY_ALREADY_EXECUTED');
-  ctx.io.write('recovery/after-reservation.json', { product_commit: C4, tool_commit: ctx.toolCommit, source_bundle_commit: B4,
+  for (const name of [RECOVERY + 'after-reservation.json', 'snapshots/after.json', RECOVERY + 'after-result.json']) assert(!ctx.io.exists(name), 'RECOVERY_ALREADY_EXECUTED');
+  ctx.io.write(RECOVERY + 'after-reservation.json', { product_commit: C4, tool_commit: ctx.toolCommit, source_bundle_commit: B4, ...PREDECESSOR,
     started: new Date().toISOString(), old_complete: 31, old_failed: 1, first_missing: GAP });
   const pair = await getPair(ctx), result = { databases: {}, buckets: {}, github: {} };
   for (const role of roles) {
@@ -400,17 +435,18 @@ async function after(ctx, api = leaf, getPair = protectedPair, getStagingPair = 
   }
   result.protected_configuration = await afterConfiguration(ctx, api);
   assert.equal(ctx.used.size, 31, 'RECOVERY_PREFIX_NOT_CONSUMED');
-  result.recovery = { source_commit: C4, source_bundle_commit: B4, tool_commit: ctx.toolCommit,
+  result.recovery = { source_commit: C4, source_bundle_commit: B4, tool_commit: ctx.toolCommit, ...PREDECESSOR,
     input: ctx.io.fileRef(FIXTURE), complete_originals: ctx.input.after_complete, failed_originals: ctx.input.after_failed,
+    private_verify_failure: ctx.input.private_verify_failure,
     interpretation: 'Original C4 after responses retain their original times; only missing tail reads were executed.' };
   const snapshot = ctx.io.write('snapshots/after.json', result);
-  ctx.io.write('recovery/after-result.json', { ok: true, snapshot, old_complete: 31, old_failed: 1,
+  ctx.io.write(RECOVERY + 'after-result.json', { ok: true, snapshot, old_complete: 31, old_failed: 1,
     new_d1_reads: ctx.fresh.length, first_new_d1: ctx.fresh[0], product_commit: C4, tool_commit: ctx.toolCommit,
-    source_commit: C4, source_bundle_commit: B4, freeze_commit: ctx.toolCommit });
+    source_commit: C4, source_bundle_commit: B4, freeze_commit: ctx.toolCommit, ...PREDECESSOR });
   return result;
 }
 function assemble(ctx) {
-  const afterResult = ctx.io.read('recovery/after-result.json'); assert.equal(afterResult.ok, true);
+  const afterResult = ctx.io.read(RECOVERY + 'after-result.json'); assert.equal(afterResult.ok, true);
   const manifest = ctx.document(ctx.files.get('rehearsal-manifest.json'));
   assert.equal(manifest.schema, 'p44-observations-v1'); assert.deepEqual(manifest.target, ctx.input.target);
   assert(manifest.run_a && manifest.run_b && manifest.artifact && manifest.artifact_listing, 'RECOVERY_MANIFEST_INCOMPLETE');
@@ -419,8 +455,8 @@ function assemble(ctx) {
   assert.equal(Object.keys(manifest.readbacks).length, 3); for (const record of Object.values(manifest.readbacks)) ctx.original(record.body);
   manifest.reviewer_attestation = ctx.input.reviewer_attestation;
   const output = ctx.io.write('manifest.json', manifest);
-  ctx.io.write('recovery/assemble-result.json', { ok: true, manifest: output, source_commit: C4,
-    source_bundle_commit: B4, freeze_commit: ctx.toolCommit, platform_operations: 0 });
+  ctx.io.write(RECOVERY + 'assemble-result.json', { ok: true, manifest: output, source_commit: C4,
+    source_bundle_commit: B4, freeze_commit: ctx.toolCommit, ...PREDECESSOR, platform_operations: 0 });
 }
 function containedEnvironment(directory) {
   for (const key of ['NODE_OPTIONS', 'NODE_V8_COVERAGE', 'NODE_COMPILE_CACHE', 'SSLKEYLOGFILE', 'GIT_TRACE', 'GIT_TRACE2',
@@ -447,16 +483,17 @@ function commandAllowed(command, args) {
 }
 function validatorArgs(label) {
   assert(['formal-precheck', 'formal-rerun-plan'].includes(label), 'RECOVERY_VALIDATOR_LABEL');
-  const args = ['-I', '-S', '-B', 'Tools/acceptance/validate_bundle.py', '--contract', 'docs/acceptance-contracts/P4-4-v5.contract.json',
-    '--repo-root', s.root.replaceAll('\\', '/'), '--previous-contract', 'docs/acceptance-contracts/P4-4-v4.contract.json',
-    '--previous-matrix', 'docs/acceptance-contracts/P4-4-v4/final-evidence-matrix.json', '--matrix',
-    'docs/acceptance-contracts/P4-4-v5/evidence-matrix.json'];
+  const args = ['-I', '-S', '-B', 'Tools/acceptance/validate_bundle.py', '--contract', 'docs/acceptance-contracts/P4-4-v6.contract.json',
+    '--repo-root', s.root.replaceAll('\\', '/'), '--previous-contract', 'docs/acceptance-contracts/P4-4-v5.contract.json',
+    '--previous-matrix', 'docs/acceptance-contracts/P4-4-v5/final-evidence-matrix.json',
+    '--reuse-source', 'docs/acceptance-contracts/P4-4-v4.contract.json', 'docs/acceptance-contracts/P4-4-v4/final-evidence-matrix.json', '--matrix',
+    'docs/acceptance-contracts/P4-4-v6/evidence-matrix.json'];
   if (label === 'formal-rerun-plan') args.push('--write-rerun-plan', 'rerun-plan.json');
   return args;
 }
 async function runCommand(io, label, command, args, environment) {
   assert(/^[a-z0-9-]+$/.test(label), 'RECOVERY_COMMAND_LABEL'); commandAllowed(command, args);
-  const stem = 'recovery-commands/' + label;
+  const stem = COMMANDS + label;
   for (const suffix of ['.log', '.json', '-reservation.json']) assert(!io.exists(stem + suffix), 'RECOVERY_COMMAND_EXISTS');
   const started = new Date().toISOString();
   io.write(stem + '-reservation.json', { label, command, args, cwd: s.root, started });
@@ -484,11 +521,11 @@ async function main(args) {
   if (args[0] === 'run') {
     const [, label, command, ...rest] = args;
     const contract = JSON.parse(fs.readFileSync(s.guard(CONTRACT)));
-    assert.equal(contract.status, 'FROZEN'); assert.equal(contract.contract_id, 'P4-4-v5');
+    assert.equal(contract.status, 'FROZEN'); assert.equal(contract.contract_id, 'P4-4-v6');
     const actual = ['node', SELF, ...args].join(' ');
     if (!['formal-precheck', 'formal-rerun-plan'].includes(label)) assert(contract.commands.some(item => item.id === label && item.command === actual), 'RECOVERY_FROZEN_COMMAND');
     else { assert.equal(command, 'python'); assert.deepEqual(rest, validatorArgs(label), 'RECOVERY_VALIDATOR_COMMAND'); }
-    return runCommand(io, label, command, rest, containedEnvironment(path.join(s.root, '.cache/p44-v5-host')));
+    return runCommand(io, label, command, rest, containedEnvironment(path.join(s.root, '.cache/p44-v6-host')));
   }
   assert(args.length === 1 && ['after', 'assemble'].includes(args[0]), 'RECOVERY_MODE');
   return withLeaves(io, async () => {
@@ -501,9 +538,9 @@ async function main(args) {
     console.log(JSON.stringify({ ok: true, mode: args[0], product_commit: C4, tool_commit: ctx.toolCommit })); return 0;
   });
 }
-module.exports = { DATA, CONTRACT, C4, B4, I4, BRANCH, REPO, FIXTURE, OLD, TAIL, GAP, SCHEMA_SQL, TOKEN_ID_SHA,
+module.exports = { DATA, CONTRACT, C4, B4, I4, C5, B5, I5, PREDECESSOR, BRANCH, REPO, FIXTURE, RECOVERY, COMMANDS, OLD, TAIL, GAP, SCHEMA_SQL, TOKEN_ID_SHA, OFFLINE_IDENTITY,
   makeIO, reference, configureHttp, withLeaves, loadRecovery, validatePrefix, admit, pythonAdmission, tables, allowedRead, d1Read, afterConfiguration,
-  after, assemble, containedEnvironment, commandAllowed, validatorArgs, runCommand, main };
+  identityFromOriginal, offlinePair, after, assemble, containedEnvironment, commandAllowed, validatorArgs, runCommand, main };
 if (require.main === module) main(process.argv.slice(2)).then(code => { process.exitCode = code; }).catch(error => {
   console.error(JSON.stringify({ ok: false, error_code: /^[A-Z0-9_]+$/.test(error.code || '') ? error.code : 'RECOVERY_FAILED' })); process.exitCode = 1;
 });

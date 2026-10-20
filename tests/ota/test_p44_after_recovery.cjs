@@ -1,10 +1,10 @@
-// Offline C4-original integration and native request/wrapper checks. No cloud operations.
+// Offline C6 recovery over preserved C5/C4 originals. No cloud operations.
 const r = require('../../Tools/ota/p44-after-recovery.cjs');
 const s = require('../../Tools/acceptance/p44/run.cjs');
 const c = require('../../Tools/acceptance/p44/capture.cjs');
 const { fs, path, assert } = s;
 const { gzipSync } = require('node:zlib');
-const originalRoot = path.join(s.root, 'docs/acceptance-contracts/P4-4-v4/evidence');
+const originalRoot = path.join(s.root, 'docs/acceptance-contracts/P4-4-v5/evidence');
 const base = new Map();
 const bytes = value => Buffer.isBuffer(value) ? value : Buffer.from(JSON.stringify(value));
 const ref = (name, value) => ({ path: name, size_bytes: value.length, sha256: s.sha256(value) });
@@ -17,11 +17,19 @@ function walk(directory, prefix = '') {
 }
 walk(originalRoot);
 const originalFiles = [...base].map(([name, value]) => ref(name, value));
-base.set('recovery/c4.contract.json', fs.readFileSync(path.join(s.root, 'docs/acceptance-contracts/P4-4-v4.contract.json')));
-base.set('recovery/c4.final-evidence-matrix.json', fs.readFileSync(path.join(s.root, 'docs/acceptance-contracts/P4-4-v4/final-evidence-matrix.json')));
-const input = { schema: 'p44-after-recovery-v1', source_commit: r.C4, source_bundle_commit: r.B4, source_index_commit: r.I4,
+for (const [name, source] of [['recovery/c4.contract.json', 'docs/acceptance-contracts/P4-4-v4.contract.json'],
+  ['recovery/c4.final-evidence-matrix.json', 'docs/acceptance-contracts/P4-4-v4/final-evidence-matrix.json']]) {
+  assert(base.get(name).equals(fs.readFileSync(path.join(s.root, source))), 'C5_CHANGED_C4_ORIGINAL');
+}
+base.set(r.RECOVERY + 'c5.contract.json', fs.readFileSync(path.join(s.root, 'docs/acceptance-contracts/P4-4-v5.contract.json')));
+base.set(r.RECOVERY + 'c5.final-evidence-matrix.json', fs.readFileSync(path.join(s.root, 'docs/acceptance-contracts/P4-4-v5/final-evidence-matrix.json')));
+const input = { schema: 'p44-after-recovery-v2', source_commit: r.C4, source_bundle_commit: r.B4, source_index_commit: r.I4,
+  ...r.PREDECESSOR, offline_identity: r.OFFLINE_IDENTITY,
   source_contract: ref('recovery/c4.contract.json', base.get('recovery/c4.contract.json')),
-  source_matrix: ref('recovery/c4.final-evidence-matrix.json', base.get('recovery/c4.final-evidence-matrix.json')), files: originalFiles };
+  source_matrix: ref('recovery/c4.final-evidence-matrix.json', base.get('recovery/c4.final-evidence-matrix.json')),
+  predecessor_contract: ref(r.RECOVERY + 'c5.contract.json', base.get(r.RECOVERY + 'c5.contract.json')),
+  predecessor_matrix: ref(r.RECOVERY + 'c5.final-evidence-matrix.json', base.get(r.RECOVERY + 'c5.final-evidence-matrix.json')),
+  private_verify_failure: ref('recovery/private-verify-failure.json', base.get('recovery/private-verify-failure.json')), files: originalFiles };
 for (const [key, name] of Object.entries({ target: 'target.json', before: 'snapshots/before.json', negatives: 'negatives.json',
   run_a: 'run-a/final.json', run_b: 'run-b/final.json', reviewer_attestation: 'reviewer-attestation.json' })) input[key] = ref(name, base.get(name));
 const old = originalFiles.filter(item => item.path.startsWith(r.OLD) && item.path.endsWith('.http.json'));
@@ -32,16 +40,17 @@ let assertions = 0;
 function check(action) { action(); assertions++; }
 async function rejects(action, pattern) { await assert.rejects(action, pattern); assertions++; }
 function memoryIO() {
-  const data = new Map(base), root = path.join(s.root, '.cache/p44-v5-development/memory-unused'), created = [];
-  return { data, created, base: root, destination: name => path.join(root, name), exists: name => data.has(name),
+  const data = new Map(base), root = path.join(s.root, '.cache/p44-v6-development/memory-unused'), created = [], sensitive = [];
+  return { data, created, sensitive, base: root, destination: name => path.join(root, name), exists: name => data.has(name),
     readBytes: name => { assert(data.has(name), 'MISSING_MEMORY_ORIGINAL'); return data.get(name); },
-    read: name => JSON.parse(data.get(name)), fileRef: name => ref(name, data.get(name)), addSensitive() {},
+    read: name => JSON.parse(data.get(name)), fileRef: name => ref(name, data.get(name)),
+    addSensitive(value) { sensitive.push(value, Buffer.from(value).toString('base64')); },
     write(name, value) { assert(!data.has(name), 'MEMORY_ORIGINAL_EXISTS'); const raw = bytes(value); data.set(name, raw); created.push(name); return ref(name, raw); } };
 }
 async function bound(io, operation, http) {
   const exists = fs.existsSync;
   fs.existsSync = name => { const relative = path.relative(io.base, String(name)); return relative && !relative.startsWith('..') && !path.isAbsolute(relative) ? io.data.has(relative.replaceAll('\\', '/')) : exists(name); };
-  try { return await r.withLeaves(io, operation, { http, privateRoot: path.join(s.root, '.cache/p44-v5-development/private-unused') }); }
+  try { return await r.withLeaves(io, operation, { http, privateRoot: path.join(s.root, '.cache/p44-v6-development/private-unused') }); }
   finally { fs.existsSync = exists; }
 }
 function change(io, name, value) {
@@ -49,7 +58,7 @@ function change(io, name, value) {
   const packet = io.read(r.FIXTURE), next = ref(name, raw);
   packet.files = packet.files.map(item => item.path === name ? next : item);
   for (const key of ['after_complete', 'after_failed']) packet[key] = packet[key].map(item => item.path === name ? next : item);
-  for (const key of ['target', 'before', 'negatives', 'run_a', 'run_b']) if (packet[key].path === name) packet[key] = next;
+  for (const key of ['target', 'before', 'negatives', 'run_a', 'run_b', 'reviewer_attestation', 'private_verify_failure']) if (packet[key].path === name) packet[key] = next;
   io.data.set(r.FIXTURE, bytes(packet));
 }
 const fixtureTime = '2026-10-20T04:00:00.000Z';
@@ -110,7 +119,22 @@ function mockAPI(ctx, alter = () => {}) {
   };
   return { api, calls };
 }
-async function originalsAndTail() {
+function exportInterop(io, ctx, output) {
+  const shared = r.makeIO(path.join(output, 'interop'));
+  const names = ['snapshots/after.json', 'manifest.json', r.RECOVERY + 'after-result.json', r.RECOVERY + 'assemble-result.json',
+    'snapshots/before.json', 'rehearsal-manifest.json', ...ctx.input.after_complete.map(item => item.path)];
+  for (const name of [...names, 'contract.json', 'descriptor.json', 'receipt.json']) shared.destination(name);
+  for (const name of names) shared.write(name, io.readBytes(name));
+  shared.write('contract.json', { scope: 'OFFLINE_CROSS_LANGUAGE_SYNTHETIC', contract_id: 'P4-4-v6', freeze_commit: ctx.toolCommit });
+  shared.write('descriptor.json', ctx.input);
+  const receipt = shared.write('receipt.json', { scope: 'OFFLINE_CROSS_LANGUAGE_SYNTHETIC', network_requests: 0,
+    product_commit: r.C4, ...r.PREDECESSOR, tool_commit: ctx.toolCommit,
+    producers: ['Tools/ota/p44-after-recovery.cjs:after', 'Tools/ota/p44-after-recovery.cjs:assemble'],
+    source: ['Tools/ota/p44-after-recovery.cjs', 'tests/ota/test_p44_after_recovery.cjs'].map(name => ref(name, fs.readFileSync(path.join(s.root, name)))),
+    files: shared.created.map(shared.fileRef) });
+  console.log(JSON.stringify({ interop: path.relative(s.root, shared.base).replaceAll('\\', '/'), receipt }));
+}
+async function originalsAndTail(output) {
   const io = memoryIO();
   await bound(io, async () => {
     const ctx = r.validatePrefix(r.loadRecovery(io)); ctx.toolCommit = 'a'.repeat(40);
@@ -122,12 +146,27 @@ async function originalsAndTail() {
       assert.equal(ctx.used.size, 31); assert.equal(ctx.fresh.filter(label => label.startsWith('protected-audit_logs-rows8-')).length, 20);
       assert(calls.every(call => call.role !== 'production'));
       assert.equal(snapshot.recovery.source_commit, r.C4); assert.equal(snapshot.protected_configuration.tool_commit, ctx.toolCommit);
+      for (const [key, value] of Object.entries(r.PREDECESSOR)) assert.equal(snapshot.recovery[key], value);
+      assert.deepEqual(snapshot.recovery.private_verify_failure, input.private_verify_failure);
       assert.equal(JSON.parse(snapshot.protected_configuration.rehearsal.values.OTA_PREVIOUS_RELEASE_JSON).targetCommitSha, r.C4);
       for (const [name, value] of base) assert(io.data.get(name).equals(value), 'ORIGINAL_BYTES_CHANGED');
-      assert(!io.created.some(name => name.startsWith(r.OLD))); assert.equal(io.read('recovery/after-result.json').old_failed, 1);
+      assert(!io.created.some(name => name.startsWith(r.OLD))); assert.equal(io.read(r.RECOVERY + 'after-result.json').old_failed, 1);
+      assert(io.readBytes('inputs/after-recovery.json').equals(base.get('inputs/after-recovery.json')));
+      const authFailure = io.read('recovery/private-verify-failure.json');
+      assert.equal(authFailure.error_code, 'ECONNRESET'); assert.equal(authFailure.attempts, 1);
+      assert(!Object.hasOwn(authFailure, 'status') && !Object.hasOwn(authFailure, 'body'));
     });
     r.assemble(ctx);
-    check(() => { assert.equal(io.read('manifest.json').target.sha256, input.target.sha256); assert.equal(io.read('recovery/assemble-result.json').platform_operations, 0); });
+    check(() => {
+      assert.equal(io.read('manifest.json').target.sha256, input.target.sha256);
+      assert.equal(io.read(r.RECOVERY + 'assemble-result.json').platform_operations, 0);
+      for (const kind of ['after', 'assemble']) {
+        const result = io.read(r.RECOVERY + kind + '-result.json');
+        assert.equal(result.freeze_commit, ctx.toolCommit); assert.equal(result.source_commit, r.C4); assert.equal(result.source_bundle_commit, r.B4);
+        for (const [key, value] of Object.entries(r.PREDECESSOR)) assert.equal(result[key], value);
+      }
+    });
+    exportInterop(io, ctx, output);
     await rejects(() => r.after(ctx, api), /RECOVERY_ALREADY_EXECUTED/);
     check(() => assert.throws(() => r.assemble(ctx), /MEMORY_ORIGINAL_EXISTS/));
   });
@@ -168,7 +207,92 @@ async function originalsAndTail() {
     await bound(next, async () => { check(() => assert.throws(() => r.validatePrefix(r.loadRecovery(next)), undefined, mutation)); assert.equal(next.created.length, 0); });
   }
 }
+async function offlineIdentity() {
+  const fixtureId = '0123456789abcdef0123456789abcdef';
+  const value = { status: 200, body: { success: true, result: { id: fixtureId, status: 'active' } } };
+  const raw = bytes(value), expected = { size_bytes: raw.length, sha256: s.sha256(raw), id_pointer: '/body/result/id', id_sha256: s.sha256(fixtureId) };
+  check(() => assert.equal(r.identityFromOriginal(raw, expected), fixtureId));
+  for (const fields of [{ size_bytes: raw.length - 1 }, { sha256: '0'.repeat(64) }, { id_pointer: '/result/id' }, { id_sha256: '0'.repeat(64) }]) {
+    check(() => assert.throws(() => r.identityFromOriginal(raw, { ...expected, ...fields })));
+  }
+  for (const mutate of [v => { v.status = 403; }, v => { v.body.success = false; }, v => { v.body.result.status = 'expired'; },
+    v => { v.body.result.id = 'invalid'; }, v => { delete v.body.result.id; }]) {
+    const altered = structuredClone(value); mutate(altered); const damaged = bytes(altered);
+    check(() => assert.throws(() => r.identityFromOriginal(damaged, { ...expected, size_bytes: damaged.length, sha256: s.sha256(damaged) })));
+  }
+  const project = path.resolve(s.root, '../..');
+  const originalPath = s.guard(path.join(project, r.OFFLINE_IDENTITY.source_path), project);
+  const tokenPath = s.guard(path.join(project, '.cache/p41-dev-20261015/.cache/cf-auth-input/token.txt'), project);
+  const privateOriginal = fs.readFileSync(originalPath), privateId = r.identityFromOriginal(privateOriginal, r.OFFLINE_IDENTITY);
+  for (const fields of [{ source_path: '.cache/other/token-status.json' }, { size_bytes: 1 }, { sha256: '0'.repeat(64) },
+    { id_pointer: '/result/id' }, { id_sha256: '0'.repeat(64) }, { mode: 'network-fallback' }, { extra: true }]) {
+    const io = memoryIO(); let reads = 0;
+    check(() => {
+      assert.throws(() => r.offlinePair({ io, input: { offline_identity: { ...r.OFFLINE_IDENTITY, ...fields } } }, () => { reads++; }), /RECOVERY_OFFLINE_SOURCE/);
+      assert.equal(reads, 0); assert.equal(io.created.length, 0);
+    });
+  }
+  for (const fail of ['missing-original', 'short-original', 'altered-original']) {
+    const io = memoryIO(), reads = [];
+    check(() => {
+      assert.throws(() => r.offlinePair({ io, input }, file => {
+        reads.push(file); assert.equal(file, originalPath);
+        if (fail === 'missing-original') throw Object.assign(new Error('Missing offline original'), { code: 'ENOENT' });
+        if (fail === 'short-original') return privateOriginal.subarray(1);
+        const damaged = Buffer.from(privateOriginal); damaged[0] ^= 1; return damaged;
+      }));
+      assert.deepEqual(reads, [originalPath]); assert.equal(io.created.length, 0); assert.equal(io.sensitive.length, 0);
+    });
+  }
+  const dummyToken = 'SYNTHETIC_TOKEN_FOR_OFFLINE_IDENTITY_TEST', derived = s.sha256(dummyToken);
+  const io = memoryIO(), reads = [], http = { ProxyAgent: class {}, request() { assert.fail('OFFLINE_NETWORK_FORBIDDEN'); } };
+  await bound(io, async () => {
+    const pair = r.offlinePair({ io, input }, file => {
+      reads.push(file);
+      if (file === originalPath) return privateOriginal;
+      assert.equal(file, tokenPath); return Buffer.from(dummyToken + '\n');
+    });
+    check(() => {
+      assert.deepEqual(reads, [originalPath, tokenPath]); assert.equal(pair.accessKeyId, privateId); assert.equal(pair.secretAccessKey, derived);
+      assert.deepEqual(io.created, [r.RECOVERY + 'offline-identity.json']);
+      const projection = io.read(r.RECOVERY + 'offline-identity.json'), published = io.readBytes(r.RECOVERY + 'offline-identity.json');
+      assert.equal(projection.verify_requests, 0); assert.equal(projection.current_active_observed, false);
+      assert.equal(projection.mode, 'offline-no-fallback'); assert.equal(projection.historical.status, 200);
+      assert.deepEqual(projection.historical, (({ started, finished, status }) => ({ started, finished, status }))(JSON.parse(privateOriginal)));
+      assert.match(projection.interpretation, /historical.*not a fresh active-status check.*No network fallback/);
+      for (const item of [dummyToken, privateId, derived]) for (const secret of [item, Buffer.from(item).toString('base64')]) {
+        assert(io.sensitive.includes(secret)); assert(!published.includes(Buffer.from(secret)));
+      }
+      assert(!io.created.some(name => name.includes('verify') || name.endsWith('.http.json')));
+    });
+  }, http);
+}
 async function regressions() {
+  for (const mutation of ['schema-v1', 'source-commit', 'source-bundle', 'source-index', 'predecessor-commit', 'predecessor-bundle',
+    'predecessor-index', 'swapped-contract', 'swapped-matrix', 'changed-contract', 'changed-matrix', 'private-phase', 'private-attempts']) {
+    const io = memoryIO(), packet = io.read(r.FIXTURE);
+    if (mutation === 'schema-v1') packet.schema = 'p44-after-recovery-v1';
+    else if (mutation === 'source-commit') packet.source_commit = r.C5;
+    else if (mutation === 'source-bundle') packet.source_bundle_commit = r.B5;
+    else if (mutation === 'source-index') packet.source_index_commit = r.I5;
+    else if (mutation === 'predecessor-commit') packet.predecessor_commit = r.C4;
+    else if (mutation === 'predecessor-bundle') packet.predecessor_bundle_commit = r.B4;
+    else if (mutation === 'predecessor-index') packet.predecessor_index_commit = r.I4;
+    else if (mutation.startsWith('swapped-')) {
+      const key = mutation === 'swapped-contract' ? 'contract' : 'matrix';
+      [packet['source_' + key], packet['predecessor_' + key]] = [packet['predecessor_' + key], packet['source_' + key]];
+    } else if (mutation.startsWith('changed-')) {
+      const key = mutation === 'changed-contract' ? 'predecessor_contract' : 'predecessor_matrix', name = packet[key].path;
+      const damaged = Buffer.concat([io.readBytes(name), Buffer.from('\n')]); io.data.set(name, damaged); packet[key] = ref(name, damaged);
+    } else {
+      const name = packet.private_verify_failure.path, failure = io.read(name);
+      if (mutation === 'private-phase') failure.status = 0; else failure.attempts = 2;
+      const damaged = bytes(failure); io.data.set(name, damaged); packet.private_verify_failure = ref(name, damaged);
+      packet.files = packet.files.map(item => item.path === name ? packet.private_verify_failure : item);
+    }
+    io.data.set(r.FIXTURE, bytes(packet));
+    check(() => { assert.throws(() => r.loadRecovery(io), undefined, mutation); assert.equal(io.created.length, 0); });
+  }
   for (const schema of [[{ name: 'bad', type: 'other', sql: 'x' }], [{ name: 'bad', type: 'table', sql: null }],
     [{ name: 'bad', type: 'table', sql: 'CREATE TABLE bad(id)', extra: true }], [{ name: 'bad', type: 'table', sql: 'CREATE TABLE bad(id) WITHOUT ROWID' }]]) check(() => assert.throws(() => r.tables(schema)));
   check(() => assert.deepEqual(r.tables([{ name: '_cf_KV', type: 'table', sql: 'CREATE TABLE _cf_KV(id) WITHOUT ROWID' }]), []));
@@ -184,7 +308,13 @@ async function regressions() {
   check(() => {
     assert.deepEqual(r.validatorArgs('formal-rerun-plan'), [...r.validatorArgs('formal-precheck'), '--write-rerun-plan', 'rerun-plan.json']);
     assert.throws(() => r.validatorArgs('formal-final-check'));
-    assert(r.validatorArgs('formal-precheck').includes('docs/acceptance-contracts/P4-4-v4/final-evidence-matrix.json'));
+    const args = r.validatorArgs('formal-precheck');
+    assert.equal(args[args.indexOf('--contract') + 1], 'docs/acceptance-contracts/P4-4-v6.contract.json');
+    assert.equal(args[args.indexOf('--previous-contract') + 1], 'docs/acceptance-contracts/P4-4-v5.contract.json');
+    assert.equal(args[args.indexOf('--previous-matrix') + 1], 'docs/acceptance-contracts/P4-4-v5/final-evidence-matrix.json');
+    assert.deepEqual(args.slice(args.indexOf('--reuse-source') + 1, args.indexOf('--reuse-source') + 3),
+      ['docs/acceptance-contracts/P4-4-v4.contract.json', 'docs/acceptance-contracts/P4-4-v4/final-evidence-matrix.json']);
+    assert.equal(args[args.indexOf('--matrix') + 1], 'docs/acceptance-contracts/P4-4-v6/evidence-matrix.json');
     assert.throws(() => r.validatorArgs('unreviewed'));
   });
   check(() => assert.throws(() => r.pythonAdmission(() => ({ status: 1, stdout: '{}' })), /RECOVERY_PYTHON_ADMISSION/));
@@ -196,7 +326,7 @@ async function regressions() {
   ]) {
     const io = memoryIO(); await bound(io, async () => {
       const ctx = r.validatePrefix(r.loadRecovery(io)); ctx.toolCommit = 'a'.repeat(40);
-      await rejects(() => r.afterConfiguration(ctx, mockAPI(ctx, alter).api)); check(() => assert(!io.exists('recovery/after-result.json'), name));
+      await rejects(() => r.afterConfiguration(ctx, mockAPI(ctx, alter).api)); check(() => assert(!io.exists(r.RECOVERY + 'after-result.json'), name));
     });
   }
   const io = memoryIO(); await bound(io, async () => {
@@ -213,20 +343,36 @@ async function regressions() {
   });
   const admitted = memoryIO(); await bound(admitted, async () => {
     const ctx = r.validatePrefix(r.loadRecovery(admitted)), head = 'a'.repeat(40);
-    const contract = { contract_id: 'P4-4-v5', status: 'FROZEN', freeze_commit: head,
+    const contract = { contract_id: 'P4-4-v6', status: 'FROZEN', freeze_commit: head,
       external_inputs: [{ evidence_path: 'evidence/' + r.FIXTURE, evidence_sha256: s.sha256(admitted.readBytes(r.FIXTURE)) }] };
     const hash = s.sha256(bytes(contract)), report = { schema: 'p44-after-admission-v1', ok: true, freeze_commit: head,
-      source_commit: r.C4, source_bundle_commit: r.B4, contract_sha256: hash };
-    admitted.write('recovery-commands/formal-precheck.json', { exitCode: 0 });
-    for (const kind of ['before', 'negatives']) admitted.write('recovery/' + kind + '-result.json', {
-      schema: 'p44-after-existing-v1', ok: true, kind, source: ctx.input[kind], source_bundle_commit: r.B4, platform_operations: 0 });
+      source_commit: r.C4, source_bundle_commit: r.B4, ...r.PREDECESSOR, contract_sha256: hash };
+    admitted.write(r.COMMANDS + 'formal-precheck.json', { exitCode: 0 });
+    for (const kind of ['before', 'negatives']) admitted.write(r.RECOVERY + kind + '-result.json', {
+      schema: 'p44-after-existing-v1', ok: true, kind, source: ctx.input[kind], source_commit: r.C4,
+      source_bundle_commit: r.B4, ...r.PREDECESSOR, platform_operations: 0 });
     check(() => assert.equal(r.admit(ctx, contract, head, report, hash).target.commitSha, r.C4));
     for (const altered of [{ ...report, freeze_commit: r.C4 }, { ...report, ok: false }, { ...report, schema: 'stale' },
-      { ...report, contract_sha256: '0'.repeat(64) }, { ...report, source_bundle_commit: '0'.repeat(40) }]) {
+      { ...report, contract_sha256: '0'.repeat(64) }, { ...report, source_bundle_commit: '0'.repeat(40) },
+      ...Object.keys(r.PREDECESSOR).map(key => ({ ...report, [key]: r.C4 }))]) {
       check(() => assert.throws(() => r.admit(ctx, contract, head, altered, hash)));
     }
     check(() => assert.throws(() => r.admit(ctx, contract, r.C4, report, hash)));
+    for (const kind of ['before', 'negatives']) for (const key of ['source_commit', ...Object.keys(r.PREDECESSOR)]) {
+      const name = r.RECOVERY + kind + '-result.json', original = admitted.readBytes(name), altered = admitted.read(name);
+      altered[key] = '0'.repeat(40); admitted.data.set(name, bytes(altered));
+      check(() => assert.throws(() => r.admit(ctx, contract, head, report, hash)));
+      admitted.data.set(name, original);
+    }
   });
+  for (const name of [r.RECOVERY + 'after-reservation.json', 'snapshots/after.json', r.RECOVERY + 'after-result.json']) {
+    const io = memoryIO(); await bound(io, async () => {
+      const ctx = r.validatePrefix(r.loadRecovery(io)); ctx.toolCommit = 'a'.repeat(40); io.write(name, {});
+      const created = [...io.created]; let called = false;
+      await rejects(() => r.after(ctx, {}, () => { called = true; }), /RECOVERY_ALREADY_EXECUTED/);
+      check(() => { assert.equal(called, false); assert.deepEqual(io.created, created); });
+    });
+  }
 }
 async function nativeTransport() {
   const undici = require(path.join(s.root, 'app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/undici'));
@@ -261,31 +407,53 @@ async function physicalWrapper(output) {
   const env = r.containedEnvironment(path.join(output, 'host'));
   const code = await r.runCommand(io, 'help', 'python', ['-I', '-S', '-B', 'Tools/acceptance/p44/inspect.py', '--help'], env);
   check(() => {
-    assert.equal(code, 0); const receipt = io.read('recovery-commands/help.json');
+    assert.equal(code, 0); const receipt = io.read(r.COMMANDS + 'help.json');
     assert.equal(receipt.exitCode, 0); assert.equal(receipt.process_closed, true); assert(receipt.started && receipt.ended);
     assert.equal(s.sha256(io.readBytes(receipt.output.path)), receipt.output.sha256);
     assert(!fs.existsSync(path.join(output, 'wrapper/commands')));
   });
   await rejects(() => r.runCommand(io, 'help', 'python', ['-I', '-S', '-B', 'Tools/acceptance/p44/inspect.py', '--help'], env), /RECOVERY_COMMAND_EXISTS/);
   check(() => assert.throws(() => io.write('../escape.json', {}), /RECOVERY_PATH/));
-  check(() => assert.throws(() => io.write('recovery-commands/help.json', {}), /RECOVERY_ORIGINAL_EXISTS/));
+  check(() => assert.throws(() => io.write(r.COMMANDS + 'help.json', {}), /RECOVERY_ORIGINAL_EXISTS/));
   io.addSensitive('OFFLINE_PROTECTED_DERIVED_KEY');
   check(() => assert.throws(() => io.write('secret.body', gzipSync(Buffer.from('OFFLINE_PROTECTED_DERIVED_KEY'))), /RECOVERY_SENSITIVE_OUTPUT/));
   check(() => assert(!io.exists('secret.body')));
 }
+function formalSnapshot() {
+  const result = {}, packageRoot = path.dirname(r.DATA);
+  function visit(file) {
+    s.guard(file);
+    const relative = path.relative(s.root, file).replaceAll('\\', '/');
+    if (fs.statSync(file).isDirectory()) {
+      result[relative] = 'directory';
+      for (const name of fs.readdirSync(file)) visit(path.join(file, name));
+    } else result[relative] = s.sha256(fs.readFileSync(file));
+  }
+  for (const file of [r.CONTRACT, packageRoot]) if (fs.existsSync(file)) visit(file);
+  return result;
+}
 async function main() {
   assert.equal(process.argv[2], '--output-dir');
   const output = s.guard(path.resolve(process.argv[3]));
-  const relative = path.relative(path.join(s.root, '.cache/p44-v5-development'), output);
+  const relative = path.relative(path.join(s.root, '.cache/p44-v6-development'), output);
   assert(relative && !relative.startsWith('..') && !path.isAbsolute(relative)); assert(!fs.existsSync(output), 'SELFTEST_EXISTS');
+  const formal = formalSnapshot();
   fs.mkdirSync(output, { recursive: true });
   const io = r.makeIO(output), started = new Date().toISOString();
   const source = ['Tools/ota/p44-after-recovery.cjs', 'tests/ota/test_p44_after_recovery.cjs'].map(name => ref(name, fs.readFileSync(path.join(s.root, name))));
   let failure;
-  try { await originalsAndTail(); await regressions(); await nativeTransport(); await physicalWrapper(output); }
+  try {
+    await originalsAndTail(output); await offlineIdentity(); await regressions(); await nativeTransport(); await physicalWrapper(output);
+    check(() => {
+      assert.deepEqual(formalSnapshot(), formal, 'SELFTEST_CHANGED_FORMAL_DATA');
+      for (const item of originalFiles) assert(fs.readFileSync(path.join(originalRoot, item.path)).equals(base.get(item.path)), 'SELFTEST_CHANGED_C5_DATA');
+    });
+  }
   catch (error) { failure = error; }
   const result = { scope: 'OFFLINE_DEVELOPMENT_SELFTEST_ONLY', ok: !failure, started, ended: new Date().toISOString(), assertions,
-    source, cloud_operations: 0, retained_complete_originals: input.after_complete.length, retained_failed_originals: input.after_failed.length,
+    source, cloud_operations: 0, c5_source_files: input.files.length, predecessor_commit: r.C5,
+    retained_complete_originals: input.after_complete.length, retained_failed_originals: input.after_failed.length,
+    retained_private_verify_failures: 1,
     error_code: failure?.code || (failure ? 'SELFTEST_FAILED' : undefined),
     source_location: failure?.stack?.match(/(?:test_p44_after_recovery\.cjs|p44-after-recovery\.cjs):[0-9]+:[0-9]+/)?.[0] };
   io.write('result.json', result); console.log(JSON.stringify(result)); process.exitCode = failure ? 1 : 0;

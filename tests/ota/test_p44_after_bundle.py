@@ -1,4 +1,4 @@
-"""Bounded C5 adapter tests: real C4 reads, synthetic writes, zero network."""
+"""Bounded C6 adapter tests: real C5/C4 reads, synthetic writes, zero network."""
 import base64
 import copy
 import contextlib
@@ -19,7 +19,8 @@ ROOT = Path(__file__).absolute().parents[2]
 SPEC = importlib.util.spec_from_file_location("p44_after_bundle", ROOT / "Tools/ota/p44-after-bundle.py")
 m = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(m)
-DEV = ROOT / ".cache/p44-v5-development/python"
+DEV = ROOT / ".cache/p44-v6-development/python"
+NODE_INTEROP = ROOT / ".cache/p44-v6-development/selftest-01/interop"
 FUTURE_TREE = "e" * 40
 ADDITIONS = ["Tools/ota/p44-after-bundle.py", "Tools/ota/p44-after-recovery.cjs",
              "tests/ota/test_p44_after_bundle.py", "tests/ota/test_p44_after_recovery.cjs"]
@@ -44,6 +45,8 @@ class AfterBundleTests(unittest.TestCase):
     def setUpClass(cls):
         cls.formal_before = formal_snapshot()
         cls.parent, cls.previous = m.source_identity()
+        cls.sources = m.reuse_sources()
+        cls.origin = cls.sources[m.SOURCE_MATRIX_HASH]
         cls.copy_plan, cls.descriptor = m.source_plan()
         cls.original = m.INSPECT.Context(ROOT, m.PARENT / "evidence/manifest.json")
         for number in range(1, 100):
@@ -56,7 +59,7 @@ class AfterBundleTests(unittest.TestCase):
         else:
             raise AssertionError("TEST_BATCH_BOUND")
         print(json.dumps({"development_only": True, "fixture_root": str(cls.batch),
-                          "c4_source_files_verified": len(cls.descriptor["files"]), "network_requests": 0,
+                          "c5_source_files_verified": len(cls.descriptor["files"]), "network_requests": 0,
                           "source_sha256": m.sha(ROOT / m.PYTHON), "tests_sha256": m.sha(Path(__file__))}), flush=True)
 
     @classmethod
@@ -97,11 +100,11 @@ class AfterBundleTests(unittest.TestCase):
         contract = self.contract()
         initial, plan = self.plan(contract)
         hashes = copy.deepcopy(self.previous["evidence_hashes"])
-        old_commands = {item["id"]: item for item in self.previous["commands"]}
+        old_commands = {item["id"]: item for item in self.origin["matrix"]["commands"]}
         commands = []
         for item in contract["commands"]:
             if item["id"] in m.EXECUTED:
-                name = "evidence/recovery-commands/" + item["id"]
+                name = "evidence/" + m.COMMANDS + "/" + item["id"]
                 hashes[name + ".log"] = m.b.sha((name + ".log").encode())
                 hashes[name + ".json"] = m.b.sha((name + ".json").encode())
                 commands.append({"id": item["id"], "command": item["command"], "exit_code": 0, "output_evidence": name + ".log"})
@@ -119,9 +122,23 @@ class AfterBundleTests(unittest.TestCase):
         value = m.mixed_matrix(contract, initial, plan, self.previous, commands, artifacts, hashes)
         return value, contract, plan
 
-    def test_actual_c4_inventory_is_bound_to_b4_and_all_bytes(self):
+    def test_actual_c5_inventory_is_bound_to_b5_and_all_bytes(self):
         self.assertEqual(set(self.descriptor), m.DESCRIPTOR_KEYS)
+        self.assertEqual(self.descriptor["schema"], "p44-after-recovery-v2")
+        self.assertEqual(len(self.descriptor["files"]), 1185)
         self.assertEqual(len(self.copy_plan), len(self.descriptor["files"]) + 2)
+        self.assertEqual(len({target for _, target in self.copy_plan}), len(self.copy_plan))
+        self.assertEqual(self.descriptor["offline_identity"], m.OFFLINE_IDENTITY)
+        for key, value in m.lineage_fields().items():
+            self.assertEqual(self.descriptor[key], value)
+        self.assertEqual(self.descriptor["source_index_commit"], m.SOURCE_INDEX)
+        self.assertEqual(self.parent["freeze_commit"], m.PREDECESSOR_COMMIT)
+        self.assertEqual(self.origin["contract"]["freeze_commit"], m.SOURCE_COMMIT)
+        copied_sources = {target.relative_to(m.DATA).as_posix(): source for source, target in self.copy_plan}
+        self.assertEqual(copied_sources["recovery/c4.contract.json"], m.PARENT / "evidence/recovery/c4.contract.json")
+        self.assertEqual(copied_sources["recovery/c4.final-evidence-matrix.json"], m.PARENT / "evidence/recovery/c4.final-evidence-matrix.json")
+        self.assertEqual(copied_sources[m.RECOVERY + "/c5.contract.json"], m.PARENT_CONTRACT)
+        self.assertEqual(copied_sources[m.RECOVERY + "/c5.final-evidence-matrix.json"], m.PARENT_MATRIX)
         self.assertEqual(len(self.descriptor["after_complete"]), 31)
         self.assertEqual([item["path"] for item in self.descriptor["after_failed"]], [m.FAILED])
         self.assertEqual(m.sha(m.PARENT_MATRIX).upper(), m.PARENT_MATRIX_HASH)
@@ -146,6 +163,79 @@ class AfterBundleTests(unittest.TestCase):
         self.assertEqual(plan["previous_matrix_sha256"], m.PARENT_MATRIX_HASH)
         m.admitted_plan(plan)
         self.assertEqual(initial["overall_result"], "NOT_RUN")
+
+    def test_missing_or_invalid_c4_source_map_fails_closed(self):
+        with patch.object(m, "reuse_sources", return_value={}):
+            with self.assertRaisesRegex(ValueError, "missing original EXECUTED bundle"):
+                self.plan(self.contract())
+        for field, value in (("contract_sha256", "0" * 64), ("original_execution", "REUSED")):
+            sources = copy.deepcopy(self.sources)
+            source = sources[m.SOURCE_MATRIX_HASH]
+            if field == "original_execution":
+                for item in source["matrix"]["criteria"]:
+                    if item["id"] in m.REUSED:
+                        item["execution"] = value
+            else:
+                source[field] = value
+            with self.subTest(field=field), patch.object(m, "reuse_sources", return_value=sources):
+                with self.assertRaisesRegex(ValueError, "invalid original EXECUTED PASS binding"):
+                    self.plan(self.contract())
+
+    def test_skipping_c5_predecessor_is_rejected(self):
+        contract = self.contract()
+        initial = m.initial_matrix(contract, "a" * 64)
+        with self.assertRaisesRegex(ValueError, "next contract version"):
+            m.computed_plan(contract, initial, self.origin["contract"], self.origin["matrix"], digest="a" * 64)
+
+    def test_actual_c5_reuse_history_resolves_only_to_c4(self):
+        previous = {"contract": self.parent, "matrix": self.previous, "contract_sha256": m.PARENT_HASH,
+                    "matrix_sha256": m.PARENT_MATRIX_HASH, "bundle_directory": m.PARENT}
+        self.assertFalse(m.RULES._validate_reuse_history(previous, self.sources, ROOT, set(), set()))
+        self.assertTrue(m.RULES._validate_reuse_history(previous, {}, ROOT, set(), set()))
+        for item in self.previous["criteria"]:
+            if item["id"] in m.REUSED:
+                self.assertEqual(item["execution"], "REUSED")
+                self.assertEqual(item["origin_contract_sha256"], m.SOURCE_HASH)
+                self.assertEqual(item["origin_matrix_sha256"], m.SOURCE_MATRIX_HASH)
+                original = next(row for row in self.origin["matrix"]["criteria"] if row["id"] == item["id"])
+                self.assertEqual((original["execution"], original["result"]), ("EXECUTED", "PASS"))
+        altered = copy.deepcopy(previous)
+        next(item for item in altered["matrix"]["criteria"] if item["id"] == "P44-RAW-RUNS").update(
+            execution="EXECUTED", reused_from_round=None, origin_contract_sha256=None, origin_matrix_sha256=None)
+        self.assertTrue(m.RULES._validate_reuse_history(altered, self.sources, ROOT, set(), set()))
+
+    def test_validation_commands_always_bind_c5_and_explicit_c4_source(self):
+        for key, command in m.validation_commands().items():
+            args = command.split()
+            with self.subTest(mode=key):
+                self.assertEqual(args[args.index("--previous-contract") + 1], m.PARENT_CONTRACT.relative_to(ROOT).as_posix())
+                self.assertEqual(args[args.index("--previous-matrix") + 1], m.PARENT_MATRIX.relative_to(ROOT).as_posix())
+                self.assertEqual(args.count("--reuse-source"), 1)
+                offset = args.index("--reuse-source")
+                self.assertEqual(args[offset + 1:offset + 3], [m.SOURCE_CONTRACT.relative_to(ROOT).as_posix(),
+                                                              m.SOURCE_MATRIX.relative_to(ROOT).as_posix()])
+
+    def test_c6_paths_and_fixture_id_do_not_collide_with_c4_or_c5(self):
+        contract = self.contract()
+        self.assertEqual((contract["contract_id"], contract["version"]), ("P4-4-v6", 6))
+        ids = [item["id"] for item in contract["external_inputs"]]
+        self.assertEqual(len(ids), len(set(ids)))
+        self.assertEqual(ids.count("after-recovery"), 1)
+        self.assertEqual(ids.count(m.FIXTURE_ID), 1)
+        for previous in self.parent["external_inputs"]:
+            self.assertEqual(previous, next(item for item in contract["external_inputs"] if item["id"] == previous["id"]))
+        inherited = {item["path"] for item in self.descriptor["files"]}
+        outputs = {m.FIXTURE, "snapshots/after.json", "manifest.json", "approvals-result.json", "states-result.json"}
+        outputs.update(m.RECOVERY + "/" + name + "-result.json" for name in ("history", "before", "negatives", "after", "assemble", "privacy"))
+        outputs.update(m.COMMANDS + "/" + name + suffix for name in m.EXECUTED | {"formal-precheck", "formal-rerun-plan"}
+                       for suffix in (".json", ".log"))
+        self.assertFalse(inherited & outputs)
+
+    def test_c5_private_failure_retains_unknown_http_receive_stage(self):
+        reference = self.descriptor["private_verify_failure"]
+        self.assertEqual(reference, next(item for item in self.descriptor["files"] if item["path"] == "recovery/private-verify-failure.json"))
+        self.assertEqual(self.original.document(reference), {"ok": False, "started": "2026-10-20T04:54:35.600Z",
+            "ended": "2026-10-20T04:54:40.458Z", "attempts": 1, "error_code": "ECONNRESET"})
 
     def test_command_description_drift_requires_stop_not_replay(self):
         contract = self.contract()
@@ -173,9 +263,9 @@ class AfterBundleTests(unittest.TestCase):
 
     def test_product_target_remains_c4_while_tools_freeze_changes(self):
         contract = self.contract()
-        self.assertEqual(contract["implementation_ref"], m.SOURCE)
-        self.assertNotEqual(contract["freeze_commit"], m.SOURCE)
-        self.assertEqual(self.original.document(self.descriptor["target"])["commitSha"], m.SOURCE)
+        self.assertEqual(contract["implementation_ref"], m.SOURCE_COMMIT)
+        self.assertNotEqual(contract["freeze_commit"], m.SOURCE_COMMIT)
+        self.assertEqual(self.original.document(self.descriptor["target"])["commitSha"], m.SOURCE_COMMIT)
 
     def test_mixed_matrix_has_direct_origins_and_unique_commands(self):
         value, contract, plan = self.mixed()
@@ -187,17 +277,32 @@ class AfterBundleTests(unittest.TestCase):
         for item in value["criteria"]:
             if item["id"] in m.REUSED:
                 self.assertEqual(item["execution"], "REUSED")
-                self.assertEqual(item["origin_contract_sha256"], m.PARENT_HASH)
-                self.assertEqual(item["origin_matrix_sha256"], m.PARENT_MATRIX_HASH)
-        self.assertFalse(m.RULES.validate_reuse(value, contract, self.previous, plan))
+                self.assertEqual(item["origin_contract_sha256"], m.SOURCE_HASH)
+                self.assertEqual(item["origin_matrix_sha256"], m.SOURCE_MATRIX_HASH)
+        self.assertFalse(m.RULES.validate_reuse(value, contract, self.previous, plan, self.sources))
 
     def test_reused_evidence_and_command_tampering_rejected(self):
         value, contract, plan = self.mixed()
         next(item for item in value["criteria"] if item["id"] == "P44-RAW-RUNS")["evidence"].append("rerun-plan.json")
-        self.assertTrue(m.RULES.validate_reuse(value, contract, self.previous, plan))
+        self.assertTrue(m.RULES.validate_reuse(value, contract, self.previous, plan, self.sources))
         value, contract, plan = self.mixed()
         next(item for item in value["commands"] if item["id"] == "formal-dispatch-b")["output_evidence"] = "rerun-plan.json"
-        self.assertTrue(m.RULES.validate_reuse(value, contract, self.previous, plan))
+        self.assertTrue(m.RULES.validate_reuse(value, contract, self.previous, plan, self.sources))
+
+    def test_reused_c4_pass_cannot_be_laundered_to_new_execution(self):
+        value, contract, plan = self.mixed()
+        next(item for item in value["criteria"] if item["id"] == "P44-RAW-RUNS").update(
+            execution="EXECUTED", reused_from_round=None, origin_contract_sha256=None, origin_matrix_sha256=None)
+        self.assertTrue(m.RULES.validate_planned_execution(value, contract, plan))
+
+    def test_admission_rejects_non_c4_reuse_origins(self):
+        _, plan = self.plan(self.contract())
+        plan["reuse_origins"]["P44-RAW-RUNS"]["matrix_sha256"] = m.PARENT_MATRIX_HASH
+        with self.assertRaisesRegex(AssertionError, "ORIGIN_PLAN_DRIFT"):
+            m.admitted_plan(plan)
+        plan["reuse_origins"].clear()
+        with self.assertRaisesRegex(AssertionError, "ORIGIN_PLAN_DRIFT"):
+            m.admitted_plan(plan)
 
     def test_missing_result_or_duplicate_command_cannot_pass(self):
         value, contract, _ = self.mixed()
@@ -297,6 +402,18 @@ class AfterBundleTests(unittest.TestCase):
         self.assertFalse(absent.exists())
         self.assertEqual((directory / "present.bin").read_bytes(), b"preserved")
 
+    def test_duplicate_copy_target_is_rejected_before_any_write(self):
+        directory = self.directory()
+        source = directory / "source.bin"
+        self.write(directory, source.name, b"source")
+        absent = directory / "must-not-exist.bin"
+        with patch.object(m, "source_plan", return_value=([(source, absent), (source, absent)], {})), \
+                patch.object(m.b, "write", side_effect=AssertionError("WRITE_FORBIDDEN")) as writer:
+            with self.assertRaisesRegex(AssertionError, "DUPLICATE_OUTPUT_TARGET"):
+                m.prepare()
+        writer.assert_not_called()
+        self.assertFalse(absent.exists())
+
     def test_reparse_and_sibling_paths_rejected_without_output(self):
         directory = self.directory()
         original = Path.lstat
@@ -317,11 +434,13 @@ class AfterBundleTests(unittest.TestCase):
         directory = self.directory()
         sentinel = b"synthetic-private-needle"
         for name in ("privacy-result.json", "commands/formal-privacy.log", "commands/formal-privacy.json",
-                     "recovery/privacy-result.json", "recovery-commands/formal-privacy.log", "recovery-commands/formal-privacy.json"):
+                     "recovery/privacy-result.json", "recovery-commands/formal-privacy.log", "recovery-commands/formal-privacy.json",
+                     m.RECOVERY + "/privacy-result.json", m.COMMANDS + "/formal-privacy.log", m.COMMANDS + "/formal-privacy.json"):
             self.write(directory, name, sentinel)
         result = m.scan_public(directory, {directory: m.INSPECT.Context(ROOT, directory / "manifest.json")}, {sentinel})
-        self.assertEqual(result["files_scanned"], 3)
-        self.assertEqual(set(result["failed_paths"]), {"privacy-result.json", "commands/formal-privacy.log", "commands/formal-privacy.json"})
+        self.assertEqual(result["files_scanned"], 6)
+        self.assertEqual(set(result["failed_paths"]), {"privacy-result.json", "commands/formal-privacy.log", "commands/formal-privacy.json",
+            "recovery/privacy-result.json", "recovery-commands/formal-privacy.log", "recovery-commands/formal-privacy.json"})
 
     def test_derived_s3_secret_and_base64_are_scanned(self):
         directory = self.directory()
@@ -334,6 +453,110 @@ class AfterBundleTests(unittest.TestCase):
         self.assertFalse(result["ok"])
         self.assertEqual(set(result["failed_paths"]), {"plain.txt", "encoded.txt"})
         self.assertNotIn(derived.decode(), json.dumps(result))
+
+    def synthetic_identity(self, document=None):
+        identifier = "1" * 32
+        raw = json.dumps(document if document is not None else {"body": {"result": {"id": identifier}}}).encode()
+        expected = {**m.OFFLINE_IDENTITY, "size_bytes": len(raw), "sha256": m.b.sha(raw), "id_sha256": m.b.sha(identifier.encode())}
+        return identifier, raw, expected
+
+    def test_offline_identity_reads_fixed_file_with_no_subprocess(self):
+        identifier, raw, expected = self.synthetic_identity()
+        target = ROOT.parents[1] / expected["source_path"]
+        requested = []
+
+        def read(path):
+            self.assertEqual(path, target)
+            requested.append(path)
+            return raw
+
+        with patch.object(m, "OFFLINE_IDENTITY", expected), patch.object(Path, "read_bytes", read), \
+                patch.object(m.subprocess, "run", side_effect=AssertionError("SUBPROCESS_FORBIDDEN")):
+            self.assertEqual(m.offline_identifier(), identifier)
+        self.assertEqual(requested, [target])
+
+    def test_offline_identity_failures_are_redacted_without_fallback(self):
+        identifier, raw, expected = self.synthetic_identity()
+        cases = [(raw + b" ", expected, "OFFLINE_IDENTITY_BYTES"),
+                 (raw.replace(identifier.encode(), b"2" * 32), expected, "OFFLINE_IDENTITY_BYTES"),
+                 (raw, {**expected, "id_sha256": "0" * 64}, "OFFLINE_IDENTITY_ID")]
+        for document, code in (({"body": {"result": {"other": identifier}}}, "OFFLINE_IDENTITY_POINTER"),
+                               ({"body": None}, "OFFLINE_IDENTITY_POINTER"),
+                               ({"body": {"result": {"id": "A" * 32}}}, "OFFLINE_IDENTITY_FORMAT"),
+                               ({"body": {"result": {"id": 123}}}, "OFFLINE_IDENTITY_FORMAT"),
+                               ({"body": {"result": {"id": "1" * 31}}}, "OFFLINE_IDENTITY_FORMAT")):
+            _, altered, pin = self.synthetic_identity(document)
+            cases.append((altered, pin, code))
+        for number, (content, pin, expected_code) in enumerate(cases):
+            output = io.StringIO()
+            with self.subTest(case=number), patch.object(m, "OFFLINE_IDENTITY", pin), \
+                    patch.object(m.subprocess, "run", side_effect=AssertionError("SUBPROCESS_FORBIDDEN")), \
+                    patch.object(m, "privacy", side_effect=lambda: m.offline_id_bytes(content)), contextlib.redirect_stdout(output):
+                self.assertEqual(m.main(["privacy"]), 1)
+            self.assertEqual(json.loads(output.getvalue()), {"ok": False, "error_code": expected_code})
+            self.assertNotIn(identifier, output.getvalue())
+
+    def test_missing_offline_identity_cannot_fall_back_to_verify(self):
+        requested = []
+
+        def missing(path):
+            requested.append(path)
+            raise FileNotFoundError(2, "No such file or directory", str(path))
+
+        output = io.StringIO()
+        with patch.object(Path, "read_bytes", missing), patch.object(m, "privacy", side_effect=m.offline_identifier), \
+                patch.object(m.subprocess, "run", side_effect=AssertionError("SUBPROCESS_FORBIDDEN")), contextlib.redirect_stdout(output):
+            self.assertEqual(m.main(["privacy"]), 1)
+        self.assertEqual(requested, [ROOT.parents[1] / m.OFFLINE_IDENTITY["source_path"]])
+        self.assertEqual(json.loads(output.getvalue()), {"ok": False, "error_code": "P44_AFTER_FAILED"})
+        self.assertNotIn(str(requested[0]), output.getvalue())
+
+    def test_known_needles_expands_offline_id_before_base64(self):
+        identifier, token = "1" * 32, b"synthetic-local-token-input"
+
+        def inputs(path):
+            if path.name == "token.txt":
+                return token
+            if path.name == "p41-ci-token.txt":
+                return b"synthetic-ci-token-input"
+            if path.name == "03.json":
+                return json.dumps({"result": [{"id": "2" * 32}]}).encode()
+            return b'{"cloudflare_api_token":"synthetic-other-secret"}'
+
+        auth = SimpleNamespace(returncode=0, stdout=b"synthetic-github-token")
+        with patch.object(Path, "read_bytes", inputs), patch.object(m, "offline_identifier", return_value=identifier), \
+                patch.object(m.subprocess, "run", return_value=auth):
+            needles = m.known_needles()
+        derived = hashlib.sha256(token).hexdigest().encode()
+        for value in (identifier.encode(), token, derived):
+            self.assertIn(value, needles)
+            self.assertIn(base64.b64encode(value), needles)
+
+    def test_raw_id_derived_key_and_encoded_forms_never_escape_privacy_results(self):
+        directory = self.directory()
+        identifier, token = b"1" * 32, b"synthetic-local-token-input"
+        derived = hashlib.sha256(token).hexdigest().encode()
+        values = {"id.txt": identifier, "token.txt": token, "derived.txt": derived}
+        values.update({"encoded-" + name: base64.b64encode(value) for name, value in list(values.items())})
+        for name, value in values.items():
+            self.write(directory, name, value)
+        result = m.scan_public(directory, {}, m.secret_forms({identifier}, token))
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["files_scanned"], len(values))
+        self.assertEqual(set(result["failed_paths"]), set(values))
+        for value in values.values():
+            self.assertNotIn(value.decode(), json.dumps(result))
+
+    def test_clean_privacy_result_preserves_complete_hash_mapping(self):
+        directory = self.directory()
+        contents = {"first.txt": b"non-secret original", "nested/second.txt": b"different non-secret original"}
+        for name, value in contents.items():
+            self.write(directory, name, value)
+        result = m.scan_public(directory, {}, m.secret_forms({b"1" * 32}, b"synthetic-local-token-input"))
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["files_scanned"], len(contents))
+        self.assertEqual(result["failed_paths"], [])
+        self.assertEqual(result["file_hashes"], {name: m.b.sha(value) for name, value in contents.items()})
 
     def test_historical_gzip_context_and_wrong_sidecar_rejected(self):
         directory = self.directory()
@@ -357,7 +580,7 @@ class AfterBundleTests(unittest.TestCase):
             m.scan_public(directory, contexts, set())
 
     def test_three_original_history_contexts_remain_bound(self):
-        contexts = m.b.privacy_contexts(m.INSPECT, self.parent, m.PARENT / "evidence")
+        contexts = m.b.privacy_contexts(m.INSPECT, self.origin["contract"], m.PARENT / "evidence")
         self.assertEqual(len(contexts), 4)
         expected = m.PARENT / "evidence/p/inputs/predecessor-before/inputs/predecessor-before"
         self.assertIs(m.b.select_privacy_context(expected / "input.body", contexts), contexts[expected])
@@ -370,7 +593,7 @@ class AfterBundleTests(unittest.TestCase):
             m.admit()
         result = json.loads(output.getvalue())
         self.assertEqual(result, {"schema": "p44-after-admission-v1", "ok": True, "freeze_commit": "f" * 40,
-            "source_commit": m.SOURCE, "source_bundle_commit": m.BUNDLE, "contract_sha256": "a" * 64})
+            **m.lineage_fields(), "contract_sha256": "a" * 64})
 
     def result_fixture(self, mismatched_after=False):
         directory = self.directory()
@@ -382,9 +605,9 @@ class AfterBundleTests(unittest.TestCase):
         self.write(directory, "rehearsal-manifest.json", original)
         manifest = {**original, "snapshots": {"before": before, "after": {} if mismatched_after else after}}
         manifest_ref = self.write(directory, "manifest.json", manifest)
-        identity = {"ok": True, "source_commit": m.SOURCE, "source_bundle_commit": m.BUNDLE, "freeze_commit": "f" * 40}
-        self.write(directory, "recovery/after-result.json", {**identity, "snapshot": after_ref})
-        self.write(directory, "recovery/assemble-result.json", {**identity, "manifest": manifest_ref})
+        identity = {"ok": True, **m.lineage_fields(), "freeze_commit": "f" * 40}
+        self.write(directory, m.RECOVERY + "/after-result.json", {**identity, "snapshot": after_ref})
+        self.write(directory, m.RECOVERY + "/assemble-result.json", {**identity, "manifest": manifest_ref})
         return directory, descriptor, m.INSPECT.Context(ROOT, directory / "manifest.json")
 
     def test_after_and_assembly_results_bind_exact_files(self):
@@ -393,9 +616,9 @@ class AfterBundleTests(unittest.TestCase):
             m.capture_results({"freeze_commit": "f" * 40}, descriptor, ctx)
         original = m.read
         for change in (lambda reference: reference.update(sha256="a" * 64), lambda reference: reference.update(path="other.json")):
-            altered = original(directory / "recovery/after-result.json")
+            altered = original(directory / m.RECOVERY / "after-result.json")
             change(altered["snapshot"])
-            with patch.object(m, "DATA", directory), patch.object(m, "read", lambda file: altered if file == directory / "recovery/after-result.json" else original(file)):
+            with patch.object(m, "DATA", directory), patch.object(m, "read", lambda file: altered if file == directory / m.RECOVERY / "after-result.json" else original(file)):
                 with self.assertRaisesRegex(AssertionError, "CAPTURE_RESULT_REFERENCE"):
                     m.capture_results({"freeze_commit": "f" * 40}, descriptor, ctx)
 
@@ -403,6 +626,51 @@ class AfterBundleTests(unittest.TestCase):
         directory, descriptor, ctx = self.result_fixture(mismatched_after=True)
         with patch.object(m, "DATA", directory), self.assertRaisesRegex(AssertionError, "MANIFEST_AFTER_BINDING"):
             m.capture_results({"freeze_commit": "f" * 40}, descriptor, ctx)
+
+    def node_interop(self):
+        directory = m.b.guard(NODE_INTEROP)
+        self.assertTrue(directory.is_dir(), "NODE_AFTER_ASSEMBLE_FIXTURE_REQUIRED")
+        return (directory, m.read(directory / "contract.json"), m.read(directory / "descriptor.json"),
+                m.INSPECT.Context(ROOT, directory / "manifest.json"))
+
+    def test_actual_node_after_assemble_outputs_satisfy_python_contract(self):
+        directory, contract, descriptor, ctx = self.node_interop()
+        before = {file.relative_to(directory).as_posix(): m.sha(file) for file in directory.rglob("*") if file.is_file()}
+        self.assertEqual(contract["freeze_commit"], "a" * 40)
+        self.assertEqual(len(descriptor["after_complete"]), 31)
+        with patch.object(m, "DATA", directory), patch.object(m.subprocess, "run", side_effect=AssertionError("SUBPROCESS_FORBIDDEN")), \
+                patch.object(m.b, "write", side_effect=AssertionError("WRITE_FORBIDDEN")):
+            m.capture_results(contract, descriptor, ctx)
+        self.assertEqual(before, {file.relative_to(directory).as_posix(): m.sha(file)
+                                  for file in directory.rglob("*") if file.is_file()})
+        print(json.dumps({"node_python_interop": True, "fixture": directory.relative_to(ROOT).as_posix(),
+                          "fixture_hashes": before}), flush=True)
+
+    def test_node_after_assemble_lineage_mismatches_are_rejected(self):
+        directory, contract, descriptor, ctx = self.node_interop()
+        original = m.read
+        for name in ("after", "assemble"):
+            path = directory / m.RECOVERY / (name + "-result.json")
+            for field in (*m.lineage_fields(), "freeze_commit"):
+                altered = original(path)
+                altered[field] = "0" * 40
+                with self.subTest(result=name, field=field), patch.object(m, "DATA", directory), \
+                        patch.object(m, "read", lambda file: altered if file == path else original(file)), \
+                        self.assertRaisesRegex(AssertionError, "CAPTURE_SOURCE_BINDING"):
+                    m.capture_results(contract, descriptor, ctx)
+
+    def test_node_after_assemble_reference_mismatches_are_rejected(self):
+        directory, contract, descriptor, ctx = self.node_interop()
+        original = m.read
+        for name, key in (("after", "snapshot"), ("assemble", "manifest")):
+            path = directory / m.RECOVERY / (name + "-result.json")
+            for field, value in (("sha256", "0" * 64), ("size_bytes", 0), ("path", "wrong.json")):
+                altered = original(path)
+                altered[key][field] = value
+                with self.subTest(result=name, field=field), patch.object(m, "DATA", directory), \
+                        patch.object(m, "read", lambda file: altered if file == path else original(file)), \
+                        self.assertRaisesRegex(AssertionError, "CAPTURE_RESULT_REFERENCE"):
+                    m.capture_results(contract, descriptor, ctx)
 
     def test_cli_failure_does_not_echo_supplied_values(self):
         output = io.StringIO()
@@ -421,9 +689,9 @@ class AfterBundleTests(unittest.TestCase):
         outputs = []
         for name, key in (("formal-precheck", "precheck"), ("formal-rerun-plan", "plan")):
             command, *args = m.validation_commands()[key].split(" ")
-            output = {"path": "recovery-commands/" + name + ".log", "size_bytes": 2, "sha256": "b" * 64}
+            output = {"path": m.COMMANDS + "/" + name + ".log", "size_bytes": 2, "sha256": "b" * 64}
             outputs.append(copy.deepcopy(output))
-            documents[m.DATA / "recovery-commands" / (name + ".json")] = {"label": name, "command": command, "args": args,
+            documents[m.DATA / m.COMMANDS / (name + ".json")] = {"label": name, "command": command, "args": args,
                 "cwd": str(ROOT), "process_closed": True, "exitCode": 0, "signal": None, "output": output}
 
         def checked_output(reference):
@@ -446,13 +714,21 @@ class AfterBundleTests(unittest.TestCase):
     def test_admission_rejects_forged_or_unclosed_precheck(self):
         with self.admission_fixture() as (documents, _):
             m.ready()
-            receipt = documents[m.DATA / "recovery-commands/formal-precheck.json"]
+            receipt = documents[m.DATA / m.COMMANDS / "formal-precheck.json"]
             receipt["process_closed"] = False
             with self.assertRaises(AssertionError):
                 m.ready()
             receipt["process_closed"] = True
             receipt["output"]["sha256"] = "c" * 64
             with self.assertRaisesRegex(AssertionError, "RECEIPT_OUTPUT_CHANGED"):
+                m.ready()
+
+    def test_admission_cannot_substitute_another_valid_receipt_output(self):
+        with self.admission_fixture() as (documents, _):
+            precheck = documents[m.DATA / m.COMMANDS / "formal-precheck.json"]
+            plan_receipt = documents[m.DATA / m.COMMANDS / "formal-rerun-plan.json"]
+            precheck["output"] = copy.deepcopy(plan_receipt["output"])
+            with self.assertRaisesRegex(AssertionError, "ADMISSION_OUTPUT_BINDING"):
                 m.ready()
 
     def test_admission_rejects_plan_or_initial_hash_change(self):
@@ -479,9 +755,9 @@ class AfterBundleTests(unittest.TestCase):
 
         class CopiedContext:
             def read(self, reference):
-                if reference == descriptor["source_contract"]:
+                if reference == descriptor["predecessor_contract"]:
                     return original_read(m.PARENT_CONTRACT)
-                if reference == descriptor["source_matrix"]:
+                if reference == descriptor["predecessor_matrix"]:
                     return original_read(m.PARENT_MATRIX)
                 return ctx_original.read(reference)
 
@@ -491,6 +767,43 @@ class AfterBundleTests(unittest.TestCase):
         with patch.object(m, "read", return_value=descriptor), patch.object(m.INSPECT, "Context", return_value=CopiedContext()), \
                 patch.object(Path, "read_bytes", lambda path: b"tampered-nonprefix" if path == target else original_read(path)):
             with self.assertRaisesRegex(m.INSPECT.EvidenceError, "FILE_DIGEST_MISMATCH"):
+                m.verify_import()
+
+    def test_full_c5_import_is_verified_without_formal_copy_or_network(self):
+        descriptor, original = self.descriptor, self.original
+        parent_copies = {descriptor["predecessor_contract"]["path"]: m.PARENT_CONTRACT,
+                         descriptor["predecessor_matrix"]["path"]: m.PARENT_MATRIX}
+        checked = set()
+
+        class CopiedContext:
+            def read(self, reference):
+                checked.add(reference["path"])
+                if reference["path"] not in parent_copies:
+                    return original.read(reference)
+                raw = parent_copies[reference["path"]].read_bytes()
+                assert set(reference) == {"path", "size_bytes", "sha256"}
+                assert len(raw) == reference["size_bytes"] and m.b.sha(raw) == reference["sha256"]
+                return raw
+
+            def document(self, reference):
+                return m.INSPECT.json_bytes(self.read(reference))
+
+        with patch.object(m, "read", return_value=descriptor), patch.object(m.INSPECT, "Context", return_value=CopiedContext()), \
+                patch.object(m.b, "write", side_effect=AssertionError("WRITE_FORBIDDEN")):
+            imported, parent, matrix, _ = m.verify_import(m.PARENT / "evidence")
+        self.assertEqual(imported, descriptor)
+        self.assertEqual(parent, self.parent)
+        self.assertEqual(matrix, self.previous)
+        self.assertTrue({item["path"] for item in descriptor["files"]} <= checked)
+        self.assertEqual(len(checked), 1187)
+
+    def test_import_rejects_offline_scope_and_predecessor_identity_drift(self):
+        for key, value in (("schema", "p44-after-recovery-v1"), ("source_commit", m.PREDECESSOR_COMMIT),
+                           ("predecessor_commit", m.SOURCE_COMMIT), ("predecessor_index_commit", m.SOURCE_INDEX),
+                           ("offline_identity", {**m.OFFLINE_IDENTITY, "mode": "fallback"})):
+            descriptor = {**self.descriptor, key: value}
+            with self.subTest(field=key), patch.object(m, "read", return_value=descriptor), \
+                    patch.object(m.b, "write", side_effect=AssertionError("WRITE_FORBIDDEN")), self.assertRaises(AssertionError):
                 m.verify_import()
 
     def test_existing_formal_contract_is_allowed_but_snapshot_is_immutable(self):
