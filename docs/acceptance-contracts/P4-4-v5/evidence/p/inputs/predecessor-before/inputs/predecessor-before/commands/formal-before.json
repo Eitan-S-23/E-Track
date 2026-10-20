@@ -1,0 +1,19 @@
+{
+  "label": "formal-before",
+  "command": "node",
+  "args": [
+    "Tools/acceptance/p44/capture.cjs",
+    "before"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "started": "2026-10-19T11:27:39.433Z",
+  "ended": "2026-10-19T11:34:43.553Z",
+  "exitCode": 1,
+  "signal": null,
+  "process_closed": true,
+  "output": {
+    "path": "commands/formal-before.log",
+    "size_bytes": 45,
+    "sha256": "54c0ba87d4dac94f8eca931b48fe25999fa00bdf1c5c32d1e8e1f871432491ad"
+  }
+}

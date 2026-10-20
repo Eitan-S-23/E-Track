@@ -7,11 +7,14 @@ missing-pair/configuration blocker is RESOLVED by the later agent handoff and
 root's independent 15-GET / 28-assertion readback. The successful provisioning
 source differs from the previously denied local token; it is not evidence that
 the old token's 403 became 200. Formal P4-4 remains IN_PROGRESS, not PASS:
-V1 through V4 are closed EVIDENCE_GAP rounds. In V4 the owner personally rejected
+V1 through V5 are closed EVIDENCE_GAP rounds. In V4 the owner personally rejected
 A and approved B; B's new-chain rehearsal, independent bytes/readbacks and
 production read-only preflight passed. The after-state collector retained 31
-complete responses before a connection timeout. Only missing after evidence and
-offline aggregate decisions remain, with C4/3.2.9 preserved as the product target.
+complete responses before a connection timeout. C5 stopped at an auxiliary token
+verification connection reset before any new business read; its HTTP receive
+phase is unknown. A matching original token ID is now available offline, without
+new credentials or permissions. Only missing after evidence and offline aggregate
+decisions remain, with C4/3.2.9 preserved as the product target.
 Historical failures remain below;
 see Independent Credential Handoff for the source, protection and lifecycle
 limits, and the final continuation sections for current execution state.
@@ -1656,3 +1659,94 @@ All new outputs remain task-local. Entire Tools/acceptance, profile definitions
 and V1-V4 frozen evidence are unchanged. Source review is complete; actual C5
 freeze, precheck, planner and missing after observations are the next steps,
 not results inferred from these development tests.
+
+### V5 Admission And Honest Gap Closure
+
+C5 is 9bfc48573a5eed190583411ac465bd847424a286, tree
+bd28d777ee526166d9c1050c23e487dddf8eac0a, already pushed to the task branch.
+The unchanged profile blob is 5ef97ae98674373c3cf641676c16ff7baf1b617f.
+Contract P4-4-v5 SHA-256 is
+ac95899a5dfdc8010dfc26ff350a2ffd94a72328412dd7a56705f72a99d83687,
+round P44-20261020-05. Actual precheck and planning both closed successfully
+against the actual C4 predecessor. The initial NOT_RUN matrix SHA-256 is
+b24fe963392fd35c35bfaa8df73c014bdb3f5c9f6a5615897e9f076c7d6e66fa;
+the actual rerun plan is
+d81c8af9a8f6d10d63bb2db1fcda8c5045d640f7f91688642d28ede4e78c842c.
+Only validation inputs changed. CONFIGURATION, RAW-RUNS, REHEARSAL and
+RAW-READBACK directly reuse C4 EXECUTED PASS; no successful business operation
+was repeated. The required history, before and negatives commands then passed
+as actual offline evaluations of retained original bytes.
+
+Formal-after closed with exit 1 at 2026-10-20T04:54:41.802Z after 172832 ms.
+Its auxiliary GET /user/tokens/verify records ECONNRESET, attempts=1, during
+04:54:35.600Z..04:54:40.458Z (4858 ms). The original failure records no status,
+informational/final headers or body-receive state. This is UNKNOWN, not proved
+pre-response failure, credential denial or D1 failure. The original SHA-256 is
+7ebfa717f21722bf19fd65a5441c10ccae58f16adf3796b0221063cea147326e;
+the closed command receipt is
+cdfe411bbc4e33b067746a2ba1a9f494663bd80c1824080fc88fdb337f5f4e94.
+Frozen call ordering and absent downstream outputs establish zero new D1/S3
+business reads. All 31 completed C4 after responses and the earlier failures
+remain unchanged. No after aggregate, complete manifest, approvals or states
+result was generated, and no downstream command exit is invented.
+
+The independently reviewed C5 gap sealer was archived before privacy at
+evidence/recovery/sealing/p44-v5-gap-close.py, SHA-256
+3d9eeb7399feb5b7f42ddabaa7fd3c7cf9874991f9b06feaf80244e0e5bd8047.
+Its separate recovery/failure-report.json has SHA-256
+18f74b72deb5664137a8e21783a072f96dca6e7543d13d24f1492174fc2c644d;
+the C4 failure-report.json was not overwritten. Actual formal-privacy then
+passed over 1182 files, 132 ZIP members and 102 decoded D1 representations,
+including lifecycle checks. No DATA file was added after that command closed;
+the privacy log, receipt and result are its three excluded self-outputs and
+receive the separate staged-byte scan. Final sealing and validation logs stay
+outside DATA in .cache/p44/logs/.
+
+Final matrix SHA-256 is
+0c79b01bbb97d276aa2fce322c0ab7f4aa5be65bc183a1457c75ca69f4c1f5dc
+(182214 bytes). It retains nine original command records and five real C5
+records: history/before/negatives/privacy exit 0, after exit 1. Four criteria
+are REUSED PASS, HISTORY/HYGIENE are new EXECUTED PASS, and RAW-STATE/APPROVALS/
+ISOLATION remain NOT_OBSERVED. The stock final validator with the actual C4
+contract/final matrix closed exit 0, VALIDATION=PASS, overall=EVIDENCE_GAP.
+This validates the honest failed-round bundle; it does not declare P4-4 PASS.
+
+### P44-C5-AUTH: Offline Identity For Minimal Continuation
+
+After the failure, root reconciled already-authorized historical credential
+metadata without a network request. The original at
+D:/github/my/E-Track/.cache/p41-dev-20261015/.cache/cf-readonly-20261015-r1/token-status.json
+is 483 bytes, SHA-256
+693ac971c7473e03f2fe526d117efe8b295cd403d24f8f66961ecb31ca563afa.
+Its /body/result/id is a complete ID matching fingerprint
+0c22488a9bee1355603d8d61faca06fcacbdafccfed8a4ba7dc490af7cacdedc.
+The other historical token-policy diagnostic independently matched the same ID.
+Only fingerprints and source metadata were reported; neither source was changed
+or copied, and the ID/value remains private. Earlier searches that did not find
+the ID do not negate this later discovery. The historical active status is not
+a fresh status check or proof of current capability.
+
+DECIDED: deliver B5 and its later freeze-index commit before editing the frozen
+source. Then adapt only the existing two Tools/ota recovery leaves and their
+tests. Read this fixed metadata file offline with exact byte/hash/ID checks,
+derive the S3 secret in memory from the same existing protected local token,
+and remove auxiliary verification entirely, with no network fallback. Put the
+actual ID, derived key and base64 forms in both privacy and staged-scan needles.
+The planned missing D1/S3 reads, not another token-status request, will establish
+their actual operation-specific authentication. Do not create or rotate tokens,
+change secrets, redeploy Workers, change descriptors or widen permissions.
+
+C6 must use C5 as the actual predecessor and C4 as the explicit original reuse
+source. Preserve all prior files and failure semantics; use new input/result/
+command namespaces rather than overwriting C5. Legacy p/ decoding still uses
+the preserved C4 contract. Product C4/3.2.9, A/B, the 31 completed after responses,
+successful uploads/registration/readbacks and production read-only preflight
+are not replayed. The entire Tools/acceptance tree and profile stay unchanged.
+Source self-tests, independent batch review, real freeze/precheck/plan and only
+the admitted missing observations are required before final adjudication.
+
+No additional owner action is currently necessary. Gates remain false; no
+production release, main merge or device action occurred. New outputs are in
+the guarded task worktree or previously authorized shared Git metadata; the
+shared-root index remains unchanged. Earlier PowerShell/Cryptnet attribution
+remains unresolved, with no external cleanup or machine-wide zero-write claim.

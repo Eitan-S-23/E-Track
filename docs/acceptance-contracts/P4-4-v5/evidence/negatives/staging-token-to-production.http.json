@@ -1,0 +1,33 @@
+{
+  "method": "POST",
+  "path": "/api/ci/firmware/preflight",
+  "started": "2026-10-19T19:41:42.278Z",
+  "request": {
+    "path": "negatives/staging-token-to-production.request.json",
+    "size_bytes": 2,
+    "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+  },
+  "request_attempts": 1,
+  "request_failures": [],
+  "status": 401,
+  "response_headers": {
+    "date": "Mon, 19 Oct 2026 19:41:47 GMT",
+    "content-type": "application/json",
+    "content-length": "109",
+    "connection": "keep-alive",
+    "cache-control": "no-store",
+    "x-request-id": "7f8ff584-bfdf-4455-87a1-1da4aa02eb29",
+    "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=CySqsi4%2BzhUvg4pzpvAUS91s%2B4f9L1obsCYMNbLJaTraoXrar1kiK1Pp6kNFeq4G7Y8WmMZNdxsTJ4MqmmxAlVWMTT3RYN6qDXMjVMNB9qucrSzzXlkTsv0w52chY64hYge47vK8hVD%2FANtPLzGT8lisLSV8KHLja06F20d%2B82J2lMUboj9tbFsI\"}]}",
+    "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+    "server": "cloudflare",
+    "cf-ray": "a4d24324ed6e6192-PDX",
+    "alt-svc": "h3=\":443\"; ma=86400"
+  },
+  "body": {
+    "path": "negatives/staging-token-to-production.body",
+    "size_bytes": 109,
+    "sha256": "03eff3dca5e4418868eeaed77f7e8a33215bf310944219a0a702a2e384da0a93"
+  },
+  "completed": true,
+  "ended": "2026-10-19T19:41:48.234Z"
+}

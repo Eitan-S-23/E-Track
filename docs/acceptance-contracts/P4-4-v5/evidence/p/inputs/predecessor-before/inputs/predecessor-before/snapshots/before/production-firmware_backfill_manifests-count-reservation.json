@@ -1,0 +1,12 @@
+{
+  "method": "POST",
+  "origin": "https://api.cloudflare.com",
+  "path": "/accounts/[ACCOUNT]/d1/database/1cd5db26-6bbd-4595-abef-72ff51ecdaf3/query",
+  "started": "2026-10-19T11:29:50.312Z",
+  "request": {
+    "path": "snapshots/before/production-firmware_backfill_manifests-count.request.json",
+    "size_bytes": 71,
+    "sha256": "1d915ddf53662412e42da2a948fc582b0c46e4cf14d3592f0384dc4eaeb7cc03"
+  },
+  "note": "Reserved before request; a lost response is not permission to replay a mutation."
+}

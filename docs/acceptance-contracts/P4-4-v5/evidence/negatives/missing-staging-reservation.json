@@ -1,0 +1,12 @@
+{
+  "method": "POST",
+  "origin": "https://e-track-firmware-p41-test.tangjichentudou.workers.dev",
+  "path": "/api/ci/firmware/preflight",
+  "started": "2026-10-19T19:41:12.865Z",
+  "request": {
+    "path": "negatives/missing-staging.request.json",
+    "size_bytes": 2,
+    "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+  },
+  "note": "Reserved before request; a lost response is not permission to replay a mutation."
+}

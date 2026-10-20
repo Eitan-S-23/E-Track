@@ -1,0 +1,29 @@
+{
+  "method": "POST",
+  "path": "/accounts/[ACCOUNT]/d1/database/1cd5db26-6bbd-4595-abef-72ff51ecdaf3/query",
+  "started": "2026-10-19T11:30:49.078Z",
+  "request": {
+    "path": "snapshots/before/production-firmware_releases_legacy-count.request.json",
+    "size_bytes": 68,
+    "sha256": "7010cf7eb7e1f06d45c78bfbf59ab827f32ccc60f8050b5d7f6008765b80c4ee"
+  },
+  "status": 200,
+  "response_headers": {
+    "date": "Mon, 19 Oct 2026 11:30:52 GMT",
+    "content-type": "application/json",
+    "content-length": "371",
+    "connection": "keep-alive",
+    "cache-control": "no-store",
+    "api-version": "2026-10-01.epoch",
+    "cf-auditlog-id": "01a153ed-c0da-78df-ba32-b78cb2bf2898",
+    "server": "cloudflare",
+    "cf-ray": "a4cf7407b9bda72a-NRT"
+  },
+  "body": {
+    "path": "snapshots/before/production-firmware_releases_legacy-count.body",
+    "size_bytes": 371,
+    "sha256": "005367870fe6d381f6fa7c0ade7e1104e84164d81245a6160e00e986d4836856"
+  },
+  "completed": true,
+  "ended": "2026-10-19T11:30:53.740Z"
+}

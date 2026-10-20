@@ -1,0 +1,1 @@
+{"sql":"SELECT * FROM \"firmware_releases\" ORDER BY rowid LIMIT 8 OFFSET 0"}
