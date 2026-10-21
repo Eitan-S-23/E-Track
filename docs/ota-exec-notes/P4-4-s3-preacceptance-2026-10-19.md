@@ -2777,3 +2777,30 @@ All existing byte, boundary and credential predicates remain active; the six
 negative self-test predicates are retained. This does not modify the stock
 formal validator, frozen input, contract, matrix or closed evidence. No formal
 command, cloud read or successful observation is repeated for this delivery check.
+
+##### P4-4 Main Delivery Closeout (2026-10-21)
+
+The user's follow-up requested complete P4-4 closeout before the P3-5 handoff.
+PR #30 merged the unchanged v8 delivery tree into main as
+6469233b282bdaf188e764d68128133f553f0247 after all four PR workflows passed.
+C8, B8 and I8 remain reachable, with all v1-v8 frozen bytes unchanged.
+
+Main Governance, GCC and App path checks passed. The Admin mock UI job exposed
+P44-DELIVERY-CI-01: the test helper typed before the dialog's scheduled initial
+focus, placing the reason into the confirmation field; the product correctly
+kept confirmation disabled. The failed run 39599518618 and both bilingual
+failure screenshots are preserved, not reclassified or discarded.
+
+Root changed only the shared UI test helper, not product code, P4-4 tools or
+frozen criteria. Commit 3ecc6722b9eb847f6b6aae196aad6aa6a23a232e waits for the
+existing animation-frame marker and verifies exact field values. PR #31 passed
+and merged as 75d3ad24424989f5a5f38fe237d24deef9decd4f. Main Cloudflare run
+39602375609 passes all jobs, including 36/36 UI cases with zero retries.
+
+P4-4 formal acceptance and main delivery are complete. This is not a new formal
+acceptance or production qualification. Product C4/3.2.9 and gate=false remain;
+no successful business observation or device action was repeated. The original
+main worktree and its dirty files/index are preserved. Full delivery identities,
+CI receipts, warnings, failure evidence and output audit are recorded in
+P4-4-main-closeout-2026-10-21.md and its adjacent inventory. Next task is P3-5
+integration admission and execution, not another P4-4 remediation campaign.

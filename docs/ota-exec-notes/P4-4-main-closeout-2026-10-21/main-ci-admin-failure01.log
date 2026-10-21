@@ -1,0 +1,125 @@
+Admin Typecheck and Mock UI	Run mock Admin UI tests	﻿2026-10-21T12:26:23.8084802Z ##[group]Run set -euo pipefail
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:23.8085233Z ^[[36;1mset -euo pipefail^[[0m
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:23.8085742Z ^[[36;1mnpm run test:ui 2>&1 | tee "$GITHUB_WORKSPACE/.cache/admin-ui/playwright.log"^[[0m
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:23.8161143Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:23.8161620Z env:
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:23.8162077Z   PLAYWRIGHT_BROWSERS_PATH: /home/runner/work/E-Track/E-Track/.cache/admin-browsers
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:23.8162770Z   PW_OUTPUT_DIR: /home/runner/work/E-Track/E-Track/.cache/admin-ui/results
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:23.8163354Z   TMPDIR: /home/runner/work/E-Track/E-Track/.cache/admin-tmp
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:23.8163897Z   XDG_CACHE_HOME: /home/runner/work/E-Track/E-Track/.cache/admin-xdg
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:23.8164491Z   npm_config_cache: /home/runner/work/E-Track/E-Track/.cache/admin-npm
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:23.8164966Z ##[endgroup]
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:23.9094855Z 
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:23.9095719Z > @trace/update-service-admin@0.1.0 test:ui
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:23.9096410Z > playwright test
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:23.9096841Z 
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:24.4886775Z 
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:24.4887498Z Running 36 tests using 1 worker
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:24.4887895Z 
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:24.8142560Z [1/36] test/firmware-ui.spec.ts:147:3 › en: retract boundary, reason, cancel and fresh confirmation
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9709936Z   1) test/firmware-ui.spec.ts:147:3 › en: retract boundary, reason, cancel and fresh confirmation ──
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9710593Z 
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9711015Z     Error: expect(locator).toBeEnabled() failed
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9711474Z 
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9711685Z     Locator:  locator('#confirmAccept')
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9712045Z     Expected: enabled
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9712333Z     Received: disabled
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9712609Z     Timeout:  5000ms
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9712790Z 
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9712906Z     Call log:
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9713351Z       - Expect "toBeEnabled" locator('#confirmAccept') with timeout 5000ms
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9713912Z       - waiting for locator('#confirmAccept')
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9715131Z         14 × locator resolved to <button disabled type="button" id="confirmAccept" data-i18n="dialog.confirm" class="confirm-button stable">Retract</button>
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9715972Z            - unexpected value "disabled"
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9716532Z 
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9716541Z 
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9717076Z       135 |   if (await page.locator("#confirmInput").isVisible()) await page.locator("#confirmInput").fill("stable");
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9718263Z       136 |   if (await page.locator("#confirmReason").isVisible()) await page.locator("#confirmReason").fill(reason);
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9719223Z     > 137 |   await expect(page.locator("#confirmAccept")).toBeEnabled();
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9719777Z           |                                                ^
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9720257Z       138 |   await page.locator("#confirmAccept").click();
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9720656Z       139 | }
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9721022Z       140 | async function closeResult(page: Page) {
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9722079Z         at fillConfirmation (/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/admin/test/firmware-ui.spec.ts:137:48)
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9723436Z         at /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/admin/test/firmware-ui.spec.ts:166:5
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9724061Z 
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9724656Z     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9725699Z     ../../../../../.cache/admin-ui/results/firmware-ui-en-retract-bou-c2206-ncel-and-fresh-confirmation/test-failed-1.png
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9726843Z     ────────────────────────────────────────────────────────────────────────────────────────────────
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9727223Z 
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9728021Z     Error Context: ../../../../../.cache/admin-ui/results/firmware-ui-en-retract-bou-c2206-ncel-and-fresh-confirmation/error-context.md
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9728710Z 
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:33.9729066Z 
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:34.3084162Z [2/36] test/firmware-ui.spec.ts:175:3 › en: CAS refresh never replays an old intent
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:38.3577097Z [3/36] test/firmware-ui.spec.ts:147:3 › zh: retract boundary, reason, cancel and fresh confirmation
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9590254Z   2) test/firmware-ui.spec.ts:147:3 › zh: retract boundary, reason, cancel and fresh confirmation ──
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9590883Z 
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9591121Z     Error: expect(locator).toBeEnabled() failed
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9591421Z 
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9591621Z     Locator:  locator('#confirmAccept')
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9592034Z     Expected: enabled
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9592374Z     Received: disabled
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9592690Z     Timeout:  5000ms
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9592884Z 
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9593012Z     Call log:
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9593545Z       - Expect "toBeEnabled" locator('#confirmAccept') with timeout 5000ms
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9594167Z       - waiting for locator('#confirmAccept')
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9595410Z         14 × locator resolved to <button disabled type="button" id="confirmAccept" data-i18n="dialog.confirm" class="confirm-button stable">撤回</button>
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9596344Z            - unexpected value "disabled"
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9596816Z 
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9596825Z 
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9597386Z       135 |   if (await page.locator("#confirmInput").isVisible()) await page.locator("#confirmInput").fill("stable");
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9598661Z       136 |   if (await page.locator("#confirmReason").isVisible()) await page.locator("#confirmReason").fill(reason);
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9599554Z     > 137 |   await expect(page.locator("#confirmAccept")).toBeEnabled();
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9600148Z           |                                                ^
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9600674Z       138 |   await page.locator("#confirmAccept").click();
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9601114Z       139 | }
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9601495Z       140 | async function closeResult(page: Page) {
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9602625Z         at fillConfirmation (/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/admin/test/firmware-ui.spec.ts:137:48)
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9604194Z         at /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/admin/test/firmware-ui.spec.ts:166:5
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9605031Z 
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9605602Z     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9606724Z     ../../../../../.cache/admin-ui/results/firmware-ui-zh-retract-bou-c1c23-ncel-and-fresh-confirmation/test-failed-1.png
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9607981Z     ────────────────────────────────────────────────────────────────────────────────────────────────
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9608385Z 
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9609092Z     Error Context: ../../../../../.cache/admin-ui/results/firmware-ui-zh-retract-bou-c1c23-ncel-and-fresh-confirmation/error-context.md
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9609810Z 
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:46.9609833Z 
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:47.3277011Z [4/36] test/firmware-ui.spec.ts:175:3 › zh: CAS refresh never replays an old intent
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:50.9914133Z [5/36] test/firmware-ui.spec.ts:193:1 › beta publisher controls are independent and stable/release actions stay owner-only
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:53.2674475Z [6/36] test/firmware-ui.spec.ts:209:1 › viewer and unavailable/reference-protected releases cannot write
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:54.2119075Z [7/36] test/firmware-ui.spec.ts:222:1 › unknown channel result is read back but never automatically repeated
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:55.4776154Z [8/36] test/firmware-ui.spec.ts:233:1 › unknown release result uses an explicit same-key/same-body reconciliation after reads
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:26:57.8665740Z [9/36] test/firmware-ui.spec.ts:254:1 › an expired original key requires a newly confirmed operation, not an automatic new key
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:27:00.2752304Z [10/36] test/firmware-ui.spec.ts:282:3 › recovery-download: interrupted reconciliation preserves intent after 401/TOKEN_EXPIRED/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:27:03.8363449Z [11/36] test/firmware-ui.spec.ts:282:3 › recovery-download: interrupted reconciliation preserves intent after 403/CSRF_INVALID/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:27:07.3909690Z [12/36] test/firmware-ui.spec.ts:282:3 › recovery-download: interrupted reconciliation preserves intent after 403/ROLE_FORBIDDEN/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:27:10.8238464Z [13/36] test/firmware-ui.spec.ts:282:3 › recovery-download: interrupted reconciliation preserves intent after 429/RATE_LIMITED/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:27:14.7895827Z [14/36] test/firmware-ui.spec.ts:282:3 › recovery-download: interrupted reconciliation preserves intent after 503/BACKEND_UNAVAILABLE/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:27:18.7755436Z [15/36] test/firmware-ui.spec.ts:282:3 › recovery-download: interrupted reconciliation preserves intent after 409/IDEMPOTENCY_CONFLICT/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:27:22.2062178Z [16/36] test/firmware-ui.spec.ts:282:3 › recovery-download: interrupted reconciliation preserves intent after 410/RELEASE_DISABLED/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:27:25.3706882Z [17/36] test/firmware-ui.spec.ts:282:3 › recovery-download: interrupted reconciliation preserves intent after 409/IDEMPOTENCY_RESULT_EXPIRED/missing
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:27:28.8865770Z [18/36] test/firmware-ui.spec.ts:282:3 › recovery-download: interrupted reconciliation preserves intent after 409/IDEMPOTENCY_RESULT_EXPIRED/mismatch
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:27:33.0697460Z [19/36] test/firmware-ui.spec.ts:282:3 › recovery-download: interrupted reconciliation preserves intent after 403/IDEMPOTENCY_RESULT_EXPIRED/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:27:36.7518059Z [20/36] test/firmware-ui.spec.ts:282:3 › disable: interrupted reconciliation preserves intent after 401/TOKEN_EXPIRED/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:27:40.6366252Z [21/36] test/firmware-ui.spec.ts:282:3 › disable: interrupted reconciliation preserves intent after 403/CSRF_INVALID/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:27:43.0559042Z [22/36] test/firmware-ui.spec.ts:282:3 › disable: interrupted reconciliation preserves intent after 403/ROLE_FORBIDDEN/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:27:46.7698905Z [23/36] test/firmware-ui.spec.ts:282:3 › disable: interrupted reconciliation preserves intent after 429/RATE_LIMITED/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:27:50.2523688Z [24/36] test/firmware-ui.spec.ts:282:3 › disable: interrupted reconciliation preserves intent after 503/BACKEND_UNAVAILABLE/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:27:53.2544568Z [25/36] test/firmware-ui.spec.ts:282:3 › disable: interrupted reconciliation preserves intent after 409/IDEMPOTENCY_CONFLICT/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:27:55.9357236Z [26/36] test/firmware-ui.spec.ts:282:3 › disable: interrupted reconciliation preserves intent after 410/RELEASE_DISABLED/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:27:59.7853936Z [27/36] test/firmware-ui.spec.ts:282:3 › disable: interrupted reconciliation preserves intent after 409/IDEMPOTENCY_RESULT_EXPIRED/missing
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:28:03.1842868Z [28/36] test/firmware-ui.spec.ts:282:3 › disable: interrupted reconciliation preserves intent after 409/IDEMPOTENCY_RESULT_EXPIRED/mismatch
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:28:06.4026325Z [29/36] test/firmware-ui.spec.ts:282:3 › disable: interrupted reconciliation preserves intent after 403/IDEMPOTENCY_RESULT_EXPIRED/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:28:09.2524268Z [30/36] test/firmware-ui.spec.ts:323:3 › a first definitive 401/TOKEN_EXPIRED rejection permits a separately confirmed intent
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:28:10.8161841Z [31/36] test/firmware-ui.spec.ts:323:3 › a first definitive 403/CSRF_INVALID rejection permits a separately confirmed intent
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:28:12.4556120Z [32/36] test/firmware-ui.spec.ts:323:3 › a first definitive 403/ROLE_FORBIDDEN rejection permits a separately confirmed intent
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:28:14.0909818Z [33/36] test/firmware-ui.spec.ts:323:3 › a first definitive 429/RATE_LIMITED rejection permits a separately confirmed intent
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:28:15.8916315Z [34/36] test/firmware-ui.spec.ts:339:1 › owner identity changes cannot replay a pending request in another actor scope
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:28:17.2043208Z [35/36] test/firmware-ui.spec.ts:350:1 › failed state refresh keeps writes locked until a successful manual read
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:28:18.3507893Z [36/36] test/firmware-ui.spec.ts:362:1 › mobile firmware controls and confirmation fit the viewport
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:28:20.2594252Z   2 failed
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:28:20.2595402Z     test/firmware-ui.spec.ts:147:3 › en: retract boundary, reason, cancel and fresh confirmation ───
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:28:20.2596447Z     test/firmware-ui.spec.ts:147:3 › zh: retract boundary, reason, cancel and fresh confirmation ───
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:28:20.2597115Z   34 passed (1.9m)
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:28:20.2806088Z ##[error]Process completed with exit code 1.

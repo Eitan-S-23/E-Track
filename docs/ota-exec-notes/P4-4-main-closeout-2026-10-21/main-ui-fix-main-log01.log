@@ -1,0 +1,1183 @@
+Public Pages Typecheck	Set up job	﻿2026-10-21T12:47:05.1943719Z Current runner version: '2.338.0'
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.1980074Z ##[group]Runner Image Provisioner
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.1981506Z Hosted Compute Agent
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.1982422Z Version: 20261012.601
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.1983666Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.1984959Z Build Date: 2026-10-12T17:48:21Z
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.1986347Z Worker ID: {d93c9e3e-2774-45de-bfb7-6bba0db04b03}
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.1987677Z Region: eastus
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.1988569Z Cloud: Azure
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.1989534Z ##[endgroup]
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.1991787Z ##[group]Operating System
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.1992808Z Ubuntu
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.1993813Z 24.04.5
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.1994660Z LTS
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.1995854Z ##[endgroup]
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.1996845Z ##[group]Runner Image
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.1997824Z Image: ubuntu-24.04
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.1998811Z Version: 20261012.334.1
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.2000623Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.2004144Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.2006222Z ##[endgroup]
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.2008105Z ##[group]GITHUB_TOKEN Permissions
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.2011299Z Contents: read
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.2012283Z Metadata: read
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.2013189Z ##[endgroup]
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.2016576Z Secret source: Actions
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.2018175Z Cache mode: write
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.2019664Z Prepare workflow directory
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.2589093Z Prepare all required actions
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.2637490Z Getting action download info
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.4610347Z Download action repository 'actions/checkout@v6' (SHA:d23441a48e516b6c34aea4fa41551a30e30af803)
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.5636490Z Download action repository 'actions/setup-node@v6' (SHA:249970729cb0ef3589644e2896645e5dc5ba9c38)
+Public Pages Typecheck	Set up job	2026-10-21T12:47:05.7409522Z Complete job name: Public Pages Typecheck
+Public Pages Typecheck	Checkout repository	﻿2026-10-21T12:47:05.8181143Z ##[group]Run actions/checkout@v6
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.8182057Z with:
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.8182523Z   repository: Eitan-S-23/E-Track
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.8186569Z   token: ***
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.8187016Z   ssh-strict: true
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.8187469Z   ssh-user: git
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.8187912Z   persist-credentials: true
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.8188392Z   clean: true
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.8188836Z   sparse-checkout-cone-mode: true
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.8189347Z   fetch-depth: 1
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.8189766Z   fetch-tags: false
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.8190204Z   show-progress: true
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.8190647Z   lfs: false
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.8191062Z   submodules: false
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.8191500Z   set-safe-directory: true
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.8191994Z   allow-unsafe-pr-checkout: false
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.8192756Z ##[endgroup]
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9166583Z Syncing repository: Eitan-S-23/E-Track
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9168598Z ##[group]Getting Git version info
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9169688Z Working directory is '/home/runner/work/E-Track/E-Track'
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9171301Z [command]/usr/bin/git version
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9278240Z git version 2.55.0
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9307035Z ##[endgroup]
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9320275Z Temporarily overriding HOME='/home/runner/work/_temp/8e20a6ff-9bc0-47ec-b2bd-a2ed9a45b3f6' before making global git config changes
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9322690Z Adding repository directory to the temporary git global config as a safe directory
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9326267Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/E-Track/E-Track
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9379838Z Deleting the contents of '/home/runner/work/E-Track/E-Track'
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9384370Z ##[group]Determining repository object format
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9386860Z ##[endgroup]
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9388146Z ##[group]Initializing the repository
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9391627Z [command]/usr/bin/git init /home/runner/work/E-Track/E-Track
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9544803Z hint: Using 'master' as the name for the initial branch. This default branch name
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9547223Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9549209Z hint: to use in all of your new repositories, which will suppress this warning,
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9551513Z hint: call:
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9552224Z hint:
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9553078Z hint: 	git config --global init.defaultBranch <name>
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9554120Z hint:
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9555279Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9556802Z hint: 'development'. The just-created branch can be renamed via this command:
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9558076Z hint:
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9558774Z hint: 	git branch -m <name>
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9559539Z hint:
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9560533Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9562168Z Initialized empty Git repository in /home/runner/work/E-Track/E-Track/.git/
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9564154Z [command]/usr/bin/git remote add origin https://github.com/Eitan-S-23/E-Track
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9619538Z ##[endgroup]
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9620327Z ##[group]Disabling automatic garbage collection
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9624250Z [command]/usr/bin/git config --local gc.auto 0
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9657145Z ##[endgroup]
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9658274Z ##[group]Setting up auth
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9659034Z Removing SSH command configuration
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9665558Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:05.9705426Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:06.0117985Z Removing HTTP extra header
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:06.0119420Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:06.0146697Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:06.0360904Z Removing includeIf entries pointing to credentials config files
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:06.0367455Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:06.0404088Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:06.0630049Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-7f4f69bb-9692-472a-aaf4-0b5e4ad10fdc.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:06.0672394Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/E-Track/E-Track/.git.path /home/runner/work/_temp/git-credentials-7f4f69bb-9692-472a-aaf4-0b5e4ad10fdc.config
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:06.0713247Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/E-Track/E-Track/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-7f4f69bb-9692-472a-aaf4-0b5e4ad10fdc.config
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:06.0753985Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-7f4f69bb-9692-472a-aaf4-0b5e4ad10fdc.config
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:06.0796629Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-7f4f69bb-9692-472a-aaf4-0b5e4ad10fdc.config
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:06.0827110Z ##[endgroup]
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:06.0827876Z ##[group]Fetching the repository
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:06.0835524Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +75d3ad24424989f5a5f38fe237d24deef9decd4f:refs/remotes/origin/main
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:20.1084554Z From https://github.com/Eitan-S-23/E-Track
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:20.1086396Z  * [new ref]         75d3ad24424989f5a5f38fe237d24deef9decd4f -> origin/main
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:20.1101706Z [command]/usr/bin/git branch --list --remote origin/main
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:20.1133363Z   origin/main
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:20.1144315Z [command]/usr/bin/git rev-parse refs/remotes/origin/main
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:20.1170980Z 75d3ad24424989f5a5f38fe237d24deef9decd4f
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:20.1177118Z ##[endgroup]
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:20.1178361Z ##[group]Determining the checkout info
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:20.1179789Z ##[endgroup]
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:20.1182156Z [command]/usr/bin/git sparse-checkout disable
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:20.1238623Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:20.1273421Z ##[group]Checking out the ref
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:20.1276704Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:21.1634167Z Updating files:  40% (10025/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:21.2066237Z Updating files:  41% (10116/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:21.2183655Z Updating files:  42% (10362/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:21.2686649Z Updating files:  43% (10609/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:21.3114238Z Updating files:  44% (10856/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:21.3399976Z Updating files:  45% (11102/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:21.3542072Z Updating files:  46% (11349/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:21.3697410Z Updating files:  47% (11596/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:21.6141169Z Updating files:  48% (11843/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:21.8338233Z Updating files:  49% (12089/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:22.0779084Z Updating files:  50% (12336/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:22.3010521Z Updating files:  51% (12583/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:22.6388129Z Updating files:  51% (12681/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:22.7761038Z Updating files:  52% (12829/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:22.8685453Z Updating files:  53% (13076/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:22.8905529Z Updating files:  54% (13323/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:22.9728480Z Updating files:  55% (13570/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.0448960Z Updating files:  56% (13816/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.0818304Z Updating files:  57% (14063/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.1620047Z Updating files:  58% (14310/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.1642590Z Updating files:  58% (14501/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.1782746Z Updating files:  59% (14556/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.2740952Z Updating files:  60% (14803/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.3105306Z Updating files:  61% (15050/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.3421371Z Updating files:  62% (15297/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.3771861Z Updating files:  63% (15543/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.4023771Z Updating files:  64% (15790/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.4324154Z Updating files:  65% (16037/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.4517082Z Updating files:  66% (16283/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.4622667Z Updating files:  67% (16530/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.4731273Z Updating files:  68% (16777/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.4928088Z Updating files:  69% (17023/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.5353033Z Updating files:  70% (17270/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.5508697Z Updating files:  71% (17517/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.5611319Z Updating files:  72% (17764/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.5719449Z Updating files:  73% (18010/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.5894071Z Updating files:  74% (18257/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.6230397Z Updating files:  75% (18504/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.6418801Z Updating files:  76% (18750/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.6600802Z Updating files:  77% (18997/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.6704865Z Updating files:  78% (19244/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.6811216Z Updating files:  79% (19491/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.7152209Z Updating files:  80% (19737/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.7346318Z Updating files:  81% (19984/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.7572203Z Updating files:  82% (20231/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.7723491Z Updating files:  83% (20477/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.7824117Z Updating files:  84% (20724/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.7969768Z Updating files:  85% (20971/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.8324676Z Updating files:  86% (21218/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.8480677Z Updating files:  87% (21464/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.8659373Z Updating files:  88% (21711/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.8759515Z Updating files:  89% (21958/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.8973811Z Updating files:  90% (22204/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.9072602Z Updating files:  91% (22451/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.9206972Z Updating files:  92% (22698/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:23.9781273Z Updating files:  93% (22945/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:24.0024462Z Updating files:  94% (23191/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:24.0253914Z Updating files:  95% (23438/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:24.0476266Z Updating files:  96% (23685/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:24.1693863Z Updating files:  97% (23931/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:24.1861452Z Updating files:  97% (24015/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:24.2148657Z Updating files:  98% (24178/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:24.2419653Z Updating files:  99% (24425/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:24.2420180Z Updating files: 100% (24671/24671)
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:24.2421137Z Updating files: 100% (24671/24671), done.
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:24.7463621Z Switched to a new branch 'main'
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:24.7466771Z branch 'main' set up to track 'origin/main'.
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:24.7598103Z ##[endgroup]
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:24.7644515Z [command]/usr/bin/git log -1 --format=%H
+Public Pages Typecheck	Checkout repository	2026-10-21T12:47:24.7672702Z 75d3ad24424989f5a5f38fe237d24deef9decd4f
+Public Pages Typecheck	Set up Node	﻿2026-10-21T12:47:25.1510738Z ##[group]Run actions/setup-node@v6
+Public Pages Typecheck	Set up Node	2026-10-21T12:47:25.1511045Z with:
+Public Pages Typecheck	Set up Node	2026-10-21T12:47:25.1511240Z   node-version: 24
+Public Pages Typecheck	Set up Node	2026-10-21T12:47:25.1511444Z   cache: npm
+Public Pages Typecheck	Set up Node	2026-10-21T12:47:25.1511878Z   cache-dependency-path: app/bluetooth_flutter_Trace/cloudflare/update-service/public/package-lock.json
+Public Pages Typecheck	Set up Node	2026-10-21T12:47:25.1512384Z   check-latest: false
+Public Pages Typecheck	Set up Node	2026-10-21T12:47:25.1514942Z   token: ***
+Public Pages Typecheck	Set up Node	2026-10-21T12:47:25.1515484Z   package-manager-cache: true
+Public Pages Typecheck	Set up Node	2026-10-21T12:47:25.1515743Z ##[endgroup]
+Public Pages Typecheck	Set up Node	2026-10-21T12:47:25.2936897Z Found in cache @ /opt/hostedtoolcache/node/24.21.0/x64
+Public Pages Typecheck	Set up Node	2026-10-21T12:47:25.2940739Z ##[group]Environment details
+Public Pages Typecheck	Set up Node	2026-10-21T12:47:25.7139263Z node: v24.21.0
+Public Pages Typecheck	Set up Node	2026-10-21T12:47:25.7140109Z npm: 11.19.0
+Public Pages Typecheck	Set up Node	2026-10-21T12:47:25.7140697Z yarn: 1.22.22
+Public Pages Typecheck	Set up Node	2026-10-21T12:47:25.7142291Z ##[endgroup]
+Public Pages Typecheck	Set up Node	2026-10-21T12:47:25.7168972Z [command]/opt/hostedtoolcache/node/24.21.0/x64/bin/npm config get cache
+Public Pages Typecheck	Set up Node	2026-10-21T12:47:25.8407268Z /home/runner/.npm
+Public Pages Typecheck	Set up Node	2026-10-21T12:47:25.9218205Z Cache hit for: node-cache-Linux-x64-npm-8c6821c0ff905001e5bfbe6ab7971c1950aff131b1bc9d024e70dde5390281c4
+Public Pages Typecheck	Set up Node	2026-10-21T12:47:26.3170554Z Received 76488894 of 76488894 (100.0%), 206.1 MBs/sec
+Public Pages Typecheck	Set up Node	2026-10-21T12:47:26.3171407Z Cache Size: ~73 MB (76488894 B)
+Public Pages Typecheck	Set up Node	2026-10-21T12:47:26.3282543Z [command]/usr/bin/tar -xf /home/runner/work/_temp/b5c95bad-70d5-45be-aafb-329f795f9f8d/cache.tzst -P -C /home/runner/work/E-Track/E-Track --use-compress-program unzstd
+Public Pages Typecheck	Set up Node	2026-10-21T12:47:26.4529630Z Cache restored successfully
+Public Pages Typecheck	Set up Node	2026-10-21T12:47:26.4566457Z Cache restored from key: node-cache-Linux-x64-npm-8c6821c0ff905001e5bfbe6ab7971c1950aff131b1bc9d024e70dde5390281c4
+Public Pages Typecheck	Install dependencies	﻿2026-10-21T12:47:26.4753154Z ##[group]Run npm ci
+Public Pages Typecheck	Install dependencies	2026-10-21T12:47:26.4753472Z ^[[36;1mnpm ci^[[0m
+Public Pages Typecheck	Install dependencies	2026-10-21T12:47:26.5073222Z shell: /usr/bin/bash -e {0}
+Public Pages Typecheck	Install dependencies	2026-10-21T12:47:26.5073586Z ##[endgroup]
+Public Pages Typecheck	Install dependencies	2026-10-21T12:47:31.8632021Z 
+Public Pages Typecheck	Install dependencies	2026-10-21T12:47:31.8639866Z added 39 packages, and audited 40 packages in 5s
+Public Pages Typecheck	Install dependencies	2026-10-21T12:47:31.8640248Z 
+Public Pages Typecheck	Install dependencies	2026-10-21T12:47:31.8640459Z 9 packages are looking for funding
+Public Pages Typecheck	Install dependencies	2026-10-21T12:47:31.8640790Z   run `npm fund` for details
+Public Pages Typecheck	Install dependencies	2026-10-21T12:47:31.9249357Z 
+Public Pages Typecheck	Install dependencies	2026-10-21T12:47:31.9250322Z 4 high severity vulnerabilities
+Public Pages Typecheck	Install dependencies	2026-10-21T12:47:31.9250829Z 
+Public Pages Typecheck	Install dependencies	2026-10-21T12:47:31.9251125Z To address all issues, run:
+Public Pages Typecheck	Install dependencies	2026-10-21T12:47:31.9251724Z   npm audit fix --force
+Public Pages Typecheck	Install dependencies	2026-10-21T12:47:31.9252066Z 
+Public Pages Typecheck	Install dependencies	2026-10-21T12:47:31.9252355Z Run `npm audit` for details.
+Public Pages Typecheck	Install dependencies	2026-10-21T12:47:31.9262586Z npm warn install-scripts 3 packages have install scripts not yet covered by allowScripts:
+Public Pages Typecheck	Install dependencies	2026-10-21T12:47:31.9263919Z npm warn install-scripts   esbuild@0.28.1 (postinstall: node install.js)
+Public Pages Typecheck	Install dependencies	2026-10-21T12:47:31.9265479Z npm warn install-scripts   sharp@0.34.5 (install: node install/check.js || npm run build)
+Public Pages Typecheck	Install dependencies	2026-10-21T12:47:31.9266889Z npm warn install-scripts   workerd@1.20260625.1 (postinstall: node install.js)
+Public Pages Typecheck	Install dependencies	2026-10-21T12:47:31.9267720Z npm warn install-scripts
+Public Pages Typecheck	Install dependencies	2026-10-21T12:47:31.9269409Z npm warn install-scripts Run `npm install-scripts ls` to review, or `npm install-scripts approve <pkg>` to allow.
+Public Pages Typecheck	Typecheck	﻿2026-10-21T12:47:31.9942806Z ##[group]Run npm run check
+Public Pages Typecheck	Typecheck	2026-10-21T12:47:31.9943139Z ^[[36;1mnpm run check^[[0m
+Public Pages Typecheck	Typecheck	2026-10-21T12:47:32.0008224Z shell: /usr/bin/bash -e {0}
+Public Pages Typecheck	Typecheck	2026-10-21T12:47:32.0008505Z ##[endgroup]
+Public Pages Typecheck	Typecheck	2026-10-21T12:47:32.1048959Z 
+Public Pages Typecheck	Typecheck	2026-10-21T12:47:32.1049813Z > @trace/update-service-public@0.1.0 check
+Public Pages Typecheck	Typecheck	2026-10-21T12:47:32.1050494Z > tsc --noEmit
+Public Pages Typecheck	Typecheck	2026-10-21T12:47:32.1050750Z 
+Public Pages Typecheck	Post Set up Node	﻿2026-10-21T12:47:32.9968194Z Post job cleanup.
+Public Pages Typecheck	Post Set up Node	2026-10-21T12:47:33.1189149Z Cache hit occurred on the primary key node-cache-Linux-x64-npm-8c6821c0ff905001e5bfbe6ab7971c1950aff131b1bc9d024e70dde5390281c4, not saving cache.
+Public Pages Typecheck	Post Checkout repository	﻿2026-10-21T12:47:33.1344231Z Post job cleanup.
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.2225958Z [command]/usr/bin/git version
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.2266749Z git version 2.55.0
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.2316332Z Temporarily overriding HOME='/home/runner/work/_temp/849ffc0a-da96-45e3-8beb-ff9eced977b7' before making global git config changes
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.2323578Z Adding repository directory to the temporary git global config as a safe directory
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.2334236Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/E-Track/E-Track
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.2361535Z Removing SSH command configuration
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.2368900Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.2405467Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.2673948Z Removing HTTP extra header
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.2680809Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.2717357Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.3027337Z Removing includeIf entries pointing to credentials config files
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.3039266Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.3076842Z includeif.gitdir:/home/runner/work/E-Track/E-Track/.git.path
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.3099691Z includeif.gitdir:/home/runner/work/E-Track/E-Track/.git/worktrees/*.path
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.3106347Z includeif.gitdir:/github/workspace/.git.path
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.3107573Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.3113715Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/E-Track/E-Track/.git.path
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.3123622Z /home/runner/work/_temp/git-credentials-7f4f69bb-9692-472a-aaf4-0b5e4ad10fdc.config
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.3148159Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/E-Track/E-Track/.git.path /home/runner/work/_temp/git-credentials-7f4f69bb-9692-472a-aaf4-0b5e4ad10fdc.config
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.3218342Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/E-Track/E-Track/.git/worktrees/*.path
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.3241840Z /home/runner/work/_temp/git-credentials-7f4f69bb-9692-472a-aaf4-0b5e4ad10fdc.config
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.3272794Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/E-Track/E-Track/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-7f4f69bb-9692-472a-aaf4-0b5e4ad10fdc.config
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.3315669Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.3347873Z /github/runner_temp/git-credentials-7f4f69bb-9692-472a-aaf4-0b5e4ad10fdc.config
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.3361383Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-7f4f69bb-9692-472a-aaf4-0b5e4ad10fdc.config
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.3401190Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.3427053Z /github/runner_temp/git-credentials-7f4f69bb-9692-472a-aaf4-0b5e4ad10fdc.config
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.3438255Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-7f4f69bb-9692-472a-aaf4-0b5e4ad10fdc.config
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.3476828Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Public Pages Typecheck	Post Checkout repository	2026-10-21T12:47:33.3714682Z Removing credentials config '/home/runner/work/_temp/git-credentials-7f4f69bb-9692-472a-aaf4-0b5e4ad10fdc.config'
+Public Pages Typecheck	Complete job	﻿2026-10-21T12:47:33.3860295Z Cleaning up orphan processes
+Worker Typecheck and Invariants	Set up job	﻿2026-10-21T12:47:05.7319768Z Current runner version: '2.338.0'
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7341277Z ##[group]Runner Image Provisioner
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7341998Z Hosted Compute Agent
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7342577Z Version: 20261012.601
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7343101Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7343715Z Build Date: 2026-10-12T17:48:21Z
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7344376Z Worker ID: {75da43a6-7124-4885-95da-bd5ac3e934d2}
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7344963Z Region: westus3
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7345506Z Cloud: Azure
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7345969Z ##[endgroup]
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7347164Z ##[group]Operating System
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7347761Z Ubuntu
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7348212Z 24.04.5
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7348676Z LTS
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7349134Z ##[endgroup]
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7349628Z ##[group]Runner Image
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7350170Z Image: ubuntu-24.04
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7350657Z Version: 20261012.334.1
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7351580Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7353000Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7354159Z ##[endgroup]
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7355081Z ##[group]GITHUB_TOKEN Permissions
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7356977Z Contents: read
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7357521Z Metadata: read
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7358063Z ##[endgroup]
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7359786Z Secret source: Actions
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7360532Z Cache mode: write
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7361261Z Prepare workflow directory
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7733587Z Prepare all required actions
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:05.7789996Z Getting action download info
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:06.0511907Z Download action repository 'actions/checkout@v6' (SHA:d23441a48e516b6c34aea4fa41551a30e30af803)
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:06.1966079Z Download action repository 'actions/setup-node@v6' (SHA:249970729cb0ef3589644e2896645e5dc5ba9c38)
+Worker Typecheck and Invariants	Set up job	2026-10-21T12:47:06.4573191Z Complete job name: Worker Typecheck and Invariants
+Worker Typecheck and Invariants	Checkout repository	﻿2026-10-21T12:47:06.5180471Z ##[group]Run actions/checkout@v6
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.5181173Z with:
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.5181528Z   repository: Eitan-S-23/E-Track
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.5184787Z   token: ***
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.5185139Z   ssh-strict: true
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.5185494Z   ssh-user: git
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.5185852Z   persist-credentials: true
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.5186235Z   clean: true
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.5186771Z   sparse-checkout-cone-mode: true
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.5187178Z   fetch-depth: 1
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.5187520Z   fetch-tags: false
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.5187881Z   show-progress: true
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.5188228Z   lfs: false
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.5188547Z   submodules: false
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.5188895Z   set-safe-directory: true
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.5189289Z   allow-unsafe-pr-checkout: false
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.5189852Z ##[endgroup]
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.5971084Z Syncing repository: Eitan-S-23/E-Track
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.5972503Z ##[group]Getting Git version info
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.5973040Z Working directory is '/home/runner/work/E-Track/E-Track'
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.5973920Z [command]/usr/bin/git version
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.6040941Z git version 2.55.0
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.6060555Z ##[endgroup]
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.6073967Z Temporarily overriding HOME='/home/runner/work/_temp/dd62f134-8f97-42fb-9f6f-5ada368ebb1e' before making global git config changes
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.6075453Z Adding repository directory to the temporary git global config as a safe directory
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.6079590Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/E-Track/E-Track
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.6119368Z Deleting the contents of '/home/runner/work/E-Track/E-Track'
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.6127638Z ##[group]Determining repository object format
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.6128583Z ##[endgroup]
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.6129230Z ##[group]Initializing the repository
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.6129965Z [command]/usr/bin/git init /home/runner/work/E-Track/E-Track
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.6999497Z hint: Using 'master' as the name for the initial branch. This default branch name
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7000950Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7002025Z hint: to use in all of your new repositories, which will suppress this warning,
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7002612Z hint: call:
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7002932Z hint:
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7003370Z hint: 	git config --global init.defaultBranch <name>
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7003892Z hint:
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7004359Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7005457Z hint: 'development'. The just-created branch can be renamed via this command:
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7006472Z hint:
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7006963Z hint: 	git branch -m <name>
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7007470Z hint:
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7007970Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7008726Z Initialized empty Git repository in /home/runner/work/E-Track/E-Track/.git/
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7010775Z [command]/usr/bin/git remote add origin https://github.com/Eitan-S-23/E-Track
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7201584Z ##[endgroup]
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7202242Z ##[group]Disabling automatic garbage collection
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7205445Z [command]/usr/bin/git config --local gc.auto 0
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7237113Z ##[endgroup]
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7237869Z ##[group]Setting up auth
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7238531Z Removing SSH command configuration
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7242711Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7272312Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7657093Z Removing HTTP extra header
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7662865Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7692601Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7888201Z Removing includeIf entries pointing to credentials config files
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7895882Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.7932225Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.8138705Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-f9240ddb-363c-470e-8f6d-57de8c62007c.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.8175696Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/E-Track/E-Track/.git.path /home/runner/work/_temp/git-credentials-f9240ddb-363c-470e-8f6d-57de8c62007c.config
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.8210433Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/E-Track/E-Track/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-f9240ddb-363c-470e-8f6d-57de8c62007c.config
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.8497041Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-f9240ddb-363c-470e-8f6d-57de8c62007c.config
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.8529747Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-f9240ddb-363c-470e-8f6d-57de8c62007c.config
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.8565097Z ##[endgroup]
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.8566121Z ##[group]Fetching the repository
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:06.8573083Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +75d3ad24424989f5a5f38fe237d24deef9decd4f:refs/remotes/origin/main
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:19.8802602Z From https://github.com/Eitan-S-23/E-Track
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:19.8803479Z  * [new ref]         75d3ad24424989f5a5f38fe237d24deef9decd4f -> origin/main
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:19.8812027Z [command]/usr/bin/git branch --list --remote origin/main
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:19.8837367Z   origin/main
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:19.8844037Z [command]/usr/bin/git rev-parse refs/remotes/origin/main
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:19.8865683Z 75d3ad24424989f5a5f38fe237d24deef9decd4f
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:19.8869653Z ##[endgroup]
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:19.8870347Z ##[group]Determining the checkout info
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:19.8871344Z ##[endgroup]
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:19.8874686Z [command]/usr/bin/git sparse-checkout disable
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:19.8917161Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:19.8943454Z ##[group]Checking out the ref
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:19.8946661Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:21.0880083Z Updating files:  49% (12181/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:21.2875321Z Updating files:  50% (12336/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:21.7664349Z Updating files:  51% (12583/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:21.8751888Z Updating files:  52% (12829/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:21.9170962Z Updating files:  53% (13076/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:21.9496929Z Updating files:  53% (13209/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:21.9666946Z Updating files:  54% (13323/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.0381023Z Updating files:  55% (13570/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.0877040Z Updating files:  56% (13816/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.1170536Z Updating files:  57% (14063/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.1799630Z Updating files:  58% (14310/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.1926666Z Updating files:  59% (14556/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.2699331Z Updating files:  60% (14803/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.3307500Z Updating files:  61% (15050/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.4214941Z Updating files:  62% (15297/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.4469053Z Updating files:  63% (15543/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.4649291Z Updating files:  64% (15790/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.4885826Z Updating files:  65% (16037/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.5038058Z Updating files:  66% (16283/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.5123221Z Updating files:  67% (16530/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.5206550Z Updating files:  68% (16777/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.5338891Z Updating files:  69% (17023/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.5610284Z Updating files:  70% (17270/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.5727773Z Updating files:  71% (17517/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.5803542Z Updating files:  72% (17764/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.5883628Z Updating files:  73% (18010/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.6030434Z Updating files:  74% (18257/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.6293599Z Updating files:  75% (18504/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.6441657Z Updating files:  76% (18750/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.6585174Z Updating files:  77% (18997/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.6662339Z Updating files:  78% (19244/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.6741802Z Updating files:  79% (19491/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.6994008Z Updating files:  80% (19737/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.7144528Z Updating files:  81% (19984/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.7309169Z Updating files:  82% (20231/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.7426198Z Updating files:  83% (20477/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.7503132Z Updating files:  84% (20724/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.7602292Z Updating files:  85% (20971/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.7878883Z Updating files:  86% (21218/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.7986162Z Updating files:  87% (21464/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.8117705Z Updating files:  88% (21711/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.8196525Z Updating files:  89% (21958/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.8367989Z Updating files:  90% (22204/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.8444411Z Updating files:  91% (22451/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.8547959Z Updating files:  92% (22698/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.9024362Z Updating files:  93% (22945/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.9138016Z Updating files:  94% (23191/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.9220716Z Updating files:  94% (23265/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.9407042Z Updating files:  95% (23438/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:22.9587966Z Updating files:  96% (23685/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:23.0740586Z Updating files:  97% (23931/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:23.0951526Z Updating files:  98% (24178/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:23.1168407Z Updating files:  99% (24425/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:23.1168934Z Updating files: 100% (24671/24671)
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:23.1169283Z Updating files: 100% (24671/24671), done.
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:23.1780793Z Switched to a new branch 'main'
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:23.1784236Z branch 'main' set up to track 'origin/main'.
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:23.1871847Z ##[endgroup]
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:23.1915436Z [command]/usr/bin/git log -1 --format=%H
+Worker Typecheck and Invariants	Checkout repository	2026-10-21T12:47:23.1942587Z 75d3ad24424989f5a5f38fe237d24deef9decd4f
+Worker Typecheck and Invariants	Set up Node	﻿2026-10-21T12:47:23.2194352Z ##[group]Run actions/setup-node@v6
+Worker Typecheck and Invariants	Set up Node	2026-10-21T12:47:23.2194598Z with:
+Worker Typecheck and Invariants	Set up Node	2026-10-21T12:47:23.2194763Z   node-version: 24
+Worker Typecheck and Invariants	Set up Node	2026-10-21T12:47:23.2194937Z   cache: npm
+Worker Typecheck and Invariants	Set up Node	2026-10-21T12:47:23.2195294Z   cache-dependency-path: app/bluetooth_flutter_Trace/cloudflare/update-service/worker/package-lock.json
+Worker Typecheck and Invariants	Set up Node	2026-10-21T12:47:23.2195687Z   check-latest: false
+Worker Typecheck and Invariants	Set up Node	2026-10-21T12:47:23.2256453Z   token: ***
+Worker Typecheck and Invariants	Set up Node	2026-10-21T12:47:23.2256753Z   package-manager-cache: true
+Worker Typecheck and Invariants	Set up Node	2026-10-21T12:47:23.2257043Z ##[endgroup]
+Worker Typecheck and Invariants	Set up Node	2026-10-21T12:47:23.3397196Z Found in cache @ /opt/hostedtoolcache/node/24.21.0/x64
+Worker Typecheck and Invariants	Set up Node	2026-10-21T12:47:23.3400227Z ##[group]Environment details
+Worker Typecheck and Invariants	Set up Node	2026-10-21T12:47:23.6831229Z node: v24.21.0
+Worker Typecheck and Invariants	Set up Node	2026-10-21T12:47:23.6831488Z npm: 11.19.0
+Worker Typecheck and Invariants	Set up Node	2026-10-21T12:47:23.6831662Z yarn: 1.22.22
+Worker Typecheck and Invariants	Set up Node	2026-10-21T12:47:23.6832761Z ##[endgroup]
+Worker Typecheck and Invariants	Set up Node	2026-10-21T12:47:23.6845910Z [command]/opt/hostedtoolcache/node/24.21.0/x64/bin/npm config get cache
+Worker Typecheck and Invariants	Set up Node	2026-10-21T12:47:23.8090066Z /home/runner/.npm
+Worker Typecheck and Invariants	Set up Node	2026-10-21T12:47:24.0272744Z Cache hit for: node-cache-Linux-x64-npm-f3d69ea38312b474bab58d6febce89f0d02bd7f185269971a587ce70088dbab7
+Worker Typecheck and Invariants	Set up Node	2026-10-21T12:47:25.2770873Z Received 37748736 of 107131111 (35.2%), 36.0 MBs/sec
+Worker Typecheck and Invariants	Set up Node	2026-10-21T12:47:25.9715990Z Received 107131111 of 107131111 (100.0%), 60.2 MBs/sec
+Worker Typecheck and Invariants	Set up Node	2026-10-21T12:47:25.9717067Z Cache Size: ~102 MB (107131111 B)
+Worker Typecheck and Invariants	Set up Node	2026-10-21T12:47:25.9771293Z [command]/usr/bin/tar -xf /home/runner/work/_temp/2683d0e1-f2e8-4a66-ae58-3f1656ee92d0/cache.tzst -P -C /home/runner/work/E-Track/E-Track --use-compress-program unzstd
+Worker Typecheck and Invariants	Set up Node	2026-10-21T12:47:26.1914696Z Cache restored successfully
+Worker Typecheck and Invariants	Set up Node	2026-10-21T12:47:26.1961522Z Cache restored from key: node-cache-Linux-x64-npm-f3d69ea38312b474bab58d6febce89f0d02bd7f185269971a587ce70088dbab7
+Worker Typecheck and Invariants	Install dependencies	﻿2026-10-21T12:47:26.2454228Z ##[group]Run npm ci
+Worker Typecheck and Invariants	Install dependencies	2026-10-21T12:47:26.2454523Z ^[[36;1mnpm ci^[[0m
+Worker Typecheck and Invariants	Install dependencies	2026-10-21T12:47:26.3445995Z shell: /usr/bin/bash -e {0}
+Worker Typecheck and Invariants	Install dependencies	2026-10-21T12:47:26.3446480Z ##[endgroup]
+Worker Typecheck and Invariants	Install dependencies	2026-10-21T12:47:31.9948914Z 
+Worker Typecheck and Invariants	Install dependencies	2026-10-21T12:47:31.9955725Z added 117 packages, and audited 118 packages in 6s
+Worker Typecheck and Invariants	Install dependencies	2026-10-21T12:47:31.9955990Z 
+Worker Typecheck and Invariants	Install dependencies	2026-10-21T12:47:31.9956152Z 28 packages are looking for funding
+Worker Typecheck and Invariants	Install dependencies	2026-10-21T12:47:31.9956695Z   run `npm fund` for details
+Worker Typecheck and Invariants	Install dependencies	2026-10-21T12:47:32.0583150Z 
+Worker Typecheck and Invariants	Install dependencies	2026-10-21T12:47:32.0583857Z 12 vulnerabilities (3 moderate, 9 high)
+Worker Typecheck and Invariants	Install dependencies	2026-10-21T12:47:32.0584078Z 
+Worker Typecheck and Invariants	Install dependencies	2026-10-21T12:47:32.0584257Z To address issues that do not require attention, run:
+Worker Typecheck and Invariants	Install dependencies	2026-10-21T12:47:32.0584570Z   npm audit fix
+Worker Typecheck and Invariants	Install dependencies	2026-10-21T12:47:32.0584679Z 
+Worker Typecheck and Invariants	Install dependencies	2026-10-21T12:47:32.0584865Z To address all issues (including breaking changes), run:
+Worker Typecheck and Invariants	Install dependencies	2026-10-21T12:47:32.0585182Z   npm audit fix --force
+Worker Typecheck and Invariants	Install dependencies	2026-10-21T12:47:32.0585305Z 
+Worker Typecheck and Invariants	Install dependencies	2026-10-21T12:47:32.0585412Z Run `npm audit` for details.
+Worker Typecheck and Invariants	Install dependencies	2026-10-21T12:47:32.0597949Z npm warn install-scripts 3 packages have install scripts not yet covered by allowScripts:
+Worker Typecheck and Invariants	Install dependencies	2026-10-21T12:47:32.0598902Z npm warn install-scripts   esbuild@0.28.1 (postinstall: node install.js)
+Worker Typecheck and Invariants	Install dependencies	2026-10-21T12:47:32.0599690Z npm warn install-scripts   sharp@0.34.5 (install: node install/check.js || npm run build)
+Worker Typecheck and Invariants	Install dependencies	2026-10-21T12:47:32.0600464Z npm warn install-scripts   workerd@1.20260625.1 (postinstall: node install.js)
+Worker Typecheck and Invariants	Install dependencies	2026-10-21T12:47:32.0600954Z npm warn install-scripts
+Worker Typecheck and Invariants	Install dependencies	2026-10-21T12:47:32.0601468Z npm warn install-scripts Run `npm install-scripts ls` to review, or `npm install-scripts approve <pkg>` to allow.
+Worker Typecheck and Invariants	Generate Wrangler Env types	﻿2026-10-21T12:47:32.1247081Z ##[group]Run npm run cf-typegen
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.1247356Z ^[[36;1mnpm run cf-typegen^[[0m
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.1307242Z shell: /usr/bin/bash -e {0}
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.1307474Z ##[endgroup]
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.2188344Z 
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.2189107Z > @trace/update-service-worker@0.1.0 cf-typegen
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.2189587Z > wrangler types --include-runtime false worker-configuration.d.ts
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.2189835Z 
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9511788Z 
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9512758Z  ⛅️ wrangler 4.105.0
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9513221Z ────────────────────
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9835920Z Generating project types...
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9836154Z 
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9921837Z interface __BaseEnv_Env {
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9922265Z 	MANIFEST_CACHE: KVNamespace;
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9922592Z 	RELEASES_BUCKET: R2Bucket;
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9922878Z 	DB: D1Database;
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9923213Z 	ENVIRONMENT: "staging" | "prod" | "dev";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9923564Z 	APP_ID: "trace";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9923880Z 	GITHUB_OWNER: "Eitan-S-23";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9924309Z 	GITHUB_REPO: "Trace";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9924628Z 	MANIFEST_CACHE_TTL_SECONDS: "60";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9925009Z 	DOWNLOAD_TOKEN_TTL_SECONDS: "300";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9925469Z 	DOWNLOAD_TOKEN_KEY_VERSION: "staging" | "prod" | "dev";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9925907Z 	RATE_LIMIT_WINDOW_SECONDS: "60";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9926406Z 	RATE_LIMIT_MAX_REQUESTS: "60";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9926758Z 	ENABLE_DIRECT_ADMIN_API: "false";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9927300Z 	RATE_LIMITER: DurableObjectNamespace<import("./src/index").RateLimiter>;
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9927785Z }
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9928105Z declare namespace Cloudflare {
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9928423Z 	interface GlobalProps {
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9928778Z 		mainModule: typeof import("./src/index");
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9929176Z 		durableNamespaces: "RateLimiter";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9929491Z 	}
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9929742Z 	interface StagingEnv {
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9930060Z 		MANIFEST_CACHE: KVNamespace;
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9930373Z 		RELEASES_BUCKET: R2Bucket;
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9930668Z 		DB: D1Database;
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9930936Z 		ENVIRONMENT: "staging";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9931302Z 		APP_ID: "trace";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9931638Z 		GITHUB_OWNER: "Eitan-S-23";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9931975Z 		GITHUB_REPO: "Trace";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9932267Z 		MANIFEST_CACHE_TTL_SECONDS: "60";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9932518Z 		DOWNLOAD_TOKEN_TTL_SECONDS: "300";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9932798Z 		DOWNLOAD_TOKEN_KEY_VERSION: "staging";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9933050Z 		RATE_LIMIT_WINDOW_SECONDS: "60";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9933297Z 		RATE_LIMIT_MAX_REQUESTS: "60";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9933562Z 		ENABLE_DIRECT_ADMIN_API: "false";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9933898Z 		RATE_LIMITER: DurableObjectNamespace<import("./src/index").RateLimiter>;
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9934209Z 	}
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9934371Z 	interface ProdEnv {
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9934582Z 		MANIFEST_CACHE: KVNamespace;
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9934800Z 		RELEASES_BUCKET: R2Bucket;
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9935001Z 		DB: D1Database;
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9935186Z 		ENVIRONMENT: "prod";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9935372Z 		APP_ID: "trace";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9935563Z 		GITHUB_OWNER: "Eitan-S-23";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9935769Z 		GITHUB_REPO: "Trace";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9935976Z 		MANIFEST_CACHE_TTL_SECONDS: "60";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9936216Z 		DOWNLOAD_TOKEN_TTL_SECONDS: "300";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9936634Z 		DOWNLOAD_TOKEN_KEY_VERSION: "prod";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9936869Z 		RATE_LIMIT_WINDOW_SECONDS: "60";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9937103Z 		RATE_LIMIT_MAX_REQUESTS: "60";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9937331Z 		ENABLE_DIRECT_ADMIN_API: "false";
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9937650Z 		RATE_LIMITER: DurableObjectNamespace<import("./src/index").RateLimiter>;
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9937945Z 	}
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9938128Z 	interface Env extends __BaseEnv_Env {}
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9938340Z }
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9938541Z interface Env extends __BaseEnv_Env {}
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9938956Z type StringifyValues<EnvType extends Record<string, unknown>> = {
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9939809Z 	[Binding in keyof EnvType]: EnvType[Binding] extends string ? EnvType[Binding] : string;
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9940139Z };
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9940327Z declare namespace NodeJS {
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9941406Z 	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "ENVIRONMENT" | "APP_ID" | "GITHUB_OWNER" | "GITHUB_REPO" | "MANIFEST_CACHE_TTL_SECONDS" | "DOWNLOAD_TOKEN_TTL_SECONDS" | "DOWNLOAD_TOKEN_KEY_VERSION" | "RATE_LIMIT_WINDOW_SECONDS" | "RATE_LIMIT_MAX_REQUESTS" | "ENABLE_DIRECT_ADMIN_API">> {}
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9942254Z }
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9942363Z 
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9942370Z 
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9942758Z ✨ Types written to worker-configuration.d.ts
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9942998Z 
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9943307Z 📣 Remember to rerun 'wrangler types' after you change your wrangler.jsonc file.
+Worker Typecheck and Invariants	Generate Wrangler Env types	2026-10-21T12:47:32.9943548Z 
+Worker Typecheck and Invariants	Typecheck	﻿2026-10-21T12:47:33.3450172Z ##[group]Run npm run check
+Worker Typecheck and Invariants	Typecheck	2026-10-21T12:47:33.3450431Z ^[[36;1mnpm run check^[[0m
+Worker Typecheck and Invariants	Typecheck	2026-10-21T12:47:33.3505893Z shell: /usr/bin/bash -e {0}
+Worker Typecheck and Invariants	Typecheck	2026-10-21T12:47:33.3506118Z ##[endgroup]
+Worker Typecheck and Invariants	Typecheck	2026-10-21T12:47:33.4277971Z 
+Worker Typecheck and Invariants	Typecheck	2026-10-21T12:47:33.4278440Z > @trace/update-service-worker@0.1.0 check
+Worker Typecheck and Invariants	Typecheck	2026-10-21T12:47:33.4278832Z > tsc --noEmit
+Worker Typecheck and Invariants	Typecheck	2026-10-21T12:47:33.4279049Z 
+Worker Typecheck and Invariants	Run invariant tests	﻿2026-10-21T12:47:35.3815659Z ##[group]Run npm test
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:35.3815892Z ^[[36;1mnpm test^[[0m
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:35.3873350Z shell: /usr/bin/bash -e {0}
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:35.3873596Z ##[endgroup]
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:35.4752384Z 
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:35.4753042Z > @trace/update-service-worker@0.1.0 test
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:35.4753418Z > vitest run
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:35.4753529Z 
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:36.3271602Z 
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:36.3275093Z ^[[1m^[[30m^[[46m RUN ^[[49m^[[39m^[[22m ^[[36mv4.1.9 ^[[39m^[[90m/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker^[[39m
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:36.3275800Z 
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:40.6204196Z ^[[90mstdout^[[2m | test/invariants.test.ts^[[2m > ^[[22m^[[2mPhase 1 update-service invariants^[[2m > ^[[22m^[[2mgates GitHub fallback through D1 state and immutable tag URLs
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:40.6207513Z ^[[22m^[[39m{"level":"info","event":"download_redirect","requestId":"bd9a8da6-3fcf-4e5b-914d-ae838031e85b","releaseId":"rel_trace_fallback_e82ff47718e945f09e7a942f34c97ff9_android_v3_0_0","assetId":"asset_rel_trace_fallback_e82ff47718e945f09e7a942f34c97ff9_android_v3_0_0_apk_ble_monitor_android_apk","channel":"ch_trace_fallback_e82ff47718e945f09e7a942f34c97ff9_android_stable","status":"redirect","mode":"github-fallback"}
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:40.6209031Z 
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:40.8272374Z ^[[90mstdout^[[2m | test/invariants.test.ts^[[2m > ^[[22m^[[2mPhase 1 update-service invariants^[[2m > ^[[22m^[[2mstreams primary downloads from R2 when the asset is available
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:40.8276703Z ^[[22m^[[39m{"level":"info","event":"download_stream","requestId":"39cd3366-20e9-46e8-b80b-46a438e1cde0","releaseId":"rel_trace_r2stream_608fe522abf24c2e9651d2a02a6b2e88_android_v3_5_0","assetId":"asset_rel_trace_r2stream_608fe522abf24c2e9651d2a02a6b2e88_android_v3_5_0_apk_ble_monitor_android_apk","channel":"ch_trace_r2stream_608fe522abf24c2e9651d2a02a6b2e88_android_stable","assetType":"apk","bytes":123456,"status":"ok","mode":"primary"}
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:40.8279091Z 
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:43.9222016Z ^[[90mstderr^[[2m | test/invariants.test.ts^[[2m > ^[[22m^[[2mPhase 1 update-service invariants^[[2m > ^[[22m^[[2mfails closed when D1 is unavailable
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:43.9223810Z ^[[22m^[[39m{"level":"error","event":"latest_failed","requestId":"bc5c492f-10e5-4579-845e-0354dfa693b5","message":"D1 failed"}
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:43.9226805Z 
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:44.0349267Z exception = workerd/api/streams/internal.c++:2563: disconnected: pump canceled
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:44.0354971Z stack: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@3217293 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@2fc7450 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@27845b0 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@53a07a0 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@2227e50
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:44.0832290Z  ^[[32m✓^[[39m test/invariants.test.ts ^[[2m(^[[22m^[[2m18 tests^[[22m^[[2m)^[[22m^[[33m 6295^[[2mms^[[22m^[[39m
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:44.0833227Z      ^[[33m^[[2m✓^[[22m^[[39m detects CAS conflict without writing channel_history ^[[33m 490^[[2mms^[[22m^[[39m
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:44.0833941Z      ^[[33m^[[2m✓^[[22m^[[39m keeps channel audit snapshots bounded across repeated publishes ^[[33m 486^[[2mms^[[22m^[[39m
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:44.0834656Z      ^[[33m^[[2m✓^[[22m^[[39m keeps disabled releases invisible and not downloadable ^[[33m 348^[[2mms^[[22m^[[39m
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:44.0835465Z      ^[[33m^[[2m✓^[[22m^[[39m gates GitHub fallback through D1 state and immutable tag URLs ^[[33m 383^[[2mms^[[22m^[[39m
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:44.0836415Z      ^[[33m^[[2m✓^[[22m^[[39m registers and renders tracepatch and vcdiff patches for the same source APK ^[[33m 939^[[2mms^[[22m^[[39m
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:44.0837725Z      ^[[33m^[[2m✓^[[22m^[[39m allows R2 backfill for an existing release without changing release identity ^[[33m 641^[[2mms^[[22m^[[39m
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:44.0849494Z      ^[[33m^[[2m✓^[[22m^[[39m rejects R2 backfill when commit identity does not match the existing release ^[[33m 541^[[2mms^[[22m^[[39m
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:44.0851042Z      ^[[33m^[[2m✓^[[22m^[[39m returns v1-compatible and v2 manifests from the same origin-scoped cache ^[[33m 452^[[2mms^[[22m^[[39m
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:44.9228955Z  ^[[32m✓^[[39m test/firmware-preflight.test.ts ^[[2m(^[[22m^[[2m13 tests^[[22m^[[2m)^[[22m^[[32m 296^[[2mms^[[22m^[[39m
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.7955488Z ^[[90mstdout^[[2m | test/firmware-v2.test.ts^[[2m > ^[[22m^[[2mP4-2 actual SQL constraints^[[2m > ^[[22m^[[2mdatabase rejects the second full, not an application precheck
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.7957757Z ^[[22m^[[39mSQL_REJECT XC-D1-DUP-FULL: Error: D1_ERROR: UNIQUE constraint failed: firmware_release_assets.release_id, firmware_release_assets.kind, firmware_release_assets.base_image_sha256: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_UNIQUE)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.7958476Z 
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.7989722Z ^[[90mstdout^[[2m | test/firmware-v2.test.ts^[[2m > ^[[22m^[[2mP4-2 actual SQL constraints^[[2m > ^[[22m^[[2mdatabase rejects the second patch for the same raw base
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.7991997Z ^[[22m^[[39mSQL_REJECT XC-D1-DUP-PATCH: Error: D1_ERROR: UNIQUE constraint failed: firmware_release_assets.release_id, firmware_release_assets.kind, firmware_release_assets.base_image_sha256: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_UNIQUE)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.7992763Z 
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8021273Z ^[[90mstdout^[[2m | test/firmware-v2.test.ts^[[2m > ^[[22m^[[2mP4-2 actual SQL constraints^[[2m > ^[[22m^[[2mdatabase rejects the second recovery asset
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8024471Z ^[[22m^[[39mSQL_REJECT duplicate-recovery: Error: D1_ERROR: UNIQUE constraint failed: firmware_release_assets.release_id, firmware_release_assets.kind, firmware_release_assets.base_image_sha256: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_UNIQUE)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8025406Z 
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8051882Z ^[[90mstdout^[[2m | test/firmware-v2.test.ts^[[2m > ^[[22m^[[2mP4-2 actual SQL constraints^[[2m > ^[[22m^[[2mSQL rejects illegal kind/base: NULL full
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8053291Z ^[[22m^[[39mSQL_REJECT NULL full: Error: D1_ERROR: NOT NULL constraint failed: firmware_release_assets.base_image_sha256: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_NOTNULL)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8054420Z 
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8090977Z ^[[90mstdout^[[2m | test/firmware-v2.test.ts^[[2m > ^[[22m^[[2mP4-2 actual SQL constraints^[[2m > ^[[22m^[[2mSQL rejects illegal kind/base: full with SHA
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8092599Z ^[[22m^[[39mSQL_REJECT full with SHA: Error: D1_ERROR: CHECK constraint failed: (kind = 'patch' AND length(base_image_sha256) = 64
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8093431Z           AND base_image_sha256 NOT GLOB '*[^0-9a-f]*' AND base_vcode > 0)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8093998Z       OR (kind IN ('full','recovery') AND base_image_sha256 = '' AND base_vcode = 0): SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_CHECK)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8094616Z 
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8118725Z ^[[90mstdout^[[2m | test/firmware-v2.test.ts^[[2m > ^[[22m^[[2mP4-2 actual SQL constraints^[[2m > ^[[22m^[[2mSQL rejects illegal kind/base: full with version
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8120144Z ^[[22m^[[39mSQL_REJECT full with version: Error: D1_ERROR: CHECK constraint failed: (kind = 'patch' AND length(base_image_sha256) = 64
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8120779Z           AND base_image_sha256 NOT GLOB '*[^0-9a-f]*' AND base_vcode > 0)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8121330Z       OR (kind IN ('full','recovery') AND base_image_sha256 = '' AND base_vcode = 0): SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_CHECK)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8121672Z 
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8143479Z ^[[90mstdout^[[2m | test/firmware-v2.test.ts^[[2m > ^[[22m^[[2mP4-2 actual SQL constraints^[[2m > ^[[22m^[[2mSQL rejects illegal kind/base: empty patch
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8145149Z ^[[22m^[[39mSQL_REJECT empty patch: Error: D1_ERROR: CHECK constraint failed: (kind = 'patch' AND length(base_image_sha256) = 64
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8146743Z           AND base_image_sha256 NOT GLOB '*[^0-9a-f]*' AND base_vcode > 0)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8147776Z       OR (kind IN ('full','recovery') AND base_image_sha256 = '' AND base_vcode = 0): SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_CHECK)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8148457Z 
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8164831Z ^[[90mstdout^[[2m | test/firmware-v2.test.ts^[[2m > ^[[22m^[[2mP4-2 actual SQL constraints^[[2m > ^[[22m^[[2mSQL rejects illegal kind/base: zero patch version
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8166495Z ^[[22m^[[39mSQL_REJECT zero patch version: Error: D1_ERROR: CHECK constraint failed: (kind = 'patch' AND length(base_image_sha256) = 64
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8167940Z           AND base_image_sha256 NOT GLOB '*[^0-9a-f]*' AND base_vcode > 0)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8169079Z       OR (kind IN ('full','recovery') AND base_image_sha256 = '' AND base_vcode = 0): SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_CHECK)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8169803Z 
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8188566Z ^[[90mstdout^[[2m | test/firmware-v2.test.ts^[[2m > ^[[22m^[[2mP4-2 actual SQL constraints^[[2m > ^[[22m^[[2mSQL rejects illegal kind/base: uppercase SHA
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8190581Z ^[[22m^[[39mSQL_REJECT uppercase SHA: Error: D1_ERROR: CHECK constraint failed: (kind = 'patch' AND length(base_image_sha256) = 64
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8192031Z           AND base_image_sha256 NOT GLOB '*[^0-9a-f]*' AND base_vcode > 0)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8193118Z       OR (kind IN ('full','recovery') AND base_image_sha256 = '' AND base_vcode = 0): SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_CHECK)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8193858Z 
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8213128Z ^[[90mstdout^[[2m | test/firmware-v2.test.ts^[[2m > ^[[22m^[[2mP4-2 actual SQL constraints^[[2m > ^[[22m^[[2mSQL rejects illegal kind/base: unknown kind
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8214805Z ^[[22m^[[39mSQL_REJECT unknown kind: Error: D1_ERROR: CHECK constraint failed: kind IN ('full','patch','recovery'): SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_CHECK)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8215545Z 
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8238841Z ^[[90mstdout^[[2m | test/firmware-v2.test.ts^[[2m > ^[[22m^[[2mP4-2 actual SQL constraints^[[2m > ^[[22m^[[2mSQL rejects illegal kind/base: recovery base
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8240165Z ^[[22m^[[39mSQL_REJECT recovery base: Error: D1_ERROR: CHECK constraint failed: (kind = 'patch' AND length(base_image_sha256) = 64
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8240735Z           AND base_image_sha256 NOT GLOB '*[^0-9a-f]*' AND base_vcode > 0)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8241599Z       OR (kind IN ('full','recovery') AND base_image_sha256 = '' AND base_vcode = 0): SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_CHECK)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8242189Z 
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8266046Z ^[[90mstdout^[[2m | test/firmware-v2.test.ts^[[2m > ^[[22m^[[2mP4-2 actual SQL constraints^[[2m > ^[[22m^[[2mSQL rejects illegal kind/base: patch ahead of target
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8268123Z ^[[22m^[[39mSQL_REJECT patch ahead of target: Error: D1_ERROR: firmware patch base version must precede target: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_TRIGGER)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8269120Z 
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8300595Z ^[[90mstdout^[[2m | test/firmware-v2.test.ts^[[2m > ^[[22m^[[2mP4-2 actual SQL constraints^[[2m > ^[[22m^[[2mdatabase rejects ready without full, and retains draft
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8302146Z ^[[22m^[[39mSQL_REJECT XC-D1-NO-FULL-READY: Error: D1_ERROR: firmware ready requires exactly one full and verified assets: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_TRIGGER)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8303021Z 
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8356207Z ^[[90mstdout^[[2m | test/firmware-v2.test.ts^[[2m > ^[[22m^[[2mP4-2 actual SQL constraints^[[2m > ^[[22m^[[2mdatabase rejects unpublished asset readiness and draft/cross-scope channel pointers
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8358318Z ^[[22m^[[39mSQL_REJECT unverified-ready: Error: D1_ERROR: firmware ready requires exactly one full and verified assets: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_TRIGGER)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8359065Z 
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8367348Z ^[[90mstdout^[[2m | test/firmware-v2.test.ts^[[2m > ^[[22m^[[2mP4-2 actual SQL constraints^[[2m > ^[[22m^[[2mdatabase rejects unpublished asset readiness and draft/cross-scope channel pointers
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8369933Z ^[[22m^[[39mSQL_REJECT draft-pointer: Error: D1_ERROR: firmware channel requires same-scope ready release: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_TRIGGER)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.8370944Z 
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.9558637Z ^[[90mstdout^[[2m | test/firmware-v2.test.ts^[[2m > ^[[22m^[[2mP4-2 actual SQL constraints^[[2m > ^[[22m^[[2mrejects direct channel changes without CAS and admin audit without a reason
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.9569634Z ^[[22m^[[39mSQL_REJECT channel-CAS: Error: D1_ERROR: firmware channel mutation requires CAS revision: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_TRIGGER)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.9570098Z 
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.9573668Z ^[[90mstdout^[[2m | test/firmware-v2.test.ts^[[2m > ^[[22m^[[2mP4-2 actual SQL constraints^[[2m > ^[[22m^[[2mrejects direct channel changes without CAS and admin audit without a reason
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.9575564Z ^[[22m^[[39mSQL_REJECT admin-reason: Error: D1_ERROR: firmware admin reason required: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_TRIGGER)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.9578578Z 
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.9600245Z  ^[[32m✓^[[39m test/firmware-v2.test.ts ^[[2m(^[[22m^[[2m91 tests^[[22m^[[2m)^[[22m^[[33m 9170^[[2mms^[[22m^[[39m
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.9601549Z      ^[[33m^[[2m✓^[[22m^[[39m registers all three assets atomically and replays canonical reordered metadata without another audit ^[[33m 749^[[2mms^[[22m^[[39m
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.9602600Z      ^[[33m^[[2m✓^[[22m^[[39m conflicts on changed runId ^[[33m 418^[[2mms^[[22m^[[39m
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.9603476Z      ^[[33m^[[2m✓^[[22m^[[39m rejects R2 missing mismatch without partial registration ^[[33m 510^[[2mms^[[22m^[[39m
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.9604467Z      ^[[33m^[[2m✓^[[22m^[[39m rejects R2 size mismatch without partial registration ^[[33m 664^[[2mms^[[22m^[[39m
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.9605539Z      ^[[33m^[[2m✓^[[22m^[[39m serializes 20 identical concurrent registrations to one release and audit ^[[33m 512^[[2mms^[[22m^[[39m
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:46.9606900Z      ^[[33m^[[2m✓^[[22m^[[39m honors independent latest/download stop flags with already-issued URLs ^[[33m 451^[[2mms^[[22m^[[39m
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:47.1893021Z uncaught exception; exception = workerd/io/actor-sqlite.c++:1204: failed: expected false; jsg.Error: Durable Object was reset and rolled back to its last known good state because the application left the database in a state where constraints were violated: FOREIGN KEY constraint failed: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_FOREIGNKEY)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:47.1900383Z stack: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@334e7d4 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@33a40a1 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@30cad62 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@3356631 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@3353410 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@333ea20 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@2d6b630 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@2fbc130 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@2fbc370 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@2fbd00c /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@539b038 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@2d3d3e8
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:47.1906860Z uncaught exception; exception = workerd/io/actor-sqlite.c++:1204: failed: expected false; jsg.Error: Durable Object was reset and rolled back to its last known good state because the application left the database in a state where constraints were violated: FOREIGN KEY constraint failed: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_FOREIGNKEY)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:47.1911289Z stack: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@334e7d4 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@33a40a1 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@30cad62 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@3356631 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@3353410 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@333ea20 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@2d6b630
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:47.1949266Z uncaught exception; source = Uncaught (in promise); stack = Error: Durable Object was reset and rolled back to its last known good state because the application left the database in a state where constraints were violated: FOREIGN KEY constraint failed: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_FOREIGNKEY)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:47.1951227Z     at async Object.fetch (file:///home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/miniflare/dist/src/workers/shared/object-entry.worker.js:15:12)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:47.1953378Z uncaught exception; exception = workerd/jsg/_virtual_includes/iterator/workerd/jsg/value.h:1480: failed: jsg.Error: Durable Object was reset and rolled back to its last known good state because the application left the database in a state where constraints were violated: FOREIGN KEY constraint failed: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_FOREIGNKEY)
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:47.1956495Z stack: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@2fbc370 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@2fbd00c /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@539b038 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/@cloudflare/workerd-linux-64/bin/workerd@2d3d3e8
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:51.3194663Z  ^[[32m✓^[[39m test/firmware-admin.test.ts ^[[2m(^[[22m^[[2m161 tests^[[22m^[[2m)^[[22m^[[33m 13506^[[2mms^[[22m^[[39m
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:51.3195844Z      ^[[33m^[[2m✓^[[22m^[[39m retracts only the pointer/revision/audit and gives upgraded devices NO_UPDATE ^[[33m 1964^[[2mms^[[22m^[[39m
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:51.3197095Z      ^[[33m^[[2m✓^[[22m^[[39m publish never clears an independent stop flag ^[[33m 2290^[[2mms^[[22m^[[39m
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:51.3198302Z      ^[[33m^[[2m✓^[[22m^[[39m retract never clears an independent stop flag ^[[33m 777^[[2mms^[[22m^[[39m
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:51.3199605Z      ^[[33m^[[2m✓^[[22m^[[39m conservatively blocks a release shared by stable and a stopped beta without changing token v2 ^[[33m 486^[[2mms^[[22m^[[39m
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:51.3217311Z 
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:51.3220829Z ^[[2m Test Files ^[[22m ^[[1m^[[32m4 passed^[[39m^[[22m^[[90m (4)^[[39m
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:51.3221689Z ^[[2m      Tests ^[[22m ^[[1m^[[32m283 passed^[[39m^[[22m^[[90m (283)^[[39m
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:51.3222295Z ^[[2m   Start at ^[[22m 12:47:36
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:51.3223425Z ^[[2m   Duration ^[[22m 14.99s^[[2m (transform 585ms, setup 1.25s, import 352ms, tests 29.27s, environment 0ms)^[[22m
+Worker Typecheck and Invariants	Run invariant tests	2026-10-21T12:47:51.3225241Z 
+Worker Typecheck and Invariants	Post Set up Node	﻿2026-10-21T12:47:51.4028190Z Post job cleanup.
+Worker Typecheck and Invariants	Post Set up Node	2026-10-21T12:47:51.5005939Z Cache hit occurred on the primary key node-cache-Linux-x64-npm-f3d69ea38312b474bab58d6febce89f0d02bd7f185269971a587ce70088dbab7, not saving cache.
+Worker Typecheck and Invariants	Post Checkout repository	﻿2026-10-21T12:47:51.5134756Z Post job cleanup.
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.5870332Z [command]/usr/bin/git version
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.5929962Z git version 2.55.0
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.5961445Z Temporarily overriding HOME='/home/runner/work/_temp/1e9b552f-ef4d-4fbe-bbcf-d5e43b490cc4' before making global git config changes
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.5962617Z Adding repository directory to the temporary git global config as a safe directory
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.5966397Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/E-Track/E-Track
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.5997436Z Removing SSH command configuration
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.6004370Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.6040297Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.6274377Z Removing HTTP extra header
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.6279562Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.6311514Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.6546978Z Removing includeIf entries pointing to credentials config files
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.6554935Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.6585227Z includeif.gitdir:/home/runner/work/E-Track/E-Track/.git.path
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.6586165Z includeif.gitdir:/home/runner/work/E-Track/E-Track/.git/worktrees/*.path
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.6587199Z includeif.gitdir:/github/workspace/.git.path
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.6587785Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.6596402Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/E-Track/E-Track/.git.path
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.6623118Z /home/runner/work/_temp/git-credentials-f9240ddb-363c-470e-8f6d-57de8c62007c.config
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.6641831Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/E-Track/E-Track/.git.path /home/runner/work/_temp/git-credentials-f9240ddb-363c-470e-8f6d-57de8c62007c.config
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.6673393Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/E-Track/E-Track/.git/worktrees/*.path
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.6701690Z /home/runner/work/_temp/git-credentials-f9240ddb-363c-470e-8f6d-57de8c62007c.config
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.6711841Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/E-Track/E-Track/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-f9240ddb-363c-470e-8f6d-57de8c62007c.config
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.6747415Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.6770756Z /github/runner_temp/git-credentials-f9240ddb-363c-470e-8f6d-57de8c62007c.config
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.6778266Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-f9240ddb-363c-470e-8f6d-57de8c62007c.config
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.6810707Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.6833128Z /github/runner_temp/git-credentials-f9240ddb-363c-470e-8f6d-57de8c62007c.config
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.6839968Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-f9240ddb-363c-470e-8f6d-57de8c62007c.config
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.6873214Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Worker Typecheck and Invariants	Post Checkout repository	2026-10-21T12:47:51.7081696Z Removing credentials config '/home/runner/work/_temp/git-credentials-f9240ddb-363c-470e-8f6d-57de8c62007c.config'
+Worker Typecheck and Invariants	Complete job	﻿2026-10-21T12:47:51.7227361Z Cleaning up orphan processes
+Admin Typecheck and Mock UI	Set up job	﻿2026-10-21T12:47:05.2485539Z Current runner version: '2.338.0'
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.2505477Z ##[group]Runner Image Provisioner
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.2506137Z Hosted Compute Agent
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.2506590Z Version: 20261012.601
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.2506983Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.2507419Z Build Date: 2026-10-12T17:48:21Z
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.2507894Z Worker ID: {70cdcf28-5eb8-441d-89a6-bad28c4da4ac}
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.2508355Z Region: centralus
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.2509086Z Cloud: Azure
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.2509441Z ##[endgroup]
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.2510460Z ##[group]Operating System
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.2511054Z Ubuntu
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.2511410Z 24.04.5
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.2511757Z LTS
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.2512088Z ##[endgroup]
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.2512432Z ##[group]Runner Image
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.2512856Z Image: ubuntu-24.04
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.2513245Z Version: 20261012.334.1
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.2513870Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.2515015Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.2515626Z ##[endgroup]
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.2516368Z ##[group]GITHUB_TOKEN Permissions
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.2517827Z Contents: read
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.2518198Z Metadata: read
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.2518541Z ##[endgroup]
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.2520118Z Secret source: Actions
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.2520646Z Cache mode: write
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.2521328Z Prepare workflow directory
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.3898968Z Prepare all required actions
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.3932026Z Getting action download info
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.6076630Z Download action repository 'actions/checkout@v6' (SHA:d23441a48e516b6c34aea4fa41551a30e30af803)
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:05.7925752Z Download action repository 'actions/setup-node@v6' (SHA:249970729cb0ef3589644e2896645e5dc5ba9c38)
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:06.1199580Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+Admin Typecheck and Mock UI	Set up job	2026-10-21T12:47:06.9289128Z Complete job name: Admin Typecheck and Mock UI
+Admin Typecheck and Mock UI	Checkout repository	﻿2026-10-21T12:47:06.9954663Z ##[group]Run actions/checkout@v6
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:06.9955495Z with:
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:06.9955984Z   repository: Eitan-S-23/E-Track
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:06.9961425Z   token: ***
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:06.9961920Z   ssh-strict: true
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:06.9962419Z   ssh-user: git
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:06.9962935Z   persist-credentials: true
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:06.9963509Z   clean: true
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:06.9964025Z   sparse-checkout-cone-mode: true
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:06.9964639Z   fetch-depth: 1
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:06.9965137Z   fetch-tags: false
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:06.9965647Z   show-progress: true
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:06.9966169Z   lfs: false
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:06.9966658Z   submodules: false
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:06.9967207Z   set-safe-directory: true
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:06.9967808Z   allow-unsafe-pr-checkout: false
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:06.9968525Z env:
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:06.9969346Z   PLAYWRIGHT_BROWSERS_PATH: /home/runner/work/E-Track/E-Track/.cache/admin-browsers
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:06.9970574Z   PW_OUTPUT_DIR: /home/runner/work/E-Track/E-Track/.cache/admin-ui/results
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:06.9971796Z   TMPDIR: /home/runner/work/E-Track/E-Track/.cache/admin-tmp
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:06.9972785Z   XDG_CACHE_HOME: /home/runner/work/E-Track/E-Track/.cache/admin-xdg
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:06.9973830Z   npm_config_cache: /home/runner/work/E-Track/E-Track/.cache/admin-npm
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:06.9974678Z ##[endgroup]
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.0705480Z Syncing repository: Eitan-S-23/E-Track
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.0708094Z ##[group]Getting Git version info
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.0708940Z Working directory is '/home/runner/work/E-Track/E-Track'
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.0710278Z [command]/usr/bin/git version
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.0797701Z git version 2.55.0
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.0816414Z ##[endgroup]
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.0829352Z Temporarily overriding HOME='/home/runner/work/_temp/29f53868-a77b-4546-86e8-0d94a454ac8e' before making global git config changes
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.0832145Z Adding repository directory to the temporary git global config as a safe directory
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.0835046Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/E-Track/E-Track
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.1382380Z Deleting the contents of '/home/runner/work/E-Track/E-Track'
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.1387288Z ##[group]Determining repository object format
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.1389031Z ##[endgroup]
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.1389938Z ##[group]Initializing the repository
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.1393557Z [command]/usr/bin/git init /home/runner/work/E-Track/E-Track
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.2196882Z hint: Using 'master' as the name for the initial branch. This default branch name
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.2198971Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.2201052Z hint: to use in all of your new repositories, which will suppress this warning,
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.2202675Z hint: call:
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.2203502Z hint:
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.2204580Z hint: 	git config --global init.defaultBranch <name>
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.2205994Z hint:
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.2207172Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.2209113Z hint: 'development'. The just-created branch can be renamed via this command:
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.2210437Z hint:
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.2211224Z hint: 	git branch -m <name>
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.2212342Z hint:
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.2213477Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.2214799Z Initialized empty Git repository in /home/runner/work/E-Track/E-Track/.git/
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.2217094Z [command]/usr/bin/git remote add origin https://github.com/Eitan-S-23/E-Track
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.2411213Z ##[endgroup]
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.2412266Z ##[group]Disabling automatic garbage collection
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.2414424Z [command]/usr/bin/git config --local gc.auto 0
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.2998639Z ##[endgroup]
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.3000253Z ##[group]Setting up auth
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.3001598Z Removing SSH command configuration
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.3005068Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.3044061Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.3349886Z Removing HTTP extra header
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.3356155Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.3388084Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.3579075Z Removing includeIf entries pointing to credentials config files
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.3585225Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.3623025Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.3819969Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-4a3b49dd-a8d6-48d4-b46a-26412b75db2d.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.4290698Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/E-Track/E-Track/.git.path /home/runner/work/_temp/git-credentials-4a3b49dd-a8d6-48d4-b46a-26412b75db2d.config
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.5503290Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/E-Track/E-Track/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-4a3b49dd-a8d6-48d4-b46a-26412b75db2d.config
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.6706466Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-4a3b49dd-a8d6-48d4-b46a-26412b75db2d.config
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.6798530Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-4a3b49dd-a8d6-48d4-b46a-26412b75db2d.config
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.6892523Z ##[endgroup]
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.6893498Z ##[group]Fetching the repository
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:07.6899020Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +75d3ad24424989f5a5f38fe237d24deef9decd4f:refs/remotes/origin/main
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:19.2498962Z From https://github.com/Eitan-S-23/E-Track
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:19.2499582Z  * [new ref]         75d3ad24424989f5a5f38fe237d24deef9decd4f -> origin/main
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:19.2509549Z [command]/usr/bin/git branch --list --remote origin/main
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:19.2538693Z   origin/main
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:19.2546007Z [command]/usr/bin/git rev-parse refs/remotes/origin/main
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:19.2569213Z 75d3ad24424989f5a5f38fe237d24deef9decd4f
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:19.2573267Z ##[endgroup]
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:19.2573622Z ##[group]Determining the checkout info
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:19.2574710Z ##[endgroup]
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:19.2578115Z [command]/usr/bin/git sparse-checkout disable
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:19.2861611Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:19.2926542Z ##[group]Checking out the ref
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:19.2930169Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:20.4734713Z Updating files:  49% (12118/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:20.6615384Z Updating files:  50% (12336/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.1065793Z Updating files:  51% (12583/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.2104902Z Updating files:  52% (12829/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.2806372Z Updating files:  53% (13076/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.2956556Z Updating files:  54% (13323/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.3255171Z Updating files:  55% (13570/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.3564383Z Updating files:  55% (13658/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.4028664Z Updating files:  56% (13816/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.4303056Z Updating files:  57% (14063/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.4877893Z Updating files:  58% (14310/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.4986400Z Updating files:  59% (14556/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.5707490Z Updating files:  60% (14803/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.5957933Z Updating files:  61% (15050/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.6188513Z Updating files:  62% (15297/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.6431700Z Updating files:  63% (15543/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.6603200Z Updating files:  64% (15790/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.6838567Z Updating files:  65% (16037/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.6977108Z Updating files:  66% (16283/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.7050628Z Updating files:  67% (16530/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.7125728Z Updating files:  68% (16777/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.7255442Z Updating files:  69% (17023/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.7511676Z Updating files:  70% (17270/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.7619759Z Updating files:  71% (17517/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.7689443Z Updating files:  72% (17764/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.7763602Z Updating files:  73% (18010/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.7896048Z Updating files:  74% (18257/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.8585388Z Updating files:  75% (18504/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.9018045Z Updating files:  76% (18750/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.9633855Z Updating files:  77% (18997/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.9703023Z Updating files:  78% (19244/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:21.9774222Z Updating files:  79% (19491/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:22.0578041Z Updating files:  80% (19737/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:22.1134958Z Updating files:  81% (19984/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:22.1741492Z Updating files:  82% (20231/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:22.2166180Z Updating files:  83% (20477/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:22.2235677Z Updating files:  84% (20724/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:22.2327634Z Updating files:  85% (20971/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:22.3177322Z Updating files:  86% (21218/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:22.3609573Z Updating files:  86% (21437/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:22.3782053Z Updating files:  87% (21464/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:22.4085669Z Updating files:  88% (21711/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:22.4158907Z Updating files:  89% (21958/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:22.5031216Z Updating files:  90% (22204/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:22.5100440Z Updating files:  91% (22451/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:22.5193576Z Updating files:  92% (22698/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:22.6064318Z Updating files:  93% (22945/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:22.6456844Z Updating files:  94% (23191/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:22.6764895Z Updating files:  95% (23438/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:22.7236027Z Updating files:  96% (23685/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:23.2657727Z Updating files:  97% (23931/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:23.3095204Z Updating files:  98% (24178/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:23.3095689Z Updating files:  99% (24425/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:23.3430687Z Updating files:  99% (24428/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:23.3431239Z Updating files: 100% (24671/24671)
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:23.3431526Z Updating files: 100% (24671/24671), done.
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:23.4206093Z Switched to a new branch 'main'
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:23.4207402Z branch 'main' set up to track 'origin/main'.
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:23.4306833Z ##[endgroup]
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:23.4344755Z [command]/usr/bin/git log -1 --format=%H
+Admin Typecheck and Mock UI	Checkout repository	2026-10-21T12:47:23.4369887Z 75d3ad24424989f5a5f38fe237d24deef9decd4f
+Admin Typecheck and Mock UI	Prepare contained UI outputs and checkout identity	﻿2026-10-21T12:47:23.4610121Z ##[group]Run mkdir -p "$TMPDIR" "$XDG_CACHE_HOME" "$GITHUB_WORKSPACE/.cache/admin-ui"
+Admin Typecheck and Mock UI	Prepare contained UI outputs and checkout identity	2026-10-21T12:47:23.4610516Z ^[[36;1mmkdir -p "$TMPDIR" "$XDG_CACHE_HOME" "$GITHUB_WORKSPACE/.cache/admin-ui"^[[0m
+Admin Typecheck and Mock UI	Prepare contained UI outputs and checkout identity	2026-10-21T12:47:23.4610962Z ^[[36;1mgit rev-parse HEAD > "$GITHUB_WORKSPACE/.cache/admin-ui/checkout-sha.txt"^[[0m
+Admin Typecheck and Mock UI	Prepare contained UI outputs and checkout identity	2026-10-21T12:47:23.4611198Z ^[[36;1mnode --version^[[0m
+Admin Typecheck and Mock UI	Prepare contained UI outputs and checkout identity	2026-10-21T12:47:23.5567539Z shell: /usr/bin/bash -e {0}
+Admin Typecheck and Mock UI	Prepare contained UI outputs and checkout identity	2026-10-21T12:47:23.5567739Z env:
+Admin Typecheck and Mock UI	Prepare contained UI outputs and checkout identity	2026-10-21T12:47:23.5567967Z   PLAYWRIGHT_BROWSERS_PATH: /home/runner/work/E-Track/E-Track/.cache/admin-browsers
+Admin Typecheck and Mock UI	Prepare contained UI outputs and checkout identity	2026-10-21T12:47:23.5568265Z   PW_OUTPUT_DIR: /home/runner/work/E-Track/E-Track/.cache/admin-ui/results
+Admin Typecheck and Mock UI	Prepare contained UI outputs and checkout identity	2026-10-21T12:47:23.5568516Z   TMPDIR: /home/runner/work/E-Track/E-Track/.cache/admin-tmp
+Admin Typecheck and Mock UI	Prepare contained UI outputs and checkout identity	2026-10-21T12:47:23.5568784Z   XDG_CACHE_HOME: /home/runner/work/E-Track/E-Track/.cache/admin-xdg
+Admin Typecheck and Mock UI	Prepare contained UI outputs and checkout identity	2026-10-21T12:47:23.5569036Z   npm_config_cache: /home/runner/work/E-Track/E-Track/.cache/admin-npm
+Admin Typecheck and Mock UI	Prepare contained UI outputs and checkout identity	2026-10-21T12:47:23.5569239Z ##[endgroup]
+Admin Typecheck and Mock UI	Prepare contained UI outputs and checkout identity	2026-10-21T12:47:24.5666468Z v22.23.3
+Admin Typecheck and Mock UI	Set up Node	﻿2026-10-21T12:47:24.6159988Z ##[group]Run actions/setup-node@v6
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:24.6160171Z with:
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:24.6160295Z   node-version: 24
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:24.6160408Z   cache: npm
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:24.6160647Z   cache-dependency-path: app/bluetooth_flutter_Trace/cloudflare/update-service/admin/package-lock.json
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:24.6161066Z   check-latest: false
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:24.6162322Z   token: ***
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:24.6162445Z   package-manager-cache: true
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:24.6162585Z env:
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:24.6162776Z   PLAYWRIGHT_BROWSERS_PATH: /home/runner/work/E-Track/E-Track/.cache/admin-browsers
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:24.6163066Z   PW_OUTPUT_DIR: /home/runner/work/E-Track/E-Track/.cache/admin-ui/results
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:24.6163329Z   TMPDIR: /home/runner/work/E-Track/E-Track/.cache/admin-tmp
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:24.6163560Z   XDG_CACHE_HOME: /home/runner/work/E-Track/E-Track/.cache/admin-xdg
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:24.6163802Z   npm_config_cache: /home/runner/work/E-Track/E-Track/.cache/admin-npm
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:24.6163996Z ##[endgroup]
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:24.7417647Z Found in cache @ /opt/hostedtoolcache/node/24.21.0/x64
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:24.7423662Z ##[group]Environment details
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:27.6119037Z node: v24.21.0
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:27.6119332Z npm: 11.19.0
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:27.6119450Z yarn: 1.22.22
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:27.6120106Z ##[endgroup]
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:27.6131636Z [command]/opt/hostedtoolcache/node/24.21.0/x64/bin/npm config get cache
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:27.8596661Z /home/runner/work/E-Track/E-Track/.cache/admin-npm
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:28.0201858Z Cache hit for: node-cache-Linux-x64-npm-3fa00c4ea6646f51531796dc5462ed9bb32b9a4e267e6df08792fadd2da0e5ac
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:29.1730427Z Received 72238020 of 80626628 (89.6%), 68.9 MBs/sec
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:30.1725038Z Received 76432324 of 80626628 (94.8%), 36.4 MBs/sec
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:31.1736715Z Received 76432324 of 80626628 (94.8%), 24.3 MBs/sec
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:31.5913392Z Received 80626628 of 80626628 (100.0%), 22.5 MBs/sec
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:31.5914053Z Cache Size: ~77 MB (80626628 B)
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:31.5937251Z [command]/usr/bin/tar -xf /home/runner/work/_temp/6ae2c4ed-890a-40d2-aebe-a9bbad0d877d/cache.tzst -P -C /home/runner/work/E-Track/E-Track --use-compress-program unzstd
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:31.6945874Z Cache restored successfully
+Admin Typecheck and Mock UI	Set up Node	2026-10-21T12:47:31.6982875Z Cache restored from key: node-cache-Linux-x64-npm-3fa00c4ea6646f51531796dc5462ed9bb32b9a4e267e6df08792fadd2da0e5ac
+Admin Typecheck and Mock UI	Install dependencies	﻿2026-10-21T12:47:31.7117796Z ##[group]Run npm ci
+Admin Typecheck and Mock UI	Install dependencies	2026-10-21T12:47:31.7117970Z ^[[36;1mnpm ci^[[0m
+Admin Typecheck and Mock UI	Install dependencies	2026-10-21T12:47:31.7222919Z shell: /usr/bin/bash -e {0}
+Admin Typecheck and Mock UI	Install dependencies	2026-10-21T12:47:31.7223085Z env:
+Admin Typecheck and Mock UI	Install dependencies	2026-10-21T12:47:31.7223283Z   PLAYWRIGHT_BROWSERS_PATH: /home/runner/work/E-Track/E-Track/.cache/admin-browsers
+Admin Typecheck and Mock UI	Install dependencies	2026-10-21T12:47:31.7223575Z   PW_OUTPUT_DIR: /home/runner/work/E-Track/E-Track/.cache/admin-ui/results
+Admin Typecheck and Mock UI	Install dependencies	2026-10-21T12:47:31.7223832Z   TMPDIR: /home/runner/work/E-Track/E-Track/.cache/admin-tmp
+Admin Typecheck and Mock UI	Install dependencies	2026-10-21T12:47:31.7224064Z   XDG_CACHE_HOME: /home/runner/work/E-Track/E-Track/.cache/admin-xdg
+Admin Typecheck and Mock UI	Install dependencies	2026-10-21T12:47:31.7224306Z   npm_config_cache: /home/runner/work/E-Track/E-Track/.cache/admin-npm
+Admin Typecheck and Mock UI	Install dependencies	2026-10-21T12:47:31.7224508Z ##[endgroup]
+Admin Typecheck and Mock UI	Install dependencies	2026-10-21T12:47:37.2016362Z 
+Admin Typecheck and Mock UI	Install dependencies	2026-10-21T12:47:37.2023058Z added 42 packages, and audited 43 packages in 5s
+Admin Typecheck and Mock UI	Install dependencies	2026-10-21T12:47:37.2023269Z 
+Admin Typecheck and Mock UI	Install dependencies	2026-10-21T12:47:37.2023393Z 9 packages are looking for funding
+Admin Typecheck and Mock UI	Install dependencies	2026-10-21T12:47:37.2023586Z   run `npm fund` for details
+Admin Typecheck and Mock UI	Install dependencies	2026-10-21T12:47:37.2400154Z 
+Admin Typecheck and Mock UI	Install dependencies	2026-10-21T12:47:37.2401117Z 4 high severity vulnerabilities
+Admin Typecheck and Mock UI	Install dependencies	2026-10-21T12:47:37.2401388Z 
+Admin Typecheck and Mock UI	Install dependencies	2026-10-21T12:47:37.2401467Z To address all issues, run:
+Admin Typecheck and Mock UI	Install dependencies	2026-10-21T12:47:37.2401645Z   npm audit fix --force
+Admin Typecheck and Mock UI	Install dependencies	2026-10-21T12:47:37.2401739Z 
+Admin Typecheck and Mock UI	Install dependencies	2026-10-21T12:47:37.2401813Z Run `npm audit` for details.
+Admin Typecheck and Mock UI	Install dependencies	2026-10-21T12:47:37.2409083Z npm warn install-scripts 3 packages have install scripts not yet covered by allowScripts:
+Admin Typecheck and Mock UI	Install dependencies	2026-10-21T12:47:37.2409665Z npm warn install-scripts   esbuild@0.28.1 (postinstall: node install.js)
+Admin Typecheck and Mock UI	Install dependencies	2026-10-21T12:47:37.2410075Z npm warn install-scripts   sharp@0.34.5 (install: node install/check.js || npm run build)
+Admin Typecheck and Mock UI	Install dependencies	2026-10-21T12:47:37.2410420Z npm warn install-scripts   workerd@1.20260625.1 (postinstall: node install.js)
+Admin Typecheck and Mock UI	Install dependencies	2026-10-21T12:47:37.2410649Z npm warn install-scripts
+Admin Typecheck and Mock UI	Install dependencies	2026-10-21T12:47:37.2411132Z npm warn install-scripts Run `npm install-scripts ls` to review, or `npm install-scripts approve <pkg>` to allow.
+Admin Typecheck and Mock UI	Typecheck	﻿2026-10-21T12:47:37.3451070Z ##[group]Run npm run check
+Admin Typecheck and Mock UI	Typecheck	2026-10-21T12:47:37.3451295Z ^[[36;1mnpm run check^[[0m
+Admin Typecheck and Mock UI	Typecheck	2026-10-21T12:47:37.3502817Z shell: /usr/bin/bash -e {0}
+Admin Typecheck and Mock UI	Typecheck	2026-10-21T12:47:37.3502980Z env:
+Admin Typecheck and Mock UI	Typecheck	2026-10-21T12:47:37.3503187Z   PLAYWRIGHT_BROWSERS_PATH: /home/runner/work/E-Track/E-Track/.cache/admin-browsers
+Admin Typecheck and Mock UI	Typecheck	2026-10-21T12:47:37.3503480Z   PW_OUTPUT_DIR: /home/runner/work/E-Track/E-Track/.cache/admin-ui/results
+Admin Typecheck and Mock UI	Typecheck	2026-10-21T12:47:37.3503750Z   TMPDIR: /home/runner/work/E-Track/E-Track/.cache/admin-tmp
+Admin Typecheck and Mock UI	Typecheck	2026-10-21T12:47:37.3503983Z   XDG_CACHE_HOME: /home/runner/work/E-Track/E-Track/.cache/admin-xdg
+Admin Typecheck and Mock UI	Typecheck	2026-10-21T12:47:37.3504227Z   npm_config_cache: /home/runner/work/E-Track/E-Track/.cache/admin-npm
+Admin Typecheck and Mock UI	Typecheck	2026-10-21T12:47:37.3504423Z ##[endgroup]
+Admin Typecheck and Mock UI	Typecheck	2026-10-21T12:47:37.4461529Z 
+Admin Typecheck and Mock UI	Typecheck	2026-10-21T12:47:37.4462505Z > @trace/update-service-admin@0.1.0 check
+Admin Typecheck and Mock UI	Typecheck	2026-10-21T12:47:37.4462902Z > tsc --noEmit
+Admin Typecheck and Mock UI	Typecheck	2026-10-21T12:47:37.4463030Z 
+Admin Typecheck and Mock UI	Install Chromium headless shell	﻿2026-10-21T12:47:38.0967943Z ##[group]Run npm exec -- playwright install chromium --only-shell
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:38.0968244Z ^[[36;1mnpm exec -- playwright install chromium --only-shell^[[0m
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:38.1021585Z shell: /usr/bin/bash -e {0}
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:38.1021744Z env:
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:38.1021948Z   PLAYWRIGHT_BROWSERS_PATH: /home/runner/work/E-Track/E-Track/.cache/admin-browsers
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:38.1022234Z   PW_OUTPUT_DIR: /home/runner/work/E-Track/E-Track/.cache/admin-ui/results
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:38.1022653Z   TMPDIR: /home/runner/work/E-Track/E-Track/.cache/admin-tmp
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:38.1022888Z   XDG_CACHE_HOME: /home/runner/work/E-Track/E-Track/.cache/admin-xdg
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:38.1023138Z   npm_config_cache: /home/runner/work/E-Track/E-Track/.cache/admin-npm
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:38.1023337Z ##[endgroup]
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:38.7343621Z Downloading Chrome Headless Shell 156.0.8078.4 (playwright chromium-headless-shell v1248) from https://cdn.playwright.dev/builds/cft/156.0.8078.4/linux64/chrome-headless-shell-linux64.zip
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:39.1180113Z |                                                                                |   0% of 120 MiB
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:39.3313108Z |■■■■■■■■                                                                        |  10% of 120 MiB
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:39.3803379Z |■■■■■■■■■■■■■■■■                                                                |  20% of 120 MiB
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:39.4108452Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 120 MiB
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:39.4682826Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 120 MiB
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:39.4947226Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 120 MiB
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:39.5227377Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 120 MiB
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:39.5611105Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 120 MiB
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:39.5791438Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 120 MiB
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:39.6072405Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 120 MiB
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:39.6409151Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 120 MiB
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.2216810Z Chrome Headless Shell 156.0.8078.4 (playwright chromium-headless-shell v1248) downloaded to /home/runner/work/E-Track/E-Track/.cache/admin-browsers/chromium_headless_shell-1248
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.2220398Z Downloading FFmpeg (playwright ffmpeg v1013) from https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1013/ffmpeg-linux.zip
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.4835845Z Error: getaddrinfo ENOTFOUND playwright.download.prss.microsoft.com
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.4836491Z     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:internal/dns/promises:102:17) {
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.4836960Z   errno: -3008,
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.4837240Z   code: 'ENOTFOUND',
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.4837460Z   syscall: 'getaddrinfo',
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.4837780Z   hostname: 'playwright.download.prss.microsoft.com'
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.4838085Z }
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.4922281Z Downloading FFmpeg (playwright ffmpeg v1013) from https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/ffmpeg/1013/ffmpeg-linux.zip
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.7320605Z Error: getaddrinfo ENOTFOUND playwright.download.prss.microsoft.com
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.7321417Z     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:internal/dns/promises:102:17) {
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.7321829Z   errno: -3008,
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.7322033Z   code: 'ENOTFOUND',
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.7322247Z   syscall: 'getaddrinfo',
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.7322542Z   hostname: 'playwright.download.prss.microsoft.com'
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.7322817Z }
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.7408526Z Downloading FFmpeg (playwright ffmpeg v1013) from https://cdn.playwright.dev/builds/ffmpeg/1013/ffmpeg-linux.zip
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.9662408Z |                                                                                |   0% of 2.2 MiB
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.9693216Z |■■■■■■■■                                                                        |  10% of 2.2 MiB
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.9702387Z |■■■■■■■■■■■■■■■■                                                                |  20% of 2.2 MiB
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.9710650Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 2.2 MiB
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.9720340Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 2.2 MiB
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.9731046Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 2.2 MiB
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.9735667Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 2.2 MiB
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.9744624Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 2.2 MiB
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.9750543Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 2.2 MiB
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.9758593Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 2.2 MiB
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:41.9768583Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 2.2 MiB
+Admin Typecheck and Mock UI	Install Chromium headless shell	2026-10-21T12:47:42.0190602Z FFmpeg (playwright ffmpeg v1013) downloaded to /home/runner/work/E-Track/E-Track/.cache/admin-browsers/ffmpeg-1013
+Admin Typecheck and Mock UI	Run mock Admin UI tests	﻿2026-10-21T12:47:42.0507136Z ##[group]Run set -euo pipefail
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:47:42.0507462Z ^[[36;1mset -euo pipefail^[[0m
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:47:42.0507819Z ^[[36;1mnpm run test:ui 2>&1 | tee "$GITHUB_WORKSPACE/.cache/admin-ui/playwright.log"^[[0m
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:47:42.0568279Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:47:42.0568492Z env:
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:47:42.0568702Z   PLAYWRIGHT_BROWSERS_PATH: /home/runner/work/E-Track/E-Track/.cache/admin-browsers
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:47:42.0568994Z   PW_OUTPUT_DIR: /home/runner/work/E-Track/E-Track/.cache/admin-ui/results
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:47:42.0569245Z   TMPDIR: /home/runner/work/E-Track/E-Track/.cache/admin-tmp
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:47:42.0569488Z   XDG_CACHE_HOME: /home/runner/work/E-Track/E-Track/.cache/admin-xdg
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:47:42.0569745Z   npm_config_cache: /home/runner/work/E-Track/E-Track/.cache/admin-npm
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:47:42.0569951Z ##[endgroup]
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:47:42.1277289Z 
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:47:42.1278051Z > @trace/update-service-admin@0.1.0 test:ui
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:47:42.1278362Z > playwright test
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:47:42.1278509Z 
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:47:42.6244705Z 
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:47:42.6245381Z Running 36 tests using 1 worker
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:47:42.6245557Z 
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:47:42.9860054Z [1/36] test/firmware-ui.spec.ts:156:3 › en: retract boundary, reason, cancel and fresh confirmation
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:47:47.9384510Z [2/36] test/firmware-ui.spec.ts:184:3 › en: CAS refresh never replays an old intent
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:47:51.4404190Z [3/36] test/firmware-ui.spec.ts:156:3 › zh: retract boundary, reason, cancel and fresh confirmation
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:47:55.9977885Z [4/36] test/firmware-ui.spec.ts:184:3 › zh: CAS refresh never replays an old intent
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:47:59.3014414Z [5/36] test/firmware-ui.spec.ts:202:1 › beta publisher controls are independent and stable/release actions stay owner-only
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:48:01.1741915Z [6/36] test/firmware-ui.spec.ts:218:1 › viewer and unavailable/reference-protected releases cannot write
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:48:02.0478257Z [7/36] test/firmware-ui.spec.ts:231:1 › unknown channel result is read back but never automatically repeated
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:48:03.3053045Z [8/36] test/firmware-ui.spec.ts:242:1 › unknown release result uses an explicit same-key/same-body reconciliation after reads
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:48:05.6673639Z [9/36] test/firmware-ui.spec.ts:263:1 › an expired original key requires a newly confirmed operation, not an automatic new key
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:48:08.7989485Z [10/36] test/firmware-ui.spec.ts:291:3 › recovery-download: interrupted reconciliation preserves intent after 401/TOKEN_EXPIRED/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:48:12.6164623Z [11/36] test/firmware-ui.spec.ts:291:3 › recovery-download: interrupted reconciliation preserves intent after 403/CSRF_INVALID/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:48:17.8299059Z [12/36] test/firmware-ui.spec.ts:291:3 › recovery-download: interrupted reconciliation preserves intent after 403/ROLE_FORBIDDEN/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:48:22.9182814Z [13/36] test/firmware-ui.spec.ts:291:3 › recovery-download: interrupted reconciliation preserves intent after 429/RATE_LIMITED/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:48:26.9166245Z [14/36] test/firmware-ui.spec.ts:291:3 › recovery-download: interrupted reconciliation preserves intent after 503/BACKEND_UNAVAILABLE/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:48:30.5728148Z [15/36] test/firmware-ui.spec.ts:291:3 › recovery-download: interrupted reconciliation preserves intent after 409/IDEMPOTENCY_CONFLICT/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:48:34.8813744Z [16/36] test/firmware-ui.spec.ts:291:3 › recovery-download: interrupted reconciliation preserves intent after 410/RELEASE_DISABLED/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:48:38.8556160Z [17/36] test/firmware-ui.spec.ts:291:3 › recovery-download: interrupted reconciliation preserves intent after 409/IDEMPOTENCY_RESULT_EXPIRED/missing
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:48:42.8823504Z [18/36] test/firmware-ui.spec.ts:291:3 › recovery-download: interrupted reconciliation preserves intent after 409/IDEMPOTENCY_RESULT_EXPIRED/mismatch
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:48:47.4781171Z [19/36] test/firmware-ui.spec.ts:291:3 › recovery-download: interrupted reconciliation preserves intent after 403/IDEMPOTENCY_RESULT_EXPIRED/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:48:51.1975393Z [20/36] test/firmware-ui.spec.ts:291:3 › disable: interrupted reconciliation preserves intent after 401/TOKEN_EXPIRED/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:48:54.4122367Z [21/36] test/firmware-ui.spec.ts:291:3 › disable: interrupted reconciliation preserves intent after 403/CSRF_INVALID/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:48:58.3063805Z [22/36] test/firmware-ui.spec.ts:291:3 › disable: interrupted reconciliation preserves intent after 403/ROLE_FORBIDDEN/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:49:02.0382434Z [23/36] test/firmware-ui.spec.ts:291:3 › disable: interrupted reconciliation preserves intent after 429/RATE_LIMITED/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:49:05.8269539Z [24/36] test/firmware-ui.spec.ts:291:3 › disable: interrupted reconciliation preserves intent after 503/BACKEND_UNAVAILABLE/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:49:09.4119995Z [25/36] test/firmware-ui.spec.ts:291:3 › disable: interrupted reconciliation preserves intent after 409/IDEMPOTENCY_CONFLICT/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:49:12.6936297Z [26/36] test/firmware-ui.spec.ts:291:3 › disable: interrupted reconciliation preserves intent after 410/RELEASE_DISABLED/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:49:16.2460291Z [27/36] test/firmware-ui.spec.ts:291:3 › disable: interrupted reconciliation preserves intent after 409/IDEMPOTENCY_RESULT_EXPIRED/missing
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:49:19.6767345Z [28/36] test/firmware-ui.spec.ts:291:3 › disable: interrupted reconciliation preserves intent after 409/IDEMPOTENCY_RESULT_EXPIRED/mismatch
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:49:23.6095348Z [29/36] test/firmware-ui.spec.ts:291:3 › disable: interrupted reconciliation preserves intent after 403/IDEMPOTENCY_RESULT_EXPIRED/valid
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:49:26.7794621Z [30/36] test/firmware-ui.spec.ts:332:3 › a first definitive 401/TOKEN_EXPIRED rejection permits a separately confirmed intent
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:49:28.5900365Z [31/36] test/firmware-ui.spec.ts:332:3 › a first definitive 403/CSRF_INVALID rejection permits a separately confirmed intent
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:49:29.9787563Z [32/36] test/firmware-ui.spec.ts:332:3 › a first definitive 403/ROLE_FORBIDDEN rejection permits a separately confirmed intent
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:49:32.0026248Z [33/36] test/firmware-ui.spec.ts:332:3 › a first definitive 429/RATE_LIMITED rejection permits a separately confirmed intent
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:49:33.8338593Z [34/36] test/firmware-ui.spec.ts:348:1 › owner identity changes cannot replay a pending request in another actor scope
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:49:34.9981144Z [35/36] test/firmware-ui.spec.ts:359:1 › failed state refresh keeps writes locked until a successful manual read
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:49:36.3212725Z [36/36] test/firmware-ui.spec.ts:371:1 › mobile firmware controls and confirmation fit the viewport
+Admin Typecheck and Mock UI	Run mock Admin UI tests	2026-10-21T12:49:38.1295012Z   36 passed (1.9m)
+Admin Typecheck and Mock UI	Preserve mock UI evidence	﻿2026-10-21T12:49:38.1545528Z ##[group]Run actions/upload-artifact@v4
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:38.1545722Z with:
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:38.1545860Z   name: admin-mock-ui-39602375609-1
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:38.1546017Z   path: .cache/admin-ui/
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:38.1546157Z   include-hidden-files: true
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:38.1546299Z   if-no-files-found: error
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:38.1546450Z   retention-days: 14
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:38.1546576Z   compression-level: 6
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:38.1546699Z   overwrite: false
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:38.1546814Z env:
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:38.1547008Z   PLAYWRIGHT_BROWSERS_PATH: /home/runner/work/E-Track/E-Track/.cache/admin-browsers
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:38.1547296Z   PW_OUTPUT_DIR: /home/runner/work/E-Track/E-Track/.cache/admin-ui/results
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:38.1547540Z   TMPDIR: /home/runner/work/E-Track/E-Track/.cache/admin-tmp
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:38.1547770Z   XDG_CACHE_HOME: /home/runner/work/E-Track/E-Track/.cache/admin-xdg
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:38.1548019Z   npm_config_cache: /home/runner/work/E-Track/E-Track/.cache/admin-npm
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:38.1548243Z ##[endgroup]
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:38.2607026Z (node:2840) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:38.2607571Z (Use `node --trace-deprecation ...` to show where the warning was created)
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:38.2670636Z With the provided path, there will be 14 files uploaded
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:38.2673865Z Artifact name is valid!
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:38.2674318Z Root directory input is valid!
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:38.5400197Z Beginning upload of artifact content to blob storage
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:38.7392159Z (node:2840) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:39.2297686Z Uploaded bytes 8388608
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:39.2755593Z Uploaded bytes 8476572
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:39.3181755Z Finished uploading artifact content to blob storage!
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:39.3182455Z SHA256 digest of uploaded artifact zip is d3bd641616d577fe6f1e1cc2168db14c0aa5daf722c13153f04de0ba65a7cf4e
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:39.3183635Z Finalizing artifact upload
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:39.5740123Z Artifact admin-mock-ui-39602375609-1.zip successfully finalized. Artifact ID 12346234358
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:39.5740734Z Artifact admin-mock-ui-39602375609-1 has been successfully uploaded! Final size is 8476572 bytes. Artifact ID is 12346234358
+Admin Typecheck and Mock UI	Preserve mock UI evidence	2026-10-21T12:49:39.5745561Z Artifact download URL: https://github.com/Eitan-S-23/E-Track/actions/runs/39602375609/artifacts/12346234358
+Admin Typecheck and Mock UI	Post Set up Node	﻿2026-10-21T12:49:39.5915170Z Post job cleanup.
+Admin Typecheck and Mock UI	Post Set up Node	2026-10-21T12:49:39.6678187Z Cache hit occurred on the primary key node-cache-Linux-x64-npm-3fa00c4ea6646f51531796dc5462ed9bb32b9a4e267e6df08792fadd2da0e5ac, not saving cache.
+Admin Typecheck and Mock UI	Post Checkout repository	﻿2026-10-21T12:49:39.6772046Z Post job cleanup.
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.7291987Z [command]/usr/bin/git version
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.7324811Z git version 2.55.0
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.7351979Z Temporarily overriding HOME='/home/runner/work/_temp/5086c879-d921-4901-8f06-c25df4cba3dd' before making global git config changes
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.7352651Z Adding repository directory to the temporary git global config as a safe directory
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.7356426Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/E-Track/E-Track
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.7383695Z Removing SSH command configuration
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.7388491Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.7416343Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.7626527Z Removing HTTP extra header
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.7631354Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.7661625Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.7879860Z Removing includeIf entries pointing to credentials config files
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.7902172Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.7917258Z includeif.gitdir:/home/runner/work/E-Track/E-Track/.git.path
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.7918013Z includeif.gitdir:/home/runner/work/E-Track/E-Track/.git/worktrees/*.path
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.7918837Z includeif.gitdir:/github/workspace/.git.path
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.7919427Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.7925682Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/E-Track/E-Track/.git.path
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.7951912Z /home/runner/work/_temp/git-credentials-4a3b49dd-a8d6-48d4-b46a-26412b75db2d.config
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.7960344Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/E-Track/E-Track/.git.path /home/runner/work/_temp/git-credentials-4a3b49dd-a8d6-48d4-b46a-26412b75db2d.config
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.8027331Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/E-Track/E-Track/.git/worktrees/*.path
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.8048706Z /home/runner/work/_temp/git-credentials-4a3b49dd-a8d6-48d4-b46a-26412b75db2d.config
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.8056040Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/E-Track/E-Track/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-4a3b49dd-a8d6-48d4-b46a-26412b75db2d.config
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.8085683Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.8105857Z /github/runner_temp/git-credentials-4a3b49dd-a8d6-48d4-b46a-26412b75db2d.config
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.8112426Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-4a3b49dd-a8d6-48d4-b46a-26412b75db2d.config
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.8140668Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.8161002Z /github/runner_temp/git-credentials-4a3b49dd-a8d6-48d4-b46a-26412b75db2d.config
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.8166466Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-4a3b49dd-a8d6-48d4-b46a-26412b75db2d.config
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.8196148Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Admin Typecheck and Mock UI	Post Checkout repository	2026-10-21T12:49:39.8383906Z Removing credentials config '/home/runner/work/_temp/git-credentials-4a3b49dd-a8d6-48d4-b46a-26412b75db2d.config'
+Admin Typecheck and Mock UI	Complete job	﻿2026-10-21T12:49:39.8506147Z Cleaning up orphan processes
+Admin Typecheck and Mock UI	Complete job	2026-10-21T12:49:39.8715409Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

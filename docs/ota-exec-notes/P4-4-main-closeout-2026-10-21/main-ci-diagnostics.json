@@ -1,0 +1,32 @@
+{
+  "scope": "Compiler diagnostics in the named job/step excerpts, not npm/action warnings",
+  "sourceRun": 39599518509,
+  "sourceSha": "6469233b282bdaf188e764d68128133f553f0247",
+  "sourceLog": ".cache/p44/logs/main-ci-firmware-log01.log",
+  "sourceLogBytes": 2707943,
+  "sourceLogSha256": "fa74aabd1bcfb717134713ec4471344a49895b1f05bea7f8983684027cfe401c",
+  "selectedSteps": [
+    "Build firmware (arm-none-eabi-gcc)\tBuild firmware",
+    "Build firmware (arm-none-eabi-gcc)\tReport firmware artifacts",
+    "Build firmware (arm-none-eabi-gcc)\tExercise the shared key-bound GCC build without protected credentials",
+    "Release tooling development checks (no cloud credentials)\tBuild the existing vendor bsdiff for this host"
+  ],
+  "counts": {
+    "Build firmware (arm-none-eabi-gcc)\tBuild firmware": {
+      "warningDiagnostics": 640,
+      "errorDiagnostics": 0
+    },
+    "Build firmware (arm-none-eabi-gcc)\tReport firmware artifacts": {
+      "warningDiagnostics": 0,
+      "errorDiagnostics": 0
+    },
+    "Build firmware (arm-none-eabi-gcc)\tExercise the shared key-bound GCC build without protected credentials": {
+      "warningDiagnostics": 640,
+      "errorDiagnostics": 0
+    },
+    "Release tooling development checks (no cloud credentials)\tBuild the existing vendor bsdiff for this host": {
+      "warningDiagnostics": 6,
+      "errorDiagnostics": 0
+    }
+  }
+}

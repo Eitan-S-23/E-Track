@@ -1,0 +1,19 @@
+{
+  "label": "main-ci-cloudflare01",
+  "command": "gh",
+  "args": [
+    "run",
+    "view",
+    "39599518618",
+    "--repo",
+    "Eitan-S-23/E-Track",
+    "--json",
+    "databaseId,name,event,headSha,headBranch,conclusion,status,jobs,url"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "startedAt": "2026-10-21T12:29:17.150Z",
+  "endedAt": "2026-10-21T12:29:20.690Z",
+  "exitCode": 0,
+  "signal": null,
+  "logPath": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\main-ci-cloudflare01.log"
+}
