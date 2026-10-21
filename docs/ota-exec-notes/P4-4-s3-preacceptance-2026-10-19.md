@@ -2380,3 +2380,86 @@ criterion or a replacement for the frozen privacy command. Its original hash
 is 0b9074a305cf87e77a2334c6a26d11ca4a77ab97d583d007243673b26b5732d4;
 self-test output is .cache/p44/logs/v7-delivery-auditor-selftest01.log,
 SHA-256 0250f0c1fe97c5c2395c55ef966b85b1d67355b2b8bf27b801de56e23b030668.
+
+#### P44-SUCCESSOR-05 Independent Finding And C7 Closeout (2026-10-21)
+
+Disposition: DECIDED, required harness repair, not an observed product failure.
+SUCCESSOR-04 remains independently closed. Root did not change the collector or
+its tests and did not delegate remediation to a sub-agent. The next implementation
+owner is the external agent selected by the user; root retains independent review.
+
+The stable source was delivered as C7
+371baeeb8519a0340a79c96b6a7cd6406b2e0346, tree
+085b095982054ecf45c1a23ff21031760376cb2b, on the authorized task branch.
+The frozen v7 contract is SHA-256
+587258cde323692569733470045a2e174ec1bef32c67088ba0cc3e76e1223314,
+round P44-20261021-07. Actual precheck and rerun-plan commands passed, retaining
+four direct C4 origins and requiring five criteria/eight commands. The actual
+plan SHA-256 is 7918ebdf96495b00ccbf16a73d2535b6ce803a1e1976e0d6315e652a738178fc.
+
+The first formal-after invocation ran from 2026-10-21T04:52:14.277Z to
+2026-10-21T05:04:43.440Z and closed with exit 1, signal null and no spawn failure.
+Its original output is {"ok":false,"error_code":"ERR_ASSERTION"}. The receipt
+is P4-4-v7/evidence/recovery-commands-v7/formal-after-invocation-1.json,
+SHA-256 a7cc8d60e49c57f75405e6335789cc0f2381fc02e0034b3ab715bc476917cdf9;
+the adjacent log SHA-256 is
+8dfea9fb1567bb31c6951ffc12fd511211be83d683545d2ae8803163891835b4.
+No attempt-2 directory, new HTTP record or after snapshot was created. There
+were zero new cloud requests; the 31 C4 plus 39 C6 complete responses and all
+historical failures remain unchanged. Invocation slot 1 was consumed; slot 2
+was not used or admitted. There is no failed attempt-result for continuation.
+
+Root independently reproduced the first-missing path with real makeIO and
+makeEnsure.d1 while explicitly blocking writes and network calls. The stack is
+makeEnsure.d1 -> prepare -> startAttempt -> makeIO.exists -> destination ->
+relative. At Tools/ota/p44-after-recovery.cjs:893, startAttempt passes
+attemptDir(2), which ends in '/', to exists. The strict relative() at line 56
+rejects that empty final component with RECOVERY_PATH. The in-memory fixture
+accepted this argument and therefore missed the production-IO mismatch.
+The probe recorded zero attempted writes and zero attempted requests. Its exact
+output and invocation are archived in P4-4-v7/closeout/independent-probe.log and
+independent-probe-receipt.json; their SHA-256 values are respectively
+90ce4a1fc40cba118ae45a41f7a9916af83a830e24335af38eca30665612d75e and
+bcd03c0894c831799f9cedf1d00a40874b1ea46381924e3e25ce35c39bb7ab8f.
+
+Preferred minimal repair: normalize the directory argument at the startAttempt
+existence-check call site. Do not weaken relative() globally or remove the
+trailing separator from attemptDir(), whose other callers concatenate filenames.
+The bounded static sweep found no other bare-directory exists call; list()
+already normalizes its directory argument. Verify with actual production makeIO
+and project-local filesystem fixtures: first missing-request registration,
+subsequent attempt numbering/reload, existing-directory refusal and unchanged
+traversal/reparse/no-overwrite guards. Network responses may be simulated, but
+the tested exists/destination/relative chain must not be mocked or replaced.
+Keep transport/retry policy, original IDs, invocation limits, time checks,
+source binding and all old evidence unchanged. Do not retry frozen v7; the
+reviewed repair requires a subsequent source freeze and actual predecessor.
+
+Independent safe work completed: formal-history, formal-before,
+formal-negatives and formal-privacy exited 0. The privacy result scanned 1439
+files, 141 decoded D1 bodies and 132 archive members; lifecycle checks passed.
+The closed privacy inventory is unchanged. Dependent assemble, approvals and
+states were not run because their required after artifact does not exist.
+
+The unchanged standard validator accepted the final matrix with the actual C6
+previous pair and both C4/C5 reuse-source pairs:
+VALIDATION=PASS contract=P4-4-v7 round=P44-20261021-07 overall=EVIDENCE_GAP.
+This is validation of the honest incomplete bundle, not P4-4 PASS. Four criteria
+are REUSED PASS, HISTORY/HYGIENE are EXECUTED PASS, and RAW-STATE/APPROVALS/
+ISOLATION are NOT_OBSERVED. EVIDENCE_GAP is used because there is no actual
+after artifact for a failed-criterion HARNESS_FAIL; none was fabricated.
+
+Final matrix: P4-4-v7/final-evidence-matrix.json, 220199 bytes, SHA-256
+1c4bdd4002748aea77ab6839344b6d9d02e4f377ec6fc35a2050e089ccbaee62.
+Failure report: P4-4-v7/closeout/failure-report.json, SHA-256
+7f0aa55068dc74a21bfe536c72ae49145b449935e5f6248d6eb3d4dff15963e6.
+Final-validator original: .cache/p44/logs/v7-final-validator01.log, SHA-256
+ba5501e81cc3fd3b5768fc582f9525cd3017083313005fcaf8578f7f4e486f4a;
+its receipt SHA-256 is 24aabad92f3ab23704b07dc889104a231b1c2596267b87549abb8eeef07635e1.
+The thin seal.py only binds existing originals and records missing observations.
+It does not collect, retry, fabricate after evidence or change the frozen tool.
+
+P4-4 stays IN_PROGRESS; product stays C4/3.2.9 and gate stays false. No A/B,
+upload, registration, successful readback, production release, main integration,
+device operation or platform-configuration change was repeated. Closeout writes
+are confined to the task worktree and authorized shared Git metadata.

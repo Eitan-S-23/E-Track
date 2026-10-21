@@ -1,0 +1,19 @@
+{
+  "label": "formal-finish-b",
+  "command": "node",
+  "args": [
+    "Tools/acceptance/p44/capture.cjs",
+    "finish-b"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "started": "2026-10-20T01:15:15.825Z",
+  "ended": "2026-10-20T01:16:35.579Z",
+  "exitCode": 0,
+  "signal": null,
+  "process_closed": true,
+  "output": {
+    "path": "commands/formal-finish-b.log",
+    "size_bytes": 68,
+    "sha256": "b903702e70eafc9668b21469f4c217315f2b182c9aa89faedb0e34ff3211a34d"
+  }
+}

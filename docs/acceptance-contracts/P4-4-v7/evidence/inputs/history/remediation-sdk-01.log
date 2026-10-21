@@ -1,0 +1,31 @@
+✔ actual S3 SDK serializes/signs immutable full creation and full replay (151.989ms)
+✔ actual S3 SDK serializes/signs immutable patch creation and full replay (46.5774ms)
+✔ actual S3 SDK serializes/signs immutable recovery creation and full replay (37.8281ms)
+✔ two simultaneous SDK writers create once and validate the winner (57.4563ms)
+✔ different bytes at one key never overwrite through the SDK (23.2341ms)
+✔ SDK digest readback fails closed (21.2216ms)
+✔ SDK short readback fails closed (23.5375ms)
+✔ SDK long readback fails closed (22.4714ms)
+✔ SDK etag readback fails closed (28.3362ms)
+✔ existing-object SDK digest mismatch stays a proved conflict (31.5796ms)
+✔ existing-object SDK short mismatch stays a proved conflict (21.078ms)
+✔ existing-object SDK long mismatch stays a proved conflict (21.4897ms)
+✔ existing-object SDK empty transport interruption is not a byte conflict (36.2337ms)
+✔ existing-object SDK partial transport interruption is not a byte conflict (32.6196ms)
+✔ replay empty stream failure projects a sanitized verification error (0.9894ms)
+✔ replay partial stream failure projects a sanitized verification error (0.8227ms)
+✔ replay abort stream failure projects a sanitized verification error (0.4496ms)
+✔ qualification empty stream failure projects a sanitized verification error (0.4587ms)
+✔ qualification partial stream failure projects a sanitized verification error (0.2944ms)
+✔ qualification abort stream failure projects a sanitized verification error (0.2646ms)
+✔ SDK access rejection leaks neither credentials nor upstream response (12.8006ms)
+✔ SDK 409 does not downgrade to unconditional creation or blind retry (12.4753ms)
+✔ no credential fallback or mixed control-plane credentials (0.543ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1296.4115

@@ -1,0 +1,24 @@
+{
+  "method": "POST",
+  "path": "/accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+  "started": "2026-10-20T01:38:30.236Z",
+  "request": {
+    "path": "snapshots/after/protected-audit_logs-rows8-16.request.json",
+    "size_bytes": 71,
+    "sha256": "cd2b85cab13b322821716cd8eb8142e55078bfb11afd37e1f51bc13c6f1c7fdb"
+  },
+  "request_headers": {
+    "accept-encoding": "gzip"
+  },
+  "request_attempts": 1,
+  "request_failures": [
+    {
+      "path": "snapshots/after/protected-audit_logs-rows8-16-request-failure-1.json",
+      "size_bytes": 637,
+      "sha256": "7ecdcb490d12a1a0ae14cec08526e74d1d83ee7a3743d6aae89980e1afefa683"
+    }
+  ],
+  "ended": "2026-10-20T01:38:44.107Z",
+  "error_code": "UND_ERR_CONNECT_TIMEOUT",
+  "completed": false
+}

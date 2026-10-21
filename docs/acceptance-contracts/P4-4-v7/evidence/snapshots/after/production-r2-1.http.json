@@ -1,0 +1,23 @@
+{
+  "method": "GET",
+  "path": "/e-track-firmware-production-releases/?list-type=2&max-keys=1000",
+  "started": "2026-10-20T01:35:27.556Z",
+  "request_attempts": 1,
+  "request_failures": [],
+  "status": 200,
+  "response_headers": {
+    "date": "Tue, 20 Oct 2026 01:35:31 GMT",
+    "content-type": "application/xml",
+    "content-length": "249",
+    "connection": "keep-alive",
+    "server": "cloudflare",
+    "cf-ray": "a4d4494c793cd4e3-NRT"
+  },
+  "body": {
+    "path": "snapshots/after/production-r2-1.body",
+    "size_bytes": 249,
+    "sha256": "6163b28fab0709e777cfd17db20885b8b61f3c3acd1d9204a5a702d89d0c76f5"
+  },
+  "completed": true,
+  "ended": "2026-10-20T01:35:31.794Z"
+}

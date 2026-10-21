@@ -1,0 +1,95 @@
+{
+  "trace/firmware/e-track-at32f435/30209-mcu-e-track-at32f435-v3.2.9/e-track-at32f435-v3.2.9-full.etu": {
+    "method": "GET",
+    "path": "/e-track-firmware-p41-test-releases/trace/firmware/e-track-at32f435/30209-mcu-e-track-at32f435-v3.2.9/e-track-at32f435-v3.2.9-full.etu",
+    "started": "2026-10-20T01:25:58.494Z",
+    "request_attempts": 1,
+    "request_failures": [],
+    "status": 200,
+    "response_headers": {
+      "date": "Tue, 20 Oct 2026 01:26:03 GMT",
+      "content-type": "application/vnd.e-track.etu",
+      "content-length": "285646",
+      "connection": "keep-alive",
+      "accept-ranges": "bytes",
+      "cache-control": "public, max-age=31536000, immutable",
+      "content-disposition": "attachment; filename=\"e-track-at32f435-v3.2.9-full.etu\"",
+      "etag": "\"b14880b90b02ece7c9709749285c63e2\"",
+      "last-modified": "Tue, 20 Oct 2026 01:13:12 GMT",
+      "x-amz-meta-content-digest": "sha-256=:TYocOYsp8XfxFT8ycei7DZC5rNv4RTInLjpf7yvaH2o=:",
+      "x-amz-meta-kind": "full",
+      "x-amz-meta-sha256": "4d8a1c398b29f177f1153f3271e8bb0d90b9acdbf84532272e3a5fef2bda1f6a",
+      "server": "cloudflare",
+      "cf-ray": "a4d43b6aae5f781f-NRT"
+    },
+    "body": {
+      "path": "readbacks/full.body",
+      "size_bytes": 285646,
+      "sha256": "4d8a1c398b29f177f1153f3271e8bb0d90b9acdbf84532272e3a5fef2bda1f6a"
+    },
+    "completed": true,
+    "ended": "2026-10-20T01:26:09.525Z"
+  },
+  "trace/firmware/e-track-at32f435/30209-mcu-e-track-at32f435-v3.2.9/e-track-at32f435-v3.2.7-to-v3.2.9-patch.etu": {
+    "method": "GET",
+    "path": "/e-track-firmware-p41-test-releases/trace/firmware/e-track-at32f435/30209-mcu-e-track-at32f435-v3.2.9/e-track-at32f435-v3.2.7-to-v3.2.9-patch.etu",
+    "started": "2026-10-20T01:26:14.402Z",
+    "request_attempts": 1,
+    "request_failures": [],
+    "status": 200,
+    "response_headers": {
+      "date": "Tue, 20 Oct 2026 01:26:18 GMT",
+      "content-type": "application/vnd.e-track.etu",
+      "content-length": "380",
+      "connection": "keep-alive",
+      "accept-ranges": "bytes",
+      "cache-control": "public, max-age=31536000, immutable",
+      "content-disposition": "attachment; filename=\"e-track-at32f435-v3.2.7-to-v3.2.9-patch.etu\"",
+      "etag": "\"ae3c06457c7b2ac7cd951e9136a01a96\"",
+      "last-modified": "Tue, 20 Oct 2026 01:13:12 GMT",
+      "x-amz-meta-content-digest": "sha-256=:qM3nuN6db9+Fk2PkjIfebFtTEC/Nim6wp+nZG+1rX0E=:",
+      "x-amz-meta-kind": "patch",
+      "x-amz-meta-sha256": "a8cde7b8de9d6fdf859363e48c87de6c5b53102fcd8a6eb0a7e9d91bed6b5f41",
+      "server": "cloudflare",
+      "cf-ray": "a4d43bca9cffd74b-NRT"
+    },
+    "body": {
+      "path": "readbacks/patch.body",
+      "size_bytes": 380,
+      "sha256": "a8cde7b8de9d6fdf859363e48c87de6c5b53102fcd8a6eb0a7e9d91bed6b5f41"
+    },
+    "completed": true,
+    "ended": "2026-10-20T01:26:18.796Z"
+  },
+  "trace/firmware/e-track-at32f435/30209-mcu-e-track-at32f435-v3.2.9/recovery-v3.2.9.bin": {
+    "method": "GET",
+    "path": "/e-track-firmware-p41-test-releases/trace/firmware/e-track-at32f435/30209-mcu-e-track-at32f435-v3.2.9/recovery-v3.2.9.bin",
+    "started": "2026-10-20T01:26:23.599Z",
+    "request_attempts": 1,
+    "request_failures": [],
+    "status": 200,
+    "response_headers": {
+      "date": "Tue, 20 Oct 2026 01:26:27 GMT",
+      "content-type": "application/octet-stream",
+      "content-length": "605080",
+      "connection": "keep-alive",
+      "accept-ranges": "bytes",
+      "cache-control": "public, max-age=31536000, immutable",
+      "content-disposition": "attachment; filename=\"recovery-v3.2.9.bin\"",
+      "etag": "\"ae5bdece38f0e60ac4921c87f73eb2cf\"",
+      "last-modified": "Tue, 20 Oct 2026 01:13:13 GMT",
+      "x-amz-meta-content-digest": "sha-256=:Wk5vEX9thzcoqylrFfI8hOI2d8ztbwTFn5A+9Jvi2cc=:",
+      "x-amz-meta-kind": "recovery",
+      "x-amz-meta-sha256": "5a4e6f117f6d873728ab296b15f23c84e23677cced6f04c59f903ef49be2d9c7",
+      "server": "cloudflare",
+      "cf-ray": "a4d43c03eab20872-NRT"
+    },
+    "body": {
+      "path": "readbacks/recovery.body",
+      "size_bytes": 605080,
+      "sha256": "5a4e6f117f6d873728ab296b15f23c84e23677cced6f04c59f903ef49be2d9c7"
+    },
+    "completed": true,
+    "ended": "2026-10-20T01:26:38.513Z"
+  }
+}

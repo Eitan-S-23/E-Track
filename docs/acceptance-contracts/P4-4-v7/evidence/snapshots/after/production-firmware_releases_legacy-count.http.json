@@ -1,0 +1,40 @@
+{
+  "method": "POST",
+  "path": "/accounts/[ACCOUNT]/d1/database/1cd5db26-6bbd-4595-abef-72ff51ecdaf3/query",
+  "started": "2026-10-20T01:34:31.633Z",
+  "request": {
+    "path": "snapshots/after/production-firmware_releases_legacy-count.request.json",
+    "size_bytes": 68,
+    "sha256": "7010cf7eb7e1f06d45c78bfbf59ab827f32ccc60f8050b5d7f6008765b80c4ee"
+  },
+  "request_headers": {
+    "accept-encoding": "gzip"
+  },
+  "request_attempts": 1,
+  "request_failures": [],
+  "status": 200,
+  "response_headers": {
+    "date": "Tue, 20 Oct 2026 01:34:37 GMT",
+    "content-type": "application/json",
+    "transfer-encoding": "chunked",
+    "connection": "keep-alive",
+    "cache-control": "no-store",
+    "api-version": "2026-10-01.epoch",
+    "cf-auditlog-id": "01a156f2-3781-7124-bf15-86518af56871",
+    "content-encoding": "gzip",
+    "server": "cloudflare",
+    "cf-ray": "a4d447f8ba9ad780-NRT"
+  },
+  "body": {
+    "path": "snapshots/after/production-firmware_releases_legacy-count.body",
+    "size_bytes": 243,
+    "sha256": "17402c43cf2db92d6d0099d0f7c5f2dfada28a7d678c2c7a024d17f4d0a2f911"
+  },
+  "decoded_body": {
+    "path": "snapshots/after/production-firmware_releases_legacy-count.decoded.body",
+    "size_bytes": 371,
+    "sha256": "0ab17e7bbf5513517f61a86e7df5ac2c2f901ca5fe80d88c8971cf70b6346e33"
+  },
+  "completed": true,
+  "ended": "2026-10-20T01:34:39.307Z"
+}

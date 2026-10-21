@@ -1,0 +1,19 @@
+{
+  "label": "formal-after",
+  "command": "node",
+  "args": [
+    "Tools/acceptance/p44/capture.cjs",
+    "after"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "started": "2026-10-20T01:30:07.241Z",
+  "ended": "2026-10-20T01:38:45.696Z",
+  "exitCode": 1,
+  "signal": null,
+  "process_closed": true,
+  "output": {
+    "path": "commands/formal-after.log",
+    "size_bytes": 67,
+    "sha256": "369b91914eecb2e0ef7e35cbcf8353f2c157bc1c206286092a75a4c36186eac7"
+  }
+}

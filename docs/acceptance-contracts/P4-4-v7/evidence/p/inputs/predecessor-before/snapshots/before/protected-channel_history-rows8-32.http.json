@@ -1,0 +1,32 @@
+{
+  "method": "POST",
+  "path": "/accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+  "started": "2026-10-19T13:31:28.424Z",
+  "request": {
+    "path": "snapshots/before/protected-channel_history-rows8-32.request.json",
+    "size_bytes": 76,
+    "sha256": "f446df56f9f5c259d6cc376617378a7cee08349d7d0a203d11d9abcf9a5c395e"
+  },
+  "status": 200,
+  "partial_body_sha256": "5fefb02684c57d81995ea075e815b590b9023b148d7dc8db3095a199baf5744d",
+  "partial_body_size_bytes": 1441765,
+  "response_headers": {
+    "date": "Mon, 19 Oct 2026 13:31:35 GMT",
+    "content-type": "application/json",
+    "content-length": "4746278",
+    "connection": "keep-alive",
+    "cache-control": "no-store",
+    "api-version": "2026-10-01.epoch",
+    "cf-auditlog-id": "01a1545c-3f12-7435-9902-c430008d3ab6",
+    "server": "cloudflare",
+    "cf-ray": "a4d024d19c83c738-NRT"
+  },
+  "body": {
+    "path": "snapshots/before/protected-channel_history-rows8-32.partial.body",
+    "size_bytes": 1441765,
+    "sha256": "5fefb02684c57d81995ea075e815b590b9023b148d7dc8db3095a199baf5744d"
+  },
+  "ended": "2026-10-19T13:32:33.108Z",
+  "error_code": 23,
+  "completed": false
+}

@@ -1,0 +1,15 @@
+{
+  "method": "POST",
+  "origin": "https://api.cloudflare.com",
+  "path": "/accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+  "started": "2026-10-20T11:53:43.464Z",
+  "request": {
+    "path": "snapshots/after-tail-v6/protected-firmware_releases-count.request.json",
+    "size_bytes": 61,
+    "sha256": "c99f1546052942321051c21b16bef6a9312618d2bf72f4e13e12d20c64c5e865"
+  },
+  "request_headers": {
+    "accept-encoding": "gzip"
+  },
+  "note": "Reserved before request; a lost response is not permission to replay a mutation."
+}

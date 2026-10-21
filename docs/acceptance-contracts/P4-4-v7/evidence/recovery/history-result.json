@@ -1,0 +1,92 @@
+{
+  "schema": "p44-original-evaluation-v1",
+  "mode": "history",
+  "started": "2026-10-20T04:46:11.481396+00:00",
+  "platform_actions": 0,
+  "manifest_sha256": "ca0fb5b0a2d11144c9c49f62eb9f18c0196e6d01681e05c78cce00bde80e3fb3",
+  "input_applicability": {
+    "source_commit": "b56534d7b6c993c0795010d0404fb8a81f7eeb9d",
+    "candidate_commit": "2756ca95e26ec636216313271708b3304d61a5cc",
+    "compared_existing_paths": {
+      "Production": 3212,
+      "Validation": 266,
+      "Governance": 38
+    },
+    "new_paths_not_covered_by_old_tests": {
+      "Production": [],
+      "Validation": [
+        "Tools/acceptance/p44/README.md",
+        "Tools/acceptance/p44/bundle.py",
+        "Tools/acceptance/p44/capture.cjs",
+        "Tools/acceptance/p44/inspect.py",
+        "Tools/acceptance/p44/origins.py",
+        "Tools/acceptance/p44/run.cjs",
+        "tests/ota/test_p44_acceptance_tools.py",
+        "tests/ota/test_p44_capture.cjs",
+        "tests/ota/test_p44_originals.py"
+      ],
+      "Governance": []
+    },
+    "profile_rule_reuse": "Tools/acceptance/validate_bundle.py",
+    "profile_config_changed": true,
+    "new_profile_names": [
+      "P44Capture"
+    ],
+    "scope": "Git objects only; formal worktree checks and newly added profile/runner tests remain separate"
+  },
+  "observed": {
+    "ci_runs": {
+      "firmware": 39175549010,
+      "governance": 39175558187
+    },
+    "original_files": 38,
+    "test_counts": {
+      "script_migration": 41,
+      "pipeline": 147,
+      "native": 283,
+      "sdk_workflow": 112,
+      "byte": 22,
+      "sdk_host": 23,
+      "workflow_host": 89
+    },
+    "governance_regression_counts": [
+      137,
+      36,
+      3,
+      14,
+      11,
+      62,
+      39,
+      29
+    ],
+    "warning_word_occurrences": {
+      "firmware_full_log": 1296,
+      "governance_full_log": 7
+    },
+    "warning_count_scope": "Occurrences in complete stdout, not unique compiler diagnostics",
+    "dependency_debt": {
+      "info": 0,
+      "low": 0,
+      "moderate": 3,
+      "high": 8,
+      "critical": 0,
+      "total": 11
+    },
+    "preserved_failures": [
+      {
+        "label": "remediation-ci-full-log-01",
+        "exit_code": 1,
+        "classification": "historical TLS log-retrieval failure, not converted to PASS"
+      },
+      {
+        "label": "remediation-npm-audit-01",
+        "exit_code": 1,
+        "classification": "disclosed dependency debt, not a clean audit"
+      }
+    ],
+    "scope": "Independent evaluation of historical development originals; no CI rerun or new rehearsal"
+  },
+  "ok": true,
+  "files_verified": 39,
+  "ended": "2026-10-20T04:46:14.096493+00:00"
+}

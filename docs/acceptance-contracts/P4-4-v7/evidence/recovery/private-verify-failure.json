@@ -1,0 +1,7 @@
+{
+  "ok": false,
+  "started": "2026-10-20T04:54:35.600Z",
+  "ended": "2026-10-20T04:54:40.458Z",
+  "attempts": 1,
+  "error_code": "ECONNRESET"
+}

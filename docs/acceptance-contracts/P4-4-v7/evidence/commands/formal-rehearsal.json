@@ -1,0 +1,28 @@
+{
+  "label": "formal-rehearsal",
+  "command": "python",
+  "args": [
+    "-I",
+    "-S",
+    "-B",
+    "Tools/acceptance/p44/inspect.py",
+    "rehearsal",
+    "--repo-root",
+    "D:/github/my/E-Track/.cache/p4-4-integration-20261018",
+    "--input",
+    "docs/acceptance-contracts/P4-4-v4/evidence/rehearsal-manifest.json",
+    "--output",
+    "docs/acceptance-contracts/P4-4-v4/evidence/rehearsal-result.json"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "started": "2026-10-20T01:21:26.617Z",
+  "ended": "2026-10-20T01:21:27.395Z",
+  "exitCode": 0,
+  "signal": null,
+  "process_closed": true,
+  "output": {
+    "path": "commands/formal-rehearsal.log",
+    "size_bytes": 211,
+    "sha256": "a86596b87fea1c769e339ae1a877898657c4c4957a59645aa8ad5f5408a125f7"
+  }
+}
