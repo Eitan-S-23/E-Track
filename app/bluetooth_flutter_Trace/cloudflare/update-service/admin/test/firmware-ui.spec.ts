@@ -132,8 +132,17 @@ const channelButton = (page: Page, channel: string, action: string) => page.loca
 const releaseButton = (page: Page, id: string, action: string) => page.locator(
   `.firmware-release-card[data-release-id="${id}"] [data-firmware-action="${action}"]`);
 async function fillConfirmation(page: Page, reason = " browser operator reason ") {
-  if (await page.locator("#confirmInput").isVisible()) await page.locator("#confirmInput").fill("stable");
-  if (await page.locator("#confirmReason").isVisible()) await page.locator("#confirmReason").fill(reason);
+  await expect(page.locator("#confirmDialog")).toBeVisible();
+  // This class is set by the animation frame that applies the initial autofocus.
+  await expect(page.locator("body")).toHaveClass(/\bconfirm-open\b/);
+  const input = page.locator("#confirmInput");
+  const reasonInput = page.locator("#confirmReason");
+  const needsText = await input.isVisible();
+  const needsReason = await reasonInput.isVisible();
+  if (needsText) await input.fill("stable");
+  if (needsReason) await reasonInput.fill(reason);
+  if (needsText) await expect(input).toHaveValue("stable");
+  if (needsReason) await expect(reasonInput).toHaveValue(reason);
   await expect(page.locator("#confirmAccept")).toBeEnabled();
   await page.locator("#confirmAccept").click();
 }
