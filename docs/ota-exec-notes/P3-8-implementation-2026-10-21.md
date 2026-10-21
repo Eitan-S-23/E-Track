@@ -97,6 +97,35 @@ No MCU/cloud/protocol/performance/App-self-update business changes.
 
 ## Current Results
 
-Source implementation: IN_PROGRESS. Development self-tests, debug APK, standard
-APK, Windows EXE, Android platform tests, devices and independent acceptance:
-NOT_RUN. This log does not freeze a contract or declare a formal PASS.
+### First WIP Feedback (2026-10-22)
+
+- Commit `38045e0482c607d9a6f8ec8b976918404e7ad5be` pushed on the assigned branch.
+- Checks-only run: https://github.com/Eitan-S-23/E-Track/actions/runs/39637361738
+  (attempt 1). Both hosts finished FAILURE; no APK requested.
+- Both hosts: Flutter 3.47.7 stable, framework
+  `abaf9c523780a608bd46686fd5e53740a07077f8`, Dart 3.13.5, engine
+  `deb287481e3ce9468f3434937ced4240a70539ca`. `flutter pub get
+  --enforce-lockfile` exit 0; `flutter analyze --no-pub` exit 0.
+- Full `flutter test --no-pub --reporter expanded --timeout 2m test`: exit 1.
+  Ubuntu: 731 passed, 16 skipped, 2 failed. Windows: 714 passed, 33 skipped,
+  2 failed. Both failures are existing in-flight cancellation tests expecting one
+  MCU ABORT but observing zero. No assertions weakened or failing logs removed.
+- Diagnosis: newly added owner-finally disposal invalidated the transport while
+  cancellation's serialized ABORT was queued. Batch repair retains it through
+  the per-transport ABORT future, including fail-closed cleanup; starts ABORT
+  before awaiting native PHY cancellation. Owner completion is now in a nested
+  finally so runtime-release exceptions cannot strand the exclusive owner.
+- Added service integration checks for acquired background/hidden/resume with
+  one BEGIN, durable-only snapshots, rejected/lost ownership safe pause and
+  strict foreground recheck, cancelled delayed acquisition, and END ACK waiting
+  for final identity while rejecting a stale cancel action. These Dart tests
+  explicitly do not substitute for Android platform execution.
+- First artifact retrieval failed with a TLS handshake timeout (exit 1).
+  The bounded retrieval retry succeeded (exit 0); no CI rerun was requested.
+  Original result JSON and combined logs for both hosts are archived under
+  `.cache/p38/run-39637361738/` (14-day remote expiry no longer sole copy).
+
+Source implementation: IN_PROGRESS; repaired batch awaiting changed-input CI.
+Debug APK, standard APK, Windows EXE, Android platform tests, devices and
+independent acceptance: NOT_RUN. Root owns the bounded native CI step and
+standard build entry described above. This log declares no formal PASS.

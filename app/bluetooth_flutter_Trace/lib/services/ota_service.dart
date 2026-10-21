@@ -154,7 +154,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   final OtaPhyClient _phyClient;
   final OtaBackgroundClient _background;
   final void Function()? _onOpenTask;
-  final String _processNonce = Random.secure().nextInt(1 << 32).toRadixString(16);
+  final String _processNonce = List<int>.generate(16, (_) => Random.secure().nextInt(256))
+      .map((byte) => byte.toRadixString(16).padLeft(2, '0')).join();
   final _backgroundReady = false.obs;
   final _backgroundReason = RxnString();
   OtaTaskKey? _taskKey;
@@ -404,6 +405,10 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   /// metadata 请求，不等待其自然超时。
   CancelToken? _activeLatestToken;
   OtaBleTransport? _transport;
+  final _abortingTransports = <OtaBleTransport, Future<void>>{};
+
+  Future<void> _abortTransportBestEffort(OtaBleTransport transport) =>
+      _abortingTransports[transport] ??= transport.abortBestEffort();
   /// 当前 [_transport] 绑定时的物理链路快照（RC3-08⑦）。
   ///
   /// transport 对象活着不等于底层链路还是绑定时那一条：后台期间系统
@@ -1471,7 +1476,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           if (abortTransport != null) {
             otaMonoLog('MONO_ABORT_BEGIN', code: e.code);
             try {
-              await abortTransport.abortBestEffort();
+              await _abortTransportBestEffort(abortTransport);
             } finally {
               otaMonoLog('MONO_ABORT_DONE', code: e.code);
             }
@@ -1551,7 +1556,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         if (abortTransport != null) {
           otaMonoLog('MONO_ABORT_BEGIN', code: 'UNKNOWN');
           try {
-            await abortTransport.abortBestEffort();
+            await _abortTransportBestEffort(abortTransport);
           } finally {
             otaMonoLog('MONO_ABORT_DONE', code: 'UNKNOWN');
           }
@@ -1561,6 +1566,9 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         return false;
       } finally {
         if (activeTransport != null) {
+          // Cancellation wakes the sender before its queued ABORT is written.
+          // Keep this transport alive until that serialized teardown settles.
+          await _abortingTransports.remove(activeTransport);
           await activeTransport.dispose();
           if (identical(_transport, activeTransport)) _transport = null;
         }
@@ -1651,20 +1659,17 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     // 下载清理会等待在途请求退出，传输先停可避免等待期间仍在发送
     // 数据段。
     final transport = _transport;
+    Future<void>? abortDone;
+    if (transport != null && !transport.isCancelled) {
+      otaMonoLog('MONO_ABORT_BEGIN', code: 'USER_CANCEL');
+      abortDone = _abortTransportBestEffort(transport).whenComplete(() {
+        otaMonoLog('MONO_ABORT_DONE', code: 'USER_CANCEL');
+      });
+    }
     if (_phyClient.isActive && !await _phyClient.cancelActive()) {
       emitOtaObservation('OTA_PHY_CANCEL nativeAcknowledged=false');
     }
-    if (transport != null && !transport.isCancelled) {
-      // RC3-07/02 四阶段：用户取消路径同样区分决定/收尾——取消的
-      // 「决定」是用户动作（无对应日志事件），这里只标记停止业务写
-      // 与 ABORT 收尾两段；终态发布（cancelled）在函数尾部。
-      otaMonoLog('MONO_ABORT_BEGIN', code: 'USER_CANCEL');
-      try {
-        await transport.abortBestEffort();
-      } finally {
-        otaMonoLog('MONO_ABORT_DONE', code: 'USER_CANCEL');
-      }
-    }
+    await abortDone;
     // epoch 屏障（RC3-04⑦）：ABORT 等待期间可能有新 owner 登记并重新
     // 下载**同一资产**。两次 attempt 的 assetId、文件名与 `.part` 路径
     // 必然相同（续传语义要求复用同一 `.part`），对快照 download 调
@@ -1827,7 +1832,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       // MONO_ABORT_BEGIN→MONO_ABORT_DONE 之差可观测。
       otaMonoLog('MONO_ABORT_BEGIN', code: code);
       try {
-        await transport.abortBestEffort();
+        await _abortTransportBestEffort(transport);
       } finally {
         otaMonoLog('MONO_ABORT_DONE', code: code);
       }
@@ -2025,11 +2030,14 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       return await body(generation);
     } finally {
       final task = _taskKey;
-      if (task != null && task.generation == epoch) await _finishBackgroundTask(task);
-      if (!done.isCompleted) done.complete();
-      if (identical(_ownerDone, done.future)) {
-        _ownerDone = null;
-        _isUpgrading.value = false;
+      try {
+        if (task != null && task.generation == epoch) await _finishBackgroundTask(task);
+      } finally {
+        if (!done.isCompleted) done.complete();
+        if (identical(_ownerDone, done.future)) {
+          _ownerDone = null;
+          _isUpgrading.value = false;
+        }
       }
     }
   }
