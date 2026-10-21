@@ -147,7 +147,100 @@ No MCU/cloud/protocol/performance/App-self-update business changes.
 - Requested root's bounded native-test and standard-build route while continuing
   authorized development checks. No workflow/build scope changed by this agent.
 
-Source implementation: IN_PROGRESS; repaired batch awaiting changed-input CI.
-Debug APK, standard APK, Windows EXE, Android platform tests, devices and
-independent acceptance: NOT_RUN. Root owns the bounded native CI step and
-standard build entry described above. This log declares no formal PASS.
+### Candidate Development Checks
+
+- Product candidate: `0d08d020156e6443530ef84ebae39d76d7379129`.
+  App subtree: `1b802bec704e6f71374e27e2dca4aa9bdd59b79c`.
+  Branch: `dev/flutter/p3-8-background-ota-20261021`.
+- Checks-only run https://github.com/Eitan-S-23/E-Track/actions/runs/39656339389
+  succeeded on both Ubuntu and Windows. Both full-package analyze commands exit
+  0 with no issues. Full tests exit 0: Ubuntu 739 passed/16 skipped/0 failed;
+  Windows 722 passed/33 skipped/0 failed. SDK identity is the same Flutter
+  3.47.7 / Dart 3.13.5 / framework and engine revisions recorded above.
+- Original results/logs are in `.cache/p38/run-39656339389/`. SHA-256 of the
+  development result JSON: Ubuntu
+  `f4b73d658d53b4b9089d46363a9131353be38cb2123f11c6b4c9b5ba72643f42`;
+  Windows `6237f27f9ede1a129a5e9eb0b909ec17c8675e18d45d0beaf9a8db52e64bfdb9`.
+- Explicit development APK request (not a blind rerun): `gh workflow run
+  flutter-dev-checks.yml --repo Eitan-S-23/E-Track --ref
+  dev/flutter/p3-8-background-ota-20261021 -f test_scope=all -f build_apk=true`
+  exited 0. Run https://github.com/Eitan-S-23/E-Track/actions/runs/39657800806
+  succeeded on both hosts at the same candidate. Linux `flutter build apk
+  --debug --no-pub --target-platform=android-arm,android-arm64` and `apksigner
+  verify --verbose` both exited 0. This compiles the Android runtime but does
+  not execute the prepared Robolectric tests.
+- The existing pure-Java PHY/write-trace lifecycle regression also passed on
+  both hosts; its report explicitly says `android_plugin_compiled=false` and
+  `hardware=false`. It is not P3-8 Service/engine platform behavior evidence.
+- Cross-layer self-check (not independent review): page/notification use the
+  same owner-published immutable snapshot; task key is preserved through the
+  bridge and every action; native ownership requires service/lock/engine/Dart
+  probe; old engines/tasks/revisions are fenced. Existing sender, package
+  validation, connection generation and final raw-image identity checks remain
+  shared. App updater retains its own channels, ID 2401 and install business.
+
+### Archived Debug Candidate
+
+- Run `39657800806`, attempt 1, full scope, source `0d08d020`: Ubuntu analyze
+  exit 0, tests exit 0 (739 passed/16 skipped/0 failed), Windows analyze exit 0,
+  tests exit 0 (722 passed/33 skipped/0 failed). Both hosts use the same recorded
+  Flutter/Dart revisions as the successful checks-only candidate run.
+- SDK build host: Temurin OpenJDK 17.0.20.1+1; Android Build Tools 35.0.0.
+  Exact commands, generated-toolchain deltas and all original output are in
+  `.cache/p38/run-39657800806/`. No local SDK/build/test substitute was used.
+- APK: 131747598 bytes, application ID `com.wen.gaia.gaia`, development debug
+  signing (`release_signing=false`). No install or device action authorized or
+  performed. It is not a standard release-mode APK or a shipping release.
+- APK SHA-256:
+  `4a4fd6a87cd01e1c2cb43c9192db0f3d8ef67e9039a3178b0c59230d23405464`.
+  Local file, relative to the worktree:
+  `.cache/p38/run-39657800806/flutter-dev-debug-apk-0d08d020156e6443530ef84ebae39d76d7379129-39657800806-1/run-0c61af611cfc41aca00fc44e93e43bea/artifacts/trace-dev-debug.apk`.
+- Adjacent `trace-dev-debug.json` SHA-256:
+  `53537ae9795110130804962b3d453f3f9a11809a8d2f5f01e744d5b0e90ee2d4`.
+  APK size/hash/commit were independently recomputed locally and match this CI
+  metadata. Remote 3-day APK expiry is not the sole retained copy.
+- Development result JSON SHA-256: Ubuntu
+  `2a686c0d9d8dd291fe12bca64f9b108b0ccac6add3027b1b84061b4cde625b1f`;
+  Windows `8e3d24a3f3940967b7e96589986bbef0a47deb3c43e165396eaeb46260eb92af`.
+- The first download failed with a TLS handshake timeout, exit 1; one bounded
+  read-only retry completed with exit 0. No build/test rerun followed the download
+  failure. The download's temporary zip was automatically removed on completion.
+
+### Handoff And Remaining Owners
+
+- Code candidate implemented; full development analyze/test and debug Android
+  compilation/signature verification passed. Subsequent handoff-only commits
+  change this record and P3-8's card/log, not the app subtree above.
+- Native platform tests: 13 prepared Robolectric Service/notification/wake-lock
+  cases, NOT_RUN. They cover delayed/rejected/late probes, stale actions and
+  snapshots, indeterminate apply, lost permissions/engine, cleanup and process
+  recreation. They do not by themselves prove a real retained Flutter engine or
+  background BLE reliability. Root owns authorizing/arranging the narrow native
+  CI invocation under the contained development SDK; no workflow was expanded.
+- Standard release-mode APK: NOT_RUN. Windows EXE: NOT_RUN. Root owns arranging
+  exact-candidate `build.yml` check-only execution with `publish_release=false`
+  and `replace_existing_release=false`. No production workflow was dispatched,
+  PR opened, release/version bump performed, or shipping artifact claimed.
+- Real background/lockscreen/notification interaction/durable advancement,
+  disconnect recovery and final new-link GET_INFO version/full raw SHA evidence:
+  NOT_RUN. No applicable new P3-8 physical originals exist from this session.
+  Root and the non-implementation reviewer reconcile any applicable existing
+  observations first and obtain only the missing bounded device authorization.
+- Formal contract freeze/approval, independent PASS, whole-card completion and
+  main closeout remain exclusively with root/non-implementation reviewer.
+  P3-8 remains IN_PROGRESS; required delivery gates are not all satisfied.
+
+### Closing Write-Boundary Audit
+
+- Active root and existing parents of every controlled output were checked;
+  product/manual records stay in this worktree. Normal branch Git operations
+  use its assigned shared `.git/worktrees/p3-8-implementation-20261021` index
+  and the authorized shared object/ref metadata, not other worktree indexes.
+- Archive reconciliation: 75 files, 149533496 bytes under `.cache/p38/`, no
+  symbolic/reparse redirections observed and every resolved location inside the
+  worktree. `.cache/p38/tmp/` contains only the preexisting `.keep` after CLI
+  completion. Logs/APK are ignored archives, not staged source or credentials.
+- No local Flutter/Gradle build, PowerShell process, device/phone/OTA/firmware
+  operation, cloud business mutation, global config/ACL change, main merge,
+  release or deployment. The main worktree's historical changes and protected
+  root `{a` were not modified. No known project-external active output remains.
