@@ -1,0 +1,1 @@
+{"ok": true, "historical_entries": 6460, "historical_git_blobs": 6213, "source_and_support_hashes_match": true, "node_checks_reviewed": 19, "python_checks_reviewed": 2, "production_diff": "one call-site normalization", "root_index_unchanged": true, "prospective_spec_exists": false, "prospective_probe_directory_exists": false, "network_requests": 0}

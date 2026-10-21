@@ -1,0 +1,9 @@
+{"development_only": true, "fixture_root": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44-v7-development\\python\\batch-6", "c5_source_files_verified": 1185, "network_requests": 0, "source_sha256": "e61af5c4d1c91cea25c47c311c2303fc4251cb4f8ae6766d2d69cefccc02013c", "tests_sha256": "5aaaa75f73aad688c7c927637f939621d604f033638026d0b874d8891e8a1b0c"}
+{"real_io_python_consumer": true, "fixture": ".cache/p44-v7-development/successor05-02/node/real-io", "verified_files": 1098, "result": {"schema": "p44-after-recovery-verification-v1", "ok": true, "c4_complete": 31, "c6_complete": 39, "total_complete": 142, "attempts": 3, "first_missing": "protected-patches-rows8-24", "new_reads": 71, "tool_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}, "partial_body_counted_complete": false}
+test_real_io_failure_reload_assembly_is_consumed_without_copying (__main__.AfterBundleTests.test_real_io_failure_reload_assembly_is_consumed_without_copying) ... ok
+test_real_io_consumer_rejects_wrong_tool_bytes (__main__.AfterBundleTests.test_real_io_consumer_rejects_wrong_tool_bytes) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 101.056s
+
+OK

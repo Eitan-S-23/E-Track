@@ -820,8 +820,167 @@ async function successorCli(output) {
       files: [...io.data].map(([name, raw]) => ({ ...ref(name, raw), base64: raw.toString('base64') })) });
   } finally { s.git = git; }
 }
+async function realIO(output) {
+  const io = r.makeIO(path.join(output, 'real-io')), selected = new Set();
+  function include(name) {
+    if (selected.has(name) || !base.has(name)) return;
+    selected.add(name);
+    // The descriptor inventories more history than this bounded consumer needs.
+    if (name === r.FIXTURE) return;
+    let value;
+    try { value = JSON.parse(base.get(name)); } catch { return; }
+    function references(value) {
+      if (!value || typeof value !== 'object') return;
+      if (value.path && value.sha256 && value.size_bytes !== undefined) include(value.path);
+      for (const item of Object.values(value)) references(item);
+    }
+    references(value);
+  }
+  for (const name of [r.FIXTURE, r.LEGACY_RESERVATION, r.RECOVERY + 'c5.contract.json',
+    r.RECOVERY + 'c5.final-evidence-matrix.json', 'recovery/c4.contract.json', 'recovery/c4.final-evidence-matrix.json',
+    'recovery/private-verify-failure.json', 'rehearsal-manifest.json', 'readbacks.json',
+    ...['target', 'before', 'negatives', 'run_a', 'run_b', 'reviewer_attestation'].map(key => input[key].path)]) include(name);
+  for (const name of base.keys()) if (name.startsWith(r.OLD) || name.startsWith(r.TAIL)) include(name);
+  console.log(JSON.stringify({ case: 'real-io-seed', files: selected.size }));
+  const seed = r.makeIO(output).write('seed-inputs.json', [...selected].map(name => ({ ...ref(name, base.get(name)),
+    base64: base.get(name).toString('base64') })));
+  const prepared = s.cp.spawnSync('python', ['-I', '-S', '-B', '-c', [
+    'import base64,hashlib,json,runpy,sys',
+    'from pathlib import Path',
+    'b=runpy.run_path("Tools/acceptance/p44/bundle.py")',
+    'root=b["guard"](Path(sys.argv[2]))',
+    'for item in json.loads(b["guard"](Path(sys.argv[1])).read_bytes()):',
+    ' file=b["guard"](root/item["path"])',
+    ' file.relative_to(root)',
+    ' raw=base64.b64decode(item["base64"],validate=True)',
+    ' assert len(raw)==item["size_bytes"] and hashlib.sha256(raw).hexdigest()==item["sha256"]',
+    ' b["write"](file,raw)',
+  ].join('\n'), path.join(output, seed.path), io.base], {
+    cwd: s.root, env: process.env, windowsHide: true, stdio: 'inherit', timeout: 120000,
+  });
+  assert.equal(prepared.status, 0, 'REAL_IO_SEED_FAILED');
+  const ctx = await r.validatePrefix(r.loadRecovery(io)); ctx.toolCommit = 'a'.repeat(40);
+  check(() => { assert.equal(ctx.initialComplete.size, 70); assert.equal(ctx.nextAttempt, 2); });
+  console.log(JSON.stringify({ case: 'real-io-prefix', complete: ctx.initialComplete.size, first_missing: ctx.prefixFirstMissing }));
+
+  const guards = r.makeIO(path.join(output, 'real-io-guards'));
+  for (const name of ['../escape.json', '/absolute.json', 'a//b', 'a/../b', 'a/', 'C:/escape.json', 'a\\b']) {
+    check(() => assert.throws(() => guards.write(name, {}), /RECOVERY_PATH/));
+  }
+  check(() => assert.throws(() => s.guard(path.join(guards.base + '-sibling', 'escape.json'), guards.base), /PATH_OUTSIDE_ROOT/));
+  const marker = guards.write(r.attemptDir(2) + 'existing.json', { development_only: true });
+  const rejected = { ...ctx, io: guards, fetching: true, visited: new Set(), order: [] };
+  let unexpectedRequests = 0;
+  await rejects(() => r.makeEnsure(rejected, { d1() { unexpectedRequests++; } }, true).d1(
+    ctx.prefixFirstMissing, 'protected', 'SELECT * FROM "patches" ORDER BY rowid LIMIT 8 OFFSET 16'), /RECOVERY_ATTEMPT_EXISTS/);
+  check(() => {
+    assert.equal(unexpectedRequests, 0); assert.deepEqual(guards.fileRef(marker.path), marker);
+    assert(!guards.exists(r.attemptDir(2) + 'attempt-reservation.json'));
+    assert.throws(() => guards.write(marker.path, {}), /RECOVERY_ORIGINAL_EXISTS/);
+  });
+  const target = guards.destination('junction-target'), junction = guards.destination('junction');
+  fs.mkdirSync(target, { recursive: true });
+  let junctionCheck = 'NOT_RUN';
+  try {
+    fs.symlinkSync(target, junction, process.platform === 'win32' ? 'junction' : 'dir');
+    check(() => {
+      assert.throws(() => guards.exists('junction/escape.json'), /REPARSE_PATH/);
+      assert.throws(() => guards.write('junction/escape.json', {}), /REPARSE_PATH/);
+      assert(!fs.existsSync(path.join(target, 'escape.json')));
+    });
+    junctionCheck = 'PASS';
+  } catch (error) {
+    if (!['EPERM', 'EACCES', 'ENOSYS'].includes(error.code)) throw error;
+    console.log(JSON.stringify({ case: 'real-io-junction', status: 'NOT_RUN', error_code: error.code }));
+  } finally {
+    if (fs.existsSync(junction)) {
+      assert(fs.lstatSync(junction).isSymbolicLink(), 'SELFTEST_JUNCTION_IDENTITY'); fs.unlinkSync(junction);
+    }
+  }
+
+  let bodyRequests = 0, destroyed = 0;
+  const partial = Buffer.from('DEVELOPMENT_FIXTURE_PARTIAL_BODY');
+  const http = { ProxyAgent: class { async destroy() { destroyed++; } }, async request() {
+    bodyRequests++;
+    assert(io.exists(r.attemptDir(2) + 'attempt-reservation.json'));
+    return { statusCode: 200, headers: { 'content-length': String(partial.length + 100) },
+      body: require('node:stream').Readable.from((async function* () {
+        yield partial;
+        await new Promise(resolve => setImmediate(resolve));
+        throw Object.assign(new Error('development fixture disconnect'), { code: 'UND_ERR_SOCKET' });
+      })()) };
+  } };
+  const mock = mockAPI(ctx), successfulD1 = mock.api.d1, requested = [];
+  mock.api.d1 = async (stem, role, sql) => {
+    const reservation = io.read(r.attemptDir(2) + 'attempt-reservation.json');
+    check(() => {
+      assert.equal(reservation.schema, r.RESUME_SCHEMA); assert.equal(reservation.attempt, 2);
+      assert.equal(reservation.product_commit, r.C4); assert.equal(reservation.tool_commit, ctx.toolCommit);
+      assert.equal(reservation.head, s.git(['rev-parse', 'HEAD']));
+      assert.equal(reservation.tool_sha256, s.sha256(fs.readFileSync(path.join(s.root, 'Tools/ota/p44-after-recovery.cjs'))));
+      assert.equal(reservation.first_missing, ctx.prefixFirstMissing); assert.equal(reservation.reused_complete, 70);
+      assert.equal(reservation.reused_records.length, 70); assert.equal(reservation.previous_attempts.length, 1);
+      assert.equal(reservation.predecessor_commit, r.C5);
+      assert(!io.exists(stem + '.http.json'), 'REQUEST_ALREADY_PERSISTED');
+      assert(!ctx.initialComplete.has(stem.slice(r.attemptDir(2).length)), 'SUCCESSFUL_PREFIX_REQUESTED');
+    });
+    requested.push(stem);
+    if (requested.length === 2) return c._test.d1(stem, role, sql);
+    return successfulD1(stem, role, sql);
+  };
+  c._test.setContext({ account: '1'.repeat(32), local: 'OFFLINE_VALUE', gh: 'OFFLINE_VALUE', sensitive: [] });
+  try {
+    await r.withLeaves(io, async () => {
+      await rejects(() => r.after(ctx, mock.api, async () => ({}), () => ({})), { code: 'UND_ERR_SOCKET' });
+    }, { http, privateRoot: path.join(output, 'private-unused') });
+  } finally { c._test.setContext(undefined); }
+  const failedLabel = requested[1].slice(r.attemptDir(2).length);
+  const failed = io.read(requested[1] + '.http.json'), result = io.read(r.attemptDir(2) + 'attempt-result.json');
+  check(() => {
+    assert.equal(bodyRequests, 1); assert.equal(destroyed, 1); assert.equal(requested.length, 2);
+    assert.equal(requested[0], r.attemptDir(2) + ctx.prefixFirstMissing);
+    assert.equal(result.ok, false); assert.equal(result.error_code, 'UND_ERR_SOCKET');
+    assert.deepEqual(result.complete_labels, [ctx.prefixFirstMissing]); assert.deepEqual(result.failure_labels, [failedLabel]);
+    assert.equal(result.new_reads.length, 2); assert.equal(result.failures.length, 1);
+    assert.equal(failed.completed, false); assert.equal(failed.status, 200); assert.equal(failed.request_attempts, 1);
+    assert.equal(failed.partial_body_size_bytes, partial.length); assert(io.readBytes(failed.body.path).equals(partial));
+    assert.equal(failed.decoded_body, undefined); assert.equal(failed.retry_reservation, undefined);
+    assert(!io.exists('snapshots/after.json')); assert(!io.exists(r.RECOVERY + 'after-result.json'));
+  });
+  const retained = new Map(io.created.map(name => [name, io.fileRef(name)]));
+  const reloaded = await r.validatePrefix(r.loadRecovery(io)); reloaded.toolCommit = ctx.toolCommit;
+  check(() => {
+    assert.equal(reloaded.initialComplete.size, 71); assert.equal(reloaded.nextAttempt, 3);
+    assert.equal(reloaded.prefixFirstMissing, failedLabel); assert(!reloaded.initialComplete.has(failedLabel));
+    assert.equal(reloaded.attempts.at(-1).complete.size, 1); assert.equal(reloaded.attempts.at(-1).failures.size, 1);
+    assert.equal(reloaded.attempts.at(-1).result.ok, false);
+  });
+  console.log(JSON.stringify({ case: 'real-io-failure-reload', partial_successes: 0, complete: 71, next_attempt: 3, body_requests: bodyRequests }));
+  const resumed = mockAPI(reloaded);
+  const snapshot = await r.after(reloaded, resumed.api, async () => ({}), () => ({}));
+  // A fresh context must consume persisted records rather than success-path maps.
+  const assembled = r.loadRecovery(io); assembled.toolCommit = ctx.toolCommit;
+  r.assemble(assembled);
+  check(() => {
+    assert.equal(resumed.calls.length, 71); assert.equal(resumed.calls[0].label, r.attemptDir(3) + failedLabel);
+    assert.equal(snapshot.recovery.reused_complete, 71); assert.equal(snapshot.recovery.new_reads.length, 71);
+    assert.equal(snapshot.recovery.attempts.length, 3); assert.equal(snapshot.recovery.reused_failures.length, 3);
+    for (const [name, previous] of retained) assert.deepEqual(io.fileRef(name), previous, 'REAL_IO_OVERWROTE_ORIGINAL');
+    for (const name of selected) assert(fs.readFileSync(path.join(io.base, name)).equals(base.get(name)), 'REAL_IO_CHANGED_SEED');
+    assert.equal(io.read('manifest.json').snapshots.after.recovery.tool_commit, ctx.toolCommit);
+    assert.equal(io.read(r.RECOVERY + 'assemble-result.json').platform_operations, 0);
+    assert.throws(() => r.assemble(assembled), /RECOVERY_ORIGINAL_EXISTS/);
+  });
+  r.makeIO(output).write('real-io.json', { scope: 'OFFLINE_CROSS_LANGUAGE_SYNTHETIC', network_requests: 0,
+    directory: path.relative(s.root, io.base).replaceAll('\\', '/'), contract: { contract_id: 'P4-4-v6', freeze_commit: ctx.toolCommit },
+    descriptor: input, source: ['Tools/ota/p44-after-recovery.cjs', 'tests/ota/test_p44_after_recovery.cjs']
+      .map(name => ref(name, fs.readFileSync(path.join(s.root, name)))),
+    seeded_files: selected.size, body_requests: bodyRequests, failed_label: failedLabel, junction_check: junctionCheck,
+    producers: ['makeEnsure.d1', 'startAttempt', 'makeIO', 'registerFresh', 'attemptResult', 'loadRecovery', 'validatePrefix', 'after', 'assemble'] });
+  console.log(JSON.stringify({ case: 'real-io-success-assembly', complete: 142, new_reads: 71, junction_check: junctionCheck }));
+}
 function formalSnapshot() {
-  const result = {}, packageRoot = path.dirname(r.DATA);
+  const result = {};
   function visit(file) {
     assert(!fs.lstatSync(file).isSymbolicLink(), 'SELFTEST_REPARSE_INPUT');
     const relative = path.relative(s.root, file).replaceAll('\\', '/');
@@ -830,13 +989,16 @@ function formalSnapshot() {
       for (const name of fs.readdirSync(file)) visit(path.join(file, name));
     } else result[relative] = s.sha256(fs.readFileSync(file));
   }
-  for (const file of [r.CONTRACT, packageRoot]) if (fs.existsSync(file)) visit(s.guard(file));
+  for (let version = 4; version <= 7; version++) {
+    const stem = path.join(s.root, 'docs/acceptance-contracts/P4-4-v' + version);
+    for (const file of [stem + '.contract.json', stem]) if (fs.existsSync(file)) visit(s.guard(file));
+  }
   return result;
 }
 async function main() {
   assert.equal(process.argv[2], '--output-dir');
   const output = s.guard(path.resolve(process.argv[3]));
-  const suite = process.argv[4] || 'all'; assert(['all', 'resume', 'body', 'successor', 'validator'].includes(suite), 'SELFTEST_SUITE');
+  const suite = process.argv[4] || 'all'; assert(['all', 'resume', 'body', 'successor', 'validator', 'real-io'].includes(suite), 'SELFTEST_SUITE');
   assert(['p44-v6-development', 'p44-v7-development'].some(name => {
     const relative = path.relative(path.join(s.root, '.cache', name), output);
     return relative && !relative.startsWith('..') && !path.isAbsolute(relative);
@@ -847,7 +1009,7 @@ async function main() {
   const source = ['Tools/ota/p44-after-recovery.cjs', 'tests/ota/test_p44_after_recovery.cjs'].map(name => ref(name, fs.readFileSync(path.join(s.root, name))));
   let failure;
   try {
-    const operations = ['successor', 'validator'].includes(suite) ? [] : [['body-disconnect', bodyDisconnects], ...(suite === 'body' ? [] :
+    const operations = ['successor', 'validator', 'real-io'].includes(suite) ? [] : [['body-disconnect', bodyDisconnects], ...(suite === 'body' ? [] :
       [['resume', resumeInterruptions], ['complete', originalsAndTail], ['tail-integrity', tailIntegrity]])];
     for (const [name, operation] of operations) {
       try { await operation(output); console.log(JSON.stringify({ case: name, ok: true })); }
@@ -856,6 +1018,7 @@ async function main() {
     if (suite === 'all') { await offlineIdentity(); await regressions(); await nativeTransport(output); await physicalWrapper(output); await successorAdmission(); await successorCli(output); }
     if (suite === 'validator') { await regressions(); await successorAdmission(); }
     if (suite === 'successor') { await successorAdmission(); await successorCli(output); }
+    if (suite === 'real-io') await realIO(output);
     check(() => {
       assert.deepEqual(formalSnapshot(), formal, 'SELFTEST_CHANGED_FORMAL_DATA');
       for (const item of originalFiles) assert(fs.readFileSync(path.join(originalRoot, item.path)).equals(base.get(item.path)), 'SELFTEST_CHANGED_C5_DATA');

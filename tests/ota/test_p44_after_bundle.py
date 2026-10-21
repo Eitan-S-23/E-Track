@@ -69,7 +69,7 @@ class AfterBundleTests(unittest.TestCase):
         cls.interop = {}
         cls.private_originals = {}
         if NODE_INTEROP is not None:
-            for name in ("interop", "interop-resumed", "native-transport", "interop-body", "successor-cli"):
+            for name in ("interop", "interop-resumed", "native-transport", "interop-body", "successor-cli", "real-io"):
                 if not (NODE_INTEROP / (name + ".json")).exists():
                     continue
                 packet = m.read(NODE_INTEROP / (name + ".json"))
@@ -77,6 +77,12 @@ class AfterBundleTests(unittest.TestCase):
                 for source in packet["source"]:
                     raw = m.b.guard(ROOT / source["path"]).read_bytes()
                     assert len(raw) == source["size_bytes"] and m.b.sha(raw) == source["sha256"], "STALE_NODE_FIXTURE"
+                if name == "real-io":
+                    directory = m.b.guard(ROOT / packet["directory"])
+                    directory.relative_to(NODE_INTEROP)
+                    assert directory.is_dir(), "REAL_IO_FIXTURE_MISSING"
+                    cls.interop[name] = (directory, packet["contract"], packet["descriptor"], packet)
+                    continue
                 directory = m.b.guard(cls.batch / name)
                 names = [entry["path"] for entry in packet["files"]]
                 assert len(names) == len(set(names)), "DUPLICATE_NODE_FIXTURE_FILE"
@@ -804,6 +810,38 @@ class AfterBundleTests(unittest.TestCase):
                                   for file in directory.rglob("*") if file.is_file()})
         print(json.dumps({"node_python_interop": True, "fixture": directory.relative_to(ROOT).as_posix(),
                           "verified_files": len(before), "result": result}), flush=True)
+
+    def test_real_io_failure_reload_assembly_is_consumed_without_copying(self):
+        directory, contract, descriptor, ctx = self.node_interop("real-io")
+        before = {file.relative_to(directory).as_posix(): m.sha(file)
+                  for file in directory.rglob("*") if file.is_file()}
+        with self.synthetic_git(), patch.object(m, "DATA", directory), \
+                patch.object(m.subprocess, "run", side_effect=AssertionError("SUBPROCESS_FORBIDDEN")), \
+                patch.object(m.b, "write", side_effect=AssertionError("WRITE_FORBIDDEN")):
+            result = m.capture_results(contract, descriptor, ctx)
+            finished = m.INSPECT.timestamp(ctx.document(descriptor["run_b"])["run"]["updated_at"])
+            failed = m._after_source(ctx, directory / m.TAIL / "attempt-2", 2, finished, True)
+        self.assertEqual(result["total_complete"], 142)
+        self.assertEqual(result["c4_complete"], 31)
+        self.assertEqual(result["c6_complete"], 39)
+        self.assertEqual(result["new_reads"], 71)
+        self.assertEqual(result["attempts"], 3)
+        self.assertFalse(failed["result"]["ok"])
+        self.assertEqual(failed["result"]["error_code"], "UND_ERR_SOCKET")
+        self.assertEqual(len(failed["complete"]), 1)
+        self.assertEqual(len(failed["failures"]), 1)
+        self.assertEqual(before, {file.relative_to(directory).as_posix(): m.sha(file)
+                                  for file in directory.rglob("*") if file.is_file()})
+        print(json.dumps({"real_io_python_consumer": True, "fixture": directory.relative_to(ROOT).as_posix(),
+                          "verified_files": len(before), "result": result,
+                          "partial_body_counted_complete": False}), flush=True)
+
+    def test_real_io_consumer_rejects_wrong_tool_bytes(self):
+        directory, contract, descriptor, ctx = self.node_interop("real-io")
+        with self.synthetic_git(), patch.object(m, "DATA", directory), \
+                patch.object(m.b, "git_bytes", return_value=b"wrong tool"), \
+                self.assertRaisesRegex(AssertionError, "AFTER_ATTEMPT_TOOL"):
+            m.capture_results(contract, descriptor, ctx)
 
     def test_repeated_disconnect_node_outputs_satisfy_python_contract(self):
         directory, contract, descriptor, ctx = self.node_interop("interop-resumed")

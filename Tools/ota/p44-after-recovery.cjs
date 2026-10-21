@@ -890,7 +890,7 @@ function registerFresh(ctx, label, kind, role, envelope, stem) {
 function startAttempt(ctx) {
   assert(!ctx.attempt && !ctx.io.exists('snapshots/after.json') && !ctx.io.exists(RECOVERY + 'after-result.json'), 'RECOVERY_ALREADY_EXECUTED');
   const number = ctx.nextAttempt;
-  assert(number >= 2 && !ctx.io.exists(attemptDir(number)), 'RECOVERY_ATTEMPT_EXISTS');
+  assert(number >= 2 && !ctx.io.exists(attemptDir(number).replace(/\/$/, '')), 'RECOVERY_ATTEMPT_EXISTS');
   const started = new Date().toISOString();
   const reservation = { schema: RESUME_SCHEMA, attempt: number, tool_commit: ctx.toolCommit,
     tool_sha256: s.sha256(fs.readFileSync(s.guard(path.join(s.root, SELF)))), head: s.git(['rev-parse', 'HEAD']),

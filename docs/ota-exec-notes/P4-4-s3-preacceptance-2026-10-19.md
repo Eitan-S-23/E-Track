@@ -2463,3 +2463,247 @@ P4-4 stays IN_PROGRESS; product stays C4/3.2.9 and gate stays false. No A/B,
 upload, registration, successful readback, production release, main integration,
 device operation or platform-configuration change was repeated. Closeout writes
 are confined to the task worktree and authorized shared Git metadata.
+
+#### P44-SUCCESSOR-05 Bounded Implementation (2026-10-21)
+
+Entry: clean task worktree, HEAD I7 ca352d8b0410d2040ced7be8a94290ef86a2b406,
+C7 371baeeb8519a0340a79c96b6a7cd6406b2e0346 and B7
+98c1d053227d437e9ec71c3ee622926b8ad4f116 are present. No prior uncommitted
+SUCCESSOR-05 changes were found. SUCCESSOR-04 remains independently closed.
+The sole writable root is D:/github/my/E-Track/.cache/p4-4-integration-20261018.
+The canonical governance is consumed read-only; no Trellis tree is installed.
+
+DECIDED: normalize only startAttempt's exists directory argument. Keep
+attemptDir's concatenation convention and strict relative/destination checks.
+The bounded sweep of exists/list callers found list already strips trailing
+separators; file references retain strict validation. Extend the existing Node
+and Python test entries with real filesystem fixtures, a failed partial body,
+reload/continuation and actual assembly/consumer checks. No new formal bundle,
+formal command, cloud request, product change or slot admission is involved.
+
+Host preparation found Node 24.13.0 (also installed Node 20.19.5) cannot create
+spawnSync capture pipes in this sandbox: actual fsutil and git calls return
+EPERM, status null, pid 0. Direct cmd/Python and Node inherited stdio execute
+fsutil successfully. A development-only stdio adapter will capture the actual
+fsutil/read-only Git subprocess output using project-local file descriptors;
+it will not cache answers, replace guard/IO/registration functions, change exit
+codes, or weaken reparse checks. All child commands keep explicit cwd/deadlines.
+This is a host execution limitation, not another production collector finding.
+Preflight used the existing Python native reparse guard for every controlled
+output tree and the five allowed source/note paths before writing. Logs,
+scratch, contained environment and fixtures stay below
+.cache/p44-v7-development/; no external cleanup is authorized or performed.
+
+Preparation adjustment: the first controlled invocation was cancelled during
+fixture seeding because it was doing three complete Node guard walks per copied
+input. No test case completed and no attempt-2 was created in that fixture.
+Its raw .cache/p44-v7-development/successor05-01/node.log is retained unchanged,
+SHA-256 5759057086399793519295eb2e6de9b4fa49629cc74ed6e9c05b9eb4006f7529.
+The command session closed with exit 1; elapsed time was not recorded by the
+interrupted launcher and is not invented. psutil subsequently found no Node
+process executing test_p44_after_recovery.cjs. No unchanged failed test was
+repeated: the second invocation changes only fixture preparation to call the
+existing Python bundle.guard/write implementation with a bounded, hash-checked
+input packet. Registration, response writes, scanning and reload continue to
+use actual makeIO and the unchanged Windows fsutil guard, without cached answers.
+
+The second run uses .cache/p44-v7-development/successor05-02/ and the thin
+launcher/preloader in successor05-01/. Its controlled stdio scratch files remain
+successor05-01/host/stdout.tmp and stderr.tmp; contained TEMP/HOME/APPDATA/cache
+paths are successor05-02/host/*. Initial retained inventory covers 6460 paths
+from v1 through v7. The shared worktree index mtime was checked read-only as
+2026-10-21T05:52:59.289Z, before this implementation session.
+
+Observed intermediate checkpoints (not a completed self-test verdict): actual
+loadRecovery/validatePrefix restored 70 complete responses and frontier
+protected-patches-rows8-16. Real makeEnsure.d1/startAttempt created the attempt-2
+directory and resume reservation before the simulated API callback. The callback
+checked schema, attempt, source/product/tool identity, current HEAD/tool bytes,
+prior record count, history and absent response file. The actual HTTP leaf then
+persisted one complete page and one truncated HTTP-200 body, closed its agent,
+and actual attemptResult recorded complete_labels=[protected-patches-rows8-16],
+failure_labels=[protected-patches-rows8-24], ok=false, UND_ERR_SOCKET, with two
+new_reads and one failure reference. The partial body was not counted complete
+and no retry reservation was created. Reload, continuation, assembly and Python
+consumer results are recorded below only after they finish.
+
+##### Completed offline batch and handoff
+
+SUCCESSOR-05 root cause: attemptDir(2) is a filename-concatenation prefix ending
+in '/', while production makeIO.exists accepts a strict relative path without
+empty components. The previous memory fixture normalized that argument and hid
+the mismatch. The production diff is one line at startAttempt's exists call:
+strip its final slash there. relative(), attemptDir(), transport, retry,
+source/time checks, no-overwrite and invocation admission remain unchanged.
+The same-chain exists/list sweep found no additional production defect.
+
+The existing Node entry adds a bounded real-io suite. Fixture inputs are a
+hash-checked 754-file subset prepared with existing Python bundle.guard/write;
+the tested IO is actual makeIO, including exists/destination/relative/write,
+makeEnsure.d1 -> prepare -> startAttempt, registerFresh, attemptResult/scanSource,
+loadRecovery/validatePrefix, after/walkAll and assemble. The production HTTP
+capture.d1/body pipeline handles a simulated truncated response. The test does
+not replace filesystem, registration, scanning, assembly or hash validators.
+The Python test entry adds a direct-directory fixture consumer and two bounded
+cases; it does not rehydrate/copied-replace the tested Node outputs. Production
+p44-after-bundle.py is byte-identical to C7 and needed no repair.
+
+External inputs simulated: network/API responses, credential-pair inputs and
+the new uncommitted candidate's Git identity. Node reads actual HEAD and tool
+bytes; candidate tool_commit is deliberately 'a' repeated 40 times. The existing
+synthetic_git helper supplies that development Git object's current producer
+bytes and ancestor answers to Python. Actual digest/lineage/source checks stay
+live, and the wrong-tool-bytes negative is rejected as AFTER_ATTEMPT_TOOL.
+No actual credential is read or exported. This synthetic identity is not a
+commit, frozen input, admission or formal source observation.
+
+| Development chain | Actual result |
+| --- | --- |
+| Prefix and first missing registration | 31 C4 + 39 C6 complete responses restored from disk; first missing rows8-16; actual attempt-2 directory/reservation written before simulated request; identity/format/path checked |
+| Partial failure | One additional complete rows8-16 page, then one truncated HTTP-200 rows8-24 body; actual HTTP/partial body/attempt-result persisted; ok=false, UND_ERR_SOCKET; one body transport call, one destroy, no retry |
+| Reload and explicit development continuation | Actual loadRecovery/validatePrefix restored 71 complete responses and failed rows8-24; next attempt=3; only 71 missing responses requested; prior success and failure hashes unchanged |
+| Success and assembly | Actual attemptResult rescanned persisted new files; a fresh loadRecovery context fed actual assemble; 142 complete responses (70 originals + 72 newly simulated completes over the two development attempts), three attempts including legacy attempt-1; manifest/result written, duplicate assembly refused |
+| Python consumption | Actual capture_results -> verify_after_recovery -> _after_source/INSPECT.Context and snapshot/configuration checks consumed the same 1098 disk files; 31 C4, 39 C6, 142 total, three attempts, 71 final new_reads; partial success count=0; no consumer writes |
+| Negative guards | Existing attempt directory rejected before request/reservation; original marker unchanged; overwrite rejected; seven illegal/traversal/absolute path cases and sibling boundary rejected; actual Windows junction rejected for exists/write, no escaped file created, junction unlinked |
+
+There were 73 simulated request outcomes across the two development attempts:
+72 complete and one truncated body. Actual cloud/network requests were zero.
+The development fixture uses the existing default v6 input interface and the
+same production tail/attempt functions used by the v7 collector. It does not
+run a v7 command or authorize its second invocation slot.
+
+All commands used cmd.exe and explicit cwd
+D:/github/my/E-Track/.cache/p4-4-integration-20261018. The two actual suite
+invocations are below; the launcher captures binary stdout/stderr without
+rewriting output and retains command vectors, PIDs, deadlines and closure.
+
+    python -I -S -B .cache\p44-v7-development\successor05-01\run.py node
+    node --require .cache\p44-v7-development\successor05-01\stdio.cjs tests/ota/test_p44_after_recovery.cjs --output-dir .cache/p44-v7-development/successor05-02/node real-io
+
+    python -I -S -B .cache\p44-v7-development\successor05-01\run.py python
+    python -I -S -B tests/ota/test_p44_after_bundle.py --node-fixture .cache/p44-v7-development/successor05-02/node AfterBundleTests.test_real_io_failure_reload_assembly_is_consumed_without_copying AfterBundleTests.test_real_io_consumer_rejects_wrong_tool_bytes
+
+| Scope | Deadline / exit / count / elapsed | Raw output / receipt |
+| --- | --- | --- |
+| Node real-io | 5400 s / 0 / 19 check groups / 4076.323545 s launcher elapsed; 06:53:19.003Z through 08:01:03.347Z inner self-test | successor05-02/node.log and node-receipt.json |
+| Python direct consumer + wrong source negative | 300 s / 0 / Ran 2 tests in 111.381 s, OK / 112.092277 s launcher elapsed | successor05-02/python.log and python-receipt.json |
+
+The Node host adapter executed 78372 actual fsutil/read-only Git subprocesses
+with zero cached answers; no path guard was weakened for speed. Both receipts
+record process_closed=true. A final psutil check found Node PID 24220 and Python
+PID 1660 absent. Native synchronous children had already returned; the mock HTTP
+agent's destruction was asserted. The cancelled preparation has no valid suite
+result and is not counted above. No old log is counted as newly executed.
+
+Node/Python syntax checks completed without errors. Final git diff --check
+returned 0; Git emitted four normal LF-to-CRLF checkout notices, not test or
+compiler diagnostics. No firmware build, complete historical failure matrix,
+formal precheck/final, formal after/assemble, live cloud request, A/B, upload,
+registration, readback, CI, device operation, commit, push or freeze was run.
+Existing valid SUCCESSOR-04/other failure-type evidence is retained and reused
+by review, not relabelled as this batch's executions. The real pipe-host issue
+required the disclosed development file-stdio adapter; an unadapted Node
+capture-pipe invocation remains environment-blocked in this sandbox.
+
+Paths below are relative to .cache/p44-v7-development/ unless fully spelled.
+
+| Original output | SHA-256 |
+| --- | --- |
+| successor05-02/node.log | d86746934cff1ca49a518e02808a7483c111ee98bf7d82b9df9516928ddc15ef |
+| successor05-02/node-receipt.json | 8c673b41c7b143ef35ddbfe6ae854457d69f1e1e929a01d308ce46bbebb8505a |
+| successor05-02/python.log | 76150f5db1d6a9ea64aa2e8a5462c03527f454bbead99913573ace0fd679ad10 |
+| successor05-02/python-receipt.json | 444bada93c9b46fa0587ee19f7bd5d0c1a80bdaa13dbe70bfc049bc771d6c15b |
+| successor05-02/originals.json | aed630a757d060d1261eeda3523ff6d33becf98faa4d7af778ea42ba0d44490b |
+| successor05-02/node/real-io.json | f452159316eaaf686163d96156e282dd775afec0f1885bea2f4a093043a35f52 |
+
+| Delivered source/test | Final SHA-256 |
+| --- | --- |
+| Tools/ota/p44-after-recovery.cjs | 4b5081954a47c36bfc71e11f5eb07bdc2c94db6a615a7a42ab85ec78fcd9a21c |
+| tests/ota/test_p44_after_recovery.cjs | d4678e22bc71a848064860290d546085d58c15f0c9dd2fc981d07d9047d48055 |
+| tests/ota/test_p44_after_bundle.py | 5aaaa75f73aad688c7c927637f939621d604f033638026d0b874d8891e8a1b0c |
+| Tools/ota/p44-after-bundle.py, unchanged | e61af5c4d1c91cea25c47c311c2303fc4251cb4f8ae6766d2d69cefccc02013c |
+
+The final note hash (including this section) and all five source/note hashes
+are stored without self-reference in successor05-02/audit.json, generated by:
+
+    python -I -S -B .cache\p44-v7-development\successor05-01\run.py audit
+
+Output audit: controlled writes are exclusively the three modified source/test
+files and this note; successor05-01/ (cancelled fixture, local launcher and
+stdio scratch), successor05-02/ (logs, raw fixtures, results, receipts, host
+environment and audit), and .cache/p44-v7-development/python/batch-5/ (empty
+existing test-entry batch directory). The audit rechecks every existing output
+path with the native reparse guard and compares the retained 6460 formal paths.
+No junction remains, no path escaped the active root, no system temporary/cache
+path was selected, and no main-worktree or shared Git index write occurred.
+The shared index mtime was again 2026-10-21T05:52:59.289Z after both suites.
+The formal v7 contract/matrix retain their stated hashes, all 70 complete
+after responses and historical failures remain original, and slot 2 remains
+unused/unadmitted. Only the four listed tracked files are dirty; no user or
+other agent changes were reset or reverted. Development artifacts are retained.
+
+Disposition: implementation self-test only, pending the original root's
+independent review. No claim excludes all future defects. Product stays
+C4/3.2.9, gate=false, P4-4 not formally passed and v7 EVIDENCE_GAP unchanged.
+The original root owns any formal successor/source delivery, freeze, missing
+read-only collection and final adjudication.
+
+实现及离线闭环自测完成，待原 root 独立复核。
+
+##### SUCCESSOR-05 Independent Closure And V8 Preparation
+
+Disposition: CLOSED for the bounded directory-argument defect. The independent
+root changed no collector or test implementation and used no sub-agent. The
+production delta is exactly the one-line exists-argument normalization; the
+strict path validator and filename-prefix convention remain unchanged. No new
+blocking finding was found in the affected batch and call-chain review.
+
+Root verified the implementation source/support/log hashes and closed receipts,
+then compared all 6460 historical entries with the supplied retained inventory
+and all 6213 historical files with actual HEAD Git blob identities. All match;
+the shared main index retains SHA-256
+2907ee569cb8415877c8c688b3e09b5948a789d6430796eab99ae3ad43f3a3dd.
+The 19-group, 4076-second Node run was reviewed, not repeated. Its file-stdio
+adapter executes real commands and preserves status/output without cached
+answers; it was not needed on the root host, whose native pipes were checked.
+
+Root independently reran the two direct Python consumer/source-negative tests:
+exit 0, 2 tests in 101.056 seconds, consuming the same 1098 files without copying
+or changing them. The disclosed synthetic development Git identity remains a
+fixture limitation, not a formal provenance assertion. A separate native Node
+probe used actual makeIO, actual Git and the version-selected v7 call path,
+without the development stdio adapter: reservation preceded the simulated
+callback, the existing attempt directory was rejected without another callback,
+and seven invalid paths were rejected. It made no network request. Its minimal
+development reservation is outside every formal package.
+
+The new v8 package descriptor retains v7 as the actual predecessor and all
+earlier failures. Its SHA-256 is
+d487dbdd0a36f9d49a8f7308acd0bb02978cdd56c829ba3bf83b0cb54f8ca0b4.
+An unmodified source_plan() against real Git/files verified 1444 copy inputs,
+1442 descriptor files and 1445 absent guarded targets. Reuse sources are C4,
+C5 and C6; removing C6 yields exactly one missing-previous-round error. Node
+and Python precheck/plan vectors match, and every validation command includes
+all three reuse-source pairs. This was a read-only preparation probe, not a
+formal precheck, freeze or new observation.
+
+Nineteen original outputs/receipts, support sources and the implementation note
+snapshot are archived under P4-4-acceptance-preparation-2026-10-19/v8/. The
+inventory SHA-256 is 2bcc2740e436a9eb5f682bd43188b94b3dbdfd9cdc612891056d5c85192e86a5.
+It binds successor05-root-record-review01, successor05-root-consumer01,
+successor05-root-entry01 and v8-source-plan-review01, including exact invocations.
+The cancelled preparation remains failed history, not a passing test.
+
+For delivery hygiene, root reuses the already-qualified v7 auditor's unchanged
+functions and native guards with only the exact v8 package/spec/preparation path
+constants substituted. Its source SHA-256 remains
+0b9074a305cf87e77a2334c6a26d11ca4a77ab97d583d007243673b26b5732d4;
+stdout-only operation and the existing credential/byte checks remain intact.
+This operational path binding is not a new formal validator or product gate.
+
+The stable repaired source may now proceed to source delivery and ordinary
+successor admission. V7 is still EVIDENCE_GAP; its second slot was not used.
+P4-4 remains IN_PROGRESS, product C4/3.2.9 and gate=false. No successful A/B,
+upload, registration or readback was replayed; no cloud/device action occurred
+during this review. Only the missing approved observations remain eligible
+after the actual frozen rerun plan and execution-worktree checks.
