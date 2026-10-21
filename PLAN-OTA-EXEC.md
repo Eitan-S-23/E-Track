@@ -735,7 +735,7 @@
 - 收口: 2026-09-04 用户放话后由主会话收口(主会话非本卡实现者), PR #19 已并入 main。刻意不用 squash 而用 merge: 包内 changed-*.json 逐条声明「该次注错/还原提交恰含一个文件」、run-*.json 把每次运行绑到具体提交, squash 会把 13 个提交压成 1 个使这些声明无法被第三方复核, fail-closed 反证四条腿的可信度随之塌掉(与 P3-6 为排除注错临时提交而 squash 的裁定相反, 理由不同)。代价如实登记: 4 次注错提交因此位于 main 可达历史中, git bisect 可能检出带注入缺陷的树; 缓解为每次注错的下一个提交即还原(缺陷树存活跨度 1 个提交)、main 顶端树干净、合并为 first-parent 线性结构故 git bisect --first-parent 不会进入注错提交。合并前 PR 全检查绿(MCU Firmware Build、Acceptance Governance、Build APK and EXE Release 三者 success; 治理 CI 本次被触发是因收口批次改动 docs/acceptance-contracts/ 与 tests/ota/, 其绿是收口硬前置)。三个 worktree 均不在 refs/heads/main 上, 故在主 worktree 切回 main 后 merge --ff-only, 快进 14 个提交, 核对 HEAD 与 origin/main 一致且无 ahead/behind, 未用 reset 或强制覆盖。入库后在 main 顶端复跑本卡接入的四条脚本全部 rc=0, 证明四次注错已彻底还原。收口证据见 docs/ota-exec-notes/P3-7-closeout.md, 收口后遗留问题清单见 docs/ota-exec-notes/P3-7-residual-issues.md。
 
 #### P3-8 Android 后台 OTA 与通知进度
-状态: 待办 ｜ 认领: — ｜ 更新: 2026-09-15(用户新增需求落盘，未实施/未实测)
+状态: 进行中 ｜ 认领: Codex(P3-8 实现) / 2026-10-21 ｜ 更新: 2026-10-21(交接核对完成，开发实施中，非独立验收)
 - 依赖: P3-3 已完成并合入 main；不以 P3-4 或 P4-2 部署为软件实施前置，不新增 P3-8 -> P3-5 硬依赖。
 - 目标: 前台发起并实际取得 Android 服务/执行器接管后，正常切应用、下拉通知栏和锁屏继续设备 OTA；页面/通知同源展示真实阶段和 durable 进度，回前台重附着任务，终态释放资源。
 - 范围: Flutter OTA/BLE 生命周期与通知的必要接线、Android 前台服务/权限/桥接及测试；不混用 App 自更新任务，不改 MCU/BLE 字节协议，不仅删除后台暂停保护。
@@ -744,6 +744,7 @@
 - 派工书: docs/ota-prompts/prompt-P3-8-implementation.md；具体设备、时长、操作/恢复配额和独立验收合同须另行审批，当前产品与正式验收 NOT_RUN。
 - 历史与权限: P3-3-v9、原认领及历史冻结包不变；本卡不授予新增推送/发布/部署或真机权限，不沿用 P3-3 临时额度。
 - 证据: —；立卡与治理验证记录见 docs/ota-exec-notes/P3-4-P3-8-requirements-2026-09-15.md，不冒充实现证据。
+- 实施记录: docs/ota-exec-notes/P3-8-implementation-2026-10-21.md；独占 dev/flutter/p3-8-background-ota-20261021，基线 2f4946a。开发 CI 已核对；标准 APK/EXE 与 Android 服务原生测试入口缺口交 root，设备/正式验收 NOT_RUN，不自行置完成。
 - 规范收口: 2026-09-16 用户授权后，规范提交 d5a0b58 已推送 main，治理 CI run 35008183321 通过；本卡仍待办，后台/通知能力及真机判据均未实施或实测。
 
 ---

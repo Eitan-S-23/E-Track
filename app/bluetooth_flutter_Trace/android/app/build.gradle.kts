@@ -99,6 +99,10 @@ android {
         jvmTarget = JavaVersion.VERSION_11.toString()
     }
 
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
+
     defaultConfig {
         applicationId = "com.wen.gaia.gaia" // 替换为你的应用 ID
         minSdk = flutter.minSdkVersion
@@ -177,6 +181,8 @@ flutter {
 }
 
 dependencies {
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.robolectric:robolectric:4.14.1")
     // Core library desugaring for flutter_local_notifications
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
     implementation("androidx.core:core-ktx:1.13.1")

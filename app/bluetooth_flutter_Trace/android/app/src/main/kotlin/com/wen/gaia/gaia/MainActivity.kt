@@ -2,12 +2,14 @@ package com.wen.gaia.gaia
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.lifecycle.Lifecycle
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.embedding.engine.FlutterEngineCache
 import io.flutter.plugin.common.MethodChannel
 import java.io.File
 
@@ -15,8 +17,25 @@ class MainActivity: FlutterActivity() {
     private var deepLinkChannel: MethodChannel? = null
     private var appUpdateChannel: MethodChannel? = null
 
+    override fun provideFlutterEngine(context: Context): FlutterEngine? =
+        FlutterEngineCache.getInstance().get(DeviceOtaBridge.ENGINE_ID)
+
+    override fun shouldDestroyEngineWithHost(): Boolean = false
+
+    override fun onResume() {
+        super.onResume()
+        DeviceOtaBridge.lifecycle(this, true)
+    }
+
+    override fun onPause() {
+        DeviceOtaBridge.lifecycle(this, false)
+        super.onPause()
+    }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        DeviceOtaBridge.install(flutterEngine, this)
+        DeviceOtaBridge.consumeOpen(intent)
         deepLinkChannel = MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             DEEP_LINK_CHANNEL
@@ -73,6 +92,7 @@ class MainActivity: FlutterActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+        if (DeviceOtaBridge.consumeOpen(intent)) return
         intent.dataString?.let { link ->
             deepLinkChannel?.invokeMethod("onDeepLink", link)
         }

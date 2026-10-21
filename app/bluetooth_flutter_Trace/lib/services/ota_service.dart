@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
@@ -10,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../config/share_links.dart';
 import '../ota/ota_ble_codec.dart';
+import '../ota/ota_background.dart';
 import '../ota/ota_ble_transport.dart';
 import '../ota/ota_device_info.dart';
 import '../ota/ota_diagnostics.dart';
@@ -32,10 +34,12 @@ enum OtaPhase {
   checkingUpdate,
   /// 固件下载中。
   downloading,
+  verifyingDownload,
   /// 下载完成并校验，待安装。
   readyToInstall,
   /// BLE 传输中（durable 进度）。
   transferring,
+  applying,
   /// END ACK OK：包传输完成，等待设备重启。
   waitingReboot,
   /// 重连成功，GET_INFO 复核目标身份中。
@@ -64,7 +68,7 @@ enum OtaPhase {
 /// 红线：不硬编码 deviceModel/版本；未知值 fail closed；
 /// MCU ACK 是 credit 与 durable 的唯一真相；取消按层归责；
 /// 同一时间只允许一个升级族操作（下载/传输互斥，取消代次防竞态）。
-class OtaService extends GetxController {
+class OtaService extends GetxController with WidgetsBindingObserver {
   static OtaService get to => Get.find();
 
   // Receiver capacity is not a safe burst size for the BLE return path.
@@ -99,6 +103,8 @@ class OtaService extends GetxController {
     int? senderWindowSegments,
     bool enablePipeline = const bool.fromEnvironment('P34_OTA_PIPELINE'),
     OtaPhyClient? phyClient,
+    OtaBackgroundClient? backgroundClient,
+    void Function()? onOpenTask,
   })  : _senderWindowSegments = RangeError.checkValueInInterval(
           senderWindowSegments ??
               (enablePipeline ? defaultPipelineWindowSegments : defaultSenderWindowSegments),
@@ -109,6 +115,8 @@ class OtaService extends GetxController {
         _enablePipeline = enablePipeline,
         _bluetoothService = bluetoothService,
         _phyClient = phyClient ?? OtaPhyClient(),
+        _background = backgroundClient ?? OtaBackgroundClient(),
+        _onOpenTask = onOpenTask,
         _notifyImpl = onNotify,
         _downloadFileGate = downloadFileGate ?? OtaFilePathGate.shared,
         _dio = dio ??
@@ -144,6 +152,166 @@ class OtaService extends GetxController {
 
   final BluetoothService? _bluetoothService;
   final OtaPhyClient _phyClient;
+  final OtaBackgroundClient _background;
+  final void Function()? _onOpenTask;
+  final String _processNonce = Random.secure().nextInt(1 << 32).toRadixString(16);
+  final _backgroundReady = false.obs;
+  final _backgroundReason = RxnString();
+  OtaTaskKey? _taskKey;
+  OtaRadioLease? _backgroundScanLease;
+  Worker? _snapshotWorker;
+  int _snapshotRevision = 0;
+  int _taskSerial = 0;
+  int _taskTotal = 0, _durableBytes = 0, _receivedBytes = 0;
+  bool _appBackgrounded = false, _foregroundPaused = false, _closed = false;
+  Completer<void>? _foregroundGate;
+  String? _lastSnapshotPhase;
+
+  bool get backgroundAcquired => _backgroundReady.value;
+  String? get backgroundUnavailableReason => _backgroundReason.value;
+  bool get canCancelTask => isUpgrading &&
+      (phase == OtaPhase.downloading || phase == OtaPhase.verifyingDownload ||
+       phase == OtaPhase.transferring) && _transport?.endStarted != true;
+
+  OtaTaskSnapshot? get taskSnapshot {
+    final key = _taskKey;
+    if (key == null) return null;
+    final stage = _foregroundPaused ? 'paused' : switch (phase) {
+      OtaPhase.downloading => 'downloading',
+      OtaPhase.verifyingDownload => 'checkingPackage',
+      OtaPhase.readyToInstall => 'ready',
+      OtaPhase.transferring => 'transferring',
+      OtaPhase.applying => 'applying',
+      OtaPhase.waitingReboot => 'reconnecting',
+      OtaPhase.reconnectVerify => 'verifying',
+      OtaPhase.completed => 'completed',
+      OtaPhase.cancelled => 'cancelled',
+      _ => 'failed',
+    };
+    return OtaTaskSnapshot(key: key, revision: _snapshotRevision, phase: stage,
+        totalBytes: _taskTotal, durableBytes: _durableBytes,
+        receivedBytes: _receivedBytes, canCancel: canCancelTask,
+        targetVerified: phase == OtaPhase.completed,
+        backgroundAcquired: backgroundAcquired,
+        backgroundReason: backgroundUnavailableReason);
+  }
+
+  void _publishSnapshot() {
+    ++_snapshotRevision;
+    final value = taskSnapshot;
+    if (value == null) return;
+    _background.publish(value, urgent: value.phase != _lastSnapshotPhase);
+    _lastSnapshotPhase = value.phase;
+  }
+
+  Future<void> _beginBackgroundTask(String address, OtaFirmwareAsset asset,
+      int generation) async {
+    _taskKey = OtaTaskKey(taskId: '${_processNonce}_${_ownerEpoch}_${++_taskSerial}',
+        generation: _ownerEpoch,
+        deviceToken: sha256.convert(utf8.encode(address.toLowerCase())).toString(),
+        packageSha256: asset.sha256);
+    final key = _taskKey!;
+    _taskTotal = asset.sizeBytes;
+    _durableBytes = 0;
+    _receivedBytes = 0;
+    _backgroundReady.value = false;
+    _backgroundReason.value = null;
+    _foregroundPaused = false;
+    _publishSnapshot();
+    if (!_background.supported) return;
+    try {
+      _backgroundScanLease = _ble.pauseDeviceOtaScanning();
+      await _backgroundScanLease!.ready.timeout(const Duration(seconds: 5));
+      if (generation != _cancelGeneration || _closed) return;
+      final acquired = await _background.acquire(taskSnapshot!,
+        ownerLive: () => !_closed && identical(_taskKey, key) && isUpgrading &&
+            generation == _cancelGeneration &&
+            (!_appBackgrounded || _background.isAcquired) &&
+            (_boundAddress == address && _boundLinkGeneration != null &&
+             _ble.otaLinkGeneration(address) == _boundLinkGeneration ||
+             phase == OtaPhase.waitingReboot || phase == OtaPhase.reconnectVerify ||
+             phase == OtaPhase.applying),
+        onLost: (reason) {
+          if (!identical(_taskKey, key) || generation != _cancelGeneration) return;
+          _backgroundReady.value = false;
+          _backgroundReason.value = reason;
+          if (_appBackgrounded) _safeBackgroundFallback();
+          _publishSnapshot();
+        },
+        onCancel: () async {
+          if (identical(_taskKey, key)) await cancelCurrentTask(keepPackage: true);
+        },
+        onOpen: () {
+          if (identical(_taskKey, key)) _onOpenTask?.call();
+        });
+      if (!identical(_taskKey, key) || generation != _cancelGeneration || _closed) {
+        await _background.release(key);
+        return;
+      }
+      _backgroundReady.value = acquired;
+      _backgroundReason.value = acquired ? null : _background.reason;
+    } catch (_) {
+      _backgroundReason.value = 'RADIO_OR_SERVICE_UNAVAILABLE';
+    }
+    if (!_backgroundReady.value && _appBackgrounded) _safeBackgroundFallback();
+    _publishSnapshot();
+  }
+
+  Future<void> _finishBackgroundTask(OtaTaskKey key) async {
+    try {
+      await _background.release(key);
+    } finally {
+      if (identical(_taskKey, key)) {
+        _backgroundReady.value = false;
+        final lease = _backgroundScanLease;
+        _backgroundScanLease = null;
+        if (lease != null) {
+          try { await lease.close().timeout(const Duration(seconds: 5)); }
+          catch (_) { _backgroundReason.value = 'SCAN_RELEASE_UNRESOLVED'; }
+        }
+      }
+    }
+  }
+
+  Future<void> _waitForForeground(int generation) async {
+    if (!_appBackgrounded || backgroundAcquired || generation != _cancelGeneration) return;
+    _foregroundGate ??= Completer<void>();
+    await _foregroundGate!.future;
+  }
+
+  void _safeBackgroundFallback() {
+    if (!isUpgrading) return;
+    _foregroundPaused = true;
+    _transport?.pauseForBackground();
+    if (phase == OtaPhase.downloading || phase == OtaPhase.verifyingDownload) {
+      _activeDownloadToken?.cancel('background execution unavailable');
+    }
+    _publishSnapshot();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      final wasBackgrounded = _appBackgrounded;
+      _appBackgrounded = false;
+      final gate = _foregroundGate;
+      _foregroundGate = null;
+      if (gate != null && !gate.isCompleted) gate.complete();
+      if (wasBackgrounded && _foregroundPaused) {
+        _foregroundPaused = false;
+        unawaited(resumeFromBackground());
+      }
+    } else {
+      _appBackgrounded = true;
+      if (!backgroundAcquired) _safeBackgroundFallback();
+    }
+  }
+
+  Future<void> cancelCurrentTask({bool keepPackage = true}) async {
+    // Recheck after a notification/dialog was displayed; END may have started.
+    if (!canCancelTask) return;
+    await cancelUpgrade(keepPackage: keepPackage);
+  }
   final int _senderWindowSegments;
   final bool _enablePipeline;
   final void Function(String title, String message)? _notifyImpl;
@@ -307,6 +475,9 @@ class OtaService extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addObserver(this);
+    _snapshotWorker = everAll([_phase, _upgradeStatus, _downloadProgress,
+      _durableProgress, _backgroundReady, _backgroundReason], (_) => _publishSnapshot());
     _upgradeStatus.value = isFirmwareServiceConfigured
         ? '固件服务已就绪'
         : '固件服务未配置';
@@ -314,6 +485,15 @@ class OtaService extends GetxController {
 
   @override
   void onClose() {
+    _closed = true;
+    _cancelGeneration++;
+    WidgetsBinding.instance.removeObserver(this);
+    _snapshotWorker?.dispose();
+    _activeLatestToken?.cancel();
+    _activeDownloadToken?.cancel();
+    final gate = _foregroundGate;
+    if (gate != null && !gate.isCompleted) gate.complete();
+    unawaited(_background.close());
     if (_phyClient.isActive) {
       _cancelGeneration++;
       unawaited(_phyClient.cancelActive().then((acknowledged) {
@@ -636,6 +816,9 @@ class OtaService extends GetxController {
     // owner 锁在首个 await 前取得（RC3-04）：同步置位无竞态窗口。
     return await _runExclusive((generation) async {
       _phase.value = OtaPhase.downloading;
+      await _beginBackgroundTask(_deviceInfoAddress!, asset, generation);
+      await _waitForForeground(generation);
+      if (generation != _cancelGeneration || _closed) return false;
       var downloaded = await _downloadOnce(asset, releaseId, generation);
       // 401 TOKEN_*/410/416/409/本地 partial 损坏：自动重新 latest 一次
       // 再重下（同一次用户操作，仅一次，防拉锯）。
@@ -673,6 +856,13 @@ class OtaService extends GetxController {
             latest.updateAvailable &&
             newAsset != null &&
             newReleaseId != null) {
+          final oldTask = _taskKey;
+          if (oldTask != null && oldTask.packageSha256 != newAsset.sha256) {
+            await _finishBackgroundTask(oldTask);
+            await _beginBackgroundTask(_deviceInfoAddress!, newAsset, generation);
+            await _waitForForeground(generation);
+            if (generation != _cancelGeneration || _closed) return false;
+          }
           downloaded = await _downloadOnce(newAsset, newReleaseId, generation);
         }
       }
@@ -690,6 +880,7 @@ class OtaService extends GetxController {
     // 发请求前取消检查（RC3-04）：注册前取消（owner 已登记、请求尚未
     // 分发到 adapter）在此静默退出，不发出任何请求。
     if (generation != _cancelGeneration) return false;
+    _phase.value = OtaPhase.downloading;
     try {
       // 归属判定（RC3-04/05）：每次下载尝试取一个单调序号，删除边界上
       // 复核序号未变才允许删。**但序号只回答「还属不属于我」**——两次
@@ -721,12 +912,15 @@ class OtaService extends GetxController {
         downloadUrl: asset.downloadUrl,
         cancelToken: token,
         onProgress: (received, total) {
+          if (generation != _cancelGeneration) return;
+          _receivedBytes = received.clamp(0, _taskTotal);
           final progress = total > 0 ? (received / total).clamp(0.0, 1.0) : 0.0;
           _downloadProgress.value = progress;
           _upgradeProgress.value = progress;
           _upgradeStatus.value =
               '下载中: ${(progress * 100).toStringAsFixed(1)}% '
               '(${_formatBytes(received)}/${_formatBytes(total)})';
+          if (total > 0 && received == total) _phase.value = OtaPhase.verifyingDownload;
         },
       );
       // 取消代次变化：不发布固件文件/已验证状态（RC2-04）。
@@ -747,6 +941,10 @@ class OtaService extends GetxController {
       return true;
     } on OtaDownloadException catch (e) {
       if (e.code == 'CANCELLED') {
+        if (_foregroundPaused && generation == _cancelGeneration) {
+          _phase.value = OtaPhase.failed;
+          _upgradeStatus.value = '后台执行不可用，下载已安全停止；回前台后可重试';
+        }
         // cancelled 终态由 cancelUpgrade 在包清理完成后统一发布
         // （RC3-12）：本处抢先发布会让「cancelled 即包已处置」的 UI
         // 契约提前成立，出现 cancelled 已显示、partial 随后才删的中间态。
@@ -826,6 +1024,10 @@ class OtaService extends GetxController {
       return null;
     } catch (error) {
       if (error is DioException && CancelToken.isCancel(error)) {
+        if (_foregroundPaused && generation == _cancelGeneration) {
+          _phase.value = OtaPhase.failed;
+          _upgradeStatus.value = '后台执行不可用，下载已安全停止；回前台后可重试';
+        }
         // 同 CANCELLED 分支（RC3-12）：不在此处发布 cancelled 终态。
         return false;
       }
@@ -970,6 +1172,10 @@ class OtaService extends GetxController {
           }
         }
 
+        await _beginBackgroundTask(deviceAddress, asset, generation);
+        await _waitForForeground(generation);
+        if (generation != _cancelGeneration || _closed) return fail('cancelled', 'owner-changed');
+
         if (experiment?.pauseScanDuringOta == true) {
           scanLease = _ble.pauseOtaScanning();
           await scanLease.ready.timeout(const Duration(seconds: 5));
@@ -1069,6 +1275,8 @@ class OtaService extends GetxController {
               ? recheck.maxWindowSegments
               : requestedWindow;
         void onDurableProgress(int durableOff, int total) {
+            if (generation != _cancelGeneration) return;
+            _durableBytes = durableOff.clamp(0, _taskTotal);
             final p = total > 0 ? (durableOff / total).clamp(0.0, 1.0) : 0.0;
             _durableProgress.value = p;
             _upgradeProgress.value = p;
@@ -1080,6 +1288,8 @@ class OtaService extends GetxController {
             debugPrint('OTA sent $sent/$total');
         }
         _upgradeStatus.value = prefixBytes == null ? 'BLE 传输中...' : 'BLE 短测中，不安装固件...';
+        await _waitForForeground(generation);
+        if (generation != _cancelGeneration || _closed) return fail('cancelled', 'owner-changed');
         if (prefixBytes != null) {
           final result = await transport.probePrefix(
             package: package, packageSha256: packageSha256, etuHeader: etuHeader,
@@ -1350,6 +1560,10 @@ class OtaService extends GetxController {
         _phase.value = OtaPhase.failed;
         return false;
       } finally {
+        if (activeTransport != null) {
+          await activeTransport.dispose();
+          if (identical(_transport, activeTransport)) _transport = null;
+        }
         // P3-4 观测：本实例的一切退出路径（全部早退、取消、三类异常、
         // 成功）都在此落终结摘要——早退路径的失败阶段/原因由上面的
         // fail()/recordFailure 留下，未进入传输的失败不伪装成成功传输。
@@ -1407,6 +1621,10 @@ class OtaService extends GetxController {
   ///   的去留：false 时一并删除。
   Future<void> cancelUpgrade({bool keepPackage = false}) async {
     _cancelGeneration++;
+    final foregroundGate = _foregroundGate;
+    _foregroundGate = null;
+    if (foregroundGate != null && !foregroundGate.isCompleted) foregroundGate.complete();
+    _foregroundPaused = false;
     // RC3-04⑤：代次自增后**同步**快照当前 owner 与 owner 代数，之后的
     // 等待只认这份快照。若等 await 时才读 _ownerDone，旧 owner 退出与新
     // owner 登记之间没有间隙屏障——取消会等到新 owner 退出、再删新操作
@@ -1539,6 +1757,7 @@ class OtaService extends GetxController {
   /// MCU 可能回 ACK_ABORT（协议行为）；回前台后传输失败可整体重试
   /// （BEGIN 幂等 + durable 续传）。
   void pauseForBackground() {
+    if (backgroundAcquired) return;
     _transport?.pauseForBackground();
   }
 
@@ -1565,6 +1784,7 @@ class OtaService extends GetxController {
   /// 迟到的复核结论属于已结束的旧会话，发布它会用旧终止态覆盖新
   /// owner 的进度/终态。
   Future<void> resumeFromBackground() async {
+    if (backgroundAcquired) return;
     final transport = _transport;
     if (transport == null) return;
     final sessionInfo = _deviceInfo;
@@ -1794,6 +2014,7 @@ class OtaService extends GetxController {
     final previous = _ownerDone;
     final generation = _cancelGeneration;
     _ownerEpoch++; // 登记即前进（RC3-04⑤）：取消窗口用它识别后来者
+    final epoch = _ownerEpoch;
     _ownerDone = done.future;
     try {
       await previous;
@@ -1803,6 +2024,8 @@ class OtaService extends GetxController {
       if (generation != _cancelGeneration) return null;
       return await body(generation);
     } finally {
+      final task = _taskKey;
+      if (task != null && task.generation == epoch) await _finishBackgroundTask(task);
       if (!done.isCompleted) done.complete();
       if (identical(_ownerDone, done.future)) {
         _ownerDone = null;
@@ -2241,7 +2464,13 @@ class OtaService extends GetxController {
       if (batchFrames > 1 && writeWithResponse) {
         throw StateError('OTA_BATCH_REQUIRES_WITHOUT_RESPONSE');
       }
+      final bindGeneration = _cancelGeneration;
       final transport = OtaBleTransport(channel: channel, stats: stats,
+          onApplyBoundary: (applying) {
+            if (bindGeneration != _cancelGeneration || !isUpgrading) return;
+            if (applying && phase == OtaPhase.transferring) _phase.value = OtaPhase.applying;
+            if (!applying && phase == OtaPhase.applying) _phase.value = OtaPhase.transferring;
+          },
           ackTimeout: experiment?.ackTimeout ?? OtaBleTransport.defaultAckTimeout,
           dataBatchFrames: batchFrames, enablePipeline: _enablePipeline);
       if (!linkCurrent()) {

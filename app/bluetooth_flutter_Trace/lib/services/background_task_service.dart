@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import '../controllers/ble_controller.dart';
 import '../controllers/monitor_controller.dart';
 import 'notification_service.dart';
+import 'ota_service.dart';
 
 class BackgroundTaskService extends GetxService {
   static BackgroundTaskService get to => Get.find();
@@ -60,6 +61,7 @@ class BackgroundTaskService extends GetxService {
 
   /// 执行后台检查
   Future<void> _performBackgroundCheck() async {
+    if (Get.isRegistered<OtaService>() && Get.find<OtaService>().isUpgrading) return;
     try {
       final monitoringDevices = _monitorController.monitoringDevices;
       if (monitoringDevices.isEmpty) {

@@ -65,6 +65,7 @@ class OtaBleTransport {
     this.writeTimeout = defaultWriteTimeout,
     int? dataBatchFrames,
     this.enablePipeline = false,
+    this.onApplyBoundary,
   })  : dataBatchFrames = dataBatchFrames ?? (enablePipeline ? defaultPipelineBatchFrames : 1),
         _channel = channel {
     if (this.dataBatchFrames != 1 && this.dataBatchFrames != 3 && this.dataBatchFrames != 12) {
@@ -83,6 +84,9 @@ class OtaBleTransport {
   }
 
   final OtaBleChannel _channel;
+  final void Function(bool applying)? onApplyBoundary;
+  bool _endStarted = false;
+  bool get endStarted => _endStarted;
   /// P3-4 链路观测统计（可选；null 时全部插桩为零行为差异）。
   final OtaLinkStats? stats;
   late final StreamSubscription<List<int>> _frameSub;
@@ -1426,6 +1430,14 @@ class OtaBleTransport {
   /// [resyncProbeSeq] 仅由 [getDeviceInfo] 的探针透传：非 null 表示本帧
   /// 是废弃期间唯一放行的重新同步探针（RC3-05⑤）。
   Future<void> _writeFrame(Uint8List frame, {int? resyncProbeSeq}) async {
+    if (frame.length > 2) {
+      final applying = frame[2] == OtaBleCodec.cmdEnd || frame[2] == _PipelineWire.end;
+      final beginning = frame[2] == OtaBleCodec.cmdBegin || frame[2] == _PipelineWire.begin;
+      if (applying || beginning) {
+        _endStarted = applying;
+        onApplyBoundary?.call(applying);
+      }
+    }
     // P3-4 观测：传输起点 = 本 transfer 首个 BEGIN 帧的**写调用时刻**，
     // 即 Dart 侧唯一可观测的代理点（契约文本见 XC-BLE-THROUGHPUT：
     // 「从 BEGIN 首字节开始发送」）。它不晚于首字节上线，且早于写串行队列

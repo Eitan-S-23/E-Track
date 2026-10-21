@@ -90,15 +90,8 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive) {
       _backgrounded = true;
-      // RC3-08：后台暂停传输发送循环（DATA/END 停发，无进展预算
-      // 停表）——后台继续发帧会与系统资源回收竞争；暂停超过 MCU
-      // 会话超时窗口时 MCU 可能回 ACK_ABORT（协议行为），回前台后
-      // 可整体重试（BEGIN 幂等 + durable 续传）。
-      otaService.pauseForBackground();
     } else if (state == AppLifecycleState.resumed && _backgrounded) {
       _backgrounded = false;
-      // RC3-08：回前台恢复传输发送循环与预算计时。
-      otaService.resumeFromBackground();
       // 回前台重新解析连接并读身份：后台期间连接可能已变化。
       _resolveAttempted = false;
       _resolveDeviceAndRead();
@@ -147,6 +140,8 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
   /// 解析连接设备（显式参数优先，否则从系统已连接列表取第一台），
   /// 然后读取设备身份。BLE 平台通道不可用时静默降级为未连接。
   Future<void> _resolveDeviceAndRead() async {
+    // Reattach only: an active owner retains its transport and reboot probe.
+    if (otaService.isUpgrading) return;
     await _resolveConnectedDevice();
     await _readDeviceInfo();
   }
@@ -754,9 +749,11 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
   Widget _buildUpgradeProgressCard() {
     final phase = otaService.phase;
     final hasFirmware = otaService.downloadedFirmwareFile != null;
-    final inDownload = phase == OtaPhase.downloading;
+    final snapshot = otaService.taskSnapshot;
+    final inDownload = phase == OtaPhase.downloading || phase == OtaPhase.verifyingDownload;
     final inTransfer =
         phase == OtaPhase.transferring ||
+        phase == OtaPhase.applying ||
         phase == OtaPhase.waitingReboot ||
         phase == OtaPhase.reconnectVerify;
     if (!otaService.isUpgrading &&
@@ -864,17 +861,25 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
             ],
           ),
           const SizedBox(height: 12),
-          if (inTransfer) ...[
-            _buildProgressRow('设备已确认（durable）', otaService.durableProgress),
+          if (snapshot != null) ...[
+            Text(snapshot.label),
+            if (otaService.isUpgrading && !snapshot.backgroundAcquired)
+              Text('后台执行不可用：${snapshot.backgroundReason ?? '等待实际接管确认'}；请保持前台'),
+            const SizedBox(height: 8),
+          ],
+          if (phase == OtaPhase.transferring) ...[
+            _buildProgressRow('设备已确认（durable）', snapshot?.progress ?? otaService.durableProgress),
             const SizedBox(height: 8),
             _buildProgressRow('网络下载', otaService.downloadProgress),
+          ] else if (inTransfer || phase == OtaPhase.verifyingDownload) ...[
+            const LinearProgressIndicator(),
           ] else if (phase != OtaPhase.cancelled &&
               (inDownload || otaService.downloadProgress > 0)) ...[
             // cancelled 不显示进度行：取消时 partial 已删/验证包保留，
             // 停留在取消瞬间的进度快照会误导（RC3-05①）。
-            _buildProgressRow('网络下载', otaService.downloadProgress),
+            _buildProgressRow('网络下载', snapshot?.progress ?? otaService.downloadProgress),
           ],
-          if (busy) ...[
+          if (busy && otaService.canCancelTask) ...[
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
@@ -1194,7 +1199,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
                 Get.back();
                 // RC3-12②：等待取消完全落地（含文件删除与状态发布）后
                 // 刷新 UI，按钮可用性与文件/phase 状态保持一致。
-                await otaService.cancelUpgrade(keepPackage: true);
+                await otaService.cancelCurrentTask(keepPackage: true);
                 if (mounted) setState(() {});
               },
               child: const Text('保留固件包并取消'),
@@ -1204,7 +1209,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
               Get.back();
               // 下载阶段保留已校验包（若有）；彻底删除走「忽略」。
               // RC3-12②：等待取消完全落地后再刷新 UI。
-              await otaService.cancelUpgrade(keepPackage: !isBlePhase);
+              await otaService.cancelCurrentTask(keepPackage: !isBlePhase);
               if (mounted) setState(() {});
             },
             style: ElevatedButton.styleFrom(

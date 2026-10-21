@@ -496,6 +496,15 @@ class BluetoothService extends GetxController {
     return _scanPause.pause();
   }
 
+  OtaRadioLease pauseDeviceOtaScanning() {
+    final wasScanning = isScanning.value;
+    final lease = _scanPause.pause();
+    final ready = lease.ready.then((_) async {
+      if (wasScanning) await _scanPause.start();
+    });
+    return OtaRadioLease(ready, lease.close);
+  }
+
   @visibleForTesting
   bool get supportsOtaAndroidPriority => Platform.isAndroid;
 
@@ -868,7 +877,7 @@ class BluetoothService extends GetxController {
 
   /// 开始扫描设备
   Future<void> startScan({Duration? timeout}) async {
-    if (_scanPauseEnabled) {
+    if (_scanPauseEnabled || _otaScanPause != null) {
       try {
         await _scanPause.start(timeout: timeout);
       } catch (error) {
@@ -1256,7 +1265,7 @@ class BluetoothService extends GetxController {
 
   /// 停止扫描
   Future<void> stopScan() async {
-    if (_scanPauseEnabled) {
+    if (_scanPauseEnabled || _otaScanPause != null) {
       try {
         await _scanPause.stop();
       } catch (error) {
