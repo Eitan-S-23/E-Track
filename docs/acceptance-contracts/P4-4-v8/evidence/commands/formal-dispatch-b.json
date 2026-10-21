@@ -1,0 +1,19 @@
+{
+  "label": "formal-dispatch-b",
+  "command": "node",
+  "args": [
+    "Tools/acceptance/p44/capture.cjs",
+    "dispatch-b"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "started": "2026-10-20T00:58:51.299Z",
+  "ended": "2026-10-20T01:03:46.983Z",
+  "exitCode": 0,
+  "signal": null,
+  "process_closed": true,
+  "output": {
+    "path": "commands/formal-dispatch-b.log",
+    "size_bytes": 289,
+    "sha256": "e1c1900db9ed77011522d9eef1b39473a749cbb7a0f36c3c6ffccaf9212e8f5a"
+  }
+}

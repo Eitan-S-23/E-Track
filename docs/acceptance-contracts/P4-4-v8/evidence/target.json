@@ -1,0 +1,32 @@
+{
+  "repository": "Eitan-S-23/E-Track",
+  "branch": "dev/p4-4/config-integration-20261018",
+  "commitSha": "2756ca95e26ec636216313271708b3304d61a5cc",
+  "versionName": "3.2.9",
+  "descriptor": {
+    "provenanceKind": "inaugural-bootstrap-v1",
+    "isFormalRelease": false,
+    "kind": "app",
+    "versionName": "3.2.7",
+    "versionCode": 30207,
+    "commitSha": "fa74905e84c489cccc248617d37ab9f56c8f961c",
+    "buildTimestamp": 1792014177,
+    "imageSha256": "aaf5ccdb047ef8b3ff4ae0837f9593ceca857d90c98ea0bc09360e411bf4196f",
+    "sourceSha256": "aaf5ccdb047ef8b3ff4ae0837f9593ceca857d90c98ea0bc09360e411bf4196f",
+    "sourceSizeBytes": 605072,
+    "archiveCommit": "c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124",
+    "archivePath": "docs/ota-exec-notes/P4-1-bootstrap-baseline-2026-10-15",
+    "sourceRunId": "38642386248",
+    "sourceRunAttempt": "1",
+    "sourceArtifactId": "11931006831",
+    "sourceArtifactSha256": "4e46526eb7bab0a8d416cad29044efdccc206ff7a922cfc2ec593d3ccf60c149",
+    "provenanceSha256": "0071e0ba5e287a18ea5d1bfa7a62a33ed819c397171f69b641b8b2ca45406e28",
+    "targetVersionName": "3.2.9",
+    "targetCommitSha": "2756ca95e26ec636216313271708b3304d61a5cc",
+    "sourceUrl": "https://raw.githubusercontent.com/Eitan-S-23/E-Track/c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124/docs/ota-exec-notes/P4-1-bootstrap-baseline-2026-10-15/app-final.bin"
+  },
+  "descriptorSha256": "d08b8b36f2b0dab9066491ccbd4e2c98109c5b15cbd0e7b839922d5254fd373b",
+  "minAppVersionCode": 0,
+  "minProtocolVersion": 1,
+  "keySha256": "a94ae0f006b3d6be51279b861dc19b8a0892833939d0a4db5a81ee7af511fe9e"
+}

@@ -1,0 +1,29 @@
+{
+  "method": "POST",
+  "path": "/accounts/[ACCOUNT]/d1/database/1cd5db26-6bbd-4595-abef-72ff51ecdaf3/query",
+  "started": "2026-10-19T11:29:21.045Z",
+  "request": {
+    "path": "snapshots/before/production-d1_migrations-0.request.json",
+    "size_bytes": 75,
+    "sha256": "5e69fea14af3325ee9d4abd246787f730e1fbe7881ed9c80041f1efdc7ebb99a"
+  },
+  "status": 200,
+  "response_headers": {
+    "date": "Mon, 19 Oct 2026 11:29:24 GMT",
+    "content-type": "application/json",
+    "content-length": "739",
+    "connection": "keep-alive",
+    "cache-control": "no-store",
+    "api-version": "2026-10-01.epoch",
+    "cf-auditlog-id": "01a153ec-69b1-77e1-b0dd-29089fa6232f",
+    "server": "cloudflare",
+    "cf-ray": "a4cf71e29bdce387-NRT"
+  },
+  "body": {
+    "path": "snapshots/before/production-d1_migrations-0.body",
+    "size_bytes": 739,
+    "sha256": "d22e2cc5a6ecacffb851123798d27eff31a5a0475658b6ac23469d35eb64ba3d"
+  },
+  "completed": true,
+  "ended": "2026-10-19T11:29:26.933Z"
+}

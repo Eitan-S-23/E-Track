@@ -2707,3 +2707,73 @@ P4-4 remains IN_PROGRESS, product C4/3.2.9 and gate=false. No successful A/B,
 upload, registration or readback was replayed; no cloud/device action occurred
 during this review. Only the missing approved observations remain eligible
 after the actual frozen rerun plan and execution-worktree checks.
+
+##### P4-4 V8 Independent Acceptance PASS (2026-10-21)
+
+The unchanged stock final validator returned exit 0:
+VALIDATION=PASS contract=P4-4-v8 round=P44-20261021-08 overall=PASS.
+All nine required criteria pass: CONFIGURATION, RAW-RUNS, REHEARSAL and
+RAW-READBACK directly reuse C4's original EXECUTED PASS; HISTORY, RAW-STATE,
+APPROVALS, ISOLATION and HYGIENE were evaluated in this round. Eight required
+commands actually executed, with nine original command records reused. The
+actual previous pair is v7; C4/C5/C6 were supplied as the complete reuse chain.
+This is formal P4-4 stage acceptance, not merely a valid EVIDENCE_GAP bundle.
+
+| Bound identity | Value |
+| --- | --- |
+| C8 source commit, already pushed | 640cb359db7672cdab1e40bc5853a9ab311e35fa |
+| C8 freeze tree | a343caba4c7d2a5976ebf7674017e7352b938626 |
+| v8 contract SHA-256 | 4c414c3632a7b4f74ffcee80c9ae9e629370ac14bf097d9a7fb1b755300d80d4 |
+| v8 final matrix SHA-256, 281881 bytes | e0236015d4d0f88bdd16f542d1c67bedd5725932111971378af4032981603bc6 |
+| Actual rerun plan SHA-256 | 0397507cd401b9f8ad5f21527321d9bc1b25f84faa9441a9071e2d9dbaa1d707 |
+| Complete manifest SHA-256 | 270e6e9376ed467f98c451cbbc90e3fcf77c46b1c7baadd3fccb32ce8c467e33 |
+| Complete after snapshot SHA-256 | ed8e8cb6e59d2fef03520bd4b12e1654edd564566191fcd22e006d3ea33edf2f |
+
+The formal after invocation ran from 2026-10-21T09:23:06.271Z to
+2026-10-21T10:13:40.380Z and closed with exit 0, signal null and no spawn
+failure. It retained 70 complete C4/C6 responses and obtained 73 additional
+complete responses, giving 143 in total. Only invocation slot 1 was used;
+there was no second invocation or continuation approval.
+
+The precise request ledger is 74 new request attempts for 73 complete responses,
+not zero failed attempts. config-production-secrets-1 encountered one
+pre-response ECONNRESET with no final response and zero received body bytes.
+The existing frozen GET retry policy reserved attempt 2 after its 500 ms delay;
+the final response was complete HTTP 200. The first failure and retry reservation
+remain in snapshots/after-tail-v6/attempt-2/. No retry policy was added or
+changed. Earlier progress counters counted incomplete HTTP envelopes only;
+the final ledger includes this failed request attempt explicitly.
+
+Actual offline assembly, approvals and state/isolation evaluation all passed.
+The privacy command passed with 1824 scanned files, 200 decoded D1 bodies,
+132 ZIP members and lifecycle checks. Its closed DATA inventory was not
+modified after scanning. The final matrix binds 1829 evidence/plan/initial-matrix
+hashes and 17 command records. No failing history was removed or relabelled.
+
+The original assessment and final-validator outputs/receipts are archived in
+P4-4-v8/closeout/, outside the closed evidence directory. The final-validation.log
+has SHA-256 db6840d81cc0face329cef92d94f1104635c4351018100dd103ab3f98d60781d;
+its receipt has SHA-256 b9ec231f3b5e483c9e96b2ff2e0197711d4105b67af79ba94da991ba48b4deb4.
+The standard validator checked actual v7 history, all reuse-source pairs,
+frozen objects, the execution worktree and the final evidence, not just plan
+generation or the matrix's handwritten result field.
+
+SUCCESSOR-05 is closed and no further remediation was identified in this
+accepted scope. The P4-4 card may be marked complete for its specified P5-before
+configuration/staging prerequisite, retaining the original implementation owner.
+Source and evidence delivery use only dev/p4-4/config-integration-20261018;
+main integration is not performed. Product stays C4/3.2.9, gate=false, and P5,
+owner/environment approval and production rebuild/publication gates remain.
+No successful A/B, upload, registration or readback was replayed; no device or
+production-release action was performed. Historical v1-v7 bundles are unchanged.
+
+Delivery-only correction: the first v8 bundle hygiene invocation stopped at
+FINAL_MATRIX_SCOPE because root had rebound the v7 auditor's path constants but
+missed its one literal expected matrix ID. Its original output/receipt are kept
+as closeout/delivery-scope-failure.log and delivery-scope-failure-receipt.json.
+The corrected invocation verifies the unchanged base-auditor hash, substitutes
+exactly that expected-ID literal with P4-4-v8, and binds only the exact v8 paths.
+All existing byte, boundary and credential predicates remain active; the six
+negative self-test predicates are retained. This does not modify the stock
+formal validator, frozen input, contract, matrix or closed evidence. No formal
+command, cloud read or successful observation is repeated for this delivery check.

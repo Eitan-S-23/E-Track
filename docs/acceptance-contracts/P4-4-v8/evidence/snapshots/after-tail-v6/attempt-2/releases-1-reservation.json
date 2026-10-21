@@ -1,0 +1,7 @@
+{
+  "method": "GET",
+  "origin": "https://api.github.com",
+  "path": "/repos/Eitan-S-23/E-Track/releases?per_page=100&page=1",
+  "started": "2026-10-21T10:01:59.356Z",
+  "note": "Reserved before request; a lost response is not permission to replay a mutation."
+}

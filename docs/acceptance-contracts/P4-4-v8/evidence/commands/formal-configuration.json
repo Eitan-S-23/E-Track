@@ -1,0 +1,28 @@
+{
+  "label": "formal-configuration",
+  "command": "python",
+  "args": [
+    "-I",
+    "-S",
+    "-B",
+    "Tools/acceptance/p44/origins.py",
+    "configuration",
+    "--repo-root",
+    "D:/github/my/E-Track/.cache/p4-4-integration-20261018",
+    "--input",
+    "docs/acceptance-contracts/P4-4-v4/evidence/inputs/originals.json",
+    "--output",
+    "docs/acceptance-contracts/P4-4-v4/evidence/configuration-result.json"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "started": "2026-10-19T19:11:40.555Z",
+  "ended": "2026-10-19T19:11:42.551Z",
+  "exitCode": 0,
+  "signal": null,
+  "process_closed": true,
+  "output": {
+    "path": "commands/formal-configuration.log",
+    "size_bytes": 219,
+    "sha256": "e8234fd3b87de57ce10e60cf670be9742d11426c545bcbd746d1b1ad62ae5204"
+  }
+}

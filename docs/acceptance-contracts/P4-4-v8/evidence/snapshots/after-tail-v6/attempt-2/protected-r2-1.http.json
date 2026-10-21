@@ -1,0 +1,23 @@
+{
+  "method": "GET",
+  "path": "/trace-update-staging-releases/?list-type=2&max-keys=1000",
+  "started": "2026-10-21T09:48:09.429Z",
+  "request_attempts": 1,
+  "request_failures": [],
+  "status": 200,
+  "response_headers": {
+    "date": "Wed, 21 Oct 2026 09:48:13 GMT",
+    "content-type": "application/xml",
+    "content-length": "18601",
+    "connection": "keep-alive",
+    "server": "cloudflare",
+    "cf-ray": "a4df5863bff6c5bf-NRT"
+  },
+  "body": {
+    "path": "snapshots/after-tail-v6/attempt-2/protected-r2-1.body",
+    "size_bytes": 18601,
+    "sha256": "97a0d78355394115466ab6be7356b0d49b9c5734f7434b3571a2cfbddf81eab6"
+  },
+  "completed": true,
+  "ended": "2026-10-21T09:48:15.440Z"
+}

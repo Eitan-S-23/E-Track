@@ -1,0 +1,10 @@
+{
+  "label": "formal-after",
+  "command": "node",
+  "args": [
+    "Tools/ota/p44-after-recovery.cjs",
+    "after"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "started": "2026-10-20T11:39:28.585Z"
+}

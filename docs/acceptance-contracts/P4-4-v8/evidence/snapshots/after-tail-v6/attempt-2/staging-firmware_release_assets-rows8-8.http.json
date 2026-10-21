@@ -1,0 +1,40 @@
+{
+  "method": "POST",
+  "path": "/accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+  "started": "2026-10-21T09:58:43.608Z",
+  "request": {
+    "path": "snapshots/after-tail-v6/attempt-2/staging-firmware_release_assets-rows8-8.request.json",
+    "size_bytes": 83,
+    "sha256": "12f56ab557de5fc6a2f5b2af7be0f9cc82b926ccbcefa87f45b94464ca11ec75"
+  },
+  "request_headers": {
+    "accept-encoding": "gzip"
+  },
+  "request_attempts": 1,
+  "request_failures": [],
+  "status": 200,
+  "response_headers": {
+    "date": "Wed, 21 Oct 2026 09:58:47 GMT",
+    "content-type": "application/json",
+    "transfer-encoding": "chunked",
+    "connection": "keep-alive",
+    "cache-control": "no-store",
+    "api-version": "2026-10-01.epoch",
+    "cf-auditlog-id": "01a15de6-2932-7945-874e-9298c0071d52",
+    "content-encoding": "gzip",
+    "server": "cloudflare",
+    "cf-ray": "a4df67e1cd8df6e1-NRT"
+  },
+  "body": {
+    "path": "snapshots/after-tail-v6/attempt-2/staging-firmware_release_assets-rows8-8.body",
+    "size_bytes": 624,
+    "sha256": "0871eaf8a3c69a6785e5f0fdada232a0148444403ed7c10dd1677cab31b39cd9"
+  },
+  "decoded_body": {
+    "path": "snapshots/after-tail-v6/attempt-2/staging-firmware_release_assets-rows8-8.decoded.body",
+    "size_bytes": 1069,
+    "sha256": "2a862f1f39895a5bb2aad2bf37b8d08833714eecffa47bfb19d120dead7e5936"
+  },
+  "completed": true,
+  "ended": "2026-10-21T09:58:51.173Z"
+}

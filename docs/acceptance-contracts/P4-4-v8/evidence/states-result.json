@@ -1,0 +1,22 @@
+{
+  "schema": "p44-offline-evaluation-v1",
+  "mode": "states",
+  "started": "2026-10-21T10:42:13.926610+00:00",
+  "platform_actions": 0,
+  "manifest_sha256": "270e6e9376ed467f98c451cbbc90e3fcf77c46b1c7baadd3fccb32ce8c467e33",
+  "observed": {
+    "production_d1_r2_unchanged": true,
+    "protected_trace_d1_r2_unchanged": true,
+    "github_releases_assets_unchanged": true,
+    "staging_existing_rows_channels_unchanged": true,
+    "staging_added_releases": 1,
+    "staging_added_assets": 3,
+    "staging_added_audit_rows": 1,
+    "staging_added_r2_keys": 3,
+    "independent_r2_byte_readbacks": 3,
+    "snapshot_scope": "Bounded before/after observations, not continuous or transactional monitoring"
+  },
+  "ok": true,
+  "files_verified": 686,
+  "ended": "2026-10-21T10:42:18.849051+00:00"
+}

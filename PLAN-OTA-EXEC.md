@@ -783,15 +783,15 @@
 - 证据: `docs/ota-exec-notes/P4-3-acceptance-2026-10-18.md`、`docs/acceptance-contracts/P4-3-v1.contract.json`、`docs/acceptance-contracts/P4-3-v1/evidence-matrix.json`、`docs/acceptance-contracts/FREEZE-INDEX.md`，新增 `P4-3-acceptance-2026-10-18/delivery.inventory.json` 及 87 条交付归档；实施报告和旧冻结增量不变。正式验收、main 集成及隔离部署现均完成；真实 publisher/viewer 会话、依赖告警及缓存归因限制保留，不代表 P4-4/P5/生产门槛已满足。
 
 #### P4-4 Secrets 与 environment 配置
-状态: 进行中 ｜ 认领: Codex P4-4 实施/配置集成 agent / 2026-10-18 ｜ 更新: 2026-10-21(产品仍为C4=2756ca9/3.2.9；A=39313672925由owner亲自拒绝，B=39351100037亲自批准并成功，新链、字节核验、独立回读和生产只读预检沿用。SUCCESSOR-04已独立关闭；C7=371baeeb冻结后首次formal-after在请求前触发RECOVERY_PATH，新增云请求为0。标准终检VALIDATION=PASS但overall=EVIDENCE_GAP，4项C4直接REUSED PASS、2项离线EXECUTED PASS、3项NOT_OBSERVED；原70份完整after及全部失败保留。SUCCESSOR-05由用户指定外部实现agent整改，root独立复核；不盲用v7第二槽，gate=false，非整卡PASS，未做主线集成)
+状态: 完成 ｜ 认领: Codex P4-4 实施/配置集成 agent / 2026-10-18 ｜ 更新: 2026-10-21(独立正式验收P4-4-v8 / P44-20261021-08 PASS，9/9必选判据；C8=640cb359，产品仍为C4=2756ca9/3.2.9。4项直接复用C4原始PASS、5项本轮执行通过；保留70份完整after并新增73份完整响应，1次响应前ECONNRESET按原策略单次重试成功，所有失败保留。SUCCESSOR-05已独立关闭；本卡仅完成P5前配置/演练资格，gate=false，未做主线集成或生产发布)
 - 目标: 配置 `CLOUDFLARE_ACCOUNT_ID`、桶限定 `TRACE_R2_ACCESS_KEY_ID/TRACE_R2_SECRET_ACCESS_KEY`、`TRACE_UPDATE_SERVICE_URL/DEPLOY_TOKEN`、R2 bucket 变量及 `firmware-production` 审批人；沿用批准的 AES；不要求旧控制面 token 或客户端 D1 绑定参数。
 - 验收: 配置准备可消费 P4-1 已交付的工作流接口和 P4-2 环境，不等待 P4-1 先用这些配置完成验收；随后共用同一次隔离 rehearsal 验证权限与注册。不能为证明配置而提前生产发布，配置变化影响的证据另作最小验证。
-- 证据: `docs/ota-exec-notes/P4-4-implementation-2026-10-18.md`；复核 P4-1-v4 原件和 P4-3 已完成交付，不复制为本卡正式 PASS。生产设置、审批拒绝与角色覆盖按实际结果记录，gate=false，不重做成功演练。
+- 证据: `docs/acceptance-contracts/P4-4-v8.contract.json`、`docs/acceptance-contracts/P4-4-v8/final-evidence-matrix.json`、`docs/acceptance-contracts/FREEZE-INDEX.md`，详细原件和独立结论见 `docs/ota-exec-notes/P4-4-s3-preacceptance-2026-10-19.md`；原实施记录保留于 `docs/ota-exec-notes/P4-4-implementation-2026-10-18.md`。本卡四项复用直接指向C4原始执行，不把P4-1/P4-3完成态直接复制为本卡PASS；gate=false，不重做成功演练。
 - 凭据入口: `docs/agent-collaboration/credential-registry.md`，`e-track-ci` = `e-track-p41-ci`；旧管理 GET/POST 403 保留原义，不是 e-track-ci 缺失或必须新建 token，也不把测试授权扩展为生产授权。后续成功消费另一份受保护 `.github-actions-secrets.staging.local.json`，未扩大旧测试 CI 用途。独立核对见 `P4-4-credential-handoff-2026-10-19-v2/inventory.json`；不再要求 owner 重选来源，也不重建已成功凭据。首版投影遗漏旧 Track 标识符遮蔽已修正，原字节移入忽略缓存保留。
-- 当前整改入口: `docs/ota-exec-notes/P4-4-s3-interface-2026-10-19.md`。新链不能直接沿用旧链 rehearsal 背书；主验收按真实依赖冻结必要新观测，不把既有“不重复成功演练”解释为新链免测。P4-1/P4-2 历史完成态和认领不变。
-- 历史开发整改（2026-10-21）: 状态仍为进行中。C6 的 39 份成功 after 与 socket 失败原件保留；原root经用户要求转为实现者，修复断连落盘/重载、Node-Python 契约和路径守卫。该批Node 145组断言、Python 61项离线自测通过，后续TRANSPORT-02与SUCCESSOR-04已由独立root复核关闭。当前SUCCESSOR-05是新发现的真实makeIO目录参数缺陷，不是产品回归；只整改调用点和实际文件系统回归，不重放成功业务。详细输入/哈希/失败封存见现有 `P4-4-s3-preacceptance-2026-10-19.md`，原认领不变。
+- 接口与历史整改记录: `docs/ota-exec-notes/P4-4-s3-interface-2026-10-19.md`。新链的真实A/B及字节/readback原件已由C4记录，后继只补缺失证据，不把既有“不重复成功演练”解释为新链免测。P4-1/P4-2历史完成态和认领不变。
+- 历史开发整改（2026-10-21）: C6的39份成功after与socket失败原件保留。断连落盘/重载、Node-Python契约和路径守卫的原开发批次Node 145组/Python 61项自测及后续TRANSPORT-02记录不改写；TRANSPORT-02、SUCCESSOR-04和SUCCESSOR-05现均经独立复核关闭。SUCCESSOR-05只修目录调用点，补真实IO失败/续跑/组装与Python消费回归；实际正式v8补采已通过该入口。详细输入、哈希、失败及关闭依据见既有预验收记录，原认领不变。
 - 历史独立预审与配置交付: Codex root；`docs/ota-exec-notes/P4-4-s3-preacceptance-2026-10-19.md` 及 `P4-4-root-review-2026-10-19/`。P44-REVIEW-01/02 已关闭；P44-DEPLOY-01 的 staging 查询脱敏误关闭与恢复、11 项依赖告警及外部缓存归因未决均保留。两次 Worker 代码部署不是生产固件发布；该准备阶段尚未执行新链 rehearsal、注册、R2 写入或设备操作，后续 A/B 实绩见当前状态。
-- 当前行动: P44-CREDENTIAL-01 已解决；owner 无需重做 A/B。P44-C6-TRANSPORT-02 已由非实现者独立复核关闭，不代表整卡 PASS。C6 最终矩阵已按 EVIDENCE_GAP 封存并通过冻结版本的原有终检，保留 C4/C6 共 70 份完整 after 响应；RAW-STATE、APPROVALS、ISOLATION 仍待补齐。正在交付 C6 缺口包并由子 agent 实现有界后继准入，主验收独立复核；不得跳过 C6、抹掉失败或把自测当正式 PASS。C4 仍为产品/原始 PASS 源，版本 3.2.9；不重做辅助 verify、工作流、上传、注册或成功 readback，不扩大权限或重建凭据。生产工作流执行仍在 P5 后，readiness 派生规则、旧冻结证据及原认领不变。
+- 当前行动: P4-4阶段正式验收已完成，RAW-STATE、APPROVALS、ISOLATION已补齐并通过，无已知待整改项；证据包及冻结索引按既有任务分支交付。主线集成未执行，不自动启动P5或生产流程。C4仍为产品/原始PASS源，版本3.2.9；不重做辅助verify、A/B、上传、注册或成功readback，不扩大权限或重建凭据。生产工作流执行、gate解锁及正式晋升仍在P5后按原审批办理；readiness派生规则、v1-v7冻结证据及原认领不变。
 
 ---
 

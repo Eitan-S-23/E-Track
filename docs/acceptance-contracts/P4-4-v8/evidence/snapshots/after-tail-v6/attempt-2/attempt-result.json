@@ -1,0 +1,465 @@
+{
+  "schema": "p44-after-attempt-result-v1",
+  "attempt": 2,
+  "ok": true,
+  "reservation": {
+    "path": "snapshots/after-tail-v6/attempt-2/attempt-reservation.json",
+    "size_bytes": 39548,
+    "sha256": "37c452b3ed90816b582a423489786a3458e313b240b94c6c0ce28acc8d5e0113"
+  },
+  "reservation_sha256": "37c452b3ed90816b582a423489786a3458e313b240b94c6c0ce28acc8d5e0113",
+  "started": "2026-10-21T09:35:32.946Z",
+  "ended": "2026-10-21T10:13:35.434Z",
+  "complete_labels": [
+    "config-production-branches-1",
+    "config-production-environment",
+    "config-production-secrets-1",
+    "config-production-variables-1",
+    "config-rehearsal-branches-1",
+    "config-rehearsal-environment",
+    "config-rehearsal-secrets-1",
+    "config-rehearsal-variables-1",
+    "config-repository-gate",
+    "config-tool-ref",
+    "protected-patches-rows8-16",
+    "protected-patches-rows8-24",
+    "protected-patches-rows8-32",
+    "protected-patches-rows8-40",
+    "protected-patches-rows8-48",
+    "protected-patches-rows8-56",
+    "protected-r2-1",
+    "protected-release_assets-count",
+    "protected-release_assets-rows8-0",
+    "protected-release_assets-rows8-16",
+    "protected-release_assets-rows8-24",
+    "protected-release_assets-rows8-32",
+    "protected-release_assets-rows8-40",
+    "protected-release_assets-rows8-48",
+    "protected-release_assets-rows8-56",
+    "protected-release_assets-rows8-64",
+    "protected-release_assets-rows8-72",
+    "protected-release_assets-rows8-8",
+    "protected-release_assets-rows8-80",
+    "protected-release_assets-rows8-88",
+    "protected-release_assets-rows8-96",
+    "protected-releases-count",
+    "protected-releases-rows8-0",
+    "protected-releases-rows8-16",
+    "protected-releases-rows8-24",
+    "protected-releases-rows8-32",
+    "protected-releases-rows8-40",
+    "protected-releases-rows8-48",
+    "protected-releases-rows8-8",
+    "releases-1",
+    "staging-announcements-count",
+    "staging-app_config-count",
+    "staging-app_config-rows8-0",
+    "staging-apps-count",
+    "staging-apps-rows8-0",
+    "staging-audit_logs-count",
+    "staging-audit_logs-rows8-0",
+    "staging-audit_logs-rows8-16",
+    "staging-audit_logs-rows8-24",
+    "staging-audit_logs-rows8-8",
+    "staging-channel_history-count",
+    "staging-channels-count",
+    "staging-d1_migrations-count",
+    "staging-d1_migrations-rows8-0",
+    "staging-firmware_admin_idempotency-count",
+    "staging-firmware_admin_idempotency_tombstones-count",
+    "staging-firmware_admin_idempotency_tombstones-rows8-0",
+    "staging-firmware_backfill_manifests-count",
+    "staging-firmware_channels-count",
+    "staging-firmware_channels-rows8-0",
+    "staging-firmware_channels_legacy-count",
+    "staging-firmware_release_assets-count",
+    "staging-firmware_release_assets-rows8-0",
+    "staging-firmware_release_assets-rows8-8",
+    "staging-firmware_releases-count",
+    "staging-firmware_releases-rows8-0",
+    "staging-firmware_releases_legacy-count",
+    "staging-patches-count",
+    "staging-r2-1",
+    "staging-release_assets-count",
+    "staging-releases-count",
+    "staging-schema",
+    "target-tag"
+  ],
+  "failure_labels": [
+    "config-production-secrets-1"
+  ],
+  "failures": [
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/config-production-secrets-1-request-failure-1.json",
+      "size_bytes": 438,
+      "sha256": "e233b2c83f8c0f90415558bc240fe4025fc370addf583d2f9d2a8115a8803c1e"
+    }
+  ],
+  "new_reads": [
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/config-production-branches-1.http.json",
+      "size_bytes": 2158,
+      "sha256": "77e3a13c27957e87af8282614ac8d2dd7a1934d32a2233986e7ab124d2637340"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/config-production-environment.http.json",
+      "size_bytes": 2114,
+      "sha256": "e05abf76a47dcaafc5a995fd355916fec04d3dec00833016f6b45f11958b2e90"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/config-production-secrets-1.http.json",
+      "size_bytes": 2598,
+      "sha256": "1e7bb34720e3377b3922f1cf464c8a8b6d27faca8e24897c66dedc99f4093d34"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/config-production-variables-1.http.json",
+      "size_bytes": 2142,
+      "sha256": "74d3e54444e360bf3531641f5e981215ac72de78295aeb8d1150dcb479e6390d"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/config-rehearsal-branches-1.http.json",
+      "size_bytes": 2156,
+      "sha256": "fc9194fb4d0d678cfec2a895ebcd98b049cf65376a038e60e5a0943067e062b4"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/config-rehearsal-environment.http.json",
+      "size_bytes": 2112,
+      "sha256": "bf6a5a4e9b460ecf7a2b9973821a3e05e50032bf2c7a870776d577e9a641f8f0"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/config-rehearsal-secrets-1.http.json",
+      "size_bytes": 2136,
+      "sha256": "0d7dc5432b4a1db3bf4051459582b6ddb99044b74467ead368ba131bc04af3da"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/config-rehearsal-variables-1.http.json",
+      "size_bytes": 2142,
+      "sha256": "ddcf241956865703615031f388bed1924658431dea53b33773dc27481b11d9c4"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/config-repository-gate.http.json",
+      "size_bytes": 2111,
+      "sha256": "79441ec2675bda2e83868f9e593b001f48bef46c7df2e26c40595afbb6be4564"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/config-tool-ref.http.json",
+      "size_bytes": 2204,
+      "sha256": "566d234cb6229891d1e01ece3b59f422dc10a274309811c566e66e35789b6829"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-patches-rows8-16.http.json",
+      "size_bytes": 1385,
+      "sha256": "3df49b7afa87012b06352f76cbaca455fa61da29ee76cad7cff37b614845540b"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-patches-rows8-24.http.json",
+      "size_bytes": 1385,
+      "sha256": "24226066e04466ed5aec4db6d60b35fb3bfc4d32c060a9f29b508b097ad02d1f"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-patches-rows8-32.http.json",
+      "size_bytes": 1385,
+      "sha256": "81252ecf10f6285a579c25f7d3741096d0d49d5d44d096ba569d2fe64836c85e"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-patches-rows8-40.http.json",
+      "size_bytes": 1385,
+      "sha256": "7ad26d6db1e72ca851a39503452bbe0e11a3d5ebc9f0dd4d515e619eadcde039"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-patches-rows8-48.http.json",
+      "size_bytes": 1385,
+      "sha256": "affb347e2d7ab0f8905d3c50adeb536cf04212e39c3e1439f464799429e5064c"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-patches-rows8-56.http.json",
+      "size_bytes": 1385,
+      "sha256": "06d357e996cd055fe1401f0b2873473ad9220426b2fb6cbb38dfa2694892ecb7"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-r2-1.http.json",
+      "size_bytes": 695,
+      "sha256": "59f19a06939471e60ea3bb0f9d2d2916853fe1535855a77ea7262594bee37f2d"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-release_assets-count.http.json",
+      "size_bytes": 1395,
+      "sha256": "d6b2cf7d1b15c0fcca6cae50a3d6487679b6055416514ff5fff500be515606f3"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-release_assets-rows8-0.http.json",
+      "size_bytes": 1403,
+      "sha256": "6e52905f0195227ebce50924979ab3e68d48f50fcc6582cd33c703e92ac864d4"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-release_assets-rows8-16.http.json",
+      "size_bytes": 1406,
+      "sha256": "b824c5cac884eb0a5202e089dadef77fb8c764012f1e0118ec0755c36fed6be9"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-release_assets-rows8-24.http.json",
+      "size_bytes": 1406,
+      "sha256": "a61d5a62edfd6552b9ae8b49d854068624867f0509dac1854ff1cfb469053a5c"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-release_assets-rows8-32.http.json",
+      "size_bytes": 1406,
+      "sha256": "ce793e9c103923e0ce06c27c83a5b429e35df0af00ae720c9869f0b3c60f857b"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-release_assets-rows8-40.http.json",
+      "size_bytes": 1406,
+      "sha256": "57b60c5628e552465a4e06fa9e51a47bf39c9851c0e8d5cae866c9d0497e3f7a"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-release_assets-rows8-48.http.json",
+      "size_bytes": 1406,
+      "sha256": "ad66876fd9d709797e4c51ea936b7c0020c729f24d7c54bb5b3bcef093799994"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-release_assets-rows8-56.http.json",
+      "size_bytes": 1406,
+      "sha256": "1d2a5173e247a4b25c9f579703b43caf9b008d29cf3510f1bd893eae2f627b72"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-release_assets-rows8-64.http.json",
+      "size_bytes": 1406,
+      "sha256": "9578ac6303756031befd2a1a5c407fdfabff0717bc8acacf6ee077a31c3f9d7c"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-release_assets-rows8-72.http.json",
+      "size_bytes": 1406,
+      "sha256": "09a2f80596daacc50e91e7efdb8ece75d389d936ff58ae90e557cbf9acad0978"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-release_assets-rows8-8.http.json",
+      "size_bytes": 1403,
+      "sha256": "17438f1dc3592f2bb08ce8ced33d2a40148741d61fcc4cd355d58b7fc565a5f4"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-release_assets-rows8-80.http.json",
+      "size_bytes": 1406,
+      "sha256": "70515d49a4df346557abe17bca9e6c10c38456b630518ab4e20b8e220ae1ae84"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-release_assets-rows8-88.http.json",
+      "size_bytes": 1406,
+      "sha256": "85940bd3dc9c0ab1887ff4c24d6f94e67684967b72f46199fb604b20a15c3e1d"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-release_assets-rows8-96.http.json",
+      "size_bytes": 1405,
+      "sha256": "e445bb407ff69c69bb0f7613db8f3947df662a7cdee756435ba1cfd72c8a218f"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-releases-count.http.json",
+      "size_bytes": 1377,
+      "sha256": "8c27a08db6517dd8c460b825446d0dccd23e58d642ce520d1d1132a75432ef75"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-releases-rows8-0.http.json",
+      "size_bytes": 1386,
+      "sha256": "6edc41935af5ecb38eae4fa19b0f2a7e04721eeadbb13c30f2782ba4a8d87f92"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-releases-rows8-16.http.json",
+      "size_bytes": 1387,
+      "sha256": "6cd6ddf5fa6171f53c5d8e0f6ca94690543f4aff0cdc02697f59952119100c39"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-releases-rows8-24.http.json",
+      "size_bytes": 1387,
+      "sha256": "059b09131b1223a272c2ebc8958adee935d010f513301ae854d9f4da8a1f0715"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-releases-rows8-32.http.json",
+      "size_bytes": 1388,
+      "sha256": "e6cb6ff3d0d5babdb215b3ebfd560295e997fa833e25ab2228b126ebd203aa69"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-releases-rows8-40.http.json",
+      "size_bytes": 1389,
+      "sha256": "fd41b2c8b625f81db3940b93327930794ea61d0d3af65f6d45318181dd0525da"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-releases-rows8-48.http.json",
+      "size_bytes": 1389,
+      "sha256": "21eb1ab3d90711fecf3e5ffa2ca0e811af10b71453f9a4b2f3a13b89e153a651"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/protected-releases-rows8-8.http.json",
+      "size_bytes": 1386,
+      "sha256": "36dfa06de227a2a16f09e2c98ab286097a96394aae70c929603bb849230122eb"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/releases-1.http.json",
+      "size_bytes": 2089,
+      "sha256": "117645809702653117a13b1d1e8d22cf4249a5b53f53af4b1d06991d6757f5b9"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-announcements-count.http.json",
+      "size_bytes": 1386,
+      "sha256": "dd4e8384f887adb615254c7c441baffd27fc26cac8a55207463dbed436cf5052"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-app_config-count.http.json",
+      "size_bytes": 1377,
+      "sha256": "6b7ecaa16b10d87592469b52b2b161b6747785714ee32e39877bf6804831baa5"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-app_config-rows8-0.http.json",
+      "size_bytes": 1383,
+      "sha256": "56d453e2ed8e7048a866691f4f2d63fec71ad31dea05d80f8f1e153e5a23dcfb"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-apps-count.http.json",
+      "size_bytes": 1359,
+      "sha256": "98c467f434c864b7a17d699e48de897917e8afc43fabee9f4dd669565eea53c8"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-apps-rows8-0.http.json",
+      "size_bytes": 1365,
+      "sha256": "bcd93352708032b11051b3822dfc248f23b80510cecb0777f9b2252d6856eff7"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-audit_logs-count.http.json",
+      "size_bytes": 1377,
+      "sha256": "31d88bcb950893fceac9b3e3e81847bcec3afe008e11029d1f1ec958aeb30a58"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-audit_logs-rows8-0.http.json",
+      "size_bytes": 1385,
+      "sha256": "48f51976cc9974fc06f1262edaea09cf391ed053880eee52a16b2e9405866c7a"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-audit_logs-rows8-16.http.json",
+      "size_bytes": 1388,
+      "sha256": "e654134bf6a59e7b07e17250b9a72ad460b2cec9fcea9f9476745e267ffe16b1"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-audit_logs-rows8-24.http.json",
+      "size_bytes": 1388,
+      "sha256": "c9b636da88d6dc87832398fd493e00ec4dbd0869743058326277347ecd9c9801"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-audit_logs-rows8-8.http.json",
+      "size_bytes": 1385,
+      "sha256": "9cca6d8065297365918437b23ddfcb606dbe622f63616f022b0132671a2dca9d"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-channel_history-count.http.json",
+      "size_bytes": 1392,
+      "sha256": "89fbf8d9b824b2c096f3eb3439d05a83bfd7121ca9abdf2ab509da5491516d09"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-channels-count.http.json",
+      "size_bytes": 1371,
+      "sha256": "fe5abd110bf8c8890220d0e054cd76d5cb3675bbb9bc89e4f1d0d3ec497bb4bc"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-d1_migrations-count.http.json",
+      "size_bytes": 1386,
+      "sha256": "f72f53ec250d0dca9224e7da9bdeac607efe124e4111e251e5258e00478858a1"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-d1_migrations-rows8-0.http.json",
+      "size_bytes": 1392,
+      "sha256": "8f9885ff4b174876dca20e3187b3b98a5fa255dadba3afcd1d1e2fc1406bf836"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-firmware_admin_idempotency_tombstones-count.http.json",
+      "size_bytes": 1458,
+      "sha256": "d5d8113e99db82f5aac1b1a236ccb2ed0cc7f428a3f1c1455048c79f7a990225"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-firmware_admin_idempotency_tombstones-rows8-0.http.json",
+      "size_bytes": 1465,
+      "sha256": "3dba94c04ff0f05607836145ba1073560ab82c0afa5b35d86d39ab9d69f9106d"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-firmware_admin_idempotency-count.http.json",
+      "size_bytes": 1425,
+      "sha256": "680294bdb6266b0641a7bea3e68a08d19c45166d6031e8585cd496aa4668adb0"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-firmware_backfill_manifests-count.http.json",
+      "size_bytes": 1428,
+      "sha256": "d7a401b4ef94f0c7984be62e2a8e9c4fcaad3d97bd1a61d22a1161a118af3645"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-firmware_channels_legacy-count.http.json",
+      "size_bytes": 1419,
+      "sha256": "b33887e47b067350613f9c4dec3b4393dee24a4bd6d99d5a6d0e9926e8eb84e0"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-firmware_channels-count.http.json",
+      "size_bytes": 1398,
+      "sha256": "df4cd55aa4a55adf9359a8d2c57b0cc5e29972f08ecc60c1e42419d84ffcd3ab"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-firmware_channels-rows8-0.http.json",
+      "size_bytes": 1405,
+      "sha256": "5873412c1b6f29fd126d420bb984bb08b85b142447c582a35d8c487cdbd8dd9d"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-firmware_release_assets-count.http.json",
+      "size_bytes": 1416,
+      "sha256": "e2bacaf1e86648807b2acdb05ff0bd32f35071435c7aa2bf0749d24105ea96c7"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-firmware_release_assets-rows8-0.http.json",
+      "size_bytes": 1424,
+      "sha256": "5c64a48ef0f6538138cc188aa21998b9e29fb10abddfedb01a5d228c16b200e1"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-firmware_release_assets-rows8-8.http.json",
+      "size_bytes": 1423,
+      "sha256": "cf2b35660ef2b1d23016bddb6372965f5a78cfb292301789c1c322f21c20d0de"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-firmware_releases_legacy-count.http.json",
+      "size_bytes": 1419,
+      "sha256": "d5f4cb2a307a3defdae8dcae99de2247499736ceb10784deebdaec90728545ba"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-firmware_releases-count.http.json",
+      "size_bytes": 1398,
+      "sha256": "1450b0038c6e08b64add82906e5a3b187ea5f3b41cd298dbc46349ff53ce272a"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-firmware_releases-rows8-0.http.json",
+      "size_bytes": 1406,
+      "sha256": "9011cdb6b2270f74a8acda0bb3f0166bcc64d1659ffee82951b985b37e61c918"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-patches-count.http.json",
+      "size_bytes": 1368,
+      "sha256": "7a1372973a683a9a884eb1e26896756771b62a8260fef1720eb17eb00231a479"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-r2-1.http.json",
+      "size_bytes": 696,
+      "sha256": "e11e9f1809ddff4032574d0b00b4690ac66ce68e204607d9bbc9973c0634be33"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-release_assets-count.http.json",
+      "size_bytes": 1389,
+      "sha256": "10b4dcccb6bdfdfe6239ccaac43a6327749513012ca406eeebc2e76dd6244217"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-releases-count.http.json",
+      "size_bytes": 1371,
+      "sha256": "b384b2636ff455e6e31d94a2cd37abb2747c56532ac84c7eb7ed9184a3a07958"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/staging-schema.http.json",
+      "size_bytes": 1350,
+      "sha256": "8336c30e01c22eaade8fe99e7c216fdcb81e236dd9147afba1d596b453a405ee"
+    },
+    {
+      "path": "snapshots/after-tail-v6/attempt-2/target-tag.http.json",
+      "size_bytes": 1950,
+      "sha256": "584ce84455c91e37ffcae23b7d05a0be04c3dd62b4df4f74fb981030bef8d462"
+    }
+  ]
+}

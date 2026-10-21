@@ -1,0 +1,19 @@
+{
+  "schema": "p44-offline-token-identity-v1",
+  "ok": true,
+  "source_path": ".cache/p41-dev-20261015/.cache/cf-readonly-20261015-r1/token-status.json",
+  "size_bytes": 483,
+  "sha256": "693ac971c7473e03f2fe526d117efe8b295cd403d24f8f66961ecb31ca563afa",
+  "id_pointer": "/body/result/id",
+  "id_sha256": "0c22488a9bee1355603d8d61faca06fcacbdafccfed8a4ba7dc490af7cacdedc",
+  "mode": "offline-no-fallback",
+  "verify_requests": 0,
+  "current_active_observed": false,
+  "evaluated_at": "2026-10-20T11:42:32.955Z",
+  "historical": {
+    "started": "2026-10-15T02:45:01.986Z",
+    "finished": "2026-10-15T02:45:03.858Z",
+    "status": 200
+  },
+  "interpretation": "Fixed historical identity read offline; not a fresh active-status check. No network fallback."
+}

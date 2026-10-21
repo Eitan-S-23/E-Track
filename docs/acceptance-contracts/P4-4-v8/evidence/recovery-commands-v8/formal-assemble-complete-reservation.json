@@ -1,0 +1,12 @@
+{
+  "label": "formal-assemble-complete",
+  "command": "node",
+  "args": [
+    "Tools/ota/p44-after-recovery.cjs",
+    "--package-spec",
+    "docs/acceptance-contracts/P4-4-v8.package.json",
+    "assemble"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "started": "2026-10-21T10:15:02.477Z"
+}

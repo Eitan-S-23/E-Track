@@ -1,0 +1,890 @@
+{
+  "schema": "etrack-acceptance-contract-v3",
+  "contract_id": "P4-4-v4",
+  "version": 4,
+  "task_id": "P4-4",
+  "parent_contract_sha256": "4FC05662F1BB9CA829BB8E769754229F6BEBC41CBB99A3ED38099DB1E5D7E2CD",
+  "status": "FROZEN",
+  "approved_by": "Independent Codex root; explicit owner delegation to finish P4-4 autonomously",
+  "approved_at": "2026-10-19T19:06:09.660781+00:00",
+  "implementation_ref": "b56534d7b6c993c0795010d0404fb8a81f7eeb9d",
+  "freeze_commit": "2756ca95e26ec636216313271708b3304d61a5cc",
+  "freeze_tree": "77549b4b756f1e88de8b854b4673857021a65783",
+  "profile_config_blob": "5ef97ae98674373c3cf641676c16ff7baf1b617f",
+  "result_taxonomy": [
+    "PASS",
+    "PRODUCT_FAIL",
+    "HARNESS_FAIL",
+    "EVIDENCE_GAP",
+    "ENV_BLOCKED"
+  ],
+  "invalidation_policy": "docs/acceptance-execution-contract.md",
+  "input_groups": [
+    {
+      "id": "production",
+      "profile": "Production",
+      "category": "production_source"
+    },
+    {
+      "id": "validation",
+      "profile": "Validation",
+      "category": "validation_inputs"
+    },
+    {
+      "id": "governance",
+      "profile": "Governance",
+      "category": "governance_inputs"
+    },
+    {
+      "id": "firmware",
+      "profile": "Firmware",
+      "category": "production_source"
+    },
+    {
+      "id": "release",
+      "profile": "P41Release",
+      "category": "production_source"
+    },
+    {
+      "id": "cloudflare",
+      "profile": "Cloudflare",
+      "category": "production_source"
+    },
+    {
+      "id": "capture",
+      "profile": "P44Capture",
+      "category": "validation_inputs"
+    },
+    {
+      "id": "evidence",
+      "profile": "Evidence",
+      "category": "validation_inputs"
+    },
+    {
+      "id": "legacy-evaluation",
+      "profile": "P41Evaluation",
+      "category": "validation_inputs"
+    }
+  ],
+  "external_inputs": [
+    {
+      "id": "target",
+      "category": "fixture",
+      "description": "Hash-bound target; historical operations retain their original date/operator/source and limitations; no replay implied",
+      "fingerprint": "sha256:5ff6dcce87c62799f8b8940d8c0d32a93d9f0e70bdaf38cc0e93b024ecd77aab",
+      "evidence_path": "evidence/target.json",
+      "evidence_sha256": "5ff6dcce87c62799f8b8940d8c0d32a93d9f0e70bdaf38cc0e93b024ecd77aab"
+    },
+    {
+      "id": "originals",
+      "category": "fixture",
+      "description": "Hash-bound originals; historical operations retain their original date/operator/source and limitations; no replay implied",
+      "fingerprint": "sha256:ca0fb5b0a2d11144c9c49f62eb9f18c0196e6d01681e05c78cce00bde80e3fb3",
+      "evidence_path": "evidence/inputs/originals.json",
+      "evidence_sha256": "ca0fb5b0a2d11144c9c49f62eb9f18c0196e6d01681e05c78cce00bde80e3fb3"
+    },
+    {
+      "id": "lifecycle",
+      "category": "fixture",
+      "description": "Hash-bound lifecycle; historical operations retain their original date/operator/source and limitations; no replay implied",
+      "fingerprint": "sha256:bf7d08257240ff10e7d73ab175acd36a7bcc1b840852801d64a5ea4d73bd4a39",
+      "evidence_path": "evidence/inputs/lifecycle.json",
+      "evidence_sha256": "bf7d08257240ff10e7d73ab175acd36a7bcc1b840852801d64a5ea4d73bd4a39"
+    },
+    {
+      "id": "bootstrap-app",
+      "category": "fixture",
+      "description": "Hash-bound bootstrap-app; historical operations retain their original date/operator/source and limitations; no replay implied",
+      "fingerprint": "sha256:aaf5ccdb047ef8b3ff4ae0837f9593ceca857d90c98ea0bc09360e411bf4196f",
+      "evidence_path": "evidence/inputs/bootstrap/app-final.bin",
+      "evidence_sha256": "aaf5ccdb047ef8b3ff4ae0837f9593ceca857d90c98ea0bc09360e411bf4196f"
+    },
+    {
+      "id": "bootstrap-proof",
+      "category": "fixture",
+      "description": "Hash-bound bootstrap-proof; historical operations retain their original date/operator/source and limitations; no replay implied",
+      "fingerprint": "sha256:0071e0ba5e287a18ea5d1bfa7a62a33ed819c397171f69b641b8b2ca45406e28",
+      "evidence_path": "evidence/inputs/bootstrap/provenance.json",
+      "evidence_sha256": "0071e0ba5e287a18ea5d1bfa7a62a33ed819c397171f69b641b8b2ca45406e28"
+    },
+    {
+      "id": "host",
+      "category": "environment",
+      "description": "Hash-bound host; historical operations retain their original date/operator/source and limitations; no replay implied",
+      "fingerprint": "sha256:adcc0f4076a41c901782dfdb465ca08ffa780e76dcf61216c1655c6364bd4ff5",
+      "evidence_path": "evidence/inputs/host.json",
+      "evidence_sha256": "adcc0f4076a41c901782dfdb465ca08ffa780e76dcf61216c1655c6364bd4ff5"
+    },
+    {
+      "id": "predecessor-before",
+      "category": "fixture",
+      "description": "Hash-bound predecessor-before; historical operations retain their original date/operator/source and limitations; no replay implied",
+      "fingerprint": "sha256:6493f2dba69627ed1ec1b84e4a431b5a7804eb2db0be0d8aecb433e5be4eb4d9",
+      "evidence_path": "evidence/inputs/predecessor-before.json",
+      "evidence_sha256": "6493f2dba69627ed1ec1b84e4a431b5a7804eb2db0be0d8aecb433e5be4eb4d9"
+    }
+  ],
+  "commands": [
+    {
+      "id": "formal-history",
+      "command": "node Tools/acceptance/p44/run.cjs formal-history python -I -S -B Tools/acceptance/p44/origins.py history --repo-root D:/github/my/E-Track/.cache/p4-4-integration-20261018 --input docs/acceptance-contracts/P4-4-v4/evidence/inputs/originals.json --output docs/acceptance-contracts/P4-4-v4/evidence/history-result.json",
+      "description": "Offline independent evaluation of hash-bound original bytes; not a repeated CI/build/cloud/device operation. Wrapper watchdog <=60 minutes; preserve failures.",
+      "input_groups": [
+        "cloudflare",
+        "evidence",
+        "firmware",
+        "governance",
+        "release",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/acceptance/p44/origins.py",
+        "Tools/acceptance/p44/run.cjs",
+        "Tools/acceptance/validate_bundle.py"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-configuration",
+      "command": "node Tools/acceptance/p44/run.cjs formal-configuration python -I -S -B Tools/acceptance/p44/origins.py configuration --repo-root D:/github/my/E-Track/.cache/p4-4-integration-20261018 --input docs/acceptance-contracts/P4-4-v4/evidence/inputs/originals.json --output docs/acceptance-contracts/P4-4-v4/evidence/configuration-result.json",
+      "description": "Offline independent evaluation of hash-bound original bytes; not a repeated CI/build/cloud/device operation. Wrapper watchdog <=60 minutes; preserve failures.",
+      "input_groups": [
+        "cloudflare",
+        "evidence",
+        "governance",
+        "release"
+      ],
+      "runner_paths": [
+        "Tools/acceptance/p44/origins.py",
+        "Tools/acceptance/p44/run.cjs",
+        "Tools/acceptance/validate_bundle.py"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-before",
+      "command": "node Tools/acceptance/p44/run.cjs formal-before node Tools/acceptance/p44/capture.cjs before inputs/predecessor-before.json",
+      "description": "Raw capture under the fixed P4-4 plan; one invocation; Undici HTTP <=60s, standard gh archive <=180s, wrapper watchdog <=60 minutes; complete bounded pages; fixed D1 POST queries use standard gzip negotiation and strictly bounded decoding, preserving wire and decoded originals, with unsafe/incomplete new compressed wire retained privately and publicly identified only by hash/size. Only capture-admitted GET and fixed D1 SELECT POST may retry request() pre-response ECONNRESET once, after an abortable 500ms wait within the same 60s signal; retain each failure and retry reservation. No retry after an HTTP response, during body collection, for other errors, private verification or business writes. Review the direct v3 and inherited v2/v1 originals: consume 47 complete, exactly matching read-only responses without network replay, including legacy LIMIT 500 and LIMIT 8 pages. Retain both partial responses and the pre-response connection failure; collect only unfinished rows with LIMIT 8. Only two planned staging dispatches; never approve/reject by API, publish, register directly, upload/delete objects, migrate, unlock gates or operate devices. Waiting/discovery reads are bounded, not repeated business operations. Uncertain mutations are not retried.",
+      "input_groups": [
+        "capture",
+        "cloudflare"
+      ],
+      "runner_paths": [
+        "Tools/acceptance/p44/capture.cjs",
+        "Tools/acceptance/p44/run.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-negatives",
+      "command": "node Tools/acceptance/p44/run.cjs formal-negatives node Tools/acceptance/p44/capture.cjs negatives",
+      "description": "Raw capture under the fixed P4-4 plan; one invocation; Undici HTTP <=60s, standard gh archive <=180s, wrapper watchdog <=60 minutes; complete bounded pages; fixed D1 POST queries use standard gzip negotiation and strictly bounded decoding, preserving wire and decoded originals, with unsafe/incomplete new compressed wire retained privately and publicly identified only by hash/size. Only capture-admitted GET and fixed D1 SELECT POST may retry request() pre-response ECONNRESET once, after an abortable 500ms wait within the same 60s signal; retain each failure and retry reservation. No retry after an HTTP response, during body collection, for other errors, private verification or business writes. Only two planned staging dispatches; never approve/reject by API, publish, register directly, upload/delete objects, migrate, unlock gates or operate devices. Waiting/discovery reads are bounded, not repeated business operations. Uncertain mutations are not retried.",
+      "input_groups": [
+        "capture",
+        "cloudflare"
+      ],
+      "runner_paths": [
+        "Tools/acceptance/p44/capture.cjs",
+        "Tools/acceptance/p44/run.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-dispatch-a",
+      "command": "node Tools/acceptance/p44/run.cjs formal-dispatch-a node Tools/acceptance/p44/capture.cjs dispatch-a",
+      "description": "Raw capture under the fixed P4-4 plan; one invocation; Undici HTTP <=60s, standard gh archive <=180s, wrapper watchdog <=60 minutes; complete bounded pages; fixed D1 POST queries use standard gzip negotiation and strictly bounded decoding, preserving wire and decoded originals, with unsafe/incomplete new compressed wire retained privately and publicly identified only by hash/size. Only capture-admitted GET and fixed D1 SELECT POST may retry request() pre-response ECONNRESET once, after an abortable 500ms wait within the same 60s signal; retain each failure and retry reservation. No retry after an HTTP response, during body collection, for other errors, private verification or business writes. Only two planned staging dispatches; never approve/reject by API, publish, register directly, upload/delete objects, migrate, unlock gates or operate devices. Waiting/discovery reads are bounded, not repeated business operations. Uncertain mutations are not retried.",
+      "input_groups": [
+        "capture",
+        "cloudflare",
+        "firmware",
+        "release"
+      ],
+      "runner_paths": [
+        "Tools/acceptance/p44/capture.cjs",
+        "Tools/acceptance/p44/run.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-finish-a",
+      "command": "node Tools/acceptance/p44/run.cjs formal-finish-a node Tools/acceptance/p44/capture.cjs finish-a",
+      "description": "Raw capture under the fixed P4-4 plan; one invocation; Undici HTTP <=60s, standard gh archive <=180s, wrapper watchdog <=60 minutes; complete bounded pages; fixed D1 POST queries use standard gzip negotiation and strictly bounded decoding, preserving wire and decoded originals, with unsafe/incomplete new compressed wire retained privately and publicly identified only by hash/size. Only capture-admitted GET and fixed D1 SELECT POST may retry request() pre-response ECONNRESET once, after an abortable 500ms wait within the same 60s signal; retain each failure and retry reservation. No retry after an HTTP response, during body collection, for other errors, private verification or business writes. Only two planned staging dispatches; never approve/reject by API, publish, register directly, upload/delete objects, migrate, unlock gates or operate devices. Waiting/discovery reads are bounded, not repeated business operations. Uncertain mutations are not retried.",
+      "input_groups": [
+        "capture",
+        "cloudflare",
+        "firmware",
+        "release"
+      ],
+      "runner_paths": [
+        "Tools/acceptance/p44/capture.cjs",
+        "Tools/acceptance/p44/run.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-dispatch-b",
+      "command": "node Tools/acceptance/p44/run.cjs formal-dispatch-b node Tools/acceptance/p44/capture.cjs dispatch-b",
+      "description": "Raw capture under the fixed P4-4 plan; one invocation; Undici HTTP <=60s, standard gh archive <=180s, wrapper watchdog <=60 minutes; complete bounded pages; fixed D1 POST queries use standard gzip negotiation and strictly bounded decoding, preserving wire and decoded originals, with unsafe/incomplete new compressed wire retained privately and publicly identified only by hash/size. Only capture-admitted GET and fixed D1 SELECT POST may retry request() pre-response ECONNRESET once, after an abortable 500ms wait within the same 60s signal; retain each failure and retry reservation. No retry after an HTTP response, during body collection, for other errors, private verification or business writes. Only two planned staging dispatches; never approve/reject by API, publish, register directly, upload/delete objects, migrate, unlock gates or operate devices. Waiting/discovery reads are bounded, not repeated business operations. Uncertain mutations are not retried.",
+      "input_groups": [
+        "capture",
+        "cloudflare",
+        "firmware",
+        "release"
+      ],
+      "runner_paths": [
+        "Tools/acceptance/p44/capture.cjs",
+        "Tools/acceptance/p44/run.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-finish-b",
+      "command": "node Tools/acceptance/p44/run.cjs formal-finish-b node Tools/acceptance/p44/capture.cjs finish-b",
+      "description": "Raw capture under the fixed P4-4 plan; one invocation; Undici HTTP <=60s, standard gh archive <=180s, wrapper watchdog <=60 minutes; complete bounded pages; fixed D1 POST queries use standard gzip negotiation and strictly bounded decoding, preserving wire and decoded originals, with unsafe/incomplete new compressed wire retained privately and publicly identified only by hash/size. Only capture-admitted GET and fixed D1 SELECT POST may retry request() pre-response ECONNRESET once, after an abortable 500ms wait within the same 60s signal; retain each failure and retry reservation. No retry after an HTTP response, during body collection, for other errors, private verification or business writes. Only two planned staging dispatches; never approve/reject by API, publish, register directly, upload/delete objects, migrate, unlock gates or operate devices. Waiting/discovery reads are bounded, not repeated business operations. Uncertain mutations are not retried.",
+      "input_groups": [
+        "capture",
+        "cloudflare",
+        "firmware",
+        "release"
+      ],
+      "runner_paths": [
+        "Tools/acceptance/p44/capture.cjs",
+        "Tools/acceptance/p44/run.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-assemble-rehearsal",
+      "command": "node Tools/acceptance/p44/run.cjs formal-assemble-rehearsal node Tools/acceptance/p44/capture.cjs assemble",
+      "description": "Raw capture under the fixed P4-4 plan; one invocation; Undici HTTP <=60s, standard gh archive <=180s, wrapper watchdog <=60 minutes; complete bounded pages; fixed D1 POST queries use standard gzip negotiation and strictly bounded decoding, preserving wire and decoded originals, with unsafe/incomplete new compressed wire retained privately and publicly identified only by hash/size. Only capture-admitted GET and fixed D1 SELECT POST may retry request() pre-response ECONNRESET once, after an abortable 500ms wait within the same 60s signal; retain each failure and retry reservation. No retry after an HTTP response, during body collection, for other errors, private verification or business writes. Only two planned staging dispatches; never approve/reject by API, publish, register directly, upload/delete objects, migrate, unlock gates or operate devices. Waiting/discovery reads are bounded, not repeated business operations. Uncertain mutations are not retried.",
+      "input_groups": [
+        "evidence"
+      ],
+      "runner_paths": [
+        "Tools/acceptance/p44/capture.cjs",
+        "Tools/acceptance/p44/run.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-rehearsal",
+      "command": "node Tools/acceptance/p44/run.cjs formal-rehearsal python -I -S -B Tools/acceptance/p44/inspect.py rehearsal --repo-root D:/github/my/E-Track/.cache/p4-4-integration-20261018 --input docs/acceptance-contracts/P4-4-v4/evidence/rehearsal-manifest.json --output docs/acceptance-contracts/P4-4-v4/evidence/rehearsal-result.json",
+      "description": "Offline independent evaluation of hash-bound original bytes; not a repeated CI/build/cloud/device operation. Wrapper watchdog <=60 minutes; preserve failures.",
+      "input_groups": [
+        "cloudflare",
+        "evidence",
+        "firmware",
+        "legacy-evaluation",
+        "release"
+      ],
+      "runner_paths": [
+        "Tools/acceptance/p44/inspect.py",
+        "Tools/acceptance/p44/run.cjs",
+        "Tools/jlink/prepare-bootstrap-app.py",
+        "docs/acceptance-contracts/P4-1-v2/tools/inspect.py"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-readbacks",
+      "command": "node Tools/acceptance/p44/run.cjs formal-readbacks node Tools/acceptance/p44/capture.cjs readbacks",
+      "description": "Raw capture under the fixed P4-4 plan; one invocation; Undici HTTP <=60s, standard gh archive <=180s, wrapper watchdog <=60 minutes; complete bounded pages; fixed D1 POST queries use standard gzip negotiation and strictly bounded decoding, preserving wire and decoded originals, with unsafe/incomplete new compressed wire retained privately and publicly identified only by hash/size. Only capture-admitted GET and fixed D1 SELECT POST may retry request() pre-response ECONNRESET once, after an abortable 500ms wait within the same 60s signal; retain each failure and retry reservation. No retry after an HTTP response, during body collection, for other errors, private verification or business writes. Only two planned staging dispatches; never approve/reject by API, publish, register directly, upload/delete objects, migrate, unlock gates or operate devices. Waiting/discovery reads are bounded, not repeated business operations. Uncertain mutations are not retried.",
+      "input_groups": [
+        "capture",
+        "cloudflare",
+        "evidence"
+      ],
+      "runner_paths": [
+        "Tools/acceptance/p44/capture.cjs",
+        "Tools/acceptance/p44/run.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-production-preflight",
+      "command": "node Tools/acceptance/p44/run.cjs formal-production-preflight node Tools/acceptance/p44/capture.cjs production-preflight",
+      "description": "Raw capture under the fixed P4-4 plan; one invocation; Undici HTTP <=60s, standard gh archive <=180s, wrapper watchdog <=60 minutes; complete bounded pages; fixed D1 POST queries use standard gzip negotiation and strictly bounded decoding, preserving wire and decoded originals, with unsafe/incomplete new compressed wire retained privately and publicly identified only by hash/size. Only capture-admitted GET and fixed D1 SELECT POST may retry request() pre-response ECONNRESET once, after an abortable 500ms wait within the same 60s signal; retain each failure and retry reservation. No retry after an HTTP response, during body collection, for other errors, private verification or business writes. Only two planned staging dispatches; never approve/reject by API, publish, register directly, upload/delete objects, migrate, unlock gates or operate devices. Waiting/discovery reads are bounded, not repeated business operations. Uncertain mutations are not retried.",
+      "input_groups": [
+        "capture",
+        "cloudflare",
+        "evidence"
+      ],
+      "runner_paths": [
+        "Tools/acceptance/p44/capture.cjs",
+        "Tools/acceptance/p44/run.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-after",
+      "command": "node Tools/acceptance/p44/run.cjs formal-after node Tools/acceptance/p44/capture.cjs after",
+      "description": "Raw capture under the fixed P4-4 plan; one invocation; Undici HTTP <=60s, standard gh archive <=180s, wrapper watchdog <=60 minutes; complete bounded pages; fixed D1 POST queries use standard gzip negotiation and strictly bounded decoding, preserving wire and decoded originals, with unsafe/incomplete new compressed wire retained privately and publicly identified only by hash/size. Only capture-admitted GET and fixed D1 SELECT POST may retry request() pre-response ECONNRESET once, after an abortable 500ms wait within the same 60s signal; retain each failure and retry reservation. No retry after an HTTP response, during body collection, for other errors, private verification or business writes. Only two planned staging dispatches; never approve/reject by API, publish, register directly, upload/delete objects, migrate, unlock gates or operate devices. Waiting/discovery reads are bounded, not repeated business operations. Uncertain mutations are not retried.",
+      "input_groups": [
+        "capture",
+        "cloudflare"
+      ],
+      "runner_paths": [
+        "Tools/acceptance/p44/capture.cjs",
+        "Tools/acceptance/p44/run.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-assemble-complete",
+      "command": "node Tools/acceptance/p44/run.cjs formal-assemble-complete node Tools/acceptance/p44/capture.cjs assemble",
+      "description": "Raw capture under the fixed P4-4 plan; one invocation; Undici HTTP <=60s, standard gh archive <=180s, wrapper watchdog <=60 minutes; complete bounded pages; fixed D1 POST queries use standard gzip negotiation and strictly bounded decoding, preserving wire and decoded originals, with unsafe/incomplete new compressed wire retained privately and publicly identified only by hash/size. Only capture-admitted GET and fixed D1 SELECT POST may retry request() pre-response ECONNRESET once, after an abortable 500ms wait within the same 60s signal; retain each failure and retry reservation. No retry after an HTTP response, during body collection, for other errors, private verification or business writes. Only two planned staging dispatches; never approve/reject by API, publish, register directly, upload/delete objects, migrate, unlock gates or operate devices. Waiting/discovery reads are bounded, not repeated business operations. Uncertain mutations are not retried.",
+      "input_groups": [
+        "evidence"
+      ],
+      "runner_paths": [
+        "Tools/acceptance/p44/capture.cjs",
+        "Tools/acceptance/p44/run.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-approvals",
+      "command": "node Tools/acceptance/p44/run.cjs formal-approvals python -I -S -B Tools/acceptance/p44/inspect.py approvals --repo-root D:/github/my/E-Track/.cache/p4-4-integration-20261018 --input docs/acceptance-contracts/P4-4-v4/evidence/manifest.json --output docs/acceptance-contracts/P4-4-v4/evidence/approvals-result.json",
+      "description": "Offline independent evaluation of hash-bound original bytes; not a repeated CI/build/cloud/device operation. Wrapper watchdog <=60 minutes; preserve failures.",
+      "input_groups": [
+        "evidence",
+        "release"
+      ],
+      "runner_paths": [
+        "Tools/acceptance/p44/inspect.py",
+        "Tools/acceptance/p44/run.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-states",
+      "command": "node Tools/acceptance/p44/run.cjs formal-states python -I -S -B Tools/acceptance/p44/inspect.py states --repo-root D:/github/my/E-Track/.cache/p4-4-integration-20261018 --input docs/acceptance-contracts/P4-4-v4/evidence/manifest.json --output docs/acceptance-contracts/P4-4-v4/evidence/states-result.json",
+      "description": "Offline independent evaluation of hash-bound original bytes; not a repeated CI/build/cloud/device operation. Wrapper watchdog <=60 minutes; preserve failures.",
+      "input_groups": [
+        "cloudflare",
+        "evidence",
+        "release"
+      ],
+      "runner_paths": [
+        "Tools/acceptance/p44/inspect.py",
+        "Tools/acceptance/p44/run.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    },
+    {
+      "id": "formal-privacy",
+      "command": "node Tools/acceptance/p44/run.cjs formal-privacy python -I -S -B Tools/acceptance/p44/bundle.py privacy",
+      "description": "Offline exact-known-secret and signed-URL scan of public bundle text and ZIP members; compressed D1 wire/decoded pairs use the same strict inspection oracle before decoded-byte scanning. Incomplete compressed wire stays private. Explicit ownership/rotation/revocation record; no key generation or rotation.",
+      "input_groups": [
+        "evidence",
+        "governance"
+      ],
+      "runner_paths": [
+        "Tools/acceptance/p44/bundle.py",
+        "Tools/acceptance/p44/inspect.py",
+        "Tools/acceptance/p44/run.cjs"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "success_exit_code": 0,
+      "output_required": true
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "P44-HISTORY-1",
+      "description": "Independently interpret unchanged-source original CI, host negative/redaction and remediation evidence; retain original failures and advisories.",
+      "path": "evidence/history-result.json"
+    },
+    {
+      "id": "P44-CONFIGURATION-1",
+      "description": "Correct names/types/scopes, exact independent bucket policies, retained reviewer/gates and verified ACL correction; original deployed modules match the source-bound CI artifact and exact Worker versions/DB/R2/settings. Historical deployment observations and secret presence are not continuous monitoring or production workflow execution.",
+      "path": "evidence/configuration-result.json"
+    },
+    {
+      "id": "P44-RAW-RUNS-1",
+      "description": "Two distinct same-source attempt-1 runs: A actually rejected and terminal before B; B actually approved and successful. Capture original waiting, reviews, complete jobs and artifact. No proxy action. Run A cannot be rerun; old-chain rehearsal is not new-chain qualification.",
+      "path": "evidence/run-a/final.json"
+    },
+    {
+      "id": "P44-RAW-RUNS-2",
+      "description": "Two distinct same-source attempt-1 runs: A actually rejected and terminal before B; B actually approved and successful. Capture original waiting, reviews, complete jobs and artifact. No proxy action. Run A cannot be rerun; old-chain rehearsal is not new-chain qualification.",
+      "path": "evidence/run-b/final.json"
+    },
+    {
+      "id": "P44-RAW-RUNS-3",
+      "description": "Two distinct same-source attempt-1 runs: A actually rejected and terminal before B; B actually approved and successful. Capture original waiting, reviews, complete jobs and artifact. No proxy action. Run A cannot be rerun; old-chain rehearsal is not new-chain qualification.",
+      "path": "evidence/artifact.json"
+    },
+    {
+      "id": "P44-RAW-RUNS-4",
+      "description": "Two distinct same-source attempt-1 runs: A actually rejected and terminal before B; B actually approved and successful. Capture original waiting, reviews, complete jobs and artifact. No proxy action. Run A cannot be rerun; old-chain rehearsal is not new-chain qualification.",
+      "path": "evidence/run-a/logs.json"
+    },
+    {
+      "id": "P44-RAW-RUNS-5",
+      "description": "Two distinct same-source attempt-1 runs: A actually rejected and terminal before B; B actually approved and successful. Capture original waiting, reviews, complete jobs and artifact. No proxy action. Run A cannot be rerun; old-chain rehearsal is not new-chain qualification.",
+      "path": "evidence/run-b/logs.json"
+    },
+    {
+      "id": "P44-REHEARSAL-1",
+      "description": "One new shared S3/preflight staging chain consumes protected inputs, verifies all GCC/pack/recovery bytes, three immutable uploads/full readbacks, ready registration and exactly one idempotent replay.",
+      "path": "evidence/rehearsal-result.json"
+    },
+    {
+      "id": "P44-REHEARSAL-2",
+      "description": "One new shared S3/preflight staging chain consumes protected inputs, verifies all GCC/pack/recovery bytes, three immutable uploads/full readbacks, ready registration and exactly one idempotent replay.",
+      "path": "evidence/rehearsal-manifest.json"
+    },
+    {
+      "id": "P44-RAW-STATE-1",
+      "description": "Bounded original three-resource SELECT/list captures. Before independently reviews 47 complete v1/v2/v3 originals (legacy LIMIT 500 and LIMIT 8 pages) with no network replay, then collects unfinished rows with fixed LIMIT 8 pages; after uses entirely new LIMIT 8 pages. Standard gzip, bounded wire/decoded originals and the unchanged 60-second deadline address the documented large-response transport failure; a public gzip probe is not D1 acceptance. Capture-admitted read-only pre-response ECONNRESET has at most one recorded retry after 500ms abortable wait under the original 60s signal; response/body errors and mutations are never retried. Three actual missing/cross-Worker 401s and two cross-bucket 403s. No production object write, register, channel mutation, Release or device action; no incomplete predecessor criterion is REUSED.",
+      "path": "evidence/snapshots/before.json"
+    },
+    {
+      "id": "P44-RAW-STATE-2",
+      "description": "Bounded original three-resource SELECT/list captures. Before independently reviews 47 complete v1/v2/v3 originals (legacy LIMIT 500 and LIMIT 8 pages) with no network replay, then collects unfinished rows with fixed LIMIT 8 pages; after uses entirely new LIMIT 8 pages. Standard gzip, bounded wire/decoded originals and the unchanged 60-second deadline address the documented large-response transport failure; a public gzip probe is not D1 acceptance. Capture-admitted read-only pre-response ECONNRESET has at most one recorded retry after 500ms abortable wait under the original 60s signal; response/body errors and mutations are never retried. Three actual missing/cross-Worker 401s and two cross-bucket 403s. No production object write, register, channel mutation, Release or device action; no incomplete predecessor criterion is REUSED.",
+      "path": "evidence/negatives.json"
+    },
+    {
+      "id": "P44-RAW-STATE-3",
+      "description": "Bounded original three-resource SELECT/list captures. Before independently reviews 47 complete v1/v2/v3 originals (legacy LIMIT 500 and LIMIT 8 pages) with no network replay, then collects unfinished rows with fixed LIMIT 8 pages; after uses entirely new LIMIT 8 pages. Standard gzip, bounded wire/decoded originals and the unchanged 60-second deadline address the documented large-response transport failure; a public gzip probe is not D1 acceptance. Capture-admitted read-only pre-response ECONNRESET has at most one recorded retry after 500ms abortable wait under the original 60s signal; response/body errors and mutations are never retried. Three actual missing/cross-Worker 401s and two cross-bucket 403s. No production object write, register, channel mutation, Release or device action; no incomplete predecessor criterion is REUSED.",
+      "path": "evidence/snapshots/after.json"
+    },
+    {
+      "id": "P44-RAW-READBACK-1",
+      "description": "Three immutable GET bodies and one correct production SELECT-only preflight use the validated artifact metadata. Evidence dependency reflects the actual parser-produced metadata; any affected recapture remains read-only, not another workflow.",
+      "path": "evidence/readbacks.json"
+    },
+    {
+      "id": "P44-RAW-READBACK-2",
+      "description": "Three immutable GET bodies and one correct production SELECT-only preflight use the validated artifact metadata. Evidence dependency reflects the actual parser-produced metadata; any affected recapture remains read-only, not another workflow.",
+      "path": "evidence/production-preflight-result.json"
+    },
+    {
+      "id": "P44-APPROVALS-1",
+      "description": "Independently bind waiting/rejection/approval actor/environment/steps and original human-action provenance. GitHub login alone does not prove a human click; root must adjudicate actual owner response or witnessed dashboard action.",
+      "path": "evidence/approvals-result.json"
+    },
+    {
+      "id": "P44-APPROVALS-2",
+      "description": "Independently bind waiting/rejection/approval actor/environment/steps and original human-action provenance. GitHub login alone does not prove a human click; root must adjudicate actual owner response or witnessed dashboard action.",
+      "path": "evidence/reviewer-attestation.json"
+    },
+    {
+      "id": "P44-ISOLATION-1",
+      "description": "Production and protected Trace D1/schema/channel/R2 and GitHub Releases/assets unchanged; staging adds only this candidate, three assets/objects and one exact registration audit. Complete byte readbacks match; before/after times bracket B, not continuous monitoring.",
+      "path": "evidence/states-result.json"
+    },
+    {
+      "id": "P44-HYGIENE-1",
+      "description": "No known credential values in public outputs; no claim of never-exposed local ACLs. Owner, operator-enforced deadline, safe replacement/revocation and temporary-management-source identity are recorded; no provider TTL or automation is fabricated.",
+      "path": "evidence/privacy-result.json"
+    },
+    {
+      "id": "P44-HYGIENE-2",
+      "description": "No known credential values in public outputs; no claim of never-exposed local ACLs. Owner, operator-enforced deadline, safe replacement/revocation and temporary-management-source identity are recorded; no provider TTL or automation is fabricated.",
+      "path": "evidence/inputs/lifecycle.json"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "P44-HISTORY",
+      "description": "Independently interpret unchanged-source original CI, host negative/redaction and remediation evidence; retain original failures and advisories.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log"
+      ],
+      "input_groups": [
+        "cloudflare",
+        "evidence",
+        "firmware",
+        "governance",
+        "release",
+        "validation"
+      ],
+      "dependency_rationale": "Only listed dependencies apply: Firmware supplies GCC/key inputs; P41Release supplies workflow/build/packing; Cloudflare supplies fixed Worker/schema/S3 consumers and locked SDK inputs; P44Capture supplies raw HTTP/process capture. Evidence/P41Evaluation supply offline interpretation, Validation supplies the original host test inputs, Governance supplies configuration/authority criteria. Raw capture and interpretation are separate criteria so parser changes do not authorize replay.",
+      "external_inputs": [
+        "originals",
+        "host"
+      ],
+      "command_ids": [
+        "formal-history"
+      ],
+      "artifact_ids": [
+        "P44-HISTORY-1"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P44-CONFIGURATION",
+      "description": "Correct names/types/scopes, exact independent bucket policies, retained reviewer/gates and verified ACL correction; original deployed modules match the source-bound CI artifact and exact Worker versions/DB/R2/settings. Historical deployment observations and secret presence are not continuous monitoring or production workflow execution.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log"
+      ],
+      "input_groups": [
+        "cloudflare",
+        "evidence",
+        "governance",
+        "release"
+      ],
+      "dependency_rationale": "Only listed dependencies apply: Firmware supplies GCC/key inputs; P41Release supplies workflow/build/packing; Cloudflare supplies fixed Worker/schema/S3 consumers and locked SDK inputs; P44Capture supplies raw HTTP/process capture. Evidence/P41Evaluation supply offline interpretation, Validation supplies the original host test inputs, Governance supplies configuration/authority criteria. Raw capture and interpretation are separate criteria so parser changes do not authorize replay.",
+      "external_inputs": [
+        "originals",
+        "host"
+      ],
+      "command_ids": [
+        "formal-configuration"
+      ],
+      "artifact_ids": [
+        "P44-CONFIGURATION-1"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P44-RAW-RUNS",
+      "description": "Two distinct same-source attempt-1 runs: A actually rejected and terminal before B; B actually approved and successful. Capture original waiting, reviews, complete jobs and artifact. No proxy action. Run A cannot be rerun; old-chain rehearsal is not new-chain qualification.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log"
+      ],
+      "input_groups": [
+        "capture",
+        "cloudflare",
+        "firmware",
+        "release"
+      ],
+      "dependency_rationale": "Only listed dependencies apply: Firmware supplies GCC/key inputs; P41Release supplies workflow/build/packing; Cloudflare supplies fixed Worker/schema/S3 consumers and locked SDK inputs; P44Capture supplies raw HTTP/process capture. Evidence/P41Evaluation supply offline interpretation, Validation supplies the original host test inputs, Governance supplies configuration/authority criteria. Raw capture and interpretation are separate criteria so parser changes do not authorize replay.",
+      "external_inputs": [
+        "target",
+        "bootstrap-app",
+        "bootstrap-proof",
+        "host"
+      ],
+      "command_ids": [
+        "formal-dispatch-a",
+        "formal-finish-a",
+        "formal-dispatch-b",
+        "formal-finish-b"
+      ],
+      "artifact_ids": [
+        "P44-RAW-RUNS-1",
+        "P44-RAW-RUNS-2",
+        "P44-RAW-RUNS-3",
+        "P44-RAW-RUNS-4",
+        "P44-RAW-RUNS-5"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P44-REHEARSAL",
+      "description": "One new shared S3/preflight staging chain consumes protected inputs, verifies all GCC/pack/recovery bytes, three immutable uploads/full readbacks, ready registration and exactly one idempotent replay.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log"
+      ],
+      "input_groups": [
+        "cloudflare",
+        "evidence",
+        "firmware",
+        "legacy-evaluation",
+        "release"
+      ],
+      "dependency_rationale": "Only listed dependencies apply: Firmware supplies GCC/key inputs; P41Release supplies workflow/build/packing; Cloudflare supplies fixed Worker/schema/S3 consumers and locked SDK inputs; P44Capture supplies raw HTTP/process capture. Evidence/P41Evaluation supply offline interpretation, Validation supplies the original host test inputs, Governance supplies configuration/authority criteria. Raw capture and interpretation are separate criteria so parser changes do not authorize replay.",
+      "external_inputs": [
+        "target",
+        "bootstrap-app",
+        "bootstrap-proof",
+        "host"
+      ],
+      "command_ids": [
+        "formal-assemble-rehearsal",
+        "formal-rehearsal"
+      ],
+      "artifact_ids": [
+        "P44-REHEARSAL-1",
+        "P44-REHEARSAL-2"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P44-RAW-STATE",
+      "description": "Bounded original three-resource SELECT/list captures. Before independently reviews 47 complete v1/v2/v3 originals (legacy LIMIT 500 and LIMIT 8 pages) with no network replay, then collects unfinished rows with fixed LIMIT 8 pages; after uses entirely new LIMIT 8 pages. Standard gzip, bounded wire/decoded originals and the unchanged 60-second deadline address the documented large-response transport failure; a public gzip probe is not D1 acceptance. Capture-admitted read-only pre-response ECONNRESET has at most one recorded retry after 500ms abortable wait under the original 60s signal; response/body errors and mutations are never retried. Three actual missing/cross-Worker 401s and two cross-bucket 403s. No production object write, register, channel mutation, Release or device action; no incomplete predecessor criterion is REUSED.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log"
+      ],
+      "input_groups": [
+        "capture",
+        "cloudflare"
+      ],
+      "dependency_rationale": "Only listed dependencies apply: Firmware supplies GCC/key inputs; P41Release supplies workflow/build/packing; Cloudflare supplies fixed Worker/schema/S3 consumers and locked SDK inputs; P44Capture supplies raw HTTP/process capture. Evidence/P41Evaluation supply offline interpretation, Validation supplies the original host test inputs, Governance supplies configuration/authority criteria. Raw capture and interpretation are separate criteria so parser changes do not authorize replay.",
+      "external_inputs": [
+        "target",
+        "host",
+        "predecessor-before"
+      ],
+      "command_ids": [
+        "formal-before",
+        "formal-negatives",
+        "formal-after"
+      ],
+      "artifact_ids": [
+        "P44-RAW-STATE-1",
+        "P44-RAW-STATE-2",
+        "P44-RAW-STATE-3"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P44-RAW-READBACK",
+      "description": "Three immutable GET bodies and one correct production SELECT-only preflight use the validated artifact metadata. Evidence dependency reflects the actual parser-produced metadata; any affected recapture remains read-only, not another workflow.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log"
+      ],
+      "input_groups": [
+        "capture",
+        "cloudflare",
+        "evidence"
+      ],
+      "dependency_rationale": "Only listed dependencies apply: Firmware supplies GCC/key inputs; P41Release supplies workflow/build/packing; Cloudflare supplies fixed Worker/schema/S3 consumers and locked SDK inputs; P44Capture supplies raw HTTP/process capture. Evidence/P41Evaluation supply offline interpretation, Validation supplies the original host test inputs, Governance supplies configuration/authority criteria. Raw capture and interpretation are separate criteria so parser changes do not authorize replay.",
+      "external_inputs": [
+        "target",
+        "host"
+      ],
+      "command_ids": [
+        "formal-readbacks",
+        "formal-production-preflight"
+      ],
+      "artifact_ids": [
+        "P44-RAW-READBACK-1",
+        "P44-RAW-READBACK-2"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P44-APPROVALS",
+      "description": "Independently bind waiting/rejection/approval actor/environment/steps and original human-action provenance. GitHub login alone does not prove a human click; root must adjudicate actual owner response or witnessed dashboard action.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log"
+      ],
+      "input_groups": [
+        "evidence",
+        "release"
+      ],
+      "dependency_rationale": "Only listed dependencies apply: Firmware supplies GCC/key inputs; P41Release supplies workflow/build/packing; Cloudflare supplies fixed Worker/schema/S3 consumers and locked SDK inputs; P44Capture supplies raw HTTP/process capture. Evidence/P41Evaluation supply offline interpretation, Validation supplies the original host test inputs, Governance supplies configuration/authority criteria. Raw capture and interpretation are separate criteria so parser changes do not authorize replay.",
+      "external_inputs": [
+        "target",
+        "host"
+      ],
+      "command_ids": [
+        "formal-assemble-complete",
+        "formal-approvals"
+      ],
+      "artifact_ids": [
+        "P44-APPROVALS-1",
+        "P44-APPROVALS-2"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P44-ISOLATION",
+      "description": "Production and protected Trace D1/schema/channel/R2 and GitHub Releases/assets unchanged; staging adds only this candidate, three assets/objects and one exact registration audit. Complete byte readbacks match; before/after times bracket B, not continuous monitoring.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log"
+      ],
+      "input_groups": [
+        "cloudflare",
+        "evidence",
+        "release"
+      ],
+      "dependency_rationale": "Only listed dependencies apply: Firmware supplies GCC/key inputs; P41Release supplies workflow/build/packing; Cloudflare supplies fixed Worker/schema/S3 consumers and locked SDK inputs; P44Capture supplies raw HTTP/process capture. Evidence/P41Evaluation supply offline interpretation, Validation supplies the original host test inputs, Governance supplies configuration/authority criteria. Raw capture and interpretation are separate criteria so parser changes do not authorize replay.",
+      "external_inputs": [
+        "target",
+        "host"
+      ],
+      "command_ids": [
+        "formal-states"
+      ],
+      "artifact_ids": [
+        "P44-ISOLATION-1"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P44-HYGIENE",
+      "description": "No known credential values in public outputs; no claim of never-exposed local ACLs. Owner, operator-enforced deadline, safe replacement/revocation and temporary-management-source identity are recorded; no provider TTL or automation is fabricated.",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "raw_log"
+      ],
+      "input_groups": [
+        "evidence",
+        "governance"
+      ],
+      "dependency_rationale": "Only listed dependencies apply: Firmware supplies GCC/key inputs; P41Release supplies workflow/build/packing; Cloudflare supplies fixed Worker/schema/S3 consumers and locked SDK inputs; P44Capture supplies raw HTTP/process capture. Evidence/P41Evaluation supply offline interpretation, Validation supplies the original host test inputs, Governance supplies configuration/authority criteria. Raw capture and interpretation are separate criteria so parser changes do not authorize replay.",
+      "external_inputs": [
+        "lifecycle",
+        "originals",
+        "host"
+      ],
+      "command_ids": [
+        "formal-privacy"
+      ],
+      "artifact_ids": [
+        "P44-HYGIENE-1",
+        "P44-HYGIENE-2"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    }
+  ],
+  "performance_gates": []
+}

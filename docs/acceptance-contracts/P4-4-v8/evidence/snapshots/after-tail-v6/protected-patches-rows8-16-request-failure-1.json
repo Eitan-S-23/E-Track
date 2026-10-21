@@ -1,0 +1,19 @@
+{
+  "schema": "p44-request-failure-v1",
+  "attempt": 1,
+  "method": "POST",
+  "path": "/accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+  "request": {
+    "path": "snapshots/after-tail-v6/protected-patches-rows8-16.request.json",
+    "size_bytes": 68,
+    "sha256": "b4c9e690f5506c35a055c9218f755b8e124bca023876e7640ac86516a6eaacc1"
+  },
+  "started": "2026-10-20T11:55:02.400Z",
+  "ended": "2026-10-20T11:55:26.849Z",
+  "error_code": "UND_ERR_SOCKET",
+  "final_response_received": false,
+  "received_body_bytes": 0,
+  "informational_seen": false,
+  "informational_count": 0,
+  "first_information": null
+}

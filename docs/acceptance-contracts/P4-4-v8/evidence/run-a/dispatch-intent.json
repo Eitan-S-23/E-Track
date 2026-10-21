@@ -1,0 +1,15 @@
+{
+  "created_at": "2026-10-19T19:45:34.844Z",
+  "commitSha": "2756ca95e26ec636216313271708b3304d61a5cc",
+  "body": {
+    "ref": "dev/p4-4/config-integration-20261018",
+    "inputs": {
+      "publish": "false",
+      "rehearsal": "true",
+      "check_bindings": "false",
+      "approved_rehearsal_run_id": "",
+      "version_name": "3.2.9",
+      "release_notes": "P4-4 new S3/preflight configuration qualification; staging only; gate=false; no production release."
+    }
+  }
+}

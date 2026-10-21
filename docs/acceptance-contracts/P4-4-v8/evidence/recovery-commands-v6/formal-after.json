@@ -1,0 +1,21 @@
+{
+  "label": "formal-after",
+  "command": "node",
+  "args": [
+    "Tools/ota/p44-after-recovery.cjs",
+    "after"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "started": "2026-10-20T11:39:28.585Z",
+  "ended": "2026-10-20T11:55:31.813Z",
+  "exitCode": 1,
+  "signal": null,
+  "process_closed": true,
+  "closed": true,
+  "spawn_failed": false,
+  "output": {
+    "path": "recovery-commands-v6/formal-after.log",
+    "size_bytes": 43,
+    "sha256": "3905175dfdac979c90a7e5387e8f7fca9605626c29a6c709f6ddb245b1cc957e"
+  }
+}

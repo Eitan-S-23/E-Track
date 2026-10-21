@@ -1,0 +1,14 @@
+{
+  "label": "remediation-workflow-01",
+  "command": "node",
+  "args": [
+    "--test",
+    "tests/ota/test_firmware_workflow.mjs"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "startedAt": "2026-10-18T22:57:11.919Z",
+  "endedAt": "2026-10-18T22:57:34.872Z",
+  "exitCode": 0,
+  "signal": null,
+  "logPath": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\remediation-workflow-01.log"
+}

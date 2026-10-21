@@ -1,0 +1,27 @@
+{
+  "label": "formal-negatives",
+  "command": "python",
+  "args": [
+    "-I",
+    "-S",
+    "-B",
+    "Tools/ota/p44-after-bundle.py",
+    "--package-spec",
+    "docs/acceptance-contracts/P4-4-v8.package.json",
+    "verify-existing",
+    "negatives"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "started": "2026-10-21T09:09:03.316Z",
+  "ended": "2026-10-21T09:09:28.843Z",
+  "exitCode": 0,
+  "signal": null,
+  "process_closed": true,
+  "closed": true,
+  "spawn_failed": false,
+  "output": {
+    "path": "recovery-commands-v8/formal-negatives.log",
+    "size_bytes": 572,
+    "sha256": "9140f700d2dcec2962d727180e80c159cac10adae63a78f35776300818f70bc4"
+  }
+}

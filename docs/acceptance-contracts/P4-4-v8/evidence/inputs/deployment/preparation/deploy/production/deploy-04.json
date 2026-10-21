@@ -1,0 +1,452 @@
+{
+  "startedAt": "2026-10-19T00:19:10.463Z",
+  "mode": "deploy",
+  "role": "production",
+  "target": {
+    "name": "e-track-firmware-production",
+    "bucket": "e-track-firmware-production-releases",
+    "d1": "1cd5db26-6bbd-4595-abef-72ff51ecdaf3",
+    "environment": "prod",
+    "originalConfig": "D:/github/my/E-Track/.cache/p4-4-integration-20261018/.cache/p44/production/wrangler.json",
+    "version": "d4ecbdc7-f097-4ced-b55c-b2f6dfe4c451"
+  },
+  "sourceCommit": "b56534d7b6c993c0795010d0404fb8a81f7eeb9d",
+  "runtimeSha256": "1ad919d795a2354cd4c7d9617f3e3c9805f831967d1a2cdd5930ba61e4c3303f",
+  "artifactId": 12154675551,
+  "requests": [
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/workers/services/e-track-firmware-production",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-19T00:19:14.922Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-deploy-production-04\\01.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-deploy-production-04\\01.headers",
+      "endedAt": "2026-10-19T00:19:17.924Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 200,
+      "bytes": 2047,
+      "sha256": "1144ad959eed0b780cbf750706a4cf5b9c5ed20997a9ba85f22f8cde1d130d83",
+      "stderr": "",
+      "requestId": "a4cb9c3eea1cd797-NRT"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/actions/variables/OTA_BOOT_CHAIN_READY",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-19T00:19:19.226Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-deploy-production-04\\02.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-deploy-production-04\\02.headers",
+      "endedAt": "2026-10-19T00:19:20.615Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 200,
+      "bytes": 119,
+      "sha256": "e2602c11ef14c5dc58477e0fd4c70c556358ec082d57d26e330a1122b27d801e",
+      "stderr": "",
+      "requestId": "5EB7:7CDE8:10441E2:11A537C:6AD56208"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/variables/OTA_BOOT_CHAIN_READY",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-19T00:19:21.682Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-deploy-production-04\\03.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-deploy-production-04\\03.headers",
+      "endedAt": "2026-10-19T00:19:23.103Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 200,
+      "bytes": 119,
+      "sha256": "c67a2c5718dfe8bbc233f1fa5248867bad6307774afb3f5fc6da15e635f9c929",
+      "stderr": "",
+      "requestId": "D985:84F06:10C7F22:12292A2:6AD5620A"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/environments/firmware-production/variables/OTA_BOOT_CHAIN_READY",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-19T00:19:24.175Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-deploy-production-04\\04.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-deploy-production-04\\04.headers",
+      "endedAt": "2026-10-19T00:19:25.656Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 200,
+      "bytes": 119,
+      "sha256": "b7b368b94ebf50c0a1a3823d1c50a1e70cc2fac4f6ada24a28e27c633848826f",
+      "stderr": "",
+      "requestId": "3783:3157C7:10066E5:1168526:6AD5620D"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/workers/scripts/e-track-firmware-production/settings",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-19T00:19:26.709Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-deploy-production-04\\05.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-deploy-production-04\\05.headers",
+      "endedAt": "2026-10-19T00:19:30.483Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 200,
+      "bytes": 2135,
+      "sha256": "577f91f8acfcef38805c7f60b3e16f7e8b691e3326bbaef1315510bca7a1d209",
+      "stderr": "",
+      "requestId": "a4cb9c883c735db3-NRT"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/workers/scripts/e-track-firmware-production/deployments",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-19T00:19:31.555Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-deploy-production-04\\06.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-deploy-production-04\\06.headers",
+      "endedAt": "2026-10-19T00:19:33.401Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 200,
+      "bytes": 2641,
+      "sha256": "bd723c783bedb9bee2eb492e9677189bdb8a55d2f0eb34dd1be1ae62cf707b45",
+      "stderr": "",
+      "requestId": "a4cb9ca62a4adf7f-NRT"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/workers/scripts/e-track-firmware-production/schedules",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-19T00:19:34.449Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-deploy-production-04\\07.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-deploy-production-04\\07.headers",
+      "endedAt": "2026-10-19T00:19:38.448Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 200,
+      "bytes": 251,
+      "sha256": "07c4b9d3cb9086645e9e2910878998b8b5e01eee97d0e367066478cc0d4833ae",
+      "stderr": "",
+      "requestId": "a4cb9cbb8e5218ce-NRT"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/workers/scripts/e-track-firmware-production/settings",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-19T00:20:00.700Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-deploy-production-04\\08.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-deploy-production-04\\08.headers",
+      "endedAt": "2026-10-19T00:20:05.315Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 200,
+      "bytes": 2282,
+      "sha256": "6f92acbaee883ec0afef70d7a005ec7b1ea5f0838d69ec947f4cd3b36178633f",
+      "stderr": "",
+      "requestId": "a4cb9d5d2f55e38d-NRT"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/workers/scripts/e-track-firmware-production/deployments",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-19T00:20:06.350Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-deploy-production-04\\09.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-deploy-production-04\\09.headers",
+      "endedAt": "2026-10-19T00:20:08.194Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 200,
+      "bytes": 3115,
+      "sha256": "cfee7ee7dded39a9ea0eee832ec41743c095fbb4965ec631112ceade57b7c813",
+      "stderr": "",
+      "requestId": "a4cb9d7fcb068afb-NRT"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/workers/scripts/e-track-firmware-production/schedules",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-19T00:20:09.241Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-deploy-production-04\\10.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-deploy-production-04\\10.headers",
+      "endedAt": "2026-10-19T00:20:13.115Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 200,
+      "bytes": 251,
+      "sha256": "07c4b9d3cb9086645e9e2910878998b8b5e01eee97d0e367066478cc0d4833ae",
+      "stderr": "",
+      "requestId": "a4cb9d9dfcb03d20-NRT"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/workers/scripts/e-track-firmware-production/content/v2",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-19T00:20:14.234Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-deploy-production-04\\11.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-deploy-production-04\\11.headers",
+      "endedAt": "2026-10-19T00:20:19.051Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 200,
+      "bytes": 149262,
+      "sha256": "708bffa56ddc8dcd2871e340cbe1610f4b14999f5a6f0178ce04c790d4671bcd",
+      "stderr": "",
+      "requestId": "a4cb9db0b8feafac-NRT"
+    }
+  ],
+  "businessDataWrites": "NONE_REQUESTED",
+  "formalAcceptance": "NOT_RUN",
+  "purpose": "Owner-authorized Worker configuration preparation; no release or device operation",
+  "resumeReason": "Previous CLI stopped at its first read-only service GET; fresh service and old-version checks precede the unperformed upload.",
+  "gates": [
+    {
+      "route": "actions/variables/OTA_BOOT_CHAIN_READY",
+      "value": "false"
+    },
+    {
+      "route": "environments/firmware-rehearsal/variables/OTA_BOOT_CHAIN_READY",
+      "value": "false"
+    },
+    {
+      "route": "environments/firmware-production/variables/OTA_BOOT_CHAIN_READY",
+      "value": "false"
+    }
+  ],
+  "before": {
+    "settings": {
+      "placement": {},
+      "compatibility_date": "2026-06-28",
+      "compatibility_flags": [
+        "nodejs_compat"
+      ],
+      "usage_model": "standard",
+      "tags": [],
+      "tail_consumers": [],
+      "logpush": false,
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1,
+        "redact_query_string": true,
+        "logs": {
+          "enabled": true,
+          "head_sampling_rate": 1,
+          "persist": true,
+          "invocation_logs": true
+        },
+        "traces": {
+          "enabled": false,
+          "persist": true,
+          "head_sampling_rate": 1
+        }
+      },
+      "annotations": {
+        "workers/triggered_by": "version_upload"
+      },
+      "bindings": [
+        {
+          "name": "APP_ID",
+          "text": "trace",
+          "type": "plain_text"
+        },
+        {
+          "database_id": "1cd5db26-6bbd-4595-abef-72ff51ecdaf3",
+          "id": "1cd5db26-6bbd-4595-abef-72ff51ecdaf3",
+          "name": "DB",
+          "type": "d1"
+        },
+        {
+          "name": "DEPLOY_TOKEN_SHA256",
+          "type": "secret_text"
+        },
+        {
+          "name": "DOWNLOAD_HMAC_KEY_CURRENT",
+          "type": "secret_text"
+        },
+        {
+          "name": "DOWNLOAD_TOKEN_KEY_VERSION",
+          "text": "p44-prod-1",
+          "type": "plain_text"
+        },
+        {
+          "name": "DOWNLOAD_TOKEN_TTL_SECONDS",
+          "text": "300",
+          "type": "plain_text"
+        },
+        {
+          "name": "ENABLE_DIRECT_ADMIN_API",
+          "text": "false",
+          "type": "plain_text"
+        },
+        {
+          "name": "ENVIRONMENT",
+          "text": "prod",
+          "type": "plain_text"
+        },
+        {
+          "name": "FIRMWARE_V2_CUTOVER_EPOCH",
+          "text": "1792039926",
+          "type": "plain_text"
+        },
+        {
+          "name": "GITHUB_OWNER",
+          "text": "Eitan-S-23",
+          "type": "plain_text"
+        },
+        {
+          "name": "GITHUB_REPO",
+          "text": "E-Track",
+          "type": "plain_text"
+        },
+        {
+          "bucket_name": "e-track-firmware-production-releases",
+          "name": "RELEASES_BUCKET",
+          "type": "r2_bucket"
+        }
+      ]
+    },
+    "version": "d4ecbdc7-f097-4ced-b55c-b2f6dfe4c451",
+    "deploymentId": "f1db5e07-3d09-434f-b977-370d7e452cf1",
+    "crons": [
+      "0 * * * *"
+    ]
+  },
+  "command": {
+    "executable": "D:\\install\\nvm\\nodejs\\node.exe",
+    "args": [
+      "D:/github/my/E-Track/.cache/p4-4-integration-20261018/app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/wrangler/bin/wrangler.js",
+      "deploy",
+      "--no-bundle",
+      "--keep-vars",
+      "--config",
+      "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\private\\deploy-production.json"
+    ],
+    "cwd": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019",
+    "startedAt": "2026-10-19T00:19:40.017Z",
+    "endedAt": "2026-10-19T00:19:59.612Z",
+    "exitCode": 0,
+    "signal": null,
+    "consolePath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\deploy\\production\\deploy-04-console.log",
+    "warningLines": 2
+  },
+  "after": {
+    "settings": {
+      "placement": {},
+      "compatibility_date": "2026-06-28",
+      "compatibility_flags": [
+        "nodejs_compat"
+      ],
+      "usage_model": "standard",
+      "tags": [],
+      "tail_consumers": [],
+      "logpush": false,
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1,
+        "redact_query_string": true,
+        "logs": {
+          "enabled": true,
+          "head_sampling_rate": 1,
+          "persist": true,
+          "invocation_logs": true
+        },
+        "traces": {
+          "enabled": false,
+          "persist": true,
+          "head_sampling_rate": 1
+        }
+      },
+      "annotations": {
+        "workers/message": "P4-4 configuration; tested CI source b56534d7b6c993c0795010d0404fb8a81f7eeb9d",
+        "workers/tag": "p44-b56534d7b6c9",
+        "workers/triggered_by": "version_upload"
+      },
+      "bindings": [
+        {
+          "name": "APP_ID",
+          "text": "trace",
+          "type": "plain_text"
+        },
+        {
+          "database_id": "1cd5db26-6bbd-4595-abef-72ff51ecdaf3",
+          "id": "1cd5db26-6bbd-4595-abef-72ff51ecdaf3",
+          "name": "DB",
+          "type": "d1"
+        },
+        {
+          "name": "DEPLOY_TOKEN_SHA256",
+          "type": "secret_text"
+        },
+        {
+          "name": "DOWNLOAD_HMAC_KEY_CURRENT",
+          "type": "secret_text"
+        },
+        {
+          "name": "DOWNLOAD_TOKEN_KEY_VERSION",
+          "text": "p44-prod-1",
+          "type": "plain_text"
+        },
+        {
+          "name": "DOWNLOAD_TOKEN_TTL_SECONDS",
+          "text": "300",
+          "type": "plain_text"
+        },
+        {
+          "name": "ENABLE_DIRECT_ADMIN_API",
+          "text": "false",
+          "type": "plain_text"
+        },
+        {
+          "name": "ENVIRONMENT",
+          "text": "prod",
+          "type": "plain_text"
+        },
+        {
+          "name": "FIRMWARE_V2_CUTOVER_EPOCH",
+          "text": "1792039926",
+          "type": "plain_text"
+        },
+        {
+          "name": "GITHUB_OWNER",
+          "text": "Eitan-S-23",
+          "type": "plain_text"
+        },
+        {
+          "name": "GITHUB_REPO",
+          "text": "E-Track",
+          "type": "plain_text"
+        },
+        {
+          "bucket_name": "e-track-firmware-production-releases",
+          "name": "RELEASES_BUCKET",
+          "type": "r2_bucket"
+        }
+      ]
+    },
+    "version": "e1653d60-03cb-4397-b154-78efd681ebbc",
+    "deploymentId": "b76395f1-f2bf-4adb-b936-0a291edf6e45",
+    "crons": [
+      "0 * * * *"
+    ]
+  },
+  "content": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\deploy\\production\\deployed-content.bin",
+    "sha256": "708bffa56ddc8dcd2871e340cbe1610f4b14999f5a6f0178ce04c790d4671bcd",
+    "contentType": "multipart/form-data; boundary=921f53d6663c633dffdaad1481c669eb25963f4d01df7228e1a1d8459d83",
+    "entrypoint": "index.js",
+    "moduleSha256": "1ad919d795a2354cd4c7d9617f3e3c9805f831967d1a2cdd5930ba61e4c3303f",
+    "moduleBytes": 149013,
+    "codeParts": [
+      "index.js"
+    ]
+  },
+  "complete": true,
+  "endedAt": "2026-10-19T00:20:19.684Z"
+}

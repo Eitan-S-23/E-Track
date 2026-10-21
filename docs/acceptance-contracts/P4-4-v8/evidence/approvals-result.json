@@ -1,0 +1,26 @@
+{
+  "schema": "p44-offline-evaluation-v1",
+  "mode": "approvals",
+  "started": "2026-10-21T10:38:47.204951+00:00",
+  "platform_actions": 0,
+  "manifest_sha256": "270e6e9376ed467f98c451cbbc90e3fcf77c46b1c7baadd3fccb32ce8c467e33",
+  "observed": {
+    "run_a": 39313672925,
+    "run_b": 39351100037,
+    "attempts": [
+      1,
+      1
+    ],
+    "review_states": [
+      "rejected",
+      "approved"
+    ],
+    "rejected_release_unexecuted": true,
+    "complete_approved_workflow": true,
+    "reviewer_attestation_hash_bound": true,
+    "human_action_origin_requires_independent_root_judgment": true
+  },
+  "ok": true,
+  "files_verified": 18,
+  "ended": "2026-10-21T10:38:47.311201+00:00"
+}

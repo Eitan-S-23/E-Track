@@ -1,0 +1,15 @@
+{
+  "method": "POST",
+  "origin": "https://api.cloudflare.com",
+  "path": "/accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+  "started": "2026-10-19T19:33:15.885Z",
+  "request": {
+    "path": "snapshots/before/staging-firmware_admin_idempotency-count.request.json",
+    "size_bytes": 70,
+    "sha256": "665d9222ff1c5179c7b21417dad34f968175535b04778fd93e3c9ba39c3024e2"
+  },
+  "request_headers": {
+    "accept-encoding": "gzip"
+  },
+  "note": "Reserved before request; a lost response is not permission to replay a mutation."
+}

@@ -1,0 +1,30 @@
+{
+  "label": "formal-approvals",
+  "command": "python",
+  "args": [
+    "-I",
+    "-S",
+    "-B",
+    "Tools/acceptance/p44/inspect.py",
+    "approvals",
+    "--repo-root",
+    "D:/github/my/E-Track/.cache/p4-4-integration-20261018",
+    "--input",
+    "docs/acceptance-contracts/P4-4-v8/evidence/manifest.json",
+    "--output",
+    "docs/acceptance-contracts/P4-4-v8/evidence/approvals-result.json"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "started": "2026-10-21T10:38:44.214Z",
+  "ended": "2026-10-21T10:38:47.338Z",
+  "exitCode": 0,
+  "signal": null,
+  "process_closed": true,
+  "closed": true,
+  "spawn_failed": false,
+  "output": {
+    "path": "recovery-commands-v8/formal-approvals.log",
+    "size_bytes": 211,
+    "sha256": "06bac52f869acd90db8c33169874499fb3d6f5efa904c1885b70d9881454e221"
+  }
+}
