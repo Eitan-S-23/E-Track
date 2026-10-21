@@ -1,0 +1,10 @@
+{"development_only": true, "fixture_root": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44-v6-development\\python\\batch-7", "c5_source_files_verified": 1185, "network_requests": 0, "source_sha256": "e61af5c4d1c91cea25c47c311c2303fc4251cb4f8ae6766d2d69cefccc02013c", "tests_sha256": "12903d318f199147c67658d0046bc5745af9ffe6507cd3dc8c2589ac76723902"}
+test_validation_commands_always_bind_c5_and_explicit_c4_source (__main__.AfterBundleTests.test_validation_commands_always_bind_c5_and_explicit_c4_source) ... ok
+test_successor_v7_reuses_actual_c5_and_keeps_c4_as_origin (__main__.AfterBundleTests.test_successor_v7_reuses_actual_c5_and_keeps_c4_as_origin) ... ok
+test_successor_validator_arguments_include_c5_in_python_and_node (__main__.AfterBundleTests.test_successor_validator_arguments_include_c5_in_python_and_node) ... ok
+test_successor_reuse_source_rejects_missing_tampered_and_wrong_lineage (__main__.AfterBundleTests.test_successor_reuse_source_rejects_missing_tampered_and_wrong_lineage) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 81.583s
+
+OK

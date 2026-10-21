@@ -1,0 +1,17 @@
+{
+  "label": "v7-source-plan-c5-probe01",
+  "command": "python",
+  "args": [
+    "-I",
+    "-S",
+    "-B",
+    "-c",
+    "exec(__import__('base64').b64decode('aW1wb3J0IGltcG9ydGxpYi51dGlsLGpzb24KZnJvbSBwYXRobGliIGltcG9ydCBQYXRoCnM9aW1wb3J0bGliLnV0aWwuc3BlY19mcm9tX2ZpbGVfbG9jYXRpb24oJ3A0NF92N19wcmVmbGlnaHQnLFBhdGgoJ1Rvb2xzL290YS9wNDQtYWZ0ZXItYnVuZGxlLnB5JykuYWJzb2x1dGUoKSk7bT1pbXBvcnRsaWIudXRpbC5tb2R1bGVfZnJvbV9zcGVjKHMpO3MubG9hZGVyLmV4ZWNfbW9kdWxlKG0pCm0uY29uZmlndXJlX3BhY2thZ2UoJ2RvY3MvYWNjZXB0YW5jZS1jb250cmFjdHMvUDQtNC12Ny5wYWNrYWdlLmpzb24nKQpvcmlnaW5hbD1tLnJldXNlX3NvdXJjZXMKZGVmIHdpdGhfYzUoKToKIHZhbHVlcz1vcmlnaW5hbCgpO3Jvb3Q9bS5ST09ULydkb2NzL2FjY2VwdGFuY2UtY29udHJhY3RzL1A0LTQtdjUnO2MseCxjaCxtaD1tLlJVTEVTLl9sb2FkX2J1bmRsZShyb290LndpdGhfc3VmZml4KCcuY29udHJhY3QuanNvbicpLHJvb3QvJ2ZpbmFsLWV2aWRlbmNlLW1hdHJpeC5qc29uJyk7dmFsdWVzW21oXT17J2NvbnRyYWN0JzpjLCdtYXRyaXgnOngsJ2NvbnRyYWN0X3NoYTI1Nic6Y2gsJ21hdHJpeF9zaGEyNTYnOm1oLCdidW5kbGVfZGlyZWN0b3J5Jzpyb290fTtyZXR1cm4gdmFsdWVzCm0ucmV1c2Vfc291cmNlcz13aXRoX2M1CnBsYW4sZGVzY3JpcHRvcj1tLnNvdXJjZV9wbGFuKCk7bS5vdXRwdXRzX2Fic2VudChbdGFyZ2V0IGZvciBfLHRhcmdldCBpbiBwbGFuXStbbS5EQVRBL20uRklYVFVSRV0pCnByaW50KGpzb24uZHVtcHMoeydyZWFkX29ubHlfcHJvYmUnOlRydWUsJ3RlbXBvcmFyeV9pbl9tZW1vcnlfYWRqdXN0bWVudCc6J3N1cHBseSBhY3R1YWwgQzUgcmV1c2UgaGlzdG9yeScsJ3NvdXJjZV9maWxlcyc6bGVuKHBsYW4pLCd0YXJnZXRzX2NoZWNrZWQnOmxlbihwbGFuKSsxLCdwYWNrYWdlJzpzdHIobS5QQUNLQUdFKSwncHJlZGVjZXNzb3JfYnVuZGxlJzptLlBSRURFQ0VTU09SX0JVTkRMRSwncHJlZGVjZXNzb3JfaW5kZXgnOm0uUFJFREVDRVNTT1JfSU5ERVgsJ3NvdXJjZV9wbGFuX3N1Y2Nlc3MnOlRydWUsJ2Nsb3VkX3JlcXVlc3RzJzowLCdldmlkZW5jZV93cml0ZXMnOjB9KSkK'))"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "startedAt": "2026-10-20T22:17:09.089Z",
+  "endedAt": "2026-10-20T22:17:45.527Z",
+  "exitCode": 0,
+  "signal": null,
+  "logPath": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\v7-source-plan-c5-probe01.log"
+}

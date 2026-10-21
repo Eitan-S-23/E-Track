@@ -1,0 +1,8 @@
+{"interop":".cache/p44-v7-development/validator-targeted-01","receipt":{"path":"interop-body.json","size_bytes":57511463,"sha256":"ec1939a9280fdc6b792b18f2690b579ce07fdb5383d167d452c6689d28b39d27"}}
+{"case":"body-disconnect","ok":true}
+{"interop":".cache/p44-v7-development/validator-targeted-01","receipt":{"path":"interop-resumed.json","size_bytes":57350149,"sha256":"0cd800ad5b21c3db50e54e1976c453dd1c736b621bdede6e55fa7067a97e6a9c"}}
+{"case":"resume","ok":true}
+{"interop":".cache/p44-v7-development/validator-targeted-01","receipt":{"path":"interop.json","size_bytes":57242649,"sha256":"c16df297cc390ef6b78a9e7fd0b9d453635c09a27885578f56c1d1a226e40b44"}}
+{"case":"complete","ok":true}
+{"case":"tail-integrity","ok":true}
+{"scope":"OFFLINE_DEVELOPMENT_SELFTEST_ONLY","ok":true,"started":"2026-10-21T03:07:38.451Z","ended":"2026-10-21T03:08:16.522Z","assertions":157,"source":[{"path":"Tools/ota/p44-after-recovery.cjs","size_bytes":86463,"sha256":"037c66a8388156382847702e72c21c1d3b01f96f5ca4976579a772c43bb3c8d2"},{"path":"tests/ota/test_p44_after_recovery.cjs","size_bytes":65716,"sha256":"d84a0d37aca555f51d630dba4e03a07539cfb5cefbe2e082a0759129709cb49c"}],"cloud_operations":0,"c5_source_files":1185,"predecessor_commit":"9bfc48573a5eed190583411ac465bd847424a286","retained_complete_originals":31,"retained_failed_originals":1,"retained_private_verify_failures":1}

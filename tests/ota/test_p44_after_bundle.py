@@ -9,6 +9,7 @@ import json
 import io
 from pathlib import Path
 import stat
+import subprocess
 import sys
 from types import SimpleNamespace
 import unittest
@@ -20,7 +21,14 @@ SPEC = importlib.util.spec_from_file_location("p44_after_bundle", ROOT / "Tools/
 m = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(m)
 DEV = ROOT / ".cache/p44-v6-development/python"
-NODE_INTEROP = ROOT / ".cache/p44-v6-development/selftest-01/interop"
+NODE_INTEROP = None
+if "--node-fixture" in sys.argv:
+    index = sys.argv.index("--node-fixture")
+    NODE_INTEROP = m.b.guard(ROOT / sys.argv[index + 1])
+    assert any(NODE_INTEROP.is_relative_to(ROOT / ".cache" / name) for name in ("p44-v6-development", "p44-v7-development"))
+    if NODE_INTEROP.is_relative_to(ROOT / ".cache/p44-v7-development"):
+        DEV = ROOT / ".cache/p44-v7-development/python"
+    del sys.argv[index:index + 2]
 FUTURE_TREE = "e" * 40
 ADDITIONS = ["Tools/ota/p44-after-bundle.py", "Tools/ota/p44-after-recovery.cjs",
              "tests/ota/test_p44_after_bundle.py", "tests/ota/test_p44_after_recovery.cjs"]
@@ -58,6 +66,32 @@ class AfterBundleTests(unittest.TestCase):
                 break
         else:
             raise AssertionError("TEST_BATCH_BOUND")
+        cls.interop = {}
+        cls.private_originals = {}
+        if NODE_INTEROP is not None:
+            for name in ("interop", "interop-resumed", "native-transport", "interop-body", "successor-cli"):
+                if not (NODE_INTEROP / (name + ".json")).exists():
+                    continue
+                packet = m.read(NODE_INTEROP / (name + ".json"))
+                assert packet["scope"] == "OFFLINE_CROSS_LANGUAGE_SYNTHETIC" and packet["network_requests"] == 0
+                for source in packet["source"]:
+                    raw = m.b.guard(ROOT / source["path"]).read_bytes()
+                    assert len(raw) == source["size_bytes"] and m.b.sha(raw) == source["sha256"], "STALE_NODE_FIXTURE"
+                directory = m.b.guard(cls.batch / name)
+                names = [entry["path"] for entry in packet["files"]]
+                assert len(names) == len(set(names)), "DUPLICATE_NODE_FIXTURE_FILE"
+                for entry in packet["files"]:
+                    target = m.b.guard(directory / entry["path"])
+                    target.relative_to(directory)
+                    raw = base64.b64decode(entry["base64"], validate=True)
+                    assert len(raw) == entry["size_bytes"] and m.b.sha(raw) == entry["sha256"], "NODE_FIXTURE_BYTES"
+                    m.b.write(target, raw)
+                for entry in packet.get("private_files", []):
+                    raw = base64.b64decode(entry["base64"], validate=True)
+                    assert len(raw) == entry["size_bytes"] and m.b.sha(raw) == entry["sha256"], "PRIVATE_FIXTURE_BYTES"
+                    assert entry["path"] not in cls.private_originals, "DUPLICATE_PRIVATE_FIXTURE"
+                    cls.private_originals[entry["path"]] = raw
+                cls.interop[name] = (directory, packet.get("contract"), packet.get("descriptor"), packet)
         print(json.dumps({"development_only": True, "fixture_root": str(cls.batch),
                           "c5_source_files_verified": len(cls.descriptor["files"]), "network_requests": 0,
                           "source_sha256": m.sha(ROOT / m.PYTHON), "tests_sha256": m.sha(Path(__file__))}), flush=True)
@@ -214,6 +248,106 @@ class AfterBundleTests(unittest.TestCase):
                 offset = args.index("--reuse-source")
                 self.assertEqual(args[offset + 1:offset + 3], [m.SOURCE_CONTRACT.relative_to(ROOT).as_posix(),
                                                               m.SOURCE_MATRIX.relative_to(ROOT).as_posix()])
+
+    def successor_module(self):
+        spec = importlib.util.spec_from_file_location("p44_successor_v7", ROOT / m.PYTHON)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        module.configure_package("docs/acceptance-contracts/P4-4-v7.package.json")
+        return module
+
+    def test_successor_v7_reuses_actual_c5_and_keeps_c4_as_origin(self):
+        next_module = self.successor_module()
+        sources = next_module.reuse_sources()
+        by_version = {source["contract"]["version"]: source for source in sources.values()}
+        self.assertEqual(set(by_version), {4, 5})
+        self.assertEqual(by_version[4]["matrix_sha256"], next_module.SOURCE_MATRIX_HASH)
+        self.assertEqual(by_version[4]["contract"]["freeze_commit"], next_module.SOURCE_COMMIT)
+        self.assertEqual(by_version[5]["matrix"]["previous_matrix_sha256"], next_module.SOURCE_MATRIX_HASH)
+        self.assertEqual(by_version[5]["contract"]["freeze_commit"], next_module.LEGACY_PREDECESSOR[0])
+        parent = {"contract": m.read(next_module.PARENT_CONTRACT), "matrix": m.read(next_module.PARENT_MATRIX),
+                  "contract_sha256": next_module.PARENT_HASH, "matrix_sha256": next_module.PARENT_MATRIX_HASH,
+                  "bundle_directory": next_module.PARENT}
+        self.assertFalse(next_module.RULES._validate_reuse_history(parent, sources, ROOT, set(), set()))
+        missing = {key: value for key, value in sources.items() if value["contract"]["version"] != 5}
+        errors = next_module.RULES._validate_reuse_history(parent, missing, ROOT, set(), set())
+        self.assertEqual(len(errors), 1)
+        self.assertIn("missing previous round", errors[0])
+        plan, descriptor = next_module.source_plan()
+        self.assertEqual(len(plan), 1416)
+        self.assertEqual(len(descriptor["files"]) + 2, len(plan))
+
+    def test_successor_validator_arguments_include_c5_in_python_and_node(self):
+        next_module = self.successor_module()
+        commands = next_module.validation_commands()
+        expected = [
+            ["docs/acceptance-contracts/P4-4-v4.contract.json", "docs/acceptance-contracts/P4-4-v4/final-evidence-matrix.json"],
+            ["docs/acceptance-contracts/P4-4-v5.contract.json", "docs/acceptance-contracts/P4-4-v5/final-evidence-matrix.json"]]
+        for key, command in commands.items():
+            args = command.split()
+            with self.subTest(mode=key):
+                self.assertEqual(args[args.index("--previous-contract") + 1], "docs/acceptance-contracts/P4-4-v6.contract.json")
+                self.assertEqual(args[args.index("--previous-matrix") + 1], "docs/acceptance-contracts/P4-4-v6/final-evidence-matrix.json")
+                pairs = [args[index + 1:index + 3] for index, value in enumerate(args) if value == "--reuse-source"]
+                self.assertEqual(pairs, expected)
+        script = ("const path=require('node:path');"
+                  "const r=require(path.join(process.cwd(),'Tools/ota/p44-after-recovery.cjs'));"
+                  "r.configurePackage('docs/acceptance-contracts/P4-4-v7.package.json');"
+                  "process.stdout.write(JSON.stringify(r.validatorArgs('formal-precheck')));")
+        result = subprocess.run(["node", "-e", script], cwd=ROOT, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout), commands["precheck"].split()[1:])
+
+    def test_successor_reuse_source_rejects_missing_tampered_and_wrong_lineage(self):
+        next_module = self.successor_module()
+        sources = next_module.reuse_sources()
+        c5 = next(source for source in sources.values() if source["contract"]["version"] == 5)
+        with self.assertRaisesRegex(AssertionError, "REUSE_SOURCE_MISSING"):
+            next_module._find_reuse_source("0" * 64)
+        with self.assertRaisesRegex(AssertionError, "REUSE_SOURCE_HASH"):
+            next_module._load_reuse_source(next_module.PARENT, "0" * 64)
+
+        workspace = self.directory()
+        wrong_name = workspace / "P4-4-v9"
+        wrong_name.mkdir()
+        real_c5 = ROOT / "docs/acceptance-contracts/P4-4-v5"
+        for source, target in ((real_c5.with_suffix(".contract.json"), wrong_name.with_suffix(".contract.json")),
+                               (real_c5 / "final-evidence-matrix.json", wrong_name / "final-evidence-matrix.json")):
+            m.b.write(target, m.b.guard(source).read_bytes())
+        with self.assertRaisesRegex(AssertionError, "REUSE_SOURCE_IDENTITY"):
+            next_module._load_reuse_source(wrong_name, c5["matrix_sha256"])
+
+        tampered = workspace / "P4-4-v5"
+        tampered.mkdir()
+        m.b.write(tampered / "final-evidence-matrix.json",
+                  m.b.guard(real_c5 / "final-evidence-matrix.json").read_bytes() + b"\n")
+        m.b.write(tampered.with_suffix(".contract.json"), m.b.guard(real_c5.with_suffix(".contract.json")).read_bytes())
+        with self.assertRaisesRegex(AssertionError, "REUSE_SOURCE_HASH"):
+            next_module._load_reuse_source(tampered, c5["matrix_sha256"])
+
+        original = next_module._load_reuse_source
+
+        def wrong_lineage(package, expected):
+            value = original(package, expected)
+            if value["contract"]["version"] == 5:
+                value = copy.deepcopy(value)
+                value["contract"]["version"] = 6
+            return value
+
+        with patch.object(next_module, "_load_reuse_source", side_effect=wrong_lineage):
+            with self.assertRaisesRegex(AssertionError, "REUSE_SOURCE_LINEAGE"):
+                next_module.reuse_sources()
+
+        def cyclic(package, expected):
+            value = original(package, expected)
+            if value["contract"]["version"] == 5:
+                value = copy.deepcopy(value)
+                value["matrix"]["previous_matrix_sha256"] = value["matrix_sha256"]
+            return value
+
+        with patch.object(next_module, "_load_reuse_source", side_effect=cyclic):
+            with self.assertRaisesRegex(AssertionError, "REUSE_SOURCE_CYCLE"):
+                next_module.reuse_sources()
 
     def test_c6_paths_and_fixture_id_do_not_collide_with_c4_or_c5(self):
         contract = self.contract()
@@ -612,8 +746,9 @@ class AfterBundleTests(unittest.TestCase):
 
     def test_after_and_assembly_results_bind_exact_files(self):
         directory, descriptor, ctx = self.result_fixture()
-        with patch.object(m, "DATA", directory):
+        with patch.object(m, "DATA", directory), patch.object(m, "verify_after_recovery", return_value={"total_complete": 0}) as verifier:
             m.capture_results({"freeze_commit": "f" * 40}, descriptor, ctx)
+            verifier.assert_called_once()
         original = m.read
         for change in (lambda reference: reference.update(sha256="a" * 64), lambda reference: reference.update(path="other.json")):
             altered = original(directory / m.RECOVERY / "after-result.json")
@@ -627,31 +762,188 @@ class AfterBundleTests(unittest.TestCase):
         with patch.object(m, "DATA", directory), self.assertRaisesRegex(AssertionError, "MANIFEST_AFTER_BINDING"):
             m.capture_results({"freeze_commit": "f" * 40}, descriptor, ctx)
 
-    def node_interop(self):
-        directory = m.b.guard(NODE_INTEROP)
-        self.assertTrue(directory.is_dir(), "NODE_AFTER_ASSEMBLE_FIXTURE_REQUIRED")
-        return (directory, m.read(directory / "contract.json"), m.read(directory / "descriptor.json"),
+    def node_interop(self, name="interop"):
+        self.assertIn(name, self.interop, "NODE_AFTER_ASSEMBLE_FIXTURE_REQUIRED: pass --node-fixture")
+        directory, contract, descriptor, _ = self.interop[name]
+        return (directory, contract, descriptor,
                 m.INSPECT.Context(ROOT, directory / "manifest.json"))
+
+    @contextlib.contextmanager
+    def synthetic_git(self):
+        # Only Git resolution is synthetic. Actual producer bytes and the entire
+        # evidence parser/hash/lineage validation remain live in these tests.
+        node_bytes = (ROOT / m.NODE).read_bytes()
+        actual_head = m.b.git("rev-parse", "HEAD")
+
+        def git(*args):
+            self.assertIn(args, [("merge-base", "--is-ancestor", "a" * 40, "HEAD"),
+                                 ("merge-base", "--is-ancestor", actual_head, "HEAD")])
+            return ""
+
+        def git_bytes(*args):
+            self.assertEqual(args, ("show", "a" * 40 + ":" + m.NODE))
+            return node_bytes
+
+        with patch.object(m.b, "git", git), patch.object(m.b, "git_bytes", git_bytes), \
+                patch.object(m, "_private_bytes", side_effect=lambda name: self.private_originals[name]):
+            yield
 
     def test_actual_node_after_assemble_outputs_satisfy_python_contract(self):
         directory, contract, descriptor, ctx = self.node_interop()
         before = {file.relative_to(directory).as_posix(): m.sha(file) for file in directory.rglob("*") if file.is_file()}
         self.assertEqual(contract["freeze_commit"], "a" * 40)
         self.assertEqual(len(descriptor["after_complete"]), 31)
-        with patch.object(m, "DATA", directory), patch.object(m.subprocess, "run", side_effect=AssertionError("SUBPROCESS_FORBIDDEN")), \
+        with self.synthetic_git(), patch.object(m, "DATA", directory), patch.object(m.subprocess, "run", side_effect=AssertionError("SUBPROCESS_FORBIDDEN")), \
                 patch.object(m.b, "write", side_effect=AssertionError("WRITE_FORBIDDEN")):
-            m.capture_results(contract, descriptor, ctx)
+            result = m.capture_results(contract, descriptor, ctx)
+        self.assertEqual(result["c4_complete"], 31)
+        self.assertEqual(result["c6_complete"], 39)
+        self.assertEqual(result["total_complete"], 142)
+        self.assertEqual(result["new_reads"], 72)
         self.assertEqual(before, {file.relative_to(directory).as_posix(): m.sha(file)
                                   for file in directory.rglob("*") if file.is_file()})
         print(json.dumps({"node_python_interop": True, "fixture": directory.relative_to(ROOT).as_posix(),
-                          "fixture_hashes": before}), flush=True)
+                          "verified_files": len(before), "result": result}), flush=True)
+
+    def test_repeated_disconnect_node_outputs_satisfy_python_contract(self):
+        directory, contract, descriptor, ctx = self.node_interop("interop-resumed")
+        with self.synthetic_git(), patch.object(m, "DATA", directory):
+            result = m.capture_results(contract, descriptor, ctx)
+        self.assertEqual(result["attempts"], 4)
+        self.assertEqual(result["total_complete"], 142)
+        self.assertEqual(result["new_reads"], 69)
+
+    def test_wrong_tool_bytes_still_rejected_in_synthetic_interop(self):
+        directory, contract, descriptor, ctx = self.node_interop()
+        with self.synthetic_git(), patch.object(m, "DATA", directory), patch.object(m.b, "git_bytes", return_value=b"wrong tool"), \
+                self.assertRaisesRegex(AssertionError, "AFTER_ATTEMPT_TOOL"):
+            m.capture_results(contract, descriptor, ctx)
+
+    def test_snapshot_dictionary_order_does_not_change_capture_order(self):
+        directory, _, _, ctx = self.node_interop()
+        snapshot = m.read(directory / "snapshots/after.json")
+        wanted = list(m._plan_records(ctx, snapshot))
+        for item in snapshot["databases"].values():
+            item["tables"] = dict(reversed(list(item["tables"].items())))
+        self.assertEqual(list(m._plan_records(ctx, snapshot)), wanted)
+
+    def test_configuration_summaries_are_bound_to_raw_pages_and_environment(self):
+        directory, _, descriptor, ctx = self.node_interop()
+        after = m.read(directory / "snapshots/after.json")["protected_configuration"]
+        before = ctx.document(descriptor["before"])["protected_configuration"]
+        m._verify_configuration(ctx, after, before)
+        for mutation in ("values", "rules", "route", "missing-page"):
+            altered = copy.deepcopy(after)
+            item = altered["production"]
+            if mutation == "values":
+                item["values"]["DECLARED_BUT_ABSENT"] = "not-in-original-response"
+            elif mutation == "rules":
+                item["rules"] = [{"name": "unapproved", "type": "branch"}]
+            elif mutation == "route":
+                item["variables"][0]["path"] = item["variables"][0]["path"].replace("firmware-production", "firmware-rehearsal")
+            else:
+                item["variables"] = []
+            with self.subTest(mutation=mutation), self.assertRaises((AssertionError, m.INSPECT.EvidenceError)):
+                m._verify_configuration(ctx, altered, before)
+
+    def test_native_retry_reservations_preserve_actual_retry_time_and_failures(self):
+        directory, _, _, ctx = self.node_interop("native-transport")
+        for name, completed, failures in (("native-success", 1, 1), ("native-failed", 0, 1)):
+            source = m._after_source(ctx, directory / name, 0, m.INSPECT.timestamp("2026-10-19T00:00:00Z"), False)
+            self.assertEqual(len(source["complete"]), completed)
+            self.assertEqual(len(source["failures"]), failures)
+            record = ctx.document(source["record_refs"][0])
+            self.assertEqual(record["request_attempts"], 2)
+            self.assertEqual(len(record["request_failures"]), 1 if completed else 2)
+
+    def test_post_response_disconnects_close_reload_and_interoperate(self):
+        directory, contract, descriptor, ctx = self.node_interop("interop-body")
+        with self.synthetic_git(), patch.object(m, "DATA", directory):
+            result = m.capture_results(contract, descriptor, ctx)
+        self.assertEqual(result["attempts"], 7)
+        self.assertEqual(result["total_complete"], 142)
+        self.assertEqual(result["new_reads"], 72)
+        for number in range(2, 7):
+            stem = m.TAIL + "/attempt-" + str(number) + "/"
+            attempt = m.read(directory / stem / "attempt-result.json")
+            self.assertFalse(attempt["ok"])
+            self.assertEqual(attempt["complete_labels"], [])
+            record = ctx.document(attempt["new_reads"][0])
+            self.assertFalse(record["completed"])
+            self.assertEqual(record["status"], 200)
+            self.assertEqual(len(record["request_failures"]), record["request_attempts"] - 1)
+            self.assertIn(attempt["new_reads"][0], attempt["failures"])
+
+    def body_fixture(self, number):
+        directory, _, _, ctx = self.node_interop("interop-body")
+        relative = m.TAIL + "/attempt-" + str(number) + "/"
+        attempt = m.read(directory / relative / "attempt-result.json")
+        label = attempt["failure_labels"][0]
+        return directory, ctx, relative, label, ctx.document(attempt["new_reads"][0])
+
+    def test_partial_body_metadata_and_storage_paths_are_strict(self):
+        _, ctx, relative, label, record = self.body_fixture(2)
+        m._partial_body(ctx, relative, label, record)
+        for change in ({"partial_body_sha256": "0" * 64}, {"partial_body_size_bytes": record["partial_body_size_bytes"] + 1},
+                       {"decoded_body": record["body"]}, {"wire_received_size_bytes": -1},
+                       {"response_headers": {**record["response_headers"], "content-encoding": "gzip"}},
+                       {"body": {**record["body"], "path": relative + label + ".body"}}):
+            with self.subTest(change=change), self.assertRaises(AssertionError):
+                m._partial_body(ctx, relative, label, {**record, **change})
+
+    def test_private_partial_original_is_required_and_hash_checked(self):
+        _, ctx, relative, label, record = self.body_fixture(3)
+        with self.synthetic_git():
+            m._partial_body(ctx, relative, label, record)
+            raw = self.private_originals[record["private_wire"]["path"]]
+            with patch.object(m, "_private_bytes", return_value=bytes([raw[0] ^ 1]) + raw[1:]), \
+                    self.assertRaisesRegex(AssertionError, "AFTER_PARTIAL_DIGEST"):
+                m._partial_body(ctx, relative, label, record)
+            with patch.object(m, "_private_bytes", side_effect=FileNotFoundError), self.assertRaises(FileNotFoundError):
+                m._partial_body(ctx, relative, label, record)
+            wrong = {**record, "private_wire": {**record["private_wire"], "path": ".cache/unrelated-private.body"}}
+            with patch.object(m, "_private_bytes") as read_private, self.assertRaisesRegex(AssertionError, "AFTER_PRIVATE_PATH"):
+                m._partial_body(ctx, relative, label, wrong)
+            read_private.assert_not_called()
+
+    def test_response_failure_cannot_be_washed_into_complete_or_pre_response(self):
+        directory, ctx, relative, label, record = self.body_fixture(2)
+        original = ctx.document
+        for mutation in ("complete", "pre-response"):
+            altered = copy.deepcopy(record)
+            if mutation == "complete":
+                altered["completed"] = True
+                altered.pop("error_code")
+            else:
+                altered.pop("status")
+            def document(reference):
+                return altered if reference["path"] == relative + label + ".http.json" else original(reference)
+            with self.subTest(mutation=mutation), patch.object(ctx, "document", document), self.assertRaises(AssertionError):
+                m._after_source(ctx, directory / relative, 2, m.INSPECT.timestamp("2026-10-19T00:00:00Z"), True)
+
+    def test_resume_summary_cannot_hide_failures_or_change_first_missing(self):
+        directory, contract, descriptor, ctx = self.node_interop("interop-resumed")
+        original = ctx.document
+        after_ref = m.read(directory / m.RECOVERY / "after-result.json")["snapshot"]
+        for field, value, error in (("reused_failures", [], "AFTER_REUSED_FAILURES"),
+                                    ("first_missing", "protected-audit_logs-rows8-16", "AFTER_FIRST_MISSING"),
+                                    ("new_reads", [], "AFTER_NEW_READS")):
+            def altered(reference):
+                result = original(reference)
+                if reference == after_ref:
+                    result["recovery"][field] = value
+                return result
+
+            with self.subTest(field=field), self.synthetic_git(), patch.object(m, "DATA", directory), \
+                    patch.object(ctx, "document", altered), self.assertRaisesRegex(AssertionError, error):
+                m.verify_after_recovery(contract, descriptor, ctx)
 
     def test_node_after_assemble_lineage_mismatches_are_rejected(self):
         directory, contract, descriptor, ctx = self.node_interop()
         original = m.read
         for name in ("after", "assemble"):
             path = directory / m.RECOVERY / (name + "-result.json")
-            for field in (*m.lineage_fields(), "freeze_commit"):
+            for field in [*m.lineage_fields(), "freeze_commit", *(["tool_commit"] if name == "after" else [])]:
                 altered = original(path)
                 altered[field] = "0" * 40
                 with self.subTest(result=name, field=field), patch.object(m, "DATA", directory), \
@@ -805,6 +1097,126 @@ class AfterBundleTests(unittest.TestCase):
             with self.subTest(field=key), patch.object(m, "read", return_value=descriptor), \
                     patch.object(m.b, "write", side_effect=AssertionError("WRITE_FORBIDDEN")), self.assertRaises(AssertionError):
                 m.verify_import()
+
+    def test_successor_package_paths_and_predecessor_are_data_driven(self):
+        spec = importlib.util.spec_from_file_location("p44_successor_test", ROOT / m.PYTHON)
+        next_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(next_module)
+        directory = self.directory()
+        package = {"schema": "p44-after-package-v1", "version": 7, "package": "docs/acceptance-contracts/P4-4-v7",
+                   "round_id": "P44-SYNTHETIC-07", "max_after_invocations": 2,
+                   "predecessor": {"commit": m.C6_TOOL, "bundle_commit": "b" * 40, "index_commit": "c" * 40,
+                                   "contract_sha256": "d" * 64, "matrix_sha256": "e" * 64}}
+        self.write(directory, "package.json", package)
+        next_module.configure_package((directory / "package.json").relative_to(ROOT).as_posix())
+        self.assertEqual(next_module.PREDECESSOR_COMMIT, m.C6_TOOL)
+        self.assertEqual(next_module.LEGACY_PREDECESSOR, m.LEGACY_PREDECESSOR)
+        self.assertIn("P4-4-v6.contract.json", next_module.validation_commands()["final"])
+        self.assertIn("P4-4-v7/final-evidence-matrix.json", next_module.validation_commands()["final"])
+        contract = next_module.successor(self.parent, {"sha256": "a" * 64})
+        after = next(row for row in contract["commands"] if row["id"] == "formal-after")
+        self.assertIn("--package-spec", after["command"])
+        self.assertNotIn("--invocation", after["command"])
+        self.assertIn("At most two", after["description"])
+        self.assertEqual(contract["version"], 7)
+
+    def test_successor_cli_output_is_consumed_by_python(self):
+        if "successor-cli" not in self.interop:
+            self.skipTest("successor CLI packet not supplied")
+        directory, contract, descriptor, packet = self.interop["successor-cli"]
+        spec = importlib.util.spec_from_file_location("p44_successor_cli_test", ROOT / m.PYTHON)
+        next_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(next_module)
+        with patch.object(next_module, "read", return_value=packet["package_spec"]):
+            next_module.configure_package(packet["package_spec_path"])
+        node_bytes = (ROOT / m.NODE).read_bytes()
+        def git(*args):
+            self.assertEqual(args, ("merge-base", "--is-ancestor", "a" * 40, "HEAD"))
+            return ""
+        def git_bytes(*args):
+            self.assertEqual(args, ("show", "a" * 40 + ":" + m.NODE))
+            return node_bytes
+        ctx = next_module.INSPECT.Context(ROOT, directory / "manifest.json")
+        with patch.object(next_module, "DATA", directory), patch.object(next_module.b, "git", git), \
+                patch.object(next_module.b, "git_bytes", git_bytes):
+            result = next_module.capture_results(contract, descriptor, ctx)
+        self.assertEqual(result["total_complete"], 142)
+        self.assertEqual(result["attempts"], 3)
+        self.assertEqual(result["new_reads"], 72)
+
+    def test_successor_multislot_receipts_and_stock_matrix_validators(self):
+        directory = self.directory()
+        matrix, contract, plan = self.mixed()
+        spec_path = ".cache/p44-v7-development/synthetic-package.json"
+        commands = "recovery-commands-v7"
+        recovery = "recovery-v7"
+        fixture = "inputs/after-recovery-v7.json"
+        package = {"max_after_invocations": 2}
+        argv = [m.NODE, "--package-spec", spec_path, "after"]
+        text = " ".join(["node", m.NODE, "--package-spec", spec_path, "run", "formal-after", "node", *argv])
+        definition = next(row for row in contract["commands"] if row["id"] == "formal-after")
+        definition["command"] = text
+        self.write(directory, "contract.json", contract)
+        self.write(directory, fixture, {"files": []})
+        source_hash = m.sha(ROOT / m.NODE)
+        attempts = []
+        receipts = []
+        for slot, code in ((1, 1), (2, 0)):
+            start = "2026-10-21T00:0" + str(slot) + ":00Z"
+            end = "2026-10-21T00:0" + str(slot) + ":02Z"
+            attempt_dir = m.TAIL + "/attempt-" + str(slot + 1)
+            reservation = {"tool_commit": contract["freeze_commit"], "tool_sha256": source_hash,
+                           "started": start, "first_missing": "protected-patches-rows8-16"}
+            self.write(directory, attempt_dir + "/attempt-reservation.json", reservation)
+            attempt = self.write(directory, attempt_dir + "/attempt-result.json", {"ok": code == 0, "ended": end,
+                                  **({"error_code": "UND_ERR_SOCKET"} if code else {})})
+            attempts.append(attempt)
+            stem = commands + "/formal-after-invocation-" + str(slot)
+            log = self.write(directory, stem + ".log", b"UND_ERR_SOCKET\n" if code else b"completed\n")
+            reserved = {"label": "formal-after", "command": "node", "args": argv, "cwd": str(ROOT), "started": start}
+            self.write(directory, stem + "-reservation.json", reserved)
+            receipts.append(self.write(directory, stem + ".json", {**reserved, "ended": end, "exitCode": code,
+                "signal": None, "closed": True, "process_closed": True, "spawn_failed": False, "output": log}))
+        approval = {"schema": "p44-after-continuation-v1", "slot": 2, "prior_receipt": receipts[0],
+            "prior_attempt_result": attempts[0], "tool_commit": contract["freeze_commit"], "tool_sha256": source_hash,
+            "first_missing": "protected-patches-rows8-16", "decision": "CONTINUE_MISSING_ONLY",
+            "basis": "Synthetic transport-state restoration; no blind retry", "approved_by": "Synthetic independent root",
+            "approved_at": "2026-10-21T00:01:30Z"}
+        self.write(directory, recovery + "/continuation-2.json", approval)
+        ctx = m.INSPECT.Context(ROOT, directory / "manifest.json")
+        with patch.multiple(m, DATA=directory, CONTRACT=directory / "contract.json", COMMANDS=commands,
+                            RECOVERY=recovery, FIXTURE=fixture, PACKAGE_SPEC=package, PACKAGE_SPEC_PATH=spec_path):
+            selected = m.new_receipt("formal-after", definition, ctx)
+            self.assertEqual(selected["output_evidence"], "evidence/" + commands + "/formal-after-invocation-2.log")
+            self.assertEqual(len(m.after_receipts(definition, ctx)), 2)
+            for broken in ({**approval, "basis": ""}, {**approval, "prior_receipt": receipts[1]},
+                           {**approval, "first_missing": "wrong"}, {**approval, "approved_at": "2099-01-01T00:00:00Z"},
+                           {**approval, "approved_at": "2026-10-21T00:02:01Z"}):
+                with patch.object(m, "read", wraps=m.read) as reader:
+                    actual_read = lambda file: m.INSPECT.json_bytes(m.b.guard(file).read_bytes())
+                    reader.side_effect = lambda file: broken if Path(file).name == "continuation-2.json" else actual_read(file)
+                    with self.assertRaises(AssertionError):
+                        m.after_receipts(definition, ctx)
+            prior_file = directory / receipts[0]["path"]
+            with patch.object(Path, "exists", autospec=True, side_effect=lambda file: False if file == prior_file else Path.is_file(file)):
+                with self.assertRaises(AssertionError):
+                    m.after_receipts(definition, ctx)
+        matrix["commands"] = [selected if row["id"] == "formal-after" else row for row in matrix["commands"]]
+        for file in directory.rglob("*"):
+            if file.is_file():
+                matrix["evidence_hashes"]["evidence/" + file.relative_to(directory).as_posix()] = m.sha(file)
+        for row in matrix["criteria"]:
+            if row["id"] == "P44-RAW-STATE":
+                row["evidence"] += ["evidence/" + item["path"] for item in receipts]
+        self.assertFalse(m.RULES.validate_matrix(matrix, contract, matrix["contract_sha256"]))
+        self.assertFalse(m.RULES.validate_reuse(matrix, contract, self.previous, plan, self.sources))
+        self.assertFalse(m.RULES.validate_planned_execution(matrix, contract, plan))
+        duplicate = copy.deepcopy(matrix)
+        duplicate["commands"].append(copy.deepcopy(selected))
+        self.assertTrue(m.RULES.validate_matrix(duplicate, contract, matrix["contract_sha256"]))
+        variable = copy.deepcopy(matrix)
+        next(row for row in variable["commands"] if row["id"] == "formal-after")["command"] += " --invocation 2"
+        self.assertTrue(m.RULES.validate_matrix(variable, contract, matrix["contract_sha256"]))
 
     def test_existing_formal_contract_is_allowed_but_snapshot_is_immutable(self):
         directory = self.directory()

@@ -1,0 +1,25 @@
+{
+  "scope": "OFFLINE_DEVELOPMENT_SELFTEST_ONLY",
+  "ok": true,
+  "started": "2026-10-20T20:54:43.885Z",
+  "ended": "2026-10-20T20:57:50.289Z",
+  "assertions": 193,
+  "source": [
+    {
+      "path": "Tools/ota/p44-after-recovery.cjs",
+      "size_bytes": 86183,
+      "sha256": "92ab5a9f10f60ab3f4d88e6d7701ac406933ccbc4b06b0bafe0a4e4c40dcb31b"
+    },
+    {
+      "path": "tests/ota/test_p44_after_recovery.cjs",
+      "size_bytes": 64004,
+      "sha256": "5724527098fa3e83239ef28063e11c27c33ddeee8ce159f56255b13292bf00dd"
+    }
+  ],
+  "cloud_operations": 0,
+  "c5_source_files": 1185,
+  "predecessor_commit": "9bfc48573a5eed190583411ac465bd847424a286",
+  "retained_complete_originals": 31,
+  "retained_failed_originals": 1,
+  "retained_private_verify_failures": 1
+}

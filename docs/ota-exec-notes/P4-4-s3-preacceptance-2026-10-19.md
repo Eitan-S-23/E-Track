@@ -2260,3 +2260,123 @@ unchanged. Stable source delivery, successor freeze, actual precheck/rerun
 plan and only the missing SELECT/list observations still precede final P4-4
 adjudication. No production release, main merge, gate unlock or device work
 is authorized by this closeout.
+
+#### P44-SUCCESSOR-04 修复记录（2026-10-21）
+
+原始失败保留：v7 `source_plan()` 预检退出 1，报
+`AssertionError: PREDECESSOR_REUSE_HISTORY`（`source_identity()` 第 177 行）。
+根因是 C6 矩阵的四项 `REUSED` 判据把 `previous_matrix_sha256` 指向 C5，而
+`reuse_sources()` 只返回了 C4，未提供标准校验器要求的中间谱系。该失败日志
+`.cache/p44/logs/v7-source-plan-preflight01.log` 未被改写；本修复未重做 A/B
+演练、上传、注册或成功 readback，也未改动既有 70 份完整 after 响应。
+
+仅修改以下四个文件：
+
+- `Tools/ota/p44-after-bundle.py`：`reuse_sources()` 改为从真实前驱矩阵出发，
+  按 `previous_matrix_sha256` 回溯；中间来源按矩阵 SHA-256 唯一定位，逐级核验
+  合同/矩阵哈希、包名与 `contract_id` 身份、`task_id`、版本递增、
+  `parent_contract_sha256`、矩阵前驱与轮次关系，并在前驱 bundle 中复核 Git
+  blob 字节。遗漏中间来源、哈希不符、身份漂移、谱系错误或循环均失败。来源集合
+  由目标版本推导（v6 为 C4；v7 为 C4+C5；v8 为 C4+C5+C6），不新增每轮常量。
+  `validation_commands()` 按同一版本推导追加全部 `--reuse-source` 对。
+- `Tools/ota/p44-after-recovery.cjs`：`validatorArgs()` 使用相同的版本推导，
+  在 `--matrix` 前依次追加 C4、C5（后续轮次自动扩展）。
+- `tests/ota/test_p44_after_bundle.py` 与
+  `tests/ota/test_p44_after_recovery.cjs`：增加真实 C6/C5/C4 正向谱系、缺失
+  中间来源、哈希篡改、身份/谱系错误、循环以及 Python/Node 参数一致性的定向用例；
+  新增 `validator` 定向套件，避免为验证默认 v6 参数而运行历史操作。
+
+未改动：`Tools/acceptance/`、任何 profile、产品源码、workflow、传输/重试策略、
+原判据与命令 ID、两个有界 after 调用槽、失败回执及既有时间检查；C4/C5/C6
+字节与 v7 package spec 身份绑定保持不变。
+
+验证结果（全部离线，工作树外无主动写入）：
+
+| 检查 | 命令/证据 | 结果 |
+| --- | --- | --- |
+| 真实 v7 `source_plan()`（不注入、不 monkeypatch） | `.cache/p44/logs/v7-source-plan-fixed02.log` | 退出 0；1416 个来源、1414 个 descriptor 文件、1417 个目标检查；复用版本 `[4,5]`；cloud/evidence 写入均为 0 |
+| 标准 `_validate_reuse_history()` | 真实 C6 前驱 + 真实 C4/C5 来源 | 完整链返回 `[]`；删除 C5 后仅返回 `reuse history P44-20261020-06: missing previous round ...` |
+| Python 定向测试（4 项） | `.cache/p44/logs/p44-successor-04-python-targeted02.log` | 退出 0，`Ran 4 tests ... OK`，81.583 s |
+| Node 定向测试（默认 v6 参数 + v7 参数） | `.cache/p44/logs/p44-successor-04-node-targeted02.log` | 退出 0，89 组断言，`cloud_operations=0` |
+| Node successor 定向套件 | `.cache/p44/logs/p44-successor-04-node-successor03.log` | 退出 0，23 组断言，`cloud_operations=0` |
+
+真实身份：C6 仍是 `--previous-contract`/`--previous-matrix`
+（`P4-4-v6.contract.json`、`P4-4-v6/final-evidence-matrix.json`）；C4 仍是四项
+原始 `EXECUTED PASS` 的直接来源；C5 作为唯一中间来源出现一次。Python
+`validation_commands()` 的 precheck 参数向量与 Node `validatorArgs('formal-precheck')`
+在定向测试中逐项相等。
+
+| 当前文件 | SHA-256 |
+| --- | --- |
+| `Tools/ota/p44-after-bundle.py` | `e61af5c4d1c91cea25c47c311c2303fc4251cb4f8ae6766d2d69cefccc02013c` |
+| `Tools/ota/p44-after-recovery.cjs` | `037c66a8388156382847702e72c21c1d3b01f96f5ca4976579a772c43bb3c8d2` |
+| `tests/ota/test_p44_after_bundle.py` | `12903d318f199147c67658d0046bc5745af9ffe6507cd3dc8c2589ac76723902` |
+| `tests/ota/test_p44_after_recovery.cjs` | `01b9ac71196a27f5cfdd22e8e72aa372d27ded28937b4b85812c5501f782c755` |
+
+| 证据文件（工作树内） | SHA-256 |
+| --- | --- |
+| `.cache/p44/logs/p44-successor-04-python-targeted02.log` | `29debccc8eb78f632cd3107945f86390c1a69781557efb010b70f382024f404c` |
+| `.cache/p44/logs/p44-successor-04-node-targeted02.log` | `4ff8d599c6ddc0c8524008aa6d08e6445f7b07d7277e6e4c082fda77361b09f8` |
+| `.cache/p44/logs/p44-successor-04-node-successor03.log` | `83d133bfdf40f608533d54ecfb47e54235f34afce23b5ecc7ff88c7589cb72e1` |
+| `.cache/p44/logs/v7-source-plan-fixed02.log` | `97f280c56053b8e8e7fe63d20c490ad89c82d48ba7ef1efdb8c04fb04374b263` |
+
+边界与残留：本节只证明“实现及离线自测完成”，不构成 P4-4 正式验收通过，也不
+证明 C6 的 `EVIDENCE_GAP` 已转为 PASS。未冻结 v7 合同，因此未运行标准 CLI 的
+正式 precheck/rerun plan/final；该步骤仍由原 root 在稳定源码交付后执行。Python
+全量历史套件与 Node 历史操作未作为本修复的验收证据重跑；一次 Node 定向套件
+门控失误曾离线执行既有操作（退出 0、157 组断言、0 云操作），其结果仅保留在
+`.cache/p44-v7-development/validator-targeted-01/`，未计入修复证据，随后已修正
+门控并以 89 组断言的定向运行替代。所有主动输出均位于
+`D:\github\my\E-Track\.cache\p4-4-integration-20261018` 内；后台命令的宿主任务
+临时输出文件由运行框架管理，不是本任务选择的证据路径。未提交、推送、冻结、
+触网、操作设备或修改平台配置。下一责任人为原 root，独立复核后决定 successor
+freeze 与正式 precheck/final。
+
+#### P44-SUCCESSOR-04 Independent Closure (2026-10-21)
+
+Disposition: CLOSED for this bounded implementation finding. The independent
+root authored no adapter or test changes and used no sub-agent for this review.
+The four source/test hashes and four implementation-log hashes match the
+preceding tables. The targeted self-test originals were reviewed rather than
+repeated or counted as independent suite executions.
+
+The root independently imported the delivered Python module, selected the
+unchanged real v7 package specification and ran source_plan() against the
+committed C6/C5/C4 files and Git objects. There was no injected source map,
+monkeypatch, mock Git or network request. The plan contains 1416 copy inputs,
+1414 descriptor files and 1417 guarded output targets. The unchanged standard
+history validator accepted the complete chain and returned exactly one
+missing-previous-round error when C5 was removed. Node and Python precheck and
+plan argument vectors match exactly; all three Python validation commands
+include C4 and C5 once, with C6 remaining the actual previous pair.
+
+For clarity, C6's matrix-level previous_matrix_sha256 identifies C5, while
+the four reused criteria still point directly to C4's original EXECUTED PASS.
+The repair preserves both identities. No new blocking finding was found in
+the bounded implementation review. The earlier transport and continuation-time
+closures remain valid; no product or successful observation was replayed.
+
+Independent receipt: .cache/p44/logs/p44-successor04-root-review01.json
+(SHA-256 703de5bf4ce9355891025156470515ebe01f6e85369bf0d2465e04c4bc355903).
+Independent output: .cache/p44/logs/p44-successor04-root-review01.log
+(SHA-256 54ef7663401e211e299fe3750cceedabf89414547d679223b1633bfe98f755b0).
+The command closed with exit 0; implementation and original evidence bytes
+were not modified. This closes SUCCESSOR-04, not P4-4 formal acceptance.
+
+C6 delivery is complete on the authorized task branch: B6 is
+90c5924f74e3c1fe3ca88576a16a9ba18b39856d and I6 is
+08e3929f19b4d3ca7fa722a3b7414c36e8285b34, both pushed. The v7 package spec
+pins those identities. Stable successor source delivery, freeze, real precheck
+and rerun plan, missing observations and final validation remain root-owned.
+
+Delivery-only preparation: the existing v6 staged audit needed approximately
+19 minutes for 1422 files. The already-drafted v7 adapter reuses the existing
+native Python path guard, credential sentinels and Git blob identities instead
+of repeated fsutil ancestor probes and per-file Git processes. Root reviewed
+and self-tested its stdout-only invocation; six negative predicates passed,
+with no credential read or Git/network action during self-test. Its optional
+--output interface is not used or qualified. The script is not a formal
+criterion or a replacement for the frozen privacy command. Its original hash
+is 0b9074a305cf87e77a2334c6a26d11ca4a77ab97d583d007243673b26b5732d4;
+self-test output is .cache/p44/logs/v7-delivery-auditor-selftest01.log,
+SHA-256 0250f0c1fe97c5c2395c55ef966b85b1d67355b2b8bf27b801de56e23b030668.
