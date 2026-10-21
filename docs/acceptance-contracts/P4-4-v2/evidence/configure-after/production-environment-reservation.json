@@ -1,0 +1,7 @@
+{
+  "method": "GET",
+  "origin": "https://api.github.com",
+  "path": "/repos/Eitan-S-23/E-Track/environments/firmware-production",
+  "started": "2026-10-19T13:20:09.894Z",
+  "note": "Reserved before request; a lost response is not permission to replay a mutation."
+}

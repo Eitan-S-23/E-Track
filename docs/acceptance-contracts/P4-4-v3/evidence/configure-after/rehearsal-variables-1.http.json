@@ -1,0 +1,42 @@
+{
+  "method": "GET",
+  "path": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/variables?per_page=100&page=1",
+  "started": "2026-10-19T15:13:43.978Z",
+  "status": 200,
+  "response_headers": {
+    "date": "Mon, 19 Oct 2026 15:13:46 GMT",
+    "content-type": "application/json; charset=utf-8",
+    "content-length": "2520",
+    "cache-control": "private, max-age=60, s-maxage=60",
+    "vary": "Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With",
+    "etag": "\"292574b426b435eb100ed700e1893fc43a9736695e4921edd15c1dd8ccc8437c\"",
+    "x-oauth-scopes": "gist, read:org, repo, user, workflow",
+    "x-accepted-oauth-scopes": "",
+    "x-oauth-client-id": "178c6fc778ccc68e1d6a",
+    "x-github-media-type": "github.v3; format=json",
+    "x-github-api-version-selected": "2022-11-28",
+    "access-control-expose-headers": "ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset, Warning",
+    "access-control-allow-origin": "*",
+    "strict-transport-security": "max-age=31536000; includeSubdomains; preload",
+    "x-frame-options": "deny",
+    "x-content-type-options": "nosniff",
+    "x-xss-protection": "0",
+    "referrer-policy": "origin-when-cross-origin, strict-origin-when-cross-origin",
+    "content-security-policy": "default-src 'none'",
+    "server": "github.com",
+    "x-ratelimit-limit": "5000",
+    "x-ratelimit-remaining": "4987",
+    "x-ratelimit-reset": "1792426276",
+    "x-ratelimit-used": "13",
+    "x-ratelimit-resource": "core",
+    "x-github-request-id": "426D:36A42C:2619C7:28E480:6AD633AA",
+    "x-github-edge-region": "westus3"
+  },
+  "body": {
+    "path": "configure-after/rehearsal-variables-1.body",
+    "size_bytes": 2520,
+    "sha256": "b978fb52ea4adee2da26bfec2a733bf99aba136c54bfe6defe28e027250726b5"
+  },
+  "completed": true,
+  "ended": "2026-10-19T15:13:48.045Z"
+}

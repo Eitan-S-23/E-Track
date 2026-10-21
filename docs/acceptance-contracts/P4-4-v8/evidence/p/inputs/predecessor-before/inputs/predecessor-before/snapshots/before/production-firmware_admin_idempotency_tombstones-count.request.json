@@ -1,0 +1,1 @@
+{"sql":"SELECT COUNT(*) AS count FROM \"firmware_admin_idempotency_tombstones\""}

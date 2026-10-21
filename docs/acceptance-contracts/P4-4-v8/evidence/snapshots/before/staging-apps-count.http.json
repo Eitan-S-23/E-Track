@@ -1,0 +1,40 @@
+{
+  "method": "POST",
+  "path": "/accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+  "started": "2026-10-19T19:30:38.184Z",
+  "request": {
+    "path": "snapshots/before/staging-apps-count.request.json",
+    "size_bytes": 48,
+    "sha256": "172dc13d22243eb93451522dfb751f00fc8e77933382fda3d76091e108af8cc1"
+  },
+  "request_headers": {
+    "accept-encoding": "gzip"
+  },
+  "request_attempts": 1,
+  "request_failures": [],
+  "status": 200,
+  "response_headers": {
+    "date": "Mon, 19 Oct 2026 19:30:41 GMT",
+    "content-type": "application/json",
+    "transfer-encoding": "chunked",
+    "connection": "keep-alive",
+    "cache-control": "no-store",
+    "api-version": "2026-10-01.epoch",
+    "cf-auditlog-id": "01a155a5-0a0d-74e8-a234-de0090322f6f",
+    "content-encoding": "gzip",
+    "server": "cloudflare",
+    "cf-ray": "a4d232e33c00c087-NRT"
+  },
+  "body": {
+    "path": "snapshots/before/staging-apps-count.body",
+    "size_bytes": 244,
+    "sha256": "7600c1821480468de55dd424a88b60da94137cca0fac894f0386b93354b3c80a"
+  },
+  "decoded_body": {
+    "path": "snapshots/before/staging-apps-count.decoded.body",
+    "size_bytes": 371,
+    "sha256": "645308a439139738f7a09a3711cad48cfd6337e884af3f84c296c4b9534bac24"
+  },
+  "completed": true,
+  "ended": "2026-10-19T19:30:44.024Z"
+}

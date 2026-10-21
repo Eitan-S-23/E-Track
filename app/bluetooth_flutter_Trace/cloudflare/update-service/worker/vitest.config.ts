@@ -7,6 +7,7 @@ export default defineConfig({
     cloudflareTest(async () => ({
       wrangler: { configPath: "./wrangler.jsonc" },
       miniflare: {
+        d1Databases: ["PREFLIGHT_LEGACY_DB"],
         bindings: {
           FIRMWARE_V2_CUTOVER_EPOCH: "1780000000",
           RATE_LIMIT_MAX_REQUESTS: "10000",

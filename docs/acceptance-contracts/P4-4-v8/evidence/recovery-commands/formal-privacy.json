@@ -1,0 +1,24 @@
+{
+  "label": "formal-privacy",
+  "command": "python",
+  "args": [
+    "-I",
+    "-S",
+    "-B",
+    "Tools/ota/p44-after-bundle.py",
+    "privacy"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "started": "2026-10-20T05:38:46.381Z",
+  "ended": "2026-10-20T05:39:15.626Z",
+  "exitCode": 0,
+  "signal": null,
+  "process_closed": true,
+  "closed": true,
+  "spawn_failed": false,
+  "output": {
+    "path": "recovery-commands/formal-privacy.log",
+    "size_bytes": 119,
+    "sha256": "afd35ff906659751a849c0141d24dec47c5495b5079dfde916400eda9e7c0989"
+  }
+}

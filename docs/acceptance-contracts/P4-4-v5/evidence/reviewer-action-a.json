@@ -1,0 +1,13 @@
+{
+  "reviewer": "Eitan-S-23",
+  "reviewer_id": 204050265,
+  "run_id": 39313672925,
+  "run_attempt": 1,
+  "state": "rejected",
+  "basis": "owner_response",
+  "evidence": {
+    "path": "owner-reject-a-response.json",
+    "size_bytes": 982,
+    "sha256": "16973493cb831c772ad6fc095be5600e515ae8914d6b20016f3532a655deabec"
+  }
+}

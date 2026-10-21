@@ -1,0 +1,15 @@
+{
+  "method": "POST",
+  "origin": "https://api.cloudflare.com",
+  "path": "/accounts/[ACCOUNT]/d1/database/1cd5db26-6bbd-4595-abef-72ff51ecdaf3/query",
+  "started": "2026-10-20T01:32:56.558Z",
+  "request": {
+    "path": "snapshots/after/production-firmware_admin_idempotency_tombstones-count.request.json",
+    "size_bytes": 81,
+    "sha256": "e806fdadbfb624debb0c96067fb37a06f5c8b0b21206bbdf359283295ad57fd4"
+  },
+  "request_headers": {
+    "accept-encoding": "gzip"
+  },
+  "note": "Reserved before request; a lost response is not permission to replay a mutation."
+}

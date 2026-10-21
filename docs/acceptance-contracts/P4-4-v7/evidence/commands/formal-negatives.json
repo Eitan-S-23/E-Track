@@ -1,0 +1,19 @@
+{
+  "label": "formal-negatives",
+  "command": "node",
+  "args": [
+    "Tools/acceptance/p44/capture.cjs",
+    "negatives"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "started": "2026-10-19T19:40:57.492Z",
+  "ended": "2026-10-19T19:42:09.980Z",
+  "exitCode": 0,
+  "signal": null,
+  "process_closed": true,
+  "output": {
+    "path": "commands/formal-negatives.log",
+    "size_bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

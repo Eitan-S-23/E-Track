@@ -1,0 +1,301 @@
+{
+  "createdAt": "2026-10-18T19:39:04.302Z",
+  "nature": "Raw command output copies only; no archive script, compression or formal acceptance bundle",
+  "productSource": "de362151bda72c0dd1c19ab1293e99838fb8976e",
+  "governanceSource": "53f336d2f6dfc6067b33b3cf6975d52c5ffad9e2",
+  "exclusions": [
+    "s3-governance-failed-log-01.log contains a transient GitHub log-download signed query; kept out of delivery, failure reported separately",
+    "private inputs",
+    "prior frozen originals"
+  ],
+  "entries": [
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-sdk-install-01.log",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-sdk-install-01.log",
+      "bytes": 27,
+      "sha256": "a292a3e36822478247134a5b7bad225e64338c71782ce650cb958cf29b511035"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-sdk-install-01.json",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-sdk-install-01.json",
+      "bytes": 737,
+      "sha256": "c78a379d58170f41a01e67fd5be3fcb29ef1cbb5d0da9edc55507591e1154c2c"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-sdk-tests-01.log",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-sdk-tests-01.log",
+      "bytes": 970,
+      "sha256": "7b427382749408dd2616acc6ebbe9b34b94f3f1701a9925fe1e0f364d2c8617a"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-sdk-tests-01.json",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-sdk-tests-01.json",
+      "bytes": 427,
+      "sha256": "43ec3e8a93f9828c806b9f0e194e82dfc86133aad951343ef2af7bd9b2c713b9"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-types-01.log",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-types-01.log",
+      "bytes": 255,
+      "sha256": "65a64f58cbb113a56b7e833068cf6a23b1b2d201ff47fc73f62057db6c475a3b"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-types-01.json",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-types-01.json",
+      "bytes": 582,
+      "sha256": "43eae67fd1564b985ebf2456f038f52e1ab8c860f7f7e7b24e91fc3e5031de04"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-types-03.log",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-types-03.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-types-03.json",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-types-03.json",
+      "bytes": 582,
+      "sha256": "b866224b07b1fd2b5e530f928b2d171fee6305523c0ab7edc1bc12a57221be20"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-preflight-host-01.log",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-preflight-host-01.log",
+      "bytes": 2570,
+      "sha256": "331c9a1d777b09ca9cbab43efaaf834c14b52cb7118f397d5310c8130a237e1a"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-preflight-host-01.json",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-preflight-host-01.json",
+      "bytes": 641,
+      "sha256": "d3161ed0289f0a8624464458ecf823d8cdfa8e036f0995810267cfb4b5f8a4cc"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-worker-host-all-01.log",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-worker-host-all-01.log",
+      "bytes": 95937,
+      "sha256": "0baa4729f8bf40a8ecfb9b2a65b2e047032bc126f744e24e7cdbf1dd3d26d66b"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-worker-host-all-01.json",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-worker-host-all-01.json",
+      "bytes": 604,
+      "sha256": "8bee9722cdf26622172e4c84f8b6d622f0d756fd1a480715d101a2a2653e74b9"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-pipeline-host-01.log",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-pipeline-host-01.log",
+      "bytes": 39472,
+      "sha256": "62289ac0d410f9912ff155e7fa8e1f395a9af9de418625ceee86635a5de920f2"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-pipeline-host-01.json",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-pipeline-host-01.json",
+      "bytes": 624,
+      "sha256": "264286e9a50b24f0b9484a8c424f545883a2f70db2f8e03daebb85238b9f57d7"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-pipeline-host-02.log",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-pipeline-host-02.log",
+      "bytes": 33578,
+      "sha256": "fa14a64075e21f95b06dfb3b3b587e277a8f1ae081ee0667e6b9e335d82eb0a9"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-pipeline-host-02.json",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-pipeline-host-02.json",
+      "bytes": 624,
+      "sha256": "aeed8f0ee42c8fca3db7c95749b559e0900f27536fbb14a145fbded52cf3e461"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-pipeline-host-03.log",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-pipeline-host-03.log",
+      "bytes": 32684,
+      "sha256": "f0aa71e965d63e85af74f7a0b7d12b327747d381f1d453058ebad744cfdb3987"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-pipeline-host-03.json",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-pipeline-host-03.json",
+      "bytes": 624,
+      "sha256": "e5f08260c8001781f4c34cfeea5782e320d17b070138063726e8b47d0d1e5b32"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-workflow-host-01.log",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-workflow-host-01.log",
+      "bytes": 10771,
+      "sha256": "2f4588261b4a332bb09e6027263aa4e2838fef4fe58ccc0723f0581edae9949f"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-workflow-host-01.json",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-workflow-host-01.json",
+      "bytes": 441,
+      "sha256": "6b8fc6dd9cdfe267fc34b500b4243fc6f909c46cea124c760695ac76d6f2b758"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-checks-dispatch-01.log",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-checks-dispatch-01.log",
+      "bytes": 63,
+      "sha256": "f7d5e9bca14ed5dc9a216f8a7ad95e18814e4224f61e617b62be15bb2ee8544d"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-checks-dispatch-01.json",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-checks-dispatch-01.json",
+      "bytes": 637,
+      "sha256": "ac70274cc7b2b3741001768dbd5b7b7142f2ae8f13e2629e21441264e7217be1"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-ci-readback-01.log",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-ci-readback-01.log",
+      "bytes": 10097,
+      "sha256": "220623353bd89458a5a4845b42bb1d087a0cbe2a724a6bee84859ce7742c5fd7"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-ci-readback-01.json",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-ci-readback-01.json",
+      "bytes": 511,
+      "sha256": "fb7e5b9a1ec63a076c04a933294a16c949ced00e84c958911b23a88a8993116f"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-ci-full-log-01.log",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-ci-full-log-01.log",
+      "bytes": 2690622,
+      "sha256": "2feadac23e5c659bcb748c61d7caf621ab1181f57e32738eba49e96536c46588"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-ci-full-log-01.json",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-ci-full-log-01.json",
+      "bytes": 472,
+      "sha256": "80c6ce588133e2fe65ba35e3f9d2e18757b55a95549187afb7353705e0c48dd2"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-ci-artifacts-01.log",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-ci-artifacts-01.log",
+      "bytes": 94,
+      "sha256": "f5c7b43e847c2e707ccd902f352288dc6d0f20340f203d13ae2ff7fa44817aa1"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-ci-artifacts-01.json",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-ci-artifacts-01.json",
+      "bytes": 457,
+      "sha256": "29a0995639e21a77a16a54da14070d96ad9e9747c321c6caa38ff513aecbc655"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-ci-artifacts-02.log",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-ci-artifacts-02.log",
+      "bytes": 4475,
+      "sha256": "6d646fde8dcd74bc4309f530db55e48278b3886e79c244b52eb668d0891bc0b0"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-ci-artifacts-02.json",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-ci-artifacts-02.json",
+      "bytes": 457,
+      "sha256": "441c8ea8f6244066fd7c791b0aca58c8b6280d85595b53675478a8479ae8a43c"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-governance-dispatch-01.log",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-governance-dispatch-01.log",
+      "bytes": 103,
+      "sha256": "a754d2f7c9f764dc7e2b445f0fa0dd670f9c3e0d239719903dde1b7fc4d37a64"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-governance-dispatch-01.json",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-governance-dispatch-01.json",
+      "bytes": 550,
+      "sha256": "9bcd257d44ecc8d03e3d875c852b799f0374515ddbdb03a9d7b7d0006d628cab"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-governance-dispatch-02.log",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-governance-dispatch-02.log",
+      "bytes": 63,
+      "sha256": "a42f05177f6a01ca98830027ba5c84cb455045fa208cc16f3391ab4646cdf25d"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-governance-dispatch-02.json",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-governance-dispatch-02.json",
+      "bytes": 550,
+      "sha256": "6c4d7e0f0ec3fc8ef719c8e52b0803ab2182433b5438c491015f26ad9f84f369"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-governance-failed-log-02.log",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-governance-failed-log-02.log",
+      "bytes": 24156,
+      "sha256": "d04f8cca83490cf039ac6dad3f6b5927e1f1071950da981f56755269a888a6ec"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-governance-failed-log-02.json",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-governance-failed-log-02.json",
+      "bytes": 499,
+      "sha256": "24bcbe20ce5fc0fc459aa97caf60c65096129529889521d5dd6223a99d05d266"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-governance-state-01.log",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-governance-state-01.log",
+      "bytes": 5301,
+      "sha256": "4b264325e4127394484f02eb989641cfb12fda075d6984f43c8c7d2a9d121a99"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-governance-state-01.json",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-governance-state-01.json",
+      "bytes": 521,
+      "sha256": "95dfb944de5279c96096a174a8ed0e55d5a17a24b1aa361ea7e71db71a7b97f1"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-governance-host-01.log",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-governance-host-01.log",
+      "bytes": 126,
+      "sha256": "7f0b27f54b6d0b1f56d9115d34f0621e84cd8e1e24d54100e2a9ddae8af82b60"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-governance-host-01.json",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-governance-host-01.json",
+      "bytes": 476,
+      "sha256": "0c18077002d5b40738a654f33c927e7fd060a58c2370c6c9d67c76f6c5a0e261"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-governance-dispatch-03.log",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-governance-dispatch-03.log",
+      "bytes": 63,
+      "sha256": "bec54c85f3959ba29ee2f5fc852d2c67a9bc0916d418d434e1cbffc7e2aa820c"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-governance-dispatch-03.json",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-governance-dispatch-03.json",
+      "bytes": 550,
+      "sha256": "39671891a108e7615b9997473e253fa19c8cb817919536a2a7784b20b4992256"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-governance-state-02.log",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-governance-state-02.log",
+      "bytes": 5301,
+      "sha256": "3f930eb7c0a570d23e0f04ad10ebe2e87555fddd75f6c61ab830c6e0f3bab05d"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-governance-state-02.json",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-governance-state-02.json",
+      "bytes": 521,
+      "sha256": "2d7ec7a4b68a1678578722de8e6d7635e5720ea3519f8a08d64f4c7e04c39c6e"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-governance-full-log-01.log",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-governance-full-log-01.log",
+      "bytes": 169265,
+      "sha256": "63e19c8a849b849926f8f383913cf9f074c1cc60fddec1f3873c4b5aa4badb7b"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-governance-full-log-01.json",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-governance-full-log-01.json",
+      "bytes": 488,
+      "sha256": "91ffd5691e2f57781bc9a4e74ccd3927d66c5c61a8cc4b1e66bf4b9a2da00ebe"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-final-source-reconciliation-01.log",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-final-source-reconciliation-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-final-source-reconciliation-01.json",
+      "destination": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\docs\\ota-exec-notes\\P4-4-s3-interface-2026-10-19\\s3-final-source-reconciliation-01.json",
+      "bytes": 667,
+      "sha256": "17db9479fae538d2c9930233ce5133751c2637a4e90dd59e8719a3a27a99b82a"
+    }
+  ]
+}

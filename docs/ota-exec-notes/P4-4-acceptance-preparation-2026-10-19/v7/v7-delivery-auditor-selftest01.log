@@ -1,0 +1,1 @@
+{"ok": true, "selftest": true, "negative_predicates": 6, "platform_operations": 0, "credential_reads": 0, "git_processes": 0, "fixtures": "memory only", "elapsed_seconds": 0.033, "auditor_sha256": "0b9074a305cf87e77a2334c6a26d11ca4a77ab97d583d007243673b26b5732d4"}

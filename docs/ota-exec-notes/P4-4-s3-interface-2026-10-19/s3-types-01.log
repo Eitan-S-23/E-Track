@@ -1,0 +1,1 @@
+app/bluetooth_flutter_Trace/cloudflare/update-service/worker/src/firmware.ts(204,51): error TS2367: This comparison appears to be unintentional because the types '"INVALID_PARAMETER" | "FORMAL_RELEASE_REQUIRED"' and '"RELEASE_CONFLICT"' have no overlap.

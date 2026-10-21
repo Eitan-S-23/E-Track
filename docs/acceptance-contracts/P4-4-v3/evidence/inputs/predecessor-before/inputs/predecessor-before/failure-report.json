@@ -1,0 +1,87 @@
+{
+  "schema": "p44-v1-failure-closeout-v1",
+  "task_id": "P4-4",
+  "contract_id": "P4-4-v1",
+  "round_id": "P44-20261019-01",
+  "freeze_commit": "08afb97ddae316b3b305354f1582afdb836d7633",
+  "freeze_tree": "0fbb1b610a6e09155a10e2d9b3b3d12e26725da7",
+  "formal_observation_attempted": true,
+  "final_matrix_result": "EVIDENCE_GAP",
+  "task_blocked_declared": false,
+  "p44_pass": false,
+  "stage_failure": {
+    "command_id": "formal-before",
+    "command_exit_code": 1,
+    "process_closed": true,
+    "phase": "before-state capture",
+    "failure_owner": "environment",
+    "classification": "HTTP 200 headers received; bounded response stream timed out before the advertised JSON body was complete",
+    "http_status": 200,
+    "completed": false,
+    "error_code": 23,
+    "configured_http_deadline_seconds": 60,
+    "request_started": "2026-10-19T11:33:38.584Z",
+    "request_ended": "2026-10-19T11:34:42.037Z",
+    "partial_body_bytes": 4214365,
+    "advertised_content_length": 9631314,
+    "prior_complete_http_responses": 31,
+    "prior_complete_http_statuses": [
+      200
+    ],
+    "envelope_body_and_request_references_verified": 63,
+    "operation": "SELECT * FROM \"channel_history\" ORDER BY rowid LIMIT 500 OFFSET 0",
+    "database_role": "protected Trace",
+    "no_complete_before_snapshot_produced": true,
+    "evidence": [
+      "evidence/commands/formal-before.json",
+      "evidence/commands/formal-before.log",
+      "evidence/snapshots/before/protected-channel_history-0.http.json",
+      "evidence/snapshots/before/protected-channel_history-0.request.json",
+      "evidence/snapshots/before/protected-channel_history-0.partial.body"
+    ]
+  },
+  "matrix_disposition": {
+    "owner": "Root acceptance session",
+    "raw_state_result": "NOT_OBSERVED",
+    "raw_state_observed": null,
+    "reason": "The frozen aggregate P44-RAW-STATE includes formal-before, formal-negatives and formal-after. Only formal-before executed. The unchanged validator requires all aggregate command records for FAIL, so an environment-owned aggregate FAIL cannot be represented without inventing two unexecuted command results. Root decided EVIDENCE_GAP with the actual failed before command and originals retained.",
+    "preserve_initial_not_run_matrix": "evidence-matrix.json",
+    "preserve_precheck_failure": "evidence/precheck-failures/hash-case-01",
+    "valid_precheck_receipt": "evidence/commands/formal-precheck-02.json",
+    "compatibility_precheck_receipt": "evidence/commands/formal-precheck.json",
+    "compatibility_copy_internal_label": "formal-precheck-02"
+  },
+  "successful_original_evaluations": [
+    {
+      "command_id": "formal-history",
+      "exit_code": 0,
+      "result": "evidence/history-result.json",
+      "interpretation": "Executed offline evaluation of existing originals, not a new CI or product run"
+    },
+    {
+      "command_id": "formal-configuration",
+      "exit_code": 0,
+      "result": "evidence/configuration-result.json",
+      "interpretation": "Executed offline evaluation of configuration and historical deployment originals, not a new deployment or release"
+    }
+  ],
+  "not_executed_follow_on_plan_commands": [
+    "formal-negatives",
+    "formal-dispatch-a",
+    "formal-finish-a",
+    "formal-dispatch-b",
+    "formal-finish-b",
+    "formal-assemble-rehearsal",
+    "formal-rehearsal",
+    "formal-after",
+    "formal-readbacks",
+    "formal-production-preflight",
+    "formal-assemble-complete",
+    "formal-approvals",
+    "formal-states"
+  ],
+  "independent_closeout_check": "Only the frozen formal-privacy command may run after this report; its own closed receipt and result determine P44-HYGIENE.",
+  "action_boundary": "No A/B dispatch, reviewer action, production publication, production R2 object write, registration, channel mutation, migration, gate unlock or device operation was executed by this failed v1 observation sequence.",
+  "next_round": "Retain this actual attempted v1 as the predecessor. Any successor must reference its contract and final matrix; preparation or capture fixes do not erase this failure or justify replay of completed observations.",
+  "scope": "Failure classification and bounded retained originals; no continuous-state or complete-snapshot claim."
+}

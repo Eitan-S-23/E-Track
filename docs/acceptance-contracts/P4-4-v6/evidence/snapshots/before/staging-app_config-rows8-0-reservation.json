@@ -1,0 +1,15 @@
+{
+  "method": "POST",
+  "origin": "https://api.cloudflare.com",
+  "path": "/accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+  "started": "2026-10-19T19:30:24.716Z",
+  "request": {
+    "path": "snapshots/before/staging-app_config-rows8-0.request.json",
+    "size_bytes": 70,
+    "sha256": "304defc99369b49251b695bb54616c862676c4b406a0e19482d84fdfad2f4e9d"
+  },
+  "request_headers": {
+    "accept-encoding": "gzip"
+  },
+  "note": "Reserved before request; a lost response is not permission to replay a mutation."
+}

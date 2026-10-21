@@ -1,0 +1,29 @@
+{
+  "method": "POST",
+  "path": "/accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+  "started": "2026-10-19T11:33:28.758Z",
+  "request": {
+    "path": "snapshots/before/protected-channel_history-count.request.json",
+    "size_bytes": 59,
+    "sha256": "75097da2346d9e9238582b4da3ea9cb3e8833237cb59dc5b0bf839ccdf8b4bdb"
+  },
+  "status": 200,
+  "response_headers": {
+    "date": "Mon, 19 Oct 2026 11:33:32 GMT",
+    "content-type": "application/json",
+    "content-length": "373",
+    "connection": "keep-alive",
+    "cache-control": "no-store",
+    "api-version": "2026-10-01.epoch",
+    "cf-auditlog-id": "01a153f0-2f01-7269-a835-8a7686fbddf6",
+    "server": "cloudflare",
+    "cf-ray": "a4cf77eb1fdea0ee-NRT"
+  },
+  "body": {
+    "path": "snapshots/before/protected-channel_history-count.body",
+    "size_bytes": 373,
+    "sha256": "12fb04e3b2429ac239cdfb7b5b84314f48d541e49b229ee0473e19382d91da56"
+  },
+  "completed": true,
+  "ended": "2026-10-19T11:33:33.078Z"
+}

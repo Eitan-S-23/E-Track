@@ -1,0 +1,31 @@
+{
+  "method": "GET",
+  "path": "/e-track-firmware-p41-test-releases/trace/firmware/e-track-at32f435/30209-mcu-e-track-at32f435-v3.2.9/recovery-v3.2.9.bin",
+  "started": "2026-10-20T01:26:23.599Z",
+  "request_attempts": 1,
+  "request_failures": [],
+  "status": 200,
+  "response_headers": {
+    "date": "Tue, 20 Oct 2026 01:26:27 GMT",
+    "content-type": "application/octet-stream",
+    "content-length": "605080",
+    "connection": "keep-alive",
+    "accept-ranges": "bytes",
+    "cache-control": "public, max-age=31536000, immutable",
+    "content-disposition": "attachment; filename=\"recovery-v3.2.9.bin\"",
+    "etag": "\"ae5bdece38f0e60ac4921c87f73eb2cf\"",
+    "last-modified": "Tue, 20 Oct 2026 01:13:13 GMT",
+    "x-amz-meta-content-digest": "sha-256=:Wk5vEX9thzcoqylrFfI8hOI2d8ztbwTFn5A+9Jvi2cc=:",
+    "x-amz-meta-kind": "recovery",
+    "x-amz-meta-sha256": "5a4e6f117f6d873728ab296b15f23c84e23677cced6f04c59f903ef49be2d9c7",
+    "server": "cloudflare",
+    "cf-ray": "a4d43c03eab20872-NRT"
+  },
+  "body": {
+    "path": "readbacks/recovery.body",
+    "size_bytes": 605080,
+    "sha256": "5a4e6f117f6d873728ab296b15f23c84e23677cced6f04c59f903ef49be2d9c7"
+  },
+  "completed": true,
+  "ended": "2026-10-20T01:26:38.513Z"
+}

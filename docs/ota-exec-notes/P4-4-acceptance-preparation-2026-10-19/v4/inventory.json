@@ -1,0 +1,205 @@
+{
+  "schema": "p44-preparation-inventory-v1",
+  "created_at": "2026-10-19T18:47:15.575Z",
+  "nature": "Bounded v4 development checks and declared preparation probes; no repeated historical CI/deployment",
+  "predecessor_bundle_commit": "20febda2ac2e05e5f4b761a9f365091b177516b6",
+  "archive": {
+    "path": "development.zip",
+    "size_bytes": 37173,
+    "sha256": "94b83bdeadf165952c36910c21ee63ca6d2c4b8fa06c30c96c9b39604be44e0f"
+  },
+  "entries": [
+    {
+      "path": ".cache/p44-v2-preparation-archive.cjs",
+      "size_bytes": 4551,
+      "sha256": "7aa0c7ca849ae3b2c6bf579444959e77da310491071c9fe8833db76e370c92c3"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v4-python-01.json",
+      "size_bytes": 3795,
+      "sha256": "005e99ea6cc9ea773f5bf3f88114b404b8d2802388219d983c471862720f3bde"
+    },
+    {
+      "path": ".cache/p44-runner-tests-20261020/selftest-v4-01/unittest-original.txt",
+      "size_bytes": 11921,
+      "sha256": "de6827073603bd7f603c5e07392f17839cff97d4c1d640fb0076d8939e0050e2"
+    },
+    {
+      "path": ".cache/p44-runner-tests-20261020/selftest-v4-01/result.json",
+      "size_bytes": 277,
+      "sha256": "191033955020e94bdb57bac175064e6351510ea595e5e78584275eb9a735e189"
+    },
+    {
+      "path": ".cache/p44-runner-tests-20261020/selftest-v4-01/test_capture_consumes_real_bundle_predecessor_plan/1.original",
+      "size_bytes": 116349,
+      "sha256": "c2151d154b7fac9a561a156393d9633348d502b88c03880f800d01fef289942d"
+    },
+    {
+      "path": ".cache/p44-runner-tests-20261020/selftest-v4-01/test_capture_consumes_real_bundle_predecessor_plan/2.original",
+      "size_bytes": 364,
+      "sha256": "963a19ed2905ad185cabc49c1e5c2d1e796e0dfb65e94c7e3960b4b853199dd6"
+    },
+    {
+      "path": ".cache/p44-runner-tests-20261020/selftest-v4-01/test_capture_consumes_real_bundle_predecessor_plan/3.original",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p44-runner-tests-20261020/selftest-v4-01/test_real_windows_three_layer_guard_and_file_reference/1.original",
+      "size_bytes": 469,
+      "sha256": "37d281f6fcced1e405055d54536ee3d435d1036a5a142a978bc9a0f291423781"
+    },
+    {
+      "path": ".cache/p44-runner-tests-20261020/selftest-v4-01/test_real_windows_three_layer_guard_and_file_reference/2.original",
+      "size_bytes": 116,
+      "sha256": "7f854eb9be00db365a72f4a35abdadf4300fa5760a40a8b99ca06e8185b35ab3"
+    },
+    {
+      "path": ".cache/p44-runner-tests-20261020/selftest-v4-01/test_real_windows_three_layer_guard_and_file_reference/3.original",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v3-final-check-01.log",
+      "size_bytes": 76,
+      "sha256": "9a90d8ff89f9671dce38612d881004c19b84002b72e38801fa495ca76ded66c7"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v3-final-check-01.json",
+      "size_bytes": 874,
+      "sha256": "cb15f875208c424c7955a7a2644b056cddf995e3aec1c03a5c9501b7232d95a2"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v3-index-check-01.json",
+      "size_bytes": 683,
+      "sha256": "be89f5d09f68eae8db776af07f219a9788fc1f2954fcb75231a1274fe2a2d4a9"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v3-index-check-01.log",
+      "size_bytes": 436,
+      "sha256": "419613f5f11885ea2861c014dad9975dbfb8fc60c0826a1fc7d082907b4cb6f5"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v4-bundle-diff-01.json",
+      "size_bytes": 524,
+      "sha256": "e921d09c1563406c1e7479fdce32ee7aeb151289e1c8a21d02077d1914b476eb"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v4-bundle-diff-01.log",
+      "size_bytes": 244,
+      "sha256": "a5f9a75b394aa9e1d12a83a3e48749b3a6f05d496ea5f37a9162c90b7a69fc0e"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v4-bundle-selftest-01.json",
+      "size_bytes": 481,
+      "sha256": "55aa3e0700f8edb1bc48e921fdbe27daf84ac656837d8e7890f1245be7ef3eb1"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v4-bundle-selftest-01.log",
+      "size_bytes": 918,
+      "sha256": "05ecf34ef86cd6379b7e67db47938ce507088e916ac4e7a8a5272788acbecfa2"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v4-capture-01.json",
+      "size_bytes": 1159,
+      "sha256": "99a23d99f02728e66ab221cf2f4ad1abf5027c0680f5463f8fbf7f56a79051ff"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v4-capture-01.log",
+      "size_bytes": 65,
+      "sha256": "6e97cb7e802ce8c58208cacf0787b309a1bb1a9d0e62860602bed7fa7f7e2d6e"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v4-capture-02.json",
+      "size_bytes": 1126,
+      "sha256": "aa3af7c9226a7cb5dd6870e0dc941ac91def5173dfc1e1c3492cb4717ebf5281"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v4-capture-02.log",
+      "size_bytes": 158,
+      "sha256": "e96b81a24c3bedc02326d1ab0f939b215be67908b368afc8e0eb975ae6f7a5f1"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v4-capture-03.json",
+      "size_bytes": 1895,
+      "sha256": "1e33e26dc0447db148898855d345e01409bf75c509b95e44a587e222f77a804e"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v4-capture-03.log",
+      "size_bytes": 133,
+      "sha256": "824c1d5c2731e666e68892c16086986f85c0439b0b7f79139d1e3501d3bfbe77"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v4-capture-retry-debug-01.json",
+      "size_bytes": 1134,
+      "sha256": "8d15d6aa0ae19c7e00a85f1f9e82edfcfbc6c8dc9c0805bf56ff8b687f4efb5f"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v4-capture-retry-debug-01.log",
+      "size_bytes": 124,
+      "sha256": "7a184eb550e15108f7553638d13b831141011592eca44af5934cf7932aa21964"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v4-root-review-01.json",
+      "size_bytes": 4998,
+      "sha256": "ce33383ab47fce3f3810a58bb154a635b7c177543caf7849d5099658e1ea7cdc"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v4-root-review-01.log",
+      "size_bytes": 187,
+      "sha256": "1bd3b9cab0f363c2ee029eda679930abf8391b60b5feb53ae8d33bec29d79504"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v4-run-syntax-01.json",
+      "size_bytes": 436,
+      "sha256": "71f2913eb0760dcf8c2d470c1e15a5b96b22d5e220bda6112156196d03141e67"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v4-run-syntax-01.log",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v4-source-01.json",
+      "size_bytes": 5711,
+      "sha256": "2b98e964829cc8d4f0bff0f325dcf873d957bad0990b14a66f52698374691a9b"
+    }
+  ],
+  "source_hashes_at_archive_time": [
+    {
+      "path": "Tools/acceptance/p44/run.cjs",
+      "sha256": "e058b2d5f2e77e37d75b2c2ee32efad4e728a46b1283e92e008180fb5f8e1af5"
+    },
+    {
+      "path": "Tools/acceptance/p44/capture.cjs",
+      "sha256": "56bdc1fcbb1a9f869599321d5e50cd4580b49d40905c07a0e662b77a8b9c58e6"
+    },
+    {
+      "path": "Tools/acceptance/p44/bundle.py",
+      "sha256": "4652c9164218becaaaf71c8de128543bea22c7031973ed1f168f4cf597dc76eb"
+    },
+    {
+      "path": "Tools/acceptance/p44/inspect.py",
+      "sha256": "600924572e507024635fcb03a93a55bf83b368359e9510ec5a218024f4b9a73e"
+    },
+    {
+      "path": "Tools/acceptance/p44/README.md",
+      "sha256": "f08ead33b9200e0c117c76845d21194adb98e8f2972855518319a0b4b9ec288f"
+    },
+    {
+      "path": "tests/ota/test_p44_capture.cjs",
+      "sha256": "9656c735902ee76a74cfa3101a93c85d7a3d116f5a435f517648995543ad3217"
+    },
+    {
+      "path": "tests/ota/test_p44_acceptance_tools.py",
+      "sha256": "df5033920cf91aea4693447bb7c027186f19a4f5b8a05dd6d370715ad7fb675c"
+    }
+  ],
+  "source_note": "Earlier results retain their own source/time; final source hashes do not retroactively bind earlier tests",
+  "preserved_limits": [
+    "Generated test fixtures remain in ignored cache; original stdout/results and committed test source are retained",
+    "Earlier mock success does not prove actual predecessor integration or live D1 compression",
+    "The public gzip probe used no credentials and does not constitute a D1 snapshot or product acceptance"
+  ],
+  "byte_exact_member_check": true
+}

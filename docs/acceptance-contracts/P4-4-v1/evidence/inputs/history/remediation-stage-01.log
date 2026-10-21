@@ -1,0 +1,12 @@
+warning: in the working copy of '.github/scripts/firmware-bindings-check.mjs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.github/workflows/firmware-build.yml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/upload-firmware-r2-asset.mjs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/ota-cross-system-contracts.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/ota-exec-notes/P4-4-configuration-2026-10-18.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/ota-exec-notes/P4-4-s3-interface-2026-10-19.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/ota-prompts/prompt-P4-1-implementation.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/ota-prompts/prompt-P4-4-integration.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/ota/firmware-pipeline.host.test.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/ota/test_acceptance_bundle.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/ota/test_firmware_s3.mjs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/ota/test_firmware_workflow.mjs', LF will be replaced by CRLF the next time Git touches it

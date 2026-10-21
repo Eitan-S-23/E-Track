@@ -1,0 +1,43 @@
+{
+  "createdAt": "2026-10-18T21:38:40.902Z",
+  "root": "D:\\github\\my\\E-Track",
+  "files": [
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p44-root-review-546d8b3-20261019\\cases-result.json",
+      "sizeBytes": 951,
+      "sha256": "6a3db0ea17ac01873402878ad090509b4258ceb24b415ce8394b4929538d4e63"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p44-root-review-546d8b3-20261019\\cases.cjs",
+      "sizeBytes": 5584,
+      "sha256": "3d656b08da095ed2d9854e6354d6ad80b8c491b7e82a74e8b7a27d2beb1fe43b"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p44-root-review-546d8b3-20261019\\originals-result.json",
+      "sizeBytes": 250,
+      "sha256": "b650cc1085681d10eb77d378aa77473ceecc165661716f04c705902967c578fb"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p44-root-review-546d8b3-20261019\\originals.cjs",
+      "sizeBytes": 1812,
+      "sha256": "4626883a3be09b1b0aa2661015608098450f4e9460e425124364a8fd9cc0df3e"
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\docs\\ota-exec-notes\\P4-4-s3-preacceptance-2026-10-19.md",
+      "sizeBytes": 8649,
+      "sha256": "65e25caff49fe62b20ffc035526ce41ebd10f20d8ea0213eb81d5badc9a8e186"
+    }
+  ],
+  "additionalGeneratedOutput": "D:\\github\\my\\E-Track\\.cache\\p44-root-review-546d8b3-20261019\\output-audit.json",
+  "checkedNodes": 13,
+  "allChosenOutputsInsideRoot": true,
+  "reparsePoints": false,
+  "productEdits": false,
+  "platformWrites": false,
+  "gitWrites": false,
+  "remoteAgentContacted": false,
+  "relayDiscovery": "No binding for this chat; no bindings or daemon configuration changed",
+  "externalOutputLocationsChosen": [],
+  "externalCleanup": false,
+  "scope": "Controlled-output audit, not a machine-wide zero-write assertion"
+}

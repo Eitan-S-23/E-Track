@@ -1,0 +1,26 @@
+{
+  "schema": "p44-lifecycle-v1",
+  "owner": "Eitan-S-23",
+  "gate": false,
+  "decision_author": "Independent root under the user's explicit autonomous P4-4 delegation; not a reviewer action",
+  "provider_expires_on": {
+    "production": null,
+    "rehearsal": null
+  },
+  "provider_ttl_configured": false,
+  "operator_review_rotation_deadline": {
+    "production": "2027-01-17T07:40:38Z",
+    "rehearsal": "2027-01-17T07:40:50Z"
+  },
+  "automatic_job_configured": false,
+  "scope": "Bounded configuration/rehearsal; P5 promotion rechecks active scope, age and ownership",
+  "rotation": "One environment at a time, same single bucket/two Item groups, install both new secret fields securely, verify authorized new run, then revoke old verified ID",
+  "emergency": "Keep gate=false, disable the identified compromised token; preserve firmware objects and evidence",
+  "temporary_management_id_sha256": "ec3e3b40801a2af2676d699686429cc49d1fea95afb328d8efb9ac519b31d666",
+  "temporary_management": "Only actual supplied local source; not old token.txt or e-track-ci. Never export management authority to workflow",
+  "historical_limits": [
+    "Initial broad private ACL was repaired, not proof no one could read it",
+    "Initial public candidate projection omitted Track identifier redaction; retained in ignored cache and superseded by v2",
+    "No original initial-400 or historical gh-set/list receipts were supplied"
+  ]
+}

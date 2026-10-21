@@ -1,0 +1,69 @@
+
+--- 2026-10-18T23:52:38.787Z debug
+🪵  Writing logs to "D:\github\my\E-Track\.cache\p44-root-acceptance-20261019\deploy\production\deploy-03-wrangler.log"
+---
+
+--- 2026-10-18T23:52:38.787Z warn
+▲ [WARNING] Proxy environment variables detected. We'll use your proxy for fetch requests.
+
+
+---
+
+--- 2026-10-18T23:52:38.834Z debug
+.env file not found at "D:\github\my\E-Track\.cache\p44-root-acceptance-20261019\.env". Continuing... For more details, refer to https://developers.cloudflare.com/workers/wrangler/system-environment-variables/
+---
+
+--- 2026-10-18T23:52:38.834Z debug
+.env file not found at "D:\github\my\E-Track\.cache\p44-root-acceptance-20261019\.env.local". Continuing... For more details, refer to https://developers.cloudflare.com/workers/wrangler/system-environment-variables/
+---
+
+--- 2026-10-18T23:52:38.855Z log
+
+ ⛅️ wrangler 4.105.0 (update available 4.151.1)
+───────────────────────────────────────────────
+---
+
+--- 2026-10-18T23:52:38.866Z warn
+▲ [WARNING] Processing private\deploy-production.json configuration:
+
+    - "unsafe" fields are experimental and may change or break at any time.
+    - Unexpected fields found in observability field: "redact_query_string"
+
+
+---
+
+--- 2026-10-18T23:52:38.889Z log
+There is a newer version of Wrangler available (current: 4.105.0, latest: 4.151.1). Try upgrading, as it might support this configuration option.
+---
+
+--- 2026-10-18T23:52:38.892Z debug
+Metrics dispatcher: Dispatching disabled - would have sent {"deviceId":"75e91e15-6e02-4b19-b6e7-569fa918a09d","event":"wrangler command started","timestamp":1792367558892,"properties":{"amplitude_session_id":1792367558866,"amplitude_event_id":0,"wranglerVersion":"4.105.0","wranglerMajorVersion":4,"wranglerMinorVersion":105,"wranglerPatchVersion":0,"osPlatform":"Windows","osVersion":"Windows 10 Education","nodeVersion":24,"isFirstUsage":true,"configFileType":"json","isCI":true,"isPagesCI":false,"isWorkersCI":false,"isInteractive":false,"hasAssets":false,"agent":"codex","argsUsed":["config","keepVars","noBundle"],"argsCombination":"config, keepVars, noBundle","sanitizedCommand":"deploy","sanitizedArgs":{"keepVars":true,"noBundle":false},"currentAgentSkillsInstalled":false}}.
+---
+
+--- 2026-10-18T23:52:39.019Z debug
+Starting verifyWorkerMatchesCITag() with tag: undefined, name: e-track-firmware-production
+---
+
+--- 2026-10-18T23:52:39.019Z debug
+No WRANGLER_CI_MATCH_TAG variable provided, aborting verifyWorkerMatchesCITag()
+---
+
+--- 2026-10-18T23:52:39.021Z debug
+-- START CF API REQUEST: GET https://api.cloudflare.com/client/v4/accounts/[REDACTED_ACCOUNT]/workers/services/e-track-firmware-production
+---
+
+--- 2026-10-18T23:52:39.021Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-18T23:52:39.022Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-18T23:52:39.022Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-18T23:52:39.022Z debug
+-- END CF API REQUEST
+---

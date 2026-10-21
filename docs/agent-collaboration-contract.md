@@ -151,6 +151,70 @@ sufficient. Apply the rule to future work; do not rerun completed experiments to
 document it. The motivating incident is recorded as
 [PROJECT-04](agent-collaboration/project-workflow.md#project-04-reuse-tools-before-replacing-them).
 
+## Reuse Before Requesting Credentials
+
+Applies to all agents before declaring a credential absent, requesting another
+token, creating/rotating one or requesting wider permissions. Read the
+[credential registry](agent-collaboration/credential-registry.md) and its original
+owner decisions first. This is a discovery rule, not a secret store or replacement
+for the task's frozen security contract. Credential-use authority recorded below
+does not by itself authorize new platform operations.
+
+User standing authorization (2026-10-18), `CF-CI-01`: any E-Track agent may use
+the existing `e-track-ci` (alias `e-track-p41-ci`) for authorized project work,
+across tasks, roles and worktrees. This is not exclusive to P4-1, P4-3 or P4-4.
+Do not request token-use permission or a replacement solely because the agent,
+role, task or worktree changed. Use the existing protected input without exposing
+the value. This authorizes credential reuse, not every operation the token might
+technically permit: the current task's platform/write boundaries, explicit
+production approval and gate requirements, no provisioning-token export and
+owner-controlled permission changes/rotation/revocation remain in force. Existing
+task-specific approvals are not inherited by another task through this token.
+
+1. Reconcile canonical name, historical aliases, platform secret name, protected
+   locator, owner, source revision and dated observations. Inspect only the named
+   protected route and necessary metadata; do not search arbitrary private caches
+   or dump environment/configuration contents. A different agent/worktree does
+   not make existing credentials disappear. No secret values in chat, argv,
+   source, logs, screenshots or artifacts, including hashes usable as credentials.
+2. Record existence, operation-specific capability and current authorization
+   separately. An active token, successful metadata GET or present environment
+   secret does not prove a correct value, write scope, runtime binding or isolation.
+   A recorded local locator is read-only input, not authority to copy/export it.
+3. Prefer applicable existing receipts and the smallest authorized read-only
+   check for the exact target/API. Do not replay successful uploads, registration
+   or rehearsal, use an unapproved mutation as a capability probe, or request
+   token-management access merely to discover a display name. Preserve original
+   denials and distinguish authentication, authorization, transport and evidence
+   gaps; an unknown capability stays unknown.
+4. If a real gap remains, consolidate one request naming the credential, target,
+   required operation, observed result, applicable authority and minimal owner
+   action. Prefer restoring the known protected route or obtaining a redacted
+   owner scope receipt over new credentials. A new token is an owner decision
+   justified by an actual gap, not the default response to a 403. Never ask for
+   plaintext in chat or widen to account-wide permissions as the default fix.
+5. Reuse standing authority only within its exact scope. For OTA, retain
+   `P41-CF-CREDENTIAL-02`: same-account dedicated CI credentials for the approved
+   test resources are not hard production permission isolation. Do not export
+   the local provisioning token to CI or silently extend test authority into
+   production. Rotation/revocation or target changes require owner control and
+   reassessment of affected evidence, not a claim that an old run proves new values.
+6. After an owner-confirmed alias, locator, rotation or capability change, update
+   the same registry ID with date, provenance, uncertainty and next owner. Preserve
+   superseded conclusions and failures. Deliver the rule/index/record to `main`
+   through the authorized integration route; until then name the exact pending
+   commit and notify active agents to reload it. Never update a frozen bundle.
+
+| Observation | Valid conclusion / next action |
+| --- | --- |
+| Token-management GET returns 403 | That management read is denied; token existence and publishing capability are not disproved. Check the required API, not a new token by default. |
+| Named local input is unavailable | This host route is unavailable; platform secret absence is unproved. Use the existing protected route or ask its owner, not for plaintext in chat. |
+| Token verify succeeds or secret name exists | Existence/status only; value correctness, target capability, isolation and current authorization need their own evidence. |
+| Exact publishing API returns 401/403 | Stop the affected operation and preserve its target-specific denial; reconcile binding/scope with the owner before any change. |
+| Timeout, TLS or proxy failure | Transport failure, not a permission diagnosis. Use an already-authorized transport; do not rotate credentials to repair connectivity. |
+| Old run passed but key/token/binding changed | Old runtime evidence does not qualify the changed configuration; identify the minimum affected verification. |
+| Test credential exists but production scope is undecided | Preserve the production-use decision; neither silently reuse it nor demand a new token without an evidenced requirement. |
+
 ## Question Packet
 
 Keep a stable question/finding ID and include only decision-relevant information:

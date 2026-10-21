@@ -1,0 +1,13 @@
+{
+  "label": "formal-privacy",
+  "command": "python",
+  "args": [
+    "-I",
+    "-S",
+    "-B",
+    "Tools/ota/p44-after-bundle.py",
+    "privacy"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "started": "2026-10-20T11:59:07.236Z"
+}

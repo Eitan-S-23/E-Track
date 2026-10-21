@@ -1,0 +1,21 @@
+
+ ⛅️ wrangler 4.105.0 (update available 4.151.1)
+───────────────────────────────────────────────
+There is a newer version of Wrangler available (current: 4.105.0, latest: 4.151.1). Try upgrading, as it might support this configuration option.
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mProxy environment variables detected. We'll use your proxy for fetch requests.[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mProcessing private\deploy-production.json configuration:[0m
+
+    - "unsafe" fields are experimental and may change or break at any time.
+    - Unexpected fields found in observability field: "redact_query_string"
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mThe request to Cloudflare's API timed out.[0m
+
+  This is likely due to network connectivity issues or slow network speeds.
+  Please check your internet connection and try again.
+
+
+🪵  Logs were written to "D:\github\my\E-Track\.cache\p44-root-acceptance-20261019\deploy\production\deploy-03-wrangler.log"

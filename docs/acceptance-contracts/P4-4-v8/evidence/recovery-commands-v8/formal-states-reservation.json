@@ -1,0 +1,15 @@
+{
+  "label": "formal-states",
+  "command": "python",
+  "args": [
+    "-I",
+    "-S",
+    "-B",
+    "Tools/ota/p44-after-bundle.py",
+    "--package-spec",
+    "docs/acceptance-contracts/P4-4-v8.package.json",
+    "states"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "started": "2026-10-21T10:41:46.829Z"
+}

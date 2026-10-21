@@ -1,0 +1,21 @@
+{"interop":".cache/p44-v7-development/node01","receipt":{"path":"interop-body.json","size_bytes":57511463,"sha256":"625857a4bb8766500bc7db0aa676d3bf13c23d80b46e51db9649a8aeba24e950"}}
+{"case":"body-disconnect","ok":true}
+{"interop":".cache/p44-v7-development/node01","receipt":{"path":"interop-resumed.json","size_bytes":57350149,"sha256":"c4a1d0fd6bf876e232e46a663d90ffd3af073f398e9c5cb93fffd4ca2b8ba2b3"}}
+{"case":"resume","ok":true}
+{"interop":".cache/p44-v7-development/node01","receipt":{"path":"interop.json","size_bytes":57242649,"sha256":"7f3d471c0f69a63e28f236c7860098e2f0d4104beba33e8090d30aeae288f98e"}}
+{"case":"complete","ok":true}
+{"case":"tail-integrity","ok":true}
+usage: inspect.py [-h] --repo-root REPO_ROOT --input INPUT --output OUTPUT
+                  {rehearsal,approvals,states}
+
+Bounded offline checks of P4-4 original evidence; no platform operations.
+
+positional arguments:
+  {rehearsal,approvals,states}
+
+options:
+  -h, --help            show this help message and exit
+  --repo-root REPO_ROOT
+  --input INPUT
+  --output OUTPUT
+{"scope":"OFFLINE_DEVELOPMENT_SELFTEST_ONLY","ok":true,"started":"2026-10-20T20:44:31.664Z","ended":"2026-10-20T20:45:36.248Z","assertions":187,"source":[{"path":"Tools/ota/p44-after-recovery.cjs","size_bytes":86017,"sha256":"bb508fbc18e8493d1b126b47df22e8cc4d058b4b599463867e6fcc1f7a7009e1"},{"path":"tests/ota/test_p44_after_recovery.cjs","size_bytes":58176,"sha256":"2b3fb4a00591e9b66a189e3934d0afa82bb409d2962aedfa0832450f986c1b5c"}],"cloud_operations":0,"c5_source_files":1185,"predecessor_commit":"9bfc48573a5eed190583411ac465bd847424a286","retained_complete_originals":31,"retained_failed_originals":1,"retained_private_verify_failures":1}

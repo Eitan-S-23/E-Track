@@ -1,0 +1,64 @@
+
+ ⛅️ wrangler 4.105.0 (update available 4.151.1)
+───────────────────────────────────────────────
+Total Upload: 145.52 KiB / gzip: 35.35 KiB
+Worker Startup Time: 2 ms
+Your Worker has access to the following bindings:
+Binding                                                       Resource            
+env.RATE_LIMITER (RateLimiter)                                Durable Object      
+env.MANIFEST_CACHE (9581ef5b95154abaa7d441fd07c2f220)         KV Namespace        
+env.DB (e-track-firmware-p41-test)                            D1 Database         
+env.RELEASES_BUCKET (e-track-firmware-p41-test-releases)      R2 Bucket           
+
+The following unsafe metadata will be attached to your Worker:
+{
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+    "redact_query_string": true,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "persist": true,
+      "invocation_logs": true
+    },
+    "traces": {
+      "enabled": false,
+      "persist": true,
+      "head_sampling_rate": 1
+    }
+  },
+  "annotations": {
+    "workers/message": "P4-4 configuration; tested CI source b56534d7b6c993c0795010d0404fb8a81f7eeb9d",
+    "workers/tag": "p44-b56534d7b6c9"
+  }
+}
+Uploaded e-track-firmware-p41-test (8.10 sec)
+Deployed e-track-firmware-p41-test triggers (7.61 sec)
+  https://e-track-firmware-p41-test.tangjichentudou.workers.dev
+  schedule: 0 * * * *
+Current Version ID: bb3d44fd-4a84-489e-9e04-6adfc54a458e
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mProxy environment variables detected. We'll use your proxy for fetch requests.[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mProcessing private\deploy-staging.json configuration:[0m
+
+    - "unsafe" fields are experimental and may change or break at any time.
+    - In your wrangler.json file, you have configured `durable_objects` exported by this Worker (RateLimiter), but no `migrations` for them. This may not work as expected until you add a `migrations` section to your wrangler.json file. Add the following configuration:
+  
+      ```
+      {
+        "migrations": [
+          {
+            "tag": "v1",
+            "new_sqlite_classes": [
+              "RateLimiter"
+            ]
+          }
+        ]
+      }
+      ```
+  
+      Refer to [4mhttps://developers.cloudflare.com/durable-objects/reference/durable-objects-migrations/[0m for more details.
+
+

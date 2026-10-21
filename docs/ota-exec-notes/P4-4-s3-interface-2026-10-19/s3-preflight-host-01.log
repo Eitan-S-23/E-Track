@@ -1,0 +1,28 @@
+
+> @trace/update-service-worker@0.1.0 test
+> vitest run --config test/vitest.host.config.ts test/firmware-preflight.test.ts
+
+
+ RUN  v4.1.9 D:/github/my/E-Track/.cache/p4-4-integration-20261018/app/bluetooth_flutter_Trace/cloudflare/update-service/worker
+
+(node:18612) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ test/firmware-preflight.test.ts > authenticated fixed-query firmware preflight > rejects  before parsing or querying 35ms
+ ✓ test/firmware-preflight.test.ts > authenticated fixed-query firmware preflight > rejects Bearer wrong-token before parsing or querying 4ms
+ ✓ test/firmware-preflight.test.ts > authenticated fixed-query firmware preflight > rejects Basic invalid before parsing or querying 1ms
+ ✓ test/firmware-preflight.test.ts > authenticated fixed-query firmware preflight > rejects Bearer test-deploy-token,other before parsing or querying 1ms
+ ✓ test/firmware-preflight.test.ts > authenticated fixed-query firmware preflight > rejects client-controlled sql before DB access 4ms
+ ✓ test/firmware-preflight.test.ts > authenticated fixed-query firmware preflight > rejects client-controlled databaseId before DB access 2ms
+ ✓ test/firmware-preflight.test.ts > authenticated fixed-query firmware preflight > rejects client-controlled bucketName before DB access 1ms
+ ✓ test/firmware-preflight.test.ts > authenticated fixed-query firmware preflight > rejects client-controlled accountId before DB access 1ms
+ ✓ test/firmware-preflight.test.ts > authenticated fixed-query firmware preflight > rejects mixed environment before querying and returns no authorization data 2ms
+ ✓ test/firmware-preflight.test.ts > authenticated fixed-query firmware preflight > executes the three SELECTs, binds the response identity and has no business writes 7ms
+ ✓ test/firmware-preflight.test.ts > authenticated fixed-query firmware preflight > preserves same-version canonical replay and blocks lower/different identities 9ms
+ ✓ test/firmware-preflight.test.ts > authenticated fixed-query firmware preflight > blocks migrated unresolved pointers and legacy maximum on a native isolated D1 fixture 21ms
+ ✓ test/firmware-preflight.test.ts > authenticated fixed-query firmware preflight > sanitizes a backend exception instead of returning SQL or values 2ms
+
+ Test Files  1 passed (1)
+      Tests  13 passed (13)
+   Start at  02:45:35
+   Duration  2.10s (transform 1.04s, setup 144ms, import 1.10s, tests 108ms, environment 0ms)
+

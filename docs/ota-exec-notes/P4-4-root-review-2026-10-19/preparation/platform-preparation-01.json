@@ -1,0 +1,19 @@
+{
+  "startedAt": "2026-10-18T22:33:45.695Z",
+  "kind": "CONFIGURATION_PREPARATION_READ_ONLY",
+  "formalAcceptance": "NOT_RUN",
+  "businessMutations": "NONE",
+  "requests": [
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/user/tokens/verify",
+      "startedAt": "2026-10-18T22:33:48.197Z",
+      "errorClass": "UND_ERR_CONNECT_TIMEOUT",
+      "endedAt": "2026-10-18T22:33:59.102Z"
+    }
+  ],
+  "credentials": {},
+  "error": "Bounded HTTP operation failed; see the sanitized receipt",
+  "endedAt": "2026-10-18T22:33:59.103Z"
+}

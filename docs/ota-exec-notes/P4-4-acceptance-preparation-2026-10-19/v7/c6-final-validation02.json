@@ -1,0 +1,29 @@
+{
+  "label": "c6-final-validation02",
+  "command": "python",
+  "args": [
+    "-I",
+    "-S",
+    "-B",
+    ".cache/p44-c6-verification/Tools/acceptance/validate_bundle.py",
+    "--contract",
+    ".cache/p44-c6-verification/docs/acceptance-contracts/P4-4-v6.contract.json",
+    "--matrix",
+    ".cache/p44-c6-verification/docs/acceptance-contracts/P4-4-v6/final-evidence-matrix.json",
+    "--repo-root",
+    ".cache/p44-c6-verification",
+    "--previous-contract",
+    ".cache/p44-c6-verification/docs/acceptance-contracts/P4-4-v5.contract.json",
+    "--previous-matrix",
+    ".cache/p44-c6-verification/docs/acceptance-contracts/P4-4-v5/final-evidence-matrix.json",
+    "--reuse-source",
+    ".cache/p44-c6-verification/docs/acceptance-contracts/P4-4-v4.contract.json",
+    ".cache/p44-c6-verification/docs/acceptance-contracts/P4-4-v4/final-evidence-matrix.json"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "startedAt": "2026-10-20T21:01:53.451Z",
+  "endedAt": "2026-10-20T21:02:59.650Z",
+  "exitCode": 0,
+  "signal": null,
+  "logPath": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\c6-final-validation02.log"
+}

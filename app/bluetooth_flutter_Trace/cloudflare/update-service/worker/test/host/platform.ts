@@ -87,7 +87,7 @@ const hits = new Map<string, number[]>();
 export const hostDb = new SqliteD1();
 const migrationDir = fileURLToPath(new URL("../../../migrations/", import.meta.url));
 export const env = {
-  DB: hostDb, RELEASES_BUCKET: new MemoryBucket(), MANIFEST_CACHE: new MemoryKv(),
+  DB: hostDb, PREFLIGHT_LEGACY_DB: new SqliteD1(), RELEASES_BUCKET: new MemoryBucket(), MANIFEST_CACHE: new MemoryKv(),
   RATE_LIMITER: { getByName() { return { check(key: string, limit: number, window: number) {
     const now = Date.now();
     const times = (hits.get(key) ?? []).filter((time) => time >= now - window * 1000);
@@ -104,8 +104,9 @@ export const env = {
     .map((name) => ({ name, sql: readFileSync(`${migrationDir}/${name}`, "utf8") }))
 } as unknown as WorkerEnv & { TEST_MIGRATIONS: Array<{ name: string; sql: string }> };
 
-export async function applyD1Migrations(_db: D1Database, migrations: Array<{ name: string; sql: string }>) {
-  for (const migration of migrations) hostDb.migrate(migration.sql);
+export async function applyD1Migrations(db: D1Database, migrations: Array<{ name: string; sql: string }>) {
+  const target = db as unknown as SqliteD1;
+  for (const migration of migrations) target.migrate(migration.sql);
 }
 export function createExecutionContext(): ExecutionContext {
   return { waitUntil(promise: Promise<unknown>) { void promise; }, passThroughOnException() {}, props: {} } as ExecutionContext;

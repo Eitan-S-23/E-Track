@@ -1,0 +1,18 @@
+{
+  "schema": "p44-request-retry-reservation-v1",
+  "attempt": 2,
+  "method": "POST",
+  "path": "/accounts/[ACCOUNT]/d1/database/0133ad9e-d4a2-4fef-a659-4f2bf3d3a645/query",
+  "request": {
+    "path": "snapshots/before/protected-release_assets-rows8-80.request.json",
+    "size_bytes": 75,
+    "sha256": "b2d368fbf428879070a821383c6d26b4284dc231d698ce6ad05beee1bf91d616"
+  },
+  "started": "2026-10-19T19:26:58.120Z",
+  "first_failure": {
+    "path": "snapshots/before/protected-release_assets-rows8-80-request-failure-1.json",
+    "size_bytes": 629,
+    "sha256": "e51efee6cb930c080fcd8739e46f9766ed4b9aac9c9506b59a9f96ac3702ffba"
+  },
+  "delay_ms": 500
+}

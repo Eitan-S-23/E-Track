@@ -1,0 +1,538 @@
+
+--- 2026-10-19T00:19:42.349Z debug
+🪵  Writing logs to "D:\github\my\E-Track\.cache\p44-root-acceptance-20261019\deploy\production\deploy-04-wrangler.log"
+---
+
+--- 2026-10-19T00:19:42.349Z warn
+▲ [WARNING] Proxy environment variables detected. We'll use your proxy for fetch requests.
+
+
+---
+
+--- 2026-10-19T00:19:42.397Z debug
+.env file not found at "D:\github\my\E-Track\.cache\p44-root-acceptance-20261019\.env". Continuing... For more details, refer to https://developers.cloudflare.com/workers/wrangler/system-environment-variables/
+---
+
+--- 2026-10-19T00:19:42.398Z debug
+.env file not found at "D:\github\my\E-Track\.cache\p44-root-acceptance-20261019\.env.local". Continuing... For more details, refer to https://developers.cloudflare.com/workers/wrangler/system-environment-variables/
+---
+
+--- 2026-10-19T00:19:42.422Z log
+
+ ⛅️ wrangler 4.105.0 (update available 4.151.1)
+───────────────────────────────────────────────
+---
+
+--- 2026-10-19T00:19:42.433Z warn
+▲ [WARNING] Processing private\deploy-production.json configuration:
+
+    - "unsafe" fields are experimental and may change or break at any time.
+    - Unexpected fields found in observability field: "redact_query_string"
+
+
+---
+
+--- 2026-10-19T00:19:42.458Z log
+There is a newer version of Wrangler available (current: 4.105.0, latest: 4.151.1). Try upgrading, as it might support this configuration option.
+---
+
+--- 2026-10-19T00:19:42.461Z debug
+Metrics dispatcher: Dispatching disabled - would have sent {"deviceId":"75e91e15-6e02-4b19-b6e7-569fa918a09d","event":"wrangler command started","timestamp":1792369182460,"properties":{"amplitude_session_id":1792369182434,"amplitude_event_id":0,"wranglerVersion":"4.105.0","wranglerMajorVersion":4,"wranglerMinorVersion":105,"wranglerPatchVersion":0,"osPlatform":"Windows","osVersion":"Windows 10 Education","nodeVersion":24,"isFirstUsage":true,"configFileType":"json","isCI":true,"isPagesCI":false,"isWorkersCI":false,"isInteractive":false,"hasAssets":false,"agent":"codex","argsUsed":["config","keepVars","noBundle"],"argsCombination":"config, keepVars, noBundle","sanitizedCommand":"deploy","sanitizedArgs":{"keepVars":true,"noBundle":false},"currentAgentSkillsInstalled":false}}.
+---
+
+--- 2026-10-19T00:19:42.586Z debug
+Starting verifyWorkerMatchesCITag() with tag: undefined, name: e-track-firmware-production
+---
+
+--- 2026-10-19T00:19:42.587Z debug
+No WRANGLER_CI_MATCH_TAG variable provided, aborting verifyWorkerMatchesCITag()
+---
+
+--- 2026-10-19T00:19:42.588Z debug
+-- START CF API REQUEST: GET https://api.cloudflare.com/client/v4/accounts/[REDACTED_ACCOUNT]/workers/services/e-track-firmware-production
+---
+
+--- 2026-10-19T00:19:42.588Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:42.589Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:42.589Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:42.589Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-10-19T00:19:49.579Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-10-19T00:19:49.580Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:49.580Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:49.580Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-10-19T00:19:49.583Z debug
+-- START CF API REQUEST: GET https://api.cloudflare.com/client/v4/accounts/[REDACTED_ACCOUNT]/workers/scripts/e-track-firmware-production/secrets
+---
+
+--- 2026-10-19T00:19:49.583Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:49.583Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:49.583Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:49.583Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-10-19T00:19:50.185Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-10-19T00:19:50.185Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:50.185Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:50.185Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-10-19T00:19:50.186Z debug
+-- START CF API REQUEST: GET https://api.cloudflare.com/client/v4/accounts/[REDACTED_ACCOUNT]/workers/scripts/e-track-firmware-production/deployments
+---
+
+--- 2026-10-19T00:19:50.186Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:50.186Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:50.186Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:50.186Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-10-19T00:19:50.748Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-10-19T00:19:50.748Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:50.748Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:50.748Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-10-19T00:19:50.758Z log
+Total Upload: 145.52 KiB / gzip: 35.35 KiB
+---
+
+--- 2026-10-19T00:19:50.759Z debug
+-- START CF API REQUEST: GET https://api.cloudflare.com/client/v4/accounts/[REDACTED_ACCOUNT]/workers/scripts/e-track-firmware-production/settings
+---
+
+--- 2026-10-19T00:19:50.759Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:50.759Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:50.759Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:50.759Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-10-19T00:19:51.329Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-10-19T00:19:51.330Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:51.330Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:51.330Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-10-19T00:19:51.333Z debug
+-- START CF API REQUEST: POST https://api.cloudflare.com/client/v4/accounts/[REDACTED_ACCOUNT]/workers/scripts/e-track-firmware-production/versions
+---
+
+--- 2026-10-19T00:19:51.333Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:51.333Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:51.333Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:51.338Z debug
+BODY: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:51.338Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-10-19T00:19:53.694Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-10-19T00:19:53.695Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:53.695Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:53.695Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-10-19T00:19:53.696Z debug
+-- START CF API REQUEST: POST https://api.cloudflare.com/client/v4/accounts/[REDACTED_ACCOUNT]/workers/scripts/e-track-firmware-production/deployments
+---
+
+--- 2026-10-19T00:19:53.696Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:53.696Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:53.696Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:53.696Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-10-19T00:19:54.951Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-10-19T00:19:54.951Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:54.951Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:54.951Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-10-19T00:19:54.952Z debug
+-- START CF API REQUEST: PATCH https://api.cloudflare.com/client/v4/accounts/[REDACTED_ACCOUNT]/workers/scripts/e-track-firmware-production/script-settings
+---
+
+--- 2026-10-19T00:19:54.952Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:54.952Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:54.952Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:54.952Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-10-19T00:19:55.720Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-10-19T00:19:55.720Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:55.720Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:55.720Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-10-19T00:19:55.726Z log
+Worker Startup Time: 2 ms
+---
+
+--- 2026-10-19T00:19:55.727Z log
+Your Worker has access to the following bindings:
+---
+
+--- 2026-10-19T00:19:55.727Z log
+Binding                                                         Resource         
+---
+
+--- 2026-10-19T00:19:55.728Z log
+env.DB (e-track-firmware-production)                            D1 Database      
+---
+
+--- 2026-10-19T00:19:55.728Z log
+env.RELEASES_BUCKET (e-track-firmware-production-releases)      R2 Bucket        
+---
+
+--- 2026-10-19T00:19:55.728Z log
+
+---
+
+--- 2026-10-19T00:19:55.728Z log
+The following unsafe metadata will be attached to your Worker:
+---
+
+--- 2026-10-19T00:19:55.728Z log
+{
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+    "redact_query_string": true,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "persist": true,
+      "invocation_logs": true
+    },
+    "traces": {
+      "enabled": false,
+      "persist": true,
+      "head_sampling_rate": 1
+    }
+  },
+  "annotations": {
+    "workers/message": "P4-4 configuration; tested CI source b56534d7b6c993c0795010d0404fb8a81f7eeb9d",
+    "workers/tag": "p44-b56534d7b6c9"
+  }
+}
+---
+
+--- 2026-10-19T00:19:55.728Z log
+Uploaded e-track-firmware-production (5.54 sec)
+---
+
+--- 2026-10-19T00:19:55.729Z debug
+-- START CF API REQUEST: GET https://api.cloudflare.com/client/v4/accounts/[REDACTED_ACCOUNT]/workers/subdomain
+---
+
+--- 2026-10-19T00:19:55.729Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:55.729Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:55.729Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:55.729Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-10-19T00:19:56.897Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-10-19T00:19:56.897Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:56.897Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:56.897Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-10-19T00:19:56.897Z debug
+-- START CF API REQUEST: GET https://api.cloudflare.com/client/v4/accounts/[REDACTED_ACCOUNT]/workers/scripts/e-track-firmware-production/subdomain
+---
+
+--- 2026-10-19T00:19:56.897Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:56.897Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:56.897Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:56.897Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-10-19T00:19:57.514Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-10-19T00:19:57.514Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:57.514Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:57.514Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-10-19T00:19:57.514Z debug
+-- START CF API REQUEST: POST https://api.cloudflare.com/client/v4/accounts/[REDACTED_ACCOUNT]/workers/scripts/e-track-firmware-production/subdomain
+---
+
+--- 2026-10-19T00:19:57.514Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:57.514Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:57.514Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:57.514Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-10-19T00:19:58.231Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-10-19T00:19:58.231Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:58.231Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:58.231Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-10-19T00:19:58.232Z debug
+-- START CF API REQUEST: PUT https://api.cloudflare.com/client/v4/accounts/[REDACTED_ACCOUNT]/workers/scripts/e-track-firmware-production/schedules
+---
+
+--- 2026-10-19T00:19:58.232Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:58.232Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:58.232Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:58.232Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-10-19T00:19:58.908Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-10-19T00:19:58.908Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:58.908Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-10-19T00:19:58.909Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-10-19T00:19:58.909Z log
+Deployed e-track-firmware-production triggers (3.18 sec)
+---
+
+--- 2026-10-19T00:19:58.909Z log
+  https://e-track-firmware-production.tangjichentudou.workers.dev
+---
+
+--- 2026-10-19T00:19:58.909Z log
+  schedule: 0 * * * *
+---
+
+--- 2026-10-19T00:19:58.909Z log
+Current Version ID: e1653d60-03cb-4397-b154-78efd681ebbc
+---
+
+--- 2026-10-19T00:19:58.919Z debug
+Metrics dispatcher: Dispatching disabled - would have sent {"deviceId":"75e91e15-6e02-4b19-b6e7-569fa918a09d","event":"deploy worker script","timestamp":1792369198919,"properties":{"amplitude_session_id":1792369198912,"amplitude_event_id":0,"wranglerVersion":"4.105.0","wranglerMajorVersion":4,"wranglerMinorVersion":105,"wranglerPatchVersion":0,"osPlatform":"Windows","osVersion":"Windows 10 Education","nodeVersion":24,"isFirstUsage":true,"configFileType":"none","isCI":true,"isPagesCI":false,"isWorkersCI":false,"isInteractive":false,"hasAssets":false,"agent":"codex","category":"Workers","os":"win32:x64","usesTypeScript":false,"durationMs":16332,"currentAgentSkillsInstalled":false}}.
+---
+
+--- 2026-10-19T00:19:58.921Z debug
+Metrics dispatcher: Dispatching disabled - would have sent {"deviceId":"75e91e15-6e02-4b19-b6e7-569fa918a09d","event":"wrangler command completed","timestamp":1792369198920,"properties":{"amplitude_session_id":1792369182434,"amplitude_event_id":1,"wranglerVersion":"4.105.0","wranglerMajorVersion":4,"wranglerMinorVersion":105,"wranglerPatchVersion":0,"osPlatform":"Windows","osVersion":"Windows 10 Education","nodeVersion":24,"isFirstUsage":true,"configFileType":"json","isCI":true,"isPagesCI":false,"isWorkersCI":false,"isInteractive":false,"hasAssets":false,"agent":"codex","argsUsed":["config","keepVars","noBundle"],"argsCombination":"config, keepVars, noBundle","sanitizedCommand":"deploy","sanitizedArgs":{"keepVars":true,"noBundle":false},"durationMs":16510,"currentAgentSkillsInstalled":false}}.
+---
+
+--- 2026-10-19T00:19:58.922Z debug
+Metrics dispatcher: Dispatching disabled - would have sent {"deviceId":"75e91e15-6e02-4b19-b6e7-569fa918a09d","event":"skills_install_skipped","timestamp":1792369198922,"properties":{"amplitude_session_id":1792369198917,"amplitude_event_id":0,"wranglerVersion":"4.105.0","wranglerMajorVersion":4,"wranglerMinorVersion":105,"wranglerPatchVersion":0,"osPlatform":"Windows","osVersion":"Windows 10 Education","nodeVersion":24,"isFirstUsage":true,"configFileType":"none","isCI":true,"isPagesCI":false,"isWorkersCI":false,"isInteractive":false,"hasAssets":false,"agent":"codex","category":"Workers","os":"win32:x64","reason":"Running in CI","command":"deploy","currentAgentSkillsInstalled":false}}.
+---

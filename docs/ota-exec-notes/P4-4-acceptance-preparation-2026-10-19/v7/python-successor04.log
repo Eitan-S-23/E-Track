@@ -1,0 +1,8 @@
+{"development_only": true, "fixture_root": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44-v7-development\\python\\batch-4", "c5_source_files_verified": 1185, "network_requests": 0, "source_sha256": "ae5b22bdf544c1393cf20bddad81cd831336db9ccee925db4660baf6132a31e7", "tests_sha256": "f2716e1f83b0174087dac9d3528969b752778148271d913fc753a0b6b48f0d6f"}
+test_successor_cli_output_is_consumed_by_python (__main__.AfterBundleTests.test_successor_cli_output_is_consumed_by_python) ... ok
+test_successor_multislot_receipts_and_stock_matrix_validators (__main__.AfterBundleTests.test_successor_multislot_receipts_and_stock_matrix_validators) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 140.979s
+
+OK

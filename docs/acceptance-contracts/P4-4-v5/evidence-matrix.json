@@ -1,0 +1,123 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P4-4-v5",
+  "contract_sha256": "AC95899A5DFDC8010DFC26FF350A2FFD94A72328412DD7A56705F72A99D83687",
+  "round_id": "P44-20261020-05",
+  "overall_result": "NOT_RUN",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "P44-HISTORY",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN: C5 missing-after recovery, retaining C4 business success and all failed originals."
+    },
+    {
+      "id": "P44-CONFIGURATION",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN: C5 missing-after recovery, retaining C4 business success and all failed originals."
+    },
+    {
+      "id": "P44-RAW-RUNS",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN: C5 missing-after recovery, retaining C4 business success and all failed originals."
+    },
+    {
+      "id": "P44-REHEARSAL",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN: C5 missing-after recovery, retaining C4 business success and all failed originals."
+    },
+    {
+      "id": "P44-RAW-STATE",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN: C5 missing-after recovery, retaining C4 business success and all failed originals."
+    },
+    {
+      "id": "P44-RAW-READBACK",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN: C5 missing-after recovery, retaining C4 business success and all failed originals."
+    },
+    {
+      "id": "P44-APPROVALS",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN: C5 missing-after recovery, retaining C4 business success and all failed originals."
+    },
+    {
+      "id": "P44-ISOLATION",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN: C5 missing-after recovery, retaining C4 business success and all failed originals."
+    },
+    {
+      "id": "P44-HYGIENE",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN: C5 missing-after recovery, retaining C4 business success and all failed originals."
+    }
+  ],
+  "evidence_hashes": {},
+  "commands": [],
+  "artifacts": []
+}

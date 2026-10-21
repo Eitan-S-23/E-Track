@@ -1,0 +1,179 @@
+{
+  "createdAt": "2026-10-18T14:39:46.938Z",
+  "nature": "P4-4 implementation observations, not independent acceptance",
+  "archive": {
+    "path": "docs/ota-exec-notes/P4-4-integration-2026-10-18/resume.zip",
+    "sizeBytes": 38392,
+    "sha256": "0e6dc38e333c38fa4bbede3e48bb9b80ffdfc4c2392956c277bfee25cb614f22"
+  },
+  "entries": [
+    {
+      "path": ".cache/p44-run.cjs",
+      "sizeBytes": 5072,
+      "sha256": "51b9b6c153f0520fffda4ecdb81cc8a10f8880acb0607173e7be3d121466d5f8"
+    },
+    {
+      "path": ".cache/p44-platform.cjs",
+      "sizeBytes": 17726,
+      "sha256": "f08927b9fa258d0e04d6a0a89d3c4d5234a89eac52c00d0dbe9802599c1d3c95"
+    },
+    {
+      "path": ".cache/p44-github-config.cjs",
+      "sizeBytes": 4820,
+      "sha256": "444f6a6c1b392205b54ac0d4886faf2c7c65876e56de3b48e9a810f65cd643b0"
+    },
+    {
+      "path": ".cache/p44-seal.cjs",
+      "sizeBytes": 4686,
+      "sha256": "c0f75326525c4a1432ec2db17131cb1fcc9e8f2e94936ff10a9a9c8f07fbde5f"
+    },
+    {
+      "path": ".cache/p44-audit.cjs",
+      "sizeBytes": 4789,
+      "sha256": "20f4edf416b8540f7ecf674743df39632d12f46f6674af13e09262756eef2573"
+    },
+    {
+      "path": ".cache/p44/environment-schema-query.json",
+      "sizeBytes": 128,
+      "sha256": "112117500d8e46b349995f92c3b4fc88a1fe770cb93b0e54a6f8938a58475269"
+    },
+    {
+      "path": ".cache/p44/evidence/auth-negative-01.json",
+      "sizeBytes": 2371,
+      "sha256": "6265ebe987ca01d225f6636b4039d5c64932c15e700896db77c8311ff166aac4"
+    },
+    {
+      "path": ".cache/p44/evidence/r2-targets-02.json",
+      "sizeBytes": 1054,
+      "sha256": "4793ec5ed543f1e7c3ac2caa72096d24c99a775414dedf613ef85ffd4ad04375"
+    },
+    {
+      "path": ".cache/p44/evidence/resume-audit-01.json",
+      "sizeBytes": 2447,
+      "sha256": "1053cd812668af8db5ce040e2bc6e309afc4b4992114a797b592e6bc7a3780d1"
+    },
+    {
+      "path": ".cache/p44/evidence/targets-01.json",
+      "sizeBytes": 16244,
+      "sha256": "6144efc6064901968646863197c121f86815f8040fe01e80d6062416ef132938"
+    },
+    {
+      "path": ".cache/p44/logs/p44-resume-audit-01.json",
+      "sizeBytes": 425,
+      "sha256": "9cb68baa5279987e987dace992d46822b7503744e9dca0933eab089292c5a406"
+    },
+    {
+      "path": ".cache/p44/logs/p44-resume-audit-01.log",
+      "sizeBytes": 2447,
+      "sha256": "1053cd812668af8db5ce040e2bc6e309afc4b4992114a797b592e6bc7a3780d1"
+    },
+    {
+      "path": ".cache/p44/logs/p44-resume-auth-negative-01.json",
+      "sizeBytes": 475,
+      "sha256": "43fc065ebcf61b22ddb265140fae9cb77c5d9f07454e57d1b58b264c9462d9f0"
+    },
+    {
+      "path": ".cache/p44/logs/p44-resume-auth-negative-01.log",
+      "sizeBytes": 2371,
+      "sha256": "6265ebe987ca01d225f6636b4039d5c64932c15e700896db77c8311ff166aac4"
+    },
+    {
+      "path": ".cache/p44/logs/p44-resume-auth-syntax-01.json",
+      "sizeBytes": 441,
+      "sha256": "443ba5c35700c4711555f7d9373a7fecb9c0b25821b4c020f078ffee47c0d368"
+    },
+    {
+      "path": ".cache/p44/logs/p44-resume-auth-syntax-01.log",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p44/logs/p44-resume-diff-check-01.json",
+      "sizeBytes": 419,
+      "sha256": "43e6fc5dd4bf7ca548f004d04fe62a1e74efe111c42670df31545b4a5f32a09b"
+    },
+    {
+      "path": ".cache/p44/logs/p44-resume-diff-check-01.log",
+      "sizeBytes": 291,
+      "sha256": "107b108573ad11acc6fc4419037140f7a560122f1932cc50d861daf7f5c0988a"
+    },
+    {
+      "path": ".cache/p44/logs/p44-resume-environment-schema-01.json",
+      "sizeBytes": 496,
+      "sha256": "8c6888276ef418b15706734359d910a82170c34ce63187c2fdf33405fb6b8a12"
+    },
+    {
+      "path": ".cache/p44/logs/p44-resume-environment-schema-01.log",
+      "sizeBytes": 478,
+      "sha256": "e8220d784103039e033e063aa11470f6095372f3999179339e52029edd540317"
+    },
+    {
+      "path": ".cache/p44/logs/p44-resume-main-01.json",
+      "sizeBytes": 441,
+      "sha256": "f364c85148acc7051337676dc0da8b9259a7c195ab32955f07453161823399c3"
+    },
+    {
+      "path": ".cache/p44/logs/p44-resume-main-01.log",
+      "sizeBytes": 57,
+      "sha256": "a958c9c155cc871c57f1e1863791afa90bc6a014e2cbeca6aca7fe3842166ec5"
+    },
+    {
+      "path": ".cache/p44/logs/p44-resume-platform-syntax-01.json",
+      "sizeBytes": 449,
+      "sha256": "dae29822653b2da73a0739c9666f5a9f862f7ceda7a986d7136032c9ae0d0437"
+    },
+    {
+      "path": ".cache/p44/logs/p44-resume-platform-syntax-01.log",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p44/logs/p44-resume-r2-02.json",
+      "sizeBytes": 444,
+      "sha256": "c448991564eb4b5fa4b920be6ee51d50a718dbb36452837188f03f6b993f56bd"
+    },
+    {
+      "path": ".cache/p44/logs/p44-resume-r2-02.log",
+      "sizeBytes": 1054,
+      "sha256": "4793ec5ed543f1e7c3ac2caa72096d24c99a775414dedf613ef85ffd4ad04375"
+    },
+    {
+      "path": ".cache/p44/logs/p44-resume-readiness-tests-01.json",
+      "sizeBytes": 514,
+      "sha256": "b3bd9878f6218e737fd4c8968e8703d0b67b4b8d130b974928b6ec9769f395ae"
+    },
+    {
+      "path": ".cache/p44/logs/p44-resume-readiness-tests-01.log",
+      "sizeBytes": 130,
+      "sha256": "ed051b86d6f8076b66c50a3f77416f4188bc9d3ebeea859d23bfa615437a5957"
+    },
+    {
+      "path": ".cache/p44/logs/p44-resume-targets-01.json",
+      "sizeBytes": 451,
+      "sha256": "41fe220c36b494920b9c5410fb17ad6fab95145071de6ca5ed9ab7a4ff31e4fa"
+    },
+    {
+      "path": ".cache/p44/logs/p44-resume-targets-01.log",
+      "sizeBytes": 16244,
+      "sha256": "6144efc6064901968646863197c121f86815f8040fe01e80d6062416ef132938"
+    },
+    {
+      "path": ".cache/p44/logs/p44-resume-workflow-host-01.json",
+      "sizeBytes": 457,
+      "sha256": "44955a373a317b815f9e5ccd6109c719ed74d235bd3c3d2235188edb9d2c584f"
+    },
+    {
+      "path": ".cache/p44/logs/p44-resume-workflow-host-01.log",
+      "sizeBytes": 10644,
+      "sha256": "44d685615b45dccd92960c241eb9b3918b6e57aba2b8d0a9dafd681935f14be9"
+    }
+  ],
+  "credentialsScanned": true,
+  "extractionVerified": true,
+  "excludes": [
+    "Private inputs/credentials",
+    "Historical frozen bundles",
+    "Pre-worktree host transcript",
+    "This archive creation receipt"
+  ]
+}

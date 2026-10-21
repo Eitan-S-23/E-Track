@@ -1,0 +1,33 @@
+{
+  "label": "formal-precheck",
+  "command": "python",
+  "args": [
+    "-I",
+    "-S",
+    "-B",
+    "Tools/acceptance/validate_bundle.py",
+    "--contract",
+    "docs/acceptance-contracts/P4-4-v5.contract.json",
+    "--repo-root",
+    "D:/github/my/E-Track/.cache/p4-4-integration-20261018",
+    "--previous-contract",
+    "docs/acceptance-contracts/P4-4-v4.contract.json",
+    "--previous-matrix",
+    "docs/acceptance-contracts/P4-4-v4/final-evidence-matrix.json",
+    "--matrix",
+    "docs/acceptance-contracts/P4-4-v5/evidence-matrix.json"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "started": "2026-10-20T04:40:53.750Z",
+  "ended": "2026-10-20T04:41:21.046Z",
+  "exitCode": 0,
+  "signal": null,
+  "process_closed": true,
+  "closed": true,
+  "spawn_failed": false,
+  "output": {
+    "path": "recovery-commands/formal-precheck.log",
+    "size_bytes": 72,
+    "sha256": "c6b51fbc589e908b95c2af00a350da0f8e7bca87b0e8cc1ec460919bda6c8876"
+  }
+}

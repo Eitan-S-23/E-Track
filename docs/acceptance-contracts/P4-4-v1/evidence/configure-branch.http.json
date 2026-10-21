@@ -1,0 +1,47 @@
+{
+  "method": "POST",
+  "path": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/deployment-branch-policies",
+  "started": "2026-10-19T11:07:06.479Z",
+  "request": {
+    "path": "configure-branch.request.json",
+    "size_bytes": 63,
+    "sha256": "3abd83e66819ecfda6c83bda03e62cdd53be8ae7c50984a397663e429d36de20"
+  },
+  "status": 200,
+  "response_headers": {
+    "date": "Mon, 19 Oct 2026 11:07:09 GMT",
+    "content-type": "application/json; charset=utf-8",
+    "content-length": "130",
+    "cache-control": "private, max-age=60, s-maxage=60",
+    "vary": "Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With",
+    "etag": "\"ed180714c95170843c97e657450691ef5429e4428981fa55afd6eefab6708867\"",
+    "x-oauth-scopes": "gist, read:org, repo, user, workflow",
+    "x-accepted-oauth-scopes": "",
+    "x-oauth-client-id": "178c6fc778ccc68e1d6a",
+    "x-github-media-type": "github.v3; format=json",
+    "x-github-api-version-selected": "2022-11-28",
+    "access-control-expose-headers": "ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset, Warning",
+    "access-control-allow-origin": "*",
+    "strict-transport-security": "max-age=31536000; includeSubdomains; preload",
+    "x-frame-options": "deny",
+    "x-content-type-options": "nosniff",
+    "x-xss-protection": "0",
+    "referrer-policy": "origin-when-cross-origin, strict-origin-when-cross-origin",
+    "content-security-policy": "default-src 'none'",
+    "server": "github.com",
+    "x-ratelimit-limit": "5000",
+    "x-ratelimit-remaining": "4992",
+    "x-ratelimit-reset": "1792411561",
+    "x-ratelimit-used": "8",
+    "x-ratelimit-resource": "core",
+    "x-github-request-id": "8AFF:F35AD:171097:18E42D:6AD5F9DC",
+    "x-github-edge-region": "westus3"
+  },
+  "body": {
+    "path": "configure-branch.body",
+    "size_bytes": 130,
+    "sha256": "89baa85b40335dc122956703e77a18d94a1a67ebd4d9e3f7ca36ddd50d2d0f03"
+  },
+  "completed": true,
+  "ended": "2026-10-19T11:07:09.902Z"
+}

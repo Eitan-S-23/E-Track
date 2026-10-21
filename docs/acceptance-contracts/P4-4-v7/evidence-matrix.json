@@ -1,0 +1,123 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P4-4-v7",
+  "contract_sha256": "587258CDE323692569733470045A2E174EC1BEF32C67088BA0CC3E76E1223314",
+  "round_id": "P44-20261021-07",
+  "overall_result": "NOT_RUN",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "P44-HISTORY",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN: successor offline-identity recovery; actual preceding frozen gap and original C4 PASS remain bound."
+    },
+    {
+      "id": "P44-CONFIGURATION",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN: successor offline-identity recovery; actual preceding frozen gap and original C4 PASS remain bound."
+    },
+    {
+      "id": "P44-RAW-RUNS",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN: successor offline-identity recovery; actual preceding frozen gap and original C4 PASS remain bound."
+    },
+    {
+      "id": "P44-REHEARSAL",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN: successor offline-identity recovery; actual preceding frozen gap and original C4 PASS remain bound."
+    },
+    {
+      "id": "P44-RAW-STATE",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN: successor offline-identity recovery; actual preceding frozen gap and original C4 PASS remain bound."
+    },
+    {
+      "id": "P44-RAW-READBACK",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN: successor offline-identity recovery; actual preceding frozen gap and original C4 PASS remain bound."
+    },
+    {
+      "id": "P44-APPROVALS",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN: successor offline-identity recovery; actual preceding frozen gap and original C4 PASS remain bound."
+    },
+    {
+      "id": "P44-ISOLATION",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN: successor offline-identity recovery; actual preceding frozen gap and original C4 PASS remain bound."
+    },
+    {
+      "id": "P44-HYGIENE",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN: successor offline-identity recovery; actual preceding frozen gap and original C4 PASS remain bound."
+    }
+  ],
+  "evidence_hashes": {},
+  "commands": [],
+  "artifacts": []
+}

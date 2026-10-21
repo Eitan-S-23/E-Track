@@ -1,0 +1,124 @@
+{
+  "schema": "etrack-rerun-plan-v1",
+  "current_contract_id": "P4-4-v7",
+  "current_contract_sha256": "587258CDE323692569733470045A2E174EC1BEF32C67088BA0CC3E76E1223314",
+  "previous_contract_id": "P4-4-v6",
+  "previous_contract_sha256": "DBB6BF4BF986B320DFE91A7A3B6817CD4031A156BE310B9F87BBAD51E65120A9",
+  "contract_lineage": "direct_successor",
+  "current_round_id": "P44-20261021-07",
+  "previous_round_id": "P44-20261020-06",
+  "previous_matrix_sha256": "7DFA85BE4A70858A38468839F4A888B12C7CF4109F2AFCB107E8997B6E5BB414",
+  "changed_input_groups": [
+    "validation"
+  ],
+  "changed_external_inputs": [
+    "after-recovery-v7"
+  ],
+  "rerun_criteria": [
+    {
+      "id": "P44-HISTORY",
+      "reasons": [
+        "artifact_definition_changed:P44-HISTORY-1",
+        "command_definition_changed:formal-history",
+        "criterion_definition_changed",
+        "external_input_changed:after-recovery-v7",
+        "input_group_changed:validation"
+      ]
+    },
+    {
+      "id": "P44-RAW-STATE",
+      "reasons": [
+        "artifact_definition_changed:P44-RAW-STATE-1",
+        "artifact_definition_changed:P44-RAW-STATE-2",
+        "artifact_definition_changed:P44-RAW-STATE-3",
+        "command_definition_changed:formal-after",
+        "command_definition_changed:formal-before",
+        "command_definition_changed:formal-negatives",
+        "criterion_definition_changed",
+        "external_input_changed:after-recovery-v7",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P44-APPROVALS",
+      "reasons": [
+        "command_definition_changed:formal-approvals",
+        "command_definition_changed:formal-assemble-complete",
+        "criterion_definition_changed",
+        "external_input_changed:after-recovery-v7",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P44-ISOLATION",
+      "reasons": [
+        "command_definition_changed:formal-states",
+        "criterion_definition_changed",
+        "external_input_changed:after-recovery-v7",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P44-HYGIENE",
+      "reasons": [
+        "artifact_definition_changed:P44-HYGIENE-1",
+        "command_definition_changed:formal-privacy",
+        "criterion_definition_changed",
+        "external_input_changed:after-recovery-v7",
+        "input_group_changed:validation"
+      ]
+    }
+  ],
+  "reusable_criteria": [
+    "P44-CONFIGURATION",
+    "P44-RAW-READBACK",
+    "P44-RAW-RUNS",
+    "P44-REHEARSAL"
+  ],
+  "reuse_origins": {
+    "P44-CONFIGURATION": {
+      "contract_sha256": "86764FA47B8C52D748BF93B83C5735352CEAB69519D8FFCC4C6BFC706F8939B5",
+      "matrix_sha256": "25D71CCB7707C83A62ACE11E6662B2BDEAB5E85DF45FAA557326010219F038D7",
+      "round_id": "P44-20261020-04"
+    },
+    "P44-RAW-RUNS": {
+      "contract_sha256": "86764FA47B8C52D748BF93B83C5735352CEAB69519D8FFCC4C6BFC706F8939B5",
+      "matrix_sha256": "25D71CCB7707C83A62ACE11E6662B2BDEAB5E85DF45FAA557326010219F038D7",
+      "round_id": "P44-20261020-04"
+    },
+    "P44-REHEARSAL": {
+      "contract_sha256": "86764FA47B8C52D748BF93B83C5735352CEAB69519D8FFCC4C6BFC706F8939B5",
+      "matrix_sha256": "25D71CCB7707C83A62ACE11E6662B2BDEAB5E85DF45FAA557326010219F038D7",
+      "round_id": "P44-20261020-04"
+    },
+    "P44-RAW-READBACK": {
+      "contract_sha256": "86764FA47B8C52D748BF93B83C5735352CEAB69519D8FFCC4C6BFC706F8939B5",
+      "matrix_sha256": "25D71CCB7707C83A62ACE11E6662B2BDEAB5E85DF45FAA557326010219F038D7",
+      "round_id": "P44-20261020-04"
+    }
+  },
+  "required_commands": [
+    "formal-after",
+    "formal-approvals",
+    "formal-assemble-complete",
+    "formal-before",
+    "formal-history",
+    "formal-negatives",
+    "formal-privacy",
+    "formal-states"
+  ],
+  "required_artifacts": [
+    "P44-APPROVALS-1",
+    "P44-APPROVALS-2",
+    "P44-HISTORY-1",
+    "P44-HYGIENE-1",
+    "P44-HYGIENE-2",
+    "P44-ISOLATION-1",
+    "P44-RAW-STATE-1",
+    "P44-RAW-STATE-2",
+    "P44-RAW-STATE-3"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "label": "formal-negatives",
+  "command": "python",
+  "args": [
+    "-I",
+    "-S",
+    "-B",
+    "Tools/ota/p44-after-bundle.py",
+    "verify-existing",
+    "negatives"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "started": "2026-10-20T11:37:53.053Z"
+}

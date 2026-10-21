@@ -1,0 +1,12 @@
+{
+  "method": "POST",
+  "origin": "https://api.github.com",
+  "path": "/repos/Eitan-S-23/E-Track/actions/workflows/firmware-build.yml/dispatches",
+  "started": "2026-10-19T19:45:42.224Z",
+  "request": {
+    "path": "run-a/dispatch.request.json",
+    "size_bytes": 291,
+    "sha256": "b636165e193b6e9d9c7322138b55e2e3a68c2657fc901573b0b0d4ca0a57040b"
+  },
+  "note": "Reserved before request; a lost response is not permission to replay a mutation."
+}

@@ -1,0 +1,149 @@
+{
+  "schema": "p44-preparation-inventory-v1",
+  "created_at": "2026-10-19T13:10:00.848Z",
+  "nature": "Bounded v2 development checks only; no formal observation or repeated historical CI/deployment",
+  "predecessor_bundle_commit": "e5994fb28466e46c99a1f247494473e6cba9cc03",
+  "archive": {
+    "path": "development.zip",
+    "size_bytes": 20428,
+    "sha256": "58765a094894e50716a33cbd3c56e217b5e43a54525f8a6fa3a47383ae9430de"
+  },
+  "entries": [
+    {
+      "path": ".cache/p44-v2-preparation-archive.cjs",
+      "size_bytes": 3862,
+      "sha256": "3ec096ec9724e5106d539449cd16b5fe48fcc317c1be52cc5d4ab0ddb147d0f8"
+    },
+    {
+      "path": ".cache/p44-runner-tests-20261019/selftest-v2-01/unittest-original.txt",
+      "size_bytes": 10052,
+      "sha256": "e665d52b02cadf3d9b9fc8a1bc4892abc2f0fc54c1bb9669d722940d865a5cfe"
+    },
+    {
+      "path": ".cache/p44-runner-tests-20261019/selftest-v2-01/result.json",
+      "size_bytes": 276,
+      "sha256": "3debacb2759d84978e0bd74b535614fcdad6c9b3ed844ea928236f00b35c5b31"
+    },
+    {
+      "path": ".cache/p44-runner-tests-20261019/selftest-v2-01/test_capture_consumes_real_bundle_predecessor_plan/1.original",
+      "size_bytes": 57450,
+      "sha256": "343eacc7393510238b93b24697b3efef7a9606fa643971326359a0b60086b504"
+    },
+    {
+      "path": ".cache/p44-runner-tests-20261019/selftest-v2-01/test_capture_consumes_real_bundle_predecessor_plan/2.original",
+      "size_bytes": 273,
+      "sha256": "fd74d6185bc2d06d9e7ce275eff58e31d92d42d4f8aff6481547284341667f7a"
+    },
+    {
+      "path": ".cache/p44-runner-tests-20261019/selftest-v2-01/test_capture_consumes_real_bundle_predecessor_plan/3.original",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v1-index-check-01.json",
+      "size_bytes": 739,
+      "sha256": "29484cd942d5809f6720e78bc94b197b861f45c207fa767ab55bf46bdf412ef1"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v1-index-check-01.log",
+      "size_bytes": 436,
+      "sha256": "95cc560f1d1763240871f629f7783ee89fa3d89312f6e6cf5642e26e936b6323"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v2-bundle-diff-01.json",
+      "size_bytes": 524,
+      "sha256": "9102c1995ad3fa917283e04d3a6c9232f7f9346c440550241e780f0e5b0828e1"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v2-bundle-diff-01.log",
+      "size_bytes": 244,
+      "sha256": "a5f9a75b394aa9e1d12a83a3e48749b3a6f05d496ea5f37a9162c90b7a69fc0e"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v2-bundle-selftest-01.json",
+      "size_bytes": 481,
+      "sha256": "64442628d559cebaea98fe658c2052225c4859ad1fe0d5e724b204e2d1fd32fb"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v2-bundle-selftest-01.log",
+      "size_bytes": 574,
+      "sha256": "dafc8e0f6506326c82838e54aa173b191719e7a29112bde43f1029e40bb2030c"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v2-capture-01.json",
+      "size_bytes": 419,
+      "sha256": "ae68fc4d9b2a674197546e65936c04bd2fab76290975551fd4ea3a5e07505369"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v2-capture-01.log",
+      "size_bytes": 133,
+      "sha256": "698c68eb8a3f84f2ca2377bdf1d33d45aaf40068813662c77d7745c8cf2167f8"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v2-capture-02.json",
+      "size_bytes": 419,
+      "sha256": "f069ada10871f98bf11eeac905d085134337dd9fbe5a507b092dd0dc089c9049"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v2-capture-02.log",
+      "size_bytes": 133,
+      "sha256": "2eea099cffab5d06960c539673c2b260c8e70d1761e83bd8a9d0c6ce2d899dff"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v2-run-syntax-01.json",
+      "size_bytes": 436,
+      "sha256": "4028d989e31383ee7d2aaf116dadf7034cc3fa556f95be0b5caf8ecdd03c7ab5"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v2-run-syntax-01.log",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v2-source-check-01.json",
+      "size_bytes": 3239,
+      "sha256": "c3b98133fd118693514dbf935d087e5d8de25552cf97abc99e6a19e9a78ed50d"
+    },
+    {
+      "path": ".cache/p44/logs/p44-v2-source-check-01.log",
+      "size_bytes": 69,
+      "sha256": "7d54226ba361e4918fffac33410c06665e16a7ef4d5e17a00ab2810ece8463e3"
+    }
+  ],
+  "source_hashes_at_archive_time": [
+    {
+      "path": "Tools/acceptance/p44/run.cjs",
+      "sha256": "a234ed085e5632a78411777c0ad6e272a955064ee87dc5a2ee0408b50aa88a90"
+    },
+    {
+      "path": "Tools/acceptance/p44/capture.cjs",
+      "sha256": "d7f43a50a13fd085f14cce24388997904d069fb1fb9a4028778fd220faab321c"
+    },
+    {
+      "path": "Tools/acceptance/p44/bundle.py",
+      "sha256": "5294cdf548fff2afc414050332bb3c45fa596d9a9ea2fe5b50a51dec77d368bf"
+    },
+    {
+      "path": "Tools/acceptance/p44/inspect.py",
+      "sha256": "7c8f9f9dfa2d22480c2f509071e131860d63abada667b119e1eebbf46287689c"
+    },
+    {
+      "path": "Tools/acceptance/p44/README.md",
+      "sha256": "405fae1cef45666f484c863a5f6aab11f8bf565fde3e93a181adfc549aa9f0b4"
+    },
+    {
+      "path": "tests/ota/test_p44_capture.cjs",
+      "sha256": "cbd60207ee09b7e7593a02abcd2712e08be823c30e2c04593de1c79e4dfe21be"
+    },
+    {
+      "path": "tests/ota/test_p44_acceptance_tools.py",
+      "sha256": "4c3d48ddfcb2eb65a26e74cc90d8be914078a448692b2a6a10e0540848c7e418"
+    }
+  ],
+  "source_note": "Earlier results retain their own source/time; final source hashes do not retroactively bind earlier tests",
+  "preserved_limits": [
+    "Generated test fixtures remain in ignored cache; original stdout/results and committed test source are retained",
+    "Independent review found P44-V2-BIND-01 before formal execution; earlier mock success did not prove actual predecessor integration"
+  ],
+  "byte_exact_member_check": true
+}

@@ -1,0 +1,27 @@
+{
+  "label": "formal-before",
+  "command": "python",
+  "args": [
+    "-I",
+    "-S",
+    "-B",
+    "Tools/ota/p44-after-bundle.py",
+    "--package-spec",
+    "docs/acceptance-contracts/P4-4-v8.package.json",
+    "verify-existing",
+    "before"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "started": "2026-10-21T09:06:59.617Z",
+  "ended": "2026-10-21T09:07:26.749Z",
+  "exitCode": 0,
+  "signal": null,
+  "process_closed": true,
+  "closed": true,
+  "spawn_failed": false,
+  "output": {
+    "path": "recovery-commands-v8/formal-before.log",
+    "size_bytes": 578,
+    "sha256": "e6abb61d606ec015db9b41403991e28f69591cf46950aa5dc0cb381d343b95f6"
+  }
+}

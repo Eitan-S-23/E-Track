@@ -1,0 +1,6 @@
+{
+  "method": "GET",
+  "path": "/user/tokens/verify",
+  "started": "2026-10-20T04:54:35.600Z",
+  "attempts_allowed": 1
+}

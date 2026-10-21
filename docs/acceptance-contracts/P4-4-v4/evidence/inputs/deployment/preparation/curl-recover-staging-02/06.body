@@ -1,0 +1,4202 @@
+--2524ef09bc653902fe2001576200a4bbe1f3e5181655b48cbae0cc480cef
+Content-Disposition: form-data; name="index.js"; filename="index.js"
+Content-Type: application/javascript+module
+
+var __defProp = Object.defineProperty;
+var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
+
+// node_modules/hono/dist/compose.js
+var compose = /* @__PURE__ */ __name((middleware, onError, onNotFound) => {
+  return (context, next) => {
+    let index = -1;
+    return dispatch(0);
+    async function dispatch(i) {
+      if (i <= index) {
+        throw new Error("next() called multiple times");
+      }
+      index = i;
+      let res;
+      let isError = false;
+      let handler;
+      if (middleware[i]) {
+        handler = middleware[i][0][0];
+        context.req.routeIndex = i;
+      } else {
+        handler = i === middleware.length && next || void 0;
+      }
+      if (handler) {
+        try {
+          res = await handler(context, () => dispatch(i + 1));
+        } catch (err) {
+          if (err instanceof Error && onError) {
+            context.error = err;
+            res = await onError(err, context);
+            isError = true;
+          } else {
+            throw err;
+          }
+        }
+      } else {
+        if (context.finalized === false && onNotFound) {
+          res = await onNotFound(context);
+        }
+      }
+      if (res && (context.finalized === false || isError)) {
+        context.res = res;
+      }
+      return context;
+    }
+    __name(dispatch, "dispatch");
+  };
+}, "compose");
+
+// node_modules/hono/dist/request/constants.js
+var GET_MATCH_RESULT = /* @__PURE__ */ Symbol();
+
+// node_modules/hono/dist/utils/body.js
+var parseBody = /* @__PURE__ */ __name(async (request, options = /* @__PURE__ */ Object.create(null)) => {
+  const { all = false, dot = false } = options;
+  const headers = request instanceof HonoRequest ? request.raw.headers : request.headers;
+  const contentType = headers.get("Content-Type");
+  if (contentType?.startsWith("multipart/form-data") || contentType?.startsWith("application/x-www-form-urlencoded")) {
+    return parseFormData(request, { all, dot });
+  }
+  return {};
+}, "parseBody");
+async function parseFormData(request, options) {
+  const formData = await request.formData();
+  if (formData) {
+    return convertFormDataToBodyData(formData, options);
+  }
+  return {};
+}
+__name(parseFormData, "parseFormData");
+function convertFormDataToBodyData(formData, options) {
+  const form = /* @__PURE__ */ Object.create(null);
+  formData.forEach((value, key) => {
+    const shouldParseAllValues = options.all || key.endsWith("[]");
+    if (!shouldParseAllValues) {
+      form[key] = value;
+    } else {
+      handleParsingAllValues(form, key, value);
+    }
+  });
+  if (options.dot) {
+    Object.entries(form).forEach(([key, value]) => {
+      const shouldParseDotValues = key.includes(".");
+      if (shouldParseDotValues) {
+        handleParsingNestedValues(form, key, value);
+        delete form[key];
+      }
+    });
+  }
+  return form;
+}
+__name(convertFormDataToBodyData, "convertFormDataToBodyData");
+var handleParsingAllValues = /* @__PURE__ */ __name((form, key, value) => {
+  if (form[key] !== void 0) {
+    if (Array.isArray(form[key])) {
+      ;
+      form[key].push(value);
+    } else {
+      form[key] = [form[key], value];
+    }
+  } else {
+    if (!key.endsWith("[]")) {
+      form[key] = value;
+    } else {
+      form[key] = [value];
+    }
+  }
+}, "handleParsingAllValues");
+var handleParsingNestedValues = /* @__PURE__ */ __name((form, key, value) => {
+  if (/(?:^|\.)__proto__\./.test(key)) {
+    return;
+  }
+  let nestedForm = form;
+  const keys = key.split(".");
+  keys.forEach((key2, index) => {
+    if (index === keys.length - 1) {
+      nestedForm[key2] = value;
+    } else {
+      if (!nestedForm[key2] || typeof nestedForm[key2] !== "object" || Array.isArray(nestedForm[key2]) || nestedForm[key2] instanceof File) {
+        nestedForm[key2] = /* @__PURE__ */ Object.create(null);
+      }
+      nestedForm = nestedForm[key2];
+    }
+  });
+}, "handleParsingNestedValues");
+
+// node_modules/hono/dist/utils/url.js
+var splitPath = /* @__PURE__ */ __name((path) => {
+  const paths = path.split("/");
+  if (paths[0] === "") {
+    paths.shift();
+  }
+  return paths;
+}, "splitPath");
+var splitRoutingPath = /* @__PURE__ */ __name((routePath) => {
+  const { groups, path } = extractGroupsFromPath(routePath);
+  const paths = splitPath(path);
+  return replaceGroupMarks(paths, groups);
+}, "splitRoutingPath");
+var extractGroupsFromPath = /* @__PURE__ */ __name((path) => {
+  const groups = [];
+  path = path.replace(/\{[^}]+\}/g, (match2, index) => {
+    const mark = `@${index}`;
+    groups.push([mark, match2]);
+    return mark;
+  });
+  return { groups, path };
+}, "extractGroupsFromPath");
+var replaceGroupMarks = /* @__PURE__ */ __name((paths, groups) => {
+  for (let i = groups.length - 1; i >= 0; i--) {
+    const [mark] = groups[i];
+    for (let j = paths.length - 1; j >= 0; j--) {
+      if (paths[j].includes(mark)) {
+        paths[j] = paths[j].replace(mark, groups[i][1]);
+        break;
+      }
+    }
+  }
+  return paths;
+}, "replaceGroupMarks");
+var patternCache = {};
+var getPattern = /* @__PURE__ */ __name((label, next) => {
+  if (label === "*") {
+    return "*";
+  }
+  const match2 = label.match(/^\:([^\{\}]+)(?:\{(.+)\})?$/);
+  if (match2) {
+    const cacheKey = `${label}#${next}`;
+    if (!patternCache[cacheKey]) {
+      if (match2[2]) {
+        patternCache[cacheKey] = next && next[0] !== ":" && next[0] !== "*" ? [cacheKey, match2[1], new RegExp(`^${match2[2]}(?=/${next})`)] : [label, match2[1], new RegExp(`^${match2[2]}$`)];
+      } else {
+        patternCache[cacheKey] = [label, match2[1], true];
+      }
+    }
+    return patternCache[cacheKey];
+  }
+  return null;
+}, "getPattern");
+var tryDecode = /* @__PURE__ */ __name((str, decoder) => {
+  try {
+    return decoder(str);
+  } catch {
+    return str.replace(/(?:%[0-9A-Fa-f]{2})+/g, (match2) => {
+      try {
+        return decoder(match2);
+      } catch {
+        return match2;
+      }
+    });
+  }
+}, "tryDecode");
+var tryDecodeURI = /* @__PURE__ */ __name((str) => tryDecode(str, decodeURI), "tryDecodeURI");
+var getPath = /* @__PURE__ */ __name((request) => {
+  const url = request.url;
+  const start = url.indexOf("/", url.indexOf(":") + 4);
+  let i = start;
+  for (; i < url.length; i++) {
+    const charCode = url.charCodeAt(i);
+    if (charCode === 37) {
+      const queryIndex = url.indexOf("?", i);
+      const hashIndex = url.indexOf("#", i);
+      const end = queryIndex === -1 ? hashIndex === -1 ? void 0 : hashIndex : hashIndex === -1 ? queryIndex : Math.min(queryIndex, hashIndex);
+      const path = url.slice(start, end);
+      return tryDecodeURI(path.includes("%25") ? path.replace(/%25/g, "%2525") : path);
+    } else if (charCode === 63 || charCode === 35) {
+      break;
+    }
+  }
+  return url.slice(start, i);
+}, "getPath");
+var getPathNoStrict = /* @__PURE__ */ __name((request) => {
+  const result = getPath(request);
+  return result.length > 1 && result.at(-1) === "/" ? result.slice(0, -1) : result;
+}, "getPathNoStrict");
+var mergePath = /* @__PURE__ */ __name((base, sub, ...rest) => {
+  if (rest.length) {
+    sub = mergePath(sub, ...rest);
+  }
+  return `${base?.[0] === "/" ? "" : "/"}${base}${sub === "/" ? "" : `${base?.at(-1) === "/" ? "" : "/"}${sub?.[0] === "/" ? sub.slice(1) : sub}`}`;
+}, "mergePath");
+var checkOptionalParameter = /* @__PURE__ */ __name((path) => {
+  if (path.charCodeAt(path.length - 1) !== 63 || !path.includes(":")) {
+    return null;
+  }
+  const segments = path.split("/");
+  const results = [];
+  let basePath = "";
+  segments.forEach((segment) => {
+    if (segment !== "" && !/\:/.test(segment)) {
+      basePath += "/" + segment;
+    } else if (/\:/.test(segment)) {
+      if (/\?/.test(segment)) {
+        if (results.length === 0 && basePath === "") {
+          results.push("/");
+        } else {
+          results.push(basePath);
+        }
+        const optionalSegment = segment.replace("?", "");
+        basePath += "/" + optionalSegment;
+        results.push(basePath);
+      } else {
+        basePath += "/" + segment;
+      }
+    }
+  });
+  return results.filter((v, i, a) => a.indexOf(v) === i);
+}, "checkOptionalParameter");
+var _decodeURI = /* @__PURE__ */ __name((value) => {
+  if (!/[%+]/.test(value)) {
+    return value;
+  }
+  if (value.indexOf("+") !== -1) {
+    value = value.replace(/\+/g, " ");
+  }
+  return value.indexOf("%") !== -1 ? tryDecode(value, decodeURIComponent_) : value;
+}, "_decodeURI");
+var _getQueryParam = /* @__PURE__ */ __name((url, key, multiple) => {
+  let encoded;
+  if (!multiple && key && !/[%+]/.test(key)) {
+    let keyIndex2 = url.indexOf("?", 8);
+    if (keyIndex2 === -1) {
+      return void 0;
+    }
+    if (!url.startsWith(key, keyIndex2 + 1)) {
+      keyIndex2 = url.indexOf(`&${key}`, keyIndex2 + 1);
+    }
+    while (keyIndex2 !== -1) {
+      const trailingKeyCode = url.charCodeAt(keyIndex2 + key.length + 1);
+      if (trailingKeyCode === 61) {
+        const valueIndex = keyIndex2 + key.length + 2;
+        const endIndex = url.indexOf("&", valueIndex);
+        return _decodeURI(url.slice(valueIndex, endIndex === -1 ? void 0 : endIndex));
+      } else if (trailingKeyCode == 38 || isNaN(trailingKeyCode)) {
+        return "";
+      }
+      keyIndex2 = url.indexOf(`&${key}`, keyIndex2 + 1);
+    }
+    encoded = /[%+]/.test(url);
+    if (!encoded) {
+      return void 0;
+    }
+  }
+  const results = {};
+  encoded ??= /[%+]/.test(url);
+  let keyIndex = url.indexOf("?", 8);
+  while (keyIndex !== -1) {
+    const nextKeyIndex = url.indexOf("&", keyIndex + 1);
+    let valueIndex = url.indexOf("=", keyIndex);
+    if (valueIndex > nextKeyIndex && nextKeyIndex !== -1) {
+      valueIndex = -1;
+    }
+    let name = url.slice(
+      keyIndex + 1,
+      valueIndex === -1 ? nextKeyIndex === -1 ? void 0 : nextKeyIndex : valueIndex
+    );
+    if (encoded) {
+      name = _decodeURI(name);
+    }
+    keyIndex = nextKeyIndex;
+    if (name === "") {
+      continue;
+    }
+    let value;
+    if (valueIndex === -1) {
+      value = "";
+    } else {
+      value = url.slice(valueIndex + 1, nextKeyIndex === -1 ? void 0 : nextKeyIndex);
+      if (encoded) {
+        value = _decodeURI(value);
+      }
+    }
+    if (multiple) {
+      if (!(results[name] && Array.isArray(results[name]))) {
+        results[name] = [];
+      }
+      ;
+      results[name].push(value);
+    } else {
+      results[name] ??= value;
+    }
+  }
+  return key ? results[key] : results;
+}, "_getQueryParam");
+var getQueryParam = _getQueryParam;
+var getQueryParams = /* @__PURE__ */ __name((url, key) => {
+  return _getQueryParam(url, key, true);
+}, "getQueryParams");
+var decodeURIComponent_ = decodeURIComponent;
+
+// node_modules/hono/dist/request.js
+var tryDecodeURIComponent = /* @__PURE__ */ __name((str) => tryDecode(str, decodeURIComponent_), "tryDecodeURIComponent");
+var HonoRequest = class {
+  static {
+    __name(this, "HonoRequest");
+  }
+  /**
+   * `.raw` can get the raw Request object.
+   *
+   * @see {@link https://hono.dev/docs/api/request#raw}
+   *
+   * @example
+   * ```ts
+   * // For Cloudflare Workers
+   * app.post('/', async (c) => {
+   *   const metadata = c.req.raw.cf?.hostMetadata?
+   *   ...
+   * })
+   * ```
+   */
+  raw;
+  #validatedData;
+  // Short name of validatedData
+  #matchResult;
+  routeIndex = 0;
+  /**
+   * `.path` can get the pathname of the request.
+   *
+   * @see {@link https://hono.dev/docs/api/request#path}
+   *
+   * @example
+   * ```ts
+   * app.get('/about/me', (c) => {
+   *   const pathname = c.req.path // `/about/me`
+   * })
+   * ```
+   */
+  path;
+  bodyCache = {};
+  constructor(request, path = "/", matchResult = [[]]) {
+    this.raw = request;
+    this.path = path;
+    this.#matchResult = matchResult;
+    this.#validatedData = {};
+  }
+  param(key) {
+    return key ? this.#getDecodedParam(key) : this.#getAllDecodedParams();
+  }
+  #getDecodedParam(key) {
+    const paramKey = this.#matchResult[0][this.routeIndex][1][key];
+    const param = this.#getParamValue(paramKey);
+    return param && /\%/.test(param) ? tryDecodeURIComponent(param) : param;
+  }
+  #getAllDecodedParams() {
+    const decoded = {};
+    const keys = Object.keys(this.#matchResult[0][this.routeIndex][1]);
+    for (const key of keys) {
+      const value = this.#getParamValue(this.#matchResult[0][this.routeIndex][1][key]);
+      if (value !== void 0) {
+        decoded[key] = /\%/.test(value) ? tryDecodeURIComponent(value) : value;
+      }
+    }
+    return decoded;
+  }
+  #getParamValue(paramKey) {
+    return this.#matchResult[1] ? this.#matchResult[1][paramKey] : paramKey;
+  }
+  query(key) {
+    return getQueryParam(this.url, key);
+  }
+  queries(key) {
+    return getQueryParams(this.url, key);
+  }
+  header(name) {
+    if (name) {
+      return this.raw.headers.get(name) ?? void 0;
+    }
+    const headerData = {};
+    this.raw.headers.forEach((value, key) => {
+      headerData[key] = value;
+    });
+    return headerData;
+  }
+  async parseBody(options) {
+    return parseBody(this, options);
+  }
+  #cachedBody = /* @__PURE__ */ __name((key) => {
+    const { bodyCache, raw: raw2 } = this;
+    const cachedBody = bodyCache[key];
+    if (cachedBody) {
+      return cachedBody;
+    }
+    const anyCachedKey = Object.keys(bodyCache)[0];
+    if (anyCachedKey) {
+      return bodyCache[anyCachedKey].then((body) => {
+        if (anyCachedKey === "json") {
+          body = JSON.stringify(body);
+        }
+        return new Response(body)[key]();
+      });
+    }
+    return bodyCache[key] = raw2[key]();
+  }, "#cachedBody");
+  /**
+   * `.json()` can parse Request body of type `application/json`
+   *
+   * @see {@link https://hono.dev/docs/api/request#json}
+   *
+   * @example
+   * ```ts
+   * app.post('/entry', async (c) => {
+   *   const body = await c.req.json()
+   * })
+   * ```
+   */
+  json() {
+    return this.#cachedBody("text").then((text2) => JSON.parse(text2));
+  }
+  /**
+   * `.text()` can parse Request body of type `text/plain`
+   *
+   * @see {@link https://hono.dev/docs/api/request#text}
+   *
+   * @example
+   * ```ts
+   * app.post('/entry', async (c) => {
+   *   const body = await c.req.text()
+   * })
+   * ```
+   */
+  text() {
+    return this.#cachedBody("text");
+  }
+  /**
+   * `.arrayBuffer()` parse Request body as an `ArrayBuffer`
+   *
+   * @see {@link https://hono.dev/docs/api/request#arraybuffer}
+   *
+   * @example
+   * ```ts
+   * app.post('/entry', async (c) => {
+   *   const body = await c.req.arrayBuffer()
+   * })
+   * ```
+   */
+  arrayBuffer() {
+    return this.#cachedBody("arrayBuffer");
+  }
+  /**
+   * `.bytes()` parses the request body as a `Uint8Array`.
+   *
+   * @see {@link https://hono.dev/docs/api/request#bytes}
+   *
+   * @example
+   * ```ts
+   * app.post('/entry', async (c) => {
+   *   const body = await c.req.bytes()
+   * })
+   * ```
+   */
+  bytes() {
+    return this.#cachedBody("arrayBuffer").then((buffer) => new Uint8Array(buffer));
+  }
+  /**
+   * Parses the request body as a `Blob`.
+   * @example
+   * ```ts
+   * app.post('/entry', async (c) => {
+   *   const body = await c.req.blob();
+   * });
+   * ```
+   * @see https://hono.dev/docs/api/request#blob
+   */
+  blob() {
+    return this.#cachedBody("blob");
+  }
+  /**
+   * Parses the request body as `FormData`.
+   * @example
+   * ```ts
+   * app.post('/entry', async (c) => {
+   *   const body = await c.req.formData();
+   * });
+   * ```
+   * @see https://hono.dev/docs/api/request#formdata
+   */
+  formData() {
+    return this.#cachedBody("formData");
+  }
+  /**
+   * Adds validated data to the request.
+   *
+   * @param target - The target of the validation.
+   * @param data - The validated data to add.
+   */
+  addValidatedData(target, data) {
+    this.#validatedData[target] = data;
+  }
+  valid(target) {
+    return this.#validatedData[target];
+  }
+  /**
+   * `.url()` can get the request url strings.
+   *
+   * @see {@link https://hono.dev/docs/api/request#url}
+   *
+   * @example
+   * ```ts
+   * app.get('/about/me', (c) => {
+   *   const url = c.req.url // `http://localhost:8787/about/me`
+   *   ...
+   * })
+   * ```
+   */
+  get url() {
+    return this.raw.url;
+  }
+  /**
+   * `.method()` can get the method name of the request.
+   *
+   * @see {@link https://hono.dev/docs/api/request#method}
+   *
+   * @example
+   * ```ts
+   * app.get('/about/me', (c) => {
+   *   const method = c.req.method // `GET`
+   * })
+   * ```
+   */
+  get method() {
+    return this.raw.method;
+  }
+  get [GET_MATCH_RESULT]() {
+    return this.#matchResult;
+  }
+  /**
+   * `.matchedRoutes()` can return a matched route in the handler
+   *
+   * @deprecated
+   *
+   * Use matchedRoutes helper defined in "hono/route" instead.
+   *
+   * @see {@link https://hono.dev/docs/api/request#matchedroutes}
+   *
+   * @example
+   * ```ts
+   * app.use('*', async function logger(c, next) {
+   *   await next()
+   *   c.req.matchedRoutes.forEach(({ handler, method, path }, i) => {
+   *     const name = handler.name || (handler.length < 2 ? '[handler]' : '[middleware]')
+   *     console.log(
+   *       method,
+   *       ' ',
+   *       path,
+   *       ' '.repeat(Math.max(10 - path.length, 0)),
+   *       name,
+   *       i === c.req.routeIndex ? '<- respond from here' : ''
+   *     )
+   *   })
+   * })
+   * ```
+   */
+  get matchedRoutes() {
+    return this.#matchResult[0].map(([[, route]]) => route);
+  }
+  /**
+   * `routePath()` can retrieve the path registered within the handler
+   *
+   * @deprecated
+   *
+   * Use routePath helper defined in "hono/route" instead.
+   *
+   * @see {@link https://hono.dev/docs/api/request#routepath}
+   *
+   * @example
+   * ```ts
+   * app.get('/posts/:id', (c) => {
+   *   return c.json({ path: c.req.routePath })
+   * })
+   * ```
+   */
+  get routePath() {
+    return this.#matchResult[0].map(([[, route]]) => route)[this.routeIndex].path;
+  }
+};
+
+// node_modules/hono/dist/utils/html.js
+var HtmlEscapedCallbackPhase = {
+  Stringify: 1,
+  BeforeStream: 2,
+  Stream: 3
+};
+var raw = /* @__PURE__ */ __name((value, callbacks) => {
+  const escapedString = new String(value);
+  escapedString.isEscaped = true;
+  escapedString.callbacks = callbacks;
+  return escapedString;
+}, "raw");
+var resolveCallback = /* @__PURE__ */ __name(async (str, phase, preserveCallbacks, context, buffer) => {
+  if (typeof str === "object" && !(str instanceof String)) {
+    if (!(str instanceof Promise)) {
+      str = str.toString();
+    }
+    if (str instanceof Promise) {
+      str = await str;
+    }
+  }
+  const callbacks = str.callbacks;
+  if (!callbacks?.length) {
+    return Promise.resolve(str);
+  }
+  if (buffer) {
+    buffer[0] += str;
+  } else {
+    buffer = [str];
+  }
+  const resStr = Promise.all(callbacks.map((c) => c({ phase, buffer, context }))).then(
+    (res) => Promise.all(
+      res.filter(Boolean).map((str2) => resolveCallback(str2, phase, false, context, buffer))
+    ).then(() => buffer[0])
+  );
+  if (preserveCallbacks) {
+    return raw(await resStr, callbacks);
+  } else {
+    return resStr;
+  }
+}, "resolveCallback");
+
+// node_modules/hono/dist/context.js
+var TEXT_PLAIN = "text/plain; charset=UTF-8";
+var setDefaultContentType = /* @__PURE__ */ __name((contentType, headers) => {
+  return {
+    "Content-Type": contentType,
+    ...headers
+  };
+}, "setDefaultContentType");
+var createResponseInstance = /* @__PURE__ */ __name((body, init) => new Response(body, init), "createResponseInstance");
+var Context = class {
+  static {
+    __name(this, "Context");
+  }
+  #rawRequest;
+  #req;
+  /**
+   * `.env` can get bindings (environment variables, secrets, KV namespaces, D1 database, R2 bucket etc.) in Cloudflare Workers.
+   *
+   * @see {@link https://hono.dev/docs/api/context#env}
+   *
+   * @example
+   * ```ts
+   * // Environment object for Cloudflare Workers
+   * app.get('*', async c => {
+   *   const counter = c.env.COUNTER
+   * })
+   * ```
+   */
+  env = {};
+  #var;
+  finalized = false;
+  /**
+   * `.error` can get the error object from the middleware if the Handler throws an error.
+   *
+   * @see {@link https://hono.dev/docs/api/context#error}
+   *
+   * @example
+   * ```ts
+   * app.use('*', async (c, next) => {
+   *   await next()
+   *   if (c.error) {
+   *     // do something...
+   *   }
+   * })
+   * ```
+   */
+  error;
+  #status;
+  #executionCtx;
+  #res;
+  #layout;
+  #renderer;
+  #notFoundHandler;
+  #preparedHeaders;
+  #matchResult;
+  #path;
+  /**
+   * Creates an instance of the Context class.
+   *
+   * @param req - The Request object.
+   * @param options - Optional configuration options for the context.
+   */
+  constructor(req, options) {
+    this.#rawRequest = req;
+    if (options) {
+      this.#executionCtx = options.executionCtx;
+      this.env = options.env;
+      this.#notFoundHandler = options.notFoundHandler;
+      this.#path = options.path;
+      this.#matchResult = options.matchResult;
+    }
+  }
+  /**
+   * `.req` is the instance of {@link HonoRequest}.
+   */
+  get req() {
+    this.#req ??= new HonoRequest(this.#rawRequest, this.#path, this.#matchResult);
+    return this.#req;
+  }
+  /**
+   * @see {@link https://hono.dev/docs/api/context#event}
+   * The FetchEvent associated with the current request.
+   *
+   * @throws Will throw an error if the context does not have a FetchEvent.
+   */
+  get event() {
+    if (this.#executionCtx && "respondWith" in this.#executionCtx) {
+      return this.#executionCtx;
+    } else {
+      throw Error("This context has no FetchEvent");
+    }
+  }
+  /**
+   * @see {@link https://hono.dev/docs/api/context#executionctx}
+   * The ExecutionContext associated with the current request.
+   *
+   * @throws Will throw an error if the context does not have an ExecutionContext.
+   */
+  get executionCtx() {
+    if (this.#executionCtx) {
+      return this.#executionCtx;
+    } else {
+      throw Error("This context has no ExecutionContext");
+    }
+  }
+  /**
+   * @see {@link https://hono.dev/docs/api/context#res}
+   * The Response object for the current request.
+   */
+  get res() {
+    return this.#res ||= createResponseInstance(null, {
+      headers: this.#preparedHeaders ??= new Headers()
+    });
+  }
+  /**
+   * Sets the Response object for the current request.
+   *
+   * @param _res - The Response object to set.
+   */
+  set res(_res) {
+    if (this.#res && _res) {
+      _res = createResponseInstance(_res.body, _res);
+      for (const [k, v] of this.#res.headers.entries()) {
+        if (k === "content-type") {
+          continue;
+        }
+        if (k === "set-cookie") {
+          const cookies = this.#res.headers.getSetCookie();
+          _res.headers.delete("set-cookie");
+          for (const cookie of cookies) {
+            _res.headers.append("set-cookie", cookie);
+          }
+        } else {
+          _res.headers.set(k, v);
+        }
+      }
+    }
+    this.#res = _res;
+    this.finalized = true;
+  }
+  /**
+   * `.render()` can create a response within a layout.
+   *
+   * @see {@link https://hono.dev/docs/api/context#render-setrenderer}
+   *
+   * @example
+   * ```ts
+   * app.get('/', (c) => {
+   *   return c.render('Hello!')
+   * })
+   * ```
+   */
+  render = /* @__PURE__ */ __name((...args) => {
+    this.#renderer ??= (content) => this.html(content);
+    return this.#renderer(...args);
+  }, "render");
+  /**
+   * Sets the layout for the response.
+   *
+   * @param layout - The layout to set.
+   * @returns The layout function.
+   */
+  setLayout = /* @__PURE__ */ __name((layout) => this.#layout = layout, "setLayout");
+  /**
+   * Gets the current layout for the response.
+   *
+   * @returns The current layout function.
+   */
+  getLayout = /* @__PURE__ */ __name(() => this.#layout, "getLayout");
+  /**
+   * `.setRenderer()` can set the layout in the custom middleware.
+   *
+   * @see {@link https://hono.dev/docs/api/context#render-setrenderer}
+   *
+   * @example
+   * ```tsx
+   * app.use('*', async (c, next) => {
+   *   c.setRenderer((content) => {
+   *     return c.html(
+   *       <html>
+   *         <body>
+   *           <p>{content}</p>
+   *         </body>
+   *       </html>
+   *     )
+   *   })
+   *   await next()
+   * })
+   * ```
+   */
+  setRenderer = /* @__PURE__ */ __name((renderer) => {
+    this.#renderer = renderer;
+  }, "setRenderer");
+  /**
+   * `.header()` can set headers.
+   *
+   * @see {@link https://hono.dev/docs/api/context#header}
+   *
+   * @example
+   * ```ts
+   * app.get('/welcome', (c) => {
+   *   // Set headers
+   *   c.header('X-Message', 'Hello!')
+   *   c.header('Content-Type', 'text/plain')
+   *
+   *   return c.body('Thank you for coming')
+   * })
+   * ```
+   */
+  header = /* @__PURE__ */ __name((name, value, options) => {
+    if (this.finalized) {
+      this.#res = createResponseInstance(this.#res.body, this.#res);
+    }
+    const headers = this.#res ? this.#res.headers : this.#preparedHeaders ??= new Headers();
+    if (value === void 0) {
+      headers.delete(name);
+    } else if (options?.append) {
+      headers.append(name, value);
+    } else {
+      headers.set(name, value);
+    }
+  }, "header");
+  status = /* @__PURE__ */ __name((status) => {
+    this.#status = status;
+  }, "status");
+  /**
+   * `.set()` can set the value specified by the key.
+   *
+   * @see {@link https://hono.dev/docs/api/context#set-get}
+   *
+   * @example
+   * ```ts
+   * app.use('*', async (c, next) => {
+   *   c.set('message', 'Hono is hot!!')
+   *   await next()
+   * })
+   * ```
+   */
+  set = /* @__PURE__ */ __name((key, value) => {
+    this.#var ??= /* @__PURE__ */ new Map();
+    this.#var.set(key, value);
+  }, "set");
+  /**
+   * `.get()` can use the value specified by the key.
+   *
+   * @see {@link https://hono.dev/docs/api/context#set-get}
+   *
+   * @example
+   * ```ts
+   * app.get('/', (c) => {
+   *   const message = c.get('message')
+   *   return c.text(`The message is "${message}"`)
+   * })
+   * ```
+   */
+  get = /* @__PURE__ */ __name((key) => {
+    return this.#var ? this.#var.get(key) : void 0;
+  }, "get");
+  /**
+   * `.var` can access the value of a variable.
+   *
+   * @see {@link https://hono.dev/docs/api/context#var}
+   *
+   * @example
+   * ```ts
+   * const result = c.var.client.oneMethod()
+   * ```
+   */
+  // c.var.propName is a read-only
+  get var() {
+    if (!this.#var) {
+      return {};
+    }
+    return Object.fromEntries(this.#var);
+  }
+  #newResponse(data, arg, headers) {
+    const responseHeaders = this.#res ? new Headers(this.#res.headers) : this.#preparedHeaders ?? new Headers();
+    if (typeof arg === "object" && "headers" in arg) {
+      const argHeaders = arg.headers instanceof Headers ? arg.headers : new Headers(arg.headers);
+      for (const [key, value] of argHeaders) {
+        if (key.toLowerCase() === "set-cookie") {
+          responseHeaders.append(key, value);
+        } else {
+          responseHeaders.set(key, value);
+        }
+      }
+    }
+    if (headers) {
+      for (const [k, v] of Object.entries(headers)) {
+        if (typeof v === "string") {
+          responseHeaders.set(k, v);
+        } else {
+          responseHeaders.delete(k);
+          for (const v2 of v) {
+            responseHeaders.append(k, v2);
+          }
+        }
+      }
+    }
+    const status = typeof arg === "number" ? arg : arg?.status ?? this.#status;
+    return createResponseInstance(data, { status, headers: responseHeaders });
+  }
+  newResponse = /* @__PURE__ */ __name((...args) => this.#newResponse(...args), "newResponse");
+  /**
+   * `.body()` can return the HTTP response.
+   * You can set headers with `.header()` and set HTTP status code with `.status`.
+   * This can also be set in `.text()`, `.json()` and so on.
+   *
+   * @see {@link https://hono.dev/docs/api/context#body}
+   *
+   * @example
+   * ```ts
+   * app.get('/welcome', (c) => {
+   *   // Set headers
+   *   c.header('X-Message', 'Hello!')
+   *   c.header('Content-Type', 'text/plain')
+   *   // Set HTTP status code
+   *   c.status(201)
+   *
+   *   // Return the response body
+   *   return c.body('Thank you for coming')
+   * })
+   * ```
+   */
+  body = /* @__PURE__ */ __name((data, arg, headers) => this.#newResponse(data, arg, headers), "body");
+  /**
+   * `.text()` can render text as `Content-Type:text/plain`.
+   *
+   * @see {@link https://hono.dev/docs/api/context#text}
+   *
+   * @example
+   * ```ts
+   * app.get('/say', (c) => {
+   *   return c.text('Hello!')
+   * })
+   * ```
+   */
+  text = /* @__PURE__ */ __name((text2, arg, headers) => {
+    return !this.#preparedHeaders && !this.#status && !arg && !headers && !this.finalized ? new Response(text2) : this.#newResponse(
+      text2,
+      arg,
+      setDefaultContentType(TEXT_PLAIN, headers)
+    );
+  }, "text");
+  /**
+   * `.json()` can render JSON as `Content-Type:application/json`.
+   *
+   * @see {@link https://hono.dev/docs/api/context#json}
+   *
+   * @example
+   * ```ts
+   * app.get('/api', (c) => {
+   *   return c.json({ message: 'Hello!' })
+   * })
+   * ```
+   */
+  json = /* @__PURE__ */ __name((object, arg, headers) => {
+    return this.#newResponse(
+      JSON.stringify(object),
+      arg,
+      setDefaultContentType("application/json", headers)
+    );
+  }, "json");
+  html = /* @__PURE__ */ __name((html, arg, headers) => {
+    const res = /* @__PURE__ */ __name((html2) => this.#newResponse(html2, arg, setDefaultContentType("text/html; charset=UTF-8", headers)), "res");
+    return typeof html === "object" ? resolveCallback(html, HtmlEscapedCallbackPhase.Stringify, false, {}).then(res) : res(html);
+  }, "html");
+  /**
+   * `.redirect()` can Redirect, default status code is 302.
+   *
+   * @see {@link https://hono.dev/docs/api/context#redirect}
+   *
+   * @example
+   * ```ts
+   * app.get('/redirect', (c) => {
+   *   return c.redirect('/')
+   * })
+   * app.get('/redirect-permanently', (c) => {
+   *   return c.redirect('/', 301)
+   * })
+   * ```
+   */
+  redirect = /* @__PURE__ */ __name((location, status) => {
+    const locationString = String(location);
+    this.header(
+      "Location",
+      // Multibyes should be encoded
+      // eslint-disable-next-line no-control-regex
+      !/[^\x00-\xFF]/.test(locationString) ? locationString : encodeURI(locationString)
+    );
+    return this.newResponse(null, status ?? 302);
+  }, "redirect");
+  /**
+   * `.notFound()` can return the Not Found Response.
+   *
+   * @see {@link https://hono.dev/docs/api/context#notfound}
+   *
+   * @example
+   * ```ts
+   * app.get('/notfound', (c) => {
+   *   return c.notFound()
+   * })
+   * ```
+   */
+  notFound = /* @__PURE__ */ __name(() => {
+    this.#notFoundHandler ??= () => createResponseInstance();
+    return this.#notFoundHandler(this);
+  }, "notFound");
+};
+
+// node_modules/hono/dist/router.js
+var METHOD_NAME_ALL = "ALL";
+var METHOD_NAME_ALL_LOWERCASE = "all";
+var METHODS = ["get", "post", "put", "delete", "options", "patch"];
+var MESSAGE_MATCHER_IS_ALREADY_BUILT = "Can not add a route since the matcher is already built.";
+var UnsupportedPathError = class extends Error {
+  static {
+    __name(this, "UnsupportedPathError");
+  }
+};
+
+// node_modules/hono/dist/utils/constants.js
+var COMPOSED_HANDLER = "__COMPOSED_HANDLER";
+
+// node_modules/hono/dist/hono-base.js
+var notFoundHandler = /* @__PURE__ */ __name((c) => {
+  return c.text("404 Not Found", 404);
+}, "notFoundHandler");
+var errorHandler = /* @__PURE__ */ __name((err, c) => {
+  if ("getResponse" in err) {
+    const res = err.getResponse();
+    return c.newResponse(res.body, res);
+  }
+  console.error(err);
+  return c.text("Internal Server Error", 500);
+}, "errorHandler");
+var Hono = class _Hono {
+  static {
+    __name(this, "_Hono");
+  }
+  get;
+  post;
+  put;
+  delete;
+  options;
+  patch;
+  all;
+  on;
+  use;
+  /*
+    This class is like an abstract class and does not have a router.
+    To use it, inherit the class and implement router in the constructor.
+  */
+  router;
+  getPath;
+  // Cannot use `#` because it requires visibility at JavaScript runtime.
+  _basePath = "/";
+  #path = "/";
+  routes = [];
+  constructor(options = {}) {
+    const allMethods = [...METHODS, METHOD_NAME_ALL_LOWERCASE];
+    allMethods.forEach((method) => {
+      this[method] = (args1, ...args) => {
+        if (typeof args1 === "string") {
+          this.#path = args1;
+        } else {
+          this.#addRoute(method, this.#path, args1);
+        }
+        args.forEach((handler) => {
+          this.#addRoute(method, this.#path, handler);
+        });
+        return this;
+      };
+    });
+    this.on = (method, path, ...handlers) => {
+      for (const p of [path].flat()) {
+        this.#path = p;
+        for (const m of [method].flat()) {
+          handlers.map((handler) => {
+            this.#addRoute(m.toUpperCase(), this.#path, handler);
+          });
+        }
+      }
+      return this;
+    };
+    this.use = (arg1, ...handlers) => {
+      if (typeof arg1 === "string") {
+        this.#path = arg1;
+      } else {
+        this.#path = "*";
+        handlers.unshift(arg1);
+      }
+      handlers.forEach((handler) => {
+        this.#addRoute(METHOD_NAME_ALL, this.#path, handler);
+      });
+      return this;
+    };
+    const { strict, ...optionsWithoutStrict } = options;
+    Object.assign(this, optionsWithoutStrict);
+    this.getPath = strict ?? true ? options.getPath ?? getPath : getPathNoStrict;
+  }
+  #clone() {
+    const clone = new _Hono({
+      router: this.router,
+      getPath: this.getPath
+    });
+    clone.errorHandler = this.errorHandler;
+    clone.#notFoundHandler = this.#notFoundHandler;
+    clone.routes = this.routes;
+    return clone;
+  }
+  #notFoundHandler = notFoundHandler;
+  // Cannot use `#` because it requires visibility at JavaScript runtime.
+  errorHandler = errorHandler;
+  /**
+   * `.route()` allows grouping other Hono instance in routes.
+   *
+   * @see {@link https://hono.dev/docs/api/routing#grouping}
+   *
+   * @param {string} path - base Path
+   * @param {Hono} app - other Hono instance
+   * @returns {Hono} routed Hono instance
+   *
+   * @example
+   * ```ts
+   * const app = new Hono()
+   * const app2 = new Hono()
+   *
+   * app2.get("/user", (c) => c.text("user"))
+   * app.route("/api", app2) // GET /api/user
+   * ```
+   */
+  route(path, app2) {
+    const subApp = this.basePath(path);
+    app2.routes.map((r) => {
+      let handler;
+      if (app2.errorHandler === errorHandler) {
+        handler = r.handler;
+      } else {
+        handler = /* @__PURE__ */ __name(async (c, next) => (await compose([], app2.errorHandler)(c, () => r.handler(c, next))).res, "handler");
+        handler[COMPOSED_HANDLER] = r.handler;
+      }
+      subApp.#addRoute(r.method, r.path, handler, r.basePath);
+    });
+    return this;
+  }
+  /**
+   * `.basePath()` allows base paths to be specified.
+   *
+   * @see {@link https://hono.dev/docs/api/routing#base-path}
+   *
+   * @param {string} path - base Path
+   * @returns {Hono} changed Hono instance
+   *
+   * @example
+   * ```ts
+   * const api = new Hono().basePath('/api')
+   * ```
+   */
+  basePath(path) {
+    const subApp = this.#clone();
+    subApp._basePath = mergePath(this._basePath, path);
+    return subApp;
+  }
+  /**
+   * `.onError()` handles an error and returns a customized Response.
+   *
+   * @see {@link https://hono.dev/docs/api/hono#error-handling}
+   *
+   * @param {ErrorHandler} handler - request Handler for error
+   * @returns {Hono} changed Hono instance
+   *
+   * @example
+   * ```ts
+   * app.onError((err, c) => {
+   *   console.error(`${err}`)
+   *   return c.text('Custom Error Message', 500)
+   * })
+   * ```
+   */
+  onError = /* @__PURE__ */ __name((handler) => {
+    this.errorHandler = handler;
+    return this;
+  }, "onError");
+  /**
+   * `.notFound()` allows you to customize a Not Found Response.
+   *
+   * @see {@link https://hono.dev/docs/api/hono#not-found}
+   *
+   * @param {NotFoundHandler} handler - request handler for not-found
+   * @returns {Hono} changed Hono instance
+   *
+   * @example
+   * ```ts
+   * app.notFound((c) => {
+   *   return c.text('Custom 404 Message', 404)
+   * })
+   * ```
+   */
+  notFound = /* @__PURE__ */ __name((handler) => {
+    this.#notFoundHandler = handler;
+    return this;
+  }, "notFound");
+  /**
+   * `.mount()` allows you to mount applications built with other frameworks into your Hono application.
+   *
+   * @see {@link https://hono.dev/docs/api/hono#mount}
+   *
+   * @param {string} path - base Path
+   * @param {Function} applicationHandler - other Request Handler
+   * @param {MountOptions} [options] - options of `.mount()`
+   * @returns {Hono} mounted Hono instance
+   *
+   * @example
+   * ```ts
+   * import { Router as IttyRouter } from 'itty-router'
+   * import { Hono } from 'hono'
+   * // Create itty-router application
+   * const ittyRouter = IttyRouter()
+   * // GET /itty-router/hello
+   * ittyRouter.get('/hello', () => new Response('Hello from itty-router'))
+   *
+   * const app = new Hono()
+   * app.mount('/itty-router', ittyRouter.handle)
+   * ```
+   *
+   * @example
+   * ```ts
+   * const app = new Hono()
+   * // Send the request to another application without modification.
+   * app.mount('/app', anotherApp, {
+   *   replaceRequest: (req) => req,
+   * })
+   * ```
+   */
+  mount(path, applicationHandler, options) {
+    let replaceRequest;
+    let optionHandler;
+    if (options) {
+      if (typeof options === "function") {
+        optionHandler = options;
+      } else {
+        optionHandler = options.optionHandler;
+        if (options.replaceRequest === false) {
+          replaceRequest = /* @__PURE__ */ __name((request) => request, "replaceRequest");
+        } else {
+          replaceRequest = options.replaceRequest;
+        }
+      }
+    }
+    const getOptions = optionHandler ? (c) => {
+      const options2 = optionHandler(c);
+      return Array.isArray(options2) ? options2 : [options2];
+    } : (c) => {
+      let executionContext = void 0;
+      try {
+        executionContext = c.executionCtx;
+      } catch {
+      }
+      return [c.env, executionContext];
+    };
+    replaceRequest ||= (() => {
+      const mergedPath = mergePath(this._basePath, path);
+      const pathPrefixLength = mergedPath === "/" ? 0 : mergedPath.length;
+      return (request) => {
+        const url = new URL(request.url);
+        url.pathname = this.getPath(request).slice(pathPrefixLength) || "/";
+        return new Request(url, request);
+      };
+    })();
+    const handler = /* @__PURE__ */ __name(async (c, next) => {
+      const res = await applicationHandler(replaceRequest(c.req.raw), ...getOptions(c));
+      if (res) {
+        return res;
+      }
+      await next();
+    }, "handler");
+    this.#addRoute(METHOD_NAME_ALL, mergePath(path, "*"), handler);
+    return this;
+  }
+  #addRoute(method, path, handler, baseRoutePath) {
+    method = method.toUpperCase();
+    path = mergePath(this._basePath, path);
+    const r = {
+      basePath: baseRoutePath !== void 0 ? mergePath(this._basePath, baseRoutePath) : this._basePath,
+      path,
+      method,
+      handler
+    };
+    this.router.add(method, path, [handler, r]);
+    this.routes.push(r);
+  }
+  #handleError(err, c) {
+    if (err instanceof Error) {
+      return this.errorHandler(err, c);
+    }
+    throw err;
+  }
+  #dispatch(request, executionCtx, env, method) {
+    if (method === "HEAD") {
+      return (async () => new Response(null, await this.#dispatch(request, executionCtx, env, "GET")))();
+    }
+    const path = this.getPath(request, { env });
+    const matchResult = this.router.match(method, path);
+    const c = new Context(request, {
+      path,
+      matchResult,
+      env,
+      executionCtx,
+      notFoundHandler: this.#notFoundHandler
+    });
+    if (matchResult[0].length === 1) {
+      let res;
+      try {
+        res = matchResult[0][0][0][0](c, async () => {
+          c.res = await this.#notFoundHandler(c);
+        });
+      } catch (err) {
+        return this.#handleError(err, c);
+      }
+      return res instanceof Promise ? res.then(
+        (resolved) => resolved || (c.finalized ? c.res : this.#notFoundHandler(c))
+      ).catch((err) => this.#handleError(err, c)) : res ?? this.#notFoundHandler(c);
+    }
+    const composed = compose(matchResult[0], this.errorHandler, this.#notFoundHandler);
+    return (async () => {
+      try {
+        const context = await composed(c);
+        if (!context.finalized) {
+          throw new Error(
+            "Context is not finalized. Did you forget to return a Response object or `await next()`?"
+          );
+        }
+        return context.res;
+      } catch (err) {
+        return this.#handleError(err, c);
+      }
+    })();
+  }
+  /**
+   * `.fetch()` will be entry point of your app.
+   *
+   * @see {@link https://hono.dev/docs/api/hono#fetch}
+   *
+   * @param {Request} request - request Object of request
+   * @param {Env} Env - env Object
+   * @param {ExecutionContext} - context of execution
+   * @returns {Response | Promise<Response>} response of request
+   *
+   */
+  fetch = /* @__PURE__ */ __name((request, ...rest) => {
+    return this.#dispatch(request, rest[1], rest[0], request.method);
+  }, "fetch");
+  /**
+   * `.request()` is a useful method for testing.
+   * You can pass a URL or pathname to send a GET request.
+   * app will return a Response object.
+   * ```ts
+   * test('GET /hello is ok', async () => {
+   *   const res = await app.request('/hello')
+   *   expect(res.status).toBe(200)
+   * })
+   * ```
+   * @see https://hono.dev/docs/api/hono#request
+   */
+  request = /* @__PURE__ */ __name((input, requestInit, Env, executionCtx) => {
+    if (input instanceof Request) {
+      return this.fetch(requestInit ? new Request(input, requestInit) : input, Env, executionCtx);
+    }
+    input = input.toString();
+    return this.fetch(
+      new Request(
+        /^https?:\/\//.test(input) ? input : `http://localhost${mergePath("/", input)}`,
+        requestInit
+      ),
+      Env,
+      executionCtx
+    );
+  }, "request");
+  /**
+   * `.fire()` automatically adds a global fetch event listener.
+   * This can be useful for environments that adhere to the Service Worker API, such as non-ES module Cloudflare Workers.
+   * @deprecated
+   * Use `fire` from `hono/service-worker` instead.
+   * ```ts
+   * import { Hono } from 'hono'
+   * import { fire } from 'hono/service-worker'
+   *
+   * const app = new Hono()
+   * // ...
+   * fire(app)
+   * ```
+   * @see https://hono.dev/docs/api/hono#fire
+   * @see https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API
+   * @see https://developers.cloudflare.com/workers/reference/migrate-to-module-workers/
+   */
+  fire = /* @__PURE__ */ __name(() => {
+    addEventListener("fetch", (event) => {
+      event.respondWith(this.#dispatch(event.request, event, void 0, event.request.method));
+    });
+  }, "fire");
+};
+
+// node_modules/hono/dist/router/reg-exp-router/matcher.js
+var emptyParam = [];
+function match(method, path) {
+  const matchers = this.buildAllMatchers();
+  const match2 = /* @__PURE__ */ __name(((method2, path2) => {
+    const matcher = matchers[method2] || matchers[METHOD_NAME_ALL];
+    const staticMatch = matcher[2][path2];
+    if (staticMatch) {
+      return staticMatch;
+    }
+    const match3 = path2.match(matcher[0]);
+    if (!match3) {
+      return [[], emptyParam];
+    }
+    const index = match3.indexOf("", 1);
+    return [matcher[1][index], match3];
+  }), "match2");
+  this.match = match2;
+  return match2(method, path);
+}
+__name(match, "match");
+
+// node_modules/hono/dist/router/reg-exp-router/node.js
+var LABEL_REG_EXP_STR = "[^/]+";
+var ONLY_WILDCARD_REG_EXP_STR = ".*";
+var TAIL_WILDCARD_REG_EXP_STR = "(?:|/.*)";
+var PATH_ERROR = /* @__PURE__ */ Symbol();
+var regExpMetaChars = new Set(".\\+*[^]$()");
+function compareKey(a, b) {
+  if (a.length === 1) {
+    return b.length === 1 ? a < b ? -1 : 1 : -1;
+  }
+  if (b.length === 1) {
+    return 1;
+  }
+  if (a === ONLY_WILDCARD_REG_EXP_STR || a === TAIL_WILDCARD_REG_EXP_STR) {
+    return 1;
+  } else if (b === ONLY_WILDCARD_REG_EXP_STR || b === TAIL_WILDCARD_REG_EXP_STR) {
+    return -1;
+  }
+  if (a === LABEL_REG_EXP_STR) {
+    return 1;
+  } else if (b === LABEL_REG_EXP_STR) {
+    return -1;
+  }
+  return a.length === b.length ? a < b ? -1 : 1 : b.length - a.length;
+}
+__name(compareKey, "compareKey");
+var Node = class _Node {
+  static {
+    __name(this, "_Node");
+  }
+  #index;
+  #varIndex;
+  #children = /* @__PURE__ */ Object.create(null);
+  insert(tokens, index, paramMap, context, pathErrorCheckOnly) {
+    if (tokens.length === 0) {
+      if (this.#index !== void 0) {
+        throw PATH_ERROR;
+      }
+      if (pathErrorCheckOnly) {
+        return;
+      }
+      this.#index = index;
+      return;
+    }
+    const [token, ...restTokens] = tokens;
+    const pattern = token === "*" ? restTokens.length === 0 ? ["", "", ONLY_WILDCARD_REG_EXP_STR] : ["", "", LABEL_REG_EXP_STR] : token === "/*" ? ["", "", TAIL_WILDCARD_REG_EXP_STR] : token.match(/^\:([^\{\}]+)(?:\{(.+)\})?$/);
+    let node;
+    if (pattern) {
+      const name = pattern[1];
+      let regexpStr = pattern[2] || LABEL_REG_EXP_STR;
+      if (name && pattern[2]) {
+        if (regexpStr === ".*") {
+          throw PATH_ERROR;
+        }
+        regexpStr = regexpStr.replace(/^\((?!\?:)(?=[^)]+\)$)/, "(?:");
+        if (/\((?!\?:)/.test(regexpStr)) {
+          throw PATH_ERROR;
+        }
+      }
+      node = this.#children[regexpStr];
+      if (!node) {
+        if (Object.keys(this.#children).some(
+          (k) => k !== ONLY_WILDCARD_REG_EXP_STR && k !== TAIL_WILDCARD_REG_EXP_STR
+        )) {
+          throw PATH_ERROR;
+        }
+        if (pathErrorCheckOnly) {
+          return;
+        }
+        node = this.#children[regexpStr] = new _Node();
+        if (name !== "") {
+          node.#varIndex = context.varIndex++;
+        }
+      }
+      if (!pathErrorCheckOnly && name !== "") {
+        paramMap.push([name, node.#varIndex]);
+      }
+    } else {
+      node = this.#children[token];
+      if (!node) {
+        if (Object.keys(this.#children).some(
+          (k) => k.length > 1 && k !== ONLY_WILDCARD_REG_EXP_STR && k !== TAIL_WILDCARD_REG_EXP_STR
+        )) {
+          throw PATH_ERROR;
+        }
+        if (pathErrorCheckOnly) {
+          return;
+        }
+        node = this.#children[token] = new _Node();
+      }
+    }
+    node.insert(restTokens, index, paramMap, context, pathErrorCheckOnly);
+  }
+  buildRegExpStr() {
+    const childKeys = Object.keys(this.#children).sort(compareKey);
+    const strList = childKeys.map((k) => {
+      const c = this.#children[k];
+      return (typeof c.#varIndex === "number" ? `(${k})@${c.#varIndex}` : regExpMetaChars.has(k) ? `\\${k}` : k) + c.buildRegExpStr();
+    });
+    if (typeof this.#index === "number") {
+      strList.unshift(`#${this.#index}`);
+    }
+    if (strList.length === 0) {
+      return "";
+    }
+    if (strList.length === 1) {
+      return strList[0];
+    }
+    return "(?:" + strList.join("|") + ")";
+  }
+};
+
+// node_modules/hono/dist/router/reg-exp-router/trie.js
+var Trie = class {
+  static {
+    __name(this, "Trie");
+  }
+  #context = { varIndex: 0 };
+  #root = new Node();
+  insert(path, index, pathErrorCheckOnly) {
+    const paramAssoc = [];
+    const groups = [];
+    for (let i = 0; ; ) {
+      let replaced = false;
+      path = path.replace(/\{[^}]+\}/g, (m) => {
+        const mark = `@\\${i}`;
+        groups[i] = [mark, m];
+        i++;
+        replaced = true;
+        return mark;
+      });
+      if (!replaced) {
+        break;
+      }
+    }
+    const tokens = path.match(/(?::[^\/]+)|(?:\/\*$)|./g) || [];
+    for (let i = groups.length - 1; i >= 0; i--) {
+      const [mark] = groups[i];
+      for (let j = tokens.length - 1; j >= 0; j--) {
+        if (tokens[j].indexOf(mark) !== -1) {
+          tokens[j] = tokens[j].replace(mark, groups[i][1]);
+          break;
+        }
+      }
+    }
+    this.#root.insert(tokens, index, paramAssoc, this.#context, pathErrorCheckOnly);
+    return paramAssoc;
+  }
+  buildRegExp() {
+    let regexp = this.#root.buildRegExpStr();
+    if (regexp === "") {
+      return [/^$/, [], []];
+    }
+    let captureIndex = 0;
+    const indexReplacementMap = [];
+    const paramReplacementMap = [];
+    regexp = regexp.replace(/#(\d+)|@(\d+)|\.\*\$/g, (_, handlerIndex, paramIndex) => {
+      if (handlerIndex !== void 0) {
+        indexReplacementMap[++captureIndex] = Number(handlerIndex);
+        return "$()";
+      }
+      if (paramIndex !== void 0) {
+        paramReplacementMap[Number(paramIndex)] = ++captureIndex;
+        return "";
+      }
+      return "";
+    });
+    return [new RegExp(`^${regexp}`), indexReplacementMap, paramReplacementMap];
+  }
+};
+
+// node_modules/hono/dist/router/reg-exp-router/router.js
+var nullMatcher = [/^$/, [], /* @__PURE__ */ Object.create(null)];
+var wildcardRegExpCache = /* @__PURE__ */ Object.create(null);
+function buildWildcardRegExp(path) {
+  return wildcardRegExpCache[path] ??= new RegExp(
+    path === "*" ? "" : `^${path.replace(
+      /\/\*$|([.\\+*[^\]$()])/g,
+      (_, metaChar) => metaChar ? `\\${metaChar}` : "(?:|/.*)"
+    )}$`
+  );
+}
+__name(buildWildcardRegExp, "buildWildcardRegExp");
+function clearWildcardRegExpCache() {
+  wildcardRegExpCache = /* @__PURE__ */ Object.create(null);
+}
+__name(clearWildcardRegExpCache, "clearWildcardRegExpCache");
+function buildMatcherFromPreprocessedRoutes(routes) {
+  const trie = new Trie();
+  const handlerData = [];
+  if (routes.length === 0) {
+    return nullMatcher;
+  }
+  const routesWithStaticPathFlag = routes.map(
+    (route) => [!/\*|\/:/.test(route[0]), ...route]
+  ).sort(
+    ([isStaticA, pathA], [isStaticB, pathB]) => isStaticA ? 1 : isStaticB ? -1 : pathA.length - pathB.length
+  );
+  const staticMap = /* @__PURE__ */ Object.create(null);
+  for (let i = 0, j = -1, len = routesWithStaticPathFlag.length; i < len; i++) {
+    const [pathErrorCheckOnly, path, handlers] = routesWithStaticPathFlag[i];
+    if (pathErrorCheckOnly) {
+      staticMap[path] = [handlers.map(([h]) => [h, /* @__PURE__ */ Object.create(null)]), emptyParam];
+    } else {
+      j++;
+    }
+    let paramAssoc;
+    try {
+      paramAssoc = trie.insert(path, j, pathErrorCheckOnly);
+    } catch (e) {
+      throw e === PATH_ERROR ? new UnsupportedPathError(path) : e;
+    }
+    if (pathErrorCheckOnly) {
+      continue;
+    }
+    handlerData[j] = handlers.map(([h, paramCount]) => {
+      const paramIndexMap = /* @__PURE__ */ Object.create(null);
+      paramCount -= 1;
+      for (; paramCount >= 0; paramCount--) {
+        const [key, value] = paramAssoc[paramCount];
+        paramIndexMap[key] = value;
+      }
+      return [h, paramIndexMap];
+    });
+  }
+  const [regexp, indexReplacementMap, paramReplacementMap] = trie.buildRegExp();
+  for (let i = 0, len = handlerData.length; i < len; i++) {
+    for (let j = 0, len2 = handlerData[i].length; j < len2; j++) {
+      const map = handlerData[i][j]?.[1];
+      if (!map) {
+        continue;
+      }
+      const keys = Object.keys(map);
+      for (let k = 0, len3 = keys.length; k < len3; k++) {
+        map[keys[k]] = paramReplacementMap[map[keys[k]]];
+      }
+    }
+  }
+  const handlerMap = [];
+  for (const i in indexReplacementMap) {
+    handlerMap[i] = handlerData[indexReplacementMap[i]];
+  }
+  return [regexp, handlerMap, staticMap];
+}
+__name(buildMatcherFromPreprocessedRoutes, "buildMatcherFromPreprocessedRoutes");
+function findMiddleware(middleware, path) {
+  if (!middleware) {
+    return void 0;
+  }
+  for (const k of Object.keys(middleware).sort((a, b) => b.length - a.length)) {
+    if (buildWildcardRegExp(k).test(path)) {
+      return [...middleware[k]];
+    }
+  }
+  return void 0;
+}
+__name(findMiddleware, "findMiddleware");
+var RegExpRouter = class {
+  static {
+    __name(this, "RegExpRouter");
+  }
+  name = "RegExpRouter";
+  #middleware;
+  #routes;
+  constructor() {
+    this.#middleware = { [METHOD_NAME_ALL]: /* @__PURE__ */ Object.create(null) };
+    this.#routes = { [METHOD_NAME_ALL]: /* @__PURE__ */ Object.create(null) };
+  }
+  add(method, path, handler) {
+    const middleware = this.#middleware;
+    const routes = this.#routes;
+    if (!middleware || !routes) {
+      throw new Error(MESSAGE_MATCHER_IS_ALREADY_BUILT);
+    }
+    if (!middleware[method]) {
+      ;
+      [middleware, routes].forEach((handlerMap) => {
+        handlerMap[method] = /* @__PURE__ */ Object.create(null);
+        Object.keys(handlerMap[METHOD_NAME_ALL]).forEach((p) => {
+          handlerMap[method][p] = [...handlerMap[METHOD_NAME_ALL][p]];
+        });
+      });
+    }
+    if (path === "/*") {
+      path = "*";
+    }
+    const paramCount = (path.match(/\/:/g) || []).length;
+    if (/\*$/.test(path)) {
+      const re = buildWildcardRegExp(path);
+      if (method === METHOD_NAME_ALL) {
+        Object.keys(middleware).forEach((m) => {
+          middleware[m][path] ||= findMiddleware(middleware[m], path) || findMiddleware(middleware[METHOD_NAME_ALL], path) || [];
+        });
+      } else {
+        middleware[method][path] ||= findMiddleware(middleware[method], path) || findMiddleware(middleware[METHOD_NAME_ALL], path) || [];
+      }
+      Object.keys(middleware).forEach((m) => {
+        if (method === METHOD_NAME_ALL || method === m) {
+          Object.keys(middleware[m]).forEach((p) => {
+            re.test(p) && middleware[m][p].push([handler, paramCount]);
+          });
+        }
+      });
+      Object.keys(routes).forEach((m) => {
+        if (method === METHOD_NAME_ALL || method === m) {
+          Object.keys(routes[m]).forEach(
+            (p) => re.test(p) && routes[m][p].push([handler, paramCount])
+          );
+        }
+      });
+      return;
+    }
+    const paths = checkOptionalParameter(path) || [path];
+    for (let i = 0, len = paths.length; i < len; i++) {
+      const path2 = paths[i];
+      Object.keys(routes).forEach((m) => {
+        if (method === METHOD_NAME_ALL || method === m) {
+          routes[m][path2] ||= [
+            ...findMiddleware(middleware[m], path2) || findMiddleware(middleware[METHOD_NAME_ALL], path2) || []
+          ];
+          routes[m][path2].push([handler, paramCount - len + i + 1]);
+        }
+      });
+    }
+  }
+  match = match;
+  buildAllMatchers() {
+    const matchers = /* @__PURE__ */ Object.create(null);
+    Object.keys(this.#routes).concat(Object.keys(this.#middleware)).forEach((method) => {
+      matchers[method] ||= this.#buildMatcher(method);
+    });
+    this.#middleware = this.#routes = void 0;
+    clearWildcardRegExpCache();
+    return matchers;
+  }
+  #buildMatcher(method) {
+    const routes = [];
+    let hasOwnRoute = method === METHOD_NAME_ALL;
+    [this.#middleware, this.#routes].forEach((r) => {
+      const ownRoute = r[method] ? Object.keys(r[method]).map((path) => [path, r[method][path]]) : [];
+      if (ownRoute.length !== 0) {
+        hasOwnRoute ||= true;
+        routes.push(...ownRoute);
+      } else if (method !== METHOD_NAME_ALL) {
+        routes.push(
+          ...Object.keys(r[METHOD_NAME_ALL]).map((path) => [path, r[METHOD_NAME_ALL][path]])
+        );
+      }
+    });
+    if (!hasOwnRoute) {
+      return null;
+    } else {
+      return buildMatcherFromPreprocessedRoutes(routes);
+    }
+  }
+};
+
+// node_modules/hono/dist/router/smart-router/router.js
+var SmartRouter = class {
+  static {
+    __name(this, "SmartRouter");
+  }
+  name = "SmartRouter";
+  #routers = [];
+  #routes = [];
+  constructor(init) {
+    this.#routers = init.routers;
+  }
+  add(method, path, handler) {
+    if (!this.#routes) {
+      throw new Error(MESSAGE_MATCHER_IS_ALREADY_BUILT);
+    }
+    this.#routes.push([method, path, handler]);
+  }
+  match(method, path) {
+    if (!this.#routes) {
+      throw new Error("Fatal error");
+    }
+    const routers = this.#routers;
+    const routes = this.#routes;
+    const len = routers.length;
+    let i = 0;
+    let res;
+    for (; i < len; i++) {
+      const router = routers[i];
+      try {
+        for (let i2 = 0, len2 = routes.length; i2 < len2; i2++) {
+          router.add(...routes[i2]);
+        }
+        res = router.match(method, path);
+      } catch (e) {
+        if (e instanceof UnsupportedPathError) {
+          continue;
+        }
+        throw e;
+      }
+      this.match = router.match.bind(router);
+      this.#routers = [router];
+      this.#routes = void 0;
+      break;
+    }
+    if (i === len) {
+      throw new Error("Fatal error");
+    }
+    this.name = `SmartRouter + ${this.activeRouter.name}`;
+    return res;
+  }
+  get activeRouter() {
+    if (this.#routes || this.#routers.length !== 1) {
+      throw new Error("No active router has been determined yet.");
+    }
+    return this.#routers[0];
+  }
+};
+
+// node_modules/hono/dist/router/trie-router/node.js
+var emptyParams = /* @__PURE__ */ Object.create(null);
+var hasChildren = /* @__PURE__ */ __name((children) => {
+  for (const _ in children) {
+    return true;
+  }
+  return false;
+}, "hasChildren");
+var Node2 = class _Node2 {
+  static {
+    __name(this, "_Node");
+  }
+  #methods;
+  #children;
+  #patterns;
+  #order = 0;
+  #params = emptyParams;
+  constructor(method, handler, children) {
+    this.#children = children || /* @__PURE__ */ Object.create(null);
+    this.#methods = [];
+    if (method && handler) {
+      const m = /* @__PURE__ */ Object.create(null);
+      m[method] = { handler, possibleKeys: [], score: 0 };
+      this.#methods = [m];
+    }
+    this.#patterns = [];
+  }
+  insert(method, path, handler) {
+    this.#order = ++this.#order;
+    let curNode = this;
+    const parts = splitRoutingPath(path);
+    const possibleKeys = [];
+    for (let i = 0, len = parts.length; i < len; i++) {
+      const p = parts[i];
+      const nextP = parts[i + 1];
+      const pattern = getPattern(p, nextP);
+      const key = Array.isArray(pattern) ? pattern[0] : p;
+      if (key in curNode.#children) {
+        curNode = curNode.#children[key];
+        if (pattern) {
+          possibleKeys.push(pattern[1]);
+        }
+        continue;
+      }
+      curNode.#children[key] = new _Node2();
+      if (pattern) {
+        curNode.#patterns.push(pattern);
+        possibleKeys.push(pattern[1]);
+      }
+      curNode = curNode.#children[key];
+    }
+    curNode.#methods.push({
+      [method]: {
+        handler,
+        possibleKeys: possibleKeys.filter((v, i, a) => a.indexOf(v) === i),
+        score: this.#order
+      }
+    });
+    return curNode;
+  }
+  #pushHandlerSets(handlerSets, node, method, nodeParams, params) {
+    for (let i = 0, len = node.#methods.length; i < len; i++) {
+      const m = node.#methods[i];
+      const handlerSet = m[method] || m[METHOD_NAME_ALL];
+      const processedSet = {};
+      if (handlerSet !== void 0) {
+        handlerSet.params = /* @__PURE__ */ Object.create(null);
+        handlerSets.push(handlerSet);
+        if (nodeParams !== emptyParams || params && params !== emptyParams) {
+          for (let i2 = 0, len2 = handlerSet.possibleKeys.length; i2 < len2; i2++) {
+            const key = handlerSet.possibleKeys[i2];
+            const processed = processedSet[handlerSet.score];
+            handlerSet.params[key] = params?.[key] && !processed ? params[key] : nodeParams[key] ?? params?.[key];
+            processedSet[handlerSet.score] = true;
+          }
+        }
+      }
+    }
+  }
+  search(method, path) {
+    const handlerSets = [];
+    this.#params = emptyParams;
+    const curNode = this;
+    let curNodes = [curNode];
+    const parts = splitPath(path);
+    const curNodesQueue = [];
+    const len = parts.length;
+    let partOffsets = null;
+    for (let i = 0; i < len; i++) {
+      const part = parts[i];
+      const isLast = i === len - 1;
+      const tempNodes = [];
+      for (let j = 0, len2 = curNodes.length; j < len2; j++) {
+        const node = curNodes[j];
+        const nextNode = node.#children[part];
+        if (nextNode) {
+          nextNode.#params = node.#params;
+          if (isLast) {
+            if (nextNode.#children["*"]) {
+              this.#pushHandlerSets(handlerSets, nextNode.#children["*"], method, node.#params);
+            }
+            this.#pushHandlerSets(handlerSets, nextNode, method, node.#params);
+          } else {
+            tempNodes.push(nextNode);
+          }
+        }
+        for (let k = 0, len3 = node.#patterns.length; k < len3; k++) {
+          const pattern = node.#patterns[k];
+          const params = node.#params === emptyParams ? {} : { ...node.#params };
+          if (pattern === "*") {
+            const astNode = node.#children["*"];
+            if (astNode) {
+              this.#pushHandlerSets(handlerSets, astNode, method, node.#params);
+              astNode.#params = params;
+              tempNodes.push(astNode);
+            }
+            continue;
+          }
+          const [key, name, matcher] = pattern;
+          if (!part && !(matcher instanceof RegExp)) {
+            continue;
+          }
+          const child = node.#children[key];
+          if (matcher instanceof RegExp) {
+            if (partOffsets === null) {
+              partOffsets = new Array(len);
+              let offset = path[0] === "/" ? 1 : 0;
+              for (let p = 0; p < len; p++) {
+                partOffsets[p] = offset;
+                offset += parts[p].length + 1;
+              }
+            }
+            const restPathString = path.substring(partOffsets[i]);
+            const m = matcher.exec(restPathString);
+            if (m) {
+              params[name] = m[0];
+              this.#pushHandlerSets(handlerSets, child, method, node.#params, params);
+              if (hasChildren(child.#children)) {
+                child.#params = params;
+                const componentCount = m[0].match(/\//)?.length ?? 0;
+                const targetCurNodes = curNodesQueue[componentCount] ||= [];
+                targetCurNodes.push(child);
+              }
+              continue;
+            }
+          }
+          if (matcher === true || matcher.test(part)) {
+            params[name] = part;
+            if (isLast) {
+              this.#pushHandlerSets(handlerSets, child, method, params, node.#params);
+              if (child.#children["*"]) {
+                this.#pushHandlerSets(
+                  handlerSets,
+                  child.#children["*"],
+                  method,
+                  params,
+                  node.#params
+                );
+              }
+            } else {
+              child.#params = params;
+              tempNodes.push(child);
+            }
+          }
+        }
+      }
+      const shifted = curNodesQueue.shift();
+      curNodes = shifted ? tempNodes.concat(shifted) : tempNodes;
+    }
+    if (handlerSets.length > 1) {
+      handlerSets.sort((a, b) => {
+        return a.score - b.score;
+      });
+    }
+    return [handlerSets.map(({ handler, params }) => [handler, params])];
+  }
+};
+
+// node_modules/hono/dist/router/trie-router/router.js
+var TrieRouter = class {
+  static {
+    __name(this, "TrieRouter");
+  }
+  name = "TrieRouter";
+  #node;
+  constructor() {
+    this.#node = new Node2();
+  }
+  add(method, path, handler) {
+    const results = checkOptionalParameter(path);
+    if (results) {
+      for (let i = 0, len = results.length; i < len; i++) {
+        this.#node.insert(method, results[i], handler);
+      }
+      return;
+    }
+    this.#node.insert(method, path, handler);
+  }
+  match(method, path) {
+    return this.#node.search(method, path);
+  }
+};
+
+// node_modules/hono/dist/hono.js
+var Hono2 = class extends Hono {
+  static {
+    __name(this, "Hono");
+  }
+  /**
+   * Creates an instance of the Hono class.
+   *
+   * @param options - Optional configuration options for the Hono instance.
+   */
+  constructor(options = {}) {
+    super(options);
+    this.router = options.router ?? new SmartRouter({
+      routers: [new RegExpRouter(), new TrieRouter()]
+    });
+  }
+};
+
+// src/errors.ts
+var ApiError = class extends Error {
+  constructor(code, message, status, details) {
+    super(message);
+    this.code = code;
+    this.status = status;
+    this.details = details;
+    this.name = "ApiError";
+  }
+  code;
+  status;
+  details;
+  static {
+    __name(this, "ApiError");
+  }
+};
+function backendUnavailable(message = "Update backend unavailable") {
+  return new ApiError("BACKEND_UNAVAILABLE", message, 503);
+}
+__name(backendUnavailable, "backendUnavailable");
+function invalidParameter(message) {
+  return new ApiError("INVALID_PARAMETER", message, 400);
+}
+__name(invalidParameter, "invalidParameter");
+
+// src/logger.ts
+var runtimeLogSink = globalThis["console"];
+function writeLog(level, event, fields) {
+  const line = JSON.stringify({ level, event, ...fields });
+  if (level === "error") {
+    runtimeLogSink["error"](line);
+    return;
+  }
+  runtimeLogSink["log"](line);
+}
+__name(writeLog, "writeLog");
+
+// src/http.ts
+function json(data, status = 200, headers) {
+  return Response.json(data, {
+    status,
+    headers: {
+      "Cache-Control": "no-store",
+      ...headers
+    }
+  });
+}
+__name(json, "json");
+function errorJson(error, requestId) {
+  if (error instanceof ApiError) {
+    return json(
+      {
+        ...error.details,
+        errorCode: error.code,
+        message: error.message,
+        requestId
+      },
+      error.status
+    );
+  }
+  const message = error instanceof Error ? error.message : String(error);
+  writeLog("error", "unhandled_error", { requestId, error: message });
+  return json(
+    {
+      errorCode: "BACKEND_UNAVAILABLE",
+      message: "Update backend unavailable",
+      requestId
+    },
+    503
+  );
+}
+__name(errorJson, "errorJson");
+function withRequestId(response, requestId) {
+  const headers = new Headers(response.headers);
+  headers.set("X-Request-Id", requestId);
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers
+  });
+}
+__name(withRequestId, "withRequestId");
+function requestIdFrom(request) {
+  const value = request.headers.get("X-Request-Id");
+  return value && /^[A-Za-z0-9._:-]{1,128}$/.test(value) ? value : crypto.randomUUID();
+}
+__name(requestIdFrom, "requestIdFrom");
+function clientIpFrom(request) {
+  return request.headers.get("CF-Connecting-IP") ?? request.headers.get("X-Forwarded-For")?.split(",")[0]?.trim() ?? "local";
+}
+__name(clientIpFrom, "clientIpFrom");
+
+// src/rate_limiter.ts
+import { DurableObject } from "cloudflare:workers";
+var RateLimiter = class extends DurableObject {
+  static {
+    __name(this, "RateLimiter");
+  }
+  constructor(ctx, env) {
+    super(ctx, env);
+    ctx.blockConcurrencyWhile(async () => {
+      this.ctx.storage.sql.exec(`
+        CREATE TABLE IF NOT EXISTS hits (
+          key TEXT NOT NULL,
+          timestamp_ms INTEGER NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_hits_key_timestamp ON hits(key, timestamp_ms);
+      `);
+    });
+  }
+  check(key, limit, windowSeconds) {
+    const now = Date.now();
+    const windowMs = windowSeconds * 1e3;
+    const cutoff = now - windowMs;
+    this.ctx.storage.sql.exec("DELETE FROM hits WHERE timestamp_ms < ?", cutoff);
+    const row = this.ctx.storage.sql.exec("SELECT COUNT(*) AS count FROM hits WHERE key = ? AND timestamp_ms >= ?", key, cutoff).one();
+    if (row.count >= limit) {
+      return { allowed: false, retryAfter: windowSeconds };
+    }
+    this.ctx.storage.sql.exec("INSERT INTO hits (key, timestamp_ms) VALUES (?, ?)", key, now);
+    return { allowed: true, retryAfter: 0 };
+  }
+};
+async function enforceRateLimit(env, key) {
+  const windowSeconds = Number(env.RATE_LIMIT_WINDOW_SECONDS || "60");
+  const limit = Number(env.RATE_LIMIT_MAX_REQUESTS || "60");
+  const shard = rateLimitShard(key);
+  const stub = env.RATE_LIMITER.getByName(`public:${shard}`);
+  return stub.check(key, limit, windowSeconds);
+}
+__name(enforceRateLimit, "enforceRateLimit");
+function rateLimitShard(key) {
+  let hash = 0;
+  for (let i = 0; i < key.length; i += 1) {
+    hash = hash * 31 + key.charCodeAt(i) >>> 0;
+  }
+  return String(hash % 128);
+}
+__name(rateLimitShard, "rateLimitShard");
+
+// src/validation.ts
+function requireString(value, field) {
+  if (typeof value !== "string" || value.trim() === "") {
+    throw invalidParameter(`${field} is required`);
+  }
+  return value.trim();
+}
+__name(requireString, "requireString");
+function requireInt(value, field) {
+  const parsed = typeof value === "number" ? value : typeof value === "string" ? Number(value) : NaN;
+  if (!Number.isInteger(parsed) || parsed < 0) {
+    throw invalidParameter(`${field} must be a non-negative integer`);
+  }
+  return parsed;
+}
+__name(requireInt, "requireInt");
+function requireSha256(value, field) {
+  const text2 = requireString(value, field).toLowerCase();
+  if (!/^[a-f0-9]{64}$/.test(text2)) {
+    throw invalidParameter(`${field} must be a SHA-256 hex digest`);
+  }
+  return text2;
+}
+__name(requireSha256, "requireSha256");
+function parsePlatform(value) {
+  if (value === "android" || value === "windows") return value;
+  throw invalidParameter("platform must be android or windows");
+}
+__name(parsePlatform, "parsePlatform");
+function parseChannel(value) {
+  if (value === "stable" || value === "beta") return value;
+  throw invalidParameter("channel must be stable or beta");
+}
+__name(parseChannel, "parseChannel");
+function parseJsonArray(value) {
+  const parsed = JSON.parse(value);
+  return Array.isArray(parsed) ? parsed.map((item) => String(item)) : [];
+}
+__name(parseJsonArray, "parseJsonArray");
+function parseCapabilities(value) {
+  if (!value) return [];
+  return value.split(",").map((capability) => capability.trim()).filter((capability) => capability.length > 0);
+}
+__name(parseCapabilities, "parseCapabilities");
+function parseJsonObject(value) {
+  if (!value) return {};
+  const parsed = JSON.parse(value);
+  return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+}
+__name(parseJsonObject, "parseJsonObject");
+
+// src/announcements.ts
+var ANNOUNCEMENTS_QUERY_PARAMS = /* @__PURE__ */ new Set(["appId", "platform", "channel", "limit"]);
+var DEFAULT_LIMIT = 8;
+var MAX_LIMIT = 20;
+async function handleAnnouncements(request, env, requestId) {
+  const url = new URL(request.url);
+  for (const key of url.searchParams.keys()) {
+    if (!ANNOUNCEMENTS_QUERY_PARAMS.has(key)) {
+      throw invalidParameter(`Unsupported query parameter: ${key}`);
+    }
+  }
+  const appId = url.searchParams.get("appId") ?? env.APP_ID;
+  const platform = parsePlatform(url.searchParams.get("platform") ?? "android");
+  const channel = parseChannel(url.searchParams.get("channel") ?? "stable");
+  const limit = parseLimit(url.searchParams.get("limit"));
+  const rate = await enforceRateLimit(
+    env,
+    `announcements:${clientIpFrom(request)}:${appId}:${platform}:${channel}`
+  );
+  if (!rate.allowed) {
+    return json(
+      { errorCode: "RATE_LIMITED", message: "Too many announcement requests", retryAfter: rate.retryAfter },
+      429,
+      { "Retry-After": String(rate.retryAfter) }
+    );
+  }
+  try {
+    const [manual, release] = await Promise.all([
+      loadManualAnnouncements(env, appId, limit),
+      loadReleaseAnnouncement(env, appId, platform, channel)
+    ]);
+    const announcements = [
+      ...manual.results.map((row) => ({
+        id: row.id,
+        type: "manual",
+        title: row.title,
+        body: row.body,
+        pinned: row.pinned === 1,
+        publishedAt: row.published_at ?? row.updated_at ?? row.created_at,
+        updatedAt: row.updated_at
+      })),
+      ...release ? [releaseAnnouncement(release)] : []
+    ];
+    return json({
+      ok: true,
+      appId,
+      platform,
+      channel,
+      announcements
+    });
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    const message = error instanceof Error ? error.message : String(error);
+    writeLog("error", "announcements_failed", { requestId, message });
+    throw backendUnavailable();
+  }
+}
+__name(handleAnnouncements, "handleAnnouncements");
+function loadManualAnnouncements(env, appId, limit) {
+  return env.DB.prepare(
+    `
+      SELECT id, title, body, pinned, published_at, created_at, updated_at
+      FROM announcements
+      WHERE app_id = ? AND published = 1
+      ORDER BY pinned DESC, COALESCE(published_at, updated_at, created_at) DESC, id DESC
+      LIMIT ?
+    `
+  ).bind(appId, limit).all();
+}
+__name(loadManualAnnouncements, "loadManualAnnouncements");
+async function loadReleaseAnnouncement(env, appId, platform, channel) {
+  return await env.DB.prepare(
+    `
+        SELECT r.id, r.version_name, r.version_code, r.release_tag, r.release_notes, r.created_at, r.updated_at
+        FROM channels c
+        JOIN releases r ON r.id = c.current_release_id
+        WHERE c.app_id = ?
+          AND c.platform = ?
+          AND c.name = ?
+          AND c.disable_latest = 0
+          AND r.state <> 'disabled'
+          AND r.archived = 0
+        LIMIT 1
+      `
+  ).bind(appId, platform, channel).first() ?? null;
+}
+__name(loadReleaseAnnouncement, "loadReleaseAnnouncement");
+function releaseAnnouncement(row) {
+  const notes = row.release_notes.trim();
+  return {
+    id: `release:${row.id}`,
+    type: "release",
+    title: `Trace ${row.version_name} \u66F4\u65B0\u516C\u544A`,
+    body: notes || `Trace ${row.version_name} \u5DF2\u53D1\u5E03\uFF0C\u6682\u65E0\u53D1\u5E03\u8BF4\u660E\u3002`,
+    versionName: row.version_name,
+    versionCode: row.version_code,
+    releaseTag: row.release_tag,
+    publishedAt: row.updated_at ?? row.created_at,
+    updatedAt: row.updated_at
+  };
+}
+__name(releaseAnnouncement, "releaseAnnouncement");
+function parseLimit(value) {
+  if (!value) return DEFAULT_LIMIT;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 1 || parsed > MAX_LIMIT) {
+    throw invalidParameter(`limit must be an integer from 1 to ${MAX_LIMIT}`);
+  }
+  return parsed;
+}
+__name(parseLimit, "parseLimit");
+
+// src/crypto.ts
+var encoder = new TextEncoder();
+function canonicalJson(value) {
+  if (Array.isArray(value)) {
+    return `[${value.map((item) => canonicalJson(item)).join(",")}]`;
+  }
+  if (value && typeof value === "object") {
+    const entries = Object.entries(value).sort(
+      ([a], [b]) => a.localeCompare(b)
+    );
+    return `{${entries.map(([key, entryValue]) => `${JSON.stringify(key)}:${canonicalJson(entryValue)}`).join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+__name(canonicalJson, "canonicalJson");
+async function sha256Hex(input) {
+  const digest = await crypto.subtle.digest("SHA-256", encoder.encode(input));
+  return hex(new Uint8Array(digest));
+}
+__name(sha256Hex, "sha256Hex");
+async function verifyBearerToken(providedToken, expectedSha256) {
+  if (!providedToken || !expectedSha256) return false;
+  const providedHash = await sha256Hex(providedToken);
+  return timingSafeEqual(providedHash.toLowerCase(), expectedSha256.toLowerCase());
+}
+__name(verifyBearerToken, "verifyBearerToken");
+async function signHmacSha256(message, key) {
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(key),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const signature = await crypto.subtle.sign("HMAC", cryptoKey, encoder.encode(message));
+  return base64Url(new Uint8Array(signature));
+}
+__name(signHmacSha256, "signHmacSha256");
+function downloadHmacKey(env, keyVersion) {
+  if (keyVersion === env.DOWNLOAD_TOKEN_KEY_VERSION) {
+    if (env.DOWNLOAD_HMAC_KEY_CURRENT) return env.DOWNLOAD_HMAC_KEY_CURRENT;
+    throw new ApiError("BACKEND_UNAVAILABLE", "Current download signing key is not configured", 503);
+  }
+  if (keyVersion === env.DOWNLOAD_TOKEN_PREVIOUS_KEY_VERSION && env.DOWNLOAD_HMAC_KEY_PREVIOUS) {
+    return env.DOWNLOAD_HMAC_KEY_PREVIOUS;
+  }
+  throw new ApiError("TOKEN_INVALID", "Download token key version is invalid", 401);
+}
+__name(downloadHmacKey, "downloadHmacKey");
+function timingSafeEqual(a, b) {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i += 1) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
+}
+__name(timingSafeEqual, "timingSafeEqual");
+function base64Url(bytes) {
+  let binary = "";
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+__name(base64Url, "base64Url");
+function hex(bytes) {
+  return Array.from(bytes).map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+__name(hex, "hex");
+
+// src/ci.ts
+async function handleRegisterRelease(request, env, requestId) {
+  const token = bearerToken(request);
+  const authorized = await verifyBearerToken(token, env.DEPLOY_TOKEN_SHA256);
+  if (!authorized) {
+    throw new ApiError("TOKEN_INVALID", "CI deploy token is invalid", 401);
+  }
+  const input = parseRegisterReleaseRequest(await request.json());
+  if (!input.isFormalRelease) {
+    throw new ApiError("FORMAL_RELEASE_REQUIRED", "Cloudflare candidates require a formal release", 403);
+  }
+  if (input.platform === "android" && !input.fixedSigningConfigured) {
+    throw new ApiError(
+      "SIGNING_REQUIRED",
+      "Android Cloudflare candidates require fixed release signing",
+      409
+    );
+  }
+  const payloadSignature = normalizePayloadSignature(input.payloadSignature);
+  await validateAssets(input, env);
+  const releaseId = releaseIdFor(input.appId, input.platform, input.releaseTag);
+  const existing = await env.DB.prepare(
+    "SELECT id, run_id, commit_sha FROM releases WHERE app_id = ? AND platform = ? AND release_tag = ? LIMIT 1"
+  ).bind(input.appId, input.platform, input.releaseTag).first();
+  if (existing) {
+    if (existing.run_id === input.runId && existing.commit_sha === input.commitSha) {
+      const r2AssetsUpdated = await updateR2AssetState(env, input, existing.id, requestId);
+      return json({ ok: true, releaseId: existing.id, idempotent: true, r2AssetsUpdated });
+    }
+    if (input.r2Backfill) {
+      if (existing.commit_sha !== input.commitSha) {
+        throw invalidParameter("r2Backfill commitSha must match the existing release");
+      }
+      const r2AssetsUpdated = await updateR2AssetState(env, input, existing.id, requestId);
+      return json({
+        ok: true,
+        releaseId: existing.id,
+        idempotent: false,
+        r2Backfill: true,
+        r2AssetsUpdated
+      });
+    }
+    throw invalidParameter("releaseTag already exists with different runId or commitSha");
+  }
+  if (input.r2Backfill) {
+    throw invalidParameter("r2Backfill can only update an existing release");
+  }
+  const securityPayload = buildSecurityPayload(input);
+  const statements = [
+    env.DB.prepare("INSERT OR IGNORE INTO apps (id, name) VALUES (?, ?)").bind(
+      input.appId,
+      input.appId
+    ),
+    env.DB.prepare("INSERT OR IGNORE INTO app_config (app_id) VALUES (?)").bind(input.appId),
+    env.DB.prepare(
+      "INSERT OR IGNORE INTO channels (id, app_id, platform, name) VALUES (?, ?, ?, 'stable')"
+    ).bind(channelIdFor(input.appId, input.platform, "stable"), input.appId, input.platform),
+    env.DB.prepare(
+      "INSERT OR IGNORE INTO channels (id, app_id, platform, name) VALUES (?, ?, ?, 'beta')"
+    ).bind(channelIdFor(input.appId, input.platform, "beta"), input.appId, input.platform),
+    env.DB.prepare(
+      `
+        INSERT INTO releases (
+          id,
+          app_id,
+          platform,
+          version_name,
+          version_code,
+          release_tag,
+          commit_sha,
+          run_id,
+          state,
+          payload_signature_json,
+          security_payload_json,
+          release_notes,
+          min_client_version_code,
+          capabilities_json
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'candidate', ?, ?, ?, ?, ?)
+      `
+    ).bind(
+      releaseId,
+      input.appId,
+      input.platform,
+      input.versionName,
+      input.versionCode,
+      input.releaseTag,
+      input.commitSha,
+      input.runId,
+      JSON.stringify(payloadSignature),
+      canonicalJson(securityPayload),
+      input.releaseNotes,
+      input.minClientVersionCode,
+      JSON.stringify(input.capabilities)
+    )
+  ];
+  for (const asset of input.assets) {
+    statements.push(
+      env.DB.prepare(
+        `
+          INSERT INTO release_assets (
+            id,
+            release_id,
+            app_id,
+            platform,
+            asset_type,
+            file_name,
+            sha256,
+            size_bytes,
+            r2_key,
+            r2_state,
+            github_url
+          )
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `
+      ).bind(
+        assetIdFor(releaseId, asset.assetType, asset.fileName),
+        releaseId,
+        input.appId,
+        input.platform,
+        asset.assetType,
+        asset.fileName,
+        asset.sha256,
+        asset.sizeBytes,
+        asset.r2Key ?? null,
+        asset.r2Key ? "available" : "not_uploaded",
+        asset.githubUrl
+      )
+    );
+  }
+  for (const patch of input.patches) {
+    const assetId = assetIdFor(releaseId, "patch", patch.patchAssetName);
+    statements.push(
+      env.DB.prepare(
+        `
+          INSERT INTO patches (
+            id,
+            app_id,
+            platform,
+            to_release_id,
+            asset_id,
+            from_version_code,
+            old_sha256,
+            patch_format,
+            patch_sha256,
+            patch_size_bytes,
+            output_sha256,
+            output_size_bytes
+          )
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `
+      ).bind(
+        patchIdFor(releaseId, patch.patchAssetName),
+        input.appId,
+        input.platform,
+        releaseId,
+        assetId,
+        patch.fromVersionCode,
+        patch.oldSha256,
+        patch.patchFormat,
+        patch.patchSha256,
+        patch.patchSizeBytes,
+        patch.outputSha256,
+        patch.outputSizeBytes
+      )
+    );
+  }
+  statements.push(
+    env.DB.prepare(
+      `
+        INSERT INTO audit_logs (
+          id,
+          app_id,
+          actor,
+          actor_type,
+          action,
+          target_type,
+          target_id,
+          request_id,
+          after_json
+        )
+        VALUES (?, ?, 'github-actions', 'ci', 'register_candidate', 'release', ?, ?, ?)
+      `
+    ).bind(crypto.randomUUID(), input.appId, releaseId, requestId, canonicalJson(securityPayload))
+  );
+  await env.DB.batch(statements);
+  return json({ ok: true, releaseId, idempotent: false }, 201);
+}
+__name(handleRegisterRelease, "handleRegisterRelease");
+function parseRegisterReleaseRequest(value) {
+  if (!value || typeof value !== "object") {
+    throw invalidParameter("request body must be an object");
+  }
+  const body = value;
+  const platform = body.platform === "android" || body.platform === "windows" ? body.platform : null;
+  if (!platform) throw invalidParameter("platform must be android or windows");
+  const assets = Array.isArray(body.assets) ? body.assets.map(parseAsset) : [];
+  const patches = Array.isArray(body.patches) ? body.patches.map(parsePatch) : [];
+  return {
+    appId: requireString(body.appId, "appId"),
+    platform,
+    releaseTag: requireString(body.releaseTag, "releaseTag"),
+    runId: requireString(body.runId, "runId"),
+    commitSha: requireString(body.commitSha, "commitSha"),
+    versionName: requireString(body.versionName, "versionName"),
+    versionCode: requireInt(body.versionCode, "versionCode"),
+    releaseNotes: String(body.releaseNotes ?? ""),
+    minClientVersionCode: body.minClientVersionCode ? requireInt(body.minClientVersionCode, "minClientVersionCode") : 0,
+    capabilities: Array.isArray(body.capabilities) ? body.capabilities.map(String) : [],
+    payloadSignature: body.payloadSignature,
+    isFormalRelease: body.isFormalRelease === true,
+    fixedSigningConfigured: body.fixedSigningConfigured === true,
+    r2Backfill: body.r2Backfill === true,
+    assets,
+    patches
+  };
+}
+__name(parseRegisterReleaseRequest, "parseRegisterReleaseRequest");
+function parseAsset(value) {
+  if (!value || typeof value !== "object") throw invalidParameter("asset must be an object");
+  const body = value;
+  const assetType = body.assetType;
+  if (assetType !== "apk" && assetType !== "windows_zip" && assetType !== "windows_exe" && assetType !== "manifest" && assetType !== "patch") {
+    throw invalidParameter("assetType is invalid");
+  }
+  return {
+    assetType,
+    fileName: requireString(body.fileName, "fileName"),
+    sha256: requireSha256(body.sha256, "sha256"),
+    sizeBytes: requireInt(body.sizeBytes, "sizeBytes"),
+    githubUrl: requireString(body.githubUrl, "githubUrl"),
+    r2Key: typeof body.r2Key === "string" ? body.r2Key : void 0,
+    r2Verified: body.r2Verified === true
+  };
+}
+__name(parseAsset, "parseAsset");
+function parsePatch(value) {
+  if (!value || typeof value !== "object") throw invalidParameter("patch must be an object");
+  const body = value;
+  return {
+    fromVersionCode: requireInt(body.fromVersionCode, "fromVersionCode"),
+    oldSha256: requireSha256(body.oldSha256, "oldSha256"),
+    patchFormat: parsePatchFormat(body.patchFormat ?? body.algorithm ?? body.format),
+    patchAssetName: requireString(body.patchAssetName, "patchAssetName"),
+    patchSha256: requireSha256(body.patchSha256, "patchSha256"),
+    patchSizeBytes: requireInt(body.patchSizeBytes, "patchSizeBytes"),
+    outputSha256: requireSha256(body.outputSha256, "outputSha256"),
+    outputSizeBytes: requireInt(body.outputSizeBytes, "outputSizeBytes")
+  };
+}
+__name(parsePatch, "parsePatch");
+async function validateAssets(input, env) {
+  if (input.platform === "android" && !input.assets.some((asset) => asset.assetType === "apk")) {
+    throw invalidParameter("android candidate requires an APK asset");
+  }
+  for (const asset of input.assets) {
+    assertSafeFileName(asset.fileName);
+    assertImmutableGitHubAssetUrl(asset.githubUrl, env, input.releaseTag);
+    if (asset.r2Key) {
+      assertExpectedR2Key(input, asset);
+      if (!asset.r2Verified) {
+        throw invalidParameter("r2Verified must be true when r2Key is provided");
+      }
+      await assertR2ObjectMatches(env, asset);
+    }
+  }
+}
+__name(validateAssets, "validateAssets");
+async function updateR2AssetState(env, input, releaseId, requestId) {
+  let updated = 0;
+  for (const asset of input.assets) {
+    if (!asset.r2Key) continue;
+    const result = await env.DB.prepare(
+      `
+        UPDATE release_assets
+        SET r2_key = ?, r2_state = 'available', updated_at = datetime('now')
+        WHERE id = ?
+          AND release_id = ?
+          AND sha256 = ?
+          AND size_bytes = ?
+          AND disabled = 0
+      `
+    ).bind(
+      asset.r2Key,
+      assetIdFor(releaseId, asset.assetType, asset.fileName),
+      releaseId,
+      asset.sha256,
+      asset.sizeBytes
+    ).run();
+    if (result.meta.changes !== 1) {
+      throw invalidParameter(`registered asset does not match R2 metadata: ${asset.fileName}`);
+    }
+    updated += 1;
+  }
+  if (updated > 0) {
+    await env.DB.prepare(
+      `
+        INSERT INTO audit_logs (
+          id,
+          app_id,
+          actor,
+          actor_type,
+          action,
+          target_type,
+          target_id,
+          request_id,
+          after_json
+        )
+        VALUES (?, ?, 'github-actions', 'ci', 'update_r2_assets', 'release', ?, ?, ?)
+      `
+    ).bind(
+      crypto.randomUUID(),
+      input.appId,
+      releaseId,
+      requestId,
+      canonicalJson({ r2AssetsUpdated: updated })
+    ).run();
+  }
+  return updated;
+}
+__name(updateR2AssetState, "updateR2AssetState");
+function buildSecurityPayload(input) {
+  const apk = input.assets.find((asset) => asset.assetType === "apk");
+  return {
+    appId: input.appId,
+    platform: input.platform,
+    versionName: input.versionName,
+    versionCode: input.versionCode,
+    releaseTag: input.releaseTag,
+    apkAssetName: apk?.fileName ?? "",
+    apkSha256: apk?.sha256 ?? "",
+    apkSize: apk?.sizeBytes ?? 0,
+    patches: input.patches.map((patch) => ({
+      fromVersionCode: patch.fromVersionCode,
+      toVersionCode: input.versionCode,
+      assetName: patch.patchAssetName,
+      sha256: patch.patchSha256,
+      size: patch.patchSizeBytes,
+      oldSha256: patch.oldSha256,
+      newSha256: patch.outputSha256
+    })),
+    assetHashes: input.assets.map((asset) => ({
+      assetType: asset.assetType,
+      fileName: asset.fileName,
+      sha256: asset.sha256,
+      size: asset.sizeBytes
+    })),
+    minClientVersionCode: input.minClientVersionCode,
+    capabilities: input.capabilities
+  };
+}
+__name(buildSecurityPayload, "buildSecurityPayload");
+function normalizePayloadSignature(value) {
+  if (typeof value === "string" && value.trim() !== "") {
+    return { algorithm: "ed25519", keyVersion: "default", signature: value.trim() };
+  }
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    const signature = value;
+    if (typeof signature.signature === "string" || typeof signature.value === "string") {
+      return signature;
+    }
+  }
+  throw invalidParameter("payloadSignature is required");
+}
+__name(normalizePayloadSignature, "normalizePayloadSignature");
+function assertImmutableGitHubAssetUrl(value, env, releaseTag) {
+  if (value.includes("/latest/download/")) {
+    throw invalidParameter("GitHub latest download URLs are not allowed");
+  }
+  const url = new URL(value);
+  if (url.hostname !== "github.com") {
+    throw invalidParameter("Phase 1 assets must use github.com immutable release URLs");
+  }
+  const expectedPrefix = `/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/releases/download/`;
+  if (!url.pathname.startsWith(expectedPrefix) || !url.pathname.includes(`/${releaseTag}/`)) {
+    throw invalidParameter("GitHub asset URL must match releaseTag");
+  }
+}
+__name(assertImmutableGitHubAssetUrl, "assertImmutableGitHubAssetUrl");
+async function assertR2ObjectMatches(env, asset) {
+  if (!asset.r2Key) return;
+  const object = await env.RELEASES_BUCKET.head(asset.r2Key);
+  if (!object) {
+    throw invalidParameter(`R2 object is missing: ${asset.fileName}`);
+  }
+  if (object.size !== asset.sizeBytes) {
+    throw invalidParameter(`R2 object size mismatch: ${asset.fileName}`);
+  }
+  const metadataSha256 = object.customMetadata?.sha256?.toLowerCase();
+  if (metadataSha256 && metadataSha256 !== asset.sha256) {
+    throw invalidParameter(`R2 object sha256 metadata mismatch: ${asset.fileName}`);
+  }
+}
+__name(assertR2ObjectMatches, "assertR2ObjectMatches");
+function assertExpectedR2Key(input, asset) {
+  const expected = r2KeyForAsset(input, asset);
+  if (asset.r2Key !== expected) {
+    throw invalidParameter(`R2 key does not match the release object key policy: ${asset.fileName}`);
+  }
+}
+__name(assertExpectedR2Key, "assertExpectedR2Key");
+function r2KeyForAsset(input, asset) {
+  assertSafeFileName(asset.fileName);
+  assertSafePathPart(input.appId, "appId");
+  assertSafePathPart(input.releaseTag, "releaseTag");
+  const releasePrefix = `${input.appId}/releases/${input.versionCode}-${input.releaseTag}`;
+  if (asset.assetType === "patch") {
+    return `${releasePrefix}/android/patches/${asset.fileName}`;
+  }
+  if (asset.assetType === "manifest") {
+    return `${releasePrefix}/manifest/${asset.fileName}`;
+  }
+  if (asset.assetType === "windows_zip" || asset.assetType === "windows_exe") {
+    return `${releasePrefix}/windows/${asset.fileName}`;
+  }
+  return `${releasePrefix}/android/${asset.fileName}`;
+}
+__name(r2KeyForAsset, "r2KeyForAsset");
+function assertSafeFileName(fileName) {
+  if (fileName.includes("/") || fileName.includes("\\") || /[\u0000-\u001F\u007F]/u.test(fileName) || fileName === "." || fileName === ".." || fileName.trim() === "") {
+    throw invalidParameter("asset fileName must be a plain file name");
+  }
+}
+__name(assertSafeFileName, "assertSafeFileName");
+function assertSafePathPart(value, fieldName) {
+  if (value.includes("/") || value.includes("\\") || value.includes("..") || /[\u0000-\u001F\u007F]/u.test(value) || value.trim() === "") {
+    throw invalidParameter(`${fieldName} contains invalid R2 path characters`);
+  }
+}
+__name(assertSafePathPart, "assertSafePathPart");
+function bearerToken(request) {
+  const authorization = request.headers.get("Authorization");
+  if (authorization?.startsWith("Bearer ")) return authorization.slice("Bearer ".length);
+  return request.headers.get("X-Deploy-Token");
+}
+__name(bearerToken, "bearerToken");
+function releaseIdFor(appId, platform, releaseTag) {
+  return `rel_${slug(appId)}_${platform}_${slug(releaseTag)}`;
+}
+__name(releaseIdFor, "releaseIdFor");
+function channelIdFor(appId, platform, channel) {
+  return `ch_${slug(appId)}_${platform}_${channel}`;
+}
+__name(channelIdFor, "channelIdFor");
+function assetIdFor(releaseId, assetType, fileName) {
+  return `asset_${releaseId}_${assetType}_${slug(fileName)}`;
+}
+__name(assetIdFor, "assetIdFor");
+function parsePatchFormat(value) {
+  if (value === void 0 || value === null || value === "" || value === "tracepatch") {
+    return "tracepatch";
+  }
+  if (value === "vcdiff" || value === "xdelta3") {
+    return "vcdiff";
+  }
+  throw invalidParameter("patchFormat is invalid");
+}
+__name(parsePatchFormat, "parsePatchFormat");
+function patchIdFor(releaseId, patchAssetName) {
+  return `patch_${releaseId}_${slug(patchAssetName)}`;
+}
+__name(patchIdFor, "patchIdFor");
+function slug(value) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+}
+__name(slug, "slug");
+
+// src/downloads.ts
+async function signedDownloadUrls(env, origin, method, assetId, releaseId) {
+  const ttlSeconds = Number(env.DOWNLOAD_TOKEN_TTL_SECONDS || "300");
+  const expiresAt = Math.floor(Date.now() / 1e3) + ttlSeconds;
+  const keyVersion = env.DOWNLOAD_TOKEN_KEY_VERSION;
+  const signature = await signDownloadToken(env, method, assetId, releaseId, expiresAt, keyVersion);
+  const query = new URLSearchParams({
+    assetId,
+    releaseId,
+    expiresAt: String(expiresAt),
+    keyVersion,
+    signature
+  });
+  return {
+    downloadUrl: `${origin}/api/public/download?${query.toString()}`,
+    fallbackUrl: `${origin}/api/public/github-fallback?${query.toString()}`,
+    expiresAt
+  };
+}
+__name(signedDownloadUrls, "signedDownloadUrls");
+async function signDownloadToken(env, method, assetId, releaseId, expiresAt, keyVersion) {
+  const key = downloadHmacKey(env, keyVersion);
+  return signHmacSha256(downloadTokenMessage(method, assetId, releaseId, expiresAt, keyVersion), key);
+}
+__name(signDownloadToken, "signDownloadToken");
+async function handleDownload(request, env, requestId, mode) {
+  const url = new URL(request.url);
+  const assetId = requiredQuery(url, "assetId");
+  const releaseId = requiredQuery(url, "releaseId");
+  const expiresAt = Number(requiredQuery(url, "expiresAt"));
+  const keyVersion = requiredQuery(url, "keyVersion");
+  const signature = requiredQuery(url, "signature");
+  await verifyDownloadToken(env, request.method, assetId, releaseId, expiresAt, keyVersion, signature);
+  const state = await loadDownloadState(env, assetId, releaseId);
+  ensureDownloadAllowed(state, mode);
+  if (mode === "primary") {
+    return streamR2Asset(env, state, requestId);
+  }
+  writeLog("info", "download_redirect", {
+    requestId,
+    releaseId,
+    assetId,
+    channel: state.channel_id,
+    status: "redirect",
+    mode
+  });
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: state.github_url,
+      "Cache-Control": "no-store",
+      "X-Request-Id": requestId
+    }
+  });
+}
+__name(handleDownload, "handleDownload");
+async function streamR2Asset(env, state, requestId) {
+  if (state.r2_state !== "available" || !state.r2_key) {
+    throw backendUnavailable("R2 primary asset is not available");
+  }
+  let object;
+  try {
+    object = await env.RELEASES_BUCKET.get(state.r2_key);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    writeLog("error", "r2_download_failed", {
+      requestId,
+      releaseId: state.release_id,
+      assetId: state.id,
+      r2Key: state.r2_key,
+      message
+    });
+    throw backendUnavailable("R2 primary asset could not be read");
+  }
+  if (!object) {
+    throw backendUnavailable("R2 primary asset is missing");
+  }
+  if (object.size !== state.size_bytes) {
+    throw backendUnavailable("R2 primary asset size mismatch");
+  }
+  const headers = new Headers();
+  object.writeHttpMetadata(headers);
+  headers.set("Content-Type", headers.get("Content-Type") ?? contentTypeForAsset(state));
+  headers.set("Content-Length", String(object.size));
+  headers.set("ETag", object.httpEtag);
+  headers.set("Cache-Control", "public, max-age=31536000, immutable");
+  headers.set("Content-Disposition", `attachment; filename="${contentDispositionFileName(state.file_name)}"`);
+  headers.set("X-Request-Id", requestId);
+  headers.set("X-Trace-Asset-Source", "r2");
+  writeLog("info", "download_stream", {
+    requestId,
+    releaseId: state.release_id,
+    assetId: state.id,
+    channel: state.channel_id,
+    assetType: state.asset_type,
+    bytes: object.size,
+    status: "ok",
+    mode: "primary"
+  });
+  return new Response(object.body, { headers });
+}
+__name(streamR2Asset, "streamR2Asset");
+async function verifyDownloadToken(env, method, assetId, releaseId, expiresAt, keyVersion, signature) {
+  if (!Number.isInteger(expiresAt) || expiresAt <= 0) {
+    throw new ApiError("TOKEN_INVALID", "Download token expiry is invalid", 401);
+  }
+  if (expiresAt < Math.floor(Date.now() / 1e3)) {
+    throw new ApiError("TOKEN_EXPIRED", "Download token expired", 401);
+  }
+  const expected = await signDownloadToken(env, method, assetId, releaseId, expiresAt, keyVersion);
+  if (!timingSafeEqual(expected, signature)) {
+    throw new ApiError("TOKEN_INVALID", "Download token signature is invalid", 401);
+  }
+}
+__name(verifyDownloadToken, "verifyDownloadToken");
+async function loadDownloadState(env, assetId, releaseId) {
+  const row = await env.DB.prepare(
+    `
+      SELECT
+        a.*,
+        r.state AS release_state,
+        r.archived AS release_archived,
+        c.id AS channel_id,
+        c.disable_downloads AS channel_disable_downloads,
+        ac.disable_all_downloads AS app_disable_downloads
+      FROM release_assets a
+      JOIN releases r ON r.id = a.release_id
+      LEFT JOIN channels c ON c.current_release_id = r.id
+      LEFT JOIN app_config ac ON ac.app_id = r.app_id
+      WHERE a.id = ? AND a.release_id = ?
+      LIMIT 1
+    `
+  ).bind(assetId, releaseId).first();
+  if (!row) {
+    throw new ApiError("ASSET_DISABLED", "Asset is not available", 410);
+  }
+  return row;
+}
+__name(loadDownloadState, "loadDownloadState");
+function ensureDownloadAllowed(row, mode) {
+  if (row.release_state === "disabled" || row.disabled === 1) {
+    throw new ApiError("ASSET_DISABLED", "Asset or release is disabled", 410);
+  }
+  if (row.release_archived === 1 || row.r2_state === "archived" || row.r2_state === "r2_deleted") {
+    throw new ApiError("ASSET_ARCHIVED", "Asset is archived and must be restored before download", 409);
+  }
+  if (row.app_disable_downloads === 1 || row.channel_disable_downloads === 1) {
+    throw new ApiError("CHANNEL_STOPPED", "Downloads are temporarily disabled", 503);
+  }
+  if (!row.channel_id) {
+    throw new ApiError("ASSET_DISABLED", "Release is not currently published to a channel", 410);
+  }
+  if (mode === "github-fallback" && row.github_url.includes("/latest/download/")) {
+    throw new ApiError("FALLBACK_UNAVAILABLE", "GitHub fallback URL is not immutable", 502);
+  }
+}
+__name(ensureDownloadAllowed, "ensureDownloadAllowed");
+function requiredQuery(url, key) {
+  const value = url.searchParams.get(key);
+  if (!value) throw new ApiError("TOKEN_INVALID", `${key} is required`, 401);
+  return value;
+}
+__name(requiredQuery, "requiredQuery");
+function contentTypeForAsset(asset) {
+  if (asset.asset_type === "apk") return "application/vnd.android.package-archive";
+  if (asset.asset_type === "manifest") return "application/json; charset=utf-8";
+  if (asset.asset_type === "windows_zip") return "application/zip";
+  if (asset.file_name.endsWith(".tpatch")) return "application/octet-stream";
+  return "application/octet-stream";
+}
+__name(contentTypeForAsset, "contentTypeForAsset");
+function contentDispositionFileName(fileName) {
+  return fileName.replace(/["\\\r\n]/g, "_");
+}
+__name(contentDispositionFileName, "contentDispositionFileName");
+function downloadTokenMessage(method, assetId, releaseId, expiresAt, keyVersion) {
+  return [method.toUpperCase(), assetId, releaseId, String(expiresAt), keyVersion].join("\n");
+}
+__name(downloadTokenMessage, "downloadTokenMessage");
+
+// ../scripts/firmware-schema.mjs
+var FIRMWARE_MODEL = "e-track-at32f435";
+var U32_MAX = 4294967295;
+var APP_VERSION_MAX = 21e8;
+var FirmwareSchemaError = class extends Error {
+  static {
+    __name(this, "FirmwareSchemaError");
+  }
+  constructor(message, code = "INVALID_PARAMETER") {
+    super(message);
+    this.name = "FirmwareSchemaError";
+    this.code = code;
+  }
+};
+function exactObject(value, keys, label = "body") {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new FirmwareSchemaError(`${label} must be an object`);
+  }
+  for (const key of Object.keys(value)) {
+    if (!keys.includes(key)) throw new FirmwareSchemaError(`Unknown ${label} field: ${key}`);
+  }
+  return value;
+}
+__name(exactObject, "exactObject");
+function text(value, label, allowEmpty = false) {
+  if (typeof value !== "string" || !allowEmpty && !value.trim() || /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(value)) {
+    throw new FirmwareSchemaError(`${label} must be a valid string`);
+  }
+  if (/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/u.test(value)) {
+    throw new FirmwareSchemaError(`${label} contains invalid Unicode`);
+  }
+  return value;
+}
+__name(text, "text");
+function integer(value, label, max = Number.MAX_SAFE_INTEGER, min = 0) {
+  if (!Number.isSafeInteger(value) || value < min || value > max) {
+    throw new FirmwareSchemaError(`${label} must be an integer in ${min}..${max}`);
+  }
+  return value;
+}
+__name(integer, "integer");
+function sha256(value, label) {
+  if (typeof value !== "string" || !/^[0-9a-f]{64}$/.test(value)) {
+    throw new FirmwareSchemaError(`${label} must be 64 lowercase hex characters`);
+  }
+  return value;
+}
+__name(sha256, "sha256");
+function versionCodeFor(version) {
+  if (typeof version !== "string" || !/^(0|[1-9][0-9]*)\.(0|[1-9][0-9]?)\.(0|[1-9][0-9]?)$/.test(version)) {
+    throw new FirmwareSchemaError("versionName must be a canonical firmware version");
+  }
+  const [major, minor, patch] = version.split(".").map(Number);
+  return integer(major * 1e4 + minor * 100 + patch, "versionCode", U32_MAX);
+}
+__name(versionCodeFor, "versionCodeFor");
+function versionNameFor(code) {
+  integer(code, "baseVersionCode", U32_MAX);
+  return `${Math.floor(code / 1e4)}.${Math.floor(code / 100) % 100}.${code % 100}`;
+}
+__name(versionNameFor, "versionNameFor");
+function assetFileName(kind, targetVersion, baseVersionCode = 0) {
+  versionCodeFor(targetVersion);
+  if (kind === "full") return `${FIRMWARE_MODEL}-v${targetVersion}-full.etu`;
+  if (kind === "recovery") return `recovery-v${targetVersion}.bin`;
+  if (kind === "patch") return `${FIRMWARE_MODEL}-v${versionNameFor(baseVersionCode)}-to-v${targetVersion}-patch.etu`;
+  throw new FirmwareSchemaError("Unknown asset kind");
+}
+__name(assetFileName, "assetFileName");
+function r2KeyFor(release, asset) {
+  return `${release.appId}/firmware/${release.deviceModel}/${release.versionCode}-${release.releaseTag}/${asset.fileName}`;
+}
+__name(r2KeyFor, "r2KeyFor");
+function canonicalJson2(value) {
+  if (Array.isArray(value)) return `[${value.map(canonicalJson2).join(",")}]`;
+  if (value && typeof value === "object") {
+    return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${canonicalJson2(value[key])}`).join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+__name(canonicalJson2, "canonicalJson");
+function contentDigest(hex2) {
+  sha256(hex2, "sha256");
+  return `sha-256=:${btoa(String.fromCharCode(...hex2.match(/../g).map((v) => parseInt(v, 16))))}:`;
+}
+__name(contentDigest, "contentDigest");
+function parseFirmwareRegistration(value, repository, requireVerified = true) {
+  const input = exactObject(value, [
+    "schemaVersion",
+    "appId",
+    "deviceModel",
+    "releaseTag",
+    "runId",
+    "commitSha",
+    "versionName",
+    "versionCode",
+    "releaseNotes",
+    "targetImageSha256",
+    "hardwareRevision",
+    "layoutId",
+    "minBootVersion",
+    "minProtocolVersion",
+    "targetHardware",
+    "transport",
+    "minAppVersionCode",
+    "isFormalRelease",
+    "assets"
+  ]);
+  if (input.schemaVersion !== 2) throw new FirmwareSchemaError("schemaVersion must be 2");
+  if (input.appId !== "trace" || input.deviceModel !== FIRMWARE_MODEL) {
+    throw new FirmwareSchemaError("Unsupported firmware appId/deviceModel");
+  }
+  if (input.isFormalRelease !== true) throw new FirmwareSchemaError("Formal firmware release required", "FORMAL_RELEASE_REQUIRED");
+  text(input.releaseTag, "releaseTag");
+  if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(input.releaseTag) || input.releaseTag.includes("..")) {
+    throw new FirmwareSchemaError("releaseTag is not a safe immutable path component");
+  }
+  text(input.runId, "runId");
+  if (typeof input.commitSha !== "string" || !/^[0-9a-f]{40}$/.test(input.commitSha)) {
+    throw new FirmwareSchemaError("commitSha must be 40 lowercase hex characters");
+  }
+  if (versionCodeFor(input.versionName) !== integer(input.versionCode, "versionCode", U32_MAX)) {
+    throw new FirmwareSchemaError("versionName/versionCode mismatch");
+  }
+  text(input.releaseNotes, "releaseNotes", true);
+  sha256(input.targetImageSha256, "targetImageSha256");
+  integer(input.hardwareRevision, "hardwareRevision", 65535);
+  for (const key of ["layoutId", "minBootVersion", "minProtocolVersion"]) integer(input[key], key, 255);
+  text(input.targetHardware, "targetHardware");
+  if (input.transport !== "ble") throw new FirmwareSchemaError("transport must be ble");
+  integer(input.minAppVersionCode, "minAppVersionCode", APP_VERSION_MAX);
+  if (!Array.isArray(input.assets) || input.assets.length === 0) throw new FirmwareSchemaError("assets must be a nonempty array");
+  const identities = /* @__PURE__ */ new Set();
+  const names = /* @__PURE__ */ new Set();
+  const assets = input.assets.map((value2) => {
+    const asset = exactObject(value2, [
+      "kind",
+      "fileName",
+      "sha256",
+      "sizeBytes",
+      "baseImageSha256",
+      "baseVersionCode",
+      "githubUrl",
+      "r2Key",
+      "r2Verified"
+    ], "asset");
+    if (!["full", "patch", "recovery"].includes(asset.kind)) throw new FirmwareSchemaError("Unknown asset kind");
+    integer(asset.baseVersionCode, "baseVersionCode", U32_MAX);
+    if (asset.kind === "patch") {
+      sha256(asset.baseImageSha256, "baseImageSha256");
+      if (asset.baseVersionCode <= 0 || asset.baseVersionCode >= input.versionCode) {
+        throw new FirmwareSchemaError("patch base must precede target");
+      }
+    } else if (asset.baseImageSha256 !== "" || asset.baseVersionCode !== 0) {
+      throw new FirmwareSchemaError("full/recovery require empty base SHA and zero base version");
+    }
+    if (typeof asset.fileName !== "string" || asset.fileName.length > 128 || asset.fileName !== assetFileName(asset.kind, input.versionName, asset.baseVersionCode)) {
+      throw new FirmwareSchemaError("asset fileName does not match the canonical naming policy");
+    }
+    const identity = `${asset.kind}:${asset.baseImageSha256}`;
+    if (identities.has(identity) || names.has(asset.fileName)) throw new FirmwareSchemaError("Duplicate asset kind/base or fileName");
+    identities.add(identity);
+    names.add(asset.fileName);
+    sha256(asset.sha256, "asset.sha256");
+    integer(asset.sizeBytes, "asset.sizeBytes", Number.MAX_SAFE_INTEGER, 1);
+    if (typeof asset.r2Verified !== "boolean" || requireVerified && !asset.r2Verified) {
+      throw new FirmwareSchemaError("Every asset must have verified R2 readback");
+    }
+    if (asset.r2Key !== r2KeyFor(input, asset)) throw new FirmwareSchemaError("Unexpected firmware R2 key");
+    let url;
+    try {
+      url = new URL(asset.githubUrl);
+    } catch {
+      throw new FirmwareSchemaError("Invalid GitHub asset URL");
+    }
+    const parts = url.pathname.split("/");
+    const repo = repository ?? `${parts[1]}/${parts[2]}`;
+    if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repo) || asset.githubUrl !== `https://github.com/${repo}/releases/download/${encodeURIComponent(input.releaseTag)}/${encodeURIComponent(asset.fileName)}`) {
+      throw new FirmwareSchemaError("GitHub URL must bind repository, releaseTag and fileName");
+    }
+    return { ...asset };
+  });
+  if (assets.filter((a) => a.kind === "full").length !== 1 || assets.filter((a) => a.kind === "recovery").length !== 1) {
+    throw new FirmwareSchemaError("Formal registration requires exactly one full and one recovery");
+  }
+  assets.sort((a, b) => (a.kind < b.kind ? -1 : a.kind > b.kind ? 1 : 0) || a.baseVersionCode - b.baseVersionCode || (a.fileName < b.fileName ? -1 : a.fileName > b.fileName ? 1 : 0));
+  return { ...input, assets };
+}
+__name(parseFirmwareRegistration, "parseFirmwareRegistration");
+
+// src/firmware_download.ts
+var V2_KEYS = ["tokenVersion", "assetId", "releaseId", "kind", "purpose", "expiresAt", "keyVersion", "signature"];
+var V1_KEYS = ["assetId", "releaseId", "expiresAt", "keyVersion", "signature"];
+function keyFor(env, version) {
+  if (version === env.DOWNLOAD_TOKEN_KEY_VERSION) {
+    if (env.DOWNLOAD_HMAC_KEY_CURRENT) return env.DOWNLOAD_HMAC_KEY_CURRENT;
+    throw backendUnavailable("Firmware signing key is not configured");
+  }
+  if (version === env.DOWNLOAD_TOKEN_PREVIOUS_KEY_VERSION && env.DOWNLOAD_HMAC_KEY_PREVIOUS) {
+    return env.DOWNLOAD_HMAC_KEY_PREVIOUS;
+  }
+  throw new ApiError("TOKEN_INVALID", "Unknown signing key version", 401);
+}
+__name(keyFor, "keyFor");
+function cutover(env) {
+  const value = env.FIRMWARE_V2_CUTOVER_EPOCH;
+  if (!value || !/^(0|[1-9][0-9]*)$/.test(value) || !Number.isSafeInteger(Number(value))) {
+    throw backendUnavailable("Auditable firmware v2 cutover epoch is not configured");
+  }
+  return Number(value);
+}
+__name(cutover, "cutover");
+function firmwareTokenMessage(asset, purpose, expiresAt, keyVersion) {
+  return ["2", "GET", asset.id, asset.release_id, asset.kind, purpose, String(expiresAt), keyVersion].join("\n");
+}
+__name(firmwareTokenMessage, "firmwareTokenMessage");
+async function signFirmwareDownload(env, origin, asset, purpose, now = Math.floor(Date.now() / 1e3)) {
+  cutover(env);
+  if (purpose === "admin-recovery" !== (asset.kind === "recovery")) {
+    throw new ApiError("TOKEN_INVALID", "Asset purpose mismatch", 401);
+  }
+  const url = new URL(origin);
+  if (url.protocol !== "https:" || url.username || url.password) throw backendUnavailable("Firmware download origin must use HTTPS");
+  const expiresAt = now + 300;
+  const keyVersion = env.DOWNLOAD_TOKEN_KEY_VERSION;
+  if (!/^[A-Za-z0-9._-]+$/.test(keyVersion)) throw backendUnavailable("Invalid signing key version");
+  const signature = await signHmacSha256(firmwareTokenMessage(asset, purpose, expiresAt, keyVersion), keyFor(env, keyVersion));
+  const query = new URLSearchParams({
+    tokenVersion: "2",
+    assetId: asset.id,
+    releaseId: asset.release_id,
+    kind: asset.kind,
+    purpose,
+    expiresAt: String(expiresAt),
+    keyVersion,
+    signature
+  });
+  return { downloadUrl: `${url.origin}/api/public/firmware/download?${query}`, expiresAt };
+}
+__name(signFirmwareDownload, "signFirmwareDownload");
+async function verifyFirmwareDownload(request, env) {
+  const url = new URL(request.url);
+  const v2 = url.searchParams.has("tokenVersion");
+  const keys = v2 ? V2_KEYS : V1_KEYS;
+  const invalid = /* @__PURE__ */ __name(() => new ApiError("TOKEN_INVALID", "Invalid firmware download token", 401), "invalid");
+  if (request.method !== "GET" || url.protocol !== "https:") throw invalid();
+  for (const key of url.searchParams.keys()) if (!keys.includes(key)) throw invalid();
+  for (const key of keys) if (url.searchParams.getAll(key).length !== 1 || !url.searchParams.get(key)) throw invalid();
+  const get = /* @__PURE__ */ __name((key) => url.searchParams.get(key), "get");
+  if (!/^(0|[1-9][0-9]*)$/.test(get("expiresAt"))) throw invalid();
+  const expiresAt = Number(get("expiresAt"));
+  const now = Math.floor(Date.now() / 1e3);
+  if (!Number.isSafeInteger(expiresAt) || !/^[A-Za-z0-9_-]{43}$/.test(get("signature"))) throw invalid();
+  for (const key of ["assetId", "releaseId", "keyVersion"]) {
+    if (!/^[A-Za-z0-9._-]+$/.test(get(key))) throw invalid();
+  }
+  let message;
+  let kind;
+  let purpose = "public-ota";
+  if (v2) {
+    if (get("tokenVersion") !== "2" || !["full", "patch", "recovery"].includes(get("kind")) || !["public-ota", "admin-recovery"].includes(get("purpose"))) throw invalid();
+    kind = get("kind");
+    purpose = get("purpose");
+    if (kind === "recovery" !== (purpose === "admin-recovery")) throw invalid();
+    message = firmwareTokenMessage({ id: get("assetId"), release_id: get("releaseId"), kind }, purpose, expiresAt, get("keyVersion"));
+  } else {
+    const end = cutover(env) + 300;
+    if (expiresAt > end) throw invalid();
+    message = ["GET", get("assetId"), get("releaseId"), String(expiresAt), get("keyVersion")].join("\n");
+  }
+  const signature = await signHmacSha256(message, keyFor(env, get("keyVersion")));
+  if (!timingSafeEqual(signature, get("signature"))) throw invalid();
+  if (now >= expiresAt) throw new ApiError("TOKEN_EXPIRED", "Firmware download token expired", 401);
+  if (v2 && expiresAt > now + 300) throw invalid();
+  return { assetId: get("assetId"), releaseId: get("releaseId"), kind, purpose };
+}
+__name(verifyFirmwareDownload, "verifyFirmwareDownload");
+async function verifyFirmwareObject(bucket, asset) {
+  const head = await bucket.head(asset.r2Key);
+  if (!head || head.size !== asset.sizeBytes || head.customMetadata?.sha256 !== asset.sha256 || head.customMetadata?.kind !== asset.kind) throw new Error("R2 metadata mismatch");
+  const object = await bucket.get(asset.r2Key, { onlyIf: { etagMatches: head.etag } });
+  if (!object || !("body" in object) || object.size !== asset.sizeBytes) throw new Error("R2 object changed or missing");
+  const hash = new crypto.DigestStream("SHA-256");
+  let bytes = 0;
+  const counter = new TransformStream({
+    transform(chunk, controller) {
+      bytes += chunk.byteLength;
+      if (bytes > asset.sizeBytes) throw new Error("R2 body exceeds registered size");
+      controller.enqueue(chunk);
+    }
+  });
+  const [, rawDigest] = await Promise.all([object.body.pipeThrough(counter).pipeTo(hash), hash.digest]);
+  const digest = Array.from(new Uint8Array(rawDigest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+  if (bytes !== asset.sizeBytes || digest !== asset.sha256) throw new Error("R2 readback mismatch");
+  return object.httpEtag;
+}
+__name(verifyFirmwareObject, "verifyFirmwareObject");
+async function streamFirmwareObject(request, bucket, asset, requestId) {
+  const etag = asset.r2_etag?.match(/^"([\x21\x23-\x7e\x80-\xff]+)"$/)?.[1];
+  if (!asset.r2_key || !etag) throw backendUnavailable("Firmware asset lacks verified R2 identity");
+  const rawRange = request.headers.get("Range");
+  let offset;
+  if (rawRange !== null) {
+    if (!/^bytes=[0-9]+-$/.test(rawRange)) throw invalidParameter("Only Range: bytes=N- is supported");
+    offset = Number(rawRange.slice(6, -1));
+    if (!Number.isSafeInteger(offset)) throw invalidParameter("Invalid Range boundary");
+    if (offset >= asset.size_bytes) return new Response(null, { status: 416, headers: {
+      "Content-Range": `bytes */${asset.size_bytes}`,
+      "X-Request-Id": requestId,
+      "Cache-Control": "no-store"
+    } });
+    if (request.headers.has("If-Range") && request.headers.get("If-Range") !== asset.r2_etag) offset = void 0;
+  }
+  const object = await bucket.get(asset.r2_key, {
+    onlyIf: { etagMatches: etag },
+    ...offset === void 0 ? {} : { range: { offset } }
+  });
+  if (!object || !("body" in object) || object.size !== asset.size_bytes || object.httpEtag !== asset.r2_etag || object.customMetadata?.sha256 && object.customMetadata.sha256 !== asset.sha256 || object.customMetadata?.kind && object.customMetadata.kind !== asset.kind) {
+    throw backendUnavailable("Firmware R2 identity changed or unavailable");
+  }
+  const headers = new Headers({
+    "Content-Type": asset.kind === "recovery" ? "application/octet-stream" : "application/vnd.e-track.etu",
+    "Content-Length": String(asset.size_bytes - (offset ?? 0)),
+    "Accept-Ranges": "bytes",
+    "ETag": object.httpEtag,
+    "Content-Disposition": `attachment; filename="${asset.file_name.replace(/["\\\x00-\x1f\x7f]/g, "_")}"`,
+    "Cache-Control": "public, max-age=31536000, immutable",
+    "X-Request-Id": requestId,
+    "X-Trace-Asset-Type": "firmware",
+    "X-Trace-Asset-Source": "r2"
+  });
+  if (offset === void 0) headers.set("Content-Digest", contentDigest(asset.sha256));
+  else headers.set("Content-Range", `bytes ${offset}-${asset.size_bytes - 1}/${asset.size_bytes}`);
+  return new Response(object.body, { status: offset === void 0 ? 200 : 206, headers });
+}
+__name(streamFirmwareObject, "streamFirmwareObject");
+
+// ../scripts/firmware-monotonic.mjs
+var FirmwareMonotonicError = class extends Error {
+  static {
+    __name(this, "FirmwareMonotonicError");
+  }
+  constructor(message) {
+    super(message);
+    this.name = "FirmwareMonotonicError";
+    this.code = "RELEASE_CONFLICT";
+  }
+};
+async function verifyMonotonic(db, metadata) {
+  const fail = /* @__PURE__ */ __name((message) => new FirmwareMonotonicError(message), "fail");
+  const unresolved = await db.prepare("SELECT COUNT(*) AS count FROM firmware_channels WHERE app_id=? AND device_model=? AND legacy_current_release_id IS NOT NULL").bind(metadata.appId, metadata.deviceModel).first();
+  if (!unresolved || unresolved.count !== 0) throw fail("Unresolved legacy firmware channel prevents publication");
+  const legacy = await db.prepare("SELECT MAX(version_code) AS version_code FROM firmware_releases_legacy WHERE app_id=? AND device_model=?").bind(metadata.appId, metadata.deviceModel).first();
+  if (!legacy || legacy.version_code !== null && (!Number.isSafeInteger(legacy.version_code) || legacy.version_code >= metadata.versionCode)) {
+    throw fail("Target must exceed legacy firmware versions");
+  }
+  const current = await db.prepare("SELECT version_code,registration_json FROM firmware_releases WHERE app_id=? AND device_model=? ORDER BY version_code DESC LIMIT 1").bind(metadata.appId, metadata.deviceModel).first();
+  const projected = { ...metadata, assets: metadata.assets.map((asset) => ({ ...asset, r2Verified: true })) };
+  if (current && (!Number.isSafeInteger(current.version_code) || current.version_code > metadata.versionCode || current.version_code === metadata.versionCode && current.registration_json !== canonicalJson2(projected))) {
+    throw fail("Target must increase D1 version or exactly replay the same canonical registration");
+  }
+  return { maxVersionCode: current?.version_code ?? null, legacyMaxVersionCode: legacy.version_code, unresolvedLegacyChannels: 0 };
+}
+__name(verifyMonotonic, "verifyMonotonic");
+
+// src/firmware.ts
+var QUERY = [
+  "appId",
+  "deviceModel",
+  "channel",
+  "currentVersionCode",
+  "currentImageSha",
+  "hardwareRevision",
+  "layoutId",
+  "bootVersion",
+  "protocolVersion",
+  "appVersionCode"
+];
+async function firmwareOperation(action) {
+  try {
+    return await action();
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    if (error instanceof FirmwareSchemaError) {
+      throw new ApiError(error.code, error.message, error.code === "FORMAL_RELEASE_REQUIRED" ? 403 : 400);
+    }
+    throw backendUnavailable();
+  }
+}
+__name(firmwareOperation, "firmwareOperation");
+function requireFirmwareJsonHeaders(request) {
+  const acceptsJson = request.headers.get("Accept")?.split(",").some((entry) => {
+    const [mediaType, ...parameters] = entry.split(";").map((value) => value.trim());
+    if (mediaType.toLowerCase() !== "application/json") return false;
+    const quality = parameters.filter((value) => /^q\s*=/i.test(value));
+    if (quality.length === 0) return true;
+    if (quality.length !== 1) return false;
+    const match2 = /^q\s*=\s*(0(?:\.\d{0,3})?|1(?:\.0{0,3})?)$/i.exec(quality[0]);
+    return !!match2 && Number(match2[1]) > 0;
+  });
+  if (new URL(request.url).protocol !== "https:" || request.headers.get("Content-Type")?.split(";")[0].trim().toLowerCase() !== "application/json" || !acceptsJson) {
+    throw invalidParameter("HTTPS, Content-Type and Accept application/json are required");
+  }
+}
+__name(requireFirmwareJsonHeaders, "requireFirmwareJsonHeaders");
+async function readFirmwareJson(request) {
+  const reader = request.body?.getReader();
+  if (!reader) throw invalidParameter("JSON body is required");
+  const chunks = [];
+  let length = 0;
+  try {
+    for (; ; ) {
+      const item = await reader.read();
+      if (item.done) break;
+      length += item.value.byteLength;
+      if (length > 1024 * 1024) throw invalidParameter("Firmware metadata exceeds 1 MiB");
+      chunks.push(item.value);
+    }
+  } finally {
+    await reader.cancel();
+  }
+  const bytes = new Uint8Array(length);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  try {
+    return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+  } catch {
+    throw invalidParameter("Invalid JSON body");
+  }
+}
+__name(readFirmwareJson, "readFirmwareJson");
+function handleFirmwareLatest(request, env, requestId) {
+  return firmwareOperation(async () => {
+    const url = new URL(request.url);
+    const get = /* @__PURE__ */ __name((name) => url.searchParams.get(name), "get");
+    if (get("deviceModel") !== FIRMWARE_MODEL) throw new ApiError("UNKNOWN_DEVICE_MODEL", "Unknown firmware deviceModel", 400);
+    for (const name of url.searchParams.keys()) if (!QUERY.includes(name)) throw invalidParameter("Unsupported latest query parameter");
+    for (const name of QUERY) {
+      if (url.searchParams.getAll(name).length !== 1 || !get(name)) throw invalidParameter(`${name} must occur exactly once`);
+    }
+    if (url.protocol !== "https:" || get("appId") !== "trace" || !["stable", "beta"].includes(get("channel"))) {
+      throw invalidParameter("Invalid firmware appId/channel or non-HTTPS request");
+    }
+    const number = /* @__PURE__ */ __name((name, max) => {
+      const value = get(name);
+      if (!/^[0-9]+$/.test(value) || !Number.isSafeInteger(Number(value)) || Number(value) > max) {
+        throw invalidParameter(`${name} is not a valid decimal integer`);
+      }
+      return Number(value);
+    }, "number");
+    const current = number("currentVersionCode", U32_MAX);
+    const appVersion = number("appVersionCode", APP_VERSION_MAX);
+    const hardware = number("hardwareRevision", 65535);
+    const layout = number("layoutId", 255);
+    const boot = number("bootVersion", 255);
+    const protocol = number("protocolVersion", 255);
+    if (!/^[0-9a-f]{64}$/.test(get("currentImageSha"))) throw invalidParameter("currentImageSha must be a complete lowercase raw SHA-256");
+    const rate = await enforceRateLimit(env, `firmware-latest:${clientIpFrom(request)}:trace:${FIRMWARE_MODEL}:${get("channel")}`);
+    if (!rate.allowed) return json({
+      errorCode: "RATE_LIMITED",
+      message: "Too many firmware checks",
+      requestId,
+      retryAfter: rate.retryAfter
+    }, 429, { "Retry-After": String(rate.retryAfter) });
+    const channel = await env.DB.prepare("SELECT * FROM firmware_channels WHERE app_id=? AND device_model=? AND name=?").bind("trace", FIRMWARE_MODEL, get("channel")).first();
+    const noUpdate2 = /* @__PURE__ */ __name((errorCode = "NO_UPDATE") => json({
+      schemaVersion: 2,
+      requestId,
+      updateAvailable: false,
+      errorCode,
+      ...errorCode === "CHANNEL_STOPPED" ? { maintenanceMessage: channel?.maintenance_message ?? null } : {}
+    }), "noUpdate");
+    if (channel?.legacy_current_release_id) throw backendUnavailable("Channel references unverified legacy firmware");
+    if (channel?.disable_latest === 1) return noUpdate2("CHANNEL_STOPPED");
+    if (!channel?.current_release_id) return noUpdate2();
+    const release = await env.DB.prepare("SELECT * FROM firmware_releases WHERE id=?").bind(channel.current_release_id).first();
+    if (!release || release.app_id !== channel.app_id || release.device_model !== channel.device_model || release.state !== "ready" || release.archived !== 0) throw backendUnavailable("Invalid firmware channel target");
+    if (release.version_code <= current) return noUpdate2();
+    if (appVersion < release.min_app_version_code) {
+      throw new ApiError("CLIENT_TOO_OLD", "App update required", 426, { minAppVersionCode: release.min_app_version_code });
+    }
+    const compatibility = { releaseId: release.id };
+    if (hardware !== release.hardware_rev) throw new ApiError(
+      "HARDWARE_INCOMPATIBLE",
+      "Hardware revision mismatch",
+      409,
+      { ...compatibility, requiredHardwareRevision: release.hardware_rev, hardwareRevision: hardware }
+    );
+    if (layout !== release.layout_id) throw new ApiError(
+      "LAYOUT_INCOMPATIBLE",
+      "Layout mismatch",
+      409,
+      { ...compatibility, requiredLayoutId: release.layout_id, layoutId: layout }
+    );
+    if (boot < release.min_boot_version) throw new ApiError(
+      "BOOT_TOO_OLD",
+      "Boot update required",
+      409,
+      { ...compatibility, minBootVersion: release.min_boot_version, bootVersion: boot }
+    );
+    if (protocol < release.min_protocol_version || protocol !== 1) throw new ApiError(
+      "PROTOCOL_UNSUPPORTED",
+      "Unsupported BLE protocol",
+      409,
+      { ...compatibility, minProtocolVersion: release.min_protocol_version, protocolVersion: protocol }
+    );
+    const assets = await firmwareAssets(env.DB, release.id);
+    const full = requireFirmwareFull(release, assets);
+    const patches = assets.filter((a) => a.kind === "patch" && a.base_image_sha256 === get("currentImageSha"));
+    if (patches.length > 1) throw backendUnavailable("Ambiguous patch base");
+    const asset = patches.length === 1 && usableFirmwareAsset(patches[0]) ? patches[0] : full;
+    const signed = await signFirmwareDownload(env, url.origin, asset, "public-ota");
+    return json({
+      schemaVersion: 2,
+      requestId,
+      updateAvailable: true,
+      appId: release.app_id,
+      deviceModel: release.device_model,
+      channel: channel.name,
+      releaseId: release.id,
+      versionName: release.version_name,
+      versionCode: release.version_code,
+      releaseTag: release.release_tag,
+      releaseNotes: release.release_notes,
+      targetImageSha256: release.target_image_sha256,
+      targetHardware: release.target_hardware,
+      transport: release.transport,
+      minAppVersionCode: release.min_app_version_code,
+      asset: {
+        assetId: asset.id,
+        kind: asset.kind,
+        fileName: asset.file_name,
+        sha256: asset.sha256,
+        sizeBytes: asset.size_bytes,
+        baseVersionCode: asset.base_vcode,
+        baseImageSha256: asset.kind === "patch" ? asset.base_image_sha256 : null,
+        ...signed
+      }
+    });
+  });
+}
+__name(handleFirmwareLatest, "handleFirmwareLatest");
+async function firmwareAssets(db, releaseId) {
+  return (await db.prepare("SELECT * FROM firmware_release_assets WHERE release_id=? ORDER BY kind,base_vcode,file_name").bind(releaseId).all()).results;
+}
+__name(firmwareAssets, "firmwareAssets");
+function usableFirmwareAsset(asset) {
+  return asset.r2_state === "available" && !!asset.r2_key && !!asset.r2_etag && /^[0-9a-f]{64}$/.test(asset.sha256) && Number.isSafeInteger(asset.size_bytes) && asset.size_bytes > 0;
+}
+__name(usableFirmwareAsset, "usableFirmwareAsset");
+function requireFirmwareFull(release, assets) {
+  const full = assets.filter((a) => a.kind === "full");
+  if (!/^[0-9a-f]{64}$/.test(release.target_image_sha256) || full.length !== 1 || !usableFirmwareAsset(full[0]) || full[0].base_vcode !== 0 || full[0].base_image_sha256 !== "" || assets.some((a) => !["full", "patch", "recovery"].includes(a.kind) || a.kind === "patch" && (!/^[0-9a-f]{64}$/.test(a.base_image_sha256) || a.base_vcode <= 0 || a.base_vcode >= release.version_code))) {
+    throw backendUnavailable("Firmware release lacks a complete verified full fallback");
+  }
+  return full[0];
+}
+__name(requireFirmwareFull, "requireFirmwareFull");
+function handleFirmwareDownload(request, env, requestId) {
+  return firmwareOperation(async () => {
+    const token = await verifyFirmwareDownload(request, env);
+    const asset = await env.DB.prepare("SELECT * FROM firmware_release_assets WHERE id=? AND release_id=?").bind(token.assetId, token.releaseId).first();
+    if (!asset) throw new ApiError("ASSET_DISABLED", "Firmware asset unavailable", 410);
+    if (token.kind && token.kind !== asset.kind || token.purpose === "admin-recovery" !== (asset.kind === "recovery")) {
+      throw new ApiError("TOKEN_INVALID", "Firmware token asset/purpose mismatch", 401);
+    }
+    const release = await env.DB.prepare("SELECT * FROM firmware_releases WHERE id=?").bind(asset.release_id).first();
+    if (!release || release.state !== "ready") throw new ApiError("ASSET_DISABLED", "Firmware release unavailable", 410);
+    if (release.archived || ["archived", "r2_deleted"].includes(asset.r2_state)) throw new ApiError("ASSET_ARCHIVED", "Firmware asset archived", 409);
+    const visibility = await env.DB.prepare(`SELECT
+      (SELECT disable_all_downloads FROM app_config WHERE app_id=?) AS stopped,
+      (SELECT count(*) FROM firmware_channels WHERE current_release_id=?) AS published,
+      (SELECT count(*) FROM firmware_channels WHERE current_release_id=? AND disable_downloads=1) AS channel_stopped`).bind(release.app_id, release.id, release.id).first();
+    if (visibility?.stopped || token.purpose === "public-ota" && visibility?.channel_stopped) {
+      throw new ApiError("CHANNEL_STOPPED", "Firmware downloads are stopped", 503);
+    }
+    if (token.purpose === "public-ota" && !visibility?.published) throw new ApiError("ASSET_DISABLED", "Firmware release withdrawn", 410);
+    if (!usableFirmwareAsset(asset)) throw backendUnavailable("Firmware R2 asset unavailable");
+    return streamFirmwareObject(request, env.RELEASES_BUCKET, asset, requestId);
+  });
+}
+__name(handleFirmwareDownload, "handleFirmwareDownload");
+async function requireFirmwareCiToken(request, env) {
+  const authorization = request.headers.get("Authorization");
+  const token = authorization && /^Bearer [^\s,]+$/.test(authorization) ? authorization.slice(7) : null;
+  if (!await verifyBearerToken(token, env.DEPLOY_TOKEN_SHA256)) throw new ApiError("TOKEN_INVALID", "Invalid CI token", 401);
+}
+__name(requireFirmwareCiToken, "requireFirmwareCiToken");
+function handleFirmwarePreflight(request, env, requestId) {
+  return firmwareOperation(async () => {
+    await requireFirmwareCiToken(request, env);
+    requireFirmwareJsonHeaders(request);
+    const value = await readFirmwareJson(request);
+    if (!value || typeof value !== "object" || Array.isArray(value)) throw invalidParameter("Invalid preflight envelope");
+    const envelope = value;
+    if (Object.keys(envelope).sort().join(",") !== "environment,metadata,schemaVersion" || envelope.schemaVersion !== 1) {
+      throw invalidParameter("Invalid preflight fields");
+    }
+    if (!["staging", "prod"].includes(env.ENVIRONMENT) || envelope.environment !== env.ENVIRONMENT) {
+      throw new ApiError("RELEASE_CONFLICT", "Preflight environment mismatch", 409);
+    }
+    const input = parseFirmwareRegistration(envelope.metadata, `${env.GITHUB_OWNER}/${env.GITHUB_REPO}`, false);
+    let summary;
+    try {
+      summary = await verifyMonotonic(env.DB, input);
+    } catch (error) {
+      if (error instanceof FirmwareMonotonicError) {
+        throw new ApiError("RELEASE_CONFLICT", error.message, 409);
+      }
+      throw error;
+    }
+    const projected = { ...input, assets: input.assets.map((asset) => ({ ...asset, r2Verified: true })) };
+    return json({
+      ok: true,
+      schemaVersion: 1,
+      requestId,
+      environment: env.ENVIRONMENT,
+      metadataSha256: await sha256Hex(canonicalJson2(projected) + "\n"),
+      ...summary
+    });
+  });
+}
+__name(handleFirmwarePreflight, "handleFirmwarePreflight");
+function handleRegisterFirmwareRelease(request, env, requestId) {
+  return firmwareOperation(async () => {
+    await requireFirmwareCiToken(request, env);
+    requireFirmwareJsonHeaders(request);
+    const input = parseFirmwareRegistration(await readFirmwareJson(request), `${env.GITHUB_OWNER}/${env.GITHUB_REPO}`);
+    const canonical = canonicalJson2(input);
+    const existing = /* @__PURE__ */ __name(() => env.DB.prepare("SELECT * FROM firmware_releases WHERE app_id=? AND device_model=? AND release_tag=?").bind(input.appId, input.deviceModel, input.releaseTag).first(), "existing");
+    const replay = /* @__PURE__ */ __name(async (row) => {
+      if (row.registration_json !== canonical) throw new ApiError("RELEASE_CONFLICT", "Firmware metadata conflicts with registered identity", 409);
+      const assets = await firmwareAssets(env.DB, row.id);
+      if (row.state !== "ready" || row.archived || assets.length !== input.assets.length || assets.some((a) => !usableFirmwareAsset(a))) {
+        throw new ApiError("RELEASE_INCOMPLETE", "Registered firmware is no longer ready/available", 409);
+      }
+      return json({ ok: true, requestId, releaseId: row.id, state: "ready", idempotent: true, assetsRegistered: assets.length });
+    }, "replay");
+    const previous = await existing();
+    if (previous && previous.registration_json !== canonical) return replay(previous);
+    const verifiedEtags = [];
+    for (const asset of input.assets) verifiedEtags.push(await verifyFirmwareObject(env.RELEASES_BUCKET, asset));
+    if (previous) return replay(previous);
+    const legacy = await env.DB.prepare(`SELECT id FROM firmware_releases_legacy
+      WHERE app_id=? AND device_model=? AND (release_tag=? OR version_code=? OR run_id=?)`).bind(input.appId, input.deviceModel, input.releaseTag, input.versionCode, input.runId).first();
+    if (legacy) throw new ApiError("RELEASE_CONFLICT", "Legacy firmware requires approved backfill", 409);
+    const releaseId = `fw_${await sha256Hex(`${input.appId}
+${input.deviceModel}
+${input.releaseTag}`)}`;
+    const statements = [
+      env.DB.prepare("INSERT OR IGNORE INTO apps(id,name) VALUES (?,?)").bind(input.appId, input.appId),
+      env.DB.prepare("INSERT OR IGNORE INTO app_config(app_id) VALUES (?)").bind(input.appId),
+      firmwareReleaseInsert(env.DB, input, releaseId, canonical)
+    ];
+    for (let index = 0; index < input.assets.length; index++) {
+      const asset = input.assets[index];
+      const id = `fw_asset_${await sha256Hex(`${releaseId}
+${asset.kind}
+${asset.baseImageSha256}`)}`;
+      statements.push(env.DB.prepare(`INSERT INTO firmware_release_assets
+        (id,release_id,kind,file_name,sha256,size_bytes,r2_key,r2_etag,r2_state,github_url,base_image_sha256,base_vcode)
+        VALUES (?,?,?,?,?,?,?,?,'available',?,?,?)`).bind(
+        id,
+        releaseId,
+        asset.kind,
+        asset.fileName,
+        asset.sha256,
+        asset.sizeBytes,
+        asset.r2Key,
+        verifiedEtags[index],
+        asset.githubUrl,
+        asset.baseImageSha256,
+        asset.baseVersionCode
+      ));
+    }
+    statements.push(env.DB.prepare("UPDATE firmware_releases SET state='ready',updated_at=datetime('now') WHERE id=? AND state='draft'").bind(releaseId));
+    for (const channel of ["stable", "beta"]) statements.push(env.DB.prepare(`INSERT OR IGNORE INTO firmware_channels
+      (id,app_id,device_model,name) VALUES (?,?,?,?)`).bind(`fw_ch_${input.appId}_${input.deviceModel}_${channel}`, input.appId, input.deviceModel, channel));
+    statements.push(env.DB.prepare(`INSERT INTO audit_logs(id,app_id,actor,actor_type,action,target_type,target_id,request_id,after_json)
+      VALUES (?,?,'github-actions','ci','register_firmware_release','firmware_release',?,?,?)`).bind(crypto.randomUUID(), input.appId, releaseId, requestId, canonicalJson2({ releaseId, state: "ready", assetsRegistered: input.assets.length })));
+    try {
+      await env.DB.batch(statements);
+    } catch (error) {
+      const concurrent = await existing();
+      if (concurrent) return replay(concurrent);
+      const conflict = await env.DB.prepare("SELECT id FROM firmware_releases WHERE app_id=? AND device_model=? AND (version_code=? OR run_id=?)").bind(input.appId, input.deviceModel, input.versionCode, input.runId).first();
+      if (conflict) throw new ApiError("RELEASE_CONFLICT", "Firmware version/run already registered", 409);
+      throw error;
+    }
+    return json({ ok: true, requestId, releaseId, state: "ready", idempotent: false, assetsRegistered: input.assets.length }, 201);
+  });
+}
+__name(handleRegisterFirmwareRelease, "handleRegisterFirmwareRelease");
+function firmwareReleaseInsert(db, input, id, canonical) {
+  return db.prepare(`INSERT INTO firmware_releases (id,app_id,device_model,version_name,version_code,release_tag,
+    commit_sha,run_id,release_notes,target_image_sha256,hardware_rev,layout_id,min_boot_version,min_protocol_version,
+    target_hardware,transport,min_app_version_code,registration_json) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).bind(
+    id,
+    input.appId,
+    input.deviceModel,
+    input.versionName,
+    input.versionCode,
+    input.releaseTag,
+    input.commitSha,
+    input.runId,
+    input.releaseNotes,
+    input.targetImageSha256,
+    input.hardwareRevision,
+    input.layoutId,
+    input.minBootVersion,
+    input.minProtocolVersion,
+    input.targetHardware,
+    input.transport,
+    input.minAppVersionCode,
+    canonical
+  );
+}
+__name(firmwareReleaseInsert, "firmwareReleaseInsert");
+
+// src/latest.ts
+var LATEST_QUERY_PARAMS = /* @__PURE__ */ new Set([
+  "appId",
+  "platform",
+  "channel",
+  "versionCode",
+  "schemaVersion",
+  "capabilities"
+]);
+async function handleLatest(request, env, requestId) {
+  const url = new URL(request.url);
+  for (const key of url.searchParams.keys()) {
+    if (!LATEST_QUERY_PARAMS.has(key)) {
+      throw invalidParameter(`Unsupported query parameter: ${key}`);
+    }
+  }
+  const appId = url.searchParams.get("appId") ?? env.APP_ID;
+  const platform = parsePlatform(url.searchParams.get("platform") ?? "android");
+  const channel = parseChannel(url.searchParams.get("channel") ?? "stable");
+  const versionCode = parseVersionCode(url.searchParams.get("versionCode"));
+  const schemaVersion = parseSchemaVersion(url.searchParams.get("schemaVersion"));
+  const capabilities = parseCapabilities(url.searchParams.get("capabilities"));
+  const wantsV2 = schemaVersion >= 2 && capabilities.length > 0;
+  const rate = await enforceRateLimit(
+    env,
+    `latest:${clientIpFrom(request)}:${appId}:${platform}:${channel}`
+  );
+  if (!rate.allowed) {
+    return json(
+      { errorCode: "RATE_LIMITED", message: "Too many update checks", retryAfter: rate.retryAfter },
+      429,
+      { "Retry-After": String(rate.retryAfter) }
+    );
+  }
+  try {
+    const state = await loadLatestState(env, appId, platform, channel);
+    if (!state.channel || !state.release) {
+      return noUpdate();
+    }
+    if (state.config.disable_all_latest === 1 || state.channel.disable_latest === 1) {
+      return json({
+        errorCode: "CHANNEL_STOPPED",
+        updateAvailable: false,
+        maintenanceMessage: state.channel.maintenance_message ?? state.config.maintenance_message
+      });
+    }
+    if (state.release.state === "disabled") {
+      return noUpdate();
+    }
+    if (versionCode >= state.release.version_code) {
+      return noUpdate();
+    }
+    if (state.release.min_client_version_code > versionCode) {
+      return json(
+        {
+          errorCode: "CLIENT_TOO_OLD",
+          message: "Client must install a compatible version first",
+          minClientVersionCode: state.release.min_client_version_code
+        },
+        426
+      );
+    }
+    const renderableState = {
+      config: state.config,
+      channel: state.channel,
+      release: state.release,
+      assets: state.assets,
+      patches: state.patches
+    };
+    const origin = new URL(request.url).origin;
+    const cacheKey = [
+      "manifest",
+      encodeURIComponent(origin),
+      env.DOWNLOAD_TOKEN_KEY_VERSION,
+      appId,
+      platform,
+      channel,
+      String(renderableState.channel.revision)
+    ].join(":");
+    const cached = await env.MANIFEST_CACHE.get(cacheKey, "json");
+    const envelope = cached && isManifestEnvelope(cached) ? cached : await renderAndCacheEnvelope(env, origin, renderableState, cacheKey);
+    return json(wantsV2 ? envelope.v2 : envelope.v1);
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    const message = error instanceof Error ? error.message : String(error);
+    writeLog("error", "latest_failed", { requestId, message });
+    throw backendUnavailable();
+  }
+}
+__name(handleLatest, "handleLatest");
+async function renderAndCacheEnvelope(env, origin, state, cacheKey) {
+  const envelope = await renderManifestEnvelope(env, origin, state);
+  const ttl = Number(env.MANIFEST_CACHE_TTL_SECONDS || "60");
+  await env.MANIFEST_CACHE.put(cacheKey, JSON.stringify(envelope), { expirationTtl: ttl });
+  return envelope;
+}
+__name(renderAndCacheEnvelope, "renderAndCacheEnvelope");
+async function renderManifestEnvelope(env, origin, state) {
+  const apk = state.assets.find((asset) => asset.asset_type === "apk");
+  if (state.release.platform === "android" && !apk) {
+    throw new ApiError("BACKEND_UNAVAILABLE", "Android APK asset is missing", 503);
+  }
+  const fullUrls = apk ? await signedDownloadUrls(env, origin, "GET", apk.id, state.release.id) : void 0;
+  const securityPayload = parseSecurityPayload(state.release.security_payload_json);
+  const payloadSignature = parseJsonObject(state.release.payload_signature_json);
+  const capabilities = parseJsonArray(state.release.capabilities_json);
+  const renderedPatches = [];
+  for (const patch of state.patches) {
+    const patchUrls = await signedDownloadUrls(env, origin, "GET", patch.asset_id, state.release.id);
+    renderedPatches.push({
+      fromVersionCode: patch.from_version_code,
+      toVersionCode: state.release.version_code,
+      assetName: patch.file_name,
+      algorithm: patch.patch_format,
+      sha256: patch.patch_sha256,
+      size: patch.patch_size_bytes,
+      oldSha256: patch.old_sha256,
+      newSha256: patch.output_sha256,
+      downloadUrl: patchUrls.downloadUrl,
+      fallbackUrl: patchUrls.fallbackUrl
+    });
+  }
+  const base = {
+    updateAvailable: true,
+    platform: state.release.platform,
+    versionName: state.release.version_name,
+    versionCode: state.release.version_code,
+    releaseTag: state.release.release_tag,
+    apkAssetName: securityPayload.apkAssetName,
+    apkSha256: securityPayload.apkSha256,
+    apkSize: securityPayload.apkSize,
+    fullDownloadUrl: fullUrls?.downloadUrl,
+    fullFallbackUrl: fullUrls?.fallbackUrl,
+    patches: renderedPatches
+  };
+  return {
+    v1: {
+      schemaVersion: 1,
+      ...base
+    },
+    v2: {
+      schemaVersion: 2,
+      appId: state.release.app_id,
+      channel: state.channel.name,
+      releaseId: state.release.id,
+      releaseNotes: state.release.release_notes,
+      minClientVersionCode: state.release.min_client_version_code,
+      capabilities,
+      payloadSignature,
+      assets: securityPayload.assetHashes,
+      ...base
+    }
+  };
+}
+__name(renderManifestEnvelope, "renderManifestEnvelope");
+async function loadLatestState(env, appId, platform, channelName) {
+  const config = await env.DB.prepare("SELECT * FROM app_config WHERE app_id = ?").bind(appId).first() ?? defaultConfig(appId);
+  const channel = await env.DB.prepare(
+    "SELECT * FROM channels WHERE app_id = ? AND platform = ? AND name = ? LIMIT 1"
+  ).bind(appId, platform, channelName).first();
+  if (!channel?.current_release_id) {
+    return { config, channel, release: null, assets: [], patches: [] };
+  }
+  const release = await env.DB.prepare("SELECT * FROM releases WHERE id = ? LIMIT 1").bind(channel.current_release_id).first();
+  if (!release) {
+    return { config, channel, release: null, assets: [], patches: [] };
+  }
+  const assets = await env.DB.prepare(
+    "SELECT * FROM release_assets WHERE release_id = ? AND disabled = 0 ORDER BY asset_type, file_name"
+  ).bind(release.id).all();
+  const patches = await env.DB.prepare(
+    `
+      SELECT p.*, a.file_name
+      FROM patches p
+      JOIN release_assets a ON a.id = p.asset_id
+      WHERE p.to_release_id = ? AND p.disabled = 0 AND a.disabled = 0
+      ORDER BY
+        p.from_version_code DESC,
+        p.old_sha256 ASC,
+        CASE p.patch_format WHEN 'tracepatch' THEN 0 ELSE 1 END,
+        a.file_name ASC
+    `
+  ).bind(release.id).all();
+  return {
+    config,
+    channel,
+    release,
+    assets: assets.results,
+    patches: patches.results
+  };
+}
+__name(loadLatestState, "loadLatestState");
+function defaultConfig(appId) {
+  return {
+    app_id: appId,
+    default_channel: "stable",
+    min_supported_client_version_code: 0,
+    emergency_manifest_url: null,
+    disable_all_latest: 0,
+    disable_all_downloads: 0,
+    maintenance_message: null
+  };
+}
+__name(defaultConfig, "defaultConfig");
+function parseSecurityPayload(value) {
+  const parsed = JSON.parse(value);
+  if (!parsed || typeof parsed !== "object") {
+    throw new ApiError("BACKEND_UNAVAILABLE", "Security payload is invalid", 503);
+  }
+  return parsed;
+}
+__name(parseSecurityPayload, "parseSecurityPayload");
+function parseVersionCode(value) {
+  if (!value) return 0;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 0) {
+    throw invalidParameter("versionCode must be a non-negative integer");
+  }
+  return parsed;
+}
+__name(parseVersionCode, "parseVersionCode");
+function parseSchemaVersion(value) {
+  if (!value) return 1;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    throw invalidParameter("schemaVersion must be a positive integer");
+  }
+  return parsed;
+}
+__name(parseSchemaVersion, "parseSchemaVersion");
+function noUpdate() {
+  return json({ errorCode: "NO_UPDATE", updateAvailable: false });
+}
+__name(noUpdate, "noUpdate");
+function isManifestEnvelope(value) {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value;
+  return typeof candidate.v1 === "object" && typeof candidate.v2 === "object";
+}
+__name(isManifestEnvelope, "isManifestEnvelope");
+
+// src/firmware_admin.ts
+function tombstoneInsert(db, now, actor, key) {
+  const sql = `INSERT INTO firmware_admin_idempotency_tombstones
+    (actor_canonical,idempotency_key,fingerprint,action,release_id,expired_at,tombstoned_at)
+    SELECT actor_canonical,idempotency_key,fingerprint,action,release_id,retained_until,?
+    FROM firmware_admin_idempotency WHERE state='completed' AND retained_until<=?
+    ${actor === void 0 ? "" : "AND actor_canonical=? AND idempotency_key=?"}
+    ON CONFLICT(actor_canonical,idempotency_key) DO NOTHING`;
+  return actor === void 0 ? db.prepare(sql).bind(now, now) : db.prepare(sql).bind(now, now, actor, key);
+}
+__name(tombstoneInsert, "tombstoneInsert");
+async function cleanupFirmwareIdempotency(db, now = Math.floor(Date.now() / 1e3)) {
+  const results = await db.batch([tombstoneInsert(db, now), db.prepare(
+    "DELETE FROM firmware_admin_idempotency WHERE state='completed' AND retained_until<=?"
+  ).bind(now)]);
+  return results[1].meta.changes;
+}
+__name(cleanupFirmwareIdempotency, "cleanupFirmwareIdempotency");
+
+// src/index.ts
+var app = new Hono2();
+app.use("*", async (c, next) => {
+  const requestId = requestIdFrom(c.req.raw);
+  c.set("requestId", requestId);
+  try {
+    await next();
+  } finally {
+    c.res = withRequestId(c.res, requestId);
+  }
+});
+app.get(
+  "/healthz",
+  (c) => json({
+    ok: true,
+    service: "trace-update-service",
+    environment: c.env.ENVIRONMENT
+  })
+);
+app.get(
+  "/api/public/latest",
+  async (c) => handleLatest(c.req.raw, c.env, c.get("requestId"))
+);
+app.get(
+  "/api/public/announcements",
+  async (c) => handleAnnouncements(c.req.raw, c.env, c.get("requestId"))
+);
+app.get(
+  "/api/public/firmware/latest",
+  async (c) => handleFirmwareLatest(c.req.raw, c.env, c.get("requestId"))
+);
+app.get(
+  "/api/public/download",
+  async (c) => handleDownload(c.req.raw, c.env, c.get("requestId"), "primary")
+);
+app.get(
+  "/api/public/firmware/download",
+  async (c) => handleFirmwareDownload(c.req.raw, c.env, c.get("requestId"))
+);
+app.get(
+  "/api/public/github-fallback",
+  async (c) => handleDownload(c.req.raw, c.env, c.get("requestId"), "github-fallback")
+);
+app.post(
+  "/api/ci/releases",
+  async (c) => handleRegisterRelease(c.req.raw, c.env, c.get("requestId"))
+);
+app.post(
+  "/api/ci/firmware/releases",
+  async (c) => handleRegisterFirmwareRelease(c.req.raw, c.env, c.get("requestId"))
+);
+app.post(
+  "/api/ci/firmware/preflight",
+  async (c) => handleFirmwarePreflight(c.req.raw, c.env, c.get("requestId"))
+);
+app.all("/api/admin/*", () => {
+  throw new ApiError(
+    "BACKEND_UNAVAILABLE",
+    "Direct Worker admin mutations are disabled; use the Access-protected Pages facade",
+    503
+  );
+});
+app.notFound(() => json({ errorCode: "NOT_FOUND", message: "Not found" }, 404));
+app.onError((error, c) => errorJson(error, c.get("requestId") ?? crypto.randomUUID()));
+var index_default = {
+  fetch: app.fetch,
+  async scheduled(_event, env) {
+    await cleanupFirmwareIdempotency(env.DB);
+  }
+};
+export {
+  RateLimiter,
+  index_default as default
+};
+//# sourceMappingURL=index.js.map
+
+--2524ef09bc653902fe2001576200a4bbe1f3e5181655b48cbae0cc480cef--

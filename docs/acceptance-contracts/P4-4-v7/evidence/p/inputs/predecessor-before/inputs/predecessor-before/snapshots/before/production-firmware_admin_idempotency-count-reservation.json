@@ -1,0 +1,12 @@
+{
+  "method": "POST",
+  "origin": "https://api.cloudflare.com",
+  "path": "/accounts/[ACCOUNT]/d1/database/1cd5db26-6bbd-4595-abef-72ff51ecdaf3/query",
+  "started": "2026-10-19T11:29:31.987Z",
+  "request": {
+    "path": "snapshots/before/production-firmware_admin_idempotency-count.request.json",
+    "size_bytes": 70,
+    "sha256": "665d9222ff1c5179c7b21417dad34f968175535b04778fd93e3c9ba39c3024e2"
+  },
+  "note": "Reserved before request; a lost response is not permission to replay a mutation."
+}

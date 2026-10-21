@@ -1,0 +1,13 @@
+{
+  "schema": "p44-request-retry-reservation-v1",
+  "attempt": 2,
+  "method": "GET",
+  "path": "/repos/Eitan-S-23/E-Track/actions/runs/39351100037",
+  "started": "2026-10-20T01:02:30.455Z",
+  "first_failure": {
+    "path": "run-b/waiting-2-request-failure-1.json",
+    "size_bytes": 402,
+    "sha256": "293544de2bd94532caf66389beaf1d168f4847293d1edac7dd3bbb3a4201e757"
+  },
+  "delay_ms": 500
+}

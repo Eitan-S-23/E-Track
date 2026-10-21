@@ -1,0 +1,23 @@
+{
+  "method": "GET",
+  "path": "/e-track-firmware-production-releases/?list-type=2&max-keys=1000",
+  "started": "2026-10-19T19:42:03.518Z",
+  "request_attempts": 1,
+  "request_failures": [],
+  "status": 403,
+  "response_headers": {
+    "date": "Mon, 19 Oct 2026 19:42:06 GMT",
+    "content-type": "application/xml",
+    "content-length": "110",
+    "connection": "keep-alive",
+    "server": "cloudflare",
+    "cf-ray": "a4d2439ce816deb6-NRT"
+  },
+  "body": {
+    "path": "negatives/staging-s3-to-production.body",
+    "size_bytes": 110,
+    "sha256": "d9228b355c91a1939be25f83f7d6acc1f39db8dfa5c37643fb710934f4e5cd40"
+  },
+  "completed": true,
+  "ended": "2026-10-19T19:42:07.432Z"
+}

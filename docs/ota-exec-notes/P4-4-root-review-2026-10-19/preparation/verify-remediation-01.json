@@ -1,0 +1,153 @@
+{
+  "startedAt": "2026-10-18T23:11:27.183Z",
+  "kind": "INDEPENDENT_OFFLINE_REMEDIATION_REVIEW",
+  "sourceCommit": "b56534d7b6c993c0795010d0404fb8a81f7eeb9d",
+  "node": "v24.13.0",
+  "realNetwork": false,
+  "formalAcceptance": "NOT_RUN",
+  "dataSource": "Fixed read-only staging D1 preparation snapshot and unchanged historical storage fixture",
+  "sqlite": "Independent in-memory three-table predicate harness, not a remote Worker or full migration campaign",
+  "qualification": [
+    {
+      "name": "empty-control",
+      "history": false,
+      "file": "current.json",
+      "requests": 2,
+      "selects": 6,
+      "connects": 1,
+      "reads": 3,
+      "puts": 0,
+      "ok": true,
+      "preflightInput": {
+        "path": "current.json",
+        "sha256": "fe435e1a0bc6afea344566846b1a63e8de39ee9335a98a874e97fbcc82b543a4",
+        "sourceCommit": "b56534d7b6c993c0795010d0404fb8a81f7eeb9d",
+        "releaseTag": "mcu-e-track-at32f435-v3.2.8",
+        "versionCode": 30208,
+        "commitSha": "b9d7d18c76e6495fbebf6758df6e4427e79e97b5",
+        "runId": "38946949709"
+      }
+    },
+    {
+      "name": "registered-30208",
+      "history": true,
+      "file": "current.json",
+      "requests": 2,
+      "selects": 6,
+      "connects": 1,
+      "reads": 3,
+      "puts": 0,
+      "ok": true,
+      "preflightInput": {
+        "path": "current.json",
+        "sha256": "fe435e1a0bc6afea344566846b1a63e8de39ee9335a98a874e97fbcc82b543a4",
+        "sourceCommit": "b56534d7b6c993c0795010d0404fb8a81f7eeb9d",
+        "releaseTag": "mcu-e-track-at32f435-v3.2.8",
+        "versionCode": 30208,
+        "commitSha": "b9d7d18c76e6495fbebf6758df6e4427e79e97b5",
+        "runId": "38946949709"
+      }
+    },
+    {
+      "name": "stale.json",
+      "history": true,
+      "file": "stale.json",
+      "requests": 1,
+      "selects": 3,
+      "connects": 0,
+      "reads": 0,
+      "puts": 0,
+      "errorCode": "RELEASE_CONFLICT",
+      "message": "Preflight rejected: HTTP 409"
+    },
+    {
+      "name": "conflicting.json",
+      "history": true,
+      "file": "conflicting.json",
+      "requests": 1,
+      "selects": 3,
+      "connects": 0,
+      "reads": 0,
+      "puts": 0,
+      "errorCode": "RELEASE_CONFLICT",
+      "message": "Preflight rejected: HTTP 409"
+    },
+    {
+      "name": "raw-hash-mismatch",
+      "history": true,
+      "file": "current.json",
+      "requests": 0,
+      "selects": 0,
+      "connects": 0,
+      "reads": 0,
+      "puts": 0,
+      "errorCode": "INVALID_PARAMETER",
+      "message": "Preflight metadata does not match its reviewed raw SHA-256"
+    }
+  ],
+  "streams": [
+    {
+      "mode": "valid",
+      "ok": true
+    },
+    {
+      "mode": "empty-failure",
+      "errorCode": "R2_VERIFY_FAILED",
+      "message": "R2 readback interrupted before verification completed"
+    },
+    {
+      "mode": "partial-failure",
+      "errorCode": "R2_VERIFY_FAILED",
+      "message": "R2 readback interrupted before verification completed"
+    },
+    {
+      "mode": "abort",
+      "errorCode": "R2_VERIFY_FAILED",
+      "message": "R2 readback interrupted before verification completed"
+    },
+    {
+      "mode": "different-bytes",
+      "errorCode": "R2_OBJECT_CONFLICT",
+      "message": "Existing R2 object has different byte identity"
+    }
+  ],
+  "inputs": [
+    {
+      "file": "docs/ota-exec-notes/P4-1-r2-registration-qualification-2026-10-15/operations/verified-metadata.json",
+      "sha256": "c963239dadf175bc097bc2d1329f9dba41d95c2380dc3ce276b81411de53efd6",
+      "bytes": 2026
+    },
+    {
+      "file": "current.json",
+      "sha256": "fe435e1a0bc6afea344566846b1a63e8de39ee9335a98a874e97fbcc82b543a4",
+      "bytes": 2046
+    },
+    {
+      "file": "stale.json",
+      "sha256": "c963239dadf175bc097bc2d1329f9dba41d95c2380dc3ce276b81411de53efd6",
+      "bytes": 2026
+    },
+    {
+      "file": "conflicting.json",
+      "sha256": "774499c7f1ac7ba39def047670757b3c7a9bde869c27532c9ae2cb5b975cd75b",
+      "bytes": 1978
+    },
+    {
+      "file": "docs/ota-exec-notes/P4-1-r2-registration-qualification-2026-10-15/fixture/e-track-at32f435-v2.8.1-full.etu",
+      "sha256": "cb3471b7790c9628bb183da07c3fc5d866135537b9412cbbe33843f50bf47799",
+      "bytes": 202
+    },
+    {
+      "file": "docs/ota-exec-notes/P4-1-r2-registration-qualification-2026-10-15/fixture/e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu",
+      "sha256": "8a825bb74ec5fdccba743d3153db97c747e188ca592355400088af24a6273c67",
+      "bytes": 208
+    },
+    {
+      "file": "docs/ota-exec-notes/P4-1-r2-registration-qualification-2026-10-15/fixture/recovery-v2.8.1.bin",
+      "sha256": "0171c47db39f84b0e9af139f3265847e403f7597cc3df5fa430ef6ac0525964c",
+      "bytes": 8200
+    }
+  ],
+  "pass": true,
+  "endedAt": "2026-10-18T23:11:33.014Z"
+}

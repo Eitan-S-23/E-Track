@@ -1,0 +1,98 @@
+{
+  "result": {
+    "placement": {},
+    "compatibility_date": "2026-06-28",
+    "compatibility_flags": [
+      "nodejs_compat"
+    ],
+    "usage_model": "standard",
+    "tags": [],
+    "tail_consumers": [],
+    "logpush": false,
+    "observability": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "redact_query_string": true,
+      "logs": {
+        "enabled": true,
+        "head_sampling_rate": 1,
+        "persist": true,
+        "invocation_logs": true
+      },
+      "traces": {
+        "enabled": false,
+        "persist": true,
+        "head_sampling_rate": 1
+      }
+    },
+    "annotations": {
+      "workers/message": "P4-4 configuration; tested CI source b56534d7b6c993c0795010d0404fb8a81f7eeb9d",
+      "workers/tag": "p44-b56534d7b6c9",
+      "workers/triggered_by": "version_upload"
+    },
+    "bindings": [
+      {
+        "name": "APP_ID",
+        "text": "trace",
+        "type": "plain_text"
+      },
+      {
+        "database_id": "1cd5db26-6bbd-4595-abef-72ff51ecdaf3",
+        "id": "1cd5db26-6bbd-4595-abef-72ff51ecdaf3",
+        "name": "DB",
+        "type": "d1"
+      },
+      {
+        "name": "DEPLOY_TOKEN_SHA256",
+        "type": "secret_text"
+      },
+      {
+        "name": "DOWNLOAD_HMAC_KEY_CURRENT",
+        "type": "secret_text"
+      },
+      {
+        "name": "DOWNLOAD_TOKEN_KEY_VERSION",
+        "text": "p44-prod-1",
+        "type": "plain_text"
+      },
+      {
+        "name": "DOWNLOAD_TOKEN_TTL_SECONDS",
+        "text": "300",
+        "type": "plain_text"
+      },
+      {
+        "name": "ENABLE_DIRECT_ADMIN_API",
+        "text": "false",
+        "type": "plain_text"
+      },
+      {
+        "name": "ENVIRONMENT",
+        "text": "prod",
+        "type": "plain_text"
+      },
+      {
+        "name": "FIRMWARE_V2_CUTOVER_EPOCH",
+        "text": "1792039926",
+        "type": "plain_text"
+      },
+      {
+        "name": "GITHUB_OWNER",
+        "text": "Eitan-S-23",
+        "type": "plain_text"
+      },
+      {
+        "name": "GITHUB_REPO",
+        "text": "E-Track",
+        "type": "plain_text"
+      },
+      {
+        "bucket_name": "e-track-firmware-production-releases",
+        "name": "RELEASES_BUCKET",
+        "type": "r2_bucket"
+      }
+    ]
+  },
+  "success": true,
+  "errors": [],
+  "messages": []
+}

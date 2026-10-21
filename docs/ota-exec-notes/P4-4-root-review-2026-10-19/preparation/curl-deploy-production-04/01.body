@@ -1,0 +1,72 @@
+{
+  "result": {
+    "id": "e-track-firmware-production",
+    "default_environment": {
+      "environment": "production",
+      "script_tag": "e0886512fa6543d18dd2116933494f4a",
+      "created_on": "2026-10-18T15:43:07.799692Z",
+      "modified_on": "2026-10-18T16:07:59.167899Z",
+      "script": {
+        "created_on": "2026-10-18T15:43:07.799692Z",
+        "modified_on": "2026-10-18T16:07:59.167899Z",
+        "id": "e-track-firmware-production",
+        "tag": "e0886512fa6543d18dd2116933494f4a",
+        "tags": [],
+        "deployment_id": "",
+        "tail_consumers": null,
+        "logpush": false,
+        "observability": {
+          "enabled": true,
+          "head_sampling_rate": 1,
+          "redact_query_string": true,
+          "logs": {
+            "enabled": true,
+            "head_sampling_rate": 1,
+            "persist": true,
+            "invocation_logs": true
+          },
+          "traces": {
+            "enabled": false,
+            "persist": true,
+            "head_sampling_rate": 1
+          }
+        },
+        "has_assets": false,
+        "has_modules": true,
+        "etag": "e2913b0289a5a3c12e38fe6518d116fc18d0eda06b6efea75c1e0c6a4188dc58",
+        "handlers": [
+          "fetch",
+          "scheduled"
+        ],
+        "named_handlers": [
+          {
+            "name": "RateLimiter",
+            "handlers": [
+              "class"
+            ]
+          }
+        ],
+        "last_deployed_from": "wrangler",
+        "compatibility_date": "2026-06-28",
+        "compatibility_flags": [
+          "nodejs_compat"
+        ],
+        "usage_model": "standard"
+      }
+    },
+    "created_on": "2026-10-18T15:43:07.799692Z",
+    "modified_on": "2026-10-18T16:07:59.167899Z",
+    "usage_model": "",
+    "environments": [
+      {
+        "environment": "production",
+        "script_tag": "e0886512fa6543d18dd2116933494f4a",
+        "created_on": "2026-10-18T15:43:07.799692Z",
+        "modified_on": "2026-10-18T16:07:59.167899Z"
+      }
+    ]
+  },
+  "success": true,
+  "errors": [],
+  "messages": []
+}

@@ -1,0 +1,58 @@
+{
+  "schema": "p44-c7-gap-closeout-v1",
+  "finding": "P44-SUCCESSOR-05",
+  "task_id": "P4-4",
+  "contract_sha256": "587258cde323692569733470045a2e174ec1bef32c67088ba0cc3e76e1223314",
+  "freeze_commit": "371baeeb8519a0340a79c96b6a7cd6406b2e0346",
+  "product_commit": "2756ca95e26ec636216313271708b3304d61a5cc",
+  "overall_result": "EVIDENCE_GAP",
+  "p44_pass": false,
+  "failure_owner": "harness",
+  "failure": {
+    "command_id": "formal-after",
+    "slot": 1,
+    "exit_code": 1,
+    "started": "2026-10-21T04:52:14.277Z",
+    "ended": "2026-10-21T05:04:43.440Z",
+    "process_closed": true,
+    "cause": "startAttempt passes a trailing-slash directory to production makeIO.exists; relative() rejects it with RECOVERY_PATH before attempt reservation or HTTP.",
+    "source_path": "Tools/ota/p44-after-recovery.cjs",
+    "source_sha256": "037c66a8388156382847702e72c21c1d3b01f96f5ca4976579a772c43bb3c8d2",
+    "receipt": {
+      "path": "evidence/recovery-commands-v7/formal-after-invocation-1.json",
+      "size_bytes": 639,
+      "sha256": "a7cc8d60e49c57f75405e6335789cc0f2381fc02e0034b3ab715bc476917cdf9"
+    }
+  },
+  "retained_complete_after": 70,
+  "new_cloud_requests": 0,
+  "new_complete_after": 0,
+  "after_slots_used": 1,
+  "second_slot_used": false,
+  "continuation_admitted": false,
+  "reason_for_no_continuation": "No failed attempt-result exists and the unchanged path assertion must be repaired; do not blindly retry or alter the frozen tool.",
+  "not_observed": [
+    "P44-RAW-STATE",
+    "P44-APPROVALS",
+    "P44-ISOLATION"
+  ],
+  "executed_pass": [
+    "P44-HISTORY",
+    "P44-HYGIENE"
+  ],
+  "reused_pass": [
+    "P44-CONFIGURATION",
+    "P44-RAW-READBACK",
+    "P44-RAW-RUNS",
+    "P44-REHEARSAL"
+  ],
+  "independent_probe": {
+    "path": "closeout/independent-probe.log",
+    "size_bytes": 1364,
+    "sha256": "90ce4a1fc40cba118ae45a41f7a9916af83a830e24335af38eca30665612d75e"
+  },
+  "privacy_files_unchanged": 1439,
+  "privacy_scope": "Closed DATA scan unchanged; closeout metadata is separately checked by the staged delivery audit.",
+  "boundary": "No product change, new cloud request, business replay, production release, gate unlock, device action or automatic continuation.",
+  "next_owner": "External implementation agent selected by user; root independently reviews the repair and successor admission."
+}

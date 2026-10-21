@@ -1,0 +1,14 @@
+{
+  "schema": "p44-after-package-v1",
+  "version": 8,
+  "package": "docs/acceptance-contracts/P4-4-v8",
+  "round_id": "P44-20261021-08",
+  "max_after_invocations": 2,
+  "predecessor": {
+    "commit": "371baeeb8519a0340a79c96b6a7cd6406b2e0346",
+    "bundle_commit": "98c1d053227d437e9ec71c3ee622926b8ad4f116",
+    "index_commit": "ca352d8b0410d2040ced7be8a94290ef86a2b406",
+    "contract_sha256": "587258cde323692569733470045a2e174ec1bef32c67088ba0cc3e76e1223314",
+    "matrix_sha256": "1c4bdd4002748aea77ab6839344b6d9d02e4f377ec6fc35a2050e089ccbaee62"
+  }
+}

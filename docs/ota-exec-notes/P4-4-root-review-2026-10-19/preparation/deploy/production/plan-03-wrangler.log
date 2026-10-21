@@ -1,0 +1,110 @@
+
+--- 2026-10-18T23:49:07.371Z debug
+🪵  Writing logs to "D:\github\my\E-Track\.cache\p44-root-acceptance-20261019\deploy\production\plan-03-wrangler.log"
+---
+
+--- 2026-10-18T23:49:07.371Z warn
+▲ [WARNING] Proxy environment variables detected. We'll use your proxy for fetch requests.
+
+
+---
+
+--- 2026-10-18T23:49:07.488Z debug
+.env file not found at "D:\github\my\E-Track\.cache\p44-root-acceptance-20261019\.env". Continuing... For more details, refer to https://developers.cloudflare.com/workers/wrangler/system-environment-variables/
+---
+
+--- 2026-10-18T23:49:07.488Z debug
+.env file not found at "D:\github\my\E-Track\.cache\p44-root-acceptance-20261019\.env.local". Continuing... For more details, refer to https://developers.cloudflare.com/workers/wrangler/system-environment-variables/
+---
+
+--- 2026-10-18T23:49:07.506Z log
+
+ ⛅️ wrangler 4.105.0 (update available 4.151.1)
+───────────────────────────────────────────────
+---
+
+--- 2026-10-18T23:49:07.517Z warn
+▲ [WARNING] Processing private\deploy-production.json configuration:
+
+    - "unsafe" fields are experimental and may change or break at any time.
+    - Unexpected fields found in observability field: "redact_query_string"
+
+
+---
+
+--- 2026-10-18T23:49:07.542Z log
+There is a newer version of Wrangler available (current: 4.105.0, latest: 4.151.1). Try upgrading, as it might support this configuration option.
+---
+
+--- 2026-10-18T23:49:07.545Z debug
+Metrics dispatcher: Dispatching disabled - would have sent {"deviceId":"75e91e15-6e02-4b19-b6e7-569fa918a09d","event":"wrangler command started","timestamp":1792367347545,"properties":{"amplitude_session_id":1792367347518,"amplitude_event_id":0,"wranglerVersion":"4.105.0","wranglerMajorVersion":4,"wranglerMinorVersion":105,"wranglerPatchVersion":0,"osPlatform":"Windows","osVersion":"Windows 10 Education","nodeVersion":24,"isFirstUsage":true,"configFileType":"json","isCI":true,"isPagesCI":false,"isWorkersCI":false,"isInteractive":false,"hasAssets":false,"agent":"codex","argsUsed":["config","dryRun","keepVars","noBundle","outdir"],"argsCombination":"config, dryRun, keepVars, noBundle, outdir","sanitizedCommand":"deploy","sanitizedArgs":{"keepVars":true,"dryRun":true,"noBundle":false},"currentAgentSkillsInstalled":false}}.
+---
+
+--- 2026-10-18T23:49:07.681Z log
+Total Upload: 145.52 KiB / gzip: 35.35 KiB
+---
+
+--- 2026-10-18T23:49:07.684Z log
+Your Worker has access to the following bindings:
+---
+
+--- 2026-10-18T23:49:07.685Z log
+Binding                                                         Resource         
+---
+
+--- 2026-10-18T23:49:07.685Z log
+env.DB (e-track-firmware-production)                            D1 Database      
+---
+
+--- 2026-10-18T23:49:07.685Z log
+env.RELEASES_BUCKET (e-track-firmware-production-releases)      R2 Bucket        
+---
+
+--- 2026-10-18T23:49:07.685Z log
+
+---
+
+--- 2026-10-18T23:49:07.685Z log
+The following unsafe metadata will be attached to your Worker:
+---
+
+--- 2026-10-18T23:49:07.685Z log
+{
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+    "redact_query_string": true,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "persist": true,
+      "invocation_logs": true
+    },
+    "traces": {
+      "enabled": false,
+      "persist": true,
+      "head_sampling_rate": 1
+    }
+  },
+  "annotations": {
+    "workers/message": "P4-4 configuration; tested CI source b56534d7b6c993c0795010d0404fb8a81f7eeb9d",
+    "workers/tag": "p44-b56534d7b6c9"
+  }
+}
+---
+
+--- 2026-10-18T23:49:07.685Z log
+--dry-run: exiting now.
+---
+
+--- 2026-10-18T23:49:07.690Z debug
+Metrics dispatcher: Dispatching disabled - would have sent {"deviceId":"75e91e15-6e02-4b19-b6e7-569fa918a09d","event":"deploy worker script","timestamp":1792367347690,"properties":{"amplitude_session_id":1792367347686,"amplitude_event_id":0,"wranglerVersion":"4.105.0","wranglerMajorVersion":4,"wranglerMinorVersion":105,"wranglerPatchVersion":0,"osPlatform":"Windows","osVersion":"Windows 10 Education","nodeVersion":24,"isFirstUsage":true,"configFileType":"none","isCI":true,"isPagesCI":false,"isWorkersCI":false,"isInteractive":false,"hasAssets":false,"agent":"codex","category":"Workers","os":"win32:x64","usesTypeScript":false,"durationMs":24,"currentAgentSkillsInstalled":false}}.
+---
+
+--- 2026-10-18T23:49:07.690Z debug
+Metrics dispatcher: Dispatching disabled - would have sent {"deviceId":"75e91e15-6e02-4b19-b6e7-569fa918a09d","event":"wrangler command completed","timestamp":1792367347690,"properties":{"amplitude_session_id":1792367347518,"amplitude_event_id":1,"wranglerVersion":"4.105.0","wranglerMajorVersion":4,"wranglerMinorVersion":105,"wranglerPatchVersion":0,"osPlatform":"Windows","osVersion":"Windows 10 Education","nodeVersion":24,"isFirstUsage":true,"configFileType":"json","isCI":true,"isPagesCI":false,"isWorkersCI":false,"isInteractive":false,"hasAssets":false,"agent":"codex","argsUsed":["config","dryRun","keepVars","noBundle","outdir"],"argsCombination":"config, dryRun, keepVars, noBundle, outdir","sanitizedCommand":"deploy","sanitizedArgs":{"keepVars":true,"dryRun":true,"noBundle":false},"durationMs":194,"currentAgentSkillsInstalled":false}}.
+---
+
+--- 2026-10-18T23:49:07.691Z debug
+Metrics dispatcher: Dispatching disabled - would have sent {"deviceId":"75e91e15-6e02-4b19-b6e7-569fa918a09d","event":"skills_install_skipped","timestamp":1792367347691,"properties":{"amplitude_session_id":1792367347688,"amplitude_event_id":0,"wranglerVersion":"4.105.0","wranglerMajorVersion":4,"wranglerMinorVersion":105,"wranglerPatchVersion":0,"osPlatform":"Windows","osVersion":"Windows 10 Education","nodeVersion":24,"isFirstUsage":true,"configFileType":"none","isCI":true,"isPagesCI":false,"isWorkersCI":false,"isInteractive":false,"hasAssets":false,"agent":"codex","category":"Workers","os":"win32:x64","reason":"Running in CI","command":"deploy","currentAgentSkillsInstalled":false}}.
+---

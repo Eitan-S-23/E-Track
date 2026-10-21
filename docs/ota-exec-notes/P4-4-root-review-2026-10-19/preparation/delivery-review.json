@@ -1,0 +1,922 @@
+{
+  "startedAt": "2026-10-19T00:02:51.579Z",
+  "commit": "15be25e593405396d8db8fb0011fc62e42d6d27d",
+  "product": "b56534d7b6c993c0795010d0404fb8a81f7eeb9d",
+  "files": [
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-checks-dispatch-01.json",
+      "bytes": 655,
+      "sha256": "4ae9fb869a39e606fdc24c50a444016a04887226772317bf4177e847be9004e2"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-checks-dispatch-01.log",
+      "bytes": 63,
+      "sha256": "48ddb00b7aa32338794954e089e20a08a2704618c48620a91253f51a1304db8f"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-ci-full-log-01.json",
+      "bytes": 490,
+      "sha256": "a88948a2c2f48dd69f27ee3eece0bdb9a13a71d4f140db9e48c6c5d9417ac33a"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-ci-full-log-01.log",
+      "bytes": 148,
+      "sha256": "595aac7068dd4f7e677116f586ab61ed74efd58f574c36b3a9966ef79b5cc17d"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-ci-full-log-02.json",
+      "bytes": 490,
+      "sha256": "b828b5561118728dad1674cc5d369dd4ebf3270628eaf5081571c9a522275449"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-ci-full-log-02.log",
+      "bytes": 2702781,
+      "sha256": "f6fa0c488bc2a2f3623687bf9f0efff99b06fef60ed7bd0d4045f24a2fa693e9"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-ci-state-01.json",
+      "bytes": 533,
+      "sha256": "e9c9b829edea8d37c6527fb7c780f1d3167fa16e0b1099d3ef78e2ad5afd3417"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-ci-state-01.log",
+      "bytes": 9395,
+      "sha256": "7c1e721648761369746d85ab7d887047b86ccd9286771d90e717ce0fc5ebd781"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-ci-state-02.json",
+      "bytes": 533,
+      "sha256": "0aaa68e32c4af177a1ea40e136ab5a93ac0057ce837a3910ae477c426812239a"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-ci-state-02.log",
+      "bytes": 10196,
+      "sha256": "042fa72aae90ff0d70183d53f6490441bb80eaa999d523b02cb11e165cc88406"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-governance-dispatch-01.json",
+      "bytes": 568,
+      "sha256": "03adcf22bf927e22d4d57cb98a3c0d8795d7afbb3a1b71dcdafc1c3f71ae2c11"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-governance-dispatch-01.log",
+      "bytes": 63,
+      "sha256": "c9863a4b2630bb75a89f682504264e81c30e463d331fa6fa9bda0d6e60188737"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-governance-full-log-01.json",
+      "bytes": 506,
+      "sha256": "1765d89e2f5f3afac6b4987aecb273ddd788d21fb45a4373ac91a2c7756ae1cf"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-governance-full-log-01.log",
+      "bytes": 167683,
+      "sha256": "a419998787f6f8ebd967b1a76d9ae3d1dfa5ce917b811c76b7888ed6c84dccd7"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-governance-host-01.json",
+      "bytes": 494,
+      "sha256": "0d454a5c87ad8d725b48fc6dd2855a854b9dddc86c79794b8c4cd8ebf4e0082d"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-governance-host-01.log",
+      "bytes": 126,
+      "sha256": "136e12af4516f117e5bad29e1d01e83198dfb7aae7db7e7b971abcbc8a433de4"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-governance-state-01.json",
+      "bytes": 549,
+      "sha256": "406715390228de3331918fb98ae402aa93e3cf98cb603c0e3d0b47a7a041a5f8"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-governance-state-01.log",
+      "bytes": 5400,
+      "sha256": "e867e12735319114ccfa4c2d3bd1f57576e3a35bdc79023d1b2de27b83b572ec"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-npm-audit-01.json",
+      "bytes": 634,
+      "sha256": "25220685d94bdb1d3046f345adaa65bc2da70b361c06ef3359498cfa68794035"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-npm-audit-01.log",
+      "bytes": 22622,
+      "sha256": "64fcd5c5288233c151633b3854104cef0627c6fef24db0019d2075a5124094ca"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-pipeline-host-01.json",
+      "bytes": 642,
+      "sha256": "79303fbece6211c92d72ad529b6f0a0dc7cdcdc18668bb21e67270a21973fcec"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-pipeline-host-01.log",
+      "bytes": 36250,
+      "sha256": "3513a9275fa3ca463f4c5c3f3900c8bd92dd51d1b752bab71fefc85ebb16b12f"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-pr-context-01.json",
+      "bytes": 591,
+      "sha256": "ea31185fc27ae6221b223b427a6d910a7be2505b4388b7860d44b0a0a759e7bd"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-pr-context-01.log",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-sdk-01.json",
+      "bytes": 433,
+      "sha256": "043ee47943375f61c26c99c2a8034387856fd07efe7883b7162607a658649889"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-sdk-01.log",
+      "bytes": 1895,
+      "sha256": "5a64caa8e902e9dbf0fe06a59c5547b15c2fdba7403022ce5906a322f6919c94"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-source-commit-01.json",
+      "bytes": 491,
+      "sha256": "612768346b89e7b4bf1caf303ab1c16e12b33a9fa3cdb8c0595dbab09132fe70"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-source-commit-01.log",
+      "bytes": 200,
+      "sha256": "db5f0fd89227f47ede8d3ad6aa6994fe8aee56a4242c32e3a7f16921c77047b6"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-source-push-01.json",
+      "bytes": 489,
+      "sha256": "9954df870f8331b80ca02b8107ca04fb866e7fddb4607c5ed6daf0c4dcd193e4"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-source-push-01.log",
+      "bytes": 111,
+      "sha256": "c854a712afa42a22cca544244e08a66c7d7c1680b9078c2f49a77e79b9a9af67"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-stage-01.json",
+      "bytes": 1037,
+      "sha256": "aef8ea5adbf17cf2d7e159dce942c0674ceae4b2cbf0b49af815468276f65d1b"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-stage-01.log",
+      "bytes": 1652,
+      "sha256": "22123512bcb233f0f521f216956217bf563221868ebc187d2f60939d1e630577"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-types-01.json",
+      "bytes": 600,
+      "sha256": "895bffe9bfe191af6a8b45dbb954d57471b811ad1e9c7e561d9aa5704e3b0bc9"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-types-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-workflow-01.json",
+      "bytes": 449,
+      "sha256": "92e7cee7299c35864a764ad5b2927c1f8496f61c2653bfb3e82cc9f293f10441"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-workflow-01.log",
+      "bytes": 11252,
+      "sha256": "88be693b9224f6b7eb1a62dfb0ecf63c1c341bb5af02c9df0f903176c47f87a1"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-delivery-01.json",
+      "bytes": 5517,
+      "sha256": "304391bcb24731fb8d79dede934ca9ce167a740f04c455b42f9d6a87e40bdd8a"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-remediation-2026-10-19/remediation-precommit-01.json",
+      "bytes": 5196,
+      "sha256": "ea5ebbda06cb30abfe94853eb62ad2228712c6fcdbc09eb8f6e9b2135ead426d"
+    }
+  ],
+  "formalAcceptance": "NOT_RUN",
+  "totalBytes": 2990737,
+  "productAndValidationUnchanged": true,
+  "ci": {
+    "firmware": {
+      "conclusion": "success",
+      "event": "workflow_dispatch",
+      "headSha": "b56534d7b6c993c0795010d0404fb8a81f7eeb9d",
+      "jobs": [
+        {
+          "completedAt": "2026-10-18T23:14:28Z",
+          "conclusion": "success",
+          "databaseId": 117817345155,
+          "name": "Build firmware (arm-none-eabi-gcc)",
+          "startedAt": "2026-10-18T23:12:46Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-18T23:12:48Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-18T23:12:46Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:05Z",
+              "conclusion": "success",
+              "name": "Checkout repository",
+              "number": 2,
+              "startedAt": "2026-10-18T23:12:48Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:07Z",
+              "conclusion": "success",
+              "name": "Set up Node for shared release helpers",
+              "number": 3,
+              "startedAt": "2026-10-18T23:13:05Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:07Z",
+              "conclusion": "success",
+              "name": "Contain build temporary and pip cache paths",
+              "number": 4,
+              "startedAt": "2026-10-18T23:13:07Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:11Z",
+              "conclusion": "success",
+              "name": "Install Arm GNU Toolchain 13.3.Rel1",
+              "number": 5,
+              "startedAt": "2026-10-18T23:13:07Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:21Z",
+              "conclusion": "success",
+              "name": "Install Ninja",
+              "number": 6,
+              "startedAt": "2026-10-18T23:13:11Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:23Z",
+              "conclusion": "success",
+              "name": "Install OTA host test dependencies",
+              "number": 7,
+              "startedAt": "2026-10-18T23:13:21Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:23Z",
+              "conclusion": "success",
+              "name": "Verify reproducible GCC timestamps",
+              "number": 8,
+              "startedAt": "2026-10-18T23:13:23Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:24Z",
+              "conclusion": "success",
+              "name": "Extract firmware version",
+              "number": 9,
+              "startedAt": "2026-10-18T23:13:23Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:25Z",
+              "conclusion": "success",
+              "name": "Configure (CMake + Ninja)",
+              "number": 10,
+              "startedAt": "2026-10-18T23:13:24Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:46Z",
+              "conclusion": "success",
+              "name": "Build firmware",
+              "number": 11,
+              "startedAt": "2026-10-18T23:13:25Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:59Z",
+              "conclusion": "success",
+              "name": "Run host tests (boot vectors, OTA host tests, P3-1 product regressions)",
+              "number": 12,
+              "startedAt": "2026-10-18T23:13:46Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:59Z",
+              "conclusion": "success",
+              "name": "Validate OTA App layout",
+              "number": 13,
+              "startedAt": "2026-10-18T23:13:59Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:59Z",
+              "conclusion": "success",
+              "name": "Validate OTA Boot skeleton",
+              "number": 14,
+              "startedAt": "2026-10-18T23:13:59Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:59Z",
+              "conclusion": "success",
+              "name": "Report firmware artifacts",
+              "number": 15,
+              "startedAt": "2026-10-18T23:13:59Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:59Z",
+              "conclusion": "success",
+              "name": "Bind same-run GCC App and Boot inputs",
+              "number": 16,
+              "startedAt": "2026-10-18T23:13:59Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:14:00Z",
+              "conclusion": "success",
+              "name": "Exercise production preparation on the real GCC build (development key only)",
+              "number": 17,
+              "startedAt": "2026-10-18T23:13:59Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:14:01Z",
+              "conclusion": "success",
+              "name": "Preserve non-publishable GCC packaging evidence",
+              "number": 18,
+              "startedAt": "2026-10-18T23:14:00Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:14:23Z",
+              "conclusion": "success",
+              "name": "Exercise the shared key-bound GCC build without protected credentials",
+              "number": 19,
+              "startedAt": "2026-10-18T23:14:01Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:14:23Z",
+              "conclusion": "success",
+              "name": "Check development key cleanup before archiving",
+              "number": 20,
+              "startedAt": "2026-10-18T23:14:23Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:14:24Z",
+              "conclusion": "success",
+              "name": "Preserve non-publishable key-bound build and packaging evidence",
+              "number": 21,
+              "startedAt": "2026-10-18T23:14:23Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:14:24Z",
+              "conclusion": "skipped",
+              "name": "Build the P3-4 acceptance candidate",
+              "number": 22,
+              "startedAt": "2026-10-18T23:14:24Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:14:24Z",
+              "conclusion": "skipped",
+              "name": "Preserve the P3-4 candidate build evidence",
+              "number": 23,
+              "startedAt": "2026-10-18T23:14:24Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:14:25Z",
+              "conclusion": "success",
+              "name": "Upload firmware artifact",
+              "number": 24,
+              "startedAt": "2026-10-18T23:14:24Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:14:26Z",
+              "conclusion": "success",
+              "name": "Upload Boot artifact",
+              "number": 25,
+              "startedAt": "2026-10-18T23:14:25Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:14:26Z",
+              "conclusion": "success",
+              "name": "Post Set up Node for shared release helpers",
+              "number": 49,
+              "startedAt": "2026-10-18T23:14:26Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:14:26Z",
+              "conclusion": "success",
+              "name": "Post Checkout repository",
+              "number": 50,
+              "startedAt": "2026-10-18T23:14:26Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:14:27Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 51,
+              "startedAt": "2026-10-18T23:14:26Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/39175549010/job/117817345155"
+        },
+        {
+          "completedAt": "2026-10-18T23:13:58Z",
+          "conclusion": "success",
+          "databaseId": 117817345384,
+          "name": "Release tooling development checks (no cloud credentials)",
+          "startedAt": "2026-10-18T23:12:46Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-18T23:12:47Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-18T23:12:47Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:03Z",
+              "conclusion": "success",
+              "name": "Checkout repository",
+              "number": 2,
+              "startedAt": "2026-10-18T23:12:47Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:04Z",
+              "conclusion": "success",
+              "name": "Set up Node",
+              "number": 3,
+              "startedAt": "2026-10-18T23:13:03Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:04Z",
+              "conclusion": "success",
+              "name": "Prepare contained test temporary directory",
+              "number": 4,
+              "startedAt": "2026-10-18T23:13:04Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:17Z",
+              "conclusion": "success",
+              "name": "Install pinned Worker dependencies",
+              "number": 5,
+              "startedAt": "2026-10-18T23:13:04Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:18Z",
+              "conclusion": "success",
+              "name": "Run script and migration host tests explicitly (not workerd)",
+              "number": 6,
+              "startedAt": "2026-10-18T23:13:17Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:20Z",
+              "conclusion": "success",
+              "name": "Run release pipeline with real handlers and SQLite host ports (not rehearsal)",
+              "number": 7,
+              "startedAt": "2026-10-18T23:13:18Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:30Z",
+              "conclusion": "success",
+              "name": "Run native workerd D1 R2 and registration invariants (not host doubles)",
+              "number": 8,
+              "startedAt": "2026-10-18T23:13:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:32Z",
+              "conclusion": "success",
+              "name": "Check Worker and shared script types",
+              "number": 9,
+              "startedAt": "2026-10-18T23:13:30Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:36Z",
+              "conclusion": "success",
+              "name": "Build tested Worker deployment input without cloud access",
+              "number": 10,
+              "startedAt": "2026-10-18T23:13:32Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:38Z",
+              "conclusion": "success",
+              "name": "Install byte test dependency",
+              "number": 11,
+              "startedAt": "2026-10-18T23:13:36Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:41Z",
+              "conclusion": "success",
+              "name": "Build the existing vendor bsdiff for this host",
+              "number": 12,
+              "startedAt": "2026-10-18T23:13:38Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:41Z",
+              "conclusion": "success",
+              "name": "Check real package generation and approved-envelope replay",
+              "number": 13,
+              "startedAt": "2026-10-18T23:13:41Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:42Z",
+              "conclusion": "success",
+              "name": "Check workflow execution graph and configuration gates",
+              "number": 14,
+              "startedAt": "2026-10-18T23:13:41Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:53Z",
+              "conclusion": "success",
+              "name": "Execute production byte preparation with isolated fixtures",
+              "number": 15,
+              "startedAt": "2026-10-18T23:13:42Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:54Z",
+              "conclusion": "success",
+              "name": "Preserve development byte fixtures and step originals",
+              "number": 16,
+              "startedAt": "2026-10-18T23:13:53Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:56Z",
+              "conclusion": "success",
+              "name": "Preserve tested Worker deployment input",
+              "number": 17,
+              "startedAt": "2026-10-18T23:13:54Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:56Z",
+              "conclusion": "success",
+              "name": "Post Set up Node",
+              "number": 33,
+              "startedAt": "2026-10-18T23:13:56Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:56Z",
+              "conclusion": "success",
+              "name": "Post Checkout repository",
+              "number": 34,
+              "startedAt": "2026-10-18T23:13:56Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:56Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 35,
+              "startedAt": "2026-10-18T23:13:56Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/39175549010/job/117817345384"
+        },
+        {
+          "completedAt": "2026-10-18T23:13:58Z",
+          "conclusion": "skipped",
+          "databaseId": 117817601476,
+          "name": "Isolated firmware binding qualification (not rehearsal)",
+          "startedAt": "2026-10-18T23:13:59Z",
+          "status": "completed",
+          "steps": [],
+          "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/39175549010/job/117817601476"
+        },
+        {
+          "completedAt": "2026-10-18T23:14:29Z",
+          "conclusion": "skipped",
+          "databaseId": 117817705637,
+          "name": "Firmware production (shared release implementation)",
+          "startedAt": "2026-10-18T23:14:29Z",
+          "status": "completed",
+          "steps": [],
+          "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/39175549010/job/117817705637"
+        },
+        {
+          "completedAt": "2026-10-18T23:14:29Z",
+          "conclusion": "skipped",
+          "databaseId": 117817706160,
+          "name": "Firmware rehearsal (shared release implementation)",
+          "startedAt": "2026-10-18T23:14:29Z",
+          "status": "completed",
+          "steps": [],
+          "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/39175549010/job/117817706160"
+        }
+      ],
+      "status": "completed",
+      "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/39175549010"
+    },
+    "governance": {
+      "conclusion": "success",
+      "event": "workflow_dispatch",
+      "headSha": "b56534d7b6c993c0795010d0404fb8a81f7eeb9d",
+      "jobs": [
+        {
+          "completedAt": "2026-10-18T23:13:53Z",
+          "conclusion": "success",
+          "databaseId": 117817372579,
+          "name": "Validate acceptance and build governance",
+          "startedAt": "2026-10-18T23:12:54Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-18T23:12:56Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-18T23:12:55Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:12Z",
+              "conclusion": "success",
+              "name": "Checkout",
+              "number": 2,
+              "startedAt": "2026-10-18T23:12:56Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:17Z",
+              "conclusion": "success",
+              "name": "Verify PowerShell",
+              "number": 3,
+              "startedAt": "2026-10-18T23:13:12Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:41Z",
+              "conclusion": "success",
+              "name": "Run governance regression tests",
+              "number": 4,
+              "startedAt": "2026-10-18T23:13:17Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:46Z",
+              "conclusion": "success",
+              "name": "Install Arm GNU Toolchain 13.3.Rel1",
+              "number": 5,
+              "startedAt": "2026-10-18T23:13:41Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:51Z",
+              "conclusion": "success",
+              "name": "Run P2-6 spec probes",
+              "number": 6,
+              "startedAt": "2026-10-18T23:13:46Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:52Z",
+              "conclusion": "success",
+              "name": "Post Checkout",
+              "number": 12,
+              "startedAt": "2026-10-18T23:13:51Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:52Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 13,
+              "startedAt": "2026-10-18T23:13:52Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/39175558187/job/117817372579"
+        },
+        {
+          "completedAt": "2026-10-18T23:13:38Z",
+          "conclusion": "success",
+          "databaseId": 117817372768,
+          "name": "Flutter debugging skill (ubuntu-latest)",
+          "startedAt": "2026-10-18T23:12:54Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-18T23:12:55Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-18T23:12:54Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:10Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "number": 2,
+              "startedAt": "2026-10-18T23:12:55Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:11Z",
+              "conclusion": "success",
+              "name": "Test host helpers (Linux)",
+              "number": 3,
+              "startedAt": "2026-10-18T23:13:10Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:11Z",
+              "conclusion": "skipped",
+              "name": "Test host helpers (Windows)",
+              "number": 4,
+              "startedAt": "2026-10-18T23:13:11Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:36Z",
+              "conclusion": "success",
+              "name": "Test P3-4 controlled service and live adapters (Linux)",
+              "number": 5,
+              "startedAt": "2026-10-18T23:13:11Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:36Z",
+              "conclusion": "skipped",
+              "name": "Test P3-4 controlled service and live adapters (Windows)",
+              "number": 6,
+              "startedAt": "2026-10-18T23:13:36Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:37Z",
+              "conclusion": "success",
+              "name": "Preserve P3-4 adapter self-test originals",
+              "number": 7,
+              "startedAt": "2026-10-18T23:13:36Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:37Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "number": 14,
+              "startedAt": "2026-10-18T23:13:37Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:37Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 15,
+              "startedAt": "2026-10-18T23:13:37Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/39175558187/job/117817372768"
+        },
+        {
+          "completedAt": "2026-10-18T23:13:53Z",
+          "conclusion": "success",
+          "databaseId": 117817372796,
+          "name": "Flutter debugging skill (windows-latest)",
+          "startedAt": "2026-10-18T23:12:54Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-18T23:12:55Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-18T23:12:55Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:14Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "number": 2,
+              "startedAt": "2026-10-18T23:12:55Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:14Z",
+              "conclusion": "skipped",
+              "name": "Test host helpers (Linux)",
+              "number": 3,
+              "startedAt": "2026-10-18T23:13:14Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:16Z",
+              "conclusion": "success",
+              "name": "Test host helpers (Windows)",
+              "number": 4,
+              "startedAt": "2026-10-18T23:13:14Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:16Z",
+              "conclusion": "skipped",
+              "name": "Test P3-4 controlled service and live adapters (Linux)",
+              "number": 5,
+              "startedAt": "2026-10-18T23:13:16Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:48Z",
+              "conclusion": "success",
+              "name": "Test P3-4 controlled service and live adapters (Windows)",
+              "number": 6,
+              "startedAt": "2026-10-18T23:13:16Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:49Z",
+              "conclusion": "success",
+              "name": "Preserve P3-4 adapter self-test originals",
+              "number": 7,
+              "startedAt": "2026-10-18T23:13:48Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:51Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "number": 14,
+              "startedAt": "2026-10-18T23:13:49Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-18T23:13:51Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 15,
+              "startedAt": "2026-10-18T23:13:51Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/39175558187/job/117817372796"
+        }
+      ],
+      "status": "completed",
+      "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/39175558187"
+    }
+  },
+  "advisories": {
+    "counts": {
+      "info": 0,
+      "low": 0,
+      "moderate": 3,
+      "high": 8,
+      "critical": 0,
+      "total": 11
+    },
+    "nodes": [
+      "@cloudflare/vitest-pool-workers",
+      "@vitest/mocker",
+      "hono",
+      "miniflare",
+      "nanoid",
+      "postcss",
+      "sharp",
+      "source-map-js",
+      "undici",
+      "vitest",
+      "wrangler"
+    ]
+  },
+  "pass": true,
+  "endedAt": "2026-10-19T00:02:56.130Z"
+}

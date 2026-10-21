@@ -1,0 +1,57 @@
+{
+  "observedAt": "2026-10-18T19:46:15.848Z",
+  "root": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "scopes": [
+    ".cache/p44",
+    ".cache/firmware-workflow-tests",
+    ".cache/firmware-key-build-tests",
+    ".cache/firmware-pipeline-tests",
+    ".cache/p4-2-script-fixtures",
+    "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules",
+    "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/.wrangler",
+    "docs/ota-exec-notes/P4-4-s3-interface-2026-10-19"
+  ],
+  "files": 9987,
+  "dirs": 2648,
+  "absent": [
+    "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/.wrangler"
+  ],
+  "links": [],
+  "privateHeaders": [],
+  "priorArchives": [
+    {
+      "name": "initial",
+      "sha256": "6fd6eb7e019547dd2f609faf0b8f2e6bd208a01e6dd62da69505be9beeff9819"
+    },
+    {
+      "name": "ci",
+      "sha256": "ea105cae9bf8a8c39ee572d4117340e3e367f99b39f5fe0a73363271f00874d4"
+    },
+    {
+      "name": "registry",
+      "sha256": "1d692a7a205994d2187835f44bfecc5334ddb9bc37c32976e4f5f2ab7796050d"
+    },
+    {
+      "name": "resume",
+      "sha256": "0e6dc38e333c38fa4bbede3e48bb9b80ffdfc4c2392956c277bfee25cb614f22"
+    },
+    {
+      "name": "production",
+      "sha256": "0d657f1b29c6fbdd2d756d02e274772b8712944b22441eb655c2032281ca1e6d"
+    },
+    {
+      "name": "ci-policy",
+      "sha256": "03cd75602b9b988ec9fca2f6fb790bb44cba4232a96e70061089bd9d131bf997"
+    }
+  ],
+  "unchangedFrozenAndMcuSources": true,
+  "knownExternalReadOnly": {
+    "path": "C:/Users/SU/AppData/Local/Microsoft/Windows/PowerShell/StartupProfileData-NonInteractive",
+    "bytes": 1004,
+    "mtime": "2026-10-18T19:40:24.913Z",
+    "attribution": "UNRESOLVED"
+  },
+  "externalCleanup": false,
+  "extraWriteBoundary": "Authorized task-only shared Git objects, refs and worktree metadata",
+  "limitation": "Selected controlled outputs, not a machine-wide filesystem trace"
+}

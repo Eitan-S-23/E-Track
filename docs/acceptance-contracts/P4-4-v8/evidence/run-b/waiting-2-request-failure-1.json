@@ -1,0 +1,14 @@
+{
+  "schema": "p44-request-failure-v1",
+  "attempt": 1,
+  "method": "GET",
+  "path": "/repos/Eitan-S-23/E-Track/actions/runs/39351100037",
+  "started": "2026-10-20T01:02:27.991Z",
+  "ended": "2026-10-20T01:02:28.596Z",
+  "error_code": "ECONNRESET",
+  "final_response_received": false,
+  "received_body_bytes": 0,
+  "informational_seen": false,
+  "informational_count": 0,
+  "first_information": null
+}

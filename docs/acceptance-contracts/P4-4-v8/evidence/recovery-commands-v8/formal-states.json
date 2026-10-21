@@ -1,0 +1,26 @@
+{
+  "label": "formal-states",
+  "command": "python",
+  "args": [
+    "-I",
+    "-S",
+    "-B",
+    "Tools/ota/p44-after-bundle.py",
+    "--package-spec",
+    "docs/acceptance-contracts/P4-4-v8.package.json",
+    "states"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "started": "2026-10-21T10:41:46.829Z",
+  "ended": "2026-10-21T10:42:18.900Z",
+  "exitCode": 0,
+  "signal": null,
+  "process_closed": true,
+  "closed": true,
+  "spawn_failed": false,
+  "output": {
+    "path": "recovery-commands-v8/formal-states.log",
+    "size_bytes": 205,
+    "sha256": "db3288d394ee2064f6ef0e812df3012e14133dd9d4baa766186760607b771806"
+  }
+}

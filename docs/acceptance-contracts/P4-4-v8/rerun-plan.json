@@ -1,0 +1,121 @@
+{
+  "schema": "etrack-rerun-plan-v1",
+  "current_contract_id": "P4-4-v8",
+  "current_contract_sha256": "4C414C3632A7B4F74FFCEE80C9AE9E629370AC14BF097D9A7FB1B755300D80D4",
+  "previous_contract_id": "P4-4-v7",
+  "previous_contract_sha256": "587258CDE323692569733470045A2E174EC1BEF32C67088BA0CC3E76E1223314",
+  "contract_lineage": "direct_successor",
+  "current_round_id": "P44-20261021-08",
+  "previous_round_id": "P44-20261021-07",
+  "previous_matrix_sha256": "1C4BDD4002748AEA77AB6839344B6D9D02E4F377EC6FC35A2050E089CCBAEE62",
+  "changed_input_groups": [
+    "validation"
+  ],
+  "changed_external_inputs": [
+    "after-recovery-v8"
+  ],
+  "rerun_criteria": [
+    {
+      "id": "P44-HISTORY",
+      "reasons": [
+        "artifact_definition_changed:P44-HISTORY-1",
+        "command_definition_changed:formal-history",
+        "criterion_definition_changed",
+        "external_input_changed:after-recovery-v8",
+        "input_group_changed:validation"
+      ]
+    },
+    {
+      "id": "P44-RAW-STATE",
+      "reasons": [
+        "command_definition_changed:formal-after",
+        "command_definition_changed:formal-before",
+        "command_definition_changed:formal-negatives",
+        "criterion_definition_changed",
+        "external_input_changed:after-recovery-v8",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P44-APPROVALS",
+      "reasons": [
+        "command_definition_changed:formal-approvals",
+        "command_definition_changed:formal-assemble-complete",
+        "criterion_definition_changed",
+        "external_input_changed:after-recovery-v8",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P44-ISOLATION",
+      "reasons": [
+        "command_definition_changed:formal-states",
+        "criterion_definition_changed",
+        "external_input_changed:after-recovery-v8",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P44-HYGIENE",
+      "reasons": [
+        "artifact_definition_changed:P44-HYGIENE-1",
+        "command_definition_changed:formal-privacy",
+        "criterion_definition_changed",
+        "external_input_changed:after-recovery-v8",
+        "input_group_changed:validation"
+      ]
+    }
+  ],
+  "reusable_criteria": [
+    "P44-CONFIGURATION",
+    "P44-RAW-READBACK",
+    "P44-RAW-RUNS",
+    "P44-REHEARSAL"
+  ],
+  "reuse_origins": {
+    "P44-CONFIGURATION": {
+      "contract_sha256": "86764FA47B8C52D748BF93B83C5735352CEAB69519D8FFCC4C6BFC706F8939B5",
+      "matrix_sha256": "25D71CCB7707C83A62ACE11E6662B2BDEAB5E85DF45FAA557326010219F038D7",
+      "round_id": "P44-20261020-04"
+    },
+    "P44-RAW-RUNS": {
+      "contract_sha256": "86764FA47B8C52D748BF93B83C5735352CEAB69519D8FFCC4C6BFC706F8939B5",
+      "matrix_sha256": "25D71CCB7707C83A62ACE11E6662B2BDEAB5E85DF45FAA557326010219F038D7",
+      "round_id": "P44-20261020-04"
+    },
+    "P44-REHEARSAL": {
+      "contract_sha256": "86764FA47B8C52D748BF93B83C5735352CEAB69519D8FFCC4C6BFC706F8939B5",
+      "matrix_sha256": "25D71CCB7707C83A62ACE11E6662B2BDEAB5E85DF45FAA557326010219F038D7",
+      "round_id": "P44-20261020-04"
+    },
+    "P44-RAW-READBACK": {
+      "contract_sha256": "86764FA47B8C52D748BF93B83C5735352CEAB69519D8FFCC4C6BFC706F8939B5",
+      "matrix_sha256": "25D71CCB7707C83A62ACE11E6662B2BDEAB5E85DF45FAA557326010219F038D7",
+      "round_id": "P44-20261020-04"
+    }
+  },
+  "required_commands": [
+    "formal-after",
+    "formal-approvals",
+    "formal-assemble-complete",
+    "formal-before",
+    "formal-history",
+    "formal-negatives",
+    "formal-privacy",
+    "formal-states"
+  ],
+  "required_artifacts": [
+    "P44-APPROVALS-1",
+    "P44-APPROVALS-2",
+    "P44-HISTORY-1",
+    "P44-HYGIENE-1",
+    "P44-HYGIENE-2",
+    "P44-ISOLATION-1",
+    "P44-RAW-STATE-1",
+    "P44-RAW-STATE-2",
+    "P44-RAW-STATE-3"
+  ]
+}

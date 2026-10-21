@@ -1,0 +1,10 @@
+{"development_only": true, "fixture_root": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44-v7-development\\python\\batch-3", "c5_source_files_verified": 1185, "network_requests": 0, "source_sha256": "ae5b22bdf544c1393cf20bddad81cd831336db9ccee925db4660baf6132a31e7", "tests_sha256": "78bedfdad12843470f0f9dcc5f2ba1b4946f5116ad41ca6a35f8cf2264d3652e"}
+test_successor_package_paths_and_predecessor_are_data_driven (__main__.AfterBundleTests.test_successor_package_paths_and_predecessor_are_data_driven) ... ok
+test_successor_multislot_receipts_and_stock_matrix_validators (__main__.AfterBundleTests.test_successor_multislot_receipts_and_stock_matrix_validators) ... ok
+test_command_description_drift_requires_stop_not_replay (__main__.AfterBundleTests.test_command_description_drift_requires_stop_not_replay) ... ok
+test_four_reused_definitions_and_external_signatures_unchanged (__main__.AfterBundleTests.test_four_reused_definitions_and_external_signatures_unchanged) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 182.098s
+
+OK

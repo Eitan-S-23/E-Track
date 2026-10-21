@@ -12,6 +12,17 @@ promote AC5 artifacts to OTA or CI release artifacts.
   Read `docs/agent-collaboration/index.md` for shared decisions and handoffs.
   The canonical rules and index live in the project root and are delivered on
   `main`; a task worktree, ignored cache or chat must not be their only copy.
+- Before requesting or creating credentials, read **Reuse Before Requesting
+  Credentials** in `docs/agent-collaboration-contract.md` and the inventory at
+  `docs/agent-collaboration/credential-registry.md`. Cloudflare `e-track-ci`
+  already exists (historical alias `e-track-p41-ci`); reconcile its protected
+  input and actual operation before asking for another token. A management API
+  403 is not proof that a publishing credential is missing. The registry is not
+  permission to use a test credential in production or export provisioning tokens.
+  User standing authorization (2026-10-18): any E-Track agent may use this
+  existing token for authorized project work, across tasks, roles and worktrees.
+  Do not ask again for token-use permission solely because the agent changed;
+  task operations, production gates and credential confidentiality still apply.
 - When using cc-connect, a manual real @mention is only for a necessary,
   already-authorized action outside chat while the current execution stays open,
   such as reinserting an SD card or handling a phone dialog, without sending a

@@ -1,0 +1,174 @@
+{
+  "createdAt": "2026-10-18T12:55:39.286Z",
+  "nature": "P4-4 implementation observations, not independent acceptance",
+  "archive": {
+    "path": "docs/ota-exec-notes/P4-4-integration-2026-10-18/initial.zip",
+    "sizeBytes": 37363,
+    "sha256": "6fd6eb7e019547dd2f609faf0b8f2e6bd208a01e6dd62da69505be9beeff9819"
+  },
+  "entries": [
+    {
+      "path": ".cache/p44-run.cjs",
+      "sizeBytes": 5072,
+      "sha256": "51b9b6c153f0520fffda4ecdb81cc8a10f8880acb0607173e7be3d121466d5f8"
+    },
+    {
+      "path": ".cache/p44-platform.cjs",
+      "sizeBytes": 10387,
+      "sha256": "b6cce96fa8da445f101a037d2af9192886dd05d7c750488b4e65bce0f0efc577"
+    },
+    {
+      "path": ".cache/p44-github-config.cjs",
+      "sizeBytes": 4820,
+      "sha256": "444f6a6c1b392205b54ac0d4886faf2c7c65876e56de3b48e9a810f65cd643b0"
+    },
+    {
+      "path": ".cache/p44-seal.cjs",
+      "sizeBytes": 3698,
+      "sha256": "0111e83ba1d15c908c4c8b95f21f58acb673e36bb9edc5470af8354ba8b7548d"
+    },
+    {
+      "path": ".cache/p44/evidence/capability-01.json",
+      "sizeBytes": 2294,
+      "sha256": "4c7b95abff282ab8cb72bac0f82b59f85a77acaa66b5cf976a056c39872c6acf"
+    },
+    {
+      "path": ".cache/p44/evidence/inventory-01.json",
+      "sizeBytes": 17059,
+      "sha256": "bcba56849bb6d8c4f8c0ceb9fdb3bafdfac6a83c8e6543e18795e4a68e1c49cb"
+    },
+    {
+      "path": ".cache/p44/evidence/production-protection-01.json",
+      "sizeBytes": 13617,
+      "sha256": "93e47de9408b6f29c7bee15ccf0f9512256201878cda7baa519d6cca13d4ab21"
+    },
+    {
+      "path": ".cache/p44/logs/credential-capability-01.json",
+      "sizeBytes": 463,
+      "sha256": "dd19b6eece8052a8fed8a2ce46ed0cbe6b9100b07206ada1ad18884bedddb6d7"
+    },
+    {
+      "path": ".cache/p44/logs/credential-capability-01.log",
+      "sizeBytes": 2294,
+      "sha256": "4c7b95abff282ab8cb72bac0f82b59f85a77acaa66b5cf976a056c39872c6acf"
+    },
+    {
+      "path": ".cache/p44/logs/diff-check-01.json",
+      "sizeBytes": 397,
+      "sha256": "1fc779758e0203772897a466516b9c98d06e0081e7a146dcaeb995fbe259224a"
+    },
+    {
+      "path": ".cache/p44/logs/diff-check-01.log",
+      "sizeBytes": 128,
+      "sha256": "feccc42813b60633283f91277f4a2505f4789a67275317b1d29b20af9bf834a2"
+    },
+    {
+      "path": ".cache/p44/logs/platform-inventory-01.json",
+      "sizeBytes": 455,
+      "sha256": "0c1166d5cfc6bfa025e2544cd7fb2a0a0e8350fbc01b0406c1ca3120b68fe22c"
+    },
+    {
+      "path": ".cache/p44/logs/platform-inventory-01.log",
+      "sizeBytes": 17059,
+      "sha256": "bcba56849bb6d8c4f8c0ceb9fdb3bafdfac6a83c8e6543e18795e4a68e1c49cb"
+    },
+    {
+      "path": ".cache/p44/logs/private-input-acl-01.json",
+      "sizeBytes": 473,
+      "sha256": "55181cafc4e11b9984a551ecafdad35e12e309589d66c467b11214cf8291deaf"
+    },
+    {
+      "path": ".cache/p44/logs/private-input-acl-01.log",
+      "sizeBytes": 76,
+      "sha256": "06b18ea06a355113831a3f0af9a3760bf762ad86b0c559ef0799c4223aaa8082"
+    },
+    {
+      "path": ".cache/p44/logs/private-input-acl-readback-01.json",
+      "sizeBytes": 458,
+      "sha256": "ccb264dab059e9011771a44767ece798e78c3f17e630bb63359efe4b3915c24e"
+    },
+    {
+      "path": ".cache/p44/logs/private-input-acl-readback-01.log",
+      "sizeBytes": 112,
+      "sha256": "178a0013c5d030d76618a0d24d06cf77f433f2d5b82d4c067d4117946d6a0990"
+    },
+    {
+      "path": ".cache/p44/logs/production-protection-01.json",
+      "sizeBytes": 429,
+      "sha256": "7c262bbbbdde9f1c40ff6a85ae61b6b710ff259cbfdf05febe31e08126666fe1"
+    },
+    {
+      "path": ".cache/p44/logs/production-protection-01.log",
+      "sizeBytes": 1369,
+      "sha256": "11326b66f066ae5d216f15c0e9ab190573d3d440dcf03202208f04276ed3c2ac"
+    },
+    {
+      "path": ".cache/p44/logs/readiness-tests-01.json",
+      "sizeBytes": 482,
+      "sha256": "b24225a3873f138be313938bc845463a461aba24cc71cfe24a95a8b8a5271002"
+    },
+    {
+      "path": ".cache/p44/logs/readiness-tests-01.log",
+      "sizeBytes": 407,
+      "sha256": "4ec7767d4b950f4e880c45ace4fb280679ba63d20c55aeb74b49919da16c6fa1"
+    },
+    {
+      "path": ".cache/p44/logs/readiness-tests-02.json",
+      "sizeBytes": 492,
+      "sha256": "b65c31b076d29ceff892aaf20283bf034fdf10080dec3eec9c605c7b1c8d8790"
+    },
+    {
+      "path": ".cache/p44/logs/readiness-tests-02.log",
+      "sizeBytes": 1019,
+      "sha256": "20a8db89dc53dfc7716c4995156c80568aed9dc346327fad7ba4c0d6d6ba9286"
+    },
+    {
+      "path": ".cache/p44/logs/readiness-tests-03.json",
+      "sizeBytes": 492,
+      "sha256": "6b419e71685aa3666dff03237d3a1b17bf81047f304552e73e101990d6be13ea"
+    },
+    {
+      "path": ".cache/p44/logs/readiness-tests-03.log",
+      "sizeBytes": 130,
+      "sha256": "bd8eda1401dc229a64a76fd4bfb86990e177ec8d0ce16718ac21cc451912441b"
+    },
+    {
+      "path": ".cache/p44/logs/seal-initial-01.json",
+      "sizeBytes": 402,
+      "sha256": "2543366bee9be1a636e7b5d9cb1e9ee2b39f368b1c5e74940ff2a08f71d1f54d"
+    },
+    {
+      "path": ".cache/p44/logs/seal-initial-01.log",
+      "sizeBytes": 986,
+      "sha256": "8e846239fc80c0895d0f8e97dea658b45481c0e122e44f855a082fdc30b03b84"
+    },
+    {
+      "path": ".cache/p44/logs/workflow-tests-01.json",
+      "sizeBytes": 437,
+      "sha256": "3cb731f52fc21eb21ee25c17576ef01ca19249102c39fc7618d31d08aa9ae9e0"
+    },
+    {
+      "path": ".cache/p44/logs/workflow-tests-01.log",
+      "sizeBytes": 7980,
+      "sha256": "6ac1069c220eecc2de2daa72d9ed948ad3d26af9e9b591410331a72aa3569de4"
+    },
+    {
+      "path": ".cache/p44/logs/workflow-tests-02.json",
+      "sizeBytes": 437,
+      "sha256": "645957d507c81360faef55745d4b364fd781d781c9719bf5a68545c5062961f5"
+    },
+    {
+      "path": ".cache/p44/logs/workflow-tests-02.log",
+      "sizeBytes": 10650,
+      "sha256": "a55b0d875178f3b8f8fb131e649f4f0699d094964885fcb61022102272833252"
+    }
+  ],
+  "credentialsScanned": true,
+  "extractionVerified": true,
+  "excludes": [
+    "Private inputs/credentials",
+    "Historical frozen bundles",
+    "Pre-worktree host transcript",
+    "This archive creation receipt"
+  ]
+}

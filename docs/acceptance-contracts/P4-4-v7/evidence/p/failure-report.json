@@ -1,0 +1,244 @@
+{
+  "schema": "p44-v3-failure-closeout-v1",
+  "task_id": "P4-4",
+  "contract_id": "P4-4-v3",
+  "round_id": "P44-20261019-03",
+  "freeze_commit": "ba952497948a03c40cbd8baebbfc9228621fb44b",
+  "freeze_tree": "5427f4728cfc0e6a3b4760548fb6e03385922c6b",
+  "formal_observation_attempted": true,
+  "final_matrix_result": "EVIDENCE_GAP",
+  "p44_pass": false,
+  "stage_failure": {
+    "command_id": "formal-before",
+    "command_exit_code": 1,
+    "process_closed": true,
+    "failure_owner": "environment",
+    "phase": "before-state capture",
+    "error_code": "ECONNRESET",
+    "classification": "Connection reset before any HTTP response status/body was observed; no credential denial or gzip failure is established.",
+    "http_status": null,
+    "completed": false,
+    "envelope_elapsed_ms": 7087,
+    "configured_http_deadline_seconds": 60,
+    "request_started": "2026-10-19T15:27:27.071Z",
+    "request_ended": "2026-10-19T15:27:34.158Z",
+    "operation": "SELECT * FROM \"patches\" ORDER BY rowid LIMIT 8 OFFSET 0",
+    "database_role": "protected Trace",
+    "evidence": [
+      "evidence/commands/formal-before.json",
+      "evidence/commands/formal-before.log",
+      "evidence/snapshots/before/protected-patches-rows8-0.http.json",
+      "evidence/snapshots/before/protected-patches-rows8-0.request.json",
+      "evidence/snapshots/before/protected-patches-rows8-0-reservation.json"
+    ]
+  },
+  "complete_new_observations_preserved": [
+    {
+      "envelope": {
+        "path": "evidence/snapshots/before/protected-channel_history-rows8-32.http.json",
+        "size_bytes": 1311,
+        "sha256": "d4c7d6f2c96a0e9be4c97685024946e1936b634fdcc139718298ded86ff95dd3"
+      },
+      "sql": "SELECT * FROM \"channel_history\" ORDER BY rowid LIMIT 8 OFFSET 32",
+      "rows": 8,
+      "wire_bytes": 90146,
+      "decoded_bytes": 4746278,
+      "started": "2026-10-19T15:24:33.981Z",
+      "ended": "2026-10-19T15:24:44.210Z"
+    },
+    {
+      "envelope": {
+        "path": "evidence/snapshots/before/protected-channel_history-rows8-40.http.json",
+        "size_bytes": 1311,
+        "sha256": "fa40d9c112d9398305385e5b196a729143d1bcb83242bc094f9ee1503d09f07b"
+      },
+      "sql": "SELECT * FROM \"channel_history\" ORDER BY rowid LIMIT 8 OFFSET 40",
+      "rows": 8,
+      "wire_bytes": 64997,
+      "decoded_bytes": 3488749,
+      "started": "2026-10-19T15:24:50.398Z",
+      "ended": "2026-10-19T15:24:59.137Z"
+    },
+    {
+      "envelope": {
+        "path": "evidence/snapshots/before/protected-channel_history-rows8-48.http.json",
+        "size_bytes": 1307,
+        "sha256": "23fd2bd223e79b7341ef57c5735aa8bb11d9b13f49b16da044aafb34e5208b9b"
+      },
+      "sql": "SELECT * FROM \"channel_history\" ORDER BY rowid LIMIT 8 OFFSET 48",
+      "rows": 8,
+      "wire_bytes": 1091,
+      "decoded_bytes": 7450,
+      "started": "2026-10-19T15:25:05.437Z",
+      "ended": "2026-10-19T15:25:14.838Z"
+    },
+    {
+      "envelope": {
+        "path": "evidence/snapshots/before/protected-channel_history-rows8-56.http.json",
+        "size_bytes": 1307,
+        "sha256": "f05e42e44083277862032fcf8b92f0512a29437f2377ca69d1db7addbd7bad7d"
+      },
+      "sql": "SELECT * FROM \"channel_history\" ORDER BY rowid LIMIT 8 OFFSET 56",
+      "rows": 8,
+      "wire_bytes": 1099,
+      "decoded_bytes": 7450,
+      "started": "2026-10-19T15:25:23.012Z",
+      "ended": "2026-10-19T15:25:31.691Z"
+    },
+    {
+      "envelope": {
+        "path": "evidence/snapshots/before/protected-channel_history-rows8-64.http.json",
+        "size_bytes": 1306,
+        "sha256": "89ca1b11c071e92d2f91d87b858cdec5e30732192239b27d1caba4d3342397a1"
+      },
+      "sql": "SELECT * FROM \"channel_history\" ORDER BY rowid LIMIT 8 OFFSET 64",
+      "rows": 1,
+      "wire_bytes": 555,
+      "decoded_bytes": 1248,
+      "started": "2026-10-19T15:25:37.853Z",
+      "ended": "2026-10-19T15:25:47.790Z"
+    },
+    {
+      "envelope": {
+        "path": "evidence/snapshots/before/protected-channels-count.http.json",
+        "size_bytes": 1275,
+        "sha256": "12a0cd70cfba1815a92ec4a23a59ceac0667c142119b9fae53d548240718829d"
+      },
+      "sql": "SELECT COUNT(*) AS count FROM \"channels\"",
+      "rows": 1,
+      "wire_bytes": 247,
+      "decoded_bytes": 373,
+      "started": "2026-10-19T15:25:53.924Z",
+      "ended": "2026-10-19T15:26:03.129Z"
+    },
+    {
+      "envelope": {
+        "path": "evidence/snapshots/before/protected-channels-rows8-0.http.json",
+        "size_bytes": 1282,
+        "sha256": "da34c7bb10aa5cb7bc498cce0a672b87ff051379467a166a8d90ae17bf5a0ef2"
+      },
+      "sql": "SELECT * FROM \"channels\" ORDER BY rowid LIMIT 8 OFFSET 0",
+      "rows": 2,
+      "wire_bytes": 699,
+      "decoded_bytes": 2410,
+      "started": "2026-10-19T15:26:09.353Z",
+      "ended": "2026-10-19T15:26:15.166Z"
+    },
+    {
+      "envelope": {
+        "path": "evidence/snapshots/before/protected-d1_migrations-count.http.json",
+        "size_bytes": 1290,
+        "sha256": "5e8f058920ffbf5ae70b983b7654c2294b9be63ffd3e67801076a0789dc3ee10"
+      },
+      "sql": "SELECT COUNT(*) AS count FROM \"d1_migrations\"",
+      "rows": 1,
+      "wire_bytes": 249,
+      "decoded_bytes": 373,
+      "started": "2026-10-19T15:26:21.571Z",
+      "ended": "2026-10-19T15:26:27.588Z"
+    },
+    {
+      "envelope": {
+        "path": "evidence/snapshots/before/protected-d1_migrations-rows8-0.http.json",
+        "size_bytes": 1296,
+        "sha256": "a7a78992a74d53129f0e17d91cd705e37b895fec75876a4d4ac96d0e9c708cab"
+      },
+      "sql": "SELECT * FROM \"d1_migrations\" ORDER BY rowid LIMIT 8 OFFSET 0",
+      "rows": 4,
+      "wire_bytes": 369,
+      "decoded_bytes": 660,
+      "started": "2026-10-19T15:26:33.767Z",
+      "ended": "2026-10-19T15:26:39.599Z"
+    },
+    {
+      "envelope": {
+        "path": "evidence/snapshots/before/protected-firmware_channels-count.http.json",
+        "size_bytes": 1302,
+        "sha256": "4067fe1d4f639f63631a00a518fac57b04da6f34480cdb3e02b6a1134785bf9c"
+      },
+      "sql": "SELECT COUNT(*) AS count FROM \"firmware_channels\"",
+      "rows": 1,
+      "wire_bytes": 247,
+      "decoded_bytes": 373,
+      "started": "2026-10-19T15:26:45.702Z",
+      "ended": "2026-10-19T15:26:54.492Z"
+    },
+    {
+      "envelope": {
+        "path": "evidence/snapshots/before/protected-firmware_releases-count.http.json",
+        "size_bytes": 1302,
+        "sha256": "2546195145af1481033ef6ff60c1c250ad039c2ef5f63997c562d7743a183ff0"
+      },
+      "sql": "SELECT COUNT(*) AS count FROM \"firmware_releases\"",
+      "rows": 1,
+      "wire_bytes": 247,
+      "decoded_bytes": 373,
+      "started": "2026-10-19T15:27:01.482Z",
+      "ended": "2026-10-19T15:27:07.218Z"
+    },
+    {
+      "envelope": {
+        "path": "evidence/snapshots/before/protected-patches-count.http.json",
+        "size_bytes": 1272,
+        "sha256": "4ace986583c5d18d79ffea103a31e4c9bbd6e4894f8cc2b77a40c400471f3784"
+      },
+      "sql": "SELECT COUNT(*) AS count FROM \"patches\"",
+      "rows": 1,
+      "wire_bytes": 250,
+      "decoded_bytes": 375,
+      "started": "2026-10-19T15:27:13.366Z",
+      "ended": "2026-10-19T15:27:20.673Z"
+    }
+  ],
+  "predecessor": {
+    "source_bundle_commit": "84268ac2ad34727b76250ff944211b7efba1cfb3",
+    "contract_sha256": "CFFF5E841B6FBE6F251A8A931C450907B477B678E890DCD6B00C2081E07D719A",
+    "matrix_sha256": "C335006F0B166535CE957C345ADF579440E087B6B980239BACA96500F019A46C",
+    "manifest": {
+      "path": "evidence/inputs/predecessor-before.json",
+      "size_bytes": 34821,
+      "sha256": "2a0e38896bf72aaa5a571ce9ad419d6376d79c29fa0a6511f48fa81b84fc282a"
+    },
+    "complete_http_originals_retained": 35,
+    "incomplete_http_originals_retained": 2
+  },
+  "total_readonly_originals": {
+    "complete": 47,
+    "incomplete": 3,
+    "successful_rehearsals_replayed": 0
+  },
+  "matrix_disposition": {
+    "raw_state_result": "NOT_OBSERVED",
+    "raw_state_observed": null,
+    "reason": "Before/negatives/after are one frozen aggregate; only before executed. Do not fabricate downstream exits to label that aggregate FAIL.",
+    "initial_not_run_matrix": {
+      "path": "evidence-matrix.json",
+      "size_bytes": 4152,
+      "sha256": "16e506428951943b553d58fb79374d97af89bd5c140fd67df27f790273d0b7df"
+    },
+    "actual_rerun_plan": {
+      "path": "rerun-plan.json",
+      "size_bytes": 4919,
+      "sha256": "5db78b0135f45d183fac89357d579be958133c198c082f6a3b8b6ceac05db73d"
+    },
+    "previous_round_id": "P44-20261019-02"
+  },
+  "privacy_scope": "The completed formal scan covered all 377 then-present files, five ZIP members and all 12 decoded D1 bodies. Later generated sealing metadata and final matrices also require the scoped staged-byte privacy audit; the successful scan is not replayed.",
+  "not_executed_follow_on_plan_commands": [
+    "formal-negatives",
+    "formal-dispatch-a",
+    "formal-finish-a",
+    "formal-dispatch-b",
+    "formal-finish-b",
+    "formal-assemble-rehearsal",
+    "formal-rehearsal",
+    "formal-readbacks",
+    "formal-production-preflight",
+    "formal-after",
+    "formal-assemble-complete",
+    "formal-approvals",
+    "formal-states"
+  ],
+  "boundary": "Zero A/B dispatch, reviewer action, registration, R2 object write, firmware publication, gate unlock or device operation. No unchanged deployment/CI was replayed.",
+  "next": "Preserve all complete originals and all three failures. Admit only a justified minimal read-only recovery under the actual lineage and rerun plan; no automatic replay of mutations or successful observations."
+}

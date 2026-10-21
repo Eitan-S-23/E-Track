@@ -6,10 +6,14 @@ import { digest, metadataBytes, readyProjection } from "./prepare-firmware-relea
 import { uploadFirmwareAsset } from "./upload-firmware-r2-asset.mjs";
 import { registerFirmware } from "./register-firmware-release.mjs";
 import { approvedFirmwareKey } from "./firmware-release-key.mjs";
+import { s3Credentials } from "./firmware-s3.mjs";
+import { preflightFirmware } from "./firmware-preflight-client.mjs";
+export { verifyMonotonic } from "./firmware-monotonic.mjs";
 
 const fail = message => new CliError(message, "RELEASE_CONFLICT", 1);
 const cancelled = () => new CliError("Release execution cancelled", "BACKEND_UNAVAILABLE", 1);
 const active = signal => { if (signal?.aborted) throw cancelled(); };
+export const PUBLICATION_PROTOCOL = "s3-worker-preflight-v1";
 
 export function releaseConfig(env) {
   const mode = env.FIRMWARE_RELEASE_MODE;
@@ -17,13 +21,15 @@ export function releaseConfig(env) {
     || (mode === "production" ? env.INPUT_PUBLISH !== "true" || env.INPUT_REHEARSAL === "true"
       : env.INPUT_REHEARSAL !== "true" || env.INPUT_PUBLISH === "true")) throw new CliError("Only an explicit, unambiguous release dispatch can use cloud bindings");
   if (env.OTA_BOOT_CHAIN_READY !== (mode === "production" ? "true" : "false")) throw fail("Boot-chain gate is not in the required state");
-  const keys = ["CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_API_TOKEN", "TRACE_UPDATE_SERVICE_URL", "TRACE_DEPLOY_TOKEN",
-    "TRACE_R2_BUCKET", "TRACE_D1_DATABASE_ID", "TRACE_D1_DATABASE_NAME", "OTA_AES_KEY", "GITHUB_TOKEN",
+  const keys = ["CLOUDFLARE_ACCOUNT_ID", "TRACE_R2_ACCESS_KEY_ID", "TRACE_R2_SECRET_ACCESS_KEY", "TRACE_UPDATE_SERVICE_URL", "TRACE_DEPLOY_TOKEN",
+    "TRACE_R2_BUCKET", "OTA_AES_KEY", "GITHUB_TOKEN",
     "GITHUB_REPOSITORY", "GITHUB_SHA", "GITHUB_RUN_ID", "GITHUB_RUN_ATTEMPT", "OTA_PREVIOUS_RELEASE_JSON",
     "TRACE_FIRMWARE_MIN_APP_VERSION_CODE", "TRACE_FIRMWARE_MIN_PROTOCOL_VERSION"];
   for (const key of keys) if (!env[key]) throw new CliError(`Missing release configuration: ${key}`);
+  s3Credentials(env);
+  if (env.TRACE_D1_DATABASE_ID || env.TRACE_D1_DATABASE_NAME) throw new CliError("Client-selected D1 bindings are not accepted by the release chain");
   approvedFirmwareKey(env);
-  for (const key of ["CLOUDFLARE_API_TOKEN", "TRACE_DEPLOY_TOKEN", "GITHUB_TOKEN"]) {
+  for (const key of ["TRACE_DEPLOY_TOKEN", "GITHUB_TOKEN"]) {
     if (/\s/.test(env[key])) throw new CliError("Release credentials must not contain whitespace");
   }
   for (const [key, max] of [["TRACE_FIRMWARE_MIN_APP_VERSION_CODE", 2100000000], ["TRACE_FIRMWARE_MIN_PROTOCOL_VERSION", 255]]) {
@@ -32,8 +38,6 @@ export function releaseConfig(env) {
     }
   }
   if (!/^[0-9a-f]{32}$/.test(env.CLOUDFLARE_ACCOUNT_ID) || !/^[0-9a-fA-F]{32}$/.test(env.OTA_AES_KEY)
-    || !/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(env.TRACE_D1_DATABASE_ID)
-    || !/^[a-zA-Z0-9_-]+$/.test(env.TRACE_D1_DATABASE_NAME)
     || !/^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/.test(env.TRACE_R2_BUCKET)
     || !/^[0-9a-f]{40}$/.test(env.GITHUB_SHA) || !/^[1-9][0-9]*$/.test(env.GITHUB_RUN_ID)
     || !/^[1-9][0-9]*$/.test(env.GITHUB_RUN_ATTEMPT)) throw new CliError("Invalid explicit release binding or identity");
@@ -44,7 +48,7 @@ export function releaseConfig(env) {
   // to production. Neither non-production bucket is a production destination.
   const rehearsalBucket = "e-track-firmware-p41-test-releases";
   if (mode === "rehearsal" ? env.TRACE_R2_BUCKET !== rehearsalBucket
-    : [rehearsalBucket, "trace-update-staging-releases"].includes(env.TRACE_R2_BUCKET)) {
+    : env.TRACE_R2_BUCKET !== "e-track-firmware-production-releases") {
     throw new CliError("Staging and production bucket bindings must remain isolated");
   }
   let canonicalRunId = env.GITHUB_RUN_ID;
@@ -57,8 +61,7 @@ export function releaseConfig(env) {
       || canonicalRunId === env.GITHUB_RUN_ID) throw new CliError("Explicit approved rehearsal provenance and hashes are required");
   }
   return { mode, canonicalRunId, executionRunId: env.GITHUB_RUN_ID, executionAttempt: env.GITHUB_RUN_ATTEMPT,
-    serviceUrl: url.origin, bucketName: env.TRACE_R2_BUCKET, accountId: env.CLOUDFLARE_ACCOUNT_ID,
-    databaseId: env.TRACE_D1_DATABASE_ID, databaseName: env.TRACE_D1_DATABASE_NAME };
+    serviceUrl: url.origin, bucketName: env.TRACE_R2_BUCKET, accountId: env.CLOUDFLARE_ACCOUNT_ID };
 }
 
 export function verifyPromotion(metadata, { approvedMetadata, approvedEvidence, approvedPreparation, approvedRun, config, env }) {
@@ -74,6 +77,9 @@ export function verifyPromotion(metadata, { approvedMetadata, approvedEvidence, 
     || String(approvedRun.id) !== config.canonicalRunId || approvedRun.head_sha !== env.GITHUB_SHA
     || approvedRun.path !== ".github/workflows/firmware-build.yml" || approvedRun.event !== "workflow_dispatch"
     || approvedRun.conclusion !== "success" || String(approvedRun.run_attempt) !== env.OTA_APPROVED_REHEARSAL_ATTEMPT
+    || evidence.publicationProtocol !== PUBLICATION_PROTOCOL
+    || evidence.preflight?.metadataSha256 !== evidence.metadataSha256 || evidence.preflight?.environment !== "staging"
+    || evidence.preflight?.ok !== true || evidence.preflight?.unresolvedLegacyChannels !== 0
     || evidence.mode !== "rehearsal" || evidence.executionRunId !== config.canonicalRunId
     || evidence.executionAttempt !== env.OTA_APPROVED_REHEARSAL_ATTEMPT
     || evidence.commitSha !== metadata.commitSha || evidence.metadataSha256 !== digest(approvedMetadata)
@@ -85,26 +91,6 @@ export function verifyPromotion(metadata, { approvedMetadata, approvedEvidence, 
     if (!result || result.ok !== true || !["UPLOADED", "ALREADY_PRESENT"].includes(result.status)
       || result.sha256 !== asset.sha256 || result.sizeBytes !== asset.sizeBytes || result.r2Key !== asset.r2Key) throw fail("Approved R2 readback evidence mismatch");
   }
-}
-
-export async function verifyMonotonic(db, metadata) {
-  // Read-only queries through the explicitly selected D1 binding. Unknown legacy
-  // pointers are not an empty database and cannot be bypassed by a new release.
-  const unresolved = await db.prepare("SELECT COUNT(*) AS count FROM firmware_channels WHERE app_id=? AND device_model=? AND legacy_current_release_id IS NOT NULL")
-    .bind(metadata.appId, metadata.deviceModel).first();
-  if (!unresolved || unresolved.count !== 0) throw fail("Unresolved legacy firmware channel prevents publication");
-  const legacy = await db.prepare("SELECT MAX(version_code) AS version_code FROM firmware_releases_legacy WHERE app_id=? AND device_model=?")
-    .bind(metadata.appId, metadata.deviceModel).first();
-  if (!legacy || (legacy.version_code !== null && (!Number.isSafeInteger(legacy.version_code) || legacy.version_code >= metadata.versionCode))) {
-    throw fail("Target must exceed legacy firmware versions");
-  }
-  const current = await db.prepare("SELECT version_code,registration_json FROM firmware_releases WHERE app_id=? AND device_model=? ORDER BY version_code DESC LIMIT 1")
-    .bind(metadata.appId, metadata.deviceModel).first();
-  if (current && (!Number.isSafeInteger(current.version_code) || current.version_code > metadata.versionCode
-    || (current.version_code === metadata.versionCode && current.registration_json !== canonicalJson(readyProjection(metadata))))) {
-    throw fail("Target must increase D1 version or exactly replay the same canonical registration");
-  }
-  return { maxVersionCode: current?.version_code ?? null, legacyMaxVersionCode: legacy.version_code, unresolvedLegacyChannels: 0 };
 }
 
 export async function verifyWorkerEnvironment(serviceUrl, mode, fetcher = fetch, signal) {
@@ -126,7 +112,7 @@ async function bounded(operation, signal) {
   finally { clearTimeout(timer); signal?.removeEventListener("abort", abort); }
 }
 
-export async function publishPreparedRelease({ root, assetsDir, metadata, config, bucket, db, github,
+export async function publishPreparedRelease({ root, assetsDir, metadata, config, bucket, github,
   deployToken, fetcher = fetch, signal, approval, env }) {
   if (canonicalJson(releaseConfig(env)) !== canonicalJson(config)) throw new CliError("Release binding changed after preflight");
   if (!["rehearsal", "production"].includes(config.mode)) throw new CliError("Checks/nightly may not publish or register");
@@ -147,7 +133,7 @@ export async function publishPreparedRelease({ root, assetsDir, metadata, config
   const events = [];
   const record = async value => { events.push(value); await writeOutput(root, attemptsPath, JSON.stringify(events, null, 2) + "\n"); };
   await verifyWorkerEnvironment(config.serviceUrl, config.mode, fetcher, signal);
-  const before = await verifyMonotonic(db, metadata);
+  const before = await preflightFirmware(metadata, { serviceUrl: config.serviceUrl, mode: config.mode, deployToken, fetcher, signal });
   await record({ step: "preflight", ...before });
   active(signal);
   let githubResult = null;
@@ -172,7 +158,8 @@ export async function publishPreparedRelease({ root, assetsDir, metadata, config
   const replay = await registerFirmware(ready, { serviceUrl: config.serviceUrl, deployToken, fetcher, signal });
   if (!replay.idempotent || replay.releaseId !== registration.releaseId) throw fail("Registration replay changed release identity");
   await record({ step: "idempotent-replay", ...replay });
-  const evidence = { mode: config.mode, commitSha: metadata.commitSha, canonicalRunId: metadata.runId,
+  const evidence = { publicationProtocol: PUBLICATION_PROTOCOL, preflight: before,
+    mode: config.mode, commitSha: metadata.commitSha, canonicalRunId: metadata.runId,
     executionRunId: config.executionRunId, executionAttempt: config.executionAttempt,
     metadataSha256: digest(metadataBytes(ready)), preparationSha256,
     github: githubResult, uploads, registration, replay };

@@ -1,0 +1,304 @@
+{
+  "inputs": [
+    {
+      "path": ".github/scripts/firmware-bindings-check.mjs",
+      "sizeBytes": 6400,
+      "sha256": "b11a5a99c4ff6053262b1934fe2eba0e58d1e6e671cddb8e92bafaa229364354"
+    },
+    {
+      "path": ".github/workflows/firmware-build.yml",
+      "sizeBytes": 47855,
+      "sha256": "4184f8bd9fbe3faf443ae17385816c8abb1c4abce953794d16bb39f3e207d866"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/upload-firmware-r2-asset.mjs",
+      "sizeBytes": 6571,
+      "sha256": "5a0774dcb9683898e70c930a41f7381d707cac0991a3cced2919fd7781099dc9"
+    },
+    {
+      "path": "tests/ota/firmware-pipeline.host.test.ts",
+      "sizeBytes": 70288,
+      "sha256": "8ccb8c73f80799937b24f1b6aa2477c6e421427937955b626e61c8553acd31e5"
+    },
+    {
+      "path": "tests/ota/test_firmware_s3.mjs",
+      "sizeBytes": 11130,
+      "sha256": "6c281b3fe8df6725b16af9afd9d8022957b84632e3c3b2e54805a8ac26e7b3c0"
+    },
+    {
+      "path": "tests/ota/test_firmware_workflow.mjs",
+      "sizeBytes": 25486,
+      "sha256": "ed74a6ea72de4ecdd22a5693e465463dc8b383687639ffb73281563a335b8ddd"
+    },
+    {
+      "path": "tests/ota/test_acceptance_bundle.py",
+      "sizeBytes": 184575,
+      "sha256": "bdd19a47d27d42c77cfc53b03466752ddc61b73b13d9ec7c97474b7533705e21"
+    },
+    {
+      "path": "docs/ota-cross-system-contracts.md",
+      "sizeBytes": 132308,
+      "sha256": "0e90c25cf2f05214ab0b0dafd522b7ac4dd1f116f9d4f69f51fe5661a8fbb35e"
+    },
+    {
+      "path": "docs/ota-prompts/prompt-P4-1-implementation.md",
+      "sizeBytes": 17837,
+      "sha256": "e0e1a27289208e0ecadc445292d0c8417e0d13fd84c5ad57155aefffda56276b"
+    },
+    {
+      "path": "docs/ota-prompts/prompt-P4-4-integration.md",
+      "sizeBytes": 7591,
+      "sha256": "1f613c11ec18bd9cad93a95ef63a1b6b4676ac463b1d0e4461c82e3fccff4069"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-interface-2026-10-19.md",
+      "sizeBytes": 20499,
+      "sha256": "1a89c6cf7369f313f6acd8ee8d94e0c71a6c276ea3a38e3b563a30bd9db0d661"
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-configuration-2026-10-18.md",
+      "sizeBytes": 42814,
+      "sha256": "a9f5797a22ccb3155065ef563eff126c64ba4c3fe3067f7556617e137ace834e"
+    },
+    {
+      "path": ".cache/p44-run.cjs",
+      "sizeBytes": 5269,
+      "sha256": "602fff00207be77d20ab7e21fdb1af591126772191719418f9433c241b59b6e5"
+    },
+    {
+      "path": ".cache/p44-remediation-audit.cjs",
+      "sizeBytes": 7846,
+      "sha256": "d555cd00144b526b469f47d7fc5e91e39b6ce3cb8cf034d61e75567c8976fe6a"
+    }
+  ],
+  "files": [
+    {
+      "path": "remediation-checks-dispatch-01.json",
+      "source": ".cache/p44/logs/remediation-checks-dispatch-01.json",
+      "sizeBytes": 655,
+      "sha256": "4ae9fb869a39e606fdc24c50a444016a04887226772317bf4177e847be9004e2"
+    },
+    {
+      "path": "remediation-checks-dispatch-01.log",
+      "source": ".cache/p44/logs/remediation-checks-dispatch-01.log",
+      "sizeBytes": 63,
+      "sha256": "48ddb00b7aa32338794954e089e20a08a2704618c48620a91253f51a1304db8f"
+    },
+    {
+      "path": "remediation-ci-full-log-01.json",
+      "source": ".cache/p44/logs/remediation-ci-full-log-01.json",
+      "sizeBytes": 490,
+      "sha256": "a88948a2c2f48dd69f27ee3eece0bdb9a13a71d4f140db9e48c6c5d9417ac33a"
+    },
+    {
+      "path": "remediation-ci-full-log-01.log",
+      "source": ".cache/p44/logs/remediation-ci-full-log-01.log",
+      "sizeBytes": 148,
+      "sha256": "595aac7068dd4f7e677116f586ab61ed74efd58f574c36b3a9966ef79b5cc17d"
+    },
+    {
+      "path": "remediation-ci-full-log-02.json",
+      "source": ".cache/p44/logs/remediation-ci-full-log-02.json",
+      "sizeBytes": 490,
+      "sha256": "b828b5561118728dad1674cc5d369dd4ebf3270628eaf5081571c9a522275449"
+    },
+    {
+      "path": "remediation-ci-full-log-02.log",
+      "source": ".cache/p44/logs/remediation-ci-full-log-02.log",
+      "sizeBytes": 2702781,
+      "sha256": "f6fa0c488bc2a2f3623687bf9f0efff99b06fef60ed7bd0d4045f24a2fa693e9"
+    },
+    {
+      "path": "remediation-ci-state-01.json",
+      "source": ".cache/p44/logs/remediation-ci-state-01.json",
+      "sizeBytes": 533,
+      "sha256": "e9c9b829edea8d37c6527fb7c780f1d3167fa16e0b1099d3ef78e2ad5afd3417"
+    },
+    {
+      "path": "remediation-ci-state-01.log",
+      "source": ".cache/p44/logs/remediation-ci-state-01.log",
+      "sizeBytes": 9395,
+      "sha256": "7c1e721648761369746d85ab7d887047b86ccd9286771d90e717ce0fc5ebd781"
+    },
+    {
+      "path": "remediation-ci-state-02.json",
+      "source": ".cache/p44/logs/remediation-ci-state-02.json",
+      "sizeBytes": 533,
+      "sha256": "0aaa68e32c4af177a1ea40e136ab5a93ac0057ce837a3910ae477c426812239a"
+    },
+    {
+      "path": "remediation-ci-state-02.log",
+      "source": ".cache/p44/logs/remediation-ci-state-02.log",
+      "sizeBytes": 10196,
+      "sha256": "042fa72aae90ff0d70183d53f6490441bb80eaa999d523b02cb11e165cc88406"
+    },
+    {
+      "path": "remediation-governance-dispatch-01.json",
+      "source": ".cache/p44/logs/remediation-governance-dispatch-01.json",
+      "sizeBytes": 568,
+      "sha256": "03adcf22bf927e22d4d57cb98a3c0d8795d7afbb3a1b71dcdafc1c3f71ae2c11"
+    },
+    {
+      "path": "remediation-governance-dispatch-01.log",
+      "source": ".cache/p44/logs/remediation-governance-dispatch-01.log",
+      "sizeBytes": 63,
+      "sha256": "c9863a4b2630bb75a89f682504264e81c30e463d331fa6fa9bda0d6e60188737"
+    },
+    {
+      "path": "remediation-governance-full-log-01.json",
+      "source": ".cache/p44/logs/remediation-governance-full-log-01.json",
+      "sizeBytes": 506,
+      "sha256": "1765d89e2f5f3afac6b4987aecb273ddd788d21fb45a4373ac91a2c7756ae1cf"
+    },
+    {
+      "path": "remediation-governance-full-log-01.log",
+      "source": ".cache/p44/logs/remediation-governance-full-log-01.log",
+      "sizeBytes": 167683,
+      "sha256": "a419998787f6f8ebd967b1a76d9ae3d1dfa5ce917b811c76b7888ed6c84dccd7"
+    },
+    {
+      "path": "remediation-governance-host-01.json",
+      "source": ".cache/p44/logs/remediation-governance-host-01.json",
+      "sizeBytes": 494,
+      "sha256": "0d454a5c87ad8d725b48fc6dd2855a854b9dddc86c79794b8c4cd8ebf4e0082d"
+    },
+    {
+      "path": "remediation-governance-host-01.log",
+      "source": ".cache/p44/logs/remediation-governance-host-01.log",
+      "sizeBytes": 126,
+      "sha256": "136e12af4516f117e5bad29e1d01e83198dfb7aae7db7e7b971abcbc8a433de4"
+    },
+    {
+      "path": "remediation-governance-state-01.json",
+      "source": ".cache/p44/logs/remediation-governance-state-01.json",
+      "sizeBytes": 549,
+      "sha256": "406715390228de3331918fb98ae402aa93e3cf98cb603c0e3d0b47a7a041a5f8"
+    },
+    {
+      "path": "remediation-governance-state-01.log",
+      "source": ".cache/p44/logs/remediation-governance-state-01.log",
+      "sizeBytes": 5400,
+      "sha256": "e867e12735319114ccfa4c2d3bd1f57576e3a35bdc79023d1b2de27b83b572ec"
+    },
+    {
+      "path": "remediation-npm-audit-01.json",
+      "source": ".cache/p44/logs/remediation-npm-audit-01.json",
+      "sizeBytes": 634,
+      "sha256": "25220685d94bdb1d3046f345adaa65bc2da70b361c06ef3359498cfa68794035"
+    },
+    {
+      "path": "remediation-npm-audit-01.log",
+      "source": ".cache/p44/logs/remediation-npm-audit-01.log",
+      "sizeBytes": 22622,
+      "sha256": "64fcd5c5288233c151633b3854104cef0627c6fef24db0019d2075a5124094ca"
+    },
+    {
+      "path": "remediation-pipeline-host-01.json",
+      "source": ".cache/p44/logs/remediation-pipeline-host-01.json",
+      "sizeBytes": 642,
+      "sha256": "79303fbece6211c92d72ad529b6f0a0dc7cdcdc18668bb21e67270a21973fcec"
+    },
+    {
+      "path": "remediation-pipeline-host-01.log",
+      "source": ".cache/p44/logs/remediation-pipeline-host-01.log",
+      "sizeBytes": 36250,
+      "sha256": "3513a9275fa3ca463f4c5c3f3900c8bd92dd51d1b752bab71fefc85ebb16b12f"
+    },
+    {
+      "path": "remediation-pr-context-01.json",
+      "source": ".cache/p44/logs/remediation-pr-context-01.json",
+      "sizeBytes": 591,
+      "sha256": "ea31185fc27ae6221b223b427a6d910a7be2505b4388b7860d44b0a0a759e7bd"
+    },
+    {
+      "path": "remediation-pr-context-01.log",
+      "source": ".cache/p44/logs/remediation-pr-context-01.log",
+      "sizeBytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "remediation-sdk-01.json",
+      "source": ".cache/p44/logs/remediation-sdk-01.json",
+      "sizeBytes": 433,
+      "sha256": "043ee47943375f61c26c99c2a8034387856fd07efe7883b7162607a658649889"
+    },
+    {
+      "path": "remediation-sdk-01.log",
+      "source": ".cache/p44/logs/remediation-sdk-01.log",
+      "sizeBytes": 1895,
+      "sha256": "5a64caa8e902e9dbf0fe06a59c5547b15c2fdba7403022ce5906a322f6919c94"
+    },
+    {
+      "path": "remediation-source-commit-01.json",
+      "source": ".cache/p44/logs/remediation-source-commit-01.json",
+      "sizeBytes": 491,
+      "sha256": "612768346b89e7b4bf1caf303ab1c16e12b33a9fa3cdb8c0595dbab09132fe70"
+    },
+    {
+      "path": "remediation-source-commit-01.log",
+      "source": ".cache/p44/logs/remediation-source-commit-01.log",
+      "sizeBytes": 200,
+      "sha256": "db5f0fd89227f47ede8d3ad6aa6994fe8aee56a4242c32e3a7f16921c77047b6"
+    },
+    {
+      "path": "remediation-source-push-01.json",
+      "source": ".cache/p44/logs/remediation-source-push-01.json",
+      "sizeBytes": 489,
+      "sha256": "9954df870f8331b80ca02b8107ca04fb866e7fddb4607c5ed6daf0c4dcd193e4"
+    },
+    {
+      "path": "remediation-source-push-01.log",
+      "source": ".cache/p44/logs/remediation-source-push-01.log",
+      "sizeBytes": 111,
+      "sha256": "c854a712afa42a22cca544244e08a66c7d7c1680b9078c2f49a77e79b9a9af67"
+    },
+    {
+      "path": "remediation-stage-01.json",
+      "source": ".cache/p44/logs/remediation-stage-01.json",
+      "sizeBytes": 1037,
+      "sha256": "aef8ea5adbf17cf2d7e159dce942c0674ceae4b2cbf0b49af815468276f65d1b"
+    },
+    {
+      "path": "remediation-stage-01.log",
+      "source": ".cache/p44/logs/remediation-stage-01.log",
+      "sizeBytes": 1652,
+      "sha256": "22123512bcb233f0f521f216956217bf563221868ebc187d2f60939d1e630577"
+    },
+    {
+      "path": "remediation-types-01.json",
+      "source": ".cache/p44/logs/remediation-types-01.json",
+      "sizeBytes": 600,
+      "sha256": "895bffe9bfe191af6a8b45dbb954d57471b811ad1e9c7e561d9aa5704e3b0bc9"
+    },
+    {
+      "path": "remediation-types-01.log",
+      "source": ".cache/p44/logs/remediation-types-01.log",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "remediation-workflow-01.json",
+      "source": ".cache/p44/logs/remediation-workflow-01.json",
+      "sizeBytes": 449,
+      "sha256": "92e7cee7299c35864a764ad5b2927c1f8496f61c2653bfb3e82cc9f293f10441"
+    },
+    {
+      "path": "remediation-workflow-01.log",
+      "source": ".cache/p44/logs/remediation-workflow-01.log",
+      "sizeBytes": 11252,
+      "sha256": "88be693b9224f6b7eb1a62dfb0ecf63c1c341bb5af02c9df0f903176c47f87a1"
+    },
+    {
+      "path": "remediation-delivery-01.json",
+      "source": ".cache/p44/evidence/remediation-delivery-01.json",
+      "sizeBytes": 5517,
+      "sha256": "304391bcb24731fb8d79dede934ca9ce167a740f04c455b42f9d6a87e40bdd8a"
+    },
+    {
+      "path": "remediation-precommit-01.json",
+      "source": ".cache/p44/evidence/remediation-precommit-01.json",
+      "sizeBytes": 5196,
+      "sha256": "ea5ebbda06cb30abfe94853eb62ad2228712c6fcdbc09eb8f6e9b2135ead426d"
+    }
+  ]
+}

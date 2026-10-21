@@ -1,0 +1,40 @@
+{
+  "method": "POST",
+  "path": "/accounts/[ACCOUNT]/d1/database/1cd5db26-6bbd-4595-abef-72ff51ecdaf3/query",
+  "started": "2026-10-20T01:32:10.770Z",
+  "request": {
+    "path": "snapshots/after/production-d1_migrations-count.request.json",
+    "size_bytes": 57,
+    "sha256": "4c3dd588530600ee92ffd9ab49e6d502af785da938c65add1bbcf9fd7c000cf4"
+  },
+  "request_headers": {
+    "accept-encoding": "gzip"
+  },
+  "request_attempts": 1,
+  "request_failures": [],
+  "status": 200,
+  "response_headers": {
+    "date": "Tue, 20 Oct 2026 01:32:18 GMT",
+    "content-type": "application/json",
+    "transfer-encoding": "chunked",
+    "connection": "keep-alive",
+    "cache-control": "no-store",
+    "api-version": "2026-10-01.epoch",
+    "cf-auditlog-id": "01a156f0-1bdc-7769-93fc-65af24458d63",
+    "content-encoding": "gzip",
+    "server": "cloudflare",
+    "cf-ray": "a4d444995becd771-NRT"
+  },
+  "body": {
+    "path": "snapshots/after/production-d1_migrations-count.body",
+    "size_bytes": 245,
+    "sha256": "05e91b1323e30e6cab7ec341e9affea8fc2dd9a733cb8454a69331df98201067"
+  },
+  "decoded_body": {
+    "path": "snapshots/after/production-d1_migrations-count.decoded.body",
+    "size_bytes": 371,
+    "sha256": "1450544e4529dcb593be45edb3d4f5b0566c1a5c27ec67a48d84171ddfa95f08"
+  },
+  "completed": true,
+  "ended": "2026-10-20T01:32:20.724Z"
+}

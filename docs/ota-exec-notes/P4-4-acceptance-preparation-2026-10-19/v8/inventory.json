@@ -1,0 +1,125 @@
+{
+  "scope": "P44-SUCCESSOR-05 independent review and v8 preparation, not formal PASS",
+  "base_commit": "ca352d8b0410d2040ced7be8a94290ef86a2b406",
+  "entries": [
+    {
+      "source": ".cache/p44-v7-development/successor05-01/node.log",
+      "path": "implementation-cancelled-node.log",
+      "size_bytes": 36,
+      "sha256": "5759057086399793519295eb2e6de9b4fa49629cc74ed6e9c05b9eb4006f7529"
+    },
+    {
+      "source": ".cache/p44-v7-development/successor05-01/run.py",
+      "path": "implementation-run.py",
+      "size_bytes": 5646,
+      "sha256": "fdb960a0a4f406d3eeaa90161d73cd0bee76173eb70cf134af2e7c6e307cefc8"
+    },
+    {
+      "source": ".cache/p44-v7-development/successor05-01/stdio.cjs",
+      "path": "implementation-stdio.cjs",
+      "size_bytes": 1819,
+      "sha256": "d6dfedf5322e608c9126b0267e9faa0f2dab8597eac04500bc5be318059173fd"
+    },
+    {
+      "source": "docs/ota-exec-notes/P4-4-s3-preacceptance-2026-10-19.md",
+      "path": "implementation-note.md",
+      "size_bytes": 173960,
+      "sha256": "2f280deb5c96a039fa50f5e6c766d53a4f75ba247885f9b2f0b6965e7de880fe"
+    },
+    {
+      "source": ".cache/p44-v7-development/successor05-02/node.log",
+      "path": "implementation-node.log",
+      "size_bytes": 1018,
+      "sha256": "d86746934cff1ca49a518e02808a7483c111ee98bf7d82b9df9516928ddc15ef"
+    },
+    {
+      "source": ".cache/p44-v7-development/successor05-02/node-receipt.json",
+      "path": "implementation-node-receipt.json",
+      "size_bytes": 812,
+      "sha256": "8c673b41c7b143ef35ddbfe6ae854457d69f1e1e929a01d308ce46bbebb8505a"
+    },
+    {
+      "source": ".cache/p44-v7-development/successor05-02/python.log",
+      "path": "implementation-python.log",
+      "size_bytes": 1216,
+      "sha256": "76150f5db1d6a9ea64aa2e8a5462c03527f454bbead99913573ace0fd679ad10"
+    },
+    {
+      "source": ".cache/p44-v7-development/successor05-02/python-receipt.json",
+      "path": "implementation-python-receipt.json",
+      "size_bytes": 852,
+      "sha256": "444bada93c9b46fa0587ee19f7bd5d0c1a80bdaa13dbe70bfc049bc771d6c15b"
+    },
+    {
+      "source": ".cache/p44-v7-development/successor05-02/audit.json",
+      "path": "implementation-audit.json",
+      "size_bytes": 176964,
+      "sha256": "d8af29a2175e0ba66218189c77f29caeb6c8d8b0348ba849df6d1338b0360290"
+    },
+    {
+      "source": ".cache/p44-v7-development/successor05-02/originals.json",
+      "path": "implementation-originals.json",
+      "size_bytes": 1110361,
+      "sha256": "aed630a757d060d1261eeda3523ff6d33becf98faa4d7af778ea42ba0d44490b"
+    },
+    {
+      "source": ".cache/p44-v7-development/successor05-02/node/real-io.json",
+      "path": "implementation-node-real-io.json",
+      "size_bytes": 253859,
+      "sha256": "f452159316eaaf686163d96156e282dd775afec0f1885bea2f4a093043a35f52"
+    },
+    {
+      "source": ".cache/p44/logs/successor05-root-record-review01.log",
+      "path": "successor05-root-record-review01.log",
+      "size_bytes": 351,
+      "sha256": "a7031f9c47e13b916cba8a292292c2d5c6a46044723912a928fa1fd9f29bb23c"
+    },
+    {
+      "source": ".cache/p44/logs/successor05-root-record-review01.json",
+      "path": "successor05-root-record-review01.json",
+      "size_bytes": 6533,
+      "sha256": "bf9a15e66dc93cd508e8fa509f55e271e304cf1d3794c2a2b07edb20ecfbfa7e"
+    },
+    {
+      "source": ".cache/p44/logs/successor05-root-consumer01.log",
+      "path": "successor05-root-consumer01.log",
+      "size_bytes": 1207,
+      "sha256": "41a8a8af231dd53276252d990f6570169f434a82bc11e95d038cefe66f05d020"
+    },
+    {
+      "source": ".cache/p44/logs/successor05-root-consumer01.json",
+      "path": "successor05-root-consumer01.json",
+      "size_bytes": 708,
+      "sha256": "efb20cd125bb069dfbe8fd1e25df94d858c309466962343b2a713f3daf0371ab"
+    },
+    {
+      "source": ".cache/p44/logs/successor05-root-entry01.log",
+      "path": "successor05-root-entry01.log",
+      "size_bytes": 550,
+      "sha256": "fa1f1065c993e64b751b488de77786c1783d4149c21c9e638f1052123929b3a0"
+    },
+    {
+      "source": ".cache/p44/logs/successor05-root-entry01.json",
+      "path": "successor05-root-entry01.json",
+      "size_bytes": 6217,
+      "sha256": "8ea3bd68f3ba701470707c82893148696af581625e9195185d8941695bf0b3f1"
+    },
+    {
+      "source": ".cache/p44/logs/v8-source-plan-review01.log",
+      "path": "v8-source-plan-review01.log",
+      "size_bytes": 454,
+      "sha256": "0f171635c7a7ac5032894c53ee0746394e95af1495207d67eaa5930a60343015"
+    },
+    {
+      "source": ".cache/p44/logs/v8-source-plan-review01.json",
+      "path": "v8-source-plan-review01.json",
+      "size_bytes": 4245,
+      "sha256": "e5483fed22f996d9c37df251cd860358b35aa97bbc6a22aa2e92436a44833fa9"
+    }
+  ],
+  "simulated_inputs": "Implementation fixture HTTP and development candidate identity; no live observation",
+  "historical_entries_verified": 6460,
+  "historical_git_blobs_verified": 6213,
+  "root_native_probe_uses_actual_git": true,
+  "cloud_requests": 0
+}

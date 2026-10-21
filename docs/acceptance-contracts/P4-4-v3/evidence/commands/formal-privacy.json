@@ -1,0 +1,22 @@
+{
+  "label": "formal-privacy",
+  "command": "python",
+  "args": [
+    "-I",
+    "-S",
+    "-B",
+    "Tools/acceptance/p44/bundle.py",
+    "privacy"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "started": "2026-10-19T15:32:54.433Z",
+  "ended": "2026-10-19T15:32:57.791Z",
+  "exitCode": 0,
+  "signal": null,
+  "process_closed": true,
+  "output": {
+    "path": "commands/formal-privacy.log",
+    "size_bytes": 115,
+    "sha256": "373a6383412e339895677403723f10585c6cfb0be45c02b523658662cd7228bd"
+  }
+}

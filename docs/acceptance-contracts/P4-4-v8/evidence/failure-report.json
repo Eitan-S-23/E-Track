@@ -1,0 +1,259 @@
+{
+  "schema": "p44-v4-failure-closeout-v1",
+  "task_id": "P4-4",
+  "contract_id": "P4-4-v4",
+  "round_id": "P44-20261020-04",
+  "freeze_commit": "2756ca95e26ec636216313271708b3304d61a5cc",
+  "freeze_tree": "77549b4b756f1e88de8b854b4673857021a65783",
+  "formal_observation_attempted": true,
+  "final_matrix_result": "EVIDENCE_GAP",
+  "p44_pass": false,
+  "stage_failure": {
+    "command_id": "formal-after",
+    "command_exit_code": 1,
+    "process_closed": true,
+    "failure_owner": "environment",
+    "phase": "after-state capture",
+    "error_code": "UND_ERR_CONNECT_TIMEOUT",
+    "classification": "Connection attempt timed out before informational/final HTTP headers or body. No credential denial, D1 error or decode failure is established.",
+    "http_status": null,
+    "completed": false,
+    "request_attempts": 1,
+    "automatic_retries": 0,
+    "request_elapsed_ms": 10500,
+    "envelope_elapsed_ms": 13871,
+    "configured_http_deadline_seconds": 60,
+    "request_started": "2026-10-20T01:38:31.684Z",
+    "request_ended": "2026-10-20T01:38:42.184Z",
+    "operation": "SELECT * FROM \"audit_logs\" ORDER BY rowid LIMIT 8 OFFSET 16",
+    "database_role": "protected Trace",
+    "evidence": [
+      "evidence/commands/formal-after.json",
+      "evidence/commands/formal-after.log",
+      "evidence/snapshots/after/protected-audit_logs-rows8-16.http.json",
+      "evidence/snapshots/after/protected-audit_logs-rows8-16.request.json",
+      "evidence/snapshots/after/protected-audit_logs-rows8-16-reservation.json",
+      "evidence/snapshots/after/protected-audit_logs-rows8-16-request-failure-1.json"
+    ]
+  },
+  "complete_after_observations_preserved": [
+    {
+      "path": "evidence/snapshots/after/production-announcements-count.http.json",
+      "size_bytes": 1341,
+      "sha256": "a92b8076777e76257d7daac0eeb0bf44bffc2f66eb18ee3349e8b73af0b22bed"
+    },
+    {
+      "path": "evidence/snapshots/after/production-app_config-count.http.json",
+      "size_bytes": 1332,
+      "sha256": "20fbc2b4b0c13229a2c11949ed6871e0c4f9250e77e84c1fbb699ca29e098b9f"
+    },
+    {
+      "path": "evidence/snapshots/after/production-apps-count.http.json",
+      "size_bytes": 1314,
+      "sha256": "ffefdfb12ef1fe72d90f499957ae1a1d5c3262cb9ec7b7205b04700988bb5823"
+    },
+    {
+      "path": "evidence/snapshots/after/production-audit_logs-count.http.json",
+      "size_bytes": 1332,
+      "sha256": "70f436f52850bfd3fd93b14d98fd028e56da1d1672133c0be18a6328b3f15b3c"
+    },
+    {
+      "path": "evidence/snapshots/after/production-channel_history-count.http.json",
+      "size_bytes": 1347,
+      "sha256": "aef33bbec67f87a8e5d44e3e42a905545f17cd3f5b9da1c923a95774fcd13f86"
+    },
+    {
+      "path": "evidence/snapshots/after/production-channels-count.http.json",
+      "size_bytes": 1326,
+      "sha256": "1b0f8098ef195047b04d6db8b1a808c9002ea34e2e73d7669b1cfd6b18c796d7"
+    },
+    {
+      "path": "evidence/snapshots/after/production-d1_migrations-count.http.json",
+      "size_bytes": 1341,
+      "sha256": "1bdd420227d39ec1d1618a0d42ed6df6d94c9532330b079a81c8b33238fac62e"
+    },
+    {
+      "path": "evidence/snapshots/after/production-d1_migrations-rows8-0.http.json",
+      "size_bytes": 1347,
+      "sha256": "f0015b4a88870711aa17ba7370a078858dd4e99d241b00500ede5c9dacdd791e"
+    },
+    {
+      "path": "evidence/snapshots/after/production-firmware_admin_idempotency-count.http.json",
+      "size_bytes": 1380,
+      "sha256": "a5912726c98f00ca68864871a1366f3e4e30a7c6001e773ff3d1ebdf4ecac6f2"
+    },
+    {
+      "path": "evidence/snapshots/after/production-firmware_admin_idempotency_tombstones-count.http.json",
+      "size_bytes": 1413,
+      "sha256": "368e62221922bad4cdbcbde4e85b3a7bd490b82150909f810131647b1a912398"
+    },
+    {
+      "path": "evidence/snapshots/after/production-firmware_backfill_manifests-count.http.json",
+      "size_bytes": 1383,
+      "sha256": "ba6606e64b031b0603286cb34deb32f1d9f34ce86fb675a55a2a497b9fe52f85"
+    },
+    {
+      "path": "evidence/snapshots/after/production-firmware_channels-count.http.json",
+      "size_bytes": 1353,
+      "sha256": "9a47f99675e48504f43fcc16c934634847a9ac328bb3a164b731e5fe2ed20ad6"
+    },
+    {
+      "path": "evidence/snapshots/after/production-firmware_channels_legacy-count.http.json",
+      "size_bytes": 1374,
+      "sha256": "d137ca0647fb254e0de40b48dff912b631a1e994a6d2975cb67742c2e6ff4d77"
+    },
+    {
+      "path": "evidence/snapshots/after/production-firmware_release_assets-count.http.json",
+      "size_bytes": 1371,
+      "sha256": "30c3bad2839eddbe9b445e0d7f00965a7af9036cf99d24faa58f4bbed8f8fd98"
+    },
+    {
+      "path": "evidence/snapshots/after/production-firmware_releases-count.http.json",
+      "size_bytes": 1353,
+      "sha256": "d43c41955376540fd9870ca1c8e700cff2a8746854a9f01079b50e9d2308834f"
+    },
+    {
+      "path": "evidence/snapshots/after/production-firmware_releases_legacy-count.http.json",
+      "size_bytes": 1374,
+      "sha256": "a87f5c9793dee378556aaa11c95c982c1141d856244fb897626cb59d7ce9a30e"
+    },
+    {
+      "path": "evidence/snapshots/after/production-patches-count.http.json",
+      "size_bytes": 1323,
+      "sha256": "93a4b659c6f746575f566085e1d622b0c835c532725473bac04e27b5a750b48f"
+    },
+    {
+      "path": "evidence/snapshots/after/production-r2-1.http.json",
+      "size_bytes": 681,
+      "sha256": "b52534727db8a6263fb9032fde918d1557c0c514f4a447cafb82175dba111245"
+    },
+    {
+      "path": "evidence/snapshots/after/production-release_assets-count.http.json",
+      "size_bytes": 1344,
+      "sha256": "e3050e4330b73b27ce501084edb1a9ce63e9520a7a4537103b9443db9046270d"
+    },
+    {
+      "path": "evidence/snapshots/after/production-releases-count.http.json",
+      "size_bytes": 1326,
+      "sha256": "ec2a5493610093b93d4f6dd8f391634cfefb74907dd91f36ca60508f97745985"
+    },
+    {
+      "path": "evidence/snapshots/after/production-schema.http.json",
+      "size_bytes": 1305,
+      "sha256": "fd37d3fdf5b538c856238e40d8f8641f4a3c4ea427aca88606fb8c977d2da9ba"
+    },
+    {
+      "path": "evidence/snapshots/after/protected-announcements-count.http.json",
+      "size_bytes": 1338,
+      "sha256": "b84659a760dda36611bd255f8dee2e93a51010423ed5e599790d8fdde151fe24"
+    },
+    {
+      "path": "evidence/snapshots/after/protected-announcements-rows8-0.http.json",
+      "size_bytes": 1344,
+      "sha256": "35212dbeed682890f938b0135977ac93e7bd95c0ea64be32a3f955739ce93287"
+    },
+    {
+      "path": "evidence/snapshots/after/protected-app_config-count.http.json",
+      "size_bytes": 1329,
+      "sha256": "bd56a496854346e2127ba5888a0ad8c5ccceee31d6a0a14dd27f5f0d95bf4e20"
+    },
+    {
+      "path": "evidence/snapshots/after/protected-app_config-rows8-0.http.json",
+      "size_bytes": 1335,
+      "sha256": "9a46bca770e39e4e41a4c7243230e2b894ad728470e80c9bb5c8a26e5d0c541f"
+    },
+    {
+      "path": "evidence/snapshots/after/protected-apps-count.http.json",
+      "size_bytes": 1311,
+      "sha256": "ea00166ed26cddedbd6d4aed7e46ef011b82399cf9969b010030e0fdffe29e8a"
+    },
+    {
+      "path": "evidence/snapshots/after/protected-apps-rows8-0.http.json",
+      "size_bytes": 1317,
+      "sha256": "f3fd1ff97155557362b393e5517bb26b5386f89fc2e52aff2868d3216393dfaf"
+    },
+    {
+      "path": "evidence/snapshots/after/protected-audit_logs-count.http.json",
+      "size_bytes": 1329,
+      "sha256": "6a8ba21372611a873ed73428b22f1d85f54983caacdcf3b3acea186e08e6947d"
+    },
+    {
+      "path": "evidence/snapshots/after/protected-audit_logs-rows8-0.http.json",
+      "size_bytes": 1338,
+      "sha256": "591d78c5d6eb7bfdc1047eda5cd8ca68eff499a4bb7ff479d2a6b534f33680a8"
+    },
+    {
+      "path": "evidence/snapshots/after/protected-audit_logs-rows8-8.http.json",
+      "size_bytes": 1337,
+      "sha256": "a7e116d9945736fec627d8d2b2ea9f9efdb205651502f8d236d4fb152c7ba2af"
+    },
+    {
+      "path": "evidence/snapshots/after/protected-schema.http.json",
+      "size_bytes": 1302,
+      "sha256": "493ffd7364eab9472787f2b8aa746ac932a177574cf28c6a2e6a6c02decb9f84"
+    }
+  ],
+  "after_http_originals": {
+    "complete": 31,
+    "incomplete": 1,
+    "complete_d1": 30,
+    "complete_r2": 1
+  },
+  "successful_observations_preserved": {
+    "run_a": 39313672925,
+    "run_a_state": "rejected",
+    "run_b": 39351100037,
+    "run_b_state": "approved",
+    "run_b_conclusion": "success",
+    "attempts": {
+      "a": 1,
+      "b": 1
+    },
+    "staging_dispatches": 2,
+    "successful_rehearsals_replayed": 0,
+    "evidence": [
+      "evidence/reviewer-attestation.json",
+      "evidence/run-a/final.json",
+      "evidence/run-b/final.json",
+      "evidence/rehearsal-result.json",
+      "evidence/readbacks.json",
+      "evidence/production-preflight-result.json"
+    ]
+  },
+  "predecessor": {
+    "source_bundle_commit": "20febda2ac2e05e5f4b761a9f365091b177516b6",
+    "contract_sha256": "4FC05662F1BB9CA829BB8E769754229F6BEBC41CBB99A3ED38099DB1E5D7E2CD",
+    "matrix_sha256": "41C328859FE3289567FFFF409375766148D826D76F79918CF34ED14740413895",
+    "manifest": {
+      "path": "evidence/inputs/predecessor-before.json",
+      "size_bytes": 52411,
+      "sha256": "6493f2dba69627ed1ec1b84e4a431b5a7804eb2db0be0d8aecb433e5be4eb4d9"
+    },
+    "complete_http_originals_retained": 47,
+    "incomplete_http_originals_retained": 3
+  },
+  "matrix_disposition": {
+    "raw_state_result": "NOT_OBSERVED",
+    "raw_state_observed": null,
+    "reason": "Before and negatives completed; after is incomplete. APPROVALS lacks assemble-complete/approvals execution; ISOLATION was not executed. Do not infer missing results from successful A/B or fabricate exits.",
+    "initial_not_run_matrix": {
+      "path": "evidence-matrix.json",
+      "size_bytes": 4341,
+      "sha256": "79a62e7a651af603e691d6985cd7e4b0fff72ae0cbd2a98b24ae2cd25b759e07"
+    },
+    "actual_rerun_plan": {
+      "path": "rerun-plan.json",
+      "size_bytes": 4866,
+      "sha256": "775b310d796e1378a87b526f7095351dced02014226e7b28fbe84094af4e4395"
+    },
+    "previous_round_id": "P44-20261019-03"
+  },
+  "not_executed_observation_commands": [
+    "formal-assemble-complete",
+    "formal-approvals",
+    "formal-states"
+  ],
+  "privacy_scope": "Prepared metadata precedes the one formal-privacy execution. The final matrix must consume its real closed receipt and successful result, not this report as a privacy verdict. Final sealing bytes remain subject to root staged-byte review.",
+  "boundary": "A was personally rejected; B was personally approved and completed the one new staging chain. No production release, gate unlock or device operation. Incomplete after data cannot prove full production/protected-resource isolation.",
+  "next": "Preserve B success and all originals. Only justified, separately admitted minimal missing read-only collection/evaluation may resume; no new workflow dispatch, upload or registration."
+}

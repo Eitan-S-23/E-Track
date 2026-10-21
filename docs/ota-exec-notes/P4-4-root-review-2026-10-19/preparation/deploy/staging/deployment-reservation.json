@@ -1,0 +1,16 @@
+{
+  "role": "staging",
+  "target": {
+    "name": "e-track-firmware-p41-test",
+    "bucket": "e-track-firmware-p41-test-releases",
+    "d1": "2617e1e1-956f-42ce-a465-da56d84abf06",
+    "environment": "staging",
+    "originalConfig": "D:/github/my/E-Track/.cache/p41-dev-20261015/.cache/cf-firmware-setup-20261015/d1-edit-r2/wrangler.json",
+    "version": "db7d28f6-453d-439b-b37e-ef98361e56d9"
+  },
+  "sourceCommit": "b56534d7b6c993c0795010d0404fb8a81f7eeb9d",
+  "runtimeSha256": "1ad919d795a2354cd4c7d9617f3e3c9805f831967d1a2cdd5930ba61e4c3303f",
+  "priorVersion": "db7d28f6-453d-439b-b37e-ef98361e56d9",
+  "reservedAt": "2026-10-18T23:33:46.344Z",
+  "mutationsAllowed": "One Worker deploy only; preserve all bindings, secrets, crons and query redaction"
+}

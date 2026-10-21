@@ -1,0 +1,41 @@
+{
+  "createdAt": "2026-10-19T07:40:33Z",
+  "account_id": "[REDACTED]",
+  "jobs": {
+    "production": {
+      "http_create": 200,
+      "token_id": "[REDACTED]",
+      "name": "e-track-firmware-production-s3-ci-20261019",
+      "bucket": "e-track-firmware-production-releases",
+      "resource_scope": "com.cloudflare.edge.r2.bucket.[REDACTED]_default_e-track-firmware-production-releases",
+      "scope_check": "PASS",
+      "s3_sigv4_listobjects_http": 200,
+      "value_masked": "[REDACTED]...53chars",
+      "gh_env": "firmware-production",
+      "gh_secret_names": [
+        "TRACE_R2_ACCESS_KEY_ID",
+        "TRACE_R2_SECRET_ACCESS_KEY"
+      ]
+    },
+    "rehearsal": {
+      "http_create": 200,
+      "token_id": "[REDACTED]",
+      "name": "e-track-firmware-rehearsal-s3-ci-20261019",
+      "bucket": "e-track-firmware-p41-test-releases",
+      "resource_scope": "com.cloudflare.edge.r2.bucket.[REDACTED]_default_e-track-firmware-p41-test-releases",
+      "scope_check": "PASS",
+      "s3_sigv4_listobjects_http": 200,
+      "value_masked": "[REDACTED]...53chars",
+      "gh_env": "firmware-rehearsal",
+      "gh_secret_names": [
+        "FIRMWARE_REHEARSAL_TRACE_R2_ACCESS_KEY_ID",
+        "FIRMWARE_REHEARSAL_TRACE_R2_SECRET_ACCESS_KEY"
+      ]
+    }
+  },
+  "buckets_seen": [
+    "e-track-firmware-p41-test-releases",
+    "e-track-firmware-production-releases",
+    "trace-update-staging-releases"
+  ]
+}

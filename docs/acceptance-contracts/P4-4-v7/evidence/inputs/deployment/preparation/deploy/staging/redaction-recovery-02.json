@@ -1,0 +1,364 @@
+{
+  "startedAt": "2026-10-18T23:41:02.377Z",
+  "purpose": "Restore the pre-deployment query-redaction invariant only",
+  "requests": [
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/workers/scripts/e-track-firmware-p41-test/settings",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-18T23:41:03.579Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-recover-staging-02\\01.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-recover-staging-02\\01.headers",
+      "endedAt": "2026-10-18T23:41:06.849Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 200,
+      "bytes": 2953,
+      "sha256": "ab691136e49230cd54532ceb78c8fa5738c4898b69ba5624a35c459dd6ed4374",
+      "stderr": "",
+      "requestId": "a4cb6454dbe9ec0b-NRT"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/workers/scripts/e-track-firmware-p41-test/deployments",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-18T23:41:07.911Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-recover-staging-02\\02.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-recover-staging-02\\02.headers",
+      "endedAt": "2026-10-18T23:41:10.414Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 200,
+      "bytes": 1703,
+      "sha256": "8641d8ddde281aa3203bb2ab579cf7019acf85bdac46b8437312ef6bdc8f6b9c",
+      "stderr": "",
+      "requestId": "a4cb646cad75de1f-NRT"
+    },
+    {
+      "method": "PATCH",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/workers/scripts/e-track-firmware-p41-test/script-settings",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-18T23:41:12.389Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-recover-staging-02\\03.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-recover-staging-02\\03.headers",
+      "endedAt": "2026-10-18T23:41:14.363Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 200,
+      "bytes": 510,
+      "sha256": "ccd837f2e3c91361b08fb24666eca225838d2384b55a593eb0985a7aa22e61b3",
+      "stderr": "",
+      "requestId": "a4cb6483be8a12bb-NRT"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/workers/scripts/e-track-firmware-p41-test/settings",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-18T23:41:15.412Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-recover-staging-02\\04.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-recover-staging-02\\04.headers",
+      "endedAt": "2026-10-18T23:41:17.709Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 200,
+      "bytes": 2952,
+      "sha256": "162002d0ec27a8fb306a6c830ecb6c453d22d3d911e62a17035e6ce5b708a889",
+      "stderr": "",
+      "requestId": "a4cb64996947d773-NRT"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/workers/scripts/e-track-firmware-p41-test/schedules",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-18T23:41:18.782Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-recover-staging-02\\05.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-recover-staging-02\\05.headers",
+      "endedAt": "2026-10-18T23:41:20.861Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 200,
+      "bytes": 251,
+      "sha256": "2eb51061e442d1609dda0c15ad027ef75958fa2691ea69a563355a03288a931b",
+      "stderr": "",
+      "requestId": "a4cb64ad2fab97de-NRT"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/workers/scripts/e-track-firmware-p41-test/content/v2",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-18T23:41:21.910Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-recover-staging-02\\06.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-recover-staging-02\\06.headers",
+      "endedAt": "2026-10-18T23:41:26.280Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 200,
+      "bytes": 149262,
+      "sha256": "3ec863b8e3883d1c8f134485bd353400ad678e6f906c858564d7dab6cf4ca615",
+      "stderr": "",
+      "requestId": "a4cb64c1d80bdb4f-NRT"
+    }
+  ],
+  "noWorkerBusinessRequests": true,
+  "formalAcceptance": "NOT_RUN",
+  "before": {
+    "placement": {},
+    "compatibility_date": "2026-06-28",
+    "compatibility_flags": [
+      "nodejs_compat"
+    ],
+    "usage_model": "standard",
+    "tags": [],
+    "tail_consumers": [],
+    "logpush": false,
+    "observability": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "redact_query_string": false,
+      "logs": {
+        "enabled": true,
+        "head_sampling_rate": 1,
+        "persist": true,
+        "invocation_logs": true
+      },
+      "traces": {
+        "enabled": false,
+        "persist": true,
+        "head_sampling_rate": 1
+      }
+    },
+    "annotations": {
+      "workers/message": "P4-4 configuration; tested CI source b56534d7b6c993c0795010d0404fb8a81f7eeb9d",
+      "workers/tag": "p44-b56534d7b6c9",
+      "workers/triggered_by": "version_upload"
+    },
+    "bindings": [
+      {
+        "name": "APP_ID",
+        "text": "trace",
+        "type": "plain_text"
+      },
+      {
+        "database_id": "2617e1e1-956f-42ce-a465-da56d84abf06",
+        "id": "2617e1e1-956f-42ce-a465-da56d84abf06",
+        "name": "DB",
+        "type": "d1"
+      },
+      {
+        "name": "DEPLOY_TOKEN_SHA256",
+        "type": "secret_text"
+      },
+      {
+        "name": "DOWNLOAD_HMAC_KEY_CURRENT",
+        "type": "secret_text"
+      },
+      {
+        "name": "DOWNLOAD_TOKEN_KEY_VERSION",
+        "text": "p41-test-1",
+        "type": "plain_text"
+      },
+      {
+        "name": "DOWNLOAD_TOKEN_TTL_SECONDS",
+        "text": "300",
+        "type": "plain_text"
+      },
+      {
+        "name": "ENABLE_DIRECT_ADMIN_API",
+        "text": "false",
+        "type": "plain_text"
+      },
+      {
+        "name": "ENVIRONMENT",
+        "text": "staging",
+        "type": "plain_text"
+      },
+      {
+        "name": "FIRMWARE_V2_CUTOVER_EPOCH",
+        "text": "1792039926",
+        "type": "plain_text"
+      },
+      {
+        "name": "GITHUB_OWNER",
+        "text": "Eitan-S-23",
+        "type": "plain_text"
+      },
+      {
+        "name": "GITHUB_REPO",
+        "text": "E-Track",
+        "type": "plain_text"
+      },
+      {
+        "name": "MANIFEST_CACHE",
+        "namespace_id": "9581ef5b95154abaa7d441fd07c2f220",
+        "type": "kv_namespace"
+      },
+      {
+        "name": "MANIFEST_CACHE_TTL_SECONDS",
+        "text": "60",
+        "type": "plain_text"
+      },
+      {
+        "class_name": "RateLimiter",
+        "name": "RATE_LIMITER",
+        "namespace_id": "51fbc6056abd4797bf28feb2f8863307",
+        "type": "durable_object_namespace"
+      },
+      {
+        "name": "RATE_LIMIT_MAX_REQUESTS",
+        "text": "60",
+        "type": "plain_text"
+      },
+      {
+        "name": "RATE_LIMIT_WINDOW_SECONDS",
+        "text": "60",
+        "type": "plain_text"
+      },
+      {
+        "bucket_name": "e-track-firmware-p41-test-releases",
+        "name": "RELEASES_BUCKET",
+        "type": "r2_bucket"
+      }
+    ]
+  },
+  "version": "bb3d44fd-4a84-489e-9e04-6adfc54a458e",
+  "deploymentId": "88983ae0-75b1-487b-af0d-788b6cf976ec",
+  "settingsWrite": true,
+  "after": {
+    "placement": {},
+    "compatibility_date": "2026-06-28",
+    "compatibility_flags": [
+      "nodejs_compat"
+    ],
+    "usage_model": "standard",
+    "tags": [],
+    "tail_consumers": [],
+    "logpush": false,
+    "observability": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "redact_query_string": true,
+      "logs": {
+        "enabled": true,
+        "head_sampling_rate": 1,
+        "persist": true,
+        "invocation_logs": true
+      },
+      "traces": {
+        "enabled": false,
+        "persist": true,
+        "head_sampling_rate": 1
+      }
+    },
+    "annotations": {
+      "workers/message": "P4-4 configuration; tested CI source b56534d7b6c993c0795010d0404fb8a81f7eeb9d",
+      "workers/tag": "p44-b56534d7b6c9",
+      "workers/triggered_by": "version_upload"
+    },
+    "bindings": [
+      {
+        "name": "APP_ID",
+        "text": "trace",
+        "type": "plain_text"
+      },
+      {
+        "database_id": "2617e1e1-956f-42ce-a465-da56d84abf06",
+        "id": "2617e1e1-956f-42ce-a465-da56d84abf06",
+        "name": "DB",
+        "type": "d1"
+      },
+      {
+        "name": "DEPLOY_TOKEN_SHA256",
+        "type": "secret_text"
+      },
+      {
+        "name": "DOWNLOAD_HMAC_KEY_CURRENT",
+        "type": "secret_text"
+      },
+      {
+        "name": "DOWNLOAD_TOKEN_KEY_VERSION",
+        "text": "p41-test-1",
+        "type": "plain_text"
+      },
+      {
+        "name": "DOWNLOAD_TOKEN_TTL_SECONDS",
+        "text": "300",
+        "type": "plain_text"
+      },
+      {
+        "name": "ENABLE_DIRECT_ADMIN_API",
+        "text": "false",
+        "type": "plain_text"
+      },
+      {
+        "name": "ENVIRONMENT",
+        "text": "staging",
+        "type": "plain_text"
+      },
+      {
+        "name": "FIRMWARE_V2_CUTOVER_EPOCH",
+        "text": "1792039926",
+        "type": "plain_text"
+      },
+      {
+        "name": "GITHUB_OWNER",
+        "text": "Eitan-S-23",
+        "type": "plain_text"
+      },
+      {
+        "name": "GITHUB_REPO",
+        "text": "E-Track",
+        "type": "plain_text"
+      },
+      {
+        "name": "MANIFEST_CACHE",
+        "namespace_id": "9581ef5b95154abaa7d441fd07c2f220",
+        "type": "kv_namespace"
+      },
+      {
+        "name": "MANIFEST_CACHE_TTL_SECONDS",
+        "text": "60",
+        "type": "plain_text"
+      },
+      {
+        "class_name": "RateLimiter",
+        "name": "RATE_LIMITER",
+        "namespace_id": "51fbc6056abd4797bf28feb2f8863307",
+        "type": "durable_object_namespace"
+      },
+      {
+        "name": "RATE_LIMIT_MAX_REQUESTS",
+        "text": "60",
+        "type": "plain_text"
+      },
+      {
+        "name": "RATE_LIMIT_WINDOW_SECONDS",
+        "text": "60",
+        "type": "plain_text"
+      },
+      {
+        "bucket_name": "e-track-firmware-p41-test-releases",
+        "name": "RELEASES_BUCKET",
+        "type": "r2_bucket"
+      }
+    ]
+  },
+  "crons": [
+    "0 * * * *"
+  ],
+  "content": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\deploy\\staging\\recovered-content-02.bin",
+    "contentType": "multipart/form-data; boundary=2524ef09bc653902fe2001576200a4bbe1f3e5181655b48cbae0cc480cef",
+    "entrypoint": "index.js",
+    "sha256": "3ec863b8e3883d1c8f134485bd353400ad678e6f906c858564d7dab6cf4ca615",
+    "moduleSha256": "1ad919d795a2354cd4c7d9617f3e3c9805f831967d1a2cdd5930ba61e4c3303f",
+    "moduleBytes": 149013
+  },
+  "complete": true,
+  "endedAt": "2026-10-18T23:41:26.594Z"
+}

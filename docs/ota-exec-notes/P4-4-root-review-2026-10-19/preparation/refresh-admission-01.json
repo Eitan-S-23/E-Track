@@ -1,0 +1,43 @@
+{
+  "startedAt": "2026-10-19T00:38:10.402Z",
+  "kind": "READ_ONLY_ADMISSION_REFRESH",
+  "formalAcceptance": "NOT_RUN",
+  "requests": [
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/environments/firmware-production",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-19T00:38:11.459Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-refresh-admission-01\\01.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-refresh-admission-01\\01.headers",
+      "endedAt": "2026-10-19T00:38:15.104Z",
+      "exitCode": 0,
+      "signal": null,
+      "status": 200,
+      "bytes": 1661,
+      "sha256": "2a5e615177b0aaa517bebaf7f51c1b183b53d0b24b159aa395f69a48e38f48b5",
+      "stderr": "",
+      "requestId": "6A73:79DFA:10674DC:11CC86A:6AD56674"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/environments/firmware-production/secrets",
+      "transport": "curl-verified-TLS-config-stdin",
+      "startedAt": "2026-10-19T00:38:16.207Z",
+      "bodyPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-refresh-admission-01\\02.body",
+      "headersPath": "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\curl-refresh-admission-01\\02.headers",
+      "endedAt": "2026-10-19T00:38:31.272Z",
+      "exitCode": 28,
+      "signal": null,
+      "status": 0,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "curl: (28) Connection timed out after 15002 milliseconds\r\n"
+    }
+  ],
+  "environments": {},
+  "error": "Curl transport failed; retain output and reconcile without write retry",
+  "endedAt": "2026-10-19T00:38:31.292Z"
+}

@@ -1,0 +1,31 @@
+{
+  "method": "GET",
+  "path": "/e-track-firmware-p41-test-releases/trace/firmware/e-track-at32f435/30209-mcu-e-track-at32f435-v3.2.9/e-track-at32f435-v3.2.9-full.etu",
+  "started": "2026-10-20T01:25:58.494Z",
+  "request_attempts": 1,
+  "request_failures": [],
+  "status": 200,
+  "response_headers": {
+    "date": "Tue, 20 Oct 2026 01:26:03 GMT",
+    "content-type": "application/vnd.e-track.etu",
+    "content-length": "285646",
+    "connection": "keep-alive",
+    "accept-ranges": "bytes",
+    "cache-control": "public, max-age=31536000, immutable",
+    "content-disposition": "attachment; filename=\"e-track-at32f435-v3.2.9-full.etu\"",
+    "etag": "\"b14880b90b02ece7c9709749285c63e2\"",
+    "last-modified": "Tue, 20 Oct 2026 01:13:12 GMT",
+    "x-amz-meta-content-digest": "sha-256=:TYocOYsp8XfxFT8ycei7DZC5rNv4RTInLjpf7yvaH2o=:",
+    "x-amz-meta-kind": "full",
+    "x-amz-meta-sha256": "4d8a1c398b29f177f1153f3271e8bb0d90b9acdbf84532272e3a5fef2bda1f6a",
+    "server": "cloudflare",
+    "cf-ray": "a4d43b6aae5f781f-NRT"
+  },
+  "body": {
+    "path": "readbacks/full.body",
+    "size_bytes": 285646,
+    "sha256": "4d8a1c398b29f177f1153f3271e8bb0d90b9acdbf84532272e3a5fef2bda1f6a"
+  },
+  "completed": true,
+  "ended": "2026-10-20T01:26:09.525Z"
+}

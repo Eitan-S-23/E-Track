@@ -1,0 +1,1 @@
+{"schema": "p44-after-existing-v1", "ok": true, "kind": "before", "source": {"path": "snapshots/before.json", "size_bytes": 246088, "sha256": "2bbf10f998f94d34c39a8788c3876837ccc1f176a7ca8c057021c3065169d7af"}, "source_bundle_commit": "da37711799a21c4eb2c5d082dab1a7b81d028511", "platform_operations": 0}

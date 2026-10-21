@@ -7,6 +7,7 @@ This index and its topic records are operational history, not acceptance inputs.
 | Topic | Scope | Record |
 | --- | --- | --- |
 | PROJECT-WORKFLOW | All components, roles and worktrees | [Project workflow decisions](project-workflow.md) |
+| PROJECT-CREDENTIAL-REUSE | All agents: discover existing credentials before requesting replacements; `e-track-ci` = `e-track-p41-ci`, protected locator and dated capability/scope evidence; no plaintext or production authority implied | [Credential registry](credential-registry.md) |
 | PROJECT-TOOL-REUSE | Existing tools first, evidenced custom-tool exceptions and stopping unnecessary tool expansion; all agents | [PROJECT-04: group16 lesson](project-workflow.md#project-04-reuse-tools-before-replacing-them) |
 | PROJECT-CANDIDATE-INSTALL | Prefer standard J-Link for candidate installation after state checks; reserve OTA for required observations, not redundant provisioning | [PROJECT-05: J-Link installation before OTA measurement](project-workflow.md#project-05-j-link-installation-before-ota-measurement) |
 | PROJECT-USER-NOTIFICATIONS | Manual real mentions only for continued operations needing an out-of-chat action without a reply; chat authorization/decisions use the automatic completion reminder | [PROJECT-06: Mid-task reminders, not duplicate final notifications](project-workflow.md#project-06-only-manual-mentions-for-mid-task-blockers) |

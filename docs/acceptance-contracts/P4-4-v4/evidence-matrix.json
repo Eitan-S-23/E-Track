@@ -1,0 +1,123 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P4-4-v4",
+  "contract_sha256": "86764FA47B8C52D748BF93B83C5735352CEAB69519D8FFCC4C6BFC706F8939B5",
+  "round_id": "P44-20261020-04",
+  "overall_result": "NOT_RUN",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "P44-HISTORY",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN under the v4 plan; all three actual predecessor failures remain recorded; history and quotas are not reset by the date change"
+    },
+    {
+      "id": "P44-CONFIGURATION",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN under the v4 plan; all three actual predecessor failures remain recorded; history and quotas are not reset by the date change"
+    },
+    {
+      "id": "P44-RAW-RUNS",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN under the v4 plan; all three actual predecessor failures remain recorded; history and quotas are not reset by the date change"
+    },
+    {
+      "id": "P44-REHEARSAL",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN under the v4 plan; all three actual predecessor failures remain recorded; history and quotas are not reset by the date change"
+    },
+    {
+      "id": "P44-RAW-STATE",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN under the v4 plan; all three actual predecessor failures remain recorded; history and quotas are not reset by the date change"
+    },
+    {
+      "id": "P44-RAW-READBACK",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN under the v4 plan; all three actual predecessor failures remain recorded; history and quotas are not reset by the date change"
+    },
+    {
+      "id": "P44-APPROVALS",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN under the v4 plan; all three actual predecessor failures remain recorded; history and quotas are not reset by the date change"
+    },
+    {
+      "id": "P44-ISOLATION",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN under the v4 plan; all three actual predecessor failures remain recorded; history and quotas are not reset by the date change"
+    },
+    {
+      "id": "P44-HYGIENE",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "NOT_RUN under the v4 plan; all three actual predecessor failures remain recorded; history and quotas are not reset by the date change"
+    }
+  ],
+  "evidence_hashes": {},
+  "commands": [],
+  "artifacts": []
+}

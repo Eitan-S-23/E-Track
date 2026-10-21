@@ -1,0 +1,33 @@
+{
+  "label": "formal-rerun-plan",
+  "command": "python",
+  "args": [
+    "-I",
+    "-S",
+    "-B",
+    "Tools/acceptance/validate_bundle.py",
+    "--contract",
+    "docs/acceptance-contracts/P4-4-v3.contract.json",
+    "--repo-root",
+    "D:/github/my/E-Track/.cache/p4-4-integration-20261018",
+    "--previous-contract",
+    "docs/acceptance-contracts/P4-4-v2.contract.json",
+    "--previous-matrix",
+    "docs/acceptance-contracts/P4-4-v2/final-evidence-matrix.json",
+    "--matrix",
+    "docs/acceptance-contracts/P4-4-v3/evidence-matrix.json",
+    "--write-rerun-plan",
+    "rerun-plan.json"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "started": "2026-10-19T15:17:09.681Z",
+  "ended": "2026-10-19T15:17:28.244Z",
+  "exitCode": 0,
+  "signal": null,
+  "process_closed": true,
+  "output": {
+    "path": "commands/formal-rerun-plan.log",
+    "size_bytes": 176,
+    "sha256": "7dcf140bbb65425e690476c6ad37c81e4cf1c2f81be28244a2694eec2b172141"
+  }
+}

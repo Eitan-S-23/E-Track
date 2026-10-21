@@ -1,0 +1,41 @@
+{
+  "label": "formal-rerun-plan",
+  "command": "python",
+  "args": [
+    "-I",
+    "-S",
+    "-B",
+    "Tools/acceptance/validate_bundle.py",
+    "--contract",
+    "docs/acceptance-contracts/P4-4-v7.contract.json",
+    "--repo-root",
+    "D:/github/my/E-Track/.cache/p4-4-integration-20261018",
+    "--previous-contract",
+    "docs/acceptance-contracts/P4-4-v6.contract.json",
+    "--previous-matrix",
+    "docs/acceptance-contracts/P4-4-v6/final-evidence-matrix.json",
+    "--reuse-source",
+    "docs/acceptance-contracts/P4-4-v4.contract.json",
+    "docs/acceptance-contracts/P4-4-v4/final-evidence-matrix.json",
+    "--reuse-source",
+    "docs/acceptance-contracts/P4-4-v5.contract.json",
+    "docs/acceptance-contracts/P4-4-v5/final-evidence-matrix.json",
+    "--matrix",
+    "docs/acceptance-contracts/P4-4-v7/evidence-matrix.json",
+    "--write-rerun-plan",
+    "rerun-plan.json"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "started": "2026-10-21T04:21:07.565Z",
+  "ended": "2026-10-21T04:22:12.998Z",
+  "exitCode": 0,
+  "signal": null,
+  "process_closed": true,
+  "closed": true,
+  "spawn_failed": false,
+  "output": {
+    "path": "recovery-commands-v7/formal-rerun-plan.log",
+    "size_bytes": 176,
+    "sha256": "18a625278dbd2b2cccbc7f64267ee64a8cbc341ca5756d53d68a60fc76e4fcd2"
+  }
+}

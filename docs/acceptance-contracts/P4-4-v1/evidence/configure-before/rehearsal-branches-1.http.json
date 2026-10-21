@@ -1,0 +1,42 @@
+{
+  "method": "GET",
+  "path": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/deployment-branch-policies?per_page=100&page=1",
+  "started": "2026-10-19T11:06:39.966Z",
+  "status": 200,
+  "response_headers": {
+    "date": "Mon, 19 Oct 2026 11:06:44 GMT",
+    "content-type": "application/json; charset=utf-8",
+    "content-length": "160",
+    "cache-control": "private, max-age=60, s-maxage=60",
+    "vary": "Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With",
+    "etag": "\"e4c948463f3211e58fb17a5ef4d843a227717a702cbe937773a4fe7f016fe772\"",
+    "x-oauth-scopes": "gist, read:org, repo, user, workflow",
+    "x-accepted-oauth-scopes": "",
+    "x-oauth-client-id": "178c6fc778ccc68e1d6a",
+    "x-github-media-type": "github.v3; format=json",
+    "x-github-api-version-selected": "2022-11-28",
+    "access-control-expose-headers": "ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset, Warning",
+    "access-control-allow-origin": "*",
+    "strict-transport-security": "max-age=31536000; includeSubdomains; preload",
+    "x-frame-options": "deny",
+    "x-content-type-options": "nosniff",
+    "x-xss-protection": "0",
+    "referrer-policy": "origin-when-cross-origin, strict-origin-when-cross-origin",
+    "content-security-policy": "default-src 'none'",
+    "server": "github.com",
+    "x-ratelimit-limit": "5000",
+    "x-ratelimit-remaining": "4994",
+    "x-ratelimit-reset": "1792411561",
+    "x-ratelimit-used": "6",
+    "x-ratelimit-resource": "core",
+    "x-github-request-id": "89CF:15E5A1:16E982:18BC18:6AD5F9C3",
+    "x-github-edge-region": "westus3"
+  },
+  "body": {
+    "path": "configure-before/rehearsal-branches-1.body",
+    "size_bytes": 160,
+    "sha256": "d8658cd9c160a2a9dc49d2025f5e6a54f1c777c4866e9b732d91aea9b5b93c13"
+  },
+  "completed": true,
+  "ended": "2026-10-19T11:06:44.809Z"
+}

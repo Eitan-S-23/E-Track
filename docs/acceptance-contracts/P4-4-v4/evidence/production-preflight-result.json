@@ -1,0 +1,38 @@
+{
+  "ok": true,
+  "http": {
+    "method": "POST",
+    "path": "/api/ci/firmware/preflight",
+    "started": "2026-10-20T01:28:37.133Z",
+    "request": {
+      "path": "production-preflight.request.json",
+      "size_bytes": 2100,
+      "sha256": "23c98392a2047f8179791e71babc3346e470618ecbfa893751e05d82774aa3f1"
+    },
+    "request_attempts": 1,
+    "request_failures": [],
+    "status": 200,
+    "response_headers": {
+      "date": "Tue, 20 Oct 2026 01:28:41 GMT",
+      "content-type": "application/json",
+      "content-length": "264",
+      "connection": "keep-alive",
+      "cache-control": "no-store",
+      "x-request-id": "6e7e4428-dafa-4213-8573-d2276bcf3b82",
+      "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=8kHru6uUWuKhs7vC1Y5lDPwvSpWo2d8WusXdeSUABL%2FxH9WhLs5O7P8lLJJSytW7J8CpkjIwUCtAWY4AfMaqXh1rkXx06czw12WtysYn66KszIQb2CFMbfpKqjVFhJlo28joldHRxKugqr1NGlseZvsQSj2Pu%2FnoyCDqf42vdTHup%2ByrhnYxtR%2F1\"}]}",
+      "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+      "server": "cloudflare",
+      "cf-ray": "a4d43f4a8fe2eb25-SJC",
+      "alt-svc": "h3=\":443\"; ma=86400"
+    },
+    "body": {
+      "path": "production-preflight.body",
+      "size_bytes": 264,
+      "sha256": "890adc8ea4e26fa4dc3bb0faedc3260e27378c0ee36698c2575db58e91385116"
+    },
+    "completed": true,
+    "ended": "2026-10-20T01:28:42.064Z"
+  },
+  "requested_request_id": "6e7e4428-dafa-4213-8573-d2276bcf3b82",
+  "effect": "Authenticated fixed SELECT-only endpoint; not production workflow consumption, registration or publication."
+}

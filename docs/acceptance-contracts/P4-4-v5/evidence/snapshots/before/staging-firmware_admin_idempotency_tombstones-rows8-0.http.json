@@ -1,0 +1,40 @@
+{
+  "method": "POST",
+  "path": "/accounts/[ACCOUNT]/d1/database/2617e1e1-956f-42ce-a465-da56d84abf06/query",
+  "started": "2026-10-19T19:33:43.377Z",
+  "request": {
+    "path": "snapshots/before/staging-firmware_admin_idempotency_tombstones-rows8-0.request.json",
+    "size_bytes": 97,
+    "sha256": "229dddfa5407a552a5cf5e03adbd525ca32eb97ff1f99758acb6489ec82d9cd4"
+  },
+  "request_headers": {
+    "accept-encoding": "gzip"
+  },
+  "request_attempts": 1,
+  "request_failures": [],
+  "status": 200,
+  "response_headers": {
+    "date": "Mon, 19 Oct 2026 19:33:47 GMT",
+    "content-type": "application/json",
+    "transfer-encoding": "chunked",
+    "connection": "keep-alive",
+    "cache-control": "no-store",
+    "api-version": "2026-10-01.epoch",
+    "cf-auditlog-id": "01a155a7-dde2-7f9a-874e-0d8b370025cc",
+    "content-encoding": "gzip",
+    "server": "cloudflare",
+    "cf-ray": "a4d237694d62f605-NRT"
+  },
+  "body": {
+    "path": "snapshots/before/staging-firmware_admin_idempotency_tombstones-rows8-0.body",
+    "size_bytes": 711,
+    "sha256": "236420e30c9af01de5e63c05d6bf375d2ff1b5c1558c3b862a9f2d5227249428"
+  },
+  "decoded_body": {
+    "path": "snapshots/before/staging-firmware_admin_idempotency_tombstones-rows8-0.decoded.body",
+    "size_bytes": 1745,
+    "sha256": "227352e0d7a54b2083e695c4002313bd43689b99c4410c9b2e4e474ea34eb507"
+  },
+  "completed": true,
+  "ended": "2026-10-19T19:33:49.375Z"
+}

@@ -1,0 +1,387 @@
+
+> @trace/update-service-worker@0.1.0 test
+> vitest run --config ../../../../../.github/scripts/p41-host.config.mjs
+
+
+ RUN  v4.1.9 D:/github/my/E-Track/.cache/p4-4-integration-20261018/app/bluetooth_flutter_Trace/cloudflare/update-service/worker
+
+(node:28360) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > firmware key wiring with a compiler double, never a local native build > rejects the source-defined development key, the public packaging fixture and zero 6ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > firmware key wiring with a compiler double, never a local native build > derives the key fingerprint and requires matching compiled-source provenance 5ms
+Compiler double, not an executed native build
+Compiler double, not an executed native build
+Compiler double, not an executed native build
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > firmware key wiring with a compiler double, never a local native build > uses one key input, verifies the App compile command, preserves both artifacts and removes the private header 538ms
+Compiler double, not an executed native build
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > firmware key wiring with a compiler double, never a local native build > rejects a compile recipe without the actual forced include before compiling 215ms
+Compiler double, not an executed native build
+error: fixture compiler diagnostic [REDACTED_KEY] ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > firmware key wiring with a compiler double, never a local native build > preserves redacted compiler errors and cleans the private header after failure 243ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > firmware key wiring with a compiler double, never a local native build > does not admit a missing key or a checks-mode request to the compiler 6ms
+Compiler double, not an executed native build
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > firmware key wiring with a compiler double, never a local native build > rejects a compiler-cache launcher before any key-bearing compilation 202ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > firmware key wiring with a compiler double, never a local native build > owns the header immediately after exclusive open and removes partial writes 166ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > firmware key wiring with a compiler double, never a local native build > cleans an abruptly terminated owned fixture through the real cleanup CLI, never a different run 1298ms
+Compiler double, not an executed native build
+Compiler double, not an executed native build
+Compiler double, not an executed native build
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > firmware key wiring with a compiler double, never a local native build > keeps the identical recipe's development run explicitly unpublishable 484ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects invalid GITHUB_EVENT_NAME before file or network access 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects invalid INPUT_CHECK_BINDINGS before file or network access 0ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects invalid INPUT_PUBLISH before file or network access 0ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects invalid INPUT_REHEARSAL before file or network access 0ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects invalid OTA_BOOT_CHAIN_READY before file or network access 0ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects invalid OTA_BOOT_CHAIN_READY before file or network access 0ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects invalid GITHUB_REPOSITORY before file or network access 0ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects invalid GITHUB_SHA before file or network access 0ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects invalid FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT before file or network access 0ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects invalid GITHUB_RUN_ID before file or network access 0ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects invalid GITHUB_RUN_ATTEMPT before file or network access 0ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects invalid TRACE_R2_BUCKET before file or network access 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects invalid TRACE_D1_DATABASE_NAME before file or network access 0ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects invalid TRACE_D1_DATABASE_ID before file or network access 0ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects invalid CLOUDFLARE_API_TOKEN before file or network access 0ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects invalid TRACE_UPDATE_SERVICE_URL before file or network access 0ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects invalid CLOUDFLARE_ACCOUNT_ID before file or network access 0ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects invalid TRACE_R2_ACCESS_KEY_ID before file or network access 0ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects invalid TRACE_R2_SECRET_ACCESS_KEY before file or network access 0ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects invalid TRACE_DEPLOY_TOKEN before file or network access 0ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > reads complete objects and fixed Worker preflight without control-plane access 64ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects absent existing objects without replacement 10ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects corruption despite matching object metadata 10ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects HEAD-only readback 7ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects unknown asset before storage 4ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects environment preflight before storage 9ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects digest preflight before storage 9ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects denied preflight before storage 7ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > bounded S3 and authenticated preflight qualification, host ports only > rejects changed monotonic observations without claiming a database snapshot 10ms
+stdout | ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > uploads and fully reads three assets, then atomically registers ready and replays with no extra rows/audit/channel effects
+P41_HOST_READY {
+  uploads: [
+    {
+      ok: true,
+      status: 'UPLOADED',
+      requestId: 'ca19b209-bcfb-4a16-aac2-a6eb5fe744d1',
+      kind: 'full',
+      fileName: 'e-track-at32f435-v20.0.1-full.etu',
+      r2Key: 'trace/firmware/e-track-at32f435/200001-mcu-e-track-at32f435-v20.0.1/e-track-at32f435-v20.0.1-full.etu',
+      sha256: '96b79623e290b4bda17da9e42320c48064e3efb510c392799ab2a7b1f9b759a3',
+      sizeBytes: 18,
+      contentDigest: 'sha-256=:lreWI+KQtL2hfankIyDEgGTj77UQw5J5mrKnsfm3WaM=:'
+    },
+    {
+      ok: true,
+      status: 'UPLOADED',
+      requestId: '042f48ab-1519-4fdb-94d4-13a923995d20',
+      kind: 'patch',
+      fileName: 'e-track-at32f435-v2.8.0-to-v20.0.1-patch.etu',
+      r2Key: 'trace/firmware/e-track-at32f435/200001-mcu-e-track-at32f435-v20.0.1/e-track-at32f435-v2.8.0-to-v20.0.1-patch.etu',
+      sha256: '022adb879b6163ddae8574d0f962d9b4f818b0bd457b572e1446ea6767fa5eee',
+      sizeBytes: 19,
+      contentDigest: 'sha-256=:Airbh5thY92uhXTQ+WLZtPgYsL1Fe1cuFEbqZ2f6Xu4=:'
+    },
+    {
+      ok: true,
+      status: 'UPLOADED',
+      requestId: 'edc75c25-714e-486c-8f8d-d5c1570b72d6',
+      kind: 'recovery',
+      fileName: 'recovery-v20.0.1.bin',
+      r2Key: 'trace/firmware/e-track-at32f435/200001-mcu-e-track-at32f435-v20.0.1/recovery-v20.0.1.bin',
+      sha256: 'd078040aeed0379ae774eb278815c0f2f5bf107251a796adfd179a20f89c3379',
+      sizeBytes: 22,
+      contentDigest: 'sha-256=:0HgECu7QN5rndOsniBXA8vW/EHJRp5at/ReaIPicM3k=:'
+    }
+  ],
+  registration: {
+    ok: true,
+    requestId: 'b86e7c9f-5215-4464-bed2-3b4ef73245d8',
+    releaseId: 'fw_0186e30639e32b86b67f3bef8958a43a66a8306360d77a1329581265ccd72e7a',
+    state: 'ready',
+    idempotent: false,
+    assetsRegistered: 3
+  },
+  replay: {
+    ok: true,
+    requestId: '292c4450-d8ff-4d29-ab81-7cfd7a34ac79',
+    releaseId: 'fw_0186e30639e32b86b67f3bef8958a43a66a8306360d77a1329581265ccd72e7a',
+    state: 'ready',
+    idempotent: true,
+    assetsRegistered: 3
+  },
+  before: { releases: 0, assets: 0, audit: 0, channels: [] },
+  after: {
+    releases: 1,
+    assets: 3,
+    audit: 1,
+    channels: [ [Object: null prototype], [Object: null prototype] ]
+  },
+  metadataSha256: 'f08d9540ba2fe252220241bb328f34f6145494f1853af3a02d2889de51b83231',
+  calls: [
+    'GET /healthz',
+    'POST /api/ci/firmware/preflight',
+    'POST /api/ci/firmware/releases',
+    'POST /api/ci/firmware/releases',
+    'GET /healthz',
+    'POST /api/ci/firmware/preflight',
+    'POST /api/ci/firmware/releases',
+    'POST /api/ci/firmware/releases'
+  ]
+}
+
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > uploads and fully reads three assets, then atomically registers ready and replays with no extra rows/audit/channel effects 856ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > missing asset rejects before health, GitHub, R2 or registration 43ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > bad digest rejects before health, GitHub, R2 or registration 70ms
+ × ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > same-key different bytes rejects without overwrite or register 85ms
+   → expected true to be false // Object.is equality
+ × ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > false-positive R2 put with missing full readback never persists verified metadata or touches D1 81ms
+   → expected true to be false // Object.is equality
+ × ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > false-positive R2 put with missing patch readback never persists verified metadata or touches D1 87ms
+   → expected true to be false // Object.is equality
+ × ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > false-positive R2 put with missing recovery readback never persists verified metadata or touches D1 97ms
+   → expected true to be false // Object.is equality
+ × ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > a real registration audit failure rolls back ready/assets and stops without retry 122ms
+   → expected [ …(2) ] to have a length of 1 but got 2
+ × ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > cancellation after the first upload stops subsequent uploads and registration 73ms
+   → expected true to be false // Object.is equality
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > monotonicity rejects lower versions and same-version changed metadata before upload 152ms
+ × ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > checks/PR/nightly, ambiguous modes, missing config and crossed buckets fail closed 48ms
+   → expected [Function] to throw an error
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BUCKET_ROLES rehearsal bucket e-track-firmware-p41-test-releases admitted=true 47ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BUCKET_ROLES rehearsal bucket trace-update-staging-releases admitted=false 52ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BUCKET_ROLES rehearsal bucket production-fixture-bucket admitted=false 54ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BUCKET_ROLES production bucket e-track-firmware-p41-test-releases admitted=false 51ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BUCKET_ROLES production bucket trace-update-staging-releases admitted=false 50ms
+ × ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BUCKET_ROLES production bucket production-fixture-bucket admitted=true 51ms
+   → Staging and production bucket bindings must remain isolated
+ × ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > production reuses approved canonical runId, checks rebuild bytes, then verifies immutable GitHub assets before R2/register 165ms
+   → Staging and production bucket bindings must remain isolated
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub full-byte readback catches false metadata and never publishes a corrupted draft 62ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub signed redirect receives no repository credential 53ms
+stdout | ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub resumes the same untagged draft after interruption with 0 uploaded assets
+P41_HOST_DRAFT_RETRY {
+  completed: 0,
+  releaseId: 7,
+  newUploads: 3,
+  existingBytesUnchanged: true,
+  fullReadbackVerified: true
+}
+
+stdout | ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub resumes the same untagged draft after interruption with 1 uploaded assets
+P41_HOST_DRAFT_RETRY {
+  completed: 1,
+  releaseId: 7,
+  newUploads: 2,
+  existingBytesUnchanged: true,
+  fullReadbackVerified: true
+}
+
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub resumes the same untagged draft after interruption with 0 uploaded assets 61ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub resumes the same untagged draft after interruption with 1 uploaded assets 69ms
+stdout | ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub resumes the same untagged draft after interruption with 3 uploaded assets
+P41_HOST_DRAFT_RETRY {
+  completed: 3,
+  releaseId: 7,
+  newUploads: 0,
+  existingBytesUnchanged: true,
+  fullReadbackVerified: true
+}
+
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub resumes the same untagged draft after interruption with 3 uploaded assets 72ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub rejects wrong target in an existing draft before any mutation 57ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub rejects mutable target in an existing draft before any mutation 50ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub rejects conflicting tag in an existing draft before any mutation 56ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub rejects ambiguous drafts in an existing draft before any mutation 50ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub rejects changed notes in an existing draft before any mutation 51ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub rejects prerelease in an existing draft before any mutation 53ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub still requires a tag for a published release 52ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub validates a newly returned draft target before any asset upload 65ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub rechecks a conflicting tag created during upload before publishing 61ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > GitHub reads every existing draft asset before adding missing assets 676ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > register cancellation does not retry and service paths cannot hide a wrong origin 83ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > rejects a stale register response even if body and response header agree 735ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > formal base transport checks actual source/version/full SHA: valid 8ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > formal base transport checks actual source/version/full SHA: wrong commit 2ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > formal base transport checks actual source/version/full SHA: wrong digest 11ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > formal base transport checks actual source/version/full SHA: not previous 4ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > formal base transport checks actual source/version/full SHA: draft 13ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > formal base transport checks actual source/version/full SHA: missing asset 10ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_VALID first attempt preserves non-formal provenance without cloud writes 66ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_VALID exact published retry preserves non-formal provenance without cloud writes 34ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_VALID exact untagged draft retry preserves non-formal provenance without cloud writes 26ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT missing approval before network 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT missing mode before network 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT missing target commit before network 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT wrong approval before network 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT wrong target before network 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT unapproved descriptor before network 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT mutable archive before network 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT path traversal before network 0ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT formal disguise before network 0ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT unknown field before network 0ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT previous release without archive reads 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT newer release without archive reads 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT other draft without archive reads 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT prerelease target without archive reads 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT ambiguous target without archive reads 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT blank tag without archive reads 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT control tag without archive reads 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT wrong published tag without archive reads 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT missing published tag without archive reads 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT wrong draft target without archive reads 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT malformed MCU version without archive reads 2ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT existing target during rehearsal without archive reads 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT bad source bytes after read-only archive access 2ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT bad provenance digest after read-only archive access 2ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT symlink after read-only archive access 2ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT Git symlink after read-only archive access 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT Git submodule after read-only archive access 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT truncated Git tree after read-only archive access 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT wrong Git commit after read-only archive access 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT wrong Git tree after read-only archive access 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT wrong Git blob after read-only archive access 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT invalid base64 after read-only archive access 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT oversized file after read-only archive access 2ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT oversized response after read-only archive access 2ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT wrong path after read-only archive access 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT wrong encoding after read-only archive access 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT missing archive after read-only archive access 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT redirected archive after read-only archive access 2ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT failed CI after read-only archive access 10ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT fork CI after read-only archive access 3ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT wrong source commit after read-only archive access 2ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT wrong run attempt after read-only archive access 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT wrong artifact after read-only archive access 2ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT wrong verification after read-only archive access 2ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT rewritten development label after read-only archive access 2ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT predecessor on page two never treats an incomplete inventory as empty 2ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT failed page two never treats an incomplete inventory as empty 1ms
+ ✓ ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BOOTSTRAP_REJECT malformed listing never treats an incomplete inventory as empty 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > same-key different bytes rejects without overwrite or register
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ ../../../../../tests/ota/firmware-pipeline.host.test.ts:509:55
+    507|       await expect(publishPreparedRelease(s)).rejects.toMatchObject({ …
+    508|       expect(put).not.toHaveBeenCalled(); expect(await counts()).toEqu…
+    509|       expect(s.calls.some(v => v.startsWith("POST"))).toBe(false);
+       |                                                       ^
+    510|     } finally { put.mockRestore(); }
+    511|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯
+
+ FAIL  ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > false-positive R2 put with missing full readback never persists verified metadata or touches D1
+ FAIL  ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > false-positive R2 put with missing patch readback never persists verified metadata or touches D1
+ FAIL  ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > false-positive R2 put with missing recovery readback never persists verified metadata or touches D1
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ ../../../../../tests/ota/firmware-pipeline.host.test.ts:526:55
+    524|       const stored = JSON.parse(await readFile(path.join(s.assetsDir, …
+    525|       expect(stored.assets.every((a: any) => a.r2Verified === false)).…
+    526|       expect(s.calls.some(v => v.startsWith("POST"))).toBe(false);
+       |                                                       ^
+    527|     } finally { get.mockRestore(); put.mockRestore(); }
+    528|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯
+
+ FAIL  ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > a real registration audit failure rolls back ready/assets and stops without retry
+AssertionError: expected [ …(2) ] to have a length of 1 but got 2
+
+- Expected
++ Received
+
+- 1
++ 2
+
+ ❯ ../../../../../tests/ota/firmware-pipeline.host.test.ts:536:57
+    534|       await expect(publishPreparedRelease(s)).rejects.toMatchObject({ …
+    535|       expect(await counts()).toEqual(before);
+    536|       expect(s.calls.filter(v => v.startsWith("POST"))).toHaveLength(1…
+       |                                                         ^
+    537|     } finally { await env.DB.exec("DROP TRIGGER p41_fail_audit"); }
+    538|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯
+
+ FAIL  ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > cancellation after the first upload stops subsequent uploads and registration
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ ../../../../../tests/ota/firmware-pipeline.host.test.ts:548:78
+    546|     try {
+    547|       await expect(publishPreparedRelease({ ...s, signal: controller.s…
+    548|       expect(reads).toBe(1); expect(s.calls.some(v => v.startsWith("PO…
+       |                                                                              ^
+    549|     } finally { get.mockRestore(); }
+    550|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯
+
+ FAIL  ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > checks/PR/nightly, ambiguous modes, missing config and crossed buckets fail closed
+AssertionError: expected [Function] to throw an error
+ ❯ ../../../../../tests/ota/firmware-pipeline.host.test.ts:565:60
+    563|       { OTA_AES_KEY: "" }, { OTA_AES_KEY: DEVELOPMENT_PACKAGING_KEY },
+    564|       { CLOUDFLARE_API_TOKEN: "" }, { TRACE_D1_DATABASE_ID: "" }, { OT…
+    565|       expect(() => releaseConfig({ ...s.env, ...change })).toThrow();
+       |                                                            ^
+    566|     }
+    567|     expect(s.calls).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯
+
+ FAIL  ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > P41_BUCKET_ROLES production bucket production-fixture-bucket admitted=true
+Error: Staging and production bucket bindings must remain isolated
+ ❯ releaseConfig ../scripts/firmware-release-pipeline.mjs:51:11
+     49|   if (mode === "rehearsal" ? env.TRACE_R2_BUCKET !== rehearsalBucket
+     50|     : env.TRACE_R2_BUCKET !== "e-track-firmware-production-releases") {
+     51|     throw new CliError("Staging and production bucket bindings must re…
+       |           ^
+     52|   }
+     53|   let canonicalRunId = env.GITHUB_RUN_ID;
+ ❯ ../../../../../tests/ota/firmware-pipeline.host.test.ts:591:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'INVALID_PARAMETER', exitCode: 2, requestId: undefined }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/9]⎯
+
+ FAIL  ../../../../../tests/ota/firmware-pipeline.host.test.ts > P4-1 production pipeline with existing handler and SQLite host ports > production reuses approved canonical runId, checks rebuild bytes, then verifies immutable GitHub assets before R2/register
+Error: Staging and production bucket bindings must remain isolated
+ ❯ releaseConfig ../scripts/firmware-release-pipeline.mjs:51:11
+     49|   if (mode === "rehearsal" ? env.TRACE_R2_BUCKET !== rehearsalBucket
+     50|     : env.TRACE_R2_BUCKET !== "e-track-firmware-production-releases") {
+     51|     throw new CliError("Staging and production bucket bindings must re…
+       |           ^
+     52|   }
+     53|   let canonicalRunId = env.GITHUB_RUN_ID;
+ ❯ ../../../../../tests/ota/firmware-pipeline.host.test.ts:607:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'INVALID_PARAMETER', exitCode: 2, requestId: undefined }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/9]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  9 failed | 122 passed (131)
+   Start at  02:47:50
+   Duration  10.28s (transform 1.34s, setup 158ms, import 1.59s, tests 8.05s, environment 0ms)
+

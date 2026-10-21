@@ -1,0 +1,12 @@
+{
+  "method": "PATCH",
+  "origin": "https://api.github.com",
+  "path": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/variables/OTA_PREVIOUS_RELEASE_JSON",
+  "started": "2026-10-19T15:12:47.567Z",
+  "request": {
+    "path": "configure-ota_previous_release_json.request.json",
+    "size_bytes": 1168,
+    "sha256": "6a553fc5f216d0961bf350d033fc80a25cf3d14b5923e5a230096468e89757f8"
+  },
+  "note": "Reserved before request; a lost response is not permission to replay a mutation."
+}

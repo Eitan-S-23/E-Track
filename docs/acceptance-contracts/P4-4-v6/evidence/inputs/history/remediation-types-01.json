@@ -1,0 +1,16 @@
+{
+  "label": "remediation-types-01",
+  "command": "node",
+  "args": [
+    "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/node_modules/typescript/bin/tsc",
+    "--noEmit",
+    "--project",
+    "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/tsconfig.json"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "startedAt": "2026-10-18T22:55:44.646Z",
+  "endedAt": "2026-10-18T22:55:49.845Z",
+  "exitCode": 0,
+  "signal": null,
+  "logPath": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\remediation-types-01.log"
+}

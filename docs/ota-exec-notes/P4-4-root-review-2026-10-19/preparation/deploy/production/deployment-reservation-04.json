@@ -1,0 +1,16 @@
+{
+  "role": "production",
+  "target": {
+    "name": "e-track-firmware-production",
+    "bucket": "e-track-firmware-production-releases",
+    "d1": "1cd5db26-6bbd-4595-abef-72ff51ecdaf3",
+    "environment": "prod",
+    "originalConfig": "D:/github/my/E-Track/.cache/p4-4-integration-20261018/.cache/p44/production/wrangler.json",
+    "version": "d4ecbdc7-f097-4ced-b55c-b2f6dfe4c451"
+  },
+  "sourceCommit": "b56534d7b6c993c0795010d0404fb8a81f7eeb9d",
+  "runtimeSha256": "1ad919d795a2354cd4c7d9617f3e3c9805f831967d1a2cdd5930ba61e4c3303f",
+  "priorVersion": "d4ecbdc7-f097-4ced-b55c-b2f6dfe4c451",
+  "reservedAt": "2026-10-19T00:19:38.798Z",
+  "mutationsAllowed": "One Worker deploy only; preserve all bindings, secrets, crons and query redaction"
+}

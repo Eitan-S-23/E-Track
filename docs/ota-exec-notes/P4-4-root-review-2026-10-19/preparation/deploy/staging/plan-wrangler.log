@@ -1,0 +1,129 @@
+
+--- 2026-10-18T23:28:44.261Z debug
+🪵  Writing logs to "D:\github\my\E-Track\.cache\p44-root-acceptance-20261019\deploy\staging\plan-wrangler.log"
+---
+
+--- 2026-10-18T23:28:44.261Z warn
+▲ [WARNING] Proxy environment variables detected. We'll use your proxy for fetch requests.
+
+
+---
+
+--- 2026-10-18T23:28:44.329Z debug
+.env file not found at "D:\github\my\E-Track\.cache\p44-root-acceptance-20261019\.env". Continuing... For more details, refer to https://developers.cloudflare.com/workers/wrangler/system-environment-variables/
+---
+
+--- 2026-10-18T23:28:44.329Z debug
+.env file not found at "D:\github\my\E-Track\.cache\p44-root-acceptance-20261019\.env.local". Continuing... For more details, refer to https://developers.cloudflare.com/workers/wrangler/system-environment-variables/
+---
+
+--- 2026-10-18T23:28:44.438Z log
+
+ ⛅️ wrangler 4.105.0
+────────────────────
+---
+
+--- 2026-10-18T23:28:44.456Z warn
+▲ [WARNING] Processing private\deploy-staging.json configuration:
+
+    - "unsafe" fields are experimental and may change or break at any time.
+    - In your wrangler.json file, you have configured `durable_objects` exported by this Worker (RateLimiter), but no `migrations` for them. This may not work as expected until you add a `migrations` section to your wrangler.json file. Add the following configuration:
+  
+      ```
+      {
+        "migrations": [
+          {
+            "tag": "v1",
+            "new_sqlite_classes": [
+              "RateLimiter"
+            ]
+          }
+        ]
+      }
+      ```
+  
+      Refer to https://developers.cloudflare.com/durable-objects/reference/durable-objects-migrations/ for more details.
+
+
+---
+
+--- 2026-10-18T23:28:44.654Z log
+Total Upload: 145.52 KiB / gzip: 35.35 KiB
+---
+
+--- 2026-10-18T23:28:44.661Z log
+Your Worker has access to the following bindings:
+---
+
+--- 2026-10-18T23:28:44.661Z log
+Binding                                                       Resource            
+---
+
+--- 2026-10-18T23:28:44.661Z log
+env.RATE_LIMITER (RateLimiter)                                Durable Object      
+---
+
+--- 2026-10-18T23:28:44.661Z log
+env.MANIFEST_CACHE (9581ef5b95154abaa7d441fd07c2f220)         KV Namespace        
+---
+
+--- 2026-10-18T23:28:44.662Z log
+env.DB (e-track-firmware-p41-test)                            D1 Database         
+---
+
+--- 2026-10-18T23:28:44.662Z log
+env.RELEASES_BUCKET (e-track-firmware-p41-test-releases)      R2 Bucket           
+---
+
+--- 2026-10-18T23:28:44.662Z log
+
+---
+
+--- 2026-10-18T23:28:44.662Z log
+The following unsafe metadata will be attached to your Worker:
+---
+
+--- 2026-10-18T23:28:44.662Z log
+{
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+    "redact_query_string": true,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "persist": true,
+      "invocation_logs": true
+    },
+    "traces": {
+      "enabled": false,
+      "persist": true,
+      "head_sampling_rate": 1
+    }
+  },
+  "annotations": {
+    "workers/message": "P4-4 configuration; tested CI source b56534d7b6c993c0795010d0404fb8a81f7eeb9d",
+    "workers/tag": "p44-b56534d7b6c9"
+  }
+}
+---
+
+--- 2026-10-18T23:28:44.662Z log
+--dry-run: exiting now.
+---
+
+--- 2026-10-18T23:28:45.718Z debug
+Metrics dispatcher: Dispatching disabled - would have sent {"deviceId":"75e91e15-6e02-4b19-b6e7-569fa918a09d","event":"wrangler command started","timestamp":1792366125718,"properties":{"amplitude_session_id":1792366124456,"amplitude_event_id":0,"wranglerVersion":"4.105.0","wranglerMajorVersion":4,"wranglerMinorVersion":105,"wranglerPatchVersion":0,"osPlatform":"Windows","osVersion":"Windows 10 Education","nodeVersion":24,"isFirstUsage":true,"configFileType":"json","isCI":true,"isPagesCI":false,"isWorkersCI":false,"isInteractive":false,"hasAssets":false,"agent":"codex","argsUsed":["config","dryRun","keepVars","noBundle","outdir"],"argsCombination":"config, dryRun, keepVars, noBundle, outdir","sanitizedCommand":"deploy","sanitizedArgs":{"keepVars":true,"dryRun":true,"noBundle":false},"currentAgentSkillsInstalled":false}}.
+---
+
+--- 2026-10-18T23:28:45.725Z debug
+Metrics dispatcher: Dispatching disabled - would have sent {"deviceId":"75e91e15-6e02-4b19-b6e7-569fa918a09d","event":"deploy worker script","timestamp":1792366125725,"properties":{"amplitude_session_id":1792366124663,"amplitude_event_id":0,"wranglerVersion":"4.105.0","wranglerMajorVersion":4,"wranglerMinorVersion":105,"wranglerPatchVersion":0,"osPlatform":"Windows","osVersion":"Windows 10 Education","nodeVersion":24,"isFirstUsage":true,"configFileType":"none","isCI":true,"isPagesCI":false,"isWorkersCI":false,"isInteractive":false,"hasAssets":false,"agent":"codex","category":"Workers","os":"win32:x64","usesTypeScript":false,"durationMs":29,"currentAgentSkillsInstalled":false}}.
+---
+
+--- 2026-10-18T23:28:46.068Z debug
+Metrics dispatcher: Dispatching disabled - would have sent {"deviceId":"75e91e15-6e02-4b19-b6e7-569fa918a09d","event":"wrangler command completed","timestamp":1792366126068,"properties":{"amplitude_session_id":1792366124456,"amplitude_event_id":1,"wranglerVersion":"4.105.0","wranglerMajorVersion":4,"wranglerMinorVersion":105,"wranglerPatchVersion":0,"osPlatform":"Windows","osVersion":"Windows 10 Education","nodeVersion":24,"isFirstUsage":true,"configFileType":"json","isCI":true,"isPagesCI":false,"isWorkersCI":false,"isInteractive":false,"hasAssets":false,"agent":"codex","argsUsed":["config","dryRun","keepVars","noBundle","outdir"],"argsCombination":"config, dryRun, keepVars, noBundle, outdir","sanitizedCommand":"deploy","sanitizedArgs":{"keepVars":true,"dryRun":true,"noBundle":false},"durationMs":328,"currentAgentSkillsInstalled":false}}.
+---
+
+--- 2026-10-18T23:28:46.070Z debug
+Metrics dispatcher: Dispatching disabled - would have sent {"deviceId":"75e91e15-6e02-4b19-b6e7-569fa918a09d","event":"skills_install_skipped","timestamp":1792366126070,"properties":{"amplitude_session_id":1792366124667,"amplitude_event_id":0,"wranglerVersion":"4.105.0","wranglerMajorVersion":4,"wranglerMinorVersion":105,"wranglerPatchVersion":0,"osPlatform":"Windows","osVersion":"Windows 10 Education","nodeVersion":24,"isFirstUsage":true,"configFileType":"none","isCI":true,"isPagesCI":false,"isWorkersCI":false,"isInteractive":false,"hasAssets":false,"agent":"codex","category":"Workers","os":"win32:x64","reason":"Running in CI","command":"deploy","currentAgentSkillsInstalled":false}}.
+---

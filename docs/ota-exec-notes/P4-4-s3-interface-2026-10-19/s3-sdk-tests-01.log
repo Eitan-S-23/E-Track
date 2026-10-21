@@ -1,0 +1,20 @@
+✔ actual S3 SDK serializes/signs immutable full creation and full replay (151.8937ms)
+✔ actual S3 SDK serializes/signs immutable patch creation and full replay (45.355ms)
+✔ actual S3 SDK serializes/signs immutable recovery creation and full replay (33.6368ms)
+✔ two simultaneous SDK writers create once and validate the winner (35.8393ms)
+✔ different bytes at one key never overwrite through the SDK (26.3657ms)
+✔ SDK digest readback fails closed (29.2005ms)
+✔ SDK short readback fails closed (18.3495ms)
+✔ SDK long readback fails closed (24.3825ms)
+✔ SDK etag readback fails closed (19.2459ms)
+✔ SDK access rejection leaks neither credentials nor upstream response (10.4016ms)
+✔ SDK 409 does not downgrade to unconditional creation or blind retry (14.6474ms)
+✔ no credential fallback or mixed control-plane credentials (0.6273ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 937.2482

@@ -1,0 +1,21 @@
+{
+  "command": [
+    "node",
+    "--require",
+    "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44-v7-development\\successor05-01\\stdio.cjs",
+    "tests/ota/test_p44_after_recovery.cjs",
+    "--output-dir",
+    "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44-v7-development\\successor05-02\\node",
+    "real-io"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "timeout_seconds": 5400,
+  "exit_code": 0,
+  "pid": 24220,
+  "process_closed": true,
+  "started_epoch": 1792565588.4731562,
+  "ended_epoch": 1792569664.7966955,
+  "elapsed_seconds": 4076.323545217514,
+  "log": ".cache\\p44-v7-development\\successor05-02\\node.log",
+  "log_sha256": "d86746934cff1ca49a518e02808a7483c111ee98bf7d82b9df9516928ddc15ef"
+}

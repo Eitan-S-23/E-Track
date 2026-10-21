@@ -1,0 +1,794 @@
+{
+  "startedAt": "2026-10-18T22:38:27.232Z",
+  "kind": "CONFIGURATION_PREPARATION_READ_ONLY",
+  "formalAcceptance": "NOT_RUN",
+  "businessMutations": "NONE",
+  "requests": [
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/user/tokens/verify",
+      "startedAt": "2026-10-18T22:38:30.165Z",
+      "status": 200,
+      "bytes": 184,
+      "sha256": "a7545ba668a31ec6a3b2b489f92e7342138d6454176206080539d18d8511f525",
+      "requestId": "a4cb08c1c92edb50-NRT",
+      "endedAt": "2026-10-18T22:38:35.691Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/user/tokens/permission_groups",
+      "startedAt": "2026-10-18T22:38:35.694Z",
+      "status": 403,
+      "bytes": 124,
+      "sha256": "bc484b5271bfb57d45898e53524ade34de83b5b97ebf37577b8c69f54eb16cbe",
+      "requestId": "a4cb08d10eb5e39c-NRT",
+      "endedAt": "2026-10-18T22:38:38.302Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/tokens/permission_groups",
+      "startedAt": "2026-10-18T22:38:38.303Z",
+      "status": 403,
+      "bytes": 124,
+      "sha256": "bc484b5271bfb57d45898e53524ade34de83b5b97ebf37577b8c69f54eb16cbe",
+      "requestId": "a4cb08db3bb63b99-NRT",
+      "endedAt": "2026-10-18T22:38:39.844Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/user/tokens/verify",
+      "startedAt": "2026-10-18T22:38:39.845Z",
+      "status": 200,
+      "bytes": 184,
+      "sha256": "d27b03218718dc624e1f3db9646a353057d45afdaa9c9ef6122009f605b5bc4d",
+      "requestId": "a4cb08e43acaf5bb-NRT",
+      "endedAt": "2026-10-18T22:38:41.650Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/user/tokens/permission_groups",
+      "startedAt": "2026-10-18T22:38:41.651Z",
+      "status": 403,
+      "bytes": 124,
+      "sha256": "bc484b5271bfb57d45898e53524ade34de83b5b97ebf37577b8c69f54eb16cbe",
+      "requestId": "a4cb08ef4edad48e-NRT",
+      "endedAt": "2026-10-18T22:38:43.058Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/tokens/permission_groups",
+      "startedAt": "2026-10-18T22:38:43.059Z",
+      "status": 403,
+      "bytes": 124,
+      "sha256": "bc484b5271bfb57d45898e53524ade34de83b5b97ebf37577b8c69f54eb16cbe",
+      "requestId": "a4cb08f86b1da0de-NRT",
+      "endedAt": "2026-10-18T22:38:44.484Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/workers/scripts/e-track-firmware-production/settings",
+      "startedAt": "2026-10-18T22:38:44.485Z",
+      "status": 200,
+      "bytes": 2135,
+      "sha256": "577f91f8acfcef38805c7f60b3e16f7e8b691e3326bbaef1315510bca7a1d209",
+      "requestId": "a4cb09009d12eb80-NRT",
+      "endedAt": "2026-10-18T22:38:45.890Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/workers/scripts/e-track-firmware-production/deployments",
+      "startedAt": "2026-10-18T22:38:45.891Z",
+      "status": 200,
+      "bytes": 2641,
+      "sha256": "bd723c783bedb9bee2eb492e9677189bdb8a55d2f0eb34dd1be1ae62cf707b45",
+      "requestId": "a4cb09093e93a0e3-NRT",
+      "endedAt": "2026-10-18T22:38:47.176Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/workers/scripts/e-track-firmware-p41-test/settings",
+      "startedAt": "2026-10-18T22:38:47.177Z",
+      "status": 200,
+      "bytes": 2797,
+      "sha256": "cbc4213ef5c253aa70f59a4322bac360f588d1baf707ba2eeaecbc7120891e21",
+      "requestId": "a4cb09136e16e36e-NRT",
+      "endedAt": "2026-10-18T22:38:48.800Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.cloudflare.com",
+      "path": "/client/v4/accounts/[REDACTED]/workers/scripts/e-track-firmware-p41-test/deployments",
+      "startedAt": "2026-10-18T22:38:48.801Z",
+      "status": 200,
+      "bytes": 1227,
+      "sha256": "ac412563a85a72a8c4a92118da1f25884682e7e1197e4d78e9bc0b5e9e41fda9",
+      "requestId": "a4cb092a4efed748-NRT",
+      "endedAt": "2026-10-18T22:38:52.493Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/environments/firmware-production",
+      "startedAt": "2026-10-18T22:38:52.494Z",
+      "status": 200,
+      "bytes": 1661,
+      "sha256": "2a5e615177b0aaa517bebaf7f51c1b183b53d0b24b159aa395f69a48e38f48b5",
+      "requestId": "AEA3:7F28B:EC9F26:1015B22:6AD54A7D",
+      "endedAt": "2026-10-18T22:38:53.455Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/environments/firmware-production/secrets",
+      "startedAt": "2026-10-18T22:38:53.456Z",
+      "status": 200,
+      "bytes": 439,
+      "sha256": "297d1adae3f86622a5438ba6de12959c4a6f3154f8f9217910d0ab011b1e0a35",
+      "requestId": "9A91:30E90C:EFDD73:1048FD4:6AD54A7E",
+      "endedAt": "2026-10-18T22:38:54.432Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/environments/firmware-production/variables",
+      "startedAt": "2026-10-18T22:38:54.433Z",
+      "status": 200,
+      "bytes": 854,
+      "sha256": "3b864ec847fd20fa67836e662addaa975f48378e2f5c2563181c76c9ed760548",
+      "requestId": "913F:258DE4:EA36F0:FEF007:6AD54A7F",
+      "endedAt": "2026-10-18T22:38:55.735Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/environments/firmware-production/deployment-branch-policies",
+      "startedAt": "2026-10-18T22:38:55.735Z",
+      "status": 200,
+      "bytes": 136,
+      "sha256": "da1f8f67f9fa1ec6dd6efd7135d5daa5cc5e747535fead87a5e75e215400d3a0",
+      "requestId": "4281:31B6AB:E1661D:F611F6:6AD54A80",
+      "endedAt": "2026-10-18T22:38:56.726Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal",
+      "startedAt": "2026-10-18T22:38:56.727Z",
+      "status": 200,
+      "bytes": 1659,
+      "sha256": "389b239fd13aea1bb302c7518caa3cd13b331df93d53450465f5989e9fab16a1",
+      "requestId": "F87F:25ACD2:E7EA99:FCAD00:6AD54A81",
+      "endedAt": "2026-10-18T22:38:57.858Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/secrets",
+      "startedAt": "2026-10-18T22:38:57.859Z",
+      "status": 200,
+      "bytes": 638,
+      "sha256": "52bafd611b54e3598f032fba5603b1b4a441d3907aa677a528be12811d5aa78b",
+      "requestId": "AF2D:6238E:F249FE:106FBA9:6AD54A82",
+      "endedAt": "2026-10-18T22:38:58.889Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/variables",
+      "startedAt": "2026-10-18T22:38:58.890Z",
+      "status": 200,
+      "bytes": 2520,
+      "sha256": "fb40827bf62ed8525657951258cd82ff2bfca51a8887d2ee6b4281b3543bf5cf",
+      "requestId": "CF8D:2D8E3E:3C53C6:41858D:6AD54A83",
+      "endedAt": "2026-10-18T22:38:59.913Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/deployment-branch-policies",
+      "startedAt": "2026-10-18T22:38:59.914Z",
+      "status": 200,
+      "bytes": 160,
+      "sha256": "d8658cd9c160a2a9dc49d2025f5e6a54f1c777c4866e9b732d91aea9b5b93c13",
+      "requestId": "BEDB:319E50:FB672B:1101AA2:6AD54A84",
+      "endedAt": "2026-10-18T22:39:01.087Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/actions/variables/OTA_BOOT_CHAIN_READY",
+      "startedAt": "2026-10-18T22:39:01.088Z",
+      "status": 200,
+      "bytes": 119,
+      "sha256": "e2602c11ef14c5dc58477e0fd4c70c556358ec082d57d26e330a1122b27d801e",
+      "requestId": "981B:3A1AC7:FEDE3B:1139597:6AD54A85",
+      "endedAt": "2026-10-18T22:39:02.214Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/git/ref/heads/main",
+      "startedAt": "2026-10-18T22:39:02.214Z",
+      "status": 200,
+      "bytes": 334,
+      "sha256": "64f3208a632f52eb2dba906be6417d3f7fbe87a82c34d8451267296745b1e6c7",
+      "requestId": "53D5:2B45EA:EE1D91:102DFDF:6AD54A87",
+      "endedAt": "2026-10-18T22:39:03.298Z"
+    }
+  ],
+  "credentials": {
+    "provisioning": {
+      "active": true,
+      "verifyStatus": 200,
+      "permissionGroups": {
+        "available": false,
+        "status": 403,
+        "codes": [
+          9109
+        ]
+      },
+      "accountPermissionGroups": {
+        "available": false,
+        "status": 403,
+        "codes": [
+          9109
+        ]
+      }
+    },
+    "existingCi": {
+      "active": true,
+      "verifyStatus": 200,
+      "permissionGroups": {
+        "available": false,
+        "status": 403,
+        "codes": [
+          9109
+        ]
+      },
+      "accountPermissionGroups": {
+        "available": false,
+        "status": 403,
+        "codes": [
+          9109
+        ]
+      }
+    }
+  },
+  "workers": [
+    {
+      "name": "e-track-firmware-production",
+      "settings": {
+        "bindings": [
+          {
+            "name": "APP_ID",
+            "type": "plain_text",
+            "value": "trace"
+          },
+          {
+            "name": "DB",
+            "type": "d1",
+            "databaseId": "1cd5db26-6bbd-4595-abef-72ff51ecdaf3"
+          },
+          {
+            "name": "DEPLOY_TOKEN_SHA256",
+            "type": "secret_text"
+          },
+          {
+            "name": "DOWNLOAD_HMAC_KEY_CURRENT",
+            "type": "secret_text"
+          },
+          {
+            "name": "DOWNLOAD_TOKEN_KEY_VERSION",
+            "type": "plain_text",
+            "value": "p44-prod-1"
+          },
+          {
+            "name": "DOWNLOAD_TOKEN_TTL_SECONDS",
+            "type": "plain_text",
+            "value": "300"
+          },
+          {
+            "name": "ENABLE_DIRECT_ADMIN_API",
+            "type": "plain_text"
+          },
+          {
+            "name": "ENVIRONMENT",
+            "type": "plain_text",
+            "value": "prod"
+          },
+          {
+            "name": "FIRMWARE_V2_CUTOVER_EPOCH",
+            "type": "plain_text",
+            "value": "1792039926"
+          },
+          {
+            "name": "GITHUB_OWNER",
+            "type": "plain_text",
+            "value": "Eitan-S-23"
+          },
+          {
+            "name": "GITHUB_REPO",
+            "type": "plain_text",
+            "value": "E-Track"
+          },
+          {
+            "name": "RELEASES_BUCKET",
+            "type": "r2_bucket",
+            "bucketName": "e-track-firmware-production-releases"
+          }
+        ],
+        "observability": {
+          "enabled": true,
+          "head_sampling_rate": 1,
+          "redact_query_string": true,
+          "logs": {
+            "enabled": true,
+            "head_sampling_rate": 1,
+            "persist": true,
+            "invocation_logs": true
+          },
+          "traces": {
+            "enabled": false,
+            "persist": true,
+            "head_sampling_rate": 1
+          }
+        }
+      },
+      "deployments": {
+        "available": true,
+        "result": {
+          "deployments": [
+            {
+              "id": "f1db5e07-3d09-434f-b977-370d7e452cf1",
+              "source": "wrangler",
+              "strategy": "percentage",
+              "author_email": "[REDACTED_EMAIL]",
+              "annotations": {
+                "workers/triggered_by": "deployment"
+              },
+              "versions": [
+                {
+                  "version_id": "d4ecbdc7-f097-4ced-b55c-b2f6dfe4c451",
+                  "percentage": 100
+                }
+              ],
+              "created_on": "2026-10-18T16:07:05.012882Z"
+            },
+            {
+              "id": "a8448d72-ecd9-4d53-8598-e7a0f30e6b30",
+              "source": "api",
+              "strategy": "percentage",
+              "author_email": "[REDACTED_EMAIL]",
+              "annotations": {
+                "workers/triggered_by": "secret"
+              },
+              "versions": [
+                {
+                  "version_id": "f030a990-1d6d-4584-811f-0b6da4b60783",
+                  "percentage": 100
+                }
+              ],
+              "created_on": "2026-10-18T15:47:38.498697Z"
+            },
+            {
+              "id": "5b4e7591-1380-4c5b-a398-eb17718818a0",
+              "source": "api",
+              "strategy": "percentage",
+              "author_email": "[REDACTED_EMAIL]",
+              "annotations": {
+                "workers/triggered_by": "secret"
+              },
+              "versions": [
+                {
+                  "version_id": "a238d848-ad73-4fdb-911f-90e8cf93ccbd",
+                  "percentage": 100
+                }
+              ],
+              "created_on": "2026-10-18T15:47:36.405069Z"
+            },
+            {
+              "id": "b51dae88-3623-485b-9cce-d1c8c8474b8b",
+              "source": "wrangler",
+              "strategy": "percentage",
+              "author_email": "[REDACTED_EMAIL]",
+              "annotations": {
+                "workers/triggered_by": "deployment"
+              },
+              "versions": [
+                {
+                  "version_id": "1df12d85-c791-4fd6-8a62-565e03e3edde",
+                  "percentage": 100
+                }
+              ],
+              "created_on": "2026-10-18T15:46:05.762093Z"
+            },
+            {
+              "id": "f043521e-631c-4f53-ac1c-d7b599dc800f",
+              "source": "wrangler",
+              "strategy": "percentage",
+              "author_email": "[REDACTED_EMAIL]",
+              "annotations": {
+                "workers/message": "Automatic deployment on upload.",
+                "workers/triggered_by": "upload"
+              },
+              "versions": [
+                {
+                  "version_id": "e340056f-8393-432a-8199-b1f816f35fdf",
+                  "percentage": 100
+                }
+              ],
+              "created_on": "2026-10-18T15:43:07.799692Z"
+            }
+          ]
+        },
+        "resultInfo": {
+          "page": 1,
+          "per_page": 10,
+          "count": 5,
+          "total_count": 5,
+          "total_pages": 1
+        }
+      }
+    },
+    {
+      "name": "e-track-firmware-p41-test",
+      "settings": {
+        "bindings": [
+          {
+            "name": "APP_ID",
+            "type": "plain_text",
+            "value": "trace"
+          },
+          {
+            "name": "DB",
+            "type": "d1",
+            "databaseId": "2617e1e1-956f-42ce-a465-da56d84abf06"
+          },
+          {
+            "name": "DEPLOY_TOKEN_SHA256",
+            "type": "secret_text"
+          },
+          {
+            "name": "DOWNLOAD_HMAC_KEY_CURRENT",
+            "type": "secret_text"
+          },
+          {
+            "name": "DOWNLOAD_TOKEN_KEY_VERSION",
+            "type": "plain_text",
+            "value": "p41-test-1"
+          },
+          {
+            "name": "DOWNLOAD_TOKEN_TTL_SECONDS",
+            "type": "plain_text",
+            "value": "300"
+          },
+          {
+            "name": "ENABLE_DIRECT_ADMIN_API",
+            "type": "plain_text"
+          },
+          {
+            "name": "ENVIRONMENT",
+            "type": "plain_text",
+            "value": "staging"
+          },
+          {
+            "name": "FIRMWARE_V2_CUTOVER_EPOCH",
+            "type": "plain_text",
+            "value": "1792039926"
+          },
+          {
+            "name": "GITHUB_OWNER",
+            "type": "plain_text",
+            "value": "Eitan-S-23"
+          },
+          {
+            "name": "GITHUB_REPO",
+            "type": "plain_text",
+            "value": "E-Track"
+          },
+          {
+            "name": "MANIFEST_CACHE",
+            "type": "kv_namespace"
+          },
+          {
+            "name": "MANIFEST_CACHE_TTL_SECONDS",
+            "type": "plain_text"
+          },
+          {
+            "name": "RATE_LIMITER",
+            "type": "durable_object_namespace"
+          },
+          {
+            "name": "RATE_LIMIT_MAX_REQUESTS",
+            "type": "plain_text"
+          },
+          {
+            "name": "RATE_LIMIT_WINDOW_SECONDS",
+            "type": "plain_text"
+          },
+          {
+            "name": "RELEASES_BUCKET",
+            "type": "r2_bucket",
+            "bucketName": "e-track-firmware-p41-test-releases"
+          }
+        ],
+        "observability": {
+          "enabled": true,
+          "head_sampling_rate": 1,
+          "redact_query_string": true,
+          "logs": {
+            "enabled": true,
+            "head_sampling_rate": 1,
+            "persist": true,
+            "invocation_logs": true
+          },
+          "traces": {
+            "enabled": false,
+            "persist": true,
+            "head_sampling_rate": 1
+          }
+        }
+      },
+      "deployments": {
+        "available": true,
+        "result": {
+          "deployments": [
+            {
+              "id": "b937481c-0aa4-4c66-9b10-94c7be4700d6",
+              "source": "wrangler",
+              "strategy": "percentage",
+              "author_email": "[REDACTED_EMAIL]",
+              "annotations": {
+                "workers/triggered_by": "secret"
+              },
+              "versions": [
+                {
+                  "version_id": "db7d28f6-453d-439b-b37e-ef98361e56d9",
+                  "percentage": 100
+                }
+              ],
+              "created_on": "2026-10-15T04:55:12.153661Z"
+            },
+            {
+              "id": "803a6959-4fc2-4de8-bf59-4a1e19b10f62",
+              "source": "wrangler",
+              "strategy": "percentage",
+              "author_email": "[REDACTED_EMAIL]",
+              "annotations": {
+                "workers/message": "Automatic deployment on upload.",
+                "workers/triggered_by": "upload"
+              },
+              "versions": [
+                {
+                  "version_id": "26389b5f-123f-402c-847d-d62d1f8c7b2c",
+                  "percentage": 100
+                }
+              ],
+              "created_on": "2026-10-15T04:53:29.736996Z"
+            }
+          ]
+        },
+        "resultInfo": {
+          "page": 1,
+          "per_page": 10,
+          "count": 2,
+          "total_count": 2,
+          "total_pages": 1
+        }
+      }
+    }
+  ],
+  "github": {
+    "firmware-production": {
+      "id": 24631238191,
+      "updatedAt": "2026-10-18T12:37:40Z",
+      "canAdminsBypass": true,
+      "protectionRules": [
+        {
+          "type": "required_reviewers",
+          "preventSelfReview": true,
+          "reviewers": [
+            {
+              "type": "User",
+              "login": "Eitan-S-23",
+              "id": 204050265
+            }
+          ]
+        },
+        {
+          "type": "branch_policy"
+        }
+      ],
+      "branchPolicy": {
+        "protected_branches": false,
+        "custom_branch_policies": true
+      },
+      "branchRules": [
+        {
+          "id": 63466803,
+          "node_id": "MDE2OkdhdGVCcmFuY2hQb2xpY3k2MzQ2NjgwMw==",
+          "name": "main",
+          "type": "branch"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "CLOUDFLARE_ACCOUNT_ID",
+          "updatedAt": "2026-10-18T15:50:24Z"
+        },
+        {
+          "name": "OTA_AES_KEY",
+          "updatedAt": "2026-10-18T15:50:34Z"
+        },
+        {
+          "name": "TRACE_DEPLOY_TOKEN",
+          "updatedAt": "2026-10-18T15:50:32Z"
+        },
+        {
+          "name": "TRACE_UPDATE_SERVICE_URL",
+          "updatedAt": "2026-10-18T15:50:29Z"
+        }
+      ],
+      "variables": [
+        {
+          "name": "OTA_BOOT_CHAIN_READY",
+          "updatedAt": "2026-10-18T12:37:46Z",
+          "value": "false"
+        },
+        {
+          "name": "TRACE_D1_DATABASE_ID",
+          "updatedAt": "2026-10-18T15:50:42Z",
+          "valueSha256": "5b5155456798fc443d64e413eb13ef3295492aeb89bde97db5cf583fafbdb6bf"
+        },
+        {
+          "name": "TRACE_D1_DATABASE_NAME",
+          "updatedAt": "2026-10-18T15:50:39Z",
+          "valueSha256": "64f55a9835d0bfb49f8aa9aa441cb77dd8adae2f78691a72c00ebcbdf9f07e1b"
+        },
+        {
+          "name": "TRACE_FIRMWARE_MIN_APP_VERSION_CODE",
+          "updatedAt": "2026-10-18T15:50:45Z",
+          "valueSha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+        },
+        {
+          "name": "TRACE_FIRMWARE_MIN_PROTOCOL_VERSION",
+          "updatedAt": "2026-10-18T15:50:47Z",
+          "valueSha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+        },
+        {
+          "name": "TRACE_R2_BUCKET",
+          "updatedAt": "2026-10-18T15:50:38Z",
+          "value": "e-track-firmware-production-releases"
+        }
+      ]
+    },
+    "firmware-rehearsal": {
+      "id": 24458272742,
+      "updatedAt": "2026-10-16T04:24:26Z",
+      "canAdminsBypass": true,
+      "protectionRules": [
+        {
+          "type": "required_reviewers",
+          "preventSelfReview": false,
+          "reviewers": [
+            {
+              "type": "User",
+              "login": "Eitan-S-23",
+              "id": 204050265
+            }
+          ]
+        },
+        {
+          "type": "branch_policy"
+        }
+      ],
+      "branchPolicy": {
+        "protected_branches": false,
+        "custom_branch_policies": true
+      },
+      "branchRules": [
+        {
+          "id": 63231554,
+          "node_id": "MDE2OkdhdGVCcmFuY2hQb2xpY3k2MzIzMTU1NA==",
+          "name": "dev/p4-1/unattended-20261015",
+          "type": "branch"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "FIRMWARE_REHEARSAL_CLOUDFLARE_ACCOUNT_ID",
+          "updatedAt": "2026-10-16T06:11:25Z"
+        },
+        {
+          "name": "FIRMWARE_REHEARSAL_CLOUDFLARE_API_TOKEN",
+          "updatedAt": "2026-10-16T06:11:27Z"
+        },
+        {
+          "name": "FIRMWARE_REHEARSAL_OTA_AES_KEY",
+          "updatedAt": "2026-10-16T04:24:34Z"
+        },
+        {
+          "name": "FIRMWARE_REHEARSAL_TRACE_DEPLOY_TOKEN",
+          "updatedAt": "2026-10-16T06:54:34Z"
+        },
+        {
+          "name": "FIRMWARE_REHEARSAL_TRACE_UPDATE_SERVICE_URL",
+          "updatedAt": "2026-10-16T06:11:31Z"
+        }
+      ],
+      "variables": [
+        {
+          "name": "FIRMWARE_REHEARSAL_BINDINGS_CHECK_COMMIT",
+          "updatedAt": "2026-10-16T06:11:22Z",
+          "value": "c715ec6b00f8d9b06a820213da72421694b1e44c"
+        },
+        {
+          "name": "FIRMWARE_REHEARSAL_TRACE_D1_DATABASE_ID",
+          "updatedAt": "2026-10-16T06:11:21Z",
+          "valueSha256": "e6784a8642627fc5a40aa7421b61f87128678273879612f6ca5f7924233467c5"
+        },
+        {
+          "name": "FIRMWARE_REHEARSAL_TRACE_D1_DATABASE_NAME",
+          "updatedAt": "2026-10-16T04:24:30Z",
+          "valueSha256": "9a58da3e4c7e17b8b09419488b4544f70e26ef9cc13273eadf412375053e8a1e"
+        },
+        {
+          "name": "FIRMWARE_REHEARSAL_TRACE_R2_BUCKET",
+          "updatedAt": "2026-10-16T04:24:29Z",
+          "valueSha256": "47ca71e622018d438f3588928ff360d95e24ca96a11148203238105ef16eb75a"
+        },
+        {
+          "name": "OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256",
+          "updatedAt": "2026-10-16T17:56:25Z",
+          "valueSha256": "e7992dddbcca05be0338bfecc5a5c81dbe177c70b1be7fe17ae9d4801b399325"
+        },
+        {
+          "name": "OTA_BOOT_CHAIN_READY",
+          "updatedAt": "2026-10-16T04:24:28Z",
+          "value": "false"
+        },
+        {
+          "name": "OTA_PREVIOUS_RELEASE_JSON",
+          "updatedAt": "2026-10-16T17:56:24Z",
+          "valueSha256": "184aaee01d10ed482792fee94dd1f57ef6d25d262f7b891f1af11ecbd383c1a5"
+        },
+        {
+          "name": "TRACE_FIRMWARE_MIN_APP_VERSION_CODE",
+          "updatedAt": "2026-10-16T11:00:49Z",
+          "valueSha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+        },
+        {
+          "name": "TRACE_FIRMWARE_MIN_PROTOCOL_VERSION",
+          "updatedAt": "2026-10-16T11:00:50Z",
+          "valueSha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+        }
+      ]
+    },
+    "repositoryGate": {
+      "name": "OTA_BOOT_CHAIN_READY",
+      "value": "false",
+      "updatedAt": "2026-10-18T12:37:50Z"
+    },
+    "main": {
+      "ref": "refs/heads/main",
+      "node_id": "REF_kwDOTh7tuK9yZWZzL2hlYWRzL21haW4",
+      "url": "https://api.github.com/repos/Eitan-S-23/E-Track/git/refs/heads/main",
+      "object": {
+        "sha": "0779f677507fa2c8a88c1799c8d2909bbae5a0a0",
+        "type": "commit",
+        "url": "https://api.github.com/repos/Eitan-S-23/E-Track/git/commits/0779f677507fa2c8a88c1799c8d2909bbae5a0a0"
+      }
+    }
+  },
+  "complete": true,
+  "endedAt": "2026-10-18T22:39:03.299Z"
+}

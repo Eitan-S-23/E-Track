@@ -1,0 +1,12 @@
+{
+  "method": "POST",
+  "origin": "https://api.github.com",
+  "path": "/repos/Eitan-S-23/E-Track/environments/firmware-rehearsal/deployment-branch-policies",
+  "started": "2026-10-19T11:07:06.479Z",
+  "request": {
+    "path": "configure-branch.request.json",
+    "size_bytes": 63,
+    "sha256": "3abd83e66819ecfda6c83bda03e62cdd53be8ae7c50984a397663e429d36de20"
+  },
+  "note": "Reserved before request; a lost response is not permission to replay a mutation."
+}

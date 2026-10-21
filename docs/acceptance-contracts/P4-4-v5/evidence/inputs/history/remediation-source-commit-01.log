@@ -1,0 +1,3 @@
+[0;32m✅ Pre-commit 检查通过[0m
+[dev/p4-4/config-integration-20261018 b56534d] fix(p44):bind-preflight-input-and-distinguish-read-failures
+ 12 files changed, 316 insertions(+), 30 deletions(-)

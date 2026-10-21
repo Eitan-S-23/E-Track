@@ -1,0 +1,22 @@
+{
+  "label": "root-record-check-01",
+  "command": "C:/Users/SU/AppData/Local/Programs/Python/Python313/python.exe",
+  "args": [
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "tests/ota/test_acceptance_bundle.py",
+    "PostP26SpecGovernanceTests.test_readiness_matrix_mirrors_board_order_and_derives_dispatch",
+    "PostP26SpecGovernanceTests.test_p44_dispatch_reconciles_interfaces_without_reopening_completed_cards",
+    "PostP26SpecGovernanceTests.test_p44_scoped_s3_chain_replaces_control_plane_without_weakening_gates",
+    "-v"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "startedAt": "2026-10-19T01:20:45.312Z",
+  "endedAt": "2026-10-19T01:20:45.995Z",
+  "exitCode": 0,
+  "signal": null,
+  "logPath": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\root-record-check-01.log"
+}

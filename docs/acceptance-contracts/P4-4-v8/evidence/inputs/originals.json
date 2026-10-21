@@ -1,0 +1,26 @@
+{
+  "schema": "p44-originals-v1",
+  "source_commit": "b56534d7b6c993c0795010d0404fb8a81f7eeb9d",
+  "candidate_commit": "2756ca95e26ec636216313271708b3304d61a5cc",
+  "history": {
+    "inventory": {
+      "path": "history/raw-output-inventory.json",
+      "size_bytes": 11531,
+      "sha256": "0d2fc54c06ec0ad5886cedb0532b662c6383fe563f687148868b67696ba33174"
+    }
+  },
+  "configuration": {
+    "inventory": {
+      "path": "configuration/inventory.json",
+      "size_bytes": 3645,
+      "sha256": "dca76bd7d6708e4c146ce30cbc5b0f8a991b198d188d4c518eec5c42b4bb4e7c"
+    }
+  },
+  "deployment": {
+    "inventory": {
+      "path": "deployment/raw-output-inventory.json",
+      "size_bytes": 70411,
+      "sha256": "44b720c6825a03c5ba8ce7d2c3f1ea9f36b487171d98d4397b18ddc5a308741e"
+    }
+  }
+}

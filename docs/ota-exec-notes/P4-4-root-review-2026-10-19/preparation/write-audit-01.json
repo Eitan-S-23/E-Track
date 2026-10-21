@@ -1,0 +1,747 @@
+{
+  "observedAt": "2026-10-19T01:23:29.615Z",
+  "mode": "record",
+  "activeProjectRoot": "D:/github/my/E-Track",
+  "additionalAuthorizedWorktree": "D:/github/my/E-Track/.cache/p4-4-integration-20261018",
+  "scopes": [
+    "D:/github/my/E-Track/.cache/p44-root-review-546d8b3-20261019",
+    "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019",
+    "D:/github/my/E-Track/docs/ota-exec-notes/P4-4-s3-preacceptance-2026-10-19.md",
+    "D:/github/my/E-Track/.cache/p4-4-integration-20261018/docs/ota-exec-notes/P4-4-root-review-2026-10-19",
+    "D:/github/my/E-Track/.cache/p4-4-integration-20261018/docs/ota-exec-notes/P4-4-s3-preacceptance-2026-10-19.md",
+    "D:/github/my/E-Track/.cache/p4-4-integration-20261018/docs/ota-exec-notes/P4-4-configuration-2026-10-18.md",
+    "D:/github/my/E-Track/.cache/p4-4-integration-20261018/PLAN-OTA-EXEC.md",
+    "D:/github/my/E-Track/.cache/p4-4-integration-20261018/.cache/p44/logs/root-record-check-01.json",
+    "D:/github/my/E-Track/.cache/p4-4-integration-20261018/.cache/p44/logs/root-record-check-01.log",
+    "D:/github/my/E-Track/.cache/p4-4-integration-20261018/.cache/p44/logs/root-record-diff-01.json",
+    "D:/github/my/E-Track/.cache/p4-4-integration-20261018/.cache/p44/logs/root-record-diff-01.log"
+  ],
+  "inspected": [
+    {
+      "path": ".cache/p44-root-review-546d8b3-20261019/cases-result.json",
+      "sizeBytes": 951
+    },
+    {
+      "path": ".cache/p44-root-review-546d8b3-20261019/cases.cjs",
+      "sizeBytes": 5584
+    },
+    {
+      "path": ".cache/p44-root-review-546d8b3-20261019/originals-result.json",
+      "sizeBytes": 250
+    },
+    {
+      "path": ".cache/p44-root-review-546d8b3-20261019/originals.cjs",
+      "sizeBytes": 1812
+    },
+    {
+      "path": ".cache/p44-root-review-546d8b3-20261019/output-audit.json",
+      "sizeBytes": 1754
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/create-s3-production-01-reservation.json",
+      "sizeBytes": 1611
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/create-s3-production-01.json",
+      "sizeBytes": 2651
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/create-s3.cjs",
+      "sizeBytes": 7348
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-03/01.body",
+      "sizeBytes": 119
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-03/01.headers",
+      "sizeBytes": 1458
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-03/02.body",
+      "sizeBytes": 119
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-03/02.headers",
+      "sizeBytes": 1460
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-03/03.body",
+      "sizeBytes": 119
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-03/03.headers",
+      "sizeBytes": 1460
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-03/04.body",
+      "sizeBytes": 2135
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-03/04.headers",
+      "sizeBytes": 949
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-03/05.body",
+      "sizeBytes": 2641
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-03/05.headers",
+      "sizeBytes": 949
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-03/06.body",
+      "sizeBytes": 251
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-03/06.headers",
+      "sizeBytes": 949
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-04/01.body",
+      "sizeBytes": 2047
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-04/01.headers",
+      "sizeBytes": 948
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-04/02.body",
+      "sizeBytes": 119
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-04/02.headers",
+      "sizeBytes": 1460
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-04/03.body",
+      "sizeBytes": 119
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-04/03.headers",
+      "sizeBytes": 1460
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-04/04.body",
+      "sizeBytes": 119
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-04/04.headers",
+      "sizeBytes": 1461
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-04/05.body",
+      "sizeBytes": 2135
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-04/05.headers",
+      "sizeBytes": 949
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-04/06.body",
+      "sizeBytes": 2641
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-04/06.headers",
+      "sizeBytes": 948
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-04/07.body",
+      "sizeBytes": 251
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-04/07.headers",
+      "sizeBytes": 949
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-04/08.body",
+      "sizeBytes": 2282
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-04/08.headers",
+      "sizeBytes": 949
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-04/09.body",
+      "sizeBytes": 3115
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-04/09.headers",
+      "sizeBytes": 949
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-04/10.body",
+      "sizeBytes": 251
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-04/10.headers",
+      "sizeBytes": 949
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-04/11.body",
+      "sizeBytes": 149262
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-deploy-production-04/11.headers",
+      "sizeBytes": 1181
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-io.cjs",
+      "sizeBytes": 3093
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-plan-production-03/01.body",
+      "sizeBytes": 2135
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-plan-production-03/01.headers",
+      "sizeBytes": 949
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-plan-production-03/02.body",
+      "sizeBytes": 2641
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-plan-production-03/02.headers",
+      "sizeBytes": 949
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-plan-production-03/03.body",
+      "sizeBytes": 251
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-plan-production-03/03.headers",
+      "sizeBytes": 949
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-recover-staging-02/01.body",
+      "sizeBytes": 2953
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-recover-staging-02/01.headers",
+      "sizeBytes": 948
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-recover-staging-02/02.body",
+      "sizeBytes": 1703
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-recover-staging-02/02.headers",
+      "sizeBytes": 948
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-recover-staging-02/03.body",
+      "sizeBytes": 510
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-recover-staging-02/03.headers",
+      "sizeBytes": 981
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-recover-staging-02/04.body",
+      "sizeBytes": 2952
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-recover-staging-02/04.headers",
+      "sizeBytes": 949
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-recover-staging-02/05.body",
+      "sizeBytes": 251
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-recover-staging-02/05.headers",
+      "sizeBytes": 949
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-recover-staging-02/06.body",
+      "sizeBytes": 149262
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-recover-staging-02/06.headers",
+      "sizeBytes": 1181
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-refresh-admission-01/01.body",
+      "sizeBytes": 1661
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-refresh-admission-01/01.headers",
+      "sizeBytes": 1461
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-refresh-admission-01/02.headers",
+      "sizeBytes": 39
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-refresh-admission-02/01.body",
+      "sizeBytes": 1661
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-refresh-admission-02/01.headers",
+      "sizeBytes": 1461
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-refresh-admission-02/02.body",
+      "sizeBytes": 439
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-refresh-admission-02/02.headers",
+      "sizeBytes": 1460
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-refresh-admission-02/03.body",
+      "sizeBytes": 854
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-refresh-admission-02/03.headers",
+      "sizeBytes": 1461
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-refresh-admission-02/04.body",
+      "sizeBytes": 136
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-refresh-admission-02/04.headers",
+      "sizeBytes": 1461
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-refresh-admission-02/05.body",
+      "sizeBytes": 1659
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-refresh-admission-02/05.headers",
+      "sizeBytes": 1462
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-refresh-admission-02/06.body",
+      "sizeBytes": 638
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-refresh-admission-02/06.headers",
+      "sizeBytes": 1460
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-refresh-admission-02/07.body",
+      "sizeBytes": 2520
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-refresh-admission-02/07.headers",
+      "sizeBytes": 1461
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-refresh-admission-02/08.body",
+      "sizeBytes": 160
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-refresh-admission-02/08.headers",
+      "sizeBytes": 1461
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-refresh-admission-02/09.body",
+      "sizeBytes": 119
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-refresh-admission-02/09.headers",
+      "sizeBytes": 1461
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-refresh-admission-02/10.body",
+      "sizeBytes": 334
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/curl-refresh-admission-02/10.headers",
+      "sizeBytes": 1532
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/d1-preparation-01.json",
+      "sizeBytes": 11742
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/d1-preparation.cjs",
+      "sizeBytes": 2575
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/delivery-review.json",
+      "sizeBytes": 34691
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/production/deploy-03-console.log",
+      "sizeBytes": 1100
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/production/deploy-03-wrangler.log",
+      "sizeBytes": 3164
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/production/deploy-03-wrangler.ndjson",
+      "sizeBytes": 501
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/production/deploy-03.json",
+      "sizeBytes": 9354
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/production/deploy-04-console.log",
+      "sizeBytes": 1928
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/production/deploy-04-wrangler.log",
+      "sizeBytes": 17476
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/production/deploy-04-wrangler.ndjson",
+      "sizeBytes": 743
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/production/deploy-04.json",
+      "sizeBytes": 16567
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/production/deployed-content.bin",
+      "sizeBytes": 149262
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/production/deployment-reservation-04.json",
+      "sizeBytes": 747
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/production/deployment-reservation.json",
+      "sizeBytes": 747
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/production/dry-run/index.js",
+      "sizeBytes": 149013
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/production/dry-run/README.md",
+      "sizeBytes": 128
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/production/plan-02.json",
+      "sizeBytes": 1254
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/production/plan-03-console.log",
+      "sizeBytes": 1676
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/production/plan-03-wrangler.log",
+      "sizeBytes": 5980
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/production/plan-03-wrangler.ndjson",
+      "sizeBytes": 693
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/production/plan-03.json",
+      "sizeBytes": 6853
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/production/plan.json",
+      "sizeBytes": 1241
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/staging/deploy-console.log",
+      "sizeBytes": 2467
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/staging/deploy-wrangler.log",
+      "sizeBytes": 18017
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/staging/deploy-wrangler.ndjson",
+      "sizeBytes": 730
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/staging/deploy.json",
+      "sizeBytes": 9220
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/staging/deployment-reservation.json",
+      "sizeBytes": 757
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/staging/dry-run/index.js",
+      "sizeBytes": 149013
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/staging/dry-run/README.md",
+      "sizeBytes": 126
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/staging/plan-console.log",
+      "sizeBytes": 2113
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/staging/plan-wrangler.log",
+      "sizeBytes": 6441
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/staging/plan-wrangler.ndjson",
+      "sizeBytes": 679
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/staging/plan.json",
+      "sizeBytes": 6488
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/staging/recovered-content-02.bin",
+      "sizeBytes": 149262
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/staging/redaction-recovery-02-reservation.json",
+      "sizeBytes": 515
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/staging/redaction-recovery-02.json",
+      "sizeBytes": 11508
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/staging/redaction-recovery-reservation.json",
+      "sizeBytes": 515
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy/staging/redaction-recovery.json",
+      "sizeBytes": 4529
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/deploy-worker.cjs",
+      "sizeBytes": 13538
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/io.cjs",
+      "sizeBytes": 5694
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/localappdata/GitHub CLI/device-id",
+      "sizeBytes": 36
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/platform-preparation-01.json",
+      "sizeBytes": 579
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/platform-preparation-02.json",
+      "sizeBytes": 25227
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/platform.cjs",
+      "sizeBytes": 5403
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/private/deploy-production.json",
+      "sizeBytes": 1656
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/private/deploy-staging.json",
+      "sizeBytes": 1746
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/publish-evidence.cjs",
+      "sizeBytes": 8520
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/refresh-admission-01.json",
+      "sizeBytes": 1872
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/refresh-admission-02.json",
+      "sizeBytes": 13654
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/refresh-admission.cjs",
+      "sizeBytes": 3750
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/restore-staging-redaction-02.cjs",
+      "sizeBytes": 4490
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/restore-staging-redaction.cjs",
+      "sizeBytes": 4410
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/root-output-audit.cjs",
+      "sizeBytes": 4731
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/tmp/update-check/wrangler-latest.json",
+      "sizeBytes": 47
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/verification-inputs/conflicting.json",
+      "sizeBytes": 1978
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/verification-inputs/current.json",
+      "sizeBytes": 2046
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/verification-inputs/docs/ota-exec-notes/P4-1-r2-registration-qualification-2026-10-15/fixture/e-track-at32f435-v2.8.0-to-v2.8.1-patch.etu",
+      "sizeBytes": 208
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/verification-inputs/docs/ota-exec-notes/P4-1-r2-registration-qualification-2026-10-15/fixture/e-track-at32f435-v2.8.1-full.etu",
+      "sizeBytes": 202
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/verification-inputs/docs/ota-exec-notes/P4-1-r2-registration-qualification-2026-10-15/fixture/recovery-v2.8.1.bin",
+      "sizeBytes": 8200
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/verification-inputs/docs/ota-exec-notes/P4-1-r2-registration-qualification-2026-10-15/operations/verified-metadata.json",
+      "sizeBytes": 2026
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/verification-inputs/stale.json",
+      "sizeBytes": 2026
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/verify-delivery.cjs",
+      "sizeBytes": 3404
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/verify-remediation-01.json",
+      "sizeBytes": 4751
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/verify-remediation.cjs",
+      "sizeBytes": 10021
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/worker-input-01-members.txt",
+      "sizeBytes": 67
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/worker-input-01.cjs",
+      "sizeBytes": 6474
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/worker-input-01.json",
+      "sizeBytes": 10760
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/worker-input-01.zip",
+      "sizeBytes": 102228
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/worker-input-02.json",
+      "sizeBytes": 12677
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/worker-input.cjs",
+      "sizeBytes": 7461
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/worker-runtime/index.js",
+      "sizeBytes": 149013
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/worker-runtime-source-map/index.js.map",
+      "sizeBytes": 281633
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/xdg-config/.wrangler/cloudflare-skills-repo-cache.json",
+      "sizeBytes": 364
+    },
+    {
+      "path": ".cache/p44-root-acceptance-20261019/xdg-config/.wrangler/metrics.json",
+      "sizeBytes": 55
+    },
+    {
+      "path": "docs/ota-exec-notes/P4-4-s3-preacceptance-2026-10-19.md",
+      "sizeBytes": 28749
+    },
+    {
+      "path": ".cache/p4-4-integration-20261018/docs/ota-exec-notes/P4-4-root-review-2026-10-19/.gitattributes",
+      "sizeBytes": 19
+    },
+    {
+      "path": ".cache/p4-4-integration-20261018/docs/ota-exec-notes/P4-4-root-review-2026-10-19/README.md",
+      "sizeBytes": 2479
+    },
+    {
+      "path": ".cache/p4-4-integration-20261018/docs/ota-exec-notes/P4-4-s3-preacceptance-2026-10-19.md",
+      "sizeBytes": 28749
+    },
+    {
+      "path": ".cache/p4-4-integration-20261018/docs/ota-exec-notes/P4-4-configuration-2026-10-18.md",
+      "sizeBytes": 45438
+    },
+    {
+      "path": ".cache/p4-4-integration-20261018/PLAN-OTA-EXEC.md",
+      "sizeBytes": 604772
+    },
+    {
+      "path": ".cache/p4-4-integration-20261018/.cache/p44/logs/root-record-check-01.json",
+      "sizeBytes": 859
+    },
+    {
+      "path": ".cache/p4-4-integration-20261018/.cache/p44/logs/root-record-check-01.log",
+      "sizeBytes": 651
+    },
+    {
+      "path": ".cache/p4-4-integration-20261018/.cache/p44/logs/root-record-diff-01.json",
+      "sizeBytes": 530
+    },
+    {
+      "path": ".cache/p4-4-integration-20261018/.cache/p44/logs/root-record-diff-01.log",
+      "sizeBytes": 145
+    }
+  ],
+  "counts": {
+    "files": 168,
+    "directories": 38,
+    "bytes": 2603182
+  },
+  "head": "15be25e593405396d8db8fb0011fc62e42d6d27d",
+  "branch": "dev/p4-4/config-integration-20261018",
+  "rootSharedIndexSha256": "2907ee569cb8415877c8c688b3e09b5948a789d6430796eab99ae3ad43f3a3dd",
+  "productAndFrozenInputsUnchangedSinceImplementationDelivery": true,
+  "selectedOutputPathsInsideAuthorizedRoot": true,
+  "externalOutputPathsSelected": [],
+  "externalReadOnlyObservations": [
+    {
+      "path": "C:/Users/SU/AppData/LocalLow/Microsoft/CryptnetUrlCache/Content/ABD721CDC3648033BA8C827AF15A4543",
+      "exists": true,
+      "sizeBytes": 309,
+      "mtime": "2026-10-18T05:11:29.717Z"
+    },
+    {
+      "path": "C:/Users/SU/AppData/LocalLow/Microsoft/CryptnetUrlCache/MetaData/ABD721CDC3648033BA8C827AF15A4543",
+      "exists": true,
+      "sizeBytes": 192,
+      "mtime": "2026-10-18T05:11:29.717Z"
+    },
+    {
+      "path": "C:/Users/SU/AppData/LocalLow/Microsoft/CryptnetUrlCache/Content/B6E4D06BF128A1673A8DAFB4E25B990D",
+      "exists": true,
+      "sizeBytes": 309,
+      "mtime": "2026-10-19T01:20:01.013Z"
+    },
+    {
+      "path": "C:/Users/SU/AppData/LocalLow/Microsoft/CryptnetUrlCache/MetaData/B6E4D06BF128A1673A8DAFB4E25B990D",
+      "exists": true,
+      "sizeBytes": 192,
+      "mtime": "2026-10-19T01:20:01.013Z"
+    },
+    {
+      "path": "C:/Users/SU/AppData/Local/Microsoft/PowerShell/StartupProfileData-NonInteractive",
+      "exists": true,
+      "sizeBytes": 68032,
+      "mtime": "2026-10-17T08:37:13.169Z"
+    },
+    {
+      "path": "C:/Users/SU/AppData/Local/Microsoft/Windows/PowerShell/StartupProfileData-NonInteractive",
+      "exists": true,
+      "sizeBytes": 1004,
+      "mtime": "2026-10-19T01:10:43.603Z"
+    }
+  ],
+  "externalCleanup": false,
+  "delegation": "Implementation child controlled-output audit was independently reconciled in delivery-review.json; two review children were read-only.",
+  "gitWrites": "Only task-worktree index/HEAD/COMMIT_EDITMSG/reflog, task branch and remote-tracking refs/reflogs, shared objects; no root index/main write.",
+  "containment": "cmd/Node; temp, home, XDG, npm, gh and Wrangler outputs project-local; TLS checks enabled.",
+  "limits": "Selected-output and inspected-command audit, not machine-wide tracing. External PowerShell-cache timestamp attribution remains unknown."
+}

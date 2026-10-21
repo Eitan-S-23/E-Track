@@ -1,0 +1,325 @@
+{
+  "startedAt": "2026-10-18T23:16:25.422Z",
+  "kind": "TESTED_WORKER_INPUT_PREPARATION",
+  "commit": "b56534d7b6c993c0795010d0404fb8a81f7eeb9d",
+  "runId": 39175549010,
+  "requests": [
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/actions/runs/39175549010",
+      "startedAt": "2026-10-18T23:16:28.435Z",
+      "status": 200,
+      "bytes": 11990,
+      "sha256": "9a4b4f0dd61600e05e42610f041dabb518a88860451a14bd81a8899b407cd334",
+      "requestId": "B8E3:316E4A:F766AB:10CA6B9:6AD55352",
+      "endedAt": "2026-10-18T23:16:34.575Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/actions/runs/39175549010/attempts/1/jobs",
+      "startedAt": "2026-10-18T23:16:34.579Z",
+      "status": 200,
+      "bytes": 13297,
+      "sha256": "b642ef5001961ece82c294462035d08c11b3588f5a4018de650590329dd5b889",
+      "requestId": "8A07:7F28B:F29943:107D761:6AD55353",
+      "endedAt": "2026-10-18T23:16:39.782Z"
+    },
+    {
+      "method": "GET",
+      "origin": "https://api.github.com",
+      "path": "/repos/Eitan-S-23/E-Track/actions/runs/39175549010/artifacts",
+      "startedAt": "2026-10-18T23:16:39.784Z",
+      "status": 200,
+      "bytes": 4475,
+      "sha256": "e047e50ec6ffd96146b9a9106572b3291449c6d4006c3d996c5512122ad1bbf5",
+      "requestId": "E31B:7E53D:103BACE:118FFB8:6AD55358",
+      "endedAt": "2026-10-18T23:16:46.317Z"
+    }
+  ],
+  "operations": [
+    {
+      "executable": "gh",
+      "args": [
+        "api",
+        "repos/Eitan-S-23/E-Track/actions/artifacts/12154675551/zip"
+      ],
+      "startedAt": "2026-10-18T23:16:46.318Z",
+      "endedAt": "2026-10-18T23:16:53.594Z",
+      "exitCode": 0,
+      "signal": null,
+      "stderr": ""
+    },
+    {
+      "executable": "C:/Windows/System32/tar.exe",
+      "args": [
+        "-tf",
+        "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\worker-input-01.zip"
+      ],
+      "startedAt": "2026-10-18T23:16:54.028Z",
+      "endedAt": "2026-10-18T23:16:54.082Z",
+      "exitCode": 0,
+      "signal": null,
+      "stderr": ""
+    },
+    {
+      "executable": "C:/Windows/System32/tar.exe",
+      "args": [
+        "-xOf",
+        "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\worker-input-01.zip",
+        "source-commit.txt"
+      ],
+      "startedAt": "2026-10-18T23:16:54.522Z",
+      "endedAt": "2026-10-18T23:16:54.561Z",
+      "exitCode": 0,
+      "signal": null,
+      "stderr": ""
+    },
+    {
+      "executable": "C:/Windows/System32/tar.exe",
+      "args": [
+        "-xOf",
+        "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\worker-input-01.zip",
+        "index.js"
+      ],
+      "startedAt": "2026-10-18T23:16:54.562Z",
+      "endedAt": "2026-10-18T23:16:54.602Z",
+      "exitCode": 0,
+      "signal": null,
+      "stderr": ""
+    },
+    {
+      "executable": "C:/Windows/System32/tar.exe",
+      "args": [
+        "-xOf",
+        "D:\\github\\my\\E-Track\\.cache\\p44-root-acceptance-20261019\\worker-input-01.zip",
+        "index.js.map"
+      ],
+      "startedAt": "2026-10-18T23:16:54.602Z",
+      "endedAt": "2026-10-18T23:16:54.644Z",
+      "exitCode": 0,
+      "signal": null,
+      "stderr": ""
+    }
+  ],
+  "deployed": false,
+  "formalAcceptance": "NOT_RUN",
+  "run": {
+    "id": 39175549010,
+    "headSha": "b56534d7b6c993c0795010d0404fb8a81f7eeb9d",
+    "attempt": 1,
+    "status": "completed",
+    "conclusion": "success"
+  },
+  "toolingJob": {
+    "id": 117817345384,
+    "run_id": 39175549010,
+    "workflow_name": "MCU Firmware Build",
+    "head_branch": "dev/p4-4/config-integration-20261018",
+    "run_url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/runs/39175549010",
+    "run_attempt": 1,
+    "node_id": "CR_kwDOTh7tuM8AAAAbbnYFaA",
+    "head_sha": "b56534d7b6c993c0795010d0404fb8a81f7eeb9d",
+    "url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/jobs/117817345384",
+    "html_url": "https://github.com/Eitan-S-23/E-Track/actions/runs/39175549010/job/117817345384",
+    "status": "completed",
+    "conclusion": "success",
+    "created_at": "2026-10-18T23:12:44Z",
+    "started_at": "2026-10-18T23:12:46Z",
+    "completed_at": "2026-10-18T23:13:58Z",
+    "name": "Release tooling development checks (no cloud credentials)",
+    "steps": [
+      {
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 1,
+        "started_at": "2026-10-18T23:12:47Z",
+        "completed_at": "2026-10-18T23:12:47Z"
+      },
+      {
+        "name": "Checkout repository",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 2,
+        "started_at": "2026-10-18T23:12:47Z",
+        "completed_at": "2026-10-18T23:13:03Z"
+      },
+      {
+        "name": "Set up Node",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 3,
+        "started_at": "2026-10-18T23:13:03Z",
+        "completed_at": "2026-10-18T23:13:04Z"
+      },
+      {
+        "name": "Prepare contained test temporary directory",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 4,
+        "started_at": "2026-10-18T23:13:04Z",
+        "completed_at": "2026-10-18T23:13:04Z"
+      },
+      {
+        "name": "Install pinned Worker dependencies",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 5,
+        "started_at": "2026-10-18T23:13:04Z",
+        "completed_at": "2026-10-18T23:13:17Z"
+      },
+      {
+        "name": "Run script and migration host tests explicitly (not workerd)",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 6,
+        "started_at": "2026-10-18T23:13:17Z",
+        "completed_at": "2026-10-18T23:13:18Z"
+      },
+      {
+        "name": "Run release pipeline with real handlers and SQLite host ports (not rehearsal)",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 7,
+        "started_at": "2026-10-18T23:13:18Z",
+        "completed_at": "2026-10-18T23:13:20Z"
+      },
+      {
+        "name": "Run native workerd D1 R2 and registration invariants (not host doubles)",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 8,
+        "started_at": "2026-10-18T23:13:20Z",
+        "completed_at": "2026-10-18T23:13:30Z"
+      },
+      {
+        "name": "Check Worker and shared script types",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 9,
+        "started_at": "2026-10-18T23:13:30Z",
+        "completed_at": "2026-10-18T23:13:32Z"
+      },
+      {
+        "name": "Build tested Worker deployment input without cloud access",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 10,
+        "started_at": "2026-10-18T23:13:32Z",
+        "completed_at": "2026-10-18T23:13:36Z"
+      },
+      {
+        "name": "Install byte test dependency",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 11,
+        "started_at": "2026-10-18T23:13:36Z",
+        "completed_at": "2026-10-18T23:13:38Z"
+      },
+      {
+        "name": "Build the existing vendor bsdiff for this host",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 12,
+        "started_at": "2026-10-18T23:13:38Z",
+        "completed_at": "2026-10-18T23:13:41Z"
+      },
+      {
+        "name": "Check real package generation and approved-envelope replay",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 13,
+        "started_at": "2026-10-18T23:13:41Z",
+        "completed_at": "2026-10-18T23:13:41Z"
+      },
+      {
+        "name": "Check workflow execution graph and configuration gates",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 14,
+        "started_at": "2026-10-18T23:13:41Z",
+        "completed_at": "2026-10-18T23:13:42Z"
+      },
+      {
+        "name": "Execute production byte preparation with isolated fixtures",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 15,
+        "started_at": "2026-10-18T23:13:42Z",
+        "completed_at": "2026-10-18T23:13:53Z"
+      },
+      {
+        "name": "Preserve development byte fixtures and step originals",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 16,
+        "started_at": "2026-10-18T23:13:53Z",
+        "completed_at": "2026-10-18T23:13:54Z"
+      },
+      {
+        "name": "Preserve tested Worker deployment input",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 17,
+        "started_at": "2026-10-18T23:13:54Z",
+        "completed_at": "2026-10-18T23:13:56Z"
+      },
+      {
+        "name": "Post Set up Node",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 33,
+        "started_at": "2026-10-18T23:13:56Z",
+        "completed_at": "2026-10-18T23:13:56Z"
+      },
+      {
+        "name": "Post Checkout repository",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 34,
+        "started_at": "2026-10-18T23:13:56Z",
+        "completed_at": "2026-10-18T23:13:56Z"
+      },
+      {
+        "name": "Complete job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 35,
+        "started_at": "2026-10-18T23:13:56Z",
+        "completed_at": "2026-10-18T23:13:56Z"
+      }
+    ],
+    "check_run_url": "https://api.github.com/repos/Eitan-S-23/E-Track/check-runs/117817345384",
+    "labels": [
+      "ubuntu-latest"
+    ],
+    "runner_id": 1000007698,
+    "runner_name": "GitHub Actions 1000007698",
+    "runner_group_id": 0,
+    "runner_group_name": "GitHub Actions"
+  },
+  "artifact": {
+    "id": 12154675551,
+    "node_id": "MDg6QXJ0aWZhY3QxMjE1NDY3NTU1MQ==",
+    "name": "p41-worker-bundle-b56534d7b6c993c0795010d0404fb8a81f7eeb9d",
+    "size_in_bytes": 102228,
+    "url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/artifacts/12154675551",
+    "archive_download_url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/artifacts/12154675551/zip",
+    "expired": false,
+    "digest": "sha256:7bee78195841780046c3333d4dc6c0b3ec9d442f8a99399051d204844a7e2f6f",
+    "created_at": "2026-10-18T23:13:55Z",
+    "updated_at": "2026-10-18T23:13:55Z",
+    "expires_at": "2026-11-01T23:13:55Z",
+    "workflow_run": {
+      "id": 39175549010,
+      "repository_id": 1310649784,
+      "head_repository_id": 1310649784,
+      "head_branch": "dev/p4-4/config-integration-20261018",
+      "head_sha": "b56534d7b6c993c0795010d0404fb8a81f7eeb9d"
+    }
+  },
+  "error": "Required preflight source absent from bundle",
+  "endedAt": "2026-10-18T23:16:56.555Z"
+}

@@ -32,7 +32,8 @@ async function main() {
   process.once("SIGTERM", cancel); process.once("SIGINT", cancel);
   try {
     if (command === "development") {
-      if (process.env.OTA_AES_KEY || process.env.CLOUDFLARE_API_TOKEN || process.env.TRACE_DEPLOY_TOKEN) {
+      if (process.env.OTA_AES_KEY || process.env.CLOUDFLARE_API_TOKEN || process.env.TRACE_DEPLOY_TOKEN
+        || process.env.TRACE_R2_ACCESS_KEY_ID || process.env.TRACE_R2_SECRET_ACCESS_KEY) {
         throw new CliError("Development validation must not receive release credentials");
       }
       const release = { releaseTag: `mcu-e-track-at32f435-v${build.versionName}`, runId: process.env.GITHUB_RUN_ID ?? "1",
@@ -94,8 +95,8 @@ async function main() {
     }
     controller.signal.throwIfAborted();
     const evidence = await withFirmwareBucket({ root, bucketName: config.bucketName, accountId: config.accountId,
-      databaseId: config.databaseId, databaseName: config.databaseName }, (bucket, db) => publishPreparedRelease({
-        root, assetsDir: outputDir, metadata: prepared.metadata, config, env, bucket, db, github, approval,
+      env, signal: controller.signal }, (bucket) => publishPreparedRelease({
+        root, assetsDir: outputDir, metadata: prepared.metadata, config, env, bucket, github, approval,
         deployToken: env.TRACE_DEPLOY_TOKEN, signal: controller.signal }));
     process.stdout.write(JSON.stringify({ ok: true, mode: config.mode, metadataSha256: evidence.metadataSha256,
       evidenceSha256: digest(await readFile(path.join(outputDir, "release-evidence.json"))),

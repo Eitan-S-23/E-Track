@@ -1,0 +1,6 @@
+{"case":"real-io-seed","files":754}
+{"case":"real-io-prefix","complete":70,"first_missing":"protected-patches-rows8-16"}
+{"case":"real-io-failure-reload","partial_successes":0,"complete":71,"next_attempt":3,"body_requests":1}
+{"case":"real-io-success-assembly","complete":142,"new_reads":71,"junction_check":"PASS"}
+{"scope":"OFFLINE_DEVELOPMENT_SELFTEST_ONLY","ok":true,"started":"2026-10-21T06:53:19.003Z","ended":"2026-10-21T08:01:03.347Z","assertions":19,"source":[{"path":"Tools/ota/p44-after-recovery.cjs","size_bytes":86482,"sha256":"4b5081954a47c36bfc71e11f5eb07bdc2c94db6a615a7a42ab85ec78fcd9a21c"},{"path":"tests/ota/test_p44_after_recovery.cjs","size_bytes":76676,"sha256":"d4678e22bc71a848064860290d546085d58c15f0c9dd2fc981d07d9047d48055"}],"cloud_operations":0,"c5_source_files":1185,"predecessor_commit":"9bfc48573a5eed190583411ac465bd847424a286","retained_complete_originals":31,"retained_failed_originals":1,"retained_private_verify_failures":1}
+{"host_stdio_actual_commands":78372,"cached_answers":0}

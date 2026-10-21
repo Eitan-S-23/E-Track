@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "files_scanned": 1149,
+  "zip_members_scanned": 132,
+  "decoded_d1_scanned": 102,
+  "known_secret_forms": 34,
+  "failed_paths": [],
+  "lifecycle_checked": true,
+  "platform_operations": 0,
+  "limits": "Known values/encodings, verified compressed D1 decoded bytes and signed-URL patterns; private failed wire is not published or scanned here; not proof of never-exposure or arbitrary unknown-secret detection"
+}

@@ -1,0 +1,19 @@
+{
+  "label": "s3-worker-host-all-01",
+  "command": "node",
+  "args": [
+    "D:/install/nvm/nodejs/node_modules/npm/bin/npm-cli.js",
+    "test",
+    "--prefix",
+    "app/bluetooth_flutter_Trace/cloudflare/update-service/worker",
+    "--",
+    "--config",
+    "test/vitest.host.config.ts"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018",
+  "startedAt": "2026-10-18T19:04:36.662Z",
+  "endedAt": "2026-10-18T19:04:52.090Z",
+  "exitCode": 0,
+  "signal": null,
+  "logPath": "D:\\github\\my\\E-Track\\.cache\\p4-4-integration-20261018\\.cache\\p44\\logs\\s3-worker-host-all-01.log"
+}

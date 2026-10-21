@@ -1,0 +1,23 @@
+{
+  "method": "GET",
+  "path": "/e-track-firmware-p41-test-releases/?list-type=2&max-keys=1000",
+  "started": "2026-10-21T10:01:43.665Z",
+  "request_attempts": 1,
+  "request_failures": [],
+  "status": 200,
+  "response_headers": {
+    "date": "Wed, 21 Oct 2026 10:01:47 GMT",
+    "content-type": "application/xml",
+    "content-length": "2891",
+    "connection": "keep-alive",
+    "server": "cloudflare",
+    "cf-ray": "a4df6c47a843d747-NRT"
+  },
+  "body": {
+    "path": "snapshots/after-tail-v6/attempt-2/staging-r2-1.body",
+    "size_bytes": 2891,
+    "sha256": "dac2aa4c891adee90384fa00f88a2fb1880a148fabf7fe96c5e0eda81a3da5c8"
+  },
+  "completed": true,
+  "ended": "2026-10-21T10:01:49.037Z"
+}

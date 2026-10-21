@@ -1,0 +1,144 @@
+✔ P4-4 actual configuration parser admits its isolated host-only control (4.5091ms)
+✔ P4-4 missing CLOUDFLARE_ACCOUNT_ID fails by name without credential disclosure (0.8828ms)
+✔ P4-4 missing TRACE_R2_ACCESS_KEY_ID fails by name without credential disclosure (4.2959ms)
+✔ P4-4 missing TRACE_R2_SECRET_ACCESS_KEY fails by name without credential disclosure (0.2066ms)
+✔ P4-4 missing TRACE_UPDATE_SERVICE_URL fails by name without credential disclosure (0.2223ms)
+✔ P4-4 missing TRACE_DEPLOY_TOKEN fails by name without credential disclosure (0.1466ms)
+✔ P4-4 missing TRACE_R2_BUCKET fails by name without credential disclosure (0.9974ms)
+✔ P4-4 missing OTA_AES_KEY fails by name without credential disclosure (0.1558ms)
+✔ P4-4 missing GITHUB_TOKEN fails by name without credential disclosure (0.1832ms)
+✔ P4-4 missing GITHUB_REPOSITORY fails by name without credential disclosure (0.373ms)
+✔ P4-4 missing GITHUB_SHA fails by name without credential disclosure (0.1899ms)
+✔ P4-4 missing GITHUB_RUN_ID fails by name without credential disclosure (0.1227ms)
+✔ P4-4 missing GITHUB_RUN_ATTEMPT fails by name without credential disclosure (0.102ms)
+✔ P4-4 missing OTA_PREVIOUS_RELEASE_JSON fails by name without credential disclosure (0.0939ms)
+✔ P4-4 missing TRACE_FIRMWARE_MIN_APP_VERSION_CODE fails by name without credential disclosure (0.154ms)
+✔ P4-4 missing TRACE_FIRMWARE_MIN_PROTOCOL_VERSION fails by name without credential disclosure (0.1432ms)
+✔ P4-4 rejects unsafe TRACE_UPDATE_SERVICE_URL configuration (26) without echoing its value (0.5406ms)
+✔ P4-4 rejects unsafe TRACE_UPDATE_SERVICE_URL configuration (32) without echoing its value (0.285ms)
+✔ P4-4 rejects unsafe TRACE_UPDATE_SERVICE_URL configuration (52) without echoing its value (0.2185ms)
+✔ P4-4 rejects unsafe TRACE_UPDATE_SERVICE_URL configuration (49) without echoing its value (0.2072ms)
+✔ P4-4 rejects unsafe CLOUDFLARE_API_TOKEN configuration (26) without echoing its value (0.1301ms)
+✔ P4-4 rejects unsafe TRACE_R2_ACCESS_KEY_ID configuration (19) without echoing its value (0.1139ms)
+✔ P4-4 rejects unsafe TRACE_R2_SECRET_ACCESS_KEY configuration (13) without echoing its value (0.1128ms)
+✔ P4-4 rejects unsafe TRACE_DEPLOY_TOKEN configuration (19) without echoing its value (0.1961ms)
+✔ P4-4 rejects unsafe TRACE_R2_BUCKET configuration (29) without echoing its value (0.2143ms)
+✔ P4-4 rejects unsafe TRACE_D1_DATABASE_ID configuration (14) without echoing its value (0.1277ms)
+✔ P4-4 rejects unsafe GITHUB_SHA configuration (18) without echoing its value (0.1665ms)
+✔ P4-4 rejects unsafe INPUT_CHECK_BINDINGS configuration (4) without echoing its value (0.0957ms)
+✔ P4-4 rejects unsafe INPUT_PUBLISH configuration (4) without echoing its value (0.0928ms)
+✔ production remains explicit dispatch/publish with a first-step hard gate and protected environment (1.2718ms)
+✔ rehearsal has only separately named staging secrets and read-only GitHub permissions (0.2434ms)
+✔ nightly/checks jobs cannot acquire release secrets or execute the cloud pipeline (0.812ms)
+✔ binding qualification is a protected explicit check-only Linux job with bounded execution (0.3633ms)
+✔ binding check credentials are confined to readback after dependency installation (0.4312ms)
+✔ both release environments use the identical production implementation and same-run App/Boot inputs (0.7793ms)
+✔ development wiring explicitly executes host, native, byte and production-GCC paths (0.4807ms)
+✔ protected builds and packaging bind the same approved key without exposing cloud credentials to compilation (0.7955ms)
+✔ bootstrap approval is explicit environment configuration, never a development default (0.3589ms)
+✔ Worker bundle is a credential-free CI build input, not a deployment (0.362ms)
+✔ Worker bundle guard rejects an actual deployment or an injected extra command (2.9247ms)
+✔ version inputs use environment mappings rather than shell interpolation (0.3158ms)
+VERSION_CASE {"label":"legacy source PR","exitCode":0,"output":"version_name=2.7.0-nightly.370\nversion_code=20700\nbuild_number=370\n"}
+✔ actual version shell: legacy source PR (749.4228ms)
+VERSION_CASE {"label":"legacy source push","exitCode":0,"output":"version_name=2.7.0-nightly.370\nversion_code=20700\nbuild_number=370\n"}
+✔ actual version shell: legacy source push (1094.0615ms)
+VERSION_CASE {"label":"legacy source checks dispatch","exitCode":0,"output":"version_name=2.7.0\nversion_code=20700\nbuild_number=370\n"}
+✔ actual version shell: legacy source checks dispatch (550.2918ms)
+VERSION_CASE {"label":"explicit formal version","exitCode":0,"output":"version_name=3.2.7\nversion_code=30207\nbuild_number=370\n"}
+✔ actual version shell: explicit formal version (486.3534ms)
+VERSION_CASE {"label":"explicit rehearsal version","exitCode":0,"output":"version_name=3.2.7\nversion_code=30207\nbuild_number=370\n"}
+✔ actual version shell: explicit rehearsal version (503.4184ms)
+VERSION_CASE {"label":"canonical source formal version","exitCode":0,"output":"version_name=3.2.7\nversion_code=30207\nbuild_number=370\n"}
+✔ actual version shell: canonical source formal version (520.8787ms)
+VERSION_CASE {"label":"canonical source rehearsal version","exitCode":0,"output":"version_name=3.2.7\nversion_code=30207\nbuild_number=370\n"}
+✔ actual version shell: canonical source rehearsal version (1131.8248ms)
+VERSION_CASE {"label":"legacy source cannot choose formal version","exitCode":1,"output":""}
+✔ actual version shell: legacy source cannot choose formal version (1152.3825ms)
+VERSION_CASE {"label":"legacy source cannot choose rehearsal version","exitCode":1,"output":""}
+✔ actual version shell: legacy source cannot choose rehearsal version (512.0755ms)
+VERSION_CASE {"label":"explicit short version","exitCode":1,"output":""}
+✔ actual version shell: explicit short version (462.6175ms)
+VERSION_CASE {"label":"explicit prefixed version","exitCode":1,"output":""}
+✔ actual version shell: explicit prefixed version (474.8243ms)
+VERSION_CASE {"label":"leading zero major","exitCode":1,"output":""}
+✔ actual version shell: leading zero major (478.5815ms)
+VERSION_CASE {"label":"leading zero minor","exitCode":1,"output":""}
+✔ actual version shell: leading zero minor (1071.3707ms)
+VERSION_CASE {"label":"leading zero patch","exitCode":1,"output":""}
+✔ actual version shell: leading zero patch (482.9516ms)
+VERSION_CASE {"label":"explicit prerelease suffix","exitCode":1,"output":""}
+✔ actual version shell: explicit prerelease suffix (1111.042ms)
+VERSION_CASE {"label":"explicit nightly suffix","exitCode":1,"output":""}
+✔ actual version shell: explicit nightly suffix (449.535ms)
+VERSION_CASE {"label":"u32 maximum","exitCode":0,"output":"version_name=429496.72.95\nversion_code=4294967295\nbuild_number=370\n"}
+✔ actual version shell: u32 maximum (487.8127ms)
+VERSION_CASE {"label":"u32 overflow","exitCode":1,"output":""}
+✔ actual version shell: u32 overflow (486.4231ms)
+VERSION_CASE {"label":"major overflow","exitCode":1,"output":""}
+✔ actual version shell: major overflow (512.1805ms)
+VERSION_CASE {"label":"huge major must not wrap Bash arithmetic","exitCode":1,"output":""}
+✔ actual version shell: huge major must not wrap Bash arithmetic (1075.1563ms)
+VERSION_CASE {"label":"malformed legacy source","exitCode":1,"output":""}
+✔ actual version shell: malformed legacy source (1166.1621ms)
+VERSION_CASE {"label":"leading zero legacy source","exitCode":1,"output":""}
+✔ actual version shell: leading zero legacy source (484.3802ms)
+VERSION_CASE {"label":"source prerelease suffix","exitCode":1,"output":""}
+✔ actual version shell: source prerelease suffix (471.724ms)
+GATE_CASE {"label":"production locked","exitCode":1}
+✔ actual shell gate: production locked (156.5876ms)
+GATE_CASE {"label":"production missing approval","exitCode":2}
+✔ actual shell gate: production missing approval (159.2135ms)
+GATE_CASE {"label":"production ambiguous mode","exitCode":2}
+✔ actual shell gate: production ambiguous mode (145.5254ms)
+GATE_CASE {"label":"production rejects binding-check mode","exitCode":2}
+✔ actual shell gate: production rejects binding-check mode (146.5367ms)
+GATE_CASE {"label":"production wrong approval","exitCode":2}
+✔ actual shell gate: production wrong approval (140.1689ms)
+GATE_CASE {"label":"production approved shell gate only","exitCode":0}
+✔ actual shell gate: production approved shell gate only (153.3622ms)
+GATE_CASE {"label":"rehearsal locked","exitCode":0}
+✔ actual shell gate: rehearsal locked (152.1084ms)
+GATE_CASE {"label":"rehearsal unlocked","exitCode":1}
+✔ actual shell gate: rehearsal unlocked (163.2792ms)
+GATE_CASE {"label":"rehearsal cannot publish","exitCode":1}
+✔ actual shell gate: rehearsal cannot publish (718.6167ms)
+GATE_CASE {"label":"rehearsal rejects binding-check mode","exitCode":1}
+✔ actual shell gate: rehearsal rejects binding-check mode (172.7807ms)
+GATE_CASE {"label":"rehearsal retry binds original attempt","exitCode":0}
+✔ actual shell gate: rehearsal retry binds original attempt (157.2207ms)
+GATE_CASE {"label":"binding-check locked reviewed source","exitCode":0}
+✔ actual shell gate: binding-check locked reviewed source (166.0732ms)
+GATE_CASE {"label":"binding-check rejects ordinary dispatch","exitCode":2}
+✔ actual shell gate: binding-check rejects ordinary dispatch (746.7062ms)
+GATE_CASE {"label":"binding-check rejects push","exitCode":2}
+✔ actual shell gate: binding-check rejects push (160.4333ms)
+GATE_CASE {"label":"binding-check rejects missing gate","exitCode":2}
+✔ actual shell gate: binding-check rejects missing gate (155.5447ms)
+GATE_CASE {"label":"binding-check rejects unlocked gate","exitCode":2}
+✔ actual shell gate: binding-check rejects unlocked gate (145.7287ms)
+GATE_CASE {"label":"binding-check rejects publication","exitCode":2}
+✔ actual shell gate: binding-check rejects publication (137.0261ms)
+GATE_CASE {"label":"binding-check rejects rehearsal","exitCode":2}
+✔ actual shell gate: binding-check rejects rehearsal (137.7606ms)
+GATE_CASE {"label":"binding-check rejects absent reviewed source","exitCode":2}
+✔ actual shell gate: binding-check rejects absent reviewed source (155.818ms)
+GATE_CASE {"label":"binding-check rejects absent preflight source","exitCode":2}
+✔ actual shell gate: binding-check rejects absent preflight source (155.3151ms)
+GATE_CASE {"label":"binding-check rejects absent preflight hash","exitCode":2}
+✔ actual shell gate: binding-check rejects absent preflight hash (146.654ms)
+GATE_CASE {"label":"binding-check rejects invalid preflight hash","exitCode":2}
+✔ actual shell gate: binding-check rejects invalid preflight hash (150.6604ms)
+GATE_CASE {"label":"binding-check rejects changed source","exitCode":2}
+✔ actual shell gate: binding-check rejects changed source (148.9173ms)
+GATE_CASE {"label":"binding-check rejects another repository","exitCode":2}
+✔ actual shell gate: binding-check rejects another repository (149.305ms)
+✔ actual execute CLI rejects a checks context with exit 2 before any cloud path (324.5743ms)
+ℹ tests 89
+ℹ suites 0
+ℹ pass 89
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 22747.3765

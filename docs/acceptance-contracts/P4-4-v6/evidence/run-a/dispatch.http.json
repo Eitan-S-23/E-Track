@@ -1,0 +1,48 @@
+{
+  "method": "POST",
+  "path": "/repos/Eitan-S-23/E-Track/actions/workflows/firmware-build.yml/dispatches",
+  "started": "2026-10-19T19:45:42.224Z",
+  "request": {
+    "path": "run-a/dispatch.request.json",
+    "size_bytes": 291,
+    "sha256": "b636165e193b6e9d9c7322138b55e2e3a68c2657fc901573b0b0d4ca0a57040b"
+  },
+  "request_attempts": 1,
+  "request_failures": [],
+  "status": 204,
+  "response_headers": {
+    "date": "Mon, 19 Oct 2026 19:45:47 GMT",
+    "x-oauth-scopes": "gist, read:org, repo, user, workflow",
+    "x-accepted-oauth-scopes": "",
+    "x-oauth-client-id": "178c6fc778ccc68e1d6a",
+    "x-github-media-type": "github.v3; format=json",
+    "deprecation": "Tue, 10 Mar 2026 00:00:00 GMT",
+    "sunset": "Fri, 10 Mar 2028 00:00:00 GMT",
+    "link": "<https://docs.github.com/en/rest/about-the-rest-api/api-versions>; rel=\"deprecation\"; type=\"text/html\"",
+    "x-github-api-version-selected": "2022-11-28",
+    "access-control-expose-headers": "ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset, Warning",
+    "access-control-allow-origin": "*",
+    "strict-transport-security": "max-age=31536000; includeSubdomains; preload",
+    "x-frame-options": "deny",
+    "x-content-type-options": "nosniff",
+    "x-xss-protection": "0",
+    "referrer-policy": "origin-when-cross-origin, strict-origin-when-cross-origin",
+    "content-security-policy": "default-src 'none'",
+    "vary": "Accept-Encoding, Accept, X-Requested-With",
+    "server": "github.com",
+    "x-ratelimit-limit": "5000",
+    "x-ratelimit-remaining": "4964",
+    "x-ratelimit-reset": "1792440086",
+    "x-ratelimit-used": "36",
+    "x-ratelimit-resource": "core",
+    "x-github-request-id": "9A7F:23D21:6E333B:748824:6AD67368",
+    "x-github-edge-region": "westus3"
+  },
+  "body": {
+    "path": "run-a/dispatch.body",
+    "size_bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "completed": true,
+  "ended": "2026-10-19T19:45:48.179Z"
+}
