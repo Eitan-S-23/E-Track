@@ -443,6 +443,35 @@ void main() {
     }
   });
 
+  test('lost background owner gates later reboot probes until foreground', () async {
+    final host = _BackgroundOwnerHarness();
+    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+        backgroundClient: host, rebootWindow: const Duration(seconds: 5),
+        rebootProbeInterval: const Duration(milliseconds: 10));
+    ble.silentRebootProbes = 1;
+    final service = Get.find<OtaService>();
+    final operation = service.startOtaUpgrade('AA:BB');
+    try {
+      await waitUntil(() => ble.probeCount == 1);
+      service.didChangeAppLifecycleState(AppLifecycleState.paused);
+      host.lose();
+      ble.releaseSilentInfo();
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      expect(ble.probeCount, 1);
+      expect(service.taskSnapshot!.phase, 'paused');
+      expect(service.taskSnapshot!.targetVerified, isFalse);
+      service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      expect(await operation, isTrue);
+      expect(ble.probeCount, 2);
+      expect(ble.beginCalls, 1);
+    } finally {
+      service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      ble.releaseSilentInfo();
+      if (service.isUpgrading) await service.cancelUpgrade(keepPackage: true);
+      await operation;
+    }
+  });
+
   const probeAddress = 'AA:BB:CC:DD:EE:FF';
   Future<OtaExperimentRuntime> probeRuntime(Uint8List bytes, {int window = 8, bool prefix = true,
       int? rebootInfoTimeoutMs, int rebootProbeIntervalMs = 500,

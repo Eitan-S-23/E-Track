@@ -125,6 +125,28 @@ No MCU/cloud/protocol/performance/App-self-update business changes.
   Original result JSON and combined logs for both hosts are archived under
   `.cache/p38/run-39637361738/` (14-day remote expiry no longer sole copy).
 
+### Second WIP Feedback And Repair
+
+- Commit `bcf4b2b09b457732af19fc17ef83700b0bbeb8e5`, checks-only run
+  https://github.com/Eitan-S-23/E-Track/actions/runs/39647015309 (attempt 1).
+  Both analyze exit 0; full tests exit 1. Ubuntu: 737 passed, 16 skipped,
+  1 failed; Windows: 720 passed, 33 skipped, 1 failed. The two first-run
+  regressions and the new background integration cases now passed.
+- The remaining historical cancellation/cleanup atomicity test timed out:
+  owner-finally awaited ABORT, but the established concurrency oracle requires
+  the retired owner to exit while ABORT is in flight. Repair moves disposal
+  ownership to cancelUpgrade after its ABORT future; the old owner can exit,
+  and old cleanup retains its transport/key rather than touching a later owner.
+  Historical test assertions and their timing bound are unchanged.
+- Feedback originals archived under `.cache/p38/run-39647015309/`.
+- Additional bounded repairs: one published immutable Rx snapshot for both
+  consumers; gate reconnect probes on background ownership and abandon an
+  in-flight probe after ownership loss; test loss during reboot verification.
+  Native engine callbacks ignore retired engines, and initial notification
+  revision fences delayed snapshots. Native changes/tests still NOT_RUN.
+- Requested root's bounded native-test and standard-build route while continuing
+  authorized development checks. No workflow/build scope changed by this agent.
+
 Source implementation: IN_PROGRESS; repaired batch awaiting changed-input CI.
 Debug APK, standard APK, Windows EXE, Android platform tests, devices and
 independent acceptance: NOT_RUN. Root owns the bounded native CI step and

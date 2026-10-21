@@ -98,8 +98,18 @@ object DeviceOtaBridge {
             }
         }
         engine.addEngineLifecycleListener(object : FlutterEngine.EngineLifecycleListener {
-            override fun onPreEngineRestart() { DeviceOtaService.active?.runtimeLost() }
-            override fun onEngineWillDestroy() { DeviceOtaService.active?.runtimeLost() }
+            override fun onPreEngineRestart() {
+                if (this@DeviceOtaBridge.engine === engine) DeviceOtaService.active?.runtimeLost()
+            }
+            override fun onEngineWillDestroy() {
+                if (this@DeviceOtaBridge.engine !== engine) return
+                DeviceOtaService.active?.runtimeLost()
+                channel?.setMethodCallHandler(null)
+                channel = null
+                this@DeviceOtaBridge.engine = null
+                if (FlutterEngineCache.getInstance().get(ENGINE_ID) === engine)
+                    FlutterEngineCache.getInstance().remove(ENGINE_ID)
+            }
         })
     }
 

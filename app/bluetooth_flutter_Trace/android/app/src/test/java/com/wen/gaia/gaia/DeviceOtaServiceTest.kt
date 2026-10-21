@@ -106,6 +106,22 @@ class DeviceOtaServiceTest {
         assertFalse(runtime.events.contains("cancel"))
     }
 
+    @Test fun initialRevisionAlsoFencesLateProgress() {
+        runtime.initial = snapshot("applying", 20, false)
+        start(); runtime.answer(true)
+        assertTrue(service.publish(key, snapshot("transferring", 19)))
+        service.onStartCommand(key.put(Intent().setAction(DeviceOtaBridge.CANCEL)), 0, 2)
+        assertFalse(runtime.events.contains("cancel"))
+    }
+
+    @Test fun engineLossReleasesWakeLockAndService() {
+        start(); runtime.answer(true)
+        service.runtimeLost()
+        assertFalse(service.hasTask())
+        assertFalse(ShadowPowerManager.getLatestWakeLock().isHeld)
+        assertTrue(runtime.events.contains("ENGINE_LOST"))
+    }
+
     @Test fun permissionsLostAndEngineLostReleaseResources() {
         start(); runtime.answer(true)
         runtime.problem = "CHANNEL_DISABLED"

@@ -68,6 +68,7 @@ class DeviceOtaService : Service() {
         }
         key = requested
         snapshot = initial
+        revision = (initial["revision"] as? Number)?.toLong() ?: -1L
         try {
             check(runtime.problem(this) == null)
             val notification = notification(requested, initial)
@@ -100,10 +101,11 @@ class DeviceOtaService : Service() {
 
     fun hasTask(): Boolean = key != null
 
-    fun owns(requested: DeviceOtaKey): Boolean = key == requested && acquired &&
-        runtime.live() && runtime.problem(this) == null &&
-        SystemClock.elapsedRealtime() - lastProbe <= 10000 &&
-        SystemClock.elapsedRealtime() - startedAt < LEASE_MS && wakeLock?.isHeld == true
+    fun owns(requested: DeviceOtaKey): Boolean = runCatching {
+        key == requested && acquired && runtime.live() && runtime.problem(this) == null &&
+            SystemClock.elapsedRealtime() - lastProbe <= 10000 &&
+            SystemClock.elapsedRealtime() - startedAt < LEASE_MS && wakeLock?.isHeld == true
+    }.getOrDefault(false)
 
     private fun scheduleProbe(requested: DeviceOtaKey) {
         handler.postDelayed({

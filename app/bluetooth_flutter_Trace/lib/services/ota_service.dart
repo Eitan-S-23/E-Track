@@ -167,6 +167,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   bool _appBackgrounded = false, _foregroundPaused = false, _closed = false;
   Completer<void>? _foregroundGate;
   String? _lastSnapshotPhase;
+  final _publishedTaskSnapshot = Rxn<OtaTaskSnapshot>();
 
   bool get backgroundAcquired => _backgroundReady.value;
   String? get backgroundUnavailableReason => _backgroundReason.value;
@@ -174,7 +175,9 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       (phase == OtaPhase.downloading || phase == OtaPhase.verifyingDownload ||
        phase == OtaPhase.transferring) && _transport?.endStarted != true;
 
-  OtaTaskSnapshot? get taskSnapshot {
+  OtaTaskSnapshot? get taskSnapshot => _publishedTaskSnapshot.value;
+
+  OtaTaskSnapshot? _buildTaskSnapshot() {
     final key = _taskKey;
     if (key == null) return null;
     final stage = _foregroundPaused ? 'paused' : switch (phase) {
@@ -199,7 +202,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
 
   void _publishSnapshot() {
     ++_snapshotRevision;
-    final value = taskSnapshot;
+    final value = _buildTaskSnapshot();
+    _publishedTaskSnapshot.value = value;
     if (value == null) return;
     _background.publish(value, urgent: value.phase != _lastSnapshotPhase);
     _lastSnapshotPhase = value.phase;
@@ -300,6 +304,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       if (gate != null && !gate.isCompleted) gate.complete();
       if (wasBackgrounded && _foregroundPaused) {
         _foregroundPaused = false;
+        _publishSnapshot();
         unawaited(resumeFromBackground());
       }
     } else {
@@ -481,7 +486,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   void onInit() {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
-    _snapshotWorker = everAll([_phase, _upgradeStatus, _downloadProgress,
+    _snapshotWorker = everAll([_phase, _upgradeStatus, _downloadProgress, _isUpgrading,
       _durableProgress, _backgroundReady, _backgroundReason], (_) => _publishSnapshot());
     _upgradeStatus.value = isFirmwareServiceConfigured
         ? '固件服务已就绪'
@@ -1566,10 +1571,14 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         return false;
       } finally {
         if (activeTransport != null) {
-          // Cancellation wakes the sender before its queued ABORT is written.
-          // Keep this transport alive until that serialized teardown settles.
-          await _abortingTransports.remove(activeTransport);
-          await activeTransport.dispose();
+          // A concurrent cancel owns disposal after its queued ABORT, without
+          // preventing this old owner from exiting or touching a later owner.
+          final cancelOwnsDisposal = generation != _cancelGeneration &&
+              _abortingTransports.containsKey(activeTransport);
+          if (!cancelOwnsDisposal) {
+            await _abortingTransports.remove(activeTransport);
+            await activeTransport.dispose();
+          }
           if (identical(_transport, activeTransport)) _transport = null;
         }
         // P3-4 观测：本实例的一切退出路径（全部早退、取消、三类异常、
@@ -1659,7 +1668,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     // 下载清理会等待在途请求退出，传输先停可避免等待期间仍在发送
     // 数据段。
     final transport = _transport;
-    Future<void>? abortDone;
+    Future<void>? abortDone = transport == null ? null : _abortingTransports[transport];
     if (transport != null && !transport.isCancelled) {
       otaMonoLog('MONO_ABORT_BEGIN', code: 'USER_CANCEL');
       abortDone = _abortTransportBestEffort(transport).whenComplete(() {
@@ -1670,6 +1679,11 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       emitOtaObservation('OTA_PHY_CANCEL nativeAcknowledged=false');
     }
     await abortDone;
+    if (transport != null && abortDone != null) {
+      await transport.dispose();
+      _abortingTransports.remove(transport);
+      if (identical(_transport, transport)) _transport = null;
+    }
     // epoch 屏障（RC3-04⑦）：ABORT 等待期间可能有新 owner 登记并重新
     // 下载**同一资产**。两次 attempt 的 assetId、文件名与 `.part` 路径
     // 必然相同（续传语义要求复用同一 `.part`），对快照 download 调
@@ -2110,17 +2124,26 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     // 「至多一个窗口必返回」的重启等待变成永久挂起：deadline 已建立却
     // 永远走不到检查它的循环，取消代次同样无人再读。超时不当失败处理：
     // 断开只是让 MCU 侧尽早释放旧连接，后续轮询本来就要重新 connect。
+    await _waitForForeground(generation);
+    if (generation != _cancelGeneration || _closed) {
+      roundStats.recordAttemptOutcome('cancelled');
+      roundStats.phaseEnd('reconnect');
+      roundStats.emitSummary();
+      return const _RebootOutcome(_RebootKind.cancelled);
+    }
     await _ble
         .disconnectOtaDeviceByAddress(deviceAddress)
         .timeout(const Duration(seconds: 5), onTimeout: () {});
     var attemptNo = 0;
     while (DateTime.now().isBefore(deadline)) {
+      await _waitForForeground(generation);
       if (generation != _cancelGeneration) {
         roundStats.recordAttemptOutcome('cancelled');
         roundStats.phaseEnd('reconnect');
         roundStats.emitSummary();
         return const _RebootOutcome(_RebootKind.cancelled);
       }
+      if (!DateTime.now().isBefore(deadline)) break;
       // RC3-08：单轮探测链（connect/discover/bind/INFO）受剩余总预算与
       // 单轮上限（O4 整改 20s）双重封顶——正常成功轮（connect ≤10s +
       // discover/MTU/subscribe/INFO 数秒）不会触顶；任一环节挂死时至多
@@ -2137,7 +2160,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           : _rebootProbeTimeout;
       var probeAbandoned = false;
       bool probeAborted() =>
-          probeAbandoned || generation != _cancelGeneration;
+          probeAbandoned || generation != _cancelGeneration || _closed ||
+          (_appBackgrounded && !backgroundAcquired);
       _RebootOutcome? outcome;
       // P3-4 观测：本轮连接尝试独立成实例（attempt 从 1 起）。绑定阶段字段
       // （发现/MTU/订阅）幂等只记首次，共享实例会把首轮的失败值带进后续轮
