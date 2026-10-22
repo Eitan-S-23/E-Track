@@ -663,3 +663,117 @@ exactly matches the separately downloaded EXE. No artifact was installed/run.
   Fix only the braces and fixture teardown (dispose, finish real async work,
   then pump one second to drain the delayed entrance callbacks). No timer
   invariant or behavioral assertion is suppressed.
+
+### R04 Executed Red/Green Results
+
+- Validated candidate: `8ede09208a0857b716ee9614c09cb83247c2bc39`; App subtree
+  `e22fb7a6db1c47304354c7652c0ddf9693d4818b`.
+- Red-input check: `27048aa1..1ecabeca` has no difference in `lib/` or
+  `android/`. Thus the executed old-owner and disabled-button failures are
+  on the reviewed production code, not a manufactured replacement service.
+  Only tests/imports and the implementation note were added before the repair.
+- Green development run:
+  https://github.com/Eitan-S-23/E-Track/actions/runs/39827513211, attempt 1.
+  Both hosts SUCCESS; full analyze exits 0. Ubuntu 753 passed / 16 skipped /
+  0 failed; Windows 736 / 33 / 0. All seven distinct new real-service/widget
+  cases execute on both hosts, including their pending-timer invariants.
+- Original green logs/results are under `.cache/p38/r04-20261023/green/`.
+  Ubuntu result SHA-256:
+  `05995bd5b491519c1ae327319530893410e433b9838d94537081ef92129f34f9`;
+  Windows result:
+  `0413d421945cd09ceae4611f93559b520edb01a265e6979c4a47e752a1fad259`.
+  SDK remains Flutter 3.47.7 / Dart 3.13.5, framework
+  `abaf9c523780a608bd46686fd5e53740a07077f8`, engine
+  `deb287481e3ce9468f3434937ced4240a70539ca`.
+- Preserve the actual generated-toolchain deltas: both results report
+  `source_unchanged=false` during SDK execution and unchanged lockfiles. After
+  restoration Ubuntu is clean; Windows has only the recorded generated-header
+  EOL difference, no semantic/untracked delta. Do not claim untouched build
+  bytes or override the existing runner policy.
+- Exact-candidate standard build:
+  https://github.com/Eitan-S-23/E-Track/actions/runs/39829695971, attempt 1,
+  `publish_release=false`, `replace_existing_release=false`. Android job
+  `120002449663` and Windows job `120002449651` SUCCESS. Both standard test
+  summaries again show 753/16 and 736/33 respectively. Pages and Release SKIPPED.
+- Standard Android build retains 10 warning lines (3 future toolchain support,
+  7 SDK requirements) and one non-fatal `Already watching path` exception.
+  Windows build has 0 warning lines. Full Actions log ZIP SHA-256:
+  `3250ea7951e5a7fd91c454d3d2d3675bb3b046e3929c73489006fccb837b1050`,
+  `.cache/p38/r04-20261023/standard-logs.zip`; checked extraction is adjacent.
+  GitHub run/job identities are also saved in `ci-summary.json` in that root.
+- No new native Service test execution or debug APK is claimed. Android subtree
+  `5c75e600d395c4f806e0978040f8a679bf227fa2` is identical to `27048aa1`;
+  native tests, development helpers and workflows have no changes. Keep the
+  independently reviewed 18/18 original as unchanged-scope evidence, not a
+  new formal REUSED anchor. The changed Dart inputs have new full tests and
+  standard APK/EXE builds above.
+- Remaining owner: independent reviewer rechecks R04 and the affected shared
+  owner/page paths. R01/R02/R03 keep their prior pre-review disposition. This
+  implementation does not close the independent finding, freeze/approve the
+  draft, operate devices, complete the card, merge main, publish or deploy.
+
+### R04 Artifact Retrieval
+
+- No successful CI/build was replayed for retrieval. The initial bounded `gh`
+  download made no useful progress; Python attempts retained partial prefixes.
+  The existing immutable-artifact Range adapter was reused in the task-local
+  `r04-20261023/resume.cjs`, not replaced with a new distribution mechanism.
+- Direct Blob reads encountered socket timeouts. After the owned processes
+  exited, the adapter was changed to use the existing host proxy for Blob only
+  and a 60-second socket timeout. GitHub API bypass remained process-local;
+  TLS verification stayed enabled. Subsequent attempts retained an SSL
+  unexpected-EOF failure and the explicit 540-second retrieval-window expiry.
+  Resume always starts at the retained byte count against a fresh signed URL
+  for the same artifact ID, with HTTP 206 and exact Content-Range validation.
+- Initial partials remain at
+  `.cache/p38/takeover-20261022/r04-standard-{apk,windows}.zip`; completed
+  successors and checked extraction belong only to `.cache/p38/r04-20261023/`.
+  Old `27048aa1` products, failed test originals and frozen/draft evidence are
+  unchanged. Partial bytes never substitute for whole-archive digest checks.
+
+- Both successor archives completed and match the immutable GitHub artifact
+  digests for standard run `39829695971`:
+
+| Artifact ID | Archive | Bytes | SHA-256 |
+| --- | --- | --- | --- |
+| `12449275261` | `standard-apk.zip` | 25793410 | `53da3443ae8b4667ce012c44976076c984fc7ed4d98cbd253104bbe8fc40727f` |
+| `12447324543` | `standard-windows.zip` | 20515655 | `a260f34bb3202fd3d76eb30c2d4336b6c5c6218750b292ed0fb3b6ba2322085e` |
+
+The existing `Tools/flutter/dev_apk.py:extract_distribution` checked all member
+paths and extracted new files under `.cache/p38/r04-20261023/standard/`:
+
+| File | Bytes | SHA-256 |
+| --- | --- | --- |
+| `android/ble-monitor-android.apk` | 47272692 | `1ef9cd86b35bd175b238a9c6ce542ce5fb991543fd0470684e82836e025b0f8d` |
+| `windows/ble-monitor-windows.exe` | 93184 | `bb111ec40f24d74e971e6291d27e99d54f003993ad00c1cd2b1ad347a9b07be7` |
+| `windows/ble-monitor-windows.zip` | 20485471 | `cda4b776e33927fcddf9cb6c2d75c7ce654d3c0eed8366719eb6c06793f2b6ca` |
+
+The APK and full Windows ZIP pass CRC checks. The Windows ZIP's embedded
+`ble_monitor.exe` equals the standalone EXE byte-for-byte. Nothing was installed
+or executed on a device. All owned download processes have exited.
+
+### R04 Delivery Boundary
+
+- Ready for independent R04 re-review, not independent closure or formal
+  acceptance. Use candidate `8ede0920`, the real red/green originals above and
+  the same canonical Spec. A documentation-only handoff on
+  `dev/flutter/p3-8-background-ota-20261021` changes only this record and the
+  P3-8 board entry; App/Android/runner/workflow inputs remain unchanged.
+- The canonical root review/index remain read-only. This branch's record is
+  pending authorized integration; the next owner can retrieve it with
+  `git show <delivery-commit>:docs/ota-exec-notes/P3-8-implementation-2026-10-21.md`.
+  R01/R02/R03 retain their independent software pre-review disposition. The
+  old acceptance draft, missing device authority/observations and NOT_RUN
+  formal status are unchanged.
+- Output audit checked all 673 current descendants of this worktree's
+  `.cache/p38/` with `host_io.checked_output`, including downloads, extraction,
+  temp and CLI cache; no reparse escape. The two documentation targets and
+  authorized shared Git object/index/ref/reflog paths were checked separately.
+  No global configuration, credential, hook, external temporary directory,
+  PowerShell startup, local App build, hardware operation or known
+  unauthorized project-external write was introduced.
+- Scoped staging/commit uses the existing hooks with an explicit message and
+  optional webhook unset, normal non-force branch push, local temp/cache and
+  automatic Git maintenance disabled. The documentation push's checks-only
+  result is supplementary; it does not trigger another standard build or
+  replace the exact-product results above.
