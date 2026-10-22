@@ -7,7 +7,7 @@ import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter/material.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart' show BluetoothDevice;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 
