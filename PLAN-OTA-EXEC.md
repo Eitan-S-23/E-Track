@@ -735,7 +735,7 @@
 - 收口: 2026-09-04 用户放话后由主会话收口(主会话非本卡实现者), PR #19 已并入 main。刻意不用 squash 而用 merge: 包内 changed-*.json 逐条声明「该次注错/还原提交恰含一个文件」、run-*.json 把每次运行绑到具体提交, squash 会把 13 个提交压成 1 个使这些声明无法被第三方复核, fail-closed 反证四条腿的可信度随之塌掉(与 P3-6 为排除注错临时提交而 squash 的裁定相反, 理由不同)。代价如实登记: 4 次注错提交因此位于 main 可达历史中, git bisect 可能检出带注入缺陷的树; 缓解为每次注错的下一个提交即还原(缺陷树存活跨度 1 个提交)、main 顶端树干净、合并为 first-parent 线性结构故 git bisect --first-parent 不会进入注错提交。合并前 PR 全检查绿(MCU Firmware Build、Acceptance Governance、Build APK and EXE Release 三者 success; 治理 CI 本次被触发是因收口批次改动 docs/acceptance-contracts/ 与 tests/ota/, 其绿是收口硬前置)。三个 worktree 均不在 refs/heads/main 上, 故在主 worktree 切回 main 后 merge --ff-only, 快进 14 个提交, 核对 HEAD 与 origin/main 一致且无 ahead/behind, 未用 reset 或强制覆盖。入库后在 main 顶端复跑本卡接入的四条脚本全部 rc=0, 证明四次注错已彻底还原。收口证据见 docs/ota-exec-notes/P3-7-closeout.md, 收口后遗留问题清单见 docs/ota-exec-notes/P3-7-residual-issues.md。
 
 #### P3-8 Android 后台 OTA 与通知进度
-状态: 进行中 ｜ 认领: Codex(P3-8 实现) / 2026-10-21 ｜ 更新: 2026-10-22(双宿主开发检查与 debug APK 通过；原生服务测试、标准构建及正式观察 NOT_RUN)
+状态: 进行中 ｜ 认领: Codex(P3-8 实现) / 2026-10-21 ｜ 更新: 2026-10-22(双宿主全量检查、原生服务 13 项、debug/标准 APK 与 EXE 构建通过；真机与独立验收 NOT_RUN)
 - 依赖: P3-3 已完成并合入 main；不以 P3-4 或 P4-2 部署为软件实施前置，不新增 P3-8 -> P3-5 硬依赖。
 - 目标: 前台发起并实际取得 Android 服务/执行器接管后，正常切应用、下拉通知栏和锁屏继续设备 OTA；页面/通知同源展示真实阶段和 durable 进度，回前台重附着任务，终态释放资源。
 - 范围: Flutter OTA/BLE 生命周期与通知的必要接线、Android 前台服务/权限/桥接及测试；不混用 App 自更新任务，不改 MCU/BLE 字节协议，不仅删除后台暂停保护。
@@ -743,8 +743,8 @@
 - 平台边界: 状态栏图标与下拉通知栏进度，不承诺所有 OEM 顶栏百分比；强制停止/进程被杀不保证持续执行，下次明确恢复按已核验包/设备及 MCU durable 状态处理。
 - 派工书: docs/ota-prompts/prompt-P3-8-implementation.md；具体设备、时长、操作/恢复配额和独立验收合同须另行审批，设备观察与正式验收 NOT_RUN。
 - 历史与权限: P3-3-v9、原认领及历史冻结包不变；本卡不授予新增推送/发布/部署或真机权限，不沿用 P3-3 临时额度。
-- 证据: 开发记录 docs/ota-exec-notes/P3-8-implementation-2026-10-21.md；候选 0d08d020，开发检查 39656339389、debug APK 39657800806 双宿主成功；此前两轮失败原件保留，非独立验收。立卡与治理历史见 docs/ota-exec-notes/P3-4-P3-8-requirements-2026-09-15.md。
-- 实施记录: 独占 dev/flutter/p3-8-background-ota-20261021，基线 2f4946a；同引擎唯一所有者、实际接管确认及安全回退、同源 durable 快照与代次隔离已形成源码候选。标准 APK/EXE 与 Android 服务原生测试入口缺口交 root；后台/锁屏 durable 及最终身份的正式观察仍待独立者承接，不自行置完成。
+- 证据: 开发记录 docs/ota-exec-notes/P3-8-implementation-2026-10-21.md；当前软件候选 5d2a0fa6，39697643246 双宿主全量检查及原生 13/13、debug APK 通过，39700401326 标准 APK/EXE 均成功，发布/部署 skipped。原始日志、JUnit、三类产物及完整哈希均已归档；此前两轮失败和历史立卡记录保留，非独立验收。
+- 实施记录: 独占 dev/flutter/p3-8-background-ota-20261021，基线 2f4946a；同引擎唯一所有者、实际接管确认及安全回退、同源 durable 快照与代次隔离已形成可评审软件候选。用户授权的原生 CI 与标准构建缺口已补齐；后台/锁屏 durable、真实引擎保活及最终身份的正式观察仍待 root/非实现者按另行设备授权承接，不自行置完成。
 - 规范收口: 2026-09-16 用户授权后，规范提交 d5a0b58 已推送 main，治理 CI run 35008183321 通过；本卡仍待办，后台/通知能力及真机判据均未实施或实测。
 
 ---
@@ -921,6 +921,8 @@
 | 2026-10-19 | P4-4 / Codex root / `P44-CREDENTIAL-01` | 新链两项产品整改与 Worker 部署已完成，但严格桶凭据的 account-owned/user-owned 创建 POST 均返回 403/9109，最终十项只读核对仍缺四个 S3 secrets | 保持两套独立桶限定 Object Read and Write，不替换旧 CI/provisioning token、不扩大权限；由 O1 直接配置或提供受保护来源与脱敏范围/有效期 | 按 §0.6 必需外部依赖缺失置阻塞；独立预审 10/10 和非发布 CI 通过不等于正式 PASS。保留实际部署异常/恢复和外部缓存未决；root 待凭据后冻结并组织新链/真实 reviewer 观测，gate=false，正式轮次零，未改 main | 已登记/外部凭据阻塞 |
 
 ## 10. 会话日志(每会话一行:日期 ｜ agent ｜ 动了哪些卡 ｜ 一句话结果)
+
+- 2026-10-22 | Codex P3-8 implementation, authorized validation continuation | P3-8 only, IN_PROGRESS | Added a default-off dedicated native-test option to the existing contained development runner. Local non-build host regressions 65+40 pass after a diagnosed process-scoped long-path retry; original failure retained. Candidate 5d2a0fa6: full dual-host App checks/debug APK and real Robolectric Service 13/13 succeed in 39697643246; standard APK/Windows EXE succeed in 39700401326, Pages/Release skipped. Originals, complete Windows ZIP and hashes are archived. Source is ready for independent review; actual device observations and formal acceptance remain NOT_RUN. No device operation, local App build, main merge, release or deployment. Existing implementation record holds the handoff and boundary audit.
 
 - 2026-10-22 | Codex P3-8 implementation | P3-8 only, IN_PROGRESS | Candidate 0d08d020 implements retained-engine connectedDevice ownership with an actual Dart-owner probe, foreground fallback, durable snapshots, bound notification actions and cleanup. Preserved two failed development rounds and repaired cancellation disposal without weakening historical assertions. Full checks 39656339389 and explicit debug APK 39657800806 succeed on both hosts; native Service tests, standard APK/EXE and device/independent acceptance remain NOT_RUN for root's bounded follow-up. No local builds, device operations, main integration or release. Record: docs/ota-exec-notes/P3-8-implementation-2026-10-21.md.
 

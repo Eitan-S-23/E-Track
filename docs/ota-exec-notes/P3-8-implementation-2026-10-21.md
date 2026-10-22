@@ -277,3 +277,131 @@ No MCU/cloud/protocol/performance/App-self-update business changes.
 - Diagnosed-path retry passed all 65 development-runner host tests (exit 0),
   raw console archived as `.cache/p38/host-checks-longpaths.log`. This is only
   Python/fixture validation and did not start Flutter/Gradle or build an App.
+- Helper isolation check with `FLUTTER_DEV_DEVICE_OTA_NATIVE_TESTS=true` passed
+  40 tests (exit 0), console `.cache/p38/host-apk-native-option.log`. Local host:
+  Python 3.13.12, Git 2.53.0.windows.1. The offline suites used contained fixture
+  outputs only; existing symlink/junction negative fixtures were removed by the
+  suite and the subsequent audit found no remaining links.
+
+### Executed Native Service Development Tests
+
+- CI/input commit: `5d2a0fa6fee9d58a608a068a7bff9f3d8e31f3a9`; app subtree
+  remains `1b802bec704e6f71374e27e2dca4aa9bdd59b79c`. No product source changed
+  in this continuation; the extension reuses existing development helpers.
+- Dispatch: `flutter-dev-checks.yml`, `test_scope=all`, `build_apk=true`,
+  `device_ota_native_tests=true`, same exclusive branch; command exit 0.
+  Run https://github.com/Eitan-S-23/E-Track/actions/runs/39697643246 (attempt 1)
+  completed SUCCESS on Ubuntu and Windows.
+- Both `flutter analyze --no-pub` and full `flutter test --no-pub --reporter
+  expanded --timeout 2m test` exited 0 on both hosts. Actual counts: Ubuntu
+  739 passed/16 skipped/0 failed; Windows 722 passed/33 skipped/0 failed.
+  Actual SDK: Flutter 3.47.7, Dart 3.13.5, framework
+  `abaf9c523780a608bd46686fd5e53740a07077f8`, engine
+  `deb287481e3ce9468f3434937ced4240a70539ca`.
+- Actual `apk_device_ota_native` Gradle command exited 0. Archived JUnit XML
+  confirms `tests=13, skipped=0, failures=0, errors=0`, 13 named testcases,
+  Robolectric SDK 34. This changes the earlier native Service test NOT_RUN
+  state to executed development success, not formal acceptance or a real
+  retained-engine/BLE/lockscreen observation.
+- Native XML original:
+  `.cache/p38/run-39697643246/ubuntu/app/bluetooth_flutter_Trace/build/app/test-results/testDebugUnitTest/TEST-com.wen.gaia.gaia.DeviceOtaServiceTest.xml`;
+  SHA-256 `9694a0791ba15c2535a1356306a72fb3dcb6a3d7cd206adab1b8877f5d42d50c`.
+  HTML report is archived alongside the original App build report hierarchy.
+- Result JSON SHA-256: Ubuntu
+  `8e9304638b6e0de17207e70d2aca846825b6dfcb8f016662cd03c5ae392e5de7`;
+  Windows `53607ca7e1767c1f320b32efc0c584c12e7ee8a5004b5c9bfab2c122c7c77b67`.
+  Originals and raw command logs are under `.cache/p38/run-39697643246/`.
+- Debug APK built and signature-verified (both exit 0), archived as
+  `.cache/p38/run-39697643246/apk/run-ded6080d2822445cb9d65d80d398b086/artifacts/trace-dev-debug.apk`.
+  131748470 bytes; locally recomputed SHA-256
+  `aec3a68e86ebbb7573697a504861b410a4210b89cb9a70c6c8e6c5606e3bf7cd`
+  matches adjacent CI metadata. Debug-signed production application ID,
+  not installed or published; prior debug APK remains preserved separately.
+- Existing profile inspection confirms helpers/workflow are in Validation,
+  and the native test class is included by current Production/Flutter roots.
+  No canonical or frozen profile, contract or previous acceptance bundle changed.
+
+### Authorized Standard Build
+
+- Command: `gh workflow run build.yml --repo Eitan-S-23/E-Track --ref
+  dev/flutter/p3-8-background-ota-20261021 -f publish_release=false
+  -f replace_existing_release=false`, exit 0.
+- Run https://github.com/Eitan-S-23/E-Track/actions/runs/39700401326 targets the
+  same `5d2a0fa6` candidate. Android release-mode APK and Windows EXE are in
+  progress; no result is inferred yet. The Pages job is skipped; the release
+  condition is false. No version bump, release/CF publication or device action.
+- Completed result: SUCCESS, exact head
+  `5d2a0fa6fee9d58a608a068a7bff9f3d8e31f3a9`, actor `Eitan-S-23`,
+  workflow_dispatch attempt 1. Android job `119568062672` and Windows job
+  `119568062707` both SUCCESS. Pages and Create GitHub Release both SKIPPED.
+- Standard job commands: both `flutter analyze` and `flutter test` exited 0;
+  actual summaries are Ubuntu 739 passed/16 skipped and Windows 722 passed/
+  33 skipped. `flutter build apk --release
+  --target-platform=android-arm,android-arm64` and `flutter build windows
+  --release` both exited 0. Setup logs bind Flutter 3.47.7 and framework
+  `abaf9c523780a608bd46686fd5e53740a07077f8` on both hosts.
+- Android release build retains 10 warning lines: three upcoming Gradle/AGP/
+  Kotlin support deprecations and seven plugins requesting Android SDK 36+.
+  No compile error; Windows release build has no warning line. Toolchain
+  maintenance is not expanded into this P3-8 change.
+- Read-only status polling encountered TLS handshake timeout/EOF. A
+  process-local `GODEBUG=http2client=0` query succeeded and confirmed both jobs;
+  no CI rerun, proxy/global configuration change or TLS validation bypass.
+- Original full Actions console archive downloaded by the logs API (exit 0)
+  to `.cache/p38/run-39700401326/logs.zip`, SHA-256
+  `33f338f5ea0800d585f077bd637da211021b468ac258647aa69eddfa7b544201`.
+  Listed/checked all archive paths and regular-file types before extracting
+  into its worktree-local `logs/`; SDK/test/build-step originals are preserved.
+- Standard APK already archived at
+  `.cache/p38/run-39700401326/android-apk/ble-monitor-android.apk`,
+  47272692 bytes, SHA-256
+  `626ca75be7ea481e8cc2249f7a5811132e95490b456bec1106b5f5b6c6e7abcd`.
+  Windows EXE/full ZIP download also completed (CLI exit 0); no artifact has
+  been installed or executed.
+- Standard Windows EXE:
+  `.cache/p38/run-39700401326/windows-exe/ble-monitor-windows.exe`,
+  93184 bytes, SHA-256
+  `6f65b13859b3846801c64543f8363c7d82aa92742987d56571fcf35e28f17cdb`.
+  The executable requires its packaged runtime/DLL/data files; the complete
+  distribution is the adjacent `ble-monitor-windows.zip`, 20482542 bytes,
+  SHA-256 `5ad8cac64d7baf55b7dbd3bbe09bdafb89ef9cc5f8581cb66d6711000247ed51`.
+  Both hashes were computed from the downloaded original bytes, not guessed
+  from an Actions artifact-container digest.
+
+### Software Candidate Handoff
+
+The original native CI and standard-build gaps are now closed for the software
+candidate `5d2a0fa6fee9d58a608a068a7bff9f3d8e31f3a9`. Full App development
+checks, 13 Android Service tests, debug APK, standard release-mode APK and
+Windows release EXE/ZIP all actually succeeded and have retained originals.
+Later record-only commits do not change App, native-test, helper or workflow
+inputs. Historical failures and prior NOT_RUN entries above describe their
+original checkpoints and are not rewritten as success.
+
+This is ready for a non-implementation review of source/artifacts and preparation
+of the missing bounded physical observations. It is not formal independent PASS:
+actual retained-engine handoff, background/lockscreen durable advancement,
+notification/page interaction, physical disconnect recovery, final new-link
+GET_INFO target version/full raw SHA and real resource release remain NOT_RUN.
+Root/non-implementation reviewer owns the remaining contract and observation
+work, with separate device/installation/OTA authority. This agent does not
+freeze/approve the contract, mark the card complete, install/run artifacts,
+merge main, publish or deploy.
+
+### Continuation Write Audit
+
+- Final controlled-output inspection covered `.cache/p38/` and both local
+  offline helper-fixture roots: 2019 files, 368300490 bytes. All resolved paths
+  are within the assigned worktree; no links remain. Download temp contains
+  only `.keep`, not a partial archive. Original ZIPs, extracted logs, JUnit and
+  product binaries remain in ignored task-local archives.
+- Manual source/guide/card/record edits and generated host logs stay inside the
+  worktree. Git writes are only normal operations for this branch/index and
+  inner test-fixture repositories under its `.cache/`; no alternate repository
+  was created to bypass host restrictions. Long-path/HTTP transport changes were
+  process-scoped, not global config or ACL edits.
+- Local commands used cmd/Git Bash and Python non-build fixtures; no local
+  Flutter/Gradle/EXE/APK build, PowerShell startup or device action. The authorized
+  standard remote workflow used its existing hosted build/packaging steps.
+  No main ref/index, historical task evidence, root `{a`, cloud business state,
+  release or deployment was modified.
