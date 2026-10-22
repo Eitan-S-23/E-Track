@@ -167,6 +167,16 @@ class DeviceOtaServiceTest {
         DeviceOtaBridge.OPEN, Uri.parse(
             "trace-device-ota://task/${task.taskId}/${task.generation}/open")))
 
+    private fun deliverNewIntent(activity: MainActivity, intent: Intent) {
+        // FlutterActivity keeps this lifecycle callback protected; reflection
+        // preserves the production access level while exercising the real
+        // MainActivity -> embedding boundary.
+        MainActivity::class.java.getDeclaredMethod("onNewIntent", Intent::class.java).apply {
+            isAccessible = true
+            invoke(activity, intent)
+        }
+    }
+
     private fun withOpenChannel(test: (List<MethodCall>) -> Unit) {
         val calls = mutableListOf<MethodCall>()
         val messenger = object : BinaryMessenger {
@@ -194,7 +204,7 @@ class DeviceOtaServiceTest {
         start(); runtime.answer(true)
         withOpenChannel { calls ->
             val activity = Robolectric.buildActivity(MainActivity::class.java).create().get()
-            activity.onNewIntent(openIntent())
+            deliverNewIntent(activity, openIntent())
             assertEquals(listOf<String?>(null), OtaEmbeddingBoundary.newUris)
             assertNull(activity.intent.data)
             assertEquals(listOf("open"), calls.map { it.method })
@@ -206,9 +216,9 @@ class DeviceOtaServiceTest {
         start(); runtime.answer(true)
         withOpenChannel { calls ->
             val activity = Robolectric.buildActivity(MainActivity::class.java).create().get()
-            activity.onNewIntent(openIntent(key.copy(generation = 2)))
-            activity.onNewIntent(openIntent(key.copy(taskId = "old_task")))
-            activity.onNewIntent(Intent(Intent.ACTION_VIEW,
+            deliverNewIntent(activity, openIntent(key.copy(generation = 2)))
+            deliverNewIntent(activity, openIntent(key.copy(taskId = "old_task")))
+            deliverNewIntent(activity, Intent(Intent.ACTION_VIEW,
                 Uri.parse("trace-device-ota://task/forged/1/open")))
             assertEquals(listOf<String?>(null, null, null), OtaEmbeddingBoundary.newUris)
             assertTrue(calls.isEmpty())
@@ -238,7 +248,7 @@ class DeviceOtaServiceTest {
             val external = "trace://share/existing-link"
             val activity = Robolectric.buildActivity(MainActivity::class.java,
                 Intent(Intent.ACTION_VIEW, Uri.parse(external))).create().get()
-            activity.onNewIntent(Intent(Intent.ACTION_VIEW, Uri.parse(external)))
+            deliverNewIntent(activity, Intent(Intent.ACTION_VIEW, Uri.parse(external)))
             assertEquals(listOf(external), OtaEmbeddingBoundary.initialUris)
             assertEquals(listOf(external), OtaEmbeddingBoundary.newUris)
             assertEquals(external, activity.intent.dataString)
