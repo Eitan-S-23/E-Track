@@ -196,7 +196,9 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
 
   void _reconcileFinishedTask() {
     if (!mounted || _backgrounded || _reconcilingTask ||
-        !_needsTaskReconcile || otaService.isUpgrading) return;
+        !_needsTaskReconcile || otaService.isUpgrading) {
+      return;
+    }
     // Cancellation releases its owner before publishing its final phase. A
     // query must not take over that gap and suppress the cancellation result.
     switch (otaService.phase) {

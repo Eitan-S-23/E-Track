@@ -453,6 +453,9 @@ void main() {
           if (service.isUpgrading) await service.cancelUpgrade(keepPackage: true);
           await operation;
         });
+        // flutter_animate's delayed entrance callbacks outlive the disposed
+        // widget briefly; drain them without disabling pending-timer checks.
+        await tester.pump(const Duration(seconds: 1));
       }
     });
   }

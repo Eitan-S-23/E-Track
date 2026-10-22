@@ -656,3 +656,10 @@ exactly matches the separately downloaded EXE. No artifact was installed/run.
   BLE wire semantics, runners, workflow, dependencies and frozen inputs remain
   unchanged. Full dual-host checks and exact-candidate standard APK/EXE builds
   will validate the repaired inputs; no local Flutter/Gradle build is used.
+- First repaired run `39826146792` at `596cc08b`: both new service oracles and
+  every widget behavior assertion pass. Overall still FAIL: the five widgets
+  leave flutter_animate's 400 ms entrance Timer pending after disposal, and
+  analysis reports one missing-braces lint. Preserve `repair-first/` originals.
+  Fix only the braces and fixture teardown (dispose, finish real async work,
+  then pump one second to drain the delayed entrance callbacks). No timer
+  invariant or behavioral assertion is suppressed.
