@@ -1,5 +1,6 @@
 package com.wen.gaia.gaia
 
+import android.app.Activity
 import android.app.Notification
 import android.content.Context
 import android.content.Intent
@@ -23,7 +24,10 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.Implementation
 import org.robolectric.annotation.Implements
 import org.robolectric.annotation.RealObject
+import org.robolectric.shadow.api.Shadow
+import org.robolectric.shadows.ShadowActivity
 import org.robolectric.shadows.ShadowPowerManager
+import org.robolectric.util.ReflectionHelpers.ClassParameter
 import java.time.Duration
 import java.nio.ByteBuffer
 
@@ -276,10 +280,15 @@ class DeviceOtaServiceTest {
  * The service and key validation above remain real; only the embedding is shadowed.
  */
 @Implements(FlutterActivity::class)
-class OtaEmbeddingBoundary {
+class OtaEmbeddingBoundary : ShadowActivity() {
     @RealObject lateinit var activity: FlutterActivity
 
-    @Implementation fun onCreate(state: Bundle?) { initialUris.add(activity.intent?.dataString) }
+    @Implementation fun onCreate(state: Bundle?) {
+        initialUris.add(activity.intent?.dataString)
+        // Keep Android's Activity initialization while bypassing the native engine.
+        Shadow.directlyOn<Void, Activity>(activity, Activity::class.java, "onCreate",
+            ClassParameter.from(Bundle::class.java, state))
+    }
     @Implementation fun onNewIntent(intent: Intent) { newUris.add(intent.dataString) }
 
     companion object {

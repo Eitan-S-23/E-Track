@@ -446,3 +446,34 @@ merge main, publish or deploy.
   task-local archive/temp root. A first cmd inline-Python quotation failed with
   SyntaxError before executing code (exit 1); Git Bash invocation succeeded
   (exit 0). No external output or cleanup followed that read-only failure.
+
+### Native Regression Harness Repair (2026-10-22)
+
+- Successor implementation owner takes over the same clean worktree at
+  `be0b64f8fdc397520300e4305603c5ac7c878315`. No review/acceptance role is
+  assumed; P38-R01 through P38-R04 remain subject to independent re-review.
+- `e1865479` contains the four source repairs and their regressions. Its
+  checks-only run `39748109544` passed; native/debug run `39748115816` failed
+  because the new tests directly called protected `MainActivity.onNewIntent`.
+  `be0b64f8` changed only that test invocation to reflection, preserving the
+  product visibility. Its checks-only run `39772250776` passed.
+- Native/debug run `39774162835` at `be0b64f8` failed: Ubuntu analyze and all
+  Dart tests passed (746 passed, 16 skipped, 0 failed), APK compilation passed,
+  but native tests had 18 cases / 5 failures. Windows completed successfully.
+  APK verification/collection were NOT_RUN; no successful artifact is inferred.
+- Retrieved the original Ubuntu artifact into the write-guarded
+  `.cache/p38/takeover-20261022/failed-native/`. The retained JUnit XML shows
+  every failure is `OtaEmbeddingBoundary cannot be cast to ShadowActivity` in
+  `ActivityController.attach`, before any notification assertion runs. This is
+  a test-fixture defect, not evidence of a product routing failure.
+- Repair: the Flutter embedding shadow now extends Robolectric `ShadowActivity`
+  so its real Activity controller can attach it. Its `onCreate` records the
+  sanitized URI then calls the Android `Activity.onCreate` directly, preserving
+  framework initialization without starting libflutter. Real MainActivity,
+  service/key validation and all five positive/negative routing oracles remain
+  unchanged. No production source, dependency, runner or workflow is changed.
+- Robolectric 4.14.1 upstream `ActivityController.attach` and `ShadowActivity`
+  were checked against the declared dependency. Validation uses the existing
+  full dual-host development workflow with `build_apk=true` and
+  `device_ota_native_tests=true`, not a local Flutter/Gradle build. The repaired
+  native cases and final-candidate builds remain pending until actual results.
