@@ -477,3 +477,135 @@ merge main, publish or deploy.
   full dual-host development workflow with `build_apk=true` and
   `device_ota_native_tests=true`, not a local Flutter/Gradle build. The repaired
   native cases and final-candidate builds remain pending until actual results.
+
+### Executed Remediation Validation
+
+- Final code/test candidate: `27048aa10079d8dd01d608967e7b5d1b473861ba`.
+  App subtree: `492fb8e35f33012127aa8adf61a22e3d592f483d`. The successor changed
+  only the Android test shadow and this record; the four production repairs
+  remain those in `e1865479`. No regression assertion was removed or weakened.
+- Development run https://github.com/Eitan-S-23/E-Track/actions/runs/39789686610,
+  attempt 1, explicit `test_scope=all`, `build_apk=true`,
+  `device_ota_native_tests=true`: both hosts SUCCESS. Ubuntu analyze exits 0,
+  tests 746 passed / 16 skipped / 0 failed; Windows analyze exits 0, tests
+  729 passed / 33 skipped / 0 failed. Both original result files bind a clean
+  checkout of `27048aa1`, full scope and successful command exits.
+- Actual SDK on both hosts: Flutter 3.47.7, Dart 3.13.5, framework
+  `abaf9c523780a608bd46686fd5e53740a07077f8`, engine
+  `deb287481e3ce9468f3434937ced4240a70539ca`.
+- Original Android JUnit: **18 tests, 0 skipped, 0 failures, 0 errors**. All five
+  previously failing Activity-entry tests now execute and pass, alongside the
+  existing 13 Service tests. The Gradle command, debug APK build, apksigner
+  verification and collection each exit 0. No real Flutter engine/device was
+  started by these Robolectric tests; platform/hardware claims remain bounded.
+- Originals: `.cache/p38/takeover-20261022/run-39789686610/ubuntu/` and
+  `windows/`. Ubuntu result JSON SHA-256:
+  `3d222ab7ba7cdba55a62661a808b56bfdeac164d41a1ceecb7a41faa6c064121`;
+  Windows result JSON:
+  `ba860212b38d748d1b8d0ad05df4da64f173cd3efed2097690f08b1ba93211c4`;
+  native `TEST-com.wen.gaia.gaia.DeviceOtaServiceTest.xml`:
+  `b6880580cb2aa95b53d3a5d167ce52fe6af018b6b21fb06d46394fba77e3ae2e`.
+
+| Finding | Changed path / exercised regression | Development result |
+| --- | --- | --- |
+| P38-R01 | Service recovery epoch and rechecking foreground gate; held INFO and held discovery after a second pause, then genuine recovery | Both full Dart suites PASS |
+| P38-R02 | Initial/new Intent sanitization in MainActivity and task-bound bridge; active, stale/malformed, recreated-process and ordinary external-link cases | All 5 Activity-entry cases PASS |
+| P38-R03 | Original absolute reboot deadline bounds the foreground gate; ownership loss past 400 ms, no new probe, honest failure and resource release; return-before-deadline coverage retained | Both full Dart suites PASS |
+| P38-R04 | Exact task-target attachment and terminal reconciliation; completed/cancelled/failed pages and an unrelated explicit device | Both full Dart suites PASS |
+
+These are implementation self-test dispositions, not independent acceptance
+closure. Return this bounded batch and its originals to the independent reviewer;
+the preacceptance report and its draft/frozen obligations were not rewritten.
+
+### Final-Candidate Standard Builds
+
+- The original user's explicit confirmation of standard APK/EXE development
+  verification was rechecked in the handed-over session. Dispatched existing
+  `build.yml` with `publish_release=false`, `replace_existing_release=false`,
+  no endpoint or application-ID override, on the same development branch.
+- Run https://github.com/Eitan-S-23/E-Track/actions/runs/39791568439, attempt 1,
+  candidate `27048aa1`: Android job `119868855099` SUCCESS and Windows job
+  `119868855022` SUCCESS. Pages and Create GitHub Release both SKIPPED. No
+  release/tag, cloud publication/deployment, main merge or device operation.
+- Both standard analyze/test steps succeeded. Raw terminal summaries again
+  report Ubuntu 746 passed / 16 skipped and Windows 729 passed / 33 skipped.
+  Android release APK and Windows release build commands succeeded.
+- Android build retains 10 warning lines: 3 Gradle/AGP/Kotlin future-support
+  warnings and 7 plugins requiring SDK 36+. It also logs one non-fatal
+  `Caught exception: Already watching path` before the successful build.
+  Windows build has 0 warning lines. Do not hide these diagnostics or widen
+  this repair into unrelated dependency upgrades. Development Actions also
+  reports the existing Node 20 action deprecation/forced Node 24 annotation.
+- Full standard console ZIP is `.cache/p38/takeover-20261022/standard-logs.zip`,
+  SHA-256 `01832f796fd52deafbad5c734a0eaa0a9153c6fe3c5a00eef6d8698b91bccd1c`.
+  Its CRC and every extraction path were checked; step logs are preserved under
+  `standard-build/logs/` in the same archive root.
+- Standard artifact ZIPs match the digests returned by the GitHub artifact API.
+  Extracted product files under `standard-build/` were hashed locally:
+
+| File | Bytes | SHA-256 |
+| --- | --- | --- |
+| `android/ble-monitor-android.apk` | 47272692 | `366a1e1c898b8729392ce86b159501592f66ee33ac19a243ca92b7117f31a026` |
+| `windows/ble-monitor-windows.exe` | 93184 | `30ee419ccc6bd3fb12c5aa3fcb9e9d3b89537ab1dc62467c7460ba5a677c0046` |
+| `windows/ble-monitor-windows.zip` | 20485199 | `286526d10b7feba76cbeaeccb13c6e30247d98f70fd6920f81c6bffbf30499c0` |
+
+The full Windows ZIP passes CRC checks and its embedded `ble_monitor.exe`
+exactly matches the separately downloaded EXE. No artifact was installed/run.
+
+### Retrieval Failures And Scope
+
+- No successful CI job was replayed to recover a download. Initial `gh run
+  download` exceeded the host's 240 s bound, retaining an incomplete ZIP;
+  subsequent small-artifact requests encountered EOF. Log/JUnit and standard
+  console retrieval succeeded through a task-local thin adapter to installed
+  curl and the existing `Tools/flutter/dev_apk.py` download/extraction functions.
+- curl downloads also recorded TLS failure (35), timeout (28), and two owned
+  zero-progress transfers were stopped by their exact PIDs. A failed Python
+  attempt targeted an existing zero-byte output; later attempts used fresh
+  destinations and preserved that failed output. One Python handshake failed
+  with SSL unexpected EOF.
+  Subsequent bytes were not treated as complete before digest verification.
+- All wrappers, temporary files, archives and extraction targets are under
+  `.cache/p38/` in this worktree, guarded before writing. Proxy bypass tests
+  affect only these child processes and Azure Blob hosts; TLS verification
+  remains enabled. No global network/configuration or credential changes.
+- Prevention: a custom shadow replacing a Flutter Activity must retain the
+  `ShadowActivity` controller contract and Android base initialization. Plain
+  Dart green results cannot qualify an unexecuted Android fixture. Preserve
+  the five real Activity-entry cases and the explicit native CI dispatch input.
+
+### Retained Debug APK And Handoff
+
+- The initial partial ZIP's member name identifies this run's
+  `run-079972b527294600b78a85f9779a1c74/artifacts/trace-dev-debug.apk`. Its
+  original 57458688 bytes were preserved, copied to a task-local successor,
+  and completed with one HTTP Range request. The adapter requires HTTP 206 and
+  the exact Content-Range before append; the entire 75477882-byte ZIP matches
+  GitHub's digest
+  `b31bf8e4616d7640d5dd6b822377848c984f6bdbe96f3fc90bcf5f9559a522d5`.
+  This is retrieval of the original artifact, not a rebuild or trust in a prefix.
+- Checked/extracted debug APK:
+  `.cache/p38/takeover-20261022/run-39789686610/apk/run-079972b527294600b78a85f9779a1c74/artifacts/trace-dev-debug.apk`.
+  Size 131748394 bytes; locally computed SHA-256
+  `0e89bd52a1b9a4c6bb073c692e7af6c94cdc12b10053aaade4381b44f163f97c`
+  agrees with the adjacent original CI metadata, which binds `27048aa1`,
+  application ID `com.wen.gaia.gaia`, and `release_signing=false`.
+- The implementation batch is ready for the original independent reviewer to
+  recheck P38-R01..R04 against `27048aa1` and these originals. A later handoff-only
+  commit does not change App/runner/workflow inputs. No independent closure,
+  formal freeze/PASS, whole-card completion or main integration is claimed.
+- Still missing: actual retained-engine/BLE background and lockscreen durable
+  progress, notification interaction and permission fallback, disconnect
+  recovery, final new-link target version/full raw SHA, and physical resource
+  cleanup. The existing preacceptance D0..D3 draft is not operating authority;
+  the independent owner must bind devices/assets and the missing bounded
+  authority before execution. No successful upgrade is replayed for collection.
+- Final local boundary audit covers the takeover archive, temp and CLI-cache
+  trees using the existing host_io guard; all resolved outputs stay inside the
+  assigned worktree, with no reparse escape. Incomplete/zero-byte download
+  attempts remain clearly separate from verified products, not silently erased.
+  WMI confirms no remaining curl/Python download worker. No local App build,
+  PowerShell startup, device action or known project-external output occurred.
+- Bare `git diff --check` reports this board's stored CRLF line endings;
+  process-local `core.whitespace=cr-at-eol` passes. The existing LF-to-CRLF
+  conversion notice is retained; no global Git setting was changed.
