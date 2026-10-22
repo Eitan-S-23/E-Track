@@ -736,6 +736,7 @@
 
 #### P3-8 Android 后台 OTA 与通知进度
 状态: 进行中 ｜ 认领: Codex(P3-8 实现) / 2026-10-21 ｜ 更新: 2026-10-22(双宿主全量检查、原生服务 13 项、debug/标准 APK 与 EXE 构建通过；真机与独立验收 NOT_RUN)
+- 集中预审整改: 2026-10-22 原候选 5d2a0fa6 的 P38-R01..R04 正在批量修复，新增生命周期竞态、Intent 路由、复核截止及页面目标回归；新输入的开发 CI/构建待运行，不沿用旧候选通过结论，不进入正式验收。
 - 依赖: P3-3 已完成并合入 main；不以 P3-4 或 P4-2 部署为软件实施前置，不新增 P3-8 -> P3-5 硬依赖。
 - 目标: 前台发起并实际取得 Android 服务/执行器接管后，正常切应用、下拉通知栏和锁屏继续设备 OTA；页面/通知同源展示真实阶段和 durable 进度，回前台重附着任务，终态释放资源。
 - 范围: Flutter OTA/BLE 生命周期与通知的必要接线、Android 前台服务/权限/桥接及测试；不混用 App 自更新任务，不改 MCU/BLE 字节协议，不仅删除后台暂停保护。
@@ -921,6 +922,8 @@
 | 2026-10-19 | P4-4 / Codex root / `P44-CREDENTIAL-01` | 新链两项产品整改与 Worker 部署已完成，但严格桶凭据的 account-owned/user-owned 创建 POST 均返回 403/9109，最终十项只读核对仍缺四个 S3 secrets | 保持两套独立桶限定 Object Read and Write，不替换旧 CI/provisioning token、不扩大权限；由 O1 直接配置或提供受保护来源与脱敏范围/有效期 | 按 §0.6 必需外部依赖缺失置阻塞；独立预审 10/10 和非发布 CI 通过不等于正式 PASS。保留实际部署异常/恢复和外部缓存未决；root 待凭据后冻结并组织新链/真实 reviewer 观测，gate=false，正式轮次零，未改 main | 已登记/外部凭据阻塞 |
 
 ## 10. 会话日志(每会话一行:日期 ｜ agent ｜ 动了哪些卡 ｜ 一句话结果)
+
+- 2026-10-22 | Codex P3-8 implementation, concentrated review remediation | P3-8 only, IN_PROGRESS | Addressing P38-R01..R04 as one batch in the existing worktree; added service lifecycle/deadline, Android Intent-boundary and task-page reattachment regressions. New CI/build results pending; original 5d2a0fa6 evidence and independent DRAFT/NOT_RUN remain unchanged. No device operation, contract freeze, main merge, release or deployment. See the existing implementation record.
 
 - 2026-10-22 | Codex P3-8 implementation, authorized validation continuation | P3-8 only, IN_PROGRESS | Added a default-off dedicated native-test option to the existing contained development runner. Local non-build host regressions 65+40 pass after a diagnosed process-scoped long-path retry; original failure retained. Candidate 5d2a0fa6: full dual-host App checks/debug APK and real Robolectric Service 13/13 succeed in 39697643246; standard APK/Windows EXE succeed in 39700401326, Pages/Release skipped. Originals, complete Windows ZIP and hashes are archived. Source is ready for independent review; actual device observations and formal acceptance remain NOT_RUN. No device operation, local App build, main merge, release or deployment. Existing implementation record holds the handoff and boundary audit.
 

@@ -166,6 +166,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   int _taskTotal = 0, _durableBytes = 0, _receivedBytes = 0;
   bool _appBackgrounded = false, _foregroundPaused = false, _closed = false;
   Completer<void>? _foregroundGate;
+  int _recoveryEpoch = 0;
+  String? _taskDeviceAddress;
   String? _lastSnapshotPhase;
   final _publishedTaskSnapshot = Rxn<OtaTaskSnapshot>();
 
@@ -176,6 +178,9 @@ class OtaService extends GetxController with WidgetsBindingObserver {
        phase == OtaPhase.transferring) && _transport?.endStarted != true;
 
   OtaTaskSnapshot? get taskSnapshot => _publishedTaskSnapshot.value;
+  String? get taskDeviceAddress =>
+      _taskKey?.generation == _ownerEpoch ? _taskDeviceAddress : null;
+  Stream<bool> get taskActivity => _isUpgrading.stream;
 
   OtaTaskSnapshot? _buildTaskSnapshot() {
     final key = _taskKey;
@@ -211,6 +216,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
 
   Future<void> _beginBackgroundTask(String address, OtaFirmwareAsset asset,
       int generation) async {
+    _taskDeviceAddress = address.toLowerCase();
     _taskKey = OtaTaskKey(taskId: '${_processNonce}_${_ownerEpoch}_${++_taskSerial}',
         generation: _ownerEpoch,
         deviceToken: sha256.convert(utf8.encode(address.toLowerCase())).toString(),
@@ -268,6 +274,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     } finally {
       if (identical(_taskKey, key)) {
         _backgroundReady.value = false;
+        _foregroundPaused = false;
+        _publishSnapshot();
         final lease = _backgroundScanLease;
         _backgroundScanLease = null;
         if (lease != null) {
@@ -278,10 +286,27 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     }
   }
 
-  Future<void> _waitForForeground(int generation) async {
-    if (!_appBackgrounded || backgroundAcquired || generation != _cancelGeneration) return;
-    _foregroundGate ??= Completer<void>();
-    await _foregroundGate!.future;
+  Future<bool> _waitForForeground(int generation, {DateTime? deadline}) async {
+    while (_appBackgrounded && !backgroundAcquired &&
+        generation == _cancelGeneration && !_closed) {
+      _foregroundGate ??= Completer<void>();
+      final gate = _foregroundGate!;
+      if (deadline == null) {
+        await gate.future;
+      } else {
+        final remaining = deadline.difference(DateTime.now());
+        if (remaining <= Duration.zero) return false;
+        try {
+          await gate.future.timeout(remaining);
+        } on TimeoutException {
+          if (identical(_foregroundGate, gate)) _foregroundGate = null;
+          return false;
+        }
+      }
+      // A resumed event can already have been superseded by another pause.
+    }
+    return generation == _cancelGeneration && !_closed &&
+        (deadline == null || DateTime.now().isBefore(deadline));
   }
 
   void _safeBackgroundFallback() {
@@ -303,12 +328,11 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       _foregroundGate = null;
       if (gate != null && !gate.isCompleted) gate.complete();
       if (wasBackgrounded && _foregroundPaused) {
-        _foregroundPaused = false;
-        _publishSnapshot();
         unawaited(resumeFromBackground());
       }
     } else {
       _appBackgrounded = true;
+      ++_recoveryEpoch;
       if (!backgroundAcquired) _safeBackgroundFallback();
     }
   }
@@ -1803,12 +1827,19 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   /// 迟到的复核结论属于已结束的旧会话，发布它会用旧终止态覆盖新
   /// owner 的进度/终态。
   Future<void> resumeFromBackground() async {
-    if (backgroundAcquired) return;
+    if (backgroundAcquired || _appBackgrounded || _closed) return;
+    final recovery = ++_recoveryEpoch;
     final transport = _transport;
-    if (transport == null) return;
+    if (transport == null) {
+      _foregroundPaused = false;
+      _publishSnapshot();
+      return;
+    }
     final sessionInfo = _deviceInfo;
     if (sessionInfo == null) {
       transport.resumeFromBackground();
+      _foregroundPaused = false;
+      _publishSnapshot();
       return;
     }
     final generation = _cancelGeneration;
@@ -1818,7 +1849,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     final boundChars = _boundChars;
     final boundLink = _boundLinkGeneration;
     bool stale() =>
-        generation != _cancelGeneration || !identical(_transport, transport);
+        generation != _cancelGeneration || !identical(_transport, transport) ||
+        recovery != _recoveryEpoch || _appBackgrounded || _closed;
 
     Future<void> failClosed(String code, String message,
         {bool retryableLater = false}) async {
@@ -1890,7 +1922,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     }
 
     // 1. 物理链路代次。
-    if (await aborted()) return;
+    if (await aborted() || stale()) return;
 
     // 2. 重新发现 OTA 特征（有界）。
     Map<String, String>? rediscovered;
@@ -1899,7 +1931,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           .findExactOtaCharacteristicsByAddress(boundAddress)
           .timeout(const Duration(seconds: 5));
     } catch (e) {
-      if (await aborted()) return;
+      if (await aborted() || stale()) return;
       await failClosed(
         'DEVICE_RECHECK_FAILED',
         '后台恢复时重新发现 OTA 服务失败（$e），已终止升级',
@@ -1907,7 +1939,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       );
       return;
     }
-    if (await aborted()) return;
+    if (await aborted() || stale()) return;
     if (rediscovered == null || !_charsMatch(rediscovered, boundChars)) {
       await failClosed(
         'DEVICE_LINK_CHANGED',
@@ -1921,7 +1953,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     try {
       final current = await transport.getDeviceInfo(
           timeout: const Duration(seconds: 3));
-      if (await aborted()) return;
+      if (await aborted() || stale()) return;
       if (!deviceIdentityMatches(current, sessionInfo)) {
         await failClosed(
           'DEVICE_IDENTITY_CHANGED',
@@ -1935,7 +1967,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       // 继续发送会把旧包字节写进未知设备。置终止态并尽力 ABORT 停止
       // 发送循环；MCU durable 层保留已落盘字节，重试经 BEGIN 幂等 +
       // durable 续传恢复，不依赖本会话续发。
-      if (await aborted()) return;
+      if (await aborted() || stale()) return;
       await failClosed(
         'DEVICE_RECHECK_FAILED',
         '后台恢复时无法复核设备身份（$e），已终止升级',
@@ -1945,7 +1977,11 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     }
     // 复核期间被取消/被新 owner 接管时不得恢复旧发送循环。
     if (await aborted()) return;
+    // No await between the final eligibility check and releasing the sender.
+    if (stale()) return;
     transport.resumeFromBackground();
+    _foregroundPaused = false;
+    _publishSnapshot();
   }
 
   /// 重新发现结果是否与绑定时完全一致（RC3-08⑦）。
@@ -2124,19 +2160,25 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     // 「至多一个窗口必返回」的重启等待变成永久挂起：deadline 已建立却
     // 永远走不到检查它的循环，取消代次同样无人再读。超时不当失败处理：
     // 断开只是让 MCU 侧尽早释放旧连接，后续轮询本来就要重新 connect。
-    await _waitForForeground(generation);
+    final eligible = await _waitForForeground(generation, deadline: deadline);
     if (generation != _cancelGeneration || _closed) {
       roundStats.recordAttemptOutcome('cancelled');
       roundStats.phaseEnd('reconnect');
       roundStats.emitSummary();
       return const _RebootOutcome(_RebootKind.cancelled);
     }
-    await _ble
-        .disconnectOtaDeviceByAddress(deviceAddress)
-        .timeout(const Duration(seconds: 5), onTimeout: () {});
+    if (eligible && (!_appBackgrounded || backgroundAcquired)) {
+      final remaining = deadline.difference(DateTime.now());
+      if (remaining > Duration.zero) {
+        await _ble.disconnectOtaDeviceByAddress(deviceAddress).timeout(
+          remaining < const Duration(seconds: 5) ? remaining : const Duration(seconds: 5),
+          onTimeout: () {});
+      }
+    }
     var attemptNo = 0;
     while (DateTime.now().isBefore(deadline)) {
-      await _waitForForeground(generation);
+      if (!await _waitForForeground(generation, deadline: deadline)) break;
+      if (_appBackgrounded && !backgroundAcquired) continue;
       if (generation != _cancelGeneration) {
         roundStats.recordAttemptOutcome('cancelled');
         roundStats.phaseEnd('reconnect');

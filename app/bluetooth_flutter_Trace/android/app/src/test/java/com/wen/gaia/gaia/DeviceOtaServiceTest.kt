@@ -3,7 +3,14 @@ package com.wen.gaia.gaia
 import android.app.Notification
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
+import android.os.Bundle
 import android.os.Looper
+import io.flutter.embedding.android.FlutterActivity
+import io.flutter.plugin.common.BinaryMessenger
+import io.flutter.plugin.common.MethodCall
+import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugin.common.StandardMethodCodec
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
@@ -13,12 +20,16 @@ import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.Implementation
+import org.robolectric.annotation.Implements
+import org.robolectric.annotation.RealObject
 import org.robolectric.shadows.ShadowPowerManager
 import java.time.Duration
+import java.nio.ByteBuffer
 
 /** Real Android Service/notification/PowerManager under Robolectric, not Dart. */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [34])
+@Config(sdk = [34], shadows = [OtaEmbeddingBoundary::class])
 class DeviceOtaServiceTest {
     private val key = DeviceOtaKey("process_1", 1, "a".repeat(64), "b".repeat(64))
     private lateinit var service: DeviceOtaService
@@ -152,6 +163,89 @@ class DeviceOtaServiceTest {
         assertNotEquals("trace_update", DeviceOtaBridge.CHANNEL_ID)
     }
 
+    private fun openIntent(task: DeviceOtaKey = key) = task.put(Intent(
+        DeviceOtaBridge.OPEN, Uri.parse(
+            "trace-device-ota://task/${task.taskId}/${task.generation}/open")))
+
+    private fun withOpenChannel(test: (List<MethodCall>) -> Unit) {
+        val calls = mutableListOf<MethodCall>()
+        val messenger = object : BinaryMessenger {
+            override fun send(channel: String, message: ByteBuffer?) {
+                send(channel, message, null)
+            }
+            override fun send(channel: String, message: ByteBuffer?, reply: BinaryMessenger.BinaryReply?) {
+                if (message != null) {
+                    val bytes = message.duplicate()
+                    bytes.flip()
+                    calls.add(StandardMethodCodec.INSTANCE.decodeMethodCall(bytes))
+                }
+            }
+            override fun setMessageHandler(channel: String, handler: BinaryMessenger.BinaryMessageHandler?) {}
+        }
+        val field = DeviceOtaBridge::class.java.getDeclaredField("channel").apply { isAccessible = true }
+        val previous = field.get(null)
+        field.set(null, MethodChannel(messenger, "trace/device_ota"))
+        OtaEmbeddingBoundary.initialUris.clear()
+        OtaEmbeddingBoundary.newUris.clear()
+        try { test(calls) } finally { field.set(null, previous) }
+    }
+
+    @Test fun internalNewIntentIsSanitizedBeforeEmbeddingAndOpensExactlyOnce() {
+        start(); runtime.answer(true)
+        withOpenChannel { calls ->
+            val activity = Robolectric.buildActivity(MainActivity::class.java).create().get()
+            activity.onNewIntent(openIntent())
+            assertEquals(listOf<String?>(null), OtaEmbeddingBoundary.newUris)
+            assertNull(activity.intent.data)
+            assertEquals(listOf("open"), calls.map { it.method })
+            assertEquals(key, DeviceOtaKey.from(calls.single().arguments))
+        }
+    }
+
+    @Test fun staleOrMalformedNotificationNeverReachesEitherRoute() {
+        start(); runtime.answer(true)
+        withOpenChannel { calls ->
+            val activity = Robolectric.buildActivity(MainActivity::class.java).create().get()
+            activity.onNewIntent(openIntent(key.copy(generation = 2)))
+            activity.onNewIntent(openIntent(key.copy(taskId = "old_task")))
+            activity.onNewIntent(Intent(Intent.ACTION_VIEW,
+                Uri.parse("trace-device-ota://task/forged/1/open")))
+            assertEquals(listOf<String?>(null, null, null), OtaEmbeddingBoundary.newUris)
+            assertTrue(calls.isEmpty())
+        }
+    }
+
+    @Test fun recreatedActivitySanitizesInitialIntentBeforeEmbeddingReadsIt() {
+        start(); runtime.answer(true)
+        withOpenChannel { calls ->
+            val activity = Robolectric.buildActivity(MainActivity::class.java, openIntent()).create().get()
+            assertEquals(listOf<String?>(null), OtaEmbeddingBoundary.initialUris)
+            assertNull(activity.intent.dataString)
+            assertEquals(listOf("open"), calls.map { it.method })
+        }
+    }
+
+    @Test fun recreatedProcessRejectsOldInitialNotificationWithoutRouting() {
+        withOpenChannel { calls ->
+            Robolectric.buildActivity(MainActivity::class.java, openIntent()).create()
+            assertEquals(listOf<String?>(null), OtaEmbeddingBoundary.initialUris)
+            assertTrue(calls.isEmpty())
+        }
+    }
+
+    @Test fun externalTraceLinksStillReachEmbeddingUnchanged() {
+        withOpenChannel { calls ->
+            val external = "trace://share/existing-link"
+            val activity = Robolectric.buildActivity(MainActivity::class.java,
+                Intent(Intent.ACTION_VIEW, Uri.parse(external))).create().get()
+            activity.onNewIntent(Intent(Intent.ACTION_VIEW, Uri.parse(external)))
+            assertEquals(listOf(external), OtaEmbeddingBoundary.initialUris)
+            assertEquals(listOf(external), OtaEmbeddingBoundary.newUris)
+            assertEquals(external, activity.intent.dataString)
+            assertTrue(calls.isEmpty())
+        }
+    }
+
     private class FakeRuntime(val key: DeviceOtaKey, var initial: Map<*, *>?) : DeviceOtaRuntime {
         var problem: String? = null
         var callback: ((Boolean) -> Unit)? = null
@@ -164,5 +258,22 @@ class DeviceOtaServiceTest {
         override fun acquired(key: DeviceOtaKey) { events.add("acquired") }
         override fun unavailable(key: DeviceOtaKey, reason: String) { events.add(reason) }
         override fun event(method: String, key: DeviceOtaKey) { events.add(method) }
+    }
+}
+
+/** Capture the actual MainActivity -> embedding entry, without loading libflutter.
+ * Flutter's automatic routing consumes these Intent data values before Dart.
+ * The service and key validation above remain real; only the embedding is shadowed.
+ */
+@Implements(FlutterActivity::class)
+class OtaEmbeddingBoundary {
+    @RealObject lateinit var activity: FlutterActivity
+
+    @Implementation fun onCreate(state: Bundle?) { initialUris.add(activity.intent?.dataString) }
+    @Implementation fun onNewIntent(intent: Intent) { newUris.add(intent.dataString) }
+
+    companion object {
+        val initialUris = mutableListOf<String?>()
+        val newUris = mutableListOf<String?>()
     }
 }

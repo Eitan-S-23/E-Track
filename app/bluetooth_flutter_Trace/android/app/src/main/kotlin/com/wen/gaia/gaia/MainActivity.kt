@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.Context
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.provider.Settings
 import androidx.lifecycle.Lifecycle
 import io.flutter.embedding.android.FlutterActivity
@@ -22,6 +23,17 @@ class MainActivity: FlutterActivity() {
 
     override fun shouldDestroyEngineWithHost(): Boolean = false
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        val original = intent
+        val internal = DeviceOtaBridge.isInternalOpen(original)
+        if (internal) setIntent(withoutInternalUri(original))
+        // Flutter reads the initial Intent during this call, before configuration.
+        super.onCreate(savedInstanceState)
+        if (internal) DeviceOtaBridge.consumeOpen(original)
+    }
+
+    private fun withoutInternalUri(intent: Intent): Intent = Intent(intent).setData(null)
+
     override fun onResume() {
         super.onResume()
         DeviceOtaBridge.lifecycle(this, true)
@@ -35,7 +47,6 @@ class MainActivity: FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         DeviceOtaBridge.install(flutterEngine, this)
-        DeviceOtaBridge.consumeOpen(intent)
         deepLinkChannel = MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             DEEP_LINK_CHANNEL
@@ -90,9 +101,15 @@ class MainActivity: FlutterActivity() {
     }
 
     override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        setIntent(intent)
-        if (DeviceOtaBridge.consumeOpen(intent)) return
+        val internal = DeviceOtaBridge.isInternalOpen(intent)
+        val delivered = if (internal) withoutInternalUri(intent) else intent
+        // Still deliver to embedding/plugins, but never auto-route the private URI.
+        super.onNewIntent(delivered)
+        setIntent(delivered)
+        if (internal) {
+            DeviceOtaBridge.consumeOpen(intent)
+            return
+        }
         intent.dataString?.let { link ->
             deepLinkChannel?.invokeMethod("onDeepLink", link)
         }

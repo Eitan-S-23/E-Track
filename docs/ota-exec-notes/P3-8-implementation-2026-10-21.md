@@ -405,3 +405,44 @@ merge main, publish or deploy.
   standard remote workflow used its existing hosted build/packaging steps.
   No main ref/index, historical task evidence, root `{a`, cloud business state,
   release or deployment was modified.
+
+## Concentrated Preacceptance Remediation (2026-10-22)
+
+- Input: independent report at the authorized read-only root path
+  `D:/github/my/E-Track/docs/ota-exec-notes/P3-8-preacceptance-2026-10-22.md`.
+  Original candidate `5d2a0fa6`, delivery HEAD `2a46ecdf`, same clean exclusive
+  worktree and branch verified. No main/root edits or review-draft mutation.
+- `.trellis/` is absent in this worktree; task Spec, root/App AGENTS and project
+  collaboration/validation contracts remain the applicable development rules.
+- Scope: OTA service, page, Android Activity/bridge, their three existing tests,
+  this record and P3-8 board/log only. No runner, protocol, cloud/MCU, App updater,
+  acceptance criteria or permission changes. Existing full dual-host/native/debug
+  workflow is runnable; actor Eitan-S-23 and workflow identity were checked.
+- P38-R01: recovery epoch invalidated by background transitions and newer
+  recoveries; check eligibility after asynchronous identity work and immediately
+  before releasing the sender. Foreground gates loop/recheck after awakening.
+  Added held-discovery and held-INFO second-pause cases; no extra DATA/END, one
+  BEGIN, and a later genuine foreground recovery must succeed.
+- P38-R02: sanitize private OTA URI before initial/new Intent reaches Flutter's
+  embedding; preserve external links and plugin delivery. Only task-key-validated
+  open goes through the dedicated bridge. Added five Robolectric Activity-entry
+  cases with an embedding shadow (no native Flutter engine), real key/service
+  checks and a recording MethodChannel. This tests the actual MainActivity
+  superclass boundary, not real Dart navigation or a running retained engine.
+- P38-R03: foreground waiting uses the existing absolute reboot deadline, as
+  does disconnect. Expiry reports REBOOT_RECONNECT_FAILED, clears paused projection
+  at cleanup, and releases the owner/scan lease without background probes. Added
+  a 400 ms unresolved-expiry case and a resumed-then-paused gate case; existing
+  return-before-deadline positive remains unchanged in intent.
+- P38-R04: page attaches the exact current task address without BLE work; after
+  owner exit it reconciles that address before enabling actions. Subscription is
+  disposed with the page. Added completed/cancelled/failed no-argument page cases
+  and an unrelated explicit-device case, with a held identity read gating actions.
+- First implementation WIP: source and new regressions prepared; `git diff
+  --check` exit 0. App analyze/tests, native cases and new builds NOT_RUN pending
+  the development CI below. Prior successful builds do not verify these changed
+  inputs. Device observations and formal independent acceptance remain NOT_RUN.
+- Boundary preflight used the existing host_io guard for every manual target and
+  task-local archive/temp root. A first cmd inline-Python quotation failed with
+  SyntaxError before executing code (exit 1); Git Bash invocation succeeded
+  (exit 0). No external output or cleanup followed that read-only failure.

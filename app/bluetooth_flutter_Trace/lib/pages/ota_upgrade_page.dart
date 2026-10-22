@@ -55,12 +55,18 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
   /// App 生命周期后台标记（RC3-08④）：后台期间停止主动发起身份读取
   /// 等 GATT 操作，回前台后重新发现连接并读身份。
   bool _backgrounded = false;
+  StreamSubscription<bool>? _taskSub;
+  String? _attachedTaskAddress;
+  bool _needsTaskReconcile = false;
+  bool _reconcilingTask = false;
 
   /// 当前连接设备地址（GET_INFO/传输的入口；无连接则为 null）。
   String? get _deviceAddress =>
+      _attachedTaskAddress ??
       (widget.connectedDevice ?? _resolvedDevice)?.remoteId.str.toLowerCase();
 
   bool get _deviceReady =>
+      !_needsTaskReconcile && !_reconcilingTask &&
       _deviceAddress != null && otaService.deviceInfo != null;
 
   @override
@@ -68,6 +74,14 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _listenConnectionChanges();
+    _taskSub = otaService.taskActivity.listen((busy) {
+      if (!mounted) return;
+      if (busy) {
+        _attachCurrentTask();
+      } else if (_needsTaskReconcile && !_backgrounded) {
+        unawaited(_resolveDeviceAndRead());
+      }
+    });
     // 进入页面即解析连接并建立设备身份。
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _resolveDeviceAndRead();
@@ -80,6 +94,10 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
     // 显式设备参数变化（RC3-08④）：旧解析结果与设备身份快照（DTO 按
     // 地址绑定，由 service 层失效）不再适用于新目标，重新解析并读取。
     if (widget.connectedDevice != oldWidget.connectedDevice) {
+      if (!otaService.isUpgrading) {
+        _attachedTaskAddress = null;
+        _needsTaskReconcile = false;
+      }
       _resolveAttempted = false;
       _resolveDeviceAndRead();
     }
@@ -101,6 +119,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
   @override
   void dispose() {
     _connectionSub?.cancel();
+    _taskSub?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -141,12 +160,38 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
   /// 然后读取设备身份。BLE 平台通道不可用时静默降级为未连接。
   Future<void> _resolveDeviceAndRead() async {
     // Reattach only: an active owner retains its transport and reboot probe.
-    if (otaService.isUpgrading) return;
+    if (otaService.isUpgrading) {
+      _attachCurrentTask();
+      return;
+    }
+    if (_reconcilingTask || _backgrounded || !mounted) return;
+    if (_needsTaskReconcile) {
+      // Keep the owner's exact target, never the first unrelated connection.
+      _needsTaskReconcile = false;
+      setState(() { _reconcilingTask = true; });
+      try {
+        await _readDeviceInfo();
+      } finally {
+        if (mounted) setState(() { _reconcilingTask = false; });
+      }
+      return;
+    }
     await _resolveConnectedDevice();
     await _readDeviceInfo();
   }
 
+  void _attachCurrentTask() {
+    final address = otaService.taskDeviceAddress;
+    if (address == null) return;
+    setState(() {
+      _attachedTaskAddress = address;
+      _resolvedDevice = BluetoothDevice.fromId(address);
+      _needsTaskReconcile = true;
+    });
+  }
+
   Future<void> _resolveConnectedDevice() async {
+    if (_attachedTaskAddress != null) return;
     if (widget.connectedDevice != null) return;
     if (_resolveAttempted) return;
     _resolveAttempted = true;

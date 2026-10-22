@@ -396,6 +396,55 @@ void main() {
     });
   }
 
+  for (final holdInfo in [false, true]) {
+    test('P38-R01 late ${holdInfo ? 'INFO' : 'discovery'} cannot undo a second pause', () async {
+      final host = _BackgroundOwnerHarness()..allow = false;
+      final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+          backgroundClient: host);
+      final service = Get.find<OtaService>();
+      ble.dataGate = Completer<void>();
+      final operation = service.startOtaUpgrade('AA:BB');
+      try {
+        await ble.dataGated.future;
+        await expectGatedDataCount(ble, 4);
+        service.didChangeAppLifecycleState(AppLifecycleState.paused);
+        ble.releaseLatestDataAck();
+        final infos = ble.getInfoCalls;
+        if (holdInfo) {
+          ble.holdInfo = true;
+        } else {
+          ble.rediscoverGate = Completer<void>();
+        }
+        service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+        if (holdInfo) {
+          await waitUntil(() => ble.getInfoCalls > infos);
+        } else {
+          await ble.rediscoverEntered.future;
+        }
+        service.didChangeAppLifecycleState(AppLifecycleState.paused);
+        ble.releaseHeldInfo();
+        ble.rediscoverGate?.complete();
+        await expectGatedDataCount(ble, 4);
+        expect(service.taskSnapshot!.phase, 'paused');
+        expect(ble.endCalls, 0);
+        if (!holdInfo) expect(ble.getInfoCalls, infos);
+        service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+        await expectGatedDataCount(ble, 8);
+        ble.releaseDataGate();
+        expect(await operation, isTrue);
+        expect(ble.beginCalls, 1);
+        expect(ble.endCalls, 1);
+      } finally {
+        ble.releaseHeldInfo();
+        if (ble.rediscoverGate?.isCompleted == false) ble.rediscoverGate!.complete();
+        service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+        ble.releaseDataGate();
+        if (service.isUpgrading) await service.cancelUpgrade(keepPackage: true);
+        await operation;
+      }
+    });
+  }
+
   test('delayed acquisition and late ACK after cancellation cannot launch BEGIN', () async {
     final host = _BackgroundOwnerHarness();
     final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
@@ -460,10 +509,52 @@ void main() {
       expect(ble.probeCount, 1);
       expect(service.taskSnapshot!.phase, 'paused');
       expect(service.taskSnapshot!.targetVerified, isFalse);
+      // A wake-up is not a permanent foreground permit.
+      service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      service.didChangeAppLifecycleState(AppLifecycleState.paused);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      expect(ble.probeCount, 1);
       service.didChangeAppLifecycleState(AppLifecycleState.resumed);
       expect(await operation, isTrue);
       expect(ble.probeCount, 2);
       expect(ble.beginCalls, 1);
+    } finally {
+      service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      ble.releaseSilentInfo();
+      if (service.isUpgrading) await service.cancelUpgrade(keepPackage: true);
+      await operation;
+    }
+  });
+
+  test('P38-R03 owner loss cannot hold reboot verification beyond its deadline', () async {
+    final host = _BackgroundOwnerHarness();
+    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+        backgroundClient: host, rebootWindow: const Duration(milliseconds: 400),
+        rebootProbeInterval: const Duration(milliseconds: 10));
+    ble.silentRebootProbes = 1;
+    final service = Get.find<OtaService>();
+    final operation = service.startOtaUpgrade('AA:BB');
+    try {
+      await waitUntil(() => ble.probeCount == 1);
+      service.didChangeAppLifecycleState(AppLifecycleState.paused);
+      host.lose();
+      ble.releaseSilentInfo();
+      expect(service.canCancelTask, isFalse);
+      expect(await operation.timeout(const Duration(seconds: 2)), isFalse);
+      expect(service.terminalState!.code, 'REBOOT_RECONNECT_FAILED');
+      expect(service.phase, OtaPhase.failed);
+      expect(service.taskSnapshot!.phase, 'failed');
+      expect(service.taskSnapshot!.targetVerified, isFalse);
+      expect(service.isUpgrading, isFalse);
+      expect(host.acquired, isFalse);
+      expect(ble.probeCount, 1);
+      expect(ble.beginCalls, 1);
+      expect(ble.endCalls, 1);
+      expect(ble.abortCalls, 0);
+      expect(ble.radioCalls.where((c) => c == 'device-scan-release').length, 2);
+      service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      expect(ble.probeCount, 1, reason: 'late return cannot revive a settled owner');
     } finally {
       service.didChangeAppLifecycleState(AppLifecycleState.resumed);
       ble.releaseSilentInfo();
@@ -4055,6 +4146,13 @@ class _UpgradeFakeBle extends BluetoothService {
   /// GET_INFO 观测计数（不分重启前后）：断言三级复核确实发了 INFO，
   /// 而不是在更早层级就返回了。
   int getInfoCalls = 0;
+  bool holdInfo = false;
+  final _heldInfoReplies = <void Function()>[];
+  void releaseHeldInfo() {
+    holdInfo = false;
+    for (final reply in _heldInfoReplies) { reply(); }
+    _heldInfoReplies.clear();
+  }
 
   /// ABORT 物理写闸门（RC3-04⑦）：非 null 且未完成时，ABORT 帧的
   /// writeOtaCharacteristic 在送达 fake 前挂起，[abortWriteEntered]
@@ -4339,7 +4437,11 @@ class _UpgradeFakeBle extends BluetoothService {
       payload =
           _probeCount <= rebootDelayProbes ? preRebootPayload : postRebootPayload;
     }
-    _send(OtaBleCodec.rspInfo, 0, f.seq, payload);
+    if (holdInfo) {
+      _heldInfoReplies.add(() => _send(OtaBleCodec.rspInfo, 0, f.seq, payload));
+    } else {
+      _send(OtaBleCodec.rspInfo, 0, f.seq, payload);
+    }
   }
 
   void _onBegin(OtaBleFrame f) {

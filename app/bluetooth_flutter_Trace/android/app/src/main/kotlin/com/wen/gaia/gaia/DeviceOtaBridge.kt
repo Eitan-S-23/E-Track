@@ -219,10 +219,14 @@ object DeviceOtaBridge {
 
     fun event(method: String, key: DeviceOtaKey) { channel?.invokeMethod(method, key.map()) }
 
+    fun isInternalOpen(intent: Intent?): Boolean =
+        intent?.action == OPEN || intent?.data?.scheme == "trace-device-ota"
+
     fun consumeOpen(intent: Intent?): Boolean {
-        if (intent?.action != OPEN) return false
+        if (!isInternalOpen(intent)) return false
         val key = DeviceOtaKey.from(intent)
-        if (key != null && DeviceOtaService.active?.owns(key) == true) event("open", key)
+        if (intent?.action == OPEN && key != null && DeviceOtaService.active?.owns(key) == true)
+            event("open", key)
         // A stale/recreated-process notification never restores cached progress.
         return true
     }
