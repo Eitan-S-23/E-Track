@@ -84,7 +84,7 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
         return path
 
     def fixture_run(self, outcomes=None, after=None, scope="all", build_apk=False,
-                    identify=None, bind=None):
+                    identify=None, bind=None, native_tests=False):
         calls = []
 
         def execute(root, argv, cwd, env, log, timeout):
@@ -122,7 +122,8 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
                         for path in identity["dirty_semantic"]
                         if path in RUNNER.TOOLCHAIN_REGENERATED]
         with mock.patch("sys.stdout", new_callable=io.StringIO), \
-                mock.patch.dict(os.environ, {"GITHUB_SHA": "1" * 40}):
+                mock.patch.dict(os.environ, {"GITHUB_SHA": "1" * 40,
+                                            "FLUTTER_DEV_DEVICE_OTA_NATIVE_TESTS": str(native_tests).lower()}):
             code, path = RUNNER.run_checks(
                 self.project, scope, build_apk=build_apk, execute=execute,
                 identify=identify, bind=bind,
@@ -150,6 +151,20 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
             self.assertTrue(all(0 < item[3] <= 600 for item in plan))
             for _, argv, _, _ in plan:
                 self.assertFalse({"build", "publish", "deploy", "push"}.intersection(argv))
+
+    def test_device_ota_native_request_rejects_checks_only_or_invalid_mode(self):
+        for mode in ("true", "yes", "1"):
+            with self.subTest(mode=mode), self.assertRaisesRegex(ValueError, "native tests|must be"):
+                RUNNER.command_plan(self.project, self.project / "run", "all",
+                                    env={"FLUTTER_DEV_DEVICE_OTA_NATIVE_TESTS": mode})
+
+    def test_device_ota_native_workflow_preserves_junit_and_default_checks_only(self):
+        text = (ROOT / ".github/workflows/flutter-dev-checks.yml").read_text(encoding="utf-8")
+        self.assertIn("device_ota_native_tests:", text)
+        self.assertIn("inputs.device_ota_native_tests && matrix.os == 'ubuntu-latest'", text)
+        self.assertIn("testDebugUnitTest/TEST-com.wen.gaia.gaia.DeviceOtaServiceTest.xml", text)
+        self.assertIn("build/app/reports/tests/testDebugUnitTest/**", text)
+        self.assertIn("if: always()", text)
 
     def test_success_is_development_only_with_all_raw_logs(self):
         code, report, calls, path = self.fixture_run(scope="ota")
@@ -791,6 +806,20 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
                 "apk_build": {"status": "FAIL", "exit_code": 1}
             }, build_apk=True)
         self.assertEqual(1, code)
+        self.assertEqual("FAIL", report["apk_result"])
+        self.assertNotIn("apk_verify", calls)
+        self.assertNotIn("apk_collect", calls)
+
+    def test_device_ota_native_failure_is_strict_and_blocks_artifact_collection(self):
+        self.apk_inputs()
+        with mock.patch.object(sys, "platform", "linux"):
+            code, report, calls, _ = self.fixture_run({
+                "apk_device_ota_native": {"status": "FAIL", "exit_code": 17}
+            }, build_apk=True, native_tests=True)
+        self.assertEqual(1, code)
+        native = next(item for item in report["commands"] if item["name"] == "apk_device_ota_native")
+        self.assertEqual(17, native["exit_code"])
+        self.assertLess(calls.index("apk_build"), calls.index("apk_device_ota_native"))
         self.assertEqual("FAIL", report["apk_result"])
         self.assertNotIn("apk_verify", calls)
         self.assertNotIn("apk_collect", calls)

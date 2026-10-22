@@ -249,6 +249,22 @@ cross-agent handoffs, collector preparation and original device-log retrieval.
 
 ## Completion And Review
 
+### P3-8 Native Service Checks
+
+The optional dispatch input `device_ota_native_tests=true` requires
+`build_apk=true` and full app checks. It runs only on Linux, reusing the debug
+helper's contained Android SDK, JDK, Gradle distribution/home and process-tree
+timeout/cleanup. Pushes and ordinary debug requests remain unchanged.
+
+After debug compilation, the bounded command is `gradle --no-daemon
+--console=plain -p app/bluetooth_flutter_Trace/android :app:testDebugUnitTest
+--tests com.wen.gaia.gaia.DeviceOtaServiceTest`. Failure fails the development
+run and blocks APK collection; no automatic retry or ignored failure is added.
+The existing development-log upload also preserves its JUnit XML and HTML report
+from `app/bluetooth_flutter_Trace/build/app/` on failure, with 14-day retention.
+These Robolectric Android Service tests do not replace actual retained-engine,
+BLE background/lockscreen observations or independent acceptance.
+
 Record four distinct outcomes: source edits, development self-tests, APK/EXE
 builds, and independent acceptance. Include commit SHA, run URL, actual scope,
 SDK identity, both host results and original failures with a remediation report.

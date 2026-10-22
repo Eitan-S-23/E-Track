@@ -52,7 +52,8 @@ class DevelopmentApkTests(unittest.TestCase):
         for name in (APK.APPLICATION_ID_ENV, APK.DEVICE_OBSERVATION_ENV,
                      APK.OBSERVATION_TARGET_ENV, APK.OBSERVATION_FIRMWARE_URL_ENV,
                      APK.OTA_LINK_CANDIDATE_ENV, APK.FIXED_SIGNING_ENV,
-                     APK.SIGNING_SECRET_ENV, "TRACE_DEV_SIGNING_STORE_FILE"):
+                     APK.SIGNING_SECRET_ENV, APK.DEVICE_OTA_NATIVE_TESTS_ENV,
+                     "TRACE_DEV_SIGNING_STORE_FILE"):
             base.pop(name, None)
         base.update({"ANDROID_HOME": str(self.root / "host-sdk"),
                      "JAVA_HOME_17_X64": str(self.root / "host-java")})
@@ -344,6 +345,25 @@ class DevelopmentApkTests(unittest.TestCase):
         sdk = next(argv for name, argv, _, _ in plan if name == "apk_sdk")
         self.assertIn(f"--sdk_root={self.run / 'android-sdk'}", sdk)
         self.assertIn("platforms;android-35", sdk)
+
+    def test_device_ota_native_tests_are_opt_in_bounded_and_share_the_sdk(self):
+        base = APK.plan(self.root, self.run, self.env)
+        self.assertNotIn("apk_device_ota_native", [item[0] for item in base])
+        plan = APK.plan(self.root, self.run,
+                        {**self.env, APK.DEVICE_OTA_NATIVE_TESTS_ENV: "true"})
+        names = [item[0] for item in plan]
+        self.assertLess(names.index("apk_build"), names.index("apk_device_ota_native"))
+        self.assertLess(names.index("apk_device_ota_native"), names.index("apk_collect"))
+        _, argv, cwd, timeout = next(item for item in plan if item[0] == "apk_device_ota_native")
+        self.assertEqual(self.run / "gradle-dist/gradle-8.12/bin/gradle", Path(argv[0]))
+        self.assertEqual(self.root, cwd)
+        self.assertEqual(1200, timeout)
+        self.assertIn(str(self.root / CHECKS.APP / "android"), argv)
+        self.assertEqual([":app:testDebugUnitTest", "--tests",
+                          "com.wen.gaia.gaia.DeviceOtaServiceTest"], argv[-3:])
+        for value in ("yes", "1", "TRUE"):
+            with self.assertRaisesRegex(ValueError, APK.DEVICE_OTA_NATIVE_TESTS_ENV):
+                APK.plan(self.root, self.run, {**self.env, APK.DEVICE_OTA_NATIVE_TESTS_ENV: value})
 
     def test_link_candidates_form_an_explicit_bounded_build_matrix(self):
         for value in ("", "baseline"):

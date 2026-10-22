@@ -24,6 +24,7 @@ from Tools.flutter.dev_checks import APP, checked_path, make_directory
 
 APK_RELATIVE = APP / "build/app/outputs/flutter-apk/app-debug.apk"
 APPLICATION_ID_ENV = "TRACE_DEV_APP_ID_SUFFIX"
+DEVICE_OTA_NATIVE_TESTS_ENV = "FLUTTER_DEV_DEVICE_OTA_NATIVE_TESTS"
 APPLICATION_ID_SUFFIX_PATTERN = re.compile(r"^\.[A-Za-z][A-Za-z0-9_]*$")
 FIXED_SIGNING_ENV = "TRACE_DEV_FIXED_SIGNING"
 SIGNING_SECRET_ENV = "TRACE_DEV_SIGNING_KEYSTORE_SECRET"
@@ -334,6 +335,9 @@ def environment(root, run_dir, env):
 
 
 def plan(root, run_dir, env):
+    native_mode = env.get(DEVICE_OTA_NATIVE_TESTS_ENV, "false")
+    if native_mode not in ("true", "false"):
+        raise ValueError(DEVICE_OTA_NATIVE_TESTS_ENV + " must be true or false")
     version, compile_sdk = android_versions(root)
     # 观测配置在这里先校验一次：非法取值在下载/构建之前失败，不浪费一轮构建。
     defines = (observation_defines(observation_config(env)) +
@@ -345,7 +349,7 @@ def plan(root, run_dir, env):
     sdk = run_dir / "android-sdk"
     gradle = run_dir / f"gradle-dist/gradle-{version}/bin/gradle"
     bootstrap = run_dir / "wrapper-bootstrap"
-    return [
+    commands = [
         ("apk_prepare", helper + ["prepare", *common], root, 900),
         ("apk_java", [str(java), "-version"], root, 30),
         ("apk_sdk", [str(source / "cmdline-tools/latest/bin/sdkmanager"),
@@ -357,10 +361,18 @@ def plan(root, run_dir, env):
         ("apk_build", [str(run_dir / "sdk/bin/flutter"), "build", "apk", "--debug",
                        "--no-pub", "--target-platform=android-arm,android-arm64",
                        *defines], root / APP, 1200),
+    ]
+    if native_mode == "true":
+        commands.append(("apk_device_ota_native", [str(gradle), "--no-daemon",
+                         "--console=plain", "-p", str(root / APP / "android"),
+                         ":app:testDebugUnitTest", "--tests",
+                         "com.wen.gaia.gaia.DeviceOtaServiceTest"], root, 1200))
+    commands.extend([
         ("apk_verify", [str(sdk / "build-tools/35.0.0/apksigner"), "verify", "--verbose",
                         str(root / APK_RELATIVE)], root, 60),
         ("apk_collect", helper + ["collect", *common], root, 30),
-    ]
+    ])
+    return commands
 
 
 def sha256(path):

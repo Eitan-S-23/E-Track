@@ -244,3 +244,36 @@ No MCU/cloud/protocol/performance/App-self-update business changes.
   operation, cloud business mutation, global config/ACL change, main merge,
   release or deployment. The main worktree's historical changes and protected
   root `{a` were not modified. No known project-external active output remains.
+
+## Authorized Validation Continuation (2026-10-22)
+
+- User explicitly confirmed authorization to continue P3-8, add the dedicated
+  Android native-test CI route and run standard APK/EXE builds. This supersedes
+  the earlier missing-CI-authority entries only in that exact scope; no device,
+  installation, cloud business write, publish/deploy or main-merge authority.
+- Re-entry: same clean worktree/branch, HEAD `9cba05e2aca0ab83825e633c9f63e84a9593af47`;
+  existing GitHub actor `Eitan-S-23`. No new worktree or repository created.
+- Bounded change list: `.github/workflows/flutter-dev-checks.yml`, existing
+  `Tools/flutter/dev_apk.py` and `dev_checks.py`, their two existing host
+  regressions, development guide and this record. Add a default-off
+  `device_ota_native_tests` dispatch input, require explicit Linux debug mode,
+  run the one P3-8 Service class using the existing contained SDK and archive
+  native JUnit/HTML. No new generic runner, acceptance contract or task Spec.
+- Validation order: offline non-build helper regressions (project-local
+  fixtures), reviewed WIP commit/push, full app checks plus native tests/debug
+  build, then exact-candidate `build.yml` with both publish/replace inputs false.
+  First failures remain preserved and are repaired from actual diagnostics.
+- Local non-build feedback: `python -B tests/ota/test_flutter_dev_apk.py`
+  passed 40 tests (exit 0). First `test_flutter_dev_checks.py` ran 64 tests,
+  exit 1, with one ERROR in
+  `test_bind_toolchain_regen_fails_closed_on_collection_failure` before its
+  injected failure: `checkout_identity` -> `worktree_fingerprints` ->
+  `git hash-object --no-filters --stdin-paths` exited 128 in the deep
+  worktree-local `gitfixture`. This is the local Windows path-length case,
+  not an Android or CI result. Retry uses process-scoped
+  `GIT_CONFIG_COUNT=1,GIT_CONFIG_KEY_0=core.longpaths,GIT_CONFIG_VALUE_0=true`;
+  no global config or outside short directory. Added a strict native-phase
+  failure propagation oracle before rerunning the host suite.
+- Diagnosed-path retry passed all 65 development-runner host tests (exit 0),
+  raw console archived as `.cache/p38/host-checks-longpaths.log`. This is only
+  Python/fixture validation and did not start Flutter/Gradle or build an App.
