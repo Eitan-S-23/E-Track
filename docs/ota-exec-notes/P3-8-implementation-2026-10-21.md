@@ -630,3 +630,29 @@ exactly matches the separately downloaded EXE. No artifact was installed/run.
   replace an executed regression with another static review. Local Flutter/
   Gradle builds remain prohibited. The existing dual-host full-check workflow
   is the runnable regression route; artifacts/logs stay in `.cache/p38/`.
+- First run `39823659366` at tests-only `14e5d157` failed to compile because
+  the unrestricted plugin import also exported BluetoothService. `1ecabeca`
+  limits that import to BluetoothDevice. No production change in either input.
+- Run `39824670865` executes the distinguishing failures on both hosts:
+  the busy listener sees `aa:bb` instead of null, and all four real-page positive
+  cases leave controls disabled after INFO succeeds. Ubuntu 746 passed / 16
+  skipped / 6 failed, Windows 729 / 33 / 6. The sixth failure is a negative
+  fixture accounting mistake: malformed INFO legitimately retries at transport
+  level. Change it to a structurally valid unknown model to retain one-query
+  failure coverage. The run also reports one unnecessary foundation import;
+  remove that redundant import, not the analyzer rule.
+- Both failed originals remain under `.cache/p38/r04-20261023/red/` and
+  `red-behavior/`. These are development failures, not formal acceptance rounds.
+- Repair scope: OtaService completes owner/future/cancellation-generation
+  registration before synchronous busy publication, still before the first
+  await. The page rejects self-reattachment during reconciliation and waits
+  for both owner exit and a settled task phase. Cancellation can publish its
+  terminal phase after busy=false; a phase listener prevents the page query
+  from advancing the epoch before cancellation publishes its final result.
+  Both subscriptions are disposed. Exact-target and successful-identity gates
+  remain intact, including no arbitrary connected-device fallback.
+- Added a real-service synchronous-busy cancellation oracle and an explicit
+  terminal-phase assertion to the real widget cases. R01/R02/R03 logic, Android,
+  BLE wire semantics, runners, workflow, dependencies and frozen inputs remain
+  unchanged. Full dual-host checks and exact-candidate standard APK/EXE builds
+  will validate the repaired inputs; no local Flutter/Gradle build is used.

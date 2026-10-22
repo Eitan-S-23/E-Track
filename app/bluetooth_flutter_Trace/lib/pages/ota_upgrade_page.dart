@@ -56,6 +56,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
   /// 等 GATT 操作，回前台后重新发现连接并读身份。
   bool _backgrounded = false;
   StreamSubscription<bool>? _taskSub;
+  StreamSubscription<OtaPhase>? _taskPhaseSub;
   String? _attachedTaskAddress;
   bool _needsTaskReconcile = false;
   bool _reconcilingTask = false;
@@ -78,10 +79,11 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
       if (!mounted) return;
       if (busy) {
         _attachCurrentTask();
-      } else if (_needsTaskReconcile && !_backgrounded) {
-        unawaited(_resolveDeviceAndRead());
+      } else {
+        _reconcileFinishedTask();
       }
     });
+    _taskPhaseSub = otaService.phaseRx.listen((_) => _reconcileFinishedTask());
     // 进入页面即解析连接并建立设备身份。
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _resolveDeviceAndRead();
@@ -120,6 +122,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
   void dispose() {
     _connectionSub?.cancel();
     _taskSub?.cancel();
+    _taskPhaseSub?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -159,12 +162,12 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
   /// 解析连接设备（显式参数优先，否则从系统已连接列表取第一台），
   /// 然后读取设备身份。BLE 平台通道不可用时静默降级为未连接。
   Future<void> _resolveDeviceAndRead() async {
+    if (_reconcilingTask || _backgrounded || !mounted) return;
     // Reattach only: an active owner retains its transport and reboot probe.
     if (otaService.isUpgrading) {
       _attachCurrentTask();
       return;
     }
-    if (_reconcilingTask || _backgrounded || !mounted) return;
     if (_needsTaskReconcile) {
       // Keep the owner's exact target, never the first unrelated connection.
       _needsTaskReconcile = false;
@@ -181,6 +184,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
   }
 
   void _attachCurrentTask() {
+    if (_reconcilingTask) return;
     final address = otaService.taskDeviceAddress;
     if (address == null) return;
     setState(() {
@@ -188,6 +192,24 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
       _resolvedDevice = BluetoothDevice.fromId(address);
       _needsTaskReconcile = true;
     });
+  }
+
+  void _reconcileFinishedTask() {
+    if (!mounted || _backgrounded || _reconcilingTask ||
+        !_needsTaskReconcile || otaService.isUpgrading) return;
+    // Cancellation releases its owner before publishing its final phase. A
+    // query must not take over that gap and suppress the cancellation result.
+    switch (otaService.phase) {
+      case OtaPhase.completed:
+      case OtaPhase.probeCompleted:
+      case OtaPhase.cancelled:
+      case OtaPhase.failed:
+      case OtaPhase.readyToInstall:
+        unawaited(_resolveDeviceAndRead());
+        break;
+      default:
+        break;
+    }
   }
 
   Future<void> _resolveConnectedDevice() async {

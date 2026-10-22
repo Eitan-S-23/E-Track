@@ -5,7 +5,6 @@ import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart' show BluetoothDevice;
 import 'package:flutter_test/flutter_test.dart';
@@ -344,6 +343,28 @@ void main() {
     }
   });
 
+  test('P38-R04 synchronous busy cancellation fences the registered query', () async {
+    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+        backgroundClient: _BackgroundOwnerHarness());
+    final service = Get.find<OtaService>();
+    expect(await service.startOtaUpgrade('AA:BB'), isTrue);
+    final infos = ble.getInfoCalls;
+    Future<void>? cancellation;
+    final subscription = service.taskActivity.listen((busy) {
+      if (busy) cancellation = service.cancelUpgrade(keepPackage: true);
+    });
+    try {
+      expect(await service.readDeviceInfo('AA:BB'), isNull);
+      expect(cancellation, isNotNull);
+      await cancellation;
+      expect(ble.getInfoCalls, infos, reason: 'cancelled query body must not run');
+      expect(service.isUpgrading, isFalse);
+      expect(service.phase, OtaPhase.cancelled);
+    } finally {
+      await subscription.cancel();
+    }
+  });
+
   for (final scenario in [
     (phase: OtaPhase.completed, unrelated: false, rejectInfo: false),
     (phase: OtaPhase.cancelled, unrelated: false, rejectInfo: false),
@@ -378,7 +399,11 @@ void main() {
           infosBeforeQuery = ble.getInfoCalls;
           ble.holdInfo = true;
           ble.discoveredAddresses.clear();
-          if (scenario.rejectInfo) ble.infoOverride = [0];
+          if (scenario.rejectInfo) {
+            // Structurally valid but unknown model: one rejected identity, not
+            // MALFORMED_INFO's legitimate transport-level retry sequence.
+            ble.infoOverride = List<int>.of(preRebootPayload)..[0] = 0x58;
+          }
         }
       });
       ElevatedButton checkButton() => tester.widget<ElevatedButton>(find.ancestor(
@@ -403,6 +428,7 @@ void main() {
           await waitUntil(() => queryArmed && ble.getInfoCalls == infosBeforeQuery + 1);
         });
         await tester.pump();
+        expect(service.phase, scenario.phase, reason: 'query cannot preempt the OTA terminal result');
         queryTargets.addAll(ble.discoveredAddresses);
         expect(queryTargets, ['aa:bb:cc:dd:ee:ff']);
         expect(service.isUpgrading, isTrue, reason: 'real GET_INFO remains held');

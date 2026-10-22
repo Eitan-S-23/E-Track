@@ -2064,7 +2064,6 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       _notify('提示', '操作进行中，请先取消或等待完成');
       return null;
     }
-    _isUpgrading.value = true;
     final done = Completer<void>();
     final previous = _ownerDone;
     final generation = _cancelGeneration;
@@ -2072,6 +2071,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     final epoch = _ownerEpoch;
     _ownerDone = done.future;
     try {
+      // GetX listeners run inline: publish only after the new owner is complete.
+      _isUpgrading.value = true;
       await previous;
       // RC3-04：排队等待期间被取消（代次已变）则不进入 body——禁止
       // 执行已被取消的操作（如恢复下载 body 前不查取消导致取消后又
