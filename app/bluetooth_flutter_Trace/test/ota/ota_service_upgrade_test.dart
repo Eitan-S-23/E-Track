@@ -6,7 +6,8 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show debugPrint;
-import 'package:flutter/widgets.dart' show AppLifecycleState;
+import 'package:flutter/material.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 
@@ -20,6 +21,7 @@ import 'package:ble_monitor/ota/ota_experiment_config.dart';
 import 'package:ble_monitor/ota/ota_phy.dart';
 import 'package:ble_monitor/ota/ota_radio_lease.dart';
 import 'package:ble_monitor/ota/ota_link_stats.dart';
+import 'package:ble_monitor/pages/ota_upgrade_page.dart';
 import 'package:ble_monitor/services/app_update_service.dart';
 import 'package:ble_monitor/services/bluetooth_service.dart';
 import 'package:ble_monitor/services/ota_service.dart';
@@ -321,6 +323,112 @@ void main() {
       if (DateTime.now().isAfter(deadline)) fail('owner transition did not settle');
       await Future<void>.delayed(const Duration(milliseconds: 5));
     }
+  }
+
+  test('P38-R04 a query busy event cannot expose the completed OTA owner', () async {
+    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+        backgroundClient: _BackgroundOwnerHarness());
+    final service = Get.find<OtaService>();
+    expect(await service.startOtaUpgrade('AA:BB'), isTrue);
+    final exposedAddresses = <String?>[];
+    final subscription = service.taskActivity.listen((busy) {
+      if (busy) exposedAddresses.add(service.taskDeviceAddress);
+    });
+    try {
+      expect(await service.readDeviceInfo('AA:BB'), isNotNull);
+      expect(exposedAddresses, <String?>[null],
+          reason: 'owner registration must precede synchronous busy delivery');
+      expect(ble.beginCalls, 1);
+    } finally {
+      await subscription.cancel();
+    }
+  });
+
+  for (final scenario in [
+    (phase: OtaPhase.completed, unrelated: false, rejectInfo: false),
+    (phase: OtaPhase.cancelled, unrelated: false, rejectInfo: false),
+    (phase: OtaPhase.failed, unrelated: false, rejectInfo: false),
+    (phase: OtaPhase.cancelled, unrelated: true, rejectInfo: false),
+    (phase: OtaPhase.completed, unrelated: false, rejectInfo: true),
+  ]) {
+    testWidgets('P38-R04 real owner/page ${scenario.phase} '
+        'unrelated=${scenario.unrelated} rejectInfo=${scenario.rejectInfo}', (tester) async {
+      tester.view.physicalSize = const Size(800, 2200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final ble = (await tester.runAsync(() => prepareDownloaded(
+          tempDir: tempFirmwareDir(), notifyLog: [], address: 'AA:BB:CC:DD:EE:FF',
+          backgroundClient: _BackgroundOwnerHarness())))!;
+      final service = Get.find<OtaService>();
+      ble.dataGate = Completer<void>();
+      if (scenario.phase == OtaPhase.failed) {
+        ble.endAckStatusOverride = OtaBleCodec.statusErrSha;
+      }
+      late Future<bool> operation;
+      await tester.runAsync(() async {
+        operation = service.startOtaUpgrade('AA:BB:CC:DD:EE:FF');
+        await ble.dataGated.future;
+      });
+      var queryArmed = false;
+      var infosBeforeQuery = 0;
+      final queryTargets = <String>[];
+      final subscription = service.taskActivity.listen((busy) {
+        if (!busy && !queryArmed) {
+          queryArmed = true;
+          infosBeforeQuery = ble.getInfoCalls;
+          ble.holdInfo = true;
+          ble.discoveredAddresses.clear();
+          if (scenario.rejectInfo) ble.infoOverride = [0];
+        }
+      });
+      ElevatedButton checkButton() => tester.widget<ElevatedButton>(find.ancestor(
+          of: find.text('检查更新'), matching: find.byType(ElevatedButton)));
+      try {
+        final beforeMount = ble.getInfoCalls;
+        await tester.pumpWidget(GetMaterialApp(home: OtaUpgradePage(
+          connectedDevice: scenario.unrelated
+              ? BluetoothDevice.fromId('11:22:33:44:55:66') : null,
+        )));
+        await tester.pump();
+        expect(ble.getInfoCalls, beforeMount,
+            reason: 'opening the notification page cannot create a second sender/query');
+        expect(checkButton().onPressed, isNull);
+        await tester.runAsync(() async {
+          if (scenario.phase == OtaPhase.cancelled) {
+            await service.cancelUpgrade(keepPackage: true);
+          } else {
+            ble.releaseDataGate();
+          }
+          expect(await operation, scenario.phase == OtaPhase.completed);
+          await waitUntil(() => queryArmed && ble.getInfoCalls == infosBeforeQuery + 1);
+        });
+        await tester.pump();
+        queryTargets.addAll(ble.discoveredAddresses);
+        expect(queryTargets, ['aa:bb:cc:dd:ee:ff']);
+        expect(service.isUpgrading, isTrue, reason: 'real GET_INFO remains held');
+        expect(checkButton().onPressed, isNull);
+        await tester.runAsync(() async {
+          ble.releaseHeldInfo();
+          await waitUntil(() => !service.isUpgrading);
+        });
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+        expect(checkButton().onPressed, scenario.rejectInfo ? isNull : isNotNull,
+            reason: 'successful real identity reconciliation must enable controls without reopening');
+        expect(ble.getInfoCalls, infosBeforeQuery + 1, reason: 'no reconciliation loop');
+        expect(ble.beginCalls, 1);
+        if (scenario.rejectInfo) expect(service.deviceInfo, isNull);
+      } finally {
+        await tester.pumpWidget(const SizedBox.shrink());
+        await subscription.cancel();
+        await tester.runAsync(() async {
+          ble.releaseHeldInfo();
+          ble.releaseDataGate();
+          if (service.isUpgrading) await service.cancelUpgrade(keepPackage: true);
+          await operation;
+        });
+      }
+    });
   }
 
   test('acknowledged background owner keeps one sender and durable snapshots', () async {
@@ -4119,6 +4227,7 @@ class _UpgradeFakeBle extends BluetoothService {
   /// findExact 调用观测计数：断言二级复核是否真的执行了重新发现
   /// （一级复核失败时不得触发），与 getInfoCalls 配对使用。
   int discoverCalls = 0;
+  final discoveredAddresses = <String>[];
   final discoveryTimeouts = <int?>[];
   final rebootDiscoveryTimeouts = <int?>[];
   int failedRebootDiscoveries = 0;
@@ -4235,6 +4344,7 @@ class _UpgradeFakeBle extends BluetoothService {
     int? discoveryTimeoutSeconds,
   }) async {
     discoverCalls++;
+    discoveredAddresses.add(deviceAddress.toLowerCase());
     discoveryTimeouts.add(discoveryTimeoutSeconds);
     // P3-4：fake 覆写的是带观测外壳的公开方法（真实外壳在此记
     // recordCharsDiscovery：耗时/成败/写模式），对齐其语义。

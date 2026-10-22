@@ -609,3 +609,24 @@ exactly matches the separately downloaded EXE. No artifact was installed/run.
 - Bare `git diff --check` reports this board's stored CRLF line endings;
   process-local `core.whitespace=cr-at-eol` passes. The existing LF-to-CRLF
   conversion notice is retained; no global Git setting was changed.
+
+## P38-R04 Real-Owner Follow-up (2026-10-23)
+
+- Independent review closes R01/R02/R03 for `27048aa1` but keeps R04 required:
+  synchronous GetX busy delivery occurs before owner-epoch registration, so a
+  plain identity query exposes the completed OTA task and rearms the page's
+  reconciliation flag. The prior page fake did not execute this owner behavior.
+- Same exclusive worktree/branch, clean handoff HEAD `6b7601e7`. Root review and
+  frozen/draft evidence stay read-only. Existing scoped development and standard
+  build authorizations apply; no device, main, release or deployment action.
+- Regression-first batch changes only this record and the existing upgrade
+  integration test. It reuses real OtaService, real OtaUpgradePage, synchronous
+  GetX delivery and the existing fake BLE/HTTP/file fixture. It covers successful,
+  cancelled and failed OTA owners, unrelated-page-device priority, failed INFO,
+  one exact-target query, held verification, no extra BEGIN or query loop, and
+  a direct service oracle for the task key exposed by the busy callback.
+- Production code is intentionally unchanged for this first development push.
+  Preserve the actual red result before the minimal owner/page repair; do not
+  replace an executed regression with another static review. Local Flutter/
+  Gradle builds remain prohibited. The existing dual-host full-check workflow
+  is the runnable regression route; artifacts/logs stay in `.cache/p38/`.
