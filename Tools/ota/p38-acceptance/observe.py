@@ -29,6 +29,19 @@ def notification_filter(package):
             "/^[^[:space:]]|^  [^[:space:]]/ {keep=0} keep {print}'")
 
 
+def runtime_binding(data, plan):
+    complete = data.split(b"\n")[:-1]
+    stamps = []
+    for raw in complete:
+        value = json.loads(raw)
+        message = value.get("message", "")
+        if isinstance(message, str) and message.startswith("OTA_EXPERIMENT "):
+            stamps.append(json.loads(message[len("OTA_EXPERIMENT "):]))
+    h.require(all(s.get("configSha256") == plan["runtime_sha256"] and s.get("runId") == plan["run_id"]
+                  for s in stamps), "App consumed another runtime configuration")
+    return bool(stamps)
+
+
 def sample(phone, out, index, plan, pid, capture):
     directory = h.fresh(out / ("sample-%04d" % index))
     value = dict(started_unix_ns=time.time_ns(), started_monotonic_ns=time.monotonic_ns())
@@ -44,7 +57,8 @@ def sample(phone, out, index, plan, pid, capture):
         h.raw(directory / (label + ".txt"), data)
         if label == "pid":
             h.require(data.strip() == str(pid).encode(), "App process changed; preserve originals, do not restart")
-        if label == "activities" and plan.get("capture_screen") is True and phone.pkg.encode() in data:
+        if label == "activities" and plan.get("capture_screen") is True and (
+                phone.pkg.encode() in data or plan.get("capture_notification_shade") is True and b"com.android.systemui" in data):
             h.raw(directory / "screen.png", phone.cmd(["exec-out", "screencap", "-p"], seconds=30))
     health = phone.health(capture)
     h.save(directory / "health.json", health)
@@ -104,6 +118,11 @@ def collect(args, out, plan):
             return matches[0] if matches else None
         capture = h.wait_for(matching_capture, 30, interval=1)
         phone.pid, phone.capture = pid, capture
+        if args.mode == "record":
+            h.require(hashlib.sha256(phone.file("files/p34-experiment.json", 8192)).hexdigest() == plan["runtime_sha256"],
+                      "runtime file differs from frozen cell")
+            h.wait_for(lambda: runtime_binding(phone.live_file("files/p34-observations/" + capture + "/events.jsonl"), plan),
+                       30, interval=1)
         result.update(pid=pid, capture=capture)
         deadline = min(time.monotonic() + args.seconds, phone.deadline - 360)
         h.save(out / "ready.json", dict(pid=pid, capture=capture, mode=args.mode, deadline_monotonic=deadline,

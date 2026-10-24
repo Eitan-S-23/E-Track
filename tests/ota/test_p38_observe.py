@@ -14,6 +14,15 @@ spec.loader.exec_module(m)
 
 
 class CollectorTests(unittest.TestCase):
+    def test_runtime_stamp_must_be_app_origin_and_cell_bound(self):
+        plan = dict(runtime_sha256="a" * 64, run_id="p38-d1")
+        self.assertFalse(m.runtime_binding(b'{"kind":"open"}\n', plan))
+        message = "OTA_EXPERIMENT " + json.dumps(dict(configSha256="a" * 64, runId="p38-d1"))
+        raw = (json.dumps(dict(kind="line", message=message)) + "\n").encode()
+        self.assertTrue(m.runtime_binding(raw, plan))
+        with self.assertRaises(RuntimeError):
+            m.runtime_binding(raw, dict(plan, run_id="p38-d2"))
+
     def test_changed_process_stops_before_later_samples(self):
         phone = Mock(pkg="com.wen.gaia.gaia.p38acceptance")
         phone.cmd.return_value = b"13\n"
