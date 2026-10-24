@@ -1,0 +1,36 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "Tools/ota/p38-acceptance/offline.py",
+    "software",
+    "--inputs",
+    ".acceptance-p3-8/v1/inputs/software.json",
+    "--out",
+    ".acceptance-p3-8/v1/software"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 44975188580200,
+  "ended_monotonic_ns": 44982275261200,
+  "stdout": {
+    "path": ".acceptance-p3-8\\v1\\execution\\software.stdout",
+    "bytes": 14307,
+    "sha256": "5c9a87f29ab82094c5cabff8df39ba2f163aba8d922c24567b67cd067d39f6d3"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-8\\v1\\execution\\software.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

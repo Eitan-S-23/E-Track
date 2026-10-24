@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "git",
+    "rev-parse",
+    "6ec6c5ce3189de79794fc0cc437e9b024767ee5d:app/bluetooth_flutter_Trace"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 44978023735600,
+  "ended_monotonic_ns": 44978427221500,
+  "stdout": {
+    "path": ".acceptance-p3-8\\v1\\software\\app-tree.stdout",
+    "bytes": 41,
+    "sha256": "14843a4b6f1d0fed1594bc868f8d3a61fefd7dd53afe29ceeb41189156cba9cd"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-8\\v1\\software\\app-tree.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

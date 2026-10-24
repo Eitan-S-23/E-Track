@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\Tools\\acceptance\\validate_bundle.py",
+    "--contract",
+    "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\docs\\acceptance-contracts\\P3-8-v1.contract.json",
+    "--matrix",
+    "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.acceptance-p3-8\\v1\\evidence-matrix.json",
+    "--repo-root",
+    "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024",
+  "monotonic_ns": 44122051227100,
+  "stdin_sha256": null
+}

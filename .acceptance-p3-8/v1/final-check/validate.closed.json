@@ -1,0 +1,37 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\Tools\\acceptance\\validate_bundle.py",
+    "--contract",
+    "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\docs\\acceptance-contracts\\P3-8-v1.contract.json",
+    "--matrix",
+    "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.acceptance-p3-8\\v1\\evidence-matrix.json",
+    "--repo-root",
+    "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 45676982880300,
+  "ended_monotonic_ns": 45683159196600,
+  "stdout": {
+    "path": ".acceptance-p3-8\\v1\\final-check\\validate.stdout",
+    "bytes": 77,
+    "sha256": "82ce5ff4dbfa214bc09ad7a9131d4c28ecd15af1b345e05f1f0f740d0685ef0b"
+  },
+  "stderr": {
+    "path": ".acceptance-p3-8\\v1\\final-check\\validate.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

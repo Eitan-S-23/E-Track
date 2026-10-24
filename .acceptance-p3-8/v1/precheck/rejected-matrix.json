@@ -1,0 +1,99 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P3-8-v1",
+  "contract_sha256": "d25aa50b9ef5e0feedcbbf6d1f37300cb63a67ab1c601d82569a7ae65cfdbb19",
+  "round_id": "20261024-P38-v1",
+  "overall_result": "NOT_RUN",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "P38-SOFTWARE",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not executed; no hardware or software PASS inferred from preparation."
+    },
+    {
+      "id": "P38-FALLBACK",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not executed; no hardware or software PASS inferred from preparation."
+    },
+    {
+      "id": "P38-BACKGROUND",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not executed; no hardware or software PASS inferred from preparation."
+    },
+    {
+      "id": "P38-NOTIFICATION",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not executed; no hardware or software PASS inferred from preparation."
+    },
+    {
+      "id": "P38-RECOVERY",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not executed; no hardware or software PASS inferred from preparation."
+    },
+    {
+      "id": "P38-FINAL-IDENTITY",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not executed; no hardware or software PASS inferred from preparation."
+    },
+    {
+      "id": "P38-CLEANUP",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not executed; no hardware or software PASS inferred from preparation."
+    }
+  ],
+  "evidence_hashes": {},
+  "commands": [],
+  "artifacts": []
+}

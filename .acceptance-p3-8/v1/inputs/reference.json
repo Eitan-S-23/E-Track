@@ -1,0 +1,210 @@
+{
+  "result": "LEGAL_1MIB_REFERENCE_READY",
+  "base": {
+    "path": ".cache\\p38\\reference-001\\base.bin",
+    "bytes": 613952,
+    "sha256": "58eebd962ba1b39369f85954a167516ec5f5e519c5d894c3db5eb0edccea76a1"
+  },
+  "target": {
+    "path": ".cache\\p38\\reference-001\\target.bin",
+    "bytes": 613952,
+    "sha256": "88cba0cd2030246b6522662c6b13b4bc8a7729f0a99917efbd66eea1f1a6f7de"
+  },
+  "package": {
+    "path": ".cache\\p38\\reference-001\\cases\\reference-1MiB.etu",
+    "bytes": 1048576,
+    "sha256": "fe6ebde3a100319d53df3bcb85ea95e6a48a75aba6cda40f1953bdeee528707c"
+  },
+  "base_version": 30287,
+  "target_version": 30288,
+  "decoder": {
+    "path": ".cache\\p38\\reference-001\\reference.exe",
+    "bytes": 90399,
+    "sha256": "a1ae1f7d970a81a299361b9d269c9fdda5335b2c9233a0f59c78c3a0de9cc177"
+  },
+  "selection": {
+    "count": 186957,
+    "seed": 1931,
+    "salt": 0,
+    "groups": 186958,
+    "base_sha256": "58eebd962ba1b39369f85954a167516ec5f5e519c5d894c3db5eb0edccea76a1",
+    "target_sha256": "88cba0cd2030246b6522662c6b13b4bc8a7729f0a99917efbd66eea1f1a6f7de",
+    "decoded_bytes": 5100944,
+    "compressed_bytes": 1048472,
+    "etu_bytes": 1048576,
+    "raw_sha256": "3380beb0adbf6435aeb950ad86700cbd4493fcb2ed66d5a21819a6f8255e1ba4",
+    "compressed_sha256": "eb1381897b98e92ad7a5faee95a0f16db07955ede3509ed500020edad78370ca",
+    "props_hex": "0200400000",
+    "elapsed_seconds": 0.5843
+  },
+  "positive": {
+    "result": "ok",
+    "result_code": 0,
+    "passed": true,
+    "byte_identical": true,
+    "boot_ok": true,
+    "guards_ok": true,
+    "workspace_lifecycle_ok": true,
+    "package_bytes": 1048576,
+    "image_bytes": 613952,
+    "decoded_bytes": 5100944,
+    "workspace_peak": 34144,
+    "prepares": 1,
+    "program_calls": 600,
+    "programmed_bytes": 613952,
+    "max_write": 1024,
+    "base_reads": 187558,
+    "package_reads": 4609
+  },
+  "negatives": [
+    {
+      "case": "payload-crc",
+      "result": {
+        "result": "payload_crc",
+        "result_code": -16,
+        "passed": true,
+        "byte_identical": false,
+        "boot_ok": false,
+        "guards_ok": true,
+        "workspace_lifecycle_ok": true,
+        "package_bytes": 1048576,
+        "image_bytes": 0,
+        "decoded_bytes": 0,
+        "workspace_peak": 0,
+        "prepares": 0,
+        "program_calls": 0,
+        "programmed_bytes": 0,
+        "max_write": 0,
+        "base_reads": 0,
+        "package_reads": 4097
+      }
+    },
+    {
+      "case": "truncated",
+      "result": {
+        "result": "package_length",
+        "result_code": -15,
+        "passed": true,
+        "byte_identical": false,
+        "boot_ok": false,
+        "guards_ok": true,
+        "workspace_lifecycle_ok": true,
+        "package_bytes": 1048575,
+        "image_bytes": 0,
+        "decoded_bytes": 0,
+        "workspace_peak": 0,
+        "prepares": 0,
+        "program_calls": 0,
+        "programmed_bytes": 0,
+        "max_write": 0,
+        "base_reads": 0,
+        "package_reads": 1
+      }
+    },
+    {
+      "case": "same-version",
+      "result": {
+        "result": "version",
+        "result_code": -12,
+        "passed": true,
+        "byte_identical": false,
+        "boot_ok": false,
+        "guards_ok": true,
+        "workspace_lifecycle_ok": true,
+        "package_bytes": 1048576,
+        "image_bytes": 0,
+        "decoded_bytes": 0,
+        "workspace_peak": 0,
+        "prepares": 0,
+        "program_calls": 0,
+        "programmed_bytes": 0,
+        "max_write": 0,
+        "base_reads": 0,
+        "package_reads": 1
+      }
+    },
+    {
+      "case": "wrong-base-sha",
+      "result": {
+        "result": "base_sha8",
+        "result_code": -14,
+        "passed": true,
+        "byte_identical": false,
+        "boot_ok": false,
+        "guards_ok": true,
+        "workspace_lifecycle_ok": true,
+        "package_bytes": 1048576,
+        "image_bytes": 0,
+        "decoded_bytes": 0,
+        "workspace_peak": 0,
+        "prepares": 0,
+        "program_calls": 0,
+        "programmed_bytes": 0,
+        "max_write": 0,
+        "base_reads": 0,
+        "package_reads": 1
+      }
+    }
+  ],
+  "sources": [
+    {
+      "path": "Tools\\ota\\p34-acceptance\\reference.py",
+      "bytes": 8751,
+      "sha256": "5a085a9ee941e9e7e667373d65dcdb06c662c640150b822973600ed0a9926660"
+    },
+    {
+      "path": "Tools\\ota\\p34-acceptance\\build.py",
+      "bytes": 9212,
+      "sha256": "d76af2c1ab82c318000444192205fbeb408b5c3cb33a2f8213bf5e72a6a08b36"
+    },
+    {
+      "path": "Tools\\ota\\p34-acceptance\\encoding.py",
+      "bytes": 7131,
+      "sha256": "0b890aa77a4361843a9d3e8705cf64604f068c894a6ad0f7983be68eb7174197"
+    },
+    {
+      "path": "Tools\\ota\\p34-acceptance\\reference_host.c",
+      "bytes": 8429,
+      "sha256": "ff4c9b7fc72ae6ed7a0ed96bac7663e7028806536c8087f3a6ba345cd4175f07"
+    },
+    {
+      "path": "Libraries\\OTA\\ota_patch.c",
+      "bytes": 47992,
+      "sha256": "ae754155af396a90b48b5adad476eef48cba7eda92cf1827d42903cbff54715d"
+    },
+    {
+      "path": "Libraries\\OTA\\ota_keys.c",
+      "bytes": 1300,
+      "sha256": "59b161adaf28dd0d61ff08f38ea8fcaa19783f917a085a7571ef5ed03339817f"
+    },
+    {
+      "path": "boot\\src\\boot_crc32.c",
+      "bytes": 1591,
+      "sha256": "128a591a5692a1a2aa5c9050e2bc24322d7a5835e781e596f08ebc534c844160"
+    },
+    {
+      "path": "boot\\src\\boot_sha256.c",
+      "bytes": 5164,
+      "sha256": "311107ef6a987fb23d602070391b8bc3a356688e3e1f03e1ea8ed905c4374073"
+    },
+    {
+      "path": "boot\\src\\boot_fw_header.c",
+      "bytes": 8046,
+      "sha256": "2332eb95d0ce245b23b218812959d556cba8025e6e120464c328ac80809c858f"
+    },
+    {
+      "path": "bsdiff_lzma_AES128-main\\bspatch\\lzma\\LzmaDec.c",
+      "bytes": 39935,
+      "sha256": "016a262f54cbdb2559ce560b60a2a0d3900158b6dede13f991847d4b5b18c18e"
+    },
+    {
+      "path": "bsdiff_lzma_AES128-main\\bspatch\\AES128_CTR\\aes_core.c",
+      "bytes": 11147,
+      "sha256": "77f2f24530a2341b332e60f4fe9e9790a5ec36964c49ba6e0a31a30c0490b9ed"
+    }
+  ],
+  "installed": false,
+  "equivalent_initial_state_qualified": false,
+  "formal_freeze": false,
+  "independent_acceptance": false
+}

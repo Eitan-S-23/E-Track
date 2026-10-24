@@ -1,0 +1,31 @@
+{
+  "app_id": "com.wen.gaia.gaia.p38acceptance",
+  "apk": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\apk-download-002\\extracted\\run-26cde6daa3e54e4d85a3a2a449983615\\artifacts\\trace-dev-debug.apk",
+    "bytes": 131791258,
+    "sha256": "0a0f57cec054369e8e4f584e5614d0705dc1809d81d691d615af49ea9f9398db"
+  },
+  "adb_key": {
+    "path": "C:\\Users\\SU\\.android\\adbkey",
+    "bytes": 1704,
+    "sha256": "f751c81ef35e6469d54d5decc0403b000cd00962989082ff7176671e8a2dd566"
+  },
+  "adb_port": 5078,
+  "phone_serial": "10ADA4197U001CK",
+  "phone_model": "V2312A",
+  "tools": {
+    "adb": {
+      "path": "D:\\install\\leidian\\LDPlayer4\\adb.exe",
+      "bytes": 5916440,
+      "sha256": "705ddc21f33ac52105d1b075b019962ad0e44fb3d560bde69ce8cb3a36bca183"
+    }
+  },
+  "ble_address": "E3:49:E1:14:D6:CB",
+  "sentinel": "OTAOBS360de9212f46e991e949eb4b",
+  "replace_apk_sha256": [],
+  "owned_configs": [],
+  "capture_screen": true,
+  "run_id": "p38-d3a",
+  "runtime_sha256": "afe23886b20b4a54ca20f37028f5abc7b50e40ccb2fa2a4bac1721eadd61fcfe",
+  "capture_notification_shade": false
+}
