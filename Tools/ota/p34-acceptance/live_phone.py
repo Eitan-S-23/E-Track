@@ -28,6 +28,19 @@ HEALTH_FIELDS = {"schema", "captureId", "time", "records", "bytes", "producerLin
                  "upgradeStarts", "upgradeEnds", "outcome", "lost", "error", "healthy"}
 
 
+def fixture_versions(plan):
+    value = plan.get("fixture_versions", dict(base=30286, target=30287, target_name="3.2.87"))
+    h.require(isinstance(value, dict) and set(value) == {"base", "target", "target_name"}, "fixture version fields")
+    h.require(type(value["base"]) is int and type(value["target"]) is int and
+              0 < value["base"] < value["target"] <= 2100000000, "fixture version order")
+    name = value["target_name"]
+    h.require(isinstance(name, str) and re.fullmatch(r"\d+\.\d+\.\d+(?:-[a-z0-9]+)?", name), "fixture version name")
+    major, minor, patch = map(int, name.split("-")[0].split("."))
+    h.require(minor <= 99 and patch <= 99 and major * 10000 + minor * 100 + patch == value["target"],
+              "fixture version name/code mismatch")
+    return value
+
+
 def _https_read(request, output, errors):
     """One read, owned by Process: socket timeouts do not bound getaddrinfo."""
     h.require(urlsplit(request["url"]).scheme == "https" and
@@ -46,6 +59,7 @@ def _https_read(request, output, errors):
 
 
 def config(plan, run_id, origin, baud, timeout):
+    versions = fixture_versions(plan)
     h.require(re.fullmatch(r"[a-z][a-z0-9-]{0,47}", run_id), "runtime run ID")
     h.require(baud in (115200, 230400, 460800, 921600) and 500 <= timeout <= 2000, "calibrated parameter range")
     parsed = urlsplit(origin)
@@ -55,8 +69,8 @@ def config(plan, run_id, origin, baud, timeout):
     return dict(schema=10, runId=run_id, target=plan["ble_address"], requestedBaud=baud,
         reuseGatt=True, withoutResponse=True, firmwareLatestUrl=origin + service.LATEST_PATH,
         packageBytes=plan["package"]["bytes"], packageSha256=plan["package"]["sha256"],
-        currentVersionCode=30286, currentImageSha256=base["sha256"],
-        targetVersionCode=30287, targetImageSha256=target["sha256"],
+        currentVersionCode=versions["base"], currentImageSha256=base["sha256"],
+        targetVersionCode=versions["target"], targetImageSha256=target["sha256"],
         senderWindowSegments=24, transferMode="full", prefixBytes=0,
         rebootInfoTimeoutMs=2000, rebootProbeIntervalMs=1500, pauseScanDuringOta=False,
         androidHighPriority=False, dataBatchFrames=12, reuseRebootInfoLink=True,
@@ -64,15 +78,19 @@ def config(plan, run_id, origin, baud, timeout):
 
 
 def service_config(plan, origin):
+    versions = fixture_versions(plan)
     asset = plan["package"]
     return dict(publicBaseUrl=origin, token=dict(keyVersion=1, keyHex=secrets.token_hex(32), ttlSeconds=300),
         channels=dict(stable="reference"), releases=dict(reference=dict(releaseId="p34-reference",
-            versionName="3.2.87", versionCode=30287, releaseTag="mcu-e-track-at32f435-v3.2.87",
+            versionName=versions["target_name"], versionCode=versions["target"],
+            releaseTag="mcu-e-track-at32f435-v" + versions["target_name"],
             releaseNotes="P3-4 controlled reference", targetImageSha256=plan["images"]["target"]["image"]["sha256"],
             targetHardware="e-track-at32f435", minAppVersionCode=0, hardwareRevision=1, layoutId=1,
             minBootVersion=1, minProtocolVersion=1, asset=dict(assetId="p34-reference-patch", kind="patch",
-                fileName="e-track-at32f435-v3.2.86-to-v3.2.87-patch.etu", path=str(h.pinned(asset)),
-                sizeBytes=asset["bytes"], sha256=asset["sha256"], baseVersionCode=30286,
+                fileName=("e-track-at32f435-%d-to-%d-patch.etu" % (versions["base"], versions["target"])
+                          if "fixture_versions" in plan else "e-track-at32f435-v3.2.86-to-v3.2.87-patch.etu"),
+                path=str(h.pinned(asset)),
+                sizeBytes=asset["bytes"], sha256=asset["sha256"], baseVersionCode=versions["base"],
                 baseImageSha256=plan["images"]["base"]["image"]["sha256"]))))
 
 
@@ -156,7 +174,7 @@ class Network:
         origin = h.wait_for(ready, min(90, remaining()))
         cfg["publicBaseUrl"] = state.public_base_url = origin
         h.save(self.out / "service-config.json", cfg)
-        query = dict(appId="trace", deviceModel="e-track-at32f435", channel="stable", currentVersionCode=30286,
+        query = dict(appId="trace", deviceModel="e-track-at32f435", channel="stable", currentVersionCode=fixture_versions(self.plan)["base"],
             currentImageSha=self.plan["images"]["base"]["image"]["sha256"], hardwareRevision=1,
             layoutId=1, bootVersion=1, protocolVersion=1, appVersionCode=86)
         requests = 0
