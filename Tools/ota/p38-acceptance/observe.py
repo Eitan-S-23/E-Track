@@ -76,13 +76,17 @@ def gate(args, out):
               contract.get("approved_by") and contract.get("approved_at"), "unapproved P3-8 contract")
     commands = [c for c in contract["commands"] if c["id"] == args.command_id]
     h.require(len(commands) == 1, "ambiguous contract command")
-    frozen_invocation(commands[0]["command"], sys.argv)
+    frozen_invocation(commands[0]["command"], sys.argv, entry="Tools/ota/p38-acceptance/observe.py")
     digest = hashlib.sha256(args.inputs.read_bytes()).hexdigest()
     h.require(any(x.get("fingerprint") == "sha256:" + digest for x in contract["external_inputs"]),
               "unbound observation inputs")
-    h.command(out, "precheck", [sys.executable, "-I", "-S", "-B", "-X", "utf8",
+    command = [sys.executable, "-I", "-S", "-B", "-X", "utf8",
         ROOT / "Tools/acceptance/validate_bundle.py", "--contract", args.contract,
-        "--matrix", args.matrix, "--repo-root", ROOT], h.environment(out), seconds=90)
+        "--matrix", args.matrix, "--repo-root", ROOT]
+    if contract["version"] > 1:
+        h.require(args.previous_contract and args.previous_matrix, "successor requires actual previous bundle")
+        command += ["--previous-contract", args.previous_contract, "--previous-matrix", args.previous_matrix]
+    h.command(out, "precheck", command, h.environment(out), seconds=90)
 
 
 def collect(args, out, plan):
@@ -165,6 +169,8 @@ def main():
     parser.add_argument("--contract", type=Path)
     parser.add_argument("--matrix", type=Path)
     parser.add_argument("--command-id")
+    parser.add_argument("--previous-contract", type=Path)
+    parser.add_argument("--previous-matrix", type=Path)
     args = parser.parse_args()
     h.require(Path.cwd() == ROOT and sys.flags.isolated and sys.flags.no_site and sys.dont_write_bytecode,
               "explicit worktree and isolated Python required")

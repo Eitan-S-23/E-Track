@@ -14,6 +14,17 @@ spec.loader.exec_module(m)
 
 
 class CollectorTests(unittest.TestCase):
+    def test_p38_frozen_entry_and_arguments(self):
+        from live import frozen_invocation
+        entry = "Tools/ota/p38-acceptance/observe.py"
+        command = "python -I -S -B -X utf8 " + entry + " record --out .cache/sample --seconds 120"
+        argv = [str(ROOT / entry), "record", "--out", str(ROOT / ".cache/sample"), "--seconds", "120"]
+        frozen_invocation(command, argv, entry=entry)
+        with self.assertRaises(RuntimeError):
+            frozen_invocation(command, argv)
+        with self.assertRaises(RuntimeError):
+            frozen_invocation(command, argv[:-1] + ["121"], entry=entry)
+
     def test_runtime_stamp_must_be_app_origin_and_cell_bound(self):
         plan = dict(runtime_sha256="a" * 64, run_id="p38-d1")
         self.assertFalse(m.runtime_binding(b'{"kind":"open"}\n', plan))

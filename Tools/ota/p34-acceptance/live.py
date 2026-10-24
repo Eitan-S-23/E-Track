@@ -217,13 +217,13 @@ def validate_inputs(plan):
     return plan
 
 
-def frozen_invocation(command, argv):
+def frozen_invocation(command, argv, *, entry="Tools/ota/p34-acceptance/live.py"):
     """Compare the full declared action, including parameters and output, not a substring."""
     tokens = shlex.split(command)
-    entry = "Tools/ota/p34-acceptance/live.py"
     h.require(len(tokens) >= 8 and tokens[1:7] == ["-I", "-S", "-B", "-X", "utf8", entry], "frozen isolated entry required")
     def normalized(parts):
-        paths = {"--inputs", "--out", "--contract", "--matrix", "--observe-root", "--previous-cell"}
+        paths = {"--inputs", "--out", "--contract", "--matrix", "--observe-root", "--previous-cell",
+                 "--previous-contract", "--previous-matrix"}
         result = list(parts)
         for i, part in enumerate(result[:-1]):
             if part in paths:
