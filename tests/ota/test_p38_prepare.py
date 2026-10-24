@@ -12,10 +12,17 @@ ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location("p38_prepare", ROOT / "Tools/ota/p38-acceptance/prepare.py")
 m = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(m)
-from live_phone import fixture_versions, service_config
+from live_phone import fixture_versions, service_config, Network
 
 
 class AdmissionTests(unittest.TestCase):
+    def test_network_rejects_unbounded_download_before_start(self):
+        for value in (True, 0, 29, 121, 30.5):
+            network = object.__new__(Network)
+            network.plan = dict(https_download_seconds=value)
+            with self.subTest(value=value), self.assertRaisesRegex(RuntimeError, "bounded HTTPS"):
+                network._start(1000)
+
     def test_service_filename_matches_existing_patch_contract(self):
         plan = dict(package=dict(bytes=1048576, sha256="a" * 64),
                     images=dict(base=dict(image=dict(sha256="b" * 64)), target=dict(image=dict(sha256="c" * 64))))

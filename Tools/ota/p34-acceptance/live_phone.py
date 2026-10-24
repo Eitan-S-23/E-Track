@@ -44,7 +44,7 @@ def fixture_versions(plan):
 def _https_read(request, output, errors):
     """One read, owned by Process: socket timeouts do not bound getaddrinfo."""
     h.require(urlsplit(request["url"]).scheme == "https" and
-        0 < request["timeout"] <= 30 and 0 < request["limit"] <= 8 * 1024 * 1024,
+        0 < request["timeout"] <= 120 and 0 < request["limit"] <= 8 * 1024 * 1024,
         "invalid bounded HTTPS read")
     try:
         with build_opener(ProxyHandler({})).open(request["url"], timeout=request["timeout"]) as response:
@@ -144,6 +144,9 @@ class Network:
 
     def _start(self, deadline):
         h.require(type(deadline) in (int, float), "explicit prepare deadline required")
+        download_seconds = self.plan.get("https_download_seconds", 30)
+        h.require(type(download_seconds) is int and 30 <= download_seconds <= 120,
+                  "bounded HTTPS download timeout required")
 
         def remaining():
             seconds = deadline - time.monotonic()
@@ -216,7 +219,7 @@ class Network:
                 asset.get("sha256") == self.plan["package"]["sha256"] and
                 asset.get("sizeBytes") == self.plan["package"]["bytes"] and
                 urlsplit(asset.get("downloadUrl", "")).hostname == urlsplit(origin).hostname, "HTTPS metadata identity")
-            downloaded = read(asset["downloadUrl"], 30, self.plan["package"]["bytes"] + 1)
+            downloaded = read(asset["downloadUrl"], download_seconds, self.plan["package"]["bytes"] + 1)
             if downloaded is None:
                 return None
             h.require(downloaded == h.pinned(self.plan["package"]).read_bytes(), "HTTPS download original bytes mismatch")

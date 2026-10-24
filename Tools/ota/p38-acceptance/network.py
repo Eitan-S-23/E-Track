@@ -31,7 +31,8 @@ def main():
     prior = h.read_json(args.prior_inputs)
     plan = dict(images=dict(base=dict(image=reference["base"]), target=dict(image=reference["target"])),
                 package=reference["package"], tools=dict(cloudflared=prior["tools"]["cloudflared"]),
-                ble_address=prior["ble_address"], fixture_versions=dict(base=30287, target=30288, target_name="3.2.88-p38"))
+                ble_address=prior["ble_address"], fixture_versions=dict(base=30287, target=30288, target_name="3.2.88-p38"),
+                https_download_seconds=120)
     for item in (plan["package"], plan["images"]["base"]["image"], plan["images"]["target"]["image"]):
         h.pinned(item)
     deadline = time.monotonic() + args.seconds
@@ -41,7 +42,7 @@ def main():
     network = Network(plan, out / "service")
     value = dict(result="NETWORK_INCOMPLETE", no_device_operations=True)
     try:
-        origin = network.start(deadline=min(deadline, time.monotonic() + 180))
+        origin = network.start(deadline=min(deadline, time.monotonic() + 300))
         h.save(out / "ready.json", dict(origin=origin, plan=h.record(out / "plan.json"),
                                        deadline_monotonic=deadline))
         print("P38_FIXTURE_READY " + origin, flush=True)
