@@ -79,6 +79,9 @@ def config(plan, run_id, origin, baud, timeout):
 
 def service_config(plan, origin):
     versions = fixture_versions(plan)
+    def semver(code):
+        return "%d.%d.%d" % (code // 10000, code // 100 % 100, code % 100)
+    filename = "e-track-at32f435-v%s-to-v%s-patch.etu" % (semver(versions["base"]), semver(versions["target"]))
     asset = plan["package"]
     return dict(publicBaseUrl=origin, token=dict(keyVersion=1, keyHex=secrets.token_hex(32), ttlSeconds=300),
         channels=dict(stable="reference"), releases=dict(reference=dict(releaseId="p34-reference",
@@ -87,8 +90,7 @@ def service_config(plan, origin):
             releaseNotes="P3-4 controlled reference", targetImageSha256=plan["images"]["target"]["image"]["sha256"],
             targetHardware="e-track-at32f435", minAppVersionCode=0, hardwareRevision=1, layoutId=1,
             minBootVersion=1, minProtocolVersion=1, asset=dict(assetId="p34-reference-patch", kind="patch",
-                fileName=("e-track-at32f435-%d-to-%d-patch.etu" % (versions["base"], versions["target"])
-                          if "fixture_versions" in plan else "e-track-at32f435-v3.2.86-to-v3.2.87-patch.etu"),
+                fileName=filename,
                 path=str(h.pinned(asset)),
                 sizeBytes=asset["bytes"], sha256=asset["sha256"], baseVersionCode=versions["base"],
                 baseImageSha256=plan["images"]["base"]["image"]["sha256"]))))

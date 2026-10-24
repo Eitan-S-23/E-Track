@@ -12,10 +12,20 @@ ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location("p38_prepare", ROOT / "Tools/ota/p38-acceptance/prepare.py")
 m = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(m)
-from live_phone import fixture_versions
+from live_phone import fixture_versions, service_config
 
 
 class AdmissionTests(unittest.TestCase):
+    def test_service_filename_matches_existing_patch_contract(self):
+        plan = dict(package=dict(bytes=1048576, sha256="a" * 64),
+                    images=dict(base=dict(image=dict(sha256="b" * 64)), target=dict(image=dict(sha256="c" * 64))))
+        with patch.object(m.h, "pinned", return_value=Path("fixture.etu")):
+            self.assertEqual(service_config(plan, "https://example.test")["releases"]["reference"]["asset"]["fileName"],
+                             "e-track-at32f435-v3.2.86-to-v3.2.87-patch.etu")
+            plan["fixture_versions"] = dict(base=30287, target=30288, target_name="3.2.88-p38")
+            self.assertEqual(service_config(plan, "https://example.test")["releases"]["reference"]["asset"]["fileName"],
+                             "e-track-at32f435-v3.2.87-to-v3.2.88-patch.etu")
+
     def test_existing_fixture_defaults_unchanged(self):
         self.assertEqual(fixture_versions({}), dict(base=30286, target=30287, target_name="3.2.87"))
 
