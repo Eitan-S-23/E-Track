@@ -62,6 +62,8 @@ git worktree remove --force .cache/freeze-check/wt-<id>
 
 | P3-8-v1 | v3 | `cf1ffd5fb8f658dd32ae4e676ad893b3bbe8b6a8` | `981572e4e6a138063a25d10aaaeef3e155a90092` | `7110859e736ea6efb914d6bb70f3a036b400f5e0` | VALIDATION=PASS, overall=EVIDENCE_GAP; P38-HOST-ENTRY-01; software originals verified, no physical transfer |
 | P3-8-v2 | v3 | `6149c1b122302c9cc93275ea5226b017f7181c5b` | `af2429199410b42b4ea428662bf8cd2e928d72a7` | `82bde295c23433ade842974db4950af4c225d83a` | VALIDATION=PASS, overall=EVIDENCE_GAP; actual v1 predecessor supplied; P38-RUNTIME-ADMISSION-02, D1 reader failed before ready, zero upgrade starts |
+| P3-8-v3 | v3 | `8a1ff7260159c02258698e753cd8557b2d1de801` | `60cb25c459bcde95f2be42edc28ef3fdb2448111` | `f595375dd8ce982610eaa53cf8496ac0af293462` | VALIDATION=PASS, overall=EVIDENCE_GAP; actual D1 fallback passed; D2 ran with notifications still denied; no END or installation |
+| P3-8-v4 | v3 | `8a1ff7260159c02258698e753cd8557b2d1de801` | `60cb25c459bcde95f2be42edc28ef3fdb2448111` | `f595375dd8ce982610eaa53cf8496ac0af293462` | VALIDATION=PASS, overall=EVIDENCE_GAP; v3 software/fallback reused; actual acquired background, sleep, notification return and cancellation passed; planned disconnect recorded, final resume/identity NOT_RUN |
 
 备注：
 
