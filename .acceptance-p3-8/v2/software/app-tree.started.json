@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "git",
+    "rev-parse",
+    "6ec6c5ce3189de79794fc0cc437e9b024767ee5d:app/bluetooth_flutter_Trace"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024",
+  "monotonic_ns": 47423494021000,
+  "stdin_sha256": null
+}

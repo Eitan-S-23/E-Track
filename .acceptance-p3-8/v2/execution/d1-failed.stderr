@@ -1,0 +1,15 @@
+Traceback (most recent call last):
+  File "D:\github\my\E-Track\.cache\p38-acceptance-20261024\Tools\ota\p38-acceptance\observe.py", line 190, in <module>
+    main()
+    ~~~~^^
+  File "D:\github\my\E-Track\.cache\p38-acceptance-20261024\Tools\ota\p38-acceptance\observe.py", line 186, in main
+    collect(args, out, plan)
+    ~~~~~~~^^^^^^^^^^^^^^^^^
+  File "D:\github\my\E-Track\.cache\p38-acceptance-20261024\Tools\ota\p38-acceptance\observe.py", line 129, in collect
+    h.wait_for(lambda: runtime_binding(phone.live_file("files/p34-observations/" + capture + "/events.jsonl"), plan),
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+               30, interval=1)
+               ^^^^^^^^^^^^^^^
+  File "D:\github\my\E-Track\.cache\p38-acceptance-20261024\Tools\ota\p34-acceptance\live_host.py", line 298, in wait_for
+    raise RuntimeError("observation deadline; preserve partial evidence, no replay")
+RuntimeError: observation deadline; preserve partial evidence, no replay

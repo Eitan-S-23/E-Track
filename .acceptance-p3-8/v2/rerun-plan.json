@@ -1,0 +1,128 @@
+{
+  "schema": "etrack-rerun-plan-v1",
+  "current_contract_id": "P3-8-v2",
+  "current_contract_sha256": "B82CDFB008011AFFFE54234E5EFE74508F57B27C0B249B798179B49B2FF5D2E7",
+  "previous_contract_id": "P3-8-v1",
+  "previous_contract_sha256": "D25AA50B9EF5E0FEEDCBBF6D1F37300CB63A67AB1C601D82569A7AE65CFDBB19",
+  "contract_lineage": "direct_successor",
+  "current_round_id": "20261024-P38-v2",
+  "previous_round_id": "20261024-P38-v1",
+  "previous_matrix_sha256": "DB7B4C507CDA6AC65B273BB00B35080DC5CCBE0F0730B1A8EC571FD469A59F51",
+  "changed_input_groups": [
+    "validation"
+  ],
+  "changed_external_inputs": [
+    "network",
+    "phone-d1",
+    "phone-d2",
+    "phone-d3a",
+    "phone-d3b"
+  ],
+  "rerun_criteria": [
+    {
+      "id": "P38-SOFTWARE",
+      "reasons": [
+        "command_definition_changed:CMD-P38-SOFTWARE",
+        "input_group_changed:validation"
+      ]
+    },
+    {
+      "id": "P38-FALLBACK",
+      "reasons": [
+        "command_definition_changed:CMD-P38-ADMISSION",
+        "command_definition_changed:CMD-P38-D1",
+        "command_definition_changed:CMD-P38-SOFTWARE",
+        "external_input_changed:network",
+        "external_input_changed:phone-d1",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P38-BACKGROUND",
+      "reasons": [
+        "command_definition_changed:CMD-P38-ADMISSION",
+        "command_definition_changed:CMD-P38-D2",
+        "external_input_changed:network",
+        "external_input_changed:phone-d2",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P38-NOTIFICATION",
+      "reasons": [
+        "command_definition_changed:CMD-P38-ADMISSION",
+        "command_definition_changed:CMD-P38-D2",
+        "command_definition_changed:CMD-P38-SOFTWARE",
+        "external_input_changed:network",
+        "external_input_changed:phone-d2",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P38-RECOVERY",
+      "reasons": [
+        "command_definition_changed:CMD-P38-ADMISSION",
+        "command_definition_changed:CMD-P38-D3A",
+        "command_definition_changed:CMD-P38-D3B",
+        "external_input_changed:network",
+        "external_input_changed:phone-d3a",
+        "external_input_changed:phone-d3b",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P38-FINAL-IDENTITY",
+      "reasons": [
+        "command_definition_changed:CMD-P38-ADMISSION",
+        "command_definition_changed:CMD-P38-D3B",
+        "command_definition_changed:CMD-P38-FINAL",
+        "external_input_changed:network",
+        "external_input_changed:phone-d3b",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P38-CLEANUP",
+      "reasons": [
+        "command_definition_changed:CMD-P38-D1",
+        "command_definition_changed:CMD-P38-D2",
+        "command_definition_changed:CMD-P38-D3A",
+        "command_definition_changed:CMD-P38-D3B",
+        "command_definition_changed:CMD-P38-FINAL",
+        "command_definition_changed:CMD-P38-SOFTWARE",
+        "external_input_changed:network",
+        "external_input_changed:phone-d1",
+        "external_input_changed:phone-d2",
+        "external_input_changed:phone-d3a",
+        "external_input_changed:phone-d3b",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    }
+  ],
+  "reusable_criteria": [],
+  "reuse_origins": {},
+  "required_commands": [
+    "CMD-P38-ADMISSION",
+    "CMD-P38-D1",
+    "CMD-P38-D2",
+    "CMD-P38-D3A",
+    "CMD-P38-D3B",
+    "CMD-P38-FINAL",
+    "CMD-P38-SOFTWARE"
+  ],
+  "required_artifacts": [
+    "ART-P38-ADMISSION",
+    "ART-P38-D1",
+    "ART-P38-D2",
+    "ART-P38-D3A",
+    "ART-P38-D3B",
+    "ART-P38-FINAL",
+    "ART-P38-SOFTWARE"
+  ]
+}

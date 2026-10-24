@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "Tools/ota/p38-acceptance/offline.py",
+    "admission",
+    "--inputs",
+    ".acceptance-p3-8/v2/inputs/admission.json",
+    "--out",
+    ".acceptance-p3-8/v2/admission"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024",
+  "monotonic_ns": 47426317349400,
+  "stdin_sha256": null
+}

@@ -1,0 +1,17 @@
+{
+  "originals": [
+    {
+      "path": ".acceptance-p3-8\\v2\\d1\\usb\\salvage\\health.json",
+      "bytes": 237,
+      "sha256": "f56f726df9354ab4b63d0d82d83088765f3e51cfd12618cbe886fe2d5cc2fd51"
+    },
+    {
+      "path": ".acceptance-p3-8\\v2\\d1\\usb\\salvage\\events.jsonl",
+      "bytes": 5211,
+      "sha256": "8ba4811f8f1ef59acd2d36cae4d29ee24f9ba7b8b3490a048d7a1e72101f7892"
+    }
+  ],
+  "errors": [],
+  "read_mode": "bounded-live-prefix; not a finished snapshot",
+  "no_restart_or_ota": true
+}
