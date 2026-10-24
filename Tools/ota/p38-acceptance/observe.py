@@ -51,6 +51,7 @@ def sample(phone, out, index, plan, pid, capture):
         "activities": ["shell", "sh", "-c", "dumpsys window | grep -E 'mCurrentFocus|mFocusedApp|mShowingLockscreen|mDreamingLockscreen'"],
         "power": ["shell", "dumpsys", "power"],
         "notification": ["shell", "sh", "-c", notification_filter(phone.pkg)],
+        "intents": ["shell", "sh", "-c", "dumpsys activity intents | awk '/^[[:space:]]*[*] PendingIntentRecord[{]/ {keep=index($0, \"" + phone.pkg + " \" )>0} /^[^[:space:]]/ {keep=0} keep {print}'"],
     }
     for label, args in commands.items():
         data = phone.cmd(args, seconds=30, success_codes=(0, 1) if label in ("pid", "activities") else (0,))
