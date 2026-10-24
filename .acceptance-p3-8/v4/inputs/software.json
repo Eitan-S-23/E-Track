@@ -1,0 +1,339 @@
+{
+  "commit": "6ec6c5ce3189de79794fc0cc437e9b024767ee5d",
+  "app_tree": "e22fb7a6db1c47304354c7652c0ddf9693d4818b",
+  "development": [
+    {
+      "report": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\windows-runtime-originals-001\\extracted\\.cache\\flutter-dev-checks\\runs\\run-3a19518575cc4d478f2280e80b209d06\\result.json",
+        "bytes": 12147,
+        "sha256": "84d09a0f95f309a27e956aa783557f57fef97705dcc247fc0eba58f07cf6bb0d"
+      },
+      "tests": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\windows-runtime-originals-001\\extracted\\.cache\\flutter-dev-checks\\runs\\run-3a19518575cc4d478f2280e80b209d06\\logs\\tests.log",
+        "bytes": 2346545,
+        "sha256": "6af8139d9eaddcdce5c0cdfda64baf5ff9aa02f51a52cfd44bb59e157c862762"
+      },
+      "analyze": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\windows-runtime-originals-001\\extracted\\.cache\\flutter-dev-checks\\runs\\run-3a19518575cc4d478f2280e80b209d06\\logs\\analyze.log",
+        "bytes": 97,
+        "sha256": "f8081dced13924804b6ff70e684ae43e971de5762098ffadbb08faacbfbd32f1"
+      },
+      "counts": {
+        "passed": 736,
+        "skipped": 33,
+        "failed": 0
+      }
+    },
+    {
+      "report": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\ci-artifacts-runtime-001\\extracted\\ubuntu\\.cache\\flutter-dev-checks\\runs\\run-c3f8eb4623554c349198983b7f0414f7\\result.json",
+        "bytes": 22396,
+        "sha256": "5446f7047fba73f3f9c042275a6252755949dc073d9219c67de342496d47a1c3"
+      },
+      "tests": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\ci-artifacts-runtime-001\\extracted\\ubuntu\\.cache\\flutter-dev-checks\\runs\\run-c3f8eb4623554c349198983b7f0414f7\\logs\\tests.log",
+        "bytes": 2215199,
+        "sha256": "89eb26a39b1c969b241b9652f44ec025de7ec5e05e3f4f4e566b0b61a9bf3a35"
+      },
+      "analyze": {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\ci-artifacts-runtime-001\\extracted\\ubuntu\\.cache\\flutter-dev-checks\\runs\\run-c3f8eb4623554c349198983b7f0414f7\\logs\\analyze.log",
+        "bytes": 97,
+        "sha256": "1a31c2b1530745dd2cc0509db7cee7cc826cb212c8608ddaede136ac7c772f33"
+      },
+      "counts": {
+        "passed": 753,
+        "skipped": 16,
+        "failed": 0
+      }
+    }
+  ],
+  "native_xml": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p3-8-implementation-20261021\\.cache\\p38\\takeover-20261022\\run-39789686610\\ubuntu\\app\\bluetooth_flutter_Trace\\build\\app\\test-results\\testDebugUnitTest\\TEST-com.wen.gaia.gaia.DeviceOtaServiceTest.xml",
+    "bytes": 2644,
+    "sha256": "b6880580cb2aa95b53d3a5d167ce52fe6af018b6b21fb06d46394fba77e3ae2e"
+  },
+  "standard": {
+    "apk": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p3-8-implementation-20261021\\.cache\\p38\\r04-20261023\\standard\\android\\ble-monitor-android.apk",
+      "bytes": 47272692,
+      "sha256": "1ef9cd86b35bd175b238a9c6ce542ce5fb991543fd0470684e82836e025b0f8d"
+    },
+    "exe": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p3-8-implementation-20261021\\.cache\\p38\\r04-20261023\\standard\\windows\\ble-monitor-windows.exe",
+      "bytes": 93184,
+      "sha256": "bb111ec40f24d74e971e6291d27e99d54f003993ad00c1cd2b1ad347a9b07be7"
+    },
+    "windows_zip": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p3-8-implementation-20261021\\.cache\\p38\\r04-20261023\\standard\\windows\\ble-monitor-windows.zip",
+      "bytes": 20485471,
+      "sha256": "cda4b776e33927fcddf9cb6c2d75c7ce654d3c0eed8366719eb6c06793f2b6ca"
+    },
+    "logs": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p3-8-implementation-20261021\\.cache\\p38\\r04-20261023\\standard-logs.zip",
+      "bytes": 1469733,
+      "sha256": "3250ea7951e5a7fd91c454d3d2d3675bb3b046e3929c73489006fccb837b1050"
+    }
+  },
+  "standard_logs": [
+    {
+      "member": "Build Android APK/2_Checkout repository.txt",
+      "bytes": 11339,
+      "sha256": "2c69549c6aab53d3c6d3a001b86300f36e8c45f302dfcef0c6222417e5fe634f",
+      "warnings": [],
+      "decisive": [
+        {
+          "line": 71,
+          "text": "2026-10-22T18:15:42.1993313Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +8ede09208a0857b716ee9614c09cb83247c2bc39:refs/remotes/origin/dev/flutter/p3-8-background-ota-20261021"
+        },
+        {
+          "line": 73,
+          "text": "2026-10-22T18:15:59.3270163Z  * [new ref]         8ede09208a0857b716ee9614c09cb83247c2bc39 -> origin/dev/flutter/p3-8-background-ota-20261021"
+        },
+        {
+          "line": 77,
+          "text": "2026-10-22T18:15:59.3331137Z 8ede09208a0857b716ee9614c09cb83247c2bc39"
+        },
+        {
+          "line": 144,
+          "text": "2026-10-22T18:16:02.6518501Z 8ede09208a0857b716ee9614c09cb83247c2bc39"
+        }
+      ]
+    },
+    {
+      "member": "Build Android APK/9_Analyze project.txt",
+      "bytes": 1600,
+      "sha256": "c4a5975df876c5388c5079a933dd4038b7d1ad78a30218747755bf4752402459",
+      "warnings": [],
+      "decisive": [
+        {
+          "line": 21,
+          "text": "2026-10-22T18:18:30.9914645Z No issues found! (ran in 11.6s)"
+        }
+      ]
+    },
+    {
+      "member": "Build Android APK/10_Run Flutter tests.txt",
+      "bytes": 2895606,
+      "sha256": "19276f4a826185899676506c3c7bf55ac2a3d4c8860bcc9a2f3329f848ba037e",
+      "warnings": [],
+      "decisive": [
+        {
+          "line": 38,
+          "text": "2026-10-22T18:18:42.4797046Z ##[group]\u2705 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: P38-R04 a query busy event cannot expose the completed OTA owner"
+        },
+        {
+          "line": 96,
+          "text": "2026-10-22T18:18:42.5678818Z ##[group]\u2705 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: P38-R04 synchronous busy cancellation fences the registered query"
+        },
+        {
+          "line": 207,
+          "text": "2026-10-22T18:18:43.2508712Z ##[group]\u2705 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: P38-R04 real owner/page OtaPhase.completed unrelated=false rejectInfo=false"
+        },
+        {
+          "line": 265,
+          "text": "2026-10-22T18:18:43.5732022Z ##[group]\u2705 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: P38-R04 real owner/page OtaPhase.cancelled unrelated=false rejectInfo=false"
+        },
+        {
+          "line": 288,
+          "text": "2026-10-22T18:18:43.7409956Z ##[group]\u2705 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: P38-R04 real owner/page OtaPhase.failed unrelated=false rejectInfo=false"
+        },
+        {
+          "line": 445,
+          "text": "2026-10-22T18:18:43.8894407Z ##[group]\u2705 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: P38-R04 real owner/page OtaPhase.cancelled unrelated=true rejectInfo=false"
+        },
+        {
+          "line": 468,
+          "text": "2026-10-22T18:18:44.0729989Z ##[group]\u2705 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: P38-R04 real owner/page OtaPhase.completed unrelated=false rejectInfo=true"
+        },
+        {
+          "line": 10055,
+          "text": "2026-10-22T18:19:03.1298545Z \u2705 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: \u8fde\u63a5\u4e0e\u751f\u547d\u5468\u671f\uff08RC3-08\u2463\uff09 P38-R04 notification page reattaches target after OtaPhase.completed"
+        },
+        {
+          "line": 10056,
+          "text": "2026-10-22T18:19:03.2061709Z \u2705 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: \u8fde\u63a5\u4e0e\u751f\u547d\u5468\u671f\uff08RC3-08\u2463\uff09 P38-R04 notification page reattaches target after OtaPhase.cancelled"
+        },
+        {
+          "line": 10057,
+          "text": "2026-10-22T18:19:03.2896533Z \u2705 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: \u8fde\u63a5\u4e0e\u751f\u547d\u5468\u671f\uff08RC3-08\u2463\uff09 P38-R04 notification page reattaches target after OtaPhase.failed"
+        },
+        {
+          "line": 10058,
+          "text": "2026-10-22T18:19:03.3669640Z \u2705 /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: \u8fde\u63a5\u4e0e\u751f\u547d\u5468\u671f\uff08RC3-08\u2463\uff09 P38-R04 current owner wins over an unrelated page device"
+        },
+        {
+          "line": 24962,
+          "text": "2026-10-22T18:20:29.0964973Z \ud83c\udf89 753 tests passed, 16 skipped."
+        }
+      ]
+    },
+    {
+      "member": "Build Android APK/12_Build release APK.txt",
+      "bytes": 15393,
+      "sha256": "3e0d2e126f460060582e57ac45b4ba1c722d4b59992ed5b7bfbab274b4100927",
+      "warnings": [
+        "2026-10-22T18:20:30.6305374Z Warning: Flutter support for your project's Gradle version (8.14.0) will soon be dropped. Please upgrade your Gradle version to a version of at least 9.1.0 soon.",
+        "2026-10-22T18:20:30.6327911Z Warning: Flutter support for your project's Android Gradle Plugin version (Android Gradle Plugin version 8.11.1) will soon be dropped. Please upgrade your Android Gradle Plugin version to a version of at least Android Gradle Plugin version 9.0.1 soon.",
+        "2026-10-22T18:20:30.6340265Z Warning: Flutter support for your project's Kotlin version (2.2.20) will soon be dropped. Please upgrade your Kotlin version to a version of at least 2.3.20 soon.",
+        "2026-10-22T18:20:31.4155179Z Warning: The plugin flutter_plugin_android_lifecycle requires Android SDK version 36 or higher.",
+        "2026-10-22T18:20:31.5136951Z Warning: The plugin geolocator_android requires Android SDK version 36 or higher.",
+        "2026-10-22T18:20:31.6156563Z Warning: The plugin package_info_plus requires Android SDK version 36 or higher.",
+        "2026-10-22T18:20:31.7165651Z Warning: The plugin path_provider_android requires Android SDK version 36 or higher.",
+        "2026-10-22T18:20:32.0136638Z Warning: The plugin share_plus requires Android SDK version 36 or higher.",
+        "2026-10-22T18:20:32.1148215Z Warning: The plugin shared_preferences_android requires Android SDK version 36 or higher.",
+        "2026-10-22T18:20:32.2130363Z Warning: The plugin sqflite_android requires Android SDK version 36 or higher."
+      ],
+      "decisive": [
+        {
+          "line": 147,
+          "text": "2026-10-22T18:21:37.8166673Z Caught exception: Already watching path: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/android"
+        },
+        {
+          "line": 149,
+          "text": "2026-10-22T18:22:48.2291532Z \u2713 Built build/app/outputs/flutter-apk/app-release.apk (47.3MB)"
+        }
+      ]
+    },
+    {
+      "member": "Build Android APK/28_Post Checkout repository.txt",
+      "bytes": 4080,
+      "sha256": "da47ba26b194cf340daab1803bb3d40a3ff788eca9d5a0d8ec2ad6a690ab368d",
+      "warnings": [],
+      "decisive": []
+    },
+    {
+      "member": "Build Windows EXE/2_Checkout repository.txt",
+      "bytes": 13336,
+      "sha256": "9ea3352f123b266665d5b11c2216dde356e25b0e82d11125fd4aec5b5b0f1b8d",
+      "warnings": [],
+      "decisive": [
+        {
+          "line": 58,
+          "text": "2026-10-22T18:15:43.6422829Z [command]\"C:\\Program Files\\Git\\bin\\git.exe\" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +8ede09208a0857b716ee9614c09cb83247c2bc39:refs/remotes/origin/dev/flutter/p3-8-background-ota-20261021"
+        },
+        {
+          "line": 60,
+          "text": "2026-10-22T18:15:55.8515462Z  * [new ref]         8ede09208a0857b716ee9614c09cb83247c2bc39 -> origin/dev/flutter/p3-8-background-ota-20261021"
+        },
+        {
+          "line": 64,
+          "text": "2026-10-22T18:15:55.9258828Z 8ede09208a0857b716ee9614c09cb83247c2bc39"
+        },
+        {
+          "line": 169,
+          "text": "2026-10-22T18:16:05.2253189Z 8ede09208a0857b716ee9614c09cb83247c2bc39"
+        }
+      ]
+    },
+    {
+      "member": "Build Windows EXE/6_Analyze project.txt",
+      "bytes": 931,
+      "sha256": "8fd846a1b38d3fc94c6b8a2ea3d1775fe70f5421e4a38291ce1dd7a47bec1565",
+      "warnings": [],
+      "decisive": [
+        {
+          "line": 12,
+          "text": "2026-10-22T18:18:03.2532677Z No issues found! (ran in 15.1s)"
+        }
+      ]
+    },
+    {
+      "member": "Build Windows EXE/7_Run Flutter tests.txt",
+      "bytes": 2921099,
+      "sha256": "d8066f846d624b104d0fb152ba4118dd164b4aaa90b2786a0527be6b4e8a2fdc",
+      "warnings": [],
+      "decisive": [
+        {
+          "line": 8243,
+          "text": "2026-10-22T18:18:59.3464278Z ##[group]\u2705 D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: P38-R04 a query busy event cannot expose the completed OTA owner"
+        },
+        {
+          "line": 8301,
+          "text": "2026-10-22T18:18:59.3992499Z ##[group]\u2705 D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: P38-R04 synchronous busy cancellation fences the registered query"
+        },
+        {
+          "line": 8522,
+          "text": "2026-10-22T18:19:00.3677686Z ##[group]\u2705 D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: P38-R04 real owner/page OtaPhase.completed unrelated=false rejectInfo=false"
+        },
+        {
+          "line": 8580,
+          "text": "2026-10-22T18:19:00.5287425Z ##[group]\u2705 D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: P38-R04 real owner/page OtaPhase.cancelled unrelated=false rejectInfo=false"
+        },
+        {
+          "line": 8603,
+          "text": "2026-10-22T18:19:00.7072158Z ##[group]\u2705 D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: P38-R04 real owner/page OtaPhase.failed unrelated=false rejectInfo=false"
+        },
+        {
+          "line": 8653,
+          "text": "2026-10-22T18:19:00.8430354Z ##[group]\u2705 D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: P38-R04 real owner/page OtaPhase.cancelled unrelated=true rejectInfo=false"
+        },
+        {
+          "line": 8676,
+          "text": "2026-10-22T18:19:01.0022841Z ##[group]\u2705 D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: P38-R04 real owner/page OtaPhase.completed unrelated=false rejectInfo=true"
+        },
+        {
+          "line": 24834,
+          "text": "2026-10-22T18:19:36.6752107Z \u2705 D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: \u8fde\u63a5\u4e0e\u751f\u547d\u5468\u671f\uff08RC3-08\u2463\uff09 P38-R04 notification page reattaches target after OtaPhase.completed"
+        },
+        {
+          "line": 24906,
+          "text": "2026-10-22T18:19:36.7728942Z \u2705 D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: \u8fde\u63a5\u4e0e\u751f\u547d\u5468\u671f\uff08RC3-08\u2463\uff09 P38-R04 notification page reattaches target after OtaPhase.cancelled"
+        },
+        {
+          "line": 24938,
+          "text": "2026-10-22T18:19:36.8421040Z \u2705 D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: \u8fde\u63a5\u4e0e\u751f\u547d\u5468\u671f\uff08RC3-08\u2463\uff09 P38-R04 notification page reattaches target after OtaPhase.failed"
+        },
+        {
+          "line": 24965,
+          "text": "2026-10-22T18:19:36.9266353Z \u2705 D:/a/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart: \u8fde\u63a5\u4e0e\u751f\u547d\u5468\u671f\uff08RC3-08\u2463\uff09 P38-R04 current owner wins over an unrelated page device"
+        },
+        {
+          "line": 25045,
+          "text": "2026-10-22T18:19:37.8089083Z \ud83c\udf89 736 tests passed, 33 skipped."
+        }
+      ]
+    },
+    {
+      "member": "Build Windows EXE/8_Build Windows release.txt",
+      "bytes": 998,
+      "sha256": "c7c727865d8152d34e99fc052ffcbe35afdcd58c5ec7e2615c74d342d683bbd9",
+      "warnings": [],
+      "decisive": [
+        {
+          "line": 12,
+          "text": "2026-10-22T18:22:10.3572048Z \u221a Built build\\windows\\x64\\runner\\Release\\ble_monitor.exe"
+        }
+      ]
+    },
+    {
+      "member": "Build Windows EXE/20_Post Checkout repository.txt",
+      "bytes": 4315,
+      "sha256": "a4bb4ed9b8952ff77f57dc382beed7249eda103edefca2711680f0eebb776e27",
+      "warnings": [],
+      "decisive": []
+    },
+    {
+      "member": "Detect changed paths/2_Checkout repository.txt",
+      "bytes": 18823,
+      "sha256": "9508302d9a734c7342628b81d2e6bd3160cc0dc52d2697b1bac927e3210e2be2",
+      "warnings": [],
+      "decisive": [
+        {
+          "line": 133,
+          "text": "2026-10-22T18:15:27.9831469Z 8ede09208a0857b716ee9614c09cb83247c2bc39"
+        },
+        {
+          "line": 206,
+          "text": "2026-10-22T18:15:32.2652483Z 8ede09208a0857b716ee9614c09cb83247c2bc39"
+        }
+      ]
+    },
+    {
+      "member": "Detect changed paths/6_Post Checkout repository.txt",
+      "bytes": 4080,
+      "sha256": "be9195a7efa76df51608ea62244e45a5a017cc798055ed64e7fe87599378c85b",
+      "warnings": [],
+      "decisive": []
+    }
+  ]
+}

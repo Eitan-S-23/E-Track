@@ -1,0 +1,48 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\Tools\\ota\\p38-acceptance\\observe.py",
+    "record",
+    "--inputs",
+    ".acceptance-p3-8/v4/inputs/phone-d3a.json",
+    "--out",
+    ".acceptance-p3-8/v4/d3a",
+    "--seconds",
+    "1200",
+    "--contract",
+    "docs/acceptance-contracts/P3-8-v4.contract.json",
+    "--matrix",
+    ".acceptance-p3-8/v4/evidence-matrix.json",
+    "--command-id",
+    "CMD-P38-D3A",
+    "--previous-contract",
+    "docs/acceptance-contracts/P3-8-v3.contract.json",
+    "--previous-matrix",
+    ".acceptance-p3-8/v3/evidence-matrix.json"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 71502299891800,
+  "ended_monotonic_ns": 72696107256200,
+  "stdout": {
+    "path": ".cache\\p38\\observe-d3a-worker-v4\\worker.stdout",
+    "bytes": 25,
+    "sha256": "fc7ceab99ed94707447bb97b9267cf46d7657c1e7e6a0742c3de1df660983d69"
+  },
+  "stderr": {
+    "path": ".cache\\p38\\observe-d3a-worker-v4\\worker.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

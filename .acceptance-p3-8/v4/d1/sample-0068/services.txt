@@ -1,0 +1,32 @@
+ACTIVITY MANAGER SERVICES (dumpsys activity services)
+  User 0 active services:
+  * ServiceRecord{d1790ba u0 com.wen.gaia.gaia.p38acceptance/com.baseflow.geolocator.GeolocatorLocationService}
+    intent={cmp=com.wen.gaia.gaia.p38acceptance/com.baseflow.geolocator.GeolocatorLocationService}
+    packageName=com.wen.gaia.gaia.p38acceptance
+    processName=com.wen.gaia.gaia.p38acceptance
+    baseDir=/data/app/~~7PEqImkHZarzVzJvdnObug==/com.wen.gaia.gaia.p38acceptance-u1iTFwS1xN9ymDsm-9oeug==/base.apk
+    dataDir=/data/user/0/com.wen.gaia.gaia.p38acceptance
+    app=ProcessRecord{baaff8e 20836:com.wen.gaia.gaia.p38acceptance/u0a406}
+    allowWhileInUsePermissionInFgs=true
+    recentCallingPackage=com.wen.gaia.gaia.p38acceptance
+    recentCallingUid=10406
+    allowStartForeground=PROC_STATE_TOP
+    startForegroundCount=0
+    infoAllowStartForeground=[callingPackage: com.wen.gaia.gaia.p38acceptance; callingUid: 10406; uidState: TOP ; intent: Intent { cmp=com.wen.gaia.gaia.p38acceptance/com.baseflow.geolocator.GeolocatorLocationService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null]
+    createTime=-23m16s442ms startingBgTimeout=--
+    lastActivity=-23m16s442ms restartTime=-23m16s442ms createdFromFg=true
+    Bindings:
+    * IntentBindRecord{f22e2fd CREATE}:
+      intent={cmp=com.wen.gaia.gaia.p38acceptance/com.baseflow.geolocator.GeolocatorLocationService}
+      binder=android.os.BinderProxy@fb1ebf2
+      requested=true received=true hasBound=true doRebind=false
+      * Client AppBindRecord{3d16243 ProcessRecord{baaff8e 20836:com.wen.gaia.gaia.p38acceptance/u0a406}}
+        Per-process Connections:
+          ConnectionRecord{afd7b6b u0 cp:com.wen.gaia.gaia.p38acceptance CR com.wen.gaia.gaia.p38acceptance/com.baseflow.geolocator.GeolocatorLocationService(d1790ba):@b087de5}
+    All Connections:
+      ConnectionRecord{afd7b6b u0 cp:com.wen.gaia.gaia.p38acceptance CR com.wen.gaia.gaia.p38acceptance/com.baseflow.geolocator.GeolocatorLocationService(d1790ba):@b087de5}
+
+  Connection bindings to services:
+  * ConnectionRecord{afd7b6b u0 cp:com.wen.gaia.gaia.p38acceptance CR com.wen.gaia.gaia.p38acceptance/com.baseflow.geolocator.GeolocatorLocationService(d1790ba):@b087de5}
+    binding=AppBindRecord{3d16243 com.wen.gaia.gaia.p38acceptance/com.baseflow.geolocator.GeolocatorLocationService:com.wen.gaia.gaia.p38acceptance}
+    conn=android.os.BinderProxy@b087de5 flags=0x1

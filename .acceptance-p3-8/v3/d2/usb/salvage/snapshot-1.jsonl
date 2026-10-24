@@ -1,0 +1,1244 @@
+{"seq":1,"kind":"open","schema":1,"captureId":"1792872944552229-477ce4380ff043ae0e2bcd9c","sentinel":"OTAOBS360de9212f46e991e949eb4b","target":"E3:49:E1:14:D6:CB","pid":10048,"platform":"android","openedAt":"2026-10-24T20:15:44.555319Z","limits":{"captureBytes":67108864,"pendingBytes":1048576}}
+{"seq":2,"kind":"line","message":"OTA_EXPERIMENT {\"schema\":1,\"runId\":\"p38-d2\",\"configSha256\":\"05ca1d42bdc292ec277c338788f43b5466ce2964381d4c93849e7be6f937c2b3\",\"requestedBaud\":921600,\"reuseGatt\":false,\"withoutResponse\":false,\"endpointHost\":\"rational-dpi-measured-markets.trycloudflare.com\",\"deviceAddress\":\"E3:49:E1:14:D6:CB\",\"packageBytes\":1048576,\"packageSha256\":\"fe6ebde3a100319d53df3bcb85ea95e6a48a75aba6cda40f1953bdeee528707c\",\"currentVersionCode\":30287,\"currentImageSha256\":\"58eebd962ba1b39369f85954a167516ec5f5e519c5d894c3db5eb0edccea76a1\",\"targetVersionCode\":30288,\"targetImageSha256\":\"88cba0cd2030246b6522662c6b13b4bc8a7729f0a99917efbd66eea1f1a6f7de\"}"}
+{"seq":3,"kind":"line","message":"OTA_LINK_NATIVE_ERROR phase=start reason=unavailable"}
+{"seq":4,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=discover us=175107"}
+{"seq":5,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=discover us=16588"}
+{"seq":6,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=control_start us=759011 cmd=0 session=0 seq=0 bytes=10"}
+{"seq":7,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=discover us=12858"}
+{"seq":8,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=platform_write us=80237 bytes=10"}
+{"seq":9,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=gatt_write us=96250 bytes=10"}
+{"seq":10,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=control_end us=862405 cmd=0 session=0 seq=0 bytes=10"}
+{"seq":11,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=get_info us=121462 ok=1"}
+{"seq":12,"kind":"line","message":"OTA_LINK_RETIRE label=query attempt=- reason=query-finished us=874469"}
+{"seq":13,"kind":"line","message":"OTA_LINK_STATS {\"schema\":1,\"label\":\"query\",\"device\":\"e3:49:e1:14:d6:cb\",\"attempt\":null,\"clock\":\"stopwatch-mono-us\",\"phases\":{\"bind\":[9,748881]},\"failure\":{\"stage\":null,\"reason\":null},\"attempts\":[],\"attemptEndUs\":null,\"retired\":{\"reason\":\"query-finished\",\"us\":874469},\"bind\":{\"charsUs\":183278,\"found\":true,\"writeMode\":\"with\",\"mtuRequested\":247,\"mtuChunkBytes\":244,\"mtuSource\":\"negotiated\",\"mtuUs\":444547,\"subscribeUs\":108069,\"subscribeOk\":true,\"phaseUs\":748872},\"getInfo\":{\"calls\":1,\"failures\":0,\"totalUs\":121462},\"transfer\":{\"startUs\":null,\"endAckUs\":null,\"elapsedUs\":null,\"outcome\":null,\"segmentsUnique\":0,\"segmentSendTotal\":0,\"retransmitFrames\":0,\"acks\":{\"ok\":0,\"duplicate\":0,\"error\":0,\"malformed\":0,\"noProgress\":0,\"abort\":0,\"ignoredErrors\":{\"schema\":1,\"counts\":{},\"saturated\":false}},\"ackSamples\":\"complete\",\"ackEarlyInvalid\":0,\"ackEarlyUnsent\":0,\"ackLatency\":{\"count\":0,\"minUs\":null,\"p50Us\":null,\"p95Us\":null,\"p99Us\":null,\"maxUs\":null},\"durable\":{\"events\":0,\"finalOff\":null}},\"gattWrites\":{\"calls\":1,\"bytes\":10,\"errors\":0,\"minUs\":96250,\"p50Us\":96250,\"p95Us\":96250,\"maxUs\":96250},\"discovers\":{\"calls\":3,\"errors\":0,\"minUs\":12858,\"p50Us\":16588,\"p95Us\":175107,\"maxUs\":175107},\"platformWrites\":{\"calls\":1,\"bytes\":10,\"errors\":0,\"minUs\":80237,\"p50Us\":80237,\"p95Us\":80237,\"maxUs\":80237}}"}
+{"seq":14,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=discover us=45297"}
+{"seq":15,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=discover us=14297"}
+{"seq":16,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=control_start us=646593 cmd=0 session=0 seq=1 bytes=10"}
+{"seq":17,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=discover us=12354"}
+{"seq":18,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=platform_write us=76131 bytes=10"}
+{"seq":19,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=gatt_write us=89138 bytes=10"}
+{"seq":20,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=control_end us=736245 cmd=0 session=0 seq=1 bytes=10"}
+{"seq":21,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=get_info us=10094905 ok=0"}
+{"seq":22,"kind":"line","message":"OTA_LINK_RETIRE label=query attempt=- reason=query-finished us=10743147"}
+{"seq":23,"kind":"line","message":"OTA_LINK_STATS {\"schema\":1,\"label\":\"query\",\"device\":\"e3:49:e1:14:d6:cb\",\"attempt\":null,\"clock\":\"stopwatch-mono-us\",\"phases\":{\"bind\":[5,646518]},\"failure\":{\"stage\":\"query\",\"reason\":\"OtaTransportException\"},\"attempts\":[],\"attemptEndUs\":null,\"retired\":{\"reason\":\"query-finished\",\"us\":10743147},\"bind\":{\"charsUs\":46015,\"found\":true,\"writeMode\":\"with\",\"mtuRequested\":247,\"mtuChunkBytes\":244,\"mtuSource\":\"negotiated\",\"mtuUs\":436025,\"subscribeUs\":83842,\"subscribeOk\":true,\"phaseUs\":646513},\"getInfo\":{\"calls\":1,\"failures\":1,\"totalUs\":10094905},\"transfer\":{\"startUs\":null,\"endAckUs\":null,\"elapsedUs\":null,\"outcome\":null,\"segmentsUnique\":0,\"segmentSendTotal\":0,\"retransmitFrames\":0,\"acks\":{\"ok\":0,\"duplicate\":0,\"error\":0,\"malformed\":0,\"noProgress\":0,\"abort\":0,\"ignoredErrors\":{\"schema\":1,\"counts\":{},\"saturated\":false}},\"ackSamples\":\"complete\",\"ackEarlyInvalid\":0,\"ackEarlyUnsent\":0,\"ackLatency\":{\"count\":0,\"minUs\":null,\"p50Us\":null,\"p95Us\":null,\"p99Us\":null,\"maxUs\":null},\"durable\":{\"events\":0,\"finalOff\":null}},\"gattWrites\":{\"calls\":1,\"bytes\":10,\"errors\":0,\"minUs\":89138,\"p50Us\":89138,\"p95Us\":89138,\"maxUs\":89138},\"discovers\":{\"calls\":3,\"errors\":0,\"minUs\":12354,\"p50Us\":14297,\"p95Us\":45297,\"maxUs\":45297},\"platformWrites\":{\"calls\":1,\"bytes\":10,\"errors\":0,\"minUs\":76131,\"p50Us\":76131,\"p95Us\":76131,\"maxUs\":76131}}"}
+{"seq":24,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=discover us=42978"}
+{"seq":25,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=discover us=20452"}
+{"seq":26,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=control_start us=725907 cmd=0 session=0 seq=2 bytes=10"}
+{"seq":27,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=discover us=12145"}
+{"seq":28,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=platform_write us=77466 bytes=10"}
+{"seq":29,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=gatt_write us=90440 bytes=10"}
+{"seq":30,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=control_end us=817170 cmd=0 session=0 seq=2 bytes=10"}
+{"seq":31,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=get_info us=855232 ok=1"}
+{"seq":32,"kind":"line","message":"OTA_LINK_RETIRE label=query attempt=- reason=query-finished us=1582290"}
+{"seq":33,"kind":"line","message":"OTA_LINK_STATS {\"schema\":1,\"label\":\"query\",\"device\":\"e3:49:e1:14:d6:cb\",\"attempt\":null,\"clock\":\"stopwatch-mono-us\",\"phases\":{\"bind\":[12,725776]},\"failure\":{\"stage\":null,\"reason\":null},\"attempts\":[],\"attemptEndUs\":null,\"retired\":{\"reason\":\"query-finished\",\"us\":1582290},\"bind\":{\"charsUs\":43841,\"found\":true,\"writeMode\":\"with\",\"mtuRequested\":247,\"mtuChunkBytes\":244,\"mtuSource\":\"negotiated\",\"mtuUs\":443720,\"subscribeUs\":90759,\"subscribeOk\":true,\"phaseUs\":725764},\"getInfo\":{\"calls\":1,\"failures\":0,\"totalUs\":855232},\"transfer\":{\"startUs\":null,\"endAckUs\":null,\"elapsedUs\":null,\"outcome\":null,\"segmentsUnique\":0,\"segmentSendTotal\":0,\"retransmitFrames\":0,\"acks\":{\"ok\":0,\"duplicate\":0,\"error\":0,\"malformed\":0,\"noProgress\":0,\"abort\":0,\"ignoredErrors\":{\"schema\":1,\"counts\":{},\"saturated\":false}},\"ackSamples\":\"complete\",\"ackEarlyInvalid\":0,\"ackEarlyUnsent\":0,\"ackLatency\":{\"count\":0,\"minUs\":null,\"p50Us\":null,\"p95Us\":null,\"p99Us\":null,\"maxUs\":null},\"durable\":{\"events\":0,\"finalOff\":null}},\"gattWrites\":{\"calls\":1,\"bytes\":10,\"errors\":0,\"minUs\":90440,\"p50Us\":90440,\"p95Us\":90440,\"maxUs\":90440},\"discovers\":{\"calls\":3,\"errors\":0,\"minUs\":12145,\"p50Us\":20452,\"p95Us\":42978,\"maxUs\":42978},\"platformWrites\":{\"calls\":1,\"bytes\":10,\"errors\":0,\"minUs\":77466,\"p50Us\":77466,\"p95Us\":77466,\"maxUs\":77466}}"}
+{"seq":34,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=discover us=78403"}
+{"seq":35,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=discover us=18293"}
+{"seq":36,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=control_start us=773536 cmd=0 session=0 seq=3 bytes=10"}
+{"seq":37,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=discover us=10819"}
+{"seq":38,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=platform_write us=76717 bytes=10"}
+{"seq":39,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=gatt_write us=88488 bytes=10"}
+{"seq":40,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=control_end us=862874 cmd=0 session=0 seq=3 bytes=10"}
+{"seq":41,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=get_info us=91328 ok=1"}
+{"seq":42,"kind":"line","message":"OTA_LINK_RETIRE label=query attempt=- reason=query-finished us=867508"}
+{"seq":43,"kind":"line","message":"OTA_LINK_STATS {\"schema\":1,\"label\":\"query\",\"device\":\"e3:49:e1:14:d6:cb\",\"attempt\":null,\"clock\":\"stopwatch-mono-us\",\"phases\":{\"bind\":[12,773412]},\"failure\":{\"stage\":null,\"reason\":null},\"attempts\":[],\"attemptEndUs\":null,\"retired\":{\"reason\":\"query-finished\",\"us\":867508},\"bind\":{\"charsUs\":79182,\"found\":true,\"writeMode\":\"with\",\"mtuRequested\":247,\"mtuChunkBytes\":244,\"mtuSource\":\"negotiated\",\"mtuUs\":498838,\"subscribeUs\":92303,\"subscribeOk\":true,\"phaseUs\":773400},\"getInfo\":{\"calls\":1,\"failures\":0,\"totalUs\":91328},\"transfer\":{\"startUs\":null,\"endAckUs\":null,\"elapsedUs\":null,\"outcome\":null,\"segmentsUnique\":0,\"segmentSendTotal\":0,\"retransmitFrames\":0,\"acks\":{\"ok\":0,\"duplicate\":0,\"error\":0,\"malformed\":0,\"noProgress\":0,\"abort\":0,\"ignoredErrors\":{\"schema\":1,\"counts\":{},\"saturated\":false}},\"ackSamples\":\"complete\",\"ackEarlyInvalid\":0,\"ackEarlyUnsent\":0,\"ackLatency\":{\"count\":0,\"minUs\":null,\"p50Us\":null,\"p95Us\":null,\"p99Us\":null,\"maxUs\":null},\"durable\":{\"events\":0,\"finalOff\":null}},\"gattWrites\":{\"calls\":1,\"bytes\":10,\"errors\":0,\"minUs\":88488,\"p50Us\":88488,\"p95Us\":88488,\"maxUs\":88488},\"discovers\":{\"calls\":3,\"errors\":0,\"minUs\":10819,\"p50Us\":18293,\"p95Us\":78403,\"maxUs\":78403},\"platformWrites\":{\"calls\":1,\"bytes\":10,\"errors\":0,\"minUs\":76717,\"p50Us\":76717,\"p95Us\":76717,\"maxUs\":76717}}"}
+{"seq":44,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=discover us=6939"}
+{"seq":45,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=discover us=18517"}
+{"seq":46,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=control_start us=726766 cmd=0 session=0 seq=4 bytes=10"}
+{"seq":47,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=discover us=20821"}
+{"seq":48,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=platform_write us=65866 bytes=10"}
+{"seq":49,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=gatt_write us=88902 bytes=10"}
+{"seq":50,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=control_end us=817597 cmd=0 session=0 seq=4 bytes=10"}
+{"seq":51,"kind":"line","message":"OTA_LINK_SAMPLE label=query kind=get_info us=138459 ok=1"}
+{"seq":52,"kind":"line","message":"OTA_LINK_RETIRE label=query attempt=- reason=query-finished us=866985"}
+{"seq":53,"kind":"line","message":"OTA_LINK_STATS {\"schema\":1,\"label\":\"query\",\"device\":\"e3:49:e1:14:d6:cb\",\"attempt\":null,\"clock\":\"stopwatch-mono-us\",\"phases\":{\"bind\":[6,726431]},\"failure\":{\"stage\":null,\"reason\":null},\"attempts\":[],\"attemptEndUs\":null,\"retired\":{\"reason\":\"query-finished\",\"us\":866985},\"bind\":{\"charsUs\":7351,\"found\":true,\"writeMode\":\"with\",\"mtuRequested\":247,\"mtuChunkBytes\":244,\"mtuSource\":\"negotiated\",\"mtuUs\":497976,\"subscribeUs\":89356,\"subscribeOk\":true,\"phaseUs\":726425},\"getInfo\":{\"calls\":1,\"failures\":0,\"totalUs\":138459},\"transfer\":{\"startUs\":null,\"endAckUs\":null,\"elapsedUs\":null,\"outcome\":null,\"segmentsUnique\":0,\"segmentSendTotal\":0,\"retransmitFrames\":0,\"acks\":{\"ok\":0,\"duplicate\":0,\"error\":0,\"malformed\":0,\"noProgress\":0,\"abort\":0,\"ignoredErrors\":{\"schema\":1,\"counts\":{},\"saturated\":false}},\"ackSamples\":\"complete\",\"ackEarlyInvalid\":0,\"ackEarlyUnsent\":0,\"ackLatency\":{\"count\":0,\"minUs\":null,\"p50Us\":null,\"p95Us\":null,\"p99Us\":null,\"maxUs\":null},\"durable\":{\"events\":0,\"finalOff\":null}},\"gattWrites\":{\"calls\":1,\"bytes\":10,\"errors\":0,\"minUs\":88902,\"p50Us\":88902,\"p95Us\":88902,\"maxUs\":88902},\"discovers\":{\"calls\":3,\"errors\":0,\"minUs\":6939,\"p50Us\":18517,\"p95Us\":20821,\"maxUs\":20821},\"platformWrites\":{\"calls\":1,\"bytes\":10,\"errors\":0,\"minUs\":65866,\"p50Us\":65866,\"p95Us\":65866,\"maxUs\":65866}}"}
+{"seq":54,"kind":"line","message":"OTA_EXPERIMENT {\"schema\":1,\"runId\":\"p38-d2\",\"configSha256\":\"05ca1d42bdc292ec277c338788f43b5466ce2964381d4c93849e7be6f937c2b3\",\"requestedBaud\":921600,\"reuseGatt\":false,\"withoutResponse\":false,\"endpointHost\":\"rational-dpi-measured-markets.trycloudflare.com\",\"deviceAddress\":\"E3:49:E1:14:D6:CB\",\"packageBytes\":1048576,\"packageSha256\":\"fe6ebde3a100319d53df3bcb85ea95e6a48a75aba6cda40f1953bdeee528707c\",\"currentVersionCode\":30287,\"currentImageSha256\":\"58eebd962ba1b39369f85954a167516ec5f5e519c5d894c3db5eb0edccea76a1\",\"targetVersionCode\":30288,\"targetImageSha256\":\"88cba0cd2030246b6522662c6b13b4bc8a7729f0a99917efbd66eea1f1a6f7de\"}"}
+{"seq":55,"kind":"upgrade-start","input":{"packageSha256":"fe6ebde3a100319d53df3bcb85ea95e6a48a75aba6cda40f1953bdeee528707c","packageBytes":1048576,"currentVersionCode":30287,"currentImageSha256":"58eebd962ba1b39369f85954a167516ec5f5e519c5d894c3db5eb0edccea76a1","targetVersionCode":30288,"targetImageSha256":"88cba0cd2030246b6522662c6b13b4bc8a7729f0a99917efbd66eea1f1a6f7de","deviceAddress":"e3:49:e1:14:d6:cb","appLifecycle":"resumed"}}
+{"seq":56,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=26199"}
+{"seq":57,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=13859"}
+{"seq":58,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=control_start us=651468 cmd=0 session=0 seq=5 bytes=10"}
+{"seq":59,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=15215"}
+{"seq":60,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=114752 bytes=10"}
+{"seq":61,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=130762 bytes=10"}
+{"seq":62,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=control_end us=783089 cmd=0 session=0 seq=5 bytes=10"}
+{"seq":63,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=get_info us=175987 ok=1"}
+{"seq":64,"kind":"line","message":"OTA_IDENTITY {\"phase\":\"pre-transfer\",\"versionCode\":30287,\"imageSha256\":\"58eebd962ba1b39369f85954a167516ec5f5e519c5d894c3db5eb0edccea76a1\",\"deviceAddress\":\"e3:49:e1:14:d6:cb\"}"}
+{"seq":65,"kind":"line","message":"OTA_MONO MONO_BUDGET_START monoUs=22 wallUs=1792873233231579"}
+{"seq":66,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=control_start us=860036 cmd=1 session=0 seq=0 bytes=111"}
+{"seq":67,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=23353"}
+{"seq":68,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=82272 bytes=111"}
+{"seq":69,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=106275 bytes=111"}
+{"seq":70,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=control_end us=967128 cmd=1 session=0 seq=0 bytes=111"}
+{"seq":71,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=begin_ack us=1006849 protocol=1 session=1 seq=0 epoch=0 off=8192 bitmap=0 ackTimeoutMs=2000 maxRetries=5 windowSegments=4"}
+{"seq":72,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=0"}
+{"seq":73,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=128"}
+{"seq":74,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=256"}
+{"seq":75,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=384"}
+{"seq":76,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=512"}
+{"seq":77,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=640"}
+{"seq":78,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=768"}
+{"seq":79,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=896"}
+{"seq":80,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=1024"}
+{"seq":81,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=1152"}
+{"seq":82,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=1280"}
+{"seq":83,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=1408"}
+{"seq":84,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=1536"}
+{"seq":85,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=1664"}
+{"seq":86,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=1792"}
+{"seq":87,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=1920"}
+{"seq":88,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=2048"}
+{"seq":89,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=2176"}
+{"seq":90,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=2304"}
+{"seq":91,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=2432"}
+{"seq":92,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=2560"}
+{"seq":93,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=2688"}
+{"seq":94,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=2816"}
+{"seq":95,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=2944"}
+{"seq":96,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=3072"}
+{"seq":97,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=3200"}
+{"seq":98,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=3328"}
+{"seq":99,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=3456"}
+{"seq":100,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=3584"}
+{"seq":101,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=3712"}
+{"seq":102,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=3840"}
+{"seq":103,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=3968"}
+{"seq":104,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=4096"}
+{"seq":105,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=4224"}
+{"seq":106,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=4352"}
+{"seq":107,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=4480"}
+{"seq":108,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=4608"}
+{"seq":109,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=4736"}
+{"seq":110,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=4864"}
+{"seq":111,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=4992"}
+{"seq":112,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=5120"}
+{"seq":113,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=5248"}
+{"seq":114,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=5376"}
+{"seq":115,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=5504"}
+{"seq":116,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=5632"}
+{"seq":117,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=5760"}
+{"seq":118,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=5888"}
+{"seq":119,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=6016"}
+{"seq":120,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=6144"}
+{"seq":121,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=6272"}
+{"seq":122,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=6400"}
+{"seq":123,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=6528"}
+{"seq":124,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=6656"}
+{"seq":125,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=6784"}
+{"seq":126,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=6912"}
+{"seq":127,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=7040"}
+{"seq":128,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=7168"}
+{"seq":129,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=7296"}
+{"seq":130,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=7424"}
+{"seq":131,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=7552"}
+{"seq":132,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=7680"}
+{"seq":133,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=7808"}
+{"seq":134,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=7936"}
+{"seq":135,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=1006849 off=8064"}
+{"seq":136,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=durable us=1031175 off=8192"}
+{"seq":137,"kind":"line","message":"OTA_MONO MONO_BUDGET_RESET monoUs=180178 wallUs=1792873233411720 durable=8192"}
+{"seq":138,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=20073"}
+{"seq":139,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=131479 bytes=142"}
+{"seq":140,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=152466 bytes=142"}
+{"seq":141,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=1189178 off=8192 len=128"}
+{"seq":142,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=8789 off=8192"}
+{"seq":143,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=22466"}
+{"seq":144,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=62204 bytes=142"}
+{"seq":145,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=85359 bytes=142"}
+{"seq":146,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=1277166 off=8320 len=128"}
+{"seq":147,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=8330 off=8320"}
+{"seq":148,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=33266"}
+{"seq":149,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=105877 bytes=142"}
+{"seq":150,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=140065 bytes=142"}
+{"seq":151,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=1418114 off=8448 len=128"}
+{"seq":152,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=17010"}
+{"seq":153,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=39275 off=8448"}
+{"seq":154,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=110222 bytes=142"}
+{"seq":155,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=128279 bytes=142"}
+{"seq":156,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=1547249 off=8576 len=128"}
+{"seq":157,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1337 off=8576"}
+{"seq":158,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=7069"}
+{"seq":159,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=81306 bytes=142"}
+{"seq":160,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=89001 bytes=142"}
+{"seq":161,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=1636885 off=8704 len=128"}
+{"seq":162,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2746 off=8704"}
+{"seq":163,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=14020"}
+{"seq":164,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=81065 bytes=142"}
+{"seq":165,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=95984 bytes=142"}
+{"seq":166,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=1733921 off=8832 len=128"}
+{"seq":167,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2737 off=8832"}
+{"seq":168,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=15700"}
+{"seq":169,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=118729 bytes=142"}
+{"seq":170,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=135394 bytes=142"}
+{"seq":171,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=1870319 off=8960 len=128"}
+{"seq":172,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3215 off=8960"}
+{"seq":173,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=19497"}
+{"seq":174,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=57174 bytes=142"}
+{"seq":175,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=78379 bytes=142"}
+{"seq":176,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=1949602 off=9088 len=128"}
+{"seq":177,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1476 off=9088"}
+{"seq":178,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=6662"}
+{"seq":179,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=86140 bytes=142"}
+{"seq":180,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=93509 bytes=142"}
+{"seq":181,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2043846 off=9216 len=128"}
+{"seq":182,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=8181 off=9216"}
+{"seq":183,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=22348"}
+{"seq":184,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=71078 bytes=142"}
+{"seq":185,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=94480 bytes=142"}
+{"seq":186,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2139356 off=9344 len=128"}
+{"seq":187,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2555 off=9344"}
+{"seq":188,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=15349"}
+{"seq":189,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=70908 bytes=142"}
+{"seq":190,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=87241 bytes=142"}
+{"seq":191,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2227593 off=9472 len=128"}
+{"seq":192,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=29820"}
+{"seq":193,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=42712 off=9472"}
+{"seq":194,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=97735 bytes=142"}
+{"seq":195,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=128804 bytes=142"}
+{"seq":196,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2357638 off=9600 len=128"}
+{"seq":197,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4184 off=9600"}
+{"seq":198,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=20901"}
+{"seq":199,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=68253 bytes=142"}
+{"seq":200,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=90160 bytes=142"}
+{"seq":201,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2448887 off=9728 len=128"}
+{"seq":202,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2033 off=9728"}
+{"seq":203,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=9930"}
+{"seq":204,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=79641 bytes=142"}
+{"seq":205,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=90540 bytes=142"}
+{"seq":206,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2540118 off=9856 len=128"}
+{"seq":207,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2671 off=9856"}
+{"seq":208,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=15642"}
+{"seq":209,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=68865 bytes=142"}
+{"seq":210,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=85339 bytes=142"}
+{"seq":211,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2626451 off=9984 len=128"}
+{"seq":212,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2694 off=9984"}
+{"seq":213,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=16875"}
+{"seq":214,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=75251 bytes=142"}
+{"seq":215,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=92952 bytes=142"}
+{"seq":216,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2720431 off=10112 len=128"}
+{"seq":217,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2470 off=10112"}
+{"seq":218,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=13144"}
+{"seq":219,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=70524 bytes=142"}
+{"seq":220,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=84512 bytes=142"}
+{"seq":221,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2805831 off=10240 len=128"}
+{"seq":222,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=14992"}
+{"seq":223,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=46598 off=10240"}
+{"seq":224,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=77231 bytes=142"}
+{"seq":225,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=93315 bytes=142"}
+{"seq":226,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2900126 off=10368 len=128"}
+{"seq":227,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2531 off=10368"}
+{"seq":228,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=17386"}
+{"seq":229,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=67442 bytes=142"}
+{"seq":230,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=85683 bytes=142"}
+{"seq":231,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=2986710 off=10496 len=128"}
+{"seq":232,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2458 off=10496"}
+{"seq":233,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=13168"}
+{"seq":234,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=75149 bytes=142"}
+{"seq":235,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=89242 bytes=142"}
+{"seq":236,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3077054 off=10624 len=128"}
+{"seq":237,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3810 off=10624"}
+{"seq":238,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=17576"}
+{"seq":239,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=119287 bytes=142"}
+{"seq":240,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=137835 bytes=142"}
+{"seq":241,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3216356 off=10752 len=128"}
+{"seq":242,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=22342"}
+{"seq":243,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=38343 off=10752"}
+{"seq":244,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=109778 bytes=142"}
+{"seq":245,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=132800 bytes=142"}
+{"seq":246,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3350073 off=10880 len=128"}
+{"seq":247,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2637 off=10880"}
+{"seq":248,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=16305"}
+{"seq":249,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=116958 bytes=142"}
+{"seq":250,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=134340 bytes=142"}
+{"seq":251,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3485376 off=11008 len=128"}
+{"seq":252,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2573 off=11008"}
+{"seq":253,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=19492"}
+{"seq":254,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=67254 bytes=142"}
+{"seq":255,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=88092 bytes=142"}
+{"seq":256,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3574591 off=11136 len=128"}
+{"seq":257,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3951 off=11136"}
+{"seq":258,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=20030"}
+{"seq":259,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=63907 bytes=142"}
+{"seq":260,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=85137 bytes=142"}
+{"seq":261,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3661139 off=11264 len=128"}
+{"seq":262,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=7573 off=11264"}
+{"seq":263,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=20836"}
+{"seq":264,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=68665 bytes=142"}
+{"seq":265,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=90419 bytes=142"}
+{"seq":266,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3752620 off=11392 len=128"}
+{"seq":267,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=12679"}
+{"seq":268,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=45746 off=11392"}
+{"seq":269,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=120801 bytes=142"}
+{"seq":270,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=134534 bytes=142"}
+{"seq":271,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3888261 off=11520 len=128"}
+{"seq":272,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3859 off=11520"}
+{"seq":273,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=16680"}
+{"seq":274,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=75560 bytes=142"}
+{"seq":275,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=93299 bytes=142"}
+{"seq":276,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=3982713 off=11648 len=128"}
+{"seq":277,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1792 off=11648"}
+{"seq":278,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=10779"}
+{"seq":279,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=121452 bytes=142"}
+{"seq":280,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=133003 bytes=142"}
+{"seq":281,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4116523 off=11776 len=128"}
+{"seq":282,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2519 off=11776"}
+{"seq":283,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=20701"}
+{"seq":284,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=61331 bytes=142"}
+{"seq":285,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=83111 bytes=142"}
+{"seq":286,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4200555 off=11904 len=128"}
+{"seq":287,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=8846"}
+{"seq":288,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=57823 off=11904"}
+{"seq":289,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=80011 bytes=142"}
+{"seq":290,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=89699 bytes=142"}
+{"seq":291,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4291254 off=12032 len=128"}
+{"seq":292,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=10179"}
+{"seq":293,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=44516 off=12032"}
+{"seq":294,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=123301 bytes=142"}
+{"seq":295,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=134336 bytes=142"}
+{"seq":296,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4426785 off=12160 len=128"}
+{"seq":297,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=91511 off=12160"}
+{"seq":298,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=durable us=4518864 off=12288"}
+{"seq":299,"kind":"line","message":"OTA_MONO MONO_BUDGET_RESET monoUs=3669161 wallUs=1792873236900709 durable=12288"}
+{"seq":300,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=27706"}
+{"seq":301,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=57280 bytes=142"}
+{"seq":302,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=85798 bytes=142"}
+{"seq":303,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4607410 off=12288 len=128"}
+{"seq":304,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=15396"}
+{"seq":305,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=94848 off=12288"}
+{"seq":306,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=81536 bytes=142"}
+{"seq":307,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=97935 bytes=142"}
+{"seq":308,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4706530 off=12416 len=128"}
+{"seq":309,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=13081"}
+{"seq":310,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=32928 off=12416"}
+{"seq":311,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=111401 bytes=142"}
+{"seq":312,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=125188 bytes=142"}
+{"seq":313,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4833298 off=12544 len=128"}
+{"seq":314,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2646 off=12544"}
+{"seq":315,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=8437"}
+{"seq":316,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=80098 bytes=142"}
+{"seq":317,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=89315 bytes=142"}
+{"seq":318,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=4923561 off=12672 len=128"}
+{"seq":319,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2554 off=12672"}
+{"seq":320,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=19353"}
+{"seq":321,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=67390 bytes=142"}
+{"seq":322,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=87791 bytes=142"}
+{"seq":323,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5012340 off=12800 len=128"}
+{"seq":324,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=15776"}
+{"seq":325,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=43812 off=12800"}
+{"seq":326,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=73245 bytes=142"}
+{"seq":327,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=89683 bytes=142"}
+{"seq":328,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5103127 off=12928 len=128"}
+{"seq":329,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=14407"}
+{"seq":330,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=46794 off=12928"}
+{"seq":331,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=132176 bytes=142"}
+{"seq":332,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=147855 bytes=142"}
+{"seq":333,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5252005 off=13056 len=128"}
+{"seq":334,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3390 off=13056"}
+{"seq":335,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=21919"}
+{"seq":336,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=94386 bytes=142"}
+{"seq":337,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=117261 bytes=142"}
+{"seq":338,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5370480 off=13184 len=128"}
+{"seq":339,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2435 off=13184"}
+{"seq":340,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=13188"}
+{"seq":341,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=82936 bytes=142"}
+{"seq":342,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=97055 bytes=142"}
+{"seq":343,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5468475 off=13312 len=128"}
+{"seq":344,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=9695"}
+{"seq":345,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=83095 off=13312"}
+{"seq":346,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=165431 bytes=142"}
+{"seq":347,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=176512 bytes=142"}
+{"seq":348,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5646073 off=13440 len=128"}
+{"seq":349,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=11865 off=13440"}
+{"seq":350,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=21612"}
+{"seq":351,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=117922 bytes=142"}
+{"seq":352,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=140623 bytes=142"}
+{"seq":353,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5787891 off=13568 len=128"}
+{"seq":354,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3142 off=13568"}
+{"seq":355,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=14154"}
+{"seq":356,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=60888 bytes=142"}
+{"seq":357,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=75773 bytes=142"}
+{"seq":358,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5864553 off=13696 len=128"}
+{"seq":359,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1186 off=13696"}
+{"seq":360,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=6264"}
+{"seq":361,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=83112 bytes=142"}
+{"seq":362,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=89851 bytes=142"}
+{"seq":363,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=5954852 off=13824 len=128"}
+{"seq":364,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1411 off=13824"}
+{"seq":365,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=9024"}
+{"seq":366,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=82155 bytes=142"}
+{"seq":367,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=91629 bytes=142"}
+{"seq":368,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=6046999 off=13952 len=128"}
+{"seq":369,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1205 off=13952"}
+{"seq":370,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=6620"}
+{"seq":371,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=81978 bytes=142"}
+{"seq":372,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=88977 bytes=142"}
+{"seq":373,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=6136410 off=14080 len=128"}
+{"seq":374,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1139 off=14080"}
+{"seq":375,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=10191"}
+{"seq":376,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=78292 bytes=142"}
+{"seq":377,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=89302 bytes=142"}
+{"seq":378,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=6226484 off=14208 len=128"}
+{"seq":379,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=6539 off=14208"}
+{"seq":380,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=23869"}
+{"seq":381,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=66655 bytes=142"}
+{"seq":382,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=91394 bytes=142"}
+{"seq":383,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=6318936 off=14336 len=128"}
+{"seq":384,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2527 off=14336"}
+{"seq":385,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=16521"}
+{"seq":386,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=116229 bytes=142"}
+{"seq":387,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=133703 bytes=142"}
+{"seq":388,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=6453710 off=14464 len=128"}
+{"seq":389,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2843 off=14464"}
+{"seq":390,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=11292"}
+{"seq":391,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=74334 bytes=142"}
+{"seq":392,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=86369 bytes=142"}
+{"seq":393,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=6540995 off=14592 len=128"}
+{"seq":394,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2523 off=14592"}
+{"seq":395,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=14265"}
+{"seq":396,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=78186 bytes=142"}
+{"seq":397,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=93408 bytes=142"}
+{"seq":398,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=6635364 off=14720 len=128"}
+{"seq":399,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2349 off=14720"}
+{"seq":400,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=15430"}
+{"seq":401,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=68451 bytes=142"}
+{"seq":402,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=84727 bytes=142"}
+{"seq":403,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=6720994 off=14848 len=128"}
+{"seq":404,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2571 off=14848"}
+{"seq":405,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=14246"}
+{"seq":406,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=120193 bytes=142"}
+{"seq":407,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=135714 bytes=142"}
+{"seq":408,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=6857754 off=14976 len=128"}
+{"seq":409,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4899 off=14976"}
+{"seq":410,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=17573"}
+{"seq":411,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=71191 bytes=142"}
+{"seq":412,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=89699 bytes=142"}
+{"seq":413,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=6949969 off=15104 len=128"}
+{"seq":414,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2308 off=15104"}
+{"seq":415,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=15382"}
+{"seq":416,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=70837 bytes=142"}
+{"seq":417,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=87124 bytes=142"}
+{"seq":418,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7037979 off=15232 len=128"}
+{"seq":419,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3338 off=15232"}
+{"seq":420,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=18003"}
+{"seq":421,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=69494 bytes=142"}
+{"seq":422,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=88792 bytes=142"}
+{"seq":423,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7127700 off=15360 len=128"}
+{"seq":424,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4550 off=15360"}
+{"seq":425,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=12947"}
+{"seq":426,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=125252 bytes=142"}
+{"seq":427,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=138793 bytes=142"}
+{"seq":428,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7267153 off=15488 len=128"}
+{"seq":429,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2350 off=15488"}
+{"seq":430,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=14505"}
+{"seq":431,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=73019 bytes=142"}
+{"seq":432,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=88640 bytes=142"}
+{"seq":433,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7356813 off=15616 len=128"}
+{"seq":434,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5381 off=15616"}
+{"seq":435,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=22580"}
+{"seq":436,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=59520 bytes=142"}
+{"seq":437,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=83355 bytes=142"}
+{"seq":438,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7441393 off=15744 len=128"}
+{"seq":439,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3499 off=15744"}
+{"seq":440,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=16331"}
+{"seq":441,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=74669 bytes=142"}
+{"seq":442,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=92095 bytes=142"}
+{"seq":443,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7534709 off=15872 len=128"}
+{"seq":444,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=14272"}
+{"seq":445,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=71049 bytes=142"}
+{"seq":446,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=86335 bytes=142"}
+{"seq":447,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7622008 off=16000 len=128"}
+{"seq":448,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3754 off=16000"}
+{"seq":449,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=91053 off=15872"}
+{"seq":450,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=17771"}
+{"seq":451,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=70511 bytes=142"}
+{"seq":452,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=88951 bytes=142"}
+{"seq":453,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7711970 off=16128 len=128"}
+{"seq":454,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4905 off=16128"}
+{"seq":455,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=12329"}
+{"seq":456,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=79300 bytes=142"}
+{"seq":457,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=92665 bytes=142"}
+{"seq":458,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7805445 off=16256 len=128"}
+{"seq":459,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=85384 off=16256"}
+{"seq":460,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=durable us=7891602 off=16384"}
+{"seq":461,"kind":"line","message":"OTA_MONO MONO_BUDGET_RESET monoUs=7041118 wallUs=1792873240272685 durable=16384"}
+{"seq":462,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=30781"}
+{"seq":463,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=58985 bytes=142"}
+{"seq":464,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=90506 bytes=142"}
+{"seq":465,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=7984017 off=16384 len=128"}
+{"seq":466,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=14465"}
+{"seq":467,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=49288 off=16384"}
+{"seq":468,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=73186 bytes=142"}
+{"seq":469,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=88723 bytes=142"}
+{"seq":470,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=8073848 off=16512 len=128"}
+{"seq":471,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=18305"}
+{"seq":472,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=41602 off=16512"}
+{"seq":473,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=112744 bytes=142"}
+{"seq":474,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=132329 bytes=142"}
+{"seq":475,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=8207333 off=16640 len=128"}
+{"seq":476,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=21931"}
+{"seq":477,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=66961 bytes=142"}
+{"seq":478,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=89585 bytes=142"}
+{"seq":479,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=8297737 off=16768 len=128"}
+{"seq":480,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1959 off=16768"}
+{"seq":481,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=92363 off=16640"}
+{"seq":482,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=11280"}
+{"seq":483,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=127955 bytes=142"}
+{"seq":484,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=140192 bytes=142"}
+{"seq":485,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=8438639 off=16896 len=128"}
+{"seq":486,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2965 off=16896"}
+{"seq":487,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=15977"}
+{"seq":488,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=65058 bytes=142"}
+{"seq":489,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=81995 bytes=142"}
+{"seq":490,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=8521669 off=17024 len=128"}
+{"seq":491,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2393 off=17024"}
+{"seq":492,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=12428"}
+{"seq":493,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=82133 bytes=142"}
+{"seq":494,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=95415 bytes=142"}
+{"seq":495,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=8617920 off=17152 len=128"}
+{"seq":496,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2655 off=17152"}
+{"seq":497,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=15748"}
+{"seq":498,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=69463 bytes=142"}
+{"seq":499,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=86053 bytes=142"}
+{"seq":500,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=8704900 off=17280 len=128"}
+{"seq":501,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=24964"}
+{"seq":502,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=42430 off=17280"}
+{"seq":503,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=106568 bytes=142"}
+{"seq":504,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=132615 bytes=142"}
+{"seq":505,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=8838453 off=17408 len=128"}
+{"seq":506,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=5928 off=17408"}
+{"seq":507,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=18058"}
+{"seq":508,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=112983 bytes=142"}
+{"seq":509,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=132028 bytes=142"}
+{"seq":510,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=8971417 off=17536 len=128"}
+{"seq":511,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2481 off=17536"}
+{"seq":512,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=13928"}
+{"seq":513,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=75405 bytes=142"}
+{"seq":514,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=90016 bytes=142"}
+{"seq":515,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=9062338 off=17664 len=128"}
+{"seq":516,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=6710 off=17664"}
+{"seq":517,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=13577"}
+{"seq":518,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=76972 bytes=142"}
+{"seq":519,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=91509 bytes=142"}
+{"seq":520,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=9154897 off=17792 len=128"}
+{"seq":521,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4103 off=17792"}
+{"seq":522,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=17086"}
+{"seq":523,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=67807 bytes=142"}
+{"seq":524,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=85619 bytes=142"}
+{"seq":525,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=9241787 off=17920 len=128"}
+{"seq":526,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=13830"}
+{"seq":527,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=44738 off=17920"}
+{"seq":528,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=130101 bytes=142"}
+{"seq":529,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=145087 bytes=142"}
+{"seq":530,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=9387748 off=18048 len=128"}
+{"seq":531,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=13333"}
+{"seq":532,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=35100 off=18048"}
+{"seq":533,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=70965 bytes=142"}
+{"seq":534,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=85349 bytes=142"}
+{"seq":535,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=9474032 off=18176 len=128"}
+{"seq":536,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=9909"}
+{"seq":537,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=40642 off=18176"}
+{"seq":538,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=118614 bytes=142"}
+{"seq":539,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=129430 bytes=142"}
+{"seq":540,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=9604582 off=18304 len=128"}
+{"seq":541,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3569 off=18304"}
+{"seq":542,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=19566"}
+{"seq":543,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=110358 bytes=142"}
+{"seq":544,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=130936 bytes=142"}
+{"seq":545,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=9736567 off=18432 len=128"}
+{"seq":546,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2269 off=18432"}
+{"seq":547,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=14900"}
+{"seq":548,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=73372 bytes=142"}
+{"seq":549,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=89432 bytes=142"}
+{"seq":550,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=9826925 off=18560 len=128"}
+{"seq":551,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3341 off=18560"}
+{"seq":552,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=16438"}
+{"seq":553,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=73578 bytes=142"}
+{"seq":554,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=91195 bytes=142"}
+{"seq":555,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=9919576 off=18688 len=128"}
+{"seq":556,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3059 off=18688"}
+{"seq":557,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=17525"}
+{"seq":558,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=68333 bytes=142"}
+{"seq":559,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=87001 bytes=142"}
+{"seq":560,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=10007538 off=18816 len=128"}
+{"seq":561,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2255 off=18816"}
+{"seq":562,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=12025"}
+{"seq":563,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=82190 bytes=142"}
+{"seq":564,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=95122 bytes=142"}
+{"seq":565,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=10103703 off=18944 len=128"}
+{"seq":566,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4014 off=18944"}
+{"seq":567,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=16722"}
+{"seq":568,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=64053 bytes=142"}
+{"seq":569,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=81581 bytes=142"}
+{"seq":570,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=10186463 off=19072 len=128"}
+{"seq":571,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=9453"}
+{"seq":572,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=91198 off=19072"}
+{"seq":573,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=86207 bytes=142"}
+{"seq":574,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=96656 bytes=142"}
+{"seq":575,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=10284175 off=19200 len=128"}
+{"seq":576,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2284 off=19200"}
+{"seq":577,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=8674"}
+{"seq":578,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early us=10370457 off=19328"}
+{"seq":579,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=80102 bytes=142"}
+{"seq":580,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=89720 bytes=142"}
+{"seq":581,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_early_invalid us=10370457 off=19328"}
+{"seq":582,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=10374846 off=19328 len=128"}
+{"seq":583,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=12754"}
+{"seq":584,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=66363 bytes=142"}
+{"seq":585,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=80201 bytes=142"}
+{"seq":586,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=10457141 off=19456 len=128"}
+{"seq":587,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2544 off=19456"}
+{"seq":588,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=13945"}
+{"seq":589,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=119494 bytes=142"}
+{"seq":590,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=134182 bytes=142"}
+{"seq":591,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=10592143 off=19584 len=128"}
+{"seq":592,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2361 off=19584"}
+{"seq":593,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=13367"}
+{"seq":594,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=76558 bytes=142"}
+{"seq":595,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=90833 bytes=142"}
+{"seq":596,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=10683773 off=19712 len=128"}
+{"seq":597,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2206 off=19712"}
+{"seq":598,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=14314"}
+{"seq":599,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=77072 bytes=142"}
+{"seq":600,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=92293 bytes=142"}
+{"seq":601,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=10776939 off=19840 len=128"}
+{"seq":602,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=15922"}
+{"seq":603,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=38977 off=19840"}
+{"seq":604,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=71361 bytes=142"}
+{"seq":605,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=88083 bytes=142"}
+{"seq":606,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=10865915 off=19968 len=128"}
+{"seq":607,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1471 off=19968"}
+{"seq":608,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=12509"}
+{"seq":609,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=73970 bytes=142"}
+{"seq":610,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=86981 bytes=142"}
+{"seq":611,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=10953435 off=20096 len=128"}
+{"seq":612,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2521 off=20096"}
+{"seq":613,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=16139"}
+{"seq":614,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=70905 bytes=142"}
+{"seq":615,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=88016 bytes=142"}
+{"seq":616,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=11042365 off=20224 len=128"}
+{"seq":617,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4196 off=20224"}
+{"seq":618,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=20868"}
+{"seq":619,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=69532 bytes=142"}
+{"seq":620,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=91517 bytes=142"}
+{"seq":621,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=11135262 off=20352 len=128"}
+{"seq":622,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=41435 off=20352"}
+{"seq":623,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=durable us=11177278 off=20480"}
+{"seq":624,"kind":"line","message":"OTA_MONO MONO_BUDGET_RESET monoUs=10326848 wallUs=1792873243558400 durable=20480"}
+{"seq":625,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=43764"}
+{"seq":626,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=130981 bytes=142"}
+{"seq":627,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=175876 bytes=142"}
+{"seq":628,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=11355499 off=20480 len=128"}
+{"seq":629,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2587 off=20480"}
+{"seq":630,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=16545"}
+{"seq":631,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=72881 bytes=142"}
+{"seq":632,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=90160 bytes=142"}
+{"seq":633,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=11446375 off=20608 len=128"}
+{"seq":634,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1280 off=20608"}
+{"seq":635,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=7217"}
+{"seq":636,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=81193 bytes=142"}
+{"seq":637,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=88940 bytes=142"}
+{"seq":638,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=11535831 off=20736 len=128"}
+{"seq":639,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2240 off=20736"}
+{"seq":640,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=13711"}
+{"seq":641,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=77596 bytes=142"}
+{"seq":642,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=92130 bytes=142"}
+{"seq":643,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=11628876 off=20864 len=128"}
+{"seq":644,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=7340 off=20864"}
+{"seq":645,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=23352"}
+{"seq":646,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=113081 bytes=142"}
+{"seq":647,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=137735 bytes=142"}
+{"seq":648,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=11767584 off=20992 len=128"}
+{"seq":649,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2418 off=20992"}
+{"seq":650,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=14477"}
+{"seq":651,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=119424 bytes=142"}
+{"seq":652,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=135133 bytes=142"}
+{"seq":653,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=11903664 off=21120 len=128"}
+{"seq":654,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2991 off=21120"}
+{"seq":655,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=15611"}
+{"seq":656,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=68161 bytes=142"}
+{"seq":657,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=84613 bytes=142"}
+{"seq":658,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=11989282 off=21248 len=128"}
+{"seq":659,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3633 off=21248"}
+{"seq":660,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=18029"}
+{"seq":661,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=66763 bytes=142"}
+{"seq":662,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=85587 bytes=142"}
+{"seq":663,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=12075824 off=21376 len=128"}
+{"seq":664,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2094 off=21376"}
+{"seq":665,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=11676"}
+{"seq":666,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=78599 bytes=142"}
+{"seq":667,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=90882 bytes=142"}
+{"seq":668,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=12167312 off=21504 len=128"}
+{"seq":669,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1744 off=21504"}
+{"seq":670,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=15644"}
+{"seq":671,"kind":"line","message":"OTA_MONO MONO_PAUSE monoUs=11369058 wallUs=1792873244600604"}
+{"seq":672,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=164913 bytes=142"}
+{"seq":673,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=181079 bytes=142"}
+{"seq":674,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=12348933 off=21632 len=128"}
+{"seq":675,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=725 off=21632"}
+{"seq":676,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=11946194 wallUs=1792873245177735 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":677,"kind":"line","message":"OTA_MONO MONO_PAUSE monoUs=12164091 wallUs=1792873245395638"}
+{"seq":678,"kind":"line","message":"OTA_MONO MONO_PAUSE monoUs=12164917 wallUs=1792873245396462"}
+{"seq":679,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=12492705 wallUs=1792873245724252 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":680,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=12894846 wallUs=1792873246126394 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":681,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=13396275 wallUs=1792873246627825 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":682,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=13895962 wallUs=1792873247127507 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":683,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=14421386 wallUs=1792873247652939 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":684,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=14902177 wallUs=1792873248133736 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":685,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=15381425 wallUs=1792873248612975 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":686,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=15878864 wallUs=1792873249110419 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":687,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=16390258 wallUs=1792873249622147 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":688,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=17032602 wallUs=1792873250264314 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":689,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=17405907 wallUs=1792873250637458 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":690,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=17921981 wallUs=1792873251153531 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":691,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=18443146 wallUs=1792873251674703 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":692,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=18885574 wallUs=1792873252117495 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":693,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=19384744 wallUs=1792873252616297 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":694,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=19881010 wallUs=1792873253112554 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":695,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=20375761 wallUs=1792873253607308 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":696,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=20870009 wallUs=1792873254101558 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":697,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=21366265 wallUs=1792873254597810 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":698,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=21864461 wallUs=1792873255096008 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":699,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=22339682 wallUs=1792873255571528 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":700,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=22916953 wallUs=1792873256148500 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":701,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=23391695 wallUs=1792873256623264 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":702,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=23886111 wallUs=1792873257117659 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":703,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=24420543 wallUs=1792873257652107 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":704,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=24894978 wallUs=1792873258126533 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":705,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=25372292 wallUs=1792873258603836 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":706,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=25864737 wallUs=1792873259096285 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":707,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=26364550 wallUs=1792873259596100 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":708,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=26885422 wallUs=1792873260116967 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":709,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=27443818 wallUs=1792873260675366 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":710,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=27843859 wallUs=1792873261075405 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":711,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=28366634 wallUs=1792873261598183 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":712,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=28835017 wallUs=1792873262066561 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":713,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=29377380 wallUs=1792873262608927 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":714,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=29868478 wallUs=1792873263100024 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":715,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=30365007 wallUs=1792873263596551 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":716,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=30862375 wallUs=1792873264093922 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":717,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=31353922 wallUs=1792873264585470 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":718,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=31851143 wallUs=1792873265082688 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":719,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=32343014 wallUs=1792873265574561 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":720,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=32840560 wallUs=1792873266072107 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":721,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=33335698 wallUs=1792873266567245 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":722,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=33831842 wallUs=1792873267063389 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":723,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=34328704 wallUs=1792873267560252 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":724,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=34820163 wallUs=1792873268051711 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":725,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=35437611 wallUs=1792873268669156 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":726,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=35854619 wallUs=1792873269086164 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":727,"kind":"line","message":"OTA_MONO MONO_PAUSE monoUs=36105768 wallUs=1792873269337393"}
+{"seq":728,"kind":"line","message":"OTA_MONO MONO_PAUSE monoUs=36131154 wallUs=1792873269362733"}
+{"seq":729,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=36400589 wallUs=1792873269632129 code=status:0,session:1,seq:106,bitmap:0x3ff,pending:0 durable=20480"}
+{"seq":730,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=control_start us=37264909 cmd=0 session=0 seq=6 bytes=10"}
+{"seq":731,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=7611"}
+{"seq":732,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=135081 bytes=10"}
+{"seq":733,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=143340 bytes=10"}
+{"seq":734,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=control_end us=37409490 cmd=0 session=0 seq=6 bytes=10"}
+{"seq":735,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=get_info us=147256 ok=1"}
+{"seq":736,"kind":"line","message":"OTA_MONO MONO_RESUME monoUs=36560934 wallUs=1792873269792491"}
+{"seq":737,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=13414"}
+{"seq":738,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=74490 bytes=142"}
+{"seq":739,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=88372 bytes=142"}
+{"seq":740,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=37502073 off=21760 len=128"}
+{"seq":741,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=4763"}
+{"seq":742,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=44114 off=21760"}
+{"seq":743,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=81077 bytes=142"}
+{"seq":744,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=86321 bytes=142"}
+{"seq":745,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=37588934 off=21888 len=128"}
+{"seq":746,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1172 off=21888"}
+{"seq":747,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=7238"}
+{"seq":748,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=92680 bytes=142"}
+{"seq":749,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=100551 bytes=142"}
+{"seq":750,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=37689838 off=22016 len=128"}
+{"seq":751,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1085 off=22016"}
+{"seq":752,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=7227"}
+{"seq":753,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=74151 bytes=142"}
+{"seq":754,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=81952 bytes=142"}
+{"seq":755,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=37772357 off=22144 len=128"}
+{"seq":756,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3074 off=22144"}
+{"seq":757,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=15135"}
+{"seq":758,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=77677 bytes=142"}
+{"seq":759,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=93646 bytes=142"}
+{"seq":760,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=37867029 off=22272 len=128"}
+{"seq":761,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2392 off=22272"}
+{"seq":762,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=14862"}
+{"seq":763,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=68394 bytes=142"}
+{"seq":764,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=84076 bytes=142"}
+{"seq":765,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=37951967 off=22400 len=128"}
+{"seq":766,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2257 off=22400"}
+{"seq":767,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=19571"}
+{"seq":768,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=68640 bytes=142"}
+{"seq":769,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=88912 bytes=142"}
+{"seq":770,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=38041791 off=22528 len=128"}
+{"seq":771,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2650 off=22528"}
+{"seq":772,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=13451"}
+{"seq":773,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=78901 bytes=142"}
+{"seq":774,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=93222 bytes=142"}
+{"seq":775,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=38135925 off=22656 len=128"}
+{"seq":776,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2995 off=22656"}
+{"seq":777,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=17474"}
+{"seq":778,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=111801 bytes=142"}
+{"seq":779,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=130151 bytes=142"}
+{"seq":780,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=38267187 off=22784 len=128"}
+{"seq":781,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2346 off=22784"}
+{"seq":782,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=16558"}
+{"seq":783,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=72075 bytes=142"}
+{"seq":784,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=89420 bytes=142"}
+{"seq":785,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=38357504 off=22912 len=128"}
+{"seq":786,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2616 off=22912"}
+{"seq":787,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=14004"}
+{"seq":788,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=74290 bytes=142"}
+{"seq":789,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=89021 bytes=142"}
+{"seq":790,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=38447399 off=23040 len=128"}
+{"seq":791,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1873 off=23040"}
+{"seq":792,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=7146"}
+{"seq":793,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=79259 bytes=142"}
+{"seq":794,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=86924 bytes=142"}
+{"seq":795,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=38534853 off=23168 len=128"}
+{"seq":796,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1077 off=23168"}
+{"seq":797,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=7018"}
+{"seq":798,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=83156 bytes=142"}
+{"seq":799,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=90794 bytes=142"}
+{"seq":800,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=38626222 off=23296 len=128"}
+{"seq":801,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2332 off=23296"}
+{"seq":802,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=11573"}
+{"seq":803,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=80125 bytes=142"}
+{"seq":804,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=92591 bytes=142"}
+{"seq":805,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=38719831 off=23424 len=128"}
+{"seq":806,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=14268"}
+{"seq":807,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=46551 off=23424"}
+{"seq":808,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=71376 bytes=142"}
+{"seq":809,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=86744 bytes=142"}
+{"seq":810,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=38807555 off=23552 len=128"}
+{"seq":811,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2998 off=23552"}
+{"seq":812,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=10521"}
+{"seq":813,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=76762 bytes=142"}
+{"seq":814,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=87771 bytes=142"}
+{"seq":815,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=38895974 off=23680 len=128"}
+{"seq":816,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=6127"}
+{"seq":817,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=45792 off=23680"}
+{"seq":818,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=83627 bytes=142"}
+{"seq":819,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=90424 bytes=142"}
+{"seq":820,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=38986916 off=23808 len=128"}
+{"seq":821,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2822 off=23808"}
+{"seq":822,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=17073"}
+{"seq":823,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=69323 bytes=142"}
+{"seq":824,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=87384 bytes=142"}
+{"seq":825,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=39075282 off=23936 len=128"}
+{"seq":826,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2303 off=23936"}
+{"seq":827,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=13950"}
+{"seq":828,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=76715 bytes=142"}
+{"seq":829,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=91634 bytes=142"}
+{"seq":830,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=39167839 off=24064 len=128"}
+{"seq":831,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2921 off=24064"}
+{"seq":832,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=13431"}
+{"seq":833,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=71828 bytes=142"}
+{"seq":834,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=85793 bytes=142"}
+{"seq":835,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=39254592 off=24192 len=128"}
+{"seq":836,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1516 off=24192"}
+{"seq":837,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=11908"}
+{"seq":838,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=125832 bytes=142"}
+{"seq":839,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=138636 bytes=142"}
+{"seq":840,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=39393900 off=24320 len=128"}
+{"seq":841,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=10055 off=24320"}
+{"seq":842,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=25483"}
+{"seq":843,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=60156 bytes=142"}
+{"seq":844,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=86610 bytes=142"}
+{"seq":845,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=39481348 off=24448 len=128"}
+{"seq":846,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=43839 off=24448"}
+{"seq":847,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=durable us=39525586 off=24576"}
+{"seq":848,"kind":"line","message":"OTA_MONO MONO_BUDGET_RESET monoUs=38675502 wallUs=1792873271907051 durable=24576"}
+{"seq":849,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=25101"}
+{"seq":850,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=60999 bytes=142"}
+{"seq":851,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=86904 bytes=142"}
+{"seq":852,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=39614827 off=24576 len=128"}
+{"seq":853,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1777 off=24576"}
+{"seq":854,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=9494"}
+{"seq":855,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=81580 bytes=142"}
+{"seq":856,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=92100 bytes=142"}
+{"seq":857,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=39707908 off=24704 len=128"}
+{"seq":858,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=16801"}
+{"seq":859,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=43828 off=24704"}
+{"seq":860,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=206885 bytes=142"}
+{"seq":861,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=224775 bytes=142"}
+{"seq":862,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=39934179 off=24832 len=128"}
+{"seq":863,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2504 off=24832"}
+{"seq":864,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=17072"}
+{"seq":865,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=67950 bytes=142"}
+{"seq":866,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=85967 bytes=142"}
+{"seq":867,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=40020978 off=24960 len=128"}
+{"seq":868,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2411 off=24960"}
+{"seq":869,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=13408"}
+{"seq":870,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=120363 bytes=142"}
+{"seq":871,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=134720 bytes=142"}
+{"seq":872,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=40156645 off=25088 len=128"}
+{"seq":873,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=15872"}
+{"seq":874,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=48727 off=25088"}
+{"seq":875,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=73356 bytes=142"}
+{"seq":876,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=90068 bytes=142"}
+{"seq":877,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=40247700 off=25216 len=128"}
+{"seq":878,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1819 off=25216"}
+{"seq":879,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=7607"}
+{"seq":880,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=80080 bytes=142"}
+{"seq":881,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=88541 bytes=142"}
+{"seq":882,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=40337121 off=25344 len=128"}
+{"seq":883,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=15582"}
+{"seq":884,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=46112 off=25344"}
+{"seq":885,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=73402 bytes=142"}
+{"seq":886,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=90039 bytes=142"}
+{"seq":887,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=40428215 off=25472 len=128"}
+{"seq":888,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=10076 off=25472"}
+{"seq":889,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=23353"}
+{"seq":890,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=115826 bytes=142"}
+{"seq":891,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=140205 bytes=142"}
+{"seq":892,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=40569754 off=25600 len=128"}
+{"seq":893,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3408 off=25600"}
+{"seq":894,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=11507"}
+{"seq":895,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=68837 bytes=142"}
+{"seq":896,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=80795 bytes=142"}
+{"seq":897,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=40651466 off=25728 len=128"}
+{"seq":898,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=18687"}
+{"seq":899,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=69720 bytes=142"}
+{"seq":900,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=88889 bytes=142"}
+{"seq":901,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=40740710 off=25856 len=128"}
+{"seq":902,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=14065"}
+{"seq":903,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=46151 off=25856"}
+{"seq":904,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=135395 off=25728"}
+{"seq":905,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=78036 bytes=142"}
+{"seq":906,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=92611 bytes=142"}
+{"seq":907,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=40833836 off=25984 len=128"}
+{"seq":908,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2332 off=25984"}
+{"seq":909,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=14738"}
+{"seq":910,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=169641 bytes=142"}
+{"seq":911,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=185418 bytes=142"}
+{"seq":912,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=41020291 off=26112 len=128"}
+{"seq":913,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3888 off=26112"}
+{"seq":914,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=20750"}
+{"seq":915,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=59122 bytes=142"}
+{"seq":916,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=80817 bytes=142"}
+{"seq":917,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=41102275 off=26240 len=128"}
+{"seq":918,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2426 off=26240"}
+{"seq":919,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=13029"}
+{"seq":920,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=119209 bytes=142"}
+{"seq":921,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=132847 bytes=142"}
+{"seq":922,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=41235992 off=26368 len=128"}
+{"seq":923,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1293 off=26368"}
+{"seq":924,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=12789"}
+{"seq":925,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=82169 bytes=142"}
+{"seq":926,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=95570 bytes=142"}
+{"seq":927,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=41332079 off=26496 len=128"}
+{"seq":928,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2358 off=26496"}
+{"seq":929,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=10941"}
+{"seq":930,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=72983 bytes=142"}
+{"seq":931,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=84687 bytes=142"}
+{"seq":932,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=41417633 off=26624 len=128"}
+{"seq":933,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2590 off=26624"}
+{"seq":934,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=13858"}
+{"seq":935,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=74015 bytes=142"}
+{"seq":936,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=88622 bytes=142"}
+{"seq":937,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=41507197 off=26752 len=128"}
+{"seq":938,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2484 off=26752"}
+{"seq":939,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=19215"}
+{"seq":940,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=74736 bytes=142"}
+{"seq":941,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=94859 bytes=142"}
+{"seq":942,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=41603427 off=26880 len=128"}
+{"seq":943,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2982 off=26880"}
+{"seq":944,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=14252"}
+{"seq":945,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=68039 bytes=142"}
+{"seq":946,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=83286 bytes=142"}
+{"seq":947,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=41687855 off=27008 len=128"}
+{"seq":948,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3349 off=27008"}
+{"seq":949,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=17601"}
+{"seq":950,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=69268 bytes=142"}
+{"seq":951,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=88008 bytes=142"}
+{"seq":952,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=41777011 off=27136 len=128"}
+{"seq":953,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3907 off=27136"}
+{"seq":954,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=16520"}
+{"seq":955,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=72394 bytes=142"}
+{"seq":956,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=89854 bytes=142"}
+{"seq":957,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=41867973 off=27264 len=128"}
+{"seq":958,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2095 off=27264"}
+{"seq":959,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=13233"}
+{"seq":960,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=72477 bytes=142"}
+{"seq":961,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=86598 bytes=142"}
+{"seq":962,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=41955364 off=27392 len=128"}
+{"seq":963,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2153 off=27392"}
+{"seq":964,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=12473"}
+{"seq":965,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=80795 bytes=142"}
+{"seq":966,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=93997 bytes=142"}
+{"seq":967,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=42050224 off=27520 len=128"}
+{"seq":968,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2408 off=27520"}
+{"seq":969,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=17368"}
+{"seq":970,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=115157 bytes=142"}
+{"seq":971,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=133517 bytes=142"}
+{"seq":972,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=42184665 off=27648 len=128"}
+{"seq":973,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2882 off=27648"}
+{"seq":974,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=15501"}
+{"seq":975,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=70558 bytes=142"}
+{"seq":976,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=86714 bytes=142"}
+{"seq":977,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=42272382 off=27776 len=128"}
+{"seq":978,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=10968"}
+{"seq":979,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=42645 off=27776"}
+{"seq":980,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=120965 bytes=142"}
+{"seq":981,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=132751 bytes=142"}
+{"seq":982,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=42405957 off=27904 len=128"}
+{"seq":983,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3268 off=27904"}
+{"seq":984,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=17082"}
+{"seq":985,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=75037 bytes=142"}
+{"seq":986,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=93108 bytes=142"}
+{"seq":987,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=42499955 off=28032 len=128"}
+{"seq":988,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2234 off=28032"}
+{"seq":989,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=8311"}
+{"seq":990,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=76427 bytes=142"}
+{"seq":991,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=85524 bytes=142"}
+{"seq":992,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=42586389 off=28160 len=128"}
+{"seq":993,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2870 off=28160"}
+{"seq":994,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=16324"}
+{"seq":995,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=71645 bytes=142"}
+{"seq":996,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=88669 bytes=142"}
+{"seq":997,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=42676033 off=28288 len=128"}
+{"seq":998,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2825 off=28288"}
+{"seq":999,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=15637"}
+{"seq":1000,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=72631 bytes=142"}
+{"seq":1001,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=88674 bytes=142"}
+{"seq":1002,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=42765480 off=28416 len=128"}
+{"seq":1003,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1004 off=28416"}
+{"seq":1004,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=5156"}
+{"seq":1005,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=84114 bytes=142"}
+{"seq":1006,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=89701 bytes=142"}
+{"seq":1007,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=42855515 off=28544 len=128"}
+{"seq":1008,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=45824 off=28544"}
+{"seq":1009,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=durable us=42901757 off=28672"}
+{"seq":1010,"kind":"line","message":"OTA_MONO MONO_BUDGET_RESET monoUs=42051112 wallUs=1792873275282658 durable=28672"}
+{"seq":1011,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=29012"}
+{"seq":1012,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=59266 bytes=142"}
+{"seq":1013,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=88930 bytes=142"}
+{"seq":1014,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=42992320 off=28672 len=128"}
+{"seq":1015,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2185 off=28672"}
+{"seq":1016,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=12275"}
+{"seq":1017,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=127404 bytes=142"}
+{"seq":1018,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=140750 bytes=142"}
+{"seq":1019,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=43133855 off=28800 len=128"}
+{"seq":1020,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=8659"}
+{"seq":1021,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=83645 off=28800"}
+{"seq":1022,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=116049 bytes=142"}
+{"seq":1023,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=125429 bytes=142"}
+{"seq":1024,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=43259921 off=28928 len=128"}
+{"seq":1025,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3787 off=28928"}
+{"seq":1026,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=10111"}
+{"seq":1027,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=79093 bytes=142"}
+{"seq":1028,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=89762 bytes=142"}
+{"seq":1029,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=43350210 off=29056 len=128"}
+{"seq":1030,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2337 off=29056"}
+{"seq":1031,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=8700"}
+{"seq":1032,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=82197 bytes=142"}
+{"seq":1033,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=91689 bytes=142"}
+{"seq":1034,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=43442825 off=29184 len=128"}
+{"seq":1035,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2889 off=29184"}
+{"seq":1036,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=14954"}
+{"seq":1037,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=73936 bytes=142"}
+{"seq":1038,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=90025 bytes=142"}
+{"seq":1039,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=43533801 off=29312 len=128"}
+{"seq":1040,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=8667"}
+{"seq":1041,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=48078 off=29312"}
+{"seq":1042,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=76433 bytes=142"}
+{"seq":1043,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=85922 bytes=142"}
+{"seq":1044,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=43620617 off=29440 len=128"}
+{"seq":1045,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3271 off=29440"}
+{"seq":1046,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=16932"}
+{"seq":1047,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=78397 bytes=142"}
+{"seq":1048,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=96426 bytes=142"}
+{"seq":1049,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=43717921 off=29568 len=128"}
+{"seq":1050,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=3348 off=29568"}
+{"seq":1051,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=10965"}
+{"seq":1052,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=70218 bytes=142"}
+{"seq":1053,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=81840 bytes=142"}
+{"seq":1054,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=43800795 off=29696 len=128"}
+{"seq":1055,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2572 off=29696"}
+{"seq":1056,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=8822"}
+{"seq":1057,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=78952 bytes=142"}
+{"seq":1058,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=88530 bytes=142"}
+{"seq":1059,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=43890185 off=29824 len=128"}
+{"seq":1060,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=2376 off=29824"}
+{"seq":1061,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=12157"}
+{"seq":1062,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=76642 bytes=142"}
+{"seq":1063,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=89386 bytes=142"}
+{"seq":1064,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=43980326 off=29952 len=128"}
+{"seq":1065,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=4189 off=29952"}
+{"seq":1066,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=9938"}
+{"seq":1067,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=79443 bytes=142"}
+{"seq":1068,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=89759 bytes=142"}
+{"seq":1069,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=44070454 off=30080 len=128"}
+{"seq":1070,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=1094 off=30080"}
+{"seq":1071,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=7396"}
+{"seq":1072,"kind":"line","message":"OTA_MONO MONO_PAUSE monoUs=43233852 wallUs=1792873276465394"}
+{"seq":1073,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=125839 bytes=142"}
+{"seq":1074,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=133723 bytes=142"}
+{"seq":1075,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=44204535 off=30208 len=128"}
+{"seq":1076,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=786 off=30208"}
+{"seq":1077,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=43895174 wallUs=1792873277126715 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1078,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=44298203 wallUs=1792873277529743 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1079,"kind":"line","message":"OTA_MONO MONO_PAUSE monoUs=44585285 wallUs=1792873277816831"}
+{"seq":1080,"kind":"line","message":"OTA_MONO MONO_PAUSE monoUs=44586125 wallUs=1792873277817671"}
+{"seq":1081,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=44853318 wallUs=1792873278084864 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1082,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=45324165 wallUs=1792873278555713 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1083,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=45905472 wallUs=1792873279137021 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1084,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=46345284 wallUs=1792873279576835 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1085,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=46881323 wallUs=1792873280112873 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1086,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=47424250 wallUs=1792873280655798 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1087,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=47879115 wallUs=1792873281110663 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1088,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=48361909 wallUs=1792873281593452 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1089,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=48968373 wallUs=1792873282199924 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1090,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=49313740 wallUs=1792873282545287 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1091,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=49849886 wallUs=1792873283081439 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1092,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=50398860 wallUs=1792873283630416 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1093,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=50902159 wallUs=1792873284133705 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1094,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=51297613 wallUs=1792873284529166 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1095,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=51786569 wallUs=1792873285018118 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1096,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=52327515 wallUs=1792873285559061 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1097,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=52822313 wallUs=1792873286053865 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1098,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=53458927 wallUs=1792873286690477 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1099,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=53812465 wallUs=1792873287044020 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1100,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=54305656 wallUs=1792873287537204 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1101,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=54800069 wallUs=1792873288031613 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1102,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=55282228 wallUs=1792873288513777 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1103,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=55799200 wallUs=1792873289030753 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1104,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=56286596 wallUs=1792873289518146 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1105,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=56829453 wallUs=1792873290061001 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1106,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=57281157 wallUs=1792873290512710 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1107,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=57772957 wallUs=1792873291004511 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1108,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=58263077 wallUs=1792873291494623 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1109,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=58771034 wallUs=1792873292002586 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1110,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=59259305 wallUs=1792873292490854 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1111,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=59798571 wallUs=1792873293030122 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1112,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=60292829 wallUs=1792873293524380 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1113,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=60825218 wallUs=1792873294056767 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1114,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=61283930 wallUs=1792873294515483 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1115,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=61781106 wallUs=1792873295012659 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1116,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=62318167 wallUs=1792873295549720 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1117,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=62764972 wallUs=1792873295996519 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1118,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=63294832 wallUs=1792873296526377 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1119,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=63769592 wallUs=1792873297001136 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1120,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=64340568 wallUs=1792873297572116 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1121,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=64761859 wallUs=1792873297993403 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1122,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=65318665 wallUs=1792873298550211 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1123,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=65736756 wallUs=1792873298968302 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1124,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=66217930 wallUs=1792873299449485 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1125,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=66775131 wallUs=1792873300006684 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1126,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=67267044 wallUs=1792873300498594 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1127,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=67761017 wallUs=1792873300992566 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1128,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=68264749 wallUs=1792873301496299 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1129,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=68751767 wallUs=1792873301983314 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1130,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=69246765 wallUs=1792873302478311 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1131,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=69741813 wallUs=1792873302973359 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1132,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=70252207 wallUs=1792873303483753 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1133,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=70733693 wallUs=1792873303965240 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1134,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=71234399 wallUs=1792873304465946 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1135,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=71720030 wallUs=1792873304951576 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1136,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=72237160 wallUs=1792873305468707 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1137,"kind":"line","message":"OTA_MONO MONO_ACK_IGNORED monoUs=72696676 wallUs=1792873305928222 code=status:0,session:1,seq:173,bitmap:0x1fff,pending:0 durable=28672"}
+{"seq":1138,"kind":"line","message":"OTA_MONO MONO_PAUSE monoUs=196116804 wallUs=1792873429348368"}
+{"seq":1139,"kind":"line","message":"OTA_MONO MONO_PAUSE monoUs=196127847 wallUs=1792873429359412"}
+{"seq":1140,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=control_start us=197408089 cmd=0 session=0 seq=7 bytes=10"}
+{"seq":1141,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=21453"}
+{"seq":1142,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=87228 bytes=10"}
+{"seq":1143,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=109239 bytes=10"}
+{"seq":1144,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=control_end us=197518114 cmd=0 session=0 seq=7 bytes=10"}
+{"seq":1145,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=get_info us=111262 ok=1"}
+{"seq":1146,"kind":"line","message":"OTA_MONO MONO_RESUME monoUs=196667983 wallUs=1792873429899523"}
+{"seq":1147,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=5920"}
+{"seq":1148,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=82405 bytes=142"}
+{"seq":1149,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=88775 bytes=142"}
+{"seq":1150,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=197608904 off=30336 len=128"}
+{"seq":1151,"kind":"line","message":"OTA_MONO MONO_DATA_NAK monoUs=196759775 wallUs=1792873429991314 code=status:5,session:0,seq:174,bitmap:0x0,pending:1 durable=28672"}
+{"seq":1152,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=7082"}
+{"seq":1153,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=81363 bytes=142"}
+{"seq":1154,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=88805 bytes=142"}
+{"seq":1155,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=197698935 off=30464 len=128"}
+{"seq":1156,"kind":"line","message":"OTA_MONO MONO_DATA_NAK monoUs=196850326 wallUs=1792873430081865 code=status:5,session:0,seq:175,bitmap:0x0,pending:1 durable=28672"}
+{"seq":1157,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=7286"}
+{"seq":1158,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=81581 bytes=142"}
+{"seq":1159,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=89389 bytes=142"}
+{"seq":1160,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=197789280 off=30592 len=128"}
+{"seq":1161,"kind":"line","message":"OTA_MONO MONO_DATA_NAK monoUs=196939663 wallUs=1792873430171204 code=status:5,session:0,seq:176,bitmap:0x0,pending:1 durable=28672"}
+{"seq":1162,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=15226"}
+{"seq":1163,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=76297 bytes=142"}
+{"seq":1164,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=93670 bytes=142"}
+{"seq":1165,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=197883581 off=30720 len=128"}
+{"seq":1166,"kind":"line","message":"OTA_MONO MONO_DATA_NAK monoUs=197033942 wallUs=1792873430265483 code=status:5,session:0,seq:177,bitmap:0x0,pending:1 durable=28672"}
+{"seq":1167,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=14415"}
+{"seq":1168,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=115380 bytes=142"}
+{"seq":1169,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=130395 bytes=142"}
+{"seq":1170,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=198014567 off=30848 len=128"}
+{"seq":1171,"kind":"line","message":"OTA_MONO MONO_DATA_NAK monoUs=197164718 wallUs=1792873430396258 code=status:5,session:0,seq:178,bitmap:0x0,pending:1 durable=28672"}
+{"seq":1172,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=6323"}
+{"seq":1173,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=82248 bytes=142"}
+{"seq":1174,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=89039 bytes=142"}
+{"seq":1175,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=198104130 off=30976 len=128"}
+{"seq":1176,"kind":"line","message":"OTA_MONO MONO_DATA_NAK monoUs=197254807 wallUs=1792873430486346 code=status:5,session:0,seq:179,bitmap:0x0,pending:1 durable=28672"}
+{"seq":1177,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=9730"}
+{"seq":1178,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=83602 bytes=142"}
+{"seq":1179,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=94024 bytes=142"}
+{"seq":1180,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=198199303 off=31104 len=128"}
+{"seq":1181,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=8915"}
+{"seq":1182,"kind":"line","message":"OTA_MONO MONO_DATA_NAK monoUs=197390625 wallUs=1792873430622164 code=status:5,session:0,seq:180,bitmap:0x0,pending:1 durable=28672"}
+{"seq":1183,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=76037 bytes=142"}
+{"seq":1184,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=85368 bytes=142"}
+{"seq":1185,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=198285172 off=31232 len=128"}
+{"seq":1186,"kind":"line","message":"OTA_MONO MONO_DATA_NAK monoUs=197434815 wallUs=1792873430666354 code=status:5,session:0,seq:181,bitmap:0x0,pending:1 durable=28672"}
+{"seq":1187,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=7041"}
+{"seq":1188,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=127211 bytes=142"}
+{"seq":1189,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=134782 bytes=142"}
+{"seq":1190,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=198420248 off=31360 len=128"}
+{"seq":1191,"kind":"line","message":"OTA_MONO MONO_DATA_NAK monoUs=197569799 wallUs=1792873430801338 code=status:5,session:0,seq:182,bitmap:0x0,pending:1 durable=28672"}
+{"seq":1192,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=11411"}
+{"seq":1193,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=76614 bytes=142"}
+{"seq":1194,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=88367 bytes=142"}
+{"seq":1195,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=198509056 off=31488 len=128"}
+{"seq":1196,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=8242"}
+{"seq":1197,"kind":"line","message":"OTA_MONO MONO_DATA_NAK monoUs=197704133 wallUs=1792873430935671 code=status:5,session:0,seq:183,bitmap:0x0,pending:1 durable=28672"}
+{"seq":1198,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=81743 bytes=142"}
+{"seq":1199,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=90441 bytes=142"}
+{"seq":1200,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=198599997 off=31616 len=128"}
+{"seq":1201,"kind":"line","message":"OTA_MONO MONO_DATA_NAK monoUs=197750687 wallUs=1792873430982229 code=status:5,session:0,seq:184,bitmap:0x0,pending:1 durable=28672"}
+{"seq":1202,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=8642"}
+{"seq":1203,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=80361 bytes=142"}
+{"seq":1204,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=89621 bytes=142"}
+{"seq":1205,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=198690319 off=31744 len=128"}
+{"seq":1206,"kind":"line","message":"OTA_MONO MONO_DATA_NAK monoUs=197841060 wallUs=1792873431072601 code=status:5,session:0,seq:185,bitmap:0x0,pending:1 durable=28672"}
+{"seq":1207,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=10813"}
+{"seq":1208,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=82423 bytes=142"}
+{"seq":1209,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=93821 bytes=142"}
+{"seq":1210,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=198784881 off=31872 len=128"}
+{"seq":1211,"kind":"line","message":"OTA_MONO MONO_DATA_NAK monoUs=197935659 wallUs=1792873431167202 code=status:5,session:0,seq:186,bitmap:0x0,pending:1 durable=28672"}
+{"seq":1212,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=13523"}
+{"seq":1213,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=70879 bytes=142"}
+{"seq":1214,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=85079 bytes=142"}
+{"seq":1215,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=198870712 off=32000 len=128"}
+{"seq":1216,"kind":"line","message":"OTA_MONO MONO_DATA_NAK monoUs=198021611 wallUs=1792873431253153 code=status:5,session:0,seq:187,bitmap:0x0,pending:1 durable=28672"}
+{"seq":1217,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=11151"}
+{"seq":1218,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=77452 bytes=142"}
+{"seq":1219,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=89181 bytes=142"}
+{"seq":1220,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=198960716 off=32128 len=128"}
+{"seq":1221,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=14588"}
+{"seq":1222,"kind":"line","message":"OTA_MONO MONO_DATA_NAK monoUs=198155003 wallUs=1792873431386548 code=status:5,session:0,seq:188,bitmap:0x0,pending:1 durable=28672"}
+{"seq":1223,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=76072 bytes=142"}
+{"seq":1224,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=91521 bytes=142"}
+{"seq":1225,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=199052997 off=32256 len=128"}
+{"seq":1226,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=11403"}
+{"seq":1227,"kind":"line","message":"OTA_MONO MONO_DATA_NAK monoUs=198246263 wallUs=1792873431477802 code=status:5,session:0,seq:189,bitmap:0x0,pending:1 durable=28672"}
+{"seq":1228,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=74389 bytes=142"}
+{"seq":1229,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=86382 bytes=142"}
+{"seq":1230,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=199140161 off=32384 len=128"}
+{"seq":1231,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=12340"}
+{"seq":1232,"kind":"line","message":"OTA_MONO MONO_DATA_NAK monoUs=198382041 wallUs=1792873431613581 code=status:5,session:0,seq:190,bitmap:0x0,pending:1 durable=28672"}
+{"seq":1233,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=123438 bytes=142"}
+{"seq":1234,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=136411 bytes=142"}
+{"seq":1235,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=199277220 off=32512 len=128"}
+{"seq":1236,"kind":"line","message":"OTA_MONO MONO_DATA_NAK monoUs=198431768 wallUs=1792873431663309 code=status:5,session:0,seq:191,bitmap:0x0,pending:1 durable=28672"}
+{"seq":1237,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=discover us=12583"}
+{"seq":1238,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=platform_write us=75960 bytes=142"}
+{"seq":1239,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=89164 bytes=142"}
+{"seq":1240,"kind":"line","message":"OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=199367175 off=32640 len=128"}
+{"seq":1241,"kind":"line","message":"OTA_MONO MONO_DATA_NAK monoUs=198517351 wallUs=1792873431748895 code=status:5,session:0,seq:192,bitmap:0x0,pending:0 durable=28672"}
+{"seq":1242,"kind":"line","message":"OTA_LINK_STATS {\"schema\":1,\"label\":\"upgrade\",\"device\":\"e3:49:e1:14:d6:cb\",\"attempt\":null,\"clock\":\"stopwatch-mono-us\",\"phases\":{\"bind\":[6,651077],\"transfer\":[860021,199373481]},\"failure\":{\"stage\":\"transfer\",\"reason\":\"mcu-ack-0xff\"},\"attempts\":[],\"attemptEndUs\":null,\"retired\":null,\"bind\":{\"charsUs\":27878,\"found\":true,\"writeMode\":\"with\",\"mtuRequested\":247,\"mtuChunkBytes\":244,\"mtuSource\":\"negotiated\",\"mtuUs\":419552,\"subscribeUs\":95286,\"subscribeOk\":true,\"phaseUs\":651071},\"getInfo\":{\"calls\":3,\"failures\":0,\"totalUs\":434505},\"transfer\":{\"begin\":{\"first\":{\"protocol\":1,\"session\":1,\"seq\":0,\"epoch\":0,\"off\":8192,\"bitmap\":0,\"ackTimeoutMs\":2000,\"maxRetries\":5,\"windowSegments\":4,\"us\":1006849},\"count\":1},\"startUs\":858918,\"endAckUs\":null,\"elapsedUs\":null,\"outcome\":\"fail\",\"segmentsUnique\":192,\"segmentSendTotal\":192,\"retransmitFrames\":0,\"acks\":{\"ok\":170,\"duplicate\":109,\"error\":19,\"malformed\":0,\"noProgress\":0,\"abort\":1,\"ignoredErrors\":{\"schema\":1,\"counts\":{},\"saturated\":false}},\"ackSamples\":\"partial:missing=20,early=1\",\"ackEarlyInvalid\":1,\"ackEarlyUnsent\":64,\"ackLatency\":{\"count\":172,\"minUs\":725,\"p50Us\":2889,\"p95Us\":83095,\"p99Us\":94848,\"maxUs\":135395},\"durable\":{\"events\":6,\"finalOff\":28672}},\"gattWrites\":{\"calls\":196,\"bytes\":27405,\"errors\":0,\"minUs\":75773,\"p50Us\":90068,\"p95Us\":140750,\"maxUs\":224775},\"discovers\":{\"calls\":198,\"errors\":0,\"minUs\":4763,\"p50Us\":14268,\"p95Us\":24964,\"maxUs\":43764},\"platformWrites\":{\"calls\":196,\"bytes\":27405,\"errors\":0,\"minUs\":57174,\"p50Us\":77452,\"p95Us\":127955,\"maxUs\":206885}}"}
+{"seq":1243,"kind":"upgrade-end","outcome":"not-completed"}
+{"kind":"snapshot","schema":1,"captureId":"1792872944552229-477ce4380ff043ae0e2bcd9c","records":1243,"bytes":149951,"producerLines":1240,"upgradeStarts":1,"upgradeEnds":1,"outcome":"not-completed","lost":0,"error":null,"healthy":true,"sha256":"de218a52a65965d357c2c717408d28d1f416e347dd9e3761e7df9ff7e39d075e","exportedAt":"2026-10-24T20:23:51.906035Z"}
