@@ -62,6 +62,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
   bool _reconcilingTask = false;
   bool _readPending = false;
   int _linkEpoch = 0;
+  bool _linkDisconnected = false;
 
   /// 当前连接设备地址（GET_INFO/传输的入口；无连接则为 null）。
   String? get _deviceAddress =>
@@ -69,7 +70,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
       (widget.connectedDevice ?? _resolvedDevice)?.remoteId.str.toLowerCase();
 
   bool get _deviceReady =>
-      !_needsTaskReconcile && !_reconcilingTask &&
+      !_linkDisconnected && !_needsTaskReconcile && !_reconcilingTask &&
       _deviceAddress != null && otaService.deviceInfo != null;
 
   @override
@@ -106,6 +107,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
       if (!otaService.isUpgrading) {
         _attachedTaskAddress = null;
         _needsTaskReconcile = false;
+        _linkDisconnected = false;
       }
       _resolveAttempted = false;
       _resolveDeviceAndRead();
@@ -149,6 +151,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
           if (changedAddress == currentAddress) {
             setState(() {
               _linkEpoch++;
+              _linkDisconnected = true;
               _attachedTaskAddress = currentAddress;
               _needsTaskReconcile = true;
               _resolvedDevice = null;
@@ -157,6 +160,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
         } else if (event.connectionState == BluetoothConnectionState.connected &&
             (currentAddress == null || currentAddress == changedAddress)) {
           _linkEpoch++;
+          _linkDisconnected = false;
           _resolveAttempted = false;
           _resolveDeviceAndRead();
         }
@@ -186,7 +190,10 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
       if (!mounted) return;
       final ready = await _readDeviceInfo();
       if (mounted) {
-        setState(() { _needsTaskReconcile = !ready || epoch != _linkEpoch; });
+        setState(() {
+          _needsTaskReconcile = !ready || epoch != _linkEpoch;
+          if (ready && epoch == _linkEpoch) _linkDisconnected = false;
+        });
       }
     } finally {
       if (mounted) setState(() { _reconcilingTask = false; });
@@ -381,8 +388,9 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
 
   Widget _buildConnectionStatusCard() {
     final deviceInfo = otaService.deviceInfo;
-    final connected = _deviceAddress != null;
-    final identityConfirmed = deviceInfo != null;
+    final connected = _deviceAddress != null && !_linkDisconnected;
+    final identityConfirmed = deviceInfo != null && connected &&
+        (!_needsTaskReconcile || otaService.isUpgrading) && !_reconcilingTask;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -497,7 +505,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
         !terminalLocked;
     final hint = _deviceAddress == null
         ? '连接码表后将自动读取设备身份'
-        : otaService.deviceInfo == null
+        : !_deviceReady && !otaService.isUpgrading
             ? '设备身份未确认（未识别到 OTA 服务或身份读取失败），暂不能检查更新'
             : terminalLocked
                 ? '已进入终止状态（${terminal.code}），重新读取设备身份后可解锁检查'
@@ -575,7 +583,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
               // 恢复入口——重新 GET_INFO 成功即重建查询链并解锁，
               // 不只给文字提示。
               if (_deviceAddress != null &&
-                  (otaService.deviceInfo == null || terminalLocked))
+                  (!_deviceReady || terminalLocked))
                 OutlinedButton.icon(
                   onPressed: _isChecking || _reconcilingTask ? null : _resolveDeviceAndRead,
                   icon: const Icon(Icons.refresh),

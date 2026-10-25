@@ -46,6 +46,13 @@ show a usable explicit transfer action, and leave OTA start with the user.
 ## Results
 
 First development batch: `e932d600ab6560cf2f874b3fae1908edf85d6a51`,
-Actions run `40145530987`. Results pending when this note was created.
+Actions run `40145530987`: failed. The second batch
+`751f2ca04c6f7980a63f5f9ab2599c8c51ab4ffc`, run `40146295666`, passed all tests
+(Ubuntu 772 passed/16 skipped; Windows 753 passed/35 skipped), but analysis
+correctly failed on a relative import of the vendored Android test platform.
+The import is being corrected to its already-overridden package name. No lint
+suppression, removed assertions or dependency upgrade was used. CI SDK:
+Flutter 3.47.8, Dart 3.13.7, framework revision
+`737ba8f885dc774b53b442759999a312c9461e4e`.
 No new APK downloaded or installed. Windows EXE build and independent acceptance
 are NOT_RUN; the authorized development workflow does not package Windows EXE.

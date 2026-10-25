@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
-import '../../vendor/flutter_blue_plus_android/lib/flutter_blue_plus_android.dart';
+import 'package:flutter_blue_plus_android/flutter_blue_plus_android.dart';
 
 import 'package:ble_monitor/ota/ota_device_info.dart';
 import 'package:ble_monitor/ota/ota_diagnostics.dart';
@@ -621,6 +621,8 @@ void main() {
       fake.phase$.value = OtaPhase.failed;
       await connectionEvent(tester, address, 0);
       expect(findButton(tester, '检查更新').onPressed, isNull);
+      expect(find.text('设备身份已确认'), findsNothing);
+      expect(find.text('未连接设备'), findsOneWidget);
       fake.readResult = null;
       await connectionEvent(tester, address, 1);
       await tester.pumpAndSettle();
