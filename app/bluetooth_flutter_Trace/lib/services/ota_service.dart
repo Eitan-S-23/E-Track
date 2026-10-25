@@ -2115,10 +2115,11 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     _ownerEpoch++; // 登记即前进（RC3-04⑤）：取消窗口用它识别后来者
     final epoch = _ownerEpoch;
     _ownerDone = done.future;
-    final releaseReconnect = _ble.holdAutomaticReconnect();
+    void Function()? releaseReconnect;
     try {
       // GetX listeners run inline: publish only after the new owner is complete.
       _isUpgrading.value = true;
+      releaseReconnect = _ble.holdAutomaticReconnect();
       await previous;
       await _ble.automaticReconnectSettled;
       // RC3-04：排队等待期间被取消（代次已变）则不进入 body——禁止
@@ -2136,7 +2137,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           _ownerDone = null;
           _isUpgrading.value = false;
         }
-        releaseReconnect();
+        releaseReconnect?.call();
       }
     }
   }

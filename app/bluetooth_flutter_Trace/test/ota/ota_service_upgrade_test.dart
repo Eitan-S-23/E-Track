@@ -3047,6 +3047,8 @@ void main() {
       expect(service.downloadedFirmwareFile, isNotNull);
 
       dirGateArmed = true;
+      // Force the HTTP branch: a valid completed cache now correctly skips it.
+      await service.downloadedFirmwareFile!.delete();
       final cancelFuture = service.cancelUpgrade(keepPackage: true);
       await dirGateEntered.future;
 

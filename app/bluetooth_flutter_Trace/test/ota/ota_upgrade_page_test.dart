@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
+import '../../vendor/flutter_blue_plus_android/lib/flutter_blue_plus_android.dart';
 
 import 'package:ble_monitor/ota/ota_device_info.dart';
 import 'package:ble_monitor/ota/ota_diagnostics.dart';
@@ -18,6 +19,17 @@ import 'package:ble_monitor/services/ota_service.dart';
 /// 通过 GetX 容器注入 fake OtaService 子类（页面内 Get.put 幂等返回已
 /// 注册实例），手动驱动 Rx 阶段字段验证各状态渲染，不触发真实 BLE/HTTP。
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  setUpAll(() async {
+    FlutterBluePlusAndroid.registerWith();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(const MethodChannel('flutter_blue_plus/methods'), (call) async {
+      if (call.method == 'flutterRestart' || call.method == 'connectedCount') return 0;
+      if (call.method == 'getAdapterState') return {'adapter_state': 4};
+      return true;
+    });
+    expect(await FlutterBluePlus.isSupported, isTrue);
+  });
   setUp(() {
     Get.testMode = true;
   });
@@ -444,7 +456,7 @@ void main() {
   group('忽略与清理（RC3-12②）', () {
     testWidgets('readyToInstall 点忽略：清包后传输入口消失、下载入口恢复',
         (tester) async {
-      final fake = _FakeOtaService();
+      final fake = _FakeOtaService()..readResult = deviceInfoOf();
       final device = BluetoothDevice(
         remoteId: const DeviceIdentifier('11:22:33:44:55:66'),
       );

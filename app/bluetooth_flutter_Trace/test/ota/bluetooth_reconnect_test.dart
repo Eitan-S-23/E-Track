@@ -78,6 +78,7 @@ void main() {
     release();
     await tester.pump(const Duration(seconds: 2));
     expect(calls, 2);
+    reconnect.dispose();
   });
 
   testWidgets('forgotten in-flight target cannot schedule another retry', (tester) async {

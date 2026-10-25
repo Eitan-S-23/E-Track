@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get/get.dart';
 import '../utils/permission_helper.dart';
+import '../utils/safe_snackbar.dart';
 import '../services/bluetooth_service.dart' as bt_service;
 
 class BleController extends GetxController {
@@ -82,7 +83,7 @@ class BleController extends GetxController {
       debugPrint('蓝牙控制器初始化成功，平台: ${_bluetoothService.getPlatformInfo()}');
     } catch (e) {
       debugPrint('初始化蓝牙失败: $e');
-      Get.snackbar('错误', '初始化蓝牙失败: $e', snackPosition: SnackPosition.BOTTOM);
+      safeSnackbar('错误', '初始化蓝牙失败: $e', snackPosition: SnackPosition.BOTTOM);
     }
   }
 
@@ -113,18 +114,18 @@ class BleController extends GetxController {
 
       // 检查蓝牙状态
       if (adapterState.value != BluetoothAdapterState.on) {
-        Get.snackbar('提示', '请先开启蓝牙', snackPosition: SnackPosition.BOTTOM);
+        safeSnackbar('提示', '请先开启蓝牙', snackPosition: SnackPosition.BOTTOM);
         return;
       }
 
       // 使用跨平台蓝牙服务扫描（持续扫描）
       await _bluetoothService.startScan();
 
-      Get.snackbar('提示', '开始扫描蓝牙设备...', snackPosition: SnackPosition.BOTTOM);
+      safeSnackbar('提示', '开始扫描蓝牙设备...', snackPosition: SnackPosition.BOTTOM);
     } catch (e) {
       isScanning.value = false;
       debugPrint('扫描失败: $e');
-      Get.snackbar('错误', '扫描失败: $e', snackPosition: SnackPosition.BOTTOM);
+      safeSnackbar('错误', '扫描失败: $e', snackPosition: SnackPosition.BOTTOM);
     }
   }
 

@@ -72,7 +72,9 @@ class BluetoothReconnect {
   void _schedule(_ReconnectTarget target) {
     if (_closed || !_available || _holds != 0 || target.connected ||
         target.running || target.timer != null || target.attempts >= delays.length ||
-        !identical(_targets[target.address.toLowerCase()], target)) return;
+        !identical(_targets[target.address.toLowerCase()], target)) {
+      return;
+    }
     target.timer = Timer(Duration(seconds: delays[target.attempts]), () {
       target.timer = null;
       target.running = true;

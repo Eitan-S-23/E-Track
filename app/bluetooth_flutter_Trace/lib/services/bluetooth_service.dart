@@ -1642,13 +1642,13 @@ class BluetoothService extends GetxController {
           throw StateError('STALE_OTA_GATT_COMPLETION');
         }
       } else {
+        final binding = reuseOtaCharacteristics
+            ? _requireOtaGatt(deviceAddress, serviceId, characteristicId)
+            : null;
         final device = _findDeviceByAddress(deviceAddress);
         if (device == null) {
           throw UnsupportedError('未找到设备，无法写入: $deviceAddress');
         }
-        final binding = reuseOtaCharacteristics
-            ? _requireOtaGatt(deviceAddress, serviceId, characteristicId)
-            : null;
         if (binding != null &&
             writeWithResponse != (binding.writeMode == 'with')) {
           throw StateError('OTA_GATT_WRITE_MODE_MISMATCH');
