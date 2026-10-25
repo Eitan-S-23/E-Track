@@ -20,6 +20,7 @@ import zipfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from Tools.flutter.dev_checks import APP, checked_path, make_directory
+from Tools.flutter import ota_link_profile
 
 
 APK_RELATIVE = APP / "build/app/outputs/flutter-apk/app-debug.apk"
@@ -221,6 +222,7 @@ OTA_LINK_CANDIDATE_ENV = "TRACE_DEV_OTA_LINK_CANDIDATE"
 
 
 def ota_link_candidate(env):
+    profile = ota_link_profile.selected(env)
     name = env.get(OTA_LINK_CANDIDATE_ENV, "").strip()
     if name in ("", "baseline"):
         return None
@@ -231,6 +233,8 @@ def ota_link_candidate(env):
         config = {"name": name, "runtime_config": True}
         if name == "runtime-pipeline":
             config["pipeline"] = True
+        if profile is not None:
+            config["profile"] = profile
         return config
     candidates = {
         "reuse-with": (True, False),

@@ -123,6 +123,7 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
                         if path in RUNNER.TOOLCHAIN_REGENERATED]
         with mock.patch("sys.stdout", new_callable=io.StringIO), \
                 mock.patch.dict(os.environ, {"GITHUB_SHA": "1" * 40,
+                                            "TRACE_DEV_OTA_LINK_PROFILE": "none",
                                             "FLUTTER_DEV_DEVICE_OTA_NATIVE_TESTS": str(native_tests).lower()}):
             code, path = RUNNER.run_checks(
                 self.project, scope, build_apk=build_apk, execute=execute,
@@ -504,7 +505,7 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
             ".github/workflows/flutter-dev-checks.yml", ".github/workflows/acceptance-governance.yml",
             ".github/workflows/build.yml", "app/bluetooth_flutter_Trace/pubspec.yaml",
             "app/bluetooth_flutter_Trace/test/ota/probe_test.dart",
-            "Tools/flutter/dev_checks.py", "Tools/flutter/dev_apk.py",
+            "Tools/flutter/dev_checks.py", "Tools/flutter/dev_apk.py", "Tools/flutter/ota_link_profile.py",
             "Tools/ota/p3-4-link-stats/observation_capture.py",
             "Tools/ota/p3-4-link-stats/batch_timing.py",
             "Tools/ota/p3-4-link-stats/acceptance_stats.py",
@@ -1027,6 +1028,7 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
         run("init", "--quiet")
         # 行尾策略写死：宿主 autocrlf 会让行尾用例时红时绿。
         run("config", "core.autocrlf", "false")
+        run("config", "core.longpaths", "true")
         run("config", "user.name", "dev-checks-fixture")
         run("config", "user.email", "fixture@example.invalid")
         run("config", "commit.gpgsign", "false")

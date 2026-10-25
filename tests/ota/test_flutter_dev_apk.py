@@ -21,6 +21,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from Tools.flutter import dev_apk as APK
 from Tools.flutter import dev_checks as CHECKS
+from Tools.flutter import ota_link_profile as PROFILE
 
 
 class DevelopmentApkTests(unittest.TestCase):
@@ -51,7 +52,7 @@ class DevelopmentApkTests(unittest.TestCase):
         # 显式覆盖。
         for name in (APK.APPLICATION_ID_ENV, APK.DEVICE_OBSERVATION_ENV,
                      APK.OBSERVATION_TARGET_ENV, APK.OBSERVATION_FIRMWARE_URL_ENV,
-                     APK.OTA_LINK_CANDIDATE_ENV, APK.FIXED_SIGNING_ENV,
+                     APK.OTA_LINK_CANDIDATE_ENV, PROFILE.ENV, APK.FIXED_SIGNING_ENV,
                      APK.SIGNING_SECRET_ENV, APK.DEVICE_OTA_NATIVE_TESTS_ENV,
                      "TRACE_DEV_SIGNING_STORE_FILE"):
             base.pop(name, None)
@@ -427,6 +428,86 @@ class DevelopmentApkTests(unittest.TestCase):
                         {**env, APK.OBSERVATION_TARGET_ENV: "XTrace"}):
             with self.subTest(env=invalid), self.assertRaisesRegex(ValueError, "Runtime OTA experiment"):
                 APK.ota_link_candidate(invalid)
+
+    def profile_env(self):
+        return {**self.observation_env(), APK.OBSERVATION_TARGET_ENV: "AA:BB:CC:DD:EE:FF",
+                APK.OTA_LINK_CANDIDATE_ENV: PROFILE.CANDIDATE, PROFILE.ENV: PROFILE.NAME}
+
+    def profile_metadata(self):
+        return dict(artifact_kind="development-debug-apk", release_signing=False,
+                    sha256="d" * 64, requested_ota_link_candidate=APK.ota_link_candidate(self.profile_env()),
+                    device_observation=dict(enabled=True, target="AA:BB:CC:DD:EE:FF"))
+
+    def profile_runtime(self):
+        return PROFILE.runtime_config(metadata=self.profile_metadata(), run_id="recovery-fast",
+            target="AA:BB:CC:DD:EE:FF", latest_url="https://fixture.invalid/api/public/firmware/latest",
+            package=dict(bytes=1048576, sha256="a" * 64), base=dict(sha256="b" * 64),
+            target_image=dict(sha256="c" * 64), base_version=30288, target_version=30289)
+
+    def test_named_profile_rejects_plain_runtime_and_baseline_builds(self):
+        for name in ("baseline", "runtime", "reuse-without", ""):
+            with self.subTest(candidate=name), self.assertRaisesRegex(ValueError, "requires runtime-pipeline"):
+                APK.plan(self.root, self.run, {**self.profile_env(), APK.OTA_LINK_CANDIDATE_ENV: name})
+        with self.assertRaisesRegex(ValueError, "Unknown"):
+            APK.ota_link_candidate({**self.profile_env(), PROFILE.ENV: "invented-fast"})
+        build = next(argv for name, argv, _, _ in APK.plan(self.root, self.run, self.profile_env()) if name == "apk_build")
+        self.assertIn("--dart-define=P34_OTA_PIPELINE=true", build)
+        self.assertEqual(PROFILE.NAME, APK.ota_link_candidate(self.profile_env())["profile"])
+
+    def test_named_profile_is_preserved_as_build_intent_in_apk_metadata(self):
+        env = self.profile_env()
+        observation = APK.observation_config(env)
+        blob = "\n".join(observation.values()).encode()
+        self.write(APK.APK_RELATIVE, self.archive_bytes([("AndroidManifest.xml", b"fixture"),
+                                                        (APK.KERNEL_BLOB, blob)]))
+        with mock.patch.object(APK, "read_application_id", return_value="com.example.fixture"), \
+                mock.patch("sys.stdout", new_callable=io.StringIO):
+            APK.collect(self.root, self.run, "1" * 40, env)
+        metadata = json.loads((self.run / "artifacts/trace-dev-debug.json").read_text())
+        PROFILE.check_apk(metadata, target="AA:BB:CC:DD:EE:FF")
+        self.assertEqual("NOT_RUN", metadata["formal_acceptance"])
+
+    def test_named_profile_pins_accepted_settings_and_forward_identity(self):
+        config = self.profile_runtime()
+        self.assertEqual((10, True, True, 24, 12, 2000), tuple(config[k] for k in
+                         ("schema", "reuseGatt", "withoutResponse", "senderWindowSegments", "dataBatchFrames", "ackTimeoutMs")))
+        self.assertEqual((30288, 30289), (config["currentVersionCode"], config["targetVersionCode"]))
+        for key, value in PROFILE.RUNTIME.items():
+            changed = {**config, key: not value if type(value) is bool else "wrong"}
+            with self.subTest(field=key), self.assertRaises(ValueError):
+                PROFILE.check_runtime(changed)
+        for changed in ({**config, "targetVersionCode": 30288}, {**config, "requestedBaud": True},
+                        {**config, "firmwareLatestUrl": "https://fixture.invalid/api/public/firmware/latest?token=x"},
+                        {**config, "extra": 1}):
+            with self.assertRaises(ValueError):
+                PROFILE.check_runtime(changed)
+
+    def test_named_profile_refuses_unbound_or_wrong_target_apk(self):
+        metadata = self.profile_metadata()
+        PROFILE.check_apk(metadata, target="AA:BB:CC:DD:EE:FF")
+        for key in ("name", "pipeline", "profile"):
+            changed = {**metadata, "requested_ota_link_candidate": {**metadata["requested_ota_link_candidate"], key: None}}
+            with self.subTest(field=key), self.assertRaises(ValueError):
+                PROFILE.check_apk(changed, target="AA:BB:CC:DD:EE:FF")
+        with self.assertRaises(ValueError):
+            PROFILE.check_apk(metadata, target="11:22:33:44:55:66")
+
+    def test_named_profile_checks_negotiated_protocol_window_batch_and_identity(self):
+        config = self.profile_runtime()
+        parameters = {key: value for key, value in PROFILE.RUNTIME.items()
+                      if key not in ("schema", "transferMode", "prefixBytes")}
+        parameters.update(protocol=2, writeMode="without", requestedWindowSegments=24, requestedDataBatchFrames=12,
+            input={**{key: config[key] for key in PROFILE.IDENTITY_FIELDS
+                      if key not in ("runId", "target", "firmwareLatestUrl")}, "deviceAddress": config["target"].lower()})
+        stats = dict(parameters=parameters, success=True, finalDurable=1048576)
+        self.assertTrue(PROFILE.check_observation(stats, config)["settings_match"])
+        for key, value in (("protocol", 1), ("senderWindowSegments", 4), ("dataBatchFrames", 1),
+                           ("reuseGatt", False), ("writeMode", "with")):
+            with self.subTest(field=key), self.assertRaises(ValueError):
+                PROFILE.check_observation({**stats, "parameters": {**parameters, key: value}}, config)
+        for changed in ({**stats, "success": False}, {**stats, "finalDurable": 4096}):
+            with self.assertRaises(ValueError):
+                PROFILE.check_observation(changed, config)
 
     def test_runtime_build_can_use_an_explicit_non_live_default_endpoint(self):
         env = {**self.observation_env(), APK.OTA_LINK_CANDIDATE_ENV: "runtime",

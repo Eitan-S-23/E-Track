@@ -41,6 +41,14 @@ on:
           - reuse-without
           - runtime
           - runtime-pipeline
+      ota_link_profile:
+        description: "Named accepted candidate settings; p34-qualified-v1 requires runtime-pipeline"
+        required: false
+        type: choice
+        default: none
+        options:
+          - none
+          - p34-qualified-v1
       device_observation:
         description: "Explicit opt-in device-observation debug APK; requires observation_target and observation_firmware_latest_url"
         required: false
@@ -87,6 +95,7 @@ jobs:
       # 显式启用的调试包名后缀：push 触发时 inputs 为空 ⇒ 生产 application id 不变。
       TRACE_DEV_APP_ID_SUFFIX: ${{ inputs.app_id_suffix || '' }}
       TRACE_DEV_OTA_LINK_CANDIDATE: ${{ inputs.ota_link_candidate || 'baseline' }}
+      TRACE_DEV_OTA_LINK_PROFILE: ${{ inputs.ota_link_profile || 'none' }}
       # 显式启用的设备观测：默认全空 ⇒ 不注入任何 dart-define，观测代码不生效。
       TRACE_DEV_DEVICE_OBSERVATION: ${{ inputs.device_observation && 'true' || '' }}
       TRACE_DEV_OBSERVATION_TARGET: ${{ inputs.observation_target || '' }}
