@@ -126,6 +126,25 @@ void main() {
     return tempDir;
   }
 
+  test('fresh latest restores completed package after service memory was lost', () async {
+    final dir = tempFirmwareDir();
+    final bytes = assetBytes(1024);
+    await File('${dir.path}${Platform.pathSeparator}$pkgName').writeAsBytes(bytes);
+    final ble = _FakeBle(infoPayload);
+    Get.put<AppUpdateService>(_FakeAppUpdateService());
+    final download = downloadDio([]);
+    final service = makeService(ble: ble,
+        latest: latestDio([_LatestBehavior.ok(latestBody(bytes))]),
+        download: download, firmwareDir: dir);
+    await service.readDeviceInfo('aa:bb:cc:dd:ee:ff');
+    expect(await service.checkFirmwareUpdate(), isNotNull);
+    expect(service.phase, OtaPhase.readyToInstall);
+    expect(await service.downloadedFirmwareFile!.readAsBytes(), bytes);
+    expect(await service.downloadFirmware(), isTrue);
+    expect(service.phase, OtaPhase.readyToInstall);
+    expect((download.httpClientAdapter as _DownloadMockAdapter).requestCount, 0);
+  });
+
   test('双击防重入：挂起下载期间 checkFirmwareUpdate 不发新请求', () async {
     final tempDir = tempFirmwareDir();
     final bytes = assetBytes(1024);

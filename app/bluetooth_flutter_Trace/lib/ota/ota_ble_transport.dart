@@ -548,6 +548,7 @@ class OtaBleTransport {
             for (var seg = 0; seg < segsInBlock; seg++) {
               _checkNoProgress();
               await _waitIfPaused(); // 后台暂停挂起（RC3-08）
+              if (view.hasPendingError) break;
               // 块完成即停（RC3-02⑥）：段间 await 让出期间，块提交 ACK
               // （advanced）可把 durable 推到块尾并清空 inFlight、bitmap
               // 被 MCU 提交后的 0 覆盖——循环恢复后若不检查会按
@@ -590,6 +591,7 @@ class OtaBleTransport {
               );
               onSent?.call(sentBytes, dataLimit);
             }
+            if (view.hasPendingError) continue;
             if (view.durableOff >= blockEnd) break;
             _checkNoProgress();
             final changed =
@@ -603,6 +605,7 @@ class OtaBleTransport {
             for (final entry in pending.entries) {
               _checkNoProgress();
               await _waitIfPaused(); // 后台暂停挂起（RC3-08）
+              if (view.hasPendingError) break;
               // 块完成即停（RC3-02⑥）：重发段间让出期间块提交 ACK 可能
               // 已把 durable 推到块尾——此时重发只会得到幂等 ACK 并触发
               // 写入确认判定 ERR_STATE（RC3-08 判定对「未写 staging 的
@@ -630,6 +633,7 @@ class OtaBleTransport {
               );
               onSent?.call(sentBytes, dataLimit);
             }
+            if (view.hasPendingError) continue;
             if (overLimit) {
               if (resumeLeft > 0) {
                 // ACK 持续丢失（RC3-08③）：MCU 可能仍 ACTIVE 卡在旧
@@ -985,6 +989,7 @@ class OtaBleTransport {
     if (gate != null) {
       await gate.future;
     }
+    _checkUsable();
   }
 
   /// 解除暂停闸门并完成等待者（取消/释放/恢复共用）。
@@ -1825,6 +1830,7 @@ class _TransferAckView {
   Completer<void>? _change;
 
   int get inFlightCount => inFlight.length;
+  bool get hasPendingError => _malformed || _error != null;
 
   /// 段是否在途未确认（未收到 ACK 且未被位图确认）。
   bool isSegmentInFlight(int seg) => inFlight.containsValue(seg);

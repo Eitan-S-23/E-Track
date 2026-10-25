@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../utils/safe_snackbar.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
@@ -373,7 +374,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     if (impl != null) {
       impl(title, message);
     } else {
-      Get.snackbar(title, message);
+      safeSnackbar(title, message);
     }
   }
 
@@ -633,6 +634,11 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           _terminalState.value = null;
           _upgradeStatus.value =
               '设备身份已确认: ${info.deviceModel} (vcode ${info.currentVersionCode})';
+          if (_latestInfo != null && _phase.value != OtaPhase.completed &&
+              _phase.value != OtaPhase.probeCompleted) {
+            await _restoreCachedPackage(_latestInfo!, generation);
+            if (generation != _cancelGeneration) return null;
+          }
         }
         return info;
       } on OtaDeviceIdentityException catch (e) {
@@ -769,6 +775,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       // 记忆本次查询身份（RC3-10⑤）：URL 过期刷新绑定同一 channel。
       _lastCheckedChannel = channel;
       _upgradeStatus.value = '发现新固件: ${latest.versionName}';
+      await _restoreCachedPackage(latest, gen ?? _cancelGeneration);
+      if (gen != null && gen != _cancelGeneration) return null;
       if (_verified != null) {
         _phase.value = OtaPhase.readyToInstall;
       } else {
@@ -905,6 +913,43 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   }
 
   bool _needsFreshManifest = false;
+
+  Future<void> _restoreCachedPackage(FirmwareLatestInfo latest, int generation) async {
+    final asset = latest.asset;
+    final releaseId = latest.releaseId;
+    if (asset == null || releaseId == null) return;
+    final lookup = OtaFirmwareDownload(
+      dirProvider: _firmwareDirProvider,
+      fileGate: _downloadFileGate,
+      stillOwns: () => generation == _cancelGeneration,
+    );
+    File? file;
+    try {
+      file = await lookup.findVerifiedFile(asset);
+    } on OtaDownloadException catch (error) {
+      if (error.code == 'CANCELLED') return;
+      rethrow;
+    }
+    if (generation != _cancelGeneration) return;
+    _firmwareFile = file;
+    _verified = file == null ? null : _VerifiedPackage(
+      assetId: asset.assetId,
+      releaseId: releaseId,
+      sha256: asset.sha256,
+      sizeBytes: asset.sizeBytes,
+      versionCode: latest.versionCode!,
+      file: file,
+    );
+    if (file != null) {
+      _downloadProgress.value = 1;
+      _upgradeProgress.value = 1;
+      _upgradeStatus.value = '已校验本地固件，可直接开始 BLE 传输';
+      _phase.value = OtaPhase.readyToInstall;
+    } else if (_phase.value == OtaPhase.readyToInstall) {
+      _downloadProgress.value = 0;
+      _phase.value = OtaPhase.idle;
+    }
+  }
 
   Future<bool?> _downloadOnce(
     OtaFirmwareAsset asset,
@@ -2070,10 +2115,12 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     _ownerEpoch++; // 登记即前进（RC3-04⑤）：取消窗口用它识别后来者
     final epoch = _ownerEpoch;
     _ownerDone = done.future;
+    final releaseReconnect = _ble.holdAutomaticReconnect();
     try {
       // GetX listeners run inline: publish only after the new owner is complete.
       _isUpgrading.value = true;
       await previous;
+      await _ble.automaticReconnectSettled;
       // RC3-04：排队等待期间被取消（代次已变）则不进入 body——禁止
       // 执行已被取消的操作（如恢复下载 body 前不查取消导致取消后又
       // 发起请求）。
@@ -2089,6 +2136,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           _ownerDone = null;
           _isUpgrading.value = false;
         }
+        releaseReconnect();
       }
     }
   }
@@ -2976,7 +3024,7 @@ class _ChannelAdapter implements OtaBleChannel {
     } catch (e) {
       // 写失败同样标记断连（PR09）：不能只依赖通知流 error/done。
       _connected = false;
-      rethrow;
+      throw OtaTransportException('BLE write failed: $e', code: 'DISCONNECTED');
     }
   }
 

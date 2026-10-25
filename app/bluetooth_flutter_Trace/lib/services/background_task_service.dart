@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import '../controllers/ble_controller.dart';
 import '../controllers/monitor_controller.dart';
@@ -44,7 +43,11 @@ class BackgroundTaskService extends GetxService {
     WidgetsBinding.instance.addObserver(_lifecycleObserver!);
 
     // 初始化通知服务（确保在后台也能显示通知）
-    await _notificationService.initialize();
+    try {
+      await _notificationService.initialize();
+    } catch (error) {
+      debugPrint('Notification initialization failed: $error');
+    }
 
     debugPrint('后台任务服务已初始化');
   }
@@ -93,13 +96,7 @@ class BackgroundTaskService extends GetxService {
   /// 确保后台通知权限
   Future<void> ensureNotificationPermission() async {
     if (Platform.isAndroid) {
-      final AndroidFlutterLocalNotificationsPlugin? androidImpl =
-          _notificationService.flutterLocalNotificationsPlugin
-              .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
-
-      if (androidImpl != null) {
-        await androidImpl.requestNotificationsPermission();
-      }
+      await _notificationService.requestNotificationPermission();
     }
   }
 }

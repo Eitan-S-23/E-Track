@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../utils/safe_snackbar.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -12,6 +13,7 @@ import '../ota/ota_link_stats.dart';
 import '../ota/ota_experiment_config.dart';
 import '../ota/ota_radio_lease.dart';
 import '../ota/ota_scan_pause.dart';
+import 'bluetooth_reconnect.dart';
 
 // 抽象蓝牙适配器接口
 abstract class BluetoothAdapter {
@@ -535,6 +537,16 @@ class BluetoothService extends GetxController {
   // 连接的设备列表
   var connectedDevices = <BluetoothDevice>[].obs;
 
+  late final BluetoothReconnect _reconnect = BluetoothReconnect(
+    connect: connectOtaDeviceByAddress,
+  );
+  final _mobileConnects = <String, Future<bool>>{};
+  final _connectEpochs = <String, int>{};
+  bool _closed = false;
+
+  void Function() holdAutomaticReconnect() => _reconnect.hold();
+  Future<void> get automaticReconnectSettled => _reconnect.settled;
+
   // 设备扫描结果数据
   var scanResults = <ScanResult>[].obs;
 
@@ -675,11 +687,15 @@ class BluetoothService extends GetxController {
     void invalidate() {
       if (identical(_otaLinkWatchOwners[key], owner)) {
         _bumpOtaLinkGeneration(deviceAddress);
+        connectedDevices.removeWhere((d) => d.remoteId.str.toLowerCase() == key);
+        _reconnect.linkChanged(deviceAddress, false);
       }
     }
     _otaLinkWatchers[key] = connectedStream.listen((isConnected) {
       if (!isConnected) {
         invalidate();
+      } else if (identical(_otaLinkWatchOwners[key], owner)) {
+        _reconnect.linkChanged(deviceAddress, true);
       }
     }, onError: (Object _) => invalidate(), onDone: invalidate);
   }
@@ -776,6 +792,8 @@ class BluetoothService extends GetxController {
 
   @override
   void onClose() {
+    _closed = true;
+    _reconnect.dispose();
     final pause = _otaScanPause;
     if (pause != null) {
       unawaited(pause.dispose().catchError((Object error) {
@@ -830,7 +848,7 @@ class BluetoothService extends GetxController {
       }
     } catch (e) {
       debugPrint('初始化蓝牙失败: $e');
-      Get.snackbar('错误', '初始化蓝牙失败: $e', snackPosition: SnackPosition.BOTTOM);
+      safeSnackbar('错误', '初始化蓝牙失败: $e', snackPosition: SnackPosition.BOTTOM);
     }
   }
 
@@ -850,7 +868,7 @@ class BluetoothService extends GetxController {
     } catch (e) {
       debugPrint('Windows蓝牙初始化失败: $e');
       adapterState.value = BluetoothAdapterState.unavailable;
-      Get.snackbar('错误', 'Windows蓝牙初始化失败: $e',
+      safeSnackbar('错误', 'Windows蓝牙初始化失败: $e',
           snackPosition: SnackPosition.BOTTOM);
     }
   }
@@ -860,7 +878,12 @@ class BluetoothService extends GetxController {
     // 监听蓝牙适配器状态
     _adapterSubscription = _adapter.adapterStateChanged.listen((state) {
       adapterState.value = state;
+      _reconnect.adapterChanged(state == BluetoothAdapterState.on);
       if (state != BluetoothAdapterState.on) {
+        for (final device in connectedDevices.toList()) {
+          _bumpOtaLinkGeneration(device.remoteId.str);
+        }
+        connectedDevices.clear();
         discoveredDevices.clear();
         scanResults.clear();
         isScanning.value = false;
@@ -870,6 +893,7 @@ class BluetoothService extends GetxController {
     // 获取当前状态
     final currentState = await _adapter.getAdapterState();
     adapterState.value = currentState;
+    _reconnect.adapterChanged(currentState == BluetoothAdapterState.on);
 
     // 获取已连接的设备
     await updateConnectedDevices();
@@ -897,7 +921,7 @@ class BluetoothService extends GetxController {
       // UI 入口的既有约定：平台异常不外抛（页面层无承接），只提示。
       // 扫描失败路径已在 _startScan 内把 isScanning 复位为 false——
       // 观测入口 startObservationScan 用该复位信号区分"启动被拒"（OBS-01）。
-      Get.snackbar('错误', '开始扫描失败: $e', snackPosition: SnackPosition.BOTTOM);
+      safeSnackbar('错误', '开始扫描失败: $e', snackPosition: SnackPosition.BOTTOM);
     }
   }
 
@@ -1245,7 +1269,7 @@ class BluetoothService extends GetxController {
     } catch (e) {
       isScanning.value = false;
       debugPrint('${Platform.isWindows ? "Windows" : "Mobile"}蓝牙扫描启动失败: $e');
-      Get.snackbar(
+      safeSnackbar(
           '错误', '${Platform.isWindows ? "Windows" : "Mobile"}蓝牙扫描启动失败: $e',
           snackPosition: SnackPosition.BOTTOM);
       throw Exception(
@@ -1309,7 +1333,7 @@ class BluetoothService extends GetxController {
             if (!connectedDevices.contains(device)) {
               connectedDevices.add(device);
             }
-            Get.snackbar('成功', '设备连接成功', snackPosition: SnackPosition.BOTTOM);
+            safeSnackbar('成功', '设备连接成功', snackPosition: SnackPosition.BOTTOM);
           } else {
             connectedDevices.remove(device);
             // RC3-08⑦：遥控路径观测到的断开同样是物理链路迁移。
@@ -1317,38 +1341,22 @@ class BluetoothService extends GetxController {
           }
         });
       } else {
-        // 移动端：使用flutter_blue_plus的连接方式
-        await device.connect(timeout: const Duration(seconds: 10));
-        if (!connectedDevices.contains(device)) {
-          connectedDevices.add(device);
+        if (!await connectOtaDeviceByAddress(device.remoteId.str)) {
+          throw StateError('BLE connection unavailable');
         }
-        // 监听移动端连接状态，及时反映断开
-        try {
-          _deviceConnectionSubscriptions[device.remoteId.str]?.cancel();
-        } catch (_) {}
-        _deviceConnectionSubscriptions[device.remoteId.str] =
-            device.connectionState.listen((state) {
-          if (state == BluetoothConnectionState.connected) {
-            if (!connectedDevices.contains(device)) {
-              connectedDevices.add(device);
-            }
-          } else if (state == BluetoothConnectionState.disconnected) {
-            connectedDevices.remove(device);
-            // RC3-08⑦：同上，断开即物理链路迁移。
-            _bumpOtaLinkGeneration(device.remoteId.str);
-          }
-        });
-
-        Get.snackbar('成功', '设备连接成功', snackPosition: SnackPosition.BOTTOM);
+        safeSnackbar('成功', '设备连接成功', snackPosition: SnackPosition.BOTTOM);
       }
     } catch (e) {
       debugPrint('连接设备失败: $e');
-      Get.snackbar('错误', '连接设备失败: $e', snackPosition: SnackPosition.BOTTOM);
+      safeSnackbar('错误', '连接设备失败: $e', snackPosition: SnackPosition.BOTTOM);
     }
   }
 
   /// 断开设备连接
   Future<void> disconnectDevice(BluetoothDevice device) async {
+    final key = device.remoteId.str.toLowerCase();
+    _reconnect.forget(key);
+    _connectEpochs[key] = (_connectEpochs[key] ?? 0) + 1;
     try {
       if (Platform.isWindows) {
         // Windows平台：断开连接并清理订阅
@@ -1357,10 +1365,10 @@ class BluetoothService extends GetxController {
         _deviceConnectionSubscriptions.remove(device.remoteId.str);
       } else {
         // 移动端：断开连接
-        await device.disconnect();
+        await _mobileOtaDevice(device.remoteId.str).disconnect();
       }
 
-      connectedDevices.remove(device);
+      connectedDevices.removeWhere((d) => d.remoteId.str.toLowerCase() == key);
     } catch (e) {
       // 断开设备连接失败
     } finally {
@@ -1395,7 +1403,7 @@ class BluetoothService extends GetxController {
   /// 启用蓝牙
   Future<void> turnOnBluetooth() async {
     if (Platform.isWindows) {
-      Get.snackbar('提示', '请在系统设置中手动启用蓝牙', snackPosition: SnackPosition.BOTTOM);
+      safeSnackbar('提示', '请在系统设置中手动启用蓝牙', snackPosition: SnackPosition.BOTTOM);
       return;
     }
 
@@ -1407,7 +1415,7 @@ class BluetoothService extends GetxController {
       }
     } catch (e) {
       debugPrint('启用蓝牙失败: $e');
-      Get.snackbar('错误', '启用蓝牙失败，请手动开启', snackPosition: SnackPosition.BOTTOM);
+      safeSnackbar('错误', '启用蓝牙失败，请手动开启', snackPosition: SnackPosition.BOTTOM);
     }
   }
 
@@ -2367,7 +2375,21 @@ class BluetoothService extends GetxController {
   /// Windows 走 WinBle 地址连接；移动端优先复用已连接/扫描缓存的
   /// 设备对象，否则按 remoteId 直接构造（设备重启后不在任何缓存里）。
   /// 返回是否成功；失败由调用方继续轮询。
-  Future<bool> connectOtaDeviceByAddress(String deviceAddress) async {
+  Future<bool> connectOtaDeviceByAddress(String deviceAddress) {
+    if (_closed) return Future.value(false);
+    final key = deviceAddress.toLowerCase();
+    final active = _mobileConnects[key];
+    if (active != null) return active;
+    final epoch = _connectEpochs[key] ?? 0;
+    late final Future<bool> future;
+    future = _connectOtaDevice(deviceAddress, epoch).whenComplete(() {
+      if (identical(_mobileConnects[key], future)) _mobileConnects.remove(key);
+    });
+    _mobileConnects[key] = future;
+    return future;
+  }
+
+  Future<bool> _connectOtaDevice(String deviceAddress, int epoch) async {
     _invalidateOtaGatt(deviceAddress.toLowerCase());
     try {
       if (Platform.isWindows) {
@@ -2383,6 +2405,10 @@ class BluetoothService extends GetxController {
       // Negotiate MTU once in requestOtaMtu after connection and discovery.
       // connect() otherwise requests 512 before the probe can bind or observe it.
       await device.connect(timeout: const Duration(seconds: 10), mtu: null);
+      if (_closed || epoch != (_connectEpochs[deviceAddress.toLowerCase()] ?? 0)) {
+        await device.disconnect();
+        return false;
+      }
       if (!device.isConnected) return false;
       connectedDevices.removeWhere((cached) =>
           cached.remoteId.str.toLowerCase() == deviceAddress.toLowerCase() &&
@@ -2396,6 +2422,7 @@ class BluetoothService extends GetxController {
         device.connectionState
             .map((state) => state == BluetoothConnectionState.connected),
       );
+      _reconnect.remember(deviceAddress);
       return true;
     } catch (e) {
       debugPrint('OTA重连失败($deviceAddress): $e');

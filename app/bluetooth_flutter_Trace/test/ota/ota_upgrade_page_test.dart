@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
@@ -585,6 +586,74 @@ void main() {
   });
 
   group('连接与生命周期（RC3-08④）', () {
+    Future<void> connectionEvent(WidgetTester tester, String address, int state) async {
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter_blue_plus/methods',
+        const StandardMethodCodec().encodeMethodCall(MethodCall(
+          'OnConnectionStateChanged', {
+            'remote_id': address,
+            'connection_state': state,
+            'disconnect_reason_code': 0,
+            'disconnect_reason_string': '',
+          })), (_) {},
+      );
+      await tester.pump();
+    }
+
+    testWidgets('same target reconnect retries failed identity read and restores actions', (tester) async {
+      const address = 'AA:BB:CC:DD:EE:FF';
+      final fake = _FakeOtaService()..readResult = deviceInfoOf();
+      await pumpPage(tester, fake: fake, connectedDevice: BluetoothDevice.fromId(address));
+      fake.hasFile = true;
+      fake.latest = latestOf();
+      fake.phase$.value = OtaPhase.failed;
+      await connectionEvent(tester, address, 0);
+      expect(findButton(tester, '检查更新').onPressed, isNull);
+      fake.readResult = null;
+      await connectionEvent(tester, address, 1);
+      await tester.pumpAndSettle();
+      expect(fake.readCalls, 2);
+      expect(findButton(tester, '检查更新').onPressed, isNull);
+      fake.readResult = deviceInfoOf();
+      await connectionEvent(tester, address, 0);
+      await connectionEvent(tester, address, 1);
+      await tester.pumpAndSettle();
+      expect(fake.readCalls, 3);
+      expect(findButton(tester, '检查更新').onPressed, isNotNull);
+      expect(findButton(tester, '开始 BLE 传输').onPressed, isNotNull);
+      await connectionEvent(tester, address, 0);
+    });
+
+    testWidgets('reconnect arriving during failed read is reconciled exactly once', (tester) async {
+      const address = 'AA:BB:CC:DD:EE:FF';
+      final fake = _FakeOtaService()..readGate = Completer<void>();
+      await pumpPage(tester, fake: fake, connectedDevice: BluetoothDevice.fromId(address), settle: false);
+      await connectionEvent(tester, address, 0);
+      await connectionEvent(tester, '11:22:33:44:55:66', 1);
+      await connectionEvent(tester, address, 1);
+      expect(fake.readCalls, 1);
+      fake.readResult = deviceInfoOf();
+      fake.readGate!.complete();
+      await tester.pumpAndSettle();
+      expect(fake.readCalls, 2);
+      expect(fake.lastReadAddress, address.toLowerCase());
+      expect(findButton(tester, '检查更新').onPressed, isNotNull);
+      await connectionEvent(tester, address, 0);
+      await connectionEvent(tester, '11:22:33:44:55:66', 0);
+    });
+
+    testWidgets('reopened failed task keeps its exact device and cached transfer entry', (tester) async {
+      final fake = _FakeOtaService()
+        ..taskAddress = 'aa:bb:cc:dd:ee:ff'
+        ..readResult = deviceInfoOf()
+        ..hasFile = true
+        ..latest = latestOf();
+      fake.phase$.value = OtaPhase.failed;
+      await pumpPage(tester, fake: fake);
+      expect(fake.lastReadAddress, 'aa:bb:cc:dd:ee:ff');
+      expect(findButton(tester, '开始 BLE 传输').onPressed, isNotNull);
+    });
+
     for (final terminal in [OtaPhase.completed, OtaPhase.cancelled, OtaPhase.failed]) {
       testWidgets('P38-R04 notification page reattaches target after $terminal', (tester) async {
         final fake = _FakeOtaService()

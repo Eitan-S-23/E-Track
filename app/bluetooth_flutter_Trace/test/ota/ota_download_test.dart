@@ -84,6 +84,60 @@ void main() {
       );
 
   group('完整下载', () {
+    test('verified completed file is reused without HTTP across instances', () async {
+      final bytes = assetBytes(1024);
+      final requests = <RequestOptions>[];
+      final dio = dioWithServer(bytes, requestLog: [requests.add]);
+      final first = await downloader(dio).download(asset: assetOf(bytes),
+          releaseId: 'rel-1', downloadUrl: 'http://localhost:9/original');
+      final second = await downloader(dio).download(asset: assetOf(bytes),
+          releaseId: 'rel-1', downloadUrl: 'http://localhost:9/renewed');
+      expect(second.path, first.path);
+      expect(await second.readAsBytes(), bytes);
+      expect(requests, hasLength(1));
+    });
+
+    test('cache lookup rejects missing, truncated and same-size corrupted files', () async {
+      final bytes = assetBytes(1024);
+      final download = downloader(dioWithServer(bytes));
+      final asset = assetOf(bytes);
+      final file = File('${tempDir.path}${Platform.pathSeparator}pkg.etu');
+      expect(await download.findVerifiedFile(asset), isNull);
+      await file.writeAsBytes(bytes.sublist(0, 100));
+      expect(await download.findVerifiedFile(asset), isNull);
+      final corrupted = Uint8List.fromList(bytes)..[7] ^= 0xff;
+      await file.writeAsBytes(corrupted);
+      expect(await download.findVerifiedFile(asset), isNull);
+      await file.writeAsBytes(bytes);
+      expect((await download.findVerifiedFile(asset))?.path, file.path);
+      expect(await download.findVerifiedFile(assetOf(corrupted)), isNull);
+    });
+
+    test('cancel while cache validation waits for file gate cannot return success', () async {
+      final bytes = assetBytes(32);
+      final file = File('${tempDir.path}${Platform.pathSeparator}pkg.etu');
+      await file.writeAsBytes(bytes);
+      final gate = OtaFilePathGate();
+      final release = Completer<void>();
+      final entered = Completer<void>();
+      final blocker = gate.run(file.path, () async {
+        entered.complete();
+        await release.future;
+      });
+      await entered.future;
+      final token = CancelToken();
+      final download = OtaFirmwareDownload(dirProvider: () async => tempDir,
+          fileGate: gate);
+      final result = download.findVerifiedFile(assetOf(bytes), cancelToken: token);
+      final checked = expectLater(result, throwsA(isA<OtaDownloadException>()
+          .having((e) => e.code, 'code', 'CANCELLED')));
+      token.cancel();
+      release.complete();
+      await blocker;
+      await checked;
+      expect(await file.readAsBytes(), bytes);
+    });
+
     test('200 全量下载 + 长度/SHA 校验 + 原子 rename', () async {
       final bytes = assetBytes(1024);
       final dio = dioWithServer(bytes);

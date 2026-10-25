@@ -18,6 +18,7 @@ class _Device extends BluetoothDevice {
   int disconnects = 0;
   int? requestedMtu = 999;
   Duration? connectTimeout;
+  Completer<void>? connectGate;
 
   @override
   bool get isConnected => connected;
@@ -32,6 +33,7 @@ class _Device extends BluetoothDevice {
     bool autoConnect = false,
   }) async {
     connects++;
+    await connectGate?.future;
     requestedMtu = mtu;
     connectTimeout = timeout;
     if (failConnect || mtu != null) {
@@ -71,6 +73,34 @@ void main() {
   });
 
   group('mobile OTA reconnect boundary', skip: Platform.isWindows, () {
+    test('simultaneous same-address connects share the native attempt', () async {
+      final gate = Completer<void>();
+      final device = _Device(upper)..connectGate = gate;
+      created.add(device);
+      service.connectedDevices.add(device);
+      final first = service.connectOtaDeviceByAddress(lower);
+      final second = service.connectOtaDeviceByAddress(upper);
+      expect(device.connects, 1);
+      gate.complete();
+      expect(await first, isTrue);
+      expect(await second, isTrue);
+      expect(device.connects, 1);
+    });
+
+    test('manual disconnect invalidates a late native connect completion', () async {
+      final gate = Completer<void>();
+      final device = _Device(upper)..connectGate = gate;
+      created.add(device);
+      service.connectedDevices.add(device);
+      service.otaDeviceFactoryForTest = (_) => device;
+      final pending = service.connectOtaDeviceByAddress(lower);
+      await service.disconnectDevice(device);
+      gate.complete();
+      expect(await pending, isFalse);
+      expect(service.connectedDevices, isEmpty);
+      expect(device.isConnected, isFalse);
+    });
+
     test('cold lowercase MAC uses native spelling and defers automatic MTU', () async {
       expect(await service.connectOtaDeviceByAddress(lower), isTrue);
       final device = created.single;

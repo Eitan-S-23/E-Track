@@ -125,7 +125,9 @@ class MyApp extends StatelessWidget {
             Get.put(DeepLinkService(), permanent: true);
 
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              Get.find<NotificationService>().initialize();
+              Get.find<NotificationService>().initialize().catchError((Object error) {
+                debugPrint('Notification initialization failed: $error');
+              });
               Get.find<AppUpdateService>().checkDailyOnStartup();
               if (!OtaExperimentRuntime.current.ready) return;
               // P3-3 T1a 设备观测（dev 分支 + dev APK 专用）。未显式注入

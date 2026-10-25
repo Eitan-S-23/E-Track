@@ -231,6 +231,12 @@ class OtaFirmwareDownload {
       }
 
       await abortIfCancelled();
+      final cached = await findVerifiedFile(asset, cancelToken: token);
+      await abortIfCancelled();
+      if (cached != null) {
+        onProgress?.call(asset.sizeBytes, asset.sizeBytes);
+        return cached;
+      }
       await cleanExpiredPartials(dir);
       await abortIfCancelled();
       while (true) {
@@ -643,6 +649,30 @@ class OtaFirmwareDownload {
 
   /// 校验本地文件当前字节仍与资产身份（长度+SHA-256）一致（PR12：
   /// BEGIN 前复核已下载包，防清单变化/文件被改后仍发送旧字节）。
+  Future<File?> findVerifiedFile(OtaFirmwareAsset asset,
+      {CancelToken? cancelToken}) async {
+    void checkOwner() {
+      if (cancelToken?.isCancelled == true || !_ownsAsset()) {
+        throw OtaDownloadException('Cache lookup cancelled', code: 'CANCELLED');
+      }
+    }
+
+    checkOwner();
+    final dir = await _resolveDir();
+    final file = File(_joinPath(dir.path, _safeFileName(asset.fileName)));
+    return _fileGate.run(_gateBucketOf('${file.path}.part'), () async {
+      checkOwner();
+      bool matches;
+      try {
+        matches = await verifyFileMatchesAsset(file, asset);
+      } on FileSystemException {
+        matches = false;
+      }
+      checkOwner();
+      return matches ? file : null;
+    });
+  }
+
   static Future<bool> verifyFileMatchesAsset(
       File file, OtaFirmwareAsset asset) async {
     if (!await file.exists()) return false;
