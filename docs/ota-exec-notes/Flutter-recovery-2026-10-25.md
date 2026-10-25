@@ -54,5 +54,58 @@ The import is being corrected to its already-overridden package name. No lint
 suppression, removed assertions or dependency upgrade was used. CI SDK:
 Flutter 3.47.8, Dart 3.13.7, framework revision
 `737ba8f885dc774b53b442759999a312c9461e4e`.
-No new APK downloaded or installed. Windows EXE build and independent acceptance
-are NOT_RUN; the authorized development workflow does not package Windows EXE.
+
+Final tested source: `b5111325581f4170a70492e6c3e1202f68d5c0c9`.
+Checks-only run `40147672398` and APK run `40147778398` both concluded success.
+Both hosts passed analysis with no issues and all tests (Ubuntu 772/16 skipped,
+Windows 753/35 skipped, zero failures). The vendored Android test platform is
+now an explicit development dependency; the lockfile and resolved versions did
+not change. Android debug APK build passed. Windows EXE build and independent
+acceptance are NOT_RUN; the authorized development workflow has no EXE job.
+
+Only one APK archive was downloaded (75,526,008 bytes). APK bytes: 131,809,306;
+SHA-256 `e8a77ce2fbb517146b6e5cae196dba7117fbf2185a9ce731e4b5abbb931f05c1`.
+CRC, actual application ID `com.wen.gaia.gaia.p38acceptance`, and fixed debug
+signer `9e9b89c5e7fdc802b1fe71806a988a866db49cd988a739caeee56cb69f3df579`
+were independently checked locally using existing aapt/apksigner, with no SDK
+download or local build. Source/result/archive receipts are in
+`.cache/recovery/final-ci`, `apk-001` and `apk-verified`.
+
+## Device Follow-Up
+
+The finite follow-up is: verify phone/current installed test APK and unchanged
+cached package; replace only the known test package without clearing data; use
+schema-1 baseline BLE settings; test cached-file reuse on reentry; test one
+Bluetooth off/on recovery; then explicitly resume the remaining transfer and
+verify post-reboot identity. Do not replay prior successful background cells or
+downgrade the MCU. The retained reference ETU and target remain the original
+30287 -> 30288 fixture, SHA-256
+`fe6ebde3a100319d53df3bcb85ea95e6a48a75aba6cda40f1953bdeee528707c`.
+
+USB inventory found no devices, corroborated after allowing discovery time.
+No APK was installed, no App data changed, and no OTA/MCU operation was started.
+Both private ADB windows closed with verified receipts. Network-001 failed its
+cross-worktree HTTPS child-entry guard before serving a phone. Network-002 used
+the same existing reader through a contained entry, passed the HTTPS fixture
+checks and was explicitly closed because the phone is absent. Do not reuse its
+expired URL. When USB returns, renew the network and write a fresh schema-1
+runtime configuration before launching this runtime-enabled APK; this does not
+require another APK build/download. This is a development/observation APK, not a
+published general-release artifact or proof of phone-side usability.
+
+## Regression Lessons
+
+Root causes were cross-layer state assumptions and missing integration tests:
+completed bytes outlived page memory, a remembered address was mistaken for a
+live verified link, and multiple service owners initialized one permission API.
+The repair uses verified disk state, explicit link/identity reconciliation and
+single-flight native operations rather than broader retries or extra downloads.
+
+Initial remediation failures were concrete test/setup gaps: the old cleanup
+test implicitly forced HTTP despite a valid completed cache; simulated native
+events lacked platform registration; a snackbar call had additional style
+parameters; a reconnect-test timer needed disposal before widget invariants.
+The sender fix was narrowed to terminal errors so existing recoverable sequence
+error handling remains unchanged. Tests still assert error-budget recovery,
+same-target binding, cancellation ownership and byte identity. Bluetooth
+controller startup callers were also migrated to the safe notification entry.
