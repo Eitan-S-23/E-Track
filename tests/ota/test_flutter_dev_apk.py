@@ -481,6 +481,11 @@ class DevelopmentApkTests(unittest.TestCase):
                         {**config, "extra": 1}):
             with self.assertRaises(ValueError):
                 PROFILE.check_runtime(changed)
+        for url in ("https://localhost/api/public/firmware/latest", "https://127.0.0.1/api/public/firmware/latest",
+                    "https://fixture.invalid/api/public/firmware/latest?", "https://fixture.invalid/api/public/firmware/latest#"):
+            with self.subTest(url=url), self.assertRaises(ValueError):
+                PROFILE.check_runtime({**config, "firmwareLatestUrl": url})
+        PROFILE.check_runtime({**config, "firmwareLatestUrl": "https://fixture.invalid:443/api/public/firmware/latest"})
 
     def test_named_profile_refuses_unbound_or_wrong_target_apk(self):
         metadata = self.profile_metadata()
@@ -500,14 +505,19 @@ class DevelopmentApkTests(unittest.TestCase):
             input={**{key: config[key] for key in PROFILE.IDENTITY_FIELDS
                       if key not in ("runId", "target", "firmwareLatestUrl")}, "deviceAddress": config["target"].lower()})
         stats = dict(parameters=parameters, success=True, finalDurable=1048576)
-        self.assertTrue(PROFILE.check_observation(stats, config)["settings_match"])
+        stamp = dict(schema=10, runId=config["runId"], configSha256=hashlib.sha256(PROFILE.runtime_bytes(config)).hexdigest())
+        self.assertTrue(PROFILE.check_observation(stats, config, experiments=[stamp])["settings_match"])
         for key, value in (("protocol", 1), ("senderWindowSegments", 4), ("dataBatchFrames", 1),
                            ("reuseGatt", False), ("writeMode", "with")):
             with self.subTest(field=key), self.assertRaises(ValueError):
-                PROFILE.check_observation({**stats, "parameters": {**parameters, key: value}}, config)
+                PROFILE.check_observation({**stats, "parameters": {**parameters, key: value}}, config, experiments=[stamp])
         for changed in ({**stats, "success": False}, {**stats, "finalDurable": 4096}):
             with self.assertRaises(ValueError):
-                PROFILE.check_observation(changed, config)
+                PROFILE.check_observation(changed, config, experiments=[stamp])
+        for stamps in ([], [{**stamp, "schema": 9}], [{**stamp, "runId": "old-run"}],
+                       [{**stamp, "configSha256": "0" * 64}], [stamp, {**stamp, "runId": "old-run"}]):
+            with self.subTest(stamps=stamps), self.assertRaises(ValueError):
+                PROFILE.check_observation(stats, config, experiments=stamps)
 
     def test_runtime_build_can_use_an_explicit_non_live_default_endpoint(self):
         env = {**self.observation_env(), APK.OTA_LINK_CANDIDATE_ENV: "runtime",

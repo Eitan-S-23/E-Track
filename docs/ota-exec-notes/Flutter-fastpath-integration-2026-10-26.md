@@ -56,3 +56,15 @@ No 30288 downgrade, Boot replacement, protocol shortcut or repeat of the prior
 slow success. If profile negotiation, identity or observations fail, preserve the
 failure and stop dependent mutation; do not accept a silent slow fallback.
 Development outcomes remain distinct from independent P3-8 adjudication.
+
+## Independent Review Batch
+
+Reviewer `fastpath_review` found two host contract gaps in `3daf949f`:
+FAST-REVIEW-01 requires every original OTA_EXPERIMENT stamp to match schema 10,
+the current run ID and the SHA-256 of canonical written runtime bytes.
+FAST-REVIEW-02 aligns host URL validation with Dart: reject localhost/IP and
+even empty query/fragment delimiters. Both have distinguishing negatives.
+These are host-only follow-ups; App sources, APK build defines and `dev_apk.py`
+remain byte-identical to the successful APK run 40237667185 at `3daf949f`.
+The APK is reused with its exact original commit/hash, not relabeled as rebuilt.
+The follow-up runs checks-only CI and needs reviewer closure, not another OTA.

@@ -3,6 +3,8 @@
 These checks bind build intent and observed settings, not performance acceptance.
 The profile does not change release defaults or remove receiver ACK validation.
 """
+import hashlib
+import json
 import re
 from urllib.parse import urlsplit
 
@@ -59,8 +61,9 @@ def check_runtime(config):
     if not re.fullmatch(r"(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}", config["target"]):
         raise ValueError("Exact BLE target required")
     uri = urlsplit(config["firmwareLatestUrl"])
-    if (uri.scheme != "https" or not uri.hostname or uri.port not in (None, 443)
-            or uri.username or uri.password or uri.query or uri.fragment
+    if (uri.scheme != "https" or not re.fullmatch(r"[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?\.[a-z]{2,}", uri.hostname or "")
+            or uri.port not in (None, 443) or uri.username or uri.password
+            or "?" in config["firmwareLatestUrl"] or "#" in config["firmwareLatestUrl"]
             or uri.path != "/api/public/firmware/latest"):
         raise ValueError("Credential-free HTTPS latest endpoint required")
     for key in ("packageSha256", "currentImageSha256", "targetImageSha256"):
@@ -84,9 +87,20 @@ def runtime_config(*, metadata, run_id, target, latest_url, package, base, targe
     return config
 
 
-def check_observation(statistics, config):
+def runtime_bytes(config):
+    check_runtime(config)
+    return (json.dumps(config, sort_keys=True, separators=(",", ":")) + "\n").encode("utf-8")
+
+
+def check_observation(statistics, config, *, experiments):
     """Consume the existing strict snapshot parser, never an unverified UI value."""
     check_runtime(config)
+    if not isinstance(experiments, list) or not experiments:
+        raise ValueError("Original runtime observations required")
+    stamp = dict(schema=config["schema"], runId=config["runId"],
+                 configSha256=hashlib.sha256(runtime_bytes(config)).hexdigest())
+    for experiment in experiments:
+        require_fields(experiment, stamp, "observed runtime")
     expected = {key: value for key, value in RUNTIME.items()
                 if key not in ("schema", "transferMode", "prefixBytes")}
     expected.update(protocol=2, writeMode="without", requestedWindowSegments=24,
