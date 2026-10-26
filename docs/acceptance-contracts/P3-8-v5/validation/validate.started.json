@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "Tools/acceptance/validate_bundle.py",
+    "--contract",
+    "docs/acceptance-contracts/P3-8-v5.contract.json",
+    "--matrix",
+    "docs/acceptance-contracts/P3-8-v5/evidence-matrix.json",
+    "--repo-root",
+    ".",
+    "--previous-contract",
+    "docs/acceptance-contracts/P3-8-v5/inputs/history/v4/contract.json",
+    "--previous-matrix",
+    "docs/acceptance-contracts/P3-8-v5/inputs/history/v4/evidence-matrix.json",
+    "--reuse-source",
+    "docs/acceptance-contracts/P3-8-v5/inputs/history/v3/contract.json",
+    "docs/acceptance-contracts/P3-8-v5/inputs/history/v3/evidence-matrix.json"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\flutter-recovery-20261025",
+  "monotonic_ns": 174805945251600,
+  "stdin_sha256": null
+}

@@ -1,0 +1,37 @@
+{
+  "images": {
+    "base": {
+      "image": {
+        "path": ".cache\\p38\\reference-001\\base.bin",
+        "bytes": 613952,
+        "sha256": "58eebd962ba1b39369f85954a167516ec5f5e519c5d894c3db5eb0edccea76a1"
+      }
+    },
+    "target": {
+      "image": {
+        "path": ".cache\\p38\\reference-001\\target.bin",
+        "bytes": 613952,
+        "sha256": "88cba0cd2030246b6522662c6b13b4bc8a7729f0a99917efbd66eea1f1a6f7de"
+      }
+    }
+  },
+  "package": {
+    "path": ".cache\\p38\\reference-001\\cases\\reference-1MiB.etu",
+    "bytes": 1048576,
+    "sha256": "fe6ebde3a100319d53df3bcb85ea95e6a48a75aba6cda40f1953bdeee528707c"
+  },
+  "tools": {
+    "cloudflared": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-4-link-stats\\.cache\\p3-4-single-ota-20260921\\bin\\cloudflared.exe",
+      "bytes": 54976432,
+      "sha256": "2837888cc0f5d58f15b6dc478376de90b4d3ba5241c7947455d1e0a0df429712"
+    }
+  },
+  "ble_address": "E3:49:E1:14:D6:CB",
+  "fixture_versions": {
+    "base": 30287,
+    "target": 30288,
+    "target_name": "3.2.88-p38"
+  },
+  "https_download_seconds": 120
+}

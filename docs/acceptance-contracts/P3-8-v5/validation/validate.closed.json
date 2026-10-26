@@ -1,0 +1,44 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "Tools/acceptance/validate_bundle.py",
+    "--contract",
+    "docs/acceptance-contracts/P3-8-v5.contract.json",
+    "--matrix",
+    "docs/acceptance-contracts/P3-8-v5/evidence-matrix.json",
+    "--repo-root",
+    ".",
+    "--previous-contract",
+    "docs/acceptance-contracts/P3-8-v5/inputs/history/v4/contract.json",
+    "--previous-matrix",
+    "docs/acceptance-contracts/P3-8-v5/inputs/history/v4/evidence-matrix.json",
+    "--reuse-source",
+    "docs/acceptance-contracts/P3-8-v5/inputs/history/v3/contract.json",
+    "docs/acceptance-contracts/P3-8-v5/inputs/history/v3/evidence-matrix.json"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 174805945251600,
+  "ended_monotonic_ns": 174819503965100,
+  "stdout": {
+    "path": ".cache\\p38-closeout-20261026\\reviewer\\final-check-001\\validate.stdout",
+    "bytes": 69,
+    "sha256": "29869528668f39838d7d4de5ba56c9bbd93dbce6692471cbc575344a8b123655"
+  },
+  "stderr": {
+    "path": ".cache\\p38-closeout-20261026\\reviewer\\final-check-001\\validate.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

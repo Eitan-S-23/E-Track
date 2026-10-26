@@ -1,0 +1,194 @@
+{
+  "criteria": {
+    "P38-SOFTWARE": {
+      "result": "PASS",
+      "observed": true
+    },
+    "P38-FALLBACK": {
+      "result": "PASS",
+      "observed": true
+    },
+    "P38-BACKGROUND": {
+      "result": "PASS",
+      "observed": true
+    },
+    "P38-NOTIFICATION": {
+      "result": "PASS",
+      "observed": true
+    },
+    "P38-RECOVERY": {
+      "result": "PASS",
+      "observed": true
+    },
+    "P38-FINAL-IDENTITY": {
+      "result": "PASS",
+      "observed": true
+    },
+    "P38-CLEANUP": {
+      "result": "PASS",
+      "observed": true
+    }
+  },
+  "observations": {
+    "SOFTWARE": {
+      "run": 40242995708,
+      "commit": "410b7d57c7ed918103986f42a30af80960506826",
+      "apk_sha256": "52323a6f5806b024df6fa8a44d1b07049b08a49d441ac11600e9dfc54d891124",
+      "exe_sha256": "5ec40ad05fc861ff8ceacd4aaf71ae1a51e6d91d2fe78a9bb5b61ec18e80e7f8",
+      "diagnostics": {
+        "Build Android APK": {
+          "passed": 772,
+          "skipped": 16,
+          "selected_sdk": [
+            "3.47.8",
+            "737ba8f885dc774b53b442759999a312c9461e4e"
+          ],
+          "warnings": [
+            "2026-10-25T23:10:27.1906210Z Warning: Flutter support for your project's Gradle version (8.14.0) will soon be dropped. Please upgrade your Gradle version to a version of at least 9.1.0 soon.",
+            "2026-10-25T23:10:27.1919218Z Warning: Flutter support for your project's Android Gradle Plugin version (Android Gradle Plugin version 8.11.1) will soon be dropped. Please upgrade your Android Gradle Plugin version to a version of at least Android Gradle Plugin version 9.0.1 soon.",
+            "2026-10-25T23:10:27.1928454Z Warning: Flutter support for your project's Kotlin version (2.2.20) will soon be dropped. Please upgrade your Kotlin version to a version of at least 2.3.20 soon.",
+            "2026-10-25T23:10:28.0807163Z Warning: The plugin flutter_plugin_android_lifecycle requires Android SDK version 36 or higher.",
+            "2026-10-25T23:10:28.1784236Z Warning: The plugin geolocator_android requires Android SDK version 36 or higher.",
+            "2026-10-25T23:10:28.2789413Z Warning: The plugin package_info_plus requires Android SDK version 36 or higher.",
+            "2026-10-25T23:10:28.3799301Z Warning: The plugin path_provider_android requires Android SDK version 36 or higher.",
+            "2026-10-25T23:10:28.5814123Z Warning: The plugin share_plus requires Android SDK version 36 or higher.",
+            "2026-10-25T23:10:28.6799512Z Warning: The plugin shared_preferences_android requires Android SDK version 36 or higher.",
+            "2026-10-25T23:10:28.7807678Z Warning: The plugin sqflite_android requires Android SDK version 36 or higher."
+          ]
+        },
+        "Build Windows EXE": {
+          "passed": 753,
+          "skipped": 35,
+          "selected_sdk": [
+            "3.47.8",
+            "737ba8f885dc774b53b442759999a312c9461e4e"
+          ],
+          "warnings": []
+        }
+      },
+      "baseline_signer": "2d8dcc1a5d711333cd9fe359337959c3cab897b97653a22bfec89e3934a2c32d",
+      "fixed_signing": {
+        "run": 40249303504,
+        "source": "aa760c533853938dacf120dcddff5b1a4f56f05f",
+        "signer": "9e9b89c5e7fdc802b1fe71806a988a866db49cd988a739caeee56cb69f3df579",
+        "apk_sha256": "66a5ef87fffe171f947c69bdbc67dd60d6498310c5a8d2a3bbac474e7d5b37a1",
+        "apk_bytes": 47397132,
+        "locally_downloaded": false
+      },
+      "release_fast_path": "NOT_CLAIMED"
+    },
+    "FALLBACK": {
+      "finalDurable": 8192,
+      "pause_markers": [
+        "OTA_MONO MONO_PAUSE monoUs=7044878 wallUs=1792872015263814",
+        "OTA_MONO MONO_PAUSE monoUs=8279714 wallUs=1792872016498663",
+        "OTA_MONO MONO_PAUSE monoUs=8281623 wallUs=1792872016500566",
+        "OTA_MONO MONO_PAUSE monoUs=54533948 wallUs=1792872062752905",
+        "OTA_MONO MONO_PAUSE monoUs=54543311 wallUs=1792872062762261",
+        "OTA_MONO MONO_RESUME monoUs=54879874 wallUs=1792872063098815"
+      ],
+      "order": {
+        "pause_record": 388,
+        "resume_record": 464,
+        "quiet_pause_record": [
+          397,
+          398,
+          456,
+          457
+        ],
+        "tail_completion_records": [
+          393
+        ],
+        "completion_is_not_write_start": true,
+        "write_start_measurement": "NOT_OBSERVED",
+        "cross_clock_subtraction": "NOT_PERFORMED"
+      },
+      "historical_source": true
+    },
+    "BACKGROUND": {
+      "locked_durable": [
+        565248,
+        724992,
+        872448,
+        1028096,
+        1048576
+      ],
+      "capture": "1792967351140709-85d3a2b67acd9ae9b0dae6e4",
+      "transfer_us": 63071407
+    },
+    "NOTIFICATION": {
+      "samples": [
+        {
+          "percent": 21,
+          "durable": 225280,
+          "cutoff_durable": 225280,
+          "records": 8129
+        },
+        {
+          "percent": 26,
+          "durable": 282624,
+          "cutoff_durable": 282624,
+          "records": 10462
+        },
+        {
+          "percent": 28,
+          "durable": 303104,
+          "cutoff_durable": 307200,
+          "records": 11329
+        },
+        {
+          "percent": 30,
+          "durable": 323584,
+          "cutoff_durable": 327680,
+          "records": 12185
+        },
+        {
+          "percent": 34,
+          "durable": 364544,
+          "cutoff_durable": 368640,
+          "records": 13874
+        }
+      ],
+      "current_open": "trace-device-ota://task/df1d61f83389d977d7bb3f7f2451c86c_9_2/9/open",
+      "pending_intent": "67adf79",
+      "independent_review_sha256": "ede61e70bcba65d13d8b209c8e8be94d2d25f7760d8b1524e1637db0ce41e3eb",
+      "fast_visual_pass": false,
+      "screenshot_numeric_progress": "NOT_VISIBLE"
+    },
+    "RECOVERY": {
+      "initial": 401408,
+      "final": 1048576,
+      "package": "fe6ebde3a100319d53df3bcb85ea95e6a48a75aba6cda40f1953bdeee528707c",
+      "explicit_resume": true,
+      "automatic_reconnect": "NOT_INFERRED"
+    },
+    "FINAL-IDENTITY": {
+      "identity": {
+        "version": 30289,
+        "bytes": 613952,
+        "sha256": "245189f7b2f02d968068b3ade77000a0b82a8de20b140bd41e2530675713bad0"
+      },
+      "boot_sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527",
+      "confirmed": true,
+      "sd_ready": true,
+      "advancing": true
+    },
+    "CLEANUP": {
+      "terminal_outcomes": [
+        "cancelled",
+        "completed",
+        "disconnected",
+        "failure"
+      ],
+      "physical_cleanup": true
+    }
+  },
+  "independent_offline_evaluation": true,
+  "new_device_operations": 0,
+  "result": "PASS",
+  "formal_precheck": {
+    "contract_sha256": "1122B8AAD76ACBC7457764B1041CF7B7B9F0335C549D8AE20D09B33C2456F1B3",
+    "freeze_commit": "2be0540feda1aec0ca001afb8456bb7bd82183ce",
+    "result": "PASS"
+  }
+}

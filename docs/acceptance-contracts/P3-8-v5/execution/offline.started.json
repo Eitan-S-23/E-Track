@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "python",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "Tools/ota/p38-closeout/evaluate.py",
+    "--inputs",
+    "docs/acceptance-contracts/P3-8-v5/inputs/inputs-final.json",
+    "--out",
+    "docs/acceptance-contracts/P3-8-v5/execution/result.json",
+    "--contract",
+    "docs/acceptance-contracts/P3-8-v5.contract.json",
+    "--matrix",
+    "docs/acceptance-contracts/P3-8-v5/evidence-matrix.json"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\flutter-recovery-20261025",
+  "monotonic_ns": 173339394233000,
+  "stdin_sha256": null
+}

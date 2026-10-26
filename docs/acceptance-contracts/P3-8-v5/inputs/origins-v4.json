@@ -1,0 +1,607 @@
+{
+  "inputs/software/run.json": {
+    "path": ".cache/flutter-recovery-20261025/.cache/p38-closeout-20261026/ci-status-002/run.stdout",
+    "bytes": 12012,
+    "sha256": "7007d251ebb2132fddefeab5bfeb80650ad9389537859babf97be265d7676063"
+  },
+  "inputs/software/jobs.json": {
+    "path": ".cache/flutter-recovery-20261025/.cache/p38-closeout-20261026/ci-status-002/jobs.stdout",
+    "bytes": 10567,
+    "sha256": "c76a2492c79a6f921fe98b444b00d4c50714978625b43f08a588f58158ce3d8c"
+  },
+  "inputs/software/artifacts.json": {
+    "path": ".cache/flutter-recovery-20261025/.cache/p38-closeout-20261026/ci-status-002/artifacts.stdout",
+    "bytes": 1445,
+    "sha256": "de5065712f9f760f3ef62ac479d58a5b1524d9253ecb0c2e3dbce2973d8538ff"
+  },
+  "inputs/software/android.zip": {
+    "path": ".cache/flutter-recovery-20261025/.cache/p38-closeout-20261026/android-download/artifact.stdout",
+    "bytes": 25851804,
+    "sha256": "011f6269430c296abd7806695f73350951f8b360cd11b95043522206f2d17dd3"
+  },
+  "inputs/software/windows.zip": {
+    "path": ".cache/flutter-recovery-20261025/.cache/p38-closeout-20261026/windows-download/artifact.stdout",
+    "bytes": 20543580,
+    "sha256": "0d0e6a40b05294547075b0041741b6daff8333edf4ac1720d679efc54b5c1e99"
+  },
+  "inputs/software/logs.zip": {
+    "path": ".cache/flutter-recovery-20261025/.cache/p38-closeout-20261026/standard-logs/logs.stdout",
+    "bytes": 1374834,
+    "sha256": "091f5156e72d0984d6ab20efae10a91cdb5bdc2e5a4e94ee546c31c3bfde0757"
+  },
+  "inputs/software/signature.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/p38-closeout-20261026/reviewer/standard-001/signature.stdout",
+    "bytes": 972,
+    "sha256": "2a231c87e006fd69224ca05f6b0df521caa122394fc142eea6ee7c5887d3daa5"
+  },
+  "inputs/software/prior_signature.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/p38-closeout-20261026/reviewer/standard-001/prior-signature.stdout",
+    "bytes": 972,
+    "sha256": "ec0e2a8e99e939ac08e17fcecd41bb246eda8fd0598cb3a7024dcac2c07921c0"
+  },
+  "inputs/software/badging.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/p38-closeout-20261026/reviewer/standard-001/badging.stdout",
+    "bytes": 6537,
+    "sha256": "f662257bf22e6d41ace47b8d17d0528fc9c16bc1623a9c02c26c34d9244e7762"
+  },
+  "inputs/software/verified-assets.json": {
+    "path": ".cache/flutter-recovery-20261025/.cache/p38-closeout-20261026/reviewer/standard-001/result.json",
+    "bytes": 645,
+    "sha256": "25918bd4aef977f11b684fe9b8399f4f5710faaed7dc83f6ef83db65aaf795ac"
+  },
+  "inputs/software/native.xml": {
+    "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/run-39789686610/ubuntu/app/bluetooth_flutter_Trace/build/app/test-results/testDebugUnitTest/TEST-com.wen.gaia.gaia.DeviceOtaServiceTest.xml",
+    "bytes": 2644,
+    "sha256": "b6880580cb2aa95b53d3a5d167ce52fe6af018b6b21fb06d46394fba77e3ae2e"
+  },
+  "inputs/snapshots/fallback.jsonl": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d1/usb/salvage/snapshot-1.jsonl",
+    "bytes": 79829,
+    "sha256": "db6477282fa05ee81eb894b83511998e2229ff52242b859c42ccb4ea0f55749a"
+  },
+  "inputs/snapshots/notification.jsonl": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d2/usb/salvage/snapshot-1.jsonl",
+    "bytes": 1573700,
+    "sha256": "ead89e6d0462bb1ac2256c088d82d171656302bd54fa4bacb34dc510f7e57abe"
+  },
+  "inputs/snapshots/disconnect.jsonl": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d3a/usb/salvage/snapshot-1.jsonl",
+    "bytes": 401030,
+    "sha256": "606751ab1706a5a3e558ea461385f2b9f507c93812b654014fca657b1e200571"
+  },
+  "inputs/snapshots/resume.jsonl": {
+    "path": ".cache/p38-acceptance-20261024/.cache/p38/resume-20261026/watch/usb/salvage/snapshot-1.jsonl",
+    "bytes": 3111339,
+    "sha256": "9f70cd5b5ae6f40ae0c116978b93bdc9e77c9c471aca225070de7e56eb1804d9"
+  },
+  "inputs/snapshots/fast.jsonl": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/usb/snapshot.jsonl",
+    "bytes": 3804605,
+    "sha256": "1bebea26fe7e8ca64f5a6d294f1781feba0fb93cf719c14966bb46e55d7c614f"
+  },
+  "inputs/fallback-transport-v4.dart": {
+    "commit": "60cb25c459bcde95f2be42edc28ef3fdb2448111",
+    "path": "app/bluetooth_flutter_Trace/lib/ota/ota_ble_transport.dart",
+    "sha256": "02464fe8454e1f17d2fdbc9fba88a4ded75240f95f300a9bbe598f110c05bb6e"
+  },
+  "inputs/fast-runtime.json": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/usb/runtime.json",
+    "bytes": 865,
+    "sha256": "70bad87ce59666905c7ca3049b62bf635c28caa086ae12f472bf2075f48480e5"
+  },
+  "inputs/terminal/fallback/services.txt": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d1/sample-0068/services.txt",
+    "bytes": 2523,
+    "sha256": "52b053d3f7ab501a630900e90ad3e3b94bfdeb57bc39074ce9798d10772eb4a5"
+  },
+  "inputs/terminal/fallback/power.txt": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d1/sample-0068/power.txt",
+    "bytes": 22751,
+    "sha256": "93ed1886738a09ee2e8861d51a9c58efed8e3f764af99722fd2d1380fc89bacd",
+    "line_numbers": [
+      1,
+      7,
+      195
+    ],
+    "selection": "Exact original lines only; omitted unrelated device state remains private."
+  },
+  "inputs/locked/0014/services.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0014/services.txt",
+    "bytes": 4101,
+    "sha256": "5fc640e800d09bb0f9edebfb142f3cffc5e69b39731b72456b72b2a4677ffa1e"
+  },
+  "inputs/locked/0014/power.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0014/power.txt",
+    "bytes": 23766,
+    "sha256": "8021e143d44b70d58b0a2145e3f7a2892aece75e53614a27b9d83cde2f51250b",
+    "line_numbers": [
+      1,
+      7,
+      195,
+      199
+    ],
+    "selection": "Exact original lines only; omitted unrelated device state remains private."
+  },
+  "inputs/locked/0014/notification.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0014/notification.txt",
+    "bytes": 4907,
+    "sha256": "3620a8c83d6d1566dc5c19fad5fd438263c2c63d3276576303443a08dbc96c31"
+  },
+  "inputs/locked/0014/pid.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0014/pid.txt",
+    "bytes": 6,
+    "sha256": "44f4331335215a68e41d6b6d3e3d7889cda863a02a872d0e4ca5b5d69c7b2cec"
+  },
+  "inputs/locked/0014/activities.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0014/activities.txt",
+    "bytes": 321,
+    "sha256": "530a34a9bee33f0455e6a8990687ab3a725b9fb64693d168694e2348eaa0568c"
+  },
+  "locked/0014/events_prefix": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0014/events.jsonl",
+    "bytes": 2060898,
+    "sha256": "0a1fcef0c08cc8fa2650f59ddca94119789a7d873bb6127606c6d787149eee73"
+  },
+  "inputs/locked/0015/services.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0015/services.txt",
+    "bytes": 4101,
+    "sha256": "bc81b6a446f1142271689c9f3e897da48d339ad82275272d8f48a01540f03a8d"
+  },
+  "inputs/locked/0015/power.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0015/power.txt",
+    "bytes": 22897,
+    "sha256": "a6ecd7b1488192b83c7bd98365afca6b3ea9d64cd29647eb36bd5636ab54e0ae",
+    "line_numbers": [
+      1,
+      7,
+      195,
+      199
+    ],
+    "selection": "Exact original lines only; omitted unrelated device state remains private."
+  },
+  "inputs/locked/0015/notification.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0015/notification.txt",
+    "bytes": 9761,
+    "sha256": "9a15af45498585bcd0aac61412c835903d66e4d0a9592f6ffdc9993387c37591"
+  },
+  "inputs/locked/0015/pid.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0015/pid.txt",
+    "bytes": 6,
+    "sha256": "44f4331335215a68e41d6b6d3e3d7889cda863a02a872d0e4ca5b5d69c7b2cec"
+  },
+  "inputs/locked/0015/activities.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0015/activities.txt",
+    "bytes": 321,
+    "sha256": "530a34a9bee33f0455e6a8990687ab3a725b9fb64693d168694e2348eaa0568c"
+  },
+  "locked/0015/events_prefix": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0015/events.jsonl",
+    "bytes": 2632144,
+    "sha256": "4ae29faa247d9363b67acbad12567bef341201c54ea47fe73cc9a463e8f55cb0"
+  },
+  "inputs/locked/0016/services.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0016/services.txt",
+    "bytes": 4101,
+    "sha256": "049e9ec91451dad08af044e03ce13b724bb99c8f04930823d26a27bad4a24ede"
+  },
+  "inputs/locked/0016/power.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0016/power.txt",
+    "bytes": 20747,
+    "sha256": "ccc61c173032ff987ff93b493230bd422ab566f8634d8bf13c24938fc476dca3",
+    "line_numbers": [
+      1,
+      7,
+      195,
+      199
+    ],
+    "selection": "Exact original lines only; omitted unrelated device state remains private."
+  },
+  "inputs/locked/0016/notification.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0016/notification.txt",
+    "bytes": 9761,
+    "sha256": "fe499dc74f77be2af79b3445146c28bdc3b5863d8cebc0b832706e75db493272"
+  },
+  "inputs/locked/0016/pid.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0016/pid.txt",
+    "bytes": 6,
+    "sha256": "44f4331335215a68e41d6b6d3e3d7889cda863a02a872d0e4ca5b5d69c7b2cec"
+  },
+  "inputs/locked/0016/activities.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0016/activities.txt",
+    "bytes": 321,
+    "sha256": "530a34a9bee33f0455e6a8990687ab3a725b9fb64693d168694e2348eaa0568c"
+  },
+  "locked/0016/events_prefix": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0016/events.jsonl",
+    "bytes": 3167474,
+    "sha256": "d733e1f2a940f8f1cb4c6bf22ec1a9fc5d12662f84bef0baad1cafd14388b471"
+  },
+  "inputs/locked/0017/services.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0017/services.txt",
+    "bytes": 4101,
+    "sha256": "de0ca753db92418d576df809f4075ee9c6d01de631afde8da0b575ce4b1396b1"
+  },
+  "inputs/locked/0017/power.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0017/power.txt",
+    "bytes": 21101,
+    "sha256": "332f398b952c40dfd240ba26ba3f4fa0d37c63fe980020aed67e8e86bb028590",
+    "line_numbers": [
+      1,
+      7,
+      195,
+      199
+    ],
+    "selection": "Exact original lines only; omitted unrelated device state remains private."
+  },
+  "inputs/locked/0017/notification.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0017/notification.txt",
+    "bytes": 4908,
+    "sha256": "4ab73248f4f4cd1edf9cd0c60f25f8dd890f3a984fb8c9ec66dcd340834ea915"
+  },
+  "inputs/locked/0017/pid.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0017/pid.txt",
+    "bytes": 6,
+    "sha256": "44f4331335215a68e41d6b6d3e3d7889cda863a02a872d0e4ca5b5d69c7b2cec"
+  },
+  "inputs/locked/0017/activities.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0017/activities.txt",
+    "bytes": 321,
+    "sha256": "530a34a9bee33f0455e6a8990687ab3a725b9fb64693d168694e2348eaa0568c"
+  },
+  "locked/0017/events_prefix": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0017/events.jsonl",
+    "bytes": 3723782,
+    "sha256": "2b523e110a679b392a25421a70a5fe560485643c53cbed5be3c5aab575b1397a"
+  },
+  "inputs/locked/0018/services.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0018/services.txt",
+    "bytes": 4094,
+    "sha256": "a2bfcff5f158d87c3b9fae05018e446d113a6f436b7ff04958b95e16fbb8b782"
+  },
+  "inputs/locked/0018/power.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0018/power.txt",
+    "bytes": 21150,
+    "sha256": "a4c501565c0aedb35eedb30fceb4e5f1808cae670fcf9ac3deb511cebc4f4187",
+    "line_numbers": [
+      1,
+      7,
+      195,
+      199
+    ],
+    "selection": "Exact original lines only; omitted unrelated device state remains private."
+  },
+  "inputs/locked/0018/notification.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0018/notification.txt",
+    "bytes": 4619,
+    "sha256": "3c211e8aade8b50d24ebcb11a07a3083262b487a94bf5e4674df8b86c9da328d"
+  },
+  "inputs/locked/0018/pid.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0018/pid.txt",
+    "bytes": 6,
+    "sha256": "44f4331335215a68e41d6b6d3e3d7889cda863a02a872d0e4ca5b5d69c7b2cec"
+  },
+  "inputs/locked/0018/activities.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0018/activities.txt",
+    "bytes": 321,
+    "sha256": "530a34a9bee33f0455e6a8990687ab3a725b9fb64693d168694e2348eaa0568c"
+  },
+  "locked/0018/events_prefix": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-0018/events.jsonl",
+    "bytes": 3793712,
+    "sha256": "f300984364a6c491f3260483f73cf1826160e5cd0ad81f48d33ffcb4aa6bd45d"
+  },
+  "inputs/notification/intent.txt": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d2/intent-observation.txt",
+    "bytes": 2028,
+    "sha256": "5cc2fb38571a1abe3378c489a0461fb4f2e864b42b8194f45e8eef9ec70c53ee"
+  },
+  "inputs/notification/0015-notification.txt": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d2/sample-0015/notification.txt",
+    "bytes": 4931,
+    "sha256": "5a76c40ea649790044ee642ddfa8b3f232c659c4c4951ebb8ea83c620b06e5b9"
+  },
+  "inputs/notification/0015-health.json": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d2/sample-0015/health.json",
+    "bytes": 292,
+    "sha256": "ff25b6d6140d5d331e15f9f35250dd0e4e73c224f4b4d752eafca21570c3c767"
+  },
+  "inputs/notification/0015-pid.txt": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d2/sample-0015/pid.txt",
+    "bytes": 7,
+    "sha256": "96e60d09c2d341c8770484e70e4bac73b3d3ea733baaed36b956ac503aa67de4"
+  },
+  "inputs/notification/0018-notification.txt": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d2/sample-0018/notification.txt",
+    "bytes": 9796,
+    "sha256": "16a5125711899a81a44382e14dec2767c81741e7098cb4dddd885b2d78eb3d5a"
+  },
+  "inputs/notification/0018-health.json": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d2/sample-0018/health.json",
+    "bytes": 295,
+    "sha256": "946e376aa2226d8ad891235d7d1d7a7f590d85c9a41d67757f4ca5318265e5ae"
+  },
+  "inputs/notification/0018-pid.txt": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d2/sample-0018/pid.txt",
+    "bytes": 7,
+    "sha256": "96e60d09c2d341c8770484e70e4bac73b3d3ea733baaed36b956ac503aa67de4"
+  },
+  "inputs/notification/0019-notification.txt": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d2/sample-0019/notification.txt",
+    "bytes": 4931,
+    "sha256": "2ed9a65c22c95261fb97a380b428e3f3e3674035056c64c3730d381b6c09b9f8"
+  },
+  "inputs/notification/0019-health.json": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d2/sample-0019/health.json",
+    "bytes": 295,
+    "sha256": "ac953d51aac8ff274fc58f85617e7557ef8a6fac4b4061a96a3faebcea554890"
+  },
+  "inputs/notification/0019-pid.txt": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d2/sample-0019/pid.txt",
+    "bytes": 7,
+    "sha256": "96e60d09c2d341c8770484e70e4bac73b3d3ea733baaed36b956ac503aa67de4"
+  },
+  "inputs/notification/0020-notification.txt": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d2/sample-0020/notification.txt",
+    "bytes": 4931,
+    "sha256": "d0b5d9ff23b421ea53021546bcb21ed21864c0d2420d87bf123872e1cb50a709"
+  },
+  "inputs/notification/0020-health.json": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d2/sample-0020/health.json",
+    "bytes": 295,
+    "sha256": "b36bc64065d02e94eecfb921cb9770d8293b5be29094df0c978327c55b1b8479"
+  },
+  "inputs/notification/0020-pid.txt": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d2/sample-0020/pid.txt",
+    "bytes": 7,
+    "sha256": "96e60d09c2d341c8770484e70e4bac73b3d3ea733baaed36b956ac503aa67de4"
+  },
+  "inputs/notification/0022-notification.txt": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d2/sample-0022/notification.txt",
+    "bytes": 4933,
+    "sha256": "95e4ab3a21d8b4ef4660400222a9bc1c4340a606c1dd848b8447cb13578ba180"
+  },
+  "inputs/notification/0022-health.json": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d2/sample-0022/health.json",
+    "bytes": 295,
+    "sha256": "c4fbbe308d2c0ff48a042e7aef0549f007734973ad798e43f16caf9fec4f0359"
+  },
+  "inputs/notification/0022-pid.txt": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d2/sample-0022/pid.txt",
+    "bytes": 7,
+    "sha256": "96e60d09c2d341c8770484e70e4bac73b3d3ea733baaed36b956ac503aa67de4"
+  },
+  "inputs/notification/returned-activities.txt": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d2/sample-0022/activities.txt",
+    "bytes": 359,
+    "sha256": "55d6f876d6e994579af11cbb88ed3d9fe41fd80c5260d358b3c6574c247f5bd8"
+  },
+  "inputs/notification/returned-page.png": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d2/sample-0022/screen.png",
+    "bytes": 393676,
+    "sha256": "fea746c428ed7e2fff0366a7231db11017e7aae0adf46e42988040f3d194eaa6"
+  },
+  "inputs/notification/adjudication.md": {
+    "path": ".cache/flutter-recovery-20261025/docs/acceptance-contracts/P3-8-v5/notification-adjudication.md",
+    "bytes": 4476,
+    "sha256": "ede61e70bcba65d13d8b209c8e8be94d2d25f7760d8b1524e1637db0ce41e3eb"
+  },
+  "inputs/mcu/app_region.bin": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/final-state/mcu/0001-full-state/app_region.bin",
+    "bytes": 983040,
+    "sha256": "0dbd75d5dbf56ff0878245073d469c1b656220a1d4867007adf2999039bfc9a0"
+  },
+  "inputs/mcu/boot.bin": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/final-state/mcu/0001-full-state/boot.bin",
+    "bytes": 65536,
+    "sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527"
+  },
+  "inputs/mcu/target.bin": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/reference/target.bin",
+    "bytes": 613952,
+    "sha256": "245189f7b2f02d968068b3ade77000a0b82a8de20b140bd41e2530675713bad0"
+  },
+  "inputs/mcu/state.bin": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/final-state/mcu/0001-full-state/state.bin",
+    "bytes": 1,
+    "sha256": "e52d9c508c502347344d8c07ad91cbd6068afc75ff6292f062a09ca381c89e71"
+  },
+  "inputs/mcu/confirmed.bin": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/final-state/mcu/0001-full-state/confirmed.bin",
+    "bytes": 1,
+    "sha256": "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a"
+  },
+  "inputs/mcu/snapped.bin": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/final-state/mcu/0001-full-state/snapped.bin",
+    "bytes": 1,
+    "sha256": "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a"
+  },
+  "inputs/mcu/owner.bin": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/final-state/mcu/0001-full-state/owner.bin",
+    "bytes": 1,
+    "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+  },
+  "inputs/mcu/active.bin": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/final-state/mcu/0001-full-state/active.bin",
+    "bytes": 1,
+    "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+  },
+  "inputs/mcu/isr.bin": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/final-state/mcu/0001-full-state/isr.bin",
+    "bytes": 1,
+    "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+  },
+  "inputs/mcu/cfsr.bin": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/final-state/mcu/0001-full-state/cfsr.bin",
+    "bytes": 4,
+    "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+  },
+  "inputs/mcu/hfsr.bin": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/final-state/mcu/0001-full-state/hfsr.bin",
+    "bytes": 4,
+    "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+  },
+  "inputs/mcu/vtor.bin": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/final-state/mcu/0001-full-state/vtor.bin",
+    "bytes": 4,
+    "sha256": "5e444e96f1fa76c66095c3ede19f4bee104091e50e7d468dba66149d8495e21f"
+  },
+  "inputs/mcu/dhcsr.bin": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/final-state/mcu/0001-full-state/dhcsr.bin",
+    "bytes": 4,
+    "sha256": "52a5c4a10657220cac05c63adfa923c7771c55d868a58ee360eb3d1511985c3e"
+  },
+  "inputs/mcu/sdio.bin": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/final-state/mcu/0001-full-state/sdio.bin",
+    "bytes": 4,
+    "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+  },
+  "inputs/mcu/sd.bin": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/final-state/mcu/0001-full-state/sd.bin",
+    "bytes": 1,
+    "sha256": "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a"
+  },
+  "inputs/mcu/health0.bin": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/final-state/mcu/0001-full-state/health0.bin",
+    "bytes": 36,
+    "sha256": "96768e4d4a9e9c24003dd6efcfb9e681c115a665888f808290cb814c93687be1"
+  },
+  "inputs/mcu/health1.bin": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/final-state/mcu/0001-full-state/health1.bin",
+    "bytes": 36,
+    "sha256": "596a1013daad1b331e2844be13651a6c88088338ab16082601df8732d706f25f"
+  },
+  "inputs/terminal/cancelled/services.txt": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d2/sample-0024/services.txt",
+    "bytes": 2520,
+    "sha256": "e8ce43b230b6c0321738ff88b738cf473ffb7dda76b1f1326fca0571a5232b27"
+  },
+  "inputs/terminal/cancelled/power.txt": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d2/sample-0024/power.txt",
+    "bytes": 22982,
+    "sha256": "4f8804e326e15e41b4253ac823294b1c5589aefad1ff08bc5114e72d62bddcb6",
+    "line_numbers": [
+      1,
+      7,
+      189,
+      425
+    ],
+    "selection": "Exact original lines only; omitted unrelated device state remains private."
+  },
+  "inputs/terminal/cancelled/notification.txt": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d2/sample-0024/notification.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "inputs/terminal/disconnected/services.txt": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d3a/sample-0067/services.txt",
+    "bytes": 2523,
+    "sha256": "0a2476152de452253593a0a9b72b3771b2916d2f5ff160276ed8530a11a1fb17"
+  },
+  "inputs/terminal/disconnected/power.txt": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d3a/sample-0067/power.txt",
+    "bytes": 23149,
+    "sha256": "92226aacb185815c05ff547f90a2fa82f4f152d2eeda115f086c867660981f75",
+    "line_numbers": [
+      1,
+      7,
+      193
+    ],
+    "selection": "Exact original lines only; omitted unrelated device state remains private."
+  },
+  "inputs/terminal/disconnected/notification.txt": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/d3a/sample-0067/notification.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "inputs/terminal/completed/services.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-9999/services.txt",
+    "bytes": 2518,
+    "sha256": "49e3045d8583f57355fdf942c7a29006817619f01959951dffa295dd2adf2455"
+  },
+  "inputs/terminal/completed/power.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-9999/power.txt",
+    "bytes": 23163,
+    "sha256": "08be056301e1eb5475ae14e0f44f381052db70dc4e172a69b123c77e25a70a59",
+    "line_numbers": [
+      1,
+      7,
+      195
+    ],
+    "selection": "Exact original lines only; omitted unrelated device state remains private."
+  },
+  "inputs/terminal/completed/notification.txt": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/sample-9999/notification.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "inputs/closures/adb.json": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/usb/adb-server.closed.json",
+    "bytes": 797,
+    "sha256": "d12e84e5724d6c0cac02e95c89cac56053392e13a240d6a50bfee0bbfdfb6e97"
+  },
+  "inputs/closures/network.json": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/network/closed.json",
+    "bytes": 105,
+    "sha256": "29a62b59e1bfdabd30b3f434976188c1268bb0ee6f912ab7abf33eb9d919dfe8"
+  },
+  "inputs/closures/logcat.json": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/logcat.closed.json",
+    "bytes": 886,
+    "sha256": "695620d613bb54ddcc0c873e565fc079aec5523e59ccc7342efdcef151503457"
+  },
+  "inputs/fast-result.json": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery-fast/session-001/result.json",
+    "bytes": 120147,
+    "sha256": "ffbb0c17cb60f41aa22cef9c27e20871dba830272da63d7de96dec6d98f10ae6"
+  },
+  "inputs/lineage/v1.contract.json": {
+    "path": ".cache/p38-acceptance-20261024/docs/acceptance-contracts/P3-8-v1.contract.json",
+    "bytes": 27915,
+    "sha256": "d25aa50b9ef5e0feedcbbf6d1f37300cb63a67ab1c601d82569a7ae65cfdbb19"
+  },
+  "inputs/lineage/v1.matrix.json": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v1/evidence-matrix.json",
+    "bytes": 5433,
+    "sha256": "db7b4c507cda6ac65b273bb00b35080dc5ccbe0f0730b1a8ec571fd469a59f51"
+  },
+  "inputs/lineage/v2.contract.json": {
+    "path": ".cache/p38-acceptance-20261024/docs/acceptance-contracts/P3-8-v2.contract.json",
+    "bytes": 29101,
+    "sha256": "b82cdfb008011afffe54234e5efe74508f57b27c0b249b798179b49b2ff5d2e7"
+  },
+  "inputs/lineage/v2.matrix.json": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v2/evidence-matrix.json",
+    "bytes": 8725,
+    "sha256": "25b932291223c16c432d72770763faf8c761f134caec923da6b3af74dfe42e3a"
+  },
+  "inputs/lineage/v3.contract.json": {
+    "path": ".cache/p38-acceptance-20261024/docs/acceptance-contracts/P3-8-v3.contract.json",
+    "bytes": 29144,
+    "sha256": "9d515846eb05f574807bd50e0f5daf28c54f7c33517acf275faed3ccce170fb5"
+  },
+  "inputs/lineage/v3.matrix.json": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v3/evidence-matrix.json",
+    "bytes": 10351,
+    "sha256": "fa19bf096f384bf2e2f4a1c60f1886f558583d9d1a3bfd37f85275de7fb0a0fd"
+  },
+  "inputs/lineage/v4.contract.json": {
+    "path": ".cache/p38-acceptance-20261024/docs/acceptance-contracts/P3-8-v4.contract.json",
+    "bytes": 30378,
+    "sha256": "2be53845e967b59a121dbe16e8f7dbd4ef56180ab6708ca64de13567b74ec851"
+  },
+  "inputs/lineage/v4.matrix.json": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/evidence-matrix.json",
+    "bytes": 15283,
+    "sha256": "065ef5e759b6424b70ca9fadd283f39abc070be9cc8eb3b7fc10bb5916c45256"
+  },
+  "inputs/failures/query-timeout-result.json": {
+    "path": ".cache/flutter-recovery-20261025/.cache/recovery/final-transfer-20261026/result.json",
+    "bytes": 401,
+    "sha256": "11931d7b0b5b8aedd63257176e1d9de12a9fd87813eef6497c2159f8a4b1a446"
+  },
+  "inputs/failures/v4-recovery-findings.md": {
+    "path": ".cache/p38-acceptance-20261024/.acceptance-p3-8/v4/recovery-findings.md",
+    "bytes": 4049,
+    "sha256": "c5497b391370c06837ec3068f35e66230fed8940a75442c5370a4cf34ac20aaa"
+  }
+}

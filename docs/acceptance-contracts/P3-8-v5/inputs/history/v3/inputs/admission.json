@@ -1,0 +1,153 @@
+{
+  "base_sha256": "58eebd962ba1b39369f85954a167516ec5f5e519c5d894c3db5eb0edccea76a1",
+  "target_sha256": "88cba0cd2030246b6522662c6b13b4bc8a7729f0a99917efbd66eea1f1a6f7de",
+  "originals": {
+    "app_region": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\native-preflight-002\\passive-read\\app_region.bin",
+      "bytes": 983040,
+      "sha256": "a669002f40d348fd71ca29ce9e2c1ba2cfd99bb0689b61ccb1c80a3b04403cb2"
+    },
+    "boot": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\native-preflight-002\\passive-read\\boot.bin",
+      "bytes": 65536,
+      "sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527"
+    },
+    "target": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\reference-001\\target.bin",
+      "bytes": 613952,
+      "sha256": "88cba0cd2030246b6522662c6b13b4bc8a7729f0a99917efbd66eea1f1a6f7de"
+    },
+    "package": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\reference-001\\cases\\reference-1MiB.etu",
+      "bytes": 1048576,
+      "sha256": "fe6ebde3a100319d53df3bcb85ea95e6a48a75aba6cda40f1953bdeee528707c"
+    },
+    "reference": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\reference-001\\result.json",
+      "bytes": 6142,
+      "sha256": "c078a6c72433f38ee44ecbe1595b9ee8ae66a114c2ecce11342f8ccb55186add"
+    },
+    "installed": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\apk-install-004\\result.json",
+      "bytes": 463,
+      "sha256": "1b2938ef8eaa62208827ad9ed44351ebf7d88731c1a17d716e2d506c01a7e949"
+    }
+  },
+  "state": {
+    "active": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\state-preflight-001\\mcu\\0001-state\\active.bin",
+      "bytes": 1,
+      "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+    },
+    "backup_slot": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\state-preflight-001\\mcu\\0001-state\\backup_slot.bin",
+      "bytes": 32,
+      "sha256": "e44336a1b816a99cda78b67e3fbed58fda3eea4f3f1bf6a12bb2957354ef1c36"
+    },
+    "candidate_slot": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\state-preflight-001\\mcu\\0001-state\\candidate_slot.bin",
+      "bytes": 32,
+      "sha256": "71f4576229bb585c10f66565b3cf71589e8d50e7c4fa55aa081edb74cf1edd29"
+    },
+    "cfsr": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\state-preflight-001\\mcu\\0001-state\\cfsr.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    "confirmed": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\state-preflight-001\\mcu\\0001-state\\confirmed.bin",
+      "bytes": 1,
+      "sha256": "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a"
+    },
+    "dhcsr": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\state-preflight-001\\mcu\\0001-state\\dhcsr.bin",
+      "bytes": 4,
+      "sha256": "52a5c4a10657220cac05c63adfa923c7771c55d868a58ee360eb3d1511985c3e"
+    },
+    "disabled": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\state-preflight-001\\mcu\\0001-state\\disabled.bin",
+      "bytes": 1,
+      "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+    },
+    "freeze": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\state-preflight-001\\mcu\\0001-state\\freeze.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    "header_after": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\state-preflight-001\\mcu\\0001-state\\header_after.bin",
+      "bytes": 96,
+      "sha256": "e07114cf3b54a7f5e6f2e916a2dea10e891116a17a18f27cdf09415724ec8424"
+    },
+    "health0": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\state-preflight-001\\mcu\\0001-state\\health0.bin",
+      "bytes": 36,
+      "sha256": "481d1b075077510d3cdad11c944f1b9e6294b3384621897dee6612e4c5a0c696"
+    },
+    "health1": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\state-preflight-001\\mcu\\0001-state\\health1.bin",
+      "bytes": 36,
+      "sha256": "0ece994e8fb90b5a871962e1cc79737d3f3d8c938d93f476d7a4d67cb5d97436"
+    },
+    "hfsr": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\state-preflight-001\\mcu\\0001-state\\hfsr.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    "isr": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\state-preflight-001\\mcu\\0001-state\\isr.bin",
+      "bytes": 1,
+      "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+    },
+    "jedec": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\state-preflight-001\\mcu\\0001-state\\jedec.bin",
+      "bytes": 4,
+      "sha256": "e218e2eccee7ced0261a4dc71db73c31d71724cfe7cb65e7467ef7d174f81a02"
+    },
+    "owner": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\state-preflight-001\\mcu\\0001-state\\owner.bin",
+      "bytes": 1,
+      "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+    },
+    "recovery_slot": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\state-preflight-001\\mcu\\0001-state\\recovery_slot.bin",
+      "bytes": 32,
+      "sha256": "c0e11ef1523fc0dc94bf759ee8e4d85344738e9096ae1fdefa10ad7ac30aec6c"
+    },
+    "rtt_signature": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\state-preflight-001\\mcu\\0001-state\\rtt_signature.bin",
+      "bytes": 16,
+      "sha256": "b037e0b75350661ec7a1531e4664d98b293002a7613eda3c7ed0115fe8b32196"
+    },
+    "sd": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\state-preflight-001\\mcu\\0001-state\\sd.bin",
+      "bytes": 1,
+      "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+    },
+    "sdio": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\state-preflight-001\\mcu\\0001-state\\sdio.bin",
+      "bytes": 4,
+      "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+    },
+    "snapped": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\state-preflight-001\\mcu\\0001-state\\snapped.bin",
+      "bytes": 1,
+      "sha256": "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a"
+    },
+    "staging": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\state-preflight-001\\mcu\\0001-state\\staging.bin",
+      "bytes": 4096,
+      "sha256": "89b99a93c4b0dce009d76a30323af3f943518bba8d81d0c7f492e2a81921be1f"
+    },
+    "state": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\state-preflight-001\\mcu\\0001-state\\state.bin",
+      "bytes": 1,
+      "sha256": "e52d9c508c502347344d8c07ad91cbd6068afc75ff6292f062a09ca381c89e71"
+    },
+    "vtor": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\state-preflight-001\\mcu\\0001-state\\vtor.bin",
+      "bytes": 4,
+      "sha256": "5e444e96f1fa76c66095c3ede19f4bee104091e50e7d468dba66149d8495e21f"
+    }
+  }
+}

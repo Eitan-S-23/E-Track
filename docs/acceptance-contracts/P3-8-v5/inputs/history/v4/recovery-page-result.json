@@ -1,0 +1,9 @@
+{
+  "result": "EXISTING_PROCESS_PAGE_OBSERVATIONS_SAVED",
+  "no_restart": true,
+  "no_ota_start": true,
+  "no_install": true,
+  "samples": 16,
+  "page_samples": 1,
+  "cached_package_sha256": "fe6ebde3a100319d53df3bcb85ea95e6a48a75aba6cda40f1953bdeee528707c"
+}

@@ -1,0 +1,137 @@
+{
+  "root": "D:\\github\\my\\E-Track\\.cache\\flutter-recovery-20261025",
+  "checked_entries": 701,
+  "controlled_output_scopes": [
+    "Tools\\ota\\p38-closeout\\evaluate.py",
+    "Tools\\ota\\p38-closeout\\prepare.py",
+    "tests\\ota\\test_p38_closeout.py",
+    "docs\\acceptance-contracts\\P3-8-v5.contract.json",
+    "docs\\acceptance-contracts\\P3-8-v5",
+    ".cache\\p38-closeout-20261026\\reviewer"
+  ],
+  "closures": [
+    {
+      "path": ".cache\\p38-closeout-20261026\\reviewer\\draft-001\\validate.closed.json",
+      "complete": true,
+      "errors": []
+    },
+    {
+      "path": ".cache\\p38-closeout-20261026\\reviewer\\final-check-001\\validate.closed.json",
+      "complete": true,
+      "errors": []
+    },
+    {
+      "path": ".cache\\p38-closeout-20261026\\reviewer\\precheck-001\\plan.closed.json",
+      "complete": true,
+      "errors": []
+    },
+    {
+      "path": ".cache\\p38-closeout-20261026\\reviewer\\precheck-001\\precheck.closed.json",
+      "complete": true,
+      "errors": []
+    },
+    {
+      "path": ".cache\\p38-closeout-20261026\\reviewer\\preparation-001\\stage.closed.json",
+      "complete": true,
+      "errors": []
+    },
+    {
+      "path": ".cache\\p38-closeout-20261026\\reviewer\\preparation-002\\stage.closed.json",
+      "complete": true,
+      "errors": []
+    },
+    {
+      "path": ".cache\\p38-closeout-20261026\\reviewer\\preparation-003\\stage.closed.json",
+      "complete": true,
+      "errors": []
+    },
+    {
+      "path": ".cache\\p38-closeout-20261026\\reviewer\\selftest-001\\unit.closed.json",
+      "complete": true,
+      "errors": []
+    },
+    {
+      "path": ".cache\\p38-closeout-20261026\\reviewer\\selftest-002\\originals.closed.json",
+      "complete": true,
+      "errors": []
+    },
+    {
+      "path": ".cache\\p38-closeout-20261026\\reviewer\\selftest-002\\unit.closed.json",
+      "complete": true,
+      "errors": []
+    },
+    {
+      "path": ".cache\\p38-closeout-20261026\\reviewer\\selftest-003\\originals.closed.json",
+      "complete": true,
+      "errors": []
+    },
+    {
+      "path": ".cache\\p38-closeout-20261026\\reviewer\\selftest-004\\unit.closed.json",
+      "complete": true,
+      "errors": []
+    },
+    {
+      "path": ".cache\\p38-closeout-20261026\\reviewer\\selftest-005\\prepare.closed.json",
+      "complete": true,
+      "errors": []
+    },
+    {
+      "path": ".cache\\p38-closeout-20261026\\reviewer\\selftest-005\\smoke.closed.json",
+      "complete": true,
+      "errors": []
+    },
+    {
+      "path": ".cache\\p38-closeout-20261026\\reviewer\\selftest-005\\unit.closed.json",
+      "complete": true,
+      "errors": []
+    },
+    {
+      "path": ".cache\\p38-closeout-20261026\\reviewer\\selftest-006\\prepare.closed.json",
+      "complete": true,
+      "errors": []
+    },
+    {
+      "path": ".cache\\p38-closeout-20261026\\reviewer\\selftest-006\\smoke.closed.json",
+      "complete": true,
+      "errors": []
+    },
+    {
+      "path": ".cache\\p38-closeout-20261026\\reviewer\\selftest-006\\unit.closed.json",
+      "complete": true,
+      "errors": []
+    },
+    {
+      "path": ".cache\\p38-closeout-20261026\\reviewer\\selftest-007\\smoke.closed.json",
+      "complete": true,
+      "errors": []
+    },
+    {
+      "path": ".cache\\p38-closeout-20261026\\reviewer\\standard-001\\badging.closed.json",
+      "complete": true,
+      "errors": []
+    },
+    {
+      "path": ".cache\\p38-closeout-20261026\\reviewer\\standard-001\\prior-signature.closed.json",
+      "complete": true,
+      "errors": []
+    },
+    {
+      "path": ".cache\\p38-closeout-20261026\\reviewer\\standard-001\\signature.closed.json",
+      "complete": true,
+      "errors": []
+    },
+    {
+      "path": "docs/acceptance-contracts/P3-8-v5/execution/offline.closed.json",
+      "cleanup_complete": true,
+      "cleanup_errors": []
+    }
+  ],
+  "unapproved_external_writes_identified": [],
+  "shell": "cmd.exe; login false; no PowerShell",
+  "python": "isolated no-site no-bytecode; local test temporary directories",
+  "java": "preparation only; local temp/home and UsePerfData disabled",
+  "git_writes_by_reviewer": false,
+  "new_device_operations": 0,
+  "network_calls": 0,
+  "remaining_processes": 0
+}

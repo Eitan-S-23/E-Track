@@ -1,0 +1,294 @@
+{
+  "schema": "etrack-acceptance-contract-v3",
+  "contract_id": "P3-8-v5",
+  "version": 5,
+  "task_id": "P3-8",
+  "parent_contract_sha256": "2BE53845E967B59A121DBE16E8F7DBD4EF56180AB6708CA64DE13567B74EC851",
+  "status": "FROZEN",
+  "approved_by": "/root/fastpath_review, user-delegated independent reviewer/acceptor; root approved bounded draft on 2026-10-26",
+  "approved_at": "2026-10-26T01:01:43Z",
+  "implementation_ref": "Product baseline 410b7d57c7ed918103986f42a30af80960506826; fixed-signer build aa760c533853938dacf120dcddff5b1a4f56f05f; committed offline runner 2be0540feda1aec0ca001afb8456bb7bd82183ce. User-delegated independent offline successor to v4: preserve historical failures, no new OTA/device/build/download operations, no release authorization. Existing originals dated 2026-10-24 through 2026-10-26 were captured by the prior independent operator and root implementation operator; origins-final.json retains their exact input identities and source paths. See notification-adjudication.md and review.md for applicability and limits.",
+  "freeze_commit": "2be0540feda1aec0ca001afb8456bb7bd82183ce",
+  "freeze_tree": "01a9ae76c845961a7a45516cdac5d3825af7a5ce",
+  "profile_config_blob": "5ef97ae98674373c3cf641676c16ff7baf1b617f",
+  "result_taxonomy": [
+    "PASS",
+    "PRODUCT_FAIL",
+    "HARNESS_FAIL",
+    "EVIDENCE_GAP",
+    "ENV_BLOCKED"
+  ],
+  "invalidation_policy": "docs/acceptance-execution-contract.md",
+  "input_groups": [
+    {
+      "id": "production",
+      "profile": "Production",
+      "category": "production_source"
+    },
+    {
+      "id": "validation",
+      "profile": "Validation",
+      "category": "validation_inputs"
+    },
+    {
+      "id": "governance",
+      "profile": "Governance",
+      "category": "governance_inputs"
+    },
+    {
+      "id": "flutter",
+      "profile": "Flutter",
+      "category": "production_source"
+    }
+  ],
+  "external_inputs": [
+    {
+      "id": "originals",
+      "category": "fixture",
+      "description": "Portable hash/length-bound original App captures, native samples, MCU readbacks, actual standard archives/CI, fixed-signer run logs, original failures and v1-v4 lineage. This binds observations, not permission to repeat physical actions. Frozen source applicability is verified by the offline evaluator and independent review.",
+      "fingerprint": "sha256:00511e9b91b73f23d9c5c9d40f0353ef7c3d2397eec089309a40bc11286e8a4f",
+      "evidence_path": "inputs/inputs-final.json",
+      "evidence_sha256": "00511e9b91b73f23d9c5c9d40f0353ef7c3d2397eec089309a40bc11286e8a4f"
+    }
+  ],
+  "commands": [
+    {
+      "id": "CMD-P38-OFFLINE",
+      "description": "One independent offline evaluation of all seven criteria using existing originals. Run only after frozen NOT_RUN precheck and previous-v4 rerun plan. Single 180-second host ceiling, no automatic retry. EXECUTED means this evaluation ran, not another OTA or build.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p38-closeout/evaluate.py --inputs docs/acceptance-contracts/P3-8-v5/inputs/inputs-final.json --out docs/acceptance-contracts/P3-8-v5/execution/result.json --contract docs/acceptance-contracts/P3-8-v5.contract.json --matrix docs/acceptance-contracts/P3-8-v5/evidence-matrix.json",
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p38-closeout/evaluate.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/flutter/ota_link_profile.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-P38-OFFLINE",
+      "description": "Actual independent evaluation of immutable originals, including per-criterion observations and formal frozen precheck.",
+      "path": "execution/result.json"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "P38-SOFTWARE",
+      "description": "Existing standard dual-host analyze/full tests/native regressions and actual APK/EXE originals are valid for exact source/SDK. Successful nonpublishing fixed-signer CI binds actual signer and APK bytes/hash. No new local build or artifact download is inferred.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log",
+        "artifact_hash"
+      ],
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "Flutter binds the actual App/native owner, UI and standard build implementation. Validation binds the strict snapshot parser, runtime/profile checks, native/firmware evaluators and frozen execution guard; immutable external originals bind historical observations and their applicability without repeating them.",
+      "external_inputs": [
+        "originals"
+      ],
+      "command_ids": [
+        "CMD-P38-OFFLINE"
+      ],
+      "artifact_ids": [
+        "ART-P38-OFFLINE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P38-FALLBACK",
+      "description": "Permission-refused foreground fallback remains usable. Historical D1 no sustained unowned background DATA is evaluated with the preserved in-flight completion tail, later paused intervals and current host pause/cancel/budget regressions; zero write starts at the first lifecycle instant is not claimed.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "raw_log",
+        "artifact_hash"
+      ],
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "Flutter binds the actual App/native owner, UI and standard build implementation. Validation binds the strict snapshot parser, runtime/profile checks, native/firmware evaluators and frozen execution guard; immutable external originals bind historical observations and their applicability without repeating them.",
+      "external_inputs": [
+        "originals"
+      ],
+      "command_ids": [
+        "CMD-P38-OFFLINE"
+      ],
+      "artifact_ids": [
+        "ART-P38-OFFLINE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P38-BACKGROUND",
+      "description": "Same acquired native foreground service, active partial lock, PID/capture and task advance MCU durable while locked. The existing fast full-transfer originals are evaluated at their exact runtime configuration, not promoted to production-fast acceptance.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log",
+        "artifact_hash"
+      ],
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "Flutter binds the actual App/native owner, UI and standard build implementation. Validation binds the strict snapshot parser, runtime/profile checks, native/firmware evaluators and frozen execution guard; immutable external originals bind historical observations and their applicability without repeating them.",
+      "external_inputs": [
+        "originals"
+      ],
+      "command_ids": [
+        "CMD-P38-OFFLINE"
+      ],
+      "artifact_ids": [
+        "ART-P38-OFFLINE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P38-NOTIFICATION",
+      "description": "Historical D2 current notification OPEN returns to the same task. Actual numeric native percentages bind to MCU durable at corresponding healthy capture cutoffs; exact screenshot/Intent and independent source-applicability adjudication support page return, without inventing screenshot numeric progress.",
+      "required": true,
+      "kind": "visual",
+      "evidence_types": [
+        "raw_log",
+        "artifact_hash"
+      ],
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "Flutter binds the actual App/native owner, UI and standard build implementation. Validation binds the strict snapshot parser, runtime/profile checks, native/firmware evaluators and frozen execution guard; immutable external originals bind historical observations and their applicability without repeating them.",
+      "external_inputs": [
+        "originals"
+      ],
+      "command_ids": [
+        "CMD-P38-OFFLINE"
+      ],
+      "artifact_ids": [
+        "ART-P38-OFFLINE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P38-RECOVERY",
+      "description": "Historical planned disconnect and later successful explicit same-package recovery have the same device/base/target/package. MCU initial durable equals last durable and first resumed send; automatic reconnect is not inferred from this recovery.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "raw_log",
+        "artifact_hash"
+      ],
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "Flutter binds the actual App/native owner, UI and standard build implementation. Validation binds the strict snapshot parser, runtime/profile checks, native/firmware evaluators and frozen execution guard; immutable external originals bind historical observations and their applicability without repeating them.",
+      "external_inputs": [
+        "originals"
+      ],
+      "command_ids": [
+        "CMD-P38-OFFLINE"
+      ],
+      "artifact_ids": [
+        "ART-P38-OFFLINE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P38-FINAL-IDENTITY",
+      "description": "END is not completion. Existing fresh post-reboot identity and full passive final target/Boot originals agree on final 30289/full raw SHA, header CRC/embedded digest, confirmation, SD-ready/idle/fault-free and advancing same-boot health.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "raw_log",
+        "artifact_hash"
+      ],
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "Flutter binds the actual App/native owner, UI and standard build implementation. Validation binds the strict snapshot parser, runtime/profile checks, native/firmware evaluators and frozen execution guard; immutable external originals bind historical observations and their applicability without repeating them.",
+      "external_inputs": [
+        "originals"
+      ],
+      "command_ids": [
+        "CMD-P38-OFFLINE"
+      ],
+      "artifact_ids": [
+        "ART-P38-OFFLINE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P38-CLEANUP",
+      "description": "Success, failure, cancellation and disconnect native service/wakelock cleanup and host closure receipts are real. Current full software resource/race/budget regressions bind App ownership cleanup. No new physical cleanup action is inferred.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "raw_log",
+        "artifact_hash"
+      ],
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "Flutter binds the actual App/native owner, UI and standard build implementation. Validation binds the strict snapshot parser, runtime/profile checks, native/firmware evaluators and frozen execution guard; immutable external originals bind historical observations and their applicability without repeating them.",
+      "external_inputs": [
+        "originals"
+      ],
+      "command_ids": [
+        "CMD-P38-OFFLINE"
+      ],
+      "artifact_ids": [
+        "ART-P38-OFFLINE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    }
+  ],
+  "performance_gates": []
+}

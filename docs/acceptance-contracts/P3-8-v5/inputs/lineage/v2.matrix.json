@@ -1,0 +1,186 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P3-8-v2",
+  "contract_sha256": "B82CDFB008011AFFFE54234E5EFE74508F57B27C0B249B798179B49B2FF5D2E7",
+  "round_id": "20261024-P38-v2",
+  "overall_result": "EVIDENCE_GAP",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "P38-SOFTWARE",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": true,
+      "evidence": [
+        "software/result.json",
+        "execution/software.stdout"
+      ],
+      "notes": "Independent re-evaluation of original software records passed; not a runtime-enabled APK qualification or a new device operation."
+    },
+    {
+      "id": "P38-FALLBACK",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "d1/result.json",
+        "d1/usb/salvage/health.json",
+        "d1/usb/salvage/events.jsonl",
+        "execution/d1-failed.stderr",
+        "execution/d1-failed.closed.json",
+        "runtime-admission-finding.md"
+      ],
+      "notes": "D1 record was launched once but failed before ready/OTA: baseline APK does not enable OTA_P34_RUNTIME_CONFIG, despite a valid file readback. App query originals are healthy with zero upgrade starts/ends. No user start notice sent; D2/D3/final not run. Raw failed command exit 1 is retained separately, not represented as an approved successful command."
+    },
+    {
+      "id": "P38-BACKGROUND",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "d1/result.json",
+        "d1/usb/salvage/health.json",
+        "d1/usb/salvage/events.jsonl",
+        "execution/d1-failed.stderr",
+        "execution/d1-failed.closed.json",
+        "runtime-admission-finding.md"
+      ],
+      "notes": "D1 record was launched once but failed before ready/OTA: baseline APK does not enable OTA_P34_RUNTIME_CONFIG, despite a valid file readback. App query originals are healthy with zero upgrade starts/ends. No user start notice sent; D2/D3/final not run. Raw failed command exit 1 is retained separately, not represented as an approved successful command."
+    },
+    {
+      "id": "P38-NOTIFICATION",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "d1/result.json",
+        "d1/usb/salvage/health.json",
+        "d1/usb/salvage/events.jsonl",
+        "execution/d1-failed.stderr",
+        "execution/d1-failed.closed.json",
+        "runtime-admission-finding.md"
+      ],
+      "notes": "D1 record was launched once but failed before ready/OTA: baseline APK does not enable OTA_P34_RUNTIME_CONFIG, despite a valid file readback. App query originals are healthy with zero upgrade starts/ends. No user start notice sent; D2/D3/final not run. Raw failed command exit 1 is retained separately, not represented as an approved successful command."
+    },
+    {
+      "id": "P38-RECOVERY",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "d1/result.json",
+        "d1/usb/salvage/health.json",
+        "d1/usb/salvage/events.jsonl",
+        "execution/d1-failed.stderr",
+        "execution/d1-failed.closed.json",
+        "runtime-admission-finding.md"
+      ],
+      "notes": "D1 record was launched once but failed before ready/OTA: baseline APK does not enable OTA_P34_RUNTIME_CONFIG, despite a valid file readback. App query originals are healthy with zero upgrade starts/ends. No user start notice sent; D2/D3/final not run. Raw failed command exit 1 is retained separately, not represented as an approved successful command."
+    },
+    {
+      "id": "P38-FINAL-IDENTITY",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "d1/result.json",
+        "d1/usb/salvage/health.json",
+        "d1/usb/salvage/events.jsonl",
+        "execution/d1-failed.stderr",
+        "execution/d1-failed.closed.json",
+        "runtime-admission-finding.md"
+      ],
+      "notes": "D1 record was launched once but failed before ready/OTA: baseline APK does not enable OTA_P34_RUNTIME_CONFIG, despite a valid file readback. App query originals are healthy with zero upgrade starts/ends. No user start notice sent; D2/D3/final not run. Raw failed command exit 1 is retained separately, not represented as an approved successful command."
+    },
+    {
+      "id": "P38-CLEANUP",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "d1/result.json",
+        "d1/usb/salvage/health.json",
+        "d1/usb/salvage/events.jsonl",
+        "execution/d1-failed.stderr",
+        "execution/d1-failed.closed.json",
+        "runtime-admission-finding.md"
+      ],
+      "notes": "D1 record was launched once but failed before ready/OTA: baseline APK does not enable OTA_P34_RUNTIME_CONFIG, despite a valid file readback. App query originals are healthy with zero upgrade starts/ends. No user start notice sent; D2/D3/final not run. Raw failed command exit 1 is retained separately, not represented as an approved successful command."
+    }
+  ],
+  "evidence_hashes": {
+    "software/result.json": "2E66163FA60B783F0D31FD38E55921EBFC6CEF39C236729025246ED6B6C2C37B",
+    "admission/result.json": "62C708853C0B6C6E50199FB7B2D92E25CAEC5A754EE6C9A176FB1B293BA0167E",
+    "d1/result.json": "DFA95900879CB77EC87D59C4D06AE4E8DC813F00760E145F580EBD1DAC178EEF",
+    "d1/usb/salvage/health.json": "F56F726DF9354AB4B63D0D82D83088765F3E51CFD12618CBE886FE2D5CC2FD51",
+    "d1/usb/salvage/events.jsonl": "8BA4811F8F1EF59ACD2D36CAE4D29EE24F9BA7B8B3490A048D7A1E72101F7892",
+    "execution/software.stdout": "5C9A87F29AB82094C5CABFF8DF39BA2F163ABA8D922C24567B67CD067D39F6D3",
+    "execution/software.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "execution/software.closed.json": "B8AD782819537C41CBA9691FB3D95D7A6EB8D784B06470F73B8020B7A3BE4B7A",
+    "execution/admission.stdout": "CFC59ABB1B3A519EDFC3792EF219FA124F6DE3DF9393ADAB82774F7E0C15082E",
+    "execution/admission.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "execution/admission.closed.json": "7A6A00221725A955AFD342992AF6794ED0640AAB982AE112924B7FA66B22CE94",
+    "execution/d1-failed.stdout": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "execution/d1-failed.stderr": "B7685793649A24F38A66BCD521BC4FE206DA91AC1B9B703839B8C2B7DA39B1AF",
+    "execution/d1-failed.closed.json": "7054809934D9B97AEA7459AD0EEC0AEC18EC39CA2E3B7CDBF3A29C28622B3BC2",
+    "runtime-admission-finding.md": "D901AA1B9F6FD1B955F5FE01F1DD78CEA9D820F4B98D5031C0457772B3A2E717"
+  },
+  "commands": [
+    {
+      "id": "CMD-P38-SOFTWARE",
+      "command": "python -I -S -B -X utf8 Tools/ota/p38-acceptance/offline.py software --inputs .acceptance-p3-8/v2/inputs/software.json --out .acceptance-p3-8/v2/software",
+      "exit_code": 0,
+      "output_evidence": "execution/software.stdout"
+    },
+    {
+      "id": "CMD-P38-ADMISSION",
+      "command": "python -I -S -B -X utf8 Tools/ota/p38-acceptance/offline.py admission --inputs .acceptance-p3-8/v2/inputs/admission.json --out .acceptance-p3-8/v2/admission",
+      "exit_code": 0,
+      "output_evidence": "execution/admission.stdout"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-P38-SOFTWARE",
+      "path": "software/result.json",
+      "size": 15596,
+      "sha256": "2E66163FA60B783F0D31FD38E55921EBFC6CEF39C236729025246ED6B6C2C37B"
+    },
+    {
+      "id": "ART-P38-ADMISSION",
+      "path": "admission/result.json",
+      "size": 2813,
+      "sha256": "62C708853C0B6C6E50199FB7B2D92E25CAEC5A754EE6C9A176FB1B293BA0167E"
+    }
+  ]
+}

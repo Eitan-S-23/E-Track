@@ -1,0 +1,60 @@
+﻿2026-10-26T00:18:05.4393761Z ##[group]Run set -euo pipefail
+2026-10-26T00:18:05.4394418Z [36;1mset -euo pipefail[0m
+2026-10-26T00:18:05.4394973Z [36;1mapk=build/app/outputs/flutter-apk/app-release.apk[0m
+2026-10-26T00:18:05.4396165Z [36;1mapksigner="$(find "${ANDROID_SDK_ROOT:-$ANDROID_HOME}/build-tools" -type f -name apksigner | sort -V | tail -n 1)"[0m
+2026-10-26T00:18:05.4397233Z [36;1mtest -n "$apksigner"[0m
+2026-10-26T00:18:05.4397853Z [36;1mecho "APK signature verifier: $apksigner"[0m
+2026-10-26T00:18:05.4398747Z [36;1m"$apksigner" verify --verbose --print-certs "$apk" | tee android/apk-signature.txt[0m
+2026-10-26T00:18:05.4399639Z [36;1mif [[ "$FIXED_SIGNING" == "true" ]]; then[0m
+2026-10-26T00:18:05.4400417Z [36;1m  actual="$(sed -n 's/^Signer #[0-9][0-9]* certificate SHA-256 digest: //p' android/apk-signature.txt)"[0m
+2026-10-26T00:18:05.4401011Z [36;1m  test -n "$EXPECTED_CERT_SHA256"[0m
+2026-10-26T00:18:05.4401411Z [36;1m  if ! test "$actual" = "$EXPECTED_CERT_SHA256"; then[0m
+2026-10-26T00:18:05.4402342Z [36;1m    echo "::error title=Android APK signer::Produced APK signer differs from the selected fixed certificate."[0m
+2026-10-26T00:18:05.4403094Z [36;1m    printf 'Expected: %s\nObserved: %s\n' "$EXPECTED_CERT_SHA256" "$actual"[0m
+2026-10-26T00:18:05.4403523Z [36;1m    exit 1[0m
+2026-10-26T00:18:05.4403753Z [36;1m  fi[0m
+2026-10-26T00:18:05.4404043Z [36;1m  echo "Verified fixed APK signer SHA-256: $actual"[0m
+2026-10-26T00:18:05.4404384Z [36;1mfi[0m
+2026-10-26T00:18:05.4404603Z [36;1msha256sum "$apk"[0m
+2026-10-26T00:18:05.4404862Z [36;1mwc -c < "$apk"[0m
+2026-10-26T00:18:05.4512069Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-26T00:18:05.4512522Z env:
+2026-10-26T00:18:05.4512791Z   PUB_HOSTED_URL: https://pub.dev
+2026-10-26T00:18:05.4513183Z   FLUTTER_STORAGE_BASE_URL: https://storage.googleapis.com
+2026-10-26T00:18:05.4513690Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-26T00:18:05.4514239Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-26T00:18:05.4514685Z   MAVEN_ARGS: -ntp
+2026-10-26T00:18:05.4514971Z   GRADLE_ACTION_ID: gradle/actions/setup-gradle
+2026-10-26T00:18:05.4515493Z   GRADLE_USER_HOME: /home/runner/.gradle
+2026-10-26T00:18:05.4515831Z   GRADLE_BUILD_ACTION_SETUP_COMPLETED: true
+2026-10-26T00:18:05.4516327Z   DEVELOCITY_INJECTION_INIT_SCRIPT_NAME: gradle-actions.inject-develocity.init.gradle
+2026-10-26T00:18:05.4516858Z   DEVELOCITY_INJECTION_CUSTOM_VALUE: gradle-actions
+2026-10-26T00:18:05.4517219Z   GITHUB_DEPENDENCY_GRAPH_ENABLED: false
+2026-10-26T00:18:05.4517635Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.47.8-x64/flutter
+2026-10-26T00:18:05.4518059Z   PUB_CACHE: /home/runner/.pub-cache
+2026-10-26T00:18:05.4518355Z   FIXED_SIGNING: true
+2026-10-26T00:18:05.4518781Z   EXPECTED_CERT_SHA256: 9e9b89c5e7fdc802b1fe71806a988a866db49cd988a739caeee56cb69f3df579
+2026-10-26T00:18:05.4519265Z ##[endgroup]
+2026-10-26T00:18:05.6291220Z APK signature verifier: /usr/local/lib/android/sdk/build-tools/37.0.0/apksigner
+2026-10-26T00:18:06.2323239Z Verifies
+2026-10-26T00:18:06.2325318Z Verified using v1 scheme (JAR signing): false
+2026-10-26T00:18:06.2333003Z Verified using v2 scheme (APK Signature Scheme v2): true
+2026-10-26T00:18:06.2333794Z Verified using v3 scheme (APK Signature Scheme v3): false
+2026-10-26T00:18:06.2334566Z Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+2026-10-26T00:18:06.2335372Z Verified using v3.2 scheme (APK Signature Scheme v3.2): false
+2026-10-26T00:18:06.2336140Z Verified using v4 scheme (APK Signature Scheme v4): false
+2026-10-26T00:18:06.2336988Z Verified for SourceStamp: false
+2026-10-26T00:18:06.2337811Z Number of signers: 1
+2026-10-26T00:18:06.2343954Z V2 Signer: certificate DN: CN=E-Track Development, OU=Development, O=E-Track, C=CN
+2026-10-26T00:18:06.2352539Z V2 Signer: certificate SHA-256 digest: 9e9b89c5e7fdc802b1fe71806a988a866db49cd988a739caeee56cb69f3df579
+2026-10-26T00:18:06.2354181Z V2 Signer: certificate SHA-1 digest: cbadfe02f5acc0002850586366d0199ffe07f11e
+2026-10-26T00:18:06.2357732Z V2 Signer: certificate MD5 digest: 8857322e6576dda730e820bea6b6d960
+2026-10-26T00:18:06.2359042Z V2 Signer: key algorithm: RSA
+2026-10-26T00:18:06.2359790Z V2 Signer: key size (bits): 3072
+2026-10-26T00:18:06.2360899Z V2 Signer: public key SHA-256 digest: 4cd454ffca9fe02bb289ab9e37009dd484323711abc0bcc70df74f1b31980519
+2026-10-26T00:18:06.2362895Z V2 Signer: public key SHA-1 digest: 76a1ba464698e455e4ade77148afcc48b975c1eb
+2026-10-26T00:18:06.2363977Z V2 Signer: public key MD5 digest: 88b03bbdc01ee6ceb3375bc75137b855
+2026-10-26T00:18:06.2503952Z ##[error]Produced APK signer differs from the selected fixed certificate.
+2026-10-26T00:18:06.2514083Z Expected: 9e9b89c5e7fdc802b1fe71806a988a866db49cd988a739caeee56cb69f3df579
+2026-10-26T00:18:06.2514580Z Observed: 
+2026-10-26T00:18:06.2516545Z ##[error]Process completed with exit code 1.

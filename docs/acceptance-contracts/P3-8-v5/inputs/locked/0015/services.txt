@@ -1,0 +1,50 @@
+ACTIVITY MANAGER SERVICES (dumpsys activity services)
+  User 0 active services:
+  * ServiceRecord{ee7fac7 u0 com.wen.gaia.gaia.p38acceptance/com.wen.gaia.gaia.DeviceOtaService}
+    intent={cmp=com.wen.gaia.gaia.p38acceptance/com.wen.gaia.gaia.DeviceOtaService}
+    packageName=com.wen.gaia.gaia.p38acceptance
+    processName=com.wen.gaia.gaia.p38acceptance
+    baseDir=/data/app/~~1-HzNTayKo5vw7wv1UsFVg==/com.wen.gaia.gaia.p38acceptance-zDDT5gsUGyxvnirPvQ5hpw==/base.apk
+    dataDir=/data/user/0/com.wen.gaia.gaia.p38acceptance
+    app=ProcessRecord{2343b83 6468:com.wen.gaia.gaia.p38acceptance/u0a406}
+    allowWhileInUsePermissionInFgs=true
+    recentCallingPackage=com.wen.gaia.gaia.p38acceptance
+    recentCallingUid=10406
+    allowStartForeground=PROC_STATE_TOP
+    startForegroundCount=1
+    infoAllowStartForeground=[callingPackage: com.wen.gaia.gaia.p38acceptance; callingUid: 10406; uidState: TOP ; intent: Intent { cmp=com.wen.gaia.gaia.p38acceptance/com.wen.gaia.gaia.DeviceOtaService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null]
+    isForeground=true foregroundId=2408 foregroundNoti=Notification(channel=trace_device_ota shortcut=null contentView=null vibrate=null sound=null defaults=0x0 flags=0x6a color=0x00000000 actions=1 vis=PRIVATE internalType=0 internalPriority=0 internalGroupPriority=0 internalFlag=0)
+    createTime=-38s780ms startingBgTimeout=--
+    lastActivity=-38s779ms restartTime=-38s779ms createdFromFg=true
+    startRequested=true delayedStop=false stopIfKilled=true callStart=true lastStartId=1
+
+  * ServiceRecord{da72a77 u0 com.wen.gaia.gaia.p38acceptance/com.baseflow.geolocator.GeolocatorLocationService}
+    intent={cmp=com.wen.gaia.gaia.p38acceptance/com.baseflow.geolocator.GeolocatorLocationService}
+    packageName=com.wen.gaia.gaia.p38acceptance
+    processName=com.wen.gaia.gaia.p38acceptance
+    baseDir=/data/app/~~1-HzNTayKo5vw7wv1UsFVg==/com.wen.gaia.gaia.p38acceptance-zDDT5gsUGyxvnirPvQ5hpw==/base.apk
+    dataDir=/data/user/0/com.wen.gaia.gaia.p38acceptance
+    app=ProcessRecord{2343b83 6468:com.wen.gaia.gaia.p38acceptance/u0a406}
+    allowWhileInUsePermissionInFgs=true
+    recentCallingPackage=com.wen.gaia.gaia.p38acceptance
+    recentCallingUid=10406
+    allowStartForeground=PROC_STATE_TOP
+    startForegroundCount=0
+    infoAllowStartForeground=[callingPackage: com.wen.gaia.gaia.p38acceptance; callingUid: 10406; uidState: TOP ; intent: Intent { cmp=com.wen.gaia.gaia.p38acceptance/com.baseflow.geolocator.GeolocatorLocationService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null]
+    createTime=-3m31s643ms startingBgTimeout=--
+    lastActivity=-3m31s643ms restartTime=-3m31s643ms createdFromFg=true
+    Bindings:
+    * IntentBindRecord{4a305b9 CREATE}:
+      intent={cmp=com.wen.gaia.gaia.p38acceptance/com.baseflow.geolocator.GeolocatorLocationService}
+      binder=android.os.BinderProxy@b3dfdfe
+      requested=true received=true hasBound=true doRebind=false
+      * Client AppBindRecord{d3cb95f ProcessRecord{2343b83 6468:com.wen.gaia.gaia.p38acceptance/u0a406}}
+        Per-process Connections:
+          ConnectionRecord{e2786e4 u0 cp:com.wen.gaia.gaia.p38acceptance CR com.wen.gaia.gaia.p38acceptance/com.baseflow.geolocator.GeolocatorLocationService(da72a77):@565a476}
+    All Connections:
+      ConnectionRecord{e2786e4 u0 cp:com.wen.gaia.gaia.p38acceptance CR com.wen.gaia.gaia.p38acceptance/com.baseflow.geolocator.GeolocatorLocationService(da72a77):@565a476}
+
+  Connection bindings to services:
+  * ConnectionRecord{e2786e4 u0 cp:com.wen.gaia.gaia.p38acceptance CR com.wen.gaia.gaia.p38acceptance/com.baseflow.geolocator.GeolocatorLocationService(da72a77):@565a476}
+    binding=AppBindRecord{d3cb95f com.wen.gaia.gaia.p38acceptance/com.baseflow.geolocator.GeolocatorLocationService:com.wen.gaia.gaia.p38acceptance}
+    conn=android.os.BinderProxy@565a476 flags=0x1

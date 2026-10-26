@@ -1,0 +1,62 @@
+{
+  "resume": {
+    "plan": {
+      "path": "inputs/capture-bindings/resume-plan.json",
+      "bytes": 1475,
+      "sha256": "6c1d1eaa81218f8fdd66dd834778579ac4f36cc714fee112bc455a97671779e9"
+    },
+    "receipt": {
+      "path": "inputs/capture-bindings/resume-receipt.json",
+      "bytes": 570,
+      "sha256": "d7e0f593c6cd9491cd5da695cf096cb0e44e4470aa0a8c74c28a0db07d6e7046"
+    }
+  },
+  "fast": {
+    "plan": {
+      "path": "inputs/capture-bindings/fast-plan.json",
+      "bytes": 1431,
+      "sha256": "8b4e11b926ba18781824c652c8340fa1b727e11499aa27088d90dfb4ea5539f5"
+    },
+    "receipt": {
+      "path": "inputs/capture-bindings/fast-receipt.json",
+      "bytes": 516,
+      "sha256": "f7e556d17fa48e4173169eb176c4f725e4ce27998ef6c3e154d37759d277d3b6"
+    }
+  },
+  "fallback": {
+    "plan": {
+      "path": "inputs/history/v4/inputs/phone-d1.json",
+      "bytes": 1274,
+      "sha256": "d865de3cf61e99a77f378fd8633201e535f8980f007f1fd9c8dfadbbe5a8b0d6"
+    },
+    "receipt": {
+      "path": "inputs/history/v4/d1/result.json",
+      "bytes": 522,
+      "sha256": "55626e594be89ba07e4b0de3959dd860da519b6298cfee41b3025326879fa6e6"
+    }
+  },
+  "notification": {
+    "plan": {
+      "path": "inputs/history/v4/inputs/phone-d2.json",
+      "bytes": 1276,
+      "sha256": "29e2dda1639b0eac5aa5cbd8f1707511dd601be8dda825e42698dd27b7fa88df"
+    },
+    "receipt": {
+      "path": "inputs/history/v4/d2/result.json",
+      "bytes": 522,
+      "sha256": "88a8ce959aaa9d3052b3c20ce9cf7e8049385a6f5af7e118c310b0b18cace65c"
+    }
+  },
+  "disconnect": {
+    "plan": {
+      "path": "inputs/history/v4/inputs/phone-d3a.json",
+      "bytes": 1278,
+      "sha256": "c47e6d70eaff1087e0bfd4fd998e489af5847f23ab9c1ceac904dfdbc468fb17"
+    },
+    "receipt": {
+      "path": "inputs/history/v4/d3a/result.json",
+      "bytes": 523,
+      "sha256": "48ca77b3247fc1e04cc15adb04289b68e288f26b7cec5390a846965248ec51e9"
+    }
+  }
+}

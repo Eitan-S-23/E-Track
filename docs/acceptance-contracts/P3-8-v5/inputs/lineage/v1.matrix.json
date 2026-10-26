@@ -1,0 +1,137 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P3-8-v1",
+  "contract_sha256": "D25AA50B9EF5E0FEEDCBBF6D1F37300CB63A67AB1C601D82569A7AE65CFDBB19",
+  "round_id": "20261024-P38-v1",
+  "overall_result": "EVIDENCE_GAP",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "P38-SOFTWARE",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": true,
+      "evidence": [
+        "software/result.json",
+        "execution/software.stdout"
+      ],
+      "notes": "Independent original-evidence evaluation executed once; full dual-host tests, 18 native cases and standard artifacts verified. No new build or device action."
+    },
+    {
+      "id": "P38-FALLBACK",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not started: the P3-4-only frozen invocation check rejects the P3-8 entry. No physical transfer attempted. Collector repair and successor required."
+    },
+    {
+      "id": "P38-BACKGROUND",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not started: the P3-4-only frozen invocation check rejects the P3-8 entry. No physical transfer attempted. Collector repair and successor required."
+    },
+    {
+      "id": "P38-NOTIFICATION",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not started: the P3-4-only frozen invocation check rejects the P3-8 entry. No physical transfer attempted. Collector repair and successor required."
+    },
+    {
+      "id": "P38-RECOVERY",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not started: the P3-4-only frozen invocation check rejects the P3-8 entry. No physical transfer attempted. Collector repair and successor required."
+    },
+    {
+      "id": "P38-FINAL-IDENTITY",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not started: the P3-4-only frozen invocation check rejects the P3-8 entry. No physical transfer attempted. Collector repair and successor required."
+    },
+    {
+      "id": "P38-CLEANUP",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not started: the P3-4-only frozen invocation check rejects the P3-8 entry. No physical transfer attempted. Collector repair and successor required."
+    }
+  ],
+  "evidence_hashes": {
+    "software/result.json": "2E66163FA60B783F0D31FD38E55921EBFC6CEF39C236729025246ED6B6C2C37B",
+    "execution/software.stdout": "5C9A87F29AB82094C5CABFF8DF39BA2F163ABA8D922C24567B67CD067D39F6D3",
+    "execution/software.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "execution/software.closed.json": "F7183E1D89F768EAB7F61D9EB6EC94CD934BD63A4DABDD4DFBEEEFEBA15FA958",
+    "admission/result.json": "62C708853C0B6C6E50199FB7B2D92E25CAEC5A754EE6C9A176FB1B293BA0167E",
+    "execution/admission.stdout": "CFC59ABB1B3A519EDFC3792EF219FA124F6DE3DF9393ADAB82774F7E0C15082E",
+    "execution/admission.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "execution/admission.closed.json": "2B2AF16199B83E6B7E47751E1A0B77ADB5110D7B229FD1551264670625DDDF61"
+  },
+  "commands": [
+    {
+      "id": "CMD-P38-SOFTWARE",
+      "command": "python -I -S -B -X utf8 Tools/ota/p38-acceptance/offline.py software --inputs .acceptance-p3-8/v1/inputs/software.json --out .acceptance-p3-8/v1/software",
+      "exit_code": 0,
+      "output_evidence": "execution/software.stdout"
+    },
+    {
+      "id": "CMD-P38-ADMISSION",
+      "command": "python -I -S -B -X utf8 Tools/ota/p38-acceptance/offline.py admission --inputs .acceptance-p3-8/v1/inputs/admission.json --out .acceptance-p3-8/v1/admission",
+      "exit_code": 0,
+      "output_evidence": "execution/admission.stdout"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-P38-SOFTWARE",
+      "path": "software/result.json",
+      "size": 15596,
+      "sha256": "2E66163FA60B783F0D31FD38E55921EBFC6CEF39C236729025246ED6B6C2C37B"
+    },
+    {
+      "id": "ART-P38-ADMISSION",
+      "path": "admission/result.json",
+      "size": 2813,
+      "sha256": "62C708853C0B6C6E50199FB7B2D92E25CAEC5A754EE6C9A176FB1B293BA0167E"
+    }
+  ]
+}

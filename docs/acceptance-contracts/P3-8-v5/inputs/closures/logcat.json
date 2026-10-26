@@ -1,0 +1,37 @@
+{
+  "argv": [
+    "D:\\install\\leidian\\LDPlayer4\\adb.exe",
+    "-H",
+    "127.0.0.1",
+    "-P",
+    "5078",
+    "-s",
+    "10ADA4197U001CK",
+    "logcat",
+    "--pid=6468",
+    "-v",
+    "epoch",
+    "-T",
+    "1"
+  ],
+  "reason": "bounded_cell_end",
+  "stopped_while_running": true,
+  "exit_code": 1,
+  "exit_status": "exited",
+  "started_monotonic_ns": 163674530066600,
+  "ended_monotonic_ns": 164119243035300,
+  "stdout": {
+    "path": ".cache\\recovery-fast\\session-001\\logcat.stdout",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": ".cache\\recovery-fast\\session-001\\logcat.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

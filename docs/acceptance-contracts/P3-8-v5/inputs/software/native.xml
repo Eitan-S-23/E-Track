@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.wen.gaia.gaia.DeviceOtaServiceTest" tests="18" skipped="0" failures="0" errors="0" timestamp="2026-10-22T13:56:12.732Z" hostname="runnervm8k3b6" time="7.53">
+  <properties/>
+  <testcase name="recreatedProcessRejectsOldInitialNotificationWithoutRouting" classname="com.wen.gaia.gaia.DeviceOtaServiceTest" time="6.725"/>
+  <testcase name="unverifiedCompletionFailsClosed" classname="com.wen.gaia.gaia.DeviceOtaServiceTest" time="0.136"/>
+  <testcase name="lateProbeCannotReviveReleasedTask" classname="com.wen.gaia.gaia.DeviceOtaServiceTest" time="0.041"/>
+  <testcase name="processRecreationDoesNotTrustNotificationOrCache" classname="com.wen.gaia.gaia.DeviceOtaServiceTest" time="0.035"/>
+  <testcase name="oldProgressCannotOverwriteNewRevision" classname="com.wen.gaia.gaia.DeviceOtaServiceTest" time="0.038"/>
+  <testcase name="notificationUsesDurableNotSentBytes" classname="com.wen.gaia.gaia.DeviceOtaServiceTest" time="0.033"/>
+  <testcase name="engineLossReleasesWakeLockAndService" classname="com.wen.gaia.gaia.DeviceOtaServiceTest" time="0.033"/>
+  <testcase name="applyingIsIndeterminateAndCannotCancel" classname="com.wen.gaia.gaia.DeviceOtaServiceTest" time="0.032"/>
+  <testcase name="deniedProbeReleasesWakeLockAndService" classname="com.wen.gaia.gaia.DeviceOtaServiceTest" time="0.047"/>
+  <testcase name="initialRevisionAlsoFencesLateProgress" classname="com.wen.gaia.gaia.DeviceOtaServiceTest" time="0.059"/>
+  <testcase name="staleOrMalformedNotificationNeverReachesEitherRoute" classname="com.wen.gaia.gaia.DeviceOtaServiceTest" time="0.072"/>
+  <testcase name="staleActionsAndReleaseDoNotTouchCurrentOwner" classname="com.wen.gaia.gaia.DeviceOtaServiceTest" time="0.029"/>
+  <testcase name="internalNewIntentIsSanitizedBeforeEmbeddingAndOpensExactlyOnce" classname="com.wen.gaia.gaia.DeviceOtaServiceTest" time="0.044"/>
+  <testcase name="permissionsLostAndEngineLostReleaseResources" classname="com.wen.gaia.gaia.DeviceOtaServiceTest" time="0.032"/>
+  <testcase name="externalTraceLinksStillReachEmbeddingUnchanged" classname="com.wen.gaia.gaia.DeviceOtaServiceTest" time="0.041"/>
+  <testcase name="recreatedActivitySanitizesInitialIntentBeforeEmbeddingReadsIt" classname="com.wen.gaia.gaia.DeviceOtaServiceTest" time="0.073"/>
+  <testcase name="noAcknowledgementUntilOwnerProbe" classname="com.wen.gaia.gaia.DeviceOtaServiceTest" time="0.029"/>
+  <testcase name="keysRequireFullPackageAndDeviceBinding" classname="com.wen.gaia.gaia.DeviceOtaServiceTest" time="0.027"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
