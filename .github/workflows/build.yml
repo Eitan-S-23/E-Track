@@ -320,11 +320,16 @@ jobs:
           apk=build/app/outputs/flutter-apk/app-release.apk
           apksigner="$(find "${ANDROID_SDK_ROOT:-$ANDROID_HOME}/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
           test -n "$apksigner"
-          "$apksigner" verify --verbose --print-certs "$apk" > android/apk-signature.txt
+          echo "APK signature verifier: $apksigner"
+          "$apksigner" verify --verbose --print-certs "$apk" | tee android/apk-signature.txt
           if [[ "$FIXED_SIGNING" == "true" ]]; then
             actual="$(sed -n 's/^Signer #[0-9][0-9]* certificate SHA-256 digest: //p' android/apk-signature.txt)"
             test -n "$EXPECTED_CERT_SHA256"
-            test "$actual" = "$EXPECTED_CERT_SHA256"
+            if ! test "$actual" = "$EXPECTED_CERT_SHA256"; then
+              echo "::error title=Android APK signer::Produced APK signer differs from the selected fixed certificate."
+              printf 'Expected: %s\nObserved: %s\n' "$EXPECTED_CERT_SHA256" "$actual"
+              exit 1
+            fi
             echo "Verified fixed APK signer SHA-256: $actual"
           fi
           sha256sum "$apk"

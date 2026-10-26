@@ -25,6 +25,43 @@ class SigningSelectionTests(unittest.TestCase):
         cls.workflow = (ROOT / ".github/workflows/build.yml").read_text(encoding="utf-8")
         step = cls.workflow.split("      - name: Configure Android release signing\n", 1)[1].split("\n      - name:", 1)[0]
         cls.script = textwrap.dedent(step.split("        run: |\n", 1)[1])
+        verification = cls.workflow.split("      - name: Verify release APK signature and identity\n", 1)[1].split("\n      - name:", 1)[0]
+        cls.verification = textwrap.dedent(verification.split("        run: |\n", 1)[1])
+
+    def verify_case(self, signature, code=0, expected_code=0):
+        out = h.fresh(self.out / self._testMethodName)
+        h.checked(out / "android").mkdir()
+        apk = h.checked(out / "build/app/outputs/flutter-apk/app-release.apk")
+        apk.parent.mkdir(parents=True)
+        h.raw(apk, b"not an APK; shell fixture only")
+        env = h.environment(out)
+        env.update(CASE_DIR=str(out).replace("\\", "/"), CASE_SIGNATURE=signature,
+                   CASE_VERIFIER_EXIT=str(code), ANDROID_HOME="/fixture",
+                   FIXED_SIGNING="true", EXPECTED_CERT_SHA256=PIN)
+        script = """find() { printf 'fake_apksigner\\n'; }
+fake_apksigner() { printf '%s\\n' "$CASE_SIGNATURE"; return "$CASE_VERIFIER_EXIT"; }
+cd "$CASE_DIR"
+""" + self.verification
+        process = h.Process(out, "shell", [self.bash, "--noprofile", "--norc", "-s"], env, stdin=script.encode())
+        stdout = process.wait(30, success_codes=(0, 1))
+        self.assertEqual(process.process.returncode, expected_code)
+        self.assertIn(signature.encode(), stdout)
+        return stdout
+
+    def test_apk_verification_accepts_selected_single_signer(self):
+        stdout = self.verify_case("Verifies\nSigner #1 certificate SHA-256 digest: " + PIN)
+        self.assertIn(b"Verified fixed APK signer SHA-256:", stdout)
+
+    def test_apk_verification_retains_failure_diagnostics(self):
+        stdout = self.verify_case("DOES NOT VERIFY", code=1, expected_code=1)
+        self.assertNotIn(b"Verified fixed APK signer SHA-256:", stdout)
+
+    def test_apk_verification_rejects_different_certificate(self):
+        self.verify_case("Verifies\nSigner #1 certificate SHA-256 digest: " + "0" * 64, expected_code=1)
+
+    def test_apk_verification_rejects_extra_signer(self):
+        self.verify_case("Verifies\nSigner #1 certificate SHA-256 digest: " + PIN +
+                         "\nSigner #2 certificate SHA-256 digest: " + PIN, expected_code=1)
 
     def run_case(self, settings, expected_code=0):
         out = h.fresh(self.out / self._testMethodName)
