@@ -2607,7 +2607,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
             if (bindGeneration != _cancelGeneration || !isUpgrading || !linkCurrent()) return;
             final reasons = <String>[
               if (selection.fallbackReason != null) selection.fallbackReason!,
-              if (selection.windowSegments < (experiment?.senderWindowSegments ?? _senderWindowSegments))
+              if ((selection.protocol == 2 || !_enablePipeline) &&
+                  selection.windowSegments < (experiment?.senderWindowSegments ?? _senderWindowSegments))
                 'receiver-window-limit',
               if (selection.protocol == 2 && selection.dataBatchFrames < linkProfile.batchFrames)
                 'without-response-unavailable',
@@ -2627,7 +2628,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
                 'reuseGatt': experiment?.reuseGatt ?? _ble.reuseOtaCharacteristics,
                 'preferWithoutResponse': experiment?.withoutResponse ?? _ble.preferOtaWithoutResponse,
               },
-              'actual': {...selection.toJson(), 'writeMode': writeWithResponse ? 'with' : 'without',
+              'actual': {..._linkSelection!.toJson(), 'writeMode': writeWithResponse ? 'with' : 'without',
                 'gattReuseEnabled': _ble.reuseOtaCharacteristics && !Platform.isWindows,
                 'mtuChunkBytes': mtuChunk},
               'fallbackReasons': reasons,

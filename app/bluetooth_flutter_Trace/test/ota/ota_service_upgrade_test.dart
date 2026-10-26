@@ -1610,6 +1610,7 @@ void main() {
       expect(record['actual']['protocol'], 2);
       expect(record['actual']['windowSegments'], settings.$3);
       expect(record['actual']['dataBatchFrames'], settings.$4);
+      expect(record['actual']['fallbackReason'], actual.fallbackReason);
       expect(record['actual']['writeMode'], settings.$2);
       expect(ble.beginCalls, 1);
       expect(ble.endCalls, 1);
@@ -1652,6 +1653,8 @@ void main() {
     expect(selection['actual']['windowSegments'], 4);
     expect(selection['actual']['writeMode'], 'with');
     expect(selection['fallbackReasons'], contains('caps2-timeout'));
+    expect(selection['fallbackReasons'], isNot(contains('receiver-window-limit')));
+    expect(selection['actual']['fallbackReason'], service.linkSelection!.fallbackReason);
     expect(ble.dataOffsets, isNotEmpty);
   });
 
