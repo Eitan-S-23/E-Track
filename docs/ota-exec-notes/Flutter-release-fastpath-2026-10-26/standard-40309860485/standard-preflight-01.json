@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "git",
+    "--no-optional-locks",
+    "ls-remote",
+    "origin",
+    "refs/heads/dev/flutter/fastpath-backend-20261026"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\flutter-fastpath-20261026",
+  "exit_code": 0,
+  "log": ".cache/records/standard-preflight-01.log"
+}

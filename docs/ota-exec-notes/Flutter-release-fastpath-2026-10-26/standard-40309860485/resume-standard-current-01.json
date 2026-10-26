@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "gh",
+    "run",
+    "view",
+    "40309860485",
+    "--repo",
+    "Eitan-S-23/E-Track",
+    "--json",
+    "databaseId,headSha,headBranch,event,status,conclusion,workflowName,url,jobs"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\flutter-fastpath-20261026",
+  "exit_code": 0,
+  "log": ".cache/records/resume-standard-current-01.log"
+}

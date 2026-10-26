@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "gh",
+    "workflow",
+    "run",
+    "build.yml",
+    "--repo",
+    "Eitan-S-23/E-Track",
+    "--ref",
+    "dev/flutter/fastpath-backend-20261026",
+    "-f",
+    "publish_release=false",
+    "-f",
+    "replace_existing_release=false",
+    "-f",
+    "release_ota_link_profile=adaptive-v2-candidate",
+    "-f",
+    "release_tag=",
+    "-f",
+    "release_application_id_suffix=",
+    "-f",
+    "firmware_latest_url="
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\flutter-fastpath-20261026",
+  "exit_code": 0,
+  "log": ".cache/records/standard-dispatch-01.log"
+}

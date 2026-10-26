@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "gh",
+    "run",
+    "view",
+    "40309860485",
+    "--repo",
+    "Eitan-S-23/E-Track",
+    "--log"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\flutter-fastpath-20261026",
+  "exit_code": 0,
+  "log": ".cache/records/standard-download-logs.log"
+}

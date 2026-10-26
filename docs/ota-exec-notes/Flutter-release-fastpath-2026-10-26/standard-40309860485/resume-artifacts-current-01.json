@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "gh",
+    "api",
+    "repos/Eitan-S-23/E-Track/actions/runs/40309860485/artifacts"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\flutter-fastpath-20261026",
+  "exit_code": 0,
+  "log": ".cache/records/resume-artifacts-current-01.log"
+}

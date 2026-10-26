@@ -1,0 +1,128 @@
+{
+  "sourceCommit": "2febc00b15658bde055d2f1e05095809c1444f76",
+  "workflowRun": "https://github.com/Eitan-S-23/E-Track/actions/runs/40309860485",
+  "developmentRun": "https://github.com/Eitan-S-23/E-Track/actions/runs/40295320180",
+  "observedAtUtc": "2026-10-26T15:24:13.812340+00:00",
+  "files": [
+    {
+      "path": "resume-artifacts-current-01.json",
+      "sizeBytes": 255,
+      "sha256": "887f5f62851af2e108898e08232d74244bf23b8e798a06e59a425bdf09377325"
+    },
+    {
+      "path": "resume-artifacts-current-01.log",
+      "sizeBytes": 1453,
+      "sha256": "5cbfd703cd2bfabfdea3166f24c2ae7b6a4bdf35e2b90e0e8bc76e642e3ae1eb"
+    },
+    {
+      "path": "resume-development-current-01.json",
+      "sizeBytes": 345,
+      "sha256": "8a3c76a91bc5d380e5f5e02580384d3728564d260feaad474addd721922ccd69"
+    },
+    {
+      "path": "resume-development-current-01.log",
+      "sizeBytes": 5931,
+      "sha256": "c5672c0455cd976f6c064d40e916416582cda52917a361cb33127fd19f3bc0af"
+    },
+    {
+      "path": "resume-standard-current-01.json",
+      "sizeBytes": 355,
+      "sha256": "a7c9f140a9c85043d25dabb6a5185213d05b1e6e494c2df705abb9f41e9c9deb"
+    },
+    {
+      "path": "resume-standard-current-01.log",
+      "sizeBytes": 7915,
+      "sha256": "71c6d40a91cdd5ea507203b9f28f0181736f87565d8832a8072cecb1174cac6f"
+    },
+    {
+      "path": "standard-dispatch-01.json",
+      "sizeBytes": 579,
+      "sha256": "077f9fd9f39e5b7d4c646bfced9c1e777eb98546f9d4bdaaea15932925900f49"
+    },
+    {
+      "path": "standard-dispatch-01.log",
+      "sizeBytes": 63,
+      "sha256": "a7b597dc07b5d9c52b26dc53545b5694296cafbcdb7977eec977fefab7fa840d"
+    },
+    {
+      "path": "standard-dispatched-runs-01.json",
+      "sizeBytes": 438,
+      "sha256": "7af27ccd6f1ebe34507ce0f1f4d46a5730477f5a47106ff044303442915dedd7"
+    },
+    {
+      "path": "standard-dispatched-runs-01.log",
+      "sizeBytes": 250,
+      "sha256": "9a40a476774e84fb80db6f23e14c166da52fd22486a0524a7f94afe36c0a40ad"
+    },
+    {
+      "path": "standard-download-logs.json",
+      "sizeBytes": 267,
+      "sha256": "c14adf358f847a5b4255ca1193fae8a61ff8a9b4df27af074ce9d31423dba33c"
+    },
+    {
+      "path": "standard-download-logs.log",
+      "sizeBytes": 7246366,
+      "sha256": "06911550e9fca64a6d4759ade671b302a17d17e06b074fe238146cbd3d54ed7a"
+    },
+    {
+      "path": "standard-existing-runs-01.json",
+      "sizeBytes": 433,
+      "sha256": "ab3ae762cb7fef46fbdff6061f00f42e606f9255e3f7c9b6e3961ca0203a92ff"
+    },
+    {
+      "path": "standard-existing-runs-01.log",
+      "sizeBytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "standard-final-artifacts.json",
+      "sizeBytes": 252,
+      "sha256": "85aaa0c3ad568e1ec50ab6026555ba24d761e45720437f7b7c7801731e995f61"
+    },
+    {
+      "path": "standard-final-artifacts.log",
+      "sizeBytes": 1453,
+      "sha256": "5cbfd703cd2bfabfdea3166f24c2ae7b6a4bdf35e2b90e0e8bc76e642e3ae1eb"
+    },
+    {
+      "path": "standard-final-run.json",
+      "sizeBytes": 236,
+      "sha256": "63a83bb6425b0b4fa7db6bb6e02173221a2383690c37eb7ef143ad1902124e37"
+    },
+    {
+      "path": "standard-final-run.log",
+      "sizeBytes": 11999,
+      "sha256": "2ef982227c1586d0233a7383d0e8bddc0b394e681e035c4224b6f11624f9f588"
+    },
+    {
+      "path": "standard-preflight-01.json",
+      "sizeBytes": 286,
+      "sha256": "e6c94031a35d9864a832aa3e082dc70a0f45d82848730ea3f2521ea1e015df09"
+    },
+    {
+      "path": "standard-preflight-01.log",
+      "sizeBytes": 90,
+      "sha256": "bb2184eed28a3324dce82e89efe805f328223936963e4920d10896bd982314ce"
+    },
+    {
+      "path": "standard-status-01.json",
+      "sizeBytes": 294,
+      "sha256": "89e757b05b8374b0eb03df899c132140c29ab1aa83b7bd82d0dfc007dabc4296"
+    },
+    {
+      "path": "standard-status-01.log",
+      "sizeBytes": 6664,
+      "sha256": "74061594d14699e4131112bae17a3d4d7c4c0707506fd0641d4b1f47220911f8"
+    },
+    {
+      "path": "standard-status-02.json",
+      "sizeBytes": 312,
+      "sha256": "c3de020a3065d6239289194af8627f4c1ae16d547f6b8f3d25c626ce61a97a46"
+    },
+    {
+      "path": "standard-status-02.log",
+      "sizeBytes": 7794,
+      "sha256": "79e027f592708af62e62c4ddcfeb67e8691b02f044e375614aebf9c1d1dee0a8"
+    }
+  ]
+}

@@ -30,3 +30,14 @@ The initial archive staging omitted logs under the repository-wide log ignore;
 the byte/index check rejected the missing originals. A local exception in this
 one evidence folder includes only these reviewed log files, with no global
 ignore/cache change. The failed staging check remains in the task receipts.
+
+`standard-40309860485/` retains the 18 original standard-build dispatch,
+reconciliation and console files, plus six successor read-only run/artifact
+receipts. Its inventory binds every archived original to its byte count and
+SHA-256. Folder-local attributes and the log-ignore exception preserve exact
+bytes in Git without altering repository-wide rules or the earlier archive.
+Run 40309860485 built the standard release-mode APK and Windows EXE at
+2febc00b; both jobs passed and Pages/Release were skipped. The successor queried
+the existing run and its two unexpired artifacts, not another build or download.
+These originals establish software-build results, not device execution,
+production qualification or current backend readiness.
