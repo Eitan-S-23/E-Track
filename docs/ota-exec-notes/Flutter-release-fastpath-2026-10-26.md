@@ -396,3 +396,12 @@ in [the concentrated implementation handoff](Flutter-release-fastpath-2026-10-26
 Exclusive branch `dev/firmware/p35-candidate-20261027`, based on `6dbd1869`;
 the new delta is uncommitted and real protected GCC/CI remains NOT_RUN pending
 actual authority. The Flutter artifacts and reviewer notes are unchanged.
+
+The user subsequently authorized scoped Git delivery and one nonpublishing
+development CI. Implementation source `7a2aea1a81f0d702b804e2935785381611d579c9`
+passed run 40374040338/1, including the real development-only keyed candidate
+recipe. Original cache and 387 App recipes match provenance; candidate compiler
+warnings 641/error lines 0 remain disclosed. Protected rehearsal/production/
+binding-qualification jobs were skipped. See the same handoff's Development CI
+Outcome section for exact original hashes and the remaining protected-key,
+branch/descriptor and device boundaries. No APK/EXE rebuild or new device action.

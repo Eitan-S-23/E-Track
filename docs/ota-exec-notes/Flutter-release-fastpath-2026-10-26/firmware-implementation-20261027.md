@@ -185,3 +185,89 @@ checks, explicit message input, no new key or global configuration writes.
 The single dispatch will use the exact newly committed source and the parameters
 in P35-PREP-CI-01 above. Results remain NOT_RUN until the run and actual jobs
 are observed; no dispatch or final build success is claimed by this note.
+
+## Development CI Outcome And Stable Source
+
+The authorized twelve-file implementation was committed/pushed as
+`7a2aea1a81f0d702b804e2935785381611d579c9`. Exactly one dispatch produced
+[40374040338/1](https://github.com/Eitan-S-23/E-Track/actions/runs/40374040338)
+at that source/branch, with the precise nonpublishing parameters above. It
+completed successfully at 2026-10-26T18:03:28Z (2026-10-27 local date).
+This supersedes earlier local-only/NOT_RUN statements for development CI, not
+for the protected-key receiver or formal acceptance.
+
+| Job / observed gate | Result |
+| --- | --- |
+| GCC build, 121752112904 | PASS: baseline App/Boot, existing layout/tests, development byte preparation, explicit keyed candidate build/preparation, private-header cleanup and strict uploads. |
+| Release tooling development checks, 121752113537 | PASS: script/migration host 41; pipeline host 156; native workerd tests 283; workflow/S3/profile 140; byte preparation 25; package replay tests 8; vectors/typecheck and credential-free Worker bundle steps passed. Native workerd tests are not live staging qualification. |
+| Binding qualification, 121752827558 | SKIPPED, no executed steps. |
+| Protected rehearsal, 121753128724 | SKIPPED, no executed steps. |
+| Production, 121753128526 | SKIPPED, no executed steps. |
+
+Only this existing run's logs and artifact metadata were retrieved. To verify
+actual compiled inputs, one keyed-development artifact ZIP was downloaded:
+ID `12672334944`, 3266327 bytes, SHA-256
+`7e5237014100e6c38187db8a16cbbd885cf0da88a28aff07d33b8f91cc8aa035`,
+expiry 2026-11-09T18:03:18Z. ZIP digest/source/run, eight build-artifact hashes,
+final/asset bytes and all build/preparation step-output hashes were checked.
+Only 31 original text/JSON/ninja files were extracted; no firmware binary was
+extracted or installed. The ZIP has no private-key header. Originals and the
+extraction inventory are in `.cache/ci-40374040338/`.
+
+The actual product configuration parser reevaluated those originals and checked
+all 387 App compile recipes. Actual CMake argv and cache select candidate ON,
+early vectors ON, experiment OFF and fallback UART 921600. The resulting
+configuration exactly matches both keyed build and preparation provenance.
+The compiled key-source SHA also matches its exact Git blob at `7a2aea1a`.
+Compiler cache is DISABLED, Boot is not an AES consumer and all development-only
+markers remain noninstallable/nonpublishable. SourceDateEpoch is 1786320000;
+finalization's source-bound build timestamp is 1793037463. These are build facts,
+not an observed module baud or device performance result.
+
+| Candidate artifact, development fixture key only | Bytes / SHA-256 |
+| --- | --- |
+| GCC App placeholder | 614076 / `903e1d960dcd56466c3a395cf7269ac1eb3a33bc994228a522346563c838fab2` |
+| Matching Boot | 14724 / `3554e193f498d23210f5ef32e09de64575b7cd39104fafcc950740e5e8a7ec34` |
+| Finalized App image, version 3.2.90 / 30290 | 614076 / `fba3a9f2f0422321ce4cbf9176f8925116ba463023b99749807050d90eec7764` |
+
+The real candidate development preparation passed full-byte equality and recovery
+verification, with no patch/base and `r2Verified=false`. Its 3.2.90 version label
+does not reserve or register a business release. Do not install these fixture-key
+images or present them as the admitted protected-key receiver.
+
+Warning accounting is explicit: candidate build step records **641 compiler
+warning lines / 0 error lines**; configure/size record zero. Baseline GCC console
+has 640 compiler warning lines. Runtime/action deprecations and dependency audit
+notices remain separately visible in the raw console; this is not a warning-free
+build. Berkeley size originals report App text/data/bss 611704/940/558632 and
+Boot 14720/4/9780, without treating aggregate BSS as a single-bank runtime proof.
+
+The complete raw console is `.cache/records/delivery-logs-01.log`, 2726967 bytes,
+SHA-256 `6ee8143e538b861864a46bb87bc374cc97fa39eadbe1dc4658ef3f93b1064276`.
+Run/dispatch/artifact originals are `delivery-run-final-01.*`,
+`delivery-dispatch-01.*`, `delivery-artifacts-01.*` and `delivery-keyed-zip-01.*`.
+Independent implementation-side original checks are
+`delivery-extract-originals-01.*`, `delivery-verify-originals-01.*` and
+`delivery-diagnostics-01.*`; these are self-checks, not independent acceptance.
+
+Commit-process audit found that the contained HOME hid the global hooks setting
+for the initial commit. No commit was amended or rewritten. The unchanged global
+pre-commit hook was replayed against that exact immutable delta and passed in
+`delivery-hook-03.*`. Two prior replay-adapter failures (hook-relative library
+lookup, then unset optional variables) remain in `delivery-hook-01/02.*`.
+Subsequent Git commands explicitly bind the read-only global hook path, preserve
+checks and disable only optional duplicate chat notification.
+
+This outcome adds only task records under the same authorization. Any later
+record-only delivery commit is not the source of the already-built artifacts:
+CI and ZIP remain bound to `7a2aea1a`, with no second dispatch or product change.
+Main, old Flutter artifact inputs, reviewer notes, protected branch/descriptor
+rules, cloud resources and devices remain unchanged. The scoped local outputs
+are the existing worktree/cache and authorized common Git metadata; no external
+output or cleanup was selected.
+
+Implementation/build wiring is ready for the existing independent reviewer to
+consume. P35-PREP-KEY-01 and protected P35-PREP-CI-01 remain open for root and
+configuration owners; they must bind the actual selected ref/profile/forward
+version and descriptor before a protected-key build. No new business key or
+device operation is needed to review this delivery. P3-5/P5/release remain unrun.
