@@ -124,6 +124,20 @@ void main() {
     expect(rows.last['healthy'], isTrue);
   });
 
+  test('actual link selection survives the unchanged strict snapshot envelope', () async {
+    final log = await open();
+    expect(log.record(sample), isTrue);
+    expect(await log.beginUpgrade(input()), isTrue);
+    const message = 'OTA_LINK_SELECTION {"schema":1,"actual":{"protocol":2,"windowSegments":24,"dataBatchFrames":12}}';
+    expect(log.record(message), isTrue);
+    await log.endUpgrade(completed: true);
+    final file = await log.exportSnapshot();
+    final rows = (await file.readAsLines()).map(jsonDecode).toList();
+    expect(rows.any((row) => row['message'] == message), isTrue);
+    expect(rows.last['healthy'], isTrue);
+    expect(rows.last['lost'], 0);
+  });
+
   test('no export during an invocation and no second invocation', () async {
     final log = await open();
     log.record(sample);

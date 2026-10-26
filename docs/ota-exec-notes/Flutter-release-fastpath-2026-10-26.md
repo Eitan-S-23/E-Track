@@ -77,5 +77,17 @@ database edit, Access mutation, provisioning or deployment is authorized here.
 
 ## Results
 
+First WIP `4c16fe69b4c818fc3f12d385aad99998c7fe6b14`, development CI
+40283979509: analyze PASS on both hosts, tests FAIL (12 on each). Exact logs
+retained in the task cache. The new selection prefix was not yet in the existing
+strict App/host snapshot allowlists, so diagnostic snapshots failed closed.
+Repair adds only the exact `OTA_LINK_SELECTION ` prefix and a distinguishing
+snapshot roundtrip; unknown lines, privacy checks, loss/footer/hash and terminal
+requirements remain unchanged. No repeat of a successful physical upgrade.
+
+Host helper 46/46 PASS; runner first failed six old command-order/index assertions
+after adding the candidate test command, then 65/65 PASS after updating those
+exact expectations. Original first failure is preserved, not hidden as green.
+
 Development and standard artifact results will be recorded with their exact
 source/run identities after inspection. Independent acceptance remains NOT_RUN.
