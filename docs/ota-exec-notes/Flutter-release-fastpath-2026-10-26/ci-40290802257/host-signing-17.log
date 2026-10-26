@@ -1,0 +1,22 @@
+test_apk_verification_accepts_build_tools_37_scheme_labels (__main__.SigningSelectionTests.test_apk_verification_accepts_build_tools_37_scheme_labels) ... ok
+test_apk_verification_accepts_one_certificate_across_schemes (__main__.SigningSelectionTests.test_apk_verification_accepts_one_certificate_across_schemes) ... ok
+test_apk_verification_accepts_selected_single_signer (__main__.SigningSelectionTests.test_apk_verification_accepts_selected_single_signer) ... ok
+test_apk_verification_rejects_different_certificate (__main__.SigningSelectionTests.test_apk_verification_rejects_different_certificate) ... ok
+test_apk_verification_rejects_extra_signer (__main__.SigningSelectionTests.test_apk_verification_rejects_extra_signer) ... ok
+test_apk_verification_rejects_missing_signer_count (__main__.SigningSelectionTests.test_apk_verification_rejects_missing_signer_count) ... ok
+test_apk_verification_requires_same_certificate_across_schemes (__main__.SigningSelectionTests.test_apk_verification_requires_same_certificate_across_schemes) ... ok
+test_apk_verification_retains_failure_diagnostics (__main__.SigningSelectionTests.test_apk_verification_retains_failure_diagnostics) ... ok
+test_bad_encoding_rejected (__main__.SigningSelectionTests.test_bad_encoding_rejected) ... ok
+test_existing_key_selected_and_pinned (__main__.SigningSelectionTests.test_existing_key_selected_and_pinned) ... ok
+test_existing_secret_and_apk_check_are_wired (__main__.SigningSelectionTests.test_existing_secret_and_apk_check_are_wired) ... ok
+test_formal_configuration_keeps_precedence (__main__.SigningSelectionTests.test_formal_configuration_keeps_precedence) ... ok
+test_keytool_failure_rejected (__main__.SigningSelectionTests.test_keytool_failure_rejected) ... ok
+test_mismatched_existing_certificate_rejected (__main__.SigningSelectionTests.test_mismatched_existing_certificate_rejected) ... ok
+test_no_keys_remains_explicit_nonrelease_fallback (__main__.SigningSelectionTests.test_no_keys_remains_explicit_nonrelease_fallback) ... ok
+test_partial_formal_key_does_not_fall_back (__main__.SigningSelectionTests.test_partial_formal_key_does_not_fall_back) ... ok
+test_partial_sideload_key_does_not_fall_back (__main__.SigningSelectionTests.test_partial_sideload_key_does_not_fall_back) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 19.960s
+
+OK

@@ -1,0 +1,26 @@
+00:00 +0: loading /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_release_link_profile_test.dart
+00:00 +0: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_release_link_profile_test.dart: candidate compiled profile drives both real services without a runtime file
+00:00 +1: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_release_link_profile_test.dart: candidate and baseline stay explicit and reject unknown input
+00:00 +2: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_release_link_profile_test.dart: candidate build retains explicit baseline injection
+00:03 +3: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: candidate real service negotiates window 32 / without
+00:03 +4: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: candidate real service negotiates window 8 / without
+00:03 +5: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: candidate real service negotiates window 32 / with
+00:05 +6: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: candidate real service never falls back after malformed CAPS2
+OTA_LINK_SAMPLE label=upgrade kind=control_start us=163 cmd=0 session=0 seq=1 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=control_end us=1456 cmd=0 session=0 seq=1 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=get_info us=1571 ok=1
+OTA_LINK_SAMPLE label=upgrade kind=control_start us=1901 cmd=16 session=0 seq=2 bytes=14
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=14
+OTA_LINK_SAMPLE label=upgrade kind=control_end us=2323 cmd=16 session=0 seq=2 bytes=14
+OTA_MONO MONO_TERMINAL_DECIDED monoUs=2077111 wallUs=1793002608977748 code=ACK_MALFORMED
+OTA_MONO MONO_ABORT_BEGIN monoUs=2077296 wallUs=1793002608977932 code=ACK_MALFORMED
+OTA_MONO MONO_WRITE_STOP monoUs=2077676 wallUs=1793002608978313
+OTA_LINK_SAMPLE label=upgrade kind=control_start us=3632 cmd=4 session=0 seq=0 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=0 bytes=10
+OTA_LINK_SAMPLE label=upgrade kind=control_end us=4601 cmd=4 session=0 seq=0 bytes=10
+OTA_MONO MONO_ABORT_DONE monoUs=2078964 wallUs=1793002608979601 code=ACK_MALFORMED
+OTA_MONO MONO_TERMINAL monoUs=2079079 wallUs=1793002608979716 code=ACK_MALFORMED
+OTA_LINK_STATS {"schema":1,"label":"upgrade","device":"AA:BB","attempt":null,"clock":"stopwatch-mono-us","phases":{"bind":[0,139]},"failure":{"stage":"transfer","reason":"transport:ACK_MALFORMED"},"attempts":[],"attemptEndUs":null,"retired":null,"bind":{"charsUs":3,"found":true,"writeMode":"with","mtuRequested":247,"mtuChunkBytes":247,"mtuSource":null,"mtuUs":0,"subscribeUs":0,"subscribeOk":true,"phaseUs":139},"getInfo":{"calls":1,"failures":0,"totalUs":1571},"transfer":{"startUs":null,"endAckUs":null,"elapsedUs":null,"outcome":"fail","segmentsUnique":0,"segmentSendTotal":0,"retransmitFrames":0,"acks":{"ok":0,"duplicate":0,"error":0,"malformed":0,"noProgress":0,"abort":0,"ignoredErrors":{"schema":1,"counts":{},"saturated":false}},"ackSamples":"complete","ackEarlyInvalid":0,"ackEarlyUnsent":0,"ackLatency":{"count":0,"minUs":null,"p50Us":null,"p95Us":null,"p99Us":null,"maxUs":null},"durable":{"events":0,"finalOff":null}},"gattWrites":{"calls":3,"bytes":34,"errors":0,"minUs":0,"p50Us":0,"p95Us":0,"maxUs":0},"discovers":{"calls":0,"errors":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null},"platformWrites":{"calls":0,"bytes":0,"errors":0,"minUs":null,"p50Us":null,"p95Us":null,"maxUs":null}}
+00:05 +7: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart: candidate real service records v1 fallback and still requires reboot identity
+00:07 +8: All tests passed!

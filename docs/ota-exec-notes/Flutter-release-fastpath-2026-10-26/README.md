@@ -26,3 +26,7 @@ and terminal summary lines from the original failed runs, not full job logs.
 Full fetched failed originals remain in the task cache/GitHub. No raw log was
 trimmed, normalized or rewritten. Scoped attributes preserve newly archived
 raw log/JSON bytes; historical attributes and frozen evidence are unchanged.
+The initial archive staging omitted logs under the repository-wide log ignore;
+the byte/index check rejected the missing originals. A local exception in this
+one evidence folder includes only these reviewed log files, with no global
+ignore/cache change. The failed staging check remains in the task receipts.

@@ -1,0 +1,37 @@
+test_app_and_host_prefix_registries_match (__main__.CaptureTests.test_app_and_host_prefix_registries_match) ... ok
+test_arbitrary_multiline_or_sensitive_content_is_not_exportable (__main__.CaptureTests.test_arbitrary_multiline_or_sensitive_content_is_not_exportable) ... ok
+test_changed_post_reboot_sha_cannot_be_called_success (__main__.CaptureTests.test_changed_post_reboot_sha_cannot_be_called_success) ... ok
+test_cli_executes_and_returns_nonzero_for_corruption (__main__.CaptureTests.test_cli_executes_and_returns_nonzero_for_corruption) ... ok
+test_complete_envelope_is_not_performance_acceptance (__main__.CaptureTests.test_complete_envelope_is_not_performance_acceptance) ... ok
+test_digest_and_all_footer_counters_are_checked (__main__.CaptureTests.test_digest_and_all_footer_counters_are_checked) ... ok
+test_duplicate_json_keys_rejected_not_last_value_wins (__main__.CaptureTests.test_duplicate_json_keys_rejected_not_last_value_wins) ... ok
+test_error_record_unknown_fields_and_unbound_counts_are_rejected (__main__.CaptureTests.test_error_record_unknown_fields_and_unbound_counts_are_rejected) ... ok
+test_experiment_record_does_not_bypass_sensitive_line_rejection (__main__.CaptureTests.test_experiment_record_does_not_bypass_sensitive_line_rejection) ... ok
+test_experiment_record_is_preserved_without_changing_upgrade_identity (__main__.CaptureTests.test_experiment_record_is_preserved_without_changing_upgrade_identity) ... ok
+test_failed_invocation_can_be_preserved_without_success_events (__main__.CaptureTests.test_failed_invocation_can_be_preserved_without_success_events) ... ok
+test_header_only_or_host_marker_cannot_prove_app_logging (__main__.CaptureTests.test_header_only_or_host_marker_cannot_prove_app_logging) ... ok
+test_input_identity_domains_and_unknown_fields (__main__.CaptureTests.test_input_identity_domains_and_unknown_fields) ... ok
+test_invalid_input_creates_no_output_and_preserves_source (__main__.CaptureTests.test_invalid_input_creates_no_output_and_preserves_source) ... ok
+test_missing_duplicate_and_reordered_rows_fail_even_with_new_hash (__main__.CaptureTests.test_missing_duplicate_and_reordered_rows_fail_even_with_new_hash) ... ok
+test_missing_end_is_not_a_complete_capture (__main__.CaptureTests.test_missing_end_is_not_a_complete_capture) ... ok
+test_multiple_invocations_not_merged_into_one (__main__.CaptureTests.test_multiple_invocations_not_merged_into_one) ... ok
+test_negotiated_selection_roundtrip_keeps_envelope_and_privacy_checks (__main__.CaptureTests.test_negotiated_selection_roundtrip_keeps_envelope_and_privacy_checks) ... ok
+test_outside_worktree_and_prefix_collision_are_rejected (__main__.CaptureTests.test_outside_worktree_and_prefix_collision_are_rejected) ... ok
+test_phy_records_preserve_completed_and_failed_envelopes (__main__.CaptureTests.test_phy_records_preserve_completed_and_failed_envelopes) ... ok
+test_phy_registration_does_not_weaken_line_or_health_guards (__main__.CaptureTests.test_phy_registration_does_not_weaken_line_or_health_guards) ... ok
+test_prefix_accepts_all_supported_requested_bauds (__main__.CaptureTests.test_prefix_accepts_all_supported_requested_bauds) ... ok
+test_prefix_cannot_include_a_full_upgrade_end (__main__.CaptureTests.test_prefix_cannot_include_a_full_upgrade_end) ... ok
+test_prefix_cli_and_failed_import_preserve_original_bytes (__main__.CaptureTests.test_prefix_cli_and_failed_import_preserve_original_bytes) ... ok
+test_prefix_rejects_invalid_timing_coverage_config_and_identity (__main__.CaptureTests.test_prefix_rejects_invalid_timing_coverage_config_and_identity) ... ok
+test_prefix_requires_original_sender_coverage_and_one_verdict (__main__.CaptureTests.test_prefix_requires_original_sender_coverage_and_one_verdict) ... ok
+test_prefix_verdict_is_a_diagnostic_not_an_upgrade_or_threshold_pass (__main__.CaptureTests.test_prefix_verdict_is_a_diagnostic_not_an_upgrade_or_threshold_pass) ... ok
+test_query_capture_is_only_a_readiness_check (__main__.CaptureTests.test_query_capture_is_only_a_readiness_check) ... ok
+test_scoped_extraction_will_not_overwrite_evidence (__main__.CaptureTests.test_scoped_extraction_will_not_overwrite_evidence) ... ok
+test_success_requires_actual_before_after_identity_and_sender_events (__main__.CaptureTests.test_success_requires_actual_before_after_identity_and_sender_events) ... ok
+test_truncated_or_appended_export_is_rejected (__main__.CaptureTests.test_truncated_or_appended_export_is_rejected) ... ok
+test_wrong_build_or_target_is_rejected (__main__.CaptureTests.test_wrong_build_or_target_is_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 32 tests in 3.665s
+
+OK

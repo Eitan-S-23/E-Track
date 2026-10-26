@@ -1,0 +1,152 @@
+Host fixtures: D:\github\my\E-Track\.cache\flutter-fastpath-20261026\.cache\flutter-dev-checks-tests\run-0bd9c8b616334a3ba006a572059a2fe6
+test_analysis_failure_collects_tests_but_never_builds_apk (__main__.FlutterDevelopmentChecksTests.test_analysis_failure_collects_tests_but_never_builds_apk) ... ok
+test_analysis_timeout_is_red_but_cleaned_up_tests_can_run (__main__.FlutterDevelopmentChecksTests.test_analysis_timeout_is_red_but_cleaned_up_tests_can_run) ... FAIL
+test_analyze_failure_still_collects_tests_and_fails_overall (__main__.FlutterDevelopmentChecksTests.test_analyze_failure_still_collects_tests_and_fails_overall) ... FAIL
+test_apk_blocks_when_starting_checkout_is_not_clean (__main__.FlutterDevelopmentChecksTests.test_apk_blocks_when_starting_checkout_is_not_clean)
+起点不干净就没有"未改动的提交检出"可言，APK 必须挡住。 ... ERROR
+test_apk_fails_when_build_drift_escapes_bound_toolchain_regen (__main__.FlutterDevelopmentChecksTests.test_apk_fails_when_build_drift_escapes_bound_toolchain_regen)
+构建期改写落在白名单之外时，不得被"恢复即未变"洗白。 ... ok
+test_apk_failure_propagates_and_does_not_collect_an_artifact (__main__.FlutterDevelopmentChecksTests.test_apk_failure_propagates_and_does_not_collect_an_artifact) ... ok
+test_apk_requires_full_scope_and_linux (__main__.FlutterDevelopmentChecksTests.test_apk_requires_full_scope_and_linux) ... ok
+test_apk_restores_toolchain_regen_files_after_build (__main__.FlutterDevelopmentChecksTests.test_apk_restores_toolchain_regen_files_after_build) ... ok
+test_apk_restores_toolchain_regenerated_files_before_build (__main__.FlutterDevelopmentChecksTests.test_apk_restores_toolchain_regenerated_files_before_build) ... ok
+test_apk_still_blocks_when_dirty_files_escape_toolchain_whitelist (__main__.FlutterDevelopmentChecksTests.test_apk_still_blocks_when_dirty_files_escape_toolchain_whitelist) ... ERROR
+test_artifact_retention_is_tiered_without_weakening_uploads (__main__.FlutterDevelopmentChecksTests.test_artifact_retention_is_tiered_without_weakening_uploads) ... ok
+test_bind_toolchain_regen_fails_closed_on_collection_failure (__main__.FlutterDevelopmentChecksTests.test_bind_toolchain_regen_fails_closed_on_collection_failure)
+收集失败必须显式炸开，不得留下字段为 null 的"已绑定"记录。 ... ok
+test_bind_toolchain_regen_records_effective_and_committed_bytes (__main__.FlutterDevelopmentChecksTests.test_bind_toolchain_regen_records_effective_and_committed_bytes)
+恢复前必须绑定生效字节，否则白名单等于"改了也算没改"。 ... ok
+test_bound_regen_exemption_rejects_paths_outside_the_whitelist (__main__.FlutterDevelopmentChecksTests.test_bound_regen_exemption_rejects_paths_outside_the_whitelist) ... ok
+test_bound_regen_exemption_requires_complete_current_evidence (__main__.FlutterDevelopmentChecksTests.test_bound_regen_exemption_requires_complete_current_evidence)
+豁免判据必须核对证据本身，而不是只核对路径出现过。 ... ok
+test_boundary_checks_nonexistent_leaf_and_all_existing_parents (__main__.FlutterDevelopmentChecksTests.test_boundary_checks_nonexistent_leaf_and_all_existing_parents) ... ok
+test_boundary_rejects_parent_escape_and_sibling_prefix (__main__.FlutterDevelopmentChecksTests.test_boundary_rejects_parent_escape_and_sibling_prefix) ... ok
+test_cli_cannot_turn_a_push_into_an_apk_request (__main__.FlutterDevelopmentChecksTests.test_cli_cannot_turn_a_push_into_an_apk_request) ... ok
+test_cli_refuses_local_sdk_initialization (__main__.FlutterDevelopmentChecksTests.test_cli_refuses_local_sdk_initialization) ... ok
+test_cli_rejects_mismatched_workspace (__main__.FlutterDevelopmentChecksTests.test_cli_rejects_mismatched_workspace) ... ok
+test_cli_rejects_non_validation_branches (__main__.FlutterDevelopmentChecksTests.test_cli_rejects_non_validation_branches) ... ok
+test_command_scopes_are_bounded_and_lock_enforced (__main__.FlutterDevelopmentChecksTests.test_command_scopes_are_bounded_and_lock_enforced) ... ok
+test_dependency_failure_leaves_analysis_and_tests_not_run (__main__.FlutterDevelopmentChecksTests.test_dependency_failure_leaves_analysis_and_tests_not_run) ... ok
+test_device_ota_native_failure_is_strict_and_blocks_artifact_collection (__main__.FlutterDevelopmentChecksTests.test_device_ota_native_failure_is_strict_and_blocks_artifact_collection) ... ok
+test_device_ota_native_request_rejects_checks_only_or_invalid_mode (__main__.FlutterDevelopmentChecksTests.test_device_ota_native_request_rejects_checks_only_or_invalid_mode) ... ok
+test_device_ota_native_workflow_preserves_junit_and_default_checks_only (__main__.FlutterDevelopmentChecksTests.test_device_ota_native_workflow_preserves_junit_and_default_checks_only) ... ok
+test_diagnostic_counts_use_full_log_and_unknown_is_not_zero (__main__.FlutterDevelopmentChecksTests.test_diagnostic_counts_use_full_log_and_unknown_is_not_zero) ... ok
+test_diagnostic_failures_do_not_hide_original_command_status (__main__.FlutterDevelopmentChecksTests.test_diagnostic_failures_do_not_hide_original_command_status) ... ok
+test_diagnostic_sdk_identity_and_control_sequences (__main__.FlutterDevelopmentChecksTests.test_diagnostic_sdk_identity_and_control_sequences) ... ok
+test_environment_contains_standard_sdk_cache_home_and_temp_outputs (__main__.FlutterDevelopmentChecksTests.test_environment_contains_standard_sdk_cache_home_and_temp_outputs) ... ok
+test_existing_log_cannot_be_overwritten (__main__.FlutterDevelopmentChecksTests.test_existing_log_cannot_be_overwritten) ... ok
+test_identity_fingerprints_distinguish_successive_content_changes (__main__.FlutterDevelopmentChecksTests.test_identity_fingerprints_distinguish_successive_content_changes)
+同一条脏路径的两次不同内容必须产生不同语义指纹。 ... ok
+test_identity_keeps_crlf_only_rewrite_out_of_semantic (__main__.FlutterDevelopmentChecksTests.test_identity_keeps_crlf_only_rewrite_out_of_semantic)
+真正的纯行尾差异仍必须放行，否则工具链改写会假红。 ... ok
+test_identity_parses_rename_records_without_mangling_paths (__main__.FlutterDevelopmentChecksTests.test_identity_parses_rename_records_without_mangling_paths)
+`-z` 的重命名记录多带一个原路径字段，误当成新记录会切掉三个字符。 ... ok
+test_identity_treats_deletion_as_semantic (__main__.FlutterDevelopmentChecksTests.test_identity_treats_deletion_as_semantic) ... ok
+test_identity_treats_untracked_directory_as_semantic (__main__.FlutterDevelopmentChecksTests.test_identity_treats_untracked_directory_as_semantic)
+`--untracked-files=normal` 把未跟踪目录折叠成一条 `dir/` 记录。 ... ok
+test_identity_treats_untracked_files_as_semantic_not_eol (__main__.FlutterDevelopmentChecksTests.test_identity_treats_untracked_files_as_semantic_not_eol)
+RC3-02 反例：`git diff` 看不见未跟踪文件。 ... ok
+test_invalid_scope_fails_before_any_run_output (__main__.FlutterDevelopmentChecksTests.test_invalid_scope_fails_before_any_run_output) ... ok
+test_invalid_scope_from_environment_is_not_a_shell_argument (__main__.FlutterDevelopmentChecksTests.test_invalid_scope_from_environment_is_not_a_shell_argument) ... ok
+test_lockfile_drift_fails_before_analysis (__main__.FlutterDevelopmentChecksTests.test_lockfile_drift_fails_before_analysis) ... ok
+test_machine_diagnostics_remain_json_and_private_blocks_cannot_leak_after_truncation (__main__.FlutterDevelopmentChecksTests.test_machine_diagnostics_remain_json_and_private_blocks_cannot_leak_after_truncation) ... ok
+test_missing_executable_is_error_not_pass (__main__.FlutterDevelopmentChecksTests.test_missing_executable_is_error_not_pass) ... ok
+test_missing_lock_does_not_silently_resolve_dependencies (__main__.FlutterDevelopmentChecksTests.test_missing_lock_does_not_silently_resolve_dependencies) ... ok
+test_missing_log_and_broken_summary_fail_without_relabeling_test_exit (__main__.FlutterDevelopmentChecksTests.test_missing_log_and_broken_summary_fail_without_relabeling_test_exit) ... ok
+test_new_run_preserves_previous_report_and_logs (__main__.FlutterDevelopmentChecksTests.test_new_run_preserves_previous_report_and_logs) ... ok
+test_real_failure_output_is_published_redacted_without_changing_raw_log (__main__.FlutterDevelopmentChecksTests.test_real_failure_output_is_published_redacted_without_changing_raw_log) ... ok
+test_real_link_or_junction_is_rejected_as_leaf_ancestor_and_root (__main__.FlutterDevelopmentChecksTests.test_real_link_or_junction_is_rejected_as_leaf_ancestor_and_root) ... ok
+test_real_process_preserves_stdout_stderr_and_exit_code (__main__.FlutterDevelopmentChecksTests.test_real_process_preserves_stdout_stderr_and_exit_code) ... ok
+test_real_timeout_and_invalid_utf8_remain_visible_in_diagnostics (__main__.FlutterDevelopmentChecksTests.test_real_timeout_and_invalid_utf8_remain_visible_in_diagnostics) ... ok
+test_real_timeout_terminates_parent_and_child_without_hanging (__main__.FlutterDevelopmentChecksTests.test_real_timeout_terminates_parent_and_child_without_hanging) ... ok
+test_release_build_does_not_mask_analysis_failures (__main__.FlutterDevelopmentChecksTests.test_release_build_does_not_mask_analysis_failures) ... ok
+test_runner_workflow_and_docs_have_profile_and_ci_ownership (__main__.FlutterDevelopmentChecksTests.test_runner_workflow_and_docs_have_profile_and_ci_ownership) ... ok
+test_sdk_setup_failure_does_not_pretend_checks_executed (__main__.FlutterDevelopmentChecksTests.test_sdk_setup_failure_does_not_pretend_checks_executed) ... FAIL
+test_source_unchanged_sees_content_change_on_an_already_dirty_path (__main__.FlutterDevelopmentChecksTests.test_source_unchanged_sees_content_change_on_an_already_dirty_path)
+只比脏路径列表会漏掉"同一个已脏文件内容又变了"。 ... ok
+test_standing_authorization_is_not_a_mainline_or_release_grant (__main__.FlutterDevelopmentChecksTests.test_standing_authorization_is_not_a_mainline_or_release_grant) ... ok
+test_success_is_development_only_with_all_raw_logs (__main__.FlutterDevelopmentChecksTests.test_success_is_development_only_with_all_raw_logs) ... FAIL
+test_test_failure_is_not_masked (__main__.FlutterDevelopmentChecksTests.test_test_failure_is_not_masked) ... ok
+test_test_failure_prevents_apk_and_success_preserves_phase_order (__main__.FlutterDevelopmentChecksTests.test_test_failure_prevents_apk_and_success_preserves_phase_order) ... ok
+test_unproven_process_cleanup_stops_downstream_work (__main__.FlutterDevelopmentChecksTests.test_unproven_process_cleanup_stops_downstream_work) ... ok
+test_windows_batch_quoting_and_exit_propagation (__main__.FlutterDevelopmentChecksTests.test_windows_batch_quoting_and_exit_propagation) ... ok
+test_windows_job_assignment_failure_never_starts_the_command (__main__.FlutterDevelopmentChecksTests.test_windows_job_assignment_failure_never_starts_the_command) ... ok
+test_workflow_disk_preflight (__main__.FlutterDevelopmentChecksTests.test_workflow_disk_preflight) ... ok
+test_workflow_is_development_only_and_covers_both_hosts (__main__.FlutterDevelopmentChecksTests.test_workflow_is_development_only_and_covers_both_hosts) ... ok
+test_workflow_requests_apk_only_on_explicit_dispatch (__main__.FlutterDevelopmentChecksTests.test_workflow_requests_apk_only_on_explicit_dispatch) ... ok
+test_workflow_sparse_inputs (__main__.FlutterDevelopmentChecksTests.test_workflow_sparse_inputs) ... ok
+
+======================================================================
+ERROR: test_apk_blocks_when_starting_checkout_is_not_clean (__main__.FlutterDevelopmentChecksTests.test_apk_blocks_when_starting_checkout_is_not_clean)
+起点不干净就没有"未改动的提交检出"可言，APK 必须挡住。
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\github\my\E-Track\.cache\flutter-fastpath-20261026\tests\ota\test_flutter_dev_checks.py", line 962, in test_apk_blocks_when_starting_checkout_is_not_clean
+    self.assertIn("clean starting checkout", report["commands"][5]["reason"])
+                                             ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+KeyError: 'reason'
+
+======================================================================
+ERROR: test_apk_still_blocks_when_dirty_files_escape_toolchain_whitelist (__main__.FlutterDevelopmentChecksTests.test_apk_still_blocks_when_dirty_files_escape_toolchain_whitelist)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\github\my\E-Track\.cache\flutter-fastpath-20261026\tests\ota\test_flutter_dev_checks.py", line 981, in test_apk_still_blocks_when_dirty_files_escape_toolchain_whitelist
+    report["commands"][5]["reason"])
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+KeyError: 'reason'
+
+======================================================================
+FAIL: test_analysis_timeout_is_red_but_cleaned_up_tests_can_run (__main__.FlutterDevelopmentChecksTests.test_analysis_timeout_is_red_but_cleaned_up_tests_can_run)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\github\my\E-Track\.cache\flutter-fastpath-20261026\tests\ota\test_flutter_dev_checks.py", line 230, in test_analysis_timeout_is_red_but_cleaned_up_tests_can_run
+    self.assertEqual("tests", calls[-1])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'tests' != 'candidate_tests'
+- tests
++ candidate_tests
+
+
+======================================================================
+FAIL: test_analyze_failure_still_collects_tests_and_fails_overall (__main__.FlutterDevelopmentChecksTests.test_analyze_failure_still_collects_tests_and_fails_overall)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\github\my\E-Track\.cache\flutter-fastpath-20261026\tests\ota\test_flutter_dev_checks.py", line 193, in test_analyze_failure_still_collects_tests_and_fails_overall
+    self.assertEqual("tests", calls[-1])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'tests' != 'candidate_tests'
+- tests
++ candidate_tests
+
+
+======================================================================
+FAIL: test_sdk_setup_failure_does_not_pretend_checks_executed (__main__.FlutterDevelopmentChecksTests.test_sdk_setup_failure_does_not_pretend_checks_executed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\github\my\E-Track\.cache\flutter-fastpath-20261026\tests\ota\test_flutter_dev_checks.py", line 222, in test_sdk_setup_failure_does_not_pretend_checks_executed
+    self.assertEqual(["NOT_RUN"] * 4, [c["status"] for c in report["commands"][1:]])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['NOT_RUN', 'NOT_RUN', 'NOT_RUN', 'NOT_RUN'] != ['NOT_RUN', 'NOT_RUN', 'NOT_RUN', 'NOT_RUN', 'NOT_RUN']
+
+Second list contains 1 additional elements.
+First extra element 4:
+'NOT_RUN'
+
+- ['NOT_RUN', 'NOT_RUN', 'NOT_RUN', 'NOT_RUN']
++ ['NOT_RUN', 'NOT_RUN', 'NOT_RUN', 'NOT_RUN', 'NOT_RUN']
+?                                   +++++++++++
+
+
+======================================================================
+FAIL: test_success_is_development_only_with_all_raw_logs (__main__.FlutterDevelopmentChecksTests.test_success_is_development_only_with_all_raw_logs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\github\my\E-Track\.cache\flutter-fastpath-20261026\tests\ota\test_flutter_dev_checks.py", line 179, in test_success_is_development_only_with_all_raw_logs
+    self.assertEqual(5, len(calls))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: 5 != 6
+
+----------------------------------------------------------------------
+Ran 65 tests in 50.252s
+
+FAILED (failures=4, errors=2)
