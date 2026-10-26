@@ -386,6 +386,21 @@ class DevelopmentApkTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "TRACE_DEV_OTA_LINK_CANDIDATE"):
                 APK.plan(self.root, self.run, {**self.env, APK.OTA_LINK_CANDIDATE_ENV: invalid})
 
+    def test_adaptive_candidate_uses_the_release_entry_without_runtime_identity(self):
+        env = {**self.env, APK.OTA_LINK_CANDIDATE_ENV: PROFILE.RELEASE_CANDIDATE}
+        candidate = APK.ota_link_candidate(env)
+        self.assertFalse(candidate["runtime_config"])
+        self.assertEqual([PROFILE.build_profile(PROFILE.RELEASE_CANDIDATE)], APK.ota_link_defines(candidate))
+        build = next(argv for step, argv, _, _ in APK.plan(self.root, self.run, env) if step == "apk_build")
+        self.assertIn(PROFILE.build_profile(PROFILE.RELEASE_CANDIDATE), build)
+        self.assertFalse(any("OTA_P34_RUNTIME_CONFIG" in arg for arg in build))
+        for invalid in ("runtime", "p34-qualified-v1", "fast", ""):
+            with self.assertRaises(ValueError):
+                PROFILE.build_profile(invalid)
+        workflow = (ROOT / ".github/workflows/build.yml").read_text(encoding="utf-8")
+        self.assertEqual(2, workflow.count("--build-profile"))
+        self.assertEqual(2, workflow.count("inputs.release_ota_link_profile || 'baseline'"))
+
     def test_collect_records_link_candidate_as_intent_not_performance_evidence(self):
         self.write(APK.APK_RELATIVE, self.archive_bytes([("AndroidManifest.xml", b"fixture")]))
         env = {**self.env, APK.OTA_LINK_CANDIDATE_ENV: "reuse-without"}

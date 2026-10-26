@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'ota_ble_codec.dart';
 import 'ota_device_info.dart';
 import 'ota_link_stats.dart';
+import 'ota_link_profile.dart';
 import 'ota_mono.dart';
 import 'ota_pipeline_window.dart';
 
@@ -66,6 +67,7 @@ class OtaBleTransport {
     int? dataBatchFrames,
     this.enablePipeline = false,
     this.onApplyBoundary,
+    this.onLinkSelection,
   })  : dataBatchFrames = dataBatchFrames ?? (enablePipeline ? defaultPipelineBatchFrames : 1),
         _channel = channel {
     if (this.dataBatchFrames != 1 && this.dataBatchFrames != 3 && this.dataBatchFrames != 12) {
@@ -85,6 +87,7 @@ class OtaBleTransport {
 
   final OtaBleChannel _channel;
   final void Function(bool applying)? onApplyBoundary;
+  final void Function(OtaTransportSelection)? onLinkSelection;
   bool _endStarted = false;
   bool get endStarted => _endStarted;
   /// P3-4 链路观测统计（可选；null 时全部插桩为零行为差异）。
@@ -483,6 +486,11 @@ class OtaBleTransport {
         }
         _session = beginAck.session;
         view.reset(beginAck.durableOff, beginAck.blockBitmap, total);
+        if (firstBegin && prefixBytes == null) {
+          onLinkSelection?.call(OtaTransportSelection(protocol: 1,
+            windowSegments: effectiveWindow.toInt(), dataBatchFrames: effectiveBatchFrames,
+            fallbackReason: enablePipeline ? 'caps2-timeout' : null));
+        }
         if (prefixBytes != null && firstBegin &&
             (beginAck.durableOff != 0 || beginAck.blockBitmap != 0)) {
           throw const OtaTransportException('Probe requires zero initial durable and bitmap',

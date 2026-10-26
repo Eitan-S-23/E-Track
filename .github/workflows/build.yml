@@ -37,6 +37,14 @@ on:
         required: false
         type: string
         default: ""
+      release_ota_link_profile:
+        description: "Explicit candidate build intent, not production qualification; baseline keeps shipping defaults"
+        required: false
+        type: choice
+        default: baseline
+        options:
+          - baseline
+          - adaptive-v2-candidate
 
 env:
   PUB_HOSTED_URL: https://pub.dev
@@ -249,9 +257,13 @@ jobs:
           TRACE_UPDATE_PAYLOAD_ED25519_PUBLIC_KEY_BASE64: ${{ secrets.TRACE_UPDATE_PAYLOAD_ED25519_PUBLIC_KEY_BASE64 }}
           DISPATCH_FIRMWARE_LATEST_URL: ${{ inputs.firmware_latest_url || '' }}
           TRACE_RELEASE_APP_ID_SUFFIX: ${{ inputs.release_application_id_suffix || '' }}
+          TRACE_OTA_LINK_PROFILE: ${{ inputs.release_ota_link_profile || 'baseline' }}
         run: |
           set +e
           build_args=(apk --release --target-platform=android-arm,android-arm64)
+          profile_define="$(python -I -S -B -X utf8 ../../Tools/flutter/ota_link_profile.py --build-profile "${TRACE_OTA_LINK_PROFILE}")" || exit 1
+          build_args+=("${profile_define}")
+          echo "OTA build intent: ${TRACE_OTA_LINK_PROFILE}; actual protocol/window/write mode require OTA_LINK_SELECTION."
           echo "Android release APK targets ARM ABIs only to keep the sideload package smaller."
           if [[ -n "${TRACE_RELEASE_APP_ID_SUFFIX:-}" ]]; then
             # 验收并存包名后缀：仅接受点前缀的合法包名段（gradle 侧同正则
@@ -384,7 +396,14 @@ jobs:
         run: flutter test
 
       - name: Build Windows release
-        run: flutter build windows --release
+        shell: bash
+        env:
+          TRACE_OTA_LINK_PROFILE: ${{ inputs.release_ota_link_profile || 'baseline' }}
+        run: |
+          set -euo pipefail
+          profile_define="$(python -I -S -B -X utf8 ../../Tools/flutter/ota_link_profile.py --build-profile "${TRACE_OTA_LINK_PROFILE}")"
+          echo "OTA build intent: ${TRACE_OTA_LINK_PROFILE}; actual protocol/window/write mode require OTA_LINK_SELECTION."
+          flutter build windows --release "${profile_define}"
 
       - name: Prepare Windows release assets
         shell: pwsh

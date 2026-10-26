@@ -21,6 +21,7 @@ import '../ota/ota_phy.dart';
 import '../ota/ota_download.dart';
 import '../ota/ota_firmware_latest.dart';
 import '../ota/ota_link_stats.dart';
+import '../ota/ota_link_profile.dart';
 import '../ota/ota_mono.dart';
 import '../ota/ota_probe_retry.dart';
 import '../ota/ota_radio_lease.dart';
@@ -102,18 +103,23 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     Duration? rebootProbeTimeout,
     Duration? rebootProbeInterval,
     int? senderWindowSegments,
-    bool enablePipeline = const bool.fromEnvironment('P34_OTA_PIPELINE'),
+    bool? enablePipeline,
+    OtaLinkProfile? linkProfile,
     OtaPhyClient? phyClient,
     OtaBackgroundClient? backgroundClient,
     void Function()? onOpenTask,
   })  : _senderWindowSegments = RangeError.checkValueInInterval(
           senderWindowSegments ??
-              (enablePipeline ? defaultPipelineWindowSegments : defaultSenderWindowSegments),
+              ((enablePipeline ?? ((linkProfile ?? OtaLinkProfile.build).pipeline ||
+                  const bool.fromEnvironment('P34_OTA_PIPELINE')))
+                  ? defaultPipelineWindowSegments : defaultSenderWindowSegments),
           1,
           OtaBleCodec.segmentsPerBlock,
           'senderWindowSegments',
         ),
-        _enablePipeline = enablePipeline,
+        linkProfile = linkProfile ?? OtaLinkProfile.build,
+        _enablePipeline = enablePipeline ?? ((linkProfile ?? OtaLinkProfile.build).pipeline ||
+            const bool.fromEnvironment('P34_OTA_PIPELINE')),
         _bluetoothService = bluetoothService,
         _phyClient = phyClient ?? OtaPhyClient(),
         _background = backgroundClient ?? OtaBackgroundClient(),
@@ -345,6 +351,9 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   }
   final int _senderWindowSegments;
   final bool _enablePipeline;
+  final OtaLinkProfile linkProfile;
+  OtaTransportSelection? _linkSelection;
+  OtaTransportSelection? get linkSelection => _linkSelection;
   final void Function(String title, String message)? _notifyImpl;
   final Dio _dio;
   final Dio _downloadDio;
@@ -1350,6 +1359,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         // ETU 包字节与身份已在上锁后就地校验（RC2-04）。
 
         final requestedWindow = experiment?.senderWindowSegments ?? _senderWindowSegments;
+        _linkSelection = null;
         final effectiveWindow = recheck.maxWindowSegments < requestedWindow
               ? recheck.maxWindowSegments
               : requestedWindow;
@@ -1361,6 +1371,9 @@ class OtaService extends GetxController with WidgetsBindingObserver {
             _upgradeProgress.value = p;
             _upgradeStatus.value =
                 '${prefixBytes == null ? '传输中' : '短测中'}: ${_formatBytes(durableOff)}/${_formatBytes(total)}（MCU 落盘确认）';
+            if (_linkSelection case final selection?) {
+              _upgradeStatus.value += ' ${selection.summary}';
+            }
         }
         void onSent(int sent, int total) {
             // GATT 已写字节只作为传输活性参考，不进 durable 进度。
@@ -2590,6 +2603,36 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       }
       final bindGeneration = _cancelGeneration;
       final transport = OtaBleTransport(channel: channel, stats: stats,
+          onLinkSelection: (selection) {
+            if (bindGeneration != _cancelGeneration || !isUpgrading || !linkCurrent()) return;
+            final reasons = <String>[
+              if (selection.fallbackReason != null) selection.fallbackReason!,
+              if (selection.windowSegments < (experiment?.senderWindowSegments ?? _senderWindowSegments))
+                'receiver-window-limit',
+              if (selection.protocol == 2 && selection.dataBatchFrames < linkProfile.batchFrames)
+                'without-response-unavailable',
+            ];
+            _linkSelection = OtaTransportSelection(protocol: selection.protocol,
+              windowSegments: selection.windowSegments, dataBatchFrames: selection.dataBatchFrames,
+              fallbackReason: reasons.isEmpty ? null : reasons.join(','));
+            emitOtaObservation('OTA_LINK_SELECTION ${jsonEncode({
+              'schema': 1,
+              'requested': {
+                ...linkProfile.requested,
+                'source': experiment == null ? 'build' : 'debug-runtime',
+                'protocol': _enablePipeline ? 2 : 1,
+                'windowSegments': experiment?.senderWindowSegments ?? _senderWindowSegments,
+                'dataBatchFrames': experiment?.dataBatchFrames ??
+                    (_enablePipeline ? OtaBleTransport.defaultPipelineBatchFrames : 1),
+                'reuseGatt': experiment?.reuseGatt ?? _ble.reuseOtaCharacteristics,
+                'preferWithoutResponse': experiment?.withoutResponse ?? _ble.preferOtaWithoutResponse,
+              },
+              'actual': {...selection.toJson(), 'writeMode': writeWithResponse ? 'with' : 'without',
+                'gattReuseEnabled': _ble.reuseOtaCharacteristics && !Platform.isWindows,
+                'mtuChunkBytes': mtuChunk},
+              'fallbackReasons': reasons,
+            })}');
+          },
           onApplyBoundary: (applying) {
             if (bindGeneration != _cancelGeneration || !isUpgrading) return;
             if (applying && phase == OtaPhase.transferring) _phase.value = OtaPhase.applying;

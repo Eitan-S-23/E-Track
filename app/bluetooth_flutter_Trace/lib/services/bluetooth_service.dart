@@ -10,6 +10,7 @@ import 'package:win_ble/win_ble.dart';
 
 import '../ota/ota_device_observation.dart';
 import '../ota/ota_link_stats.dart';
+import '../ota/ota_link_profile.dart';
 import '../ota/ota_experiment_config.dart';
 import '../ota/ota_radio_lease.dart';
 import '../ota/ota_scan_pause.dart';
@@ -470,17 +471,20 @@ class BluetoothService extends GetxController {
     bool? reuseOtaCharacteristics,
     bool? preferOtaWithoutResponse,
     OtaExperimentRuntime? experiment,
+    OtaLinkProfile? linkProfile,
   }) : _experiment = experiment ?? OtaExperimentRuntime.current,
        reuseOtaCharacteristics =
            (experiment ?? OtaExperimentRuntime.current).config?.reuseGatt ??
            reuseOtaCharacteristics ??
-           (kDebugMode && const bool.fromEnvironment('OTA_P34_REUSE_GATT')),
+           ((linkProfile ?? OtaLinkProfile.build).reuseGatt ||
+               (kDebugMode && const bool.fromEnvironment('OTA_P34_REUSE_GATT'))),
        preferOtaWithoutResponse =
            (experiment ?? OtaExperimentRuntime.current).config?.withoutResponse ??
            preferOtaWithoutResponse ??
-           (kDebugMode && const bool.fromEnvironment('OTA_P34_PREFER_WITHOUT_RESPONSE'));
+           ((linkProfile ?? OtaLinkProfile.build).preferWithoutResponse ||
+               (kDebugMode && const bool.fromEnvironment('OTA_P34_PREFER_WITHOUT_RESPONSE')));
 
-  // Development candidates, not selected production link parameters.
+  // Requested binding policy; actual properties and connection tokens decide use.
   final bool reuseOtaCharacteristics;
   final bool preferOtaWithoutResponse;
   final OtaExperimentRuntime _experiment;

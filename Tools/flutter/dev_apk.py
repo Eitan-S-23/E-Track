@@ -226,6 +226,8 @@ def ota_link_candidate(env):
     name = env.get(OTA_LINK_CANDIDATE_ENV, "").strip()
     if name in ("", "baseline"):
         return None
+    if name == ota_link_profile.RELEASE_CANDIDATE:
+        return {"name": name, "runtime_config": False, "build_profile": name}
     if name in ("runtime", "runtime-pipeline"):
         observation = observation_config(env)
         if observation is None or not re.fullmatch(r"(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}", observation["target"]):
@@ -250,6 +252,8 @@ def ota_link_candidate(env):
 def ota_link_defines(config):
     if config is None:
         return []
+    if config.get("build_profile"):
+        return [ota_link_profile.build_profile(config["build_profile"])]
     if config.get("runtime_config") is True:
         defines = ["--dart-define=OTA_P34_RUNTIME_CONFIG=true"]
         if config.get("pipeline") is True:

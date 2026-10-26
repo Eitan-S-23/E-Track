@@ -109,7 +109,7 @@ def log_diagnostics(root, log_path, command, env, *, limit=65536):
                 byte_count += len(raw)
                 line = ANSI_ESCAPE.sub("", raw.decode("utf-8", "replace")).strip()
                 ota_lines += "OTA_LINK_" in line
-                totals = TEST_TOTALS.fullmatch(line) if command["name"] == "tests" else None
+                totals = TEST_TOTALS.fullmatch(line) if command["name"] in ("tests", "candidate_tests") else None
                 if totals:
                     result["test_counts"] = {
                         key: int(value or 0) for key, value in zip(("passed", "skipped", "failed"), totals.groups())
@@ -679,6 +679,9 @@ def command_plan(root, run_dir, scope, *, build_apk=False, env=None):
         ("analyze", [flutter, "analyze", "--no-pub"], app, 300),
         ("tests", [flutter, "test", "--no-pub", "--reporter", "expanded",
                    "--timeout", "2m", SCOPES[scope]], app, 600),
+        ("candidate_tests", [flutter, "test", "--no-pub", "--reporter", "expanded",
+                             "--timeout", "2m", "--dart-define=OTA_LINK_PROFILE=adaptive-v2-candidate",
+                             "test/ota/ota_release_link_profile_test.dart"], app, 120),
     ]
     if build_apk:
         if scope != "all" or sys.platform != "linux":
@@ -769,7 +772,7 @@ def run_checks(root, scope, *, build_apk=False, execute=run_command,
         if name == "apk_prepare" and not blocked:
             if not report["diagnostics_complete"]:
                 blocked = "APK generation requires complete development diagnostics"
-            elif any(item["status"] != "PASS" for item in report["commands"][:5]):
+            elif any(item["status"] != "PASS" for item in report["commands"][:6]):
                 blocked = "APK generation requires both analysis and full tests to pass"
             elif source["head"] != os.environ.get("GITHUB_SHA"):
                 blocked = "APK generation requires the tested commit to match GITHUB_SHA"

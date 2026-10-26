@@ -1,6 +1,6 @@
 part of 'ota_ble_transport.dart';
 
-/// Explicit development extension. The v1 codec and INFO stay unchanged.
+/// Negotiated v2 extension. The v1 codec and INFO stay unchanged.
 class _PipelineWire {
   static const caps = 0x10;
   static const begin = 0x11;
@@ -328,6 +328,8 @@ extension _PipelineTransfer on OtaBleTransport {
         rethrow;
       }
       final resume = beginAck.durable;
+      onLinkSelection?.call(OtaTransportSelection(protocol: 2,
+        windowSegments: window.maxInFlightSegments, dataBatchFrames: dataBatchFrames));
       final beginAt = beginAck.arrivalUs;
       if (beginAt != null) {
         stats!.recordBeginAck(protocol: 2, session: _session, sequence: beginSeq,

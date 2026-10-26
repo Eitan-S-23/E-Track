@@ -142,13 +142,15 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
         for scope, directory in (("all", "test"), ("ota", "test/ota")):
             plan = RUNNER.command_plan(self.project, self.project / "run", scope)
             self.assertEqual(
-                ["sdk_checkout", "sdk_version", "dependencies", "analyze", "tests"],
+                ["sdk_checkout", "sdk_version", "dependencies", "analyze", "tests", "candidate_tests"],
                 [item[0] for item in plan],
             )
             self.assertEqual(["pub", "get", "--enforce-lockfile"], plan[2][1][1:])
             self.assertEqual(["analyze", "--no-pub"], plan[3][1][1:])
             self.assertEqual(directory, plan[4][1][-1])
             self.assertIn("--no-pub", plan[4][1])
+            self.assertIn("--dart-define=OTA_LINK_PROFILE=adaptive-v2-candidate", plan[5][1])
+            self.assertEqual("test/ota/ota_release_link_profile_test.dart", plan[5][1][-1])
             self.assertTrue(all(0 < item[3] <= 600 for item in plan))
             for _, argv, _, _ in plan:
                 self.assertFalse({"build", "publish", "deploy", "push"}.intersection(argv))
@@ -174,7 +176,7 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
         self.assertEqual("development-self-test", report["evidence_kind"])
         self.assertEqual("NOT_RUN", report["formal_acceptance"])
         self.assertEqual("ota", report["scope"])
-        self.assertEqual(5, len(calls))
+        self.assertEqual(6, len(calls))
         self.assertTrue(report["lockfile_unchanged"])
         for item in report["commands"]:
             self.assertEqual(0, item["exit_code"])
@@ -188,7 +190,7 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
         })
         self.assertEqual(1, code)
         self.assertEqual("FAIL", report["development_result"])
-        self.assertEqual("tests", calls[-1])
+        self.assertEqual("candidate_tests", calls[-1])
         self.assertEqual(23, report["commands"][3]["exit_code"])
         self.assertEqual("PASS", report["commands"][4]["status"])
 
@@ -217,7 +219,7 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
         })
         self.assertEqual(1, code)
         self.assertEqual(["sdk_checkout"], calls)
-        self.assertEqual(["NOT_RUN"] * 4, [c["status"] for c in report["commands"][1:]])
+        self.assertEqual(["NOT_RUN"] * 5, [c["status"] for c in report["commands"][1:]])
 
     def test_analysis_timeout_is_red_but_cleaned_up_tests_can_run(self):
         code, report, calls, _ = self.fixture_run({
@@ -225,7 +227,7 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
                         "cleanup_error": None}
         })
         self.assertEqual(1, code)
-        self.assertEqual("tests", calls[-1])
+        self.assertEqual("candidate_tests", calls[-1])
         self.assertTrue(report["commands"][3]["timed_out"])
 
     def test_unproven_process_cleanup_stops_downstream_work(self):
@@ -957,7 +959,7 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
                 build_apk=True, identify=lambda root: next(states))
         self.assertEqual(1, code)
         self.assertEqual("NOT_RUN", report["apk_result"])
-        self.assertIn("clean starting checkout", report["commands"][5]["reason"])
+        self.assertIn("clean starting checkout", next(c for c in report["commands"] if c["name"] == "apk_prepare")["reason"])
         self.assertEqual([], checkouts)
         self.assertFalse(any(name.startswith("apk_") for name in calls))
 
@@ -976,7 +978,7 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
         self.assertEqual(1, code)
         self.assertEqual("NOT_RUN", report["apk_result"])
         self.assertIn("unchanged, committed checkout",
-                      report["commands"][5]["reason"])
+            next(c for c in report["commands"] if c["name"] == "apk_prepare")["reason"])
         self.assertEqual([], checkouts)
         self.assertFalse(any(name.startswith("apk_") for name in calls))
 

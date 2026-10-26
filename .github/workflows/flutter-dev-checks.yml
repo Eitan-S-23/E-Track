@@ -41,6 +41,7 @@ on:
           - reuse-without
           - runtime
           - runtime-pipeline
+          - adaptive-v2-candidate
       ota_link_profile:
         description: "Named accepted candidate settings; p34-qualified-v1 requires runtime-pipeline"
         required: false

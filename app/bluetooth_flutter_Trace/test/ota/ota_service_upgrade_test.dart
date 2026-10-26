@@ -20,6 +20,7 @@ import 'package:ble_monitor/ota/ota_experiment_config.dart';
 import 'package:ble_monitor/ota/ota_phy.dart';
 import 'package:ble_monitor/ota/ota_radio_lease.dart';
 import 'package:ble_monitor/ota/ota_link_stats.dart';
+import 'package:ble_monitor/ota/ota_link_profile.dart';
 import 'package:ble_monitor/pages/ota_upgrade_page.dart';
 import 'package:ble_monitor/services/app_update_service.dart';
 import 'package:ble_monitor/services/bluetooth_service.dart';
@@ -211,6 +212,7 @@ void main() {
     int? senderWindowSegments,
     OtaPhyClient? phyClient,
     OtaBackgroundClient? backgroundClient,
+    OtaLinkProfile? linkProfile,
   }) {
     // RC3-02⑤：默认值不得用 const []——记录替身恒 add，const 列表首条
     // 通知即抛 UnsupportedError。默认改为可增长列表。
@@ -235,6 +237,7 @@ void main() {
       rebootProbeTimeout: rebootProbeTimeout,
       rebootProbeInterval: rebootProbeInterval,
       senderWindowSegments: senderWindowSegments,
+      linkProfile: linkProfile,
       phyClient: phyClient,
       backgroundClient: backgroundClient,
     );
@@ -274,6 +277,7 @@ void main() {
     String writeMode = 'with',
     OtaPhyClient? phyClient,
     OtaBackgroundClient? backgroundClient,
+    OtaLinkProfile? linkProfile,
   }) async {
     final ble = _UpgradeFakeBle(
       preRebootPayload: Uint8List.fromList(preRebootPayload)
@@ -290,6 +294,7 @@ void main() {
       rebootProbeTimeout: rebootProbeTimeout,
       rebootProbeInterval: rebootProbeInterval,
       senderWindowSegments: senderWindowSegments,
+      linkProfile: linkProfile,
       latestAdapter: package == null ? null : _LatestOkAdapter(latestBody(package)),
       downloadAdapter: package == null ? null : _DownloadOkAdapter(package),
       phyClient: phyClient,
@@ -1576,6 +1581,30 @@ void main() {
       expect(await File('${output.path}/observations.log').readAsString(),
           '${messages.join('\n')}\n');
     });
+  });
+
+  test('candidate real service records v1 fallback and still requires reboot identity', () async {
+    final lines = <String>[];
+    final previous = debugPrint;
+    debugPrint = (message, {wrapWidth}) { if (message != null) lines.add(message); };
+    addTearDown(() => debugPrint = previous);
+    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+        linkProfile: OtaLinkProfile.adaptiveCandidate);
+    final service = Get.find<OtaService>();
+    expect(await service.startOtaUpgrade('AA:BB'), isTrue);
+    expect(service.phase, OtaPhase.completed);
+    expect(service.linkSelection!.protocol, 1);
+    expect(service.linkSelection!.dataBatchFrames, 1);
+    expect(service.linkSelection!.fallbackReason, contains('caps2-timeout'));
+    final selection = jsonDecode(lines.singleWhere((s) => s.startsWith('OTA_LINK_SELECTION '))
+        .substring('OTA_LINK_SELECTION '.length)) as Map;
+    expect(selection['requested']['protocol'], 2);
+    expect(selection['requested']['windowSegments'], 24);
+    expect(selection['actual']['protocol'], 1);
+    expect(selection['actual']['windowSegments'], 4);
+    expect(selection['actual']['writeMode'], 'with');
+    expect(selection['fallbackReasons'], contains('caps2-timeout'));
+    expect(ble.dataOffsets, isNotEmpty);
   });
 
   test('端到端成功闭环：read → check → download → start → completed', () async {

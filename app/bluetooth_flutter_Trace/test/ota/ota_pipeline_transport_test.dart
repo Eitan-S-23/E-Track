@@ -8,6 +8,7 @@ import 'package:ble_monitor/ota/ota_ble_codec.dart';
 import 'package:ble_monitor/ota/ota_ble_transport.dart';
 import 'package:ble_monitor/ota/ota_device_info.dart';
 import 'package:ble_monitor/ota/ota_link_stats.dart';
+import 'package:ble_monitor/ota/ota_link_profile.dart';
 import 'package:ble_monitor/ota/ota_diagnostics.dart';
 import 'package:ble_monitor/ota/ota_observation_log.dart';
 import 'package:ble_monitor/ota/ota_mono.dart';
@@ -205,6 +206,41 @@ Future<void> until(bool Function() condition) async {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  test('negotiated v2 reports actual window and batch only after BEGIN', () async {
+    final peer = _Peer();
+    final selections = <OtaTransportSelection>[];
+    final transport = OtaBleTransport(channel: peer, enablePipeline: true,
+        dataBatchFrames: 12, onLinkSelection: selections.add);
+    expect(selections, isEmpty);
+    expect((await transport.transfer(package: package(9000),
+        packageSha256: List.filled(32, 1), etuHeader: package(64), windowSegments: 8)).isOk, isTrue);
+    expect(selections.single.toJson(), {'protocol': 2, 'windowSegments': 8,
+      'dataBatchFrames': 12, 'fallbackReason': null});
+    await transport.dispose();
+    await peer.events.close();
+  });
+
+  test('only a safe CAPS2 timeout can report v1 compatibility fallback', () async {
+    final peer = _Peer()..supports = false;
+    final selections = <OtaTransportSelection>[];
+    final transport = OtaBleTransport(channel: peer, enablePipeline: true,
+        dataBatchFrames: 12, ackTimeout: const Duration(milliseconds: 30),
+        onLinkSelection: selections.add);
+    expect((await transfer(transport, package(1000))).isOk, isTrue);
+    expect(selections.single.toJson(), {'protocol': 1, 'windowSegments': 4,
+      'dataBatchFrames': 1, 'fallbackReason': 'caps2-timeout'});
+    await transport.dispose();
+    await peer.events.close();
+    final invalid = _Peer()..badCaps = true;
+    final rejected = OtaBleTransport(channel: invalid, enablePipeline: true,
+        onLinkSelection: selections.add);
+    await expectLater(transfer(rejected, package(1000)), throwsA(isA<OtaTransportException>()));
+    expect(selections, hasLength(1));
+    expect(invalid.frames.any((f) => f.cmd == 1 || f.cmd == 0x11), isFalse);
+    await rejected.dispose();
+    await invalid.events.close();
+  });
 
   test('real v2 transport schema10 snapshot reaches formal statistics without early ACK fabrication', () async {
     const sentinel = 'OTAOBS0123456789abcdef01234567';

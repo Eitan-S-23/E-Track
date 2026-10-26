@@ -11,6 +11,15 @@ from urllib.parse import urlsplit
 NAME = "p34-qualified-v1"
 ENV = "TRACE_DEV_OTA_LINK_PROFILE"
 CANDIDATE = "runtime-pipeline"
+RELEASE_CANDIDATE = "adaptive-v2-candidate"
+
+
+def build_profile(name):
+    """Credential/device-free selector shared by debug CI and standard builds."""
+    if name not in ("baseline", RELEASE_CANDIDATE):
+        raise ValueError("Unknown OTA_LINK_PROFILE")
+    return "--dart-define=OTA_LINK_PROFILE=" + name
+
 RUNTIME = {
     "schema": 10, "requestedBaud": 921600, "reuseGatt": True,
     "withoutResponse": True, "senderWindowSegments": 24,
@@ -113,3 +122,10 @@ def check_observation(statistics, config, *, experiments):
     require_fields(parameters.get("input", {}), inputs, "observed identity")
     require_fields(statistics, {"success": True, "finalDurable": config["packageBytes"]}, "transfer")
     return {"profile": NAME, "settings_match": True, "performance_acceptance": "NOT_ADJUDICATED"}
+
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--build-profile", required=True)
+    print(build_profile(parser.parse_args().build_profile))
