@@ -1,0 +1,11 @@
+{
+  "apk_sha256": "52323a6f5806b024df6fa8a44d1b07049b08a49d441ac11600e9dfc54d891124",
+  "exe_sha256": "5ec40ad05fc861ff8ceacd4aaf71ae1a51e6d91d2fe78a9bb5b61ec18e80e7f8",
+  "signature_sha256": "2a231c87e006fd69224ca05f6b0df521caa122394fc142eea6ee7c5887d3daa5",
+  "badging_sha256": "f662257bf22e6d41ace47b8d17d0528fc9c16bc1623a9c02c26c34d9244e7762",
+  "signer": "2d8dcc1a5d711333cd9fe359337959c3cab897b97653a22bfec89e3934a2c32d",
+  "prior_signer": "9e4e4a949178e4ce583b86bf45ee5312288c27938ec573fa265ad23e2d9fe786",
+  "fixed_signing": "NOT_ADJUDICATED",
+  "source": "410b7d57c7ed918103986f42a30af80960506826",
+  "no_new_build_or_download": true
+}

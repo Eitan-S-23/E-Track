@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
+import 'package:flutter_blue_plus_android/flutter_blue_plus_android.dart';
 
 import 'package:ble_monitor/ota/ota_device_info.dart';
 import 'package:ble_monitor/ota/ota_diagnostics.dart';
@@ -16,6 +19,17 @@ import 'package:ble_monitor/services/ota_service.dart';
 /// 通过 GetX 容器注入 fake OtaService 子类（页面内 Get.put 幂等返回已
 /// 注册实例），手动驱动 Rx 阶段字段验证各状态渲染，不触发真实 BLE/HTTP。
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  setUpAll(() async {
+    FlutterBluePlusAndroid.registerWith();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(const MethodChannel('flutter_blue_plus/methods'), (call) async {
+      if (call.method == 'flutterRestart' || call.method == 'connectedCount') return 0;
+      if (call.method == 'getAdapterState') return {'adapter_state': 4};
+      return true;
+    });
+    expect(await FlutterBluePlus.isSupported, isTrue);
+  });
   setUp(() {
     Get.testMode = true;
   });
@@ -71,6 +85,7 @@ void main() {
     _FakeOtaService? fake,
     BluetoothDevice? connectedDevice,
     OtaDiagnostics? diagnostics,
+    bool settle = true,
   }) async {
     // 升级页按手机竖屏设计：默认 800x600 测试视口下「取消升级」「忽略」
     // 等操作按钮位于视口外（hit test 落空、对话框不弹出）。统一放大
@@ -86,7 +101,11 @@ void main() {
     ));
     // postFrameCallback（自动解析连接 + 读取身份）与入场动画。
     await tester.pump();
-    await tester.pumpAndSettle();
+    if (settle) {
+      await tester.pumpAndSettle();
+    } else {
+      await tester.pump(const Duration(seconds: 1));
+    }
   }
 
   ElevatedButton findButton(WidgetTester tester, String label) {
@@ -437,7 +456,7 @@ void main() {
   group('忽略与清理（RC3-12②）', () {
     testWidgets('readyToInstall 点忽略：清包后传输入口消失、下载入口恢复',
         (tester) async {
-      final fake = _FakeOtaService();
+      final fake = _FakeOtaService()..readResult = deviceInfoOf();
       final device = BluetoothDevice(
         remoteId: const DeviceIdentifier('11:22:33:44:55:66'),
       );
@@ -579,6 +598,118 @@ void main() {
   });
 
   group('连接与生命周期（RC3-08④）', () {
+    Future<void> connectionEvent(WidgetTester tester, String address, int state) async {
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter_blue_plus/methods',
+        const StandardMethodCodec().encodeMethodCall(MethodCall(
+          'OnConnectionStateChanged', {
+            'remote_id': address,
+            'connection_state': state,
+            'disconnect_reason_code': 0,
+            'disconnect_reason_string': '',
+          })), (_) {},
+      );
+      await tester.pump();
+    }
+
+    testWidgets('same target reconnect retries failed identity read and restores actions', (tester) async {
+      const address = 'AA:BB:CC:DD:EE:FF';
+      final fake = _FakeOtaService()..readResult = deviceInfoOf();
+      await pumpPage(tester, fake: fake, connectedDevice: BluetoothDevice.fromId(address));
+      fake.hasFile = true;
+      fake.latest = latestOf();
+      fake.phase$.value = OtaPhase.failed;
+      await connectionEvent(tester, address, 0);
+      expect(findButton(tester, '检查更新').onPressed, isNull);
+      expect(find.text('设备身份已确认'), findsNothing);
+      expect(find.text('未连接设备'), findsOneWidget);
+      fake.readResult = null;
+      await connectionEvent(tester, address, 1);
+      await tester.pumpAndSettle();
+      expect(fake.readCalls, 2);
+      expect(findButton(tester, '检查更新').onPressed, isNull);
+      fake.readResult = deviceInfoOf();
+      await connectionEvent(tester, address, 0);
+      await connectionEvent(tester, address, 1);
+      await tester.pumpAndSettle();
+      expect(fake.readCalls, 3);
+      expect(findButton(tester, '检查更新').onPressed, isNotNull);
+      expect(findButton(tester, '开始 BLE 传输').onPressed, isNotNull);
+      await connectionEvent(tester, address, 0);
+    });
+
+    testWidgets('reconnect arriving during failed read is reconciled exactly once', (tester) async {
+      const address = 'AA:BB:CC:DD:EE:FF';
+      final fake = _FakeOtaService()..readGate = Completer<void>();
+      await pumpPage(tester, fake: fake, connectedDevice: BluetoothDevice.fromId(address), settle: false);
+      await connectionEvent(tester, address, 0);
+      await connectionEvent(tester, '11:22:33:44:55:66', 1);
+      await connectionEvent(tester, address, 1);
+      expect(fake.readCalls, 1);
+      fake.readResult = deviceInfoOf();
+      fake.readGate!.complete();
+      await tester.pumpAndSettle();
+      expect(fake.readCalls, 2);
+      expect(fake.lastReadAddress, address.toLowerCase());
+      expect(findButton(tester, '检查更新').onPressed, isNotNull);
+      await connectionEvent(tester, address, 0);
+      await connectionEvent(tester, '11:22:33:44:55:66', 0);
+    });
+
+    testWidgets('reopened failed task keeps its exact device and cached transfer entry', (tester) async {
+      final fake = _FakeOtaService()
+        ..taskAddress = 'aa:bb:cc:dd:ee:ff'
+        ..readResult = deviceInfoOf()
+        ..hasFile = true
+        ..latest = latestOf();
+      fake.phase$.value = OtaPhase.failed;
+      await pumpPage(tester, fake: fake);
+      expect(fake.lastReadAddress, 'aa:bb:cc:dd:ee:ff');
+      expect(findButton(tester, '开始 BLE 传输').onPressed, isNotNull);
+    });
+
+    for (final terminal in [OtaPhase.completed, OtaPhase.cancelled, OtaPhase.failed]) {
+      testWidgets('P38-R04 notification page reattaches target after $terminal', (tester) async {
+        final fake = _FakeOtaService()
+          ..taskAddress = 'aa:bb:cc:dd:ee:ff'
+          ..info = deviceInfoOf()
+          ..readResult = deviceInfoOf();
+        fake.isUpgrading$.value = true;
+        fake.phase$.value = OtaPhase.transferring;
+        await pumpPage(tester, fake: fake, settle: false);
+        expect(fake.readCalls, 0, reason: 'a notification page is not a second BLE owner');
+        expect(findButton(tester, '检查更新').onPressed, isNull);
+        fake.readGate = Completer<void>();
+        fake.phase$.value = terminal;
+        fake.isUpgrading$.value = false;
+        await tester.pump();
+        expect(fake.readCalls, 1);
+        expect(fake.lastReadAddress, 'aa:bb:cc:dd:ee:ff');
+        expect(findButton(tester, '检查更新').onPressed, isNull,
+            reason: 'cached identity must not enable actions before reconciliation');
+        fake.readGate!.complete();
+        await tester.pumpAndSettle();
+        expect(findButton(tester, '检查更新').onPressed, isNotNull);
+        expect(fake.readCalls, 1, reason: 'identity read completion must not loop');
+      });
+    }
+
+    testWidgets('P38-R04 current owner wins over an unrelated page device', (tester) async {
+      final fake = _FakeOtaService()
+        ..taskAddress = 'aa:bb:cc:dd:ee:ff'
+        ..readResult = deviceInfoOf();
+      fake.isUpgrading$.value = true;
+      fake.phase$.value = OtaPhase.transferring;
+      await pumpPage(tester, fake: fake, settle: false, connectedDevice:
+          BluetoothDevice.fromId('11:22:33:44:55:66'));
+      expect(fake.readCalls, 0);
+      fake.phase$.value = OtaPhase.cancelled;
+      fake.isUpgrading$.value = false;
+      await tester.pumpAndSettle();
+      expect(fake.lastReadAddress, 'aa:bb:cc:dd:ee:ff');
+      expect(findButton(tester, '检查更新').onPressed, isNotNull);
+    });
+
     testWidgets('显式设备参数变化：重新解析并读取新地址身份', (tester) async {
       final fake = _FakeOtaService()..readResult = deviceInfoOf();
       final deviceA = BluetoothDevice(
@@ -640,6 +771,8 @@ class _FakeOtaService extends OtaService {
   DeviceOtaInfo? readResult;
   /// 交互记录：readDeviceInfo/cancelUpgrade/cleanupFirmware 调用参数。
   int readCalls = 0;
+  String? taskAddress;
+  Completer<void>? readGate;
   String? lastReadAddress;
   int cancelCalls = 0;
   bool? lastKeepPackage;
@@ -653,6 +786,10 @@ class _FakeOtaService extends OtaService {
   OtaPhase get phase => phase$.value;
   @override
   bool get isUpgrading => isUpgrading$.value;
+  @override
+  Stream<bool> get taskActivity => isUpgrading$.stream;
+  @override
+  String? get taskDeviceAddress => taskAddress;
   @override
   String get upgradeStatus => status$.value;
   @override
@@ -676,6 +813,7 @@ class _FakeOtaService extends OtaService {
   Future<DeviceOtaInfo?> readDeviceInfo(String deviceAddress) async {
     readCalls++;
     lastReadAddress = deviceAddress;
+    await readGate?.future;
     // 页面自动读取：返回值同时驱动连接卡状态。
     final result = readResult;
     if (result != null) {

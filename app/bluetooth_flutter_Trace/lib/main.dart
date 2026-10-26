@@ -10,6 +10,7 @@ import 'ota/ota_experiment_config.dart';
 import 'pages/main_app_page.dart';
 import 'pages/home_page.dart';
 import 'pages/monitor_page.dart';
+import 'pages/ota_upgrade_page.dart';
 import 'pages/saved_devices_page.dart';
 import 'pages/speedometer_page.dart';
 import 'pages/test_notification_page.dart';
@@ -108,7 +109,9 @@ class MyApp extends StatelessWidget {
             Get.put(ResponsiveService(), permanent: true); // 首先注册响应式服务
             Get.put(ScanSettingsService(), permanent: true);
             Get.put(AlertService(), permanent: true);
-            Get.put(OtaService(), permanent: true);
+            Get.put(OtaService(onOpenTask: () {
+              if (Get.currentRoute != '/device-ota') Get.toNamed('/device-ota');
+            }), permanent: true);
             Get.put(AppUpdateService(), permanent: true);
             Get.put(bt_service.BluetoothService(),
                 permanent: true); // 注册跨平台蓝牙服务
@@ -122,7 +125,9 @@ class MyApp extends StatelessWidget {
             Get.put(DeepLinkService(), permanent: true);
 
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              Get.find<NotificationService>().initialize();
+              Get.find<NotificationService>().initialize().catchError((Object error) {
+                debugPrint('Notification initialization failed: $error');
+              });
               Get.find<AppUpdateService>().checkDailyOnStartup();
               if (!OtaExperimentRuntime.current.ready) return;
               // P3-3 T1a 设备观测（dev 分支 + dev APK 专用）。未显式注入
@@ -150,6 +155,7 @@ class MyApp extends StatelessWidget {
             });
           }),
           getPages: [
+            GetPage(name: '/device-ota', page: () => const OtaUpgradePage()),
             GetPage(name: '/main', page: () => const MainAppPage()),
             GetPage(name: '/', page: () => const HomePage()),
             GetPage(name: '/monitor', page: () => const MonitorPage()),

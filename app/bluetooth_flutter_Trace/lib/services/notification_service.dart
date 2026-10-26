@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
 import 'package:local_notifier/local_notifier.dart';
 
 class NotificationService {
@@ -9,6 +9,9 @@ class NotificationService {
   factory NotificationService() => _instance;
 
   NotificationService._internal();
+
+  @visibleForTesting
+  NotificationService.forTesting();
 
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -20,10 +23,24 @@ class NotificationService {
   static List<int> get vibrationPattern => [0, 300, 200, 400, 200, 500];
 
   bool _isInitialized = false;
+  Future<void>? _initializing;
+  Future<bool?>? _permissionRequest;
+  bool? _permissionGranted;
 
   /// 初始化通知服务
-  Future<void> initialize() async {
-    if (_isInitialized) return;
+  Future<void> initialize() {
+    if (_isInitialized) return Future.value();
+    final pending = _initializing;
+    if (pending != null) return pending;
+    late final Future<void> future;
+    future = _initialize().whenComplete(() {
+      if (identical(_initializing, future)) _initializing = null;
+    });
+    _initializing = future;
+    return future;
+  }
+
+  Future<void> _initialize() async {
 
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -57,8 +74,30 @@ class NotificationService {
   }
 
   /// 请求通知权限
-  Future<void> _requestPermissions() async {
-    if (kIsWeb) return; // Web平台不需要特殊权限处理
+  Future<bool?> requestNotificationPermission() async {
+    if (!_isInitialized) {
+      await initialize();
+      return _permissionGranted;
+    }
+    return _requestPermissions();
+  }
+
+  Future<bool?> _requestPermissions() {
+    final pending = _permissionRequest;
+    if (pending != null) return pending;
+    late final Future<bool?> future;
+    future = _requestPermissionsImpl().then((granted) {
+      _permissionGranted = granted;
+      return granted;
+    }).whenComplete(() {
+      if (identical(_permissionRequest, future)) _permissionRequest = null;
+    });
+    _permissionRequest = future;
+    return future;
+  }
+
+  Future<bool?> _requestPermissionsImpl() async {
+    if (kIsWeb) return true;
 
     // Android 13+ 需要特殊的权限处理
     final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
@@ -67,8 +106,9 @@ class NotificationService {
                 AndroidFlutterLocalNotificationsPlugin>();
 
     if (androidImplementation != null) {
-      await androidImplementation.requestNotificationsPermission();
+      return androidImplementation.requestNotificationsPermission();
     }
+    return true;
   }
 
   /// 显示报警通知

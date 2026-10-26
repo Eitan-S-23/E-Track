@@ -1,0 +1,22 @@
+{
+  "result": "FRESH_CAPTURE_READY_NO_OTA",
+  "pid": 31399,
+  "capture": "1792962452861728-9f56351e5694cc711466aab9",
+  "health": {
+    "schema": 1,
+    "captureId": "1792962452861728-9f56351e5694cc711466aab9",
+    "time": "2026-10-25T21:07:37.939354Z",
+    "records": 2,
+    "bytes": 1019,
+    "producerLines": 1,
+    "upgradeStarts": 0,
+    "upgradeEnds": 0,
+    "outcome": null,
+    "lost": 0,
+    "error": null,
+    "healthy": true
+  },
+  "package_sha256": "fe6ebde3a100319d53df3bcb85ea95e6a48a75aba6cda40f1953bdeee528707c",
+  "deleted_files": 0,
+  "no_mcu": true
+}

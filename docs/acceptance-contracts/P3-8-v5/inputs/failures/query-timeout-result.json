@@ -1,0 +1,18 @@
+{
+  "no_ui_actions": true,
+  "formal_acceptance": "NOT_RUN",
+  "latest": {
+    "schema": 1,
+    "captureId": "1792920264534582-84bf92b987d113605710ea55",
+    "time": "2026-10-25T19:05:44.565186Z",
+    "records": 108,
+    "bytes": 26779,
+    "producerLines": 105,
+    "upgradeStarts": 1,
+    "upgradeEnds": 1,
+    "outcome": "not-completed",
+    "lost": 0,
+    "error": null,
+    "healthy": true
+  }
+}

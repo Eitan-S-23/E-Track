@@ -1,0 +1,6 @@
+  mCurrentFocus=null
+  mFocusedApp=null
+    mShowingDream=false mDreamingLockscreen=false
+  mCurrentFocus=Window{d751cfa u0 com.wen.gaia.gaia.p38acceptance/com.wen.gaia.gaia.MainActivity}
+  mFocusedApp=ActivityRecord{f3a750f u0 com.wen.gaia.gaia.p38acceptance/com.wen.gaia.gaia.MainActivity} t70210 d0}
+    mShowingDream=false mDreamingLockscreen=false

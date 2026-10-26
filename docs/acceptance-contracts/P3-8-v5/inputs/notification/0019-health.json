@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "captureId": "1792874413236283-485d08a1f060cb05ac4720ec",
+  "time": "2026-10-24T20:46:26.286376Z",
+  "records": 11329,
+  "bytes": 1218856,
+  "producerLines": 11327,
+  "upgradeStarts": 1,
+  "upgradeEnds": 0,
+  "outcome": null,
+  "lost": 0,
+  "error": null,
+  "healthy": true
+}

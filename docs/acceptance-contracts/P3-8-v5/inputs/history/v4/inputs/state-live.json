@@ -1,0 +1,75 @@
+{
+  "result": "POST_D2_STATE_OBSERVED",
+  "observations": {
+    "confirmed": true,
+    "sd_ready": true,
+    "ota_idle": true,
+    "fault_free": true,
+    "same_boot_advancing": true,
+    "health_samples": [
+      [
+        30000,
+        30,
+        1000,
+        0,
+        403791,
+        403791,
+        0,
+        1,
+        1
+      ],
+      [
+        30000,
+        30,
+        1000,
+        0,
+        404198,
+        404199,
+        0,
+        1,
+        1
+      ]
+    ]
+  },
+  "storage": {
+    "jedec": 15679512,
+    "capacity_bytes": 16777216,
+    "slots": {
+      "candidate_slot": {
+        "erased": false,
+        "bytes": 613952,
+        "crc32": 2889683253,
+        "version": 30287,
+        "sha8": "21a9d1ef8828498e"
+      },
+      "backup_slot": {
+        "erased": false,
+        "bytes": 613952,
+        "crc32": 2889683253,
+        "version": 30286,
+        "sha8": "9a5b5a40fcbd2056"
+      },
+      "recovery_slot": {
+        "erased": false,
+        "bytes": 619580,
+        "crc32": 2429394932,
+        "version": 30276,
+        "sha8": "deb4484dd0614f49"
+      }
+    },
+    "staging_header_hex": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "staging_journal_sha256": "91b73056534f6611626281aa655c796fd4d5e2ceb6a19c035c7f2abc1d440c16",
+    "staging_erased": false,
+    "journal": {
+      "erased": false,
+      "package_sha256": "fe6ebde3a100319d53df3bcb85ea95e6a48a75aba6cda40f1953bdeee528707c",
+      "bytes": 1048576,
+      "durable": 28672,
+      "matches_reference": true,
+      "expected_begin_durable": 28672,
+      "committed_target": null
+    }
+  },
+  "no_halt_reset_flash": true,
+  "originals": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\post-d2-state-v3\\mcu\\0001-state"
+}

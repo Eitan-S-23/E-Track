@@ -1,0 +1,19 @@
+test_fixed_signing_requires_real_success_exact_pin_and_unchanged_product (__main__.CloseoutTests.test_fixed_signing_requires_real_success_exact_pin_and_unchanged_product) ... ok
+test_formal_output_rejects_unfrozen_entry (__main__.CloseoutTests.test_formal_output_rejects_unfrozen_entry) ... ok
+test_isolated_script_entries_load_before_any_output (__main__.CloseoutTests.test_isolated_script_entries_load_before_any_output) ... ok
+test_locked_progress_rejects_unrelated_snapshot_pid_and_no_progress (__main__.CloseoutTests.test_locked_progress_rejects_unrelated_snapshot_pid_and_no_progress) ... ok
+test_missing_input_is_not_success (__main__.CloseoutTests.test_missing_input_is_not_success) ... ok
+test_native_terminal_rejects_either_resource_and_remaining_notification (__main__.CloseoutTests.test_native_terminal_rejects_either_resource_and_remaining_notification) ... ok
+test_notification_binds_percentage_to_prior_durable_and_current_intent (__main__.CloseoutTests.test_notification_binds_percentage_to_prior_durable_and_current_intent) ... ok
+test_output_must_stay_in_authorized_reviewer_scope (__main__.CloseoutTests.test_output_must_stay_in_authorized_reviewer_scope) ... ok
+test_pause_uses_record_order_not_unrelated_clock_origins (__main__.CloseoutTests.test_pause_uses_record_order_not_unrelated_clock_origins) ... ok
+test_pinned_input_rejects_modified_bytes_and_escape (__main__.CloseoutTests.test_pinned_input_rejects_modified_bytes_and_escape) ... ok
+test_raw_health_requires_sd_and_advance (__main__.CloseoutTests.test_raw_health_requires_sd_and_advance) ... ok
+test_recovery_requires_same_package_real_offset_and_distinct_capture (__main__.CloseoutTests.test_recovery_requires_same_package_real_offset_and_distinct_capture) ... ok
+test_snapshot_requires_external_apk_target_pid_and_capture (__main__.CloseoutTests.test_snapshot_requires_external_apk_target_pid_and_capture) ... ok
+test_test_counts_supports_actual_hosted_reporter_without_guessing (__main__.CloseoutTests.test_test_counts_supports_actual_hosted_reporter_without_guessing) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 1.986s
+
+OK

@@ -1,0 +1,31 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "tests/ota/test_p38_closeout.py"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 171612828972200,
+  "ended_monotonic_ns": 171615422284100,
+  "stdout": {
+    "path": ".cache\\p38-closeout-20261026\\reviewer\\selftest-006\\unit.stdout",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": ".cache\\p38-closeout-20261026\\reviewer\\selftest-006\\unit.stderr",
+    "bytes": 2178,
+    "sha256": "c810f6fc183069376af85e9ea4f30ed4cfcbc2314303d61c31c5ff944ec0e9ea"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

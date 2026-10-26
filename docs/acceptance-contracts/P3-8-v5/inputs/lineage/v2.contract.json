@@ -1,0 +1,654 @@
+{
+  "schema": "etrack-acceptance-contract-v3",
+  "contract_id": "P3-8-v2",
+  "version": 2,
+  "task_id": "P3-8",
+  "parent_contract_sha256": "D25AA50B9EF5E0FEEDCBBF6D1F37300CB63A67AB1C601D82569A7AE65CFDBB19",
+  "status": "FROZEN",
+  "approved_by": "Codex root, independent operator under user P3-8 delegation of 2026-10-24",
+  "approved_at": "2026-10-24T14:08:45Z",
+  "implementation_ref": "Product 8ede0920 / delivery 6ec6c5ce, App tree e22fb7a6db1c47304354c7652c0ddf9693d4818b. Collector repair af242919; unchanged product. Preserve P3-8-v1 EVIDENCE_GAP and P38-HOST-ENTRY-01. Renewed finite network-006 before any physical transfer.",
+  "freeze_commit": "af2429199410b42b4ea428662bf8cd2e928d72a7",
+  "freeze_tree": "82bde295c23433ade842974db4950af4c225d83a",
+  "profile_config_blob": "5ef97ae98674373c3cf641676c16ff7baf1b617f",
+  "result_taxonomy": [
+    "PASS",
+    "PRODUCT_FAIL",
+    "HARNESS_FAIL",
+    "EVIDENCE_GAP",
+    "ENV_BLOCKED"
+  ],
+  "invalidation_policy": "docs/acceptance-execution-contract.md",
+  "input_groups": [
+    {
+      "id": "production",
+      "profile": "Production",
+      "category": "production_source"
+    },
+    {
+      "id": "validation",
+      "profile": "Validation",
+      "category": "validation_inputs"
+    },
+    {
+      "id": "governance",
+      "profile": "Governance",
+      "category": "governance_inputs"
+    },
+    {
+      "id": "flutter",
+      "profile": "Flutter",
+      "category": "production_source"
+    }
+  ],
+  "external_inputs": [
+    {
+      "id": "software",
+      "category": "fixture",
+      "description": "Exact software original/provenance bindings. Absolute source paths are read-only; no permission follows from this inventory.",
+      "fingerprint": "sha256:fd59cccf156972d0458e019372bcd2c689aa46952d9bb4b404f842d34c80d7d5",
+      "evidence_path": "inputs/software.json",
+      "evidence_sha256": "fd59cccf156972d0458e019372bcd2c689aa46952d9bb4b404f842d34c80d7d5"
+    },
+    {
+      "id": "admission",
+      "category": "fixture",
+      "description": "Exact admission original/provenance bindings. Absolute source paths are read-only; no permission follows from this inventory.",
+      "fingerprint": "sha256:4a580519d3434644dbe7351cff746f7b51ec2a555885a0593ace01407ae1832e",
+      "evidence_path": "inputs/admission.json",
+      "evidence_sha256": "4a580519d3434644dbe7351cff746f7b51ec2a555885a0593ace01407ae1832e"
+    },
+    {
+      "id": "network",
+      "category": "environment",
+      "description": "Exact network original/provenance bindings. Absolute source paths are read-only; no permission follows from this inventory.",
+      "fingerprint": "sha256:ea9e89cc8ebbd72bf527899c6cbf1e7d0d74d7b0aaae6b7a1466c702e73a9fbd",
+      "evidence_path": "inputs/network.json",
+      "evidence_sha256": "ea9e89cc8ebbd72bf527899c6cbf1e7d0d74d7b0aaae6b7a1466c702e73a9fbd"
+    },
+    {
+      "id": "network-plan",
+      "category": "fixture",
+      "description": "Exact network-plan original/provenance bindings. Absolute source paths are read-only; no permission follows from this inventory.",
+      "fingerprint": "sha256:badd567eb8d400818fb39a3f6c5d470fd64a07ead5898c47c9e0c56fa0fe0431",
+      "evidence_path": "inputs/network-plan.json",
+      "evidence_sha256": "badd567eb8d400818fb39a3f6c5d470fd64a07ead5898c47c9e0c56fa0fe0431"
+    },
+    {
+      "id": "reference",
+      "category": "fixture",
+      "description": "Exact reference original/provenance bindings. Absolute source paths are read-only; no permission follows from this inventory.",
+      "fingerprint": "sha256:c078a6c72433f38ee44ecbe1595b9ee8ae66a114c2ecce11342f8ccb55186add",
+      "evidence_path": "inputs/reference.json",
+      "evidence_sha256": "c078a6c72433f38ee44ecbe1595b9ee8ae66a114c2ecce11342f8ccb55186add"
+    },
+    {
+      "id": "prior",
+      "category": "fixture",
+      "description": "Exact prior original/provenance bindings. Absolute source paths are read-only; no permission follows from this inventory.",
+      "fingerprint": "sha256:ae48a2f2f836651dd9e02bb70485696bb89f4f1ed203d3d71c6cb021335786b3",
+      "evidence_path": "inputs/prior.json",
+      "evidence_sha256": "ae48a2f2f836651dd9e02bb70485696bb89f4f1ed203d3d71c6cb021335786b3"
+    },
+    {
+      "id": "phone-d1",
+      "category": "environment",
+      "description": "Exact phone-d1 original/provenance bindings. Absolute source paths are read-only; no permission follows from this inventory.",
+      "fingerprint": "sha256:21b1ba614a1dbc14b97ed18bb95600b4d919fdd1fdbf2d56d9eda59dcafdd455",
+      "evidence_path": "inputs/phone-d1.json",
+      "evidence_sha256": "21b1ba614a1dbc14b97ed18bb95600b4d919fdd1fdbf2d56d9eda59dcafdd455"
+    },
+    {
+      "id": "phone-d2",
+      "category": "environment",
+      "description": "Exact phone-d2 original/provenance bindings. Absolute source paths are read-only; no permission follows from this inventory.",
+      "fingerprint": "sha256:34a9ba507bb8fa8fd09b9655e2534aee3dd7cd1ea851b1f37482ea991fa7d140",
+      "evidence_path": "inputs/phone-d2.json",
+      "evidence_sha256": "34a9ba507bb8fa8fd09b9655e2534aee3dd7cd1ea851b1f37482ea991fa7d140"
+    },
+    {
+      "id": "phone-d3a",
+      "category": "environment",
+      "description": "Exact phone-d3a original/provenance bindings. Absolute source paths are read-only; no permission follows from this inventory.",
+      "fingerprint": "sha256:ef53e0fef79a3386c2490737d7626c7f817d92cfc3c814b33e39bce9de5271ad",
+      "evidence_path": "inputs/phone-d3a.json",
+      "evidence_sha256": "ef53e0fef79a3386c2490737d7626c7f817d92cfc3c814b33e39bce9de5271ad"
+    },
+    {
+      "id": "phone-d3b",
+      "category": "environment",
+      "description": "Exact phone-d3b original/provenance bindings. Absolute source paths are read-only; no permission follows from this inventory.",
+      "fingerprint": "sha256:6bb3bc5ff37d35abd8bc495267a8dce5264a346144f5da6649faf503ea9c73f9",
+      "evidence_path": "inputs/phone-d3b.json",
+      "evidence_sha256": "6bb3bc5ff37d35abd8bc495267a8dce5264a346144f5da6649faf503ea9c73f9"
+    }
+  ],
+  "commands": [
+    {
+      "id": "CMD-P38-SOFTWARE",
+      "description": "Independent offline evaluation of existing originals, not another build/device run. Bound by the source inputs and a 180-second host command ceiling; failures retained, no automatic retry.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p38-acceptance/offline.py software --inputs .acceptance-p3-8/v2/inputs/software.json --out .acceptance-p3-8/v2/software",
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json",
+        "Tools/ota/p38-acceptance/prepare.py",
+        "Tools/ota/p38-acceptance/background.py",
+        "Tools/ota/p38-acceptance/offline.py"
+      ],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-P38-ADMISSION",
+      "description": "Independent offline evaluation of existing originals, not another build/device run. Bound by the source inputs and a 180-second host command ceiling; failures retained, no automatic retry.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p38-acceptance/offline.py admission --inputs .acceptance-p3-8/v2/inputs/admission.json --out .acceptance-p3-8/v2/admission",
+      "input_groups": [
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json",
+        "Tools/ota/p38-acceptance/prepare.py",
+        "Tools/ota/p38-acceptance/background.py",
+        "Tools/ota/p38-acceptance/offline.py"
+      ],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-P38-D1",
+      "description": "Notifications denied. One foreground partial transfer, ordinary background for 30-60 seconds, return and confirm safe identity recheck; cancel while canCancel and before END. No whole-package installation. Preserve queued/in-flight writes separately from sustained unowned sending. Restore notification permission only after the capture is sealed and resources closed. Private ADB is serial. Existing background launcher may own this exact worker; it adds no UI/device operations. Stop marker only closes host observation. Wait for acquisition/reader readiness before user action; loss/unknown outcome stops dependent mutations. Check live fixture remaining time before each cell; expiry requires a rebound successor, never silent endpoint substitution.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p38-acceptance/observe.py record --inputs .acceptance-p3-8/v2/inputs/phone-d1.json --out .acceptance-p3-8/v2/d1 --seconds 1200 --contract docs/acceptance-contracts/P3-8-v2.contract.json --matrix .acceptance-p3-8/v2/evidence-matrix.json --command-id CMD-P38-D1 --previous-contract docs/acceptance-contracts/P3-8-v1.contract.json --previous-matrix .acceptance-p3-8/v1/evidence-matrix.json",
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json",
+        "Tools/ota/p38-acceptance/prepare.py",
+        "Tools/ota/p38-acceptance/background.py",
+        "Tools/ota/p38-acceptance/observe.py"
+      ],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-P38-D2",
+      "description": "Notifications granted. One same-package partial transfer: acquired native service/lock, background 30-60 seconds, lockscreen 30-60 seconds, notification shade and current-notification return, then pre-END cancel before 80 percent. Record exact task Intent and same-process/BEGIN/durable continuity; no screenshot of unrelated foreground apps. Private ADB is serial. Existing background launcher may own this exact worker; it adds no UI/device operations. Stop marker only closes host observation. Wait for acquisition/reader readiness before user action; loss/unknown outcome stops dependent mutations. Check live fixture remaining time before each cell; expiry requires a rebound successor, never silent endpoint substitution.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p38-acceptance/observe.py record --inputs .acceptance-p3-8/v2/inputs/phone-d2.json --out .acceptance-p3-8/v2/d2 --seconds 1800 --contract docs/acceptance-contracts/P3-8-v2.contract.json --matrix .acceptance-p3-8/v2/evidence-matrix.json --command-id CMD-P38-D2 --previous-contract docs/acceptance-contracts/P3-8-v1.contract.json --previous-matrix .acceptance-p3-8/v1/evidence-matrix.json",
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json",
+        "Tools/ota/p38-acceptance/prepare.py",
+        "Tools/ota/p38-acceptance/background.py",
+        "Tools/ota/p38-acceptance/observe.py"
+      ],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-P38-D3A",
+      "description": "One same-package resume, one planned pre-END BLE disconnect after durable advancement and before 80 percent. Observe honest interruption and cleanup. No END. Restore Bluetooth, preserve all original records, then prepare a fresh capture without clearing the package or resetting MCU. Private ADB is serial. Existing background launcher may own this exact worker; it adds no UI/device operations. Stop marker only closes host observation. Wait for acquisition/reader readiness before user action; loss/unknown outcome stops dependent mutations. Check live fixture remaining time before each cell; expiry requires a rebound successor, never silent endpoint substitution.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p38-acceptance/observe.py record --inputs .acceptance-p3-8/v2/inputs/phone-d3a.json --out .acceptance-p3-8/v2/d3a --seconds 1200 --contract docs/acceptance-contracts/P3-8-v2.contract.json --matrix .acceptance-p3-8/v2/evidence-matrix.json --command-id CMD-P38-D3A --previous-contract docs/acceptance-contracts/P3-8-v1.contract.json --previous-matrix .acceptance-p3-8/v1/evidence-matrix.json",
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json",
+        "Tools/ota/p38-acceptance/prepare.py",
+        "Tools/ota/p38-acceptance/background.py",
+        "Tools/ota/p38-acceptance/observe.py"
+      ],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-P38-D3B",
+      "description": "One final same-package resume from the actual MCU BEGIN durable offset; permit normal END/apply/reboot and new-link GET_INFO. No manual reset, downgrade or replay after success. Retrieve immutable snapshot and perform final full passive readback; retain 30288. Private ADB is serial. Existing background launcher may own this exact worker; it adds no UI/device operations. Stop marker only closes host observation. Wait for acquisition/reader readiness before user action; loss/unknown outcome stops dependent mutations. Check live fixture remaining time before each cell; expiry requires a rebound successor, never silent endpoint substitution.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p38-acceptance/observe.py record --inputs .acceptance-p3-8/v2/inputs/phone-d3b.json --out .acceptance-p3-8/v2/d3b --seconds 3600 --contract docs/acceptance-contracts/P3-8-v2.contract.json --matrix .acceptance-p3-8/v2/evidence-matrix.json --command-id CMD-P38-D3B --previous-contract docs/acceptance-contracts/P3-8-v1.contract.json --previous-matrix .acceptance-p3-8/v1/evidence-matrix.json",
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json",
+        "Tools/ota/p38-acceptance/prepare.py",
+        "Tools/ota/p38-acceptance/background.py",
+        "Tools/ota/p38-acceptance/observe.py"
+      ],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-P38-FINAL",
+      "description": "One full passive App/Boot read, then two advancing confirmation/health samples. Require exact 30288 target bytes, unchanged group16 Boot and confirmed/idle/fault-free state. Exact old ELF/map only after proving header-only change. No halt/reset/flash; 600-second outer bound and explicit failure, never replay OTA to obtain logs.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p38-acceptance/final_state.py --prior-inputs .acceptance-p3-8/v2/inputs/prior.json --reference .acceptance-p3-8/v2/inputs/reference.json --out .acceptance-p3-8/v2/final-mcu",
+      "input_groups": [
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p34-acceptance/live.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/ota/p3-3-service/service.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+        "Tools/ota/p3-4-link-stats/observation_capture.py",
+        "Tools/ota/p3-4-link-stats/batch_timing.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/provenance/manifest_profiles.json",
+        "Tools/ota/p38-acceptance/prepare.py",
+        "Tools/ota/p38-acceptance/background.py",
+        "Tools/ota/p38-acceptance/final_state.py"
+      ],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-P38-SOFTWARE",
+      "description": "Actual original result plus supporting raw observations for software",
+      "path": "software/result.json"
+    },
+    {
+      "id": "ART-P38-ADMISSION",
+      "description": "Actual original result plus supporting raw observations for admission",
+      "path": "admission/result.json"
+    },
+    {
+      "id": "ART-P38-D1",
+      "description": "Actual original result plus supporting raw observations for d1",
+      "path": "d1/result.json"
+    },
+    {
+      "id": "ART-P38-D2",
+      "description": "Actual original result plus supporting raw observations for d2",
+      "path": "d2/result.json"
+    },
+    {
+      "id": "ART-P38-D3A",
+      "description": "Actual original result plus supporting raw observations for d3a",
+      "path": "d3a/result.json"
+    },
+    {
+      "id": "ART-P38-D3B",
+      "description": "Actual original result plus supporting raw observations for d3b",
+      "path": "d3b/result.json"
+    },
+    {
+      "id": "ART-P38-FINAL",
+      "description": "Actual original result plus supporting raw observations for final",
+      "path": "final-mcu/result.json"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "P38-SOFTWARE",
+      "description": "Existing dual-host full tests/analyze, native Service tests and standard APK/EXE originals are valid for their exact recorded source/SDK; recording APK provenance is bound. No new build is inferred.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log",
+        "artifact_hash"
+      ],
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "Flutter contains the unchanged OTA/UI/native owner implementation. Validation contains the source-pinned collectors and original-evidence evaluators; external bindings supply exact APK, firmware, CI/SDK and device conditions.",
+      "external_inputs": [
+        "software"
+      ],
+      "command_ids": [
+        "CMD-P38-SOFTWARE"
+      ],
+      "artifact_ids": [
+        "ART-P38-SOFTWARE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P38-FALLBACK",
+      "description": "Permission refusal is explicit and leaves a usable foreground path; unowned background does not sustain sending. Existing late-recheck regression and actual D1 fallback both apply.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "raw_log",
+        "artifact_hash"
+      ],
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "Flutter contains the unchanged OTA/UI/native owner implementation. Validation contains the source-pinned collectors and original-evidence evaluators; external bindings supply exact APK, firmware, CI/SDK and device conditions.",
+      "external_inputs": [
+        "software",
+        "admission",
+        "phone-d1",
+        "network",
+        "network-plan",
+        "reference"
+      ],
+      "command_ids": [
+        "CMD-P38-SOFTWARE",
+        "CMD-P38-ADMISSION",
+        "CMD-P38-D1"
+      ],
+      "artifact_ids": [
+        "ART-P38-SOFTWARE",
+        "ART-P38-ADMISSION",
+        "ART-P38-D1"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P38-BACKGROUND",
+      "description": "Same acquired native service/lock/engine/task advances actual MCU durable bytes during both background and lockscreen without duplicate BEGIN or lifecycle-induced suspension.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log",
+        "artifact_hash"
+      ],
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "Flutter contains the unchanged OTA/UI/native owner implementation. Validation contains the source-pinned collectors and original-evidence evaluators; external bindings supply exact APK, firmware, CI/SDK and device conditions.",
+      "external_inputs": [
+        "admission",
+        "phone-d2",
+        "network",
+        "network-plan",
+        "reference"
+      ],
+      "command_ids": [
+        "CMD-P38-ADMISSION",
+        "CMD-P38-D2"
+      ],
+      "artifact_ids": [
+        "ART-P38-ADMISSION",
+        "ART-P38-D2"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P38-NOTIFICATION",
+      "description": "Native notification and UI reflect the same task/phase/durable truth; current tap reattaches once. Stale-event isolation and terminal exact-target page recovery remain covered by original regressions and the D2 actual interaction.",
+      "required": true,
+      "kind": "visual",
+      "evidence_types": [
+        "raw_log",
+        "artifact_hash"
+      ],
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "Flutter contains the unchanged OTA/UI/native owner implementation. Validation contains the source-pinned collectors and original-evidence evaluators; external bindings supply exact APK, firmware, CI/SDK and device conditions.",
+      "external_inputs": [
+        "software",
+        "admission",
+        "phone-d2",
+        "network",
+        "network-plan",
+        "reference"
+      ],
+      "command_ids": [
+        "CMD-P38-SOFTWARE",
+        "CMD-P38-ADMISSION",
+        "CMD-P38-D2"
+      ],
+      "artifact_ids": [
+        "ART-P38-SOFTWARE",
+        "ART-P38-ADMISSION",
+        "ART-P38-D2"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P38-RECOVERY",
+      "description": "Planned disconnect/reconnect validates the exact device/package and resumes from MCU durable state, not UI cached progress.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "raw_log",
+        "artifact_hash"
+      ],
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "Flutter contains the unchanged OTA/UI/native owner implementation. Validation contains the source-pinned collectors and original-evidence evaluators; external bindings supply exact APK, firmware, CI/SDK and device conditions.",
+      "external_inputs": [
+        "admission",
+        "phone-d3a",
+        "phone-d3b",
+        "network",
+        "network-plan",
+        "reference"
+      ],
+      "command_ids": [
+        "CMD-P38-ADMISSION",
+        "CMD-P38-D3A",
+        "CMD-P38-D3B"
+      ],
+      "artifact_ids": [
+        "ART-P38-ADMISSION",
+        "ART-P38-D3A",
+        "ART-P38-D3B"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P38-FINAL-IDENTITY",
+      "description": "END is not completion. Fresh post-reboot link reports exact target version/full raw SHA; passive full target and Boot readback and confirmation all match.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "raw_log",
+        "artifact_hash"
+      ],
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "Flutter contains the unchanged OTA/UI/native owner implementation. Validation contains the source-pinned collectors and original-evidence evaluators; external bindings supply exact APK, firmware, CI/SDK and device conditions.",
+      "external_inputs": [
+        "admission",
+        "phone-d3b",
+        "reference",
+        "prior",
+        "network",
+        "network-plan"
+      ],
+      "command_ids": [
+        "CMD-P38-ADMISSION",
+        "CMD-P38-D3B",
+        "CMD-P38-FINAL"
+      ],
+      "artifact_ids": [
+        "ART-P38-ADMISSION",
+        "ART-P38-D3B",
+        "ART-P38-FINAL"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P38-CLEANUP",
+      "description": "Success, failure, cancellation and bounded verification release native service/wakelock and App owner/subscriptions/scan lease. Physical D1/D2/D3 cleanup and existing deadline/race regressions both required.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "raw_log",
+        "artifact_hash"
+      ],
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "Flutter contains the unchanged OTA/UI/native owner implementation. Validation contains the source-pinned collectors and original-evidence evaluators; external bindings supply exact APK, firmware, CI/SDK and device conditions.",
+      "external_inputs": [
+        "software",
+        "admission",
+        "network",
+        "network-plan",
+        "reference",
+        "prior",
+        "phone-d1",
+        "phone-d2",
+        "phone-d3a",
+        "phone-d3b"
+      ],
+      "command_ids": [
+        "CMD-P38-SOFTWARE",
+        "CMD-P38-D1",
+        "CMD-P38-D2",
+        "CMD-P38-D3A",
+        "CMD-P38-D3B",
+        "CMD-P38-FINAL"
+      ],
+      "artifact_ids": [
+        "ART-P38-SOFTWARE",
+        "ART-P38-D1",
+        "ART-P38-D2",
+        "ART-P38-D3A",
+        "ART-P38-D3B",
+        "ART-P38-FINAL"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    }
+  ],
+  "performance_gates": []
+}

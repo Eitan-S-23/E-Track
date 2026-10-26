@@ -1,0 +1,13 @@
+  * com.wen.gaia.gaia.p38acceptance: 4 items
+    #0: PendingIntentRecord{d4ba272 com.wen.gaia.gaia.p38acceptance startService (allowlist: 6d11a46:+30s0ms/0/NOTIFICATION_SERVICE/NotificationManagerService)}
+      uid=10406 packageName=com.wen.gaia.gaia.p38acceptance featureId=null type=startService flags=0x4000000
+      requestIntent=act=com.wen.gaia.gaia.DEVICE_OTA_CANCEL dat=trace-device-ota://task/df1d61f83389d977d7bb3f7f2451c86c_6_1/6/cancel cmp=com.wen.gaia.gaia.p38acceptance/com.wen.gaia.gaia.DeviceOtaService (has extras)
+    #1: PendingIntentRecord{67adf79 com.wen.gaia.gaia.p38acceptance startActivity (allowlist: 6d11a46:+30s0ms/0/NOTIFICATION_SERVICE/NotificationManagerService)}
+      uid=10406 packageName=com.wen.gaia.gaia.p38acceptance featureId=null type=startActivity flags=0x4000000
+      requestIntent=act=com.wen.gaia.gaia.DEVICE_OTA_OPEN dat=trace-device-ota://task/df1d61f83389d977d7bb3f7f2451c86c_9_2/9/open flg=0x24000000 cmp=com.wen.gaia.gaia.p38acceptance/com.wen.gaia.gaia.MainActivity (has extras)
+    #2: PendingIntentRecord{9cf637d com.wen.gaia.gaia.p38acceptance startActivity (allowlist: 6d11a46:+30s0ms/0/NOTIFICATION_SERVICE/NotificationManagerService)}
+      uid=10406 packageName=com.wen.gaia.gaia.p38acceptance featureId=null type=startActivity flags=0x4000000
+      requestIntent=act=com.wen.gaia.gaia.DEVICE_OTA_OPEN dat=trace-device-ota://task/df1d61f83389d977d7bb3f7f2451c86c_6_1/6/open flg=0x24000000 cmp=com.wen.gaia.gaia.p38acceptance/com.wen.gaia.gaia.MainActivity (has extras)
+    #3: PendingIntentRecord{2fe34be com.wen.gaia.gaia.p38acceptance startService (allowlist: 6d11a46:+30s0ms/0/NOTIFICATION_SERVICE/NotificationManagerService)}
+      uid=10406 packageName=com.wen.gaia.gaia.p38acceptance featureId=null type=startService flags=0x4000000
+      requestIntent=act=com.wen.gaia.gaia.DEVICE_OTA_CANCEL dat=trace-device-ota://task/df1d61f83389d977d7bb3f7f2451c86c_9_2/9/cancel cmp=com.wen.gaia.gaia.p38acceptance/com.wen.gaia.gaia.DeviceOtaService (has extras)

@@ -1,0 +1,88 @@
+{
+  "result": "ADMISSION_ORIGINALS_VERIFIED_NOT_A_NEW_SAMPLE",
+  "baseline": {
+    "version_code": 30287,
+    "version_name": "3.2.87-p34a",
+    "bytes": 613952,
+    "raw_sha256": "58eebd962ba1b39369f85954a167516ec5f5e519c5d894c3db5eb0edccea76a1",
+    "header_sha256": "21a9d1ef8828498e96bdd72a558a3e47773d5b31b0c04c952c640d50f27903cb",
+    "hardware_revision": 1,
+    "layout": 1,
+    "min_boot": 1
+  },
+  "target": {
+    "version_code": 30288,
+    "version_name": "3.2.88-p38",
+    "bytes": 613952,
+    "raw_sha256": "88cba0cd2030246b6522662c6b13b4bc8a7729f0a99917efbd66eea1f1a6f7de",
+    "header_sha256": "b9b89384605150d8de0296fda09b93c2cd3e678425b8d81800c510ca2470dc90",
+    "hardware_revision": 1,
+    "layout": 1,
+    "min_boot": 1
+  },
+  "runtime": {
+    "confirmed": true,
+    "sd_ready": false,
+    "ota_idle": true,
+    "fault_free": true,
+    "same_boot_advancing": true,
+    "health_samples": [
+      [
+        30000,
+        30,
+        1000,
+        0,
+        1513156,
+        1513156,
+        0,
+        1,
+        1
+      ],
+      [
+        30000,
+        30,
+        1000,
+        0,
+        1513448,
+        1513448,
+        0,
+        1,
+        1
+      ]
+    ]
+  },
+  "originals": {
+    "app_region": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\native-preflight-002\\passive-read\\app_region.bin",
+      "bytes": 983040,
+      "sha256": "a669002f40d348fd71ca29ce9e2c1ba2cfd99bb0689b61ccb1c80a3b04403cb2"
+    },
+    "boot": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\native-preflight-002\\passive-read\\boot.bin",
+      "bytes": 65536,
+      "sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527"
+    },
+    "target": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\reference-001\\target.bin",
+      "bytes": 613952,
+      "sha256": "88cba0cd2030246b6522662c6b13b4bc8a7729f0a99917efbd66eea1f1a6f7de"
+    },
+    "package": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\reference-001\\cases\\reference-1MiB.etu",
+      "bytes": 1048576,
+      "sha256": "fe6ebde3a100319d53df3bcb85ea95e6a48a75aba6cda40f1953bdeee528707c"
+    },
+    "reference": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\reference-001\\result.json",
+      "bytes": 6142,
+      "sha256": "c078a6c72433f38ee44ecbe1595b9ee8ae66a114c2ecce11342f8ccb55186add"
+    },
+    "installed": {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.cache\\p38\\apk-install-004\\result.json",
+      "bytes": 463,
+      "sha256": "1b2938ef8eaa62208827ad9ed44351ebf7d88731c1a17d716e2d506c01a7e949"
+    }
+  },
+  "no_device_action": true,
+  "live_identity_required_before_transfer": true
+}

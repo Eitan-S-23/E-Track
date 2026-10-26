@@ -1,0 +1,4 @@
+POWER MANAGER (dumpsys power)
+  mWakefulness=Awake
+Wake Locks: size=7
+  10-25 04:47:32.635 - 10406 - REL trace:DeviceOta

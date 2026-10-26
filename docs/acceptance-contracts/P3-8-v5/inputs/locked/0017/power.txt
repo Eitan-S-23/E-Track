@@ -1,0 +1,4 @@
+POWER MANAGER (dumpsys power)
+  mWakefulness=Asleep
+Wake Locks: size=12
+  PARTIAL_WAKE_LOCK              'trace:DeviceOta' ACQ=-58s453ms (uid=10406 pid=6468)

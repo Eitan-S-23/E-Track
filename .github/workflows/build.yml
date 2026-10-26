@@ -158,8 +158,10 @@ jobs:
           SIDELOAD_KEYSTORE_PASSWORD: ${{ secrets.SIDELOAD_KEYSTORE_PASSWORD }}
           SIDELOAD_KEY_ALIAS: ${{ secrets.SIDELOAD_KEY_ALIAS }}
           SIDELOAD_KEY_PASSWORD: ${{ secrets.SIDELOAD_KEY_PASSWORD }}
+          ETRACK_DEV_SIGNING_KEYSTORE: ${{ secrets.ETRACK_DEV_SIGNING_KEYSTORE }}
         run: |
           set -euo pipefail
+          umask 077
 
           android_release_signing_present=false
           sideload_signing_present=false
@@ -172,27 +174,43 @@ jobs:
             sideload_signing_present=true
           fi
 
-          if [[ "${android_release_signing_present}" == "false" && "${sideload_signing_present}" == "false" ]]; then
+          if [[ "${android_release_signing_present}" == "false" && "${sideload_signing_present}" == "false" && -z "${ETRACK_DEV_SIGNING_KEYSTORE:-}" ]]; then
             echo "::warning title=Android release signing::No fixed signing secrets are configured; release APK will use CI debug signing and cannot reliably update previous CI APKs."
             echo "fixed_signing_configured=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
+          expected_certificate_sha256=""
           if [[ "${android_release_signing_present}" == "true" ]]; then
             keystore_base64="${ANDROID_RELEASE_KEYSTORE_BASE64:?Missing ANDROID_RELEASE_KEYSTORE_BASE64 secret}"
             keystore_password="${ANDROID_RELEASE_KEYSTORE_PASSWORD:?Missing ANDROID_RELEASE_KEYSTORE_PASSWORD secret}"
             key_alias="${ANDROID_RELEASE_KEY_ALIAS:?Missing ANDROID_RELEASE_KEY_ALIAS secret}"
             key_password="${ANDROID_RELEASE_KEY_PASSWORD:?Missing ANDROID_RELEASE_KEY_PASSWORD secret}"
-          else
+          elif [[ "${sideload_signing_present}" == "true" ]]; then
             keystore_base64="${SIDELOAD_KEYSTORE_BASE64:?Missing SIDELOAD_KEYSTORE_BASE64 secret}"
             keystore_password="${SIDELOAD_KEYSTORE_PASSWORD:?Missing SIDELOAD_KEYSTORE_PASSWORD secret}"
             key_alias="${SIDELOAD_KEY_ALIAS:?Missing SIDELOAD_KEY_ALIAS secret}"
             key_password="${SIDELOAD_KEY_PASSWORD:?Missing SIDELOAD_KEY_PASSWORD secret}"
+          else
+            # Owner-authorized reuse of the existing fixed key, not a new key.
+            keystore_base64="${ETRACK_DEV_SIGNING_KEYSTORE:?Missing existing fixed signing secret}"
+            keystore_password="android"
+            key_alias="androiddebugkey"
+            key_password="android"
+            expected_certificate_sha256="9e9b89c5e7fdc802b1fe71806a988a866db49cd988a739caeee56cb69f3df579"
           fi
 
           if ! printf '%s' "${keystore_base64}" | base64 --decode > android/release-keystore.jks; then
             rm -f android/release-keystore.jks
             echo "::error title=Android release signing::Failed to decode fixed signing keystore secret."
+            exit 1
+          fi
+
+          keytool -exportcert -keystore android/release-keystore.jks \
+            -storepass "${keystore_password}" -alias "${key_alias}" > android/release-signing.cer
+          certificate_sha256="$(sha256sum android/release-signing.cer | cut -d ' ' -f 1)"
+          if [[ -n "${expected_certificate_sha256}" && "${certificate_sha256}" != "${expected_certificate_sha256}" ]]; then
+            echo "::error title=Android fixed signing::Existing key certificate differs from its pinned identity."
             exit 1
           fi
 
@@ -205,7 +223,12 @@ jobs:
 
           chmod 600 android/release-keystore.jks android/key.properties
           echo "Android release signing configured with a fixed keystore."
+          echo "certificate_sha256=${certificate_sha256}" >> "$GITHUB_OUTPUT"
           echo "fixed_signing_configured=true" >> "$GITHUB_OUTPUT"
+
+      - name: Verify fixed signing selection regressions
+        working-directory: .
+        run: python -I -S -B -X utf8 tests/ota/test_android_release_signing.py
 
       - name: Analyze project
         run: flutter analyze
@@ -286,6 +309,33 @@ jobs:
           fi
 
           exit "$status"
+
+      - name: Verify release APK signature and identity
+        shell: bash
+        env:
+          FIXED_SIGNING: ${{ steps.android_release_signing.outputs.fixed_signing_configured }}
+          EXPECTED_CERT_SHA256: ${{ steps.android_release_signing.outputs.certificate_sha256 }}
+        run: |
+          set -euo pipefail
+          apk=build/app/outputs/flutter-apk/app-release.apk
+          apksigner="$(find "${ANDROID_SDK_ROOT:-$ANDROID_HOME}/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
+          test -n "$apksigner"
+          echo "APK signature verifier: $apksigner"
+          "$apksigner" verify --verbose --print-certs "$apk" | tee android/apk-signature.txt
+          if [[ "$FIXED_SIGNING" == "true" ]]; then
+            grep -Fxq 'Number of signers: 1' android/apk-signature.txt
+            # Build Tools 37 labels schemes as "V2 Signer:" instead of "Signer #1".
+            actual="$(sed -n 's/^.* certificate SHA-256 digest: //p' android/apk-signature.txt | sort -u)"
+            test -n "$EXPECTED_CERT_SHA256"
+            if ! test "$actual" = "$EXPECTED_CERT_SHA256"; then
+              echo "::error title=Android APK signer::Produced APK signer differs from the selected fixed certificate."
+              printf 'Expected: %s\nObserved: %s\n' "$EXPECTED_CERT_SHA256" "$actual"
+              exit 1
+            fi
+            echo "Verified fixed APK signer SHA-256: $actual"
+          fi
+          sha256sum "$apk"
+          wc -c < "$apk"
 
       - name: Prepare Android release asset
         shell: bash

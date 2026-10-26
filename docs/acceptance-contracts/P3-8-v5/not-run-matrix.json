@@ -1,0 +1,99 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P3-8-v5",
+  "contract_sha256": "1122B8AAD76ACBC7457764B1041CF7B7B9F0335C549D8AE20D09B33C2456F1B3",
+  "round_id": "20261026-P38-v5",
+  "overall_result": "NOT_RUN",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "P38-SOFTWARE",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Formal evaluation not run; preparation cache smoke is not formal acceptance."
+    },
+    {
+      "id": "P38-FALLBACK",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Formal evaluation not run; preparation cache smoke is not formal acceptance."
+    },
+    {
+      "id": "P38-BACKGROUND",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Formal evaluation not run; preparation cache smoke is not formal acceptance."
+    },
+    {
+      "id": "P38-NOTIFICATION",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Formal evaluation not run; preparation cache smoke is not formal acceptance."
+    },
+    {
+      "id": "P38-RECOVERY",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Formal evaluation not run; preparation cache smoke is not formal acceptance."
+    },
+    {
+      "id": "P38-FINAL-IDENTITY",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Formal evaluation not run; preparation cache smoke is not formal acceptance."
+    },
+    {
+      "id": "P38-CLEANUP",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Formal evaluation not run; preparation cache smoke is not formal acceptance."
+    }
+  ],
+  "evidence_hashes": {},
+  "commands": [],
+  "artifacts": []
+}

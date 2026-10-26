@@ -1,0 +1,9 @@
+{
+  "origin": "https://condo-substance-composer-micro.trycloudflare.com",
+  "plan": {
+    "path": ".cache\\p38\\network-008\\plan.json",
+    "bytes": 1099,
+    "sha256": "badd567eb8d400818fb39a3f6c5d470fd64a07ead5898c47c9e0c56fa0fe0431"
+  },
+  "deadline_monotonic": 77573.2226373
+}

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'safe_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -45,7 +46,7 @@ class PermissionHelper {
       return true;
     } catch (e) {
       debugPrint('请求权限时发生错误: $e');
-      Get.snackbar(
+      safeSnackbar(
         '权限错误',
         '请求权限时发生错误: $e',
         snackPosition: SnackPosition.BOTTOM,

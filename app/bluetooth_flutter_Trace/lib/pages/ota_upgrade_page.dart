@@ -55,19 +55,42 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
   /// App 生命周期后台标记（RC3-08④）：后台期间停止主动发起身份读取
   /// 等 GATT 操作，回前台后重新发现连接并读身份。
   bool _backgrounded = false;
+  StreamSubscription<bool>? _taskSub;
+  StreamSubscription<OtaPhase>? _taskPhaseSub;
+  String? _attachedTaskAddress;
+  bool _needsTaskReconcile = false;
+  bool _reconcilingTask = false;
+  bool _readPending = false;
+  int _linkEpoch = 0;
+  bool _linkDisconnected = false;
 
   /// 当前连接设备地址（GET_INFO/传输的入口；无连接则为 null）。
   String? get _deviceAddress =>
+      _attachedTaskAddress ??
       (widget.connectedDevice ?? _resolvedDevice)?.remoteId.str.toLowerCase();
 
   bool get _deviceReady =>
+      !_linkDisconnected && !_needsTaskReconcile && !_reconcilingTask &&
       _deviceAddress != null && otaService.deviceInfo != null;
 
   @override
   void initState() {
     super.initState();
+    if (widget.connectedDevice == null) {
+      _attachedTaskAddress = otaService.taskDeviceAddress;
+      _needsTaskReconcile = _attachedTaskAddress != null;
+    }
     WidgetsBinding.instance.addObserver(this);
     _listenConnectionChanges();
+    _taskSub = otaService.taskActivity.listen((busy) {
+      if (!mounted) return;
+      if (busy) {
+        _attachCurrentTask();
+      } else {
+        _reconcileFinishedTask();
+      }
+    });
+    _taskPhaseSub = otaService.phaseRx.listen((_) => _reconcileFinishedTask());
     // 进入页面即解析连接并建立设备身份。
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _resolveDeviceAndRead();
@@ -80,6 +103,12 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
     // 显式设备参数变化（RC3-08④）：旧解析结果与设备身份快照（DTO 按
     // 地址绑定，由 service 层失效）不再适用于新目标，重新解析并读取。
     if (widget.connectedDevice != oldWidget.connectedDevice) {
+      _linkEpoch++;
+      if (!otaService.isUpgrading) {
+        _attachedTaskAddress = null;
+        _needsTaskReconcile = false;
+        _linkDisconnected = false;
+      }
       _resolveAttempted = false;
       _resolveDeviceAndRead();
     }
@@ -90,15 +119,8 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive) {
       _backgrounded = true;
-      // RC3-08：后台暂停传输发送循环（DATA/END 停发，无进展预算
-      // 停表）——后台继续发帧会与系统资源回收竞争；暂停超过 MCU
-      // 会话超时窗口时 MCU 可能回 ACK_ABORT（协议行为），回前台后
-      // 可整体重试（BEGIN 幂等 + durable 续传）。
-      otaService.pauseForBackground();
     } else if (state == AppLifecycleState.resumed && _backgrounded) {
       _backgrounded = false;
-      // RC3-08：回前台恢复传输发送循环与预算计时。
-      otaService.resumeFromBackground();
       // 回前台重新解析连接并读身份：后台期间连接可能已变化。
       _resolveAttempted = false;
       _resolveDeviceAndRead();
@@ -108,6 +130,8 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
   @override
   void dispose() {
     _connectionSub?.cancel();
+    _taskSub?.cancel();
+    _taskPhaseSub?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -124,17 +148,19 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
         final changedAddress = event.device.remoteId.str.toLowerCase();
         final currentAddress = _deviceAddress;
         if (event.connectionState == BluetoothConnectionState.disconnected) {
-          if (changedAddress == currentAddress &&
-              widget.connectedDevice == null) {
-            // 自动解析的目标断连：失效解析结果（显式传入设备保留参数，
-            // 由调用方与 service 层 DTO 地址绑定负责失效）。
+          if (changedAddress == currentAddress) {
             setState(() {
+              _linkEpoch++;
+              _linkDisconnected = true;
+              _attachedTaskAddress = currentAddress;
+              _needsTaskReconcile = true;
               _resolvedDevice = null;
             });
           }
         } else if (event.connectionState == BluetoothConnectionState.connected &&
-            currentAddress == null) {
-          // 页面空闲（无目标）时有设备连入：立即解析并读取身份。
+            (currentAddress == null || currentAddress == changedAddress)) {
+          _linkEpoch++;
+          _linkDisconnected = false;
           _resolveAttempted = false;
           _resolveDeviceAndRead();
         }
@@ -147,11 +173,70 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
   /// 解析连接设备（显式参数优先，否则从系统已连接列表取第一台），
   /// 然后读取设备身份。BLE 平台通道不可用时静默降级为未连接。
   Future<void> _resolveDeviceAndRead() async {
-    await _resolveConnectedDevice();
-    await _readDeviceInfo();
+    if (_backgrounded || !mounted) return;
+    if (_reconcilingTask) {
+      _readPending = true;
+      return;
+    }
+    // Reattach only: an active owner retains its transport and reboot probe.
+    if (otaService.isUpgrading) {
+      _attachCurrentTask();
+      return;
+    }
+    setState(() { _reconcilingTask = true; });
+    final epoch = _linkEpoch;
+    try {
+      await _resolveConnectedDevice();
+      if (!mounted) return;
+      final ready = await _readDeviceInfo();
+      if (mounted) {
+        setState(() {
+          _needsTaskReconcile = !ready || epoch != _linkEpoch;
+          if (ready && epoch == _linkEpoch) _linkDisconnected = false;
+        });
+      }
+    } finally {
+      if (mounted) setState(() { _reconcilingTask = false; });
+      if (_readPending) {
+        _readPending = false;
+        if (mounted) unawaited(_resolveDeviceAndRead());
+      }
+    }
+  }
+
+  void _attachCurrentTask() {
+    if (_reconcilingTask) return;
+    final address = otaService.taskDeviceAddress;
+    if (address == null) return;
+    setState(() {
+      _attachedTaskAddress = address;
+      _resolvedDevice = BluetoothDevice.fromId(address);
+      _needsTaskReconcile = true;
+    });
+  }
+
+  void _reconcileFinishedTask() {
+    if (!mounted || _backgrounded || _reconcilingTask ||
+        !_needsTaskReconcile || otaService.isUpgrading) {
+      return;
+    }
+    // Cancellation releases its owner before publishing its final phase. A
+    // query must not take over that gap and suppress the cancellation result.
+    switch (otaService.phase) {
+      case OtaPhase.completed:
+      case OtaPhase.probeCompleted:
+      case OtaPhase.cancelled:
+      case OtaPhase.failed:
+      case OtaPhase.readyToInstall:
+        unawaited(_resolveDeviceAndRead());
+        break;
+      default:
+        break;
+    }
   }
 
   Future<void> _resolveConnectedDevice() async {
+    if (_attachedTaskAddress != null) return;
     if (widget.connectedDevice != null) return;
     if (_resolveAttempted) return;
     _resolveAttempted = true;
@@ -172,15 +257,16 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
     }
   }
 
-  Future<void> _readDeviceInfo() async {
+  Future<bool> _readDeviceInfo() async {
     // 后台停写（RC3-08④）：后台期间不主动发起 GET_INFO 等 GATT
     // 操作，回前台时由生命周期回调统一重新读取。
-    if (_backgrounded) return;
+    if (_backgrounded || !mounted) return false;
     await _resolveConnectedDevice();
     final address = _deviceAddress;
-    if (address == null) return;
-    await otaService.readDeviceInfo(address);
+    if (address == null || !mounted) return false;
+    final info = await otaService.readDeviceInfo(address);
     if (mounted) setState(() {});
+    return info != null;
   }
 
   @override
@@ -302,8 +388,9 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
 
   Widget _buildConnectionStatusCard() {
     final deviceInfo = otaService.deviceInfo;
-    final connected = _deviceAddress != null;
-    final identityConfirmed = deviceInfo != null;
+    final connected = _deviceAddress != null && !_linkDisconnected;
+    final identityConfirmed = deviceInfo != null && connected &&
+        (!_needsTaskReconcile || otaService.isUpgrading) && !_reconcilingTask;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -418,7 +505,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
         !terminalLocked;
     final hint = _deviceAddress == null
         ? '连接码表后将自动读取设备身份'
-        : otaService.deviceInfo == null
+        : !_deviceReady && !otaService.isUpgrading
             ? '设备身份未确认（未识别到 OTA 服务或身份读取失败），暂不能检查更新'
             : terminalLocked
                 ? '已进入终止状态（${terminal.code}），重新读取设备身份后可解锁检查'
@@ -496,9 +583,9 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
               // 恢复入口——重新 GET_INFO 成功即重建查询链并解锁，
               // 不只给文字提示。
               if (_deviceAddress != null &&
-                  (otaService.deviceInfo == null || terminalLocked))
+                  (!_deviceReady || terminalLocked))
                 OutlinedButton.icon(
-                  onPressed: _isChecking ? null : _readDeviceInfo,
+                  onPressed: _isChecking || _reconcilingTask ? null : _resolveDeviceAndRead,
                   icon: const Icon(Icons.refresh),
                   label: Text(terminalLocked && otaService.deviceInfo != null
                       ? '重新读取身份解锁'
@@ -754,9 +841,11 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
   Widget _buildUpgradeProgressCard() {
     final phase = otaService.phase;
     final hasFirmware = otaService.downloadedFirmwareFile != null;
-    final inDownload = phase == OtaPhase.downloading;
+    final snapshot = otaService.taskSnapshot;
+    final inDownload = phase == OtaPhase.downloading || phase == OtaPhase.verifyingDownload;
     final inTransfer =
         phase == OtaPhase.transferring ||
+        phase == OtaPhase.applying ||
         phase == OtaPhase.waitingReboot ||
         phase == OtaPhase.reconnectVerify;
     if (!otaService.isUpgrading &&
@@ -864,17 +953,25 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
             ],
           ),
           const SizedBox(height: 12),
-          if (inTransfer) ...[
-            _buildProgressRow('设备已确认（durable）', otaService.durableProgress),
+          if (snapshot != null) ...[
+            Text(snapshot.label),
+            if (otaService.isUpgrading && !snapshot.backgroundAcquired)
+              Text('后台执行不可用：${snapshot.backgroundReason ?? '等待实际接管确认'}；请保持前台'),
+            const SizedBox(height: 8),
+          ],
+          if (phase == OtaPhase.transferring) ...[
+            _buildProgressRow('设备已确认（durable）', snapshot?.progress ?? otaService.durableProgress),
             const SizedBox(height: 8),
             _buildProgressRow('网络下载', otaService.downloadProgress),
+          ] else if (inTransfer || phase == OtaPhase.verifyingDownload) ...[
+            const LinearProgressIndicator(),
           ] else if (phase != OtaPhase.cancelled &&
               (inDownload || otaService.downloadProgress > 0)) ...[
             // cancelled 不显示进度行：取消时 partial 已删/验证包保留，
             // 停留在取消瞬间的进度快照会误导（RC3-05①）。
-            _buildProgressRow('网络下载', otaService.downloadProgress),
+            _buildProgressRow('网络下载', snapshot?.progress ?? otaService.downloadProgress),
           ],
-          if (busy) ...[
+          if (busy && otaService.canCancelTask) ...[
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
@@ -892,7 +989,8 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
           ],
           // 已校验固件包就绪（含取消后保留的包，RC3-05①）：提供传输
           // 入口——取消下载/取消传输时选择保留的验证包可直接重新发起。
-          if ((phase == OtaPhase.readyToInstall || phase == OtaPhase.cancelled) &&
+          if ((phase == OtaPhase.readyToInstall || phase == OtaPhase.cancelled ||
+                  (phase == OtaPhase.failed && otaService.terminalState == null)) &&
               hasFirmware) ...[
             const SizedBox(height: 16),
             SizedBox(
@@ -1194,7 +1292,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
                 Get.back();
                 // RC3-12②：等待取消完全落地（含文件删除与状态发布）后
                 // 刷新 UI，按钮可用性与文件/phase 状态保持一致。
-                await otaService.cancelUpgrade(keepPackage: true);
+                await otaService.cancelCurrentTask(keepPackage: true);
                 if (mounted) setState(() {});
               },
               child: const Text('保留固件包并取消'),
@@ -1204,7 +1302,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
               Get.back();
               // 下载阶段保留已校验包（若有）；彻底删除走「忽略」。
               // RC3-12②：等待取消完全落地后再刷新 UI。
-              await otaService.cancelUpgrade(keepPackage: !isBlePhase);
+              await otaService.cancelCurrentTask(keepPackage: !isBlePhase);
               if (mounted) setState(() {});
             },
             style: ElevatedButton.styleFrom(

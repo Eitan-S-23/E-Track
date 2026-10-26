@@ -24,6 +24,11 @@ on:
         required: false
         type: string
         default: ""
+      device_ota_native_tests:
+        description: "Run P3-8 Android Service tests in the contained Linux SDK; requires build_apk=true"
+        required: false
+        type: boolean
+        default: false
       ota_link_candidate:
         description: "P3-4 debug-only screening candidate; not a production baud or performance result"
         required: false
@@ -36,6 +41,14 @@ on:
           - reuse-without
           - runtime
           - runtime-pipeline
+      ota_link_profile:
+        description: "Named accepted candidate settings; p34-qualified-v1 requires runtime-pipeline"
+        required: false
+        type: choice
+        default: none
+        options:
+          - none
+          - p34-qualified-v1
       device_observation:
         description: "Explicit opt-in device-observation debug APK; requires observation_target and observation_firmware_latest_url"
         required: false
@@ -78,9 +91,11 @@ jobs:
       PYTHONUTF8: "1"
       FLUTTER_DEV_TEST_SCOPE: ${{ github.event_name == 'workflow_dispatch' && inputs.build_apk && 'all' || inputs.test_scope || 'all' }}
       FLUTTER_DEV_BUILD_APK: ${{ github.event_name == 'workflow_dispatch' && inputs.build_apk && matrix.os == 'ubuntu-latest' && 'true' || 'false' }}
+      FLUTTER_DEV_DEVICE_OTA_NATIVE_TESTS: ${{ github.event_name == 'workflow_dispatch' && inputs.device_ota_native_tests && matrix.os == 'ubuntu-latest' && 'true' || 'false' }}
       # 显式启用的调试包名后缀：push 触发时 inputs 为空 ⇒ 生产 application id 不变。
       TRACE_DEV_APP_ID_SUFFIX: ${{ inputs.app_id_suffix || '' }}
       TRACE_DEV_OTA_LINK_CANDIDATE: ${{ inputs.ota_link_candidate || 'baseline' }}
+      TRACE_DEV_OTA_LINK_PROFILE: ${{ inputs.ota_link_profile || 'none' }}
       # 显式启用的设备观测：默认全空 ⇒ 不注入任何 dart-define，观测代码不生效。
       TRACE_DEV_DEVICE_OBSERVATION: ${{ inputs.device_observation && 'true' || '' }}
       TRACE_DEV_OBSERVATION_TARGET: ${{ inputs.observation_target || '' }}
@@ -171,6 +186,8 @@ jobs:
             .cache/flutter-dev-checks/runs/*/logs/*.log
             .cache/p34-phy-native/runs/*/result.json
             .cache/p34-phy-native/runs/*/logs/*.log
+            app/bluetooth_flutter_Trace/build/app/test-results/testDebugUnitTest/TEST-com.wen.gaia.gaia.DeviceOtaServiceTest.xml
+            app/bluetooth_flutter_Trace/build/app/reports/tests/testDebugUnitTest/**
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 14

@@ -660,6 +660,11 @@ def restore_toolchain_regen(root, dirty_semantic):
 
 
 def command_plan(root, run_dir, scope, *, build_apk=False, env=None):
+    native_mode = (env or {}).get("FLUTTER_DEV_DEVICE_OTA_NATIVE_TESTS", "false")
+    if native_mode not in ("true", "false"):
+        raise ValueError("FLUTTER_DEV_DEVICE_OTA_NATIVE_TESTS must be true or false")
+    if native_mode == "true" and not build_apk:
+        raise ValueError("Device OTA native tests require explicit Linux debug APK mode")
     if scope not in SCOPES:
         raise ValueError(f"Unknown test scope: {scope}")
     sdk = checked_path(root, run_dir / "sdk")

@@ -1,0 +1,16 @@
+{
+  "result": "OBSERVATIONS_SAVED_NOT_ADJUDICATED",
+  "formal_acceptance": "NOT_ADJUDICATED",
+  "inputs": {
+    "path": "D:\\github\\my\\E-Track\\.cache\\p38-acceptance-20261024\\.acceptance-p3-8\\v3\\inputs\\phone-d1.json",
+    "bytes": 1274,
+    "sha256": "d865de3cf61e99a77f378fd8633201e535f8980f007f1fd9c8dfadbbe5a8b0d6"
+  },
+  "no_ui_input": true,
+  "no_ota_start": true,
+  "pid": 20836,
+  "capture": "1792871123585347-d3d21016fe983a6079583764",
+  "samples": 68,
+  "cleanup_errors": [],
+  "adb_key_unchanged": true
+}

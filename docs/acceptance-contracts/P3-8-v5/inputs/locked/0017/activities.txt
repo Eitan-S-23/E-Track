@@ -1,0 +1,6 @@
+  mCurrentFocus=null
+  mFocusedApp=null
+    mShowingDream=false mDreamingLockscreen=true
+  mCurrentFocus=Window{com.android.systemui:89739e7 u0 NotificationShade}
+  mFocusedApp=ActivityRecord{fbb237e u0 com.ss.android.lark/.chatwindow.ChatWindowActivity} t69957 d0}
+    mShowingDream=false mDreamingLockscreen=true

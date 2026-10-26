@@ -1,0 +1,14 @@
+{
+  "pid": 6468,
+  "capture": "1792967351140709-85d3a2b67acd9ae9b0dae6e4",
+  "config": {
+    "path": ".cache\\recovery-fast\\session-001\\usb\\runtime.json",
+    "bytes": 865,
+    "sha256": "70bad87ce59666905c7ca3049b62bf635c28caa086ae12f472bf2075f48480e5"
+  },
+  "apk": {
+    "path": ".cache\\recovery-fast\\apk-verified\\extracted\\run-6587258944754e209f340f2b4d39f196\\artifacts\\trace-dev-debug.apk",
+    "bytes": 131809838,
+    "sha256": "fe27b7587300f74f2e58996ae47cbf302f927e6a8a7c69b9749d28146c3157b1"
+  }
+}

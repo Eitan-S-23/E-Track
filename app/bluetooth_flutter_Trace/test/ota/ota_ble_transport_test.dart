@@ -2698,6 +2698,35 @@ void main() {
       await rebound.dispose();
     }, timeout: const Timeout(Duration(seconds: 60)));
 
+    test('latched MCU abort during pause prevents further DATA after resume', () async {
+      final package = packageBytes(4096);
+      final mcu = _McuSim()..respondDataAck = false;
+      final transport = OtaBleTransport(channel: mcu,
+          ackTimeout: const Duration(milliseconds: 50));
+      addTearDown(transport.dispose);
+      addTearDown(mcu.close);
+      final future = transport.transfer(package: package,
+          packageSha256: shaOf(package), etuHeader: etuHeaderOf(package),
+          windowSegments: 4);
+      for (var i = 0; i < 100 && mcu.dataFrames.isEmpty; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 5));
+      }
+      expect(mcu.dataFrames, isNotEmpty);
+      transport.pauseForBackground();
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      final frozen = mcu.dataFrames.length;
+      mcu._sendAck(OtaBleCodec.rspAckAbort, OtaBleCodec.statusAborted,
+          mcu.dataFrames.last);
+      mcu._teardown();
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      transport.resumeFromBackground();
+      final result = await future;
+      expect(result.isOk, isFalse);
+      expect(result.status, OtaBleCodec.statusAborted);
+      expect(mcu.dataFrames.length, frozen);
+      expect(mcu.endCalls, 0);
+    });
+
     test('后台暂停/恢复：发窗在帧边界挂起，恢复后传输完成（RC3-08）',
         () async {
       final package = packageBytes(4096);

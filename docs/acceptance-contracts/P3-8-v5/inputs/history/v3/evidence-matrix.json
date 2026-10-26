@@ -1,0 +1,211 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P3-8-v3",
+  "contract_sha256": "9D515846EB05F574807BD50E0F5DAF28C54F7C33517ACF275FAED3CCCE170FB5",
+  "round_id": "20261025-P38-v3",
+  "overall_result": "EVIDENCE_GAP",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "P38-SOFTWARE",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": true,
+      "evidence": [
+        "software/result.json",
+        "execution/software.stdout"
+      ],
+      "notes": "Actual original software/provenance evaluation passed; no new build or download."
+    },
+    {
+      "id": "P38-FALLBACK",
+      "result": "PASS",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": true,
+      "evidence": [
+        "software/result.json",
+        "admission/result.json",
+        "d1/result.json",
+        "d1/usb/salvage/snapshot-1.jsonl",
+        "d1/interpretation.json",
+        "d1/sample-0042/screen.png",
+        "d1/sample-0068/services.txt",
+        "d1/sample-0068/power.txt"
+      ],
+      "notes": "Actual permission-denied foreground transfer advanced to 8192; unowned background paused durable for 47.834996 seconds. Timeout failure after resume is expressly permitted by the existing fallback contract and is preserved, not a successful OTA or a cancellation observation."
+    },
+    {
+      "id": "P38-BACKGROUND",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "d2/result.json",
+        "d2/usb/salvage/snapshot-1.jsonl",
+        "d2/interpretation.json",
+        "d2/sample-0011/screen.png"
+      ],
+      "notes": "Actual D2 invocation was still notification-permission-denied, so it cannot demonstrate acquired background/lockscreen/notification. It failed before END. D3 and final readback not executed; cleanup coverage incomplete. Subsequent user-0 notification grant is a state change for a successor, not a retroactive pass."
+    },
+    {
+      "id": "P38-NOTIFICATION",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "d2/result.json",
+        "d2/usb/salvage/snapshot-1.jsonl",
+        "d2/interpretation.json",
+        "d2/sample-0011/screen.png"
+      ],
+      "notes": "Actual D2 invocation was still notification-permission-denied, so it cannot demonstrate acquired background/lockscreen/notification. It failed before END. D3 and final readback not executed; cleanup coverage incomplete. Subsequent user-0 notification grant is a state change for a successor, not a retroactive pass."
+    },
+    {
+      "id": "P38-RECOVERY",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "d2/result.json",
+        "d2/usb/salvage/snapshot-1.jsonl",
+        "d2/interpretation.json",
+        "d2/sample-0011/screen.png"
+      ],
+      "notes": "Actual D2 invocation was still notification-permission-denied, so it cannot demonstrate acquired background/lockscreen/notification. It failed before END. D3 and final readback not executed; cleanup coverage incomplete. Subsequent user-0 notification grant is a state change for a successor, not a retroactive pass."
+    },
+    {
+      "id": "P38-FINAL-IDENTITY",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "d2/result.json",
+        "d2/usb/salvage/snapshot-1.jsonl",
+        "d2/interpretation.json",
+        "d2/sample-0011/screen.png"
+      ],
+      "notes": "Actual D2 invocation was still notification-permission-denied, so it cannot demonstrate acquired background/lockscreen/notification. It failed before END. D3 and final readback not executed; cleanup coverage incomplete. Subsequent user-0 notification grant is a state change for a successor, not a retroactive pass."
+    },
+    {
+      "id": "P38-CLEANUP",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "d2/result.json",
+        "d2/usb/salvage/snapshot-1.jsonl",
+        "d2/interpretation.json",
+        "d2/sample-0011/screen.png"
+      ],
+      "notes": "Actual D2 invocation was still notification-permission-denied, so it cannot demonstrate acquired background/lockscreen/notification. It failed before END. D3 and final readback not executed; cleanup coverage incomplete. Subsequent user-0 notification grant is a state change for a successor, not a retroactive pass."
+    }
+  ],
+  "evidence_hashes": {
+    "admission/result.json": "FE85A6EF7271034BB4CC576DA2F1692336921DF609C16C4808C297F179FFAC50",
+    "d1/interpretation.json": "E345FC36CAF7125D59DF0B4FB6390BDD03D6683E04437C247D27C7C2534D6F80",
+    "d1/result.json": "55626E594BE89BA07E4B0DE3959DD860DA519B6298CFEE41B3025326879FA6E6",
+    "d1/sample-0042/screen.png": "2FED90BD7B0A074CABA4268B8C3F8D8949D7EB9C38435345B8E8DE3A25DB9C6F",
+    "d1/sample-0068/power.txt": "93ED1886738A09EE2E8861D51A9C58EFED8E3F764AF99722FD2D1380FC89BACD",
+    "d1/sample-0068/services.txt": "52B053D3F7AB501A630900E90AD3E3B94BFDEB57BC39074CE9798D10772EB4A5",
+    "d1/usb/salvage/snapshot-1.jsonl": "DB6477282FA05EE81EB894B83511998E2229FF52242B859C42CCB4EA0F55749A",
+    "d2/interpretation.json": "300E95DC627FA64255C301441C76F49465081BFB8AC624EBF55FC6091CE05B3F",
+    "d2/result.json": "512F7F0927CD0B169FD94FAE5FEC66AA1CB9FD8D984295DC28CEB11006CB1E4C",
+    "d2/sample-0011/screen.png": "5DDD392B4EAFD8BA91947377A956AECDD6FA787621CC586934D7B7629E6F5A87",
+    "d2/usb/salvage/snapshot-1.jsonl": "FFD4741ABBEC67E63928D53EBC7AA4F18A97D532F767EDB0836FC654DF98AC74",
+    "execution/admission.closed.json": "010358D05A5151F1AB7A2824C3EC5F25B4293D0D63746305E4B746F51D5BFFF5",
+    "execution/admission.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "execution/admission.stdout": "3C253C4CDF0EF3CD92D76F46EBF82290B8DA0B443E646D44DFE30792AAAAC841",
+    "execution/d1.closed.json": "786330966A89EDEDE14319B1C1F4C76D75F0886DA39D7BE28EA83EFA62AF9EE3",
+    "execution/d1.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "execution/d1.stdout": "FC7CEAB99ED94707447BB97B9267CF46D7657C1E7E6A0742C3DE1DF660983D69",
+    "execution/d2.closed.json": "26EDBFE797606440334D08432A43D9623CD1EC54E199AB3F7B4863314319446C",
+    "execution/d2.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "execution/d2.stdout": "FC7CEAB99ED94707447BB97B9267CF46D7657C1E7E6A0742C3DE1DF660983D69",
+    "execution/software.closed.json": "7605485607E0D2F8D272074D33AC1EA95F844B0601381B5E7E86855DA91E5F46",
+    "execution/software.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "execution/software.stdout": "28FDF72320CA0FE6803A2E6486A589510FF4B6D76445C053C78DB3C634BDFDA7",
+    "software/result.json": "842BDC39ED27F5F8876E45B01B6CEC9BF024062F0236C8EDFCE838F5187ADAB6"
+  },
+  "commands": [
+    {
+      "id": "CMD-P38-SOFTWARE",
+      "command": "python -I -S -B -X utf8 Tools/ota/p38-acceptance/offline.py software --inputs .acceptance-p3-8/v3/inputs/software.json --out .acceptance-p3-8/v3/software",
+      "exit_code": 0,
+      "output_evidence": "execution/software.stdout"
+    },
+    {
+      "id": "CMD-P38-ADMISSION",
+      "command": "python -I -S -B -X utf8 Tools/ota/p38-acceptance/offline.py admission --inputs .acceptance-p3-8/v3/inputs/admission.json --out .acceptance-p3-8/v3/admission",
+      "exit_code": 0,
+      "output_evidence": "execution/admission.stdout"
+    },
+    {
+      "id": "CMD-P38-D1",
+      "command": "python -I -S -B -X utf8 Tools/ota/p38-acceptance/observe.py record --inputs .acceptance-p3-8/v3/inputs/phone-d1.json --out .acceptance-p3-8/v3/d1 --seconds 1200 --contract docs/acceptance-contracts/P3-8-v3.contract.json --matrix .acceptance-p3-8/v3/evidence-matrix.json --command-id CMD-P38-D1 --previous-contract docs/acceptance-contracts/P3-8-v2.contract.json --previous-matrix .acceptance-p3-8/v2/evidence-matrix.json",
+      "exit_code": 0,
+      "output_evidence": "execution/d1.stdout"
+    },
+    {
+      "id": "CMD-P38-D2",
+      "command": "python -I -S -B -X utf8 Tools/ota/p38-acceptance/observe.py record --inputs .acceptance-p3-8/v3/inputs/phone-d2.json --out .acceptance-p3-8/v3/d2 --seconds 1800 --contract docs/acceptance-contracts/P3-8-v3.contract.json --matrix .acceptance-p3-8/v3/evidence-matrix.json --command-id CMD-P38-D2 --previous-contract docs/acceptance-contracts/P3-8-v2.contract.json --previous-matrix .acceptance-p3-8/v2/evidence-matrix.json",
+      "exit_code": 0,
+      "output_evidence": "execution/d2.stdout"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-P38-SOFTWARE",
+      "path": "software/result.json",
+      "size": 15599,
+      "sha256": "842BDC39ED27F5F8876E45B01B6CEC9BF024062F0236C8EDFCE838F5187ADAB6"
+    },
+    {
+      "id": "ART-P38-ADMISSION",
+      "path": "admission/result.json",
+      "size": 2813,
+      "sha256": "FE85A6EF7271034BB4CC576DA2F1692336921DF609C16C4808C297F179FFAC50"
+    },
+    {
+      "id": "ART-P38-D1",
+      "path": "d1/result.json",
+      "size": 522,
+      "sha256": "55626E594BE89BA07E4B0DE3959DD860DA519B6298CFEE41B3025326879FA6E6"
+    },
+    {
+      "id": "ART-P38-D2",
+      "path": "d2/result.json",
+      "size": 522,
+      "sha256": "512F7F0927CD0B169FD94FAE5FEC66AA1CB9FD8D984295DC28CEB11006CB1E4C"
+    }
+  ]
+}

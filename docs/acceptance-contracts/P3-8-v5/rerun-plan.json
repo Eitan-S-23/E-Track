@@ -1,0 +1,121 @@
+{
+  "schema": "etrack-rerun-plan-v1",
+  "current_contract_id": "P3-8-v5",
+  "current_contract_sha256": "1122B8AAD76ACBC7457764B1041CF7B7B9F0335C549D8AE20D09B33C2456F1B3",
+  "previous_contract_id": "P3-8-v4",
+  "previous_contract_sha256": "2BE53845E967B59A121DBE16E8F7DBD4EF56180AB6708CA64DE13567B74EC851",
+  "contract_lineage": "direct_successor",
+  "current_round_id": "20261026-P38-v5",
+  "previous_round_id": "20261025-P38-v4",
+  "previous_matrix_sha256": "065EF5E759B6424B70CA9FADD283F39ABC070BE9CC8EB3B7FC10BB5916C45256",
+  "changed_input_groups": [
+    "flutter",
+    "production",
+    "validation"
+  ],
+  "changed_external_inputs": [
+    "admission",
+    "network",
+    "network-live",
+    "network-plan",
+    "originals",
+    "phone-d1",
+    "phone-d2",
+    "phone-d3a",
+    "phone-d3b",
+    "prior",
+    "reference",
+    "software",
+    "state-live"
+  ],
+  "rerun_criteria": [
+    {
+      "id": "P38-SOFTWARE",
+      "reasons": [
+        "artifact_definition_changed:ART-P38-OFFLINE",
+        "command_definition_changed:CMD-P38-OFFLINE",
+        "criterion_definition_changed",
+        "external_input_changed:originals",
+        "input_group_changed:flutter",
+        "input_group_changed:validation"
+      ]
+    },
+    {
+      "id": "P38-FALLBACK",
+      "reasons": [
+        "artifact_definition_changed:ART-P38-OFFLINE",
+        "command_definition_changed:CMD-P38-OFFLINE",
+        "criterion_definition_changed",
+        "external_input_changed:originals",
+        "input_group_changed:flutter",
+        "input_group_changed:validation"
+      ]
+    },
+    {
+      "id": "P38-BACKGROUND",
+      "reasons": [
+        "artifact_definition_changed:ART-P38-OFFLINE",
+        "command_definition_changed:CMD-P38-OFFLINE",
+        "criterion_definition_changed",
+        "external_input_changed:originals",
+        "input_group_changed:flutter",
+        "input_group_changed:validation"
+      ]
+    },
+    {
+      "id": "P38-NOTIFICATION",
+      "reasons": [
+        "artifact_definition_changed:ART-P38-OFFLINE",
+        "command_definition_changed:CMD-P38-OFFLINE",
+        "criterion_definition_changed",
+        "external_input_changed:originals",
+        "input_group_changed:flutter",
+        "input_group_changed:validation"
+      ]
+    },
+    {
+      "id": "P38-RECOVERY",
+      "reasons": [
+        "artifact_definition_changed:ART-P38-OFFLINE",
+        "command_definition_changed:CMD-P38-OFFLINE",
+        "criterion_definition_changed",
+        "external_input_changed:originals",
+        "input_group_changed:flutter",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P38-FINAL-IDENTITY",
+      "reasons": [
+        "artifact_definition_changed:ART-P38-OFFLINE",
+        "command_definition_changed:CMD-P38-OFFLINE",
+        "criterion_definition_changed",
+        "external_input_changed:originals",
+        "input_group_changed:flutter",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "P38-CLEANUP",
+      "reasons": [
+        "artifact_definition_changed:ART-P38-OFFLINE",
+        "command_definition_changed:CMD-P38-OFFLINE",
+        "criterion_definition_changed",
+        "external_input_changed:originals",
+        "input_group_changed:flutter",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    }
+  ],
+  "reusable_criteria": [],
+  "reuse_origins": {},
+  "required_commands": [
+    "CMD-P38-OFFLINE"
+  ],
+  "required_artifacts": [
+    "ART-P38-OFFLINE"
+  ]
+}
