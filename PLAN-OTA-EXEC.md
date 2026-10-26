@@ -44,7 +44,7 @@
 | P0 | 契约冻结+基建 | 完成 | 6/6 | P0-4/P0-5 独立真机复核通过；P1/P2 方案硬门槛重开 |
 | P1 | bootloader | 进行中 | 5/7 | P0 已 6/6,门槛已开;P1-1/P1-2/P1-3/P1-4/P1-5 独立验收通过;P1-6 进行中;P1-7(启动耗时与 POWER_EN 重复锁存)2026-08-04 新立 |
 | P2 | MCU App 升级链 | 完成 | 6/6 | **P0 全部完成(方案硬门槛)** |
-| P3 | BLE+Flutter | 进行中 | 5/8 | P2-1/2 完成；P3-8 为新增后台 OTA 能力，不重开 P3-3 |
+| P3 | BLE+Flutter | 进行中 | 7/8 | P3-4 候选阶段、P3-8 已完成并交付；P3-5 最终闭环仍待办，不重开既有完成卡 |
 | P4 | CI/CF | 完成 | 4/4 | P5 前实现、配置与隔离 rehearsal 已完成；生产晋升仍须 P5 与原审批 |
 | P5 | 联调验收 | 待办 | 0/3 | P1-P4 全部完成 |
 
@@ -735,7 +735,7 @@
 - 收口: 2026-09-04 用户放话后由主会话收口(主会话非本卡实现者), PR #19 已并入 main。刻意不用 squash 而用 merge: 包内 changed-*.json 逐条声明「该次注错/还原提交恰含一个文件」、run-*.json 把每次运行绑到具体提交, squash 会把 13 个提交压成 1 个使这些声明无法被第三方复核, fail-closed 反证四条腿的可信度随之塌掉(与 P3-6 为排除注错临时提交而 squash 的裁定相反, 理由不同)。代价如实登记: 4 次注错提交因此位于 main 可达历史中, git bisect 可能检出带注入缺陷的树; 缓解为每次注错的下一个提交即还原(缺陷树存活跨度 1 个提交)、main 顶端树干净、合并为 first-parent 线性结构故 git bisect --first-parent 不会进入注错提交。合并前 PR 全检查绿(MCU Firmware Build、Acceptance Governance、Build APK and EXE Release 三者 success; 治理 CI 本次被触发是因收口批次改动 docs/acceptance-contracts/ 与 tests/ota/, 其绿是收口硬前置)。三个 worktree 均不在 refs/heads/main 上, 故在主 worktree 切回 main 后 merge --ff-only, 快进 14 个提交, 核对 HEAD 与 origin/main 一致且无 ahead/behind, 未用 reset 或强制覆盖。入库后在 main 顶端复跑本卡接入的四条脚本全部 rc=0, 证明四次注错已彻底还原。收口证据见 docs/ota-exec-notes/P3-7-closeout.md, 收口后遗留问题清单见 docs/ota-exec-notes/P3-7-residual-issues.md。
 
 #### P3-8 Android 后台 OTA 与通知进度
-状态: 完成 ｜ 认领: Codex(P3-8 实现) / 2026-10-21 ｜ 验收: Codex(fastpath_review) / 2026-10-26 / P3-8-v5 PASS ｜ 更新: 2026-10-26(七项原件独立离线验收全部通过；证据包 1006c936；主线交付由 root 按已授权 merge commit 与实际 CI 门禁执行)
+状态: 完成 ｜ 认领: Codex(P3-8 实现) / 2026-10-21 ｜ 验收: Codex(fastpath_review) / 2026-10-26 / P3-8-v5 PASS ｜ 更新: 2026-10-26(七项原件独立离线验收全部通过；证据包 1006c936；PR #32 经开发/治理/标准构建 CI 全绿，以 e766917 merge commit 合入 main；未发布 Release)
 - 集中预审整改: 独立复核已关闭 27048aa1 的 R01/R02/R03，R04 的同步 busy/owner 竞态需后继修复。8ede0920 完成 owner 先登记后通知、页面自重入保护与取消终态收尾；真实 service/widget 先红后绿，新增 7 项全通过，开发 39827513211 与标准构建 39829695971 均成功。旧原生 18/18 的 Android 输入未变，未伪造新执行；R04 是否独立关闭仍由评审者判定。
 - 依赖: P3-3 已完成并合入 main；不以 P3-4 或 P4-2 部署为软件实施前置，不新增 P3-8 -> P3-5 硬依赖。
 - 目标: 前台发起并实际取得 Android 服务/执行器接管后，正常切应用、下拉通知栏和锁屏继续设备 OTA；页面/通知同源展示真实阶段和 durable 进度，回前台重附着任务，终态释放资源。
