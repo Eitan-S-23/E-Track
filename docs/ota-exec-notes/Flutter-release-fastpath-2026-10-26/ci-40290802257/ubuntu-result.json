@@ -1,0 +1,324 @@
+{
+  "schema": "etrack-flutter-dev-checks-v1",
+  "evidence_kind": "development-self-test",
+  "formal_acceptance": "NOT_RUN",
+  "development_result": "PASS",
+  "diagnostics_complete": true,
+  "scope": "all",
+  "apk_requested": false,
+  "apk_result": "NOT_REQUESTED",
+  "source_before": {
+    "head": "57e6f064cec0c819aef8e348cd7690ca868c6a7e",
+    "clean": true,
+    "status": "",
+    "dirty_semantic": [],
+    "dirty_semantic_sha": {},
+    "dirty_eol_only": [],
+    "dirty_untracked": []
+  },
+  "host": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "sdk_channel": "stable",
+  "github_run_url": "https://github.com/Eitan-S-23/E-Track/actions/runs/40290802257",
+  "github_run_attempt": "1",
+  "lock_sha256_before": "23790b1857fcc603dbd89d1aeb03b3239ab0841cee809cd08b163fc84b95d0b6",
+  "toolchain_regen": [
+    {
+      "stage": "after_run",
+      "path": "app/bluetooth_flutter_Trace/analysis_options.yaml",
+      "committed_sha256": "b51e122148d477516d45c68eb455a22dd0eacdde9c4979b16c656bb71215c99e",
+      "effective_sha256": "62d5001517860783236e148ad669ce5560998c64f1cabc2de997131225f56129",
+      "effective_bytes": 1536,
+      "effective_blob": "862c9069fb4c3ad6e8b08e5029aefe1fede44a1e",
+      "diff": "diff --git a/app/bluetooth_flutter_Trace/analysis_options.yaml b/app/bluetooth_flutter_Trace/analysis_options.yaml\nindex 61b6c4d..862c906 100644\n--- a/app/bluetooth_flutter_Trace/analysis_options.yaml\n+++ b/app/bluetooth_flutter_Trace/analysis_options.yaml\n@@ -7,6 +7,12 @@\n \n # The following line activates a set of recommended lints for Flutter apps,\n # packages, and plugins designed to encourage good coding practices.\n+analyzer:\n+  exclude:\n+    - build/**\n+    - android/**\n+    - ios/**\n+    - windows/**\n include: package:flutter_lints/flutter.yaml\n \n linter:\n"
+    },
+    {
+      "stage": "after_run",
+      "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc",
+      "committed_sha256": "4564401de97a1695607fdcd94b127135039d2eaa0b959aeb9c11d1eb3d2c8354",
+      "effective_sha256": "76a4be5a75bf1878c8ad51f8b631261296fce9c7368d70797d3b0645eed86b03",
+      "effective_bytes": 1196,
+      "effective_blob": "78cbc3a6706333e1c35500de87904494c0692f79",
+      "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\nindex e5396e9..78cbc3a 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n@@ -7,14 +7,23 @@\n #include \"generated_plugin_registrant.h\"\n \n #include <audioplayers_windows/audioplayers_windows_plugin.h>\n+#include <geolocator_windows/geolocator_windows.h>\n #include <local_notifier/local_notifier_plugin.h>\n #include <permission_handler_windows/permission_handler_windows_plugin.h>\n+#include <share_plus/share_plus_windows_plugin_c_api.h>\n+#include <url_launcher_windows/url_launcher_windows.h>\n \n void RegisterPlugins(flutter::PluginRegistry* registry) {\n   AudioplayersWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"AudioplayersWindowsPlugin\"));\n+  GeolocatorWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"GeolocatorWindows\"));\n   LocalNotifierPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"LocalNotifierPlugin\"));\n   PermissionHandlerWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"PermissionHandlerWindowsPlugin\"));\n+  SharePlusWindowsPluginCApiRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"SharePlusWindowsPluginCApi\"));\n+  UrlLauncherWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"UrlLauncherWindows\"));\n }\n"
+    },
+    {
+      "stage": "after_run",
+      "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake",
+      "committed_sha256": "1db11c659b7efc38d10618f7aa3d5050318e0ed1cdbd4cfc1b65d2bb6a926f68",
+      "effective_sha256": "ea84ec97821d13df3a50c1f6fb143c45c74dc1a95b15427b2905e8f1eadef750",
+      "effective_bytes": 869,
+      "effective_blob": "1b07b9cb7555eb75f34d2663449f786927cb5cf6",
+      "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\nindex 843fa68..1b07b9c 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n@@ -4,8 +4,11 @@\n \n list(APPEND FLUTTER_PLUGIN_LIST\n   audioplayers_windows\n+  geolocator_windows\n   local_notifier\n   permission_handler_windows\n+  share_plus\n+  url_launcher_windows\n )\n \n list(APPEND FLUTTER_FFI_PLUGIN_LIST\n"
+    }
+  ],
+  "commands": [
+    {
+      "name": "sdk_checkout",
+      "argv": [
+        "git",
+        "clone",
+        "--config",
+        "core.longpaths=true",
+        "--depth",
+        "1",
+        "--branch",
+        "stable",
+        "https://github.com/flutter/flutter.git",
+        "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-2bac3cc1b4f74b08aee9f519ec2fcb14/sdk"
+      ],
+      "cwd": "/home/runner/work/E-Track/E-Track",
+      "timeout_seconds": 180,
+      "status": "PASS",
+      "exit_code": 0,
+      "log": "logs/sdk_checkout.log",
+      "timed_out": false,
+      "launch": [
+        "git",
+        "clone",
+        "--config",
+        "core.longpaths=true",
+        "--depth",
+        "1",
+        "--branch",
+        "stable",
+        "https://github.com/flutter/flutter.git",
+        "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-2bac3cc1b4f74b08aee9f519ec2fcb14/sdk"
+      ],
+      "pid": 2372,
+      "elapsed_seconds": 2.469,
+      "diagnostics": {
+        "available": true,
+        "published": true,
+        "log_bytes": 124,
+        "test_counts": null,
+        "ota_link_lines": 0,
+        "sdk_identity": null,
+        "truncated": false
+      }
+    },
+    {
+      "name": "sdk_version",
+      "argv": [
+        "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-2bac3cc1b4f74b08aee9f519ec2fcb14/sdk/bin/flutter",
+        "--version",
+        "--machine"
+      ],
+      "cwd": "/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace",
+      "timeout_seconds": 300,
+      "status": "PASS",
+      "exit_code": 0,
+      "log": "logs/sdk_version.log",
+      "timed_out": false,
+      "launch": [
+        "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-2bac3cc1b4f74b08aee9f519ec2fcb14/sdk/bin/flutter",
+        "--version",
+        "--machine"
+      ],
+      "pid": 2383,
+      "elapsed_seconds": 22.973,
+      "diagnostics": {
+        "available": true,
+        "published": true,
+        "log_bytes": 4327,
+        "test_counts": null,
+        "ota_link_lines": 0,
+        "sdk_identity": {
+          "frameworkVersion": "3.47.8",
+          "frameworkRevision": "737ba8f885dc774b53b442759999a312c9461e4e",
+          "channel": "stable",
+          "dartSdkVersion": "3.13.7",
+          "engineRevision": "cf636b1dfb818dd6a3ff16e390e93b1a036969c8"
+        },
+        "truncated": false
+      }
+    },
+    {
+      "name": "dependencies",
+      "argv": [
+        "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-2bac3cc1b4f74b08aee9f519ec2fcb14/sdk/bin/flutter",
+        "pub",
+        "get",
+        "--enforce-lockfile"
+      ],
+      "cwd": "/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace",
+      "timeout_seconds": 300,
+      "status": "PASS",
+      "exit_code": 0,
+      "log": "logs/dependencies.log",
+      "timed_out": false,
+      "launch": [
+        "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-2bac3cc1b4f74b08aee9f519ec2fcb14/sdk/bin/flutter",
+        "pub",
+        "get",
+        "--enforce-lockfile"
+      ],
+      "pid": 2514,
+      "elapsed_seconds": 8.581,
+      "diagnostics": {
+        "available": true,
+        "published": true,
+        "log_bytes": 5077,
+        "test_counts": null,
+        "ota_link_lines": 0,
+        "sdk_identity": null,
+        "truncated": false
+      }
+    },
+    {
+      "name": "analyze",
+      "argv": [
+        "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-2bac3cc1b4f74b08aee9f519ec2fcb14/sdk/bin/flutter",
+        "analyze",
+        "--no-pub"
+      ],
+      "cwd": "/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace",
+      "timeout_seconds": 300,
+      "status": "PASS",
+      "exit_code": 0,
+      "log": "logs/analyze.log",
+      "timed_out": false,
+      "launch": [
+        "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-2bac3cc1b4f74b08aee9f519ec2fcb14/sdk/bin/flutter",
+        "analyze",
+        "--no-pub"
+      ],
+      "pid": 2650,
+      "elapsed_seconds": 12.09,
+      "diagnostics": {
+        "available": true,
+        "published": true,
+        "log_bytes": 97,
+        "test_counts": null,
+        "ota_link_lines": 0,
+        "sdk_identity": null,
+        "truncated": false
+      }
+    },
+    {
+      "name": "tests",
+      "argv": [
+        "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-2bac3cc1b4f74b08aee9f519ec2fcb14/sdk/bin/flutter",
+        "test",
+        "--no-pub",
+        "--reporter",
+        "expanded",
+        "--timeout",
+        "2m",
+        "test"
+      ],
+      "cwd": "/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace",
+      "timeout_seconds": 600,
+      "status": "PASS",
+      "exit_code": 0,
+      "log": "logs/tests.log",
+      "timed_out": false,
+      "launch": [
+        "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-2bac3cc1b4f74b08aee9f519ec2fcb14/sdk/bin/flutter",
+        "test",
+        "--no-pub",
+        "--reporter",
+        "expanded",
+        "--timeout",
+        "2m",
+        "test"
+      ],
+      "pid": 2721,
+      "elapsed_seconds": 109.471,
+      "diagnostics": {
+        "available": true,
+        "published": true,
+        "log_bytes": 2118172,
+        "test_counts": {
+          "passed": 783,
+          "skipped": 16,
+          "failed": 0
+        },
+        "ota_link_lines": 19110,
+        "sdk_identity": null,
+        "truncated": true
+      }
+    },
+    {
+      "name": "candidate_tests",
+      "argv": [
+        "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-2bac3cc1b4f74b08aee9f519ec2fcb14/sdk/bin/flutter",
+        "test",
+        "--no-pub",
+        "--reporter",
+        "expanded",
+        "--timeout",
+        "2m",
+        "--dart-define=OTA_LINK_PROFILE=adaptive-v2-candidate",
+        "--plain-name",
+        "candidate",
+        "test/ota/ota_release_link_profile_test.dart",
+        "test/ota/ota_service_upgrade_test.dart"
+      ],
+      "cwd": "/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace",
+      "timeout_seconds": 120,
+      "status": "PASS",
+      "exit_code": 0,
+      "log": "logs/candidate_tests.log",
+      "timed_out": false,
+      "launch": [
+        "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-2bac3cc1b4f74b08aee9f519ec2fcb14/sdk/bin/flutter",
+        "test",
+        "--no-pub",
+        "--reporter",
+        "expanded",
+        "--timeout",
+        "2m",
+        "--dart-define=OTA_LINK_PROFILE=adaptive-v2-candidate",
+        "--plain-name",
+        "candidate",
+        "test/ota/ota_release_link_profile_test.dart",
+        "test/ota/ota_service_upgrade_test.dart"
+      ],
+      "pid": 3150,
+      "elapsed_seconds": 15.05,
+      "diagnostics": {
+        "available": true,
+        "published": true,
+        "log_bytes": 3922,
+        "test_counts": {
+          "passed": 8,
+          "skipped": 0,
+          "failed": 0
+        },
+        "ota_link_lines": 11,
+        "sdk_identity": null,
+        "truncated": false
+      }
+    }
+  ],
+  "lock_sha256_after": "23790b1857fcc603dbd89d1aeb03b3239ab0841cee809cd08b163fc84b95d0b6",
+  "lockfile_unchanged": true,
+  "source_after": {
+    "head": "57e6f064cec0c819aef8e348cd7690ca868c6a7e",
+    "clean": false,
+    "status": "M app/bluetooth_flutter_Trace/analysis_options.yaml\n M app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n M app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake",
+    "dirty_semantic": [
+      "app/bluetooth_flutter_Trace/analysis_options.yaml",
+      "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc",
+      "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake"
+    ],
+    "dirty_semantic_sha": {
+      "app/bluetooth_flutter_Trace/analysis_options.yaml": "862c9069fb4c3ad6e8b08e5029aefe1fede44a1e",
+      "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc": "78cbc3a6706333e1c35500de87904494c0692f79",
+      "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake": "1b07b9cb7555eb75f34d2663449f786927cb5cf6"
+    },
+    "dirty_eol_only": [],
+    "dirty_untracked": []
+  },
+  "source_unchanged": false,
+  "source_deltas_bound_toolchain_regen": true,
+  "source_after_restored": {
+    "head": "57e6f064cec0c819aef8e348cd7690ca868c6a7e",
+    "clean": true,
+    "status": "",
+    "dirty_semantic": [],
+    "dirty_semantic_sha": {},
+    "dirty_eol_only": [],
+    "dirty_untracked": []
+  }
+}

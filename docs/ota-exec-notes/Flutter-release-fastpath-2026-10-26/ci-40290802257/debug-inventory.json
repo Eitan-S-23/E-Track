@@ -1,0 +1,8 @@
+{
+  "sourceCommit": "57e6f064cec0c819aef8e348cd7690ca868c6a7e",
+  "workflowRun": "https://github.com/Eitan-S-23/E-Track/actions/runs/40291265828",
+  "selection": "exact complete signature/collection/terminal summary lines from original job logs",
+  "path": "debug-apk-summary-selected.log",
+  "sizeBytes": 8117,
+  "sha256": "da3aa3f0ce7af0fb6beb0b3da8d28e72c0439289e0dac5cdb208583a1808ebe1"
+}

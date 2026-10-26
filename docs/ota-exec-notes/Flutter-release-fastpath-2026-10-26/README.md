@@ -18,3 +18,11 @@ The observer uses existing protected CI credentials only in memory; it never
 reads the provisioning credential as a fallback or exports credentials. The
 script/command/environment receipts remain in the exclusive worktree's cache.
 No database, R2 object, channel, Access policy or deployment was modified.
+
+`ci-40290802257/` retains exact full analyze/test/candidate-entry/SDK logs and
+result reports from both hosts at source 57e6f064, with a size/SHA-256 inventory.
+The two `*-summary-selected.log` files are explicitly selected complete analyze
+and terminal summary lines from the original failed runs, not full job logs.
+Full fetched failed originals remain in the task cache/GitHub. No raw log was
+trimmed, normalized or rewritten. Scoped attributes preserve newly archived
+raw log/JSON bytes; historical attributes and frozen evidence are unchanged.

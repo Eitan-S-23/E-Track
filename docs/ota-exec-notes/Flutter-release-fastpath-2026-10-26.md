@@ -126,5 +126,83 @@ replace_existing_release=false, release_ota_link_profile=adaptive-v2-candidate,
 no private runtime/device/run/package identity defines. Retain existing fixed
 signing selection and both standard Android release APK/Windows EXE gates.
 
+### Stable Development Batch
+
+Source `57e6f064cec0c819aef8e348cd7690ca868c6a7e`, full checks run
+`https://github.com/Eitan-S-23/E-Track/actions/runs/40290802257`: both jobs PASS.
+Ubuntu: 783 passed, 16 skipped, 0 failed; Windows: 764 passed, 35 skipped,
+0 failed. Both candidate-defined real-entry commands: 8 passed, no skipped or
+failed tests. Both analyze commands PASS with no reported issues. Actual SDK:
+Flutter 3.47.8/revision 737ba8f885dc774b53b442759999a312c9461e4e,
+Dart 3.13.7, engine cf636b1dfb818dd6a3ff16e390e93b1a036969c8.
+These are development results with declared skips, not hardware proof.
+
+Host regressions: APK helper 46/46, runner 65/65, snapshot 32/32 and fixed-signing
+selection/verification shell 17/17 PASS. The signing entry initially could not
+import its supported p34-acceptance/live_host helper in the narrow worktree;
+materializing that tracked dependency resolved the host prerequisite, not a
+product repair. That original failure remains archived. Git whitespace checks
+use CR-at-EOL recognition; raw evidence is separately byte/SHA checked and not
+edited to satisfy source whitespace rules. Actions' Node-20 deprecation warning
+is retained; passing analysis does not claim all CI output is warning-free.
+
+One explicit debug APK request is run 40291265828 on the same source, using
+adaptive-v2-candidate, no runtime/observation identity, application suffix
+.p35candidate, and the existing fixed signing key. Both complete jobs PASS,
+including full tests and strict upload. APK metadata and verified signer are:
+
+- Application ID: com.wen.gaia.gaia.p35candidate.
+- Bytes: 131815790; APK SHA-256:
+  d1190ceef54acf3196e4f642caf7f78640c71fed033272c2fc5529ff57756a6f.
+- Existing fixed certificate SHA-256:
+  9e9b89c5e7fdc802b1fe71806a988a866db49cd988a739caeee56cb69f3df579;
+  exactly one signer, v2 scheme verifies.
+- Artifact ID: 12636498748; ZIP digest:
+  01b643da52d2ff34a50f541b6693b83d3c51bc272da76183720bc316c922e819;
+  expires 2026-10-29T08:25:43Z. No APK bytes were downloaded or installed here.
+- requested_ota_link_candidate: adaptive-v2-candidate, runtime_config=false,
+  build_profile=adaptive-v2-candidate. This is build intent, not a new device
+  negotiation or speed/stability observation. Proposed version remains the
+  source pubspec 1.0.62+88; no independent APK version readback is claimed.
+
+The adjacent debug summary contains exact selected original signature,
+collection and terminal result lines. No local Flutter/Gradle build or SDK
+acquisition was performed.
+Standard release APK/EXE remain NOT_RUN pending root's actual build-only
+authorization; this note and self-tests do not satisfy that gate.
+
+### Root Handoff And Remaining Gates
+
+Stable product source is 57e6f064cec0c819aef8e348cd7690ca868c6a7e. The subsequent
+record-only handoff commit does not change App/CI/Worker inputs and must be named
+by exact ref at handoff, without pretending the older APK was rebuilt there.
+
+Root may execute or explicitly delegate `build.yml` on that final development
+ref, version 1.0.62+88, publish_release=false, replace_existing_release=false,
+release_ota_link_profile=adaptive-v2-candidate, release_application_id_suffix=''.
+Select the intended permanent firmware endpoint under root's actual authority;
+empty firmware_latest_url retains existing configured behavior and is sufficient
+for the build-only release-mode software gate, not P3-5 backend admission. No
+temporary URL, device address/run ID/package identity or runtime config is a
+build input. Both Android release APK and Windows EXE must pass. Preserve fixed
+signing, no existing Release replacement or publishing/deployment.
+
+The separate readiness packet above needs configuration/firmware/network-policy
+owners: one compatible forward test candidate >30289, a deliberately selected
+staging channel with its stop flags handled through the authorized entry, and
+a permitted public query/download route. Retain current 30289; do not downgrade,
+hand-edit ready/hash/MCU state or use a fake backend. Independent acceptance and
+P3-5/P5 physical campaigns are not performed by this implementation owner.
+
+### Output Audit
+
+Owned outputs are confined to this exclusive worktree (source/docs, contained
+host fixtures/receipts, downloaded CI logs and selected exact archives) and the
+authorized common Git metadata D:/github/my/E-Track/.git. No PowerShell startup,
+local SDK/Gradle build, device operation, cloud mutation, credential/configuration
+export or other-worktree source write was performed. No frozen evidence was
+edited. The dirty root archive remains untouched. Records and reusable handoff
+are pending root main integration, not delivered governance on main.
+
 Development and standard artifact results will be recorded with their exact
 source/run identities after inspection. Independent acceptance remains NOT_RUN.

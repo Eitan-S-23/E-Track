@@ -1,0 +1,98 @@
+{
+  "sourceCommit": "57e6f064cec0c819aef8e348cd7690ca868c6a7e",
+  "workflowRun": "https://github.com/Eitan-S-23/E-Track/actions/runs/40290802257",
+  "files": [
+    {
+      "path": "ubuntu-result.json",
+      "sizeBytes": 13382,
+      "sha256": "a24b3c0735c16857a9cf424a387ced68223bdd8fdf9db0c804afcc7afc7221b9"
+    },
+    {
+      "path": "ubuntu-analyze.log",
+      "sizeBytes": 97,
+      "sha256": "668057e25a15f7d4945c82e7dc8959e1b7adbf15e0d24717eacdef0b823370df"
+    },
+    {
+      "path": "ubuntu-tests.log",
+      "sizeBytes": 2118172,
+      "sha256": "5fb4bc28dcb52997f9f93dd17819708207102fadec304f428fa5c34b140eaca7"
+    },
+    {
+      "path": "ubuntu-candidate_tests.log",
+      "sizeBytes": 3922,
+      "sha256": "ddb211202f50fb2fcfc5e89874e88894c9015ff3400a7857c0280c703b29b57f"
+    },
+    {
+      "path": "ubuntu-sdk_version.log",
+      "sizeBytes": 4327,
+      "sha256": "fe834a77f2e3fa388e2337e2330eb3b2b4425c99f017d504af622d6d435dd761"
+    },
+    {
+      "path": "windows-result.json",
+      "sizeBytes": 13679,
+      "sha256": "92d6191eac0c968f647b84e239e217d0d29bcbf09c8fe880e275bf0521bfd64e"
+    },
+    {
+      "path": "windows-analyze.log",
+      "sizeBytes": 97,
+      "sha256": "261b2d37bd3654f699aa54768919c7521197de360a4593591a16989f914162f1"
+    },
+    {
+      "path": "windows-tests.log",
+      "sizeBytes": 2236681,
+      "sha256": "3e118dab5cb74d374c15117c58ec837ec0b092200573b89a91e1e1f2bc9a5b2d"
+    },
+    {
+      "path": "windows-candidate_tests.log",
+      "sizeBytes": 3805,
+      "sha256": "27c6cc51c747bc23823536d13467a5b3f75c4899ed440c59980ddd49f9f3522b"
+    },
+    {
+      "path": "windows-sdk_version.log",
+      "sizeBytes": 920,
+      "sha256": "7fbccf17b4e4cb3eb80eccdc14f2f61bb1070f4a027069883644cd2350e0aeae"
+    },
+    {
+      "path": "host-apk-46.log",
+      "sizeBytes": 7671,
+      "sha256": "5aff11121a0fc85f44deedd7b94a8f7b6606b06bd0d418327e795671610e0126"
+    },
+    {
+      "path": "host-runner-original-failure.log",
+      "sizeBytes": 16021,
+      "sha256": "597b66a278aa3e14b0a9e2721fefa18a955ce3566d281e6cd0d5286a2467e642"
+    },
+    {
+      "path": "host-runner-65.log",
+      "sizeBytes": 11560,
+      "sha256": "94d5ae6e7d36746b0bf6908f7ea7078055c46c577eccbcff56b44ced5d06d1da"
+    },
+    {
+      "path": "host-capture-32.log",
+      "sizeBytes": 4706,
+      "sha256": "8a62f7b15a9d8668348cb7d32fb57bd5f53da10b0c8f2d530721fc889a8aeac1"
+    },
+    {
+      "path": "host-signing-missing-sparse-input.log",
+      "sizeBytes": 241,
+      "sha256": "50c952e75a6800ee0dca30fc1d925cec66e149bc206462d620f8a24e019d43ad"
+    },
+    {
+      "path": "host-signing-17.log",
+      "sizeBytes": 2400,
+      "sha256": "8f53bbe267261638dedea7f741589bb1c5c6f78bc42de49a5e292c49990457d5"
+    },
+    {
+      "path": "first-ci-summary-selected.log",
+      "sizeBytes": 4241,
+      "sha256": "c4a80f0b194d16be32f8db61058f7efa2a073ca3980f87e3cb897dc400ad5b8d",
+      "selection": "exact complete analyze and DEVELOPMENT_RESULT lines from original job logs"
+    },
+    {
+      "path": "lint-ci-summary-selected.log",
+      "sizeBytes": 5716,
+      "sha256": "2f251db1b83d1abb3e2f3b7ac2d603f86fc2e8a0405ec0d8a4bd6f715f622b25",
+      "selection": "exact complete analyze and DEVELOPMENT_RESULT lines from original job logs"
+    }
+  ]
+}
