@@ -735,17 +735,17 @@
 - 收口: 2026-09-04 用户放话后由主会话收口(主会话非本卡实现者), PR #19 已并入 main。刻意不用 squash 而用 merge: 包内 changed-*.json 逐条声明「该次注错/还原提交恰含一个文件」、run-*.json 把每次运行绑到具体提交, squash 会把 13 个提交压成 1 个使这些声明无法被第三方复核, fail-closed 反证四条腿的可信度随之塌掉(与 P3-6 为排除注错临时提交而 squash 的裁定相反, 理由不同)。代价如实登记: 4 次注错提交因此位于 main 可达历史中, git bisect 可能检出带注入缺陷的树; 缓解为每次注错的下一个提交即还原(缺陷树存活跨度 1 个提交)、main 顶端树干净、合并为 first-parent 线性结构故 git bisect --first-parent 不会进入注错提交。合并前 PR 全检查绿(MCU Firmware Build、Acceptance Governance、Build APK and EXE Release 三者 success; 治理 CI 本次被触发是因收口批次改动 docs/acceptance-contracts/ 与 tests/ota/, 其绿是收口硬前置)。三个 worktree 均不在 refs/heads/main 上, 故在主 worktree 切回 main 后 merge --ff-only, 快进 14 个提交, 核对 HEAD 与 origin/main 一致且无 ahead/behind, 未用 reset 或强制覆盖。入库后在 main 顶端复跑本卡接入的四条脚本全部 rc=0, 证明四次注错已彻底还原。收口证据见 docs/ota-exec-notes/P3-7-closeout.md, 收口后遗留问题清单见 docs/ota-exec-notes/P3-7-residual-issues.md。
 
 #### P3-8 Android 后台 OTA 与通知进度
-状态: 进行中 ｜ 认领: Codex(P3-8 实现) / 2026-10-21 ｜ 更新: 2026-10-23(R04 后继候选 8ede0920 双宿主 753/736 项与标准 APK/EXE 通过；待 R04 独立复核，真机与正式验收 NOT_RUN)
+状态: 完成 ｜ 认领: Codex(P3-8 实现) / 2026-10-21 ｜ 验收: Codex(fastpath_review) / 2026-10-26 / P3-8-v5 PASS ｜ 更新: 2026-10-26(七项原件独立离线验收全部通过；证据包 1006c936；主线交付由 root 按已授权 merge commit 与实际 CI 门禁执行)
 - 集中预审整改: 独立复核已关闭 27048aa1 的 R01/R02/R03，R04 的同步 busy/owner 竞态需后继修复。8ede0920 完成 owner 先登记后通知、页面自重入保护与取消终态收尾；真实 service/widget 先红后绿，新增 7 项全通过，开发 39827513211 与标准构建 39829695971 均成功。旧原生 18/18 的 Android 输入未变，未伪造新执行；R04 是否独立关闭仍由评审者判定。
 - 依赖: P3-3 已完成并合入 main；不以 P3-4 或 P4-2 部署为软件实施前置，不新增 P3-8 -> P3-5 硬依赖。
 - 目标: 前台发起并实际取得 Android 服务/执行器接管后，正常切应用、下拉通知栏和锁屏继续设备 OTA；页面/通知同源展示真实阶段和 durable 进度，回前台重附着任务，终态释放资源。
 - 范围: Flutter OTA/BLE 生命周期与通知的必要接线、Android 前台服务/权限/桥接及测试；不混用 App 自更新任务，不改 MCU/BLE 字节协议，不仅删除后台暂停保护。
 - 验收: OTA-XC-ANDROID-OTA-BACKGROUND 与 OTA-XC-OTA-PROGRESS 的接管/回退/代次隔离/取消/进度语义有正反例，必要 Actions analyze/test/APK/EXE 通过；独立真机证明后台及锁屏期间 durable 推进、通知/UI 一致、重启后新连接 GET_INFO 目标版本与完整 raw SHA 一致，并有服务/锁/订阅收尾证据。
 - 平台边界: 状态栏图标与下拉通知栏进度，不承诺所有 OEM 顶栏百分比；强制停止/进程被杀不保证持续执行，下次明确恢复按已核验包/设备及 MCU durable 状态处理。
-- 派工书: docs/ota-prompts/prompt-P3-8-implementation.md；具体设备、时长、操作/恢复配额和独立验收合同须另行审批，设备观察与正式验收 NOT_RUN。
+- 派工书: docs/ota-prompts/prompt-P3-8-implementation.md；授权后的原始设备观察由 P3-8-v5 后继合同独立评估，七项 EXECUTED PASS 指本轮离线核验，不冒充新一轮真机操作。
 - 历史与权限: P3-3-v9、原认领及历史冻结包不变；本卡不授予新增推送/发布/部署或真机权限，不沿用 P3-3 临时额度。
-- 证据: 开发记录 docs/ota-exec-notes/P3-8-implementation-2026-10-21.md 的 R04 后继章节；当前候选 8ede0920，开发 39827513211 与标准 39829695971，原件位于该工作树 .cache/p38/r04-20261023/。27048aa1 的原生 18/18、旧 APK/EXE 及 5d2a0fa6 的历史结果全部保留，不覆盖失败或冒充当前 Dart 输入的证据；正式验收仍 NOT_RUN。
-- 实施记录: 独占 dev/flutter/p3-8-background-ota-20261021，基线 2f4946a；同引擎唯一所有者、实际接管确认及安全回退、同源 durable 快照与代次隔离已形成可评审软件候选。用户授权的原生 CI 与标准构建缺口已补齐；后台/锁屏 durable、真实引擎保活及最终身份的正式观察仍待 root/非实现者按另行设备授权承接，不自行置完成。
+- 证据: docs/acceptance-contracts/P3-8-v5/final-report.md；冻结源 2be0540f，证据包 1006c936，七项 PASS 且实际 v4 前驱/v3 来源终检通过。标准 40242995708 双宿主 analyze/test/APK/EXE 成功，Android 772 通过/16 跳过/10 条 warning，Windows 753 通过/35 跳过/0 条 warning；固定签名 40249303504 成功。旧 18/18 原生测试按不变 Android 输入适用，不伪造重跑；v1-v4 失败及旧结果全部保留。
+- 实施记录: 原实现 dev/flutter/p3-8-background-ota-20261021、基线 2f4946a；后继恢复与交付 dev/flutter/ota-recovery-20261025。后台/锁屏 durable、通知代次与回页、401408 显式续传、完整 30289/Boot 身份及终态资源均有独立核验；截图不证明可见百分比，开发高速参数不等于生产高速默认值。收口与权限见 docs/ota-exec-notes/P3-8-closeout-2026-10-26.md，不据此关闭 P3-4/P5 发布门禁。
 - 规范收口: 2026-09-16 用户授权后，规范提交 d5a0b58 已推送 main，治理 CI run 35008183321 通过；本卡仍待办，后台/通知能力及真机判据均未实施或实测。
 
 ---
