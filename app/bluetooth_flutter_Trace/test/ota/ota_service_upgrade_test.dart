@@ -280,6 +280,7 @@ void main() {
     OtaLinkProfile? linkProfile,
   }) async {
     final ble = _UpgradeFakeBle(
+      linkProfile: linkProfile,
       preRebootPayload: Uint8List.fromList(preRebootPayload)
         ..[49] = receiverWindowSegments,
       postRebootPayload:
@@ -1581,6 +1582,53 @@ void main() {
       expect(await File('${output.path}/observations.log').readAsString(),
           '${messages.join('\n')}\n');
     });
+  });
+
+  for (final settings in [(32, 'without', 24, 12), (8, 'without', 8, 12), (32, 'with', 24, 1)]) {
+    test('candidate real service negotiates window ${settings.$1} / ${settings.$2}', () async {
+      final lines = <String>[];
+      final previous = debugPrint;
+      debugPrint = (message, {wrapWidth}) { if (message != null) lines.add(message); };
+      addTearDown(() => debugPrint = previous);
+      final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+          receiverWindowSegments: settings.$1, writeMode: settings.$2,
+          linkProfile: OtaLinkProfile.adaptiveCandidate);
+      ble.pipelineSupported = true;
+      final service = Get.find<OtaService>();
+      expect(await service.startOtaUpgrade('AA:BB'), isTrue);
+      expect(service.phase, OtaPhase.completed);
+      final actual = service.linkSelection!;
+      expect(actual.protocol, 2);
+      expect(actual.windowSegments, settings.$3);
+      expect(actual.dataBatchFrames, settings.$4);
+      if (settings.$1 == 8) expect(actual.summary, contains('receiver-window-limit'));
+      if (settings.$2 == 'with') expect(actual.summary, contains('without-response-unavailable'));
+      final record = jsonDecode(lines.singleWhere((s) => s.startsWith('OTA_LINK_SELECTION '))
+          .substring('OTA_LINK_SELECTION '.length)) as Map;
+      expect(record['requested']['windowSegments'], 24);
+      expect(record['requested']['dataBatchFrames'], 12);
+      expect(record['actual']['protocol'], 2);
+      expect(record['actual']['windowSegments'], settings.$3);
+      expect(record['actual']['dataBatchFrames'], settings.$4);
+      expect(record['actual']['writeMode'], settings.$2);
+      expect(ble.beginCalls, 1);
+      expect(ble.endCalls, 1);
+      expect(ble._pipeReceived, assetBytes());
+    });
+  }
+
+  test('candidate real service never falls back after malformed CAPS2', () async {
+    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+        linkProfile: OtaLinkProfile.adaptiveCandidate);
+    ble.pipelineSupported = true;
+    ble.badPipelineCaps = true;
+    final service = Get.find<OtaService>();
+    expect(await service.startOtaUpgrade('AA:BB'), isFalse);
+    expect(service.phase, OtaPhase.failed);
+    expect(service.linkSelection, isNull);
+    expect(ble.beginCalls, 0);
+    expect(ble.dataOffsets, isEmpty);
+    expect(ble.endCalls, 0);
   });
 
   test('candidate real service records v1 fallback and still requires reboot identity', () async {
@@ -4117,7 +4165,8 @@ class _UpgradeFakeBle extends BluetoothService {
     required this.preRebootPayload,
     required this.postRebootPayload,
     this.rebootDelayProbes = 0,
-  });
+    OtaLinkProfile? linkProfile,
+  }) : super(linkProfile: linkProfile);
 
   final List<int> preRebootPayload;
   final List<int> postRebootPayload;
@@ -4567,6 +4616,7 @@ class _UpgradeFakeBle extends BluetoothService {
           _onAbort(f);
           break;
         default:
+          if (pipelineSupported) _onPipeline(f);
           break;
       }
     }
@@ -4582,6 +4632,70 @@ class _UpgradeFakeBle extends BluetoothService {
       seq: seq,
       payload: payload,
     ));
+  }
+
+  // Synthetic v2 peer for real-service wiring. All existing v1 fault tests remain.
+  bool pipelineSupported = false, badPipelineCaps = false;
+  int _pipeEpoch = 0, _pipeAccepted = 0, _pipeDurable = 0, _pipeTotal = 0, _pipeBeginSeq = 0;
+  Uint8List _pipeReceived = Uint8List(0), _pipeSha = Uint8List(0);
+
+  void _pipeAck(int cmd, OtaBleFrame frame) {
+    final base = cmd == 0x91 ? 2 : 1;
+    final payload = ByteData(base + 16)..setUint8(0, 0);
+    if (base == 2) payload.setUint8(1, 7);
+    payload.setUint32(base, _pipeEpoch, Endian.little);
+    payload.setUint32(base + 4, _pipeDurable, Endian.little);
+    payload.setUint32(base + 8, _pipeAccepted, Endian.little);
+    payload.setUint32(base + 12, (_pipeDurable + 8192).clamp(0, _pipeTotal), Endian.little);
+    _send(cmd, 7, frame.seq, payload.buffer.asUint8List());
+  }
+
+  void _onPipeline(OtaBleFrame frame) {
+    final payload = ByteData.sublistView(frame.payload);
+    switch (frame.cmd) {
+      case 0x10:
+        _pipeEpoch = payload.getUint32(0, Endian.little);
+        final caps = ByteData(16);
+        caps.buffer.asUint8List().setRange(0, 8, [80, 50, 66, 76, 2, 2, 128, 0]);
+        caps.setUint32(8, _pipeEpoch, Endian.little);
+        caps.setUint32(12, badPipelineCaps ? 28 : 24, Endian.little);
+        _send(0x90, 0, frame.seq, caps.buffer.asUint8List());
+        break;
+      case 0x11:
+        expect(frame.session, 0);
+        expect(payload.getUint32(101, Endian.little), _pipeEpoch);
+        _pipeTotal = payload.getUint32(1, Endian.little);
+        _pipeBeginSeq = frame.seq;
+        _pipeReceived = Uint8List(_pipeTotal);
+        _pipeSha = Uint8List.fromList(frame.payload.sublist(5, 37));
+        _pipeAccepted = _pipeDurable = 0;
+        beginCalls++;
+        _pipeAck(0x91, frame);
+        break;
+      case 0x12:
+        expect(frame.session, 7);
+        expect(payload.getUint32(0, Endian.little), _pipeEpoch);
+        final offset = payload.getUint32(4, Endian.little);
+        expect(frame.seq, (_pipeBeginSeq + 1 + offset ~/ 128) & 0xffff);
+        expect(offset, _pipeAccepted);
+        final end = offset + frame.payload.length - 8;
+        expect(end, lessThanOrEqualTo((_pipeDurable + 8192).clamp(0, _pipeTotal)));
+        _pipeReceived.setRange(offset, end, frame.payload.sublist(8));
+        _pipeAccepted = end;
+        if (end == _pipeTotal) { _pipeDurable = end; }
+        else if (end - _pipeDurable == 8192) { _pipeDurable += 4096; }
+        dataOffsets.add(offset);
+        _pipeAck(0x92, frame);
+        break;
+      case 0x13:
+        expect(_pipeDurable, _pipeTotal);
+        expect(frame.payload.sublist(4), _pipeSha);
+        expect(sha256.convert(_pipeReceived).bytes, _pipeSha);
+        endCalls++;
+        _rebooted = true;
+        _pipeAck(0x93, frame);
+        break;
+    }
   }
 
   // ---- 命令处理（真值语义）----
