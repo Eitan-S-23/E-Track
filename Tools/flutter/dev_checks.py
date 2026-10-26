@@ -681,7 +681,8 @@ def command_plan(root, run_dir, scope, *, build_apk=False, env=None):
                    "--timeout", "2m", SCOPES[scope]], app, 600),
         ("candidate_tests", [flutter, "test", "--no-pub", "--reporter", "expanded",
                              "--timeout", "2m", "--dart-define=OTA_LINK_PROFILE=adaptive-v2-candidate",
-                             "test/ota/ota_release_link_profile_test.dart"], app, 120),
+                             "--plain-name", "candidate", "test/ota/ota_release_link_profile_test.dart",
+                             "test/ota/ota_service_upgrade_test.dart"], app, 120),
     ]
     if build_apk:
         if scope != "all" or sys.platform != "linux":

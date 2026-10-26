@@ -125,6 +125,22 @@ class CaptureTests(unittest.TestCase):
         self.assertEqual(len(prefixes), len(set(prefixes)))
         self.assertEqual(tuple(prefixes), m.PREFIXES)
 
+    def test_negotiated_selection_roundtrip_keeps_envelope_and_privacy_checks(self):
+        message = 'OTA_LINK_SELECTION ' + json.dumps(dict(schema=1,
+            actual=dict(protocol=2, windowSegments=24, dataBatchFrames=12)))
+        items = rows()
+        items.insert(3, dict(kind='line', message=message))
+        items = [dict(row, seq=i) for i, row in enumerate(items, 1)]
+        result, log = self.verify(encoded(items))
+        self.assertIn(message, log)
+        self.assertEqual('completed', result['outcome'])
+        self.assertFalse(result['eligibleForThreshold'])
+        for invalid in ('OTA_LINK_SELECTION_UNKNOWN {}', 'OTA_LINK_SELECTION token=secret'):
+            bad = copy.deepcopy(items)
+            bad[3]['message'] = invalid
+            with self.assertRaises(m.CaptureError):
+                self.verify(encoded(bad))
+
     def test_phy_records_preserve_completed_and_failed_envelopes(self):
         messages = ("OTA_PHY " + json.dumps(dict(schema=1, status="observed", txPhy=2, rxPhy=2)),
                     "OTA_PHY_CANCEL nativeAcknowledged=false")

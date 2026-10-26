@@ -75,6 +75,26 @@ expiry/no-update semantics and current read-only environment state are still to
 be reconciled. No actual backend defect is asserted. No upload, register,
 database edit, Access mutation, provisioning or deployment is authorized here.
 
+### Current Reconciliation, 2026-10-26
+
+Bounded five control-plane reads and two public latest GETs are archived beside
+this note. No successful register/upload/rehearsal/readback was repeated.
+
+| Item | Existing evidence and current applicability | Gap / owner / minimum next action |
+| --- | --- | --- |
+| Real v2 register/schema | P4-2 `fc4fbbb` native entry tests; P4-4 C4 run 39351100037, schema 2 three-asset registration and exact replay | Implemented; no code repair or repeat registration. Root/OTA reviewer retains independent reconciliation. |
+| Deployed Worker and target | Current settings GET 200: exact test D1 2617e1e1-956f-42ce-a465-da56d84abf06 and bucket e-track-firmware-p41-test-releases. Current deployment 88983ae0-75b1-487b-af0d-788b6cf976ec/version bb3d44fd-4a84-489e-9e04-6adfc54a458e matches P4-4-v8 configuration original | No redeploy. Published module SHA 1ad919d795a2354cd4c7d9617f3e3c9805f831967d1a2cdd5930ba61e4c3303f remains bound to that version. Original fixed cutover 1792039926 and token TTL 300s are reused, not requalified by a new transfer. |
+| Assets and D1 identity | Current SELECT returns 30209 ready/unarchived at C4, the same raw target SHA eecb806e3b11565f5f7c9ad3a28e6dd20cbca27ad245650dd3de70f3973f0eb1 and three available asset rows. Each original full/patch/recovery R2 body was independently rehashed locally and matches current D1 length/digest | Current remote object bytes were not re-downloaded. Immutable original proof is available; if a fresh presence check is required, root must bind an authorized read-only bucket route. Do not replay expired S3 credentials or uploads. |
+| Visibility/download state | Both channels still point to 30208; stable revision 13 and beta revision 11; both disable_latest=1 and disable_downloads=1. Ready 30209 is not the pointed-to release | A real P3-5 combination is not currently exposed. Configuration owner/root must authorize and prepare one dedicated staging test channel, not hand-edit ready/hash or unlock production. No stop flag was changed here. |
+| Public path | Both host latest probes returned edge 403/error 1010 browser-signature denial | Host-route observation, not a proved Flutter or Worker defect. Root/network-policy owner supplies a permitted route or policy decision; retain failures, do not disguise the host or bypass WAF/Access. Current latest/download/no-update remain unobserved. |
+| Stable device/asset pairing | P3-8 retains MCU 30289 with raw SHA 245189f7b2f02d968068b3ade77000a0b82a8de20b140bd41e2530675713bad0; highest test ready release is 30209, below it | Root/firmware asset owner selects a reviewed bootable forward candidate >30289, compatible hardware/key/Boot and actual P3-4 receiver source, then uses the real pipeline under actual authority. No downgrade or invented version/hash. |
+| Fixture selection/error behavior | Delivered versioned fixture and P4-2 native tests cover patch/full/no-update/errors; current deployed version/bindings match historical originals | No backend product change or new backend test campaign justified. Actual P3-5 query/download and final no-update need the chosen real pair and permitted route, not a static JSON substitute. |
+
+Backend disposition: implementation exists; configuration/forward-asset/route
+readiness is incomplete, with owners above. No backend source defect was found
+and no backend code/configuration was changed. This does not reopen P4-2/P4-4
+or replace independent acceptance of the eventual real test combination.
+
 ## Results
 
 First WIP `4c16fe69b4c818fc3f12d385aad99998c7fe6b14`, development CI
@@ -88,6 +108,23 @@ requirements remain unchanged. No repeat of a successful physical upgrade.
 Host helper 46/46 PASS; runner first failed six old command-order/index assertions
 after adding the candidate test command, then 65/65 PASS after updating those
 exact expectations. Original first failure is preserved, not hidden as green.
+
+Second source `f5cf470e2406be05887238d31bc08c8dbd9af823`, run 40285858937:
+full analyze/test and candidate-build-entry tests PASS on both hosts. The next
+test-only batch `4f0adc949bffede49a48219642ceb933e328faae`, run 40287042349,
+passed tests on both hosts but strict analyze rejected one `use_super_parameters`
+lint in the new synthetic peer. Corrected with a super parameter, not suppression.
+The new real-service tests exercise v2 batch12, INFO window 8 downgrade,
+with-response batch1 and malformed CAPS2 failure, including final full raw
+identity. The candidate-defined CI command now exercises these real services
+with the compiled default as well as the ordinary baseline full suite.
+
+Proposed final App version: 1.0.62+88 (previous 1.0.61+87); the queried v1.0.62
+GitHub Release does not exist. This reserves a candidate input, not publication.
+Root build-only request: exact final branch/ref, build.yml, publish_release=false,
+replace_existing_release=false, release_ota_link_profile=adaptive-v2-candidate,
+no private runtime/device/run/package identity defines. Retain existing fixed
+signing selection and both standard Android release APK/Windows EXE gates.
 
 Development and standard artifact results will be recorded with their exact
 source/run identities after inspection. Independent acceptance remains NOT_RUN.

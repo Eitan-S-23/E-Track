@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('compiled profile drives both real services without a runtime file', () {
+  test('candidate compiled profile drives both real services without a runtime file', () {
     final profile = OtaLinkProfile.build;
     final runtime = OtaExperimentRuntime(enabled: false);
     OtaExperimentRuntime.withInstance(runtime, () {
@@ -21,7 +21,7 @@ void main() {
     });
   });
 
-  test('release candidate and baseline stay explicit and reject unknown input', () {
+  test('candidate and baseline stay explicit and reject unknown input', () {
     expect(OtaLinkProfile.parse('baseline'), same(OtaLinkProfile.baseline));
     final candidate = OtaLinkProfile.parse('adaptive-v2-candidate');
     expect(candidate, same(OtaLinkProfile.adaptiveCandidate));
@@ -35,7 +35,7 @@ void main() {
     }
   });
 
-  test('explicit baseline injection remains available in a candidate build', () {
+  test('candidate build retains explicit baseline injection', () {
     final bluetooth = BluetoothService(linkProfile: OtaLinkProfile.baseline);
     final service = OtaService(linkProfile: OtaLinkProfile.baseline,
         bluetoothService: bluetooth);

@@ -1592,7 +1592,7 @@ void main() {
       addTearDown(() => debugPrint = previous);
       final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
           receiverWindowSegments: settings.$1, writeMode: settings.$2,
-          linkProfile: OtaLinkProfile.adaptiveCandidate);
+          linkProfile: OtaLinkProfile.build.pipeline ? null : OtaLinkProfile.adaptiveCandidate);
       ble.pipelineSupported = true;
       final service = Get.find<OtaService>();
       expect(await service.startOtaUpgrade('AA:BB'), isTrue);
@@ -1619,7 +1619,7 @@ void main() {
 
   test('candidate real service never falls back after malformed CAPS2', () async {
     final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
-        linkProfile: OtaLinkProfile.adaptiveCandidate);
+        linkProfile: OtaLinkProfile.build.pipeline ? null : OtaLinkProfile.adaptiveCandidate);
     ble.pipelineSupported = true;
     ble.badPipelineCaps = true;
     final service = Get.find<OtaService>();
@@ -1637,7 +1637,7 @@ void main() {
     debugPrint = (message, {wrapWidth}) { if (message != null) lines.add(message); };
     addTearDown(() => debugPrint = previous);
     final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
-        linkProfile: OtaLinkProfile.adaptiveCandidate);
+        linkProfile: OtaLinkProfile.build.pipeline ? null : OtaLinkProfile.adaptiveCandidate);
     final service = Get.find<OtaService>();
     expect(await service.startOtaUpgrade('AA:BB'), isTrue);
     expect(service.phase, OtaPhase.completed);
@@ -4165,8 +4165,8 @@ class _UpgradeFakeBle extends BluetoothService {
     required this.preRebootPayload,
     required this.postRebootPayload,
     this.rebootDelayProbes = 0,
-    OtaLinkProfile? linkProfile,
-  }) : super(linkProfile: linkProfile);
+    super.linkProfile,
+  });
 
   final List<int> preRebootPayload;
   final List<int> postRebootPayload;

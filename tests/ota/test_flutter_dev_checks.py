@@ -150,7 +150,8 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
             self.assertEqual(directory, plan[4][1][-1])
             self.assertIn("--no-pub", plan[4][1])
             self.assertIn("--dart-define=OTA_LINK_PROFILE=adaptive-v2-candidate", plan[5][1])
-            self.assertEqual("test/ota/ota_release_link_profile_test.dart", plan[5][1][-1])
+            self.assertEqual(["test/ota/ota_release_link_profile_test.dart", "test/ota/ota_service_upgrade_test.dart"], plan[5][1][-2:])
+            self.assertIn("--plain-name", plan[5][1])
             self.assertTrue(all(0 < item[3] <= 600 for item in plan))
             for _, argv, _, _ in plan:
                 self.assertFalse({"build", "publish", "deploy", "push"}.intersection(argv))
