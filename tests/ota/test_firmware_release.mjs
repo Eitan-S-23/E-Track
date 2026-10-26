@@ -11,6 +11,7 @@ import { captureBuildInputs, digest, metadataBytes, prepareFirmwareRelease, read
   validateBaseDescriptor } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/prepare-firmware-release.mjs";
 import { outputPath, writeOutput } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-cli.mjs";
 import { parseFirmwareRegistration } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-schema.mjs";
+import { captureBuildConfiguration, firmwareCMakeOptions } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-build-profile.mjs";
 
 const root = path.resolve(fileURLToPath(new URL("../../", import.meta.url)));
 const python = process.env.PYTHON ?? (process.platform === "win32" ? "python" : "python3");
@@ -63,6 +64,48 @@ function bootstrapBase(options) {
     provenanceSha256: "b".repeat(64), targetVersionName: options.release.versionName,
     targetCommitSha: options.release.commitSha };
 }
+
+async function bindBuildConfiguration(options, profile = "baseline") {
+  const cmake = await readFile(path.join(root, "MDK-ARM_F435/cmake-generated/CMakeLists.txt"), "utf8");
+  const block = cmake.match(/if\(P34_OTA_CANDIDATE\)([\s\S]*?)\nendif\(\)/)[1];
+  const defs = profile === "baseline" ? ["OTA_TARGET_APP"] : ["OTA_TARGET_APP", "P34_EARLY_FAULT_VECTORS=1",
+    ...block.match(/target_compile_definitions\(X_Track_App_GCC PRIVATE([\s\S]*?)\n\s*\)/)[1]
+      .trim().split(/\s+/).map(value => value.replace("${P34_OTA_UART_BAUD}", "921600"))];
+  const cache = "CMAKE_BUILD_TYPE:STRING=Release\nKEIL_GCC_COMPILER_CACHE:STRING=OFF\n" +
+    Object.entries(firmwareCMakeOptions(profile)).map(([key, value]) => `${key}:STRING=${value}\n`).join("");
+  const commands = [{ file: "synthetic-ota_keys.c", command: "fixture-only-gcc " + defs.map(d => "-D" + d).join(" ") +
+    " -o CMakeFiles/X_Track_App_GCC.dir/synthetic.o" }];
+  options.buildEvidenceDir = path.join(options.dir, "compile-evidence");
+  await writeOutput(root, path.join(options.buildEvidenceDir, "CMakeCache.txt"), cache);
+  await writeOutput(root, path.join(options.buildEvidenceDir, "compile_commands.json"), JSON.stringify(commands));
+  options.build.buildConfiguration = captureBuildConfiguration({ profile, cache, commands });
+}
+
+test("preparation retains actual build configuration without extending registration metadata", async () => {
+  const options = await input(); await bindBuildConfiguration(options, "p34-v2-candidate");
+  const result = await prepareFirmwareRelease(options);
+  assert.deepEqual(result.summary.build.buildConfiguration, options.build.buildConfiguration);
+  assert.equal(result.summary.build.buildConfiguration.actualProfile, "p34-v2-candidate");
+  assert.equal(Object.hasOwn(result.metadata, "buildConfiguration"), false);
+  assert.equal(result.summary.patchByteEqual, true);
+});
+
+test("same-source different config refuses a previous preparation before target output creation", async () => {
+  const options = await input(); await bindBuildConfiguration(options);
+  await prepareFirmwareRelease(options);
+  await bindBuildConfiguration(options, "p34-v2-candidate");
+  const outputDir = path.join(options.dir, "candidate-replay");
+  await assert.rejects(prepareFirmwareRelease({ ...options, referenceDir: options.outputDir, outputDir }), /reference GCC.*differs/);
+  assert.equal(existsSync(outputDir), false);
+});
+
+test("preparation independently checks compile originals instead of trusting the profile label", async () => {
+  const options = await input(); await bindBuildConfiguration(options, "p34-v2-candidate");
+  const cache = path.join(options.buildEvidenceDir, "CMakeCache.txt");
+  await writeOutput(root, cache, (await readFile(cache, "utf8")).replace("P34_EARLY_FAULT_VECTORS:STRING=ON", "P34_EARLY_FAULT_VECTORS:STRING=OFF"));
+  await assert.rejects(prepareFirmwareRelease(options), /provenance mismatch/);
+  assert.equal(existsSync(options.outputDir), false);
+});
 
 test("real finalize/full/patch/recovery bytes and canonical P4-2 metadata roundtrip", async () => {
   const options = await input();

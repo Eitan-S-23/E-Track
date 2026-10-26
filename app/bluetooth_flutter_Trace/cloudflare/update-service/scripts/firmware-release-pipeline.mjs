@@ -8,6 +8,7 @@ import { registerFirmware } from "./register-firmware-release.mjs";
 import { approvedFirmwareKey } from "./firmware-release-key.mjs";
 import { s3Credentials } from "./firmware-s3.mjs";
 import { preflightFirmware } from "./firmware-preflight-client.mjs";
+import { firmwareBuildProfile, verifyBuildConfiguration } from "./firmware-build-profile.mjs";
 export { verifyMonotonic } from "./firmware-monotonic.mjs";
 
 const fail = message => new CliError(message, "RELEASE_CONFLICT", 1);
@@ -16,6 +17,7 @@ const active = signal => { if (signal?.aborted) throw cancelled(); };
 export const PUBLICATION_PROTOCOL = "s3-worker-preflight-v1";
 
 export function releaseConfig(env) {
+  const buildProfile = firmwareBuildProfile(env.INPUT_FIRMWARE_BUILD_PROFILE);
   const mode = env.FIRMWARE_RELEASE_MODE;
   if (env.GITHUB_EVENT_NAME !== "workflow_dispatch" || env.INPUT_CHECK_BINDINGS === "true" || !["rehearsal", "production"].includes(mode)
     || (mode === "production" ? env.INPUT_PUBLISH !== "true" || env.INPUT_REHEARSAL === "true"
@@ -61,10 +63,10 @@ export function releaseConfig(env) {
       || canonicalRunId === env.GITHUB_RUN_ID) throw new CliError("Explicit approved rehearsal provenance and hashes are required");
   }
   return { mode, canonicalRunId, executionRunId: env.GITHUB_RUN_ID, executionAttempt: env.GITHUB_RUN_ATTEMPT,
-    serviceUrl: url.origin, bucketName: env.TRACE_R2_BUCKET, accountId: env.CLOUDFLARE_ACCOUNT_ID };
+    buildProfile, serviceUrl: url.origin, bucketName: env.TRACE_R2_BUCKET, accountId: env.CLOUDFLARE_ACCOUNT_ID };
 }
 
-export function verifyPromotion(metadata, { approvedMetadata, approvedEvidence, approvedPreparation, approvedRun, config, env }) {
+export function verifyPromotion(metadata, { approvedMetadata, approvedEvidence, approvedPreparation, approvedRun, currentBuild, config, env }) {
   const parsed = parseFirmwareRegistration(JSON.parse(approvedMetadata));
   const evidence = JSON.parse(approvedEvidence);
   if (digest(approvedMetadata) !== env.OTA_APPROVED_REHEARSAL_METADATA_SHA256
@@ -73,6 +75,10 @@ export function verifyPromotion(metadata, { approvedMetadata, approvedEvidence, 
     || !metadataBytes(parsed).equals(approvedMetadata) || !metadataBytes(readyProjection(metadata)).equals(approvedMetadata)) {
     throw fail("Rebuilt assets/canonical metadata differ from approved rehearsal bytes");
   }
+  const previousBuild = JSON.parse(approvedPreparation).build;
+  verifyBuildConfiguration(previousBuild, config.buildProfile);
+  verifyBuildConfiguration(currentBuild, config.buildProfile);
+  if (canonicalJson(previousBuild) !== canonicalJson(currentBuild)) throw fail("Approved rehearsal GCC build configuration/provenance differs");
   if (metadata.runId !== config.canonicalRunId || parsed.commitSha !== env.GITHUB_SHA
     || String(approvedRun.id) !== config.canonicalRunId || approvedRun.head_sha !== env.GITHUB_SHA
     || approvedRun.path !== ".github/workflows/firmware-build.yml" || approvedRun.event !== "workflow_dispatch"
@@ -119,14 +125,17 @@ export async function publishPreparedRelease({ root, assetsDir, metadata, config
   active(signal);
   metadata = parseFirmwareRegistration(metadata, env.GITHUB_REPOSITORY, false);
   if (metadata.runId !== config.canonicalRunId || metadata.commitSha !== env.GITHUB_SHA) throw fail("Release provenance does not match execution");
-  if (config.mode === "production") verifyPromotion(metadata, { ...approval, config, env });
+  const preparationBytes = await readFile(path.join(assetsDir, "verification.json"));
+  const preparation = JSON.parse(preparationBytes);
+  verifyBuildConfiguration(preparation.build, config.buildProfile);
+  if (config.mode === "production") verifyPromotion(metadata, { ...approval, currentBuild: preparation.build, config, env });
   const bytesByName = new Map();
   for (const asset of metadata.assets) {
     const bytes = await readFile(path.join(assetsDir, asset.fileName));
     if (bytes.length !== asset.sizeBytes || digest(bytes) !== asset.sha256) throw fail("Local release asset differs from metadata");
     bytesByName.set(asset.fileName, bytes);
   }
-  const preparationSha256 = digest(await readFile(path.join(assetsDir, "verification.json")));
+  const preparationSha256 = digest(preparationBytes);
   const metadataPath = outputPath(root, path.join(assetsDir, "cloudflare-firmware-release-metadata.json"));
   const evidencePath = outputPath(root, path.join(assetsDir, "release-evidence.json"));
   const attemptsPath = outputPath(root, path.join(assetsDir, "release-steps.json"));

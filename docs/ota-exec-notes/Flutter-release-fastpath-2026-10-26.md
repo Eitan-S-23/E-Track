@@ -388,3 +388,11 @@ the authorized shared project `.git`. Global hooks are read-only inputs, with
 their temporary/cache paths contained and optional chat notification disabled
 for this command. No external writes, frozen-evidence edits, backend mutation,
 device operation, local Flutter/Gradle build or main/tag push is selected.
+
+## P35-PREP-FW-01 Implementation Follow-Up, 2026-10-27
+
+The MCU protected candidate build wiring and local host self-tests are recorded
+in [the concentrated implementation handoff](Flutter-release-fastpath-2026-10-26/firmware-implementation-20261027.md).
+Exclusive branch `dev/firmware/p35-candidate-20261027`, based on `6dbd1869`;
+the new delta is uncommitted and real protected GCC/CI remains NOT_RUN pending
+actual authority. The Flutter artifacts and reviewer notes are unchanged.

@@ -33,6 +33,30 @@ const p44Fixture = () => ({
 
 test("P4-4 actual configuration parser admits its isolated host-only control", () => {
   assert.equal(releaseConfig(p44Fixture()).mode, "rehearsal");
+  assert.equal(releaseConfig(p44Fixture()).buildProfile, "baseline");
+});
+
+test("P35 explicit protected profile is a baseline-default allowlist passed identically to compiler and release", () => {
+  const input = workflow.on.workflow_dispatch.inputs.firmware_build_profile;
+  assert.equal(input.type, "choice"); assert.equal(input.default, "baseline");
+  assert.deepEqual(input.options, ["baseline", "p34-v2-candidate"]);
+  for (const job of [production, rehearsal]) {
+    const build = job.steps.find(step => step.id === "keyed_build");
+    const release = job.steps.find(step => step.id === "release_execute");
+    assert.equal(build.env.INPUT_FIRMWARE_BUILD_PROFILE, "${{ github.event.inputs.firmware_build_profile }}");
+    assert.equal(release.env.INPUT_FIRMWARE_BUILD_PROFILE, build.env.INPUT_FIRMWARE_BUILD_PROFILE);
+    assert.match(build.run, /--profile "\$INPUT_FIRMWARE_BUILD_PROFILE"/);
+    assert.doesNotMatch(build.run, /\$\{\{[^}]*inputs\./);
+  }
+  assert.equal(releaseConfig({ ...p44Fixture(), INPUT_FIRMWARE_BUILD_PROFILE: "p34-v2-candidate" }).buildProfile, "p34-v2-candidate");
+  const development = workflow.jobs.build.steps.find(step => step.id === "keyed_development");
+  assert.equal(development.env.INPUT_FIRMWARE_BUILD_PROFILE, "${{ github.event.inputs.firmware_build_profile || 'baseline' }}");
+  assert.match(development.run, /--development/);
+  assert.match(development.run, /--profile "\$INPUT_FIRMWARE_BUILD_PROFILE"/);
+  assert.doesNotMatch(JSON.stringify(development.env), /secrets\./);
+  for (const value of ["", "unknown", "baseline;exit 0", "P34_OTA_CANDIDATE=ON"]) {
+    assert.throws(() => releaseConfig({ ...p44Fixture(), INPUT_FIRMWARE_BUILD_PROFILE: value }), /Unknown firmware/);
+  }
 });
 
 for (const name of ["CLOUDFLARE_ACCOUNT_ID", "TRACE_R2_ACCESS_KEY_ID", "TRACE_R2_SECRET_ACCESS_KEY", "TRACE_UPDATE_SERVICE_URL", "TRACE_DEPLOY_TOKEN",

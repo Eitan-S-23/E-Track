@@ -19,6 +19,7 @@ import { verifyStoredFirmwareAsset } from "../../app/bluetooth_flutter_Trace/clo
 import { bindingsCheckConfig, checkFirmwareBindings } from "../../.github/scripts/firmware-bindings-check.mjs";
 import { buildKeyedFirmware, cleanupPrivateBuildKey } from "../../.github/scripts/firmware-gcc-keyed-build.mjs";
 import { approvedFirmwareKey, DEVELOPMENT_PACKAGING_KEY, firmwareKeyBinding, verifyBuildKeyBinding } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-release-key.mjs";
+import { firmwareCMakeOptions } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-build-profile.mjs";
 import { SqliteD1 } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/worker/test/host/sqlite-d1";
 import { firmwareReleaseInsert } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/worker/src/firmware";
 
@@ -60,7 +61,8 @@ describe("firmware key wiring with a compiler double, never a local native build
     const env = keyEnv();
     const state = { root, buildDir: path.join(dir, "gcc"), evidenceDir: path.join(dir, "evidence"),
       versionName: "3.2.8", commitSha: env.GITHUB_SHA, buildTimestamp: 1786320000, env,
-      omitInclude: false, failBuild: false, cacheLauncher: false, keyHeader: "" };
+      omitInclude: false, failBuild: false, cacheLauncher: false, keyHeader: "",
+      corruptCache: false, omitCandidateDefines: false, changeCompileInput: false, failCleanup: false };
     const execute = vi.fn(async (tool: string, args: string[], options: any) => {
       expect(options.env.OTA_AES_KEY).toBeUndefined();
       expect(options.env.SCCACHE_BUCKET).toBeUndefined(); expect(options.env.CCACHE_DIR).toBeUndefined();
@@ -70,17 +72,29 @@ describe("firmware key wiring with a compiler double, never a local native build
       if (tool === "cmake" && args[0] === "-S") {
         expect(args).toContain("-DCMAKE_BUILD_TYPE=Release"); expect(args).toContain("-DCMAKE_OBJECT_PATH_MAX=1024");
         expect(args).toContain("-DKEIL_GCC_COMPILER_CACHE:STRING=OFF");
-        await writeOutput(root, path.join(state.buildDir, "CMakeCache.txt"), "KEIL_GCC_COMPILER_CACHE:STRING=OFF\n");
+        const chosen = args.includes("-DP34_OTA_CANDIDATE:BOOL=ON") ? "p34-v2-candidate" : "baseline";
+        const options = firmwareCMakeOptions(chosen);
+        if (state.corruptCache) options.P34_OTA_CANDIDATE = "OFF";
+        await writeOutput(root, path.join(state.buildDir, "CMakeCache.txt"),
+          "KEIL_GCC_COMPILER_CACHE:STRING=OFF\nCMAKE_BUILD_TYPE:STRING=Release\n" +
+          Object.entries(options).map(([key, value]) => `${key}:STRING=${value}\n`).join(""));
         await writeOutput(root, path.join(state.buildDir, "CMakeFiles/rules.ninja"),
           `command = cmake -E env SOURCE_DATE_EPOCH=1786320000 ${state.cacheLauncher ? "sccache " : ""}arm-none-eabi-gcc $FLAGS\n`);
         const flag = state.omitInclude ? "-I" : "-include";
+        const definitions = chosen === "p34-v2-candidate" && !state.omitCandidateDefines
+          ? "-DP34_OTA_FIXED_CONFIG=1 -DP34_OTA_PIPELINE=1 -DP34_OTA_PIPELINE_SYNC=1 -DP34_OTA_PIPELINE_ACK_BIND=1 " +
+            "-DP34_OTA_PIPELINE_WAIT_RX=1 -DP34_EARLY_FAULT_VECTORS=1 -DCONFIG_BT_FIXED_BAUD=921600u " +
+            "-DCONFIG_BT_BAUD_EXPERIMENT=0 -DCONFIG_OTA_BLE_PROFILE=0 -DCONFIG_RTT_DEBUG_CMD_ENABLE=0 " +
+            "-DCONFIG_OTA_INSTALL_PROFILE=0 -DCONFIG_OTA_INSTALL_COST=0" : "";
         await writeOutput(root, path.join(state.buildDir, "compile_commands.json"), JSON.stringify([{
           file: path.join(root, "Libraries/OTA/ota_keys.c"),
-          command: `arm-none-eabi-gcc ${flag} "${state.keyHeader.replaceAll("\\", "/")}" -o CMakeFiles/X_Track_App_GCC.dir/ota_keys.c.obj`
+          command: `arm-none-eabi-gcc -DOTA_TARGET_APP ${definitions} ${flag} "${state.keyHeader.replaceAll("\\", "/")}" -o CMakeFiles/X_Track_App_GCC.dir/ota_keys.c.obj`
         }]));
       } else if (tool === "cmake") {
         expect(args).toEqual(["--build", state.buildDir, "--target", "X_Track_App_GCC", "X_Track_Boot", "--parallel"]);
         if (state.failBuild) return { status: 1, stdout: "", stderr: `error: fixture compiler diagnostic ${state.env.OTA_AES_KEY}` };
+        if (state.changeCompileInput) await writeOutput(root, path.join(state.buildDir, "compile_commands.json"), "[]");
+        if (state.failCleanup) await writeOutput(root, path.join(state.buildDir, "key-build-owner.json"), "{}");
         for (const [dir, name] of [["app-gcc", "X-Track-App-GCC"], ["boot", "X-Track-Boot"]]) {
           for (const extension of ["bin", "elf", "hex", "map"]) await writeOutput(root,
             path.join(state.buildDir, dir, `${name}.${extension}`), Buffer.from(`compiler-double-only-${dir}-${extension}`));
@@ -97,8 +111,91 @@ describe("firmware key wiring with a compiler double, never a local native build
     expect(f.execute).toHaveBeenCalledTimes(3); expect(existsSync(f.state.keyHeader)).toBe(false);
     const evidence = JSON.parse(await readFile(path.join(f.evidenceDir, "keyed-build-evidence.json"), "utf8"));
     expect(evidence.artifacts).toHaveLength(8); expect(evidence.bootKeyConsumer).toBe(false);
+    expect(build.buildConfiguration.actualProfile).toBe("baseline");
+    expect(evidence.buildConfiguration).toEqual(build.buildConfiguration);
     expect(JSON.stringify(evidence)).not.toContain(f.env.OTA_AES_KEY);
     expect(existsSync(path.join(f.evidenceDir, "DEVELOPMENT-ONLY.json"))).toBe(false);
+  });
+
+  it("explicit candidate reaches actual CMake arguments and the preserved compiler recipe, never the baseline", async () => {
+    const f = await fixture();
+    const build = await buildKeyedFirmware({ ...f, profile: "p34-v2-candidate",
+      env: { ...f.env, INPUT_FIRMWARE_BUILD_PROFILE: "p34-v2-candidate" } });
+    const configure = f.execute.mock.calls[0][1];
+    expect(configure).toContain("-DP34_OTA_CANDIDATE:BOOL=ON");
+    expect(configure).toContain("-DP34_EARLY_FAULT_VECTORS:BOOL=ON");
+    expect(configure).toContain("-DP3_4_LINK_PROFILE:BOOL=OFF");
+    expect(configure).toContain("-DP34_OTA_UART_BAUD:STRING=921600");
+    expect(build.buildConfiguration).toMatchObject({ requestedProfile: "p34-v2-candidate", actualProfile: "p34-v2-candidate" });
+    expect(build.buildConfiguration.appCompileDefinitions).toContain("P34_OTA_PIPELINE_WAIT_RX=1");
+    const evidence = JSON.parse(await readFile(path.join(f.evidenceDir, "keyed-build-evidence.json"), "utf8"));
+    expect(evidence.buildConfiguration).toEqual(build.buildConfiguration);
+    expect(evidence.compileCommandsSha256).toBe(digest(await readFile(path.join(f.evidenceDir, "compile_commands.json"))));
+    expect(verifyBuildKeyBinding(build, f.env)).toEqual(approvedFirmwareKey(f.env));
+    expect(JSON.stringify(evidence)).not.toContain(f.env.OTA_AES_KEY);
+    expect(existsSync(f.state.keyHeader)).toBe(false);
+  });
+
+  it("rejects unknown and contradictory workflow profiles before output creation or any compiler call", async () => {
+    const f = await fixture();
+    for (const profile of ["unknown", "", "P34_OTA_CANDIDATE=ON", "baseline --development"]) {
+      await expect(buildKeyedFirmware({ ...f, profile })).rejects.toThrow(/Unknown firmware/);
+    }
+    await expect(buildKeyedFirmware({ ...f, profile: "baseline",
+      env: { ...f.env, INPUT_FIRMWARE_BUILD_PROFILE: "p34-v2-candidate" } })).rejects.toThrow(/workflow request/);
+    expect(f.execute).not.toHaveBeenCalled(); expect(existsSync(f.buildDir)).toBe(false);
+  });
+
+  it.each(["corruptCache", "omitCandidateDefines"])("candidate %s cannot be relabelled as a successful build", async flag => {
+    const f = await fixture(); (f.state as any)[flag] = true;
+    await expect(buildKeyedFirmware({ ...f, profile: "p34-v2-candidate" })).rejects.toThrow(/profile\/options\/compile/);
+    expect(f.execute).toHaveBeenCalledTimes(1); expect(existsSync(f.state.keyHeader)).toBe(false);
+    expect(existsSync(path.join(f.evidenceDir, "gcc-build-inputs.json"))).toBe(false);
+  });
+
+  it("configuration drift during compilation fails and cleans the private key rather than archiving false provenance", async () => {
+    const f = await fixture(); f.state.changeCompileInput = true;
+    await expect(buildKeyedFirmware(f)).rejects.toThrow(/changed during/);
+    expect(f.execute).toHaveBeenCalledTimes(2); expect(existsSync(f.state.keyHeader)).toBe(false);
+    expect(existsSync(path.join(f.evidenceDir, "gcc-build-inputs.json"))).toBe(false);
+  });
+
+  it("real release execute entry rejects an incompatible or old build before base retrieval, packaging or cloud effects", async () => {
+    const f = await fixture(); const build = await buildKeyedFirmware(f);
+    const env = { ...process.env, ...f.env, RELEASE_VERSION: build.versionName,
+      CLOUDFLARE_ACCOUNT_ID: "a".repeat(32), TRACE_R2_ACCESS_KEY_ID: "a".repeat(32),
+      TRACE_R2_SECRET_ACCESS_KEY: "b".repeat(64), TRACE_DEPLOY_TOKEN: "fixture-only-deploy",
+      TRACE_UPDATE_SERVICE_URL: "https://fixture.invalid", TRACE_R2_BUCKET: "e-track-firmware-p41-test-releases",
+      GITHUB_TOKEN: "fixture-only-github", GITHUB_REPOSITORY: "Eitan-S-23/E-Track", OTA_PREVIOUS_RELEASE_JSON: "{}",
+      TRACE_FIRMWARE_MIN_APP_VERSION_CODE: "0", TRACE_FIRMWARE_MIN_PROTOCOL_VERSION: "1" };
+    for (const profile of ["p34-v2-candidate", "baseline"]) {
+      const manifest = structuredClone(build);
+      if (profile === "baseline") delete manifest.buildConfiguration;
+      const input = path.join(f.evidenceDir, `incompatible-${profile}.json`);
+      const out = path.join(f.evidenceDir, `not-prepared-${profile}`);
+      await writeOutput(root, input, JSON.stringify(manifest));
+      const result = spawnSync(process.execPath, [path.join(root, ".github/scripts/firmware-release.mjs"), "execute",
+        "--app", path.join(f.evidenceDir, "app/X-Track-App-GCC.bin"),
+        "--boot", path.join(f.evidenceDir, "boot/X-Track-Boot.bin"), "--build-inputs", input, "--output-dir", out],
+        { cwd: root, encoding: "utf8", windowsHide: true, timeout: 15000,
+          env: { ...env, INPUT_FIRMWARE_BUILD_PROFILE: profile } });
+      expect(result.status).toBe(1);
+      expect(JSON.parse(result.stderr).message).toMatch(/profile\/options\/compile/);
+      expect(existsSync(out)).toBe(false);
+      await writeOutput(root, path.join(f.evidenceDir, `execute-rejection-${profile}.json`), JSON.stringify({
+        fixtureOnly: true, exitCode: result.status, stdout: result.stdout, stderr: result.stderr }));
+    }
+  });
+
+  it("private header cleanup failure remains fatal and preserves the owned fixture for an explicit recovery", async () => {
+    const f = await fixture(); f.state.failCleanup = true;
+    await expect(buildKeyedFirmware(f)).rejects.toThrow(/different key-build owner/);
+    expect(existsSync(f.state.keyHeader)).toBe(true);
+    expect(existsSync(path.join(f.evidenceDir, "gcc-build-inputs.json"))).toBe(false);
+    await writeOutput(root, path.join(f.buildDir, "key-build-owner.json"), JSON.stringify({
+      commitSha: f.env.GITHUB_SHA, runId: f.env.GITHUB_RUN_ID, runAttempt: f.env.GITHUB_RUN_ATTEMPT }));
+    await cleanupPrivateBuildKey(f);
+    expect(existsSync(f.state.keyHeader)).toBe(false);
   });
 
   it("rejects a compile recipe without the actual forced include before compiling", async () => {
@@ -369,8 +466,14 @@ async function setup(omitKind?: string) {
   const assetsDir = await mkdtemp(path.join(parent, "case-"));
   for (const a of metadata.assets) if (a.kind !== omitKind) await writeOutput(root, path.join(assetsDir, a.fileName), bytesFor(a.kind));
   await writeOutput(root, path.join(assetsDir, "cloudflare-firmware-release-metadata.json"), metadataBytes(metadata));
+  const build = { commitSha: metadata.commitSha, versionName: metadata.versionName, versionCode: metadata.versionCode,
+    buildTimestamp: 1786320000, keyBinding: approvedFirmwareKey({ OTA_AES_KEY: aesKey }),
+    app: { fileName: "X-Track-App-GCC.bin", sizeBytes: 8192, sha256: "a".repeat(64) },
+    boot: { fileName: "X-Track-Boot.bin", sizeBytes: 1024, sha256: "b".repeat(64) },
+    buildConfiguration: { schemaVersion: 1, requestedProfile: "baseline", actualProfile: "baseline",
+      cmakeOptions: firmwareCMakeOptions("baseline"), appCompileDefinitions: ["OTA_TARGET_APP"] } };
   await writeOutput(root, path.join(assetsDir, "verification.json"), JSON.stringify({ fixtureOnly: true,
-    layer: "script-handler-host", bytePreparationTestedSeparately: true }));
+    layer: "script-handler-host", bytePreparationTestedSeparately: true, build }));
   const environment = { FIRMWARE_RELEASE_MODE: "rehearsal", GITHUB_EVENT_NAME: "workflow_dispatch",
     INPUT_PUBLISH: "false", INPUT_REHEARSAL: "true", OTA_BOOT_CHAIN_READY: "false",
     CLOUDFLARE_ACCOUNT_ID: "1".repeat(32), TRACE_R2_ACCESS_KEY_ID: "a".repeat(32), TRACE_R2_SECRET_ACCESS_KEY: "b".repeat(64),
@@ -390,7 +493,7 @@ async function setup(omitKind?: string) {
     if (url === "https://example.com/api/ci/firmware/releases") return SELF.fetch(url, init);
     throw new Error("Unexpected test network request");
   };
-  return { root, assetsDir, metadata, config: releaseConfig(environment), env: environment,
+  return { root, assetsDir, metadata, build, config: releaseConfig(environment), env: environment,
     bucket: env.RELEASES_BUCKET, db: env.DB, deployToken: "test-deploy-token", fetcher, calls,
     github: { publish: vi.fn(() => { throw new Error("Rehearsal must never publish GitHub"); }) } };
 }
@@ -416,7 +519,7 @@ async function promotionFixture(s: Awaited<ReturnType<typeof setup>>) {
   const approvedRun = { id: Number(s.metadata.runId), head_sha: s.metadata.commitSha, path: ".github/workflows/firmware-build.yml",
     event: "workflow_dispatch", conclusion: "success", run_attempt: 1 };
   return { config: releaseConfig(envProduction), envProduction,
-    approval: { approvedMetadata, approvedEvidence, approvedPreparation, approvedRun } };
+    approval: { approvedMetadata, approvedEvidence, approvedPreparation, approvedRun, currentBuild: s.build } };
 }
 
 // Only the GitHub HTTP/storage surface is doubled. Publication ordering and
@@ -579,6 +682,36 @@ function bootstrapHttp() {
 }
 
 describe("P4-1 production pipeline with existing handler and SQLite host ports", () => {
+  it("changed or missing build configuration is rejected before any rehearsal network or storage operation", async () => {
+    const s = await setup();
+    const selected = { ...s.env, INPUT_FIRMWARE_BUILD_PROFILE: "p34-v2-candidate" };
+    await expect(publishPreparedRelease({ ...s, env: selected, config: releaseConfig(selected) }))
+      .rejects.toThrow(/profile\/options\/compile/);
+    await writeOutput(root, path.join(s.assetsDir, "verification.json"), JSON.stringify({ fixtureOnly: true }));
+    await expect(publishPreparedRelease(s)).rejects.toThrow(/profile\/options\/compile/);
+    expect(s.calls).toEqual([]); expect(s.github.publish).not.toHaveBeenCalled();
+  });
+
+  it("promotion refuses a same-source different configuration and an old unbound preparation", async () => {
+    const s = await setup(); await publishPreparedRelease(s);
+    const { config, envProduction, approval } = await promotionFixture(s);
+    const changed = structuredClone(s.build);
+    changed.buildConfiguration.appCompileDefinitions.push("TEST_DIFFERENT_BUILD=1");
+    changed.buildConfiguration.appCompileDefinitions.sort();
+    expect(() => verifyPromotion(s.metadata, { ...approval, currentBuild: changed, config, env: envProduction }))
+      .toThrow(/configuration\/provenance differs/);
+    const selected = { ...envProduction, INPUT_FIRMWARE_BUILD_PROFILE: "p34-v2-candidate" };
+    expect(() => verifyPromotion(s.metadata, { ...approval, config: releaseConfig(selected), env: selected }))
+      .toThrow(/profile\/options\/compile/);
+    const old = JSON.parse(approval.approvedPreparation.toString()); delete old.build.buildConfiguration;
+    const approvedPreparation = Buffer.from(JSON.stringify(old));
+    const evidence = JSON.parse(approval.approvedEvidence.toString()); evidence.preparationSha256 = digest(approvedPreparation);
+    const approvedEvidence = Buffer.from(JSON.stringify(evidence));
+    expect(() => verifyPromotion(s.metadata, { ...approval, approvedPreparation, approvedEvidence, config,
+      env: { ...envProduction, OTA_APPROVED_REHEARSAL_EVIDENCE_SHA256: digest(approvedEvidence) } }))
+      .toThrow(/profile\/options\/compile/);
+    expect(s.github.publish).not.toHaveBeenCalled();
+  });
   it("uploads and fully reads three assets, then atomically registers ready and replays with no extra rows/audit/channel effects", async () => {
     const s = await setup(); const before = await counts();
     const first = await publishPreparedRelease(s);

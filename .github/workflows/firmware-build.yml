@@ -97,6 +97,14 @@ on:
         description: "固件版本名（如 2.8.0）；正式链留空须源码已有三段版本，非发布检查兼容两段版本"
         required: false
         type: string
+      firmware_build_profile:
+        description: "Protected GCC receiver configuration; candidate is not a production default"
+        required: true
+        type: choice
+        default: baseline
+        options:
+          - baseline
+          - p34-v2-candidate
       release_notes:
         description: "发布说明（app/admin 展示）"
         required: false
@@ -183,7 +191,7 @@ jobs:
           PYTHONPATH="$GITHUB_WORKSPACE/Tools" python3 -B tests/ota-vectors/test_vectors.py
       - name: Check workflow execution graph and configuration gates
         working-directory: .
-        run: node --test tests/ota/test_firmware_workflow.mjs tests/ota/test_firmware_s3.mjs
+        run: node --test tests/ota/test_firmware_workflow.mjs tests/ota/test_firmware_s3.mjs tests/ota/test_firmware_build_profile.mjs
       - name: Execute production byte preparation with isolated fixtures
         id: byte_tests
         working-directory: .
@@ -528,6 +536,7 @@ jobs:
         shell: bash
         env:
           VERSION_NAME: ${{ steps.version.outputs.version_name }}
+          INPUT_FIRMWARE_BUILD_PROFILE: ${{ github.event.inputs.firmware_build_profile || 'baseline' }}
         run: |
           set -euo pipefail
           cleanup_key() {
@@ -541,7 +550,7 @@ jobs:
           trap 'exit 143' TERM
           node .github/scripts/firmware-gcc-keyed-build.mjs --development \
             --build-dir .cache/keyed-development-build --evidence-dir .cache/keyed-development/build \
-            --version "${VERSION_NAME%%-*}"
+            --version "${VERSION_NAME%%-*}" --profile "$INPUT_FIRMWARE_BUILD_PROFILE"
           node .github/scripts/firmware-release.mjs development \
             --app .cache/keyed-development/build/app/X-Track-App-GCC.bin \
             --boot .cache/keyed-development/build/boot/X-Track-Boot.bin \
@@ -777,6 +786,7 @@ jobs:
         shell: bash
         env:
           FIRMWARE_RELEASE_MODE: rehearsal
+          INPUT_FIRMWARE_BUILD_PROFILE: ${{ github.event.inputs.firmware_build_profile }}
           INPUT_PUBLISH: ${{ github.event.inputs.publish }}
           INPUT_REHEARSAL: ${{ github.event.inputs.rehearsal }}
           INPUT_CHECK_BINDINGS: ${{ github.event.inputs.check_bindings }}
@@ -795,13 +805,15 @@ jobs:
           trap 'exit 130' INT
           trap 'exit 143' TERM
           node .github/scripts/firmware-gcc-keyed-build.mjs \
-            --build-dir .cache/release-gcc --evidence-dir .cache/release/keyed-build --version "$RELEASE_VERSION"
+            --build-dir .cache/release-gcc --evidence-dir .cache/release/keyed-build --version "$RELEASE_VERSION" \
+            --profile "$INPUT_FIRMWARE_BUILD_PROFILE"
 
       - name: Run the shared finalize verify upload register pipeline
         id: release_execute
         shell: bash
         env:
           FIRMWARE_RELEASE_MODE: rehearsal
+          INPUT_FIRMWARE_BUILD_PROFILE: ${{ github.event.inputs.firmware_build_profile }}
           INPUT_CHECK_BINDINGS: ${{ github.event.inputs.check_bindings }}
           INPUT_PUBLISH: ${{ github.event.inputs.publish }}
           INPUT_REHEARSAL: ${{ github.event.inputs.rehearsal }}
@@ -929,6 +941,7 @@ jobs:
         shell: bash
         env:
           FIRMWARE_RELEASE_MODE: production
+          INPUT_FIRMWARE_BUILD_PROFILE: ${{ github.event.inputs.firmware_build_profile }}
           INPUT_PUBLISH: ${{ github.event.inputs.publish }}
           INPUT_REHEARSAL: ${{ github.event.inputs.rehearsal }}
           INPUT_CHECK_BINDINGS: ${{ github.event.inputs.check_bindings }}
@@ -947,13 +960,15 @@ jobs:
           trap 'exit 130' INT
           trap 'exit 143' TERM
           node .github/scripts/firmware-gcc-keyed-build.mjs \
-            --build-dir .cache/release-gcc --evidence-dir .cache/release/keyed-build --version "$RELEASE_VERSION"
+            --build-dir .cache/release-gcc --evidence-dir .cache/release/keyed-build --version "$RELEASE_VERSION" \
+            --profile "$INPUT_FIRMWARE_BUILD_PROFILE"
 
       - name: Run the shared finalize verify upload register pipeline
         id: release_execute
         shell: bash
         env:
           FIRMWARE_RELEASE_MODE: production
+          INPUT_FIRMWARE_BUILD_PROFILE: ${{ github.event.inputs.firmware_build_profile }}
           INPUT_CHECK_BINDINGS: ${{ github.event.inputs.check_bindings }}
           INPUT_PUBLISH: ${{ github.event.inputs.publish }}
           INPUT_REHEARSAL: ${{ github.event.inputs.rehearsal }}

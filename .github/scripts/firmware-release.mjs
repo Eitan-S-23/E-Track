@@ -3,11 +3,12 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { args, CliError, failure, outputPath, projectRoot, required, writeOutput } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-cli.mjs";
 import { canonicalJson, versionCodeFor } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-schema.mjs";
-import { captureBuildInputs, digest, metadataBytes, prepareFirmwareRelease, readyProjection } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/prepare-firmware-release.mjs";
+import { captureBuildInputs, digest, metadataBytes, prepareFirmwareRelease, readyProjection, verifyReferenceBuild } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/prepare-firmware-release.mjs";
 import { firmwareGitHub } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-github-release.mjs";
 import { publishPreparedRelease, releaseConfig, verifyPromotion } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-release-pipeline.mjs";
 import { withFirmwareBucket } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/upload-firmware-r2-asset.mjs";
 import { DEVELOPMENT_PACKAGING_KEY, verifyBuildKeyBinding } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-release-key.mjs";
+import { verifyBuildConfiguration } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-build-profile.mjs";
 
 async function main() {
   const [command, ...argv] = process.argv.slice(2);
@@ -50,6 +51,7 @@ async function main() {
     const env = process.env;
     const config = releaseConfig(env);
     verifyBuildKeyBinding(build, env);
+    verifyBuildConfiguration(build, config.buildProfile);
     if (build.commitSha !== env.GITHUB_SHA || build.versionName !== env.RELEASE_VERSION
       || build.versionCode !== versionCodeFor(env.RELEASE_VERSION)) throw new CliError("Build artifact does not belong to this release run");
     const release = { releaseTag: `mcu-e-track-at32f435-v${build.versionName}`, runId: config.canonicalRunId,
@@ -65,10 +67,7 @@ async function main() {
     if (referenceRoot) {
       referencePreparation = await readFile(path.join(referenceRoot, "prepared/verification.json"));
       referenceMetadata = await readFile(path.join(referenceRoot, "prepared/cloudflare-firmware-release-metadata.json"));
-      const previous = JSON.parse(referencePreparation);
-      if (canonicalJson(previous.build) !== canonicalJson(build) || previous.runId !== config.canonicalRunId) {
-        throw new CliError("Rehearsal reference GCC App/Boot/provenance differs from the current build");
-      }
+      verifyReferenceBuild(build, referencePreparation, config.canonicalRunId);
     }
     const github = firmwareGitHub({ repository: env.GITHUB_REPOSITORY, token: env.GITHUB_TOKEN, signal: controller.signal });
     const base = JSON.parse(env.OTA_PREVIOUS_RELEASE_JSON);
@@ -82,6 +81,7 @@ async function main() {
     await writeOutput(root, path.join(inputs, "base-provenance.json"), JSON.stringify(source.evidence, null, 2) + "\n");
     const prepared = await prepareFirmwareRelease({ root, app, boot, build, release, repository: env.GITHUB_REPOSITORY,
       base, baseFile, outputDir, bsdiff: options.bsdiff, python: options.python ?? "python3",
+      buildEvidenceDir: path.dirname(path.resolve(options["build-inputs"])),
       referenceDir: referenceRoot && path.join(referenceRoot, "prepared") });
     if (referenceMetadata && !metadataBytes(readyProjection(JSON.parse(referenceMetadata))).equals(metadataBytes(readyProjection(prepared.metadata)))) {
       throw new CliError("Reproduced metadata differs from the reference attempt");
@@ -91,7 +91,7 @@ async function main() {
       const approvedRun = await github.json(`/actions/runs/${config.canonicalRunId}/attempts/${env.OTA_APPROVED_REHEARSAL_ATTEMPT}`);
       approval = { approvedMetadata: referenceMetadata, approvedPreparation: referencePreparation, approvedRun,
         approvedEvidence: await readFile(path.join(referenceRoot, "prepared/release-evidence.json")) };
-      verifyPromotion(prepared.metadata, { ...approval, config, env });
+      verifyPromotion(prepared.metadata, { ...approval, currentBuild: prepared.summary.build, config, env });
     }
     controller.signal.throwIfAborted();
     const evidence = await withFirmwareBucket({ root, bucketName: config.bucketName, accountId: config.accountId,
