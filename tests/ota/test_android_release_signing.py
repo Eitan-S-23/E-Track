@@ -49,18 +49,32 @@ cd "$CASE_DIR"
         return stdout
 
     def test_apk_verification_accepts_selected_single_signer(self):
-        stdout = self.verify_case("Verifies\nSigner #1 certificate SHA-256 digest: " + PIN)
+        stdout = self.verify_case("Verifies\nNumber of signers: 1\nSigner #1 certificate SHA-256 digest: " + PIN)
         self.assertIn(b"Verified fixed APK signer SHA-256:", stdout)
+
+    def test_apk_verification_accepts_build_tools_37_scheme_labels(self):
+        self.verify_case("Verifies\nNumber of signers: 1\nV2 Signer: certificate SHA-256 digest: " + PIN)
+
+    def test_apk_verification_requires_same_certificate_across_schemes(self):
+        self.verify_case("Verifies\nNumber of signers: 1\nV2 Signer: certificate SHA-256 digest: " + PIN +
+                         "\nV3 Signer: certificate SHA-256 digest: " + "0" * 64, expected_code=1)
+
+    def test_apk_verification_accepts_one_certificate_across_schemes(self):
+        self.verify_case("Verifies\nNumber of signers: 1\nV2 Signer: certificate SHA-256 digest: " + PIN +
+                         "\nV3 Signer: certificate SHA-256 digest: " + PIN)
+
+    def test_apk_verification_rejects_missing_signer_count(self):
+        self.verify_case("Verifies\nV2 Signer: certificate SHA-256 digest: " + PIN, expected_code=1)
 
     def test_apk_verification_retains_failure_diagnostics(self):
         stdout = self.verify_case("DOES NOT VERIFY", code=1, expected_code=1)
         self.assertNotIn(b"Verified fixed APK signer SHA-256:", stdout)
 
     def test_apk_verification_rejects_different_certificate(self):
-        self.verify_case("Verifies\nSigner #1 certificate SHA-256 digest: " + "0" * 64, expected_code=1)
+        self.verify_case("Verifies\nNumber of signers: 1\nSigner #1 certificate SHA-256 digest: " + "0" * 64, expected_code=1)
 
     def test_apk_verification_rejects_extra_signer(self):
-        self.verify_case("Verifies\nSigner #1 certificate SHA-256 digest: " + PIN +
+        self.verify_case("Verifies\nNumber of signers: 2\nSigner #1 certificate SHA-256 digest: " + PIN +
                          "\nSigner #2 certificate SHA-256 digest: " + PIN, expected_code=1)
 
     def run_case(self, settings, expected_code=0):
