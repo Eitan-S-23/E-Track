@@ -139,6 +139,152 @@ void main() {
     expect(tester.widget<TextButton>(button).onPressed, isNotNull);
   });
 
+  group('P35-SMOKE-UI-01 deferred page feedback', () {
+    Future<void> tap(WidgetTester tester, Finder button) async {
+      await tester.ensureVisible(button);
+      await tester.tap(button);
+      await tester.pump();
+    }
+
+    Future<_FakeOtaService> startDownload(WidgetTester tester) async {
+      final fake = _FakeOtaService()
+        ..readResult = deviceInfoOf()
+        ..latest = latestOf()
+        ..downloadGate = Completer<bool>();
+      await pumpPage(tester, fake: fake,
+          connectedDevice: BluetoothDevice.fromId('AA:BB:CC:DD:EE:FF'));
+      await tap(tester, find.widgetWithText(ElevatedButton, '下载固件'));
+      expect(fake.downloadCalls, 1);
+      expect(fake.phase, OtaPhase.downloading);
+      return fake;
+    }
+
+    for (final disposed in [false, true]) {
+      testWidgets('download completes after page disposed=$disposed', (tester) async {
+        final fake = await startDownload(tester);
+        if (disposed) {
+          await tester.pumpWidget(const MaterialApp(home: Scaffold(body: Text('away'))));
+        }
+        fake.downloadGate!.complete(true);
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        expect(fake.downloadedFirmwareFile, isNotNull);
+        expect(fake.phase, OtaPhase.readyToInstall);
+        expect(fake.downloadCalls, 1);
+        expect(fake.cleanupCalls, 0);
+        expect(fake.cancelCalls, 0);
+        if (disposed) {
+          expect(find.byType(SnackBar), findsNothing);
+        } else {
+          expect(find.descendant(of: find.byType(SnackBar),
+              matching: find.textContaining('固件已下载并校验')), findsOneWidget);
+          expect(findButton(tester, '开始 BLE 传输').onPressed, isNotNull);
+        }
+      });
+    }
+
+    testWidgets('covered route does not receive a late download notification', (tester) async {
+      final fake = await startDownload(tester);
+      final context = tester.element(find.byType(OtaUpgradePage));
+      unawaited(Navigator.of(context).push(MaterialPageRoute<void>(
+          builder: (_) => const Scaffold(body: Text('other route')))));
+      await tester.pump(const Duration(seconds: 1));
+      fake.downloadGate!.complete(true);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byType(SnackBar), findsNothing);
+      expect(fake.hasFile, isTrue);
+      Navigator.of(tester.element(find.text('other route'))).pop();
+      await tester.pumpAndSettle();
+      expect(findButton(tester, '开始 BLE 传输').onPressed, isNotNull);
+      expect(fake.downloadCalls, 1);
+    });
+
+    for (final cancelled in [false, true]) {
+      testWidgets('download negative result after cancelled=$cancelled', (tester) async {
+        final fake = await startDownload(tester);
+        if (cancelled) {
+          await tap(tester, find.widgetWithText(OutlinedButton, '取消下载'));
+          await tap(tester, find.widgetWithText(ElevatedButton, '确认取消'));
+        }
+        fake.downloadGate!.complete(false);
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        expect(fake.hasFile, isFalse);
+        expect(fake.phase, cancelled ? OtaPhase.cancelled : OtaPhase.failed);
+        expect(find.byType(SnackBar), findsNothing);
+        expect(fake.cancelCalls, cancelled ? 1 : 0);
+        expect(fake.downloadCalls, 1);
+      });
+    }
+
+    for (final disposed in [false, true]) {
+      testWidgets('check failure after page disposed=$disposed', (tester) async {
+        final fake = _FakeOtaService()
+          ..readResult = deviceInfoOf()
+          ..checkGate = Completer<FirmwareLatestInfo?>();
+        await pumpPage(tester, fake: fake,
+            connectedDevice: BluetoothDevice.fromId('AA:BB:CC:DD:EE:FF'));
+        await tap(tester, find.widgetWithText(ElevatedButton, '检查更新'));
+        expect(fake.checkCalls, 1);
+        if (disposed) await tester.pumpWidget(const MaterialApp(home: Scaffold()));
+        fake.checkGate!.completeError(StateError('deferred check failure'));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        if (disposed) {
+          expect(find.byType(SnackBar), findsNothing);
+        } else {
+          expect(find.descendant(of: find.byType(SnackBar),
+              matching: find.textContaining('检查更新失败')), findsOneWidget);
+          expect(findButton(tester, '检查更新').onPressed, isNotNull);
+        }
+      });
+
+      testWidgets('cleanup failure after page disposed=$disposed', (tester) async {
+        final fake = _FakeOtaService()
+          ..readResult = deviceInfoOf()
+          ..latest = latestOf()
+          ..hasFile = true
+          ..cleanupGate = Completer<bool>();
+        await pumpPage(tester, fake: fake,
+            connectedDevice: BluetoothDevice.fromId('AA:BB:CC:DD:EE:FF'));
+        await tap(tester, find.widgetWithText(OutlinedButton, '忽略'));
+        expect(fake.cleanupCalls, 1);
+        if (disposed) await tester.pumpWidget(const MaterialApp(home: Scaffold()));
+        fake.cleanupGate!.complete(false);
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        expect(fake.hasFile, isTrue);
+        if (disposed) {
+          expect(find.byType(SnackBar), findsNothing);
+        } else {
+          expect(find.descendant(of: find.byType(SnackBar),
+              matching: find.textContaining('固件包清理失败')), findsOneWidget);
+        }
+      });
+
+      testWidgets('export failure after page disposed=$disposed', (tester) async {
+        final diagnostics = _DeferredDiagnostics();
+        await pumpPage(tester, diagnostics: diagnostics);
+        await tap(tester, find.byKey(const ValueKey('ota-export-observations')));
+        expect(diagnostics.exports, 1);
+        if (disposed) await tester.pumpWidget(const MaterialApp(home: Scaffold()));
+        diagnostics.gate.completeError(StateError('deferred export failure'));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        expect(diagnostics.status.value.lastExport, isNull);
+        if (disposed) {
+          expect(find.byType(SnackBar), findsNothing);
+        } else {
+          expect(find.descendant(of: find.byType(SnackBar),
+              matching: find.textContaining('导出未完成')), findsOneWidget);
+          expect(tester.widget<TextButton>(find.byKey(
+              const ValueKey('ota-export-observations'))).onPressed, isNotNull);
+        }
+      });
+    }
+  });
+
   group('连接与身份卡', () {
     testWidgets('未连接设备：显示未连接，检查更新按钮禁用', (tester) async {
       await pumpPage(tester);
@@ -779,6 +925,11 @@ class _FakeOtaService extends OtaService {
   int cleanupCalls = 0;
   /// cleanupFirmware 结果（false 模拟忙碌拒绝或删除失败）。
   bool cleanupResult = true;
+  Completer<bool>? cleanupGate;
+  Completer<bool>? downloadGate;
+  Completer<FirmwareLatestInfo?>? checkGate;
+  int downloadCalls = 0;
+  int checkCalls = 0;
 
   @override
   Rx<OtaPhase> get phaseRx => phase$;
@@ -838,7 +989,7 @@ class _FakeOtaService extends OtaService {
   @override
   Future<bool> cleanupFirmware() async {
     cleanupCalls++;
-    if (!cleanupResult) return false;
+    if (!(await cleanupGate?.future ?? cleanupResult)) return false;
     // 模拟真实状态转换（RC3-12①：readyToInstall→idle + 复位文件）。
     hasFile = false;
     if (phase$.value == OtaPhase.readyToInstall) {
@@ -846,5 +997,38 @@ class _FakeOtaService extends OtaService {
       status$.value = '固件包已清理';
     }
     return true;
+  }
+
+  @override
+  Future<FirmwareLatestInfo?> checkFirmwareUpdate({String? channel}) async {
+    checkCalls++;
+    return await checkGate?.future;
+  }
+
+  @override
+  Future<bool> downloadFirmware() async {
+    downloadCalls++;
+    isUpgrading$.value = true;
+    phase$.value = OtaPhase.downloading;
+    final success = await downloadGate!.future;
+    if (phase == OtaPhase.cancelled) return false;
+    hasFile = success;
+    phase$.value = success ? OtaPhase.readyToInstall : OtaPhase.failed;
+    isUpgrading$.value = false;
+    return success;
+  }
+}
+
+class _DeferredDiagnostics extends OtaDiagnostics {
+  _DeferredDiagnostics() {
+    status.value = const OtaDiagnosticStatus(enabled: true, ready: true,
+        records: 3, producerLines: 2);
+  }
+  final gate = Completer<File>();
+  int exports = 0;
+  @override
+  Future<File> exportSnapshot() {
+    exports++;
+    return gate.future;
   }
 }
