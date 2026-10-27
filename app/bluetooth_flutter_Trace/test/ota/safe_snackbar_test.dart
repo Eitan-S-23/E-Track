@@ -102,7 +102,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('missing Scaffold is the only handled FlutterError', (tester) async {
+  testWidgets('missing Scaffold is guarded and unrelated errors propagate', (tester) async {
     late BuildContext context;
     await tester.pumpWidget(MaterialApp(home: Builder(builder: (value) {
       context = value;
@@ -113,10 +113,10 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.byType(SnackBar), findsNothing);
     await tester.pumpWidget(MaterialApp(home: _BrokenMessenger(
-        child: Builder(builder: (value) {
+        child: Scaffold(body: Builder(builder: (value) {
           context = value;
           return const Text('broken');
-        }))));
+        })))));
     safeSnackbar('page', 'ready', context: context);
     await tester.pump();
     expect(tester.takeException(), isA<FlutterError>().having(

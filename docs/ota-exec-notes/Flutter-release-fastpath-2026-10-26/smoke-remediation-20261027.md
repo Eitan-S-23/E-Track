@@ -30,8 +30,11 @@ context. The existing helper rechecks that exact context on its scheduled frame,
 rejects covered/transitioning/background page delivery and uses ScaffoldMessenger
 instead of a GetX overlay. Missing Navigator/Messenger returns without redirecting
 to another page. Service callers retain their existing root-context fallback.
-Only the specific missing-descendant-Scaffold FlutterError is handled; unrelated
-FlutterError is rethrown. No new blanket exception handler was introduced.
+Before display the helper checks for a mounted descendant Scaffold owned by the
+same Messenger through the public widget tree. No exception handler is needed;
+unrelated errors propagate normally. This avoids relying on debug assertions or
+private registration fields. The first candidate's exception-based guard failed
+the missing-Scaffold regression and was superseded as recorded below.
 Feedback uses the existing helper's Material SnackBar presentation, not GetX's
 top overlay/icon. Live foreground success/error feedback remains required.
 
@@ -120,3 +123,46 @@ removed its own partial checkout, then a scoped core.longpaths=true checkout
 reused the retained branch successfully. Both creation receipts stay in the
 parent firmware worktree .cache/records/smoke-worktree-01/02.*. No frozen
 evidence was edited and no other worktree/index was switched or staged.
+
+## First Fixed Batch And Consolidated Feedback
+
+Source 491de8b3745e6af443674c57240c51beda413940, push run 40510986837/1:
+https://github.com/Eitan-S-23/E-Track/actions/runs/40510986837.
+Ubuntu 802 passed / 16 skipped / 3 failed; Windows 783 passed / 35 skipped /
+3 failed. Analysis on both hosts found one missing-braces lint. Those original
+logs, uploads and failed watch receipt remain unchanged under fixed-* and
+.cache/ci-40510986837/. This batch is not claimed green.
+
+All original page download/check/cleanup/export failure and cancellation
+regressions passed. The three remaining failures are new dependency/share checks:
+missing Scaffold produced AssertionError (tests.log:11872 on Ubuntu), not the
+FlutterError the old helper anticipated. The final helper therefore checks the
+actual Messenger-owned descendant Scaffold before display instead of expanding
+catch to arbitrary errors. The unrelated-error test now installs a real
+Scaffold before injecting its unrelated failure; its assertion is unchanged.
+Missing-braces lint is corrected, not suppressed.
+
+The two unavailable-share cases had zero intercepted calls because the initial
+test double used shareFiles. Read-only source archives for share_plus 12.0.2
+and share_plus_platform_interface 6.1.0 match the existing lockfile SHA-256s.
+The real interface calls method share; the test handler now uses that exact
+method, also checks the original file path and retains deferred completion,
+foreground feedback, disposal and original-file assertions. No sharing product
+logic, dependency or lockfile was changed or installed locally.
+
+P35-SMOKE-LOG-01 passed on both hosts in this otherwise-red batch. Actual summary
+is 1200 UTF-8 bytes; prefix has five records/two producer lines. Ubuntu snapshot
+2633 bytes / SHA-256 185d564917b1acebeed4bf3c48a5fd3c36bfe569801b9e9d82f8fac7f4ccbb6b;
+Windows snapshot 2635 bytes / SHA-256 35612c79ca60c299197afbde5eb35493c8d4d59b9fe98a5b4b0d46abafeec20b.
+Exact unwrapped bytes have identical SHA-256 on both hosts:
+bb9d11524e9a4e1c258cd5cc26eec1f9b45309b66b8f8eec3706f7b553c79222.
+All six damaged variants and missing input were rejected; disabled behavior and
+close immutability passed. Original lines are Ubuntu tests.log:11677 and Windows
+tests.log:786. The existing host parser regression additionally
+executed locally: python -I -S -B -X utf8 tests/ota/test_p3_4_observation_capture.py,
+32 passed in parser-tests-01.*. This is file-route self-testing, not formal
+acceptance, native Android execution or recovery of the clipped smoke records.
+
+A patch invocation had invalid hunk syntax before editing; the corrected patch
+keeps all original assertions. The consolidated changed-input checks are pending
+their next exact source/run; unchanged red runs are not rerun or erased.

@@ -297,8 +297,9 @@ void main() {
         var shares = 0;
         const channel = MethodChannel('dev.fluttercommunity.plus/share');
         tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (call) async {
-          if (call.method == 'shareFiles') {
+          if (call.method == 'share') {
             shares++;
+            expect((call.arguments as Map)['paths'], [file.path]);
             return gate.future;
           }
           return null;
