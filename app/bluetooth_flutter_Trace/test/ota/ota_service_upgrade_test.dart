@@ -17,6 +17,7 @@ import 'package:ble_monitor/ota/ota_device_info.dart';
 import 'package:ble_monitor/ota/ota_diagnostics.dart';
 import 'package:ble_monitor/ota/ota_download.dart';
 import 'package:ble_monitor/ota/ota_experiment_config.dart';
+import 'package:ble_monitor/ota/ota_firmware_latest.dart';
 import 'package:ble_monitor/ota/ota_phy.dart';
 import 'package:ble_monitor/ota/ota_radio_lease.dart';
 import 'package:ble_monitor/ota/ota_link_stats.dart';
@@ -457,6 +458,222 @@ void main() {
         service.didChangeAppLifecycleState(AppLifecycleState.resumed);
         if (service.isUpgrading) await service.cancelUpgrade(keepPackage: true);
         await operation;
+      }
+    });
+  }
+
+  for (final outcome in ['no-update', 'rejected']) {
+    for (final sentinel in ['null', 'changed-map']) {
+      for (final resumeEarly in [false, true]) {
+        test('lifecycle matrix latest $outcome sentinel=$sentinel early=$resumeEarly', () async {
+          final adapter = _LifecycleLatestAdapter(
+              outcome == 'no-update'
+                  ? '{"schemaVersion":2,"requestId":"none",'
+                      '"updateAvailable":false,"errorCode":"NO_UPDATE"}'
+                  : '{"schemaVersion":2,"requestId":"reject",'
+                      '"errorCode":"INVALID_PARAMETER","message":"rejected"}',
+              status: outcome == 'rejected' ? 400 : 200);
+          final ble = _UpgradeFakeBle(preRebootPayload: preRebootPayload,
+              postRebootPayload: postRebootPayload);
+          final notifications = <String>[];
+          final service = makeService(ble: ble, firmwareDir: tempFirmwareDir(),
+              latestAdapter: adapter, notifyLog: notifications);
+          Get.put<AppUpdateService>(_FakeAppUpdateService());
+          expect(await service.readDeviceInfo('AA:BB'), isNotNull);
+          final calls = (ble.discoverCalls, ble.getInfoCalls, ble.platformWriteCalls);
+          final operation = service.checkFirmwareUpdate();
+          try {
+            await adapter.entered.future;
+            ble.discoverReplies.add(sentinel == 'null' ? null : {
+              'serviceId': 'fff0', 'writeCharId': 'fff2',
+              'notifyCharId': 'fff1', 'writeMode': 'without',
+            });
+            service.didChangeAppLifecycleState(AppLifecycleState.inactive);
+            service.didChangeAppLifecycleState(AppLifecycleState.paused);
+            if (resumeEarly) {
+              service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+              service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+              await service.resumeFromBackground();
+              expect(service.isUpgrading, isTrue);
+              expect(adapter.release.isCompleted, isFalse);
+              expect((ble.discoverCalls, ble.getInfoCalls, ble.platformWriteCalls), calls);
+              expect(ble.abortCalls, 0);
+            }
+            adapter.release.complete();
+            expect(await operation, isNull);
+            expect(service.isUpgrading, isFalse);
+            expect(service.phase, outcome == 'rejected' ? OtaPhase.failed : OtaPhase.idle);
+            expect(service.terminalState?.code, outcome == 'rejected' ? 'INVALID_PARAMETER' : null);
+            final terminal = service.terminalState;
+            final status = service.upgradeStatus;
+            final published = List<String>.of(notifications);
+            service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+            service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+            await service.resumeFromBackground();
+            await Future<void>.delayed(const Duration(milliseconds: 30));
+            expect((ble.discoverCalls, ble.getInfoCalls, ble.platformWriteCalls), calls);
+            expect(ble.discoverReplies, hasLength(1), reason: 'the sentinel must remain unconsumed');
+            expect(ble.abortCalls, 0);
+            expect(ble.beginCalls, 0);
+            expect(ble.endCalls, 0);
+            expect(adapter.calls, 1);
+            expect(service.upgradeStatus, status);
+            expect(service.terminalState, same(terminal));
+            expect(notifications, published);
+            expect(notifications.where((line) => line.contains('已终止')), isEmpty);
+          } finally {
+            if (!adapter.release.isCompleted) adapter.release.complete();
+            service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+            await operation;
+          }
+        });
+      }
+    }
+  }
+
+  for (final sentinel in ['null', 'changed-map']) {
+    for (final settleSuccessor in [false, true]) {
+      test('lifecycle matrix retained transport successor sentinel=$sentinel settled=$settleSuccessor', () async {
+        final successorAdapter = _LifecycleLatestAdapter(latestBody(assetBytes()));
+        final queryAdapter = _LifecycleLatestAdapter(latestBody(assetBytes()), next: successorAdapter);
+        final initialAdapter = _LifecycleLatestAdapter(latestBody(assetBytes()), next: queryAdapter)
+          ..release.complete();
+        final ble = _UpgradeFakeBle(preRebootPayload: preRebootPayload,
+            postRebootPayload: postRebootPayload);
+        final notifications = <String>[];
+        final service = makeService(ble: ble, firmwareDir: tempFirmwareDir(),
+            latestAdapter: initialAdapter, notifyLog: notifications);
+        Get.put<AppUpdateService>(_FakeAppUpdateService());
+        expect(await service.readDeviceInfo('AA:BB'), isNotNull);
+        expect(await service.checkFirmwareUpdate(), isNotNull);
+        expect(await service.downloadFirmware(), isTrue);
+        final file = service.downloadedFirmwareFile!;
+        final calls = (ble.discoverCalls, ble.getInfoCalls, ble.platformWriteCalls, ble.subscribeCalls);
+        final query = service.checkFirmwareUpdate();
+        final recoveryGate = Completer<void>();
+        Future<void>? recovery;
+        Future<FirmwareLatestInfo?>? successor;
+        try {
+          await queryAdapter.entered.future;
+          service.didChangeAppLifecycleState(AppLifecycleState.inactive);
+          service.didChangeAppLifecycleState(AppLifecycleState.paused);
+          queryAdapter.release.complete();
+          expect(await query, isNotNull);
+          expect(service.isUpgrading, isFalse);
+          // A buggy idle recovery waits here while the next HTTP owner takes over.
+          ble.rediscoverGate = recoveryGate;
+          ble.discoverReplies.add(sentinel == 'null' ? null : {
+            'serviceId': 'fff0', 'writeCharId': 'fff2',
+            'notifyCharId': 'fff1', 'writeMode': 'without',
+          });
+          service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+          recovery = service.resumeFromBackground();
+          successor = service.checkFirmwareUpdate();
+          await successorAdapter.entered.future;
+          if (settleSuccessor) {
+            successorAdapter.release.complete();
+            expect(await successor, isNotNull);
+          } else {
+            expect(service.isUpgrading, isTrue);
+          }
+          final phase = service.phase;
+          final terminal = service.terminalState;
+          final status = service.upgradeStatus;
+          final published = List<String>.of(notifications);
+          recoveryGate.complete();
+          await recovery;
+          service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+          await service.resumeFromBackground();
+          await Future<void>.delayed(const Duration(milliseconds: 30));
+          expect(service.phase, phase);
+          expect(service.terminalState, same(terminal));
+          expect(service.upgradeStatus, status);
+          expect(notifications, published);
+          expect((ble.discoverCalls, ble.getInfoCalls, ble.platformWriteCalls, ble.subscribeCalls), calls,
+              reason: 'both HTTP owners retain the same bound transport/subscription');
+          expect(ble.subscribeCalls, 1);
+          expect(ble.discoverReplies, hasLength(1));
+          expect(ble.abortCalls, 0);
+          expect(ble.beginCalls, 0);
+          expect(service.downloadedFirmwareFile!.path, file.path);
+          expect(await file.readAsBytes(), assetBytes());
+          if (!settleSuccessor) {
+            successorAdapter.release.complete();
+            expect(await successor, isNotNull);
+          }
+          expect(service.phase, OtaPhase.readyToInstall);
+          expect(service.terminalState, isNull);
+          expect(initialAdapter.calls, 3);
+        } finally {
+          if (!queryAdapter.release.isCompleted) queryAdapter.release.complete();
+          if (!successorAdapter.release.isCompleted) successorAdapter.release.complete();
+          if (!recoveryGate.isCompleted) recoveryGate.complete();
+          service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+          await query;
+          await successor;
+          await recovery;
+        }
+      });
+    }
+  }
+
+  for (final holdInfo in [false, true]) {
+    test('lifecycle matrix late transfer ${holdInfo ? 'INFO' : 'discovery'} cannot overwrite successor', () async {
+      final notifications = <String>[];
+      final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: notifications,
+          backgroundClient: _BackgroundOwnerHarness()..allow = false);
+      final service = Get.find<OtaService>();
+      ble.dataGate = Completer<void>();
+      final transfer = service.startOtaUpgrade('AA:BB');
+      final recoveryGate = Completer<void>();
+      Future<void>? recovery;
+      try {
+        await ble.dataGated.future;
+        service.pauseForBackground();
+        final infos = ble.getInfoCalls;
+        if (holdInfo) {
+          ble.holdInfo = true;
+        } else {
+          ble.rediscoverGate = recoveryGate;
+        }
+        recovery = service.resumeFromBackground();
+        if (holdInfo) {
+          await waitUntil(() => ble.getInfoCalls > infos);
+        } else {
+          await ble.rediscoverEntered.future;
+        }
+        await service.cancelUpgrade(keepPackage: true);
+        expect(await transfer, isFalse);
+        // Only the captured old discovery/INFO remains delayed, not the new bind.
+        ble.rediscoverGate = null;
+        ble.holdInfo = false;
+        expect(await service.readDeviceInfo('AA:BB'), isNotNull);
+        expect(await service.checkFirmwareUpdate(), isNotNull);
+        final file = service.downloadedFirmwareFile!;
+        final calls = (ble.discoverCalls, ble.getInfoCalls, ble.platformWriteCalls, ble.abortCalls);
+        final status = service.upgradeStatus;
+        final published = List<String>.of(notifications);
+        ble.releaseHeldInfo();
+        recoveryGate.complete();
+        await recovery;
+        await Future<void>.delayed(const Duration(milliseconds: 30));
+        expect(service.phase, OtaPhase.readyToInstall);
+        expect(service.terminalState, isNull);
+        expect(service.upgradeStatus, status);
+        expect(notifications, published);
+        expect((ble.discoverCalls, ble.getInfoCalls, ble.platformWriteCalls, ble.abortCalls), calls);
+        expect(service.downloadedFirmwareFile!.path, file.path);
+        expect(await file.readAsBytes(), assetBytes());
+        expect(ble.beginCalls, 1);
+        expect(ble.endCalls, 0);
+      } finally {
+        ble.rediscoverGate = null;
+        ble.releaseHeldInfo();
+        if (!recoveryGate.isCompleted) recoveryGate.complete();
+        ble.releaseDataGate();
+        if (service.isUpgrading) await service.cancelUpgrade(keepPackage: true);
+        await transfer;
+        await recovery;
       }
     });
   }
@@ -3883,9 +4100,10 @@ void main() {
 /// latest 固定 200 JSON mock（本文件所有用例的 HTTP 侧行为恒 ok，
 /// 注入矩阵在 ota_service_session_test.dart 覆盖）。
 class _LifecycleLatestAdapter implements HttpClientAdapter {
-  _LifecycleLatestAdapter(this.body, {this.status = 200});
+  _LifecycleLatestAdapter(this.body, {this.status = 200, this.next});
   final String body;
   final int status;
+  final _LifecycleLatestAdapter? next;
   final entered = Completer<void>();
   final release = Completer<void>();
   int calls = 0;
@@ -3894,6 +4112,9 @@ class _LifecycleLatestAdapter implements HttpClientAdapter {
   Future<ResponseBody> fetch(RequestOptions options,
       Stream<Uint8List>? requestStream, Future<void>? cancelFuture) async {
     calls++;
+    if (calls > 1 && next != null) {
+      return next!.fetch(options, requestStream, cancelFuture);
+    }
     entered.complete();
     await release.future;
     return ResponseBody.fromString(body, status,
@@ -4512,6 +4733,7 @@ class _UpgradeFakeBle extends BluetoothService {
   int linkGeneration = 0;
   Object? gattBindingToken;
   int platformWriteCalls = 0;
+  int subscribeCalls = 0;
 
   /// findExact 调用观测计数：断言二级复核是否真的执行了重新发现
   /// （一级复核失败时不得触发），与 getInfoCalls 配对使用。
@@ -4700,6 +4922,7 @@ class _UpgradeFakeBle extends BluetoothService {
   }) async {
     // P3-4：对齐外壳的 stats 上报语义（外壳在订阅成功后记
     // recordSubscribe）；fake 恒返回非 null 流，ok 恒 true。
+    subscribeCalls++;
     stats?.recordSubscribe(durationUs: 0, ok: true);
     return _notifyController.stream;
   }

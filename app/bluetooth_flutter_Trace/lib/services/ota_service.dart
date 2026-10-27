@@ -174,8 +174,6 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   bool _appBackgrounded = false, _foregroundPaused = false, _closed = false;
   Completer<void>? _foregroundGate;
   int _recoveryEpoch = 0;
-  _OtaOperation? _operation;
-  bool _downloadStoppedForBackground = false;
   String? _taskDeviceAddress;
   String? _lastSnapshotPhase;
   final _publishedTaskSnapshot = Rxn<OtaTaskSnapshot>();
@@ -319,17 +317,11 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   }
 
   void _safeBackgroundFallback() {
-    if (!isUpgrading || _operation == null || _operation == _OtaOperation.query) return;
+    if (!isUpgrading) return;
     _foregroundPaused = true;
-    if (_operation == _OtaOperation.transfer) {
-      _transport?.pauseForBackground();
-    } else if (phase == OtaPhase.downloading || phase == OtaPhase.verifyingDownload) {
-      final token = _activeDownloadToken;
-      if (token != null && !token.isCancelled) {
-        // Cancellation can settle after the resumed event clears the UI pause.
-        _downloadStoppedForBackground = true;
-        token.cancel('background execution unavailable');
-      }
+    _transport?.pauseForBackground();
+    if (phase == OtaPhase.downloading || phase == OtaPhase.verifyingDownload) {
+      _activeDownloadToken?.cancel('background execution unavailable');
     }
     _publishSnapshot();
   }
@@ -926,7 +918,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         }
       }
       return downloaded ?? false;
-    }, operation: _OtaOperation.download) ?? false;
+    }) ?? false;
   }
 
   bool _needsFreshManifest = false;
@@ -1037,7 +1029,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       return true;
     } on OtaDownloadException catch (e) {
       if (e.code == 'CANCELLED') {
-        if (_downloadStoppedForBackground && generation == _cancelGeneration) {
+        if (_foregroundPaused && generation == _cancelGeneration) {
           _phase.value = OtaPhase.failed;
           _upgradeStatus.value = '后台执行不可用，下载已安全停止；回前台后可重试';
         }
@@ -1120,7 +1112,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       return null;
     } catch (error) {
       if (error is DioException && CancelToken.isCancel(error)) {
-        if (_downloadStoppedForBackground && generation == _cancelGeneration) {
+        if (_foregroundPaused && generation == _cancelGeneration) {
           _phase.value = OtaPhase.failed;
           _upgradeStatus.value = '后台执行不可用，下载已安全停止；回前台后可重试';
         }
@@ -1697,7 +1689,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           await diagnostics.finishUpgrade(completed: diagnosticCompleted);
         }
       }
-    }, operation: _OtaOperation.transfer) ?? false;
+    }) ?? false;
   }
 
   /// 消费一次 failClosed 已决终止（RC3-08/12②）。代次未变但在途写在
@@ -1866,8 +1858,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   /// MCU 可能回 ACK_ABORT（协议行为）；回前台后传输失败可整体重试
   /// （BEGIN 幂等 + durable 续传）。
   void pauseForBackground() {
-    if (backgroundAcquired || !isUpgrading || _operation != _OtaOperation.transfer) return;
-    _foregroundPaused = true;
+    if (backgroundAcquired) return;
     _transport?.pauseForBackground();
   }
 
@@ -1895,14 +1886,6 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   /// owner 的进度/终态。
   Future<void> resumeFromBackground() async {
     if (backgroundAcquired || _appBackgrounded || _closed) return;
-    if (!isUpgrading || _operation != _OtaOperation.transfer ||
-        phase != OtaPhase.transferring) {
-      _foregroundPaused = false;
-      _publishSnapshot();
-      return;
-    }
-    if (!_foregroundPaused) return;
-    final owner = _ownerEpoch;
     final recovery = ++_recoveryEpoch;
     final transport = _transport;
     if (transport == null) {
@@ -1925,9 +1908,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     final boundLink = _boundLinkGeneration;
     bool stale() =>
         generation != _cancelGeneration || !identical(_transport, transport) ||
-        owner != _ownerEpoch || !isUpgrading || _operation != _OtaOperation.transfer ||
-        phase != OtaPhase.transferring || recovery != _recoveryEpoch ||
-        _appBackgrounded || _closed;
+        recovery != _recoveryEpoch || _appBackgrounded || _closed;
 
     Future<void> failClosed(String code, String message,
         {bool retryableLater = false}) async {
@@ -2136,8 +2117,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   ///   `_ownerDone` 误清；取消路径由此保证旧 owner 退出后
   ///   [cancelUpgrade] 才发布 cancelled 状态，避免晚到的旧状态
   ///   覆盖取消终态。
-  Future<T?> _runExclusive<T>(Future<T?> Function(int generation) body,
-      {_OtaOperation operation = _OtaOperation.query}) async {
+  Future<T?> _runExclusive<T>(Future<T?> Function(int generation) body) async {
     if (_isUpgrading.value) {
       _notify('提示', '操作进行中，请先取消或等待完成');
       return null;
@@ -2148,10 +2128,6 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     _ownerEpoch++; // 登记即前进（RC3-04⑤）：取消窗口用它识别后来者
     final epoch = _ownerEpoch;
     _ownerDone = done.future;
-    _operation = operation;
-    _foregroundPaused = false;
-    _downloadStoppedForBackground = false;
-    ++_recoveryEpoch;
     void Function()? releaseReconnect;
     try {
       // GetX listeners run inline: publish only after the new owner is complete.
@@ -2165,11 +2141,6 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       if (generation != _cancelGeneration) return null;
       return await body(generation);
     } finally {
-      if (identical(_ownerDone, done.future)) {
-        _operation = null;
-        _foregroundPaused = false;
-        ++_recoveryEpoch;
-      }
       final task = _taskKey;
       try {
         if (task != null && task.generation == epoch) await _finishBackgroundTask(task);
@@ -2940,8 +2911,6 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     return error.toString();
   }
 }
-
-enum _OtaOperation { query, download, transfer }
 
 /// 重启复核结果分类（RC3-08②）。
 enum _RebootKind {
