@@ -330,6 +330,137 @@ void main() {
     }
   }
 
+  test('lifecycle query INFO completion cannot schedule a transport recovery', () async {
+    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: []);
+    final service = Get.find<OtaService>();
+    ble.holdInfo = true;
+    final infos = ble.getInfoCalls;
+    final operation = service.readDeviceInfo('AA:BB');
+    try {
+      await waitUntil(() => ble.getInfoCalls > infos);
+      service.didChangeAppLifecycleState(AppLifecycleState.paused);
+      ble.releaseHeldInfo();
+      expect(await operation, isNotNull);
+      final calls = (ble.discoverCalls, ble.getInfoCalls, ble.platformWriteCalls);
+      final status = service.upgradeStatus;
+      service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      await service.resumeFromBackground();
+      expect((ble.discoverCalls, ble.getInfoCalls, ble.platformWriteCalls), calls);
+      expect(service.upgradeStatus, status);
+      expect(service.terminalState, isNull);
+      expect(service.taskSnapshot!.phase, 'ready');
+      expect(service.downloadedFirmwareFile!.existsSync(), isTrue);
+    } finally {
+      ble.releaseHeldInfo();
+      service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      await operation;
+    }
+  });
+
+  for (final outcome in ['available', 'no-update', 'invalid', 'rejected']) {
+    test('lifecycle latest $outcome completion preserves the HTTP result', () async {
+      final reply = switch (outcome) {
+        'available' => latestBody(assetBytes()),
+        'no-update' => '{"schemaVersion":2,"requestId":"none",'
+            '"updateAvailable":false,"errorCode":"NO_UPDATE"}',
+        'rejected' => '{"schemaVersion":2,"requestId":"reject",'
+            '"errorCode":"INVALID_PARAMETER","message":"rejected"}',
+        _ => '{}',
+      };
+      final adapter = _LifecycleLatestAdapter(reply,
+          status: outcome == 'rejected' ? 400 : 200);
+      final ble = _UpgradeFakeBle(preRebootPayload: preRebootPayload,
+          postRebootPayload: postRebootPayload);
+      final service = makeService(ble: ble, firmwareDir: tempFirmwareDir(),
+          latestAdapter: adapter);
+      Get.put<AppUpdateService>(_FakeAppUpdateService());
+      expect(await service.readDeviceInfo('AA:BB'), isNotNull);
+      final operation = service.checkFirmwareUpdate();
+      try {
+        await adapter.entered.future;
+        service.didChangeAppLifecycleState(AppLifecycleState.paused);
+        adapter.release.complete();
+        final latest = await operation;
+        expect(latest != null, outcome == 'available');
+        expect(service.phase, outcome == 'invalid' || outcome == 'rejected'
+            ? OtaPhase.failed : OtaPhase.idle);
+        expect(service.terminalState?.code, switch (outcome) {
+          'invalid' => 'LATEST_SCHEMA_INVALID',
+          'rejected' => 'INVALID_PARAMETER',
+          _ => null,
+        });
+        final terminal = service.terminalState;
+        final status = service.upgradeStatus;
+        final calls = (ble.discoverCalls, ble.getInfoCalls, ble.platformWriteCalls);
+        service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+        await service.resumeFromBackground();
+        expect((ble.discoverCalls, ble.getInfoCalls, ble.platformWriteCalls), calls);
+        expect(service.upgradeStatus, status);
+        expect(service.terminalState, same(terminal));
+        expect(adapter.calls, 1);
+        expect(ble.beginCalls, 0);
+      } finally {
+        if (!adapter.release.isCompleted) adapter.release.complete();
+        service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+        await operation;
+      }
+    });
+  }
+
+  test('lifecycle idle resume cannot recheck a retained query transport', () async {
+    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: []);
+    final service = Get.find<OtaService>();
+    final calls = (ble.discoverCalls, ble.getInfoCalls, ble.platformWriteCalls);
+    await service.resumeFromBackground();
+    expect((ble.discoverCalls, ble.getInfoCalls, ble.platformWriteCalls), calls);
+    expect(service.phase, OtaPhase.readyToInstall);
+    expect(ble.beginCalls, 0);
+  });
+
+  for (final resumeEarly in [false, true]) {
+    test('lifecycle stopped download has no BLE recovery; early=$resumeEarly', () async {
+      final adapter = _LifecycleDownloadAdapter(assetBytes());
+      final ble = _UpgradeFakeBle(preRebootPayload: preRebootPayload,
+          postRebootPayload: postRebootPayload);
+      final service = makeService(ble: ble, firmwareDir: tempFirmwareDir(),
+          downloadAdapter: adapter,
+          backgroundClient: _BackgroundOwnerHarness()..allow = false);
+      Get.put<AppUpdateService>(_FakeAppUpdateService());
+      expect(await service.readDeviceInfo('AA:BB'), isNotNull);
+      expect(await service.checkFirmwareUpdate(), isNotNull);
+      final calls = (ble.discoverCalls, ble.getInfoCalls, ble.platformWriteCalls);
+      final operation = service.downloadFirmware();
+      try {
+        await adapter.entered.future;
+        service.didChangeAppLifecycleState(AppLifecycleState.paused);
+        if (resumeEarly) {
+          service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+          await service.resumeFromBackground();
+        }
+        expect(await operation, isFalse);
+        expect(service.phase, OtaPhase.failed);
+        expect(service.upgradeStatus, contains('下载已安全停止'));
+        expect(service.terminalState, isNull);
+        expect(service.taskSnapshot!.phase, 'failed');
+        service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+        await service.resumeFromBackground();
+        expect((ble.discoverCalls, ble.getInfoCalls, ble.platformWriteCalls), calls);
+        expect(service.downloadedFirmwareFile, isNull);
+        expect(ble.beginCalls, 0);
+        adapter.allow = true;
+        expect(await service.downloadFirmware(), isTrue);
+        expect(adapter.calls, 2);
+        expect(service.phase, OtaPhase.readyToInstall);
+        expect(service.taskSnapshot!.phase, 'ready');
+        expect(await service.downloadedFirmwareFile!.readAsBytes(), assetBytes());
+      } finally {
+        service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+        if (service.isUpgrading) await service.cancelUpgrade(keepPackage: true);
+        await operation;
+      }
+    });
+  }
+
   test('P38-R04 a query busy event cannot expose the completed OTA owner', () async {
     final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
         backgroundClient: _BackgroundOwnerHarness());
@@ -3751,6 +3882,52 @@ void main() {
 
 /// latest 固定 200 JSON mock（本文件所有用例的 HTTP 侧行为恒 ok，
 /// 注入矩阵在 ota_service_session_test.dart 覆盖）。
+class _LifecycleLatestAdapter implements HttpClientAdapter {
+  _LifecycleLatestAdapter(this.body, {this.status = 200});
+  final String body;
+  final int status;
+  final entered = Completer<void>();
+  final release = Completer<void>();
+  int calls = 0;
+
+  @override
+  Future<ResponseBody> fetch(RequestOptions options,
+      Stream<Uint8List>? requestStream, Future<void>? cancelFuture) async {
+    calls++;
+    entered.complete();
+    await release.future;
+    return ResponseBody.fromString(body, status,
+        headers: {'content-type': ['application/json']});
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+class _LifecycleDownloadAdapter implements HttpClientAdapter {
+  _LifecycleDownloadAdapter(this.bytes);
+  final Uint8List bytes;
+  final entered = Completer<void>();
+  bool allow = false;
+  int calls = 0;
+
+  @override
+  Future<ResponseBody> fetch(RequestOptions options,
+      Stream<Uint8List>? requestStream, Future<void>? cancelFuture) async {
+    calls++;
+    if (!allow) {
+      entered.complete();
+      await cancelFuture!;
+      throw DioException(requestOptions: options, type: DioExceptionType.cancel);
+    }
+    return ResponseBody(Stream<Uint8List>.fromIterable([bytes]), 200,
+        headers: {'content-length': ['${bytes.length}']});
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
 class _LatestOkAdapter implements HttpClientAdapter {
   _LatestOkAdapter(this.body);
 
