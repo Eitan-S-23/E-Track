@@ -9,6 +9,7 @@ import '../ota/ota_diagnostics.dart';
 import '../ota/ota_experiment_config.dart';
 import '../ota/ota_firmware_latest.dart';
 import '../services/ota_service.dart';
+import '../utils/safe_snackbar.dart';
 
 /// OTA 固件升级页。
 ///
@@ -736,18 +737,17 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
                   // 只对删除失败（非忙碌）补充暴露，不静默当作已清理。
                   onPressed: () async {
                     final ok = await otaService.cleanupFirmware();
+                    if (!mounted) return;
                     if (!ok) {
                       if (!otaService.isUpgrading) {
-                        Get.snackbar('错误', '固件包清理失败，请重试',
+                        safeSnackbar('错误', '固件包清理失败，请重试', context: context,
                             backgroundColor: Colors.red.withValues(alpha: 0.1),
                             colorText: Colors.red.shade700,
-                            snackPosition: SnackPosition.TOP,
-                            icon: const Icon(Icons.error_outline,
-                                color: Colors.red));
+                            snackPosition: SnackPosition.TOP);
                       }
                       return;
                     }
-                    if (mounted) setState(() {});
+                    setState(() {});
                   },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.grey,
@@ -1203,11 +1203,11 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
     try {
       await otaService.checkFirmwareUpdate();
     } catch (e) {
-      Get.snackbar('错误', '检查更新失败: $e',
+      if (!mounted) return;
+      safeSnackbar('错误', '检查更新失败: $e', context: context,
           backgroundColor: Colors.red.withValues(alpha: 0.1),
           colorText: Colors.red.shade700,
-          snackPosition: SnackPosition.TOP,
-          icon: const Icon(Icons.error_outline, color: Colors.red));
+          snackPosition: SnackPosition.TOP);
     } finally {
       if (mounted) {
         setState(() {
@@ -1219,14 +1219,13 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
 
   void _downloadFirmware() async {
     final success = await otaService.downloadFirmware();
-    if (!success) return;
+    if (!success || !mounted) return;
 
-    Get.snackbar('成功', '固件已下载并校验，可开始 BLE 传输',
+    safeSnackbar('成功', '固件已下载并校验，可开始 BLE 传输', context: context,
         backgroundColor: Colors.green.withValues(alpha: 0.1),
         colorText: Colors.green.shade700,
-        snackPosition: SnackPosition.TOP,
-        icon: const Icon(Icons.check_circle, color: Colors.green));
-    if (mounted) setState(() {});
+        snackPosition: SnackPosition.TOP);
+    setState(() {});
   }
 
   void _startUpgrade() async {
@@ -1253,12 +1252,12 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
             ? null : box.localToGlobal(Offset.zero) & box.size,
       ));
       if (mounted && result.status == ShareResultStatus.unavailable) {
-        Get.snackbar('诊断记录', '系统分享不可用；原始记录仍保留在应用内',
+        safeSnackbar('诊断记录', '系统分享不可用；原始记录仍保留在应用内', context: context,
             snackPosition: SnackPosition.TOP);
       }
     } catch (_) {
       if (mounted) {
-        Get.snackbar('诊断记录', '导出未完成；原始记录仍保留在应用内',
+        safeSnackbar('诊断记录', '导出未完成；原始记录仍保留在应用内', context: context,
             snackPosition: SnackPosition.TOP);
       }
     } finally {

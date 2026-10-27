@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:crypto/crypto.dart';
 import 'package:ble_monitor/ota/ota_diagnostics.dart';
 import 'package:ble_monitor/ota/ota_link_stats.dart';
 import 'package:ble_monitor/ota/ota_mono.dart';
@@ -42,9 +43,104 @@ void main() {
       directoryProvider: () async { directoryCalls++; return root; });
     expect(await diagnostics.beginUpgrade(input()), isTrue);
     await diagnostics.finishUpgrade(completed: true);
+    OtaDiagnostics.withInstance(diagnostics, () {
+      emitOtaObservation('OTA_LINK_STATS ${jsonEncode({'fixture': '测量' * 600})}');
+    });
+    await expectLater(diagnostics.exportSnapshot(), throwsStateError);
     expect(directoryCalls, 0);
     expect(await root.list().length, 0);
     expect(diagnostics.status.value.enabled, isFalse);
+  });
+
+  test('P35-SMOKE-LOG-01 real UTF-8 summary survives file/export/strict host parser', () async {
+    await initialize();
+    late String summary;
+    await OtaDiagnostics.withInstance(diagnostics, () async {
+      final stats = OtaLinkStats(label: 'query', clockUs: () => 40);
+      stats.recordGetInfo(durationUs: 20);
+      expect(await diagnostics.beginUpgrade(input()), isTrue);
+      stats.recordFailure(stage: 'fixture', reason: '测量记录完整性');
+      summary = 'OTA_LINK_STATS ${jsonEncode(stats.toJson())}';
+      expect(utf8.encode(summary).length, greaterThan(1024));
+      stats.emitSummary();
+      // A synthetic file-route test is not a successful upgrade/performance run.
+      await diagnostics.finishUpgrade(completed: false);
+    });
+    final snapshot = diagnostics.status.value.lastExport!;
+    final original = await snapshot.readAsBytes();
+    final rows = (await snapshot.readAsLines()).map(jsonDecode).toList();
+    final footer = rows.last as Map<String, dynamic>;
+    final prefix = original.sublist(0, footer['bytes'] as int);
+    final messages = rows.where((row) => row['kind'] == 'line')
+        .map((row) => row['message'] as String).toList();
+    expect(messages.last, summary);
+    expect(footer['records'], rows.length - 1);
+    expect(footer['producerLines'], messages.length);
+    expect(footer['sha256'], sha256.convert(prefix).toString());
+    expect(footer['upgradeStarts'], 1);
+    expect(footer['upgradeEnds'], 1);
+    expect(footer['lost'], 0);
+    expect(footer['healthy'], isTrue);
+    expect(footer['outcome'], 'not-completed');
+
+    final repo = Directory.current.parent.parent;
+    final parser = File('${repo.path}/Tools/ota/p3-4-link-stats/observation_capture.py');
+    expect(await parser.exists(), isTrue);
+    Future<ProcessResult> parse(File file, {Directory? out}) => Process.run(
+      Platform.isWindows ? 'python' : 'python3', [
+        '-I', '-S', '-B', '-X', 'utf8', parser.path,
+        out == null ? 'inspect' : 'extract', '--input', file.path,
+        '--expect-sentinel', 'OTAOBS0123456789abcdef01234567',
+        '--expect-target', 'AA:BB:CC:DD:EE:FF',
+        if (out != null) ...['--out-root', out.path],
+      ], workingDirectory: repo.path);
+    final out = Directory('${root.path}/extracted');
+    final result = await parse(snapshot, out: out);
+    expect(result.exitCode, 0, reason: '${result.stdout}\n${result.stderr}');
+    final record = jsonDecode(result.stdout as String) as Map<String, dynamic>;
+    final unwrapped = utf8.encode('${messages.join('\n')}\n');
+    expect(await File('${out.path}/observations.log').readAsBytes(), unwrapped);
+    expect(record['records'], footer['records']);
+    expect(record['producerLines'], messages.length);
+    expect(record['rawSha256'], sha256.convert(original).toString());
+    expect(record['unwrappedSha256'], sha256.convert(unwrapped).toString());
+    expect(record['eligibleForThreshold'], isFalse);
+    expect(record['independentAcceptance'], 'NOT_RUN');
+
+    final lines = utf8.decode(original).split('\n')..removeLast();
+    final damaged = <String, List<int>>{
+      'missing-footer': utf8.encode('${lines.take(lines.length - 1).join('\n')}\n'),
+      'missing-record': utf8.encode('${[lines.first, ...lines.skip(2)].join('\n')}\n'),
+      'clipped-summary': utf8.encode('${lines.map((line) =>
+          line.contains('OTA_LINK_STATS ') ? line.substring(0, 1024) : line).join('\n')}\n'),
+      'truncated': original.sublist(0, original.length - 1),
+      'corrupt-prefix': [...original]..[100] ^= 1,
+      'corrupt-counter': utf8.encode('${[...lines.take(lines.length - 1),
+          jsonEncode({...footer, 'producerLines': messages.length + 1})].join('\n')}\n'),
+    };
+    for (final entry in damaged.entries) {
+      final file = File('${root.path}/${entry.key}.jsonl');
+      await file.writeAsBytes(entry.value, flush: true);
+      final rejectedOut = Directory('${root.path}/reject-${entry.key}');
+      final rejected = await parse(file, out: rejectedOut);
+      expect(rejected.exitCode, 2, reason: entry.key);
+      expect(rejected.stderr, contains('CAPTURE_REJECTED'), reason: entry.key);
+      expect(await rejectedOut.exists(), isFalse, reason: entry.key);
+    }
+    final missing = await parse(File('${root.path}/absent.jsonl'));
+    expect(missing.exitCode, 2);
+    expect(missing.stderr, contains('CAPTURE_REJECTED'));
+    await diagnostics.close();
+    expect(await snapshot.readAsBytes(), original);
+    final afterClose = await parse(snapshot);
+    expect(afterClose.exitCode, 0, reason: '${afterClose.stderr}');
+    oldPrint('P35-SMOKE-LOG-01 ${jsonEncode({
+      'summaryBytes': utf8.encode(summary).length, 'snapshotBytes': original.length,
+      'records': footer['records'], 'producerLines': messages.length,
+      'snapshotSha256': sha256.convert(original).toString(),
+      'unwrappedSha256': sha256.convert(unwrapped).toString(),
+      'damagedVariantsRejected': damaged.length, 'missingFileRejected': true,
+    })}');
   });
 
   test('actual stats and MONO producers persist without debugPrint', () async {

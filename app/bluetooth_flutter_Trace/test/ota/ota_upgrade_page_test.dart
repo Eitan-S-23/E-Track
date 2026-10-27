@@ -7,6 +7,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:flutter_blue_plus_android/flutter_blue_plus_android.dart';
+import 'package:share_plus/share_plus.dart';
 
 import 'package:ble_monitor/ota/ota_device_info.dart';
 import 'package:ble_monitor/ota/ota_diagnostics.dart';
@@ -159,7 +160,7 @@ void main() {
       return fake;
     }
 
-    for (final disposed in [false, true]) {
+    for (final disposed in [true, false]) {
       testWidgets('download completes after page disposed=$disposed', (tester) async {
         final fake = await startDownload(tester);
         if (disposed) {
@@ -280,6 +281,44 @@ void main() {
               matching: find.textContaining('导出未完成')), findsOneWidget);
           expect(tester.widget<TextButton>(find.byKey(
               const ValueKey('ota-export-observations'))).onPressed, isNotNull);
+        }
+      });
+
+      testWidgets('unavailable share after page disposed=$disposed', (tester) async {
+        final parent = Directory('${Directory.current.path}/.dart_tool/p35-page-tests')
+          ..createSync(recursive: true);
+        final directory = parent.createTempSync('share-');
+        addTearDown(() => directory.deleteSync(recursive: true));
+        final file = File('${directory.path}/snapshot.jsonl')..writeAsStringSync('fixture\n');
+        final diagnostics = OtaDiagnostics();
+        diagnostics.status.value = OtaDiagnosticStatus(enabled: true, ready: true,
+            records: 3, producerLines: 2, lastExport: file);
+        final gate = Completer<String>();
+        var shares = 0;
+        const channel = MethodChannel('dev.fluttercommunity.plus/share');
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (call) async {
+          if (call.method == 'shareFiles') {
+            shares++;
+            return gate.future;
+          }
+          return null;
+        });
+        addTearDown(() => tester.binding.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, null));
+        await pumpPage(tester, diagnostics: diagnostics);
+        await tap(tester, find.byKey(const ValueKey('ota-export-observations')));
+        expect(shares, 1);
+        if (disposed) await tester.pumpWidget(const MaterialApp(home: Scaffold()));
+        gate.complete(ShareResult.unavailable.raw);
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        expect(diagnostics.status.value.lastExport, file);
+        expect(file.readAsStringSync(), 'fixture\n');
+        if (disposed) {
+          expect(find.byType(SnackBar), findsNothing);
+        } else {
+          expect(find.descendant(of: find.byType(SnackBar),
+              matching: find.textContaining('系统分享不可用')), findsOneWidget);
         }
       });
     }
