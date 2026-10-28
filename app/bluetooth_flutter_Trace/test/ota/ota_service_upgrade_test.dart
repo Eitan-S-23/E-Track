@@ -678,6 +678,160 @@ void main() {
     });
   }
 
+  for (final profile in [OtaLinkProfile.baseline, OtaLinkProfile.adaptiveCandidate]) {
+    for (final resumeEarly in [false, true]) {
+      test('lifecycle R01 paused END retry ${profile.name} early=$resumeEarly settles with verified target', () async {
+        final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+            linkProfile: profile, backgroundClient: _BackgroundOwnerHarness()..allow = false);
+        final service = Get.find<OtaService>();
+        ble.dropFirstEnd = true;
+        final operation = service.startOtaUpgrade('AA:BB');
+        try {
+          await ble.firstEndEntered.future.timeout(const Duration(seconds: 5));
+          expect(service.phase, OtaPhase.applying);
+          expect(service.linkSelection!.protocol, 1);
+          expect(service.canCancelTask, isFalse);
+          service.didChangeAppLifecycleState(AppLifecycleState.inactive);
+          service.didChangeAppLifecycleState(AppLifecycleState.paused);
+          if (!resumeEarly) {
+            await Future<void>.delayed(OtaBleTransport.defaultAckTimeout + const Duration(milliseconds: 250));
+            expect(ble.endCalls, 1, reason: 'timed-out END retry must wait at the pause gate');
+            expect(service.isUpgrading, isTrue);
+          }
+          await service.cancelCurrentTask(keepPackage: true);
+          expect(ble.abortCalls, 0, reason: 'the normal cancel action stays disabled after END');
+          service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+          service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+          await service.resumeFromBackground();
+          expect(await operation.timeout(const Duration(seconds: 6)), isTrue);
+          expect(service.isUpgrading, isFalse);
+          expect(service.phase, OtaPhase.completed);
+          expect(service.terminalState, isNull);
+          expect(ble.endCalls, 2);
+          expect(ble.endSequences[1], ble.endSequences[0], reason: 'END retry reuses the session sequence');
+          expect(ble.beginCalls, 1);
+          expect(ble.abortCalls, 0);
+          expect(ble.getInfoCalls, 4, reason: 'initial INFO, bind recheck, strict resume INFO and fresh target INFO');
+          expect(ble.discoverCalls, 4);
+          expect(ble.probeCount, greaterThan(0));
+          expect(service.deviceInfo!.currentVersionCode, 20900);
+          expect(service.deviceInfo!.currentImageSha256Hex, '62' * 32);
+        } finally {
+          // Close a failing host fixture; do not enable user cancellation after END.
+          if (service.isUpgrading) service.onClose();
+          await operation.timeout(const Duration(seconds: 3));
+        }
+      });
+    }
+  }
+
+  for (final failure in ['null-discovery', 'link-changed']) {
+    test('lifecycle R01 paused END $failure has bounded safe failure', () async {
+      final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+          linkProfile: OtaLinkProfile.baseline,
+          backgroundClient: _BackgroundOwnerHarness()..allow = false);
+      final service = Get.find<OtaService>();
+      ble.dropFirstEnd = true;
+      final operation = service.startOtaUpgrade('AA:BB');
+      try {
+        await ble.firstEndEntered.future;
+        expect(service.phase, OtaPhase.applying);
+        service.didChangeAppLifecycleState(AppLifecycleState.inactive);
+        service.didChangeAppLifecycleState(AppLifecycleState.paused);
+        await Future<void>.delayed(OtaBleTransport.defaultAckTimeout + const Duration(milliseconds: 250));
+        if (failure == 'null-discovery') {
+          ble.discoverReplies.add(null);
+        } else {
+          ble.linkGeneration++;
+        }
+        service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+        service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+        await service.resumeFromBackground();
+        expect(await operation.timeout(const Duration(seconds: 6)), isFalse);
+        expect(service.isUpgrading, isFalse);
+        expect(service.phase, OtaPhase.cancelled);
+        expect(service.terminalState?.code, 'DEVICE_LINK_CHANGED');
+        expect(ble.endCalls, 1);
+        expect(ble.getInfoCalls, 2, reason: 'failed link/chars recheck cannot issue INFO');
+        expect(ble.abortCalls, failure == 'null-discovery' ? 1 : 0);
+        expect(service.downloadedFirmwareFile, isNotNull);
+      } finally {
+        if (service.isUpgrading) service.onClose();
+        await operation.timeout(const Duration(seconds: 3));
+      }
+    });
+  }
+
+  test('lifecycle R01 late first END ACK cannot release pause or fabricate success', () async {
+    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+        linkProfile: OtaLinkProfile.baseline,
+        backgroundClient: _BackgroundOwnerHarness()..allow = false);
+    final service = Get.find<OtaService>();
+    ble.deferFirstEnd = true;
+    final operation = service.startOtaUpgrade('AA:BB');
+    try {
+      await ble.firstEndEntered.future;
+      service.didChangeAppLifecycleState(AppLifecycleState.inactive);
+      service.didChangeAppLifecycleState(AppLifecycleState.paused);
+      await Future<void>.delayed(OtaBleTransport.defaultAckTimeout + const Duration(milliseconds: 250));
+      ble.releaseFirstEnd();
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      expect(service.isUpgrading, isTrue);
+      expect(service.phase, OtaPhase.applying);
+      expect(ble.endCalls, 1);
+      expect(service.canCancelTask, isFalse);
+      service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      await service.resumeFromBackground();
+      expect(await operation.timeout(const Duration(seconds: 6)), isFalse);
+      expect(service.isUpgrading, isFalse);
+      expect(service.terminalState?.code, 'DEVICE_IDENTITY_CHANGED',
+          reason: 'peer applied the deferred END; do not bypass the strict source recheck');
+      expect(service.phase, OtaPhase.cancelled);
+      expect(ble.endCalls, 1);
+    } finally {
+      if (service.isUpgrading) service.onClose();
+      ble.releaseFirstEnd();
+      await operation.timeout(const Duration(seconds: 3));
+    }
+  });
+
+  test('lifecycle R01 closed END owner ignores late ACK and resumed events', () async {
+    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+        linkProfile: OtaLinkProfile.baseline,
+        backgroundClient: _BackgroundOwnerHarness()..allow = false);
+    final service = Get.find<OtaService>();
+    ble.deferFirstEnd = true;
+    final operation = service.startOtaUpgrade('AA:BB');
+    try {
+      await ble.firstEndEntered.future;
+      service.didChangeAppLifecycleState(AppLifecycleState.paused);
+      expect(service.canCancelTask, isFalse);
+      await service.cancelCurrentTask(keepPackage: true);
+      expect(service.isUpgrading, isTrue);
+      expect(ble.abortCalls, 0);
+      service.onClose();
+      expect(await operation.timeout(const Duration(seconds: 3)), isFalse);
+      final calls = (ble.discoverCalls, ble.getInfoCalls, ble.platformWriteCalls);
+      final status = service.upgradeStatus;
+      final phase = service.phase;
+      ble.releaseFirstEnd();
+      service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      await service.resumeFromBackground();
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      expect((ble.discoverCalls, ble.getInfoCalls, ble.platformWriteCalls), calls);
+      expect(service.isUpgrading, isFalse);
+      expect(service.upgradeStatus, status);
+      expect(service.phase, phase);
+      expect(service.phase, isNot(OtaPhase.completed));
+      expect(ble.endCalls, 1);
+    } finally {
+      if (service.isUpgrading) service.onClose();
+      ble.releaseFirstEnd();
+      await operation.timeout(const Duration(seconds: 3));
+    }
+  });
+
   test('P38-R04 a query busy event cannot expose the completed OTA owner', () async {
     final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
         backgroundClient: _BackgroundOwnerHarness());
@@ -4802,6 +4956,16 @@ class _UpgradeFakeBle extends BluetoothService {
   // ---- 观测 ----
   int beginCalls = 0;
   int endCalls = 0;
+  bool dropFirstEnd = false, deferFirstEnd = false;
+  final firstEndEntered = Completer<void>();
+  final endSequences = <int>[];
+  OtaBleFrame? _deferredEnd;
+
+  void releaseFirstEnd() {
+    final frame = _deferredEnd;
+    _deferredEnd = null;
+    if (frame != null) _handleEnd(frame);
+  }
   int abortCalls = 0;
   final dataOffsets = <int>[];
   /// 每帧 DATA 的判定结果（判定时刻记录，不受 ACK 闸门延迟影响）：
@@ -5323,6 +5487,16 @@ class _UpgradeFakeBle extends BluetoothService {
   void _onEnd(OtaBleFrame f) {
     endCalls++;
     endShaBytes = Uint8List.fromList(f.payload);
+    endSequences.add(f.seq);
+    if (endCalls == 1 && (dropFirstEnd || deferFirstEnd)) {
+      if (deferFirstEnd) _deferredEnd = f;
+      firstEndEntered.complete();
+      return;
+    }
+    _handleEnd(f);
+  }
+
+  void _handleEnd(OtaBleFrame f) {
     if (_state != _active || f.session != _sessionId) {
       _send(OtaBleCodec.rspAckEnd, f.session, f.seq,
           packAck(OtaBleCodec.statusErrState, _stagedDurable, 0));
