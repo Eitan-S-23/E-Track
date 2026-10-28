@@ -499,6 +499,14 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
     // 身份，而非盲目重查）；retryableLater（如重启重连失败）仍可查。
     final terminal = otaService.terminalState;
     final terminalLocked = terminal != null && !terminal.retryableLater;
+    final status = otaService.upgradeStatus;
+    final showIdleStatus = !_isChecking &&
+        !otaService.isUpgrading &&
+        otaService.phase == OtaPhase.idle &&
+        terminal == null &&
+        otaService.latestInfo == null &&
+        otaService.downloadedFirmwareFile == null &&
+        status.isNotEmpty;
     final canCheck = !_isChecking &&
         !otaService.isUpgrading &&
         otaService.isFirmwareServiceConfigured &&
@@ -550,6 +558,21 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
             ),
             textAlign: TextAlign.center,
           ),
+          if (showIdleStatus) ...[
+            const SizedBox(height: 12),
+            Semantics(
+              liveRegion: true,
+              child: Text(
+                status,
+                key: const ValueKey('ota-check-status'),
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF2E3A59),
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 20),
           // Wrap 而非 Row：terminalLocked 态下「检查更新」与「重新读取
           // 身份解锁」两个按钮同排，窄屏总宽溢出会被截断——Wrap 在宽度
@@ -883,6 +906,21 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
     }
 
     final busy = inDownload || inTransfer;
+    final title = switch (phase) {
+      OtaPhase.idle => '固件状态',
+      OtaPhase.checkingUpdate => '检查固件更新中',
+      OtaPhase.downloading => '下载进度',
+      OtaPhase.verifyingDownload => '校验固件包',
+      OtaPhase.readyToInstall => '固件就绪',
+      OtaPhase.transferring => '固件传输（设备确认）',
+      OtaPhase.applying => '设备应用固件',
+      OtaPhase.waitingReboot => '等待设备重启',
+      OtaPhase.reconnectVerify => '重连并核验固件',
+      OtaPhase.completed => '固件升级完成',
+      OtaPhase.probeCompleted => 'BLE 短测完成（未安装固件）',
+      OtaPhase.cancelled => '已取消',
+      OtaPhase.failed => '操作失败',
+    };
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -916,11 +954,8 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
               ),
               const SizedBox(width: 12),
               Text(
-                inTransfer
-                    ? '固件传输（设备确认）'
-                    : inDownload
-                        ? '下载进度'
-                        : '固件就绪',
+                title,
+                key: const ValueKey('ota-phase-title'),
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,

@@ -773,7 +773,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           _phase.value = OtaPhase.failed;
           return null;
         }
-        _upgradeStatus.value = '固件已是最新版本';
+        _upgradeStatus.value = '暂无可用更新';
         _phase.value = OtaPhase.idle;
         return null;
       }
@@ -832,7 +832,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       if (terminal != null) {
         _terminalState.value = terminal;
         _clearFirmwareInfo();
-        _upgradeStatus.value = '设备不兼容: ${terminal.code}';
+        _upgradeStatus.value = terminal.userMessage;
         _notify('提示', terminal.userMessage);
         _phase.value = OtaPhase.failed;
         return null;
@@ -3036,6 +3036,10 @@ class OtaTerminalState {
         return '无法识别设备型号，请确认连接的是 E-Track 码表';
       case 'CHANNEL_STOPPED':
         return '固件通道已停发，请稍后再试';
+      case 'BACKEND_UNAVAILABLE':
+        return '固件服务暂不可用，请稍后重试';
+      case 'RATE_LIMITED':
+        return '检查更新过于频繁，请稍后重试';
       default:
         return message;
     }
