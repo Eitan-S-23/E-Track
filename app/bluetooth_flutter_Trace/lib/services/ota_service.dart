@@ -7,7 +7,7 @@ import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart' show BluetoothDevice, BluetoothConnectionState;
 import 'package:get/get.dart' hide Response;
 import 'package:path_provider/path_provider.dart';
 
@@ -201,7 +201,9 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     final address = _deviceInfoAddress;
     if (_closed || _isUpgrading.value || _ownerDone != null ||
         address == null || _deviceInfo == null || p35.captureId != null ||
-        OtaDiagnostics.current.enabled || !Platform.isAndroid) return false;
+        OtaDiagnostics.current.enabled || !Platform.isAndroid) {
+      return false;
+    }
     _p35Address = address.toLowerCase();
     _p35Identity = _deviceInfo;
     final device = BluetoothDevice.fromId(address);
@@ -220,7 +222,9 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   Future<bool> reconnectP35Target() async {
     final address = _p35Address;
     if (!p35.healthy || _closed || isUpgrading || _ownerDone != null ||
-        address == null) return false;
+        address == null) {
+      return false;
+    }
     if (!await _ble.connectOtaDeviceByAddress(address) || _closed) return false;
     return await readDeviceInfo(address) != null;
   }
@@ -704,7 +708,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         _deviceInfo = info;
         // 快照绑定来源地址（RC3-08）：换设备连接时旧快照失效。
         _deviceInfoAddress = deviceAddress;
-        _identityLinkGeneration = _ble.otaLinkGeneration(deviceAddress);
+        _identityLinkGeneration = _boundLinkGeneration;
         if (_p35Address == deviceAddress.toLowerCase()) _p35Identity = info;
         // RC3-08⑤/12⑤/12⑦：资产失效以「签署这批资产的身份/地址」为
         // 基准，不是「上一次快照」。旧写法捕获 previousInfo/
@@ -1275,10 +1279,14 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       _phase.value = OtaPhase.transferring;
       // P3-4 链路观测：本轮升级的单一时钟域实例（发现→绑定→复核→传输
       // 全链路同源时间戳；重启探测用独立 probe 实例，见 _waitForTargetIdentity）。
+      final observationOwner = _ownerEpoch;
       final linkStats = OtaLinkStats(label: isPrefixProbe ? 'prefix-probe' : 'upgrade', device: deviceAddress,
-        onTransferState: (sample) {
-          if (!p35.active || !isUpgrading || generation != _cancelGeneration || _closed ||
-              _p35Address != deviceAddress.toLowerCase()) return;
+        onTransferState: !p35.active ? null : (sample) {
+          if (!p35.active || !isUpgrading || _ownerEpoch != observationOwner ||
+              generation != _cancelGeneration || _closed ||
+              _p35Address != deviceAddress.toLowerCase()) {
+            return;
+          }
           _p35Transfer = sample;
           p35.record(sample['event']! as String);
           _p35Transfer = {...sample, 'sendOffset': null};
@@ -1450,7 +1458,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
             'deviceAddress': deviceAddress,
           })}');
         }
-        _identityLinkGeneration = _ble.otaLinkGeneration(deviceAddress);
+        _identityLinkGeneration = _boundLinkGeneration;
         if (_p35Address == deviceAddress.toLowerCase()) _p35Identity = recheck;
         p35.record('identity');
 
@@ -1584,7 +1592,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
             // 刷新本地快照为升级后身份。
             _deviceInfo = outcome.info;
             _deviceInfoAddress = deviceAddress;
-            _identityLinkGeneration = _ble.otaLinkGeneration(deviceAddress);
+            _identityLinkGeneration = _boundLinkGeneration;
             if (_p35Address == deviceAddress.toLowerCase()) _p35Identity = outcome.info;
             diagnosticCompleted = true;
             if (diagnostics.enabled) {

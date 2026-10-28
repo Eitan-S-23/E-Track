@@ -250,7 +250,8 @@ def find_control(xml, wanted, package):
                 and node.get('enabled') == 'true', 'control disabled/not clickable', 'UI_UNAVAILABLE')
         matches.append(node)
     unique = {id(n): n for n in matches}
-    require(len(unique) == 1, 'control missing or ambiguous; no blind coordinates', 'UI_UNAVAILABLE')
+    require(unique, 'control missing; no blind coordinates', 'UI_UNAVAILABLE')
+    require(len(unique) == 1, 'control ambiguous; no blind coordinates', 'UI_UNAVAILABLE')
     node = next(iter(unique.values()))
     bounds = re.fullmatch(r'\[(\d+),(\d+)\]\[(\d+),(\d+)\]', node.get('bounds', ''))
     require(bounds is not None, 'invalid control bounds', 'UI_UNAVAILABLE')
@@ -342,14 +343,15 @@ class Campaign:
             before = self.wait(at_boundary, case['id'] + '-boundary')
             self.io.record('disconnect-intent', case=case['id'], state=before)
             try:
-                self.io.radio(False)
+                self.io.radio(False, case=case)
                 cut = self.wait(lambda s: not s['linkConnected'], case['id'] + '-actual-disconnect',
                     self.p['limits']['disconnect_seconds'], allow_failure=True)
                 require(case_matches(cut, case), 'actual disconnect outside frozen window', 'EVIDENCE_GAP')
                 require(cut['durable'] >= before['durable'], 'durable regressed at disconnect', 'EVIDENCE_GAP')
             finally:
                 # Restore the adapter, not the firmware or an uncertain UI operation.
-                self.io.radio(True)
+                if self.io.radio_touched:
+                    self.io.radio(True)
             for step in self.p['ui']['reconnect']:
                 self.io.tap(step)
             connected = self.wait(lambda s: s['linkConnected'] and s['freshConnection'],
@@ -394,6 +396,7 @@ class Android:
         self.total_deadline = time.monotonic() + p['limits']['total_seconds'] + 30
         self.last_ui = None
         self.last_state_at = None
+        self.campaign = None
 
     def record(self, event, **fields):
         self.journal_seq += 1
@@ -519,6 +522,8 @@ class Android:
     def retrieve(self, capture_id):
         require(isinstance(capture_id, str) and re.fullmatch('[0-9a-f]{32}', capture_id), 'explicit capture ID required')
         remote = '/sdcard/Android/data/' + self.p['app']['id'] + '/files/p35-observations/' + capture_id + '.jsonl'
+        size = self.cmd(['shell', 'wc', '-c', remote]).split()[0]
+        require(size.isdigit() and int(size) <= 128 * 1024 * 1024 + 8192, 'oversized App original', 'EVIDENCE_GAP')
         raw = self.cmd(['exec-out', 'cat', remote], seconds=60)
         self.h.raw(self.out / 'app-capture.jsonl', raw)
         report = audit_capture(raw, capture_id)
@@ -541,8 +546,16 @@ class Android:
         require(len(values) == 1, 'unqualified Android Bluetooth state format', 'CAPABILITY_MISSING')
         return values[0] == 'ON'
 
-    def radio(self, enabled):
+    def radio(self, enabled, *, case=None):
         require(self.p.get('allow_bluetooth_toggle') is True, 'adapter toggle affects other phone Bluetooth connections; explicit plan opt-in required')
+        if not enabled:
+            self.pump()
+            latest = self.decoder.previous
+            require(latest is not None and self.last_state_at is not None and
+                    time.monotonic() - self.last_state_at < self.p['limits']['event_seconds'],
+                    'stale capture before radio injection', 'COLLECTOR_FAILED')
+            require(case is not None and latest['phase'] == 'transferring' and latest['linkConnected'] and
+                    case_matches(latest, case), 'live state escaped disconnect window before command', 'EVIDENCE_GAP')
         if enabled:
             require(not self.restore_attempted, 'radio restoration already attempted; reconcile actual state', 'CLEANUP_FAILED')
             self.restore_attempted = True
@@ -595,6 +608,7 @@ def main(argv=None):
     if args.mode == 'audit':
         require(args.archive is not None and args.capture_id is not None and args.plan is None and
                 args.out is None and not args.execute, 'audit is read-only and requires archive and capture ID')
+        require(args.archive.stat().st_size <= 128 * 1024 * 1024 + 8192, 'oversized App original', 'EVIDENCE_GAP')
         print(json.dumps(audit_capture(args.archive.read_bytes(), args.capture_id)))
         return 0
     require(args.plan is not None and args.archive is None, 'plan required; archive only for offline audit')
@@ -613,7 +627,9 @@ def main(argv=None):
     require(not out.exists(), 'existing/uncertain run directory; do not replay')
     for name in ['plan.json', 'inputs.json', 'result.json', 'journal', 'commands', 'adb-server.stdout', 'adb-server.stderr',
                  'adb-server.started.json', 'adb-server.closed.json', 'logcat.stdout', 'logcat.stderr',
-                 'logcat.started.json', 'logcat.closed.json', 'host', 'app-capture.jsonl', 'app-capture-integrity.json']:
+                 'logcat.started.json', 'logcat.closed.json', 'host', 'app-capture.jsonl', 'app-capture-integrity.json',
+                 'previous-owner.stdout', 'previous-owner.stderr', 'previous-owner.started.json',
+                 'previous-owner.closed.json', 'unresolved-owner.json']:
         h.checked(out / name)
     for pin in [p['phone']['adb'], p['phone']['adb_key'], p['firmware']['package']]:
         h.pinned(pin)
@@ -623,9 +639,9 @@ def main(argv=None):
         runner=h.record(Path(__file__)), hostHelper=h.record(Path(h.__file__)),
         formalAcceptance=False))
     result = dict(outcome='NOT_RUN', formalAcceptance='NOT_ADJUDICATED', recovered=0)
-    driver, campaign = None, None
+    driver = None
     try:
-        with h.device_owner(out):
+        with h.device_owner(out, read_only=args.mode in {'probe', 'retrieve'}):
             driver = Android(p, out, h)
             try:
                 driver.startup(retrieval_only=args.mode == 'retrieve')
@@ -640,7 +656,8 @@ def main(argv=None):
                 driver.close()
     except Exception as error:
         result.update(outcome=getattr(error, 'code', 'HOST_FAILED'), detail=str(error),
-                      recovered=len(campaign.cases) if campaign else 0, preserveOriginals=True, replay=False)
+                      recovered=len(driver.campaign.cases) if driver and driver.campaign else 0,
+                      preserveOriginals=True, replay=False)
     h.save(out / 'result.json', result)
     print(json.dumps({k: v for k, v in result.items() if k not in {'cases', 'final'}}))
     return 0 if result['outcome'] in {'PROBE_READY', 'AUTOMATION_COMPLETED', 'ORIGINALS_RETRIEVED'} else 2
@@ -659,7 +676,8 @@ def execute_ui(mode, p, driver):
     if mode == 'probe':
         return dict(outcome='PROBE_READY', telemetry=True, checkControl=True, deviceMutations=0,
                     radioInjection='NOT_TESTED', fullCampaign='NOT_RUN')
-    result = Campaign(p, driver).run()
+    driver.campaign = Campaign(p, driver)
+    result = driver.campaign.run()
     result['archive'] = driver.finish_capture()
     return result
 

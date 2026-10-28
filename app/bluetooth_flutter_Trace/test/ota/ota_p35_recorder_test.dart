@@ -22,7 +22,7 @@ class Writer implements OtaObservationWriter {
   bool fail = false;
   @override
   Future<void> append(List<int> value) async {
-    if (fail) throw FileSystemException('synthetic disk failure');
+    if (fail) throw const FileSystemException('synthetic disk failure');
     bytes.addAll(value);
   }
   @override

@@ -308,7 +308,8 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
                       ? null : () async {
                     if (otaService.p35.active) {
                       await otaService.stopP35Recording();
-                    } else if (!await otaService.startP35Recording() && mounted) {
+                    } else if (!await otaService.startP35Recording()) {
+                      if (!context.mounted) return;
                       safeSnackbar('自动化记录', '记录未启动，请检查设备身份、存储及记录状态', context: context);
                     }
                   },

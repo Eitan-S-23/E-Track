@@ -79,6 +79,7 @@ class Fake:
         self.actions, self.records = [], []
         self.now = 0
         self.fail_disable = False
+        self.radio_touched = False
 
     def clock(self):
         return self.now
@@ -93,7 +94,8 @@ class Fake:
     def tap(self, selector):
         self.actions.append(('tap', selector))
 
-    def radio(self, enabled):
+    def radio(self, enabled, *, case=None):
+        self.radio_touched = not enabled
         self.actions.append(('radio', enabled))
         if not enabled and self.fail_disable:
             raise r.Stop('ENV_BLOCKED', 'uncertain disable')
@@ -310,6 +312,17 @@ class CampaignTests(unittest.TestCase):
 
 
 class AdapterTests(unittest.TestCase):
+    def test_late_boundary_is_rejected_before_any_radio_command(self):
+        android = object.__new__(r.Android)
+        android.p = plan(); android.pump = lambda: None
+        android.decoder = r.Decoder()
+        android.decoder.previous = state(phase='applying', durable=1048576)
+        android.last_state_at = r.time.monotonic()
+        android.radio_touched = False
+        with self.assertRaisesRegex(r.Stop, 'escaped disconnect window'):
+            android.radio(False, case=plan()['cases'][0])
+        self.assertFalse(android.radio_touched)
+
     def test_radio_toggle_requires_explicit_opt_in(self):
         android=object.__new__(r.Android)
         android.p=plan();android.p['allow_bluetooth_toggle']=False
