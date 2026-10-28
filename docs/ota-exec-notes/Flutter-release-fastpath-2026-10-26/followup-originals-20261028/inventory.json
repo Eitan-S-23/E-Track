@@ -1,0 +1,216 @@
+{
+  "purpose": "original development evidence, not a new frozen acceptance",
+  "source": "392158684d2c2e9492e6140ca41e86bb7f118efc",
+  "files": [
+    {
+      "path": "lifecycle-red-inventory.json",
+      "bytes": 3546,
+      "sha256": "090b8acfac1b27b427db8325359192da46e0992ccf9e71716926fa2c3d1e5e29"
+    },
+    {
+      "path": "lifecycle-red-ubuntu-zip-01.zip",
+      "bytes": 187189,
+      "sha256": "c229577cd549d4aa25aafbb8b5199005356261c7c751ed63e3eafdd158cad2bd"
+    },
+    {
+      "path": "lifecycle-red-windows-zip-01.zip",
+      "bytes": 188417,
+      "sha256": "e32918e3bcf13acadc59374d2c44a7a72e546684392bb62609b9bb06b94a0576"
+    },
+    {
+      "path": "lifecycle-red-status-01.log",
+      "bytes": 5599,
+      "sha256": "7d4252f07285338bf67391741d6ccbde2abdac8231bb37b4cccb27955f2eef2b"
+    },
+    {
+      "path": "lifecycle-red-artifacts-01.log",
+      "bytes": 1508,
+      "sha256": "5edb37d7b8ae8890251857fbb754451deaaaf394ca016c6818ed0690977befb8"
+    },
+    {
+      "path": "lifecycle-fixed-inventory.json",
+      "bytes": 5986,
+      "sha256": "5d4f7dd9c9466a134b2edf686873809bc61e6c9c5d558b75564b57e980f58448"
+    },
+    {
+      "path": "lifecycle-fixed-ubuntu-zip-01.zip",
+      "bytes": 181736,
+      "sha256": "b61a9472d39a622e0b12d71326d5f11df9bf576441da2fc1ab6e8c06122b5ab8"
+    },
+    {
+      "path": "lifecycle-fixed-windows-zip-01.zip",
+      "bytes": 187391,
+      "sha256": "b2cee8e94f5bbecf3d251b5b10353868dd322b0cdb7d9f9add3746e781b6c1e4"
+    },
+    {
+      "path": "lifecycle-fixed-status-01.log",
+      "bytes": 5964,
+      "sha256": "348548fae16a0be5abc5457bd4ae9da4938f7568163df03b92e4a11d0341939c"
+    },
+    {
+      "path": "lifecycle-fixed-artifacts-01.log",
+      "bytes": 1508,
+      "sha256": "1435baf2ba207793d5d39ac0f7f406fa98df7e57403553d0fb95acc42f3859ac"
+    },
+    {
+      "path": "lifecycle-matrix-red-inventory.json",
+      "bytes": 3546,
+      "sha256": "55ad42ce82b601c14b821cd46cb88abf4165d891fa59ea680ba56df0884e0749"
+    },
+    {
+      "path": "lifecycle-matrix-red-ubuntu-zip-01.zip",
+      "bytes": 194041,
+      "sha256": "a926623f5e25c445dcd1599534b0a87506fb36845192d7dd8fecf62876892557"
+    },
+    {
+      "path": "lifecycle-matrix-red-windows-zip-01.zip",
+      "bytes": 194180,
+      "sha256": "1c814d4967fc92304ba66a9cb63e4ed709c78b17c330c13c170bd2767c166d9e"
+    },
+    {
+      "path": "lifecycle-matrix-red-status-01.log",
+      "bytes": 5909,
+      "sha256": "900c3d27953ddd6e831dca62cebf951609052270b41fe252e3ada00ba078c176"
+    },
+    {
+      "path": "lifecycle-matrix-red-artifacts-01.log",
+      "bytes": 1508,
+      "sha256": "71f752743b88800d0ffc2ee7a0b22219afd2261031e0f6d77d5effc9b9529915"
+    },
+    {
+      "path": "lifecycle-matrix-fixed-inventory.json",
+      "bytes": 5986,
+      "sha256": "5a2cc6e2a9e1b683f5a26a4d01992d96c2f0640f268dc5740bfb982cbae30675"
+    },
+    {
+      "path": "lifecycle-matrix-fixed-ubuntu-zip-01.zip",
+      "bytes": 192234,
+      "sha256": "7b3a10a7f902001e593cc41cd52166ec9b1c6d76fdae5540de1a175b106af412"
+    },
+    {
+      "path": "lifecycle-matrix-fixed-windows-zip-01.zip",
+      "bytes": 195245,
+      "sha256": "0a6923ece3d1de9b181e430cdf819fd63bfbdfc4b19e9f4e6183fa5d1e43abde"
+    },
+    {
+      "path": "lifecycle-matrix-fixed-status-01.log",
+      "bytes": 5909,
+      "sha256": "fcaaebda3aa4df1a3252823d78c02a4f0fe0e92acd7ea24b6292a66409094ca6"
+    },
+    {
+      "path": "lifecycle-matrix-fixed-artifacts-01.log",
+      "bytes": 1508,
+      "sha256": "ebcf129ccee4c97cb80bbf50062ecc994b4c283c4bf01a48a790c18a2ce8b84c"
+    },
+    {
+      "path": "lifecycle-r01-red-inventory.json",
+      "bytes": 3546,
+      "sha256": "b2d86f4e76eb967343927a9d2fb3df87116a56f36f21ca985ed1c190acd5c572"
+    },
+    {
+      "path": "lifecycle-r01-red-ubuntu-zip-01.zip",
+      "bytes": 198266,
+      "sha256": "8d1e97897c37ac00a05435d5ae19802826127483f82427902c81050302c2705a"
+    },
+    {
+      "path": "lifecycle-r01-red-windows-zip-01.zip",
+      "bytes": 183375,
+      "sha256": "e6264951a1d1cab44fa43445e8904ec8357e7cdaaac28235f90e643c750ffe8b"
+    },
+    {
+      "path": "lifecycle-r01-red-status-01.log",
+      "bytes": 5909,
+      "sha256": "c77ac49263857968b9d18b67a97cda4a53445c24297ae86d17a8a8f25d595305"
+    },
+    {
+      "path": "lifecycle-r01-red-artifacts-01.log",
+      "bytes": 1508,
+      "sha256": "ead9b245a05dd49277e18a7ad442c16eda72d36f8847bc08fd06b35e84a54b70"
+    },
+    {
+      "path": "lifecycle-r01-fixed-inventory.json",
+      "bytes": 5988,
+      "sha256": "d34de49602b953b510b9aafea45912fd658b576ba1edc3151d7ffea3ceb81680"
+    },
+    {
+      "path": "lifecycle-r01-fixed-ubuntu-zip-01.zip",
+      "bytes": 207393,
+      "sha256": "a454939f5ba945ae8e9df9fdd5f3834e5f524d0abd22025c1c9bdf1b2e30f1a5"
+    },
+    {
+      "path": "lifecycle-r01-fixed-windows-zip-01.zip",
+      "bytes": 196500,
+      "sha256": "4437bfeb380393c1821b65a745451332b718e8d4dccb19d71534937dee644635"
+    },
+    {
+      "path": "lifecycle-r01-fixed-status-01.log",
+      "bytes": 5909,
+      "sha256": "c1d7c6a6c03e4c70a3f5e4c54b8d56f632fb7f687a058b028f5f6670e9617f6a"
+    },
+    {
+      "path": "lifecycle-r01-fixed-artifacts-01.log",
+      "bytes": 1508,
+      "sha256": "f0c81bab94f197b9453d5b48df6acc6e33531c4c58c29ec6c1ffa5d091f31edd"
+    },
+    {
+      "path": "candidate-status-03.log",
+      "bytes": 7695,
+      "sha256": "e7aa922a4e8b9bb5b4c0064417f8b72a50e5c59a2bf617996bee809a49b84e0a"
+    },
+    {
+      "path": "candidate-artifacts-01.log",
+      "bytes": 1457,
+      "sha256": "ca577906304212e693de4c96782d70f5f736a3115ca1f6ea5a42a2461a1c4d6d"
+    },
+    {
+      "path": "candidate-android-console-01.log",
+      "bytes": 3878186,
+      "sha256": "d8a9586b7c165bc906967b82b1e38b2ab9cd4c10fa81e04c9518c06d10a2eb0f"
+    },
+    {
+      "path": "candidate-windows-console-01.log",
+      "bytes": 3767647,
+      "sha256": "945750a13dc276b5bd40cff51a36b42d43f02a2eb62abe6dca6e77a09886b463"
+    },
+    {
+      "path": "signature.stdout",
+      "bytes": 994,
+      "sha256": "d235278cbe3ddcd7d9ca371bbfbd1aaf833f330b5884f678e045b478bc97733b"
+    },
+    {
+      "path": "signature.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "signature.json",
+      "bytes": 844,
+      "sha256": "7c01d1df3eb06fa2bfd2c10b598ccfb9db2de90a307f94441224b4a0d704b261"
+    },
+    {
+      "path": "badging.stdout",
+      "bytes": 6537,
+      "sha256": "42f5e316c3aa186f81e57f43e6982168355459dbd5bc16ee6b635f6c6f177552"
+    },
+    {
+      "path": "badging.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "badging.json",
+      "bytes": 448,
+      "sha256": "21d14b6922d000c4b821e16911488f6910e8499c873dc893908a56a37ea224e0"
+    },
+    {
+      "path": "plan.json",
+      "bytes": 694,
+      "sha256": "374868c8d562b5f9b63c64fd52ed76b575f1716bd253499cd7af98c114b0bc8a"
+    },
+    {
+      "path": "artifact-verification.json",
+      "bytes": 1181,
+      "sha256": "509c07e2697c9bdc735959650123284b56cf7a699273b129ea50d6cc0b927d5e"
+    }
+  ]
+}

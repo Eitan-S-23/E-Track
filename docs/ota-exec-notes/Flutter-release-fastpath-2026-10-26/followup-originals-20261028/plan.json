@@ -1,0 +1,17 @@
+{
+  "source": "392158684d2c2e9492e6140ca41e86bb7f118efc",
+  "run": 40652822499,
+  "attempt": 1,
+  "expectedSignerSha256": "9e9b89c5e7fdc802b1fe71806a988a866db49cd988a739caeee56cb69f3df579",
+  "expectedApplicationId": "com.wen.gaia.gaia",
+  "version": "1.0.62+88",
+  "inputs": {
+    "publish_release": false,
+    "replace_existing_release": false,
+    "firmware_latest_url": "https://e-track-firmware-p41-test.tangjichentudou.workers.dev/api/public/firmware/latest",
+    "release_ota_link_profile": "adaptive-v2-candidate"
+  },
+  "scope": "authorized integration, nonpublishing candidate build, targeted query/lifecycle device follow-up",
+  "noFirmwareReplay": true,
+  "noCloudMutation": true
+}

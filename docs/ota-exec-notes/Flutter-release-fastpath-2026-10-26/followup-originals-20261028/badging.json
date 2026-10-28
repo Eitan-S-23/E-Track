@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\.cache\\p3-3-apk\\tools\\android-15\\aapt.exe",
+    "dump",
+    "badging",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\received\\ble-monitor-android.apk"
+  ],
+  "exitCode": 0,
+  "stdoutSha256": "42f5e316c3aa186f81e57f43e6982168355459dbd5bc16ee6b635f6c6f177552",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

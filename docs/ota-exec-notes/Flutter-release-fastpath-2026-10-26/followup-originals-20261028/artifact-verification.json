@@ -1,0 +1,39 @@
+{
+  "result": "VERIFIED",
+  "source": "392158684d2c2e9492e6140ca41e86bb7f118efc",
+  "run": 40652822499,
+  "attempt": 1,
+  "version": "1.0.62+88",
+  "applicationId": "com.wen.gaia.gaia",
+  "debuggable": false,
+  "signerSha256": "9e9b89c5e7fdc802b1fe71806a988a866db49cd988a739caeee56cb69f3df579",
+  "artifacts": [
+    {
+      "artifact": "android-apk",
+      "artifactId": 12800183867,
+      "name": "ble-monitor-android.apk",
+      "bytes": 47429900,
+      "sha256": "4231372ada6f25829bded58070359f697016cf772b7fb20f0b93078e0691a404"
+    },
+    {
+      "artifact": "windows-exe",
+      "artifactId": 12799888545,
+      "name": "ble-monitor-windows.zip",
+      "bytes": 20519040,
+      "sha256": "cc8c35034a5b8761e7c26d8caa79be6ba53e766212648a15e790c8b03a7f4e02"
+    },
+    {
+      "artifact": "windows-exe",
+      "artifactId": 12799888545,
+      "name": "ble-monitor-windows.exe",
+      "bytes": 93184,
+      "sha256": "b94bdb2d1ec7f49ea958b3db5bb3b287bd7aacabd471e1f1d141298d7d0c9764"
+    }
+  ],
+  "windowsX64": true,
+  "windowsBundleMatchesExe": true,
+  "endpointAndProfileLiteralsVerified": true,
+  "deviceOperations": 0,
+  "installed": false,
+  "formalAcceptance": "NOT_RUN"
+}

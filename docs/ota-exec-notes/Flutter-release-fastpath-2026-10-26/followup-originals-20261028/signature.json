@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "D:/install/jdk17/bin/java.exe",
+    "-XX:-UsePerfData",
+    "-Djava.io.tmpdir=D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\host\\tmp",
+    "-Duser.home=D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\host\\java-home",
+    "-XX:ErrorFile=D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\host\\java-error.log",
+    "-jar",
+    "D:\\github\\my\\E-Track\\.cache\\worktrees\\p3-3-admission\\.cache\\p3-3-apk\\tools\\android-15\\lib\\apksigner.jar",
+    "verify",
+    "--verbose",
+    "--print-certs",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\received\\ble-monitor-android.apk"
+  ],
+  "exitCode": 0,
+  "stdoutSha256": "d235278cbe3ddcd7d9ca371bbfbd1aaf833f330b5884f678e045b478bc97733b",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
