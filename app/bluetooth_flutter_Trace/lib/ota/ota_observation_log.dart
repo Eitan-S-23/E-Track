@@ -86,6 +86,7 @@ class OtaObservationLog {
   static const maxLineBytes = 16 * 1024;
   static const _batchBytes = 32 * 1024;
   static const prefixes = [
+    'OTA_QUERY ',
     'OTA_LINK_SAMPLE ',
     'OTA_LINK_STATS ',
     'OTA_LINK_SELECTION ',
@@ -135,6 +136,8 @@ class OtaObservationLog {
   int _lost = 0;
   int _exports = 0;
   bool _exporting = false;
+  int _queryExports = 0;
+  bool _queryExporting = false;
   String? _outcome;
   String? _error;
 
@@ -425,11 +428,21 @@ class OtaObservationLog {
     return done.future;
   }
 
-  Future<File> exportSnapshot() async {
-    if (_closed || _exporting || upgradeActive || _exports >= 4) {
+  Future<File> exportSnapshot() => _exportSnapshot(queryOnly: false);
+
+  Future<File> exportQuerySnapshot() => _exportSnapshot(queryOnly: true);
+
+  Future<File> _exportSnapshot({required bool queryOnly}) async {
+    if (_closed || (queryOnly
+        ? _queryExporting || _queryExports >= 8 || _upgradeStarts != 0
+        : _exporting || upgradeActive || _exports >= 4)) {
       throw StateError('observation export unavailable');
     }
-    _exporting = true;
+    if (queryOnly) {
+      _queryExporting = true;
+    } else {
+      _exporting = true;
+    }
     try {
       final status = await checkpoint();
       if (!status.healthy) throw StateError('observation capture incomplete');
@@ -437,7 +450,8 @@ class OtaObservationLog {
       if (used + (maxBytes - status.bytes) + status.bytes + 8192 > maxStoreBytes) {
         throw const FileSystemException('observation export storage limit');
       }
-      final output = File('${directory.path}/snapshot-${++_exports}.jsonl');
+      final name = queryOnly ? 'query-${++_queryExports}' : 'snapshot-${++_exports}';
+      final output = File('${directory.path}/$name.jsonl');
       await output.create(exclusive: true);
       final destination = await output.open(mode: FileMode.writeOnlyAppend);
       final digest = _DigestSink();
@@ -462,7 +476,11 @@ class OtaObservationLog {
       }
       return output;
     } finally {
-      _exporting = false;
+      if (queryOnly) {
+        _queryExporting = false;
+      } else {
+        _exporting = false;
+      }
     }
   }
 

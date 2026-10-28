@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -9,6 +10,8 @@ import 'package:get/get.dart';
 
 import 'package:ble_monitor/ota/ota_ble_codec.dart';
 import 'package:ble_monitor/ota/ota_device_info.dart';
+import 'package:ble_monitor/ota/ota_diagnostics.dart';
+import 'package:ble_monitor/ota/ota_query_trace.dart';
 import 'package:ble_monitor/ota/ota_link_stats.dart';
 import 'package:ble_monitor/services/app_update_service.dart';
 import 'package:ble_monitor/services/bluetooth_service.dart';
@@ -124,6 +127,60 @@ void main() {
       if (tempDir.existsSync()) tempDir.deleteSync(recursive: true);
     });
     return tempDir;
+  }
+
+  for (final mode in ['no_update', 'retry', 'schema_invalid', 'cancelled', 'identity_missing']) {
+    test('query trace follows real service and HTTP branches: $mode', () async {
+      final dir = tempFirmwareDir();
+      final ble = _FakeBle(infoPayload);
+      Get.put<AppUpdateService>(_FakeAppUpdateService());
+      final gate = Completer<void>();
+      const noUpdate = '{"schemaVersion":2,"requestId":"req-query","updateAvailable":false,"errorCode":"NO_UPDATE"}';
+      final dio = latestDio([
+        if (mode == 'retry') _LatestBehavior.status(503),
+        if (mode == 'cancelled') _LatestBehavior.gated(gate)
+        else _LatestBehavior.ok(mode == 'schema_invalid' ? '{}' : noUpdate),
+      ]);
+      final service = makeService(ble: ble, latest: dio,
+          download: downloadDio([]), firmwareDir: dir);
+      if (mode != 'identity_missing') await service.readDeviceInfo('aa:bb:cc:dd:ee:ff');
+      final diagnostics = _QueryDiagnostics();
+      final trace = OtaQueryTrace.start(diagnostics, 'ui')!;
+      final operation = trace.bind(() => service.checkFirmwareUpdate());
+      if (mode == 'cancelled') {
+        for (var i = 0; i < 100 &&
+            (dio.httpClientAdapter as _LatestMockAdapter).requestCount == 0; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 10));
+        }
+        await service.cancelUpgrade();
+        gate.complete();
+      }
+      expect(await operation, isNull);
+      await trace.checkpoint();
+      final events = diagnostics.events;
+      expect(events.every((row) => row['queryId'] == trace.id), isTrue);
+      expect(events.where((row) => row['stage'] == 'service_exit'), hasLength(1));
+      final stages = events.map((row) => row['stage']).toList();
+      if (mode == 'identity_missing') {
+        expect(stages, contains('gate_rejected'));
+        expect(stages, isNot(contains('http_start')));
+      } else if (mode == 'cancelled') {
+        expect(stages, contains('cancelled'));
+        expect(service.phase, OtaPhase.cancelled);
+        expect(stages, isNot(contains('latest_parsed')));
+      } else {
+        expect(stages, containsAllInOrder(['owner_wait', 'owner_ready',
+          'local_version_start', 'local_version_done', 'http_start', 'http_response',
+          'result', 'owner_released', 'service_exit']));
+        expect(events.singleWhere((row) => row['stage'] == 'result')['fields']['outcome'],
+            mode == 'schema_invalid' ? 'schema_invalid' : 'no_update');
+        if (mode == 'retry') {
+          expect(stages, contains('http_retry'));
+          expect(events.where((row) => row['stage'] == 'http_start')
+              .map((row) => row['fields']['attempt']), orderedEquals([1, 2]));
+        }
+      }
+    });
   }
 
   test('fresh latest restores completed package after service memory was lost', () async {
@@ -556,6 +613,19 @@ class _FakeAppUpdateService extends AppUpdateService {
 }
 
 /// latest 行为（一次请求消费一个）。
+class _QueryDiagnostics extends OtaDiagnostics {
+  _QueryDiagnostics() {
+    status.value = const OtaDiagnosticStatus(enabled: true, ready: true);
+  }
+  final events = <Map<String, dynamic>>[];
+  @override
+  void record(String line) {
+    events.add(jsonDecode(line.substring('OTA_QUERY '.length)) as Map<String, dynamic>);
+  }
+  @override
+  Future<File?> checkpointQuery({bool snapshot = false}) async => null;
+}
+
 class _LatestBehavior {
   _LatestBehavior._(this.status, this.body, this.gate);
 

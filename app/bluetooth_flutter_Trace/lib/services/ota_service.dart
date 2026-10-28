@@ -24,6 +24,7 @@ import '../ota/ota_link_stats.dart';
 import '../ota/ota_link_profile.dart';
 import '../ota/ota_mono.dart';
 import '../ota/ota_probe_retry.dart';
+import '../ota/ota_query_trace.dart';
 import '../ota/ota_radio_lease.dart';
 import 'app_update_service.dart';
 import 'bluetooth_service.dart';
@@ -690,22 +691,53 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   /// 入口互斥（RC3-04）：与其他升级族入口经同一 owner 锁串行；取消
   /// 代次贯穿 latest 重试与发布，取消后不发布旧状态。
   Future<FirmwareLatestInfo?> checkFirmwareUpdate({String? channel}) async {
+    final inherited = OtaQueryTrace.current;
+    final trace = inherited ?? OtaQueryTrace.start(OtaDiagnostics.current, 'service');
+    if (trace == null) return _checkFirmwareUpdate(channel: channel);
+    return trace.bind(() async {
+      trace.event('service_enter', {
+        'hasIdentity': _deviceInfo != null, 'busy': isUpgrading,
+        'configured': isFirmwareServiceConfigured,
+      });
+      try {
+        return await _checkFirmwareUpdate(channel: channel);
+      } catch (error) {
+        trace.event('service_exception', {'type': error.runtimeType.toString()});
+        rethrow;
+      } finally {
+        trace.event('service_exit', {
+          'phase': phase.name, 'terminal': terminalState?.code,
+          'statusSha256': OtaQueryTrace.digest(upgradeStatus),
+          'hasUpdate': latestInfo?.hasUpdate == true,
+        });
+        unawaited(trace.checkpoint());
+        if (inherited == null) unawaited(trace.snapshot());
+      }
+    });
+  }
+
+  Future<FirmwareLatestInfo?> _checkFirmwareUpdate({String? channel}) async {
+    final trace = OtaQueryTrace.current;
     if (_isUpgrading.value) {
+      trace?.event('gate_rejected', {'reason': 'busy'});
       _notify('提示', '升级流程进行中，请先取消或等待完成');
       return null;
     }
     final locked = _terminalLocked();
     if (locked != null) {
+      trace?.event('gate_rejected', {'reason': 'terminal', 'code': terminalState?.code});
       _upgradeStatus.value = locked;
       return null;
     }
     final info = _deviceInfo;
     if (info == null) {
+      trace?.event('gate_rejected', {'reason': 'identity_missing'});
       _upgradeStatus.value = '未建立设备身份，先连接设备完成 GET_INFO';
       _notify('错误', '请先连接设备后再检查固件更新');
       return null;
     }
     if (!isFirmwareServiceConfigured) {
+      trace?.event('gate_rejected', {'reason': 'endpoint_missing'});
       _upgradeStatus.value = '固件服务未配置';
       _notify('错误', '固件更新地址未配置，无法检查更新');
       return null;
@@ -713,16 +745,23 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     return _runExclusive((generation) async {
       final int appVersionCode;
       try {
+        trace?.event('local_version_start');
         appVersionCode =
             await Get.find<AppUpdateService>().getLocalAppVersionCode();
+        trace?.event('local_version_done', {'appVersionCode': appVersionCode,
+          'firmwareVersionCode': info.currentVersionCode});
       } catch (_) {
+        trace?.event('gate_rejected', {'reason': 'local_version_failed'});
         _upgradeStatus.value = '无法读取本机 App 版本（appVersionCode）';
         _notify('错误', '无法读取本机应用版本，不能检查固件更新');
         return null;
       }
       // App-info await 后取消检查（RC3-04）：读取本地版本期间用户
       // 取消，不发 latest 请求。
-      if (generation != _cancelGeneration) return null;
+      if (generation != _cancelGeneration) {
+        trace?.event('cancelled', {'stage': 'local_version'});
+        return null;
+      }
       return _checkLatestLocked(info, appVersionCode, channel,
           generation: generation);
     });
@@ -744,11 +783,14 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     _phase.value = OtaPhase.checkingUpdate;
     _terminalState.value = null;
     final gen = generation;
+    final trace = OtaQueryTrace.current;
     try {
       _upgradeStatus.value = '检查固件更新中...';
       _upgradeProgress.value = 0.0;
 
       final uri = _latestUriBuilder(info, appVersionCode, channel);
+      trace?.event('latest_start', {'endpointSha256': OtaQueryTrace.digest(
+        '${uri.scheme}://${uri.host}:${uri.port}${uri.path}')});
       final response = await _getLatestWithRetry(uri, gen);
       if (response == null) return null; // 取消：静默退出，不发布状态
       final body = _readJsonObject(response.data);
@@ -759,6 +801,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         // effectiveChannel 默认值即 ShareLinks.updateChannel。
         expectedChannel: channel ?? ShareLinks.updateChannel,
       );
+      trace?.event('latest_parsed', {'requestId': body['requestId'],
+        'updateAvailable': latest.updateAvailable, 'errorCode': latest.errorCode});
 
       if (!latest.updateAvailable) {
         _clearFirmwareInfo();
@@ -771,10 +815,12 @@ class OtaService extends GetxController with WidgetsBindingObserver {
             retryableLater: true,
           );
           _phase.value = OtaPhase.failed;
+          trace?.event('result', {'outcome': 'channel_stopped'});
           return null;
         }
         _upgradeStatus.value = '固件已是最新版本';
         _phase.value = OtaPhase.idle;
+        trace?.event('result', {'outcome': 'no_update'});
         return null;
       }
 
@@ -792,15 +838,19 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       // 记忆本次查询身份（RC3-10⑤）：URL 过期刷新绑定同一 channel。
       _lastCheckedChannel = channel;
       _upgradeStatus.value = '发现新固件: ${latest.versionName}';
+      trace?.event('cache_restore_start');
       await _restoreCachedPackage(latest, gen ?? _cancelGeneration);
+      trace?.event('cache_restore_done');
       if (gen != null && gen != _cancelGeneration) return null;
       if (_verified != null) {
         _phase.value = OtaPhase.readyToInstall;
       } else {
         _phase.value = OtaPhase.idle;
       }
+      trace?.event('result', {'outcome': 'update_available'});
       return latest;
     } on OtaLatestParseException catch (e) {
+      trace?.event('result', {'outcome': 'schema_invalid'});
       // 解析失败是稳定终态：闭锁资产/文件，重试同样请求无意义（PR11）。
       _clearFirmwareInfo();
       _terminalState.value = OtaTerminalState(
@@ -812,6 +862,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       _phase.value = OtaPhase.failed;
       return null;
     } on FormatException catch (e) {
+      trace?.event('result', {'outcome': 'json_invalid'});
       // 200 响应体非 JSON 对象（如空 body/数组）：与解析失败同级稳定
       // 终态，清旧资产防止继续消费过期清单（RC3-10）。
       _clearFirmwareInfo();
@@ -829,6 +880,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       // 此时进入可稍后重试终态并清旧资产，避免沿用可能过期的清单。
       if (gen != null && gen != _cancelGeneration) return null; // 取消：静默
       final terminal = _terminalFromDioError(error, retryExhausted: true);
+      trace?.event('result', {'outcome': 'error', 'type': error.runtimeType.toString(),
+        'code': terminal?.code});
       if (terminal != null) {
         _terminalState.value = terminal;
         _clearFirmwareInfo();
@@ -2142,7 +2195,9 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   ///   覆盖取消终态。
   Future<T?> _runExclusive<T>(Future<T?> Function(int generation) body,
       {_OtaOperation operation = _OtaOperation.query}) async {
+    final queryTrace = OtaQueryTrace.current;
     if (_isUpgrading.value) {
+      queryTrace?.event('gate_rejected', {'reason': 'owner_busy'});
       _notify('提示', '操作进行中，请先取消或等待完成');
       return null;
     }
@@ -2161,12 +2216,17 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       // GetX listeners run inline: publish only after the new owner is complete.
       _isUpgrading.value = true;
       releaseReconnect = _ble.holdAutomaticReconnect();
+      queryTrace?.event('owner_wait');
       await previous;
       await _ble.automaticReconnectSettled;
+      queryTrace?.event('owner_ready');
       // RC3-04：排队等待期间被取消（代次已变）则不进入 body——禁止
       // 执行已被取消的操作（如恢复下载 body 前不查取消导致取消后又
       // 发起请求）。
-      if (generation != _cancelGeneration) return null;
+      if (generation != _cancelGeneration) {
+        queryTrace?.event('cancelled', {'stage': 'owner_wait'});
+        return null;
+      }
       return await body(generation);
     } finally {
       if (identical(_ownerDone, done.future)) {
@@ -2184,6 +2244,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           _isUpgrading.value = false;
         }
         releaseReconnect?.call();
+        queryTrace?.event('owner_released');
       }
     }
   }
@@ -2707,22 +2768,41 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   /// latest 请求）。
   Future<Response<dynamic>?> _getLatestWithRetry(Uri uri, int? generation) async {
     var attempts = 0;
+    final trace = OtaQueryTrace.current;
     while (true) {
       final token = CancelToken();
       _activeLatestToken = token;
       try {
+        trace?.event('http_start', {'attempt': attempts + 1});
         final response = await _dio.getUri(uri, cancelToken: token);
-        if (_generationCancelled(generation)) return null;
+        trace?.event('http_response', {'attempt': attempts + 1,
+          'status': response.statusCode,
+          'requestId': _firstHeader(response.headers, 'x-request-id')});
+        if (_generationCancelled(generation)) {
+          trace?.event('cancelled', {'stage': 'http_response'});
+          return null;
+        }
         return response;
       } on DioException catch (e) {
-        if (CancelToken.isCancel(e)) return null; // 取消：静默退出
+        trace?.event('http_error', {'attempt': attempts + 1,
+          'type': e.type.name, 'status': e.response?.statusCode,
+          'requestId': _firstHeader(e.response?.headers, 'x-request-id')});
+        if (CancelToken.isCancel(e)) {
+          trace?.event('cancelled', {'stage': 'http'});
+          return null;
+        }
         if (!_isAutoRetryableLatestError(e) || attempts >= 2) rethrow;
         attempts++;
         final retryAfter = _retryAfterSecondsOf(e) ?? (attempts == 1 ? 1 : 2);
+        trace?.event('http_retry', {'nextAttempt': attempts + 1,
+          'delaySeconds': retryAfter.clamp(1, 30)});
         await Future<void>.delayed(
           Duration(seconds: retryAfter.clamp(1, 30)),
         );
-        if (_generationCancelled(generation)) return null;
+        if (_generationCancelled(generation)) {
+          trace?.event('cancelled', {'stage': 'retry_wait'});
+          return null;
+        }
       } finally {
         if (identical(_activeLatestToken, token)) _activeLatestToken = null;
       }

@@ -80,6 +80,15 @@ class OtaDiagnostics {
     _log?.record(line);
   }
 
+  Future<File?> checkpointQuery({bool snapshot = false}) async {
+    if (!enabled) return null;
+    final log = _log;
+    if (log == null || !(await log.checkpoint()).healthy) {
+      throw StateError('query capture unavailable');
+    }
+    return snapshot ? log.exportQuerySnapshot() : null;
+  }
+
   Future<bool> beginUpgrade(Map<String, Object?> input) async {
     final runtime = OtaExperimentRuntime.current;
     if (runtime.enabled) {

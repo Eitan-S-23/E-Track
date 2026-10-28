@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -118,6 +119,133 @@ void main() {
     );
     return button;
   }
+
+  group('idle firmware query feedback', () {
+    final status = find.byKey(const ValueKey('ota-check-status'));
+
+    testWidgets('no-update result remains visible and repeat checks hide stale feedback', (tester) async {
+      final fake = _FakeOtaService()
+        ..readResult = deviceInfoOf()
+        ..checkGate = Completer<FirmwareLatestInfo?>();
+      await pumpPage(tester, fake: fake,
+          connectedDevice: BluetoothDevice.fromId('AA:BB:CC:DD:EE:FF'));
+      expect(status, findsNothing, reason: 'no success before a query result');
+      final button = find.widgetWithText(ElevatedButton, '检查更新');
+      for (var attempt = 1; attempt <= 2; attempt++) {
+        await tester.ensureVisible(button);
+        await tester.tap(button);
+        await tester.pump();
+        expect(fake.checkCalls, attempt);
+        expect(status, findsNothing, reason: 'old feedback is hidden while checking');
+        expect(findButton(tester, '检查中...').onPressed, isNull);
+        fake.status$.value = '固件已是最新版本';
+        fake.phase$.value = OtaPhase.idle;
+        fake.checkGate!.complete(null);
+        await tester.pumpAndSettle();
+        expect(tester.widget<Text>(status).data, '固件已是最新版本');
+        expect(findButton(tester, '检查更新').onPressed, isNotNull);
+        expect(find.text('固件就绪'), findsNothing);
+        expect(find.text('开始 BLE 传输'), findsNothing);
+        await tester.pump(const Duration(seconds: 5));
+        expect(status, findsOneWidget, reason: 'result must not expire like a snackbar');
+        fake.checkGate = Completer<FirmwareLatestInfo?>();
+      }
+      expect(fake.downloadCalls, 0);
+      expect(fake.cancelCalls, 0);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('idle status text changes rebuild without a phase change', (tester) async {
+      final fake = _FakeOtaService();
+      await pumpPage(tester, fake: fake);
+      expect(status, findsNothing);
+      fake.status$.value = '无法读取本机 App 版本（appVersionCode）';
+      await tester.pump();
+      expect(tester.widget<Text>(status).data, fake.upgradeStatus);
+      fake.status$.value = '固件已是最新版本';
+      await tester.pump();
+      expect(tester.widget<Text>(status).data, fake.upgradeStatus);
+      fake.status$.value = '';
+      await tester.pump();
+      expect(status, findsNothing);
+    });
+
+    for (final state in ['manifest', 'cached', 'checking', 'failed', 'terminal']) {
+      testWidgets('$state uses its existing feedback instead of an idle result', (tester) async {
+        final fake = _FakeOtaService()..readResult = deviceInfoOf();
+        await pumpPage(tester, fake: fake,
+            connectedDevice: BluetoothDevice.fromId('AA:BB:CC:DD:EE:FF'));
+        fake.status$.value = 'query state';
+        if (state == 'manifest') fake.latest = latestOf();
+        if (state == 'cached') fake.hasFile = true;
+        if (state == 'checking') fake.phase$.value = OtaPhase.checkingUpdate;
+        if (state == 'failed') fake.phase$.value = OtaPhase.failed;
+        if (state == 'terminal') {
+          fake.terminal$.value = OtaTerminalState(
+              code: 'CHANNEL_STOPPED', message: 'channel stopped', retryableLater: true);
+        }
+        await tester.pump();
+        expect(status, findsNothing);
+        expect(tester.takeException(), isNull);
+      });
+    }
+  });
+
+  group('query UI trace', () {
+    for (final mode in ['visible', 'disposed', 'covered']) {
+      testWidgets('records callback and actual frame state when $mode', (tester) async {
+        final fake = _FakeOtaService()
+          ..readResult = deviceInfoOf()
+          ..checkGate = Completer<FirmwareLatestInfo?>();
+        final diagnostics = _QueryPageDiagnostics();
+        await pumpPage(tester, fake: fake, diagnostics: diagnostics,
+            connectedDevice: BluetoothDevice.fromId('AA:BB:CC:DD:EE:FF'));
+        final button = find.widgetWithText(ElevatedButton, '检查更新');
+        await tester.ensureVisible(button);
+        await tester.tap(button);
+        await tester.pump();
+        if (mode == 'disposed') {
+          await tester.pumpWidget(const MaterialApp(home: Scaffold()));
+        } else if (mode == 'covered') {
+          unawaited(Navigator.of(tester.element(find.byType(OtaUpgradePage)))
+              .push(MaterialPageRoute<void>(builder: (_) => const Scaffold(body: Text('away')))));
+          await tester.pump(const Duration(seconds: 1));
+        }
+        fake.status$.value = '固件已是最新版本';
+        fake.checkGate!.complete(null);
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        final events = diagnostics.events;
+        expect(events.where((row) => row['stage'] == 'ui_callback'), hasLength(1));
+        expect(events.map((row) => row['queryId']).toSet(), hasLength(1));
+        expect(diagnostics.snapshots, 1);
+        if (mode == 'disposed') {
+          expect(events.singleWhere((row) => row['stage'] == 'ui_absent')['fields']['reason'], 'disposed');
+        } else {
+          final frame = events.singleWhere((row) => row['stage'] == 'ui_frame')['fields'];
+          expect(frame['routeCurrent'], mode == 'visible');
+          if (mode == 'visible') {
+            expect(frame['feedbackAttached'], isTrue);
+            expect(frame['feedbackInViewport'], isTrue);
+          }
+        }
+      });
+    }
+
+    testWidgets('disabled button records a pointer and its gates without starting a query', (tester) async {
+      final fake = _FakeOtaService();
+      final diagnostics = _QueryPageDiagnostics();
+      await pumpPage(tester, fake: fake, diagnostics: diagnostics);
+      final button = find.widgetWithText(ElevatedButton, '检查更新');
+      await tester.ensureVisible(button);
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+      expect(fake.checkCalls, 0);
+      final event = diagnostics.events.singleWhere((row) => row['stage'] == 'ui_disabled_pointer');
+      expect(event['fields']['deviceReady'], isFalse);
+      expect(diagnostics.snapshots, 1);
+    });
+  });
 
   testWidgets('diagnostic export is absent in the default configuration', (tester) async {
     await pumpPage(tester);
@@ -1056,6 +1184,23 @@ class _FakeOtaService extends OtaService {
     phase$.value = success ? OtaPhase.readyToInstall : OtaPhase.failed;
     isUpgrading$.value = false;
     return success;
+  }
+}
+
+class _QueryPageDiagnostics extends OtaDiagnostics {
+  _QueryPageDiagnostics() {
+    status.value = const OtaDiagnosticStatus(enabled: true, ready: true);
+  }
+  final events = <Map<String, dynamic>>[];
+  int snapshots = 0;
+  @override
+  void record(String line) {
+    events.add(jsonDecode(line.substring('OTA_QUERY '.length)) as Map<String, dynamic>);
+  }
+  @override
+  Future<File?> checkpointQuery({bool snapshot = false}) async {
+    if (snapshot) snapshots++;
+    return null;
   }
 }
 

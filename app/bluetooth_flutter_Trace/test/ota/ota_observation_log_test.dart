@@ -323,6 +323,32 @@ void main() {
     await expectLater(first.exportSnapshot(), throwsStateError);
   });
 
+  test('query snapshots are immutable, query-only and do not spend OTA export slots', () async {
+    final log = await open();
+    log.record('OTA_QUERY {"schema":1,"stage":"result"}');
+    final file = await log.exportQuerySnapshot();
+    final original = await file.readAsBytes();
+    final footer = jsonDecode((await file.readAsLines()).last);
+    expect(footer['upgradeStarts'], 0);
+    expect(footer['upgradeEnds'], 0);
+    expect(footer['outcome'], isNull);
+    expect(footer['sha256'], sha256.convert(original.sublist(0, footer['bytes'] as int)).toString());
+    expect(await OtaObservationLog.latestSnapshot(root), isNull);
+    for (var i = 1; i < 8; i++) {
+      log.record('OTA_QUERY {"schema":1,"stage":"result"}');
+      await log.exportQuerySnapshot();
+    }
+    await expectLater(log.exportQuerySnapshot(), throwsStateError);
+    expect(await file.readAsBytes(), original);
+    expect(await log.beginUpgrade(input()), isTrue);
+    await expectLater(log.exportQuerySnapshot(), throwsStateError);
+    await log.endUpgrade(completed: false);
+    for (var i = 0; i < 4; i++) {
+      await log.exportSnapshot();
+    }
+    expect((await log.checkpoint()).healthy, isTrue);
+  });
+
   test('close is idempotent and refuses further records', () async {
     final writer = MemoryWriter();
     final log = await open(writer: writer);

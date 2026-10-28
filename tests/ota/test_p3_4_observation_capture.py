@@ -254,6 +254,23 @@ class CaptureTests(unittest.TestCase):
         self.assertIsNone(result["outcome"])
         with self.assertRaises(m.CaptureError): self.verify(data)
 
+    def test_query_trace_keeps_query_only_and_privacy_boundaries(self):
+        items = rows(complete=False)
+        message = 'OTA_QUERY ' + json.dumps(dict(schema=1, queryId='1793190000000-1',
+            seq=1, elapsedUs=0, stage='ui_callback', fields=dict(deviceReady=True)))
+        items[1]['message'] = message
+        result, log = self.verify(encoded(items), require_upgrade=False)
+        self.assertIn(message, log)
+        self.assertIsNone(result['outcome'])
+        self.assertFalse(result['eligibleForThreshold'])
+        with self.assertRaises(m.CaptureError):
+            self.verify(encoded(items))
+        for bad in ('OTA_QUERY_UNKNOWN {}', 'OTA_QUERY token=secret',
+                    'OTA_QUERY https://private.invalid/', 'OTA_QUERY ok\nok'):
+            items[1]['message'] = bad
+            with self.assertRaises(m.CaptureError):
+                self.verify(encoded(items), require_upgrade=False)
+
     def test_experiment_record_is_preserved_without_changing_upgrade_identity(self):
         items = rows()
         message = "OTA_EXPERIMENT " + json.dumps(dict(schema=1, runId="b921600-001",

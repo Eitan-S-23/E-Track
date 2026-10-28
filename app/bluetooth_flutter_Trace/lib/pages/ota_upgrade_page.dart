@@ -8,6 +8,7 @@ import 'package:share_plus/share_plus.dart';
 import '../ota/ota_diagnostics.dart';
 import '../ota/ota_experiment_config.dart';
 import '../ota/ota_firmware_latest.dart';
+import '../ota/ota_query_trace.dart';
 import '../services/ota_service.dart';
 import '../utils/safe_snackbar.dart';
 
@@ -42,6 +43,8 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
 
   bool _isChecking = false;
   bool _isExporting = false;
+  final _checkStatusKey = GlobalKey();
+  OtaQueryTrace? _lastQueryTrace;
   /// 自动解析出的已连接设备（无显式 connectedDevice 参数时，
   /// PR18：speedometer 等入口 `Get.to(OtaUpgradePage())` 不传参）。
   BluetoothDevice? _resolvedDevice;
@@ -499,6 +502,15 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
     // 身份，而非盲目重查）；retryableLater（如重启重连失败）仍可查。
     final terminal = otaService.terminalState;
     final terminalLocked = terminal != null && !terminal.retryableLater;
+    final status = otaService.upgradeStatus;
+    // Idle query results have no firmware/progress card to carry their feedback.
+    final showCheckStatus = !_isChecking &&
+        !otaService.isUpgrading &&
+        otaService.phase == OtaPhase.idle &&
+        terminal == null &&
+        otaService.latestInfo?.hasUpdate != true &&
+        otaService.downloadedFirmwareFile == null &&
+        status.isNotEmpty;
     final canCheck = !_isChecking &&
         !otaService.isUpgrading &&
         otaService.isFirmwareServiceConfigured &&
@@ -559,23 +571,35 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
             runSpacing: 12,
             alignment: WrapAlignment.center,
             children: [
-              ElevatedButton.icon(
-                onPressed: canCheck ? _checkForUpdate : null,
-                icon: _isChecking
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.search),
-                label: Text(_isChecking ? '检查中...' : '检查更新'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4A90E2),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 32, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+              Listener(
+                onPointerDown: (_) {
+                  if (canCheck) return;
+                  final trace = OtaQueryTrace.start(_diagnostics, 'disabled_button');
+                  trace?.event('ui_disabled_pointer', {
+                    'checking': _isChecking, 'busy': otaService.isUpgrading,
+                    'deviceReady': _deviceReady, 'terminalLocked': terminalLocked,
+                    'configured': otaService.isFirmwareServiceConfigured,
+                  });
+                  if (trace != null) unawaited(trace.snapshot());
+                },
+                child: ElevatedButton.icon(
+                  onPressed: canCheck ? _checkForUpdate : null,
+                  icon: _isChecking
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.search),
+                  label: Text(_isChecking ? '检查中...' : '检查更新'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF4A90E2),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
               ),
@@ -597,6 +621,19 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
                 ),
             ],
           ),
+          if (showCheckStatus) ...[
+            const SizedBox(height: 16),
+            Semantics(
+              key: _checkStatusKey,
+              liveRegion: true,
+              child: Text(
+                status,
+                key: const ValueKey('ota-check-status'),
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Color(0xFF2E3A59)),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -1196,13 +1233,22 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
   }
 
   void _checkForUpdate() async {
+    final trace = OtaQueryTrace.start(_diagnostics, 'ui');
+    _lastQueryTrace = trace;
+    trace?.event('ui_callback', {'deviceReady': _deviceReady,
+      'lifecycle': WidgetsBinding.instance.lifecycleState?.name ?? 'unknown'});
     setState(() {
       _isChecking = true;
     });
 
     try {
-      await otaService.checkFirmwareUpdate();
+      if (trace == null) {
+        await otaService.checkFirmwareUpdate();
+      } else {
+        await trace.bind(() => otaService.checkFirmwareUpdate());
+      }
     } catch (e) {
+      trace?.event('ui_exception', {'type': e.runtimeType.toString()});
       if (!mounted) return;
       safeSnackbar('错误', '检查更新失败: $e', context: context,
           backgroundColor: Colors.red.withValues(alpha: 0.1),
@@ -1214,7 +1260,42 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
           _isChecking = false;
         });
       }
+      if (trace != null) {
+        trace.event('ui_callback_end', {'mounted': mounted});
+        unawaited(trace.checkpoint());
+        if (!mounted) {
+          trace.event('ui_absent', {'reason': 'disposed'});
+          unawaited(trace.snapshot());
+        } else {
+          trace.event('ui_frame_pending');
+          WidgetsBinding.instance.addPostFrameCallback((_) => _recordQueryFrame(trace));
+        }
+      }
     }
+  }
+
+  void _recordQueryFrame(OtaQueryTrace trace) {
+    if (!mounted || !identical(trace, _lastQueryTrace)) {
+      trace.event('ui_absent', {'reason': mounted ? 'superseded' : 'disposed'});
+    } else {
+      final box = _checkStatusKey.currentContext?.findRenderObject();
+      Rect? rect;
+      if (box is RenderBox && box.attached && box.hasSize) {
+        rect = box.localToGlobal(Offset.zero) & box.size;
+      }
+      final viewport = Offset.zero & MediaQuery.sizeOf(context);
+      trace.event('ui_frame', {
+        'phase': otaService.phase.name,
+        'statusSha256': OtaQueryTrace.digest(otaService.upgradeStatus),
+        'routeCurrent': ModalRoute.of(context)?.isCurrent == true,
+        'lifecycle': WidgetsBinding.instance.lifecycleState?.name ?? 'unknown',
+        'feedbackAttached': rect != null,
+        'feedbackInViewport': rect != null && !rect.isEmpty && rect.overlaps(viewport),
+        'hasUpdate': otaService.latestInfo?.hasUpdate == true,
+        'terminal': otaService.terminalState?.code,
+      });
+    }
+    unawaited(trace.snapshot());
   }
 
   void _downloadFirmware() async {
