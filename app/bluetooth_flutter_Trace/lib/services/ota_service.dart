@@ -174,7 +174,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   Map<String, Object?> _p35Transfer = {};
 
   Map<String, Object?> _p35Snapshot() => {
-    'deviceAddress': _p35Address,
+    'deviceAddress': _deviceInfoAddress ?? _assetOwnerAddress ?? _p35Address,
     'phase': phase.name,
     'currentVersionCode': _p35Identity?.currentVersionCode ?? 0,
     'currentImageSha256': _p35Identity?.currentImageSha256Hex,

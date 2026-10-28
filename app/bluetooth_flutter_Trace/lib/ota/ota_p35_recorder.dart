@@ -28,20 +28,22 @@ class OtaP35Recorder {
   final List<String> _pending = [];
   OtaObservationWriter? _writer;
   Future<void>? _draining, _stopping;
+  Completer<void>? _opened;
   Timer? _heartbeat, _deadline;
   Map<String, Object?> Function()? _snapshot;
   String? captureId, error;
   File? file;
   int _seq = 0, _bytes = 0, _written = 0, lost = 0;
-  bool _starting = false, _accepting = false;
+  bool _starting = false, _accepting = false, _stopRequested = false;
   late _DigestSink _digest;
   late ByteConversionSink _hash;
   bool get active => _accepting;
   bool get healthy => active && error == null;
 
   Future<bool> start(Map<String, Object?> Function() snapshot) async {
-    if (_starting || active || captureId != null) return false;
+    if (_starting || active || captureId != null || _stopRequested) return false;
     _starting = true;
+    _opened = Completer<void>();
     status.value = 'starting';
     try {
       final base = await (directoryProvider?.call() ?? _defaultDirectory());
@@ -61,6 +63,7 @@ class OtaP35Recorder {
       await _writer!.append(utf8.encode('$header\n'));
       await _writer!.flush();
       _emit(header);
+      if (_stopRequested) return false;
       _snapshot = snapshot;
       _clock.start();
       _accepting = true;
@@ -80,6 +83,7 @@ class OtaP35Recorder {
       return false;
     } finally {
       _starting = false;
+      _opened!.complete();
     }
   }
 
@@ -144,9 +148,13 @@ class OtaP35Recorder {
 
   void fail(String code) { if (active) _fail(code); }
 
-  Future<void> stop() => _stopping ??= _stop();
+  Future<void> stop() {
+    _stopRequested = true;
+    return _stopping ??= _stop();
+  }
 
   Future<void> _stop() async {
+    await _opened?.future;
     _accepting = false;
     _heartbeat?.cancel();
     _deadline?.cancel();

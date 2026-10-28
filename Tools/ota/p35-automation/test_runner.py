@@ -266,6 +266,12 @@ class CampaignTests(unittest.TestCase):
         with self.assertRaises(r.Stop):c.run()
         self.assertNotIn(('tap',{'text':'start'}),io.actions)
 
+    def test_historical_identity_is_not_sufficient_to_start(self):
+        rows = trace(); rows[3]['freshConnection'] = False
+        c, io = self.run_rows(rows)
+        with self.assertRaises(r.Stop): c.run()
+        self.assertNotIn(('tap', {'text': 'start'}), io.actions)
+
     def test_missed_boundary_never_injects(self):
         rows=trace();rows[5]['durable']=4096
         c,io=self.run_rows(rows)

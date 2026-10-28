@@ -125,4 +125,19 @@ void main() {
     expect(r.error, 'snapshot-failed');
     await r.stop();
   });
+
+  test('stop during asynchronous open cannot resurrect recording', () async {
+    final directory = Completer<Directory>();
+    final lines = <String>[];
+    final r = OtaP35Recorder(emit: lines.add, directoryProvider: () => directory.future);
+    final starting = r.start(snapshot);
+    final stopping = r.stop();
+    directory.complete(root);
+    expect(await starting, isFalse);
+    await stopping;
+    expect(r.active, isFalse);
+    expect(r.status.value, 'closed');
+    expect(lines.where((l) => l.startsWith('OTA_P35_STATE ')), isEmpty);
+    expect(await r.start(snapshot), isFalse);
+  });
 }

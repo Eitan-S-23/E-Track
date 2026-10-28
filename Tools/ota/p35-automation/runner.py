@@ -342,6 +342,7 @@ class Campaign:
             self.io.tap(self.p['ui']['download'])
         ready = self.wait(lambda s: s['phase'] == 'readyToInstall', 'download-and-verify')
         bound(ready, self.p, package=True)
+        require(ready['linkConnected'] and ready['freshConnection'], 'fresh package-owner identity required before start', 'IDENTITY_MISMATCH')
         self.io.tap(self.p['ui']['start'])
         self.wait(lambda s: s['event'] == 'beginAck', 'initial-BEGIN')
         require(self.state['durable'] == 0 and self.state['bitmap'] in (None, 0), 'unknown initial staging; no reset/erase workaround')
@@ -466,6 +467,8 @@ class Android:
             data = stream.read()
         self.offset += len(data)
         states = self.decoder.feed(data)
+        require(all(s['deviceAddress'] == self.p['firmware']['device_address'] for s in states),
+                'App switched target during capture; no further UI/radio actions', 'IDENTITY_MISMATCH')
         if states:
             self.last_state_at = time.monotonic()
         self.queue.extend(states)
