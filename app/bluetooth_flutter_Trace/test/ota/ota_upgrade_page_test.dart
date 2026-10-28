@@ -122,24 +122,28 @@ void main() {
 
   testWidgets('P35 controls expose native semantic identifiers and tap actions', (tester) async {
     final semantics = tester.ensureSemantics();
-    addTearDown(semantics.dispose);
-    final fake = _FakeOtaService()..readResult = deviceInfoOf();
-    await pumpPage(tester, fake: fake,
-        connectedDevice: BluetoothDevice.fromId('AA:BB:CC:DD:EE:FF'));
-    for (final id in ['p35-check', 'p35-arm']) {
-      final control = find.byWidgetPredicate((w) => w is Semantics && w.properties.identifier == id);
-      expect(control, findsOneWidget);
-      final node = tester.getSemantics(control);
-      expect(node.getSemanticsData().identifier, id);
-      final actions = <SemanticsNode>[];
-      void visit(SemanticsNode node) {
-        if (node.getSemanticsData().hasAction(SemanticsAction.tap)) actions.add(node);
-        node.visitChildren((child) { visit(child); return true; });
+    try {
+      final fake = _FakeOtaService()..readResult = deviceInfoOf();
+      await pumpPage(tester, fake: fake,
+          connectedDevice: BluetoothDevice.fromId('AA:BB:CC:DD:EE:FF'));
+      for (final id in ['p35-check', 'p35-arm']) {
+        final control = find.byWidgetPredicate((w) => w is Semantics && w.properties.identifier == id);
+        expect(control, findsOneWidget);
+        final node = tester.getSemantics(control);
+        expect(node.getSemanticsData().identifier, id);
+        final actions = <SemanticsNode>[];
+        void visit(SemanticsNode node) {
+          if (node.getSemanticsData().hasAction(SemanticsAction.tap)) actions.add(node);
+          node.visitChildren((child) { visit(child); return true; });
+        }
+        visit(node);
+        // Flutter may keep the button as a child of its identifier container.
+        // The host must resolve exactly this one action, never any screen button.
+        expect(actions, hasLength(1), reason: '$id: ${node.toStringDeep()}');
       }
-      visit(node);
-      // Flutter may keep the button as a child of its identifier container.
-      // The host must resolve exactly this one action, never any screen button.
-      expect(actions, hasLength(1), reason: '$id: ${node.toStringDeep()}');
+    } finally {
+      // Flutter verifies handle disposal before package:test tearDown callbacks.
+      semantics.dispose();
     }
   });
 
