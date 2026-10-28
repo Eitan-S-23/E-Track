@@ -535,7 +535,7 @@ void main() {
       expect(find.text('取消升级'), findsOneWidget);
     });
 
-    testWidgets('waitingReboot：仍按传输样式渲染等待重启', (tester) async {
+    testWidgets('waitingReboot：独立重启阶段，尚未完成且不可取消', (tester) async {
       final fake = _FakeOtaService();
       await pumpPage(tester, fake: fake);
       fake.phase$.value = OtaPhase.waitingReboot;
@@ -545,11 +545,16 @@ void main() {
       // 忙碌阶段无限动画：定量 pump（RC3-02）。
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
-      expect(find.text('固件传输（设备确认）'), findsOneWidget);
+      expect(find.text('等待设备重启'), findsOneWidget);
       expect(find.text('升级包传输完成，等待设备重启...'), findsOneWidget);
+      expect(find.text('固件传输（设备确认）'), findsNothing);
+      expect(find.text('固件升级完成'), findsNothing);
+      expect(find.text('取消升级'), findsNothing);
+      expect(tester.widget<LinearProgressIndicator>(
+          find.byType(LinearProgressIndicator)).value, isNull);
     });
 
-    testWidgets('reconnectVerify：复核阶段按传输样式渲染', (tester) async {
+    testWidgets('reconnectVerify：独立身份复核阶段，尚未完成且不可取消', (tester) async {
       final fake = _FakeOtaService();
       await pumpPage(tester, fake: fake);
       fake.phase$.value = OtaPhase.reconnectVerify;
@@ -558,8 +563,13 @@ void main() {
       // 忙碌阶段无限动画：定量 pump（RC3-02）。
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
-      expect(find.text('固件传输（设备确认）'), findsOneWidget);
+      expect(find.text('重连并核验固件'), findsOneWidget);
       expect(find.text('设备已重连，复核升级结果...'), findsOneWidget);
+      expect(find.text('固件传输（设备确认）'), findsNothing);
+      expect(find.text('固件升级完成'), findsNothing);
+      expect(find.text('取消升级'), findsNothing);
+      expect(tester.widget<LinearProgressIndicator>(
+          find.byType(LinearProgressIndicator)).value, isNull);
     });
 
     testWidgets('readyToInstall：固件就绪 + 开始 BLE 传输入口', (tester) async {
