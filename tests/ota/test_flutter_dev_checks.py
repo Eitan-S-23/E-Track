@@ -512,6 +512,7 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
             "Tools/ota/p3-4-link-stats/observation_capture.py",
             "Tools/ota/p3-4-link-stats/batch_timing.py",
             "Tools/ota/p3-4-link-stats/acceptance_stats.py",
+            "Tools/ota/p35-automation/runner.py", "Tools/ota/p35-automation/test_runner.py",
             "Tools/provenance/manifest_profiles.json",
             "tests/ota/test_flutter_dev_checks.py", "tests/ota/test_flutter_dev_apk.py",
             "tests/ota/test_p3_4_observation_capture.py",

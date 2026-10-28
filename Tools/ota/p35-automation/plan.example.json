@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "run_id": "p35-fill-reviewed-inputs",
+  "allow_bluetooth_toggle": false,
+  "phone": {
+    "serial": "REQUIRED",
+    "model": "REQUIRED",
+    "adb_port": 5093,
+    "adb": {"path": "REQUIRED", "bytes": 0, "sha256": null},
+    "adb_key": {"path": "REQUIRED_READ_ONLY_KEY", "bytes": 0, "sha256": null}
+  },
+  "app": {
+    "id": "com.wen.gaia.gaia.p35acceptance",
+    "version_code": 0,
+    "sha256": null,
+    "release": true
+  },
+  "firmware": {
+    "device_address": "REQUIRED",
+    "protocol": 2,
+    "current": {"version": 30293, "sha256": null},
+    "target": {"version": 30294, "sha256": null},
+    "package": {"path": "REQUIRED", "bytes": 1048576, "sha256": null},
+    "release_id": "REQUIRED_REAL_READY_RELEASE",
+    "latest_url": "https://e-track-firmware-p41-public.pages.dev/api/public/firmware/latest"
+  },
+  "ui": {
+    "navigate": [],
+    "arm": {"resource-id": "p35-arm"},
+    "stop": {"resource-id": "p35-stop"},
+    "check": {"resource-id": "p35-check"},
+    "download": {"resource-id": "p35-download"},
+    "start": {"resource-id": "p35-start"},
+    "resume": {"resource-id": "p35-start"},
+    "reconnect": [{"resource-id": "p35-reconnect"}]
+  },
+  "limits": {"total_seconds": 1800, "stage_seconds": 180, "event_seconds": 5, "disconnect_seconds": 10},
+  "cases": [
+    {"id":"R01","durable_min":0,"durable_max":4095,"bitmap":"any"},
+    {"id":"R02","durable_min":4096,"durable_max":8191,"bitmap":"any"},
+    {"id":"R03","durable_min":131072,"durable_max":135167,"bitmap":"any"},
+    {"id":"R04","durable_min":262144,"durable_max":266239,"bitmap":"any"},
+    {"id":"R05","durable_min":393216,"durable_max":397311,"bitmap":"any"},
+    {"id":"R06","durable_min":524288,"durable_max":528383,"bitmap":"any"},
+    {"id":"R07","durable_min":655360,"durable_max":659455,"bitmap":"any"},
+    {"id":"R08","durable_min":786432,"durable_max":790527,"bitmap":"any"},
+    {"id":"R09","durable_min":917504,"durable_max":921599,"bitmap":"any"},
+    {"id":"R10","durable_min":983040,"durable_max":987135,"bitmap":"any"}
+  ]
+}

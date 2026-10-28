@@ -48,6 +48,7 @@ class OtaLinkStats {
     required this.label,
     this.device,
     this.attempt,
+    this.onTransferState,
     int Function()? clockUs,
   }) : _clockUs = clockUs;
 
@@ -62,6 +63,22 @@ class OtaLinkStats {
   /// 每次连接尝试必须是独立实例：绑定阶段字段（发现/MTU/订阅）幂等只记
   /// 首次，共享实例会让首轮失败值污染后续轮次的最终摘要。
   final int? attempt;
+
+  final void Function(Map<String, Object?>)? onTransferState;
+  Map<String, Object?>? _acceptedState;
+
+  /// Called only after the transport accepted the actual ACK/window state.
+  /// v2 has no bitmap. Do not reconstruct one from writes or percentages.
+  void recordAcceptedState({required int durable, required int? bitmap,
+      int? protocol, int? session, bool begin = false}) {
+    if (retired || onTransferState == null) return;
+    _acceptedState = {
+      'protocol': protocol ?? _acceptedState?['protocol'],
+      'session': session ?? _acceptedState?['session'],
+      'durable': durable, 'bitmap': bitmap, 'sendOffset': null,
+    };
+    onTransferState!({..._acceptedState!, 'event': begin ? 'beginAck' : 'state'});
+  }
 
   late final Stopwatch _clock = Stopwatch()..start();
 
@@ -384,6 +401,9 @@ class OtaLinkStats {
       return;
     }
     segmentSendTotal++;
+    if (_acceptedState != null) {
+      onTransferState?.call({..._acceptedState!, 'event': 'data', 'sendOffset': offsetBytes});
+    }
     if (_sentOffsets.add(offsetBytes)) {
       _firstSendEndUs[offsetBytes] = now;
       _onSegmentFirstSend(offsetBytes, lengthBytes, now);

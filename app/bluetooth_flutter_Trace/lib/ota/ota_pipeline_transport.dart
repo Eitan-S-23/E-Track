@@ -138,6 +138,7 @@ class _PipelineAckView {
       }
       final before = window.durableOffset;
       final changed = window.acknowledge(ack.body);
+      stats?.recordAcceptedState(durable: window.durableOffset, bitmap: null);
       stats?.recordAckClass(changed ? 'ok' : 'duplicate');
       if (window.durableOffset > before) {
         stats?.recordAckConfirm(blockStart: before,
@@ -331,6 +332,8 @@ extension _PipelineTransfer on OtaBleTransport {
       onLinkSelection?.call(OtaTransportSelection(protocol: 2,
         windowSegments: window.maxInFlightSegments, dataBatchFrames: dataBatchFrames));
       final beginAt = beginAck.arrivalUs;
+      stats?.recordAcceptedState(protocol: 2, session: _session,
+          durable: resume, bitmap: null, begin: true);
       if (beginAt != null) {
         stats!.recordBeginAck(protocol: 2, session: _session, sequence: beginSeq,
           epoch: epoch, durableOffset: resume, bitmap: 0, atUs: beginAt,

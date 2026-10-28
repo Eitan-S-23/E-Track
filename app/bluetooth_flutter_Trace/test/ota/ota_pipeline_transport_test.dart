@@ -207,6 +207,45 @@ Future<void> until(bool Function() condition) async {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  test('P35 observes accepted protocol state and actual DATA completion', () async {
+    for (final pipeline in [false, true]) {
+      final peer = _Peer();
+      final observed = <Map<String, Object?>>[];
+      final stats = OtaLinkStats(label: 'p35', onTransferState: observed.add);
+      final transport = sender(peer, enabled: pipeline, stats: stats);
+      expect((await transfer(transport, package(9000))).isOk, isTrue);
+      final begin = observed.firstWhere((e) => e['event'] == 'beginAck');
+      expect(begin['protocol'], pipeline ? 2 : 1);
+      expect(begin['durable'], 0);
+      expect(begin['bitmap'], pipeline ? isNull : 0);
+      final sent = observed.where((e) => e['event'] == 'data').toList();
+      expect(sent.first['sendOffset'], 0);
+      expect(observed.last['durable'], 9000);
+      expect(observed.every((e) => e['protocol'] == begin['protocol']), isTrue);
+      if (pipeline) expect(observed.every((e) => e['bitmap'] == null), isTrue);
+      await transport.dispose();
+      await peer.events.close();
+    }
+  });
+
+  test('P35 does not publish invalid v2 ACK state or retired samples', () async {
+    final peer = _Peer();
+    peer.mutateDataAck = (payload) => ByteData.sublistView(payload)
+        .setUint32(9, 0x100000, Endian.little);
+    final observed = <Map<String, Object?>>[];
+    final stats = OtaLinkStats(label: 'p35', onTransferState: observed.add);
+    final transport = sender(peer, stats: stats);
+    await expectLater(transfer(transport, package(9000)), throwsA(isA<OtaTransportException>()));
+    expect(observed.every((e) => e['durable'] == 0), isTrue);
+    final count = observed.length;
+    stats.retire(reason: 'finished');
+    stats.recordAcceptedState(durable: 4096, bitmap: null);
+    stats.recordSegmentSendEnd(offsetBytes: 128, lengthBytes: 128);
+    expect(observed.length, count);
+    await transport.dispose();
+    await peer.events.close();
+  });
+
   test('negotiated v2 reports actual window and batch only after BEGIN', () async {
     final peer = _Peer();
     final selections = <OtaTransportSelection>[];

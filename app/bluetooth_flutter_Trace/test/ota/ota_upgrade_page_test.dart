@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
@@ -118,6 +119,20 @@ void main() {
     );
     return button;
   }
+
+  testWidgets('P35 controls expose native semantic identifiers and tap actions', (tester) async {
+    final semantics = tester.ensureSemantics();
+    addTearDown(semantics.dispose);
+    final fake = _FakeOtaService()..readResult = deviceInfoOf();
+    await pumpPage(tester, fake: fake,
+        connectedDevice: BluetoothDevice.fromId('AA:BB:CC:DD:EE:FF'));
+    for (final id in ['p35-check', 'p35-arm']) {
+      final control = find.byWidgetPredicate((w) => w is Semantics && w.properties.identifier == id);
+      expect(control, findsOneWidget);
+      expect(tester.getSemantics(control).getSemanticsData().identifier, id);
+      expect(tester.getSemantics(control).getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+    }
+  });
 
   testWidgets('no-update feedback persists and repeated checks hide the old result',
       (tester) async {

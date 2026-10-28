@@ -486,6 +486,8 @@ class OtaBleTransport {
         }
         _session = beginAck.session;
         view.reset(beginAck.durableOff, beginAck.blockBitmap, total);
+        stats?.recordAcceptedState(protocol: 1, session: _session,
+            durable: view.durableOff, bitmap: view.blockBitmap, begin: true);
         if (firstBegin && prefixBytes == null) {
           onLinkSelection?.call(OtaTransportSelection(protocol: 1,
             windowSegments: effectiveWindow.toInt(), dataBatchFrames: effectiveBatchFrames,
@@ -1970,6 +1972,7 @@ class _TransferAckView {
     if (advanced) stats?.recordDurableAdvance(ack.durableOff);
     durableOff = ack.durableOff;
     blockBitmap = ack.blockBitmap;
+    stats?.recordAcceptedState(durable: durableOff, bitmap: blockBitmap);
     if (advanced) {
       // durable 跨块前移（MCU 整块 commit 后推进）：旧块所有在途段
       // （含丢 ACK 的）一并回收，防跨块残留耗尽窗口；旧块计数同步清
