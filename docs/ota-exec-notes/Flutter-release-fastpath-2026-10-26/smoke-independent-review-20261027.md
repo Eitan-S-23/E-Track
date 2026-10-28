@@ -571,3 +571,36 @@ matches, the retry uses the hook's documented per-command GIT_NO_SECRET_CHECK=1
 exception for this evidence-only commit; conflict/debug checks remain enabled.
 The failed receipt is preserved under records/integration-commit-01.* in the
 project-local integration area. No build, download, install or OTA was repeated.
+
+### Main Delivery And Corrected Test-Package Authorization
+
+Controlled fast-forward delivered e41bca268a5f69ac84bee18d4f392a6e2890a17d to
+remote main. Main checks completed successfully: build.yml 40659783155,
+firmware-build.yml 40659783133, governance 40659783120 and Cloudflare checks
+40659783056. APK/EXE analyze/test/build/upload steps executed; Release and Pages
+were skipped. Firmware production, rehearsal and binding jobs were skipped.
+These are integration checks, not new device or formal acceptance observations.
+
+Before any installation, root reconciled the prior installed test App as
+com.wen.gaia.gaia.p35acceptance, versionCode 89, APK SHA-256
+040c5ca12f428c1a42e6c2fbcdfeff47ac361497e8a0f128e3c5d45818339e32. The earlier
+40652822499 candidate instead has the unsuffixed application ID and versionCode
+88. It was not installed and cannot be used to update that test App. Its original
+build result remains valid only for its actual identity, not for device admission.
+
+After root disclosed the mismatch, the user explicitly approved rebuilding for
+the original .p35acceptance App with a versionCode greater than 89, leaving the
+ordinary App untouched. The exclusive candidate/p35acceptance-20261028 branch
+changes only pubspec version to 1.0.64+90 plus this record; product logic remains
+the reviewed 39215868 implementation. This version change is not a main delivery.
+Use build.yml with release_application_id_suffix=.p35acceptance,
+release_ota_link_profile=adaptive-v2-candidate, the same permanent isolated test
+latest endpoint, publish_release=false and replace_existing_release=false.
+
+Before data-preserving replacement, verify both host results and actual APK
+application ID/version/signature/endpoint, then inspect the same phone and both
+installed package identities. Preserve old test data and the ordinary App.
+Only query/lifecycle smoke on retained MCU 30292 is planned; no uninstall, data
+clear, forced downgrade, MCU flash/reset, new OTA or cloud mutation. New build
+receipts use records/p90-* and artifact/phone outputs use p35acceptance-90 under
+the existing project-local integration area. Prior receipts remain immutable.
