@@ -129,8 +129,17 @@ void main() {
     for (final id in ['p35-check', 'p35-arm']) {
       final control = find.byWidgetPredicate((w) => w is Semantics && w.properties.identifier == id);
       expect(control, findsOneWidget);
-      expect(tester.getSemantics(control).getSemanticsData().identifier, id);
-      expect(tester.getSemantics(control).getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+      final node = tester.getSemantics(control);
+      expect(node.getSemanticsData().identifier, id);
+      final actions = <SemanticsNode>[];
+      void visit(SemanticsNode node) {
+        if (node.getSemanticsData().hasAction(SemanticsAction.tap)) actions.add(node);
+        node.visitChildren((child) { visit(child); return true; });
+      }
+      visit(node);
+      // Flutter may keep the button as a child of its identifier container.
+      // The host must resolve exactly this one action, never any screen button.
+      expect(actions, hasLength(1), reason: '$id: ${node.toStringDeep()}');
     }
   });
 

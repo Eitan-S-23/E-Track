@@ -103,6 +103,8 @@ def validate_plan(p):
     require(isinstance(fw.get('latest_url'), str) and re.fullmatch(r'https://[a-z0-9.-]+/api/public/firmware/latest', fw['latest_url']), 'real latest URL without credentials/query')
     for key in ['arm', 'stop', 'check', 'download', 'start', 'resume']:
         selector(ui.get(key))
+    require(ui['arm'] == {'resource-id': 'p35-arm'} and ui['stop'] == {'resource-id': 'p35-stop'},
+            'capture controls must be the dedicated native identifiers, never business-button substitutes')
     for key in ['navigate', 'reconnect']:
         require(isinstance(ui.get(key), list) and len(ui[key]) <= 12, 'bounded UI route')
         for step in ui[key]:
@@ -244,6 +246,15 @@ def find_control(xml, wanted, package):
         require(node.get('package') == package, 'selector matched foreign app/overlay', 'UI_UNAVAILABLE')
         require(node.get('enabled') == 'true' and node.get('visible-to-user') != 'false',
                 'target control disabled/hidden', 'UI_UNAVAILABLE')
+        if node.get('clickable') != 'true':
+            # Flutter may put identifier on a semantic container and the actual
+            # button action on its child. Never pick among multiple actions.
+            children = [child for child in node.iter('node') if child is not node and child.get('clickable') == 'true']
+            require(len(children) <= 1, 'identifier contains ambiguous actions', 'UI_UNAVAILABLE')
+            if children:
+                node = children[0]
+                require(node.get('package') == package and node.get('enabled') == 'true' and
+                        node.get('visible-to-user') != 'false', 'descendant disabled/foreign/hidden', 'UI_UNAVAILABLE')
         while node.get('clickable') != 'true' and node in parents:
             node = parents[node]
         require(node.get('package') == package and node.get('clickable') == 'true'
@@ -480,6 +491,8 @@ class Android:
         return self.last_ui
 
     def tap(self, wanted, *, bootstrap=False):
+        require(not bootstrap or wanted == {'resource-id': 'p35-arm'},
+                'only the dedicated record control may precede telemetry readiness')
         self.pump()
         point = None
         # Scroll only within a native, package-owned viewport. No screenshots or
@@ -538,7 +551,9 @@ class Android:
             self.pump()
             time.sleep(.05)
         require(self.decoder.closed is not None, 'no App close receipt; retrieve originals later, never replay OTA', 'EVIDENCE_GAP')
-        return self.retrieve(capture_id)
+        report = self.retrieve(capture_id)
+        require(report['final'] == self.decoder.previous, 'live/stored final records differ', 'EVIDENCE_GAP')
+        return report
 
     def radio_state(self):
         text = self.cmd(['shell', 'dumpsys', 'bluetooth_manager']).decode(errors='replace')

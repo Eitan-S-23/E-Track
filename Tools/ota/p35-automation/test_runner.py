@@ -105,6 +105,12 @@ class Fake:
 
 
 class PlanTests(unittest.TestCase):
+    def test_bootstrap_cannot_be_replaced_by_an_upgrade_tap(self):
+        p = plan(); p['ui']['arm'] = p['ui']['start']
+        with self.assertRaises(r.Stop): r.validate_plan(p)
+        android = object.__new__(r.Android)
+        with self.assertRaises(r.Stop): android.tap(p['ui']['start'], bootstrap=True)
+
     def test_valid(self):
         self.assertEqual(len(r.validate_plan(plan())['cases']), 10)
 
@@ -128,6 +134,14 @@ class PlanTests(unittest.TestCase):
 
 
 class UITests(unittest.TestCase):
+    def test_flutter_identifier_container_resolves_one_button_descendant(self):
+        parent = '<node resource-id="p35-start" package="com.example.p35" clickable="false" enabled="true" bounds="[0,0][120,100]">'
+        self.assertEqual(r.find_control(xml(parent + node() + '</node>'),
+            {'resource-id': 'p35-start'}, 'com.example.p35'), (60, 50))
+        for children in [node() + node(), node(enabled='false'), node(package='other.app')]:
+            with self.assertRaises(r.Stop):
+                r.find_control(xml(parent + children + '</node>'), {'resource-id': 'p35-start'}, 'com.example.p35')
+
     def test_text_and_resource_id(self):
         self.assertEqual(r.find_control(xml(node(**{'resource-id':'ota-start'})),
             {'resource-id':'ota-start'}, 'com.example.p35'), (60,50))
