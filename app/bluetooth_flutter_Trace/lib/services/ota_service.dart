@@ -1871,6 +1871,12 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     _transport?.pauseForBackground();
   }
 
+  // Applying starts before END ACK; a pending v1 END retry still uses the pause gate.
+  bool get _hasLiveTransferRecoveryOwner =>
+      isUpgrading && _operation == _OtaOperation.transfer &&
+      (phase == OtaPhase.transferring ||
+          (phase == OtaPhase.applying && _transport?.endStarted == true));
+
   /// App 回前台（RC3-08）：恢复传输发送循环与无进展预算计时。
   ///
   /// RC3-08⑤：恢复发送**前**先复核设备——后台期间设备可能被更换
@@ -1895,8 +1901,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   /// owner 的进度/终态。
   Future<void> resumeFromBackground() async {
     if (backgroundAcquired || _appBackgrounded || _closed) return;
-    if (!isUpgrading || _operation != _OtaOperation.transfer ||
-        phase != OtaPhase.transferring) {
+    if (!_hasLiveTransferRecoveryOwner) {
       _foregroundPaused = false;
       _publishSnapshot();
       return;
@@ -1925,8 +1930,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     final boundLink = _boundLinkGeneration;
     bool stale() =>
         generation != _cancelGeneration || !identical(_transport, transport) ||
-        owner != _ownerEpoch || !isUpgrading || _operation != _OtaOperation.transfer ||
-        phase != OtaPhase.transferring || recovery != _recoveryEpoch ||
+        owner != _ownerEpoch || !_hasLiveTransferRecoveryOwner || recovery != _recoveryEpoch ||
         _appBackgrounded || _closed;
 
     Future<void> failClosed(String code, String message,
