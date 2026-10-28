@@ -604,3 +604,110 @@ Only query/lifecycle smoke on retained MCU 30292 is planned; no uninstall, data
 clear, forced downgrade, MCU flash/reset, new OTA or cloud mutation. New build
 receipts use records/p90-* and artifact/phone outputs use p35acceptance-90 under
 the existing project-local integration area. Prior receipts remain immutable.
+
+### Firmware Public Access Repair (2026-10-28)
+
+The user's subsequent scope is to repair current server access before further
+App checks, not to compare unidentified older Apps or increase the App timeout.
+The current workers.dev endpoint failed before HTTP on the same phone outside
+the App. DNS differed from the Cloudflare DoH response; a temporary resolved-IP
+probe reached TCP but failed TLS. The Worker itself returned healthy staging
+responses through the host proxy. The already-existing ordinary Pages service
+was reachable directly from the phone, but is not the same firmware data source.
+Original observations remain in `.cache/p35-access-20261028/{control-01,phone-01,
+dns-compare-01,phone-resolved-01}` and `.cache/p35-phone90/connectivity-01`.
+
+Browser authorization was explicitly requested by the user. Login attempts
+01..03 did not yield a credential; attempt 03 exhausted Wrangler's fixed 120 s
+callback deadline. At the user's request, attempt 04 extended only that timer
+to 900 s with a process-local preload. Wrangler 4.105.0 exposes no login-timeout
+option; the installed source's `user oauth authorization timeout` timer is the
+only override target. OAuth state/PKCE, scopes and token exchange are unchanged,
+the installed tool is not edited, and other timers retain their original values.
+The targeted timer self-test passed. The callback was confirmed live before
+opening the existing Edge profile; a current-session reminder was delivered.
+Attempt 04 exited 0 and reported `Successfully logged in.`
+
+The first local receipt checked the wrong credential directory (userprofile).
+The actual credential is under the attempt's project-contained XDG config path;
+`pages-control-01/credential-verification.json` records that correction and the
+successful Pages API read. No credential contents are published. A Pages list
+request with per_page=100 was rejected as invalid options (400/8000024); the
+normal unfiltered list succeeded. Documentation retrieval returned 403 at the
+Cloudflare site; current official cloudflare-docs source was retrieved instead.
+
+Root is the implementation owner for this new access adapter, not its independent
+acceptance reviewer. `firmware-public` is a separate public Pages entry bound
+only to `e-track-firmware-p41-test`. Its three GET routes reuse the existing
+health/latest/download implementation through a service binding. The original
+request origin, query, client headers, upstream errors and download stream are
+preserved; all other routes/methods are rejected before reaching the Worker.
+No Worker deployment, D1/R2/KV/signing-key copy, ordinary App-service rebind,
+firmware/channel publication, App install or MCU action is part of this repair.
+
+Self-tests: 16 passed, zero failed/skipped; generated binding types and strict
+JavaScript typecheck passed (`pages-validate-01`). A new isolated Pages project
+was created and deployed once with standard Wrangler and --no-bundle. Deployment
+8a5e5aa3-2cd0-4f29-806a-efa6fe48df1f succeeded at
+https://e-track-firmware-p41-public.pages.dev. API readback confirms the exact
+service binding. Pages calls its stable branch slot `production`; that is still
+this isolated test project, not a production firmware service or publication.
+The source is uncommitted; deployment metadata says commit_dirty=true and its
+message identifies the uncommitted inputs. `pages-deploy-01/inputs.json` binds
+the actual source hashes, rather than claiming base 73351eb0 contains this code.
+
+Host direct HTTPS, without proxy/DNS override/TLS bypass: health 200 in 3.796 s;
+actual latest with retained MCU 30292 identity and App 90 returned 200 in 2.394 s,
+schemaVersion 2, updateAvailable=false, errorCode=NO_UPDATE. Private route 404.
+Original bodies and transport timings are in `pages-host-01`. The first phone
+verification attempt found the expected USB device absent, issued no network
+request and closed its private ADB server. The prepared follow-up waits for the
+same phone before issuing the four planned read-only HTTP checks.
+
+At this entry phone verification is pending. The installed App still embeds the
+old workers.dev URL; server deployment alone does not repair that installed APK.
+Future App checks must first verify direct health and the real latest query on
+the phone network. Health alone, proxy success or merely increasing a timeout
+cannot substitute for that result. No new formal P3-5 acceptance is claimed.
+
+#### Same-Phone Direct Verification Completed
+
+The existing phone reconnected during the prepared `pages-phone-02` window;
+serial/model were verified before requests. All four checks passed with TLS
+verification, no proxy and no forced DNS: health HTTP 200 in 1.122 s; actual
+latest HTTP 200 in 1.424 s with schemaVersion=2, updateAvailable=false and
+errorCode=NO_UPDATE; missing identity HTTP 400; private route HTTP 404.
+The latest request ID is 66aee667-eb3d-4273-ab1c-0e17e51f3fcc. Original phone
+curl bodies/timings, input matrix and private ADB receipts are preserved under
+`.cache/p35-access-20261028/pages-phone-02`. Its result reports ok=true and
+usbClosed=true. No App UI action, install, firmware transfer or MCU action was
+used. The original workers.dev network route is not claimed repaired; the
+verified Pages origin is the replacement access route. Updating the installed
+test App's compiled endpoint remains separate, unfinished work.
+
+### Test App 91: Verified Public Endpoint
+
+The user requested proceeding with the new test App after the server-access
+discussion. This authorizes the scoped candidate build and data-preserving
+installation, not production publication or further MCU/OTA operations.
+Version becomes 1.0.65+91; the sole App source change is this version bump.
+Use the existing build.yml dispatch on candidate/p35acceptance-20261028 with
+firmware_latest_url=https://e-track-firmware-p41-public.pages.dev/api/public/firmware/latest,
+release_application_id_suffix=.p35acceptance,
+release_ota_link_profile=adaptive-v2-candidate, publish_release=false and
+replace_existing_release=false. Ordinary App update configuration, firmware
+query code and timeout are not modified.
+
+The previous discussion clarified that the exact old-host connectivity cause
+is not established: DNS differences are a clue, not proof by themselves, and
+the TLS failure after an address override prevents a DNS-only conclusion. The
+replacement public route is directly verified; no further old-domain diagnosis
+is requested. Its local source and App-90 originals remain preserved separately.
+
+Before installation, require both host builds/tests and vendor verification of
+the actual App-91 identity, original fixed signer and new endpoint in both AOT
+libraries. Reconcile the same phone's installed test App and ordinary App, then
+use install -r only if the test App is still the verified App 90 and no OTA
+service is active. Already-installed exact App 91 is a no-op, not a reinstall.
+Preflight the new endpoint directly on that phone before inviting an in-App
+check. No uninstall, data clearing, ordinary-App replacement or MCU operation.
