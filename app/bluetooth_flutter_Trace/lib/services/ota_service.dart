@@ -1600,7 +1600,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
             // 刷新本地快照为升级后身份。
             _deviceInfo = outcome.info;
             _deviceInfoAddress = deviceAddress;
-            _identityLinkGeneration = _boundLinkGeneration;
+            _identityLinkGeneration = outcome.identityLinkGeneration;
             if (_p35Address == deviceAddress.toLowerCase()) _p35Identity = outcome.info;
             diagnosticCompleted = true;
             if (diagnostics.enabled) {
@@ -2589,7 +2589,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
                 target.currentImageSha256Hex == latest.targetImageSha256) {
               resolvedIdentity = true;
               // 目标身份确认：连接已不需要，身份交给主流程。
-              return _RebootOutcome(_RebootKind.targetVerified, info: target);
+              return _RebootOutcome.targetVerified(
+                  info: target, identityLinkGeneration: connectedGeneration);
             }
             // 旧身份/中间态：MCU 尚未重启完成，本轮连接由 finally
             // 统一释放后继续轮询。
@@ -3074,11 +3075,18 @@ enum _RebootKind {
 
 /// [_RebootOutcome] 见 OtaService._waitForTargetIdentity。
 class _RebootOutcome {
-  const _RebootOutcome(this.kind, {this.info});
+  const _RebootOutcome(this.kind) : info = null, identityLinkGeneration = null;
+
+  const _RebootOutcome.targetVerified({required DeviceOtaInfo info,
+    required int identityLinkGeneration})
+      : kind = _RebootKind.targetVerified, info = info,
+        identityLinkGeneration = identityLinkGeneration;
 
   final _RebootKind kind;
   /// targetVerified 时携带升级后的设备身份快照。
   final DeviceOtaInfo? info;
+  // Captured by the probe and checked after GET_INFO, never sampled at publication.
+  final int? identityLinkGeneration;
 }
 
 /// 已验证的下载包（PR12）：绑定 assetId/releaseId/sha256/size/versionCode
