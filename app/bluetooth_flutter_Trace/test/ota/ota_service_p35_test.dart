@@ -16,7 +16,7 @@ const lower = 'aa:bb:cc:dd:ee:ff';
 const upper = 'AA:BB:CC:DD:EE:FF';
 
 class _NativeDevice extends BluetoothDevice {
-  _NativeDevice(String address, this.nativeCache) : super.fromId(address);
+  _NativeDevice(super.remoteId, this.nativeCache) : super.fromId();
 
   // Mirrors the SDK's case-sensitive native connection-state cache.
   final Map<String, bool> nativeCache;
