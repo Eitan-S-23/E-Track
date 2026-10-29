@@ -8,7 +8,8 @@ import 'package:ble_monitor/ota/ota_link_stats.dart';
 import 'package:ble_monitor/ota/ota_p35_recorder.dart';
 import 'package:ble_monitor/services/bluetooth_service.dart';
 import 'package:ble_monitor/services/ota_service.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart'
+    show BluetoothConnectionState, BluetoothDevice;
 import 'package:flutter_test/flutter_test.dart';
 
 const lower = 'aa:bb:cc:dd:ee:ff';
