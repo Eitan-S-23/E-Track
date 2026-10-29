@@ -148,6 +148,24 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 20));
   }
 
+  Future<void> waitFor(bool Function() ready, String reason) async {
+    final clock = Stopwatch()..start();
+    while (!ready()) {
+      if (clock.elapsed >= const Duration(seconds: 5)) {
+        fail('P35 observation deadline: $reason');
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 1));
+    }
+  }
+
+  Future<Map<String, dynamic>> rowAfter(int seq, String event) async {
+    bool matches(Map<String, dynamic> row) =>
+        (row['seq'] as int) > seq && row['event'] == event;
+    // Publication follows the real file flush, not a fixed host scheduling delay.
+    await waitFor(() => rows().any(matches), '$event after seq $seq');
+    return rows().firstWhere(matches);
+  }
+
   setUp(() async {
     final parent = Directory('${Directory.current.path}/.dart_tool/p35-service-tests');
     await parent.create(recursive: true);
@@ -197,20 +215,27 @@ void main() {
   });
 
   test('actual disconnect and reconnect never refresh a cached identity', () async {
-    await service.startP35Recording();
-    await flush();
+    expect(await service.startP35Recording(), isTrue);
+    await waitFor(
+      () => ble.device.states.hasListener &&
+          rows().where((row) => row['event'] == 'state').length >= 2,
+      'initial snapshot and subscribed native state',
+    );
+    var seq = rows().last['seq'] as int;
     ble.setLink(false);
-    await flush();
-    expect(rows().last['linkConnected'], isFalse);
-    expect(rows().last['freshConnection'], isFalse);
+    var row = await rowAfter(seq, 'state');
+    expect(row['linkConnected'], isFalse);
+    expect(row['freshConnection'], isFalse);
+    seq = row['seq'] as int;
     ble.setLink(true);
-    await flush();
-    expect(rows().last['linkConnected'], isTrue);
-    expect(rows().last['freshConnection'], isFalse);
+    row = await rowAfter(seq, 'state');
+    expect(row['linkConnected'], isTrue);
+    expect(row['freshConnection'], isFalse);
     expect(service.hasCurrentDeviceIdentity(lower), isFalse);
+    seq = row['seq'] as int;
     expect(await service.readDeviceInfo(lower), isNotNull);
-    await flush();
-    expect(rows().last['freshConnection'], isTrue);
+    row = await rowAfter(seq, 'identity');
+    expect(row['freshConnection'], isTrue);
   });
 
   test('generation-only invalidation remains visible in a recorded heartbeat', () async {
