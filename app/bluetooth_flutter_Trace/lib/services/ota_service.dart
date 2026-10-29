@@ -3077,10 +3077,8 @@ enum _RebootKind {
 class _RebootOutcome {
   const _RebootOutcome(this.kind) : info = null, identityLinkGeneration = null;
 
-  const _RebootOutcome.targetVerified({required DeviceOtaInfo info,
-    required int identityLinkGeneration})
-      : kind = _RebootKind.targetVerified, info = info,
-        identityLinkGeneration = identityLinkGeneration;
+  const _RebootOutcome.targetVerified({required this.info,
+    required this.identityLinkGeneration}) : kind = _RebootKind.targetVerified;
 
   final _RebootKind kind;
   /// targetVerified 时携带升级后的设备身份快照。
