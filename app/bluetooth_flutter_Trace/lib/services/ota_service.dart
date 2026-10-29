@@ -192,10 +192,18 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     'sendOffset': _p35Transfer['sendOffset'],
     'linkConnected': _p35Connected,
     // A cached identity after disconnect is historical, not a new GET_INFO.
-    'freshConnection': _p35Connected && _deviceInfo != null &&
-        _deviceInfoAddress == _p35Address && _identityLinkGeneration != null &&
-        _identityLinkGeneration == _ble.otaLinkGeneration(_p35Address!),
+    'freshConnection': _p35Connected && hasCurrentDeviceIdentity(_p35Address),
   };
+
+  // Read-only oracle shared by the recorder and host service regressions.
+  @visibleForTesting
+  int? get identityLinkGeneration => _identityLinkGeneration;
+
+  @visibleForTesting
+  bool hasCurrentDeviceIdentity(String? address) =>
+      address != null && _deviceInfo != null && _deviceInfoAddress == address &&
+      _identityLinkGeneration != null &&
+      _identityLinkGeneration == _ble.otaLinkGeneration(address);
 
   Future<bool> startP35Recording() async {
     final address = _deviceInfoAddress;

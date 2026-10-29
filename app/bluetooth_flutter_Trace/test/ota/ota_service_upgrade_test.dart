@@ -2027,6 +2027,116 @@ void main() {
     });
   });
 
+  for (final profile in [OtaLinkProfile.baseline, OtaLinkProfile.adaptiveCandidate]) {
+    test('P35-READY-01 ${profile.name} binds final identity to actual reboot connection', () async {
+      const address = 'aa:bb';
+      final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+          address: address, linkProfile: profile);
+      final service = Get.find<OtaService>();
+      final transferGeneration = ble.linkGeneration;
+      expect(service.identityLinkGeneration, transferGeneration);
+      expect(service.hasCurrentDeviceIdentity(address), isTrue);
+      ble.advanceGenerationOnConnection = true;
+
+      expect(await service.startOtaUpgrade(address), isTrue);
+      expect(service.phase, OtaPhase.completed);
+      expect(ble.beginCalls, 1);
+      expect(ble.endCalls, 1);
+      expect(ble.stagedDurable, assetBytes().length);
+      expect(ble.getInfoCalls, 3, reason: 'query, pre-transfer recheck, reboot GET_INFO');
+      expect(ble.linkGeneration, greaterThan(transferGeneration));
+      expect(service.deviceInfo!.currentVersionCode, 20900);
+      expect(service.deviceInfo!.currentImageSha256Hex, '62' * 32);
+      expect(service.identityLinkGeneration, ble.rebootInfoGenerations.single);
+      expect(service.hasCurrentDeviceIdentity(address), isTrue,
+          reason: 'the recorder must consume the successful probe binding, not the transfer binding');
+
+      // A cached successful identity cannot become fresh again just by reconnecting.
+      await ble.disconnectOtaDeviceByAddress(address);
+      expect(service.hasCurrentDeviceIdentity(address), isFalse);
+      await ble.connectOtaDeviceByAddress(address);
+      expect(service.hasCurrentDeviceIdentity(address), isFalse);
+      expect(await service.readDeviceInfo(address), isNotNull);
+      expect(service.hasCurrentDeviceIdentity(address), isTrue);
+      expect(service.identityLinkGeneration, ble.linkGeneration);
+    });
+  }
+
+  test('P35-READY-01 generation change during probe disposal cannot relabel identity', () async {
+    const address = 'aa:bb';
+    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [], address: address);
+    final service = Get.find<OtaService>();
+    ble.advanceGenerationOnConnection = true;
+    int? queriedGeneration;
+    ble._notifyController.onCancel = () {
+      if (ble.probeCount > 0 && queriedGeneration == null) {
+        queriedGeneration = ble.linkGeneration;
+        ble.linkGeneration++;
+      }
+    };
+    expect(await service.startOtaUpgrade(address), isTrue);
+    expect(queriedGeneration, isNotNull);
+    expect(service.deviceInfo!.currentVersionCode, 20900);
+    expect(service.deviceInfo!.currentImageSha256Hex, '62' * 32);
+    expect(service.identityLinkGeneration, queriedGeneration,
+        reason: 'publication must not read the newer generation after probe cleanup awaits');
+    expect(service.identityLinkGeneration, isNot(ble.linkGeneration));
+    expect(service.hasCurrentDeviceIdentity(address), isFalse);
+  });
+
+  for (final retireOwner in [false, true]) {
+    test('P35-READY-01 pending reboot INFO ${retireOwner ? 'owner retirement' : 'link change'} rejects late identity', () async {
+      const address = 'aa:bb';
+      final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+          address: address, rebootWindow: const Duration(milliseconds: 700),
+          rebootProbeTimeout: const Duration(milliseconds: 200),
+          rebootProbeInterval: const Duration(milliseconds: 10));
+      final service = Get.find<OtaService>();
+      final originalGeneration = service.identityLinkGeneration;
+      final entered = Completer<void>();
+      ble.advanceGenerationOnConnection = true;
+      ble.onRebootDiscovery = () async { ble.holdInfo = true; };
+      ble.onRebootInfo = () { if (!entered.isCompleted) entered.complete(); };
+      final operation = service.startOtaUpgrade(address);
+      try {
+        await entered.future.timeout(const Duration(seconds: 3));
+        ble.linkGeneration++;
+        if (retireOwner) service.onClose();
+        ble.connectHangRounds = 10;
+        ble.releaseHeldInfo();
+        expect(await operation.timeout(const Duration(seconds: 3)), isFalse);
+        expect(service.phase, isNot(OtaPhase.completed));
+        expect(service.deviceInfo?.currentVersionCode, isNot(20900));
+        expect(service.identityLinkGeneration, originalGeneration);
+        expect(service.hasCurrentDeviceIdentity(address), isFalse);
+        if (!retireOwner) {
+          expect(service.terminalState?.code, 'REBOOT_RECONNECT_FAILED');
+        }
+      } finally {
+        ble.releaseHeldInfo();
+        if (service.isUpgrading) service.onClose();
+        await operation.timeout(const Duration(seconds: 3));
+      }
+    });
+  }
+
+  test('P35-READY-01 target version with wrong full raw SHA cannot publish identity', () async {
+    const address = 'aa:bb';
+    final wrongSha = List<int>.of(postRebootPayload)..[16] ^= 1;
+    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+        address: address, rebootPayload: wrongSha,
+        rebootWindow: const Duration(milliseconds: 500),
+        rebootProbeTimeout: const Duration(milliseconds: 100),
+        rebootProbeInterval: const Duration(milliseconds: 10));
+    final service = Get.find<OtaService>();
+    ble.advanceGenerationOnConnection = true;
+    expect(await service.startOtaUpgrade(address), isFalse);
+    expect(service.terminalState?.code, 'REBOOT_RECONNECT_FAILED');
+    expect(service.phase, OtaPhase.failed);
+    expect(service.deviceInfo!.currentVersionCode, 20801);
+    expect(service.hasCurrentDeviceIdentity(address), isFalse);
+  });
+
   test('real service produces a saved trace and actual reboot identity', () async {
     TestWidgetsFlutterBinding.ensureInitialized();
     final tempDir = tempFirmwareDir();
@@ -4885,6 +4995,9 @@ class _UpgradeFakeBle extends BluetoothService {
   /// BluetoothService.otaLinkGeneration 读取当前代次，fake 覆写为可变
   /// 字段，测试在传输在途后改值模拟「后台期间断开重连」。
   int linkGeneration = 0;
+  bool advanceGenerationOnConnection = false;
+  final rebootInfoGenerations = <int>[];
+  void Function()? onRebootInfo;
   Object? gattBindingToken;
   int platformWriteCalls = 0;
   int subscribeCalls = 0;
@@ -4988,6 +5101,7 @@ class _UpgradeFakeBle extends BluetoothService {
       _connectHangRemaining--;
       await Completer<bool>().future;
     }
+    if (advanceGenerationOnConnection) linkGeneration++;
     return true;
   }
 
@@ -5001,6 +5115,7 @@ class _UpgradeFakeBle extends BluetoothService {
   @override
   Future<void> disconnectOtaDeviceByAddress(String deviceAddress) async {
     disconnectCalls++;
+    if (advanceGenerationOnConnection) linkGeneration++;
   }
 
   @override
@@ -5280,6 +5395,8 @@ class _UpgradeFakeBle extends BluetoothService {
       payload = preRebootPayload;
     } else {
       _probeCount++;
+      rebootInfoGenerations.add(linkGeneration);
+      onRebootInfo?.call();
       probeInfoTimes.add(_probeClock.elapsed);
       if (_probeCount <= silentRebootProbes) {
         _silentInfo.add(f);
