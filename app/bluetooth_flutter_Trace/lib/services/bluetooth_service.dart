@@ -788,6 +788,11 @@ class BluetoothService extends GetxController {
         : _otaDeviceFactory(canonical);
   }
 
+  /// Read-only observation uses the same native identifier as OTA connection.
+  /// This resolves a handle only; it never connects or discovers services.
+  BluetoothDevice otaDeviceForObservation(String address) =>
+      _mobileOtaDevice(address);
+
   @override
   void onInit() {
     super.onInit();

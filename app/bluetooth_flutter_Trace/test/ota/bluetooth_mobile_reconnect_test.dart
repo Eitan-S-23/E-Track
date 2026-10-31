@@ -72,6 +72,36 @@ void main() {
     }
   });
 
+  test('P35 observation reuses the canonical cached connection without I/O', () {
+    final cached = _Device(upper)..connected = true;
+    created.add(cached);
+    service.connectedDevices.add(cached);
+    final observed = service.otaDeviceForObservation(lower);
+    expect(observed, same(cached));
+    expect(observed.isConnected, isTrue);
+    expect(created, hasLength(1));
+    expect(cached.connects, 0);
+    expect(cached.disconnects, 0);
+  });
+
+  test('P35 observation never reuses a lowercase native-cache key', () {
+    final stale = _Device(lower);
+    created.add(stale);
+    service.connectedDevices.add(stale);
+    final observed = service.otaDeviceForObservation(lower);
+    expect(observed.remoteId.str, upper);
+    expect(observed, isNot(same(stale)));
+    expect(created.last, same(observed));
+    expect(created.every((d) => d.connects == 0 && d.disconnects == 0), isTrue);
+  });
+
+  test('P35 observation preserves non-MAC UUID spelling', () {
+    const uuid = 'e006b3a7-ef7b-4980-a668-1f8005f84383';
+    final observed = service.otaDeviceForObservation(uuid);
+    expect(observed.remoteId.str, uuid);
+    expect(created.single.connects, 0);
+  });
+
   group('mobile OTA reconnect boundary', skip: Platform.isWindows, () {
     test('simultaneous same-address connects share the native attempt', () async {
       final gate = Completer<void>();

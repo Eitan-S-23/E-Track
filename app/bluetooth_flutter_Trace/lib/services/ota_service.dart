@@ -111,6 +111,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     OtaBackgroundClient? backgroundClient,
     void Function()? onOpenTask,
     OtaP35Recorder? p35Recorder,
+    bool Function()? p35PlatformCheck,
   })  : _senderWindowSegments = RangeError.checkValueInInterval(
           senderWindowSegments ??
               ((enablePipeline ?? ((linkProfile ?? OtaLinkProfile.build).pipeline ||
@@ -128,6 +129,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         _background = backgroundClient ?? OtaBackgroundClient(),
         _onOpenTask = onOpenTask,
         p35 = p35Recorder ?? OtaP35Recorder(),
+        _p35PlatformCheck = p35PlatformCheck ?? (() => Platform.isAndroid),
         _notifyImpl = onNotify,
         _downloadFileGate = downloadFileGate ?? OtaFilePathGate.shared,
         _dio = dio ??
@@ -166,34 +168,40 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   final OtaBackgroundClient _background;
   final void Function()? _onOpenTask;
   final OtaP35Recorder p35;
+  // Platform-only injection lets host regressions exercise the real recorder route.
+  final bool Function() _p35PlatformCheck;
   StreamSubscription<BluetoothConnectionState>? _p35Connection;
   String? _p35Address, _p35LatestUrl;
   DeviceOtaInfo? _p35Identity;
   int? _identityLinkGeneration;
-  bool _p35Connected = false;
+  BluetoothDevice? _p35Device;
   Map<String, Object?> _p35Transfer = {};
 
-  Map<String, Object?> _p35Snapshot() => {
-    'deviceAddress': _deviceInfoAddress ?? _assetOwnerAddress ?? _p35Address,
-    'phase': phase.name,
-    'currentVersionCode': _p35Identity?.currentVersionCode ?? 0,
-    'currentImageSha256': _p35Identity?.currentImageSha256Hex,
-    'targetVersionCode': _latestInfo?.versionCode ?? 0,
-    'targetImageSha256': _latestInfo?.targetImageSha256,
-    'packageSha256': _asset?.sha256,
-    'packageBytes': _asset?.sizeBytes ?? 0,
-    'packageVerified': _verified != null,
-    'releaseId': _releaseId,
-    'latestUrl': _p35LatestUrl,
-    'protocol': _p35Transfer['protocol'],
-    'session': _p35Transfer['session'] ?? 0,
-    'durable': _p35Transfer['durable'] ?? 0,
-    'bitmap': _p35Transfer['bitmap'],
-    'sendOffset': _p35Transfer['sendOffset'],
-    'linkConnected': _p35Connected,
-    // A cached identity after disconnect is historical, not a new GET_INFO.
-    'freshConnection': _p35Connected && hasCurrentDeviceIdentity(_p35Address),
-  };
+  Map<String, Object?> _p35Snapshot() {
+    // Re-read the canonical cache after async open and on every heartbeat/event.
+    final connected = _p35Device?.isConnected ?? false;
+    return {
+      'deviceAddress': _deviceInfoAddress ?? _assetOwnerAddress ?? _p35Address,
+      'phase': phase.name,
+      'currentVersionCode': _p35Identity?.currentVersionCode ?? 0,
+      'currentImageSha256': _p35Identity?.currentImageSha256Hex,
+      'targetVersionCode': _latestInfo?.versionCode ?? 0,
+      'targetImageSha256': _latestInfo?.targetImageSha256,
+      'packageSha256': _asset?.sha256,
+      'packageBytes': _asset?.sizeBytes ?? 0,
+      'packageVerified': _verified != null,
+      'releaseId': _releaseId,
+      'latestUrl': _p35LatestUrl,
+      'protocol': _p35Transfer['protocol'],
+      'session': _p35Transfer['session'] ?? 0,
+      'durable': _p35Transfer['durable'] ?? 0,
+      'bitmap': _p35Transfer['bitmap'],
+      'sendOffset': _p35Transfer['sendOffset'],
+      'linkConnected': connected,
+      // A cached identity after disconnect is historical, not a new GET_INFO.
+      'freshConnection': connected && hasCurrentDeviceIdentity(_p35Address),
+    };
+  }
 
   // Read-only oracle shared by the recorder and host service regressions.
   @visibleForTesting
@@ -209,18 +217,17 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     final address = _deviceInfoAddress;
     if (_closed || _isUpgrading.value || _ownerDone != null ||
         address == null || _deviceInfo == null || p35.captureId != null ||
-        OtaDiagnostics.current.enabled || !Platform.isAndroid) {
+        OtaDiagnostics.current.enabled || !_p35PlatformCheck()) {
       return false;
     }
     _p35Address = address.toLowerCase();
     _p35Identity = _deviceInfo;
-    final device = BluetoothDevice.fromId(address);
-    _p35Connected = device.isConnected;
+    final device = _ble.otaDeviceForObservation(address);
+    _p35Device = device;
     final started = await p35.start(_p35Snapshot);
     if (_closed) { await p35.stop(); return false; }
     if (!started) return false;
-    _p35Connection = device.connectionState.listen((value) {
-      _p35Connected = value == BluetoothConnectionState.connected;
+    _p35Connection = device.connectionState.listen((_) {
       p35.record();
     }, onError: (Object _) => p35.fail('connection-stream-failed'));
     return true;
@@ -242,6 +249,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     await _p35Connection?.cancel();
     _p35Connection = null;
     await p35.stop();
+    _p35Device = null;
   }
   final String _processNonce = List<int>.generate(16, (_) => Random.secure().nextInt(256))
       .map((byte) => byte.toRadixString(16).padLeft(2, '0')).join();

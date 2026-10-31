@@ -228,6 +228,35 @@ class TelemetryTests(unittest.TestCase):
 
 
 class CampaignTests(unittest.TestCase):
+    def test_case_results_require_whole_run_success_and_preserve_unrun_cases(self):
+        c, io = self.run_rows(trace())
+        c.run()
+        self.assertEqual([row['outcome'] for row in c.case_results(complete=True)], ['PASS'] * 10)
+        self.assertEqual([row['outcome'] for row in c.case_results()], ['RECOVERY_OBSERVED'] * 10)
+        self.assertIsNone(c.active_case)
+        rows = trace()
+        second = next(s for s in rows if s['event'] == 'data' and s['durable'] == 4096)
+        second['sendOffset'] = 999
+        c, io = self.run_rows(rows)
+        with self.assertRaises(r.Stop) as error:
+            c.run()
+        report = c.case_results(error_code=error.exception.code)
+        self.assertEqual([row['id'] for row in report], [case['id'] for case in plan()['cases']])
+        self.assertEqual([row['outcome'] for row in report], ['RECOVERY_OBSERVED', 'FAIL'] + ['NOT_RUN'] * 8)
+        self.assertEqual(report[1]['stage'], 'R02-first-resumed-DATA')
+        self.assertEqual(report[1]['code'], 'PRODUCT_OR_ENV_FAILURE')
+        self.assertEqual(len(c.cases), 1)
+
+    def test_case_results_never_promote_recoveries_after_failed_final_identity(self):
+        rows = trace()
+        rows[-1]['freshConnection'] = False
+        c, io = self.run_rows(rows)
+        with self.assertRaises(r.Stop):
+            c.run()
+        self.assertEqual(len(c.cases), 10)
+        self.assertEqual([row['outcome'] for row in c.case_results()], ['RECOVERY_OBSERVED'] * 10)
+        self.assertEqual(c.stage, 'post-reboot-identity')
+
     def test_v2_campaign_uses_real_durable_resume_not_v1_bits(self):
         p = plan(); p['firmware']['protocol'] = 2
         for case in p['cases']: case['bitmap'] = 'any'
@@ -378,6 +407,54 @@ class ArchiveTests(unittest.TestCase):
                       raw.replace(b'"seq": 1', b'"seq": 2')]:
             with self.assertRaises(r.Stop): r.audit_capture(value, 'e'*32)
         with self.assertRaises(r.Stop): r.audit_capture(raw, 'f'*32)
+
+
+class ResultTests(unittest.TestCase):
+    def test_cli_preserves_ten_statuses_on_failure_and_redacts_archive(self):
+        import contextlib
+        import io
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        for mode in ('success', 'case-failure', 'cleanup-failure'):
+            with self.subTest(mode=mode):
+                rows = trace()
+                if mode == 'case-failure':
+                    next(s for s in rows if s['event'] == 'data' and s['durable'] == 4096)['sendOffset'] = 999
+                device = Fake(rows)
+                campaign = r.Campaign(plan(), device, device.clock)
+                saved = {}
+                def close():
+                    if mode == 'cleanup-failure':
+                        raise r.Stop('CLEANUP_FAILED', 'owned process not closed')
+                driver = SimpleNamespace(campaign=campaign, startup=lambda **_: None, close=close)
+                helper = SimpleNamespace(checked=lambda path: Path(path), pinned=lambda pin: Path('fixture'),
+                    save=lambda path, value: saved.update({Path(path).name: value}),
+                    record=lambda path: {}, device_owner=lambda *args, **kwargs: contextlib.nullcontext(),
+                    __file__=__file__)
+                def execute(*args):
+                    result = campaign.run()
+                    result['archive'] = {'privateDeviceIdentity': 'MUST_NOT_APPEAR_IN_CONSOLE'}
+                    return result
+                console = io.StringIO()
+                out = r.ROOT / '.cache/p35-ten-prepare-20261030/never-created-cli-unit'
+                self.assertFalse(out.exists())
+                with patch.object(r, 'strict_json', lambda raw: plan()), patch.object(r, 'load_host', lambda: helper), \
+                     patch.object(r, 'Android', lambda *args: driver), patch.object(r, 'execute_ui', execute), \
+                     contextlib.redirect_stdout(console):
+                    code = r.main(['run', '--plan', __file__, '--out', str(out), '--execute'])
+                result = saved['result.json']
+                self.assertEqual(len(result['caseResults']), 10)
+                self.assertNotIn('MUST_NOT_APPEAR_IN_CONSOLE', console.getvalue())
+                self.assertFalse(out.exists())
+                if mode == 'case-failure':
+                    self.assertEqual(code, 2)
+                    self.assertEqual(len(result['cases']), 1)
+                    self.assertEqual([x['outcome'] for x in result['caseResults']],
+                        ['RECOVERY_OBSERVED', 'FAIL'] + ['NOT_RUN'] * 8)
+                else:
+                    self.assertEqual(code, 0 if mode == 'success' else 2)
+                    self.assertEqual([x['outcome'] for x in result['caseResults']],
+                        ['PASS' if mode == 'success' else 'RECOVERY_OBSERVED'] * 10)
 
 
 if __name__ == '__main__':

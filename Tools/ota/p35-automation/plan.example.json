@@ -34,6 +34,12 @@
     "resume": {"resource-id": "p35-start"},
     "reconnect": [{"resource-id": "p35-reconnect"}]
   },
+  "preparation": {
+    "display_name": "",
+    "command_seconds": 30,
+    "cleanup_seconds": 60,
+    "restart_closed_recorder": false
+  },
   "limits": {"total_seconds": 1800, "stage_seconds": 180, "event_seconds": 5, "disconnect_seconds": 10},
   "cases": [
     {"id":"R01","durable_min":0,"durable_max":4095,"bitmap":"any"},
