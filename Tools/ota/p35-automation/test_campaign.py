@@ -79,7 +79,17 @@ class Device(native_fixture.SyntheticDevice):
     def command(self, args):
         if args == ['shell', 'dumpsys', 'bluetooth_manager']:
             self.calls.append(args)
+            if self.fault in {'empty-manager', 'adapter-restore-transitional'}:
+                return b''
             return ('state: ' + ('ON' if self.radio_on else 'OFF') + '\n').encode()
+        if args == list(r.RADIO_ADAPTER):
+            self.calls.append(args)
+            value = 'ON' if self.radio_on else 'OFF'
+            if self.fault == 'adapter-restore-transitional' and self.radio_on and self.resume_index == 0 and self.upgrade_starts:
+                value = 'TURNING_ON'
+            # Synthetic OFF/turning only; actual phone evidence qualifies ON.
+            return ('    AdapterProperties\n      State: ' + value + '\n'
+                    '    Profile\n      State: OFF\n').encode()
         if args[:3] == ['shell', 'cmd', 'bluetooth_manager']:
             self.calls.append(args)
             if self.fault == 'restore-failure' and args[-1] == 'enable':
@@ -222,6 +232,28 @@ class IntegrationTests(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertTrue(result['cleanup']['complete'])
         self.assertFalse(lock.exists())
+
+    def test_empty_manager_adapter_reader_completes_one_synthetic_group(self):
+        code, result, device, out, lock = self.run_case('empty-manager')
+        self.assertEqual(code, 0)
+        self.assertEqual(result['recovered'], 10)
+        self.assertEqual((device.arms, device.stops, device.upgrade_starts), (1, 1, 1))
+        self.assertEqual(sum(args == list(r.RADIO_MANAGER) for args in device.calls), 1)
+        self.assertGreater(sum(args == list(r.RADIO_ADAPTER) for args in device.calls), 20)
+        self.assertEqual(device.workers, ['adb-server', 'logcat'])
+        self.assertTrue(result['cleanup']['complete'])
+        self.assertEqual((out/'app-capture.jsonl').read_bytes(), device.raw)
+        self.assertFalse(lock.exists())
+
+    def test_adapter_transition_restore_failure_keeps_original_and_never_replays(self):
+        code, result, device, out, lock = self.run_case('adapter-restore-transitional')
+        self.assertEqual(code, 2)
+        self.assertEqual(device.upgrade_starts, 1)
+        self.assertEqual(sum(args[:3] == ['shell', 'cmd', 'bluetooth_manager'] and args[-1] == 'enable'
+                             for args in device.calls), 1)
+        self.assertTrue(result['cleanup']['radioErrors'])
+        self.assertTrue(lock.exists())
+        self.assertTrue((out/'logcat.stdout').read_bytes())
 
     def test_identity_mismatch_never_starts_ota_and_preserves_recording(self):
         code, result, device, out, lock = self.run_case('identity-mismatch')

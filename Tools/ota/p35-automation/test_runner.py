@@ -360,6 +360,215 @@ class CampaignTests(unittest.TestCase):
         self.assertFalse(any(k=='radio' for k,_ in io.actions))
 
 
+class RadioStateTests(unittest.TestCase):
+    # Sanitized shape of the observed --print output; no phone identifiers.
+    # OFF/turning variants below are synthetic, not actual phone observations.
+    ADAPTER_ON = (b'SERVICE com.android.bluetooth/.btservice.AdapterService\n'
+                  b'    AdapterProperties\n'
+                  b'      ConnectionState: STATE_DISCONNECTED\n'
+                  b'      State: ON\n'
+                  b'    Profile: HeadsetService\n'
+                  b'      State: OFF\n')
+
+    def device(self, outputs):
+        android = object.__new__(r.Android)
+        android.calls = []
+        def cmd(args, seconds=15):
+            android.calls.append((args, seconds))
+            value = outputs.pop(0)
+            if isinstance(value, BaseException):
+                raise value
+            return value
+        android.cmd = cmd
+        return android
+
+    def test_empty_manager_uses_scoped_adapter_state(self):
+        android = self.device([b'', self.ADAPTER_ON])
+        self.assertIs(android.radio_state(), True)
+        self.assertEqual([args for args, _ in android.calls], [
+            ['shell', 'dumpsys', 'bluetooth_manager'],
+            ['shell', 'dumpsys', 'activity', 'service',
+             'com.android.bluetooth/.btservice.AdapterService', '--print']])
+
+    def test_selected_reader_is_reused_without_manager_reprobe(self):
+        android = self.device([b'', self.ADAPTER_ON, self.ADAPTER_ON.replace(b'State: ON', b'State: OFF')])
+        self.assertIs(android.radio_state(), True)
+        self.assertIs(android.radio_state(), False)
+        self.assertEqual([args for args, _ in android.calls],
+                         [list(r.RADIO_MANAGER), list(r.RADIO_ADAPTER), list(r.RADIO_ADAPTER)])
+
+    def test_supported_manager_formats_and_scoped_profiles(self):
+        for value, expected in [('ON', True), ('OFF', False)]:
+            for raw in [('state: ' + value + '\n').encode(),
+                        ('Bluetooth Status\n  enabled: true\n  state: ' + value +
+                         '\nProfile\n  state: ON\n').encode()]:
+                with self.subTest(raw=raw):
+                    android = self.device([raw, raw])
+                    self.assertIs(android.radio_state(), expected)
+                    self.assertIs(android.radio_state(), expected)
+                    self.assertEqual([args for args, _ in android.calls], [list(r.RADIO_MANAGER)] * 2)
+        android = self.device([b'', self.ADAPTER_ON + b'Unrelated profile log\n\tstate: OFF\n'])
+        self.assertIs(android.radio_state(), True)
+
+    def test_turning_and_ble_only_states_never_confirm_on_or_off(self):
+        for value in ['TURNING_ON', 'TURNING_OFF', 'BLE_ON', 'BLE_TURNING_ON', 'BLE_TURNING_OFF']:
+            with self.subTest(value=value):
+                manager = self.device([('state: ' + value).encode()])
+                self.assertIsNone(manager.radio_state())
+                self.assertEqual(len(manager.calls), 1)
+                adapter = self.device([b'', self.ADAPTER_ON.replace(b'State: ON', ('State: ' + value).encode())])
+                self.assertIsNone(adapter.radio_state())
+
+    def test_malformed_ambiguous_absent_and_profile_states_fail_closed(self):
+        bad = [b'', b'bluetooth_on=0', b"Can't find service: com.android.bluetooth/.btservice.AdapterService",
+               b'Profile\n  State: OFF\n', b'    AdapterProperties\n      mState: OFF\n',
+               b'    AdapterProperties\n      Profile\n        State: OFF\n',
+               self.ADAPTER_ON.replace(b'State: ON', b'state: ON'),
+               self.ADAPTER_ON.replace(b'State: ON', b'State: ON\n      State: OFF'),
+               self.ADAPTER_ON + b'    AdapterProperties\n      State: OFF\n',
+               self.ADAPTER_ON.replace(b'State: ON', b'State: ON trailing'),
+               self.ADAPTER_ON.replace(b'State: ON', b'State: 10'), b'\xff', b'\x00',
+               self.ADAPTER_ON.replace(b'      State:', b'\tState:'), b'x' * (1024 * 1024 + 1)]
+        for raw in bad:
+            with self.subTest(sample=raw[:100]):
+                android = self.device([b'', raw])
+                with self.assertRaises(r.Stop) as error:
+                    android.radio_state()
+                self.assertEqual(error.exception.code, 'CAPABILITY_MISSING')
+                self.assertEqual(len(android.calls), 2)
+
+    def test_nonempty_invalid_manager_never_hides_failure_with_fallback(self):
+        for raw in [b'bluetooth_on=1', b'Profile\n  state: ON\n', b'state: ON\nstate: OFF\n',
+                    b'Bluetooth Status\n  enabled: true\n', b'state: NOT_ON', b'\xff']:
+            android = self.device([raw])
+            with self.assertRaises(r.Stop):
+                android.radio_state()
+            self.assertEqual(len(android.calls), 1)
+
+    def test_nonzero_command_and_timeout_errors_propagate_without_retry(self):
+        for prefix in [[], [b'']]:
+            for error in [RuntimeError('standard tool nonzero exit'), TimeoutError('read timed out')]:
+                android = self.device(prefix + [error])
+                with self.assertRaises(type(error)) as caught:
+                    android.radio_state()
+                self.assertIs(caught.exception, error)
+                self.assertEqual(len(android.calls), len(prefix) + 1)
+
+    def test_fallback_shares_the_initial_read_deadline(self):
+        from unittest.mock import patch
+        for elapsed, expected_calls in [(2, 2), (6, 1)]:
+            now = [0.0]
+            android = self.device([b'', self.ADAPTER_ON])
+            cmd = android.cmd
+            def read(args, seconds=15):
+                value = cmd(args, seconds)
+                if args == list(r.RADIO_MANAGER):
+                    now[0] += elapsed
+                return value
+            android.cmd = read
+            with patch.object(r.time, 'monotonic', lambda: now[0]):
+                if elapsed == 2:
+                    self.assertIs(android.radio_state(), True)
+                    self.assertEqual([seconds for _, seconds in android.calls], [5, 3])
+                else:
+                    with self.assertRaisesRegex(r.Stop, 'state-read deadline'):
+                        android.radio_state()
+            self.assertEqual(len(android.calls), expected_calls)
+        android = self.device([b'state: ON'])
+        now = [0.0]
+        cmd = android.cmd
+        def late_on(args, seconds=15):
+            value = cmd(args, seconds)
+            now[0] += 6
+            return value
+        android.cmd = late_on
+        with patch.object(r.time, 'monotonic', lambda: now[0]):
+            with self.assertRaisesRegex(r.Stop, 'state-read deadline'):
+                android.radio_state()
+        self.assertEqual(len(android.calls), 1)
+
+    def test_invalid_read_allowance_starts_no_command(self):
+        for seconds in [0, -1, 6, float('inf'), float('nan'), True]:
+            android = self.device([])
+            with self.assertRaises(r.Stop):
+                android.radio_state(seconds=seconds)
+            self.assertEqual(android.calls, [])
+
+    def radio_device(self, outputs):
+        android = self.device(outputs)
+        android.p = plan()
+        android.p['limits']['disconnect_seconds'] = .15
+        android.radio_state_source = 'adapter'
+        android.radio_touched = True
+        android.restore_attempted = False
+        android.record = lambda *args, **kwargs: None
+        read = android.cmd
+        def cmd(args, seconds=15):
+            if args[:3] == ['shell', 'cmd', 'bluetooth_manager']:
+                android.calls.append((args, seconds))
+                return b''
+            return read(args, seconds)
+        android.cmd = cmd
+        return android
+
+    def test_restoration_waits_for_explicit_on_with_bounded_reads(self):
+        from unittest.mock import patch
+        now = [0.0]
+        android = self.radio_device([self.ADAPTER_ON.replace(b'State: ON', b'State: TURNING_ON'),
+                                     self.ADAPTER_ON])
+        with patch.object(r.time, 'monotonic', lambda: now[0]), \
+             patch.object(r.time, 'sleep', lambda seconds: now.__setitem__(0, now[0] + seconds)):
+            android.radio(True)
+        self.assertFalse(android.radio_touched)
+        self.assertTrue(android.restore_attempted)
+        self.assertAlmostEqual(android.calls[-1][1], .1)
+        self.assertEqual(sum(args[-1] == 'enable' for args, _ in android.calls), 1)
+
+    def test_permanent_transition_times_out_without_second_restore(self):
+        from unittest.mock import patch
+        now = [0.0]
+        android = self.radio_device([self.ADAPTER_ON.replace(b'State: ON', b'State: TURNING_ON')] * 10)
+        with patch.object(r.time, 'monotonic', lambda: now[0]), \
+             patch.object(r.time, 'sleep', lambda seconds: now.__setitem__(0, now[0] + seconds)):
+            with self.assertRaisesRegex(r.Stop, 'did not reach requested state'):
+                android.radio(True)
+            count = len(android.calls)
+            with self.assertRaisesRegex(r.Stop, 'already attempted'):
+                android.radio(True)
+        self.assertEqual(len(android.calls), count)
+        self.assertTrue(android.radio_touched)
+        self.assertAlmostEqual(now[0], .15)
+        self.assertEqual(sum(args[-1] == 'enable' for args, _ in android.calls), 1)
+
+    def test_disable_waits_for_explicit_synthetic_off(self):
+        from unittest.mock import patch
+        now = [0.0]
+        android = self.radio_device([self.ADAPTER_ON.replace(b'State: ON', b'State: TURNING_OFF'),
+                                     self.ADAPTER_ON.replace(b'State: ON', b'State: OFF')])
+        android.pump = lambda: None
+        android.decoder = r.Decoder()
+        android.decoder.previous = state(phase='transferring', durable=0)
+        android.last_state_at = 0
+        with patch.object(r.time, 'monotonic', lambda: now[0]), \
+             patch.object(r.time, 'sleep', lambda seconds: now.__setitem__(0, now[0] + seconds)):
+            android.radio(False, case=android.p['cases'][0])
+        self.assertTrue(android.radio_touched)
+        self.assertFalse(android.restore_attempted)
+        self.assertAlmostEqual(now[0], .05)
+        self.assertEqual(sum(args[-1] == 'disable' for args, _ in android.calls), 1)
+
+    def test_absent_adapter_after_restore_is_not_off_or_success(self):
+        from unittest.mock import patch
+        now = [0.0]
+        android = self.radio_device([b'No services match'])
+        with patch.object(r.time, 'monotonic', lambda: now[0]):
+            with self.assertRaises(r.Stop):
+                android.radio(True)
+        self.assertTrue(android.radio_touched)
+        self.assertTrue(android.restore_attempted)
+        self.assertEqual(sum(args[-1] == 'enable' for args, _ in android.calls), 1)
+
+
 class AdapterTests(unittest.TestCase):
     def test_late_boundary_is_rejected_before_any_radio_command(self):
         android = object.__new__(r.Android)

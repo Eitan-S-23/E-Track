@@ -473,6 +473,52 @@ class Campaign:
                     formalAcceptance='NOT_ADJUDICATED', cases=self.cases)
 
 
+RADIO_MANAGER = ('shell', 'dumpsys', 'bluetooth_manager')
+RADIO_ADAPTER = ('shell', 'dumpsys', 'activity', 'service',
+                 'com.android.bluetooth/.btservice.AdapterService', '--print')
+
+
+def parse_radio_state(raw, source):
+    require(isinstance(raw, bytes) and len(raw) <= 1024 * 1024,
+            'missing/oversized Bluetooth state dump', 'CAPABILITY_MISSING')
+    try:
+        text = raw.decode('utf-8')
+    except UnicodeError:
+        raise Stop('CAPABILITY_MISSING', 'invalid Bluetooth state encoding') from None
+    require('\x00' not in text, 'malformed Bluetooth state dump', 'CAPABILITY_MISSING')
+    require(source in {'manager', 'adapter'}, 'unknown Bluetooth state reader', 'CAPABILITY_MISSING')
+    header, field = ('Bluetooth Status', 'state') if source == 'manager' else ('AdapterProperties', 'State')
+    lines = text.splitlines()
+    sections = [(index, len(line) - len(line.lstrip(' '))) for index, line in enumerate(lines)
+                if line.strip() == header]
+    if source == 'manager' and not sections:
+        # Retain the original standalone manager format, never a profile-only dump.
+        block = [line for line in lines if line.strip()]
+        require(len(block) == 1, 'unqualified Bluetooth manager dump', 'CAPABILITY_MISSING')
+    else:
+        require(len(sections) == 1, 'missing/ambiguous Bluetooth state section', 'CAPABILITY_MISSING')
+        index, indent = sections[0]
+        block = []
+        for line in lines[index + 1:]:
+            if not line.strip():
+                continue
+            depth = len(line) - len(line.lstrip(' '))
+            if depth <= indent:
+                break
+            if depth == indent + 2:
+                block.append(line)
+    values = [match for line in block
+              if (match := re.fullmatch(r' *' + field + r': *(.*)', line))]
+    require(len(values) == 1, 'missing/ambiguous Bluetooth state field', 'CAPABILITY_MISSING')
+    require('\t' not in values[0].group(0), 'malformed Bluetooth state field', 'CAPABILITY_MISSING')
+    value = values[0].group(1).strip()
+    require(value in {'ON', 'OFF', 'TURNING_ON', 'TURNING_OFF', 'BLE_ON',
+                      'BLE_TURNING_ON', 'BLE_TURNING_OFF'},
+            'unknown Bluetooth adapter state', 'CAPABILITY_MISSING')
+    # Turning and BLE-only states do not confirm either requested full-radio state.
+    return {'ON': True, 'OFF': False}.get(value)
+
+
 class Android:
     """Thin standard adb/uiautomator adapter; logcat writes independently of polling."""
     def __init__(self, p, out, h, automatic=False):
@@ -503,6 +549,7 @@ class Android:
         self.pid = self.initial_radio = None
         self.radio_touched = False
         self.restore_attempted = False
+        self.radio_state_source = None
         self.sequence, self.offset, self.journal_seq = 0, 0, 0
         self.decoder, self.queue = Decoder(), deque()
         self.total_deadline = time.monotonic() + p['limits']['total_seconds'] + p.get('preparation', {}).get('cleanup_seconds', 60)
@@ -786,11 +833,28 @@ class Android:
         require(report['final'] == self.decoder.previous, 'live/stored final records differ', 'EVIDENCE_GAP')
         return report
 
-    def radio_state(self):
-        text = self.cmd(['shell', 'dumpsys', 'bluetooth_manager']).decode(errors='replace')
-        values = re.findall(r'(?m)^\s*state:\s*(ON|OFF)\s*$', text)
-        require(len(values) == 1, 'unqualified Android Bluetooth state format', 'CAPABILITY_MISSING')
-        return values[0] == 'ON'
+    def radio_state(self, seconds=5):
+        require(type(seconds) in (int, float) and math.isfinite(seconds) and 0 < seconds <= 5,
+                'finite Bluetooth state-read timeout required', 'ENV_BLOCKED')
+        deadline = time.monotonic() + seconds
+
+        def read(command):
+            remaining = deadline - time.monotonic()
+            require(remaining > 0, 'Bluetooth state-read deadline', 'ENV_BLOCKED')
+            raw = self.cmd(list(command), seconds=remaining)
+            require(time.monotonic() < deadline, 'Bluetooth state-read deadline', 'ENV_BLOCKED')
+            return raw
+
+        source = getattr(self, 'radio_state_source', None)
+        if source is None:
+            raw = read(RADIO_MANAGER)
+            source = 'adapter' if not raw.strip() else 'manager'
+            self.radio_state_source = source
+            if source == 'adapter':
+                raw = read(RADIO_ADAPTER)
+        else:
+            raw = read(RADIO_MANAGER if source == 'manager' else RADIO_ADAPTER)
+        return parse_radio_state(raw, source)
 
     def radio(self, enabled, *, case=None):
         require(self.p.get('allow_bluetooth_toggle') is True, 'adapter toggle affects other phone Bluetooth connections; explicit plan opt-in required')
@@ -812,12 +876,12 @@ class Android:
         self.cmd(['shell', 'cmd', 'bluetooth_manager', 'enable' if enabled else 'disable'], seconds=5)
         deadline = time.monotonic() + self.p['limits']['disconnect_seconds']
         while time.monotonic() < deadline:
-            if self.radio_state() == enabled:
+            if self.radio_state(seconds=min(5, deadline - time.monotonic())) is enabled:
                 self.record('radio-state-observed', enabled=enabled)
                 if enabled:
                     self.radio_touched = False
                 return
-            time.sleep(.05)
+            time.sleep(min(.05, max(0, deadline - time.monotonic())))
         raise Stop('ENV_BLOCKED', 'Bluetooth command did not reach requested state')
 
     def close(self):
