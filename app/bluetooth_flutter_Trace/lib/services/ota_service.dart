@@ -213,7 +213,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       _identityLinkGeneration != null &&
       _identityLinkGeneration == _ble.otaLinkGeneration(address);
 
-  Future<bool> startP35Recording() async {
+  Future<bool> startP35Recording({bool reliable = false}) async {
     final address = _deviceInfoAddress;
     if (_closed || _isUpgrading.value || _ownerDone != null ||
         address == null || _deviceInfo == null || p35.captureId != null ||
@@ -224,7 +224,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     _p35Identity = _deviceInfo;
     final device = _ble.otaDeviceForObservation(address);
     _p35Device = device;
-    final started = await p35.start(_p35Snapshot);
+    final started = await p35.start(_p35Snapshot, reliable: reliable);
     if (_closed) { await p35.stop(); return false; }
     if (!started) return false;
     _p35Connection = device.connectionState.listen((_) {

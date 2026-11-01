@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'ota_observation_log.dart';
 import 'ota_p35_android_log.dart';
+import 'ota_p35_stream.dart';
 
 /// Explicit, Release-capable observation only. Never drives the OTA state machine.
 /// Published lines have already been flushed to app-owned storage. A failed
@@ -29,6 +30,9 @@ class OtaP35Recorder {
   final Stopwatch _clock = Stopwatch();
   final List<String> _pending = [];
   OtaObservationWriter? _writer;
+  OtaP35Stream? _stream;
+  bool _probing = false;
+  bool get streaming => _stream != null;
   Future<void>? _draining, _stopping;
   Completer<void>? _opened;
   Timer? _heartbeat, _deadline;
@@ -42,7 +46,8 @@ class OtaP35Recorder {
   bool get active => _accepting;
   bool get healthy => active && error == null;
 
-  Future<bool> start(Map<String, Object?> Function() snapshot) async {
+  Future<bool> start(Map<String, Object?> Function() snapshot, {bool reliable = false,
+    OtaP35Stream? stream}) async {
     if (_starting || active || captureId != null || _stopRequested) return false;
     _starting = true;
     _opened = Completer<void>();
@@ -57,6 +62,10 @@ class OtaP35Recorder {
       file = File('${root.path}/$captureId.jsonl');
       await file!.create(exclusive: true);
       _writer = await (writerFactory?.call(file!) ?? _open(file!));
+      if (reliable) {
+        _stream = stream ?? OtaP35Stream();
+        await _stream!.open();
+      }
       _digest = _DigestSink();
       _hash = sha256.startChunkedConversion(_digest);
       final header = 'OTA_P35_CAPTURE ${jsonEncode({
@@ -64,6 +73,7 @@ class OtaP35Recorder {
       })}';
       await _writer!.append(utf8.encode('$header\n'));
       await _writer!.flush();
+      if (_stream != null) await _stream!.send(utf8.encode('$header\n'));
       _emit(header);
       if (_stopRequested) return false;
       _snapshot = snapshot;
@@ -82,6 +92,7 @@ class OtaP35Recorder {
       final writer = _writer;
       _writer = null;
       try { await writer?.close(); } catch (_) { /* Failure is already latched. */ }
+      await _stream?.close();
       return false;
     } finally {
       _starting = false;
@@ -128,13 +139,14 @@ class OtaP35Recorder {
         _written += batch.length;
         // Keep native publication after persistence, without a debug-print queue.
         try {
+          if (_stream != null) await _stream!.send(bytes);
           for (final line in batch) { _emit(line.trimRight()); }
         } catch (cause) {
           lost += _seq - _written;
           _pending.clear();
           _fail(cause is AndroidLogWriteFailure
               ? 'log-write-failed:native=${cause.result}:expected=${cause.expectedBytes}'
-              : 'log-write-failed');
+              : streaming ? 'live-stream-failed' : 'log-write-failed');
           return;
         }
       }
@@ -159,6 +171,28 @@ class OtaP35Recorder {
 
   void fail(String code) { if (active) _fail(code); }
 
+  /// Logging load only: actual idle snapshots, never fake DATA/ACK or an OTA.
+  Future<void> probeIdleStream() async {
+    if (!healthy || !streaming || _probing) return;
+    _probing = true;
+    try {
+      for (var batch = 0; batch < 300; batch++) {
+        if (_stopRequested || !active) return;
+        final current = _snapshot!();
+        if (!healthy || current['phase'] != 'idle' || current['targetVersionCode'] != 0 ||
+            current['packageBytes'] != 0) throw StateError('probe requires idle/no package');
+        for (var i = 0; i < 20; i++) { record(); }
+        await _draining;
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+      }
+      if (healthy) status.value = 'recording:probe-complete:6000';
+    } catch (_) {
+      _fail('probe-failed');
+    } finally {
+      _probing = false;
+    }
+  }
+
   Future<void> stop() {
     _stopRequested = true;
     return _stopping ??= _stop();
@@ -182,12 +216,14 @@ class OtaP35Recorder {
       })}';
       await writer.append(utf8.encode('$footer\n'));
       await writer.flush();
+      if (_stream != null) await _stream!.send(utf8.encode('$footer\n'));
       _emit(footer);
     } catch (_) {
       _fail('close-failed');
     } finally {
       try { await writer.close(); } catch (_) { _fail('close-failed'); }
       _writer = null;
+      await _stream?.close();
       // A failed recorder still changes from active to closed. Notify the UI
       // without turning its unhealthy result into a successful capture.
       status.value = error == null ? 'closed' : 'failed:$error:closed';
