@@ -290,6 +290,23 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
           ValueListenableBuilder<String>(
             valueListenable: otaService.p35.status,
             builder: (context, status, _) => Obx(() => Row(children: [
+              if (!otaService.p35.active)
+                Semantics(identifier: 'p35-arm-stream', child: IconButton(
+                  tooltip: 'Start acknowledged live recording',
+                  onPressed: otaService.isUpgrading || status == 'starting' || !_deviceReady ||
+                      otaService.p35.captureId != null ? null : () async {
+                    await otaService.startP35Recording(reliable: true);
+                  },
+                  icon: const Icon(Icons.cable),
+                )),
+              if (otaService.p35.active && otaService.p35.streaming)
+                Semantics(identifier: 'p35-log-probe', child: IconButton(
+                  tooltip: 'Idle logging load probe (no OTA)',
+                  onPressed: otaService.isUpgrading ? null : () async {
+                    await otaService.p35.probeIdleStream();
+                  },
+                  icon: const Icon(Icons.speed),
+                )),
               if (otaService.p35.active)
                 Semantics(identifier: 'p35-reconnect', child: IconButton(
                   tooltip: '重连取证目标（不开始升级）',

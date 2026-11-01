@@ -50,6 +50,58 @@ def strict_json(raw):
         raise Stop('EVIDENCE_GAP', 'invalid UTF-8/JSON') from error
 
 
+def audit_logcat_status(raw, capture_id, archive):
+    value = strict_json(raw)
+    common = {'schema', 'captureId', 'source', 'status'}
+    require(isinstance(value, dict) and type(value.get('schema')) is int and value['schema'] == 1 and
+            value.get('captureId') == capture_id and value.get('source') == 'diagnostic-only',
+            'unbound native mirror status', 'EVIDENCE_GAP')
+    if value.get('status') == 'NO_NATIVE_ERROR_OBSERVED':
+        require(set(value) == common, 'invalid native mirror summary', 'EVIDENCE_GAP')
+    else:
+        require(value.get('status') == 'FAILED_DISABLED' and set(value) == common | {
+            'errorType', 'nativeResult', 'expectedBytes', 'record', 'recordSha256'} and
+            isinstance(value['errorType'], str) and bool(value['errorType']) and
+            isinstance(value['record'], str), 'invalid native mirror failure', 'EVIDENCE_GAP')
+        require((type(value['nativeResult']) is int and type(value['expectedBytes']) is int and value['expectedBytes'] > 0)
+                or value['nativeResult'] is None and value['expectedBytes'] is None,
+                'invalid native mirror return', 'EVIDENCE_GAP')
+        line = value['record'].encode('utf-8')
+        if value['nativeResult'] is not None:
+            require(value['expectedBytes'] == len(line) + 9 and value['nativeResult'] != value['expectedBytes'],
+                    'native mirror return does not describe this failed write', 'EVIDENCE_GAP')
+        require(line in archive.splitlines() and hashlib.sha256(line).hexdigest() == value['recordSha256'],
+                'native mirror rejection is not bound to the original', 'EVIDENCE_GAP')
+    return value
+
+
+def audit_logcat_mirror(raw, capture_id, states, status):
+    """Audit optional text rendering without treating it as the primary stream.
+
+    Android's events text renderer can truncate a successfully stored binary
+    string. Preserve every malformed line's location/hash; never reconstruct it
+    from the complete, independently validated App/ACK-stream original.
+    """
+    observed, errors = [], []
+    for number, line in enumerate(raw.splitlines(), 1):
+        marker = line.find(PREFIX.encode())
+        if marker < 0:
+            continue
+        try:
+            row = validate_state(strict_json(line[marker + len(PREFIX):]))
+        except Stop as error:
+            errors.append(dict(line=number, bytes=len(line), sha256=hashlib.sha256(line).hexdigest(),
+                               code=error.code, detail=str(error)))
+            continue
+        if row['captureId'] == capture_id:
+            observed.append(row)
+    return dict(source='diagnostic-only', captureId=capture_id, records=len(observed), originalRecords=len(states),
+        rawBytes=len(raw), rawSha256=hashlib.sha256(raw).hexdigest(), parseErrors=errors,
+        missingSequences=sorted({x['seq'] for x in states}-{x['seq'] for x in observed}),
+        retainedMatch=all(0 < x['seq'] <= len(states) and states[x['seq']-1] == x for x in observed),
+        exactEquality=not errors and observed == states, nativeMirror=status, usedForInjection=False)
+
+
 def uint(value, maximum=0xffffffff):
     return type(value) is int and 0 <= value <= maximum
 
@@ -82,8 +134,11 @@ def selector(value):
     return value
 
 
-def validate_plan(p):
+def validate_plan(p, *, single=False, scenarios=False):
     require(isinstance(p, dict) and type(p.get('schema')) is int and p['schema'] == 1, 'plan schema must be 1')
+    require(not (single and scenarios) and (p.get('test_profile') in {'resume-once', 'background-lock'}
+            if scenarios else p.get('test_profile') == ('single-upgrade' if single else None)),
+            'test profile requires its explicit development entry')
     require(isinstance(p.get('run_id'), str) and re.fullmatch(r'p35-[a-z0-9-]{1,40}', p['run_id']), 'run_id')
     for section in ['phone', 'app', 'firmware', 'ui', 'limits']:
         require(isinstance(p.get(section), dict), 'missing plan section: ' + section)
@@ -109,7 +164,9 @@ def validate_plan(p):
     require(isinstance(fw.get('latest_url'), str) and re.fullmatch(r'https://[a-z0-9.-]+/api/public/firmware/latest', fw['latest_url']), 'real latest URL without credentials/query')
     for key in ['arm', 'stop', 'check', 'download', 'start', 'resume']:
         selector(ui.get(key))
-    require(ui['arm'] == {'resource-id': 'p35-arm'} and ui['stop'] == {'resource-id': 'p35-stop'},
+    stream_port = p['preparation'].get('live_stream_port') if isinstance(p.get('preparation'), dict) else None
+    arm_id = 'p35-arm-stream' if stream_port is not None else 'p35-arm'
+    require(ui['arm'] == {'resource-id': arm_id} and ui['stop'] == {'resource-id': 'p35-stop'},
             'capture controls must be the dedicated native identifiers, never business-button substitutes')
     for key in ['navigate', 'reconnect']:
         require(isinstance(ui.get(key), list) and len(ui[key]) <= 12, 'bounded UI route')
@@ -122,16 +179,52 @@ def validate_plan(p):
     require(limits['stage_seconds'] < limits['total_seconds'], 'stage deadline must fit total deadline')
     prep = p.get('preparation', {})
     require(isinstance(prep, dict) and set(prep) <= {'display_name', 'command_seconds',
-        'cleanup_seconds', 'restart_closed_recorder'}, 'preparation fields')
+        'cleanup_seconds', 'restart_closed_recorder', 'startup_log_tag', 'radio_state_reader',
+        'capture_failure_buffer', 'log_buffer', 'live_stream_port', 'logcat_binary'}, 'preparation fields')
+    require(type(prep.get('logcat_binary', False)) is bool and (not prep.get('logcat_binary') or
+            stream_port is not None and prep.get('log_buffer') == 'events'),
+            'binary diagnostic requires the acknowledged primary and events buffer')
+    if stream_port is not None:
+        require(type(stream_port) is int and 1024 <= stream_port <= 65535 and
+                stream_port not in (5037, phone['adb_port']) and app['id'].endswith('.p35acceptance') and
+                prep.get('log_buffer') == 'events', 'explicit test-only live stream binding required')
+    require(type(prep.get('capture_failure_buffer', False)) is bool, 'capture failure buffer opt-in must be boolean')
+    require(prep.get('log_buffer', 'main') in ('main', 'events'), 'unsupported telemetry log buffer')
+    require(prep.get('log_buffer') != 'events' or 'startup_log_tag' not in prep,
+            'structured events must not change text logging policy')
+    require(prep.get('radio_state_reader') in (None, 'vivo-pd2312-sdk33-getState-v1'),
+            'unqualified radio-state reader profile')
     require(isinstance(prep.get('display_name', ''), str) and len(prep.get('display_name', '')) <= 128,
             'optional exact advertised name')
     require(type(prep.get('restart_closed_recorder', False)) is bool, 'explicit recorder lifecycle permission')
+    if 'startup_log_tag' in prep:
+        logging = prep['startup_log_tag']
+        require(isinstance(logging, dict) and {'before', 'during', 'seconds'} <= set(logging) <=
+                {'before', 'during', 'seconds', 'allow_info_baseline'} and
+                logging['before'] == 'M' and logging['during'] == 'V' and
+                type(logging.get('allow_info_baseline', False)) is bool and
+                type(logging['seconds']) is int and 60 <= logging['seconds'] <= 300,
+                'only the explicitly qualified bounded M-to-V startup logging policy is supported')
     for key, default, lo, hi in [('command_seconds', 30, 5, 60), ('cleanup_seconds', 60, 20, 90)]:
         value = prep.get(key, default)
         require(type(value) in (int, float) and math.isfinite(value) and lo <= value <= hi,
                 'preparation limit: ' + key)
     cases = p.get('cases')
-    require(isinstance(cases, list) and len(cases) == 10, 'exactly ten planned independent disconnect events required')
+    if scenarios:
+        require(stream_port is not None, 'scenario coverage requires the acknowledged live stream')
+        if p['test_profile'] == 'background-lock':
+            require(cases == [] and p.get('allow_bluetooth_toggle') is False and
+                    p.get('allow_display_control') is True,
+                    'background-lock requires explicit display scope and forbids radio cuts')
+            return p
+        require(p.get('allow_bluetooth_toggle') is True and p.get('allow_display_control', False) is False,
+                'resume-once requires adapter scope, not display mutations')
+    if single:
+        require(cases == [] and p.get('allow_bluetooth_toggle') is False,
+                'single upgrade forbids disconnect cases and adapter mutation')
+        return p
+    require(isinstance(cases, list) and len(cases) == (1 if scenarios else 10),
+            'exactly one development cut or ten formal disconnect events required')
     previous, ids = -1, set()
     for case in cases:
         require(isinstance(case, dict) and set(case) == {'id', 'durable_min', 'durable_max', 'bitmap'}, 'case fields')
@@ -143,6 +236,10 @@ def validate_plan(p):
         require(case['bitmap'] in {'zero', 'partial', 'any'}, 'bitmap predicate')
         require(fw['protocol'] == 1 or case['bitmap'] == 'any', 'v2 has no bitmap; do not invent partial bits')
         previous = hi
+    if scenarios:
+        require(cases[0]['durable_min'] >= 4096 and cases[0]['durable_max'] < size // 2,
+                'resume-once requires a positive durable prefix before the package midpoint')
+        return p
     require(any(c['durable_min'] == 0 for c in cases) and
             (fw['protocol'] == 2 or any(c['bitmap'] == 'partial' for c in cases))
             and cases[-1]['durable_min'] >= size * .8, 'early/partial/tail coverage required')
@@ -157,8 +254,25 @@ STATE_KEYS = {'schema', 'captureId', 'protocol', 'seq', 'monoUs', 'deviceAddress
 
 
 def validate_state(s):
-    require(isinstance(s, dict) and set(s) == STATE_KEYS and type(s['schema']) is int and s['schema'] == 1,
+    require(isinstance(s, dict) and type(s.get('schema')) is int and s['schema'] in (1, 2) and
+            set(s) == STATE_KEYS | ({'runtime'} if s['schema'] == 2 else set()),
             'missing/unknown Release telemetry fields', 'EVIDENCE_GAP')
+    if s['schema'] == 2:
+        runtime = s['runtime']
+        require(isinstance(runtime, dict) and set(runtime) == {'backgrounded', 'acquired', 'reason',
+                'active', 'paused', 'ownerEpoch', 'revision', 'task'}, 'runtime fields', 'EVIDENCE_GAP')
+        require(all(type(runtime[k]) is bool for k in ('backgrounded', 'acquired', 'active', 'paused')) and
+                all(uint(runtime[k], 2**63-1) for k in ('ownerEpoch', 'revision')) and
+                (runtime['reason'] is None or isinstance(runtime['reason'], str) and len(runtime['reason']) <= 256),
+                'runtime domains', 'EVIDENCE_GAP')
+        task = runtime['task']
+        require(task is None or isinstance(task, dict) and set(task) == {
+                'taskId', 'generation', 'deviceToken', 'packageSha256'} and
+                isinstance(task['taskId'], str) and 0 < len(task['taskId']) <= 128 and
+                uint(task['generation'], 2**63-1) and digest(task['deviceToken']) and digest(task['packageSha256']),
+                'runtime task binding', 'EVIDENCE_GAP')
+        require(not runtime['acquired'] or runtime['active'] and task is not None and
+                task['generation'] == runtime['ownerEpoch'], 'acquired runtime has no current owner', 'EVIDENCE_GAP')
     require(uint(s['seq'], 2**63-1) and uint(s['monoUs'], 2**63-1) and isinstance(s['phase'], str)
             and s['phase'] in PHASES and isinstance(s['event'], str)
             and s['event'] in {'state', 'heartbeat', 'beginAck', 'data', 'identity'}, 'telemetry domain', 'EVIDENCE_GAP')
@@ -221,8 +335,10 @@ class Decoder:
             s = validate_state(strict_json(row[start + len(PREFIX):]))
             if self.previous is not None:
                 require(s['captureId'] == self.previous['captureId'] and
+                        s['schema'] == self.previous['schema'] and
                         s['seq'] == self.previous['seq'] + 1 and s['monoUs'] >= self.previous['monoUs'],
-                        'lost/replayed/reordered producer records', 'EVIDENCE_GAP')
+                        'lost/replayed/reordered producer records: expected seq %s, received %s' %
+                        (self.previous['seq'] + 1, s['seq']), 'EVIDENCE_GAP')
             self.previous = s
             result.append(s)
         return result
@@ -254,15 +370,29 @@ def audit_capture(raw, capture_id):
 
 
 def foreground_ok(raw, package):
-    """Ignore unused displays' null focus, not a second live window/overlay.
-
-    Adapted from the acceptance agent's p35_capability.py phone repair. Keep
-    this origin visible for a different independent reviewer of this scope.
-    """
-    text = raw.decode(errors='replace')
-    if re.search(r'\b(?:mShowingLockscreen|mDreamingLockscreen|mKeyguardShowing|isStatusBarKeyguard)=true\b', text):
+    """Use the live full-dump sections, never the nested LAST ANR snapshot."""
+    try:
+        text = raw.decode('utf-8')
+    except UnicodeError:
         return False
-    values = re.findall(r'(?m)^\s*mCurrentFocus=([^\r\n]+)', text)
+    if not text.endswith('\n'):
+        return False
+    headings = list(re.finditer(r'(?m)^WINDOW MANAGER [^\r\n]*\(dumpsys window ([a-z]+)\):?\r?$', text))
+    policies = [i for i, m in enumerate(headings) if m[1] == 'policy']
+    if len(policies) != 1:
+        return False
+    live = headings[policies[0]:]
+    # These root sections bound the current policy and every current display.
+    # A historical DISPLAY heading alone is not an observation boundary.
+    if [m[1] for m in live[:7]] != ['policy', 'animator', 'sessions', 'displays', 'tokens', 'windows', 'trace']:
+        return False
+    if len({m[1] for m in live}) != len(live):
+        return False
+    current = text[live[0].start():]
+    if re.search(r'\b(?:mShowingLockscreen|mDreamingLockscreen|mKeyguardShowing|isStatusBarKeyguard|isKeyguardShowing)=true\b', current):
+        return False
+    displays = text[live[3].end():live[4].start()]
+    values = re.findall(r'(?m)^\s*mCurrentFocus=([^\r\n]+)', displays)
     values = [v.strip() for v in values if v.strip() != 'null']
     return len(values) == 1 and re.fullmatch(r'Window\{[0-9a-f]+ u0 ' +
         re.escape(package) + r'/[A-Za-z0-9_.$]+\}', values[0]) is not None
@@ -360,8 +490,8 @@ def resume_offset(s):
 
 
 class Campaign:
-    def __init__(self, plan, driver, clock=time.monotonic):
-        self.p, self.io, self.clock = validate_plan(plan), driver, clock
+    def __init__(self, plan, driver, clock=time.monotonic, *, single=False, scenarios=False):
+        self.p, self.io, self.clock = validate_plan(plan, single=single, scenarios=scenarios), driver, clock
         self.deadline = clock() + plan['limits']['total_seconds']
         self.state, self.cases = None, []
         self.active_case, self.stage = None, 'initial-idle'
@@ -387,6 +517,10 @@ class Campaign:
         while self.clock() < deadline:
             state = self.io.next_state(min(self.p['limits']['event_seconds'], deadline - self.clock()))
             validate_state(state)
+            scenario = getattr(self.io, 'scenario', None)
+            if scenario is not None:
+                scenario.observe(state)
+                scenario.healthy()
             require(state['deviceAddress'] == self.p['firmware']['device_address'],
                     'event from a different BLE device', 'IDENTITY_MISMATCH')
             self.state = state
@@ -435,6 +569,7 @@ class Campaign:
             before = self.wait(at_boundary, case['id'] + '-boundary')
             self.io.record('disconnect-intent', case=case['id'], state=before)
             try:
+                self.stage = case['id'] + '-radio-off'
                 self.io.radio(False, case=case)
                 cut = self.wait(lambda s: not s['linkConnected'], case['id'] + '-actual-disconnect',
                     self.p['limits']['disconnect_seconds'], allow_failure=True)
@@ -465,17 +600,39 @@ class Campaign:
             self.cases.append(value)
             self.io.record('recovery-observed', **value)
             self.active_case = None
-        final = self.wait(lambda s: s['phase'] == 'completed' and s['event'] == 'identity', 'post-reboot-identity')
+        coverage = None
+        final = None
+        if self.p.get('test_profile') == 'background-lock':
+            import scenarios
+            self.io.scenario = scenarios.Background(self)
+            coverage = self.io.scenario.run()
+            final = self.io.scenario.final
+        if final is None:
+            final = self.wait(lambda s: s['phase'] == 'completed' and s['event'] == 'identity', 'post-reboot-identity')
         bound(final, self.p, package=True, final=True)
         require(final['freshConnection'] and final['linkConnected'] and final['durable'] == self.p['firmware']['package']['bytes'],
                 'END/UI completion is not fresh final identity', 'EVIDENCE_GAP')
         return dict(outcome='AUTOMATION_COMPLETED', recovered=len(self.cases), final=final,
-                    formalAcceptance='NOT_ADJUDICATED', cases=self.cases)
+                    formalAcceptance='NOT_ADJUDICATED', cases=self.cases, scenarioCoverage=coverage)
 
 
 RADIO_MANAGER = ('shell', 'dumpsys', 'bluetooth_manager')
 RADIO_ADAPTER = ('shell', 'dumpsys', 'activity', 'service',
                  'com.android.bluetooth/.btservice.AdapterService', '--print')
+RADIO_BINDER = ('shell', 'service', 'call', 'bluetooth_manager', '8')
+RADIO_FRAMEWORK = '/system/framework/framework.jar'
+RADIO_FRAMEWORK_SHA256 = '3614bbb0ff5717fe1946ebe95d569ae06c9d8c07b0f9ad49b65e716ebc87a4ab'
+RADIO_FINGERPRINT = 'vivo/PD2312/PD2312:13/TP1A.220624.014/compiler06251531:user/release-keys'
+
+
+def parse_radio_parcel(raw):
+    # The pinned ROM's getState() has no arguments and returns exception=0, int.
+    # Never infer OFF from a missing service, exception, boolean or command exit.
+    require(isinstance(raw, bytes) and len(raw) <= 256, 'invalid radio-state parcel', 'CAPABILITY_MISSING')
+    match = re.fullmatch(rb"Result: Parcel\(00000000 (0000000[a-f]|00000010) +'\.{8}'\)\r?\n?", raw)
+    require(match is not None, 'unqualified radio-state parcel', 'CAPABILITY_MISSING')
+    value = int(match[1], 16)
+    return {10: False, 12: True}.get(value)
 
 
 def parse_radio_state(raw, source):
@@ -491,6 +648,12 @@ def parse_radio_state(raw, source):
     lines = text.splitlines()
     sections = [(index, len(line) - len(line.lstrip(' '))) for index, line in enumerate(lines)
                 if line.strip() == header]
+    if source == 'adapter' and not sections and re.fullmatch(
+            r'SERVICE com\.android\.bluetooth/\.btservice\.AdapterService [0-9a-f]+ '
+            r'pid=[1-9][0-9]* user=0\r?\n  Client:\r?\n(?:\r?\n)*', text):
+        # Android can keep the service envelope while its client is changing.
+        # This is unavailable state, not OFF; the existing transition bound applies.
+        return None
     if source == 'manager' and not sections:
         # Retain the original standalone manager format, never a profile-only dump.
         block = [line for line in lines if line.strip()]
@@ -546,6 +709,9 @@ class Android:
             self.base = [str(h.pinned(p['phone']['adb'])), '-H', '127.0.0.1', '-P',
                          str(p['phone']['adb_port']), '-s', p['phone']['serial']]
         self.server = self.capture = None
+        self.stream_capture = None
+        self.stream_port = p.get('preparation', {}).get('live_stream_port')
+        self.stream_forwarded = False
         self.pid = self.initial_radio = None
         self.radio_touched = False
         self.restore_attempted = False
@@ -556,6 +722,13 @@ class Android:
         self.last_ui = None
         self.last_state_at = None
         self.campaign = None
+        self.product_result = None
+        self.state_sink = None
+        self.scenario = None
+        self.transfer_start_attempted = False
+        self.log_tag_touched = False
+        self.log_tag_restore_attempted = False
+        self.log_tag_started = self.log_tag_saved_deadlines = None
         if self.preparation:
             self.preparation.decoder = self.decoder
             self.preparation.pump = self.pump
@@ -572,12 +745,22 @@ class Android:
             self.preparation.mutation_unknown = False
 
     def check_cleanup_state(self, state):
+        history = getattr(self.preparation, 'capture_recovery_states', None) or self.preparation.live
+        if state['phase'] == 'readyToInstall':
+            require(not getattr(self, 'transfer_start_attempted', True) and self.preparation.live and
+                    all(s['phase'] in {'idle', 'checkingUpdate', 'downloading', 'verifyingDownload', 'readyToInstall'} and
+                        s['protocol'] is None and s['bitmap'] is None and s['session'] == s['durable'] == 0 and
+                        s['sendOffset'] is None and s['event'] not in {'beginAck', 'data', 'endAck'}
+                        for s in history),
+                    'transfer intent/history prevents pre-BEGIN cleanup', 'UNRESOLVED_STATE')
+            bound(state, self.p, package=True)
+            return
         require(state['phase'] in {'idle', 'completed', 'failed'},
                 'transfer/apply/reboot outcome unresolved; preserve owner', 'UNRESOLVED_STATE')
         if not self.final_verified:
             require(not any(row['phase'] in {'applying', 'waitingReboot', 'reconnectVerify', 'completed'}
                     or row['packageBytes'] > 0 and row['durable'] == row['packageBytes']
-                    for row in self.preparation.live),
+                    for row in history),
                     'post-transfer device outcome unknown; no App stop or replay', 'UNRESOLVED_STATE')
         bound(state, self.p, final=self.final_verified)
 
@@ -591,6 +774,81 @@ class Android:
             require(hashlib.sha256(raw).hexdigest() == pin['sha256'], 'old original changed before ARM', 'EVIDENCE_GAP')
         prep.arm_baseline_confirmed = True
         prep.record('arm-baseline', pid=prep.pid, captures=prep.previous_captures)
+
+    def prepare_startup_logging(self):
+        policy = self.p.get('preparation', {}).get('startup_log_tag')
+        if policy is None:
+            return
+        prep = self.preparation
+        require(prep is not None and not self.log_tag_touched and self.log_tag_started is None,
+                'startup logging owner is single-use')
+        require(not prep.cmd(['shell', 'pidof', self.p['app']['id']], success_codes=(0, 1)).strip(),
+                'startup logging requires an absent test process', 'UNRESOLVED_STATE')
+        before = self.cmd(['shell', 'getprop', 'log.tag'], seconds=5).decode('utf-8', 'strict').strip()
+        if before == 'I' and policy.get('allow_info_baseline', False):
+            # INFO already passed real reader/original qualification. No write
+            # means no property restoration ownership; live readiness still gates OTA.
+            self.record('startup-log-tag-not-needed', observed=before, propertyWrites=0)
+            return
+        require(before == policy['before'], 'global log.tag baseline changed; not overwritten', 'UNRESOLVED_STATE')
+        self.record('startup-log-tag-intent', property='log.tag', before=before, during=policy['during'],
+                    maxSeconds=policy['seconds'])
+        self.log_tag_started = time.monotonic()
+        self.log_tag_saved_deadlines = (prep.total, self.total_deadline)
+        # Reserve restoration commands plus their bounded owned-process closure.
+        work_end = self.log_tag_started + policy['seconds'] - 45
+        prep.total, self.total_deadline = min(prep.total, work_end), min(self.total_deadline, work_end)
+        prep.stage_deadline = min(prep.stage_deadline, work_end)
+        prep.phone.operation_deadline = prep.stage_deadline
+        self.log_tag_touched = True
+        self.cmd(['shell', 'setprop', 'log.tag', policy['during']], seconds=5)
+        require(self.cmd(['shell', 'getprop', 'log.tag'], seconds=5).decode('utf-8', 'strict').strip() == policy['during'],
+                'global log.tag configuration readback failed', 'UNRESOLVED_STATE')
+        self.record('startup-log-tag-configured', beforeLaunch=True)
+
+    def restore_startup_logging(self):
+        if not getattr(self, 'log_tag_touched', False):
+            return
+        require(not self.log_tag_restore_attempted, 'startup logging restoration unresolved; no replay', 'UNRESOLVED_STATE')
+        self.log_tag_restore_attempted = True
+        policy, prep = self.p['preparation']['startup_log_tag'], self.preparation
+        old_operation_deadline = prep.phone.operation_deadline
+        prep.phone.operation_deadline = None
+        try:
+            current = self.cmd(['shell', 'getprop', 'log.tag'], seconds=5).decode('utf-8', 'strict').strip()
+            require(current in (policy['before'], policy['during']), 'foreign global log.tag change; not overwritten', 'UNRESOLVED_STATE')
+            if current == policy['during']:
+                self.cmd(['shell', 'setprop', 'log.tag', policy['before']], seconds=5)
+            require(self.cmd(['shell', 'getprop', 'log.tag'], seconds=5).decode('utf-8', 'strict').strip() == policy['before'],
+                    'global log.tag restoration unconfirmed', 'UNRESOLVED_STATE')
+            self.log_tag_touched = False
+            elapsed = time.monotonic() - self.log_tag_started
+            self.record('startup-log-tag-restored', value=policy['before'], elapsedSeconds=elapsed)
+            require(elapsed <= policy['seconds'], 'startup logging duration exceeded its bound', 'TIMEOUT')
+        finally:
+            prep.total, self.total_deadline = self.log_tag_saved_deadlines
+            prep.phone.operation_deadline = old_operation_deadline
+
+    def finish_startup_logging(self):
+        if not getattr(self, 'log_tag_touched', False):
+            return
+        self.restore_startup_logging()
+        self.enter_stage('startup-log-tag-restored-readiness', self.p['limits']['stage_seconds'])
+        self.pump()
+        boundary = self.decoder.previous['seq']
+        self.queue.clear()
+        end = min(self.total_deadline, time.monotonic() + self.p['limits']['event_seconds'])
+        fresh = []
+        while len(fresh) < 2:
+            remaining = end - time.monotonic()
+            require(remaining > 0, 'no continuing telemetry after startup logging restoration', 'CAPABILITY_MISSING')
+            state = self.next_state(remaining)
+            bound(state, self.p)
+            require(state['phase'] == 'idle' and state['seq'] > boundary and state['packageBytes'] == 0,
+                    'unexpected state after logging restoration', 'UNRESOLVED_STATE')
+            fresh.append(state['seq'])
+        self.queue.appendleft(state)
+        self.record('startup-log-tag-restored-readiness', boundarySeq=boundary, freshSeqs=fresh)
 
     def fresh_identity(self):
         self.enter_stage('fresh-identity', self.p['limits']['stage_seconds'])
@@ -610,6 +868,7 @@ class Android:
                 self.queue.clear()
                 self.queue.append(fresh)
                 self.record('identity-query-observed', seq=fresh['seq'])
+                self.finish_startup_logging()
                 return
             time.sleep(.02)
         raise Stop('IDENTITY_MISMATCH', 'no query-bound current identity; no OTA start')
@@ -651,21 +910,56 @@ class Android:
         return self.h.command(self.out / 'commands', 'adb-%05d' % self.sequence,
                               self.base + args, self.env, seconds=seconds)
 
+    def logcat_command(self):
+        if self.p.get('preparation', {}).get('logcat_binary'):
+            # The old adb logcat shortcut applies shell CR conversion to binary.
+            return self.base + ['exec-out', 'logcat', '-B', '-b', 'events', '--pid=' + self.pid, '-T', '1']
+        buffer = ['-b', 'events'] if self.p.get('preparation', {}).get('log_buffer') == 'events' else []
+        return self.base + ['logcat', *buffer, '-v', 'epoch', '--pid=' + self.pid, '-T', '1', '*:V']
+
+    def prepare_live_stream(self):
+        if self.stream_port is None:
+            return
+        require(self.preparation is not None and not self.h.listening(self.stream_port),
+                'stream requires automatic owned test App and an unused local port', 'ENV_BLOCKED')
+        import live_stream
+        self.record('stream-forward-intent', localPort=self.stream_port, remotePort=live_stream.REMOTE_PORT)
+        self.cmd(['forward', '--no-rebind', 'tcp:' + str(self.stream_port), 'tcp:' + str(live_stream.REMOTE_PORT)])
+        self.stream_forwarded = True
+        expected = '%s tcp:%d tcp:%d' % (self.p['phone']['serial'], self.stream_port, live_stream.REMOTE_PORT)
+        require(expected in self.cmd(['forward', '--list']).decode().splitlines(), 'forward binding mismatch', 'ENV_BLOCKED')
+        self.preparation.observation_source = 'acknowledged-stream-v1'
+
+    def start_live_stream(self):
+        require(self.stream_forwarded and self.stream_capture is None, 'stream is single use', 'ENV_BLOCKED')
+        self.stream_capture = self.h.Process(self.out, 'live-stream',
+            [sys.executable, '-I', '-S', '-B', '-u', '-X', 'utf8',
+             str(ROOT / 'Tools/ota/p35-automation/live_stream.py'), '--port', str(self.stream_port),
+             '--wire-out', str(self.h.checked(self.out / 'live-stream.wire'))], self.env)
+        self.offset = 0
+        require(self.stream_capture.alive(), 'live stream receiver failed to start', 'COLLECTOR_FAILED')
+
     def startup(self, *, retrieval_only=False):
         if self.preparation:
-            self.preparation.start()
+            if self.p.get('preparation', {}).get('startup_log_tag') is not None:
+                self.preparation.start_phone()
+                self.preparation.old_captures()
+                self.prepare_startup_logging()
+                self.preparation.launch()
+            else:
+                self.preparation.start()
             self.preparation.navigate()
             self.preparation.prepare_recorder()
             self.pid, self.server = self.preparation.pid, self.preparation.phone.server
             self.initial_radio = self.radio_state()
             require(self.initial_radio is True, 'Bluetooth must initially be on')
-            self.capture = self.h.Process(self.out, 'logcat', self.base +
-                ['logcat', '-v', 'epoch', '--pid=' + self.pid, '-T', '1', '*:V'], self.env)
+            self.capture = self.h.Process(self.out, 'logcat', self.logcat_command(), self.env)
             self.preparation.logcat = self.capture
             time.sleep(.2)
             require(self.capture.alive(), 'logcat did not start', 'COLLECTOR_FAILED')
             self.offset = self.capture.paths['stdout'].stat().st_size
             self.record('capture-started', pid=self.pid, screenshots=False, source='shared-phone-logcat')
+            self.prepare_live_stream()
             return
         port = self.p['phone']['adb_port']
         require(not self.h.listening(port), 'private ADB port already owned')
@@ -688,8 +982,7 @@ class Android:
         self.pid = pid
         self.initial_radio = self.radio_state()
         require(self.initial_radio is True, 'Bluetooth must initially be on')
-        self.capture = self.h.Process(self.out, 'logcat', self.base +
-            ['logcat', '-v', 'epoch', '--pid=' + pid, '-T', '1', '*:V'], self.env)
+        self.capture = self.h.Process(self.out, 'logcat', self.logcat_command(), self.env)
         # Discard pre-readiness buffered lines. A fresh producer heartbeat must follow.
         time.sleep(.2)
         require(self.capture.alive(), 'logcat did not start', 'COLLECTOR_FAILED')
@@ -706,7 +999,12 @@ class Android:
 
     def _pump_logcat(self):
         require(self.capture and self.capture.alive() and self.server.alive(), 'collector/ADB stopped; no action replay', 'COLLECTOR_FAILED')
-        path = self.capture.paths['stdout']
+        selected = self.capture
+        if getattr(self, 'stream_port', None) is not None:
+            if self.stream_capture is None:
+                return  # No producer/ARM yet, never use diagnostic logcat as fallback.
+            selected = self.stream_capture
+        path = selected.paths['stdout']
         size = path.stat().st_size
         require(self.offset <= size <= 256 * 1024 * 1024 and size - self.offset <= 1024 * 1024,
                 'capture truncated, oversized or control consumer fell behind', 'EVIDENCE_GAP')
@@ -715,6 +1013,8 @@ class Android:
             data = stream.read()
         self.offset += len(data)
         states = self.decoder.feed(data)
+        require(selected.alive() or self.decoder.closed is not None and selected.process.poll() == 0,
+                'live stream ended without a verified close frame', 'COLLECTOR_FAILED')
         require(all(s['deviceAddress'] == self.p['firmware']['device_address'] for s in states),
                 'App switched target during capture; no further UI/radio actions', 'IDENTITY_MISMATCH')
         if states:
@@ -727,7 +1027,11 @@ class Android:
                 prep.capture_id = states[0]['captureId']
                 prep.capture_state = 'ACTIVE'
                 prep.live.extend(states)
-        self.queue.extend(states)
+        if getattr(self, 'state_sink', None):
+            for state in states:
+                self.state_sink(state)
+        else:
+            self.queue.extend(states)
         require(len(self.queue) <= 1000, 'event backlog; refusing late injection', 'EVIDENCE_GAP')
 
     def next_state(self, seconds):
@@ -751,7 +1055,8 @@ class Android:
         return self.last_ui
 
     def tap(self, wanted, *, bootstrap=False):
-        require(not bootstrap or wanted == {'resource-id': 'p35-arm'},
+        arm_id = 'p35-arm-stream' if getattr(self, 'stream_port', None) is not None else 'p35-arm'
+        require(not bootstrap or wanted == {'resource-id': arm_id},
                 'only the dedicated record control may precede telemetry readiness')
         self.pump()
         point = None
@@ -769,16 +1074,9 @@ class Android:
                     time.sleep(.25)
                     continue
                 require('control missing' in str(error), str(error), error.code)
-                require(b'<!' not in xml, 'unsafe scroll hierarchy', 'UI_UNAVAILABLE')
-                begin, end = xml.find(b'<hierarchy'), xml.rfind(b'</hierarchy>')
-                tree = ET.fromstring(xml[begin:end + len(b'</hierarchy>')])
-                views = [n for n in tree.iter('node') if n.get('package') == self.p['app']['id'] and
-                         n.get('scrollable') == 'true' and n.get('enabled') == 'true']
-                require(len(views) == 1, 'no unique native scroll viewport', 'UI_UNAVAILABLE')
-                bounds = re.fullmatch(r'\[(\d+),(\d+)\]\[(\d+),(\d+)\]', views[0].get('bounds', ''))
-                require(bounds is not None, 'invalid scroll viewport', 'UI_UNAVAILABLE')
-                x1, y1, x2, y2 = map(int, bounds.groups())
-                require(0 <= x1 < x2 <= 20000 and 0 <= y1 < y2 <= 20000, 'invalid viewport bounds', 'UI_UNAVAILABLE')
+                viewport = load_smoke().scroll_viewport(xml, self.p['app']['id'])
+                require(viewport is not None, 'no unique native scroll viewport', 'UI_UNAVAILABLE')
+                x1, y1, x2, y2 = viewport
                 x, top, bottom = (x1+x2)//2, y1+(y2-y1)//4, y1+3*(y2-y1)//4
                 a, b = (bottom, top) if attempt < 6 else (top, bottom)
                 self.cmd(['shell', 'input', 'swipe', str(x), str(a), str(x), str(b), '250'], seconds=5)
@@ -789,6 +1087,8 @@ class Android:
                 'producer heartbeat expired before UI action', 'COLLECTOR_FAILED')
         require(not self.queue or self.queue[-1]['healthy'], 'capture unhealthy before UI action')
         self.record('tap-intent', selector=wanted, point=list(point))
+        if wanted in (self.p['ui']['start'], self.p['ui']['resume']):
+            self.transfer_start_attempted = True
         if self.preparation:
             self.preparation.mutation_unknown = True
             if bootstrap:
@@ -796,6 +1096,8 @@ class Android:
                 self.preparation.arm_action_count = 1
             if wanted == self.p['ui']['stop']:
                 self.preparation.stop_attempted = True
+        if bootstrap and getattr(self, 'stream_port', None) is not None:
+            self.start_live_stream()
         self.cmd(['shell', 'input', 'tap', str(point[0]), str(point[1])], seconds=5)
         self.record('tap-command-returned', selector=wanted)
 
@@ -805,12 +1107,32 @@ class Android:
             raw = self.preparation.original(capture_id, self.out / 'app-capture.jsonl')
             report = audit_capture(raw, capture_id)
             states = Decoder().feed(b''.join(raw.splitlines(keepends=True)[1:-1]))
-            require(states == self.preparation.live, 'logcat/App original sequence differs', 'EVIDENCE_GAP')
+            require(states == self.preparation.live, 'live/App original sequence differs', 'EVIDENCE_GAP')
             self.preparation.capture_seal = load_smoke().sealed_file(raw, capture_id)
             self.preparation.capture_resolved = True
             self.preparation.capture_state = 'SEALED'
             self.confirm_action()
             self.h.save(self.out / 'app-capture-integrity.json', report)
+            if self.stream_port is not None:
+                remote = '/sdcard/Android/data/' + self.p['app']['id'] + '/files/p35-logcat-diagnostics/' + capture_id + '.json'
+                diagnostic = self.cmd(['exec-out', 'cat', remote], seconds=5)
+                self.h.raw(self.out / 'logcat-native-status.json', diagnostic)
+                status = audit_logcat_status(diagnostic, capture_id, raw)
+                wire = self.capture.paths['stdout'].read_bytes()
+                rendered = wire
+                binary = self.p.get('preparation', {}).get('logcat_binary', False)
+                if binary:
+                    import logcat_binary
+                    self.h.raw(self.out / 'logcat-live-snapshot.bin', wire)
+                    terminal = self.cmd(['exec-out', 'logcat', '-B', '-d', '-b', 'events', '--pid=' + self.pid], seconds=10)
+                    self.h.raw(self.out / 'logcat-terminal.bin', terminal)
+                    mirror, rendered, end = logcat_binary.audit_pair(wire, terminal, int(self.pid), capture_id, raw, states, status)
+                    self.h.raw(self.out / 'logcat-decoded.jsonl', rendered)
+                    self.h.raw(self.out / 'logcat-terminal-decoded.jsonl', end)
+                else:
+                    mirror = audit_logcat_mirror(rendered, capture_id, states, status)
+                    mirror.update(wireFormat='text', wireBytes=len(wire), wireSha256=hashlib.sha256(wire).hexdigest())
+                self.h.save(self.out / 'logcat-diagnostic-integrity.json', mirror)
             return report
         remote = '/sdcard/Android/data/' + self.p['app']['id'] + '/files/p35-observations/' + capture_id + '.jsonl'
         size = self.cmd(['shell', 'wc', '-c', remote]).split()[0]
@@ -844,6 +1166,19 @@ class Android:
             raw = self.cmd(list(command), seconds=remaining)
             require(time.monotonic() < deadline, 'Bluetooth state-read deadline', 'ENV_BLOCKED')
             return raw
+
+        profile = self.p.get('preparation', {}).get('radio_state_reader')
+        if profile == 'vivo-pd2312-sdk33-getState-v1':
+            if not getattr(self, 'radio_getter_verified', False):
+                fingerprint = read(('shell', 'getprop', 'ro.build.fingerprint')).strip()
+                require(fingerprint == RADIO_FINGERPRINT.encode(), 'radio reader ROM changed', 'CAPABILITY_MISSING')
+                checksum = read(('shell', 'sha256sum', RADIO_FRAMEWORK)).split()
+                require(checksum == [RADIO_FRAMEWORK_SHA256.encode(), RADIO_FRAMEWORK.encode()],
+                        'radio reader framework changed; no Binder call', 'CAPABILITY_MISSING')
+                self.radio_getter_verified = True
+                self.record('radio-reader-verified', profile=profile, frameworkSha256=RADIO_FRAMEWORK_SHA256,
+                            method='IBluetoothManager.getState', transaction=8)
+            return parse_radio_parcel(read(RADIO_BINDER))
 
         source = getattr(self, 'radio_state_source', None)
         if source is None:
@@ -882,10 +1217,48 @@ class Android:
                     self.radio_touched = False
                 return
             time.sleep(min(.05, max(0, deadline - time.monotonic())))
-        raise Stop('ENV_BLOCKED', 'Bluetooth command did not reach requested state')
+        raise Stop('ENV_BLOCKED', 'Bluetooth command did not reach requested state: ' + ('ON' if enabled else 'OFF'))
+
+    def capture_failure_buffer(self):
+        """One diagnostic snapshot after radio restoration; never a live fallback."""
+        prep = self.preparation
+        if (not self.p.get('preparation', {}).get('capture_failure_buffer', False) or not prep or
+                not prep.capture_id or getattr(self, 'failure_buffer_attempted', False)):
+            return
+        self.failure_buffer_attempted = True
+        deadline = time.monotonic() + 15
+        buffer = self.p.get('preparation', {}).get('log_buffer', 'main')
+        result = dict(captureId=prep.capture_id, pid=self.pid, buffer=buffer, usedForReadiness=False, files={})
+        commands = [
+            ('buffer', ['logcat', '-d', '-b', buffer, '-v', 'epoch', '--pid=' + self.pid, '*:V']),
+            ('log-tag', ['shell', 'getprop', 'log.tag']),
+            ('rate-limit', ['shell', 'getprop', 'persist.log.ratelimit']),
+        ]
+        try:
+            require(self.cmd(['shell', 'pidof', self.p['app']['id']], seconds=5).strip().decode() == self.pid,
+                    'failure snapshot PID changed', 'IDENTITY_MISMATCH')
+            for name, command in commands:
+                remaining = deadline - time.monotonic()
+                require(remaining > 0, 'failure snapshot deadline', 'TIMEOUT')
+                raw = self.cmd(command, seconds=min(5, remaining))
+                result['files'][name] = self.h.raw(self.out / 'failure-buffer' / (name + '.raw'), raw)
+            result['outcome'] = 'DIAGNOSTIC_ONLY'
+        except Exception as error:
+            result.update(outcome='DIAGNOSTIC_FAILED', code=getattr(error, 'code', 'HOST_FAILED'), detail=str(error))
+        self.h.save(self.out / 'failure-buffer' / 'result.json', result)
 
     def close(self):
         errors = []
+        logging_errors = []
+        if getattr(self, 'scenario', None):
+            try:
+                self.scenario.restore()
+            except Exception as error:
+                errors.append('display restoration: ' + str(error))
+        try:
+            self.restore_startup_logging()
+        except Exception as error:
+            logging_errors.append(str(error))
         if self.preparation:
             self.preparation.stage_deadline = time.monotonic() + self.preparation.p['limits']['cleanup_seconds']
             self.preparation.phone.operation_deadline = self.preparation.stage_deadline
@@ -899,7 +1272,13 @@ class Android:
                     errors.append('radio restoration: ' + str(error))
         if self.preparation:
             prefix_error = None
+            buffer_error = None
             prep = self.preparation
+            if not self.final_verified or prep.stream_failed:
+                try:
+                    self.capture_failure_buffer()
+                except Exception as error:
+                    buffer_error = str(error)
             unsafe = prep.stream_failed or prep.mutation_unknown
             if prep.capture_id and self.decoder.previous:
                 try:
@@ -911,10 +1290,21 @@ class Android:
                     prep.prefix(prep.capture_id, self.out / 'failed-original-prefix.jsonl')
                 except Exception as error:
                     prefix_error = str(error)
-            self.cleanup_result = self.preparation.cleanup()
+            try:
+                self.cleanup_result = self.preparation.cleanup()
+            finally:
+                if getattr(self, 'stream_capture', None) is not None:
+                    try:
+                        self.stream_capture.close('p35-stream-finished')
+                    except Exception as error:
+                        errors.append('owned stream close: ' + str(error))
+                if getattr(self, 'stream_forwarded', False) and self.h.listening(self.stream_port):
+                    errors.append('owned stream forward still listening')
             self.cleanup_result['radioErrors'] = errors
+            self.cleanup_result['startupLoggingErrors'] = logging_errors
             self.cleanup_result['prefixPreservationError'] = prefix_error
-            require(self.cleanup_result['complete'] and not self.cleanup_result['unresolved'] and not errors,
+            self.cleanup_result['bufferPreservationError'] = buffer_error
+            require(self.cleanup_result['complete'] and not self.cleanup_result['unresolved'] and not errors and not logging_errors,
                     'shared campaign action/cleanup unresolved; retain device lock', 'UNRESOLVED_STATE')
             return
         for process in [self.capture, self.server]:
@@ -929,6 +1319,11 @@ class Android:
 
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
+    if argv and argv[0] in {'pipeline', 'pipeline-check', 'pipeline-recover'}:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        sys.modules['runner'] = sys.modules[__name__]
+        import pipeline
+        return pipeline.main(argv)
     if argv and argv[0] in {'smoke', 'smoke-check', 'smoke-reconcile'}:
         sys.path.insert(0, str(Path(__file__).resolve().parent))
         # The terminal entry is __main__; share its Stop/decoder types rather
@@ -949,26 +1344,33 @@ def main(argv=None):
     parser.add_argument('--archive', type=Path, help='offline audit of an unchanged App JSONL file')
     parser.add_argument('--out', type=Path)
     parser.add_argument('--execute', action='store_true', help='required for UI/radio mutations; not formal acceptance authorization')
+    profiles = parser.add_mutually_exclusive_group()
+    profiles.add_argument('--single-upgrade', action='store_true', help='development-only single upgrade, no injected disconnects')
+    profiles.add_argument('--scenario-coverage', action='store_true', help='explicit resume-once or background-lock development scenario')
     parser.add_argument('--capture-id', help='retrieve unchanged App originals after USB recovery; no UI or OTA replay')
     args = parser.parse_args(argv)
     require(Path.cwd() == ROOT and sys.flags.isolated and sys.flags.no_site and sys.dont_write_bytecode,
             'run from active root with python -I -S -B -X utf8')
     if args.mode == 'audit':
         require(args.archive is not None and args.capture_id is not None and args.plan is None and
-                args.out is None and not args.execute, 'audit is read-only and requires archive and capture ID')
+                args.out is None and not args.execute and not args.single_upgrade and not args.scenario_coverage,
+                'audit is read-only and requires archive and capture ID')
         require(args.archive.stat().st_size <= 128 * 1024 * 1024 + 8192, 'oversized App original', 'EVIDENCE_GAP')
         print(json.dumps(audit_capture(args.archive.read_bytes(), args.capture_id)))
         return 0
     require(args.plan is not None and args.archive is None, 'plan required; archive only for offline audit')
-    p = validate_plan(strict_json(args.plan.read_bytes()))
+    configuration = args.plan.read_bytes()
+    p = validate_plan(strict_json(configuration), single=args.single_upgrade, scenarios=args.scenario_coverage)
     if args.mode == 'check':
         require(not args.execute and args.out is None, 'check is offline/no outputs')
-        print(json.dumps(dict(plan='VALID', cases=10, deviceOperations=0, liveQualification='NOT_RUN')))
+        print(json.dumps(dict(plan='VALID', cases=len(p['cases']), deviceOperations=0, liveQualification='NOT_RUN')))
         return 0
     require(args.out is not None and (args.mode != 'run' or args.execute), 'explicit output and --execute required')
-    if args.mode == 'run':
+    if args.mode == 'run' and p['cases']:
         require(p.get('allow_bluetooth_toggle') is True, 'explicit device/adapter injection authorization required before startup')
     require(args.mode == 'run' or not args.execute, 'read-only mode never accepts --execute')
+    require(args.mode != 'probe' or p.get('preparation', {}).get('live_stream_port') is None,
+            'acknowledged stream requires explicit owned recording, not the legacy read-only probe')
     require((args.mode == 'retrieve') == (args.capture_id is not None), 'capture ID only for retrieval')
     if args.capture_id is not None:
         require(re.fullmatch('[0-9a-f]{32}', args.capture_id), 'invalid capture ID')
@@ -982,14 +1384,21 @@ def main(argv=None):
                  'adb-server.started.json', 'adb-server.closed.json', 'logcat.stdout', 'logcat.stderr',
                  'logcat.started.json', 'logcat.closed.json', 'host', 'app-capture.jsonl', 'app-capture-integrity.json',
                  'previous-owner.stdout', 'previous-owner.stderr', 'previous-owner.started.json',
-                 'previous-owner.closed.json', 'unresolved-owner.json']:
+                 'previous-owner.closed.json', 'unresolved-owner.json', 'failure-buffer',
+                 'live-stream.stdout', 'live-stream.stderr', 'live-stream.started.json', 'live-stream.closed.json',
+                 'live-stream.wire', 'logcat-diagnostic-integrity.json', 'logcat-native-status.json', 'logcat-decoded.jsonl',
+                 'logcat-terminal.bin', 'logcat-terminal-decoded.jsonl', 'logcat-live-snapshot.bin']:
         h.checked(out / name)
     for pin in [p['phone']['adb'], p['phone']['adb_key'], p['firmware']['package']]:
         h.pinned(pin)
-    h.save(out / 'plan.json', p)
+    h.raw(out / 'plan.json', configuration)
     h.save(out / 'inputs.json', dict(mode=args.mode,
-        planSha256=hashlib.sha256(args.plan.read_bytes()).hexdigest(),
+        singleUpgrade=args.single_upgrade,
+        scenarioCoverage=args.scenario_coverage,
+        planSha256=hashlib.sha256(configuration).hexdigest(),
         runner=h.record(Path(__file__)), hostHelper=h.record(Path(h.__file__)),
+        liveStreamHelper=h.record(ROOT / 'Tools/ota/p35-automation/live_stream.py') if p.get('preparation', {}).get('live_stream_port') else None,
+        binaryLogcatHelper=h.record(ROOT / 'Tools/ota/p35-automation/logcat_binary.py') if p.get('preparation', {}).get('logcat_binary') else None,
         formalAcceptance=False))
     result = dict(outcome='NOT_RUN', formalAcceptance='NOT_ADJUDICATED', recovered=0)
     driver = None
@@ -1010,6 +1419,7 @@ def main(argv=None):
                     result.update(execute_ui(args.mode, p, driver))
             except Exception as error:
                 result['executionError'] = dict(code=getattr(error, 'code', 'HOST_FAILED'), detail=str(error))
+                result['verifiedStages'] = getattr(driver, 'product_result', None)
                 result.update(outcome=getattr(error, 'code', 'HOST_FAILED'), detail=str(error),
                     recovered=len(driver.campaign.cases) if driver.campaign else 0, preserveOriginals=True, replay=False)
             finally:
@@ -1020,10 +1430,16 @@ def main(argv=None):
                       preserveOriginals=True, replay=False)
     if args.mode == 'run':
         campaign = driver.campaign if driver else None
-        result.update(planned=10, semantics='one-upgrade-ten-disconnect-events',
+        background = p.get('test_profile') == 'background-lock'
+        result.update(planned=len(p['cases']), semantics=p['test_profile'] if args.scenario_coverage else
+            'single-upgrade-no-injection' if args.single_upgrade else 'one-upgrade-ten-disconnect-events',
+            plannedCoverage=dict(foregroundUpgrade=True, adapterDisconnectResume=bool(p['cases']),
+                disconnectWindows=len(p['cases']), background=background, screenLock=background,
+                processDeathRecovery=False, rfImpairment=False, physicalPowerLoss=False),
+            telemetrySource='acknowledged-stream-v1' if p.get('preparation', {}).get('live_stream_port') else 'logcat',
             cases=campaign.cases if campaign else [],
             caseResults=campaign.case_results(complete=result['outcome'] == 'AUTOMATION_COMPLETED',
-                error_code=result['outcome']) if campaign else
+                error_code=result.get('executionError', {}).get('code', result['outcome'])) if campaign else
                 [dict(id=case['id'], outcome='NOT_RUN') for case in p['cases']])
         result['cleanup'] = getattr(driver, 'cleanup_result', None) if driver else None
         result['lockRetained'] = (ROOT / '.cache/p34-live-device.lock').exists()
@@ -1035,7 +1451,9 @@ def main(argv=None):
 
 def execute_ui(mode, p, driver):
     if mode == 'run':
-        require(p.get('allow_bluetooth_toggle') is True, 'explicit adapter-toggle scope required')
+        single = p.get('test_profile') == 'single-upgrade'
+        validate_plan(p, single=single, scenarios=p.get('test_profile') in {'resume-once', 'background-lock'})
+        require(not p['cases'] or p.get('allow_bluetooth_toggle') is True, 'explicit adapter-toggle scope required')
         if getattr(driver, 'preparation', None):
             driver.arm_baseline()
         driver.tap(p['ui']['arm'], bootstrap=True)
@@ -1050,8 +1468,15 @@ def execute_ui(mode, p, driver):
                     radioInjection='NOT_TESTED', fullCampaign='NOT_RUN')
     if getattr(driver, 'preparation', None):
         driver.fresh_identity()
-    driver.campaign = Campaign(p, driver)
+    if p.get('test_profile') in {'resume-once', 'background-lock'}:
+        require(state['schema'] == 2, 'scenario profile requires actual runtime telemetry schema 2', 'CAPABILITY_MISSING')
+    if p.get('test_profile') == 'background-lock':
+        import scenarios
+        scenarios.preflight(driver)
+    driver.campaign = Campaign(p, driver, single=p.get('test_profile') == 'single-upgrade',
+        scenarios=p.get('test_profile') in {'resume-once', 'background-lock'})
     result = driver.campaign.run()
+    driver.product_result = result
     if getattr(driver, 'preparation', None):
         result['noUpdate'] = driver.no_update()
     result['archive'] = driver.finish_capture()

@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:ble_monitor/ota/ota_observation_log.dart';
+import 'package:ble_monitor/ota/ota_p35_android_log.dart';
 import 'package:ble_monitor/ota/ota_p35_recorder.dart';
+import 'package:ble_monitor/ota/ota_p35_stream.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Map<String, Object?> snapshot() => {
@@ -31,6 +33,20 @@ class Writer implements OtaObservationWriter {
   Future<void> close() async {}
 }
 
+class MemoryStream extends OtaP35Stream {
+  final bytes = <int>[];
+  bool reject = false;
+  @override
+  Future<void> open() async {}
+  @override
+  Future<void> send(List<int> data) async {
+    if (reject) throw StateError('synthetic ACK failure');
+    bytes.addAll(data);
+  }
+  @override
+  Future<void> close() async {}
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late Directory root;
@@ -47,6 +63,27 @@ void main() {
     r.record(); await r.stop();
     expect(lines, isEmpty);
     expect(r.captureId, isNull);
+  });
+
+  test('runtime schema is explicit, persisted and independent of container schema', () async {
+    final stream = MemoryStream();
+    final r = OtaP35Recorder(emit: (_) {}, directoryProvider: () async => root);
+    expect(await r.start(snapshot, stateSchema: 2), isFalse);
+    final runtime = <String, Object?>{'backgrounded': true, 'acquired': true,
+      'reason': null, 'active': true, 'paused': false, 'ownerEpoch': 3,
+      'revision': 17, 'task': {'taskId': 'test_3', 'generation': 3,
+        'deviceToken': 'd' * 64, 'packageSha256': 'c' * 64}};
+    expect(await r.start(() => {...snapshot(), 'runtime': runtime},
+        reliable: true, stream: stream, stateSchema: 2), isTrue);
+    await r.stop();
+    final raw = await r.file!.readAsBytes();
+    expect(raw, stream.bytes);
+    final lines = utf8.decode(raw).trim().split('\n');
+    expect(jsonDecode(lines.first.substring('OTA_P35_CAPTURE '.length))['schema'], 1);
+    final row = jsonDecode(lines[1].substring('OTA_P35_STATE '.length));
+    expect(row['schema'], 2);
+    expect(row['runtime'], runtime);
+    expect(jsonDecode(lines.last.substring('OTA_P35_CAPTURE '.length))['healthy'], isTrue);
   });
 
   test('ten resume events remain one loss-accounted persisted capture', () async {
@@ -119,11 +156,91 @@ void main() {
     writer.gate!.complete(); await r.stop();
   });
 
+  test('native publication failure preserves originals and latches unhealthy', () async {
+    final r = OtaP35Recorder(directoryProvider: () async => root, emit: (line) {
+      if (line.startsWith('OTA_P35_STATE ')) {
+        throw StateError('synthetic native writer rejection');
+      }
+    });
+    await r.start(snapshot);
+    await r.stop();
+    expect(r.error, 'log-write-failed');
+    expect(r.healthy, isFalse);
+    r.record('heartbeat');
+    final raw = await r.file!.readAsString();
+    expect(raw, contains('OTA_P35_STATE '));
+    final footer = jsonDecode(raw.trimRight().split('\n').last.substring(16))
+        as Map<String, dynamic>;
+    expect(footer['healthy'], isFalse);
+    expect(footer['error'], 'log-write-failed');
+  });
+
+  test('acknowledged stream survives mirror EAGAIN but preserves its original rejection', () async {
+    final stream = MemoryStream();
+    var attempts = 0;
+    final r = OtaP35Recorder(directoryProvider: () async => root, emit: (line) {
+      attempts++;
+      if (line.startsWith('OTA_P35_STATE ')) throw AndroidLogWriteFailure(-11, 586);
+    });
+    expect(await r.start(snapshot, reliable: true, stream: stream), isTrue);
+    r.record(); r.record();
+    await r.stop();
+    final raw = await r.file!.readAsBytes();
+    expect(stream.bytes, raw);
+    expect(r.error, isNull);
+    expect(r.status.value, 'closed');
+    expect(attempts, 2);
+    final diagnostic = jsonDecode(await r.logcatDiagnosticFile!.readAsString()) as Map<String,dynamic>;
+    expect(diagnostic['status'], 'FAILED_DISABLED');
+    expect(diagnostic['captureId'], r.captureId);
+    expect(diagnostic['nativeResult'], -11);
+    expect(diagnostic['expectedBytes'], 586);
+    expect(diagnostic['record'], contains('"seq":1'));
+    expect(utf8.decode(raw), contains('"healthy":true,"lost":0,"error":null'));
+  });
+
+  test('primary stream failure still latches unhealthy even when mirror is optional', () async {
+    final stream = MemoryStream();
+    final r = OtaP35Recorder(directoryProvider: () async => root, emit: (_) {});
+    await r.start(snapshot, reliable: true, stream: stream);
+    await Future<void>.delayed(Duration.zero);
+    stream.reject = true;
+    r.record();
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+    await r.stop();
+    expect(r.error, 'live-stream-failed');
+    expect(await r.file!.readAsString(), contains('"healthy":false'));
+  });
+
   test('snapshot errors are capture errors, never OTA exceptions', () async {
     final r = OtaP35Recorder(emit: (_) {}, directoryProvider: () async => root);
     await r.start(() => throw StateError('synthetic'));
     expect(r.error, 'snapshot-failed');
     await r.stop();
+  });
+
+  test('native failure details survive sealing and closed state notifies UI', () async {
+    final lines = <String>[];
+    final active = <bool>[];
+    final r = OtaP35Recorder(directoryProvider: () async => root, emit: (line) {
+      if (line.startsWith('OTA_P35_STATE ')) {
+        throw AndroidLogWriteFailure(-11, 1234);
+      }
+      lines.add(line);
+    });
+    r.status.addListener(() => active.add(r.active));
+    await r.start(snapshot);
+    await r.stop();
+    expect(r.error, 'log-write-failed:native=-11:expected=1234');
+    expect(r.active, isFalse);
+    expect(r.healthy, isFalse);
+    expect(active.last, isFalse);
+    expect(r.status.value, 'failed:log-write-failed:native=-11:expected=1234:closed');
+    expect(lines.where((l) => l.startsWith('OTA_P35_ERROR ')).single,
+      contains('log-write-failed:native=-11:expected=1234'));
+    final raw = await r.file!.readAsString();
+    expect(raw, contains('"healthy":false'));
+    expect(raw, contains('log-write-failed:native=-11:expected=1234'));
   });
 
   test('stop during asynchronous open cannot resurrect recording', () async {

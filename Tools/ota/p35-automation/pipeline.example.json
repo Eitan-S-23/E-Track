@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "run_id": "p35-new-firmware-test",
+  "build": {
+    "ref": "dev/firmware/REPLACE_WITH_REVIEWED_BRANCH",
+    "sha": "REPLACE_WITH_EXACT_SOURCE_COMMIT",
+    "workflow_blob": "REPLACE_WITH_EXACT_WORKFLOW_GIT_BLOB",
+    "version": "3.2.95",
+    "seconds": 3600,
+    "variables": {}
+  },
+  "cloud": {
+    "actor_sha256": "REPLACE_WITH_TEST_OWNER_ACTOR_SHA256",
+    "query": {
+      "appId": "trace",
+      "deviceModel": "e-track-at32f435",
+      "channel": "stable",
+      "currentVersionCode": 30293,
+      "currentImageSha": "REPLACE_WITH_FRESH_CURRENT_IMAGE_SHA256",
+      "appVersionCode": 92,
+      "hardwareRevision": 1,
+      "layoutId": 1,
+      "bootVersion": 1,
+      "protocolVersion": 1
+    }
+  },
+  "plan": {
+    "path": ".cache/REPLACE_WITH_REVIEWED_RUNNER_PLAN.json",
+    "bytes": 1,
+    "sha256": "REPLACE_WITH_PLAN_FILE_SHA256"
+  },
+  "authority": {
+    "test_ci": false,
+    "test_channel": false,
+    "device_campaign": false,
+    "exclusive_rehearsal_environment": false,
+    "reference": "REPLACE_WITH_ACTUAL_TASK_AUTHORIZATION; booleans do not grant permission"
+  }
+}

@@ -9,6 +9,30 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import runner as r
 
 
+def window_dump(focus, *, history=b'', policy=b''):
+    sections = [('policy', 'POLICY STATE', policy), ('animator', 'ANIMATOR STATE', b''),
+        ('sessions', 'SESSIONS', b''), ('displays', 'DISPLAY CONTENTS', focus),
+        ('tokens', 'TOKENS', b''), ('windows', 'WINDOWS', b''), ('trace', 'TRACE', b'')]
+    return history + b''.join(('WINDOW MANAGER ' + title + ' (dumpsys window ' + name + ')\n').encode()
+                             + body + b'\n' for name, title, body in sections)
+
+
+class ForegroundTests(unittest.TestCase):
+    def test_current_sections_exclude_nested_historical_display(self):
+        pkg = 'com.example.p35'
+        focus = ('mCurrentFocus=Window{abc u0 ' + pkg + '/MainActivity}\n').encode()
+        history = b'WINDOW MANAGER LAST ANR (dumpsys window lastanr)\n'
+        history += b'WINDOW MANAGER DISPLAY CONTENTS (dumpsys window displays)\n'
+        history += b'mCurrentFocus=Window{def u0 foreign.app/MainActivity}\nmShowingLockscreen=true\n'
+        self.assertTrue(r.foreground_ok(window_dump(b'mCurrentFocus=null\n' + focus, history=history), pkg))
+        for raw in (history, focus, window_dump(focus).split(b'WINDOW MANAGER TOKENS')[0],
+                    window_dump(focus).rstrip(b'\n'), window_dump(focus, policy=b'mKeyguardShowing=true\n'),
+                    window_dump(focus+focus), window_dump(focus+b'mCurrentFocus=Window{aaa u0 overlay.app/Dialog}\n'),
+                    window_dump(focus.replace(pkg.encode(), b'other.app'), history=history.replace(b'foreign.app', pkg.encode()))):
+            with self.subTest(raw=raw):
+                self.assertFalse(r.foreground_ok(raw, pkg))
+
+
 def plan():
     pin = dict(path='not-used-by-unit-tests', bytes=1048576, sha256='a'*64)
     return dict(schema=1, run_id='p35-unit', allow_bluetooth_toggle=True,
@@ -361,6 +385,8 @@ class CampaignTests(unittest.TestCase):
 
 
 class RadioStateTests(unittest.TestCase):
+    ENVELOPE = (b'SERVICE com.android.bluetooth/.btservice.AdapterService 854462b pid=22045 user=0\r\n'
+                b'  Client:\r\n')
     # Sanitized shape of the observed --print output; no phone identifiers.
     # OFF/turning variants below are synthetic, not actual phone observations.
     ADAPTER_ON = (b'SERVICE com.android.bluetooth/.btservice.AdapterService\n'
@@ -372,7 +398,9 @@ class RadioStateTests(unittest.TestCase):
 
     def device(self, outputs):
         android = object.__new__(r.Android)
+        android.p = plan()
         android.calls = []
+        android.record = lambda *args, **kwargs: None
         def cmd(args, seconds=15):
             android.calls.append((args, seconds))
             value = outputs.pop(0)
@@ -389,6 +417,16 @@ class RadioStateTests(unittest.TestCase):
             ['shell', 'dumpsys', 'bluetooth_manager'],
             ['shell', 'dumpsys', 'activity', 'service',
              'com.android.bluetooth/.btservice.AdapterService', '--print']])
+
+    def test_exact_service_envelope_is_unknown_not_off_or_a_format_failure(self):
+        path = r.ROOT / '.cache/p35-native-log-20261101/pipeline4-01/device/usb/adb-00198.stdout'
+        raw = path.read_bytes() if path.exists() else self.ENVELOPE
+        self.assertEqual(raw, self.ENVELOPE)
+        self.assertIsNone(r.parse_radio_state(raw, 'adapter'))
+        for bad in (raw + b'  State: OFF\n', raw.replace(b'AdapterService', b'OtherService'),
+                    raw.replace(b'pid=22045', b'pid=unknown')):
+            with self.subTest(raw=bad), self.assertRaises(r.Stop):
+                r.parse_radio_state(bad, 'adapter')
 
     def test_selected_reader_is_reused_without_manager_reprobe(self):
         android = self.device([b'', self.ADAPTER_ON, self.ADAPTER_ON.replace(b'State: ON', b'State: OFF')])
@@ -544,6 +582,7 @@ class RadioStateTests(unittest.TestCase):
         from unittest.mock import patch
         now = [0.0]
         android = self.radio_device([self.ADAPTER_ON.replace(b'State: ON', b'State: TURNING_OFF'),
+                                     self.ENVELOPE,
                                      self.ADAPTER_ON.replace(b'State: ON', b'State: OFF')])
         android.pump = lambda: None
         android.decoder = r.Decoder()
@@ -554,7 +593,7 @@ class RadioStateTests(unittest.TestCase):
             android.radio(False, case=android.p['cases'][0])
         self.assertTrue(android.radio_touched)
         self.assertFalse(android.restore_attempted)
-        self.assertAlmostEqual(now[0], .05)
+        self.assertAlmostEqual(now[0], .1)
         self.assertEqual(sum(args[-1] == 'disable' for args, _ in android.calls), 1)
 
     def test_absent_adapter_after_restore_is_not_off_or_success(self):
@@ -636,8 +675,10 @@ class ResultTests(unittest.TestCase):
                     if mode == 'cleanup-failure':
                         raise r.Stop('CLEANUP_FAILED', 'owned process not closed')
                 driver = SimpleNamespace(campaign=campaign, startup=lambda **_: None, close=close)
-                helper = SimpleNamespace(checked=lambda path: Path(path), pinned=lambda pin: Path('fixture'),
+                helper = SimpleNamespace(checked=lambda path: Path(str(path) + '.synthetic-absent')
+                    if Path(path).name in {'p34-live-device.lock', 'p35-reconcile-device.lock'} else Path(path), pinned=lambda pin: Path('fixture'),
                     save=lambda path, value: saved.update({Path(path).name: value}),
+                    raw=lambda path, value: saved.update({Path(path).name: value}),
                     record=lambda path: {}, device_owner=lambda *args, **kwargs: contextlib.nullcontext(),
                     __file__=__file__)
                 def execute(*args):

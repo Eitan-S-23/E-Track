@@ -41,6 +41,8 @@ class Device(native_fixture.SyntheticDevice):
         self.upgrade_starts = self.arms = self.stops = 0
         self.resume_index = 0
         self.workers = []
+        self.log_tag = 'M'
+        self.startup_logging = False
 
     def push(self, sample):
         self.seq += 1
@@ -54,6 +56,9 @@ class Device(native_fixture.SyntheticDevice):
 
     def emit(self, event):
         row = native_fixture.state(event=event)
+        if self.startup_logging and not self.upgrade_starts:
+            row.update(targetVersionCode=0, targetImageSha256=None, releaseId=None,
+                packageBytes=0, packageSha256=None, packageVerified=False, latestUrl=None)
         if self.fault == 'identity-mismatch':
             row['currentImageSha256'] = 'f' * 64
         self.push(row)
@@ -77,6 +82,25 @@ class Device(native_fixture.SyntheticDevice):
         return native_fixture.xml(*items)
 
     def command(self, args):
+        if args == ['shell', 'getprop', 'ro.build.fingerprint']:
+            self.calls.append(args)
+            return r.RADIO_FINGERPRINT.encode()
+        if args == ['shell', 'sha256sum', r.RADIO_FRAMEWORK]:
+            self.calls.append(args)
+            return (r.RADIO_FRAMEWORK_SHA256 + '  ' + r.RADIO_FRAMEWORK).encode()
+        if args == list(r.RADIO_BINDER):
+            self.calls.append(args)
+            return ("Result: Parcel(00000000 %08x   '........')\n" % (12 if self.radio_on else 10)).encode()
+        if args == ['shell', 'getprop', 'log.tag']:
+            self.calls.append(args)
+            return (self.log_tag + '\n').encode()
+        if args[:3] == ['shell', 'setprop', 'log.tag']:
+            self.calls.append(args)
+            self.log_tag = args[-1]
+            self.startup_logging = True
+            if self.log_tag == 'M' and self.active:
+                self.pending.extend([dict(self.rows[-1], event='heartbeat')] * 2)
+            return b''
         if args == ['shell', 'dumpsys', 'bluetooth_manager']:
             self.calls.append(args)
             if self.fault in {'empty-manager', 'adapter-restore-transitional'}:
@@ -165,7 +189,7 @@ class IntegrationTests(unittest.TestCase):
         import live_phone
         cls.live_phone = live_phone
 
-    def run_case(self, fault=None, locked=False):
+    def run_case(self, fault=None, locked=False, startup_logging=False, info_baseline=False, radio_getter=False, single=False):
         host = self.host
         case = host.fresh(self.area / ('case-' + uuid.uuid4().hex))
         out = case / 'evidence'
@@ -188,7 +212,17 @@ class IntegrationTests(unittest.TestCase):
                 if self.server:
                     self.server.close('synthetic shared closure')
         config = case / 'plan.json'
-        host.save(config, plan())
+        configuration = plan()
+        if single:
+            configuration.update(test_profile='single-upgrade', cases=[], allow_bluetooth_toggle=False)
+        if radio_getter:
+            configuration['preparation']['radio_state_reader'] = 'vivo-pd2312-sdk33-getState-v1'
+        if startup_logging:
+            configuration['preparation']['startup_log_tag'] = dict(before='M', during='V', seconds=300)
+            if info_baseline:
+                configuration['preparation']['startup_log_tag']['allow_info_baseline'] = True
+                device.log_tag = 'I'
+        host.save(config, configuration)
         lock = case / '.cache/p34-live-device.lock'
         if locked:
             host.save(lock, dict(pid=os.getpid(), out=str(out)))
@@ -202,7 +236,8 @@ class IntegrationTests(unittest.TestCase):
                  patch.object(host, 'listening', lambda port: bool(device.server and device.server.alive())), \
                  patch.object(r.time, 'monotonic', device.mono), patch.object(r.time, 'sleep', device.sleep), \
                  patch.object(s.Smoke, 'record_smoke', side_effect=AssertionError('must not run a preliminary smoke')):
-                code = r.main(['run', '--plan', str(config), '--out', str(out), '--execute'])
+                code = r.main(['run', '--plan', str(config), '--out', str(out), '--execute'] +
+                              (['--single-upgrade'] if single else []))
         finally:
             os.chdir(cwd)
         self.assertFalse(device.server and device.server.alive())
@@ -226,11 +261,44 @@ class IntegrationTests(unittest.TestCase):
         self.assertEqual((out/'app-capture.jsonl').read_bytes(), device.raw)
         self.assertTrue(device.no_update_seen)
 
+    def test_opt_in_startup_logging_restored_before_single_complete_campaign(self):
+        code, result, device, out, lock = self.run_case(startup_logging=True)
+        self.assertEqual(code, 0)
+        self.assertEqual(result['recovered'], 10)
+        self.assertEqual(device.log_tag, 'M')
+        writes = [c for c in device.calls if c[:3] == ['shell', 'setprop', 'log.tag']]
+        self.assertEqual([c[-1] for c in writes], ['V', 'M'])
+        restore_index = device.calls.index(writes[1])
+        check_index = next(i for i, c in enumerate(device.calls) if c == ['shell', 'input', 'tap', '290', '50'])
+        self.assertLess(restore_index, check_index)
+        self.assertFalse(lock.exists())
+        self.assertEqual((device.arms, device.stops, device.upgrade_starts), (1, 1, 1))
+
     def test_navigation_failure_never_arms_or_starts_ota(self):
         code, result, device, out, lock = self.run_case('list-missing')
         self.assertEqual((device.arms, device.upgrade_starts), (0, 0))
         self.assertEqual(code, 2)
         self.assertTrue(result['cleanup']['complete'])
+        self.assertFalse(lock.exists())
+
+    def test_info_baseline_completes_real_caller_without_property_writes(self):
+        code, result, device, out, lock = self.run_case(startup_logging=True, info_baseline=True)
+        self.assertEqual(code, 0)
+        self.assertEqual(result['recovered'], 10)
+        self.assertEqual(result['noUpdate']['outcome'], 'NO_UPDATE')
+        self.assertFalse(any(c[:3] == ['shell', 'setprop', 'log.tag'] for c in device.calls))
+        self.assertEqual((device.arms, device.stops, device.upgrade_starts), (1, 1, 1))
+        self.assertEqual((out / 'app-capture.jsonl').read_bytes(), device.raw)
+        self.assertFalse(lock.exists())
+
+    def test_bound_getter_completes_ten_recoveries_without_adapter_dump_dependency(self):
+        code, result, device, out, lock = self.run_case(radio_getter=True)
+        self.assertEqual(code, 0)
+        self.assertEqual(result['recovered'], 10)
+        self.assertEqual((device.arms, device.stops, device.upgrade_starts), (1, 1, 1))
+        self.assertFalse(any(c == list(r.RADIO_ADAPTER) or c == list(r.RADIO_MANAGER) for c in device.calls))
+        self.assertEqual(device.calls.count(['shell', 'sha256sum', r.RADIO_FRAMEWORK]), 1)
+        self.assertEqual((out / 'app-capture.jsonl').read_bytes(), device.raw)
         self.assertFalse(lock.exists())
 
     def test_empty_manager_adapter_reader_completes_one_synthetic_group(self):

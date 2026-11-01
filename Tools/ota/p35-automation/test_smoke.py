@@ -226,10 +226,10 @@ class UnitTests(unittest.TestCase):
     def test_multidisplay_null_focus_and_real_conflicts(self):
         pkg = plan()['app']['id']
         focus = ('mCurrentFocus=Window{123 u0 ' + pkg + '/MainActivity}\n').encode()
-        self.assertTrue(r.foreground_ok(b'mCurrentFocus=null\n' + focus, pkg))
+        self.assertTrue(r.foreground_ok(fixtures.window_dump(b'mCurrentFocus=null\n' + focus), pkg))
         for raw in [b'mCurrentFocus=null\n', focus+focus, focus.replace(pkg.encode(), b'foreign.app'),
                     focus+b'mCurrentFocus=Window{456 u0 system.dialog/Permission}\n', focus+b'mShowingLockscreen=true\n']:
-            with self.subTest(raw=raw): self.assertFalse(r.foreground_ok(raw, pkg))
+            with self.subTest(raw=raw): self.assertFalse(r.foreground_ok(fixtures.window_dump(raw), pkg))
 
     def test_layout_motion_is_not_business_transition(self):
         left = xml(node(identifier='p35-arm'))
@@ -450,7 +450,8 @@ class SyntheticDevice:
                 if self.fault=='restart-old-changed':self.old_raw=archive([state(linkConnected=False,freshConnection=False,monoUs=2000000)])
             if self.fault=='launch-timeout':raise r.Stop('TIMEOUT','synthetic uncertain launch')
             if self.fault=='launch-error':return b'Error: synthetic launch result\n'
-            return b'Status: ok\n'
+            if self.fault=='launch-unknown':return b''
+            return ('Status: ok\nActivity: '+args[-1]+'\nComplete\n').encode()
         if args[:2]==['shell','pidof']:
             if self.fault=='list-pid-change' and self.swipes:self.pid='9876'
             if self.active and self.fault=='file-pid-change':self.pid='9876'
@@ -463,7 +464,13 @@ class SyntheticDevice:
             owner='foreign.app' if self.fault=='foreign' or self.fault=='restart-foreign' and self.restarted else pkg
             if self.fault=='file-background-sealed' and not self.foregrounded:owner='foreign.app'
             if self.fault=='list-foreign' and self.swipes:owner='foreign.app'
-            return ('mCurrentFocus=null\nmCurrentFocus=Window{123 u0 '+owner+'/MainActivity}\n').encode()
+            focus = ('mCurrentFocus=null\nmCurrentFocus=Window{123 u0 '+owner+'/MainActivity}\n').encode()
+            if self.fault=='window-history-only':return b'WINDOW MANAGER LAST ANR (dumpsys window lastanr)\n'+focus
+            raw = fixtures.window_dump(focus, policy=b'mKeyguardShowing=true\n' if self.fault=='window-locked' else b'')
+            if self.fault=='window-truncated':return raw.split(b'WINDOW MANAGER TOKENS')[0]
+            if self.fault=='window-conflict':return fixtures.window_dump(focus+focus)
+            if self.fault=='window-history':return b'WINDOW MANAGER LAST ANR (dumpsys window lastanr)\nWINDOW MANAGER DISPLAY CONTENTS (dumpsys window displays)\nmCurrentFocus=Window{456 u0 old.app/MainActivity}\n'+raw
+            return raw
         if args[:2]==['exec-out','uiautomator']:
             if self.fault=='foreign':raise AssertionError('foreign hierarchy must never be read')
             return self.tree()
@@ -703,13 +710,25 @@ class RouteTests(unittest.TestCase):
         self.assertEqual(device.pid,'1234');self.assertFalse(any('force-stop' in c for c in device.calls))
 
     def test_unconfirmed_cold_foreground_keeps_process_and_lock_without_hierarchy(self):
-        _,device,_,_,error,cleanup=self.run_route('foreign',terminal=True,cold_start=True)
+        _,device,out,_,error,cleanup=self.run_route('foreign',terminal=True,cold_start=True)
         self.assertIsNone(error);self.assertEqual(device.exit_code,2)
         self.assertTrue(cleanup['unresolved']);self.assertFalse(cleanup['ownedAppLaunchConfirmed'])
         self.assertTrue(device.result['lockRetained']);self.assertIsNotNone(device.pid)
         self.assertEqual(device.result['code'],'UNRESOLVED_STATE')
         self.assertEqual(device.result['executionError']['code'],'UI_UNAVAILABLE')
         self.assertFalse(any(c[:2]==['exec-out','uiautomator'] or 'force-stop' in c for c in device.calls))
+        events=[self.h.read_json(p) for p in sorted((out/'journal').glob('*.json'))]
+        self.assertEqual(sum(x['event']=='launch-returned' for x in events),1)
+        self.assertFalse(any(x['event']=='launch-confirmed' for x in events))
+
+    def test_current_window_negative_shapes_block_full_launch_chain(self):
+        for fault in ('window-history-only','window-truncated','window-locked','window-conflict'):
+            with self.subTest(fault=fault):
+                _,device,out,_,_,cleanup=self.run_route(fault,terminal=True,cold_start=True)
+                self.assertEqual(device.exit_code,2)
+                self.assertTrue(device.result['lockRetained'])
+                self.assertEqual(cleanup['armAttempts'],0)
+                self.assertFalse(any(c[:2]==['exec-out','uiautomator'] or 'force-stop' in c for c in device.calls))
 
     def test_cold_owned_stop_timeout_preserves_capture_and_never_replays_stop(self):
         _,device,out,report,error,cleanup=self.run_route('owned-stop-timeout',terminal=True,cold_start=True)
@@ -732,7 +751,7 @@ class RouteTests(unittest.TestCase):
                              'force-stop' in c for c in device.calls))
 
     def test_unconfirmed_launch_keeps_lock_and_never_replays_or_reads_hierarchy(self):
-        for fault,cold,code in [('launch-error',True,'ENV_BLOCKED'),('launch-timeout',True,'TIMEOUT'),
+        for fault,cold,code in [('launch-error',True,'ENV_BLOCKED'),('launch-unknown',True,'ENV_BLOCKED'),('launch-timeout',True,'TIMEOUT'),
                               ('launch-post-pid-missing',True,'ENV_BLOCKED'),
                               ('launch-post-pid-ambiguous',True,'ENV_BLOCKED'),
                               ('launch-existing-pid-changed',False,'IDENTITY_MISMATCH')]:
@@ -922,6 +941,93 @@ class RouteTests(unittest.TestCase):
 
 
 class EntryTests(unittest.TestCase):
+    def test_launch_return_without_ui_confirmation_reconciles_only_bound_safe_owner(self):
+        for kind in ('safe','campaign','inspect','foreign','pid-change','new-file','busy','stop-timeout',
+                     'exited','exited-replacement','exited-busy','exited-empty-services','exited-new-file',
+                     'unknown-return','missing-closure','stream-change','extra-mutation','historical-only'):
+            with self.subTest(kind=kind), self.root() as (root,config):
+                h=self.h;prior=h.fresh(root/'prior');out=root/'recovered';p=plan();pkg=p['app']['id']
+                original=dict(outcome='BLOCKED',lockRetained=True,otaOperations=0,radioToggles=0,installOperations=0,
+                    cleanup=dict(ownedAppLaunchConfirmed=False))
+                if kind=='campaign':
+                    p['device'].update(expected_version=30293,expected_sha256='c'*64)
+                    config=root/'bound-configuration.json'
+                    h.save(config,p)
+                    cp=fixtures.plan();cp.update(phone=p['phone'],app=p['app'])
+                    cp['firmware'].update(device_address=p['device']['address'],
+                        current=dict(version=p['device']['expected_version'],sha256=p['device']['expected_sha256']))
+                    h.save(prior/'plan.json',cp)
+                    h.save(prior/'inputs.json',dict(mode='run',planSha256=hashlib.sha256((prior/'plan.json').read_bytes()).hexdigest()))
+                    original=dict(outcome='UNRESOLVED_STATE',lockRetained=True,cases=[],recovered=0,
+                        caseResults=[dict(id=c['id'],outcome='NOT_RUN') for c in cp['cases']],
+                        executionError=dict(code='UI_UNAVAILABLE'),cleanup=dict(captureState='NOT_ARMED',armAttempts=0,
+                            stopAttempts=0,ownedAppStopAttempts=0,appRestartAttempts=0,ownedAppLaunchConfirmed=False))
+                else:
+                    h.save(prior/'inputs.json',dict(configurationSha256=hashlib.sha256(config.read_bytes()).hexdigest()))
+                h.save(prior/'result.json',original)
+                h.save(prior/'usb/closed.json',dict(cleanup_complete=True,server_closed=True,listening=False))
+                h.save(prior/'journal/00001.json',dict(event='launch-intent'))
+                probe='if [ -d "$1" ]; then echo directory; elif [ ! -e "$1" ]; then echo missing; else echo unknown; fi'
+                remote='/sdcard/Android/data/'+pkg+'/files/p35-observations'
+                component=pkg+'/MainActivity'
+                commands=[(['sh','-c',probe,'sh',remote],b'missing\n'),
+                    (['cmd','package','resolve-activity','--brief',pkg],(component+'\n').encode()),
+                    (['pidof',pkg],b''),(['am','start','-W','-n',component],
+                        b'' if kind=='unknown-return' else ('Status: ok\nActivity: '+component+'\nComplete\n').encode()),
+                    (['pidof',pkg],b'1234\n'),(['pidof',pkg],b'1234\n'),
+                    (['dumpsys','window'],fixtures.window_dump(('mCurrentFocus=Window{aaa u0 '+pkg+'/MainActivity}\n').encode()))]
+                if kind=='extra-mutation':commands.append((['input','tap','1','1'],b''))
+                base=[str(Path(p['phone']['adb']['path']).resolve()),'-H','127.0.0.1','-P','5093','-s',p['phone']['serial']]
+                for i,(cmd,data) in enumerate(commands,1):
+                    label='adb-%05d'%i;argv=base+['shell',s.shlex.join(cmd)]
+                    h.save(prior/'usb'/(label+'.started.json'),dict(argv=argv,cwd=str(root),monotonic_ns=i*10))
+                    stdout=h.raw(prior/'usb'/(label+'.stdout'),data);stderr=h.raw(prior/'usb'/(label+'.stderr'),b'')
+                    if kind=='missing-closure' and i==4:continue
+                    if kind=='stream-change' and i==4:stdout=dict(stdout,sha256='0'*64)
+                    h.save(prior/'usb'/(label+'.closed.json'),dict(argv=argv,cleanup_complete=True,reason='completed',
+                        stopped_while_running=False,exit_code=0,started_monotonic_ns=i*10,ended_monotonic_ns=i*10+1,
+                        stdout=stdout,stderr=stderr))
+                lock=root/'.cache/p34-live-device.lock';h.save(lock,dict(pid=123,out=str(prior)))
+                old_lock=lock.read_bytes();old_result=(prior/'result.json').read_bytes()
+                device=SyntheticDevice(out,h,fault={'foreign':'foreign','busy':'busy','historical-only':'window-history-only',
+                    'stop-timeout':'owned-stop-timeout'}.get(kind),initial='home')
+                if kind=='pid-change':device.pid='9876'
+                if kind=='new-file':device.raw=archive([state()])
+                if kind=='stop-timeout':device.restarted=True;device.cold=False
+                if kind.startswith('exited'):
+                    device.pid=None;device.fault='foreign'
+                    if kind=='exited-new-file':device.raw=archive([state()])
+                class Driver(s.Smoke):
+                    def start_phone(self):
+                        self.phone.server=device.process(self.phone.out,'adb-server',[],{})
+                        self.phone.close=lambda:self.phone.server.close('synthetic finished')
+                    def cmd(self,args,**kwargs):
+                        if kind.startswith('exited') and args[:4]==['shell','dumpsys','activity','services']:
+                            device.calls.append(args)
+                            if kind=='exited-empty-services':return b''
+                            return b'ACTIVITY MANAGER SERVICES (dumpsys activity services)\n'+(b'DeviceOtaService' if kind=='exited-busy' else b'')
+                        if kind=='exited-replacement' and args==['shell','pidof',pkg] and any(c==args for c in device.calls):
+                            device.pid='9876'
+                        return device.command(args)
+                with patch.object(h,'command',lambda *a,**k:b'INFO: No tasks match\n'),\
+                     patch.object(h,'listening',lambda port:bool(device.server and device.server.alive())),\
+                     patch.object(s,'Smoke',Driver),patch.object(s.time,'monotonic',device.mono),patch.object(s.time,'sleep',device.sleep):
+                    try:code=s.reconcile(p,config.read_bytes(),prior,out,h,inspect_only=kind=='inspect')
+                    except (r.Stop,RuntimeError):code=2
+                self.assertEqual((prior/'result.json').read_bytes(),old_result)
+                self.assertEqual(len(list((prior/'journal').glob('*.json'))),1)
+                self.assertFalse(any(c[:3]==['shell','input','tap'] for c in device.calls))
+                if kind in ('safe','campaign','exited'):
+                    self.assertEqual(code,0);self.assertFalse(lock.exists())
+                    self.assertEqual(sum('force-stop' in c for c in device.calls),0 if kind=='exited' else 1)
+                    if kind=='exited':
+                        self.assertTrue(h.read_json(out/'result.json')['inspection']['originalProcessAbsentVerified'])
+                        self.assertFalse(any(c[:3]==['shell','am','start'] or c[:2]==['exec-out','uiautomator'] for c in device.calls))
+                    else:self.assertTrue(h.read_json(out/'result.json')['cleanup']['ownedAppClosed'])
+                else:
+                    self.assertIn(code,(1,2));self.assertEqual(lock.read_bytes(),old_lock)
+                    self.assertEqual(sum('force-stop' in c for c in device.calls),1 if kind=='stop-timeout' else 0)
+
     def test_file_zero_log_recovery_closed_active_partial_ambiguous_and_changed_process(self):
         for kind in ['sealed','background-sealed','unready-sealed','active','unhealthy','header','partial','many','pid-changed',
                      'app-exited','previously-sealed-app-exited','no-start','inspect-only',

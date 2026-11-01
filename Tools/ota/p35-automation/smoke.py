@@ -10,6 +10,7 @@ import math
 import os
 from pathlib import Path
 import re
+import shlex
 import sys
 import time
 
@@ -98,6 +99,14 @@ def scroll_viewport(xml, package):
     views = [n for n in tree.iter('node') if n.get('scrollable') == 'true' and
              n.get('enabled') == 'true' and n.get('visible-to-user') != 'false']
     views = [n for n in views if not any(c in views for c in n.iter('node') if c is not n)]
+    if has_label(xml, package, FIRMWARE):
+        main = [n for n in views if n.get('class') == 'android.widget.ScrollView']
+        if len(main) == 1:
+            # Flutter's passive success snackbar can expose its own scroll action.
+            views = [n for n in views if n is main[0] or not (
+                n.get('class') == 'android.view.View' and n.get('clickable') == 'false' and
+                not n.get('resource-id') and len(list(n)) == 0 and
+                n.get('content-desc', '').startswith('\u6210\u529f:'))]
     anchored = [n for n in views if any('\u53ef\u7528\u8bbe\u5907' in v.splitlines() or
         any(MAC.fullmatch(line.lower()) for line in v.splitlines())
         for child in n.iter('node') for v in (child.get('text', ''), child.get('content-desc', '')))]
@@ -148,6 +157,96 @@ def prearm_page(xml, package):
     r.require(has_label(xml, package, '\u8bbe\u5907\u4e2d\u5fc3'), 'unknown pre-ARM page', 'UNRESOLVED_STATE')
     r.find_control(xml, HOME, package)
     return 'home'
+
+
+def launch_return(response, component):
+    text = response.decode('utf-8', 'strict')
+    r.require(not re.search(r'Error:|Exception', text) and
+        re.findall(r'(?m)^Status: (\S+)\r?$', text) == ['ok'] and
+        re.findall(r'(?m)^Activity: (\S+)\r?$', text) == [component] and
+        re.findall(r'(?m)^(Complete)\r?$', text) == ['Complete'],
+        'APP launch result unavailable/ambiguous', 'ENV_BLOCKED')
+
+
+def failed_launch_receipts(p, prior, h):
+    """Attribute a pre-UI launch using originals, without adding old journal events."""
+    pkg = p['app']['id']
+    remote = '/sdcard/Android/data/' + pkg + '/files/p35-observations'
+    records = []
+    pins = []
+    base = [str(Path(p['phone']['adb']['path']).resolve()), '-H', '127.0.0.1', '-P',
+            str(p['phone']['adb_port']), '-s', p['phone']['serial']]
+    for path in sorted((prior / 'usb').glob('adb-[0-9]*.started.json')):
+        start = h.read_json(path)
+        stem = path.name[:-len('.started.json')]
+        closed_path = path.with_name(stem + '.closed.json')
+        r.require(closed_path.is_file(), 'original command outcome unavailable', 'UNRESOLVED_STATE')
+        closed = h.read_json(closed_path)
+        argv = start['argv']
+        r.require(argv[:7] == base and closed.get('argv') == argv and
+            Path(start['cwd']).resolve() == ROOT and closed.get('cleanup_complete') is True and
+            closed.get('reason') == 'completed' and closed.get('stopped_while_running') is False and
+            closed.get('exit_code') in (0, 1) and
+            closed.get('started_monotonic_ns') == start['monotonic_ns'],
+            'original command closure/identity unbound', 'UNRESOLVED_STATE')
+        streams = []
+        for suffix in ('stdout', 'stderr'):
+            file = path.with_name(stem + '.' + suffix)
+            r.require(h.record(file) == closed[suffix], 'original command stream changed', 'EVIDENCE_GAP')
+            streams.append(file.read_bytes())
+            pins.append(h.record(file))
+        pins.extend((h.record(path), h.record(closed_path)))
+        tail = argv[7:]
+        command = shlex.split(tail[1]) if len(tail) == 2 and tail[0] in ('shell', 'exec-out') else tail[1:]
+        r.require(closed['exit_code'] == 0 or command == ['pidof', pkg] and not streams[0].strip(),
+                  'original command did not succeed', 'UNRESOLVED_STATE')
+        records.append((tail[0], command, streams[0], streams[1], start['monotonic_ns'], closed['ended_monotonic_ns']))
+    r.require(records and all(a[5] <= b[4] for a, b in zip(records, records[1:])),
+              'original commands missing/overlapping', 'UNRESOLVED_STATE')
+    launches = [i for i, row in enumerate(records) if row[1][:2] == ['am', 'start']]
+    r.require(len(launches) == 1, 'one original launch required', 'UNRESOLVED_STATE')
+    index = launches[0]
+    command, response = records[index][1:3]
+    r.require(command[:4] == ['am', 'start', '-W', '-n'] and len(command) == 5 and
+        re.fullmatch(re.escape(pkg) + r'/[A-Za-z0-9_.$]+', command[-1]),
+        'original launcher unbound', 'UNRESOLVED_STATE')
+    component = command[-1]
+    launch_return(response, component)
+    r.require(index >= 2 and records[index-2][1] == ['cmd', 'package', 'resolve-activity', '--brief', pkg] and
+        records[index-2][2].decode().strip().splitlines()[-1] == component and
+        records[index-1][1] == ['pidof', pkg], 'pre-launch process binding missing', 'UNRESOLVED_STATE')
+    previous = records[index-1][2].decode().strip()
+    after = records[index+1:]
+    r.require(len(after) >= 2 and after[0][1] == ['pidof', pkg] and
+        all(row[1] in (['pidof', pkg], ['dumpsys', 'window']) for row in after),
+        'post-launch actions not query-only', 'UNRESOLVED_STATE')
+    pid = after[0][2].decode().strip()
+    r.require(pid.isdigit() and (not previous or previous == pid) and
+        all(row[2].decode().strip() == pid for row in after if row[1] == ['pidof', pkg]),
+        'original process changed/ambiguous', 'UNRESOLVED_STATE')
+    probe = 'if [ -d "$1" ]; then echo directory; elif [ ! -e "$1" ]; then echo missing; else echo unknown; fi'
+    baseline = {x.name: x for x in (prior / 'previous-captures').glob('*.jsonl')}
+    probes = [row[2].strip() for row in records[:index] if row[1] == ['sh', '-c', probe, 'sh', remote]]
+    listings = [row[2].decode().splitlines() for row in records[:index] if row[1] == ['ls', '-1', remote]]
+    r.require(probes == [b'missing'] and not baseline and not listings or
+        probes == [b'directory'] and len(listings) == 1 and len(listings[0]) == len(set(listings[0])) and
+        set(listings[0]) == set(baseline), 'original capture baseline unbound', 'UNRESOLVED_STATE')
+    for name, file in baseline.items():
+        originals = [row[2] for row in records[:index] if row[1] == ['cat', remote + '/' + name]]
+        r.require(len(originals) == 1 and originals[0] == file.read_bytes(),
+                  'original baseline differs from retrieval receipt', 'EVIDENCE_GAP')
+    for kind, cmd, stdout, stderr, _, _ in records[:index-2]:
+        safe = cmd in (['-l'], [], ['getprop', 'ro.product.model'], ['pm', 'list', 'packages', pkg],
+            ['pm', 'path', pkg], ['dumpsys', 'package', pkg], ['dumpsys', 'activity', 'services', pkg],
+            ['sh', '-c', probe, 'sh', remote], ['ls', '-1', remote])
+        safe = safe or len(cmd) == 2 and cmd[0] in ('cat', 'sha256sum') and (
+            re.fullmatch(re.escape(remote) + r'/[0-9a-f]{32}\.jsonl', cmd[1]) or
+            cmd[0] == 'sha256sum' and cmd[1].startswith('/data/app/') and cmd[1].endswith('/base.apk'))
+        safe = safe or len(cmd) == 3 and cmd[:2] == ['wc', '-c'] and re.fullmatch(
+            re.escape(remote) + r'/[0-9a-f]{32}\.jsonl', cmd[2])
+        r.require(safe, 'original pre-launch actions not query-only', 'UNRESOLVED_STATE')
+    return dict(pid=pid, owned=not previous, component=component, receipts=pins,
+                basis='closed original launch result + pre/post process receipts')
 
 
 def semantic_control(xml, package, label, *, token=False):
@@ -357,6 +456,8 @@ class Smoke:
         self.arm_action_count = 0
         self.capture_resolved = False
         self.capture_seal = None
+        self.capture_recovery_states = None
+        self.stop_seal_recovered = False
         self.capture_state = 'NOT_ARMED'
         self.stream_failed = False
         self.original_verified = False
@@ -549,11 +650,39 @@ class Smoke:
             raw = self.original(cid, self.out / 'previous-captures' / (cid + '.jsonl'))
             try:
                 report = sealed_file(raw, cid)
-                r.require(report['final']['phase'] in {'idle', 'completed', 'failed', 'cancelled'},
-                          'old capture has unresolved OTA phase', 'UNRESOLVED_STATE')
-                self.previous_captures[cid] = dict(bytes=len(raw), sha256=report['sha256'], final=report['final'], healthy=report['healthy'])
             except r.Stop as error:
                 raise r.Stop('UNRESOLVED_STATE', 'previous capture unsealed/corrupt; original preserved') from error
+            if report['final']['phase'] == 'readyToInstall':
+                # A sealed download is not a transfer. A later idle home instance
+                # is not the old download owner merely because a PID exists.
+                states = FileCursor(cid).feed(raw)
+                r.require(report['healthy'] and report['final']['packageVerified'] and
+                    all(row['phase'] in {'idle', 'checkingUpdate', 'downloading', 'verifyingDownload', 'readyToInstall'} and
+                        row['protocol'] is None and row['bitmap'] is None and row['session'] == row['durable'] == 0 and
+                        row['sendOffset'] is None and row['event'] not in {'beginAck', 'data', 'endAck'}
+                        for row in states), 'old ready capture has unproved transfer history', 'UNRESOLVED_STATE')
+                pid = self.cmd(['shell', 'pidof', self.p['app']['id']], success_codes=(0, 1)).strip().decode()
+                if pid:
+                    r.require(pid.isdigit(), 'ambiguous existing APP process', 'UNRESOLVED_STATE')
+                    previous_pid = self.pid
+                    self.pid = pid
+                    try:
+                        self.idle_services()
+                        self.foreground_existing(pid)
+                        tree = self.ui()
+                        r.require(prearm_page(tree, self.p['app']['id']) == 'home' and
+                                  r.idle_equivalent(tree, self.ui()),
+                                  'existing APP is not stable pre-ARM home', 'UNRESOLVED_STATE')
+                        self.idle_services()
+                        r.require(self.cmd(['shell', 'pidof', self.p['app']['id']]).strip().decode() == pid,
+                                  'existing APP changed during admission', 'UNRESOLVED_STATE')
+                        self.record('old-ready-idle-home', captureId=cid, pid=pid, sha256=report['sha256'])
+                    finally:
+                        self.pid = previous_pid
+            else:
+                r.require(report['final']['phase'] in {'idle', 'completed', 'failed', 'cancelled'},
+                          'old capture has unresolved OTA phase', 'UNRESOLVED_STATE')
+            self.previous_captures[cid] = dict(bytes=len(raw), sha256=report['sha256'], final=report['final'], healthy=report['healthy'])
 
     def start_phone(self):
         self.enter('preflight')
@@ -590,10 +719,10 @@ class Smoke:
                   'old APP process changed before launch', 'IDENTITY_MISMATCH')
         r.require(forbidden_pid is None or not previous_pid,
                   'APP process appeared after stop; no launch', 'UNRESOLVED_STATE')
-        self.record('launch-intent')
+        self.record('launch-intent', component=component[-1], previousPid=previous_pid)
         self.mutation_unknown = True
         response = self.cmd(['shell', 'am', 'start', '-W', '-n', component[-1]])
-        r.require(b'Error:' not in response and b'Exception' not in response, 'APP launch unconfirmed', 'ENV_BLOCKED')
+        launch_return(response, component[-1])
         self.pid = self.cmd(['shell', 'pidof', self.p['app']['id']]).strip().decode()
         r.require(self.pid.isdigit(), 'one APP process required', 'ENV_BLOCKED')
         r.require(required_pid is None or self.pid == required_pid,
@@ -604,6 +733,8 @@ class Smoke:
                   'existing APP process changed during launch', 'IDENTITY_MISMATCH')
         if not previous_pid:
             self.owned_app_pid = self.pid
+        self.record('launch-returned', pid=self.pid, previousPid=previous_pid, component=component[-1],
+                    responseSha256=hashlib.sha256(response).hexdigest())
         self.ui()
         self.mutation_unknown = False
         self.record('launch-confirmed', pid=self.pid)
@@ -665,11 +796,17 @@ class Smoke:
         try:
             r.find_control(tree, {'resource-id': 'p35-check'}, pkg)
         except r.Stop as error:
-            r.require(error.code == 'UI_UNAVAILABLE' and 'disabled' in str(error) and
+            r.require(error.code == 'UI_UNAVAILABLE' and
                 self.capture_resolved and self.capture_seal is not None,
                 'idle state not proved by check control or owned seal', 'UNRESOLVED_STATE')
             self.check_cleanup_state(self.capture_seal['final'])
-            sealed_unready_ui(tree, pkg)
+            if self.capture_seal['final']['phase'] == 'readyToInstall':
+                r.require('control missing' in str(error) or 'disabled' in str(error),
+                          'ambiguous pre-transfer cleanup UI', 'UNRESOLVED_STATE')
+                r.find_control(tree, QUERY, pkg)
+            else:
+                r.require('disabled' in str(error), 'missing idle check control', 'UNRESOLVED_STATE')
+                sealed_unready_ui(tree, pkg)
         r.require(r.idle_equivalent(tree, self.ui()), 'APP business state changed; no process stop', 'UNRESOLVED_STATE')
         return tree
 
@@ -853,13 +990,18 @@ class Smoke:
         journal = [self.h.read_json(x) for x in sorted((prior / 'journal').glob('*.json'))]
         launches = [x for x in journal if x.get('event') == 'launch-confirmed']
         arms = [i for i, x in enumerate(journal) if x.get('event') == 'tap-intent' and x.get('control') == ARM]
+        binding = None
+        if not launches and not arms:
+            binding = failed_launch_receipts(self.p, prior, self.h)
+            self.h.save(self.out / 'launch-association.json', binding)
+            launches = [binding]
         r.require(len(launches) == 1 and len(arms) <= 1, 'old action binding unavailable', 'UNRESOLVED_STATE')
         prearm = not arms
         if prearm:
             intents = [i for i, x in enumerate(journal) if x.get('event') == 'tap-intent']
-            r.require(intents and all(journal[i].get('control') in (HOME, DEVICES) and
+            r.require((intents or binding is not None) and all(journal[i].get('control') in (HOME, DEVICES) and
                 i+1 < len(journal) and journal[i+1].get('event') == 'tap-returned' for i in intents) and
-                all(x.get('event') in {'stage', 'launch-intent', 'launch-confirmed', 'tap-intent', 'tap-returned'}
+                all(x.get('event') in {'stage', 'launch-intent', 'launch-returned', 'launch-confirmed', 'tap-intent', 'tap-returned'}
                     for x in journal), 'pre-ARM actions are not positively bound', 'UNRESOLVED_STATE')
         else:
             r.require(any(x.get('event') == 'tap-returned' for x in journal[arms[0]+1:]),
@@ -876,6 +1018,8 @@ class Smoke:
         report = dict(classification='D', originalPid=old_pid, currentPid=pid, sameProcess=pid == old_pid,
                       candidates=[], baselineUnchanged=True, deviceAndApkVerified=True, recordStarts=0,
                       preArmActionsVerified=prearm)
+        if binding is not None:
+            report['launchAssociation'] = binding
         names = self.capture_names()
         report['directoryReadable'] = True
         r.require(set(self.previous_captures) <= names, 'baseline file missing', 'UNRESOLVED_STATE')
@@ -909,7 +1053,27 @@ class Smoke:
             self.pid = pid
             tree = self.ui()
             self.h.raw(self.out / 'current-ui.xml', tree)
-        if pid != old_pid or not report['baselineUnchanged'] or len(added) > 1 or prearm and added:
+        if (binding is not None and binding['owned'] and prearm and not pid and
+            not report['foreground'] and report['baselineUnchanged'] and not added):
+            # A returned pre-ARM launch can already have exited. Never relaunch
+            # it to establish continuity or stop a replacement process.
+            services = self.cmd(['shell', 'dumpsys', 'activity', 'services', self.p['app']['id']])
+            r.require(services.startswith(b'ACTIVITY MANAGER SERVICES (dumpsys activity services)') and
+                b'DeviceOtaService' not in services, 'exited owner service state unavailable/busy', 'UNRESOLVED_STATE')
+            r.require(self.capture_names() == set(self.previous_captures),
+                      'capture store changed after original process absence', 'UNRESOLVED_STATE')
+            for cid, old in self.previous_captures.items():
+                raw = self.original(cid, self.out / 'exited-prearm-baseline' / (cid + '.jsonl'))
+                r.require(hashlib.sha256(raw).hexdigest() == old['sha256'],
+                          'exited original capture baseline changed', 'UNRESOLVED_STATE')
+            r.require(not self.cmd(['shell', 'pidof', self.p['app']['id']], success_codes=(0, 1)).strip(),
+                      'App appeared during original process absence checks', 'UNRESOLVED_STATE')
+            self.capture_resolved = True
+            self.mutation_unknown = False
+            report.update(classification='C', captureState='PRE_ARM_PROCESS_EXITED_VERIFIED',
+                originalProcessAbsentVerified=True, processAbsenceObservations=2,
+                originalLaunchResolved=True, uiReadinessClaimed=False, freshUpgradeStateClaimed=False)
+        elif pid != old_pid or not report['baselineUnchanged'] or len(added) > 1 or prearm and added:
             report['missingEvidence'] = 'original process continuity/unchanged baseline/unique candidate not established'
         elif prearm and not added and tree is not None:
             report['preArmPage'] = prearm_page(tree, self.p['app']['id'])
@@ -917,6 +1081,9 @@ class Smoke:
             self.mutation_unknown = False
             self.capture_resolved = True
             report.update(classification='C', captureState='PRE_ARM_NAVIGATION_VERIFIED')
+            if binding is not None and binding['owned']:
+                self.owned_app_pid = old_pid
+                self.owned_launch_confirmed = True
         elif prearm and not added:
             report.update(classification='C', captureState='PRE_ARM_FOREGROUND_RESTORE_REQUIRED')
         elif not added:
@@ -940,8 +1107,10 @@ class Smoke:
                     idle_phase(state, self.p)
                 report['captureState'] = 'SEALED' if self.decoder.closed else 'ACTIVE'
                 self.capture_state = report['captureState']
-        report['associationBasis'] = ['returned HOME/DEVICES only' if prearm else 'original ARM intent/return',
-            'confirmed original PID/current PID', 'verified phone/APK', 'unchanged original baseline',
+        report['associationBasis'] = [('closed launch receipts; no ARM/business actions' if binding is not None else
+            'returned HOME/DEVICES only') if prearm else 'original ARM intent/return',
+            'original launch PID + repeated current process absence' if report.get('originalProcessAbsentVerified') else
+            'original PID/current PID comparison (see sameProcess)', 'verified phone/APK', 'unchanged original baseline',
             'no new capture plus known pre-ARM page verification' if prearm else 'real header and target states']
         if tree is not None:
             report['associationBasis'].append('foreground test APP hierarchy')
@@ -1045,6 +1214,30 @@ class Smoke:
         self.ui()
         return report
 
+    def recover_sealed_stop(self):
+        """Resolve only an already-stopped recorder, never repair live evidence."""
+        r.require(self.arm_attempted and self.arm_baseline_confirmed and self.stop_attempted and
+            self.stream_failed and not self.stop_seal_recovered and self.capture_id and self.live and
+            self.live[0]['seq'] == 1 and self.capture_id not in self.previous_captures and
+            self.decoder.opened == dict(schema=1, kind='open', captureId=self.capture_id),
+            'no bound STOP/failed stream for sealed recovery', 'UNRESOLVED_STATE')
+        raw = self.original(self.capture_id, self.out / 'sealed-stop-original.jsonl')
+        report = r.audit_capture(raw, self.capture_id)
+        rows = FileCursor(self.capture_id).feed(raw)
+        r.require(self.original_verified and all(0 < row['seq'] <= len(rows) and rows[row['seq'] - 1] == row
+                  for row in self.live), 'sealed recovery conflicts with observed rows', 'EVIDENCE_GAP')
+        r.require(rows[-1]['phase'] in {'idle', 'failed', 'cancelled'} and
+            all(row['phase'] not in {'applying', 'waitingReboot', 'reconnectVerify', 'completed'} and
+                (row['packageBytes'] == 0 or row['durable'] < row['packageBytes']) for row in rows),
+            'sealed recovery has unknown/post-transfer outcome', 'UNRESOLVED_STATE')
+        self.h.save(self.out / 'sealed-stop-recovery.json', dict(archive=report,
+            observedRecords=len(self.live), liveEvidence='FAILED_UNCHANGED', noNewStop=True))
+        self.capture_seal = sealed_file(raw, self.capture_id)
+        self.capture_recovery_states = rows
+        self.capture_resolved = self.stop_seal_recovered = True
+        self.capture_state = 'SEALED_WITH_LIVE_GAP'
+        self.mutation_unknown = False
+
     def cleanup(self):
         errors = []
         self.stage_deadline = time.monotonic() + self.p['limits']['cleanup_seconds']
@@ -1082,14 +1275,21 @@ class Smoke:
                     self.record('arm-not-started-verified')
             except BaseException as error:
                 errors.append(dict(step='capture-salvage', code=getattr(error, 'code', 'HOST_FAILED'), detail=str(error)))
+                if self.stop_attempted and self.stream_failed:
+                    try:
+                        self.recover_sealed_stop()
+                    except BaseException as recovery_error:
+                        errors.append(dict(step='sealed-stop-recovery',
+                            code=getattr(recovery_error, 'code', 'HOST_FAILED'), detail=str(recovery_error)))
         if self.owned_app_pid and not self.owned_app_closed:
             try:
-                r.require(not self.owned_stop_attempted and not self.mutation_unknown and not self.stream_failed and
+                r.require(not self.owned_stop_attempted and not self.mutation_unknown and
+                    (not self.stream_failed or self.stop_seal_recovered) and
                     self.owned_launch_confirmed and (not self.restart_attempted or self.restart_confirmed) and
                     (not self.arm_attempted or self.capture_resolved),
                     'owned APP action/capture unresolved; no process stop', 'UNRESOLVED_STATE')
                 if self.arm_attempted and self.decoder.previous is not None:
-                    self.check_cleanup_state(self.decoder.previous)
+                    self.check_cleanup_state(self.capture_seal['final'] if self.stop_seal_recovered else self.decoder.previous)
                 if self.prearm_navigation and not self.arm_attempted:
                     self.idle_prearm_ui()
                 else:
@@ -1118,6 +1318,7 @@ class Smoke:
             observationSource=self.observation_source, armAttempts=self.arm_action_count,
             stopAttempts=int(self.stop_attempted), logcatDiagnosticError=self.diagnostic_error,
             captureSeal=self.capture_seal,
+            sealedStopRecovered=self.stop_seal_recovered,
             captureState=self.capture_state,
             unresolved=self.mutation_unknown or self.arm_attempted and not self.capture_resolved or
                 self.restart_attempted and not self.restart_confirmed or
@@ -1146,7 +1347,8 @@ def preflight_outputs(h, out):
         'journal', 'previous-captures', 'after-restart-captures', 'previous-owner-results', 'prior-lock.json', 'app-capture.jsonl',
         'app-capture-integrity.json', 'unresolved-owner.json', 'observations', 'arm-baseline', 'inspection.json',
         'candidates', 'current-ui.xml', 'after-capture-baseline', 'prearm-cleanup-captures', 'previous-recovery-lease.json',
-        'previous-recovery-result.json', 'previous-recovery-usb-closed.json'):
+        'previous-recovery-result.json', 'previous-recovery-usb-closed.json', 'launch-association.json',
+        'exited-prearm-baseline'):
         h.checked(out / name)
     for suffix in ('stdout', 'stderr', 'started.json', 'closed.json'):
         h.checked(out / ('logcat.' + suffix))
@@ -1266,7 +1468,8 @@ def reconcile_file_source(p, prior, out, h, lock_bytes, original_result, *, insp
                         inspection.update(captureState='PREVIOUSLY_SEALED_APP_EXITED',
                             originalProcessAbsentVerified=True, priorAssociation=h.record(previous_out / 'result.json'))
                 r.require(inspection.get('captureState') in {'SEALED', 'ACTIVE', 'NOT_STARTED_VERIFIED',
-                    'PREVIOUSLY_SEALED_APP_EXITED', 'PRE_ARM_NAVIGATION_VERIFIED', 'PRE_ARM_FOREGROUND_RESTORE_REQUIRED'},
+                    'PREVIOUSLY_SEALED_APP_EXITED', 'PRE_ARM_NAVIGATION_VERIFIED', 'PRE_ARM_FOREGROUND_RESTORE_REQUIRED',
+                    'PRE_ARM_PROCESS_EXITED_VERIFIED'},
                           'capture attribution unresolved; see inspection originals', 'UNRESOLVED_STATE')
                 r.require(lock.read_bytes() == lock_bytes, 'owner changed after inspection', 'UNRESOLVED_STATE')
                 if lease.exists():
@@ -1289,6 +1492,10 @@ def reconcile_file_source(p, prior, out, h, lock_bytes, original_result, *, insp
                     inspection.update(captureState='PRE_ARM_NAVIGATION_VERIFIED', foregroundRestored=True)
                 if original_result.get('cleanup', {}).get('ownedAppLaunchConfirmed') and not exited_after_seal:
                     driver.owned_app_pid = driver.pid
+                    driver.owned_launch_confirmed = True
+                if (inspection['captureState'] == 'PRE_ARM_NAVIGATION_VERIFIED' and
+                    inspection.get('launchAssociation', {}).get('owned')):
+                    driver.owned_app_pid = inspection['originalPid']
                     driver.owned_launch_confirmed = True
                 if inspection['captureState'] == 'ACTIVE':
                     driver.foreground_existing(driver.pid)
@@ -1385,10 +1592,36 @@ def reconcile(p, configuration, prior, out, h, *, sealed_original=None, inspect_
     result = h.read_json(prior / 'result.json')
     closed = h.read_json(prior / 'usb/closed.json')
     inputs = h.read_json(prior / 'inputs.json')
-    r.require(result.get('lockRetained') is True and result.get('otaOperations') == 0 and
-        result.get('radioToggles') == 0 and result.get('installOperations') == 0 and
-        closed.get('cleanup_complete') is True and closed.get('server_closed') is True and closed.get('listening') is False and
-        inputs.get('configurationSha256') == hashlib.sha256(configuration).hexdigest(),
+    smoke_bound = (result.get('otaOperations') == 0 and result.get('radioToggles') == 0 and
+        result.get('installOperations') == 0 and
+        inputs.get('configurationSha256') == hashlib.sha256(configuration).hexdigest())
+    campaign_bound = False
+    if inputs.get('mode') == 'run':
+        original_plan = (prior / 'plan.json').read_bytes()
+        single = inputs.get('singleUpgrade', False)
+        r.require(type(single) is bool, 'invalid original campaign profile', 'UNRESOLVED_STATE')
+        plan = r.validate_plan(r.strict_json(original_plan), single=single)
+        journal = [h.read_json(x) for x in sorted((prior / 'journal').glob('*.json'))]
+        cleanup = result.get('cleanup', {})
+        r.require(inputs.get('planSha256') == hashlib.sha256(original_plan).hexdigest() and
+            plan['phone'] == p['phone'] and plan['app'] == p['app'] and
+            plan['firmware']['device_address'] == p['device']['address'] and
+            plan['firmware']['current'] == dict(version=p['device']['expected_version'], sha256=p['device']['expected_sha256']) and
+            result.get('outcome') == 'UNRESOLVED_STATE' and result.get('cases') == [] and
+            result.get('recovered') == 0 and
+            result.get('caseResults') == [dict(id=x['id'], outcome='NOT_RUN') for x in plan['cases']] and
+            result.get('executionError', {}).get('code') == 'UI_UNAVAILABLE' and
+            cleanup.get('captureState') == 'NOT_ARMED' and cleanup.get('armAttempts') == 0 and
+            cleanup.get('stopAttempts') == 0 and cleanup.get('ownedAppStopAttempts') == 0 and
+            cleanup.get('appRestartAttempts') == 0 and
+            sum(x.get('event') == 'launch-intent' for x in journal) == 1 and
+            all(x.get('event') in {'stage', 'launch-intent', 'launch-returned'} for x in journal) and
+            all(x.get('stage') in {'preflight', 'launch'} for x in journal if x.get('event') == 'stage'),
+            'campaign is not a bound pre-ARM launch failure', 'UNRESOLVED_STATE')
+        failed_launch_receipts(p, prior, h)
+        campaign_bound = True
+    r.require(result.get('lockRetained') is True and (smoke_bound or campaign_bound) and
+        closed.get('cleanup_complete') is True and closed.get('server_closed') is True and closed.get('listening') is False,
         'original operation/configuration/closure unbound', 'UNRESOLVED_STATE')
     old_decoder = r.Decoder()
     logcat = prior / 'logcat.stdout'
