@@ -180,7 +180,9 @@ class OtaP35Recorder {
         if (_stopRequested || !active) return;
         final current = _snapshot!();
         if (!healthy || current['phase'] != 'idle' || current['targetVersionCode'] != 0 ||
-            current['packageBytes'] != 0) throw StateError('probe requires idle/no package');
+            current['packageBytes'] != 0) {
+          throw StateError('probe requires idle/no package');
+        }
         for (var i = 0; i < 20; i++) { record(); }
         await _draining;
         await Future<void>.delayed(const Duration(milliseconds: 50));
