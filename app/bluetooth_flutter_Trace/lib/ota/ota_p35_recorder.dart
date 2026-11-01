@@ -42,6 +42,7 @@ class OtaP35Recorder {
   String? captureId, error;
   File? file;
   int _seq = 0, _bytes = 0, _written = 0, lost = 0;
+  int _stateSchema = 1;
   bool _starting = false, _accepting = false, _stopRequested = false;
   late _DigestSink _digest;
   late ByteConversionSink _hash;
@@ -49,8 +50,10 @@ class OtaP35Recorder {
   bool get healthy => active && error == null;
 
   Future<bool> start(Map<String, Object?> Function() snapshot, {bool reliable = false,
-    OtaP35Stream? stream}) async {
+    OtaP35Stream? stream, int stateSchema = 1}) async {
+    if (stateSchema != 1 && stateSchema != 2 || stateSchema == 2 && !reliable) return false;
     if (_starting || active || captureId != null || _stopRequested) return false;
+    _stateSchema = stateSchema;
     _starting = true;
     _opened = Completer<void>();
     status.value = 'starting';
@@ -108,7 +111,7 @@ class OtaP35Recorder {
   void record([String event = 'state']) {
     if (!healthy) return;
     try {
-      final row = <String, Object?>{..._snapshot!(), 'schema': 1,
+      final row = <String, Object?>{..._snapshot!(), 'schema': _stateSchema,
         'captureId': captureId, 'seq': ++_seq, 'monoUs': _clock.elapsedMicroseconds,
         'event': event, 'healthy': true, 'lost': 0, 'error': null};
       final line = 'OTA_P35_STATE ${jsonEncode(row)}\n';

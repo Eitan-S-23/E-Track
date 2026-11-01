@@ -65,6 +65,27 @@ void main() {
     expect(r.captureId, isNull);
   });
 
+  test('runtime schema is explicit, persisted and independent of container schema', () async {
+    final stream = MemoryStream();
+    final r = OtaP35Recorder(emit: (_) {}, directoryProvider: () async => root);
+    expect(await r.start(snapshot, stateSchema: 2), isFalse);
+    final runtime = <String, Object?>{'backgrounded': true, 'acquired': true,
+      'reason': null, 'active': true, 'paused': false, 'ownerEpoch': 3,
+      'revision': 17, 'task': {'taskId': 'test_3', 'generation': 3,
+        'deviceToken': 'd' * 64, 'packageSha256': 'c' * 64}};
+    expect(await r.start(() => {...snapshot(), 'runtime': runtime},
+        reliable: true, stream: stream, stateSchema: 2), isTrue);
+    await r.stop();
+    final raw = await r.file!.readAsBytes();
+    expect(raw, stream.bytes);
+    final lines = utf8.decode(raw).trim().split('\n');
+    expect(jsonDecode(lines.first.substring('OTA_P35_CAPTURE '.length))['schema'], 1);
+    final row = jsonDecode(lines[1].substring('OTA_P35_STATE '.length));
+    expect(row['schema'], 2);
+    expect(row['runtime'], runtime);
+    expect(jsonDecode(lines.last.substring('OTA_P35_CAPTURE '.length))['healthy'], isTrue);
+  });
+
   test('ten resume events remain one loss-accounted persisted capture', () async {
     final lines = <String>[];
     final r = OtaP35Recorder(emit: lines.add, directoryProvider: () async => root);

@@ -176,6 +176,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   int? _identityLinkGeneration;
   BluetoothDevice? _p35Device;
   Map<String, Object?> _p35Transfer = {};
+  bool _p35RuntimeEvidence = false;
 
   Map<String, Object?> _p35Snapshot() {
     // Re-read the canonical cache after async open and on every heartbeat/event.
@@ -200,6 +201,16 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       'linkConnected': connected,
       // A cached identity after disconnect is historical, not a new GET_INFO.
       'freshConnection': connected && hasCurrentDeviceIdentity(_p35Address),
+      if (_p35RuntimeEvidence) 'runtime': {
+        'backgrounded': _appBackgrounded,
+        'acquired': backgroundAcquired,
+        'reason': backgroundUnavailableReason,
+        'active': isUpgrading,
+        'paused': _foregroundPaused,
+        'ownerEpoch': _ownerEpoch,
+        'revision': _snapshotRevision,
+        'task': _taskKey?.toMap(),
+      },
     };
   }
 
@@ -224,7 +235,9 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     _p35Identity = _deviceInfo;
     final device = _ble.otaDeviceForObservation(address);
     _p35Device = device;
-    final started = await p35.start(_p35Snapshot, reliable: reliable);
+    _p35RuntimeEvidence = reliable;
+    final started = await p35.start(_p35Snapshot, reliable: reliable,
+        stateSchema: reliable ? 2 : 1);
     if (_closed) { await p35.stop(); return false; }
     if (!started) return false;
     _p35Connection = device.connectionState.listen((_) {
@@ -440,6 +453,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       ++_recoveryEpoch;
       if (!backgroundAcquired) _safeBackgroundFallback();
     }
+    p35.record();
   }
 
   Future<void> cancelCurrentTask({bool keepPackage = true}) async {
