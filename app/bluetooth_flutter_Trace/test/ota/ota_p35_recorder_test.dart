@@ -119,6 +119,25 @@ void main() {
     writer.gate!.complete(); await r.stop();
   });
 
+  test('native publication failure preserves originals and latches unhealthy', () async {
+    final r = OtaP35Recorder(directoryProvider: () async => root, emit: (line) {
+      if (line.startsWith('OTA_P35_STATE ')) {
+        throw StateError('synthetic native writer rejection');
+      }
+    });
+    await r.start(snapshot);
+    await r.stop();
+    expect(r.error, 'log-write-failed');
+    expect(r.healthy, isFalse);
+    r.record('heartbeat');
+    final raw = await r.file!.readAsString();
+    expect(raw, contains('OTA_P35_STATE '));
+    final footer = jsonDecode(raw.trimRight().split('\n').last.substring(16))
+        as Map<String, dynamic>;
+    expect(footer['healthy'], isFalse);
+    expect(footer['error'], 'log-write-failed');
+  });
+
   test('snapshot errors are capture errors, never OTA exceptions', () async {
     final r = OtaP35Recorder(emit: (_) {}, directoryProvider: () async => root);
     await r.start(() => throw StateError('synthetic'));

@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'ota_observation_log.dart';
+import 'ota_p35_android_log.dart';
 
 /// Explicit, Release-capable observation only. Never drives the OTA state machine.
 /// Published lines have already been flushed to app-owned storage. A failed
@@ -16,7 +17,8 @@ class OtaP35Recorder {
   OtaP35Recorder({this.directoryProvider, this.writerFactory,
     void Function(String)? emit, this.maxBytes = 128 * 1024 * 1024,
     this.maxPending = 256, this.maxDuration = const Duration(hours: 1)})
-      : _emit = emit ?? ((line) => debugPrintSynchronously(line));
+      : _emit = emit ?? (Platform.isAndroid
+          ? emitP35AndroidLog : ((line) => debugPrintSynchronously(line)));
 
   final Future<Directory> Function()? directoryProvider;
   final Future<OtaObservationWriter> Function(File)? writerFactory;
@@ -124,8 +126,15 @@ class OtaP35Recorder {
         await _writer!.flush();
         _hash.add(bytes);
         _written += batch.length;
-        // No throttled debugPrint queue between persistence and the consumer.
-        for (final line in batch) { _emit(line.trimRight()); }
+        // Keep native publication after persistence, without a debug-print queue.
+        try {
+          for (final line in batch) { _emit(line.trimRight()); }
+        } catch (_) {
+          lost += _seq - _written;
+          _pending.clear();
+          _fail('log-write-failed');
+          return;
+        }
       }
     } catch (_) {
       lost += _seq - _written;
