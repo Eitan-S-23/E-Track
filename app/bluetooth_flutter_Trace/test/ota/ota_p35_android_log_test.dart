@@ -5,23 +5,22 @@ import 'package:ffi/ffi.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('native emitter preserves exact UTF-8 record and Info priority', () {
+  test('event emitter preserves exact UTF-8 record and dedicated numeric tag', () {
     const line = 'OTA_P35_STATE {"label":"\u4e2d\u6587","seq":1}';
     var calls = 0;
-    emitP35AndroidLog(line, write: (priority, tag, message) {
+    emitP35AndroidLog(line, write: (tag, message) {
       calls++;
-      expect(priority, 4);
-      expect(tag.toDartString(), 'ETrackP35');
+      expect(tag, p35AndroidEventTag);
       expect(message.toDartString(), line);
-      return utf8.encode(line).length;
+      return utf8.encode(line).length + 9;
     });
     expect(calls, 1);
   });
 
-  test('native zero or negative return fails instead of silent fallback', () {
-    for (final result in [0, -1, -11]) {
+  test('failed, short or fixed-success returns cannot qualify an event write', () {
+    for (final result in [0, -1, -11, 1, 18, 9999]) {
       expect(() => emitP35AndroidLog('OTA_P35_CAPTURE {}',
-        write: (priority, tag, message) => result), throwsStateError);
+        write: (tag, message) => result), throwsStateError);
     }
   });
 
@@ -30,7 +29,7 @@ void main() {
       'OTA_P35_STATE {}\r', 'OTA_P35_STATE {}\x00',
       'OTA_P35_STATE ${'\u4e2d' * 1200}']) {
       var calls = 0;
-      expect(() => emitP35AndroidLog(line, write: (priority, tag, message) {
+      expect(() => emitP35AndroidLog(line, write: (tag, message) {
         calls++;
         return 1;
       }), throwsArgumentError);
@@ -40,9 +39,9 @@ void main() {
 
   test('capture and error prefixes retain their original bytes', () {
     for (final line in ['OTA_P35_CAPTURE {}', 'OTA_P35_ERROR {}']) {
-      emitP35AndroidLog(line, write: (priority, tag, message) {
+      emitP35AndroidLog(line, write: (tag, message) {
         expect(message.toDartString(), line);
-        return 1;
+        return utf8.encode(line).length + 9;
       });
     }
   });
