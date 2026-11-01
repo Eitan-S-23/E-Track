@@ -129,10 +129,12 @@ class OtaP35Recorder {
         // Keep native publication after persistence, without a debug-print queue.
         try {
           for (final line in batch) { _emit(line.trimRight()); }
-        } catch (_) {
+        } catch (cause) {
           lost += _seq - _written;
           _pending.clear();
-          _fail('log-write-failed');
+          _fail(cause is AndroidLogWriteFailure
+              ? 'log-write-failed:native=${cause.result}:expected=${cause.expectedBytes}'
+              : 'log-write-failed');
           return;
         }
       }
@@ -186,7 +188,9 @@ class OtaP35Recorder {
     } finally {
       try { await writer.close(); } catch (_) { _fail('close-failed'); }
       _writer = null;
-      if (error == null) status.value = 'closed';
+      // A failed recorder still changes from active to closed. Notify the UI
+      // without turning its unhealthy result into a successful capture.
+      status.value = error == null ? 'closed' : 'failed:$error:closed';
     }
   }
 

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:ble_monitor/ota/ota_observation_log.dart';
+import 'package:ble_monitor/ota/ota_p35_android_log.dart';
 import 'package:ble_monitor/ota/ota_p35_recorder.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -143,6 +144,30 @@ void main() {
     await r.start(() => throw StateError('synthetic'));
     expect(r.error, 'snapshot-failed');
     await r.stop();
+  });
+
+  test('native failure details survive sealing and closed state notifies UI', () async {
+    final lines = <String>[];
+    final active = <bool>[];
+    final r = OtaP35Recorder(directoryProvider: () async => root, emit: (line) {
+      if (line.startsWith('OTA_P35_STATE ')) {
+        throw AndroidLogWriteFailure(-11, 1234);
+      }
+      lines.add(line);
+    });
+    r.status.addListener(() => active.add(r.active));
+    await r.start(snapshot);
+    await r.stop();
+    expect(r.error, 'log-write-failed:native=-11:expected=1234');
+    expect(r.active, isFalse);
+    expect(r.healthy, isFalse);
+    expect(active.last, isFalse);
+    expect(r.status.value, 'failed:log-write-failed:native=-11:expected=1234:closed');
+    expect(lines.where((l) => l.startsWith('OTA_P35_ERROR ')).single,
+      contains('log-write-failed:native=-11:expected=1234'));
+    final raw = await r.file!.readAsString();
+    expect(raw, contains('"healthy":false'));
+    expect(raw, contains('log-write-failed:native=-11:expected=1234'));
   });
 
   test('stop during asynchronous open cannot resurrect recording', () async {

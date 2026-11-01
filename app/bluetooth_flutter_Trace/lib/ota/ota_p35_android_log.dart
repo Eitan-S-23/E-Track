@@ -8,6 +8,14 @@ typedef _NativeLogWrite = Int32 Function(Int32 tag, Pointer<Utf8> message);
 
 const p35AndroidEventTag = 0x45545035;
 
+class AndroidLogWriteFailure extends StateError {
+  AndroidLogWriteFailure(this.result, this.expectedBytes)
+      : super('Android log result=$result expected=$expectedBytes');
+
+  final int result;
+  final int expectedBytes;
+}
+
 final AndroidLogWrite _androidWrite = DynamicLibrary.open('liblog.so')
     .lookupFunction<_NativeLogWrite, AndroidLogWrite>('__android_log_bswrite');
 
@@ -29,8 +37,9 @@ void emitP35AndroidLog(String line, {AndroidLogWrite? write}) {
   try {
     message = line.toNativeUtf8();
     // Binary event framing is tag(4), string type(1), length(4), then UTF-8.
-    if (nativeWrite(p35AndroidEventTag, message) != byteLength + 9) {
-      throw StateError('Android log writer rejected P35 record');
+    final result = nativeWrite(p35AndroidEventTag, message);
+    if (result != byteLength + 9) {
+      throw AndroidLogWriteFailure(result, byteLength + 9);
     }
   } finally {
     if (message != null) malloc.free(message);

@@ -24,6 +24,16 @@ void main() {
     }
   });
 
+  test('native failures retain exact return and expected count', () {
+    const line = 'OTA_P35_CAPTURE {}';
+    for (final result in [0, -11, 1, 9999]) {
+      expect(() => emitP35AndroidLog(line, write: (tag, message) => result),
+        throwsA(isA<AndroidLogWriteFailure>()
+          .having((e) => e.result, 'native result', result)
+          .having((e) => e.expectedBytes, 'expected bytes', utf8.encode(line).length + 9)));
+    }
+  });
+
   test('invalid or oversized records never enter the native writer', () {
     for (final line in ['unrelated', 'OTA_P35_STATE {}\n',
       'OTA_P35_STATE {}\r', 'OTA_P35_STATE {}\x00',
