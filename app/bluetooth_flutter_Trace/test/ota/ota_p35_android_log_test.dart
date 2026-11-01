@@ -21,7 +21,7 @@ void main() {
   test('native zero or negative return fails instead of silent fallback', () {
     for (final result in [0, -1, -11]) {
       expect(() => emitP35AndroidLog('OTA_P35_CAPTURE {}',
-        write: (_, _, _) => result), throwsStateError);
+        write: (priority, tag, message) => result), throwsStateError);
     }
   });
 
@@ -30,7 +30,7 @@ void main() {
       'OTA_P35_STATE {}\r', 'OTA_P35_STATE {}\x00',
       'OTA_P35_STATE ${'\u4e2d' * 1200}']) {
       var calls = 0;
-      expect(() => emitP35AndroidLog(line, write: (_, _, _) {
+      expect(() => emitP35AndroidLog(line, write: (priority, tag, message) {
         calls++;
         return 1;
       }), throwsArgumentError);
@@ -40,7 +40,7 @@ void main() {
 
   test('capture and error prefixes retain their original bytes', () {
     for (final line in ['OTA_P35_CAPTURE {}', 'OTA_P35_ERROR {}']) {
-      emitP35AndroidLog(line, write: (_, _, message) {
+      emitP35AndroidLog(line, write: (priority, tag, message) {
         expect(message.toDartString(), line);
         return 1;
       });
