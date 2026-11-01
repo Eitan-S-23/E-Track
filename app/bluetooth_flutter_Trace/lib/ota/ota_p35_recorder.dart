@@ -31,6 +31,8 @@ class OtaP35Recorder {
   final List<String> _pending = [];
   OtaObservationWriter? _writer;
   OtaP35Stream? _stream;
+  File? logcatDiagnosticFile;
+  bool _mirrorFailed = false, _diagnosticWritten = false;
   bool _probing = false;
   bool get streaming => _stream != null;
   Future<void>? _draining, _stopping;
@@ -63,6 +65,9 @@ class OtaP35Recorder {
       await file!.create(exclusive: true);
       _writer = await (writerFactory?.call(file!) ?? _open(file!));
       if (reliable) {
+        final diagnostics = Directory('${base.path}/p35-logcat-diagnostics');
+        await diagnostics.create(recursive: true);
+        logcatDiagnosticFile = File('${diagnostics.path}/$captureId.json');
         _stream = stream ?? OtaP35Stream();
         await _stream!.open();
       }
@@ -74,7 +79,7 @@ class OtaP35Recorder {
       await _writer!.append(utf8.encode('$header\n'));
       await _writer!.flush();
       if (_stream != null) await _stream!.send(utf8.encode('$header\n'));
-      _emit(header);
+      await _mirror(header);
       if (_stopRequested) return false;
       _snapshot = snapshot;
       _clock.start();
@@ -140,7 +145,7 @@ class OtaP35Recorder {
         // Keep native publication after persistence, without a debug-print queue.
         try {
           if (_stream != null) await _stream!.send(bytes);
-          for (final line in batch) { _emit(line.trimRight()); }
+          for (final line in batch) { await _mirror(line.trimRight()); }
         } catch (cause) {
           lost += _seq - _written;
           _pending.clear();
@@ -170,6 +175,34 @@ class OtaP35Recorder {
   }
 
   void fail(String code) { if (active) _fail(code); }
+
+  Future<void> _diagnostic(Map<String, Object?> value) async {
+    if (_diagnosticWritten) return;
+    final destination = logcatDiagnosticFile!;
+    await destination.create(exclusive: true);
+    await destination.writeAsString(jsonEncode({
+      'schema': 1, 'captureId': captureId, 'source': 'diagnostic-only', ...value,
+    }), flush: true);
+    _diagnosticWritten = true;
+  }
+
+  Future<void> _mirror(String line) async {
+    if (streaming && _mirrorFailed) return;
+    try {
+      _emit(line);
+    } catch (cause) {
+      if (!streaming) rethrow;
+      // The primary batch was already persisted and ACKed. Preserve the exact
+      // mirror rejection once; an optional lossy sink must not stop that stream.
+      await _diagnostic({
+        'status': 'FAILED_DISABLED', 'errorType': cause.runtimeType.toString(),
+        'nativeResult': cause is AndroidLogWriteFailure ? cause.result : null,
+        'expectedBytes': cause is AndroidLogWriteFailure ? cause.expectedBytes : null,
+        'record': line, 'recordSha256': sha256.convert(utf8.encode(line)).toString(),
+      });
+      _mirrorFailed = true;
+    }
+  }
 
   /// Logging load only: actual idle snapshots, never fake DATA/ACK or an OTA.
   Future<void> probeIdleStream() async {
@@ -218,8 +251,9 @@ class OtaP35Recorder {
       })}';
       await writer.append(utf8.encode('$footer\n'));
       await writer.flush();
+      await _mirror(footer);
+      if (streaming) await _diagnostic({'status': 'NO_NATIVE_ERROR_OBSERVED'});
       if (_stream != null) await _stream!.send(utf8.encode('$footer\n'));
-      _emit(footer);
     } catch (_) {
       _fail('close-failed');
     } finally {
