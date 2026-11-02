@@ -161,7 +161,13 @@ class OtaBleTransport {
   /// （[maxResyncProbes] × [resyncProbeTimeout]，含等待在途旧写结算的开销）
   /// 用尽仍无证据即抛错，标记保持废弃，绝不假装恢复。
   Future<DeviceOtaInfo> getDeviceInfo(
-      {Duration timeout = const Duration(seconds: 10)}) async {
+      {Duration timeout = const Duration(seconds: 10)}) =>
+      _getDeviceInfo(timeout: timeout);
+
+  Future<DeviceOtaInfo> _getDeviceInfo({
+    Duration timeout = const Duration(seconds: 10),
+    bool allowCancelled = false,
+  }) async {
     // P3-4 观测：一次 GET_INFO 往返（含实例内有界重试/探针）。失败往返
     // 同样登记耗时与失败计数（在 finally 收口），不因无身份值可采而消失。
     final statsWatch = stats == null ? null : (Stopwatch()..start());
@@ -192,7 +198,7 @@ class OtaBleTransport {
       }
 
       while (true) {
-        _checkUsable();
+        _checkUsable(allowCancelled: allowCancelled);
         final poisoned = _writeChannelPoisoned;
         if (poisoned && remaining() == Duration.zero) {
           throw const OtaTransportException(
@@ -221,6 +227,7 @@ class OtaBleTransport {
                     : remaining())
                 : timeout,
             resyncProbeSeq: seq,
+            allowCancelled: allowCancelled,
           );
         } on OtaTransportException catch (e) {
           // 只有废弃态才把超时解释为「探针被悬空帧吞掉」：此时本探针是
@@ -936,6 +943,17 @@ class OtaBleTransport {
     cancel();
     if (_disposed) return;
     try {
+      await _writeSerial;
+      if (_disposed) return;
+      _quarantineUnconfirmedData();
+      // Preserve normal cancellation without assuming platform delivery. Only
+      // this newly retired DATA uncertainty may recover here; an explicitly
+      // failed partial write remains fail-closed for the caller to reconcile.
+      if (_writeChannelPoisoned && _channel.isConnected &&
+          _unconfirmedDataEpoch == _deviceWriteLedger.epoch) {
+        await _getDeviceInfo(allowCancelled: true);
+        _dataWriteDispatched = false;
+      }
       final frame = OtaBleCodec.encodeCommand(
         cmd: _pipelineEpoch == null ? OtaBleCodec.cmdAbort : _PipelineWire.abort,
         session: _session,
@@ -1307,11 +1325,16 @@ class OtaBleTransport {
     required int seq,
     required Duration timeout,
     int? resyncProbeSeq,
+    bool allowCancelled = false,
   }) async {
     final waiter = _ResponseWaiter(expectedRsp, session, seq);
     _waiters.add(waiter);
     try {
-      await _writeFrame(frame, resyncProbeSeq: resyncProbeSeq);
+      if (allowCancelled) {
+        await _writeFrameAfterCancel(frame, resyncProbeSeq: resyncProbeSeq);
+      } else {
+        await _writeFrame(frame, resyncProbeSeq: resyncProbeSeq);
+      }
       final resp = await waiter.future.timeout(
         // RC3-07：用写完后的当前剩余硬截止封顶应答等待——写分片/结算已
         // 消耗的部分计入同一恢复预算，应答不得另起一段超出截止的等待
@@ -1327,11 +1350,11 @@ class OtaBleTransport {
     }
   }
 
-  void _checkUsable() {
+  void _checkUsable({bool allowCancelled = false}) {
     if (_disposed) {
       throw const OtaTransportException('transport 已释放', code: 'DISPOSED');
     }
-    if (_cancelled) {
+    if (_cancelled && !allowCancelled) {
       throw const OtaTransportException('OTA 传输已取消', code: 'CANCELLED');
     }
   }
@@ -1474,12 +1497,12 @@ class OtaBleTransport {
   /// 取消旁路写通路（RC2-03）：仅用于取消后的尽力 ABORT——
   /// `_cancelled` 状态不再拦截（否则 ABORT 被自身写检查吞掉），
   /// `_disposed` 仍然拒绝（释放后不再占用写通道）。
-  Future<void> _writeFrameAfterCancel(Uint8List frame) async {
+  Future<void> _writeFrameAfterCancel(Uint8List frame, {int? resyncProbeSeq}) async {
     if (_disposed) {
       throw const OtaTransportException('transport 已释放', code: 'DISPOSED');
     }
     _observeControlFrame(frame, completed: false);
-    await _writeFrameChecked(frame, allowCancelled: true);
+    await _writeFrameChecked(frame, allowCancelled: true, resyncProbeSeq: resyncProbeSeq);
     _observeControlFrame(frame, completed: true);
   }
 
@@ -1543,6 +1566,7 @@ class OtaBleTransport {
       _deviceLedgers[_deviceScope] ??= _DeviceWriteLedger();
 
   bool get _writeChannelPoisoned => _poisonedDevices[_deviceScope] ?? false;
+  int? _unconfirmedDataEpoch;
 
   void _quarantineUnconfirmedData() {
     // Platform completion does not prove delivery through BLE/UART. Retain the
@@ -1551,6 +1575,7 @@ class OtaBleTransport {
         (_pipelineView?.unconfirmedSeqs.isNotEmpty ?? false);
     if (_dataWriteDispatched && pending && !_writeChannelPoisoned) {
       _poisonWriteChannel();
+      _unconfirmedDataEpoch = _deviceWriteLedger.epoch;
     }
   }
 

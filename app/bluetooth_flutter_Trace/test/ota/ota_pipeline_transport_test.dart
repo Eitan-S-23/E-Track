@@ -188,6 +188,7 @@ class _Peer implements OtaBleChannel {
 class _PrefixLossPeer extends _Peer {
   bool dropDataTail = true;
   bool dropInfo = false;
+  bool failInfo = false;
   int infoWrites = 0;
   int completedDataWrites = 0;
   int swallowedQueries = 0;
@@ -219,6 +220,9 @@ class _PrefixLossPeer extends _Peer {
       return;
     }
     if (dropInfo && frame.cmd == OtaBleCodec.cmdGetInfo) return;
+    if (failInfo && frame.cmd == OtaBleCodec.cmdGetInfo) {
+      throw const OtaTransportException('Synthetic INFO write error', code: 'INFO_REJECTED');
+    }
     await super.writeChunk(chunk);
   }
 }
@@ -841,6 +845,41 @@ void main() {
 
   group('P35-R03 unconfirmed downstream delivery', () {
     for (final pipeline in [false, true]) {
+      test('v${pipeline ? 2 : 1} failed cancellation probe cannot authorize ABORT', () async {
+        final peer = _PrefixLossPeer();
+        final old = sender(_ReboundChannel(peer), enabled: pipeline);
+        OtaBleTransport? next;
+        addTearDown(() async {
+          await old.dispose();
+          await next?.dispose();
+          await peer.events.close();
+        });
+        final sent = Completer<void>();
+        final bytes = package(128);
+        final operation = old.transfer(package: bytes,
+            packageSha256: List<int>.filled(32, 1), etuHeader: bytes.sublist(0, 64),
+            windowSegments: 1, onSent: (_, __) { if (!sent.isCompleted) sent.complete(); });
+        final failed = expectLater(operation,
+            throwsA(isA<OtaTransportException>().having((e) => e.code, 'code', 'CANCELLED')));
+        await sent.future.timeout(const Duration(seconds: 1));
+        await Future<void>.delayed(Duration.zero);
+        peer.failInfo = true;
+        await old.abortBestEffort();
+        await failed;
+        expect(peer.infoWrites, 2);
+        expect(peer.frames.any((f) => f.cmd == OtaBleCodec.cmdAbort || f.cmd == 0x14), isFalse);
+        await expectLater(old.getDeviceInfo(),
+            throwsA(isA<OtaTransportException>().having((e) => e.code, 'code', 'CANCELLED')));
+        await old.dispose();
+        final rebound = sender(_ReboundChannel(peer), enabled: pipeline);
+        next = rebound;
+        await expectLater(rebound.begin(totalLen: bytes.length,
+            packageSha256: List<int>.filled(32, 1), etuHeader: bytes.sublist(0, 64)),
+            throwsA(isA<OtaTransportException>().having((e) => e.code, 'code', 'WRITE_TIMEOUT')));
+        peer.failInfo = false;
+        await rebound.getDeviceInfo();
+        expect((await transfer(rebound, bytes)).isOk, isTrue);
+      });
       for (final exit in ['disconnect', 'notification-error', 'cancel', 'dispose']) {
         for (final stayConnected in [false, true]) {
         if (exit == 'disconnect' && stayConnected) continue;
@@ -897,8 +936,10 @@ void main() {
           expect(error, isA<OtaTransportException>()
               .having((e) => e.code, 'code', expectedCode));
           await old.abortBestEffort();
-          expect(peer.receiverPrefix, isNotEmpty,
-              reason: 'Best-effort ABORT must not enter an unconfirmed DATA prefix');
+          final recoveredOnCancel = stayConnected && exit != 'dispose';
+          expect(peer.receiverPrefix, recoveredOnCancel ? isNull : isNotEmpty,
+              reason: 'ABORT requires matching INFO first; disconnected/disposed owners cannot probe');
+          expect(peer.infoWrites, recoveredOnCancel ? 2 : 0);
           await old.dispose();
 
           final other = _PrefixLossPeer()..dropInfo = true;
@@ -917,15 +958,17 @@ void main() {
           final next = sender(_ReboundChannel(peer), enabled: pipeline);
           rebound = next;
           final beforeQuery = peer.writes.length;
+          if (!recoveredOnCancel) {
           await expectLater(next.begin(totalLen: bytes.length,
               packageSha256: List<int>.filled(32, 1), etuHeader: bytes.sublist(0, 64)),
               throwsA(isA<OtaTransportException>().having((e) => e.code, 'code', 'WRITE_TIMEOUT')));
           expect(peer.writes.length, beforeQuery,
               reason: 'A new wrapper cannot bypass the receiver recovery gate');
+          }
           final info = await next.getDeviceInfo(timeout: const Duration(milliseconds: 100));
           expect(info.currentVersionCode, 30286);
           expect(peer.swallowedQueries, 1);
-          expect(peer.infoWrites, 2);
+          expect(peer.infoWrites, recoveredOnCancel ? 3 : 2);
           expect(peer.receiverPrefix, isNull);
           expect((await transfer(next, bytes)).isOk, isTrue);
         });
