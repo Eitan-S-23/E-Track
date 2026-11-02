@@ -69,3 +69,25 @@ For revalidation at the bundle/record commit, use the standard validator with
 the v5 contract/matrix and `P3-5-v5/history/v4/{contract,matrix}.json` as previous
 inputs. Do not rerun the original device commands or the already-final evaluation.
 Future integration must preserve freeze/bundle commit IDs; do not squash/rebase.
+
+## Mainline Delivery Authorization
+
+On 2026-11-03 the user explicitly authorized the next delivery step: push this
+accepted task branch, run necessary CI, create the PR and merge it into remote
+main with a merge commit after the checks pass. This supersedes the earlier
+local-only permission boundary for that delivery, not the frozen evidence or
+product result. No tag/Release, deployment, protected release gate change, P5
+test or device operation is included. The local shared main worktree/index is
+left untouched; exact-ref Git fetches only obtain objects for verification.
+
+Remote main `e41bca268a5f69ac84bee18d4f392a6e2890a17d` was verified as an
+ancestor of accepted closeout `b7e88e1b34086b43c545e4cc204691c0e4f724ee`.
+No unrelated branch or uncommitted notes are included. The current GitHub PR for
+`dev/flutter/p35-automation-20261029` is the delivery receipt for its exact head,
+required CI, merge commit and post-merge results. Source and bundle commit IDs
+above remain the immutable acceptance anchors after the merge.
+
+Preparation/API/Git/CI originals and the final merge receipt are retained under
+`.cache/p35-main-delivery-20261103/` in this worktree. Those delivery observations
+are not another acceptance campaign and do not rewrite P3-5-v4/v5. The README,
+task board and this note distinguish completed acceptance from later delivery.
