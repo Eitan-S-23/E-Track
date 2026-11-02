@@ -1,0 +1,397 @@
+{
+  "schema": "etrack-acceptance-contract-v3",
+  "contract_id": "P1-7-v1",
+  "version": 1,
+  "task_id": "P1-7",
+  "parent_contract_sha256": null,
+  "status": "FROZEN",
+  "approved_by": "Original independent reviewer under current user P1-7 execution and explicit local Git authorization",
+  "approved_at": "2026-11-02T20:26:55.868606+00:00",
+  "implementation_ref": "Existing P1-7 fixes; retained group16 Boot and 30313 App are separate exact external binary bindings, not a claim of one fresh build.",
+  "freeze_commit": "ad85298dde3efa08a5ff13935b208edfb64b1fc2",
+  "freeze_tree": "e1deaa7d8b37a497ff4f996331c4b3a0654ee796",
+  "profile_config_blob": "5ef97ae98674373c3cf641676c16ff7baf1b617f",
+  "result_taxonomy": [
+    "PASS",
+    "PRODUCT_FAIL",
+    "HARNESS_FAIL",
+    "EVIDENCE_GAP",
+    "ENV_BLOCKED"
+  ],
+  "invalidation_policy": "docs/acceptance-execution-contract.md",
+  "input_groups": [
+    {
+      "id": "production",
+      "profile": "Production",
+      "category": "production_source"
+    },
+    {
+      "id": "validation",
+      "profile": "Validation",
+      "category": "validation_inputs"
+    },
+    {
+      "id": "governance",
+      "profile": "Governance",
+      "category": "governance_inputs"
+    }
+  ],
+  "external_inputs": [
+    {
+      "id": "input-00",
+      "category": "fixture",
+      "description": "Exact observation input: app-final.bin",
+      "fingerprint": "sha256:4126d801e6bd6efd57a9f20d5a128a50cfb5a46580dc10d9a2227702247d5805",
+      "evidence_path": "inputs/app-final.bin",
+      "evidence_sha256": "4126d801e6bd6efd57a9f20d5a128a50cfb5a46580dc10d9a2227702247d5805"
+    },
+    {
+      "id": "input-01",
+      "category": "fixture",
+      "description": "Exact observation input: app.elf",
+      "fingerprint": "sha256:a59906b4c85da39e8dcfa514d00791901baa8ca3e704ce7ee94cdb2125c768bb",
+      "evidence_path": "inputs/app.elf",
+      "evidence_sha256": "a59906b4c85da39e8dcfa514d00791901baa8ca3e704ce7ee94cdb2125c768bb"
+    },
+    {
+      "id": "input-02",
+      "category": "fixture",
+      "description": "Exact observation input: app.map",
+      "fingerprint": "sha256:67b24e8c60d71ffd9e6977656912afe50f4e62e674c851828fe5a9eb16b2e87f",
+      "evidence_path": "inputs/app.map",
+      "evidence_sha256": "67b24e8c60d71ffd9e6977656912afe50f4e62e674c851828fe5a9eb16b2e87f"
+    },
+    {
+      "id": "input-03",
+      "category": "fixture",
+      "description": "Exact observation input: boot-executable.bin",
+      "fingerprint": "sha256:2f84014278421de7a84a0f621a494a9974fbf51c56b768974b0c5e647105ec80",
+      "evidence_path": "inputs/boot-executable.bin",
+      "evidence_sha256": "2f84014278421de7a84a0f621a494a9974fbf51c56b768974b0c5e647105ec80"
+    },
+    {
+      "id": "input-04",
+      "category": "fixture",
+      "description": "Exact observation input: boot-full.bin",
+      "fingerprint": "sha256:01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527",
+      "evidence_path": "inputs/boot-full.bin",
+      "evidence_sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527"
+    },
+    {
+      "id": "input-05",
+      "category": "fixture",
+      "description": "Exact observation input: boot.elf",
+      "fingerprint": "sha256:f0917cd4332444ae41afb2da49dc17b82b4536a62417b69300c2e41d6c82e036",
+      "evidence_path": "inputs/boot.elf",
+      "evidence_sha256": "f0917cd4332444ae41afb2da49dc17b82b4536a62417b69300c2e41d6c82e036"
+    },
+    {
+      "id": "input-06",
+      "category": "fixture",
+      "description": "Exact observation input: boot.map",
+      "fingerprint": "sha256:cde67dc4fcc63c24fcb98342acdd602eb75a4f3ce0e5c0ad365f583c70520433",
+      "evidence_path": "inputs/boot.map",
+      "evidence_sha256": "cde67dc4fcc63c24fcb98342acdd602eb75a4f3ce0e5c0ad365f583c70520433"
+    },
+    {
+      "id": "input-07",
+      "category": "fixture",
+      "description": "Exact observation input: package.etu",
+      "fingerprint": "sha256:706e73e657e1ed7b9a94bdc42ec79a50a14f8ed73ee37cd4d9b1e6e3ac16c251",
+      "evidence_path": "inputs/package.etu",
+      "evidence_sha256": "706e73e657e1ed7b9a94bdc42ec79a50a14f8ed73ee37cd4d9b1e6e3ac16c251"
+    },
+    {
+      "id": "input-08",
+      "category": "fixture",
+      "description": "Exact observation input: plan.json",
+      "fingerprint": "sha256:37d5084d0df5cf0a6b8bd3c7d26903e901aa591c5bce859f0b4d556c450b115b",
+      "evidence_path": "inputs/plan.json",
+      "evidence_sha256": "37d5084d0df5cf0a6b8bd3c7d26903e901aa591c5bce859f0b4d556c450b115b"
+    },
+    {
+      "id": "initial-readiness",
+      "category": "hardware_state",
+      "description": "Prior passive image and health observation; fresh recheck required.",
+      "fingerprint": "sha256:e93f085a471e441f93e24352a65c3798f2178b0d75fca9913a746589fe68e031",
+      "evidence_path": "inputs/initial-readiness.json",
+      "evidence_sha256": "e93f085a471e441f93e24352a65c3798f2178b0d75fca9913a746589fe68e031"
+    }
+  ],
+  "commands": [
+    {
+      "id": "CMD-STARTUP",
+      "description": "One bounded first startup observation, not complete P1-7. Full identity/health -> storage-idle halt -> one reset/release -> 200 native samples -> 35s settle -> retained image/health. Failed/uncertain state: preserve owner and reconcile, never replay automatically. No flash/OTA/persistent edits. Recovery key and battery remain unobserved until an admitted supplementary method exists.",
+      "command": "python -I -S -B -X utf8 Tools/acceptance/p17_observe.py --plan docs/acceptance-contracts/P1-7-v1/inputs/plan.json --out .cache/p17-acceptance-20261103-01/startup-01 --contract docs/acceptance-contracts/P1-7-v1.contract.json --matrix docs/acceptance-contracts/P1-7-v1/initial-matrix.json",
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/acceptance/p17_observe.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/acceptance/validate_bundle.py"
+      ],
+      "expected_exit_codes": [
+        0,
+        1,
+        2
+      ],
+      "output_required": true
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-OBSERVATION",
+      "path": "observation/result.json",
+      "description": "Actual native timing and retained-state result"
+    },
+    {
+      "id": "ART-BOOT",
+      "path": "inputs/boot-full.bin",
+      "description": "Retained complete physical Boot partition"
+    },
+    {
+      "id": "ART-APP",
+      "path": "inputs/app-final.bin",
+      "description": "Retained exact 30313 App"
+    },
+    {
+      "id": "ART-PLAN",
+      "path": "inputs/plan.json",
+      "description": "Bound tool and image inputs"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "C-STARTUP",
+      "description": "Reset/release to fresh App RTT signature <=1500ms; preserve interval and debugger overhead.",
+      "required": true,
+      "kind": "performance",
+      "evidence_types": [
+        "raw_log",
+        "binary_readback"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "dependency_rationale": "Bound production executable plus native capture/evaluation tooling and unchanged P1-7 requirements.",
+      "external_inputs": [
+        "input-00",
+        "input-01",
+        "input-02",
+        "input-03",
+        "input-04",
+        "input-05",
+        "input-06",
+        "input-07",
+        "input-08",
+        "initial-readiness"
+      ],
+      "command_ids": [
+        "CMD-STARTUP"
+      ],
+      "artifact_ids": [
+        "ART-OBSERVATION",
+        "ART-BOOT",
+        "ART-APP",
+        "ART-PLAN"
+      ],
+      "gate": {
+        "type": "numeric",
+        "basis": "product_sla",
+        "operator": "le",
+        "limit": 1500,
+        "unit": "ms",
+        "rationale": "Unchanged P1-7 task gate, not fitted to a measurement; conservative observation upper bound."
+      }
+    },
+    {
+      "id": "C-POWER-HOLD",
+      "description": "After Boot latches PD2 high, no sampled low through App startup; preserve sample resolution.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "raw_log",
+        "binary_readback"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "dependency_rationale": "Bound production executable plus native capture/evaluation tooling and unchanged P1-7 requirements.",
+      "external_inputs": [
+        "input-00",
+        "input-01",
+        "input-02",
+        "input-03",
+        "input-04",
+        "input-05",
+        "input-06",
+        "input-07",
+        "input-08",
+        "initial-readiness"
+      ],
+      "command_ids": [
+        "CMD-STARTUP"
+      ],
+      "artifact_ids": [
+        "ART-OBSERVATION",
+        "ART-BOOT",
+        "ART-APP",
+        "ART-PLAN"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "C-RECOVERY-KEY",
+      "description": "Physical recovery predicate requires continuous key hold >=3s, rejects a short hold, and Boot 1000ms delay remains a real second. Startup/tick sampling alone cannot PASS this combined criterion.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "raw_log",
+        "binary_readback"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "dependency_rationale": "Bound production executable plus native capture/evaluation tooling and unchanged P1-7 requirements.",
+      "external_inputs": [
+        "input-00",
+        "input-01",
+        "input-02",
+        "input-03",
+        "input-04",
+        "input-05",
+        "input-06",
+        "input-07",
+        "input-08",
+        "initial-readiness"
+      ],
+      "command_ids": [
+        "CMD-STARTUP"
+      ],
+      "artifact_ids": [
+        "ART-OBSERVATION",
+        "ART-BOOT",
+        "ART-APP",
+        "ART-PLAN"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "C-CLOCK-SIZE",
+      "description": "Boot-phase clock registers resolve 288MHz and bound Boot executable <=65536 bytes.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log",
+        "binary_readback"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "dependency_rationale": "Bound production executable plus native capture/evaluation tooling and unchanged P1-7 requirements.",
+      "external_inputs": [
+        "input-00",
+        "input-01",
+        "input-02",
+        "input-03",
+        "input-04",
+        "input-05",
+        "input-06",
+        "input-07",
+        "input-08",
+        "initial-readiness"
+      ],
+      "command_ids": [
+        "CMD-STARTUP"
+      ],
+      "artifact_ids": [
+        "ART-OBSERVATION",
+        "ART-BOOT",
+        "ART-APP",
+        "ART-PLAN"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "C-BATTERY",
+      "description": "With USB and J-Link disconnected, battery-only physical power-button startup enters App. External-supply startup cannot PASS this criterion.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log",
+        "binary_readback"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "dependency_rationale": "Bound production executable plus native capture/evaluation tooling and unchanged P1-7 requirements.",
+      "external_inputs": [
+        "input-00",
+        "input-01",
+        "input-02",
+        "input-03",
+        "input-04",
+        "input-05",
+        "input-06",
+        "input-07",
+        "input-08",
+        "initial-readiness"
+      ],
+      "command_ids": [
+        "CMD-STARTUP"
+      ],
+      "artifact_ids": [
+        "ART-OBSERVATION",
+        "ART-BOOT",
+        "ART-APP",
+        "ART-PLAN"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    }
+  ],
+  "performance_gates": [],
+  "scope": {
+    "authority": "Current user approved P1-7 and named shared Git boundary; no remote writes.",
+    "firstObservationOnly": true,
+    "partialCriteria": [
+      "C-RECOVERY-KEY",
+      "C-BATTERY"
+    ],
+    "retainedState": "30313 App and same group16 Boot; no replacement or downgrade",
+    "noPhysicalRecoveryForcing": true,
+    "noP16PowerCuts": true,
+    "oldEvidenceUnchanged": true
+  }
+}
