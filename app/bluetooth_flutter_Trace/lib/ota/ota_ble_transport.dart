@@ -257,7 +257,9 @@ class OtaBleTransport {
           await _awaitDeviceWritesIdle(remaining());
           continue;
         }
-        if (poisoned && _writeChannelPoisoned) {
+        try {
+          final info = DeviceOtaInfo.fromInfoPayload(payload);
+          if (poisoned && _writeChannelPoisoned) {
           // 应答到了、废弃却没解除：本探针发出时仍有在途旧物理写（或其间
           // 发生了重新废弃），其 INFO 不构成重新同步证据。不能把 payload
           // 当成功返回——上层据此认为链路可信，而迟到的旧分片随后仍会污染
@@ -269,9 +271,7 @@ class OtaBleTransport {
           }
           await _awaitDeviceWritesIdle(remaining());
           continue;
-        }
-        try {
-          final info = DeviceOtaInfo.fromInfoPayload(payload);
+          }
           stats?.recordGetInfo(
               durationUs: statsWatch!.elapsedMicroseconds);
           statsRecorded = true;
@@ -939,7 +939,7 @@ class OtaBleTransport {
   ///
   /// ABORT 帧走取消旁路写通路（RC2-03）：常规 [_writeFrame] 的可用性
   /// 检查会因 `_cancelled` 拒绝发送，导致 ABORT 被自身拦截。
-  Future<void> abortBestEffort() async {
+  Future<void> abortBestEffort({bool allowResync = true}) async {
     cancel();
     if (_disposed) return;
     try {
@@ -949,7 +949,7 @@ class OtaBleTransport {
       // Preserve normal cancellation without assuming platform delivery. Only
       // this newly retired DATA uncertainty may recover here; an explicitly
       // failed partial write remains fail-closed for the caller to reconcile.
-      if (_writeChannelPoisoned && _channel.isConnected &&
+      if (allowResync && _writeChannelPoisoned && _channel.isConnected &&
           _unconfirmedDataEpoch == _deviceWriteLedger.epoch) {
         await _getDeviceInfo(allowCancelled: true);
         _dataWriteDispatched = false;
@@ -1047,7 +1047,13 @@ class OtaBleTransport {
     // 三个条件缺一不可（见 [_isResyncEvidence]）：seq 匹配只是其一，
     // 还要求应答属于本世代废弃、且该探针发出时设备上没有在途旧物理写。
     if (_isResyncEvidence(f)) {
-      _clearWriteChannelPoison();
+      try {
+        DeviceOtaInfo.fromInfoPayload(f.payload);
+        _clearWriteChannelPoison();
+      } on OtaDeviceIdentityException {
+        // Deliver the response to its waiter for the original identity error,
+        // but a matching header alone cannot authorize business traffic.
+      }
     }
     // 传输期 ACK 视图只消费 DATA ACK（每段独立应答，一问一答等待者
     // 无法覆盖）；BEGIN/END/ABORT ACK 由等待者按 cmd+session+seq 精确

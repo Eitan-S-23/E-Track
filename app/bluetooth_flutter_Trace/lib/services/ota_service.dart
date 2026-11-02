@@ -558,8 +558,9 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   OtaBleTransport? _transport;
   final _abortingTransports = <OtaBleTransport, Future<void>>{};
 
-  Future<void> _abortTransportBestEffort(OtaBleTransport transport) =>
-      _abortingTransports[transport] ??= transport.abortBestEffort();
+  Future<void> _abortTransportBestEffort(OtaBleTransport transport,
+      {bool allowResync = true}) =>
+      _abortingTransports[transport] ??= transport.abortBestEffort(allowResync: allowResync);
   /// 当前 [_transport] 绑定时的物理链路快照（RC3-08⑦）。
   ///
   /// transport 对象活着不等于底层链路还是绑定时那一条：后台期间系统
@@ -2090,7 +2091,9 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       // MONO_ABORT_BEGIN→MONO_ABORT_DONE 之差可观测。
       otaMonoLog('MONO_ABORT_BEGIN', code: code);
       try {
-        await _abortTransportBestEffort(transport);
+        // Recheck already rejected this binding/identity. Cancellation must
+        // not use it to launch another recovery query or revive DATA.
+        await _abortTransportBestEffort(transport, allowResync: false);
       } finally {
         otaMonoLog('MONO_ABORT_DONE', code: code);
       }

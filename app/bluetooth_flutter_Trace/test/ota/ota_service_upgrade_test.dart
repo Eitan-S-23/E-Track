@@ -4245,7 +4245,8 @@ void main() {
       expect(service.terminalState?.code, 'DEVICE_LINK_CHANGED');
       expect(service.terminalState?.retryableLater, isTrue);
       expect(await startFuture, isFalse);
-      expect(ble.abortCalls, 1);
+      expect(ble.abortCalls, 0,
+          reason: 'Unconfirmed DATA and rejected characteristics forbid resync or ABORT');
     });
 
     test('后台恢复三级复核：INFO 身份漂移 → DEVICE_IDENTITY_CHANGED（RC3-08⑦）',
@@ -4275,7 +4276,8 @@ void main() {
           reason: '身份漂移是稳定拒绝，不得标成可重试');
       expect(await startFuture, isFalse);
       expect(service.phase, OtaPhase.cancelled);
-      expect(ble.abortCalls, 1);
+      expect(ble.abortCalls, 0,
+          reason: 'Unconfirmed DATA and rejected identity forbid resync or ABORT');
     });
 
     test('后台复检迟到发布：取消后的复核结论不得覆盖取消终态（RC3-04⑦）',
