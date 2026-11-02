@@ -1,0 +1,72 @@
+{
+  "publicationProtocol": "s3-worker-preflight-v1",
+  "preflight": {
+    "ok": true,
+    "schemaVersion": 1,
+    "requestId": "a07bb659-d303-4507-a017-0cca4e5b5623",
+    "environment": "staging",
+    "metadataSha256": "afca791f4a109b1ab219197e1af62d995abd20f26d3a2e40d6b556fe69220e6e",
+    "maxVersionCode": 30308,
+    "legacyMaxVersionCode": null,
+    "unresolvedLegacyChannels": 0
+  },
+  "mode": "rehearsal",
+  "commitSha": "18f6b3d3af0c24b1ce81573700cd61005b7c530e",
+  "canonicalRunId": "41429938166",
+  "executionRunId": "41429938166",
+  "executionAttempt": "1",
+  "metadataSha256": "afca791f4a109b1ab219197e1af62d995abd20f26d3a2e40d6b556fe69220e6e",
+  "preparationSha256": "3d310f44d59fe38d2dfb6d6c513fbff1dc06e3ad9f33877fab970a5637cd924c",
+  "github": null,
+  "uploads": [
+    {
+      "ok": true,
+      "status": "UPLOADED",
+      "requestId": "ebdfe52f-50dc-4082-91c6-36a94b6a1f6d",
+      "kind": "full",
+      "fileName": "e-track-at32f435-v3.3.9-full.etu",
+      "r2Key": "trace/firmware/e-track-at32f435/30309-mcu-e-track-at32f435-v3.3.9/e-track-at32f435-v3.3.9-full.etu",
+      "sha256": "a1e81c779d16c99a387491894275a26491f45fa18355a240253c3b070ae350aa",
+      "sizeBytes": 291076,
+      "contentDigest": "sha-256=:oegcd50WyZo4dJGJQnWiZJH0X6GDVaJAJTw7BwrjUKo=:"
+    },
+    {
+      "ok": true,
+      "status": "UPLOADED",
+      "requestId": "e67a7245-2ef9-4993-8c30-d5565a939905",
+      "kind": "patch",
+      "fileName": "e-track-at32f435-v3.2.7-to-v3.3.9-patch.etu",
+      "r2Key": "trace/firmware/e-track-at32f435/30309-mcu-e-track-at32f435-v3.3.9/e-track-at32f435-v3.2.7-to-v3.3.9-patch.etu",
+      "sha256": "19e69752a62b0c903d4ff97aa9d11b0c25b6e5ee511c2146c0987166d685cbea",
+      "sizeBytes": 25540,
+      "contentDigest": "sha-256=:GeaXUqYrDJA9T/l6qdEbDCW25e5RHCFGwJhxZtaFy+o=:"
+    },
+    {
+      "ok": true,
+      "status": "UPLOADED",
+      "requestId": "e1b1ffba-f7b5-436f-9688-f8c334dfb857",
+      "kind": "recovery",
+      "fileName": "recovery-v3.3.9.bin",
+      "r2Key": "trace/firmware/e-track-at32f435/30309-mcu-e-track-at32f435-v3.3.9/recovery-v3.3.9.bin",
+      "sha256": "4d728c0c0ae1089769a1ba0502f8df2504041b03a1ca7b331aa79ebed62365da",
+      "sizeBytes": 614100,
+      "contentDigest": "sha-256=:TXKMDArhCJdpoboFAvjfJQQEGwOhynszGqeevtYjZdo=:"
+    }
+  ],
+  "registration": {
+    "ok": true,
+    "requestId": "162cf667-9dbf-471d-be30-b3e60a6b9eaa",
+    "releaseId": "fw_267a07e4d1e9370bcacf755739f97e065998af3db5c3dcb65627e78e9c3a4b82",
+    "state": "ready",
+    "idempotent": false,
+    "assetsRegistered": 3
+  },
+  "replay": {
+    "ok": true,
+    "requestId": "02181e6f-0aaa-4f5a-aab4-c49a08d10a66",
+    "releaseId": "fw_267a07e4d1e9370bcacf755739f97e065998af3db5c3dcb65627e78e9c3a4b82",
+    "state": "ready",
+    "idempotent": true,
+    "assetsRegistered": 3
+  }
+}

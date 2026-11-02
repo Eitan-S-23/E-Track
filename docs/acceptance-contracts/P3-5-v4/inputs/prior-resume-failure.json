@@ -1,0 +1,9 @@
+{
+  "outcome": "UNRESOLVED_STATE",
+  "device": "EVIDENCE_GAP",
+  "cloudRestored": false,
+  "buildRestored": true,
+  "formalAcceptance": "NOT_ADJUDICATED",
+  "restoreError": "TimeoutError",
+  "deviceLockRetained": false
+}

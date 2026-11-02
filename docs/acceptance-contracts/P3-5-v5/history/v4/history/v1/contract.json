@@ -1,0 +1,832 @@
+{
+  "schema": "etrack-acceptance-contract-v3",
+  "contract_id": "P3-5-v1",
+  "version": 1,
+  "task_id": "P3-5",
+  "parent_contract_sha256": null,
+  "status": "FROZEN",
+  "approved_by": "User-designated independent acceptance session, under the existing single 30293-to-30294 ten-event authorization and local input-freeze authority; no new permission or criterion waiver.",
+  "approved_at": "2026-10-31T18:56:06.624925+00:00",
+  "implementation_ref": "dev/flutter/p35-automation-20261029@eb0b1fd68b7996f123ee9f314a799b76ecd8f2c2",
+  "freeze_commit": "eb0b1fd68b7996f123ee9f314a799b76ecd8f2c2",
+  "freeze_tree": "791b8acc940b10b3b43a4e133b009e6213f0fc53",
+  "profile_config_blob": "5ef97ae98674373c3cf641676c16ff7baf1b617f",
+  "result_taxonomy": [
+    "PASS",
+    "PRODUCT_FAIL",
+    "HARNESS_FAIL",
+    "EVIDENCE_GAP",
+    "ENV_BLOCKED"
+  ],
+  "invalidation_policy": "docs/acceptance-execution-contract.md",
+  "input_groups": [
+    {
+      "id": "production",
+      "profile": "Production",
+      "category": "production_source"
+    },
+    {
+      "id": "validation",
+      "profile": "Validation",
+      "category": "validation_inputs"
+    },
+    {
+      "id": "governance",
+      "profile": "Governance",
+      "category": "governance_inputs"
+    }
+  ],
+  "external_inputs": [
+    {
+      "id": "plan",
+      "category": "fixture",
+      "description": "Original input or dated preflight, not new physical execution: .cache\\p35-campaign-30294-20261030\\plan.execution.json",
+      "fingerprint": "sha256:2c2b4b0b1547178006dda4780e6633846f4701df3188d64d610d5e4f1c91341e",
+      "evidence_path": "acceptance-freeze/contract-01/inputs/plan.json",
+      "evidence_sha256": "2c2b4b0b1547178006dda4780e6633846f4701df3188d64d610d5e4f1c91341e"
+    },
+    {
+      "id": "firmware-archive",
+      "category": "fixture",
+      "description": "Original input or dated preflight, not new physical execution: .cache\\p35-campaign-30294-20261030\\build\\archive-01\\verified.json",
+      "fingerprint": "sha256:b524085b7b85b14960c4e4b9bc17ee0f63990dedc3c84e586186a1b2a7726833",
+      "evidence_path": "acceptance-freeze/contract-01/inputs/firmware-archive.json",
+      "evidence_sha256": "b524085b7b85b14960c4e4b9bc17ee0f63990dedc3c84e586186a1b2a7726833"
+    },
+    {
+      "id": "delivery",
+      "category": "fixture",
+      "description": "Original input or dated preflight, not new physical execution: .cache\\p35-campaign-30294-20261030\\implementation-delivery-20261101.json",
+      "fingerprint": "sha256:18094c3c21586be15408b011c8be37fc8c8c9a486c60afec89f895cde57e59c8",
+      "evidence_path": "acceptance-freeze/contract-01/inputs/delivery.json",
+      "evidence_sha256": "18094c3c21586be15408b011c8be37fc8c8c9a486c60afec89f895cde57e59c8"
+    },
+    {
+      "id": "repair-review",
+      "category": "fixture",
+      "description": "Original input or dated preflight, not new physical execution: .cache\\p35-radio-reader-20261101\\independent-01\\result.json",
+      "fingerprint": "sha256:3981dd3fdf47bcb6108aeffabe04710b7ea4a83f3e1ea1240a7207a685a8f7c9",
+      "evidence_path": "acceptance-freeze/contract-01/inputs/repair-review.json",
+      "evidence_sha256": "3981dd3fdf47bcb6108aeffabe04710b7ea4a83f3e1ea1240a7207a685a8f7c9"
+    },
+    {
+      "id": "source-commit",
+      "category": "fixture",
+      "description": "Original input or dated preflight, not new physical execution: .cache\\p35-campaign-30294-20261030\\acceptance-freeze\\source-02\\result.json",
+      "fingerprint": "sha256:8cb8eab03a2f091e8841b93bc44dfd298a2e48fbee1f0082eec5d7b4ed9ae7f8",
+      "evidence_path": "acceptance-freeze/contract-01/inputs/source-commit.json",
+      "evidence_sha256": "8cb8eab03a2f091e8841b93bc44dfd298a2e48fbee1f0082eec5d7b4ed9ae7f8"
+    },
+    {
+      "id": "radio-readonly",
+      "category": "fixture",
+      "description": "Original input or dated preflight, not new physical execution: .cache\\p35-campaign-30294-20261030\\acceptance-preflight\\radio-preflight-02\\result.json",
+      "fingerprint": "sha256:9e481e179c2540d0ceea0234c4ac06698046b19ac74ff0c540ee661cccc9c32f",
+      "evidence_path": "acceptance-freeze/contract-01/inputs/radio-readonly.json",
+      "evidence_sha256": "9e481e179c2540d0ceea0234c4ac06698046b19ac74ff0c540ee661cccc9c32f"
+    },
+    {
+      "id": "test-cloud-state",
+      "category": "fixture",
+      "description": "Original input or dated preflight, not new physical execution: .cache\\p35-campaign-30294-20261030\\acceptance-preflight\\cloud-bindings-04\\result.json",
+      "fingerprint": "sha256:03763e8cd2caf20360271b46c594e36fb2dcac67f60a3a52ea4235be9f84d4b9",
+      "evidence_path": "acceptance-freeze/contract-01/inputs/test-cloud-state.json",
+      "evidence_sha256": "03763e8cd2caf20360271b46c594e36fb2dcac67f60a3a52ea4235be9f84d4b9"
+    },
+    {
+      "id": "test-cloud-bindings",
+      "category": "fixture",
+      "description": "Original input or dated preflight, not new physical execution: .cache\\p35-campaign-30294-20261030\\acceptance-preflight\\cloud-bindings-05\\result.json",
+      "fingerprint": "sha256:a5ae6a0b671ace09f96a8af963d9f282104fe0211fa8bb4a9fdc07c9e4838e8f",
+      "evidence_path": "acceptance-freeze/contract-01/inputs/test-cloud-bindings.json",
+      "evidence_sha256": "a5ae6a0b671ace09f96a8af963d9f282104fe0211fa8bb4a9fdc07c9e4838e8f"
+    }
+  ],
+  "commands": [
+    {
+      "id": "CMD-PLAN",
+      "description": "Offline validation of the immutable real-asset ten-window plan; no device action; timeout 30 seconds.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p35-automation/runner.py check --plan .cache/p35-campaign-30294-20261030/plan.execution.json",
+      "input_groups": [
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p35-automation/runner.py",
+        "Tools/ota/p35-automation/smoke.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py"
+      ],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-CAMPAIGN",
+      "description": "Exactly one admitted full upgrade with ten global Bluetooth disable/enable events. Start only after fresh phone/MCU admission and near-window normal test-channel CAS/full-selection verification. 1800-second test bound, existing bounded safe cleanup, no second group, no restart after failure, no kill during unknown apply.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p35-automation/runner.py run --plan .cache/p35-campaign-30294-20261030/plan.execution.json --out .cache/p35-campaign-30294-20261030/run-once --execute",
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "runner_paths": [
+        "Tools/ota/p35-automation/runner.py",
+        "Tools/ota/p35-automation/smoke.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_phone.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/flutter/dev_checks.py",
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py"
+      ],
+      "expected_exit_codes": [
+        0,
+        2
+      ],
+      "output_required": true
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-PLAN",
+      "description": "Pinned executable plan, not a template.",
+      "path": "plan.execution.json"
+    },
+    {
+      "id": "ART-RESULT",
+      "description": "Actual runner result, every attempted/unrun recovery and cleanup retained.",
+      "path": "run-once/result.json"
+    },
+    {
+      "id": "ART-CAPTURE",
+      "description": "Unchanged App-generated JSONL with original footer.",
+      "path": "run-once/app-capture.jsonl"
+    },
+    {
+      "id": "ART-INTEGRITY",
+      "description": "Strict count/hash/loss/live-file identity check.",
+      "path": "run-once/app-capture-integrity.json"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "C-ADMISSION",
+      "description": "Plan valid and independently reviewed original CI/asset/host evidence binds the exact APK, current and target raw images, full ETU, real ready release and isolated routing. Prior P3-1/P3-2/P3-3 and candidate-stage P3-4, plus P4-2 implementation closure, are historical prerequisites, not reruns. Historical stale readiness rows are not new failed product observations. No source/profile mutation or unapproved side effect.",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "validation",
+        "governance"
+      ],
+      "dependency_rationale": "Validation checks exact real inputs; governance supplies the unchanged P3-5 Spec and admission obligations.",
+      "external_inputs": [
+        "plan",
+        "firmware-archive",
+        "delivery",
+        "repair-review",
+        "source-commit",
+        "radio-readonly",
+        "test-cloud-state",
+        "test-cloud-bindings"
+      ],
+      "command_ids": [
+        "CMD-PLAN"
+      ],
+      "artifact_ids": [
+        "ART-PLAN"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C-MOBILE-CHAIN",
+      "description": "Same pinned non-debuggable Actions APK queries the exact device, obtains normal real-backend full selection, verifies downloaded bytes and transfers the 291113-byte full ETU. Fresh zero-origin BEGIN and normal MCU apply/reboot path; no PC sender, toy substitute or extra Stage A transfer.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production supplies App/MCU/backend behavior; validation supplies the admitted runner, original acquisition, timing, identity and recovery interpretation. Historical binary sources are separately pinned, not claimed rebuilt from this host-only successor.",
+      "external_inputs": [
+        "plan",
+        "firmware-archive",
+        "delivery",
+        "repair-review",
+        "source-commit",
+        "radio-readonly",
+        "test-cloud-state",
+        "test-cloud-bindings"
+      ],
+      "command_ids": [
+        "CMD-CAMPAIGN"
+      ],
+      "artifact_ids": [
+        "ART-RESULT",
+        "ART-CAPTURE",
+        "ART-INTEGRITY"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C-FINAL-IDENTITY",
+      "description": "Final fresh post-reboot connection GET_INFO is version 30294 with full raw image SHA256 984a06e8bd037ec8471cb6a9afc4c62bc996e20779ac19440ddc1497495da553; END ACK/UI100 alone never suffices. Same device and target/package/release identities throughout.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production supplies App/MCU/backend behavior; validation supplies the admitted runner, original acquisition, timing, identity and recovery interpretation. Historical binary sources are separately pinned, not claimed rebuilt from this host-only successor.",
+      "external_inputs": [
+        "plan",
+        "firmware-archive",
+        "delivery",
+        "repair-review",
+        "source-commit",
+        "radio-readonly",
+        "test-cloud-state",
+        "test-cloud-bindings"
+      ],
+      "command_ids": [
+        "CMD-CAMPAIGN"
+      ],
+      "artifact_ids": [
+        "ART-RESULT",
+        "ART-CAPTURE",
+        "ART-INTEGRITY"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C-NO-UPDATE",
+      "description": "After final verified identity the actual normal latest action returns no update; retain query/transition and native NO_UPDATE evidence.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production supplies App/MCU/backend behavior; validation supplies the admitted runner, original acquisition, timing, identity and recovery interpretation. Historical binary sources are separately pinned, not claimed rebuilt from this host-only successor.",
+      "external_inputs": [
+        "plan",
+        "firmware-archive",
+        "delivery",
+        "repair-review",
+        "source-commit",
+        "radio-readonly",
+        "test-cloud-state",
+        "test-cloud-bindings"
+      ],
+      "command_ids": [
+        "CMD-CAMPAIGN"
+      ],
+      "artifact_ids": [
+        "ART-RESULT",
+        "ART-CAPTURE",
+        "ART-INTEGRITY"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C-INTEGRITY",
+      "description": "Original App JSONL open/close IDs, exact body digest/count/sequence, healthy/lost/error fields, live/stored equality and source/protocol bindings pass. No fabricated footer, hidden loss, stale session/URL/file, or second logger.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production supplies App/MCU/backend behavior; validation supplies the admitted runner, original acquisition, timing, identity and recovery interpretation. Historical binary sources are separately pinned, not claimed rebuilt from this host-only successor.",
+      "external_inputs": [
+        "plan",
+        "firmware-archive",
+        "delivery",
+        "repair-review",
+        "source-commit",
+        "radio-readonly",
+        "test-cloud-state",
+        "test-cloud-bindings"
+      ],
+      "command_ids": [
+        "CMD-CAMPAIGN"
+      ],
+      "artifact_ids": [
+        "ART-RESULT",
+        "ART-CAPTURE",
+        "ART-INTEGRITY"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C-CLEANUP",
+      "description": "Original logs retrieved, no unresolved action, owned App/host processes and ADB5093 closed, Bluetooth restored to observed ON and exact owned test stable pointer restored by normal CAS/retract. Stable flags and beta unchanged. Cloud restoration receipts required separately; runner success alone does not prove it.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production supplies App/MCU/backend behavior; validation supplies the admitted runner, original acquisition, timing, identity and recovery interpretation. Historical binary sources are separately pinned, not claimed rebuilt from this host-only successor.",
+      "external_inputs": [
+        "plan",
+        "firmware-archive",
+        "delivery",
+        "repair-review",
+        "source-commit",
+        "radio-readonly",
+        "test-cloud-state",
+        "test-cloud-bindings"
+      ],
+      "command_ids": [
+        "CMD-CAMPAIGN"
+      ],
+      "artifact_ids": [
+        "ART-RESULT",
+        "ART-CAPTURE",
+        "ART-INTEGRITY"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C-COVERAGE",
+      "description": "Independently inspect actual disconnect positions across the fixed nonoverlapping R01..R10 windows, including pre-durable, positive committed boundary and near-tail coverage. Protocol2 has no bitmap: explicitly N/A per BLE-v2 contract, never invent a bitmap PASS. A missing required position remains a coverage gap even if ten generic recoveries succeed; do not widen windows or automatically rerun.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production supplies App/MCU/backend behavior; validation supplies the admitted runner, original acquisition, timing, identity and recovery interpretation. Historical binary sources are separately pinned, not claimed rebuilt from this host-only successor.",
+      "external_inputs": [
+        "plan",
+        "firmware-archive",
+        "delivery",
+        "repair-review",
+        "source-commit",
+        "radio-readonly",
+        "test-cloud-state",
+        "test-cloud-bindings"
+      ],
+      "command_ids": [
+        "CMD-CAMPAIGN"
+      ],
+      "artifact_ids": [
+        "ART-RESULT",
+        "ART-CAPTURE",
+        "ART-INTEGRITY"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "R01",
+      "description": "One actual global adapter OFF and ON, real BLE loss inside frozen durable window 0..28671, fresh same-device reconnection/BEGIN, protocol2 MCU durable resume position and first missing DATA, then advancing durable; contributes to the single final target identity. Any missing OFF/restore, stale/late state or failed observation is not recovery PASS.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production supplies App/MCU/backend behavior; validation supplies the admitted runner, original acquisition, timing, identity and recovery interpretation. Historical binary sources are separately pinned, not claimed rebuilt from this host-only successor.",
+      "external_inputs": [
+        "plan",
+        "firmware-archive",
+        "delivery",
+        "repair-review",
+        "source-commit",
+        "radio-readonly",
+        "test-cloud-state",
+        "test-cloud-bindings"
+      ],
+      "command_ids": [
+        "CMD-CAMPAIGN"
+      ],
+      "artifact_ids": [
+        "ART-RESULT",
+        "ART-CAPTURE",
+        "ART-INTEGRITY"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "R02",
+      "description": "One actual global adapter OFF and ON, real BLE loss inside frozen durable window 28672..57343, fresh same-device reconnection/BEGIN, protocol2 MCU durable resume position and first missing DATA, then advancing durable; contributes to the single final target identity. Any missing OFF/restore, stale/late state or failed observation is not recovery PASS.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production supplies App/MCU/backend behavior; validation supplies the admitted runner, original acquisition, timing, identity and recovery interpretation. Historical binary sources are separately pinned, not claimed rebuilt from this host-only successor.",
+      "external_inputs": [
+        "plan",
+        "firmware-archive",
+        "delivery",
+        "repair-review",
+        "source-commit",
+        "radio-readonly",
+        "test-cloud-state",
+        "test-cloud-bindings"
+      ],
+      "command_ids": [
+        "CMD-CAMPAIGN"
+      ],
+      "artifact_ids": [
+        "ART-RESULT",
+        "ART-CAPTURE",
+        "ART-INTEGRITY"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "R03",
+      "description": "One actual global adapter OFF and ON, real BLE loss inside frozen durable window 57344..86015, fresh same-device reconnection/BEGIN, protocol2 MCU durable resume position and first missing DATA, then advancing durable; contributes to the single final target identity. Any missing OFF/restore, stale/late state or failed observation is not recovery PASS.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production supplies App/MCU/backend behavior; validation supplies the admitted runner, original acquisition, timing, identity and recovery interpretation. Historical binary sources are separately pinned, not claimed rebuilt from this host-only successor.",
+      "external_inputs": [
+        "plan",
+        "firmware-archive",
+        "delivery",
+        "repair-review",
+        "source-commit",
+        "radio-readonly",
+        "test-cloud-state",
+        "test-cloud-bindings"
+      ],
+      "command_ids": [
+        "CMD-CAMPAIGN"
+      ],
+      "artifact_ids": [
+        "ART-RESULT",
+        "ART-CAPTURE",
+        "ART-INTEGRITY"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "R04",
+      "description": "One actual global adapter OFF and ON, real BLE loss inside frozen durable window 86016..114687, fresh same-device reconnection/BEGIN, protocol2 MCU durable resume position and first missing DATA, then advancing durable; contributes to the single final target identity. Any missing OFF/restore, stale/late state or failed observation is not recovery PASS.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production supplies App/MCU/backend behavior; validation supplies the admitted runner, original acquisition, timing, identity and recovery interpretation. Historical binary sources are separately pinned, not claimed rebuilt from this host-only successor.",
+      "external_inputs": [
+        "plan",
+        "firmware-archive",
+        "delivery",
+        "repair-review",
+        "source-commit",
+        "radio-readonly",
+        "test-cloud-state",
+        "test-cloud-bindings"
+      ],
+      "command_ids": [
+        "CMD-CAMPAIGN"
+      ],
+      "artifact_ids": [
+        "ART-RESULT",
+        "ART-CAPTURE",
+        "ART-INTEGRITY"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "R05",
+      "description": "One actual global adapter OFF and ON, real BLE loss inside frozen durable window 114688..143359, fresh same-device reconnection/BEGIN, protocol2 MCU durable resume position and first missing DATA, then advancing durable; contributes to the single final target identity. Any missing OFF/restore, stale/late state or failed observation is not recovery PASS.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production supplies App/MCU/backend behavior; validation supplies the admitted runner, original acquisition, timing, identity and recovery interpretation. Historical binary sources are separately pinned, not claimed rebuilt from this host-only successor.",
+      "external_inputs": [
+        "plan",
+        "firmware-archive",
+        "delivery",
+        "repair-review",
+        "source-commit",
+        "radio-readonly",
+        "test-cloud-state",
+        "test-cloud-bindings"
+      ],
+      "command_ids": [
+        "CMD-CAMPAIGN"
+      ],
+      "artifact_ids": [
+        "ART-RESULT",
+        "ART-CAPTURE",
+        "ART-INTEGRITY"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "R06",
+      "description": "One actual global adapter OFF and ON, real BLE loss inside frozen durable window 143360..172031, fresh same-device reconnection/BEGIN, protocol2 MCU durable resume position and first missing DATA, then advancing durable; contributes to the single final target identity. Any missing OFF/restore, stale/late state or failed observation is not recovery PASS.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production supplies App/MCU/backend behavior; validation supplies the admitted runner, original acquisition, timing, identity and recovery interpretation. Historical binary sources are separately pinned, not claimed rebuilt from this host-only successor.",
+      "external_inputs": [
+        "plan",
+        "firmware-archive",
+        "delivery",
+        "repair-review",
+        "source-commit",
+        "radio-readonly",
+        "test-cloud-state",
+        "test-cloud-bindings"
+      ],
+      "command_ids": [
+        "CMD-CAMPAIGN"
+      ],
+      "artifact_ids": [
+        "ART-RESULT",
+        "ART-CAPTURE",
+        "ART-INTEGRITY"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "R07",
+      "description": "One actual global adapter OFF and ON, real BLE loss inside frozen durable window 172032..200703, fresh same-device reconnection/BEGIN, protocol2 MCU durable resume position and first missing DATA, then advancing durable; contributes to the single final target identity. Any missing OFF/restore, stale/late state or failed observation is not recovery PASS.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production supplies App/MCU/backend behavior; validation supplies the admitted runner, original acquisition, timing, identity and recovery interpretation. Historical binary sources are separately pinned, not claimed rebuilt from this host-only successor.",
+      "external_inputs": [
+        "plan",
+        "firmware-archive",
+        "delivery",
+        "repair-review",
+        "source-commit",
+        "radio-readonly",
+        "test-cloud-state",
+        "test-cloud-bindings"
+      ],
+      "command_ids": [
+        "CMD-CAMPAIGN"
+      ],
+      "artifact_ids": [
+        "ART-RESULT",
+        "ART-CAPTURE",
+        "ART-INTEGRITY"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "R08",
+      "description": "One actual global adapter OFF and ON, real BLE loss inside frozen durable window 200704..229375, fresh same-device reconnection/BEGIN, protocol2 MCU durable resume position and first missing DATA, then advancing durable; contributes to the single final target identity. Any missing OFF/restore, stale/late state or failed observation is not recovery PASS.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production supplies App/MCU/backend behavior; validation supplies the admitted runner, original acquisition, timing, identity and recovery interpretation. Historical binary sources are separately pinned, not claimed rebuilt from this host-only successor.",
+      "external_inputs": [
+        "plan",
+        "firmware-archive",
+        "delivery",
+        "repair-review",
+        "source-commit",
+        "radio-readonly",
+        "test-cloud-state",
+        "test-cloud-bindings"
+      ],
+      "command_ids": [
+        "CMD-CAMPAIGN"
+      ],
+      "artifact_ids": [
+        "ART-RESULT",
+        "ART-CAPTURE",
+        "ART-INTEGRITY"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "R09",
+      "description": "One actual global adapter OFF and ON, real BLE loss inside frozen durable window 229376..258047, fresh same-device reconnection/BEGIN, protocol2 MCU durable resume position and first missing DATA, then advancing durable; contributes to the single final target identity. Any missing OFF/restore, stale/late state or failed observation is not recovery PASS.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production supplies App/MCU/backend behavior; validation supplies the admitted runner, original acquisition, timing, identity and recovery interpretation. Historical binary sources are separately pinned, not claimed rebuilt from this host-only successor.",
+      "external_inputs": [
+        "plan",
+        "firmware-archive",
+        "delivery",
+        "repair-review",
+        "source-commit",
+        "radio-readonly",
+        "test-cloud-state",
+        "test-cloud-bindings"
+      ],
+      "command_ids": [
+        "CMD-CAMPAIGN"
+      ],
+      "artifact_ids": [
+        "ART-RESULT",
+        "ART-CAPTURE",
+        "ART-INTEGRITY"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "R10",
+      "description": "One actual global adapter OFF and ON, real BLE loss inside frozen durable window 258048..291112, fresh same-device reconnection/BEGIN, protocol2 MCU durable resume position and first missing DATA, then advancing durable; contributes to the single final target identity. Any missing OFF/restore, stale/late state or failed observation is not recovery PASS.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production supplies App/MCU/backend behavior; validation supplies the admitted runner, original acquisition, timing, identity and recovery interpretation. Historical binary sources are separately pinned, not claimed rebuilt from this host-only successor.",
+      "external_inputs": [
+        "plan",
+        "firmware-archive",
+        "delivery",
+        "repair-review",
+        "source-commit",
+        "radio-readonly",
+        "test-cloud-state",
+        "test-cloud-bindings"
+      ],
+      "command_ids": [
+        "CMD-CAMPAIGN"
+      ],
+      "artifact_ids": [
+        "ART-RESULT",
+        "ART-CAPTURE",
+        "ART-INTEGRITY"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    }
+  ],
+  "performance_gates": [],
+  "scope": {
+    "spec": "docs/ota-prompts/prompt-P3-5-integration.md",
+    "execution": "single-30294-full-ten-disconnect-group",
+    "whole_card": "Requires all frozen criteria and applicable upstream/original-evidence review; not inferred from automationOutcome.",
+    "excluded": [
+      "new build or App installation",
+      "production mutation/release",
+      "J-Link/reset/downgrade",
+      "additional OTA or implementation smoke"
+    ],
+    "source_identity_note": "Host repair frozen at eb0b1fd6; pinned APK and firmware retain their original different build commits and exact hashes. No false same-build claim."
+  }
+}

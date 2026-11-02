@@ -183,6 +183,74 @@ class _Peer implements OtaBleChannel {
   }
 }
 
+// Inject downstream loss without failing or leaving a platform write pending.
+// This is a synthetic boundary fixture, not a replay of the physical R03 bytes.
+class _PrefixLossPeer extends _Peer {
+  bool dropDataTail = true;
+  bool dropInfo = false;
+  bool failInfo = false;
+  bool badInfo = false;
+  int infoWrites = 0;
+  int completedDataWrites = 0;
+  int swallowedQueries = 0;
+  List<int>? receiverPrefix;
+
+  @override
+  Future<void> writeChunk(List<int> chunk) async {
+    final frame = OtaBleCodec.decodeFrame(chunk);
+    if (frame.cmd == OtaBleCodec.cmdGetInfo) infoWrites++;
+    final prefix = receiverPrefix;
+    if (prefix != null) {
+      // Ten missing tail bytes consume exactly the first ten-byte GET_INFO.
+      // The receiver drops that completed bad-CRC frame, then accepts queries.
+      expect(frame.cmd, OtaBleCodec.cmdGetInfo,
+          reason: 'Uncertain downstream state must admit only recovery queries');
+      expect(chunk.length, 10);
+      expect(() => OtaBleCodec.decodeFrame([...prefix, ...chunk]),
+          throwsFormatException);
+      receiverPrefix = null;
+      swallowedQueries++;
+      writes.add(List<int>.of(chunk));
+      return;
+    }
+    if (dropDataTail && (frame.cmd == 0x12 || frame.cmd == OtaBleCodec.cmdData)) {
+      dropDataTail = false;
+      receiverPrefix = List<int>.of(chunk.sublist(0, chunk.length - 10));
+      writes.add(List<int>.of(chunk));
+      completedDataWrites++;
+      return;
+    }
+    if (dropInfo && frame.cmd == OtaBleCodec.cmdGetInfo) return;
+    if (failInfo && frame.cmd == OtaBleCodec.cmdGetInfo) {
+      throw const OtaTransportException('Synthetic INFO write error', code: 'INFO_REJECTED');
+    }
+    if (badInfo && frame.cmd == OtaBleCodec.cmdGetInfo) {
+      reply(OtaBleCodec.rspInfo, 0, frame.seq, buildInfoPayload(
+          model: List<int>.of(DeviceOtaInfo.wireModelETrack)..[0] = 0x58,
+          hardwareRevision: 3, layoutId: 5, bootVersion: 2,
+          currentVersionCode: 30286, imageSha256: List<int>.filled(32, 0xbb)));
+      return;
+    }
+    await super.writeChunk(chunk);
+  }
+}
+
+// New characteristic/channel wrappers must retain the physical device scope.
+class _ReboundChannel implements OtaBleChannel {
+  _ReboundChannel(this.peer);
+  final _Peer peer;
+  @override
+  Object get deviceScope => peer.deviceScope;
+  @override
+  bool get isConnected => peer.isConnected;
+  @override
+  Stream<List<int>> get notifications => peer.notifications;
+  @override
+  Future<int> maxWriteChunkSize() => peer.maxWriteChunkSize();
+  @override
+  Future<void> writeChunk(List<int> chunk) => peer.writeChunk(chunk);
+}
+
 Uint8List package(int len) => Uint8List.fromList(List.generate(len, (i) => i & 255));
 
 Future<OtaAckResult> transfer(OtaBleTransport transport, Uint8List bytes,
@@ -206,6 +274,45 @@ Future<void> until(bool Function() condition) async {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  test('P35 observes accepted protocol state and actual DATA completion', () async {
+    for (final pipeline in [false, true]) {
+      final peer = _Peer();
+      final observed = <Map<String, Object?>>[];
+      final stats = OtaLinkStats(label: 'p35', onTransferState: observed.add);
+      final transport = sender(peer, enabled: pipeline, stats: stats);
+      expect((await transfer(transport, package(9000))).isOk, isTrue);
+      final begin = observed.firstWhere((e) => e['event'] == 'beginAck');
+      expect(begin['protocol'], pipeline ? 2 : 1);
+      expect(begin['durable'], 0);
+      expect(begin['bitmap'], pipeline ? isNull : 0);
+      final sent = observed.where((e) => e['event'] == 'data').toList();
+      expect(sent.first['sendOffset'], 0);
+      expect(observed.last['durable'], 9000);
+      expect(observed.every((e) => e['protocol'] == begin['protocol']), isTrue);
+      if (pipeline) expect(observed.every((e) => e['bitmap'] == null), isTrue);
+      await transport.dispose();
+      await peer.events.close();
+    }
+  });
+
+  test('P35 does not publish invalid v2 ACK state or retired samples', () async {
+    final peer = _Peer();
+    peer.mutateDataAck = (payload) => ByteData.sublistView(payload)
+        .setUint32(9, 0x100000, Endian.little);
+    final observed = <Map<String, Object?>>[];
+    final stats = OtaLinkStats(label: 'p35', onTransferState: observed.add);
+    final transport = sender(peer, stats: stats);
+    await expectLater(transfer(transport, package(9000)), throwsA(isA<OtaTransportException>()));
+    expect(observed.every((e) => e['durable'] == 0), isTrue);
+    final count = observed.length;
+    stats.retire(reason: 'finished');
+    stats.recordAcceptedState(durable: 4096, bitmap: null);
+    stats.recordSegmentSendEnd(offsetBytes: 128, lengthBytes: 128);
+    expect(observed.length, count);
+    await transport.dispose();
+    await peer.events.close();
+  });
 
   test('negotiated v2 reports actual window and batch only after BEGIN', () async {
     final peer = _Peer();
@@ -742,6 +849,169 @@ void main() {
       await transport.dispose();
     }
     await peer.events.close();
+  });
+
+  group('P35-R03 unconfirmed downstream delivery', () {
+    for (final pipeline in [false, true]) {
+      for (final failure in ['write', 'identity']) {
+      test('v${pipeline ? 2 : 1} failed cancellation $failure probe cannot authorize ABORT', () async {
+        final peer = _PrefixLossPeer();
+        final old = sender(_ReboundChannel(peer), enabled: pipeline);
+        OtaBleTransport? next;
+        addTearDown(() async {
+          await old.dispose();
+          await next?.dispose();
+          await peer.events.close();
+        });
+        final sent = Completer<void>();
+        final bytes = package(128);
+        final operation = old.transfer(package: bytes,
+            packageSha256: List<int>.filled(32, 1), etuHeader: bytes.sublist(0, 64),
+            windowSegments: 1, onSent: (_, __) { if (!sent.isCompleted) sent.complete(); });
+        final failed = expectLater(operation,
+            throwsA(isA<OtaTransportException>().having((e) => e.code, 'code', 'CANCELLED')));
+        await sent.future.timeout(const Duration(seconds: 1));
+        await Future<void>.delayed(Duration.zero);
+        peer.failInfo = failure == 'write';
+        peer.badInfo = failure == 'identity';
+        await old.abortBestEffort();
+        await failed;
+        expect(peer.infoWrites, 2);
+        expect(peer.frames.any((f) => f.cmd == OtaBleCodec.cmdAbort || f.cmd == 0x14), isFalse);
+        await expectLater(old.getDeviceInfo(),
+            throwsA(isA<OtaTransportException>().having((e) => e.code, 'code', 'CANCELLED')));
+        await old.dispose();
+        final rebound = sender(_ReboundChannel(peer), enabled: pipeline);
+        next = rebound;
+        await expectLater(rebound.begin(totalLen: bytes.length,
+            packageSha256: List<int>.filled(32, 1), etuHeader: bytes.sublist(0, 64)),
+            throwsA(isA<OtaTransportException>().having((e) => e.code, 'code', 'WRITE_TIMEOUT')));
+        peer.failInfo = false;
+        peer.badInfo = false;
+        await rebound.getDeviceInfo();
+        expect((await transfer(rebound, bytes)).isOk, isTrue);
+      });
+      }
+      for (final exit in ['disconnect', 'notification-error', 'cancel', 'dispose']) {
+        for (final stayConnected in [false, true]) {
+        if (exit == 'disconnect' && stayConnected) continue;
+        test('v${pipeline ? 2 : 1} $exit after completed DATA write resynchronizes'
+            '${stayConnected ? ' while still connected' : ''}', () async {
+          final peer = _PrefixLossPeer();
+          final old = OtaBleTransport(channel: _ReboundChannel(peer),
+              enablePipeline: pipeline, dataBatchFrames: 1,
+              ackTimeout: const Duration(milliseconds: 500),
+              noProgressTimeout: const Duration(seconds: 3));
+          OtaBleTransport? rebound;
+          addTearDown(() async {
+            await old.dispose();
+            await rebound?.dispose();
+            await peer.events.close();
+          });
+          final sent = Completer<void>();
+          final bytes = package(128);
+          var finished = false;
+          final operation = old.transfer(package: bytes,
+            packageSha256: List<int>.filled(32, 1), etuHeader: bytes.sublist(0, 64),
+            windowSegments: 1,
+            onSent: (_, __) { if (!sent.isCompleted) sent.complete(); });
+          final result = operation.then<Object?>((_) {
+            finished = true;
+            return null;
+          }, onError: (Object error) {
+            finished = true;
+            return error;
+          });
+          await sent.future.timeout(const Duration(seconds: 1));
+          // Allow the writer continuation to settle and enter the ACK wait.
+          await Future<void>.delayed(Duration.zero);
+          expect(finished, isFalse);
+          expect(peer.completedDataWrites, 1);
+          expect(peer.accepted, 0);
+          expect(peer.receiverPrefix, isNotEmpty);
+          peer.connected = stayConnected;
+          if (exit == 'notification-error') {
+            peer.events.addError(const OtaTransportException(
+                'Synthetic notification loss', code: 'NOTIFY_LOST'));
+          } else if (exit == 'cancel') {
+            old.cancel();
+          } else if (exit == 'dispose') {
+            await old.dispose();
+          }
+          final error = await result.timeout(const Duration(seconds: 1));
+          final expectedCode = switch (exit) {
+            'notification-error' => 'NOTIFY_LOST',
+            'cancel' => 'CANCELLED',
+            'dispose' => 'DISPOSED',
+            _ => 'DISCONNECTED',
+          };
+          expect(error, isA<OtaTransportException>()
+              .having((e) => e.code, 'code', expectedCode));
+          await old.abortBestEffort();
+          final recoveredOnCancel = stayConnected && exit != 'dispose';
+          expect(peer.receiverPrefix, recoveredOnCancel ? isNull : isNotEmpty,
+              reason: 'ABORT requires matching INFO first; disconnected/disposed owners cannot probe');
+          expect(peer.infoWrites, recoveredOnCancel ? 2 : 0);
+          await old.dispose();
+
+          final other = _PrefixLossPeer()..dropInfo = true;
+          final isolated = sender(_ReboundChannel(other));
+          try {
+            await expectLater(isolated.getDeviceInfo(timeout: const Duration(milliseconds: 30)),
+                throwsA(isA<OtaTransportException>().having((e) => e.code, 'code', 'TIMEOUT')));
+            expect(other.infoWrites, 1, reason: 'Another device must not inherit recovery state');
+          } finally {
+            await isolated.dispose();
+            await other.events.close();
+          }
+
+          // No reset or staging clear: only the connection wrapper changes.
+          peer.connected = true;
+          final next = sender(_ReboundChannel(peer), enabled: pipeline);
+          rebound = next;
+          final beforeQuery = peer.writes.length;
+          if (!recoveredOnCancel) {
+          await expectLater(next.begin(totalLen: bytes.length,
+              packageSha256: List<int>.filled(32, 1), etuHeader: bytes.sublist(0, 64)),
+              throwsA(isA<OtaTransportException>().having((e) => e.code, 'code', 'WRITE_TIMEOUT')));
+          expect(peer.writes.length, beforeQuery,
+              reason: 'A new wrapper cannot bypass the receiver recovery gate');
+          }
+          final info = await next.getDeviceInfo(timeout: const Duration(milliseconds: 100));
+          expect(info.currentVersionCode, 30286);
+          expect(peer.swallowedQueries, 1);
+          expect(peer.infoWrites, recoveredOnCancel ? 3 : 2);
+          expect(peer.receiverPrefix, isNull);
+          expect((await transfer(next, bytes)).isOk, isTrue);
+        });
+        }
+      }
+    }
+
+    test('cold query timeout is not converted into global retries', () async {
+      final peer = _PrefixLossPeer()..dropInfo = true;
+      final transport = sender(_ReboundChannel(peer));
+      addTearDown(() async {
+        await transport.dispose();
+        await peer.events.close();
+      });
+      await expectLater(transport.getDeviceInfo(timeout: const Duration(milliseconds: 30)),
+          throwsA(isA<OtaTransportException>().having((e) => e.code, 'code', 'TIMEOUT')));
+      expect(peer.infoWrites, 1);
+    });
+
+    test('healthy device identity and transfer do not require recovery probes', () async {
+      final peer = _PrefixLossPeer()..dropDataTail = false;
+      final transport = sender(_ReboundChannel(peer));
+      addTearDown(() async {
+        await transport.dispose();
+        await peer.events.close();
+      });
+      expect((await transport.getDeviceInfo()).currentVersionCode, 30286);
+      expect((await transfer(transport, package(128))).isOk, isTrue);
+      expect(peer.infoWrites, 1);
+      expect(peer.swallowedQueries, 0);
+    });
   });
 
   test('no durable progress, disconnect and invalid END cannot become success', () async {

@@ -1,0 +1,50 @@
+{
+  "captureId": "3bc6df8929b64c30fd1685152f14a829",
+  "records": 5820,
+  "sha256": "0df368f8d43d6cf79adaef096a47f7eb48be012ae8748d8462ee6ffd1f87c22e",
+  "final": {
+    "deviceAddress": "e3:49:e1:14:d6:cb",
+    "phase": "idle",
+    "currentVersionCode": 30309,
+    "currentImageSha256": "e767525b4e4ae1d3c727304b0e00ac980ddc3c6f2c82e52b5c0a07a95a88465b",
+    "targetVersionCode": 0,
+    "targetImageSha256": null,
+    "packageSha256": null,
+    "packageBytes": 0,
+    "packageVerified": false,
+    "releaseId": null,
+    "latestUrl": "https://e-track-firmware-p41-public.pages.dev/api/public/firmware/latest",
+    "protocol": null,
+    "session": 0,
+    "durable": 0,
+    "bitmap": null,
+    "sendOffset": null,
+    "linkConnected": true,
+    "freshConnection": true,
+    "runtime": {
+      "backgrounded": false,
+      "acquired": false,
+      "reason": null,
+      "active": false,
+      "paused": false,
+      "ownerEpoch": 48,
+      "revision": 743,
+      "task": {
+        "taskId": "2cae87bd0a8ba276b70402afd3ad5f0a_46_12",
+        "generation": 46,
+        "deviceToken": "960b64d91617caccac41324c2f28a7b204aaa5a7222487011f094e8608229c9d",
+        "packageSha256": "a1e81c779d16c99a387491894275a26491f45fa18355a240253c3b070ae350aa"
+      }
+    },
+    "schema": 2,
+    "captureId": "3bc6df8929b64c30fd1685152f14a829",
+    "seq": 5820,
+    "monoUs": 462001872,
+    "event": "heartbeat",
+    "healthy": true,
+    "lost": 0,
+    "error": null
+  },
+  "integrity": "VERIFIED",
+  "formalAcceptance": "NOT_ADJUDICATED"
+}

@@ -1,0 +1,11 @@
+{
+  "name": "e-track-firmware-p41-public",
+  "pages_build_output_dir": "./site",
+  "compatibility_date": "2026-10-28",
+  "services": [
+    {
+      "binding": "FIRMWARE_SERVICE",
+      "service": "e-track-firmware-p41-test"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "python",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "Tools/acceptance/validate_bundle.py",
+    "--contract",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\docs\\acceptance-contracts\\P3-5-v5.contract.json",
+    "--matrix",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\docs\\acceptance-contracts\\P3-5-v5\\evidence-matrix.json",
+    "--repo-root",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source",
+    "--previous-contract",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\docs\\acceptance-contracts\\P3-5-v5\\history\\v4\\contract.json",
+    "--previous-matrix",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\docs\\acceptance-contracts\\P3-5-v5\\history\\v4\\matrix.json",
+    "--write-rerun-plan",
+    "rerun-plan.json"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source",
+  "monotonic_ns": 831220814276300,
+  "stdin_sha256": null
+}

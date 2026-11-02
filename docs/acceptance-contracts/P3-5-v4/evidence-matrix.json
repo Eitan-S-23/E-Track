@@ -1,0 +1,535 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P3-5-v4",
+  "contract_sha256": "449BDA804F1F2A7BB50B3E5796013B1965322DAD430FB7F5B26DF19B77EF9BC1",
+  "round_id": "P35-OFFLINE-CLOSEOUT-20261102-01",
+  "overall_result": "EVIDENCE_GAP",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "C-ADMISSION",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "execution/offline.stderr",
+        "execution/offline.closed.json"
+      ],
+      "notes": "Harness-origin evidence gap: formal precheck compared lowercase predecessor SHA with the canonical uppercase CLI plan and raised before original evaluation/result creation. Product criteria NOT_OBSERVED; no device action. Original failure preserved."
+    },
+    {
+      "id": "C-MOBILE-CHAIN",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "execution/offline.stderr",
+        "execution/offline.closed.json"
+      ],
+      "notes": "Harness-origin evidence gap: formal precheck compared lowercase predecessor SHA with the canonical uppercase CLI plan and raised before original evaluation/result creation. Product criteria NOT_OBSERVED; no device action. Original failure preserved."
+    },
+    {
+      "id": "C-FINAL-IDENTITY",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "execution/offline.stderr",
+        "execution/offline.closed.json"
+      ],
+      "notes": "Harness-origin evidence gap: formal precheck compared lowercase predecessor SHA with the canonical uppercase CLI plan and raised before original evaluation/result creation. Product criteria NOT_OBSERVED; no device action. Original failure preserved."
+    },
+    {
+      "id": "C-NO-UPDATE",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "execution/offline.stderr",
+        "execution/offline.closed.json"
+      ],
+      "notes": "Harness-origin evidence gap: formal precheck compared lowercase predecessor SHA with the canonical uppercase CLI plan and raised before original evaluation/result creation. Product criteria NOT_OBSERVED; no device action. Original failure preserved."
+    },
+    {
+      "id": "C-INTEGRITY",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "execution/offline.stderr",
+        "execution/offline.closed.json"
+      ],
+      "notes": "Harness-origin evidence gap: formal precheck compared lowercase predecessor SHA with the canonical uppercase CLI plan and raised before original evaluation/result creation. Product criteria NOT_OBSERVED; no device action. Original failure preserved."
+    },
+    {
+      "id": "C-CLEANUP",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "execution/offline.stderr",
+        "execution/offline.closed.json"
+      ],
+      "notes": "Harness-origin evidence gap: formal precheck compared lowercase predecessor SHA with the canonical uppercase CLI plan and raised before original evaluation/result creation. Product criteria NOT_OBSERVED; no device action. Original failure preserved."
+    },
+    {
+      "id": "C-COVERAGE",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "execution/offline.stderr",
+        "execution/offline.closed.json"
+      ],
+      "notes": "Harness-origin evidence gap: formal precheck compared lowercase predecessor SHA with the canonical uppercase CLI plan and raised before original evaluation/result creation. Product criteria NOT_OBSERVED; no device action. Original failure preserved."
+    },
+    {
+      "id": "R01",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "execution/offline.stderr",
+        "execution/offline.closed.json"
+      ],
+      "notes": "Harness-origin evidence gap: formal precheck compared lowercase predecessor SHA with the canonical uppercase CLI plan and raised before original evaluation/result creation. Product criteria NOT_OBSERVED; no device action. Original failure preserved."
+    },
+    {
+      "id": "R02",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "execution/offline.stderr",
+        "execution/offline.closed.json"
+      ],
+      "notes": "Harness-origin evidence gap: formal precheck compared lowercase predecessor SHA with the canonical uppercase CLI plan and raised before original evaluation/result creation. Product criteria NOT_OBSERVED; no device action. Original failure preserved."
+    },
+    {
+      "id": "R03",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "execution/offline.stderr",
+        "execution/offline.closed.json"
+      ],
+      "notes": "Harness-origin evidence gap: formal precheck compared lowercase predecessor SHA with the canonical uppercase CLI plan and raised before original evaluation/result creation. Product criteria NOT_OBSERVED; no device action. Original failure preserved."
+    },
+    {
+      "id": "R04",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "execution/offline.stderr",
+        "execution/offline.closed.json"
+      ],
+      "notes": "Harness-origin evidence gap: formal precheck compared lowercase predecessor SHA with the canonical uppercase CLI plan and raised before original evaluation/result creation. Product criteria NOT_OBSERVED; no device action. Original failure preserved."
+    },
+    {
+      "id": "R05",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "execution/offline.stderr",
+        "execution/offline.closed.json"
+      ],
+      "notes": "Harness-origin evidence gap: formal precheck compared lowercase predecessor SHA with the canonical uppercase CLI plan and raised before original evaluation/result creation. Product criteria NOT_OBSERVED; no device action. Original failure preserved."
+    },
+    {
+      "id": "R06",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "execution/offline.stderr",
+        "execution/offline.closed.json"
+      ],
+      "notes": "Harness-origin evidence gap: formal precheck compared lowercase predecessor SHA with the canonical uppercase CLI plan and raised before original evaluation/result creation. Product criteria NOT_OBSERVED; no device action. Original failure preserved."
+    },
+    {
+      "id": "R07",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "execution/offline.stderr",
+        "execution/offline.closed.json"
+      ],
+      "notes": "Harness-origin evidence gap: formal precheck compared lowercase predecessor SHA with the canonical uppercase CLI plan and raised before original evaluation/result creation. Product criteria NOT_OBSERVED; no device action. Original failure preserved."
+    },
+    {
+      "id": "R08",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "execution/offline.stderr",
+        "execution/offline.closed.json"
+      ],
+      "notes": "Harness-origin evidence gap: formal precheck compared lowercase predecessor SHA with the canonical uppercase CLI plan and raised before original evaluation/result creation. Product criteria NOT_OBSERVED; no device action. Original failure preserved."
+    },
+    {
+      "id": "R09",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "execution/offline.stderr",
+        "execution/offline.closed.json"
+      ],
+      "notes": "Harness-origin evidence gap: formal precheck compared lowercase predecessor SHA with the canonical uppercase CLI plan and raised before original evaluation/result creation. Product criteria NOT_OBSERVED; no device action. Original failure preserved."
+    },
+    {
+      "id": "R10",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "execution/offline.stderr",
+        "execution/offline.closed.json"
+      ],
+      "notes": "Harness-origin evidence gap: formal precheck compared lowercase predecessor SHA with the canonical uppercase CLI plan and raised before original evaluation/result creation. Product criteria NOT_OBSERVED; no device action. Original failure preserved."
+    },
+    {
+      "id": "C-PUBLICATION",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [
+        "execution/offline.stderr",
+        "execution/offline.closed.json"
+      ],
+      "notes": "Harness-origin evidence gap: formal precheck compared lowercase predecessor SHA with the canonical uppercase CLI plan and raised before original evaluation/result creation. Product criteria NOT_OBSERVED; no device action. Original failure preserved."
+    }
+  ],
+  "evidence_hashes": {
+    "authorization.json": "DAA0FB520C7F2A6B72384B27737985D5FED3E17C073715B7E14DFD9DD5789EF3",
+    "contract.json": "449BDA804F1F2A7BB50B3E5796013B1965322DAD430FB7F5B26DF19B77EF9BC1",
+    "not-run-matrix.json": "999EEFDEC8CBFD7197D486BCE769BE00527242EBFA098D2C552F887BA175BC1E",
+    "rerun-plan.json": "BBD4441846A04485C9FA55FDBF91804EAA1BFA40192E3E385911ECB916639494",
+    "approved/configuration.json": "E0436F0E5C6079D258B0FBF85B6DF20931DF2E836DAF2C5029A558148E36C619",
+    "execution/offline.closed.json": "5550FF75F57AC39FF1756652287D7EB9BBF07C9940F540494611EADE12155C0A",
+    "execution/offline.started.json": "8F3549A7E98B29F0E40BBACC80773FB38F3E83EF09AF902ADF42122BC07D0FB3",
+    "execution/offline.stderr": "4723923B4A009181AAF9569755ADCEC27CB782FCCBE21DE21799B1F1F8D66C15",
+    "execution/offline.stdout": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "inputs/app-asset.json": "CD562A1C5EA32E3EA6C2F3A0BDED490CE00B8E1DCBD1E2BFE1A3AF7103552AD8",
+    "inputs/approval.json": "E5643BDC5CC2D5967B9736115ABB285E90BB3DFF890B1CA3B67FFDC63C59BEFA",
+    "inputs/candidate-commit.json": "D1AD140CDD2A4902E32947B7CCF5775A846BF72074003D827EB7E56B5D3C1CF4",
+    "inputs/configuration.json": "E0436F0E5C6079D258B0FBF85B6DF20931DF2E836DAF2C5029A558148E36C619",
+    "inputs/device-ack-original.stdout": "E7FEB945B571F999291A8BB767278D4715F0EF7CDC4794B68DCDE2D826C91133",
+    "inputs/device-admission.json": "CDCC73F42F55AAE030E27B73D1A3B23F293550CF5D7FC11071828A83E67C8FB6",
+    "inputs/device-original.jsonl": "E7FEB945B571F999291A8BB767278D4715F0EF7CDC4794B68DCDE2D826C91133",
+    "inputs/originals.json": "F1A5FDA063DABB069A6EF63C4EEE26921BD0E25665D59E2FE08AA22E21E6D189",
+    "inputs/packet-01.bin": "634CE971BA98F70650EB7E39FE71265BA5F7050F12B460D4683398E347F7BFF6",
+    "inputs/packet-02.bin": "B3DC88A9B2615B4855C7D0102A4E99F974032617B73065D283950CEFD86C22F4",
+    "inputs/packet-03.bin": "9E9AB2FED73F70F34CD45C0CC514F24A2218764920D72266BB5A5B1F6BB99636",
+    "inputs/preflight-attempt.json": "6A4040CA0E97BE56C2F99412D7503B19B529F7D04AA34F3E5C760A73DAB00551",
+    "inputs/prior-background-failure.json": "A79F90EBD971F93FB969CA166C9A40AE5DDB44F2F654874DDA6C84D29F537D71",
+    "inputs/prior-r03-original.jsonl": "6C7EF2F091E0053D89505EE93FFC5E325EE321DC7CC2BBE3454D31954B5A8E90",
+    "inputs/prior-r03-result.json": "2F64EC58885C26314A024B119A0CD246BE117439E86B52A241B3BC907D6051BA",
+    "inputs/prior-resume-failure.json": "453931EB225D24A12191BC78651993F3B8DB114CD9254D091E1EFE0F488D333E",
+    "inputs/prior-review.json": "FA9CFF98504DCB84FDDCF6359AE32E5DF2245558F78431AB90DE2779BC9F5330",
+    "inputs/runner-template.json": "6539DD70FD0864AB5D1CD74F1FF146CA78FC3200CE5A99CBA913F132B21BC31E",
+    "pipeline-01/channels-restored.json": "F692A02EFCD3912752DB783A5CB1E7B6E90ACAE6D22183FA2F63C8E50A8F6F56",
+    "pipeline-01/plan.json": "7FF4F57404CCA646DAD6CABD6F31F7F3B0887823ABF17079B4D3C8EB7E70BF29",
+    "pipeline-01/result.json": "75D3B584D7ED293588DFBF3B0330DE9D58559EE0729999F0DCEA1D0EB1CC40AF",
+    "pipeline-01/target.json": "418495B884666111BA070B62639C6BBF8873EA5AD75CC57EEB50AF14B1EC8CCD",
+    "preflight/result.json": "E532BE2F2B30D332DDAFDE10181E034BE94A266AFBBAA40016FAE02A1B2CA98B",
+    "preparation/freeze-01/git-001.closed.json": "9592B2092A91752DABD1F391DB452E232A75FA390C809D278B9CECFC53F358C5",
+    "preparation/freeze-01/git-001.started.json": "B081FD5E0BA0E98EB402767EB255D5663F71E9239F3EC183976707FBC6D426AF",
+    "preparation/freeze-01/git-001.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/freeze-01/git-001.stdout": "3C7B591549442A207B25DE52A914289569E2EEE3B0C29CF996B66797046A8CE4",
+    "preparation/freeze-01/git-002.closed.json": "1878FC8079D562BF4FE55085BD09EF6A87AED42698DB4EEB181F12CDC99B8CCB",
+    "preparation/freeze-01/git-002.started.json": "B553313C831561045553E51DE3B738D8A83A7D762BFCEA2FBF88FA63C897E8B1",
+    "preparation/freeze-01/git-002.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/freeze-01/git-002.stdout": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/freeze-01/git-003.closed.json": "F178440E6E97F42C4B51EE3DC71B346811E1FA44CD977B8AE81BE2D4CBFA5641",
+    "preparation/freeze-01/git-003.started.json": "6A3EF0A2392C08A6152AC314D24839CA5C0E4365CB3B1E6F39211F63F1C3059D",
+    "preparation/freeze-01/git-003.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/freeze-01/git-003.stdout": "3C7B591549442A207B25DE52A914289569E2EEE3B0C29CF996B66797046A8CE4",
+    "preparation/freeze-01/git-004.closed.json": "A7C5C1D87F26CF26856EA194B8A190F2828379F434D9BE05982C0EBBFF16DD8E",
+    "preparation/freeze-01/git-004.started.json": "276EAC2A21598957AAE58010690423F4B30D79437D9AB03F13BCAB071DE4FD2B",
+    "preparation/freeze-01/git-004.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/freeze-01/git-004.stdout": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/freeze-01/git-005.closed.json": "8F7E336ADFCEE46217F1FE0A4DB39E1782A6BB834BF237F9D85B770FAA7C337E",
+    "preparation/freeze-01/git-005.started.json": "13F36656ECA58C46183FB754377F1FC7408296EF5C298DD558FE32BEFB1CB0BA",
+    "preparation/freeze-01/git-005.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/freeze-01/git-005.stdout": "0B8A3853400C4DE542C48D7DD4CB2315C0CB14681AC57D4AC2536AD4DB79D92E",
+    "preparation/freeze-01/git-006.closed.json": "50766430CE6C54600040CC022D2FAB7F1160013CCA2503E1CEDD95A35D8A6477",
+    "preparation/freeze-01/git-006.started.json": "2412EEDED04F1CAB31F0EA95715EF18A1219ACF690C35E7D1789853A87B4F658",
+    "preparation/freeze-01/git-006.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/freeze-01/git-006.stdout": "985F97E71CDCA9871AC1FFEC10C9DAB316B7F9CEBE2BE541AD5D28351B94BA6F",
+    "preparation/freeze-01/git-007.closed.json": "941148BFAE08350BE73F73A802540D27721128FC1EB3B58AE29647656C7E1EBC",
+    "preparation/freeze-01/git-007.started.json": "0C790930AED51F6622DBFB8CA3E6260E5D71A6FF7F826EBA6AC14F7EC8903A41",
+    "preparation/freeze-01/git-007.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/freeze-01/git-007.stdout": "FB641CB2394239C2FD7F3B58C3C26E438A649BC57F76A5CC436BEA086839413D",
+    "preparation/freeze-01/plan.closed.json": "3DB16FAFEB25AA6224CBBC50E3DBCE99878EA0C3140401DB784EEFAD9933C4D6",
+    "preparation/freeze-01/plan.started.json": "A7B696B11DFF965F7C0F0BD4339C77C9274ADBAE31DB7859F66764490FD0173A",
+    "preparation/freeze-01/plan.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/freeze-01/plan.stdout": "4DB9B28BB52FF8FF8A4631841CA11FDBC833954AF773F06E6E7BE8EA5C8CFECD",
+    "preparation/freeze-01/precheck.closed.json": "C3026C74855AD62E6017A959EBEF3E0AAB41BDFE7DFA68904878E5AA6FBFB9F3",
+    "preparation/freeze-01/precheck.started.json": "432CAD78F08C68985E64049AF8D26F6FBEA8480141E2AB063119CD0D08F41895",
+    "preparation/freeze-01/precheck.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/freeze-01/precheck.stdout": "293AE1DC7052039B5637A621FE989EDC14DC7F01A934E14E6CFC7344B36975CA",
+    "preparation/freeze-01/result.json": "BC4DF9642E88345A994B117F11809557C72F91ACE4F74E68AC6E2629AAA39921",
+    "preparation/privacy-01/git-001.closed.json": "F79140F6AC4DA72DE451549CE13945B154B6426955AA4E7BB020A0E2A94BAFFA",
+    "preparation/privacy-01/git-001.started.json": "1C5B9696D48C673DA74D990FCFDB29CF1A80D48C871FD52D86A23FD4C24E183C",
+    "preparation/privacy-01/git-001.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/privacy-01/git-001.stdout": "3C7B591549442A207B25DE52A914289569E2EEE3B0C29CF996B66797046A8CE4",
+    "preparation/privacy-01/git-002.closed.json": "FCDF7643BB0E41A85365D42C35DA20D2D4DE4C08EA76489E52EB840BE12B5A8F",
+    "preparation/privacy-01/git-002.started.json": "31F58E5C68C4C3F1B18A2CDE8E258FE9F27CE360ECC85934689F80860007323E",
+    "preparation/privacy-01/git-002.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/privacy-01/git-002.stdout": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/privacy-01/result.json": "E660F21674B6293053C2F26F3115F45683020EF7ABF4FDFFDE00ABCB2682C064",
+    "preparation/smoke-01/git-001.closed.json": "FAB60EADBAA860E8FE4BA8B0145D5B3C69456F07D7FE3DEFFB30C5044B108621",
+    "preparation/smoke-01/git-001.started.json": "23F7CD1837B5855E32CB205A89CB71A6D1251404CC123F99534E4B158F7ACFCD",
+    "preparation/smoke-01/git-001.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/smoke-01/git-001.stdout": "3C7B591549442A207B25DE52A914289569E2EEE3B0C29CF996B66797046A8CE4",
+    "preparation/smoke-01/git-002.closed.json": "389BA17BB85993781A3B886EADC13DC993C38731E4113AD3581DA7CF7DDD0055",
+    "preparation/smoke-01/git-002.started.json": "6DE7A24344D52F708E298F0D7F8937DB413AA48F231AA6143AC07CBD2C6E5ACB",
+    "preparation/smoke-01/git-002.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/smoke-01/git-002.stdout": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/smoke-01/result.json": "124458A3853D1467478B3C6B5CC1E57979F4280E496A06676A34E4806918496D",
+    "preparation/smoke-01/smoke.closed.json": "47B8BCC86F54827E33C969781A36CBC049230D9452FE6494392F0C484009B60C",
+    "preparation/smoke-01/smoke.started.json": "DC350BAAE44B98310C456DBF8950633E635D7EA1F3F4E8471F3D9A299B8D6270",
+    "preparation/smoke-01/smoke.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/smoke-01/smoke.stdout": "EAE1BBFEF15D0668EC6C32F9ADABAFB62B0F1F32DD601F3E08BDF6BC3525909B",
+    "preparation/smoke-02/git-001.closed.json": "7E63718763AAA78D39CAB580AC4A5205DEB404CB9C6D5F89D8B074BB2A0DAA2B",
+    "preparation/smoke-02/git-001.started.json": "06EFAAB21D7B55E7C503157FDF68841F1F878425BEC3089E5CF62D5F8A77BE51",
+    "preparation/smoke-02/git-001.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/smoke-02/git-001.stdout": "3C7B591549442A207B25DE52A914289569E2EEE3B0C29CF996B66797046A8CE4",
+    "preparation/smoke-02/git-002.closed.json": "3BB5BBE7738418BE966816853B70070D706E6E9FB75F31166F7C29E75996EAE0",
+    "preparation/smoke-02/git-002.started.json": "C715A659D1A076CAADDE83FDF6A52F953F9C65332661C92D2D5707522F6A4AE5",
+    "preparation/smoke-02/git-002.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/smoke-02/git-002.stdout": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/smoke-02/result.json": "E0A800BEDFE484B349AF647B8A1B09313923507D14650DF2664F738167D39324",
+    "preparation/smoke-02/smoke.closed.json": "6A1E7BC449AFC8B0B943631523BBB9DEDCA92596D4845AA380657028AF8576EB",
+    "preparation/smoke-02/smoke.started.json": "2A261A9B2DB258EC298C6BB435B5535E7DE4F35A1F30804816A00580412C6C8A",
+    "preparation/smoke-02/smoke.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/smoke-02/smoke.stdout": "5201B77D6241621983E4962F4A19CD51474CF4B7E1214E0C77A928C459DE9B4C",
+    "preparation/test-01/git-001.closed.json": "5F7C21719BB09EC2F31260590784604CD6E27C7EFB761976080B7C3FFAE7E359",
+    "preparation/test-01/git-001.started.json": "15949DAE0C30540E404A5FEFCCDA5EC73795BB98FC6D963216F6F41E2304337B",
+    "preparation/test-01/git-001.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/test-01/git-001.stdout": "3C7B591549442A207B25DE52A914289569E2EEE3B0C29CF996B66797046A8CE4",
+    "preparation/test-01/git-002.closed.json": "8DFA45DDFB8DC0F8D91BE29752D2D48C459DF65004BE4A83E3C9F681558BF9AF",
+    "preparation/test-01/git-002.started.json": "B79CE4E4426245071C290726AFD28AE2706BF4CEED61090B3275EFC98AA781EC",
+    "preparation/test-01/git-002.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/test-01/git-002.stdout": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/test-01/result.json": "67A1EE8A1138BB164FFC3233627A604FE50EC33D97A07D131562E4DFD9AB2579",
+    "preparation/test-01/unit.closed.json": "789065CE051DAB644202C2D960F7177E7CEBF276849D3ADE77A5B254D996A0F7",
+    "preparation/test-01/unit.started.json": "7B69D5CC663C9B426E0925734EDC38BCBB71432B433D99E306F89F0C709A2E3E",
+    "preparation/test-01/unit.stderr": "448D6B3D42AE4937A09931C672331D9A667D9484BA076FDC668ACC247AE07EF7",
+    "preparation/test-01/unit.stdout": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/test-02/git-001.closed.json": "5D1107F92E6896BF72C650833E59D6F10989D3F9B038F1423EB096A4FEEC0AE6",
+    "preparation/test-02/git-001.started.json": "4335995B27538D70A907BC31C9DB538A07075559810484E8AE2101516A0987D5",
+    "preparation/test-02/git-001.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/test-02/git-001.stdout": "3C7B591549442A207B25DE52A914289569E2EEE3B0C29CF996B66797046A8CE4",
+    "preparation/test-02/git-002.closed.json": "D84980D7C8EEEBC2CC96C4DAC7B25498AA8705619CC9334FC256F592A095CD9A",
+    "preparation/test-02/git-002.started.json": "3D1CE60B603CAE4D2A663EF23D87D4E4F959D54689A9A564D76C589D7EF8DE3D",
+    "preparation/test-02/git-002.stderr": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/test-02/git-002.stdout": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "preparation/test-02/result.json": "67A1EE8A1138BB164FFC3233627A604FE50EC33D97A07D131562E4DFD9AB2579",
+    "preparation/test-02/unit.closed.json": "703420DB2A0CEF23030FE6D71132C38EC88362DA2E86053DA22D59B611A024AA",
+    "preparation/test-02/unit.started.json": "0F6F6398BCEBF6654C3F9E426457CB4F174B9256C066F69C3B608A211C0A67AB",
+    "preparation/test-02/unit.stderr": "79D13ACE0E84353AC8E83DB974C43741A927C327DA0D7BF6035345514F8E1216",
+    "preparation/test-02/unit.stdout": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "pipeline-01/build/variables-restored.json": "5BBAE953A1F47416C5232278DE1427C79554FEA0CB5EDA87B1FE8813CA4AF81A",
+    "pipeline-01/device/app-capture-integrity.json": "FECC66071EEDB499884B54288D708EE0D404C8E5899E96497631EA2E6A205AE8",
+    "pipeline-01/device/app-capture.jsonl": "0DF368F8D43D6CF79ADAEF096A47F7EB48BE012AE8748D8462EE6FFD1F87C22E",
+    "pipeline-01/device/live-stream.stdout": "0DF368F8D43D6CF79ADAEF096A47F7EB48BE012AE8748D8462EE6FFD1F87C22E",
+    "pipeline-01/device/logcat-diagnostic-integrity.json": "195103668125D449C4FE8A39B36BC507650F4BA1E4B0237AF69C414C4399DF9B",
+    "pipeline-01/device/result.json": "7F433FF3176239F45252620D5AACA0E3B0BA1C28F7F2DB34A25033BDCDC74F56",
+    "pipeline-01/build/originals/prepared/release-evidence.json": "330C5BF7FDA1C0642899781BCB992E75F2E146102B3FAA813466D18BFFD8F3C2",
+    "history/v1/contract.json": "A1A69A1E0C48549CF3718157C56D528E4D783E9DA95E0D8E981796C0ADDF7D12",
+    "history/v2/contract.json": "90498C8837D55FED5DFA54B1E412000767B5CDDF36FAEF0FD28CD9CB1261DAF7",
+    "history/v2/matrix.json": "36ABE7093BAA0040181CE8942F152876924743AB43396CA8EDC16025914165E7",
+    "history/v3/contract.json": "DCE333E032ACA463310E3789CE857657A4DBD5C76D49FDC5EFBB29CE9F2CC41C",
+    "history/v3/matrix.json": "F61037167693933E288C07283729B160B55B89BC2A279CA7DC56E038F7EF0EC4",
+    "history/v3/inputs/app-asset.json": "CD562A1C5EA32E3EA6C2F3A0BDED490CE00B8E1DCBD1E2BFE1A3AF7103552AD8",
+    "history/v3/inputs/approval.json": "E5643BDC5CC2D5967B9736115ABB285E90BB3DFF890B1CA3B67FFDC63C59BEFA",
+    "history/v3/inputs/candidate-commit.json": "D1AD140CDD2A4902E32947B7CCF5775A846BF72074003D827EB7E56B5D3C1CF4",
+    "history/v3/inputs/configuration.json": "E0436F0E5C6079D258B0FBF85B6DF20931DF2E836DAF2C5029A558148E36C619",
+    "history/v3/inputs/device-ack-original.stdout": "E7FEB945B571F999291A8BB767278D4715F0EF7CDC4794B68DCDE2D826C91133",
+    "history/v3/inputs/device-admission.json": "CDCC73F42F55AAE030E27B73D1A3B23F293550CF5D7FC11071828A83E67C8FB6",
+    "history/v3/inputs/device-original.jsonl": "E7FEB945B571F999291A8BB767278D4715F0EF7CDC4794B68DCDE2D826C91133",
+    "history/v3/inputs/preflight-attempt.json": "6A4040CA0E97BE56C2F99412D7503B19B529F7D04AA34F3E5C760A73DAB00551",
+    "history/v3/inputs/prior-background-failure.json": "A79F90EBD971F93FB969CA166C9A40AE5DDB44F2F654874DDA6C84D29F537D71",
+    "history/v3/inputs/prior-r03-original.jsonl": "6C7EF2F091E0053D89505EE93FFC5E325EE321DC7CC2BBE3454D31954B5A8E90",
+    "history/v3/inputs/prior-r03-result.json": "2F64EC58885C26314A024B119A0CD246BE117439E86B52A241B3BC907D6051BA",
+    "history/v3/inputs/prior-resume-failure.json": "453931EB225D24A12191BC78651993F3B8DB114CD9254D091E1EFE0F488D333E",
+    "history/v3/inputs/prior-review.json": "FA9CFF98504DCB84FDDCF6359AE32E5DF2245558F78431AB90DE2779BC9F5330",
+    "history/v3/inputs/runner-template.json": "6539DD70FD0864AB5D1CD74F1FF146CA78FC3200CE5A99CBA913F132B21BC31E",
+    "history/v3/preflight/result.json": "E532BE2F2B30D332DDAFDE10181E034BE94A266AFBBAA40016FAE02A1B2CA98B"
+  },
+  "commands": [
+    {
+      "id": "CMD-P35-OFFLINE",
+      "command": "python -I -S -B -X utf8 Tools/ota/p35-closeout/evaluate.py --inputs docs/acceptance-contracts/P3-5-v4/inputs/originals.json --out docs/acceptance-contracts/P3-5-v4/execution/result.json --contract docs/acceptance-contracts/P3-5-v4.contract.json --matrix docs/acceptance-contracts/P3-5-v4/evidence-matrix.json",
+      "exit_code": 1,
+      "output_evidence": "execution/offline.stdout"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-CONFIG",
+      "path": "approved/configuration.json",
+      "size": 3973,
+      "sha256": "E0436F0E5C6079D258B0FBF85B6DF20931DF2E836DAF2C5029A558148E36C619"
+    },
+    {
+      "id": "ART-TEMPLATE",
+      "path": "inputs/runner-template.json",
+      "size": 3534,
+      "sha256": "6539DD70FD0864AB5D1CD74F1FF146CA78FC3200CE5A99CBA913F132B21BC31E"
+    },
+    {
+      "id": "ART-PLAN",
+      "path": "pipeline-01/plan.json",
+      "size": 3528,
+      "sha256": "7FF4F57404CCA646DAD6CABD6F31F7F3B0887823ABF17079B4D3C8EB7E70BF29"
+    },
+    {
+      "id": "ART-RESULT",
+      "path": "pipeline-01/result.json",
+      "size": 248,
+      "sha256": "75D3B584D7ED293588DFBF3B0330DE9D58559EE0729999F0DCEA1D0EB1CC40AF"
+    },
+    {
+      "id": "ART-DEVICE",
+      "path": "pipeline-01/device/result.json",
+      "size": 74229,
+      "sha256": "7F433FF3176239F45252620D5AACA0E3B0BA1C28F7F2DB34A25033BDCDC74F56"
+    },
+    {
+      "id": "ART-CAPTURE",
+      "path": "pipeline-01/device/app-capture.jsonl",
+      "size": 7090790,
+      "sha256": "0DF368F8D43D6CF79ADAEF096A47F7EB48BE012AE8748D8462EE6FFD1F87C22E"
+    },
+    {
+      "id": "ART-INTEGRITY",
+      "path": "pipeline-01/device/app-capture-integrity.json",
+      "size": 1520,
+      "sha256": "FECC66071EEDB499884B54288D708EE0D404C8E5899E96497631EA2E6A205AE8"
+    },
+    {
+      "id": "ART-ACK",
+      "path": "pipeline-01/device/live-stream.stdout",
+      "size": 7090790,
+      "sha256": "0DF368F8D43D6CF79ADAEF096A47F7EB48BE012AE8748D8462EE6FFD1F87C22E"
+    },
+    {
+      "id": "ART-DIAGNOSTIC",
+      "path": "pipeline-01/device/logcat-diagnostic-integrity.json",
+      "size": 187538,
+      "sha256": "195103668125D449C4FE8A39B36BC507650F4BA1E4B0237AF69C414C4399DF9B"
+    },
+    {
+      "id": "ART-TARGET",
+      "path": "pipeline-01/target.json",
+      "size": 2699,
+      "sha256": "418495B884666111BA070B62639C6BBF8873EA5AD75CC57EEB50AF14B1EC8CCD"
+    },
+    {
+      "id": "ART-RELEASE",
+      "path": "pipeline-01/build/originals/prepared/release-evidence.json",
+      "size": 2802,
+      "sha256": "330C5BF7FDA1C0642899781BCB992E75F2E146102B3FAA813466D18BFFD8F3C2"
+    },
+    {
+      "id": "ART-CHANNEL-RESTORE",
+      "path": "pipeline-01/channels-restored.json",
+      "size": 617,
+      "sha256": "F692A02EFCD3912752DB783A5CB1E7B6E90ACAE6D22183FA2F63C8E50A8F6F56"
+    },
+    {
+      "id": "ART-VARIABLE-RESTORE",
+      "path": "pipeline-01/build/variables-restored.json",
+      "size": 119,
+      "sha256": "5BBAE953A1F47416C5232278DE1427C79554FEA0CB5EDA87B1FE8813CA4AF81A"
+    },
+    {
+      "id": "ART-ORIGINALS",
+      "path": "inputs/originals.json",
+      "size": 968,
+      "sha256": "F1A5FDA063DABB069A6EF63C4EEE26921BD0E25665D59E2FE08AA22E21E6D189"
+    }
+  ]
+}

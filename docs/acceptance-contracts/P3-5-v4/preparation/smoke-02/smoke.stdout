@@ -1,0 +1,23 @@
+packet-integrity PASS
+source-identity PASS
+ten-original-manifest PASS
+supplement-original-manifest PASS
+ci-red-green PASS
+release-assets PASS
+ten-recoveries PASS
+supplements PASS
+mcu-readbacks PASS
+cleanup-and-failures PASS
+negative-controls PASS
+build-originals PASS
+supplemental-failure-lineage PASS
+prior-review-integrity PASS
+supplement-source PASS
+remediation-inventory PASS
+zero-position-and-negative-controls PASS
+firmware-ci-originals PASS
+mcu-originals PASS
+failure-and-restoration-lineage PASS
+mobile-chain PASS
+admission PASS
+{"result": "PASS", "criteria": {"C-ADMISSION": {"result": "PASS", "observed": true, "checks": ["packet-integrity", "source-identity", "supplement-source", "prior-review-integrity", "admission"]}, "C-MOBILE-CHAIN": {"result": "PASS", "observed": true, "checks": ["packet-integrity", "source-identity", "supplement-source", "prior-review-integrity", "mobile-chain", "release-assets", "ci-red-green", "ten-recoveries"]}, "C-FINAL-IDENTITY": {"result": "PASS", "observed": true, "checks": ["packet-integrity", "source-identity", "supplement-source", "prior-review-integrity", "ten-recoveries", "mcu-readbacks", "mcu-originals"]}, "C-NO-UPDATE": {"result": "PASS", "observed": true, "checks": ["packet-integrity", "source-identity", "supplement-source", "prior-review-integrity", "ten-recoveries", "zero-position-and-negative-controls"]}, "C-INTEGRITY": {"result": "PASS", "observed": true, "checks": ["packet-integrity", "source-identity", "supplement-source", "prior-review-integrity", "ten-original-manifest", "supplement-original-manifest", "remediation-inventory", "negative-controls"]}, "C-CLEANUP": {"result": "PASS", "observed": true, "checks": ["packet-integrity", "source-identity", "supplement-source", "prior-review-integrity", "cleanup-and-failures", "supplemental-failure-lineage", "failure-and-restoration-lineage", "build-originals", "firmware-ci-originals"]}, "C-COVERAGE": {"result": "PASS", "observed": true, "checks": ["packet-integrity", "source-identity", "supplement-source", "prior-review-integrity", "ten-recoveries", "supplements", "zero-position-and-negative-controls"]}, "C-PUBLICATION": {"result": "PASS", "observed": true, "checks": ["packet-integrity", "source-identity", "supplement-source", "prior-review-integrity", "build-originals", "firmware-ci-originals", "mobile-chain"]}, "R01": {"result": "PASS", "observed": true, "checks": ["packet-integrity", "source-identity", "supplement-source", "prior-review-integrity", "ten-recoveries"]}, "R02": {"result": "PASS", "observed": true, "checks": ["packet-integrity", "source-identity", "supplement-source", "prior-review-integrity", "ten-recoveries"]}, "R03": {"result": "PASS", "observed": true, "checks": ["packet-integrity", "source-identity", "supplement-source", "prior-review-integrity", "ten-recoveries"]}, "R04": {"result": "PASS", "observed": true, "checks": ["packet-integrity", "source-identity", "supplement-source", "prior-review-integrity", "ten-recoveries"]}, "R05": {"result": "PASS", "observed": true, "checks": ["packet-integrity", "source-identity", "supplement-source", "prior-review-integrity", "ten-recoveries"]}, "R06": {"result": "PASS", "observed": true, "checks": ["packet-integrity", "source-identity", "supplement-source", "prior-review-integrity", "ten-recoveries"]}, "R07": {"result": "PASS", "observed": true, "checks": ["packet-integrity", "source-identity", "supplement-source", "prior-review-integrity", "ten-recoveries"]}, "R08": {"result": "PASS", "observed": true, "checks": ["packet-integrity", "source-identity", "supplement-source", "prior-review-integrity", "ten-recoveries"]}, "R09": {"result": "PASS", "observed": true, "checks": ["packet-integrity", "source-identity", "supplement-source", "prior-review-integrity", "ten-recoveries"]}, "R10": {"result": "PASS", "observed": true, "checks": ["packet-integrity", "source-identity", "supplement-source", "prior-review-integrity", "ten-recoveries"]}}}

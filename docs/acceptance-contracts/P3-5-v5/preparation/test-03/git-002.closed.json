@@ -1,0 +1,42 @@
+{
+  "argv": [
+    "git",
+    "--no-optional-locks",
+    "-c",
+    "core.autocrlf=true",
+    "-c",
+    "core.hooksPath=C:/Users/SU/.git-hooks",
+    "-c",
+    "user.name=eitan",
+    "-c",
+    "user.email=example@ggbond",
+    "-c",
+    "gc.auto=0",
+    "-c",
+    "maintenance.auto=false",
+    "diff",
+    "--cached",
+    "--name-only",
+    "-z"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 831045002651600,
+  "ended_monotonic_ns": 831045342769500,
+  "stdout": {
+    "path": ".cache\\p35-formal-closeout-20261102\\test-03\\git-002.stdout",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": ".cache\\p35-formal-closeout-20261102\\test-03\\git-002.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

@@ -31,6 +31,8 @@ This index and its topic records are operational history, not acceptance inputs.
 
 | P35-SMOKE-FOLLOWUP-20261028 | Supersedes the pending software-review state above: source `392158684d2c2e9492e6140ca41e86bb7f118efc`, branch `dev/flutter/p35-smoke-followup-20261027`. UI, file-route and lifecycle/R01 bounded independent software reviews PASS. Exact-source endpoint-bound nonpublishing APK/EXE run 40652822499/1 passes; root is preparing authorized main integration and targeted phone follow-up. Historical red results and immutable archives retained. No formal P3-5/P5, ten-disconnect or production qualification claimed. | [Root review and follow-up](../ota-exec-notes/Flutter-release-fastpath-2026-10-26/smoke-independent-review-20261027.md#authorized-integration-and-device-follow-up-2026-10-28) |
 
+| P35-ACCEPTANCE-20261103 | Independent P3-5-v5 PASS: 18 required offline EXECUTED PASS criteria, source `54a860d122afba3c7361e0b77a50c29905f37ad2`, bundle `62a018aa9e84cc857b456686c9e6e1298155c9de`, local closeout `b7e88e1b34086b43c545e4cc204691c0e4f724ee`. Original 30309 ten-window group and separate 30313 zero-durable supplement remain distinct; v4 and earlier failures are preserved. User authorized PR/CI/merge delivery of `dev/flutter/p35-automation-20261029`; the PR merge receipt binds final main delivery. No new device test, P5/endurance or production release. | [P3-5 acceptance and delivery](../ota-exec-notes/P3-5-local-closeout-2026-11-02.md#mainline-delivery-authorization) |
+
 Add one row when a durable cross-agent handoff is needed. Link an existing task
 note instead of duplicating its evidence. Include an exact source commit when the
 record has not yet reached main; do not use a machine-private path as its only

@@ -1,0 +1,6 @@
+{
+  "outcome": "PASS",
+  "uniqueObjects": 6786,
+  "findings": [],
+  "limitation": "Bounded private-key/token signature scan, not proof of absence of every possible secret; originals were separately sanitized at capture. No credential values printed."
+}

@@ -7,6 +7,7 @@ import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart' show BluetoothDevice, BluetoothConnectionState;
 import 'package:get/get.dart' hide Response;
 import 'package:path_provider/path_provider.dart';
 
@@ -16,6 +17,7 @@ import '../ota/ota_background.dart';
 import '../ota/ota_ble_transport.dart';
 import '../ota/ota_device_info.dart';
 import '../ota/ota_diagnostics.dart';
+import '../ota/ota_p35_recorder.dart';
 import '../ota/ota_experiment_config.dart';
 import '../ota/ota_phy.dart';
 import '../ota/ota_download.dart';
@@ -108,6 +110,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     OtaPhyClient? phyClient,
     OtaBackgroundClient? backgroundClient,
     void Function()? onOpenTask,
+    OtaP35Recorder? p35Recorder,
+    bool Function()? p35PlatformCheck,
   })  : _senderWindowSegments = RangeError.checkValueInInterval(
           senderWindowSegments ??
               ((enablePipeline ?? ((linkProfile ?? OtaLinkProfile.build).pipeline ||
@@ -124,6 +128,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         _phyClient = phyClient ?? OtaPhyClient(),
         _background = backgroundClient ?? OtaBackgroundClient(),
         _onOpenTask = onOpenTask,
+        p35 = p35Recorder ?? OtaP35Recorder(),
+        _p35PlatformCheck = p35PlatformCheck ?? (() => Platform.isAndroid),
         _notifyImpl = onNotify,
         _downloadFileGate = downloadFileGate ?? OtaFilePathGate.shared,
         _dio = dio ??
@@ -161,6 +167,103 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   final OtaPhyClient _phyClient;
   final OtaBackgroundClient _background;
   final void Function()? _onOpenTask;
+  final OtaP35Recorder p35;
+  // Platform-only injection lets host regressions exercise the real recorder route.
+  final bool Function() _p35PlatformCheck;
+  StreamSubscription<BluetoothConnectionState>? _p35Connection;
+  String? _p35Address, _p35LatestUrl;
+  DeviceOtaInfo? _p35Identity;
+  int? _identityLinkGeneration;
+  BluetoothDevice? _p35Device;
+  Map<String, Object?> _p35Transfer = {};
+  bool _p35RuntimeEvidence = false;
+
+  Map<String, Object?> _p35Snapshot() {
+    // Re-read the canonical cache after async open and on every heartbeat/event.
+    final connected = _p35Device?.isConnected ?? false;
+    return {
+      'deviceAddress': _deviceInfoAddress ?? _assetOwnerAddress ?? _p35Address,
+      'phase': phase.name,
+      'currentVersionCode': _p35Identity?.currentVersionCode ?? 0,
+      'currentImageSha256': _p35Identity?.currentImageSha256Hex,
+      'targetVersionCode': _latestInfo?.versionCode ?? 0,
+      'targetImageSha256': _latestInfo?.targetImageSha256,
+      'packageSha256': _asset?.sha256,
+      'packageBytes': _asset?.sizeBytes ?? 0,
+      'packageVerified': _verified != null,
+      'releaseId': _releaseId,
+      'latestUrl': _p35LatestUrl,
+      'protocol': _p35Transfer['protocol'],
+      'session': _p35Transfer['session'] ?? 0,
+      'durable': _p35Transfer['durable'] ?? 0,
+      'bitmap': _p35Transfer['bitmap'],
+      'sendOffset': _p35Transfer['sendOffset'],
+      'linkConnected': connected,
+      // A cached identity after disconnect is historical, not a new GET_INFO.
+      'freshConnection': connected && hasCurrentDeviceIdentity(_p35Address),
+      if (_p35RuntimeEvidence) 'runtime': {
+        'backgrounded': _appBackgrounded,
+        'acquired': backgroundAcquired,
+        'reason': backgroundUnavailableReason,
+        'active': isUpgrading,
+        'paused': _foregroundPaused,
+        'ownerEpoch': _ownerEpoch,
+        'revision': _snapshotRevision,
+        'task': _taskKey?.toMap(),
+      },
+    };
+  }
+
+  // Read-only oracle shared by the recorder and host service regressions.
+  @visibleForTesting
+  int? get identityLinkGeneration => _identityLinkGeneration;
+
+  @visibleForTesting
+  bool hasCurrentDeviceIdentity(String? address) =>
+      address != null && _deviceInfo != null && _deviceInfoAddress == address &&
+      _identityLinkGeneration != null &&
+      _identityLinkGeneration == _ble.otaLinkGeneration(address);
+
+  Future<bool> startP35Recording({bool reliable = false}) async {
+    final address = _deviceInfoAddress;
+    if (_closed || _isUpgrading.value || _ownerDone != null ||
+        address == null || _deviceInfo == null || p35.captureId != null ||
+        OtaDiagnostics.current.enabled || !_p35PlatformCheck()) {
+      return false;
+    }
+    _p35Address = address.toLowerCase();
+    _p35Identity = _deviceInfo;
+    final device = _ble.otaDeviceForObservation(address);
+    _p35Device = device;
+    _p35RuntimeEvidence = reliable;
+    final started = await p35.start(_p35Snapshot, reliable: reliable,
+        stateSchema: reliable ? 2 : 1);
+    if (_closed) { await p35.stop(); return false; }
+    if (!started) return false;
+    _p35Connection = device.connectionState.listen((_) {
+      p35.record();
+    }, onError: (Object _) => p35.fail('connection-stream-failed'));
+    return true;
+  }
+
+  /// Reuses the normal connector and GET_INFO gate; never starts a transfer.
+  Future<bool> reconnectP35Target() async {
+    final address = _p35Address;
+    if (!p35.healthy || _closed || isUpgrading || _ownerDone != null ||
+        address == null) {
+      return false;
+    }
+    if (!await _ble.connectOtaDeviceByAddress(address) || _closed) return false;
+    return await readDeviceInfo(address) != null;
+  }
+
+  Future<void> stopP35Recording() async {
+    if (isUpgrading || _ownerDone != null) return;
+    await _p35Connection?.cancel();
+    _p35Connection = null;
+    await p35.stop();
+    _p35Device = null;
+  }
   final String _processNonce = List<int>.generate(16, (_) => Random.secure().nextInt(256))
       .map((byte) => byte.toRadixString(16).padLeft(2, '0')).join();
   final _backgroundReady = false.obs;
@@ -350,6 +453,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       ++_recoveryEpoch;
       if (!backgroundAcquired) _safeBackgroundFallback();
     }
+    p35.record();
   }
 
   Future<void> cancelCurrentTask({bool keepPackage = true}) async {
@@ -454,8 +558,9 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   OtaBleTransport? _transport;
   final _abortingTransports = <OtaBleTransport, Future<void>>{};
 
-  Future<void> _abortTransportBestEffort(OtaBleTransport transport) =>
-      _abortingTransports[transport] ??= transport.abortBestEffort();
+  Future<void> _abortTransportBestEffort(OtaBleTransport transport,
+      {bool allowResync = true}) =>
+      _abortingTransports[transport] ??= transport.abortBestEffort(allowResync: allowResync);
   /// 当前 [_transport] 绑定时的物理链路快照（RC3-08⑦）。
   ///
   /// transport 对象活着不等于底层链路还是绑定时那一条：后台期间系统
@@ -529,7 +634,10 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
     _snapshotWorker = everAll([_phase, _upgradeStatus, _downloadProgress, _isUpgrading,
-      _durableProgress, _backgroundReady, _backgroundReason], (_) => _publishSnapshot());
+      _durableProgress, _backgroundReady, _backgroundReason], (_) {
+        _publishSnapshot();
+        p35.record();
+      });
     _upgradeStatus.value = isFirmwareServiceConfigured
         ? '固件服务已就绪'
         : '固件服务未配置';
@@ -541,6 +649,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     _cancelGeneration++;
     WidgetsBinding.instance.removeObserver(this);
     _snapshotWorker?.dispose();
+    unawaited(_p35Connection?.cancel());
+    unawaited(p35.stop());
     _activeLatestToken?.cancel();
     _activeDownloadToken?.cancel();
     final gate = _foregroundGate;
@@ -629,6 +739,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         _deviceInfo = info;
         // 快照绑定来源地址（RC3-08）：换设备连接时旧快照失效。
         _deviceInfoAddress = deviceAddress;
+        _identityLinkGeneration = _boundLinkGeneration;
+        if (_p35Address == deviceAddress.toLowerCase()) _p35Identity = info;
         // RC3-08⑤/12⑤/12⑦：资产失效以「签署这批资产的身份/地址」为
         // 基准，不是「上一次快照」。旧写法捕获 previousInfo/
         // previousAddress 后立即把两者置空，一旦中间夹了一次读取失败，
@@ -657,6 +769,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
             if (generation != _cancelGeneration) return null;
           }
         }
+        p35.record('identity');
         return info;
       } on OtaDeviceIdentityException catch (e) {
         _deviceInfo = null;
@@ -749,6 +862,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       _upgradeProgress.value = 0.0;
 
       final uri = _latestUriBuilder(info, appVersionCode, channel);
+      _p35LatestUrl = Uri(scheme: uri.scheme, host: uri.host, port: uri.hasPort ? uri.port : null,
+          path: uri.path).toString();
       final response = await _getLatestWithRetry(uri, gen);
       if (response == null) return null; // 取消：静默退出，不发布状态
       final body = _readJsonObject(response.data);
@@ -773,7 +888,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           _phase.value = OtaPhase.failed;
           return null;
         }
-        _upgradeStatus.value = '固件已是最新版本';
+        _upgradeStatus.value = '暂无可用更新';
         _phase.value = OtaPhase.idle;
         return null;
       }
@@ -832,7 +947,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       if (terminal != null) {
         _terminalState.value = terminal;
         _clearFirmwareInfo();
-        _upgradeStatus.value = '设备不兼容: ${terminal.code}';
+        _upgradeStatus.value = terminal.userMessage;
         _notify('提示', terminal.userMessage);
         _phase.value = OtaPhase.failed;
         return null;
@@ -1195,7 +1310,18 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       _phase.value = OtaPhase.transferring;
       // P3-4 链路观测：本轮升级的单一时钟域实例（发现→绑定→复核→传输
       // 全链路同源时间戳；重启探测用独立 probe 实例，见 _waitForTargetIdentity）。
-      final linkStats = OtaLinkStats(label: isPrefixProbe ? 'prefix-probe' : 'upgrade', device: deviceAddress);
+      final observationOwner = _ownerEpoch;
+      final linkStats = OtaLinkStats(label: isPrefixProbe ? 'prefix-probe' : 'upgrade', device: deviceAddress,
+        onTransferState: !p35.active ? null : (sample) {
+          if (!p35.active || !isUpgrading || _ownerEpoch != observationOwner ||
+              generation != _cancelGeneration || _closed ||
+              _p35Address != deviceAddress.toLowerCase()) {
+            return;
+          }
+          _p35Transfer = sample;
+          p35.record(sample['event']! as String);
+          _p35Transfer = {...sample, 'sendOffset': null};
+        });
       OtaBleTransport? activeTransport;
       OtaRadioLease? scanLease;
       OtaRadioLease? priorityLease;
@@ -1363,6 +1489,9 @@ class OtaService extends GetxController with WidgetsBindingObserver {
             'deviceAddress': deviceAddress,
           })}');
         }
+        _identityLinkGeneration = _boundLinkGeneration;
+        if (_p35Address == deviceAddress.toLowerCase()) _p35Identity = recheck;
+        p35.record('identity');
 
         // ETU 包字节与身份已在上锁后就地校验（RC2-04）。
 
@@ -1494,6 +1623,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
             // 刷新本地快照为升级后身份。
             _deviceInfo = outcome.info;
             _deviceInfoAddress = deviceAddress;
+            _identityLinkGeneration = outcome.identityLinkGeneration;
+            if (_p35Address == deviceAddress.toLowerCase()) _p35Identity = outcome.info;
             diagnosticCompleted = true;
             if (diagnostics.enabled) {
               emitOtaObservation('OTA_IDENTITY ${jsonEncode({
@@ -1504,6 +1635,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
               })}');
             }
             _phase.value = OtaPhase.completed;
+            p35.record('identity');
             _upgradeStatus.value =
                 '固件升级完成: 设备已运行 ${latest.versionName}（vcode ${latest.versionCode}）';
             return true;
@@ -1959,7 +2091,9 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       // MONO_ABORT_BEGIN→MONO_ABORT_DONE 之差可观测。
       otaMonoLog('MONO_ABORT_BEGIN', code: code);
       try {
-        await _abortTransportBestEffort(transport);
+        // Recheck already rejected this binding/identity. Cancellation must
+        // not use it to launch another recovery query or revive DATA.
+        await _abortTransportBestEffort(transport, allowResync: false);
       } finally {
         otaMonoLog('MONO_ABORT_DONE', code: code);
       }
@@ -2480,7 +2614,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
                 target.currentImageSha256Hex == latest.targetImageSha256) {
               resolvedIdentity = true;
               // 目标身份确认：连接已不需要，身份交给主流程。
-              return _RebootOutcome(_RebootKind.targetVerified, info: target);
+              return _RebootOutcome.targetVerified(
+                  info: target, identityLinkGeneration: connectedGeneration);
             }
             // 旧身份/中间态：MCU 尚未重启完成，本轮连接由 finally
             // 统一释放后继续轮询。
@@ -2799,6 +2934,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   }
 
   void _clearFirmwareInfo() {
+    _p35Transfer = {};
     _latestInfo = null;
     _asset = null;
     _releaseId = null;
@@ -2964,11 +3100,16 @@ enum _RebootKind {
 
 /// [_RebootOutcome] 见 OtaService._waitForTargetIdentity。
 class _RebootOutcome {
-  const _RebootOutcome(this.kind, {this.info});
+  const _RebootOutcome(this.kind) : info = null, identityLinkGeneration = null;
+
+  const _RebootOutcome.targetVerified({required this.info,
+    required this.identityLinkGeneration}) : kind = _RebootKind.targetVerified;
 
   final _RebootKind kind;
   /// targetVerified 时携带升级后的设备身份快照。
   final DeviceOtaInfo? info;
+  // Captured by the probe and checked after GET_INFO, never sampled at publication.
+  final int? identityLinkGeneration;
 }
 
 /// 已验证的下载包（PR12）：绑定 assetId/releaseId/sha256/size/versionCode
@@ -3036,6 +3177,10 @@ class OtaTerminalState {
         return '无法识别设备型号，请确认连接的是 E-Track 码表';
       case 'CHANNEL_STOPPED':
         return '固件通道已停发，请稍后再试';
+      case 'BACKEND_UNAVAILABLE':
+        return '固件服务暂不可用，请稍后重试';
+      case 'RATE_LIMITED':
+        return '检查更新过于频繁，请稍后重试';
       default:
         return message;
     }

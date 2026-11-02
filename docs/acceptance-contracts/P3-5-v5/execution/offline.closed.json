@@ -1,0 +1,39 @@
+{
+  "argv": [
+    "python",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "Tools/ota/p35-closeout/evaluate.py",
+    "--inputs",
+    "docs/acceptance-contracts/P3-5-v5/inputs/originals.json",
+    "--out",
+    "docs/acceptance-contracts/P3-5-v5/execution/result.json",
+    "--contract",
+    "docs/acceptance-contracts/P3-5-v5.contract.json",
+    "--matrix",
+    "docs/acceptance-contracts/P3-5-v5/evidence-matrix.json"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 831277419325400,
+  "ended_monotonic_ns": 831320843180800,
+  "stdout": {
+    "path": "docs\\acceptance-contracts\\P3-5-v5\\execution\\offline.stdout",
+    "bytes": 3978,
+    "sha256": "5201b77d6241621983e4962f4a19cd51474cf4b7e1214e0c77a928c459de9b4c"
+  },
+  "stderr": {
+    "path": "docs\\acceptance-contracts\\P3-5-v5\\execution\\offline.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

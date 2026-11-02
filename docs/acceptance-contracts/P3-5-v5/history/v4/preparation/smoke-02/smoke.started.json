@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "python",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "Tools/ota/p35-closeout/evaluate.py",
+    "--inputs",
+    "docs/acceptance-contracts/P3-5-v4/inputs/originals.json",
+    "--out",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p35-formal-closeout-20261102\\smoke-02\\result.json"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source",
+  "monotonic_ns": 830274680489400,
+  "stdin_sha256": null
+}

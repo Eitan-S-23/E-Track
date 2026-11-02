@@ -432,50 +432,111 @@ void main() {
     expect(await pkg!.length(), bytes.length);
   });
 
-  test('BACKEND_UNAVAILABLE 三次尝试耗尽 → retryableLater 终态并清资产',
-      () async {
-    final tempDir = tempFirmwareDir();
+  test('NO_UPDATE clears the previous package and retains repeatable idle feedback', () async {
+    final dir = tempFirmwareDir();
     final bytes = assetBytes(1024);
-    final ble = _FakeBle(infoPayload);
-    // 第一轮 latest 正常（建立资产）；第二轮 check：503 三连（重试耗尽）。
+    await File('${dir.path}${Platform.pathSeparator}$pkgName').writeAsBytes(bytes);
+    const noUpdate = '{"schemaVersion":2,"requestId":"none",'
+        '"updateAvailable":false,"errorCode":"NO_UPDATE"}';
     final latest = latestDio([
       _LatestBehavior.ok(latestBody(bytes)),
-      _LatestBehavior.status(503,
-          body: '{"errorCode":"BACKEND_UNAVAILABLE","retryAfter":1}'),
-      _LatestBehavior.status(503,
-          body: '{"errorCode":"BACKEND_UNAVAILABLE","retryAfter":1}'),
-      _LatestBehavior.status(503,
-          body: '{"errorCode":"BACKEND_UNAVAILABLE","retryAfter":1}'),
+      _LatestBehavior.ok(noUpdate),
+      _LatestBehavior.ok(noUpdate),
     ]);
-    final download = downloadDio([]);
-    final service = makeService(
-      ble: ble,
-      latest: latest,
-      download: download,
-      firmwareDir: tempDir,
-    );
     Get.put<AppUpdateService>(_FakeAppUpdateService());
-
+    final service = makeService(ble: _FakeBle(infoPayload), latest: latest,
+        download: downloadDio([]), firmwareDir: dir);
     await service.readDeviceInfo('AA:BB');
     expect(await service.checkFirmwareUpdate(), isNotNull);
-    expect(service.latestInfo, isNotNull);
+    expect(service.phase, OtaPhase.readyToInstall);
+    expect(service.downloadedFirmwareFile, isNotNull);
+    for (var attempt = 0; attempt < 2; attempt++) {
+      expect(await service.checkFirmwareUpdate(), isNull);
+      expect(service.phase, OtaPhase.idle);
+      expect(service.upgradeStatus, '暂无可用更新');
+      expect(service.latestInfo, isNull);
+      expect(service.downloadedFirmwareFile, isNull);
+      expect(service.terminalState, isNull);
+      expect(service.isUpgrading, isFalse);
+    }
+    expect((latest.httpClientAdapter as _LatestMockAdapter).requestCount, 3);
+  });
 
-    // 第二次 check：503 → 自动重试 2 次（退避 1s/1s，真实时间）→ 耗尽。
-    final latestAdapter = latest.httpClientAdapter as _LatestMockAdapter;
-    expect(await service.checkFirmwareUpdate(), isNull);
-    // 3 次尝试全部发出（1 初次 + 2 重试）。
-    expect(latestAdapter.requestCount, 4);
+  for (final failure in [
+    (status: 503, code: 'BACKEND_UNAVAILABLE', message: '固件服务暂不可用，请稍后重试'),
+    (status: 429, code: 'RATE_LIMITED', message: '检查更新过于频繁，请稍后重试'),
+  ]) {
+    test('${failure.code} exhausted retries retain accurate feedback and clear assets',
+        () async {
+      final tempDir = tempFirmwareDir();
+      final bytes = assetBytes(1024);
+      final ble = _FakeBle(infoPayload);
+      // Establish an asset, exhaust the bounded retries, then allow a manual check.
+      final latest = latestDio([
+        _LatestBehavior.ok(latestBody(bytes)),
+        for (var attempt = 0; attempt < 3; attempt++)
+          _LatestBehavior.status(failure.status,
+              body: '{"errorCode":"${failure.code}","retryAfter":1}'),
+        _LatestBehavior.ok(latestBody(bytes)),
+      ]);
+      final download = downloadDio([]);
+      final service = makeService(
+        ble: ble,
+        latest: latest,
+        download: download,
+        firmwareDir: tempDir,
+      );
+      Get.put<AppUpdateService>(_FakeAppUpdateService());
 
-    final terminal = service.terminalState;
-    expect(terminal, isNotNull);
-    expect(terminal!.code, 'BACKEND_UNAVAILABLE');
-    expect(terminal.retryableLater, isTrue);
-    // 资产已清：旧清单可能已过期（RC2-04）。
-    expect(service.latestInfo, isNull);
-    expect(service.downloadedFirmwareFile, isNull);
-    // retryableLater 不闭锁入口。
-    expect(service.isUpgrading, isFalse);
-  }, timeout: const Timeout(Duration(seconds: 20)));
+      await service.readDeviceInfo('AA:BB');
+      expect(await service.checkFirmwareUpdate(), isNotNull);
+      expect(service.latestInfo, isNotNull);
+
+      final latestAdapter = latest.httpClientAdapter as _LatestMockAdapter;
+      expect(await service.checkFirmwareUpdate(), isNull);
+      expect(latestAdapter.requestCount, 4);
+
+      final terminal = service.terminalState;
+      expect(terminal, isNotNull);
+      expect(terminal!.code, failure.code);
+      expect(terminal.retryableLater, isTrue);
+      expect(terminal.userMessage, failure.message);
+      expect(service.upgradeStatus, failure.message);
+      expect(service.phase, OtaPhase.failed);
+      expect(service.latestInfo, isNull);
+      expect(service.downloadedFirmwareFile, isNull);
+      expect(service.isUpgrading, isFalse);
+      expect(await service.checkFirmwareUpdate(), isNotNull);
+      expect(latestAdapter.requestCount, 5);
+      expect(service.terminalState, isNull);
+    }, timeout: const Timeout(Duration(seconds: 20)));
+  }
+
+  for (final failure in [
+    (status: 426, code: 'CLIENT_TOO_OLD', message: '当前 App 版本过低（需 ≥ 60），请先升级 App'),
+    (status: 409, code: 'HARDWARE_INCOMPATIBLE', message: '硬件版本不兼容（需要 4，实际 3）'),
+    (status: 400, code: 'UNKNOWN_REASON', message: 'server detail'),
+  ]) {
+    test('${failure.code} keeps its typed message and identity lock', () async {
+      final latest = latestDio([
+        _LatestBehavior.status(failure.status,
+            body: '{"errorCode":"${failure.code}","message":"server detail",'
+                '"requestId":"req-reject","minAppVersionCode":60,'
+                '"requiredHardwareRevision":4,"actualHardwareRevision":3}'),
+      ]);
+      Get.put<AppUpdateService>(_FakeAppUpdateService());
+      final service = makeService(ble: _FakeBle(infoPayload), latest: latest,
+          download: downloadDio([]), firmwareDir: tempFirmwareDir());
+      await service.readDeviceInfo('AA:BB');
+      expect(await service.checkFirmwareUpdate(), isNull);
+      expect(service.phase, OtaPhase.failed);
+      expect(service.upgradeStatus, failure.message);
+      expect(service.terminalState!.requestId, 'req-reject');
+      expect(service.terminalState!.retryableLater, isFalse);
+      expect(await service.checkFirmwareUpdate(), isNull);
+      expect((latest.httpClientAdapter as _LatestMockAdapter).requestCount, 1);
+    });
+  }
 }
 
 /// fake BLE：GET_INFO mini 应答；发现/订阅/MTU 返回固定合法值。

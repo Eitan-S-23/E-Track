@@ -62,6 +62,9 @@ git worktree remove --force .cache/freeze-check/wt-<id>
 
 | P3-8-v5 | v3 | `1006c936b144151718cd5668db780502badb88d2` | `2be0540feda1aec0ca001afb8456bb7bd82183ce` | `01a9ae76c845961a7a45516cdac5d3825af7a5ce` | VALIDATION=PASS, overall=PASS(2026-10-26; seven independent offline EXECUTED PASS criteria, actual v4 predecessor and v3 origin supplied; original 2026-10-24..26 device/CI evidence, historical failures and scope limits preserved; no repeated OTA/build/download; production-fast release qualification excluded) |
 
+| P3-5-v4 | v3 | `25cb4a5ec35e498e0fec5b0c7dd671c15d0a98a5` | `5f591e2e7210c00b48fe276eea7cd73146626153` | `ed33ff16b3e060f0a037a6e421422d44f7fdbe33` | VALIDATION=PASS, overall=EVIDENCE_GAP(2026-11-02; evaluator stopped before original parsing because of caller hash-case mismatch; actual stderr/closed receipt and missing result preserved, no new device operation) |
+| P3-5-v5 | v3 | `62a018aa9e84cc857b456686c9e6e1298155c9de` | `54a860d122afba3c7361e0b77a50c29905f37ad2` | `bfef1d0169f09c58a268f39bd1ad7be3f7d473ea` | VALIDATION=PASS, overall=PASS(2026-11-02 UTC; 18 required offline EXECUTED PASS criteria, 22 original checks, actual v4 predecessor; original 30309 ten-window group plus separate 30313 zero-durable supplement, failures and limits retained; local closeout only, no physical replay, main integration or production release) |
+
 备注：
 
 - P2-6-v1 的初冻提交 `85e98a6` 已被 `d27200d`（修复证据包入库完整性）整体重写，

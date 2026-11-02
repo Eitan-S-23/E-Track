@@ -1,0 +1,183 @@
+{
+  "schema": "etrack-rerun-plan-v1",
+  "current_contract_id": "P3-5-v5",
+  "current_contract_sha256": "531941A6AB9A2339DDE4F826591761A0F0884E5AE43DFB0DF6386622C2BB1B20",
+  "previous_contract_id": "P3-5-v4",
+  "previous_contract_sha256": "449BDA804F1F2A7BB50B3E5796013B1965322DAD430FB7F5B26DF19B77EF9BC1",
+  "contract_lineage": "direct_successor",
+  "current_round_id": "P35-OFFLINE-CLOSEOUT-20261102-02",
+  "previous_round_id": "P35-OFFLINE-CLOSEOUT-20261102-01",
+  "previous_matrix_sha256": "BACE954F9395B159B4F6AB5B30B4F4A6ADDC8D0CA57B88590DB6B08100C927F2",
+  "changed_input_groups": [
+    "validation"
+  ],
+  "changed_external_inputs": [],
+  "rerun_criteria": [
+    {
+      "id": "C-ADMISSION",
+      "reasons": [
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C-MOBILE-CHAIN",
+      "reasons": [
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C-FINAL-IDENTITY",
+      "reasons": [
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C-NO-UPDATE",
+      "reasons": [
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C-INTEGRITY",
+      "reasons": [
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C-CLEANUP",
+      "reasons": [
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C-COVERAGE",
+      "reasons": [
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "R01",
+      "reasons": [
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "R02",
+      "reasons": [
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "R03",
+      "reasons": [
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "R04",
+      "reasons": [
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "R05",
+      "reasons": [
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "R06",
+      "reasons": [
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "R07",
+      "reasons": [
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "R08",
+      "reasons": [
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "R09",
+      "reasons": [
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "R10",
+      "reasons": [
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C-PUBLICATION",
+      "reasons": [
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    }
+  ],
+  "reusable_criteria": [],
+  "reuse_origins": {},
+  "required_commands": [
+    "CMD-P35-OFFLINE"
+  ],
+  "required_artifacts": [
+    "ART-ACK",
+    "ART-CAPTURE",
+    "ART-CHANNEL-RESTORE",
+    "ART-CONFIG",
+    "ART-DEVICE",
+    "ART-DIAGNOSTIC",
+    "ART-EVALUATION",
+    "ART-INTEGRITY",
+    "ART-ORIGINALS",
+    "ART-PLAN",
+    "ART-RELEASE",
+    "ART-RESULT",
+    "ART-TARGET",
+    "ART-TEMPLATE",
+    "ART-VARIABLE-RESTORE"
+  ]
+}

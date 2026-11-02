@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
@@ -117,6 +118,162 @@ void main() {
       ),
     );
     return button;
+  }
+
+  testWidgets('P35 controls expose native semantic identifiers and tap actions', (tester) async {
+    final semantics = tester.ensureSemantics();
+    try {
+      final fake = _FakeOtaService()..readResult = deviceInfoOf();
+      await pumpPage(tester, fake: fake,
+          connectedDevice: BluetoothDevice.fromId('AA:BB:CC:DD:EE:FF'));
+      for (final id in ['p35-check', 'p35-arm']) {
+        final control = find.byWidgetPredicate((w) => w is Semantics && w.properties.identifier == id);
+        expect(control, findsOneWidget);
+        final node = tester.getSemantics(control);
+        expect(node.getSemanticsData().identifier, id);
+        final actions = <SemanticsNode>[];
+        void visit(SemanticsNode node) {
+          if (node.getSemanticsData().hasAction(SemanticsAction.tap)) actions.add(node);
+          node.visitChildren((child) { visit(child); return true; });
+        }
+        visit(node);
+        // Flutter may keep the button as a child of its identifier container.
+        // The host must resolve exactly this one action, never any screen button.
+        expect(actions, hasLength(1), reason: '$id: ${node.toStringDeep()}');
+      }
+    } finally {
+      // Flutter verifies handle disposal before package:test tearDown callbacks.
+      semantics.dispose();
+    }
+  });
+
+  testWidgets('no-update feedback persists and repeated checks hide the old result',
+      (tester) async {
+    final fake = _FakeOtaService()
+      ..readResult = deviceInfoOf()
+      ..checkGate = Completer<FirmwareLatestInfo?>();
+    await pumpPage(tester, fake: fake,
+        connectedDevice: BluetoothDevice.fromId('AA:BB:CC:DD:EE:FF'));
+    final feedback = find.byKey(const ValueKey('ota-check-status'));
+    expect(feedback, findsNothing);
+
+    for (var attempt = 1; attempt <= 2; attempt++) {
+      fake.checkGate = Completer<FirmwareLatestInfo?>();
+      await tester.tap(find.widgetWithText(ElevatedButton, '检查更新'));
+      await tester.pump();
+      expect(fake.checkCalls, attempt);
+      expect(feedback, findsNothing);
+      expect(findButton(tester, '检查中...').onPressed, isNull);
+      fake.phase$.value = OtaPhase.checkingUpdate;
+      fake.status$.value = '检查固件更新中...';
+      await tester.pump();
+      expect(feedback, findsNothing);
+
+      fake.status$.value = '暂无可用更新';
+      fake.phase$.value = OtaPhase.idle;
+      fake.checkGate!.complete(null);
+      await tester.pumpAndSettle();
+      expect(tester.widget<Text>(feedback).data, '暂无可用更新');
+      expect(findButton(tester, '检查更新').onPressed, isNotNull);
+      expect(find.text('固件就绪'), findsNothing);
+      expect(find.text('开始 BLE 传输'), findsNothing);
+      await tester.pump(const Duration(seconds: 10));
+      expect(feedback, findsOneWidget);
+    }
+
+    fake.status$.value = '固件包已清理';
+    await tester.pump();
+    expect(tester.widget<Text>(feedback).data, '固件包已清理',
+        reason: 'status must be observed even when idle phase does not change');
+    final liveRegion = find.ancestor(of: feedback, matching: find.byWidgetPredicate(
+        (widget) => widget is Semantics && widget.properties.liveRegion == true));
+    expect(liveRegion, findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final otherState in ['manifest', 'cache', 'checking', 'busy', 'failed', 'terminal']) {
+    testWidgets('idle feedback is not duplicated for $otherState', (tester) async {
+      final fake = _FakeOtaService();
+      await pumpPage(tester, fake: fake);
+      fake.status$.value = '暂无可用更新';
+      switch (otherState) {
+        case 'manifest':
+          fake.latest = latestOf();
+        case 'cache':
+          fake.hasFile = true;
+        case 'checking':
+          fake.phase$.value = OtaPhase.checkingUpdate;
+        case 'busy':
+          fake.isUpgrading$.value = true;
+        case 'failed':
+          fake.phase$.value = OtaPhase.failed;
+        case 'terminal':
+          fake.terminal$.value = OtaTerminalState(code: 'CLIENT_TOO_OLD', message: 'old');
+      }
+      await tester.pump();
+      expect(find.byKey(const ValueKey('ota-check-status')), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  final phaseTitles = {
+    OtaPhase.idle: '固件状态',
+    OtaPhase.checkingUpdate: '检查固件更新中',
+    OtaPhase.downloading: '下载进度',
+    OtaPhase.verifyingDownload: '校验固件包',
+    OtaPhase.readyToInstall: '固件就绪',
+    OtaPhase.transferring: '固件传输（设备确认）',
+    OtaPhase.applying: '设备应用固件',
+    OtaPhase.waitingReboot: '等待设备重启',
+    OtaPhase.reconnectVerify: '重连并核验固件',
+    OtaPhase.cancelled: '已取消',
+    OtaPhase.failed: '操作失败',
+  };
+  for (final entry in phaseTitles.entries) {
+    testWidgets('phase heading and action gates follow ${entry.key}', (tester) async {
+      final fake = _FakeOtaService()..readResult = deviceInfoOf();
+      await pumpPage(tester, fake: fake,
+          connectedDevice: BluetoothDevice.fromId('AA:BB:CC:DD:EE:FF'));
+      final phase = entry.key;
+      final canStart = [OtaPhase.readyToInstall, OtaPhase.cancelled, OtaPhase.failed]
+          .contains(phase);
+      final busy = !canStart && phase != OtaPhase.idle;
+      fake.hasFile = true;
+      fake.downloadProgress$.value = 1;
+      fake.durableProgress$.value = 0.4;
+      fake.status$.value = 'phase detail';
+      fake.phase$.value = phase;
+      fake.isUpgrading$.value = busy;
+      await tester.pump();
+      expect(tester.widget<Text>(find.byKey(const ValueKey('ota-phase-title'))).data,
+          entry.value);
+      expect(find.text('固件升级完成'), findsNothing);
+      if (phase != OtaPhase.readyToInstall) {
+        expect(find.text('固件就绪'), findsNothing);
+      }
+      if (canStart) {
+        expect(findButton(tester, '开始 BLE 传输').onPressed, isNotNull);
+      } else {
+        expect(find.text('开始 BLE 传输'), findsNothing);
+      }
+      final cancellable = [OtaPhase.downloading, OtaPhase.verifyingDownload,
+          OtaPhase.transferring].contains(phase);
+      expect(find.text(phase == OtaPhase.transferring ? '取消升级' : '取消下载'),
+          cancellable ? findsOneWidget : findsNothing);
+      if (busy) expect(findButton(tester, '检查更新').onPressed, isNull);
+      if ([OtaPhase.verifyingDownload, OtaPhase.applying, OtaPhase.waitingReboot,
+          OtaPhase.reconnectVerify].contains(phase)) {
+        expect(tester.widget<LinearProgressIndicator>(
+            find.byType(LinearProgressIndicator)).value, isNull);
+        expect(find.textContaining('%'), findsNothing);
+      }
+      if (phase == OtaPhase.transferring) {
+        expect(find.text('40.0%'), findsOneWidget);
+        expect(find.text('设备已确认（durable）'), findsOneWidget);
+      }
+      if (phase == OtaPhase.cancelled) expect(find.text('网络下载'), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
   }
 
   testWidgets('diagnostic export is absent in the default configuration', (tester) async {
@@ -406,7 +563,7 @@ void main() {
       expect(find.text('取消升级'), findsOneWidget);
     });
 
-    testWidgets('waitingReboot：仍按传输样式渲染等待重启', (tester) async {
+    testWidgets('waitingReboot：独立重启阶段，尚未完成且不可取消', (tester) async {
       final fake = _FakeOtaService();
       await pumpPage(tester, fake: fake);
       fake.phase$.value = OtaPhase.waitingReboot;
@@ -416,11 +573,16 @@ void main() {
       // 忙碌阶段无限动画：定量 pump（RC3-02）。
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
-      expect(find.text('固件传输（设备确认）'), findsOneWidget);
+      expect(find.text('等待设备重启'), findsOneWidget);
       expect(find.text('升级包传输完成，等待设备重启...'), findsOneWidget);
+      expect(find.text('固件传输（设备确认）'), findsNothing);
+      expect(find.text('固件升级完成'), findsNothing);
+      expect(find.text('取消升级'), findsNothing);
+      expect(tester.widget<LinearProgressIndicator>(
+          find.byType(LinearProgressIndicator)).value, isNull);
     });
 
-    testWidgets('reconnectVerify：复核阶段按传输样式渲染', (tester) async {
+    testWidgets('reconnectVerify：独立身份复核阶段，尚未完成且不可取消', (tester) async {
       final fake = _FakeOtaService();
       await pumpPage(tester, fake: fake);
       fake.phase$.value = OtaPhase.reconnectVerify;
@@ -429,8 +591,13 @@ void main() {
       // 忙碌阶段无限动画：定量 pump（RC3-02）。
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
-      expect(find.text('固件传输（设备确认）'), findsOneWidget);
+      expect(find.text('重连并核验固件'), findsOneWidget);
       expect(find.text('设备已重连，复核升级结果...'), findsOneWidget);
+      expect(find.text('固件传输（设备确认）'), findsNothing);
+      expect(find.text('固件升级完成'), findsNothing);
+      expect(find.text('取消升级'), findsNothing);
+      expect(tester.widget<LinearProgressIndicator>(
+          find.byType(LinearProgressIndicator)).value, isNull);
     });
 
     testWidgets('readyToInstall：固件就绪 + 开始 BLE 传输入口', (tester) async {

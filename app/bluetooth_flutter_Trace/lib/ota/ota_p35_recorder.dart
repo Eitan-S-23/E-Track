@@ -1,0 +1,302 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:math';
+
+import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
+
+import 'ota_observation_log.dart';
+import 'ota_p35_android_log.dart';
+import 'ota_p35_stream.dart';
+
+/// Explicit, Release-capable observation only. Never drives the OTA state machine.
+/// Published lines have already been flushed to app-owned storage. A failed
+/// writer stops telemetry, not an in-flight upgrade, and cannot become healthy.
+class OtaP35Recorder {
+  OtaP35Recorder({this.directoryProvider, this.writerFactory,
+    void Function(String)? emit, this.maxBytes = 128 * 1024 * 1024,
+    this.maxPending = 256, this.maxDuration = const Duration(hours: 1)})
+      : _emit = emit ?? (Platform.isAndroid
+          ? emitP35AndroidLog : ((line) => debugPrintSynchronously(line)));
+
+  final Future<Directory> Function()? directoryProvider;
+  final Future<OtaObservationWriter> Function(File)? writerFactory;
+  final void Function(String) _emit;
+  final int maxBytes, maxPending;
+  final Duration maxDuration;
+  final status = ValueNotifier<String>('off');
+  final Stopwatch _clock = Stopwatch();
+  final List<String> _pending = [];
+  OtaObservationWriter? _writer;
+  OtaP35Stream? _stream;
+  File? logcatDiagnosticFile;
+  bool _mirrorFailed = false, _diagnosticWritten = false;
+  bool _probing = false;
+  bool get streaming => _stream != null;
+  Future<void>? _draining, _stopping;
+  Completer<void>? _opened;
+  Timer? _heartbeat, _deadline;
+  Map<String, Object?> Function()? _snapshot;
+  String? captureId, error;
+  File? file;
+  int _seq = 0, _bytes = 0, _written = 0, lost = 0;
+  int _stateSchema = 1;
+  bool _starting = false, _accepting = false, _stopRequested = false;
+  late _DigestSink _digest;
+  late ByteConversionSink _hash;
+  bool get active => _accepting;
+  bool get healthy => active && error == null;
+
+  Future<bool> start(Map<String, Object?> Function() snapshot, {bool reliable = false,
+    OtaP35Stream? stream, int stateSchema = 1}) async {
+    if (stateSchema != 1 && stateSchema != 2 || stateSchema == 2 && !reliable) return false;
+    if (_starting || active || captureId != null || _stopRequested) return false;
+    _stateSchema = stateSchema;
+    _starting = true;
+    _opened = Completer<void>();
+    status.value = 'starting';
+    try {
+      final base = await (directoryProvider?.call() ?? _defaultDirectory());
+      final root = Directory('${base.path}/p35-observations');
+      await root.create(recursive: true);
+      if (await root.list().length >= 32) throw StateError('archive-full');
+      captureId = List.generate(16, (_) => Random.secure().nextInt(256))
+          .map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+      file = File('${root.path}/$captureId.jsonl');
+      await file!.create(exclusive: true);
+      _writer = await (writerFactory?.call(file!) ?? _open(file!));
+      if (reliable) {
+        final diagnostics = Directory('${base.path}/p35-logcat-diagnostics');
+        await diagnostics.create(recursive: true);
+        logcatDiagnosticFile = File('${diagnostics.path}/$captureId.json');
+        _stream = stream ?? OtaP35Stream();
+        await _stream!.open();
+      }
+      _digest = _DigestSink();
+      _hash = sha256.startChunkedConversion(_digest);
+      final header = 'OTA_P35_CAPTURE ${jsonEncode({
+        'schema': 1, 'kind': 'open', 'captureId': captureId,
+      })}';
+      await _writer!.append(utf8.encode('$header\n'));
+      await _writer!.flush();
+      if (_stream != null) await _stream!.send(utf8.encode('$header\n'));
+      await _mirror(header);
+      if (_stopRequested) return false;
+      _snapshot = snapshot;
+      _clock.start();
+      _accepting = true;
+      status.value = 'recording';
+      record();
+      _heartbeat = Timer.periodic(const Duration(seconds: 1), (_) => record('heartbeat'));
+      _deadline = Timer(maxDuration, () {
+        _fail('duration-limit');
+        unawaited(stop());
+      });
+      return true;
+    } catch (_) {
+      _fail('open-failed');
+      final writer = _writer;
+      _writer = null;
+      try { await writer?.close(); } catch (_) { /* Failure is already latched. */ }
+      await _stream?.close();
+      return false;
+    } finally {
+      _starting = false;
+      _opened!.complete();
+    }
+  }
+
+  void record([String event = 'state']) {
+    if (!healthy) return;
+    try {
+      final row = <String, Object?>{..._snapshot!(), 'schema': _stateSchema,
+        'captureId': captureId, 'seq': ++_seq, 'monoUs': _clock.elapsedMicroseconds,
+        'event': event, 'healthy': true, 'lost': 0, 'error': null};
+      final line = 'OTA_P35_STATE ${jsonEncode(row)}\n';
+      final length = utf8.encode(line).length;
+      if (length > 3500 || _bytes + length > maxBytes || _pending.length >= maxPending) {
+        lost++;
+        _fail('capture-limit');
+        return;
+      }
+      _bytes += length;
+      _pending.add(line);
+      _drain();
+    } catch (_) {
+      lost++;
+      _fail('snapshot-failed');
+    }
+  }
+
+  void _drain() {
+    if (_draining != null) return;
+    _draining = _writePending().whenComplete(() => _draining = null);
+  }
+
+  Future<void> _writePending() async {
+    try {
+      while (_pending.isNotEmpty) {
+        final batch = List<String>.of(_pending);
+        _pending.clear();
+        final bytes = utf8.encode(batch.join());
+        await _writer!.append(bytes);
+        await _writer!.flush();
+        _hash.add(bytes);
+        _written += batch.length;
+        // Keep native publication after persistence, without a debug-print queue.
+        try {
+          if (_stream != null) await _stream!.send(bytes);
+          for (final line in batch) { await _mirror(line.trimRight()); }
+        } catch (cause) {
+          lost += _seq - _written;
+          _pending.clear();
+          _fail(cause is AndroidLogWriteFailure
+              ? 'log-write-failed:native=${cause.result}:expected=${cause.expectedBytes}'
+              : streaming ? 'live-stream-failed' : 'log-write-failed');
+          return;
+        }
+      }
+    } catch (_) {
+      lost += _seq - _written;
+      _pending.clear();
+      _fail('write-failed');
+    }
+  }
+
+  void _fail(String code) {
+    error ??= code;
+    status.value = 'failed:$error';
+    _heartbeat?.cancel();
+    _deadline?.cancel();
+    try {
+      _emit('OTA_P35_ERROR ${jsonEncode({
+        'captureId': captureId, 'error': error, 'lost': lost,
+      })}');
+    } catch (_) { /* Missing heartbeat still fails the host closed. */ }
+  }
+
+  void fail(String code) { if (active) _fail(code); }
+
+  Future<void> _diagnostic(Map<String, Object?> value) async {
+    if (_diagnosticWritten) return;
+    final destination = logcatDiagnosticFile!;
+    await destination.create(exclusive: true);
+    await destination.writeAsString(jsonEncode({
+      'schema': 1, 'captureId': captureId, 'source': 'diagnostic-only', ...value,
+    }), flush: true);
+    _diagnosticWritten = true;
+  }
+
+  Future<void> _mirror(String line) async {
+    if (streaming && _mirrorFailed) return;
+    try {
+      _emit(line);
+    } catch (cause) {
+      if (!streaming) rethrow;
+      // The primary batch was already persisted and ACKed. Preserve the exact
+      // mirror rejection once; an optional lossy sink must not stop that stream.
+      await _diagnostic({
+        'status': 'FAILED_DISABLED', 'errorType': cause.runtimeType.toString(),
+        'nativeResult': cause is AndroidLogWriteFailure ? cause.result : null,
+        'expectedBytes': cause is AndroidLogWriteFailure ? cause.expectedBytes : null,
+        'record': line, 'recordSha256': sha256.convert(utf8.encode(line)).toString(),
+      });
+      _mirrorFailed = true;
+    }
+  }
+
+  /// Logging load only: actual idle snapshots, never fake DATA/ACK or an OTA.
+  Future<void> probeIdleStream() async {
+    if (!healthy || !streaming || _probing) return;
+    _probing = true;
+    try {
+      for (var batch = 0; batch < 300; batch++) {
+        if (_stopRequested || !active) return;
+        final current = _snapshot!();
+        if (!healthy || current['phase'] != 'idle' || current['targetVersionCode'] != 0 ||
+            current['packageBytes'] != 0) {
+          throw StateError('probe requires idle/no package');
+        }
+        for (var i = 0; i < 20; i++) { record(); }
+        await _draining;
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+      }
+      if (healthy) status.value = 'recording:probe-complete:6000';
+    } catch (_) {
+      _fail('probe-failed');
+    } finally {
+      _probing = false;
+    }
+  }
+
+  Future<void> stop() {
+    _stopRequested = true;
+    return _stopping ??= _stop();
+  }
+
+  Future<void> _stop() async {
+    await _opened?.future;
+    _accepting = false;
+    _heartbeat?.cancel();
+    _deadline?.cancel();
+    await _draining;
+    final writer = _writer;
+    if (writer == null) return;
+    try {
+      _hash.close();
+      final footer = 'OTA_P35_CAPTURE ${jsonEncode({
+        'schema': 1, 'kind': 'close', 'captureId': captureId,
+        'records': _written, 'sha256': _digest.value.toString(),
+        'healthy': error == null && lost == 0 && _written == _seq,
+        'lost': lost, 'error': error,
+      })}';
+      await writer.append(utf8.encode('$footer\n'));
+      await writer.flush();
+      await _mirror(footer);
+      if (streaming) await _diagnostic({'status': 'NO_NATIVE_ERROR_OBSERVED'});
+      if (_stream != null) await _stream!.send(utf8.encode('$footer\n'));
+    } catch (_) {
+      _fail('close-failed');
+    } finally {
+      try { await writer.close(); } catch (_) { _fail('close-failed'); }
+      _writer = null;
+      await _stream?.close();
+      // A failed recorder still changes from active to closed. Notify the UI
+      // without turning its unhealthy result into a successful capture.
+      status.value = error == null ? 'closed' : 'failed:$error:closed';
+    }
+  }
+
+  static Future<Directory> _defaultDirectory() async {
+    // Android shell can retrieve these app-owned files without run-as or a
+    // debuggable APK. Uninstall/clear-data still removes them; never auto-delete.
+    final directory = Platform.isAndroid ? await getExternalStorageDirectory()
+        : await getApplicationSupportDirectory();
+    if (directory == null) throw StateError('storage-unavailable');
+    return directory;
+  }
+
+  static Future<OtaObservationWriter> _open(File file) async =>
+      _Writer(await file.open(mode: FileMode.writeOnly));
+}
+
+class _Writer implements OtaObservationWriter {
+  _Writer(this.file);
+  final RandomAccessFile file;
+  @override
+  Future<void> append(List<int> bytes) async { await file.writeFrom(bytes); }
+  @override
+  Future<void> flush() async { await file.flush(); }
+  @override
+  Future<void> close() async { await file.close(); }
+}
+
+class _DigestSink implements Sink<Digest> {
+  Digest? value;
+  @override
+  void add(Digest data) { value = data; }
+  @override
+  void close() {}
+}

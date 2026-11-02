@@ -1,0 +1,41 @@
+{
+  "argv": [
+    "python",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "Tools/acceptance/validate_bundle.py",
+    "--contract",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\docs\\acceptance-contracts\\P3-5-v5.contract.json",
+    "--matrix",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\docs\\acceptance-contracts\\P3-5-v5\\evidence-matrix.json",
+    "--repo-root",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source",
+    "--previous-contract",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\docs\\acceptance-contracts\\P3-5-v5\\history\\v4\\contract.json",
+    "--previous-matrix",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\docs\\acceptance-contracts\\P3-5-v5\\history\\v4\\matrix.json"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 831227871638700,
+  "ended_monotonic_ns": 831233745696800,
+  "stdout": {
+    "path": ".cache\\p35-formal-closeout-20261102\\freeze-02\\precheck.stdout",
+    "bytes": 89,
+    "sha256": "aca9f01eae5c12d7d155107269a31db039c323233272d18755ed9f8aecc56ffa"
+  },
+  "stderr": {
+    "path": ".cache\\p35-formal-closeout-20261102\\freeze-02\\precheck.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

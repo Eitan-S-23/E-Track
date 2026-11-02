@@ -1,0 +1,1382 @@
+{
+  "result": "PASS",
+  "criteria": {
+    "C-ADMISSION": {
+      "result": "PASS",
+      "observed": true,
+      "checks": [
+        "packet-integrity",
+        "source-identity",
+        "supplement-source",
+        "prior-review-integrity",
+        "admission"
+      ]
+    },
+    "C-MOBILE-CHAIN": {
+      "result": "PASS",
+      "observed": true,
+      "checks": [
+        "packet-integrity",
+        "source-identity",
+        "supplement-source",
+        "prior-review-integrity",
+        "mobile-chain",
+        "release-assets",
+        "ci-red-green",
+        "ten-recoveries"
+      ]
+    },
+    "C-FINAL-IDENTITY": {
+      "result": "PASS",
+      "observed": true,
+      "checks": [
+        "packet-integrity",
+        "source-identity",
+        "supplement-source",
+        "prior-review-integrity",
+        "ten-recoveries",
+        "mcu-readbacks",
+        "mcu-originals"
+      ]
+    },
+    "C-NO-UPDATE": {
+      "result": "PASS",
+      "observed": true,
+      "checks": [
+        "packet-integrity",
+        "source-identity",
+        "supplement-source",
+        "prior-review-integrity",
+        "ten-recoveries",
+        "zero-position-and-negative-controls"
+      ]
+    },
+    "C-INTEGRITY": {
+      "result": "PASS",
+      "observed": true,
+      "checks": [
+        "packet-integrity",
+        "source-identity",
+        "supplement-source",
+        "prior-review-integrity",
+        "ten-original-manifest",
+        "supplement-original-manifest",
+        "remediation-inventory",
+        "negative-controls"
+      ]
+    },
+    "C-CLEANUP": {
+      "result": "PASS",
+      "observed": true,
+      "checks": [
+        "packet-integrity",
+        "source-identity",
+        "supplement-source",
+        "prior-review-integrity",
+        "cleanup-and-failures",
+        "supplemental-failure-lineage",
+        "failure-and-restoration-lineage",
+        "build-originals",
+        "firmware-ci-originals"
+      ]
+    },
+    "C-COVERAGE": {
+      "result": "PASS",
+      "observed": true,
+      "checks": [
+        "packet-integrity",
+        "source-identity",
+        "supplement-source",
+        "prior-review-integrity",
+        "ten-recoveries",
+        "supplements",
+        "zero-position-and-negative-controls"
+      ]
+    },
+    "C-PUBLICATION": {
+      "result": "PASS",
+      "observed": true,
+      "checks": [
+        "packet-integrity",
+        "source-identity",
+        "supplement-source",
+        "prior-review-integrity",
+        "build-originals",
+        "firmware-ci-originals",
+        "mobile-chain"
+      ]
+    },
+    "R01": {
+      "result": "PASS",
+      "observed": true,
+      "checks": [
+        "packet-integrity",
+        "source-identity",
+        "supplement-source",
+        "prior-review-integrity",
+        "ten-recoveries"
+      ]
+    },
+    "R02": {
+      "result": "PASS",
+      "observed": true,
+      "checks": [
+        "packet-integrity",
+        "source-identity",
+        "supplement-source",
+        "prior-review-integrity",
+        "ten-recoveries"
+      ]
+    },
+    "R03": {
+      "result": "PASS",
+      "observed": true,
+      "checks": [
+        "packet-integrity",
+        "source-identity",
+        "supplement-source",
+        "prior-review-integrity",
+        "ten-recoveries"
+      ]
+    },
+    "R04": {
+      "result": "PASS",
+      "observed": true,
+      "checks": [
+        "packet-integrity",
+        "source-identity",
+        "supplement-source",
+        "prior-review-integrity",
+        "ten-recoveries"
+      ]
+    },
+    "R05": {
+      "result": "PASS",
+      "observed": true,
+      "checks": [
+        "packet-integrity",
+        "source-identity",
+        "supplement-source",
+        "prior-review-integrity",
+        "ten-recoveries"
+      ]
+    },
+    "R06": {
+      "result": "PASS",
+      "observed": true,
+      "checks": [
+        "packet-integrity",
+        "source-identity",
+        "supplement-source",
+        "prior-review-integrity",
+        "ten-recoveries"
+      ]
+    },
+    "R07": {
+      "result": "PASS",
+      "observed": true,
+      "checks": [
+        "packet-integrity",
+        "source-identity",
+        "supplement-source",
+        "prior-review-integrity",
+        "ten-recoveries"
+      ]
+    },
+    "R08": {
+      "result": "PASS",
+      "observed": true,
+      "checks": [
+        "packet-integrity",
+        "source-identity",
+        "supplement-source",
+        "prior-review-integrity",
+        "ten-recoveries"
+      ]
+    },
+    "R09": {
+      "result": "PASS",
+      "observed": true,
+      "checks": [
+        "packet-integrity",
+        "source-identity",
+        "supplement-source",
+        "prior-review-integrity",
+        "ten-recoveries"
+      ]
+    },
+    "R10": {
+      "result": "PASS",
+      "observed": true,
+      "checks": [
+        "packet-integrity",
+        "source-identity",
+        "supplement-source",
+        "prior-review-integrity",
+        "ten-recoveries"
+      ]
+    }
+  },
+  "checks": [
+    {
+      "id": "packet-integrity",
+      "result": "PASS",
+      "detail": {
+        "files": 11015,
+        "objects": 6786,
+        "exactBytes": true
+      }
+    },
+    {
+      "id": "source-identity",
+      "result": "PASS",
+      "detail": {
+        "head": "ff59986aae202b6e234c6f108c75ce16781abac6",
+        "tree": "82309866993f3881051f4cdf8deded9d10808c46",
+        "product": "d717e6a0",
+        "pins": "unchanged"
+      }
+    },
+    {
+      "id": "ten-original-manifest",
+      "result": "PASS",
+      "detail": {
+        "files": 2399,
+        "bytes": 76918931
+      }
+    },
+    {
+      "id": "supplement-original-manifest",
+      "result": "PASS",
+      "detail": {
+        "files": 4490,
+        "bytes": 286602050
+      }
+    },
+    {
+      "id": "ci-red-green",
+      "result": "PASS",
+      "detail": [
+        {
+          "run": 41399653523,
+          "source": "605cf744922d08ffa81942b62b80943ae9ade02e",
+          "hosts": [
+            {
+              "host": "Windows-2022Server-10.0.20348-SP0",
+              "counts": {
+                "passed": 880,
+                "skipped": 35,
+                "failed": 8
+              },
+              "terminal": "Some tests failed."
+            },
+            {
+              "host": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+              "counts": {
+                "passed": 899,
+                "skipped": 16,
+                "failed": 8
+              },
+              "terminal": "Some tests failed."
+            }
+          ]
+        },
+        {
+          "run": 41400895048,
+          "source": "7d25279105fa90205f2b5b39178e2d39adaaa5ac",
+          "hosts": [
+            {
+              "host": "Windows-2022Server-10.0.20348-SP0",
+              "counts": {
+                "passed": 885,
+                "skipped": 35,
+                "failed": 9
+              },
+              "terminal": "Some tests failed."
+            },
+            {
+              "host": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+              "counts": {
+                "passed": 904,
+                "skipped": 16,
+                "failed": 9
+              },
+              "terminal": "Some tests failed."
+            }
+          ]
+        },
+        {
+          "run": 41402700563,
+          "source": "2a1fd0e3abd29835998fdff5925fa3063a1beef4",
+          "hosts": [
+            {
+              "host": "Windows-2022Server-10.0.20348-SP0",
+              "counts": {
+                "passed": 894,
+                "skipped": 35,
+                "failed": 2
+              },
+              "terminal": "Some tests failed."
+            },
+            {
+              "host": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+              "counts": {
+                "passed": 913,
+                "skipped": 16,
+                "failed": 2
+              },
+              "terminal": "Some tests failed."
+            }
+          ]
+        },
+        {
+          "run": 41403989651,
+          "source": "d717e6a04fefa538a363f07cfe344c7935dcc384",
+          "hosts": [
+            {
+              "host": "Windows-2022Server-10.0.20348-SP0",
+              "counts": {
+                "passed": 898,
+                "skipped": 35,
+                "failed": 0
+              },
+              "terminal": "All tests passed!"
+            },
+            {
+              "host": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+              "counts": {
+                "passed": 917,
+                "skipped": 16,
+                "failed": 0
+              },
+              "terminal": "All tests passed!"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "release-assets",
+      "result": "PASS",
+      "detail": {
+        "run": 41423973333,
+        "source": "d717e6a04fefa538a363f07cfe344c7935dcc384",
+        "apk": {
+          "path": ".cache\\p35-r03-remediation-20261102\\release-artifacts\\assets-resumed-01\\android\\ble-monitor-android.apk",
+          "bytes": 47643080,
+          "sha256": "f37c3282cd6420672d766b1761bd84f68fd29297248069a74a0bdb9fea78e1f8",
+          "artifactId": 13130998258
+        },
+        "exe": {
+          "path": ".cache\\p35-r03-remediation-20261102\\release-artifacts\\assets-resumed-01\\windows\\ble-monitor-windows.exe",
+          "bytes": 93184,
+          "sha256": "3ea918568b51dda8144a1e42a486c713303495624d1d836e2fc77ea28d8c4d9e",
+          "artifactId": 13131716600
+        },
+        "jobs": [
+          [
+            "Detect changed paths",
+            "success"
+          ],
+          [
+            "Build Windows EXE",
+            "success"
+          ],
+          [
+            "Build Android APK",
+            "success"
+          ],
+          [
+            "Deploy GitHub Pages",
+            "skipped"
+          ],
+          [
+            "Create GitHub Release",
+            "skipped"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "ten-recoveries",
+      "result": "PASS",
+      "detail": {
+        "audit": {
+          "captureId": "3bc6df8929b64c30fd1685152f14a829",
+          "records": 5820,
+          "sha256": "0df368f8d43d6cf79adaef096a47f7eb48be012ae8748d8462ee6ffd1f87c22e",
+          "final": {
+            "deviceAddress": "e3:49:e1:14:d6:cb",
+            "phase": "idle",
+            "currentVersionCode": 30309,
+            "currentImageSha256": "e767525b4e4ae1d3c727304b0e00ac980ddc3c6f2c82e52b5c0a07a95a88465b",
+            "targetVersionCode": 0,
+            "targetImageSha256": null,
+            "packageSha256": null,
+            "packageBytes": 0,
+            "packageVerified": false,
+            "releaseId": null,
+            "latestUrl": "https://e-track-firmware-p41-public.pages.dev/api/public/firmware/latest",
+            "protocol": null,
+            "session": 0,
+            "durable": 0,
+            "bitmap": null,
+            "sendOffset": null,
+            "linkConnected": true,
+            "freshConnection": true,
+            "runtime": {
+              "backgrounded": false,
+              "acquired": false,
+              "reason": null,
+              "active": false,
+              "paused": false,
+              "ownerEpoch": 48,
+              "revision": 743,
+              "task": {
+                "taskId": "2cae87bd0a8ba276b70402afd3ad5f0a_46_12",
+                "generation": 46,
+                "deviceToken": "960b64d91617caccac41324c2f28a7b204aaa5a7222487011f094e8608229c9d",
+                "packageSha256": "a1e81c779d16c99a387491894275a26491f45fa18355a240253c3b070ae350aa"
+              }
+            },
+            "schema": 2,
+            "captureId": "3bc6df8929b64c30fd1685152f14a829",
+            "seq": 5820,
+            "monoUs": 462001872,
+            "event": "heartbeat",
+            "healthy": true,
+            "lost": 0,
+            "error": null
+          },
+          "integrity": "VERIFIED",
+          "formalAcceptance": "NOT_ADJUDICATED"
+        },
+        "cases": [
+          {
+            "id": "R01",
+            "intentDurable": 0,
+            "cutDurable": 4096,
+            "resumeDurable": 8192,
+            "firstData": 8192,
+            "sequences": [
+              288,
+              439,
+              499,
+              503
+            ]
+          },
+          {
+            "id": "R02",
+            "intentDurable": 28672,
+            "cutDurable": 45056,
+            "resumeDurable": 49152,
+            "firstData": 49152,
+            "sequences": [
+              877,
+              1165,
+              1228,
+              1232
+            ]
+          },
+          {
+            "id": "R03",
+            "intentDurable": 57344,
+            "cutDurable": 69632,
+            "resumeDurable": 73728,
+            "firstData": 73728,
+            "sequences": [
+              1378,
+              1651,
+              1713,
+              1717
+            ]
+          },
+          {
+            "id": "R04",
+            "intentDurable": 86016,
+            "cutDurable": 94208,
+            "resumeDurable": 98304,
+            "firstData": 98304,
+            "sequences": [
+              1950,
+              2125,
+              2188,
+              2192
+            ]
+          },
+          {
+            "id": "R05",
+            "intentDurable": 114688,
+            "cutDurable": 122880,
+            "resumeDurable": 126976,
+            "firstData": 126976,
+            "sequences": [
+              2497,
+              2662,
+              2722,
+              2726
+            ]
+          },
+          {
+            "id": "R06",
+            "intentDurable": 143360,
+            "cutDurable": 155648,
+            "resumeDurable": 159744,
+            "firstData": 159744,
+            "sequences": [
+              3010,
+              3246,
+              3309,
+              3313
+            ]
+          },
+          {
+            "id": "R07",
+            "intentDurable": 172032,
+            "cutDurable": 184320,
+            "resumeDurable": 184320,
+            "firstData": 184320,
+            "sequences": [
+              3526,
+              3756,
+              3818,
+              3822
+            ]
+          },
+          {
+            "id": "R08",
+            "intentDurable": 200704,
+            "cutDurable": 221184,
+            "resumeDurable": 225280,
+            "firstData": 225280,
+            "sequences": [
+              4091,
+              4481,
+              4544,
+              4548
+            ]
+          },
+          {
+            "id": "R09",
+            "intentDurable": 229376,
+            "cutDurable": 245760,
+            "resumeDurable": 249856,
+            "firstData": 249856,
+            "sequences": [
+              4629,
+              4944,
+              5007,
+              5011
+            ]
+          },
+          {
+            "id": "R10",
+            "intentDurable": 258048,
+            "cutDurable": 270336,
+            "resumeDurable": 274432,
+            "firstData": 274432,
+            "sequences": [
+              5175,
+              5402,
+              5464,
+              5468
+            ]
+          }
+        ],
+        "zeroOrigin": true,
+        "preFirstDurableCutObserved": false,
+        "final": {
+          "deviceAddress": "e3:49:e1:14:d6:cb",
+          "phase": "completed",
+          "currentVersionCode": 30309,
+          "currentImageSha256": "e767525b4e4ae1d3c727304b0e00ac980ddc3c6f2c82e52b5c0a07a95a88465b",
+          "targetVersionCode": 30309,
+          "targetImageSha256": "e767525b4e4ae1d3c727304b0e00ac980ddc3c6f2c82e52b5c0a07a95a88465b",
+          "packageSha256": "a1e81c779d16c99a387491894275a26491f45fa18355a240253c3b070ae350aa",
+          "packageBytes": 291076,
+          "packageVerified": true,
+          "releaseId": "fw_267a07e4d1e9370bcacf755739f97e065998af3db5c3dcb65627e78e9c3a4b82",
+          "latestUrl": "https://e-track-firmware-p41-public.pages.dev/api/public/firmware/latest",
+          "protocol": 2,
+          "session": 11,
+          "durable": 291076,
+          "bitmap": null,
+          "sendOffset": null,
+          "linkConnected": true,
+          "freshConnection": true,
+          "runtime": {
+            "backgrounded": false,
+            "acquired": true,
+            "reason": null,
+            "active": true,
+            "paused": false,
+            "ownerEpoch": 46,
+            "revision": 730,
+            "task": {
+              "taskId": "2cae87bd0a8ba276b70402afd3ad5f0a_46_12",
+              "generation": 46,
+              "deviceToken": "960b64d91617caccac41324c2f28a7b204aaa5a7222487011f094e8608229c9d",
+              "packageSha256": "a1e81c779d16c99a387491894275a26491f45fa18355a240253c3b070ae350aa"
+            }
+          },
+          "schema": 2,
+          "captureId": "3bc6df8929b64c30fd1685152f14a829",
+          "seq": 5793,
+          "monoUs": 448618831,
+          "event": "identity",
+          "healthy": true,
+          "lost": 0,
+          "error": null
+        },
+        "noUpdate": {
+          "deviceAddress": "e3:49:e1:14:d6:cb",
+          "phase": "idle",
+          "currentVersionCode": 30309,
+          "currentImageSha256": "e767525b4e4ae1d3c727304b0e00ac980ddc3c6f2c82e52b5c0a07a95a88465b",
+          "targetVersionCode": 0,
+          "targetImageSha256": null,
+          "packageSha256": null,
+          "packageBytes": 0,
+          "packageVerified": false,
+          "releaseId": null,
+          "latestUrl": "https://e-track-firmware-p41-public.pages.dev/api/public/firmware/latest",
+          "protocol": null,
+          "session": 0,
+          "durable": 0,
+          "bitmap": null,
+          "sendOffset": null,
+          "linkConnected": true,
+          "freshConnection": true,
+          "runtime": {
+            "backgrounded": false,
+            "acquired": false,
+            "reason": null,
+            "active": true,
+            "paused": false,
+            "ownerEpoch": 48,
+            "revision": 742,
+            "task": {
+              "taskId": "2cae87bd0a8ba276b70402afd3ad5f0a_46_12",
+              "generation": 46,
+              "deviceToken": "960b64d91617caccac41324c2f28a7b204aaa5a7222487011f094e8608229c9d",
+              "packageSha256": "a1e81c779d16c99a387491894275a26491f45fa18355a240253c3b070ae350aa"
+            }
+          },
+          "schema": 2,
+          "captureId": "3bc6df8929b64c30fd1685152f14a829",
+          "seq": 5811,
+          "monoUs": 454309489,
+          "event": "state",
+          "healthy": true,
+          "lost": 0,
+          "error": null
+        }
+      }
+    },
+    {
+      "id": "supplements",
+      "result": "PASS",
+      "detail": {
+        "prefix": {
+          "records": 789,
+          "sealed": false,
+          "sha256": "f8c8fc282271bb9261efffd8b7340fad630727020611c5804ef39f423d583eeb"
+        },
+        "audit": {
+          "captureId": "4cf36311f8c2a98ccefe11630681cc71",
+          "records": 5071,
+          "sha256": "34a67e950bfed1669a2a835a5c299299c5f8b267ed24d203db94a86ebf8ee3c0",
+          "final": {
+            "deviceAddress": "e3:49:e1:14:d6:cb",
+            "phase": "idle",
+            "currentVersionCode": 30311,
+            "currentImageSha256": "57a785af6597da4418571bb4157d6b44e98a4610da085c94fd53aab6da515385",
+            "targetVersionCode": 0,
+            "targetImageSha256": null,
+            "packageSha256": null,
+            "packageBytes": 0,
+            "packageVerified": false,
+            "releaseId": null,
+            "latestUrl": "https://e-track-firmware-p41-public.pages.dev/api/public/firmware/latest",
+            "protocol": null,
+            "session": 0,
+            "durable": 0,
+            "bitmap": null,
+            "sendOffset": null,
+            "linkConnected": true,
+            "freshConnection": true,
+            "runtime": {
+              "backgrounded": false,
+              "acquired": false,
+              "reason": null,
+              "active": false,
+              "paused": false,
+              "ownerEpoch": 7,
+              "revision": 241,
+              "task": {
+                "taskId": "29592874c369fe681dd12d02e891c7e6_5_1",
+                "generation": 5,
+                "deviceToken": "960b64d91617caccac41324c2f28a7b204aaa5a7222487011f094e8608229c9d",
+                "packageSha256": "13425bac985bf7f34ce42e61a042bad0d45f61e90bd58563eb849483c7a2ba73"
+              }
+            },
+            "schema": 2,
+            "captureId": "4cf36311f8c2a98ccefe11630681cc71",
+            "seq": 5071,
+            "monoUs": 652001623,
+            "event": "heartbeat",
+            "healthy": true,
+            "lost": 0,
+            "error": null
+          },
+          "integrity": "VERIFIED",
+          "formalAcceptance": "NOT_ADJUDICATED"
+        },
+        "pidPair": [
+          "16419",
+          "22313"
+        ],
+        "resumedDurable": 28672,
+        "firstData": 28672,
+        "lockedSeconds": 600.0488843000494,
+        "lockSamples": 47,
+        "resumeBeginToFinalSeconds": 45.370589,
+        "continuousTenMinuteTransfer": false,
+        "multiCycleEndurance": false
+      }
+    },
+    {
+      "id": "mcu-readbacks",
+      "result": "PASS",
+      "detail": [
+        {
+          "version": 30309,
+          "appSha256": "e767525b4e4ae1d3c727304b0e00ac980ddc3c6f2c82e52b5c0a07a95a88465b",
+          "bootSha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527",
+          "health": {
+            "health": [
+              [
+                30000,
+                30,
+                1000,
+                0,
+                43136,
+                43136,
+                30057,
+                1,
+                1
+              ],
+              [
+                30000,
+                30,
+                1000,
+                0,
+                43408,
+                43408,
+                30057,
+                1,
+                1
+              ]
+            ],
+            "registers": {
+              "vtor": 134285312,
+              "cfsr": 0,
+              "hfsr": 0,
+              "dhcsr": 16842753,
+              "sdio": 0,
+              "freeze": 0
+            },
+            "confirmed_state": 4,
+            "confirmation_source": "current initialized App BCB snapshot; not an EEPROM dump"
+          },
+          "journal": {
+            "erased": false,
+            "package_sha256": "a1e81c779d16c99a387491894275a26491f45fa18355a240253c3b070ae350aa",
+            "bytes": 291076,
+            "durable": 291076,
+            "matches_reference": true,
+            "expected_begin_durable": 291076,
+            "committed_target": 30309
+          }
+        },
+        {
+          "version": 30310,
+          "appSha256": "cc035d9dd5fb55aec46136347c361f72333b39723dc0537448914500b1099290",
+          "bootSha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527",
+          "health": {
+            "health": [
+              [
+                30000,
+                30,
+                1000,
+                0,
+                128508,
+                128508,
+                30018,
+                1,
+                1
+              ],
+              [
+                30000,
+                30,
+                1000,
+                0,
+                128781,
+                128781,
+                30018,
+                1,
+                1
+              ]
+            ],
+            "registers": {
+              "vtor": 134285312,
+              "cfsr": 0,
+              "hfsr": 0,
+              "dhcsr": 17104897,
+              "sdio": 0,
+              "freeze": 0
+            },
+            "confirmed_state": 4,
+            "confirmation_source": "current initialized App BCB snapshot; not an EEPROM dump"
+          },
+          "journal": {
+            "erased": false,
+            "package_sha256": "99622a4a754acaccbad1ea7157f69bf4a880b65873cf92d78cf93b335fd64f3b",
+            "bytes": 290964,
+            "durable": 290964,
+            "matches_reference": true,
+            "expected_begin_durable": 290964,
+            "committed_target": 30310
+          }
+        },
+        {
+          "version": 30311,
+          "appSha256": "57a785af6597da4418571bb4157d6b44e98a4610da085c94fd53aab6da515385",
+          "bootSha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527",
+          "health": {
+            "health": [
+              [
+                30000,
+                30,
+                1000,
+                0,
+                209319,
+                209319,
+                30018,
+                1,
+                1
+              ],
+              [
+                30000,
+                30,
+                1000,
+                0,
+                209574,
+                209574,
+                30018,
+                1,
+                1
+              ]
+            ],
+            "registers": {
+              "vtor": 134285312,
+              "cfsr": 0,
+              "hfsr": 0,
+              "dhcsr": 16842753,
+              "sdio": 0,
+              "freeze": 0
+            },
+            "confirmed_state": 4,
+            "confirmation_source": "current initialized App BCB snapshot; not an EEPROM dump"
+          },
+          "journal": {
+            "erased": false,
+            "package_sha256": "13425bac985bf7f34ce42e61a042bad0d45f61e90bd58563eb849483c7a2ba73",
+            "bytes": 290977,
+            "durable": 290977,
+            "matches_reference": true,
+            "expected_begin_durable": 290977,
+            "committed_target": 30311
+          }
+        }
+      ]
+    },
+    {
+      "id": "cleanup-and-failures",
+      "result": "PASS",
+      "detail": {
+        "restorations": [
+          {
+            "folder": ".cache\\p35-30309-20261102\\pipeline-01",
+            "revision": [
+              56,
+              58
+            ]
+          },
+          {
+            "folder": ".cache\\p35-supplement-20261102\\background-lock\\pipeline-01",
+            "revision": [
+              58,
+              60
+            ]
+          },
+          {
+            "folder": ".cache\\p35-supplement-20261102\\process-death\\pipeline-01",
+            "revision": [
+              60,
+              62
+            ]
+          },
+          {
+            "folder": ".cache\\p35-supplement-20261102\\process-continuation",
+            "revision": [
+              62,
+              64
+            ]
+          }
+        ],
+        "earlyUnlock": "preserved failure",
+        "auxiliaryLogcat": "incomplete, not primary",
+        "backgroundFailedCaptureRecords": 5196
+      }
+    },
+    {
+      "id": "negative-controls",
+      "result": "PASS",
+      "detail": {
+        "missingFooter": "rejected",
+        "replayedSequence": "rejected",
+        "loss": "rejected",
+        "wrongPackage": "rejected"
+      }
+    },
+    {
+      "id": "build-originals",
+      "result": "PASS",
+      "detail": [
+        {
+          "run": 41429938166,
+          "version": 30309,
+          "warnings": 641,
+          "errors": 0,
+          "artifactSha256": "sha256:6887d35bad60c10a4376c91f7c3e269152241d3719c1956081ad0e0dbf325743",
+          "variablesRestored": true
+        },
+        {
+          "run": 41438742889,
+          "version": 30310,
+          "warnings": 641,
+          "errors": 0,
+          "artifactSha256": "sha256:a1da7fcae51bd41bdb2dcce3ae74f13955152e76695c942cba3a7c7fd7df2894",
+          "variablesRestored": true
+        },
+        {
+          "run": 41442090993,
+          "version": 30311,
+          "warnings": 641,
+          "errors": 0,
+          "artifactSha256": "sha256:7e0884c579390a706cecf0d474d53e9112873a06619b10da60fd8e195592549d",
+          "variablesRestored": true
+        }
+      ]
+    },
+    {
+      "id": "supplemental-failure-lineage",
+      "result": "PASS",
+      "detail": {
+        "usbFailurePreserved": true,
+        "unstartedRecoveryOnly": true,
+        "tenInterruptedReceipt": "still missing, not invented",
+        "currentLocalLocksAbsent": true,
+        "formalMatrix": "NOT_RUN",
+        "formalArtifactPathsNotMaterialized": [
+          {
+            "id": "ART-CONFIG",
+            "path": "approved/configuration.json"
+          }
+        ]
+      }
+    },
+    {
+      "id": "prior-review-integrity",
+      "result": "PASS",
+      "detail": {
+        "unchangedInputs": 6942,
+        "previousPassedChecks": 13,
+        "unresolvedPriorCheck": "required-positions",
+        "histories": [
+          {
+            "path": "results-01.json",
+            "passed": 7,
+            "failed": 3
+          },
+          {
+            "path": "results-02.json",
+            "passed": 4,
+            "failed": 1
+          },
+          {
+            "path": "results-03.json",
+            "passed": 1,
+            "failed": 1
+          },
+          {
+            "path": "results-04.json",
+            "passed": 1,
+            "failed": 0
+          }
+        ],
+        "method": "Rehashed unchanged original inputs; did not replay prior physical tests."
+      }
+    },
+    {
+      "id": "supplement-source",
+      "result": "PASS",
+      "detail": {
+        "head": "ff59986aae202b6e234c6f108c75ce16781abac6",
+        "tree": "82309866993f3881051f4cdf8deded9d10808c46",
+        "product": "d717e6a0",
+        "pins": "unchanged",
+        "firmwareSource": "18f6b3d3",
+        "apkSha256": "f37c3282cd6420672d766b1761bd84f68fd29297248069a74a0bdb9fea78e1f8",
+        "triggerChange": "Earlier fault injection only; no product or link-parameter edit."
+      }
+    },
+    {
+      "id": "remediation-inventory",
+      "result": "PASS",
+      "detail": {
+        "files": 4051,
+        "bytes": 444773846
+      }
+    },
+    {
+      "id": "zero-position-and-negative-controls",
+      "result": "PASS",
+      "detail": {
+        "records": 5306,
+        "capture": {
+          "captureId": "f46f08a6738b6cb71c8409da3717b528",
+          "records": 5306,
+          "sha256": "058a5e5b09dd27b3334d3e64c92e22c375fd2bb571f4592770f4a13e66613cc8",
+          "final": {
+            "deviceAddress": "e3:49:e1:14:d6:cb",
+            "phase": "idle",
+            "currentVersionCode": 30313,
+            "currentImageSha256": "4126d801e6bd6efd57a9f20d5a128a50cfb5a46580dc10d9a2227702247d5805",
+            "targetVersionCode": 0,
+            "targetImageSha256": null,
+            "packageSha256": null,
+            "packageBytes": 0,
+            "packageVerified": false,
+            "releaseId": null,
+            "latestUrl": "https://e-track-firmware-p41-public.pages.dev/api/public/firmware/latest",
+            "protocol": null,
+            "session": 0,
+            "durable": 0,
+            "bitmap": null,
+            "sendOffset": null,
+            "linkConnected": true,
+            "freshConnection": true,
+            "runtime": {
+              "backgrounded": false,
+              "acquired": false,
+              "reason": null,
+              "active": false,
+              "paused": false,
+              "ownerEpoch": 12,
+              "revision": 519,
+              "task": {
+                "taskId": "17f83892182c8dca12c74cc5f42335d6_10_3",
+                "generation": 10,
+                "deviceToken": "960b64d91617caccac41324c2f28a7b204aaa5a7222487011f094e8608229c9d",
+                "packageSha256": "706e73e657e1ed7b9a94bdc42ec79a50a14f8ed73ee37cd4d9b1e6e3ac16c251"
+              }
+            },
+            "schema": 2,
+            "captureId": "f46f08a6738b6cb71c8409da3717b528",
+            "seq": 5306,
+            "monoUs": 141001881,
+            "event": "heartbeat",
+            "healthy": true,
+            "lost": 0,
+            "error": null
+          },
+          "integrity": "VERIFIED",
+          "formalAcceptance": "NOT_ADJUDICATED"
+        },
+        "sequences": [
+          289,
+          291,
+          318,
+          376,
+          379
+        ],
+        "initialDurable": 0,
+        "actualCutDurable": 0,
+        "resumeDurable": 0,
+        "firstData": 0,
+        "beginToCutSeconds": 0.158585,
+        "finalVersion": 30313,
+        "noUpdateSeq": 5297,
+        "negativeControls": [
+          "positive_cut",
+          "buffered_resume",
+          "wrong_first_offset",
+          "wrong_first_session",
+          "original_R01_zero_intent_positive_cut"
+        ],
+        "observedRadioPairs": 1,
+        "oldTenGroupUnchanged": true
+      }
+    },
+    {
+      "id": "firmware-ci-originals",
+      "result": "PASS",
+      "detail": [
+        {
+          "run": 41457337813,
+          "version": 30312,
+          "warnings": 641,
+          "errors": 0,
+          "artifactSha256": "sha256:24f52cc1e216f8c23c64434d684b8ea5f51ea7c397a81b50781a7f47356ed9c6",
+          "variablesReadback": true
+        },
+        {
+          "run": 41463640594,
+          "version": 30313,
+          "warnings": 641,
+          "errors": 0,
+          "artifactSha256": "sha256:b9c6f8ffd95d1197ef8c28fab71be6cf1edc7c099a1d5105f1cf297c7c6dda1a",
+          "variablesReadback": true
+        }
+      ]
+    },
+    {
+      "id": "mcu-originals",
+      "result": "PASS",
+      "detail": [
+        {
+          "version": 30312,
+          "imageSha256": "3f7af6cf57f4d3b43900f2ba166501196d5d836c361ed6c5943b1febcb7ccccf",
+          "bootSha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527",
+          "health": {
+            "health": [
+              [
+                30000,
+                30,
+                1000,
+                0,
+                92501,
+                92501,
+                30053,
+                1,
+                1
+              ],
+              [
+                30000,
+                30,
+                1000,
+                0,
+                92774,
+                92775,
+                30053,
+                1,
+                1
+              ]
+            ],
+            "registers": {
+              "vtor": 134285312,
+              "cfsr": 0,
+              "hfsr": 0,
+              "dhcsr": 16842753,
+              "sdio": 0,
+              "freeze": 0
+            },
+            "confirmed_state": 4,
+            "confirmation_source": "current initialized App BCB snapshot; not an EEPROM dump"
+          },
+          "storage": {
+            "jedec": 15679512,
+            "capacity_bytes": 16777216,
+            "slots": {
+              "candidate_slot": {
+                "erased": false,
+                "bytes": 614092,
+                "crc32": 1139004111,
+                "version": 30312,
+                "sha8": "e768d2594ae467f6"
+              },
+              "backup_slot": {
+                "erased": false,
+                "bytes": 614092,
+                "crc32": 1139004111,
+                "version": 30311,
+                "sha8": "b3d0872aa3023a8d"
+              },
+              "recovery_slot": {
+                "erased": false,
+                "bytes": 619580,
+                "crc32": 2429394932,
+                "version": 30276,
+                "sha8": "deb4484dd0614f49"
+              }
+            },
+            "staging_header_hex": "4554534c03ffffffd870040089cc39d768760000fcdbb2f0162fce27544d4f43",
+            "staging_journal_sha256": "fda8c53c2af2edc67b979aa36524bd897fe3dfe0b0301b611c2855dc18483585",
+            "staging_erased": false,
+            "journal": {
+              "erased": false,
+              "package_sha256": "fcdbb2f0162fce276c8357bc7c97c9646b710f5e3a40bc15e341420ac5a02476",
+              "bytes": 291032,
+              "durable": 291032,
+              "matches_reference": true,
+              "expected_begin_durable": 291032,
+              "committed_target": 30312
+            }
+          }
+        },
+        {
+          "version": 30313,
+          "imageSha256": "4126d801e6bd6efd57a9f20d5a128a50cfb5a46580dc10d9a2227702247d5805",
+          "bootSha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527",
+          "health": {
+            "health": [
+              [
+                30000,
+                30,
+                1000,
+                0,
+                47214,
+                47214,
+                30037,
+                1,
+                1
+              ],
+              [
+                30000,
+                30,
+                1000,
+                0,
+                47485,
+                47485,
+                30037,
+                1,
+                1
+              ]
+            ],
+            "registers": {
+              "vtor": 134285312,
+              "cfsr": 0,
+              "hfsr": 0,
+              "dhcsr": 16842753,
+              "sdio": 0,
+              "freeze": 0
+            },
+            "confirmed_state": 4,
+            "confirmation_source": "current initialized App BCB snapshot; not an EEPROM dump"
+          },
+          "storage": {
+            "jedec": 15679512,
+            "capacity_bytes": 16777216,
+            "slots": {
+              "candidate_slot": {
+                "erased": false,
+                "bytes": 614092,
+                "crc32": 1139004111,
+                "version": 30313,
+                "sha8": "4034878d234965ea"
+              },
+              "backup_slot": {
+                "erased": false,
+                "bytes": 614092,
+                "crc32": 1139004111,
+                "version": 30312,
+                "sha8": "e768d2594ae467f6"
+              },
+              "recovery_slot": {
+                "erased": false,
+                "bytes": 619580,
+                "crc32": 2429394932,
+                "version": 30276,
+                "sha8": "deb4484dd0614f49"
+              }
+            },
+            "staging_header_hex": "4554534c03ffffff717004003c5373b669760000706e73e657e1ed7b544d4f43",
+            "staging_journal_sha256": "d51db68772a3f965e6603aa28495183e08f32d89adc3aee635c612937dd5a23f",
+            "staging_erased": false,
+            "journal": {
+              "erased": false,
+              "package_sha256": "706e73e657e1ed7b9a94bdc42ec79a50a14f8ed73ee37cd4d9b1e6e3ac16c251",
+              "bytes": 290929,
+              "durable": 290929,
+              "matches_reference": true,
+              "expected_begin_durable": 290929,
+              "committed_target": 30313
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "failure-and-restoration-lineage",
+      "result": "PASS",
+      "detail": {
+        "failed30312Preserved": true,
+        "separateCaptures": true,
+        "downloadFailurePreserved": true,
+        "channelRestorations": [
+          [
+            64,
+            66
+          ],
+          [
+            66,
+            68
+          ],
+          [
+            68,
+            70
+          ]
+        ],
+        "currentLocalLocksAbsent": true,
+        "auxiliaryLogcat": "Incomplete; not the primary observation source"
+      }
+    },
+    {
+      "id": "mobile-chain",
+      "result": "PASS",
+      "detail": {
+        "phaseSequences": [
+          19,
+          37,
+          268,
+          282,
+          5792
+        ],
+        "package": "a1e81c779d16c99a387491894275a26491f45fa18355a240253c3b070ae350aa",
+        "release": "fw_267a07e4d1e9370bcacf755739f97e065998af3db5c3dcb65627e78e9c3a4b82",
+        "records": 5820
+      }
+    },
+    {
+      "id": "admission",
+      "result": "PASS",
+      "detail": {
+        "historicalAdmissionVersion": 30307,
+        "campaignInitialVersion": 30307,
+        "newPhysicalAdmission": false,
+        "originalSource": "ff59986aae202b6e234c6f108c75ce16781abac6"
+      }
+    }
+  ],
+  "originalReads": 11014,
+  "operation": "independent offline evaluation of dated originals",
+  "newDeviceOperations": 0,
+  "coverage": "Original 30309 R01-R10 plus separate 30313 pre-durable supplement; not a replacement R01",
+  "limits": [
+    "Auxiliary Logcat incomplete",
+    "No continuous ten-minute transfer or endurance claim"
+  ],
+  "formalPrecheck": null
+}

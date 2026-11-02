@@ -286,6 +286,55 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
         backgroundColor: Colors.white,
         foregroundColor: const Color(0xFF2E3A59),
         elevation: 0,
+        actions: [
+          ValueListenableBuilder<String>(
+            valueListenable: otaService.p35.status,
+            builder: (context, status, _) => Obx(() => Row(children: [
+              if (!otaService.p35.active)
+                Semantics(identifier: 'p35-arm-stream', child: IconButton(
+                  tooltip: 'Start acknowledged live recording',
+                  onPressed: otaService.isUpgrading || status == 'starting' || !_deviceReady ||
+                      otaService.p35.captureId != null ? null : () async {
+                    await otaService.startP35Recording(reliable: true);
+                  },
+                  icon: const Icon(Icons.cable),
+                )),
+              if (otaService.p35.active && otaService.p35.streaming)
+                Semantics(identifier: 'p35-log-probe', child: IconButton(
+                  tooltip: 'Idle logging load probe (no OTA)',
+                  onPressed: otaService.isUpgrading ? null : () async {
+                    await otaService.p35.probeIdleStream();
+                  },
+                  icon: const Icon(Icons.speed),
+                )),
+              if (otaService.p35.active)
+                Semantics(identifier: 'p35-reconnect', child: IconButton(
+                  tooltip: '重连取证目标（不开始升级）',
+                  onPressed: otaService.isUpgrading ? null : () async {
+                    await otaService.reconnectP35Target();
+                    if (mounted) await _resolveDeviceAndRead();
+                  },
+                  icon: const Icon(Icons.bluetooth_connected),
+                )),
+              Semantics(identifier: otaService.p35.active ? 'p35-stop' : 'p35-arm',
+                child: IconButton(
+                  tooltip: otaService.p35.active ? '结束并保留自动化记录'
+                      : '开始自动化记录（包含设备标识，最长一小时）: $status',
+                  onPressed: otaService.isUpgrading || status == 'starting' ||
+                      (!otaService.p35.active && (!_deviceReady || otaService.p35.captureId != null))
+                      ? null : () async {
+                    if (otaService.p35.active) {
+                      await otaService.stopP35Recording();
+                    } else if (!await otaService.startP35Recording()) {
+                      if (!context.mounted) return;
+                      safeSnackbar('自动化记录', '记录未启动，请检查设备身份、存储及记录状态', context: context);
+                    }
+                  },
+                  icon: Icon(otaService.p35.active ? Icons.stop_circle_outlined : Icons.fiber_manual_record),
+                )),
+            ])),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -499,6 +548,14 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
     // 身份，而非盲目重查）；retryableLater（如重启重连失败）仍可查。
     final terminal = otaService.terminalState;
     final terminalLocked = terminal != null && !terminal.retryableLater;
+    final status = otaService.upgradeStatus;
+    final showIdleStatus = !_isChecking &&
+        !otaService.isUpgrading &&
+        otaService.phase == OtaPhase.idle &&
+        terminal == null &&
+        otaService.latestInfo == null &&
+        otaService.downloadedFirmwareFile == null &&
+        status.isNotEmpty;
     final canCheck = !_isChecking &&
         !otaService.isUpgrading &&
         otaService.isFirmwareServiceConfigured &&
@@ -550,6 +607,21 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
             ),
             textAlign: TextAlign.center,
           ),
+          if (showIdleStatus) ...[
+            const SizedBox(height: 12),
+            Semantics(
+              liveRegion: true,
+              child: Text(
+                status,
+                key: const ValueKey('ota-check-status'),
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF2E3A59),
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 20),
           // Wrap 而非 Row：terminalLocked 态下「检查更新」与「重新读取
           // 身份解锁」两个按钮同排，窄屏总宽溢出会被截断——Wrap 在宽度
@@ -559,7 +631,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
             runSpacing: 12,
             alignment: WrapAlignment.center,
             children: [
-              ElevatedButton.icon(
+              Semantics(identifier: 'p35-check', child: ElevatedButton.icon(
                 onPressed: canCheck ? _checkForUpdate : null,
                 icon: _isChecking
                     ? const SizedBox(
@@ -578,14 +650,14 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-              ),
+              )),
               // RC3-12③：终止闭锁但身份快照仍在时（如下载侧
               // HARDWARE_INCOMPATIBLE 闭锁），同样提供实际可执行的
               // 恢复入口——重新 GET_INFO 成功即重建查询链并解锁，
               // 不只给文字提示。
               if (_deviceAddress != null &&
                   (!_deviceReady || terminalLocked))
-                OutlinedButton.icon(
+                Semantics(identifier: 'p35-identity', child: OutlinedButton.icon(
                   onPressed: _isChecking || _reconcilingTask ? null : _resolveDeviceAndRead,
                   icon: const Icon(Icons.refresh),
                   label: Text(terminalLocked && otaService.deviceInfo != null
@@ -594,7 +666,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
                   style: OutlinedButton.styleFrom(
                     foregroundColor: const Color(0xFF4A90E2),
                   ),
-                ),
+                )),
             ],
           ),
         ],
@@ -758,14 +830,14 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: ElevatedButton(
+                child: Semantics(identifier: 'p35-download', child: ElevatedButton(
                   onPressed: canDownload ? _downloadFirmware : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4A90E2),
                     foregroundColor: Colors.white,
                   ),
                   child: const Text('下载固件'),
-                ),
+                )),
               ),
             ],
           ),
@@ -883,6 +955,21 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
     }
 
     final busy = inDownload || inTransfer;
+    final title = switch (phase) {
+      OtaPhase.idle => '固件状态',
+      OtaPhase.checkingUpdate => '检查固件更新中',
+      OtaPhase.downloading => '下载进度',
+      OtaPhase.verifyingDownload => '校验固件包',
+      OtaPhase.readyToInstall => '固件就绪',
+      OtaPhase.transferring => '固件传输（设备确认）',
+      OtaPhase.applying => '设备应用固件',
+      OtaPhase.waitingReboot => '等待设备重启',
+      OtaPhase.reconnectVerify => '重连并核验固件',
+      OtaPhase.completed => '固件升级完成',
+      OtaPhase.probeCompleted => 'BLE 短测完成（未安装固件）',
+      OtaPhase.cancelled => '已取消',
+      OtaPhase.failed => '操作失败',
+    };
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -916,11 +1003,8 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
               ),
               const SizedBox(width: 12),
               Text(
-                inTransfer
-                    ? '固件传输（设备确认）'
-                    : inDownload
-                        ? '下载进度'
-                        : '固件就绪',
+                title,
+                key: const ValueKey('ota-phase-title'),
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -995,7 +1079,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton.icon(
+              child: Semantics(identifier: 'p35-start', child: ElevatedButton.icon(
                 onPressed:
                     _deviceReady && !otaService.isUpgrading ? _startUpgrade : null,
                 icon: const Icon(Icons.bluetooth_audio),
@@ -1004,7 +1088,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
                   backgroundColor: const Color(0xFF4CAF50),
                   foregroundColor: Colors.white,
                 ),
-              ),
+              )),
             ),
           ],
         ],

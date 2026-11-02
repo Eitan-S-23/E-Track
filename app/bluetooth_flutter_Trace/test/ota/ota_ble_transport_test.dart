@@ -1165,6 +1165,10 @@ void main() {
       // 同时消费同一 ACK 流，产生串台）。
       await transport.dispose();
       final transport2 = OtaBleTransport(channel: mcu);
+      // Recovery follows the real service route: a fresh identity must prove
+      // framing before BEGIN, without resetting the retained journal.
+      await transport2.getDeviceInfo();
+      expect(mcu.stagedDurable, 4096);
       final ack2 = await transport2.transfer(
         package: package,
         packageSha256: shaOf(package),

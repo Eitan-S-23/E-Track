@@ -1,0 +1,31 @@
+{
+  "argv": [
+    "python",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "Tools/ota/p35-closeout/test_evaluate.py"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 830094195332600,
+  "ended_monotonic_ns": 830098515433200,
+  "stdout": {
+    "path": ".cache\\p35-formal-closeout-20261102\\test-01\\unit.stdout",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": ".cache\\p35-formal-closeout-20261102\\test-01\\unit.stderr",
+    "bytes": 905,
+    "sha256": "448d6b3d42ae4937a09931c672331d9a667d9484ba076fdc668acc247ae07ef7"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

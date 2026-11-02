@@ -1,0 +1,24 @@
+{
+  "schema": "p35-packet-parts-v1",
+  "parts": [
+    {
+      "path": "packet-01.bin",
+      "bytes": 50331648,
+      "sha256": "634ce971ba98f70650eb7e39fe71265ba5f7050f12b460d4683398e347f7bff6"
+    },
+    {
+      "path": "packet-02.bin",
+      "bytes": 50331648,
+      "sha256": "b3dc88a9b2615b4855c7d0102a4e99f974032617b73065d283950cefd86c22f4"
+    },
+    {
+      "path": "packet-03.bin",
+      "bytes": 37089433,
+      "sha256": "9e9ab2fed73f70f34cd45c0cc514f24a2218764920d72266bb5a5b1f6bb99636"
+    }
+  ],
+  "bytes": 137752729,
+  "sha256": "092f38cca6cf92ed3096e23f39914d411fed860b0adde2e84fb7fede7c629640",
+  "origin": "Independent raw-evidence packet from 2026-11-02 reviews; App source d717e6a0, firmware 18f6b3d3, acquisition ff59986a; original dates/commands/operators and all failures retained inside.",
+  "applicability": "same App/firmware/link inputs; 30309 ten-window group plus distinct 30310-30313 supplemental images; not one concatenated campaign"
+}
