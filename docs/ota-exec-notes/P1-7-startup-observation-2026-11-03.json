@@ -1,0 +1,111 @@
+{
+  "outcome": "ORIGINAL_OBSERVATIONS_EVALUATED",
+  "formalAcceptance": "NOT_ADJUDICATED",
+  "observed": {
+    "startup": {
+      "result": "PASS",
+      "lower_ms": 1446.335,
+      "upper_ms": 1478.732,
+      "reset_inclusive_upper_ms": 1564.9470000000001
+    },
+    "powerHold": {
+      "result": "PASS",
+      "samples": 200,
+      "drops": [],
+      "first_high_lower_ms": 984.4089999999999,
+      "first_high_upper_ms": 1015.716,
+      "observed_after_signature_ms": 3975.944,
+      "max_sample_gap_ms": 28.71100000000024,
+      "scope": "No sampled drop, not an oscilloscope proof of arbitrarily short glitches"
+    },
+    "clock": {
+      "result": "PASS",
+      "register_decoded_hz": [
+        288000000
+      ],
+      "reported_hz": 288000000,
+      "boot_samples": 51,
+      "scope": "PLL source/multiplier/dividers decoded against bound 8MHz reference, not oscillator metrology"
+    },
+    "tickCalibration": {
+      "result": "PASS",
+      "elapsed_ms": 1364.4875000000002,
+      "tick_delta": 1371,
+      "ticks_per_host_ms": 1.0047728542767889
+    },
+    "recoveryKey": "NOT_OBSERVED",
+    "batteryStartup": "NOT_OBSERVED"
+  },
+  "original": {
+    "path": "docs\\acceptance-contracts\\P1-7-v1\\observation\\native\\0003-startup-samples\\sdk.log",
+    "bytes": 307948,
+    "sha256": "a3a86e51d777ca85c876363c54b62512d1d7f249e3e7f2a10a80b6e5eb24f701"
+  },
+  "source": {
+    "path": "Tools\\acceptance\\p17_observe.py",
+    "bytes": 10453,
+    "sha256": "f6feb4195626f863b6fddec4da6c842a4a487f1799326a87b5f80b15684b3f5a"
+  },
+  "evaluator": {
+    "path": ".cache\\p17-acceptance-20261103-01\\review.py",
+    "bytes": 3215,
+    "sha256": "ba32ab81e11b3975fc1bfd5893b28c0992601c6139f8e0cbeb87674f2c65aeb1"
+  },
+  "sourceCommit": "95ced4719becde765655fa9eaae3a426cf26f769",
+  "firstSourceCommit": "ad85298dde3efa08a5ff13935b208edfb64b1fc2",
+  "firstBundleCommit": "6fc4687018942bcffd7201a0ac732fd2d302294d",
+  "verifiedGitBlobs": 159,
+  "originalNativeEvents": 1202,
+  "bootExecutableBytes": 14800,
+  "physicalOperationsThisReview": 0,
+  "totalPhysicalResets": 1,
+  "flashOperations": 0,
+  "otaOperations": 0,
+  "retainedApp": "30313",
+  "retainedBootUnchanged": true,
+  "postResetHealth": {
+    "health": [
+      [
+        30000,
+        30,
+        1000,
+        0,
+        17408,
+        17408,
+        0,
+        1,
+        1
+      ],
+      [
+        30000,
+        30,
+        1000,
+        0,
+        17681,
+        17681,
+        0,
+        1,
+        1
+      ]
+    ],
+    "registers": {
+      "vtor": 134285312,
+      "cfsr": 0,
+      "hfsr": 0,
+      "dhcsr": 16842753,
+      "sdio": 0,
+      "freeze": 0
+    },
+    "confirmed_state": 4,
+    "confirmation_source": "current initialized App BCB snapshot; not an EEPROM dump"
+  },
+  "missing": [
+    "measured recovery-key short/long predicate",
+    "battery-only power-button startup"
+  ],
+  "limitations": [
+    "CPU release-to-signature and host reset-command-to-signature are distinct timing scopes.",
+    "The first contract remains HARNESS_FAIL. This offline result does not retroactively change it.",
+    "Final same-task supplemental admission and adjudication must preserve the failed first invocation."
+  ]
+}

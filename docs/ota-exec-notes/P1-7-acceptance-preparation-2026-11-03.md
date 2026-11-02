@@ -91,3 +91,69 @@ P1-7 local-commit scope above. That boundary is now authorized for this task.
 Proceed on a separate local P1-7 task branch, preserving main and unrelated work.
 No additional approval is needed for each same-scope local commit. This update
 does not turn preparation tests into device acceptance or authorize remote writes.
+
+## First Physical Observation And Offline Parser Repair
+
+The admitted first cell executed once after FROZEN/NOT_RUN precheck passed.
+Source commit: `ad85298dde3efa08a5ff13935b208edfb64b1fc2`.
+Original bundle: `6fc4687018942bcffd7201a0ac732fd2d302294d`.
+Parser repair: `95ced4719becde765655fa9eaae3a426cf26f769`.
+Branch: `acceptance/p1-7-20261103`, local only. No main change or push.
+
+Complete image/health checks, storage-idle breakpoint, one reset/start, 200
+six-field sample sets, normal settling, and complete post-image/health checks
+executed. The runner then failed in offline interpretation: native Commander
+uses GoEx and ReadMemU32_64, whereas the first parser covered Go and ReadMemEx.
+The original exit 1 and HARNESS_FAIL matrix remain unchanged and were validated
+before changing the parser. No physical measurement was repeated to fix parsing.
+
+The amended parser normalizes only API naming and item-versus-byte counts.
+Seventeen host tests pass, including the actual native original and rejection
+controls. Offline review rehashed all declared originals and verified that all
+159 Git blobs inside the first evidence package equal their original file bytes.
+Native CRLF and trailing spaces were preserved using package-local attributes;
+the earlier whitespace-check failure was not repaired by altering raw evidence.
+
+Results from those same original samples:
+
+- CPU release (GoEx) to fresh RTT signature: 1446.335..1478.732 ms. The committed
+  pre-observation oracle uses this running interval, not a post-hoc timing change.
+- Including the debugger reset API invocation overhead, the upper bound is
+  1564.947 ms. Keep this different host timing scope explicit; do not present it
+  as <=1500 ms or silently conflate it with reset release.
+- PD2 first high is bounded by 984.409..1015.716 ms after GoEx. No later sampled
+  low among 200 sets; samples extend 3975.944 ms past the first signature. The
+  largest inter-read gap is 28.711 ms, not continuous oscilloscope coverage.
+- Fifty-one Boot-phase clock samples decode PLL source/multiplier/dividers to
+  nominal 288000000 Hz; the exact executable is 14800 bytes.
+- Boot ticks advance 1371 over a 1364.4875 ms native-clock interval, ratio
+  1.004772854. This is clock/tick calibration, not a measured recovery-key hold.
+- Post-reset App/Boot match the full originals, BCB snapshot is CONFIRMED,
+  main-loop/watchdog health advances, SD is ready, and CFSR/HFSR are zero.
+
+Machine-readable review: `P1-7-startup-observation-2026-11-03.json` alongside this
+note. This is a verified original-observation report, not overall P1-7 PASS and
+not a retroactive change to the first contract's HARNESS_FAIL verdict.
+
+The failed runner retained its device lock after the parser exception. The
+reviewer verified the original successful postcheck, all closed receipts and
+absence of the owner/debugger processes, archived the lock, then released only
+that owned lock. This reconciliation added zero device operations.
+
+## Next User Observation
+
+Remaining actual conditions are recovery-key short/long behavior and battery-only
+power-button startup. Do not emulate the first by holding the key during an
+ordinary valid-App boot; that path correctly never invokes the recovery predicate.
+Do not damage images or BCB just to reach it. Its isolated method remains pending.
+
+For the battery observation, the board is verified and all owned tools are closed.
+Ask the user to shut down normally, disconnect both USB and J-Link from the device,
+start on battery using the normal power button, release it, and observe normal
+operation for 30 seconds. Preserve the user's exact report/video as a user-owned
+observation and bind it to the pre/post identity; do not claim the agent directly
+observed an unplugged device. No user battery result has been received yet.
+
+Keep P1-7 in progress. A final same-task supplemental evaluation must include the
+missing observations, preserve the first failure and exact timing scopes, and
+complete admission/validation without repeating the successful startup capture.
