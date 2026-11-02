@@ -1,4 +1,4 @@
-"""P3-5 v4: independent offline original evaluation, never another campaign."""
+"""P3-5 v5: independent offline original evaluation, never another campaign."""
 import argparse
 import json
 from pathlib import Path
@@ -10,7 +10,15 @@ import supplement as s
 import store
 
 ROOT = v.ROOT
-BUNDLE = ROOT / 'docs/acceptance-contracts/P3-5-v4'
+BUNDLE = ROOT / 'docs/acceptance-contracts/P3-5-v5'
+
+
+def predecessor_plan(contract, matrix, digest, previous):
+    sys.path.insert(0, str(ROOT))
+    from Tools.acceptance import validate_bundle as validator
+    pc, pm, ph, mh = validator._load_bundle(previous / 'contract.json', previous / 'matrix.json')
+    assert not validator.validate_contract_lineage(contract, pc, digest, ph)
+    return validator.compute_rerun_plan(contract, pc, pm, digest, ph, mh, matrix['round_id'], ROOT)
 
 
 def precheck(source, target, contract_path, matrix_path):
@@ -30,13 +38,7 @@ def precheck(source, target, contract_path, matrix_path):
     assert any(x['evidence_path'] == source.relative_to(BUNDLE).as_posix()
                and x['evidence_sha256'] == store.sha(source.read_bytes()) for x in contract['external_inputs'])
     assert any(x['path'] == target.relative_to(BUNDLE).as_posix() for x in contract['artifacts'])
-    previous = BUNDLE / 'history/v3'
-    pc = json.loads((previous / 'contract.json').read_bytes())
-    pm = json.loads((previous / 'matrix.json').read_bytes())
-    ph = store.sha((previous / 'contract.json').read_bytes())
-    mh = store.sha((previous / 'matrix.json').read_bytes())
-    assert not validator.validate_contract_lineage(contract, pc, digest, ph)
-    plan = validator.compute_rerun_plan(contract, pc, pm, digest, ph, mh, matrix['round_id'], ROOT)
+    plan = predecessor_plan(contract, matrix, digest, BUNDLE / 'history/v4')
     assert plan == json.loads((BUNDLE / 'rerun-plan.json').read_bytes())
     assert plan['required_commands'] == [command['id']]
     return dict(contract_sha256=digest, freeze_commit=contract['freeze_commit'], result='PASS')

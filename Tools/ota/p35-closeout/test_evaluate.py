@@ -84,6 +84,15 @@ class PositionTests(unittest.TestCase):
     def test_actual_admission_identity(self):
         self.assertEqual(evaluate.admission()['campaignInitialVersion'],30307)
 
+    def test_canonical_predecessor_plan(self):
+        sys.path.insert(0,str(v.ROOT))
+        from Tools.acceptance import validate_bundle as validator
+        b=v.ROOT/'docs/acceptance-contracts/P3-5-v4'
+        c,m,d,_=validator._load_bundle(b/'contract.json',b/'evidence-matrix.json')
+        expected=json.loads((b/'rerun-plan.json').read_bytes())
+        self.assertEqual(evaluate.predecessor_plan(c,m,d,b/'history/v3'),expected)
+        self.assertEqual(expected['previous_contract_sha256'],expected['previous_contract_sha256'].upper())
+
     def test_invalid_positions(self):
         for n,k,value in ((318,'durable',4096),(376,'durable',8192),(379,'sendOffset',128),
                           (379,'session',1),(318,'linkConnected',True)):
