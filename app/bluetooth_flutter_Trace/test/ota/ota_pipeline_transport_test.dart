@@ -842,7 +842,10 @@ void main() {
   group('P35-R03 unconfirmed downstream delivery', () {
     for (final pipeline in [false, true]) {
       for (final exit in ['disconnect', 'notification-error', 'cancel', 'dispose']) {
-        test('v${pipeline ? 2 : 1} $exit after completed DATA write resynchronizes', () async {
+        for (final stayConnected in [false, true]) {
+        if (exit == 'disconnect' && stayConnected) continue;
+        test('v${pipeline ? 2 : 1} $exit after completed DATA write resynchronizes'
+            '${stayConnected ? ' while still connected' : ''}', () async {
           final peer = _PrefixLossPeer();
           final old = OtaBleTransport(channel: _ReboundChannel(peer),
               enablePipeline: pipeline, dataBatchFrames: 1,
@@ -875,7 +878,7 @@ void main() {
           expect(peer.completedDataWrites, 1);
           expect(peer.accepted, 0);
           expect(peer.receiverPrefix, isNotEmpty);
-          peer.connected = false;
+          peer.connected = stayConnected;
           if (exit == 'notification-error') {
             peer.events.addError(const OtaTransportException(
                 'Synthetic notification loss', code: 'NOTIFY_LOST'));
@@ -893,6 +896,9 @@ void main() {
           };
           expect(error, isA<OtaTransportException>()
               .having((e) => e.code, 'code', expectedCode));
+          await old.abortBestEffort();
+          expect(peer.receiverPrefix, isNotEmpty,
+              reason: 'Best-effort ABORT must not enter an unconfirmed DATA prefix');
           await old.dispose();
 
           final other = _PrefixLossPeer()..dropInfo = true;
@@ -910,6 +916,12 @@ void main() {
           peer.connected = true;
           final next = sender(_ReboundChannel(peer), enabled: pipeline);
           rebound = next;
+          final beforeQuery = peer.writes.length;
+          await expectLater(next.begin(totalLen: bytes.length,
+              packageSha256: List<int>.filled(32, 1), etuHeader: bytes.sublist(0, 64)),
+              throwsA(isA<OtaTransportException>().having((e) => e.code, 'code', 'WRITE_TIMEOUT')));
+          expect(peer.writes.length, beforeQuery,
+              reason: 'A new wrapper cannot bypass the receiver recovery gate');
           final info = await next.getDeviceInfo(timeout: const Duration(milliseconds: 100));
           expect(info.currentVersionCode, 30286);
           expect(peer.swallowedQueries, 1);
@@ -917,6 +929,7 @@ void main() {
           expect(peer.receiverPrefix, isNull);
           expect((await transfer(next, bytes)).isOk, isTrue);
         });
+        }
       }
     }
 

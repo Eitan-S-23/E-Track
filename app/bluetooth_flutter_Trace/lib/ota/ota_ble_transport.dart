@@ -143,6 +143,7 @@ class OtaBleTransport {
   /// transfer 之外的帧（GET_INFO 探针/后台复核），决定 [_writeFrame] 是否
   /// 可登记传输起点；不参与任何控制流判据。
   bool _inTransfer = false;
+  bool _dataWriteDispatched = false;
 
   int get session => _session;
   /// 本实例是否已被取消（取消后代次失效，禁止复用，由上层重建）。
@@ -399,6 +400,7 @@ class OtaBleTransport {
     }
     _checkUsable();
     _busy = true;
+    _dataWriteDispatched = false;
     final effectiveWindow = (windowSegments ?? OtaBleCodec.segmentsPerBlock)
         .clamp(1, OtaBleCodec.segmentsPerBlock);
     final effectiveBatchFrames = batchFrames ?? dataBatchFrames;
@@ -820,6 +822,7 @@ class OtaBleTransport {
         }
       }
     } finally {
+      if (!transferOk) _quarantineUnconfirmedData();
       _ackView = null;
       _noProgressClock = null; // 解除预算对 transfer 后命令（ABORT 等）约束
       _busy = false;
@@ -947,6 +950,7 @@ class OtaBleTransport {
 
   /// 释放上游订阅并完成待处理等待者（页面退出/重绑时调用）。
   Future<void> dispose() async {
+    _quarantineUnconfirmedData();
     _disposed = true;
     _releasePauseGate();
     // 与 [cancel] 同理（RC3-05⑤）：释放后本实例不再持有重新同步事务。
@@ -1063,6 +1067,7 @@ class OtaBleTransport {
   }
 
   void _dispatchError(Object e) {
+    _quarantineUnconfirmedData();
     _pipelineView?.fail(e);
     _ackView?.fail(e);
     for (final w in List<_FrameWaiterBase>.of(_waiters)) {
@@ -1539,6 +1544,16 @@ class OtaBleTransport {
 
   bool get _writeChannelPoisoned => _poisonedDevices[_deviceScope] ?? false;
 
+  void _quarantineUnconfirmedData() {
+    // Platform completion does not prove delivery through BLE/UART. Retain the
+    // existing device-scoped recovery gate when retiring unconfirmed DATA.
+    final pending = (_ackView?.inFlight.isNotEmpty ?? false) ||
+        (_pipelineView?.unconfirmedSeqs.isNotEmpty ?? false);
+    if (_dataWriteDispatched && pending && !_writeChannelPoisoned) {
+      _poisonWriteChannel();
+    }
+  }
+
   void _poisonWriteChannel() {
     final ledger = _deviceWriteLedger;
     // 世代前进（RC3-05⑤）：新一段废弃使此前登记过的全部探针证据失效，
@@ -1641,6 +1656,9 @@ class OtaBleTransport {
     void Function(int)? onChunkStarting,
     void Function(int)? onChunkCompleted,
   }) async {
+    // Run after the old writer settles: a healthy in-frame cancellation may
+    // still receive its ACK, but an unconfirmed prefix must not consume ABORT.
+    if (allowCancelled) _quarantineUnconfirmedData();
     // 排队期间通道可能已被前序帧废弃（RC3-05⑤）：[_writeFrameChecked] 只在
     // 入队时刻检查，而取消路径的 ABORT 常常在前序 DATA 写超时**之前**就已
     // 排队（abortBestEffort 不等待传输循环退出）。轮到它启动时若不复核，
@@ -1715,6 +1733,9 @@ class OtaBleTransport {
         // 宽限仍取 2×writeTimeout——该路径的终止上界是
         // writeTimeout + 2×writeTimeout，以单次写超时为唯一依据。
         onChunkStarting?.call(end);
+        if (_inTransfer && (frame[2] == OtaBleCodec.cmdData || frame[2] == _PipelineWire.data)) {
+          _dataWriteDispatched = true;
+        }
         final pendingWrite = _channel.writeChunk(frame.sublist(offset, end));
         _trackOutstandingWrite(pendingWrite);
         dispatchedAny = true;

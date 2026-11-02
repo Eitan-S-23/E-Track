@@ -90,14 +90,15 @@ class _PipelineAckView {
   final void Function(int) onDurable;
   final OtaLinkStats? stats;
   final Set<int> sentSeqs = {};
+  final Set<int> unconfirmedSeqs = {};
   final Map<int, int> sendCounts = {};
   int eligibleEnd;
   Object? _error;
   bool retryRequested = false;
   Completer<void>? _change;
 
-  String? rejectionReason(OtaBleFrame frame) {
-    if (!window.active) return 'inactive';
+  String? rejectionReason(OtaBleFrame frame, {bool framingOnly = false}) {
+    if (!window.active && !framingOnly) return 'inactive';
     if (frame.session != session) return 'session';
     if (frame.cmd != _PipelineWire.ackData && frame.cmd != _PipelineWire.ackAbort) {
       return 'unmatched';
@@ -114,10 +115,15 @@ class _PipelineAckView {
   }
 
   void onAck(OtaBleFrame frame, {int? atUs}) {
-    if (rejectionReason(frame) != null) return;
+    if (rejectionReason(frame, framingOnly: true) != null) return;
+    final framingOnly = !window.active;
     try {
       final ack = _PipelineAck(frame);
       if (ack.epoch != window.epoch) return;
+      // A matched reply proves this request reached a frame boundary, even
+      // after cancellation. It must not revive credit, progress or a session.
+      if (frame.cmd == _PipelineWire.ackData) unconfirmedSeqs.remove(frame.seq);
+      if (!window.active) return;
       if (ack.status != OtaBleCodec.statusOk) {
         _recordPipelineAckError(stats, frame, 'ACK_STATUS');
         stats?.recordAckClass('error');
@@ -149,9 +155,11 @@ class _PipelineAckView {
       }
       if (changed) _signal();
     } on FormatException {
+      if (framingOnly) return;
       _recordPipelineAckError(stats, frame, 'ACK_MALFORMED');
       fail(const OtaTransportException('Invalid v2 credit', code: 'ACK_MALFORMED'));
     } on OtaTransportException catch (error) {
+      if (framingOnly) return;
       _recordPipelineAckError(stats, frame, error.code ?? 'ACK_MALFORMED');
       fail(error);
     }
@@ -280,6 +288,7 @@ extension _PipelineTransfer on OtaBleTransport {
       throw const OtaTransportException('Previous v2 session requires teardown', code: 'BUSY');
     }
     _busy = true;
+    _dataWriteDispatched = false;
     var negotiated = false;
     var transferStarted = false;
     var ok = false;
@@ -383,6 +392,7 @@ extension _PipelineTransfer on OtaBleTransport {
               final offset = offsets[registered];
               view.sendCounts[offset] = (view.sendCounts[offset] ?? 0) + 1;
               view.sentSeqs.add(sequences[registered]);
+              view.unconfirmedSeqs.add(sequences[registered]);
               view.eligibleEnd = math.max(view.eligibleEnd, math.min(offset + 128, package.length));
               registered++;
             }
@@ -455,6 +465,7 @@ extension _PipelineTransfer on OtaBleTransport {
     } on ArgumentError {
       throw const OtaTransportException('Invalid v2 bounds', code: 'ACK_MALFORMED');
     } finally {
+      if (!ok) _quarantineUnconfirmedData();
       _pipelineView?.window.cancel();
       _pipelineView = null;
       _noProgressClock = null;
