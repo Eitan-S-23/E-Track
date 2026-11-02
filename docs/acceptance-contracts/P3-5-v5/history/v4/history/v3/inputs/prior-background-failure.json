@@ -1,0 +1,8 @@
+{
+  "outcome": "FAIL",
+  "device": "IDENTITY_MISMATCH",
+  "cloudRestored": true,
+  "buildRestored": true,
+  "formalAcceptance": "NOT_ADJUDICATED",
+  "deviceLockRetained": false
+}

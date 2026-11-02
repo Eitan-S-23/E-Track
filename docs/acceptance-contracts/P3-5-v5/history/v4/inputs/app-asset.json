@@ -1,0 +1,37 @@
+{
+  "result": "VERIFIED",
+  "source": "d717e6a04fefa538a363f07cfe344c7935dcc384",
+  "run": 41423973333,
+  "version": "1.0.71+97",
+  "applicationId": "com.wen.gaia.gaia.p35acceptance",
+  "signerSha256": "9e9b89c5e7fdc802b1fe71806a988a866db49cd988a739caeee56cb69f3df579",
+  "debuggable": false,
+  "assets": [
+    {
+      "path": ".cache\\p35-r03-remediation-20261102\\release-artifacts\\assets-resumed-01\\android\\ble-monitor-android.apk",
+      "bytes": 47643080,
+      "sha256": "f37c3282cd6420672d766b1761bd84f68fd29297248069a74a0bdb9fea78e1f8",
+      "artifactId": 13130998258
+    },
+    {
+      "path": ".cache\\p35-r03-remediation-20261102\\release-artifacts\\assets-resumed-01\\windows\\ble-monitor-windows.exe",
+      "bytes": 93184,
+      "sha256": "3ea918568b51dda8144a1e42a486c713303495624d1d836e2fc77ea28d8c4d9e",
+      "artifactId": 13131716600
+    },
+    {
+      "path": ".cache\\p35-r03-remediation-20261102\\release-artifacts\\assets-resumed-01\\windows\\ble-monitor-windows.zip",
+      "bytes": 20538453,
+      "sha256": "6d571e788a2c40835d47d9b35b2527053460acd08bae47aa82b39b631ad28e23",
+      "artifactId": 13131716600
+    }
+  ],
+  "apkMatchesCiHash": true,
+  "nativeMarkersPresent": true,
+  "windowsX64": true,
+  "windowsBundleMatchesExe": true,
+  "windowsArtifactLocalVerification": "VERIFIED",
+  "installed": false,
+  "published": false,
+  "formalAcceptance": "NOT_ADJUDICATED"
+}

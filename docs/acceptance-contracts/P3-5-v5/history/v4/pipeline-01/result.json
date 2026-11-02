@@ -1,0 +1,10 @@
+{
+  "outcome": "PASS",
+  "device": "AUTOMATION_COMPLETED",
+  "cloudRestored": true,
+  "buildRestored": true,
+  "formalAcceptance": "NOT_ADJUDICATED",
+  "runId": 41429938166,
+  "continuedInterruptedInvocation": true,
+  "deviceLockRetained": false
+}

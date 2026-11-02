@@ -1,0 +1,15 @@
+test_alias_size_mismatch (__main__.ArchiveTests.test_alias_size_mismatch) ... ok
+test_conflicting_alias (__main__.ArchiveTests.test_conflicting_alias) ... ok
+test_exact_aliases_and_glob (__main__.ArchiveTests.test_exact_aliases_and_glob) ... ok
+test_missing_object (__main__.ArchiveTests.test_missing_object) ... ok
+test_tampered_object (__main__.ArchiveTests.test_tampered_object) ... ok
+test_traversal_and_absolute_paths (__main__.ArchiveTests.test_traversal_and_absolute_paths) ... ok
+test_unindexed_member (__main__.ArchiveTests.test_unindexed_member) ... ok
+test_capture_corruption (__main__.PositionTests.test_capture_corruption) ... ok
+test_invalid_positions (__main__.PositionTests.test_invalid_positions) ... ok
+test_real_position (__main__.PositionTests.test_real_position) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 2.800s
+
+OK

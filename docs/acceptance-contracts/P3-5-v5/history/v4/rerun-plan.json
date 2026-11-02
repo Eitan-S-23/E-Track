@@ -1,0 +1,257 @@
+{
+  "schema": "etrack-rerun-plan-v1",
+  "current_contract_id": "P3-5-v4",
+  "current_contract_sha256": "449BDA804F1F2A7BB50B3E5796013B1965322DAD430FB7F5B26DF19B77EF9BC1",
+  "previous_contract_id": "P3-5-v3",
+  "previous_contract_sha256": "DCE333E032ACA463310E3789CE857657A4DBD5C76D49FDC5EFBB29CE9F2CC41C",
+  "contract_lineage": "direct_successor",
+  "current_round_id": "P35-OFFLINE-CLOSEOUT-20261102-01",
+  "previous_round_id": "P35-REPAIRED-30309-20261102-01",
+  "previous_matrix_sha256": "F61037167693933E288C07283729B160B55B89BC2A279CA7DC56E038F7EF0EC4",
+  "changed_input_groups": [
+    "validation"
+  ],
+  "changed_external_inputs": [
+    "original-packet"
+  ],
+  "rerun_criteria": [
+    {
+      "id": "C-ADMISSION",
+      "reasons": [
+        "artifact_definition_changed:ART-EVALUATION",
+        "artifact_definition_changed:ART-ORIGINALS",
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "criterion_definition_changed",
+        "external_input_changed:original-packet",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C-MOBILE-CHAIN",
+      "reasons": [
+        "artifact_definition_changed:ART-EVALUATION",
+        "artifact_definition_changed:ART-ORIGINALS",
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "criterion_definition_changed",
+        "external_input_changed:original-packet",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C-FINAL-IDENTITY",
+      "reasons": [
+        "artifact_definition_changed:ART-EVALUATION",
+        "artifact_definition_changed:ART-ORIGINALS",
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "criterion_definition_changed",
+        "external_input_changed:original-packet",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C-NO-UPDATE",
+      "reasons": [
+        "artifact_definition_changed:ART-EVALUATION",
+        "artifact_definition_changed:ART-ORIGINALS",
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "criterion_definition_changed",
+        "external_input_changed:original-packet",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C-INTEGRITY",
+      "reasons": [
+        "artifact_definition_changed:ART-EVALUATION",
+        "artifact_definition_changed:ART-ORIGINALS",
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "criterion_definition_changed",
+        "external_input_changed:original-packet",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C-CLEANUP",
+      "reasons": [
+        "artifact_definition_changed:ART-EVALUATION",
+        "artifact_definition_changed:ART-ORIGINALS",
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "criterion_definition_changed",
+        "external_input_changed:original-packet",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C-COVERAGE",
+      "reasons": [
+        "artifact_definition_changed:ART-EVALUATION",
+        "artifact_definition_changed:ART-ORIGINALS",
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "criterion_definition_changed",
+        "external_input_changed:original-packet",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "R01",
+      "reasons": [
+        "artifact_definition_changed:ART-EVALUATION",
+        "artifact_definition_changed:ART-ORIGINALS",
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "criterion_definition_changed",
+        "external_input_changed:original-packet",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "R02",
+      "reasons": [
+        "artifact_definition_changed:ART-EVALUATION",
+        "artifact_definition_changed:ART-ORIGINALS",
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "criterion_definition_changed",
+        "external_input_changed:original-packet",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "R03",
+      "reasons": [
+        "artifact_definition_changed:ART-EVALUATION",
+        "artifact_definition_changed:ART-ORIGINALS",
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "criterion_definition_changed",
+        "external_input_changed:original-packet",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "R04",
+      "reasons": [
+        "artifact_definition_changed:ART-EVALUATION",
+        "artifact_definition_changed:ART-ORIGINALS",
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "criterion_definition_changed",
+        "external_input_changed:original-packet",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "R05",
+      "reasons": [
+        "artifact_definition_changed:ART-EVALUATION",
+        "artifact_definition_changed:ART-ORIGINALS",
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "criterion_definition_changed",
+        "external_input_changed:original-packet",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "R06",
+      "reasons": [
+        "artifact_definition_changed:ART-EVALUATION",
+        "artifact_definition_changed:ART-ORIGINALS",
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "criterion_definition_changed",
+        "external_input_changed:original-packet",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "R07",
+      "reasons": [
+        "artifact_definition_changed:ART-EVALUATION",
+        "artifact_definition_changed:ART-ORIGINALS",
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "criterion_definition_changed",
+        "external_input_changed:original-packet",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "R08",
+      "reasons": [
+        "artifact_definition_changed:ART-EVALUATION",
+        "artifact_definition_changed:ART-ORIGINALS",
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "criterion_definition_changed",
+        "external_input_changed:original-packet",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "R09",
+      "reasons": [
+        "artifact_definition_changed:ART-EVALUATION",
+        "artifact_definition_changed:ART-ORIGINALS",
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "criterion_definition_changed",
+        "external_input_changed:original-packet",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "R10",
+      "reasons": [
+        "artifact_definition_changed:ART-EVALUATION",
+        "artifact_definition_changed:ART-ORIGINALS",
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "criterion_definition_changed",
+        "external_input_changed:original-packet",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "C-PUBLICATION",
+      "reasons": [
+        "artifact_definition_changed:ART-EVALUATION",
+        "artifact_definition_changed:ART-ORIGINALS",
+        "command_definition_changed:CMD-P35-OFFLINE",
+        "criterion_definition_changed",
+        "external_input_changed:original-packet",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    }
+  ],
+  "reusable_criteria": [],
+  "reuse_origins": {},
+  "required_commands": [
+    "CMD-P35-OFFLINE"
+  ],
+  "required_artifacts": [
+    "ART-ACK",
+    "ART-CAPTURE",
+    "ART-CHANNEL-RESTORE",
+    "ART-CONFIG",
+    "ART-DEVICE",
+    "ART-DIAGNOSTIC",
+    "ART-EVALUATION",
+    "ART-INTEGRITY",
+    "ART-ORIGINALS",
+    "ART-PLAN",
+    "ART-RELEASE",
+    "ART-RESULT",
+    "ART-TARGET",
+    "ART-TEMPLATE",
+    "ART-VARIABLE-RESTORE"
+  ]
+}

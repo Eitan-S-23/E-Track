@@ -1,0 +1,24 @@
+{
+  "status": "USER_APPROVED",
+  "approvedAt": "2026-11-02T10:29:50.745792+00:00",
+  "version": "3.3.9",
+  "source": "18f6b3d3af0c24b1ce81573700cd61005b7c530e",
+  "variables": {
+    "OTA_PREVIOUS_RELEASE_JSON": {
+      "before": "{\"archiveCommit\":\"c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124\",\"archivePath\":\"docs/ota-exec-notes/P4-1-bootstrap-baseline-2026-10-15\",\"buildTimestamp\":1792014177,\"commitSha\":\"fa74905e84c489cccc248617d37ab9f56c8f961c\",\"imageSha256\":\"aaf5ccdb047ef8b3ff4ae0837f9593ceca857d90c98ea0bc09360e411bf4196f\",\"isFormalRelease\":false,\"kind\":\"app\",\"provenanceKind\":\"inaugural-bootstrap-v1\",\"provenanceSha256\":\"0071e0ba5e287a18ea5d1bfa7a62a33ed819c397171f69b641b8b2ca45406e28\",\"sourceArtifactId\":\"11931006831\",\"sourceArtifactSha256\":\"4e46526eb7bab0a8d416cad29044efdccc206ff7a922cfc2ec593d3ccf60c149\",\"sourceRunAttempt\":\"1\",\"sourceRunId\":\"38642386248\",\"sourceSha256\":\"aaf5ccdb047ef8b3ff4ae0837f9593ceca857d90c98ea0bc09360e411bf4196f\",\"sourceSizeBytes\":605072,\"sourceUrl\":\"https://raw.githubusercontent.com/Eitan-S-23/E-Track/c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124/docs/ota-exec-notes/P4-1-bootstrap-baseline-2026-10-15/app-final.bin\",\"targetCommitSha\":\"18f6b3d3af0c24b1ce81573700cd61005b7c530e\",\"targetVersionName\":\"3.2.92\",\"versionCode\":30207,\"versionName\":\"3.2.7\"}",
+      "during": "{\"archiveCommit\":\"c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124\",\"archivePath\":\"docs/ota-exec-notes/P4-1-bootstrap-baseline-2026-10-15\",\"buildTimestamp\":1792014177,\"commitSha\":\"fa74905e84c489cccc248617d37ab9f56c8f961c\",\"imageSha256\":\"aaf5ccdb047ef8b3ff4ae0837f9593ceca857d90c98ea0bc09360e411bf4196f\",\"isFormalRelease\":false,\"kind\":\"app\",\"provenanceKind\":\"inaugural-bootstrap-v1\",\"provenanceSha256\":\"0071e0ba5e287a18ea5d1bfa7a62a33ed819c397171f69b641b8b2ca45406e28\",\"sourceArtifactId\":\"11931006831\",\"sourceArtifactSha256\":\"4e46526eb7bab0a8d416cad29044efdccc206ff7a922cfc2ec593d3ccf60c149\",\"sourceRunAttempt\":\"1\",\"sourceRunId\":\"38642386248\",\"sourceSha256\":\"aaf5ccdb047ef8b3ff4ae0837f9593ceca857d90c98ea0bc09360e411bf4196f\",\"sourceSizeBytes\":605072,\"sourceUrl\":\"https://raw.githubusercontent.com/Eitan-S-23/E-Track/c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124/docs/ota-exec-notes/P4-1-bootstrap-baseline-2026-10-15/app-final.bin\",\"targetCommitSha\":\"18f6b3d3af0c24b1ce81573700cd61005b7c530e\",\"targetVersionName\":\"3.3.9\",\"versionCode\":30207,\"versionName\":\"3.2.7\"}"
+    },
+    "OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256": {
+      "before": "3f8b6f8155eac5e982cc0993abe79efcf34f4ba3bb03967b0592f95cd42351a4",
+      "during": "c96f3dca29c91f57354b73f0a69edb2b37aaf93f8dcac51ca8b02b1d70e34a1b"
+    }
+  },
+  "descriptorSha256": "c96f3dca29c91f57354b73f0a69edb2b37aaf93f8dcac51ca8b02b1d70e34a1b",
+  "normalProtectedApprovalRequired": true,
+  "authority": "Current user explicitly approved same-source 3.3.9 test target, test-backend ten-disconnect group and restoration; covered actions need no repeated approval. Implementation executes; independent owner reviews originals. No production, downgrade, erase or BCB edits.",
+  "proposal": {
+    "path": ".cache\\p35-r03-remediation-20261102\\target-scope-01\\proposal.json",
+    "bytes": 5626,
+    "sha256": "95225742dc72754b19c3c7371088625160878734701922936562337fa5b14741"
+  }
+}
