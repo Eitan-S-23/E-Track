@@ -1,0 +1,150 @@
+{
+  "schema": 1,
+  "run_id": "p35-repaired-30309-20261102",
+  "allow_bluetooth_toggle": true,
+  "phone": {
+    "serial": "10ADA4197U001CK",
+    "model": "V2312A",
+    "adb_port": 5093,
+    "adb": {
+      "path": "D:/install/leidian/LDPlayer4/adb.exe",
+      "bytes": 5916440,
+      "sha256": "705ddc21f33ac52105d1b075b019962ad0e44fb3d560bde69ce8cb3a36bca183"
+    },
+    "adb_key": {
+      "path": "C:/Users/SU/.android/adbkey",
+      "bytes": 1704,
+      "sha256": "f751c81ef35e6469d54d5decc0403b000cd00962989082ff7176671e8a2dd566"
+    }
+  },
+  "app": {
+    "id": "com.wen.gaia.gaia.p35acceptance",
+    "sha256": "f37c3282cd6420672d766b1761bd84f68fd29297248069a74a0bdb9fea78e1f8",
+    "version_code": 97,
+    "release": true
+  },
+  "firmware": {
+    "device_address": "e3:49:e1:14:d6:cb",
+    "protocol": 2,
+    "current": {
+      "version": 30307,
+      "sha256": "67a337adb7d2224d101f69830dd8623f6ab8c77768690bf4dbe649fc1ef50a19"
+    },
+    "target": {
+      "version": 30309,
+      "sha256": "e767525b4e4ae1d3c727304b0e00ac980ddc3c6f2c82e52b5c0a07a95a88465b"
+    },
+    "package": {
+      "path": ".cache\\p35-30309-20261102\\pipeline-01\\build\\originals\\prepared\\e-track-at32f435-v3.3.9-full.etu",
+      "bytes": 291076,
+      "sha256": "a1e81c779d16c99a387491894275a26491f45fa18355a240253c3b070ae350aa"
+    },
+    "release_id": "fw_267a07e4d1e9370bcacf755739f97e065998af3db5c3dcb65627e78e9c3a4b82",
+    "latest_url": "https://e-track-firmware-p41-public.pages.dev/api/public/firmware/latest"
+  },
+  "preparation": {
+    "display_name": "",
+    "command_seconds": 30,
+    "cleanup_seconds": 90,
+    "restart_closed_recorder": true,
+    "radio_state_reader": "vivo-pd2312-sdk33-getState-v1",
+    "capture_failure_buffer": true,
+    "log_buffer": "events",
+    "live_stream_port": 5193,
+    "logcat_binary": true
+  },
+  "ui": {
+    "navigate": [],
+    "arm": {
+      "resource-id": "p35-arm-stream"
+    },
+    "stop": {
+      "resource-id": "p35-stop"
+    },
+    "check": {
+      "resource-id": "p35-check"
+    },
+    "download": {
+      "resource-id": "p35-download"
+    },
+    "start": {
+      "resource-id": "p35-start"
+    },
+    "resume": {
+      "resource-id": "p35-start"
+    },
+    "reconnect": [
+      {
+        "resource-id": "p35-reconnect"
+      }
+    ]
+  },
+  "limits": {
+    "total_seconds": 1800,
+    "stage_seconds": 180,
+    "event_seconds": 5,
+    "disconnect_seconds": 10
+  },
+  "cases": [
+    {
+      "id": "R01",
+      "durable_min": 0,
+      "durable_max": 28671,
+      "bitmap": "any"
+    },
+    {
+      "id": "R02",
+      "durable_min": 28672,
+      "durable_max": 57343,
+      "bitmap": "any"
+    },
+    {
+      "id": "R03",
+      "durable_min": 57344,
+      "durable_max": 86015,
+      "bitmap": "any"
+    },
+    {
+      "id": "R04",
+      "durable_min": 86016,
+      "durable_max": 114687,
+      "bitmap": "any"
+    },
+    {
+      "id": "R05",
+      "durable_min": 114688,
+      "durable_max": 143359,
+      "bitmap": "any"
+    },
+    {
+      "id": "R06",
+      "durable_min": 143360,
+      "durable_max": 172031,
+      "bitmap": "any"
+    },
+    {
+      "id": "R07",
+      "durable_min": 172032,
+      "durable_max": 200703,
+      "bitmap": "any"
+    },
+    {
+      "id": "R08",
+      "durable_min": 200704,
+      "durable_max": 229375,
+      "bitmap": "any"
+    },
+    {
+      "id": "R09",
+      "durable_min": 229376,
+      "durable_max": 258047,
+      "bitmap": "any"
+    },
+    {
+      "id": "R10",
+      "durable_min": 258048,
+      "durable_max": 291075,
+      "bitmap": "any"
+    }
+  ]
+}

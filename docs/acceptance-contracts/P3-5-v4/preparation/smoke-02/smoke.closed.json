@@ -1,0 +1,35 @@
+{
+  "argv": [
+    "python",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "Tools/ota/p35-closeout/evaluate.py",
+    "--inputs",
+    "docs/acceptance-contracts/P3-5-v4/inputs/originals.json",
+    "--out",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p35-formal-closeout-20261102\\smoke-02\\result.json"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 830274680489400,
+  "ended_monotonic_ns": 830314711961600,
+  "stdout": {
+    "path": ".cache\\p35-formal-closeout-20261102\\smoke-02\\smoke.stdout",
+    "bytes": 3978,
+    "sha256": "5201b77d6241621983e4962f4a19cd51474cf4b7e1214e0c77a928c459de9b4c"
+  },
+  "stderr": {
+    "path": ".cache\\p35-formal-closeout-20261102\\smoke-02\\smoke.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

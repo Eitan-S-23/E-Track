@@ -1,0 +1,47 @@
+{
+  "outcome": "APPROVED_PREFLIGHT_PASS",
+  "source": "18f6b3d3af0c24b1ce81573700cd61005b7c530e",
+  "app": {
+    "id": "com.wen.gaia.gaia.p35acceptance",
+    "sha256": "f37c3282cd6420672d766b1761bd84f68fd29297248069a74a0bdb9fea78e1f8",
+    "version_code": 97,
+    "release": true
+  },
+  "channels": {
+    "beta": {
+      "appId": "trace",
+      "deviceModel": "e-track-at32f435",
+      "channel": "beta",
+      "currentReleaseId": "fw_12367eee317a0774a7271cf982ee7f933c6b089336645f9e607501105e72bf0c",
+      "revision": 11,
+      "disableLatest": true,
+      "disableDownloads": true,
+      "maintenanceMessage": null
+    },
+    "stable": {
+      "appId": "trace",
+      "deviceModel": "e-track-at32f435",
+      "channel": "stable",
+      "currentReleaseId": "fw_ce2a2af06d906a42cc9e7f2b9f8587c98a198a9d37fcad3ac30a3384aac0f4fb",
+      "revision": 56,
+      "disableLatest": false,
+      "disableDownloads": false,
+      "maintenanceMessage": null
+    }
+  },
+  "configuration": {
+    "path": ".cache\\p35-30309-20261102\\inputs\\configuration.json",
+    "bytes": 3973,
+    "sha256": "e0436f0e5c6079d258b0fbf85b6df20931df2e836daf2c5029a558148e36c619"
+  },
+  "identityOriginal": {
+    "path": ".cache\\p35-r03-remediation-20261102\\candidate-device\\identity\\app-capture.jsonl",
+    "bytes": 13150,
+    "sha256": "e7feb945b571f999291a8bb767278d4715f0ef7cdc4794b68dcde2d826c91133"
+  },
+  "queryNotRepeated": true,
+  "remoteMutations": 0,
+  "ota": 0,
+  "phoneReadOnly": true,
+  "privatePortsClosed": true
+}

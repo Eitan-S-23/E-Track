@@ -1,0 +1,1108 @@
+{
+  "schema": "etrack-acceptance-contract-v3",
+  "contract_id": "P3-5-v4",
+  "version": 4,
+  "task_id": "P3-5",
+  "parent_contract_sha256": "DCE333E032ACA463310E3789CE857657A4DBD5C76D49FDC5EFBB29CE9F2CC41C",
+  "status": "FROZEN",
+  "approved_by": "Original independent reviewer /root under current user local-closeout authorization",
+  "approved_at": "2026-11-02T15:42:42.928252+00:00",
+  "implementation_ref": "App d717e6a04fefa538a363f07cfe344c7935dcc384; firmware 18f6b3d3af0c24b1ce81573700cd61005b7c530e; original host ff59986aae202b6e234c6f108c75ce16781abac6. User-authorized same-task offline successor under execution-contract 0.1. Original observations on 2026-11-02 by implementation operators independently evaluated by /root; dates, identities, actual interrupted/suffix commands and failures remain in the exact packet. No new hardware or release qualification.",
+  "freeze_commit": "5f591e2e7210c00b48fe276eea7cd73146626153",
+  "freeze_tree": "ed33ff16b3e060f0a037a6e421422d44f7fdbe33",
+  "profile_config_blob": "5ef97ae98674373c3cf641676c16ff7baf1b617f",
+  "result_taxonomy": [
+    "PASS",
+    "PRODUCT_FAIL",
+    "HARNESS_FAIL",
+    "EVIDENCE_GAP",
+    "ENV_BLOCKED"
+  ],
+  "invalidation_policy": "docs/acceptance-execution-contract.md",
+  "input_groups": [
+    {
+      "id": "production",
+      "profile": "Production",
+      "category": "production_source"
+    },
+    {
+      "id": "validation",
+      "profile": "Validation",
+      "category": "validation_inputs"
+    },
+    {
+      "id": "governance",
+      "profile": "Governance",
+      "category": "governance_inputs"
+    }
+  ],
+  "external_inputs": [
+    {
+      "id": "configuration",
+      "category": "fixture",
+      "description": "Current 3.3.9 group binding: configuration. Actual identities are in the original file; implementation-owned observation, not independent PASS.",
+      "fingerprint": "sha256:e0436f0e5c6079d258b0fbf85b6df20931df2e836daf2c5029a558148e36c619",
+      "evidence_path": "inputs/configuration.json",
+      "evidence_sha256": "e0436f0e5c6079d258b0fbf85b6df20931df2e836daf2c5029a558148e36c619"
+    },
+    {
+      "id": "runner-template",
+      "category": "fixture",
+      "description": "Current 3.3.9 group binding: runner-template. Actual identities are in the original file; implementation-owned observation, not independent PASS.",
+      "fingerprint": "sha256:6539dd70fd0864ab5d1cd74f1ff146ca78fc3200ce5a99cba913f132b21bc31e",
+      "evidence_path": "inputs/runner-template.json",
+      "evidence_sha256": "6539dd70fd0864ab5d1cd74f1ff146ca78fc3200ce5a99cba913f132b21bc31e"
+    },
+    {
+      "id": "target-proposal",
+      "category": "environment",
+      "description": "Current 3.3.9 group binding: target-proposal. Actual identities are in the original file; implementation-owned observation, not independent PASS.",
+      "fingerprint": "sha256:e5643bdc5cc2d5967b9736115abb285e90bb3dff890b1ca3b67ffdc63c59befa",
+      "evidence_path": "inputs/approval.json",
+      "evidence_sha256": "e5643bdc5cc2d5967b9736115abb285e90bb3dff890b1ca3b67ffdc63c59befa"
+    },
+    {
+      "id": "remote-admission",
+      "category": "environment",
+      "description": "Current 3.3.9 group binding: remote-admission. Actual identities are in the original file; implementation-owned observation, not independent PASS.",
+      "fingerprint": "sha256:e532be2f2b30d332ddafde10181e034be94a266afbbaa40016fae02a1b2ca98b",
+      "evidence_path": "preflight/result.json",
+      "evidence_sha256": "e532be2f2b30d332ddafde10181e034be94a266afbbaa40016fae02a1b2ca98b"
+    },
+    {
+      "id": "device-admission",
+      "category": "hardware_state",
+      "description": "Current 3.3.9 group binding: device-admission. Actual identities are in the original file; implementation-owned observation, not independent PASS.",
+      "fingerprint": "sha256:cdcc73f42f55aae030e27b73d1a3b23f293550cf5d7fc11071828a83e67c8fb6",
+      "evidence_path": "inputs/device-admission.json",
+      "evidence_sha256": "cdcc73f42f55aae030e27b73d1a3b23f293550cf5d7fc11071828a83e67c8fb6"
+    },
+    {
+      "id": "device-original",
+      "category": "hardware_state",
+      "description": "Current 3.3.9 group binding: device-original. Actual identities are in the original file; implementation-owned observation, not independent PASS.",
+      "fingerprint": "sha256:e7feb945b571f999291a8bb767278d4715f0ef7cdc4794b68dcde2d826c91133",
+      "evidence_path": "inputs/device-original.jsonl",
+      "evidence_sha256": "e7feb945b571f999291a8bb767278d4715f0ef7cdc4794b68dcde2d826c91133"
+    },
+    {
+      "id": "device-ack-original",
+      "category": "hardware_state",
+      "description": "Current 3.3.9 group binding: device-ack-original. Actual identities are in the original file; implementation-owned observation, not independent PASS.",
+      "fingerprint": "sha256:e7feb945b571f999291a8bb767278d4715f0ef7cdc4794b68dcde2d826c91133",
+      "evidence_path": "inputs/device-ack-original.stdout",
+      "evidence_sha256": "e7feb945b571f999291a8bb767278d4715f0ef7cdc4794b68dcde2d826c91133"
+    },
+    {
+      "id": "preflight-attempt",
+      "category": "fixture",
+      "description": "Retained CURRENT_IDENTITY_BLOCKED wrapper assertion and complete cleanup, not relabeled PASS.",
+      "fingerprint": "sha256:6a4040ca0e97be56c2f99412d7503b19b529f7d04aa34f3e5c760a73dab00551",
+      "evidence_path": "inputs/preflight-attempt.json",
+      "evidence_sha256": "6a4040ca0e97be56c2f99412d7503b19b529f7d04aa34f3e5c760a73dab00551"
+    },
+    {
+      "id": "app-asset",
+      "category": "fixture",
+      "description": "Current 3.3.9 group binding: app-asset. Actual identities are in the original file; implementation-owned observation, not independent PASS.",
+      "fingerprint": "sha256:cd562a1c5ea32e3ea6c2f3a0bded490ce00b8e1dcbd1e2bfe1a3af7103552ad8",
+      "evidence_path": "inputs/app-asset.json",
+      "evidence_sha256": "cd562a1c5ea32e3ea6c2f3a0bded490ce00b8e1dcbd1e2bfe1a3af7103552ad8"
+    },
+    {
+      "id": "candidate-commit",
+      "category": "fixture",
+      "description": "Current 3.3.9 group binding: candidate-commit. Actual identities are in the original file; implementation-owned observation, not independent PASS.",
+      "fingerprint": "sha256:d1ad140cdd2a4902e32947b7ccf5775a846bf72074003d827eb7e56b5d3c1cf4",
+      "evidence_path": "inputs/candidate-commit.json",
+      "evidence_sha256": "d1ad140cdd2a4902e32947b7ccf5775a846bf72074003d827eb7e56b5d3c1cf4"
+    },
+    {
+      "id": "prior-review",
+      "category": "fixture",
+      "description": "Prior independent offline/raw-evidence and 258-method review closure; historical facts, not a formal EXECUTED PASS reuse origin.",
+      "fingerprint": "sha256:fa9cff98504dcb84fddcf6359ae32e5df2245558f78431ab90de2779bc9f5330",
+      "evidence_path": "inputs/prior-review.json",
+      "evidence_sha256": "fa9cff98504dcb84fddcf6359ae32e5df2245558f78431ab90de2779bc9f5330"
+    },
+    {
+      "id": "prior-resume-failure",
+      "category": "fixture",
+      "description": "Original failed development resume pipeline result; one recovery cannot replace R01-R10.",
+      "fingerprint": "sha256:453931eb225d24a12191bc78651993f3b8db114cd9254d091e1efe0f488d333e",
+      "evidence_path": "inputs/prior-resume-failure.json",
+      "evidence_sha256": "453931eb225d24a12191bc78651993f3b8db114cd9254d091e1efe0f488d333e"
+    },
+    {
+      "id": "prior-background-failure",
+      "category": "fixture",
+      "description": "Original failed development background pipeline result; short background/lock observations are not a ten-recovery group.",
+      "fingerprint": "sha256:a79f90ebd971f93fb969ca166c9a40ae5ddb44f2f654874dda6c84d29f537d71",
+      "evidence_path": "inputs/prior-background-failure.json",
+      "evidence_sha256": "a79f90ebd971f93fb969ca166c9a40ae5ddb44f2f654874dda6c84d29f537d71"
+    },
+    {
+      "id": "prior-r03-result",
+      "category": "fixture",
+      "description": "Preserved failed 3.3.8 group, not replayed or counted toward repaired group.",
+      "fingerprint": "sha256:2f64ec58885c26314a024b119a0cd246be117439e86b52a241b3bc907d6051ba",
+      "evidence_path": "inputs/prior-r03-result.json",
+      "evidence_sha256": "2f64ec58885c26314a024b119a0cd246be117439e86b52a241b3bc907d6051ba"
+    },
+    {
+      "id": "prior-r03-original",
+      "category": "fixture",
+      "description": "Preserved failed 3.3.8 group, not replayed or counted toward repaired group.",
+      "fingerprint": "sha256:6c7ef2f091e0053d89505ee93ffc5e325ee321dc7cc2bbe3454d31954b5a8e90",
+      "evidence_path": "inputs/prior-r03-original.jsonl",
+      "evidence_sha256": "6c7ef2f091e0053d89505ee93ffc5e325ee321dc7cc2bbe3454d31954b5a8e90"
+    },
+    {
+      "id": "original-packet",
+      "category": "fixture",
+      "description": "Hash-bound portable packet parts retaining the original ten-window/supplemental records and failed attempts; no new physical operation.",
+      "fingerprint": "sha256:f1a5fda063dabb069a6ef63c4eee26921bd0e25665d59e2fe08aa22e21e6d189",
+      "evidence_path": "inputs/originals.json",
+      "evidence_sha256": "f1a5fda063dabb069a6ef63c4eee26921bd0e25665d59e2fe08aa22e21e6d189"
+    }
+  ],
+  "commands": [
+    {
+      "id": "CMD-P35-OFFLINE",
+      "description": "One bounded 900-second independent original-evidence evaluation after real frozen NOT_RUN/previous-v3 precheck. No device, network, CI, download, build or automatic rerun; EXECUTED describes offline evaluation only.",
+      "command": "python -I -S -B -X utf8 Tools/ota/p35-closeout/evaluate.py --inputs docs/acceptance-contracts/P3-5-v4/inputs/originals.json --out docs/acceptance-contracts/P3-5-v4/execution/result.json --contract docs/acceptance-contracts/P3-5-v4.contract.json --matrix docs/acceptance-contracts/P3-5-v4/evidence-matrix.json",
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "runner_paths": [
+        ".agents/skills/e-track-flutter-debug/scripts/host_io.py",
+        "Tools/acceptance/validate_bundle.py",
+        "Tools/flutter/dev_checks.py",
+        "Tools/ota/p34-acceptance/build.py",
+        "Tools/ota/p34-acceptance/live_host.py",
+        "Tools/ota/p34-acceptance/live_mcu.py",
+        "Tools/ota/p34-acceptance/metrics.py",
+        "Tools/ota/p35-automation/pipeline.py",
+        "Tools/ota/p35-automation/pipeline_build.py",
+        "Tools/ota/p35-automation/pipeline_cloud.py",
+        "Tools/ota/p35-automation/runner.py",
+        "Tools/ota/p35-automation/scenarios.py",
+        "Tools/ota/p35-closeout/evaluate.py",
+        "Tools/ota/p35-closeout/original.py",
+        "Tools/ota/p35-closeout/store.py",
+        "Tools/ota/p35-closeout/supplement.py",
+        "Tools/provenance/manifest_profiles.json"
+      ],
+      "expected_exit_codes": [
+        0,
+        1
+      ],
+      "output_required": true
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-CONFIG",
+      "path": "approved/configuration.json",
+      "description": "Exact approved pipeline configuration."
+    },
+    {
+      "id": "ART-TEMPLATE",
+      "path": "inputs/runner-template.json",
+      "description": "Immutable structural template, not a directly executable old-package plan."
+    },
+    {
+      "id": "ART-PLAN",
+      "path": "pipeline-01/plan.json",
+      "description": "Actual executable plan derived once from newly verified CI target before device operations."
+    },
+    {
+      "id": "ART-RESULT",
+      "path": "pipeline-01/result.json",
+      "description": "Original whole-pipeline result, including restoration and any unexecuted stages."
+    },
+    {
+      "id": "ART-DEVICE",
+      "path": "pipeline-01/device/result.json",
+      "description": "Original phone runner result and every R01-R10 outcome, including failed/unrun events."
+    },
+    {
+      "id": "ART-CAPTURE",
+      "path": "pipeline-01/device/app-capture.jsonl",
+      "description": "Unchanged App-generated capture with original footer."
+    },
+    {
+      "id": "ART-INTEGRITY",
+      "path": "pipeline-01/device/app-capture-integrity.json",
+      "description": "Strict original capture audit with identity, counts, digest and loss fields."
+    },
+    {
+      "id": "ART-ACK",
+      "path": "pipeline-01/device/live-stream.stdout",
+      "description": "Persisted reliable primary live bytes; not reconstructed from Logcat."
+    },
+    {
+      "id": "ART-DIAGNOSTIC",
+      "path": "pipeline-01/device/logcat-diagnostic-integrity.json",
+      "description": "Binary Logcat live/terminal/native-status audit; incomplete originals retained and not mislabeled lossless."
+    },
+    {
+      "id": "ART-TARGET",
+      "path": "pipeline-01/target.json",
+      "description": "Actual new CI/register target version, complete raw image digest and full package binding."
+    },
+    {
+      "id": "ART-RELEASE",
+      "path": "pipeline-01/build/originals/prepared/release-evidence.json",
+      "description": "Unchanged test rehearsal upload/readback/ready registration evidence from the actual CI run."
+    },
+    {
+      "id": "ART-CHANNEL-RESTORE",
+      "path": "pipeline-01/channels-restored.json",
+      "description": "Normal API CAS restoration readback of owned stable pointer/settings; beta unchanged."
+    },
+    {
+      "id": "ART-VARIABLE-RESTORE",
+      "path": "pipeline-01/build/variables-restored.json",
+      "description": "Exact restoration of named temporary rehearsal variables after terminal CI."
+    },
+    {
+      "id": "ART-EVALUATION",
+      "path": "execution/result.json",
+      "description": "Actual independent per-criterion original-evidence evaluation"
+    },
+    {
+      "id": "ART-ORIGINALS",
+      "path": "inputs/originals.json",
+      "description": "Every-byte packet-part binding, exact original ZIP path index"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "C-ADMISSION",
+      "description": "Offline evaluate the dated original scope, not a new physical command: Validate exact approved configuration bytes, candidate objects, actual dependency closure, pinned APK/ADB inputs, current device query/full hash and current protected test backend. Historical raw-evidence/host review remains a dated prerequisite, not another test run or formal REUSED PASS. Product execution requires the recorded exact bootstrap approval, FROZEN NOT_RUN admission, qualified current phone and no conflicting owner.",
+      "required": true,
+      "kind": "process",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation",
+        "governance"
+      ],
+      "dependency_rationale": "Production binds the actual original candidate; Validation binds the committed parser and source/receipt checks; Governance binds original admission obligations. Earlier admission and fresh campaign identity are independently matched to the same 30307 full image.",
+      "external_inputs": [
+        "configuration",
+        "runner-template",
+        "target-proposal",
+        "remote-admission",
+        "device-admission",
+        "device-original",
+        "device-ack-original",
+        "preflight-attempt",
+        "app-asset",
+        "candidate-commit",
+        "prior-review",
+        "prior-resume-failure",
+        "prior-background-failure",
+        "prior-r03-result",
+        "prior-r03-original",
+        "original-packet"
+      ],
+      "command_ids": [
+        "CMD-P35-OFFLINE"
+      ],
+      "artifact_ids": [
+        "ART-CONFIG",
+        "ART-TEMPLATE",
+        "ART-EVALUATION",
+        "ART-ORIGINALS"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C-MOBILE-CHAIN",
+      "description": "Offline evaluate the dated original scope, not a new physical command: The pinned non-debuggable Actions APK queries the same MCU, selects the new ready full ETU through the normal real test backend, downloads and verifies its exact bytes, transfers from a fresh zero-origin BEGIN, and follows normal MCU apply/reboot/reconnect. Target/package/release must equal ART-TARGET and ART-PLAN produced by this pipeline, never the template's old placeholders. No PC sender or extra preliminary OTA.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production binds App/firmware/workflow behavior; Validation binds pipeline composition, native acquisition, reliable stream and interpretation. Actual APK and firmware build commits remain explicit external identities, not a false single-build claim.",
+      "external_inputs": [
+        "configuration",
+        "runner-template",
+        "remote-admission",
+        "device-admission",
+        "device-original",
+        "app-asset",
+        "target-proposal",
+        "original-packet"
+      ],
+      "command_ids": [
+        "CMD-P35-OFFLINE"
+      ],
+      "artifact_ids": [
+        "ART-PLAN",
+        "ART-RESULT",
+        "ART-DEVICE",
+        "ART-CAPTURE",
+        "ART-INTEGRITY",
+        "ART-TARGET",
+        "ART-EVALUATION",
+        "ART-ORIGINALS"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C-FINAL-IDENTITY",
+      "description": "Offline evaluate the dated original scope, not a new physical command: Fresh post-reboot connection GET_INFO equals the approved new version 30309 and full raw target image SHA256 from this pipeline's verified metadata/app-final.bin. END ACK/UI100 is insufficient. Never substitute retained 30306 observations for the new target. Separately verify full retained 30313 App and unchanged Boot/confirmed health from the supplemental dated originals.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production binds App/firmware/workflow behavior; Validation binds pipeline composition, native acquisition, reliable stream and interpretation. Actual APK and firmware build commits remain explicit external identities, not a false single-build claim.",
+      "external_inputs": [
+        "configuration",
+        "runner-template",
+        "remote-admission",
+        "device-admission",
+        "device-original",
+        "app-asset",
+        "target-proposal",
+        "original-packet"
+      ],
+      "command_ids": [
+        "CMD-P35-OFFLINE"
+      ],
+      "artifact_ids": [
+        "ART-PLAN",
+        "ART-RESULT",
+        "ART-DEVICE",
+        "ART-CAPTURE",
+        "ART-INTEGRITY",
+        "ART-TARGET",
+        "ART-EVALUATION",
+        "ART-ORIGINALS"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C-NO-UPDATE",
+      "description": "Offline evaluate the dated original scope, not a new physical command: After the final fresh target identity, the normal latest action returns NO_UPDATE with original query/transition and native UI evidence for this same target and test channel.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production binds App/firmware/workflow behavior; Validation binds pipeline composition, native acquisition, reliable stream and interpretation. Actual APK and firmware build commits remain explicit external identities, not a false single-build claim.",
+      "external_inputs": [
+        "configuration",
+        "runner-template",
+        "remote-admission",
+        "device-admission",
+        "device-original",
+        "app-asset",
+        "target-proposal",
+        "original-packet"
+      ],
+      "command_ids": [
+        "CMD-P35-OFFLINE"
+      ],
+      "artifact_ids": [
+        "ART-PLAN",
+        "ART-RESULT",
+        "ART-DEVICE",
+        "ART-CAPTURE",
+        "ART-INTEGRITY",
+        "ART-TARGET",
+        "ART-EVALUATION",
+        "ART-ORIGINALS"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C-INTEGRITY",
+      "description": "Offline evaluate the dated original scope, not a new physical command: App capture open/close IDs, strict sequence/count/body digest, healthy/lost/error and source/package bindings pass. Reliable primary ACK-stream bytes equal the immutable App snapshot; diagnostic Logcat live/terminal/native-status originals are retained and audited separately, with any truncation explicit. No fabricated footer, hidden loss or stale session/URL/file.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production binds App/firmware/workflow behavior; Validation binds pipeline composition, native acquisition, reliable stream and interpretation. Actual APK and firmware build commits remain explicit external identities, not a false single-build claim.",
+      "external_inputs": [
+        "configuration",
+        "runner-template",
+        "remote-admission",
+        "device-admission",
+        "device-original",
+        "app-asset",
+        "target-proposal",
+        "original-packet"
+      ],
+      "command_ids": [
+        "CMD-P35-OFFLINE"
+      ],
+      "artifact_ids": [
+        "ART-PLAN",
+        "ART-RESULT",
+        "ART-DEVICE",
+        "ART-CAPTURE",
+        "ART-INTEGRITY",
+        "ART-TARGET",
+        "ART-ACK",
+        "ART-DIAGNOSTIC",
+        "ART-EVALUATION",
+        "ART-ORIGINALS"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C-CLEANUP",
+      "description": "Offline evaluate the dated original scope, not a new physical command: All original logs retrieved and uncertain actions reconciled; owned recording/App lifecycle closed within admitted ownership, collectors/ADB/stream ports and locks released. Bluetooth restored to initially observed ON. Restore the exact two rehearsal variables only after terminal CI and the owned stable pointer/settings by normal CAS; beta and production gates unchanged. Keep upgraded MCU, no downgrade. Preserve conflicts instead of overwriting another owner.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production binds App/firmware/workflow behavior; Validation binds pipeline composition, native acquisition, reliable stream and interpretation. Actual APK and firmware build commits remain explicit external identities, not a false single-build claim.",
+      "external_inputs": [
+        "configuration",
+        "runner-template",
+        "remote-admission",
+        "device-admission",
+        "device-original",
+        "app-asset",
+        "target-proposal",
+        "original-packet"
+      ],
+      "command_ids": [
+        "CMD-P35-OFFLINE"
+      ],
+      "artifact_ids": [
+        "ART-PLAN",
+        "ART-RESULT",
+        "ART-DEVICE",
+        "ART-CAPTURE",
+        "ART-INTEGRITY",
+        "ART-TARGET",
+        "ART-CHANNEL-RESTORE",
+        "ART-VARIABLE-RESTORE",
+        "ART-EVALUATION",
+        "ART-ORIGINALS"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C-COVERAGE",
+      "description": "Offline evaluate the dated original scope, not a new physical command: Ten actual separate OFF/ON BLE-loss/reconnect events in fixed nonoverlapping R01-R10 windows determined before injection solely from the new verified full package length N by frozen pipeline.windows. Include pre-durable, positive committed boundaries and near-tail observations. BLE wire v2 has no bitmap: N/A, never invented PASS. Ten generic recoveries do not cure a missing required position; no post-hoc window edits or automatic replacement group. The original ten nonoverlapping 30309 windows remain unchanged. The separately reviewed 30313 single-point supplement closes the missing pre-durable position; it is not spliced into R01. Process recovery/background/600-second locked observation retain their own captures and limits.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production binds App/firmware/workflow behavior; Validation binds pipeline composition, native acquisition, reliable stream and interpretation. Actual APK and firmware build commits remain explicit external identities, not a false single-build claim.",
+      "external_inputs": [
+        "configuration",
+        "runner-template",
+        "remote-admission",
+        "device-admission",
+        "device-original",
+        "app-asset",
+        "target-proposal",
+        "original-packet"
+      ],
+      "command_ids": [
+        "CMD-P35-OFFLINE"
+      ],
+      "artifact_ids": [
+        "ART-PLAN",
+        "ART-RESULT",
+        "ART-DEVICE",
+        "ART-CAPTURE",
+        "ART-INTEGRITY",
+        "ART-TARGET",
+        "ART-EVALUATION",
+        "ART-ORIGINALS"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "R01",
+      "description": "Offline evaluate the dated original scope, not a new physical command: One actual global adapter OFF and ON with real BLE loss in window R01: S[0]..S[1]-1, S[i]=floor(floor(N*i/10)/4096)*4096, N=this pipeline's verified full ETU size. Exact numeric windows are materialized once by frozen pipeline.windows before device work. Fresh same-device reconnect/BEGIN must resume at MCU-reported durable offset, first missing DATA matches it and durable advances. All ten contribute to the same final image. Missing OFF/ON, missed/late window or unobserved recovery is not PASS.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production binds App/firmware/workflow behavior; Validation binds pipeline composition, native acquisition, reliable stream and interpretation. Actual APK and firmware build commits remain explicit external identities, not a false single-build claim.",
+      "external_inputs": [
+        "configuration",
+        "runner-template",
+        "remote-admission",
+        "device-admission",
+        "device-original",
+        "app-asset",
+        "target-proposal",
+        "original-packet"
+      ],
+      "command_ids": [
+        "CMD-P35-OFFLINE"
+      ],
+      "artifact_ids": [
+        "ART-PLAN",
+        "ART-RESULT",
+        "ART-DEVICE",
+        "ART-CAPTURE",
+        "ART-INTEGRITY",
+        "ART-TARGET",
+        "ART-EVALUATION",
+        "ART-ORIGINALS"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "R02",
+      "description": "Offline evaluate the dated original scope, not a new physical command: One actual global adapter OFF and ON with real BLE loss in window R02: S[1]..S[2]-1, S[i]=floor(floor(N*i/10)/4096)*4096, N=this pipeline's verified full ETU size. Exact numeric windows are materialized once by frozen pipeline.windows before device work. Fresh same-device reconnect/BEGIN must resume at MCU-reported durable offset, first missing DATA matches it and durable advances. All ten contribute to the same final image. Missing OFF/ON, missed/late window or unobserved recovery is not PASS.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production binds App/firmware/workflow behavior; Validation binds pipeline composition, native acquisition, reliable stream and interpretation. Actual APK and firmware build commits remain explicit external identities, not a false single-build claim.",
+      "external_inputs": [
+        "configuration",
+        "runner-template",
+        "remote-admission",
+        "device-admission",
+        "device-original",
+        "app-asset",
+        "target-proposal",
+        "original-packet"
+      ],
+      "command_ids": [
+        "CMD-P35-OFFLINE"
+      ],
+      "artifact_ids": [
+        "ART-PLAN",
+        "ART-RESULT",
+        "ART-DEVICE",
+        "ART-CAPTURE",
+        "ART-INTEGRITY",
+        "ART-TARGET",
+        "ART-EVALUATION",
+        "ART-ORIGINALS"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "R03",
+      "description": "Offline evaluate the dated original scope, not a new physical command: One actual global adapter OFF and ON with real BLE loss in window R03: S[2]..S[3]-1, S[i]=floor(floor(N*i/10)/4096)*4096, N=this pipeline's verified full ETU size. Exact numeric windows are materialized once by frozen pipeline.windows before device work. Fresh same-device reconnect/BEGIN must resume at MCU-reported durable offset, first missing DATA matches it and durable advances. All ten contribute to the same final image. Missing OFF/ON, missed/late window or unobserved recovery is not PASS.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production binds App/firmware/workflow behavior; Validation binds pipeline composition, native acquisition, reliable stream and interpretation. Actual APK and firmware build commits remain explicit external identities, not a false single-build claim.",
+      "external_inputs": [
+        "configuration",
+        "runner-template",
+        "remote-admission",
+        "device-admission",
+        "device-original",
+        "app-asset",
+        "target-proposal",
+        "original-packet"
+      ],
+      "command_ids": [
+        "CMD-P35-OFFLINE"
+      ],
+      "artifact_ids": [
+        "ART-PLAN",
+        "ART-RESULT",
+        "ART-DEVICE",
+        "ART-CAPTURE",
+        "ART-INTEGRITY",
+        "ART-TARGET",
+        "ART-EVALUATION",
+        "ART-ORIGINALS"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "R04",
+      "description": "Offline evaluate the dated original scope, not a new physical command: One actual global adapter OFF and ON with real BLE loss in window R04: S[3]..S[4]-1, S[i]=floor(floor(N*i/10)/4096)*4096, N=this pipeline's verified full ETU size. Exact numeric windows are materialized once by frozen pipeline.windows before device work. Fresh same-device reconnect/BEGIN must resume at MCU-reported durable offset, first missing DATA matches it and durable advances. All ten contribute to the same final image. Missing OFF/ON, missed/late window or unobserved recovery is not PASS.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production binds App/firmware/workflow behavior; Validation binds pipeline composition, native acquisition, reliable stream and interpretation. Actual APK and firmware build commits remain explicit external identities, not a false single-build claim.",
+      "external_inputs": [
+        "configuration",
+        "runner-template",
+        "remote-admission",
+        "device-admission",
+        "device-original",
+        "app-asset",
+        "target-proposal",
+        "original-packet"
+      ],
+      "command_ids": [
+        "CMD-P35-OFFLINE"
+      ],
+      "artifact_ids": [
+        "ART-PLAN",
+        "ART-RESULT",
+        "ART-DEVICE",
+        "ART-CAPTURE",
+        "ART-INTEGRITY",
+        "ART-TARGET",
+        "ART-EVALUATION",
+        "ART-ORIGINALS"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "R05",
+      "description": "Offline evaluate the dated original scope, not a new physical command: One actual global adapter OFF and ON with real BLE loss in window R05: S[4]..S[5]-1, S[i]=floor(floor(N*i/10)/4096)*4096, N=this pipeline's verified full ETU size. Exact numeric windows are materialized once by frozen pipeline.windows before device work. Fresh same-device reconnect/BEGIN must resume at MCU-reported durable offset, first missing DATA matches it and durable advances. All ten contribute to the same final image. Missing OFF/ON, missed/late window or unobserved recovery is not PASS.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production binds App/firmware/workflow behavior; Validation binds pipeline composition, native acquisition, reliable stream and interpretation. Actual APK and firmware build commits remain explicit external identities, not a false single-build claim.",
+      "external_inputs": [
+        "configuration",
+        "runner-template",
+        "remote-admission",
+        "device-admission",
+        "device-original",
+        "app-asset",
+        "target-proposal",
+        "original-packet"
+      ],
+      "command_ids": [
+        "CMD-P35-OFFLINE"
+      ],
+      "artifact_ids": [
+        "ART-PLAN",
+        "ART-RESULT",
+        "ART-DEVICE",
+        "ART-CAPTURE",
+        "ART-INTEGRITY",
+        "ART-TARGET",
+        "ART-EVALUATION",
+        "ART-ORIGINALS"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "R06",
+      "description": "Offline evaluate the dated original scope, not a new physical command: One actual global adapter OFF and ON with real BLE loss in window R06: S[5]..S[6]-1, S[i]=floor(floor(N*i/10)/4096)*4096, N=this pipeline's verified full ETU size. Exact numeric windows are materialized once by frozen pipeline.windows before device work. Fresh same-device reconnect/BEGIN must resume at MCU-reported durable offset, first missing DATA matches it and durable advances. All ten contribute to the same final image. Missing OFF/ON, missed/late window or unobserved recovery is not PASS.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production binds App/firmware/workflow behavior; Validation binds pipeline composition, native acquisition, reliable stream and interpretation. Actual APK and firmware build commits remain explicit external identities, not a false single-build claim.",
+      "external_inputs": [
+        "configuration",
+        "runner-template",
+        "remote-admission",
+        "device-admission",
+        "device-original",
+        "app-asset",
+        "target-proposal",
+        "original-packet"
+      ],
+      "command_ids": [
+        "CMD-P35-OFFLINE"
+      ],
+      "artifact_ids": [
+        "ART-PLAN",
+        "ART-RESULT",
+        "ART-DEVICE",
+        "ART-CAPTURE",
+        "ART-INTEGRITY",
+        "ART-TARGET",
+        "ART-EVALUATION",
+        "ART-ORIGINALS"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "R07",
+      "description": "Offline evaluate the dated original scope, not a new physical command: One actual global adapter OFF and ON with real BLE loss in window R07: S[6]..S[7]-1, S[i]=floor(floor(N*i/10)/4096)*4096, N=this pipeline's verified full ETU size. Exact numeric windows are materialized once by frozen pipeline.windows before device work. Fresh same-device reconnect/BEGIN must resume at MCU-reported durable offset, first missing DATA matches it and durable advances. All ten contribute to the same final image. Missing OFF/ON, missed/late window or unobserved recovery is not PASS.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production binds App/firmware/workflow behavior; Validation binds pipeline composition, native acquisition, reliable stream and interpretation. Actual APK and firmware build commits remain explicit external identities, not a false single-build claim.",
+      "external_inputs": [
+        "configuration",
+        "runner-template",
+        "remote-admission",
+        "device-admission",
+        "device-original",
+        "app-asset",
+        "target-proposal",
+        "original-packet"
+      ],
+      "command_ids": [
+        "CMD-P35-OFFLINE"
+      ],
+      "artifact_ids": [
+        "ART-PLAN",
+        "ART-RESULT",
+        "ART-DEVICE",
+        "ART-CAPTURE",
+        "ART-INTEGRITY",
+        "ART-TARGET",
+        "ART-EVALUATION",
+        "ART-ORIGINALS"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "R08",
+      "description": "Offline evaluate the dated original scope, not a new physical command: One actual global adapter OFF and ON with real BLE loss in window R08: S[7]..S[8]-1, S[i]=floor(floor(N*i/10)/4096)*4096, N=this pipeline's verified full ETU size. Exact numeric windows are materialized once by frozen pipeline.windows before device work. Fresh same-device reconnect/BEGIN must resume at MCU-reported durable offset, first missing DATA matches it and durable advances. All ten contribute to the same final image. Missing OFF/ON, missed/late window or unobserved recovery is not PASS.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production binds App/firmware/workflow behavior; Validation binds pipeline composition, native acquisition, reliable stream and interpretation. Actual APK and firmware build commits remain explicit external identities, not a false single-build claim.",
+      "external_inputs": [
+        "configuration",
+        "runner-template",
+        "remote-admission",
+        "device-admission",
+        "device-original",
+        "app-asset",
+        "target-proposal",
+        "original-packet"
+      ],
+      "command_ids": [
+        "CMD-P35-OFFLINE"
+      ],
+      "artifact_ids": [
+        "ART-PLAN",
+        "ART-RESULT",
+        "ART-DEVICE",
+        "ART-CAPTURE",
+        "ART-INTEGRITY",
+        "ART-TARGET",
+        "ART-EVALUATION",
+        "ART-ORIGINALS"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "R09",
+      "description": "Offline evaluate the dated original scope, not a new physical command: One actual global adapter OFF and ON with real BLE loss in window R09: S[8]..S[9]-1, S[i]=floor(floor(N*i/10)/4096)*4096, N=this pipeline's verified full ETU size. Exact numeric windows are materialized once by frozen pipeline.windows before device work. Fresh same-device reconnect/BEGIN must resume at MCU-reported durable offset, first missing DATA matches it and durable advances. All ten contribute to the same final image. Missing OFF/ON, missed/late window or unobserved recovery is not PASS.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production binds App/firmware/workflow behavior; Validation binds pipeline composition, native acquisition, reliable stream and interpretation. Actual APK and firmware build commits remain explicit external identities, not a false single-build claim.",
+      "external_inputs": [
+        "configuration",
+        "runner-template",
+        "remote-admission",
+        "device-admission",
+        "device-original",
+        "app-asset",
+        "target-proposal",
+        "original-packet"
+      ],
+      "command_ids": [
+        "CMD-P35-OFFLINE"
+      ],
+      "artifact_ids": [
+        "ART-PLAN",
+        "ART-RESULT",
+        "ART-DEVICE",
+        "ART-CAPTURE",
+        "ART-INTEGRITY",
+        "ART-TARGET",
+        "ART-EVALUATION",
+        "ART-ORIGINALS"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "R10",
+      "description": "Offline evaluate the dated original scope, not a new physical command: One actual global adapter OFF and ON with real BLE loss in window R10: S[9]..N-1, S[i]=floor(floor(N*i/10)/4096)*4096, N=this pipeline's verified full ETU size. Exact numeric windows are materialized once by frozen pipeline.windows before device work. Fresh same-device reconnect/BEGIN must resume at MCU-reported durable offset, first missing DATA matches it and durable advances. All ten contribute to the same final image. Missing OFF/ON, missed/late window or unobserved recovery is not PASS.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production binds App/firmware/workflow behavior; Validation binds pipeline composition, native acquisition, reliable stream and interpretation. Actual APK and firmware build commits remain explicit external identities, not a false single-build claim.",
+      "external_inputs": [
+        "configuration",
+        "runner-template",
+        "remote-admission",
+        "device-admission",
+        "device-original",
+        "app-asset",
+        "target-proposal",
+        "original-packet"
+      ],
+      "command_ids": [
+        "CMD-P35-OFFLINE"
+      ],
+      "artifact_ids": [
+        "ART-PLAN",
+        "ART-RESULT",
+        "ART-DEVICE",
+        "ART-CAPTURE",
+        "ART-INTEGRITY",
+        "ART-TARGET",
+        "ART-EVALUATION",
+        "ART-ORIGINALS"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    },
+    {
+      "id": "C-PUBLICATION",
+      "description": "Offline evaluate the dated original scope, not a new physical command: One actual existing firmware-build.yml dispatch on pinned 18f6b3d, p34-v2-candidate, version 3.3.9, rehearsal=true/publish=false; normal required protected review. Bind run ID/attempt/source/workflow to new final image and full/patch/recovery artifacts, test R2 full-byte readbacks and normal ready registration. Count and retain all compiler warnings/errors; 0 errors required, not a warning-free claim. Existing formal production Release, gates and channels remain untouched.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "original_command_receipt",
+        "raw_observation"
+      ],
+      "input_groups": [
+        "production",
+        "validation"
+      ],
+      "dependency_rationale": "Production binds the actual workflow/build/release chain; Validation binds dispatch identity, artifact byte verification, registration and restoration checks.",
+      "external_inputs": [
+        "configuration",
+        "remote-admission",
+        "target-proposal",
+        "original-packet"
+      ],
+      "command_ids": [
+        "CMD-P35-OFFLINE"
+      ],
+      "artifact_ids": [
+        "ART-RESULT",
+        "ART-TARGET",
+        "ART-RELEASE",
+        "ART-VARIABLE-RESTORE",
+        "ART-EVALUATION",
+        "ART-ORIGINALS"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "protocol_contract",
+        "expected": true
+      }
+    }
+  ],
+  "performance_gates": [],
+  "scope": {
+    "spec": "docs/ota-prompts/prompt-P3-5-integration.md",
+    "execution": "one-repaired-30309-full-upgrade-ten-disconnect-group",
+    "authority": {
+      "status": "USER_APPROVED",
+      "approvedAt": "2026-11-02T10:29:50.745792+00:00",
+      "version": "3.3.9",
+      "source": "18f6b3d3af0c24b1ce81573700cd61005b7c530e",
+      "variables": {
+        "OTA_PREVIOUS_RELEASE_JSON": {
+          "before": "{\"archiveCommit\":\"c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124\",\"archivePath\":\"docs/ota-exec-notes/P4-1-bootstrap-baseline-2026-10-15\",\"buildTimestamp\":1792014177,\"commitSha\":\"fa74905e84c489cccc248617d37ab9f56c8f961c\",\"imageSha256\":\"aaf5ccdb047ef8b3ff4ae0837f9593ceca857d90c98ea0bc09360e411bf4196f\",\"isFormalRelease\":false,\"kind\":\"app\",\"provenanceKind\":\"inaugural-bootstrap-v1\",\"provenanceSha256\":\"0071e0ba5e287a18ea5d1bfa7a62a33ed819c397171f69b641b8b2ca45406e28\",\"sourceArtifactId\":\"11931006831\",\"sourceArtifactSha256\":\"4e46526eb7bab0a8d416cad29044efdccc206ff7a922cfc2ec593d3ccf60c149\",\"sourceRunAttempt\":\"1\",\"sourceRunId\":\"38642386248\",\"sourceSha256\":\"aaf5ccdb047ef8b3ff4ae0837f9593ceca857d90c98ea0bc09360e411bf4196f\",\"sourceSizeBytes\":605072,\"sourceUrl\":\"https://raw.githubusercontent.com/Eitan-S-23/E-Track/c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124/docs/ota-exec-notes/P4-1-bootstrap-baseline-2026-10-15/app-final.bin\",\"targetCommitSha\":\"18f6b3d3af0c24b1ce81573700cd61005b7c530e\",\"targetVersionName\":\"3.2.92\",\"versionCode\":30207,\"versionName\":\"3.2.7\"}",
+          "during": "{\"archiveCommit\":\"c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124\",\"archivePath\":\"docs/ota-exec-notes/P4-1-bootstrap-baseline-2026-10-15\",\"buildTimestamp\":1792014177,\"commitSha\":\"fa74905e84c489cccc248617d37ab9f56c8f961c\",\"imageSha256\":\"aaf5ccdb047ef8b3ff4ae0837f9593ceca857d90c98ea0bc09360e411bf4196f\",\"isFormalRelease\":false,\"kind\":\"app\",\"provenanceKind\":\"inaugural-bootstrap-v1\",\"provenanceSha256\":\"0071e0ba5e287a18ea5d1bfa7a62a33ed819c397171f69b641b8b2ca45406e28\",\"sourceArtifactId\":\"11931006831\",\"sourceArtifactSha256\":\"4e46526eb7bab0a8d416cad29044efdccc206ff7a922cfc2ec593d3ccf60c149\",\"sourceRunAttempt\":\"1\",\"sourceRunId\":\"38642386248\",\"sourceSha256\":\"aaf5ccdb047ef8b3ff4ae0837f9593ceca857d90c98ea0bc09360e411bf4196f\",\"sourceSizeBytes\":605072,\"sourceUrl\":\"https://raw.githubusercontent.com/Eitan-S-23/E-Track/c860b3be7a0b1a3ca1b3a53cf79cc9ef21cc9124/docs/ota-exec-notes/P4-1-bootstrap-baseline-2026-10-15/app-final.bin\",\"targetCommitSha\":\"18f6b3d3af0c24b1ce81573700cd61005b7c530e\",\"targetVersionName\":\"3.3.9\",\"versionCode\":30207,\"versionName\":\"3.2.7\"}"
+        },
+        "OTA_APPROVED_BOOTSTRAP_BASELINE_SHA256": {
+          "before": "3f8b6f8155eac5e982cc0993abe79efcf34f4ba3bb03967b0592f95cd42351a4",
+          "during": "c96f3dca29c91f57354b73f0a69edb2b37aaf93f8dcac51ca8b02b1d70e34a1b"
+        }
+      },
+      "descriptorSha256": "c96f3dca29c91f57354b73f0a69edb2b37aaf93f8dcac51ca8b02b1d70e34a1b",
+      "normalProtectedApprovalRequired": true,
+      "authority": "Current user explicitly approved same-source 3.3.9 test target, test-backend ten-disconnect group and restoration; covered actions need no repeated approval. Implementation executes; independent owner reviews originals. No production, downgrade, erase or BCB edits.",
+      "proposal": {
+        "path": ".cache\\p35-r03-remediation-20261102\\target-scope-01\\proposal.json",
+        "bytes": 5626,
+        "sha256": "95225742dc72754b19c3c7371088625160878734701922936562337fa5b14741"
+      }
+    },
+    "windowRule": "N must be 40960..0x180000, wire protocol v2; S[i]=floor(floor(N*i/10)/4096)*4096 for i=0..9; Ri=[S[i], S[i+1]-1], last=[S[9], N-1]. No hand-tuned windows after any observation.",
+    "restoredState": "Exact named rehearsal variable strings; original owned test stable pointer/settings with the normal revision advance; beta unchanged; MCU retains newly verified target.",
+    "recovery": "Uncertain dispatch/release/device state: reconcile originals first. pipeline-recover is only for existing bound remote restoration, never another dispatch/OTA; require its own documented admission if needed. No lock deletion, force-stop during unknown apply, reset, flash or downgrade.",
+    "sourceIdentity": "App d717e6a0, installed release hash f37c3282...; host ff59986a with unchanged source profiles; firmware 18f6b3d keyed by approved workflow. No single-build fiction.",
+    "previous": "v2 and failed 3.3.8 originals remain unchanged. No failed event reused as a new PASS.",
+    "independentAcceptance": "NOT_ADJUDICATED; original independent owner reviews these physical originals without duplicate campaign.",
+    "excluded": [
+      "Production Release/deployment/channel/gate changes",
+      "Boot/protocol/firmware business changes",
+      "Unnecessary APK build/install, clear-data or force-stop",
+      "J-Link/reset/downgrade and physical power-loss campaign",
+      "Duplicate ten-window campaign or extra OTA solely for new logs",
+      "New agents, push/merge or unapproved additional Git commits"
+    ],
+    "preExecution": [
+      "Actual frozen NOT_RUN precheck and recomputed minimum plan must pass.",
+      "Source/workflow, variables, test channels and device ownership must still match; otherwise reconcile without starting another attempt.",
+      "Only the unified pipeline may materialize the new target plan from verified new CI; no direct execution of the old-package template."
+    ]
+  }
+}
