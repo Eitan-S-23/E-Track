@@ -1,6 +1,7 @@
 """Offline rejection controls for P1-7 timing; no device operations."""
 import copy
 import importlib.util
+import json
 from pathlib import Path
 import unittest
 
@@ -107,6 +108,33 @@ class Tests(unittest.TestCase):
     def test_invalid_pll_rejected(self):
         with self.assertRaises(RuntimeError):
             p17.decode_clock(b'\0'*8+(8).to_bytes(4,'little'))
+
+    def test_word_native_reads_use_item_return_count(self):
+        log = ('T1 000:001.000 JLINK_ReadMemU32_64(0x20000000, 0x2 Items)\n'
+               'T1 000:002.000   Data:  53 45 47 47 45 52 20 52\n'
+               'T1 000:003.000 - 2.000ms returns 2 (0x2)\n')
+        value, = p17.sdk_events(log)
+        self.assertEqual(value['size'],8)
+        self.assertEqual(value['return_count'],2)
+        with self.assertRaises(RuntimeError):
+            p17.sdk_events(log.replace('returns 2 (0x2)','returns 8 (0x8)'))
+
+    def test_goex_and_read_unit_validation(self):
+        value, = p17.sdk_events('T1 000:001.000 JLINK_GoEx(MaxEmulInsts = 0, Flags = 0x01)\n'
+                                'T1 000:003.000 - 2.000ms\n')
+        self.assertEqual(value['kind'],'Go')
+        with self.assertRaises(RuntimeError):
+            p17.sdk_events('T1 000:001.000 JLINK_ReadMemU32_64(0x20000000, 0x2 Bytes)\n')
+
+    def test_real_commander_original(self):
+        bundle = ROOT/'docs/acceptance-contracts/P1-7-v1'
+        raw = (bundle/'observation/native/0003-startup-samples/sdk.log').read_text()
+        events = p17.sdk_events(raw)
+        self.assertEqual(len(events),1202)
+        plan = json.loads((bundle/'inputs/plan.json').read_bytes())
+        result = p17.summarize(events,plan['addresses'],plan['samples'])
+        self.assertEqual(result['powerHold']['samples'],200)
+        self.assertEqual(result['recoveryKey'],'NOT_OBSERVED')
 
 
 if __name__ == '__main__':

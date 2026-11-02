@@ -22,21 +22,24 @@ def sdk_events(text):
         h.require(stamp >= previous, 'nonmonotonic SDK clock')
         previous = stamp
         body = match[3].strip()
-        call = re.match(r'JLINK_(ReadMemEx(?:_64)?|Go|Reset(?:Ex)?)\((.*)', body)
+        call = re.match(r'JLINK_(ReadMem(?:Ex|U32)(?:_64)?|Go(?:Ex)?|Reset(?:Ex)?)\((.*)', body)
         if call:
             h.require(pending is None, 'incomplete SDK operation')
-            pending = dict(kind=call[1], start_ms=stamp)
+            pending = dict(kind='Go' if call[1] == 'GoEx' else call[1], api=call[1], start_ms=stamp)
             if call[1].startswith('ReadMem'):
-                args = re.match(r'0x([\dA-Fa-f]+), 0x([\dA-Fa-f]+) Bytes', call[2])
+                args = re.match(r'0x([\dA-Fa-f]+), 0x([\dA-Fa-f]+) (Bytes|Items)', call[2])
                 h.require(args is not None, 'unrecognized native read')
-                pending.update(address=int(args[1], 16), size=int(args[2], 16))
+                words = call[1].startswith('ReadMemU32')
+                h.require(args[3] == ('Items' if words else 'Bytes'), 'native read unit mismatch')
+                count = int(args[2], 16)
+                pending.update(address=int(args[1], 16), size=count*(4 if words else 1), return_count=count)
         elif pending and body.startswith('Data:'):
             pending['data'] = bytes.fromhex(body[5:].split('...')[0].strip())
         elif pending and body.startswith('- '):
             pending['end_ms'] = stamp
             if pending['kind'].startswith('ReadMem'):
                 count = re.search(r'returns (\d+) \(0x', body)
-                h.require(count and int(count[1]) == pending['size'], 'failed/short native read')
+                h.require(count and int(count[1]) == pending['return_count'], 'failed/short native read')
                 if pending['size'] <= 16:
                     h.require(len(pending.get('data', b'')) == pending['size'], 'missing native bytes')
                     events.append(pending)
