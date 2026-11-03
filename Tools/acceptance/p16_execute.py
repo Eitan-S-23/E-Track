@@ -16,6 +16,14 @@ import p16_backup
 ROWS = ('01', '02', '04', '06', '08', '09', '10', '11', '12', '13', '14', '18', '19', '20')
 
 
+def admitted_plan(contract, plan_path):
+    h.require(contract.get('task_id') == 'P1-6' and contract.get('status') == 'FROZEN', 'wrong/unfrozen task')
+    bindings = [item for item in contract['external_inputs'] if item['id'] == 'recovery-plan']
+    h.require(len(bindings) == 1 and hashlib.sha256(plan_path.read_bytes()).hexdigest().upper() ==
+              bindings[0]['evidence_sha256'].upper(), 'recovery plan differs from frozen external input')
+    return h.read_json(plan_path)
+
+
 def passive_read(mcu, label, expected, *, restored=False):
     commands = [('internal', 0x08000000, 0x100000), ('candidate', 0x90000000, 0x100000),
                 ('backup', 0x90100000, 0x100000), ('recovery', 0x90200000, 0x100000),
@@ -46,7 +54,7 @@ def main():
     args = parser.parse_args()
     h.require(Path.cwd() == ROOT and sys.flags.isolated and sys.flags.no_site and sys.dont_write_bytecode,
               'explicit isolated worktree execution required')
-    plan = h.read_json(args.plan)
+    plan = admitted_plan(h.read_json(args.contract), args.plan)
     h.require(plan['schema'] == 'p16-group16-recovery-v1' and plan['probeSerial'] == 123456 and
               plan['bootAffectedBytes'] == 0x5000 and plan['appAffectedBytes'] == 0xc3000, 'unexpected recovery scope')
     for name in ('originalBoot', 'originalApp', 'testBoot', 'v0', 'v1'):

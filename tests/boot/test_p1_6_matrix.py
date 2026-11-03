@@ -226,6 +226,18 @@ class MatrixTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, 'comparator'):
             E.passive_read(mcu, 'test', expected, restored=True)
 
+    def test_frozen_plan_identity_checked_before_device_entry(self):
+        path = self.root / 'plan.json'; path.write_bytes(b'{}')
+        contract = dict(task_id='P1-6', status='FROZEN', external_inputs=[dict(id='recovery-plan',
+            evidence_sha256=hashlib.sha256(path.read_bytes()).hexdigest())])
+        self.assertEqual(E.admitted_plan(contract, path), {})
+        path.write_bytes(b'{"changed":true}')
+        with self.assertRaisesRegex(RuntimeError, 'differs'):
+            E.admitted_plan(contract, path)
+        contract['task_id'] = 'P1-7'
+        with self.assertRaisesRegex(RuntimeError, 'wrong/unfrozen'):
+            E.admitted_plan(contract, path)
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
