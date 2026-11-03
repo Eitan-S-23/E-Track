@@ -1,0 +1,7 @@
+{
+  "outcome": "HARNESS_FAIL",
+  "failure": "isolated entry import",
+  "actualExitCode": 1,
+  "deviceOperations": 0,
+  "originalsEvaluated": false
+}

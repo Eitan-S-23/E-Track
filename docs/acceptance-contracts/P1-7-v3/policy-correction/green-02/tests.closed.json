@@ -1,0 +1,32 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\tests\\ota\\test_acceptance_bundle.py",
+    "UnexpectedExitTests"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 883625632772700,
+  "ended_monotonic_ns": 883646477298500,
+  "stdout": {
+    "path": ".cache\\p17-record-20261103-01\\green-02\\tests.stdout",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": ".cache\\p17-record-20261103-01\\green-02\\tests.stderr",
+    "bytes": 112,
+    "sha256": "87b7bd0ca1e297a57befb330272278a60503c68f0162870c8ee353804bbff328"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

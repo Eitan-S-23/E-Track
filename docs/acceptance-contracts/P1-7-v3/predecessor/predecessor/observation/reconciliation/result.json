@@ -1,0 +1,13 @@
+{
+  "outcome": "OWNED_CELL_CLOSED_AFTER_VERIFIED_POSTSTATE",
+  "hardwareCommandsAdded": 0,
+  "parserFailurePreserved": true,
+  "poststate": {
+    "path": ".cache\\p17-acceptance-20261103-01\\startup-01\\0005-after\\result.json",
+    "bytes": 2209,
+    "sha256": "797b1edbf5f3ec4018d18b9a636e7b307b06d2bea3c4789a5bfbb405ef97159b"
+  },
+  "ownedPidAbsent": true,
+  "allStartedCommandsClosed": true,
+  "reason": "Only offline parsing failed after the complete native postcheck."
+}

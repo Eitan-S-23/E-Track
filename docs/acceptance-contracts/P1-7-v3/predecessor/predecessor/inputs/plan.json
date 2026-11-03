@@ -1,0 +1,163 @@
+{
+  "scope": "P1-7-current-image-startup",
+  "mcu": {
+    "probe_serial": 123456,
+    "tools": {
+      "commander": {
+        "path": "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLink.exe",
+        "bytes": 414672,
+        "sha256": "9a498039ffc3446fdf9c033683c6b3d699e206d0b08e9faa336e79bed0b37d85"
+      },
+      "nm": {
+        "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\bin\\arm-none-eabi-nm.EXE",
+        "bytes": 1374856,
+        "sha256": "d2a2d9eb8c24c6ed2467c8a1539dd931206e67878a28fe3f0f8d9e42b450efb9"
+      },
+      "objdump": {
+        "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\bin\\arm-none-eabi-objdump.EXE",
+        "bytes": 2089128,
+        "sha256": "b583366d8e5a61bf91fd94451bea816ce079760362cff102fc43687748c020e8"
+      },
+      "objcopy": {
+        "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\bin\\arm-none-eabi-objcopy.EXE",
+        "bytes": 1496832,
+        "sha256": "b0b80ad85e53ca2785513b7905f97bd8458be46137c2e92a998c7bf202cb831b"
+      }
+    },
+    "package": {
+      "path": "docs\\acceptance-contracts\\P1-7-v1\\inputs\\package.etu",
+      "bytes": 290929,
+      "sha256": "706e73e657e1ed7b9a94bdc42ec79a50a14f8ed73ee37cd4d9b1e6e3ac16c251"
+    },
+    "boot": {
+      "path": "docs\\acceptance-contracts\\P1-7-v1\\inputs\\boot-full.bin",
+      "bytes": 65536,
+      "sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527"
+    },
+    "images": {
+      "target": {
+        "image": {
+          "path": "docs\\acceptance-contracts\\P1-7-v1\\inputs\\app-final.bin",
+          "bytes": 614092,
+          "sha256": "4126d801e6bd6efd57a9f20d5a128a50cfb5a46580dc10d9a2227702247d5805"
+        },
+        "elf": {
+          "path": "docs\\acceptance-contracts\\P1-7-v1\\inputs\\app.elf",
+          "bytes": 885768,
+          "sha256": "a59906b4c85da39e8dcfa514d00791901baa8ca3e704ce7ee94cdb2125c768bb"
+        },
+        "map": {
+          "path": "docs\\acceptance-contracts\\P1-7-v1\\inputs\\app.map",
+          "bytes": 2660636,
+          "sha256": "67b24e8c60d71ffd9e6977656912afe50f4e62e674c851828fe5a9eb16b2e87f"
+        }
+      }
+    }
+  },
+  "addresses": {
+    "rtt": 537212072,
+    "pd2": 1073875988,
+    "vtor": 3758157064,
+    "crm": 1073887232,
+    "boot_millis": 536875056,
+    "boot_clock": 536870912
+  },
+  "samples": 200,
+  "bootExecutable": {
+    "path": "docs\\acceptance-contracts\\P1-7-v1\\inputs\\boot-executable.bin",
+    "bytes": 14800,
+    "sha256": "2f84014278421de7a84a0f621a494a9974fbf51c56b768974b0c5e647105ec80"
+  },
+  "bootElf": {
+    "path": "docs\\acceptance-contracts\\P1-7-v1\\inputs\\boot.elf",
+    "bytes": 36860,
+    "sha256": "f0917cd4332444ae41afb2da49dc17b82b4536a62417b69300c2e41d6c82e036"
+  },
+  "bootMap": {
+    "path": "docs\\acceptance-contracts\\P1-7-v1\\inputs\\boot.map",
+    "bytes": 110639,
+    "sha256": "cde67dc4fcc63c24fcb98342acdd602eb75a4f3ce0e5c0ad365f583c70520433"
+  },
+  "oldBootSuffix": "Retained physical 16..64KiB suffix is verified unchanged, never programmed.",
+  "criterionLimits": {
+    "startupUpperMs": 1500,
+    "powerHold": "no sampled low after latch; >=3s after signature",
+    "clockHz": 288000000,
+    "bootBytesMax": 65536,
+    "tickCalibration": "500ms or longer Boot window, 2% measurement tolerance"
+  },
+  "excluded": [
+    "flash",
+    "OTA",
+    "persistent-state editing",
+    "recovery forcing",
+    "battery claim"
+  ],
+  "pins": [
+    {
+      "path": "Tools\\acceptance\\p17_observe.py",
+      "bytes": 10152,
+      "sha256": "a83de24a450859eb23d24f86e98240e16c8c0fac52283eb88eb6669a1f5b1b7a"
+    },
+    {
+      "path": "docs\\acceptance-contracts\\P1-7-v1\\inputs\\boot-full.bin",
+      "bytes": 65536,
+      "sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527"
+    },
+    {
+      "path": "docs\\acceptance-contracts\\P1-7-v1\\inputs\\package.etu",
+      "bytes": 290929,
+      "sha256": "706e73e657e1ed7b9a94bdc42ec79a50a14f8ed73ee37cd4d9b1e6e3ac16c251"
+    },
+    {
+      "path": "docs\\acceptance-contracts\\P1-7-v1\\inputs\\app-final.bin",
+      "bytes": 614092,
+      "sha256": "4126d801e6bd6efd57a9f20d5a128a50cfb5a46580dc10d9a2227702247d5805"
+    },
+    {
+      "path": "docs\\acceptance-contracts\\P1-7-v1\\inputs\\app.elf",
+      "bytes": 885768,
+      "sha256": "a59906b4c85da39e8dcfa514d00791901baa8ca3e704ce7ee94cdb2125c768bb"
+    },
+    {
+      "path": "docs\\acceptance-contracts\\P1-7-v1\\inputs\\app.map",
+      "bytes": 2660636,
+      "sha256": "67b24e8c60d71ffd9e6977656912afe50f4e62e674c851828fe5a9eb16b2e87f"
+    },
+    {
+      "path": "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLink.exe",
+      "bytes": 414672,
+      "sha256": "9a498039ffc3446fdf9c033683c6b3d699e206d0b08e9faa336e79bed0b37d85"
+    },
+    {
+      "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\bin\\arm-none-eabi-nm.EXE",
+      "bytes": 1374856,
+      "sha256": "d2a2d9eb8c24c6ed2467c8a1539dd931206e67878a28fe3f0f8d9e42b450efb9"
+    },
+    {
+      "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\bin\\arm-none-eabi-objdump.EXE",
+      "bytes": 2089128,
+      "sha256": "b583366d8e5a61bf91fd94451bea816ce079760362cff102fc43687748c020e8"
+    },
+    {
+      "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\bin\\arm-none-eabi-objcopy.EXE",
+      "bytes": 1496832,
+      "sha256": "b0b80ad85e53ca2785513b7905f97bd8458be46137c2e92a998c7bf202cb831b"
+    },
+    {
+      "path": "docs\\acceptance-contracts\\P1-7-v1\\inputs\\boot-executable.bin",
+      "bytes": 14800,
+      "sha256": "2f84014278421de7a84a0f621a494a9974fbf51c56b768974b0c5e647105ec80"
+    },
+    {
+      "path": "docs\\acceptance-contracts\\P1-7-v1\\inputs\\boot.elf",
+      "bytes": 36860,
+      "sha256": "f0917cd4332444ae41afb2da49dc17b82b4536a62417b69300c2e41d6c82e036"
+    },
+    {
+      "path": "docs\\acceptance-contracts\\P1-7-v1\\inputs\\boot.map",
+      "bytes": 110639,
+      "sha256": "cde67dc4fcc63c24fcb98342acdd602eb75a4f3ce0e5c0ad365f583c70520433"
+    }
+  ]
+}

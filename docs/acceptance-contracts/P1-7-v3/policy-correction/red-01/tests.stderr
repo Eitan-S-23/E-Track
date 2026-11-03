@@ -1,0 +1,169 @@
+FFFFFFFFF.F.F..
+======================================================================
+FAIL: test_actual_p17_failure_is_preserved_not_rewritten (__main__.UnexpectedExitTests.test_actual_p17_failure_is_preserved_not_rewritten)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\github\my\E-Track\.cache\p35-integration-20261028\source\tests\ota\test_acceptance_bundle.py", line 435, in test_actual_p17_failure_is_preserved_not_rewritten
+    self.assertEqual([], VALIDATOR.validate_matrix(matrix, contract, digest))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [] != ['matrix.commands[0].exit_code is not an approved expected result']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'matrix.commands[0].exit_code is not an approved expected result'
+
+- []
++ ['matrix.commands[0].exit_code is not an approved expected result']
+
+======================================================================
+FAIL: test_actual_unexpected_exit_can_be_recorded_only_as_failure (__main__.UnexpectedExitTests.test_actual_unexpected_exit_can_be_recorded_only_as_failure) (owner='harness', code=1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\github\my\E-Track\.cache\p35-integration-20261028\source\tests\ota\test_acceptance_bundle.py", line 361, in test_actual_unexpected_exit_can_be_recorded_only_as_failure
+    self.assertEqual([], self.errors(contract, matrix))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [] != ['matrix.commands[0].exit_code is not an approved expected result']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'matrix.commands[0].exit_code is not an approved expected result'
+
+- []
++ ['matrix.commands[0].exit_code is not an approved expected result']
+
+======================================================================
+FAIL: test_actual_unexpected_exit_can_be_recorded_only_as_failure (__main__.UnexpectedExitTests.test_actual_unexpected_exit_can_be_recorded_only_as_failure) (owner='harness', code=-9)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\github\my\E-Track\.cache\p35-integration-20261028\source\tests\ota\test_acceptance_bundle.py", line 361, in test_actual_unexpected_exit_can_be_recorded_only_as_failure
+    self.assertEqual([], self.errors(contract, matrix))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [] != ['matrix.commands[0].exit_code is not an approved expected result']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'matrix.commands[0].exit_code is not an approved expected result'
+
+- []
++ ['matrix.commands[0].exit_code is not an approved expected result']
+
+======================================================================
+FAIL: test_actual_unexpected_exit_can_be_recorded_only_as_failure (__main__.UnexpectedExitTests.test_actual_unexpected_exit_can_be_recorded_only_as_failure) (owner='product', code=1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\github\my\E-Track\.cache\p35-integration-20261028\source\tests\ota\test_acceptance_bundle.py", line 361, in test_actual_unexpected_exit_can_be_recorded_only_as_failure
+    self.assertEqual([], self.errors(contract, matrix))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [] != ['matrix.commands[0].exit_code is not an approved expected result']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'matrix.commands[0].exit_code is not an approved expected result'
+
+- []
++ ['matrix.commands[0].exit_code is not an approved expected result']
+
+======================================================================
+FAIL: test_actual_unexpected_exit_can_be_recorded_only_as_failure (__main__.UnexpectedExitTests.test_actual_unexpected_exit_can_be_recorded_only_as_failure) (owner='product', code=-9)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\github\my\E-Track\.cache\p35-integration-20261028\source\tests\ota\test_acceptance_bundle.py", line 361, in test_actual_unexpected_exit_can_be_recorded_only_as_failure
+    self.assertEqual([], self.errors(contract, matrix))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [] != ['matrix.commands[0].exit_code is not an approved expected result']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'matrix.commands[0].exit_code is not an approved expected result'
+
+- []
++ ['matrix.commands[0].exit_code is not an approved expected result']
+
+======================================================================
+FAIL: test_actual_unexpected_exit_can_be_recorded_only_as_failure (__main__.UnexpectedExitTests.test_actual_unexpected_exit_can_be_recorded_only_as_failure) (owner='environment', code=1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\github\my\E-Track\.cache\p35-integration-20261028\source\tests\ota\test_acceptance_bundle.py", line 361, in test_actual_unexpected_exit_can_be_recorded_only_as_failure
+    self.assertEqual([], self.errors(contract, matrix))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [] != ['matrix.commands[0].exit_code is not an approved expected result']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'matrix.commands[0].exit_code is not an approved expected result'
+
+- []
++ ['matrix.commands[0].exit_code is not an approved expected result']
+
+======================================================================
+FAIL: test_actual_unexpected_exit_can_be_recorded_only_as_failure (__main__.UnexpectedExitTests.test_actual_unexpected_exit_can_be_recorded_only_as_failure) (owner='environment', code=-9)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\github\my\E-Track\.cache\p35-integration-20261028\source\tests\ota\test_acceptance_bundle.py", line 361, in test_actual_unexpected_exit_can_be_recorded_only_as_failure
+    self.assertEqual([], self.errors(contract, matrix))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [] != ['matrix.commands[0].exit_code is not an approved expected result']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'matrix.commands[0].exit_code is not an approved expected result'
+
+- []
++ ['matrix.commands[0].exit_code is not an approved expected result']
+
+======================================================================
+FAIL: test_actual_unexpected_exit_can_be_recorded_only_as_failure (__main__.UnexpectedExitTests.test_actual_unexpected_exit_can_be_recorded_only_as_failure) (owner='evidence', code=1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\github\my\E-Track\.cache\p35-integration-20261028\source\tests\ota\test_acceptance_bundle.py", line 361, in test_actual_unexpected_exit_can_be_recorded_only_as_failure
+    self.assertEqual([], self.errors(contract, matrix))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [] != ['matrix.commands[0].exit_code is not an approved expected result']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'matrix.commands[0].exit_code is not an approved expected result'
+
+- []
++ ['matrix.commands[0].exit_code is not an approved expected result']
+
+======================================================================
+FAIL: test_actual_unexpected_exit_can_be_recorded_only_as_failure (__main__.UnexpectedExitTests.test_actual_unexpected_exit_can_be_recorded_only_as_failure) (owner='evidence', code=-9)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\github\my\E-Track\.cache\p35-integration-20261028\source\tests\ota\test_acceptance_bundle.py", line 361, in test_actual_unexpected_exit_can_be_recorded_only_as_failure
+    self.assertEqual([], self.errors(contract, matrix))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [] != ['matrix.commands[0].exit_code is not an approved expected result']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'matrix.commands[0].exit_code is not an approved expected result'
+
+- []
++ ['matrix.commands[0].exit_code is not an approved expected result']
+
+======================================================================
+FAIL: test_failed_predecessor_and_corrected_successor_end_to_end (__main__.UnexpectedExitTests.test_failed_predecessor_and_corrected_successor_end_to_end)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\github\my\E-Track\.cache\p35-integration-20261028\source\tests\ota\test_acceptance_bundle.py", line 454, in test_failed_predecessor_and_corrected_successor_end_to_end
+    self.assertEqual(0, code, errors)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 1 : ERROR: previous: matrix.commands[0].exit_code is not an approved expected result
+VALIDATION=FAIL errors=1
+
+
+======================================================================
+FAIL: test_failure_exception_always_requires_hashed_output (__main__.UnexpectedExitTests.test_failure_exception_always_requires_hashed_output) (optional=True, output=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\github\my\E-Track\.cache\p35-integration-20261028\source\tests\ota\test_acceptance_bundle.py", line 398, in test_failure_exception_always_requires_hashed_output
+    self.assertTrue(any("must reference hashed evidence" in e for e in self.errors(contract, matrix)))
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 8 tests in 8.483s
+
+FAILED (failures=11)

@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\bin\\arm-none-eabi-objdump.exe",
+    "-d",
+    "--disassemble=ota_ble_session_active",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\docs\\acceptance-contracts\\P1-7-v1\\inputs\\app.elf"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 847644871115900,
+  "ended_monotonic_ns": 847645117455800,
+  "stdout": {
+    "path": ".cache\\p17-acceptance-20261103-01\\startup-01\\symbols-target\\active.stdout",
+    "bytes": 496,
+    "sha256": "bb3e496e82b6faf8afa3feafc32ed33b17615127444fbb334d8960b934b5c7ee"
+  },
+  "stderr": {
+    "path": ".cache\\p17-acceptance-20261103-01\\startup-01\\symbols-target\\active.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}
