@@ -42,12 +42,14 @@ if ($Action -eq 'Seed') {
     $log = Invoke-P16JLink -RunDirectory $RunDirectory -Label 'install-test-fixture' -TimeoutSeconds 300 -Lines @(
         'h', ('loadbin "{0}", 0x08000000' -f $testBoot),
         ('verifybin "{0}", 0x08000000' -f $testBoot),
-        ('loadbin "{0}", 0x08010000' -f $v0), ('verifybin "{0}", 0x08010000' -f $v0),
         ('w4 0x{0:X8}, 0' -f $script:P16ControlAddress), 'qc'
     )
-    if ([regex]::Matches((Get-Content -LiteralPath $log -Raw), 'Verify successful\.').Count -ne 2) {
+    if ([regex]::Matches((Get-Content -LiteralPath $log -Raw), 'Verify successful\.').Count -ne 1) {
         throw 'Test fixture verification missing'
     }
+    # This probe/DLL timed out in RAM CRC when a second loadbin reused the session.
+    # A fresh native session reloads the vendor algorithm; do not replace the flasher.
+    Invoke-P16FlashApp -AppBin $v0 -RunDirectory $RunDirectory -Label 'install-test-app' | Out-Null
     $before = Run-Control $script:P16OpcodeSnapshot 0 'original-bcb-before-clear'
     if ([uint32]$before.Result.state -ne 4 -or [uint32]$before.Result.cur_vcode -ne 30313) {
         throw 'Original BCB is not confirmed 30313; retain snapshot and stop'

@@ -334,3 +334,42 @@ sources also parse without generating bytecode. The shared-root governance was
 compared read-only; it is older than this task branch's existing authorized
 failure-record and P4-1/credential additions, not a newer conflicting policy.
 No historical frozen file was changed to adopt the new group16 matrix.
+
+## Native Installation Failure And Verified Recovery
+
+Preparation source was committed as `b48faa056aedfe39d27efecb8f6752fb5c355326`,
+with frozen-plan binding in `b3510b5ed315d303d2ee3109b8d7e72f4b73e660`.
+The v1 outer caller rejected its timeout (>18000 seconds) before the campaign
+entry created any directory or device lock. Its launch receipt is preserved.
+Source `66cb723f95cba0ae13ba9e5c447d23972aefc933` bounds the matrix to 10800
+seconds, setup to 2400 each and the outer caller to 18000. Nineteen host matrix/
+plan/deadline tests pass. The v2 actual NOT_RUN precheck passed; plan-only output
+is not substituted for that admission. A misplaced first plan output remains
+inside the worktree alongside the corrected relative-path output.
+
+The v2 campaign verified fresh full internal Flash and all three slots against
+the backup, then established a real idle halt and cleared the owned comparator.
+Its first native load programmed/verified the 18804-byte test Boot. The second
+load in the SAME Commander process timed out in the vendor RAM CRC routine
+before App erase/program. The old-probe/native cache interaction is an evidenced
+route problem, not a proved electrical or network fault. Fourteen AUTO rows,
+BCB test setup and slot writes were never reached. Preserve `campaign-02/`,
+`launch-02/` and their error/cleanup receipts; do not silently replay that entry.
+
+Passive `reconcile-01/` reads proved the complete App partition and every byte
+outside the 0x5000 Boot prefix unchanged. Core diagnostics showed RAMCode
+PC=0x2000041A and fault/lockup status, not a running product observation.
+The dead campaign's original lock was archived and transferred to the bounded
+recovery owner. A fresh standard Commander session restored ONLY the original
+0x5000 Boot prefix, then normally restarted production. `recover-boot-01/`
+independently verified the whole internal 1 MiB and all three full 1 MiB slots
+byte-identical to backup, original group16/30313, advancing healthy operation,
+unchanged staging, clear fault/comparators and freeze=0. Ownership was released.
+No App/BCB/slot restoration write or physical power operation was required.
+
+The minimal repair uses one standard Commander process per downloaded image,
+retaining the same verification, image bytes and write bounds. Eight idle-halt/
+download-separation host checks pass. This does not add a Flash driver, change
+the device firmware under test, waive a row or claim the matrix passed. The
+next successor must retain the v2 failed installation as its actual predecessor
+and admit only the still-missing AUTO observations after the verified recovery.

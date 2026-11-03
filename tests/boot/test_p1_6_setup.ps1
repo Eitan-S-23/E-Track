@@ -61,4 +61,13 @@ if ($first[0] -ne 'r' -or $first[1] -ne 'w4 0xE0042008, 0x00001000' -or
     throw 'Ordinary reset must use the idle breakpoint and leave the core halted'
 }
 $passed++
+$setup = [IO.File]::ReadAllText((Join-Path $script:P1RepoRoot 'Tools/jlink/p1-6-setup.ps1'))
+$install = $setup.Substring($setup.IndexOf("-Label 'install-test-fixture'"))
+$install = $install.Substring(0, $install.IndexOf("'original-bcb-before-clear'"))
+if ([regex]::Matches($install, 'loadbin "').Count -ne 1 -or
+    -not $install.Contains('Invoke-P16FlashApp -AppBin $v0') -or
+    $install -match "loadbin.*0x08010000") {
+    throw 'Boot and App must use separate native download sessions'
+}
+$passed++
 Write-Output "P16_IDLE_HALT_MOCK_CHECKS=$passed PASS deviceOperations=0"
