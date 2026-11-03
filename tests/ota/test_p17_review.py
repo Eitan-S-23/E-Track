@@ -1,5 +1,6 @@
 """Read-only original-evidence and tampering controls for P1-7."""
 from pathlib import Path
+import subprocess
 import sys
 import unittest
 from unittest.mock import patch
@@ -16,6 +17,13 @@ def read(name):
 
 
 class Tests(unittest.TestCase):
+    def test_isolated_cli_entry(self):
+        result = subprocess.run([sys.executable, '-I', '-S', '-B', '-X', 'utf8',
+            str(ROOT/'Tools/acceptance/p17_review.py'), '--help'], cwd=ROOT,
+            capture_output=True, timeout=15, check=False)
+        self.assertEqual(result.returncode, 0, result.stderr.decode())
+        self.assertIn(b'--bundle', result.stdout)
+
     def test_actual_originals_without_device_access(self):
         with patch.object(r.p.live_mcu, 'MCU', side_effect=AssertionError('device forbidden')):
             result = r.evaluate(read)

@@ -5,6 +5,7 @@ import json
 from pathlib import Path, PurePosixPath
 import sys
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import p17_observe as p
 
 CONTRACT_SHA256 = '3387d981ae3145736160c288e5659dab79f757684c6f1c41e2774d7f7515c6b3'
