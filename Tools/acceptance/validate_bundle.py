@@ -854,6 +854,7 @@ def validate_matrix(matrix, contract, contract_sha256, allow_draft=False):
     results = []
     required_command_ids = set()
     required_artifact_ids = set()
+    command_outcomes = {}
     for index, item in enumerate(matrix_criteria):
         prefix = f"matrix.criteria[{index}]"
         if not isinstance(item, dict):
@@ -906,6 +907,8 @@ def validate_matrix(matrix, contract, contract_sha256, allow_draft=False):
             errors.append(f"{prefix} NOT_OBSERVED requires notes")
 
         if criterion is not None:
+            for command_id in criterion.get("command_ids", []):
+                command_outcomes.setdefault(command_id, []).append((result, execution, owner))
             gate_result = _gate_satisfied(criterion.get("gate"), item.get("observed"))
             if result == "PASS" and gate_result is not True:
                 errors.append(f"{prefix}.observed does not satisfy the frozen gate")
@@ -998,12 +1001,22 @@ def validate_matrix(matrix, contract, contract_sha256, allow_draft=False):
         elif specification is not None and command.get("command") != specification.get("command"):
             errors.append(f"{prefix}.command does not match the frozen contract")
         exit_code = command.get("exit_code")
+        recorded_failure = False
         if not isinstance(exit_code, int) or isinstance(exit_code, bool):
             errors.append(f"{prefix}.exit_code must be an integer")
         elif specification is not None and exit_code not in specification.get("expected_exit_codes", []):
-            errors.append(f"{prefix}.exit_code is not an approved expected result")
+            outcomes = command_outcomes.get(command_id, [])
+            # A failed invocation is evidence, never an alternate success code.
+            recorded_failure = (
+                overall in FINAL_RESULTS - {"PASS"}
+                and any(result == "FAIL" and execution == "EXECUTED" and owner in FAILURE_OWNERS
+                        for result, execution, owner in outcomes)
+                and not any(result == "PASS" for result, _, _ in outcomes)
+            )
+            if not recorded_failure:
+                errors.append(f"{prefix}.exit_code is not an approved expected result")
         output = command.get("output_evidence")
-        if specification is not None and specification.get("output_required") is True:
+        if recorded_failure or specification is not None and specification.get("output_required") is True:
             if not _nonempty(output) or output not in evidence_hashes:
                 errors.append(f"{prefix}.output_evidence must reference hashed evidence")
         elif output is not None and (not _nonempty(output) or output not in evidence_hashes):

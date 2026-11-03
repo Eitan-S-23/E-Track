@@ -186,8 +186,8 @@ python Tools/acceptance/validate_bundle.py `
 合同还必须定义：
 
 1. `commands`：命令 ID、用途、精确命令文本、允许的退出码和是否强制保留输出。负例
-   命令可以批准非零退出码，但实际命令必须与合同一致，退出码必须属于冻结的
-   `expected_exit_codes`。
+   命令可以批准非零退出码，但实际命令必须与合同一致。支持 PASS 的退出码必须属于冻结的
+   `expected_exit_codes`；非预期实际退出码只能按第 4 节的失败记录规则保存，不能视作通过。
 2. `artifacts`：产物 ID、用途和证据包内精确路径。
 3. `criteria`：每项判据必须显式引用 `input_groups`、`external_inputs`、`command_ids`、
    `artifact_ids`，并定义可执行 gate。
@@ -237,6 +237,26 @@ attached -c、node eval、bash -lc 等内联执行；未知选项 fail-closed。
 harness 失败还必须绑定实际参与判定的产物；不得仅凭一段手写失败说明宣告
 `PRODUCT_FAIL` 或 `HARNESS_FAIL`。`NOT_OBSERVED`、证据缺口以及确实未产生下游产物的
 环境阻塞可以不伪造产物，但必须保留原因和已有原始证据。
+
+### 4.1 非预期退出码的失败记录
+
+2026-11-03 用户批准修正失败记录规则：`expected_exit_codes` 限定可接受的命令结果，
+不是要求 agent 事后把崩溃码加入冻结合同或把实际失败改成成功。仅当以下条件同时成立，
+矩阵可如实记录不在该集合内的实际整数退出码：
+
+- 整轮为 `PRODUCT_FAIL`、`HARNESS_FAIL`、`EVIDENCE_GAP` 或 `ENV_BLOCKED`，不是
+  `PASS` 或尚未执行的 `NOT_RUN`。
+- 至少一项引用该命令的判据为 `EXECUTED FAIL`，有合法失败归属和原始证据；无关命令的
+  失败、只有 `NOT_OBSERVED` 或 `REUSED` 声明都不能触发本例外。
+- 引用该命令的所有判据都不是 `PASS`，包括共享命令的其他判据和 `REUSED PASS`。
+- 该命令的 `output_evidence` 必须绑定真实文件及 SHA-256，即使原定义的
+  `output_required=false`。命令文本、冻结对象、证据边界、产物、失败归属和产品 gate
+  的既有检查仍全部执行，不能仅凭退出码证明产品失败。
+
+校验失败记录成功只表示记录可核验，不表示产品通过或该命令退出码被追认成功。这样的
+记录可以成为后继轮次的真实失败前驱，但不能成为 `REUSED PASS` 的执行锚点。
+重新解释旧失败时，保留原合同、矩阵、实际退出码及旧校验器的拒绝记录，明确引用本次
+授权更正；不回改历史字节或宣称原轮曾通过。修复后仍须按真实前驱计算最小复验计划。
 
 ## 5. 输入组范围与枚举口径
 

@@ -341,6 +341,137 @@ def run_main(arguments):
     return result, stdout.getvalue(), stderr.getvalue()
 
 
+class UnexpectedExitTests(unittest.TestCase):
+    def failure(self, owner="harness", overall="HARNESS_FAIL"):
+        contract = valid_contract()
+        matrix = valid_matrix(contract, result="FAIL", owner=owner, overall=overall)
+        matrix["commands"][0]["exit_code"] = 1
+        return contract, matrix
+
+    def errors(self, contract, matrix):
+        return VALIDATOR.validate_matrix(matrix, contract, contract_hash(contract))
+
+    def test_actual_unexpected_exit_can_be_recorded_only_as_failure(self):
+        for owner, overall in (("harness", "HARNESS_FAIL"), ("product", "PRODUCT_FAIL"),
+                               ("environment", "ENV_BLOCKED"), ("evidence", "EVIDENCE_GAP")):
+            for code in (1, -9):
+                with self.subTest(owner=owner, code=code):
+                    contract, matrix = self.failure(owner, overall)
+                    matrix["commands"][0]["exit_code"] = code
+                    self.assertEqual([], self.errors(contract, matrix))
+
+    def test_unexpected_exit_cannot_support_pass_in_a_failed_round(self):
+        for shared in (False, True):
+            with self.subTest(shared=shared):
+                contract, matrix = self.failure()
+                spec = copy.deepcopy(contract["criteria"][0])
+                spec["id"] = "FUNC-2"
+                passed = copy.deepcopy(valid_matrix(contract)["criteria"][0])
+                passed["id"] = "FUNC-2"
+                if not shared:
+                    command = copy.deepcopy(contract["commands"][0])
+                    command["id"] = "CMD-PASS"
+                    contract["commands"].append(command)
+                    spec["command_ids"] = ["CMD-PASS"]
+                    invocation = copy.deepcopy(matrix["commands"][0])
+                    invocation["id"] = "CMD-PASS"
+                    matrix["commands"].append(invocation)
+                contract["criteria"].append(spec)
+                matrix["criteria"].append(passed)
+                matrix["contract_sha256"] = contract_hash(contract)
+                self.assertTrue(any("not an approved expected result" in e for e in self.errors(contract, matrix)))
+
+    def test_not_observed_is_not_a_failed_invocation(self):
+        contract, matrix = self.failure()
+        matrix["overall_result"] = "EVIDENCE_GAP"
+        matrix["criteria"][0].update(result="NOT_OBSERVED", failure_owner=None)
+        self.assertTrue(any("not an approved expected result" in e for e in self.errors(contract, matrix)))
+
+    def test_failure_exception_always_requires_hashed_output(self):
+        for optional in (False, True):
+            for output in (None, "raw/unbound.log"):
+                with self.subTest(optional=optional, output=output):
+                    contract, matrix = self.failure()
+                    contract["commands"][0]["output_required"] = not optional
+                    matrix["contract_sha256"] = contract_hash(contract)
+                    matrix["commands"][0]["output_evidence"] = output
+                    self.assertTrue(any("must reference hashed evidence" in e for e in self.errors(contract, matrix)))
+
+    def test_failure_does_not_bypass_existing_integrity_requirements(self):
+        changes = (
+            lambda m: m["commands"][0].update(command="echo substituted"),
+            lambda m: m["commands"][0].update(exit_code=True),
+            lambda m: m["commands"][0].update(exit_code="1"),
+            lambda m: m.update(artifacts=[]),
+            lambda m: m["criteria"][0].update(failure_owner=None),
+            lambda m: m["criteria"][0].update(execution="REUSED", reused_from_round="older"),
+            lambda m: m.update(overall_result="PASS"),
+            lambda m: m.update(overall_result="NOT_RUN"),
+        )
+        for index, change in enumerate(changes):
+            with self.subTest(index=index):
+                contract, matrix = self.failure()
+                change(matrix)
+                self.assertTrue(self.errors(contract, matrix))
+
+    def test_expected_nonzero_negative_check_still_passes(self):
+        contract = valid_contract()
+        contract["commands"][0]["expected_exit_codes"] = [2]
+        matrix = valid_matrix(contract)
+        matrix["commands"][0]["exit_code"] = 2
+        self.assertEqual([], self.errors(contract, matrix))
+        matrix["commands"][0]["exit_code"] = 1
+        self.assertTrue(self.errors(contract, matrix))
+
+    def test_actual_p17_failure_is_preserved_not_rewritten(self):
+        contract_path = ROOT / "docs/acceptance-contracts/P1-7-v2.contract.json"
+        matrix_path = ROOT / "docs/acceptance-contracts/P1-7-v2/final-matrix.json"
+        contract_raw, matrix_raw = contract_path.read_bytes(), matrix_path.read_bytes()
+        contract, matrix = json.loads(contract_raw), json.loads(matrix_raw)
+        digest = hashlib.sha256(contract_raw).hexdigest().upper()
+        self.assertEqual([0], contract["commands"][0]["expected_exit_codes"])
+        self.assertEqual(1, matrix["commands"][0]["exit_code"])
+        self.assertEqual("HARNESS_FAIL", matrix["overall_result"])
+        self.assertEqual([], VALIDATOR.validate_matrix(matrix, contract, digest))
+        self.assertEqual([], VALIDATOR.validate_evidence_files(matrix, matrix_path.parent))
+        self.assertEqual(contract_raw, contract_path.read_bytes())
+        self.assertEqual(matrix_raw, matrix_path.read_bytes())
+
+    def test_failed_predecessor_and_corrected_successor_end_to_end(self):
+        with tempfile.TemporaryDirectory(dir=ROOT, prefix=".acceptance-validator-test-") as name:
+            root = Path(name)
+            repo = create_fixture_repo(root / "repo")
+            contract, matrix = self.failure()
+            previous = write_bundle(root / "previous", repo, contract, matrix)
+            current_contract = successor_contract(previous[2], hashlib.sha256(previous[0].read_bytes()).hexdigest().upper())
+            commit_fixture_files(repo, {"Tools/jlink/failure_fix.py": b"# corrected fixture runner\n"})
+            current_matrix = valid_matrix(current_contract)
+            current_matrix["round_id"] = "corrected-successor"
+            current = write_bundle(root / "current", repo, current_contract, current_matrix)
+            args = ["--contract", str(current[0]), "--matrix", str(current[1]), "--repo-root", str(repo),
+                    "--previous-contract", str(previous[0]), "--previous-matrix", str(previous[1])]
+            code, output, errors = run_main(args)
+            self.assertEqual(0, code, errors)
+            self.assertIn("overall=PASS", output)
+            plan = VALIDATOR.compute_rerun_plan(
+                current[2], previous[2], previous[3], repo_root=repo,
+                current_contract_sha256=hashlib.sha256(current[0].read_bytes()).hexdigest().upper(),
+                previous_contract_sha256=hashlib.sha256(previous[0].read_bytes()).hexdigest().upper(),
+                previous_matrix_sha256=hashlib.sha256(previous[1].read_bytes()).hexdigest().upper(),
+            )
+            self.assertEqual([], plan["reusable_criteria"])
+            self.assertEqual(["CMD-FUNC-1"], plan["required_commands"])
+            raw = previous[1].parent / "raw/func-1.log"
+            raw.write_bytes(b"tampered\n")
+            code, _, errors = run_main(args)
+            self.assertEqual(1, code)
+            self.assertIn("previous:", errors)
+            raw.unlink()
+            code, _, errors = run_main(args)
+            self.assertEqual(1, code)
+            self.assertIn("previous:", errors)
+
+
 class AcceptanceBundleTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
