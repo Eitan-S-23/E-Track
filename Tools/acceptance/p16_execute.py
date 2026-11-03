@@ -14,6 +14,8 @@ sys.path.insert(0, str(ROOT / 'Tools/acceptance'))
 import p16_backup
 
 ROWS = ('01', '02', '04', '06', '08', '09', '10', '11', '12', '13', '14', '18', '19', '20')
+SETUP_SECONDS = 2400
+MATRIX_SECONDS = 10800
 
 
 def admitted_plan(contract, plan_path):
@@ -89,7 +91,7 @@ def main():
     def setup(mode):
         return h.command(out, mode.lower(), ['powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass',
             '-File', 'Tools/jlink/p1-6-setup.ps1', '-Action', mode, '-Plan', args.plan.resolve(),
-            '-RunDirectory', out / mode.lower()], env, seconds=2400)
+            '-RunDirectory', out / mode.lower()], env, seconds=SETUP_SECONDS)
 
     old = h.command
     try:
@@ -111,7 +113,7 @@ def main():
                 '-ExecutionPolicy', 'Bypass', '-File', 'Tools/jlink/test-p1-6-matrix.ps1',
                 '-BuildDirectory', assets / 'build', '-AssetDirectory', assets,
                 '-RunDirectory', out / 'matrix', '-ProbeSerial', str(plan['probeSerial']),
-                '-ExecuteBoard', '-AssumeS0'], env, seconds=24000))
+                '-ExecuteBoard', '-AssumeS0'], env, seconds=MATRIX_SECONDS))
             action('restore', lambda: setup('Restore'))
             h.command = p16_backup.passive
             final = m.MCU(plan['retained'], h.fresh(out / 'after'))

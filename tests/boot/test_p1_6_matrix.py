@@ -238,6 +238,11 @@ class MatrixTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, 'wrong/unfrozen'):
             E.admitted_plan(contract, path)
 
+    def test_campaign_deadlines_fit_existing_host_bound(self):
+        self.assertLessEqual(E.MATRIX_SECONDS + 2 * E.SETUP_SECONDS + 2400, 18000)
+        self.assertGreater(E.MATRIX_SECONDS, 0)
+        self.assertGreater(E.SETUP_SECONDS, 0)
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
