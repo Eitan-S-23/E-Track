@@ -1,0 +1,8 @@
+exec DisableAutoUpdateFW
+exec SetRestartOnClose = 0
+exec InhibitConnectRetries = 1
+exec SetEnableMemCache = 0
+connect
+exec ExcludeFlashCacheRange 0x08000000-0x080FFFFF
+sleep 35000
+qc

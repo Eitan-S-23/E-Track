@@ -1,0 +1,92 @@
+{
+  "health": [
+    [
+      30000,
+      30,
+      1000,
+      0,
+      17408,
+      17408,
+      0,
+      1,
+      1
+    ],
+    [
+      30000,
+      30,
+      1000,
+      0,
+      17681,
+      17681,
+      0,
+      1,
+      1
+    ]
+  ],
+  "registers": {
+    "vtor": 134285312,
+    "cfsr": 0,
+    "hfsr": 0,
+    "dhcsr": 16842753,
+    "sdio": 0,
+    "freeze": 0
+  },
+  "confirmed_state": 4,
+  "confirmation_source": "current initialized App BCB snapshot; not an EEPROM dump",
+  "stack": {
+    "guard_intact": true,
+    "free_painted_bytes": 5092,
+    "high_water_bytes": 3100,
+    "scope": "Paint observed at this read, not a whole-program worst-case proof"
+  },
+  "storage": {
+    "jedec": 15679512,
+    "capacity_bytes": 16777216,
+    "slots": {
+      "candidate_slot": {
+        "erased": false,
+        "bytes": 614092,
+        "crc32": 1139004111,
+        "version": 30313,
+        "sha8": "4034878d234965ea"
+      },
+      "backup_slot": {
+        "erased": false,
+        "bytes": 614092,
+        "crc32": 1139004111,
+        "version": 30312,
+        "sha8": "e768d2594ae467f6"
+      },
+      "recovery_slot": {
+        "erased": false,
+        "bytes": 619580,
+        "crc32": 2429394932,
+        "version": 30276,
+        "sha8": "deb4484dd0614f49"
+      }
+    },
+    "staging_header_hex": "4554534c03ffffff717004003c5373b669760000706e73e657e1ed7b544d4f43",
+    "staging_journal_sha256": "d51db68772a3f965e6603aa28495183e08f32d89adc3aee635c612937dd5a23f",
+    "staging_erased": false,
+    "journal": {
+      "erased": false,
+      "package_sha256": "706e73e657e1ed7b9a94bdc42ec79a50a14f8ed73ee37cd4d9b1e6e3ac16c251",
+      "bytes": 290929,
+      "durable": 290929,
+      "matches_reference": true,
+      "expected_begin_durable": 290929,
+      "committed_target": 30313
+    }
+  },
+  "role": "target",
+  "image": {
+    "path": "docs\\acceptance-contracts\\P1-7-v1\\inputs\\app-final.bin",
+    "bytes": 614092,
+    "sha256": "4126d801e6bd6efd57a9f20d5a128a50cfb5a46580dc10d9a2227702247d5805"
+  },
+  "boot": {
+    "path": ".cache\\p17-acceptance-20261103-01\\startup-01\\0005-after\\boot.bin",
+    "bytes": 65536,
+    "sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527"
+  }
+}

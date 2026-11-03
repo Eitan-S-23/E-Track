@@ -1,0 +1,3 @@
+IDENTITY_AND_HEALTH_OK; stopping at storage-idle boundary
+IDLE_BOUNDARY_OK; one reset/start with native timestamped sampling
+SAMPLING_COMPLETE; waiting for normal boot confirmation
