@@ -4,6 +4,12 @@
 > 决策历史与验证记录见 `PLAN-OTA-DRAFT.md`;两轮审查记录见 `PLAN-OTA-REVIEW-LOG.md`。
 > **实施顺序:P0(契约冻结+基建)→ P1(bootloader)→ P2(MCU App)→ P3(BLE+Flutter)→ P4(CI/CF)→ P5(联调)。P0 未完成不得进入 P1/P2。**
 
+> 2026-11-04 后续 P1-6/P5 候选按用户裁定 `OTA-DEC-019` 采用现用 group16 加速 Boot。
+> 本文旧的“APPLY 每块提交/复位必重擦每块”假设对该候选由
+> `docs/ota-prompts/prompt-P1-6-acceptance.md` 的分组持久化与相同块重验证规则替代。
+> `resume_block` 单位仍为 4KB；ROLLBACK 逐块、状态转换原子性和其他二进制/安全门槛不变。
+> 旧冻结版本、历史验收和六项真实断电义务不被本说明改写或关闭。
+
 ## 0. 需求映射与威胁模型
 
 ### 0.1 需求映射(用户六条 → 方案落点)

@@ -30,7 +30,7 @@ $script:P16OffTargetCheckpoint = 60
 
 function Invoke-P16Protocol {
     param([Parameter(Mandatory = $true)][string[]]$Arguments)
-    $output = & (Get-P1Python) $script:P16Protocol @Arguments
+    $output = & (Get-P1Python) -I -S -B -X utf8 $script:P16Protocol @Arguments
     if ($LASTEXITCODE -ne 0) {
         throw "P1-6 protocol tool failed: $($Arguments -join ' ')"
     }
@@ -42,6 +42,7 @@ function Write-P16Json {
         [Parameter(Mandatory = $true)]$Value,
         [Parameter(Mandatory = $true)][string]$Path
     )
+    $Path = Assert-WorktreeFileOutput -RepoRoot $script:P1RepoRoot -FilePath $Path
     $json = $Value | ConvertTo-Json -Depth 12
     [System.IO.File]::WriteAllText(
         $Path, $json + [Environment]::NewLine,
@@ -68,18 +69,21 @@ function Invoke-P16JLink {
         [int]$TimeoutSeconds = 120
     )
     Assert-P16NoJLinkProcess
-    [System.IO.Directory]::CreateDirectory($RunDirectory) | Out-Null
+    $RunDirectory = New-WorktreeDirectory -RepoRoot $script:P1RepoRoot -DirectoryPath $RunDirectory
     $commandFile = Join-Path $RunDirectory ($Label + '.jlink')
     $logPath = Join-Path $RunDirectory ($Label + '.log')
-    Write-P1JLinkCommandFile -Path $commandFile -Lines $Lines
-    try {
-        Invoke-P1JLink -CommandFile $commandFile -LogPath $logPath -TimeoutSeconds $TimeoutSeconds | Out-Null
-    }
-    finally {
-        Stop-Process -Name 'JLinkGUIServer' -Force -ErrorAction SilentlyContinue
-        Start-Sleep -Milliseconds 250
-        Assert-P16NoJLinkProcess
-    }
+    $prefix = @('exec DisableAutoUpdateFW', 'exec SetRestartOnClose = 0',
+        'exec InhibitConnectRetries = 1', 'exec SetEnableMemCache = 0', 'connect',
+        'exec ExcludeFlashCacheRange 0x08000000-0x080FFFFF',
+        'w4 0xE0042008, 0x00001000')
+    Write-P1JLinkCommandFile -Path $commandFile -Lines ($prefix + $Lines)
+    $serial = Get-Variable -Name P16ProbeSerial -Scope Script -ErrorAction SilentlyContinue
+    if ($null -eq $serial -or [int]$serial.Value -le 0) { throw 'Explicit P1-6 probe serial required' }
+    & (Get-P1Python) -I -S -B -X utf8 (Join-Path $PSScriptRoot 'p1_6_matrix.py') native `
+        --tool $script:P1JLinkExe --commands $commandFile --log $logPath `
+        --serial ([int]$serial.Value) --timeout $TimeoutSeconds
+    if ($LASTEXITCODE -ne 0) { throw "P1-6 native command failed: $Label" }
+    Assert-P16NoJLinkProcess
     return $logPath
 }
 
@@ -858,20 +862,73 @@ function Invoke-P16FlashApp {
     return $log
 }
 
+function Invoke-P16IdleHalt {
+    param(
+        [Parameter(Mandatory = $true)][uint32]$Address,
+        [Parameter(Mandatory = $true)][string]$RunDirectory,
+        [Parameter(Mandatory = $true)][string]$Label,
+        [string[]]$Before = @(),
+        [int]$TimeoutSeconds = 120
+    )
+    if ($Address -lt $script:P1AppAddress -or
+        $Address -ge ($script:P1AppAddress + $script:P1AppLength) -or ($Address -band 1)) {
+        throw 'Bound HAL_Update instruction address required'
+    }
+    $fpb = Join-Path $RunDirectory ($Label + '.fpb.bin')
+    $sdio = Join-Path $RunDirectory ($Label + '.sdio.bin')
+    $dhcsr = Join-Path $RunDirectory ($Label + '.dhcsr.bin')
+    $log = Invoke-P16JLink -RunDirectory $RunDirectory -Label $Label -TimeoutSeconds $TimeoutSeconds -Lines ($Before + @(
+        ('SetBP 0x{0:X8}, T, H' -f $Address), 'g', 'Sleep 500', 'regs',
+        'mem32 0xE000ED08, 1', 'mem32 0xE000ED28, 1',
+        ('savebin "{0}", 0xE0002000, 0x28' -f $fpb),
+        ('savebin "{0}", 0x4002C434, 0x4' -f $sdio),
+        ('savebin "{0}", 0xE000EDF0, 0x4' -f $dhcsr), 'qc'
+    ))
+    $pc = Get-P1LogHex32 -Text (Get-Content -LiteralPath $log -Raw) `
+        -Pattern '^\s*PC\s*=\s*(?:0x)?([0-9A-Fa-f]{8})\b' -Label 'PC'
+    if ($pc -ne $Address -or
+        (Get-Item -LiteralPath $sdio).Length -ne 4 -or
+        (Get-Item -LiteralPath $dhcsr).Length -ne 4 -or
+        ([BitConverter]::ToUInt32([IO.File]::ReadAllBytes($sdio), 0) -band 0x3800) -ne 0 -or
+        ([BitConverter]::ToUInt32([IO.File]::ReadAllBytes($dhcsr), 0) -band 0x20000) -eq 0) {
+        throw 'Storage-idle halt not established; no firmware write permitted'
+    }
+    $fp = [IO.File]::ReadAllBytes($fpb)
+    if ($fp.Length -ne 40) { throw 'Incomplete FPB readback' }
+    $active = @(2..7 | Where-Object { ([BitConverter]::ToUInt32($fp, $_ * 4) -band 1) -ne 0 })
+    if ($active.Count -ne 1 -or
+        ([BitConverter]::ToUInt32($fp, $active[0] * 4) -band 0x1FFFFFFC) -ne ($Address -band 0x1FFFFFFC)) {
+        throw 'Hardware breakpoint ownership mismatch'
+    }
+    $cleared = Join-Path $RunDirectory ($Label + '.cleared-fpb.bin')
+    Invoke-P16JLink -RunDirectory $RunDirectory -Label ($Label + '-clear-owned') -Lines @(
+        'h', ('w4 0x{0:X8}, 0x00000000' -f (0xE0002000L + $active[0] * 4)),
+        ('savebin "{0}", 0xE0002000, 0x28' -f $cleared), 'qc'
+    ) | Out-Null
+    $fp = [IO.File]::ReadAllBytes($cleared)
+    if ($fp.Length -ne 40) { throw 'Incomplete cleared FPB readback' }
+    foreach ($index in 2..7) {
+        if (([BitConverter]::ToUInt32($fp, $index * 4) -band 1) -ne 0) { throw 'Comparator not cleared' }
+    }
+    return $log
+}
+
 function Invoke-P16OrdinaryResetEvidence {
     param(
         [Parameter(Mandatory = $true)][string]$RunDirectory,
         [Parameter(Mandatory = $true)][string]$Label,
         [int]$WaitMilliseconds = 5000
     )
-    $log = Invoke-P16JLink -Lines @(
-        'r', 'g', ('Sleep {0}' -f $WaitMilliseconds), 'h', 'regs',
-        'mem32 0xE000ED08, 1',
-        'mem32 0xE000ED28, 1',
-        'g', 'qc'
+    $idle = Get-Variable -Name P16SafeHalt -Scope Script -ErrorAction SilentlyContinue
+    if ($null -eq $idle) { throw 'Linked P1-6 HAL_Update address required' }
+    # Leave a proven idle halt, not an arbitrary SDIO interruption, for the next command.
+    $log = Invoke-P16IdleHalt -Address ([uint32]$idle.Value) -Before @(
+        'r', 'w4 0xE0042008, 0x00001000', 'g', ('Sleep {0}' -f $WaitMilliseconds)
     ) -RunDirectory $RunDirectory -Label $Label `
         -TimeoutSeconds ([Math]::Ceiling($WaitMilliseconds / 1000.0) + 75)
-    $evidence = Assert-P1NormalResetEvidence -LogPath $log
+    $expectedVtor = Get-Variable -Name P16ExpectedVtor -Scope Script -ErrorAction SilentlyContinue
+    if ($null -eq $expectedVtor) { throw 'Linked P1-6 runtime VTOR required' }
+    $evidence = Assert-P1NormalResetEvidence -LogPath $log -ExpectedVtor ([uint32]$expectedVtor.Value)
     $record = [ordered]@{
         pc = ('0x{0:X8}' -f $evidence.PC)
         vtor = ('0x{0:X8}' -f $evidence.VTOR)
