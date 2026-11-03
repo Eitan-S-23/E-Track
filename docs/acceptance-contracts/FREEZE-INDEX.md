@@ -64,6 +64,7 @@ git worktree remove --force .cache/freeze-check/wt-<id>
 
 | P3-5-v4 | v3 | `25cb4a5ec35e498e0fec5b0c7dd671c15d0a98a5` | `5f591e2e7210c00b48fe276eea7cd73146626153` | `ed33ff16b3e060f0a037a6e421422d44f7fdbe33` | VALIDATION=PASS, overall=EVIDENCE_GAP(2026-11-02; evaluator stopped before original parsing because of caller hash-case mismatch; actual stderr/closed receipt and missing result preserved, no new device operation) |
 | P3-5-v5 | v3 | `62a018aa9e84cc857b456686c9e6e1298155c9de` | `54a860d122afba3c7361e0b77a50c29905f37ad2` | `bfef1d0169f09c58a268f39bd1ad7be3f7d473ea` | VALIDATION=PASS, overall=PASS(2026-11-02 UTC; 18 required offline EXECUTED PASS criteria, 22 original checks, actual v4 predecessor; original 30309 ten-window group plus separate 30313 zero-durable supplement, failures and limits retained; local closeout only, no physical replay, main integration or production release) |
+| P1-7-v3 | v3 | `28e1a9e0542ae6b274ba7961b6eb919e6c6bacf4` | `7146a0060230cb99b818f6a1c1b669379b5e03e9` | `a45687d2a436a3c2ffd196c01c15a767bcaebad9` | VALIDATION=PASS, overall=EVIDENCE_GAP(2026-11-03; three offline startup criteria PASS, recovery key and battery NOT_OBSERVED; actual v2 HARNESS_FAIL predecessor and original rejection preserved under user-authorized failure-record correction; no device replay or whole-card PASS) |
 
 备注：
 

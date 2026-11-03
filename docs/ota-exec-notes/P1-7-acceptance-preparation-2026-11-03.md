@@ -222,3 +222,57 @@ original-location findings are in `P1-autonomous-review-2026-11-03.md`.
 P1 remains 5/7. Physical key and pure-battery startup are still unobserved. All
 local P1-7 commits stayed on acceptance/p1-7-20261103; main and its index were
 preserved. No push/merge, device operation, product edit or external cleanup.
+
+## Authorized Failure-Record Correction And v3 Closure
+
+2026-11-03: the user explicitly approved the proposed limited common-validator
+failure-record correction. P17-RECORD-01 is now CLOSED; this supersedes the
+NEED_DECISION/formal-blocker status above without changing its historical facts.
+
+Source: `7146a0060230cb99b818f6a1c1b669379b5e03e9`, branch
+`acceptance/p1-7-20261103`. Execution contract section 4.1 and validate_matrix now
+allow an unexpected integer exit only in a non-PASS final record with a directly
+consuming EXECUTED FAIL criterion, no consuming PASS criterion, and hashed actual
+command output even if output was originally optional. Command identity,
+provenance, artifact checks, failure ownership and all product gates are unchanged.
+An unrelated failure, NOT_OBSERVED or REUSED record cannot authorize this exception.
+Explicitly approved nonzero negative-test success codes retain their old meaning.
+
+The new 8-test group first reproduced the failure, then passed with the fix.
+Its first green attempt exposed an error in the new test fixture's use of a
+canonical JSON hash instead of the actual predecessor file hash; the fixture
+call was corrected, with the failed run preserved. The full acceptance bundle,
+acceptance efficiency, P1-7 parser and P1-7 evaluator suites then passed all 203
+tests with no skips. This is local host regression, not a CI or hardware campaign.
+Exact red/green/full logs and old validator bytes are included in the v3 bundle's
+`policy-correction/` directory. Working receipts are under
+`.cache/p17-record-20261103-01/`.
+
+P1-7-v3 freezes the corrected source and uses the actual v2 HARNESS_FAIL matrix
+as its immediate predecessor. The original v1 observation remains a distinct
+hash-bound raw input. Both old bundles, actual exit codes, and the old validator
+rejection remain byte-identical. The new rule makes that failed record
+representable; it does not claim the old invocation or old validation succeeded.
+
+FROZEN/NOT_RUN precheck and the computed rerun plan passed. One admitted offline
+original-evaluation command executed, followed by successful final validation.
+Result: C-STARTUP, C-POWER-HOLD and C-CLOCK-SIZE are EXECUTED PASS for this offline
+evaluation; C-RECOVERY-KEY and C-BATTERY are NOT_OBSERVED. Overall EVIDENCE_GAP.
+The CPU-release 1478.732 ms upper bound and reset-API-inclusive 1564.947 ms upper
+bound remain separate, and sampled PD2/nominal PLL limitations remain explicit.
+The standalone prior review has not been retroactively declared an admitted run.
+
+Bundle: `28e1a9e0542ae6b274ba7961b6eb919e6c6bacf4`.
+Contract: `docs/acceptance-contracts/P1-7-v3.contract.json`.
+Matrix: `docs/acceptance-contracts/P1-7-v3/final-matrix.json`.
+This is the local evidence closeout, not whole P1-7 completion or main delivery.
+The freeze index is appended only after the bundle commit. To reproduce final
+validation at the bundle commit, use the same existing validator with:
+
+    python -I -S -B -X utf8 Tools/acceptance/validate_bundle.py --contract docs/acceptance-contracts/P1-7-v3.contract.json --matrix docs/acceptance-contracts/P1-7-v3/final-matrix.json --repo-root . --previous-contract docs/acceptance-contracts/P1-7-v3/predecessor/contract.json --previous-matrix docs/acceptance-contracts/P1-7-v3/predecessor/final-matrix.json
+
+Remaining product work is unchanged: actual recovery-key short/long behavior,
+pure-battery startup, and P1-6 original retrieval/physical power-cut obligations.
+No reset, flash, OTA, device collection, remote CI, push or merge was performed.
+Common rules and this handoff remain pending authorized main integration; other
+worktrees must not be described as already updated by this local commit.
