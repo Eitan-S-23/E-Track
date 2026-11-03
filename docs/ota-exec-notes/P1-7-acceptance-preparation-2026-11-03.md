@@ -157,3 +157,68 @@ observed an unplugged device. No user battery result has been received yet.
 Keep P1-7 in progress. A final same-task supplemental evaluation must include the
 missing observations, preserve the first failure and exact timing scopes, and
 complete admission/validation without repeating the successful startup capture.
+
+## Autonomous Follow-Through And Explicit Formal Blocker
+
+2026-11-03: the user requested the remaining work that does not need physical
+intervention. Existing observation evaluation and host preparation proceeded,
+without another reset, flash, OTA or debugger session.
+
+The new offline entry `Tools/acceptance/p17_review.py` verifies the exact first
+contract/matrix, all declared originals, native timestamped samples, full before
+and after images, original health buffers and 17 original command closures.
+It calls the existing pure parser/health checks, never a device entry.
+
+P17-ENTRY-01 is CLOSED. Its first committed entry (`e1898b05a30ceacf5fd9b35b41ed46c73356a05c`)
+passed import-based tests but failed the real isolated CLI: Python -I excludes
+the script directory, so the sibling parser could not be imported. This was a
+reviewer-written harness mistake, not firmware regression or network trouble.
+The original command actually exited 1 before evaluating any original. The
+failure and unchanged copied originals were committed as
+`138303c3d4cd83ea4da524d0d4183ca31bba678c`, P1-7-v2. They must not be relabeled
+as successful execution or as an unexecuted NOT_RUN predecessor.
+
+Repair `d665f92a45889b95bd433c80194297a3789bda70` explicitly adds the local module
+directory and adds a real isolated CLI test. All 22 Python tests pass (17 existing
+parser tests and 5 evaluator tests, including seven tampering subcases). The
+corrected CLI was also actually executed on the same original bytes. Results:
+three scoped startup criteria PASS, recovery-key and battery NOT_OBSERVED.
+Machine-readable result: `P1-7-offline-followthrough-2026-11-03.json`.
+Exact logs/source pins: `.cache/p1-offline-20261103-01/host-02/` and
+`offline-corrected-01/`. This standalone review is not formal successor admission.
+
+P17-RECORD-01 remains NEED_DECISION, a formal recording limitation exposed by
+the reviewer's failure. The new frozen v2 command declares expected_exit_codes
+[0], but its actual failed invocation is 1. The canonical validator rejects even
+a HARNESS_FAIL matrix with that unexpected exit code. Its exact rejection is
+preserved in `.cache/p1-offline-20261103-01/record-import-failure-01/`.
+v2 precheck/rerun-plan generation passed; final validation did NOT pass. No
+FREEZE-INDEX row or whole-card acceptance is claimed for v2. The failed native
+stderr also triggered whitespace checking; its exact staged bytes were verified
+and excluded only from whitespace checking, not from any evidence verification.
+
+Do not edit frozen v2 to add exit 1, replace the actual exit with 0, substitute
+the old NOT_RUN matrix as predecessor, or skip v2 by reusing v1 as the immediate
+parent. These would conceal the real execution history. Fixing the import does
+not by itself resolve this formal-history issue.
+
+Recommended next decision is a narrowly approved correction to failure-record
+handling in the shared execution contract/validator: an unexpected actual exit
+may be recorded as failure with original output and a failed criterion, never
+as PASS or a reusable PASS anchor. Keep strict exit-code admission for PASS,
+strict command text, original history, artifact hashes and all product gates.
+Tests must cover unexpected exit with failure, rejection with PASS, missing
+output, and actual predecessor lineage. A new P1-7 successor then binds the
+corrected evaluator and the actual v2 HARNESS_FAIL predecessor. Because this
+changes common acceptance governance beyond the local P1-7 source/evidence
+scope, this session did not silently implement it or rewrite any frozen file.
+
+Six additional host cases compiled the unchanged production recovery predicate
+with stubbed GPIO/time and passed with zero compiler warnings/errors. They prove
+logic only, not a physical recovery-key hold. The power-cut feasibility review
+also found no qualified autonomous rail-cut/restore fixture. Details and P1-6
+original-location findings are in `P1-autonomous-review-2026-11-03.md`.
+
+P1 remains 5/7. Physical key and pure-battery startup are still unobserved. All
+local P1-7 commits stayed on acceptance/p1-7-20261103; main and its index were
+preserved. No push/merge, device operation, product edit or external cleanup.
