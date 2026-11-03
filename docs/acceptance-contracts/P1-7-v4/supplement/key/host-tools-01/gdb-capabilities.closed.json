@@ -1,0 +1,42 @@
+{
+  "argv": [
+    "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\bin\\arm-none-eabi-gdb.exe",
+    "-nx",
+    "-nh",
+    "--batch",
+    "-ex",
+    "show version",
+    "-ex",
+    "help set direct-call-timeout",
+    "-ex",
+    "help set unwind-on-timeout",
+    "-ex",
+    "help set breakpoint auto-hw",
+    "-ex",
+    "help set remote hardware-breakpoint-limit",
+    "-ex",
+    "python import sys; print(sys.version)",
+    "-ex",
+    "show architecture"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 921842816650000,
+  "ended_monotonic_ns": 921848598908000,
+  "stdout": {
+    "path": ".cache\\p17-key-method-20261104-01\\host-tools-01\\gdb-capabilities.stdout",
+    "bytes": 21362,
+    "sha256": "7a55ac4b4b7d4ec54fad6708d009dbe54ada3398823246bb9d328c61735229e1"
+  },
+  "stderr": {
+    "path": ".cache\\p17-key-method-20261104-01\\host-tools-01\\gdb-capabilities.stderr",
+    "bytes": 56,
+    "sha256": "6fe8d87eb3dca2ddaa9dde7e4e625831f39e5a596a685684aded7481e10a05bb"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

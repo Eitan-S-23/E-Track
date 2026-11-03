@@ -1,0 +1,41 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\Tools\\acceptance\\validate_bundle.py",
+    "--contract",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\docs\\acceptance-contracts\\P1-7-v4.contract.json",
+    "--matrix",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\docs\\acceptance-contracts\\P1-7-v4\\final-matrix.json",
+    "--repo-root",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source",
+    "--previous-contract",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\docs\\acceptance-contracts\\P1-7-v4\\predecessor\\contract.json",
+    "--previous-matrix",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\docs\\acceptance-contracts\\P1-7-v4\\predecessor\\final-matrix.json"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 1,
+  "exit_status": "exited",
+  "started_monotonic_ns": 926230158540900,
+  "ended_monotonic_ns": 926230590842100,
+  "stdout": {
+    "path": ".cache\\p17-closeout-20261104-01\\evaluate\\final.stdout",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": ".cache\\p17-closeout-20261104-01\\evaluate\\final.stderr",
+    "bytes": 97,
+    "sha256": "858b73b82d64c29a4f021951ff0c051ee66b3c483d4aad29d7a243604ae2d871"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

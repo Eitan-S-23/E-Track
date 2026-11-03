@@ -1,0 +1,9 @@
+{
+  "outcome": "HOST_PREPARATION_CHECKS_PASS",
+  "stageFilePublished": true,
+  "registerNamesMatched": true,
+  "guardAndCallStructureChecked": true,
+  "deviceOperations": 0,
+  "physicalCallsExecuted": 0,
+  "previousFailurePreserved": true
+}

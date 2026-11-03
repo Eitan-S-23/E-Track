@@ -1,0 +1,18 @@
+{
+  "outcome": "ACTUAL_STATE_READ",
+  "pc": 134224298,
+  "values": {
+    "dhcsr": 196611,
+    "vtor": 134217728,
+    "freeze": 4096,
+    "cfsr": 0,
+    "hfsr": 0,
+    "gpio": 57087,
+    "hold": 4,
+    "ticks": 1003
+  },
+  "resetCommands": 0,
+  "resumeCommands": 0,
+  "keyCalls": 0,
+  "lockRetained": true
+}

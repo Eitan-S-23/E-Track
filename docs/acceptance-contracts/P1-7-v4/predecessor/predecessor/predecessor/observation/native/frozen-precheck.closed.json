@@ -1,0 +1,37 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\Tools\\acceptance\\validate_bundle.py",
+    "--contract",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\docs\\acceptance-contracts\\P1-7-v1.contract.json",
+    "--matrix",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\docs\\acceptance-contracts\\P1-7-v1\\initial-matrix.json",
+    "--repo-root",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 847640179511400,
+  "ended_monotonic_ns": 847644051979400,
+  "stdout": {
+    "path": ".cache\\p17-acceptance-20261103-01\\startup-01\\frozen-precheck.stdout",
+    "bytes": 80,
+    "sha256": "c767c46235140cd44556a5f7047d33eb82c190dad6a19cbd80504470e1b14121"
+  },
+  "stderr": {
+    "path": ".cache\\p17-acceptance-20261103-01\\startup-01\\frozen-precheck.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

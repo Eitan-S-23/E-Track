@@ -1,0 +1,48 @@
+{
+  "argv": [
+    "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\bin\\arm-none-eabi-gdb.exe",
+    "-nx",
+    "-nh",
+    "--batch",
+    "-x",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p17-key-method-20261104-01\\gdb-definitions-03.gdb",
+    "-ex",
+    "help p17-key-test",
+    "-ex",
+    "set logging file D:/github/my/E-Track/.cache/p35-integration-20261028/source/.cache/p17-key-method-20261104-01/gdb-check-03/stage-probe.log",
+    "-ex",
+    "set logging overwrite on",
+    "-ex",
+    "set logging redirect on",
+    "-ex",
+    "set logging enabled on",
+    "-ex",
+    "echo P17_STAGE probe\\n",
+    "-ex",
+    "set logging enabled off",
+    "-ex",
+    "set logging redirect off",
+    "-ex",
+    "show breakpoint auto-hw"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 923469679119900,
+  "ended_monotonic_ns": 923470755975700,
+  "stdout": {
+    "path": ".cache\\p17-key-method-20261104-01\\gdb-check-03\\gdb.stdout",
+    "bytes": 63,
+    "sha256": "5a05e34d1d7e0fcef6a3a126eb88348a8f86a68a6efc4aa647edfc1c5303df05"
+  },
+  "stderr": {
+    "path": ".cache\\p17-key-method-20261104-01\\gdb-check-03\\gdb.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

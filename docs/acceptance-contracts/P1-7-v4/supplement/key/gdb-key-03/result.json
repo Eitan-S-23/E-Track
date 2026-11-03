@@ -1,0 +1,29 @@
+{
+  "outcome": "KEY_PREDICATES_OBSERVED_POSTCHECK_PENDING",
+  "longTicks": 3000,
+  "shortTicks": 10,
+  "notifications": [
+    {
+      "stage": "hold",
+      "monoNs": 924577964115500,
+      "delivered": true
+    },
+    {
+      "stage": "release",
+      "monoNs": 924593146482100,
+      "delivered": true
+    },
+    {
+      "stage": "short",
+      "monoNs": 924597290314800,
+      "delivered": true
+    }
+  ],
+  "devicePostcheck": "NOT_RUN",
+  "formalAcceptance": false,
+  "resetCommands": 0,
+  "priorResetCommands": 1,
+  "keyCalls": 2,
+  "flashProgramming": 0,
+  "portsClosed": true
+}

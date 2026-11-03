@@ -1,0 +1,4 @@
+predecessor/** -text -diff
+policy-correction/** -text -diff
+evaluation/*.stdout -text -diff
+evaluation/*.stderr -text -diff

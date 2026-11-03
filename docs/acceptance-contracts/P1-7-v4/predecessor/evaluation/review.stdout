@@ -1,0 +1,1 @@
+{"outcome": "ORIGINALS_EVALUATED", "overallResult": "EVIDENCE_GAP", "criteria": {"C_STARTUP": "PASS", "C_POWER_HOLD": "PASS", "C_CLOCK_SIZE": "PASS", "C_RECOVERY_KEY": "NOT_OBSERVED", "C_BATTERY": "NOT_OBSERVED"}, "deviceOperations": 0}

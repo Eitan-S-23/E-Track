@@ -1,0 +1,70 @@
+{
+  "image": {
+    "image": {
+      "path": "docs\\acceptance-contracts\\P1-7-v1\\inputs\\app-final.bin",
+      "bytes": 614092,
+      "sha256": "4126d801e6bd6efd57a9f20d5a128a50cfb5a46580dc10d9a2227702247d5805"
+    },
+    "elf": {
+      "path": "docs\\acceptance-contracts\\P1-7-v1\\inputs\\app.elf",
+      "bytes": 885768,
+      "sha256": "a59906b4c85da39e8dcfa514d00791901baa8ca3e704ce7ee94cdb2125c768bb"
+    },
+    "map": {
+      "path": "docs\\acceptance-contracts\\P1-7-v1\\inputs\\app.map",
+      "bytes": 2660636,
+      "sha256": "67b24e8c60d71ffd9e6977656912afe50f4e62e674c851828fe5a9eb16b2e87f"
+    }
+  },
+  "rtt": 537212072,
+  "offsets": {
+    "active": 212,
+    "isr": 479
+  },
+  "symbols": {
+    "_ZL12g_ota_health": [
+      537212256,
+      36
+    ],
+    "_ZL18g_ota_confirm_done": [
+      537212254,
+      1
+    ],
+    "_ZL20g_ota_state_snapshot": [
+      537212252,
+      1
+    ],
+    "_ZL19g_ota_state_snapped": [
+      537212253,
+      1
+    ],
+    "_ZL10SD_IsReady": [
+      537208992,
+      1
+    ],
+    "_ZL19g_ota_overlay_owner": [
+      537212304,
+      1
+    ],
+    "_ZL13s_ble_session": [
+      537207792,
+      632
+    ],
+    "_SEGGER_RTT": [
+      537212072,
+      168
+    ],
+    "_ZN3HAL10HAL_UpdateEv": [
+      134484168,
+      48
+    ],
+    "_ZL19g_qspi_ota_disabled": [
+      536871293,
+      1
+    ],
+    "_ZL15g_qspi_jedec_id": [
+      537210908,
+      4
+    ]
+  }
+}

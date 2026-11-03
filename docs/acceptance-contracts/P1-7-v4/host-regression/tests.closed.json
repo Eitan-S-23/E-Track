@@ -1,0 +1,31 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p17-closeout-20261104-01\\tests.py"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 925558410545800,
+  "ended_monotonic_ns": 926025549771100,
+  "stdout": {
+    "path": ".cache\\p17-closeout-20261104-01\\regression\\tests.stdout",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": ".cache\\p17-closeout-20261104-01\\regression\\tests.stderr",
+    "bytes": 34035,
+    "sha256": "32dfcfa8bf25a83b12572dd78ca328dc56b8f1f2c8600fa39f66af2d8375bdbf"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

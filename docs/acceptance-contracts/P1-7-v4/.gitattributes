@@ -1,0 +1,6 @@
+predecessor/** -text -diff
+supplement/** -text -diff
+host-regression/** -text -diff
+packaging-history/** -text -diff
+evaluation/*.stdout -text -diff
+evaluation/*.stderr -text -diff

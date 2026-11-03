@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\bin\\arm-none-eabi-gdb.exe",
+    "-nx",
+    "-nh",
+    "--batch",
+    "-x",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p17-key-method-20261104-01\\gdb-key-04.gdb"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 1,
+  "exit_status": "exited",
+  "started_monotonic_ns": 924363978594300,
+  "ended_monotonic_ns": 924376164415600,
+  "stdout": {
+    "path": ".cache\\p17-key-method-20261104-01\\gdb-key-02\\gdb.stdout",
+    "bytes": 187,
+    "sha256": "2ec41645eff969b813bdab4d568f0b9846f8eaf110c98d89937d597a6d139d54"
+  },
+  "stderr": {
+    "path": ".cache\\p17-key-method-20261104-01\\gdb-key-02\\gdb.stderr",
+    "bytes": 2655,
+    "sha256": "9eaaa3f302e666e168208ab277360db2c97194fcbe3385931abb166a5ef11ebe"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

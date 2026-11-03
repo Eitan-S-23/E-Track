@@ -1,0 +1,71 @@
+SEGGER J-Link GDB Server V8.18 Command Line Version
+
+JLinkARM.dll V8.18 (DLL compiled Mar  5 2025 14:42:43)
+
+Command line: -select USB=123456 -device CORTEX-M4 -if SWD -speed 1000 -port 25341 -swoport 25342 -telnetport 25343 -rtttelnetport 25344 -localhostonly -noir -nohalt -noreset -nogui -singlerun -SettingsFile D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p17-key-method-20261104-01\gdb-qualify-01\settings.jlink -log D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p17-key-method-20261104-01\gdb-qualify-01\server.log
+-----GDB Server start settings-----
+GDBInit file:                  none
+GDB Server Listening port:     25341
+SWO raw output listening port: 25342
+Terminal I/O port:             25343
+Accept remote connection:      localhost only
+Generate logfile:              off
+Verify download:               off
+Init regs on start:            off
+Silent mode:                   off
+Single run mode:               on
+Target connection timeout:     0 ms
+------J-Link related settings------
+J-Link Host interface:         USB
+J-Link script:                 none
+J-Link settings file:          D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p17-key-method-20261104-01\gdb-qualify-01\settings.jlink
+------Target related settings------
+Target device:                 CORTEX-M4
+Target device parameters:      none
+Target interface:              SWD
+Target interface speed:        1000kHz
+Target endian:                 little
+
+Connecting to J-Link...
+J-Link is connected.
+Firmware: J-Link ARM-OB STM32 compiled Aug 22 2012 19:52:04
+Hardware: V7.00
+Feature(s): RDI,FlashDL,FlashBP,JFlash,GDB
+Checking target voltage...
+Target voltage: 3.30 V
+Listening on TCP/IP port 25341
+Connecting to target...
+Connected to target
+Waiting for GDB connection...Connected to 127.0.0.1
+GDB client (conn. 884) requested target.xml from GDB Server
+Reading common registers: ...Target halted (PC = 0x08021D84)
+Read register 'r0' (4 bytes) from hardware: 0xA0FE0320
+Read register 'r1' (4 bytes) from hardware: 0x00000000
+Read register 'r2' (4 bytes) from hardware: 0x00000000
+Read register 'r3' (4 bytes) from hardware: 0xFFFF0000
+Read register 'r4' (4 bytes) from hardware: 0x00FE0320
+Read register 'r5' (4 bytes) from hardware: 0x59000000
+Read register 'r6' (4 bytes) from hardware: 0x00000000
+Read register 'r7' (4 bytes) from hardware: 0x00000000
+Read register 'r8' (4 bytes) from hardware: 0x20000000
+Read register 'r9' (4 bytes) from hardware: 0xFFFFFFFF
+Read register 'r10' (4 bytes) from hardware: 0x707F0520
+Read register 'r11' (4 bytes) from hardware: 0x00000000
+Read register 'r12' (4 bytes) from hardware: 0x39010000
+Read register 'sp' (4 bytes) from hardware: 0x207D0520
+Read register 'lr' (4 bytes) from hardware: 0xD51C0208
+Read register 'pc' (4 bytes) from hardware: 0x841D0208
+Read register 'xpsr' (4 bytes) from hardware: 0x00000061
+Read 4 bytes @ address 0x08021D84 (Data = 0xFA1F421A)
+Read 2 bytes @ address 0x08021D84 (Data = 0x421A)
+Received monitor command: exec DisableAutoUpdateFW
+Executed DisableAutoUpdateFW
+Received monitor command: exec SetRestartOnClose = 0
+Executed SetRestartOnClose = 0
+Received monitor command: flash breakpoints = 0
+Flash breakpoints disabled
+Read 4 bytes @ address 0xE000ED00 (Data = 0x410FC241)
+GDB closed TCP/IP connection (Socket 884)
+Starting target CPU...
+Restoring target state and closing J-Link connection...
+Shutting down...

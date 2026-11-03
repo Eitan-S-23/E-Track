@@ -1,0 +1,2 @@
+ERROR: matrix rerun bindings must be null when no criterion is REUSED
+VALIDATION=FAIL errors=1

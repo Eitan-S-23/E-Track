@@ -1,0 +1,15 @@
+Traceback (most recent call last):
+  File "D:\github\my\E-Track\.cache\p35-integration-20261028\source\Tools\acceptance\p17_observe.py", line 183, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "D:\github\my\E-Track\.cache\p35-integration-20261028\source\Tools\acceptance\p17_observe.py", line 179, in main
+    return startup(args.plan, h.checked(args.out), args.contract, args.matrix)
+  File "D:\github\my\E-Track\.cache\p35-integration-20261028\source\Tools\acceptance\p17_observe.py", line 160, in startup
+    measured = summarize(sdk_events((sample_out/'sdk.log').read_text(encoding='utf8',errors='strict')),
+                         plan['addresses'], plan['samples'])
+  File "D:\github\my\E-Track\.cache\p35-integration-20261028\source\Tools\acceptance\p17_observe.py", line 53, in summarize
+    h.require(len(gos) == len(resets) == 1, 'not one reset/start observation')
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\github\my\E-Track\.cache\p35-integration-20261028\source\Tools\ota\p34-acceptance\live_host.py", line 24, in require
+    raise RuntimeError(message)
+RuntimeError: not one reset/start observation

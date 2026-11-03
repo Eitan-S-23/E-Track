@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "D:\\github\\my\\cc-connect-thread-guard\\build\\cc-connect.exe",
+    "send",
+    "--stdin"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source",
+  "monotonic_ns": 924596358630500,
+  "stdin_sha256": "744ae36bc47d67787030ad427cd06fc4379657243f5064b42afbbd74b82cb20b"
+}

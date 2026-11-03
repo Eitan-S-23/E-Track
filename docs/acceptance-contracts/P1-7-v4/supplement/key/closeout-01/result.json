@@ -1,0 +1,130 @@
+{
+  "outcome": "KEY_OBSERVATIONS_AND_RETAINED_STATE_VERIFIED",
+  "observed": {
+    "longResult": true,
+    "longTicks": 3000,
+    "shortResult": false,
+    "shortTicks": 10,
+    "nativeTicks": [
+      1003,
+      4003,
+      4003,
+      4013
+    ],
+    "hostCallToContextRestoreMs": [
+      3024,
+      52
+    ],
+    "shortLimitation": "Observed rejection after 10 ticks; not a measured one-second hold or debounced waveform."
+  },
+  "health": {
+    "health": [
+      [
+        30000,
+        30,
+        1000,
+        0,
+        16374,
+        16374,
+        0,
+        1,
+        1
+      ],
+      [
+        30000,
+        30,
+        1000,
+        0,
+        16640,
+        16640,
+        0,
+        1,
+        1
+      ]
+    ],
+    "registers": {
+      "vtor": 134285312,
+      "cfsr": 0,
+      "hfsr": 0,
+      "dhcsr": 16842753,
+      "sdio": 0,
+      "freeze": 0
+    },
+    "confirmed_state": 4,
+    "confirmation_source": "current initialized App BCB snapshot; not an EEPROM dump"
+  },
+  "stack": {
+    "guard_intact": true,
+    "free_painted_bytes": 5092,
+    "high_water_bytes": 3100,
+    "scope": "Paint observed at this read, not a whole-program worst-case proof"
+  },
+  "storage": {
+    "jedec": 15679512,
+    "capacity_bytes": 16777216,
+    "slots": {
+      "candidate_slot": {
+        "erased": false,
+        "bytes": 614092,
+        "crc32": 1139004111,
+        "version": 30313,
+        "sha8": "4034878d234965ea"
+      },
+      "backup_slot": {
+        "erased": false,
+        "bytes": 614092,
+        "crc32": 1139004111,
+        "version": 30312,
+        "sha8": "e768d2594ae467f6"
+      },
+      "recovery_slot": {
+        "erased": false,
+        "bytes": 619580,
+        "crc32": 2429394932,
+        "version": 30276,
+        "sha8": "deb4484dd0614f49"
+      }
+    },
+    "staging_header_hex": "4554534c03ffffff717004003c5373b669760000706e73e657e1ed7b544d4f43",
+    "staging_journal_sha256": "d51db68772a3f965e6603aa28495183e08f32d89adc3aee635c612937dd5a23f",
+    "staging_erased": false,
+    "journal": {
+      "erased": false,
+      "package_sha256": "706e73e657e1ed7b9a94bdc42ec79a50a14f8ed73ee37cd4d9b1e6e3ac16c251",
+      "bytes": 290929,
+      "durable": 290929,
+      "matches_reference": true,
+      "expected_begin_durable": 290929,
+      "committed_target": 30313
+    }
+  },
+  "postRead": {
+    "path": ".cache\\p17-key-post-20261104-01\\inspect-01\\result.json",
+    "bytes": 2746,
+    "sha256": "a53809a9e34e17bfe22a8abb866826d946419218eb9d9d80c02dc454ce338adc"
+  },
+  "source": {
+    "path": ".cache\\p17-key-method-20261104-01\\closeout-02.py",
+    "bytes": 7361,
+    "sha256": "9f6af2ab53d1db62c3280dce669683ea9b327bc7742b2e4c32ef799ed33fa40d"
+  },
+  "timeUtc": "2026-11-03T17:59:25.009800+00:00",
+  "negativeChecks": 4,
+  "oldInputFilesVerified": 188,
+  "newOutputFiles": 263,
+  "resetCommands": 1,
+  "keyCalls": 2,
+  "firmwareProgramming": 0,
+  "ota": 0,
+  "deviceLockReleased": true,
+  "ownedProcessesClosed": true,
+  "debuggerPortsClosed": true,
+  "priorFailuresPreserved": true,
+  "sameCheckpointContinuation": true,
+  "noRepeatedSuccessfulKeyCall": true,
+  "controlledWritesWithinRoot": true,
+  "nativeException": "C:/Users/SU/AppData/Roaming/SEGGER/",
+  "gitWrites": 0,
+  "formalAcceptance": "P1-7-v3 remains unchanged; supplemental formal adjudication not performed by this closeout.",
+  "scope": "Isolated exact physical Boot predicate, not a forced end-to-end recovery receiver entry."
+}

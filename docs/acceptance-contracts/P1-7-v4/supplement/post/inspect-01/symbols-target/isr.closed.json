@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\bin\\arm-none-eabi-objdump.exe",
+    "-d",
+    "--disassemble=ota_ble_session_isr_active",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p35-pre-durable-20261102\\target-30313\\download-recovery-01\\originals\\keyed-build\\app\\X-Track-App-GCC.elf"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 924642223398800,
+  "ended_monotonic_ns": 924642437434400,
+  "stdout": {
+    "path": ".cache\\p17-key-post-20261104-01\\inspect-01\\symbols-target\\isr.stdout",
+    "bytes": 568,
+    "sha256": "968c8f8c53f1bef1cbdf6f2701e2782bae2080400c43a8bb5ba855472000c211"
+  },
+  "stderr": {
+    "path": ".cache\\p17-key-post-20261104-01\\inspect-01\\symbols-target\\isr.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

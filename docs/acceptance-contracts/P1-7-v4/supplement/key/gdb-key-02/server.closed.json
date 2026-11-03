@@ -1,0 +1,51 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLinkGDBServerCL.exe",
+    "-select",
+    "USB=123456",
+    "-device",
+    "CORTEX-M4",
+    "-if",
+    "SWD",
+    "-speed",
+    "1000",
+    "-port",
+    "25341",
+    "-swoport",
+    "25342",
+    "-telnetport",
+    "25343",
+    "-rtttelnetport",
+    "25344",
+    "-localhostonly",
+    "-noir",
+    "-nohalt",
+    "-noreset",
+    "-nogui",
+    "-singlerun",
+    "-SettingsFile",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p17-key-method-20261104-01\\gdb-key-02\\settings.jlink",
+    "-log",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p17-key-method-20261104-01\\gdb-key-02\\server.log"
+  ],
+  "reason": "key_batch_stopped",
+  "stopped_while_running": true,
+  "exit_code": 1,
+  "exit_status": "exited",
+  "started_monotonic_ns": 924362727595900,
+  "ended_monotonic_ns": 924376202606100,
+  "stdout": {
+    "path": ".cache\\p17-key-method-20261104-01\\gdb-key-02\\server.stdout",
+    "bytes": 29248,
+    "sha256": "6513d99a1107a5ed092a89c7cbbb2d89417411ce6e5c51f5972d1a6e77634102"
+  },
+  "stderr": {
+    "path": ".cache\\p17-key-method-20261104-01\\gdb-key-02\\server.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

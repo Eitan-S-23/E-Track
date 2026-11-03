@@ -1,0 +1,107 @@
+{
+  "status": "PREPARED_NOT_RUN",
+  "scope": "isolated physical predicate observation",
+  "gdb": {
+    "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\bin\\arm-none-eabi-gdb.exe",
+    "bytes": 11884824,
+    "sha256": "9bf61d2f28da0b84ed2f5a7119e7feb22ab42011889e8c7a963ce989de64010b"
+  },
+  "server": {
+    "path": "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLinkGDBServerCL.exe",
+    "bytes": 590288,
+    "sha256": "1eed5ed1bfd44e5c13aaf7fe56224bab811bc7127bc1aec107ad62250455d930"
+  },
+  "definitions": {
+    "path": ".cache\\p17-key-method-20261104-01\\gdb-definitions-04.gdb",
+    "bytes": 15460,
+    "sha256": "1f6a329a6f51f8a3f9bec2588ba3b35d0a0284de225bfbf617bb21fe582c98e7"
+  },
+  "entry": {
+    "path": ".cache\\p17-key-method-20261104-01\\gdb-key-04.gdb",
+    "bytes": 142,
+    "sha256": "6627eaa8b9da9c8054cbeec2986f3a258483b003d437a95ecde9b9b2e57b6940"
+  },
+  "retained": {
+    "probe_serial": 123456,
+    "tools": {
+      "commander": {
+        "path": "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLink.exe",
+        "bytes": 414672,
+        "sha256": "9a498039ffc3446fdf9c033683c6b3d699e206d0b08e9faa336e79bed0b37d85"
+      },
+      "nm": {
+        "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\bin\\arm-none-eabi-nm.EXE",
+        "bytes": 1374856,
+        "sha256": "d2a2d9eb8c24c6ed2467c8a1539dd931206e67878a28fe3f0f8d9e42b450efb9"
+      },
+      "objdump": {
+        "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\bin\\arm-none-eabi-objdump.EXE",
+        "bytes": 2089128,
+        "sha256": "b583366d8e5a61bf91fd94451bea816ce079760362cff102fc43687748c020e8"
+      },
+      "objcopy": {
+        "path": "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\bin\\arm-none-eabi-objcopy.EXE",
+        "bytes": 1496832,
+        "sha256": "b0b80ad85e53ca2785513b7905f97bd8458be46137c2e92a998c7bf202cb831b"
+      }
+    },
+    "package": {
+      "path": ".cache\\p35-pre-durable-20261102\\target-30313\\download-recovery-01\\originals\\prepared\\e-track-at32f435-v3.3.13-full.etu",
+      "bytes": 290929,
+      "sha256": "706e73e657e1ed7b9a94bdc42ec79a50a14f8ed73ee37cd4d9b1e6e3ac16c251"
+    },
+    "boot": {
+      "path": "docs\\acceptance-contracts\\P3-8-v5\\inputs\\mcu\\boot.bin",
+      "bytes": 65536,
+      "sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527"
+    },
+    "images": {
+      "target": {
+        "image": {
+          "path": ".cache\\p35-pre-durable-20261102\\target-30313\\download-recovery-01\\originals\\prepared\\app-final.bin",
+          "bytes": 614092,
+          "sha256": "4126d801e6bd6efd57a9f20d5a128a50cfb5a46580dc10d9a2227702247d5805"
+        },
+        "elf": {
+          "path": ".cache\\p35-pre-durable-20261102\\target-30313\\download-recovery-01\\originals\\keyed-build\\app\\X-Track-App-GCC.elf",
+          "bytes": 885768,
+          "sha256": "a59906b4c85da39e8dcfa514d00791901baa8ca3e704ce7ee94cdb2125c768bb"
+        },
+        "map": {
+          "path": ".cache\\p35-pre-durable-20261102\\target-30313\\download-recovery-01\\originals\\keyed-build\\app\\X-Track-App-GCC.map",
+          "bytes": 2660636,
+          "sha256": "67b24e8c60d71ffd9e6977656912afe50f4e62e674c851828fe5a9eb16b2e87f"
+        }
+      }
+    }
+  },
+  "postRead": {
+    "path": ".cache\\p17-gdb-post-20261104-01\\inspect-01\\result.json",
+    "bytes": 2750,
+    "sha256": "72ab97cecefabf0424ee4582f688cf0fdf99810f404fec451e33bc9d5fc5f0a6"
+  },
+  "out": "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p17-key-method-20261104-01\\gdb-key-02",
+  "ports": [
+    25341,
+    25342,
+    25343,
+    25344
+  ],
+  "overallSeconds": 240,
+  "perUserWaitSeconds": 60,
+  "userActions": [
+    "Hold power key after the App is stopped and the hold signal is sent.",
+    "Release on the release signal after the long predicate returns.",
+    "On the short signal, press for about one second and release."
+  ],
+  "operations": {
+    "reset": 1,
+    "predicateCalls": 2,
+    "firmwareProgramming": 0,
+    "persistentStateEdits": 0
+  },
+  "recovery": "On any unexpected stop/timeout, close owned processes, retain the lock and reconcile the actual PC/state before resuming. Do not assume disconnect alone leaves the MCU halted.",
+  "success": "Both predicate results, tick durations and complete CPU context checks pass; restore scratch/debug freeze, resume normal Boot, then independently verify App/Boot and health.",
+  "limitations": "The controlled calls themselves are not yet physically qualified or formal acceptance. Native GDB attachment does briefly halt the MCU.",
+  "preparationHistory": "gdb-key-01 source filename quotes failed before GDB attach; host-repair successful CLI misclassified by host output-text assumption; unchanged originals evaluated without rerun"
+}

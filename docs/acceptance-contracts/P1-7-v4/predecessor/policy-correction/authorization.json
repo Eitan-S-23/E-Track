@@ -1,0 +1,10 @@
+{
+  "authority": "Current user explicitly allowed the proposed limited failure-record correction.",
+  "date": "2026-11-03T06:42:13.994978+00:00",
+  "sourceCommit": "7146a0060230cb99b818f6a1c1b669379b5e03e9",
+  "historicalBytesUnchanged": true,
+  "oldRejectionPreserved": true,
+  "noRelaxedPassExitCodes": true,
+  "noDeviceOperations": true,
+  "noRemoteWrites": true
+}

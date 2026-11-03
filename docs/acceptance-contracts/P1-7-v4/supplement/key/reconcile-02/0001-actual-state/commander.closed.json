@@ -1,0 +1,45 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLink.exe",
+    "-Device",
+    "CORTEX-M4",
+    "-If",
+    "SWD",
+    "-Speed",
+    "1000",
+    "-USB",
+    "123456",
+    "-AutoConnect",
+    "0",
+    "-ExitOnError",
+    "1",
+    "-NoGui",
+    "1",
+    "-SettingsFile",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p17-key-method-20261104-01\\reconcile-02\\0001-actual-state\\settings.jlink",
+    "-Log",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p17-key-method-20261104-01\\reconcile-02\\0001-actual-state\\sdk.log",
+    "-CommandFile",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p17-key-method-20261104-01\\reconcile-02\\0001-actual-state\\commands.jlink"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 924476969778700,
+  "ended_monotonic_ns": 924477448139100,
+  "stdout": {
+    "path": ".cache\\p17-key-method-20261104-01\\reconcile-02\\0001-actual-state\\commander.stdout",
+    "bytes": 6379,
+    "sha256": "e70a1d3e5808e05c5773234ac7dc5f1501d09ef5dff8192dae076827f57ef2ba"
+  },
+  "stderr": {
+    "path": ".cache\\p17-key-method-20261104-01\\reconcile-02\\0001-actual-state\\commander.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

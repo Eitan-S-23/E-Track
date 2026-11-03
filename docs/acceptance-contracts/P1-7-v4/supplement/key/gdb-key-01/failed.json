@@ -1,0 +1,6 @@
+{
+  "outcome": "STOPPED_RECONCILE_DEVICE",
+  "error": "standard tool failed; inspect original command streams",
+  "deviceLockRetained": true,
+  "notifications": []
+}

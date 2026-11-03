@@ -1,0 +1,2 @@
+ERROR: matrix.commands[0].exit_code is not an approved expected result
+VALIDATION=FAIL errors=1

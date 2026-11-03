@@ -1,0 +1,6 @@
+0x080019aa in main ()
+Note: automatically using hardware breakpoints for read-only addresses.
+P17_RESULT long result=1 ticks=3000 gpio=00005eff
+P17_RESULT short result=0 ticks=10 gpio=00005eff
+Restoring binary file D:/github/my/E-Track/.cache/p35-integration-20261028/source/.cache/p17-key-method-20261104-01/gdb-key-03/stack-before.bin into memory (0x20057d20 to 0x20057f20)
+[Inferior 1 (Remote target) detached]

@@ -1,0 +1,17 @@
+exec DisableAutoUpdateFW
+exec SetRestartOnClose = 0
+exec InhibitConnectRetries = 1
+exec SetEnableMemCache = 0
+connect
+exec ExcludeFlashCacheRange 0x08000000-0x080FFFFF
+regs
+savebin "D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p17-key-method-20261104-01\reconcile-02\0001-actual-state\dhcsr.bin", 0xE000EDF0, 0x4
+savebin "D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p17-key-method-20261104-01\reconcile-02\0001-actual-state\vtor.bin", 0xE000ED08, 0x4
+savebin "D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p17-key-method-20261104-01\reconcile-02\0001-actual-state\freeze.bin", 0xE0042008, 0x4
+savebin "D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p17-key-method-20261104-01\reconcile-02\0001-actual-state\cfsr.bin", 0xE000ED28, 0x4
+savebin "D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p17-key-method-20261104-01\reconcile-02\0001-actual-state\hfsr.bin", 0xE000ED2C, 0x4
+savebin "D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p17-key-method-20261104-01\reconcile-02\0001-actual-state\gpio.bin", 0x40020010, 0x4
+savebin "D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p17-key-method-20261104-01\reconcile-02\0001-actual-state\hold.bin", 0x40020C14, 0x4
+savebin "D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p17-key-method-20261104-01\reconcile-02\0001-actual-state\boot_code.bin", 0x080019A0, 0x20
+savebin "D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p17-key-method-20261104-01\reconcile-02\0001-actual-state\ticks.bin", 0x20001030, 0x4
+qc

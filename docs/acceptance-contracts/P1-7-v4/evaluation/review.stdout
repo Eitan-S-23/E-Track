@@ -1,0 +1,1 @@
+{"outcome": "P17_ORIGINALS_ACCEPTED", "overallResult": "PASS", "criteria": {"C_STARTUP": "PASS", "C_POWER_HOLD": "PASS", "C_CLOCK_SIZE": "PASS", "C_RECOVERY_KEY": "PASS", "C_BATTERY": "PASS"}, "deviceOperations": 0}

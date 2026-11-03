@@ -1,0 +1,19 @@
+{
+  "plan": {
+    "path": ".cache\\p17-key-method-20261104-01\\key-plan-02.json",
+    "bytes": 4847,
+    "sha256": "3d41bf6047e3d322fde388c819c5764abe1b496e6248b758649aa917b48e1626"
+  },
+  "entry": {
+    "path": ".cache\\p17-key-method-20261104-01\\execute-02.py",
+    "bytes": 8188,
+    "sha256": "5d3b54b50c518cfdc1dcfee4eaf705b2571235ee59cc584358236e71ea4832ae"
+  },
+  "operations": {
+    "reset": 1,
+    "predicateCalls": 2,
+    "firmwareProgramming": 0,
+    "persistentStateEdits": 0
+  },
+  "formalAcceptance": false
+}

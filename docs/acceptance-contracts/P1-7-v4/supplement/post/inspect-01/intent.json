@@ -1,0 +1,24 @@
+{
+  "task": "P1-7",
+  "timeUtc": "2026-11-03T17:52:06.151139+00:00",
+  "scope": "entry-readiness, not formal P1-7 criterion execution",
+  "reset": 0,
+  "halt": 0,
+  "flash": 0,
+  "ota": 0,
+  "eepromWrite": 0,
+  "rttConsumption": 0,
+  "priorPlan": {
+    "path": ".cache\\p35-pre-durable-20261102\\target-30313\\final-mcu-01\\plan.json",
+    "bytes": 2288,
+    "sha256": "5caa1d35903f1099cc8858aca5f6aebaa67471bb8170901d3b01899b29701a88"
+  },
+  "caller": {
+    "path": ".cache\\p17-readiness-20261103-01\\preflight.py",
+    "bytes": 3816,
+    "sha256": "3e3f74f7ca7622839887d1841af168e5b6c8dbf349ac83bce928d6f0c696917a"
+  },
+  "approvedNativeHistory": "C:\\Users\\SU\\AppData\\Roaming\\SEGGER\\JLinkDLL.ini",
+  "nativeBeforeMtimeNs": 1793723854420935800,
+  "controllableOutputRoot": "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p17-key-post-20261104-01\\inspect-01"
+}

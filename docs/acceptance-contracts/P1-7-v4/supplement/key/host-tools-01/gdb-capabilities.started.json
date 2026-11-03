@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\bin\\arm-none-eabi-gdb.exe",
+    "-nx",
+    "-nh",
+    "--batch",
+    "-ex",
+    "show version",
+    "-ex",
+    "help set direct-call-timeout",
+    "-ex",
+    "help set unwind-on-timeout",
+    "-ex",
+    "help set breakpoint auto-hw",
+    "-ex",
+    "help set remote hardware-breakpoint-limit",
+    "-ex",
+    "python import sys; print(sys.version)",
+    "-ex",
+    "show architecture"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source",
+  "monotonic_ns": 921842816650000,
+  "stdin_sha256": null
+}

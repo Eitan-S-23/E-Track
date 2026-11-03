@@ -1,0 +1,17 @@
+{
+  "outcome": "STOPPED_RECONCILE_DEVICE",
+  "error": "standard tool failed; inspect original command streams",
+  "deviceLockRetained": true,
+  "notifications": [
+    {
+      "stage": "hold",
+      "monoNs": 924365870947900,
+      "delivered": true
+    },
+    {
+      "stage": "abort",
+      "monoNs": 924378025319600,
+      "delivered": true
+    }
+  ]
+}

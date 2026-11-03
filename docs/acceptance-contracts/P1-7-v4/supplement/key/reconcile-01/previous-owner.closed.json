@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "tasklist",
+    "/FO",
+    "CSV",
+    "/NH",
+    "/FI",
+    "PID eq 15292"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 924280823182900,
+  "ended_monotonic_ns": 924281199855200,
+  "stdout": {
+    "path": ".cache\\p17-key-method-20261104-01\\reconcile-01\\previous-owner.stdout",
+    "bytes": 36,
+    "sha256": "cb1256981f7b3ac53e3cfc7c6a13d4b058702bb707431b31e202abfcf6782f07"
+  },
+  "stderr": {
+    "path": ".cache\\p17-key-method-20261104-01\\reconcile-01\\previous-owner.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

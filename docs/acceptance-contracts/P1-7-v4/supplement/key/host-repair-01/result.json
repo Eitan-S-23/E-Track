@@ -1,0 +1,15 @@
+{
+  "outcome": "SOURCE_ENTRY_LOADED",
+  "deviceOperations": 0,
+  "correctedOracle": "GDB help reports User-defined.; no repeat command",
+  "definitions": {
+    "path": ".cache\\p17-key-method-20261104-01\\gdb-definitions-04.gdb",
+    "bytes": 15460,
+    "sha256": "1f6a329a6f51f8a3f9bec2588ba3b35d0a0284de225bfbf617bb21fe582c98e7"
+  },
+  "entry": {
+    "path": ".cache\\p17-key-method-20261104-01\\gdb-key-04.gdb",
+    "bytes": 142,
+    "sha256": "6627eaa8b9da9c8054cbeec2986f3a258483b003d437a95ecde9b9b2e57b6940"
+  }
+}

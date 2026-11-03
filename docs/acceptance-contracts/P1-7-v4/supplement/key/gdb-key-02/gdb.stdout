@@ -1,0 +1,7 @@
+0x0802a59c in ?? ()
+Hardware assisted breakpoint 1 at 0x80410c8
+
+Breakpoint 1, 0x080410c8 in ?? ()
+Hardware assisted breakpoint 2 at 0x80019aa
+
+Breakpoint 2, 0x080019aa in main ()

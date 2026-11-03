@@ -1,0 +1,35 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\Tools\\acceptance\\p17_supplement.py",
+    "--bundle",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\docs\\acceptance-contracts\\P1-7-v4",
+    "--out",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\docs\\acceptance-contracts\\P1-7-v4\\evaluation\\result.json"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 926219051245100,
+  "ended_monotonic_ns": 926229597070100,
+  "stdout": {
+    "path": "docs\\acceptance-contracts\\P1-7-v4\\evaluation\\review.stdout",
+    "bytes": 217,
+    "sha256": "dcce41f49a97f73791e06814b822691335f551ac64254bb430e00b4218d98d62"
+  },
+  "stderr": {
+    "path": "docs\\acceptance-contracts\\P1-7-v4\\evaluation\\review.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

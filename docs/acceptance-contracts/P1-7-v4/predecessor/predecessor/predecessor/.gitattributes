@@ -1,0 +1,3 @@
+# Native evidence is immutable binary data, including CRLF and trailing spaces.
+inputs/** -text -diff
+observation/** -text -diff

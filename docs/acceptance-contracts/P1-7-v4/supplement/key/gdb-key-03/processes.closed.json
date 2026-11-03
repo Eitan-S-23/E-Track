@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "tasklist",
+    "/FO",
+    "CSV",
+    "/NH"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 924573204567000,
+  "ended_monotonic_ns": 924573939975100,
+  "stdout": {
+    "path": ".cache\\p17-key-method-20261104-01\\gdb-key-03\\processes.stdout",
+    "bytes": 14484,
+    "sha256": "fef157dc7eb01a5e654cdb04d757cdc9c2931b31eb327ec4815f814197daaa2e"
+  },
+  "stderr": {
+    "path": ".cache\\p17-key-method-20261104-01\\gdb-key-03\\processes.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

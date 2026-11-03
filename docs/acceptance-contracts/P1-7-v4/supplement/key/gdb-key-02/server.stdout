@@ -1,0 +1,744 @@
+SEGGER J-Link GDB Server V8.18 Command Line Version
+
+JLinkARM.dll V8.18 (DLL compiled Mar  5 2025 14:42:43)
+
+Command line: -select USB=123456 -device CORTEX-M4 -if SWD -speed 1000 -port 25341 -swoport 25342 -telnetport 25343 -rtttelnetport 25344 -localhostonly -noir -nohalt -noreset -nogui -singlerun -SettingsFile D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p17-key-method-20261104-01\gdb-key-02\settings.jlink -log D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p17-key-method-20261104-01\gdb-key-02\server.log
+-----GDB Server start settings-----
+GDBInit file:                  none
+GDB Server Listening port:     25341
+SWO raw output listening port: 25342
+Terminal I/O port:             25343
+Accept remote connection:      localhost only
+Generate logfile:              off
+Verify download:               off
+Init regs on start:            off
+Silent mode:                   off
+Single run mode:               on
+Target connection timeout:     0 ms
+------J-Link related settings------
+J-Link Host interface:         USB
+J-Link script:                 none
+J-Link settings file:          D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p17-key-method-20261104-01\gdb-key-02\settings.jlink
+------Target related settings------
+Target device:                 CORTEX-M4
+Target device parameters:      none
+Target interface:              SWD
+Target interface speed:        1000kHz
+Target endian:                 little
+
+Connecting to J-Link...
+J-Link is connected.
+Firmware: J-Link ARM-OB STM32 compiled Aug 22 2012 19:52:04
+Hardware: V7.00
+Feature(s): RDI,FlashDL,FlashBP,JFlash,GDB
+Checking target voltage...
+Target voltage: 3.30 V
+Listening on TCP/IP port 25341
+Connecting to target...
+Connected to target
+Waiting for GDB connection...Connected to 127.0.0.1
+GDB client (conn. 844) requested target.xml from GDB Server
+Reading common registers: ...Target halted (PC = 0x0802A59C)
+Read register 'r0' (4 bytes) from hardware: 0xBC1F0608
+Read register 'r1' (4 bytes) from hardware: 0x2E000000
+Read register 'r2' (4 bytes) from hardware: 0x2E000000
+Read register 'r3' (4 bytes) from hardware: 0x00000000
+Read register 'r4' (4 bytes) from hardware: 0x00000000
+Read register 'r5' (4 bytes) from hardware: 0x407C0520
+Read register 'r6' (4 bytes) from hardware: 0xD81F0608
+Read register 'r7' (4 bytes) from hardware: 0x00000000
+Read register 'r8' (4 bytes) from hardware: 0xBC1F0608
+Read register 'r9' (4 bytes) from hardware: 0x00000000
+Read register 'r10' (4 bytes) from hardware: 0x00000000
+Read register 'r11' (4 bytes) from hardware: 0x6C0F0320
+Read register 'r12' (4 bytes) from hardware: 0xED690208
+Read register 'sp' (4 bytes) from hardware: 0xA07B0520
+Read register 'lr' (4 bytes) from hardware: 0xB9A60208
+Read register 'pc' (4 bytes) from hardware: 0x9CA50208
+Read register 'xpsr' (4 bytes) from hardware: 0x00000021
+Read 4 bytes @ address 0x0802A59C (Data = 0x460CB5F0)
+Read 2 bytes @ address 0x0802A59C (Data = 0xB5F0)
+Received monitor command: exec DisableAutoUpdateFW
+Executed DisableAutoUpdateFW
+Received monitor command: exec SetRestartOnClose = 0
+Executed SetRestartOnClose = 0
+Received monitor command: flash breakpoints = 0
+Flash breakpoints disabled
+Reading register 'msp' = 0x20057BA0
+Reading register 'psp' = 0x00000000
+Read 4 bytes @ address 0xE0042008 (Data = 0x00000000)
+Downloading 4 bytes @ address 0xE0042008
+Reading common registers: Read register 'r0' (4 bytes) from hardware: 0xBC1F0608
+Read register 'r1' (4 bytes) from hardware: 0x2E000000
+Read register 'r2' (4 bytes) from hardware: 0x2E000000
+Read register 'r3' (4 bytes) from hardware: 0x00000000
+Read register 'r4' (4 bytes) from hardware: 0x00000000
+Read register 'r5' (4 bytes) from hardware: 0x407C0520
+Read register 'r6' (4 bytes) from hardware: 0xD81F0608
+Read register 'r7' (4 bytes) from hardware: 0x00000000
+Read register 'r8' (4 bytes) from hardware: 0xBC1F0608
+Read register 'r9' (4 bytes) from hardware: 0x00000000
+Read register 'r10' (4 bytes) from hardware: 0x00000000
+Read register 'r11' (4 bytes) from hardware: 0x6C0F0320
+Read register 'r12' (4 bytes) from hardware: 0xED690208
+Read register 'sp' (4 bytes) from hardware: 0xA07B0520
+Read register 'lr' (4 bytes) from hardware: 0xB9A60208
+Read register 'pc' (4 bytes) from hardware: 0x9CA50208
+Read register 'xpsr' (4 bytes) from hardware: 0x00000021
+Read 4 bytes @ address 0x0802A59C (Data = 0x460CB5F0)
+Read 2 bytes @ address 0x0802A59C (Data = 0xB5F0)
+Reading register 'msp' = 0x20057BA0
+Reading register 'psp' = 0x00000000
+Received monitor command: halt
+Halting target CPU...
+...Target halted (PC = 0x0802A59C)
+Read 2 bytes @ address 0x080410C8 (Data = 0xB508)
+Setting breakpoint @ address 0x080410C8, Kind = 2, Type = THUMB, BPHandle = 0x0001
+Starting target CPU...
+...Breakpoint (set by 'GDB') reached @ address 0x080410C8
+Reading common registers: Read register 'r0' (4 bytes) from hardware: 0x60350520
+Read register 'r1' (4 bytes) from hardware: 0x00000000
+Read register 'r2' (4 bytes) from hardware: 0x01000000
+Read register 'r3' (4 bytes) from hardware: 0x01000000
+Read register 'r4' (4 bytes) from hardware: 0x54350520
+Read register 'r5' (4 bytes) from hardware: 0x5C350520
+Read register 'r6' (4 bytes) from hardware: 0x5E350520
+Read register 'r7' (4 bytes) from hardware: 0x5D350520
+Read register 'r8' (4 bytes) from hardware: 0xAE253700
+Read register 'r9' (4 bytes) from hardware: 0x60350520
+Read register 'r10' (4 bytes) from hardware: 0x04000000
+Read register 'r11' (4 bytes) from hardware: 0x50350520
+Read register 'r12' (4 bytes) from hardware: 0x000000FA
+Read register 'sp' (4 bytes) from hardware: 0xD07F0520
+Read register 'lr' (4 bytes) from hardware: 0xD54A0408
+Read register 'pc' (4 bytes) from hardware: 0xC8100408
+Read register 'xpsr' (4 bytes) from hardware: 0x00000021
+Removing breakpoint @ address 0x080410C8, Size = 2
+Read 4 bytes @ address 0x080410C8 (Data = 0xF004B508)
+Read 2 bytes @ address 0x080410C8 (Data = 0xB508)
+Read 4 bytes @ address 0x08010400 (Data = 0x57465445)
+Read 4 bytes @ address 0x08010404 (Data = 0x00000001)
+Read 4 bytes @ address 0x08010408 (Data = 0x00007669)
+Read 4 bytes @ address 0x0801040C (Data = 0x2E332E33)
+Read 4 bytes @ address 0x08010410 (Data = 0x00003331)
+Read 4 bytes @ address 0x08010414 (Data = 0x00000000)
+Read 4 bytes @ address 0x08010418 (Data = 0x00000000)
+Read 4 bytes @ address 0x0801041C (Data = 0x6ADF9926)
+Read 4 bytes @ address 0x08010420 (Data = 0x00000001)
+Read 4 bytes @ address 0x08010424 (Data = 0x00095ECC)
+Read 4 bytes @ address 0x08010428 (Data = 0x8D873440)
+Read 4 bytes @ address 0x0801042C (Data = 0xEA654923)
+Read 4 bytes @ address 0x08010430 (Data = 0x8FFE78BA)
+Read 4 bytes @ address 0x08010434 (Data = 0xD706C17E)
+Read 4 bytes @ address 0x08010438 (Data = 0xC8FD6B77)
+Read 4 bytes @ address 0x0801043C (Data = 0x341E3F8D)
+Read 4 bytes @ address 0x08010440 (Data = 0xC9533EDC)
+Read 4 bytes @ address 0x08010444 (Data = 0x93AC5EE7)
+Read 4 bytes @ address 0x08010448 (Data = 0xFFFF0101)
+Read 4 bytes @ address 0x0801044C (Data = 0xFFFFFFFF)
+Read 4 bytes @ address 0x08010450 (Data = 0xFFFFFFFF)
+Read 4 bytes @ address 0x08010454 (Data = 0xFFFFFFFF)
+Read 4 bytes @ address 0x08010458 (Data = 0xFFFFFFFF)
+Read 4 bytes @ address 0x0801045C (Data = 0x38436B1A)
+Read 1 bytes @ address 0x200528A0 (Data = 0x01)
+Read 1 bytes @ address 0x20053590 (Data = 0x00)
+Read 1 bytes @ address 0x2005355E (Data = 0x01)
+Read 1 bytes @ address 0x2005355C (Data = 0x04)
+Read 4 bytes @ address 0x4002C434 (Data = 0x00000000)
+Reading register 'msp' = 0x20057FD0
+Reading register 'psp' = 0x00000000
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x0000C6DE)
+Received monitor command: sleep 50
+Sleep 50ms
+Read 4 bytes @ address 0x40020010 (Data = 0x000046DE)
+Read 4 bytes @ address 0x40020010 (Data = 0x000046DE)
+Received monitor command: reset
+Resetting target
+Downloading 4 bytes @ address 0xE0042008
+Reading common registers: Read register 'r0' (4 bytes) from hardware: 0x00000000
+Read register 'r1' (4 bytes) from hardware: 0x00000000
+Read register 'r2' (4 bytes) from hardware: 0x00000000
+Read register 'r3' (4 bytes) from hardware: 0x00000000
+Read register 'r4' (4 bytes) from hardware: 0x00000000
+Read register 'r5' (4 bytes) from hardware: 0x00000000
+Read register 'r6' (4 bytes) from hardware: 0x00000000
+Read register 'r7' (4 bytes) from hardware: 0x00000000
+Read register 'r8' (4 bytes) from hardware: 0x00000000
+Read register 'r9' (4 bytes) from hardware: 0x00000000
+Read register 'r10' (4 bytes) from hardware: 0x00000000
+Read register 'r11' (4 bytes) from hardware: 0x00000000
+Read register 'r12' (4 bytes) from hardware: 0x00000000
+Read register 'sp' (4 bytes) from hardware: 0x00800520
+Read register 'lr' (4 bytes) from hardware: 0xFFFFFFFF
+Read register 'pc' (4 bytes) from hardware: 0xCC280008
+Read register 'xpsr' (4 bytes) from hardware: 0x00000001
+Read 4 bytes @ address 0x080028CC (Data = 0x4685480D)
+Read 2 bytes @ address 0x080028CC (Data = 0x480D)
+Reading register 'msp' = 0x20058000
+Reading register 'psp' = 0x00000000
+Read 2 bytes @ address 0x080019AA (Data = 0xB108)
+Setting breakpoint @ address 0x080019AA, Kind = 2, Type = THUMB, BPHandle = 0x0002
+Starting target CPU...
+...Breakpoint (set by 'GDB') reached @ address 0x080019AA
+Reading common registers: Read register 'r0' (4 bytes) from hardware: 0x00000000
+Read register 'r1' (4 bytes) from hardware: 0x0A000000
+Read register 'r2' (4 bytes) from hardware: 0x00510000
+Read register 'r3' (4 bytes) from hardware: 0x08000000
+Read register 'r4' (4 bytes) from hardware: 0x10100020
+Read register 'r5' (4 bytes) from hardware: 0x18100020
+Read register 'r6' (4 bytes) from hardware: 0x08100020
+Read register 'r7' (4 bytes) from hardware: 0x0C100020
+Read register 'r8' (4 bytes) from hardware: 0x14100020
+Read register 'r9' (4 bytes) from hardware: 0x1C100020
+Read register 'r10' (4 bytes) from hardware: 0x20100020
+Read register 'r11' (4 bytes) from hardware: 0x04100020
+Read register 'r12' (4 bytes) from hardware: 0x00110000
+Read register 'sp' (4 bytes) from hardware: 0x207F0520
+Read register 'lr' (4 bytes) from hardware: 0x23200008
+Read register 'pc' (4 bytes) from hardware: 0xAA190008
+Read register 'xpsr' (4 bytes) from hardware: 0x00000001
+Removing breakpoint @ address 0x080019AA, Size = 2
+Read 4 bytes @ address 0x080019AA (Data = 0xF000B108)
+Read 2 bytes @ address 0x080019AA (Data = 0xB108)
+Read 4 bytes @ address 0xE000ED08 (Data = 0x08000000)
+Read 4 bytes @ address 0x20000000 (Data = 0x112A8800)
+Read 4 bytes @ address 0xE000E014 (Data = 0x000464FF)
+Read 4 bytes @ address 0x40020C14 (Data = 0x00000004)
+GDB closed TCP/IP connection (Socket 844)

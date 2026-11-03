@@ -1,0 +1,7 @@
+{
+  "outcome": "GDB_GENERIC_CONNECTION_QUALIFIED",
+  "keyCalls": 0,
+  "resetCommands": 0,
+  "flashCommands": 0,
+  "portsClosed": true
+}

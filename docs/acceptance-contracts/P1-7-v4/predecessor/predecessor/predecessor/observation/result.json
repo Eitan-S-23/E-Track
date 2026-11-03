@@ -1,0 +1,12 @@
+{
+  "outcome": "HARNESS_FAIL",
+  "author": "independent reviewer, not a successful runner return",
+  "reason": "Committed parser recognizes Go/ReadMemEx but native Commander emitted GoEx/ReadMemU32_64.",
+  "next": "Extend offline parsing and evaluate these unchanged originals; no physical replay.",
+  "originalExitCode": 1,
+  "resetCount": 1,
+  "flashCount": 0,
+  "otaCount": 0,
+  "poststate": "native/0005-after/result.json",
+  "deviceOwnerReleased": true
+}

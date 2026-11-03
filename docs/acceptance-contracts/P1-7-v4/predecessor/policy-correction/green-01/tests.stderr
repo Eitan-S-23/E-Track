@@ -1,0 +1,15 @@
+...E....
+======================================================================
+ERROR: test_failed_predecessor_and_corrected_successor_end_to_end (__main__.UnexpectedExitTests.test_failed_predecessor_and_corrected_successor_end_to_end)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\github\my\E-Track\.cache\p35-integration-20261028\source\tests\ota\test_acceptance_bundle.py", line 456, in test_failed_predecessor_and_corrected_successor_end_to_end
+    plan = VALIDATOR.compute_rerun_plan(current[2], previous[2], previous[3], repo_root=repo)
+  File "D:\github\my\E-Track\.cache\p35-integration-20261028\source\Tools\acceptance\validate_bundle.py", line 1540, in compute_rerun_plan
+    raise ValueError("invalid contract lineage: " + "; ".join(lineage_errors))
+ValueError: invalid contract lineage: contract.parent_contract_sha256 does not bind the previous contract file
+
+----------------------------------------------------------------------
+Ran 8 tests in 11.078s
+
+FAILED (errors=1)

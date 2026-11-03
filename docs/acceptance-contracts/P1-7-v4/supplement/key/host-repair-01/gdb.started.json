@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\bin\\arm-none-eabi-gdb.exe",
+    "-nx",
+    "-nh",
+    "--batch",
+    "-ex",
+    "source D:/github/my/E-Track/.cache/p35-integration-20261028/source/.cache/p17-key-method-20261104-01/gdb-definitions-04.gdb",
+    "-ex",
+    "help p17-key-test"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source",
+  "monotonic_ns": 924278701384700,
+  "stdin_sha256": null
+}

@@ -1,0 +1,17 @@
+[
+  {
+    "stage": "hold",
+    "monoNs": 924577964115500,
+    "delivered": true
+  },
+  {
+    "stage": "release",
+    "monoNs": 924593146482100,
+    "delivered": true
+  },
+  {
+    "stage": "short",
+    "monoNs": 924597290314800,
+    "delivered": true
+  }
+]
