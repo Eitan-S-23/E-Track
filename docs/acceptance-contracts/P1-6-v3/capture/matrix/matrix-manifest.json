@@ -1,0 +1,103 @@
+{
+    "checkout":  "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source",
+    "build_directory":  "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p16g-20261104-01\\fixtures\\build",
+    "asset_directory":  "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p16g-20261104-01\\fixtures",
+    "control_address":  "0x20057E00",
+    "control_size":  512,
+    "automatic":  [
+                      "01",
+                      "02",
+                      "04",
+                      "06",
+                      "08",
+                      "09",
+                      "10",
+                      "11",
+                      "12",
+                      "13",
+                      "14",
+                      "18",
+                      "19",
+                      "20"
+                  ],
+    "physical_pending":  [
+                             "03",
+                             "05",
+                             "07",
+                             "15",
+                             "16",
+                             "17"
+                         ],
+    "block_size":  4096,
+    "block_count":  195,
+    "probe_serial":  123456,
+    "input_binding":  {
+                          "v0":  30314,
+                          "v1":  30315,
+                          "bytes":  794761,
+                          "blocks":  195,
+                          "control":  537230848,
+                          "vtor":  134285312,
+                          "safeHalt":  134484168,
+                          "changedBlock":  160,
+                          "applyResume":  176,
+                          "rollbackResume":  161,
+                          "applyGroup":  16,
+                          "images":  [
+                                         {
+                                             "length":  794761,
+                                             "version_code":  30314,
+                                             "raw_sha256":  "9bb2bcd28693fc172a0f2bf2ed23465615c12f0af58bc30e1c6ac181d695a4fc",
+                                             "double_zero_sha256":  "4d69b9dacc38d0bcb64d11fb838988571ee625250c0c831efc65636d33f53d21",
+                                             "header_crc32":  "e37a2857"
+                                         },
+                                         {
+                                             "length":  794761,
+                                             "version_code":  30315,
+                                             "raw_sha256":  "a3026758d9fc136392251986e21c2658c9e2d94a885d5a1f526cf1f8eefaa038",
+                                             "double_zero_sha256":  "70432419107d6fbf47eaea54590b2cecfb5df44a6979b0cb78c6f446f94065d1",
+                                             "header_crc32":  "252aee75"
+                                         }
+                                     ],
+                          "maps":  [
+                                       {
+                                           "path":  ".cache\\p16g-20261104-01\\fixtures\\build\\boot\\X-Track-Boot.map",
+                                           "bytes":  114976,
+                                           "sha256":  "59a7606751e314245904fb7355863a4f5fe336849b71509d906d7ef22fd04487"
+                                       },
+                                       {
+                                           "path":  ".cache\\p16g-20261104-01\\fixtures\\build\\app-gcc\\X-Track-App-GCC.map",
+                                           "bytes":  2649390,
+                                           "sha256":  "f55fdad3d1b2105d4300fd2dfbc599c540617edee8ad72dfe320a87bca39706a"
+                                       }
+                                   ]
+                      },
+    "candidate":  {
+                      "version_code":  30315,
+                      "length":  794761,
+                      "raw_sha256":  "a3026758d9fc136392251986e21c2658c9e2d94a885d5a1f526cf1f8eefaa038",
+                      "double_zero_sha256":  "70432419107d6fbf47eaea54590b2cecfb5df44a6979b0cb78c6f446f94065d1",
+                      "header_crc32":  "252aee75"
+                  },
+    "backup":  {
+                   "version_code":  30314,
+                   "length":  794761,
+                   "raw_sha256":  "9bb2bcd28693fc172a0f2bf2ed23465615c12f0af58bc30e1c6ac181d695a4fc",
+                   "double_zero_sha256":  "4d69b9dacc38d0bcb64d11fb838988571ee625250c0c831efc65636d33f53d21",
+                   "header_crc32":  "e37a2857"
+               },
+    "recovery":  {
+                     "version_code":  30314,
+                     "length":  794761,
+                     "raw_sha256":  "9bb2bcd28693fc172a0f2bf2ed23465615c12f0af58bc30e1c6ac181d695a4fc",
+                     "double_zero_sha256":  "4d69b9dacc38d0bcb64d11fb838988571ee625250c0c831efc65636d33f53d21",
+                     "header_crc32":  "e37a2857"
+                 },
+    "baseline_evidence":  {
+                              "candidate":  "baseline-candidate-app-bcb-snapshot.json",
+                              "backup":  "baseline-backup-slot-snapshot.json",
+                              "recovery":  "baseline-recovery-slot-snapshot.json",
+                              "s0":  "s0-stage.json",
+                              "internal_raw":  "s0-internal-v0.json"
+                          }
+}

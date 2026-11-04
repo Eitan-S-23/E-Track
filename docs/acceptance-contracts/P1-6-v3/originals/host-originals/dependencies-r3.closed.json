@@ -1,0 +1,46 @@
+{
+  "argv": [
+    "D:/install/mingw64/bin/gcc.exe",
+    "-std=c99",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-DP34_BOOT_SKIP_IDENTICAL_BLOCKS=1",
+    "-ID:\\github\\my\\E-Track\\boot\\include",
+    "-ID:\\github\\my\\E-Track\\Libraries",
+    "-ID:\\github\\my\\E-Track\\Tools\\ota",
+    "-ID:\\github\\my\\E-Track\\.cache\\p34-boot-checkpoint",
+    "-DP34_BOOT_APPLY_CHECKPOINT_BLOCKS=16",
+    "-include",
+    "D:\\github\\my\\E-Track\\tests\\boot\\p34_checkpoint_hook.h",
+    "D:\\github\\my\\E-Track\\tests\\boot\\test_p34_boot_checkpoint.c",
+    "D:\\github\\my\\E-Track\\.cache\\p34-boot-checkpoint\\boot_state_machine.c",
+    "D:\\github\\my\\E-Track\\boot\\src\\boot_fw_header.c",
+    "D:\\github\\my\\E-Track\\boot\\src\\boot_slot.c",
+    "D:\\github\\my\\E-Track\\boot\\src\\boot_crc32.c",
+    "D:\\github\\my\\E-Track\\boot\\src\\boot_sha256.c",
+    "D:\\github\\my\\E-Track\\Libraries\\EEPROM\\eeprom_bcb.c",
+    "-MM"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 944739785572200,
+  "ended_monotonic_ns": 944741599894600,
+  "stdout": {
+    "path": ".cache\\p16g-20261104-01\\host-originals\\dependencies-r3.stdout",
+    "bytes": 2999,
+    "sha256": "fac4936f4e7890acaed11f4f170ba161641b770b65db31ca0f4465931cd6aebb"
+  },
+  "stderr": {
+    "path": ".cache\\p16g-20261104-01\\host-originals\\dependencies-r3.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

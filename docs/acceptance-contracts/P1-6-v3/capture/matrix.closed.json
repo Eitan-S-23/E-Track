@@ -1,0 +1,40 @@
+{
+  "argv": [
+    "powershell.exe",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "Tools/jlink/test-p1-6-matrix.ps1",
+    "-BuildDirectory",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p16g-20261104-01\\fixtures\\build",
+    "-AssetDirectory",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p16g-20261104-01\\fixtures",
+    "-RunDirectory",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p16g-20261104-01\\campaign-03\\matrix",
+    "-ProbeSerial",
+    "123456",
+    "-ExecuteBoard",
+    "-AssumeS0"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 945215440052500,
+  "ended_monotonic_ns": 951844122674100,
+  "stdout": {
+    "path": ".cache\\p16g-20261104-01\\campaign-03\\matrix.stdout",
+    "bytes": 1668,
+    "sha256": "8a179fb8a9029241bd26e2aede43817aa4e7899732b10ce7d4841671a894731f"
+  },
+  "stderr": {
+    "path": ".cache\\p16g-20261104-01\\campaign-03\\matrix.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

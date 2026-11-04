@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "tasklist",
+    "/FO",
+    "CSV",
+    "/NH"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source",
+  "monotonic_ns": 944228156859200,
+  "stdin_sha256": null
+}

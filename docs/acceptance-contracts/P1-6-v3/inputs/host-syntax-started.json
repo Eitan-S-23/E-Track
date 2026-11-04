@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "powershell.exe",
+    "-NoProfile",
+    "-Command",
+    "$ErrorActionPreference='Stop'; foreach ($p in @('Tools/jlink/p1-6-common.ps1','Tools/jlink/p1-6-setup.ps1','Tools/jlink/test-p1-6-matrix.ps1','tests/boot/test_p1_6_setup.ps1')) { $e=$null; $t=$null; [System.Management.Automation.Language.Parser]::ParseFile((Join-Path (Get-Location) $p),[ref]$t,[ref]$e) | Out-Null; if($e.Count) {throw ($e | Out-String)} }; 'SYNTAX_PASS'"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source",
+  "monotonic_ns": 941826274622800,
+  "stdin_sha256": null
+}

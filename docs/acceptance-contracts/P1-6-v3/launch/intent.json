@@ -1,0 +1,12 @@
+{
+  "command": "python -I -S -B -X utf8 -u Tools/acceptance/p16_execute.py --plan .cache/p16g-20261104-01/restore-inputs/plan.json --out .cache/p16g-20261104-01/campaign-03 --contract docs/acceptance-contracts/P1-6-v3.contract.json --matrix docs/acceptance-contracts/P1-6-v3/initial-matrix.json",
+  "contract": {
+    "path": "docs\\acceptance-contracts\\P1-6-v3.contract.json",
+    "bytes": 77745,
+    "sha256": "291cc3cbe98c07f2ed3492613c0da92ed9f1ed981aa61fadb769bb73cf62a9f6"
+  },
+  "precheckInside": true,
+  "autoRows": 14,
+  "physicalRows": 0,
+  "noBlindRetry": true
+}

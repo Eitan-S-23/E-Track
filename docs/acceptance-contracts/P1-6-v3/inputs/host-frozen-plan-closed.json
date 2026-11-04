@@ -1,0 +1,31 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "tests/boot/test_p1_6_matrix.py"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 942239469126000,
+  "ended_monotonic_ns": 942242416881200,
+  "stdout": {
+    "path": ".cache\\p16g-20261104-01\\host-final\\frozen-plan.stdout",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": ".cache\\p16g-20261104-01\\host-final\\frozen-plan.stderr",
+    "bytes": 2188,
+    "sha256": "0d93a91507bec940e97dade2de1fa7d7a38a9dc99e61259785ccccd0ea7392b7"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

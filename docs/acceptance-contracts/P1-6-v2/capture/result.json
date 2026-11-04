@@ -1,0 +1,22 @@
+{
+  "error": "standard tool failed; inspect original command streams",
+  "actions": [
+    {
+      "name": "current-identity",
+      "status": "started",
+      "monotonicNs": 943316619474600
+    },
+    {
+      "name": "current-backup-equality",
+      "status": "started",
+      "monotonicNs": 943342640472300
+    },
+    {
+      "name": "seed",
+      "status": "started",
+      "monotonicNs": 943457647860100
+    }
+  ],
+  "disposition": "STOP_AND_RECONCILE_CURRENT_STATE_NO_BLIND_RETRY",
+  "lockRetained": true
+}

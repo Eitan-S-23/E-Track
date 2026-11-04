@@ -1,0 +1,45 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLink.exe",
+    "-USB",
+    "123456",
+    "-Device",
+    "AT32F435RGT7",
+    "-If",
+    "SWD",
+    "-Speed",
+    "1000",
+    "-AutoConnect",
+    "0",
+    "-ExitOnError",
+    "1",
+    "-NoGui",
+    "1",
+    "-Log",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p16g-20261104-01\\campaign-03\\matrix\\row-19\\setup-test-boot-t3-pre-invalidate.native\\segger.log",
+    "-SettingsFile",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p16g-20261104-01\\campaign-03\\matrix\\row-19\\setup-test-boot-t3-pre-invalidate.native\\settings.jlink",
+    "-CommandFile",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p16g-20261104-01\\campaign-03\\matrix\\row-19\\setup-test-boot-t3-pre-invalidate.jlink"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 951137090199100,
+  "ended_monotonic_ns": 951137581293500,
+  "stdout": {
+    "path": ".cache\\p16g-20261104-01\\campaign-03\\matrix\\row-19\\setup-test-boot-t3-pre-invalidate.native\\commander.stdout",
+    "bytes": 3477,
+    "sha256": "b02fbcaf30c3ae891b1a644ef6a245c90dea47521c9112f0d4ca63ee38fc9ea8"
+  },
+  "stderr": {
+    "path": ".cache\\p16g-20261104-01\\campaign-03\\matrix\\row-19\\setup-test-boot-t3-pre-invalidate.native\\commander.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

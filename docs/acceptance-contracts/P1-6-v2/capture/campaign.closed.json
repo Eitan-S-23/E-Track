@@ -1,0 +1,40 @@
+{
+  "argv": [
+    "python",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "-u",
+    "Tools/acceptance/p16_execute.py",
+    "--plan",
+    ".cache/p16g-20261104-01/restore-inputs/plan.json",
+    "--out",
+    ".cache/p16g-20261104-01/campaign-02",
+    "--contract",
+    "docs/acceptance-contracts/P1-6-v2.contract.json",
+    "--matrix",
+    "docs/acceptance-contracts/P1-6-v2/initial-matrix.json"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 1,
+  "exit_status": "exited",
+  "started_monotonic_ns": 943311325237600,
+  "ended_monotonic_ns": 943766427225400,
+  "stdout": {
+    "path": ".cache\\p16g-20261104-01\\launch-02\\campaign.stdout",
+    "bytes": 183,
+    "sha256": "e96470ece3325933446892061ec42a6ff5b73f770f0c5702d476fb367f1e64ce"
+  },
+  "stderr": {
+    "path": ".cache\\p16g-20261104-01\\launch-02\\campaign.stderr",
+    "bytes": 2188,
+    "sha256": "fc9760001c87043d42d89673f0a4e2d7e29cc51d8dc72842af9a2cb64381d172"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

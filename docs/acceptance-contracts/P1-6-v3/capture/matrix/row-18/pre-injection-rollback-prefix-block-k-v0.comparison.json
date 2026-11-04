@@ -1,0 +1,7 @@
+{
+    "block":  160,
+    "address":  "0x080B0000",
+    "expected":  "V0",
+    "captured_sha256":  "f600eca824e84a43f0691b267bd620e462c50da165c5b80e17aecb7a924f1fa8",
+    "expected_sha256":  "f600eca824e84a43f0691b267bd620e462c50da165c5b80e17aecb7a924f1fa8"
+}

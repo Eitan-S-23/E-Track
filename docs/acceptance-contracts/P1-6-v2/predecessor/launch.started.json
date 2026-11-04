@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "python",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "-u",
+    "Tools/acceptance/p16_execute.py",
+    "--plan",
+    ".cache/p16g-20261104-01/restore-inputs/plan.json",
+    "--out",
+    ".cache/p16g-20261104-01/campaign-01",
+    "--contract",
+    "docs/acceptance-contracts/P1-6-v1.contract.json",
+    "--matrix",
+    "docs/acceptance-contracts/P1-6-v1/initial-matrix.json"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source",
+  "monotonic_ns": 942842778581900,
+  "stdin_sha256": null
+}

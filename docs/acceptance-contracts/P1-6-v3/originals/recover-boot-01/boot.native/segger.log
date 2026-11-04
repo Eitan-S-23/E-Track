@@ -1,0 +1,351 @@
+T582C 000:009.018   SEGGER J-Link V8.18 Log File
+T582C 000:010.041   DLL Compiled: Mar  5 2025 14:42:43
+T582C 000:010.077   Logging started @ 2026-11-03 23:16
+T582C 000:010.109   Process: C:\Users\SU\SEGGER\JLink_V818\JLink.exe
+T582C 000:010.645 - 10.141ms 
+T582C 000:011.700 JLINK_ExecCommand("DisableAutoUpdateFW", ...). 
+T582C 000:011.763 - 0.259ms returns 0x00
+T582C 000:011.943 JLINK_EMU_SelectByUSBSN(SerialNo = 123456)
+T582C 000:020.385 - 8.551ms returns 0x00
+T582C 000:020.500 JLINK_SetWarnOutHandler(...)
+T582C 000:020.540 - 0.042ms 
+T582C 000:020.576 JLINK_ExecCommand("SuppressGUI = 1", ...). 
+T582C 000:020.610 - 0.033ms returns 0x00
+T582C 000:020.647 JLINK_OpenEx(...)
+T582C 000:032.938   Firmware: J-Link ARM-OB STM32 compiled Aug 22 2012 19:52:04
+T582C 000:036.005   Hardware: V7.00
+T582C 000:036.048   S/N: 4294967295
+T582C 000:036.070   OEM: SEGGER
+T582C 000:036.092   Feature(s): RDI,FlashDL,FlashBP,JFlash,GDB
+T582C 000:036.907   Bootloader: (FW returned invalid version)
+T582C 000:037.950   TELNET listener socket opened on port 19021
+T582C 000:038.712 - 17.883ms returns "O.K."
+T582C 000:038.765 JLINK_SetFlashProgProgressCallback(...)
+T582C 000:038.782 - 0.019ms 
+T582C 000:038.800 JLINK_GetFirmwareString(...)
+T582C 000:038.815 - 0.015ms 
+T582C 000:038.833 JLINK_GetHardwareVersion()
+T582C 000:038.848 - 0.014ms returns 70000
+T582C 000:038.872 JLINK_GetHWInfo(...)
+T582C 000:039.048 - 0.177ms returns 0
+T582C 000:039.078 JLINK_GetSN()
+T582C 000:039.094 - 0.016ms returns -1
+T582C 000:039.113 JLINK_GetOEMString(...)
+T582C 000:039.131 JLINK_EMU_GetCurrConnectionInfo()
+T582C 000:039.146 - 0.017ms returns 0
+T582C 000:039.165 JLINK_EMU_HasCapEx(0x00000026)
+T582C 000:039.183 - 0.018ms returns 0
+T582C 000:039.200 JLINK_GetEmuCaps()
+T582C 000:039.215 - 0.014ms returns 0x88EA5833
+T582C 000:039.230 JLINK_GetEmuCaps()
+T582C 000:039.245 - 0.014ms returns 0x88EA5833
+T582C 000:039.260 JLINK_GetHWStatus(...)
+T582C 000:039.395 - 0.134ms returns 0
+T582C 000:039.415 JLINK_EMU_HasCapEx(0x00000044)
+T582C 000:039.430 - 0.014ms returns 0
+T582C 000:039.448 JLINK_ExecCommand("ProjectFile = D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p16g-20261104-01\recover-boot-01\boot.native\settings.jlink", ...). 
+T582C 000:139.998 - 100.549ms returns 0x00
+T582C 000:140.041 JLINK_ExecCommand("SetRestartOnClose = 0", ...). 
+T582C 000:140.070 - 0.010ms returns 0x01
+T582C 000:140.197 JLINK_ExecCommand("InhibitConnectRetries = 1", ...). 
+T582C 000:140.237 - 0.005ms returns 0x00
+T582C 000:140.262 JLINK_ExecCommand("SetEnableMemCache = 0", ...). 
+T582C 000:140.277 - 0.001ms returns 0x01
+T582C 000:140.293 JLINK_ExecCommand("ProjectFile = D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p16g-20261104-01\recover-boot-01\boot.native\settings.jlink", ...). 
+T582C 000:142.098 - 1.803ms returns 0x00
+T582C 000:142.130 JLINK_DEVICE_GetIndex(sDeviceName = AT32F435RGT7)
+T582C 000:142.158 - 0.028ms returns 443
+T582C 000:142.187 JLINK_ExecCommand("device=AT32F435RGT7", ...). 
+T582C 000:143.689   Flash bank @ 0x08000000: SFL: Parsing sectorization info from ELF file
+T582C 000:143.737     FlashDevice.SectorInfo[0]: .SectorSize = 0x00001000, .SectorStartAddr = 0x08000000
+T582C 000:143.759   FlashBank @0x08000000: Sectorization info from SFL ELF file ignored because sectorization override from DLL / XML file is active.
+T582C 000:144.591   Flash bank @ 0x1FFFC000: SFL: Parsing sectorization info from ELF file
+T582C 000:144.640     FlashDevice.SectorInfo[0]: .SectorSize = 0x00001000, .SectorStartAddr = 0x00000000
+T582C 000:144.662   FlashBank @0x1FFFC000: Sectorization info from SFL ELF file ignored because sectorization override from DLL / XML file is active.
+T582C 000:144.750   Flash bank @ 0x90000000: SFL: Parsing sectorization info from ELF file
+T582C 000:144.774     FlashDevice.SectorInfo[0]: .SectorSize = 0x00010000, .SectorStartAddr = 0x00000000
+T582C 000:146.138   Device "AT32F435RGT7" selected.
+T582C 000:146.914 - 4.711ms returns 0x00
+T582C 000:146.940 JLINK_EnableLog(...)
+T582C 000:146.989 - 0.048ms 
+T582C 000:147.023 JLINK_GetEmuCaps()
+T582C 000:147.037 - 0.013ms returns 0x88EA5833
+T582C 000:147.051 JLINK_TIF_GetAvailable(...)
+T582C 000:147.334 - 0.282ms 
+T582C 000:147.605 JLINK_TIF_Select(JLINKARM_TIF_SWD)
+T582C 000:148.191 - 0.817ms returns 0x00
+T582C 000:148.221 JLINK_IsConnected()
+T582C 000:148.236 - 0.014ms returns FALSE
+T582C 000:148.252 JLINK_SetSpeed(1000)
+T582C 000:148.389 - 0.137ms 
+T582C 000:148.429 JLINK_Connect()
+T582C 000:149.780   InitTarget() start
+T582C 000:149.813    J-Link Script File: Executing InitTarget()
+T582C 000:152.024   DAP initialized successfully.
+T582C 000:153.672     No Protection is set.
+T582C 000:153.701   InitTarget() end - Took 3.88ms
+T582C 000:154.735   Found SW-DP with ID 0x2BA01477
+T582C 000:158.918   Old FW that does not support reading DPIDR via DAP jobs
+T582C 000:162.674   DPv0 detected
+T582C 000:162.703   CoreSight SoC-400 or earlier
+T582C 000:162.726   Scanning AP map to find all available APs
+T582C 000:165.286   AP[1]: Stopped AP scan as end of AP map has been reached
+T582C 000:165.316   AP[0]: AHB-AP (IDR: 0x24770011, ADDR: 0x00000000)
+T582C 000:165.338   Iterating through AP map to find AHB-AP to use
+T582C 000:169.488   AP[0]: Core found
+T582C 000:169.516   AP[0]: AHB-AP ROM base: 0xE00FF000
+T582C 000:171.518   CPUID register: 0x410FC241. Implementer code: 0x41 (ARM)
+T582C 000:171.547   Found Cortex-M4 r0p1, Little endian.
+T582C 000:171.826   -- Max. mem block: 0x00002C18
+T582C 000:172.766   CPU_ReadMem(4 bytes @ 0xE000EDF0)
+T582C 000:173.636   CPU_ReadMem(4 bytes @ 0xE0002000)
+T582C 000:174.509   FPUnit: 6 code (BP) slots and 2 literal slots
+T582C 000:174.543   CPU_ReadMem(4 bytes @ 0xE000EDFC)
+T582C 000:175.408   CPU_ReadMem(4 bytes @ 0xE0001000)
+T582C 000:176.291   CPU_WriteMem(4 bytes @ 0xE0001000)
+T582C 000:177.287   CPU_ReadMem(4 bytes @ 0xE000ED88)
+T582C 000:178.159   CPU_WriteMem(4 bytes @ 0xE000ED88)
+T582C 000:179.090   CPU_ReadMem(4 bytes @ 0xE000ED88)
+T582C 000:179.943   CPU_WriteMem(4 bytes @ 0xE000ED88)
+T582C 000:180.839   CoreSight components:
+T582C 000:180.873   ROMTbl[0] @ E00FF000
+T582C 000:180.897   CPU_ReadMem(64 bytes @ 0xE00FF000)
+T582C 000:183.389   CPU_ReadMem(32 bytes @ 0xE000EFE0)
+T582C 000:185.004   [0][0]: E000E000 CID B105E00D PID 000BB00C SCS-M7
+T582C 000:185.038   CPU_ReadMem(32 bytes @ 0xE0001FE0)
+T582C 000:186.616   [0][1]: E0001000 CID B105E00D PID 003BB002 DWT
+T582C 000:186.652   CPU_ReadMem(32 bytes @ 0xE0002FE0)
+T582C 000:188.423   [0][2]: E0002000 CID B105E00D PID 002BB003 FPB
+T582C 000:188.478   CPU_ReadMem(32 bytes @ 0xE0000FE0)
+T582C 000:190.185   [0][3]: E0000000 CID B105E00D PID 003BB001 ITM
+T582C 000:190.240   CPU_ReadMem(32 bytes @ 0xE0040FE0)
+T582C 000:191.938   [0][4]: E0040000 CID B105900D PID 000BB9A1 TPIU
+T582C 000:191.995   CPU_ReadMem(32 bytes @ 0xE0041FE0)
+T582C 000:193.787   [0][5]: E0041000 CID 00000000 PID 00000000 ???
+T582C 000:193.873 - 45.443ms returns 0x00
+T582C 000:193.900 JLINK_GetIdData(pIdData)
+T582C 000:194.525   pIdData->ScanLen=4
+T582C 000:194.558   pIdData->NumDevices=1
+T582C 000:194.579   pIdData->aId[0]=0x2BA01477
+T582C 000:194.601   pIdData->aIrRead[0]=0
+T582C 000:194.630   pIdData->aScanLen[0]=0
+T582C 000:194.652   pIdData->aScanRead[0]=0
+T582C 000:194.674 - 0.773ms 
+T582C 000:194.695 JLINK_GetMemZones(...)
+T582C 000:194.710 - 0.015ms returns 1
+T582C 000:194.730 JLINK_HasError()
+T582C 000:194.833 JLINK_CORE_GetFound()
+T582C 000:194.859 - 0.036ms returns 0xE0000FF
+T582C 000:195.299 JLINK_ExecCommand("ExcludeFlashCacheRange 0x08000000-0x080FFFFF", ...). 
+T582C 000:195.346 - 0.003ms returns 0x00
+T582C 000:195.392 JLINK_WriteU32_64(0xE0042008, 0x00001000)
+T582C 000:196.057   CPU is running
+T582C 000:196.112   CPU_WriteMem(4 bytes @ 0xE0042008)
+T582C 000:197.151 - 1.758ms returns 0 (0x00000000)
+T582C 000:197.191 JLINK_Halt()
+T582C 000:205.271 - 8.078ms returns 0x00
+T582C 000:205.324 JLINK_GetDeviceFamily
+T582C 000:205.340 - 0.015ms returns 14
+T582C 000:205.356 JLINK_CORE_GetFound()
+T582C 000:205.371 - 0.014ms returns 0xE0000FF
+T582C 000:205.467 JLINK_GetDebugInfo(0x01 = Unknown)
+T582C 000:205.486   Value=0x00000001
+T582C 000:205.510 - 0.042ms returns 0
+T582C 000:205.547 JLINK_ReadRegs(NumRegs = 28)
+T582C 000:205.898   CPU_ReadMem(4 bytes @ 0xE0001004)
+T582C 000:206.892   
+  R0 (0)         = 0x00                 R1 (1)         = 0x00                 R2 (2)         = 0x00                 R3 (3)         = 0x00              
+  R4 (4)         = 0x00                 R5 (5)         = 0x00                 R6 (6)         = 0x00                 R7 (7)         = 0x00              
+  R8 (8)         = 0x00                 R9 (9)         = 0x400006B0           R10 (10)       = 0x00                 R11 (11)       = 0x00              
+  R12 (12)       = 0x00                 R13 (SP) (13)  = 0x20000A70           MSP (17)       = 0x20000A70           PSP (18)       = 0x00              
+  R14 (14)       = 0x20000A71           R15 (PC) (15)  = 0x2000041A           XPSR (16)      = 0x1000000            APSR (21)      = 0x00              
+  EPSR (22)      = 0x1000000            IPSR (23)      = 0x00                 CFBP (20)      = 0x00                 CONTROL (27)   = 0x00              
+  FAULTMASK (26) = 0x00                 BASEPRI (25)   = 0x00                 PRIMASK (24)   = 0x00                 CycleCnt (65)  = 0xD464A52F        
+T582C 000:206.947 - 1.399ms returns 0x00
+T582C 000:206.996 JLINK_ReadRegs(NumRegs = 33)
+T582C 000:219.672   
+  FPS0 (33)  = 0x00                 FPS1 (34)  = 0x00                 FPS2 (35)  = 0x00                 FPS3 (36)  = 0x00              
+  FPS4 (37)  = 0x00                 FPS5 (38)  = 0x00                 FPS6 (39)  = 0x00                 FPS7 (40)  = 0x00              
+  FPS8 (41)  = 0x00                 FPS9 (42)  = 0x00                 FPS10 (43) = 0x00                 FPS11 (44) = 0x00              
+  FPS12 (45) = 0x00                 FPS13 (46) = 0x00                 FPS14 (47) = 0x00                 FPS15 (48) = 0x00              
+  FPS16 (49) = 0x00                 FPS17 (50) = 0x00                 FPS18 (51) = 0x00                 FPS19 (52) = 0x00              
+  FPS20 (53) = 0x00                 FPS21 (54) = 0x00                 FPS22 (55) = 0x00                 FPS23 (56) = 0x00              
+  FPS24 (57) = 0x00                 FPS25 (58) = 0x00                 FPS26 (59) = 0x00                 FPS27 (60) = 0x00              
+  FPS28 (61) = 0x00                 FPS29 (62) = 0x00                 FPS30 (63) = 0x00                 FPS31 (64) = 0x00              
+  FPSCR (32) = 0x00              
+T582C 000:219.727 - 12.730ms returns 0x00
+T582C 000:219.794 JLINK_Reset()
+T582C 000:219.823   JLINK_GetResetTypeDesc
+T582C 000:219.839   - 0.015ms 
+T582C 000:219.856   Reset type: NORMAL (https://wiki.segger.com/J-Link_Reset_Strategies)
+T582C 000:219.881   CPU_WriteMem(4 bytes @ 0xE000EDF0)
+T582C 000:220.870   CPU_WriteMem(4 bytes @ 0xE000EDFC)
+T582C 000:221.876   Reset: Halt core after reset via DEMCR.VC_CORERESET.
+T582C 000:222.531   Reset: Reset device via AIRCR.SYSRESETREQ.
+T582C 000:222.567   CPU_WriteMem(4 bytes @ 0xE000ED0C)
+T582C 000:276.634   CPU_ReadMem(4 bytes @ 0xE000EDF0)
+T582C 000:277.559   CPU_ReadMem(4 bytes @ 0xE000EDF0)
+T582C 000:278.440   CPU_WriteMem(4 bytes @ 0xE000EDFC)
+T582C 000:284.467   CPU_ReadMem(4 bytes @ 0xE000EDF0)
+T582C 000:293.663   CPU_WriteMem(4 bytes @ 0xE0002000)
+T582C 000:294.773   CPU_ReadMem(4 bytes @ 0xE000EDFC)
+T582C 000:295.821   CPU_ReadMem(4 bytes @ 0xE0001000)
+T582C 000:296.755 - 76.960ms 
+T582C 000:296.795 JLINK_Halt()
+T582C 000:296.811 - 0.015ms returns 0x00
+T582C 000:296.894 JLINK_ExecCommand("SetVerifyRAMDownload = 1", ...). 
+T582C 000:296.939 - 0.003ms returns 0x00
+T582C 000:296.970 JLINK_DownloadFile()
+T582C 000:297.652   Data:  00 80 05 20 CD 28 00 08 1D 29 00 08 1D 29 00 08 ...
+T582C 000:297.966   completely In flash
+T582C 000:298.011   Old firmware which does not support pausing periodic actions during flash download
+T582C 000:298.045   CPU_ReadMem(4 bytes @ 0xE000ED90)
+T582C 000:299.142   CPU_ReadMem(4 bytes @ 0xE000ED94)
+T582C 000:300.429    -- --------------------------------------
+T582C 000:300.463    -- Start of determining flash info (Bank @ 0x08000000)
+T582C 000:300.486    -- End of determining flash info
+T582C 000:300.506    -- Start of determining dirty areas in flash cache
+T582C 000:300.526    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08000000 if necessary
+T582C 000:300.548    -- Start of preparing flash programming
+T582C 000:300.570    -- Preparing RAMCode
+T582C 000:300.589    -- Calculating RAM usage
+T582C 000:300.609    -- RAM usage = 6888 Bytes
+T582C 000:300.627    -- Preserving CPU registers
+T582C 000:300.663    -- Preparing memory
+T582C 000:300.683    -- Preparing target
+T582C 000:300.701    -- Preserving target RAM temporarily used for programming
+T582C 000:482.974    -- Downloading RAMCode
+T582C 000:630.439    -- Initializing RAMCode (InitType: 3 = Verify)
+T582C 000:630.495    -- Executing SEGGER_FL_Prepare(3)
+T582C 000:645.660    -- End of preparing flash programming
+T582C 000:645.751   CPU_ReadMem(2048 bytes @ 0x08000000)
+T582C 001:125.160    -- Updating flash cache (2048 bytes @ 0x08000000)
+T582C 001:125.226    -- Updating flash cache invalid range 0x08000000 - 0x080007FF (2048 bytes)
+T582C 001:125.278    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08000800 if necessary
+T582C 001:125.322    -- Start of preparing flash programming
+T582C 001:125.357    -- End of preparing flash programming
+T582C 001:125.404   CPU_ReadMem(2048 bytes @ 0x08000800)
+T582C 001:180.729    -- Updating flash cache (2048 bytes @ 0x08000800)
+T582C 001:180.840    -- Updating flash cache invalid range 0x08000800 - 0x08000FFF (2048 bytes)
+T582C 001:180.951    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08001000 if necessary
+T582C 001:181.034    -- Start of preparing flash programming
+T582C 001:181.129    -- End of preparing flash programming
+T582C 001:181.197   CPU_ReadMem(2048 bytes @ 0x08001000)
+T582C 001:236.481    -- Updating flash cache (2048 bytes @ 0x08001000)
+T582C 001:236.538    -- Updating flash cache invalid range 0x08001000 - 0x080017FF (2048 bytes)
+T582C 001:236.579    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08001800 if necessary
+T582C 001:236.613    -- Start of preparing flash programming
+T582C 001:236.643    -- End of preparing flash programming
+T582C 001:236.682   CPU_ReadMem(2048 bytes @ 0x08001800)
+T582C 001:292.116    -- Updating flash cache (2048 bytes @ 0x08001800)
+T582C 001:292.464    -- Updating flash cache invalid range 0x08001800 - 0x08001FFF (2048 bytes)
+T582C 001:292.804    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08002000 if necessary
+T582C 001:293.107    -- Start of preparing flash programming
+T582C 001:293.393    -- End of preparing flash programming
+T582C 001:293.583   CPU_ReadMem(2048 bytes @ 0x08002000)
+T582C 001:375.414    -- Updating flash cache (2048 bytes @ 0x08002000)
+T582C 001:375.537    -- Updating flash cache invalid range 0x08002000 - 0x080027FF (2048 bytes)
+T582C 001:375.644    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08002800 if necessary
+T582C 001:375.698    -- Start of preparing flash programming
+T582C 001:375.780    -- End of preparing flash programming
+T582C 001:377.643   CPU_ReadMem(2048 bytes @ 0x08002800)
+T582C 001:433.312    -- Updating flash cache (2048 bytes @ 0x08002800)
+T582C 001:433.368    -- Updating flash cache invalid range 0x08002800 - 0x08002FFF (2048 bytes)
+T582C 001:433.409    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08003000 if necessary
+T582C 001:433.443    -- Start of preparing flash programming
+T582C 001:433.473    -- End of preparing flash programming
+T582C 001:433.508   CPU_ReadMem(2048 bytes @ 0x08003000)
+T582C 001:488.699    -- Updating flash cache (2048 bytes @ 0x08003000)
+T582C 001:488.738    -- Updating flash cache invalid range 0x08003000 - 0x080037FF (2048 bytes)
+T582C 001:488.766    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08003800 if necessary
+T582C 001:488.842    -- Start of preparing flash programming
+T582C 001:488.862    -- End of preparing flash programming
+T582C 001:488.886   CPU_ReadMem(2048 bytes @ 0x08003800)
+T582C 001:544.107    -- Updating flash cache (2048 bytes @ 0x08003800)
+T582C 001:544.147    -- Updating flash cache invalid range 0x08003800 - 0x08003FFF (2048 bytes)
+T582C 001:544.176    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08004000 if necessary
+T582C 001:544.198    -- Start of preparing flash programming
+T582C 001:544.217    -- End of preparing flash programming
+T582C 001:544.241   CPU_ReadMem(2048 bytes @ 0x08004000)
+T582C 001:599.669    -- Updating flash cache (2048 bytes @ 0x08004000)
+T582C 001:599.733    -- Updating flash cache invalid range 0x08004000 - 0x080047FF (2048 bytes)
+T582C 001:599.777    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08004800 if necessary
+T582C 001:599.810    -- Start of preparing flash programming
+T582C 001:599.840    -- End of preparing flash programming
+T582C 001:599.877   CPU_ReadMem(2048 bytes @ 0x08004800)
+T582C 001:655.338    -- Updating flash cache (2048 bytes @ 0x08004800)
+T582C 001:655.400    -- Updating flash cache invalid range 0x08004800 - 0x08004FFF (2048 bytes)
+T582C 001:655.776    -- End of determining dirty areas
+T582C 001:655.820    -- CPU speed could not be measured.
+T582C 001:655.852    -- Start of comparing flash
+T582C 001:655.881    -- CRC check was estimated as fastest method
+T582C 001:655.912    -- Comparing range 0x8000000 - 0x8004FFF (10 Sectors, 20 KB), using single-block CRC calculation
+T582C 001:661.829    -- CRC does not match, checking individual sectors
+T582C 001:668.629    -- CRC does not match for sectors 0-9
+T582C 001:668.712    -- End of comparing flash
+T582C 001:668.744    -- Start of erasing sectors
+T582C 001:668.774    -- Erasing range 0x08000000 - 0x08004FFF ( 10 Sectors, 20 KB)
+T582C 002:189.282    -- End of erasing sectors
+T582C 002:189.333    -- Start of flash programming
+T582C 002:189.358    -- Programming range 0x08000000 - 0x08004FFF ( 10 Sectors, 20 KB)
+T582C 002:784.317    -- End of flash programming
+T582C 002:784.369    -- 0x8000000 - 0x8004FFF ( 10 Sectors, 20 KB)
+T582C 002:784.394    -- Start of verifying flash
+T582C 002:784.416    -- Use CRC or checksum calculation as verify method
+T582C 002:784.438    -- Checksum is not supported by this flash bank. Switched to read back method.
+T582C 002:856.935    -- End of verifying flash
+T582C 002:856.989    -- Start of restoring
+T582C 002:857.017    -- End of restoring
+T582C 002:857.044    -- Bank 0 @ 0x08000000: 1 range affected (20480 bytes)
+T582C 002:857.068    -- Total: 2.556s (Prepare: 1.355s, Compare: 0.012s, Erase: 0.520s, Program: 0.664s, Verify: 0.002s, Restore: 0.000s)
+T582C 002:857.091    -- Program speed: 29 KB/s
+T582C 002:861.319 - 2564.347ms returns 0x00
+T582C 002:861.362 JLINK_ExecCommand("SetVerifyRAMDownload = 0", ...). 
+T582C 002:861.383 - 0.002ms returns 0x01
+T582C 002:864.638 JLINK_IsHalted()
+T582C 002:865.672 - 1.032ms returns FALSE
+T582C 002:865.723 JLINK_Halt()
+T582C 002:873.930 - 8.205ms returns 0x00
+T582C 002:873.982 JLINK_ReadMemEx_64(0x08000000, 0x5000 Bytes, ...)
+T582C 002:874.006   CPU_ReadMem(20480 bytes @ 0x08000000)
+T582C 003:417.881   Data:  00 80 05 20 CD 28 00 08 1D 29 00 08 1D 29 00 08 ...
+T582C 003:417.936 - 543.954ms returns 20480 (0x5000)
+T582C 003:419.784 JLINK_ReadMemEx_64(0x08000000, 0x100000 Bytes, ...)
+T582C 003:419.824   CPU_ReadMem(1048576 bytes @ 0x08000000)
+T582C 031:225.732   Data:  00 80 05 20 CD 28 00 08 1D 29 00 08 1D 29 00 08 ...
+T582C 031:225.780 - 27805.994ms returns 1048576 (0x100000)
+T582C 031:226.804 JLINK_SetResetDelay(0)
+T582C 031:226.860 - 0.059ms 
+T582C 031:226.892 JLINK_Reset()
+T582C 031:226.934   JLINK_GetResetTypeDesc
+T582C 031:226.950   - 0.014ms 
+T582C 031:226.970   Reset type: NORMAL (https://wiki.segger.com/J-Link_Reset_Strategies)
+T582C 031:226.988   CPU_WriteMem(4 bytes @ 0xE000EDF0)
+T582C 031:227.018   CPU_WriteMem(4 bytes @ 0xE000EDFC)
+T582C 031:227.040   Reset: Halt core after reset via DEMCR.VC_CORERESET.
+T582C 031:227.718   Reset: Reset device via AIRCR.SYSRESETREQ.
+T582C 031:227.750   CPU_WriteMem(4 bytes @ 0xE000ED0C)
+T582C 031:278.966   CPU_ReadMem(4 bytes @ 0xE000EDF0)
+T582C 031:287.686   CPU_ReadMem(4 bytes @ 0xE000EDF0)
+T582C 031:288.704   CPU_ReadMem(4 bytes @ 0xE000EDF0)
+T582C 031:290.768   CPU_WriteMem(4 bytes @ 0xE000EDFC)
+T582C 031:296.156   CPU_ReadMem(4 bytes @ 0xE000EDF0)
+T582C 031:306.086   CPU_WriteMem(4 bytes @ 0xE0002000)
+T582C 031:306.160   CPU_ReadMem(4 bytes @ 0xE000EDFC)
+T582C 031:307.876   CPU_ReadMem(4 bytes @ 0xE0001000)
+T582C 031:308.774 - 81.878ms 
+T582C 031:308.852 JLINK_WriteU32_64(0xE0042008, 0x00000000)
+T582C 031:308.884   CPU_WriteMem(6888 bytes @ 0x20000000)
+T582C 031:308.912   CPU_WriteMem(4 bytes @ 0xE0042008)
+T582C 031:308.934 - 0.082ms returns 0 (0x00000000)
+T582C 031:308.954 JLINK_GoEx(MaxEmulInsts = 0, Flags = 0x01)
+T582C 031:308.980   CPU_ReadMem(4 bytes @ 0xE0001000)
+T582C 031:518.618   CPU_WriteMem(4 bytes @ 0xE0001004)
+T582C 031:520.326   Memory map 'after startup completion point' is active
+T582C 031:520.378 - 211.421ms 
+T582C 076:521.512 JLINK_IsOpen()
+T582C 076:521.576 - 0.066ms returns 0x01
+T582C 076:527.112 JLINK_Close()
+T582C 076:538.960 - 11.853ms
+T582C 076:539.232   
+T582C 076:539.248   Closed

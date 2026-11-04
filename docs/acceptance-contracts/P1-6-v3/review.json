@@ -1,0 +1,47 @@
+{
+  "task": "P1-6",
+  "timeUtc": "2026-11-04T01:53:09.270777+00:00",
+  "outcome": "AUTO_14_INDEPENDENTLY_CLOSED_PHYSICAL_6_NOT_OBSERVED",
+  "role": "Original non-implementer; actual raw control/BCB/image inspection, not a second device campaign",
+  "auto": [
+    "01",
+    "02",
+    "04",
+    "06",
+    "08",
+    "09",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "18",
+    "19",
+    "20"
+  ],
+  "physicalNotObserved": [
+    "03",
+    "05",
+    "07",
+    "15",
+    "16",
+    "17"
+  ],
+  "observations": "Every trajectory anchors to an original decoded 512-byte capture; active BCB CRC/fields and full final image bytes independently checked. Group16 K=160,A=176,R=161,N=195 and original row fault semantics inspected.",
+  "group16HostModels": "Source-normalized equality, original successful receipts/logs, current changed inventory headers excluded by actual compiler dependency output. No model replay.",
+  "restoration": {
+    "internal": "byte-exact full 1 MiB compared with original",
+    "slots": "original header and complete declared payload; unused tails are not claimed identical",
+    "bcb": "known CONFIRMED 30313 with no pending apply/rollback; raw A/B and sequence may differ",
+    "unrelated": "staging header/journal unchanged; no writes outside three test slots and BCB A/B"
+  },
+  "finalRetainedVersion": 30313,
+  "finalImageSha256": "4126d801e6bd6efd57a9f20d5a128a50cfb5a46580dc10d9a2227702247d5805",
+  "oldFailuresPreserved": true,
+  "oldP17AndP35Replayed": false,
+  "wholeP16Pass": false,
+  "productionRelease": false,
+  "sourceFilesInZip": 241,
+  "captureFiles": 7419,
+  "next": "P5-1 same-candidate preparation under OTA-DEC-018; no waiver of P5 statistics or physical gaps"
+}

@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "D:/install/mingw64/bin/gcc.exe",
+    "-std=c99",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-DP34_BOOT_SKIP_IDENTICAL_BLOCKS=1",
+    "-ID:\\github\\my\\E-Track\\boot\\include",
+    "-ID:\\github\\my\\E-Track\\Libraries",
+    "-ID:\\github\\my\\E-Track\\Tools\\ota",
+    "-ID:\\github\\my\\E-Track\\.cache\\p34-boot-checkpoint",
+    "-DP34_BOOT_APPLY_CHECKPOINT_BLOCKS=16",
+    "-include",
+    "D:\\github\\my\\E-Track\\tests\\boot\\p34_checkpoint_hook.h",
+    "D:\\github\\my\\E-Track\\tests\\boot\\test_p34_boot_checkpoint.c",
+    "D:\\github\\my\\E-Track\\.cache\\p34-boot-checkpoint\\boot_state_machine.c",
+    "D:\\github\\my\\E-Track\\boot\\src\\boot_fw_header.c",
+    "D:\\github\\my\\E-Track\\boot\\src\\boot_slot.c",
+    "D:\\github\\my\\E-Track\\boot\\src\\boot_crc32.c",
+    "D:\\github\\my\\E-Track\\boot\\src\\boot_sha256.c",
+    "D:\\github\\my\\E-Track\\Libraries\\EEPROM\\eeprom_bcb.c",
+    "-MM"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source",
+  "monotonic_ns": 944739785572200,
+  "stdin_sha256": null
+}

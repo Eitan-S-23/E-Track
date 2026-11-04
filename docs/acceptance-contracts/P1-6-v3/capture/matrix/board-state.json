@@ -1,0 +1,7 @@
+{
+    "semantic_state":  "PHYSICAL_RECOVERY",
+    "candidate_damaged":  false,
+    "backup_damaged":  true,
+    "recovery_damaged":  true,
+    "last_row":  "20"
+}

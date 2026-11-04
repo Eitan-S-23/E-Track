@@ -1,0 +1,34 @@
+{
+    "row":  "11",
+    "execution":  "AUTO",
+    "candidate":  {
+                      "version_code":  30315,
+                      "length":  794761,
+                      "raw_sha256":  "a3026758d9fc136392251986e21c2658c9e2d94a885d5a1f526cf1f8eefaa038",
+                      "double_zero_sha256":  "70432419107d6fbf47eaea54590b2cecfb5df44a6979b0cb78c6f446f94065d1",
+                      "header_crc32":  "252aee75"
+                  },
+    "backup":  {
+                   "version_code":  30314,
+                   "length":  794761,
+                   "raw_sha256":  "9bb2bcd28693fc172a0f2bf2ed23465615c12f0af58bc30e1c6ac181d695a4fc",
+                   "double_zero_sha256":  "4d69b9dacc38d0bcb64d11fb838988571ee625250c0c831efc65636d33f53d21",
+                   "header_crc32":  "e37a2857"
+               },
+    "recovery":  {
+                     "version_code":  30314,
+                     "length":  794761,
+                     "raw_sha256":  "9bb2bcd28693fc172a0f2bf2ed23465615c12f0af58bc30e1c6ac181d695a4fc",
+                     "double_zero_sha256":  "4d69b9dacc38d0bcb64d11fb838988571ee625250c0c831efc65636d33f53d21",
+                     "header_crc32":  "e37a2857"
+                 },
+    "control_address":  "0x20057E00",
+    "checkpoint_source":  {
+                              "cp1":  "boot/src/boot_state_machine.c:610 args=(copy_phase,resume_block)",
+                              "cp2":  "boot/src/boot_state_machine.c:622 args=(copy_phase,resume_block)",
+                              "cp3_to_cp6":  "boot/src/boot_state_machine.c:395-419 args=(copy_phase,block-or-resume)",
+                              "cp7_to_cp11":  "boot/src/boot_state_machine.c:655-801",
+                              "cp12":  "USER/HAL/HAL_EEPROM.cpp:125-133 args=(vcode,state)",
+                              "cp13":  "boot/src/boot_main.c:187-189 args=(status,state)"
+                          }
+}

@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "Tools/acceptance/validate_bundle.py",
+    "--contract",
+    "docs/acceptance-contracts/P1-6-v3.contract.json",
+    "--matrix",
+    "docs/acceptance-contracts/P1-6-v3/final-matrix.json",
+    "--previous-contract",
+    "docs/acceptance-contracts/P1-6-v2.contract.json",
+    "--previous-matrix",
+    "docs/acceptance-contracts/P1-6-v2/failed-matrix.json",
+    "--repo-root",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source",
+  "monotonic_ns": 953788364310400,
+  "stdin_sha256": null
+}

@@ -1,0 +1,2618 @@
+T485C 000:001.888   SEGGER J-Link V8.18 Log File
+T485C 000:002.154   DLL Compiled: Mar  5 2025 14:42:43
+T485C 000:002.229   Logging started @ 2026-11-04 01:18
+T485C 000:002.289   Process: C:\Users\SU\SEGGER\JLink_V818\JLink.exe
+T485C 000:002.349 - 2.340ms 
+T485C 000:002.759 JLINK_ExecCommand("DisableAutoUpdateFW", ...). 
+T485C 000:002.839 - 0.079ms returns 0x00
+T485C 000:002.920 JLINK_EMU_SelectByUSBSN(SerialNo = 123456)
+T485C 000:011.266 - 8.346ms returns 0x00
+T485C 000:011.408 JLINK_SetWarnOutHandler(...)
+T485C 000:011.469 - 0.063ms 
+T485C 000:011.522 JLINK_ExecCommand("SuppressGUI = 1", ...). 
+T485C 000:011.574 - 0.052ms returns 0x00
+T485C 000:011.630 JLINK_OpenEx(...)
+T485C 000:021.039   Firmware: J-Link ARM-OB STM32 compiled Aug 22 2012 19:52:04
+T485C 000:023.262   Hardware: V7.00
+T485C 000:023.313   S/N: 4294967295
+T485C 000:023.341   OEM: SEGGER
+T485C 000:023.369   Feature(s): RDI,FlashDL,FlashBP,JFlash,GDB
+T485C 000:023.667   Bootloader: (FW returned invalid version)
+T485C 000:024.362   TELNET listener socket opened on port 19021
+T485C 000:024.799 - 13.163ms returns "O.K."
+T485C 000:024.849 JLINK_SetFlashProgProgressCallback(...)
+T485C 000:024.872 - 0.025ms 
+T485C 000:024.894 JLINK_GetFirmwareString(...)
+T485C 000:024.914 - 0.019ms 
+T485C 000:024.936 JLINK_GetHardwareVersion()
+T485C 000:024.956 - 0.019ms returns 70000
+T485C 000:024.982 JLINK_GetHWInfo(...)
+T485C 000:025.147 - 0.166ms returns 0
+T485C 000:025.177 JLINK_GetSN()
+T485C 000:025.198 - 0.020ms returns -1
+T485C 000:025.221 JLINK_GetOEMString(...)
+T485C 000:025.244 JLINK_EMU_GetCurrConnectionInfo()
+T485C 000:025.264 - 0.021ms returns 0
+T485C 000:025.286 JLINK_EMU_HasCapEx(0x00000026)
+T485C 000:025.306 - 0.019ms returns 0
+T485C 000:025.326 JLINK_GetEmuCaps()
+T485C 000:025.346 - 0.019ms returns 0x88EA5833
+T485C 000:025.366 JLINK_GetEmuCaps()
+T485C 000:025.385 - 0.019ms returns 0x88EA5833
+T485C 000:025.405 JLINK_GetHWStatus(...)
+T485C 000:025.537 - 0.131ms returns 0
+T485C 000:025.561 JLINK_EMU_HasCapEx(0x00000044)
+T485C 000:025.581 - 0.020ms returns 0
+T485C 000:025.605 JLINK_ExecCommand("ProjectFile = D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p16g-20261104-01\campaign-03\matrix\row-20\00-prepare-s0\restore-internal-v0.native\settings.jlink", ...). 
+T485C 000:099.084 - 73.476ms returns 0x00
+T485C 000:099.131 JLINK_ExecCommand("SetRestartOnClose = 0", ...). 
+T485C 000:099.170 - 0.013ms returns 0x01
+T485C 000:099.230 JLINK_ExecCommand("InhibitConnectRetries = 1", ...). 
+T485C 000:099.258 - 0.004ms returns 0x00
+T485C 000:099.288 JLINK_ExecCommand("SetEnableMemCache = 0", ...). 
+T485C 000:099.311 - 0.001ms returns 0x01
+T485C 000:099.338 JLINK_ExecCommand("ProjectFile = D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p16g-20261104-01\campaign-03\matrix\row-20\00-prepare-s0\restore-internal-v0.native\settings.jlink", ...). 
+T485C 000:101.742 - 2.402ms returns 0x00
+T485C 000:101.801 JLINK_DEVICE_GetIndex(sDeviceName = AT32F435RGT7)
+T485C 000:101.828 - 0.027ms returns 443
+T485C 000:101.844 JLINK_ExecCommand("device=AT32F435RGT7", ...). 
+T485C 000:101.912   Flash bank @ 0x08000000: SFL: Parsing sectorization info from ELF file
+T485C 000:101.932     FlashDevice.SectorInfo[0]: .SectorSize = 0x00001000, .SectorStartAddr = 0x08000000
+T485C 000:101.951   FlashBank @0x08000000: Sectorization info from SFL ELF file ignored because sectorization override from DLL / XML file is active.
+T485C 000:102.338   Flash bank @ 0x1FFFC000: SFL: Parsing sectorization info from ELF file
+T485C 000:102.359     FlashDevice.SectorInfo[0]: .SectorSize = 0x00001000, .SectorStartAddr = 0x00000000
+T485C 000:102.378   FlashBank @0x1FFFC000: Sectorization info from SFL ELF file ignored because sectorization override from DLL / XML file is active.
+T485C 000:102.449   Flash bank @ 0x90000000: SFL: Parsing sectorization info from ELF file
+T485C 000:102.468     FlashDevice.SectorInfo[0]: .SectorSize = 0x00010000, .SectorStartAddr = 0x00000000
+T485C 000:103.410   Device "AT32F435RGT7" selected.
+T485C 000:104.696 - 2.837ms returns 0x00
+T485C 000:104.793 JLINK_EnableLog(...)
+T485C 000:104.806 - 0.013ms 
+T485C 000:104.828 JLINK_GetEmuCaps()
+T485C 000:104.842 - 0.013ms returns 0x88EA5833
+T485C 000:104.856 JLINK_TIF_GetAvailable(...)
+T485C 000:105.024 - 0.167ms 
+T485C 000:105.050 JLINK_TIF_Select(JLINKARM_TIF_SWD)
+T485C 000:105.357 - 0.307ms returns 0x00
+T485C 000:105.379 JLINK_IsConnected()
+T485C 000:105.392 - 0.012ms returns FALSE
+T485C 000:105.406 JLINK_SetSpeed(1000)
+T485C 000:105.467 - 0.060ms 
+T485C 000:105.486 JLINK_Connect()
+T485C 000:105.707   InitTarget() start
+T485C 000:105.731    J-Link Script File: Executing InitTarget()
+T485C 000:107.836   DAP initialized successfully.
+T485C 000:109.726     No Protection is set.
+T485C 000:109.796   InitTarget() end - Took 4.06ms
+T485C 000:110.878   Found SW-DP with ID 0x2BA01477
+T485C 000:114.575   Old FW that does not support reading DPIDR via DAP jobs
+T485C 000:118.275   DPv0 detected
+T485C 000:118.317   CoreSight SoC-400 or earlier
+T485C 000:118.347   Scanning AP map to find all available APs
+T485C 000:120.724   AP[1]: Stopped AP scan as end of AP map has been reached
+T485C 000:120.758   AP[0]: AHB-AP (IDR: 0x24770011, ADDR: 0x00000000)
+T485C 000:120.787   Iterating through AP map to find AHB-AP to use
+T485C 000:124.861   AP[0]: Core found
+T485C 000:124.900   AP[0]: AHB-AP ROM base: 0xE00FF000
+T485C 000:127.204   CPUID register: 0x410FC241. Implementer code: 0x41 (ARM)
+T485C 000:127.295   Found Cortex-M4 r0p1, Little endian.
+T485C 000:127.698   -- Max. mem block: 0x00002C18
+T485C 000:128.231   CPU_ReadMem(4 bytes @ 0xE000EDF0)
+T485C 000:129.083   CPU_ReadMem(4 bytes @ 0xE0002000)
+T485C 000:129.928   FPUnit: 6 code (BP) slots and 2 literal slots
+T485C 000:129.961   CPU_ReadMem(4 bytes @ 0xE000EDFC)
+T485C 000:130.802   CPU_ReadMem(4 bytes @ 0xE0001000)
+T485C 000:131.650   CPU_WriteMem(4 bytes @ 0xE0001000)
+T485C 000:132.559   CPU_ReadMem(4 bytes @ 0xE000ED88)
+T485C 000:133.409   CPU_WriteMem(4 bytes @ 0xE000ED88)
+T485C 000:134.303   CPU_ReadMem(4 bytes @ 0xE000ED88)
+T485C 000:135.150   CPU_WriteMem(4 bytes @ 0xE000ED88)
+T485C 000:136.029   CoreSight components:
+T485C 000:136.067   ROMTbl[0] @ E00FF000
+T485C 000:136.097   CPU_ReadMem(64 bytes @ 0xE00FF000)
+T485C 000:138.530   CPU_ReadMem(32 bytes @ 0xE000EFE0)
+T485C 000:140.133   [0][0]: E000E000 CID B105E00D PID 000BB00C SCS-M7
+T485C 000:140.171   CPU_ReadMem(32 bytes @ 0xE0001FE0)
+T485C 000:141.748   [0][1]: E0001000 CID B105E00D PID 003BB002 DWT
+T485C 000:141.782   CPU_ReadMem(32 bytes @ 0xE0002FE0)
+T485C 000:143.354   [0][2]: E0002000 CID B105E00D PID 002BB003 FPB
+T485C 000:143.384   CPU_ReadMem(32 bytes @ 0xE0000FE0)
+T485C 000:144.950   [0][3]: E0000000 CID B105E00D PID 003BB001 ITM
+T485C 000:144.977   CPU_ReadMem(32 bytes @ 0xE0040FE0)
+T485C 000:146.544   [0][4]: E0040000 CID B105900D PID 000BB9A1 TPIU
+T485C 000:146.568   CPU_ReadMem(32 bytes @ 0xE0041FE0)
+T485C 000:148.150   [0][5]: E0041000 CID 00000000 PID 00000000 ???
+T485C 000:148.226 - 42.738ms returns 0x00
+T485C 000:148.298 JLINK_GetIdData(pIdData)
+T485C 000:148.730   pIdData->ScanLen=4
+T485C 000:148.769   pIdData->NumDevices=1
+T485C 000:148.798   pIdData->aId[0]=0x2BA01477
+T485C 000:148.826   pIdData->aIrRead[0]=0
+T485C 000:148.854   pIdData->aScanLen[0]=0
+T485C 000:148.882   pIdData->aScanRead[0]=0
+T485C 000:148.910 - 0.612ms 
+T485C 000:148.936 JLINK_GetMemZones(...)
+T485C 000:148.956 - 0.019ms returns 1
+T485C 000:148.979 JLINK_HasError()
+T485C 000:149.001 JLINK_CORE_GetFound()
+T485C 000:149.021 - 0.019ms returns 0xE0000FF
+T485C 000:149.067 JLINK_ExecCommand("ExcludeFlashCacheRange 0x08000000-0x080FFFFF", ...). 
+T485C 000:149.094 - 0.004ms returns 0x00
+T485C 000:149.130 JLINK_WriteU32_64(0xE0042008, 0x00001000)
+T485C 000:149.450   CPU is running
+T485C 000:149.488   CPU_WriteMem(4 bytes @ 0xE0042008)
+T485C 000:150.453 - 1.322ms returns 0 (0x00000000)
+T485C 000:150.493 JLINK_Halt()
+T485C 000:158.498 - 8.004ms returns 0x00
+T485C 000:158.525 JLINK_GetDeviceFamily
+T485C 000:158.538 - 0.012ms returns 14
+T485C 000:158.606 JLINK_CORE_GetFound()
+T485C 000:158.624 - 0.017ms returns 0xE0000FF
+T485C 000:158.644 JLINK_GetDebugInfo(0x01 = Unknown)
+T485C 000:158.658   Value=0x00000001
+T485C 000:158.676 - 0.032ms returns 0
+T485C 000:158.692 JLINK_ReadRegs(NumRegs = 28)
+T485C 000:158.727   CPU_ReadMem(4 bytes @ 0xE0001004)
+T485C 000:159.574   
+  R0 (0)         = 0x01                 R1 (1)         = 0x44                 R2 (2)         = 0x02                 R3 (3)         = 0x20057E00        
+  R4 (4)         = 0x2000101C           R5 (5)         = 0x20001010           R6 (6)         = 0x20001020           R7 (7)         = 0x00              
+  R8 (8)         = 0x20001004           R9 (9)         = 0x20001008           R10 (10)       = 0x2000100C           R11 (11)       = 0x20001014        
+  R12 (12)       = 0x20057FEC           R13 (SP) (13)  = 0x20057D20           MSP (17)       = 0x20057D20           PSP (18)       = 0x00              
+  R14 (14)       = 0x8001D1D            R15 (PC) (15)  = 0x8002B16            XPSR (16)      = 0x61000000           APSR (21)      = 0x60000000        
+  EPSR (22)      = 0x1000000            IPSR (23)      = 0x00                 CFBP (20)      = 0x00                 CONTROL (27)   = 0x00              
+  FAULTMASK (26) = 0x00                 BASEPRI (25)   = 0x00                 PRIMASK (24)   = 0x00                 CycleCnt (65)  = 0x311B771         
+T485C 000:159.598 - 0.905ms returns 0x00
+T485C 000:159.621 JLINK_ReadRegs(NumRegs = 33)
+T485C 000:171.948   
+  FPS0 (33)  = 0x00                 FPS1 (34)  = 0x00                 FPS2 (35)  = 0x00                 FPS3 (36)  = 0x00              
+  FPS4 (37)  = 0x00                 FPS5 (38)  = 0x00                 FPS6 (39)  = 0x00                 FPS7 (40)  = 0x00              
+  FPS8 (41)  = 0x00                 FPS9 (42)  = 0x00                 FPS10 (43) = 0x00                 FPS11 (44) = 0x00              
+  FPS12 (45) = 0x00                 FPS13 (46) = 0x00                 FPS14 (47) = 0x00                 FPS15 (48) = 0x00              
+  FPS16 (49) = 0x00                 FPS17 (50) = 0x00                 FPS18 (51) = 0x00                 FPS19 (52) = 0x00              
+  FPS20 (53) = 0x00                 FPS21 (54) = 0x00                 FPS22 (55) = 0x00                 FPS23 (56) = 0x00              
+  FPS24 (57) = 0x00                 FPS25 (58) = 0x00                 FPS26 (59) = 0x00                 FPS27 (60) = 0x00              
+  FPS28 (61) = 0x00                 FPS29 (62) = 0x00                 FPS30 (63) = 0x00                 FPS31 (64) = 0x00              
+  FPSCR (32) = 0x00              
+T485C 000:172.010 - 12.388ms returns 0x00
+T485C 000:172.079 JLINK_Reset()
+T485C 000:172.112   JLINK_GetResetTypeDesc
+T485C 000:172.133   - 0.020ms 
+T485C 000:172.154   Reset type: NORMAL (https://wiki.segger.com/J-Link_Reset_Strategies)
+T485C 000:172.182   CPU_WriteMem(4 bytes @ 0xE000EDF0)
+T485C 000:173.076   CPU_WriteMem(4 bytes @ 0xE000EDFC)
+T485C 000:173.978   Reset: Halt core after reset via DEMCR.VC_CORERESET.
+T485C 000:174.456   Reset: Reset device via AIRCR.SYSRESETREQ.
+T485C 000:174.495   CPU_WriteMem(4 bytes @ 0xE000ED0C)
+T485C 000:228.662   CPU_ReadMem(4 bytes @ 0xE000EDF0)
+T485C 000:229.554   CPU_ReadMem(4 bytes @ 0xE000EDF0)
+T485C 000:230.421   CPU_WriteMem(4 bytes @ 0xE000EDFC)
+T485C 000:237.454   CPU_ReadMem(4 bytes @ 0xE000EDF0)
+T485C 000:246.221   CPU_WriteMem(4 bytes @ 0xE0002000)
+T485C 000:247.200   CPU_ReadMem(4 bytes @ 0xE000EDFC)
+T485C 000:248.100   CPU_ReadMem(4 bytes @ 0xE0001000)
+T485C 000:249.139 - 77.058ms 
+T485C 000:249.199 JLINK_Halt()
+T485C 000:249.229 - 0.029ms returns 0x00
+T485C 000:249.309 JLINK_ExecCommand("SetVerifyRAMDownload = 1", ...). 
+T485C 000:249.343 - 0.003ms returns 0x00
+T485C 000:249.369 JLINK_DownloadFile()
+T485C 000:251.764   Data:  00 7E 05 20 AD BF 01 08 37 C0 01 08 37 C0 01 08 ...
+T485C 000:252.404   completely In flash
+T485C 000:252.531   Data:  20 46 29 46 02 F0 DA F9 02 46 0B 46 02 F0 B8 FC ...
+T485C 000:252.827   completely In flash
+T485C 000:252.933   Data:  00 21 00 63 00 C5 00 42 00 83 00 62 00 62 00 83 ...
+T485C 000:253.353   completely In flash
+T485C 000:253.418   Data:  A5 A5 A5 A5 A5 A5 A5 A5 A5 A5 A5 A5 A5 A5 A5 A5 ...
+T485C 000:253.456   completely In flash
+T485C 000:253.901   Old firmware which does not support pausing periodic actions during flash download
+T485C 000:253.951   CPU_ReadMem(4 bytes @ 0xE000ED90)
+T485C 000:254.842   CPU_ReadMem(4 bytes @ 0xE000ED94)
+T485C 000:255.754    -- --------------------------------------
+T485C 000:255.804    -- Start of determining flash info (Bank @ 0x08000000)
+T485C 000:256.099    -- End of determining flash info
+T485C 000:256.137    -- Start of determining dirty areas in flash cache
+T485C 000:256.189    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08010000 if necessary
+T485C 000:256.222    -- Start of preparing flash programming
+T485C 000:256.664    -- Preparing RAMCode
+T485C 000:256.702    -- Calculating RAM usage
+T485C 000:256.731    -- RAM usage = 6888 Bytes
+T485C 000:256.759    -- Preserving CPU registers
+T485C 000:256.993    -- Preparing memory
+T485C 000:257.031    -- Preparing target
+T485C 000:257.060    -- Preserving target RAM temporarily used for programming
+T485C 000:439.260    -- Downloading RAMCode
+T485C 000:563.132    -- Initializing RAMCode (InitType: 3 = Verify)
+T485C 000:563.188    -- Executing SEGGER_FL_Prepare(3)
+T485C 000:574.985    -- End of preparing flash programming
+T485C 000:575.110   CPU_ReadMem(2048 bytes @ 0x08010000)
+T485C 000:630.332    -- Updating flash cache (2048 bytes @ 0x08010000)
+T485C 000:630.386    -- Updating flash cache invalid range 0x08010000 - 0x080107FF (2048 bytes)
+T485C 000:630.428    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08010800 if necessary
+T485C 000:630.461    -- Start of preparing flash programming
+T485C 000:630.492    -- End of preparing flash programming
+T485C 000:630.528   CPU_ReadMem(2048 bytes @ 0x08010800)
+T485C 000:685.716    -- Updating flash cache (2048 bytes @ 0x08010800)
+T485C 000:685.773    -- Updating flash cache invalid range 0x08010800 - 0x08010FFF (2048 bytes)
+T485C 000:685.813    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08011000 if necessary
+T485C 000:685.846    -- Start of preparing flash programming
+T485C 000:685.877    -- End of preparing flash programming
+T485C 000:685.965   CPU_ReadMem(2048 bytes @ 0x08011000)
+T485C 000:741.452    -- Updating flash cache (2048 bytes @ 0x08011000)
+T485C 000:741.612    -- Updating flash cache invalid range 0x08011000 - 0x080117FF (2048 bytes)
+T485C 000:741.744    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08011800 if necessary
+T485C 000:742.877    -- Start of preparing flash programming
+T485C 000:743.130    -- End of preparing flash programming
+T485C 000:743.426   CPU_ReadMem(2048 bytes @ 0x08011800)
+T485C 000:799.260    -- Updating flash cache (2048 bytes @ 0x08011800)
+T485C 000:799.326    -- Updating flash cache invalid range 0x08011800 - 0x08011FFF (2048 bytes)
+T485C 000:799.443    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08012000 if necessary
+T485C 000:799.484    -- Start of preparing flash programming
+T485C 000:799.515    -- End of preparing flash programming
+T485C 000:799.552   CPU_ReadMem(2048 bytes @ 0x08012000)
+T485C 000:854.921    -- Updating flash cache (2048 bytes @ 0x08012000)
+T485C 000:854.991    -- Updating flash cache invalid range 0x08012000 - 0x080127FF (2048 bytes)
+T485C 000:855.036    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08012800 if necessary
+T485C 000:855.069    -- Start of preparing flash programming
+T485C 000:855.100    -- End of preparing flash programming
+T485C 000:855.137   CPU_ReadMem(2048 bytes @ 0x08012800)
+T485C 000:910.405    -- Updating flash cache (2048 bytes @ 0x08012800)
+T485C 000:910.458    -- Updating flash cache invalid range 0x08012800 - 0x08012FFF (2048 bytes)
+T485C 000:910.496    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08013000 if necessary
+T485C 000:910.583    -- Start of preparing flash programming
+T485C 000:910.611    -- End of preparing flash programming
+T485C 000:911.470   CPU_ReadMem(2048 bytes @ 0x08013000)
+T485C 000:966.728    -- Updating flash cache (2048 bytes @ 0x08013000)
+T485C 000:966.796    -- Updating flash cache invalid range 0x08013000 - 0x080137FF (2048 bytes)
+T485C 000:966.835    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08013800 if necessary
+T485C 000:966.883    -- Start of preparing flash programming
+T485C 000:966.918    -- End of preparing flash programming
+T485C 000:966.953   CPU_ReadMem(2048 bytes @ 0x08013800)
+T485C 001:022.178    -- Updating flash cache (2048 bytes @ 0x08013800)
+T485C 001:022.237    -- Updating flash cache invalid range 0x08013800 - 0x08013FFF (2048 bytes)
+T485C 001:022.276    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08014000 if necessary
+T485C 001:022.309    -- Start of preparing flash programming
+T485C 001:022.339    -- End of preparing flash programming
+T485C 001:022.373   CPU_ReadMem(2048 bytes @ 0x08014000)
+T485C 001:077.558    -- Updating flash cache (2048 bytes @ 0x08014000)
+T485C 001:077.617    -- Updating flash cache invalid range 0x08014000 - 0x080147FF (2048 bytes)
+T485C 001:077.660    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08014800 if necessary
+T485C 001:077.694    -- Start of preparing flash programming
+T485C 001:077.725    -- End of preparing flash programming
+T485C 001:077.761   CPU_ReadMem(2048 bytes @ 0x08014800)
+T485C 001:153.307    -- Updating flash cache (2048 bytes @ 0x08014800)
+T485C 001:153.431    -- Updating flash cache invalid range 0x08014800 - 0x08014FFF (2048 bytes)
+T485C 001:153.541    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08015000 if necessary
+T485C 001:153.619    -- Start of preparing flash programming
+T485C 001:153.697    -- End of preparing flash programming
+T485C 001:153.800   CPU_ReadMem(2048 bytes @ 0x08015000)
+T485C 001:209.178    -- Updating flash cache (2048 bytes @ 0x08015000)
+T485C 001:209.246    -- Updating flash cache invalid range 0x08015000 - 0x080157FF (2048 bytes)
+T485C 001:209.289    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08015800 if necessary
+T485C 001:209.324    -- Start of preparing flash programming
+T485C 001:209.356    -- End of preparing flash programming
+T485C 001:209.393   CPU_ReadMem(2048 bytes @ 0x08015800)
+T485C 001:573.931    -- Updating flash cache (2048 bytes @ 0x08015800)
+T485C 001:573.991    -- Updating flash cache invalid range 0x08015800 - 0x08015FFF (2048 bytes)
+T485C 001:574.033    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08016000 if necessary
+T485C 001:613.389    -- Start of preparing flash programming
+T485C 001:613.488    -- End of preparing flash programming
+T485C 001:680.339   CPU_ReadMem(2048 bytes @ 0x08016000)
+T485C 001:735.723    -- Updating flash cache (2048 bytes @ 0x08016000)
+T485C 001:735.820    -- Updating flash cache invalid range 0x08016000 - 0x080167FF (2048 bytes)
+T485C 001:735.939    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08016800 if necessary
+T485C 001:736.013    -- Start of preparing flash programming
+T485C 001:736.108    -- End of preparing flash programming
+T485C 001:736.191   CPU_ReadMem(2048 bytes @ 0x08016800)
+T485C 001:791.489    -- Updating flash cache (2048 bytes @ 0x08016800)
+T485C 001:791.548    -- Updating flash cache invalid range 0x08016800 - 0x08016FFF (2048 bytes)
+T485C 001:791.594    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08017000 if necessary
+T485C 001:791.630    -- Start of preparing flash programming
+T485C 001:791.661    -- End of preparing flash programming
+T485C 001:791.700   CPU_ReadMem(2048 bytes @ 0x08017000)
+T485C 001:847.106    -- Updating flash cache (2048 bytes @ 0x08017000)
+T485C 001:847.165    -- Updating flash cache invalid range 0x08017000 - 0x080177FF (2048 bytes)
+T485C 001:847.218    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08017800 if necessary
+T485C 001:847.253    -- Start of preparing flash programming
+T485C 001:847.287    -- End of preparing flash programming
+T485C 001:847.353   CPU_ReadMem(2048 bytes @ 0x08017800)
+T485C 001:904.220    -- Updating flash cache (2048 bytes @ 0x08017800)
+T485C 001:904.279    -- Updating flash cache invalid range 0x08017800 - 0x08017FFF (2048 bytes)
+T485C 001:904.322    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08018000 if necessary
+T485C 001:904.358    -- Start of preparing flash programming
+T485C 001:904.391    -- End of preparing flash programming
+T485C 001:904.426   CPU_ReadMem(2048 bytes @ 0x08018000)
+T485C 001:959.683    -- Updating flash cache (2048 bytes @ 0x08018000)
+T485C 001:959.785    -- Updating flash cache invalid range 0x08018000 - 0x080187FF (2048 bytes)
+T485C 001:959.844    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08018800 if necessary
+T485C 001:959.879    -- Start of preparing flash programming
+T485C 001:959.909    -- End of preparing flash programming
+T485C 001:959.949   CPU_ReadMem(2048 bytes @ 0x08018800)
+T485C 002:015.177    -- Updating flash cache (2048 bytes @ 0x08018800)
+T485C 002:015.300    -- Updating flash cache invalid range 0x08018800 - 0x08018FFF (2048 bytes)
+T485C 002:015.407    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08019000 if necessary
+T485C 002:015.516    -- Start of preparing flash programming
+T485C 002:015.569    -- End of preparing flash programming
+T485C 002:015.665   CPU_ReadMem(2048 bytes @ 0x08019000)
+T485C 002:070.887    -- Updating flash cache (2048 bytes @ 0x08019000)
+T485C 002:070.963    -- Updating flash cache invalid range 0x08019000 - 0x080197FF (2048 bytes)
+T485C 002:071.006    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08019800 if necessary
+T485C 002:071.065    -- Start of preparing flash programming
+T485C 002:071.096    -- End of preparing flash programming
+T485C 002:071.132   CPU_ReadMem(2048 bytes @ 0x08019800)
+T485C 002:126.330    -- Updating flash cache (2048 bytes @ 0x08019800)
+T485C 002:126.386    -- Updating flash cache invalid range 0x08019800 - 0x08019FFF (2048 bytes)
+T485C 002:126.438    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0801A000 if necessary
+T485C 002:126.483    -- Start of preparing flash programming
+T485C 002:126.512    -- End of preparing flash programming
+T485C 002:126.549   CPU_ReadMem(2048 bytes @ 0x0801A000)
+T485C 002:181.851    -- Updating flash cache (2048 bytes @ 0x0801A000)
+T485C 002:181.993    -- Updating flash cache invalid range 0x0801A000 - 0x0801A7FF (2048 bytes)
+T485C 002:182.108    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0801A800 if necessary
+T485C 002:182.196    -- Start of preparing flash programming
+T485C 002:182.255    -- End of preparing flash programming
+T485C 002:182.358   CPU_ReadMem(2048 bytes @ 0x0801A800)
+T485C 002:237.565    -- Updating flash cache (2048 bytes @ 0x0801A800)
+T485C 002:237.623    -- Updating flash cache invalid range 0x0801A800 - 0x0801AFFF (2048 bytes)
+T485C 002:237.664    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0801B000 if necessary
+T485C 002:237.696    -- Start of preparing flash programming
+T485C 002:237.725    -- End of preparing flash programming
+T485C 002:237.759   CPU_ReadMem(2048 bytes @ 0x0801B000)
+T485C 002:292.951    -- Updating flash cache (2048 bytes @ 0x0801B000)
+T485C 002:293.008    -- Updating flash cache invalid range 0x0801B000 - 0x0801B7FF (2048 bytes)
+T485C 002:293.052    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0801B800 if necessary
+T485C 002:293.090    -- Start of preparing flash programming
+T485C 002:293.120    -- End of preparing flash programming
+T485C 002:293.156   CPU_ReadMem(2048 bytes @ 0x0801B800)
+T485C 002:348.319    -- Updating flash cache (2048 bytes @ 0x0801B800)
+T485C 002:348.394    -- Updating flash cache invalid range 0x0801B800 - 0x0801BFFF (2048 bytes)
+T485C 002:348.434    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0801C000 if necessary
+T485C 002:348.468    -- Start of preparing flash programming
+T485C 002:348.499    -- End of preparing flash programming
+T485C 002:348.534   CPU_ReadMem(2048 bytes @ 0x0801C000)
+T485C 002:403.848    -- Updating flash cache (2048 bytes @ 0x0801C000)
+T485C 002:403.895    -- Updating flash cache invalid range 0x0801C000 - 0x0801C7FF (2048 bytes)
+T485C 002:403.923    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0801C800 if necessary
+T485C 002:403.945    -- Start of preparing flash programming
+T485C 002:403.965    -- End of preparing flash programming
+T485C 002:403.988   CPU_ReadMem(2048 bytes @ 0x0801C800)
+T485C 002:459.086    -- Updating flash cache (2048 bytes @ 0x0801C800)
+T485C 002:459.152    -- Updating flash cache invalid range 0x0801C800 - 0x0801CFFF (2048 bytes)
+T485C 002:459.193    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0801D000 if necessary
+T485C 002:459.228    -- Start of preparing flash programming
+T485C 002:459.258    -- End of preparing flash programming
+T485C 002:459.294   CPU_ReadMem(2048 bytes @ 0x0801D000)
+T485C 002:514.534    -- Updating flash cache (2048 bytes @ 0x0801D000)
+T485C 002:514.591    -- Updating flash cache invalid range 0x0801D000 - 0x0801D7FF (2048 bytes)
+T485C 002:514.622    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0801D800 if necessary
+T485C 002:514.648    -- Start of preparing flash programming
+T485C 002:514.668    -- End of preparing flash programming
+T485C 002:514.693   CPU_ReadMem(2048 bytes @ 0x0801D800)
+T485C 002:569.927    -- Updating flash cache (2048 bytes @ 0x0801D800)
+T485C 002:569.980    -- Updating flash cache invalid range 0x0801D800 - 0x0801DFFF (2048 bytes)
+T485C 002:570.011    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0801E000 if necessary
+T485C 002:570.038    -- Start of preparing flash programming
+T485C 002:570.058    -- End of preparing flash programming
+T485C 002:570.083   CPU_ReadMem(2048 bytes @ 0x0801E000)
+T485C 002:625.330    -- Updating flash cache (2048 bytes @ 0x0801E000)
+T485C 002:625.398    -- Updating flash cache invalid range 0x0801E000 - 0x0801E7FF (2048 bytes)
+T485C 002:625.440    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0801E800 if necessary
+T485C 002:625.477    -- Start of preparing flash programming
+T485C 002:625.509    -- End of preparing flash programming
+T485C 002:625.544   CPU_ReadMem(2048 bytes @ 0x0801E800)
+T485C 002:680.791    -- Updating flash cache (2048 bytes @ 0x0801E800)
+T485C 002:680.844    -- Updating flash cache invalid range 0x0801E800 - 0x0801EFFF (2048 bytes)
+T485C 002:680.875    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0801F000 if necessary
+T485C 002:680.902    -- Start of preparing flash programming
+T485C 002:680.923    -- End of preparing flash programming
+T485C 002:680.948   CPU_ReadMem(2048 bytes @ 0x0801F000)
+T485C 002:736.092    -- Updating flash cache (2048 bytes @ 0x0801F000)
+T485C 002:736.161    -- Updating flash cache invalid range 0x0801F000 - 0x0801F7FF (2048 bytes)
+T485C 002:736.204    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0801F800 if necessary
+T485C 002:736.241    -- Start of preparing flash programming
+T485C 002:736.272    -- End of preparing flash programming
+T485C 002:736.309   CPU_ReadMem(2048 bytes @ 0x0801F800)
+T485C 002:791.477    -- Updating flash cache (2048 bytes @ 0x0801F800)
+T485C 002:791.549    -- Updating flash cache invalid range 0x0801F800 - 0x0801FFFF (2048 bytes)
+T485C 002:791.596    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08020000 if necessary
+T485C 002:791.630    -- Start of preparing flash programming
+T485C 002:791.660    -- End of preparing flash programming
+T485C 002:791.697   CPU_ReadMem(2048 bytes @ 0x08020000)
+T485C 002:846.859    -- Updating flash cache (2048 bytes @ 0x08020000)
+T485C 002:846.927    -- Updating flash cache invalid range 0x08020000 - 0x080207FF (2048 bytes)
+T485C 002:846.968    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08020800 if necessary
+T485C 002:847.004    -- Start of preparing flash programming
+T485C 002:847.035    -- End of preparing flash programming
+T485C 002:847.071   CPU_ReadMem(2048 bytes @ 0x08020800)
+T485C 002:902.348    -- Updating flash cache (2048 bytes @ 0x08020800)
+T485C 002:902.414    -- Updating flash cache invalid range 0x08020800 - 0x08020FFF (2048 bytes)
+T485C 002:902.452    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08021000 if necessary
+T485C 002:902.514    -- Start of preparing flash programming
+T485C 002:902.548    -- End of preparing flash programming
+T485C 002:902.588   CPU_ReadMem(2048 bytes @ 0x08021000)
+T485C 002:957.940    -- Updating flash cache (2048 bytes @ 0x08021000)
+T485C 002:958.007    -- Updating flash cache invalid range 0x08021000 - 0x080217FF (2048 bytes)
+T485C 002:958.050    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08021800 if necessary
+T485C 002:958.086    -- Start of preparing flash programming
+T485C 002:958.116    -- End of preparing flash programming
+T485C 002:958.151   CPU_ReadMem(2048 bytes @ 0x08021800)
+T485C 003:013.403    -- Updating flash cache (2048 bytes @ 0x08021800)
+T485C 003:013.450    -- Updating flash cache invalid range 0x08021800 - 0x08021FFF (2048 bytes)
+T485C 003:013.478    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08022000 if necessary
+T485C 003:013.500    -- Start of preparing flash programming
+T485C 003:013.519    -- End of preparing flash programming
+T485C 003:013.542   CPU_ReadMem(2048 bytes @ 0x08022000)
+T485C 003:068.705    -- Updating flash cache (2048 bytes @ 0x08022000)
+T485C 003:068.760    -- Updating flash cache invalid range 0x08022000 - 0x080227FF (2048 bytes)
+T485C 003:068.800    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08022800 if necessary
+T485C 003:068.834    -- Start of preparing flash programming
+T485C 003:068.864    -- End of preparing flash programming
+T485C 003:068.900   CPU_ReadMem(2048 bytes @ 0x08022800)
+T485C 003:124.167    -- Updating flash cache (2048 bytes @ 0x08022800)
+T485C 003:124.242    -- Updating flash cache invalid range 0x08022800 - 0x08022FFF (2048 bytes)
+T485C 003:124.297    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08023000 if necessary
+T485C 003:124.331    -- Start of preparing flash programming
+T485C 003:124.359    -- End of preparing flash programming
+T485C 003:124.413   CPU_ReadMem(2048 bytes @ 0x08023000)
+T485C 003:179.557    -- Updating flash cache (2048 bytes @ 0x08023000)
+T485C 003:179.626    -- Updating flash cache invalid range 0x08023000 - 0x080237FF (2048 bytes)
+T485C 003:179.667    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08023800 if necessary
+T485C 003:179.702    -- Start of preparing flash programming
+T485C 003:179.734    -- End of preparing flash programming
+T485C 003:179.770   CPU_ReadMem(2048 bytes @ 0x08023800)
+T485C 003:234.945    -- Updating flash cache (2048 bytes @ 0x08023800)
+T485C 003:234.997    -- Updating flash cache invalid range 0x08023800 - 0x08023FFF (2048 bytes)
+T485C 003:235.037    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08024000 if necessary
+T485C 003:235.071    -- Start of preparing flash programming
+T485C 003:235.101    -- End of preparing flash programming
+T485C 003:235.135   CPU_ReadMem(2048 bytes @ 0x08024000)
+T485C 003:290.233    -- Updating flash cache (2048 bytes @ 0x08024000)
+T485C 003:290.280    -- Updating flash cache invalid range 0x08024000 - 0x080247FF (2048 bytes)
+T485C 003:290.308    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08024800 if necessary
+T485C 003:290.330    -- Start of preparing flash programming
+T485C 003:290.407    -- End of preparing flash programming
+T485C 003:290.432   CPU_ReadMem(2048 bytes @ 0x08024800)
+T485C 003:345.540    -- Updating flash cache (2048 bytes @ 0x08024800)
+T485C 003:345.591    -- Updating flash cache invalid range 0x08024800 - 0x08024FFF (2048 bytes)
+T485C 003:345.621    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08025000 if necessary
+T485C 003:345.646    -- Start of preparing flash programming
+T485C 003:345.666    -- End of preparing flash programming
+T485C 003:345.692   CPU_ReadMem(2048 bytes @ 0x08025000)
+T485C 003:400.864    -- Updating flash cache (2048 bytes @ 0x08025000)
+T485C 003:400.932    -- Updating flash cache invalid range 0x08025000 - 0x080257FF (2048 bytes)
+T485C 003:400.974    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08025800 if necessary
+T485C 003:401.011    -- Start of preparing flash programming
+T485C 003:401.042    -- End of preparing flash programming
+T485C 003:401.080   CPU_ReadMem(2048 bytes @ 0x08025800)
+T485C 003:456.243    -- Updating flash cache (2048 bytes @ 0x08025800)
+T485C 003:456.306    -- Updating flash cache invalid range 0x08025800 - 0x08025FFF (2048 bytes)
+T485C 003:456.346    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08026000 if necessary
+T485C 003:456.379    -- Start of preparing flash programming
+T485C 003:456.409    -- End of preparing flash programming
+T485C 003:456.449   CPU_ReadMem(2048 bytes @ 0x08026000)
+T485C 003:511.784    -- Updating flash cache (2048 bytes @ 0x08026000)
+T485C 003:511.852    -- Updating flash cache invalid range 0x08026000 - 0x080267FF (2048 bytes)
+T485C 003:511.894    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08026800 if necessary
+T485C 003:511.930    -- Start of preparing flash programming
+T485C 003:511.960    -- End of preparing flash programming
+T485C 003:511.997   CPU_ReadMem(2048 bytes @ 0x08026800)
+T485C 003:567.253    -- Updating flash cache (2048 bytes @ 0x08026800)
+T485C 003:567.314    -- Updating flash cache invalid range 0x08026800 - 0x08026FFF (2048 bytes)
+T485C 003:567.353    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08027000 if necessary
+T485C 003:567.386    -- Start of preparing flash programming
+T485C 003:567.416    -- End of preparing flash programming
+T485C 003:567.450   CPU_ReadMem(2048 bytes @ 0x08027000)
+T485C 003:622.712    -- Updating flash cache (2048 bytes @ 0x08027000)
+T485C 003:622.783    -- Updating flash cache invalid range 0x08027000 - 0x080277FF (2048 bytes)
+T485C 003:622.826    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08027800 if necessary
+T485C 003:622.862    -- Start of preparing flash programming
+T485C 003:622.893    -- End of preparing flash programming
+T485C 003:622.930   CPU_ReadMem(2048 bytes @ 0x08027800)
+T485C 003:678.091    -- Updating flash cache (2048 bytes @ 0x08027800)
+T485C 003:678.146    -- Updating flash cache invalid range 0x08027800 - 0x08027FFF (2048 bytes)
+T485C 003:678.186    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08028000 if necessary
+T485C 003:678.219    -- Start of preparing flash programming
+T485C 003:678.249    -- End of preparing flash programming
+T485C 003:678.284   CPU_ReadMem(2048 bytes @ 0x08028000)
+T485C 003:733.398    -- Updating flash cache (2048 bytes @ 0x08028000)
+T485C 003:733.465    -- Updating flash cache invalid range 0x08028000 - 0x080287FF (2048 bytes)
+T485C 003:733.509    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08028800 if necessary
+T485C 003:733.545    -- Start of preparing flash programming
+T485C 003:733.576    -- End of preparing flash programming
+T485C 003:733.613   CPU_ReadMem(2048 bytes @ 0x08028800)
+T485C 003:788.782    -- Updating flash cache (2048 bytes @ 0x08028800)
+T485C 003:788.852    -- Updating flash cache invalid range 0x08028800 - 0x08028FFF (2048 bytes)
+T485C 003:788.894    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08029000 if necessary
+T485C 003:788.942    -- Start of preparing flash programming
+T485C 003:788.973    -- End of preparing flash programming
+T485C 003:789.009   CPU_ReadMem(2048 bytes @ 0x08029000)
+T485C 003:844.306    -- Updating flash cache (2048 bytes @ 0x08029000)
+T485C 003:844.358    -- Updating flash cache invalid range 0x08029000 - 0x080297FF (2048 bytes)
+T485C 003:844.390    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08029800 if necessary
+T485C 003:844.416    -- Start of preparing flash programming
+T485C 003:844.437    -- End of preparing flash programming
+T485C 003:844.462   CPU_ReadMem(2048 bytes @ 0x08029800)
+T485C 003:899.634    -- Updating flash cache (2048 bytes @ 0x08029800)
+T485C 003:899.685    -- Updating flash cache invalid range 0x08029800 - 0x08029FFF (2048 bytes)
+T485C 003:899.724    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0802A000 if necessary
+T485C 003:899.758    -- Start of preparing flash programming
+T485C 003:899.788    -- End of preparing flash programming
+T485C 003:899.822   CPU_ReadMem(2048 bytes @ 0x0802A000)
+T485C 003:955.100    -- Updating flash cache (2048 bytes @ 0x0802A000)
+T485C 003:955.170    -- Updating flash cache invalid range 0x0802A000 - 0x0802A7FF (2048 bytes)
+T485C 003:955.210    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0802A800 if necessary
+T485C 003:955.244    -- Start of preparing flash programming
+T485C 003:955.273    -- End of preparing flash programming
+T485C 003:955.311   CPU_ReadMem(2048 bytes @ 0x0802A800)
+T485C 004:010.480    -- Updating flash cache (2048 bytes @ 0x0802A800)
+T485C 004:010.548    -- Updating flash cache invalid range 0x0802A800 - 0x0802AFFF (2048 bytes)
+T485C 004:010.590    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0802B000 if necessary
+T485C 004:010.627    -- Start of preparing flash programming
+T485C 004:010.660    -- End of preparing flash programming
+T485C 004:010.696   CPU_ReadMem(2048 bytes @ 0x0802B000)
+T485C 004:065.868    -- Updating flash cache (2048 bytes @ 0x0802B000)
+T485C 004:065.915    -- Updating flash cache invalid range 0x0802B000 - 0x0802B7FF (2048 bytes)
+T485C 004:065.944    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0802B800 if necessary
+T485C 004:065.966    -- Start of preparing flash programming
+T485C 004:065.985    -- End of preparing flash programming
+T485C 004:066.009   CPU_ReadMem(2048 bytes @ 0x0802B800)
+T485C 004:121.171    -- Updating flash cache (2048 bytes @ 0x0802B800)
+T485C 004:121.230    -- Updating flash cache invalid range 0x0802B800 - 0x0802BFFF (2048 bytes)
+T485C 004:121.269    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0802C000 if necessary
+T485C 004:121.302    -- Start of preparing flash programming
+T485C 004:121.332    -- End of preparing flash programming
+T485C 004:121.367   CPU_ReadMem(2048 bytes @ 0x0802C000)
+T485C 004:176.632    -- Updating flash cache (2048 bytes @ 0x0802C000)
+T485C 004:176.699    -- Updating flash cache invalid range 0x0802C000 - 0x0802C7FF (2048 bytes)
+T485C 004:176.740    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0802C800 if necessary
+T485C 004:176.780    -- Start of preparing flash programming
+T485C 004:176.810    -- End of preparing flash programming
+T485C 004:176.846   CPU_ReadMem(2048 bytes @ 0x0802C800)
+T485C 004:232.032    -- Updating flash cache (2048 bytes @ 0x0802C800)
+T485C 004:232.095    -- Updating flash cache invalid range 0x0802C800 - 0x0802CFFF (2048 bytes)
+T485C 004:232.141    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0802D000 if necessary
+T485C 004:232.178    -- Start of preparing flash programming
+T485C 004:232.210    -- End of preparing flash programming
+T485C 004:232.248   CPU_ReadMem(2048 bytes @ 0x0802D000)
+T485C 004:287.469    -- Updating flash cache (2048 bytes @ 0x0802D000)
+T485C 004:287.517    -- Updating flash cache invalid range 0x0802D000 - 0x0802D7FF (2048 bytes)
+T485C 004:287.552    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0802D800 if necessary
+T485C 004:287.575    -- Start of preparing flash programming
+T485C 004:287.606    -- End of preparing flash programming
+T485C 004:287.633   CPU_ReadMem(2048 bytes @ 0x0802D800)
+T485C 004:342.845    -- Updating flash cache (2048 bytes @ 0x0802D800)
+T485C 004:342.893    -- Updating flash cache invalid range 0x0802D800 - 0x0802DFFF (2048 bytes)
+T485C 004:342.921    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0802E000 if necessary
+T485C 004:342.943    -- Start of preparing flash programming
+T485C 004:342.962    -- End of preparing flash programming
+T485C 004:342.986   CPU_ReadMem(2048 bytes @ 0x0802E000)
+T485C 004:398.079    -- Updating flash cache (2048 bytes @ 0x0802E000)
+T485C 004:398.130    -- Updating flash cache invalid range 0x0802E000 - 0x0802E7FF (2048 bytes)
+T485C 004:398.160    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0802E800 if necessary
+T485C 004:398.186    -- Start of preparing flash programming
+T485C 004:398.207    -- End of preparing flash programming
+T485C 004:398.232   CPU_ReadMem(2048 bytes @ 0x0802E800)
+T485C 004:453.401    -- Updating flash cache (2048 bytes @ 0x0802E800)
+T485C 004:453.465    -- Updating flash cache invalid range 0x0802E800 - 0x0802EFFF (2048 bytes)
+T485C 004:453.504    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0802F000 if necessary
+T485C 004:453.537    -- Start of preparing flash programming
+T485C 004:453.566    -- End of preparing flash programming
+T485C 004:453.604   CPU_ReadMem(2048 bytes @ 0x0802F000)
+T485C 004:508.861    -- Updating flash cache (2048 bytes @ 0x0802F000)
+T485C 004:508.930    -- Updating flash cache invalid range 0x0802F000 - 0x0802F7FF (2048 bytes)
+T485C 004:508.978    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0802F800 if necessary
+T485C 004:509.014    -- Start of preparing flash programming
+T485C 004:509.044    -- End of preparing flash programming
+T485C 004:509.080   CPU_ReadMem(2048 bytes @ 0x0802F800)
+T485C 004:564.335    -- Updating flash cache (2048 bytes @ 0x0802F800)
+T485C 004:564.403    -- Updating flash cache invalid range 0x0802F800 - 0x0802FFFF (2048 bytes)
+T485C 004:564.445    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08030000 if necessary
+T485C 004:564.481    -- Start of preparing flash programming
+T485C 004:564.511    -- End of preparing flash programming
+T485C 004:564.548   CPU_ReadMem(2048 bytes @ 0x08030000)
+T485C 004:619.732    -- Updating flash cache (2048 bytes @ 0x08030000)
+T485C 004:619.827    -- Updating flash cache invalid range 0x08030000 - 0x080307FF (2048 bytes)
+T485C 004:619.877    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08030800 if necessary
+T485C 004:619.917    -- Start of preparing flash programming
+T485C 004:619.965    -- End of preparing flash programming
+T485C 004:620.014   CPU_ReadMem(2048 bytes @ 0x08030800)
+T485C 004:675.332    -- Updating flash cache (2048 bytes @ 0x08030800)
+T485C 004:675.401    -- Updating flash cache invalid range 0x08030800 - 0x08030FFF (2048 bytes)
+T485C 004:675.443    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08031000 if necessary
+T485C 004:675.480    -- Start of preparing flash programming
+T485C 004:675.510    -- End of preparing flash programming
+T485C 004:675.546   CPU_ReadMem(2048 bytes @ 0x08031000)
+T485C 004:730.708    -- Updating flash cache (2048 bytes @ 0x08031000)
+T485C 004:730.771    -- Updating flash cache invalid range 0x08031000 - 0x080317FF (2048 bytes)
+T485C 004:730.811    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08031800 if necessary
+T485C 004:730.844    -- Start of preparing flash programming
+T485C 004:730.874    -- End of preparing flash programming
+T485C 004:730.909   CPU_ReadMem(2048 bytes @ 0x08031800)
+T485C 004:786.097    -- Updating flash cache (2048 bytes @ 0x08031800)
+T485C 004:786.166    -- Updating flash cache invalid range 0x08031800 - 0x08031FFF (2048 bytes)
+T485C 004:786.213    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08032000 if necessary
+T485C 004:786.246    -- Start of preparing flash programming
+T485C 004:786.276    -- End of preparing flash programming
+T485C 004:786.311   CPU_ReadMem(2048 bytes @ 0x08032000)
+T485C 004:841.488    -- Updating flash cache (2048 bytes @ 0x08032000)
+T485C 004:841.585    -- Updating flash cache invalid range 0x08032000 - 0x080327FF (2048 bytes)
+T485C 004:841.658    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08032800 if necessary
+T485C 004:841.716    -- Start of preparing flash programming
+T485C 004:841.773    -- End of preparing flash programming
+T485C 004:841.841   CPU_ReadMem(2048 bytes @ 0x08032800)
+T485C 004:897.093    -- Updating flash cache (2048 bytes @ 0x08032800)
+T485C 004:897.144    -- Updating flash cache invalid range 0x08032800 - 0x08032FFF (2048 bytes)
+T485C 004:897.184    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08033000 if necessary
+T485C 004:897.219    -- Start of preparing flash programming
+T485C 004:897.249    -- End of preparing flash programming
+T485C 004:897.285   CPU_ReadMem(2048 bytes @ 0x08033000)
+T485C 004:952.477    -- Updating flash cache (2048 bytes @ 0x08033000)
+T485C 004:952.536    -- Updating flash cache invalid range 0x08033000 - 0x080337FF (2048 bytes)
+T485C 004:952.577    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08033800 if necessary
+T485C 004:952.607    -- Start of preparing flash programming
+T485C 004:952.634    -- End of preparing flash programming
+T485C 004:952.666   CPU_ReadMem(2048 bytes @ 0x08033800)
+T485C 005:007.943    -- Updating flash cache (2048 bytes @ 0x08033800)
+T485C 005:008.015    -- Updating flash cache invalid range 0x08033800 - 0x08033FFF (2048 bytes)
+T485C 005:008.056    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08034000 if necessary
+T485C 005:008.092    -- Start of preparing flash programming
+T485C 005:008.122    -- End of preparing flash programming
+T485C 005:008.157   CPU_ReadMem(2048 bytes @ 0x08034000)
+T485C 005:063.400    -- Updating flash cache (2048 bytes @ 0x08034000)
+T485C 005:063.469    -- Updating flash cache invalid range 0x08034000 - 0x080347FF (2048 bytes)
+T485C 005:063.511    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08034800 if necessary
+T485C 005:063.546    -- Start of preparing flash programming
+T485C 005:063.576    -- End of preparing flash programming
+T485C 005:063.611   CPU_ReadMem(2048 bytes @ 0x08034800)
+T485C 005:118.941    -- Updating flash cache (2048 bytes @ 0x08034800)
+T485C 005:119.009    -- Updating flash cache invalid range 0x08034800 - 0x08034FFF (2048 bytes)
+T485C 005:119.052    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08035000 if necessary
+T485C 005:119.088    -- Start of preparing flash programming
+T485C 005:119.119    -- End of preparing flash programming
+T485C 005:119.154   CPU_ReadMem(2048 bytes @ 0x08035000)
+T485C 005:174.324    -- Updating flash cache (2048 bytes @ 0x08035000)
+T485C 005:174.392    -- Updating flash cache invalid range 0x08035000 - 0x080357FF (2048 bytes)
+T485C 005:174.433    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08035800 if necessary
+T485C 005:174.469    -- Start of preparing flash programming
+T485C 005:174.500    -- End of preparing flash programming
+T485C 005:174.535   CPU_ReadMem(2048 bytes @ 0x08035800)
+T485C 005:229.795    -- Updating flash cache (2048 bytes @ 0x08035800)
+T485C 005:229.863    -- Updating flash cache invalid range 0x08035800 - 0x08035FFF (2048 bytes)
+T485C 005:229.903    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08036000 if necessary
+T485C 005:229.936    -- Start of preparing flash programming
+T485C 005:229.966    -- End of preparing flash programming
+T485C 005:230.002   CPU_ReadMem(2048 bytes @ 0x08036000)
+T485C 005:285.168    -- Updating flash cache (2048 bytes @ 0x08036000)
+T485C 005:285.236    -- Updating flash cache invalid range 0x08036000 - 0x080367FF (2048 bytes)
+T485C 005:285.307    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08036800 if necessary
+T485C 005:285.343    -- Start of preparing flash programming
+T485C 005:285.391    -- End of preparing flash programming
+T485C 005:285.429   CPU_ReadMem(2048 bytes @ 0x08036800)
+T485C 005:340.692    -- Updating flash cache (2048 bytes @ 0x08036800)
+T485C 005:340.739    -- Updating flash cache invalid range 0x08036800 - 0x08036FFF (2048 bytes)
+T485C 005:340.767    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08037000 if necessary
+T485C 005:340.789    -- Start of preparing flash programming
+T485C 005:340.808    -- End of preparing flash programming
+T485C 005:340.832   CPU_ReadMem(2048 bytes @ 0x08037000)
+T485C 005:396.159    -- Updating flash cache (2048 bytes @ 0x08037000)
+T485C 005:396.206    -- Updating flash cache invalid range 0x08037000 - 0x080377FF (2048 bytes)
+T485C 005:396.234    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08037800 if necessary
+T485C 005:396.256    -- Start of preparing flash programming
+T485C 005:396.275    -- End of preparing flash programming
+T485C 005:396.299   CPU_ReadMem(2048 bytes @ 0x08037800)
+T485C 005:451.396    -- Updating flash cache (2048 bytes @ 0x08037800)
+T485C 005:451.447    -- Updating flash cache invalid range 0x08037800 - 0x08037FFF (2048 bytes)
+T485C 005:451.478    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08038000 if necessary
+T485C 005:451.513    -- Start of preparing flash programming
+T485C 005:451.536    -- End of preparing flash programming
+T485C 005:451.561   CPU_ReadMem(2048 bytes @ 0x08038000)
+T485C 005:506.871    -- Updating flash cache (2048 bytes @ 0x08038000)
+T485C 005:506.918    -- Updating flash cache invalid range 0x08038000 - 0x080387FF (2048 bytes)
+T485C 005:506.947    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08038800 if necessary
+T485C 005:506.968    -- Start of preparing flash programming
+T485C 005:506.987    -- End of preparing flash programming
+T485C 005:507.011   CPU_ReadMem(2048 bytes @ 0x08038800)
+T485C 005:562.326    -- Updating flash cache (2048 bytes @ 0x08038800)
+T485C 005:562.394    -- Updating flash cache invalid range 0x08038800 - 0x08038FFF (2048 bytes)
+T485C 005:562.437    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08039000 if necessary
+T485C 005:562.473    -- Start of preparing flash programming
+T485C 005:562.505    -- End of preparing flash programming
+T485C 005:562.541   CPU_ReadMem(2048 bytes @ 0x08039000)
+T485C 005:617.873    -- Updating flash cache (2048 bytes @ 0x08039000)
+T485C 005:617.933    -- Updating flash cache invalid range 0x08039000 - 0x080397FF (2048 bytes)
+T485C 005:617.981    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08039800 if necessary
+T485C 005:618.016    -- Start of preparing flash programming
+T485C 005:618.046    -- End of preparing flash programming
+T485C 005:618.083   CPU_ReadMem(2048 bytes @ 0x08039800)
+T485C 005:673.331    -- Updating flash cache (2048 bytes @ 0x08039800)
+T485C 005:673.387    -- Updating flash cache invalid range 0x08039800 - 0x08039FFF (2048 bytes)
+T485C 005:673.427    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0803A000 if necessary
+T485C 005:673.461    -- Start of preparing flash programming
+T485C 005:673.491    -- End of preparing flash programming
+T485C 005:673.526   CPU_ReadMem(2048 bytes @ 0x0803A000)
+T485C 005:728.787    -- Updating flash cache (2048 bytes @ 0x0803A000)
+T485C 005:728.842    -- Updating flash cache invalid range 0x0803A000 - 0x0803A7FF (2048 bytes)
+T485C 005:728.882    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0803A800 if necessary
+T485C 005:728.915    -- Start of preparing flash programming
+T485C 005:728.945    -- End of preparing flash programming
+T485C 005:728.995   CPU_ReadMem(2048 bytes @ 0x0803A800)
+T485C 005:784.329    -- Updating flash cache (2048 bytes @ 0x0803A800)
+T485C 005:784.393    -- Updating flash cache invalid range 0x0803A800 - 0x0803AFFF (2048 bytes)
+T485C 005:784.431    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0803B000 if necessary
+T485C 005:784.463    -- Start of preparing flash programming
+T485C 005:784.493    -- End of preparing flash programming
+T485C 005:784.528   CPU_ReadMem(2048 bytes @ 0x0803B000)
+T485C 005:839.886    -- Updating flash cache (2048 bytes @ 0x0803B000)
+T485C 005:839.954    -- Updating flash cache invalid range 0x0803B000 - 0x0803B7FF (2048 bytes)
+T485C 005:839.994    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0803B800 if necessary
+T485C 005:840.026    -- Start of preparing flash programming
+T485C 005:840.056    -- End of preparing flash programming
+T485C 005:840.092   CPU_ReadMem(2048 bytes @ 0x0803B800)
+T485C 005:895.263    -- Updating flash cache (2048 bytes @ 0x0803B800)
+T485C 005:895.329    -- Updating flash cache invalid range 0x0803B800 - 0x0803BFFF (2048 bytes)
+T485C 005:895.372    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0803C000 if necessary
+T485C 005:895.407    -- Start of preparing flash programming
+T485C 005:895.437    -- End of preparing flash programming
+T485C 005:895.473   CPU_ReadMem(2048 bytes @ 0x0803C000)
+T485C 005:950.877    -- Updating flash cache (2048 bytes @ 0x0803C000)
+T485C 005:950.949    -- Updating flash cache invalid range 0x0803C000 - 0x0803C7FF (2048 bytes)
+T485C 005:950.991    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0803C800 if necessary
+T485C 005:951.026    -- Start of preparing flash programming
+T485C 005:951.057    -- End of preparing flash programming
+T485C 005:951.093   CPU_ReadMem(2048 bytes @ 0x0803C800)
+T485C 006:006.331    -- Updating flash cache (2048 bytes @ 0x0803C800)
+T485C 006:006.397    -- Updating flash cache invalid range 0x0803C800 - 0x0803CFFF (2048 bytes)
+T485C 006:006.439    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0803D000 if necessary
+T485C 006:006.501    -- Start of preparing flash programming
+T485C 006:006.531    -- End of preparing flash programming
+T485C 006:006.568   CPU_ReadMem(2048 bytes @ 0x0803D000)
+T485C 006:061.788    -- Updating flash cache (2048 bytes @ 0x0803D000)
+T485C 006:061.853    -- Updating flash cache invalid range 0x0803D000 - 0x0803D7FF (2048 bytes)
+T485C 006:061.892    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0803D800 if necessary
+T485C 006:061.924    -- Start of preparing flash programming
+T485C 006:061.954    -- End of preparing flash programming
+T485C 006:061.992   CPU_ReadMem(2048 bytes @ 0x0803D800)
+T485C 006:117.339    -- Updating flash cache (2048 bytes @ 0x0803D800)
+T485C 006:117.403    -- Updating flash cache invalid range 0x0803D800 - 0x0803DFFF (2048 bytes)
+T485C 006:117.443    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0803E000 if necessary
+T485C 006:117.475    -- Start of preparing flash programming
+T485C 006:117.505    -- End of preparing flash programming
+T485C 006:117.540   CPU_ReadMem(2048 bytes @ 0x0803E000)
+T485C 006:172.865    -- Updating flash cache (2048 bytes @ 0x0803E000)
+T485C 006:172.931    -- Updating flash cache invalid range 0x0803E000 - 0x0803E7FF (2048 bytes)
+T485C 006:172.970    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0803E800 if necessary
+T485C 006:173.002    -- Start of preparing flash programming
+T485C 006:173.032    -- End of preparing flash programming
+T485C 006:173.067   CPU_ReadMem(2048 bytes @ 0x0803E800)
+T485C 006:228.259    -- Updating flash cache (2048 bytes @ 0x0803E800)
+T485C 006:228.328    -- Updating flash cache invalid range 0x0803E800 - 0x0803EFFF (2048 bytes)
+T485C 006:228.367    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0803F000 if necessary
+T485C 006:228.411    -- Start of preparing flash programming
+T485C 006:228.441    -- End of preparing flash programming
+T485C 006:228.477   CPU_ReadMem(2048 bytes @ 0x0803F000)
+T485C 006:283.878    -- Updating flash cache (2048 bytes @ 0x0803F000)
+T485C 006:283.947    -- Updating flash cache invalid range 0x0803F000 - 0x0803F7FF (2048 bytes)
+T485C 006:283.989    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0803F800 if necessary
+T485C 006:284.023    -- Start of preparing flash programming
+T485C 006:284.056    -- End of preparing flash programming
+T485C 006:284.092   CPU_ReadMem(2048 bytes @ 0x0803F800)
+T485C 006:339.261    -- Updating flash cache (2048 bytes @ 0x0803F800)
+T485C 006:339.340    -- Updating flash cache invalid range 0x0803F800 - 0x0803FFFF (2048 bytes)
+T485C 006:339.386    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08040000 if necessary
+T485C 006:339.496    -- Start of preparing flash programming
+T485C 006:339.529    -- End of preparing flash programming
+T485C 006:339.565   CPU_ReadMem(2048 bytes @ 0x08040000)
+T485C 006:394.877    -- Updating flash cache (2048 bytes @ 0x08040000)
+T485C 006:394.949    -- Updating flash cache invalid range 0x08040000 - 0x080407FF (2048 bytes)
+T485C 006:394.988    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08040800 if necessary
+T485C 006:395.021    -- Start of preparing flash programming
+T485C 006:395.050    -- End of preparing flash programming
+T485C 006:395.085   CPU_ReadMem(2048 bytes @ 0x08040800)
+T485C 006:450.333    -- Updating flash cache (2048 bytes @ 0x08040800)
+T485C 006:450.401    -- Updating flash cache invalid range 0x08040800 - 0x08040FFF (2048 bytes)
+T485C 006:450.441    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08041000 if necessary
+T485C 006:450.474    -- Start of preparing flash programming
+T485C 006:450.504    -- End of preparing flash programming
+T485C 006:450.539   CPU_ReadMem(2048 bytes @ 0x08041000)
+T485C 006:505.711    -- Updating flash cache (2048 bytes @ 0x08041000)
+T485C 006:505.763    -- Updating flash cache invalid range 0x08041000 - 0x080417FF (2048 bytes)
+T485C 006:505.805    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08041800 if necessary
+T485C 006:505.838    -- Start of preparing flash programming
+T485C 006:505.869    -- End of preparing flash programming
+T485C 006:505.907   CPU_ReadMem(2048 bytes @ 0x08041800)
+T485C 006:561.179    -- Updating flash cache (2048 bytes @ 0x08041800)
+T485C 006:561.244    -- Updating flash cache invalid range 0x08041800 - 0x08041FFF (2048 bytes)
+T485C 006:561.282    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08042000 if necessary
+T485C 006:561.311    -- Start of preparing flash programming
+T485C 006:561.339    -- End of preparing flash programming
+T485C 006:561.373   CPU_ReadMem(2048 bytes @ 0x08042000)
+T485C 006:616.562    -- Updating flash cache (2048 bytes @ 0x08042000)
+T485C 006:616.613    -- Updating flash cache invalid range 0x08042000 - 0x080427FF (2048 bytes)
+T485C 006:616.653    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08042800 if necessary
+T485C 006:616.692    -- Start of preparing flash programming
+T485C 006:616.722    -- End of preparing flash programming
+T485C 006:616.758   CPU_ReadMem(2048 bytes @ 0x08042800)
+T485C 006:672.022    -- Updating flash cache (2048 bytes @ 0x08042800)
+T485C 006:672.089    -- Updating flash cache invalid range 0x08042800 - 0x08042FFF (2048 bytes)
+T485C 006:672.127    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08043000 if necessary
+T485C 006:672.157    -- Start of preparing flash programming
+T485C 006:672.184    -- End of preparing flash programming
+T485C 006:672.218   CPU_ReadMem(2048 bytes @ 0x08043000)
+T485C 006:727.407    -- Updating flash cache (2048 bytes @ 0x08043000)
+T485C 006:727.463    -- Updating flash cache invalid range 0x08043000 - 0x080437FF (2048 bytes)
+T485C 006:727.502    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08043800 if necessary
+T485C 006:727.544    -- Start of preparing flash programming
+T485C 006:727.574    -- End of preparing flash programming
+T485C 006:727.609   CPU_ReadMem(2048 bytes @ 0x08043800)
+T485C 006:782.871    -- Updating flash cache (2048 bytes @ 0x08043800)
+T485C 006:782.940    -- Updating flash cache invalid range 0x08043800 - 0x08043FFF (2048 bytes)
+T485C 006:782.979    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08044000 if necessary
+T485C 006:783.011    -- Start of preparing flash programming
+T485C 006:783.041    -- End of preparing flash programming
+T485C 006:783.077   CPU_ReadMem(2048 bytes @ 0x08044000)
+T485C 006:838.253    -- Updating flash cache (2048 bytes @ 0x08044000)
+T485C 006:838.307    -- Updating flash cache invalid range 0x08044000 - 0x080447FF (2048 bytes)
+T485C 006:838.346    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08044800 if necessary
+T485C 006:838.378    -- Start of preparing flash programming
+T485C 006:838.409    -- End of preparing flash programming
+T485C 006:838.445   CPU_ReadMem(2048 bytes @ 0x08044800)
+T485C 006:893.712    -- Updating flash cache (2048 bytes @ 0x08044800)
+T485C 006:893.797    -- Updating flash cache invalid range 0x08044800 - 0x08044FFF (2048 bytes)
+T485C 006:893.846    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08045000 if necessary
+T485C 006:893.912    -- Start of preparing flash programming
+T485C 006:893.944    -- End of preparing flash programming
+T485C 006:894.017   CPU_ReadMem(2048 bytes @ 0x08045000)
+T485C 006:949.246    -- Updating flash cache (2048 bytes @ 0x08045000)
+T485C 006:949.303    -- Updating flash cache invalid range 0x08045000 - 0x080457FF (2048 bytes)
+T485C 006:949.342    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08045800 if necessary
+T485C 006:949.376    -- Start of preparing flash programming
+T485C 006:949.405    -- End of preparing flash programming
+T485C 006:949.440   CPU_ReadMem(2048 bytes @ 0x08045800)
+T485C 007:004.721    -- Updating flash cache (2048 bytes @ 0x08045800)
+T485C 007:004.785    -- Updating flash cache invalid range 0x08045800 - 0x08045FFF (2048 bytes)
+T485C 007:004.825    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08046000 if necessary
+T485C 007:004.858    -- Start of preparing flash programming
+T485C 007:004.888    -- End of preparing flash programming
+T485C 007:004.924   CPU_ReadMem(2048 bytes @ 0x08046000)
+T485C 007:060.249    -- Updating flash cache (2048 bytes @ 0x08046000)
+T485C 007:060.306    -- Updating flash cache invalid range 0x08046000 - 0x080467FF (2048 bytes)
+T485C 007:060.345    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08046800 if necessary
+T485C 007:060.378    -- Start of preparing flash programming
+T485C 007:060.408    -- End of preparing flash programming
+T485C 007:060.443   CPU_ReadMem(2048 bytes @ 0x08046800)
+T485C 007:115.841    -- Updating flash cache (2048 bytes @ 0x08046800)
+T485C 007:115.900    -- Updating flash cache invalid range 0x08046800 - 0x08046FFF (2048 bytes)
+T485C 007:115.941    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08047000 if necessary
+T485C 007:115.973    -- Start of preparing flash programming
+T485C 007:116.003    -- End of preparing flash programming
+T485C 007:116.039   CPU_ReadMem(2048 bytes @ 0x08047000)
+T485C 007:171.253    -- Updating flash cache (2048 bytes @ 0x08047000)
+T485C 007:171.332    -- Updating flash cache invalid range 0x08047000 - 0x080477FF (2048 bytes)
+T485C 007:171.372    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08047800 if necessary
+T485C 007:171.403    -- Start of preparing flash programming
+T485C 007:171.433    -- End of preparing flash programming
+T485C 007:171.469   CPU_ReadMem(2048 bytes @ 0x08047800)
+T485C 007:226.789    -- Updating flash cache (2048 bytes @ 0x08047800)
+T485C 007:226.861    -- Updating flash cache invalid range 0x08047800 - 0x08047FFF (2048 bytes)
+T485C 007:226.989    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08048000 if necessary
+T485C 007:227.025    -- Start of preparing flash programming
+T485C 007:227.055    -- End of preparing flash programming
+T485C 007:227.092   CPU_ReadMem(2048 bytes @ 0x08048000)
+T485C 007:282.256    -- Updating flash cache (2048 bytes @ 0x08048000)
+T485C 007:282.323    -- Updating flash cache invalid range 0x08048000 - 0x080487FF (2048 bytes)
+T485C 007:282.361    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08048800 if necessary
+T485C 007:282.395    -- Start of preparing flash programming
+T485C 007:282.424    -- End of preparing flash programming
+T485C 007:282.459   CPU_ReadMem(2048 bytes @ 0x08048800)
+T485C 007:337.647    -- Updating flash cache (2048 bytes @ 0x08048800)
+T485C 007:337.710    -- Updating flash cache invalid range 0x08048800 - 0x08048FFF (2048 bytes)
+T485C 007:337.749    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08049000 if necessary
+T485C 007:337.782    -- Start of preparing flash programming
+T485C 007:337.812    -- End of preparing flash programming
+T485C 007:337.847   CPU_ReadMem(2048 bytes @ 0x08049000)
+T485C 007:393.173    -- Updating flash cache (2048 bytes @ 0x08049000)
+T485C 007:393.240    -- Updating flash cache invalid range 0x08049000 - 0x080497FF (2048 bytes)
+T485C 007:393.290    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08049800 if necessary
+T485C 007:393.323    -- Start of preparing flash programming
+T485C 007:393.353    -- End of preparing flash programming
+T485C 007:393.387   CPU_ReadMem(2048 bytes @ 0x08049800)
+T485C 007:448.555    -- Updating flash cache (2048 bytes @ 0x08049800)
+T485C 007:448.630    -- Updating flash cache invalid range 0x08049800 - 0x08049FFF (2048 bytes)
+T485C 007:448.670    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0804A000 if necessary
+T485C 007:448.703    -- Start of preparing flash programming
+T485C 007:448.733    -- End of preparing flash programming
+T485C 007:448.769   CPU_ReadMem(2048 bytes @ 0x0804A000)
+T485C 007:504.014    -- Updating flash cache (2048 bytes @ 0x0804A000)
+T485C 007:504.076    -- Updating flash cache invalid range 0x0804A000 - 0x0804A7FF (2048 bytes)
+T485C 007:504.115    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0804A800 if necessary
+T485C 007:504.148    -- Start of preparing flash programming
+T485C 007:504.177    -- End of preparing flash programming
+T485C 007:504.213   CPU_ReadMem(2048 bytes @ 0x0804A800)
+T485C 007:559.322    -- Updating flash cache (2048 bytes @ 0x0804A800)
+T485C 007:559.385    -- Updating flash cache invalid range 0x0804A800 - 0x0804AFFF (2048 bytes)
+T485C 007:559.425    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0804B000 if necessary
+T485C 007:559.484    -- Start of preparing flash programming
+T485C 007:559.514    -- End of preparing flash programming
+T485C 007:559.549   CPU_ReadMem(2048 bytes @ 0x0804B000)
+T485C 007:614.781    -- Updating flash cache (2048 bytes @ 0x0804B000)
+T485C 007:614.848    -- Updating flash cache invalid range 0x0804B000 - 0x0804B7FF (2048 bytes)
+T485C 007:614.887    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0804B800 if necessary
+T485C 007:614.920    -- Start of preparing flash programming
+T485C 007:614.949    -- End of preparing flash programming
+T485C 007:614.985   CPU_ReadMem(2048 bytes @ 0x0804B800)
+T485C 007:670.097    -- Updating flash cache (2048 bytes @ 0x0804B800)
+T485C 007:670.157    -- Updating flash cache invalid range 0x0804B800 - 0x0804BFFF (2048 bytes)
+T485C 007:670.196    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0804C000 if necessary
+T485C 007:670.229    -- Start of preparing flash programming
+T485C 007:670.258    -- End of preparing flash programming
+T485C 007:670.293   CPU_ReadMem(2048 bytes @ 0x0804C000)
+T485C 007:725.484    -- Updating flash cache (2048 bytes @ 0x0804C000)
+T485C 007:725.565    -- Updating flash cache invalid range 0x0804C000 - 0x0804C7FF (2048 bytes)
+T485C 007:725.605    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0804C800 if necessary
+T485C 007:725.637    -- Start of preparing flash programming
+T485C 007:725.681    -- End of preparing flash programming
+T485C 007:725.717   CPU_ReadMem(2048 bytes @ 0x0804C800)
+T485C 007:780.863    -- Updating flash cache (2048 bytes @ 0x0804C800)
+T485C 007:780.941    -- Updating flash cache invalid range 0x0804C800 - 0x0804CFFF (2048 bytes)
+T485C 007:780.984    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0804D000 if necessary
+T485C 007:781.017    -- Start of preparing flash programming
+T485C 007:781.046    -- End of preparing flash programming
+T485C 007:781.081   CPU_ReadMem(2048 bytes @ 0x0804D000)
+T485C 007:836.323    -- Updating flash cache (2048 bytes @ 0x0804D000)
+T485C 007:836.390    -- Updating flash cache invalid range 0x0804D000 - 0x0804D7FF (2048 bytes)
+T485C 007:836.431    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0804D800 if necessary
+T485C 007:836.466    -- Start of preparing flash programming
+T485C 007:836.496    -- End of preparing flash programming
+T485C 007:836.531   CPU_ReadMem(2048 bytes @ 0x0804D800)
+T485C 007:891.705    -- Updating flash cache (2048 bytes @ 0x0804D800)
+T485C 007:891.774    -- Updating flash cache invalid range 0x0804D800 - 0x0804DFFF (2048 bytes)
+T485C 007:891.817    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0804E000 if necessary
+T485C 007:891.853    -- Start of preparing flash programming
+T485C 007:891.884    -- End of preparing flash programming
+T485C 007:891.919   CPU_ReadMem(2048 bytes @ 0x0804E000)
+T485C 007:947.246    -- Updating flash cache (2048 bytes @ 0x0804E000)
+T485C 007:947.305    -- Updating flash cache invalid range 0x0804E000 - 0x0804E7FF (2048 bytes)
+T485C 007:947.344    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0804E800 if necessary
+T485C 007:947.377    -- Start of preparing flash programming
+T485C 007:947.407    -- End of preparing flash programming
+T485C 007:947.441   CPU_ReadMem(2048 bytes @ 0x0804E800)
+T485C 008:002.633    -- Updating flash cache (2048 bytes @ 0x0804E800)
+T485C 008:002.697    -- Updating flash cache invalid range 0x0804E800 - 0x0804EFFF (2048 bytes)
+T485C 008:002.737    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0804F000 if necessary
+T485C 008:002.770    -- Start of preparing flash programming
+T485C 008:002.800    -- End of preparing flash programming
+T485C 008:002.835   CPU_ReadMem(2048 bytes @ 0x0804F000)
+T485C 008:058.098    -- Updating flash cache (2048 bytes @ 0x0804F000)
+T485C 008:058.177    -- Updating flash cache invalid range 0x0804F000 - 0x0804F7FF (2048 bytes)
+T485C 008:058.217    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0804F800 if necessary
+T485C 008:058.249    -- Start of preparing flash programming
+T485C 008:058.279    -- End of preparing flash programming
+T485C 008:058.315   CPU_ReadMem(2048 bytes @ 0x0804F800)
+T485C 008:113.560    -- Updating flash cache (2048 bytes @ 0x0804F800)
+T485C 008:113.624    -- Updating flash cache invalid range 0x0804F800 - 0x0804FFFF (2048 bytes)
+T485C 008:113.663    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08050000 if necessary
+T485C 008:113.697    -- Start of preparing flash programming
+T485C 008:113.726    -- End of preparing flash programming
+T485C 008:113.761   CPU_ReadMem(2048 bytes @ 0x08050000)
+T485C 008:168.939    -- Updating flash cache (2048 bytes @ 0x08050000)
+T485C 008:169.001    -- Updating flash cache invalid range 0x08050000 - 0x080507FF (2048 bytes)
+T485C 008:169.039    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08050800 if necessary
+T485C 008:169.072    -- Start of preparing flash programming
+T485C 008:169.101    -- End of preparing flash programming
+T485C 008:169.149   CPU_ReadMem(2048 bytes @ 0x08050800)
+T485C 008:224.340    -- Updating flash cache (2048 bytes @ 0x08050800)
+T485C 008:224.413    -- Updating flash cache invalid range 0x08050800 - 0x08050FFF (2048 bytes)
+T485C 008:224.457    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08051000 if necessary
+T485C 008:224.495    -- Start of preparing flash programming
+T485C 008:224.525    -- End of preparing flash programming
+T485C 008:224.562   CPU_ReadMem(2048 bytes @ 0x08051000)
+T485C 008:279.714    -- Updating flash cache (2048 bytes @ 0x08051000)
+T485C 008:279.801    -- Updating flash cache invalid range 0x08051000 - 0x080517FF (2048 bytes)
+T485C 008:279.841    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08051800 if necessary
+T485C 008:279.877    -- Start of preparing flash programming
+T485C 008:279.913    -- End of preparing flash programming
+T485C 008:279.949   CPU_ReadMem(2048 bytes @ 0x08051800)
+T485C 008:335.081    -- Updating flash cache (2048 bytes @ 0x08051800)
+T485C 008:335.128    -- Updating flash cache invalid range 0x08051800 - 0x08051FFF (2048 bytes)
+T485C 008:335.156    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08052000 if necessary
+T485C 008:335.177    -- Start of preparing flash programming
+T485C 008:335.197    -- End of preparing flash programming
+T485C 008:335.221   CPU_ReadMem(2048 bytes @ 0x08052000)
+T485C 008:390.328    -- Updating flash cache (2048 bytes @ 0x08052000)
+T485C 008:390.394    -- Updating flash cache invalid range 0x08052000 - 0x080527FF (2048 bytes)
+T485C 008:390.433    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08052800 if necessary
+T485C 008:390.466    -- Start of preparing flash programming
+T485C 008:390.496    -- End of preparing flash programming
+T485C 008:390.532   CPU_ReadMem(2048 bytes @ 0x08052800)
+T485C 008:445.794    -- Updating flash cache (2048 bytes @ 0x08052800)
+T485C 008:445.839    -- Updating flash cache invalid range 0x08052800 - 0x08052FFF (2048 bytes)
+T485C 008:445.867    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08053000 if necessary
+T485C 008:445.889    -- Start of preparing flash programming
+T485C 008:445.908    -- End of preparing flash programming
+T485C 008:445.932   CPU_ReadMem(2048 bytes @ 0x08053000)
+T485C 008:501.178    -- Updating flash cache (2048 bytes @ 0x08053000)
+T485C 008:501.226    -- Updating flash cache invalid range 0x08053000 - 0x080537FF (2048 bytes)
+T485C 008:501.274    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08053800 if necessary
+T485C 008:501.306    -- Start of preparing flash programming
+T485C 008:501.335    -- End of preparing flash programming
+T485C 008:501.360   CPU_ReadMem(2048 bytes @ 0x08053800)
+T485C 008:556.552    -- Updating flash cache (2048 bytes @ 0x08053800)
+T485C 008:556.618    -- Updating flash cache invalid range 0x08053800 - 0x08053FFF (2048 bytes)
+T485C 008:556.659    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08054000 if necessary
+T485C 008:556.695    -- Start of preparing flash programming
+T485C 008:556.726    -- End of preparing flash programming
+T485C 008:556.761   CPU_ReadMem(2048 bytes @ 0x08054000)
+T485C 008:612.018    -- Updating flash cache (2048 bytes @ 0x08054000)
+T485C 008:612.085    -- Updating flash cache invalid range 0x08054000 - 0x080547FF (2048 bytes)
+T485C 008:612.126    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08054800 if necessary
+T485C 008:612.164    -- Start of preparing flash programming
+T485C 008:612.195    -- End of preparing flash programming
+T485C 008:612.234   CPU_ReadMem(2048 bytes @ 0x08054800)
+T485C 008:667.400    -- Updating flash cache (2048 bytes @ 0x08054800)
+T485C 008:667.468    -- Updating flash cache invalid range 0x08054800 - 0x08054FFF (2048 bytes)
+T485C 008:667.509    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08055000 if necessary
+T485C 008:667.545    -- Start of preparing flash programming
+T485C 008:667.587    -- End of preparing flash programming
+T485C 008:667.624   CPU_ReadMem(2048 bytes @ 0x08055000)
+T485C 008:722.861    -- Updating flash cache (2048 bytes @ 0x08055000)
+T485C 008:722.928    -- Updating flash cache invalid range 0x08055000 - 0x080557FF (2048 bytes)
+T485C 008:722.970    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08055800 if necessary
+T485C 008:723.006    -- Start of preparing flash programming
+T485C 008:723.036    -- End of preparing flash programming
+T485C 008:723.074   CPU_ReadMem(2048 bytes @ 0x08055800)
+T485C 008:778.256    -- Updating flash cache (2048 bytes @ 0x08055800)
+T485C 008:778.302    -- Updating flash cache invalid range 0x08055800 - 0x08055FFF (2048 bytes)
+T485C 008:778.330    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08056000 if necessary
+T485C 008:778.352    -- Start of preparing flash programming
+T485C 008:778.371    -- End of preparing flash programming
+T485C 008:778.394   CPU_ReadMem(2048 bytes @ 0x08056000)
+T485C 008:833.629    -- Updating flash cache (2048 bytes @ 0x08056000)
+T485C 008:833.691    -- Updating flash cache invalid range 0x08056000 - 0x080567FF (2048 bytes)
+T485C 008:833.732    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08056800 if necessary
+T485C 008:833.766    -- Start of preparing flash programming
+T485C 008:833.797    -- End of preparing flash programming
+T485C 008:833.832   CPU_ReadMem(2048 bytes @ 0x08056800)
+T485C 008:889.090    -- Updating flash cache (2048 bytes @ 0x08056800)
+T485C 008:889.158    -- Updating flash cache invalid range 0x08056800 - 0x08056FFF (2048 bytes)
+T485C 008:889.201    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08057000 if necessary
+T485C 008:889.237    -- Start of preparing flash programming
+T485C 008:889.270    -- End of preparing flash programming
+T485C 008:889.307   CPU_ReadMem(2048 bytes @ 0x08057000)
+T485C 008:944.470    -- Updating flash cache (2048 bytes @ 0x08057000)
+T485C 008:944.530    -- Updating flash cache invalid range 0x08057000 - 0x080577FF (2048 bytes)
+T485C 008:944.568    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08057800 if necessary
+T485C 008:944.599    -- Start of preparing flash programming
+T485C 008:944.626    -- End of preparing flash programming
+T485C 008:944.661   CPU_ReadMem(2048 bytes @ 0x08057800)
+T485C 008:999.939    -- Updating flash cache (2048 bytes @ 0x08057800)
+T485C 009:000.004    -- Updating flash cache invalid range 0x08057800 - 0x08057FFF (2048 bytes)
+T485C 009:000.043    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08058000 if necessary
+T485C 009:000.076    -- Start of preparing flash programming
+T485C 009:000.106    -- End of preparing flash programming
+T485C 009:000.141   CPU_ReadMem(2048 bytes @ 0x08058000)
+T485C 009:055.401    -- Updating flash cache (2048 bytes @ 0x08058000)
+T485C 009:055.454    -- Updating flash cache invalid range 0x08058000 - 0x080587FF (2048 bytes)
+T485C 009:055.494    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08058800 if necessary
+T485C 009:055.526    -- Start of preparing flash programming
+T485C 009:055.557    -- End of preparing flash programming
+T485C 009:055.591   CPU_ReadMem(2048 bytes @ 0x08058800)
+T485C 009:110.898    -- Updating flash cache (2048 bytes @ 0x08058800)
+T485C 009:110.982    -- Updating flash cache invalid range 0x08058800 - 0x08058FFF (2048 bytes)
+T485C 009:111.022    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08059000 if necessary
+T485C 009:111.055    -- Start of preparing flash programming
+T485C 009:111.105    -- End of preparing flash programming
+T485C 009:111.139   CPU_ReadMem(2048 bytes @ 0x08059000)
+T485C 009:166.309    -- Updating flash cache (2048 bytes @ 0x08059000)
+T485C 009:166.362    -- Updating flash cache invalid range 0x08059000 - 0x080597FF (2048 bytes)
+T485C 009:166.394    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08059800 if necessary
+T485C 009:166.429    -- Start of preparing flash programming
+T485C 009:166.450    -- End of preparing flash programming
+T485C 009:166.474   CPU_ReadMem(2048 bytes @ 0x08059800)
+T485C 009:221.715    -- Updating flash cache (2048 bytes @ 0x08059800)
+T485C 009:221.782    -- Updating flash cache invalid range 0x08059800 - 0x08059FFF (2048 bytes)
+T485C 009:221.822    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0805A000 if necessary
+T485C 009:221.855    -- Start of preparing flash programming
+T485C 009:221.885    -- End of preparing flash programming
+T485C 009:221.920   CPU_ReadMem(2048 bytes @ 0x0805A000)
+T485C 009:277.089    -- Updating flash cache (2048 bytes @ 0x0805A000)
+T485C 009:277.161    -- Updating flash cache invalid range 0x0805A000 - 0x0805A7FF (2048 bytes)
+T485C 009:277.223    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0805A800 if necessary
+T485C 009:277.259    -- Start of preparing flash programming
+T485C 009:277.289    -- End of preparing flash programming
+T485C 009:277.325   CPU_ReadMem(2048 bytes @ 0x0805A800)
+T485C 009:332.454    -- Updating flash cache (2048 bytes @ 0x0805A800)
+T485C 009:332.500    -- Updating flash cache invalid range 0x0805A800 - 0x0805AFFF (2048 bytes)
+T485C 009:332.529    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0805B000 if necessary
+T485C 009:332.550    -- Start of preparing flash programming
+T485C 009:332.570    -- End of preparing flash programming
+T485C 009:332.594   CPU_ReadMem(2048 bytes @ 0x0805B000)
+T485C 009:387.703    -- Updating flash cache (2048 bytes @ 0x0805B000)
+T485C 009:387.766    -- Updating flash cache invalid range 0x0805B000 - 0x0805B7FF (2048 bytes)
+T485C 009:387.806    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0805B800 if necessary
+T485C 009:387.838    -- Start of preparing flash programming
+T485C 009:387.869    -- End of preparing flash programming
+T485C 009:387.903   CPU_ReadMem(2048 bytes @ 0x0805B800)
+T485C 009:443.115    -- Updating flash cache (2048 bytes @ 0x0805B800)
+T485C 009:443.182    -- Updating flash cache invalid range 0x0805B800 - 0x0805BFFF (2048 bytes)
+T485C 009:443.257    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0805C000 if necessary
+T485C 009:443.300    -- Start of preparing flash programming
+T485C 009:443.330    -- End of preparing flash programming
+T485C 009:443.366   CPU_ReadMem(2048 bytes @ 0x0805C000)
+T485C 009:498.542    -- Updating flash cache (2048 bytes @ 0x0805C000)
+T485C 009:498.593    -- Updating flash cache invalid range 0x0805C000 - 0x0805C7FF (2048 bytes)
+T485C 009:498.623    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0805C800 if necessary
+T485C 009:498.650    -- Start of preparing flash programming
+T485C 009:498.670    -- End of preparing flash programming
+T485C 009:498.694   CPU_ReadMem(2048 bytes @ 0x0805C800)
+T485C 009:554.028    -- Updating flash cache (2048 bytes @ 0x0805C800)
+T485C 009:554.074    -- Updating flash cache invalid range 0x0805C800 - 0x0805CFFF (2048 bytes)
+T485C 009:554.102    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0805D000 if necessary
+T485C 009:554.123    -- Start of preparing flash programming
+T485C 009:554.142    -- End of preparing flash programming
+T485C 009:554.166   CPU_ReadMem(2048 bytes @ 0x0805D000)
+T485C 009:609.325    -- Updating flash cache (2048 bytes @ 0x0805D000)
+T485C 009:609.388    -- Updating flash cache invalid range 0x0805D000 - 0x0805D7FF (2048 bytes)
+T485C 009:609.427    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0805D800 if necessary
+T485C 009:609.460    -- Start of preparing flash programming
+T485C 009:609.490    -- End of preparing flash programming
+T485C 009:609.525   CPU_ReadMem(2048 bytes @ 0x0805D800)
+T485C 009:664.706    -- Updating flash cache (2048 bytes @ 0x0805D800)
+T485C 009:664.774    -- Updating flash cache invalid range 0x0805D800 - 0x0805DFFF (2048 bytes)
+T485C 009:664.828    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0805E000 if necessary
+T485C 009:664.864    -- Start of preparing flash programming
+T485C 009:664.894    -- End of preparing flash programming
+T485C 009:664.933   CPU_ReadMem(2048 bytes @ 0x0805E000)
+T485C 009:720.260    -- Updating flash cache (2048 bytes @ 0x0805E000)
+T485C 009:720.322    -- Updating flash cache invalid range 0x0805E000 - 0x0805E7FF (2048 bytes)
+T485C 009:720.362    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0805E800 if necessary
+T485C 009:720.397    -- Start of preparing flash programming
+T485C 009:720.427    -- End of preparing flash programming
+T485C 009:720.462   CPU_ReadMem(2048 bytes @ 0x0805E800)
+T485C 009:775.886    -- Updating flash cache (2048 bytes @ 0x0805E800)
+T485C 009:775.934    -- Updating flash cache invalid range 0x0805E800 - 0x0805EFFF (2048 bytes)
+T485C 009:775.962    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0805F000 if necessary
+T485C 009:775.984    -- Start of preparing flash programming
+T485C 009:776.003    -- End of preparing flash programming
+T485C 009:776.027   CPU_ReadMem(2048 bytes @ 0x0805F000)
+T485C 009:831.331    -- Updating flash cache (2048 bytes @ 0x0805F000)
+T485C 009:831.378    -- Updating flash cache invalid range 0x0805F000 - 0x0805F7FF (2048 bytes)
+T485C 009:831.406    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0805F800 if necessary
+T485C 009:831.427    -- Start of preparing flash programming
+T485C 009:831.446    -- End of preparing flash programming
+T485C 009:831.470   CPU_ReadMem(2048 bytes @ 0x0805F800)
+T485C 009:886.625    -- Updating flash cache (2048 bytes @ 0x0805F800)
+T485C 009:886.678    -- Updating flash cache invalid range 0x0805F800 - 0x0805FFFF (2048 bytes)
+T485C 009:886.719    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08060000 if necessary
+T485C 009:886.753    -- Start of preparing flash programming
+T485C 009:886.783    -- End of preparing flash programming
+T485C 009:886.819   CPU_ReadMem(2048 bytes @ 0x08060000)
+T485C 009:942.106    -- Updating flash cache (2048 bytes @ 0x08060000)
+T485C 009:942.153    -- Updating flash cache invalid range 0x08060000 - 0x080607FF (2048 bytes)
+T485C 009:942.181    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08060800 if necessary
+T485C 009:942.202    -- Start of preparing flash programming
+T485C 009:942.222    -- End of preparing flash programming
+T485C 009:942.246   CPU_ReadMem(2048 bytes @ 0x08060800)
+T485C 009:997.393    -- Updating flash cache (2048 bytes @ 0x08060800)
+T485C 009:997.453    -- Updating flash cache invalid range 0x08060800 - 0x08060FFF (2048 bytes)
+T485C 009:997.490    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08061000 if necessary
+T485C 009:997.526    -- Start of preparing flash programming
+T485C 009:997.553    -- End of preparing flash programming
+T485C 009:997.586   CPU_ReadMem(2048 bytes @ 0x08061000)
+T485C 010:052.769    -- Updating flash cache (2048 bytes @ 0x08061000)
+T485C 010:052.817    -- Updating flash cache invalid range 0x08061000 - 0x080617FF (2048 bytes)
+T485C 010:052.845    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08061800 if necessary
+T485C 010:052.866    -- Start of preparing flash programming
+T485C 010:052.886    -- End of preparing flash programming
+T485C 010:052.909   CPU_ReadMem(2048 bytes @ 0x08061800)
+T485C 010:108.248    -- Updating flash cache (2048 bytes @ 0x08061800)
+T485C 010:108.318    -- Updating flash cache invalid range 0x08061800 - 0x08061FFF (2048 bytes)
+T485C 010:108.358    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08062000 if necessary
+T485C 010:108.390    -- Start of preparing flash programming
+T485C 010:108.421    -- End of preparing flash programming
+T485C 010:108.456   CPU_ReadMem(2048 bytes @ 0x08062000)
+T485C 010:163.790    -- Updating flash cache (2048 bytes @ 0x08062000)
+T485C 010:163.869    -- Updating flash cache invalid range 0x08062000 - 0x080627FF (2048 bytes)
+T485C 010:163.914    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08062800 if necessary
+T485C 010:163.949    -- Start of preparing flash programming
+T485C 010:163.979    -- End of preparing flash programming
+T485C 010:164.016   CPU_ReadMem(2048 bytes @ 0x08062800)
+T485C 010:219.182    -- Updating flash cache (2048 bytes @ 0x08062800)
+T485C 010:219.250    -- Updating flash cache invalid range 0x08062800 - 0x08062FFF (2048 bytes)
+T485C 010:219.290    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08063000 if necessary
+T485C 010:219.323    -- Start of preparing flash programming
+T485C 010:219.354    -- End of preparing flash programming
+T485C 010:219.389   CPU_ReadMem(2048 bytes @ 0x08063000)
+T485C 010:274.536    -- Updating flash cache (2048 bytes @ 0x08063000)
+T485C 010:274.582    -- Updating flash cache invalid range 0x08063000 - 0x080637FF (2048 bytes)
+T485C 010:274.611    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08063800 if necessary
+T485C 010:274.633    -- Start of preparing flash programming
+T485C 010:274.653    -- End of preparing flash programming
+T485C 010:274.676   CPU_ReadMem(2048 bytes @ 0x08063800)
+T485C 010:329.790    -- Updating flash cache (2048 bytes @ 0x08063800)
+T485C 010:329.855    -- Updating flash cache invalid range 0x08063800 - 0x08063FFF (2048 bytes)
+T485C 010:329.894    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08064000 if necessary
+T485C 010:329.926    -- Start of preparing flash programming
+T485C 010:329.954    -- End of preparing flash programming
+T485C 010:330.012   CPU_ReadMem(2048 bytes @ 0x08064000)
+T485C 010:385.324    -- Updating flash cache (2048 bytes @ 0x08064000)
+T485C 010:385.388    -- Updating flash cache invalid range 0x08064000 - 0x080647FF (2048 bytes)
+T485C 010:385.430    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08064800 if necessary
+T485C 010:385.464    -- Start of preparing flash programming
+T485C 010:385.496    -- End of preparing flash programming
+T485C 010:385.531   CPU_ReadMem(2048 bytes @ 0x08064800)
+T485C 010:440.846    -- Updating flash cache (2048 bytes @ 0x08064800)
+T485C 010:440.897    -- Updating flash cache invalid range 0x08064800 - 0x08064FFF (2048 bytes)
+T485C 010:440.925    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08065000 if necessary
+T485C 010:440.947    -- Start of preparing flash programming
+T485C 010:440.966    -- End of preparing flash programming
+T485C 010:440.990   CPU_ReadMem(2048 bytes @ 0x08065000)
+T485C 010:496.275    -- Updating flash cache (2048 bytes @ 0x08065000)
+T485C 010:496.343    -- Updating flash cache invalid range 0x08065000 - 0x080657FF (2048 bytes)
+T485C 010:496.432    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08065800 if necessary
+T485C 010:496.466    -- Start of preparing flash programming
+T485C 010:496.522    -- End of preparing flash programming
+T485C 010:496.560   CPU_ReadMem(2048 bytes @ 0x08065800)
+T485C 010:551.851    -- Updating flash cache (2048 bytes @ 0x08065800)
+T485C 010:551.897    -- Updating flash cache invalid range 0x08065800 - 0x08065FFF (2048 bytes)
+T485C 010:551.924    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08066000 if necessary
+T485C 010:551.946    -- Start of preparing flash programming
+T485C 010:551.966    -- End of preparing flash programming
+T485C 010:551.989   CPU_ReadMem(2048 bytes @ 0x08066000)
+T485C 010:607.258    -- Updating flash cache (2048 bytes @ 0x08066000)
+T485C 010:607.326    -- Updating flash cache invalid range 0x08066000 - 0x080667FF (2048 bytes)
+T485C 010:607.365    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08066800 if necessary
+T485C 010:607.398    -- Start of preparing flash programming
+T485C 010:607.427    -- End of preparing flash programming
+T485C 010:607.475   CPU_ReadMem(2048 bytes @ 0x08066800)
+T485C 010:662.850    -- Updating flash cache (2048 bytes @ 0x08066800)
+T485C 010:662.898    -- Updating flash cache invalid range 0x08066800 - 0x08066FFF (2048 bytes)
+T485C 010:662.926    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08067000 if necessary
+T485C 010:662.949    -- Start of preparing flash programming
+T485C 010:662.968    -- End of preparing flash programming
+T485C 010:662.991   CPU_ReadMem(2048 bytes @ 0x08067000)
+T485C 010:718.252    -- Updating flash cache (2048 bytes @ 0x08067000)
+T485C 010:718.318    -- Updating flash cache invalid range 0x08067000 - 0x080677FF (2048 bytes)
+T485C 010:718.358    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08067800 if necessary
+T485C 010:718.394    -- Start of preparing flash programming
+T485C 010:718.424    -- End of preparing flash programming
+T485C 010:718.459   CPU_ReadMem(2048 bytes @ 0x08067800)
+T485C 010:773.846    -- Updating flash cache (2048 bytes @ 0x08067800)
+T485C 010:773.894    -- Updating flash cache invalid range 0x08067800 - 0x08067FFF (2048 bytes)
+T485C 010:773.922    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08068000 if necessary
+T485C 010:773.944    -- Start of preparing flash programming
+T485C 010:773.963    -- End of preparing flash programming
+T485C 010:773.986   CPU_ReadMem(2048 bytes @ 0x08068000)
+T485C 010:829.245    -- Updating flash cache (2048 bytes @ 0x08068000)
+T485C 010:829.309    -- Updating flash cache invalid range 0x08068000 - 0x080687FF (2048 bytes)
+T485C 010:829.349    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08068800 if necessary
+T485C 010:829.382    -- Start of preparing flash programming
+T485C 010:829.412    -- End of preparing flash programming
+T485C 010:829.447   CPU_ReadMem(2048 bytes @ 0x08068800)
+T485C 010:884.710    -- Updating flash cache (2048 bytes @ 0x08068800)
+T485C 010:884.778    -- Updating flash cache invalid range 0x08068800 - 0x08068FFF (2048 bytes)
+T485C 010:884.819    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08069000 if necessary
+T485C 010:884.855    -- Start of preparing flash programming
+T485C 010:884.886    -- End of preparing flash programming
+T485C 010:884.923   CPU_ReadMem(2048 bytes @ 0x08069000)
+T485C 010:940.098    -- Updating flash cache (2048 bytes @ 0x08069000)
+T485C 010:940.146    -- Updating flash cache invalid range 0x08069000 - 0x080697FF (2048 bytes)
+T485C 010:940.174    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08069800 if necessary
+T485C 010:940.195    -- Start of preparing flash programming
+T485C 010:940.214    -- End of preparing flash programming
+T485C 010:940.238   CPU_ReadMem(2048 bytes @ 0x08069800)
+T485C 010:995.399    -- Updating flash cache (2048 bytes @ 0x08069800)
+T485C 010:995.458    -- Updating flash cache invalid range 0x08069800 - 0x08069FFF (2048 bytes)
+T485C 010:995.498    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0806A000 if necessary
+T485C 010:995.533    -- Start of preparing flash programming
+T485C 010:995.563    -- End of preparing flash programming
+T485C 010:995.598   CPU_ReadMem(2048 bytes @ 0x0806A000)
+T485C 011:050.782    -- Updating flash cache (2048 bytes @ 0x0806A000)
+T485C 011:050.846    -- Updating flash cache invalid range 0x0806A000 - 0x0806A7FF (2048 bytes)
+T485C 011:050.885    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0806A800 if necessary
+T485C 011:050.918    -- Start of preparing flash programming
+T485C 011:050.948    -- End of preparing flash programming
+T485C 011:050.982   CPU_ReadMem(2048 bytes @ 0x0806A800)
+T485C 011:106.097    -- Updating flash cache (2048 bytes @ 0x0806A800)
+T485C 011:106.160    -- Updating flash cache invalid range 0x0806A800 - 0x0806AFFF (2048 bytes)
+T485C 011:106.199    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0806B000 if necessary
+T485C 011:106.232    -- Start of preparing flash programming
+T485C 011:106.272    -- End of preparing flash programming
+T485C 011:106.307   CPU_ReadMem(2048 bytes @ 0x0806B000)
+T485C 011:161.472    -- Updating flash cache (2048 bytes @ 0x0806B000)
+T485C 011:161.538    -- Updating flash cache invalid range 0x0806B000 - 0x0806B7FF (2048 bytes)
+T485C 011:161.579    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0806B800 if necessary
+T485C 011:161.614    -- Start of preparing flash programming
+T485C 011:161.643    -- End of preparing flash programming
+T485C 011:161.678   CPU_ReadMem(2048 bytes @ 0x0806B800)
+T485C 011:216.866    -- Updating flash cache (2048 bytes @ 0x0806B800)
+T485C 011:216.937    -- Updating flash cache invalid range 0x0806B800 - 0x0806BFFF (2048 bytes)
+T485C 011:216.979    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0806C000 if necessary
+T485C 011:217.018    -- Start of preparing flash programming
+T485C 011:217.052    -- End of preparing flash programming
+T485C 011:217.247   CPU_ReadMem(2048 bytes @ 0x0806C000)
+T485C 011:272.410    -- Updating flash cache (2048 bytes @ 0x0806C000)
+T485C 011:272.475    -- Updating flash cache invalid range 0x0806C000 - 0x0806C7FF (2048 bytes)
+T485C 011:272.514    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0806C800 if necessary
+T485C 011:272.547    -- Start of preparing flash programming
+T485C 011:272.578    -- End of preparing flash programming
+T485C 011:272.612   CPU_ReadMem(2048 bytes @ 0x0806C800)
+T485C 011:327.845    -- Updating flash cache (2048 bytes @ 0x0806C800)
+T485C 011:327.890    -- Updating flash cache invalid range 0x0806C800 - 0x0806CFFF (2048 bytes)
+T485C 011:327.918    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0806D000 if necessary
+T485C 011:327.940    -- Start of preparing flash programming
+T485C 011:327.959    -- End of preparing flash programming
+T485C 011:327.983   CPU_ReadMem(2048 bytes @ 0x0806D000)
+T485C 011:383.173    -- Updating flash cache (2048 bytes @ 0x0806D000)
+T485C 011:383.219    -- Updating flash cache invalid range 0x0806D000 - 0x0806D7FF (2048 bytes)
+T485C 011:383.247    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0806D800 if necessary
+T485C 011:383.270    -- Start of preparing flash programming
+T485C 011:383.289    -- End of preparing flash programming
+T485C 011:383.313   CPU_ReadMem(2048 bytes @ 0x0806D800)
+T485C 011:438.560    -- Updating flash cache (2048 bytes @ 0x0806D800)
+T485C 011:438.624    -- Updating flash cache invalid range 0x0806D800 - 0x0806DFFF (2048 bytes)
+T485C 011:438.664    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0806E000 if necessary
+T485C 011:438.697    -- Start of preparing flash programming
+T485C 011:438.726    -- End of preparing flash programming
+T485C 011:438.762   CPU_ReadMem(2048 bytes @ 0x0806E000)
+T485C 011:493.982    -- Updating flash cache (2048 bytes @ 0x0806E000)
+T485C 011:494.047    -- Updating flash cache invalid range 0x0806E000 - 0x0806E7FF (2048 bytes)
+T485C 011:494.087    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0806E800 if necessary
+T485C 011:494.120    -- Start of preparing flash programming
+T485C 011:494.150    -- End of preparing flash programming
+T485C 011:494.185   CPU_ReadMem(2048 bytes @ 0x0806E800)
+T485C 011:549.328    -- Updating flash cache (2048 bytes @ 0x0806E800)
+T485C 011:549.371    -- Updating flash cache invalid range 0x0806E800 - 0x0806EFFF (2048 bytes)
+T485C 011:549.399    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0806F000 if necessary
+T485C 011:549.421    -- Start of preparing flash programming
+T485C 011:549.440    -- End of preparing flash programming
+T485C 011:549.463   CPU_ReadMem(2048 bytes @ 0x0806F000)
+T485C 011:604.694    -- Updating flash cache (2048 bytes @ 0x0806F000)
+T485C 011:604.746    -- Updating flash cache invalid range 0x0806F000 - 0x0806F7FF (2048 bytes)
+T485C 011:604.777    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0806F800 if necessary
+T485C 011:604.809    -- Start of preparing flash programming
+T485C 011:604.829    -- End of preparing flash programming
+T485C 011:604.854   CPU_ReadMem(2048 bytes @ 0x0806F800)
+T485C 011:660.203    -- Updating flash cache (2048 bytes @ 0x0806F800)
+T485C 011:660.267    -- Updating flash cache invalid range 0x0806F800 - 0x0806FFFF (2048 bytes)
+T485C 011:660.306    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08070000 if necessary
+T485C 011:660.339    -- Start of preparing flash programming
+T485C 011:660.369    -- End of preparing flash programming
+T485C 011:660.404   CPU_ReadMem(2048 bytes @ 0x08070000)
+T485C 011:715.713    -- Updating flash cache (2048 bytes @ 0x08070000)
+T485C 011:715.771    -- Updating flash cache invalid range 0x08070000 - 0x080707FF (2048 bytes)
+T485C 011:715.814    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08070800 if necessary
+T485C 011:715.847    -- Start of preparing flash programming
+T485C 011:715.878    -- End of preparing flash programming
+T485C 011:715.914   CPU_ReadMem(2048 bytes @ 0x08070800)
+T485C 011:771.269    -- Updating flash cache (2048 bytes @ 0x08070800)
+T485C 011:771.325    -- Updating flash cache invalid range 0x08070800 - 0x08070FFF (2048 bytes)
+T485C 011:771.357    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08071000 if necessary
+T485C 011:771.384    -- Start of preparing flash programming
+T485C 011:771.406    -- End of preparing flash programming
+T485C 011:771.430   CPU_ReadMem(2048 bytes @ 0x08071000)
+T485C 011:826.788    -- Updating flash cache (2048 bytes @ 0x08071000)
+T485C 011:826.840    -- Updating flash cache invalid range 0x08071000 - 0x080717FF (2048 bytes)
+T485C 011:826.882    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08071800 if necessary
+T485C 011:826.914    -- Start of preparing flash programming
+T485C 011:826.945    -- End of preparing flash programming
+T485C 011:826.978   CPU_ReadMem(2048 bytes @ 0x08071800)
+T485C 011:882.278    -- Updating flash cache (2048 bytes @ 0x08071800)
+T485C 011:882.332    -- Updating flash cache invalid range 0x08071800 - 0x08071FFF (2048 bytes)
+T485C 011:882.373    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08072000 if necessary
+T485C 011:882.406    -- Start of preparing flash programming
+T485C 011:882.437    -- End of preparing flash programming
+T485C 011:882.472   CPU_ReadMem(2048 bytes @ 0x08072000)
+T485C 011:937.891    -- Updating flash cache (2048 bytes @ 0x08072000)
+T485C 011:938.022    -- Updating flash cache invalid range 0x08072000 - 0x080727FF (2048 bytes)
+T485C 011:938.066    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08072800 if necessary
+T485C 011:938.101    -- Start of preparing flash programming
+T485C 011:938.131    -- End of preparing flash programming
+T485C 011:938.168   CPU_ReadMem(2048 bytes @ 0x08072800)
+T485C 011:993.453    -- Updating flash cache (2048 bytes @ 0x08072800)
+T485C 011:993.510    -- Updating flash cache invalid range 0x08072800 - 0x08072FFF (2048 bytes)
+T485C 011:993.551    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08073000 if necessary
+T485C 011:993.584    -- Start of preparing flash programming
+T485C 011:993.615    -- End of preparing flash programming
+T485C 011:993.651   CPU_ReadMem(2048 bytes @ 0x08073000)
+T485C 012:049.031    -- Updating flash cache (2048 bytes @ 0x08073000)
+T485C 012:049.086    -- Updating flash cache invalid range 0x08073000 - 0x080737FF (2048 bytes)
+T485C 012:049.127    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08073800 if necessary
+T485C 012:049.161    -- Start of preparing flash programming
+T485C 012:049.190    -- End of preparing flash programming
+T485C 012:049.226   CPU_ReadMem(2048 bytes @ 0x08073800)
+T485C 012:104.404    -- Updating flash cache (2048 bytes @ 0x08073800)
+T485C 012:104.461    -- Updating flash cache invalid range 0x08073800 - 0x08073FFF (2048 bytes)
+T485C 012:104.516    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08074000 if necessary
+T485C 012:104.550    -- Start of preparing flash programming
+T485C 012:104.580    -- End of preparing flash programming
+T485C 012:104.618   CPU_ReadMem(2048 bytes @ 0x08074000)
+T485C 012:159.785    -- Updating flash cache (2048 bytes @ 0x08074000)
+T485C 012:159.851    -- Updating flash cache invalid range 0x08074000 - 0x080747FF (2048 bytes)
+T485C 012:159.899    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08074800 if necessary
+T485C 012:159.933    -- Start of preparing flash programming
+T485C 012:159.963    -- End of preparing flash programming
+T485C 012:160.000   CPU_ReadMem(2048 bytes @ 0x08074800)
+T485C 012:215.173    -- Updating flash cache (2048 bytes @ 0x08074800)
+T485C 012:215.240    -- Updating flash cache invalid range 0x08074800 - 0x08074FFF (2048 bytes)
+T485C 012:215.280    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08075000 if necessary
+T485C 012:215.314    -- Start of preparing flash programming
+T485C 012:215.343    -- End of preparing flash programming
+T485C 012:215.378   CPU_ReadMem(2048 bytes @ 0x08075000)
+T485C 012:270.563    -- Updating flash cache (2048 bytes @ 0x08075000)
+T485C 012:270.646    -- Updating flash cache invalid range 0x08075000 - 0x080757FF (2048 bytes)
+T485C 012:270.686    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08075800 if necessary
+T485C 012:270.718    -- Start of preparing flash programming
+T485C 012:270.748    -- End of preparing flash programming
+T485C 012:270.995   CPU_ReadMem(2048 bytes @ 0x08075800)
+T485C 012:326.166    -- Updating flash cache (2048 bytes @ 0x08075800)
+T485C 012:326.222    -- Updating flash cache invalid range 0x08075800 - 0x08075FFF (2048 bytes)
+T485C 012:326.261    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08076000 if necessary
+T485C 012:326.300    -- Start of preparing flash programming
+T485C 012:326.331    -- End of preparing flash programming
+T485C 012:326.366   CPU_ReadMem(2048 bytes @ 0x08076000)
+T485C 012:381.549    -- Updating flash cache (2048 bytes @ 0x08076000)
+T485C 012:381.602    -- Updating flash cache invalid range 0x08076000 - 0x080767FF (2048 bytes)
+T485C 012:381.642    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08076800 if necessary
+T485C 012:381.674    -- Start of preparing flash programming
+T485C 012:381.704    -- End of preparing flash programming
+T485C 012:381.739   CPU_ReadMem(2048 bytes @ 0x08076800)
+T485C 012:436.950    -- Updating flash cache (2048 bytes @ 0x08076800)
+T485C 012:437.019    -- Updating flash cache invalid range 0x08076800 - 0x08076FFF (2048 bytes)
+T485C 012:437.058    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08077000 if necessary
+T485C 012:437.090    -- Start of preparing flash programming
+T485C 012:437.120    -- End of preparing flash programming
+T485C 012:437.155   CPU_ReadMem(2048 bytes @ 0x08077000)
+T485C 012:492.331    -- Updating flash cache (2048 bytes @ 0x08077000)
+T485C 012:492.390    -- Updating flash cache invalid range 0x08077000 - 0x080777FF (2048 bytes)
+T485C 012:492.431    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08077800 if necessary
+T485C 012:492.466    -- Start of preparing flash programming
+T485C 012:492.496    -- End of preparing flash programming
+T485C 012:492.535   CPU_ReadMem(2048 bytes @ 0x08077800)
+T485C 012:547.716    -- Updating flash cache (2048 bytes @ 0x08077800)
+T485C 012:547.794    -- Updating flash cache invalid range 0x08077800 - 0x08077FFF (2048 bytes)
+T485C 012:547.832    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08078000 if necessary
+T485C 012:547.871    -- Start of preparing flash programming
+T485C 012:547.901    -- End of preparing flash programming
+T485C 012:547.938   CPU_ReadMem(2048 bytes @ 0x08078000)
+T485C 012:603.096    -- Updating flash cache (2048 bytes @ 0x08078000)
+T485C 012:603.212    -- Updating flash cache invalid range 0x08078000 - 0x080787FF (2048 bytes)
+T485C 012:603.256    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08078800 if necessary
+T485C 012:603.286    -- Start of preparing flash programming
+T485C 012:603.315    -- End of preparing flash programming
+T485C 012:603.446   CPU_ReadMem(2048 bytes @ 0x08078800)
+T485C 012:658.716    -- Updating flash cache (2048 bytes @ 0x08078800)
+T485C 012:658.785    -- Updating flash cache invalid range 0x08078800 - 0x08078FFF (2048 bytes)
+T485C 012:658.824    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08079000 if necessary
+T485C 012:658.856    -- Start of preparing flash programming
+T485C 012:658.886    -- End of preparing flash programming
+T485C 012:658.922   CPU_ReadMem(2048 bytes @ 0x08079000)
+T485C 012:714.099    -- Updating flash cache (2048 bytes @ 0x08079000)
+T485C 012:714.178    -- Updating flash cache invalid range 0x08079000 - 0x080797FF (2048 bytes)
+T485C 012:714.223    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08079800 if necessary
+T485C 012:714.262    -- Start of preparing flash programming
+T485C 012:714.294    -- End of preparing flash programming
+T485C 012:714.331   CPU_ReadMem(2048 bytes @ 0x08079800)
+T485C 012:769.475    -- Updating flash cache (2048 bytes @ 0x08079800)
+T485C 012:769.534    -- Updating flash cache invalid range 0x08079800 - 0x08079FFF (2048 bytes)
+T485C 012:769.574    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0807A000 if necessary
+T485C 012:769.605    -- Start of preparing flash programming
+T485C 012:769.634    -- End of preparing flash programming
+T485C 012:769.670   CPU_ReadMem(2048 bytes @ 0x0807A000)
+T485C 012:824.864    -- Updating flash cache (2048 bytes @ 0x0807A000)
+T485C 012:824.922    -- Updating flash cache invalid range 0x0807A000 - 0x0807A7FF (2048 bytes)
+T485C 012:824.962    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0807A800 if necessary
+T485C 012:824.994    -- Start of preparing flash programming
+T485C 012:825.024    -- End of preparing flash programming
+T485C 012:825.059   CPU_ReadMem(2048 bytes @ 0x0807A800)
+T485C 012:880.258    -- Updating flash cache (2048 bytes @ 0x0807A800)
+T485C 012:880.332    -- Updating flash cache invalid range 0x0807A800 - 0x0807AFFF (2048 bytes)
+T485C 012:880.373    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0807B000 if necessary
+T485C 012:880.406    -- Start of preparing flash programming
+T485C 012:880.436    -- End of preparing flash programming
+T485C 012:880.472   CPU_ReadMem(2048 bytes @ 0x0807B000)
+T485C 012:935.720    -- Updating flash cache (2048 bytes @ 0x0807B000)
+T485C 012:935.786    -- Updating flash cache invalid range 0x0807B000 - 0x0807B7FF (2048 bytes)
+T485C 012:935.834    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0807B800 if necessary
+T485C 012:935.874    -- Start of preparing flash programming
+T485C 012:935.903    -- End of preparing flash programming
+T485C 012:935.939   CPU_ReadMem(2048 bytes @ 0x0807B800)
+T485C 012:991.162    -- Updating flash cache (2048 bytes @ 0x0807B800)
+T485C 012:991.270    -- Updating flash cache invalid range 0x0807B800 - 0x0807BFFF (2048 bytes)
+T485C 012:991.346    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0807C000 if necessary
+T485C 012:991.433    -- Start of preparing flash programming
+T485C 012:991.509    -- End of preparing flash programming
+T485C 012:991.591   CPU_ReadMem(2048 bytes @ 0x0807C000)
+T485C 013:046.796    -- Updating flash cache (2048 bytes @ 0x0807C000)
+T485C 013:046.867    -- Updating flash cache invalid range 0x0807C000 - 0x0807C7FF (2048 bytes)
+T485C 013:046.913    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0807C800 if necessary
+T485C 013:046.946    -- Start of preparing flash programming
+T485C 013:046.976    -- End of preparing flash programming
+T485C 013:047.013   CPU_ReadMem(2048 bytes @ 0x0807C800)
+T485C 013:102.168    -- Updating flash cache (2048 bytes @ 0x0807C800)
+T485C 013:102.224    -- Updating flash cache invalid range 0x0807C800 - 0x0807CFFF (2048 bytes)
+T485C 013:102.267    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0807D000 if necessary
+T485C 013:102.299    -- Start of preparing flash programming
+T485C 013:102.330    -- End of preparing flash programming
+T485C 013:102.366   CPU_ReadMem(2048 bytes @ 0x0807D000)
+T485C 013:157.544    -- Updating flash cache (2048 bytes @ 0x0807D000)
+T485C 013:157.597    -- Updating flash cache invalid range 0x0807D000 - 0x0807D7FF (2048 bytes)
+T485C 013:157.638    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0807D800 if necessary
+T485C 013:157.670    -- Start of preparing flash programming
+T485C 013:157.701    -- End of preparing flash programming
+T485C 013:157.738   CPU_ReadMem(2048 bytes @ 0x0807D800)
+T485C 013:212.949    -- Updating flash cache (2048 bytes @ 0x0807D800)
+T485C 013:213.006    -- Updating flash cache invalid range 0x0807D800 - 0x0807DFFF (2048 bytes)
+T485C 013:213.046    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0807E000 if necessary
+T485C 013:213.078    -- Start of preparing flash programming
+T485C 013:213.108    -- End of preparing flash programming
+T485C 013:213.143   CPU_ReadMem(2048 bytes @ 0x0807E000)
+T485C 013:268.338    -- Updating flash cache (2048 bytes @ 0x0807E000)
+T485C 013:268.431    -- Updating flash cache invalid range 0x0807E000 - 0x0807E7FF (2048 bytes)
+T485C 013:268.471    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0807E800 if necessary
+T485C 013:268.504    -- Start of preparing flash programming
+T485C 013:268.534    -- End of preparing flash programming
+T485C 013:268.640   CPU_ReadMem(2048 bytes @ 0x0807E800)
+T485C 013:323.797    -- Updating flash cache (2048 bytes @ 0x0807E800)
+T485C 013:323.870    -- Updating flash cache invalid range 0x0807E800 - 0x0807EFFF (2048 bytes)
+T485C 013:323.911    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0807F000 if necessary
+T485C 013:323.943    -- Start of preparing flash programming
+T485C 013:323.974    -- End of preparing flash programming
+T485C 013:324.013   CPU_ReadMem(2048 bytes @ 0x0807F000)
+T485C 013:379.262    -- Updating flash cache (2048 bytes @ 0x0807F000)
+T485C 013:379.317    -- Updating flash cache invalid range 0x0807F000 - 0x0807F7FF (2048 bytes)
+T485C 013:379.355    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0807F800 if necessary
+T485C 013:379.385    -- Start of preparing flash programming
+T485C 013:379.412    -- End of preparing flash programming
+T485C 013:379.446   CPU_ReadMem(2048 bytes @ 0x0807F800)
+T485C 013:434.630    -- Updating flash cache (2048 bytes @ 0x0807F800)
+T485C 013:434.702    -- Updating flash cache invalid range 0x0807F800 - 0x0807FFFF (2048 bytes)
+T485C 013:434.749    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08080000 if necessary
+T485C 013:434.781    -- Start of preparing flash programming
+T485C 013:434.810    -- End of preparing flash programming
+T485C 013:434.846   CPU_ReadMem(2048 bytes @ 0x08080000)
+T485C 013:490.016    -- Updating flash cache (2048 bytes @ 0x08080000)
+T485C 013:490.085    -- Updating flash cache invalid range 0x08080000 - 0x080807FF (2048 bytes)
+T485C 013:490.125    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08080800 if necessary
+T485C 013:490.157    -- Start of preparing flash programming
+T485C 013:490.186    -- End of preparing flash programming
+T485C 013:490.221   CPU_ReadMem(2048 bytes @ 0x08080800)
+T485C 013:545.394    -- Updating flash cache (2048 bytes @ 0x08080800)
+T485C 013:545.453    -- Updating flash cache invalid range 0x08080800 - 0x08080FFF (2048 bytes)
+T485C 013:545.491    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08081000 if necessary
+T485C 013:545.520    -- Start of preparing flash programming
+T485C 013:545.560    -- End of preparing flash programming
+T485C 013:545.594   CPU_ReadMem(2048 bytes @ 0x08081000)
+T485C 013:600.802    -- Updating flash cache (2048 bytes @ 0x08081000)
+T485C 013:600.872    -- Updating flash cache invalid range 0x08081000 - 0x080817FF (2048 bytes)
+T485C 013:600.910    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08081800 if necessary
+T485C 013:600.941    -- Start of preparing flash programming
+T485C 013:600.971    -- End of preparing flash programming
+T485C 013:601.006   CPU_ReadMem(2048 bytes @ 0x08081800)
+T485C 013:656.174    -- Updating flash cache (2048 bytes @ 0x08081800)
+T485C 013:656.226    -- Updating flash cache invalid range 0x08081800 - 0x08081FFF (2048 bytes)
+T485C 013:656.266    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08082000 if necessary
+T485C 013:656.298    -- Start of preparing flash programming
+T485C 013:656.328    -- End of preparing flash programming
+T485C 013:656.363   CPU_ReadMem(2048 bytes @ 0x08082000)
+T485C 013:711.531    -- Updating flash cache (2048 bytes @ 0x08082000)
+T485C 013:711.579    -- Updating flash cache invalid range 0x08082000 - 0x080827FF (2048 bytes)
+T485C 013:711.606    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08082800 if necessary
+T485C 013:711.629    -- Start of preparing flash programming
+T485C 013:711.648    -- End of preparing flash programming
+T485C 013:711.672   CPU_ReadMem(2048 bytes @ 0x08082800)
+T485C 013:766.776    -- Updating flash cache (2048 bytes @ 0x08082800)
+T485C 013:766.822    -- Updating flash cache invalid range 0x08082800 - 0x08082FFF (2048 bytes)
+T485C 013:766.850    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08083000 if necessary
+T485C 013:766.870    -- Start of preparing flash programming
+T485C 013:766.890    -- End of preparing flash programming
+T485C 013:766.914   CPU_ReadMem(2048 bytes @ 0x08083000)
+T485C 013:822.086    -- Updating flash cache (2048 bytes @ 0x08083000)
+T485C 013:822.150    -- Updating flash cache invalid range 0x08083000 - 0x080837FF (2048 bytes)
+T485C 013:822.190    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08083800 if necessary
+T485C 013:822.224    -- Start of preparing flash programming
+T485C 013:822.254    -- End of preparing flash programming
+T485C 013:822.288   CPU_ReadMem(2048 bytes @ 0x08083800)
+T485C 013:877.467    -- Updating flash cache (2048 bytes @ 0x08083800)
+T485C 013:877.531    -- Updating flash cache invalid range 0x08083800 - 0x08083FFF (2048 bytes)
+T485C 013:877.571    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08084000 if necessary
+T485C 013:877.606    -- Start of preparing flash programming
+T485C 013:877.637    -- End of preparing flash programming
+T485C 013:877.672   CPU_ReadMem(2048 bytes @ 0x08084000)
+T485C 013:932.864    -- Updating flash cache (2048 bytes @ 0x08084000)
+T485C 013:932.933    -- Updating flash cache invalid range 0x08084000 - 0x080847FF (2048 bytes)
+T485C 013:932.974    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08084800 if necessary
+T485C 013:933.011    -- Start of preparing flash programming
+T485C 013:933.042    -- End of preparing flash programming
+T485C 013:933.077   CPU_ReadMem(2048 bytes @ 0x08084800)
+T485C 013:988.238    -- Updating flash cache (2048 bytes @ 0x08084800)
+T485C 013:988.306    -- Updating flash cache invalid range 0x08084800 - 0x08084FFF (2048 bytes)
+T485C 013:988.344    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08085000 if necessary
+T485C 013:988.378    -- Start of preparing flash programming
+T485C 013:988.406    -- End of preparing flash programming
+T485C 013:988.442   CPU_ReadMem(2048 bytes @ 0x08085000)
+T485C 014:043.627    -- Updating flash cache (2048 bytes @ 0x08085000)
+T485C 014:043.674    -- Updating flash cache invalid range 0x08085000 - 0x080857FF (2048 bytes)
+T485C 014:043.702    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08085800 if necessary
+T485C 014:043.731    -- Start of preparing flash programming
+T485C 014:043.750    -- End of preparing flash programming
+T485C 014:043.774   CPU_ReadMem(2048 bytes @ 0x08085800)
+T485C 014:098.942    -- Updating flash cache (2048 bytes @ 0x08085800)
+T485C 014:099.006    -- Updating flash cache invalid range 0x08085800 - 0x08085FFF (2048 bytes)
+T485C 014:099.045    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08086000 if necessary
+T485C 014:099.078    -- Start of preparing flash programming
+T485C 014:099.109    -- End of preparing flash programming
+T485C 014:099.142   CPU_ReadMem(2048 bytes @ 0x08086000)
+T485C 014:154.314    -- Updating flash cache (2048 bytes @ 0x08086000)
+T485C 014:154.365    -- Updating flash cache invalid range 0x08086000 - 0x080867FF (2048 bytes)
+T485C 014:154.398    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08086800 if necessary
+T485C 014:154.422    -- Start of preparing flash programming
+T485C 014:154.445    -- End of preparing flash programming
+T485C 014:154.472   CPU_ReadMem(2048 bytes @ 0x08086800)
+T485C 014:209.710    -- Updating flash cache (2048 bytes @ 0x08086800)
+T485C 014:209.776    -- Updating flash cache invalid range 0x08086800 - 0x08086FFF (2048 bytes)
+T485C 014:209.816    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08087000 if necessary
+T485C 014:209.850    -- Start of preparing flash programming
+T485C 014:209.878    -- End of preparing flash programming
+T485C 014:209.914   CPU_ReadMem(2048 bytes @ 0x08087000)
+T485C 014:265.091    -- Updating flash cache (2048 bytes @ 0x08087000)
+T485C 014:265.157    -- Updating flash cache invalid range 0x08087000 - 0x080877FF (2048 bytes)
+T485C 014:265.197    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08087800 if necessary
+T485C 014:265.230    -- Start of preparing flash programming
+T485C 014:265.259    -- End of preparing flash programming
+T485C 014:265.294   CPU_ReadMem(2048 bytes @ 0x08087800)
+T485C 014:320.538    -- Updating flash cache (2048 bytes @ 0x08087800)
+T485C 014:320.605    -- Updating flash cache invalid range 0x08087800 - 0x08087FFF (2048 bytes)
+T485C 014:320.648    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08088000 if necessary
+T485C 014:320.685    -- Start of preparing flash programming
+T485C 014:320.715    -- End of preparing flash programming
+T485C 014:320.752   CPU_ReadMem(2048 bytes @ 0x08088000)
+T485C 014:375.942    -- Updating flash cache (2048 bytes @ 0x08088000)
+T485C 014:376.013    -- Updating flash cache invalid range 0x08088000 - 0x080887FF (2048 bytes)
+T485C 014:376.056    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08088800 if necessary
+T485C 014:376.093    -- Start of preparing flash programming
+T485C 014:376.125    -- End of preparing flash programming
+T485C 014:376.162   CPU_ReadMem(2048 bytes @ 0x08088800)
+T485C 014:431.317    -- Updating flash cache (2048 bytes @ 0x08088800)
+T485C 014:431.384    -- Updating flash cache invalid range 0x08088800 - 0x08088FFF (2048 bytes)
+T485C 014:431.429    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08089000 if necessary
+T485C 014:431.466    -- Start of preparing flash programming
+T485C 014:431.496    -- End of preparing flash programming
+T485C 014:431.531   CPU_ReadMem(2048 bytes @ 0x08089000)
+T485C 014:486.709    -- Updating flash cache (2048 bytes @ 0x08089000)
+T485C 014:486.771    -- Updating flash cache invalid range 0x08089000 - 0x080897FF (2048 bytes)
+T485C 014:486.811    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08089800 if necessary
+T485C 014:486.843    -- Start of preparing flash programming
+T485C 014:486.874    -- End of preparing flash programming
+T485C 014:486.910   CPU_ReadMem(2048 bytes @ 0x08089800)
+T485C 014:542.090    -- Updating flash cache (2048 bytes @ 0x08089800)
+T485C 014:542.158    -- Updating flash cache invalid range 0x08089800 - 0x08089FFF (2048 bytes)
+T485C 014:542.213    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0808A000 if necessary
+T485C 014:542.248    -- Start of preparing flash programming
+T485C 014:542.278    -- End of preparing flash programming
+T485C 014:542.315   CPU_ReadMem(2048 bytes @ 0x0808A000)
+T485C 014:597.456    -- Updating flash cache (2048 bytes @ 0x0808A000)
+T485C 014:597.509    -- Updating flash cache invalid range 0x0808A000 - 0x0808A7FF (2048 bytes)
+T485C 014:597.539    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0808A800 if necessary
+T485C 014:597.570    -- Start of preparing flash programming
+T485C 014:597.590    -- End of preparing flash programming
+T485C 014:597.616   CPU_ReadMem(2048 bytes @ 0x0808A800)
+T485C 014:652.782    -- Updating flash cache (2048 bytes @ 0x0808A800)
+T485C 014:652.850    -- Updating flash cache invalid range 0x0808A800 - 0x0808AFFF (2048 bytes)
+T485C 014:652.890    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0808B000 if necessary
+T485C 014:652.926    -- Start of preparing flash programming
+T485C 014:652.957    -- End of preparing flash programming
+T485C 014:652.992   CPU_ReadMem(2048 bytes @ 0x0808B000)
+T485C 014:708.150    -- Updating flash cache (2048 bytes @ 0x0808B000)
+T485C 014:708.197    -- Updating flash cache invalid range 0x0808B000 - 0x0808B7FF (2048 bytes)
+T485C 014:708.229    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0808B800 if necessary
+T485C 014:708.253    -- Start of preparing flash programming
+T485C 014:708.274    -- End of preparing flash programming
+T485C 014:708.298   CPU_ReadMem(2048 bytes @ 0x0808B800)
+T485C 014:763.402    -- Updating flash cache (2048 bytes @ 0x0808B800)
+T485C 014:763.472    -- Updating flash cache invalid range 0x0808B800 - 0x0808BFFF (2048 bytes)
+T485C 014:763.515    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0808C000 if necessary
+T485C 014:763.552    -- Start of preparing flash programming
+T485C 014:763.582    -- End of preparing flash programming
+T485C 014:763.618   CPU_ReadMem(2048 bytes @ 0x0808C000)
+T485C 014:818.784    -- Updating flash cache (2048 bytes @ 0x0808C000)
+T485C 014:818.851    -- Updating flash cache invalid range 0x0808C000 - 0x0808C7FF (2048 bytes)
+T485C 014:818.894    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0808C800 if necessary
+T485C 014:818.930    -- Start of preparing flash programming
+T485C 014:818.960    -- End of preparing flash programming
+T485C 014:818.997   CPU_ReadMem(2048 bytes @ 0x0808C800)
+T485C 014:874.170    -- Updating flash cache (2048 bytes @ 0x0808C800)
+T485C 014:874.242    -- Updating flash cache invalid range 0x0808C800 - 0x0808CFFF (2048 bytes)
+T485C 014:874.285    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0808D000 if necessary
+T485C 014:874.322    -- Start of preparing flash programming
+T485C 014:874.352    -- End of preparing flash programming
+T485C 014:874.389   CPU_ReadMem(2048 bytes @ 0x0808D000)
+T485C 014:929.542    -- Updating flash cache (2048 bytes @ 0x0808D000)
+T485C 014:929.603    -- Updating flash cache invalid range 0x0808D000 - 0x0808D7FF (2048 bytes)
+T485C 014:929.645    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0808D800 if necessary
+T485C 014:929.680    -- Start of preparing flash programming
+T485C 014:929.710    -- End of preparing flash programming
+T485C 014:929.746   CPU_ReadMem(2048 bytes @ 0x0808D800)
+T485C 014:984.936    -- Updating flash cache (2048 bytes @ 0x0808D800)
+T485C 014:985.005    -- Updating flash cache invalid range 0x0808D800 - 0x0808DFFF (2048 bytes)
+T485C 014:985.050    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0808E000 if necessary
+T485C 014:985.086    -- Start of preparing flash programming
+T485C 014:985.117    -- End of preparing flash programming
+T485C 014:985.154   CPU_ReadMem(2048 bytes @ 0x0808E000)
+T485C 015:040.410    -- Updating flash cache (2048 bytes @ 0x0808E000)
+T485C 015:040.662    -- Updating flash cache invalid range 0x0808E000 - 0x0808E7FF (2048 bytes)
+T485C 015:040.768    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0808E800 if necessary
+T485C 015:040.866    -- Start of preparing flash programming
+T485C 015:040.958    -- End of preparing flash programming
+T485C 015:041.136   CPU_ReadMem(2048 bytes @ 0x0808E800)
+T485C 015:096.326    -- Updating flash cache (2048 bytes @ 0x0808E800)
+T485C 015:096.371    -- Updating flash cache invalid range 0x0808E800 - 0x0808EFFF (2048 bytes)
+T485C 015:096.400    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0808F000 if necessary
+T485C 015:096.442    -- Start of preparing flash programming
+T485C 015:096.461    -- End of preparing flash programming
+T485C 015:096.485   CPU_ReadMem(2048 bytes @ 0x0808F000)
+T485C 015:151.694    -- Updating flash cache (2048 bytes @ 0x0808F000)
+T485C 015:151.739    -- Updating flash cache invalid range 0x0808F000 - 0x0808F7FF (2048 bytes)
+T485C 015:151.768    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0808F800 if necessary
+T485C 015:151.789    -- Start of preparing flash programming
+T485C 015:151.808    -- End of preparing flash programming
+T485C 015:151.832   CPU_ReadMem(2048 bytes @ 0x0808F800)
+T485C 015:207.016    -- Updating flash cache (2048 bytes @ 0x0808F800)
+T485C 015:207.088    -- Updating flash cache invalid range 0x0808F800 - 0x0808FFFF (2048 bytes)
+T485C 015:207.130    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08090000 if necessary
+T485C 015:207.165    -- Start of preparing flash programming
+T485C 015:207.195    -- End of preparing flash programming
+T485C 015:207.234   CPU_ReadMem(2048 bytes @ 0x08090000)
+T485C 015:262.400    -- Updating flash cache (2048 bytes @ 0x08090000)
+T485C 015:262.467    -- Updating flash cache invalid range 0x08090000 - 0x080907FF (2048 bytes)
+T485C 015:262.507    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08090800 if necessary
+T485C 015:262.541    -- Start of preparing flash programming
+T485C 015:262.573    -- End of preparing flash programming
+T485C 015:262.608   CPU_ReadMem(2048 bytes @ 0x08090800)
+T485C 015:317.786    -- Updating flash cache (2048 bytes @ 0x08090800)
+T485C 015:317.848    -- Updating flash cache invalid range 0x08090800 - 0x08090FFF (2048 bytes)
+T485C 015:317.888    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08091000 if necessary
+T485C 015:317.920    -- Start of preparing flash programming
+T485C 015:317.950    -- End of preparing flash programming
+T485C 015:317.984   CPU_ReadMem(2048 bytes @ 0x08091000)
+T485C 015:373.094    -- Updating flash cache (2048 bytes @ 0x08091000)
+T485C 015:373.154    -- Updating flash cache invalid range 0x08091000 - 0x080917FF (2048 bytes)
+T485C 015:373.192    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08091800 if necessary
+T485C 015:373.224    -- Start of preparing flash programming
+T485C 015:373.259    -- End of preparing flash programming
+T485C 015:373.296   CPU_ReadMem(2048 bytes @ 0x08091800)
+T485C 015:428.482    -- Updating flash cache (2048 bytes @ 0x08091800)
+T485C 015:428.582    -- Updating flash cache invalid range 0x08091800 - 0x08091FFF (2048 bytes)
+T485C 015:428.622    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08092000 if necessary
+T485C 015:428.682    -- Start of preparing flash programming
+T485C 015:428.712    -- End of preparing flash programming
+T485C 015:428.747   CPU_ReadMem(2048 bytes @ 0x08092000)
+T485C 015:483.933    -- Updating flash cache (2048 bytes @ 0x08092000)
+T485C 015:483.997    -- Updating flash cache invalid range 0x08092000 - 0x080927FF (2048 bytes)
+T485C 015:484.037    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08092800 if necessary
+T485C 015:484.070    -- Start of preparing flash programming
+T485C 015:484.099    -- End of preparing flash programming
+T485C 015:484.134   CPU_ReadMem(2048 bytes @ 0x08092800)
+T485C 015:539.376    -- Updating flash cache (2048 bytes @ 0x08092800)
+T485C 015:539.422    -- Updating flash cache invalid range 0x08092800 - 0x08092FFF (2048 bytes)
+T485C 015:539.450    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08093000 if necessary
+T485C 015:539.472    -- Start of preparing flash programming
+T485C 015:539.491    -- End of preparing flash programming
+T485C 015:539.515   CPU_ReadMem(2048 bytes @ 0x08093000)
+T485C 015:594.706    -- Updating flash cache (2048 bytes @ 0x08093000)
+T485C 015:594.770    -- Updating flash cache invalid range 0x08093000 - 0x080937FF (2048 bytes)
+T485C 015:594.810    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08093800 if necessary
+T485C 015:594.842    -- Start of preparing flash programming
+T485C 015:594.872    -- End of preparing flash programming
+T485C 015:594.906   CPU_ReadMem(2048 bytes @ 0x08093800)
+T485C 015:650.088    -- Updating flash cache (2048 bytes @ 0x08093800)
+T485C 015:650.152    -- Updating flash cache invalid range 0x08093800 - 0x08093FFF (2048 bytes)
+T485C 015:650.190    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08094000 if necessary
+T485C 015:650.224    -- Start of preparing flash programming
+T485C 015:650.254    -- End of preparing flash programming
+T485C 015:650.290   CPU_ReadMem(2048 bytes @ 0x08094000)
+T485C 015:705.467    -- Updating flash cache (2048 bytes @ 0x08094000)
+T485C 015:705.523    -- Updating flash cache invalid range 0x08094000 - 0x080947FF (2048 bytes)
+T485C 015:705.562    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08094800 if necessary
+T485C 015:705.595    -- Start of preparing flash programming
+T485C 015:705.624    -- End of preparing flash programming
+T485C 015:705.659   CPU_ReadMem(2048 bytes @ 0x08094800)
+T485C 015:760.792    -- Updating flash cache (2048 bytes @ 0x08094800)
+T485C 015:760.845    -- Updating flash cache invalid range 0x08094800 - 0x08094FFF (2048 bytes)
+T485C 015:760.877    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08095000 if necessary
+T485C 015:760.904    -- Start of preparing flash programming
+T485C 015:760.925    -- End of preparing flash programming
+T485C 015:760.950   CPU_ReadMem(2048 bytes @ 0x08095000)
+T485C 015:816.155    -- Updating flash cache (2048 bytes @ 0x08095000)
+T485C 015:816.266    -- Updating flash cache invalid range 0x08095000 - 0x080957FF (2048 bytes)
+T485C 015:816.416    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08095800 if necessary
+T485C 015:816.530    -- Start of preparing flash programming
+T485C 015:816.698    -- End of preparing flash programming
+T485C 015:816.744   CPU_ReadMem(2048 bytes @ 0x08095800)
+T485C 015:871.923    -- Updating flash cache (2048 bytes @ 0x08095800)
+T485C 015:871.974    -- Updating flash cache invalid range 0x08095800 - 0x08095FFF (2048 bytes)
+T485C 015:872.005    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08096000 if necessary
+T485C 015:872.030    -- Start of preparing flash programming
+T485C 015:872.051    -- End of preparing flash programming
+T485C 015:872.077   CPU_ReadMem(2048 bytes @ 0x08096000)
+T485C 015:927.240    -- Updating flash cache (2048 bytes @ 0x08096000)
+T485C 015:927.306    -- Updating flash cache invalid range 0x08096000 - 0x080967FF (2048 bytes)
+T485C 015:927.344    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08096800 if necessary
+T485C 015:927.378    -- Start of preparing flash programming
+T485C 015:927.406    -- End of preparing flash programming
+T485C 015:927.442   CPU_ReadMem(2048 bytes @ 0x08096800)
+T485C 015:982.624    -- Updating flash cache (2048 bytes @ 0x08096800)
+T485C 015:982.688    -- Updating flash cache invalid range 0x08096800 - 0x08096FFF (2048 bytes)
+T485C 015:982.726    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08097000 if necessary
+T485C 015:982.760    -- Start of preparing flash programming
+T485C 015:982.790    -- End of preparing flash programming
+T485C 015:982.926   CPU_ReadMem(2048 bytes @ 0x08097000)
+T485C 016:038.086    -- Updating flash cache (2048 bytes @ 0x08097000)
+T485C 016:038.157    -- Updating flash cache invalid range 0x08097000 - 0x080977FF (2048 bytes)
+T485C 016:038.197    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08097800 if necessary
+T485C 016:038.234    -- Start of preparing flash programming
+T485C 016:038.264    -- End of preparing flash programming
+T485C 016:038.299   CPU_ReadMem(2048 bytes @ 0x08097800)
+T485C 016:093.477    -- Updating flash cache (2048 bytes @ 0x08097800)
+T485C 016:093.538    -- Updating flash cache invalid range 0x08097800 - 0x08097FFF (2048 bytes)
+T485C 016:093.578    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08098000 if necessary
+T485C 016:093.610    -- Start of preparing flash programming
+T485C 016:093.637    -- End of preparing flash programming
+T485C 016:093.670   CPU_ReadMem(2048 bytes @ 0x08098000)
+T485C 016:148.845    -- Updating flash cache (2048 bytes @ 0x08098000)
+T485C 016:148.909    -- Updating flash cache invalid range 0x08098000 - 0x080987FF (2048 bytes)
+T485C 016:148.936    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08098800 if necessary
+T485C 016:148.958    -- Start of preparing flash programming
+T485C 016:148.978    -- End of preparing flash programming
+T485C 016:149.002   CPU_ReadMem(2048 bytes @ 0x08098800)
+T485C 016:204.174    -- Updating flash cache (2048 bytes @ 0x08098800)
+T485C 016:204.248    -- Updating flash cache invalid range 0x08098800 - 0x08098FFF (2048 bytes)
+T485C 016:204.293    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08099000 if necessary
+T485C 016:204.331    -- Start of preparing flash programming
+T485C 016:204.363    -- End of preparing flash programming
+T485C 016:204.402   CPU_ReadMem(2048 bytes @ 0x08099000)
+T485C 016:259.714    -- Updating flash cache (2048 bytes @ 0x08099000)
+T485C 016:259.784    -- Updating flash cache invalid range 0x08099000 - 0x080997FF (2048 bytes)
+T485C 016:259.827    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08099800 if necessary
+T485C 016:259.862    -- Start of preparing flash programming
+T485C 016:259.894    -- End of preparing flash programming
+T485C 016:259.930   CPU_ReadMem(2048 bytes @ 0x08099800)
+T485C 016:315.272    -- Updating flash cache (2048 bytes @ 0x08099800)
+T485C 016:315.341    -- Updating flash cache invalid range 0x08099800 - 0x08099FFF (2048 bytes)
+T485C 016:315.381    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0809A000 if necessary
+T485C 016:315.418    -- Start of preparing flash programming
+T485C 016:315.448    -- End of preparing flash programming
+T485C 016:315.483   CPU_ReadMem(2048 bytes @ 0x0809A000)
+T485C 016:370.878    -- Updating flash cache (2048 bytes @ 0x0809A000)
+T485C 016:370.939    -- Updating flash cache invalid range 0x0809A000 - 0x0809A7FF (2048 bytes)
+T485C 016:370.978    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0809A800 if necessary
+T485C 016:371.029    -- Start of preparing flash programming
+T485C 016:371.062    -- End of preparing flash programming
+T485C 016:371.098   CPU_ReadMem(2048 bytes @ 0x0809A800)
+T485C 016:426.438    -- Updating flash cache (2048 bytes @ 0x0809A800)
+T485C 016:426.502    -- Updating flash cache invalid range 0x0809A800 - 0x0809AFFF (2048 bytes)
+T485C 016:426.541    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0809B000 if necessary
+T485C 016:426.573    -- Start of preparing flash programming
+T485C 016:426.603    -- End of preparing flash programming
+T485C 016:426.637   CPU_ReadMem(2048 bytes @ 0x0809B000)
+T485C 016:481.970    -- Updating flash cache (2048 bytes @ 0x0809B000)
+T485C 016:482.038    -- Updating flash cache invalid range 0x0809B000 - 0x0809B7FF (2048 bytes)
+T485C 016:482.080    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0809B800 if necessary
+T485C 016:482.126    -- Start of preparing flash programming
+T485C 016:482.157    -- End of preparing flash programming
+T485C 016:482.195   CPU_ReadMem(2048 bytes @ 0x0809B800)
+T485C 016:537.523    -- Updating flash cache (2048 bytes @ 0x0809B800)
+T485C 016:537.586    -- Updating flash cache invalid range 0x0809B800 - 0x0809BFFF (2048 bytes)
+T485C 016:537.626    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0809C000 if necessary
+T485C 016:537.659    -- Start of preparing flash programming
+T485C 016:537.688    -- End of preparing flash programming
+T485C 016:537.723   CPU_ReadMem(2048 bytes @ 0x0809C000)
+T485C 016:593.040    -- Updating flash cache (2048 bytes @ 0x0809C000)
+T485C 016:593.118    -- Updating flash cache invalid range 0x0809C000 - 0x0809C7FF (2048 bytes)
+T485C 016:593.162    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0809C800 if necessary
+T485C 016:593.202    -- Start of preparing flash programming
+T485C 016:593.235    -- End of preparing flash programming
+T485C 016:593.282   CPU_ReadMem(2048 bytes @ 0x0809C800)
+T485C 016:648.613    -- Updating flash cache (2048 bytes @ 0x0809C800)
+T485C 016:648.682    -- Updating flash cache invalid range 0x0809C800 - 0x0809CFFF (2048 bytes)
+T485C 016:648.723    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0809D000 if necessary
+T485C 016:648.758    -- Start of preparing flash programming
+T485C 016:648.790    -- End of preparing flash programming
+T485C 016:648.826   CPU_ReadMem(2048 bytes @ 0x0809D000)
+T485C 016:704.208    -- Updating flash cache (2048 bytes @ 0x0809D000)
+T485C 016:704.253    -- Updating flash cache invalid range 0x0809D000 - 0x0809D7FF (2048 bytes)
+T485C 016:704.283    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0809D800 if necessary
+T485C 016:704.309    -- Start of preparing flash programming
+T485C 016:704.330    -- End of preparing flash programming
+T485C 016:704.355   CPU_ReadMem(2048 bytes @ 0x0809D800)
+T485C 016:759.707    -- Updating flash cache (2048 bytes @ 0x0809D800)
+T485C 016:759.773    -- Updating flash cache invalid range 0x0809D800 - 0x0809DFFF (2048 bytes)
+T485C 016:759.814    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0809E000 if necessary
+T485C 016:759.878    -- Start of preparing flash programming
+T485C 016:759.917    -- End of preparing flash programming
+T485C 016:759.954   CPU_ReadMem(2048 bytes @ 0x0809E000)
+T485C 016:815.282    -- Updating flash cache (2048 bytes @ 0x0809E000)
+T485C 016:815.324    -- Updating flash cache invalid range 0x0809E000 - 0x0809E7FF (2048 bytes)
+T485C 016:815.352    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0809E800 if necessary
+T485C 016:815.374    -- Start of preparing flash programming
+T485C 016:815.394    -- End of preparing flash programming
+T485C 016:815.416   CPU_ReadMem(2048 bytes @ 0x0809E800)
+T485C 016:870.696    -- Updating flash cache (2048 bytes @ 0x0809E800)
+T485C 016:870.764    -- Updating flash cache invalid range 0x0809E800 - 0x0809EFFF (2048 bytes)
+T485C 016:870.804    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0809F000 if necessary
+T485C 016:870.874    -- Start of preparing flash programming
+T485C 016:870.908    -- End of preparing flash programming
+T485C 016:870.946   CPU_ReadMem(2048 bytes @ 0x0809F000)
+T485C 016:926.272    -- Updating flash cache (2048 bytes @ 0x0809F000)
+T485C 016:926.334    -- Updating flash cache invalid range 0x0809F000 - 0x0809F7FF (2048 bytes)
+T485C 016:926.376    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0809F800 if necessary
+T485C 016:926.414    -- Start of preparing flash programming
+T485C 016:926.444    -- End of preparing flash programming
+T485C 016:926.478   CPU_ReadMem(2048 bytes @ 0x0809F800)
+T485C 016:981.844    -- Updating flash cache (2048 bytes @ 0x0809F800)
+T485C 016:981.892    -- Updating flash cache invalid range 0x0809F800 - 0x0809FFFF (2048 bytes)
+T485C 016:981.920    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A0000 if necessary
+T485C 016:981.950    -- Start of preparing flash programming
+T485C 016:981.970    -- End of preparing flash programming
+T485C 016:981.994   CPU_ReadMem(2048 bytes @ 0x080A0000)
+T485C 017:037.168    -- Updating flash cache (2048 bytes @ 0x080A0000)
+T485C 017:037.228    -- Updating flash cache invalid range 0x080A0000 - 0x080A07FF (2048 bytes)
+T485C 017:037.268    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A0800 if necessary
+T485C 017:037.300    -- Start of preparing flash programming
+T485C 017:037.330    -- End of preparing flash programming
+T485C 017:037.364   CPU_ReadMem(2048 bytes @ 0x080A0800)
+T485C 017:092.556    -- Updating flash cache (2048 bytes @ 0x080A0800)
+T485C 017:092.620    -- Updating flash cache invalid range 0x080A0800 - 0x080A0FFF (2048 bytes)
+T485C 017:092.674    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A1000 if necessary
+T485C 017:092.708    -- Start of preparing flash programming
+T485C 017:092.736    -- End of preparing flash programming
+T485C 017:092.772   CPU_ReadMem(2048 bytes @ 0x080A1000)
+T485C 017:148.048    -- Updating flash cache (2048 bytes @ 0x080A1000)
+T485C 017:148.160    -- Updating flash cache invalid range 0x080A1000 - 0x080A17FF (2048 bytes)
+T485C 017:148.204    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A1800 if necessary
+T485C 017:148.234    -- Start of preparing flash programming
+T485C 017:148.262    -- End of preparing flash programming
+T485C 017:148.300   CPU_ReadMem(2048 bytes @ 0x080A1800)
+T485C 017:203.488    -- Updating flash cache (2048 bytes @ 0x080A1800)
+T485C 017:203.558    -- Updating flash cache invalid range 0x080A1800 - 0x080A1FFF (2048 bytes)
+T485C 017:203.600    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A2000 if necessary
+T485C 017:203.636    -- Start of preparing flash programming
+T485C 017:203.666    -- End of preparing flash programming
+T485C 017:203.702   CPU_ReadMem(2048 bytes @ 0x080A2000)
+T485C 017:258.874    -- Updating flash cache (2048 bytes @ 0x080A2000)
+T485C 017:258.948    -- Updating flash cache invalid range 0x080A2000 - 0x080A27FF (2048 bytes)
+T485C 017:258.990    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A2800 if necessary
+T485C 017:259.038    -- Start of preparing flash programming
+T485C 017:259.078    -- End of preparing flash programming
+T485C 017:259.116   CPU_ReadMem(2048 bytes @ 0x080A2800)
+T485C 017:314.246    -- Updating flash cache (2048 bytes @ 0x080A2800)
+T485C 017:314.310    -- Updating flash cache invalid range 0x080A2800 - 0x080A2FFF (2048 bytes)
+T485C 017:314.348    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A3000 if necessary
+T485C 017:314.382    -- Start of preparing flash programming
+T485C 017:314.412    -- End of preparing flash programming
+T485C 017:314.448   CPU_ReadMem(2048 bytes @ 0x080A3000)
+T485C 017:369.704    -- Updating flash cache (2048 bytes @ 0x080A3000)
+T485C 017:369.776    -- Updating flash cache invalid range 0x080A3000 - 0x080A37FF (2048 bytes)
+T485C 017:369.818    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A3800 if necessary
+T485C 017:369.854    -- Start of preparing flash programming
+T485C 017:369.884    -- End of preparing flash programming
+T485C 017:369.920   CPU_ReadMem(2048 bytes @ 0x080A3800)
+T485C 017:425.086    -- Updating flash cache (2048 bytes @ 0x080A3800)
+T485C 017:425.154    -- Updating flash cache invalid range 0x080A3800 - 0x080A3FFF (2048 bytes)
+T485C 017:425.196    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A4000 if necessary
+T485C 017:425.228    -- Start of preparing flash programming
+T485C 017:425.260    -- End of preparing flash programming
+T485C 017:425.296   CPU_ReadMem(2048 bytes @ 0x080A4000)
+T485C 017:480.478    -- Updating flash cache (2048 bytes @ 0x080A4000)
+T485C 017:480.542    -- Updating flash cache invalid range 0x080A4000 - 0x080A47FF (2048 bytes)
+T485C 017:480.594    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A4800 if necessary
+T485C 017:480.628    -- Start of preparing flash programming
+T485C 017:480.656    -- End of preparing flash programming
+T485C 017:480.692   CPU_ReadMem(2048 bytes @ 0x080A4800)
+T485C 017:536.028    -- Updating flash cache (2048 bytes @ 0x080A4800)
+T485C 017:536.094    -- Updating flash cache invalid range 0x080A4800 - 0x080A4FFF (2048 bytes)
+T485C 017:536.138    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A5000 if necessary
+T485C 017:536.176    -- Start of preparing flash programming
+T485C 017:536.210    -- End of preparing flash programming
+T485C 017:536.252   CPU_ReadMem(2048 bytes @ 0x080A5000)
+T485C 017:591.572    -- Updating flash cache (2048 bytes @ 0x080A5000)
+T485C 017:591.640    -- Updating flash cache invalid range 0x080A5000 - 0x080A57FF (2048 bytes)
+T485C 017:591.682    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A5800 if necessary
+T485C 017:591.718    -- Start of preparing flash programming
+T485C 017:591.748    -- End of preparing flash programming
+T485C 017:591.786   CPU_ReadMem(2048 bytes @ 0x080A5800)
+T485C 017:647.076    -- Updating flash cache (2048 bytes @ 0x080A5800)
+T485C 017:647.132    -- Updating flash cache invalid range 0x080A5800 - 0x080A5FFF (2048 bytes)
+T485C 017:647.162    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A6000 if necessary
+T485C 017:647.188    -- Start of preparing flash programming
+T485C 017:647.208    -- End of preparing flash programming
+T485C 017:647.234   CPU_ReadMem(2048 bytes @ 0x080A6000)
+T485C 017:702.550    -- Updating flash cache (2048 bytes @ 0x080A6000)
+T485C 017:702.608    -- Updating flash cache invalid range 0x080A6000 - 0x080A67FF (2048 bytes)
+T485C 017:702.648    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A6800 if necessary
+T485C 017:702.684    -- Start of preparing flash programming
+T485C 017:702.714    -- End of preparing flash programming
+T485C 017:702.750   CPU_ReadMem(2048 bytes @ 0x080A6800)
+T485C 017:758.128    -- Updating flash cache (2048 bytes @ 0x080A6800)
+T485C 017:758.192    -- Updating flash cache invalid range 0x080A6800 - 0x080A6FFF (2048 bytes)
+T485C 017:758.230    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A7000 if necessary
+T485C 017:758.264    -- Start of preparing flash programming
+T485C 017:758.292    -- End of preparing flash programming
+T485C 017:758.328   CPU_ReadMem(2048 bytes @ 0x080A7000)
+T485C 017:813.708    -- Updating flash cache (2048 bytes @ 0x080A7000)
+T485C 017:813.772    -- Updating flash cache invalid range 0x080A7000 - 0x080A77FF (2048 bytes)
+T485C 017:813.812    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A7800 if necessary
+T485C 017:813.848    -- Start of preparing flash programming
+T485C 017:813.878    -- End of preparing flash programming
+T485C 017:813.916   CPU_ReadMem(2048 bytes @ 0x080A7800)
+T485C 017:869.380    -- Updating flash cache (2048 bytes @ 0x080A7800)
+T485C 017:869.446    -- Updating flash cache invalid range 0x080A7800 - 0x080A7FFF (2048 bytes)
+T485C 017:869.488    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A8000 if necessary
+T485C 017:869.524    -- Start of preparing flash programming
+T485C 017:869.554    -- End of preparing flash programming
+T485C 017:869.590   CPU_ReadMem(2048 bytes @ 0x080A8000)
+T485C 017:924.960    -- Updating flash cache (2048 bytes @ 0x080A8000)
+T485C 017:925.028    -- Updating flash cache invalid range 0x080A8000 - 0x080A87FF (2048 bytes)
+T485C 017:925.068    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A8800 if necessary
+T485C 017:925.102    -- Start of preparing flash programming
+T485C 017:925.132    -- End of preparing flash programming
+T485C 017:925.168   CPU_ReadMem(2048 bytes @ 0x080A8800)
+T485C 017:980.548    -- Updating flash cache (2048 bytes @ 0x080A8800)
+T485C 017:980.614    -- Updating flash cache invalid range 0x080A8800 - 0x080A8FFF (2048 bytes)
+T485C 017:980.656    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A9000 if necessary
+T485C 017:980.692    -- Start of preparing flash programming
+T485C 017:980.724    -- End of preparing flash programming
+T485C 017:980.760   CPU_ReadMem(2048 bytes @ 0x080A9000)
+T485C 018:036.124    -- Updating flash cache (2048 bytes @ 0x080A9000)
+T485C 018:036.186    -- Updating flash cache invalid range 0x080A9000 - 0x080A97FF (2048 bytes)
+T485C 018:036.226    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A9800 if necessary
+T485C 018:036.260    -- Start of preparing flash programming
+T485C 018:036.290    -- End of preparing flash programming
+T485C 018:036.326   CPU_ReadMem(2048 bytes @ 0x080A9800)
+T485C 018:091.710    -- Updating flash cache (2048 bytes @ 0x080A9800)
+T485C 018:091.774    -- Updating flash cache invalid range 0x080A9800 - 0x080A9FFF (2048 bytes)
+T485C 018:091.812    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080AA000 if necessary
+T485C 018:091.846    -- Start of preparing flash programming
+T485C 018:091.876    -- End of preparing flash programming
+T485C 018:091.910   CPU_ReadMem(2048 bytes @ 0x080AA000)
+T485C 018:147.294    -- Updating flash cache (2048 bytes @ 0x080AA000)
+T485C 018:147.362    -- Updating flash cache invalid range 0x080AA000 - 0x080AA7FF (2048 bytes)
+T485C 018:147.404    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080AA800 if necessary
+T485C 018:147.438    -- Start of preparing flash programming
+T485C 018:147.470    -- End of preparing flash programming
+T485C 018:147.506   CPU_ReadMem(2048 bytes @ 0x080AA800)
+T485C 018:202.958    -- Updating flash cache (2048 bytes @ 0x080AA800)
+T485C 018:203.028    -- Updating flash cache invalid range 0x080AA800 - 0x080AAFFF (2048 bytes)
+T485C 018:203.072    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080AB000 if necessary
+T485C 018:203.108    -- Start of preparing flash programming
+T485C 018:203.140    -- End of preparing flash programming
+T485C 018:203.174   CPU_ReadMem(2048 bytes @ 0x080AB000)
+T485C 018:258.560    -- Updating flash cache (2048 bytes @ 0x080AB000)
+T485C 018:258.638    -- Updating flash cache invalid range 0x080AB000 - 0x080AB7FF (2048 bytes)
+T485C 018:258.686    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080AB800 if necessary
+T485C 018:258.724    -- Start of preparing flash programming
+T485C 018:258.754    -- End of preparing flash programming
+T485C 018:258.790   CPU_ReadMem(2048 bytes @ 0x080AB800)
+T485C 018:314.126    -- Updating flash cache (2048 bytes @ 0x080AB800)
+T485C 018:314.196    -- Updating flash cache invalid range 0x080AB800 - 0x080ABFFF (2048 bytes)
+T485C 018:314.236    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080AC000 if necessary
+T485C 018:314.274    -- Start of preparing flash programming
+T485C 018:314.304    -- End of preparing flash programming
+T485C 018:314.340   CPU_ReadMem(2048 bytes @ 0x080AC000)
+T485C 018:369.716    -- Updating flash cache (2048 bytes @ 0x080AC000)
+T485C 018:369.772    -- Updating flash cache invalid range 0x080AC000 - 0x080AC7FF (2048 bytes)
+T485C 018:369.820    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080AC800 if necessary
+T485C 018:369.854    -- Start of preparing flash programming
+T485C 018:369.894    -- End of preparing flash programming
+T485C 018:369.932   CPU_ReadMem(2048 bytes @ 0x080AC800)
+T485C 018:425.296    -- Updating flash cache (2048 bytes @ 0x080AC800)
+T485C 018:425.362    -- Updating flash cache invalid range 0x080AC800 - 0x080ACFFF (2048 bytes)
+T485C 018:425.404    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080AD000 if necessary
+T485C 018:425.438    -- Start of preparing flash programming
+T485C 018:425.500    -- End of preparing flash programming
+T485C 018:425.538   CPU_ReadMem(2048 bytes @ 0x080AD000)
+T485C 018:480.876    -- Updating flash cache (2048 bytes @ 0x080AD000)
+T485C 018:480.942    -- Updating flash cache invalid range 0x080AD000 - 0x080AD7FF (2048 bytes)
+T485C 018:480.984    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080AD800 if necessary
+T485C 018:481.020    -- Start of preparing flash programming
+T485C 018:481.048    -- End of preparing flash programming
+T485C 018:481.084   CPU_ReadMem(2048 bytes @ 0x080AD800)
+T485C 018:536.470    -- Updating flash cache (2048 bytes @ 0x080AD800)
+T485C 018:536.522    -- Updating flash cache invalid range 0x080AD800 - 0x080ADFFF (2048 bytes)
+T485C 018:536.554    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080AE000 if necessary
+T485C 018:536.580    -- Start of preparing flash programming
+T485C 018:536.600    -- End of preparing flash programming
+T485C 018:536.626   CPU_ReadMem(2048 bytes @ 0x080AE000)
+T485C 018:591.964    -- Updating flash cache (2048 bytes @ 0x080AE000)
+T485C 018:592.030    -- Updating flash cache invalid range 0x080AE000 - 0x080AE7FF (2048 bytes)
+T485C 018:592.078    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080AE800 if necessary
+T485C 018:592.110    -- Start of preparing flash programming
+T485C 018:592.140    -- End of preparing flash programming
+T485C 018:592.180   CPU_ReadMem(2048 bytes @ 0x080AE800)
+T485C 018:647.548    -- Updating flash cache (2048 bytes @ 0x080AE800)
+T485C 018:647.618    -- Updating flash cache invalid range 0x080AE800 - 0x080AEFFF (2048 bytes)
+T485C 018:647.660    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080AF000 if necessary
+T485C 018:647.696    -- Start of preparing flash programming
+T485C 018:647.726    -- End of preparing flash programming
+T485C 018:647.762   CPU_ReadMem(2048 bytes @ 0x080AF000)
+T485C 018:703.128    -- Updating flash cache (2048 bytes @ 0x080AF000)
+T485C 018:703.194    -- Updating flash cache invalid range 0x080AF000 - 0x080AF7FF (2048 bytes)
+T485C 018:703.234    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080AF800 if necessary
+T485C 018:703.266    -- Start of preparing flash programming
+T485C 018:703.296    -- End of preparing flash programming
+T485C 018:703.332   CPU_ReadMem(2048 bytes @ 0x080AF800)
+T485C 018:758.706    -- Updating flash cache (2048 bytes @ 0x080AF800)
+T485C 018:758.770    -- Updating flash cache invalid range 0x080AF800 - 0x080AFFFF (2048 bytes)
+T485C 018:758.810    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080B0000 if necessary
+T485C 018:758.844    -- Start of preparing flash programming
+T485C 018:758.872    -- End of preparing flash programming
+T485C 018:758.908   CPU_ReadMem(2048 bytes @ 0x080B0000)
+T485C 018:814.088    -- Updating flash cache (2048 bytes @ 0x080B0000)
+T485C 018:814.144    -- Updating flash cache invalid range 0x080B0000 - 0x080B07FF (2048 bytes)
+T485C 018:814.186    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080B0800 if necessary
+T485C 018:814.372    -- Start of preparing flash programming
+T485C 018:814.404    -- End of preparing flash programming
+T485C 018:814.442   CPU_ReadMem(2048 bytes @ 0x080B0800)
+T485C 018:869.626    -- Updating flash cache (2048 bytes @ 0x080B0800)
+T485C 018:869.692    -- Updating flash cache invalid range 0x080B0800 - 0x080B0FFF (2048 bytes)
+T485C 018:869.734    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080B1000 if necessary
+T485C 018:869.770    -- Start of preparing flash programming
+T485C 018:869.800    -- End of preparing flash programming
+T485C 018:869.838   CPU_ReadMem(2048 bytes @ 0x080B1000)
+T485C 018:925.024    -- Updating flash cache (2048 bytes @ 0x080B1000)
+T485C 018:925.088    -- Updating flash cache invalid range 0x080B1000 - 0x080B17FF (2048 bytes)
+T485C 018:925.132    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080B1800 if necessary
+T485C 018:925.200    -- Start of preparing flash programming
+T485C 018:925.232    -- End of preparing flash programming
+T485C 018:925.278   CPU_ReadMem(2048 bytes @ 0x080B1800)
+T485C 018:980.468    -- Updating flash cache (2048 bytes @ 0x080B1800)
+T485C 018:980.532    -- Updating flash cache invalid range 0x080B1800 - 0x080B1FFF (2048 bytes)
+T485C 018:980.572    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080B2000 if necessary
+T485C 018:980.604    -- Start of preparing flash programming
+T485C 018:980.634    -- End of preparing flash programming
+T485C 018:980.692   CPU_ReadMem(2048 bytes @ 0x080B2000)
+T485C 019:035.868    -- Updating flash cache (2048 bytes @ 0x080B2000)
+T485C 019:035.932    -- Updating flash cache invalid range 0x080B2000 - 0x080B27FF (2048 bytes)
+T485C 019:035.972    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080B2800 if necessary
+T485C 019:036.004    -- Start of preparing flash programming
+T485C 019:036.034    -- End of preparing flash programming
+T485C 019:036.070   CPU_ReadMem(2048 bytes @ 0x080B2800)
+T485C 019:091.254    -- Updating flash cache (2048 bytes @ 0x080B2800)
+T485C 019:091.326    -- Updating flash cache invalid range 0x080B2800 - 0x080B2FFF (2048 bytes)
+T485C 019:091.372    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080B3000 if necessary
+T485C 019:091.408    -- Start of preparing flash programming
+T485C 019:091.444    -- End of preparing flash programming
+T485C 019:091.516   CPU_ReadMem(2048 bytes @ 0x080B3000)
+T485C 019:146.706    -- Updating flash cache (2048 bytes @ 0x080B3000)
+T485C 019:146.770    -- Updating flash cache invalid range 0x080B3000 - 0x080B37FF (2048 bytes)
+T485C 019:146.810    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080B3800 if necessary
+T485C 019:146.844    -- Start of preparing flash programming
+T485C 019:146.872    -- End of preparing flash programming
+T485C 019:146.908   CPU_ReadMem(2048 bytes @ 0x080B3800)
+T485C 019:202.104    -- Updating flash cache (2048 bytes @ 0x080B3800)
+T485C 019:202.170    -- Updating flash cache invalid range 0x080B3800 - 0x080B3FFF (2048 bytes)
+T485C 019:202.210    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080B4000 if necessary
+T485C 019:202.254    -- Start of preparing flash programming
+T485C 019:202.284    -- End of preparing flash programming
+T485C 019:202.328   CPU_ReadMem(2048 bytes @ 0x080B4000)
+T485C 019:257.474    -- Updating flash cache (2048 bytes @ 0x080B4000)
+T485C 019:257.542    -- Updating flash cache invalid range 0x080B4000 - 0x080B47FF (2048 bytes)
+T485C 019:257.584    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080B4800 if necessary
+T485C 019:257.620    -- Start of preparing flash programming
+T485C 019:257.652    -- End of preparing flash programming
+T485C 019:257.690   CPU_ReadMem(2048 bytes @ 0x080B4800)
+T485C 019:312.844    -- Updating flash cache (2048 bytes @ 0x080B4800)
+T485C 019:312.896    -- Updating flash cache invalid range 0x080B4800 - 0x080B4FFF (2048 bytes)
+T485C 019:312.924    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080B5000 if necessary
+T485C 019:312.946    -- Start of preparing flash programming
+T485C 019:312.966    -- End of preparing flash programming
+T485C 019:312.988   CPU_ReadMem(2048 bytes @ 0x080B5000)
+T485C 019:368.072    -- Updating flash cache (2048 bytes @ 0x080B5000)
+T485C 019:368.118    -- Updating flash cache invalid range 0x080B5000 - 0x080B57FF (2048 bytes)
+T485C 019:368.148    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080B5800 if necessary
+T485C 019:368.168    -- Start of preparing flash programming
+T485C 019:368.188    -- End of preparing flash programming
+T485C 019:368.212   CPU_ReadMem(2048 bytes @ 0x080B5800)
+T485C 019:423.302    -- Updating flash cache (2048 bytes @ 0x080B5800)
+T485C 019:423.350    -- Updating flash cache invalid range 0x080B5800 - 0x080B5FFF (2048 bytes)
+T485C 019:423.378    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080B6000 if necessary
+T485C 019:423.408    -- Start of preparing flash programming
+T485C 019:423.428    -- End of preparing flash programming
+T485C 019:423.460   CPU_ReadMem(2048 bytes @ 0x080B6000)
+T485C 019:478.694    -- Updating flash cache (2048 bytes @ 0x080B6000)
+T485C 019:478.740    -- Updating flash cache invalid range 0x080B6000 - 0x080B67FF (2048 bytes)
+T485C 019:478.768    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080B6800 if necessary
+T485C 019:478.790    -- Start of preparing flash programming
+T485C 019:478.810    -- End of preparing flash programming
+T485C 019:478.836   CPU_ReadMem(2048 bytes @ 0x080B6800)
+T485C 019:534.018    -- Updating flash cache (2048 bytes @ 0x080B6800)
+T485C 019:534.094    -- Updating flash cache invalid range 0x080B6800 - 0x080B6FFF (2048 bytes)
+T485C 019:534.134    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080B7000 if necessary
+T485C 019:534.166    -- Start of preparing flash programming
+T485C 019:534.196    -- End of preparing flash programming
+T485C 019:534.232   CPU_ReadMem(2048 bytes @ 0x080B7000)
+T485C 019:589.396    -- Updating flash cache (2048 bytes @ 0x080B7000)
+T485C 019:589.460    -- Updating flash cache invalid range 0x080B7000 - 0x080B77FF (2048 bytes)
+T485C 019:589.500    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080B7800 if necessary
+T485C 019:589.532    -- Start of preparing flash programming
+T485C 019:589.564    -- End of preparing flash programming
+T485C 019:589.596   CPU_ReadMem(2048 bytes @ 0x080B7800)
+T485C 019:644.784    -- Updating flash cache (2048 bytes @ 0x080B7800)
+T485C 019:644.852    -- Updating flash cache invalid range 0x080B7800 - 0x080B7FFF (2048 bytes)
+T485C 019:644.896    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080B8000 if necessary
+T485C 019:644.932    -- Start of preparing flash programming
+T485C 019:644.964    -- End of preparing flash programming
+T485C 019:645.002   CPU_ReadMem(2048 bytes @ 0x080B8000)
+T485C 019:700.168    -- Updating flash cache (2048 bytes @ 0x080B8000)
+T485C 019:700.234    -- Updating flash cache invalid range 0x080B8000 - 0x080B87FF (2048 bytes)
+T485C 019:700.274    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080B8800 if necessary
+T485C 019:700.308    -- Start of preparing flash programming
+T485C 019:700.336    -- End of preparing flash programming
+T485C 019:700.372   CPU_ReadMem(2048 bytes @ 0x080B8800)
+T485C 019:755.546    -- Updating flash cache (2048 bytes @ 0x080B8800)
+T485C 019:755.608    -- Updating flash cache invalid range 0x080B8800 - 0x080B8FFF (2048 bytes)
+T485C 019:755.646    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080B9000 if necessary
+T485C 019:755.680    -- Start of preparing flash programming
+T485C 019:755.708    -- End of preparing flash programming
+T485C 019:755.744   CPU_ReadMem(2048 bytes @ 0x080B9000)
+T485C 019:810.934    -- Updating flash cache (2048 bytes @ 0x080B9000)
+T485C 019:811.002    -- Updating flash cache invalid range 0x080B9000 - 0x080B97FF (2048 bytes)
+T485C 019:811.044    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080B9800 if necessary
+T485C 019:811.080    -- Start of preparing flash programming
+T485C 019:811.110    -- End of preparing flash programming
+T485C 019:811.148   CPU_ReadMem(2048 bytes @ 0x080B9800)
+T485C 019:866.324    -- Updating flash cache (2048 bytes @ 0x080B9800)
+T485C 019:866.396    -- Updating flash cache invalid range 0x080B9800 - 0x080B9FFF (2048 bytes)
+T485C 019:866.436    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080BA000 if necessary
+T485C 019:866.484    -- Start of preparing flash programming
+T485C 019:866.514    -- End of preparing flash programming
+T485C 019:866.550   CPU_ReadMem(2048 bytes @ 0x080BA000)
+T485C 019:921.708    -- Updating flash cache (2048 bytes @ 0x080BA000)
+T485C 019:921.776    -- Updating flash cache invalid range 0x080BA000 - 0x080BA7FF (2048 bytes)
+T485C 019:921.832    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080BA800 if necessary
+T485C 019:921.868    -- Start of preparing flash programming
+T485C 019:921.900    -- End of preparing flash programming
+T485C 019:921.934   CPU_ReadMem(2048 bytes @ 0x080BA800)
+T485C 019:977.078    -- Updating flash cache (2048 bytes @ 0x080BA800)
+T485C 019:977.132    -- Updating flash cache invalid range 0x080BA800 - 0x080BAFFF (2048 bytes)
+T485C 019:977.164    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080BB000 if necessary
+T485C 019:977.188    -- Start of preparing flash programming
+T485C 019:977.210    -- End of preparing flash programming
+T485C 019:977.236   CPU_ReadMem(2048 bytes @ 0x080BB000)
+T485C 020:032.378    -- Updating flash cache (2048 bytes @ 0x080BB000)
+T485C 020:032.424    -- Updating flash cache invalid range 0x080BB000 - 0x080BB7FF (2048 bytes)
+T485C 020:032.452    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080BB800 if necessary
+T485C 020:032.474    -- Start of preparing flash programming
+T485C 020:032.492    -- End of preparing flash programming
+T485C 020:032.516   CPU_ReadMem(2048 bytes @ 0x080BB800)
+T485C 020:087.692    -- Updating flash cache (2048 bytes @ 0x080BB800)
+T485C 020:087.740    -- Updating flash cache invalid range 0x080BB800 - 0x080BBFFF (2048 bytes)
+T485C 020:087.768    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080BC000 if necessary
+T485C 020:087.790    -- Start of preparing flash programming
+T485C 020:087.810    -- End of preparing flash programming
+T485C 020:087.834   CPU_ReadMem(2048 bytes @ 0x080BC000)
+T485C 020:143.012    -- Updating flash cache (2048 bytes @ 0x080BC000)
+T485C 020:143.082    -- Updating flash cache invalid range 0x080BC000 - 0x080BC7FF (2048 bytes)
+T485C 020:143.124    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080BC800 if necessary
+T485C 020:143.158    -- Start of preparing flash programming
+T485C 020:143.188    -- End of preparing flash programming
+T485C 020:143.226   CPU_ReadMem(2048 bytes @ 0x080BC800)
+T485C 020:198.396    -- Updating flash cache (2048 bytes @ 0x080BC800)
+T485C 020:198.464    -- Updating flash cache invalid range 0x080BC800 - 0x080BCFFF (2048 bytes)
+T485C 020:198.506    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080BD000 if necessary
+T485C 020:198.540    -- Start of preparing flash programming
+T485C 020:198.572    -- End of preparing flash programming
+T485C 020:198.610   CPU_ReadMem(2048 bytes @ 0x080BD000)
+T485C 020:253.798    -- Updating flash cache (2048 bytes @ 0x080BD000)
+T485C 020:253.878    -- Updating flash cache invalid range 0x080BD000 - 0x080BD7FF (2048 bytes)
+T485C 020:253.924    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080BD800 if necessary
+T485C 020:253.960    -- Start of preparing flash programming
+T485C 020:253.990    -- End of preparing flash programming
+T485C 020:254.028   CPU_ReadMem(2048 bytes @ 0x080BD800)
+T485C 020:309.154    -- Updating flash cache (2048 bytes @ 0x080BD800)
+T485C 020:309.204    -- Updating flash cache invalid range 0x080BD800 - 0x080BDFFF (2048 bytes)
+T485C 020:309.236    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080BE000 if necessary
+T485C 020:309.262    -- Start of preparing flash programming
+T485C 020:309.292    -- End of preparing flash programming
+T485C 020:309.338   CPU_ReadMem(2048 bytes @ 0x080BE000)
+T485C 020:364.480    -- Updating flash cache (2048 bytes @ 0x080BE000)
+T485C 020:364.548    -- Updating flash cache invalid range 0x080BE000 - 0x080BE7FF (2048 bytes)
+T485C 020:364.594    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080BE800 if necessary
+T485C 020:364.628    -- Start of preparing flash programming
+T485C 020:364.658    -- End of preparing flash programming
+T485C 020:364.692   CPU_ReadMem(2048 bytes @ 0x080BE800)
+T485C 020:419.866    -- Updating flash cache (2048 bytes @ 0x080BE800)
+T485C 020:419.940    -- Updating flash cache invalid range 0x080BE800 - 0x080BEFFF (2048 bytes)
+T485C 020:419.980    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080BF000 if necessary
+T485C 020:420.012    -- Start of preparing flash programming
+T485C 020:420.060    -- End of preparing flash programming
+T485C 020:420.096   CPU_ReadMem(2048 bytes @ 0x080BF000)
+T485C 020:475.238    -- Updating flash cache (2048 bytes @ 0x080BF000)
+T485C 020:475.308    -- Updating flash cache invalid range 0x080BF000 - 0x080BF7FF (2048 bytes)
+T485C 020:475.348    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080BF800 if necessary
+T485C 020:475.384    -- Start of preparing flash programming
+T485C 020:475.414    -- End of preparing flash programming
+T485C 020:475.450   CPU_ReadMem(2048 bytes @ 0x080BF800)
+T485C 020:530.714    -- Updating flash cache (2048 bytes @ 0x080BF800)
+T485C 020:530.756    -- Updating flash cache invalid range 0x080BF800 - 0x080BFFFF (2048 bytes)
+T485C 020:530.782    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080C0000 if necessary
+T485C 020:530.804    -- Start of preparing flash programming
+T485C 020:530.824    -- End of preparing flash programming
+T485C 020:530.850   CPU_ReadMem(2048 bytes @ 0x080C0000)
+T485C 020:586.014    -- Updating flash cache (2048 bytes @ 0x080C0000)
+T485C 020:586.082    -- Updating flash cache invalid range 0x080C0000 - 0x080C07FF (2048 bytes)
+T485C 020:586.148    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080C0800 if necessary
+T485C 020:586.220    -- Start of preparing flash programming
+T485C 020:586.252    -- End of preparing flash programming
+T485C 020:586.290   CPU_ReadMem(2048 bytes @ 0x080C0800)
+T485C 020:641.470    -- Updating flash cache (2048 bytes @ 0x080C0800)
+T485C 020:641.538    -- Updating flash cache invalid range 0x080C0800 - 0x080C0FFF (2048 bytes)
+T485C 020:641.580    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080C1000 if necessary
+T485C 020:641.612    -- Start of preparing flash programming
+T485C 020:641.644    -- End of preparing flash programming
+T485C 020:641.680   CPU_ReadMem(2048 bytes @ 0x080C1000)
+T485C 020:696.860    -- Updating flash cache (2048 bytes @ 0x080C1000)
+T485C 020:696.928    -- Updating flash cache invalid range 0x080C1000 - 0x080C17FF (2048 bytes)
+T485C 020:696.968    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080C1800 if necessary
+T485C 020:697.004    -- Start of preparing flash programming
+T485C 020:697.034    -- End of preparing flash programming
+T485C 020:697.070   CPU_ReadMem(2048 bytes @ 0x080C1800)
+T485C 020:752.244    -- Updating flash cache (2048 bytes @ 0x080C1800)
+T485C 020:752.310    -- Updating flash cache invalid range 0x080C1800 - 0x080C1FFF (2048 bytes)
+T485C 020:752.352    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080C2000 if necessary
+T485C 020:752.388    -- Start of preparing flash programming
+T485C 020:752.420    -- End of preparing flash programming
+T485C 020:752.454   CPU_ReadMem(2048 bytes @ 0x080C2000)
+T485C 020:807.696    -- Updating flash cache (2048 bytes @ 0x080C2000)
+T485C 020:807.748    -- Updating flash cache invalid range 0x080C2000 - 0x080C27FF (2048 bytes)
+T485C 020:807.778    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080C2800 if necessary
+T485C 020:807.804    -- Start of preparing flash programming
+T485C 020:807.824    -- End of preparing flash programming
+T485C 020:807.848   CPU_ReadMem(2048 bytes @ 0x080C2800)
+T485C 020:863.012    -- Updating flash cache (2048 bytes @ 0x080C2800)
+T485C 020:863.080    -- Updating flash cache invalid range 0x080C2800 - 0x080C2FFF (2048 bytes)
+T485C 020:863.122    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080C3000 if necessary
+T485C 020:863.156    -- Start of preparing flash programming
+T485C 020:863.188    -- End of preparing flash programming
+T485C 020:863.236   CPU_ReadMem(2048 bytes @ 0x080C3000)
+T485C 020:918.392    -- Updating flash cache (2048 bytes @ 0x080C3000)
+T485C 020:918.460    -- Updating flash cache invalid range 0x080C3000 - 0x080C37FF (2048 bytes)
+T485C 020:918.502    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080C3800 if necessary
+T485C 020:918.540    -- Start of preparing flash programming
+T485C 020:918.570    -- End of preparing flash programming
+T485C 020:918.606   CPU_ReadMem(2048 bytes @ 0x080C3800)
+T485C 020:973.792    -- Updating flash cache (2048 bytes @ 0x080C3800)
+T485C 020:973.852    -- Updating flash cache invalid range 0x080C3800 - 0x080C3FFF (2048 bytes)
+T485C 020:973.894    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080C4000 if necessary
+T485C 020:973.928    -- Start of preparing flash programming
+T485C 020:973.958    -- End of preparing flash programming
+T485C 020:973.994   CPU_ReadMem(2048 bytes @ 0x080C4000)
+T485C 021:029.170    -- Updating flash cache (2048 bytes @ 0x080C4000)
+T485C 021:029.238    -- Updating flash cache invalid range 0x080C4000 - 0x080C47FF (2048 bytes)
+T485C 021:029.280    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080C4800 if necessary
+T485C 021:029.316    -- Start of preparing flash programming
+T485C 021:029.348    -- End of preparing flash programming
+T485C 021:029.382   CPU_ReadMem(2048 bytes @ 0x080C4800)
+T485C 021:084.548    -- Updating flash cache (2048 bytes @ 0x080C4800)
+T485C 021:084.614    -- Updating flash cache invalid range 0x080C4800 - 0x080C4FFF (2048 bytes)
+T485C 021:084.656    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080C5000 if necessary
+T485C 021:084.692    -- Start of preparing flash programming
+T485C 021:084.722    -- End of preparing flash programming
+T485C 021:084.758   CPU_ReadMem(2048 bytes @ 0x080C5000)
+T485C 021:139.938    -- Updating flash cache (2048 bytes @ 0x080C5000)
+T485C 021:140.004    -- Updating flash cache invalid range 0x080C5000 - 0x080C57FF (2048 bytes)
+T485C 021:140.042    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080C5800 if necessary
+T485C 021:140.076    -- Start of preparing flash programming
+T485C 021:140.106    -- End of preparing flash programming
+T485C 021:140.140   CPU_ReadMem(2048 bytes @ 0x080C5800)
+T485C 021:195.322    -- Updating flash cache (2048 bytes @ 0x080C5800)
+T485C 021:195.386    -- Updating flash cache invalid range 0x080C5800 - 0x080C5FFF (2048 bytes)
+T485C 021:195.426    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080C6000 if necessary
+T485C 021:195.458    -- Start of preparing flash programming
+T485C 021:195.488    -- End of preparing flash programming
+T485C 021:195.524   CPU_ReadMem(2048 bytes @ 0x080C6000)
+T485C 021:250.716    -- Updating flash cache (2048 bytes @ 0x080C6000)
+T485C 021:250.782    -- Updating flash cache invalid range 0x080C6000 - 0x080C67FF (2048 bytes)
+T485C 021:250.822    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080C6800 if necessary
+T485C 021:250.856    -- Start of preparing flash programming
+T485C 021:250.884    -- End of preparing flash programming
+T485C 021:250.920   CPU_ReadMem(2048 bytes @ 0x080C6800)
+T485C 021:306.070    -- Updating flash cache (2048 bytes @ 0x080C6800)
+T485C 021:306.118    -- Updating flash cache invalid range 0x080C6800 - 0x080C6FFF (2048 bytes)
+T485C 021:306.148    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080C7000 if necessary
+T485C 021:306.168    -- Start of preparing flash programming
+T485C 021:306.188    -- End of preparing flash programming
+T485C 021:306.212   CPU_ReadMem(2048 bytes @ 0x080C7000)
+T485C 021:361.396    -- Updating flash cache (2048 bytes @ 0x080C7000)
+T485C 021:361.442    -- Updating flash cache invalid range 0x080C7000 - 0x080C77FF (2048 bytes)
+T485C 021:361.468    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080C7800 if necessary
+T485C 021:361.490    -- Start of preparing flash programming
+T485C 021:361.516    -- End of preparing flash programming
+T485C 021:361.540   CPU_ReadMem(2048 bytes @ 0x080C7800)
+T485C 021:416.722    -- Updating flash cache (2048 bytes @ 0x080C7800)
+T485C 021:416.782    -- Updating flash cache invalid range 0x080C7800 - 0x080C7FFF (2048 bytes)
+T485C 021:416.824    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080C8000 if necessary
+T485C 021:416.858    -- Start of preparing flash programming
+T485C 021:416.884    -- End of preparing flash programming
+T485C 021:416.920   CPU_ReadMem(2048 bytes @ 0x080C8000)
+T485C 021:472.092    -- Updating flash cache (2048 bytes @ 0x080C8000)
+T485C 021:472.138    -- Updating flash cache invalid range 0x080C8000 - 0x080C87FF (2048 bytes)
+T485C 021:472.164    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080C8800 if necessary
+T485C 021:472.188    -- Start of preparing flash programming
+T485C 021:472.204    -- End of preparing flash programming
+T485C 021:472.228   CPU_ReadMem(2048 bytes @ 0x080C8800)
+T485C 021:527.398    -- Updating flash cache (2048 bytes @ 0x080C8800)
+T485C 021:527.446    -- Updating flash cache invalid range 0x080C8800 - 0x080C8FFF (2048 bytes)
+T485C 021:527.474    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080C9000 if necessary
+T485C 021:527.500    -- Start of preparing flash programming
+T485C 021:527.520    -- End of preparing flash programming
+T485C 021:527.544   CPU_ReadMem(2048 bytes @ 0x080C9000)
+T485C 021:582.708    -- Updating flash cache (2048 bytes @ 0x080C9000)
+T485C 021:582.772    -- Updating flash cache invalid range 0x080C9000 - 0x080C97FF (2048 bytes)
+T485C 021:582.812    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080C9800 if necessary
+T485C 021:582.844    -- Start of preparing flash programming
+T485C 021:582.874    -- End of preparing flash programming
+T485C 021:582.908   CPU_ReadMem(2048 bytes @ 0x080C9800)
+T485C 021:638.090    -- Updating flash cache (2048 bytes @ 0x080C9800)
+T485C 021:638.152    -- Updating flash cache invalid range 0x080C9800 - 0x080C9FFF (2048 bytes)
+T485C 021:638.192    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080CA000 if necessary
+T485C 021:638.224    -- Start of preparing flash programming
+T485C 021:638.254    -- End of preparing flash programming
+T485C 021:638.290   CPU_ReadMem(2048 bytes @ 0x080CA000)
+T485C 021:693.484    -- Updating flash cache (2048 bytes @ 0x080CA000)
+T485C 021:693.590    -- Updating flash cache invalid range 0x080CA000 - 0x080CA7FF (2048 bytes)
+T485C 021:693.632    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080CA800 if necessary
+T485C 021:693.664    -- Start of preparing flash programming
+T485C 021:693.694    -- End of preparing flash programming
+T485C 021:693.732   CPU_ReadMem(2048 bytes @ 0x080CA800)
+T485C 021:748.940    -- Updating flash cache (2048 bytes @ 0x080CA800)
+T485C 021:748.988    -- Updating flash cache invalid range 0x080CA800 - 0x080CAFFF (2048 bytes)
+T485C 021:749.014    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080CB000 if necessary
+T485C 021:749.036    -- Start of preparing flash programming
+T485C 021:749.054    -- End of preparing flash programming
+T485C 021:749.078   CPU_ReadMem(2048 bytes @ 0x080CB000)
+T485C 021:804.248    -- Updating flash cache (2048 bytes @ 0x080CB000)
+T485C 021:804.330    -- Updating flash cache invalid range 0x080CB000 - 0x080CB7FF (2048 bytes)
+T485C 021:804.372    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080CB800 if necessary
+T485C 021:804.406    -- Start of preparing flash programming
+T485C 021:804.436    -- End of preparing flash programming
+T485C 021:804.470   CPU_ReadMem(2048 bytes @ 0x080CB800)
+T485C 021:859.708    -- Updating flash cache (2048 bytes @ 0x080CB800)
+T485C 021:859.776    -- Updating flash cache invalid range 0x080CB800 - 0x080CBFFF (2048 bytes)
+T485C 021:859.818    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080CC000 if necessary
+T485C 021:859.866    -- Start of preparing flash programming
+T485C 021:859.896    -- End of preparing flash programming
+T485C 021:859.932   CPU_ReadMem(2048 bytes @ 0x080CC000)
+T485C 021:915.092    -- Updating flash cache (2048 bytes @ 0x080CC000)
+T485C 021:915.148    -- Updating flash cache invalid range 0x080CC000 - 0x080CC7FF (2048 bytes)
+T485C 021:915.178    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080CC800 if necessary
+T485C 021:915.204    -- Start of preparing flash programming
+T485C 021:915.226    -- End of preparing flash programming
+T485C 021:915.252   CPU_ReadMem(2048 bytes @ 0x080CC800)
+T485C 021:970.390    -- Updating flash cache (2048 bytes @ 0x080CC800)
+T485C 021:970.458    -- Updating flash cache invalid range 0x080CC800 - 0x080CCFFF (2048 bytes)
+T485C 021:970.500    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080CD000 if necessary
+T485C 021:970.534    -- Start of preparing flash programming
+T485C 021:970.564    -- End of preparing flash programming
+T485C 021:970.600   CPU_ReadMem(2048 bytes @ 0x080CD000)
+T485C 022:025.788    -- Updating flash cache (2048 bytes @ 0x080CD000)
+T485C 022:025.840    -- Updating flash cache invalid range 0x080CD000 - 0x080CD7FF (2048 bytes)
+T485C 022:025.868    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080CD800 if necessary
+T485C 022:025.892    -- Start of preparing flash programming
+T485C 022:025.914    -- End of preparing flash programming
+T485C 022:025.938   CPU_ReadMem(2048 bytes @ 0x080CD800)
+T485C 022:081.094    -- Updating flash cache (2048 bytes @ 0x080CD800)
+T485C 022:081.140    -- Updating flash cache invalid range 0x080CD800 - 0x080CDFFF (2048 bytes)
+T485C 022:081.168    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080CE000 if necessary
+T485C 022:081.190    -- Start of preparing flash programming
+T485C 022:081.210    -- End of preparing flash programming
+T485C 022:081.232   CPU_ReadMem(2048 bytes @ 0x080CE000)
+T485C 022:136.394    -- Updating flash cache (2048 bytes @ 0x080CE000)
+T485C 022:136.458    -- Updating flash cache invalid range 0x080CE000 - 0x080CE7FF (2048 bytes)
+T485C 022:136.498    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080CE800 if necessary
+T485C 022:136.530    -- Start of preparing flash programming
+T485C 022:136.560    -- End of preparing flash programming
+T485C 022:136.594   CPU_ReadMem(2048 bytes @ 0x080CE800)
+T485C 022:191.786    -- Updating flash cache (2048 bytes @ 0x080CE800)
+T485C 022:191.850    -- Updating flash cache invalid range 0x080CE800 - 0x080CEFFF (2048 bytes)
+T485C 022:191.888    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080CF000 if necessary
+T485C 022:191.922    -- Start of preparing flash programming
+T485C 022:191.952    -- End of preparing flash programming
+T485C 022:191.988   CPU_ReadMem(2048 bytes @ 0x080CF000)
+T485C 022:247.172    -- Updating flash cache (2048 bytes @ 0x080CF000)
+T485C 022:247.240    -- Updating flash cache invalid range 0x080CF000 - 0x080CF7FF (2048 bytes)
+T485C 022:247.278    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080CF800 if necessary
+T485C 022:247.316    -- Start of preparing flash programming
+T485C 022:247.346    -- End of preparing flash programming
+T485C 022:247.380   CPU_ReadMem(2048 bytes @ 0x080CF800)
+T485C 022:302.528    -- Updating flash cache (2048 bytes @ 0x080CF800)
+T485C 022:302.576    -- Updating flash cache invalid range 0x080CF800 - 0x080CFFFF (2048 bytes)
+T485C 022:302.604    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080D0000 if necessary
+T485C 022:302.626    -- Start of preparing flash programming
+T485C 022:302.644    -- End of preparing flash programming
+T485C 022:302.668   CPU_ReadMem(2048 bytes @ 0x080D0000)
+T485C 022:357.780    -- Updating flash cache (2048 bytes @ 0x080D0000)
+T485C 022:357.852    -- Updating flash cache invalid range 0x080D0000 - 0x080D07FF (2048 bytes)
+T485C 022:357.904    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080D0800 if necessary
+T485C 022:357.940    -- Start of preparing flash programming
+T485C 022:357.970    -- End of preparing flash programming
+T485C 022:358.004   CPU_ReadMem(2048 bytes @ 0x080D0800)
+T485C 022:413.164    -- Updating flash cache (2048 bytes @ 0x080D0800)
+T485C 022:413.232    -- Updating flash cache invalid range 0x080D0800 - 0x080D0FFF (2048 bytes)
+T485C 022:413.272    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080D1000 if necessary
+T485C 022:413.308    -- Start of preparing flash programming
+T485C 022:413.340    -- End of preparing flash programming
+T485C 022:413.374   CPU_ReadMem(2048 bytes @ 0x080D1000)
+T485C 022:468.532    -- Updating flash cache (2048 bytes @ 0x080D1000)
+T485C 022:468.584    -- Updating flash cache invalid range 0x080D1000 - 0x080D17FF (2048 bytes)
+T485C 022:468.616    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080D1800 if necessary
+T485C 022:468.642    -- Start of preparing flash programming
+T485C 022:468.662    -- End of preparing flash programming
+T485C 022:468.688   CPU_ReadMem(2048 bytes @ 0x080D1800)
+T485C 022:523.862    -- Updating flash cache (2048 bytes @ 0x080D1800)
+T485C 022:523.924    -- Updating flash cache invalid range 0x080D1800 - 0x080D1FFF (2048 bytes)
+T485C 022:523.964    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080D2000 if necessary
+T485C 022:523.996    -- Start of preparing flash programming
+T485C 022:524.028    -- End of preparing flash programming
+T485C 022:524.064   CPU_ReadMem(2048 bytes @ 0x080D2000)
+T485C 022:579.466    -- Updating flash cache (2048 bytes @ 0x080D2000)
+T485C 022:579.518    -- Updating flash cache invalid range 0x080D2000 - 0x080D27FF (2048 bytes)
+T485C 022:579.602    -- End of determining dirty areas
+T485C 022:579.628    -- CPU speed could not be measured.
+T485C 022:579.652    -- Start of comparing flash
+T485C 022:579.670    -- CRC check was estimated as fastest method
+T485C 022:579.692    -- Comparing range 0x8010000 - 0x802FFFF (64 Sectors, 128 KB), using single-block CRC calculation
+T485C 022:601.926    -- CRC matches
+T485C 022:601.988    -- Comparing range 0x8030000 - 0x804FFFF (64 Sectors, 128 KB), using single-block CRC calculation
+T485C 022:627.722    -- CRC matches
+T485C 022:627.786    -- Comparing range 0x8050000 - 0x806FFFF (64 Sectors, 128 KB), using single-block CRC calculation
+T485C 022:653.548    -- CRC matches
+T485C 022:653.612    -- Comparing range 0x8070000 - 0x808FFFF (64 Sectors, 128 KB), using single-block CRC calculation
+T485C 022:679.420    -- CRC matches
+T485C 022:679.484    -- Comparing range 0x8090000 - 0x80AFFFF (64 Sectors, 128 KB), using single-block CRC calculation
+T485C 022:706.266    -- CRC matches
+T485C 022:706.326    -- Comparing range 0x80B0000 - 0x80CFFFF (64 Sectors, 128 KB), using single-block CRC calculation
+T485C 022:732.086    -- CRC matches
+T485C 022:732.144    -- Comparing range 0x80D0000 - 0x80D27FF (5 Sectors, 10 KB), using single-block CRC calculation
+T485C 022:736.778    -- CRC matches
+T485C 022:736.852    -- Comparing range 0x8010000 - 0x802FFFF (64 Sectors, 128 KB), using alternative single-block CRC calculation
+T485C 022:759.220    -- CRC matches
+T485C 022:759.268    -- Comparing range 0x8030000 - 0x804FFFF (64 Sectors, 128 KB), using alternative single-block CRC calculation
+T485C 022:786.050    -- CRC matches
+T485C 022:786.116    -- Comparing range 0x8050000 - 0x806FFFF (64 Sectors, 128 KB), using alternative single-block CRC calculation
+T485C 022:812.718    -- CRC matches
+T485C 022:812.772    -- Comparing range 0x8070000 - 0x808FFFF (64 Sectors, 128 KB), using alternative single-block CRC calculation
+T485C 022:839.348    -- CRC matches
+T485C 022:839.412    -- Comparing range 0x8090000 - 0x80AFFFF (64 Sectors, 128 KB), using alternative single-block CRC calculation
+T485C 022:866.044    -- CRC matches
+T485C 022:866.092    -- Comparing range 0x80B0000 - 0x80CFFFF (64 Sectors, 128 KB), using alternative single-block CRC calculation
+T485C 022:892.698    -- CRC matches
+T485C 022:892.762    -- Comparing range 0x80D0000 - 0x80D27FF (5 Sectors, 10 KB), using alternative single-block CRC calculation
+T485C 022:897.264    -- CRC matches
+T485C 022:897.302    -- End of comparing flash
+T485C 022:897.334    -- Start of erasing sectors
+T485C 022:897.364    -- End of erasing sectors
+T485C 022:897.392    -- Start of flash programming
+T485C 022:897.420    -- End of flash programming
+T485C 022:897.450    -- Start of verifying flash
+T485C 022:897.478    -- End of verifying flash
+T485C 022:897.530    -- Start of restoring
+T485C 022:897.558    -- End of restoring
+T485C 022:897.592    -- Bank 0 @ 0x08000000: Skipped. Contents already match
+T485C 022:897.620    -- Bank 0 @ 0x08000000: Skipped. Contents already match
+T485C 022:902.956 - 22653.584ms returns 0x00
+T485C 022:902.998 JLINK_ExecCommand("SetVerifyRAMDownload = 0", ...). 
+T485C 022:903.024 - 0.003ms returns 0x01
+T485C 022:904.064 JLINK_IsHalted()
+T485C 022:904.934 - 0.869ms returns FALSE
+T485C 022:904.972 JLINK_Halt()
+T485C 022:912.906 - 7.932ms returns 0x00
+T485C 022:912.960 JLINK_ReadMemEx_64(0x08010000, 0xC2089 Bytes, ...)
+T485C 022:912.990   CPU_ReadMem(794761 bytes @ 0x08010000)
+T485C 043:987.124   Data:  00 7E 05 20 AD BF 01 08 37 C0 01 08 37 C0 01 08 ...
+T485C 043:987.192 - 21074.234ms returns 794761 (0xC2089)
+T485C 043:988.796 JLINK_IsOpen()
+T485C 043:988.828 - 0.030ms returns 0x01
+T485C 043:995.064 JLINK_Close()
+T485C 043:995.892   CPU_WriteMem(6888 bytes @ 0x20000000)
+T485C 044:010.376 - 15.310ms
+T485C 044:010.636   
+T485C 044:010.656   Closed

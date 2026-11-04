@@ -1,0 +1,1314 @@
+Archive member included to satisfy reference by file (symbol)
+
+D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_aeabi_ldivmod.o)
+                              CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/system_at32f435_437.c.obj (__aeabi_ldivmod)
+D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_aeabi_uldivmod.o)
+                              CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/system_at32f435_437.c.obj (__aeabi_uldivmod)
+D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_udivmoddi4.o)
+                              D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_aeabi_ldivmod.o) (__udivmoddi4)
+D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_dvmd_tls.o)
+                              D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_aeabi_ldivmod.o) (__aeabi_ldiv0)
+D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-memcmp.o)
+                              CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_fw_header.c.obj (memcmp)
+D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-memset.o)
+                              CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_sha256.c.obj (memset)
+D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-memcpy-stub.o)
+                              CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_sha256.c.obj (memcpy)
+
+Discarded input sections
+
+ .text          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_runtime.c.obj
+ .data          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_runtime.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_runtime.c.obj
+ .text          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_crc32.c.obj
+ .data          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_crc32.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_crc32.c.obj
+ .text          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_sha256.c.obj
+ .data          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_sha256.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_sha256.c.obj
+ .text          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_fw_header.c.obj
+ .data          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_fw_header.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_fw_header.c.obj
+ .text          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_slot.c.obj
+ .data          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_slot.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_slot.c.obj
+ .rodata.boot_slot_result_name.str1.1
+                0x00000000        0x8 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_slot.c.obj
+ .text.boot_slot_result_name
+                0x00000000       0x18 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_slot.c.obj
+ .rodata.str1.1
+                0x00000000       0x2d CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_slot.c.obj
+ .rodata.names.0
+                0x00000000       0x1c CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_slot.c.obj
+ .text          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_state_machine.c.obj
+ .data          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_state_machine.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_state_machine.c.obj
+ .text          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_ymodem.c.obj
+ .data          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_ymodem.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_ymodem.c.obj
+ .text          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_recovery.c.obj
+ .data          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_recovery.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_recovery.c.obj
+ .text          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_main.c.obj
+ .data          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_main.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_main.c.obj
+ .text          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_handoff_at32.c.obj
+ .data          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_handoff_at32.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_handoff_at32.c.obj
+ .text          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+ .data          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+ .text.boot_platform_millis
+                0x00000000        0xc CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+ .text          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/Libraries/EEPROM/eeprom_bcb.c.obj
+ .data          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/Libraries/EEPROM/eeprom_bcb.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/Libraries/EEPROM/eeprom_bcb.c.obj
+ .text          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/cmake/startup_at32f435_437_gcc.S.obj
+ .data          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/cmake/startup_at32f435_437_gcc.S.obj
+ .bss           0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/cmake/startup_at32f435_437_gcc.S.obj
+ .text          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/system_at32f435_437.c.obj
+ .data          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/system_at32f435_437.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/system_at32f435_437.c.obj
+ .text          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .data          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .text.crm_lext_bypass
+                0x00000000       0x10 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .text.crm_hext_bypass
+                0x00000000       0x10 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .text.crm_interrupt_flag_get
+                0x00000000       0x94 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .text.crm_hext_stable_wait
+                0x00000000       0x22 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .text.crm_hick_clock_trimming_set
+                0x00000000       0x10 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .text.crm_hick_clock_calibration_set
+                0x00000000       0x2c CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .text.crm_periph_reset
+                0x00000000        0x4 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .text.crm_periph_lowpower_mode_enable
+                0x00000000        0x4 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .text.crm_flag_clear
+                0x00000000       0x8c CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .text.crm_ertc_clock_select
+                0x00000000       0x1c CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .text.crm_ertc_clock_enable
+                0x00000000       0x10 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .text.crm_usb_clock_div_set
+                0x00000000       0x14 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .text.crm_clock_failure_detection_enable
+                0x00000000       0x10 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .text.crm_battery_powered_domain_reset
+                0x00000000       0x10 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .text.crm_hick_divider_select
+                0x00000000       0x14 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .text.crm_hick_sclk_frequency_select
+                0x00000000       0x20 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .text.crm_usb_clock_source_select
+                0x00000000       0x34 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .text.crm_clkout_to_tmr10_enable
+                0x00000000       0x14 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .text.crm_clock_out1_set
+                0x00000000       0x10 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .text.crm_clock_out2_set
+                0x00000000       0x2c CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .text.crm_clkout_div_set
+                0x00000000       0x38 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .text.crm_emac_output_pulse_set
+                0x00000000       0x14 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .text.crm_interrupt_enable
+                0x00000000       0x14 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .text.crm_pll_parameter_calculate
+                0x00000000       0xbc CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .text          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .data          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_flag_get
+                0x00000000       0x38 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_flag_clear
+                0x00000000       0x24 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_bank1_operation_status_get
+                0x00000000        0x4 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_bank1_operation_wait_for
+                0x00000000        0x4 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_bank1_unlock
+                0x00000000       0x18 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_bank2_unlock
+                0x00000000       0x18 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_bank1_lock
+                0x00000000       0x10 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_bank2_lock
+                0x00000000       0x10 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_block_erase
+                0x00000000       0x70 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_internal_all_erase
+                0x00000000       0x50 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_bank1_erase
+                0x00000000       0x2c CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_bank2_erase
+                0x00000000       0x2c CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_user_system_data_erase
+                0x00000000       0x74 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_eopb0_config
+                0x00000000       0x40 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_halfword_program
+                0x00000000       0x60 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_byte_program
+                0x00000000       0x60 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_user_system_data_program
+                0x00000000       0x4c CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_epp_set
+                0x00000000       0xcc CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_epp_status_get
+                0x00000000       0x10 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_fap_enable
+                0x00000000       0x78 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_fap_status_get
+                0x00000000       0x10 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_ssb_set
+                0x00000000       0x40 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_ssb_status_get
+                0x00000000       0x10 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_interrupt_enable
+                0x00000000       0x40 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_slib_enable
+                0x00000000       0x70 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_slib_disable
+                0x00000000       0x24 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_slib_remaining_count_get
+                0x00000000       0x10 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_slib_state_get
+                0x00000000       0x10 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_slib_start_sector_get
+                0x00000000       0x10 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_slib_inststart_sector_get
+                0x00000000       0x10 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_slib_end_sector_get
+                0x00000000       0x10 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_crc_calibrate
+                0x00000000       0x3c CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_nzw_boost_enable
+                0x00000000       0x10 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text.flash_continue_read_enable
+                0x00000000       0x10 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .text          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_gpio.c.obj
+ .data          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_gpio.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_gpio.c.obj
+ .text.gpio_reset
+                0x00000000       0xec CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_gpio.c.obj
+ .text.gpio_input_data_read
+                0x00000000        0x6 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_gpio.c.obj
+ .text.gpio_output_data_bit_read
+                0x00000000        0xc CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_gpio.c.obj
+ .text.gpio_output_data_read
+                0x00000000        0x6 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_gpio.c.obj
+ .text.gpio_bits_write
+                0x00000000        0xa CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_gpio.c.obj
+ .text.gpio_port_write
+                0x00000000        0x4 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_gpio.c.obj
+ .text.gpio_pin_wp_config
+                0x00000000       0x10 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_gpio.c.obj
+ .text.gpio_pins_huge_driven_config
+                0x00000000       0x12 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_gpio.c.obj
+ .text          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+ .data          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+ .text.qspi_reset
+                0x00000000       0x44 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+ .text.qspi_encryption_enable
+                0x00000000        0xa CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+ .text.qspi_xip_cache_bypass_set
+                0x00000000        0xa CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+ .text.qspi_interrupt_enable
+                0x00000000        0xa CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+ .text.qspi_interrupt_flag_get
+                0x00000000       0x1a CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+ .text.qspi_dma_rx_threshold_set
+                0x00000000        0xa CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+ .text.qspi_dma_tx_threshold_set
+                0x00000000        0xa CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+ .text.qspi_dma_enable
+                0x00000000        0xa CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+ .text.qspi_xip_init
+                0x00000000       0x52 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+ .text.qspi_half_word_read
+                0x00000000        0x8 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+ .text.qspi_word_read
+                0x00000000        0x6 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+ .text.qspi_half_word_write
+                0x00000000        0x6 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+ .text.qspi_word_write
+                0x00000000        0x6 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+ .text          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .data          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text.usart_reset
+                0x00000000       0xec CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text.usart_clock_config
+                0x00000000       0x1c CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text.usart_clock_enable
+                0x00000000        0xa CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text.usart_interrupt_enable
+                0x00000000       0x1c CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text.usart_dma_transmitter_enable
+                0x00000000        0xa CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text.usart_dma_receiver_enable
+                0x00000000        0xa CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text.usart_wakeup_id_set
+                0x00000000       0x2e CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text.usart_wakeup_mode_set
+                0x00000000        0xa CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text.usart_receiver_mute_enable
+                0x00000000        0xa CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text.usart_break_bit_num_set
+                0x00000000        0xa CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text.usart_lin_mode_enable
+                0x00000000        0xa CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text.usart_break_send
+                0x00000000        0xa CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text.usart_smartcard_guard_time_set
+                0x00000000        0xa CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text.usart_irda_smartcard_division_set
+                0x00000000        0xa CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text.usart_smartcard_mode_enable
+                0x00000000        0xa CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text.usart_smartcard_nack_set
+                0x00000000        0xa CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text.usart_single_line_halfduplex_select
+                0x00000000        0xa CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text.usart_irda_mode_enable
+                0x00000000        0xa CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text.usart_irda_low_power_enable
+                0x00000000        0xa CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text.usart_hardware_flow_control_set
+                0x00000000       0x3e CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text.usart_interrupt_flag_get
+                0x00000000       0x98 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text.usart_flag_clear
+                0x00000000        0xe CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text.usart_rs485_delay_time_config
+                0x00000000       0x12 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text.usart_transmit_receive_pin_swap
+                0x00000000        0xa CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text.usart_id_bit_num_set
+                0x00000000        0xa CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text.usart_de_polarity_set
+                0x00000000        0xa CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text.usart_rs485_mode_enable
+                0x00000000        0xa CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .text          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_wdt.c.obj
+ .data          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_wdt.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_wdt.c.obj
+ .text.wdt_flag_get
+                0x00000000       0x14 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_wdt.c.obj
+ .text.wdt_window_counter_set
+                0x00000000       0x10 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_wdt.c.obj
+ .text          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/MDK-ARM_F435/Platform/Core/at32f435_437_clock.c.obj
+ .data          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/MDK-ARM_F435/Platform/Core/at32f435_437_clock.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/MDK-ARM_F435/Platform/Core/at32f435_437_clock.c.obj
+ .text.extend_sram_512k
+                0x00000000       0x30 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/MDK-ARM_F435/Platform/Core/at32f435_437_clock.c.obj
+ .text          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_pwc.c.obj
+ .data          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_pwc.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_pwc.c.obj
+ .text.pwc_reset
+                0x00000000       0x1c CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_pwc.c.obj
+ .text.pwc_battery_powered_domain_access
+                0x00000000       0x10 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_pwc.c.obj
+ .text.pwc_pvm_level_select
+                0x00000000       0x10 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_pwc.c.obj
+ .text.pwc_power_voltage_monitor_enable
+                0x00000000       0x10 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_pwc.c.obj
+ .text.pwc_wakeup_pin_enable
+                0x00000000       0x14 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_pwc.c.obj
+ .text.pwc_flag_clear
+                0x00000000       0x24 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_pwc.c.obj
+ .text.pwc_flag_get
+                0x00000000       0x14 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_pwc.c.obj
+ .text.pwc_sleep_mode_enter
+                0x00000000       0x20 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_pwc.c.obj
+ .text.pwc_deep_sleep_mode_enter
+                0x00000000       0x2c CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_pwc.c.obj
+ .text.pwc_voltage_regulate_set
+                0x00000000       0x10 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_pwc.c.obj
+ .text.pwc_standby_mode_enter
+                0x00000000       0x28 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_pwc.c.obj
+ .comment       0x00000000       0x46 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_pwc.c.obj
+ .ARM.attributes
+                0x00000000       0x34 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_pwc.c.obj
+ .text          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_p1_6_test.c.obj
+ .data          0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_p1_6_test.c.obj
+ .bss           0x00000000        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_p1_6_test.c.obj
+ .text          0x00000000       0xa0 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_aeabi_ldivmod.o)
+ .data          0x00000000        0x0 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_aeabi_ldivmod.o)
+ .bss           0x00000000        0x0 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_aeabi_ldivmod.o)
+ .debug_line_str
+                0x00000000       0xc9 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_aeabi_ldivmod.o)
+ .debug_frame   0x00000000       0x44 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_aeabi_ldivmod.o)
+ .ARM.attributes
+                0x00000000       0x22 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_aeabi_ldivmod.o)
+ .data          0x00000000        0x0 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_aeabi_uldivmod.o)
+ .bss           0x00000000        0x0 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_aeabi_uldivmod.o)
+ .text          0x00000000        0x0 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_udivmoddi4.o)
+ .data          0x00000000        0x0 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_udivmoddi4.o)
+ .bss           0x00000000        0x0 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_udivmoddi4.o)
+ .ARM.extab.text.__udivmoddi4
+                0x00000000        0x0 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_udivmoddi4.o)
+ .data          0x00000000        0x0 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_dvmd_tls.o)
+ .bss           0x00000000        0x0 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_dvmd_tls.o)
+ .text          0x00000000        0x0 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-memcmp.o)
+ .data          0x00000000        0x0 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-memcmp.o)
+ .bss           0x00000000        0x0 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-memcmp.o)
+ .text          0x00000000        0x0 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-memset.o)
+ .data          0x00000000        0x0 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-memset.o)
+ .bss           0x00000000        0x0 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-memset.o)
+ .text          0x00000000        0x0 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-memcpy-stub.o)
+ .data          0x00000000        0x0 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-memcpy-stub.o)
+ .bss           0x00000000        0x0 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-memcpy-stub.o)
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+FLASH            0x08000000         0x00010000         xr
+RAM              0x20000000         0x00057e00         xrw
+P1_6_CTRL        0x20057e00         0x00000200         rw
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_runtime.c.obj
+LOAD CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_crc32.c.obj
+LOAD CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_sha256.c.obj
+LOAD CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_fw_header.c.obj
+LOAD CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_slot.c.obj
+LOAD CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_state_machine.c.obj
+LOAD CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_ymodem.c.obj
+LOAD CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_recovery.c.obj
+LOAD CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_main.c.obj
+LOAD CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_handoff_at32.c.obj
+LOAD CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+LOAD CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/Libraries/EEPROM/eeprom_bcb.c.obj
+LOAD CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/cmake/startup_at32f435_437_gcc.S.obj
+LOAD CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/system_at32f435_437.c.obj
+LOAD CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+LOAD CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+LOAD CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_gpio.c.obj
+LOAD CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+LOAD CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+LOAD CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_wdt.c.obj
+LOAD CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/MDK-ARM_F435/Platform/Core/at32f435_437_clock.c.obj
+LOAD CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_pwc.c.obj
+LOAD CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_p1_6_test.c.obj
+START GROUP
+LOAD D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a
+LOAD D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libc_nano.a
+END GROUP
+START GROUP
+LOAD D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a
+LOAD D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libc_nano.a
+LOAD D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libnosys.a
+END GROUP
+START GROUP
+LOAD D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a
+LOAD D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libc_nano.a
+LOAD D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libnosys.a
+END GROUP
+                0x20057e00                        _estack = (ORIGIN (RAM) + LENGTH (RAM))
+                0x20000000                        _sstack = ORIGIN (RAM)
+                0x00000200                        _Min_Heap_Size = 0x200
+                0x00001000                        _Min_Stack_Size = 0x1000
+
+.isr_vector     0x08000000      0x20c
+                0x08000000                        . = ALIGN (0x4)
+ *(.isr_vector)
+ .isr_vector    0x08000000      0x20c CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/cmake/startup_at32f435_437_gcc.S.obj
+                0x08000000                g_pfnVectors
+                0x08000000                __Vectors
+                0x0800020c                __Vectors_End
+                0x0800020c                        . = ALIGN (0x4)
+                0x00000001                        ASSERT ((ADDR (.isr_vector) == ORIGIN (FLASH)), Boot vector table is not at the Boot origin)
+                0x00000001                        ASSERT ((SIZEOF (.isr_vector) <= 0x400), Boot vector table exceeds the reserved prefix)
+
+.text           0x0800020c     0x475c
+                0x0800020c                        . = ALIGN (0x4)
+ *(.text*)
+ .text.__libc_init_array
+                0x0800020c        0x2 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_runtime.c.obj
+                0x0800020c                __libc_init_array
+ .text.boot_crc32_init
+                0x0800020e        0xa CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_crc32.c.obj
+                0x0800020e                boot_crc32_init
+ .text.boot_crc32_update
+                0x08000218       0x34 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_crc32.c.obj
+                0x08000218                boot_crc32_update
+ .text.boot_crc32_final
+                0x0800024c        0x8 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_crc32.c.obj
+                0x0800024c                boot_crc32_final
+ .text.boot_crc32
+                0x08000254       0x1c CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_crc32.c.obj
+                0x08000254                boot_crc32
+ .text.sha256_transform
+                0x08000270      0x120 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_sha256.c.obj
+ .text.boot_sha256_init
+                0x08000390       0x58 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_sha256.c.obj
+                0x08000390                boot_sha256_init
+ .text.boot_sha256_update
+                0x080003e8       0x62 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_sha256.c.obj
+                0x080003e8                boot_sha256_update
+ .text.boot_sha256_final
+                0x0800044a       0xae CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_sha256.c.obj
+                0x0800044a                boot_sha256_final
+ .text.read_le32
+                0x080004f8        0x4 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_fw_header.c.obj
+ .text.boot_fw_default_expectations
+                0x080004fc       0x28 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_fw_header.c.obj
+                0x080004fc                boot_fw_default_expectations
+ .text.boot_fw_header_validate_ex
+                0x08000524      0x2b4 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_fw_header.c.obj
+                0x08000524                boot_fw_header_validate_ex
+ .text.boot_fw_header_validate
+                0x080007d8        0x8 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_fw_header.c.obj
+                0x080007d8                boot_fw_header_validate
+ .text.boot_fw_result_name
+                0x080007e0       0x18 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_fw_header.c.obj
+                0x080007e0                boot_fw_result_name
+ .text.read_le32
+                0x080007f8        0x4 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_slot.c.obj
+ .text.boot_slot_header_parse
+                0x080007fc       0xc4 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_slot.c.obj
+                0x080007fc                boot_slot_header_parse
+ .text.ota_p1_6_read_u32
+                0x080008c0       0x24 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_state_machine.c.obj
+ .text.image_read_bridge
+                0x080008e4       0x38 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_state_machine.c.obj
+ .text.return_jump
+                0x0800091c       0x2a CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_state_machine.c.obj
+ *fill*         0x08000946        0x2 
+ .text.validate_internal_app
+                0x08000948       0x3c CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_state_machine.c.obj
+ .text.validate_external_source
+                0x08000984      0x15c CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_state_machine.c.obj
+ .text.verified_prefix_matches_source
+                0x08000ae0       0xa8 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_state_machine.c.obj
+ .text.commit_record
+                0x08000b88       0x34 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_state_machine.c.obj
+ .text.initialize_recovery_rollback
+                0x08000bbc       0x54 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_state_machine.c.obj
+ .text.commit_confirmed
+                0x08000c10       0x5e CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_state_machine.c.obj
+ .text.return_hold
+                0x08000c6e       0x1e CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_state_machine.c.obj
+ .text.ota_p1_6_checkpoint_matches
+                0x08000c8c       0xc4 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_state_machine.c.obj
+ .text.boot_p1_6_checkpoint
+                0x08000d50       0xcc CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_state_machine.c.obj
+ .text.begin_rollback
+                0x08000e1c       0x5a CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_state_machine.c.obj
+ *fill*         0x08000e76        0x2 
+ .text.copy_source
+                0x08000e78      0x178 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_state_machine.c.obj
+ .text.boot_state_machine_run
+                0x08000ff0      0x4d0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_state_machine.c.obj
+                0x08000ff0                boot_state_machine_run
+ .text.boot_state_machine_accept_physical_recovery
+                0x080014c0       0xa4 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_state_machine.c.obj
+                0x080014c0                boot_state_machine_accept_physical_recovery
+ .text.read_byte
+                0x08001564        0x6 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_ymodem.c.obj
+ .text.cancel_transfer
+                0x0800156a       0x18 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_ymodem.c.obj
+ .text.read_packet
+                0x08001582       0xe0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_ymodem.c.obj
+ .text.boot_ymodem_receive
+                0x08001662      0x25c CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_ymodem.c.obj
+                0x08001662                boot_ymodem_receive
+ *fill*         0x080018be        0x2 
+ .text.boot_ymodem_result_name
+                0x080018c0       0x18 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_ymodem.c.obj
+                0x080018c0                boot_ymodem_result_name
+ .text.recovery_flush_page
+                0x080018d8       0x50 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_recovery.c.obj
+ .text.internal_flash_read
+                0x08001928       0x2c CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_recovery.c.obj
+ .text.recovery_write
+                0x08001954       0xd8 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_recovery.c.obj
+ .text.recovery_begin
+                0x08001a2c       0x3c CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_recovery.c.obj
+ .text.uart_putc
+                0x08001a68        0x6 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_recovery.c.obj
+ .text.uart_getc
+                0x08001a6e        0x8 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_recovery.c.obj
+ .text.recovery_abort
+                0x08001a76        0xe CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_recovery.c.obj
+ .text.recovery_end
+                0x08001a84       0x64 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_recovery.c.obj
+ .text.boot_recovery_receive
+                0x08001ae8       0xc8 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_recovery.c.obj
+                0x08001ae8                boot_recovery_receive
+ .text.ota_p1_6_read_u32
+                0x08001bb0       0x24 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_main.c.obj
+ .text.state_log
+                0x08001bd4        0x6 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_main.c.obj
+ .text.state_internal_program
+                0x08001bda        0xa CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_main.c.obj
+ .text.state_internal_erase
+                0x08001be4        0x6 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_main.c.obj
+ .text.state_internal_read
+                0x08001bea        0xa CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_main.c.obj
+ .text.state_external_read
+                0x08001bf4        0xa CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_main.c.obj
+ .text.eeprom_read
+                0x08001bfe        0x4 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_main.c.obj
+ .text.eeprom_write
+                0x08001c02        0x4 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_main.c.obj
+ *fill*         0x08001c06        0x2 
+ .text.ota_p1_6_checkpoint_matches.constprop.0
+                0x08001c08       0xc0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_main.c.obj
+ .text.startup.main
+                0x08001cc8      0x278 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_main.c.obj
+                0x08001cc8                main
+ .text.boot_branch_to_app
+                0x08001f40        0xe CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_handoff_at32.c.obj
+ .text.handoff_flash_read
+                0x08001f4e       0x26 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_handoff_at32.c.obj
+ .text.boot_handoff_to_app
+                0x08001f74      0x10c CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_handoff_at32.c.obj
+                0x08001f74                boot_handoff_to_app
+ .text.i2c_delay
+                0x08002080       0x18 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+ .text.i2c_sda  0x08002098       0x20 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+ .text.i2c_scl  0x080020b8       0x48 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+ .text.i2c_start
+                0x08002100       0x26 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+ .text.i2c_stop
+                0x08002126       0x18 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+ .text.i2c_write_byte
+                0x0800213e       0x56 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+ .text.qspi_wait_flag.constprop.0
+                0x08002194       0x30 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+ .text.qspi_send
+                0x080021c4       0x48 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+ .text.qspi_read_command
+                0x0800220c       0x6c CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+ .text.qspi_wait_ready.constprop.0
+                0x08002278       0x38 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+ .text.SysTick_Handler
+                0x080022b0       0x10 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+                0x080022b0                SysTick_Handler
+ .text.boot_platform_delay_ms
+                0x080022c0       0x18 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+                0x080022c0                boot_platform_delay_ms
+ .text.boot_platform_recovery_key_held
+                0x080022d8       0x44 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+                0x080022d8                boot_platform_recovery_key_held
+ .text.boot_platform_uart_putc
+                0x0800231c       0x34 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+                0x0800231c                boot_platform_uart_putc
+ .text.boot_platform_init
+                0x08002350      0x17c CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+                0x08002350                boot_platform_init
+ .text.boot_platform_uart_getc
+                0x080024cc       0x44 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+                0x080024cc                boot_platform_uart_getc
+ .text.boot_platform_log
+                0x08002510       0x14 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+                0x08002510                boot_platform_log
+ .text.boot_platform_eeprom_read
+                0x08002524       0xd0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+                0x08002524                boot_platform_eeprom_read
+ .text.boot_platform_eeprom_write
+                0x080025f4      0x100 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+                0x080025f4                boot_platform_eeprom_write
+ .text.boot_platform_qspi_init
+                0x080026f4      0x144 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+                0x080026f4                boot_platform_qspi_init
+ .text.boot_platform_qspi_read
+                0x08002838       0x5e CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+                0x08002838                boot_platform_qspi_read
+ *fill*         0x08002896        0x2 
+ .text.boot_platform_qspi_erase_4k
+                0x08002898       0x6c CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+                0x08002898                boot_platform_qspi_erase_4k
+ .text.boot_platform_qspi_program
+                0x08002904       0xd8 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+                0x08002904                boot_platform_qspi_program
+ .text.boot_platform_flash_erase_4k
+                0x080029dc       0x5e CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+                0x080029dc                boot_platform_flash_erase_4k
+ .text.boot_platform_flash_program
+                0x08002a3a       0x88 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+                0x08002a3a                boot_platform_flash_program
+ .text.boot_platform_flash_read
+                0x08002ac2       0x30 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+                0x08002ac2                boot_platform_flash_read
+ .text.boot_platform_watchdog_start
+                0x08002af2       0x22 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+                0x08002af2                boot_platform_watchdog_start
+ .text.boot_platform_hold
+                0x08002b14        0x4 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+                0x08002b14                boot_platform_hold
+ .text.put_u32le
+                0x08002b18       0x10 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/Libraries/EEPROM/eeprom_bcb.c.obj
+ .text.get_u32le
+                0x08002b28        0x4 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/Libraries/EEPROM/eeprom_bcb.c.obj
+ .text.bcb_crc32
+                0x08002b2c       0x60 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/Libraries/EEPROM/eeprom_bcb.c.obj
+                0x08002b2c                bcb_crc32
+ .text.bcb_serialize
+                0x08002b8c       0xa8 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/Libraries/EEPROM/eeprom_bcb.c.obj
+                0x08002b8c                bcb_serialize
+ .text.bcb_deserialize
+                0x08002c34       0x88 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/Libraries/EEPROM/eeprom_bcb.c.obj
+                0x08002c34                bcb_deserialize
+ .text.bcb_is_valid
+                0x08002cbc       0x38 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/Libraries/EEPROM/eeprom_bcb.c.obj
+                0x08002cbc                bcb_is_valid
+ .text.bcb_arbiter
+                0x08002cf4       0x88 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/Libraries/EEPROM/eeprom_bcb.c.obj
+                0x08002cf4                bcb_arbiter
+ .text.bcb_commit
+                0x08002d7c       0xd0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/Libraries/EEPROM/eeprom_bcb.c.obj
+                0x08002d7c                bcb_commit
+ .text.bcb_make_idle
+                0x08002e4c       0x2e CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/Libraries/EEPROM/eeprom_bcb.c.obj
+                0x08002e4c                bcb_make_idle
+ *fill*         0x08002e7a        0x2 
+ .text.Reset_Handler
+                0x08002e7c       0x50 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/cmake/startup_at32f435_437_gcc.S.obj
+                0x08002e7c                Reset_Handler
+ .text.Default_Handler
+                0x08002ecc        0x2 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/cmake/startup_at32f435_437_gcc.S.obj
+                0x08002ecc                SDIO1_IRQHandler
+                0x08002ecc                XMC_IRQHandler
+                0x08002ecc                EXINT2_IRQHandler
+                0x08002ecc                DebugMon_Handler
+                0x08002ecc                TMR20_TRG_HALL_IRQHandler
+                0x08002ecc                UART8_IRQHandler
+                0x08002ecc                SPI4_IRQHandler
+                0x08002ecc                I2C2_EVT_IRQHandler
+                0x08002ecc                TMR20_CH_IRQHandler
+                0x08002ecc                TMR1_OVF_TMR10_IRQHandler
+                0x08002ecc                TMR8_TRG_HALL_TMR14_IRQHandler
+                0x08002ecc                I2C1_ERR_IRQHandler
+                0x08002ecc                EXINT9_5_IRQHandler
+                0x08002ecc                HardFault_Handler
+                0x08002ecc                TAMP_STAMP_IRQHandler
+                0x08002ecc                EMAC_IRQHandler
+                0x08002ecc                PendSV_Handler
+                0x08002ecc                NMI_Handler
+                0x08002ecc                EDMA_Stream7_IRQHandler
+                0x08002ecc                CAN2_RX1_IRQHandler
+                0x08002ecc                TMR5_GLOBAL_IRQHandler
+                0x08002ecc                TMR20_OVF_IRQHandler
+                0x08002ecc                EDMA_Stream2_IRQHandler
+                0x08002ecc                CAN1_RX0_IRQHandler
+                0x08002ecc                FPU_IRQHandler
+                0x08002ecc                UsageFault_Handler
+                0x08002ecc                EDMA_Stream3_IRQHandler
+                0x08002ecc                SDIO2_IRQHandler
+                0x08002ecc                OTGFS2_IRQHandler
+                0x08002ecc                SPI1_IRQHandler
+                0x08002ecc                TMR6_DAC_GLOBAL_IRQHandler
+                0x08002ecc                CAN2_RX0_IRQHandler
+                0x08002ecc                OTGFS1_IRQHandler
+                0x08002ecc                DMA2_Channel2_IRQHandler
+                0x08002ecc                DMA1_Channel4_IRQHandler
+                0x08002ecc                TMR8_CH_IRQHandler
+                0x08002ecc                EDMA_Stream4_IRQHandler
+                0x08002ecc                USART6_IRQHandler
+                0x08002ecc                EXINT0_IRQHandler
+                0x08002ecc                USART3_IRQHandler
+                0x08002ecc                DMA1_Channel7_IRQHandler
+                0x08002ecc                CAN1_RX1_IRQHandler
+                0x08002ecc                DVP_IRQHandler
+                0x08002ecc                UART5_IRQHandler
+                0x08002ecc                ACC_IRQHandler
+                0x08002ecc                DMAMUX_IRQHandler
+                0x08002ecc                EMAC_WKUP_IRQHandler
+                0x08002ecc                DMA2_Channel1_IRQHandler
+                0x08002ecc                OTGFS2_WKUP_IRQHandler
+                0x08002ecc                EXINT3_IRQHandler
+                0x08002ecc                DMA1_Channel6_IRQHandler
+                0x08002ecc                UART4_IRQHandler
+                0x08002ecc                DMA2_Channel4_IRQHandler
+                0x08002ecc                ERTCAlarm_IRQHandler
+                0x08002ecc                DMA1_Channel1_IRQHandler
+                0x08002ecc                DMA2_Channel7_IRQHandler
+                0x08002ecc                TMR20_BRK_IRQHandler
+                0x08002ecc                QSPI1_IRQHandler
+                0x08002ecc                TMR3_GLOBAL_IRQHandler
+                0x08002ecc                TMR7_GLOBAL_IRQHandler
+                0x08002ecc                CAN1_SE_IRQHandler
+                0x08002ecc                CAN2_TX_IRQHandler
+                0x08002ecc                I2C3_ERR_IRQHandler
+                0x08002ecc                SPI3_I2S3EXT_IRQHandler
+                0x08002ecc                TMR1_BRK_TMR9_IRQHandler
+                0x08002ecc                TMR8_BRK_TMR12_IRQHandler
+                0x08002ecc                MemManage_Handler
+                0x08002ecc                TMR1_TRG_HALL_TMR11_IRQHandler
+                0x08002ecc                CAN1_TX_IRQHandler
+                0x08002ecc                SVC_Handler
+                0x08002ecc                DMA2_Channel5_IRQHandler
+                0x08002ecc                DMA1_Channel5_IRQHandler
+                0x08002ecc                EDMA_Stream6_IRQHandler
+                0x08002ecc                QSPI2_IRQHandler
+                0x08002ecc                TMR4_GLOBAL_IRQHandler
+                0x08002ecc                EXINT4_IRQHandler
+                0x08002ecc                CAN2_SE_IRQHandler
+                0x08002ecc                PVM_IRQHandler
+                0x08002ecc                I2C3_EVT_IRQHandler
+                0x08002ecc                DMA1_Channel3_IRQHandler
+                0x08002ecc                I2C1_EVT_IRQHandler
+                0x08002ecc                TMR8_OVF_TMR13_IRQHandler
+                0x08002ecc                DMA2_Channel6_IRQHandler
+                0x08002ecc                EDMA_Stream5_IRQHandler
+                0x08002ecc                EDMA_Stream1_IRQHandler
+                0x08002ecc                EXINT1_IRQHandler
+                0x08002ecc                UART7_IRQHandler
+                0x08002ecc                USART2_IRQHandler
+                0x08002ecc                DMA1_Channel2_IRQHandler
+                0x08002ecc                TMR2_GLOBAL_IRQHandler
+                0x08002ecc                ERTC_WKUP_IRQHandler
+                0x08002ecc                FLASH_IRQHandler
+                0x08002ecc                SPI2_I2S2EXT_IRQHandler
+                0x08002ecc                I2C2_ERR_IRQHandler
+                0x08002ecc                BusFault_Handler
+                0x08002ecc                USART1_IRQHandler
+                0x08002ecc                TMR1_CH_IRQHandler
+                0x08002ecc                CRM_IRQHandler
+                0x08002ecc                EDMA_Stream8_IRQHandler
+                0x08002ecc                OTGFS1_WKUP_IRQHandler
+                0x08002ecc                EXINT15_10_IRQHandler
+                0x08002ecc                ADC1_2_3_IRQHandler
+                0x08002ecc                WWDT_IRQHandler
+                0x08002ecc                DMA2_Channel3_IRQHandler
+ *fill*         0x08002ece        0x2 
+ .text.SystemInit
+                0x08002ed0       0x68 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/system_at32f435_437.c.obj
+                0x08002ed0                SystemInit
+ .text.system_core_clock_update
+                0x08002f38       0x80 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/system_at32f435_437.c.obj
+                0x08002f38                system_core_clock_update
+ .text.crm_reset
+                0x08002fb8       0x4c CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+                0x08002fb8                crm_reset
+ .text.crm_flag_get
+                0x08003004       0x1e CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+                0x08003004                crm_flag_get
+ .text.crm_periph_clock_enable
+                0x08003022       0x26 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+                0x08003022                crm_periph_clock_enable
+ .text.crm_clock_source_enable
+                0x08003048       0x4c CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+                0x08003048                crm_clock_source_enable
+ .text.crm_ahb_div_set
+                0x08003094       0x10 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+                0x08003094                crm_ahb_div_set
+ .text.crm_apb1_div_set
+                0x080030a4       0x10 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+                0x080030a4                crm_apb1_div_set
+ .text.crm_apb2_div_set
+                0x080030b4       0x10 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+                0x080030b4                crm_apb2_div_set
+ .text.crm_auto_step_mode_enable
+                0x080030c4       0x1c CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+                0x080030c4                crm_auto_step_mode_enable
+ .text.crm_pll_config
+                0x080030e0       0x38 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+                0x080030e0                crm_pll_config
+ .text.crm_sysclk_switch
+                0x08003118       0x38 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+                0x08003118                crm_sysclk_switch
+ .text.crm_sysclk_switch_status_get
+                0x08003150       0x10 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+                0x08003150                crm_sysclk_switch_status_get
+ .text.crm_clocks_freq_get
+                0x08003160       0xac CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+                0x08003160                crm_clocks_freq_get
+ .text.flash_operation_status_get
+                0x0800320c       0x28 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+                0x0800320c                flash_operation_status_get
+ .text.flash_bank2_operation_status_get
+                0x08003234       0x28 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+                0x08003234                flash_bank2_operation_status_get
+ .text.flash_operation_wait_for
+                0x0800325c       0x20 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+                0x0800325c                flash_operation_wait_for
+ .text.flash_bank2_operation_wait_for
+                0x0800327c       0x20 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+                0x0800327c                flash_bank2_operation_wait_for
+ .text.flash_unlock
+                0x0800329c       0x1c CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+                0x0800329c                flash_unlock
+ .text.flash_lock
+                0x080032b8       0x18 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+                0x080032b8                flash_lock
+ .text.flash_sector_erase
+                0x080032d0       0x70 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+                0x080032d0                flash_sector_erase
+ .text.flash_word_program
+                0x08003340       0x60 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+                0x08003340                flash_word_program
+ .text.gpio_init
+                0x080033a0       0x7a CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_gpio.c.obj
+                0x080033a0                gpio_init
+ .text.gpio_default_para_init
+                0x0800341a        0xe CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_gpio.c.obj
+                0x0800341a                gpio_default_para_init
+ .text.gpio_input_data_bit_read
+                0x08003428        0xc CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_gpio.c.obj
+                0x08003428                gpio_input_data_bit_read
+ .text.gpio_bits_set
+                0x08003434        0x4 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_gpio.c.obj
+                0x08003434                gpio_bits_set
+ .text.gpio_bits_reset
+                0x08003438        0x4 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_gpio.c.obj
+                0x08003438                gpio_bits_reset
+ .text.gpio_pin_mux_config
+                0x0800343c       0x34 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_gpio.c.obj
+                0x0800343c                gpio_pin_mux_config
+ .text.qspi_sck_mode_set
+                0x08003470        0xa CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+                0x08003470                qspi_sck_mode_set
+ .text.qspi_clk_division_set
+                0x0800347a        0xa CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+                0x0800347a                qspi_clk_division_set
+ .text.qspi_flag_get
+                0x08003484       0x24 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+                0x08003484                qspi_flag_get
+ .text.qspi_flag_clear
+                0x080034a8        0x4 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+                0x080034a8                qspi_flag_clear
+ .text.qspi_busy_config
+                0x080034ac        0xa CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+                0x080034ac                qspi_busy_config
+ .text.qspi_xip_enable
+                0x080034b6       0x50 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+                0x080034b6                qspi_xip_enable
+ .text.qspi_cmd_operation_kick
+                0x08003506       0x46 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+                0x08003506                qspi_cmd_operation_kick
+ .text.qspi_byte_read
+                0x0800354c        0x6 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+                0x0800354c                qspi_byte_read
+ .text.qspi_byte_write
+                0x08003552        0x6 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+                0x08003552                qspi_byte_write
+ .text.qspi_auto_ispc_enable
+                0x08003558       0x30 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+                0x08003558                qspi_auto_ispc_enable
+ .text.usart_init
+                0x08003588       0x80 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+                0x08003588                usart_init
+ .text.usart_parity_selection_config
+                0x08003608       0x34 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+                0x08003608                usart_parity_selection_config
+ .text.usart_enable
+                0x0800363c        0xa CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+                0x0800363c                usart_enable
+ .text.usart_transmitter_enable
+                0x08003646        0xa CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+                0x08003646                usart_transmitter_enable
+ .text.usart_receiver_enable
+                0x08003650        0xa CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+                0x08003650                usart_receiver_enable
+ .text.usart_data_transmit
+                0x0800365a        0x8 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+                0x0800365a                usart_data_transmit
+ .text.usart_data_receive
+                0x08003662        0x6 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+                0x08003662                usart_data_receive
+ .text.usart_flag_get
+                0x08003668        0xc CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+                0x08003668                usart_flag_get
+ .text.wdt_enable
+                0x08003674       0x10 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_wdt.c.obj
+                0x08003674                wdt_enable
+ .text.wdt_counter_reload
+                0x08003684       0x10 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_wdt.c.obj
+                0x08003684                wdt_counter_reload
+ .text.wdt_reload_value_set
+                0x08003694        0xc CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_wdt.c.obj
+                0x08003694                wdt_reload_value_set
+ .text.wdt_divider_set
+                0x080036a0       0x10 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_wdt.c.obj
+                0x080036a0                wdt_divider_set
+ .text.wdt_register_write_enable
+                0x080036b0       0x14 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_wdt.c.obj
+                0x080036b0                wdt_register_write_enable
+ .text.system_clock_config
+                0x080036c4       0x98 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/MDK-ARM_F435/Platform/Core/at32f435_437_clock.c.obj
+                0x080036c4                system_clock_config
+ .text.ota_p1_6_read_u32
+                0x0800375c       0x24 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_p1_6_test.c.obj
+ .text.ota_p1_6_write_u32
+                0x08003780       0x24 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_p1_6_test.c.obj
+ .text.control_copy_out
+                0x080037a4       0x18 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_p1_6_test.c.obj
+ .text.bcb_read
+                0x080037bc        0x4 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_p1_6_test.c.obj
+ .text.snapshot_bcb
+                0x080037c0       0xd4 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_p1_6_test.c.obj
+ .text.bcb_write
+                0x08003894        0x4 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_p1_6_test.c.obj
+ .text.internal_reader
+                0x08003898       0x26 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_p1_6_test.c.obj
+ *fill*         0x080038be        0x2 
+ .text.validate_internal_app
+                0x080038c0       0x28 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_p1_6_test.c.obj
+ .text.snapshot_app
+                0x080038e8       0x64 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_p1_6_test.c.obj
+ .text.control_crc
+                0x0800394c       0x50 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_p1_6_test.c.obj
+ .text.result_finish
+                0x0800399c       0x54 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_p1_6_test.c.obj
+ .text.slot_reader
+                0x080039f0       0x2c CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_p1_6_test.c.obj
+ .text.verify_external_crc
+                0x08003a1c       0x60 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_p1_6_test.c.obj
+ .text.validate_slot
+                0x08003a7c       0xbc CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_p1_6_test.c.obj
+ .text.boot_p1_6_capture_checkpoint_state
+                0x08003b38        0xe CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_p1_6_test.c.obj
+                0x08003b38                boot_p1_6_capture_checkpoint_state
+ *fill*         0x08003b46        0x2 
+ .text.boot_p1_6_process_command
+                0x08003b48      0x5fc CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_p1_6_test.c.obj
+                0x08003b48                boot_p1_6_process_command
+ .text          0x08004144       0x30 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_aeabi_uldivmod.o)
+                0x08004144                __aeabi_uldivmod
+ .text.__udivmoddi4
+                0x08004174      0x2bc D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_udivmoddi4.o)
+                0x08004174                __udivmoddi4
+ .text          0x08004430        0x4 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_dvmd_tls.o)
+                0x08004430                __aeabi_idiv0
+                0x08004430                __aeabi_ldiv0
+ .text.memcmp   0x08004434       0x20 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-memcmp.o)
+                0x08004434                memcmp
+ .text.memset   0x08004454       0x10 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-memset.o)
+                0x08004454                memset
+ .text.memcpy   0x08004464       0x1c D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-memcpy-stub.o)
+                0x08004464                memcpy
+ *(.rodata*)
+ .rodata.k_sha256
+                0x08004480      0x100 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_sha256.c.obj
+ .rodata.boot_fw_header_validate_ex.str1.1
+                0x08004580      0x342 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_fw_header.c.obj
+                                  0x5 (size before relaxing)
+ .rodata.boot_fw_result_name.str1.1
+                0x080048c2        0x8 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_fw_header.c.obj
+ .rodata.str1.1
+                0x080048c2       0x9d CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_fw_header.c.obj
+ *fill*         0x080048c2        0x2 
+ .rodata.names.0
+                0x080048c4       0x3c CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_fw_header.c.obj
+ .rodata.boot_slot_header_parse.str1.1
+                0x08004900        0x5 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_slot.c.obj
+ .rodata.boot_state_machine_run.str1.1
+                0x08004900       0x18 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_state_machine.c.obj
+ .rodata.boot_ymodem_result_name.str1.1
+                0x08004900        0x8 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_ymodem.c.obj
+ .rodata.str1.1
+                0x08004900       0x43 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_ymodem.c.obj
+ .rodata.names.0
+                0x08004900       0x24 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_ymodem.c.obj
+ .rodata.recovery_end.str1.1
+                0x08004924       0x46 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_recovery.c.obj
+ .rodata.boot_recovery_receive.str1.1
+                0x08004924       0x98 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_recovery.c.obj
+ .rodata.main.str1.1
+                0x08004924       0xd8 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_main.c.obj
+ .rodata.bcb_hal.0
+                0x08004924        0x8 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_main.c.obj
+ .rodata.boot_handoff_to_app.str1.1
+                0x0800492c       0x7f CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_handoff_at32.c.obj
+ .rodata.boot_platform_init.str1.1
+                0x0800492c       0x16 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+ .rodata.sys_ahb_div_table.0
+                0x0800492c       0x10 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/system_at32f435_437.c.obj
+ .rodata.pll_fr_table.1
+                0x0800493c        0x6 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/system_at32f435_437.c.obj
+ .rodata.ahb_apb1_div_table.1
+                0x08004942        0x8 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .rodata.sclk_ahb_div_table.2
+                0x0800494a       0x10 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .rodata.pll_fr_table.3
+                0x0800495a        0x6 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .rodata.g_p1_6_bcb_hal
+                0x08004960        0x8 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_p1_6_test.c.obj
+ *(.glue_7)
+ .glue_7        0x08004968        0x0 linker stubs
+ *(.glue_7t)
+ .glue_7t       0x08004968        0x0 linker stubs
+ *(.eh_frame)
+ *(.init)
+ *(.fini)
+                0x080049fc                        . = ALIGN (0x4)
+                0x08004968                        _etext = .
+                0x0800020c                        _stext = ADDR (.text)
+
+.vfp11_veneer   0x08004968        0x0
+ .vfp11_veneer  0x08004968        0x0 linker stubs
+
+.v4_bx          0x08004968        0x0
+ .v4_bx         0x08004968        0x0 linker stubs
+
+.iplt           0x08004968        0x0
+ .iplt          0x08004968        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_crc32.c.obj
+
+.log_const_data
+                0x08004968        0x0
+                [!provide]                        PROVIDE (__start_log_const_data = .)
+ *(SORT_BY_NAME(.log_const_data*))
+                [!provide]                        PROVIDE (__stop_log_const_data = .)
+
+.log_backends   0x08004968        0x0
+                [!provide]                        PROVIDE (__start_log_backends = .)
+ *(SORT_BY_NAME(.log_backends*))
+                [!provide]                        PROVIDE (__stop_log_backends = .)
+
+.nrf_balloc     0x08004968        0x0
+                [!provide]                        PROVIDE (__start_nrf_balloc = .)
+ *(.nrf_balloc)
+                [!provide]                        PROVIDE (__stop_nrf_balloc = .)
+
+.ARM.extab
+ *(.ARM.extab* .gnu.linkonce.armextab.*)
+
+.ARM.exidx      0x08004968        0x8
+                0x08004968                        __exidx_start = .
+ *(.ARM.exidx*)
+ .ARM.exidx.text.__udivmoddi4
+                0x08004968        0x8 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_udivmoddi4.o)
+                0x08004970                        __exidx_end = .
+
+.rel.dyn        0x08004970        0x0
+ .rel.iplt      0x08004970        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_crc32.c.obj
+
+.preinit_array  0x08004970        0x0
+                [!provide]                        PROVIDE (__preinit_array_start = .)
+ *(.preinit_array*)
+                [!provide]                        PROVIDE (__preinit_array_end = .)
+
+.init_array     0x08004970        0x0
+                [!provide]                        PROVIDE (__init_array_start = .)
+ *(SORT_BY_NAME(.init_array.*))
+ *(.init_array*)
+                [!provide]                        PROVIDE (__init_array_end = .)
+
+.fini_array     0x08004970        0x0
+                [!provide]                        PROVIDE (__fini_array_start = .)
+ *(SORT_BY_NAME(.fini_array.*))
+ *(.fini_array*)
+                [!provide]                        PROVIDE (__fini_array_end = .)
+                0x08004970                        _sidata = LOADADDR (.data)
+
+.data           0x20000000        0x4 load address 0x08004970
+                0x20000000                        . = ALIGN (0x4)
+                0x20000000                        _sdata = .
+ *(.data*)
+ .data.system_core_clock
+                0x20000000        0x4 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/system_at32f435_437.c.obj
+                0x20000000                system_core_clock
+                0x20000004                        . = ALIGN (0x4)
+                0x20000004                        _edata = .
+
+.igot.plt       0x20000004        0x0 load address 0x08004974
+ .igot.plt      0x20000004        0x0 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_crc32.c.obj
+
+.log_dynamic_data
+                0x20000004        0x0 load address 0x08004974
+                [!provide]                        PROVIDE (__start_log_dynamic_data = .)
+ *(SORT_BY_NAME(.log_dynamic_data*))
+                [!provide]                        PROVIDE (__stop_log_dynamic_data = .)
+
+.log_filter_data
+                0x20000004        0x0 load address 0x08004974
+                [!provide]                        PROVIDE (__start_log_filter_data = .)
+ *(SORT_BY_NAME(.log_filter_data*))
+                [!provide]                        PROVIDE (__stop_log_filter_data = .)
+
+.p1_6_control   0x20057e00      0x200
+                0x20057e00                        . = ALIGN (0x4)
+                0x20057e00                        __p1_6_control_start__ = .
+                0x20058000                        . = (. + 0x200)
+ *fill*         0x20057e00      0x200 
+                0x20058000                        __p1_6_control_end__ = .
+                0x00000001                        ASSERT ((ADDR (.p1_6_control) == 0x20057e00), P1-6 control address drifted)
+                0x00000001                        ASSERT ((SIZEOF (.p1_6_control) == 0x200), P1-6 control size drifted)
+
+.bss            0x20000004     0x2534
+                0x20000004                        . = ALIGN (0x4)
+                0x20000004                        _sbss = .
+ *(.bss*)
+ .bss.g_copy_block
+                0x20000004     0x1000 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_state_machine.c.obj
+ .bss.g_boot_p1_state_resume
+                0x20001004        0x4 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_main.c.obj
+                0x20001004                g_boot_p1_state_resume
+ .bss.g_boot_p1_state_value
+                0x20001008        0x4 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_main.c.obj
+                0x20001008                g_boot_p1_state_value
+ .bss.g_boot_p1_state_action
+                0x2000100c        0x4 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_main.c.obj
+                0x2000100c                g_boot_p1_state_action
+ .bss.g_boot_p1_state_status
+                0x20001010        0x4 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_main.c.obj
+                0x20001010                g_boot_p1_state_status
+ .bss.g_boot_p1_recovery_result
+                0x20001014        0x4 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_main.c.obj
+                0x20001014                g_boot_p1_recovery_result
+ .bss.g_boot_p1_app_result
+                0x20001018        0x4 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_main.c.obj
+                0x20001018                g_boot_p1_app_result
+ .bss.g_boot_p1_qspi_result
+                0x2000101c        0x4 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_main.c.obj
+                0x2000101c                g_boot_p1_qspi_result
+ .bss.g_boot_p1_bcb_result
+                0x20001020        0x4 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_main.c.obj
+                0x20001020                g_boot_p1_bcb_result
+ .bss.g_boot_p1_handoff_reset
+                0x20001024        0x4 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_handoff_at32.c.obj
+                0x20001024                g_boot_p1_handoff_reset
+ .bss.g_boot_p1_handoff_msp
+                0x20001028        0x4 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_handoff_at32.c.obj
+                0x20001028                g_boot_p1_handoff_msp
+ .bss.g_boot_p1_handoff_validation
+                0x2000102c        0x4 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_handoff_at32.c.obj
+                0x2000102c                g_boot_p1_handoff_validation
+ .bss.g_boot_millis
+                0x20001030        0x4 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+ .bss.crc32_table_ready
+                0x20001034        0x4 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/Libraries/EEPROM/eeprom_bcb.c.obj
+ .bss.crc32_table
+                0x20001038      0x400 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/Libraries/EEPROM/eeprom_bcb.c.obj
+ .bss.g_p1_6_verify
+                0x20001438      0x100 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_p1_6_test.c.obj
+ .bss.g_p1_6_block
+                0x20001538     0x1000 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_p1_6_test.c.obj
+ *(COMMON)
+                0x20002538                        . = ALIGN (0x4)
+                0x20002538                        _ebss = .
+
+.stack          0x20002538        0x0
+                0x20002538                        . = ALIGN (0x8)
+ *(.stack)
+                0x20002538                        . = ALIGN (0x8)
+
+.heap           0x20002538        0x0
+                0x20002538                        . = ALIGN (0x8)
+ *(.heap)
+                0x20002538                        . = ALIGN (0x8)
+
+._user_heap_stack
+                0x20002538     0x1200
+                0x20002538                        . = ALIGN (0x8)
+                [!provide]                        PROVIDE (end = .)
+                0x20002738                        . = (. + _Min_Heap_Size)
+ *fill*         0x20002538      0x200 
+                0x20003738                        . = (. + _Min_Stack_Size)
+ *fill*         0x20002738     0x1000 
+                0x20003738                        . = ALIGN (0x8)
+
+/DISCARD/
+ *(.note.GNU-stack)
+OUTPUT(boot\X-Track-Boot.elf elf32-littlearm)
+LOAD linker stubs
+
+.comment        0x00000000       0x45
+ .comment       0x00000000       0x45 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_runtime.c.obj
+                                 0x46 (size before relaxing)
+ .comment       0x00000045       0x46 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_crc32.c.obj
+ .comment       0x00000045       0x46 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_sha256.c.obj
+ .comment       0x00000045       0x46 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_fw_header.c.obj
+ .comment       0x00000045       0x46 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_slot.c.obj
+ .comment       0x00000045       0x46 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_state_machine.c.obj
+ .comment       0x00000045       0x46 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_ymodem.c.obj
+ .comment       0x00000045       0x46 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_recovery.c.obj
+ .comment       0x00000045       0x46 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_main.c.obj
+ .comment       0x00000045       0x46 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_handoff_at32.c.obj
+ .comment       0x00000045       0x46 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+ .comment       0x00000045       0x46 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/Libraries/EEPROM/eeprom_bcb.c.obj
+ .comment       0x00000045       0x46 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/system_at32f435_437.c.obj
+ .comment       0x00000045       0x46 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .comment       0x00000045       0x46 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .comment       0x00000045       0x46 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_gpio.c.obj
+ .comment       0x00000045       0x46 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+ .comment       0x00000045       0x46 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .comment       0x00000045       0x46 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_wdt.c.obj
+ .comment       0x00000045       0x46 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/MDK-ARM_F435/Platform/Core/at32f435_437_clock.c.obj
+ .comment       0x00000045       0x46 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_p1_6_test.c.obj
+
+.ARM.attributes
+                0x00000000       0x32
+ .ARM.attributes
+                0x00000000       0x34 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_runtime.c.obj
+ .ARM.attributes
+                0x00000034       0x34 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_crc32.c.obj
+ .ARM.attributes
+                0x00000068       0x34 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_sha256.c.obj
+ .ARM.attributes
+                0x0000009c       0x34 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_fw_header.c.obj
+ .ARM.attributes
+                0x000000d0       0x34 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_slot.c.obj
+ .ARM.attributes
+                0x00000104       0x34 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_state_machine.c.obj
+ .ARM.attributes
+                0x00000138       0x34 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_ymodem.c.obj
+ .ARM.attributes
+                0x0000016c       0x34 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_recovery.c.obj
+ .ARM.attributes
+                0x000001a0       0x34 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_main.c.obj
+ .ARM.attributes
+                0x000001d4       0x34 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_handoff_at32.c.obj
+ .ARM.attributes
+                0x00000208       0x34 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/platform/at32/boot_platform_at32.c.obj
+ .ARM.attributes
+                0x0000023c       0x34 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/Libraries/EEPROM/eeprom_bcb.c.obj
+ .ARM.attributes
+                0x00000270       0x25 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/cmake/startup_at32f435_437_gcc.S.obj
+ .ARM.attributes
+                0x00000295       0x34 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/system_at32f435_437.c.obj
+ .ARM.attributes
+                0x000002c9       0x34 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_crm.c.obj
+ .ARM.attributes
+                0x000002fd       0x34 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_flash.c.obj
+ .ARM.attributes
+                0x00000331       0x34 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_gpio.c.obj
+ .ARM.attributes
+                0x00000365       0x34 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_qspi.c.obj
+ .ARM.attributes
+                0x00000399       0x34 CMakeFiles/X_Track_Boot.dir/3db7655de51eec457ea8733463754186/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_usart.c.obj
+ .ARM.attributes
+                0x000003cd       0x34 CMakeFiles/X_Track_Boot.dir/635fcfb0ef76d714a4a1821dad5818ec/f/MDK-ARM_F435/RTE/Device/-AT32F435RGT7/at32f435_437_wdt.c.obj
+ .ARM.attributes
+                0x00000401       0x34 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/MDK-ARM_F435/Platform/Core/at32f435_437_clock.c.obj
+ .ARM.attributes
+                0x00000435       0x34 CMakeFiles/X_Track_Boot.dir/D_/github/my/E-Track/.cache/p34-bc-target/f/boot/src/boot_p1_6_test.c.obj
+ .ARM.attributes
+                0x00000469       0x22 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_aeabi_uldivmod.o)
+ .ARM.attributes
+                0x0000048b       0x34 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_udivmoddi4.o)
+ .ARM.attributes
+                0x000004bf       0x22 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_dvmd_tls.o)
+ .ARM.attributes
+                0x000004e1       0x34 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-memcmp.o)
+ .ARM.attributes
+                0x00000515       0x34 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-memset.o)
+ .ARM.attributes
+                0x00000549       0x34 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-memcpy-stub.o)
+
+.debug_line_str
+                0x00000000       0xd5
+ .debug_line_str
+                0x00000000       0xd5 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_aeabi_uldivmod.o)
+                                 0xc9 (size before relaxing)
+ .debug_line_str
+                0x000000d5       0xcd D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_dvmd_tls.o)
+
+.debug_frame    0x00000000       0xd0
+ .debug_frame   0x00000000       0x2c D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_aeabi_uldivmod.o)
+ .debug_frame   0x0000002c       0x34 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libgcc.a(_udivmoddi4.o)
+ .debug_frame   0x00000060       0x28 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-memcmp.o)
+ .debug_frame   0x00000088       0x20 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-memset.o)
+ .debug_frame   0x000000a8       0x28 D:/singlechip/gcc+gdb+openocd/tools/arm-gnu-toolchain-13.3.rel1-ming/bin/../lib/gcc/arm-none-eabi/13.3.1/thumb/v7e-m+fp/hard\libc_nano.a(libc_a-memcpy-stub.o)

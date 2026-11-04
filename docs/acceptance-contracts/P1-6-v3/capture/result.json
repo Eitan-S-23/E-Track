@@ -1,0 +1,259 @@
+{
+  "outcome": "AUTO_MATRIX_EXECUTED_RESTORED",
+  "auto": [
+    "01",
+    "02",
+    "04",
+    "06",
+    "08",
+    "09",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "18",
+    "19",
+    "20"
+  ],
+  "physicalNotRun": [
+    "03",
+    "05",
+    "07",
+    "15",
+    "16",
+    "17"
+  ],
+  "before": {
+    "health": [
+      [
+        30000,
+        30,
+        1000,
+        0,
+        130136,
+        130136,
+        0,
+        1,
+        1
+      ],
+      [
+        30000,
+        30,
+        1000,
+        0,
+        130409,
+        130409,
+        0,
+        1,
+        1
+      ]
+    ],
+    "registers": {
+      "vtor": 134285312,
+      "cfsr": 0,
+      "hfsr": 0,
+      "dhcsr": 16842753,
+      "sdio": 0,
+      "freeze": 0
+    },
+    "confirmed_state": 4,
+    "confirmation_source": "current initialized App BCB snapshot; not an EEPROM dump",
+    "stack": {
+      "guard_intact": true,
+      "free_painted_bytes": 5092,
+      "high_water_bytes": 3100,
+      "scope": "Paint observed at this read, not a whole-program worst-case proof"
+    },
+    "storage": {
+      "jedec": 15679512,
+      "capacity_bytes": 16777216,
+      "slots": {
+        "candidate_slot": {
+          "erased": false,
+          "bytes": 614092,
+          "crc32": 1139004111,
+          "version": 30313,
+          "sha8": "4034878d234965ea"
+        },
+        "backup_slot": {
+          "erased": false,
+          "bytes": 614092,
+          "crc32": 1139004111,
+          "version": 30312,
+          "sha8": "e768d2594ae467f6"
+        },
+        "recovery_slot": {
+          "erased": false,
+          "bytes": 619580,
+          "crc32": 2429394932,
+          "version": 30276,
+          "sha8": "deb4484dd0614f49"
+        }
+      },
+      "staging_header_hex": "4554534c03ffffff717004003c5373b669760000706e73e657e1ed7b544d4f43",
+      "staging_journal_sha256": "d51db68772a3f965e6603aa28495183e08f32d89adc3aee635c612937dd5a23f",
+      "staging_erased": false,
+      "journal": {
+        "erased": false,
+        "package_sha256": "706e73e657e1ed7b9a94bdc42ec79a50a14f8ed73ee37cd4d9b1e6e3ac16c251",
+        "bytes": 290929,
+        "durable": 290929,
+        "matches_reference": true,
+        "expected_begin_durable": 290929,
+        "committed_target": 30313
+      }
+    },
+    "role": "target",
+    "image": {
+      "path": ".cache\\p35-pre-durable-20261102\\target-30313\\download-recovery-01\\originals\\prepared\\app-final.bin",
+      "bytes": 614092,
+      "sha256": "4126d801e6bd6efd57a9f20d5a128a50cfb5a46580dc10d9a2227702247d5805"
+    },
+    "boot": {
+      "path": ".cache\\p16g-20261104-01\\campaign-03\\before\\0001-admission\\boot.bin",
+      "bytes": 65536,
+      "sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527"
+    }
+  },
+  "after": {
+    "health": [
+      [
+        30000,
+        30,
+        1000,
+        0,
+        8007,
+        8007,
+        0,
+        1,
+        1
+      ],
+      [
+        30000,
+        30,
+        1000,
+        0,
+        8281,
+        8281,
+        0,
+        1,
+        1
+      ]
+    ],
+    "registers": {
+      "vtor": 134285312,
+      "cfsr": 0,
+      "hfsr": 0,
+      "dhcsr": 17104897,
+      "sdio": 0,
+      "freeze": 0
+    },
+    "confirmed_state": 4,
+    "confirmation_source": "current initialized App BCB snapshot; not an EEPROM dump",
+    "stack": {
+      "guard_intact": true,
+      "free_painted_bytes": 5092,
+      "high_water_bytes": 3100,
+      "scope": "Paint observed at this read, not a whole-program worst-case proof"
+    },
+    "storage": {
+      "jedec": 15679512,
+      "capacity_bytes": 16777216,
+      "slots": {
+        "candidate_slot": {
+          "erased": false,
+          "bytes": 614092,
+          "crc32": 1139004111,
+          "version": 30313,
+          "sha8": "4034878d234965ea"
+        },
+        "backup_slot": {
+          "erased": false,
+          "bytes": 614092,
+          "crc32": 1139004111,
+          "version": 30312,
+          "sha8": "e768d2594ae467f6"
+        },
+        "recovery_slot": {
+          "erased": false,
+          "bytes": 619580,
+          "crc32": 2429394932,
+          "version": 30276,
+          "sha8": "deb4484dd0614f49"
+        }
+      },
+      "staging_header_hex": "4554534c03ffffff717004003c5373b669760000706e73e657e1ed7b544d4f43",
+      "staging_journal_sha256": "d51db68772a3f965e6603aa28495183e08f32d89adc3aee635c612937dd5a23f",
+      "staging_erased": false,
+      "journal": {
+        "erased": false,
+        "package_sha256": "706e73e657e1ed7b9a94bdc42ec79a50a14f8ed73ee37cd4d9b1e6e3ac16c251",
+        "bytes": 290929,
+        "durable": 290929,
+        "matches_reference": true,
+        "expected_begin_durable": 290929,
+        "committed_target": 30313
+      }
+    },
+    "role": "target",
+    "image": {
+      "path": ".cache\\p35-pre-durable-20261102\\target-30313\\download-recovery-01\\originals\\prepared\\app-final.bin",
+      "bytes": 614092,
+      "sha256": "4126d801e6bd6efd57a9f20d5a128a50cfb5a46580dc10d9a2227702247d5805"
+    },
+    "boot": {
+      "path": ".cache\\p16g-20261104-01\\campaign-03\\after\\0001-retained\\boot.bin",
+      "bytes": 65536,
+      "sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527"
+    }
+  },
+  "readback": {
+    "internal": {
+      "path": ".cache\\p16g-20261104-01\\campaign-03\\after\\0002-full-state\\internal.bin",
+      "bytes": 1048576,
+      "sha256": "ec911489479760ce654d131130bccaa25845dc80ea32a6ab02066fe5895ea7af"
+    },
+    "slots": {
+      "candidate": {
+        "raw": {
+          "path": ".cache\\p16g-20261104-01\\campaign-03\\after\\0002-full-state\\candidate.bin",
+          "bytes": 1048576,
+          "sha256": "12a23367128e13e65c96607c02f863e2c5d72cae53d609dc1b43a62d447da71a"
+        },
+        "originalPayloadRestored": true,
+        "fullSlotIdentical": false
+      },
+      "backup": {
+        "raw": {
+          "path": ".cache\\p16g-20261104-01\\campaign-03\\after\\0002-full-state\\backup.bin",
+          "bytes": 1048576,
+          "sha256": "24cc6bb6c77431676008f2499dc7857c1a21e9f890665cf30876f319742d3fef"
+        },
+        "originalPayloadRestored": true,
+        "fullSlotIdentical": false
+      },
+      "recovery": {
+        "raw": {
+          "path": ".cache\\p16g-20261104-01\\campaign-03\\after\\0002-full-state\\recovery.bin",
+          "bytes": 1048576,
+          "sha256": "19abe55c7cf68a1d85ab98b6db1d469c5b9126600e46c66acb9521044ccc4c6c"
+        },
+        "originalPayloadRestored": true,
+        "fullSlotIdentical": false
+      }
+    },
+    "fpb": {
+      "path": ".cache\\p16g-20261104-01\\campaign-03\\after\\0002-full-state\\fpb.bin",
+      "bytes": 40,
+      "sha256": "0599a0b5653dbec1a79e7b8e666487b42d581b6de0dbfe366a4ec0bd07b29a75"
+    }
+  },
+  "acceptance": "PENDING_INDEPENDENT_ORIGINAL_EVALUATION",
+  "restorePolicy": {
+    "internal": "byte-exact full 1 MiB compared with original",
+    "slots": "original header and complete declared payload; unused tails are not claimed identical",
+    "bcb": "known CONFIRMED 30313 with no pending apply/rollback; raw A/B and sequence may differ",
+    "unrelated": "staging header/journal unchanged; no writes outside three test slots and BCB A/B"
+  }
+}

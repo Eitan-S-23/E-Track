@@ -1,0 +1,278 @@
+{
+  "D:\\github\\my\\E-Track\\.cache\\p34-boot-checkpoint\\boot_state_machine.c": {
+    "bytes": 30136,
+    "sha256": "831aa43d7734ae4e2b0abf53e56a6fd72357831e2b10c70f98921589febcdf9f"
+  },
+  "D:\\github\\my\\E-Track\\.cache\\p34-bc-target\\f\\boot\\src\\boot_state_machine.c": {
+    "bytes": 29305,
+    "sha256": "7710df775b1d05521710d3f4b48fd279572c9af11f0a92305ab27e7aa2e5b568"
+  },
+  "D:\\github\\my\\E-Track\\.cache\\p34-boot-checkpoint\\r3\\result.json": {
+    "bytes": 9192,
+    "sha256": "93c299259ef62a04e35f801f436a4d5a697e3030b78756abe0cc7632b1c5d786"
+  },
+  "D:\\github\\my\\E-Track\\boot\\src\\boot_state_machine.c": {
+    "bytes": 29923,
+    "sha256": "f4808a78c5f55ed4980f90f538cc7191ef88a09eed1e5678f354627c21a90d97"
+  },
+  "D:\\github\\my\\E-Track\\tests\\boot\\test_boot_state_machine.c": {
+    "bytes": 42644,
+    "sha256": "d838a03dbd1c7df4670c3ac38999a47d5a18268dbdf46f19aa6bf6c692146c4d"
+  },
+  "D:\\github\\my\\E-Track\\Tools\\ota\\p34_boot_checkpoint.h": {
+    "bytes": 627,
+    "sha256": "01dc17cfd305c2765c5f4eb80109fdf6eab77a678a0c5ebb4c7db7fcaae4b7b1"
+  },
+  "D:\\github\\my\\E-Track\\tests\\boot\\p34_checkpoint_hook.h": {
+    "bytes": 394,
+    "sha256": "cfa5f7ee897dcecc79518410530135f8eb022a3ad141ca022099994ac307daf6"
+  },
+  "D:\\github\\my\\E-Track\\tests\\boot\\test_p34_boot_checkpoint.c": {
+    "bytes": 10808,
+    "sha256": "2f2ad1f2dcde91ce5cb360c64de333c6f954b71fda7d2c45e8fbc232d57c5466"
+  },
+  "D:\\github\\my\\E-Track\\Tools\\ota\\p34_boot_checkpoint_model.py": {
+    "bytes": 6253,
+    "sha256": "e4705a897a84d74344e0da53dc8dea04986408a138c9d8de06a4640fa5b904a5"
+  },
+  "D:\\github\\my\\E-Track\\.cache\\p34-boot-checkpoint\\fixture.c": {
+    "bytes": 42648,
+    "sha256": "65162365e64482a54b74463dbdcad1f940d0ff5e40e358c6c8da46e39aaa01dc"
+  },
+  "D:\\github\\my\\E-Track\\boot\\src\\boot_fw_header.c": {
+    "bytes": 8046,
+    "sha256": "2332eb95d0ce245b23b218812959d556cba8025e6e120464c328ac80809c858f"
+  },
+  "D:\\github\\my\\E-Track\\boot\\src\\boot_slot.c": {
+    "bytes": 2062,
+    "sha256": "de82110955e1c3a103dc16b6ac32088e3c5a9f43e6a6a917e74c028f985a17b0"
+  },
+  "D:\\github\\my\\E-Track\\boot\\src\\boot_crc32.c": {
+    "bytes": 1591,
+    "sha256": "128a591a5692a1a2aa5c9050e2bc24322d7a5835e781e596f08ebc534c844160"
+  },
+  "D:\\github\\my\\E-Track\\boot\\src\\boot_sha256.c": {
+    "bytes": 5164,
+    "sha256": "311107ef6a987fb23d602070391b8bc3a356688e3e1f03e1ea8ed905c4374073"
+  },
+  "D:\\github\\my\\E-Track\\Libraries\\EEPROM\\eeprom_bcb.c": {
+    "bytes": 9314,
+    "sha256": "143fa828043bb8332427dc524912126d824511624f02a660c3505d1e9891b499"
+  },
+  "D:\\github\\my\\E-Track\\boot\\include\\boot_crypto.h": {
+    "bytes": 801,
+    "sha256": "50e2a2dcab26dea6cc89f74247a4df8d8162cc0ea1a8f3b05db91c141725b8b5"
+  },
+  "D:\\github\\my\\E-Track\\boot\\include\\boot_fw_header.h": {
+    "bytes": 2203,
+    "sha256": "8c2b72d6b6926158188bd439c83d2caf53c9c37dd3d00abb187a1832c73452b5"
+  },
+  "D:\\github\\my\\E-Track\\boot\\include\\boot_handoff.h": {
+    "bytes": 415,
+    "sha256": "0d241f31c7a2bacbf7f07f171956653d0a99a1d6c3eb58581619f3f7041302df"
+  },
+  "D:\\github\\my\\E-Track\\boot\\include\\boot_p1_6_test.h": {
+    "bytes": 893,
+    "sha256": "66119965bd610868440ede1ede912361d5432ebd93eca61cb4d57b33de4f848f"
+  },
+  "D:\\github\\my\\E-Track\\boot\\include\\boot_platform.h": {
+    "bytes": 1255,
+    "sha256": "6ffcc647b7a5e547a458bacf6c177dc50f877e1163a1adb441c7220f327c17a7"
+  },
+  "D:\\github\\my\\E-Track\\boot\\include\\boot_recovery.h": {
+    "bytes": 175,
+    "sha256": "27c5a22f927877b97523822fa629e40df801e9b5ede12cd83b92c51eb2e05b47"
+  },
+  "D:\\github\\my\\E-Track\\boot\\include\\boot_slot.h": {
+    "bytes": 1003,
+    "sha256": "aa2d4abf38d16015b95c746c0c2e5428c4a2c49ef6bf45e56c5e56d2c5c916ec"
+  },
+  "D:\\github\\my\\E-Track\\boot\\include\\boot_state_machine.h": {
+    "bytes": 1821,
+    "sha256": "fe99868ea053da573bddd2cf004d846c93b86f0e9bba25300779a5bb8f6a6cd9"
+  },
+  "D:\\github\\my\\E-Track\\boot\\include\\boot_ymodem.h": {
+    "bytes": 1085,
+    "sha256": "c4c91a87b039cea6331800bdb2211da1c0e4b517a9d7b6537197391db0224195"
+  },
+  "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_backup.h": {
+    "bytes": 6188,
+    "sha256": "0c41248a4f068db85c22e7910d0a97e34c98477645cc685f1edb2c0414ac9c2e"
+  },
+  "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_ble_frame.h": {
+    "bytes": 7283,
+    "sha256": "8257dfdc1112e8bb2dc7bbde3cc690cd32b711165be3b9d621d9f07a3acacc48"
+  },
+  "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_ble_ring.h": {
+    "bytes": 1642,
+    "sha256": "fc9e1dc2b06b2c1805ac36a772e451cc51de82ab02fe58348cd0e4da92cc59eb"
+  },
+  "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_ble_session.h": {
+    "bytes": 7396,
+    "sha256": "7d249536f90dc68a8422efbaf948a849adb1cb6c5c5f6125f4f93d88da048411"
+  },
+  "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_confirm.h": {
+    "bytes": 1922,
+    "sha256": "12fd1260c5384ef938ec1d1af7bc2afec37df47d84c27a2b6e9f1b80bca254da"
+  },
+  "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_confirm_health.h": {
+    "bytes": 3421,
+    "sha256": "a746668f63e7ea6fb629cc13564c07d2468c72e0d4038d10566c1a9bc5814af6"
+  },
+  "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_device_info.h": {
+    "bytes": 3440,
+    "sha256": "62a0e57b33023fa481193b9f7c7b5153a6286a86669cbb5232ad456d92aa91c5"
+  },
+  "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_erase_plan.h": {
+    "bytes": 845,
+    "sha256": "a04c770d5c2baf7c8cb6308c1af31f96e7bb7f1a6f372de47154954b20b7db59"
+  },
+  "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_keys.h": {
+    "bytes": 347,
+    "sha256": "d1d06be486e76744126623f03decec7c5c7d3f844de4615ae12dad53c52f1cd5"
+  },
+  "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_layout.h": {
+    "bytes": 2275,
+    "sha256": "8f9688334f1de948f31f4736b2718f3615e4f35e6c05e9d906938a867238f5dd"
+  },
+  "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_p1_6_test.h": {
+    "bytes": 8374,
+    "sha256": "c59aa11d435e926d88895ed495b0723f7c8fc3b01fbbc7077078a8cb4f2edf6d"
+  },
+  "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_p2_1_test.h": {
+    "bytes": 2400,
+    "sha256": "ef0e1f435dc547ea726711c6d60654502d55ce5c19dbf2971f8d2cc92b2a54c8"
+  },
+  "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_p2_2_test.h": {
+    "bytes": 2955,
+    "sha256": "82063df91338b363855208af10b0ef4203ce5a24ce4f134b44dea131b27907a7"
+  },
+  "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_p2_3_test.h": {
+    "bytes": 3309,
+    "sha256": "38e7106999a31faf61df0a72c164891130c84aebc16f620d7b7a4c92b6af4231"
+  },
+  "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_package.h": {
+    "bytes": 2897,
+    "sha256": "f53524051291de62fdc54ca5e2832f096e05d1f50d3102162df12becf12dd2b4"
+  },
+  "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_patch.h": {
+    "bytes": 4892,
+    "sha256": "31b8504a5dbed474f96da53b3e7f67df33f01018fdab20ca08db90664d6c3b92"
+  },
+  "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_sd.h": {
+    "bytes": 4394,
+    "sha256": "5c1b5103ad119e793ae1b7c6bbde50152db3e21d06d77bf67c0f52d4b638ce13"
+  },
+  "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_slot_header.h": {
+    "bytes": 2294,
+    "sha256": "5d6d5a688b9f8f67c2a474d49e31732593ecae0dae35bb00b96f289ae8ab0507"
+  },
+  "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_staging.h": {
+    "bytes": 3826,
+    "sha256": "c15a19d9bd32659d2d7bdee3b46582d1b158dea7c6bc29f83d6ea34ad1855f02"
+  },
+  "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_vtor_check.h": {
+    "bytes": 779,
+    "sha256": "8a0ca2ff2a4b9b5fdf9317d32c9caef5ef041d4490ff7de34e887cc638fe9209"
+  },
+  "D:\\github\\my\\E-Track\\Libraries\\EEPROM\\EEPROM.h": {
+    "bytes": 2223,
+    "sha256": "fbb9efae58c4f23e9a09a456f7fd2c78aa96fccca72cbc659200b7e9fe25e25d"
+  },
+  "D:\\github\\my\\E-Track\\Libraries\\EEPROM\\eeprom_bcb.h": {
+    "bytes": 6626,
+    "sha256": "301f1416f34e6bd8f1bea013a6f5bede9be9deca9cffba9ad0fb7dac6a19b9d8"
+  },
+  "D:\\github\\my\\E-Track\\.cache\\p34-boot-checkpoint\\r3\\g16-compile.json": {
+    "bytes": 1279,
+    "sha256": "89235cd6df03d2e0c3fa81f6e613819fe77b9427682444c6c0b98312bc2e73dc"
+  },
+  "D:\\github\\my\\E-Track\\.cache\\p34-boot-checkpoint\\r3\\g16-run.json": {
+    "bytes": 344,
+    "sha256": "a7156875cfac90bdd4375dbd0dfe017ddea821e2a4b2e78c5d5335e7e4ef30fe"
+  },
+  "D:\\github\\my\\E-Track\\.cache\\p34-boot-checkpoint\\r3\\g16-compile.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "D:\\github\\my\\E-Track\\.cache\\p34-boot-checkpoint\\r3\\g16-run.log": {
+    "bytes": 267,
+    "sha256": "23f82eade5b0d390dbbb969985e78a07d1a644be74be8036efc085a9f3bb1d2e"
+  },
+  "D:\\github\\my\\E-Track\\.cache\\p34-boot-checkpoint\\extension1\\result.json": {
+    "bytes": 10285,
+    "sha256": "d972ba3221d68fa76810b5f16e7e1ffea1748b4bc340d0c9ca1d7ef24f5e15e5"
+  },
+  "D:\\github\\my\\E-Track\\tests\\boot\\p34_checkpoint_extension.c": {
+    "bytes": 1996,
+    "sha256": "1b65cab8caeb7e7bd912858405319158a6cfbf494bad7a52f18d60dc7e473cf3"
+  },
+  "D:\\github\\my\\E-Track\\Tools\\ota\\p34_boot_checkpoint_extension.py": {
+    "bytes": 3574,
+    "sha256": "71fce6c098d48af45bf155010f94d3cffe93dad11a72a5a277d8659e53a30786"
+  },
+  "D:\\github\\my\\E-Track\\Tools\\ota\\p34_install_cost.py": {
+    "bytes": 8885,
+    "sha256": "26387f3e243d84f1319a7475bb97c34347f30a908f4243c03ec6c49e65c791b8"
+  },
+  "D:\\github\\my\\E-Track\\Tools\\ota\\p34_session.py": {
+    "bytes": 90934,
+    "sha256": "8de5209f436f2a0807e264b021f2e195c7a33cd83ade988de375c6054127865e"
+  },
+  "D:\\github\\my\\E-Track\\.agents\\skills\\e-track-flutter-debug\\scripts\\host_io.py": {
+    "bytes": 4128,
+    "sha256": "0c72625cc23f6c83b0cd96b47aed83fdfdf7cf564d5fddc64e5d77d45de30968"
+  },
+  "D:\\github\\my\\E-Track\\.cache\\p34-boot-checkpoint\\extension1\\g16-compile.json": {
+    "bytes": 1308,
+    "sha256": "9fbd17faee416524a6e23f04c22ee592ae0b41007b04e49164a3be9f7e0844b6"
+  },
+  "D:\\github\\my\\E-Track\\.cache\\p34-boot-checkpoint\\extension1\\g16-run.json": {
+    "bytes": 360,
+    "sha256": "ba258e9bcc7400b64451f46be217e3d60bc1bd16dbcdf6a9933f90b0e5e3364b"
+  },
+  "D:\\github\\my\\E-Track\\.cache\\p34-boot-checkpoint\\extension1\\g16-compile.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "D:\\github\\my\\E-Track\\.cache\\p34-boot-checkpoint\\extension1\\g16-run.log": {
+    "bytes": 117,
+    "sha256": "822df3f0936b9d735ec8645051005f012d31e3001789a8d887ec379871b32671"
+  },
+  "D:\\github\\my\\E-Track\\.cache\\p34-boot-checkpoint\\review-tests1\\result.json": {
+    "bytes": 11272,
+    "sha256": "32eb77be234c1225e4809e771f4a10c84df2e861a6b21c9d0aa8931f0f7a3596"
+  },
+  "D:\\github\\my\\E-Track\\tests\\boot\\p34_checkpoint_review.c": {
+    "bytes": 11350,
+    "sha256": "ec193b6d5c7c24ccf017adceefa5d81899e399dc79c4adb7eac3499e4d1452ee"
+  },
+  "D:\\github\\my\\E-Track\\Tools\\ota\\p34_boot_checkpoint_review.py": {
+    "bytes": 3283,
+    "sha256": "ed3f38bd49a7ce2f8e738c48ecc31cb55a63eb9484e32ca4ea281c1efd7bff8f"
+  },
+  "D:\\github\\my\\E-Track\\.cache\\p34-boot-checkpoint\\review-tests1\\compile.json": {
+    "bytes": 1313,
+    "sha256": "8ac88076121107afe794700a6be8a84985b16edbfae2f25572b89fe64c6b87ef"
+  },
+  "D:\\github\\my\\E-Track\\.cache\\p34-boot-checkpoint\\review-tests1\\run.json": {
+    "bytes": 365,
+    "sha256": "0661628864a8d2ce6dd2f1a24ab8ef20ad499aeb99e2e4730370f0b69a663733"
+  },
+  "D:\\github\\my\\E-Track\\.cache\\p34-boot-checkpoint\\review-tests1\\compile.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "D:\\github\\my\\E-Track\\.cache\\p34-boot-checkpoint\\review-tests1\\run.log": {
+    "bytes": 416,
+    "sha256": "28a2f6203b999ba1ebb0495252752724873d2c6eee5eda0228a4aa65c3102e74"
+  },
+  "D:\\github\\my\\E-Track\\.cache\\p34-boot-checkpoint\\review-tests1\\review.c": {
+    "bytes": 22176,
+    "sha256": "6f5b274e83202fb318c75448939ce9cd6133c23d0b275a44bc2f0d7c682d2828"
+  },
+  "D:\\github\\my\\E-Track\\.cache\\p34-boot-checkpoint\\review-tests1\\review.exe": {
+    "bytes": 120662,
+    "sha256": "39582c5872c1fbb218c40c23da06acedf7e7c4c5db234c419be2bb39ee5aba36"
+  }
+}

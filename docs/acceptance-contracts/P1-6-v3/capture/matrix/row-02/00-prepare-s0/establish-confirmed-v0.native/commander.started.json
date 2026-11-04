@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLink.exe",
+    "-USB",
+    "123456",
+    "-Device",
+    "AT32F435RGT7",
+    "-If",
+    "SWD",
+    "-Speed",
+    "1000",
+    "-AutoConnect",
+    "0",
+    "-ExitOnError",
+    "1",
+    "-NoGui",
+    "1",
+    "-Log",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p16g-20261104-01\\campaign-03\\matrix\\row-02\\00-prepare-s0\\establish-confirmed-v0.native\\segger.log",
+    "-SettingsFile",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p16g-20261104-01\\campaign-03\\matrix\\row-02\\00-prepare-s0\\establish-confirmed-v0.native\\settings.jlink",
+    "-CommandFile",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p16g-20261104-01\\campaign-03\\matrix\\row-02\\00-prepare-s0\\establish-confirmed-v0.jlink"
+  ],
+  "cwd": "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source",
+  "monotonic_ns": 945501642386600,
+  "stdin_sha256": null
+}

@@ -1,0 +1,45 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLink.exe",
+    "-USB",
+    "123456",
+    "-Device",
+    "AT32F435RGT7",
+    "-If",
+    "SWD",
+    "-Speed",
+    "1000",
+    "-AutoConnect",
+    "0",
+    "-ExitOnError",
+    "1",
+    "-NoGui",
+    "1",
+    "-Log",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p16g-20261104-01\\campaign-03\\restore\\restore-slot-recovery-continue-poll-03.native\\segger.log",
+    "-SettingsFile",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p16g-20261104-01\\campaign-03\\restore\\restore-slot-recovery-continue-poll-03.native\\settings.jlink",
+    "-CommandFile",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p16g-20261104-01\\campaign-03\\restore\\restore-slot-recovery-continue-poll-03.jlink"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 952091956421500,
+  "ended_monotonic_ns": 952093593004700,
+  "stdout": {
+    "path": ".cache\\p16g-20261104-01\\campaign-03\\restore\\restore-slot-recovery-continue-poll-03.native\\commander.stdout",
+    "bytes": 3490,
+    "sha256": "21c89f3f6fd2b0361dee286220f29673374ef5dea7b395fd0b1d951d3374f80a"
+  },
+  "stderr": {
+    "path": ".cache\\p16g-20261104-01\\campaign-03\\restore\\restore-slot-recovery-continue-poll-03.native\\commander.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

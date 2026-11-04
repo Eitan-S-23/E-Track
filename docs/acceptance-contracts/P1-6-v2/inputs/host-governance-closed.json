@@ -1,0 +1,33 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "tests/ota/test_acceptance_bundle.py",
+    "AcceptanceExecutionPolicyTests",
+    "PostP26SpecGovernanceTests"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 942055972896300,
+  "ended_monotonic_ns": 942057304514300,
+  "stdout": {
+    "path": ".cache\\p16g-20261104-01\\host-final\\governance.stdout",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": ".cache\\p16g-20261104-01\\host-final\\governance.stderr",
+    "bytes": 150,
+    "sha256": "4aacc437e66b065d8b6e43b83c13ec2f472d4ab687d4a1db9dd5b2f8b5e45fe0"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

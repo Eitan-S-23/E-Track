@@ -1,0 +1,32 @@
+{
+  "argv": [
+    "powershell.exe",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "tests/boot/test_p1_6_setup.ps1",
+    "-Out",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p16g-20261104-01\\host-final\\mock"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 941818413360400,
+  "ended_monotonic_ns": 941823106476200,
+  "stdout": {
+    "path": ".cache\\p16g-20261104-01\\host-final\\setup.stdout",
+    "bytes": 53,
+    "sha256": "4c4fb387ab869c3e7a5eb66aa071442d4baff8d152586ef44f08fb898430979d"
+  },
+  "stderr": {
+    "path": ".cache\\p16g-20261104-01\\host-final\\setup.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

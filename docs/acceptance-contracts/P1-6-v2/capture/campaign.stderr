@@ -1,0 +1,27 @@
+Traceback (most recent call last):
+  File "D:\github\my\E-Track\.cache\p35-integration-20261028\source\Tools\acceptance\p16_execute.py", line 141, in <module>
+    main()
+    ~~~~^^
+  File "D:\github\my\E-Track\.cache\p35-integration-20261028\source\Tools\acceptance\p16_execute.py", line 106, in main
+    action('seed', lambda: setup('Seed'))
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\github\my\E-Track\.cache\p35-integration-20261028\source\Tools\acceptance\p16_execute.py", line 85, in action
+    value = operation()
+  File "D:\github\my\E-Track\.cache\p35-integration-20261028\source\Tools\acceptance\p16_execute.py", line 106, in <lambda>
+    action('seed', lambda: setup('Seed'))
+                           ~~~~~^^^^^^^^
+  File "D:\github\my\E-Track\.cache\p35-integration-20261028\source\Tools\acceptance\p16_execute.py", line 92, in setup
+    return h.command(out, mode.lower(), ['powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass',
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        '-File', 'Tools/jlink/p1-6-setup.ps1', '-Action', mode, '-Plan', args.plan.resolve(),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        '-RunDirectory', out / mode.lower()], env, seconds=SETUP_SECONDS)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\github\my\E-Track\.cache\p35-integration-20261028\source\Tools\ota\p34-acceptance\live_host.py", line 277, in command
+    result = process.wait(seconds, success_codes, read_ready=read_ready, deadline=deadline)
+  File "D:\github\my\E-Track\.cache\p35-integration-20261028\source\Tools\ota\p34-acceptance\live_host.py", line 261, in wait
+    require(code in success_codes, "standard tool failed; inspect original command streams")
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\github\my\E-Track\.cache\p35-integration-20261028\source\Tools\ota\p34-acceptance\live_host.py", line 24, in require
+    raise RuntimeError(message)
+RuntimeError: standard tool failed; inspect original command streams

@@ -1,0 +1,31 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "tests/boot/test_p1_6_matrix.py"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 943009179209600,
+  "ended_monotonic_ns": 943012260998200,
+  "stdout": {
+    "path": ".cache\\p16g-20261104-01\\host-final\\deadline.stdout",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": ".cache\\p16g-20261104-01\\host-final\\deadline.stderr",
+    "bytes": 2315,
+    "sha256": "2e148b3d297c50aa6944b4dbcaf97032b4db19275b3e2a5f9f95924f1b37e27b"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

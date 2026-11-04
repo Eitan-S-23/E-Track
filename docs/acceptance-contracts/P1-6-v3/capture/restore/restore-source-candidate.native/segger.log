@@ -1,0 +1,2084 @@
+T3E40 000:001.800   SEGGER J-Link V8.18 Log File
+T3E40 000:002.062   DLL Compiled: Mar  5 2025 14:42:43
+T3E40 000:002.246   Logging started @ 2026-11-04 01:31
+T3E40 000:002.303   Process: C:\Users\SU\SEGGER\JLink_V818\JLink.exe
+T3E40 000:002.366 - 2.357ms 
+T3E40 000:002.755 JLINK_ExecCommand("DisableAutoUpdateFW", ...). 
+T3E40 000:002.839 - 0.083ms returns 0x00
+T3E40 000:002.930 JLINK_EMU_SelectByUSBSN(SerialNo = 123456)
+T3E40 000:012.066 - 9.136ms returns 0x00
+T3E40 000:012.215 JLINK_SetWarnOutHandler(...)
+T3E40 000:012.281 - 0.069ms 
+T3E40 000:012.342 JLINK_ExecCommand("SuppressGUI = 1", ...). 
+T3E40 000:012.400 - 0.057ms returns 0x00
+T3E40 000:012.466 JLINK_OpenEx(...)
+T3E40 000:022.751   Firmware: J-Link ARM-OB STM32 compiled Aug 22 2012 19:52:04
+T3E40 000:024.927   Hardware: V7.00
+T3E40 000:024.969   S/N: 4294967295
+T3E40 000:025.009   OEM: SEGGER
+T3E40 000:025.050   Feature(s): RDI,FlashDL,FlashBP,JFlash,GDB
+T3E40 000:025.355   Bootloader: (FW returned invalid version)
+T3E40 000:026.100   TELNET listener socket opened on port 19021
+T3E40 000:026.567 - 14.095ms returns "O.K."
+T3E40 000:026.622 JLINK_SetFlashProgProgressCallback(...)
+T3E40 000:026.654 - 0.034ms 
+T3E40 000:026.679 JLINK_GetFirmwareString(...)
+T3E40 000:026.699 - 0.020ms 
+T3E40 000:026.723 JLINK_GetHardwareVersion()
+T3E40 000:026.745 - 0.021ms returns 70000
+T3E40 000:026.773 JLINK_GetHWInfo(...)
+T3E40 000:026.960 - 0.187ms returns 0
+T3E40 000:027.005 JLINK_GetSN()
+T3E40 000:027.032 - 0.026ms returns -1
+T3E40 000:027.058 JLINK_GetOEMString(...)
+T3E40 000:027.084 JLINK_EMU_GetCurrConnectionInfo()
+T3E40 000:027.105 - 0.024ms returns 0
+T3E40 000:027.127 JLINK_EMU_HasCapEx(0x00000026)
+T3E40 000:027.148 - 0.021ms returns 0
+T3E40 000:027.169 JLINK_GetEmuCaps()
+T3E40 000:027.189 - 0.019ms returns 0x88EA5833
+T3E40 000:027.209 JLINK_GetEmuCaps()
+T3E40 000:027.230 - 0.021ms returns 0x88EA5833
+T3E40 000:027.252 JLINK_GetHWStatus(...)
+T3E40 000:027.398 - 0.146ms returns 0
+T3E40 000:027.428 JLINK_EMU_HasCapEx(0x00000044)
+T3E40 000:027.448 - 0.020ms returns 0
+T3E40 000:027.472 JLINK_ExecCommand("ProjectFile = D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p16g-20261104-01\campaign-03\restore\restore-source-candidate.native\settings.jlink", ...). 
+T3E40 000:113.970 - 86.495ms returns 0x00
+T3E40 000:114.027 JLINK_ExecCommand("SetRestartOnClose = 0", ...). 
+T3E40 000:114.065 - 0.009ms returns 0x01
+T3E40 000:114.130 JLINK_ExecCommand("InhibitConnectRetries = 1", ...). 
+T3E40 000:114.165 - 0.005ms returns 0x00
+T3E40 000:114.202 JLINK_ExecCommand("SetEnableMemCache = 0", ...). 
+T3E40 000:114.228 - 0.001ms returns 0x01
+T3E40 000:114.256 JLINK_ExecCommand("ProjectFile = D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p16g-20261104-01\campaign-03\restore\restore-source-candidate.native\settings.jlink", ...). 
+T3E40 000:116.595 - 2.337ms returns 0x00
+T3E40 000:116.642 JLINK_DEVICE_GetIndex(sDeviceName = AT32F435RGT7)
+T3E40 000:116.683 - 0.040ms returns 443
+T3E40 000:116.706 JLINK_ExecCommand("device=AT32F435RGT7", ...). 
+T3E40 000:116.817   Flash bank @ 0x08000000: SFL: Parsing sectorization info from ELF file
+T3E40 000:116.854     FlashDevice.SectorInfo[0]: .SectorSize = 0x00001000, .SectorStartAddr = 0x08000000
+T3E40 000:116.883   FlashBank @0x08000000: Sectorization info from SFL ELF file ignored because sectorization override from DLL / XML file is active.
+T3E40 000:117.342   Flash bank @ 0x1FFFC000: SFL: Parsing sectorization info from ELF file
+T3E40 000:117.377     FlashDevice.SectorInfo[0]: .SectorSize = 0x00001000, .SectorStartAddr = 0x00000000
+T3E40 000:117.406   FlashBank @0x1FFFC000: Sectorization info from SFL ELF file ignored because sectorization override from DLL / XML file is active.
+T3E40 000:117.520   Flash bank @ 0x90000000: SFL: Parsing sectorization info from ELF file
+T3E40 000:117.550     FlashDevice.SectorInfo[0]: .SectorSize = 0x00010000, .SectorStartAddr = 0x00000000
+T3E40 000:118.809   Device "AT32F435RGT7" selected.
+T3E40 000:119.617 - 2.887ms returns 0x00
+T3E40 000:119.706 JLINK_EnableLog(...)
+T3E40 000:119.735 - 0.028ms 
+T3E40 000:119.773 JLINK_GetEmuCaps()
+T3E40 000:119.805 - 0.031ms returns 0x88EA5833
+T3E40 000:119.829 JLINK_TIF_GetAvailable(...)
+T3E40 000:120.030 - 0.200ms 
+T3E40 000:120.076 JLINK_TIF_Select(JLINKARM_TIF_SWD)
+T3E40 000:120.446 - 0.371ms returns 0x00
+T3E40 000:120.481 JLINK_IsConnected()
+T3E40 000:120.501 - 0.020ms returns FALSE
+T3E40 000:120.525 JLINK_SetSpeed(1000)
+T3E40 000:120.609 - 0.083ms 
+T3E40 000:120.640 JLINK_Connect()
+T3E40 000:120.871   InitTarget() start
+T3E40 000:120.906    J-Link Script File: Executing InitTarget()
+T3E40 000:123.270   DAP initialized successfully.
+T3E40 000:125.243     No Protection is set.
+T3E40 000:125.300   InitTarget() end - Took 4.39ms
+T3E40 000:126.372   Found SW-DP with ID 0x2BA01477
+T3E40 000:130.570   Old FW that does not support reading DPIDR via DAP jobs
+T3E40 000:134.563   DPv0 detected
+T3E40 000:134.607   CoreSight SoC-400 or earlier
+T3E40 000:134.637   Scanning AP map to find all available APs
+T3E40 000:137.381   AP[1]: Stopped AP scan as end of AP map has been reached
+T3E40 000:137.427   AP[0]: AHB-AP (IDR: 0x24770011, ADDR: 0x00000000)
+T3E40 000:137.459   Iterating through AP map to find AHB-AP to use
+T3E40 000:142.032   AP[0]: Core found
+T3E40 000:142.081   AP[0]: AHB-AP ROM base: 0xE00FF000
+T3E40 000:144.394   CPUID register: 0x410FC241. Implementer code: 0x41 (ARM)
+T3E40 000:144.445   Found Cortex-M4 r0p1, Little endian.
+T3E40 000:144.798   -- Max. mem block: 0x00002C18
+T3E40 000:145.316   CPU_ReadMem(4 bytes @ 0xE000EDF0)
+T3E40 000:146.188   CPU_ReadMem(4 bytes @ 0xE0002000)
+T3E40 000:147.071   FPUnit: 6 code (BP) slots and 2 literal slots
+T3E40 000:147.117   CPU_ReadMem(4 bytes @ 0xE000EDFC)
+T3E40 000:148.043   CPU_ReadMem(4 bytes @ 0xE0001000)
+T3E40 000:148.907   CPU_WriteMem(4 bytes @ 0xE0001000)
+T3E40 000:149.860   CPU_ReadMem(4 bytes @ 0xE000ED88)
+T3E40 000:150.730   CPU_WriteMem(4 bytes @ 0xE000ED88)
+T3E40 000:151.651   CPU_ReadMem(4 bytes @ 0xE000ED88)
+T3E40 000:152.560   CPU_WriteMem(4 bytes @ 0xE000ED88)
+T3E40 000:153.479   CoreSight components:
+T3E40 000:153.518   ROMTbl[0] @ E00FF000
+T3E40 000:153.548   CPU_ReadMem(64 bytes @ 0xE00FF000)
+T3E40 000:156.015   CPU_ReadMem(32 bytes @ 0xE000EFE0)
+T3E40 000:157.672   [0][0]: E000E000 CID B105E00D PID 000BB00C SCS-M7
+T3E40 000:157.728   CPU_ReadMem(32 bytes @ 0xE0001FE0)
+T3E40 000:159.370   [0][1]: E0001000 CID B105E00D PID 003BB002 DWT
+T3E40 000:159.419   CPU_ReadMem(32 bytes @ 0xE0002FE0)
+T3E40 000:161.036   [0][2]: E0002000 CID B105E00D PID 002BB003 FPB
+T3E40 000:161.078   CPU_ReadMem(32 bytes @ 0xE0000FE0)
+T3E40 000:162.690   [0][3]: E0000000 CID B105E00D PID 003BB001 ITM
+T3E40 000:162.732   CPU_ReadMem(32 bytes @ 0xE0040FE0)
+T3E40 000:164.330   [0][4]: E0040000 CID B105900D PID 000BB9A1 TPIU
+T3E40 000:164.369   CPU_ReadMem(32 bytes @ 0xE0041FE0)
+T3E40 000:165.959   [0][5]: E0041000 CID 00000000 PID 00000000 ???
+T3E40 000:166.045 - 45.405ms returns 0x00
+T3E40 000:166.120 JLINK_GetIdData(pIdData)
+T3E40 000:166.538   pIdData->ScanLen=4
+T3E40 000:166.577   pIdData->NumDevices=1
+T3E40 000:166.605   pIdData->aId[0]=0x2BA01477
+T3E40 000:166.633   pIdData->aIrRead[0]=0
+T3E40 000:166.661   pIdData->aScanLen[0]=0
+T3E40 000:166.689   pIdData->aScanRead[0]=0
+T3E40 000:166.720 - 0.599ms 
+T3E40 000:166.745 JLINK_GetMemZones(...)
+T3E40 000:166.766 - 0.020ms returns 1
+T3E40 000:166.791 JLINK_HasError()
+T3E40 000:166.815 JLINK_CORE_GetFound()
+T3E40 000:166.835 - 0.019ms returns 0xE0000FF
+T3E40 000:166.884 JLINK_ExecCommand("ExcludeFlashCacheRange 0x08000000-0x080FFFFF", ...). 
+T3E40 000:166.911 - 0.004ms returns 0x00
+T3E40 000:166.950 JLINK_WriteU32_64(0xE0042008, 0x00001000)
+T3E40 000:167.263   CPU is running
+T3E40 000:167.302   CPU_WriteMem(4 bytes @ 0xE0042008)
+T3E40 000:168.210 - 1.259ms returns 0 (0x00000000)
+T3E40 000:168.248 JLINK_Halt()
+T3E40 000:176.219 - 7.968ms returns 0x00
+T3E40 000:176.264 JLINK_GetDeviceFamily
+T3E40 000:176.286 - 0.021ms returns 14
+T3E40 000:176.307 JLINK_CORE_GetFound()
+T3E40 000:176.400 - 0.092ms returns 0xE0000FF
+T3E40 000:176.432 JLINK_GetDebugInfo(0x01 = Unknown)
+T3E40 000:176.454   Value=0x00000001
+T3E40 000:176.484 - 0.052ms returns 0
+T3E40 000:176.509 JLINK_ReadRegs(NumRegs = 28)
+T3E40 000:176.569   CPU_ReadMem(4 bytes @ 0xE0001004)
+T3E40 000:177.433   
+  R0 (0)         = 0x01                 R1 (1)         = 0x44                 R2 (2)         = 0x02                 R3 (3)         = 0x20057E00        
+  R4 (4)         = 0x2000101C           R5 (5)         = 0x20001010           R6 (6)         = 0x20001020           R7 (7)         = 0x00              
+  R8 (8)         = 0x20001004           R9 (9)         = 0x20001008           R10 (10)       = 0x2000100C           R11 (11)       = 0x20001014        
+  R12 (12)       = 0x20057FEC           R13 (SP) (13)  = 0x20057D20           MSP (17)       = 0x20057D20           PSP (18)       = 0x00              
+  R14 (14)       = 0x8001D1D            R15 (PC) (15)  = 0x8002B16            XPSR (16)      = 0x61000000           APSR (21)      = 0x60000000        
+  EPSR (22)      = 0x1000000            IPSR (23)      = 0x00                 CFBP (20)      = 0x00                 CONTROL (27)   = 0x00              
+  FAULTMASK (26) = 0x00                 BASEPRI (25)   = 0x00                 PRIMASK (24)   = 0x00                 CycleCnt (65)  = 0xBA7CE326        
+T3E40 000:177.471 - 0.961ms returns 0x00
+T3E40 000:177.509 JLINK_ReadRegs(NumRegs = 33)
+T3E40 000:189.877   
+  FPS0 (33)  = 0x00                 FPS1 (34)  = 0x00                 FPS2 (35)  = 0x00                 FPS3 (36)  = 0x00              
+  FPS4 (37)  = 0x00                 FPS5 (38)  = 0x00                 FPS6 (39)  = 0x00                 FPS7 (40)  = 0x00              
+  FPS8 (41)  = 0x00                 FPS9 (42)  = 0x00                 FPS10 (43) = 0x00                 FPS11 (44) = 0x00              
+  FPS12 (45) = 0x00                 FPS13 (46) = 0x00                 FPS14 (47) = 0x00                 FPS15 (48) = 0x00              
+  FPS16 (49) = 0x00                 FPS17 (50) = 0x00                 FPS18 (51) = 0x00                 FPS19 (52) = 0x00              
+  FPS20 (53) = 0x00                 FPS21 (54) = 0x00                 FPS22 (55) = 0x00                 FPS23 (56) = 0x00              
+  FPS24 (57) = 0x00                 FPS25 (58) = 0x00                 FPS26 (59) = 0x00                 FPS27 (60) = 0x00              
+  FPS28 (61) = 0x00                 FPS29 (62) = 0x00                 FPS30 (63) = 0x00                 FPS31 (64) = 0x00              
+  FPSCR (32) = 0x00              
+T3E40 000:189.928 - 12.418ms returns 0x00
+T3E40 000:189.994 JLINK_Reset()
+T3E40 000:190.037   JLINK_GetResetTypeDesc
+T3E40 000:190.061   - 0.024ms 
+T3E40 000:190.085   Reset type: NORMAL (https://wiki.segger.com/J-Link_Reset_Strategies)
+T3E40 000:190.114   CPU_WriteMem(4 bytes @ 0xE000EDF0)
+T3E40 000:191.212   CPU_WriteMem(4 bytes @ 0xE000EDFC)
+T3E40 000:192.485   Reset: Halt core after reset via DEMCR.VC_CORERESET.
+T3E40 000:193.098   Reset: Reset device via AIRCR.SYSRESETREQ.
+T3E40 000:193.156   CPU_WriteMem(4 bytes @ 0xE000ED0C)
+T3E40 000:247.664   CPU_ReadMem(4 bytes @ 0xE000EDF0)
+T3E40 000:248.566   CPU_ReadMem(4 bytes @ 0xE000EDF0)
+T3E40 000:249.465   CPU_WriteMem(4 bytes @ 0xE000EDFC)
+T3E40 000:255.431   CPU_ReadMem(4 bytes @ 0xE000EDF0)
+T3E40 000:264.149   CPU_WriteMem(4 bytes @ 0xE0002000)
+T3E40 000:265.117   CPU_ReadMem(4 bytes @ 0xE000EDFC)
+T3E40 000:266.017   CPU_ReadMem(4 bytes @ 0xE0001000)
+T3E40 000:266.898 - 76.903ms 
+T3E40 000:266.948 JLINK_Halt()
+T3E40 000:266.978 - 0.029ms returns 0x00
+T3E40 000:267.047 JLINK_ExecCommand("SetVerifyRAMDownload = 1", ...). 
+T3E40 000:267.081 - 0.002ms returns 0x00
+T3E40 000:267.107 JLINK_DownloadFile()
+T3E40 000:269.278   Data:  00 80 05 20 AD BF 01 08 37 C0 01 08 37 C0 01 08 ...
+T3E40 000:269.662   completely In flash
+T3E40 000:269.775   Data:  23 43 25 F0 00 4A 4A EA D3 73 B3 42 A0 46 A9 46 ...
+T3E40 000:269.865   completely In flash
+T3E40 000:269.937   Data:  00 41 00 41 00 41 00 41 00 41 00 41 00 41 00 41 ...
+T3E40 000:270.255   completely In flash
+T3E40 000:270.451   Old firmware which does not support pausing periodic actions during flash download
+T3E40 000:270.495   CPU_ReadMem(4 bytes @ 0xE000ED90)
+T3E40 000:271.400   CPU_ReadMem(4 bytes @ 0xE000ED94)
+T3E40 000:272.354    -- --------------------------------------
+T3E40 000:272.405    -- Start of determining flash info (Bank @ 0x08000000)
+T3E40 000:272.443    -- End of determining flash info
+T3E40 000:272.479    -- Start of determining dirty areas in flash cache
+T3E40 000:272.533    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08010000 if necessary
+T3E40 000:272.570    -- Start of preparing flash programming
+T3E40 000:272.609    -- Preparing RAMCode
+T3E40 000:272.639    -- Calculating RAM usage
+T3E40 000:272.670    -- RAM usage = 6888 Bytes
+T3E40 000:272.701    -- Preserving CPU registers
+T3E40 000:272.763    -- Preparing memory
+T3E40 000:272.796    -- Preparing target
+T3E40 000:272.826    -- Preserving target RAM temporarily used for programming
+T3E40 000:455.222    -- Downloading RAMCode
+T3E40 000:579.841    -- Initializing RAMCode (InitType: 3 = Verify)
+T3E40 000:579.903    -- Executing SEGGER_FL_Prepare(3)
+T3E40 000:591.707    -- End of preparing flash programming
+T3E40 000:591.773   CPU_ReadMem(2048 bytes @ 0x08010000)
+T3E40 000:702.433    -- Updating flash cache (2048 bytes @ 0x08010000)
+T3E40 000:702.486    -- Updating flash cache invalid range 0x08010000 - 0x080107FF (2048 bytes)
+T3E40 000:716.579    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08010800 if necessary
+T3E40 000:716.650    -- Start of preparing flash programming
+T3E40 000:716.678    -- End of preparing flash programming
+T3E40 000:716.720   CPU_ReadMem(2048 bytes @ 0x08010800)
+T3E40 000:771.940    -- Updating flash cache (2048 bytes @ 0x08010800)
+T3E40 000:771.994    -- Updating flash cache invalid range 0x08010800 - 0x08010FFF (2048 bytes)
+T3E40 000:772.034    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08011000 if necessary
+T3E40 000:772.108    -- Start of preparing flash programming
+T3E40 000:772.140    -- End of preparing flash programming
+T3E40 000:772.177   CPU_ReadMem(2048 bytes @ 0x08011000)
+T3E40 000:827.399    -- Updating flash cache (2048 bytes @ 0x08011000)
+T3E40 000:827.454    -- Updating flash cache invalid range 0x08011000 - 0x080117FF (2048 bytes)
+T3E40 000:827.496    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08011800 if necessary
+T3E40 000:827.531    -- Start of preparing flash programming
+T3E40 000:827.562    -- End of preparing flash programming
+T3E40 000:827.598   CPU_ReadMem(2048 bytes @ 0x08011800)
+T3E40 000:882.866    -- Updating flash cache (2048 bytes @ 0x08011800)
+T3E40 000:882.923    -- Updating flash cache invalid range 0x08011800 - 0x08011FFF (2048 bytes)
+T3E40 000:882.965    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08012000 if necessary
+T3E40 000:882.999    -- Start of preparing flash programming
+T3E40 000:883.031    -- End of preparing flash programming
+T3E40 000:883.070   CPU_ReadMem(2048 bytes @ 0x08012000)
+T3E40 000:938.331    -- Updating flash cache (2048 bytes @ 0x08012000)
+T3E40 000:938.386    -- Updating flash cache invalid range 0x08012000 - 0x080127FF (2048 bytes)
+T3E40 000:938.431    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08012800 if necessary
+T3E40 000:938.465    -- Start of preparing flash programming
+T3E40 000:938.495    -- End of preparing flash programming
+T3E40 000:938.536   CPU_ReadMem(2048 bytes @ 0x08012800)
+T3E40 000:993.793    -- Updating flash cache (2048 bytes @ 0x08012800)
+T3E40 000:993.846    -- Updating flash cache invalid range 0x08012800 - 0x08012FFF (2048 bytes)
+T3E40 000:993.887    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08013000 if necessary
+T3E40 000:993.921    -- Start of preparing flash programming
+T3E40 000:993.952    -- End of preparing flash programming
+T3E40 000:994.057   CPU_ReadMem(2048 bytes @ 0x08013000)
+T3E40 001:049.326    -- Updating flash cache (2048 bytes @ 0x08013000)
+T3E40 001:049.380    -- Updating flash cache invalid range 0x08013000 - 0x080137FF (2048 bytes)
+T3E40 001:049.422    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08013800 if necessary
+T3E40 001:049.459    -- Start of preparing flash programming
+T3E40 001:049.491    -- End of preparing flash programming
+T3E40 001:049.527   CPU_ReadMem(2048 bytes @ 0x08013800)
+T3E40 001:105.152    -- Updating flash cache (2048 bytes @ 0x08013800)
+T3E40 001:105.562    -- Updating flash cache invalid range 0x08013800 - 0x08013FFF (2048 bytes)
+T3E40 001:105.608    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08014000 if necessary
+T3E40 001:106.115    -- Start of preparing flash programming
+T3E40 001:109.638    -- End of preparing flash programming
+T3E40 001:109.687   CPU_ReadMem(2048 bytes @ 0x08014000)
+T3E40 001:164.933    -- Updating flash cache (2048 bytes @ 0x08014000)
+T3E40 001:164.985    -- Updating flash cache invalid range 0x08014000 - 0x080147FF (2048 bytes)
+T3E40 001:165.024    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08014800 if necessary
+T3E40 001:165.056    -- Start of preparing flash programming
+T3E40 001:165.085    -- End of preparing flash programming
+T3E40 001:165.119   CPU_ReadMem(2048 bytes @ 0x08014800)
+T3E40 002:037.267    -- Updating flash cache (2048 bytes @ 0x08014800)
+T3E40 002:037.378    -- Updating flash cache invalid range 0x08014800 - 0x08014FFF (2048 bytes)
+T3E40 002:037.568    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08015000 if necessary
+T3E40 002:037.608    -- Start of preparing flash programming
+T3E40 002:037.677    -- End of preparing flash programming
+T3E40 002:037.715   CPU_ReadMem(2048 bytes @ 0x08015000)
+T3E40 002:627.817    -- Updating flash cache (2048 bytes @ 0x08015000)
+T3E40 002:627.927    -- Updating flash cache invalid range 0x08015000 - 0x080157FF (2048 bytes)
+T3E40 002:628.005    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08015800 if necessary
+T3E40 002:628.060    -- Start of preparing flash programming
+T3E40 002:628.087    -- End of preparing flash programming
+T3E40 002:628.158   CPU_ReadMem(2048 bytes @ 0x08015800)
+T3E40 002:684.387    -- Updating flash cache (2048 bytes @ 0x08015800)
+T3E40 002:684.456    -- Updating flash cache invalid range 0x08015800 - 0x08015FFF (2048 bytes)
+T3E40 002:684.518    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08016000 if necessary
+T3E40 002:684.554    -- Start of preparing flash programming
+T3E40 002:684.585    -- End of preparing flash programming
+T3E40 002:684.634   CPU_ReadMem(2048 bytes @ 0x08016000)
+T3E40 002:739.950    -- Updating flash cache (2048 bytes @ 0x08016000)
+T3E40 002:740.585    -- Updating flash cache invalid range 0x08016000 - 0x080167FF (2048 bytes)
+T3E40 002:740.629    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08016800 if necessary
+T3E40 002:740.659    -- Start of preparing flash programming
+T3E40 002:740.688    -- End of preparing flash programming
+T3E40 002:740.746   CPU_ReadMem(2048 bytes @ 0x08016800)
+T3E40 002:796.038    -- Updating flash cache (2048 bytes @ 0x08016800)
+T3E40 002:796.097    -- Updating flash cache invalid range 0x08016800 - 0x08016FFF (2048 bytes)
+T3E40 002:796.140    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08017000 if necessary
+T3E40 002:796.176    -- Start of preparing flash programming
+T3E40 002:796.207    -- End of preparing flash programming
+T3E40 002:796.244   CPU_ReadMem(2048 bytes @ 0x08017000)
+T3E40 002:851.424    -- Updating flash cache (2048 bytes @ 0x08017000)
+T3E40 002:851.481    -- Updating flash cache invalid range 0x08017000 - 0x080177FF (2048 bytes)
+T3E40 002:851.524    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08017800 if necessary
+T3E40 002:851.559    -- Start of preparing flash programming
+T3E40 002:851.616    -- End of preparing flash programming
+T3E40 002:851.652   CPU_ReadMem(2048 bytes @ 0x08017800)
+T3E40 002:906.939    -- Updating flash cache (2048 bytes @ 0x08017800)
+T3E40 002:906.992    -- Updating flash cache invalid range 0x08017800 - 0x08017FFF (2048 bytes)
+T3E40 002:907.035    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08018000 if necessary
+T3E40 002:907.071    -- Start of preparing flash programming
+T3E40 002:907.103    -- End of preparing flash programming
+T3E40 002:907.141   CPU_ReadMem(2048 bytes @ 0x08018000)
+T3E40 002:962.475    -- Updating flash cache (2048 bytes @ 0x08018000)
+T3E40 002:962.530    -- Updating flash cache invalid range 0x08018000 - 0x080187FF (2048 bytes)
+T3E40 002:962.571    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08018800 if necessary
+T3E40 002:962.605    -- Start of preparing flash programming
+T3E40 002:962.635    -- End of preparing flash programming
+T3E40 002:962.678   CPU_ReadMem(2048 bytes @ 0x08018800)
+T3E40 003:017.936    -- Updating flash cache (2048 bytes @ 0x08018800)
+T3E40 003:017.995    -- Updating flash cache invalid range 0x08018800 - 0x08018FFF (2048 bytes)
+T3E40 003:018.036    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08019000 if necessary
+T3E40 003:018.077    -- Start of preparing flash programming
+T3E40 003:018.124    -- End of preparing flash programming
+T3E40 003:018.162   CPU_ReadMem(2048 bytes @ 0x08019000)
+T3E40 003:073.397    -- Updating flash cache (2048 bytes @ 0x08019000)
+T3E40 003:073.434    -- Updating flash cache invalid range 0x08019000 - 0x080197FF (2048 bytes)
+T3E40 003:073.462    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08019800 if necessary
+T3E40 003:073.484    -- Start of preparing flash programming
+T3E40 003:073.511    -- End of preparing flash programming
+T3E40 003:073.546   CPU_ReadMem(2048 bytes @ 0x08019800)
+T3E40 003:128.719    -- Updating flash cache (2048 bytes @ 0x08019800)
+T3E40 003:128.774    -- Updating flash cache invalid range 0x08019800 - 0x08019FFF (2048 bytes)
+T3E40 003:128.821    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0801A000 if necessary
+T3E40 003:128.857    -- Start of preparing flash programming
+T3E40 003:128.889    -- End of preparing flash programming
+T3E40 003:128.928   CPU_ReadMem(2048 bytes @ 0x0801A000)
+T3E40 003:184.095    -- Updating flash cache (2048 bytes @ 0x0801A000)
+T3E40 003:184.151    -- Updating flash cache invalid range 0x0801A000 - 0x0801A7FF (2048 bytes)
+T3E40 003:184.192    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0801A800 if necessary
+T3E40 003:184.226    -- Start of preparing flash programming
+T3E40 003:184.256    -- End of preparing flash programming
+T3E40 003:184.293   CPU_ReadMem(2048 bytes @ 0x0801A800)
+T3E40 003:239.476    -- Updating flash cache (2048 bytes @ 0x0801A800)
+T3E40 003:239.534    -- Updating flash cache invalid range 0x0801A800 - 0x0801AFFF (2048 bytes)
+T3E40 003:239.596    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0801B000 if necessary
+T3E40 003:239.632    -- Start of preparing flash programming
+T3E40 003:239.664    -- End of preparing flash programming
+T3E40 003:239.702   CPU_ReadMem(2048 bytes @ 0x0801B000)
+T3E40 003:294.861    -- Updating flash cache (2048 bytes @ 0x0801B000)
+T3E40 003:294.915    -- Updating flash cache invalid range 0x0801B000 - 0x0801B7FF (2048 bytes)
+T3E40 003:294.956    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0801B800 if necessary
+T3E40 003:294.990    -- Start of preparing flash programming
+T3E40 003:295.022    -- End of preparing flash programming
+T3E40 003:295.059   CPU_ReadMem(2048 bytes @ 0x0801B800)
+T3E40 003:350.242    -- Updating flash cache (2048 bytes @ 0x0801B800)
+T3E40 003:350.295    -- Updating flash cache invalid range 0x0801B800 - 0x0801BFFF (2048 bytes)
+T3E40 003:350.334    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0801C000 if necessary
+T3E40 003:350.378    -- Start of preparing flash programming
+T3E40 003:350.409    -- End of preparing flash programming
+T3E40 003:350.445   CPU_ReadMem(2048 bytes @ 0x0801C000)
+T3E40 003:405.722    -- Updating flash cache (2048 bytes @ 0x0801C000)
+T3E40 003:405.780    -- Updating flash cache invalid range 0x0801C000 - 0x0801C7FF (2048 bytes)
+T3E40 003:405.825    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0801C800 if necessary
+T3E40 003:405.916    -- Start of preparing flash programming
+T3E40 003:405.948    -- End of preparing flash programming
+T3E40 003:406.064   CPU_ReadMem(2048 bytes @ 0x0801C800)
+T3E40 003:461.242    -- Updating flash cache (2048 bytes @ 0x0801C800)
+T3E40 003:461.297    -- Updating flash cache invalid range 0x0801C800 - 0x0801CFFF (2048 bytes)
+T3E40 003:461.345    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0801D000 if necessary
+T3E40 003:461.383    -- Start of preparing flash programming
+T3E40 003:461.413    -- End of preparing flash programming
+T3E40 003:461.451   CPU_ReadMem(2048 bytes @ 0x0801D000)
+T3E40 003:516.700    -- Updating flash cache (2048 bytes @ 0x0801D000)
+T3E40 003:516.828    -- Updating flash cache invalid range 0x0801D000 - 0x0801D7FF (2048 bytes)
+T3E40 003:516.868    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0801D800 if necessary
+T3E40 003:516.902    -- Start of preparing flash programming
+T3E40 003:516.938    -- End of preparing flash programming
+T3E40 003:516.983   CPU_ReadMem(2048 bytes @ 0x0801D800)
+T3E40 003:572.241    -- Updating flash cache (2048 bytes @ 0x0801D800)
+T3E40 003:572.295    -- Updating flash cache invalid range 0x0801D800 - 0x0801DFFF (2048 bytes)
+T3E40 003:572.335    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0801E000 if necessary
+T3E40 003:572.368    -- Start of preparing flash programming
+T3E40 003:572.399    -- End of preparing flash programming
+T3E40 003:572.435   CPU_ReadMem(2048 bytes @ 0x0801E000)
+T3E40 003:627.708    -- Updating flash cache (2048 bytes @ 0x0801E000)
+T3E40 003:627.762    -- Updating flash cache invalid range 0x0801E000 - 0x0801E7FF (2048 bytes)
+T3E40 003:627.806    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0801E800 if necessary
+T3E40 003:627.841    -- Start of preparing flash programming
+T3E40 003:627.872    -- End of preparing flash programming
+T3E40 003:627.910   CPU_ReadMem(2048 bytes @ 0x0801E800)
+T3E40 003:683.170    -- Updating flash cache (2048 bytes @ 0x0801E800)
+T3E40 003:683.226    -- Updating flash cache invalid range 0x0801E800 - 0x0801EFFF (2048 bytes)
+T3E40 003:683.268    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0801F000 if necessary
+T3E40 003:683.302    -- Start of preparing flash programming
+T3E40 003:683.333    -- End of preparing flash programming
+T3E40 003:683.370   CPU_ReadMem(2048 bytes @ 0x0801F000)
+T3E40 003:746.228    -- Updating flash cache (2048 bytes @ 0x0801F000)
+T3E40 003:746.289    -- Updating flash cache invalid range 0x0801F000 - 0x0801F7FF (2048 bytes)
+T3E40 003:746.335    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0801F800 if necessary
+T3E40 003:746.372    -- Start of preparing flash programming
+T3E40 003:746.404    -- End of preparing flash programming
+T3E40 003:746.446   CPU_ReadMem(2048 bytes @ 0x0801F800)
+T3E40 003:801.648    -- Updating flash cache (2048 bytes @ 0x0801F800)
+T3E40 003:801.704    -- Updating flash cache invalid range 0x0801F800 - 0x0801FFFF (2048 bytes)
+T3E40 003:801.745    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08020000 if necessary
+T3E40 003:801.779    -- Start of preparing flash programming
+T3E40 003:801.810    -- End of preparing flash programming
+T3E40 003:801.846   CPU_ReadMem(2048 bytes @ 0x08020000)
+T3E40 003:857.015    -- Updating flash cache (2048 bytes @ 0x08020000)
+T3E40 003:857.071    -- Updating flash cache invalid range 0x08020000 - 0x080207FF (2048 bytes)
+T3E40 003:857.123    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08020800 if necessary
+T3E40 003:857.158    -- Start of preparing flash programming
+T3E40 003:857.188    -- End of preparing flash programming
+T3E40 003:857.227   CPU_ReadMem(2048 bytes @ 0x08020800)
+T3E40 003:912.480    -- Updating flash cache (2048 bytes @ 0x08020800)
+T3E40 003:912.534    -- Updating flash cache invalid range 0x08020800 - 0x08020FFF (2048 bytes)
+T3E40 003:912.574    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08021000 if necessary
+T3E40 003:912.608    -- Start of preparing flash programming
+T3E40 003:912.638    -- End of preparing flash programming
+T3E40 003:912.674   CPU_ReadMem(2048 bytes @ 0x08021000)
+T3E40 003:968.074    -- Updating flash cache (2048 bytes @ 0x08021000)
+T3E40 003:968.128    -- Updating flash cache invalid range 0x08021000 - 0x080217FF (2048 bytes)
+T3E40 003:968.166    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08021800 if necessary
+T3E40 003:968.198    -- Start of preparing flash programming
+T3E40 003:968.228    -- End of preparing flash programming
+T3E40 003:968.264   CPU_ReadMem(2048 bytes @ 0x08021800)
+T3E40 004:023.478    -- Updating flash cache (2048 bytes @ 0x08021800)
+T3E40 004:023.531    -- Updating flash cache invalid range 0x08021800 - 0x08021FFF (2048 bytes)
+T3E40 004:023.576    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08022000 if necessary
+T3E40 004:023.611    -- Start of preparing flash programming
+T3E40 004:023.642    -- End of preparing flash programming
+T3E40 004:023.678   CPU_ReadMem(2048 bytes @ 0x08022000)
+T3E40 004:079.795    -- Updating flash cache (2048 bytes @ 0x08022000)
+T3E40 004:079.952    -- Updating flash cache invalid range 0x08022000 - 0x080227FF (2048 bytes)
+T3E40 004:079.994    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08022800 if necessary
+T3E40 004:080.026    -- Start of preparing flash programming
+T3E40 004:080.053    -- End of preparing flash programming
+T3E40 004:080.090   CPU_ReadMem(2048 bytes @ 0x08022800)
+T3E40 004:135.477    -- Updating flash cache (2048 bytes @ 0x08022800)
+T3E40 004:135.532    -- Updating flash cache invalid range 0x08022800 - 0x08022FFF (2048 bytes)
+T3E40 004:135.576    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08023000 if necessary
+T3E40 004:135.610    -- Start of preparing flash programming
+T3E40 004:135.642    -- End of preparing flash programming
+T3E40 004:135.688   CPU_ReadMem(2048 bytes @ 0x08023000)
+T3E40 004:197.522    -- Updating flash cache (2048 bytes @ 0x08023000)
+T3E40 004:197.582    -- Updating flash cache invalid range 0x08023000 - 0x080237FF (2048 bytes)
+T3E40 004:198.266    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08023800 if necessary
+T3E40 004:198.304    -- Start of preparing flash programming
+T3E40 004:198.336    -- End of preparing flash programming
+T3E40 004:198.379   CPU_ReadMem(2048 bytes @ 0x08023800)
+T3E40 004:735.333    -- Updating flash cache (2048 bytes @ 0x08023800)
+T3E40 004:735.427    -- Updating flash cache invalid range 0x08023800 - 0x08023FFF (2048 bytes)
+T3E40 004:735.506    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08024000 if necessary
+T3E40 004:735.570    -- Start of preparing flash programming
+T3E40 004:735.600    -- End of preparing flash programming
+T3E40 004:735.667   CPU_ReadMem(2048 bytes @ 0x08024000)
+T3E40 004:791.018    -- Updating flash cache (2048 bytes @ 0x08024000)
+T3E40 004:793.270    -- Updating flash cache invalid range 0x08024000 - 0x080247FF (2048 bytes)
+T3E40 004:794.146    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08024800 if necessary
+T3E40 004:794.187    -- Start of preparing flash programming
+T3E40 004:794.219    -- End of preparing flash programming
+T3E40 004:794.262   CPU_ReadMem(2048 bytes @ 0x08024800)
+T3E40 004:852.457    -- Updating flash cache (2048 bytes @ 0x08024800)
+T3E40 004:860.541    -- Updating flash cache invalid range 0x08024800 - 0x08024FFF (2048 bytes)
+T3E40 004:864.399    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08025000 if necessary
+T3E40 004:864.588    -- Start of preparing flash programming
+T3E40 004:864.646    -- End of preparing flash programming
+T3E40 004:864.753   CPU_ReadMem(2048 bytes @ 0x08025000)
+T3E40 004:922.403    -- Updating flash cache (2048 bytes @ 0x08025000)
+T3E40 004:922.462    -- Updating flash cache invalid range 0x08025000 - 0x080257FF (2048 bytes)
+T3E40 004:922.509    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08025800 if necessary
+T3E40 004:922.543    -- Start of preparing flash programming
+T3E40 004:922.575    -- End of preparing flash programming
+T3E40 004:922.617   CPU_ReadMem(2048 bytes @ 0x08025800)
+T3E40 005:000.249    -- Updating flash cache (2048 bytes @ 0x08025800)
+T3E40 005:003.127    -- Updating flash cache invalid range 0x08025800 - 0x08025FFF (2048 bytes)
+T3E40 005:003.175    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08026000 if necessary
+T3E40 005:003.209    -- Start of preparing flash programming
+T3E40 005:003.242    -- End of preparing flash programming
+T3E40 005:003.284   CPU_ReadMem(2048 bytes @ 0x08026000)
+T3E40 005:058.559    -- Updating flash cache (2048 bytes @ 0x08026000)
+T3E40 005:058.616    -- Updating flash cache invalid range 0x08026000 - 0x080267FF (2048 bytes)
+T3E40 005:058.660    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08026800 if necessary
+T3E40 005:058.697    -- Start of preparing flash programming
+T3E40 005:058.730    -- End of preparing flash programming
+T3E40 005:058.769   CPU_ReadMem(2048 bytes @ 0x08026800)
+T3E40 005:114.141    -- Updating flash cache (2048 bytes @ 0x08026800)
+T3E40 005:114.199    -- Updating flash cache invalid range 0x08026800 - 0x08026FFF (2048 bytes)
+T3E40 005:114.243    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08027000 if necessary
+T3E40 005:114.278    -- Start of preparing flash programming
+T3E40 005:114.310    -- End of preparing flash programming
+T3E40 005:114.351   CPU_ReadMem(2048 bytes @ 0x08027000)
+T3E40 005:169.553    -- Updating flash cache (2048 bytes @ 0x08027000)
+T3E40 005:169.607    -- Updating flash cache invalid range 0x08027000 - 0x080277FF (2048 bytes)
+T3E40 005:169.648    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08027800 if necessary
+T3E40 005:169.682    -- Start of preparing flash programming
+T3E40 005:169.719    -- End of preparing flash programming
+T3E40 005:169.756   CPU_ReadMem(2048 bytes @ 0x08027800)
+T3E40 005:224.942    -- Updating flash cache (2048 bytes @ 0x08027800)
+T3E40 005:224.998    -- Updating flash cache invalid range 0x08027800 - 0x08027FFF (2048 bytes)
+T3E40 005:225.041    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08028000 if necessary
+T3E40 005:225.078    -- Start of preparing flash programming
+T3E40 005:225.112    -- End of preparing flash programming
+T3E40 005:225.162   CPU_ReadMem(2048 bytes @ 0x08028000)
+T3E40 005:280.399    -- Updating flash cache (2048 bytes @ 0x08028000)
+T3E40 005:280.455    -- Updating flash cache invalid range 0x08028000 - 0x080287FF (2048 bytes)
+T3E40 005:280.498    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08028800 if necessary
+T3E40 005:280.535    -- Start of preparing flash programming
+T3E40 005:280.566    -- End of preparing flash programming
+T3E40 005:280.603   CPU_ReadMem(2048 bytes @ 0x08028800)
+T3E40 005:335.864    -- Updating flash cache (2048 bytes @ 0x08028800)
+T3E40 005:335.931    -- Updating flash cache invalid range 0x08028800 - 0x08028FFF (2048 bytes)
+T3E40 005:336.065    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08029000 if necessary
+T3E40 005:336.102    -- Start of preparing flash programming
+T3E40 005:336.155    -- End of preparing flash programming
+T3E40 005:336.223   CPU_ReadMem(2048 bytes @ 0x08029000)
+T3E40 005:391.400    -- Updating flash cache (2048 bytes @ 0x08029000)
+T3E40 005:391.453    -- Updating flash cache invalid range 0x08029000 - 0x080297FF (2048 bytes)
+T3E40 005:391.493    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08029800 if necessary
+T3E40 005:391.528    -- Start of preparing flash programming
+T3E40 005:391.559    -- End of preparing flash programming
+T3E40 005:391.594   CPU_ReadMem(2048 bytes @ 0x08029800)
+T3E40 005:446.863    -- Updating flash cache (2048 bytes @ 0x08029800)
+T3E40 005:446.917    -- Updating flash cache invalid range 0x08029800 - 0x08029FFF (2048 bytes)
+T3E40 005:446.959    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0802A000 if necessary
+T3E40 005:446.995    -- Start of preparing flash programming
+T3E40 005:447.028    -- End of preparing flash programming
+T3E40 005:447.065   CPU_ReadMem(2048 bytes @ 0x0802A000)
+T3E40 005:502.399    -- Updating flash cache (2048 bytes @ 0x0802A000)
+T3E40 005:502.454    -- Updating flash cache invalid range 0x0802A000 - 0x0802A7FF (2048 bytes)
+T3E40 005:502.495    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0802A800 if necessary
+T3E40 005:502.530    -- Start of preparing flash programming
+T3E40 005:502.560    -- End of preparing flash programming
+T3E40 005:502.598   CPU_ReadMem(2048 bytes @ 0x0802A800)
+T3E40 005:557.857    -- Updating flash cache (2048 bytes @ 0x0802A800)
+T3E40 005:557.909    -- Updating flash cache invalid range 0x0802A800 - 0x0802AFFF (2048 bytes)
+T3E40 005:557.953    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0802B000 if necessary
+T3E40 005:557.989    -- Start of preparing flash programming
+T3E40 005:558.021    -- End of preparing flash programming
+T3E40 005:558.058   CPU_ReadMem(2048 bytes @ 0x0802B000)
+T3E40 005:613.247    -- Updating flash cache (2048 bytes @ 0x0802B000)
+T3E40 005:613.301    -- Updating flash cache invalid range 0x0802B000 - 0x0802B7FF (2048 bytes)
+T3E40 005:613.342    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0802B800 if necessary
+T3E40 005:613.377    -- Start of preparing flash programming
+T3E40 005:613.406    -- End of preparing flash programming
+T3E40 005:613.445   CPU_ReadMem(2048 bytes @ 0x0802B800)
+T3E40 005:668.632    -- Updating flash cache (2048 bytes @ 0x0802B800)
+T3E40 005:668.687    -- Updating flash cache invalid range 0x0802B800 - 0x0802BFFF (2048 bytes)
+T3E40 005:668.729    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0802C000 if necessary
+T3E40 005:668.765    -- Start of preparing flash programming
+T3E40 005:668.797    -- End of preparing flash programming
+T3E40 005:668.833   CPU_ReadMem(2048 bytes @ 0x0802C000)
+T3E40 005:724.105    -- Updating flash cache (2048 bytes @ 0x0802C000)
+T3E40 005:724.167    -- Updating flash cache invalid range 0x0802C000 - 0x0802C7FF (2048 bytes)
+T3E40 005:724.212    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0802C800 if necessary
+T3E40 005:724.255    -- Start of preparing flash programming
+T3E40 005:724.290    -- End of preparing flash programming
+T3E40 005:724.331   CPU_ReadMem(2048 bytes @ 0x0802C800)
+T3E40 005:779.479    -- Updating flash cache (2048 bytes @ 0x0802C800)
+T3E40 005:779.576    -- Updating flash cache invalid range 0x0802C800 - 0x0802CFFF (2048 bytes)
+T3E40 005:779.619    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0802D000 if necessary
+T3E40 005:779.653    -- Start of preparing flash programming
+T3E40 005:779.683    -- End of preparing flash programming
+T3E40 005:779.721   CPU_ReadMem(2048 bytes @ 0x0802D000)
+T3E40 005:835.091    -- Updating flash cache (2048 bytes @ 0x0802D000)
+T3E40 005:835.145    -- Updating flash cache invalid range 0x0802D000 - 0x0802D7FF (2048 bytes)
+T3E40 005:835.195    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0802D800 if necessary
+T3E40 005:835.234    -- Start of preparing flash programming
+T3E40 005:835.285    -- End of preparing flash programming
+T3E40 005:835.324   CPU_ReadMem(2048 bytes @ 0x0802D800)
+T3E40 005:890.550    -- Updating flash cache (2048 bytes @ 0x0802D800)
+T3E40 005:890.603    -- Updating flash cache invalid range 0x0802D800 - 0x0802DFFF (2048 bytes)
+T3E40 005:890.647    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0802E000 if necessary
+T3E40 005:890.681    -- Start of preparing flash programming
+T3E40 005:890.713    -- End of preparing flash programming
+T3E40 005:890.752   CPU_ReadMem(2048 bytes @ 0x0802E000)
+T3E40 005:945.945    -- Updating flash cache (2048 bytes @ 0x0802E000)
+T3E40 005:946.003    -- Updating flash cache invalid range 0x0802E000 - 0x0802E7FF (2048 bytes)
+T3E40 005:946.043    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0802E800 if necessary
+T3E40 005:946.078    -- Start of preparing flash programming
+T3E40 005:946.109    -- End of preparing flash programming
+T3E40 005:946.145   CPU_ReadMem(2048 bytes @ 0x0802E800)
+T3E40 006:001.321    -- Updating flash cache (2048 bytes @ 0x0802E800)
+T3E40 006:001.371    -- Updating flash cache invalid range 0x0802E800 - 0x0802EFFF (2048 bytes)
+T3E40 006:001.410    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0802F000 if necessary
+T3E40 006:001.443    -- Start of preparing flash programming
+T3E40 006:001.473    -- End of preparing flash programming
+T3E40 006:001.509   CPU_ReadMem(2048 bytes @ 0x0802F000)
+T3E40 006:056.639    -- Updating flash cache (2048 bytes @ 0x0802F000)
+T3E40 006:056.721    -- Updating flash cache invalid range 0x0802F000 - 0x0802F7FF (2048 bytes)
+T3E40 006:056.765    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0802F800 if necessary
+T3E40 006:056.800    -- Start of preparing flash programming
+T3E40 006:056.830    -- End of preparing flash programming
+T3E40 006:056.868   CPU_ReadMem(2048 bytes @ 0x0802F800)
+T3E40 006:112.096    -- Updating flash cache (2048 bytes @ 0x0802F800)
+T3E40 006:112.151    -- Updating flash cache invalid range 0x0802F800 - 0x0802FFFF (2048 bytes)
+T3E40 006:112.195    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08030000 if necessary
+T3E40 006:112.229    -- Start of preparing flash programming
+T3E40 006:112.260    -- End of preparing flash programming
+T3E40 006:112.299   CPU_ReadMem(2048 bytes @ 0x08030000)
+T3E40 006:167.558    -- Updating flash cache (2048 bytes @ 0x08030000)
+T3E40 006:167.611    -- Updating flash cache invalid range 0x08030000 - 0x080307FF (2048 bytes)
+T3E40 006:167.655    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08030800 if necessary
+T3E40 006:167.692    -- Start of preparing flash programming
+T3E40 006:167.723    -- End of preparing flash programming
+T3E40 006:167.760   CPU_ReadMem(2048 bytes @ 0x08030800)
+T3E40 006:222.940    -- Updating flash cache (2048 bytes @ 0x08030800)
+T3E40 006:222.991    -- Updating flash cache invalid range 0x08030800 - 0x08030FFF (2048 bytes)
+T3E40 006:223.034    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08031000 if necessary
+T3E40 006:223.069    -- Start of preparing flash programming
+T3E40 006:223.102    -- End of preparing flash programming
+T3E40 006:223.140   CPU_ReadMem(2048 bytes @ 0x08031000)
+T3E40 006:278.325    -- Updating flash cache (2048 bytes @ 0x08031000)
+T3E40 006:278.383    -- Updating flash cache invalid range 0x08031000 - 0x080317FF (2048 bytes)
+T3E40 006:278.428    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08031800 if necessary
+T3E40 006:278.563    -- Start of preparing flash programming
+T3E40 006:278.591    -- End of preparing flash programming
+T3E40 006:278.645   CPU_ReadMem(2048 bytes @ 0x08031800)
+T3E40 006:334.017    -- Updating flash cache (2048 bytes @ 0x08031800)
+T3E40 006:334.071    -- Updating flash cache invalid range 0x08031800 - 0x08031FFF (2048 bytes)
+T3E40 006:334.115    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08032000 if necessary
+T3E40 006:334.159    -- Start of preparing flash programming
+T3E40 006:334.190    -- End of preparing flash programming
+T3E40 006:334.228   CPU_ReadMem(2048 bytes @ 0x08032000)
+T3E40 006:389.395    -- Updating flash cache (2048 bytes @ 0x08032000)
+T3E40 006:389.450    -- Updating flash cache invalid range 0x08032000 - 0x080327FF (2048 bytes)
+T3E40 006:389.589    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08032800 if necessary
+T3E40 006:389.632    -- Start of preparing flash programming
+T3E40 006:389.667    -- End of preparing flash programming
+T3E40 006:389.704   CPU_ReadMem(2048 bytes @ 0x08032800)
+T3E40 006:444.939    -- Updating flash cache (2048 bytes @ 0x08032800)
+T3E40 006:444.993    -- Updating flash cache invalid range 0x08032800 - 0x08032FFF (2048 bytes)
+T3E40 006:445.034    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08033000 if necessary
+T3E40 006:445.068    -- Start of preparing flash programming
+T3E40 006:445.101    -- End of preparing flash programming
+T3E40 006:445.157   CPU_ReadMem(2048 bytes @ 0x08033000)
+T3E40 006:500.324    -- Updating flash cache (2048 bytes @ 0x08033000)
+T3E40 006:500.378    -- Updating flash cache invalid range 0x08033000 - 0x080337FF (2048 bytes)
+T3E40 006:500.420    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08033800 if necessary
+T3E40 006:500.455    -- Start of preparing flash programming
+T3E40 006:500.486    -- End of preparing flash programming
+T3E40 006:500.525   CPU_ReadMem(2048 bytes @ 0x08033800)
+T3E40 006:555.715    -- Updating flash cache (2048 bytes @ 0x08033800)
+T3E40 006:555.771    -- Updating flash cache invalid range 0x08033800 - 0x08033FFF (2048 bytes)
+T3E40 006:555.812    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08034000 if necessary
+T3E40 006:555.850    -- Start of preparing flash programming
+T3E40 006:555.881    -- End of preparing flash programming
+T3E40 006:555.919   CPU_ReadMem(2048 bytes @ 0x08034000)
+T3E40 006:611.245    -- Updating flash cache (2048 bytes @ 0x08034000)
+T3E40 006:611.297    -- Updating flash cache invalid range 0x08034000 - 0x080347FF (2048 bytes)
+T3E40 006:611.337    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08034800 if necessary
+T3E40 006:611.371    -- Start of preparing flash programming
+T3E40 006:611.401    -- End of preparing flash programming
+T3E40 006:611.443   CPU_ReadMem(2048 bytes @ 0x08034800)
+T3E40 006:666.719    -- Updating flash cache (2048 bytes @ 0x08034800)
+T3E40 006:666.776    -- Updating flash cache invalid range 0x08034800 - 0x08034FFF (2048 bytes)
+T3E40 006:666.818    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08035000 if necessary
+T3E40 006:666.853    -- Start of preparing flash programming
+T3E40 006:666.887    -- End of preparing flash programming
+T3E40 006:666.924   CPU_ReadMem(2048 bytes @ 0x08035000)
+T3E40 006:722.262    -- Updating flash cache (2048 bytes @ 0x08035000)
+T3E40 006:722.321    -- Updating flash cache invalid range 0x08035000 - 0x080357FF (2048 bytes)
+T3E40 006:722.368    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08035800 if necessary
+T3E40 006:722.403    -- Start of preparing flash programming
+T3E40 006:722.435    -- End of preparing flash programming
+T3E40 006:722.473   CPU_ReadMem(2048 bytes @ 0x08035800)
+T3E40 006:781.371    -- Updating flash cache (2048 bytes @ 0x08035800)
+T3E40 006:781.481    -- Updating flash cache invalid range 0x08035800 - 0x08035FFF (2048 bytes)
+T3E40 006:781.629    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08036000 if necessary
+T3E40 006:781.668    -- Start of preparing flash programming
+T3E40 006:781.765    -- End of preparing flash programming
+T3E40 006:781.913   CPU_ReadMem(2048 bytes @ 0x08036000)
+T3E40 006:840.124    -- Updating flash cache (2048 bytes @ 0x08036000)
+T3E40 006:840.219    -- Updating flash cache invalid range 0x08036000 - 0x080367FF (2048 bytes)
+T3E40 006:871.015    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08036800 if necessary
+T3E40 006:871.081    -- Start of preparing flash programming
+T3E40 006:871.152    -- End of preparing flash programming
+T3E40 006:871.217   CPU_ReadMem(2048 bytes @ 0x08036800)
+T3E40 006:926.562    -- Updating flash cache (2048 bytes @ 0x08036800)
+T3E40 006:926.617    -- Updating flash cache invalid range 0x08036800 - 0x08036FFF (2048 bytes)
+T3E40 006:926.659    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08037000 if necessary
+T3E40 006:926.699    -- Start of preparing flash programming
+T3E40 006:926.729    -- End of preparing flash programming
+T3E40 006:926.767   CPU_ReadMem(2048 bytes @ 0x08037000)
+T3E40 007:651.324    -- Updating flash cache (2048 bytes @ 0x08037000)
+T3E40 007:651.433    -- Updating flash cache invalid range 0x08037000 - 0x080377FF (2048 bytes)
+T3E40 007:651.553    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08037800 if necessary
+T3E40 007:651.589    -- Start of preparing flash programming
+T3E40 007:651.745    -- End of preparing flash programming
+T3E40 007:651.785   CPU_ReadMem(2048 bytes @ 0x08037800)
+T3E40 007:708.232    -- Updating flash cache (2048 bytes @ 0x08037800)
+T3E40 007:708.297    -- Updating flash cache invalid range 0x08037800 - 0x08037FFF (2048 bytes)
+T3E40 007:708.343    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08038000 if necessary
+T3E40 007:708.390    -- Start of preparing flash programming
+T3E40 007:708.421    -- End of preparing flash programming
+T3E40 007:708.460   CPU_ReadMem(2048 bytes @ 0x08038000)
+T3E40 007:763.721    -- Updating flash cache (2048 bytes @ 0x08038000)
+T3E40 007:763.786    -- Updating flash cache invalid range 0x08038000 - 0x080387FF (2048 bytes)
+T3E40 007:763.836    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08038800 if necessary
+T3E40 007:763.874    -- Start of preparing flash programming
+T3E40 007:763.911    -- End of preparing flash programming
+T3E40 007:763.953   CPU_ReadMem(2048 bytes @ 0x08038800)
+T3E40 007:819.327    -- Updating flash cache (2048 bytes @ 0x08038800)
+T3E40 007:819.382    -- Updating flash cache invalid range 0x08038800 - 0x08038FFF (2048 bytes)
+T3E40 007:819.425    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08039000 if necessary
+T3E40 007:819.459    -- Start of preparing flash programming
+T3E40 007:819.490    -- End of preparing flash programming
+T3E40 007:819.528   CPU_ReadMem(2048 bytes @ 0x08039000)
+T3E40 007:874.869    -- Updating flash cache (2048 bytes @ 0x08039000)
+T3E40 007:874.922    -- Updating flash cache invalid range 0x08039000 - 0x080397FF (2048 bytes)
+T3E40 007:874.963    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08039800 if necessary
+T3E40 007:875.000    -- Start of preparing flash programming
+T3E40 007:875.030    -- End of preparing flash programming
+T3E40 007:875.066   CPU_ReadMem(2048 bytes @ 0x08039800)
+T3E40 007:930.324    -- Updating flash cache (2048 bytes @ 0x08039800)
+T3E40 007:930.389    -- Updating flash cache invalid range 0x08039800 - 0x08039FFF (2048 bytes)
+T3E40 007:930.431    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0803A000 if necessary
+T3E40 007:930.466    -- Start of preparing flash programming
+T3E40 007:930.497    -- End of preparing flash programming
+T3E40 007:930.535   CPU_ReadMem(2048 bytes @ 0x0803A000)
+T3E40 007:985.714    -- Updating flash cache (2048 bytes @ 0x0803A000)
+T3E40 007:985.771    -- Updating flash cache invalid range 0x0803A000 - 0x0803A7FF (2048 bytes)
+T3E40 007:985.813    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0803A800 if necessary
+T3E40 007:985.849    -- Start of preparing flash programming
+T3E40 007:985.881    -- End of preparing flash programming
+T3E40 007:985.918   CPU_ReadMem(2048 bytes @ 0x0803A800)
+T3E40 008:041.236    -- Updating flash cache (2048 bytes @ 0x0803A800)
+T3E40 008:041.337    -- Updating flash cache invalid range 0x0803A800 - 0x0803AFFF (2048 bytes)
+T3E40 008:041.412    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0803B000 if necessary
+T3E40 008:041.445    -- Start of preparing flash programming
+T3E40 008:041.482    -- End of preparing flash programming
+T3E40 008:041.520   CPU_ReadMem(2048 bytes @ 0x0803B000)
+T3E40 008:097.561    -- Updating flash cache (2048 bytes @ 0x0803B000)
+T3E40 008:097.623    -- Updating flash cache invalid range 0x0803B000 - 0x0803B7FF (2048 bytes)
+T3E40 008:097.668    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0803B800 if necessary
+T3E40 008:097.701    -- Start of preparing flash programming
+T3E40 008:097.731    -- End of preparing flash programming
+T3E40 008:097.773   CPU_ReadMem(2048 bytes @ 0x0803B800)
+T3E40 008:153.017    -- Updating flash cache (2048 bytes @ 0x0803B800)
+T3E40 008:153.110    -- Updating flash cache invalid range 0x0803B800 - 0x0803BFFF (2048 bytes)
+T3E40 008:153.153    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0803C000 if necessary
+T3E40 008:153.187    -- Start of preparing flash programming
+T3E40 008:153.217    -- End of preparing flash programming
+T3E40 008:153.254   CPU_ReadMem(2048 bytes @ 0x0803C000)
+T3E40 008:208.401    -- Updating flash cache (2048 bytes @ 0x0803C000)
+T3E40 008:208.457    -- Updating flash cache invalid range 0x0803C000 - 0x0803C7FF (2048 bytes)
+T3E40 008:208.505    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0803C800 if necessary
+T3E40 008:208.537    -- Start of preparing flash programming
+T3E40 008:208.576    -- End of preparing flash programming
+T3E40 008:209.093   CPU_ReadMem(2048 bytes @ 0x0803C800)
+T3E40 008:264.327    -- Updating flash cache (2048 bytes @ 0x0803C800)
+T3E40 008:264.425    -- Updating flash cache invalid range 0x0803C800 - 0x0803CFFF (2048 bytes)
+T3E40 008:264.473    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0803D000 if necessary
+T3E40 008:264.510    -- Start of preparing flash programming
+T3E40 008:264.544    -- End of preparing flash programming
+T3E40 008:264.583   CPU_ReadMem(2048 bytes @ 0x0803D000)
+T3E40 008:319.866    -- Updating flash cache (2048 bytes @ 0x0803D000)
+T3E40 008:319.921    -- Updating flash cache invalid range 0x0803D000 - 0x0803D7FF (2048 bytes)
+T3E40 008:319.963    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0803D800 if necessary
+T3E40 008:319.998    -- Start of preparing flash programming
+T3E40 008:320.051    -- End of preparing flash programming
+T3E40 008:320.089   CPU_ReadMem(2048 bytes @ 0x0803D800)
+T3E40 008:375.480    -- Updating flash cache (2048 bytes @ 0x0803D800)
+T3E40 008:375.534    -- Updating flash cache invalid range 0x0803D800 - 0x0803DFFF (2048 bytes)
+T3E40 008:375.576    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0803E000 if necessary
+T3E40 008:375.610    -- Start of preparing flash programming
+T3E40 008:375.641    -- End of preparing flash programming
+T3E40 008:375.681   CPU_ReadMem(2048 bytes @ 0x0803E000)
+T3E40 008:431.094    -- Updating flash cache (2048 bytes @ 0x0803E000)
+T3E40 008:431.150    -- Updating flash cache invalid range 0x0803E000 - 0x0803E7FF (2048 bytes)
+T3E40 008:431.191    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0803E800 if necessary
+T3E40 008:431.225    -- Start of preparing flash programming
+T3E40 008:431.255    -- End of preparing flash programming
+T3E40 008:431.291   CPU_ReadMem(2048 bytes @ 0x0803E800)
+T3E40 008:486.476    -- Updating flash cache (2048 bytes @ 0x0803E800)
+T3E40 008:486.530    -- Updating flash cache invalid range 0x0803E800 - 0x0803EFFF (2048 bytes)
+T3E40 008:486.572    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0803F000 if necessary
+T3E40 008:486.608    -- Start of preparing flash programming
+T3E40 008:486.638    -- End of preparing flash programming
+T3E40 008:486.675   CPU_ReadMem(2048 bytes @ 0x0803F000)
+T3E40 008:542.029    -- Updating flash cache (2048 bytes @ 0x0803F000)
+T3E40 008:542.086    -- Updating flash cache invalid range 0x0803F000 - 0x0803F7FF (2048 bytes)
+T3E40 008:542.129    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0803F800 if necessary
+T3E40 008:542.162    -- Start of preparing flash programming
+T3E40 008:542.195    -- End of preparing flash programming
+T3E40 008:542.234   CPU_ReadMem(2048 bytes @ 0x0803F800)
+T3E40 008:597.394    -- Updating flash cache (2048 bytes @ 0x0803F800)
+T3E40 008:597.452    -- Updating flash cache invalid range 0x0803F800 - 0x0803FFFF (2048 bytes)
+T3E40 008:597.494    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08040000 if necessary
+T3E40 008:597.530    -- Start of preparing flash programming
+T3E40 008:597.561    -- End of preparing flash programming
+T3E40 008:597.598   CPU_ReadMem(2048 bytes @ 0x08040000)
+T3E40 008:652.896    -- Updating flash cache (2048 bytes @ 0x08040000)
+T3E40 008:652.947    -- Updating flash cache invalid range 0x08040000 - 0x080407FF (2048 bytes)
+T3E40 008:652.987    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08040800 if necessary
+T3E40 008:653.017    -- Start of preparing flash programming
+T3E40 008:653.046    -- End of preparing flash programming
+T3E40 008:653.087   CPU_ReadMem(2048 bytes @ 0x08040800)
+T3E40 008:708.408    -- Updating flash cache (2048 bytes @ 0x08040800)
+T3E40 008:708.467    -- Updating flash cache invalid range 0x08040800 - 0x08040FFF (2048 bytes)
+T3E40 008:708.512    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08041000 if necessary
+T3E40 008:708.549    -- Start of preparing flash programming
+T3E40 008:708.581    -- End of preparing flash programming
+T3E40 008:708.618   CPU_ReadMem(2048 bytes @ 0x08041000)
+T3E40 008:763.867    -- Updating flash cache (2048 bytes @ 0x08041000)
+T3E40 008:763.926    -- Updating flash cache invalid range 0x08041000 - 0x080417FF (2048 bytes)
+T3E40 008:763.970    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08041800 if necessary
+T3E40 008:764.005    -- Start of preparing flash programming
+T3E40 008:764.035    -- End of preparing flash programming
+T3E40 008:764.072   CPU_ReadMem(2048 bytes @ 0x08041800)
+T3E40 008:819.274    -- Updating flash cache (2048 bytes @ 0x08041800)
+T3E40 008:819.328    -- Updating flash cache invalid range 0x08041800 - 0x08041FFF (2048 bytes)
+T3E40 008:819.370    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08042000 if necessary
+T3E40 008:819.403    -- Start of preparing flash programming
+T3E40 008:819.434    -- End of preparing flash programming
+T3E40 008:819.471   CPU_ReadMem(2048 bytes @ 0x08042000)
+T3E40 008:874.758    -- Updating flash cache (2048 bytes @ 0x08042000)
+T3E40 008:874.875    -- Updating flash cache invalid range 0x08042000 - 0x080427FF (2048 bytes)
+T3E40 008:874.975    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08042800 if necessary
+T3E40 008:875.080    -- Start of preparing flash programming
+T3E40 008:875.165    -- End of preparing flash programming
+T3E40 008:875.245   CPU_ReadMem(2048 bytes @ 0x08042800)
+T3E40 008:930.477    -- Updating flash cache (2048 bytes @ 0x08042800)
+T3E40 008:930.531    -- Updating flash cache invalid range 0x08042800 - 0x08042FFF (2048 bytes)
+T3E40 008:930.572    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08043000 if necessary
+T3E40 008:930.607    -- Start of preparing flash programming
+T3E40 008:930.638    -- End of preparing flash programming
+T3E40 008:930.673   CPU_ReadMem(2048 bytes @ 0x08043000)
+T3E40 008:985.941    -- Updating flash cache (2048 bytes @ 0x08043000)
+T3E40 008:985.996    -- Updating flash cache invalid range 0x08043000 - 0x080437FF (2048 bytes)
+T3E40 008:986.037    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08043800 if necessary
+T3E40 008:986.070    -- Start of preparing flash programming
+T3E40 008:986.114    -- End of preparing flash programming
+T3E40 008:986.150   CPU_ReadMem(2048 bytes @ 0x08043800)
+T3E40 009:041.395    -- Updating flash cache (2048 bytes @ 0x08043800)
+T3E40 009:041.447    -- Updating flash cache invalid range 0x08043800 - 0x08043FFF (2048 bytes)
+T3E40 009:041.490    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08044000 if necessary
+T3E40 009:041.523    -- Start of preparing flash programming
+T3E40 009:041.555    -- End of preparing flash programming
+T3E40 009:041.592   CPU_ReadMem(2048 bytes @ 0x08044000)
+T3E40 009:097.896    -- Updating flash cache (2048 bytes @ 0x08044000)
+T3E40 009:097.959    -- Updating flash cache invalid range 0x08044000 - 0x080447FF (2048 bytes)
+T3E40 009:098.023    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08044800 if necessary
+T3E40 009:098.107    -- Start of preparing flash programming
+T3E40 009:098.175    -- End of preparing flash programming
+T3E40 009:098.234   CPU_ReadMem(2048 bytes @ 0x08044800)
+T3E40 009:655.142    -- Updating flash cache (2048 bytes @ 0x08044800)
+T3E40 009:655.246    -- Updating flash cache invalid range 0x08044800 - 0x08044FFF (2048 bytes)
+T3E40 009:655.338    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08045000 if necessary
+T3E40 009:655.422    -- Start of preparing flash programming
+T3E40 009:655.501    -- End of preparing flash programming
+T3E40 009:655.559   CPU_ReadMem(2048 bytes @ 0x08045000)
+T3E40 009:712.540    -- Updating flash cache (2048 bytes @ 0x08045000)
+T3E40 009:712.598    -- Updating flash cache invalid range 0x08045000 - 0x080457FF (2048 bytes)
+T3E40 009:713.240    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08045800 if necessary
+T3E40 009:713.277    -- Start of preparing flash programming
+T3E40 009:713.309    -- End of preparing flash programming
+T3E40 009:713.350   CPU_ReadMem(2048 bytes @ 0x08045800)
+T3E40 009:769.425    -- Updating flash cache (2048 bytes @ 0x08045800)
+T3E40 009:769.550    -- Updating flash cache invalid range 0x08045800 - 0x08045FFF (2048 bytes)
+T3E40 009:769.655    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08046000 if necessary
+T3E40 009:770.352    -- Start of preparing flash programming
+T3E40 009:770.389    -- End of preparing flash programming
+T3E40 009:770.428   CPU_ReadMem(2048 bytes @ 0x08046000)
+T3E40 009:837.863    -- Updating flash cache (2048 bytes @ 0x08046000)
+T3E40 009:837.934    -- Updating flash cache invalid range 0x08046000 - 0x080467FF (2048 bytes)
+T3E40 009:837.998    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08046800 if necessary
+T3E40 009:838.030    -- Start of preparing flash programming
+T3E40 009:838.093    -- End of preparing flash programming
+T3E40 009:838.162   CPU_ReadMem(2048 bytes @ 0x08046800)
+T3E40 009:903.925    -- Updating flash cache (2048 bytes @ 0x08046800)
+T3E40 009:904.048    -- Updating flash cache invalid range 0x08046800 - 0x08046FFF (2048 bytes)
+T3E40 009:904.138    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08047000 if necessary
+T3E40 009:904.236    -- Start of preparing flash programming
+T3E40 009:904.325    -- End of preparing flash programming
+T3E40 009:904.386   CPU_ReadMem(2048 bytes @ 0x08047000)
+T3E40 009:959.707    -- Updating flash cache (2048 bytes @ 0x08047000)
+T3E40 009:959.772    -- Updating flash cache invalid range 0x08047000 - 0x080477FF (2048 bytes)
+T3E40 009:959.816    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08047800 if necessary
+T3E40 009:959.851    -- Start of preparing flash programming
+T3E40 009:959.882    -- End of preparing flash programming
+T3E40 009:959.921   CPU_ReadMem(2048 bytes @ 0x08047800)
+T3E40 010:015.253    -- Updating flash cache (2048 bytes @ 0x08047800)
+T3E40 010:015.310    -- Updating flash cache invalid range 0x08047800 - 0x08047FFF (2048 bytes)
+T3E40 010:015.354    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08048000 if necessary
+T3E40 010:015.470    -- Start of preparing flash programming
+T3E40 010:015.502    -- End of preparing flash programming
+T3E40 010:015.542   CPU_ReadMem(2048 bytes @ 0x08048000)
+T3E40 010:070.710    -- Updating flash cache (2048 bytes @ 0x08048000)
+T3E40 010:070.766    -- Updating flash cache invalid range 0x08048000 - 0x080487FF (2048 bytes)
+T3E40 010:070.808    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08048800 if necessary
+T3E40 010:070.846    -- Start of preparing flash programming
+T3E40 010:070.877    -- End of preparing flash programming
+T3E40 010:070.915   CPU_ReadMem(2048 bytes @ 0x08048800)
+T3E40 010:126.095    -- Updating flash cache (2048 bytes @ 0x08048800)
+T3E40 010:126.154    -- Updating flash cache invalid range 0x08048800 - 0x08048FFF (2048 bytes)
+T3E40 010:126.195    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08049000 if necessary
+T3E40 010:126.229    -- Start of preparing flash programming
+T3E40 010:126.260    -- End of preparing flash programming
+T3E40 010:126.297   CPU_ReadMem(2048 bytes @ 0x08049000)
+T3E40 010:181.563    -- Updating flash cache (2048 bytes @ 0x08049000)
+T3E40 010:181.620    -- Updating flash cache invalid range 0x08049000 - 0x080497FF (2048 bytes)
+T3E40 010:181.664    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08049800 if necessary
+T3E40 010:181.698    -- Start of preparing flash programming
+T3E40 010:181.730    -- End of preparing flash programming
+T3E40 010:181.769   CPU_ReadMem(2048 bytes @ 0x08049800)
+T3E40 010:237.022    -- Updating flash cache (2048 bytes @ 0x08049800)
+T3E40 010:237.098    -- Updating flash cache invalid range 0x08049800 - 0x08049FFF (2048 bytes)
+T3E40 010:237.151    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0804A000 if necessary
+T3E40 010:237.186    -- Start of preparing flash programming
+T3E40 010:237.216    -- End of preparing flash programming
+T3E40 010:237.254   CPU_ReadMem(2048 bytes @ 0x0804A000)
+T3E40 010:292.471    -- Updating flash cache (2048 bytes @ 0x0804A000)
+T3E40 010:292.525    -- Updating flash cache invalid range 0x0804A000 - 0x0804A7FF (2048 bytes)
+T3E40 010:292.566    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0804A800 if necessary
+T3E40 010:292.602    -- Start of preparing flash programming
+T3E40 010:292.632    -- End of preparing flash programming
+T3E40 010:292.669   CPU_ReadMem(2048 bytes @ 0x0804A800)
+T3E40 010:347.937    -- Updating flash cache (2048 bytes @ 0x0804A800)
+T3E40 010:347.995    -- Updating flash cache invalid range 0x0804A800 - 0x0804AFFF (2048 bytes)
+T3E40 010:348.037    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0804B000 if necessary
+T3E40 010:348.072    -- Start of preparing flash programming
+T3E40 010:348.102    -- End of preparing flash programming
+T3E40 010:348.139   CPU_ReadMem(2048 bytes @ 0x0804B000)
+T3E40 010:403.317    -- Updating flash cache (2048 bytes @ 0x0804B000)
+T3E40 010:403.371    -- Updating flash cache invalid range 0x0804B000 - 0x0804B7FF (2048 bytes)
+T3E40 010:403.414    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0804B800 if necessary
+T3E40 010:403.449    -- Start of preparing flash programming
+T3E40 010:403.482    -- End of preparing flash programming
+T3E40 010:403.518   CPU_ReadMem(2048 bytes @ 0x0804B800)
+T3E40 010:458.714    -- Updating flash cache (2048 bytes @ 0x0804B800)
+T3E40 010:458.770    -- Updating flash cache invalid range 0x0804B800 - 0x0804BFFF (2048 bytes)
+T3E40 010:458.812    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0804C000 if necessary
+T3E40 010:458.847    -- Start of preparing flash programming
+T3E40 010:458.879    -- End of preparing flash programming
+T3E40 010:458.915   CPU_ReadMem(2048 bytes @ 0x0804C000)
+T3E40 010:514.089    -- Updating flash cache (2048 bytes @ 0x0804C000)
+T3E40 010:514.144    -- Updating flash cache invalid range 0x0804C000 - 0x0804C7FF (2048 bytes)
+T3E40 010:514.202    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0804C800 if necessary
+T3E40 010:514.237    -- Start of preparing flash programming
+T3E40 010:514.278    -- End of preparing flash programming
+T3E40 010:514.317   CPU_ReadMem(2048 bytes @ 0x0804C800)
+T3E40 010:569.478    -- Updating flash cache (2048 bytes @ 0x0804C800)
+T3E40 010:569.532    -- Updating flash cache invalid range 0x0804C800 - 0x0804CFFF (2048 bytes)
+T3E40 010:569.575    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0804D000 if necessary
+T3E40 010:569.610    -- Start of preparing flash programming
+T3E40 010:569.640    -- End of preparing flash programming
+T3E40 010:569.678   CPU_ReadMem(2048 bytes @ 0x0804D000)
+T3E40 010:624.940    -- Updating flash cache (2048 bytes @ 0x0804D000)
+T3E40 010:624.994    -- Updating flash cache invalid range 0x0804D000 - 0x0804D7FF (2048 bytes)
+T3E40 010:625.034    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0804D800 if necessary
+T3E40 010:625.066    -- Start of preparing flash programming
+T3E40 010:625.098    -- End of preparing flash programming
+T3E40 010:625.135   CPU_ReadMem(2048 bytes @ 0x0804D800)
+T3E40 010:680.395    -- Updating flash cache (2048 bytes @ 0x0804D800)
+T3E40 010:680.450    -- Updating flash cache invalid range 0x0804D800 - 0x0804DFFF (2048 bytes)
+T3E40 010:680.492    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0804E000 if necessary
+T3E40 010:680.527    -- Start of preparing flash programming
+T3E40 010:680.559    -- End of preparing flash programming
+T3E40 010:680.597   CPU_ReadMem(2048 bytes @ 0x0804E000)
+T3E40 010:735.950    -- Updating flash cache (2048 bytes @ 0x0804E000)
+T3E40 010:736.008    -- Updating flash cache invalid range 0x0804E000 - 0x0804E7FF (2048 bytes)
+T3E40 010:736.050    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0804E800 if necessary
+T3E40 010:736.086    -- Start of preparing flash programming
+T3E40 010:736.118    -- End of preparing flash programming
+T3E40 010:736.154   CPU_ReadMem(2048 bytes @ 0x0804E800)
+T3E40 010:791.323    -- Updating flash cache (2048 bytes @ 0x0804E800)
+T3E40 010:791.379    -- Updating flash cache invalid range 0x0804E800 - 0x0804EFFF (2048 bytes)
+T3E40 010:791.421    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0804F000 if necessary
+T3E40 010:791.454    -- Start of preparing flash programming
+T3E40 010:791.486    -- End of preparing flash programming
+T3E40 010:791.523   CPU_ReadMem(2048 bytes @ 0x0804F000)
+T3E40 010:846.708    -- Updating flash cache (2048 bytes @ 0x0804F000)
+T3E40 010:846.761    -- Updating flash cache invalid range 0x0804F000 - 0x0804F7FF (2048 bytes)
+T3E40 010:846.802    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0804F800 if necessary
+T3E40 010:846.835    -- Start of preparing flash programming
+T3E40 010:846.866    -- End of preparing flash programming
+T3E40 010:846.901   CPU_ReadMem(2048 bytes @ 0x0804F800)
+T3E40 010:902.258    -- Updating flash cache (2048 bytes @ 0x0804F800)
+T3E40 010:902.347    -- Updating flash cache invalid range 0x0804F800 - 0x0804FFFF (2048 bytes)
+T3E40 010:902.398    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08050000 if necessary
+T3E40 010:902.431    -- Start of preparing flash programming
+T3E40 010:902.462    -- End of preparing flash programming
+T3E40 010:902.499   CPU_ReadMem(2048 bytes @ 0x08050000)
+T3E40 010:957.701    -- Updating flash cache (2048 bytes @ 0x08050000)
+T3E40 010:957.755    -- Updating flash cache invalid range 0x08050000 - 0x080507FF (2048 bytes)
+T3E40 010:957.797    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08050800 if necessary
+T3E40 010:957.830    -- Start of preparing flash programming
+T3E40 010:957.862    -- End of preparing flash programming
+T3E40 010:957.899   CPU_ReadMem(2048 bytes @ 0x08050800)
+T3E40 011:013.098    -- Updating flash cache (2048 bytes @ 0x08050800)
+T3E40 011:013.159    -- Updating flash cache invalid range 0x08050800 - 0x08050FFF (2048 bytes)
+T3E40 011:013.201    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08051000 if necessary
+T3E40 011:013.236    -- Start of preparing flash programming
+T3E40 011:013.268    -- End of preparing flash programming
+T3E40 011:013.306   CPU_ReadMem(2048 bytes @ 0x08051000)
+T3E40 011:068.470    -- Updating flash cache (2048 bytes @ 0x08051000)
+T3E40 011:068.536    -- Updating flash cache invalid range 0x08051000 - 0x080517FF (2048 bytes)
+T3E40 011:068.578    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08051800 if necessary
+T3E40 011:068.614    -- Start of preparing flash programming
+T3E40 011:068.645    -- End of preparing flash programming
+T3E40 011:068.681   CPU_ReadMem(2048 bytes @ 0x08051800)
+T3E40 011:123.931    -- Updating flash cache (2048 bytes @ 0x08051800)
+T3E40 011:124.001    -- Updating flash cache invalid range 0x08051800 - 0x08051FFF (2048 bytes)
+T3E40 011:124.044    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08052000 if necessary
+T3E40 011:124.080    -- Start of preparing flash programming
+T3E40 011:124.110    -- End of preparing flash programming
+T3E40 011:124.146   CPU_ReadMem(2048 bytes @ 0x08052000)
+T3E40 011:179.394    -- Updating flash cache (2048 bytes @ 0x08052000)
+T3E40 011:179.458    -- Updating flash cache invalid range 0x08052000 - 0x080527FF (2048 bytes)
+T3E40 011:179.497    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08052800 if necessary
+T3E40 011:179.530    -- Start of preparing flash programming
+T3E40 011:179.561    -- End of preparing flash programming
+T3E40 011:179.596   CPU_ReadMem(2048 bytes @ 0x08052800)
+T3E40 011:234.945    -- Updating flash cache (2048 bytes @ 0x08052800)
+T3E40 011:235.018    -- Updating flash cache invalid range 0x08052800 - 0x08052FFF (2048 bytes)
+T3E40 011:235.058    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08053000 if necessary
+T3E40 011:235.089    -- Start of preparing flash programming
+T3E40 011:235.119    -- End of preparing flash programming
+T3E40 011:235.155   CPU_ReadMem(2048 bytes @ 0x08053000)
+T3E40 011:290.452    -- Updating flash cache (2048 bytes @ 0x08053000)
+T3E40 011:290.548    -- Updating flash cache invalid range 0x08053000 - 0x080537FF (2048 bytes)
+T3E40 011:290.614    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08053800 if necessary
+T3E40 011:290.649    -- Start of preparing flash programming
+T3E40 011:290.734    -- End of preparing flash programming
+T3E40 011:290.811   CPU_ReadMem(2048 bytes @ 0x08053800)
+T3E40 011:346.095    -- Updating flash cache (2048 bytes @ 0x08053800)
+T3E40 011:346.161    -- Updating flash cache invalid range 0x08053800 - 0x08053FFF (2048 bytes)
+T3E40 011:346.201    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08054000 if necessary
+T3E40 011:346.233    -- Start of preparing flash programming
+T3E40 011:346.262    -- End of preparing flash programming
+T3E40 011:346.298   CPU_ReadMem(2048 bytes @ 0x08054000)
+T3E40 011:401.550    -- Updating flash cache (2048 bytes @ 0x08054000)
+T3E40 011:401.606    -- Updating flash cache invalid range 0x08054000 - 0x080547FF (2048 bytes)
+T3E40 011:401.645    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08054800 if necessary
+T3E40 011:401.677    -- Start of preparing flash programming
+T3E40 011:401.706    -- End of preparing flash programming
+T3E40 011:401.742   CPU_ReadMem(2048 bytes @ 0x08054800)
+T3E40 011:457.154    -- Updating flash cache (2048 bytes @ 0x08054800)
+T3E40 011:457.259    -- Updating flash cache invalid range 0x08054800 - 0x08054FFF (2048 bytes)
+T3E40 011:457.358    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08055000 if necessary
+T3E40 011:457.442    -- Start of preparing flash programming
+T3E40 011:457.510    -- End of preparing flash programming
+T3E40 011:457.591   CPU_ReadMem(2048 bytes @ 0x08055000)
+T3E40 011:512.935    -- Updating flash cache (2048 bytes @ 0x08055000)
+T3E40 011:513.002    -- Updating flash cache invalid range 0x08055000 - 0x080557FF (2048 bytes)
+T3E40 011:513.041    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08055800 if necessary
+T3E40 011:513.074    -- Start of preparing flash programming
+T3E40 011:513.103    -- End of preparing flash programming
+T3E40 011:513.138   CPU_ReadMem(2048 bytes @ 0x08055800)
+T3E40 011:568.374    -- Updating flash cache (2048 bytes @ 0x08055800)
+T3E40 011:568.439    -- Updating flash cache invalid range 0x08055800 - 0x08055FFF (2048 bytes)
+T3E40 011:568.493    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08056000 if necessary
+T3E40 011:568.534    -- Start of preparing flash programming
+T3E40 011:568.561    -- End of preparing flash programming
+T3E40 011:568.597   CPU_ReadMem(2048 bytes @ 0x08056000)
+T3E40 011:623.937    -- Updating flash cache (2048 bytes @ 0x08056000)
+T3E40 011:624.008    -- Updating flash cache invalid range 0x08056000 - 0x080567FF (2048 bytes)
+T3E40 011:624.049    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08056800 if necessary
+T3E40 011:624.083    -- Start of preparing flash programming
+T3E40 011:624.114    -- End of preparing flash programming
+T3E40 011:624.151   CPU_ReadMem(2048 bytes @ 0x08056800)
+T3E40 011:679.397    -- Updating flash cache (2048 bytes @ 0x08056800)
+T3E40 011:679.461    -- Updating flash cache invalid range 0x08056800 - 0x08056FFF (2048 bytes)
+T3E40 011:679.500    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08057000 if necessary
+T3E40 011:679.533    -- Start of preparing flash programming
+T3E40 011:679.562    -- End of preparing flash programming
+T3E40 011:679.597   CPU_ReadMem(2048 bytes @ 0x08057000)
+T3E40 011:734.930    -- Updating flash cache (2048 bytes @ 0x08057000)
+T3E40 011:734.983    -- Updating flash cache invalid range 0x08057000 - 0x080577FF (2048 bytes)
+T3E40 011:735.022    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08057800 if necessary
+T3E40 011:735.055    -- Start of preparing flash programming
+T3E40 011:735.085    -- End of preparing flash programming
+T3E40 011:735.120   CPU_ReadMem(2048 bytes @ 0x08057800)
+T3E40 011:790.240    -- Updating flash cache (2048 bytes @ 0x08057800)
+T3E40 011:790.294    -- Updating flash cache invalid range 0x08057800 - 0x08057FFF (2048 bytes)
+T3E40 011:790.334    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08058000 if necessary
+T3E40 011:790.366    -- Start of preparing flash programming
+T3E40 011:790.397    -- End of preparing flash programming
+T3E40 011:790.431   CPU_ReadMem(2048 bytes @ 0x08058000)
+T3E40 011:845.550    -- Updating flash cache (2048 bytes @ 0x08058000)
+T3E40 011:845.615    -- Updating flash cache invalid range 0x08058000 - 0x080587FF (2048 bytes)
+T3E40 011:845.658    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08058800 if necessary
+T3E40 011:845.691    -- Start of preparing flash programming
+T3E40 011:845.722    -- End of preparing flash programming
+T3E40 011:845.758   CPU_ReadMem(2048 bytes @ 0x08058800)
+T3E40 011:900.938    -- Updating flash cache (2048 bytes @ 0x08058800)
+T3E40 011:901.042    -- Updating flash cache invalid range 0x08058800 - 0x08058FFF (2048 bytes)
+T3E40 011:901.095    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08059000 if necessary
+T3E40 011:901.130    -- Start of preparing flash programming
+T3E40 011:901.159    -- End of preparing flash programming
+T3E40 011:901.200   CPU_ReadMem(2048 bytes @ 0x08059000)
+T3E40 011:956.398    -- Updating flash cache (2048 bytes @ 0x08059000)
+T3E40 011:956.466    -- Updating flash cache invalid range 0x08059000 - 0x080597FF (2048 bytes)
+T3E40 011:956.508    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08059800 if necessary
+T3E40 011:956.543    -- Start of preparing flash programming
+T3E40 011:956.574    -- End of preparing flash programming
+T3E40 011:956.625   CPU_ReadMem(2048 bytes @ 0x08059800)
+T3E40 012:011.860    -- Updating flash cache (2048 bytes @ 0x08059800)
+T3E40 012:011.924    -- Updating flash cache invalid range 0x08059800 - 0x08059FFF (2048 bytes)
+T3E40 012:011.964    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0805A000 if necessary
+T3E40 012:011.997    -- Start of preparing flash programming
+T3E40 012:012.026    -- End of preparing flash programming
+T3E40 012:012.064   CPU_ReadMem(2048 bytes @ 0x0805A000)
+T3E40 012:067.243    -- Updating flash cache (2048 bytes @ 0x0805A000)
+T3E40 012:067.296    -- Updating flash cache invalid range 0x0805A000 - 0x0805A7FF (2048 bytes)
+T3E40 012:067.328    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0805A800 if necessary
+T3E40 012:067.354    -- Start of preparing flash programming
+T3E40 012:067.375    -- End of preparing flash programming
+T3E40 012:067.401   CPU_ReadMem(2048 bytes @ 0x0805A800)
+T3E40 012:122.542    -- Updating flash cache (2048 bytes @ 0x0805A800)
+T3E40 012:122.610    -- Updating flash cache invalid range 0x0805A800 - 0x0805AFFF (2048 bytes)
+T3E40 012:122.654    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0805B000 if necessary
+T3E40 012:122.690    -- Start of preparing flash programming
+T3E40 012:122.722    -- End of preparing flash programming
+T3E40 012:122.758   CPU_ReadMem(2048 bytes @ 0x0805B000)
+T3E40 012:177.938    -- Updating flash cache (2048 bytes @ 0x0805B000)
+T3E40 012:178.002    -- Updating flash cache invalid range 0x0805B000 - 0x0805B7FF (2048 bytes)
+T3E40 012:178.043    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0805B800 if necessary
+T3E40 012:178.078    -- Start of preparing flash programming
+T3E40 012:178.109    -- End of preparing flash programming
+T3E40 012:178.147   CPU_ReadMem(2048 bytes @ 0x0805B800)
+T3E40 012:233.330    -- Updating flash cache (2048 bytes @ 0x0805B800)
+T3E40 012:233.407    -- Updating flash cache invalid range 0x0805B800 - 0x0805BFFF (2048 bytes)
+T3E40 012:233.452    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0805C000 if necessary
+T3E40 012:233.488    -- Start of preparing flash programming
+T3E40 012:233.522    -- End of preparing flash programming
+T3E40 012:233.562   CPU_ReadMem(2048 bytes @ 0x0805C000)
+T3E40 012:288.715    -- Updating flash cache (2048 bytes @ 0x0805C000)
+T3E40 012:288.763    -- Updating flash cache invalid range 0x0805C000 - 0x0805C7FF (2048 bytes)
+T3E40 012:288.791    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0805C800 if necessary
+T3E40 012:288.814    -- Start of preparing flash programming
+T3E40 012:288.832    -- End of preparing flash programming
+T3E40 012:288.857   CPU_ReadMem(2048 bytes @ 0x0805C800)
+T3E40 012:344.232    -- Updating flash cache (2048 bytes @ 0x0805C800)
+T3E40 012:344.334    -- Updating flash cache invalid range 0x0805C800 - 0x0805CFFF (2048 bytes)
+T3E40 012:344.376    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0805D000 if necessary
+T3E40 012:344.409    -- Start of preparing flash programming
+T3E40 012:344.439    -- End of preparing flash programming
+T3E40 012:344.477   CPU_ReadMem(2048 bytes @ 0x0805D000)
+T3E40 012:399.627    -- Updating flash cache (2048 bytes @ 0x0805D000)
+T3E40 012:399.680    -- Updating flash cache invalid range 0x0805D000 - 0x0805D7FF (2048 bytes)
+T3E40 012:399.721    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0805D800 if necessary
+T3E40 012:399.757    -- Start of preparing flash programming
+T3E40 012:399.791    -- End of preparing flash programming
+T3E40 012:399.829   CPU_ReadMem(2048 bytes @ 0x0805D800)
+T3E40 012:455.095    -- Updating flash cache (2048 bytes @ 0x0805D800)
+T3E40 012:455.162    -- Updating flash cache invalid range 0x0805D800 - 0x0805DFFF (2048 bytes)
+T3E40 012:455.206    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0805E000 if necessary
+T3E40 012:455.254    -- Start of preparing flash programming
+T3E40 012:455.285    -- End of preparing flash programming
+T3E40 012:455.322   CPU_ReadMem(2048 bytes @ 0x0805E000)
+T3E40 012:510.558    -- Updating flash cache (2048 bytes @ 0x0805E000)
+T3E40 012:510.626    -- Updating flash cache invalid range 0x0805E000 - 0x0805E7FF (2048 bytes)
+T3E40 012:510.670    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0805E800 if necessary
+T3E40 012:510.706    -- Start of preparing flash programming
+T3E40 012:510.735    -- End of preparing flash programming
+T3E40 012:510.771   CPU_ReadMem(2048 bytes @ 0x0805E800)
+T3E40 012:566.085    -- Updating flash cache (2048 bytes @ 0x0805E800)
+T3E40 012:566.136    -- Updating flash cache invalid range 0x0805E800 - 0x0805EFFF (2048 bytes)
+T3E40 012:566.167    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0805F000 if necessary
+T3E40 012:566.193    -- Start of preparing flash programming
+T3E40 012:566.213    -- End of preparing flash programming
+T3E40 012:566.239   CPU_ReadMem(2048 bytes @ 0x0805F000)
+T3E40 012:621.470    -- Updating flash cache (2048 bytes @ 0x0805F000)
+T3E40 012:621.538    -- Updating flash cache invalid range 0x0805F000 - 0x0805F7FF (2048 bytes)
+T3E40 012:621.580    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0805F800 if necessary
+T3E40 012:621.615    -- Start of preparing flash programming
+T3E40 012:621.646    -- End of preparing flash programming
+T3E40 012:621.686   CPU_ReadMem(2048 bytes @ 0x0805F800)
+T3E40 012:676.845    -- Updating flash cache (2048 bytes @ 0x0805F800)
+T3E40 012:676.891    -- Updating flash cache invalid range 0x0805F800 - 0x0805FFFF (2048 bytes)
+T3E40 012:676.922    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08060000 if necessary
+T3E40 012:676.947    -- Start of preparing flash programming
+T3E40 012:676.968    -- End of preparing flash programming
+T3E40 012:676.994   CPU_ReadMem(2048 bytes @ 0x08060000)
+T3E40 012:732.323    -- Updating flash cache (2048 bytes @ 0x08060000)
+T3E40 012:732.392    -- Updating flash cache invalid range 0x08060000 - 0x080607FF (2048 bytes)
+T3E40 012:732.436    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08060800 if necessary
+T3E40 012:732.473    -- Start of preparing flash programming
+T3E40 012:732.504    -- End of preparing flash programming
+T3E40 012:732.541   CPU_ReadMem(2048 bytes @ 0x08060800)
+T3E40 012:787.698    -- Updating flash cache (2048 bytes @ 0x08060800)
+T3E40 012:787.763    -- Updating flash cache invalid range 0x08060800 - 0x08060FFF (2048 bytes)
+T3E40 012:787.805    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08061000 if necessary
+T3E40 012:787.847    -- Start of preparing flash programming
+T3E40 012:787.879    -- End of preparing flash programming
+T3E40 012:787.915   CPU_ReadMem(2048 bytes @ 0x08061000)
+T3E40 012:843.170    -- Updating flash cache (2048 bytes @ 0x08061000)
+T3E40 012:843.230    -- Updating flash cache invalid range 0x08061000 - 0x080617FF (2048 bytes)
+T3E40 012:843.273    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08061800 if necessary
+T3E40 012:843.309    -- Start of preparing flash programming
+T3E40 012:843.340    -- End of preparing flash programming
+T3E40 012:843.376   CPU_ReadMem(2048 bytes @ 0x08061800)
+T3E40 012:898.720    -- Updating flash cache (2048 bytes @ 0x08061800)
+T3E40 012:898.782    -- Updating flash cache invalid range 0x08061800 - 0x08061FFF (2048 bytes)
+T3E40 012:898.823    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08062000 if necessary
+T3E40 012:898.859    -- Start of preparing flash programming
+T3E40 012:898.890    -- End of preparing flash programming
+T3E40 012:898.926   CPU_ReadMem(2048 bytes @ 0x08062000)
+T3E40 012:954.097    -- Updating flash cache (2048 bytes @ 0x08062000)
+T3E40 012:954.170    -- Updating flash cache invalid range 0x08062000 - 0x080627FF (2048 bytes)
+T3E40 012:954.218    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08062800 if necessary
+T3E40 012:954.270    -- Start of preparing flash programming
+T3E40 012:954.306    -- End of preparing flash programming
+T3E40 012:954.333   CPU_ReadMem(2048 bytes @ 0x08062800)
+T3E40 013:009.587    -- Updating flash cache (2048 bytes @ 0x08062800)
+T3E40 013:009.657    -- Updating flash cache invalid range 0x08062800 - 0x08062FFF (2048 bytes)
+T3E40 013:009.697    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08063000 if necessary
+T3E40 013:009.750    -- Start of preparing flash programming
+T3E40 013:009.790    -- End of preparing flash programming
+T3E40 013:009.828   CPU_ReadMem(2048 bytes @ 0x08063000)
+T3E40 013:065.091    -- Updating flash cache (2048 bytes @ 0x08063000)
+T3E40 013:065.138    -- Updating flash cache invalid range 0x08063000 - 0x080637FF (2048 bytes)
+T3E40 013:065.166    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08063800 if necessary
+T3E40 013:065.188    -- Start of preparing flash programming
+T3E40 013:065.207    -- End of preparing flash programming
+T3E40 013:065.230   CPU_ReadMem(2048 bytes @ 0x08063800)
+T3E40 013:120.404    -- Updating flash cache (2048 bytes @ 0x08063800)
+T3E40 013:120.450    -- Updating flash cache invalid range 0x08063800 - 0x08063FFF (2048 bytes)
+T3E40 013:120.478    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08064000 if necessary
+T3E40 013:120.499    -- Start of preparing flash programming
+T3E40 013:120.518    -- End of preparing flash programming
+T3E40 013:120.542   CPU_ReadMem(2048 bytes @ 0x08064000)
+T3E40 013:175.854    -- Updating flash cache (2048 bytes @ 0x08064000)
+T3E40 013:175.916    -- Updating flash cache invalid range 0x08064000 - 0x080647FF (2048 bytes)
+T3E40 013:175.957    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08064800 if necessary
+T3E40 013:175.992    -- Start of preparing flash programming
+T3E40 013:176.023    -- End of preparing flash programming
+T3E40 013:176.059   CPU_ReadMem(2048 bytes @ 0x08064800)
+T3E40 013:231.335    -- Updating flash cache (2048 bytes @ 0x08064800)
+T3E40 013:231.407    -- Updating flash cache invalid range 0x08064800 - 0x08064FFF (2048 bytes)
+T3E40 013:231.450    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08065000 if necessary
+T3E40 013:231.488    -- Start of preparing flash programming
+T3E40 013:231.519    -- End of preparing flash programming
+T3E40 013:231.555   CPU_ReadMem(2048 bytes @ 0x08065000)
+T3E40 013:286.859    -- Updating flash cache (2048 bytes @ 0x08065000)
+T3E40 013:286.928    -- Updating flash cache invalid range 0x08065000 - 0x080657FF (2048 bytes)
+T3E40 013:286.970    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08065800 if necessary
+T3E40 013:287.006    -- Start of preparing flash programming
+T3E40 013:287.036    -- End of preparing flash programming
+T3E40 013:287.072   CPU_ReadMem(2048 bytes @ 0x08065800)
+T3E40 013:342.389    -- Updating flash cache (2048 bytes @ 0x08065800)
+T3E40 013:342.442    -- Updating flash cache invalid range 0x08065800 - 0x08065FFF (2048 bytes)
+T3E40 013:342.482    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08066000 if necessary
+T3E40 013:342.515    -- Start of preparing flash programming
+T3E40 013:342.535    -- End of preparing flash programming
+T3E40 013:342.561   CPU_ReadMem(2048 bytes @ 0x08066000)
+T3E40 013:397.946    -- Updating flash cache (2048 bytes @ 0x08066000)
+T3E40 013:397.997    -- Updating flash cache invalid range 0x08066000 - 0x080667FF (2048 bytes)
+T3E40 013:398.029    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08066800 if necessary
+T3E40 013:398.054    -- Start of preparing flash programming
+T3E40 013:398.074    -- End of preparing flash programming
+T3E40 013:398.100   CPU_ReadMem(2048 bytes @ 0x08066800)
+T3E40 013:453.413    -- Updating flash cache (2048 bytes @ 0x08066800)
+T3E40 013:453.464    -- Updating flash cache invalid range 0x08066800 - 0x08066FFF (2048 bytes)
+T3E40 013:453.506    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08067000 if necessary
+T3E40 013:453.533    -- Start of preparing flash programming
+T3E40 013:453.555    -- End of preparing flash programming
+T3E40 013:453.581   CPU_ReadMem(2048 bytes @ 0x08067000)
+T3E40 013:508.936    -- Updating flash cache (2048 bytes @ 0x08067000)
+T3E40 013:509.005    -- Updating flash cache invalid range 0x08067000 - 0x080677FF (2048 bytes)
+T3E40 013:509.048    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08067800 if necessary
+T3E40 013:509.085    -- Start of preparing flash programming
+T3E40 013:509.117    -- End of preparing flash programming
+T3E40 013:509.152   CPU_ReadMem(2048 bytes @ 0x08067800)
+T3E40 013:564.507    -- Updating flash cache (2048 bytes @ 0x08067800)
+T3E40 013:564.600    -- Updating flash cache invalid range 0x08067800 - 0x08067FFF (2048 bytes)
+T3E40 013:564.726    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08068000 if necessary
+T3E40 013:564.766    -- Start of preparing flash programming
+T3E40 013:564.806    -- End of preparing flash programming
+T3E40 013:564.845   CPU_ReadMem(2048 bytes @ 0x08068000)
+T3E40 013:620.086    -- Updating flash cache (2048 bytes @ 0x08068000)
+T3E40 013:620.155    -- Updating flash cache invalid range 0x08068000 - 0x080687FF (2048 bytes)
+T3E40 013:620.195    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08068800 if necessary
+T3E40 013:620.230    -- Start of preparing flash programming
+T3E40 013:620.261    -- End of preparing flash programming
+T3E40 013:620.298   CPU_ReadMem(2048 bytes @ 0x08068800)
+T3E40 013:675.693    -- Updating flash cache (2048 bytes @ 0x08068800)
+T3E40 013:675.768    -- Updating flash cache invalid range 0x08068800 - 0x08068FFF (2048 bytes)
+T3E40 013:675.818    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08069000 if necessary
+T3E40 013:675.859    -- Start of preparing flash programming
+T3E40 013:675.890    -- End of preparing flash programming
+T3E40 013:675.960   CPU_ReadMem(2048 bytes @ 0x08069000)
+T3E40 013:731.398    -- Updating flash cache (2048 bytes @ 0x08069000)
+T3E40 013:731.469    -- Updating flash cache invalid range 0x08069000 - 0x080697FF (2048 bytes)
+T3E40 013:731.509    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08069800 if necessary
+T3E40 013:731.544    -- Start of preparing flash programming
+T3E40 013:731.574    -- End of preparing flash programming
+T3E40 013:731.611   CPU_ReadMem(2048 bytes @ 0x08069800)
+T3E40 013:786.859    -- Updating flash cache (2048 bytes @ 0x08069800)
+T3E40 013:786.928    -- Updating flash cache invalid range 0x08069800 - 0x08069FFF (2048 bytes)
+T3E40 013:786.973    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0806A000 if necessary
+T3E40 013:787.008    -- Start of preparing flash programming
+T3E40 013:787.040    -- End of preparing flash programming
+T3E40 013:787.075   CPU_ReadMem(2048 bytes @ 0x0806A000)
+T3E40 013:842.238    -- Updating flash cache (2048 bytes @ 0x0806A000)
+T3E40 013:842.306    -- Updating flash cache invalid range 0x0806A000 - 0x0806A7FF (2048 bytes)
+T3E40 013:842.347    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0806A800 if necessary
+T3E40 013:842.382    -- Start of preparing flash programming
+T3E40 013:842.413    -- End of preparing flash programming
+T3E40 013:842.450   CPU_ReadMem(2048 bytes @ 0x0806A800)
+T3E40 013:897.629    -- Updating flash cache (2048 bytes @ 0x0806A800)
+T3E40 013:897.696    -- Updating flash cache invalid range 0x0806A800 - 0x0806AFFF (2048 bytes)
+T3E40 013:897.739    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0806B000 if necessary
+T3E40 013:897.774    -- Start of preparing flash programming
+T3E40 013:897.805    -- End of preparing flash programming
+T3E40 013:897.840   CPU_ReadMem(2048 bytes @ 0x0806B000)
+T3E40 013:953.018    -- Updating flash cache (2048 bytes @ 0x0806B000)
+T3E40 013:953.069    -- Updating flash cache invalid range 0x0806B000 - 0x0806B7FF (2048 bytes)
+T3E40 013:953.101    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0806B800 if necessary
+T3E40 013:953.142    -- Start of preparing flash programming
+T3E40 013:953.163    -- End of preparing flash programming
+T3E40 013:953.189   CPU_ReadMem(2048 bytes @ 0x0806B800)
+T3E40 014:008.322    -- Updating flash cache (2048 bytes @ 0x0806B800)
+T3E40 014:008.386    -- Updating flash cache invalid range 0x0806B800 - 0x0806BFFF (2048 bytes)
+T3E40 014:008.426    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0806C000 if necessary
+T3E40 014:008.459    -- Start of preparing flash programming
+T3E40 014:008.488    -- End of preparing flash programming
+T3E40 014:008.523   CPU_ReadMem(2048 bytes @ 0x0806C000)
+T3E40 014:063.848    -- Updating flash cache (2048 bytes @ 0x0806C000)
+T3E40 014:063.891    -- Updating flash cache invalid range 0x0806C000 - 0x0806C7FF (2048 bytes)
+T3E40 014:063.918    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0806C800 if necessary
+T3E40 014:063.941    -- Start of preparing flash programming
+T3E40 014:063.960    -- End of preparing flash programming
+T3E40 014:063.984   CPU_ReadMem(2048 bytes @ 0x0806C800)
+T3E40 014:119.171    -- Updating flash cache (2048 bytes @ 0x0806C800)
+T3E40 014:119.219    -- Updating flash cache invalid range 0x0806C800 - 0x0806CFFF (2048 bytes)
+T3E40 014:119.248    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0806D000 if necessary
+T3E40 014:119.269    -- Start of preparing flash programming
+T3E40 014:119.288    -- End of preparing flash programming
+T3E40 014:119.312   CPU_ReadMem(2048 bytes @ 0x0806D000)
+T3E40 014:174.475    -- Updating flash cache (2048 bytes @ 0x0806D000)
+T3E40 014:174.546    -- Updating flash cache invalid range 0x0806D000 - 0x0806D7FF (2048 bytes)
+T3E40 014:174.587    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0806D800 if necessary
+T3E40 014:174.624    -- Start of preparing flash programming
+T3E40 014:174.656    -- End of preparing flash programming
+T3E40 014:174.691   CPU_ReadMem(2048 bytes @ 0x0806D800)
+T3E40 014:230.018    -- Updating flash cache (2048 bytes @ 0x0806D800)
+T3E40 014:230.080    -- Updating flash cache invalid range 0x0806D800 - 0x0806DFFF (2048 bytes)
+T3E40 014:230.123    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0806E000 if necessary
+T3E40 014:230.160    -- Start of preparing flash programming
+T3E40 014:230.190    -- End of preparing flash programming
+T3E40 014:230.227   CPU_ReadMem(2048 bytes @ 0x0806E000)
+T3E40 014:285.379    -- Updating flash cache (2048 bytes @ 0x0806E000)
+T3E40 014:285.427    -- Updating flash cache invalid range 0x0806E000 - 0x0806E7FF (2048 bytes)
+T3E40 014:285.454    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0806E800 if necessary
+T3E40 014:285.477    -- Start of preparing flash programming
+T3E40 014:285.496    -- End of preparing flash programming
+T3E40 014:285.520   CPU_ReadMem(2048 bytes @ 0x0806E800)
+T3E40 014:340.648    -- Updating flash cache (2048 bytes @ 0x0806E800)
+T3E40 014:340.723    -- Updating flash cache invalid range 0x0806E800 - 0x0806EFFF (2048 bytes)
+T3E40 014:340.770    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0806F000 if necessary
+T3E40 014:340.806    -- Start of preparing flash programming
+T3E40 014:340.963    -- End of preparing flash programming
+T3E40 014:341.005   CPU_ReadMem(2048 bytes @ 0x0806F000)
+T3E40 014:396.154    -- Updating flash cache (2048 bytes @ 0x0806F000)
+T3E40 014:396.205    -- Updating flash cache invalid range 0x0806F000 - 0x0806F7FF (2048 bytes)
+T3E40 014:396.235    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0806F800 if necessary
+T3E40 014:396.261    -- Start of preparing flash programming
+T3E40 014:396.282    -- End of preparing flash programming
+T3E40 014:396.317   CPU_ReadMem(2048 bytes @ 0x0806F800)
+T3E40 014:451.554    -- Updating flash cache (2048 bytes @ 0x0806F800)
+T3E40 014:451.622    -- Updating flash cache invalid range 0x0806F800 - 0x0806FFFF (2048 bytes)
+T3E40 014:451.664    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08070000 if necessary
+T3E40 014:451.698    -- Start of preparing flash programming
+T3E40 014:451.728    -- End of preparing flash programming
+T3E40 014:451.765   CPU_ReadMem(2048 bytes @ 0x08070000)
+T3E40 014:507.091    -- Updating flash cache (2048 bytes @ 0x08070000)
+T3E40 014:507.139    -- Updating flash cache invalid range 0x08070000 - 0x080707FF (2048 bytes)
+T3E40 014:507.170    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08070800 if necessary
+T3E40 014:507.194    -- Start of preparing flash programming
+T3E40 014:507.214    -- End of preparing flash programming
+T3E40 014:507.240   CPU_ReadMem(2048 bytes @ 0x08070800)
+T3E40 014:562.509    -- Updating flash cache (2048 bytes @ 0x08070800)
+T3E40 014:562.557    -- Updating flash cache invalid range 0x08070800 - 0x08070FFF (2048 bytes)
+T3E40 014:562.584    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08071000 if necessary
+T3E40 014:562.606    -- Start of preparing flash programming
+T3E40 014:562.626    -- End of preparing flash programming
+T3E40 014:562.650   CPU_ReadMem(2048 bytes @ 0x08071000)
+T3E40 014:618.019    -- Updating flash cache (2048 bytes @ 0x08071000)
+T3E40 014:618.082    -- Updating flash cache invalid range 0x08071000 - 0x080717FF (2048 bytes)
+T3E40 014:618.123    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08071800 if necessary
+T3E40 014:618.158    -- Start of preparing flash programming
+T3E40 014:618.189    -- End of preparing flash programming
+T3E40 014:618.226   CPU_ReadMem(2048 bytes @ 0x08071800)
+T3E40 014:673.510    -- Updating flash cache (2048 bytes @ 0x08071800)
+T3E40 014:673.573    -- Updating flash cache invalid range 0x08071800 - 0x08071FFF (2048 bytes)
+T3E40 014:673.614    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08072000 if necessary
+T3E40 014:673.650    -- Start of preparing flash programming
+T3E40 014:673.680    -- End of preparing flash programming
+T3E40 014:673.717   CPU_ReadMem(2048 bytes @ 0x08072000)
+T3E40 014:729.114    -- Updating flash cache (2048 bytes @ 0x08072000)
+T3E40 014:729.197    -- Updating flash cache invalid range 0x08072000 - 0x080727FF (2048 bytes)
+T3E40 014:729.245    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08072800 if necessary
+T3E40 014:729.285    -- Start of preparing flash programming
+T3E40 014:729.322    -- End of preparing flash programming
+T3E40 014:729.408   CPU_ReadMem(2048 bytes @ 0x08072800)
+T3E40 014:784.739    -- Updating flash cache (2048 bytes @ 0x08072800)
+T3E40 014:784.786    -- Updating flash cache invalid range 0x08072800 - 0x08072FFF (2048 bytes)
+T3E40 014:784.813    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08073000 if necessary
+T3E40 014:784.842    -- Start of preparing flash programming
+T3E40 014:784.880    -- End of preparing flash programming
+T3E40 014:784.915   CPU_ReadMem(2048 bytes @ 0x08073000)
+T3E40 014:840.237    -- Updating flash cache (2048 bytes @ 0x08073000)
+T3E40 014:840.306    -- Updating flash cache invalid range 0x08073000 - 0x080737FF (2048 bytes)
+T3E40 014:840.349    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08073800 if necessary
+T3E40 014:840.386    -- Start of preparing flash programming
+T3E40 014:840.416    -- End of preparing flash programming
+T3E40 014:840.453   CPU_ReadMem(2048 bytes @ 0x08073800)
+T3E40 014:895.622    -- Updating flash cache (2048 bytes @ 0x08073800)
+T3E40 014:895.669    -- Updating flash cache invalid range 0x08073800 - 0x08073FFF (2048 bytes)
+T3E40 014:895.696    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08074000 if necessary
+T3E40 014:895.726    -- Start of preparing flash programming
+T3E40 014:895.746    -- End of preparing flash programming
+T3E40 014:895.770   CPU_ReadMem(2048 bytes @ 0x08074000)
+T3E40 014:950.936    -- Updating flash cache (2048 bytes @ 0x08074000)
+T3E40 014:950.998    -- Updating flash cache invalid range 0x08074000 - 0x080747FF (2048 bytes)
+T3E40 014:951.032    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08074800 if necessary
+T3E40 014:951.056    -- Start of preparing flash programming
+T3E40 014:951.077    -- End of preparing flash programming
+T3E40 014:951.102   CPU_ReadMem(2048 bytes @ 0x08074800)
+T3E40 015:006.234    -- Updating flash cache (2048 bytes @ 0x08074800)
+T3E40 015:006.299    -- Updating flash cache invalid range 0x08074800 - 0x08074FFF (2048 bytes)
+T3E40 015:006.342    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08075000 if necessary
+T3E40 015:006.378    -- Start of preparing flash programming
+T3E40 015:006.408    -- End of preparing flash programming
+T3E40 015:006.445   CPU_ReadMem(2048 bytes @ 0x08075000)
+T3E40 015:061.662    -- Updating flash cache (2048 bytes @ 0x08075000)
+T3E40 015:061.760    -- Updating flash cache invalid range 0x08075000 - 0x080757FF (2048 bytes)
+T3E40 015:061.832    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08075800 if necessary
+T3E40 015:061.896    -- Start of preparing flash programming
+T3E40 015:061.955    -- End of preparing flash programming
+T3E40 015:062.022   CPU_ReadMem(2048 bytes @ 0x08075800)
+T3E40 015:117.240    -- Updating flash cache (2048 bytes @ 0x08075800)
+T3E40 015:117.309    -- Updating flash cache invalid range 0x08075800 - 0x08075FFF (2048 bytes)
+T3E40 015:117.350    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08076000 if necessary
+T3E40 015:117.392    -- Start of preparing flash programming
+T3E40 015:117.424    -- End of preparing flash programming
+T3E40 015:117.459   CPU_ReadMem(2048 bytes @ 0x08076000)
+T3E40 015:172.624    -- Updating flash cache (2048 bytes @ 0x08076000)
+T3E40 015:172.669    -- Updating flash cache invalid range 0x08076000 - 0x080767FF (2048 bytes)
+T3E40 015:172.698    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08076800 if necessary
+T3E40 015:172.718    -- Start of preparing flash programming
+T3E40 015:172.738    -- End of preparing flash programming
+T3E40 015:172.762   CPU_ReadMem(2048 bytes @ 0x08076800)
+T3E40 015:227.938    -- Updating flash cache (2048 bytes @ 0x08076800)
+T3E40 015:228.010    -- Updating flash cache invalid range 0x08076800 - 0x08076FFF (2048 bytes)
+T3E40 015:228.053    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08077000 if necessary
+T3E40 015:228.090    -- Start of preparing flash programming
+T3E40 015:228.120    -- End of preparing flash programming
+T3E40 015:228.157   CPU_ReadMem(2048 bytes @ 0x08077000)
+T3E40 015:283.317    -- Updating flash cache (2048 bytes @ 0x08077000)
+T3E40 015:283.384    -- Updating flash cache invalid range 0x08077000 - 0x080777FF (2048 bytes)
+T3E40 015:283.426    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08077800 if necessary
+T3E40 015:283.462    -- Start of preparing flash programming
+T3E40 015:283.493    -- End of preparing flash programming
+T3E40 015:283.531   CPU_ReadMem(2048 bytes @ 0x08077800)
+T3E40 015:338.701    -- Updating flash cache (2048 bytes @ 0x08077800)
+T3E40 015:338.752    -- Updating flash cache invalid range 0x08077800 - 0x08077FFF (2048 bytes)
+T3E40 015:338.784    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08078000 if necessary
+T3E40 015:338.811    -- Start of preparing flash programming
+T3E40 015:338.830    -- End of preparing flash programming
+T3E40 015:338.856   CPU_ReadMem(2048 bytes @ 0x08078000)
+T3E40 015:394.008    -- Updating flash cache (2048 bytes @ 0x08078000)
+T3E40 015:394.075    -- Updating flash cache invalid range 0x08078000 - 0x080787FF (2048 bytes)
+T3E40 015:394.118    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08078800 if necessary
+T3E40 015:394.166    -- Start of preparing flash programming
+T3E40 015:394.198    -- End of preparing flash programming
+T3E40 015:394.237   CPU_ReadMem(2048 bytes @ 0x08078800)
+T3E40 015:449.395    -- Updating flash cache (2048 bytes @ 0x08078800)
+T3E40 015:449.462    -- Updating flash cache invalid range 0x08078800 - 0x08078FFF (2048 bytes)
+T3E40 015:449.504    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08079000 if necessary
+T3E40 015:449.539    -- Start of preparing flash programming
+T3E40 015:449.570    -- End of preparing flash programming
+T3E40 015:449.605   CPU_ReadMem(2048 bytes @ 0x08079000)
+T3E40 015:504.754    -- Updating flash cache (2048 bytes @ 0x08079000)
+T3E40 015:504.806    -- Updating flash cache invalid range 0x08079000 - 0x080797FF (2048 bytes)
+T3E40 015:504.838    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08079800 if necessary
+T3E40 015:504.862    -- Start of preparing flash programming
+T3E40 015:504.885    -- End of preparing flash programming
+T3E40 015:504.909   CPU_ReadMem(2048 bytes @ 0x08079800)
+T3E40 015:560.069    -- Updating flash cache (2048 bytes @ 0x08079800)
+T3E40 015:560.120    -- Updating flash cache invalid range 0x08079800 - 0x08079FFF (2048 bytes)
+T3E40 015:560.150    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0807A000 if necessary
+T3E40 015:560.176    -- Start of preparing flash programming
+T3E40 015:560.195    -- End of preparing flash programming
+T3E40 015:560.221   CPU_ReadMem(2048 bytes @ 0x0807A000)
+T3E40 015:615.392    -- Updating flash cache (2048 bytes @ 0x0807A000)
+T3E40 015:615.462    -- Updating flash cache invalid range 0x0807A000 - 0x0807A7FF (2048 bytes)
+T3E40 015:615.506    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0807A800 if necessary
+T3E40 015:615.541    -- Start of preparing flash programming
+T3E40 015:615.571    -- End of preparing flash programming
+T3E40 015:615.608   CPU_ReadMem(2048 bytes @ 0x0807A800)
+T3E40 015:670.856    -- Updating flash cache (2048 bytes @ 0x0807A800)
+T3E40 015:670.920    -- Updating flash cache invalid range 0x0807A800 - 0x0807AFFF (2048 bytes)
+T3E40 015:670.962    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0807B000 if necessary
+T3E40 015:670.998    -- Start of preparing flash programming
+T3E40 015:671.029    -- End of preparing flash programming
+T3E40 015:671.066   CPU_ReadMem(2048 bytes @ 0x0807B000)
+T3E40 015:726.240    -- Updating flash cache (2048 bytes @ 0x0807B000)
+T3E40 015:726.307    -- Updating flash cache invalid range 0x0807B000 - 0x0807B7FF (2048 bytes)
+T3E40 015:726.349    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0807B800 if necessary
+T3E40 015:726.384    -- Start of preparing flash programming
+T3E40 015:726.414    -- End of preparing flash programming
+T3E40 015:726.450   CPU_ReadMem(2048 bytes @ 0x0807B800)
+T3E40 015:781.629    -- Updating flash cache (2048 bytes @ 0x0807B800)
+T3E40 015:781.698    -- Updating flash cache invalid range 0x0807B800 - 0x0807BFFF (2048 bytes)
+T3E40 015:781.741    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0807C000 if necessary
+T3E40 015:781.778    -- Start of preparing flash programming
+T3E40 015:781.808    -- End of preparing flash programming
+T3E40 015:781.845   CPU_ReadMem(2048 bytes @ 0x0807C000)
+T3E40 015:837.013    -- Updating flash cache (2048 bytes @ 0x0807C000)
+T3E40 015:837.083    -- Updating flash cache invalid range 0x0807C000 - 0x0807C7FF (2048 bytes)
+T3E40 015:837.125    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0807C800 if necessary
+T3E40 015:837.160    -- Start of preparing flash programming
+T3E40 015:837.190    -- End of preparing flash programming
+T3E40 015:837.227   CPU_ReadMem(2048 bytes @ 0x0807C800)
+T3E40 015:892.378    -- Updating flash cache (2048 bytes @ 0x0807C800)
+T3E40 015:892.432    -- Updating flash cache invalid range 0x0807C800 - 0x0807CFFF (2048 bytes)
+T3E40 015:892.470    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0807D000 if necessary
+T3E40 015:892.496    -- Start of preparing flash programming
+T3E40 015:892.517    -- End of preparing flash programming
+T3E40 015:892.541   CPU_ReadMem(2048 bytes @ 0x0807D000)
+T3E40 015:947.693    -- Updating flash cache (2048 bytes @ 0x0807D000)
+T3E40 015:947.760    -- Updating flash cache invalid range 0x0807D000 - 0x0807D7FF (2048 bytes)
+T3E40 015:947.802    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0807D800 if necessary
+T3E40 015:947.837    -- Start of preparing flash programming
+T3E40 015:947.867    -- End of preparing flash programming
+T3E40 015:947.904   CPU_ReadMem(2048 bytes @ 0x0807D800)
+T3E40 016:003.098    -- Updating flash cache (2048 bytes @ 0x0807D800)
+T3E40 016:003.165    -- Updating flash cache invalid range 0x0807D800 - 0x0807DFFF (2048 bytes)
+T3E40 016:003.219    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0807E000 if necessary
+T3E40 016:003.259    -- Start of preparing flash programming
+T3E40 016:003.290    -- End of preparing flash programming
+T3E40 016:003.326   CPU_ReadMem(2048 bytes @ 0x0807E000)
+T3E40 016:058.453    -- Updating flash cache (2048 bytes @ 0x0807E000)
+T3E40 016:058.504    -- Updating flash cache invalid range 0x0807E000 - 0x0807E7FF (2048 bytes)
+T3E40 016:058.534    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0807E800 if necessary
+T3E40 016:058.560    -- Start of preparing flash programming
+T3E40 016:058.579    -- End of preparing flash programming
+T3E40 016:058.605   CPU_ReadMem(2048 bytes @ 0x0807E800)
+T3E40 016:113.770    -- Updating flash cache (2048 bytes @ 0x0807E800)
+T3E40 016:113.838    -- Updating flash cache invalid range 0x0807E800 - 0x0807EFFF (2048 bytes)
+T3E40 016:113.882    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0807F000 if necessary
+T3E40 016:113.922    -- Start of preparing flash programming
+T3E40 016:113.958    -- End of preparing flash programming
+T3E40 016:114.030   CPU_ReadMem(2048 bytes @ 0x0807F000)
+T3E40 016:169.246    -- Updating flash cache (2048 bytes @ 0x0807F000)
+T3E40 016:169.293    -- Updating flash cache invalid range 0x0807F000 - 0x0807F7FF (2048 bytes)
+T3E40 016:169.322    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0807F800 if necessary
+T3E40 016:169.342    -- Start of preparing flash programming
+T3E40 016:169.362    -- End of preparing flash programming
+T3E40 016:169.386   CPU_ReadMem(2048 bytes @ 0x0807F800)
+T3E40 016:224.541    -- Updating flash cache (2048 bytes @ 0x0807F800)
+T3E40 016:224.611    -- Updating flash cache invalid range 0x0807F800 - 0x0807FFFF (2048 bytes)
+T3E40 016:224.653    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08080000 if necessary
+T3E40 016:224.690    -- Start of preparing flash programming
+T3E40 016:224.722    -- End of preparing flash programming
+T3E40 016:224.758   CPU_ReadMem(2048 bytes @ 0x08080000)
+T3E40 016:279.936    -- Updating flash cache (2048 bytes @ 0x08080000)
+T3E40 016:280.006    -- Updating flash cache invalid range 0x08080000 - 0x080807FF (2048 bytes)
+T3E40 016:280.048    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08080800 if necessary
+T3E40 016:280.085    -- Start of preparing flash programming
+T3E40 016:280.117    -- End of preparing flash programming
+T3E40 016:280.154   CPU_ReadMem(2048 bytes @ 0x08080800)
+T3E40 016:335.312    -- Updating flash cache (2048 bytes @ 0x08080800)
+T3E40 016:335.381    -- Updating flash cache invalid range 0x08080800 - 0x08080FFF (2048 bytes)
+T3E40 016:335.424    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08081000 if necessary
+T3E40 016:335.459    -- Start of preparing flash programming
+T3E40 016:335.488    -- End of preparing flash programming
+T3E40 016:335.525   CPU_ReadMem(2048 bytes @ 0x08081000)
+T3E40 016:390.693    -- Updating flash cache (2048 bytes @ 0x08081000)
+T3E40 016:390.776    -- Updating flash cache invalid range 0x08081000 - 0x080817FF (2048 bytes)
+T3E40 016:390.818    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08081800 if necessary
+T3E40 016:390.856    -- Start of preparing flash programming
+T3E40 016:390.886    -- End of preparing flash programming
+T3E40 016:390.923   CPU_ReadMem(2048 bytes @ 0x08081800)
+T3E40 016:446.126    -- Updating flash cache (2048 bytes @ 0x08081800)
+T3E40 016:446.186    -- Updating flash cache invalid range 0x08081800 - 0x08081FFF (2048 bytes)
+T3E40 016:446.232    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08082000 if necessary
+T3E40 016:446.267    -- Start of preparing flash programming
+T3E40 016:446.299    -- End of preparing flash programming
+T3E40 016:446.341   CPU_ReadMem(2048 bytes @ 0x08082000)
+T3E40 016:501.546    -- Updating flash cache (2048 bytes @ 0x08082000)
+T3E40 016:501.610    -- Updating flash cache invalid range 0x08082000 - 0x080827FF (2048 bytes)
+T3E40 016:501.650    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08082800 if necessary
+T3E40 016:501.683    -- Start of preparing flash programming
+T3E40 016:501.715    -- End of preparing flash programming
+T3E40 016:501.750   CPU_ReadMem(2048 bytes @ 0x08082800)
+T3E40 016:556.920    -- Updating flash cache (2048 bytes @ 0x08082800)
+T3E40 016:556.997    -- Updating flash cache invalid range 0x08082800 - 0x08082FFF (2048 bytes)
+T3E40 016:557.037    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08083000 if necessary
+T3E40 016:557.070    -- Start of preparing flash programming
+T3E40 016:557.099    -- End of preparing flash programming
+T3E40 016:557.134   CPU_ReadMem(2048 bytes @ 0x08083000)
+T3E40 016:612.459    -- Updating flash cache (2048 bytes @ 0x08083000)
+T3E40 016:612.584    -- Updating flash cache invalid range 0x08083000 - 0x080837FF (2048 bytes)
+T3E40 016:612.627    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08083800 if necessary
+T3E40 016:612.661    -- Start of preparing flash programming
+T3E40 016:612.690    -- End of preparing flash programming
+T3E40 016:612.728   CPU_ReadMem(2048 bytes @ 0x08083800)
+T3E40 016:667.934    -- Updating flash cache (2048 bytes @ 0x08083800)
+T3E40 016:667.992    -- Updating flash cache invalid range 0x08083800 - 0x08083FFF (2048 bytes)
+T3E40 016:668.034    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08084000 if necessary
+T3E40 016:668.072    -- Start of preparing flash programming
+T3E40 016:668.104    -- End of preparing flash programming
+T3E40 016:668.142   CPU_ReadMem(2048 bytes @ 0x08084000)
+T3E40 016:723.310    -- Updating flash cache (2048 bytes @ 0x08084000)
+T3E40 016:723.378    -- Updating flash cache invalid range 0x08084000 - 0x080847FF (2048 bytes)
+T3E40 016:723.419    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08084800 if necessary
+T3E40 016:723.454    -- Start of preparing flash programming
+T3E40 016:723.486    -- End of preparing flash programming
+T3E40 016:723.522   CPU_ReadMem(2048 bytes @ 0x08084800)
+T3E40 016:778.700    -- Updating flash cache (2048 bytes @ 0x08084800)
+T3E40 016:778.764    -- Updating flash cache invalid range 0x08084800 - 0x08084FFF (2048 bytes)
+T3E40 016:778.804    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08085000 if necessary
+T3E40 016:778.840    -- Start of preparing flash programming
+T3E40 016:778.870    -- End of preparing flash programming
+T3E40 016:778.906   CPU_ReadMem(2048 bytes @ 0x08085000)
+T3E40 016:834.098    -- Updating flash cache (2048 bytes @ 0x08085000)
+T3E40 016:834.162    -- Updating flash cache invalid range 0x08085000 - 0x080857FF (2048 bytes)
+T3E40 016:834.202    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08085800 if necessary
+T3E40 016:834.268    -- Start of preparing flash programming
+T3E40 016:834.296    -- End of preparing flash programming
+T3E40 016:834.346   CPU_ReadMem(2048 bytes @ 0x08085800)
+T3E40 016:889.526    -- Updating flash cache (2048 bytes @ 0x08085800)
+T3E40 016:889.570    -- Updating flash cache invalid range 0x08085800 - 0x08085FFF (2048 bytes)
+T3E40 016:889.596    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08086000 if necessary
+T3E40 016:889.618    -- Start of preparing flash programming
+T3E40 016:889.636    -- End of preparing flash programming
+T3E40 016:889.660   CPU_ReadMem(2048 bytes @ 0x08086000)
+T3E40 016:944.860    -- Updating flash cache (2048 bytes @ 0x08086000)
+T3E40 016:944.930    -- Updating flash cache invalid range 0x08086000 - 0x080867FF (2048 bytes)
+T3E40 016:944.972    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08086800 if necessary
+T3E40 016:945.006    -- Start of preparing flash programming
+T3E40 016:945.036    -- End of preparing flash programming
+T3E40 016:945.074   CPU_ReadMem(2048 bytes @ 0x08086800)
+T3E40 017:000.236    -- Updating flash cache (2048 bytes @ 0x08086800)
+T3E40 017:000.306    -- Updating flash cache invalid range 0x08086800 - 0x08086FFF (2048 bytes)
+T3E40 017:000.348    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08087000 if necessary
+T3E40 017:000.382    -- Start of preparing flash programming
+T3E40 017:000.412    -- End of preparing flash programming
+T3E40 017:000.448   CPU_ReadMem(2048 bytes @ 0x08087000)
+T3E40 017:055.626    -- Updating flash cache (2048 bytes @ 0x08087000)
+T3E40 017:055.672    -- Updating flash cache invalid range 0x08087000 - 0x080877FF (2048 bytes)
+T3E40 017:055.700    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08087800 if necessary
+T3E40 017:055.722    -- Start of preparing flash programming
+T3E40 017:055.740    -- End of preparing flash programming
+T3E40 017:055.764   CPU_ReadMem(2048 bytes @ 0x08087800)
+T3E40 017:111.136    -- Updating flash cache (2048 bytes @ 0x08087800)
+T3E40 017:111.214    -- Updating flash cache invalid range 0x08087800 - 0x08087FFF (2048 bytes)
+T3E40 017:111.262    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08088000 if necessary
+T3E40 017:111.300    -- Start of preparing flash programming
+T3E40 017:111.334    -- End of preparing flash programming
+T3E40 017:111.378   CPU_ReadMem(2048 bytes @ 0x08088000)
+T3E40 017:166.548    -- Updating flash cache (2048 bytes @ 0x08088000)
+T3E40 017:166.620    -- Updating flash cache invalid range 0x08088000 - 0x080887FF (2048 bytes)
+T3E40 017:166.662    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08088800 if necessary
+T3E40 017:166.694    -- Start of preparing flash programming
+T3E40 017:166.724    -- End of preparing flash programming
+T3E40 017:166.762   CPU_ReadMem(2048 bytes @ 0x08088800)
+T3E40 017:221.952    -- Updating flash cache (2048 bytes @ 0x08088800)
+T3E40 017:222.026    -- Updating flash cache invalid range 0x08088800 - 0x08088FFF (2048 bytes)
+T3E40 017:222.070    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08089000 if necessary
+T3E40 017:222.124    -- Start of preparing flash programming
+T3E40 017:222.156    -- End of preparing flash programming
+T3E40 017:222.196   CPU_ReadMem(2048 bytes @ 0x08089000)
+T3E40 017:277.324    -- Updating flash cache (2048 bytes @ 0x08089000)
+T3E40 017:277.398    -- Updating flash cache invalid range 0x08089000 - 0x080897FF (2048 bytes)
+T3E40 017:277.440    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08089800 if necessary
+T3E40 017:277.474    -- Start of preparing flash programming
+T3E40 017:277.506    -- End of preparing flash programming
+T3E40 017:277.544   CPU_ReadMem(2048 bytes @ 0x08089800)
+T3E40 017:332.694    -- Updating flash cache (2048 bytes @ 0x08089800)
+T3E40 017:332.760    -- Updating flash cache invalid range 0x08089800 - 0x08089FFF (2048 bytes)
+T3E40 017:332.800    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0808A000 if necessary
+T3E40 017:332.832    -- Start of preparing flash programming
+T3E40 017:332.874    -- End of preparing flash programming
+T3E40 017:332.910   CPU_ReadMem(2048 bytes @ 0x0808A000)
+T3E40 017:388.106    -- Updating flash cache (2048 bytes @ 0x0808A000)
+T3E40 017:388.178    -- Updating flash cache invalid range 0x0808A000 - 0x0808A7FF (2048 bytes)
+T3E40 017:388.220    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0808A800 if necessary
+T3E40 017:388.258    -- Start of preparing flash programming
+T3E40 017:388.286    -- End of preparing flash programming
+T3E40 017:388.324   CPU_ReadMem(2048 bytes @ 0x0808A800)
+T3E40 017:443.478    -- Updating flash cache (2048 bytes @ 0x0808A800)
+T3E40 017:443.544    -- Updating flash cache invalid range 0x0808A800 - 0x0808AFFF (2048 bytes)
+T3E40 017:443.584    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0808B000 if necessary
+T3E40 017:443.618    -- Start of preparing flash programming
+T3E40 017:443.648    -- End of preparing flash programming
+T3E40 017:443.682   CPU_ReadMem(2048 bytes @ 0x0808B000)
+T3E40 017:498.876    -- Updating flash cache (2048 bytes @ 0x0808B000)
+T3E40 017:499.294    -- Updating flash cache invalid range 0x0808B000 - 0x0808B7FF (2048 bytes)
+T3E40 017:499.338    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0808B800 if necessary
+T3E40 017:499.442    -- Start of preparing flash programming
+T3E40 017:499.474    -- End of preparing flash programming
+T3E40 017:499.512   CPU_ReadMem(2048 bytes @ 0x0808B800)
+T3E40 017:554.700    -- Updating flash cache (2048 bytes @ 0x0808B800)
+T3E40 017:554.768    -- Updating flash cache invalid range 0x0808B800 - 0x0808BFFF (2048 bytes)
+T3E40 017:554.812    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0808C000 if necessary
+T3E40 017:554.846    -- Start of preparing flash programming
+T3E40 017:554.878    -- End of preparing flash programming
+T3E40 017:554.916   CPU_ReadMem(2048 bytes @ 0x0808C000)
+T3E40 017:610.094    -- Updating flash cache (2048 bytes @ 0x0808C000)
+T3E40 017:610.172    -- Updating flash cache invalid range 0x0808C000 - 0x0808C7FF (2048 bytes)
+T3E40 017:610.216    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0808C800 if necessary
+T3E40 017:610.252    -- Start of preparing flash programming
+T3E40 017:610.284    -- End of preparing flash programming
+T3E40 017:610.324   CPU_ReadMem(2048 bytes @ 0x0808C800)
+T3E40 017:665.482    -- Updating flash cache (2048 bytes @ 0x0808C800)
+T3E40 017:665.552    -- Updating flash cache invalid range 0x0808C800 - 0x0808CFFF (2048 bytes)
+T3E40 017:665.592    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0808D000 if necessary
+T3E40 017:665.626    -- Start of preparing flash programming
+T3E40 017:665.656    -- End of preparing flash programming
+T3E40 017:665.692   CPU_ReadMem(2048 bytes @ 0x0808D000)
+T3E40 017:720.864    -- Updating flash cache (2048 bytes @ 0x0808D000)
+T3E40 017:720.930    -- Updating flash cache invalid range 0x0808D000 - 0x0808D7FF (2048 bytes)
+T3E40 017:720.970    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0808D800 if necessary
+T3E40 017:721.004    -- Start of preparing flash programming
+T3E40 017:721.032    -- End of preparing flash programming
+T3E40 017:721.076   CPU_ReadMem(2048 bytes @ 0x0808D800)
+T3E40 017:776.244    -- Updating flash cache (2048 bytes @ 0x0808D800)
+T3E40 017:776.316    -- Updating flash cache invalid range 0x0808D800 - 0x0808DFFF (2048 bytes)
+T3E40 017:776.358    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0808E000 if necessary
+T3E40 017:776.396    -- Start of preparing flash programming
+T3E40 017:776.426    -- End of preparing flash programming
+T3E40 017:776.462   CPU_ReadMem(2048 bytes @ 0x0808E000)
+T3E40 017:831.636    -- Updating flash cache (2048 bytes @ 0x0808E000)
+T3E40 017:831.706    -- Updating flash cache invalid range 0x0808E000 - 0x0808E7FF (2048 bytes)
+T3E40 017:831.744    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0808E800 if necessary
+T3E40 017:832.008    -- Start of preparing flash programming
+T3E40 017:832.038    -- End of preparing flash programming
+T3E40 017:832.108   CPU_ReadMem(2048 bytes @ 0x0808E800)
+T3E40 017:887.320    -- Updating flash cache (2048 bytes @ 0x0808E800)
+T3E40 017:887.450    -- Updating flash cache invalid range 0x0808E800 - 0x0808EFFF (2048 bytes)
+T3E40 017:887.606    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0808F000 if necessary
+T3E40 017:887.636    -- Start of preparing flash programming
+T3E40 017:887.690    -- End of preparing flash programming
+T3E40 017:887.724   CPU_ReadMem(2048 bytes @ 0x0808F000)
+T3E40 017:942.862    -- Updating flash cache (2048 bytes @ 0x0808F000)
+T3E40 017:942.926    -- Updating flash cache invalid range 0x0808F000 - 0x0808F7FF (2048 bytes)
+T3E40 017:942.966    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0808F800 if necessary
+T3E40 017:943.000    -- Start of preparing flash programming
+T3E40 017:943.030    -- End of preparing flash programming
+T3E40 017:943.064   CPU_ReadMem(2048 bytes @ 0x0808F800)
+T3E40 017:998.240    -- Updating flash cache (2048 bytes @ 0x0808F800)
+T3E40 017:998.310    -- Updating flash cache invalid range 0x0808F800 - 0x0808FFFF (2048 bytes)
+T3E40 017:998.354    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08090000 if necessary
+T3E40 017:998.390    -- Start of preparing flash programming
+T3E40 017:998.420    -- End of preparing flash programming
+T3E40 017:998.456   CPU_ReadMem(2048 bytes @ 0x08090000)
+T3E40 018:053.632    -- Updating flash cache (2048 bytes @ 0x08090000)
+T3E40 018:053.702    -- Updating flash cache invalid range 0x08090000 - 0x080907FF (2048 bytes)
+T3E40 018:053.742    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08090800 if necessary
+T3E40 018:053.776    -- Start of preparing flash programming
+T3E40 018:053.828    -- End of preparing flash programming
+T3E40 018:053.864   CPU_ReadMem(2048 bytes @ 0x08090800)
+T3E40 018:109.024    -- Updating flash cache (2048 bytes @ 0x08090800)
+T3E40 018:109.100    -- Updating flash cache invalid range 0x08090800 - 0x08090FFF (2048 bytes)
+T3E40 018:109.148    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08091000 if necessary
+T3E40 018:109.184    -- Start of preparing flash programming
+T3E40 018:109.220    -- End of preparing flash programming
+T3E40 018:109.256   CPU_ReadMem(2048 bytes @ 0x08091000)
+T3E40 018:164.396    -- Updating flash cache (2048 bytes @ 0x08091000)
+T3E40 018:164.470    -- Updating flash cache invalid range 0x08091000 - 0x080917FF (2048 bytes)
+T3E40 018:164.516    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08091800 if necessary
+T3E40 018:164.554    -- Start of preparing flash programming
+T3E40 018:164.586    -- End of preparing flash programming
+T3E40 018:164.626   CPU_ReadMem(2048 bytes @ 0x08091800)
+T3E40 018:219.864    -- Updating flash cache (2048 bytes @ 0x08091800)
+T3E40 018:219.932    -- Updating flash cache invalid range 0x08091800 - 0x08091FFF (2048 bytes)
+T3E40 018:219.978    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08092000 if necessary
+T3E40 018:220.014    -- Start of preparing flash programming
+T3E40 018:220.046    -- End of preparing flash programming
+T3E40 018:220.396   CPU_ReadMem(2048 bytes @ 0x08092000)
+T3E40 018:275.556    -- Updating flash cache (2048 bytes @ 0x08092000)
+T3E40 018:275.626    -- Updating flash cache invalid range 0x08092000 - 0x080927FF (2048 bytes)
+T3E40 018:275.666    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08092800 if necessary
+T3E40 018:275.700    -- Start of preparing flash programming
+T3E40 018:275.842    -- End of preparing flash programming
+T3E40 018:275.886   CPU_ReadMem(2048 bytes @ 0x08092800)
+T3E40 018:331.114    -- Updating flash cache (2048 bytes @ 0x08092800)
+T3E40 018:331.182    -- Updating flash cache invalid range 0x08092800 - 0x08092FFF (2048 bytes)
+T3E40 018:331.234    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08093000 if necessary
+T3E40 018:331.268    -- Start of preparing flash programming
+T3E40 018:331.298    -- End of preparing flash programming
+T3E40 018:331.332   CPU_ReadMem(2048 bytes @ 0x08093000)
+T3E40 018:386.492    -- Updating flash cache (2048 bytes @ 0x08093000)
+T3E40 018:386.556    -- Updating flash cache invalid range 0x08093000 - 0x080937FF (2048 bytes)
+T3E40 018:386.596    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08093800 if necessary
+T3E40 018:386.630    -- Start of preparing flash programming
+T3E40 018:386.660    -- End of preparing flash programming
+T3E40 018:386.696   CPU_ReadMem(2048 bytes @ 0x08093800)
+T3E40 018:442.070    -- Updating flash cache (2048 bytes @ 0x08093800)
+T3E40 018:442.144    -- Updating flash cache invalid range 0x08093800 - 0x08093FFF (2048 bytes)
+T3E40 018:442.188    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08094000 if necessary
+T3E40 018:442.224    -- Start of preparing flash programming
+T3E40 018:442.256    -- End of preparing flash programming
+T3E40 018:442.292   CPU_ReadMem(2048 bytes @ 0x08094000)
+T3E40 018:497.488    -- Updating flash cache (2048 bytes @ 0x08094000)
+T3E40 018:497.558    -- Updating flash cache invalid range 0x08094000 - 0x080947FF (2048 bytes)
+T3E40 018:497.598    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08094800 if necessary
+T3E40 018:497.630    -- Start of preparing flash programming
+T3E40 018:497.660    -- End of preparing flash programming
+T3E40 018:497.702   CPU_ReadMem(2048 bytes @ 0x08094800)
+T3E40 018:552.872    -- Updating flash cache (2048 bytes @ 0x08094800)
+T3E40 018:552.940    -- Updating flash cache invalid range 0x08094800 - 0x08094FFF (2048 bytes)
+T3E40 018:552.980    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08095000 if necessary
+T3E40 018:553.012    -- Start of preparing flash programming
+T3E40 018:553.044    -- End of preparing flash programming
+T3E40 018:553.078   CPU_ReadMem(2048 bytes @ 0x08095000)
+T3E40 018:608.232    -- Updating flash cache (2048 bytes @ 0x08095000)
+T3E40 018:608.292    -- Updating flash cache invalid range 0x08095000 - 0x080957FF (2048 bytes)
+T3E40 018:608.332    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08095800 if necessary
+T3E40 018:608.364    -- Start of preparing flash programming
+T3E40 018:608.388    -- End of preparing flash programming
+T3E40 018:608.428   CPU_ReadMem(2048 bytes @ 0x08095800)
+T3E40 018:663.530    -- Updating flash cache (2048 bytes @ 0x08095800)
+T3E40 018:663.580    -- Updating flash cache invalid range 0x08095800 - 0x08095FFF (2048 bytes)
+T3E40 018:663.608    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08096000 if necessary
+T3E40 018:663.628    -- Start of preparing flash programming
+T3E40 018:663.648    -- End of preparing flash programming
+T3E40 018:663.672   CPU_ReadMem(2048 bytes @ 0x08096000)
+T3E40 018:718.842    -- Updating flash cache (2048 bytes @ 0x08096000)
+T3E40 018:718.888    -- Updating flash cache invalid range 0x08096000 - 0x080967FF (2048 bytes)
+T3E40 018:718.916    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08096800 if necessary
+T3E40 018:718.938    -- Start of preparing flash programming
+T3E40 018:718.956    -- End of preparing flash programming
+T3E40 018:718.980   CPU_ReadMem(2048 bytes @ 0x08096800)
+T3E40 018:774.094    -- Updating flash cache (2048 bytes @ 0x08096800)
+T3E40 018:774.144    -- Updating flash cache invalid range 0x08096800 - 0x08096FFF (2048 bytes)
+T3E40 018:774.172    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08097000 if necessary
+T3E40 018:774.196    -- Start of preparing flash programming
+T3E40 018:774.214    -- End of preparing flash programming
+T3E40 018:774.236   CPU_ReadMem(2048 bytes @ 0x08097000)
+T3E40 018:829.388    -- Updating flash cache (2048 bytes @ 0x08097000)
+T3E40 018:829.466    -- Updating flash cache invalid range 0x08097000 - 0x080977FF (2048 bytes)
+T3E40 018:829.504    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08097800 if necessary
+T3E40 018:829.538    -- Start of preparing flash programming
+T3E40 018:829.568    -- End of preparing flash programming
+T3E40 018:829.604   CPU_ReadMem(2048 bytes @ 0x08097800)
+T3E40 018:884.776    -- Updating flash cache (2048 bytes @ 0x08097800)
+T3E40 018:884.852    -- Updating flash cache invalid range 0x08097800 - 0x08097FFF (2048 bytes)
+T3E40 018:884.880    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08098000 if necessary
+T3E40 018:884.902    -- Start of preparing flash programming
+T3E40 018:884.930    -- End of preparing flash programming
+T3E40 018:884.968   CPU_ReadMem(2048 bytes @ 0x08098000)
+T3E40 018:940.176    -- Updating flash cache (2048 bytes @ 0x08098000)
+T3E40 018:940.244    -- Updating flash cache invalid range 0x08098000 - 0x080987FF (2048 bytes)
+T3E40 018:940.292    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08098800 if necessary
+T3E40 018:940.324    -- Start of preparing flash programming
+T3E40 018:940.358    -- End of preparing flash programming
+T3E40 018:940.406   CPU_ReadMem(2048 bytes @ 0x08098800)
+T3E40 018:995.576    -- Updating flash cache (2048 bytes @ 0x08098800)
+T3E40 018:995.646    -- Updating flash cache invalid range 0x08098800 - 0x08098FFF (2048 bytes)
+T3E40 018:995.692    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08099000 if necessary
+T3E40 018:995.728    -- Start of preparing flash programming
+T3E40 018:995.762    -- End of preparing flash programming
+T3E40 018:995.800   CPU_ReadMem(2048 bytes @ 0x08099000)
+T3E40 019:051.100    -- Updating flash cache (2048 bytes @ 0x08099000)
+T3E40 019:051.146    -- Updating flash cache invalid range 0x08099000 - 0x080997FF (2048 bytes)
+T3E40 019:051.172    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x08099800 if necessary
+T3E40 019:051.196    -- Start of preparing flash programming
+T3E40 019:051.214    -- End of preparing flash programming
+T3E40 019:051.238   CPU_ReadMem(2048 bytes @ 0x08099800)
+T3E40 019:106.516    -- Updating flash cache (2048 bytes @ 0x08099800)
+T3E40 019:106.572    -- Updating flash cache invalid range 0x08099800 - 0x08099FFF (2048 bytes)
+T3E40 019:106.612    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0809A000 if necessary
+T3E40 019:106.646    -- Start of preparing flash programming
+T3E40 019:106.676    -- End of preparing flash programming
+T3E40 019:106.710   CPU_ReadMem(2048 bytes @ 0x0809A000)
+T3E40 019:162.084    -- Updating flash cache (2048 bytes @ 0x0809A000)
+T3E40 019:162.120    -- Updating flash cache invalid range 0x0809A000 - 0x0809A7FF (2048 bytes)
+T3E40 019:162.148    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0809A800 if necessary
+T3E40 019:162.170    -- Start of preparing flash programming
+T3E40 019:162.188    -- End of preparing flash programming
+T3E40 019:162.212   CPU_ReadMem(2048 bytes @ 0x0809A800)
+T3E40 019:217.502    -- Updating flash cache (2048 bytes @ 0x0809A800)
+T3E40 019:217.566    -- Updating flash cache invalid range 0x0809A800 - 0x0809AFFF (2048 bytes)
+T3E40 019:217.606    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0809B000 if necessary
+T3E40 019:217.640    -- Start of preparing flash programming
+T3E40 019:217.670    -- End of preparing flash programming
+T3E40 019:217.706   CPU_ReadMem(2048 bytes @ 0x0809B000)
+T3E40 019:273.020    -- Updating flash cache (2048 bytes @ 0x0809B000)
+T3E40 019:273.090    -- Updating flash cache invalid range 0x0809B000 - 0x0809B7FF (2048 bytes)
+T3E40 019:273.132    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0809B800 if necessary
+T3E40 019:273.168    -- Start of preparing flash programming
+T3E40 019:273.198    -- End of preparing flash programming
+T3E40 019:273.236   CPU_ReadMem(2048 bytes @ 0x0809B800)
+T3E40 019:328.612    -- Updating flash cache (2048 bytes @ 0x0809B800)
+T3E40 019:328.662    -- Updating flash cache invalid range 0x0809B800 - 0x0809BFFF (2048 bytes)
+T3E40 019:328.694    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0809C000 if necessary
+T3E40 019:328.722    -- Start of preparing flash programming
+T3E40 019:328.742    -- End of preparing flash programming
+T3E40 019:328.768   CPU_ReadMem(2048 bytes @ 0x0809C000)
+T3E40 019:384.100    -- Updating flash cache (2048 bytes @ 0x0809C000)
+T3E40 019:384.170    -- Updating flash cache invalid range 0x0809C000 - 0x0809C7FF (2048 bytes)
+T3E40 019:384.212    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0809C800 if necessary
+T3E40 019:384.248    -- Start of preparing flash programming
+T3E40 019:384.278    -- End of preparing flash programming
+T3E40 019:384.314   CPU_ReadMem(2048 bytes @ 0x0809C800)
+T3E40 019:439.698    -- Updating flash cache (2048 bytes @ 0x0809C800)
+T3E40 019:439.784    -- Updating flash cache invalid range 0x0809C800 - 0x0809CFFF (2048 bytes)
+T3E40 019:439.834    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0809D000 if necessary
+T3E40 019:439.860    -- Start of preparing flash programming
+T3E40 019:439.882    -- End of preparing flash programming
+T3E40 019:439.908   CPU_ReadMem(2048 bytes @ 0x0809D000)
+T3E40 019:495.276    -- Updating flash cache (2048 bytes @ 0x0809D000)
+T3E40 019:495.330    -- Updating flash cache invalid range 0x0809D000 - 0x0809D7FF (2048 bytes)
+T3E40 019:495.360    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0809D800 if necessary
+T3E40 019:495.386    -- Start of preparing flash programming
+T3E40 019:495.406    -- End of preparing flash programming
+T3E40 019:495.432   CPU_ReadMem(2048 bytes @ 0x0809D800)
+T3E40 019:550.754    -- Updating flash cache (2048 bytes @ 0x0809D800)
+T3E40 019:550.822    -- Updating flash cache invalid range 0x0809D800 - 0x0809DFFF (2048 bytes)
+T3E40 019:550.864    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0809E000 if necessary
+T3E40 019:550.900    -- Start of preparing flash programming
+T3E40 019:550.932    -- End of preparing flash programming
+T3E40 019:550.966   CPU_ReadMem(2048 bytes @ 0x0809E000)
+T3E40 019:606.356    -- Updating flash cache (2048 bytes @ 0x0809E000)
+T3E40 019:606.432    -- Updating flash cache invalid range 0x0809E000 - 0x0809E7FF (2048 bytes)
+T3E40 019:606.492    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0809E800 if necessary
+T3E40 019:606.528    -- Start of preparing flash programming
+T3E40 019:606.560    -- End of preparing flash programming
+T3E40 019:606.600   CPU_ReadMem(2048 bytes @ 0x0809E800)
+T3E40 019:662.020    -- Updating flash cache (2048 bytes @ 0x0809E800)
+T3E40 019:662.086    -- Updating flash cache invalid range 0x0809E800 - 0x0809EFFF (2048 bytes)
+T3E40 019:662.128    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0809F000 if necessary
+T3E40 019:662.164    -- Start of preparing flash programming
+T3E40 019:662.196    -- End of preparing flash programming
+T3E40 019:662.232   CPU_ReadMem(2048 bytes @ 0x0809F000)
+T3E40 019:717.508    -- Updating flash cache (2048 bytes @ 0x0809F000)
+T3E40 019:717.574    -- Updating flash cache invalid range 0x0809F000 - 0x0809F7FF (2048 bytes)
+T3E40 019:717.614    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x0809F800 if necessary
+T3E40 019:717.654    -- Start of preparing flash programming
+T3E40 019:717.692    -- End of preparing flash programming
+T3E40 019:717.728   CPU_ReadMem(2048 bytes @ 0x0809F800)
+T3E40 019:773.012    -- Updating flash cache (2048 bytes @ 0x0809F800)
+T3E40 019:773.080    -- Updating flash cache invalid range 0x0809F800 - 0x0809FFFF (2048 bytes)
+T3E40 019:773.122    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A0000 if necessary
+T3E40 019:773.158    -- Start of preparing flash programming
+T3E40 019:773.204    -- End of preparing flash programming
+T3E40 019:773.240   CPU_ReadMem(2048 bytes @ 0x080A0000)
+T3E40 019:828.396    -- Updating flash cache (2048 bytes @ 0x080A0000)
+T3E40 019:828.444    -- Updating flash cache invalid range 0x080A0000 - 0x080A07FF (2048 bytes)
+T3E40 019:828.472    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A0800 if necessary
+T3E40 019:828.492    -- Start of preparing flash programming
+T3E40 019:828.512    -- End of preparing flash programming
+T3E40 019:828.552   CPU_ReadMem(2048 bytes @ 0x080A0800)
+T3E40 019:883.708    -- Updating flash cache (2048 bytes @ 0x080A0800)
+T3E40 019:883.756    -- Updating flash cache invalid range 0x080A0800 - 0x080A0FFF (2048 bytes)
+T3E40 019:883.782    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A1000 if necessary
+T3E40 019:883.804    -- Start of preparing flash programming
+T3E40 019:883.824    -- End of preparing flash programming
+T3E40 019:883.848   CPU_ReadMem(2048 bytes @ 0x080A1000)
+T3E40 019:939.092    -- Updating flash cache (2048 bytes @ 0x080A1000)
+T3E40 019:939.142    -- Updating flash cache invalid range 0x080A1000 - 0x080A17FF (2048 bytes)
+T3E40 019:939.170    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A1800 if necessary
+T3E40 019:939.192    -- Start of preparing flash programming
+T3E40 019:939.212    -- End of preparing flash programming
+T3E40 019:939.236   CPU_ReadMem(2048 bytes @ 0x080A1800)
+T3E40 019:994.380    -- Updating flash cache (2048 bytes @ 0x080A1800)
+T3E40 019:994.428    -- Updating flash cache invalid range 0x080A1800 - 0x080A1FFF (2048 bytes)
+T3E40 019:994.458    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A2000 if necessary
+T3E40 019:994.478    -- Start of preparing flash programming
+T3E40 019:994.498    -- End of preparing flash programming
+T3E40 019:994.522   CPU_ReadMem(2048 bytes @ 0x080A2000)
+T3E40 020:049.628    -- Updating flash cache (2048 bytes @ 0x080A2000)
+T3E40 020:049.700    -- Updating flash cache invalid range 0x080A2000 - 0x080A27FF (2048 bytes)
+T3E40 020:049.740    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A2800 if necessary
+T3E40 020:049.776    -- Start of preparing flash programming
+T3E40 020:049.808    -- End of preparing flash programming
+T3E40 020:049.844   CPU_ReadMem(2048 bytes @ 0x080A2800)
+T3E40 020:105.008    -- Updating flash cache (2048 bytes @ 0x080A2800)
+T3E40 020:105.076    -- Updating flash cache invalid range 0x080A2800 - 0x080A2FFF (2048 bytes)
+T3E40 020:105.120    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A3000 if necessary
+T3E40 020:105.156    -- Start of preparing flash programming
+T3E40 020:105.188    -- End of preparing flash programming
+T3E40 020:105.224   CPU_ReadMem(2048 bytes @ 0x080A3000)
+T3E40 020:160.396    -- Updating flash cache (2048 bytes @ 0x080A3000)
+T3E40 020:160.464    -- Updating flash cache invalid range 0x080A3000 - 0x080A37FF (2048 bytes)
+T3E40 020:160.506    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A3800 if necessary
+T3E40 020:160.542    -- Start of preparing flash programming
+T3E40 020:160.572    -- End of preparing flash programming
+T3E40 020:160.608   CPU_ReadMem(2048 bytes @ 0x080A3800)
+T3E40 020:215.784    -- Updating flash cache (2048 bytes @ 0x080A3800)
+T3E40 020:215.850    -- Updating flash cache invalid range 0x080A3800 - 0x080A3FFF (2048 bytes)
+T3E40 020:215.888    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A4000 if necessary
+T3E40 020:215.922    -- Start of preparing flash programming
+T3E40 020:215.956    -- End of preparing flash programming
+T3E40 020:215.990   CPU_ReadMem(2048 bytes @ 0x080A4000)
+T3E40 020:271.328    -- Updating flash cache (2048 bytes @ 0x080A4000)
+T3E40 020:271.392    -- Updating flash cache invalid range 0x080A4000 - 0x080A47FF (2048 bytes)
+T3E40 020:271.430    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A4800 if necessary
+T3E40 020:271.476    -- Start of preparing flash programming
+T3E40 020:271.508    -- End of preparing flash programming
+T3E40 020:271.542   CPU_ReadMem(2048 bytes @ 0x080A4800)
+T3E40 020:326.846    -- Updating flash cache (2048 bytes @ 0x080A4800)
+T3E40 020:326.898    -- Updating flash cache invalid range 0x080A4800 - 0x080A4FFF (2048 bytes)
+T3E40 020:326.928    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A5000 if necessary
+T3E40 020:326.954    -- Start of preparing flash programming
+T3E40 020:326.972    -- End of preparing flash programming
+T3E40 020:326.996   CPU_ReadMem(2048 bytes @ 0x080A5000)
+T3E40 020:382.340    -- Updating flash cache (2048 bytes @ 0x080A5000)
+T3E40 020:382.414    -- Updating flash cache invalid range 0x080A5000 - 0x080A57FF (2048 bytes)
+T3E40 020:382.456    -- Filling invalid ranges in sector buffer (flash cache) for sector @ 0x080A5800 if necessary
+T3E40 020:382.492    -- Start of preparing flash programming
+T3E40 020:382.524    -- End of preparing flash programming
+T3E40 020:382.560   CPU_ReadMem(2048 bytes @ 0x080A5800)
+T3E40 020:444.544    -- Updating flash cache (2048 bytes @ 0x080A5800)
+T3E40 020:444.634    -- Updating flash cache invalid range 0x080A5800 - 0x080A5FFF (2048 bytes)
+T3E40 020:444.886    -- End of determining dirty areas
+T3E40 020:445.716    -- CPU speed could not be measured.
+T3E40 020:445.750    -- Start of comparing flash
+T3E40 020:445.786    -- CRC check was estimated as fastest method
+T3E40 020:445.818    -- Comparing range 0x8010000 - 0x802FFFF (64 Sectors, 128 KB), using single-block CRC calculation
+T3E40 020:467.846    -- CRC matches
+T3E40 020:467.896    -- Comparing range 0x8030000 - 0x804FFFF (64 Sectors, 128 KB), using single-block CRC calculation
+T3E40 020:494.258    -- CRC matches
+T3E40 020:494.304    -- Comparing range 0x8050000 - 0x806FFFF (64 Sectors, 128 KB), using single-block CRC calculation
+T3E40 020:521.066    -- CRC matches
+T3E40 020:521.134    -- Comparing range 0x8070000 - 0x808FFFF (64 Sectors, 128 KB), using single-block CRC calculation
+T3E40 020:547.928    -- CRC matches
+T3E40 020:547.996    -- Comparing range 0x8090000 - 0x80A5FFF (44 Sectors, 88 KB), using single-block CRC calculation
+T3E40 020:566.540    -- CRC matches
+T3E40 020:566.596    -- Comparing range 0x8010000 - 0x802FFFF (64 Sectors, 128 KB), using alternative single-block CRC calculation
+T3E40 020:588.774    -- CRC does not match, checking individual sectors
+T3E40 020:595.644    -- CRC does not match for sectors 32-47
+T3E40 020:602.544    -- CRC matches for sectors 48-63
+T3E40 020:611.924    -- CRC matches for sectors 64-79
+T3E40 020:621.152    -- CRC matches for sectors 80-95
+T3E40 020:621.214    -- Comparing range 0x8030000 - 0x804FFFF (64 Sectors, 128 KB), using alternative single-block CRC calculation
+T3E40 020:647.816    -- CRC matches
+T3E40 020:647.884    -- Comparing range 0x8050000 - 0x806FFFF (64 Sectors, 128 KB), using alternative single-block CRC calculation
+T3E40 020:674.304    -- CRC matches
+T3E40 020:674.344    -- Comparing range 0x8070000 - 0x808FFFF (64 Sectors, 128 KB), using alternative single-block CRC calculation
+T3E40 020:700.966    -- CRC matches
+T3E40 020:701.032    -- Comparing range 0x8090000 - 0x80A5FFF (44 Sectors, 88 KB), using alternative single-block CRC calculation
+T3E40 020:719.620    -- CRC matches
+T3E40 020:719.686    -- End of comparing flash
+T3E40 020:719.722    -- Start of erasing sectors
+T3E40 020:719.754    -- Erasing range 0x08010000 - 0x08017FFF ( 16 Sectors, 32 KB)
+T3E40 021:576.818    -- End of erasing sectors
+T3E40 021:576.876    -- Start of flash programming
+T3E40 021:576.908    -- Programming range 0x08010000 - 0x08017FFF ( 16 Sectors, 32 KB)
+T3E40 022:568.562    -- End of flash programming
+T3E40 022:568.628    -- 0x8010000 - 0x8017FFF ( 16 Sectors, 32 KB)
+T3E40 022:568.660    -- Start of verifying flash
+T3E40 022:568.692    -- Use CRC or checksum calculation as verify method
+T3E40 022:568.722    -- Checksum is not supported by this flash bank. Switched to read back method.
+T3E40 022:642.716    -- End of verifying flash
+T3E40 022:642.782    -- Start of restoring
+T3E40 022:642.814    -- End of restoring
+T3E40 022:643.540    -- Bank 0 @ 0x08000000: 1 range affected (32768 bytes)
+T3E40 022:643.588    -- Total: 22.370s (Prepare: 20.173s, Compare: 0.273s, Erase: 0.857s, Program: 1.062s, Verify: 0.003s, Restore: 0.000s)
+T3E40 022:643.644    -- Program speed: 29 KB/s
+T3E40 022:649.046 - 22381.938ms returns 0x00
+T3E40 022:649.108 JLINK_ExecCommand("SetVerifyRAMDownload = 0", ...). 
+T3E40 022:649.136 - 0.003ms returns 0x01
+T3E40 022:650.176 JLINK_IsHalted()
+T3E40 022:651.032 - 0.855ms returns FALSE
+T3E40 022:651.068 JLINK_Halt()
+T3E40 022:659.110 - 8.040ms returns 0x00
+T3E40 022:659.196 JLINK_ReadMemEx_64(0x08010000, 0x95ECC Bytes, ...)
+T3E40 022:659.250   CPU_ReadMem(614092 bytes @ 0x08010000)
+T3E40 038:931.660   Data:  00 80 05 20 AD BF 01 08 37 C0 01 08 37 C0 01 08 ...
+T3E40 038:931.708 - 16272.515ms returns 614092 (0x95ECC)
+T3E40 038:932.496 JLINK_IsOpen()
+T3E40 038:932.524 - 0.029ms returns 0x01
+T3E40 038:933.640 JLINK_Close()
+T3E40 038:933.984   CPU_WriteMem(6888 bytes @ 0x20000000)
+T3E40 038:948.900 - 15.258ms
+T3E40 038:948.936   
+T3E40 038:948.952   Closed

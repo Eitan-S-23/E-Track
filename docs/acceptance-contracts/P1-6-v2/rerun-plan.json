@@ -1,0 +1,186 @@
+{
+  "schema": "etrack-rerun-plan-v1",
+  "current_contract_id": "P1-6-v2",
+  "current_contract_sha256": "EF0726542854162C87241C186480416D7B07CAF50E6FCC992DB70113FED7FA29",
+  "previous_contract_id": "P1-6-v1",
+  "previous_contract_sha256": "EB0D442F3F03F1289CAA08AB4AD768A3CB321AD0CDD1CE00B0E23F8C8C449989",
+  "contract_lineage": "direct_successor",
+  "current_round_id": "P1-6-group16-20261104-02",
+  "previous_round_id": "P1-6-group16-20261104-01",
+  "previous_matrix_sha256": "76C4D6614E866D2B2C97BD18A3E475802B0CF615457D56A3B68B4497C1460824",
+  "changed_input_groups": [
+    "validation"
+  ],
+  "changed_external_inputs": [],
+  "rerun_criteria": [
+    {
+      "id": "ROW-01",
+      "reasons": [
+        "command_definition_changed:CMD-AUTO",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "ROW-02",
+      "reasons": [
+        "command_definition_changed:CMD-AUTO",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "ROW-03",
+      "reasons": [
+        "command_definition_changed:CMD-AUTO",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "ROW-04",
+      "reasons": [
+        "command_definition_changed:CMD-AUTO",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "ROW-05",
+      "reasons": [
+        "command_definition_changed:CMD-AUTO",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "ROW-06",
+      "reasons": [
+        "command_definition_changed:CMD-AUTO",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "ROW-07",
+      "reasons": [
+        "command_definition_changed:CMD-AUTO",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "ROW-08",
+      "reasons": [
+        "command_definition_changed:CMD-AUTO",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "ROW-09",
+      "reasons": [
+        "command_definition_changed:CMD-AUTO",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "ROW-10",
+      "reasons": [
+        "command_definition_changed:CMD-AUTO",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "ROW-11",
+      "reasons": [
+        "command_definition_changed:CMD-AUTO",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "ROW-12",
+      "reasons": [
+        "command_definition_changed:CMD-AUTO",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "ROW-13",
+      "reasons": [
+        "command_definition_changed:CMD-AUTO",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "ROW-14",
+      "reasons": [
+        "command_definition_changed:CMD-AUTO",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "ROW-15",
+      "reasons": [
+        "command_definition_changed:CMD-AUTO",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "ROW-16",
+      "reasons": [
+        "command_definition_changed:CMD-AUTO",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "ROW-17",
+      "reasons": [
+        "command_definition_changed:CMD-AUTO",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "ROW-18",
+      "reasons": [
+        "command_definition_changed:CMD-AUTO",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "ROW-19",
+      "reasons": [
+        "command_definition_changed:CMD-AUTO",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    },
+    {
+      "id": "ROW-20",
+      "reasons": [
+        "command_definition_changed:CMD-AUTO",
+        "input_group_changed:validation",
+        "previous_result_not_pass"
+      ]
+    }
+  ],
+  "reusable_criteria": [],
+  "reuse_origins": {},
+  "required_commands": [
+    "CMD-AUTO"
+  ],
+  "required_artifacts": [
+    "ART-PLAN",
+    "ART-RUN"
+  ]
+}

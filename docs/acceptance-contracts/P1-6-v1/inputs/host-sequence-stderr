@@ -1,0 +1,15 @@
+test_all_consumers_reference_same_exception (__main__.NonPowerSequenceTests.test_all_consumers_reference_same_exception) ... ok
+test_current_readiness_does_not_silently_open (__main__.NonPowerSequenceTests.test_current_readiness_does_not_silently_open) ... ok
+test_decision_is_explicit_and_authorized (__main__.NonPowerSequenceTests.test_decision_is_explicit_and_authorized) ... ok
+test_group16_decision_reaches_forward_contracts (__main__.NonPowerSequenceTests.test_group16_decision_reaches_forward_contracts) ... ok
+test_group16_successor_keeps_twenty_fault_types (__main__.NonPowerSequenceTests.test_group16_successor_keeps_twenty_fault_types) ... ok
+test_original_twenty_rows_and_physical_classes_remain (__main__.NonPowerSequenceTests.test_original_twenty_rows_and_physical_classes_remain) ... ok
+test_p51_numeric_gates_are_not_reduced (__main__.NonPowerSequenceTests.test_p51_numeric_gates_are_not_reduced) ... ok
+test_p52_partial_is_not_complete_or_release (__main__.NonPowerSequenceTests.test_p52_partial_is_not_complete_or_release) ... ok
+test_p53_is_draft_only_until_final_results (__main__.NonPowerSequenceTests.test_p53_is_draft_only_until_final_results) ... ok
+test_release_gate_remains_closed_until_full_p5 (__main__.NonPowerSequenceTests.test_release_gate_remains_closed_until_full_p5) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.035s
+
+OK

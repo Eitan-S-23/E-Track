@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "D:\\singlechip\\gcc+gdb+openocd\\tools\\arm-gnu-toolchain-13.3.rel1-ming\\bin\\arm-none-eabi-objcopy.exe",
+    "-O",
+    "binary",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p35-pre-durable-20261102\\target-30313\\download-recovery-01\\originals\\keyed-build\\app\\X-Track-App-GCC.elf",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p16g-20261104-01\\recover-boot-01\\after\\symbols-target\\elf.bin"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 944204618800200,
+  "ended_monotonic_ns": 944204870788300,
+  "stdout": {
+    "path": ".cache\\p16g-20261104-01\\recover-boot-01\\after\\symbols-target\\objcopy.stdout",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": ".cache\\p16g-20261104-01\\recover-boot-01\\after\\symbols-target\\objcopy.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

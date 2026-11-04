@@ -1,0 +1,190 @@
+T44AC 000:002.056   SEGGER J-Link V8.18 Log File
+T44AC 000:002.334   DLL Compiled: Mar  5 2025 14:42:43
+T44AC 000:002.389   Logging started @ 2026-11-04 00:03
+T44AC 000:002.439   Process: C:\Users\SU\SEGGER\JLink_V818\JLink.exe
+T44AC 000:002.497 - 2.489ms 
+T44AC 000:002.926 JLINK_ExecCommand("DisableAutoUpdateFW", ...). 
+T44AC 000:003.021 - 0.095ms returns 0x00
+T44AC 000:003.177 JLINK_EMU_SelectByUSBSN(SerialNo = 123456)
+T44AC 000:014.266 - 11.090ms returns 0x00
+T44AC 000:014.430 JLINK_SetWarnOutHandler(...)
+T44AC 000:014.488 - 0.061ms 
+T44AC 000:014.542 JLINK_ExecCommand("SuppressGUI = 1", ...). 
+T44AC 000:014.595 - 0.052ms returns 0x00
+T44AC 000:014.653 JLINK_OpenEx(...)
+T44AC 000:025.200   Firmware: J-Link ARM-OB STM32 compiled Aug 22 2012 19:52:04
+T44AC 000:027.322   Hardware: V7.00
+T44AC 000:027.370   S/N: 4294967295
+T44AC 000:027.399   OEM: SEGGER
+T44AC 000:027.427   Feature(s): RDI,FlashDL,FlashBP,JFlash,GDB
+T44AC 000:027.728   Bootloader: (FW returned invalid version)
+T44AC 000:028.446   TELNET listener socket opened on port 19021
+T44AC 000:029.119 - 14.460ms returns "O.K."
+T44AC 000:029.179 JLINK_SetFlashProgProgressCallback(...)
+T44AC 000:029.207 - 0.030ms 
+T44AC 000:029.232 JLINK_GetFirmwareString(...)
+T44AC 000:029.263 - 0.030ms 
+T44AC 000:029.291 JLINK_GetHardwareVersion()
+T44AC 000:029.312 - 0.021ms returns 70000
+T44AC 000:029.341 JLINK_GetHWInfo(...)
+T44AC 000:029.530 - 0.190ms returns 0
+T44AC 000:029.572 JLINK_GetSN()
+T44AC 000:029.596 - 0.023ms returns -1
+T44AC 000:029.621 JLINK_GetOEMString(...)
+T44AC 000:029.646 JLINK_EMU_GetCurrConnectionInfo()
+T44AC 000:029.667 - 0.023ms returns 0
+T44AC 000:029.690 JLINK_EMU_HasCapEx(0x00000026)
+T44AC 000:029.710 - 0.020ms returns 0
+T44AC 000:029.730 JLINK_GetEmuCaps()
+T44AC 000:029.750 - 0.019ms returns 0x88EA5833
+T44AC 000:029.769 JLINK_GetEmuCaps()
+T44AC 000:029.789 - 0.019ms returns 0x88EA5833
+T44AC 000:029.810 JLINK_GetHWStatus(...)
+T44AC 000:029.983 - 0.172ms returns 0
+T44AC 000:030.012 JLINK_EMU_HasCapEx(0x00000044)
+T44AC 000:030.031 - 0.019ms returns 0
+T44AC 000:030.056 JLINK_ExecCommand("ProjectFile = D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p16g-20261104-01\campaign-03\matrix\row-06\final-app-confirmed-v1-continue-poll-15.native\settings.jlink", ...). 
+T44AC 000:134.047 - 103.989ms returns 0x00
+T44AC 000:134.096 JLINK_ExecCommand("SetRestartOnClose = 0", ...). 
+T44AC 000:134.146 - 0.017ms returns 0x01
+T44AC 000:134.216 JLINK_ExecCommand("InhibitConnectRetries = 1", ...). 
+T44AC 000:134.254 - 0.005ms returns 0x00
+T44AC 000:134.286 JLINK_ExecCommand("SetEnableMemCache = 0", ...). 
+T44AC 000:134.309 - 0.001ms returns 0x01
+T44AC 000:134.336 JLINK_ExecCommand("ProjectFile = D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p16g-20261104-01\campaign-03\matrix\row-06\final-app-confirmed-v1-continue-poll-15.native\settings.jlink", ...). 
+T44AC 000:136.738 - 2.401ms returns 0x00
+T44AC 000:136.795 JLINK_DEVICE_GetIndex(sDeviceName = AT32F435RGT7)
+T44AC 000:136.835 - 0.039ms returns 443
+T44AC 000:136.859 JLINK_ExecCommand("device=AT32F435RGT7", ...). 
+T44AC 000:136.959   Flash bank @ 0x08000000: SFL: Parsing sectorization info from ELF file
+T44AC 000:136.994     FlashDevice.SectorInfo[0]: .SectorSize = 0x00001000, .SectorStartAddr = 0x08000000
+T44AC 000:137.023   FlashBank @0x08000000: Sectorization info from SFL ELF file ignored because sectorization override from DLL / XML file is active.
+T44AC 000:137.518   Flash bank @ 0x1FFFC000: SFL: Parsing sectorization info from ELF file
+T44AC 000:137.558     FlashDevice.SectorInfo[0]: .SectorSize = 0x00001000, .SectorStartAddr = 0x00000000
+T44AC 000:137.585   FlashBank @0x1FFFC000: Sectorization info from SFL ELF file ignored because sectorization override from DLL / XML file is active.
+T44AC 000:137.691   Flash bank @ 0x90000000: SFL: Parsing sectorization info from ELF file
+T44AC 000:137.734     FlashDevice.SectorInfo[0]: .SectorSize = 0x00010000, .SectorStartAddr = 0x00000000
+T44AC 000:138.973   Device "AT32F435RGT7" selected.
+T44AC 000:139.988 - 3.106ms returns 0x00
+T44AC 000:140.027 JLINK_EnableLog(...)
+T44AC 000:140.052 - 0.024ms 
+T44AC 000:140.084 JLINK_GetEmuCaps()
+T44AC 000:140.106 - 0.021ms returns 0x88EA5833
+T44AC 000:140.128 JLINK_TIF_GetAvailable(...)
+T44AC 000:140.321 - 0.192ms 
+T44AC 000:140.362 JLINK_TIF_Select(JLINKARM_TIF_SWD)
+T44AC 000:140.757 - 0.395ms returns 0x00
+T44AC 000:140.795 JLINK_IsConnected()
+T44AC 000:140.815 - 0.019ms returns FALSE
+T44AC 000:140.837 JLINK_SetSpeed(1000)
+T44AC 000:140.920 - 0.082ms 
+T44AC 000:140.949 JLINK_Connect()
+T44AC 000:141.193   InitTarget() start
+T44AC 000:141.233    J-Link Script File: Executing InitTarget()
+T44AC 000:143.604   DAP initialized successfully.
+T44AC 000:145.511     No Protection is set.
+T44AC 000:145.563   InitTarget() end - Took 4.32ms
+T44AC 000:146.698   Found SW-DP with ID 0x2BA01477
+T44AC 000:151.148   Old FW that does not support reading DPIDR via DAP jobs
+T44AC 000:155.269   DPv0 detected
+T44AC 000:155.319   CoreSight SoC-400 or earlier
+T44AC 000:155.353   Scanning AP map to find all available APs
+T44AC 000:158.006   AP[1]: Stopped AP scan as end of AP map has been reached
+T44AC 000:158.057   AP[0]: AHB-AP (IDR: 0x24770011, ADDR: 0x00000000)
+T44AC 000:158.087   Iterating through AP map to find AHB-AP to use
+T44AC 000:162.612   AP[0]: Core found
+T44AC 000:162.669   AP[0]: AHB-AP ROM base: 0xE00FF000
+T44AC 000:165.126   CPUID register: 0x410FC241. Implementer code: 0x41 (ARM)
+T44AC 000:165.185   Found Cortex-M4 r0p1, Little endian.
+T44AC 000:165.497   -- Max. mem block: 0x00002C18
+T44AC 000:166.041   CPU_ReadMem(4 bytes @ 0xE000EDF0)
+T44AC 000:166.919   CPU_ReadMem(4 bytes @ 0xE0002000)
+T44AC 000:167.866   FPUnit: 6 code (BP) slots and 2 literal slots
+T44AC 000:167.911   CPU_ReadMem(4 bytes @ 0xE000EDFC)
+T44AC 000:168.787   CPU_ReadMem(4 bytes @ 0xE0001000)
+T44AC 000:169.680   CPU_WriteMem(4 bytes @ 0xE0001000)
+T44AC 000:170.642   CPU_ReadMem(4 bytes @ 0xE000ED88)
+T44AC 000:171.539   CPU_WriteMem(4 bytes @ 0xE000ED88)
+T44AC 000:172.461   CPU_ReadMem(4 bytes @ 0xE000ED88)
+T44AC 000:173.342   CPU_WriteMem(4 bytes @ 0xE000ED88)
+T44AC 000:174.259   CoreSight components:
+T44AC 000:174.300   ROMTbl[0] @ E00FF000
+T44AC 000:174.331   CPU_ReadMem(64 bytes @ 0xE00FF000)
+T44AC 000:176.877   CPU_ReadMem(32 bytes @ 0xE000EFE0)
+T44AC 000:178.532   [0][0]: E000E000 CID B105E00D PID 000BB00C SCS-M7
+T44AC 000:178.582   CPU_ReadMem(32 bytes @ 0xE0001FE0)
+T44AC 000:180.215   [0][1]: E0001000 CID B105E00D PID 003BB002 DWT
+T44AC 000:180.270   CPU_ReadMem(32 bytes @ 0xE0002FE0)
+T44AC 000:181.909   [0][2]: E0002000 CID B105E00D PID 002BB003 FPB
+T44AC 000:181.973   CPU_ReadMem(32 bytes @ 0xE0000FE0)
+T44AC 000:183.621   [0][3]: E0000000 CID B105E00D PID 003BB001 ITM
+T44AC 000:183.679   CPU_ReadMem(32 bytes @ 0xE0040FE0)
+T44AC 000:185.366   [0][4]: E0040000 CID B105900D PID 000BB9A1 TPIU
+T44AC 000:185.425   CPU_ReadMem(32 bytes @ 0xE0041FE0)
+T44AC 000:187.043   [0][5]: E0041000 CID 00000000 PID 00000000 ???
+T44AC 000:187.136 - 46.186ms returns 0x00
+T44AC 000:187.218 JLINK_GetIdData(pIdData)
+T44AC 000:187.780   pIdData->ScanLen=4
+T44AC 000:187.821   pIdData->NumDevices=1
+T44AC 000:187.851   pIdData->aId[0]=0x2BA01477
+T44AC 000:187.889   pIdData->aIrRead[0]=0
+T44AC 000:187.918   pIdData->aScanLen[0]=0
+T44AC 000:187.962   pIdData->aScanRead[0]=0
+T44AC 000:187.990 - 0.771ms 
+T44AC 000:188.017 JLINK_GetMemZones(...)
+T44AC 000:188.037 - 0.020ms returns 1
+T44AC 000:188.062 JLINK_HasError()
+T44AC 000:188.086 JLINK_CORE_GetFound()
+T44AC 000:188.105 - 0.018ms returns 0xE0000FF
+T44AC 000:188.154 JLINK_ExecCommand("ExcludeFlashCacheRange 0x08000000-0x080FFFFF", ...). 
+T44AC 000:188.183 - 0.004ms returns 0x00
+T44AC 000:188.222 JLINK_WriteU32_64(0xE0042008, 0x00001000)
+T44AC 000:188.553   CPU is running
+T44AC 000:188.604   CPU_WriteMem(4 bytes @ 0xE0042008)
+T44AC 000:189.591 - 1.368ms returns 0 (0x00000000)
+T44AC 000:189.647 JLINK_GoEx(MaxEmulInsts = 0, Flags = 0x01)
+T44AC 000:197.539   CPU_ReadMem(4 bytes @ 0xE0001000)
+T44AC 000:199.712   Memory map 'after startup completion point' is active
+T44AC 000:199.845 - 10.198ms 
+T44AC 002:051.955 JLINK_Halt()
+T44AC 002:059.977 - 8.020ms returns 0x00
+T44AC 002:060.138 JLINK_GetDeviceFamily
+T44AC 002:060.164 - 0.024ms returns 14
+T44AC 002:060.185 JLINK_CORE_GetFound()
+T44AC 002:060.205 - 0.019ms returns 0xE0000FF
+T44AC 002:060.238 JLINK_GetDebugInfo(0x01 = Unknown)
+T44AC 002:060.260   Value=0x00000001
+T44AC 002:060.289 - 0.051ms returns 0
+T44AC 002:060.316 JLINK_ReadRegs(NumRegs = 28)
+T44AC 002:060.374   CPU_ReadMem(4 bytes @ 0xE0001004)
+T44AC 002:063.195   
+  R0 (0)         = 0x00                 R1 (1)         = 0x38D6               R2 (2)         = 0x01                 R3 (3)         = 0x20053560        
+  R4 (4)         = 0x20053554           R5 (5)         = 0x2005355C           R6 (6)         = 0x2005355E           R7 (7)         = 0x2005355D        
+  R8 (8)         = 0x38D6               R9 (9)         = 0x20053560           R10 (10)       = 0x03                 R11 (11)       = 0x20053550        
+  R12 (12)       = 0xFA000000           R13 (SP) (13)  = 0x20057DD0           MSP (17)       = 0x20057DD0           PSP (18)       = 0x00              
+  R14 (14)       = 0x8044DA3            R15 (PC) (15)  = 0x8044DCA            XPSR (16)      = 0x41000000           APSR (21)      = 0x40000000        
+  EPSR (22)      = 0x1000000            IPSR (23)      = 0x00                 CFBP (20)      = 0x4000000            CONTROL (27)   = 0x4000000         
+  FAULTMASK (26) = 0x00                 BASEPRI (25)   = 0x00                 PRIMASK (24)   = 0x00                 CycleCnt (65)  = 0x474C2A2C        
+T44AC 002:063.252 - 2.934ms returns 0x00
+T44AC 002:063.303 JLINK_ReadRegs(NumRegs = 33)
+T44AC 002:075.696   
+  FPS0 (33)  = 0x88ADEFD9           FPS1 (34)  = 0x4018D988           FPS2 (35)  = 0xFFFFFBD1           FPS3 (36)  = 0x3FEFFFFF        
+  FPS4 (37)  = 0x00                 FPS5 (38)  = 0x00                 FPS6 (39)  = 0x00                 FPS7 (40)  = 0x00              
+  FPS8 (41)  = 0x00                 FPS9 (42)  = 0x00                 FPS10 (43) = 0x310F72C5           FPS11 (44) = 0xB493EF57        
+  FPS12 (45) = 0x37D00684           FPS13 (46) = 0x444B2000           FPS14 (47) = 0x4025C238           FPS15 (48) = 0x403433FF        
+  FPS16 (49) = 0x00                 FPS17 (50) = 0x00                 FPS18 (51) = 0x00                 FPS19 (52) = 0x00              
+  FPS20 (53) = 0x00                 FPS21 (54) = 0x00                 FPS22 (55) = 0x00                 FPS23 (56) = 0x00              
+  FPS24 (57) = 0x00                 FPS25 (58) = 0x00                 FPS26 (59) = 0x00                 FPS27 (60) = 0x00              
+  FPS28 (61) = 0x00                 FPS29 (62) = 0x00                 FPS30 (63) = 0x00                 FPS31 (64) = 0x00              
+  FPSCR (32) = 0x80000010        
+T44AC 002:075.796 - 12.492ms returns 0x00
+T44AC 002:077.913 JLINK_ReadMemEx_64(0x20057E00, 0x200 Bytes, ...)
+T44AC 002:077.966   CPU_ReadMem(512 bytes @ 0x20057E00)
+T44AC 002:092.422   Data:  45 50 36 41 01 00 00 00 00 00 00 00 00 00 00 00 ...
+T44AC 002:092.529 - 14.615ms returns 512 (0x200)
+T44AC 002:093.081 JLINK_IsOpen()
+T44AC 002:093.148 - 0.066ms returns 0x01
+T44AC 002:102.078 JLINK_Close()
+T44AC 002:114.201 - 12.122ms
+T44AC 002:114.248   
+T44AC 002:114.269   Closed

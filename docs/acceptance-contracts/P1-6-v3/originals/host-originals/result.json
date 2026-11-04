@@ -1,0 +1,39 @@
+{
+  "outcome": "EXISTING_GROUP16_MODELS_REVIEWED",
+  "results": [
+    {
+      "original": "r3",
+      "originalExit": 0,
+      "rawOutput": "NORMAL group=16 changed=1 commits=10 events=483\r\nNORMAL group=16 changed=73 commits=10 events=843\r\nNORMAL group=16 changed=146 commits=10 events=1208\r\nBOOT_CHECKPOINT_MODEL_PASS group=16 scenarios=1793 cuts=1691 max_rework=16 page_events=576912 flash_events=1243304\r\n",
+      "changedInventoryHeadersNotCompiled": [
+        "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_ble_frame.h",
+        "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_ble_session.h",
+        "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_staging.h"
+      ]
+    },
+    {
+      "original": "extension1",
+      "originalExit": 0,
+      "rawOutput": "OLD_SOURCE_CUT group=16 state=2 frontier=0 verified=2\r\nCHECKPOINT_EXTENSION_PASS group=16 frontiers=13 scenarios=39\r\n",
+      "changedInventoryHeadersNotCompiled": [
+        "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_ble_frame.h",
+        "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_ble_session.h",
+        "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_staging.h"
+      ]
+    },
+    {
+      "original": "review-tests1",
+      "originalExit": 0,
+      "rawOutput": "TRANSACTION_PASS tx=1 target=64 tears=56 read_faults=6\r\nTRANSACTION_PASS tx=2 target=0 tears=56 read_faults=6\r\nTRANSACTION_PASS tx=3 target=64 tears=56 read_faults=6\r\nTRANSACTION_PASS tx=11 target=64 tears=56 read_faults=6\r\nTRANSACTION_PASS tx=12 target=0 tears=56 read_faults=6\r\nTRANSACTION_PASS tx=13 target=64 tears=56 read_faults=6\r\nCHECKPOINT_REVIEW_PASS tears=336 io_faults=36 sequences=11 oracle_negatives=3\r\n",
+      "changedInventoryHeadersNotCompiled": [
+        "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_ble_frame.h",
+        "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_ble_session.h",
+        "D:\\github\\my\\E-Track\\Libraries\\OTA\\ota_staging.h"
+      ]
+    }
+  ],
+  "actualStateMachineMatchesTargetIgnoringCRLF": true,
+  "modelsRerun": 0,
+  "deviceOperations": 0,
+  "scope": "Host model invariants only; no electrical power-cut proof or new endurance group."
+}

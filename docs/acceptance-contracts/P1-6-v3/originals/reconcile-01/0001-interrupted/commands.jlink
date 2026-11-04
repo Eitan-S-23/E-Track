@@ -1,0 +1,14 @@
+exec DisableAutoUpdateFW
+exec SetRestartOnClose = 0
+exec InhibitConnectRetries = 1
+exec SetEnableMemCache = 0
+connect
+exec ExcludeFlashCacheRange 0x08000000-0x080FFFFF
+savebin "D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p16g-20261104-01\reconcile-01\0001-interrupted\internal.bin", 0x08000000, 0x100000
+savebin "D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p16g-20261104-01\reconcile-01\0001-interrupted\fpb.bin", 0xE0002000, 0x28
+savebin "D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p16g-20261104-01\reconcile-01\0001-interrupted\core.bin", 0xE000ED08, 0x34
+savebin "D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p16g-20261104-01\reconcile-01\0001-interrupted\dhcsr.bin", 0xE000EDF0, 0x4
+savebin "D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p16g-20261104-01\reconcile-01\0001-interrupted\wdt.bin", 0x40003000, 0x10
+savebin "D:\github\my\E-Track\.cache\p35-integration-20261028\source\.cache\p16g-20261104-01\reconcile-01\0001-interrupted\freeze.bin", 0xE0042008, 0x4
+regs
+qc

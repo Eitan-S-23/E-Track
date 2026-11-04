@@ -1,0 +1,5 @@
+P16_ACTION_START=current-identity
+P16_ACTION_COMPLETE=current-identity
+P16_ACTION_START=current-backup-equality
+P16_ACTION_COMPLETE=current-backup-equality
+P16_ACTION_START=seed

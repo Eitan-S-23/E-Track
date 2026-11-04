@@ -1,0 +1,36 @@
+{
+  "argv": [
+    "powershell.exe",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "Tools/jlink/p1-6-setup.ps1",
+    "-Action",
+    "Restore",
+    "-Plan",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p16g-20261104-01\\restore-inputs\\plan.json",
+    "-RunDirectory",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p16g-20261104-01\\campaign-03\\restore"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 951844974519500,
+  "ended_monotonic_ns": 952387538530500,
+  "stdout": {
+    "path": ".cache\\p16g-20261104-01\\campaign-03\\restore.stdout",
+    "bytes": 54,
+    "sha256": "313703c93630395976255511d27d7fb678e7d6f36484e584f1ce7bfa6e876134"
+  },
+  "stderr": {
+    "path": ".cache\\p16g-20261104-01\\campaign-03\\restore.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

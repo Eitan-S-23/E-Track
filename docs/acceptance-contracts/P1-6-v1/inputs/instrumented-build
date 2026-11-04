@@ -1,0 +1,37 @@
+{
+  "instrumented": true,
+  "retainedReproduced": false,
+  "group": 16,
+  "skipIdentical": true,
+  "warnings": 0,
+  "errors": 0,
+  "configureWarnings": 0,
+  "artifacts": [
+    {
+      "path": ".cache\\p16g-20261104-01\\instrumented\\b\\boot\\X-Track-Boot.bin",
+      "bytes": 18804,
+      "sha256": "3b81e559ac4e758abcfe3bbac390bc49a17ee2106e03d2f9179db16aed1fd012"
+    },
+    {
+      "path": ".cache\\p16g-20261104-01\\instrumented\\b\\boot\\X-Track-Boot.elf",
+      "bytes": 42968,
+      "sha256": "5693cfd37f851e841c18a095580d461773f47272cbf4f255bdb4c0e5999c7162"
+    },
+    {
+      "path": ".cache\\p16g-20261104-01\\instrumented\\b\\boot\\X-Track-Boot.map",
+      "bytes": 114976,
+      "sha256": "59a7606751e314245904fb7355863a4f5fe336849b71509d906d7ef22fd04487"
+    },
+    {
+      "path": ".cache\\p16g-20261104-01\\instrumented\\b\\boot\\X-Track-Boot.hex",
+      "bytes": 52960,
+      "sha256": "cb12179630fa7d8a25f5d1e872c96524cbb7fa1b8fe31345ec76be1de9939c7a"
+    }
+  ],
+  "source": {
+    "path": ".cache\\p16g-20261104-01\\instrumented\\source-inputs.json",
+    "bytes": 583092,
+    "sha256": "05071b0c0f398d37fdfe71544f1d7ddb7803937d4e5bd2521cb6471ad4fe4325"
+  },
+  "deviceOperations": 0
+}

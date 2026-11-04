@@ -1,0 +1,45 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLink.exe",
+    "-USB",
+    "123456",
+    "-Device",
+    "AT32F435RGT7",
+    "-If",
+    "SWD",
+    "-Speed",
+    "1000",
+    "-AutoConnect",
+    "0",
+    "-ExitOnError",
+    "1",
+    "-NoGui",
+    "1",
+    "-Log",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p16g-20261104-01\\campaign-03\\seed\\seed-clear-bcb-continue-poll-01.native\\segger.log",
+    "-SettingsFile",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p16g-20261104-01\\campaign-03\\seed\\seed-clear-bcb-continue-poll-01.native\\settings.jlink",
+    "-CommandFile",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p16g-20261104-01\\campaign-03\\seed\\seed-clear-bcb-continue-poll-01.jlink"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 944873016977200,
+  "ended_monotonic_ns": 944875155581500,
+  "stdout": {
+    "path": ".cache\\p16g-20261104-01\\campaign-03\\seed\\seed-clear-bcb-continue-poll-01.native\\commander.stdout",
+    "bytes": 3470,
+    "sha256": "3a2556b6b7093ede5ab90a855740a7717f6e6b01cf211adf44f00ebe40468cd6"
+  },
+  "stderr": {
+    "path": ".cache\\p16g-20261104-01\\campaign-03\\seed\\seed-clear-bcb-continue-poll-01.native\\commander.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

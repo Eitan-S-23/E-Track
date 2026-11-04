@@ -1,0 +1,37 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "-I",
+    "-S",
+    "-B",
+    "-X",
+    "utf8",
+    "Tools/acceptance/validate_bundle.py",
+    "--contract",
+    "docs\\acceptance-contracts\\P1-6-v3.contract.json",
+    "--matrix",
+    "docs\\acceptance-contracts\\P1-6-v3\\initial-matrix.json",
+    "--repo-root",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 944607311732200,
+  "ended_monotonic_ns": 944611436287000,
+  "stdout": {
+    "path": ".cache\\p16g-20261104-01\\campaign-03\\precheck.stdout",
+    "bytes": 81,
+    "sha256": "3e197d3cb77916f19359cca6e1bc1120cbc464a8dec3d72f62fc73df54c6140f"
+  },
+  "stderr": {
+    "path": ".cache\\p16g-20261104-01\\campaign-03\\precheck.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

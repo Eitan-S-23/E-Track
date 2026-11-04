@@ -1,0 +1,297 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P1-6-v2",
+  "contract_sha256": "EF0726542854162C87241C186480416D7B07CAF50E6FCC992DB70113FED7FA29",
+  "round_id": "P1-6-group16-20261104-02",
+  "overall_result": "HARNESS_FAIL",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "ROW-01",
+      "result": "FAIL",
+      "failure_owner": "harness",
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": false,
+      "evidence": [
+        "capture/result.json",
+        "capture/campaign.stdout",
+        "capture/campaign.stderr",
+        "capture/campaign.started.json",
+        "capture/campaign.closed.json",
+        "capture/native-sdk.log",
+        "capture/native-closure.json",
+        "capture/reconcile.json",
+        "capture/recovery.json",
+        "capture/precheck.stdout"
+      ],
+      "notes": "Entry failure blocking ROW-01, not an executed fault or product failure. Test Boot written; second same-process App download timed out before erase. All state subsequently restored and verified."
+    },
+    {
+      "id": "ROW-02",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not reached: native seed failed before every AUTO row. Physical rows remain unavailable."
+    },
+    {
+      "id": "ROW-03",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not reached: native seed failed before every AUTO row. Physical rows remain unavailable."
+    },
+    {
+      "id": "ROW-04",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not reached: native seed failed before every AUTO row. Physical rows remain unavailable."
+    },
+    {
+      "id": "ROW-05",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not reached: native seed failed before every AUTO row. Physical rows remain unavailable."
+    },
+    {
+      "id": "ROW-06",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not reached: native seed failed before every AUTO row. Physical rows remain unavailable."
+    },
+    {
+      "id": "ROW-07",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not reached: native seed failed before every AUTO row. Physical rows remain unavailable."
+    },
+    {
+      "id": "ROW-08",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not reached: native seed failed before every AUTO row. Physical rows remain unavailable."
+    },
+    {
+      "id": "ROW-09",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not reached: native seed failed before every AUTO row. Physical rows remain unavailable."
+    },
+    {
+      "id": "ROW-10",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not reached: native seed failed before every AUTO row. Physical rows remain unavailable."
+    },
+    {
+      "id": "ROW-11",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not reached: native seed failed before every AUTO row. Physical rows remain unavailable."
+    },
+    {
+      "id": "ROW-12",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not reached: native seed failed before every AUTO row. Physical rows remain unavailable."
+    },
+    {
+      "id": "ROW-13",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not reached: native seed failed before every AUTO row. Physical rows remain unavailable."
+    },
+    {
+      "id": "ROW-14",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not reached: native seed failed before every AUTO row. Physical rows remain unavailable."
+    },
+    {
+      "id": "ROW-15",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not reached: native seed failed before every AUTO row. Physical rows remain unavailable."
+    },
+    {
+      "id": "ROW-16",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not reached: native seed failed before every AUTO row. Physical rows remain unavailable."
+    },
+    {
+      "id": "ROW-17",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not reached: native seed failed before every AUTO row. Physical rows remain unavailable."
+    },
+    {
+      "id": "ROW-18",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not reached: native seed failed before every AUTO row. Physical rows remain unavailable."
+    },
+    {
+      "id": "ROW-19",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not reached: native seed failed before every AUTO row. Physical rows remain unavailable."
+    },
+    {
+      "id": "ROW-20",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Not reached: native seed failed before every AUTO row. Physical rows remain unavailable."
+    }
+  ],
+  "evidence_hashes": {
+    "capture/result.json": "F402D9ADCD3392ECE2A2801470BD6EE4A0793B8F0653C097EB6350B769D0C641",
+    "capture/campaign.stdout": "E96470ECE3325933446892061EC42A6FF5B73F770F0C5702D476FB367F1E64CE",
+    "capture/campaign.stderr": "FC9760001C87043D42D89673F0A4E2D7E29CC51D8DC72842AF9A2CB64381D172",
+    "capture/campaign.started.json": "A852FE9F49D3278DAAAC8C36258118CDEE664A60436E622C9E8C3B4FB3E23C8A",
+    "capture/campaign.closed.json": "CA45CFC4B05220E9990C4BB05B7F8E6375A55BB5EDDF43E52AB057092170A62A",
+    "capture/native-sdk.log": "9EEF4CA5C1DC0BE5ABE803E477FAF141AB27E8FEC9B8100AB1BCE7FB22F7AC8C",
+    "capture/native-closure.json": "3DAF6B2238D1537C0264B6300C61E6801A0D244B4CA7B5DFF6CC54D8C2A068BC",
+    "capture/reconcile.json": "E542A4038CEF8EC3F3DE414178E8FCFD752A7C53E7CCDA8F84AB6837DF9601B3",
+    "capture/recovery.json": "A53E7EB7286AC45AB01A1952DF8BC9E55FA831C2204644AFC3CA989BD3DE5A44",
+    "capture/precheck.stdout": "A4422F787A5967CC74CFBBF71DF7E5393B1E53E691F3D3BE4C8E61960E5BFC8E"
+  },
+  "commands": [
+    {
+      "id": "CMD-AUTO",
+      "command": "python -I -S -B -X utf8 -u Tools/acceptance/p16_execute.py --plan .cache/p16g-20261104-01/restore-inputs/plan.json --out .cache/p16g-20261104-01/campaign-02 --contract docs/acceptance-contracts/P1-6-v2.contract.json --matrix docs/acceptance-contracts/P1-6-v2/initial-matrix.json",
+      "exit_code": 1,
+      "output_evidence": "capture/campaign.stderr"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-RUN",
+      "path": "capture/result.json",
+      "size": 511,
+      "sha256": "F402D9ADCD3392ECE2A2801470BD6EE4A0793B8F0653C097EB6350B769D0C641"
+    },
+    {
+      "id": "ART-PLAN",
+      "path": "inputs/recovery-plan",
+      "size": 12080,
+      "sha256": "5B3B96D9C8C8665A3B2B91623B41840EF261A2726201381C299BA0CBAE5E1E6B"
+    }
+  ]
+}

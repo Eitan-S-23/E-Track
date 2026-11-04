@@ -1,0 +1,45 @@
+{
+  "argv": [
+    "C:\\Users\\SU\\SEGGER\\JLink_V818\\JLink.exe",
+    "-USB",
+    "123456",
+    "-Device",
+    "AT32F435RGT7",
+    "-If",
+    "SWD",
+    "-Speed",
+    "1000",
+    "-AutoConnect",
+    "0",
+    "-ExitOnError",
+    "1",
+    "-NoGui",
+    "1",
+    "-Log",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p16g-20261104-01\\campaign-03\\matrix\\row-06\\final-app-confirmed-v1-continue-poll-04.native\\segger.log",
+    "-SettingsFile",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p16g-20261104-01\\campaign-03\\matrix\\row-06\\final-app-confirmed-v1-continue-poll-04.native\\settings.jlink",
+    "-CommandFile",
+    "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p16g-20261104-01\\campaign-03\\matrix\\row-06\\final-app-confirmed-v1-continue-poll-04.jlink"
+  ],
+  "reason": "completed",
+  "stopped_while_running": false,
+  "exit_code": 0,
+  "exit_status": "exited",
+  "started_monotonic_ns": 946879886864700,
+  "ended_monotonic_ns": 946881511937600,
+  "stdout": {
+    "path": ".cache\\p16g-20261104-01\\campaign-03\\matrix\\row-06\\final-app-confirmed-v1-continue-poll-04.native\\commander.stdout",
+    "bytes": 3504,
+    "sha256": "e0f5e0d60c734afe6ceea957d4d777b4689c22adcc63e71aed08c857e2ad1a27"
+  },
+  "stderr": {
+    "path": ".cache\\p16g-20261104-01\\campaign-03\\matrix\\row-06\\final-app-confirmed-v1-continue-poll-04.native\\commander.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

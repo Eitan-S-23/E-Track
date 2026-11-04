@@ -1,0 +1,34 @@
+{
+  "V0-final.bin": {
+    "length": 794761,
+    "version_code": 30314,
+    "raw_sha256": "9bb2bcd28693fc172a0f2bf2ed23465615c12f0af58bc30e1c6ac181d695a4fc",
+    "double_zero_sha256": "4d69b9dacc38d0bcb64d11fb838988571ee625250c0c831efc65636d33f53d21",
+    "header_crc32": "e37a2857"
+  },
+  "V1-final.bin": {
+    "length": 794761,
+    "version_code": 30315,
+    "raw_sha256": "a3026758d9fc136392251986e21c2658c9e2d94a885d5a1f526cf1f8eefaa038",
+    "double_zero_sha256": "70432419107d6fbf47eaea54590b2cecfb5df44a6979b0cb78c6f446f94065d1",
+    "header_crc32": "252aee75"
+  },
+  "policy": {
+    "applyGroup": 16,
+    "rollbackGroup": 1,
+    "changedBlock": 160,
+    "applyResume": 176,
+    "rollbackResume": 161,
+    "blocks": 195,
+    "payloadSource": {
+      "path": ".cache\\p16-auto-20261104-01\\build-test-02\\b\\app-gcc\\X-Track-App-GCC.bin",
+      "bytes": 614776,
+      "sha256": "6c5bd4d0f333fb656e1534e8e181b5d700f151e964d1f674687151aeda678533"
+    },
+    "appendedOnlyAfter": 614776,
+    "bootBuild": "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p16g-20261104-01\\instrumented\\b",
+    "appBuild": "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p16-auto-20261104-01\\build-test-02\\b",
+    "bootSha256": "3b81e559ac4e758abcfe3bbac390bc49a17ee2106e03d2f9179db16aed1fd012",
+    "nonProductionFixture": true
+  }
+}

@@ -1,0 +1,23 @@
+test_ambiguous_section_rejected (__main__.MatrixTests.test_ambiguous_section_rejected) ... ok
+test_changed_body_not_accepted_as_safe_suffix (__main__.MatrixTests.test_changed_body_not_accepted_as_safe_suffix) ... ok
+test_corrupt_image_rejected_even_if_raw_hash_updated (__main__.MatrixTests.test_corrupt_image_rejected_even_if_raw_hash_updated) ... ok
+test_current_versions_and_dynamic_block_count (__main__.MatrixTests.test_current_versions_and_dynamic_block_count) ... ok
+test_exact_restore_and_explicit_unused_tail_scope (__main__.MatrixTests.test_exact_restore_and_explicit_unused_tail_scope) ... ok
+test_frozen_plan_identity_checked_before_device_entry (__main__.MatrixTests.test_frozen_plan_identity_checked_before_device_entry) ... ok
+test_manifest_tampering_rejected (__main__.MatrixTests.test_manifest_tampering_rejected) ... ok
+test_missing_or_ambiguous_idle_halt_symbol_rejected (__main__.MatrixTests.test_missing_or_ambiguous_idle_halt_symbol_rejected) ... ok
+test_native_outputs_and_selector_owned (__main__.MatrixTests.test_native_outputs_and_selector_owned) ... ok
+test_nonforward_pair_rejected (__main__.MatrixTests.test_nonforward_pair_rejected) ... ok
+test_obsolete_per_block_policy_rejected (__main__.MatrixTests.test_obsolete_per_block_policy_rejected) ... ok
+test_restore_rejects_active_comparator (__main__.MatrixTests.test_restore_rejects_active_comparator) ... ok
+test_restore_rejects_header_payload_and_internal_mismatch (__main__.MatrixTests.test_restore_rejects_header_payload_and_internal_mismatch) ... ok
+test_runtime_vtor_checked (__main__.MatrixTests.test_runtime_vtor_checked) ... ok
+test_unscoped_or_overwritten_readback_rejected_before_launch (__main__.MatrixTests.test_unscoped_or_overwritten_readback_rejected_before_launch) ... ok
+test_wrong_boot_rejected (__main__.MatrixTests.test_wrong_boot_rejected) ... ok
+test_wrong_control_address_or_size_rejected (__main__.MatrixTests.test_wrong_control_address_or_size_rejected) ... ok
+test_wrong_group_boundary_rejected (__main__.MatrixTests.test_wrong_group_boundary_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 1.524s
+
+OK
