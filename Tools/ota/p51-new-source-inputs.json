@@ -1,0 +1,25 @@
+{
+  "schema": "p51-new-source-inputs-v2",
+  "task": "P5-1",
+  "mode": "new-source",
+  "repository": "Eitan-S-23/E-Track",
+  "reviewedProductBaseline": "b871d57e66645f43b29a8006a58ca6a3692951f3",
+  "profile": "p34-v2-candidate",
+  "derivation": "one-keyed-source-build/two-fw-header-finalizations",
+  "timestampPolicy": "actual-checkout-commit-time-for-both-headers",
+  "productPaths": [
+    "USER", "ArduinoAPI", "Libraries", "MDK-ARM_F435", "boot", "cmake",
+    "vendor", "Simulator", "bsdiff_lzma_AES128-main", "segger_rtt"
+  ],
+  "bootBinding": {
+    "manifest": "Tools/ota/p51-candidate-inputs.json",
+    "manifestSha256": "f07b239edcae98736cac220fa111e302560809ebc10ad9db8289bcdc256573c9"
+  },
+  "reference": {
+    "totalBytes": 1048576,
+    "seed": 7,
+    "budget": 256
+  },
+  "bleFullCell": "root may request candidate_full_base_version: same reviewed executable, distinct lower version than patch base; restore and bind actual GET_INFO, never fabricate hash or D1",
+  "purpose": "Artifact-only source candidate; no reservation, registration, release or device claim."
+}

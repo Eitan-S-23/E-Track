@@ -6,24 +6,33 @@ import { pathToFileURL } from "node:url";
 import { args, CliError, failure, outputPath, projectRoot, writeOutput } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-cli.mjs";
 import { digest } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/prepare-firmware-release.mjs";
 import { firmwareKeyHeader, verifyBuildKeyBinding } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-release-key.mjs";
-import { verifyBuildConfiguration } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-build-profile.mjs";
+import { verifyBuildConfiguration, readBuildConfiguration } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-build-profile.mjs";
+import { buildKeyedFirmware, cleanupPrivateBuildKey } from "./firmware-gcc-keyed-build.mjs";
+import { candidateAdmission, candidateMode, UI_BASELINE } from "./firmware-candidate-context.mjs";
+export { candidateAdmission } from "./firmware-candidate-context.mjs";
 
-export function candidateAdmission(env) {
-  if (env.GITHUB_ACTIONS !== "true" || env.GITHUB_EVENT_NAME !== "workflow_dispatch"
-      || env.GITHUB_REPOSITORY !== "Eitan-S-23/E-Track" || env.INPUT_PACKAGE_CANDIDATE !== "true"
-      || env.INPUT_PUBLISH !== "false" || env.INPUT_REHEARSAL !== "false" || env.INPUT_CHECK_BINDINGS !== "false"
-      || env.OTA_BOOT_CHAIN_READY !== "false" || env.INPUT_VERSION_NAME !== "3.3.16"
-      || env.INPUT_FIRMWARE_BUILD_PROFILE !== "p34-v2-candidate"
-      || !/^[0-9a-f]{40}$/.test(env.GITHUB_SHA ?? "")
-      || env.GITHUB_SHA !== env.INPUT_CANDIDATE_REVIEWED_COMMIT
-      || !/^[1-9][0-9]*$/.test(env.GITHUB_RUN_ID ?? "") || !/^[1-9][0-9]*$/.test(env.GITHUB_RUN_ATTEMPT ?? "")) {
-    throw new CliError("Candidate requires the exact reviewed source, protected locked-gate artifact-only dispatch");
+export function verifyCandidateCheckout(root, env, config, git = argv =>
+  execFileSync("git", ["--no-optional-locks", ...argv], { cwd: root, encoding: "utf8", windowsHide: true }).trim()) {
+  const owner = candidateAdmission(env);
+  if (git(["rev-parse", "HEAD"]) !== owner.commitSha) throw new CliError("Candidate checkout differs from reviewed source");
+  if (candidateMode(env) === "archived-original") return owner;
+  const expectedPaths = ["USER", "ArduinoAPI", "Libraries", "MDK-ARM_F435", "boot", "cmake",
+    "vendor", "Simulator", "bsdiff_lzma_AES128-main", "segger_rtt"];
+  if (config?.schema !== "p51-new-source-inputs-v2" || config.mode !== "new-source"
+      || config.repository !== env.GITHUB_REPOSITORY || config.reviewedProductBaseline !== UI_BASELINE
+      || config.profile !== "p34-v2-candidate"
+      || JSON.stringify(config.productPaths) !== JSON.stringify(expectedPaths)
+      || config.derivation !== "one-keyed-source-build/two-fw-header-finalizations"
+      || config.timestampPolicy !== "actual-checkout-commit-time-for-both-headers") {
+    throw new CliError("New-source reviewed product/input contract mismatch");
   }
-  if (Object.entries(env).some(([name, value]) => value &&
-      /^(CLOUDFLARE_|CF_API|TRACE_|GH_TOKEN|GITHUB_TOKEN)/.test(name))) {
-    throw new CliError("Candidate packaging must not receive cloud or publishing credentials");
+  git(["merge-base", "--is-ancestor", UI_BASELINE, owner.commitSha]);
+  if (git(["diff", "--name-only", UI_BASELINE, owner.commitSha, "--", ...expectedPaths])
+      || git(["diff", "--name-only", "HEAD"])
+      || git(["status", "--porcelain", "--untracked-files=all", "--", ...expectedPaths])) {
+    throw new CliError("Candidate product differs from the reviewed UI baseline or checkout is dirty");
   }
-  return { commitSha: env.GITHUB_SHA, runId: env.GITHUB_RUN_ID, runAttempt: env.GITHUB_RUN_ATTEMPT };
+  return owner;
 }
 
 function area(root) { return outputPath(root, path.join(root, ".cache/p51-candidate")); }
@@ -44,6 +53,9 @@ function ownership(env) {
 }
 
 export async function cleanupCandidate(root, env) {
+  if (existsSync(path.join(root, ".cache/p51cg"))) {
+    await cleanupPrivateBuildKey({ root, buildDir: ".cache/p51cg", env });
+  }
   const parent = area(root), privateDir = outputPath(root, path.join(parent, "private"));
   if (existsSync(privateDir)) {
     if (existsSync(path.join(privateDir, "native-active.json"))) {
@@ -65,6 +77,90 @@ export async function cleanupCandidate(root, env) {
   }
   if (existsSync(privateDir)) throw new CliError("Private candidate cleanup incomplete");
   return { privateAbsent: true };
+}
+
+export async function buildSourceCandidate({ root, env, config, execute, build = buildKeyedFirmware,
+  git = argv => execFileSync("git", ["--no-optional-locks", ...argv],
+    { cwd: root, encoding: "utf8", windowsHide: true }).trim() }) {
+  verifyCandidateCheckout(root, env, config, git);
+  if (candidateMode(env) !== "new-source") throw new CliError("Only new-source invokes GCC");
+  const buildTimestamp = Number(git(["show", "-s", "--format=%ct", "HEAD"]));
+  const result = await build({ root, buildDir: ".cache/p51cg", evidenceDir: ".cache/p51-candidate/keyed-build",
+    versionName: env.INPUT_VERSION_NAME, commitSha: env.GITHUB_SHA, buildTimestamp, env,
+    profile: config.profile, execute });
+  verifyBuildKeyBinding(result, env);
+  verifyBuildConfiguration(result, config.profile);
+  verifyCandidateCheckout(root, env, config, git);
+  return result;
+}
+
+export async function sourceMetadata(root, env, config, build) {
+  const parent = area(root), prepared = path.join(parent, "prepared");
+  const proof = JSON.parse(await readFile(path.join(parent, "evidence/source-images.json")));
+  const verification = JSON.parse(await readFile(path.join(parent, "evidence/verification.json")));
+  const assets = [];
+  for (const name of ["app-start.bin", "app-final.bin", "X-Track-Boot.bin", "full.etu", "patch.etu",
+    "reference-1MiB.etu", "recovery.bin", ...(env.INPUT_CANDIDATE_FULL_BASE_VERSION ? ["app-start-full.bin"] : [])]) {
+    const bytes = await readFile(outputPath(root, path.join(prepared, name)));
+    assets.push({ fileName: name, sizeBytes: bytes.length, sha256: digest(bytes) });
+  }
+  const identity = name => assets.find(a => a.fileName === name);
+  if (identity("app-start.bin").sha256 !== proof.base.sha256 || identity("app-final.bin").sha256 !== proof.target.sha256
+      || identity("X-Track-Boot.bin").sha256 !== proof.boot.sha256
+      || identity("patch.etu").sizeBytes !== 1048576
+      || identity("patch.etu").sha256 !== identity("reference-1MiB.etu").sha256
+      || !verification.fullByteEqual || !verification.patchByteEqual || !verification.recoveryByteEqual
+      || verification.native.checks.length !== (env.INPUT_CANDIDATE_FULL_BASE_VERSION ? 12 : 11)
+      || verification.native.checks.some(c => !c.observation.passed)
+      || JSON.stringify(assets) !== JSON.stringify(verification.assets)
+      || proof.base.versionName !== env.INPUT_CANDIDATE_BASE_VERSION || proof.target.versionName !== env.INPUT_VERSION_NAME
+      || JSON.stringify(proof.raw) !== JSON.stringify(build.app)) {
+    throw new CliError("New-source byte verification/asset identity mismatch");
+  }
+  if (env.INPUT_CANDIDATE_FULL_BASE_VERSION && (proof.fullBase?.versionName !== env.INPUT_CANDIDATE_FULL_BASE_VERSION
+      || identity("app-start-full.bin").sha256 !== proof.fullBase.sha256)) {
+    throw new CliError("Full-cell start identity mismatch");
+  }
+  const keyed = path.join(parent, "keyed-build");
+  if (JSON.stringify(await readBuildConfiguration(keyed, config.profile)) !== JSON.stringify(build.buildConfiguration)) {
+    throw new CliError("New-source compiler configuration drift");
+  }
+  const evidence = JSON.parse(await readFile(path.join(keyed, "keyed-build-evidence.json")));
+  for (const record of evidence.artifacts) {
+    const bytes = await readFile(outputPath(root, path.join(keyed, record.path)));
+    if (bytes.length !== record.sizeBytes || digest(bytes) !== record.sha256) throw new CliError("Compiled artifact drift");
+  }
+  return { schema: "p51-artifact-candidate-v2", mode: "new-source", task: "P5-1",
+    isFormalRelease: false, productionPublishable: false, readyRegistered: false,
+    versionName: proof.target.versionName, versionCode: proof.target.versionCode,
+    buildTimestamp: proof.target.buildTimestamp, targetImageSha256: proof.target.sha256,
+    baseVersionName: proof.base.versionName, baseVersionCode: proof.base.versionCode,
+    baseImageSha256: proof.base.sha256,
+    hardwareAcceptance: "NOT_RUN", runner: ownership(env),
+    source: { reviewedProductBaseline: config.reviewedProductBaseline, actualCheckout: env.GITHUB_SHA,
+      workflowCommit: env.GITHUB_WORKFLOW_SHA, workflowRef: env.GITHUB_WORKFLOW_REF,
+      productUnchangedFromReviewedBaseline: true },
+    derivation: env.INPUT_CANDIDATE_FULL_BASE_VERSION
+      ? "one-keyed-source-build/three-fw-header-finalizations" : config.derivation,
+    sourceCompilations: 1, build, finalization: proof,
+    elfMapRelationship: { directory: "keyed-build/app", headerOffset: 1024, headerBytes: 96,
+      description: "ELF/MAP exactly match raw GCC App; start/target differ only in the documented finalized fw_header",
+      artifacts: evidence.artifacts.filter(a => a.path.startsWith("app/")) },
+    ordinaryBuiltBoot: { ...build.boot, candidateBoot: false, purpose: "compile-only, not approved group16" },
+    boot: { ...proof.boot, kind: "external-approved-group16", firmwareRebuilt: false },
+    key: { ...build.keyBinding, compiledAndPackagingBindingMatched: true },
+    assets: assets.map(asset => ({ ...asset,
+      kind: ({ "full.etu": "full", "patch.etu": "patch", "reference-1MiB.etu": "reference",
+        "recovery.bin": "recovery", "app-start.bin": "start-app", "app-final.bin": "target-app",
+        "X-Track-Boot.bin": "external-boot", "app-start-full.bin": "full-cell-start-app" })[asset.fileName],
+      ...(asset.fileName === "patch.etu" || asset.fileName === "reference-1MiB.etu"
+        ? { baseVersionCode: proof.base.versionCode, baseImageSha256: proof.base.sha256 }
+        : {}) })),
+    reference: { aliasOf: "patch.etu", totalLength: 1048576, fullConsumption: true },
+    bleFullCell: { actualDeviceBinding: "NOT_RUN", instruction: config.bleFullCell,
+      patchBase: proof.base, suppliedFullStart: proof.fullBase ?? null,
+      noFabricatedDeviceIdentity: true },
+    noCloudMutation: true, noDeviceOperation: true };
 }
 
 export async function candidateMetadata(root, env, manifest) {
@@ -107,31 +203,73 @@ async function main() {
     process.stdout.write("P51_PRIVATE_CLEANUP_VERIFIED\n");
     return;
   }
-  const owner = candidateAdmission(env);
-  const head = execFileSync("git", ["--no-optional-locks", "rev-parse", "HEAD"], { cwd: root, encoding: "utf8", windowsHide: true }).trim();
-  if (head !== owner.commitSha) throw new CliError("Candidate checkout differs from reviewed source");
-  if (mode === "gate") { process.stdout.write("P51_ARTIFACT_ONLY_ADMITTED\n"); return; }
-  const manifestFile = path.join(root, "Tools/ota/p51-candidate-inputs.json");
+  const inputMode = candidateMode(env);
+  const manifestFile = path.join(root, inputMode === "new-source"
+    ? "Tools/ota/p51-new-source-inputs.json" : "Tools/ota/p51-candidate-inputs.json");
   const manifestBytes = await readFile(manifestFile), manifest = JSON.parse(manifestBytes);
+  const owner = verifyCandidateCheckout(root, env, manifest);
+  if (mode === "gate") { process.stdout.write("P51_ARTIFACT_ONLY_ADMITTED\n"); return; }
   const privateDir = outputPath(root, path.join(out, "private"));
   const evidence = outputPath(root, path.join(out, "evidence"));
   await mkdir(evidence, { recursive: true });
-  const run = async mode => {
+  const run = async (mode, extra = [], childEnv = env) => {
+    const label = mode === "command" ? path.basename(extra[1], ".json") : mode;
     const argv = ["-I", "-S", "-B", "-X", "utf8", path.join(root, "Tools/ota/p51-package.py"), mode,
-      "--root-out", out, "--cc", options.cc ?? "gcc"];
+      "--root-out", out, "--cc", options.cc ?? "gcc", ...extra];
     const result = spawnSync(options.python ?? "python3", argv,
-      { cwd: root, env, encoding: "utf8", windowsHide: true, timeout: 600000, maxBuffer: 1024 * 1024 });
+      { cwd: root, env: childEnv, encoding: "utf8", windowsHide: true, timeout: 660000, maxBuffer: 16 * 1024 * 1024 });
     const ok = !result.error && result.status === 0;
-    await writeOutput(root, path.join(evidence, `${mode}.stdout.txt`), redactCandidate(result.stdout, env.OTA_AES_KEY));
-    await writeOutput(root, path.join(evidence, `${mode}.stderr.txt`), redactCandidate(result.stderr, env.OTA_AES_KEY));
-    await writeOutput(root, path.join(evidence, `${mode}-process.json`), JSON.stringify({ stage: mode, argv,
+    await writeOutput(root, path.join(evidence, `${label}.stdout.txt`), redactCandidate(result.stdout, env.OTA_AES_KEY));
+    await writeOutput(root, path.join(evidence, `${label}.stderr.txt`), redactCandidate(result.stderr, env.OTA_AES_KEY));
+    await writeOutput(root, path.join(evidence, `${label}-process.json`), JSON.stringify({ stage: mode, argv,
       exitCode: result.status, signal: result.signal, timeout: result.error?.code === "ETIMEDOUT", ok }) + "\n");
     if (!ok) throw new CliError("Candidate adapter failed; bounded process receipt retained", "INVALID_PARAMETER", 1);
+    return result;
   };
   if (mode === "inputs") {
     if (env.OTA_AES_KEY) throw new CliError("Input admission must run without the packaging secret");
-    await run("inputs");
+    await run(inputMode === "new-source" ? "source-inputs" : "inputs");
     await writeOutput(root, path.join(evidence, "input-binding.json"), JSON.stringify({ manifestSha256: digest(manifestBytes), owner }) + "\n");
+    return;
+  }
+  if (inputMode === "new-source") {
+    const binding = JSON.parse(await readFile(path.join(evidence, "input-binding.json")));
+    if (binding.manifestSha256 !== digest(manifestBytes) || JSON.stringify(binding.owner) !== JSON.stringify(owner)) {
+      throw new CliError("Candidate new-source input owner changed");
+    }
+    if (existsSync(privateDir)) throw new CliError("Preserve earlier candidate private state");
+    await mkdir(privateDir);
+    await writeOutput(root, path.join(privateDir, "owner.json"), JSON.stringify(owner));
+    try {
+      let counter = 0;
+      const execute = async (tool, argv, options) => {
+        const label = `compiler-${++counter}`;
+        const request = outputPath(root, path.join(privateDir, label + ".json"));
+        await writeOutput(root, request, JSON.stringify({ label, argv: [tool, ...argv], timeout: 600 }));
+        // The adapter alone receives the key for redaction; its compiler tree does not.
+        let result;
+        try { result = await run("command", ["--command-json", request], { ...options.env, OTA_AES_KEY: env.OTA_AES_KEY }); }
+        catch { result = { status: 1 }; }
+        const receipt = JSON.parse(await readFile(path.join(evidence, "native", label + ".process.json")));
+        return { status: result.status === 0 ? receipt.exitCode : 1,
+          stdout: await readFile(path.join(evidence, "native", label + ".stdout.txt"), "utf8"),
+          stderr: await readFile(path.join(evidence, "native", label + ".stderr.txt"), "utf8"),
+          treeCleanupComplete: receipt.treeCleanupComplete };
+      };
+      const build = await buildSourceCandidate({ root, env, config: manifest, execute });
+      await writeOutput(root, path.join(privateDir, "key.h"), firmwareKeyHeader(env.OTA_AES_KEY));
+      await writeOutput(root, path.join(out, "inputs/source-build.json"), JSON.stringify({ build, owner,
+        configSha256: digest(manifestBytes), reviewedProductBaseline: manifest.reviewedProductBaseline,
+        workflowCommit: env.GITHUB_WORKFLOW_SHA, baseVersion: env.INPUT_CANDIDATE_BASE_VERSION,
+        targetVersion: env.INPUT_VERSION_NAME, fullBaseVersion: env.INPUT_CANDIDATE_FULL_BASE_VERSION || "" }) + "\n");
+      await run("source-package");
+      verifyCandidateCheckout(root, env, manifest);
+      verifyBuildKeyBinding(build, env);
+      const metadata = await sourceMetadata(root, env, manifest, build);
+      await writeOutput(root, path.join(out, "prepared/candidate-metadata.json"), JSON.stringify(metadata, null, 2) + "\n");
+      await writeOutput(root, path.join(evidence, "inputs.json"), manifestBytes);
+      process.stdout.write("P51_NEW_SOURCE_PACKAGED; formal candidate binding and hardware NOT_RUN\n");
+    } finally { await cleanupCandidate(root, env); }
     return;
   }
   const buildBytes = await readFile(path.join(out, "inputs/build.json"));

@@ -826,3 +826,773 @@ ceiling or changing OTA parameters. Root's `app-review-inputs.json` binds exactl
 17 source/test/version files for serialized development CI. Flutter checks and
 APK/EXE verification are pending; no device, cloud mutation, formal admission,
 merge or release follows merely from this WIP source commit.
+
+### P51 Continuation Checkpoint And Service-Entry Decision
+
+The local smoke suffix completed: 31 unit methods, the remaining seven entry
+methods and 37 route methods all passed. These 75 methods have closed owned
+receipts under `.cache/p51-smoke-resume-01/`; the original six completed entry
+methods and the overall 180-second timeout are not relabeled as a successful
+whole-suite invocation. No product code or test assertion changed to achieve
+this result. The real local paths remain fully checked; no boundary guard was
+disabled to shorten execution.
+
+WIP source `792a8a372d21ff4abd056deae28ef9b8e64bec6a` is pushed on
+`dev/flutter/p51-timing-20261104`. Its only automatic development run is
+`41794760486`, with Ubuntu and Windows jobs still running at this checkpoint.
+The prior commit adapter stopped after staging because it compared Windows
+backslash paths to Git POSIX paths. The exact 18-file staged set was inspected;
+the corrected suffix committed without re-creating the branch or re-staging.
+That host failure is preserved in `app-commit-01/`; `app-commit-02/` records the
+actual successful commit. No force push, main integration or release occurred.
+APK/EXE verification and all P51 physical observations remain NOT_RUN. Reconcile
+the existing CI run before dispatching any later validation; do not replay it.
+
+P51-SERVICE-ENTRY-01 is NEED_DECISION, not a credential or observed backend
+failure. The approved protected packaging route deliberately emits
+`p51-artifact-candidate-v1`, `isFormalRelease=false`, `readyRegistered=false`.
+The existing firmware registration client requires schema 2 and
+`isFormalRelease=true`; the ordinary release workflow rebuilds its own App/Boot
+instead of consuming this explicitly external group16/exact-size candidate.
+Changing the candidate flag or pretending those bytes came from that ordinary
+workflow would lose the approved provenance and is not an acceptable shortcut.
+
+Recommended boundary: explicitly authorize a minimal, independently reviewed
+isolated-test-service entry for these unchanged 30316 assets, preserving their
+artifact-only originals and exact App/group16/source/run identities. It would
+include the three test assets' upload/full readback/registration and only the
+necessary temporary test-channel selection followed by restoration, using the
+existing P41 test resources. This is beyond the specifically artifact-only CI
+allowance, not a request to repeat ordinary development CI authorization.
+It excludes production, gate unlocking, existing evidence rewrites, key export,
+other devices and unrelated external filesystem writes. Root must obtain this
+scope decision before implementing or executing that integration. Do not start
+a board/phone operation merely because the local preparation or development
+workflow succeeds. The next owner is the current root after the decision.
+
+Continuation output and closed-command inventory:
+`.cache/p51-execution-20261104-01/continuation-audit.json`. Chosen local outputs
+remain in the active worktree; external writes are limited to the previously
+authorized task Git objects/refs/reflogs and worktrees/source1 metadata. No
+PowerShell, SEGGER, ADB, physical reset/install, test-service mutation, external
+cleanup or unrelated worktree edit was performed in this continuation.
+
+Final read-only CI reconciliation: `app-status-04/` records development run
+`41794760486` completed SUCCESS at the same `792a8a372d21ff4abd056deae28ef9b8e64bec6a`.
+Both Ubuntu and Windows jobs succeeded; this supersedes only the earlier
+in-progress checkpoint, not APK/EXE or hardware NOT_RUN. No second development
+dispatch occurred. The session audit verified 75 remaining smoke methods,
+172 closed command receipts and 5361 retained output/source files before that
+last CI GET. Its own earlier CI_RUNNING label is an as-of record, preserved;
+the additional status-04 output guard/closed receipts and Git write audit were
+checked separately. The user-facing next step remains P51-SERVICE-ENTRY-01.
+
+### P51-SERVICE-ENTRY-01 Authorized
+
+The user replied with full authorization for the exact proposed isolated service
+entry and explicitly requested no repeated same-scope permission questions.
+This supersedes NEED_DECISION: proceed with unchanged candidate assets, existing
+test resources/credentials, independent input checks, immutable upload/full
+readback/registration, and necessary temporary test-channel switching/restoration.
+Original artifact-only metadata and all original source/run identities remain
+immutable. A separate schema-2 test registration record is not production
+promotion or a claim that the ordinary release workflow rebuilt these inputs.
+No new backend or production pipeline implementation is required when the
+existing public helpers cover these operations. Production release, gate unlock,
+key export, unrelated devices and external filesystem writes remain excluded.
+The already-authorized exact-source nonpublishing APK/EXE build may proceed.
+New local service-entry records are under `.cache/p51-service-20261104-01/`.
+
+### P51 Isolated Service Entry Completed And Restored
+
+The authorized entry reused the existing metadata builder, S3 port, immutable
+uploader, full readback, preflight, registration and channel CAS/restore helpers.
+No backend product or workflow code changed. The original artifact-only metadata
+and all three candidate assets remain byte-identical. A separate schema-2 test
+registration explicitly binds the external group16 Boot, original App source and
+packaging run; it is not an ordinary release-workflow rebuild or production release.
+
+Target 30316 is registered ready with three verified assets as
+`fw_945e0c02b4c1daa4f219f8ba2ce09b283292b7f413a92afd43720aadeaefd3ff`.
+One intended idempotency replay returned the same release. The temporary stable
+selection naturally returned full for the declared alternate 30313 fixture and
+patch for the original 30313 base. Public R2-backed downloads matched the exact
+291069-byte full and 1048576-byte patch originals. These were host fixture
+queries, not observations of the current board or a physical OTA.
+
+`selection-01/result.json` records `P51_TEST_SELECTION_PASS_RESTORED`:
+stable revision 70 -> 71 -> 72, original pointer/settings restored; disabled
+beta revision 11 unchanged. No channel remains activated for a future campaign.
+The direct Node timeout, Python DNS failure and first proxy-adapter failure are
+retained as separate failed attempts. The corrected proxy route succeeded without
+credential rotation, production mutation or rewriting those failures.
+
+The exact-source nonpublishing App build `41796295859`, attempt 1, succeeded
+on source `792a8a372d21ff4abd056deae28ef9b8e64bec6a`; both Android APK and Windows
+EXE jobs passed, Release and Pages jobs skipped. Development run `41794760486`
+already passed both hosts. No duplicate dispatch occurred. Artifact IDs are
+`13305708928` (Android) and `13305174904` (Windows), pinned in
+`app-artifacts-01/` under the execution directory.
+
+Both initial archive GETs hit their bounded 240-second deadlines after partial
+delivery. Their closed/cleanup-complete receipts and original prefixes remain in
+`app-download-android-01/` and `app-download-windows-01/`. The continuation uses
+verified HTTP Range suffixes through the approved local proxy; final archive
+identity and vendor APK checks must pass before any installation. Build success,
+service readiness and local fixture preparation do not satisfy P5-1 4/4, 30/30,
+four-hour soak or physical restoration qualification.
+
+### P51 App Artifacts Preserved; Phone Connection Required
+
+Both Range continuations completed with HTTP 206 and exact Content-Range. Their
+unchanged 10584064-byte Android and 10338304-byte Windows prefixes plus actual
+suffixes reconstruct the complete CI archives and match the pinned GitHub
+digests. `app-download-android-02/`, `app-download-windows-02/` and `app-logs-01/`
+preserve the originals; no CI redispatch or successful download replay occurred.
+
+`app-verified-01/verification.json` records vendor verification of fixed signing,
+Release/non-debuggable manifest, side-by-side application ID, version 1.0.72+98,
+CI APK hash and both ABI native libraries' test endpoint/adaptive-v2/timing
+markers. APK: 47643192 bytes, SHA256
+`b0a5cd5cbb45ba7e75ad492b65d4843ef70c33fbda365abaea495c48b3ebbcf1`.
+The Windows executable is x64 and equals its bundled copy; the original Windows
+ZIP and EXE are both preserved. This verification reused the existing vendor
+verifier and installed read-only tools, not a local Flutter build.
+
+The single read-only private-ADB preparation at 2026-11-04T08:57:58Z found the
+authorized phone serial `10ADA4197U001CK` (expected model V2312A) absent. The
+original `device not found` diagnostic is retained in `phone-inspect-01/`.
+No package identity, current OTA state or unlocked state was inferred. The private
+server closed normally, port 5093 closed and the device lock was released.
+Only fixed C/D and optical F volumes were present; SD placement remains pending.
+
+Next action is to reconnect and unlock that original test phone over USB, without
+changing the board's power/firmware or starting OTA manually. Root then reconciles
+its actual installed APK and old captures before any necessary update. No new
+permission question is needed. Complete recovery qualification, SD/UI collection,
+upstream applicability and precise finite-campaign freeze still precede formal
+four-cell/30-of-30/four-hour execution; none is claimed by this preparation.
+
+The continuation changed only this task-note appendix and new project-local
+retrieval/verification/phone-check records. No commit/push, production operation,
+device install/launch/reset/flash, test-channel change or external cleanup was
+performed. `continuation-02-audit.json` records output containment, closed owned
+commands, retained failed prefixes, artifact hashes and absent private ports/locks.
+
+### P51 Phone Reconnected: Bounded App Preparation
+
+The user reports the original phone reconnected. The current root continues
+under the existing authority, with one necessary test-package update only:
+V2312A / `10ADA4197U001CK`, private ADB 5093, expected old fixed-signed 1.0.71+97
+to verified 1.0.72+98. The existing private-ADB, capture seal and vendor-install
+routes are reused. Before mutation require exact phone/old APK identity, absent
+OTA service, no running test process and sealed old captures; preserve ordinary
+App identity and all captures, install with `-r` without data clear, then verify
+the full installed APK hash/version and unchanged originals. An uncertain install
+is reconciled, not retried. The finite host window is 900 seconds with a separate
+180-second install deadline and explicit owned-server cleanup. No App launch,
+UI tap, radio change, MCU operation or OTA is part of this update. Outputs are
+`phone-update-01/` and `phone-binding.json` under the execution directory.
+
+### P51 Phone Updated; SD Placement Pending
+
+The phone preparation succeeded exactly once. `phone-update-01/result.json`
+records `INSTALLED_AND_VERIFIED`, installed versionCode 98 and full APK SHA256
+`b0a5cd5cbb45ba7e75ad492b65d4843ef70c33fbda365abaea495c48b3ebbcf1`.
+All nine old capture files passed their original seal/hash checks before and
+after installation; the ordinary App identity is unchanged. There was no App
+launch, UI tap, recorder ARM, data clear, radio write or OTA. Private ADB closed
+normally, and the device lock was released. The initial host input rejection
+(`run_id` required the existing `p35-` prefix) happened before any device command;
+its source and explicit failure summary remain in
+`phone-update-preflight-failure-01/`. Only the invocation ID was corrected.
+
+`current-02/` is a fresh passive board inspection before card handling, not a
+repeat of the accepted campaigns. Full current 30313 App and retained group16
+Boot bytes match, current-boot confirmation/health/stack/storage gates pass and
+debug freeze remains zero. SD is ready with no active OTA/storage owner, no
+halt/fault or active SDIO transfer at the sample. All six owned commands closed;
+no reset, halt, flash or board persistent write was requested. This is a dated
+sample, not a physical restoration qualification or a guarantee against later
+user actions.
+
+`sd-ready-01/P51/` contains the exact canonical-name full and patch files from
+the reviewed candidate, with `sd-ready-01/manifest.json` binding their hashes,
+lengths, target and patch base. The bytes were copied only within the worktree.
+Windows still exposes fixed C/D and optical F, not a removable SD volume. The
+next physical prerequisite is connecting the test card with a reader while
+preserving board power and without starting an upgrade. The intended new card
+directory is `P51`; there is no formatting, deletion or replacement of existing
+card content. Identify the actual volume and check that directory before any
+card write; no unknown drive or inferred root is authorized by this note alone.
+
+The new preparation changes are local helpers, copies, receipts and this note.
+The phone write is limited to the approved side-by-side test-package update.
+The only permitted PC-external automatic write is existing SEGGER native history;
+all controllable subprocess/cache/temp/J-Link outputs are project-local. No Git
+write, CI/network mutation, test-channel activation or production action occurred.
+`phone-update-audit-01.json` binds the successful installation, nine preserved
+captures, passive board originals, local SD files, closed receipts and port/lock
+checks. Formal recovery qualification, SD/BLE cells and long-test freeze/execution
+remain pending; neither this install nor the passive sample counts toward 30/30.
+
+### P51-SD-ROUTE-01: Reuse The Board USB MSC Interface
+
+The user pointed out the existing SD-as-USB-disk feature. The previous reader
+request was premature: absence of a mounted volume did not establish absence of
+the standard USB route. Prefer the board's native data USB connector, leaving
+the card installed and preserving the existing J-Link supply/debug connection.
+
+Read-only verification against actual App source
+`18f6b3d3af0c24b1ce81573700cd61005b7c530e` confirms
+`Libraries/USB_MSC/msc_diskio.h` selects `MSC_USE_SD_CARD`, not QSPI Flash.
+The retained 30313 map includes linked HAL USB/MSC code; HAL initialization
+starts USB and the disk callbacks access SD sectors through SDIO. USB uses
+OTGFS1 / PA11-PA12, identifies as VID 2E3C / PID 5720 (AT32 Mass Storage), and
+does not require the disconnected PA9 VBUS signal. The old hotplug README's
+QSPI/VBUS description is not the current candidate configuration.
+
+The approved preparation route is native USB enumeration, identify the actual
+SD volume, then bounded file placement/readback in its new `P51` directory.
+Windows safe eject and disconnecting only the data USB connection must precede
+board-side SD upgrade; do not run host block access and board SD import together.
+The existing LiveMap USB exclusion is not claimed as proof of global SD locking.
+If native enumeration fails, diagnose that observation before choosing a reader.
+At this check the host exposes fixed C/D and optical E/F, with no removable SD
+volume; no USB connection, card write,
+device action or code change was performed. This appendix is the only write,
+inside the active worktree. It supersedes the reader-only prerequisite, not the
+remaining recovery, collection or formal acceptance gates.
+
+### P51 Native USB SD File Placement Complete
+
+The user connected the board data USB after the bounded file-placement request.
+The actual disk is `AT32 SD Card USB Device`, parent
+`USB\VID_2E3C&PID_5720\0E31DBF910C8`, mapped to FAT32 `E:` and volume
+`\\?\Volume{4f8b85af-161d-11f1-ae99-8b882b800350}\`. A read-only storage descriptor
+independently confirms AT32 / SD Card / 1.00 / 0E31DBF910C8 / USB/removable.
+The permitted external file boundary is only its new `E:\P51` directory and
+the two named package files; no other drive or root file is in scope.
+
+`sd-copy-01/` records exactly two exclusive-create writes, flush/fsync and full
+readback matching the already-reviewed source length/SHA256 for full and patch.
+The original root names are preserved, with only `P51` added. No format, overwrite,
+deletion, recovery-image copy or OTA occurred. Files intentionally remain on the
+card for the pending SD cells; they are not disposable host-cache outputs.
+
+The standard Windows `CM_Request_Device_EjectW` request for that exact USB parent
+returned success. A subsequent native PnP enumeration confirms the disk is no
+longer connected. All file handles and owned command processes closed; the device
+lock is absent. This is safe host ejection, not evidence that the physical cable
+has been removed or that board-side USB/SD state has already recovered.
+
+Next user action: disconnect only the board data USB cable, leaving J-Link supply
+and the SD card in place. Do not start the SD upgrade yet. The next owner checks
+post-USB device/storage state before recovery qualification or formal execution.
+`copy-sd.py`, `copied.json`, `eject.json`, `result.json` and `write-audit.json`
+preserve the precise route and boundaries. No Git, CI, network publication,
+firmware flash/reset or acceptance result changed in this step.
+
+### P51 Post-USB State Verified
+
+The user confirmed physical removal of the data USB cable. `current-03/` reuses
+the passive inspection entry with a fresh output label; its previous source is
+preserved under `post-usb-inspect-inputs/`. Full original 30313 App and group16
+Boot bytes, confirmation, advancing health, stack guard and idle SD/storage
+checks pass. No reset, halt, flash or persistent board write was performed.
+
+The additional one-byte USB read is bound to the exact retained executable:
+`HAL::USB_IsPlugged` loads the literal 0x20052d18 and its actual getter loads
+offset 740, giving 0x20052ffc. The raw getter opcodes and literal are verified
+against the full App before using this address. Observed state is 4 (SUSPENDED),
+not 3 (CONFIGURED), and native PnP enumeration has no matching SD disk. This is
+actual board-side release evidence, not an inference from host ejection alone.
+The original logs/readbacks and closed owned-command receipts remain in the new
+directory; port/lock and write checks are recorded in `write-audit.json`.
+
+Before SD import, verify the ordinary board file browser sees `P51` and both
+copied ETU names, without selecting Start Import. Host byte verification plus
+USB/SD health does not prove the already-mounted board filesystem's directory
+view has refreshed. This is a no-upgrade placement check, not a fifth matrix
+cell or grounds to recopy already verified files. Any missing directory should
+be diagnosed before a deliberate remount/restart, not repaired by arbitrary
+memory/BCB writes.
+
+Further read-only route review confirms the existing P35 single-upgrade runner
+can bind either package; no new cloud pipeline is needed. Its link-diagnostic
+audit preserves the new original lines, but the older P34 formal statistics
+entry expects a different snapshot/runtime envelope. Do not fabricate that
+envelope or present the count-only diagnostic audit as complete P5 performance
+adjudication. Exact four-cell/long-test evaluation and frozen commands remain
+required before formal execution. No successful prior test was replayed and no
+new OTA result, source commit, CI or production action is claimed here.
+
+### P51-UI-01: Long Filenames Wrap Inside Fixed-Height Rows
+
+The user confirms `P51` contains two visible files after USB removal, resolving
+the board-directory visibility question. They also report that long filenames
+are split over several lines inside each single file row and become crowded.
+This is a user-reported visual observation, not an agent screenshot or a new
+upgrade observation. Do not describe it as an unreadable/corrupt filesystem:
+the two copied original byte streams already passed full host readback.
+
+Disposition: OPEN_PRODUCT_UI_FINDING for the SD file-selection surface. Keep
+the affected SD UI verdict pending and do not start import while ambiguity is
+unresolved. No completed upstream acceptance is retroactively reopened.
+
+Static source evidence is consistent with the report. At
+`FirmwareUpdate::AddRow` (`USER/App/Pages/FirmwareUpdate/FirmwareUpdate.cpp`),
+the parent row is fixed at `ROW_H=38`, while the label uses `LV_LABEL_LONG_DOT`
+and width `LIST_W-76` with no height constraint. The bundled LVGL label defaults
+to `LV_SIZE_CONTENT` height; DOT mode does not set the text-expand flag and only
+inserts ellipsis when the measured text exceeds the label's own height. The
+label can therefore wrap/grow to multiple lines inside the fixed parent row.
+The relevant page source is unchanged between retained App source `18f6b3d`
+and current HEAD. `RouteSelect::AddRow` has the same pattern, but no separate
+physical RouteSelect failure is claimed.
+
+Preferred implementation repair: explicitly size the filename label to one
+font line, retain bounded horizontal ellipsis and vertical centering, and keep
+the complete stored path/name unchanged for selection and the confirmation
+view. Do not edit LVGL globally, shorten/rename the accepted SD files, alter FAT
+handling, inflate all rows, or change OTA/package semantics to conceal this UI
+problem. The implementation owner should use both actual canonical filenames
+and long ASCII/CJK/shared-prefix cases in a headless/simulator layout regression:
+after layout, label height equals one line, bounds fit the 38-pixel row, icons
+and adjacent rows do not overlap, and selection/confirmation still resolves
+the original full path and correct FULL/PATCH kind.
+
+This acceptance root records the finding and repair oracle, not a live product
+fix. Apply any repair as a separately reviewed implementation candidate, then
+bind its actual dependencies and minimum rechecks before resuming the affected
+SD verdict; do not modify the selected 30313/30316 images in place. No production
+source, firmware, SD file, App installation, device state or frozen bundle was
+changed in this review. Only this project-local note was appended; source/linked
+LVGL inspection and Git comparison were read-only. No new build or visual
+regression was run, so no repaired-layout PASS is claimed.
+
+### P51-UI-01: Independent Local Review, 2026-11-04
+
+DECIDED: the delivered list/confirmation repair passes independent local UI
+review. No blocking new defect was found in this bounded change set. This
+supersedes OPEN_PRODUCT_UI_FINDING for the reviewed source behavior only; it
+does not make the unchanged installed 30313 image repaired, start SD import,
+close P5 or replace the required candidate binding/build/device evidence.
+
+The root reviewer did not edit product code. Reviewed the implementation handoff
+`P51-UI-01-implementation-2026-11-04.md`, all four product files, all three test
+files, both page lifecycles, bundled LVGL DOT/scroll restoration, actual encoder
+port and downstream selected-name consumers. HEAD remains
+`792a8a372d21ff4abd056deae28ef9b8e64bec6a`; the delivered source/test/font hashes
+match `fixed-04/inputs.json` before and after review. The worktree remains dirty
+and uncommitted. Existing unrelated changes and historical evidence are retained.
+No `.trellis/` exists in this worktree; no replacement workflow was created.
+
+Independent output base: `.cache/p51-ui-review-20261104-01/`.
+The existing real-LVGL runner was rebuilt and run once with a fresh output:
+
+```cmd
+python -B -X utf8 tests/ui/test_file_browser.py --phase fixed --reuse-lvgl .cache/p51-ui-impl-20261104-01/old/lvgl --output .cache/p51-ui-review-20261104-01/regression
+```
+
+An outer Python invocation supplied `GIT_OPTIONAL_LOCKS=0` and
+`PYTHONDONTWRITEBYTECODE=1`; the reviewed runner puts compiler TEMP/TMP/TMPDIR
+inside its output. All commands used `cmd.exe` and the explicit active worktree.
+The retained library hash and all current source/configuration bindings were
+checked before reuse, rather than treating the previous summary as a new test.
+`regression/commands.json` contains the seven actual compile/run commands,
+working directories, logs and exit codes. All return 0; original log reports
+`P51_UI_FIXED_SELFTEST=PASS checks=14820 begins=1 pops=2`. The Begin is a service
+double with the work timer immediately removed, not a real import.
+
+Results independently confirm 19-pixel labels inside 38-pixel rows, complete
+text restoration through repeated DOT/scroll transitions, horizontal suffix
+visibility only on the focused overflowing row, no short-name animation and
+clean disappearance/rebuild/destruction. Real native encoder edit/scroll/exit,
+full confirmation names, fixed type/version/button regions, reset scroll,
+cancel-without-Begin and unchanged full selection paths pass. The shared helper
+is justified for RouteSelect's identical row defect; its GPX path behavior is
+unchanged. This is not MCU filesystem evidence.
+
+All 11 independent PNG outputs equal their `fixed-04` counterparts byte-for-byte.
+The reviewer inspected old crowded rows and the fixed PATCH top/bottom, selected
+suffix, CJK and RouteSelect frames. Independent executable SHA-256:
+`092eef36a88ae0742397448c2ad790ca5b894e8017ca70a57a4798a6c0c671b5`.
+Its hash is not required to match the implementation executable, whose build
+location differs. Exact build flags and retained library are recorded.
+
+Review findings and scope decisions:
+
+| ID | Disposition | Basis, direction and next owner |
+| --- | --- | --- |
+| P51-UI-01 | DECIDED, local repair verified | List focus and full confirmation-name oracle pass for both pages. Root owns the next source integration, exact candidate/build bindings and affected SD checks; no additional UI repair batch is required for this finding. |
+| P51-UI-FONT-01 | OUT_OF_SCOPE, existing display debt | Three existing PageFactory unused-parameter compiler warnings and 118 runtime missing-U+0076 warnings match the original fixed run; zero errors. The unchanged version font renders the `v` prefix as a box while numeric versions and FULL/PATCH remain visible. Root recommends a separately scoped font correction; do not silently regenerate fonts or relabel the warning count as zero. RouteSelect's existing 48-byte navigation display-metadata cap is also unchanged; it is not the full file-path buffer. |
+| P51-UI-WORK-01 | OUT_OF_SCOPE, existing progress-page display debt | The unchanged `CreateWorkUI` name label still uses content-height DOT and may extend into the progress bar. A bounded service-double probe found the same name bounds y=106..162 and bar y=148..163 with a supported 63-byte name and an explicit 47-byte old-cap display control; percent bounds y=176..197 are separate in this case. This is not evidence of a newly introduced expansion regression. Root recommends a separate bounded work-name layout repair, retaining full identity and unobstructed progress, with an original-vs-fixed page regression before closing that issue. |
+
+`work-probe.cpp` includes the existing test adapter and actual page source; it
+does not create a replacement framework. `probe/commands.json`, `build.log`,
+`run.log`, `work-full-name.png` and `work-old-cap-control.png` preserve its two
+successful commands and observations. The control changes only the display text
+to the previous buffer limit; it is not claimed as execution of an old firmware.
+Probe compile warnings: 3 existing unused-parameter warnings; runtime warnings
+and errors: 0. No Step/Apply/Stage, filesystem package access or device call ran.
+The unrelated existing work-page defect does not invalidate the bounded
+list/confirmation repair or authorize changing its scope during review.
+
+The tracked product diff passes `git diff --check` (three LF/CRLF advisories,
+not compiler warnings). Production GCC/Boot/AC5, standalone Win32 simulator,
+CI, real package/filesystem, new candidate generation and device/OTA verification
+remain NOT_RUN in this review. No old P1/P3/P4/P2-5 result was reopened. Before
+P5 execution, root must bind the reviewed UI into the actual new candidate and
+recompute affected dependencies; never rewrite existing 30313/30316 assets or
+claim the host executable is the installed firmware.
+
+Output audit: `audit.json` hashes the 47 generated evidence/probe files, binds
+review inputs and the nine successful commands, and records 11 matching PNGs.
+All controllable writes were prechecked within the active worktree: this note
+and the new review output base, including compiler temporary files. Reparse
+parents were rejected; Git optional index writes were disabled. No product
+source, original evidence, package, SD file, external path or installed state
+was modified; no commit/push/CI or cleanup was performed. Final audit also
+checks the note and audit file themselves without rewriting original evidence.
+
+### P51 UI Follow-Up: Independent Review, 2026-11-04
+
+DECIDED: P51-UI-FONT-01 and P51-UI-WORK-01 pass the bounded independent local
+UI review. No blocking defect was found in the delivered follow-up. These two
+items were brought into local implementation scope by the user's follow-up
+dispatch; their former OUT_OF_SCOPE disposition no longer describes this batch.
+The original list/confirmation/RouteSelect repair remains verified. This does
+not constitute a production build, installed-image claim or P5 acceptance.
+
+#### Evidence Attribution Correction
+
+The previous review's description of the `v` warning as a product display defect
+was too broad and is withdrawn. The unchanged production
+`OtaUpdate::Session::FormatVersion` returns `3.3.13`, without `v`; the earlier
+service double supplied `v3.3.13`. The 118 original warnings and screenshots
+prove missing U+0076 when that test input is rendered with the 24 font, not the
+actual product formatter's spelling or an observed board defect. The root
+should have checked this service boundary before making that attribution.
+The prior list geometry, path and lifecycle observations are not invalidated
+by this formatter-only discrepancy. All original logs and records are retained.
+
+The implementation disclosed and corrected the mismatch: the test runner now
+extracts and links the verbatim product formatting function, preserving it in
+`format_version.cpp`. Root compared that generated text with the unchanged
+source, including its bounds/termination behavior. The current UI intentionally
+adds `v` in its own display buffer, as requested in this follow-up, and leaves
+the numeric value, formatting service and version gates unchanged. Therefore
+this is verified support for the requested prefixed presentation, not proof
+that an earlier installed firmware had the synthetic test's missing prefix.
+
+#### Reviewed Scope And Results
+
+Root reviewed the localized FirmwareUpdate version-font selection, scrolling
+text helpers, ShowConfirm/StartImport/FinishImport and disappearance/release
+paths, plus the expanded test oracle and formatter extraction. The page-local
+font descriptor copy uses native fallback; all 12 shared font C sources remain
+byte-identical. The 124-pixel version column fits the tested formatter boundary
+values without placeholder glyphs, wrapping or caption overlap. Ordinary numeric
+glyphs retain the existing large font; longest uint32 representations select
+the existing smaller family. This tests display coverage, not OTA admissibility
+of arbitrary version codes.
+
+The work-name viewport remains 186 x 19 pixels. Long names scroll horizontally
+without focus, short names remain still, and the complete path passed to the
+Begin double is unchanged. Start resets scrolling and status color. The scoped
+status viewport also prevents the PATCH success text/type collision found by
+the implementation's first follow-up run. This is within the dispatched
+working/result visible-field requirement, not an OTA-state-machine change.
+Working, projected success/failure, consecutive inputs and page lifecycle tests
+preserve separated progress/type/detail/button regions and clean animations.
+
+Source HEAD remains `792a8a372d21ff4abd056deae28ef9b8e64bec6a`, with local dirty
+implementation. Current FirmwareUpdate.cpp SHA-256:
+`e646c2724e7bae1b6bab5010b4353b6be230515844530c850b21219e624d243c`.
+All test/product/font/configuration bindings agree with the implementation's
+`fixed-04/inputs.json`; the other previously reviewed product files are unchanged.
+The original overlap baseline, PATCH assertion failure and `lv_color_eq` test
+compile failure were read and retained, not replaced by the successful run.
+
+Independent evidence: `.cache/p51-ui-followup-review-20261104-01/`.
+One fresh local run used the existing runner:
+
+```cmd
+python -B -X utf8 tests/ui/test_file_browser.py --phase fixed --reuse-lvgl .cache/p51-ui-impl-20261104-01/old/lvgl --output .cache/p51-ui-followup-review-20261104-01/regression
+```
+
+The outer invocation set `GIT_OPTIONAL_LOCKS=0` and
+`PYTHONDONTWRITEBYTECODE=1`; the runner contained TEMP/TMP/TMPDIR. All commands
+used cmd.exe and this explicit worktree. After a conversation/runtime
+interruption, process handle 70842 was unavailable. Root recovered the completed
+inner command receipts, logs, PNGs and summary rather than rerunning the test.
+The outer terminal completion receipt is unavailable; all seven recorded
+compile/run commands exited 0 and the completed summary reports exit 0.
+
+Raw result: `P51_UI_FIXED_SELFTEST=PASS checks=30543 begins=9 pops=2`.
+The nine Begin calls are path-recording doubles; every work timer was removed
+before advancing LVGL, and no Step/Apply/Stage or real import ran. Compiler
+warnings: 3 existing PageFactory unused parameters. Runtime warnings, compiler
+errors and runtime errors: 0. The complete original list/confirmation/RouteSelect
+regression still executes, including native encoder scrolling and cancellation.
+
+All 20 independent PNGs match the implementation's final PNGs byte-for-byte;
+seven unchanged list/RouteSelect frames also match the prior independent review.
+Root inspected normal/max versions, work-name start/suffix, PATCH success and
+failure frames. Independent executable SHA-256:
+`3936a55d1e83ba1fd63af0525401e60a0740caf288eca8525ddddf22e6a499de`.
+`audit.json` binds the 57 generated files, exact source inputs, shared library,
+seven command receipts, screenshot comparisons and the interruption limitation.
+
+#### Boundary And Next Action
+
+Root did not change production code or the implementation handoff. The only
+review writes are the new evidence directory (including compiler temporaries
+and generated formatter) and this appended task note. Canonical paths and all
+parent reparse attributes were prechecked; the final audit includes ignored
+outputs, not just Git status. No controlled external output, cleanup, original
+evidence rewrite, Git mutation, CI, package generation or device operation was
+performed. Product diff and note whitespace checks pass with Git LF/CRLF
+advisories kept separate from compiler warning counts.
+
+Both follow-up display items are closed for the reviewed local source; no
+additional implementation round or third reviewer is required for this batch.
+Root next owns authorized source integration, production candidate build and
+exact new firmware/package/restore bindings, then the minimum affected P5
+execution. Production GCC/Boot/AC5, standalone simulator, CI, package generation,
+real filesystem/phone/SD/board/OTA and formal acceptance remain NOT_RUN here.
+Existing 30313/30316 images and unrelated P1/P3/P4/P2-5 results remain unchanged;
+do not overwrite those assets or replay their successful observations merely
+because this UI review is complete.
+
+### P51 UI Source Committed And Production Targets Compiled
+
+2026-11-04: the user said to proceed after root's completed follow-up review.
+Root committed only the nine reviewed UI/test/implementation-handoff files as
+`b871d57e66645f43b29a8006a58ca6a3692951f3`, tree
+`74f3bbffe4e237a491aa643d9d7481769d29cb38`, on the existing local task branch
+`dev/flutter/p51-timing-20261104`. No branch switch, amend, push, main change or
+unrelated staging occurred. `commit.json` under the new output directory binds
+the exact committed worktree bytes. All 55 other pre-existing dirty/untracked
+files were byte-checked unchanged before this intentional task-note append.
+
+Evidence directory: `.cache/p51-ui-delivery-20261104-01/`.
+Build directory: `.cache/p51ub/`.
+The thin local `run.py` reuses the existing P34 owned-command and contained
+environment helpers, the generated production CMake entry and the canonical
+`firmwareCMakeOptions('p34-v2-candidate')` definition. It does not replace the
+build system, key loader or packaging pipeline. The source commit and build
+each ran once; continuation messages did not replay either operation.
+
+Production-target compile result: PASS, not an installable candidate. CMake
+Release configure, both `X_Track_App_GCC` and `X_Track_Boot`, GNU size and the
+existing build-profile validator all exit 0. Toolchain: Arm GNU 13.3.Rel1;
+SOURCE_DATE_EPOCH=1786320000; compiler cache OFF; all profile test injections OFF.
+The short project-local build uses CMAKE_OBJECT_PATH_MAX=240 because this
+worktree's Windows response-file path limit had already been evidenced during
+restore preparation. This deliberate local-path difference from CI's 1024 is
+recorded; no external short directory or source flags workaround was used.
+
+Configure warnings/errors: 0/0. Compile/link warnings/errors: 641/0. The full
+warning log is retained, including wchar_t ABI, unused parameter and existing
+library/platform diagnostics; matching a historical total is not a claim that
+every warning was independently proved unchanged. These are not the three
+warnings of the separate headless UI test and must not be reported as such.
+
+GNU size output:
+
+| Target | text | data | bss | dec |
+| --- | ---: | ---: | ---: | ---: |
+| App | 612836 | 940 | 558664 | 1172440 |
+| Boot | 14720 | 4 | 9780 | 24504 |
+
+The App raw binary is 615208 bytes, SHA-256
+`73248f3fac8a68745a2098dbc725b6ee1b2499d10e8fb4b40ff44b1ea002b89a`,
+modified 2026-11-04T12:12:24.207107Z. The ordinary source Boot binary is 14724
+bytes, SHA-256
+`5842ff3e19ba9e1eaaea10f27e825c7b6efc278b200531014b0dba61264f6594`,
+modified 2026-11-04T12:12:19.426358Z. `build-result.json` records all eight
+ELF/HEX/BIN/MAP lengths, hashes and timestamps; exact commands/configuration,
+original diagnostics and closed command receipts are in `build/`.
+
+Neither binary may be installed for P5: the App has the default source key,
+no protected key binding and an unfinalized 96-byte fw_header reservation; the
+ordinary source Boot is not the retained external group16 Boot. No private key
+was read/exported and no package was generated. The original 30313/30316
+assets, retained device state and protected CI/service receipts remain intact.
+
+### P51-NEW-SOURCE-01: Protected Candidate Build Capability Gap
+
+DECIDED: a bounded implementation change is required before new candidates can
+be produced. This is a tooling capability gap, not another UI product failure
+or missing-credential diagnosis. No failed CI dispatch was needed to establish
+it, and no existing protected run should be blindly repeated.
+
+Concrete evidence:
+
+- `.github/workflows/firmware-build.yml` package-candidate job is explicitly
+  packaging-only; it has no ARM compiler/build step and skips the ordinary build.
+- `.github/scripts/firmware-candidate.mjs::candidateAdmission` accepts only
+  version 3.3.16. Its metadata states the old executable is unchanged and the
+  target is a header-only derivation from original CI.
+- `Tools/ota/p51-package.py::resolve_inputs` binds source `18f6b3d`, original
+  30313 bytes, the fixed 30316 target hash/timestamp and old reference stream.
+  Substituting the new binary/manifest is not supported and would violate that
+  original lineage. Preserve this working legacy mode and its old input file.
+- The existing keyed-build helper supports protected rehearsal/production,
+  while this candidate route correctly requires publish/rehearsal/check_bindings
+  false. Fabricating a different mode or running an uploading ordinary rehearsal
+  is not an acceptable way to obtain artifact-only new-source outputs.
+
+Preferred minimal direction for a separate implementation owner: extend the
+existing protected artifact-only entry with an explicit reviewed new-source
+variant, reusing the existing GCC/key, finalization, reference encoder, native
+decoder and metadata helpers. Keep the legacy archived-original mode unchanged.
+Bind the exact source commit, profile, protected key build and approved external
+group16 Boot. Return the new baseline/target App and matching ELF/MAP plus full,
+base-bound exact-1MiB patch/reference, recovery and complete provenance. The
+baseline used for SD selection must also contain the repaired UI; merely
+changing the upgrade target leaves the user choosing files through the old UI.
+Choose and verify a fresh forward version pair before dispatch, without reusing
+or overwriting the already bound 30313/30316 identities.
+
+Required oracle: credential-free positive/negative admission, source/base/key
+mismatch rejection, immutable old inputs, artifact-only job graph and no
+cloud/publishing credential leakage; then exact-source protected compilation,
+native full/patch/recovery reconstruction, complete source/key/Boot provenance
+and verified private cleanup before upload. Do not weaken production/rehearsal
+gates, export keys, patch key bytes from an old ELF, substitute the ordinary Boot
+or create a second general release pipeline. Root retains independent review;
+the next decision is assigning/authorizing that bounded implementation agent,
+not re-requesting the existing CI credential or device permissions.
+
+P5 freeze, new protected dispatch, new asset service registration, installation
+and physical matrix remain unexecuted until this capability and candidate
+bindings are available. Unrelated accepted observations remain reusable only
+under their real dependencies; no new four-combination or long-test PASS exists.
+
+Delivery audit completed before another conversation interruption. Its lost
+outer process handle was reconciled from complete `audit.json`, not rerun:
+1181 project paths checked, all seven Git/build commands have successful closed
+receipts, no unexpected external write observed. Controlled build/log/cache/
+temporary outputs remain in the two named worktree directories. The sole
+external writes are the previously authorized task Git object/ref/reflog and
+`D:/github/my/E-Track/.git/worktrees/source1` metadata for this nine-file commit;
+automatic Git maintenance was disabled. No hook/global configuration, main
+worktree/index/ref, remote, device, SD or old evidence was modified. This note
+is the only subsequent intentional change among the preserved task records.
+
+### P51-NEW-SOURCE-01: Independent Local Review Completed
+
+2026-11-04: root independently reviewed the bounded implementation handed off
+in `P51-new-source-implementation-2026-11-04.md`. Result:
+LOCAL_INDEPENDENT_REVIEW_PASS, with no blocking findings in the reviewed scope.
+This closes the local implementation-review step, not the protected execution,
+candidate binding or P5 acceptance. No further implementation batch is requested.
+
+Reviewed base HEAD remains `b871d57e66645f43b29a8006a58ca6a3692951f3` on
+`dev/flutter/p51-timing-20261104`; the new-source implementation remains
+uncommitted. Evidence: `.cache/p51-new-source-review-20261104-01/`.
+`source-inputs.json` and the closing `audit.json` bind all 11 implementation/test/
+handoff files to the implementer's `final-02.json`. The reviewed UI/product paths
+remain unchanged from HEAD, with no untracked product inputs. The archived v1
+manifest retains SHA-256
+`f07b239edcae98736cac220fa111e302560809ebc10ad9db8289bcdc256573c9`.
+
+The concentrated review covered explicit mode admission, exact source/workflow/
+baseline provenance, canonical forward versions, protected artifact-only gates,
+the single keyed compilation and two/optional-three header finalizations,
+external group16 Boot versus ordinary compile-only Boot, native full/patch/
+recovery verification, metadata drift rejection and process-owned cleanup before
+the explicit public upload set. Existing archived-original behavior is retained;
+no product UI, protocol, filesystem or version-gate repair was made by root.
+
+Root executed the four selected host commands once through the existing P34
+contained-environment/owned-command helper. The interrupted outer handle was
+reconciled from completed original receipts, not by replaying commands:
+
+| Original result directory | Selected result | Exit | Elapsed seconds |
+| --- | --- | ---: | ---: |
+| `node/` | 167/167 candidate/workflow/profile tests | 0 | 39.033 |
+| `python/` | 13/13 packaging tests | 0 | 209.387 |
+| `keyed/` | 17/17 key-wiring tests; 139 unrelated explicitly skipped | 0 | 19.936 |
+| `reference/` | 8/8 reference tests | 0 | 1.627 |
+
+Total: 205 selected host tests passed, no command timed out. Exact argv, cwd,
+limits, log sizes/digests and results remain in each `intent.json`, `test.json`
+and `test.log`; the closing audit independently rechecks these log bindings.
+Scoped implementation `git diff --check` exits 0 with eight LF/CRLF advisories.
+The key-wiring log retains one Node SQLite ExperimentalWarning and the expected
+redacted compiler-error negative case; these are not a failed production build.
+The native all-assets verification reports zero compiler warnings/errors.
+
+The actual reference search and native decoders ran. The separate synthetic
+pipeline integration reuses the exact search recipe, then re-encodes and checks
+full consumption and reconstruction; its search selector and keyed compiler are
+test doubles. Its 12 native all-assets cases pass, including distinct full-start
+selection, exact-byte positive results, guards/workspace lifecycle and zero
+prepare/program calls on rejected inputs. Root rehashed all eight prepared assets
+and raw BIN/ELF/MAP identities against the original SELFTEST metadata. The patch
+and reference are byte aliases of exactly 1,048,576 bytes. These public-key,
+synthetic-version fixtures are not protected-compiled UI or installable assets.
+
+All 34 actual native process receipts confirm WindowsJob tree closure without
+cleanup errors, including the injected timeout. The retained empty active marker
+and literal `fixture` private header belong solely to the deliberate
+`active-keyed-*` rejection fixture; they are not real protected key residue or a
+live process. A first closing-audit attempt expected TAP `#` summary markers,
+while Node emitted its spec reporter markers. It stopped before writing the
+audit; root corrected only that matcher, recorded the failure in `audit.json`,
+and did not rerun tests or modify original logs.
+
+Boundary audit: 642 output files checked under the review directory and 48 new
+workflow-test fixture directories in `.cache/firmware-workflow-tests/`. Existing
+host_io normalized-path/reparse-parent guards were applied before writes and
+during the audit. HOME, APPDATA, LOCALAPPDATA, temporary and cache directories
+were contained; known possible Vite cache locations were checked. No unexpected
+external write was observed. This is a controlled-output/cache audit, not an
+asserted whole-machine filesystem trace. Root's only tracked-file edit in this
+review is this appended task record; unrelated dirty work and old observations
+were preserved. No commit/index mutation, push, protected dispatch, credential
+retrieval, upload, formal candidate generation or device operation occurred.
+
+Next owner: root. Integrate only the reviewed paths under existing effective
+authority; check occupied identities and recovery feasibility before selecting
+fresh B/T and optional F. Bind the eventual reviewed execution commit and run the
+existing protected artifact-only `new-source` entry, retaining gate=false and
+publish/rehearsal/check_bindings=false. Inspect actual ARM toolchain/build,
+warnings/errors, source/key/group16 provenance, exact-reference/native receipts
+and real private cleanup before binding candidates. Linux toolchain extraction,
+protected ARM CI, concrete version reservation, formal assets, recovery/device
+binding and the P5 physical matrix remain NOT_RUN. This local review neither
+requires unrelated historical replay nor closes those downstream obligations.
+
+### P51 New-Source Delivery Continuation
+
+2026-11-04: the user explicitly directed root not to stop between autonomous
+steps when user intervention is unnecessary. Continue the already delegated
+source/CI/candidate preparation chain, retaining all production and device
+preconditions. Reuse `dev/firmware/p51-packaging-20261104` and its existing
+firmware-rehearsal policy; do not add a branch policy or alter reviewers/gates.
+Root will fast-forward that remote branch from its reconciled evidence commit
+`7f965c6ded4162ffd7aedd7c8730a7956244be0c`, preserving the prior packaging run.
+
+New receipts: `.cache/p51-new-source-delivery-20261104-01/`.
+Read-only `prepare-03` confirms no active firmware workflow, unchanged required
+reviewers/four branch policies and repository/rehearsal/production gates=false.
+GitHub firmware tag/release inventory has no 3.3.17/18/19 occupation; isolated
+test-service `service-01` lists 28 releases, maximum version 30316, with no
+mutation requests. Root selects F=3.3.17, B=3.3.18 and T=3.3.19 for this source
+candidate. Both starts include the reviewed UI; F has a truthful distinct
+identity for FULL selection, while B is the exact PATCH base. Same-source
+finalized images remain compatible with the existing bound-backup/restore route;
+actual per-image recovery bindings and device health must pass before installation.
+
+Two preparation failures were reconciled without any mutation: `prepare-01`
+received EOF on its first GitHub GET; `prepare-02` found the remote at the known
+root evidence commit rather than the earlier packaging commit. Its SHA matches
+the retained `commit-evidence/result.json` and is an ancestor of current HEAD.
+No third-party branch change, overwrite, force push or replayed dispatch occurred.
+The reviewed implementation plus this root note are the only planned commit
+paths; unrelated dirty files remain outside the index.

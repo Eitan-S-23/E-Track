@@ -8,6 +8,7 @@ import { versionCodeFor } from "../../app/bluetooth_flutter_Trace/cloudflare/upd
 import { captureBuildInputs, digest } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/prepare-firmware-release.mjs";
 import { approvedFirmwareKey, DEVELOPMENT_PACKAGING_KEY, firmwareKeyBinding, firmwareKeyHeader } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-release-key.mjs";
 import { captureBuildConfiguration, firmwareBuildProfile, firmwareCMakeOptions } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-build-profile.mjs";
+import { candidateAdmission } from "./firmware-candidate-context.mjs";
 
 function ownerIdentity(env) {
   if (!/^[0-9a-f]{40}$/.test(env.GITHUB_SHA ?? "") || !/^[1-9][0-9]*$/.test(env.GITHUB_RUN_ID ?? "")
@@ -19,6 +20,9 @@ export async function cleanupPrivateBuildKey({ root, buildDir, env = process.env
   const owner = ownerIdentity(env);
   buildDir = outputPath(root, path.resolve(root, buildDir));
   const header = outputPath(root, path.join(buildDir, "private-key.h"));
+  if (existsSync(path.join(buildDir, "key-build-active.json"))) {
+    throw new CliError("Key-build process-tree closure unconfirmed; do not clean or upload");
+  }
   if (!existsSync(header)) return;
   const recorded = JSON.parse(await readFile(outputPath(root, path.join(buildDir, "key-build-owner.json")), "utf8"));
   if (JSON.stringify(recorded) !== JSON.stringify(owner)) throw new CliError("Refusing to clean a different key-build owner");
@@ -46,7 +50,13 @@ export async function buildKeyedFirmware({ root, buildDir, evidenceDir, versionN
     keyBinding = firmwareKeyBinding(key, "development-ci-key-v1");
   } else {
     const mode = env.FIRMWARE_RELEASE_MODE;
-    if (env.GITHUB_EVENT_NAME !== "workflow_dispatch" || !["rehearsal", "production"].includes(mode)
+    if (mode === "artifact-candidate") {
+      candidateAdmission(env);
+      if (env.INPUT_CANDIDATE_MODE !== "new-source" || development || profile !== "p34-v2-candidate"
+          || versionName !== env.INPUT_VERSION_NAME || execute === spawnSync) {
+        throw new CliError("Artifact-candidate compilation requires the new-source owner and bounded executor");
+      }
+    } else if (env.INPUT_PACKAGE_CANDIDATE === "true" || env.GITHUB_EVENT_NAME !== "workflow_dispatch" || !["rehearsal", "production"].includes(mode)
       || env.INPUT_CHECK_BINDINGS === "true" || env.OTA_BOOT_CHAIN_READY !== (mode === "production" ? "true" : "false")
       || (mode === "production" ? env.INPUT_PUBLISH !== "true" || env.INPUT_REHEARSAL === "true"
         : env.INPUT_REHEARSAL !== "true" || env.INPUT_PUBLISH === "true")) throw new CliError("Key-bound compilation requires the gated protected release context");
@@ -73,8 +83,15 @@ export async function buildKeyedFirmware({ root, buildDir, evidenceDir, versionN
     value.replaceAll(secret.toLowerCase(), "[REDACTED_KEY]").replaceAll(secret.toUpperCase(), "[REDACTED_KEY]"), text);
   const steps = [];
   async function run(label, executable, argv) {
+    const active = outputPath(root, path.join(buildDir, "key-build-active.json"));
+    const candidate = env.FIRMWARE_RELEASE_MODE === "artifact-candidate";
+    if (candidate) await writeOutput(root, active, JSON.stringify({ owner, label }));
     const result = await execute(executable, argv, { cwd: root, env: childEnv, encoding: "utf8", windowsHide: true,
       timeout: 600000, maxBuffer: 16 * 1024 * 1024 });
+    if (candidate) {
+      if (result.treeCleanupComplete !== true) throw new CliError("Key-build process-tree closure unconfirmed; do not clean or upload");
+      await unlink(active);
+    }
     const stdout = redact(result.stdout ?? ""), stderr = redact(result.stderr ?? "");
     await writeOutput(root, path.join(evidenceDir, "steps", `${label}.stdout.txt`), stdout);
     await writeOutput(root, path.join(evidenceDir, "steps", `${label}.stderr.txt`), stderr);

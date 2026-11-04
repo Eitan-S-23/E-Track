@@ -1,4 +1,4 @@
-"""Artifact-only P5 candidate adapter; no firmware build, cloud or device code."""
+"""Artifact-only P5 candidate adapter; existing codecs/owned host commands only."""
 import argparse
 import contextlib
 import hashlib
@@ -190,6 +190,23 @@ def resolve_inputs(manifest):
     target = base[:0x400] + pack.build_fw_header(base, manifest['targetVersion'], manifest['targetTimestamp']) + base[0x460:]
     require(sha(target) == manifest['targetSha256'] and recovery.validate_app(target)['version_code'] == 30316,
             'Header-only target identity')
+    boot_bytes = resolve_boot(manifest)
+    row = json.loads(read(manifest['reference']['selection']))
+    compressed = read(manifest['reference']['stream'])
+    require(row['base_sha256'] == sha(base) and row['target_sha256'] == sha(target)
+            and row['compressed_sha256'] == sha(compressed) and row['compressed_bytes'] == len(compressed)
+            and row['etu_bytes'] == 1048576 == 104 + len(compressed), 'Reference identity/length')
+    props = bytes.fromhex(row['props_hex'])
+    raw = encoding.strict_lzma(props, compressed, row['decoded_bytes'])
+    require(sha(raw) == row['raw_sha256'] and unpack.bspatch_apply(base, len(target), raw) == target,
+            'Reference decompression/patch identity')
+    require(raw == encoding.patch_stream(base, target, row['count'], row['seed'], row['salt']), 'Reference progression witness')
+    return dict(base=base, target=target, boot=boot_bytes, build=build, buildOriginal=files['build'], row=row, compressed=compressed,
+                artifact=artifact, manifest=manifest)
+
+
+def resolve_boot(manifest):
+    """Same approved external Boot proof for both modes; never the ordinary build."""
     boot = manifest['boot']
     boot_build = json.loads(read(boot['build']))
     require(boot['group'] == boot_build['group'] == 16 and boot['skipIdentical'] and boot_build['skipIdentical']
@@ -207,18 +224,122 @@ def resolve_inputs(manifest):
             verified(z.read(name), record)
         require(json.loads(z.read('evidence/baseline/result.json')) == boot_build, 'Boot source/build lineage')
         verified(z.read('evidence/baseline/source-inputs.json'), boot_build['source'])
-    row = json.loads(read(manifest['reference']['selection']))
-    compressed = read(manifest['reference']['stream'])
-    require(row['base_sha256'] == sha(base) and row['target_sha256'] == sha(target)
-            and row['compressed_sha256'] == sha(compressed) and row['compressed_bytes'] == len(compressed)
-            and row['etu_bytes'] == 1048576 == 104 + len(compressed), 'Reference identity/length')
-    props = bytes.fromhex(row['props_hex'])
-    raw = encoding.strict_lzma(props, compressed, row['decoded_bytes'])
-    require(sha(raw) == row['raw_sha256'] and unpack.bspatch_apply(base, len(target), raw) == target,
-            'Reference decompression/patch identity')
-    require(raw == encoding.patch_stream(base, target, row['count'], row['seed'], row['salt']), 'Reference progression witness')
-    return dict(base=base, target=target, boot=boot_bytes, build=build, buildOriginal=files['build'], row=row, compressed=compressed,
-                artifact=artifact, manifest=manifest)
+    return boot_bytes
+
+
+def source_boot(config):
+    require(config['schema'] == 'p51-new-source-inputs-v2' and config['mode'] == 'new-source', 'New-source schema')
+    binding = config['bootBinding']
+    require(binding['manifest'] == 'Tools/ota/p51-candidate-inputs.json', 'External Boot binding path')
+    manifest_bytes = checked(ROOT / binding['manifest']).read_bytes()
+    require(sha(manifest_bytes) == binding['manifestSha256'], 'External Boot manifest drift')
+    manifest = json.loads(manifest_bytes)
+    return resolve_boot(manifest), manifest
+
+
+def source_images(raw, build, base_version, target_version):
+    """Reuse the actual finalizer, once per header, not two source compilations."""
+    for name in (base_version, target_version):
+        require(isinstance(name, str) and len(name) <= 16 and
+                re.fullmatch(r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]?)\.(0|[1-9][0-9]?)', name), 'Canonical version pair')
+    require(30316 < pack.parse_version_name(base_version) < pack.parse_version_name(target_version) <= 0xffffffff,
+            'Fresh forward version pair')
+    require(build['versionName'] == target_version and build['versionCode'] == pack.parse_version_name(target_version),
+            'Build target version mismatch')
+    require(len(raw) == build['app']['sizeBytes'] and sha(raw) == build['app']['sha256'], 'Source App identity mismatch')
+    require(raw[0x400:0x460] == b'\xff' * 96, 'Source App must have an unfinalized header')
+    timestamp = build['buildTimestamp']
+    require(type(timestamp) is int and 0 <= timestamp <= 0xffffffff, 'Build timestamp uint32')
+    images = []
+    for version in (base_version, target_version):
+        image = raw[:0x400] + pack.build_fw_header(raw, version, timestamp) + raw[0x460:]
+        fields = recovery.validate_app(image)
+        require(fields['version_name'] == version and fields['version_code'] == pack.parse_version_name(version),
+                'Finalizer identity')
+        images.append(image)
+    return tuple(images)
+
+
+def source_reference(base, target, config, out):
+    """Legal progressing reference search; no padding or default-key witness."""
+    reference = config['reference']
+    require(reference['totalBytes'] == 1048576 and type(reference['seed']) is int
+            and 0 <= reference['seed'] <= 0xffffffff and type(reference['budget']) is int
+            and 2 <= reference['budget'] <= 256, 'Bounded reference configuration')
+    encoding.OUT, encoding.pack, encoding.unpack = checked(out), pack, unpack
+    encoding.save_json = lambda name, value: save_json(checked(out) / name, value)
+    row = encoding.search(base, target, reference['seed'], reference['budget'])
+    raw, props, compressed = encoding.encode(base, target, row['count'], row['seed'], row['salt'])
+    require(104 + len(compressed) == 1048576 and sha(compressed) == row['compressed_sha256']
+            and sha(raw) == row['raw_sha256'], 'Reference selected identity')
+    require(encoding.strict_lzma(props, compressed, len(raw)) == raw
+            and unpack.bspatch_apply(base, len(target), raw) == target, 'Reference full-consumption/byte identity')
+    save_json(checked(out) / 'selection.json', row)
+    save(checked(out) / 'reference.lzma', compressed)
+    return row, compressed
+
+
+def package_source(config, out, key, cc):
+    out = checked(out)
+    boot, original = source_boot(config)
+    request = json.loads((out / 'inputs/source-build.json').read_bytes())
+    owner = {k: os.environ[v] for k, v in (('commitSha', 'GITHUB_SHA'), ('runId', 'GITHUB_RUN_ID'),
+                                           ('runAttempt', 'GITHUB_RUN_ATTEMPT'))}
+    build = request['build']
+    require(request['owner'] == owner and request['workflowCommit'] == os.environ['GITHUB_WORKFLOW_SHA']
+            and request['reviewedProductBaseline'] == config['reviewedProductBaseline']
+            and request['configSha256'] == sha((ROOT / 'Tools/ota/p51-new-source-inputs.json').read_bytes())
+            and build['commitSha'] == owner['commitSha']
+            and request['baseVersion'] == os.environ['INPUT_CANDIDATE_BASE_VERSION']
+            and request['targetVersion'] == os.environ['INPUT_VERSION_NAME']
+            and request.get('fullBaseVersion', '') == os.environ.get('INPUT_CANDIDATE_FULL_BASE_VERSION', ''),
+            'Source request ownership/drift')
+    require((out / 'inputs/boot.bin').read_bytes() == boot, 'Source admitted Boot drift')
+    header = ''.join('#define OTA_AES_KEY_1_WORD%d 0x%su\n' % (i, key.hex()[i*8:i*8+8]) for i in range(4)).encode()
+    require(build['keyBinding']['source'] == 'approved-ci-key-v1'
+            and build['keyBinding']['keySha256'] == sha(key)
+            and build['keyBinding']['headerSha256'] == sha(header)
+            and build['keyBinding']['keySourceSha256'] == sha((ROOT / 'Libraries/OTA/ota_keys.c').read_bytes())
+            and (out / 'private/key.h').read_bytes() == header, 'Compiled/packaging key input mismatch')
+    keyed = out / 'keyed-build'
+    require(json.loads((keyed / 'gcc-build-inputs.json').read_bytes()) == build, 'Keyed build receipt drift')
+    evidence = json.loads((keyed / 'keyed-build-evidence.json').read_bytes())
+    require(evidence['commitSha'] == owner['commitSha'] and evidence['keyBinding'] == build['keyBinding']
+            and evidence['buildConfiguration'] == build['buildConfiguration'], 'Keyed compiler evidence mismatch')
+    for record in evidence['artifacts']:
+        verified(checked(keyed / record['path']).read_bytes(), dict(bytes=record['sizeBytes'], sha256=record['sha256']))
+    raw = checked(keyed / 'app/X-Track-App-GCC.bin').read_bytes()
+    base, target = source_images(raw, build, request['baseVersion'], request['targetVersion'])
+    full_base = None
+    if request.get('fullBaseVersion'):
+        require(request['fullBaseVersion'] != request['baseVersion'], 'Full-cell start must differ from patch base')
+        full_base, same_target = source_images(raw, build, request['fullBaseVersion'], request['targetVersion'])
+        require(same_target == target, 'Full-cell target identity drift')
+        save(out / 'inputs/full-base.bin', full_base)
+    save(out / 'inputs/base.bin', base)
+    save(out / 'inputs/target.bin', target)
+    row, compressed = source_reference(base, target, config, out / 'evidence/reference')
+    data = dict(base=base, target=target, boot=boot, row=row, compressed=compressed)
+    if full_base is not None:
+        data['fullBase'] = full_base
+    result = package(data, key, out / 'prepared')
+    save(out / 'prepared/app-start.bin', base)
+    if full_base is not None:
+        save(out / 'prepared/app-start-full.bin', full_base)
+    result['native'] = native_verify(data, out / 'prepared', out / 'private', cc, all_assets=True)
+    identity = lambda image, version: dict(versionName=version, versionCode=pack.parse_version_name(version),
+        sizeBytes=len(image), sha256=sha(image), headerSha256=sha(image[0x400:0x460]), buildTimestamp=build['buildTimestamp'])
+    save_json(out / 'evidence/source-images.json', dict(base=identity(base, request['baseVersion']),
+        target=identity(target, request['targetVersion']), raw=build['app'], sourceCompilations=1,
+        fullBase=identity(full_base, request['fullBaseVersion']) if full_base is not None else None,
+        headerOnlyDerivation=True, headerOffset=1024, headerBytes=96,
+        boot=dict(sha256=sha(boot), sizeBytes=len(boot), group=16, source=original['boot']['source'],
+                  build=original['boot']['build'], evidenceCommit=original['bootEvidenceCommit'])))
+    result['assets'] = [dict(fileName=name, sizeBytes=len(blob), sha256=sha(blob)) for name in
+        ('app-start.bin', 'app-final.bin', 'X-Track-Boot.bin', 'full.etu', 'patch.etu', 'reference-1MiB.etu', 'recovery.bin',
+         *(['app-start-full.bin'] if full_base is not None else []))
+        for blob in [(out / 'prepared' / name).read_bytes()]]
+    save_json(out / 'evidence/verification.json', result)
 
 
 def materialize(manifest, out):
@@ -254,6 +375,8 @@ def package(data, key, out):
     inner = pack.normalize_patch_header(bytes(native), len(compressed), base, target)
     patch = envelope(inner + compressed, key, target, base)
     full = envelope(pack.lzma_alone_encode(target), key, target)
+    pack.check_limits(len(target), len(full), 'candidate-full')
+    pack.check_limits(len(target), len(patch), 'candidate-patch')
     require(len(patch) == 1048576, 'Exact reference size')
     for name, blob in [('app-final.bin', target), ('X-Track-Boot.bin', data['boot']),
                        ('full.etu', full), ('patch.etu', patch), ('reference-1MiB.etu', patch)]:
@@ -283,7 +406,7 @@ def package(data, key, out):
                 referenceBytes=len(patch), referenceAliasesPatch=True)
 
 
-def native_verify(data, out, private, cc):
+def native_verify(data, out, private, cc, all_assets=False):
     out, private = checked(out), checked(private)
     exe = checked(private / ('decoder.exe' if os.name == 'nt' else 'decoder'))
     sources = ['Tools/ota/p34-acceptance/reference_host.c', 'Libraries/OTA/ota_patch.c', 'Libraries/OTA/ota_keys.c',
@@ -291,13 +414,16 @@ def native_verify(data, out, private, cc):
                'bsdiff_lzma_AES128-main/bspatch/lzma/LzmaDec.c', 'bsdiff_lzma_AES128-main/bspatch/AES128_CTR/aes_core.c']
     includes = ['Libraries', 'boot/include', 'bsdiff_lzma_AES128-main/bspatch/lzma',
                 'bsdiff_lzma_AES128-main/bspatch/AES128_CTR']
+    if all_assets:
+        sources.append('Libraries/OTA/ota_package.c')
     temp = checked(private / 'tmp')
     temp.mkdir(exist_ok=True)
     env = {k: v for k, v in os.environ.items() if not k.startswith(('OTA_', 'GH_', 'GITHUB_TOKEN', 'TRACE_', 'CF_', 'CLOUDFLARE_'))}
     env.update(TEMP=str(temp), TMP=str(temp), TMPDIR=str(temp))
     evidence = checked(private.parent / 'evidence/native')
     stdout, stderr = native_command('compile', [cc, '-std=c99', '-O2', '-Wall', '-Wextra', '-Werror',
-        '-DOTA_PATCH_COALESCE_WRITES=1', '-DCONFIG_OTA_APP_CRC32_NIBBLE=1', '-include', str(private / 'key.h'),
+        '-DOTA_PATCH_COALESCE_WRITES=1', '-DCONFIG_OTA_APP_CRC32_NIBBLE=1',
+        *(['-DP51_ALL_ASSETS=1'] if all_assets else []), '-include', str(private / 'key.h'),
         *['-I' + str(ROOT / p) for p in includes], *[str(ROOT / p) for p in sources], '-o', str(exe)],
         env, evidence)
     require(not stdout and not stderr, 'Native compile produced unexpected diagnostics')
@@ -314,12 +440,31 @@ def native_verify(data, out, private, cc):
 
     cases = [('positive', blob, 'ok'), ('payload-crc', bytes(bad_crc), 'payload_crc'),
              ('truncated', blob[:-1], 'package_length'),
-             ('same-version', change(40, struct.pack('<I', 30313)), 'version'),
+             ('same-version', change(40, data['base'][0x408:0x40c]), 'version'),
              ('wrong-base-sha', change(52, bytes([blob[52] ^ 1])), 'base_sha8')]
+    if all_assets:
+        wrong_base = bytearray(data['base'])
+        wrong_base[-1] ^= 1
+        save(private / 'wrong-base.bin', wrong_base)
+        cases += [('wrong-base-image', blob, 'base_sha8')]
+        full = (out / 'full.etu').read_bytes()
+        if data.get('fullBase') is not None:
+            cases += [('full-other-start', full, 'ok')]
+        corrupt_full = bytearray(full)
+        corrupt_full[-1] ^= 1
+        cases += [('full-positive', full, 'ok'), ('full-crc', bytes(corrupt_full), 'payload_crc'),
+                  ('full-truncated', full[:-1], 'package_length'),
+                  ('recovery-positive', (out / 'recovery.bin').read_bytes(), 'ok')]
+        bad_recovery = bytearray((out / 'recovery.bin').read_bytes())
+        bad_recovery[-1] ^= 1
+        cases += [('recovery-crc', bytes(bad_recovery), 'recovery_trailer')]
     for name, value, expected in cases:
         file = checked(private / (name + '.etu'))
         save(file, value)
-        stdout, stderr = native_command(name, [str(exe), str(file), str(private.parent / 'inputs/base.bin'),
+        base_file = private / 'wrong-base.bin' if name == 'wrong-base-image' else private.parent / 'inputs/base.bin'
+        if name == 'full-other-start':
+            base_file = private.parent / 'inputs/full-base.bin'
+        stdout, stderr = native_command(name, [str(exe), str(file), str(base_file),
             str(out / 'app-final.bin'), expected], env, evidence)
         require(not stderr, 'Native decoder produced unexpected diagnostics')
         observed = json.loads(redacted(stdout))
@@ -334,13 +479,36 @@ def native_verify(data, out, private, cc):
 def main():
     global STAGE
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('mode', choices=['inputs', 'package'])
+    parser.add_argument('mode', choices=['inputs', 'package', 'source-inputs', 'source-package', 'command'])
     parser.add_argument('--root-out', type=Path, required=True)
     parser.add_argument('--cc', default='gcc')
+    parser.add_argument('--command-json', type=Path)
     args = parser.parse_args()
     require(Path.cwd() == ROOT and sys.flags.isolated and sys.flags.no_site and sys.dont_write_bytecode,
             'Explicit worktree and isolated Python required')
     out = checked(args.root_out)
+    if args.mode == 'command':
+        request = json.loads(checked(args.command_json).read_bytes())
+        require(re.fullmatch(r'compiler-[1-9][0-9]*', request['label'])
+                and request['argv'][0] in ('cmake', 'arm-none-eabi-size') and request['timeout'] == 600,
+                'Bounded compiler request')
+        env = {k: v for k, v in os.environ.items()
+               if not k.startswith(('OTA_', 'GH_', 'GITHUB_TOKEN', 'TRACE_', 'CF_', 'CLOUDFLARE_'))}
+        native_command(request['label'], request['argv'], env, out / 'evidence/native', timeout=request['timeout'])
+        return
+    if args.mode.startswith('source-'):
+        config = json.loads((ROOT / 'Tools/ota/p51-new-source-inputs.json').read_bytes())
+        if args.mode == 'source-inputs':
+            require(not (out / 'inputs').exists(), 'Preserve prior input attempt')
+            boot, original = source_boot(config)
+            save(out / 'inputs/boot.bin', boot)
+            save_json(out / 'inputs/manifest.json', config)
+            print('P51_NEW_SOURCE_BOOT_INPUTS_VERIFIED')
+            return
+        require(json.loads((out / 'inputs/manifest.json').read_bytes()) == config, 'Materialized source config drift')
+        package_source(config, out, bytes.fromhex(os.environ['OTA_AES_KEY']), args.cc)
+        print('P51_NEW_SOURCE_BYTES_VERIFIED; formal/hardware NOT_RUN')
+        return
     manifest = json.loads((ROOT / 'Tools/ota/p51-candidate-inputs.json').read_bytes())
     if args.mode == 'inputs':
         materialize(manifest, out / 'inputs')

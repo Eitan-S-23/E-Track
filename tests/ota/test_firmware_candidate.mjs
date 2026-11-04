@@ -4,12 +4,15 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import { test } from "node:test";
-import { candidateAdmission, cleanupCandidate, redactCandidate } from "../../.github/scripts/firmware-candidate.mjs";
+import { candidateAdmission, cleanupCandidate, redactCandidate, verifyCandidateCheckout, buildSourceCandidate } from "../../.github/scripts/firmware-candidate.mjs";
+import { candidateMode, UI_BASELINE } from "../../.github/scripts/firmware-candidate-context.mjs";
+import { buildKeyedFirmware, cleanupPrivateBuildKey } from "../../.github/scripts/firmware-gcc-keyed-build.mjs";
+import { firmwareCMakeOptions } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-build-profile.mjs";
 import { outputPath, writeOutput } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-cli.mjs";
 import { firmwareKeyBinding, verifyBuildKeyBinding } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-release-key.mjs";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
-const fixtures = outputPath(root, path.join(root, ".cache/p51-packaging-impl-20261104-01/node-tests"));
+const fixtures = outputPath(root, path.resolve(root, process.env.P51_TEST_AREA || ".cache/p51-packaging-impl-20261104-01/node-tests"));
 const env = () => ({ GITHUB_ACTIONS: "true", GITHUB_EVENT_NAME: "workflow_dispatch", GITHUB_REPOSITORY: "Eitan-S-23/E-Track",
   GITHUB_SHA: "a".repeat(40), INPUT_CANDIDATE_REVIEWED_COMMIT: "a".repeat(40),
   GITHUB_RUN_ID: "123", GITHUB_RUN_ATTEMPT: "1", INPUT_PACKAGE_CANDIDATE: "true", INPUT_PUBLISH: "false",
@@ -84,11 +87,136 @@ test("workflow candidate path has exactly one protected secret and an explicit u
   assert.match(job, /secrets\.FIRMWARE_REHEARSAL_OTA_AES_KEY/);
   assert.ok(job.indexOf("firmware-candidate.mjs gate") < job.indexOf("secrets."));
   assert.ok(job.indexOf("firmware-candidate.mjs inputs") < job.indexOf("secrets."));
-  assert.doesNotMatch(job, /firmware-release.mjs|wrangler|TRACE_|CLOUDFLARE_|arm-none-eabi|needs:/);
+  assert.doesNotMatch(job, /firmware-release.mjs|wrangler|TRACE_|CLOUDFLARE_|needs:/);
+  assert.match(job, /Install contained Arm GNU Toolchain for new-source only\n        if: github.event.inputs.candidate_mode == 'new-source'/);
+  assert.match(job, /sha256sum --check/);
   const upload = job.split("name: p51-candidate-")[1];
   assert.match(upload, /candidate-metadata.json/);
   assert.doesNotMatch(upload, /private|key\.h|decoder|path: \.cache\/p51-candidate\/\s*$/m);
   assert.match(job, /always\(\) && steps.cleanup.outcome == 'success'/);
+});
+
+const sourceEnv = () => ({ ...env(), INPUT_CANDIDATE_MODE: "new-source",
+  INPUT_CANDIDATE_BASE_VERSION: "3.4.1", INPUT_VERSION_NAME: "3.4.2",
+  FIRMWARE_RELEASE_MODE: "artifact-candidate",
+  FIRMWARE_CANDIDATE_CONTEXT: "firmware-rehearsal/artifact-only-new-source-v1",
+  GITHUB_REF: "refs/heads/fixture-only",
+  GITHUB_WORKFLOW_SHA: "a".repeat(40),
+  GITHUB_WORKFLOW_REF: "Eitan-S-23/E-Track/.github/workflows/firmware-build.yml@refs/heads/fixture-only" });
+const config = JSON.parse(await readFile(path.join(root, "Tools/ota/p51-new-source-inputs.json")));
+const gitDouble = argv => argv[0] === "rev-parse" ? "a".repeat(40)
+  : argv[0] === "show" ? "1790000000" : "";
+
+test("new and archived modes are explicit; synthetic new-source context binds workflow separately", () => {
+  assert.equal(candidateMode(env()), "archived-original");
+  assert.equal(candidateMode(sourceEnv()), "new-source");
+  assert.equal(candidateAdmission(sourceEnv()).commitSha, "a".repeat(40));
+  assert.equal(candidateAdmission({ ...sourceEnv(), INPUT_CANDIDATE_FULL_BASE_VERSION: "3.4.0" }).runId, "123");
+  for (const full of ["3.3.16", "3.4.1", "3.4.2", "3.4.3", "3.4.0-x"]) {
+    assert.throws(() => candidateAdmission({ ...sourceEnv(), INPUT_CANDIDATE_FULL_BASE_VERSION: full }));
+  }
+  assert.throws(() => candidateAdmission({ ...env(), INPUT_CANDIDATE_MODE: "new-source" }));
+  assert.throws(() => candidateAdmission({ ...sourceEnv(), INPUT_CANDIDATE_MODE: "archived-original" }));
+});
+for (const [name, value] of [
+  ["INPUT_CANDIDATE_MODE", "unknown"], ["INPUT_PUBLISH", "true"], ["INPUT_REHEARSAL", "true"],
+  ["INPUT_CHECK_BINDINGS", "true"], ["OTA_BOOT_CHAIN_READY", "true"],
+  ["FIRMWARE_RELEASE_MODE", "rehearsal"], ["FIRMWARE_RELEASE_MODE", "production"],
+  ["FIRMWARE_CANDIDATE_CONTEXT", ""], ["GITHUB_ACTIONS", "false"], ["GITHUB_REPOSITORY", "fork/repo"],
+  ["GITHUB_WORKFLOW_SHA", "b".repeat(40)], ["GITHUB_WORKFLOW_REF", "other/workflow@main"],
+  ["INPUT_CANDIDATE_REVIEWED_COMMIT", "b".repeat(40)], ["INPUT_FIRMWARE_BUILD_PROFILE", "baseline"],
+  ["INPUT_CANDIDATE_BASE_VERSION", "3.3.16"], ["INPUT_CANDIDATE_BASE_VERSION", "3.4.2"],
+  ["INPUT_VERSION_NAME", "3.4.0"], ["INPUT_VERSION_NAME", "3.4.2-extra"],
+  ["INPUT_VERSION_NAME", "3.100.1"], ["INPUT_VERSION_NAME", "429496.99.99"],
+  ["CF_API_TOKEN", "fixture"], ["GH_TOKEN", "fixture"]]) {
+  test(`new-source rejects ${name}=${value} before compilation`, () => {
+    assert.throws(() => candidateAdmission({ ...sourceEnv(), [name]: value }));
+  });
+}
+test("source validation rejects different checkout, dirty product, unreviewed changes and wrong baseline", () => {
+  verifyCandidateCheckout(root, sourceEnv(), config, gitDouble);
+  for (const verb of ["rev-parse", "diff", "status", "merge-base"]) {
+    assert.throws(() => verifyCandidateCheckout(root, sourceEnv(), config, argv => {
+      if (argv[0] === verb) {
+        if (verb === "merge-base") throw Error("not ancestor");
+        return "different source";
+      }
+      return gitDouble(argv);
+    }));
+  }
+  assert.throws(() => verifyCandidateCheckout(root, sourceEnv(), { ...config, reviewedProductBaseline: "b".repeat(40) }, gitDouble));
+  assert.equal(config.reviewedProductBaseline, UI_BASELINE);
+});
+test("new-source orchestration actually calls the existing keyed compiler once, not archived input resolution", async () => {
+  let calls = 0;
+  const key = "bc".repeat(16), keyBinding = firmwareKeyBinding(key, "approved-ci-key-v1");
+  const fake = { keyBinding, buildConfiguration: null };
+  await assert.rejects(buildSourceCandidate({ root, env: { ...sourceEnv(), OTA_AES_KEY: key }, config,
+    git: gitDouble, execute: async () => {}, build: async options => {
+      calls++; assert.equal(options.commitSha, "a".repeat(40)); assert.equal(options.versionName, "3.4.2");
+      assert.equal(options.profile, "p34-v2-candidate"); assert.equal(options.buildTimestamp, 1790000000);
+      return fake;
+    } }), /provenance mismatch/);
+  assert.equal(calls, 1);
+});
+
+test("existing keyed builder supports strict candidate context, captured configuration and private cleanup", async () => {
+  await mkdir(fixtures, { recursive: true });
+  const dir = await mkdtemp(path.join(fixtures, "source-keyed-"));
+  const buildDir = path.join(dir, "gcc"), evidenceDir = path.join(dir, "evidence");
+  const e = { ...sourceEnv(), OTA_AES_KEY: "bc".repeat(16) };
+  const state = { calls: 0 };
+  const execute = async (tool, argv, options) => {
+    state.calls++;
+    assert.equal(options.env.OTA_AES_KEY, undefined);
+    assert.equal(options.env.TEMP, path.join(buildDir, "tmp"));
+    if (argv[0] === "-S") {
+      assert.equal(tool, "cmake");
+      assert.ok(argv.includes("-DP34_OTA_CANDIDATE:BOOL=ON"));
+      await writeOutput(root, path.join(buildDir, "CMakeCache.txt"),
+        "KEIL_GCC_COMPILER_CACHE:STRING=OFF\nCMAKE_BUILD_TYPE:STRING=Release\n" +
+        Object.entries(firmwareCMakeOptions("p34-v2-candidate")).map(([k,v]) => `${k}:STRING=${v}\n`).join(""));
+      await writeOutput(root, path.join(buildDir, "CMakeFiles/rules.ninja"), "command = arm-none-eabi-gcc\n");
+      const defs = "OTA_TARGET_APP P34_OTA_FIXED_CONFIG=1 P34_OTA_PIPELINE=1 P34_OTA_PIPELINE_SYNC=1 " +
+        "P34_OTA_PIPELINE_ACK_BIND=1 P34_OTA_PIPELINE_WAIT_RX=1 P34_EARLY_FAULT_VECTORS=1 CONFIG_BT_FIXED_BAUD=921600u " +
+        "CONFIG_BT_BAUD_EXPERIMENT=0 CONFIG_OTA_BLE_PROFILE=0 CONFIG_RTT_DEBUG_CMD_ENABLE=0 CONFIG_OTA_INSTALL_PROFILE=0 CONFIG_OTA_INSTALL_COST=0";
+      await writeOutput(root, path.join(buildDir, "compile_commands.json"), JSON.stringify([{
+        file: path.join(root, "Libraries/OTA/ota_keys.c"), command: "arm-none-eabi-gcc " +
+          defs.split(" ").map(d => "-D" + d).join(" ") + ` -include "${path.join(buildDir,"private-key.h").replaceAll("\\", "/")}" -o CMakeFiles/X_Track_App_GCC.dir/keys.o`
+      }]));
+    } else if (argv[0] === "--build") {
+      assert.equal(await readFile(path.join(buildDir, "private-key.h"), "utf8"),
+        Array.from({length:4}, (_,i) => `#define OTA_AES_KEY_1_WORD${i} 0xbcbcbcbcu\n`).join(""));
+      for (const [d,n] of [["app-gcc","X-Track-App-GCC"],["boot","X-Track-Boot"]])
+        for (const ext of ["elf","map","bin","hex"]) await writeOutput(root, path.join(buildDir,d,n+"."+ext), "compiler double, not firmware");
+    }
+    return { status: 0, stdout: "", stderr: "", treeCleanupComplete: true };
+  };
+  const result = await buildSourceCandidate({ root, env: e, config, git: gitDouble, execute,
+    build: options => buildKeyedFirmware({ ...options, buildDir, evidenceDir }) });
+  assert.equal(state.calls, 3);
+  verifyBuildKeyBinding(result, e);
+  assert.equal(result.buildConfiguration.actualProfile, "p34-v2-candidate");
+  await assert.rejects(access(path.join(buildDir, "private-key.h")));
+  const evidence = await readFile(path.join(evidenceDir, "keyed-build-evidence.json"), "utf8");
+  assert.ok(!evidence.includes(e.OTA_AES_KEY));
+  await assert.rejects(buildKeyedFirmware({ root, buildDir, evidenceDir, env: e,
+    versionName: e.INPUT_VERSION_NAME, commitSha: e.GITHUB_SHA, buildTimestamp: 1790000000 }), /bounded executor/);
+  for (const mode of ["production", "rehearsal"]) {
+    await assert.rejects(buildKeyedFirmware({ root, buildDir, evidenceDir,
+      env: { ...e, FIRMWARE_RELEASE_MODE: mode, INPUT_REHEARSAL: mode === "rehearsal" ? "true" : "false",
+        INPUT_PUBLISH: mode === "production" ? "true" : "false", OTA_BOOT_CHAIN_READY: mode === "production" ? "true" : "false" },
+      versionName: e.INPUT_VERSION_NAME, commitSha: e.GITHUB_SHA, buildTimestamp: 1790000000, execute }), /protected release context/);
+  }
+});
+test("unconfirmed key-build trees block header cleanup and candidate upload cleanup", async () => {
+  const dir = await mkdtemp(path.join(fixtures, "active-keyed-"));
+  const buildDir = path.join(dir, ".cache/p51cg");
+  await writeOutput(dir, path.join(buildDir, "private-key.h"), "fixture");
+  await writeOutput(dir, path.join(buildDir, "key-build-active.json"), "{}");
+  await assert.rejects(cleanupPrivateBuildKey({ root: dir, buildDir, env: sourceEnv() }), /unconfirmed/);
+  await assert.rejects(cleanupCandidate(dir, sourceEnv()), /unconfirmed/);
+  await access(path.join(buildDir, "private-key.h"));
 });
 
 test("candidate-only excludes all original jobs, while mixed modes still reach the failing candidate gate", async () => {

@@ -56,7 +56,7 @@ describe("firmware key wiring with a compiler double, never a local native build
   });
 
   async function fixture() {
-    const parent = outputPath(root, path.join(root, ".cache/firmware-key-build-tests"));
+    const parent = outputPath(root, path.resolve(root, process.env.P51_TEST_AREA || ".cache/firmware-key-build-tests"));
     await mkdir(parent, { recursive: true }); const dir = await mkdtemp(path.join(parent, "case-"));
     const env = keyEnv();
     const state = { root, buildDir: path.join(dir, "gcc"), evidenceDir: path.join(dir, "evidence"),

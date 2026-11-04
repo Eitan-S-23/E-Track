@@ -1,5 +1,8 @@
 /* Only storage I/O is emulated. The patch decoder and Boot validator are real. */
 #include "OTA/ota_patch.h"
+#ifdef P51_ALL_ASSETS
+#include "OTA/ota_package.h"
+#endif
 #include "boot_crypto.h"
 #include "boot_fw_header.h"
 
@@ -167,6 +170,7 @@ int main(int argc, char **argv)
     ota_patch_result_t result;
     boot_sha256_ctx_t sha;
     uint8_t hash[32];
+    const char *result_name;
     int equal = 0, boot_ok = 0, matched, guards, lifecycle, passed;
     if (argc != 5) {
         fprintf(stderr, "usage: patch_host PACKAGE BASE EXPECTED EXPECTED_RESULT\n");
@@ -198,8 +202,54 @@ int main(int argc, char **argv)
     boot_sha256_update(&sha, state.base.bytes, state.base.length);
     boot_sha256_final(&sha, hash);
     memcpy(device.base_image_sha8, hash, sizeof(device.base_image_sha8));
+#ifdef P51_ALL_ASSETS
+    if (state.package.length >= 64u && state.package.bytes[6] == OTA_PACKAGE_FULL_FLAGS) {
+        ota_package_io_t full_io;
+        ota_package_device_t full_device;
+        ota_package_info_t full_info;
+        full_io.ctx = &state;
+        full_io.package_read = package_read;
+        full_io.candidate_prepare = candidate_prepare;
+        full_io.candidate_program = candidate_program;
+        full_io.candidate_read = candidate_read;
+        full_io.workspace_acquire = workspace_acquire;
+        full_io.workspace_release = workspace_release;
+        full_device.current_vcode = device.current_vcode;
+        full_device.hardware_rev = device.hardware_rev;
+        full_device.layout_id = device.layout_id;
+        full_device.boot_version = device.boot_version;
+        memset(&full_info, 0, sizeof(full_info));
+        result = (ota_patch_result_t)ota_package_apply_full(&full_io, &full_device, state.package.length, &full_info);
+        result_name = ota_package_result_name((ota_package_result_t)result);
+        info.image_len = full_info.image_len;
+        info.workspace_peak = full_info.workspace_peak;
+    } else if (state.package.length >= 0x468u && memcmp(state.package.bytes + 0x400u, "ETFW", 4u) == 0) {
+        /* Recovery owner's raw image + length/CRC trailer, not UART/device I/O. */
+        uint32_t image_len = state.package.length - 8u;
+        int valid = u32le(state.package.bytes + image_len) == image_len &&
+            u32le(state.package.bytes + image_len + 4u) == boot_crc32(state.package.bytes, image_len);
+        result = valid ? OTA_PATCH_OK : OTA_PATCH_ERR_ARGUMENT;
+        result_name = valid ? "ok" : "recovery_trailer";
+        if (valid) {
+            uint32_t off;
+            candidate_prepare(&state, image_len);
+            for (off = 0u; off < image_len; ) {
+                uint32_t take = image_len - off;
+                if (take > OTA_PATCH_WORK_SIZE) take = OTA_PATCH_WORK_SIZE;
+                if (candidate_program(&state, off, state.package.bytes + off, take)) return 2;
+                off += take;
+            }
+            info.image_len = image_len;
+        }
+    } else {
+        result = ota_patch_apply(&io, &device, state.package.length, &info);
+        result_name = ota_patch_result_name(result);
+    }
+#else
     result = ota_patch_apply(&io, &device, state.package.length, &info);
-    matched = strcmp(ota_patch_result_name(result), argv[4]) == 0;
+    result_name = ota_patch_result_name(result);
+#endif
+    matched = strcmp(result_name, argv[4]) == 0;
     guards = guards_intact();
     lifecycle = state.acquires == state.releases && state.acquires <= 1u &&
                 (!state.acquires || state.workspace_zeroed);
@@ -223,7 +273,7 @@ int main(int argc, char **argv)
            "\"image_bytes\":%u,\"decoded_bytes\":%u,\"workspace_peak\":%u,"
            "\"prepares\":%u,\"program_calls\":%u,\"programmed_bytes\":%u,"
            "\"max_write\":%u,\"base_reads\":%u,\"package_reads\":%u}\n",
-           ota_patch_result_name(result), (int)result, passed ? "true" : "false",
+           result_name, (int)result, passed ? "true" : "false",
            equal ? "true" : "false", boot_ok ? "true" : "false", guards ? "true" : "false",
            lifecycle ? "true" : "false", (unsigned)state.package.length,
            (unsigned)info.image_len, (unsigned)info.decoded_len, (unsigned)info.workspace_peak,
