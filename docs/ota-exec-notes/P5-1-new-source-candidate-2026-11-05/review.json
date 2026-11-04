@@ -1,0 +1,329 @@
+{
+  "outcome": "PROTECTED_NEW_SOURCE_ORIGINALS_REVIEW_PASS",
+  "checks": [
+    "bound-ci-archive-and-source",
+    "new-source-workflow-baseline-and-artifact-only-provenance",
+    "actual-keyed-compiler-artifacts-profile-and-diagnostics",
+    "three-finalized-start-target-identities-recovery-and-external-boot",
+    "exact-asset-hashes-envelope-reference-alias-and-negative-controls",
+    "native-originals-process-closure-and-private-cleanup",
+    "adaptive-reference-reencoded-and-linux-regressions"
+  ],
+  "source": "1430c8ff7f3bcd9a35bfe158ba697b99021f75f2",
+  "runId": 41900439548,
+  "artifactId": 13359301400,
+  "metadata": {
+    "schema": "p51-artifact-candidate-v2",
+    "mode": "new-source",
+    "task": "P5-1",
+    "isFormalRelease": false,
+    "productionPublishable": false,
+    "readyRegistered": false,
+    "versionName": "3.3.19",
+    "versionCode": 30319,
+    "buildTimestamp": 1793820855,
+    "targetImageSha256": "fdd065a8871bcffcc8e262fa4a43a71cbf20752adab9904a27c0eb59d8f7b89d",
+    "baseVersionName": "3.3.18",
+    "baseVersionCode": 30318,
+    "baseImageSha256": "74c20ab69baa85e73cd6273d84dea95e53428fd81620d184d25c859d150407a1",
+    "hardwareAcceptance": "NOT_RUN",
+    "runner": {
+      "commitSha": "1430c8ff7f3bcd9a35bfe158ba697b99021f75f2",
+      "runId": "41900439548",
+      "runAttempt": "1"
+    },
+    "source": {
+      "reviewedProductBaseline": "b871d57e66645f43b29a8006a58ca6a3692951f3",
+      "actualCheckout": "1430c8ff7f3bcd9a35bfe158ba697b99021f75f2",
+      "workflowCommit": "1430c8ff7f3bcd9a35bfe158ba697b99021f75f2",
+      "workflowRef": "Eitan-S-23/E-Track/.github/workflows/firmware-build.yml@refs/heads/dev/firmware/p51-packaging-20261104",
+      "productUnchangedFromReviewedBaseline": true
+    },
+    "derivation": "one-keyed-source-build/three-fw-header-finalizations",
+    "sourceCompilations": 1,
+    "build": {
+      "commitSha": "1430c8ff7f3bcd9a35bfe158ba697b99021f75f2",
+      "versionName": "3.3.19",
+      "versionCode": 30319,
+      "buildTimestamp": 1793820855,
+      "app": {
+        "fileName": "X-Track-App-GCC.bin",
+        "sizeBytes": 615132,
+        "sha256": "78ca849d31976ab5e5037f5aa1f9d02d58f17ed006b1710653207168a0385438"
+      },
+      "boot": {
+        "fileName": "X-Track-Boot.bin",
+        "sizeBytes": 14724,
+        "sha256": "3554e193f498d23210f5ef32e09de64575b7cd39104fafcc950740e5e8a7ec34"
+      },
+      "keyBinding": {
+        "schemaVersion": 1,
+        "keyId": 1,
+        "source": "approved-ci-key-v1",
+        "keySha256": "a94ae0f006b3d6be51279b861dc19b8a0892833939d0a4db5a81ee7af511fe9e",
+        "headerSha256": "aac414ffff84f3997298fe631a81190bce1d7efe5f4d1718cc1f05103b1f4622",
+        "keySourceSha256": "baf619c85412a9f87f249ee97a19bf781a9b802fe2aab68254fedca884609495"
+      },
+      "buildConfiguration": {
+        "schemaVersion": 1,
+        "requestedProfile": "p34-v2-candidate",
+        "actualProfile": "p34-v2-candidate",
+        "cmakeOptions": {
+          "P34_OTA_CANDIDATE": "ON",
+          "P34_EARLY_FAULT_VECTORS": "ON",
+          "P3_4_LINK_PROFILE": "OFF",
+          "P34_OTA_UART_BAUD": "921600",
+          "P1_6_TEST_ENABLE": "OFF",
+          "P2_1_TEST_ENABLE": "OFF",
+          "P2_2_TEST_ENABLE": "OFF",
+          "P2_3_TEST_ENABLE": "OFF",
+          "P2_6_TEST_ENABLE": "OFF",
+          "BOOT_HANDOFF_TEST_INJECT_PENDING": "OFF",
+          "BOOT_HANDOFF_TEST_CLEAR_BCB": "OFF"
+        },
+        "appCompileDefinitions": [
+          "ARDUINO=111",
+          "AT32F435RGT7",
+          "CONFIG_BT_BAUD_EXPERIMENT=0",
+          "CONFIG_BT_FIXED_BAUD=921600u",
+          "CONFIG_OTA_ACTIVE_PUMP=1",
+          "CONFIG_OTA_APP_CRC32_NIBBLE=1",
+          "CONFIG_OTA_BLE_PROFILE=0",
+          "CONFIG_OTA_INSTALL_BLOCK_ERASE=1",
+          "CONFIG_OTA_INSTALL_COST=0",
+          "CONFIG_OTA_INSTALL_HALF_ERASE=1",
+          "CONFIG_OTA_INSTALL_PROFILE=0",
+          "CONFIG_OTA_INSTALL_QE_REUSE=1",
+          "CONFIG_OTA_LINK_METRICS=1",
+          "CONFIG_OTA_STAGING_BLOCK_ERASE=1",
+          "CONFIG_OTA_STAGING_QE_REUSE=1",
+          "CONFIG_OTA_UI_CADENCE=1",
+          "CONFIG_RTT_DEBUG_CMD_ENABLE=0",
+          "LIBRARY_VERSION",
+          "LV_MEM_SIZE=126976U",
+          "OTA_PATCH_COALESCE_WRITES=1",
+          "OTA_TARGET_APP",
+          "P34_EARLY_FAULT_VECTORS=1",
+          "P34_OTA_FIXED_CONFIG=1",
+          "P34_OTA_PIPELINE=1",
+          "P34_OTA_PIPELINE_ACK_BIND=1",
+          "P34_OTA_PIPELINE_SYNC=1",
+          "P34_OTA_PIPELINE_WAIT_RX=1",
+          "_RTE_",
+          "__AT32F435_437__"
+        ]
+      }
+    },
+    "finalization": {
+      "base": {
+        "versionName": "3.3.18",
+        "versionCode": 30318,
+        "sizeBytes": 615132,
+        "sha256": "74c20ab69baa85e73cd6273d84dea95e53428fd81620d184d25c859d150407a1",
+        "headerSha256": "c1fbf651b48f1ff8f255a86d1e3d645e658f94c92e633c3f7d8fc218c20dcfcd",
+        "buildTimestamp": 1793820855
+      },
+      "target": {
+        "versionName": "3.3.19",
+        "versionCode": 30319,
+        "sizeBytes": 615132,
+        "sha256": "fdd065a8871bcffcc8e262fa4a43a71cbf20752adab9904a27c0eb59d8f7b89d",
+        "headerSha256": "ec82ad2baba1319d7a3f9ff664d0dc164b146b18e0d71417707a2639f7319b26",
+        "buildTimestamp": 1793820855
+      },
+      "raw": {
+        "fileName": "X-Track-App-GCC.bin",
+        "sizeBytes": 615132,
+        "sha256": "78ca849d31976ab5e5037f5aa1f9d02d58f17ed006b1710653207168a0385438"
+      },
+      "sourceCompilations": 1,
+      "fullBase": {
+        "versionName": "3.3.17",
+        "versionCode": 30317,
+        "sizeBytes": 615132,
+        "sha256": "0fc735659ad2febf7eed7bd2576bfc2a0605f706b3924bffd7ea0b24099a82b9",
+        "headerSha256": "73cc082bd4d8c48e02f62a4b5d5bcef6c00d9b6c0070d7678c9549999848dcb0",
+        "buildTimestamp": 1793820855
+      },
+      "headerOnlyDerivation": true,
+      "headerOffset": 1024,
+      "headerBytes": 96,
+      "boot": {
+        "sha256": "2f84014278421de7a84a0f621a494a9974fbf51c56b768974b0c5e647105ec80",
+        "sizeBytes": 14800,
+        "group": 16,
+        "source": {
+          "path": "docs/acceptance-contracts/P1-6-v3/originals/group16-source.zip",
+          "bytes": 841237,
+          "sha256": "eb16e302302007cf1bca806d7b8aee17b513488c371423f5b6dfed7d928818fc"
+        },
+        "build": {
+          "path": "docs/acceptance-contracts/P1-6-v3/inputs/baseline-build",
+          "bytes": 1156,
+          "sha256": "fe2c4df80a602bcfeac2baec3fde76851d7128c5a3834dc5b1f674f6a9c6be19"
+        },
+        "evidenceCommit": "6876afd2617be90d504ade5708e79d2c40928fd2"
+      }
+    },
+    "elfMapRelationship": {
+      "directory": "keyed-build/app",
+      "headerOffset": 1024,
+      "headerBytes": 96,
+      "description": "ELF/MAP exactly match raw GCC App; start/target differ only in the documented finalized fw_header",
+      "artifacts": [
+        {
+          "path": "app/X-Track-App-GCC.bin",
+          "sizeBytes": 615132,
+          "sha256": "78ca849d31976ab5e5037f5aa1f9d02d58f17ed006b1710653207168a0385438",
+          "modifiedAt": "2026-11-04T19:58:10.602Z"
+        },
+        {
+          "path": "app/X-Track-App-GCC.elf",
+          "sizeBytes": 886316,
+          "sha256": "834017fb10bced91529748388580538f81ebf76ca617c21b5746037f1ca0c24d",
+          "modifiedAt": "2026-11-04T19:58:10.586Z"
+        },
+        {
+          "path": "app/X-Track-App-GCC.hex",
+          "sizeBytes": 1726284,
+          "sha256": "30b40dcbd873923b17283404f09d20f073abe517845d15bb6874c41267be31ee",
+          "modifiedAt": "2026-11-04T19:58:10.599Z"
+        },
+        {
+          "path": "app/X-Track-App-GCC.map",
+          "sizeBytes": 2695518,
+          "sha256": "c8d885dbc5307544236296e604eedea0c945f11013e1debf901f95252d584072",
+          "modifiedAt": "2026-11-04T19:58:10.588Z"
+        }
+      ]
+    },
+    "ordinaryBuiltBoot": {
+      "fileName": "X-Track-Boot.bin",
+      "sizeBytes": 14724,
+      "sha256": "3554e193f498d23210f5ef32e09de64575b7cd39104fafcc950740e5e8a7ec34",
+      "candidateBoot": false,
+      "purpose": "compile-only, not approved group16"
+    },
+    "boot": {
+      "sha256": "2f84014278421de7a84a0f621a494a9974fbf51c56b768974b0c5e647105ec80",
+      "sizeBytes": 14800,
+      "group": 16,
+      "source": {
+        "path": "docs/acceptance-contracts/P1-6-v3/originals/group16-source.zip",
+        "bytes": 841237,
+        "sha256": "eb16e302302007cf1bca806d7b8aee17b513488c371423f5b6dfed7d928818fc"
+      },
+      "build": {
+        "path": "docs/acceptance-contracts/P1-6-v3/inputs/baseline-build",
+        "bytes": 1156,
+        "sha256": "fe2c4df80a602bcfeac2baec3fde76851d7128c5a3834dc5b1f674f6a9c6be19"
+      },
+      "evidenceCommit": "6876afd2617be90d504ade5708e79d2c40928fd2",
+      "kind": "external-approved-group16",
+      "firmwareRebuilt": false
+    },
+    "key": {
+      "schemaVersion": 1,
+      "keyId": 1,
+      "source": "approved-ci-key-v1",
+      "keySha256": "a94ae0f006b3d6be51279b861dc19b8a0892833939d0a4db5a81ee7af511fe9e",
+      "headerSha256": "aac414ffff84f3997298fe631a81190bce1d7efe5f4d1718cc1f05103b1f4622",
+      "keySourceSha256": "baf619c85412a9f87f249ee97a19bf781a9b802fe2aab68254fedca884609495",
+      "compiledAndPackagingBindingMatched": true
+    },
+    "assets": [
+      {
+        "fileName": "app-start.bin",
+        "sizeBytes": 615132,
+        "sha256": "74c20ab69baa85e73cd6273d84dea95e53428fd81620d184d25c859d150407a1",
+        "kind": "start-app"
+      },
+      {
+        "fileName": "app-final.bin",
+        "sizeBytes": 615132,
+        "sha256": "fdd065a8871bcffcc8e262fa4a43a71cbf20752adab9904a27c0eb59d8f7b89d",
+        "kind": "target-app"
+      },
+      {
+        "fileName": "X-Track-Boot.bin",
+        "sizeBytes": 14800,
+        "sha256": "2f84014278421de7a84a0f621a494a9974fbf51c56b768974b0c5e647105ec80",
+        "kind": "external-boot"
+      },
+      {
+        "fileName": "full.etu",
+        "sizeBytes": 291700,
+        "sha256": "fd3f610f1c0a918e152c61b604e4d1646adc551a1b33c21e8a04adce9eb19140",
+        "kind": "full"
+      },
+      {
+        "fileName": "patch.etu",
+        "sizeBytes": 1048576,
+        "sha256": "919036dc304dfafc236bf593bca1c1da29a816067b67eb74b14d77a7d100dfee",
+        "kind": "patch",
+        "baseVersionCode": 30318,
+        "baseImageSha256": "74c20ab69baa85e73cd6273d84dea95e53428fd81620d184d25c859d150407a1"
+      },
+      {
+        "fileName": "reference-1MiB.etu",
+        "sizeBytes": 1048576,
+        "sha256": "919036dc304dfafc236bf593bca1c1da29a816067b67eb74b14d77a7d100dfee",
+        "kind": "reference",
+        "baseVersionCode": 30318,
+        "baseImageSha256": "74c20ab69baa85e73cd6273d84dea95e53428fd81620d184d25c859d150407a1"
+      },
+      {
+        "fileName": "recovery.bin",
+        "sizeBytes": 615140,
+        "sha256": "f3d7951c077b402c275d83d0bc24c381be5c8fb65068e6242279c1d231b61336",
+        "kind": "recovery"
+      },
+      {
+        "fileName": "app-start-full.bin",
+        "sizeBytes": 615132,
+        "sha256": "0fc735659ad2febf7eed7bd2576bfc2a0605f706b3924bffd7ea0b24099a82b9",
+        "kind": "full-cell-start-app"
+      }
+    ],
+    "reference": {
+      "aliasOf": "patch.etu",
+      "totalLength": 1048576,
+      "fullConsumption": true
+    },
+    "bleFullCell": {
+      "actualDeviceBinding": "NOT_RUN",
+      "instruction": "root may request candidate_full_base_version: same reviewed executable, distinct lower version than patch base; restore and bind actual GET_INFO, never fabricate hash or D1",
+      "patchBase": {
+        "versionName": "3.3.18",
+        "versionCode": 30318,
+        "sizeBytes": 615132,
+        "sha256": "74c20ab69baa85e73cd6273d84dea95e53428fd81620d184d25c859d150407a1",
+        "headerSha256": "c1fbf651b48f1ff8f255a86d1e3d645e658f94c92e633c3f7d8fc218c20dcfcd",
+        "buildTimestamp": 1793820855
+      },
+      "suppliedFullStart": {
+        "versionName": "3.3.17",
+        "versionCode": 30317,
+        "sizeBytes": 615132,
+        "sha256": "0fc735659ad2febf7eed7bd2576bfc2a0605f706b3924bffd7ea0b24099a82b9",
+        "headerSha256": "73cc082bd4d8c48e02f62a4b5d5bcef6c00d9b6c0070d7678c9549999848dcb0",
+        "buildTimestamp": 1793820855
+      },
+      "noFabricatedDeviceIdentity": true
+    },
+    "noCloudMutation": true,
+    "noDeviceOperation": true
+  },
+  "warnings": 641,
+  "errors": 0,
+  "nativeWarnings": 0,
+  "nativeErrors": 0,
+  "nativeProcessReceipts": 16,
+  "sourceBuilds": 1,
+  "headerFinalizations": 3,
+  "referenceMeasurements": 140,
+  "predictionMatched": true,
+  "deviceOperations": 0,
+  "keyExported": false,
+  "P5": "NOT_RUN"
+}

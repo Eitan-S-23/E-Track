@@ -1799,3 +1799,43 @@ That prediction remains distinct from an actual new CI build and is mandatory
 before the existing authorized artifact-only dispatch. No input timestamp/seed
 will be selected to chase a known witness. No protected CI, service mutation,
 device operation or P5 acceptance occurred in this review.
+
+### P51 New-Source Candidate: Actual CI And Original Review Passed
+
+Root committed only the five reviewed code/test/handoff/root-record files as
+`1430c8ff7f3bcd9a35bfe158ba697b99021f75f2`, tree
+`0d2bb53f248f9c8f90bef052f2ea7069ec4de8bb`; 54 unrelated dirty files were
+preserved. The unchanged hooks passed without an exception. Root then cold-tested
+that commit's actual timestamp 1793820855 at F/B/T=3.3.17/18/19. It found a strict
+exact witness in 140 measurements, 527.130 seconds, with no change to seed,
+timestamp, budget or deadlines. This was a prediction, not an ARM build.
+
+After unused-version/remote/protection/service reconciliation, root fast-forwarded
+the already-authorized candidate branch and dispatched exactly one protected
+artifact-only run `41900439548/1`, with one user-delegated approval. It succeeded.
+No branch-policy or gate/reviewer change was made. Repository, rehearsal and
+production boot-chain gates remain false; post-CI channels/releases exactly
+match the pre-CI service snapshot. No publication or ready registration occurred.
+
+Artifact `13359301400` is 6586031 bytes, SHA-256
+`a906221d772a0df5b6b069a250a5b8f951b97371bacd1a8be4b0d77c51988e0b`.
+Root retrieved 252 original members, checked their allowlist/path/archive binding,
+and passed all seven independent artifact evaluations. The raw GCC image and all
+three finalized inputs exactly match the prediction, including the 140-point
+v4 witness. Selected compressed bytes were independently re-encoded and strictly
+decoded. Original protected-key/native evidence has 12 checks and 16 closed
+process receipts, all passing, with zero native warnings/errors. Private cleanup
+passed and no private key/header was exported. Linux Node 50 and Python 19 tests
+pass; GCC diagnostics contain 641 warnings and zero errors, not zero warnings.
+
+The exact originals and provenance are archived in
+`docs/ota-exec-notes/P5-1-new-source-candidate-2026-11-05/`. Its README records
+the actual App/full/patch/reference/recovery/group16 identities and limits. The
+ordinary Boot built by CI is compile-only. Previous 30313/30316 assets and every
+failed search/run remain unchanged. P51-REFERENCE-SEARCH-02 is closed for this
+candidate preparation; it is not a universal witness-existence guarantee.
+
+No MCU, phone, SD, 30/30, four-hour or P5 formal acceptance action occurred. Next
+execution preparation must use the actual new assets, rebind both rollback
+fixtures and validate current device/collector state before installing anything.
+Do not reuse the old 30313/30316 fixture bindings or claim P5 from this CI result.

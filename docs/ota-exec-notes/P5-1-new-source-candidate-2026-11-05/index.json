@@ -1,0 +1,47 @@
+{
+  "kind": "P51_NEW_SOURCE_CANDIDATE_PREPARATION_NOT_P5_ACCEPTANCE",
+  "files": [
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-new-source-candidate-2026-11-05\\artifact.zip",
+      "bytes": 6586031,
+      "sha256": "a906221d772a0df5b6b069a250a5b8f951b97371bacd1a8be4b0d77c51988e0b"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-new-source-candidate-2026-11-05\\workflow-logs.zip",
+      "bytes": 153733,
+      "sha256": "47c29f5be54cb14eac492f827159fe4988435f605ec4280e0eae0b4db7890aa4"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-new-source-candidate-2026-11-05\\provenance.zip",
+      "bytes": 393778,
+      "sha256": "36aa152c38f3284fd6ed587a63ac101c896aaf230084b480e3397428f94bb8b5"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-new-source-candidate-2026-11-05\\review.json",
+      "bytes": 12503,
+      "sha256": "ddf9e8c9c0c796f6beed72fc370bdfd1e9d5a3d5fcb802566539e48929f821ff"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-new-source-candidate-2026-11-05\\github-artifact.json",
+      "bytes": 806,
+      "sha256": "9f45c7df68d0a3443a32edc91b6d83437682b7ada26d983e0c8ebea22af71a11"
+    }
+  ],
+  "source": "1430c8ff7f3bcd9a35bfe158ba697b99021f75f2",
+  "runId": 41900439548,
+  "attempt": 1,
+  "artifactId": 13359301400,
+  "provenanceRecords": 413,
+  "remoteMutations": {
+    "fastForwardPush": 1,
+    "branchPolicyChanges": 0,
+    "workflowDispatch": 1,
+    "delegatedApproval": 1
+  },
+  "gatesAndReviewersUnchanged": true,
+  "testServiceUnchanged": true,
+  "deviceOperations": 0,
+  "productionRelease": false,
+  "keyExported": false,
+  "P5": "NOT_RUN"
+}
