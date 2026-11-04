@@ -1596,3 +1596,112 @@ the retained `commit-evidence/result.json` and is an ancestor of current HEAD.
 No third-party branch change, overwrite, force push or replayed dispatch occurred.
 The reviewed implementation plus this root note are the only planned commit
 paths; unrelated dirty files remain outside the index.
+
+### P51 New-Source CI Failed At Reference Synthesis
+
+Root committed the 12 reviewed implementation/test/handoff/task-record paths as
+`db049b6b2b9e0bc0ff0c534d52b686494b7d704c`, tree
+`44805a995a1b62b6d22a92ae268bc73fb45928fa`. All 54 unrelated dirty files were
+byte-preserved. A first commit was rejected solely because the global debug
+statement hook matched a public test's success sentinel. Root verified that
+single line and unchanged staged bytes, then applied the hook's debug-only
+exception for that one commit; secret scanning remained enabled. No hook/global
+configuration was edited. `commit-01` failure and `commit-02` success remain.
+
+The exact source was fast-forward pushed to the existing packaging branch.
+GitHub proxy TLS/EOF failures stopped two pre-dispatch read stages before POST;
+bounded HTTP/1.1 probes showed the proxy route failed while direct API TLS worked.
+Root selected process-local NO_PROXY for api.github.com only, without changing
+system networking. `dispatch-03` made the only actual dispatch, run
+`41849745315/1`; root supplied the already user-delegated protected approval.
+No policy/reviewer/gate change or second dispatch occurred.
+
+Actual result: CI FAILURE, confined to new-source reference synthesis. Source
+admission, contained Arm GNU 13.3.Rel1 checksum/extraction and the 50 Node/13
+Python Linux regressions passed. Real keyed GCC configure, App/ordinary-Boot
+build and size passed: 641 compile/link warnings, 0 compiler errors. Warnings
+are preserved, not hidden or automatically proved identical to historical ones.
+The ordinary Boot remains compile-only, never a replacement for group16.
+
+The reference search consumed its 256 unique measurements without finding exactly
+1,048,576 bytes. Original near misses were 1,048,575 and 1,048,577 bytes. The
+source-package subprocess exited 1 without timeout; no candidate metadata or
+full/patch/recovery package was created. Private cleanup and evidence upload
+passed, and all three actual compiler process groups closed cleanly.
+
+Artifact `13335076821`: 1,815,505 bytes, SHA-256
+`c7ab23cd19071b4ba053d0cab44b647878407af0832926e948b0eae7225c72f0`.
+The archive, workflow logs and 302 rehashed extracted originals are retained in
+`.cache/p51-new-source-delivery-20261104-01/download-01/`. The independent failure
+analysis and a separate finite 61-new-measurement count-neighborhood probe are
+in `failure-analysis-01/` and `reference-probe-01/`. The latter also found no exact
+witness; it did not run CI, access the key, alter the codec or create encrypted
+packages. The prewritten success verifier was NOT_RUN because this failed run
+does not meet its admission conditions.
+
+Finding `P51-REFERENCE-SEARCH-01` and the concrete input hashes, implementation
+direction, invariants and regression oracle are in
+`P51-reference-search-remediation-2026-11-04.md`. Return only this bounded search/
+failure-diagnostic repair to an implementation owner; keep the reviewed UI,
+archived-original mode and old asset identities unchanged. Do not blindly rerun
+the same deterministic CI or install its partial artifacts. This is a tooling
+failure, not an observed MCU/UI failure or P5 physical verdict.
+
+Root exhausted the existing handoff routes before asking for intervention:
+the tool tree has no live implementation agent, and cc-connect discovery reports
+no binding for this chat. One implementation-owner routing/authorization is
+required; the old explicitly bounded child scope is not silently expanded.
+After that handoff, root can independently review/self-test evidence and resume
+the existing CI/candidate chain without new per-step requests.
+
+Controlled logs, caches, downloads, extraction and diagnostic files remain inside
+the active worktree. The only external writes were the previously authorized
+task Git objects/ref/reflog/index paths; shared main HEAD/index/config were checked
+unchanged. No encryption key export, system proxy/daemon change, service mutation,
+device operation, SD rewrite, historical replay or P5 freeze occurred. New failure
+notes remain local pending the next scoped documentation delivery.
+
+### P51 Reference Search Repair Independently Reviewed, 2026-11-05
+
+Root resumed the implementer's completed batch without starting another agent.
+Result: INDEPENDENT_REFERENCE_REPAIR_REVIEW_PASS for the local repair, no blocking
+finding. This does not reclassify failed run 41849745315 or assert a new protected
+candidate/P5 result. The three code/test edits and handoff are bound to
+`.cache/p51-reference-search-impl-20261104-01/final.json` at base `db049b6b`.
+
+Independent evidence: `.cache/p51-reference-search-review-20261105-01/`.
+Root inspected the complete diff, checked the actual code/handoff digests and
+byte-verified 774 original delivery files plus 55 unrelated work files unchanged.
+AST checks confirm the old search, patch stream/encoder/strict decoder, legacy
+input resolver, packaging and native process/decoder functions are unchanged.
+New-source alone selects the adaptive strategy; both manifests, workflow, keyed
+build/admission helpers and product UI are unchanged.
+
+The implementer's 209 selected host tests and 112 closed process receipts were
+independently checked from originals; 139 unrelated Vitest tests remain explicitly
+skipped. Root additionally executed the four focused scheduler/cache/diagnostic
+tests successfully. This is not another 209-test campaign or a native/MCU rebuild.
+
+Root replayed the real final scheduler with the four original input/cache sets.
+All selected cached points still counted against 256; no missing measurement was
+silently re-encoded. The selected witness was freshly encoded and strictly
+verified for each case, including truncated/tail negatives. Results were exactly
+137/177/26/229 unique selections with original raw/compressed identities. The last
+case consumed 192 first-seed measurements and then selected seed 8. Each case's
+11 actual native decoder originals, source hashes, observations and process
+closure were independently evaluated, not redundantly executed.
+
+The two-sample real-input exhaustion record reports reference-search and
+REFERENCE_SEARCH_BUDGET_EXHAUSTED, with no selected stream/success assets.
+The earlier count/salt-only proposal failure remains retained. No codec padding,
+budget/deadline increase, private-key export, gate relaxation or device operation
+was used to obtain this local result.
+
+Next: root will commit only the reviewed repair/handoff and related root records,
+then preflight the intended version pair with that exact commit timestamp and
+the retained real GCC raw image. That is a diagnostic prediction, not a substitute
+for the next CI's actual keyed build/raw identity. Only after a legal bounded
+witness is demonstrated will root proceed to one exact-source protected run.
+Linux timing, actual new build/reference/native receipts, candidate/recovery
+binding and P5 remain downstream checks. Existing authority is retained; no
+per-step user intervention or new implementation agent is required at this point.

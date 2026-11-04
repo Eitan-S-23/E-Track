@@ -167,6 +167,15 @@ class CandidateInputs(unittest.TestCase):
         build = dict(versionName='3.4.2', versionCode=30402, buildTimestamp=1790000000,
                      app=dict(sizeBytes=len(raw), sha256=m.sha(raw)))
         base, target = m.source_images(raw, build, '3.4.1', '3.4.2')
+        # Optional original measurements avoid replaying a known failed encoding
+        # campaign. The search still charges every selected cache entry to its budget.
+        cache = os.environ.get('P51_TEST_REFERENCE_CACHE')
+        if cache:
+            for path in m.checked(Path(cache)).glob('measure-*.json'):
+                record = json.loads(path.read_bytes())
+                self.assertEqual(record['base_sha256'], m.sha(base))
+                self.assertEqual(record['target_sha256'], m.sha(target))
+                m.save(out / 'evidence/reference/logs' / path.name, path.read_bytes())
         row, compressed = m.source_reference(base, target, config, out / 'evidence/reference')
         self.assertEqual(104 + len(compressed), 1048576)
         plain = m.encoding.strict_lzma(bytes.fromhex(row['props_hex']), compressed, row['decoded_bytes'])
@@ -255,7 +264,7 @@ class CandidateInputs(unittest.TestCase):
             patch_raw, props, compressed = m.encoding.encode(base, target, 209108, 7, 3)
             row = dict(count=209108, seed=7, salt=3, decoded_bytes=len(patch_raw), props_hex=props.hex(),
                        compressed_sha256=m.sha(compressed), raw_sha256=m.sha(patch_raw))
-            with mock.patch.object(m.encoding, 'search', return_value=row):
+            with mock.patch.object(m.encoding, 'search_adaptive', return_value=row):
                 m.package_source(config, out, key, os.environ.get('P51_TEST_CC') or shutil.which('gcc'))
         script = fixture / 'metadata.mjs'
         module = (ROOT / '.github/scripts/firmware-candidate.mjs').as_uri()
@@ -291,6 +300,94 @@ console.log("source_metadata_bound_and_drift_rejected");
         m.save_json(fixture / 'SELFTEST-ONLY.json', dict(protectedCI=False, protectedKey=False,
                     installable=False, sourceBuild='compiler receipt double and synthetic bytes',
                     referenceSearch='exact integration recipe replay; actual search in separate test'))
+
+
+class AdaptiveReferenceSearch(unittest.TestCase):
+    def test_nonmonotonic_counts_recenter_after_salt_change(self):
+        calls, reports = [], []
+        def measured(old, new, count, seed, salt, **kwargs):
+            calls.append((count, seed, salt))
+            length = 100 + 3 * count if not salt else {9: 133, 7: 126, 8: 128}.get(count, 100 + 3 * count)
+            if not salt and count == 10:
+                length = 126  # Increasing count from 9 reduces compressed size.
+            return dict(count=count, seed=seed, salt=salt, etu_bytes=length)
+        with mock.patch.object(m.encoding, 'TARGET', 128), mock.patch.object(m.encoding, 'measurement', measured), \
+                mock.patch.object(m.encoding, 'save_json', lambda name, row: reports.append(row)):
+            row = m.encoding.search_adaptive(b'base', bytes(32), 7, 32)
+        self.assertEqual((row['count'], row['salt']), (8, 1))
+        self.assertEqual([c[0] for c in calls if c[2] == 1], [9, 7, 8])
+        self.assertEqual(len(calls), len(set(calls)))
+        self.assertEqual(row['measurements'], len(calls))
+        self.assertEqual(reports[0]['outcome'], 'exact-witness')
+
+    def test_budget_exhaustion_unique_cache_samples_and_safe_diagnostic(self):
+        calls, reports = [], []
+        def measured(old, new, count, seed, salt, **kwargs):
+            calls.append((count, seed, salt))
+            return dict(count=count, seed=seed, salt=salt, etu_bytes=127 if count == 0 else 129)
+        config = dict(reference=dict(totalBytes=1048576, seed=7, budget=256))
+        AREA.mkdir(parents=True, exist_ok=True)
+        out = m.checked(Path(tempfile.mkdtemp(prefix='exhausted-', dir=AREA)))
+        with mock.patch.object(m.encoding, 'TARGET', 128), mock.patch.object(m.encoding, 'measurement', measured), \
+                mock.patch.object(m.encoding, 'save_json', lambda name, row: reports.append(row)), \
+                mock.patch.object(m.encoding, 'search', side_effect=AssertionError('old search must not run')), \
+                mock.patch.object(m.encoding, 'encode') as encode:
+            # source_reference installs its own real report writer. Capture the typed
+            # exception at the same adapter boundary used by source-package.
+            with self.assertRaises(m.encoding.ReferenceSearchExhausted) as caught:
+                m.source_reference(b'a', b'ab', config, out)
+            encode.assert_not_called()
+        diagnostic = m.failure_diagnostic(caught.exception)
+        self.assertEqual(diagnostic['stage'], 'reference-search')
+        self.assertEqual(diagnostic['reason'], 'REFERENCE_SEARCH_BUDGET_EXHAUSTED')
+        self.assertEqual(diagnostic['measurements'], 256)
+        self.assertEqual(len(calls), 256)
+        self.assertEqual(len(set(calls)), 256)
+        self.assertEqual(sum(seed == 7 for _, seed, _ in calls), 192)
+        self.assertEqual(sum(seed == 8 for _, seed, _ in calls), 64)
+        report = json.loads((out / 'search-report.json').read_bytes())
+        self.assertEqual(report['outcome'], 'budget-exhausted')
+        self.assertFalse((out / 'selection.json').exists())
+        self.assertFalse((out / 'reference.lzma').exists())
+        self.assertFalse((out / 'prepared').exists())
+        self.assertNotIn('secret', json.dumps(m.failure_diagnostic(RuntimeError('secret'))))
+
+    def test_endpoint_witness_and_unbracketed_failure(self):
+        def measured(old, new, count, seed, salt, **kwargs):
+            return dict(count=count, seed=seed, salt=salt, etu_bytes=128)
+        with mock.patch.object(m.encoding, 'TARGET', 128), mock.patch.object(m.encoding, 'measurement', measured), \
+                mock.patch.object(m.encoding, 'save_json') as report:
+            row = m.encoding.search_adaptive(b'a', b'ab', 0, 2)
+            self.assertEqual(row['measurements'], 2)
+            self.assertEqual(row['count'], 0)
+        with mock.patch.object(m.encoding, 'measurement', measured), mock.patch.object(m.encoding, 'save_json') as report:
+            with self.assertRaisesRegex(RuntimeError, 'bracket'):
+                m.encoding.search_adaptive(b'a', b'ab', 7, 2)
+            self.assertEqual(report.call_args.args[1]['outcome'], 'initial-bracket-miss')
+        for seed, budget in [(True, 256), (-1, 256), (2**32, 256), (7, True), (7, 257), (7, 1)]:
+            with self.assertRaises(ValueError):
+                m.encoding.search_adaptive(b'a', b'ab', seed, budget)
+
+    def test_real_measurement_cache_input_and_parameter_identity(self):
+        AREA.mkdir(parents=True, exist_ok=True)
+        out = m.checked(Path(tempfile.mkdtemp(prefix='cache-', dir=AREA)))
+        old, new = b'base bytes', b'target bytes'
+        with mock.patch.object(m.encoding, 'OUT', out), mock.patch.object(m.encoding, 'pack', m.pack), \
+                mock.patch.object(m.encoding, 'save_json', lambda name, value: m.save_json(out / name, value)):
+            row = m.encoding.measurement(old, new, 3, 7, 2, strict_cache=True)
+            path = m.checked(out / 'logs/measure-3-7-2.json')
+            with mock.patch.object(m.encoding, 'encode', side_effect=AssertionError('must reuse cache')):
+                self.assertEqual(m.encoding.measurement(old, new, 3, 7, 2, strict_cache=True), row)
+            for old2, new2 in [(old + b'x', new), (old, new + b'x')]:
+                with self.assertRaisesRegex(AssertionError, 'input identity'):
+                    m.encoding.measurement(old2, new2, 3, 7, 2, strict_cache=True)
+            for field, value in [('count', 4), ('seed', 8), ('salt', 3), ('groups', 8),
+                                 ('decoded_bytes', 42), ('props_hex', '0300400000'), ('compressed_bytes', -1),
+                                 ('etu_bytes', 99), ('raw_sha256', 'z' * 64)]:
+                path.write_text(json.dumps(dict(row, **{field: value})), encoding='utf-8')
+                with self.subTest(field=field), self.assertRaisesRegex(AssertionError, 'encoding'):
+                    m.encoding.measurement(old, new, 3, 7, 2, strict_cache=True)
+            path.write_text(json.dumps(row), encoding='utf-8')
 
 
 if __name__ == '__main__':

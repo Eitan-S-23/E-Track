@@ -56,13 +56,24 @@ def encode(old: bytes, new: bytes, count: int, seed: int, salt: int):
     alone = pack.lzma_alone_encode(raw, 16384)
     return raw, alone[:5], alone[13:]
 
-def measurement(old: bytes, new: bytes, count: int, seed: int, salt: int):
+def measurement(old: bytes, new: bytes, count: int, seed: int, salt: int, *, strict_cache=False):
     relative = f"logs/measure-{count}-{seed}-{salt}.json"
     path = OUT / relative
     if path.exists():
         result = json.loads(path.read_text(encoding="utf-8"))
         if result["base_sha256"] != digest(old) or result["target_sha256"] != digest(new):
             raise AssertionError("Cached input identity differs")
+        if strict_cache:
+            expected = {"count": count, "seed": seed, "salt": salt, "groups": count + 1,
+                        "decoded_bytes": len(new) + 24 * (count + 1), "props_hex": "0200400000"}
+            if any(result.get(k) != v or type(result.get(k)) is not type(v) for k, v in expected.items()):
+                raise AssertionError("Cached encoding identity differs")
+            if (type(result.get("compressed_bytes")) is not int or result["compressed_bytes"] <= 0
+                    or result.get("etu_bytes") != 104 + result["compressed_bytes"]
+                    or any(not isinstance(result.get(k), str) or len(result[k]) != 64
+                           or any(c not in "0123456789abcdef" for c in result[k])
+                           for k in ("raw_sha256", "compressed_sha256"))):
+                raise AssertionError("Cached encoding receipt invalid")
         return result
     started = time.monotonic()
     raw, props, compressed = encode(old, new, count, seed, salt)
@@ -109,6 +120,88 @@ def search(old: bytes, new: bytes, seed: int, budget: int):
             if row["etu_bytes"] == TARGET:
                 return row
     raise RuntimeError("No exact witness within bounded search")
+
+class ReferenceSearchExhausted(RuntimeError):
+    """Safe, typed failure for the explicit new-source search only."""
+    def __init__(self, measurements, budget):
+        super().__init__("Reference search budget exhausted; no exact witness")
+        self.measurements = measurements
+        self.budget = budget
+
+def search_adaptive(old: bytes, new: bytes, seed: int, budget: int):
+    """Recenter each salted stream; fine compression lengths are not monotonic."""
+    if (not old or not new or type(seed) is not int or not 0 <= seed <= 0xffffffff
+            or type(budget) is not int or not 2 <= budget <= 256):
+        raise ValueError("Invalid adaptive reference search inputs")
+    seen = {}
+    def report(outcome):
+        value = dict(strategy="adaptive-count-salt-seed-v2", outcome=outcome,
+                     measurements=len(seen), budget=budget, targetBytes=TARGET,
+                     baseSha256=digest(old), targetSha256=digest(new), samples=list(seen.values()))
+        save_json("search-report.json", value)
+        return value
+    def witness(row):
+        report("exact-witness")
+        return dict(row, strategy="adaptive-count-salt-seed-v2", measurements=len(seen), budget=budget)
+    def sample(count, salt, stream_seed=seed):
+        key = (count, stream_seed, salt)
+        if key not in seen:
+            if len(seen) >= budget:
+                report("budget-exhausted")
+                raise ReferenceSearchExhausted(len(seen), budget)
+            seen[key] = measurement(old, new, count, stream_seed, salt, strict_cache=True)
+        return seen[key]
+
+    low, high = 0, min(len(new) - 1, 262144)
+    lo, hi = sample(low, 0), sample(high, 0)
+    for row in (lo, hi):
+        if row["etu_bytes"] == TARGET:
+            return witness(row)
+    if not lo["etu_bytes"] < TARGET < hi["etu_bytes"]:
+        report("initial-bracket-miss")
+        raise RuntimeError("Initial sample bracket does not straddle target")
+    # The coarse slope is stable enough for a proposal, not a monotonicity claim.
+    slope = (hi["etu_bytes"] - lo["etu_bytes"]) / (high - low)
+    while high - low > 1:
+        middle = (low + high) // 2
+        row = sample(middle, 0)
+        if row["etu_bytes"] == TARGET:
+            return witness(row)
+        if row["etu_bytes"] < TARGET:
+            low = middle
+        else:
+            high = middle
+
+    # Reserve a quarter for a different whole progressing stream, not just its
+    # final eight salted seeks. Never reuse one seed's near miss as the other's root.
+    primary_limit = max(len(seen), budget - budget // 4)
+    for stream_seed, first_salt, limit in ((seed, 1, primary_limit), ((seed + 1) & 0xffffffff, 0, budget)):
+        for salt in range(first_salt, 65536):
+            if len(seen) >= limit:
+                break
+            stream_rows = [r for r in seen.values() if r["seed"] == stream_seed]
+            anchor = min(stream_rows or list(seen.values()), key=lambda r: abs(r["etu_bytes"] - TARGET))
+            count = anchor["count"]
+            # Bound each salt's work so one noisy local neighborhood cannot monopolize it.
+            for _ in range(4):
+                if len(seen) >= limit:
+                    break
+                row = sample(count, salt, stream_seed)
+                error = TARGET - row["etu_bytes"]
+                if error == 0:
+                    return witness(row)
+                proposal = max(0, min(len(new) - 1, count + round(error / slope)))
+                if (proposal, stream_seed, salt) in seen or proposal == count:
+                    candidates = (count + delta for radius in range(1, 5) for delta in (radius, -radius))
+                    proposal = next((c for c in candidates if 0 <= c < len(new) and (c, stream_seed, salt) not in seen), None)
+                    if proposal is None:
+                        break
+                count = proposal
+    if len(seen) >= budget:
+        report("budget-exhausted")
+        raise ReferenceSearchExhausted(len(seen), budget)
+    report("parameter-space-exhausted")
+    raise RuntimeError("Reference search parameter space exhausted")
 
 def package_bytes(old: bytes, new: bytes, raw: bytes, *, declared_size=None,
                   compressed_tail=b"") -> bytes:

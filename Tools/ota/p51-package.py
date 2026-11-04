@@ -262,13 +262,17 @@ def source_images(raw, build, base_version, target_version):
 
 def source_reference(base, target, config, out):
     """Legal progressing reference search; no padding or default-key witness."""
+    global STAGE
+    STAGE = 'reference-config'
     reference = config['reference']
     require(reference['totalBytes'] == 1048576 and type(reference['seed']) is int
             and 0 <= reference['seed'] <= 0xffffffff and type(reference['budget']) is int
             and 2 <= reference['budget'] <= 256, 'Bounded reference configuration')
     encoding.OUT, encoding.pack, encoding.unpack = checked(out), pack, unpack
     encoding.save_json = lambda name, value: save_json(checked(out) / name, value)
-    row = encoding.search(base, target, reference['seed'], reference['budget'])
+    STAGE = 'reference-search'
+    row = encoding.search_adaptive(base, target, reference['seed'], reference['budget'])
+    STAGE = 'reference-verify'
     raw, props, compressed = encoding.encode(base, target, row['count'], row['seed'], row['salt'])
     require(104 + len(compressed) == 1048576 and sha(compressed) == row['compressed_sha256']
             and sha(raw) == row['raw_sha256'], 'Reference selected identity')
@@ -280,6 +284,8 @@ def source_reference(base, target, config, out):
 
 
 def package_source(config, out, key, cc):
+    global STAGE
+    STAGE = 'admission'
     out = checked(out)
     boot, original = source_boot(config)
     request = json.loads((out / 'inputs/source-build.json').read_bytes())
@@ -322,6 +328,7 @@ def package_source(config, out, key, cc):
     data = dict(base=base, target=target, boot=boot, row=row, compressed=compressed)
     if full_base is not None:
         data['fullBase'] = full_base
+    STAGE = 'source-package-roundtrips'
     result = package(data, key, out / 'prepared')
     save(out / 'prepared/app-start.bin', base)
     if full_base is not None:
@@ -529,6 +536,15 @@ def main():
     print('P51_PACKAGES_VERIFIED; physical acceptance NOT_RUN')
 
 
+def failure_diagnostic(error):
+    result = dict(error='P51_PACKAGE_FAILED', stage=STAGE, exception=type(error).__name__,
+                  originalInputsRetained=True)
+    if isinstance(error, encoding.ReferenceSearchExhausted):
+        result.update(reason='REFERENCE_SEARCH_BUDGET_EXHAUSTED', measurements=error.measurements,
+                      budget=error.budget)
+    return result
+
+
 if __name__ == '__main__':
     def cancelled(signum, frame):
         raise InterruptedError('candidate cancelled')
@@ -537,6 +553,5 @@ if __name__ == '__main__':
         main()
     except Exception as error:
         # No traceback or exception value can disclose protected environment data.
-        print(json.dumps(dict(error='P51_PACKAGE_FAILED', stage=STAGE, exception=type(error).__name__,
-                              originalInputsRetained=True)), file=sys.stderr)
+        print(json.dumps(failure_diagnostic(error)), file=sys.stderr)
         raise SystemExit(1)
