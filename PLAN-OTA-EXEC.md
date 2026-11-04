@@ -42,11 +42,11 @@
 |---|---|---|---|---|
 | PRE | 前置修正(复审产物) | 完成 | 4/4 | 无 |
 | P0 | 契约冻结+基建 | 完成 | 6/6 | P0-4/P0-5 独立真机复核通过；P1/P2 方案硬门槛重开 |
-| P1 | bootloader | 进行中 | 6/7 | P0 已 6/6;P1-1/P1-2/P1-3/P1-4/P1-5 已验收;P1-7-v4 于 2026-11-04 本地独立验收 PASS,待主线集成;仅 P1-6 原件与精确断电义务未完成 |
+| P1 | bootloader | 进行中 | 6/7 | P1-7-v4 本地 PASS；P1-6-v3 加速版 AUTO 已独立收口 14/14，原固件已恢复；仅六项真实断电未测，待主线集成 |
 | P2 | MCU App 升级链 | 完成 | 6/6 | **P0 全部完成(方案硬门槛)** |
 | P3 | BLE+Flutter | 完成 | 8/8 | P3-5-v5 独立验收 PASS，主线交付已授权并以 PR 合并记录为准；P3-4/P3-8 既有完成状态不变，P5 与生产发布仍独立受控 |
 | P4 | CI/CF | 完成 | 4/4 | P5 前实现、配置与隔离 rehearsal 已完成；生产晋升仍须 P5 与原审批 |
-| P5 | 联调验收 | 待办 | 0/3 | P1-P4 全部完成 |
+| P5 | 联调验收 | 待办 | 0/3 | P1-P4 适用阶段；按 OTA-DEC-018，P1-6 AUTO 独立收口后可先做非断电部分，物理缺项仍阻断整体与发布 |
 
 **人工配合点总览(排期时预留)**:
 - git 提交/推送确认:PRE-4 及各阶段收口;
@@ -439,11 +439,14 @@
 - 独立验收(整改复验通过):验收人 Codex(非实现会话)/2026-07-28;逐项关闭上一轮五项阻断:legacy role+SHA 同名隔离、最终 PC/VTOR/CFSR 严格判定、recovery 路径碰撞写前拒绝与源资产不变、生产范围恢复 P1-4 基线、fresh legacy AC5 `0E0W` 且使用受控 scatter。宿主 `42/42` 含真实 PowerShell `8/8`;recovery 真机 `563116B→563108B` 精确剥离 8B、源 SHA 不变,普通 reset `PC=0x08042CE4/VTOR=0x08010000/CFSR=0`、RTT/HANDOFF 正常;CI run `30370629275` head SHA/结论/双四件套通过。详见 `docs/ota-exec-notes/P1-4-P1-5-remediation-acceptance-2026-07-28.md`;结论通过,卡置 `完成`,P1 进度 `5/6`。
 
 #### P1-6 注错试验与断电矩阵
-状态: 进行中 ｜ 认领: Codex / 2026-07-29 ｜ 更新: 2026-07-29(20 点矩阵已冻结；14 个 AUTO 点真机证据全通过并已恢复生产 Boot+App；6 个真实物理断电点待用户配合) ｜ **部分需用户物理配合**
+状态: 进行中 ｜ 认领: Codex / 2026-07-29 ｜ 更新: 2026-11-04(P1-6-v3 独立验收 AUTO 14/14 PASS；六项 PHYSICAL 未测，整卡 EVIDENCE_GAP；已恢复原加速 Boot/3.3.13) ｜ **部分需用户物理配合**
 - 目标: 注错全回滚:候选 CRC 坏/搬运中断电/三连失败;断电矩阵 20 点(§8):J-Link halt+复位注入可自动化的点全自动跑,**标注"物理"的点(擦/写指令飞行中真断电)列清单请用户在场配合**;每例记录状态轨迹+最终版本哈希+"可启动或进恢复"二判。
 - 验收: 20 点矩阵表全绿(证据落 `docs/ota-exec-notes/P1-6-*.md`)。
 - 证据: `docs/ota-exec-notes/P1-6-implementation-evidence-2026-07-29.md`(实现会话进行中；不得据此置完成)
 - 后续验收先核对已记录的 14 个 AUTO 原件与当前依赖，不因换验收者重跑 20 点；物理断电必须有真实条件证据。与 P5-2 共用适用原件，未知覆盖先对账，不默认作废或通过。
+- 2026-11-04 顺序调整：按用户批准的 `OTA-DEC-018`，先独立收口 14 项 AUTO；六项 PHYSICAL `03/05/07/15/16/17` 继续未完成，P1-6 整卡不置完成。自动原件缺口不随顺序调整消失；当前补测准备及旧脚本适用性见 `docs/ota-exec-notes/P1-P5-nonpower-sequence-2026-11-04.md`。
+- 当前验收 Spec：`docs/ota-prompts/prompt-P1-6-acceptance.md`，按 `OTA-DEC-019` 绑定现用 group16 加速 Boot；旧逐块 APPLY 检查点只保留为历史，不用于新测试。
+- 2026-11-04 正式 AUTO 收口：`P1-6-v3` 前检、十四项真实软件注错、原件复核与终检通过；证据包 `6876afd2617be90d504ade5708e79d2c40928fd2`。完整原固件、三个槽有效镜像、确认/运行健康及清理均核验；先前启动器/原生下载失败保留。六项真实断电仍未测，P1 保持 6/7；P5-1 的 AUTO 前置已满足，可进入同组候选准备，不再等待这些物理项。详见上述现行任务记录。
 
 #### P1-7 boot 启动耗时与 POWER_EN 重复锁存修复
 正式收口(2026-11-04)：P1-7-v4 已完成冻结前检、原件离线核验与最终校验，五项均为 EXECUTED PASS；214 项宿主回归通过。本地证据包 `f3af9ee656593e7f5581835c596bc6df53b4b54f`，输入提交 `7b067c01f4fc03c526573a2d6f7f9e01cdf8bb47`，最终矩阵为 `docs/acceptance-contracts/P1-7-v4/final-matrix-02.json`。保留全部失败、10 tick 短样本局限和纯电池开机的人工作证来源，未重跑设备。P1-7 整卡本地验收完成；未推送/合并，P1-6 与 P5 门槛不变。下列未完成描述均为历史进度。
@@ -812,6 +815,8 @@
 状态: 待办 ｜ 认领: — ｜ 更新: —
 - 目标: 稳定候选的 SD/BLE × 全量/差分四组合实际升级证据，升级后 GET_INFO 与 fw_header 复核；统一完成 OTA-XC-BLE-TUNING 的同组 30/30 与真实四小时长测，不让实现方/验收方各跑一套。
 - 验收: 4/4 与上述最终性能/可靠性门槛均满足；适用旧原件先独立核验，同一观察可支撑多个判据，不跨参数组拼接。
+- 执行顺序: `OTA-DEC-018` 允许满足 P1-6 AUTO 和其他前置后先行；不等待物理断电不等于已证明断电安全，也不解锁生产发布。
+- 前置进展(2026-11-04): P1-6-v3 AUTO 已独立收口 14/14；可准备 P5-1 同组生产候选、full/patch/recovery 与 App 绑定。当前仍未形成该最终资产组，尚未冻结或执行 P5-1，不拼接旧成功片段冒充 30/30。
 - 证据: —
 
 #### P5-2 故障注入矩阵
@@ -819,6 +824,7 @@
 - 目标: §8 注入点=每个持久化提交点/擦写/窗口 ACK/重连;每例输出状态轨迹+最终版本哈希+"可启动或进恢复"二判;弱信号/低电量/满 staging/降级包/坏包/错板(hw_rev/layout_id)全过;含 TEST_BOOT 三连失败回滚、recovery 路径、物理断电抽样点。
 - 验收: 矩阵表全绿,证据落 `docs/ota-exec-notes/P5-2-*.md`。
 - 先逐项核验 P1-6 和 P3-5 等适用原件，只补最终候选仍缺的注错条件；不无条件复制旧 PASS，也不把每张上游卡的故障矩阵再执行一遍。
+- 执行顺序: `OTA-DEC-018` 允许非断电部分先行，物理断电/低电量等条件不足的必选项仍保留原分类，不得删行或将整卡置完成。
 - 证据: —
 
 #### P5-3 文档收尾
@@ -849,8 +855,8 @@
 | 10 | P4-2 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-2-implementation.md |  | `OTA-XC-D1-RELEASE`, `OTA-XC-D1-ASSET`, `OTA-XC-D1-CHANNEL`, `OTA-XC-D1-AUDIT`, `OTA-XC-D1-MIGRATION`, `OTA-XC-HTTP-ADMIN`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-HTTP-REGISTER`, `OTA-XC-ASSET-SELECTION`, `OTA-XC-SCHEMA-FIXTURE` | READY | FROZEN | SATISFIED | P0 阶段门槛已完成；明确不依赖 P4-1 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
 | 11 | P4-3 | IMPLEMENTATION | docs/ota-prompts/prompt-P4-3-implementation.md |  | `OTA-XC-HTTP-ADMIN`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-ADMIN-RETRACT`, `OTA-XC-ADMIN-STOP`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-D1-CHANNEL`, `OTA-XC-D1-AUDIT`, `OTA-XC-D1-RETENTION` | READY | FROZEN | SATISFIED | P4-2 已独立实现验收并交付 main；P42-EXT-03B 真实 Access/Admin 演练仍按本卡单独取证 | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
 | 12 | P4-4 | INTEGRATION | docs/ota-prompts/prompt-P4-4-integration.md |  | `OTA-XC-SECRETS`, `OTA-XC-RELEASE-GATE`, `OTA-XC-BOOTSTRAP-BASE` | READY | FROZEN | SATISFIED | P4-1 已交付工作流接口、P4-2 隔离 Worker/D1/R2 环境及 P4-1-v4 原件已按 P44-DISPATCH-20261018 对账；P4-3 交付完成；生产配置与审批/角色缺口由本卡承接，不重复成功 rehearsal | DISPATCHABLE | FROZEN_DECISIONS_AND_DEPENDENCIES_SATISFIED |
-| 13 | P5-1 | ACCEPTANCE | docs/ota-prompts/prompt-P5-1-acceptance.md |  | `OTA-XC-IMAGE-IDENTITY`, `OTA-XC-HTTP-LATEST`, `OTA-XC-ASSET-SELECTION`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-TEST-VECTORS`, `OTA-XC-BLE-TUNING` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | P1-P4 适用候选/rehearsal阶段完成（当前仍有未完成卡） | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: P1-P4 incomplete |
-| 14 | P5-2 | ACCEPTANCE | docs/ota-prompts/prompt-P5-2-acceptance.md |  | `OTA-XC-CANCEL-RECOVERY`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-HTTP-ADMIN`, `OTA-XC-ADMIN-STOP`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-TEST-VECTORS` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | P1-P4 适用阶段完成，并具备 P5-1 主路径 | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: P1-P4 and P5-1 incomplete |
+| 13 | P5-1 | ACCEPTANCE | docs/ota-prompts/prompt-P5-1-acceptance.md |  | `OTA-XC-IMAGE-IDENTITY`, `OTA-XC-HTTP-LATEST`, `OTA-XC-ASSET-SELECTION`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-TEST-VECTORS`, `OTA-XC-BLE-TUNING` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | OTA-DEC-018：P1-6 AUTO 已收口；可准备同组候选，物理项不阻断该准备 | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: final common candidate/assets not yet bound; AUTO prerequisite satisfied |
+| 14 | P5-2 | ACCEPTANCE | docs/ota-prompts/prompt-P5-2-acceptance.md |  | `OTA-XC-CANCEL-RECOVERY`, `OTA-XC-HTTP-DOWNLOAD`, `OTA-XC-HTTP-ADMIN`, `OTA-XC-ADMIN-STOP`, `OTA-XC-ADMIN-IDEMPOTENCY`, `OTA-XC-TEST-VECTORS` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | P1-6 AUTO 已收口；按 OTA-DEC-018 仍须 P5-1 主路径，物理缺项仅允许部分执行 | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: P5-1 main paths incomplete; AUTO prerequisite satisfied |
 | 15 | P5-3 | ACCEPTANCE | docs/ota-prompts/prompt-P5-3-acceptance.md |  | `OTA-XC-SCOPE`, `OTA-XC-D1-RETENTION`, `OTA-XC-SECRETS` | DEFERRED_ACCEPTANCE | FROZEN | BLOCKED_BY_DEPENDENCY | P1-P4 适用阶段完成，并取得 P5-1/P5-2 结论 | NOT_DISPATCHABLE | DEFERRED_ACCEPTANCE: P1-P4 and P5-1/P5-2 incomplete |
 
 <!-- post-p2-6-readiness:end -->
@@ -879,6 +885,7 @@
 
 | 日期 | 发起(卡ID/agent) | 冲突点 | 提议 | 处置(用户/审查结论) | 状态 |
 |---|---|---|---|---|---|
+| 2026-11-04 | P1-6 / 当前 root | 现用 group16 加速 Boot 与旧逐块提交/第 65 块检查点不一致 | 按现用源码和分组持久化更新后继检查点，保留原故障类型/行号谱系与六项断电义务 | 用户明确“就按加速版的来，原来P1的那部分已经过时了”；OTA-DEC-019 与 prompt-P1-6-acceptance.md 为后续口径；不以普通 Boot 自测代替现用候选 | 已批准；P1-6-v3 AUTO 14/14 已收口，物理六项保留 |
 | 2026-08-19 | P2-6 / Codex 实现会话 | 新增静态栈闭环 harness 在真实 ELF/map/`.su` 关联阶段连续失败三次；冻结停止条件要求立即置阻塞并停止，即使尚未形成产品 FAIL | 不由实现会话自行重置计数或执行第四次；由非实现协调会话审查三份原始日志和当前 harness diff，裁定是否授权新的受控验证轮次 | 非实现协调裁定为 **AUTHORIZED_RESUME**：确认旧轮次已按规则终止；三次均为可定界的 harness 关联缺陷,无产品门槛失败证据；恢复 P2-6 为“进行中”,授权新轮次最多三次执行。首次正式执行前须静态闭合匿名命名空间空键、真实 LZMA 对象归属、优化克隆与 `.su` 基函数关联三类问题；不改静态路线、冻结数字、产品语义或 §1.1 范围 | 已批准/恢复进行中 |
 | 2026-08-20 | P2-6 / Codex 实现会话 | AUTHORIZED_RESUME 新轮次正式执行 3/3 均在 harness 证据解析阶段失败；第三次仍失败，且生产 IRQ67 调用图存在无法给出有限深度的递归环 | 保留三次原始日志和 SHA-256；不得执行第四次、不得删边或假设有限递归；将 C3/C13/C16 记 `EVIDENCE_GAP`，置 P2-6 为阻塞并等待新的非实现协调裁定 | 生产实现与冻结数字不变；生产 v2.8.0 已回刷并 `Verify successful`；本轮仅修改 §1.1 允许的 harness/证据代码及看板/证据回填 | 已登记/阻塞停止 |
 | 2026-08-20 | P2-6A / Codex 前置整改会话 | 已耗尽轮次留下两个可独立处理的前置缺陷：IRQ67 可达 SDIO 超时恢复递归环，以及探针/`.su`/间接调用聚合不能在正式执行前一次性收敛 | 不重开 P2-6 正式轮次；仅把 `sd_init()` 恢复移到六个外层传输边界、锁定初始化内部底层调用无恢复、让两构型各自产出 `.su`，并以独立 preflight 聚合真实 ELF/map/`.su`、对象归属、间接调用与循环 | 静态回归全绿；preflight `issues=0`、`notes=24`、`formal_test_executed=false`，IRQ67 与 FULL/PATCH/测量根均静态闭合。该结论只批准 P2-6A 完成，不重置 `3/3`、不授权正式执行、不改变 C3/C13/C16=`EVIDENCE_GAP` 或 P2-6=`阻塞` | 已完成/待新裁定 |

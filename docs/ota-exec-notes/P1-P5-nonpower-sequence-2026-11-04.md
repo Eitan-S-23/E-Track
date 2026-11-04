@@ -373,3 +373,67 @@ download-separation host checks pass. This does not add a Flash driver, change
 the device firmware under test, waive a row or claim the matrix passed. The
 next successor must retain the v2 failed installation as its actual predecessor
 and admit only the still-missing AUTO observations after the verified recovery.
+
+## P1-6-v3 AUTO Closeout
+
+2026-11-04: all fourteen AUTO rows executed successfully after the scoped native
+session repair. Source freeze `c614421eb2512f7cc962d4dbef81548b0d24474c`, tree
+`e4ab92149c7e9ec506d5fa45de9779d91cc9f70d`; compact original evidence is committed
+as `6876afd2617be90d504ade5708e79d2c40928fd2`. The bundle contains 7633 files;
+each staged Git blob was checked against the working-file bytes before commit.
+Per-bundle -text attributes preserve original binary and text streams. No remote
+push, merge, production release or main worktree/index change occurred.
+
+Both actual FROZEN/NOT_RUN admission and final validation passed. The final
+matrix is `docs/acceptance-contracts/P1-6-v3/final-matrix.json`: fourteen
+EXECUTED PASS and six NOT_OBSERVED, overall EVIDENCE_GAP. That whole-contract
+result retains missing electrical tests; it does not negate the now-complete
+AUTO subsection or imply a product failure. No older P1-7/P3-5 campaign replay.
+
+Independent raw review anchored every row trajectory to captured 512-byte
+control records, checked active BCB CRC/fields and the exact final full image.
+Actual group16 frontiers are K=160, A=176, R=161 and N=195. Row08 keeps durable
+160 while revalidating/skipping equal block160 and erasing161. Row09 retains
+the committed prefix at176. The final partial group commits195. Trial counts
+3->2->1->0 lead to rollback; rollback resumes161 with its prefix preserved.
+The both-sources-corrupt row reaches recovery while preserving valid internal
+V1. All thirteen BOOTABLE terminals and the one PHYSICAL_RECOVERY terminal
+match their frozen meanings; the latter is NOT an electrical power-cut test.
+
+Existing group16 host originals were evaluated without repeating their models:
+1793 group16 scenarios/1691 modeled cuts, 39 source-switch extensions, and
+336 byte-prefix tears/36 I/O faults/11 sequences/3 negative oracles. Actual
+state-machine text matches the target ignoring CRLF. Three changed inventory
+headers are demonstrably outside the original compiler dependency closure.
+Raw inputs and review method are preserved in the bundle's originals area.
+
+The final restoration readback verifies the complete internal 1 MiB against the
+pre-test original, including original group16 Boot and 30313 App. Original
+candidate/backup/recovery headers and their complete declared image payloads
+match. Staging/journal are unchanged. Final BCB is CONFIRMED30313, runtime
+advances, SD is ready, fault registers and debug freeze are zero, no active
+hardware comparator remains, and the owned device lock/processes are closed.
+As predeclared, BCB sequence bytes and unused slot tails differ; they are not
+claimed byte-identical. Full before/after slot dumps retain those differences.
+No unrelated settings or storage region was intentionally rewritten.
+
+The finite campaign is `.cache/p16g-20261104-01/campaign-03/`; its completed
+outer receipt is `launch-03/campaign.closed.json`. v1 pre-entry timeout rejection,
+v2 native preparation failure and the separately verified Boot-only recovery
+remain preserved. No successful row was repeated to repair packaging.
+
+Six PHYSICAL rows 03/05/07/15/16/17 still require qualified electrical conditions.
+P1 remains6/7 and P5 remains0/3. P5-1's AUTO prerequisite is now satisfied:
+next prepare one production-candidate full/patch/recovery/App group and assess
+upstream applicability, then freeze the four combinations/30-of-30/four-hour
+campaign. Those candidate bindings do not yet exist; temporary P1-6 fixtures
+are not P5 production artifacts. Do not reuse the exact-byte Boot reproduction
+as a claim that the ordinary current-tree Boot automatically became group16.
+
+Final build/test counts: instrumented Boot compile/configure0 warnings0 errors;
+baseline Boot compile0/0 with one preserved configure warning; reused test-App
+build641 warnings0 errors. Latest host checks are19 matrix/plan/deadline methods,
+8 idle/native-session mocks,10 sequence regressions and46 governance methods.
+All controlled outputs, copied originals and archives remain in the active
+worktree. Authorized external effects are task Git objects/ref/worktree metadata
+and native PowerShell/SEGGER startup/history paths only; no external cleanup.
