@@ -35,6 +35,31 @@ def header_mutation(blob, offset, value):
     return bytes(changed)
 
 
+def prepare_images(raw, base_version, target_version, build_timestamp, preserve_base, pack, unpack):
+    if type(build_timestamp) is not int or not 0 <= build_timestamp <= 0xffffffff:
+        raise ValueError("build timestamp must be uint32")
+    if preserve_base:
+        unpack.verify_fw_header(raw, "preserved base")
+        name = raw[0x40c:0x41c]
+        expected = base_version.encode("ascii")
+        if not 0 < len(expected) < 16 or name != expected.ljust(16, b"\0") or \
+                struct.unpack_from("<I", raw, 0x408)[0] != pack.parse_version_name(base_version):
+            raise ValueError("preserved base version differs from the declared base")
+    images = []
+    for label, version in (("base", base_version), ("target", target_version)):
+        image = bytearray(raw)
+        if label != "base" or not preserve_base:
+            image[0x400:0x460] = pack.build_fw_header(bytes(image), version, build_timestamp)
+        image = bytes(image)
+        unpack.verify_fw_header(image, label)
+        if image[:0x400] + image[0x460:] != raw[:0x400] + raw[0x460:]:
+            raise RuntimeError("finalizer changed executable bytes")
+        images.append(image)
+    if struct.unpack_from("<I", images[1], 0x408)[0] <= struct.unpack_from("<I", images[0], 0x408)[0]:
+        raise ValueError("reference target must be a newer legal version")
+    return tuple(images)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--app", type=Path, required=True)
@@ -42,6 +67,9 @@ def main():
     parser.add_argument("--cc", default="gcc")
     parser.add_argument("--base-version", default="3.2.86-p34a")
     parser.add_argument("--target-version", default="3.2.87-p34a")
+    parser.add_argument("--preserve-base", action="store_true",
+                        help="Use the exact finalized input as base; reject a mismatched declared base version")
+    parser.add_argument("--build-timestamp", type=int, default=1786320000)
     args = parser.parse_args()
     if Path.cwd() != ROOT or not (sys.flags.isolated and sys.flags.no_site and sys.dont_write_bytecode):
         raise RuntimeError("explicit worktree and isolated Python required")
@@ -52,6 +80,7 @@ def main():
     if out.exists():
         raise RuntimeError("preserve earlier fixture generation")
     for leaf in ("base.bin", "target.bin", "reference.exe", "reference", "search.log", "logs", "proof", "cases",
+                 "DEVELOPMENT-ONLY.json",
                  "intent.json", "result.json", "failed.json"):
         host.checked(out / leaf)
     for label in ("compiler", "compile", "positive", "payload-crc", "truncated", "same-version", "wrong-base-sha"):
@@ -77,24 +106,19 @@ def main():
     encoding.save_json = lambda relative, value: host.io.write_json(ROOT, out / relative, value)
     host.io.write_json(ROOT, out / "intent.json", dict(app=host.record(source),
         base_version=args.base_version, target_version=args.target_version,
+        preserve_base=args.preserve_base, target_build_timestamp=args.build_timestamp,
         encoder="existing FAST/HC3 depth8 16KiB lc2/lp0/pb0", search_budget=128, device_operations=0))
+    host.io.write_json(ROOT, out / "DEVELOPMENT-ONLY.json", dict(installable=False, publishable=False,
+        key_source="development-example", note="Size/decoder fixture only; protected packaging is separate."))
     try:
         raw = source.read_bytes()
-        images = []
-        for label, version in (("base", args.base_version), ("target", args.target_version)):
-            image = bytearray(raw)
-            image[0x400:0x460] = pack.build_fw_header(bytes(image), version, 1786320000)
-            image = bytes(image)
-            unpack.verify_fw_header(image, label)
-            if image[:0x400] + image[0x460:] != raw[:0x400] + raw[0x460:]:
-                raise RuntimeError("finalizer changed executable bytes")
-            images.append(image)
+        images = prepare_images(raw, args.base_version, args.target_version, args.build_timestamp,
+                                args.preserve_base, pack, unpack)
+        for label, image in zip(("base", "target"), images):
             save(label + ".bin", image)
         base, target = images
         base_version = struct.unpack_from("<I", base, 0x408)[0]
         target_version = struct.unpack_from("<I", target, 0x408)[0]
-        if target_version <= base_version:
-            raise RuntimeError("reference target must be a newer legal version")
         with (out / "search.log").open("x", encoding="utf-8") as log, contextlib.redirect_stdout(log):
             selection = encoding.search(base, target, seed=1931, budget=128)
             encoding.save_json("proof/selection.json", selection)
@@ -150,6 +174,8 @@ def main():
             target=host.record(out / "target.bin"), package=host.record(package),
             base_version=base_version, target_version=target_version, decoder=host.record(exe),
             selection=selection, positive=positive, negatives=negatives,
+            preserved_base=args.preserve_base, target_build_timestamp=args.build_timestamp,
+            installable=False, publishable=False, key_source="development-example",
             sources=[host.record(path) for path in [Path(__file__), HERE / "build.py", HERE / "encoding.py", *sources]],
             installed=False, equivalent_initial_state_qualified=False, formal_freeze=False, independent_acceptance=False)
         host.io.write_json(ROOT, out / "result.json", result)

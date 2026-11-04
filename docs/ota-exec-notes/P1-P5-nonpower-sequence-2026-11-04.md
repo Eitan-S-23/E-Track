@@ -437,3 +437,163 @@ build641 warnings0 errors. Latest host checks are19 matrix/plan/deadline methods
 All controlled outputs, copied originals and archives remain in the active
 worktree. Authorized external effects are task Git objects/ref/worktree metadata
 and native PowerShell/SEGGER startup/history paths only; no external cleanup.
+
+## P5-1 Entry Inventory After AUTO Closure
+
+2026-11-04. The user requested checking P1-6 and starting P5-1 if the available
+P1-6 work was complete, with authorization for necessary in-scope work. The
+fourteen AUTO observations are complete; the six electrical cases are not.
+This continuation therefore starts P5-1 preparation under OTA-DEC-018, not a
+replay of P1-6 or a new USB/power-removal experiment. The active writable root
+remains `D:/github/my/E-Track/.cache/p35-integration-20261028/source`.
+
+One offline inventory ran successfully with 18 checks, including wrong-version
+and wrong-image-hash rejection by the existing firmware byte checker. Originals,
+exact input hashes, check results and the source comparison are recorded in
+`.cache/p51-preparation-20261104-01/`. This is preparation evidence, not 18
+product tests, formal admission, or any P5-1 physical PASS. No formal P5-1
+contract was created. The readiness row in `PLAN-OTA-EXEC.md` remains authoritative.
+
+### Existing Inputs Reconciled
+
+- The P1-6-v3 matrix contains exactly fourteen observed EXECUTED PASS AUTO rows;
+  six PHYSICAL rows remain unobserved and overall EVIDENCE_GAP remains unchanged.
+- Firmware CI run 41463640594, source
+  `18f6b3d3af0c24b1ce81573700cd61005b7c530e`, already produced a complete 30313
+  App/full/patch/recovery/metadata group. The full is 290929 bytes, patch 25561
+  bytes and recovery 614100 bytes. All three actual files match metadata hashes.
+- The finalized App is 614092 bytes with SHA256
+  `4126d801e6bd6efd57a9f20d5a128a50cfb5a46580dc10d9a2227702247d5805`.
+  Preserved CI full-decoded, patch-decoded and recovery App bytes all match it.
+  The existing parser independently checked the header, image hash and ETU
+  outer/base fields. This did not newly decrypt the encrypted packages.
+- The patch requires exact base 30207, SHA256
+  `aaf5ccdb047ef8b3ff4ae0837f9593ceca857d90c98ea0bc09360e411bf4196f`.
+  Its preserved base bytes equal the committed P4-1 bootstrap original. This
+  proves base availability, not permission or a validated route to downgrade
+  the current board to that base.
+- The retained Actions APK still hashes to
+  `f37c3282cd6420672d766b1761bd84f68fd29297248069a74a0bdb9fea78e1f8`.
+  This is the P3-5 candidate APK, not a new installation or a current-phone query.
+- The reproduced non-instrumented group16 Boot is 14800 bytes with SHA256
+  `2f84014278421de7a84a0f621a494a9974fbf51c56b768974b0c5e647105ec80`.
+  Its state-machine source, checkpoint header and CMake input match the preserved
+  source snapshot. No new Boot build or device read was required.
+
+### Remaining Preparation And Next Owner
+
+| ID | Observed fact | Direction and verification |
+| --- | --- | --- |
+| P51-CANDIDATE-01 | The 30313 CI Boot is 14724 bytes, SHA256 `3554e193f498d23210f5ef32e09de64575b7cd39104fafcc950740e5e8a7ec34`; it is not the retained group16 Boot. Current worktree `boot/src/boot_state_machine.c` still commits every copied block and lacks the retained skip-identical implementation. | Root binds the selected App/APK and approved group16 source/artifact explicitly. The existing independent group16 evidence remains valid; this is not a reason to rerun P1-6 or install the CI Boot. If final delivery needs production-source integration, return that bounded change to implementation ownership and obtain independent review, rather than silently modifying product code in P5 acceptance. |
+| P51-ASSETS-02 | The last verified board already runs 30313, none of the three existing assets is the required 1048576-byte reference, and P1-6 versions 30314/30315 are temporary fault-test fixtures. | Prepare a legal forward version/base pair and all corresponding assets from the selected production executable. Reuse existing pack/unpack and reference machinery. Qualify its key binding: `Tools/ota/p34-acceptance/reference.py` currently only supports the development-key route. Do not reuse an old-version reference, append arbitrary ETU bytes or promote P1-6 test images. Check exact ETU length, real decoding, target bytes and negative controls before freezing. |
+| P51-EXECUTION-03 | The prior ten-recovery campaign and current restored board are dated observations, not a declared P5 statistical group or a fresh starting-state check. | Bind the safe CONFIRMED start/restore route and sole collector ownership; independently assess P3-5 applicability to the selected parameters. Then declare four real SD/BLE x full/patch cells, one same-group 30/30 reference campaign and real four-hour soak. Preserve all attempts; do not count setup/idle/restore time as transfer or rebuild successful old evidence by replay. |
+
+These items are asset/candidate/runner preparation, not an observed new firmware
+failure or a network diagnosis. No network test was needed for this inventory.
+No user physical action is needed at this preparation stage. Request an actual
+SD/phone action only after its input and complete observation route are ready.
+The current authorization is recorded once; do not ask again for the same scope.
+Production release, gate unlocking, arbitrary BCB manipulation, unrelated
+filesystem writes and other devices remain outside this preparation.
+
+All chosen writes in this continuation are this appendix and the six files in
+the new project-local preparation directory. There were no builds, Git writes,
+network calls, device operations, native PowerShell/SEGGER invocations, product
+edits, deletions or external writes. Existing dirty files and frozen evidence
+were not reverted or rewritten. Early read-only query errors did not run a
+device action and are not product failures.
+
+### P51-ASSETS-02: Exact-Base Reference Preparation
+
+The next bounded preparation reuses `Tools/ota/p34-acceptance/reference.py`,
+its progressing-delta size search and real native decoder. Its existing entry
+always re-finalizes both images at timestamp 1786320000, changing the hash of
+the actual 30313 base; it also explicitly forbids release-key input. The minimum
+adapter is an exact-base option and explicit target build timestamp, with tests
+for unchanged base/executable bytes and rejection of a wrong or damaged base.
+No replacement encoder, flasher, protocol, product code or workflow is needed.
+
+Prepare an offline 30313-to-30316 reference from the existing CI executable,
+skipping the P1-6-only 30314/30315 fixtures. The generated encrypted reference is
+development-key-only and NOT_INSTALLABLE; retain the key-independent raw delta,
+compressed stream and exact-size witness for subsequent protected packaging.
+This is not authorization to extract a firmware key, export a protected CI key,
+publish a release or send the development package to the board. The current
+process has no OTA_AES_KEY input; that does not imply the CI secret is absent.
+All host test, compiler, home/cache/temp and search outputs are confined to
+`.cache/p51-reference-20261104-01/`. The search retains its existing 128-sample
+limit and has a bounded outer host window. Failed attempts are retained.
+
+### Exact-Base Reference Prepared; Protected Packaging Handoff
+
+The exact-base adapter and eight targeted unit methods passed. The existing
+bounded search generated an exact 1048576-byte legal reference PATCH for
+30313 -> 30316. Its unchanged real C decoder passed one complete decode and
+four required rejections: payload CRC, truncated length, same version and wrong
+base SHA. Each negative stopped before candidate preparation. Native compilation
+retained zero warnings and zero errors. All owned test/build processes closed.
+
+The base is byte-identical to the original 30313 CI App. The proposed 30316 App
+remains 614092 bytes, SHA256
+`6845544537f10da0367443342bed3618ff7986dbac86a7ccf1f9cfcd80e6edc2`;
+all bytes outside fw_header equal the existing executable. The target timestamp
+is explicitly 1793038630. This locally finalized target is not a new CI run,
+released image or installed firmware. Source remains the original
+`18f6b3d3af0c24b1ce81573700cd61005b7c530e` CI executable family.
+
+The retained witness uses 186518 progressing delta groups, a 5090524-byte raw
+delta and a 1048472-byte fully consumed LZMA stream. Native decoding reconstructs
+all target bytes with guards/workspace cleanup intact. These are host decoding
+facts, not a measured device speed or runtime-memory claim. The raw delta and
+compressed witness can be reused in protected packaging without repeating this
+size search. The encrypted host fixture explicitly remains DEVELOPMENT-ONLY,
+NOT_INSTALLABLE and NOT_PUBLISHABLE.
+
+Evidence: `.cache/p51-reference-20261104-01/reference/`, exact outer command
+receipts under `host-tests/` and `launch/`, and `handoff.json`/`audit.json`.
+Only validation tooling changed: the existing reference entry now optionally
+preserves the exact base and accepts an explicit target timestamp; its legacy
+default finalization is covered by regression. No production code/workflow,
+frozen bundle or prior result was changed, and no device operation occurred.
+
+P51-PACKAGING-01 is the next implementation boundary, not a new device failure.
+The protected candidate/reference path must use the approved CI secret inside
+its protected environment, bind group16 rather than silently selecting the old
+CI Boot, and return full/base-bound patch/recovery/reference assets with exact
+source, target, key and CI provenance. The reference remains exactly 1048576
+bytes and must decode to the bound target; wrong base/hash/key and missing
+provenance must fail. Reuse the existing encoder/packer and native decoder;
+do not export the key, weaken the release gates or promote the development
+fixture. Any production build/packaging integration belongs to an implementation
+owner, followed by this independent acceptance owner, not self-acceptance.
+
+The current chat's cc-connect discovery returned `no binding for this chat`.
+No implementation agent was contacted or spawned; no daemon/configuration was
+changed. The read-only CLI query had CC_LOG_FILE removed to avoid inherited
+external log writes. It is not evidence of a GitHub/network failure. Assigning
+the separate implementation work is the remaining coordination step; the
+current ordinary P5 authorization is not being re-requested.
+
+No 4/4, 30/30, four-hour soak, firmware CI, publication, Git commit/push, MCU
+flash/reset or physical test was run here. Controllable outputs and caches are
+inside the active worktree. Existing unrelated changes remain untouched.
+
+### P51 Implementation Delegation Authorized
+
+The user explicitly answered "allow" to starting a separate implementation
+sub-agent for P51-PACKAGING-01. Root started `p51_packaging_impl` for that bounded
+implementation; root remains the independent acceptance owner. Initial work is
+read-only design, followed by root-preflighted file/test outputs. No additional
+agent, hardware work, production release, secret export or gate relaxation is
+included. The old absent cc-connect binding does not block this explicitly
+authorized built-in child-agent route.
+
+The proposed direction is a protected artifact-only preparation path reusing
+existing key/pack/decode helpers and the exact archived App/group16 inputs,
+without relabeling them as same-invocation outputs of the existing production
+release pipeline. Root separately captures read-only GitHub workflow/environment,
+branch-policy, secret-name and active-run metadata in
+`.cache/p51-owner-20261104-01/remote-readiness/`. These GETs do not qualify secret
+values, dispatch CI, change protection or provide release authority. A model
+provider rate-limit interruption of the child was resumed as the same task,
+without another agent or replayed product operation.
