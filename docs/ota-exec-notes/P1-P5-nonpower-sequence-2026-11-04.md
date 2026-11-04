@@ -597,3 +597,53 @@ branch-policy, secret-name and active-run metadata in
 values, dispatch CI, change protection or provide release authority. A model
 provider rate-limit interruption of the child was resumed as the same task,
 without another agent or replayed product operation.
+
+### Protected Packaging Implementation Reviewed Locally
+
+The authorized implementation child finished P51-PACKAGING-01 and stopped
+editing. Its ten source/data/test files and preserved failed attempts are bound
+by `.cache/p51-packaging-impl-20261104-01/audit.json` and `handoff.md`.
+Root independently rehashed the delivered files and original test outputs,
+reviewed the code and reran 10 Python methods plus 23 new-entry and 90 existing
+workflow checks. All passed with unchanged delivered source. Review output:
+`.cache/p51-owner-20261104-01/review-01/`.
+
+- P51-REVIEW-01 is closed: bounded per-stage compiler/decoder diagnostics and
+  observations are saved before failure, with case-insensitive full-key/word
+  redaction. The original build input is hash checked before key matching.
+- P51-REVIEW-02 is closed: the existing WindowsJob/gated launcher and POSIX
+  process-group ownership handle native timeouts. A real parent/child timeout
+  regression passes. An uncertain active-tree marker prevents cleanup/upload
+  rather than falsely claiming resource closure.
+- P51-REVIEW-03 is closed: portable manifest paths reject Windows drive/colon,
+  backslash, absolute and dot-segment escapes before filesystem access.
+
+The new `package_candidate` workflow mode is artifact-only. Ordinary jobs are
+unchanged unless this explicit mode is selected; conflicting modes fail before
+secret use. The existing protected `firmware-rehearsal` reviewer remains. The
+dispatch supplies `candidate_reviewed_commit` equal to the actual runner SHA;
+no permanent source-approval variable or key export is introduced. Only the
+single packaging step receives the existing secret. Exact original App/key
+binding and explicit external group16 Boot provenance are checked. The valid
+1 MiB PATCH doubles as the reference alias, not an additional release asset kind.
+
+This is LOCAL_IMPLEMENTATION_REVIEW_PASS, not protected-key verification,
+Linux CI, registered release, P5-1 4/4, 30/30 or four-hour acceptance. Native
+host decoding uses synthetic keys and retains zero compile warnings/errors.
+Root's prior exact-base helper is committed as
+`6c6dff05feb3f6723c68c4551cd3753f915e2cd6`; the reviewed implementation is the
+next scoped local commit on `dev/firmware/p51-packaging-20261104`.
+
+Read-only GitHub checks found the workflow active, the packaging secret name
+present (value unverified), both boot-chain gates false, and no active/waiting
+firmware runs. Only three older task branches are currently admitted to
+`firmware-rehearsal`; the new P51 branch is not. The remaining remote action
+needs explicit authorization to push this branch, add exactly its environment
+branch-policy entry, and dispatch/review the one artifact-only candidate run.
+Do not move an older allowed branch, remove reviewers, unlock production or
+silently change environment policy. No remote write or CI dispatch has occurred.
+
+All local controlled outputs remain under the active worktree, plus previously
+authorized task Git objects/ref/reflog and worktrees/source1 metadata. Main
+index/ref/config, unrelated dirty files and frozen evidence are not changed.
+No additional agent, production/native firmware build or device action was used.

@@ -1,0 +1,15 @@
+{
+  "count": 186517,
+  "seed": 1931,
+  "salt": 5,
+  "groups": 186518,
+  "base_sha256": "4126d801e6bd6efd57a9f20d5a128a50cfb5a46580dc10d9a2227702247d5805",
+  "target_sha256": "6845544537f10da0367443342bed3618ff7986dbac86a7ccf1f9cfcd80e6edc2",
+  "decoded_bytes": 5090524,
+  "compressed_bytes": 1048472,
+  "etu_bytes": 1048576,
+  "raw_sha256": "8ac9c538829573d0ccaafffc58c4ce94f81bbf4d0ff115215a7baf69c9f28e41",
+  "compressed_sha256": "d7826708741f94fe40bf6d84b2e9f1d8cf1a7f6ae44bc094d8ed76e877f8e9c2",
+  "props_hex": "0200400000",
+  "elapsed_seconds": 0.9536
+}

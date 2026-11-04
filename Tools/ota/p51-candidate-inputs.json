@@ -1,0 +1,115 @@
+{
+  "schema": "p51-candidate-inputs-v1",
+  "task": "P5-1",
+  "repository": "Eitan-S-23/E-Track",
+  "sourceCommit": "18f6b3d3af0c24b1ce81573700cd61005b7c530e",
+  "originalRun": 41463640594,
+  "originalAttempt": 1,
+  "originalArtifact": 13149783400,
+  "originalVersion": "3.3.13",
+  "targetVersion": "3.3.16",
+  "targetTimestamp": 1793038630,
+  "targetSha256": "6845544537f10da0367443342bed3618ff7986dbac86a7ccf1f9cfcd80e6edc2",
+  "sourceEvidenceCommit": "62a018aa9e84cc857b456686c9e6e1298155c9de",
+  "bootEvidenceCommit": "6876afd2617be90d504ade5708e79d2c40928fd2",
+  "packet": {
+    "index": {
+      "path": "docs/acceptance-contracts/P3-5-v5/inputs/originals.json",
+      "bytes": 968,
+      "sha256": "f1a5fda063dabb069a6ef63c4eee26921bd0e25665d59e2fe08aa22e21e6d189"
+    },
+    "parts": [
+      {
+        "path": "docs/acceptance-contracts/P3-5-v5/inputs/packet-01.bin",
+        "bytes": 50331648,
+        "sha256": "634ce971ba98f70650eb7e39fe71265ba5f7050f12b460d4683398e347f7bff6"
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-5-v5/inputs/packet-02.bin",
+        "bytes": 50331648,
+        "sha256": "b3dc88a9b2615b4855c7d0102a4e99f974032617b73065d283950cefd86c22f4"
+      },
+      {
+        "path": "docs/acceptance-contracts/P3-5-v5/inputs/packet-03.bin",
+        "bytes": 37089433,
+        "sha256": "9e9ab2fed73f70f34cd45c0cc514f24a2218764920d72266bb5a5b1f6bb99636"
+      }
+    ],
+    "bytes": 137752729,
+    "sha256": "092f38cca6cf92ed3096e23f39914d411fed860b0adde2e84fb7fede7c629640",
+    "objects": {
+      "artifact": {
+        "originalPath": ".cache/p35-pre-durable-20261102/target-30313/download-recovery-01/artifact.json",
+        "bytes": 806,
+        "sha256": "2ea84c9ec7a3d392a2d1fb6a343cc83bbfa0fe93bc0467cab1bbebb5fbf8ad04"
+      },
+      "archive": {
+        "originalPath": ".cache/p35-pre-durable-20261102/target-30313/download-recovery-01/artifact.zip",
+        "bytes": 4289685,
+        "sha256": "b9c6f8ffd95d1197ef8c28fab71be6cf1edc7c099a1d5105f1cf297c7c6dda1a"
+      }
+    },
+    "members": {
+      "base": {
+        "member": "prepared/app-final.bin",
+        "bytes": 614092,
+        "sha256": "4126d801e6bd6efd57a9f20d5a128a50cfb5a46580dc10d9a2227702247d5805"
+      },
+      "app": {
+        "member": "keyed-build/app/X-Track-App-GCC.bin",
+        "bytes": 614092,
+        "sha256": "2606fd87e9062418adadf2dc3aa39b58011ee8c30a45a887ed8b776cfe8c8d14"
+      },
+      "build": {
+        "member": "keyed-build/gcc-build-inputs.json",
+        "bytes": 2396,
+        "sha256": "d2de6f36ffa508b7415a32aa81bfad3b7f827fb07cef796ff0e8698d38bc36a0"
+      },
+      "verification": {
+        "member": "prepared/verification.json",
+        "bytes": 14679,
+        "sha256": "39495152c024306666b47754c93a3c53d92e471a25b3403c326ef1b853e85efe"
+      },
+      "keyedEvidence": {
+        "member": "keyed-build/keyed-build-evidence.json",
+        "bytes": 13458,
+        "sha256": "ec30b0fc098f2950acb919cdfec162db625b7b67fdea7f292345edbfece74902"
+      }
+    }
+  },
+  "boot": {
+    "image": {
+      "path": "docs/acceptance-contracts/P1-6-v3/inputs/originalBoot",
+      "bytes": 20480,
+      "sha256": "628fb3ad100a59235006fc193c844e107da837e14e452f486d40f0baa598a439"
+    },
+    "build": {
+      "path": "docs/acceptance-contracts/P1-6-v3/inputs/baseline-build",
+      "bytes": 1156,
+      "sha256": "fe2c4df80a602bcfeac2baec3fde76851d7128c5a3834dc5b1f674f6a9c6be19"
+    },
+    "source": {
+      "path": "docs/acceptance-contracts/P1-6-v3/originals/group16-source.zip",
+      "bytes": 841237,
+      "sha256": "eb16e302302007cf1bca806d7b8aee17b513488c371423f5b6dfed7d928818fc"
+    },
+    "bytes": 14800,
+    "sha256": "2f84014278421de7a84a0f621a494a9974fbf51c56b768974b0c5e647105ec80",
+    "group": 16,
+    "skipIdentical": true,
+    "instrumented": false
+  },
+  "reference": {
+    "stream": {
+      "path": "Tools/ota/p51-inputs/reference.lzma",
+      "bytes": 1048472,
+      "sha256": "d7826708741f94fe40bf6d84b2e9f1d8cf1a7f6ae44bc094d8ed76e877f8e9c2"
+    },
+    "selection": {
+      "path": "Tools/ota/p51-inputs/selection.json",
+      "bytes": 559,
+      "sha256": "dfa70da181f5a55a8f4b21679c3b787be694d64838500f3fc3541d2ebed32bde"
+    }
+  },
+  "purpose": "Protected artifact-only candidate, external approved group16 Boot; not a release or hardware result."
+}

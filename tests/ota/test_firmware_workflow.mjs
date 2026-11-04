@@ -95,7 +95,7 @@ for (const [name, value] of [
 }
 
 test("production remains explicit dispatch/publish with a first-step hard gate and protected environment", () => {
-  assert.equal(normalize(production.if), "github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true'");
+  assert.equal(normalize(production.if), "github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true' && github.event.inputs.package_candidate != 'true'");
   assert.equal(production.environment, "firmware-production");
   assert.equal(production.steps[0].id, "gate");
   assert.match(production.steps[0].run, /OTA_BOOT_CHAIN_READY/);
@@ -125,7 +125,7 @@ test("nightly/checks jobs cannot acquire release secrets or execute the cloud pi
 });
 
 test("binding qualification is a protected explicit check-only Linux job with bounded execution", () => {
-  assert.equal(normalize(bindings.if), "github.event_name == 'workflow_dispatch' && github.event.inputs.check_bindings == 'true' && github.event.inputs.publish != 'true' && github.event.inputs.rehearsal != 'true'");
+  assert.equal(normalize(bindings.if), "github.event_name == 'workflow_dispatch' && github.event.inputs.check_bindings == 'true' && github.event.inputs.publish != 'true' && github.event.inputs.rehearsal != 'true' && github.event.inputs.package_candidate != 'true'");
   assert.equal(bindings.environment, "firmware-rehearsal");
   assert.equal(bindings["runs-on"], "ubuntu-latest");
   assert.equal(bindings["timeout-minutes"], "10");
