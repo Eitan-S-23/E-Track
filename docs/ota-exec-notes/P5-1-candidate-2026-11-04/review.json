@@ -1,0 +1,96 @@
+{
+  "outcome": "PROTECTED_CANDIDATE_ORIGINALS_REVIEW_PASS",
+  "checks": [
+    "archive-and-executed-ci-identity",
+    "manifest-source-and-protected-key-execution",
+    "target-header-recovery-and-external-group16-boot",
+    "asset-bytes-envelopes-reference-alias-and-negative-controls",
+    "native-decoder-originals-positive-four-negative-and-source-binding",
+    "linux-regressions-private-cleanup-and-stage-receipts"
+  ],
+  "runId": 41778918087,
+  "artifactId": 13298118510,
+  "source": "446b0a99b8538714be7e54e640eeb6e58658e76b",
+  "metadata": {
+    "schema": "p51-artifact-candidate-v1",
+    "task": "P5-1",
+    "purpose": "independent acceptance inputs only",
+    "isFormalRelease": false,
+    "productionPublishable": false,
+    "hardwareAcceptance": "NOT_RUN",
+    "readyRegistered": false,
+    "runner": {
+      "commitSha": "446b0a99b8538714be7e54e640eeb6e58658e76b",
+      "runId": "41778918087",
+      "runAttempt": "1"
+    },
+    "appSourceCommit": "18f6b3d3af0c24b1ce81573700cd61005b7c530e",
+    "originalCiRun": 41463640594,
+    "originalCiArtifact": 13149783400,
+    "sourceEvidenceCommit": "62a018aa9e84cc857b456686c9e6e1298155c9de",
+    "versionName": "3.3.16",
+    "versionCode": 30316,
+    "buildTimestamp": 1793038630,
+    "targetImageSha256": "6845544537f10da0367443342bed3618ff7986dbac86a7ccf1f9cfcd80e6edc2",
+    "targetBytes": 614092,
+    "derivation": "Original GCC executable unchanged; fw_header-only forward finalization",
+    "boot": {
+      "kind": "external-approved-group16",
+      "sha256": "2f84014278421de7a84a0f621a494a9974fbf51c56b768974b0c5e647105ec80",
+      "bytes": 14800,
+      "source": {
+        "path": "docs/acceptance-contracts/P1-6-v3/originals/group16-source.zip",
+        "bytes": 841237,
+        "sha256": "eb16e302302007cf1bca806d7b8aee17b513488c371423f5b6dfed7d928818fc"
+      },
+      "evidenceCommit": "6876afd2617be90d504ade5708e79d2c40928fd2",
+      "firmwareRebuilt": false
+    },
+    "key": {
+      "source": "approved-ci-key-v1",
+      "exactOriginalBuildBindingMatched": true
+    },
+    "assets": [
+      {
+        "kind": "full",
+        "fileName": "full.etu",
+        "sizeBytes": 291069,
+        "sha256": "9bbbd1cadb7fc161c0259155dee79e6a4de27cf1c969013e5fcd81221c3bed99",
+        "baseVersionCode": 0,
+        "baseImageSha256": ""
+      },
+      {
+        "kind": "patch",
+        "fileName": "patch.etu",
+        "sizeBytes": 1048576,
+        "sha256": "2e0c738dadac308e554caa594fde3b4ed65e06a0f7ae81049e9a335f34399b16",
+        "baseVersionCode": 30313,
+        "baseImageSha256": "4126d801e6bd6efd57a9f20d5a128a50cfb5a46580dc10d9a2227702247d5805"
+      },
+      {
+        "kind": "recovery",
+        "fileName": "recovery.bin",
+        "sizeBytes": 614100,
+        "sha256": "e6d39a38b7e984ea53c2f65cb9a2ceead9ba49e1c8c95fd9931c3fc6737c8295",
+        "baseVersionCode": 0,
+        "baseImageSha256": ""
+      }
+    ],
+    "reference": {
+      "aliasOf": "patch.etu",
+      "fileName": "reference-1MiB.etu",
+      "totalLength": 1048576,
+      "sha256": "2e0c738dadac308e554caa594fde3b4ed65e06a0f7ae81049e9a335f34399b16"
+    },
+    "noCloudMutation": true,
+    "noDeviceOperation": true
+  },
+  "nativeWarnings": 0,
+  "nativeErrors": 0,
+  "linuxPythonTests": 10,
+  "linuxNodeTests": 23,
+  "firmwareRebuilt": false,
+  "deviceOperations": 0,
+  "keyExported": false,
+  "formalP51Acceptance": "NOT_RUN"
+}

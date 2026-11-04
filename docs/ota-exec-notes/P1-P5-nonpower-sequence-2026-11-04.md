@@ -647,3 +647,66 @@ All local controlled outputs remain under the active worktree, plus previously
 authorized task Git objects/ref/reflog and worktrees/source1 metadata. Main
 index/ref/config, unrelated dirty files and frozen evidence are not changed.
 No additional agent, production/native firmware build or device action was used.
+
+### P51 Protected CI Authorization Continuation
+
+The user explicitly authorized the previously named remote scope and then
+confirmed full same-scope authority without repeated approval requests. Root
+may push `dev/firmware/p51-packaging-20261104` at reviewed implementation
+`446b0a99b8538714be7e54e640eeb6e58658e76b`, add exactly that branch to the
+existing firmware-rehearsal allowlist, dispatch the artifact-only candidate and
+approve its protected run on the user's behalf. Such approval is user-delegated
+agent action, not a claimed human click. Existing reviewers, other policies and
+all production/rehearsal boot-chain gates must remain unchanged and closed.
+No device operation, production publication, key export or unrelated write is
+part of this continuation. Per-operation intent, raw responses and readbacks
+are retained under `.cache/p51-owner-20261104-01/ci-*` using the existing host
+and GitHub adapters. Uncertain mutations are reconciled, never blindly replayed.
+
+### P51-ASSETS-02 Closed: Protected CI And Independent Artifact Review
+
+The authorized exact branch push succeeded without force. Exactly one new
+firmware-rehearsal branch policy was added; all existing policies/reviewers and
+repository, rehearsal and production boot-chain gates remained unchanged.
+Root made one artifact-only dispatch and its user-delegated protected approval.
+Run `41778918087`, attempt 1, completed successfully at reviewed source
+`446b0a99b8538714be7e54e640eeb6e58658e76b`. All ordinary firmware, rehearsal,
+binding-qualification and production jobs were skipped as intended.
+
+Artifact `13298118510` uploaded and downloaded successfully: 3082312 bytes,
+SHA256 `121e8e26ee8171b017d81ca163cc40387f2bde168bdb82fb349aca5af54ee446`.
+Original archive, workflow logs, provenance and independent result are preserved
+in `docs/ota-exec-notes/P5-1-candidate-2026-11-04/`; see its README and index.
+This continuation did not observe a push, upload or download failure.
+
+Six independent original-artifact checks passed. Candidate App 30316 is 614092
+bytes, SHA256 `6845544537f10da0367443342bed3618ff7986dbac86a7ccf1f9cfcd80e6edc2`.
+The exact-base PATCH and reference alias are both 1048576 bytes, SHA256
+`2e0c738dadac308e554caa594fde3b4ed65e06a0f7ae81049e9a335f34399b16`.
+Full is 291069 bytes; recovery is 614100 bytes and contains the exact target.
+The 14800-byte external group16 Boot is unchanged. The protected key matches
+the original CI build binding; no key was exported or read locally.
+
+Actual Linux CI originals show 10 Python tests and 23 Node checks passing.
+The real native decoder produced the exact target and rejected payload CRC,
+truncated length, same-version and wrong-base-hash negatives before prepare.
+Native compilation had 0 warnings and 0 errors. There was no MCU firmware
+rebuild, and historical 641-warning firmware builds are not relabeled warning-free.
+All native process trees closed and private-header/decoder cleanup passed.
+
+Two root inspection failures were local review-entry mistakes, not CI/product
+failures: an isolated Python import path omitted the already installed crypto
+dependency; normalizing a CRLF native source changed its comparison hash.
+Failed source versions and records remain; the final review checks exact bytes
+from the unchanged archive and source. Neither caused another CI run or OTA.
+
+P51-ASSETS-02 is closed for protected candidate preparation. P51-EXECUTION-03
+remains pending: bind supported complete-state starting/restoration inputs,
+SD placement/UI and BLE service/collector routes, independently assess old P3-5
+parameter applicability, then freeze the actual 4/4, same-group 30/30 and real
+four-hour campaign. No P5-1 contract or physical PASS is created by this record.
+No user physical action is needed until the observation route is ready.
+
+All controlled local outputs are under the active worktree and authorized task
+Git metadata. The shared main index/ref/config, unrelated changes and frozen
+evidence remain unchanged. The board and phone were not operated in this stage.

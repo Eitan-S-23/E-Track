@@ -1,0 +1,48 @@
+{
+  "kind": "P51_PREPARATION_EVIDENCE_NOT_FORMAL_ACCEPTANCE",
+  "files": [
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-candidate-2026-11-04\\artifact.zip",
+      "bytes": 3082312,
+      "sha256": "121e8e26ee8171b017d81ca163cc40387f2bde168bdb82fb349aca5af54ee446"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-candidate-2026-11-04\\workflow-logs.zip",
+      "bytes": 27117,
+      "sha256": "ff8824d4ad369676338c38d3d763d49de29d3a2ecec3e8fdb55d75c1f02de848"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-candidate-2026-11-04\\provenance.zip",
+      "bytes": 191589,
+      "sha256": "83c66090fdbe03b5c650e4a4e08b686a77632ca3a20ba44fc64e525bfd1968f4"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-candidate-2026-11-04\\review.json",
+      "bytes": 3372,
+      "sha256": "ac674da8dbf983a10d0928189c9532a4a51b28fbd97d9a91a21e15e8149a6ad2"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-candidate-2026-11-04\\github-artifact.json",
+      "bytes": 723,
+      "sha256": "7bfb016815d310bb9242e0e2929f2917d05cd69a18df1cd057f17fb00e7d9fbd"
+    }
+  ],
+  "source": "446b0a99b8538714be7e54e640eeb6e58658e76b",
+  "runId": 41778918087,
+  "attempt": 1,
+  "artifactId": 13298118510,
+  "closedOwnerCommands": 60,
+  "environmentAddedExactlyOneBranch": true,
+  "gatesAndReviewersUnchanged": true,
+  "mainIndexUnchanged": true,
+  "remoteMutations": {
+    "branchPush": 1,
+    "environmentBranchAddition": 1,
+    "workflowDispatch": 1,
+    "delegatedApproval": 1
+  },
+  "deviceOperations": 0,
+  "productionRelease": false,
+  "secretExport": false,
+  "writeScope": "Active worktree; authorized task Git remote-tracking metadata; authorized GitHub branch/environment/CI only"
+}
