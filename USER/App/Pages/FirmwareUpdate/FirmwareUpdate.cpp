@@ -1,4 +1,5 @@
 #include "FirmwareUpdate.h"
+#include "Utils/lv_ext/lv_file_browser_label.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -42,6 +43,7 @@ using namespace Page;
 #define FOCUS_PAD_X      2
 #define FOCUS_PAD_Y      2
 #define WORK_STEP_BYTES  4096u
+#define VERSION_VALUE_W  (LV_HOR_RES - 20 - 24 - 72)
 
 namespace
 {
@@ -49,6 +51,7 @@ namespace
     lv_style_t btnStyle;
     lv_style_t btnFocusedStyle;
     lv_style_t iconStyle;
+    lv_font_t versionFont;
     lv_style_transition_dsc_t btnTransition;
     bool stylesReady = false;
 
@@ -94,6 +97,10 @@ namespace
             return;
         }
         stylesReady = true;
+        /* Local descriptor only: retain the large numeric glyphs and resolve
+         * the missing prefix from the same font family without changing it. */
+        versionFont = *ResourcePool::GetFont("bahnschrift_24");
+        versionFont.fallback = ResourcePool::GetFont("bahnschrift_17");
 
         lv_style_init(&listStyle);
         lv_style_set_bg_opa(&listStyle, LV_OPA_0);
@@ -186,6 +193,39 @@ namespace
         lv_label_set_text(label, text);
         lv_obj_align(label, LV_ALIGN_CENTER, 0, 1);
     }
+
+    void SetVersionText(lv_obj_t* label, const char* text)
+    {
+        const lv_font_t* fonts[] = {
+            &versionFont, ResourcePool::GetFont("bahnschrift_17"),
+            ResourcePool::GetFont("bahnschrift_13")
+        };
+        const lv_font_t* font = fonts[2];
+        for (uint8_t i = 0u; i < sizeof(fonts) / sizeof(fonts[0]); ++i)
+        {
+            lv_point_t size;
+            lv_txt_get_size(&size, text, fonts[i],
+                            lv_obj_get_style_text_letter_space(label, 0), 0,
+                            LV_COORD_MAX, LV_TEXT_FLAG_EXPAND);
+            if (size.x <= VERSION_VALUE_W)
+            {
+                font = fonts[i];
+                break;
+            }
+        }
+        lv_obj_set_style_text_font(label, font, 0);
+        lv_obj_set_size(label, VERSION_VALUE_W, lv_font_get_line_height(font));
+        lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_RIGHT, 0);
+        lv_label_set_long_mode(label, LV_LABEL_LONG_CLIP);
+        lv_label_set_text(label, text);
+    }
+
+    void SetScrollingText(lv_obj_t* label, const char* text)
+    {
+        lv_label_set_long_mode(label, LV_LABEL_LONG_CLIP);
+        lv_label_set_text(label, text);
+        lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL);
+    }
 }
 
 FirmwareUpdate::FirmwareUpdate()
@@ -197,6 +237,7 @@ FirmwareUpdate::FirmwareUpdate()
       focusHalo(nullptr),
       list(nullptr),
       confirmPanel(nullptr),
+      confirmNameArea(nullptr),
       confirmNameLabel(nullptr),
       confirmKindLabel(nullptr),
       currentVersionLabel(nullptr),
@@ -252,6 +293,12 @@ void FirmwareUpdate::onViewLoad()
 
 void FirmwareUpdate::onViewWillAppear()
 {
+    if (workNameLabel != nullptr &&
+        (mode == MODE_WORKING || mode == MODE_RESULT))
+    {
+        lv_label_set_long_mode(workNameLabel, LV_LABEL_LONG_SCROLL);
+        lv_label_set_long_mode(workStatusLabel, LV_LABEL_LONG_SCROLL);
+    }
     RefreshGroup();
 }
 
@@ -402,37 +449,57 @@ void FirmwareUpdate::CreateConfirmUI()
     lv_label_set_text(confirmKindLabel, "FULL");
     lv_obj_align(confirmKindLabel, LV_ALIGN_TOP_RIGHT, -12, 9);
 
-    confirmNameLabel = lv_label_create(confirmPanel);
+    confirmNameArea = lv_obj_create(confirmPanel);
+    lv_obj_remove_style_all(confirmNameArea);
+    lv_obj_set_pos(confirmNameArea, 12, 39);
+    lv_obj_set_size(confirmNameArea, LV_HOR_RES - 46, 56);
+    lv_obj_set_style_pad_all(confirmNameArea, 3, 0);
+    lv_obj_set_style_pad_right(confirmNameArea, 8, 0);
+    lv_obj_set_style_border_width(confirmNameArea, 1, 0);
+    lv_obj_set_style_border_color(confirmNameArea, lv_color_hex(0x17333b), 0);
+    lv_obj_set_style_border_opa(confirmNameArea, LV_OPA_COVER, 0);
+    lv_obj_set_scroll_dir(confirmNameArea, LV_DIR_VER);
+    lv_obj_set_scrollbar_mode(confirmNameArea, LV_SCROLLBAR_MODE_AUTO);
+    lv_obj_set_style_width(confirmNameArea, 3, LV_PART_SCROLLBAR);
+    lv_obj_set_style_bg_color(confirmNameArea, lv_color_hex(0x20e8f0),
+                              LV_PART_SCROLLBAR);
+    lv_obj_set_style_bg_opa(confirmNameArea, LV_OPA_80, LV_PART_SCROLLBAR);
+    lv_obj_add_flag(confirmNameArea, LV_OBJ_FLAG_SCROLL_WITH_ARROW);
+    lv_obj_clear_flag(confirmNameArea, LV_OBJ_FLAG_SCROLL_CHAIN |
+                                       LV_OBJ_FLAG_SCROLL_ELASTIC);
+    lv_obj_add_event_cb(confirmNameArea, onEvent, LV_EVENT_ALL, this);
+
+    confirmNameLabel = lv_label_create(confirmNameArea);
     lv_obj_set_style_text_font(confirmNameLabel, ResourcePool::GetFont("cn_16"), 0);
     lv_obj_set_style_text_color(confirmNameLabel, lv_color_white(), 0);
-    lv_label_set_long_mode(confirmNameLabel, LV_LABEL_LONG_DOT);
-    lv_obj_set_width(confirmNameLabel, LV_HOR_RES - 54);
+    lv_label_set_long_mode(confirmNameLabel, LV_LABEL_LONG_WRAP);
+    lv_obj_set_width(confirmNameLabel, LV_PCT(100));
     lv_label_set_text(confirmNameLabel, "");
-    lv_obj_align(confirmNameLabel, LV_ALIGN_TOP_LEFT, 12, 43);
+    lv_obj_align(confirmNameLabel, LV_ALIGN_TOP_LEFT, 0, 0);
 
     lv_obj_t* currentCaption = lv_label_create(confirmPanel);
     lv_obj_set_style_text_font(currentCaption, ResourcePool::GetFont("cn_16"), 0);
     lv_obj_set_style_text_color(currentCaption, lv_color_hex(0x70a5ad), 0);
     lv_label_set_text(currentCaption, TXT_CURRENT_VER);
-    lv_obj_align(currentCaption, LV_ALIGN_TOP_LEFT, 12, 79);
+    lv_obj_align(currentCaption, LV_ALIGN_TOP_LEFT, 12, 105);
 
     currentVersionLabel = lv_label_create(confirmPanel);
     lv_obj_set_style_text_font(currentVersionLabel, ResourcePool::GetFont("bahnschrift_24"), 0);
     lv_obj_set_style_text_color(currentVersionLabel, lv_color_white(), 0);
-    lv_label_set_text(currentVersionLabel, "v0.0.0");
-    lv_obj_align(currentVersionLabel, LV_ALIGN_TOP_RIGHT, -12, 75);
+    SetVersionText(currentVersionLabel, "v0.0.0");
+    lv_obj_align(currentVersionLabel, LV_ALIGN_TOP_RIGHT, -12, 101);
 
     lv_obj_t* targetCaption = lv_label_create(confirmPanel);
     lv_obj_set_style_text_font(targetCaption, ResourcePool::GetFont("cn_16"), 0);
     lv_obj_set_style_text_color(targetCaption, lv_color_hex(0x70a5ad), 0);
     lv_label_set_text(targetCaption, TXT_FILE_VER);
-    lv_obj_align(targetCaption, LV_ALIGN_TOP_LEFT, 12, 119);
+    lv_obj_align(targetCaption, LV_ALIGN_TOP_LEFT, 12, 141);
 
     targetVersionLabel = lv_label_create(confirmPanel);
     lv_obj_set_style_text_font(targetVersionLabel, ResourcePool::GetFont("bahnschrift_24"), 0);
     lv_obj_set_style_text_color(targetVersionLabel, lv_color_hex(0x52f58a), 0);
-    lv_label_set_text(targetVersionLabel, "v0.0.0");
-    lv_obj_align(targetVersionLabel, LV_ALIGN_TOP_RIGHT, -12, 115);
+    SetVersionText(targetVersionLabel, "v0.0.0");
+    lv_obj_align(targetVersionLabel, LV_ALIGN_TOP_RIGHT, -12, 137);
 
     cancelButton = lv_obj_create(confirmPanel);
     ConfigurePlainButton(cancelButton, TXT_BACK, 12, 181, 82);
@@ -462,7 +529,9 @@ void FirmwareUpdate::CreateWorkUI()
     workStatusLabel = lv_label_create(workPanel);
     lv_obj_set_style_text_font(workStatusLabel, ResourcePool::GetFont("cn_16"), 0);
     lv_obj_set_style_text_color(workStatusLabel, lv_color_hex(0x20e8f0), 0);
-    lv_label_set_text(workStatusLabel, TXT_IMPORTING);
+    lv_obj_set_size(workStatusLabel, LV_HOR_RES - 20 - 24 - 60,
+                    lv_font_get_line_height(ResourcePool::GetFont("cn_16")));
+    SetScrollingText(workStatusLabel, TXT_IMPORTING);
     lv_obj_align(workStatusLabel, LV_ALIGN_TOP_LEFT, 12, 11);
 
     workKindLabel = lv_label_create(workPanel);
@@ -474,8 +543,9 @@ void FirmwareUpdate::CreateWorkUI()
     workNameLabel = lv_label_create(workPanel);
     lv_obj_set_style_text_font(workNameLabel, ResourcePool::GetFont("cn_16"), 0);
     lv_obj_set_style_text_color(workNameLabel, lv_color_white(), 0);
-    lv_label_set_long_mode(workNameLabel, LV_LABEL_LONG_DOT);
-    lv_obj_set_width(workNameLabel, LV_HOR_RES - 54);
+    lv_obj_set_size(workNameLabel, LV_HOR_RES - 54,
+                    lv_font_get_line_height(ResourcePool::GetFont("cn_16")));
+    lv_label_set_long_mode(workNameLabel, LV_LABEL_LONG_SCROLL);
     lv_label_set_text(workNameLabel, "");
     lv_obj_align(workNameLabel, LV_ALIGN_TOP_LEFT, 12, 49);
 
@@ -685,8 +755,8 @@ void FirmwareUpdate::AddRow(const char* name, const char* path,
     if (lv_obj_get_child_cnt(row) > 1u)
     {
         lv_obj_t* label = lv_obj_get_child(row, 1);
-        lv_label_set_long_mode(label, LV_LABEL_LONG_DOT);
-        lv_obj_set_width(label, LIST_W - 76);
+        FileBrowserLabel::Configure(row, label, LIST_W - 76,
+                                    ResourcePool::GetFont("cn_16"));
         lv_obj_set_style_text_color(label, lv_color_white(), 0);
         lv_obj_set_style_text_font(label, ResourcePool::GetFont("cn_16"), 0);
         lv_obj_align(label, LV_ALIGN_LEFT_MID, 42, 0);
@@ -826,29 +896,31 @@ void FirmwareUpdate::ShowConfirm(const Row_t& row)
         CreateConfirmUI();
     }
 
-    char currentVersion[20];
-    char targetVersion[20];
+    char currentVersion[20] = "v";
+    char targetVersion[20] = "v";
 
     strncpy(selectedPath, row.path, sizeof(selectedPath));
     selectedPath[sizeof(selectedPath) - 1u] = '\0';
     strncpy(selectedName, row.name, sizeof(selectedName));
     selectedName[sizeof(selectedName) - 1u] = '\0';
     OtaUpdate::Session::FormatVersion(updater.CurrentVersionCode(),
-                                      currentVersion,
-                                      sizeof(currentVersion));
+                                      currentVersion + 1,
+                                      sizeof(currentVersion) - 1u);
     OtaUpdate::Session::FormatVersion(selectedInfo.target_vcode,
-                                      targetVersion,
-                                      sizeof(targetVersion));
+                                      targetVersion + 1,
+                                      sizeof(targetVersion) - 1u);
     lv_label_set_text(confirmNameLabel, selectedName);
     lv_label_set_text(confirmKindLabel,
                       selectedInfo.kind == OTA_SD_KIND_PATCH
                           ? "PATCH" : "FULL");
-    lv_label_set_text(currentVersionLabel, currentVersion);
-    lv_label_set_text(targetVersionLabel, targetVersion);
+    SetVersionText(currentVersionLabel, currentVersion);
+    SetVersionText(targetVersionLabel, targetVersion);
     lv_obj_add_flag(pathLabel, LV_OBJ_FLAG_HIDDEN);
     lv_obj_clear_flag(confirmPanel, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(backButton, LV_OBJ_FLAG_HIDDEN);
     lv_obj_move_foreground(confirmPanel);
+    lv_obj_update_layout(confirmPanel);
+    lv_obj_scroll_to_y(confirmNameArea, 0, LV_ANIM_OFF);
     mode = MODE_CONFIRM;
     RefreshGroup();
 }
@@ -887,8 +959,10 @@ void FirmwareUpdate::StartImport()
     lv_obj_add_flag(backButton, LV_OBJ_FLAG_HIDDEN);
     lv_obj_clear_flag(workPanel, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(resultButton, LV_OBJ_FLAG_HIDDEN);
-    lv_label_set_text(workStatusLabel, TXT_IMPORTING);
-    lv_label_set_text(workNameLabel, selectedName);
+    SetScrollingText(workStatusLabel, TXT_IMPORTING);
+    lv_obj_set_style_text_color(workStatusLabel, lv_color_hex(0x20e8f0), 0);
+    /* Reset the previous filename's native offset before starting a new one. */
+    SetScrollingText(workNameLabel, selectedName);
     lv_label_set_text(workKindLabel,
                       selectedInfo.kind == OTA_SD_KIND_PATCH
                           ? "PATCH" : "FULL");
@@ -968,7 +1042,7 @@ void FirmwareUpdate::FinishImport(bool success)
     if (success)
     {
         /* STAGED 已原子提交且读回通过，才允许显示成功并提示重启 */
-        lv_label_set_text(workStatusLabel, TXT_STAGED_READY);
+        SetScrollingText(workStatusLabel, TXT_STAGED_READY);
         lv_obj_set_style_text_color(workStatusLabel,
                                     lv_color_hex(0x52f58a), 0);
         lv_bar_set_value(progressBar, 100, LV_ANIM_OFF);
@@ -977,7 +1051,7 @@ void FirmwareUpdate::FinishImport(bool success)
     }
     else
     {
-        lv_label_set_text(workStatusLabel, TXT_FAILED);
+        SetScrollingText(workStatusLabel, TXT_FAILED);
         lv_obj_set_style_text_color(workStatusLabel,
                                     lv_color_hex(0xff6b57), 0);
         lv_label_set_text(workDetailLabel, updater.LastError());
@@ -993,7 +1067,7 @@ bool FirmwareUpdate::IsFocusTarget(lv_obj_t* obj)
         return false;
     }
     if (obj == backButton || obj == cancelButton || obj == startButton ||
-        obj == resultButton)
+        obj == resultButton || obj == confirmNameArea)
     {
         return true;
     }
@@ -1083,6 +1157,7 @@ void FirmwareUpdate::ReleaseUI()
     focusHalo = nullptr;
     list = nullptr;
     confirmPanel = nullptr;
+    confirmNameArea = nullptr;
     confirmNameLabel = nullptr;
     confirmKindLabel = nullptr;
     currentVersionLabel = nullptr;
@@ -1138,6 +1213,11 @@ void FirmwareUpdate::RefreshGroup()
     {
         lv_group_add_obj(group, cancelButton);
         lv_group_add_obj(group, startButton);
+        if (lv_obj_get_scroll_top(confirmNameArea) > 0 ||
+            lv_obj_get_scroll_bottom(confirmNameArea) > 0)
+        {
+            lv_group_add_obj(group, confirmNameArea);
+        }
         first = cancelButton;
     }
     else if (mode == MODE_RESULT)
@@ -1174,7 +1254,8 @@ void FirmwareUpdate::ClearGroup()
             }
         }
         lv_obj_t* owned[] = {
-            backButton, cancelButton, startButton, resultButton
+            backButton, cancelButton, startButton, resultButton,
+            confirmNameArea
         };
         for (uint8_t i = 0u;
              i < sizeof(owned) / sizeof(owned[0]); ++i)
@@ -1188,6 +1269,15 @@ void FirmwareUpdate::ClearGroup()
                 ClearFocusState(owned[i]);
             }
         }
+    }
+    for (uint8_t i = 0u; i < rowCount; ++i)
+    {
+        FileBrowserLabel::SetFocused(rows[i].row, false);
+    }
+    if (workNameLabel != nullptr)
+    {
+        lv_label_set_long_mode(workNameLabel, LV_LABEL_LONG_CLIP);
+        lv_label_set_long_mode(workStatusLabel, LV_LABEL_LONG_CLIP);
     }
     if (focusHalo != nullptr)
     {

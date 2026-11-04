@@ -1,4 +1,5 @@
 #include "RouteSelect.h"
+#include "Utils/lv_ext/lv_file_browser_label.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -502,8 +503,8 @@ void RouteSelect::AddRow(const char* name, const char* path, bool isDir, bool is
     if (lv_obj_get_child_cnt(row) > 1)
     {
         lv_obj_t* label = lv_obj_get_child(row, 1);
-        lv_label_set_long_mode(label, LV_LABEL_LONG_DOT);
-        lv_obj_set_width(label, LIST_W - 76);
+        FileBrowserLabel::Configure(row, label, LIST_W - 76,
+                                    ResourcePool::GetFont("cn_16"));
         lv_obj_set_style_text_color(label, lv_color_white(), 0);
         lv_obj_set_style_text_font(label, ResourcePool::GetFont("cn_16"), 0);
         lv_obj_align(label, LV_ALIGN_LEFT_MID, 42, 0);
@@ -707,6 +708,10 @@ void RouteSelect::ClearGroup()
             }
             ClearFocusState(backButton);
         }
+    }
+    for (uint8_t i = 0; i < rowCount; i++)
+    {
+        FileBrowserLabel::SetFocused(rows[i].row, false);
     }
     if (focusHalo)
     {
