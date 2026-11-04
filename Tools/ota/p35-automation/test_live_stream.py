@@ -2,6 +2,7 @@
 import hashlib
 import io
 import json
+import os
 import struct
 import socket
 import sys
@@ -11,9 +12,10 @@ from collections import deque
 from pathlib import Path
 from types import SimpleNamespace
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import live_stream as live
 import runner as r
-from test_runner import plan, state
+from test_runner import mixed_archive, plan, state
 
 
 def archive(count=100):
@@ -38,6 +40,38 @@ class Peer:
 
 
 class StreamTests(unittest.TestCase):
+    def test_mixed_diagnostic_tail_is_persisted_hashed_and_acked(self):
+        raw = mixed_archive()
+        frames = raw.splitlines(keepends=True)
+        peer, sink = Peer(frames), io.BytesIO()
+        result = live.receive(peer, sink)
+        self.assertEqual(result['records'], 4)
+        self.assertEqual(sink.getvalue(), raw)
+        self.assertEqual(len(peer.acks), len(frames))
+        self.assertEqual(r.audit_link_diagnostics(raw, 'a' * 32)['groups'][0]['ackLatencyUs'], [40])
+
+    def test_live_state_pump_requires_explicit_timing_arm_for_mixed_capture(self):
+        raw = mixed_archive()
+        for timing in (False, True):
+            driver = self.driver(raw, running=False)
+            driver.preparation = SimpleNamespace(arm_attempted=True, live=[], previous_captures=set())
+            if timing:
+                driver.p['ui']['arm'] = {'resource-id': 'p51-arm-timing'}
+                driver._pump_logcat()
+                self.assertEqual(len(driver.queue), 1)
+                self.assertEqual(len(driver.decoder.diagnostics), 3)
+            else:
+                with self.assertRaises(r.Stop):
+                    driver._pump_logcat()
+
+    def test_mixed_diagnostic_loss_cannot_be_acked_as_complete(self):
+        frames = mixed_archive().splitlines(keepends=True)
+        for changed in (frames[:2] + frames[3:], frames[:-1]):
+            peer, sink = Peer(changed), io.BytesIO()
+            with self.assertRaises(r.Stop):
+                live.receive(peer, sink)
+            self.assertLess(len(peer.acks), len(frames))
+
     def test_native_mirror_error_must_be_bound_to_exact_original(self):
         raw=b''.join(archive(3));line=raw.splitlines()[1]
         cid=state()['captureId']
@@ -158,7 +192,8 @@ class StreamTests(unittest.TestCase):
 class RealWorkerTests(unittest.TestCase):
     def run_worker(self, complete):
         h=r.load_host()
-        out=h.checked(r.ROOT/'.cache/p35-stream-host-tests'/uuid.uuid4().hex)
+        parent = Path(os.environ.get('P35_STREAM_TEST_OUT', str(r.ROOT/'.cache/p35-stream-host-tests')))
+        out=h.checked(parent/uuid.uuid4().hex)
         for n in ('worker.stdout','worker.stderr','worker.started.json','worker.closed.json','wire.bin','expected.jsonl','host'):
             h.checked(out/n)
         h.fresh(out)

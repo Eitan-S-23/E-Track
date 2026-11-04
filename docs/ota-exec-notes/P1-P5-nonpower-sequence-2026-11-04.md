@@ -710,3 +710,119 @@ No user physical action is needed until the observation route is ready.
 All controlled local outputs are under the active worktree and authorized task
 Git metadata. The shared main index/ref/config, unrelated changes and frozen
 evidence remain unchanged. The board and phone were not operated in this stage.
+
+### P51-EXECUTION-03: Current State And Recovery Preparation
+
+The following preparation belongs to `.cache/p51-execution-20261104-01/`.
+It is not a P5-1 physical campaign or a frozen acceptance contract. Continuation
+messages do not replay the completed observations or previous protected CI.
+
+`current-01/observation.json` records one completed passive inspection:
+CURRENT_30313_CONFIRMED_HEALTHY, exact selected App and group16 Boot, CONFIRMED,
+advancing loop/watchdog and SD ready. Six owned commands closed; the device lock
+was removed normally. No halt, reset, flash or persistent write occurred. Native
+SEGGER history updates use the existing standing exception. Only fixed C/D and
+optical F volumes were present; no host-mounted removable SD volume was found.
+
+`old-statistics-inventory.json` establishes the actual logging gap: the preserved
+30313 capture has 5306 state records but zero OTA_LINK_SAMPLE/OTA_LINK_STATS in
+the retained App/Logcat originals. State-recorder timestamps are not the original
+link clock. Do not replay that successful OTA or infer ACK latency from state time.
+
+Root adapted the existing P34 validation-only restore fixture, not a production
+rollback path: optional exact compile-time bindings and explicit mailbox version
+pairs support 30316 -> 30313, selected backup length/CRC/SHA and full Boot-region
+hash. Default P34 bindings remain unchanged. Default and P51 native transaction
+tests each passed 22 cases; five P51 mailbox methods passed. The complete live
+route regression passed 135 methods after correcting an obsolete test mock. Its
+earlier 134-method run with one mock error remains in `live-regressions-01/`.
+
+The first restore build failed on a Windows GCC response-file path limit and is
+preserved in `restore-build-01/`. The successful build reused the same supported
+entry with project-local `.cache/p51r` and object-path-max 240: 643 warnings,
+zero errors, App-only fixture, no Boot rebuild. The finalized restore fixture is
+111836 bytes, SHA256
+`b481a1bc45660655f7fadb7b785a2a30cd183b7372c7a422f05c30dbf8ef3b60`.
+`restore-prepared-01/` verifies actual linked expected/Boot/backup bytes and the
+640-byte control mailbox. It has not been installed; physical restoration is
+NOT_RUN. No arbitrary BCB write or App-only version downgrade is admitted.
+
+`backend-read-01/` records a read-only check of the existing isolated test service:
+27 releases, highest version 30313, no 30316; stable revision 70, beta revision 11.
+The existing Access session covers the planned twelve-hour host window. No new
+credential, channel mutation, release registration or network blocker was found.
+Artifact-only metadata is not silently relabeled as a registered formal release.
+
+### P51-TIMING-01/02: Reliable Link Observations Before New Device Work
+
+The existing authorized implementation owner `p51_packaging_impl` now owns the
+minimal App observation extension. Root retains independent review and serial
+Git/CI/device ownership. Explicit p51-arm-timing opts into a separate diagnostic
+record type in the existing file, FIFO, acknowledged stream, sequence/hash/seal.
+Original OtaLinkStats samples retain their source clock and runtime owner; default
+recording, transport parameters and ACK algorithms must remain unchanged.
+
+Initial host self-tests passed 70 runner and 15 live-stream methods. Flutter
+analyze/tests and nonpublishing Release APK/EXE verification remain pending.
+Root found P51-TIMING-02 before physical execution: binary Logcat framing and
+shared file-cursor/seal/recovery consumers still assumed state-only schema 1,
+and state array indexing assumed sequence equals array position. The same owner
+is correcting those consumers together with mixed-record/diagnostic-tail/loss
+tests and checking a realistic summary against the existing 3500-byte limit.
+No physical observation is invalidated because no P51 transfer has started.
+
+After the consolidated handoff, root will commit only this batch on
+`dev/flutter/p51-timing-20261104`, use its automatic full dual-host development
+checks once, then the already-authorized nonpublishing APK/EXE workflow. Planned
+version is 1.0.72+98; preserve the existing side-by-side application identity,
+test endpoint and adaptive-v2-candidate link profile. No production release,
+test-channel activation or new OTA is authorized merely by these CI receipts.
+
+The four-cell route is still being bound: production latest selects a matching
+patch automatically, so BLE full needs a legitimate nonmatching baseline or a
+supported full-selection route, not a fabricated current hash or edited D1 row.
+The one-hour/128MiB recorder limits remain; declare per-cell sealing/retrieval
+for long observations rather than recording four hours into one file. Preserve
+all failed attempts, original CI/evidence and the six P1-6 PHYSICAL obligations.
+
+### P51 Interrupted Host Preparation Reconciled
+
+The full-cell baseline preparation had already completed and was not replayed.
+It is the same 30313 executable, with only its normal fw_header timestamp/hash
+changed, raw SHA256
+`68251b1bb66a1d36a8e166d2e7f64639e251911a3bbdc39da9e935691f9876ea`.
+It is separate from the original-base 30/30 group. Actual service selection and
+physical installation remain NOT_RUN; no current-device identity is inferred.
+
+The `.cache/p51rf` configure succeeded, but its build stopped after 131 reported
+steps and left no build/result receipt. No compiler/Ninja/Python process remained
+at continuation. The existing Ninja directory was incrementally completed using
+the unchanged build entry's process/environment primitives, not reconfigured or
+clean-built. `.cache/p51rf-resume-01/` binds the original interruption separately
+from the successful suffix and size receipts. Original logs are byte-preserved.
+Partial/suffix warning counts are 57/586, both with zero error diagnostics; these
+are separate logs, not a new clean-build warning count. The fixture is App-only;
+the retained group16 Boot and protected candidate packages were not rebuilt.
+
+`restore-full-prepared-01/` under the execution directory validates the actual
+linked expected versions, full Boot hash, alternate backup hash and 640-byte
+mailbox. Final fixture: 111836 bytes, SHA256
+`b6d22016c19325d267bbfba0eecac8679e529828d72f8eefa1e9178eec51587f`.
+It remains PREPARED_NOT_INSTALLED, not a physical restoration PASS.
+
+Timing-consumer host receipts in `python-07/` include runner 72, stream 15,
+binary Logcat 9, mirror 3 and cleanup 3 passing methods. The smoke command's
+180-second timeout remains a failure with cleanup complete. Its six completed
+entry methods were not replayed. `.cache/p51-smoke-resume-01/` uses verbose,
+bounded per-method suffix checks and periodic stack diagnostics: the interrupted
+seventh method passed in 89.388 seconds, with a sampled stack in Windows path
+validation, not a device command. Remaining route checks are still in progress.
+The diagnostic's periodic 'Timeout' text is a stack timer, not a fabricated
+test failure or permission to ignore the outer command deadline.
+
+The consolidated WIP source includes mixed-record cursor/seal/Logcat recovery
+and a realistic 1MiB summary-size regression, without widening the 3500-byte
+ceiling or changing OTA parameters. Root's `app-review-inputs.json` binds exactly
+17 source/test/version files for serialized development CI. Flutter checks and
+APK/EXE verification are pending; no device, cloud mutation, formal admission,
+merge or release follows merely from this WIP source commit.

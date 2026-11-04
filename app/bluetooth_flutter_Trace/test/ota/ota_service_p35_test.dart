@@ -6,6 +6,7 @@ import 'package:ble_monitor/ota/ota_ble_codec.dart';
 import 'package:ble_monitor/ota/ota_device_info.dart';
 import 'package:ble_monitor/ota/ota_link_stats.dart';
 import 'package:ble_monitor/ota/ota_p35_recorder.dart';
+import 'package:ble_monitor/ota/ota_p35_stream.dart';
 import 'package:ble_monitor/services/bluetooth_service.dart';
 import 'package:ble_monitor/services/ota_service.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart'
@@ -128,6 +129,24 @@ class _QueryBle extends BluetoothService {
   }
 }
 
+class _MemoryStream extends OtaP35Stream {
+  @override
+  Future<void> open() async {}
+  @override
+  Future<void> send(List<int> bytes) async {}
+  @override
+  Future<void> close() async {}
+}
+
+class _ServiceRecorder extends OtaP35Recorder {
+  _ServiceRecorder({required super.emit, required super.directoryProvider});
+  @override
+  Future<bool> start(Map<String, Object?> Function() snapshot, {bool reliable = false,
+      OtaP35Stream? stream, int stateSchema = 1, bool linkTimings = false}) =>
+      super.start(snapshot, reliable: reliable, stream: stream ?? (reliable ? _MemoryStream() : null),
+        stateSchema: stateSchema, linkTimings: linkTimings);
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late Directory root;
@@ -174,7 +193,7 @@ void main() {
     lines = [];
     directoryProvider = null;
     supported = true;
-    recorder = OtaP35Recorder(
+    recorder = _ServiceRecorder(
       emit: lines.add,
       directoryProvider: () => directoryProvider?.call() ?? Future.value(root),
     );
@@ -195,6 +214,21 @@ void main() {
     await ble.device.states.close();
     await ble.notifications.close();
     await root.delete(recursive: true);
+  });
+
+  test('timing recording requires explicit reliable mode and binds real service owner', () async {
+    expect(await service.startP35Recording(linkTimings: true), isFalse);
+    expect(recorder.captureId, isNull);
+    expect(await service.startP35Recording(reliable: true, linkTimings: true), isTrue);
+    await flush();
+    expect(recorder.linkTimings, isTrue);
+    final owner = (rows().last['runtime'] as Map)['ownerEpoch'] as int;
+    final observer = recorder.bindLinkStats(ownerEpoch: owner, label: 'upgrade');
+    expect(observer, isNotNull);
+    observer!('OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=123 off=0 len=128');
+    await service.stopP35Recording();
+    expect(await recorder.file!.readAsString(), contains('us=123 off=0 len=128'));
+    expect(ble.infoCalls, 1);
   });
 
   test('real P35 service uses canonical native state, not the lowercase cache miss', () async {

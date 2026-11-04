@@ -224,7 +224,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       _identityLinkGeneration != null &&
       _identityLinkGeneration == _ble.otaLinkGeneration(address);
 
-  Future<bool> startP35Recording({bool reliable = false}) async {
+  Future<bool> startP35Recording({bool reliable = false, bool linkTimings = false}) async {
+    if (linkTimings && !reliable) return false;
     final address = _deviceInfoAddress;
     if (_closed || _isUpgrading.value || _ownerDone != null ||
         address == null || _deviceInfo == null || p35.captureId != null ||
@@ -237,7 +238,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     _p35Device = device;
     _p35RuntimeEvidence = reliable;
     final started = await p35.start(_p35Snapshot, reliable: reliable,
-        stateSchema: reliable ? 2 : 1);
+        stateSchema: reliable ? 2 : 1, linkTimings: linkTimings);
     if (_closed) { await p35.stop(); return false; }
     if (!started) return false;
     _p35Connection = device.connectionState.listen((_) {
@@ -1312,6 +1313,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       // 全链路同源时间戳；重启探测用独立 probe 实例，见 _waitForTargetIdentity）。
       final observationOwner = _ownerEpoch;
       final linkStats = OtaLinkStats(label: isPrefixProbe ? 'prefix-probe' : 'upgrade', device: deviceAddress,
+        onObservation: p35.bindLinkStats(ownerEpoch: observationOwner,
+            label: isPrefixProbe ? 'prefix-probe' : 'upgrade'),
         onTransferState: !p35.active ? null : (sample) {
           if (!p35.active || !isUpgrading || _ownerEpoch != observationOwner ||
               generation != _cancelGeneration || _closed ||

@@ -43,6 +43,10 @@ class OtaP35Recorder {
   File? file;
   int _seq = 0, _bytes = 0, _written = 0, lost = 0;
   int _stateSchema = 1;
+  bool _linkTimings = false;
+  int _statsInstances = 0;
+  int get _captureSchema => _linkTimings ? 2 : 1;
+  bool get linkTimings => active && _linkTimings;
   bool _starting = false, _accepting = false, _stopRequested = false;
   late _DigestSink _digest;
   late ByteConversionSink _hash;
@@ -50,10 +54,12 @@ class OtaP35Recorder {
   bool get healthy => active && error == null;
 
   Future<bool> start(Map<String, Object?> Function() snapshot, {bool reliable = false,
-    OtaP35Stream? stream, int stateSchema = 1}) async {
+    OtaP35Stream? stream, int stateSchema = 1, bool linkTimings = false}) async {
     if (stateSchema != 1 && stateSchema != 2 || stateSchema == 2 && !reliable) return false;
+    if (linkTimings && (!reliable || stateSchema != 2)) return false;
     if (_starting || active || captureId != null || _stopRequested) return false;
     _stateSchema = stateSchema;
+    _linkTimings = linkTimings;
     _starting = true;
     _opened = Completer<void>();
     status.value = 'starting';
@@ -77,7 +83,8 @@ class OtaP35Recorder {
       _digest = _DigestSink();
       _hash = sha256.startChunkedConversion(_digest);
       final header = 'OTA_P35_CAPTURE ${jsonEncode({
-        'schema': 1, 'kind': 'open', 'captureId': captureId,
+        'schema': _captureSchema, 'kind': 'open', 'captureId': captureId,
+        if (_linkTimings) 'diagnostics': 'ota-link-v1',
       })}';
       await _writer!.append(utf8.encode('$header\n'));
       await _writer!.flush();
@@ -115,19 +122,67 @@ class OtaP35Recorder {
         'captureId': captureId, 'seq': ++_seq, 'monoUs': _clock.elapsedMicroseconds,
         'event': event, 'healthy': true, 'lost': 0, 'error': null};
       final line = 'OTA_P35_STATE ${jsonEncode(row)}\n';
-      final length = utf8.encode(line).length;
-      if (length > 3500 || _bytes + length > maxBytes || _pending.length >= maxPending) {
-        lost++;
-        _fail('capture-limit');
-        return;
-      }
-      _bytes += length;
-      _pending.add(line);
-      _drain();
+      _enqueue(line);
     } catch (_) {
       lost++;
       _fail('snapshot-failed');
     }
+  }
+
+  static final _privateDiagnostic = RegExp(
+      r'https?://|[?&][^\s=]+=|(?:token|authorization|secret|password|api[_-]?key)["\s]*[:=]',
+      caseSensitive: false);
+  static const _linkPrefixes = ['OTA_LINK_SAMPLE ', 'OTA_LINK_STATS ',
+      'OTA_LINK_RETIRE ', 'OTA_LINK_LATE ', 'OTA_LINK_ACK_IGNORED ', 'OTA_LINK_ACK_ERROR '];
+
+  /// One immutable owner and source-clock binding per actual OtaLinkStats.
+  void Function(String)? bindLinkStats({required int ownerEpoch,
+      required String label, int? attempt}) {
+    if (!linkTimings || !healthy) return null;
+    try {
+      final runtime = _snapshot!()['runtime'];
+      if (ownerEpoch < 0 || !const ['upgrade', 'probe', 'query', 'prefix-probe'].contains(label) ||
+          attempt != null && attempt <= 0 || runtime is! Map || runtime['ownerEpoch'] != ownerEpoch) {
+        throw StateError('invalid diagnostic owner');
+      }
+      record();
+      if (!healthy) return null;
+      final id = ++_statsInstances;
+      final context = <String, Object?>{'statsId': id, 'clockId': '$captureId:$id',
+        'ownerEpoch': ownerEpoch, 'ownerStateSeq': _seq, 'label': label, 'attempt': attempt};
+      final capture = captureId;
+      return (line) {
+        if (!healthy || !linkTimings || captureId != capture) return;
+        try {
+          if (!_linkPrefixes.any(line.startsWith) || line.contains('\n') || line.contains('\r') ||
+              _privateDiagnostic.hasMatch(line)) {
+            throw StateError('unsafe diagnostic');
+          }
+          final row = <String, Object?>{'schema': 1, 'captureId': captureId,
+            'seq': ++_seq, 'monoUs': _clock.elapsedMicroseconds, ...context, 'line': line};
+          _enqueue('OTA_P35_DIAGNOSTIC ${jsonEncode(row)}\n');
+        } catch (_) {
+          lost++;
+          _fail('diagnostic-failed');
+        }
+      };
+    } catch (_) {
+      lost++;
+      _fail('diagnostic-owner-failed');
+      return null;
+    }
+  }
+
+  void _enqueue(String line) {
+    final length = utf8.encode(line).length;
+    if (length > 3500 || _bytes + length > maxBytes || _pending.length >= maxPending) {
+      lost++;
+      _fail('capture-limit');
+      return;
+    }
+    _bytes += length;
+    _pending.add(line);
+    _drain();
   }
 
   void _drain() {
@@ -247,7 +302,7 @@ class OtaP35Recorder {
     try {
       _hash.close();
       final footer = 'OTA_P35_CAPTURE ${jsonEncode({
-        'schema': 1, 'kind': 'close', 'captureId': captureId,
+        'schema': _captureSchema, 'kind': 'close', 'captureId': captureId,
         'records': _written, 'sha256': _digest.value.toString(),
         'healthy': error == null && lost == 0 && _written == _seq,
         'lost': lost, 'error': error,

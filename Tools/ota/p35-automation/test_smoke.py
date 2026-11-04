@@ -167,6 +167,71 @@ class UnitTests(unittest.TestCase):
         with self.assertRaises(r.Stop): r.audit_capture(raw, 'e'*32)
         with self.assertRaises(r.Stop): s.sealed_file(raw.replace(b'"records": 1', b'"records": 2'), 'e'*32)
 
+    def test_mixed_file_cursor_and_seal_preserve_global_sequence_and_tail(self):
+        raw = fixtures.mixed_archive(interleaved=True)
+        lines = raw.splitlines(keepends=True)
+        cursor = s.FileCursor('a' * 32)
+        observed = []
+        for length in range(1, len(lines) + 1):
+            prefix = b''.join(lines[:length])
+            observed.extend(cursor.feed(prefix))
+            self.assertEqual(cursor.feed(prefix), [])
+        self.assertEqual([row['seq'] for row in observed], [1, 3])
+        self.assertEqual(cursor.decoder.previous['seq'], 3)
+        self.assertEqual(cursor.decoder.previous_record['seq'], 5)
+        seal = s.sealed_file(raw, 'a' * 32)
+        self.assertEqual(seal['records'], 5)
+        self.assertEqual(seal['final'], observed[-1])
+        self.assertTrue(seal['healthy'])
+        self.assertFalse(s.sealed_file(unhealthy_archive(raw), 'a' * 32)['healthy'])
+        for index in (2, 4, 5):
+            with self.subTest(index=index), self.assertRaises(r.Stop):
+                s.sealed_file(b''.join(lines[:index] + lines[index+1:]), 'a' * 32)
+        for changed in (raw.replace(b'"records": 5', b'"records": 2'),
+                        raw.replace(b'"ownerEpoch": 7', b'"ownerEpoch": 8', 1),
+                        raw.replace(b'"schema": 2, "kind": "close"', b'"schema": 1, "kind": "close"'),
+                        raw.replace(b'us=40 off=0', b'us=41 off=0')):
+            with self.assertRaises(r.Stop): s.sealed_file(changed, 'a' * 32)
+
+    def test_mixed_sealed_stop_recovery_checks_observed_diagnostics_not_list_index(self):
+        from types import SimpleNamespace
+        raw = fixtures.mixed_archive(interleaved=True)
+        lines = raw.splitlines(keepends=True)
+        for corrupt in (False, True):
+            driver = object.__new__(s.Smoke)
+            driver.arm_attempted = driver.arm_baseline_confirmed = driver.stop_attempted = True
+            driver.stream_failed = driver.original_verified = True
+            driver.stop_seal_recovered = False
+            driver.capture_id = 'a' * 32
+            driver.previous_captures = {}
+            driver.decoder = r.Decoder()
+            driver.live = driver.decoder.feed(b''.join(lines[:4]))
+            driver.out = r.ROOT / '.cache/unused-mixed-seal-test'
+            driver.original = lambda cid, destination: raw
+            driver.h = SimpleNamespace(save=lambda path, value: None)
+            if corrupt:
+                driver.decoder.diagnostics[0]['line'] += ' changed=1'
+                with self.assertRaises(r.Stop): driver.recover_sealed_stop()
+            else:
+                driver.recover_sealed_stop()
+                self.assertTrue(driver.capture_resolved)
+                self.assertEqual(driver.capture_seal['records'], 5)
+                self.assertEqual(driver.capture_state, 'SEALED_WITH_LIVE_GAP')
+
+    def test_mixed_optional_diagnostic_compare_checks_tail_identity(self):
+        driver = object.__new__(s.Smoke)
+        driver.decoder = r.Decoder()
+        driver.live = driver.decoder.feed(fixtures.mixed_archive(interleaved=True))
+        driver.capture_id = 'a' * 32
+        driver.diagnostic_header = driver.decoder.opened
+        driver.diagnostic_footer = driver.decoder.closed
+        driver.diagnostic_error = None
+        originals = driver.live + driver.decoder.diagnostics
+        driver.diagnostic_states = {x['seq']: copy.deepcopy(x) for x in originals}
+        driver.compare_diagnostics()
+        driver.diagnostic_states[5]['ownerEpoch'] += 1
+        with self.assertRaises(r.Stop): driver.compare_diagnostics()
+
     def test_file_old_unhealthy_but_sealed_original_is_preserved_not_a_permanent_block(self):
         raw=unhealthy_archive(archive([state()]))
         driver=object.__new__(s.Smoke)
@@ -621,7 +686,7 @@ class RouteTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.h=r.load_host()
-        cls.area=cls.h.fresh(r.ROOT/'.cache/p35-standalone-selftest-20261029'/('suite-'+uuid.uuid4().hex))
+        cls.area=cls.h.fresh(Path(os.environ.get('P35_SMOKE_TEST_OUT', r.ROOT/'.cache/p35-standalone-selftest-20261029'))/('suite-'+uuid.uuid4().hex))
         sys.path.insert(0,str(r.ROOT/'Tools/ota/p34-acceptance'))
         import live_phone
         cls.live_phone=live_phone
@@ -1148,7 +1213,7 @@ class EntryTests(unittest.TestCase):
         cls.h=r.load_host()
         sys.path.insert(0,str(r.ROOT/'Tools/ota/p34-acceptance'))
         import live_phone
-        cls.area=cls.h.fresh(r.ROOT/'.cache/p35-standalone-selftest-20261029'/('entry-'+uuid.uuid4().hex))
+        cls.area=cls.h.fresh(Path(os.environ.get('P35_SMOKE_TEST_OUT', r.ROOT/'.cache/p35-standalone-selftest-20261029'))/('entry-'+uuid.uuid4().hex))
 
     @contextmanager
     def root(self):

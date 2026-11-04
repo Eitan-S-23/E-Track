@@ -291,6 +291,15 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
             valueListenable: otaService.p35.status,
             builder: (context, status, _) => Obx(() => Row(children: [
               if (!otaService.p35.active)
+                Semantics(identifier: 'p51-arm-timing', child: IconButton(
+                  tooltip: 'Start acknowledged raw link timing recording',
+                  onPressed: otaService.isUpgrading || status == 'starting' || !_deviceReady ||
+                      otaService.p35.captureId != null ? null : () async {
+                    await otaService.startP35Recording(reliable: true, linkTimings: true);
+                  },
+                  icon: const Icon(Icons.query_stats),
+                )),
+              if (!otaService.p35.active)
                 Semantics(identifier: 'p35-arm-stream', child: IconButton(
                   tooltip: 'Start acknowledged live recording',
                   onPressed: otaService.isUpgrading || status == 'starting' || !_deviceReady ||

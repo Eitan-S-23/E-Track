@@ -309,12 +309,12 @@ def latest_identity(states, after_seq):
 
 def audit_smoke(raw, capture_id, p, live, identity_seq=None, *, observation_source='logcat', samples=None):
     report = r.audit_capture(raw, capture_id)
-    states = r.Decoder().feed(b''.join(raw.splitlines(keepends=True)[1:-1]))
+    states = r.Decoder().feed(raw)
     r.require(states == live, 'live/persisted sequence mismatch', 'EVIDENCE_GAP')
     r.require(observation_source in {'logcat', 'app-file'}, 'unknown observation source', 'EVIDENCE_GAP')
     if observation_source == 'app-file':
         r.require(type(identity_seq) is int and identity_seq > 0, 'file observation needs query-bound identity sequence', 'EVIDENCE_GAP')
-        r.require(samples and samples[-1]['lastConsumedSeq'] == len(states),
+        r.require(samples and samples[-1]['lastConsumedSeq'] == report['records'],
                   'missing execution-time file observations', 'EVIDENCE_GAP')
         consumed, previous_time = 0, -1
         for sample in samples:
@@ -324,7 +324,7 @@ def audit_smoke(raw, capture_id, p, live, identity_seq=None, *, observation_sour
                 'file sample/final prefix mismatch', 'EVIDENCE_GAP')
             cursor = FileCursor(capture_id)
             cursor.feed(raw[:size])
-            consumed = cursor.decoder.previous['seq'] if cursor.decoder.previous else 0
+            consumed = cursor.decoder.previous_record['seq'] if cursor.decoder.previous_record else 0
             r.require(consumed == sample['lastConsumedSeq'], 'invented file observation sequence', 'EVIDENCE_GAP')
             previous_time = sample['hostMonoNs']
         r.require(any(x['stage'] == 'capture-start' and x['lastConsumedSeq'] > 0 for x in samples) and
@@ -368,22 +368,19 @@ class FileCursor:
         r.require(len(raw) - end <= r.MAX_LINE, 'oversize incomplete App line', 'EVIDENCE_GAP')
         lines = raw[self.consumed:end].splitlines(keepends=True)
         states = []
-        previous_seq = self.decoder.previous['seq'] if self.decoder.previous else 0
         for line in lines:
-            r.require(line.startswith((b'OTA_P35_CAPTURE ', r.PREFIX.encode())),
+            r.require(line.startswith((b'OTA_P35_CAPTURE ', r.PREFIX.encode(), r.DIAGNOSTIC_PREFIX.encode())),
                       'unexpected complete App file line', 'EVIDENCE_GAP')
             r.require(self.decoder.closed is None, 'App bytes after footer', 'EVIDENCE_GAP')
-            if line.startswith(r.PREFIX.encode()):
+            if line.startswith((r.PREFIX.encode(), r.DIAGNOSTIC_PREFIX.encode())):
                 r.require(self.decoder.opened is not None, 'App state before header', 'EVIDENCE_GAP')
             else:
                 receipt = r.strict_json(line[len(b'OTA_P35_CAPTURE '):])
                 r.require(receipt.get('kind') in {'open', 'close'}, 'unknown complete App receipt', 'EVIDENCE_GAP')
             states.extend(self.decoder.feed(line))
-            r.require(self.decoder.opened == dict(schema=1, kind='open', captureId=self.capture_id) and
-                type(self.decoder.opened['schema']) is int,
+            r.require(r.valid_capture_header(self.decoder.opened, self.capture_id),
                 'App file/header capture identity mismatch', 'EVIDENCE_GAP')
-        r.require(not states or states[0]['seq'] == previous_seq + 1 and
-            all(x['captureId'] == self.capture_id for x in states), 'file capture identity', 'EVIDENCE_GAP')
+        r.require(all(x['captureId'] == self.capture_id for x in states), 'file capture identity', 'EVIDENCE_GAP')
         self.raw, self.consumed = raw, end
         return states
 
@@ -396,15 +393,16 @@ def sealed_file(raw, capture_id):
     r.require(raw.endswith(b'\n') and footer is not None and states and states[0]['seq'] == 1,
               'unsealed/incomplete App file', 'EVIDENCE_GAP')
     body = b''.join(raw.splitlines(keepends=True)[1:-1])
+    count = len(states) + len(cursor.decoder.diagnostics)
     r.require(set(footer) == {'schema', 'kind', 'captureId', 'records', 'sha256', 'healthy', 'lost', 'error'} and
-        type(footer['schema']) is int and footer['schema'] == 1 and footer['kind'] == 'close' and
-        footer['captureId'] == capture_id and type(footer['records']) is int and footer['records'] == len(states) and
+        type(footer['schema']) is int and footer['schema'] == cursor.decoder.opened['schema'] and footer['kind'] == 'close' and
+        footer['captureId'] == capture_id and type(footer['records']) is int and footer['records'] == count and
         footer['sha256'] == hashlib.sha256(body).hexdigest() and type(footer['healthy']) is bool and
         r.uint(footer['lost']) and (footer['error'] is None or isinstance(footer['error'], str) and footer['error']) and
         (not footer['healthy'] or footer['lost'] == 0 and footer['error'] is None),
         'App seal count/hash/domain mismatch', 'EVIDENCE_GAP')
     return dict(integrity='VERIFIED', healthy=footer['healthy'] and footer['lost'] == 0 and footer['error'] is None,
-                footer=footer, final=states[-1], sha256=hashlib.sha256(raw).hexdigest(), records=len(states))
+                footer=footer, final=states[-1], sha256=hashlib.sha256(raw).hexdigest(), records=count)
 
 
 def sealed_unready_ui(tree, pkg):
@@ -420,8 +418,7 @@ def capture_prefix(raw, capture_id, p):
     r.require(0 < len(raw) <= MAX_CAPTURE, 'capture prefix bounds', 'EVIDENCE_GAP')
     decoder = r.Decoder()
     states = decoder.feed(raw)
-    r.require(decoder.opened is not None and type(decoder.opened.get('schema')) is int and
-        decoder.opened == dict(schema=1, kind='open', captureId=capture_id) and
+    r.require(r.valid_capture_header(decoder.opened, capture_id) and
         states and states[0]['seq'] == 1 and all(s['captureId'] == capture_id for s in states),
         'unowned/incomplete capture prefix', 'EVIDENCE_GAP')
     for state in states:
@@ -903,13 +900,13 @@ class Smoke:
         self.diagnostic_pending = lines.pop()
         r.require(len(self.diagnostic_pending) <= r.MAX_LINE, 'oversize diagnostic tail', 'EVIDENCE_GAP')
         for line in lines:
-            for marker in (b'OTA_P35_CAPTURE ', r.PREFIX.encode(), b'OTA_P35_ERROR '):
+            for marker in (b'OTA_P35_CAPTURE ', r.PREFIX.encode(), r.DIAGNOSTIC_PREFIX.encode(), b'OTA_P35_ERROR '):
                 start = line.find(marker)
                 if start < 0:
                     continue
                 value = r.strict_json(line[start + len(marker):])
-                if marker == r.PREFIX.encode():
-                    r.validate_state(value)
+                if marker in (r.PREFIX.encode(), r.DIAGNOSTIC_PREFIX.encode()):
+                    (r.validate_state if marker == r.PREFIX.encode() else r.validate_diagnostic)(value)
                     old = self.diagnostic_states.get(value['seq'])
                     r.require(old is None or old == value, 'conflicting diagnostic sequence', 'EVIDENCE_GAP')
                     self.diagnostic_states[value['seq']] = value
@@ -942,7 +939,7 @@ class Smoke:
             self.decoder = self.file_cursor.decoder
         destination = self.out / 'observations' / ('%05d.jsonl' % (len(self.file_samples) + 1))
         raw = self.prefix(cid, destination)
-        before = self.live[-1]['seq'] if self.live else 0
+        before = self.decoder.previous_record['seq'] if self.decoder.previous_record else 0
         states = self.file_cursor.feed(raw)
         if self.decoder.opened:
             self.capture_id = cid
@@ -959,7 +956,7 @@ class Smoke:
         if self.live:
             self.capture_state = 'ACTIVE'
         sample = dict(**self.h.record(destination), stage=self.stage, hostMonoNs=time.monotonic_ns(),
-                      previousConsumedSeq=before, lastConsumedSeq=self.live[-1]['seq'] if self.live else 0)
+                      previousConsumedSeq=before, lastConsumedSeq=self.decoder.previous_record['seq'] if self.decoder.previous_record else 0)
         self.file_samples.append(sample)
         self.record('file-observed', sample=sample)
         r.require(self.cmd(['shell', 'pidof', self.p['app']['id']], success_codes=(0, 1)).strip().decode() == self.pid,
@@ -975,11 +972,12 @@ class Smoke:
             r.require(self.diagnostic_header == self.decoder.opened, 'logcat/file header conflict', 'EVIDENCE_GAP')
         if self.diagnostic_footer and self.decoder.closed:
             r.require(self.diagnostic_footer == self.decoder.closed, 'logcat/file footer conflict', 'EVIDENCE_GAP')
-        for state in self.live:
+        originals = {x['seq']: x for x in self.live + self.decoder.diagnostics}
+        for state in originals.values():
             if state['seq'] in self.diagnostic_states:
                 r.require(self.diagnostic_states[state['seq']] == state, 'logcat/file state conflict', 'EVIDENCE_GAP')
         if self.decoder.closed:
-            r.require(all(value['captureId'] == self.capture_id and 1 <= seq <= len(self.live)
+            r.require(all(value['captureId'] == self.capture_id and originals.get(seq) == value
                 for seq, value in self.diagnostic_states.items()), 'diagnostic state missing from sealed App file', 'EVIDENCE_GAP')
             if isinstance(self.diagnostic_error, dict):
                 r.require(self.diagnostic_error.get('captureId') == self.capture_id and not self.decoder.closed.get('healthy'),
@@ -1036,7 +1034,7 @@ class Smoke:
             cursor = FileCursor(cid)
             try:
                 states = cursor.feed(raw)
-                item.update(header=cursor.decoder.opened, records=len(states),
+                item.update(header=cursor.decoder.opened, records=len(states) + len(cursor.decoder.diagnostics),
                     partialTailBytes=len(raw)-cursor.consumed, footer=cursor.decoder.closed,
                     targetBound=bool(states) and all(x['deviceAddress'].lower() == self.p['device']['address'] for x in states))
                 if cursor.decoder.closed:
@@ -1203,7 +1201,8 @@ class Smoke:
         self.compare_diagnostics()
         report = audit_smoke(raw, self.capture_id, self.p, self.live, self.identity_seq,
                             observation_source=self.observation_source, samples=self.file_samples)
-        report['logcatOverlapRecords'] = len(set(self.diagnostic_states) & {x['seq'] for x in self.live})
+        report['logcatOverlapRecords'] = len(set(self.diagnostic_states) &
+            {x['seq'] for x in self.live + self.decoder.diagnostics})
         report['logcatDiagnosticError'] = self.diagnostic_error
         self.h.save(self.out / 'app-capture-integrity.json', report)
         for cid, old in self.previous_captures.items():
@@ -1219,19 +1218,22 @@ class Smoke:
         r.require(self.arm_attempted and self.arm_baseline_confirmed and self.stop_attempted and
             self.stream_failed and not self.stop_seal_recovered and self.capture_id and self.live and
             self.live[0]['seq'] == 1 and self.capture_id not in self.previous_captures and
-            self.decoder.opened == dict(schema=1, kind='open', captureId=self.capture_id),
+            r.valid_capture_header(self.decoder.opened, self.capture_id),
             'no bound STOP/failed stream for sealed recovery', 'UNRESOLVED_STATE')
         raw = self.original(self.capture_id, self.out / 'sealed-stop-original.jsonl')
         report = r.audit_capture(raw, self.capture_id)
-        rows = FileCursor(self.capture_id).feed(raw)
-        r.require(self.original_verified and all(0 < row['seq'] <= len(rows) and rows[row['seq'] - 1] == row
-                  for row in self.live), 'sealed recovery conflicts with observed rows', 'EVIDENCE_GAP')
+        cursor = FileCursor(self.capture_id)
+        rows = cursor.feed(raw)
+        originals = {x['seq']: x for x in rows + cursor.decoder.diagnostics}
+        r.require(self.original_verified and cursor.decoder.opened == self.decoder.opened and
+                  all(originals.get(row['seq']) == row for row in self.live + self.decoder.diagnostics),
+                  'sealed recovery conflicts with observed rows', 'EVIDENCE_GAP')
         r.require(rows[-1]['phase'] in {'idle', 'failed', 'cancelled'} and
             all(row['phase'] not in {'applying', 'waitingReboot', 'reconnectVerify', 'completed'} and
                 (row['packageBytes'] == 0 or row['durable'] < row['packageBytes']) for row in rows),
             'sealed recovery has unknown/post-transfer outcome', 'UNRESOLVED_STATE')
         self.h.save(self.out / 'sealed-stop-recovery.json', dict(archive=report,
-            observedRecords=len(self.live), liveEvidence='FAILED_UNCHANGED', noNewStop=True))
+            observedRecords=len(self.live) + len(self.decoder.diagnostics), liveEvidence='FAILED_UNCHANGED', noNewStop=True))
         self.capture_seal = sealed_file(raw, self.capture_id)
         self.capture_recovery_states = rows
         self.capture_resolved = self.stop_seal_recovered = True
@@ -1663,8 +1665,8 @@ def reconcile(p, configuration, prior, out, h, *, sealed_original=None, inspect_
             driver.enter('reconcile-capture')
             raw = driver.prefix(capture_id, out / 'before-prefix.jsonl')
             decoded = capture_prefix(raw, capture_id, p)
-            r.require(decoded.previous['seq'] >= old_decoder.previous['seq'] and
-                decoded.previous['monoUs'] >= old_decoder.previous['monoUs'], 'capture replayed/truncated', 'EVIDENCE_GAP')
+            r.require(decoded.previous_record['seq'] >= old_decoder.previous_record['seq'] and
+                decoded.previous_record['monoUs'] >= old_decoder.previous_record['monoUs'], 'capture replayed/truncated', 'EVIDENCE_GAP')
             if sealed_bytes is not None:
                 r.require(decoded.closed is not None and raw == sealed_bytes,
                           'previously resolved capture changed/reopened; no release or stop', 'UNRESOLVED_STATE')

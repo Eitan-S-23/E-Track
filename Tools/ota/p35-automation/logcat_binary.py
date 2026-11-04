@@ -42,7 +42,7 @@ def decode_prefix(raw, pid, *, allow_partial=True):
             r.require(len(body)>=9 and body[4]==2 and struct.unpack_from('<I', body,5)[0]==len(body)-9,
                       'noncanonical P35 binary string event', 'EVIDENCE_GAP')
             value=body[9:]
-            r.require(value.startswith((b'OTA_P35_STATE ',b'OTA_P35_CAPTURE ',b'OTA_P35_ERROR ')) and
+            r.require(value.startswith((b'OTA_P35_STATE ',b'OTA_P35_DIAGNOSTIC ',b'OTA_P35_CAPTURE ',b'OTA_P35_ERROR ')) and
                       not any(x in value for x in (b'\0',b'\r',b'\n')),
                       'invalid P35 binary message framing', 'EVIDENCE_GAP')
             try:
@@ -58,15 +58,15 @@ def decode_prefix(raw, pid, *, allow_partial=True):
 def audit_pair(live, terminal, pid, capture_id, original, states, status):
     prefix, count, tail = decode_prefix(live, pid)
     end, end_count = decode(terminal, pid)
-    a = r.audit_logcat_mirror(prefix, capture_id, states, status)
-    z = r.audit_logcat_mirror(end, capture_id, states, status)
+    a = r.audit_logcat_mirror(prefix, capture_id, states, status, original=original)
+    z = r.audit_logcat_mirror(end, capture_id, states, status, original=original)
     missing = sorted(set(a['missingSequences']) & set(z['missingSequences']))
     # Both sources remain separate originals, including any interrupted live
     # frame. This proves coverage, not a repaired or lossless live binary file.
     report = dict(source='diagnostic-only', captureId=capture_id, wireFormat='android-binary-events',
         live=a, terminal=z, liveEntries=count, terminalEntries=end_count, partialLiveTail=tail,
         liveWireSha256=hashlib.sha256(live).hexdigest(), terminalWireSha256=hashlib.sha256(terminal).hexdigest(),
-        missingSequences=missing, originalRecords=len(states), nativeMirror=status, usedForInjection=False,
+        missingSequences=missing, originalRecords=a['originalRecords'], nativeMirror=status, usedForInjection=False,
         retainedMatch=a['retainedMatch'] and z['retainedMatch'],
         completeCombinedCoverage=not missing and a['retainedMatch'] and z['retainedMatch'] and
             not a['parseErrors'] and not z['parseErrors'] and original.splitlines()[0] in prefix.splitlines() and

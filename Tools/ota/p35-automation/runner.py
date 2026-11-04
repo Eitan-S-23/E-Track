@@ -15,6 +15,11 @@ import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[3]
 PREFIX = 'OTA_P35_STATE '
+DIAGNOSTIC_PREFIX = 'OTA_P35_DIAGNOSTIC '
+LINK_PREFIXES = ('OTA_LINK_SAMPLE ', 'OTA_LINK_STATS ', 'OTA_LINK_RETIRE ', 'OTA_LINK_LATE ',
+                 'OTA_LINK_ACK_IGNORED ', 'OTA_LINK_ACK_ERROR ')
+PRIVATE_DIAGNOSTIC = re.compile(r'https?://|[?&][^\s=]+='
+    r'|(?:token|authorization|secret|password|api[_-]?key)[\"\s]*[:=]', re.I)
 PHASES = {'idle', 'checkingUpdate', 'downloading', 'verifyingDownload',
           'readyToInstall', 'transferring', 'applying', 'waitingReboot',
           'reconnectVerify', 'completed', 'failed', 'cancelled'}
@@ -75,31 +80,43 @@ def audit_logcat_status(raw, capture_id, archive):
     return value
 
 
-def audit_logcat_mirror(raw, capture_id, states, status):
+def audit_logcat_mirror(raw, capture_id, states, status, *, original=None):
     """Audit optional text rendering without treating it as the primary stream.
 
     Android's events text renderer can truncate a successfully stored binary
     string. Preserve every malformed line's location/hash; never reconstruct it
     from the complete, independently validated App/ACK-stream original.
     """
+    reference = states
+    if original is not None:
+        decoder = Decoder()
+        require(decoder.feed(original) == states, 'mirror reference states differ from original', 'EVIDENCE_GAP')
+        reference = sorted(states + decoder.diagnostics, key=lambda x: x['seq'])
+    by_seq = {x['seq']: x for x in reference}
     observed, errors = [], []
+    reference_complete = True
     for number, line in enumerate(raw.splitlines(), 1):
-        marker = line.find(PREFIX.encode())
+        diagnostic = line.find(DIAGNOSTIC_PREFIX.encode()) >= 0
+        prefix = DIAGNOSTIC_PREFIX if diagnostic else PREFIX
+        marker = line.find(prefix.encode())
+        if original is None and (diagnostic or b'OTA_P35_CAPTURE ' in line and b'ota-link-v1' in line):
+            reference_complete = False
         if marker < 0:
             continue
         try:
-            row = validate_state(strict_json(line[marker + len(PREFIX):]))
+            row = (validate_diagnostic if diagnostic else validate_state)(strict_json(line[marker + len(prefix):]))
         except Stop as error:
             errors.append(dict(line=number, bytes=len(line), sha256=hashlib.sha256(line).hexdigest(),
                                code=error.code, detail=str(error)))
             continue
         if row['captureId'] == capture_id:
             observed.append(row)
-    return dict(source='diagnostic-only', captureId=capture_id, records=len(observed), originalRecords=len(states),
+    reference_complete = reference_complete and [x['seq'] for x in reference] == list(range(1, len(reference) + 1))
+    return dict(source='diagnostic-only', captureId=capture_id, records=len(observed), originalRecords=len(reference),
         rawBytes=len(raw), rawSha256=hashlib.sha256(raw).hexdigest(), parseErrors=errors,
-        missingSequences=sorted({x['seq'] for x in states}-{x['seq'] for x in observed}),
-        retainedMatch=all(0 < x['seq'] <= len(states) and states[x['seq']-1] == x for x in observed),
-        exactEquality=not errors and observed == states, nativeMirror=status, usedForInjection=False)
+        missingSequences=sorted(set(by_seq)-{x['seq'] for x in observed}), referenceComplete=reference_complete,
+        retainedMatch=reference_complete and all(by_seq.get(x['seq']) == x for x in observed),
+        exactEquality=reference_complete and not errors and observed == reference, nativeMirror=status, usedForInjection=False)
 
 
 def uint(value, maximum=0xffffffff):
@@ -166,6 +183,8 @@ def validate_plan(p, *, single=False, scenarios=False):
         selector(ui.get(key))
     stream_port = p['preparation'].get('live_stream_port') if isinstance(p.get('preparation'), dict) else None
     arm_id = 'p35-arm-stream' if stream_port is not None else 'p35-arm'
+    if stream_port is not None and ui['arm'] == {'resource-id': 'p51-arm-timing'}:
+        arm_id = 'p51-arm-timing'
     require(ui['arm'] == {'resource-id': arm_id} and ui['stop'] == {'resource-id': 'p35-stop'},
             'capture controls must be the dedicated native identifiers, never business-button substitutes')
     for key in ['navigate', 'reconnect']:
@@ -298,6 +317,37 @@ def validate_state(s):
     return s
 
 
+def validate_diagnostic(s):
+    keys = {'schema', 'captureId', 'seq', 'monoUs', 'statsId', 'clockId', 'ownerEpoch',
+            'ownerStateSeq', 'label', 'attempt', 'line'}
+    require(isinstance(s, dict) and set(s) == keys and type(s['schema']) is int and s['schema'] == 1,
+            'diagnostic fields', 'EVIDENCE_GAP')
+    require(isinstance(s['captureId'], str) and re.fullmatch('[0-9a-f]{32}', s['captureId']) and
+            all(uint(s[k], 2**63-1) for k in ('seq', 'monoUs', 'statsId', 'ownerEpoch', 'ownerStateSeq')) and
+            s['statsId'] > 0 and 0 < s['ownerStateSeq'] < s['seq'] and
+            s['clockId'] == '%s:%s' % (s['captureId'], s['statsId']), 'diagnostic clock/owner', 'EVIDENCE_GAP')
+    require(s['label'] in ('upgrade', 'probe', 'query', 'prefix-probe') and
+            (s['attempt'] is None or uint(s['attempt']) and s['attempt'] > 0), 'diagnostic instance', 'EVIDENCE_GAP')
+    line = s['line']
+    require(isinstance(line, str) and line.startswith(LINK_PREFIXES) and '\n' not in line and '\r' not in line
+            and not PRIVATE_DIAGNOSTIC.search(line), 'unsafe/unknown diagnostic line', 'EVIDENCE_GAP')
+    if line.startswith(('OTA_LINK_STATS ', 'OTA_LINK_ACK_IGNORED ')):
+        value = strict_json(line.split(' ', 1)[1])
+        require(value.get('label') == s['label'] and value.get('attempt') == s['attempt'],
+                'diagnostic source instance differs', 'EVIDENCE_GAP')
+        if line.startswith('OTA_LINK_STATS '):
+            require(value.get('clock') == 'stopwatch-mono-us', 'diagnostic source clock differs', 'EVIDENCE_GAP')
+    else:
+        require(line.split(' ', 2)[1] == 'label=' + s['label'], 'diagnostic source label differs', 'EVIDENCE_GAP')
+    return s
+
+
+def valid_capture_header(value, capture_id):
+    return isinstance(value, dict) and type(value.get('schema')) is int and (
+        value == dict(schema=1, kind='open', captureId=capture_id) or
+        value == dict(schema=2, kind='open', captureId=capture_id, diagnostics='ota-link-v1'))
+
+
 class Decoder:
     """Incremental parser; no partial line, old PID, dropped sequence or invented state."""
     def __init__(self):
@@ -305,6 +355,10 @@ class Decoder:
         self.previous = None
         self.opened = None
         self.closed = None
+        self.previous_record = None
+        self.diagnostics = []
+        self.state_owners = {}
+        self.instances = {}
 
     def feed(self, data):
         self.pending += data
@@ -324,21 +378,38 @@ class Decoder:
                 if capture.get('kind') == 'open':
                     require(self.opened is None and self.previous is None and self.closed is None,
                             'replayed capture header', 'EVIDENCE_GAP')
+                    require(valid_capture_header(capture, capture.get('captureId')), 'unknown capture schema', 'EVIDENCE_GAP')
                     self.opened = capture
                 if capture.get('kind') == 'close':
                     require(self.closed is None, 'replayed capture footer', 'EVIDENCE_GAP')
                     self.closed = capture
-            start = row.find(PREFIX.encode())
+            diagnostic_start = row.find(DIAGNOSTIC_PREFIX.encode())
+            start = diagnostic_start if diagnostic_start >= 0 else row.find(PREFIX.encode())
             if start < 0:
                 continue
             require(self.closed is None, 'state after capture footer', 'EVIDENCE_GAP')
-            s = validate_state(strict_json(row[start + len(PREFIX):]))
-            if self.previous is not None:
-                require(s['captureId'] == self.previous['captureId'] and
-                        s['schema'] == self.previous['schema'] and
-                        s['seq'] == self.previous['seq'] + 1 and s['monoUs'] >= self.previous['monoUs'],
+            is_diagnostic = diagnostic_start >= 0
+            prefix = DIAGNOSTIC_PREFIX if is_diagnostic else PREFIX
+            s = (validate_diagnostic if is_diagnostic else validate_state)(strict_json(row[start + len(prefix):]))
+            if self.previous_record is not None:
+                require(s['captureId'] == self.previous_record['captureId'] and
+                        s['seq'] == self.previous_record['seq'] + 1 and s['monoUs'] >= self.previous_record['monoUs'],
                         'lost/replayed/reordered producer records: expected seq %s, received %s' %
-                        (self.previous['seq'] + 1, s['seq']), 'EVIDENCE_GAP')
+                        (self.previous_record['seq'] + 1, s['seq']), 'EVIDENCE_GAP')
+            if self.opened is not None:
+                require(s['captureId'] == self.opened['captureId'] and
+                        (self.previous_record is not None or s['seq'] == 1), 'capture header binding', 'EVIDENCE_GAP')
+            self.previous_record = s
+            if is_diagnostic:
+                require(self.opened is not None and self.opened['schema'] == 2, 'unannounced diagnostic', 'EVIDENCE_GAP')
+                require(self.state_owners.get(s['ownerStateSeq']) == s['ownerEpoch'], 'diagnostic owner anchor differs', 'EVIDENCE_GAP')
+                identity = tuple(s[k] for k in ('clockId', 'ownerEpoch', 'ownerStateSeq', 'label', 'attempt'))
+                require(self.instances.setdefault(s['statsId'], identity) == identity, 'diagnostic instance drift', 'EVIDENCE_GAP')
+                self.diagnostics.append(s)
+                continue
+            require(self.previous is None or s['schema'] == self.previous['schema'], 'state schema changed', 'EVIDENCE_GAP')
+            if s['schema'] == 2:
+                self.state_owners[s['seq']] = s['runtime']['ownerEpoch']
             self.previous = s
             result.append(s)
         return result
@@ -352,21 +423,75 @@ def audit_capture(raw, capture_id):
     require(len(rows) >= 3 and rows[0].startswith(marker) and rows[-1].startswith(marker),
             'App capture missing header/footer; preserve partial file', 'EVIDENCE_GAP')
     header, footer = (strict_json(row[len(marker):]) for row in (rows[0], rows[-1]))
-    require(type(header.get('schema')) is int and header == dict(schema=1, kind='open', captureId=capture_id),
+    require(valid_capture_header(header, capture_id),
             'wrong App capture header', 'EVIDENCE_GAP')
     require(set(footer) == {'schema', 'kind', 'captureId', 'records', 'sha256', 'healthy', 'lost', 'error'} and
-            type(footer['schema']) is int and footer['schema'] == 1 and footer['kind'] == 'close' and footer['captureId'] == capture_id and
+            type(footer['schema']) is int and footer['schema'] == header['schema'] and footer['kind'] == 'close' and footer['captureId'] == capture_id and
             footer['healthy'] is True and type(footer['lost']) is int and footer['lost'] == 0 and footer['error'] is None,
             'unhealthy App capture footer', 'EVIDENCE_GAP')
     states_raw = b''.join(rows[1:-1])
-    require(all(row.startswith(PREFIX.encode()) for row in rows[1:-1]), 'unexpected persisted record', 'EVIDENCE_GAP')
+    prefixes = (PREFIX.encode(), DIAGNOSTIC_PREFIX.encode()) if header['schema'] == 2 else (PREFIX.encode(),)
+    require(all(row.startswith(prefixes) for row in rows[1:-1]), 'unexpected persisted record', 'EVIDENCE_GAP')
     decoder = Decoder()
-    states = decoder.feed(states_raw)
+    states = decoder.feed(raw)
+    count = len(states) + len(decoder.diagnostics)
     require(states and states[0]['seq'] == 1 and all(s['captureId'] == capture_id for s in states) and
-            type(footer['records']) is int and len(states) == footer['records'] and
+            type(footer['records']) is int and count == footer['records'] and
             footer['sha256'] == hashlib.sha256(states_raw).hexdigest(), 'App capture count/hash/sequence mismatch', 'EVIDENCE_GAP')
-    return dict(captureId=capture_id, records=len(states), sha256=hashlib.sha256(raw).hexdigest(),
-                final=states[-1], integrity='VERIFIED', formalAcceptance='NOT_ADJUDICATED')
+    result = dict(captureId=capture_id, records=count, sha256=hashlib.sha256(raw).hexdigest(),
+                  final=states[-1], integrity='VERIFIED', formalAcceptance='NOT_ADJUDICATED')
+    if header['schema'] == 2:
+        result.update(stateRecords=len(states), diagnosticRecords=len(decoder.diagnostics))
+    return result
+
+
+def audit_link_diagnostics(raw, capture_id):
+    """Return real raw lines grouped by their source clock, never a P34 snapshot."""
+    archive = audit_capture(raw, capture_id)
+    decoder = Decoder()
+    decoder.feed(raw)
+    require(decoder.diagnostics, 'no acknowledged link diagnostics', 'EVIDENCE_GAP')
+    sys.path.insert(0, str(ROOT / 'Tools/ota/p3-4-link-stats'))
+    from acceptance_stats import rank
+    groups = {}
+    for row in decoder.diagnostics:
+        group = groups.setdefault(row['statsId'], dict(clockId=row['clockId'], ownerEpoch=row['ownerEpoch'],
+            label=row['label'], attempt=row['attempt'], lines=[]))
+        group['lines'].append(row['line'])
+    for group in groups.values():
+        summaries = [strict_json(line[len('OTA_LINK_STATS '):]) for line in group['lines'] if line.startswith('OTA_LINK_STATS ')]
+        require(len(summaries) == 1, 'missing/duplicate source summary', 'EVIDENCE_GAP')
+        summary = summaries[0]
+        sends, repeats, acks = [], [], []
+        for line in group['lines']:
+            match = re.fullmatch(r'OTA_LINK_SAMPLE label=\S+ kind=(segment_first_send|segment_retransmit|ack_latency) us=(-?\d+) off=(\d+)(?: len=(\d+))?', line)
+            if match:
+                (sends if match[1] == 'segment_first_send' else repeats if match[1] == 'segment_retransmit' else acks).append((int(match[3]), int(match[2])))
+        transfer = summary.get('transfer')
+        require(isinstance(transfer, dict) and {'segmentsUnique', 'segmentSendTotal', 'retransmitFrames',
+                'outcome', 'ackSamples', 'ackEarlyInvalid', 'ackLatency'} <= transfer.keys() and
+                all(uint(transfer[k], 2**63-1) for k in ('segmentsUnique', 'segmentSendTotal', 'retransmitFrames', 'ackEarlyInvalid')) and
+                isinstance(transfer['ackLatency'], dict) and uint(transfer['ackLatency'].get('count'), 2**63-1),
+                'missing/invalid source transfer summary', 'EVIDENCE_GAP')
+        require(len(sends) == len({off for off, _ in sends}) == transfer['segmentsUnique'] and
+                len(sends) + len(repeats) == transfer['segmentSendTotal'] and
+                len(repeats) == transfer['retransmitFrames'] and len(acks) == transfer['ackLatency']['count'] and
+                len(acks) == len({off for off, _ in acks}) and all(us >= 0 for _, us in sends + repeats + acks),
+                'diagnostic samples disagree with source summary', 'EVIDENCE_GAP')
+        require({off for off, _ in acks + repeats} <= {off for off, _ in sends},
+                'ACK/retry belongs to another source clock', 'EVIDENCE_GAP')
+        latencies = [us for _, us in acks]
+        expected = dict(count=len(latencies), minUs=min(latencies) if latencies else None,
+            p50Us=rank(latencies, 50), p95Us=rank(latencies, 95), p99Us=rank(latencies, 99),
+            maxUs=max(latencies) if latencies else None)
+        require(transfer['ackLatency'] == expected and all(v is None or uint(v, 2**63-1)
+                for v in transfer['ackLatency'].values()), 'raw ACK distribution differs from source summary', 'EVIDENCE_GAP')
+        if transfer['outcome'] == 'ok':
+            require(transfer['ackSamples'] == 'complete' and transfer['ackEarlyInvalid'] == 0 and
+                    len(acks) == len(sends), 'completed source has missing/invalid ACK samples', 'EVIDENCE_GAP')
+        group.update(summary=summary, ackLatencyUs=latencies)
+    return dict(archive=archive, groups=list(groups.values()), format='p35-original-link-lines-v1',
+                physicalAcceptance='NOT_ADJUDICATED')
 
 
 def foreground_ok(raw, package):
@@ -1021,7 +1146,10 @@ class Android:
             self.last_state_at = time.monotonic()
             if self.preparation:
                 prep = self.preparation
-                require(prep.arm_attempted and self.decoder.opened == dict(schema=1, kind='open', captureId=states[0]['captureId'])
+                expected = dict(schema=1, kind='open', captureId=states[0]['captureId'])
+                if self.p['ui']['arm'] == {'resource-id': 'p51-arm-timing'}:
+                    expected.update(schema=2, diagnostics='ota-link-v1')
+                require(prep.arm_attempted and self.decoder.opened == expected
                         and (prep.live or states[0]['seq'] == 1), 'unowned campaign recording', 'EVIDENCE_GAP')
                 require(states[0]['captureId'] not in prep.previous_captures, 'replayed old capture', 'EVIDENCE_GAP')
                 prep.capture_id = states[0]['captureId']
@@ -1056,6 +1184,8 @@ class Android:
 
     def tap(self, wanted, *, bootstrap=False):
         arm_id = 'p35-arm-stream' if getattr(self, 'stream_port', None) is not None else 'p35-arm'
+        if getattr(self, 'stream_port', None) is not None and getattr(self, 'p', {}).get('ui', {}).get('arm') == {'resource-id': 'p51-arm-timing'}:
+            arm_id = 'p51-arm-timing'
         require(not bootstrap or wanted == {'resource-id': arm_id},
                 'only the dedicated record control may precede telemetry readiness')
         self.pump()
@@ -1106,8 +1236,12 @@ class Android:
         if self.preparation:
             raw = self.preparation.original(capture_id, self.out / 'app-capture.jsonl')
             report = audit_capture(raw, capture_id)
-            states = Decoder().feed(b''.join(raw.splitlines(keepends=True)[1:-1]))
+            original_decoder = Decoder()
+            states = original_decoder.feed(raw)
             require(states == self.preparation.live, 'live/App original sequence differs', 'EVIDENCE_GAP')
+            if original_decoder.opened['schema'] == 2:
+                require(original_decoder.diagnostics == self.decoder.diagnostics,
+                        'live/App original diagnostics differ', 'EVIDENCE_GAP')
             self.preparation.capture_seal = load_smoke().sealed_file(raw, capture_id)
             self.preparation.capture_resolved = True
             self.preparation.capture_state = 'SEALED'
@@ -1130,7 +1264,7 @@ class Android:
                     self.h.raw(self.out / 'logcat-decoded.jsonl', rendered)
                     self.h.raw(self.out / 'logcat-terminal-decoded.jsonl', end)
                 else:
-                    mirror = audit_logcat_mirror(rendered, capture_id, states, status)
+                    mirror = audit_logcat_mirror(rendered, capture_id, states, status, original=raw)
                     mirror.update(wireFormat='text', wireBytes=len(wire), wireSha256=hashlib.sha256(wire).hexdigest())
                 self.h.save(self.out / 'logcat-diagnostic-integrity.json', mirror)
             return report
@@ -1339,7 +1473,7 @@ def main(argv=None):
             return 2
     parser = argparse.ArgumentParser(description=__doc__,
         epilog='No-OTA entry: runner.py smoke --plan CONFIG --execute; offline: smoke-check --plan CONFIG')
-    parser.add_argument('mode', choices=['check', 'probe', 'run', 'retrieve', 'audit'])
+    parser.add_argument('mode', choices=['check', 'probe', 'run', 'retrieve', 'audit', 'audit-timing'])
     parser.add_argument('--plan', type=Path)
     parser.add_argument('--archive', type=Path, help='offline audit of an unchanged App JSONL file')
     parser.add_argument('--out', type=Path)
@@ -1351,12 +1485,13 @@ def main(argv=None):
     args = parser.parse_args(argv)
     require(Path.cwd() == ROOT and sys.flags.isolated and sys.flags.no_site and sys.dont_write_bytecode,
             'run from active root with python -I -S -B -X utf8')
-    if args.mode == 'audit':
+    if args.mode in ('audit', 'audit-timing'):
         require(args.archive is not None and args.capture_id is not None and args.plan is None and
                 args.out is None and not args.execute and not args.single_upgrade and not args.scenario_coverage,
                 'audit is read-only and requires archive and capture ID')
         require(args.archive.stat().st_size <= 128 * 1024 * 1024 + 8192, 'oversized App original', 'EVIDENCE_GAP')
-        print(json.dumps(audit_capture(args.archive.read_bytes(), args.capture_id)))
+        check = audit_link_diagnostics if args.mode == 'audit-timing' else audit_capture
+        print(json.dumps(check(args.archive.read_bytes(), args.capture_id)))
         return 0
     require(args.plan is not None and args.archive is None, 'plan required; archive only for offline audit')
     configuration = args.plan.read_bytes()

@@ -120,13 +120,27 @@ void main() {
     return button;
   }
 
+  testWidgets('timing arm is explicit and requests reliable raw diagnostics only', (tester) async {
+    final fake = _FakeOtaService()..readResult = deviceInfoOf();
+    await pumpPage(tester, fake: fake,
+        connectedDevice: BluetoothDevice.fromId('AA:BB:CC:DD:EE:FF'));
+    expect(fake.recordingTimings, isNull);
+    final control = find.byWidgetPredicate((w) => w is Semantics && w.properties.identifier == 'p51-arm-timing');
+    await tester.tap(find.descendant(of: control, matching: find.byType(IconButton)));
+    await tester.pump();
+    expect(fake.recordingReliable, isTrue);
+    expect(fake.recordingTimings, isTrue);
+    expect(fake.checkCalls, 0);
+    expect(fake.downloadCalls, 0);
+  });
+
   testWidgets('P35 controls expose native semantic identifiers and tap actions', (tester) async {
     final semantics = tester.ensureSemantics();
     try {
       final fake = _FakeOtaService()..readResult = deviceInfoOf();
       await pumpPage(tester, fake: fake,
           connectedDevice: BluetoothDevice.fromId('AA:BB:CC:DD:EE:FF'));
-      for (final id in ['p35-check', 'p35-arm']) {
+      for (final id in ['p35-check', 'p35-arm', 'p51-arm-timing']) {
         final control = find.byWidgetPredicate((w) => w is Semantics && w.properties.identifier == id);
         expect(control, findsOneWidget);
         final node = tester.getSemantics(control);
@@ -1108,6 +1122,14 @@ void main() {
 /// Rx 字段可由测试直接驱动（Obx 订阅生效）。
 class _FakeOtaService extends OtaService {
   _FakeOtaService() : super();
+
+  bool? recordingReliable, recordingTimings;
+  @override
+  Future<bool> startP35Recording({bool reliable = false, bool linkTimings = false}) async {
+    recordingReliable = reliable;
+    recordingTimings = linkTimings;
+    return false;
+  }
 
   final phase$ = Rx<OtaPhase>(OtaPhase.idle);
   final isUpgrading$ = false.obs;

@@ -15,6 +15,44 @@ import 'package:ble_monitor/ota/ota_link_stats.dart';
 /// transport 层接线（真实 transfer + fake MCU）在
 /// `ota_ble_transport_test.dart` 的 `P3-4 链路观测接线` 组覆盖。
 void main() {
+  test('optional observer receives original source-clock lines without changing statistics', () {
+    final previousPrint = debugPrint;
+    final printed = <String>[];
+    final observed = <String>[];
+    debugPrint = (String? value, {int? wrapWidth}) { if (value != null) printed.add(value); };
+    addTearDown(() => debugPrint = previousPrint);
+    var now = 100;
+    final stats = OtaLinkStats(label: 'upgrade', clockUs: () => now, onObservation: observed.add);
+    stats.recordTransferStart();
+    stats.recordSegmentSendEnd(offsetBytes: 0, lengthBytes: 128);
+    now = 120;
+    stats.recordSegmentSendEnd(offsetBytes: 0, lengthBytes: 128);
+    stats.recordAckConfirm(blockStart: 0, segs: [0], segmentSize: 128, atUs: 140);
+    stats.recordEndAckArrival(atUs: 150);
+    now = 150;
+    stats.recordTransferOutcome(ok: true);
+    stats.emitSummary();
+    stats.retire(reason: 'finished');
+    now = 160;
+    stats.recordSegmentSendEnd(offsetBytes: 128, lengthBytes: 128);
+    expect(observed, printed);
+    expect(observed, contains('OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=100 off=0 len=128'));
+    expect(observed, contains('OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=40 off=0'));
+    expect(observed.any((line) => line.startsWith('OTA_LINK_LATE ')), isTrue);
+    expect(stats.ackLatencySamplesUs, [40]);
+    expect(stats.segmentSendTotal, 2);
+    expect(stats.retransmitFrames, 1);
+  });
+
+  test('observer exception cannot alter the measured send or ACK', () {
+    final stats = OtaLinkStats(label: 'upgrade', clockUs: () => 100,
+      onObservation: (_) => throw StateError('synthetic sink failure'));
+    stats.recordSegmentSendEnd(offsetBytes: 0, lengthBytes: 128);
+    stats.recordAckConfirm(blockStart: 0, segs: [0], segmentSize: 128, atUs: 140);
+    expect(stats.ackLatencySamplesUs, [40]);
+    expect(stats.ackSampleIntegrity, 'complete');
+  });
+
   test('first ACK error is bounded, immutable and observation only', () {
     final previousPrint = debugPrint;
     final lines = <String>[];
