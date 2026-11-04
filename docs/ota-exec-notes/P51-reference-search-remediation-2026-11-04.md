@@ -138,3 +138,70 @@ selections. The initial failure and earlier owner-routing state above remain
 historical facts, not current blockers. Actual next-source CI and candidate
 binding remain pending; local review does not retroactively make run 41849745315
 successful or close P5.
+
+## P51-REFERENCE-SEARCH-02: Next-Input Counterexample
+
+After local review, root committed the bounded repair as
+`b1422489a3cb5a56428f5e640513d195ca29e46f` without pushing it. Root then used that
+commit's actual timestamp 1793813128 and the retained raw GCC image to predict
+the intended 3.3.18 -> 3.3.19 inputs before another protected build. The final v2
+strategy exhausted 256 measurements again: 192 at seed 7 and 64 at seed 8. The
+closest total was 1048577 bytes at count 210016 / seed 7 / salt 4. No timeout,
+encrypted package, candidate metadata, cloud mutation or CI dispatch occurred.
+
+New fixed regression inputs, each 615132 bytes:
+
+- `.cache/p51-reference-search-review-20261105-01/next-inputs/base.bin`, SHA-256
+  `69f83b830e10b7d4247714183c48747f9599b6b27f6dd08e14482c9b9b66d03c`.
+- `.cache/p51-reference-search-review-20261105-01/next-inputs/target.bin`, SHA-256
+  `83f5cc00ae8f279f18f92a4e298b0f62535fb6c7c3d56ad027857401dbd06c2a`.
+
+The reference subdirectory contains the ordered search-report and all 256
+measurements. `next-inputs/failed.json` and `preflight-01/predict.closed.json`
+record the precise failure and completed process cleanup. The Windows search
+took 997.53 seconds; it is not a Linux deadline measurement. These inputs were
+constructed from a prior real GCC image, not claimed as a new source build.
+
+The existing failure-diagnostic repair and four successful 137/177/26/229 cases
+are valid and must remain. The new counterexample establishes that those cases
+alone do not make the intended next candidate ready. Extend the bounded strategy
+and its coverage using this exact pair; do not regress to an old search or merely
+adjust the current input to get a pass. Reuse completed failing measurements.
+
+Preferred next direction: improve justified coverage/length targeting rather
+than assuming one more seed or another fixed neighborhood solves the problem.
+Retain the legal progressing stream and strict decoder/byte-identity contract.
+If the existing 256-measurement policy cannot provide an adequate demonstrated
+route, first return an evidenced finite-budget/runtime proposal accounting for
+the existing 660-second child, 30-minute step and 40-minute job bounds. Do not
+change these bounds unilaterally, silently change timestamp policy, or add a
+second release pipeline. No universal-existence claim is required, but this exact
+intended input needs an executable route before another CI attempt.
+
+Required verification: the new fixed pair must find a strict legal exact witness;
+retain the original fixed pair and all existing generalization/negative tests;
+exercise a small predeclared timestamp/version variation set rather than selecting
+only successful variants. Record cold versus cached cost and every attempted
+case, with failures intact. Root will separately check the next execution commit's
+actual timestamp again before dispatch. Implementation changes, self-tests and a
+separate handoff only; no commit/push/CI/keys/device actions by the implementer.
+
+User instruction: if implementation remediation is needed, send its prompt to
+the user; do not start another sub-agent. The former generic owner-routing
+authorization question is no longer the requested workflow.
+
+## P51-REFERENCE-SEARCH-02: Local Repair Independently Verified
+
+2026-11-05, root review at b1422489: isolated-frontier v4 passes the bounded
+repair oracle. Exact raw evidence evaluation and eight charged-cache replays
+are in `.cache/p51-reference-followup-review-20261105-01/result.json`.
+Unique counts are 62/126/69/159 for the fixed/three predeclared variants and
+157/197/38/249 for the retained regression inputs. Selected witnesses were
+freshly encoded and strictly decoded; five main histories are exact v2 prefixes.
+Six focused tests were newly run and 19 successful suite originals independently
+reviewed. The v3 regression, timeout-fixture error and all older originals remain.
+
+DECIDED: local implementation repair verified; no further implementation request
+from this batch. Delivery readiness still requires the next actual commit-time
+prediction and actual protected CI original artifacts. Root owns those steps;
+no sub-agent, device operation, budget/deadline increase or P5 verdict is implied.

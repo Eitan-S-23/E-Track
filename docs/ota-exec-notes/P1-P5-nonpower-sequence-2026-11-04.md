@@ -1705,3 +1705,97 @@ witness is demonstrated will root proceed to one exact-source protected run.
 Linux timing, actual new build/reference/native receipts, candidate/recovery
 binding and P5 remain downstream checks. Existing authority is retained; no
 per-step user intervention or new implementation agent is required at this point.
+
+### P51-REFERENCE-SEARCH-02: Next Bound Input Exhausts Adaptive Budget
+
+Root committed only the six reviewed code/test/handoff/root-record paths as
+`b1422489a3cb5a56428f5e640513d195ca29e46f`, tree
+`880ae72af11349d82dae9011213d4e0a6bf62945`. All 54 unrelated work files remain
+byte-identical. No hook exception was required. The commit has NOT been pushed;
+the existing remote candidate branch still points to `db049b6b` as observed in
+the read-only preparation. No new protected dispatch or approval occurred.
+
+The exact-next-input preflight then failed, so candidate preparation is NOT_READY.
+This does not erase the preceding independent verification of the four fixed
+regressions or its 209 original test results. It adds a new, actually executed
+counterexample to delivery readiness before spending another protected CI run.
+
+Evidence under `.cache/p51-reference-search-review-20261105-01/`:
+`next-inputs/failed.json`, `next-inputs/reference/search-report.json`, all 256
+individual measurement records and `preflight-01/predict.{stdout,stderr,closed.json}`.
+The unchanged raw GCC image from run 41849745315 was finalized with the current
+commit's actual timestamp 1793813128, B=3.3.18 and T=3.3.19. These are diagnostic
+predictions using a retained compiled image, not a new ARM build or admitted
+firmware. Both images are 615132 bytes:
+
+- Base SHA-256: `69f83b830e10b7d4247714183c48747f9599b6b27f6dd08e14482c9b9b66d03c`.
+- Target SHA-256: `83f5cc00ae8f279f18f92a4e298b0f62535fb6c7c3d56ad027857401dbd06c2a`.
+
+The adaptive v2 search charged 192 seed-7 and 64 seed-8 measurements, found no
+exact witness, and reported REFERENCE_SEARCH_BUDGET_EXHAUSTED at reference-search.
+The closest result was count=210016, seed=7, salt=4, ETU length 1048577. Total
+measured encoding time was about 988.7 seconds; preflight search/verification
+elapsed 997.53 seconds on this Windows host. The 1800-second diagnostic command
+exited 1 normally, without timeout; its job and process tree are closed. These
+times are not Linux CI measurements and do not justify changing its 660-second
+source-package timeout silently. No selected stream, encrypted package or
+successful candidate metadata was created.
+
+Read-only GitHub protection and test-service occupation checks passed. The first
+local preparation wrapper imported a different module named runner, colliding
+with pipeline_cloud's import; root fixed only the task-local wrapper import and
+used a new receipt directory. That host entry failure made no cloud mutation and
+did not restart the running preflight. No production/validation implementation
+was modified by root beyond committing the independently reviewed bytes.
+
+Return the new fixed counterexample to the external implementation owner under
+P51-REFERENCE-SEARCH-02, with the original 256-sample failure reused rather than
+re-executed. Preserve all earlier failures/successes. Do not change timestamp,
+version, seed or rerun the unchanged search merely to obtain a lucky pass; do not
+hardcode a known witness or widen budget/timeouts without an evidenced proposal.
+The existing remediation note now carries the next-input hashes and oracle.
+Per the user's explicit direction, root will provide a remediation prompt and
+will not open a child agent. No device, SD, service mutation, additional CI or
+P5 freeze has been performed.
+
+### P51-REFERENCE-SEARCH-02: Independent Follow-Up Review
+
+2026-11-05: root independently reviewed the implementer's isolated-frontier v4
+batch at base `b1422489a3cb5a56428f5e640513d195ca29e46f`. Result:
+INDEPENDENT_REFERENCE_FOLLOWUP_REVIEW_PASS, no blocking finding in this bounded
+repair. This does not erase the v2 next-input failure, v3 regression or original
+protected CI failure. No new product implementation was authored by root.
+
+Evidence: `.cache/p51-reference-followup-review-20261105-01/`.
+`execute.py` reuses the existing owned process and output guards; `review.py`
+independently binds the final source/handoff/plan hashes and preserves all 5225
+prior evidence files plus 55 unrelated work files. All 269 original process
+closures were checked; no active native marker remained. Nine nonadaptive
+encoder functions are AST-identical to the committed baseline. Existing
+manifests, package/native functions, keyed build and workflow are unchanged.
+
+The 19-test original successful suite and expected failure receipts were reviewed,
+including retained python-01 timeout-fixture failure and rejected v3 old-header
+search. Root freshly executed the six scheduler/cache tests, all passing.
+Eight real charged-cache scheduler replays found the original exact witnesses
+in 62/126/69/159/157/197/38/249 unique selections, with no missing cache point
+newly measured. Each selected stream was freshly encoded, strictly decoded to
+the exact target, and tested for rejection of truncation/trailing bytes. Each
+case's eleven original native checks and decoder source bindings were reviewed,
+not repeated. No new cold/native/ARM campaign is claimed.
+
+The three declared variants reproduce the plan's exact version/timestamp input
+bytes. The fixed cold original reports 62 fresh encodings, zero cache reuse and
+313.479 seconds for search plus strict verification on Windows. Five final main
+traces match the v2 prefixes of 46/137/177/25/229 points. The new frontier cannot
+change main anchors/visited decisions; both histories share one physical cache
+and 256-point budget. Its at-most-26-point allocation and observed overlap are
+checked separately, not summed into an inflated unique count.
+
+Root will commit only the two reviewed implementation/test files, implementer
+handoff and these related root records, then test the next commit's actual
+timestamp at the already selected F/B/T=3.3.17/18/19 using retained raw GCC bytes.
+That prediction remains distinct from an actual new CI build and is mandatory
+before the existing authorized artifact-only dispatch. No input timestamp/seed
+will be selected to chase a known witness. No protected CI, service mutation,
+device operation or P5 acceptance occurred in this review.

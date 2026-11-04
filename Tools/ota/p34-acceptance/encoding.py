@@ -134,15 +134,22 @@ def search_adaptive(old: bytes, new: bytes, seed: int, budget: int):
             or type(budget) is not int or not 2 <= budget <= 256):
         raise ValueError("Invalid adaptive reference search inputs")
     seen = {}
+    main_seen = {}
+    expanded = set()
+    neighbor_measurements = 0
+    neighbor_limit = (budget + 9) // 10
     def report(outcome):
-        value = dict(strategy="adaptive-count-salt-seed-v2", outcome=outcome,
+        value = dict(strategy="isolated-frontier-count-salt-seed-v4", outcome=outcome,
                      measurements=len(seen), budget=budget, targetBytes=TARGET,
+                     neighborMeasurements=neighbor_measurements, neighborLimit=neighbor_limit,
+                     mainMeasurements=len(main_seen), mainSamples=list(main_seen.values()),
                      baseSha256=digest(old), targetSha256=digest(new), samples=list(seen.values()))
         save_json("search-report.json", value)
         return value
-    def witness(row):
+    def witness(row, found_by="main"):
         report("exact-witness")
-        return dict(row, strategy="adaptive-count-salt-seed-v2", measurements=len(seen), budget=budget)
+        return dict(row, strategy="isolated-frontier-count-salt-seed-v4", measurements=len(seen), budget=budget,
+                    neighborMeasurements=neighbor_measurements, mainMeasurements=len(main_seen), foundBy=found_by)
     def sample(count, salt, stream_seed=seed):
         key = (count, stream_seed, salt)
         if key not in seen:
@@ -152,8 +159,37 @@ def search_adaptive(old: bytes, new: bytes, seed: int, budget: int):
             seen[key] = measurement(old, new, count, stream_seed, salt, strict_cache=True)
         return seen[key]
 
+    def main_sample(count, salt, stream_seed=seed):
+        row = sample(count, salt, stream_seed)
+        main_seen[(count, stream_seed, salt)] = row
+        return row
+
+    def explore(stream_seed):
+        nonlocal neighbor_measurements
+        # A close count is not a monotonic root. Explore a bounded best-first
+        # frontier before abandoning that salt; newly close neighbors join it.
+        while neighbor_measurements < neighbor_limit and len(seen) < budget:
+            near = [r for r in seen.values() if r['seed'] == stream_seed
+                    and abs(r['etu_bytes'] - TARGET) <= 8
+                    and (r['count'], r['seed'], r['salt']) not in expanded]
+            if not near:
+                break
+            anchor = min(near, key=lambda r: abs(r['etu_bytes'] - TARGET))
+            expanded.add((anchor['count'], anchor['seed'], anchor['salt']))
+            for delta in (1, -1, 2, -2):
+                count = anchor['count'] + delta
+                if neighbor_measurements >= neighbor_limit or len(seen) >= budget:
+                    break
+                if not 0 <= count < len(new) or (count, stream_seed, anchor['salt']) in seen:
+                    continue
+                row = sample(count, anchor['salt'], stream_seed)
+                neighbor_measurements += 1
+                if row['etu_bytes'] == TARGET:
+                    return row
+        return None
+
     low, high = 0, min(len(new) - 1, 262144)
-    lo, hi = sample(low, 0), sample(high, 0)
+    lo, hi = main_sample(low, 0), main_sample(high, 0)
     for row in (lo, hi):
         if row["etu_bytes"] == TARGET:
             return witness(row)
@@ -164,7 +200,7 @@ def search_adaptive(old: bytes, new: bytes, seed: int, budget: int):
     slope = (hi["etu_bytes"] - lo["etu_bytes"]) / (high - low)
     while high - low > 1:
         middle = (low + high) // 2
-        row = sample(middle, 0)
+        row = main_sample(middle, 0)
         if row["etu_bytes"] == TARGET:
             return witness(row)
         if row["etu_bytes"] < TARGET:
@@ -172,28 +208,36 @@ def search_adaptive(old: bytes, new: bytes, seed: int, budget: int):
         else:
             high = middle
 
-    # Reserve a quarter for a different whole progressing stream, not just its
-    # final eight salted seeks. Never reuse one seed's near miss as the other's root.
-    primary_limit = max(len(seen), budget - budget // 4)
+    # Keep v2's logical seed quotas. Both beams share one physical encoding budget;
+    # a frontier point later requested by the main beam is not charged twice.
+    # The main beam retains v2's proposals, anchor history and logical seed quota.
+    # Frontier results share the global budget/cache, never its proposal history.
+    primary_limit = max(len(main_seen), budget - budget // 4)
     for stream_seed, first_salt, limit in ((seed, 1, primary_limit), ((seed + 1) & 0xffffffff, 0, budget)):
+        row = explore(stream_seed)
+        if row is not None:
+            return witness(row, "frontier")
         for salt in range(first_salt, 65536):
-            if len(seen) >= limit:
+            if len(main_seen) >= limit:
                 break
-            stream_rows = [r for r in seen.values() if r["seed"] == stream_seed]
-            anchor = min(stream_rows or list(seen.values()), key=lambda r: abs(r["etu_bytes"] - TARGET))
+            stream_rows = [r for r in main_seen.values() if r["seed"] == stream_seed]
+            anchor = min(stream_rows or list(main_seen.values()), key=lambda r: abs(r["etu_bytes"] - TARGET))
             count = anchor["count"]
             # Bound each salt's work so one noisy local neighborhood cannot monopolize it.
             for _ in range(4):
-                if len(seen) >= limit:
+                if len(main_seen) >= limit:
                     break
-                row = sample(count, salt, stream_seed)
+                row = main_sample(count, salt, stream_seed)
                 error = TARGET - row["etu_bytes"]
                 if error == 0:
                     return witness(row)
+                nearby = explore(stream_seed)
+                if nearby is not None:
+                    return witness(nearby, "frontier")
                 proposal = max(0, min(len(new) - 1, count + round(error / slope)))
-                if (proposal, stream_seed, salt) in seen or proposal == count:
+                if (proposal, stream_seed, salt) in main_seen or proposal == count:
                     candidates = (count + delta for radius in range(1, 5) for delta in (radius, -radius))
-                    proposal = next((c for c in candidates if 0 <= c < len(new) and (c, stream_seed, salt) not in seen), None)
+                    proposal = next((c for c in candidates if 0 <= c < len(new) and (c, stream_seed, salt) not in main_seen), None)
                     if proposal is None:
                         break
                 count = proposal

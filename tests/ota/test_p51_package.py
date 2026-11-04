@@ -303,6 +303,37 @@ console.log("source_metadata_bound_and_drift_rejected");
 
 
 class AdaptiveReferenceSearch(unittest.TestCase):
+    def test_frontier_does_not_change_main_anchor_or_history(self):
+        calls = []
+        def measured(old, new, count, seed, salt, **kwargs):
+            calls.append((count, seed, salt))
+            length = ({8:127, 9:124, 10:132}.get(count, 100+3*count) if salt == 0
+                      else {9:129, 10:128}.get(count, 100+3*count))
+            return dict(count=count, seed=seed, salt=salt, etu_bytes=length)
+        with mock.patch.object(m.encoding, 'TARGET', 128), mock.patch.object(m.encoding, 'measurement', measured), \
+                mock.patch.object(m.encoding, 'save_json') as report:
+            row = m.encoding.search_adaptive(b'base', bytes(32), 7, 32)
+        self.assertEqual((row['count'], row['salt'], row['foundBy']), (10, 1, 'main'))
+        self.assertEqual([count for count, _, salt in calls if salt == 1], [9, 10])
+        main = report.call_args.args[1]['mainSamples']
+        self.assertFalse(any(r['count'] == 8 for r in main))
+        self.assertTrue(any(count == 8 and salt == 0 for count, _, salt in calls))
+
+    def test_best_first_frontier_inspects_unmeasured_close_count(self):
+        calls = []
+        def measured(old, new, count, seed, salt, **kwargs):
+            calls.append((count, seed, salt))
+            length = 128 if count == 8 and salt == 0 else 100 + 3 * count
+            return dict(count=count, seed=seed, salt=salt, etu_bytes=length)
+        with mock.patch.object(m.encoding, 'TARGET', 128), mock.patch.object(m.encoding, 'measurement', measured), \
+                mock.patch.object(m.encoding, 'save_json') as report:
+            row = m.encoding.search_adaptive(b'base', bytes(32), 7, 32)
+        self.assertEqual((row['count'], row['salt']), (8, 0))
+        self.assertEqual(row['neighborMeasurements'], 1)
+        self.assertEqual(len(calls), len(set(calls)))
+        self.assertTrue(all(salt == 0 for _, _, salt in calls))
+        self.assertEqual(report.call_args.args[1]['neighborMeasurements'], 1)
+
     def test_nonmonotonic_counts_recenter_after_salt_change(self):
         calls, reports = [], []
         def measured(old, new, count, seed, salt, **kwargs):
@@ -347,6 +378,8 @@ class AdaptiveReferenceSearch(unittest.TestCase):
         self.assertEqual(sum(seed == 8 for _, seed, _ in calls), 64)
         report = json.loads((out / 'search-report.json').read_bytes())
         self.assertEqual(report['outcome'], 'budget-exhausted')
+        self.assertEqual(report['neighborMeasurements'], 26)
+        self.assertEqual(report['neighborLimit'], 26)
         self.assertFalse((out / 'selection.json').exists())
         self.assertFalse((out / 'reference.lzma').exists())
         self.assertFalse((out / 'prepared').exists())
