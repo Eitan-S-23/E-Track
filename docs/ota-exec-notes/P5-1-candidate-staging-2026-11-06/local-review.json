@@ -1,0 +1,43 @@
+{
+  "outcome": "LOCAL_INDEPENDENT_REVIEW_PASS",
+  "blockingFindings": [],
+  "originalAudit": {
+    "path": ".cache\\p51-candidate-staging-review-20261106-01\\run-01\\original-audit.json",
+    "bytes": 22494,
+    "sha256": "fd33105eea6bbfd3814a1bf1820d7d3d643772edd273fd5f96b14262cb1e70d5"
+  },
+  "targetedReceipt": {
+    "path": ".cache\\p51-candidate-staging-review-20261106-01\\run-01\\targeted.closed.json",
+    "bytes": 937,
+    "sha256": "0e2705203680773ab97dedd549dbedd36098cc1fc338c32ec1b6cc096d66372a"
+  },
+  "targetedTests": [
+    "real archive resolves with immutable metadata and distinct compilation/delivery identities",
+    "corrupt-readback stops without registration or blind retry",
+    "register-uncertain stops without registration or blind retry",
+    "matching existing objects are read back without upload and one idempotent registration suffices",
+    "conflicting existing object is never overwritten or registered",
+    "workflow is opt-in protected, mutually exclusive, and has no firmware/production action"
+  ],
+  "originalDistinctTests": 268,
+  "newIndependentTargetedTests": 6,
+  "sourceFiles": {
+    ".github/scripts/firmware-candidate-context.mjs": "eead6ebe0b2d509de883c32921152c1170759c11cea2978d238a129a7cc67ff7",
+    ".github/workflows/firmware-build.yml": "1c0227b327c6dac95979dd8419c2ac93fa9376461b7951de70195380ab8a6cbd",
+    "app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-release-pipeline.mjs": "0d624920905c3aa8b5660d35af4812a07a1492730e1df184fafa5f471f411269",
+    "tests/ota/test_firmware_workflow.mjs": "9207617373a7480a054a9e712546ce6e9dda048a637b3cd1acbf9537283986d1",
+    ".github/scripts/firmware-candidate-staging.mjs": "9cbc23fbff723d83608f4b99823d5a4d1f65368cfad594d85eea0eaca1ef6066",
+    "Tools/ota/p51-staging-inputs.py": "f6a0ffca399027d4832d9bffa361c1859532ce001694d410f0e141d229ca4b0c",
+    "Tools/ota/p51-staging-inputs.json": "6b76b96769640f5e414abd85e6e53d336cf8a191796cc116595eacdde74be214",
+    "tests/ota/test_firmware_staging.mjs": "36e2e8dcde574ec1d291d12c01891894d7d6b7d8712a9beb40db962fb4bd8c71",
+    "tests/ota/test_p51_staging_inputs.py": "2b49f5fe64d522402ee95540dd9acbd9ce0371ca74ff45082b64a3aa3bfdf1d8",
+    "docs/ota-exec-notes/P51-candidate-staging-implementation-2026-11-05.md": "af0c6739e0a83a911ae61bc204cb9a2b7a88951509c43b40a615f31dd2f90a20"
+  },
+  "cloud": 0,
+  "protectedCI": 0,
+  "devices": 0,
+  "sourceEdits": 0,
+  "limitation": "HTTP/S3 are disclosed test doubles; actual protected CI/upload/registration remain NOT_RUN",
+  "localBoundary": "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source",
+  "controlledExternalWrites": 0
+}

@@ -1,0 +1,67 @@
+{
+  "source": "7a5bf6058dbdbc1c5c64a79dec3b0df765985be3",
+  "tree": "1aca4464ee00c0e3669536dd7d35600954961e46",
+  "files": [
+    ".github/scripts/firmware-candidate-context.mjs",
+    ".github/workflows/firmware-build.yml",
+    "app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-release-pipeline.mjs",
+    "tests/ota/test_firmware_workflow.mjs",
+    ".github/scripts/firmware-candidate-staging.mjs",
+    "Tools/ota/p51-staging-inputs.py",
+    "Tools/ota/p51-staging-inputs.json",
+    "tests/ota/test_firmware_staging.mjs",
+    "tests/ota/test_p51_staging_inputs.py",
+    "docs/ota-exec-notes/P51-candidate-staging-implementation-2026-11-05.md",
+    "docs/ota-exec-notes/P51-candidate-staging-independent-review-2026-11-06.md"
+  ],
+  "timestamp": 1793906179,
+  "fileIdentities": {
+    ".github/scripts/firmware-candidate-context.mjs": {
+      "bytes": 4172,
+      "sha256": "eead6ebe0b2d509de883c32921152c1170759c11cea2978d238a129a7cc67ff7"
+    },
+    ".github/workflows/firmware-build.yml": {
+      "bytes": 62436,
+      "sha256": "1c0227b327c6dac95979dd8419c2ac93fa9376461b7951de70195380ab8a6cbd"
+    },
+    "app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-release-pipeline.mjs": {
+      "bytes": 12709,
+      "sha256": "0d624920905c3aa8b5660d35af4812a07a1492730e1df184fafa5f471f411269"
+    },
+    "tests/ota/test_firmware_workflow.mjs": {
+      "bytes": 27049,
+      "sha256": "9207617373a7480a054a9e712546ce6e9dda048a637b3cd1acbf9537283986d1"
+    },
+    ".github/scripts/firmware-candidate-staging.mjs": {
+      "bytes": 16268,
+      "sha256": "9cbc23fbff723d83608f4b99823d5a4d1f65368cfad594d85eea0eaca1ef6066"
+    },
+    "Tools/ota/p51-staging-inputs.py": {
+      "bytes": 5879,
+      "sha256": "f6a0ffca399027d4832d9bffa361c1859532ce001694d410f0e141d229ca4b0c"
+    },
+    "Tools/ota/p51-staging-inputs.json": {
+      "bytes": 1507,
+      "sha256": "6b76b96769640f5e414abd85e6e53d336cf8a191796cc116595eacdde74be214"
+    },
+    "tests/ota/test_firmware_staging.mjs": {
+      "bytes": 19565,
+      "sha256": "36e2e8dcde574ec1d291d12c01891894d7d6b7d8712a9beb40db962fb4bd8c71"
+    },
+    "tests/ota/test_p51_staging_inputs.py": {
+      "bytes": 5089,
+      "sha256": "2b49f5fe64d522402ee95540dd9acbd9ce0371ca74ff45082b64a3aa3bfdf1d8"
+    },
+    "docs/ota-exec-notes/P51-candidate-staging-implementation-2026-11-05.md": {
+      "bytes": 13563,
+      "sha256": "af0c6739e0a83a911ae61bc204cb9a2b7a88951509c43b40a615f31dd2f90a20"
+    },
+    "docs/ota-exec-notes/P51-candidate-staging-independent-review-2026-11-06.md": {
+      "bytes": 3400,
+      "sha256": "11635066463e57841e19d21dce9aa572946934e3984d0c9e6947e27dbf9b9215"
+    }
+  },
+  "unrelatedPreserved": 56,
+  "sourceCompilations": 0,
+  "packageGenerations": 0
+}

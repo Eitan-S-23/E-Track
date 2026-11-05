@@ -1,0 +1,20 @@
+{
+  "id": 13447170644,
+  "node_id": "MDg6QXJ0aWZhY3QxMzQ0NzE3MDY0NA==",
+  "name": "p51-staging-42093030305-1",
+  "size_in_bytes": 1682251,
+  "url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/artifacts/13447170644",
+  "archive_download_url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/artifacts/13447170644/zip",
+  "expired": false,
+  "digest": "sha256:1ac066b1f5948c35bf3d88239eab59bf770517a5e400d7540aae9df33773e3c5",
+  "created_at": "2026-11-05T19:24:47Z",
+  "updated_at": "2026-11-05T19:24:47Z",
+  "expires_at": "2026-11-19T19:24:47Z",
+  "workflow_run": {
+    "id": 42093030305,
+    "repository_id": 1310649784,
+    "head_repository_id": 1310649784,
+    "head_branch": "dev/firmware/p51-packaging-20261104",
+    "head_sha": "7a5bf6058dbdbc1c5c64a79dec3b0df765985be3"
+  }
+}

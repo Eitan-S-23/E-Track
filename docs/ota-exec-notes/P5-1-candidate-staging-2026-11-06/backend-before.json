@@ -1,0 +1,10 @@
+{
+  "outcome": "STAGING_INVENTORY_READ",
+  "releaseCount": 28,
+  "highestVersion": 30316,
+  "candidates": [],
+  "stableRevision": 72,
+  "betaRevision": 11,
+  "mutationRequests": 0,
+  "deviceOperations": 0
+}

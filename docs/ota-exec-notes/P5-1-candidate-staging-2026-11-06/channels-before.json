@@ -1,0 +1,22 @@
+{
+  "beta": {
+    "appId": "trace",
+    "deviceModel": "e-track-at32f435",
+    "channel": "beta",
+    "currentReleaseId": "fw_12367eee317a0774a7271cf982ee7f933c6b089336645f9e607501105e72bf0c",
+    "revision": 11,
+    "disableLatest": true,
+    "disableDownloads": true,
+    "maintenanceMessage": null
+  },
+  "stable": {
+    "appId": "trace",
+    "deviceModel": "e-track-at32f435",
+    "channel": "stable",
+    "currentReleaseId": "fw_ce2a2af06d906a42cc9e7f2b9f8587c98a198a9d37fcad3ac30a3384aac0f4fb",
+    "revision": 72,
+    "disableLatest": false,
+    "disableDownloads": false,
+    "maintenanceMessage": null
+  }
+}

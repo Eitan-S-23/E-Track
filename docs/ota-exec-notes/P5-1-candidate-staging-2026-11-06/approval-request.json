@@ -1,0 +1,11 @@
+{
+  "route": "/actions/runs/42093030305/pending_deployments",
+  "method": "POST",
+  "body": {
+    "environment_ids": [
+      24458272742
+    ],
+    "state": "approved",
+    "comment": "User-delegated root approval for reviewed immutable P51 staging delivery at 7a5bf6058dbdbc1c5c64a79dec3b0df765985be3; only three original assets, no build, production/channel/device action."
+  }
+}

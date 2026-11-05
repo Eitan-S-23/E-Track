@@ -1,0 +1,56 @@
+{
+  "outcome": "STAGING_INVENTORY_READ",
+  "releaseCount": 29,
+  "highestVersion": 30319,
+  "candidates": [
+    {
+      "releaseId": "fw_cac2b99e842cc9407b9677ead0c2efeda601e4781242c4928cd2128df219965b",
+      "appId": "trace",
+      "deviceModel": "e-track-at32f435",
+      "versionName": "3.3.19",
+      "versionCode": 30319,
+      "releaseTag": "mcu-e-track-at32f435-v3.3.19",
+      "state": "ready",
+      "archived": false,
+      "releaseNotes": "P51 isolated staging only; immutable candidate, not production approval",
+      "targetImageSha256": "fdd065a8871bcffcc8e262fa4a43a71cbf20752adab9904a27c0eb59d8f7b89d",
+      "publishedChannels": [],
+      "assets": [
+        {
+          "assetId": "fw_asset_546f72e7dd07a05a821c50c225088fdc4cf423171e77fd4c290399e4788b954a",
+          "kind": "full",
+          "fileName": "e-track-at32f435-v3.3.19-full.etu",
+          "sha256": "fd3f610f1c0a918e152c61b604e4d1646adc551a1b33c21e8a04adce9eb19140",
+          "sizeBytes": 291700,
+          "r2State": "available",
+          "baseVersionCode": 0,
+          "baseImageSha256": null
+        },
+        {
+          "assetId": "fw_asset_bdec686cf09372406a3d61fa0e1542216bc25574d08e2ec03fa1a1ad2fcd0e2f",
+          "kind": "patch",
+          "fileName": "e-track-at32f435-v3.3.18-to-v3.3.19-patch.etu",
+          "sha256": "919036dc304dfafc236bf593bca1c1da29a816067b67eb74b14d77a7d100dfee",
+          "sizeBytes": 1048576,
+          "r2State": "available",
+          "baseVersionCode": 30318,
+          "baseImageSha256": "74c20ab69baa85e73cd6273d84dea95e53428fd81620d184d25c859d150407a1"
+        },
+        {
+          "assetId": "fw_asset_522746ae6cf8ba7d422b59ed21d7e01e5ac79c223da489e0dfea0abf1c7d9d2b",
+          "kind": "recovery",
+          "fileName": "recovery-v3.3.19.bin",
+          "sha256": "f3d7951c077b402c275d83d0bc24c381be5c8fb65068e6242279c1d231b61336",
+          "sizeBytes": 615140,
+          "r2State": "available",
+          "baseVersionCode": 0,
+          "baseImageSha256": null
+        }
+      ]
+    }
+  ],
+  "stableRevision": 72,
+  "betaRevision": 11,
+  "mutationRequests": 0,
+  "deviceOperations": 0
+}

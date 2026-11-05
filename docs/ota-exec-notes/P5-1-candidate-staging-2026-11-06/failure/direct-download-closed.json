@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "gh",
+    "api",
+    "repos/Eitan-S-23/E-Track/actions/artifacts/13447170644/zip"
+  ],
+  "reason": "timeout_outcome_unknown",
+  "stopped_while_running": true,
+  "exit_code": 1,
+  "exit_status": "exited",
+  "started_monotonic_ns": 1103654951729600,
+  "ended_monotonic_ns": 1103835102688700,
+  "stdout": {
+    "path": ".cache\\p51-candidate-staging-delivery-20261106-01\\download-01\\archive.stdout",
+    "bytes": 768996,
+    "sha256": "3a53b8c5d1f281d890d810db7c13c3bd4802a186fc0d2c34b889e348d0b56bc4"
+  },
+  "stderr": {
+    "path": ".cache\\p51-candidate-staging-delivery-20261106-01\\download-01\\archive.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "job_terminated": true,
+  "job_handle_closed": true,
+  "cleanup_complete": true,
+  "cleanup_errors": []
+}

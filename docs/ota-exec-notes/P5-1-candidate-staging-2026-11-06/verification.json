@@ -1,0 +1,90 @@
+{
+  "outcome": "PROTECTED_STAGING_DELIVERY_REVIEW_PASS",
+  "checks": [
+    "actual-delivery-run-and-source",
+    "complete-github-artifact-digest",
+    "all-extracted-original-bindings",
+    "original-compilation-identity-not-delivery-identity",
+    "actual-delivery-workflow-identity",
+    "metadata-and-source-proof-digests",
+    "staging-only-no-production-eligibility",
+    "unchanged-original-archive",
+    "unchanged-full-bytes",
+    "unchanged-patch-bytes",
+    "unchanged-recovery-bytes",
+    "exact-target-image",
+    "exact-three-asset-allowlist",
+    "three-complete-upload-receipts",
+    "actual-full-readback-full",
+    "actual-full-readback-patch",
+    "actual-full-readback-recovery",
+    "all-readbacks-before-single-registration",
+    "actual-registration-ready",
+    "independent-before-after-registration",
+    "independent-remote-release-binding",
+    "independent-remote-full",
+    "independent-remote-patch",
+    "independent-remote-recovery",
+    "complete-channel-state-unchanged-stable72-beta11",
+    "all-other-release-records-unchanged",
+    "protection-rules-and-all-false-gates-unchanged",
+    "only-staging-job-executed",
+    "no-github-release-tag",
+    "no-rebuild-repackage-channel-or-device-action",
+    "actual-linux-ci-56-node-6-python-tests",
+    "three-action-deprecation-warnings-no-errors",
+    "closed-download-02-archive.closed",
+    "closed-download-02-artifacts.closed",
+    "closed-download-02-run.closed",
+    "closed-download-02-workflow-logs.closed",
+    "closed-backend-read-01-read.closed",
+    "closed-backend-read-02-read.closed"
+  ],
+  "runId": 42093030305,
+  "runAttempt": 1,
+  "source": "7a5bf6058dbdbc1c5c64a79dec3b0df765985be3",
+  "artifactId": 13447170644,
+  "artifact": {
+    "path": ".cache\\p51-candidate-staging-delivery-20261106-01\\download-02\\archive.stdout",
+    "bytes": 1682251,
+    "sha256": "1ac066b1f5948c35bf3d88239eab59bf770517a5e400d7540aae9df33773e3c5"
+  },
+  "logs": {
+    "path": ".cache\\p51-candidate-staging-delivery-20261106-01\\download-02\\workflow-logs.stdout",
+    "bytes": 34595,
+    "sha256": "53c969b9b326f84d10d030547ddf8706280f029c345e3588d3e7cc66e703184d"
+  },
+  "originalOwner": {
+    "commitSha": "1430c8ff7f3bcd9a35bfe158ba697b99021f75f2",
+    "runId": "41900439548",
+    "runAttempt": "1",
+    "artifactId": 13359301400,
+    "buildTimestamp": 1793820855
+  },
+  "releaseId": "fw_cac2b99e842cc9407b9677ead0c2efeda601e4781242c4928cd2128df219965b",
+  "metadata": {
+    "path": ".cache\\p51-candidate-staging-delivery-20261106-01\\download-02\\extracted\\evidence\\staging-registration-ready.json",
+    "bytes": 2045,
+    "sha256": "e195c7c5250f522f293af1eba5f0a4e349d2f088c203599226199b45137f70f7"
+  },
+  "originalIndependentHostTests": 268,
+  "rootTargetedTests": 6,
+  "ciNodeTests": 56,
+  "ciPythonTests": 6,
+  "actionWarnings": [
+    "2026-11-05T19:24:46.9905305Z (node:2736) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.",
+    "2026-11-05T19:24:47.3558082Z (node:2736) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.",
+    "2026-11-05T19:24:48.5246416Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/"
+  ],
+  "errorCount": 0,
+  "compiler": "NOT_RUN",
+  "channelsUnchanged": true,
+  "previousDownloadFailure": {
+    "path": ".cache\\p51-candidate-staging-delivery-20261106-01\\download-01\\archive.closed.json",
+    "bytes": 843,
+    "sha256": "522d53758d955adddc869138d4e343bb00aec5351ee4e62b50df4d719eb2b1e5"
+  },
+  "devices": 0,
+  "production": false,
+  "P5": "NOT_RUN"
+}

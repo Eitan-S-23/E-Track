@@ -1,0 +1,80 @@
+[
+  {
+    "step": "admitted",
+    "originalOwner": {
+      "commitSha": "1430c8ff7f3bcd9a35bfe158ba697b99021f75f2",
+      "runId": "41900439548",
+      "runAttempt": "1",
+      "artifactId": 13359301400,
+      "buildTimestamp": 1793820855
+    },
+    "delivery": {
+      "commitSha": "7a5bf6058dbdbc1c5c64a79dec3b0df765985be3",
+      "runId": "42093030305",
+      "runAttempt": "1",
+      "workflowCommit": "7a5bf6058dbdbc1c5c64a79dec3b0df765985be3",
+      "workflowRef": "Eitan-S-23/E-Track/.github/workflows/firmware-build.yml@refs/heads/dev/firmware/p51-packaging-20261104"
+    }
+  },
+  {
+    "step": "preflight",
+    "ok": true,
+    "schemaVersion": 1,
+    "requestId": "dc214579-1a49-4cc2-a1af-d1d3a0fa974e",
+    "environment": "staging",
+    "metadataSha256": "e195c7c5250f522f293af1eba5f0a4e349d2f088c203599226199b45137f70f7",
+    "maxVersionCode": 30316,
+    "legacyMaxVersionCode": null,
+    "unresolvedLegacyChannels": 0
+  },
+  {
+    "step": "r2-full-readback",
+    "ok": true,
+    "status": "UPLOADED",
+    "requestId": "6f205987-f3a4-40d6-8d13-0f433ea7a38f",
+    "kind": "full",
+    "fileName": "e-track-at32f435-v3.3.19-full.etu",
+    "r2Key": "trace/firmware/e-track-at32f435/30319-mcu-e-track-at32f435-v3.3.19/e-track-at32f435-v3.3.19-full.etu",
+    "sha256": "fd3f610f1c0a918e152c61b604e4d1646adc551a1b33c21e8a04adce9eb19140",
+    "sizeBytes": 291700,
+    "contentDigest": "sha-256=:/T9hDxwKkY4VLGG2BOTRZGrcVRobM8IeigStzp6xkUA=:"
+  },
+  {
+    "step": "r2-full-readback",
+    "ok": true,
+    "status": "UPLOADED",
+    "requestId": "2d9f5c83-0fbe-46e0-9c1f-f4f60ebedffe",
+    "kind": "patch",
+    "fileName": "e-track-at32f435-v3.3.18-to-v3.3.19-patch.etu",
+    "r2Key": "trace/firmware/e-track-at32f435/30319-mcu-e-track-at32f435-v3.3.19/e-track-at32f435-v3.3.18-to-v3.3.19-patch.etu",
+    "sha256": "919036dc304dfafc236bf593bca1c1da29a816067b67eb74b14d77a7d100dfee",
+    "sizeBytes": 1048576,
+    "contentDigest": "sha-256=:kZA23DBN+vwja/WTvKHB2imoFgZ7Z+t0sU13p9EA3+4=:"
+  },
+  {
+    "step": "r2-full-readback",
+    "ok": true,
+    "status": "UPLOADED",
+    "requestId": "50ddc7f0-1e5c-4812-9445-a69280077134",
+    "kind": "recovery",
+    "fileName": "recovery-v3.3.19.bin",
+    "r2Key": "trace/firmware/e-track-at32f435/30319-mcu-e-track-at32f435-v3.3.19/recovery-v3.3.19.bin",
+    "sha256": "f3d7951c077b402c275d83d0bc24c381be5c8fb65068e6242279c1d231b61336",
+    "sizeBytes": 615140,
+    "contentDigest": "sha-256=:89eVHAd7QCwnXYPQvCTDgb5cj7ZQaOYkInnB0jG2EzY=:"
+  },
+  {
+    "step": "registration-request",
+    "retries": 1,
+    "metadataSha256": "e195c7c5250f522f293af1eba5f0a4e349d2f088c203599226199b45137f70f7"
+  },
+  {
+    "step": "registration-ready",
+    "ok": true,
+    "requestId": "fdffc63b-7537-4a5a-8b6e-1035d7e4f9b6",
+    "releaseId": "fw_cac2b99e842cc9407b9677ead0c2efeda601e4781242c4928cd2128df219965b",
+    "state": "ready",
+    "idempotent": false,
+    "assetsRegistered": 3
+  }
+]

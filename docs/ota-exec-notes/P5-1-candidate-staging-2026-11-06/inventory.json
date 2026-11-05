@@ -1,0 +1,107 @@
+{
+  "source": "7a5bf6058dbdbc1c5c64a79dec3b0df765985be3",
+  "runId": 42093030305,
+  "artifactId": 13447170644,
+  "files": [
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-candidate-staging-2026-11-06\\artifact.zip",
+      "bytes": 1682251,
+      "sha256": "1ac066b1f5948c35bf3d88239eab59bf770517a5e400d7540aae9df33773e3c5"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-candidate-staging-2026-11-06\\workflow-logs.zip",
+      "bytes": 34595,
+      "sha256": "53c969b9b326f84d10d030547ddf8706280f029c345e3588d3e7cc66e703184d"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-candidate-staging-2026-11-06\\github-artifact.json",
+      "bytes": 804,
+      "sha256": "8887de62bfcc4962b3133bbf4936b37318ac51ace38ffad5a9f2ee13802b0797"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-candidate-staging-2026-11-06\\github-run.json",
+      "bytes": 11999,
+      "sha256": "c67e6e4344f81bd6505e3e35a9cfdff381fc8624e1844847bd07fc5c2f278b4a"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-candidate-staging-2026-11-06\\github-jobs.json",
+      "bytes": 8769,
+      "sha256": "eef2e391a9035e3dc3325652bff78e4db24bc8634588b7e1a2675bc48e0cdc23"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-candidate-staging-2026-11-06\\verification.json",
+      "bytes": 3937,
+      "sha256": "a93dfc64f01472ee8c1e7eb8f97bd88c4efc77ab9a1fe898cae0c0a0e6b71401"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-candidate-staging-2026-11-06\\source.json",
+      "bytes": 2758,
+      "sha256": "3f6bcb63ad83adee170a3ff72173fb7e6e29189c44096abd71321611d5e771c5"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-candidate-staging-2026-11-06\\channels-before.json",
+      "bytes": 617,
+      "sha256": "54dea96a6dcf6d03f5f4a131df282c656bfe07e0f46623f817d5cec0edc34f0c"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-candidate-staging-2026-11-06\\channels-after.json",
+      "bytes": 617,
+      "sha256": "54dea96a6dcf6d03f5f4a131df282c656bfe07e0f46623f817d5cec0edc34f0c"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-candidate-staging-2026-11-06\\backend-before.json",
+      "bytes": 207,
+      "sha256": "40c96a7a5e072a044ffe60bc90b9ceac8f91aae6e20acd84e8404df15585b3e2"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-candidate-staging-2026-11-06\\backend-after.json",
+      "bytes": 2125,
+      "sha256": "380ac14adc9b9f8e08edc040dc8e0e68548626132353e1870bccad49a16c2417"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-candidate-staging-2026-11-06\\approval-request.json",
+      "bytes": 382,
+      "sha256": "2bd562a855a5b5c36a828bab357f03832fc019f1d9a7051fc78bfdc090013688"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-candidate-staging-2026-11-06\\approval-response.json",
+      "bytes": 3887,
+      "sha256": "90b4a265ab6742965a57d9f78d60d544c39614ac07d33f0ee3c340f1d7093311"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-candidate-staging-2026-11-06\\local-review.json",
+      "bytes": 2653,
+      "sha256": "e8085ff742227b52f0c7f20856b905aa59cfb85e1e379bd60e812cfdf3545063"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-candidate-staging-2026-11-06\\failure\\direct-download-closed.json",
+      "bytes": 843,
+      "sha256": "522d53758d955adddc869138d4e343bb00aec5351ee4e62b50df4d719eb2b1e5"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-candidate-staging-2026-11-06\\failure\\direct-download.partial",
+      "bytes": 768996,
+      "sha256": "3a53b8c5d1f281d890d810db7c13c3bd4802a186fc0d2c34b889e348d0b56bc4"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-candidate-staging-2026-11-06\\staging-registration-ready.json",
+      "bytes": 2045,
+      "sha256": "e195c7c5250f522f293af1eba5f0a4e349d2f088c203599226199b45137f70f7"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-candidate-staging-2026-11-06\\staging-delivery-evidence.json",
+      "bytes": 3493,
+      "sha256": "19f10ee374a308b1737782bf10aa431d63b25b020135abd1c1059c65e664f9e9"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-candidate-staging-2026-11-06\\staging-delivery-steps.json",
+      "bytes": 2914,
+      "sha256": "245236ed9394a46cfebe553bcf0030cd1255ebbd1741272b71f024e3323c7379"
+    }
+  ],
+  "policiesUnchanged": true,
+  "channelsUnchanged": true,
+  "devices": 0,
+  "production": false,
+  "P5": "NOT_RUN"
+}
