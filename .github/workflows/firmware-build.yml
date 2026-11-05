@@ -39,6 +39,8 @@ on:
       - "Tools/etu_pack.py"
       - "Tools/etu_unpack.py"
       - "Tools/jlink/prepare-bootstrap-app.py"
+      - "Tools/ota/p51-staging-inputs.*"
+      - "tests/ota/test_p51_staging_inputs.py"
       - "tests/ota/*firmware*"
       - "app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/*firmware*"
   pull_request:
@@ -70,10 +72,17 @@ on:
       - "Tools/etu_pack.py"
       - "Tools/etu_unpack.py"
       - "Tools/jlink/prepare-bootstrap-app.py"
+      - "Tools/ota/p51-staging-inputs.*"
+      - "tests/ota/test_p51_staging_inputs.py"
       - "tests/ota/*firmware*"
       - "app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/*firmware*"
   workflow_dispatch:
     inputs:
+      stage_candidate:
+        description: "Deliver the pinned P51 candidate unchanged to isolated staging only; no build or production approval"
+        required: true
+        type: boolean
+        default: false
       package_candidate:
         description: "Protected P5 artifact-only candidate; explicit archived-original or new-source, no publication"
         required: true
@@ -140,8 +149,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: firmware-build-${{ github.event_name == 'workflow_dispatch' && (inputs.publish || inputs.rehearsal || inputs.check_bindings || inputs.package_candidate) && 'release' || github.ref }}
-  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' || (!inputs.publish && !inputs.rehearsal && !inputs.check_bindings && !inputs.package_candidate) }}
+  group: firmware-build-${{ github.event_name == 'workflow_dispatch' && (inputs.publish || inputs.rehearsal || inputs.check_bindings || inputs.package_candidate || inputs.stage_candidate) && 'release' || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' || (!inputs.publish && !inputs.rehearsal && !inputs.check_bindings && !inputs.package_candidate && !inputs.stage_candidate) }}
 
 env:
   DEVICE_MODEL: e-track-at32f435
@@ -153,6 +162,91 @@ env:
   SOURCE_DATE_EPOCH: "1786320000"
 
 jobs:
+  stage-candidate:
+    name: Deliver immutable P51 candidate to isolated staging (not approval)
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.stage_candidate == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: firmware-rehearsal
+    permissions:
+      contents: read
+    env:
+      INPUT_STAGE_CANDIDATE: ${{ github.event.inputs.stage_candidate }}
+      INPUT_PACKAGE_CANDIDATE: ${{ github.event.inputs.package_candidate }}
+      INPUT_PUBLISH: ${{ github.event.inputs.publish }}
+      INPUT_REHEARSAL: ${{ github.event.inputs.rehearsal }}
+      INPUT_CHECK_BINDINGS: ${{ github.event.inputs.check_bindings }}
+      INPUT_VERSION_NAME: ${{ github.event.inputs.version_name }}
+      INPUT_FIRMWARE_BUILD_PROFILE: ${{ github.event.inputs.firmware_build_profile }}
+      INPUT_CANDIDATE_REVIEWED_COMMIT: ${{ github.event.inputs.candidate_reviewed_commit }}
+      INPUT_CANDIDATE_MODE: ${{ github.event.inputs.candidate_mode }}
+      INPUT_CANDIDATE_BASE_VERSION: ${{ github.event.inputs.candidate_base_version }}
+      INPUT_CANDIDATE_FULL_BASE_VERSION: ${{ github.event.inputs.candidate_full_base_version }}
+      INPUT_APPROVED_REHEARSAL_RUN_ID: ${{ github.event.inputs.approved_rehearsal_run_id }}
+      INPUT_RELEASE_NOTES: ${{ github.event.inputs.release_notes }}
+      OTA_BOOT_CHAIN_READY: ${{ vars.OTA_BOOT_CHAIN_READY }}
+      FIRMWARE_RELEASE_MODE: immutable-candidate-staging
+      FIRMWARE_CANDIDATE_CONTEXT: firmware-rehearsal/immutable-candidate-staging-v1
+      HOME: ${{ github.workspace }}/.cache/p51-staging/home
+      TMPDIR: ${{ github.workspace }}/.cache/p51-staging/tmp
+      XDG_CACHE_HOME: ${{ github.workspace }}/.cache/p51-staging/cache
+      npm_config_cache: ${{ github.workspace }}/.cache/p51-staging/npm
+      PIP_CACHE_DIR: ${{ github.workspace }}/.cache/p51-staging/pip
+      PYTHONPATH: ${{ github.workspace }}/.cache/p51-staging/python
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Checkout exact reviewed delivery revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - name: Reject mixed modes before any protected credential use
+        run: node .github/scripts/firmware-candidate-staging.mjs gate
+      - name: Install contained read-only archive and existing S3 helper dependencies
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME" "$TMPDIR" "$PIP_CACHE_DIR"
+          python3 -m pip install --only-binary=:all: --disable-pip-version-check --target .cache/p51-staging/python pycryptodome==3.23.0 PyYAML==6.0.3
+          npm ci --ignore-scripts --prefix app/bluetooth_flutter_Trace/cloudflare/update-service/worker
+      - name: Run credential-free immutable staging host tests
+        env:
+          P51_TEST_AREA: ${{ github.workspace }}/.cache/p51-staging/selftests
+        run: |
+          node --test tests/ota/test_firmware_staging.mjs
+          python3 -I -S -B -X utf8 tests/ota/test_p51_staging_inputs.py
+      - name: Admit the original archive and three selected assets without credentials
+        id: inputs
+        run: node .github/scripts/firmware-candidate-staging.mjs inputs
+      - name: Upload full-readback and register only the unchanged staging candidate
+        id: delivery
+        timeout-minutes: 15
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.FIRMWARE_REHEARSAL_CLOUDFLARE_ACCOUNT_ID }}
+          TRACE_R2_ACCESS_KEY_ID: ${{ secrets.FIRMWARE_REHEARSAL_TRACE_R2_ACCESS_KEY_ID }}
+          TRACE_R2_SECRET_ACCESS_KEY: ${{ secrets.FIRMWARE_REHEARSAL_TRACE_R2_SECRET_ACCESS_KEY }}
+          TRACE_UPDATE_SERVICE_URL: ${{ secrets.FIRMWARE_REHEARSAL_TRACE_UPDATE_SERVICE_URL }}
+          TRACE_DEPLOY_TOKEN: ${{ secrets.FIRMWARE_REHEARSAL_TRACE_DEPLOY_TOKEN }}
+          TRACE_R2_BUCKET: ${{ vars.FIRMWARE_REHEARSAL_TRACE_R2_BUCKET }}
+        run: node .github/scripts/firmware-candidate-staging.mjs execute
+      - name: Preserve unchanged selected assets and separate staging evidence
+        if: always() && steps.inputs.outcome != 'skipped' && steps.inputs.outcome != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: p51-staging-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .cache/p51-staging/run-${{ github.run_id }}-${{ github.run_attempt }}/assets/e-track-at32f435-v3.3.19-full.etu
+            .cache/p51-staging/run-${{ github.run_id }}-${{ github.run_attempt }}/assets/e-track-at32f435-v3.3.18-to-v3.3.19-patch.etu
+            .cache/p51-staging/run-${{ github.run_id }}-${{ github.run_attempt }}/assets/recovery-v3.3.19.bin
+            .cache/p51-staging/run-${{ github.run_id }}-${{ github.run_attempt }}/inputs/source-proof.json
+            .cache/p51-staging/run-${{ github.run_id }}-${{ github.run_attempt }}/evidence/
+          include-hidden-files: true
+          retention-days: 14
+          if-no-files-found: error
   package-candidate:
     name: Protected P5 candidate artifacts (no release or device operation)
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.package_candidate == 'true'
@@ -162,6 +256,7 @@ jobs:
     permissions:
       contents: read
     env:
+      INPUT_STAGE_CANDIDATE: ${{ github.event.inputs.stage_candidate }}
       INPUT_PACKAGE_CANDIDATE: ${{ github.event.inputs.package_candidate }}
       INPUT_PUBLISH: ${{ github.event.inputs.publish }}
       INPUT_REHEARSAL: ${{ github.event.inputs.rehearsal }}
@@ -278,7 +373,7 @@ jobs:
           if-no-files-found: error
   release-development-checks:
     name: Release tooling development checks (no cloud credentials)
-    if: github.event.inputs.package_candidate != 'true'
+    if: github.event.inputs.package_candidate != 'true' && github.event.inputs.stage_candidate != 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -341,7 +436,7 @@ jobs:
           PYTHONPATH="$GITHUB_WORKSPACE/Tools" python3 -B tests/ota-vectors/test_vectors.py
       - name: Check workflow execution graph and configuration gates
         working-directory: .
-        run: node --test tests/ota/test_firmware_workflow.mjs tests/ota/test_firmware_s3.mjs tests/ota/test_firmware_build_profile.mjs
+        run: node --test tests/ota/test_firmware_workflow.mjs tests/ota/test_firmware_s3.mjs tests/ota/test_firmware_build_profile.mjs tests/ota/test_firmware_staging.mjs
       - name: Execute production byte preparation with isolated fixtures
         id: byte_tests
         working-directory: .
@@ -369,7 +464,7 @@ jobs:
 
   build:
     name: Build firmware (arm-none-eabi-gcc)
-    if: github.event.inputs.package_candidate != 'true'
+    if: github.event.inputs.package_candidate != 'true' && github.event.inputs.stage_candidate != 'true'
     runs-on: ubuntu-latest
     outputs:
       version_name: ${{ steps.version.outputs.version_name }}
@@ -783,7 +878,7 @@ jobs:
     needs: [release-development-checks]
     timeout-minutes: 10
     if: >-
-      github.event_name == 'workflow_dispatch' && github.event.inputs.check_bindings == 'true' && github.event.inputs.publish != 'true' && github.event.inputs.rehearsal != 'true' && github.event.inputs.package_candidate != 'true'
+      github.event_name == 'workflow_dispatch' && github.event.inputs.check_bindings == 'true' && github.event.inputs.publish != 'true' && github.event.inputs.rehearsal != 'true' && github.event.inputs.package_candidate != 'true' && github.event.inputs.stage_candidate != 'true'
     environment: firmware-rehearsal
     permissions:
       contents: read
@@ -866,7 +961,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build, release-development-checks]
     if: >-
-      github.event_name == 'workflow_dispatch' && github.event.inputs.rehearsal == 'true' && github.event.inputs.publish != 'true' && github.event.inputs.package_candidate != 'true'
+      github.event_name == 'workflow_dispatch' && github.event.inputs.rehearsal == 'true' && github.event.inputs.publish != 'true' && github.event.inputs.package_candidate != 'true' && github.event.inputs.stage_candidate != 'true'
     environment: firmware-rehearsal
     permissions:
       contents: read
@@ -1019,7 +1114,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build, release-development-checks]
     if: >-
-      github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true' && github.event.inputs.package_candidate != 'true'
+      github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true' && github.event.inputs.package_candidate != 'true' && github.event.inputs.stage_candidate != 'true'
     environment: firmware-production
     permissions:
       contents: write

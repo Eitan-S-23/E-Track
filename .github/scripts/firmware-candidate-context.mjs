@@ -13,6 +13,7 @@ export function candidateAdmission(env) {
   if (env.GITHUB_ACTIONS !== "true" || env.GITHUB_EVENT_NAME !== "workflow_dispatch"
       || env.GITHUB_REPOSITORY !== "Eitan-S-23/E-Track" || env.INPUT_PACKAGE_CANDIDATE !== "true"
       || env.INPUT_PUBLISH !== "false" || env.INPUT_REHEARSAL !== "false" || env.INPUT_CHECK_BINDINGS !== "false"
+      || (env.INPUT_STAGE_CANDIDATE && env.INPUT_STAGE_CANDIDATE !== "false")
       || env.OTA_BOOT_CHAIN_READY !== "false"
       || env.INPUT_FIRMWARE_BUILD_PROFILE !== "p34-v2-candidate"
       || !/^[0-9a-f]{40}$/.test(env.GITHUB_SHA ?? "")

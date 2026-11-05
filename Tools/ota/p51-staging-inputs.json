@@ -1,0 +1,19 @@
+{
+  "schema": "p51-candidate-staging-inputs-v1",
+  "task": "P51-CANDIDATE-STAGING-01",
+  "profile": "p34-v2-candidate",
+  "sourceInputs": {"path": "Tools/ota/p51-start-state-inputs.json", "bytes": 1831, "sha256": "855b4dd5384de5a359a2fc58abaf4738f1297ad92c7efafbfffff4e7cb0f7ccd"},
+  "serviceUrl": "https://e-track-firmware-p41-test.tangjichentudou.workers.dev",
+  "bucketName": "e-track-firmware-p41-test-releases",
+  "versionName": "3.3.19",
+  "versionCode": 30319,
+  "baseVersionCode": 30318,
+  "baseImageSha256": "74c20ab69baa85e73cd6273d84dea95e53428fd81620d184d25c859d150407a1",
+  "finalImage": {"member": "prepared/app-final.bin", "bytes": 615132, "sha256": "fdd065a8871bcffcc8e262fa4a43a71cbf20752adab9904a27c0eb59d8f7b89d"},
+  "verification": {"member": "evidence/verification.json", "bytes": 9812, "sha256": "a955c27a4de78bd60411cc84161f40f3887df63c0eb53a463586e954c637a14e"},
+  "assets": [
+    {"kind": "full", "member": "prepared/full.etu", "bytes": 291700, "sha256": "fd3f610f1c0a918e152c61b604e4d1646adc551a1b33c21e8a04adce9eb19140", "fileName": "e-track-at32f435-v3.3.19-full.etu"},
+    {"kind": "patch", "member": "prepared/patch.etu", "bytes": 1048576, "sha256": "919036dc304dfafc236bf593bca1c1da29a816067b67eb74b14d77a7d100dfee", "fileName": "e-track-at32f435-v3.3.18-to-v3.3.19-patch.etu"},
+    {"kind": "recovery", "member": "prepared/recovery.bin", "bytes": 615140, "sha256": "f3d7951c077b402c275d83d0bc24c381be5c8fb65068e6242279c1d231b61336", "fileName": "recovery-v3.3.19.bin"}
+  ]
+}
