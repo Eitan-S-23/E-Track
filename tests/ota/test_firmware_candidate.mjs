@@ -107,6 +107,48 @@ const config = JSON.parse(await readFile(path.join(root, "Tools/ota/p51-new-sour
 const gitDouble = argv => argv[0] === "rev-parse" ? "a".repeat(40)
   : argv[0] === "show" ? "1790000000" : "";
 
+const supplementEnv = () => ({ ...sourceEnv(), INPUT_CANDIDATE_MODE: "start-state-supplement",
+  INPUT_VERSION_NAME: "3.3.19", INPUT_CANDIDATE_BASE_VERSION: "",
+  FIRMWARE_RELEASE_MODE: "artifact-candidate-supplement",
+  FIRMWARE_CANDIDATE_CONTEXT: "firmware-rehearsal/artifact-only-start-state-v1" });
+const supplementConfig = JSON.parse(await readFile(path.join(root, "Tools/ota/p51-start-state-inputs.json")));
+test("supplement is explicit and distinguishes immutable original compilation from actual workflow", async () => {
+  const e = supplementEnv();
+  assert.equal(candidateMode(e), "start-state-supplement");
+  assert.equal(candidateAdmission(e).commitSha, e.GITHUB_SHA);
+  assert.notEqual(e.GITHUB_SHA, supplementConfig.sourceCommit);
+  verifyCandidateCheckout(root, e, supplementConfig, gitDouble);
+  let calls = 0;
+  await assert.rejects(buildSourceCandidate({ root, env: e, config: supplementConfig, git: gitDouble,
+    build: async () => { calls++; } }), /Only new-source/);
+  assert.equal(calls, 0);
+  assert.throws(() => verifyCandidateCheckout(root, e, supplementConfig, () => "wrong checkout"));
+});
+for (const [name,value] of [["INPUT_PUBLISH","true"],["INPUT_REHEARSAL","true"],["INPUT_CHECK_BINDINGS","true"],
+  ["OTA_BOOT_CHAIN_READY","true"],["INPUT_VERSION_NAME","3.3.18"],["INPUT_CANDIDATE_BASE_VERSION","3.3.18"],
+  ["INPUT_CANDIDATE_FULL_BASE_VERSION","3.3.17"],["FIRMWARE_RELEASE_MODE","production"],
+  ["FIRMWARE_CANDIDATE_CONTEXT","firmware-rehearsal/artifact-only-new-source-v1"],
+  ["GITHUB_WORKFLOW_SHA",supplementConfig.sourceCommit],["GITHUB_WORKFLOW_REF","wrong/workflow"],
+  ["GITHUB_EVENT_NAME","push"],["GITHUB_TOKEN","fixture"],["INPUT_CANDIDATE_REVIEWED_COMMIT","b".repeat(40)]]) {
+  test(`supplement rejects mixed/unbound input ${name}`, () => {
+    assert.throws(() => candidateAdmission({ ...supplementEnv(), [name]:value }));
+  });
+}
+test("supplement uploads only explicit new FULL assets, metadata and safe evidence after cleanup", async () => {
+  const text=await readFile(path.join(root,".github/workflows/firmware-build.yml"),"utf8");
+  const job=text.split("  package-candidate:\n")[1].split("  release-development-checks:\n")[0];
+  const upload=job.split("      - name: Preserve only supplemental initialization assets and receipts\n")[1];
+  assert.ok(upload);
+  assert.match(upload,/steps.cleanup.outcome == 'success'/);
+  assert.match(upload,/candidate_mode == 'start-state-supplement'/);
+  const paths=upload.split("          path: |\n")[1].split("          include-hidden-files:")[0].trim().split("\n").map(s=>s.trim());
+  assert.deepEqual(paths,[".cache/p51-candidate/prepared/initialize-30317-full.etu",
+    ".cache/p51-candidate/prepared/initialize-30318-full.etu",".cache/p51-candidate/prepared/supplement-metadata.json",
+    ".cache/p51-candidate/evidence/",".cache/p51-candidate/inputs/manifest.json",
+    ".cache/p51-candidate/inputs/supplement-build.json",".cache/p51-candidate/inputs/supplement-source.json"]);
+  assert.doesNotMatch(paths.join("\n"),/private|decoder|key\.h|keyed-build/);
+});
+
 test("new and archived modes are explicit; synthetic new-source context binds workflow separately", () => {
   assert.equal(candidateMode(env()), "archived-original");
   assert.equal(candidateMode(sourceEnv()), "new-source");

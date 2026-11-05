@@ -279,9 +279,16 @@ class MCU:
 
     def install(self, current, target):
         h.require((current, target) in INSTALL_PAIRS, "unsafe direct install; target-to-base requires ordinary Boot rollback")
+        current_image = h.pinned(self.plan["images"][current]["image"]).read_bytes()
+        target_image = h.pinned(self.plan["images"][target]["image"]).read_bytes()
+        current_version = struct.unpack_from("<I", current_image, 0x408)[0]
+        target_version = struct.unpack_from("<I", target_image, 0x408)[0]
+        # CONFIRMED group16 Boot does not synchronize BCB after App-only flashing.
+        h.require(current_version != 0 and current_version == target_version,
+                  "cross-version App-only install forbidden; establish aligned App/BCB through normal OTA")
         before = self.inspect(current, "pre-install")
         staged = before["storage"]["journal"]["committed_target"]
-        h.require(staged is None or staged <= (30287 if current == "target" else 30286),
+        h.require(staged is None or staged <= current_version,
                   "newer committed staging/pending apply; do not replace the App")
         bound, destination = self.bind(current), self.bind(target)
         address = bound["table"][SYMBOLS["main_loop"]][0]

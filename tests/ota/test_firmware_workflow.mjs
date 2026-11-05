@@ -8,6 +8,7 @@ import { outputPath, writeOutput } from "../../app/bluetooth_flutter_Trace/cloud
 import { releaseConfig } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-release-pipeline.mjs";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
+const fixtures = outputPath(root, path.resolve(root, process.env.P51_TEST_AREA || ".cache/firmware-workflow-tests"));
 const python = process.env.PYTHON ?? (process.platform === "win32" ? "python" : "python3");
 const text = await readFile(path.join(root, ".github/workflows/firmware-build.yml"), "utf8");
 // BaseLoader preserves YAML's "on" key rather than YAML 1.1's boolean alias.
@@ -299,7 +300,7 @@ const versionCases = [
   ["source prerelease suffix", { source: "v2.7.0-rc.1", rehearsal: "true" }, null]
 ];
 for (const [label, values, expectedName, expectedCode] of versionCases) test(`actual version shell: ${label}`, async () => {
-  const parent = outputPath(root, path.join(root, ".cache/firmware-workflow-tests"));
+  const parent = fixtures;
   await mkdir(parent, { recursive: true });
   const dir = await mkdtemp(path.join(parent, "version-"));
   const source = values.source ?? "v2.7";
@@ -359,7 +360,7 @@ const cases = [
   ["binding-check rejects another repository", bindings, { INPUT_CHECK_BINDINGS: "true", GITHUB_REPOSITORY: "Eitan-S-23/Trace" }, 2]
 ];
 for (const [label, job, override, expected] of cases) test(`actual shell gate: ${label}`, async () => {
-  const parent = outputPath(root, path.join(root, ".cache/firmware-workflow-tests"));
+  const parent = fixtures;
   await mkdir(parent, { recursive: true });
   const dir = await mkdtemp(path.join(parent, "gate-"));
   const output = outputPath(root, path.join(dir, "github-output.txt"));
@@ -382,7 +383,7 @@ for (const [label, job, override, expected] of cases) test(`actual shell gate: $
 });
 
 test("actual execute CLI rejects a checks context with exit 2 before any cloud path", async () => {
-  const parent = outputPath(root, path.join(root, ".cache/firmware-workflow-tests"));
+  const parent = fixtures;
   await mkdir(parent, { recursive: true });
   const dir = await mkdtemp(path.join(parent, "cli-"));
   const manifest = path.join(dir, "inputs.json"); await writeOutput(root, manifest, "{}");

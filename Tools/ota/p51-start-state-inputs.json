@@ -1,0 +1,31 @@
+{
+  "schema": "p51-start-state-inputs-v1",
+  "mode": "start-state-supplement",
+  "task": "P51-START-STATE-01",
+  "repository": "Eitan-S-23/E-Track",
+  "purpose": "preparation-only/normal-OTA-start-state",
+  "sourceCommit": "1430c8ff7f3bcd9a35bfe158ba697b99021f75f2",
+  "originalRun": 41900439548,
+  "originalAttempt": 1,
+  "originalArtifact": 13359301400,
+  "buildTimestamp": 1793820855,
+  "archive": {
+    "path": "docs/ota-exec-notes/P5-1-new-source-candidate-2026-11-05/artifact.zip",
+    "bytes": 6586031,
+    "sha256": "a906221d772a0df5b6b069a250a5b8f951b97371bacd1a8be4b0d77c51988e0b"
+  },
+  "artifact": {
+    "path": "docs/ota-exec-notes/P5-1-new-source-candidate-2026-11-05/github-artifact.json",
+    "bytes": 806,
+    "sha256": "9f45c7df68d0a3443a32edc91b6d83437682b7ada26d983e0c8ebea22af71a11"
+  },
+  "members": {
+    "metadata": {"member": "prepared/candidate-metadata.json", "bytes": 10982, "sha256": "d0ac413335eb8bd77838e4ec8ca305c411a4f517b6d03b1f06746c1e1e73ce96"},
+    "build": {"member": "keyed-build/gcc-build-inputs.json", "bytes": 2396, "sha256": "36f8d3c7385614e917421c90175f1545fb7f6833c19a8ffc16a69e1b5b84907b"},
+    "keyedEvidence": {"member": "keyed-build/keyed-build-evidence.json", "bytes": 13433, "sha256": "cb9e5472c9918ae41792bb87c09d97e768606430d084317b9b47627c4874e623"}
+  },
+  "images": [
+    {"member": "prepared/app-start-full.bin", "bytes": 615132, "sha256": "0fc735659ad2febf7eed7bd2576bfc2a0605f706b3924bffd7ea0b24099a82b9", "versionName": "3.3.17", "versionCode": 30317, "proofField": "fullBase", "fileName": "initialize-30317-full.etu"},
+    {"member": "prepared/app-start.bin", "bytes": 615132, "sha256": "74c20ab69baa85e73cd6273d84dea95e53428fd81620d184d25c859d150407a1", "versionName": "3.3.18", "versionCode": 30318, "proofField": "base", "fileName": "initialize-30318-full.etu"}
+  ]
+}

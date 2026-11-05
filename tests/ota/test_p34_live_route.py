@@ -340,8 +340,12 @@ class LiveRouteTests(unittest.TestCase):
                                         ("maintenance", "base"), ("target", "restore")})
 
     def test_safe_install_waits_for_boot_and_rejects_wrong_storage_halt(self):
-        mcu = m.MCU({}, self.out / "mcu")
-        destination = h.pinned(self.file("candidate.bin", b"synthetic"))
+        current = bytearray(0x460)
+        struct.pack_into("<I", current, 0x408, 30286)
+        initial = self.file("initial.bin", bytes(current))
+        candidate = self.file("candidate.bin", bytes(current))
+        mcu = m.MCU(dict(images=dict(initial=dict(image=initial), base=dict(image=candidate))), self.out / "mcu")
+        destination = h.pinned(candidate)
         bound = dict(table={m.SYMBOLS["main_loop"]: (0x08020000, 12)}, image=destination)
         halted = dict(sdio=bytes(4), dhcsr=struct.pack("<I", 0x20000))
         calls = []
@@ -361,6 +365,69 @@ class LiveRouteTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "halt not proved safe"):
                 mcu.install("initial", "base")
             self.assertEqual(len(calls), 1)
+
+    def test_install_uses_bound_current_version_not_old_p34_constant(self):
+        current = bytearray(0x460)
+        struct.pack_into("<I", current, 0x408, 30316)
+        initial = self.file("current30316.bin", bytes(current))
+        mcu = m.MCU(dict(images=dict(initial=dict(image=initial), base=dict(image=initial))), self.out / "mcu")
+        bound = dict(table={m.SYMBOLS["main_loop"]: (0x08020000, 12)}, image=h.pinned(initial))
+        before = dict(registers=dict(freeze=0),storage=dict(journal=dict(committed_target=30316)))
+        halted = dict(sdio=bytes(4),dhcsr=struct.pack("<I",0x20000))
+        with patch.object(mcu,"inspect",return_value=before), patch.object(mcu,"bind",return_value=bound), \
+             patch.object(mcu,"execute",return_value=(halted,"PC = 08020000",self.out)) as execute, \
+             patch.object(mcu,"wait_boot"):
+            mcu.install("initial","base")
+            self.assertEqual(execute.call_count,2)
+            execute.reset_mock()
+            before["storage"]["journal"]["committed_target"] = 30317
+            with self.assertRaisesRegex(RuntimeError,"newer committed staging"):
+                mcu.install("initial","base")
+            execute.assert_not_called()
+
+    def test_cross_version_install_rejected_before_any_device_or_binding_call(self):
+        for current_role, target_role in m.INSTALL_PAIRS:
+            for old, new in ((30313, 30317), (30313, 30318), (30319, 30318)):
+                with self.subTest(pair=(current_role, target_role), versions=(old, new)):
+                    images = {}
+                    for role, version in ((current_role, old), (target_role, new)):
+                        raw = bytearray(0x460)
+                        struct.pack_into('<I', raw, 0x408, version)
+                        record = self.file('%s-%d-%s-%s-%d-%d.bin' % (role, version, current_role, target_role, old, new), bytes(raw))
+                        images[role] = dict(image=record)
+                    mcu = m.MCU(dict(images=images), self.out / ('guard-%s-%s-%d' % (current_role, target_role, new)))
+                    with patch.object(mcu, 'inspect') as inspect, patch.object(mcu, 'bind') as bind, \
+                            patch.object(mcu, 'execute') as execute, patch.object(mcu, 'wait_boot') as wait:
+                        with self.assertRaisesRegex(RuntimeError, 'cross-version App-only'):
+                            mcu.install(current_role, target_role)
+                        for call in (inspect, bind, execute, wait):
+                            call.assert_not_called()
+
+    def test_same_version_receiver_maintenance_and_bound_restore_remain_allowed(self):
+        for current_role, target_role in m.INSTALL_PAIRS:
+            with self.subTest(pair=(current_role, target_role)):
+                raw = bytearray(0x460)
+                struct.pack_into('<I', raw, 0x408, 30319)
+                image = self.file('same-%s-%s.bin' % (current_role, target_role), bytes(raw))
+                boot = self.file('boot-%s-%s.bin' % (current_role, target_role), b'preserved-boot-fixture')
+                mcu = m.MCU(dict(images={r: dict(image=image) for r in (current_role, target_role)}, boot=boot),
+                            self.out / ('same-%s-%s' % (current_role, target_role)))
+                bound = dict(table={m.SYMBOLS['main_loop']: (0x08020000, 12)}, image=h.pinned(image))
+                def execute(commands, reads, label, **kwargs):
+                    if label == 'restore-image-readback':
+                        return dict(app=bytes(raw), boot=b'preserved-boot-fixture'), '', self.out
+                    return dict(sdio=bytes(4), dhcsr=struct.pack('<I', 0x20000)), 'PC = 08020000', self.out
+                with patch.object(mcu, 'inspect', return_value=dict(registers=dict(freeze=0),
+                         storage=dict(journal=dict(committed_target=None)))), patch.object(mcu, 'bind', return_value=bound), \
+                         patch.object(mcu, 'execute', side_effect=execute) as calls, patch.object(mcu, 'wait_boot') as wait, \
+                         patch.object(mcu, 'restore_state', return_value=dict(phase=1)) as restore:
+                    mcu.install(current_role, target_role)
+                    self.assertEqual(calls.call_count, 3 if target_role == 'restore' else 2)
+                    if target_role == 'restore':
+                        restore.assert_called_once_with(1)
+                        wait.assert_not_called()
+                    else:
+                        wait.assert_called_once_with(target_role)
 
     def test_stack_and_qspi_capacity_observations_are_not_constant_pass(self):
         stack = b"\xa5" * 4096 + bytes(4096)

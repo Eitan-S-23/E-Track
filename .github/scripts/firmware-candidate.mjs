@@ -16,6 +16,13 @@ export function verifyCandidateCheckout(root, env, config, git = argv =>
   const owner = candidateAdmission(env);
   if (git(["rev-parse", "HEAD"]) !== owner.commitSha) throw new CliError("Candidate checkout differs from reviewed source");
   if (candidateMode(env) === "archived-original") return owner;
+  if (candidateMode(env) === "start-state-supplement") {
+    if (config?.schema !== "p51-start-state-inputs-v1" || config.mode !== "start-state-supplement"
+        || config.repository !== env.GITHUB_REPOSITORY || config.task !== "P51-START-STATE-01"
+        || config.purpose !== "preparation-only/normal-OTA-start-state"
+        || git(["diff", "--name-only", "HEAD"])) throw new CliError("Supplement contract/checkout drift");
+    return owner;
+  }
   const expectedPaths = ["USER", "ArduinoAPI", "Libraries", "MDK-ARM_F435", "boot", "cmake",
     "vendor", "Simulator", "bsdiff_lzma_AES128-main", "segger_rtt"];
   if (config?.schema !== "p51-new-source-inputs-v2" || config.mode !== "new-source"
@@ -191,6 +198,52 @@ export async function candidateMetadata(root, env, manifest) {
     noCloudMutation: true, noDeviceOperation: true };
 }
 
+export async function supplementMetadata(root, env, config) {
+  candidateAdmission(env);
+  const parent = area(root);
+  const proofBytes = await readFile(outputPath(root, path.join(parent, "inputs/supplement-source.json")));
+  const proof = JSON.parse(proofBytes);
+  const verification = JSON.parse(await readFile(outputPath(root, path.join(parent, "evidence/supplement-verification.json"))));
+  const build = JSON.parse(await readFile(outputPath(root, path.join(parent, "inputs/supplement-build.json"))));
+  const admitted = await readFile(outputPath(root, path.join(parent, "inputs/manifest.json")));
+  const originalOwner = { commitSha: config.sourceCommit, runId: String(config.originalRun), runAttempt: String(config.originalAttempt) };
+  const nativeCases = config.images.flatMap(rec => ["positive", "payload-crc", "truncated", "wrong-target-version"]
+    .map(name => `init-${rec.versionCode}-${name}`));
+  if (JSON.stringify(proof.originalOwner) !== JSON.stringify(originalOwner)
+      || proof.configSha256 !== digest(admitted) || JSON.stringify(JSON.parse(admitted)) !== JSON.stringify(config)
+      || JSON.stringify(proof.build) !== JSON.stringify(build) || build.commitSha !== originalOwner.commitSha
+      || verification.sourceProofSha256 !== digest(proofBytes)
+      || JSON.stringify(proof.images) !== JSON.stringify(config.images)
+      || !verification.fullByteEqual || !verification.strictFullConsumption
+      || JSON.stringify(proof.build.keyBinding) !== JSON.stringify(verification.keyBinding)
+      || verification.assets.length !== 2 || verification.native.checks.length !== 8
+      || verification.native.warnings !== 0 || verification.native.errors !== 0
+      || JSON.stringify(verification.native.checks.map(c => c.case)) !== JSON.stringify(nativeCases)
+      || verification.native.checks.some(c => !c.observation.passed
+        || (c.case.endsWith("-positive") ? !c.observation.byte_identical : c.observation.prepares !== 0))) {
+    throw new CliError("Supplement verification/source drift");
+  }
+  for (const [i, rec] of config.images.entries()) {
+    const bytes = await readFile(outputPath(root, path.join(parent, "prepared", rec.fileName)));
+    const asset = verification.assets[i];
+    if (asset.fileName !== rec.fileName || asset.sizeBytes !== bytes.length || asset.sha256 !== digest(bytes)
+        || asset.targetVersionCode !== rec.versionCode || asset.targetVersionName !== rec.versionName
+        || asset.targetImageSha256 !== rec.sha256 || asset.targetBytes !== rec.bytes
+        || asset.purpose !== config.purpose || asset.kind !== "full-initialization") throw new CliError("Supplement asset identity drift");
+  }
+  return { schema: "p51-start-state-supplement-v1", mode: "start-state-supplement", task: config.task,
+    purpose: config.purpose, isFormalRelease: false, productionPublishable: false, readyRegistered: false,
+    runner: ownership(env), workflow: { commitSha: env.GITHUB_WORKFLOW_SHA, ref: env.GITHUB_WORKFLOW_REF },
+    originalBuild: { ...originalOwner, artifactId: config.originalArtifact, archive: config.archive,
+      artifactReceipt: config.artifact, buildTimestamp: config.buildTimestamp, build: proof.build,
+      elfMapRelationship: proof.elfMapRelationship },
+    derivation: "immutable-finalized-start-images/FULL-envelope-only", sourceCompilations: 0,
+    originalImages: config.images, boot: { ...proof.boot, firmwareRebuilt: false, includedInSupplement: false },
+    key: { ...proof.build.keyBinding, exactOriginalBuildBindingMatched: true }, assets: verification.assets,
+    noReferenceSearch: true, target30319Regenerated: false, hardwareAcceptance: "NOT_RUN",
+    noCloudMutation: true, noDeviceOperation: true, setupExcludedFromP5Statistics: true };
+}
+
 async function main() {
   const mode = process.argv[2];
   if (!["gate", "inputs", "package", "cleanup"].includes(mode)) throw new CliError("Unknown candidate mode");
@@ -204,8 +257,8 @@ async function main() {
     return;
   }
   const inputMode = candidateMode(env);
-  const manifestFile = path.join(root, inputMode === "new-source"
-    ? "Tools/ota/p51-new-source-inputs.json" : "Tools/ota/p51-candidate-inputs.json");
+  const manifestFile = path.join(root, inputMode === "start-state-supplement" ? "Tools/ota/p51-start-state-inputs.json"
+    : inputMode === "new-source" ? "Tools/ota/p51-new-source-inputs.json" : "Tools/ota/p51-candidate-inputs.json");
   const manifestBytes = await readFile(manifestFile), manifest = JSON.parse(manifestBytes);
   const owner = verifyCandidateCheckout(root, env, manifest);
   if (mode === "gate") { process.stdout.write("P51_ARTIFACT_ONLY_ADMITTED\n"); return; }
@@ -228,8 +281,30 @@ async function main() {
   };
   if (mode === "inputs") {
     if (env.OTA_AES_KEY) throw new CliError("Input admission must run without the packaging secret");
-    await run(inputMode === "new-source" ? "source-inputs" : "inputs");
+    await run(inputMode === "start-state-supplement" ? "supplement-inputs" : inputMode === "new-source" ? "source-inputs" : "inputs");
     await writeOutput(root, path.join(evidence, "input-binding.json"), JSON.stringify({ manifestSha256: digest(manifestBytes), owner }) + "\n");
+    return;
+  }
+  if (inputMode === "start-state-supplement") {
+    const binding = JSON.parse(await readFile(path.join(evidence, "input-binding.json")));
+    if (binding.manifestSha256 !== digest(manifestBytes) || JSON.stringify(binding.owner) !== JSON.stringify(owner)) {
+      throw new CliError("Supplement input/runner owner changed");
+    }
+    const build = JSON.parse(await readFile(path.join(out, "inputs/supplement-build.json")));
+    verifyBuildKeyBinding(build, env);
+    verifyBuildConfiguration(build, "p34-v2-candidate");
+    if (existsSync(privateDir)) throw new CliError("Preserve earlier candidate private state");
+    await mkdir(privateDir);
+    await writeOutput(root, path.join(privateDir, "owner.json"), JSON.stringify(owner));
+    try {
+      await writeOutput(root, path.join(privateDir, "key.h"), firmwareKeyHeader(env.OTA_AES_KEY));
+      await run("supplement-package");
+      verifyCandidateCheckout(root, env, manifest);
+      verifyBuildKeyBinding(build, env);
+      const metadata = await supplementMetadata(root, env, manifest);
+      await writeOutput(root, path.join(out, "prepared/supplement-metadata.json"), JSON.stringify(metadata, null, 2) + "\n");
+      process.stdout.write("P51_START_STATE_SUPPLEMENT_PACKAGED; preparation-only, hardware NOT_RUN\n");
+    } finally { await cleanupCandidate(root, env); }
     return;
   }
   if (inputMode === "new-source") {

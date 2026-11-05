@@ -84,13 +84,14 @@ on:
         required: false
         type: string
       candidate_mode:
-        description: "Archived inputs remain unchanged; new-source builds the reviewed UI executable once"
+        description: "Archived unchanged; new-source compiles; start-state-supplement only wraps pinned starting images"
         required: true
         type: choice
         default: archived-original
         options:
           - archived-original
           - new-source
+          - start-state-supplement
       candidate_base_version:
         description: "New-source only: root-approved fresh canonical start version above 3.3.16; target is version_name"
         required: false
@@ -172,8 +173,8 @@ jobs:
       INPUT_CANDIDATE_MODE: ${{ github.event.inputs.candidate_mode }}
       INPUT_CANDIDATE_BASE_VERSION: ${{ github.event.inputs.candidate_base_version }}
       INPUT_CANDIDATE_FULL_BASE_VERSION: ${{ github.event.inputs.candidate_full_base_version }}
-      FIRMWARE_RELEASE_MODE: ${{ github.event.inputs.candidate_mode == 'new-source' && 'artifact-candidate' || '' }}
-      FIRMWARE_CANDIDATE_CONTEXT: ${{ github.event.inputs.candidate_mode == 'new-source' && 'firmware-rehearsal/artifact-only-new-source-v1' || '' }}
+      FIRMWARE_RELEASE_MODE: ${{ github.event.inputs.candidate_mode == 'new-source' && 'artifact-candidate' || github.event.inputs.candidate_mode == 'start-state-supplement' && 'artifact-candidate-supplement' || '' }}
+      FIRMWARE_CANDIDATE_CONTEXT: ${{ github.event.inputs.candidate_mode == 'new-source' && 'firmware-rehearsal/artifact-only-new-source-v1' || github.event.inputs.candidate_mode == 'start-state-supplement' && 'firmware-rehearsal/artifact-only-start-state-v1' || '' }}
       HOME: ${{ github.workspace }}/.cache/p51-candidate/home
       XDG_CACHE_HOME: ${{ github.workspace }}/.cache/p51-candidate/cache
       PIP_CACHE_DIR: ${{ github.workspace }}/.cache/p51-candidate/pip
@@ -225,7 +226,7 @@ jobs:
         if: always() && steps.gate.outcome == 'success'
         run: node .github/scripts/firmware-candidate.mjs cleanup
       - name: Preserve allowlisted candidate artifacts and receipts
-        if: always() && steps.cleanup.outcome == 'success'
+        if: always() && steps.cleanup.outcome == 'success' && github.event.inputs.candidate_mode != 'start-state-supplement'
         uses: actions/upload-artifact@v4
         with:
           name: p51-candidate-${{ github.run_id }}-${{ github.run_attempt }}
@@ -255,6 +256,23 @@ jobs:
             .cache/p51-candidate/keyed-build/compiler-launchers.ninja
             .cache/p51-candidate/keyed-build/steps.json
             .cache/p51-candidate/keyed-build/steps/
+          include-hidden-files: true
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Preserve only supplemental initialization assets and receipts
+        if: always() && steps.cleanup.outcome == 'success' && github.event.inputs.candidate_mode == 'start-state-supplement'
+        uses: actions/upload-artifact@v4
+        with:
+          name: p51-start-state-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .cache/p51-candidate/prepared/initialize-30317-full.etu
+            .cache/p51-candidate/prepared/initialize-30318-full.etu
+            .cache/p51-candidate/prepared/supplement-metadata.json
+            .cache/p51-candidate/evidence/
+            .cache/p51-candidate/inputs/manifest.json
+            .cache/p51-candidate/inputs/supplement-build.json
+            .cache/p51-candidate/inputs/supplement-source.json
           include-hidden-files: true
           retention-days: 14
           if-no-files-found: error
