@@ -1,0 +1,51 @@
+{
+  "outcome": "PROTECTED_START_STATE_SUPPLEMENT_REVIEW_PASS",
+  "checks": [
+    "actual-ci-artifact-source-and-digest",
+    "separate-original-compilation-and-actual-supplement-provenance",
+    "unchanged-finalized-images-external-boot-and-original-key-binding",
+    "two-exact-full-envelopes-and-no-target-or-boot-assets",
+    "eight-real-native-byte-oracles-process-closure-and-private-cleanup",
+    "actual-linux-credential-free-regressions"
+  ],
+  "source": "4fe8468a6276ab46e6fd4304c98a93da64d193b3",
+  "runId": 42004577880,
+  "artifactId": 13404502804,
+  "assets": [
+    {
+      "fileName": "initialize-30317-full.etu",
+      "sizeBytes": 291656,
+      "sha256": "c771eba2acd90fd2815611b9df53312a4cba4e9187c09fdd84efa5b70842724d",
+      "targetVersionName": "3.3.17",
+      "targetVersionCode": 30317,
+      "targetImageSha256": "0fc735659ad2febf7eed7bd2576bfc2a0605f706b3924bffd7ea0b24099a82b9",
+      "targetBytes": 615132,
+      "purpose": "preparation-only/normal-OTA-start-state",
+      "kind": "full-initialization"
+    },
+    {
+      "fileName": "initialize-30318-full.etu",
+      "sizeBytes": 291652,
+      "sha256": "fc25b7fb85bf0a963bafafe457cedea7e1ec7bcc9dee3cead3ff9d2805bf0734",
+      "targetVersionName": "3.3.18",
+      "targetVersionCode": 30318,
+      "targetImageSha256": "74c20ab69baa85e73cd6273d84dea95e53428fd81620d184d25c859d150407a1",
+      "targetBytes": 615132,
+      "purpose": "preparation-only/normal-OTA-start-state",
+      "kind": "full-initialization"
+    }
+  ],
+  "originalBuildSource": "1430c8ff7f3bcd9a35bfe158ba697b99021f75f2",
+  "originalRun": 41900439548,
+  "originalArtifact": 13359301400,
+  "originalTimestamp": 1793820855,
+  "nativeWarnings": 0,
+  "nativeErrors": 0,
+  "nativeChecks": 8,
+  "nativeProcessReceipts": 10,
+  "newARMCompilations": 0,
+  "referenceSearches": 0,
+  "protectedKeyExported": false,
+  "deviceOperations": 0,
+  "P5": "NOT_RUN"
+}

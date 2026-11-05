@@ -1,0 +1,23 @@
+{
+  "source": "4fe8468a6276ab46e6fd4304c98a93da64d193b3",
+  "tree": "98f1c791e762a0824e86adb54321c2abf3efb721",
+  "files": [
+    ".github/scripts/firmware-candidate-context.mjs",
+    ".github/scripts/firmware-candidate.mjs",
+    ".github/workflows/firmware-build.yml",
+    "Tools/ota/p51-package.py",
+    "Tools/ota/p51-start-state-inputs.json",
+    "Tools/ota/p34-acceptance/live_mcu.py",
+    "tests/ota/test_p51_package.py",
+    "tests/ota/test_firmware_candidate.mjs",
+    "tests/ota/test_firmware_workflow.mjs",
+    "tests/ota/test_p34_live_route.py",
+    "docs/ota-exec-notes/P51-start-state-implementation-2026-11-05.md",
+    "docs/ota-exec-notes/P51-start-state-followup-implementation-2026-11-05.md",
+    "docs/ota-exec-notes/P51-start-state-independent-review-2026-11-05.md"
+  ],
+  "timestamp": 1793871199,
+  "excludedRestoreEditsPreserved": true,
+  "unrelatedPreserved": 54,
+  "sourceCompilations": 0
+}

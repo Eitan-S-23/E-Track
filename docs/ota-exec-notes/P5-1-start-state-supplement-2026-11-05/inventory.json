@@ -1,0 +1,51 @@
+{
+  "source": "4fe8468a6276ab46e6fd4304c98a93da64d193b3",
+  "runId": 42004577880,
+  "artifactId": 13404502804,
+  "files": [
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-start-state-supplement-2026-11-05\\artifact.zip",
+      "bytes": 607722,
+      "sha256": "020bbd5a50b5ce9400d27f686f987c0bfe04ee3cc7e2e37c00419c0939d6d6aa"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-start-state-supplement-2026-11-05\\workflow-logs.zip",
+      "bytes": 88382,
+      "sha256": "4d494de1dfc8225d98f17479ffe10214c135252156074f54757e680080754e21"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-start-state-supplement-2026-11-05\\github-artifact.json",
+      "bytes": 807,
+      "sha256": "1a607dc4dda991fa261b97f435eddad32435deac395186427a8c9920290bff31"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-start-state-supplement-2026-11-05\\github-run.json",
+      "bytes": 11990,
+      "sha256": "23cbd6634300338a31fd13e0d7f2f37f424b9241a97251334a360dfa1c3e7692"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-start-state-supplement-2026-11-05\\github-jobs.json",
+      "bytes": 8361,
+      "sha256": "27efeb785b4465e139b91822a0c0ef321578aec3bb523dd8edf4df95cba44c99"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-start-state-supplement-2026-11-05\\verification.json",
+      "bytes": 1898,
+      "sha256": "3000220532dd107cea295c54923e932516387d2788d6be077f945610b900d997"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-start-state-supplement-2026-11-05\\supplement-metadata.json",
+      "bytes": 8141,
+      "sha256": "70b2e6eac80ad5c16c480291a74fd77ce133bdc2289e2782c42eff6f5546a7f4"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P5-1-start-state-supplement-2026-11-05\\source.json",
+      "bytes": 913,
+      "sha256": "d6c07dcab31abf0aa736e03992624929112459d7cb36ea8c7f4f3be16994925d"
+    }
+  ],
+  "policiesUnchanged": true,
+  "devices": 0,
+  "production": false,
+  "P5": "NOT_RUN"
+}
