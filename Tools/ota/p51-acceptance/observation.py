@@ -108,17 +108,22 @@ class Observer(s.Smoke):
 
     def ui(self):
         package = self.p['app']['id']
-        h.require(self.cmd(['shell', 'pidof', package]).strip().decode() == self.pid, 'App PID changed')
-        before = self.cmd(['shell', 'dumpsys', 'window'])
-        if not r.foreground_ok(before, package):
-            raise r.Stop('UI_UNAVAILABLE', 'test APP not foreground/unlocked; no hierarchy collected')
-        raw = self.cmd(['exec-out', 'uiautomator', 'dump', '--compressed', '/dev/tty'])
-        after = self.cmd(['shell', 'dumpsys', 'window'])
-        h.require(self.cmd(['shell', 'pidof', package]).strip().decode() == self.pid, 'App PID changed')
-        if not r.foreground_ok(after, package):
-            raise r.Stop('UI_UNAVAILABLE', 'pre-ARM focus changed; sample discarded')
-        s.nodes(raw, package)
-        return raw
+        for attempt in range(3):
+            h.require(self.cmd(['shell', 'pidof', package]).strip().decode() == self.pid, 'App PID changed')
+            before = self.cmd(['shell', 'dumpsys', 'window'])
+            if not r.foreground_ok(before, package):
+                raise r.Stop('UI_UNAVAILABLE', 'test APP not foreground/unlocked; no hierarchy collected')
+            raw = self.cmd(['exec-out', 'uiautomator', 'dump', '--compressed', '/dev/tty'])
+            after = self.cmd(['shell', 'dumpsys', 'window'])
+            h.require(self.cmd(['shell', 'pidof', package]).strip().decode() == self.pid, 'App PID changed')
+            if not r.foreground_ok(after, package):
+                raise r.Stop('UI_UNAVAILABLE', 'pre-ARM focus changed; sample discarded')
+            if raw.strip() == b'ERROR: null root node returned by UiTestAutomationBridge.':
+                self.record('native-ui-null-root', attempt=attempt+1)
+                if attempt < 2:
+                    continue  # cmd retains the same phase deadline and every original.
+            s.nodes(raw, package)
+            return raw
 
     def navigate(self):
         self.phase('manual-firmware-page', 300)

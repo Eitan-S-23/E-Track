@@ -12,6 +12,29 @@ import pipeline_cloud as cloud
 
 
 class ExecutionGuards(unittest.TestCase):
+    def test_known_null_root_has_bounded_read_only_recovery(self):
+        driver = object.__new__(obs.Observer)
+        driver.p, driver.pid = dict(app=dict(id='test.pkg')), '7305'
+        null = b'ERROR: null root node returned by UiTestAutomationBridge.\n'
+        valid = b'<hierarchy><node package="test.pkg"/></hierarchy>'
+        responses = [item for raw in (null, null, valid) for item in (b'7305', b'window', raw, b'window', b'7305')]
+        with patch.object(driver, 'cmd', side_effect=responses) as cmd, patch.object(driver, 'record') as record, \
+                patch.object(obs.r, 'foreground_ok', return_value=True):
+            self.assertEqual(driver.ui(), valid)
+        self.assertEqual(cmd.call_count, 15)
+        self.assertEqual(record.call_count, 2)
+        self.assertTrue(all(call.args[0][0] in ('shell', 'exec-out') for call in cmd.call_args_list))
+
+    def test_persistent_null_or_other_missing_hierarchy_still_fails(self):
+        driver = object.__new__(obs.Observer)
+        driver.p, driver.pid = dict(app=dict(id='test.pkg')), '7305'
+        for raw, count in ((b'ERROR: null root node returned by UiTestAutomationBridge.', 3), (b'unknown failure', 1)):
+            responses = [item for _ in range(count) for item in (b'7305', b'window', raw, b'window', b'7305')]
+            with patch.object(driver, 'cmd', side_effect=responses) as cmd, patch.object(driver, 'record'), \
+                    patch.object(obs.r, 'foreground_ok', return_value=True), self.assertRaises(obs.r.Stop):
+                driver.ui()
+            self.assertEqual(cmd.call_count, 5*count)
+
     def test_real_cli_normalizes_relative_input_before_recording(self):
         argv = ['run.py', 'cell', '--inputs', '.cache/input.json', '--out', '.cache/not-created',
                 '--contract', 'docs/contract.json', '--matrix', '.cache/matrix.json', '--command-id', 'SD-FULL']
