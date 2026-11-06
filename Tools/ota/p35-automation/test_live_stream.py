@@ -6,6 +6,7 @@ import os
 import struct
 import socket
 import sys
+import time
 import uuid
 import unittest
 from collections import deque
@@ -40,6 +41,24 @@ class Peer:
 
 
 class StreamTests(unittest.TestCase):
+    def test_idle_timeout_is_explicit_bounded_and_legacy_default_is_five(self):
+        for seconds in (None, 60, True, 0, 181):
+            driver = object.__new__(r.Android)
+            driver.stream_forwarded, driver.stream_capture = True, None
+            driver.out, driver.env, driver.stream_port = Path('synthetic'), {}, 5193
+            calls = []
+            def process(*args):
+                calls.append(args)
+                return SimpleNamespace(alive=lambda: True)
+            driver.h = SimpleNamespace(checked=lambda path: path, Process=process)
+            if seconds in (True, 0, 181):
+                with self.assertRaises(r.Stop):
+                    driver.start_live_stream(idle_seconds=seconds)
+                self.assertEqual(calls, [])
+            else:
+                driver.start_live_stream(**({} if seconds is None else dict(idle_seconds=seconds)))
+                self.assertEqual(calls[0][2][-2:], ['--idle-seconds', str(5 if seconds is None else seconds)])
+
     def test_mixed_diagnostic_tail_is_persisted_hashed_and_acked(self):
         raw = mixed_archive()
         frames = raw.splitlines(keepends=True)
@@ -190,6 +209,49 @@ class StreamTests(unittest.TestCase):
 
 
 class RealWorkerTests(unittest.TestCase):
+    def test_real_six_second_gap_preserves_explicit_wait_and_legacy_failure(self):
+        h = r.load_host()
+        parent = Path(os.environ.get('P35_STREAM_TEST_OUT', str(r.ROOT / '.cache/p35-stream-host-tests')))
+        for idle in (5, 15):
+            with self.subTest(idle=idle):
+                out = h.fresh(h.checked(parent / uuid.uuid4().hex))
+                env = h.environment(out)
+                frames = list(archive(1))
+                worker = None
+                with socket.socket() as server:
+                    server.bind(('127.0.0.1', 0))
+                    server.listen(1)
+                    server.settimeout(5)
+                    try:
+                        argv = [sys.executable, '-I', '-S', '-B', '-u', '-X', 'utf8',
+                            str(r.ROOT / 'Tools/ota/p35-automation/live_stream.py'), '--port', str(server.getsockname()[1]),
+                            '--wire-out', str(h.checked(out / 'wire.bin'))]
+                        if idle != 5:
+                            argv += ['--idle-seconds', str(idle)]
+                        worker = h.Process(out, 'worker', argv, env)
+                        peer, _ = server.accept()
+                        with peer:
+                            peer.settimeout(5)
+                            def send(frame):
+                                peer.sendall(struct.pack('!I', len(frame)) + frame)
+                                wanted = ('ACK %d %s\n' % (len(frame), hashlib.sha256(frame).hexdigest())).encode()
+                                self.assertEqual(live.exact(peer, len(wanted)), wanted)
+                            send(frames[0])
+                            time.sleep(6)
+                            if idle > 6:
+                                for frame in frames[1:]:
+                                    send(frame)
+                            h.wait_for(lambda: not worker.alive(), 5)
+                            self.assertEqual(worker.process.returncode, 0 if idle > 6 else 1)
+                            if idle == 5:
+                                self.assertIn('TimeoutError', worker.paths['stderr'].read_text())
+                    finally:
+                        if worker:
+                            worker.close('idle-gap-test-finished')
+                expected = frames if idle > 6 else frames[:1]
+                self.assertEqual((out / 'worker.stdout').read_bytes(), b''.join(expected))
+                self.assertEqual((out / 'wire.bin').read_bytes(), b''.join(struct.pack('!I', len(x)) + x for x in expected))
+
     def run_worker(self, complete):
         h=r.load_host()
         parent = Path(os.environ.get('P35_STREAM_TEST_OUT', str(r.ROOT/'.cache/p35-stream-host-tests')))

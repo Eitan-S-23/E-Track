@@ -12,6 +12,12 @@ import pipeline_cloud as cloud
 
 
 class ExecutionGuards(unittest.TestCase):
+    def test_p5_uses_explicit_bounded_stream_idle_window(self):
+        driver = object.__new__(obs.Observer)
+        with patch.object(obs.r.Android, 'start_live_stream', return_value='started') as start:
+            self.assertEqual(driver.start_live_stream(), 'started')
+        start.assert_called_once_with(driver, idle_seconds=60)
+
     def test_known_null_root_has_bounded_read_only_recovery(self):
         driver = object.__new__(obs.Observer)
         driver.p, driver.pid = dict(app=dict(id='test.pkg')), '7305'

@@ -84,7 +84,11 @@ class Observer(s.Smoke):
             self.record('launch-ui-deferred', pid=self.pid)
 
     prepare_live_stream = r.Android.prepare_live_stream
-    start_live_stream = r.Android.start_live_stream
+
+    def start_live_stream(self):
+        # Manual preparation can briefly pause the producer; phase and whole
+        # recording deadlines still bound the owner, and EOF/footer checks stay strict.
+        return r.Android.start_live_stream(self, idle_seconds=60)
 
     def tap(self, *args, **kwargs):
         raise RuntimeError('user owns UI; no automatic tap')
@@ -163,7 +167,7 @@ class Observer(s.Smoke):
         self.idle_services()
         self.prepare_live_stream()
         self.phase('manual-recording-arm', 300)
-        self.ask('recording-arm', '\u8bf7\u53ea\u70b9\u9875\u9762\u53f3\u4e0a\u89d2\u6298\u7ebf\u7edf\u8ba1\u56fe\u6807\u5f00\u59cb\u539f\u59cb\u8ba1\u65f6\u8bb0\u5f55\u3002\u5f00\u59cb\u540e\u505c\u7559\u539f\u9875\uff0c\u5148\u4e0d\u91cd\u8fde\u3001\u4e0d\u505c\u6b62\u8bb0\u5f55\u3001\u4e0d\u5f00\u59cb\u5347\u7ea7\uff1b\u6211\u4f1a\u5355\u72ec\u901a\u77e5\u4e0b\u4e00\u6b65\u3002\u4fdd\u6301 App \u524d\u53f0\uff0c\u65e0\u9700\u56de\u590d\u3002', asynchronous=True)
+        self.ask('recording-arm', '\u70b9 App \u53f3\u4e0a\u89d2\u6298\u7ebf\u56fe\u6807\u5f00\u59cb\u8ba1\u65f6\u3002\u4fdd\u6301\u672c\u9875\uff0c\u7b49\u4e0b\u4e00\u6761\u63d0\u793a\uff0c\u4e0d\u7528\u56de\u804a\u5929\u3002', asynchronous=True)
         def armed():
             names = self.capture_names()
             old = set(self.previous_captures)
@@ -201,7 +205,7 @@ class Observer(s.Smoke):
         self.phase('fresh-device-identity', 180)
         self.pump_stream()
         if request and identity(self.live, image['version'], image['sha256'], self.p['device']['address'], after) is None:
-            self.ask('fresh-identity', '\u8bb0\u5f55\u5df2\u5f00\u59cb\u3002\u73b0\u5728\u8bf7\u53ea\u70b9\u201c\u7801\u8868\u56fa\u4ef6\u201d\u9875\u53f3\u4e0a\u89d2\u84dd\u7259\u56fe\u6807\u201c\u91cd\u8fde\u53d6\u8bc1\u76ee\u6807\u201d\uff0c\u5c06\u5f53\u524d\u8bbe\u5907\u7248\u672c\u8bfb\u5165\u8fd9\u6b21\u8bb0\u5f55\u3002\u4e0d\u505c\u6b62\u8bb0\u5f55\uff0c\u4e0d\u5f00\u59cb\u5347\u7ea7\uff0c\u65e0\u9700\u56de\u590d\u3002')
+            self.ask('fresh-identity', '\u70b9 App \u53f3\u4e0a\u89d2\u84dd\u7259\u56fe\u6807\u201c\u91cd\u8fde\u53d6\u8bc1\u76ee\u6807\u201d\u3002\u4e0d\u505c\u8bb0\u5f55\uff0c\u4e0d\u7528\u56de\u804a\u5929\u3002')
         def found():
             self.pump_stream()
             return identity(self.live, image['version'], image['sha256'], self.p['device']['address'], after)

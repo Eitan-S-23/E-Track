@@ -1055,12 +1055,14 @@ class Android:
         require(expected in self.cmd(['forward', '--list']).decode().splitlines(), 'forward binding mismatch', 'ENV_BLOCKED')
         self.preparation.observation_source = 'acknowledged-stream-v1'
 
-    def start_live_stream(self):
+    def start_live_stream(self, *, idle_seconds=5):
         require(self.stream_forwarded and self.stream_capture is None, 'stream is single use', 'ENV_BLOCKED')
+        require(type(idle_seconds) is int and 1 <= idle_seconds <= 180, 'invalid stream idle timeout', 'ENV_BLOCKED')
         self.stream_capture = self.h.Process(self.out, 'live-stream',
             [sys.executable, '-I', '-S', '-B', '-u', '-X', 'utf8',
              str(ROOT / 'Tools/ota/p35-automation/live_stream.py'), '--port', str(self.stream_port),
-             '--wire-out', str(self.h.checked(self.out / 'live-stream.wire'))], self.env)
+             '--wire-out', str(self.h.checked(self.out / 'live-stream.wire')),
+             '--idle-seconds', str(idle_seconds)], self.env)
         self.offset = 0
         require(self.stream_capture.alive(), 'live stream receiver failed to start', 'COLLECTOR_FAILED')
 

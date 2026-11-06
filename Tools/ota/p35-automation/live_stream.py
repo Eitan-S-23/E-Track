@@ -76,8 +76,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--port', required=True, type=int)
     parser.add_argument('--wire-out', required=True, type=Path)
+    parser.add_argument('--idle-seconds', type=int, default=5)
     args = parser.parse_args()
     r.require(1024 <= args.port <= 65535 and args.port != 5037, 'invalid local stream port')
+    r.require(1 <= args.idle_seconds <= 180, 'invalid live stream idle timeout')
     h = r.load_host()
     wire_path = h.checked(args.wire_out)
     r.require(not wire_path.exists(), 'existing wire evidence; no replay')
@@ -101,7 +103,7 @@ def main():
     r.require(peer is not None, 'live producer connection deadline', 'CAPABILITY_MISSING')
     with peer:
         peer.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-        peer.settimeout(5)
+        peer.settimeout(args.idle_seconds)
         with wire_path.open('xb') as wire:
             result = receive(peer, sys.stdout.buffer, sync=lambda: os.fsync(sys.stdout.fileno()), wire=wire)
     print(json.dumps(result), file=sys.stderr, flush=True)
