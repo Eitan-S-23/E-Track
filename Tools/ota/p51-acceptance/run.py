@@ -88,7 +88,15 @@ def gate(args, out):
               'execution input is not frozen')
     h.command(out, 'contract-precheck', [sys.executable, '-I', '-S', '-B', '-X', 'utf8',
         h.ROOT / 'Tools/acceptance/validate_bundle.py', '--contract', args.contract,
-        '--matrix', args.matrix, '--repo-root', h.ROOT], h.environment(out), seconds=120)
+        '--matrix', args.matrix, '--repo-root', h.ROOT, *predecessor_arguments(contract)], h.environment(out), seconds=120)
+
+
+def predecessor_arguments(contract):
+    if contract['version'] == 1:
+        return []
+    prior = contract.get('predecessor_bundle')
+    h.require(isinstance(prior, dict) and set(prior) == {'contract', 'matrix'}, 'successor must bind its actual predecessor')
+    return ['--previous-contract', h.pinned(prior['contract']), '--previous-matrix', h.pinned(prior['matrix'])]
 
 
 @contextmanager
@@ -301,6 +309,7 @@ def main():
     args = parser.parse_args()
     h.require(Path.cwd() == h.ROOT and sys.flags.isolated and sys.flags.no_site and sys.dont_write_bytecode,
               'explicit worktree and isolated Python required')
+    args.inputs = (h.ROOT / args.inputs).resolve()
     plan = validate(h.read_json(args.inputs))
     for name in ('host', 'phone', 'mcu', 'cloud', 'result.json', 'failed.json'):
         h.checked(args.out / name)

@@ -22,6 +22,17 @@ class Cloud:
         self.auth, self.csrf = {}, None
         self.number = 0
 
+    def connect(self, origin, context):
+        require(origin in (ADMIN, PUBLIC), 'test API only')
+        hostname = urlsplit(origin).hostname
+        proxy = self.config.get('https_proxy')
+        if proxy is None:
+            return http.client.HTTPSConnection(hostname, timeout=25, context=context)
+        require(proxy == 'http://127.0.0.1:7897', 'only the explicitly bound local test proxy is supported')
+        connection = http.client.HTTPSConnection('127.0.0.1', 7897, timeout=25, context=context)
+        connection.set_tunnel(hostname, 443)
+        return connection
+
     def request(self, origin, route, body=None):
         require(origin in (ADMIN, PUBLIC) and route.startswith('/api/'), 'test API only')
         require(body is None or origin == ADMIN, 'no public mutation')
@@ -37,10 +48,10 @@ class Cloud:
             headers.update(Origin=ADMIN, **{'X-CSRF-Token': self.csrf,
                                           'Content-Type': 'application/json'})
             payload = json.dumps(body).encode()
-        # No redirects, proxy discovery, cookies on the public endpoint, or retries.
+        # No redirects, implicit proxy discovery, public cookies, or retries.
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
         context.load_default_certs()  # Unlike create_default_context, ignores SSLKEYLOGFILE.
-        connection = http.client.HTTPSConnection(urlsplit(origin).hostname, timeout=25, context=context)
+        connection = self.connect(origin, context)
         deadline = time.monotonic() + 30
         try:
             connection.request('GET' if body is None else 'POST', route, payload, headers)

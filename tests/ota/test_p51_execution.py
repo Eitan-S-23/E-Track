@@ -8,9 +8,50 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'Tools/ota/p51-acceptance'))
 import run
 import observation as obs
+import pipeline_cloud as cloud
 
 
 class ExecutionGuards(unittest.TestCase):
+    def test_real_cli_normalizes_relative_input_before_recording(self):
+        argv = ['run.py', 'cell', '--inputs', '.cache/input.json', '--out', '.cache/not-created',
+                '--contract', 'docs/contract.json', '--matrix', '.cache/matrix.json', '--command-id', 'SD-FULL']
+        def record(path):
+            self.assertEqual(path, ROOT / '.cache/input.json')
+            return {}
+        with patch.object(sys, 'argv', argv), patch.object(run.h, 'read_json', return_value={}), \
+                patch.object(run, 'validate', return_value={}), patch.object(run.h, 'record', side_effect=record), \
+                patch.object(run.h, 'fresh', return_value=ROOT / '.cache/not-created'), patch.object(run.h, 'save'), \
+                patch.object(run, 'gate', side_effect=RuntimeError('stop before device')) as gate, \
+                patch.object(run.m, 'MCU') as mcu, self.assertRaisesRegex(RuntimeError, 'stop before device'):
+            run.main()
+        gate.assert_called_once()
+        mcu.assert_not_called()
+
+    def test_successor_requires_pinned_actual_predecessor(self):
+        self.assertEqual(run.predecessor_arguments({'version': 1}), [])
+        with self.assertRaises(RuntimeError):
+            run.predecessor_arguments({'version': 2})
+        prior = dict(contract={'path': 'first'}, matrix={'path': 'second'})
+        with patch.object(run.h, 'pinned', side_effect=lambda pin: pin['path']):
+            self.assertEqual(run.predecessor_arguments(dict(version=2, predecessor_bundle=prior)),
+                             ['--previous-contract', 'first', '--previous-matrix', 'second'])
+
+    def test_cloud_proxy_is_explicit_bound_connect_with_target_tls(self):
+        context = object()
+        with patch.object(cloud.http.client, 'HTTPSConnection') as connection:
+            direct = cloud.Cloud({}, Path('.cache/not-created'), None)
+            direct.connect(cloud.ADMIN, context)
+            connection.assert_called_once_with('e-track-firmware-p43-admin-test.pages.dev', timeout=25, context=context)
+            connection.return_value.set_tunnel.assert_not_called()
+            connection.reset_mock()
+            proxied = cloud.Cloud({'https_proxy': 'http://127.0.0.1:7897'}, Path('.cache/not-created'), None)
+            proxied.connect(cloud.ADMIN, context)
+            connection.assert_called_once_with('127.0.0.1', 7897, timeout=25, context=context)
+            connection.return_value.set_tunnel.assert_called_once_with('e-track-firmware-p43-admin-test.pages.dev', 443)
+            for value in ('http://elsewhere:7897', 'http://127.0.0.1:80', 'http://user:pass@127.0.0.1:7897'):
+                with self.subTest(value=value), self.assertRaises(Exception):
+                    cloud.Cloud({'https_proxy': value}, Path('.cache/not-created'), None).connect(cloud.ADMIN, context)
+
     def test_exact_frozen_arguments(self):
         argv = ['cell', '--inputs', '.cache/in.json', '--out', '.cache/out', '--channel', 'sd',
                 '--contract', 'docs/c.json', '--matrix', '.cache/m.json', '--command-id', 'sd-full']
