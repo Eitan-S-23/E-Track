@@ -96,7 +96,13 @@ def predecessor_arguments(contract):
         return []
     prior = contract.get('predecessor_bundle')
     h.require(isinstance(prior, dict) and set(prior) == {'contract', 'matrix'}, 'successor must bind its actual predecessor')
-    return ['--previous-contract', h.pinned(prior['contract']), '--previous-matrix', h.pinned(prior['matrix'])]
+    arguments = ['--previous-contract', h.pinned(prior['contract']), '--previous-matrix', h.pinned(prior['matrix'])]
+    sources = contract.get('reuse_sources', [])
+    h.require(isinstance(sources, list), 'reuse sources must be pinned contract/matrix pairs')
+    for source in sources:
+        h.require(isinstance(source, dict) and set(source) == {'contract', 'matrix'}, 'unbound reuse source')
+        arguments += ['--reuse-source', h.pinned(source['contract']), h.pinned(source['matrix'])]
+    return arguments
 
 
 @contextmanager
@@ -151,7 +157,7 @@ def cell(plan, out, channel_name):
     phone = obs.Observer(plan['phone'], out / 'phone', plan['notify_cli'])
     try:
         phone.start_recording()
-        initial = phone.fresh_identity(plan['firmware']['current'])
+        initial = phone.fresh_identity(plan['firmware']['current'], request=True)
         if channel_name == 'ble':
             phone.ready_package(plan['firmware'])
         collector = sc.Collector(mcu, points, time.monotonic()+2100)
@@ -203,7 +209,7 @@ def ble_block(plan, out, max_cells):
                 break
             folder = h.fresh(out / ('cell-%02d' % (index+1)))
             mcu = m.MCU(plan['mcu'], folder / 'mcu')
-            initial = phone.fresh_identity(plan['firmware']['current'], previous_seq, request=bool(index))
+            initial = phone.fresh_identity(plan['firmware']['current'], previous_seq, request=True)
             before = mcu.inspect('base', 'pre-transfer')
             h.require(before['storage']['journal']['expected_begin_durable'] == 0, 'nonzero reference start')
             ready = phone.ready_package(plan['firmware'])
@@ -310,6 +316,8 @@ def main():
     h.require(Path.cwd() == h.ROOT and sys.flags.isolated and sys.flags.no_site and sys.dont_write_bytecode,
               'explicit worktree and isolated Python required')
     args.inputs = (h.ROOT / args.inputs).resolve()
+    if args.previous is not None:
+        args.previous = (h.ROOT / args.previous).resolve()
     plan = validate(h.read_json(args.inputs))
     for name in ('host', 'phone', 'mcu', 'cloud', 'result.json', 'failed.json'):
         h.checked(args.out / name)

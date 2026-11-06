@@ -3,6 +3,7 @@ import copy
 from pathlib import Path
 import sys
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'Tools/ota/p51-acceptance'))
@@ -10,6 +11,26 @@ import evaluate as e
 
 
 class TimingTests(unittest.TestCase):
+    def test_single_original_cell_mode_never_runs_other_cells_or_long_group(self):
+        argv = ['evaluate.py', '--cell', '.cache/prior-cell', '--inputs', '.cache/inputs.json', '--out', '.cache/not-created']
+        for failure in (False, True):
+            observed = dict(states=[4, 1, 3, 4], rawImageVerified=True)
+            with patch.object(sys, 'argv', argv), patch.object(e.h, 'read_json', return_value={}), \
+                    patch.object(e.run, 'validate', return_value={'bound': True}), \
+                    patch.object(e.h, 'fresh', return_value=ROOT / '.cache/not-created'), patch.object(e.h, 'save') as save, \
+                    patch.object(e, 'four_cell', return_value=observed,
+                        side_effect=RuntimeError('missing original') if failure else None) as cell, \
+                    patch.object(e, 'long_group') as long_group:
+                if failure:
+                    with self.assertRaisesRegex(RuntimeError, 'missing original'):
+                        e.main()
+                    self.assertEqual(save.call_args.args[0].name, 'failed.json')
+                else:
+                    e.main()
+                    self.assertEqual(save.call_args.args[1], dict(outcome='CELL_ORIGINALS_VERIFIED', cell=observed, deviceOperations=0))
+                cell.assert_called_once_with(ROOT / '.cache/prior-cell', {'bound': True})
+                long_group.assert_not_called()
+
     def group(self):
         return dict(label='upgrade', clockId='original:1', ackLatencyUs=[100, 200], summary=dict(
             bind=dict(writeMode='withoutResponse', mtuChunkBytes=244), transfer=dict(outcome='ok',

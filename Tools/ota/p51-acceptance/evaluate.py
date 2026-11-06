@@ -164,12 +164,18 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--inputs', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--cell', type=Path, help='Re-evaluate one existing cell, without executing any device action')
     args = parser.parse_args()
     h.require(Path.cwd() == h.ROOT and sys.flags.isolated and sys.flags.no_site and sys.dont_write_bytecode,
               'explicit worktree and isolated Python required')
     spec = h.read_json(args.inputs)
     out = h.fresh(args.out)
     try:
+        if args.cell is not None:
+            result = four_cell(h.checked(h.ROOT / args.cell), run.validate(spec))
+            h.save(out / 'result.json', dict(outcome='CELL_ORIGINALS_VERIFIED', cell=result, deviceOperations=0))
+            print('CELL_ORIGINALS_VERIFIED', flush=True)
+            return
         results = [four_cell(h.checked(h.ROOT / item['out']), run.validate(h.read_json(h.pinned(item['inputs']))))
                    for item in spec['cells']]
         h.require(len(results) == 4 and {(row['channel'], row['kind']) for row in results} ==

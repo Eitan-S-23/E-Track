@@ -59,6 +59,44 @@ class ExecutionGuards(unittest.TestCase):
             self.assertEqual(run.predecessor_arguments(dict(version=2, predecessor_bundle=prior)),
                              ['--previous-contract', 'first', '--previous-matrix', 'second'])
 
+    def test_original_reuse_sources_are_forwarded_without_skipping_predecessor(self):
+        prior = dict(contract={'path': 'previous-contract'}, matrix={'path': 'previous-matrix'})
+        origin = dict(contract={'path': 'origin-contract'}, matrix={'path': 'origin-matrix'})
+        with patch.object(run.h, 'pinned', side_effect=lambda pin: pin['path']):
+            self.assertEqual(run.predecessor_arguments(dict(version=7, predecessor_bundle=prior, reuse_sources=[origin])),
+                ['--previous-contract', 'previous-contract', '--previous-matrix', 'previous-matrix',
+                 '--reuse-source', 'origin-contract', 'origin-matrix'])
+            for sources in ('unbound', [{'contract': origin['contract']}], [None]):
+                with self.subTest(sources=sources), self.assertRaises(RuntimeError):
+                    run.predecessor_arguments(dict(version=7, predecessor_bundle=prior, reuse_sources=sources))
+
+    def test_previous_cell_path_is_absolute_before_any_device_operation(self):
+        argv = ['run.py', 'restore', '--inputs', '.cache/input.json', '--out', '.cache/not-created',
+                '--previous', '.cache/previous-cell', '--contract', 'docs/contract.json',
+                '--matrix', '.cache/matrix.json', '--command-id', 'RESTORE-BLE-FULL']
+        def gate(args, out):
+            self.assertEqual(args.previous, ROOT / '.cache/previous-cell')
+            raise RuntimeError('stop before device')
+        with patch.object(sys, 'argv', argv), patch.object(run.h, 'read_json', return_value={}), \
+                patch.object(run, 'validate', return_value={}), patch.object(run.h, 'record', return_value={}), \
+                patch.object(run.h, 'fresh', return_value=ROOT / '.cache/not-created'), patch.object(run.h, 'save'), \
+                patch.object(run, 'gate', side_effect=gate), patch.object(run.m, 'MCU') as mcu, \
+                self.assertRaisesRegex(RuntimeError, 'stop before device'):
+            run.main()
+        mcu.assert_not_called()
+
+    def test_identity_step_asks_immediately_only_when_required_event_is_missing(self):
+        image = dict(version=30317, sha256='a'*64)
+        for present in (None, {'event': 'identity'}):
+            driver = object.__new__(obs.Observer)
+            driver.p, driver.live = dict(device=dict(address='e3:49:e1:14:d6:cb')), []
+            with patch.object(driver, 'phase'), patch.object(driver, 'pump_stream') as pump, \
+                    patch.object(driver, 'ask') as ask, patch.object(driver, 'wait', return_value={'seq': 9}), \
+                    patch.object(driver, 'record'), patch.object(obs, 'identity', return_value=present):
+                self.assertEqual(driver.fresh_identity(image, request=True), {'seq': 9})
+                pump.assert_called_once()
+                self.assertEqual(ask.call_count, int(present is None))
+
     def test_cloud_proxy_is_explicit_bound_connect_with_target_tls(self):
         context = object()
         with patch.object(cloud.http.client, 'HTTPSConnection') as connection:
