@@ -44,6 +44,14 @@ class TimingTests(unittest.TestCase):
             with self.subTest(field=field), self.assertRaises(RuntimeError):
                 e.run.final_storage(dict(storage=dict(journal=dict(journal, **{field: value}))), fw)
 
+    def test_soak_excludes_outer_setup_and_observation_delay(self):
+        self.assertEqual(e.conservative_span([(1, 1000000001, 2000000001),
+            (11000000001, 12000000001, 13000000001)]), 10)
+        self.assertEqual(e.conservative_span([(1, 100, 200)]), 0)
+        for intervals in ([], [(3, 2, 4)], [(1, 2, 9), (8, 10, 11)]):
+            with self.assertRaises(RuntimeError):
+                e.conservative_span(intervals)
+
 
 if __name__ == '__main__':
     unittest.main()

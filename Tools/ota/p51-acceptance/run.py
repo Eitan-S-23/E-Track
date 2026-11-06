@@ -201,12 +201,17 @@ def ble_block(plan, out, max_cells):
                 package=plan['mcu']['package'], hostMonoNs=time.monotonic_ns()))
             invite(phone, plan, 'ble', before, folder)
             phone.phase('transfer-and-reconnect', 600)
+            boundaries = {}
             def terminal():
                 phone.pump_stream()
                 rows = [row for row in phone.live if row['seq'] > ready['seq']]
+                if 'beginObservedMonoNs' not in boundaries and any(row['event'] == 'beginAck' for row in rows):
+                    boundaries['beginObservedMonoNs'] = time.monotonic_ns()
+                    h.save(folder / 'begin-observed.json', boundaries)
                 h.require(not any(row['phase'] in ('failed', 'cancelled') for row in rows), 'actual BLE attempt failed')
                 return next((row for row in reversed(rows) if row['phase'] == 'completed'), None)
             finished = phone.wait(terminal)
+            h.require(boundaries, 'no observed BEGIN ACK boundary')
             r.bound(finished, dict(firmware=plan['firmware']), package=True, final=True)
             h.require(finished['freshConnection'] and finished['linkConnected'], 'no fresh completed identity')
             mcu.wait_boot('target')
@@ -214,7 +219,7 @@ def ble_block(plan, out, max_cells):
             final_storage(final, plan['firmware'])
             item = dict(index=index+1, firstSeq=ready['seq'], lastSeq=finished['seq'],
                 initial=initial, finalInfo=finished, native=final, package=plan['mcu']['package'],
-                hostFinishedMonoNs=time.monotonic_ns(), debuggerHaltsDuringTransfer=0)
+                hostFinishedMonoNs=time.monotonic_ns(), debuggerHaltsDuringTransfer=0, **boundaries)
             h.save(folder / 'result.json', item)
             completed.append(item)
             phone.phase('verified-base-restoration', 600)

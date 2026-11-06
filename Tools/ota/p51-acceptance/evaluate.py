@@ -113,7 +113,7 @@ def long_group(blocks, p, clock):
             timing.update(captureId=header['captureId'], cell=index)
             rows.append(timing)
             intent = h.read_json(folder / ('cell-%02d' % index) / 'intent.json')
-            intervals.append((intent['hostMonoNs'], cell['hostFinishedMonoNs']))
+            intervals.append((intent['hostMonoNs'], cell['beginObservedMonoNs'], cell['hostFinishedMonoNs']))
     h.require(len(rows) >= 30, 'fewer than the predeclared first 30 attempts')
     parameters = rows[0]['parameters']
     h.require(all(row['parameters'] == parameters for row in rows), 'mixed candidate parameter groups')
@@ -132,13 +132,25 @@ def long_group(blocks, p, clock):
     h.pinned(clock_result['log'])
     h.require(clock_result['elapsed_seconds'] == log[-1]['elapsed_ns']/1e9 and
               clock_result['observed_actions'] > 0, 'clock did not observe the campaign')
-    span = (intervals[-1][1]-intervals[0][0])/1e9
+    observed_files = {row['original']['path']: row['original'] for row in log if row['kind'] == 'action_observed'}
+    for source in (blocks[0] / 'intent.json', blocks[-1] / 'result.json'):
+        pin = h.record(source)
+        h.require(observed_files.get(pin['path']) == pin, 'observer clock did not bracket the actual campaign')
+    span = conservative_span(intervals)
     return dict(attempts=len(rows), first30Successes=30, stability30=stable, parameters=parameters,
         p95Us=p95, p99Us=p99, requiredAckTimeoutMs=expected_timeout, observedSpanSeconds=span,
         observerSeconds=clock_result['elapsed_seconds'], transferSeconds=sum(row['elapsedUs'] for row in rows)/1e6,
         soakObserved=span >= 14400 and clock_result['elapsed_seconds'] >= span,
         note='Wall span includes explicit install/restore/UI intervals; it is not continuous payload-transfer time.',
         rows=rows)
+
+
+def conservative_span(intervals):
+    h.require(intervals and all(0 < start <= begin <= end for start, begin, end in intervals) and
+              all(a[2] <= b[0] for a, b in zip(intervals, intervals[1:])), 'invalid campaign time ordering')
+    # First ACK observation is after the first BEGIN. Last invitation is before
+    # the last transfer. Their difference cannot add initial/final setup time.
+    return max(0, intervals[-1][0]-intervals[0][1])/1e9
 
 
 def main():
@@ -153,16 +165,20 @@ def main():
     try:
         results = [four_cell(h.checked(h.ROOT / item['out']), run.validate(h.read_json(h.pinned(item['inputs']))))
                    for item in spec['cells']]
-        h.require({(row['channel'], row['kind']) for row in results} ==
+        h.require(len(results) == 4 and {(row['channel'], row['kind']) for row in results} ==
                   {('sd', 'full'), ('ble', 'full'), ('sd', 'patch'), ('ble', 'patch')}, 'not exactly four combinations')
         h.save(out / 'four.json', dict(combinations=len(results), cells=results))
         p = run.validate(h.read_json(h.pinned(spec['long_inputs'])))
         blocks = []
+        absent = False
         for path in spec['blocks']:
             folder = h.checked(h.ROOT / path)
             if folder.exists():
+                h.require(not absent, 'a declared earlier block was omitted')
                 h.require((folder / 'result.json').is_file() and not (folder / 'failed.json').exists(), 'unfinished/failed block')
                 blocks.append(folder)
+            else:
+                absent = True
         result = long_group(blocks, p, h.checked(h.ROOT / spec['clock']))
         h.save(out / 'long.json', result)
         h.require(result['stability30'] and result['soakObserved'], 'required long-test gates not met')
