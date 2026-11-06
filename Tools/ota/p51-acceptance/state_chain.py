@@ -7,6 +7,7 @@ import hashlib
 import re
 import struct
 import sys
+import time
 import zlib
 from pathlib import Path
 
@@ -140,6 +141,96 @@ def extract(data, console, points, phase):
     return pair, value
 
 
+def completed_console(raw, start, marker):
+    tail = raw[start:]
+    position = tail.find(str(marker).encode('ascii'))
+    if position < 0:
+        return False
+    end = tail.find(b'Reading 4 bytes from addr 0xE000EDF0 into file...O.K.', position)
+    return tail[:end+len(b'Reading 4 bytes from addr 0xE000EDF0 into file...O.K.')] if end >= 0 else False
+
+
+class Commander:
+    """One standard Commander process; each batch is retained before submission."""
+    def __init__(self, mcu, deadline):
+        self.mcu, self.deadline = mcu, deadline
+        self.out = h.fresh(mcu.out / 'native-session')
+        h.require(mcu.logger is None, 'another RTT reader is active')
+        mcu.foreign_debuggers(self.out, deadline=deadline)
+        for leaf in ('settings.jlink', 'sdk.log', 'result.json'):
+            h.checked(self.out / leaf)
+        self.process = h.Process(self.out, 'commander', [mcu.tool('commander'),
+            '-Device', 'AT32F435RGT7', '-If', 'SWD', '-Speed', '1000', '-USB', str(mcu.plan['probe_serial']),
+            '-AutoConnect', '0', '-ExitOnError', '1', '-NoGui', '1',
+            '-SettingsFile', self.out / 'settings.jlink', '-Log', self.out / 'sdk.log'],
+            mcu.env, interactive=True)
+        try:
+            self.execute(m.START, {}, 'session-connect', seconds=30)
+        except BaseException:
+            self.close()
+            raise
+
+    def execute(self, commands, reads, label, *, seconds=60, cleanup=False):
+        deadline = time.monotonic() + seconds
+        if not cleanup:
+            deadline = min(deadline, self.deadline)
+        h.require(deadline > time.monotonic() and self.process.alive(), 'Commander session expired/closed')
+        self.mcu.count += 1
+        out = h.fresh(self.mcu.out / ('%04d-' % self.mcu.count + label))
+        paths = {name: h.checked(out / (name + '.bin')) for name in reads}
+        marker = h.checked(out / 'batch_complete.bin')
+        lines = []
+        for command in commands:
+            if isinstance(command, tuple):
+                name, address, size = command
+                h.require(name in paths and reads[name] == size and 0 < size <= 0x180000,
+                          'unbound original readback')
+                lines.append('savebin "%s", 0x%08X, 0x%X' % (paths[name], address, size))
+            else:
+                h.require(command not in ('q', 'qc', 'exit'), 'session closure is owned')
+                lines.append(command)
+        lines.append('savebin "%s", 0x%08X, 0x4' % (marker, m.REGISTERS['dhcsr']))
+        # Commander buffers redirected stdout. Console-only help flushes the
+        # preceding batch; no extra target command or connection is needed.
+        lines += ['?', '?', '?']
+        packet = ('\n'.join(lines) + '\n').encode('ascii')
+        h.raw(out / 'commands.jlink', packet)
+        original = self.process.paths['stdout']
+        start = original.stat().st_size
+        self.process.send(packet)
+        def complete():
+            h.require(self.process.alive(), 'Commander exited before batch completion')
+            if not marker.is_file() or marker.stat().st_size != 4:
+                return False
+            return completed_console(original.read_bytes(), start, marker)
+        console = h.wait_for(complete, max(.001, deadline-time.monotonic()), interval=.05)
+        h.raw(out / 'commander.stdout', console)
+        h.save(out / 'console-source.json', dict(path=str(original.relative_to(h.ROOT)),
+            offset=start, length=len(console), sha256=hashlib.sha256(console).hexdigest()))
+        data = {}
+        for name, size in reads.items():
+            h.require(paths[name].is_file() and paths[name].stat().st_size == size, 'missing/short native readback')
+            data[name] = paths[name].read_bytes()
+        text = console.decode('utf8', 'replace')
+        h.require(not re.search(r'(?im)^.*(?:ERROR:|Error:|Unknown command|Cannot connect|CPU is not halted)', text),
+                  'native Commander diagnostic; preserve originals')
+        return data, text, out
+
+    def close(self):
+        if self.process.closed:
+            return
+        try:
+            if self.process.alive():
+                self.process.send(b'qc\n')
+                self.process.process.stdin.close()
+            self.process.wait(10)
+            h.save(self.out / 'result.json', dict(stdout=h.record(self.process.paths['stdout']),
+                stderr=h.record(self.process.paths['stderr']), receipt=h.record(self.process.paths['closed.json']),
+                singleConnection=True))
+        finally:
+            self.process.close('commander-session-closed')
+
+
 class Collector:
     def __init__(self, mcu, points, deadline):
         self.mcu, self.points, self.deadline = mcu, points, deadline
@@ -148,14 +239,25 @@ class Collector:
         self.samples = []
         self.armed = None
         self.idle_proved = False
+        self.session = None
+        self.handles = []
 
     def execute(self, commands, reads, label, seconds=60):
-        return self.mcu.execute(commands, reads, label, seconds=seconds, deadline=self.deadline)
+        if self.session is None:
+            return self.mcu.execute(commands, reads, label, seconds=seconds, deadline=self.deadline)
+        data, console, out = self.session.execute(commands, reads, label, seconds=seconds)
+        new = [int(value) for value in re.findall(r'Breakpoint set @ addr 0x[0-9A-Fa-f]+ \(Handle = (\d+)\)', console)]
+        self.handles += new
+        h.require(len(new) == sum(isinstance(line, str) and line.startswith('SetBP ') for line in commands),
+                  'missing native breakpoint handle')
+        return data, console, out
 
     def clear(self):
         h.require(self.original is not None, 'no original debugger state')
-        return ['w4 0x%08X, 0x%08X' % (FPB+8+i*4, value)
-                for i, value in enumerate(self.original['comparators'])]
+        lines = ['ClearBP %d' % handle for handle in self.handles]
+        self.handles = []
+        return lines + ['w4 0x%08X, 0x%08X' % (FPB+8+i*4, value)
+                        for i, value in enumerate(self.original['comparators'])]
 
     def prepare(self):
         h.require(self.original is None, 'duplicate preparation')
@@ -197,7 +299,7 @@ class Collector:
                   1 <= wait_seconds <= 600, 'invalid capture order/deadline')
         role = 'base' if phase in PHASES[:2] else 'target'
         model = self.points['roles'][role]
-        # Clear the prior connection's comparator before g; do not rely on its handle.
+        # The call stop and EEPROM return stay in this same Commander connection.
         lines = ['WaitHalt %d' % (wait_seconds*1000), 'w4 0x%08X, 0x00001000' % FREEZE] + self.clear()
         lines += ['SetBP 0x%08X, T, H' % model['epilogue'], 'g', 'WaitHalt 5000', 'regs',
             ('dhcsr', m.REGISTERS['dhcsr'], 4), ('stack_original', model['lower'], 8192),
@@ -234,22 +336,39 @@ class Collector:
         self.idle_proved = True
 
     def close(self):
-        if not self.touched:
-            return
-        # Cleanup has its own reserve; an expired observation cannot strand our halt.
-        lines = self.clear() + ['g', 'w4 0x%08X, 0x%08X' % (FREEZE, self.original['freeze']),
-            ('fpb', FPB, 40), ('freeze', FREEZE, 4), ('dhcsr', m.REGISTERS['dhcsr'], 4)]
-        data, _, out = self.mcu.execute(lines, dict(fpb=40, freeze=4, dhcsr=4), 'debug-cleanup', seconds=60)
-        h.require(list(struct.unpack('<10I', data['fpb'])[2:8]) == self.original['comparators'] and
-                  int.from_bytes(data['freeze'], 'little') == self.original['freeze'] and
-                  not int.from_bytes(data['dhcsr'], 'little') & 0x20000, 'debugger cleanup incomplete')
-        self.touched = False
-        h.save(out / 'restored.json', dict(breakpointsRestored=True, freezeRestored=True, cpuNotHalted=True))
+        if self.session is not None and hasattr(self.session, 'process') and not self.session.process.alive():
+            ended, self.session = self.session, None
+            try:
+                ended.close()
+            except BaseException as error:
+                h.save(self.mcu.out / 'native-exit-failure.json', dict(type=type(error).__name__, message=str(error)))
+            # Only after this owned process closes may the standard one-shot
+            # route reconcile and restore our debugger registers.
+            self.handles = []
+        try:
+            if not self.touched:
+                return
+            execute = self.session.execute if self.session is not None else self.mcu.execute
+            options = dict(seconds=60, cleanup=True) if self.session is not None else dict(seconds=60)
+            status, _, _ = execute([('dhcsr', m.REGISTERS['dhcsr'], 4)], dict(dhcsr=4), 'cleanup-state', **options)
+            resume = ['g'] if int.from_bytes(status['dhcsr'], 'little') & 0x20000 else []
+            lines = self.clear() + resume + ['w4 0x%08X, 0x%08X' % (FREEZE, self.original['freeze']),
+                ('fpb', FPB, 40), ('freeze', FREEZE, 4), ('dhcsr', m.REGISTERS['dhcsr'], 4)]
+            data, _, out = execute(lines, dict(fpb=40, freeze=4, dhcsr=4), 'debug-cleanup', **options)
+            h.require(list(struct.unpack('<10I', data['fpb'])[2:8]) == self.original['comparators'] and
+                      int.from_bytes(data['freeze'], 'little') == self.original['freeze'] and
+                      not int.from_bytes(data['dhcsr'], 'little') & 0x20000, 'debugger cleanup incomplete')
+            self.touched = False
+            h.save(out / 'restored.json', dict(breakpointsRestored=True, freezeRestored=True, cpuNotHalted=True))
+        finally:
+            if self.session is not None:
+                self.session.close()
 
     def run(self, channel, ready):
         h.require(channel in ('sd', 'ble'), 'unknown transport')
         try:
             before = self.prepare()
+            self.session = Commander(self.mcu, self.deadline)
             armed = self.arm('beforeBackup')
             ready(before, armed)
             self.capture('beforeBackup', 600)

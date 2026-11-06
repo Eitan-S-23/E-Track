@@ -90,7 +90,22 @@ class FakeMCU:
         elif label == 'sd-idle-before-reset':
             console = 'PC = %08X\n' % self.table[s.m.SYMBOLS['main_loop']][0]
             data['dhcsr'] = struct.pack('<I', 0x20000)
+        for line in commands:
+            if isinstance(line, str) and line.startswith('SetBP '):
+                console += 'Breakpoint set @ addr %s (Handle = 1)\n' % line.split()[1].rstrip(',')
         return data, console, self.out / label
+
+
+class FakeCommander:
+    def __init__(self, mcu, deadline):
+        self.mcu = mcu
+        mcu.commands.append(('session-connect', [], {}))
+
+    def execute(self, *args, **kwargs):
+        return self.mcu.execute(*args, **kwargs)
+
+    def close(self):
+        self.mcu.commands.append(('session-close', [], {}))
 
 
 class StateChainTests(unittest.TestCase):
@@ -167,7 +182,8 @@ class StateChainTests(unittest.TestCase):
     def run_fake(self, channel, failure=None, ready=None):
         fake = FakeMCU(self.points, self.tables['base'], failure)
         collector = s.Collector(fake, self.points, 999999999.0)
-        with patch.object(s.h, 'save'), patch.object(s.h, 'raw'), patch.object(s.h, 'record', return_value={}):
+        with patch.object(s.h, 'save'), patch.object(s.h, 'raw'), patch.object(s.h, 'record', return_value={}), \
+                patch.object(s, 'Commander', FakeCommander):
             try:
                 result = collector.run(channel, ready or (lambda before, armed: None))
             except RuntimeError as error:
@@ -183,6 +199,10 @@ class StateChainTests(unittest.TestCase):
         self.assertEqual(sum(cmd == 'r' for _, lines, _ in fake.commands for cmd in lines), 1)
         self.assertFalse(collector.touched)
         self.assertFalse(result['timingCredit'])
+        self.assertEqual(labels.count('session-connect'), 1)
+        self.assertEqual(labels.count('session-close'), 1)
+        self.assertLess(labels.index('debug-cleanup'), labels.index('session-close'))
+        self.assertTrue(any(isinstance(line, str) and line.startswith('ClearBP ') for _, lines, _ in fake.commands for line in lines))
 
     def test_ble_sequence_never_resets_or_calls_sd_idle(self):
         fake, _, result = self.run_fake('ble')
@@ -191,14 +211,15 @@ class StateChainTests(unittest.TestCase):
         self.assertFalse(any(cmd == 'r' for _, lines, _ in fake.commands for cmd in lines))
 
     def test_failure_at_each_device_step_keeps_cleanup_and_never_replays(self):
-        labels = [row[0] for row in self.run_fake('sd')[0].commands if row[0] not in ('debug-precheck', 'debug-cleanup', 'wait-boot')]
+        labels = [row[0] for row in self.run_fake('sd')[0].commands if row[0] not in
+                  ('debug-precheck', 'debug-cleanup', 'cleanup-state', 'session-connect', 'session-close', 'wait-boot')]
         for label in labels:
             fake, _, error = self.run_fake('sd', failure=label)
             with self.subTest(label=label):
                 self.assertIsInstance(error, RuntimeError)
                 observed = [row[0] for row in fake.commands]
                 self.assertEqual(observed.count(label), 1)
-                self.assertEqual(observed[-1], 'debug-cleanup')
+                self.assertEqual(observed[-2:], ['debug-cleanup', 'session-close'])
                 self.assertNotIn('wait-boot', observed)
                 if label == 'sd-idle-before-reset':
                     self.assertNotIn('arm-testBoot', observed)

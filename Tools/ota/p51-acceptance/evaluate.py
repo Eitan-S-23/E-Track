@@ -60,6 +60,13 @@ def four_cell(folder, p):
         h.require(len(matches) == 1, 'missing original BCB phase')
         source = matches[0]
         data = {path.stem: path.read_bytes() for path in source.glob('*.bin')}
+        link = h.read_json(source / 'console-source.json')
+        session = h.read_json(native / 'native-session/result.json')
+        original = h.pinned(session['stdout']).read_bytes()
+        fragment = (source / 'commander.stdout').read_bytes()
+        h.require(link['path'] == session['stdout']['path'] and
+                  fragment == original[link['offset']:link['offset']+link['length']] and
+                  hashlib.sha256(fragment).hexdigest() == link['sha256'], 'console is not an original session fragment')
         pair, observed = sc.extract(data, (source / 'commander.stdout').read_text(), points, phase)
         h.require(pair == data['pair'], 'derived pair differs from original stack')
         samples.append(observed)
