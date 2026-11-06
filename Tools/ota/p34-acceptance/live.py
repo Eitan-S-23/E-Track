@@ -495,7 +495,7 @@ def phone_cell(plan, out, args):
         raise error
 
 
-def soak_clock(out, observed_root, seconds):
+def soak_clock(out, observed_root, seconds, *, stop_event=None):
     """One host process records elapsed time and observed action/idle intervals."""
     h.require(1 <= seconds <= 18000 and observed_root.is_dir(), "bounded existing campaign required")
     path = h.checked(out / "monotonic.jsonl")
@@ -514,7 +514,8 @@ def soak_clock(out, observed_root, seconds):
             return event
         emit("start", planned_seconds=seconds, clock=time.get_clock_info("monotonic").implementation,
              baseline=seen)
-        while (time.monotonic_ns()-start) / 1e9 < seconds:
+        def observe_files():
+            nonlocal observed
             for item in files():
                 h.checked(item)
                 identity, raw = str(item.resolve()), item.read_bytes()
@@ -531,11 +532,18 @@ def soak_clock(out, observed_root, seconds):
                     emit("action_observed", original=dict(path=str(item.relative_to(h.ROOT)), bytes=len(raw), sha256=digest))
                     seen[identity] = digest
                     observed += 1
+        while (time.monotonic_ns()-start) / 1e9 < seconds and not (stop_event and stop_event.is_set()):
+            observe_files()
             now = time.monotonic_ns()-start
             max_gap = max(max_gap, now-last)
             emit("heartbeat", observed_actions=observed, gap_ns=now-last)
             last = now
-            time.sleep(min(1, max(0, seconds-(time.monotonic_ns()-start)/1e9)))
+            delay = min(1, max(0, seconds-(time.monotonic_ns()-start)/1e9))
+            if stop_event is None:
+                time.sleep(delay)
+            else:
+                stop_event.wait(delay)
+        observe_files()
         stop = emit("stop", observed_actions=observed, gap_ns=time.monotonic_ns()-start-last)
         max_gap = max(max_gap, stop["gap_ns"])
     h.save(out / "clock-result.json", dict(log=h.record(path), elapsed_seconds=stop["elapsed_ns"]/1e9,

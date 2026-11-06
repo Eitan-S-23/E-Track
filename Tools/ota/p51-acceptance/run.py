@@ -1,5 +1,6 @@
 """Frozen P5 native state cells, verified restoration and bounded BLE blocks."""
 import argparse
+import copy
 from contextlib import contextmanager
 import hashlib
 import json
@@ -9,6 +10,7 @@ import shlex
 import struct
 import sys
 import time
+import threading
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import state_chain as sc
@@ -228,9 +230,11 @@ def ble_block(plan, out, max_cells):
         report = phone.finish(diagnostics=True)
         upgrades = [group for group in report['groups'] if group['label'] == 'upgrade']
         h.require(len(upgrades) == len(completed), 'missing/extra upgrade diagnostic groups')
-        h.save(out / 'result.json', dict(outcome='BLE_BLOCK_OBSERVED', cells=completed,
+        result = dict(outcome='BLE_BLOCK_OBSERVED', cells=completed,
             original=h.record(phone.out / 'app-capture.jsonl'), diagnostics=h.record(phone.out / 'observation.json'),
-            inputs=plan['firmware'], retained='base', formalVerdict='NOT_ADJUDICATED', allAttemptsPreserved=True))
+            inputs=plan['firmware'], retained='base', formalVerdict='NOT_ADJUDICATED', allAttemptsPreserved=True)
+        h.save(out / 'result.json', result)
+        return result
     finally:
         try:
             phone.preserve_failure()
@@ -239,9 +243,51 @@ def ble_block(plan, out, max_cells):
         h.require(phone.capture_id is None or phone.capture_resolved, 'block original unresolved; no replay')
 
 
+def long_campaign(plan, out):
+    from live import soak_clock
+    clock_out = h.fresh(out / 'clock')
+    stop, clock_errors = threading.Event(), []
+    def observe():
+        try:
+            soak_clock(clock_out, out, 18000, stop_event=stop)
+        except BaseException as error:
+            clock_errors.append(error)
+    thread = threading.Thread(target=observe, name='p5-soak-clock')
+    thread.start()
+    end = time.monotonic()+18000
+    blocks, count, first_begin, span = [], 0, None, 0
+    try:
+        h.wait_for(lambda: (clock_out / 'monotonic.jsonl').is_file(), 5)
+        for index in range(1, 17):
+            h.require(not clock_errors and time.monotonic()+3000 < end, 'insufficient complete next-block/cleanup budget')
+            current = copy.deepcopy(plan)
+            current['phone']['limits']['total_seconds'] = min(5400, int(end-time.monotonic()-180))
+            folder = h.fresh(out / ('block-%02d' % index))
+            h.save(folder / 'intent.json', dict(index=index, hostMonoNs=time.monotonic_ns(),
+                package=plan['mcu']['package'], maxCells=8))
+            result = ble_block(current, folder, 8)
+            blocks.append(h.record(folder / 'result.json'))
+            count += len(result['cells'])
+            first_begin = first_begin or result['cells'][0]['beginObservedMonoNs']
+            last = folder / ('cell-%02d' % len(result['cells'])) / 'intent.json'
+            span = (h.read_json(last)['hostMonoNs']-first_begin)/1e9
+            h.save(out / ('progress-%02d.json' % index), dict(completed=count, conservativeSpanSeconds=span,
+                blocks=blocks, first30='the first 30 declared attempts, never selected afterward'))
+            if count >= 30 and span >= 14400:
+                break
+        h.require(count >= 30 and span >= 14400, 'finite campaign ended without all required observations')
+    finally:
+        stop.set()
+        thread.join(timeout=10)
+        h.require(not thread.is_alive() and not clock_errors, 'soak observer closure failed')
+    h.save(out / 'result.json', dict(outcome='LONG_CAMPAIGN_OBSERVED', blocks=blocks, attempts=count,
+        conservativeSpanSeconds=span, clock=h.record(clock_out / 'clock-result.json'),
+        retained='base', formalVerdict='NOT_ADJUDICATED'))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=('cell', 'restore', 'ble-block', 'clock'))
+    parser.add_argument('action', choices=('cell', 'restore', 'ble-block', 'long', 'clock'))
     parser.add_argument('--inputs', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--channel', choices=('sd', 'ble'), default='sd')
@@ -268,13 +314,15 @@ def main():
             soak_clock(out, h.checked(args.observe_root), args.seconds)
             return
         with h.device_owner(out):
-            with channel(plan, out, args.action == 'ble-block' or args.action == 'cell' and args.channel == 'ble'):
+            with channel(plan, out, args.action in ('ble-block', 'long') or args.action == 'cell' and args.channel == 'ble'):
                 if args.action == 'cell':
                     cell(plan, out, args.channel)
                 elif args.action == 'restore':
                     restore(plan, out, args.previous)
-                else:
+                elif args.action == 'ble-block':
                     ble_block(plan, out, args.max_cells)
+                else:
+                    long_campaign(plan, out)
         print(h.read_json(out / 'result.json')['outcome'], flush=True)
     except BaseException as error:
         h.save(out / 'failed.json', dict(type=type(error).__name__, message=str(error),
