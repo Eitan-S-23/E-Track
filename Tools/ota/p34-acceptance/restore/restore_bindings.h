@@ -1,0 +1,28 @@
+#ifndef P34_RESTORE_BINDINGS_H
+#define P34_RESTORE_BINDINGS_H
+
+#ifdef P34_RESTORE_BINDINGS_HEADER
+#include P34_RESTORE_BINDINGS_HEADER
+#else
+#define P34_RESTORE_FROM_VERSION 30287u
+#define P34_RESTORE_TO_VERSION 30286u
+#define P34_RESTORE_BACKUP_LENGTH 613952u
+#define P34_RESTORE_BACKUP_CRC32 2889683253u
+#define P34_RESTORE_BOOT_SHA256_BYTES \
+    0x01,0xe4,0xb9,0xe1,0x62,0xbf,0xaa,0xf9,0xfd,0xa0,0x70,0xaa,0x13,0xc0,0xce,0xc3, \
+    0xf3,0x77,0xb8,0xd6,0x96,0xdb,0x01,0xf7,0x31,0xe0,0xab,0x3d,0x14,0x64,0xe5,0x27
+#define P34_RESTORE_BACKUP_SHA256_BYTES \
+    0x9b,0x3a,0x4a,0x21,0x40,0x9c,0x59,0xb9,0x16,0x97,0x63,0x85,0xec,0x87,0x7b,0x7d, \
+    0x90,0xbd,0x7e,0x4c,0x90,0xb3,0x55,0x3f,0x0b,0x8d,0xf2,0xb0,0x2f,0xd7,0x87,0xdc
+#endif
+
+#if !defined(P34_RESTORE_FROM_VERSION) || !defined(P34_RESTORE_TO_VERSION) || \
+    !defined(P34_RESTORE_BACKUP_LENGTH) || !defined(P34_RESTORE_BACKUP_CRC32) || \
+    !defined(P34_RESTORE_BOOT_SHA256_BYTES) || !defined(P34_RESTORE_BACKUP_SHA256_BYTES)
+#error "A restore fixture requires complete compile-time bindings"
+#endif
+#if P34_RESTORE_FROM_VERSION <= P34_RESTORE_TO_VERSION || P34_RESTORE_TO_VERSION == 0 || \
+    P34_RESTORE_BACKUP_LENGTH < 0x460u || P34_RESTORE_BACKUP_LENGTH > 0xF0000u
+#error "Invalid restore direction or image bounds"
+#endif
+#endif

@@ -1,4 +1,12 @@
 function(configure_restore_app)
+    if(DEFINED P34_RESTORE_BINDINGS_HEADER)
+        if(NOT IS_ABSOLUTE "${P34_RESTORE_BINDINGS_HEADER}" OR
+           NOT EXISTS "${P34_RESTORE_BINDINGS_HEADER}")
+            message(FATAL_ERROR "Restore bindings must be an existing absolute header")
+        endif()
+        target_compile_definitions(X_Track_App_GCC PRIVATE
+            P34_RESTORE_BINDINGS_HEADER="${P34_RESTORE_BINDINGS_HEADER}")
+    endif()
     get_target_property(sources X_Track_App_GCC SOURCES)
     list(LENGTH sources before_count)
     list(FILTER sources EXCLUDE REGEX "/USER/main[.]cpp$")

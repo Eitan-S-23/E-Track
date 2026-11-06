@@ -21,7 +21,10 @@ int restore_prepare(const bcb_hal_t *hal, const restore_expect_t *expected,
         before->backup_vcode != expected->to_version ||
         before->backup_len != expected->backup_length ||
         before->backup_crc32 != expected->backup_crc32 ||
-        expected->from_version != 30287u || expected->to_version != 30286u)
+        expected->from_version != P34_RESTORE_FROM_VERSION ||
+        expected->to_version != P34_RESTORE_TO_VERSION ||
+        expected->backup_length != P34_RESTORE_BACKUP_LENGTH ||
+        expected->backup_crc32 != P34_RESTORE_BACKUP_CRC32)
         return RESTORE_STATE;
     return RESTORE_OK;
 }

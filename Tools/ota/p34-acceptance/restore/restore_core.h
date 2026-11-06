@@ -1,6 +1,7 @@
 #ifndef P34_RESTORE_CORE_H
 #define P34_RESTORE_CORE_H
 #include "EEPROM/eeprom_bcb.h"
+#include "restore_bindings.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

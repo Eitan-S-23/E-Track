@@ -107,9 +107,21 @@ def main():
     parser.add_argument("--ninja", default="ninja")
     parser.add_argument("--cc", default="gcc")
     parser.add_argument("--default-baud", type=int, choices=(115200, 230400, 460800, 921600), default=921600)
+    parser.add_argument("--restore-bindings", type=Path,
+                        help="Explicit compile-time bindings for a restore fixture only")
+    parser.add_argument("--object-path-max", type=int, default=1024,
+                        help="CMake object path limit; shorten within the project on Windows")
     args = parser.parse_args()
     if Path.cwd() != ROOT or not (sys.flags.isolated and sys.flags.no_site and sys.dont_write_bytecode):
         raise RuntimeError("run from the explicit worktree with Python -I -S -B")
+    if not 128 <= args.object_path_max <= 1024:
+        raise RuntimeError("object path limit must be between 128 and 1024")
+    if args.restore_bindings is not None:
+        if args.variant != "restore":
+            raise RuntimeError("restore bindings cannot affect production or maintenance builds")
+        args.restore_bindings = checked(args.restore_bindings)
+        if not args.restore_bindings.is_file():
+            raise RuntimeError("restore bindings header is absent")
     out = checked(args.out)
     if out.exists():
         raise RuntimeError("fresh project-local output required")
@@ -145,7 +157,7 @@ def main():
             args.toolchain = args.toolchain.resolve(strict=True)
             flags = "-fmacro-prefix-map=" + ROOT.as_posix() + "=."
             command = [cmake, "-S", ROOT / "MDK-ARM_F435/cmake-generated", "-B", out / "b", "-G", "Ninja",
-                "-DCMAKE_BUILD_TYPE=Release", "-DCMAKE_OBJECT_PATH_MAX=1024",
+                "-DCMAKE_BUILD_TYPE=Release", "-DCMAKE_OBJECT_PATH_MAX=" + str(args.object_path_max),
                 "-DKEIL_GCC_COMPILER_CACHE:FILEPATH=", "-DARM_TOOLCHAIN_ROOT=" + str(args.toolchain),
                 "-DCMAKE_MAKE_PROGRAM=" + ninja, "-DCMAKE_INSTALL_PREFIX=" + str(out / "install"),
                 "-DCMAKE_C_FLAGS:STRING=" + flags, "-DCMAKE_CXX_FLAGS:STRING=" + flags,
@@ -157,6 +169,8 @@ def main():
                                str(args.toolchain / "bin" / ("arm-none-eabi-" + compiler + suffix)))
             if args.variant == "restore":
                 command.append("-DCMAKE_PROJECT_INCLUDE=" + str(Path(__file__).parent / "restore/inject.cmake"))
+                if args.restore_bindings is not None:
+                    command.append("-DP34_RESTORE_BINDINGS_HEADER=" + args.restore_bindings.as_posix())
             run(out, env, "configure", command, 180)
             log = run(out, env, "build", [cmake, "--build", out / "b", "--target", "X_Track_App_GCC", "--parallel", "8"], 900)
             run(out, env, "size", [args.toolchain / "bin" / ("arm-none-eabi-size" + suffix),
@@ -165,6 +179,8 @@ def main():
                 artifacts=[record(out / "b/app-gcc" / ("X-Track-App-GCC." + ext)) for ext in ("elf", "hex", "bin", "map")],
                 warnings=len(re.findall(rb"\bwarning:", log)), errors=len(re.findall(rb"\berror:", log)),
                 boot_built=False, source_date_epoch=1786320000)
+            if args.restore_bindings is not None:
+                result["restore_bindings"] = record(args.restore_bindings)
         result.update(installed=False, formal_freeze=False, independent_acceptance=False)
         io.write_json(ROOT, out / "result.json", result)
         print(json.dumps(result), flush=True)

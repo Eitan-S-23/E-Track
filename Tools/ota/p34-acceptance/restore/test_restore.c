@@ -6,7 +6,8 @@
 static uint8_t storage[256], original[256];
 static unsigned writes, erases;
 static int fail_read, fail_write, fail_erase, corrupt_write;
-static restore_expect_t expected = {30287,30286,613952,2889683253u};
+static restore_expect_t expected = {P34_RESTORE_FROM_VERSION,P34_RESTORE_TO_VERSION,
+    P34_RESTORE_BACKUP_LENGTH,P34_RESTORE_BACKUP_CRC32};
 static int read_bytes(uint8_t reg, uint8_t *data, uint16_t size)
 {
     if (fail_read || (unsigned)reg + size > sizeof(storage)) return -1;
@@ -44,8 +45,8 @@ static void fixture(uint16_t seq, int active_b)
     value.backup_crc32 = expected.backup_crc32;
     value.backup_vcode = expected.to_version;
     value.cand_addr = 0x1000;
-    value.cand_len = 613952;
-    value.cand_vcode = 30287;
+    value.cand_len = expected.backup_length;
+    value.cand_vcode = expected.from_version;
     value.cand_crc32 = 0x12345678;
     value.seq = seq;
     bcb_serialize(&value, storage + (active_b ? 64 : 0));
@@ -73,7 +74,7 @@ int main(void)
             assert(after.state == BCB_STATE_ROLLBACK && after.copy_phase == BCB_COPY_ROLLBACK);
             assert(after.boot_try == 0 && after.resume_block == 0);
             assert(after.seq == (uint16_t)(before.seq + 1));
-            assert(after.backup_vcode == 30286 && after.cur_vcode == 30287);
+            assert(after.backup_vcode == expected.to_version && after.cur_vcode == expected.from_version);
             assert(after.cand_crc32 == before.cand_crc32 && after.backup_crc32 == before.backup_crc32);
             assert(!memcmp(storage + 128, original + 128, 128));
             assert(!memcmp(storage + (active_b ? 64 : 0), original + (active_b ? 64 : 0), 64));
@@ -116,6 +117,21 @@ int main(void)
         assert(result == (bad == 0 ? RESTORE_STATE : bad == 1 ? RESTORE_JOURNAL : RESTORE_COMMIT));
         assert(writes == (unsigned)(bad >= 2) && erases == (unsigned)(bad >= 1));
         assert(!memcmp(storage, original, 64) && !memcmp(storage + 128, original + 128, 128));
+        ++checks;
+    }
+    for (int bad = 0; bad < 4; ++bad) {
+        fixture(10,0);
+        before = prepare();
+        restore_expect_t wrong = expected;
+        if (bad == 0) { wrong.from_version++; before.cur_vcode++; }
+        if (bad == 1) { wrong.to_version--; before.backup_vcode--; }
+        if (bad == 2) { wrong.backup_length--; before.backup_len--; }
+        if (bad == 3) { wrong.backup_crc32++; before.backup_crc32++; }
+        bcb_serialize(&before, storage);
+        bcb_arbiter_result_t active;
+        assert(restore_prepare(&hal, &wrong, &after, &active) == RESTORE_STATE);
+        assert(restore_execute(&hal, &wrong, &before, clear_journal, &after) == RESTORE_STATE);
+        assert(!writes && !erases);
         ++checks;
     }
     printf("RESTORE_CORE_TESTS=%u PASS; real bcb_commit, atomic inactive block, no settings writes\n", checks);

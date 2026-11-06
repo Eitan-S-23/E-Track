@@ -121,11 +121,14 @@ def storage_observation(samples, package=None):
         journal=journal_observation(samples["staging"], package) if package is not None else None)
 
 
-def restore_gate(raw, base, boot, phase):
+def restore_gate(raw, base, boot, phase, *, versions=(30287, 30286)):
+    h.require(isinstance(versions, tuple) and len(versions) == 2 and
+              all(type(v) is int and 0 < v <= 0xffffffff for v in versions) and
+              versions[0] > versions[1], "restore version binding")
     h.require(len(raw) == 640, "restore mailbox size")
     w = struct.unpack_from("<16I", raw)
     h.require(w[:4] == (0x41343352, 1, phase, 0) and w[8:12] ==
-              (30287, 30286, len(base), __import__("zlib").crc32(base)), "restore phase/identity/error")
+              (*versions, len(base), __import__("zlib").crc32(base)), "restore phase/identity/error")
     h.require(raw[576:608].hex() == boot and raw[608:640].hex() == __import__("hashlib").sha256(base).hexdigest(),
               "restore did not verify the bound Boot/backup")
     h.require(raw[319] == 0x55, "missing EEPROM initialization marker")
@@ -447,8 +450,10 @@ class MCU:
         time.sleep(.2)
         b = self.read(address, 640, "restore-mailbox-b")
         base = h.pinned(self.plan["images"]["base"]["image"]).read_bytes()
-        first = restore_gate(a, base, self.plan["boot"]["sha256"], phase)
-        second = restore_gate(b, base, self.plan["boot"]["sha256"], phase)
+        target = h.pinned(self.plan["images"]["target"]["image"]).read_bytes()
+        versions = (struct.unpack_from("<I", target, 0x408)[0], struct.unpack_from("<I", base, 0x408)[0])
+        first = restore_gate(a, base, self.plan["boot"]["sha256"], phase, versions=versions)
+        second = restore_gate(b, base, self.plan["boot"]["sha256"], phase, versions=versions)
         h.require(second["tick"] > first["tick"], "restore stopped or reset")
         return second
 

@@ -1,4 +1,4 @@
-"""Run the existing 18-case restore transaction regression with real bcb_commit."""
+"""Run the bound restore transaction regression with real bcb_commit."""
 import argparse
 import importlib.util
 import os
@@ -17,6 +17,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--cc", default="gcc")
+    parser.add_argument("--p51", action="store_true", help="Use the explicit P51 compile-time fixture")
     args = parser.parse_args()
     if Path.cwd() != host.ROOT or not (sys.flags.isolated and sys.flags.no_site and sys.dont_write_bytecode):
         raise RuntimeError("explicit worktree and isolated Python required")
@@ -33,16 +34,20 @@ def main():
         raise RuntimeError("native C compiler unavailable")
     sources = [HERE / "test_restore.c", HERE / "restore_core.c",
                host.ROOT / "Libraries/EEPROM/eeprom_bcb.c"]
+    bindings = host.ROOT / "Tools/ota/p51-acceptance/restore-bindings.h"
+    defines = ['-DP34_RESTORE_BINDINGS_HEADER="' + str(bindings.as_posix()) + '"'] if args.p51 else []
     host.run(out, env, "compile", [cc, "-std=c99", "-O2", "-Wall", "-Wextra", "-Werror",
-        "-I" + str(host.ROOT / "Libraries"), *sources, "-o", exe], 90)
+        *defines, "-I" + str(host.ROOT / "Libraries"), *sources, "-o", exe], 90)
     log = host.run(out, env, "test", [exe], 30)
     match = re.search(rb"RESTORE_CORE_TESTS=(\d+) PASS;", log)
-    if match is None or int(match[1]) != 18:
+    if match is None or int(match[1]) != 22:
         raise RuntimeError("complete transaction regression missing")
     host.io.write_json(host.ROOT, out / "result.json", dict(result="RESTORE_TRANSACTION_REGRESSION_PASS",
-        checks=18, sources=[host.record(path) for path in sources], executable=host.record(exe),
+        checks=22, binding="P51" if args.p51 else "P34-default",
+        sources=[host.record(path) for path in [*sources, HERE / "restore_core.h", HERE / "restore_bindings.h",
+                 *([bindings] if args.p51 else [])]], executable=host.record(exe),
         device_operations=0, independent_acceptance=False))
-    print("RESTORE_CORE_TESTS=18 PASS", flush=True)
+    print("RESTORE_CORE_TESTS=22 PASS", flush=True)
 
 
 if __name__ == "__main__":
