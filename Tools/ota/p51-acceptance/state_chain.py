@@ -84,6 +84,17 @@ def bind(mcu):
 
 
 def register(console, name):
+    # WaitHalt prints registers too. Only the explicit regs response starts
+    # with J-Link>PC; never pick an arbitrary last register from a whole batch.
+    starts = list(re.finditer(r'(?m)^J-Link>PC\b', console))
+    if starts:
+        h.require(len(starts) == 1, 'ambiguous explicit regs blocks')
+        console = console[starts[0].start():]
+        boundary = re.search(r'(?m)^J-Link>', console[len('J-Link>'):])
+        if boundary:
+            console = console[:len('J-Link>') + boundary.start()]
+    else:
+        h.require(not re.search(r'(?m)^J-Link>CPU halted\.', console), 'missing explicit regs block')
     pattern = r'SP\(R13\)\s*=\s*([0-9A-Fa-f]{8})' if name == 'SP' else r'\b' + name + r'\s*=\s*([0-9A-Fa-f]{8})'
     found = re.findall(pattern, console)
     h.require(len(found) == 1, 'missing/ambiguous register: ' + name)

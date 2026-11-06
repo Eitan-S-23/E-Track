@@ -58,6 +58,11 @@ def sample(points, phase, seq=None):
     return data, console
 
 
+def native_console(console, waits=2):
+    automatic = 'J-Link>CPU halted.\nPC = 08010000\nR0 = FFFFFFFF\nSP(R13)= 00000000\n'
+    return automatic * waits + 'J-Link>' + console + 'J-Link>Opening binary file for writing...\n'
+
+
 class FakeMCU:
     def __init__(self, points, table, failure=None):
         self.out = ROOT / '.cache/p51-state-chain-test-unused'
@@ -87,8 +92,9 @@ class FakeMCU:
             data.update(fpb=struct.pack('<10I', *words), freeze=struct.pack('<I', 0x1000))
         elif label.startswith('capture-'):
             data, console = sample(self.points, label.removeprefix('capture-'))
+            console = native_console(console)
         elif label == 'sd-idle-before-reset':
-            console = 'PC = %08X\n' % self.table[s.m.SYMBOLS['main_loop']][0]
+            console = native_console('PC = %08X\n' % self.table[s.m.SYMBOLS['main_loop']][0], waits=1)
             data['dhcsr'] = struct.pack('<I', 0x20000)
         for line in commands:
             if isinstance(line, str) and line.startswith('SetBP '):
@@ -133,6 +139,36 @@ class StateChainTests(unittest.TestCase):
             pair, value = s.extract(data, console, self.points, phase)
             self.assertEqual(len(pair), 128)
             self.assertEqual(value['state'], expected)
+
+    def test_explicit_regs_disambiguates_automatic_waithalt_outputs(self):
+        for phase in s.PHASES:
+            data, console = sample(self.points, phase)
+            expected = s.extract(data, console, self.points, phase)
+            for waits in (1, 2):
+                with self.subTest(phase=phase, waits=waits):
+                    self.assertEqual(s.extract(data, native_console(console, waits), self.points, phase), expected)
+                    self.assertEqual(s.extract(data, native_console(console, waits).replace('\n', '\r\n'),
+                                               self.points, phase), expected)
+
+    def test_missing_duplicate_and_incomplete_explicit_regs_fail_closed(self):
+        data, console = sample(self.points, 'beforeBackup')
+        automatic = native_console(console).split('J-Link>PC')[0]
+        for damaged in (automatic, automatic.split('J-Link>CPU halted.')[0] +
+                'J-Link>CPU halted.\n' + console,
+                native_console(console) + native_console(console),
+                native_console(console.replace('SP(R13)', 'other')),
+                native_console(console + 'R0 = 00000001\n'),
+                native_console(console).replace('J-Link>PC =', 'J-Link>PC invalid=')):
+            with self.subTest(console=damaged), self.assertRaises(RuntimeError):
+                s.extract(data, damaged, self.points, 'beforeBackup')
+
+    def test_explicit_regs_cannot_borrow_correct_pc_or_frame_from_waithalt(self):
+        data, console = sample(self.points, 'beforeBackup')
+        for damaged in (console.replace('PC = 08010128', 'PC = 0801012A'),
+                        console.replace('SP(R13)= 20057D00', 'SP(R13)= 20050000')):
+            with self.subTest(console=damaged), self.assertRaises(RuntimeError):
+                s.extract(data, 'J-Link>CPU halted.\n' + console + native_console(damaged),
+                          self.points, 'beforeBackup')
 
     def test_wrong_caller_header_stack_and_halt_rejected(self):
         for phase in s.PHASES:
