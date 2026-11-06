@@ -1,6 +1,7 @@
 import { env } from "cloudflare:workers";
 import { SELF } from "cloudflare:test";
 import { expect } from "vitest";
+import { createHash } from "node:crypto";
 import fixture from "./fixtures/firmware-release-v2.json";
 import { assetFileName, canonicalJson, parseFirmwareRegistration, r2KeyFor } from "../../scripts/firmware-schema.mjs";
 import type { FirmwareRegistration } from "../../scripts/firmware-schema.mjs";
@@ -11,8 +12,11 @@ import type { FirmwareChannelRow } from "../src/types";
 export const SCHEMA_FIXTURE = parseFirmwareRegistration(fixture);
 export const BASE_SHA = "11".repeat(32);
 let sequence = 0;
-export const bytesFor = (kind: string) => new TextEncoder().encode(`P4-2-${kind}-fixture\n`);
-export function metadata(): FirmwareRegistration {
+export const schemaBytesFor = (kind: string) => new TextEncoder().encode(`P4-2-${kind}-fixture\n`);
+// Keep the schema golden bytes separate from profitable-PATCH selection fixtures.
+export const bytesFor = (kind: string) => new TextEncoder().encode(`P4-2-${kind}-fixture\n`.repeat(kind === "full" ? 2 : 1));
+type AssetBodies = Partial<Record<"full" | "patch" | "recovery", Uint8Array>>;
+export function metadata(bodies: AssetBodies = {}): FirmwareRegistration {
   const value = structuredClone(SCHEMA_FIXTURE);
   const n = ++sequence;
   value.versionName = `20.${Math.floor(n / 100)}.${n % 100}`;
@@ -20,14 +24,17 @@ export function metadata(): FirmwareRegistration {
   value.releaseTag = `mcu-e-track-at32f435-v${value.versionName}`;
   value.runId = `p42-${n}`;
   for (const asset of value.assets) {
+    const bytes = bodies[asset.kind] ?? bytesFor(asset.kind);
+    asset.sizeBytes = bytes.byteLength;
+    asset.sha256 = createHash("sha256").update(bytes).digest("hex");
     asset.fileName = assetFileName(asset.kind, value.versionName, asset.baseVersionCode);
     asset.r2Key = r2KeyFor(value, asset);
     asset.githubUrl = `https://github.com/Eitan-S-23/Trace/releases/download/${value.releaseTag}/${asset.fileName}`;
   }
   return value;
 }
-export async function uploadFixture(value: FirmwareRegistration) {
-  for (const asset of value.assets) await env.RELEASES_BUCKET.put(asset.r2Key, bytesFor(asset.kind), {
+export async function uploadFixture(value: FirmwareRegistration, bodies: AssetBodies = {}) {
+  for (const asset of value.assets) await env.RELEASES_BUCKET.put(asset.r2Key, bodies[asset.kind] ?? bytesFor(asset.kind), {
     customMetadata: { sha256: asset.sha256, kind: asset.kind }, httpMetadata: {
       contentType: asset.kind === "recovery" ? "application/octet-stream" : "application/vnd.e-track.etu" } });
 }
@@ -36,9 +43,9 @@ export function register(value: unknown, headers: Record<string, string> = {}) {
     Authorization: "Bearer test-deploy-token", "Content-Type": "application/json", Accept: "application/json", ...headers
   }, body: JSON.stringify(value) });
 }
-export async function registered(published = true, override: Partial<FirmwareRegistration> = {}) {
-  const input = { ...metadata(), ...override };
-  await uploadFixture(input);
+export async function registered(published = true, override: Partial<FirmwareRegistration> = {}, bodies: AssetBodies = {}) {
+  const input = { ...metadata(bodies), ...override };
+  await uploadFixture(input, bodies);
   const response = await register(input);
   const body = await response.json<{ releaseId: string; errorCode?: string }>();
   expect(response.status, JSON.stringify(body)).toBe(201);

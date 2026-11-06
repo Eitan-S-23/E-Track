@@ -15,11 +15,14 @@ import threading
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import state_chain as sc
 import observation as obs
+import functional_sample
 from observation import r
 h, m = sc.h, sc.m
 
 RUNNERS = [
     'Tools/ota/p51-acceptance/run.py', 'Tools/ota/p51-acceptance/state_chain.py',
+    'Tools/ota/p51-acceptance/functional_sample.py', '.github/scripts/firmware-byte-check.py',
+    'Tools/etu_unpack.py', 'Tools/jlink/prepare-bootstrap-app.py',
     'Tools/ota/p51-acceptance/observation.py', 'Tools/ota/p34-acceptance/live_host.py',
     'Tools/ota/p34-acceptance/live_mcu.py', 'Tools/ota/p34-acceptance/live_phone.py',
     'Tools/ota/p34-acceptance/build.py', 'Tools/flutter/dev_checks.py',
@@ -60,6 +63,10 @@ def validate(plan):
     h.require(3000 <= phone['limits']['total_seconds'] <= 5400 and phone['limits']['cleanup_seconds'] == 180,
               'phone observation/cleanup budget changed')
     return plan
+
+
+def validate_functional_patch(plan):
+    functional_sample.validate(plan, h)
 
 
 def invocation(command, argv):
@@ -325,6 +332,8 @@ def main():
     h.save(out / 'intent.json', dict(argv=sys.argv, inputs=h.record(args.inputs), hostMonoNs=time.monotonic_ns()))
     try:
         gate(args, out)
+        if args.action == 'cell':
+            validate_functional_patch(plan)
         if args.action == 'clock':
             from live import soak_clock
             h.require(args.observe_root is not None and 14400 <= args.seconds <= 18000, 'bounded real soak clock required')

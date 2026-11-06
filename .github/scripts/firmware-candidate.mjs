@@ -138,6 +138,7 @@ export async function sourceMetadata(root, env, config, build) {
     if (bytes.length !== record.sizeBytes || digest(bytes) !== record.sha256) throw new CliError("Compiled artifact drift");
   }
   return { schema: "p51-artifact-candidate-v2", mode: "new-source", task: "P5-1",
+    packagePurpose: "fixed-load-benchmark", representativeFunctionalSample: false,
     isFormalRelease: false, productionPublishable: false, readyRegistered: false,
     versionName: proof.target.versionName, versionCode: proof.target.versionCode,
     buildTimestamp: proof.target.buildTimestamp, targetImageSha256: proof.target.sha256,
@@ -185,6 +186,7 @@ export async function candidateMetadata(root, env, manifest) {
       || !(await readFile(path.join(prepared, "patch.etu"))).equals(await readFile(path.join(prepared, "reference-1MiB.etu")))
       || assets[1].sizeBytes !== 1048576) throw new CliError("Prepared candidate identity mismatch");
   return { schema: "p51-artifact-candidate-v1", task: "P5-1", purpose: "independent acceptance inputs only",
+    packagePurpose: "fixed-load-benchmark", representativeFunctionalSample: false,
     isFormalRelease: false, productionPublishable: false, hardwareAcceptance: "NOT_RUN", readyRegistered: false,
     runner: ownership(env), appSourceCommit: manifest.sourceCommit, originalCiRun: manifest.originalRun,
     originalCiArtifact: manifest.originalArtifact, sourceEvidenceCommit: manifest.sourceEvidenceCommit,

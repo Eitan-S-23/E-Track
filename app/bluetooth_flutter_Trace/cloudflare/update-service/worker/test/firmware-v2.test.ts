@@ -168,6 +168,38 @@ describe("P4-2 latest and public download", () => {
       expect(noUpdate).not.toHaveProperty("asset");
     }
   });
+  it.each([
+    [127, 128, "patch"],
+    [128, 128, "full"],
+    [129, 128, "full"],
+    [1048576, 291700, "full"]
+  ])("selects %s-byte patch versus %s-byte full as %s, with matching downloaded bytes", async (patchSize, fullSize, expectedKind) => {
+    const bodies = { patch: new Uint8Array(Number(patchSize)).fill(0x50), full: new Uint8Array(Number(fullSize)).fill(0x46) };
+    const { input } = await registered(true, {}, bodies);
+    const response = await latest();
+    expect(response.status).toBe(200);
+    const selected = await response.json<LatestBody>();
+    const expected = input.assets.find((asset) => asset.kind === expectedKind)!;
+    expect(selected.asset).toMatchObject({ kind: expectedKind, fileName: expected.fileName,
+      sizeBytes: expected.sizeBytes, sha256: expected.sha256, baseVersionCode: expected.baseVersionCode,
+      baseImageSha256: expectedKind === "patch" ? BASE_SHA : null });
+    const download = await SELF.fetch(selected.asset.downloadUrl);
+    expect(download.status).toBe(200);
+    expect(download.headers.get("Content-Length")).toBe(String(expected.sizeBytes));
+    expect(download.headers.get("Content-Digest")).toBe(contentDigest(expected.sha256));
+    expect(new Uint8Array(await download.arrayBuffer())).toEqual(expectedKind === "patch" ? bodies.patch : bodies.full);
+    const mismatch = await (await latest({ currentImageSha: "22".repeat(32) })).json<LatestBody>();
+    expect(mismatch.asset.kind).toBe("full");
+  });
+  it("does not let a smaller usable patch bypass an unavailable full fallback", async () => {
+    const { releaseId } = await registered();
+    await env.DB.prepare("UPDATE firmware_release_assets SET r2_state='archived' WHERE release_id=? AND kind='full'").bind(releaseId).run();
+    const response = await latest();
+    expect(response.status).toBe(503);
+    const result = await response.json();
+    expect(result).toMatchObject({ errorCode: "BACKEND_UNAVAILABLE" });
+    expect(result).not.toHaveProperty("asset");
+  });
   it("falls back when matching patch is archived but rejects an archived full even when patch matches", async () => {
     const { releaseId } = await registered();
     await env.DB.prepare("UPDATE firmware_release_assets SET r2_state='archived' WHERE release_id=? AND kind='patch'").bind(releaseId).run();

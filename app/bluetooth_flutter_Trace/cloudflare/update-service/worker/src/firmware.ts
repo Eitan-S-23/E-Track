@@ -118,7 +118,8 @@ export function handleFirmwareLatest(request: Request, env: WorkerEnv, requestId
     const full = requireFirmwareFull(release, assets);
     const patches = assets.filter((a) => a.kind === "patch" && a.base_image_sha256 === get("currentImageSha"));
     if (patches.length > 1) throw backendUnavailable("Ambiguous patch base");
-    const asset = patches.length === 1 && usableFirmwareAsset(patches[0]) ? patches[0] : full;
+    const asset = patches.length === 1 && usableFirmwareAsset(patches[0])
+      && patches[0].size_bytes < full.size_bytes ? patches[0] : full;
     const signed = await signFirmwareDownload(env, url.origin, asset, "public-ota");
     return json({ schemaVersion: 2, requestId, updateAvailable: true, appId: release.app_id,
       deviceModel: release.device_model, channel: channel.name, releaseId: release.id,

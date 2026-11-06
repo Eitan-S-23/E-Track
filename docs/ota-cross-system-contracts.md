@@ -11,6 +11,7 @@
 - 2026-09-15 增补：按用户要求及 `OTA-DEC-014` / 决策记录 11，增加 P3-4 链路诊断与 P3-8 Android 后台 OTA/通知要求。增补只约束后续实现和验收，不追溯改写 P3-3-v9 或其他历史冻结包，也不授予新的远端或真机操作权限。
 - 2026-10-13 验收组织按 `OTA-DEC-016`：候选阶段与最终长测分开，独立核验已有原件而非重复操作；P4 以隔离 rehearsal 进入 P5，生产晋升仍在 P5 之后。数值/协议门槛和历史冻结包不变。
 - 2026-11-04 执行顺序按 `OTA-DEC-018` 增加有限非断电先行：P1-6 AUTO 独立收口和其他适用前置满足后，可先做 P5-1，再做 P5-2 条件具备的非断电项。物理断电义务、完整矩阵和生产发布门禁不变，不由本条自动判定准入或完成。
+- 2026-11-07 按用户批准的 `OTA-DEC-020` 修正后续选包与测试样本：只有最终 ETU 比 full 严格更小的匹配 patch 才自动下发；正常发布差分与固定负载基准分开。此变更不回改历史冻结包，不修改 BLE 性能门槛或授予生产部署权限。
 
 已冻结条款中的“必须”“不得”“仅”表示冻结规范性要求；“例如”“建议实现”“当前入口”属于非规范性说明。条款冻结不授予环境操作或正式执行资格。实现和派单资格仍以 `PLAN-OTA-EXEC.md` readiness 矩阵为唯一来源。
 
@@ -214,19 +215,20 @@ latest 的处理顺序固定为：参数校验和限流 → 加载有效 channel
 
 ### OTA-XC-ASSET-SELECTION
 
-裁定依据：`OTA-DEC-002`。
+裁定依据：`OTA-DEC-002`、`OTA-DEC-020`。后者前向替代 `PLAN-OTA.md` §6 中“匹配即返回 patch”的选择条件，不修改其身份域或历史验收含义。
 
 Worker 只从 channel 当前指向的 `ready` release 选包：
 
 patch 的 `base_image_sha256 == currentImageSha` 比较必须使用 `OTA-XC-IMAGE-IDENTITY` 定义的最终 `app.bin` raw SHA-256，不得使用 asset 摘要、header 双零摘要或摘要前缀。
 
 1. `version_code <= currentVersionCode` 时 `NO_UPDATE`。
-2. 若存在 `kind=patch`、`r2_state=available` 且 `base_image_sha256 == currentImageSha` 的唯一资产，返回该 patch。
-3. 只有输入 `currentImageSha` 来自完整有效 INFO，且不存在匹配的已验证 patch 或匹配 patch 不可用时，才返回唯一 `kind=full`、`r2_state=available` 资产。
+2. 若存在 `kind=patch`、`r2_state=available` 且 `base_image_sha256 == currentImageSha` 的唯一已验证资产，并且其 `size_bytes < full.size_bytes`，才返回该 patch。比较完整压缩、加密和封装后的 ETU 字节数，不比较 raw 镜像或解压后的差分流。
+3. 输入 `currentImageSha` 必须来自完整有效 INFO；不存在匹配的已验证 patch、匹配 patch 不可用，或其大小等于/大于 full 时，返回唯一 `kind=full`、`r2_state=available` 资产。不得为了命中 PATCH 测试而绕过大小门禁。
 4. full 缺失、重复或不可用时不得返回 patch 代替完整兜底，必须 fail closed 为后端不可用。
 5. `recovery` 永不参与自动选包。
 6. full 所属 release 必须具有权威 `target_image_sha256`，并通过资产长度和资产 SHA-256 检查；hardware、layout、Boot 和 protocol 已由 `OTA-XC-HTTP-LATEST` 在选包前分别判定，选包层不得把兼容错误改写成后端不可用。
 7. 缺少权威目标镜像身份的 legacy release 不得进入 latest，也不得因为存在 full 文件而自动放行。
+8. 仍允许保存/注册已验证但不划算的 patch，供审计或限定测试使用；它不获得自动选包资格。注册和下载 schema 不新增“强制差分”开关，recovery 及身份/兼容门禁不变。
 
 ### OTA-XC-HTTP-DOWNLOAD
 

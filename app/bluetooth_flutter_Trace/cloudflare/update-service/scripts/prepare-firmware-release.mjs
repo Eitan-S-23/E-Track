@@ -203,8 +203,10 @@ export async function prepareFirmwareRelease({ root, app, boot, build, release, 
   await run("full-apply", "Tools/etu_unpack.py", [full, "--out", fullCandidate, "--verify-fw-header"], "unpack(full) OK:");
   if (!(await readFile(fullCandidate)).equals(finalized)) throw badInput("Full roundtrip byte mismatch");
   await verify(finalImage, "app", release.versionName, targetSha, "full-outer-verify", ["--package", full]);
+  let patchComparison = null;
   if (base) {
     const patch = path.join(out, names[1]);
+    const patchTool = await fileIdentity(path.resolve(bsdiff));
     await run("patch-pack", "Tools/etu_pack.py", ["pack-patch", "--old", baseApp, "--new", finalImage, "--out", patch,
       "--ver-name", release.versionName, "--base-ver-name", base.versionName, "--bsdiff-exe", path.resolve(bsdiff),
       ...reproduce(patch)], "pack-patch OK:");
@@ -214,6 +216,18 @@ export async function prepareFirmwareRelease({ root, app, boot, build, release, 
       "--verify-fw-header"], "unpack(patch) OK:");
     if (!(await readFile(candidate)).equals(finalized)) throw badInput("Patch application byte mismatch");
     await verify(finalImage, "app", release.versionName, targetSha, "patch-outer-verify", ["--package", patch, "--base-image", baseApp]);
+    if (canonicalJson(await fileIdentity(path.resolve(bsdiff))) !== canonicalJson(patchTool)) {
+      throw badInput("bsdiff executable changed during preparation");
+    }
+    const old = await readFile(baseApp);
+    const fullBytes = verifiedAssets[0].sizeBytes, patchBytes = verifiedAssets[1].sizeBytes;
+    patchComparison = { encoding: "vendor-bsdiff-lzma", tool: patchTool,
+      baseImageSha256: base.imageSha256, targetImageSha256: targetSha,
+      changesOutsideFwHeader: !old.subarray(0, 0x400).equals(finalized.subarray(0, 0x400))
+        || !old.subarray(0x460).equals(finalized.subarray(0x460)),
+      fullPackageBytes: fullBytes, patchPackageBytes: patchBytes,
+      savedBytes: fullBytes - patchBytes, savingsRatio: (fullBytes - patchBytes) / fullBytes,
+      preferredKindForMatchingBase: patchBytes < fullBytes ? "patch" : "full" };
   }
   const recovery = path.join(out, names.at(-1));
   await run("recovery-create", "Tools/jlink/prepare-bootstrap-app.py", ["prepare", "--input", finalImage,
@@ -234,6 +248,7 @@ export async function prepareFirmwareRelease({ root, app, boot, build, release, 
   const prepared = metadataBytes(metadata);
   await writeOutput(root, path.join(out, "cloudflare-firmware-release-metadata.json"), prepared);
   const summary = { ok: true, commitSha: release.commitSha, runId: release.runId, versionName: release.versionName,
+    packagePurpose: "normal-upgrade", patchComparison,
     build, base: base ?? null, finalImage: await fileIdentity(finalImage), assets: metadata.assets,
     fullByteEqual: true, patchByteEqual: base ? true : null, recoveryVerified: true,
     preparedMetadataSha256: digest(prepared), expectedReadyMetadataSha256: digest(metadataBytes(readyProjection(metadata))),

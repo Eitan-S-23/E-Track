@@ -4,7 +4,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import { test } from "node:test";
-import { candidateAdmission, cleanupCandidate, redactCandidate, verifyCandidateCheckout, buildSourceCandidate } from "../../.github/scripts/firmware-candidate.mjs";
+import { candidateAdmission, candidateMetadata, cleanupCandidate, redactCandidate, verifyCandidateCheckout, buildSourceCandidate } from "../../.github/scripts/firmware-candidate.mjs";
+import { digest } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/prepare-firmware-release.mjs";
 import { candidateMode, UI_BASELINE } from "../../.github/scripts/firmware-candidate-context.mjs";
 import { buildKeyedFirmware, cleanupPrivateBuildKey } from "../../.github/scripts/firmware-gcc-keyed-build.mjs";
 import { firmwareCMakeOptions } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-build-profile.mjs";
@@ -21,6 +22,24 @@ const env = () => ({ GITHUB_ACTIONS: "true", GITHUB_EVENT_NAME: "workflow_dispat
 
 test("pure admission accepts only the explicit artifact-only context (host fixture, no CI execution)", () => {
   assert.equal(candidateAdmission(env()).runId, "123");
+});
+
+test("reference alias metadata is explicitly benchmark-only, never a representative functional sample", async () => {
+  await mkdir(fixtures, { recursive: true });
+  const dir = await mkdtemp(path.join(fixtures, "benchmark-label-"));
+  const prepared = path.join(dir, ".cache/p51-candidate/prepared");
+  const app = Buffer.alloc(2048, 1), boot = Buffer.alloc(256, 2), patch = Buffer.alloc(1048576, 3);
+  for (const [name, bytes] of [["app-final.bin", app], ["X-Track-Boot.bin", boot], ["patch.etu", patch],
+    ["reference-1MiB.etu", patch], ["full.etu", Buffer.alloc(128, 4)], ["recovery.bin", Buffer.alloc(2056, 5)]]) {
+    await writeOutput(dir, path.join(prepared, name), bytes);
+  }
+  const manifest = { targetSha256: digest(app), boot: { sha256: digest(boot) },
+    packet: { members: { base: { sha256: "a".repeat(64) } } }, targetVersion: "3.3.16" };
+  const result = await candidateMetadata(dir, env(), manifest);
+  assert.equal(result.packagePurpose, "fixed-load-benchmark");
+  assert.equal(result.representativeFunctionalSample, false);
+  assert.equal(result.reference.aliasOf, "patch.etu");
+  assert.equal(result.productionPublishable, false);
 });
 
 test("actual CLI rejects a non-dispatch host before any candidate inputs or private key use", () => {

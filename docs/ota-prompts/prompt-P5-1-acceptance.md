@@ -14,10 +14,12 @@ task_id: P5-1
 
 在同一受控发布候选上核验 SD/BLE × full/patch 四个组合，每个组合至少有一轮真实 MCU 升级原件；每轮从已知 CONFIRMED 起点开始，经 staging/candidate/Boot TEST_BOOT 到新 CONFIRMED，并在升级后用 GET_INFO、fw_header/BCB 和目标 metadata 复核版本与镜像身份。
 
+按 `OTA-DEC-020`，四组合主样本必须来自正常发布制包流程。PATCH 使用现有 vendor bsdiff + LZMA，绑定有真实代码/资源变化的新旧 finalized App，并记录相对同目标 full 的最终 ETU 大小和节省比例。只改版本头的正常小包保留为边界用例；刻意非最小化的 1 MiB 参考包只属于固定负载基准，二者不能替代代表性主样本。已有特殊样本原件仍证明其实际输入上的行为，不改写成正常差分收益。
+
 按 `OTA-DEC-016`，本卡统一承担稳定交付候选的一套 BLE 同组 30/30 参考包完整成功与真实
 四小时 soak，数值/统计规则仍以 `OTA-XC-BLE-TUNING` 为准。先独立评估已有适用原件，
 缺什么才新增什么；不要求实现者与验收者各做一套，也不把每个四组合都扩为 30 次。
-同一预先声明且条件匹配的观察可同时支撑四组合、30/30 或 soak 的适用判据；统计仍分清
+同一预先声明且样本目的和条件均匹配的观察可支撑多个适用判据；不能默认用特殊参考包同时代替正常四组合样本。统计仍分清
 通道、包、版本和参数组，不能事后拼接成功笔或用空闲/恢复耗时凑传输时长。
 
 ## 非目标
@@ -63,6 +65,8 @@ task_id: P5-1
 - 输入按 v3 绑定 `freeze_commit`、`freeze_tree`、`profile_config_blob`、已审批组件 profile 和真实 `depends_on`；原始设备/资产记录用哈希绑定的 `external_inputs`，不再生成旧工作树 manifest。
 - 正式 `REUSED` 保持同任务原始执行锚点；开发/用户或跨任务原件须实际执行独立离线核验并保留原操作日期、操作者和输入身份，不伪造正式来源或新的物理执行。
 - 每轮输入记录 source/target versionCode、source/target image identity、asset kind/hash/size、channel/releaseId、设备/Boot/App artifact hash。
+- 正常 PATCH cell 的 `functional_sample` 必须绑定 `purpose=normal-upgrade`、正常制包 `verification.json` 的 `preparation` 文件摘要，以及同目标 `full_package` 的完整文件摘要。runner 在 channel/device ownership 前复核工具编码、实际包大小与输入身份，并直接比较镜像头之外的内容；缺失、参考/诊断用途、仅改版本头或差分不更小均不得进入代表性功能 cell。该字段不追写旧合同或旧原件。
+- 制包证明须保留同目录的 metadata、`steps.json`、逐步 stdout/stderr、原始 App/base、full/patch apply candidate 及资产文件；制包工具实物由现有 `tool_dependencies` 绑定。准入复算这些原件的摘要、命令输入关系及 candidate 与目标逐字节一致，并复用现有字节校验器核验实际 ETU 的包型、长度、CRC、算法/密钥编号和基版/目标身份，不能只信成功布尔值或自洽的 JSON 声明。原始 CI 命令路径只作关系核验，不在验收机重放；已验证制包原件无需每次设备执行重新制包。
 - 输出记录完整状态轨迹、staging/BCB 关键提交、最终 GET_INFO、fw_header/BCB 对比和人机 UI 结果。
 
 ## 状态机与生命周期所有者
@@ -74,7 +78,7 @@ task_id: P5-1
 ## 错误、超时、重试、取消、恢复与幂等
 
 - 非计划断连、超时、卡/Flash 异常或用户误操作均保留实际尝试并先分类、取证、定位；不自动从起点重跑直至成功。只有实际修复或不可补取的必要观察才按执行合同最小复验，不剪掉失败片段拼成成功。
-- full/patch 选择必须可由 current image hash 和 latest/SD metadata解释。
+- full/patch 选择必须可由 current image hash 和 latest/SD metadata解释；公共 latest 按 `OTA-XC-ASSET-SELECTION` 仅自动选择比 full 严格更小的匹配 patch，不为测试强制绕过。
 - 重复 DATA、SD 两遍读取、Boot resume 等幂等由各冻结合同判定；验收只观察，不放宽。
 - 若环境失败与产品失败无法区分，结果为证据缺口，不得判 PASS。
 
@@ -103,6 +107,7 @@ task_id: P5-1
 - 四组合分别独立 PASS，才可汇总 4/4。
 - 最终 versionCode 和统一镜像身份必须等于目标 metadata，状态必须 CONFIRMED，设备可正常启动。
 - patch 轮必须证明基版匹配且最终 candidate 与目标 finalized App 一致；full 轮必须证明不依赖 patch 基版。
+- 正常 PATCH 主样本须绑定正常制包命令、工具/输入摘要、真实代码/资源变化与离线 apply 逐字节一致证据；报告大小以及传输、应用、重连阶段的实际耗时，不用固定负载数据代表真实差分收益。
 - 任一 required 证据缺失、来源不匹配或其冻结输入漂移，对应判据不得 PASS；未受影响结果的适用性由真实依赖决定。
 - BLE 参考包必须是完整合法 `.etu` 且 `total_len=1048576`；P95 不超过 120 秒、任一轮不超过 150 秒、有效吞吐不低于 9 KiB/s、clean run DATA 重传率不超过 1%，`maxRetries=5`，30 秒无 durable 进展中止。
 - timeout 与 ACK 取样仍按 `clamp(3*P99_ACK, 500ms, 2000ms)` 和共享 nearest-rank 规则；30/30、四小时及 P3-5 的 10/10 必须适用于同一候选参数组合，不从不同组合拼接。

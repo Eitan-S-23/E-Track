@@ -21,7 +21,7 @@ const repository = "Eitan-S-23/Trace";
 const fixture = JSON.parse(await readFile(path.join(root,
   "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/test/fixtures/firmware-release-v2.json"), "utf8"));
 
-async function input() {
+async function input({ headerOnly = false } = {}) {
   const parent = outputPath(root, path.join(root, ".cache/firmware-release-tests"));
   await mkdir(parent, { recursive: true });
   const dir = await mkdtemp(path.join(parent, "case-"));
@@ -34,7 +34,8 @@ async function input() {
   await writeOutput(root, boot, Buffer.from("synthetic Boot input, not installable"));
   const old = path.join(dir, "old-placeholder.bin");
   const baseFile = path.join(dir, "base.bin");
-  const oldBytes = Buffer.from(raw); oldBytes[0x500] ^= 0x19;
+  const oldBytes = Buffer.from(raw);
+  if (!headerOnly) oldBytes[0x500] ^= 0x19;
   await writeOutput(root, old, oldBytes);
   const setup = spawnSync(python, ["-B", path.join(root, "Tools/etu_pack.py"), "finalize", "--app", old,
     "--out", baseFile, "--ver-name", "2.8.0", "--build-ts", "1786320000"],
@@ -113,6 +114,17 @@ test("real finalize/full/patch/recovery bytes and canonical P4-2 metadata roundt
   assert.deepEqual(result.metadata.assets.map(a => a.kind), ["full", "patch", "recovery"]);
   assert.equal(result.summary.patchByteEqual, true);
   assert.equal(result.summary.r2Verified, false);
+  const fullBytes = result.metadata.assets.find(a => a.kind === "full").sizeBytes;
+  const patchBytes = result.metadata.assets.find(a => a.kind === "patch").sizeBytes;
+  assert.equal(result.summary.packagePurpose, "normal-upgrade");
+  assert.deepEqual(result.summary.patchComparison, {
+    encoding: "vendor-bsdiff-lzma", tool: { fileName: path.basename(bsdiff),
+      sizeBytes: (await readFile(bsdiff)).length, sha256: digest(await readFile(bsdiff)) },
+    baseImageSha256: options.base.imageSha256, targetImageSha256: result.summary.finalImage.sha256,
+    changesOutsideFwHeader: true, fullPackageBytes: fullBytes, patchPackageBytes: patchBytes,
+    savedBytes: fullBytes - patchBytes, savingsRatio: (fullBytes - patchBytes) / fullBytes,
+    preferredKindForMatchingBase: patchBytes < fullBytes ? "patch" : "full"
+  });
   assert.equal(result.metadata.targetImageSha256, result.summary.finalImage.sha256);
   assert.equal(result.metadata.assets[1].baseImageSha256, options.base.imageSha256);
   assert.throws(() => parseFirmwareRegistration(result.metadata), /readback/);
@@ -125,6 +137,14 @@ test("real finalize/full/patch/recovery bytes and canonical P4-2 metadata roundt
   assert.equal(digest(metadataBytes(readyProjection(result.metadata))), result.summary.expectedReadyMetadataSha256);
   process.stdout.write(`BYTE_FIXTURE ${JSON.stringify({ path: options.outputDir, assets: result.metadata.assets,
     finalImage: result.summary.finalImage, metadataSha256: result.summary.preparedMetadataSha256 })}\n`);
+});
+
+test("normal vendor patch reports header-only input as a boundary case, not representative source changes", async () => {
+  const result = await prepareFirmwareRelease(await input({ headerOnly: true }));
+  assert.equal(result.summary.patchByteEqual, true);
+  assert.equal(result.summary.packagePurpose, "normal-upgrade");
+  assert.equal(result.summary.patchComparison.changesOutsideFwHeader, false);
+  assert.equal(Object.hasOwn(result.metadata, "patchComparison"), false);
 });
 
 test("explicit bootstrap provenance still generates and byte-applies a real patch", async () => {

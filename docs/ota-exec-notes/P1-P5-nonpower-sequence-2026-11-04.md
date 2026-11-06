@@ -1839,3 +1839,1093 @@ No MCU, phone, SD, 30/30, four-hour or P5 formal acceptance action occurred. Nex
 execution preparation must use the actual new assets, rebind both rollback
 fixtures and validate current device/collector state before installing anything.
 Do not reuse the old 30313/30316 fixture bindings or claim P5 from this CI result.
+
+### P51 Starting-State Preparation And Installation Constraint
+
+2026-11-05 continuation: both new rollback fixtures are built, native-tested
+(22 checks each) and independently ELF-bound for 30319 -> 30317/30318. Exact
+candidate ELF/MAP and existing APK identities are bound without any installation.
+Each fixture build reports 643 warnings/zero errors; native checks have zero
+warnings/errors. The full Boot region preserves its non-erased tail, not an
+invented all-FF padding. Old inputs and all wrapper failures remain intact.
+
+P51-START-STATE-01 is a newly evidenced preparation gap. The real group16 Boot's
+CONFIRMED path does not update BCB cur_vcode after an App-only version change;
+the real backup path rejects that mismatch. Six targeted native observations
+using actual new candidate bytes prove the mismatch and matching-version positive
+controls. The direct-install adapter currently lacks this early version guard.
+No unsafe installation was attempted, and no physical failure is claimed.
+
+See `P51-start-state-preparation-2026-11-05.md` for exact evidence and remediation.
+Preferred route: supplement the existing immutable 1430c8ff candidate with only
+the two missing protected-key FULL initialization packages, retaining all image
+bytes/timestamps and reference results; add fail-closed direct-install admission.
+Root will then establish the starts through ordinary OTA/Boot, separately from
+formal P5 statistics. Do not change product BCB rules, force recovery, regenerate
+the reviewed reference or overwrite prior assets to conceal the setup gap.
+
+No CI, key access, service mutation, J-Link/ADB/device action, P5 freeze or child
+agent was performed in this continuation. Implementation remediation is returned
+to the user as a concrete prompt, while the completed offline bindings remain.
+
+### P51-START-STATE-01 Independent Review, 2026-11-05
+
+Root resumed the incomplete relay-session work without replaying the original
+317 host tests or eight native checks. Independent offline evaluation verifies
+their raw originals, 1841 retained files, 54 unrelated dirty files, 2129 outputs
+and 67 closed process receipts. Both public-fixture FULL payloads strictly
+reconstruct the original 30317/30318 images; this is not protected-key packaging.
+
+Local review result is HARNESS_FAIL: P51-START-REVIEW-02 requires the supplement
+adapter test to own both empty base-version environment fields instead of
+inheriting new-source values. The retained real new-source-context probe fails
+before its intended key oracle. P51-START-REVIEW-01 is a non-blocking correction:
+the wrong-expected-image decoder receipt says exit 1, not the handoff's exit 2.
+No additional product defect was found in the bounded review.
+
+User authorized direct coordination with the already-bound implementation agent.
+Root delivered the two-item packet, but execution requests twice returned model
+rate limiting. Between them the agent explicitly confirmed task receipt and no
+work/process in progress. Final file hashes remain unchanged; no corrected
+handoff exists. Do not claim remediation, protected CI or P5 PASS. Resume the
+small implementation/test-only delta when that service is available; retain this
+completed audit rather than restarting it. No commit/push, CI, device action,
+binding/model change or new sub-agent was performed by root.
+
+Full record: `docs/ota-exec-notes/P51-start-state-independent-review-2026-11-05.md`.
+Original evidence: `.cache/p51-start-state-root-review-20261105-01/` and `-02/`.
+
+### P51-START-STATE-01 Follow-Up Accepted Locally
+
+The user delivered P51_START_REVIEW_FIX_20261105_02. Root independently evaluated
+the exact test-only delta and four original 2/2 context results, exit 0 with all
+owned processes closed. REVIEW-02 isolation and REVIEW-01 additive exit-code
+correction are RESOLVED; local review is PASS. Production gates and the nine
+other reviewed source files are unchanged, and the prior package/native audit
+is reused without replay. No further local finding remains in this bounded batch.
+
+Audit: `.cache/p51-start-state-followup-review-20261105-01/audit.json`.
+Details: the Follow-Up Review appendix in
+`docs/ota-exec-notes/P51-start-state-independent-review-2026-11-05.md`.
+Protected supplemental CI/key binding, actual initialization packages and live
+start-state/P5 work remain NOT_RUN. No commit/push, CI, packaging, device action
+or contact with an implementation agent occurred in this root follow-up.
+
+### P51 Start-State Supplement Delivered And Fresh Passive Check
+
+Following the user's explicit confirmation of task Git metadata writes under
+`D:/github/my/E-Track/.git`, root committed only the reviewed supplement tooling,
+tests and handoffs as `4fe8468a6276ab46e6fd4304c98a93da64d193b3` and pushed the
+authorized `dev/firmware/p51-packaging-20261104` branch. Only the install-method
+delta of live_mcu.py was staged; unrelated restore changes remain dirty intact.
+The active main index/config/HEAD and unrelated worktree bytes were preserved.
+
+Exactly one protected artifact-only run, 42004577880/1, was dispatched and
+approved under the existing delegated authority. It succeeded with artifact
+13404502804. Six independent checks passed, including actual Linux 66 Node and
+25 Python regressions, eight native FULL/negative checks, ten closed native
+receipts and private cleanup. Native warnings/errors are 0/0; no ARM build or
+reference search occurred. Original 30317/30318 images and timestamp 1793820855
+remain byte-bound to source 1430c8ff; actual supplement workflow source is 4fe8468a.
+All other firmware jobs were skipped. Three gate variables remained false and
+environment/branch protection settings were unchanged after execution.
+
+Unmodified ZIPs, GitHub receipts, metadata and verification were archived at
+`docs/ota-exec-notes/P5-1-start-state-supplement-2026-11-05/` and committed as
+`045f1f89effb11f672d3a91ff7f7ab32704f4800`. The first evidence push returned
+HTTP 408. A separate GET confirmed the remote still at 4fe8468a; a bounded
+retry bypassing the inherited proxy for github.com succeeded and remote SHA
+045f1f89 was verified. No CI was repeated; the failed push originals remain in
+`.cache/p51-start-state-delivery-20261105-01/evidence-push-01/`.
+
+Fresh passive state is in `.cache/p51-live-start-20261105-01/current-01/`:
+the complete App matches retained 30313, the complete 64 KiB Boot region is
+unchanged, current App confirmation snapshot is CONFIRMED, health/watchdog
+advance, SD is ready/idle and the native USB state is not configured. This is
+not a new EEPROM cur_vcode read. No reset/halt/flash/persistent write was requested;
+all owned commands closed and the device lock was released. Only the standing
+SEGGER native-history exception applies outside the project for this observation.
+
+Four verified local SD files are ready under
+`.cache/p51-live-start-20261105-01/sd-ready-01/P51/20261105/`, with source hashes
+and headers bound by manifest.json: initialize-30317-full.etu,
+initialize-30318-full.etu, e-track-at32f435-v3.3.19-full.etu and
+e-track-at32f435-v3.3.18-to-v3.3.19-patch.etu. No SD card write or OTA occurred.
+The host currently exposes no removable SD disk (only C:/D: fixed and F: optical).
+The next required human action is reconnecting the board's native data USB while
+preserving J-Link power, plus explicit approval for adding these four files only
+under the freshly reidentified E:/P51/20261105 directory. Do not overwrite the
+existing P51 files; if the volume or drive mapping differs, reconcile before writing.
+Initialization remains outside P5 statistics; four combinations, 30/30 and the
+four-hour run remain NOT_RUN. No implementation agent was contacted in this work.
+
+### P51 Native SD Placement Completed; Phone Connection Required
+
+The user confirmed connection and explicitly authorized adding the four files
+only under `E:/P51/20261105`. Root freshly identified the original removable
+FAT32 native USB volume by GUID and AT32/SD Card/1.00/0E31DBF910C8 descriptor,
+plus exact connected PnP identity. The destination was absent; existing P51
+contained only the two retained 30316 packages. No prior copy was replayed.
+
+`.cache/p51-live-start-20261105-01/sd-copy-01/` records four exclusive-create
+writes, flush/fsync and complete readbacks matching the prepared hashes:
+initialize-30317-full.etu (291656 bytes), initialize-30318-full.etu (291652),
+e-track-at32f435-v3.3.19-full.etu (291700), and
+e-track-at32f435-v3.3.18-to-v3.3.19-patch.etu (1048576).
+Both old 30316 files were hash-checked before and after and remain unchanged.
+Root names were preserved and only the authorized child directory was added.
+Config Manager eject returned 0 with no veto; the exact disk was no longer
+connected in PnP. There was no overwrite, delete, format, import or upgrade.
+
+One current-session real Feishu mention requested unplugging only the board's
+data USB while retaining J-Link power, without a chat reply. Its successful
+send and closed-process receipts are in `unplug-notify-01/`; this was not an
+agent relay. The subsequent passive `current-03/` observation confirms the
+full retained 30313 App, unchanged full Boot region, CONFIRMED App snapshot,
+advancing health and idle/ready SD. Native USB state is 4 (not CONFIGURED=3),
+and the host disk is absent. This software state does not by itself prove
+physical cable removal, nor is it a fresh EEPROM cur_vcode observation.
+No halt, reset, flash, persistent board write or competing RTT reader was used.
+
+The fresh private-ADB check in `phone-inspect-01/` failed on its first read-only
+get-serialno command: `error: device '10ADA4197U001CK' not found`, exit 1.
+It did not reach APK identity verification. The private ADB server and stop
+command exited 0, all process trees closed and the device lock was released.
+The failure and original streams remain; no install, App launch, UI tap,
+data clearing or OTA was attempted. The previous version-98 APK binding is
+historical, not reconfirmed in this continuation.
+
+Next human action is reconnecting the V2312A test phone by data USB (unlock and
+handle its existing debugging prompt if shown), retaining J-Link power and
+keeping the board's data USB disconnected. Do not start SD import yet. Root
+will reconcile current phone identity through a new bounded observation before
+ordinary OTA/Boot initialization. No new implementation, CI, packaging or
+formal P5 execution is requested by this environmental failure.
+
+Write boundary: new helpers and evidence are under the active worktree; the
+only selected external file writes were the four expressly authorized SD paths.
+The passive debugger retains the standing SEGGER native-history exception.
+No Git commit/push or implementation-agent contact occurred. Final local path,
+source-package and process closure audit: `continuation-audit.json` in the same
+live-start area. Four-combination, 30/30 and four-hour results remain NOT_RUN.
+
+### P51 Phone Reconnected And First SD Initialization Prepared
+
+After the user reported reconnecting the phone, root ran a fresh private-ADB
+observation in `.cache/p51-live-start-20261105-01/phone-inspect-02/`, without
+replaying the failed output or reinstalling/launching the App. Serial/model
+match the pinned V2312A. The installed acceptance APK has versionCode 98 and
+SHA-256 b0a5cd5cbb45ba7e75ad492b65d4843ef70c33fbda365abaea495c48b3ebbcf1,
+matching the already verified artifact. Keyguard is unlocked, no test-App PID
+or OTA service is present, and the private server/port and device lock closed.
+The previous missing-device failure is preserved, now environmentally resolved.
+
+`initialize-sd.py prepare` bound the first ordinary SD setup, 30313 -> 30317,
+to the actual copied initialize-30317-full.etu and exact original/candidate
+App/ELF/MAP plus the unchanged full Boot region. Inputs and result are in
+`initialize-inputs-01/`. Ten host slot-oracle checks pass using the real image
+bytes, including truncated/corrupt payload, wrong image and wrong-kind rejection.
+No new package, ARM build, installation, import or reset occurred in preparation.
+
+The next user action is the board's normal Firmware Update file picker:
+select `P51/20261105/initialize-30317-full.etu`, confirm FULL with current 3.3.13
+and target 3.3.17, and start one import. Keep J-Link power and keep native board
+data USB disconnected. On completion leave the result page visible and provide
+its photo/status; do not reset or repeat a failed/uncertain import. This request
+requires a chat result and therefore uses the normal final reply, not another
+manual mention. No transient SD timing/BCB trace is claimed from this setup.
+
+The prepared `staged-after-user-result` entry is NOT_RUN. It only performs
+passive standard-Commander reads after the result is known: full current
+App/Boot, complete candidate and backup slots, complete staged package and
+stable health/storage checks. It does not read EEPROM, call firmware functions,
+write registers or reset. Root must review the UI result and these original
+bytes before separately recording a normal reset/Boot confirmation observation.
+Do not mistake the old App's CONFIRMED RAM snapshot for freshly read STAGED BCB.
+Ordinary target confirmation and full target identity remain required before
+the 30317 starting state is admitted. Initialization is excluded from P5
+four-combination, 30/30 and four-hour statistics; all remain NOT_RUN.
+
+Only project-local helpers, inputs, query receipts and this note were written
+in this phone continuation. No SD file write, J-Link invocation, Git/CI action,
+implementation-agent contact or product-code edit occurred. Closure and path
+audit: `phone-resume-audit.json` in the same live-start area.
+The initial offline closure audit incorrectly demanded exit 0 for the absent-App
+pidof query; its expected exit 1 and empty stdout were already accepted by the
+unchanged collector. The corrected audit checks that exact exception, retains
+`phone-resume-audit-failure-01.json` and the original query receipt, and repeats
+no device operation. All 15 owned phone commands are closed.
+
+### P51 First SD Initialization Reconciled After User Power Cycle
+
+The user reports one completed import showing ready, followed by disconnecting
+and reconnecting J-Link supply because the SD page did not automatically reboot.
+After an unmeasured long black screen, the board lit normally and their BLE
+software showed 3.3.17. No photo is available. This is a user-initiated power
+cycle after import, not an agent-controlled reset or an executed P1/P5-2 fault
+case. FirmwareUpdate intentionally ends with STAGED readiness and a return
+button; it does not automatically reset. The prior instruction to preserve the
+result page was not followed, so the planned pre-reset staged observation is
+NOT_RUN and must not be recreated by repeating the successful initialization.
+
+Root performed only passive reconciliation using the existing Commander adapter
+and pinned 30313/30317 inputs. Originals are in
+`.cache/p51-live-start-20261105-01/post-initialize-01/`. Full App bytes now match
+30317 (615132 bytes, SHA-256
+0fc735659ad2febf7eed7bd2576bfc2a0605f706b3924bffd7ea0b24099a82b9).
+The whole 65536-byte Boot region remains unchanged, including its non-erased
+tail. Before/after snapshots show CONFIRMED, advancing main-loop/watchdog health,
+idle/ready storage, intact stack guard, no faults and debug freeze zero.
+
+Both exact ELFs bind RTT control at 0x200534a8 and its 1024-byte up buffer at
+0x200530a8. Root saved header/control/buffer/control/header before bulk reads,
+verified stable header/descriptor, and reconstructed 285 pending bytes without
+advancing the RTT read pointer. The retained actual startup record contains
+`OTA: TEST_BOOT confirmed vcode=30317`. This is a current-startup firmware
+confirmation tied to the full current image, not a manufactured EEPROM dump,
+an old-address logger or a complete Boot/STAGED trace.
+
+The complete candidate slot matches 30317, the complete backup slot matches
+the original 30313, and the entire retained staging package matches the exact
+initialize-30317-full.etu bytes/hash. Slot headers, image CRCs, embedded SHA8s,
+versions and payloads pass; staging target 30317 and package journal match.
+All 16 owned commands closed and the device lock was released. No reset, halt,
+Flash/EEPROM write, RTT consumption, repeat import or new phone operation was
+performed by root. An entry-script reserved-keyword SyntaxError happened before
+execution; its original source and receipt are retained as
+post-initialize-entry-failure-01.py/.json. It caused zero device commands.
+
+The first initialization is successful and establishes the matched 30317
+starting image/firmware confirmation. Its backup is 30313, not the 30317 backup
+required for a later 30319 -> 30317 restore fixture; that fixture remains
+inadmissible until its actual preceding 30317 -> 30319 upgrade creates the backup.
+Raw post-reboot GET_INFO is user-reported only, not independently captured here.
+SD-stage/Boot timing, raw EEPROM and the omitted pre-reset trace stay unobserved.
+No black-screen performance, physical fault or P5 acceptance verdict follows.
+
+The reviewed UI code is now installed, but live long-filename behavior is still
+pending a user observation: focus a long-name row without starting another import
+and report whether it stays single-line and scrolls far enough to read the end.
+A photograph is not required for that text report. No repaired-layout hardware
+PASS is claimed before the observation. Four-combination/30-of-30/four-hour
+statistics remain NOT_RUN; the initialization is excluded from them.
+
+Only project-local helpers, originals and this note were selected as outputs,
+plus the standing automatic SEGGER native-history exception. No SD file write,
+Git/CI operation or implementation-agent contact occurred. Final original/path
+and closure audit: `post-initialize-audit.json` in the live-start area.
+
+### P51 Long-Filename Row Confirmed; Candidate Delivery Entry Gap
+
+The user explicitly confirms the current long-filename row is normal, in direct
+reply to the question about single-line layout and full-name horizontal scroll.
+This corroborates the original row-display repair on the independently verified
+30317 image. No photo or additional confirmation/progress-page observation is
+claimed. Do not reopen implementation or repeat initialization for this symptom.
+
+Root continued execution readiness rather than starting an unbound upgrade.
+A three-negative-case offline entry probe confirms the existing artifact-only
+metadata/modes are correctly rejected by the ordinary registration/publishing
+route. The current Release APK cannot use P34 Debug endpoint overrides, while
+the ordinary rehearsal entry refinalizes/repackages and requires its execution
+source. It cannot directly deliver the pinned candidate bytes unchanged under
+a newer tooling source without a reviewed explicit adaptation.
+
+P51-CANDIDATE-STAGING-01 is a preparation gap, not another UI or OTA product
+failure. Preferred bounded implementation and exact existing helper/asset
+identities are in `P51-candidate-staging-preparation-2026-11-05.md`. Root must
+not weaken provenance/gates, repackage the precise reference, relabel immutable
+metadata or directly publish around the protected entry to make progress.
+The user receives the implementation prompt; no agent was contacted or spawned.
+
+One fresh read-only backend check succeeded in login/channel GETs (stable72,
+beta11) but timed out reading the release list. Exit1 and all originals are
+preserved; the process tree is closed. No credential denial, missing-candidate
+fact or current complete inventory is inferred. Reconcile the live release
+before future publication and never restore the stale revision70 snapshot.
+No service write, CI, Git commit/push, device command or SD file operation was
+performed in this readiness check. New outputs are project-local under
+`.cache/p51-execution-readiness-20261105-01/`; final audit is `audit.json` there.
+Formal P5 freeze/four combinations/30-of-30/four-hour acceptance remain NOT_RUN.
+
+### P51-CANDIDATE-STAGING-01 Local Independent Review (2026-11-06)
+
+Root completed the bounded independent review without product edits. All 426
+implementation outputs and 21 preserved entry files match their bindings;
+268 distinct original host tests were verified from raw names and receipts.
+Six final-source staging regressions passed, exit0 with complete tree closure.
+No blocking findings. Details and scope are in
+`P51-candidate-staging-independent-review-2026-11-06.md`; original root evidence
+is `.cache/p51-candidate-staging-review-20261106-01/run-01/`.
+
+This is LOCAL_INDEPENDENT_REVIEW_PASS only. Protected delivery and real backend
+registration remain pending. Root next reconciles the current release inventory
+before scoped integration and one protected immutable-asset delivery. No phone
+window, initialization, UI reimplementation, source rebuild, new witness search,
+upstream campaign or P5 pass follows from the local tooling result.
+
+### P51 Immutable Staging Delivery Independently Verified (2026-11-06)
+
+Root integrated exactly 11 reviewed files at
+`7a5bf6058dbdbc1c5c64a79dec3b0df765985be3`, preserved unrelated dirty files and
+pushed the exact commit to `dev/firmware/p51-packaging-20261104` without force.
+One stage_candidate-only dispatch and user-delegated approval produced successful
+run42093030305/1. Six other jobs skipped; no ARM build, package generation,
+reference search, channel mutation, GitHub Release, production or device action.
+
+Actual CI 56 Node plus six Python tests passed. Three action deprecation warnings
+remain; errors0. Root independently verified 38 actual-output/provenance/backend
+checks, including unchanged original asset bytes, all three complete R2 readbacks
+before the one registration, exact separate compilation/delivery sources and
+unchanged protection/gates. The 30319 staging release is ready with three available
+assets and no published channel. Full channel states remain stable72/beta11;
+all other 28 releases are unchanged.
+
+Archive13447170644 is 1682251 bytes, SHA-256
+1ac066b1f5948c35bf3d88239eab59bf770517a5e400d7540aae9df33773e3c5.
+Originals, local/actual-CI review, metadata and API receipts are in
+`P5-1-candidate-staging-2026-11-06/`. The first direct archive GET timed out with
+768996 partial bytes and full process closure; original failure and bytes were
+preserved. A changed proxy download route retrieved that same artifact and hash.
+The successful cloud operation was never replayed to repair its host download.
+
+P51-CANDIDATE-STAGING-01 is resolved for this actual protected delivery. The next
+root work is latest/full-versus-patch download binding, exact SD/BLE collection
+and restoration commands, and formal freeze/precheck. No phone window was asked
+for or used. Four-combination/30-of-30/four-hour acceptance remains NOT_RUN.
+
+### P51 Public Selection Preparation Plan (2026-11-06)
+
+Staging evidence is committed/pushed at
+`220250326bda06763e7b4c19bd924899e7078120`. The direct evidence push failed its
+TLS handshake; a fresh remote GET proved the ref had not advanced. One retry
+through the already qualified proxy succeeded, with exact remote readback and
+closed processes. Both original push receipts remain in the delivery area.
+
+Within the user's continued staging/P5 authority, root next uses the existing
+Access/CSRF/channel CAS API for one finite preparation: verify the full current
+channel/release identity, temporarily activate the already-ready 30319 on the
+isolated stable test channel, query the real 30317 and 30318 image identities,
+download and compare the selected FULL/PATCH bytes, and restore the original
+channel target through the existing checked retract API. Do not restore an old
+revision number: a successful publish/retract advances72->73->74. The expected
+starting state is the just-read stable72/beta11; concurrent change stops mutation.
+
+This uses no new package, firmware, App installation or device command. Two
+successful queries/downloads are preparation evidence, not physical OTA results.
+Each HTTP/download and the outer owner are bounded, with an explicit cleanup
+reserve; uncertain mutation is reconciled through current channel state before
+any restoration. Existing callers, not direct D1 edits or invented endpoints,
+own activation/restoration. Phone/board windows stay closed during preparation.
+
+### P51 Resume And BCB Collection Qualification (2026-11-06)
+
+The repeated retry request resumes preparation, not successful OTA or channel
+operations. Original selection-01 completed: FULL for 30317 (291700 bytes) and
+PATCH for 30318 (1048576 bytes), both byte-identical to the staged originals;
+the channel restoration receipt is stable74/beta11. It was not replayed.
+
+New evidence area E is
+`.cache/p51-execution-precheck-20261106-01/retry-01/`. Real GDB CLI control-flow
+positive/negative checks passed without embedded Python. The root preparation
+script first had a pre-execution unmatched-parenthesis error, preserved in
+entry-failure-01.json. Its corrected execution then failed: V8.18 GDB Server
+does not support -help and opened the probe before rejecting Unspecified target.
+Exit -3, stdout/stderr and full process closure are preserved. The initial
+failure.json's constant deviceConnections=0 is incorrect for the probe;
+reconcile-01/correction.json explicitly corrects it to one probe connection,
+with target initialization rejected. Do not reuse that command.
+
+The existing passive Commander adapter reconciled the actual board: full 30317
+App and whole group16 Boot region match, initialized CONFIRMED snapshot, advancing
+loop/watchdog/tick, idle SD, intact stack guard, no fault, freeze=0 and no active
+hardware breakpoint. No reset/halt/flash/EEPROM write/OTA replay was performed
+in reconciliation. This is not an EEPROM dump or a proof of pre-launch uptime.
+
+P51-OBSERVATION-01 remains preparation: P5 requires real BCB/TEST_BOOT state,
+not the initialized App's cached CONFIRMED byte. The actual App ELF shows both
+64-byte EEPROM readbacks live at SP/SP+64 at bcb_arbiter return, with r0 carrying
+the selected block. A standard Commander hardware-breakpoint snapshot suffices;
+there is no need for a replacement GDB protocol or another server lifecycle.
+
+Within the user's continued task/device authority, root will self-test the
+bounded raw-BCB/sequence/register oracle, then qualify one snapshot on the current
+30317 via one ordinary reset at the verified storage-idle boundary. This is a
+collector qualification, not another upgrade, P1 acceptance or P5 statistical
+sample. Preconditions: fresh exact App/Boot and health, no newer staging, no
+other device owner, no active breakpoint, exact original ELF instruction check.
+Temporary debugger-only changes: one owned hardware breakpoint and APB watchdog
+debug-freeze bit 0x1000 at 0xE0042008. No PC calls, firmware edits, package changes,
+BCB/slot writes, fault injection or power interruption. Capture the normal
+startup's EEPROM readbacks, remove the actual changed comparator, resume, restore
+original freeze and verify full App/Boot plus running health/FPB. Preserve failure
+and reconcile before any retry. Finite stages: 30-second idle halt, 60-second
+reset/capture, 30-second read, 60-second cleanup/settle, 300-second final readback.
+The final retained state is the same healthy 30317/group16. All controlled outputs
+stay in E; automatic native SEGGER history uses only the standing exception.
+No phone window or formal P5 freeze is opened by this qualification.
+
+Qualification follow-up: bcb-live-01's 22 host checks passed and one planned
+reset ran. The saved pair has valid A/B CRCs, selected B/seq15, CONFIRMED with
+current/candidate30317 and backup30313. However final review rejects its
+BCB_COMMANDER_COLLECTION_QUALIFIED verdict: PC/SP and bytes came from different
+Commander connections, without a halted-state bracket around the byte read.
+Cleanup's explicit go also reports one CPU-is-not-halted diagnostic, despite
+exit0. P51-OBS-CAPTURE-01 is HARNESS_FAIL, not a product failure. Full original
+App/Boot, storage and final running health/cleared FPB/freeze0 are verified.
+All failed originals remain unchanged; bcb-live-01-review.json is the correction.
+
+Root's minimal fix reuses the same runner but adds the whole 8192-byte stack,
+header and a second DHCSR sample to the original stopped-register connection.
+The BCB pair is then sliced offline at that connection's observed SP; no second
+device connection supplies the sample. After positive/negative host checks,
+one targeted repeat is added to the finite preparation matrix (two actual normal
+resets total if completed, zero OTA/flash). This is a concrete collector repair,
+not a blind replay or a new acceptance round. Restoration requirements are unchanged.
+
+The unchanged private phone check also ran once: the selected phone was not
+found. Its original get-serialno stderr and PHONE_OBSERVATION_FAILED result are
+in E/phone-inspect-02. ADB stopped normally, port5093 and device lock are closed;
+no install, launch or OTA ran. Reconnect/unlock is the next real user intervention,
+after the independent-safe collector repair and audit have completed.
+
+### P51 Same-Connection BCB Qualified; Phone Still Absent (2026-11-06)
+
+P51-OBS-CAPTURE-01's targeted repair passed six new positive/negative checks,
+in addition to the original 22 parser checks. bcb-live-02 captured PC/SP, the
+full 8192-byte stack, exact App header and halted DHCSR before/after in one
+Commander connection. Its extraction.json binds the actual stack and derived
+128-byte pair; both CRCs are valid, the observed arbiter result selects B/seq15,
+state CONFIRMED, current/candidate30317, backup30313, bootTry/copyPhase/resume0.
+The pair SHA-256 is
+eec80954acfcae93eeac0b86286e232e3166801fbb3fcbd5a7b496089f660763.
+The original multi-connection HARNESS_FAIL is not overwritten or promoted.
+
+The corrected qualification ran one normal reset, making two actual resets in
+this continuation including the rejected capture. Zero OTA, Flash or direct
+EEPROM/slot writes. Eighteen owned commands closed; final full App and Boot match
+the originals, storage matches before, health advances, stack guard is intact,
+no fault, hardware breakpoint restored and freeze0. The corrected run has zero
+Commander warning/error diagnostics; the old run's one CPU-not-halted error and
+the GDB -help warning/failure remain explicit. This qualifies only current BCB
+collection, not a new SD/BLE upgrade or a complete STAGED/TEST_BOOT trace.
+
+After a further explicit user retry, only the failed read-only phone check was
+repeated in E/phone-inspect-03. It again reports the selected V2312A serial not
+found. Both phone-inspect-02 and -03 preserve the original exit1 stderr; the
+strict binding wrapper correctly refuses PHONE_IDENTITY_OBSERVED. Both private
+servers exit normally, port5093 and the device lock are closed, with zero install,
+launch, App data change or OTA. User action now required: connect the test phone's
+data USB to this PC, unlock it and handle an existing USB-debugging dialog if
+shown. Keep J-Link power; do not start an import/upgrade or connect the board's
+native data USB to compensate for the missing phone.
+
+Output audit is E/audit-01/result.json. All controllable outputs and temporary
+ownership locks are inside this worktree; only automatic SEGGER native history
+uses its standing external exception. No PowerShell, dependency/toolchain install,
+Git commit/push, CI, channel change or new package occurred in this continuation.
+Code changes are preparation-only local helpers and this task note; existing
+dirty product/tooling changes and frozen evidence remain untouched. Formal P5
+freeze, four combinations, 30/30 and four-hour soak remain NOT_RUN.
+
+### P51 Phone Reconnected; Manual Identity Preparation (2026-11-06)
+
+The user reports the phone connected. New evidence area Q is
+`.cache/p51-phone-resume-20261106-01/`. `inspect.py` reuses the pinned prior
+read-only phone check with fresh outputs. It completed with exit0: selected
+V2312A is unlocked, installed side-by-side Release APK98 matches the original
+SHA-256 b0a5cd5cbb45ba7e75ad492b65d4843ef70c33fbda365abaea495c48b3ebbcf1,
+and the test-App PID and DeviceOtaService were absent. Private ADB5093 closed
+normally and the ownership lock was released. No install, launch, tap,
+recording, BLE query, OTA, board command or cloud mutation occurred in that check.
+
+Next is one bounded no-OTA identity/recording preparation on retained 30317,
+not a replay of initialization or a formal P5 sample. `manual-query.py` only
+adapts existing Smoke/Phone launch, original-file sampling, seal/count/hash and
+identity oracles; it does not call the old runner's navigation, tap or cleanup
+workflow. Automatic tap/swipe entry points are rejected. The user owns ordinary
+connection/navigation/record/query/stop UI actions. No timing/acknowledged
+recording, package download, OTA start, force-stop, installation or data clearing
+is permitted. The exact 30317 full raw image identity is pinned; post-arm App
+identity plus at least eight seconds/five heartbeats and a valid original footer
+are required. This is decoded App evidence, not raw wire-frame capture.
+
+Root prepares preservation of all existing captures, fresh private outputs,
+bounded retrieval and closure before notifying the current-session requester.
+The client sends text through the existing cc-connect socket only; CC_LOG_FILE
+is removed and client homes/caches/temp/receipts remain under Q. No agent relay
+or daemon restart is involved. The host runtime is bounded to 1050 seconds,
+with no automatic UI retry; a remaining live recorder is sealed by the user and
+unresolved outcomes retain their evidence/ownership. The verified App may remain
+open after private ADB closes. No Git or channel mutation is planned by this step.
+
+The first manual window Q/query-01 preserved all nine existing sealed captures
+and launched the already verified test APK exactly once (PID23317). The current
+session open-page mention was delivered. Before any recording request, a window
+sample showed foreground changing to Feishu while unlocked. The adapter treated
+that pre-ARM transition as fatal and closed normally with OBSERVATION_FAILED
+(exit2). There was no recording, automated tap, new board command or OTA. This
+is a premature host-wait failure, not a firmware defect; original source and
+receipts remain unchanged.
+
+Q/manual-query-resume.py is a source-pinned thin correction: query-02 attaches
+only to the same proven PID, preserves the same old captures, and tolerates only
+the exact not-foreground UI observation during pre-ARM user navigation. Changed
+PID, foreign/ambiguous UI and any post-ARM failure remain strict. It does not
+relaunch, resend the pending page request, tap, reset or repeat an upgrade. A
+delayed-success check and three rejection checks precede this targeted new
+window. This addresses the observed collector failure without extending scope.
+
+### P51 Phone Query Originals Recovered And Diagnosed (2026-11-06)
+
+The resume adapter's first output-label self-check failed before any device
+command; its exact source and structured terminal-failure transcription remain
+in Q/resume-preflight-failure-01. After the label-only correction, the two
+automatic-UI rejection checks and four pre-ARM wait checks passed. query-02
+attached to PID23317 without relaunching and preserved the nine old captures.
+The user opened the firmware page, armed one ordinary recording and used the
+query controls. No host UI tap, new firmware installation or OTA was performed.
+
+The bound post-arm identity was sequence27: 30317 and the expected full image
+SHA-256 0fc735659ad2febf7eed7bd2576bfc2a0605f706b3924bffd7ea0b24099a82b9.
+The normal STOP wait exceeded its phase deadline; that OBSERVATION_FAILED/exit2
+is retained. Cleanup requested only sealing the existing recording, observed
+its normal footer and retrieved the exact original, not a new recording.
+Capture b818935899422b689911d5e68286cc68 has 194 records, approximately170 seconds,
+healthy=true, lost0 and error=null. Its 113474-byte original SHA-256 is
+a353c8f0d77af2f6f897e6adba5b59a466902c2d340a28f691721df9277a71f8.
+
+The strict offline smoke evaluation is FAIL, not PASS: after the selected
+identity, sequence45 records freshConnection=false. All sampled connections
+remain connected and all versions/image identities are unchanged, but that does
+not excuse the strict assertion. The first offline review stopped at this FAIL
+(exit1); Q/query-02-review-02 finishes original/receipt validation (exit0) while
+explicitly retaining smokeTestOutcome=FAIL and its failed sequence. It verifies
+live sampled prefixes, the original seal/hash, 155 post-selected-identity
+heartbeats, zero package/transfer state and the native size/cat/hash retrieval.
+Earlier pre-selected-identity refresh samples are not silently called fresh.
+
+A separate read-only window Q/logcat-read-01 retrieves the same PID's retained
+main/events log and all ten current phone originals, proving all hashes still
+match. It performs no launch, tap, new recording, BLE identity request, OTA or
+board command. No DeviceOtaService is active and private ADB closes normally.
+The App stays open; no force-stop or data deletion is used.
+
+P51-PHONE-OBS-01: the retained log records App foreground restoration and native
+top-resumed at epoch1793963655.960/.973, the false sample at1793963656.514, and
+a successful same-identity GET_INFO event at1793963656.687. Installed APK source
+792a8a3 matches both inspected files: OtaUpgradePage rereads on foreground
+restoration; OtaService::readDeviceInfo invalidates the previous identity before
+awaiting the new read. This explains why an uninterrupted-foreground smoke
+oracle cannot pass this trace. Do not infer physical disconnection or change
+production code merely to keep this diagnostic flag true. The strict FAIL and
+host timeouts remain intact; current identity/original integrity are separate
+valid observations. No clean stability/throughput or raw-wire claim is made.
+
+Q/audit-01 independently correlates logcat payloads with the unchanged original,
+binds source and process receipts, records the exact false-flag samples and
+Android log levels, and audits output boundaries. It covers the original480
+owned commands plus its own separate audit receipts. All controllable PC outputs
+are under Q or this append-only task note; only completed owned project-local
+locks were removed. The existing ADB key and installed tools were read-only.
+The three current-session mentions used the existing bridge socket with local
+client logs; no relay, daemon reconfiguration or external cleanup occurred.
+There was one test-App launch and one user recording, zero automated UI taps,
+installs, OTA, MCU commands, channel mutations, Git commit/push or CI/builds.
+
+Next root work remains the acknowledged raw-timing path and exact SD/BLE
+STAGED/TEST_BOOT/final-identity collection/restoration bindings before formal
+freeze. Do not restart initialization, repeat this recording merely for its
+late STOP, regenerate existing assets, or count these170 idle seconds as soak.
+P5 four combinations, 30/30 and four-hour acceptance remain NOT_RUN.
+
+### P51 Final Collection Preparation (2026-11-06)
+
+Root continues under the user's renewed instruction to proceed without routine
+approval stops. Active output area F is
+`.cache/p51-final-preparation-20261106-01/`, inside this worktree. Existing stream,
+runner and restore regressions passed 15+72+5=92 tests with their real process
+receipts. Offline binding-01 rejected an incorrect assumption that the inline
+`ota_confirm_test_boot` had a standalone ELF symbol. Its failure and original
+adapter are preserved. binding-02 uses the actual `HAL::OTA_ConfirmBoot` caller;
+both base/target/restore ELF-image bindings pass without firmware builds or
+device commands. This is not a physical restore or state-chain result.
+
+The existing recorder creates its original file before waiting five seconds for
+the acknowledged stream peer. The next finite preparation uses that new-file
+marker to start the existing `live_stream.py`; no protocol/timeout/App change.
+One schema2 raw-timing query-only recording supplies the still-missing live
+diagnostic route, not a replay of the ordinary recording for its late STOP.
+Preserve and verify all old phone originals and exact installed APK first.
+Only a proved closed, idle recorder may use the existing test-App-only restart
+route; never reinstall or clear data. The user owns navigation, timing ARM,
+query and STOP. No automatic UI tap, package download, OTA, board command or
+channel mutation is included. A new recording requires a new observed file,
+verified framing/ACKs, immutable original equality, a real query summary and
+fresh identity; logcat is not a fallback. All failures remain separate.
+
+The window reserves 300 seconds for manual page preparation, 300 for manual
+ARM, 180 for query/STOP, 120 for retrieval and 90 for failure sealing/cleanup,
+inside a bounded 1200-second owner. The ARM watcher must be running before its
+current-session notification. No chat acknowledgement or mid-recording switch
+to Feishu is requested. Formal four-cell/long-test freeze still waits for exact
+state-chain/restore command bindings; the already qualified single-connection
+BCB extraction and existing Commander WaitHalt route are reused, not rerun as
+another qualification or replaced by a new debugger/Flash implementation.
+
+### P51 Preparation Reconciliation And Scope Correction (2026-11-06)
+
+The preceding query-summary prerequisite was a root harness mistake. Installed
+source 792a8a3 only binds P35 raw link diagnostics for upgrade/prefix-probe, not
+ordinary idle queries. F/timing-query-02 retains its original failure; it is not
+an App/firmware failure and must not be repeated to manufacture diagnostics.
+F/timing-review-01/result.json independently verifies the actual ACK stream:
+23 frames, 21 idle state records, 15356 original bytes, healthy footer/lost0;
+zero post-ARM identity events, zero raw diagnostic records and zero OTA credit.
+F/timing-readback-01/result.json verifies all 11 phone originals unchanged,
+test-App PID7305 and no active OTA service. No reinstall/data clearing occurred.
+
+The final read-only audit completed exit0: 2124 files, 498 closed commands,
+493 exit0, two exit2 and three exit1 receipts, zero forced closures, private
+ADB/stream ports closed and device lock absent. All selected PC outputs are
+worktree-local. Existing failures, private UI dumps and four notification
+receipts remain unchanged; the two redundant post-restart page reminders are
+not to be repeated. No board command or OTA occurred in that phone preparation.
+
+F/state-bindings-02 supplies 50 offline checks and actual-image/disassembly
+bindings for the BCB callers. state-bindings-01 is explicitly rejected because
+its fixture and oracle repeated the same wrong candidate address. The corrected
+candidate payload address is 0x1000, independently checked against the earlier
+real BCB original. Neither points.json nor a synthetic test is a state-chain run.
+
+The user asked root to stop extending preparation and proceed. Root's next
+bounded change is a thin standard-Commander invocation adapter at
+Tools/ota/p51-acceptance/state_chain.py. It reuses MCU ownership, pinning,
+original streams and single-connection BCB extraction. No replacement debugger,
+Flash algorithm, new production code, repeated idle recording or package build.
+First intended cell is SD FULL 30317 ->30319, after the required committed
+inputs/frozen contract/precheck. Native halts are observation instrumentation,
+not throughput credit. Four combinations, 30/30 and four-hour soak remain NOT_RUN.
+
+### P51 Native Connection Correction Before First Cell (2026-11-06)
+
+Root's three local tooling commits are e096a179, d3bc6ed3 and e53e36ee.
+F/source-review-01 has 248 host tests; -02 has 20 targeted tests and -03 has
+24 targeted tests. These are not four-combination observations. The private
+F/freeze-01/publish validator exited 1 because matrix.contract_sha256 used
+lowercase while the existing validator binds uppercase file SHA-256. The draft,
+NOT_RUN matrix and failure receipt remain unchanged; no official P5 contract
+was published and no transfer ran.
+
+P51-OBS-CAPTURE-02: the drafted Collector still disconnected between arming,
+capturing and resuming. Earlier bcb-live-01 already disproved relying on state
+across such connections. Before any transfer, retain one standard Commander
+process for these batches, use its actual ClrBP handles, preserve each submitted
+batch and the single original stdout, and close after verified debugger cleanup.
+This only adds streaming stdin to the existing owned standard-tool process;
+there is no new debugger protocol, Flash algorithm or production change.
+Qualification is bounded host tests plus two read-only native batches, with no
+halt/reset/upgrade. Actual BCB phases remain first-cell observations, not a
+second preparatory OTA. No historical successful transfer or phone idle query
+is to be repeated.
+
+### P51 First Formal Entry And Corrected Continuation (2026-11-07)
+
+F remains `.cache/p51-final-preparation-20261106-01/`; directory dates are
+retained, not evidence timestamps. Native invocation correction is local commit
+`13847ab03bc4628d6c7b7e136200692a085a3851`. F/commander-tests-01 passed
+159 host tests, including 137 existing shared-process regressions; the targeted
+buffering follow-up and source-review-04 each passed 23. Readonly-01 connected
+and wrote its original readback, but its host wait expired because Commander
+buffers redirected stdout. Its normal exit0/closed receipt and original data
+are retained. Readonly-02 used console-only help to flush each completed native
+batch; two batches in one actual connection passed, with 30317 header, running
+CPU, freeze0 and no active FPB. No halt, reset, App/Boot/BCB write or OTA ran.
+The old failed read-only owner was reconciled against its closed process and
+fresh state, then its local lock was removed. The vendor help binds the canonical
+`ClearBP` command used by the submitted collector.
+
+The first official P5-1-v1 contract and exact PRECHECK passed. Its first SD-FULL
+entry exited1 before gate/device_owner/MCU/phone construction: run.py passed the
+relative --inputs path into absolute-only record(). The original stderr and
+receipt remain at
+`.cache/p51-campaign-20261106-02/command-output/sd-full/`; its initially empty
+product folder has a separately labelled interpretation result, not an invented
+device result. The immutable final-evidence-matrix.json records EXECUTED FAIL,
+harness owner, overall HARNESS_FAIL; F/entry-failure-02/validator proves the
+failure record is valid. The original NOT_RUN matrix remains untouched. An
+earlier attempt to use write-once save() on that matrix was rejected; no original
+was overwritten, and the final matrix was instead written to its own path.
+
+Local successor source is `50525077b57dfb698b8ce122e27230b38b728213`:
+normalize CLI inputs before record(), enforce pinned previous-bundle arguments
+for successor gates, and bind the already-qualified localhost7897 HTTPS CONNECT
+route explicitly in the test Cloud adapter. It adds no public API, retry,
+credential export or product change. F/source-review-05 passed 26 host tests,
+including actual CLI-entry normalization and direct/proxy/rejected-proxy cases.
+P5-1-v2 is frozen against that source and the real v1 failure. F/freeze-03 and
+`.cache/p51-campaign-20261106-03/rerun-plan.json` preserve the machine-computed
+continuation; no prior physical success exists to replay or discard.
+
+The v2 exact PRECHECK passed. The SD-FULL entry is now active in
+`.cache/p51-campaign-20261106-03/sd-full/`. Actual phone/Release APK98 checks and
+preservation of the existing originals passed. Its one current-session manual
+firmware-page notification has a successful receipt. The user owns navigation,
+record ARM and the subsequent actual import start; no automated tap is used.
+At this checkpoint it is waiting for the firmware page, not transferring.
+F/cloud-readiness-01 independently verified the existing owner Access session
+through the explicit proxy and read stable74; zero publish/retract, latest
+queries, package downloads or device operations belong to that check.
+
+All new PC outputs are in this worktree, including F and the three distinct
+campaign directories. Commits touch only the named task Git metadata under the
+standing `.git` boundary; the main worktree HEAD/index/config checks remain
+unchanged. Native SEGGER history uses the existing named exception; no other
+external writes or cleanup, PowerShell, CI, push, package build, installation,
+automatic UI action, upgrade, reset, flash or channel mutation occurred before
+this checkpoint. Product four-combination, 30/30 and soak credit remains zero.
+
+### P51 UI Window Ended; Prepared Successor Awaits Foreground (2026-11-07)
+
+The v2 SD-FULL entry above did not reach record ARM or an MCU connection.
+After the test App became foreground, native uiautomator returned exactly
+`ERROR: null root node returned by UiTestAutomationBridge.` with exit0
+(phone/usb/adb-00309.stdout and its receipt). The entry correctly refused missing
+hierarchy and exited1. This was not an import/upgrade failure or an absent USB
+phone. `.cache/p51-campaign-20261106-03/final-evidence-matrix.json` records the
+actual ENV_BLOCKED result; F/ui-failure-01 validates it against v1, preserves the
+notification and all eleven prior originals, and reconciles its closed owner.
+
+The narrow observation repair is local commit
+`7c07280fd6ed8393ed4bab13df1c08108e8d6018`: at most three UI reads for that exact
+native null-root response, each still bracketed by the same PID and foreground
+checks. All originals remain; the phase deadline is not renewed. Other malformed
+hierarchy, identity changes and a third null root still fail. No UI tap, recorder
+ARM, transfer or generic retry is added. F/source-review-06 passed 28 targeted
+host tests, including transient/persistent/other-error cases.
+
+F/ui-readiness-01 then performed only the existing phone identity check and one
+foreground check. The live focus was another application, so no hierarchy was
+read and no record/navigation/import was attempted. Its PID7305, closed private
+ADB and null captureId are retained. The new three-read recovery is host-tested,
+not yet a successful real-device hierarchy recovery. Do not call it physical
+state-chain qualification or replay the failed frozen output directory.
+
+P5-1-v3 now freezes 7c07280f and the real v2 ENV_BLOCKED predecessor. F/freeze-04
+and `.cache/p51-campaign-20261106-04/rerun-plan.json` retain validation and the
+minimum continuation. Its exact declared PRECHECK passed at
+`.cache/p51-campaign-20261106-04/precheck/`; SD-FULL in this successor has NOT_RUN.
+After the user puts the test App on its firmware page, resume with:
+
+    python -I -S -B -X utf8 .cache/p51-final-preparation-20261106-01/execute-declared.py SD-FULL
+
+Use cmd.exe and this worktree as the explicit working directory. Do not rebuild,
+re-freeze unchanged source, re-run UI implementation review, recopy SD packages,
+replay 30313->30317, requalify public selection, or start an idle recording.
+The next actual record is for SD FULL 30317->30319; the user still owns required
+phone/board controls, and must not start before the ready notification.
+
+F/closeout-audit-01/result.json passed: 1758 reviewed output files, all selected
+non-fixture command owners closed, private ports5093/5193 closed, no J-Link
+process and no device lock. Source changes, loose preparation scripts, versioned
+contracts, this note and all selected evidence stay in the active worktree.
+Task Git metadata and automatic SEGGER native history use only the named standing
+exceptions; main HEAD/index/config still match the last scoped-commit preflight.
+No other controlled external writes or cleanup occurred. New commits remain
+local, not pushed. Total actual upgrades/recordings/resets/flashes/channel
+mutations in this continuation are zero; four combinations, first30 and soak
+remain unexecuted. The present human prerequisite is the test App in the
+foreground, not another permission or package-preparation decision.
+
+### P51 First Actual SD FULL And Retained Target (2026-11-07)
+
+The user resumed. The unchanged v3 SD-FULL command ran once in campaign-04.
+Phone identity/eleven originals and the firmware page passed. The known closed
+recorder was safely restarted from PID7305 to PID32101 without reinstall/data
+clearing. User record ARM and SD import notices were delivered once each.
+Capture70d7890804b53e3cfec5ae36fca60ccc contains 256 healthy, lost0 records and
+both actual 30317 and 30319 identity events. Its original 184058 bytes are sealed
+at sd-full/phone/failure-original.jsonl, SHA256
+7f0083c62c10ccac847c793da21e9615b4d01feeaad3b6c1abfb982ef6bb984f.
+
+The first native beforeBackup snapshot exists. Commander WaitHalt prints its own
+complete registers, so two WaitHalt calls plus explicit regs produced three PC
+sets. The strict parser rejected that stdout as ambiguous. Original stack/header/
+halt brackets and complete stdout are retained. Cleanup restored all comparators,
+freeze0 and running CPU, and all phone/native processes closed. No agent reset
+was issued. The device nevertheless reached 30319; reset origin has not been
+established and is not labelled a product defect or an agent-issued reset.
+
+F/sd-full-reconcile-01 reinterprets the unique explicit J-Link>PC register block,
+without changing originals, proving initial real BCB B/seq15/CONFIRMED30317.
+One passive current-target readback proves the full615132-byte App equals the
+original30319 target, the entire65536-byte group16 Boot is unchanged, initialized
+confirmation4/health advances, faults0, SD idle, stack guard intact and FPB clear.
+The actual291700-byte FULL journal matches the bound package and committed30319;
+backup slot header is30317. This is the same first import, never a replay.
+Direct STAGED/TEST_BOOT/final-BCB originals are missing; do not call the formal
+SD-FULL criterion PASS or turn this collection failure into a failed upgrade.
+
+The next necessary baseline recovery is within the declared four-cell plan:
+use the existing full-restore plan and exact30319 same-version restore fixture,
+which validates the real preceding30317 backup before ordinary Boot rollback.
+Reuse MCU.restore and standard Commander, not a new flasher or App-only downgrade.
+It must prove complete30317 App, unchanged Boot, confirmation, health and zero
+staging durable before BLE-FULL. Stop and reconcile on any unknown outcome;
+retain the current target rather than guessing EEPROM/slot writes. This is a
+recorded recovery after a successfully installed but incompletely observed SD
+cell, not a rerun of that cell or a claim that its failed frozen result passed.
+
+### P51 Baseline Recovered And Register Parser Repair (2026-11-07)
+
+The resumed existing recovery process completed, exit0. F/first-full-recovery-01
+binds full30317 readback (0fc73565...), unchanged entire group16 Boot, initialized
+confirmation4, advancing health, SD idle, freeze0, intact guard and5092 painted
+free stack bytes. Ordinary Boot rollback completed and staging/journal is erased,
+expected next BEGIN durable0. No Boot programming and no repeated SD import.
+The owned process and device lock closed before parser work.
+
+v3 is sealed as HARNESS_FAIL at campaign-04/final-evidence-matrix-02.json, with
+the real v2 predecessor. Final validation passed while source still matched v3.
+The first packaging validation rejection (missing declared failure artifacts)
+and its matrix remain preserved; the added sd-full/result.json is explicitly a
+derived failure interpretation, never CELL_OBSERVED or formal RESTORE success.
+Actual30319 installation and missing intermediate BCB evidence remain separate.
+
+Only state_chain.register and its host tests change: the unique explicit
+J-Link>PC block is isolated from WaitHalt automatic registers. Duplicate/missing
+explicit blocks, wrong PC/SP and incomplete registers still fail; original
+header/stack/LR/CRC/BCB checks are unchanged. SD-idle uses the same parser.
+F/source-review-07 passes31 tests and reinterprets the same original beforeBackup
+stack to the identical B/seq15/CONFIRMED30317 pair. No device test was repeated.
+
+Next: a successor frozen at this two-file validation fix, then BLE FULL from the
+verified30317 base, its recovery, necessary30318 initialization, SD PATCH,
+recovery, BLE PATCH and recovery. Keep the first SD FULL evidence gap open;
+machine rerun recommendations do not authorize replaying its successful import
+solely to repair collection. The reference/soak campaign remains NOT_RUN.
+
+### P51 Pre-ARM Page Change And Prepared Phone (2026-11-07)
+
+Parser/test source is locally committed at45ae7d7cdfa69663b306df32c7ca22437f2a7e1f,
+not pushed. The v4 BLE-FULL entry stopped before recording/MCU connection/OTA:
+the actual native hierarchy changed from firmware page (adb-00130) to device
+scanning (adb-00136) during closed-recorder idle admission. It did not observe
+an active recorder, issue force-stop or send an upgrade. Test-channel target
+restored, stable74->75->76 and beta11 unchanged; USB/stream processes closed.
+Campaign-05/final-evidence-matrix.json preserves ENV_BLOCKED with its actual v3
+predecessor; F/page-failure-01 final validation passes. The dead owner was
+reconciled before the next phone-only preparation.
+
+F/phone-prearm-01 used existing idle-services/UI checks while asking the user to
+remain on the firmware page. It observed PID16489 (previous failed window32101),
+preserved all12 originals and verified enabled timing control. This preparation
+did NOT restart the App itself (restarted=false), start a recorder, tap/swipe,
+connect J-Link or mutate the test channel. Its private ADB closed. No attribution
+of the externally changed App process is inferred. v5 retains unchanged source,
+binds the actual v4 failure and prepared phone, and resumes BLE-FULL only after
+fresh command admission. First SD FULL and its state-evidence gap are unchanged.
+
+### P51 First Actual BLE FULL Verified (2026-11-07)
+
+The v5 BLE-FULL command completed once, exit0, in campaign-06. Direct native
+BCB states are4/1/3/4 with sequences183/184/197/198, initial30317 and final30319.
+Full615132-byte App equals fdd065a8..., all65536 group16 Boot bytes are unchanged,
+complete291700-byte staged FULL matches fd3f610f..., faults0, guard intact,
+SD idle and freeze0. No host reset was issued for this BLE cell.
+Phone capture aea74f08d618833b7f55a17dd37ac0dc is sealed:14532 records,
+9359250 bytes, SHA25694e7902396f3487875dda4113860346188ea36e90e5352a3f61ffcf78b129c33.
+Initial/final real INFO, ACK stream/footer and native mirror were retained;
+old12 captures are unchanged. Private ADB/stream/Commander closed and test
+channel restored, stable76->77->78/beta11. This is functional, not long-test
+timing evidence because the state observer intentionally halts at boundaries.
+
+F/ble-full-review-01 ran the existing four_cell evaluator on the originals and
+sealed v5's final matrix: BLE-FULL EXECUTED PASS, overall EVIDENCE_GAP for the
+remaining work. Final validator passed with actual v4 predecessor.
+Before the unused restore command, a read-only host check proved its relative
+--previous path would fail the existing absolute-only record() after recovery.
+No failed recovery was executed to discover this. Reuse-before-tooling applies:
+v6 changes only unused CLI arguments to canonical absolute previous paths, not
+the MCU recovery implementation or frozen product/validation source.
+
+v6 shares campaign-06's retained evidence and records the direct v5 BLE-FULL
+origin as REUSED. Its machine rerun plan explicitly excludes BLE-FULL. Original
+v5 PRECHECK/BLE command and artifact definitions remain exact; a distinct fresh
+PRECHECK-V6 admits the remaining commands. All prechecks pass. First SD FULL
+and its recovery stay withheld rather than replayed for missing logs. The
+declared RESTORE-BLE-FULL is now running; do not infer its outcome from this plan.
+
+### P51 Initialization Window And Three Actual Combinations (2026-11-07)
+
+RESTORE-BLE-FULL completed with full30317, unchanged Boot, confirmation/health
+and erased zero-durable journal. Its declared result is in campaign-06.
+The first INITIALIZE-30318 window in that campaign did not reach any MCU
+connection/import: recording started, but the first new identity event arrived
+at198.527333 seconds, after the180-second initial-identity window. All245 records
+were sealed, including the late identity. The failure, exact command receipt and
+successful preceding recovery are retained in v6/final-evidence-matrix-v6.json.
+RESTORE remains an unobserved combined criterion; partial_command_failures names
+the actual failed initialization rather than fabricating its other unexecuted
+commands. Final v6 validation passed before source changes; owner/USB closed.
+
+Local source675f18701ab975de3ea21f08ea2cee8a22242465 splits record ARM from the
+subsequent identity request. A missing identity is now requested immediately
+within its own phase; an already received matching identity causes no duplicate
+request. Initial cells and first long-block cells use the same path. The same
+small host batch normalizes --previous, forwards pinned original reuse sources,
+and exposes the existing four_cell evaluator as an offline --cell CLI. No
+firmware, APK, package, protocol, deadline or device safety check changed.
+F/source-review-08 passes35 tests and re-evaluates the same original BLE FULL.
+The source commit is local, not pushed.
+
+v7/campaign-07 binds the actual v6 predecessor and v5 original. BLE-FULL is an
+executed offline re-evaluation of campaign-06, not another BLE upgrade; its
+original four states/INFO/App/Boot/package pass unchanged. SD FULL and both
+already-completed FULL baseline recoveries are withheld from physical replay.
+
+The next INITIALIZE-30318 command completed its FIRST actual import, using the
+already present initialize-30318-full.etu. Native states4/1/3/4, one SD-idle-gated
+normal reset, complete30318 image and unchanged group16 Boot were verified.
+Fresh30318 INFO and sealed phone originals were retained. This setup is not an
+extra four-combination result.
+
+SD-PATCH then completed once: actual30318->30319, native states4/1/3/4, complete
+1048576-byte bound PATCH journal, exact target App and unchanged Boot. Its phone
+originals/closure and declared exit0 are retained under campaign-07/sd-patch.
+RESTORE-SD-PATCH then completed through the existing30319 same-version fixture
+and ordinary Boot rollback, retaining complete30318 with confirmation, unchanged
+Boot and erased zero-durable journal. No Boot programming or App-only downgrade.
+BLE-PATCH is now running; its outcome is not prefilled here.
+
+The first30/four-hour campaign remains NOT_RUN. Before launching it, review the
+actual BLE PATCH record size against the existing128MiB+8192-byte capture limit
+and the long runner's eight-cells-per-record default. The already observed FULL
+record alone is9359250 bytes for291700 payload bytes; this flags a capacity risk,
+not proof of a future overflow. The inherited phone-store bound is32 originals
+and existing originals must not be deleted to make the plan fit. Check actual
+remaining capacity and avoid repeated archival copies before any long transfer;
+do not run a predictably undersized collector then replay successful upgrades.
+
+### P51 Last-Cell Phone And Stream Failures Preserved (2026-11-07)
+
+The first campaign-07 BLE-PATCH entry stopped on pidof exit1/empty stdout before
+record ARM or MCU connection. PID13343 had disappeared; passive reconciliation
+observed PID23264, the same16 originals, no active OTA service and complete30318
+with erased zero-durable staging. Process-change cause remains UNESTABLISHED;
+the old-PID crash buffer was empty, not proof of a user action or absence of a
+product defect. Channels restored, stable78->79->80/beta11. v7 final validates
+ENV_BLOCKED with BLE-FULL and SD-PATCH PASS; existing successful upgrades were
+not replayed. v8 inherited both exact observations and continued only BLE-PATCH.
+
+That next entry failed before initial INFO or any upgrade invitation: the
+connected live-stream receiver raised TimeoutError. The App's immutable original
+d827e5533892e74a34d584aa8c402254 is retained,4630 bytes,
+SHA256dba0947598cd020c1591d3e1e4c6d45946af20a14059d7c904076204a3b41229.
+Its checksum/footer are intact but it is explicitly unhealthy:6 records, lost2,
+live-stream-failed. This is never made healthy or credited as an OTA attempt.
+F/stream-reconcile-01 passively reconfirmed full30318, unchanged Boot, healthy
+running state and erased zero durable, with17 original recordings and no new
+recording/launch/reset/write during reconciliation. Channel target restored,
+stable80->81->82/beta11. v8/final-evidence-matrix-v8.json records HARNESS_FAIL;
+its BLE-PATCH result artifact is an explicit failure interpretation only. Final
+validation passed against the actual v7 before editing any validation source.
+
+The receiver's post-connect socket idle timeout was fixed at5 seconds, distinct
+from the180-second manual identity phase. The producer pause cause is not
+established. Local source99bcee1777b7de1155d386294e1986c7e18310c4 adds a bounded
+explicit --idle-seconds parameter: legacy/default stays5, P5 requests60.
+Connection establishment stays5; phase/whole-record deadlines, original sequence/
+hash/healthy-footer checks and persist-before-ACK are unchanged. Record/identity
+notifications are shorter so the action fits without opening chat.
+F/source-review-09 passes125 checks, including actual child processes with a
+six-second gap: legacy default fails as before; an explicit longer wait preserves
+and acknowledges the complete original. No firmware, package or APK changed.
+
+v9/campaign-08 binds source99bcee17, the real v8 failure and v7 original source.
+BLE-FULL and SD-PATCH commands independently re-evaluated their existing raw
+observations, with zero device replay. The physical BLE-PATCH command is now
+running with the explicit60-second observer idle window. No outcome is assumed.
+LONG/EVALUATE remain withheld for capacity/remaining-evidence planning. Source
+commits remain local and unpushed; no phone-original cleanup has been performed.
+
+### P51 Last Cell Completed; Delta Sample Correction (2026-11-07)
+
+The preceding running-v9 text is historical. The disabled-recorder recovery was
+completed without deleting phone originals, followed by the v10 BLE PATCH
+30318->30319 in `.cache/p51-campaign-20261106-08/ble-patch-02/`. The original
+result records the complete native 4/1/3/4 state chain, full target/Boot checks,
+healthy final INFO and 51352 phone records. It used the original 1048576-byte
+reference PATCH. RESTORE-BLE-PATCH has not run; the last observed board remains
+30319. The first SD FULL direct-state gap, final matrix work and LONG remain open.
+
+The user then approved correcting normal-delta testing and automatic selection.
+Root switched to implementation for P51-DELTA-01 / OTA-DEC-020. The local fix,
+612 host tests, 10 native C checks, exact commands/source identities and output
+audit are in `docs/ota-exec-notes/P51-DELTA-01-2026-11-07.md`. Actual normal vendor
+bsdiff/LZMA on the original real UI-change pair 30313->30319 yields12445 bytes
+versus291700 FULL; the 30318->30319 header-only boundary yields308 bytes. These
+new envelopes use an isolated development key and are diagnostic only, not
+device candidates. No original package, device, channel or phone archive changed.
+
+New code is uncommitted and not deployed, and cannot be independently accepted
+by its implementer. Do not resume old frozen device commands against this dirty
+worktree or assume the former public-latest reference route still selects PATCH
+after the size policy is deployed. Review/bind normal candidates and minimum
+functional supplement first; retain separate fixed-load/capacity planning and
+all original P5/physical/release obligations. No successful OTA was replayed.
+
+### P51-DELTA-REVIEW-01 Root Remediation (2026-11-07)
+
+Independent consolidated pre-review reported **HARNESS_FAIL**, with one required
+functional-admission fix. Original report:
+`.cache/p51-delta-review-20261107-01/report.md`. Root has serially linked it here;
+neither that report nor its evidence was rewritten.
+
+Local repair now checks actual ETU identity/integrity and the complete archived
+normal-preparation command/tool/output chain, including byte-identical applied
+candidates. A shared existing byte-check function replaces duplicated envelope
+logic; no Worker, firmware, package algorithm or cloud schema was changed.
+Final targeted self-tests: 37 admission methods, 26 normal packaging/CLI tests
+and 10 nonpower tests. Three reviewer negatives and its incomplete old positive
+control also reject before device/channel ownership. All intermediate failures
+remain in `.cache/p51-delta-r01-20261107-01/`.
+
+Details, commands, dependency impact and boundary audit:
+`docs/ota-exec-notes/P51-DELTA-01-2026-11-07.md`, REVIEW-01 sections and
+`.cache/p51-delta-r01-20261107-01/audit-01/`. This is root implementation/self-test,
+not independent re-review or formal PASS. The same reviewer is next owner;
+commit/push, deployment, protected new candidates and device supplement remain
+unexecuted. Last observed board state and every outstanding P5/physical gate
+remain unchanged.
+
+The reviewer's disclosed four new/one updated external Cryptnet certificate-cache
+files are retained; root has not moved, deleted or restored them. Their exact
+paths and attribution remain in the original boundary report. This remediation
+used no network documentation fetch, native curl or PowerShell.
+
+### P51-DELTA-REVIEW-01 Independent Closure And Delivery (2026-11-07)
+
+The same independent reviewer has closed the local host-only repair finding.
+Repository-visible report: `P51-DELTA-REVIEW-01-2026-11-07.md`; original report
+SHA-256 `a7e39b2a1752a190c9010fc32ca08ddc496fd92ac31973893fad76d146738de7`.
+Root checked the report's completed closure, current six-file identity and
+decisive receipts; this is not root self-acceptance or formal P5 completion.
+Four retained invalid claims reject and the genuine smaller normal positive
+passes. The 73 existing host methods were independently evaluated, not rerun.
+
+Root supplied only a byte-identical readable copy of the inaccessible positive,
+35 files/91940 bytes; the reviewer checked the pre-existing output-index hashes.
+Original DACLs, old evidence and all device/package bytes were preserved. Relay
+partial returns, writer conflict, timeouts and the review's first Git ownership
+failure remain separate host records. No global trust/daemon change was used.
+
+The next already-authorized actions are scoped source delivery, required CI and
+isolated Worker delivery. Main and production stay untouched. A successor must
+retain the real Firmware dependency of `Libraries/OTA/ota_layout.h`, not only
+P41Release/Validation. Protected normal candidate inputs and a complete safe
+baseline/restoration route remain separate work; current normal release variables
+still point at the old bootstrap, and the old P1-6 restore is not directly usable
+on the present group16/30319 state. Do not replay v10 or promote diagnostic keys.
+Details and unchanged obligations are in `P51-DELTA-01-2026-11-07.md`; root-only
+continuation receipts are under `.cache/p51-delta-followup-20261107-01/`.
