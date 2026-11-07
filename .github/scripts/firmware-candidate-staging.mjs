@@ -82,13 +82,7 @@ async function loadNormalStagingInputs(root, out, inputs) {
   for (const pin of [inputs.sourceInputs, inputs.archive, inputs.artifact, inputs.run]) await pinned(root, pin);
   const proofBytes = await readFile(outputPath(root, path.join(out, "inputs/source-proof.json")));
   const proof = JSON.parse(proofBytes);
-  if (proof.schema !== "p51-normal-staging-source-proof-v1"
-    || canonicalJson(proof.originalOwner) !== canonicalJson(inputs.originalOwner)
-    || canonicalJson(proof.archive) !== canonicalJson(inputs.archive)
-    || canonicalJson(proof.artifactReceipt) !== canonicalJson(inputs.artifact)
-    || proof.configSha256 !== digest(Buffer.from(canonicalJson(inputs) + "\n"))
-    || digest(Buffer.from(canonicalJson(proof.files) + "\n")) !== inputs.archiveMembersSha256
-    || ["sourceCompilations", "finalizations", "packageGenerations", "referenceSearches"].some(k => proof[k] !== 0)) {
+  if (digest(Buffer.from(canonicalJson(proof.files) + "\n")) !== inputs.archiveMembersSha256) {
     throw fail("Normal staging original proof/inventory changed");
   }
   const originals = new Map();
@@ -114,6 +108,12 @@ async function loadNormalStagingInputs(root, out, inputs) {
   if (!buildBytes.equals(originals.get("inputs/originals/target/keyed-build/gcc-build-inputs.json"))) throw fail("Normal staging build changed");
   const build = JSON.parse(buildBytes);
   verifyBuildConfiguration(build, inputs.profile);
+  const expectedProof = { schema: "p51-normal-staging-source-proof-v1", originalOwner: inputs.originalOwner,
+    archive: inputs.archive, artifactReceipt: inputs.artifact, configSha256: digest(Buffer.from(canonicalJson(inputs) + "\n")),
+    files: proof.files, sourceCompilations: 0, finalizations: 0, packageGenerations: 0, referenceSearches: 0,
+    originalSourceProofSha256: candidate.sourceProofSha256, preparations: candidate.preparations,
+    targetSourceCommit: build.commitSha, assets: inputs.assets, finalImage: inputs.finalImage };
+  if (canonicalJson(proof) !== canonicalJson(expectedProof)) throw fail("Normal staging complete source proof changed");
   if (candidate.schema !== "p51-normal-candidate-v1" || candidate.isFormalRelease !== false || candidate.productionPublishable !== false
     || candidate.readyRegistered !== false || registration.runId !== inputs.originalOwner.runId
     || registration.commitSha !== build.commitSha || proof.targetSourceCommit !== build.commitSha

@@ -115,6 +115,28 @@ test("rewritten inventory cannot hide omitted preparation originals", async () =
   await assert.rejects(executeStaging({ root, out, env: env(), git, ...io }), /inventory/);
   assert.deepEqual(io.calls, []);
 });
+for (const [key, value] of [["originalSourceProofSha256", "0".repeat(64)],
+  ["preparations", { target: { path: "invented.json", sha256: "0".repeat(64) } }],
+  ["assets", []], ["finalImage", { ...inputs.finalImage, sha256: "0".repeat(64) }],
+  ["unexpected", "unchecked-claim"]]) {
+  test(`normal proof rejects changed or added ${key} before every cloud port`, async () => {
+    const out = await fixture(), io = ports(), file = path.join(out, "inputs/source-proof.json");
+    const proof = JSON.parse(await readFile(file)); proof[key] = value;
+    await writeOutput(root, file, JSON.stringify(proof));
+    await assert.rejects(executeStaging({ root, out, env: env(), git, ...io }));
+    assert.deepEqual(io.calls, []); assert.equal(io.closed(), false);
+  });
+}
+const originalProof = JSON.parse(await readFile(path.join(admitted, "inputs/source-proof.json")));
+for (const key of Object.keys(originalProof)) {
+  test(`normal proof rejects omitted ${key} before every cloud port`, async () => {
+    const out = await fixture(), io = ports(), file = path.join(out, "inputs/source-proof.json");
+    const proof = structuredClone(originalProof); delete proof[key];
+    await writeOutput(root, file, JSON.stringify(proof));
+    await assert.rejects(executeStaging({ root, out, env: env(), git, ...io }));
+    assert.deepEqual(io.calls, []); assert.equal(io.closed(), false);
+  });
+}
 for (const mode of ["corrupt", "uncertain"]) test(`normal delivery preserves ${mode} failure without blind retry`, async () => {
   const out = await fixture(), io = ports(mode);
   await assert.rejects(executeStaging({ root, out, env: env(), git, ...io }));

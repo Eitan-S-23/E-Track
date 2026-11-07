@@ -22,6 +22,27 @@ const rehearsal = workflow.jobs["rehearse-cloudflare"];
 const bindings = workflow.jobs["check-firmware-bindings"];
 const normalize = value => value.trim().replace(/\s+/g, " ");
 
+const normalStagingDependencies = ["Tools/ota/p51-normal-staging-inputs.py", "Tools/ota/p51-normal-staging-inputs.json",
+  "tests/ota/test_p51_normal_staging_inputs.py"];
+function assertNormalStagingPaths(events) {
+  for (const name of ["push", "pull_request"]) {
+    const event = events[name], matches = file => event.paths.some(pattern => path.posix.matchesGlob(file, pattern));
+    assert.deepEqual(event.branches, ["main", "master"]);
+    for (const file of normalStagingDependencies) assert.ok(matches(file), `${name} misses ${file}`);
+    assert.equal(matches("app/bluetooth_flutter_Trace/lib/services/ota_service.dart"), false);
+  }
+}
+test("normal staging parser configuration and tests trigger both automatic CI paths", () => {
+  assertNormalStagingPaths(workflow.on);
+});
+test("normal staging path guard rejects each missing automatic dependency", () => {
+  for (const event of ["push", "pull_request"]) for (const file of normalStagingDependencies) {
+    const changed = structuredClone(workflow.on);
+    changed[event].paths = changed[event].paths.filter(pattern => !path.posix.matchesGlob(file, pattern));
+    assert.throws(() => assertNormalStagingPaths(changed), /misses/);
+  }
+});
+
 test("normal candidate workflow connects the protected context, producer tool and complete evidence", () => {
   const job = workflow.jobs["package-candidate"];
   const github = { event: { inputs: { candidate_mode: "normal-delta" } } };
