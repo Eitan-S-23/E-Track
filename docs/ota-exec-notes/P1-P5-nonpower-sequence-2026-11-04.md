@@ -2929,3 +2929,27 @@ still point at the old bootstrap, and the old P1-6 restore is not directly usabl
 on the present group16/30319 state. Do not replay v10 or promote diagnostic keys.
 Details and unchanged obligations are in `P51-DELTA-01-2026-11-07.md`; root-only
 continuation receipts are under `.cache/p51-delta-followup-20261107-01/`.
+
+### P51 CI Dependency Wiring Followup (2026-11-07)
+
+Reviewed delta source was committed/pushed as
+`7ce7c0a2cb5a7ae1a7e9452121d8d4a818cd35da` to the existing packaging branch.
+One checks-only run, `42315720055`, was reconciled after a post-dispatch GET
+timeout, not redispatched. Firmware build succeeded; the development workflow
+failed because its real `-I -S` staging parser could not import `Crypto` from an
+ordinary pip installation. All protected/publication jobs were skipped.
+
+`P51-CI-DEPS-01` contains only the development dependency path/cwd wiring and its
+regressions. Its 242 final local host methods pass. The same independent reviewer
+is checking this bounded fix; the earlier DELTA R1 closure is not repeated.
+The full original command/source/count record, including intermediate failures,
+is in `.cache/p51-ci-deps-20261107-01/self-check.json` and the delta task note.
+The previous GCC run emitted 1280 compiler/linker warning lines, one CMake
+warning and zero compiler errors, not the earlier simulator's warning count.
+
+One pre-existing external Cryptnet metadata file changed during the local normal
+preparation test window. Exact path/hashes and unknown attribution are disclosed
+in `P51-DELTA-01-2026-11-07.md`; no cleanup or external rewrite was performed.
+No phone/board operation, Worker deployment or protected candidate generation
+occurred here. All existing restore, normal-candidate, SD FULL evidence, long-test,
+physical-fault and formal P5 obligations remain open.

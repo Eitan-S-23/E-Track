@@ -383,6 +383,7 @@ jobs:
       npm_config_cache: ${{ github.workspace }}/.cache/p41/npm
       PIP_CACHE_DIR: ${{ github.workspace }}/.cache/p41/pip
       TMPDIR: ${{ github.workspace }}/.cache/p41/tmp
+      PYTHONPATH: ${{ github.workspace }}/.cache/p51-staging/python
       PYTHONDONTWRITEBYTECODE: "1"
       BSDIFF_EXE: ${{ github.workspace }}/.cache/bsdiff/bin/bsdiff
     defaults:
@@ -423,7 +424,9 @@ jobs:
           printf '%s\n' "$GITHUB_SHA" > "$GITHUB_WORKSPACE/.cache/p41-worker-bundle/source-commit.txt"
           printf '%s\n' 'Build-only input; no deployment or rehearsal performed.' > "$GITHUB_WORKSPACE/.cache/p41-worker-bundle/purpose.txt"
       - name: Install byte test dependency
-        run: python3 -m pip install --disable-pip-version-check pycryptodome==3.23.0 PyYAML==6.0.3
+        working-directory: .
+        run: >-
+          python3 -m pip install --only-binary=:all: --disable-pip-version-check --target .cache/p51-staging/python pycryptodome==3.23.0 PyYAML==6.0.3
       - name: Build the existing vendor bsdiff for this host
         working-directory: .
         run: |
@@ -433,7 +436,7 @@ jobs:
         working-directory: .
         run: |
           python3 -B tests/ota/test_firmware_pack.py
-          PYTHONPATH="$GITHUB_WORKSPACE/Tools" python3 -B tests/ota-vectors/test_vectors.py
+          PYTHONPATH="$GITHUB_WORKSPACE/Tools:$PYTHONPATH" python3 -B tests/ota-vectors/test_vectors.py
       - name: Check workflow execution graph and configuration gates
         working-directory: .
         run: node --test tests/ota/test_firmware_workflow.mjs tests/ota/test_firmware_s3.mjs tests/ota/test_firmware_build_profile.mjs tests/ota/test_firmware_staging.mjs

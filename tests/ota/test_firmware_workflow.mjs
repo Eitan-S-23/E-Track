@@ -182,13 +182,71 @@ test("development wiring explicitly executes host, native, byte and production-G
   assert.match(checks, /p41-host.config.mjs/);
   assert.match(checks, /npm test -- --reporter=verbose/);
   assert.match(checks, /test_firmware_pack.py/);
-  assert.match(checks, /PYTHONPATH="\$GITHUB_WORKSPACE\/Tools" python3 -B tests\/ota-vectors\/test_vectors.py/);
+  assert.match(checks, /PYTHONPATH="\$GITHUB_WORKSPACE\/Tools:\$PYTHONPATH" python3 -B tests\/ota-vectors\/test_vectors.py/);
   assert.match(checks, /node --test tests\/ota\/test_firmware_release.mjs/);
   const build = workflow.jobs.build.steps.map(step => step.run ?? "").join("\n");
   assert.match(build, /--target X_Track_App_GCC X_Track_Boot/);
   assert.match(build, /firmware-release.mjs capture/);
   assert.match(build, /firmware-release.mjs development/);
   assert.match(build, /firmware-gcc-keyed-build.mjs --development/);
+});
+
+const developmentChecks = workflow.jobs["release-development-checks"];
+function assertDevelopmentPythonWiring(job) {
+  assert.equal(job.env.PYTHONPATH, "${{ github.workspace }}/.cache/p51-staging/python");
+  assert.equal(job.env.PYTHONPATH, workflow.jobs["stage-candidate"].env.PYTHONPATH);
+  assert.equal(job.env.PYTHONDONTWRITEBYTECODE, "1");
+  const install = job.steps.find(step => step.name === "Install byte test dependency");
+  assert.equal(install["working-directory"], ".");
+  assert.equal(install.run, "python3 -m pip install --only-binary=:all: --disable-pip-version-check --target .cache/p51-staging/python pycryptodome==3.23.0 PyYAML==6.0.3");
+  for (const entry of ["test_firmware_pack.py", "test_firmware_staging.mjs", "test_firmware_release.mjs"]) {
+    const consumer = job.steps.find(step => step.run?.includes(entry));
+    assert.ok(consumer && job.steps.indexOf(install) < job.steps.indexOf(consumer));
+    assert.equal(consumer["working-directory"], ".");
+    assert.equal(consumer.env?.PYTHONPATH ?? job.env.PYTHONPATH, job.env.PYTHONPATH);
+  }
+  const vectors = job.steps.find(step => step.run?.includes("test_vectors.py"));
+  assert.match(vectors.run, /PYTHONPATH="\$GITHUB_WORKSPACE\/Tools:\$PYTHONPATH" python3 -B tests\/ota-vectors\/test_vectors.py/);
+}
+
+test("P51 CI Python dependencies reach isolated and ordinary consumers from the repository root", () => {
+  assertDevelopmentPythonWiring(developmentChecks);
+});
+
+test("P51 CI dependency guard rejects the old site install, wrong cwd, path loss and late installation", () => {
+  for (const mutate of [
+    job => { delete job.env.PYTHONPATH; },
+    job => { delete job.steps.find(step => step.name === "Install byte test dependency")["working-directory"]; },
+    job => { const step = job.steps.find(step => step.name === "Install byte test dependency"); step.run = step.run.replace("--target .cache/p51-staging/python ", ""); },
+    job => { const step = job.steps.find(step => step.run?.includes("test_vectors.py")); step.run = step.run.replace("/Tools:$PYTHONPATH", "/Tools"); },
+    job => { const index = job.steps.findIndex(step => step.name === "Install byte test dependency"); job.steps.push(...job.steps.splice(index, 1)); }
+  ]) {
+    const changed = structuredClone(developmentChecks);
+    mutate(changed);
+    assert.throws(() => assertDevelopmentPythonWiring(changed));
+  }
+});
+
+test("P51 CI contained dependency modules load with site disabled and vectors preserve that path", () => {
+  assertDevelopmentPythonWiring(developmentChecks);
+  const workspace = path.resolve(root).replaceAll("\\", "/");
+  const dependencies = developmentChecks.env.PYTHONPATH.replace("${{ github.workspace }}", workspace);
+  const environment = { ...process.env, GITHUB_WORKSPACE: workspace, PYTHONPATH: dependencies };
+  const probe = execFileSync(python, ["-S", "-B", "-c", [
+    "import os; from pathlib import Path; import Crypto,yaml; from Crypto.Cipher import AES",
+    "root=Path(os.environ['PYTHONPATH']).resolve()",
+    "assert Crypto.__version__=='3.23.0' and yaml.__version__=='6.0.3'",
+    "assert all(Path(m.__file__).resolve().is_relative_to(root) for m in (Crypto,yaml))",
+    "assert AES.new(bytes(16),AES.MODE_ECB).encrypt(bytes(16)).hex()=='66e94bd4ef8a2c3b884cfa59ca342b2e'",
+    "print('CONTAINED_PYTHON_DEPENDENCIES_OK')"
+  ].join("; ")], { cwd: root, env: environment, encoding: "utf8", windowsHide: true, timeout: 15000 });
+  assert.equal(probe.trim(), "CONTAINED_PYTHON_DEPENDENCIES_OK");
+  const step = developmentChecks.steps.find(value => value.run?.includes("test_vectors.py"));
+  // Execute the real shell assignments without rerunning either package test here.
+  const paths = execFileSync(bash, ["--noprofile", "--norc", "-c",
+    'python3() { printf "%s\\n" "$PYTHONPATH"; }\n' + step.run],
+  { cwd: root, env: environment, encoding: "utf8", windowsHide: true, timeout: 15000 });
+  assert.deepEqual(paths.trim().split(/\r?\n/), [dependencies, `${workspace}/Tools:${dependencies}`]);
 });
 
 test("protected builds and packaging bind the same approved key without exposing cloud credentials to compilation", () => {
