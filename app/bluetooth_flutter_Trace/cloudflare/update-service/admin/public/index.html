@@ -3804,6 +3804,9 @@
           "actions.selectedHint": "Use the selected release.",
           "actions.publishBeta": "Publish to Beta",
           "actions.publishStable": "Publish to Stable",
+          "actions.rollbackBeta": "Roll back Beta",
+          "actions.rollbackStable": "Roll back Stable",
+          "actions.rollbackHint": "Move the channel to this older version",
           "actions.disableRelease": "Disable Release",
           "actions.deleteRelease": "Delete Release",
           "actions.betaHint": "Release to the Beta channel",
@@ -3930,6 +3933,9 @@
           "status.stableCancelled": "Stable publish cancelled.",
           "status.publishing": "Publishing {tag} to {channel}...",
           "status.published": "Published {tag} to {channel}. New revision {revision}.",
+          "status.rollbackCancelled": "Channel rollback cancelled.",
+          "status.rollingBack": "Rolling {channel} back to {tag}...",
+          "status.rolledBack": "Rolled {channel} back to {tag}. New revision {revision}.",
           "status.savingNotes": "Saving release notes...",
           "status.notesSaved": "Release notes saved.",
           "status.savingAnnouncement": "Saving announcement...",
@@ -3945,6 +3951,8 @@
           "status.requestFailed": "Request failed",
           "confirm.publish": "Publish {tag} to {channel}?",
           "confirm.publishDetail": "The selected release becomes the current {channel} version after CAS revision validation.",
+          "confirm.rollback": "Roll {channel} back to {tag}?",
+          "confirm.rollbackDetail": "Channel versionCode {from} -> {to}, subject to CAS revision validation. Already-updated clients will not downgrade; a corrective client update needs a higher versionCode.",
           "confirm.stableWarning": "Stable affects normal clients. Type stable below to continue.",
           "confirm.stablePrompt": "Type stable to confirm stable publish",
           "confirm.disable": "Disable unpublished release {tag}?",
@@ -3956,6 +3964,10 @@
           "result.publishFailureTitle": "Publish failed",
           "result.publishSuccess": "{tag} is now published to {channel}.",
           "result.publishFailure": "{tag} was not published to {channel}.",
+          "result.rollbackSuccessTitle": "Rollback completed",
+          "result.rollbackFailureTitle": "Rollback not confirmed",
+          "result.rollbackSuccess": "{channel} now points to {tag}. Already-updated clients will not downgrade.",
+          "result.rollbackFailure": "Rollback of {channel} to {tag} was not confirmed. Refresh the channel state before trying again.",
           "result.notesSuccessTitle": "Notes saved",
           "result.notesFailureTitle": "Notes save failed",
           "result.notesSuccess": "Release notes for {tag} were saved.",
@@ -4143,6 +4155,9 @@
           "actions.selectedHint": "针对当前选中版本执行操作。",
           "actions.publishBeta": "发布到 Beta",
           "actions.publishStable": "发布到 Stable",
+          "actions.rollbackBeta": "回退到 Beta",
+          "actions.rollbackStable": "回退到 Stable",
+          "actions.rollbackHint": "将通道指向这个较旧版本",
           "actions.disableRelease": "禁用版本",
           "actions.deleteRelease": "删除版本",
           "actions.betaHint": "发布到 Beta 通道",
@@ -4269,6 +4284,9 @@
           "status.stableCancelled": "Stable 发布已取消。",
           "status.publishing": "正在将 {tag} 发布到 {channel}...",
           "status.published": "{tag} 已发布到 {channel}。新修订号 {revision}。",
+          "status.rollbackCancelled": "通道回退已取消。",
+          "status.rollingBack": "正在将 {channel} 回退到 {tag}...",
+          "status.rolledBack": "{channel} 已回退到 {tag}。新修订号 {revision}。",
           "status.savingNotes": "正在保存发布说明...",
           "status.notesSaved": "发布说明已保存。",
           "status.savingAnnouncement": "正在保存公告...",
@@ -4284,6 +4302,8 @@
           "status.requestFailed": "请求失败",
           "confirm.publish": "将 {tag} 发布到 {channel}？",
           "confirm.publishDetail": "通过 CAS 修订校验后，所选版本会成为 {channel} 当前版本。",
+          "confirm.rollback": "将 {channel} 回退到 {tag}？",
+          "confirm.rollbackDetail": "通道 versionCode {from} -> {to}，仍须通过 CAS 修订校验。已升级的客户端不会降级；修复已升级客户端需要更高的 versionCode。",
           "confirm.stableWarning": "Stable 会影响普通客户端。请在下方输入 stable 继续。",
           "confirm.stablePrompt": "输入 stable 确认发布到 Stable",
           "confirm.disable": "禁用未发布版本 {tag}？",
@@ -4295,6 +4315,10 @@
           "result.publishFailureTitle": "发布失败",
           "result.publishSuccess": "{tag} 已发布到 {channel}。",
           "result.publishFailure": "{tag} 未发布到 {channel}。",
+          "result.rollbackSuccessTitle": "回退完成",
+          "result.rollbackFailureTitle": "回退未确认",
+          "result.rollbackSuccess": "{channel} 现在指向 {tag}。已升级的客户端不会降级。",
+          "result.rollbackFailure": "尚未确认 {channel} 已回退到 {tag}。请先刷新通道状态，再决定是否重试。",
           "result.notesSuccessTitle": "说明已保存",
           "result.notesFailureTitle": "说明保存失败",
           "result.notesSuccess": "{tag} 的发布说明已保存。",
@@ -4999,42 +5023,56 @@
         }
       }
 
+      function appChannelMode(release, channelRow) {
+        if (!release || !channelRow || release.state === "disabled" || Number(release.archived) === 1
+          || Number(channelRow.disable_latest) === 1 || !Number.isSafeInteger(release.version_code)
+          || !Number.isSafeInteger(channelRow.revision)) return null;
+        if (!channelRow.current_release_id) return "publish";
+        if (channelRow.current_release_id === release.id || !Number.isSafeInteger(channelRow.version_code)
+          || release.version_code === channelRow.version_code) return null;
+        return release.version_code < channelRow.version_code ? "rollback" : "publish";
+      }
+
       async function publishRelease(channel, releaseId) {
         const release = state.releases.find((item) => item.id === releaseId);
         const channelRow = state.channels.find((item) => item.name === channel);
-        if (!release || !channelRow) return;
+        const mode = appChannelMode(release, channelRow);
+        if (!mode || state.busy || !canRole(channel === "stable" ? "owner" : "publisher")) return;
+        const rollback = mode === "rollback";
         const channelText = channelLabel(channel);
+        const actionLabel = t(`actions.${rollback ? "rollback" : "publish"}${channel === "stable" ? "Stable" : "Beta"}`);
+        const operationDetail = rollback
+          ? t("confirm.rollbackDetail", { from: channelRow.version_code, to: release.version_code })
+          : t("confirm.publishDetail", { channel: channelText });
         const confirmed = await openConfirmDialog({
           tone: channel === "stable" ? "stable" : "default",
           icon: channel === "stable" ? "i-stable" : "i-beta",
-          title: channel === "stable" ? t("actions.publishStable") : t("actions.publishBeta"),
-          message: t("confirm.publish", { tag: release.release_tag, channel: channelText }),
-          detail:
-            channel === "stable"
-              ? t("confirm.stableWarning")
-              : t("confirm.publishDetail", { channel: channelText }),
-          confirmLabel: channel === "stable" ? t("actions.publishStable") : t("actions.publishBeta"),
+          title: actionLabel,
+          message: t(rollback ? "confirm.rollback" : "confirm.publish", { tag: release.release_tag, channel: channelText }),
+          detail: operationDetail + (channel === "stable" ? ` ${t("confirm.stableWarning")}` : ""),
+          confirmLabel: actionLabel,
           confirmClass: channel === "stable" ? "stable" : "primary",
           requiredText: channel === "stable" ? "stable" : ""
         });
         if (!confirmed) {
-          if (channel === "stable") setStatus("status.stableCancelled", "warn");
+          if (rollback) setStatus("status.rollbackCancelled", "warn");
+          else if (channel === "stable") setStatus("status.stableCancelled", "warn");
           return;
         }
         if (channel === "stable" && confirmed.value !== "stable") {
           setStatus("status.stableCancelled", "warn");
           return;
         }
-        setBusy(true, "status.publishing", { tag: release.release_tag, channel: channelText });
+        setBusy(true, rollback ? "status.rollingBack" : "status.publishing", { tag: release.release_tag, channel: channelText });
         try {
           const result = await mutate(`/api/admin/channels/${channel}/publish`, {
             appId: "trace",
             platform: "android",
             releaseId,
             expectedRevision: Number(channelRow.revision),
-            rollback: false
+            rollback
           });
-          const detail = t("status.published", {
+          const detail = t(rollback ? "status.rolledBack" : "status.published", {
             tag: release.release_tag,
             channel: channelText,
             revision: result.revision
@@ -5043,8 +5081,8 @@
           await openResultDialog({
             tone: channel === "stable" ? "stable" : "success",
             icon: channel === "stable" ? "i-stable" : "i-beta",
-            title: t("result.publishSuccessTitle"),
-            message: t("result.publishSuccess", { tag: release.release_tag, channel: channelText }),
+            title: t(rollback ? "result.rollbackSuccessTitle" : "result.publishSuccessTitle"),
+            message: t(rollback ? "result.rollbackSuccess" : "result.publishSuccess", { tag: release.release_tag, channel: channelText }),
             detail,
             confirmClass: channel === "stable" ? "stable" : "primary"
           });
@@ -5053,8 +5091,8 @@
           await openResultDialog({
             tone: "danger",
             icon: channel === "stable" ? "i-stable" : "i-beta",
-            title: t("result.publishFailureTitle"),
-            message: t("result.publishFailure", { tag: release.release_tag, channel: channelText }),
+            title: t(rollback ? "result.rollbackFailureTitle" : "result.publishFailureTitle"),
+            message: t(rollback ? "result.rollbackFailure" : "result.publishFailure", { tag: release.release_tag, channel: channelText }),
             detail: error.message,
             confirmClass: "danger"
           });
@@ -6156,11 +6194,15 @@
         const noRelease = !release;
         const disabled = noRelease || release.state === "disabled";
         const published = publishedChannels(release).length > 0;
-        document.querySelectorAll("[data-action='publish'][data-channel='beta']").forEach((button) => {
-          button.disabled = state.busy || disabled || !canRole("publisher");
-        });
-        document.querySelectorAll("[data-action='publish'][data-channel='stable']").forEach((button) => {
-          button.disabled = state.busy || disabled || !canRole("owner");
+        document.querySelectorAll("[data-action='publish']").forEach((button) => {
+          const channel = button.dataset.channel;
+          const mode = appChannelMode(release, state.channels.find((item) => item.name === channel));
+          button.disabled = state.busy || !mode || !canRole(channel === "stable" ? "owner" : "publisher");
+          const label = button.querySelector(".action-copy strong");
+          const hint = button.querySelector(".action-copy span");
+          label.textContent = mode === "rollback"
+            ? t(channel === "stable" ? "actions.rollbackStable" : "actions.rollbackBeta") : t(label.dataset.i18n);
+          hint.textContent = mode === "rollback" ? t("actions.rollbackHint") : t(hint.dataset.i18n);
         });
         document.querySelectorAll("[data-action='disable']").forEach((button) => {
           button.disabled = state.busy || disabled || published || !canRole("owner");
