@@ -16,6 +16,7 @@ sys.path.insert(0, str(ROOT / 'Tools/ota/p51-acceptance'))
 import run
 import observation as obs
 import pipeline_cloud as cloud
+import evaluate
 
 
 class FunctionalSampleGuards(unittest.TestCase):
@@ -479,6 +480,105 @@ class ExecutionGuards(unittest.TestCase):
         with patch.object(fake, 'cmd') as command:
             fake.preserve_failure()
         command.assert_not_called()
+
+
+class EvaluationEntry(unittest.TestCase):
+    def setUp(self):
+        parent = run.h.checked(Path(os.environ.get('P51_TEST_AREA', ROOT / '.cache/p51-functional-sample-tests')))
+        parent.mkdir(parents=True, exist_ok=True)
+        self.area = run.h.checked(Path(tempfile.mkdtemp(prefix='eval-', dir=parent)))
+        self.plan = self.area / 'plan.json'
+        run.h.save(self.plan, {})
+        self.blocks = [self.area / ('block-%02d' % index) for index in (1, 2)]
+        for folder in self.blocks:
+            run.h.save(folder / 'result.json', {'outcome': 'BLE_BLOCK_OBSERVED'})
+        self.spec = dict(long_inputs=run.h.record(self.plan), blocks=[str(path) for path in self.blocks],
+                         clock=str(self.area / 'clock'))
+        self.result = dict(stability30=True, soakObserved=True, attempts=30)
+        self.count = 0
+
+    def arguments(self, *flags):
+        self.count += 1
+        inputs = self.area / ('input-%d.json' % self.count)
+        self.output = self.area / ('output-%d' % self.count)
+        run.h.save(inputs, self.spec)
+        return ['evaluate.py', '--inputs', str(inputs), '--out', str(self.output), *flags]
+
+    def test_long_only_does_not_evaluate_or_claim_four_combinations(self):
+        with patch.object(sys, 'argv', self.arguments('--long-only')), \
+                patch.object(evaluate.run, 'validate', return_value={}), \
+                patch.object(evaluate, 'four_cell') as four, \
+                patch.object(evaluate, 'long_group', return_value=self.result) as long:
+            evaluate.main()
+        four.assert_not_called()
+        long.assert_called_once_with(self.blocks, {}, self.area / 'clock')
+        saved = run.h.read_json(self.output / 'result.json')
+        self.assertEqual(saved, dict(outcome='LONG_ORIGINALS_VERIFIED', group=self.result, deviceOperations=0))
+        self.assertFalse((self.output / 'four.json').exists())
+
+    def test_default_still_requires_and_reports_all_four_combinations(self):
+        rows = [dict(channel=channel, kind=kind) for channel in ('sd', 'ble') for kind in ('full', 'patch')]
+        self.spec['cells'] = [dict(out=str(self.blocks[0]), inputs=run.h.record(self.plan)) for _ in rows]
+        with patch.object(sys, 'argv', self.arguments()), patch.object(evaluate.run, 'validate', return_value={}), \
+                patch.object(evaluate, 'four_cell', side_effect=rows) as four, \
+                patch.object(evaluate, 'long_group', return_value=self.result):
+            evaluate.main()
+        self.assertEqual(four.call_count, 4)
+        saved = run.h.read_json(self.output / 'result.json')
+        self.assertEqual(saved['outcome'], 'OBSERVATIONS_MEET_P5_GATES')
+        self.assertEqual(saved['combinations'], 4)
+
+    def test_cell_mode_is_unchanged(self):
+        with patch.object(sys, 'argv', self.arguments('--cell', str(self.blocks[0]))), \
+                patch.object(evaluate.run, 'validate', return_value={}), \
+                patch.object(evaluate, 'four_cell', return_value={'original': True}) as four, \
+                patch.object(evaluate, 'long_group') as long:
+            evaluate.main()
+        four.assert_called_once_with(self.blocks[0], {})
+        long.assert_not_called()
+        self.assertEqual(run.h.read_json(self.output / 'result.json')['outcome'], 'CELL_ORIGINALS_VERIFIED')
+
+    def test_scopes_are_mutually_exclusive_before_output_creation(self):
+        with patch.object(sys, 'argv', self.arguments('--long-only', '--cell', str(self.blocks[0]))), \
+                self.assertRaises(SystemExit) as failure:
+            evaluate.main()
+        self.assertEqual(failure.exception.code, 2)
+        self.assertFalse(self.output.exists())
+
+    def test_long_only_keeps_missing_prefix_and_failed_block_rejections(self):
+        original = list(self.spec['blocks'])
+        for failed in (False, True):
+            self.spec['blocks'] = original if failed else [original[0], str(self.area / 'absent'), original[1]]
+            if failed:
+                run.h.save(self.blocks[0] / 'failed.json', {'preserved': True})
+            with self.subTest(failed=failed), patch.object(sys, 'argv', self.arguments('--long-only')), \
+                    patch.object(evaluate.run, 'validate', return_value={}), \
+                    patch.object(evaluate, 'long_group') as long, self.assertRaises(RuntimeError):
+                evaluate.main()
+            long.assert_not_called()
+            self.assertTrue((self.output / 'failed.json').is_file())
+            self.assertFalse((self.output / 'result.json').exists())
+
+    def test_long_only_preserves_required_gates_and_original_failure(self):
+        for key in ('stability30', 'soakObserved'):
+            result = dict(self.result, **{key: False})
+            with self.subTest(gate=key), patch.object(sys, 'argv', self.arguments('--long-only')), \
+                    patch.object(evaluate.run, 'validate', return_value={}), \
+                    patch.object(evaluate, 'long_group', return_value=result), \
+                    self.assertRaisesRegex(RuntimeError, 'required long-test gates'):
+                evaluate.main()
+            self.assertEqual(run.h.read_json(self.output / 'long.json'), result)
+            self.assertTrue((self.output / 'failed.json').is_file())
+            self.assertFalse((self.output / 'result.json').exists())
+
+    def test_long_original_parse_failure_is_not_converted_to_success(self):
+        with patch.object(sys, 'argv', self.arguments('--long-only')), \
+                patch.object(evaluate.run, 'validate', return_value={}), \
+                patch.object(evaluate, 'long_group', side_effect=RuntimeError('bad original')), \
+                self.assertRaisesRegex(RuntimeError, 'bad original'):
+            evaluate.main()
+        self.assertEqual(run.h.read_json(self.output / 'failed.json')['message'], 'bad original')
+        self.assertFalse((self.output / 'result.json').exists())
 
 
 if __name__ == '__main__':

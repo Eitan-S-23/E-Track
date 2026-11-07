@@ -164,7 +164,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--inputs', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
-    parser.add_argument('--cell', type=Path, help='Re-evaluate one existing cell, without executing any device action')
+    scope = parser.add_mutually_exclusive_group()
+    scope.add_argument('--cell', type=Path, help='Re-evaluate one existing cell, without executing any device action')
+    scope.add_argument('--long-only', action='store_true', help='Evaluate only the declared long-test originals, not the four combinations')
     args = parser.parse_args()
     h.require(Path.cwd() == h.ROOT and sys.flags.isolated and sys.flags.no_site and sys.dont_write_bytecode,
               'explicit worktree and isolated Python required')
@@ -176,11 +178,12 @@ def main():
             h.save(out / 'result.json', dict(outcome='CELL_ORIGINALS_VERIFIED', cell=result, deviceOperations=0))
             print('CELL_ORIGINALS_VERIFIED', flush=True)
             return
-        results = [four_cell(h.checked(h.ROOT / item['out']), run.validate(h.read_json(h.pinned(item['inputs']))))
-                   for item in spec['cells']]
-        h.require(len(results) == 4 and {(row['channel'], row['kind']) for row in results} ==
-                  {('sd', 'full'), ('ble', 'full'), ('sd', 'patch'), ('ble', 'patch')}, 'not exactly four combinations')
-        h.save(out / 'four.json', dict(combinations=len(results), cells=results))
+        if not args.long_only:
+            results = [four_cell(h.checked(h.ROOT / item['out']), run.validate(h.read_json(h.pinned(item['inputs']))))
+                       for item in spec['cells']]
+            h.require(len(results) == 4 and {(row['channel'], row['kind']) for row in results} ==
+                      {('sd', 'full'), ('ble', 'full'), ('sd', 'patch'), ('ble', 'patch')}, 'not exactly four combinations')
+            h.save(out / 'four.json', dict(combinations=len(results), cells=results))
         p = run.validate(h.read_json(h.pinned(spec['long_inputs'])))
         blocks = []
         absent = False
@@ -195,6 +198,10 @@ def main():
         result = long_group(blocks, p, h.checked(h.ROOT / spec['clock']))
         h.save(out / 'long.json', result)
         h.require(result['stability30'] and result['soakObserved'], 'required long-test gates not met')
+        if args.long_only:
+            h.save(out / 'result.json', dict(outcome='LONG_ORIGINALS_VERIFIED', group=result, deviceOperations=0))
+            print('LONG_ORIGINALS_VERIFIED', flush=True)
+            return
         h.save(out / 'result.json', dict(outcome='OBSERVATIONS_MEET_P5_GATES', combinations=4, group=result))
         print('OBSERVATIONS_MEET_P5_GATES', flush=True)
     except BaseException as error:
