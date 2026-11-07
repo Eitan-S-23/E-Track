@@ -1,5 +1,9 @@
 const publicPaths = new Set([
   "/healthz",
+  "/api/public/latest",
+  "/api/public/download",
+  "/api/public/github-fallback",
+  "/api/public/announcements",
   "/api/public/firmware/latest",
   "/api/public/firmware/download"
 ]);
