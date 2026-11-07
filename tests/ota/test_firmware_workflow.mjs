@@ -7,6 +7,7 @@ import { test } from "node:test";
 import { runInNewContext } from "node:vm";
 import { outputPath, writeOutput } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-cli.mjs";
 import { releaseConfig } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-release-pipeline.mjs";
+import { candidateAdmission } from "../../.github/scripts/firmware-candidate-context.mjs";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const fixtures = outputPath(root, path.resolve(root, process.env.P51_TEST_AREA || ".cache/firmware-workflow-tests"));
@@ -49,6 +50,27 @@ test("normal candidate workflow connects the protected context, producer tool an
 });
 
 // P4-4 checks the actual configuration parser without a build or cloud call.
+test("normal candidate dispatch projects disallowed notes and rehearsal ID into the pre-secret gate", () => {
+  const job = workflow.jobs["package-candidate"], sha = "a".repeat(40);
+  const inputs = { stage_candidate: "false", package_candidate: "true", publish: "false", rehearsal: "false", check_bindings: "false",
+    candidate_mode: "normal-delta", version_name: "3.3.21", candidate_base_version: "3.3.20", candidate_full_base_version: "",
+    candidate_reviewed_commit: sha, firmware_build_profile: "p34-v2-candidate", release_notes: "", approved_rehearsal_run_id: "" };
+  const projected = values => {
+    const github = { event: { inputs: values } }, env = { GITHUB_ACTIONS: "true", GITHUB_EVENT_NAME: "workflow_dispatch",
+      GITHUB_REPOSITORY: "Eitan-S-23/E-Track", GITHUB_SHA: sha, GITHUB_WORKFLOW_SHA: sha, GITHUB_RUN_ID: "123", GITHUB_RUN_ATTEMPT: "1",
+      GITHUB_REF: "refs/heads/fixture-only", GITHUB_WORKFLOW_REF: "Eitan-S-23/E-Track/.github/workflows/firmware-build.yml@refs/heads/fixture-only",
+      OTA_BOOT_CHAIN_READY: "false" };
+    for (const [key, expression] of Object.entries(job.env)) {
+      if (key.startsWith("INPUT_") || key.startsWith("FIRMWARE_")) env[key] = runInNewContext(expression.trim().slice(3, -2), { github });
+    }
+    return env;
+  };
+  assert.equal(candidateAdmission(projected(inputs)).runId, "123");
+  for (const key of ["release_notes", "approved_rehearsal_run_id"]) {
+    assert.throws(() => candidateAdmission(projected({ ...inputs, [key]: "not-empty" })));
+  }
+});
+
 const p44Fixture = () => ({
   FIRMWARE_RELEASE_MODE: "rehearsal", GITHUB_EVENT_NAME: "workflow_dispatch",
   INPUT_REHEARSAL: "true", INPUT_PUBLISH: "false", INPUT_CHECK_BINDINGS: "false",

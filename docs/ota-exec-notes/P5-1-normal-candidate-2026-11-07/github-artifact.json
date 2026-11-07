@@ -1,0 +1,20 @@
+{
+  "id": 13570446315,
+  "node_id": "MDg6QXJ0aWZhY3QxMzU3MDQ0NjMxNQ==",
+  "name": "p51-normal-42362540910-1",
+  "size_in_bytes": 7132193,
+  "url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/artifacts/13570446315",
+  "archive_download_url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/artifacts/13570446315/zip",
+  "expired": false,
+  "digest": "sha256:c04da54ec5bbc247d73a544f4270ac98f0b9654b1ae5dc815b3d6c48f90c9568",
+  "created_at": "2026-11-07T10:10:29Z",
+  "updated_at": "2026-11-07T10:10:29Z",
+  "expires_at": "2026-11-21T10:10:27Z",
+  "workflow_run": {
+    "id": 42362540910,
+    "repository_id": 1310649784,
+    "head_repository_id": 1310649784,
+    "head_branch": "dev/firmware/p51-packaging-20261104",
+    "head_sha": "3b90e3b494201fc7bb46d098705adb0dd33bf132"
+  }
+}

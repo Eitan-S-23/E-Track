@@ -224,8 +224,9 @@ jobs:
         env:
           P51_TEST_AREA: ${{ github.workspace }}/.cache/p51-staging/selftests
         run: |
-          node --test tests/ota/test_firmware_staging.mjs
+          node --test tests/ota/test_firmware_staging.mjs tests/ota/test_firmware_normal_staging.mjs
           python3 -I -S -B -X utf8 tests/ota/test_p51_staging_inputs.py
+          python3 -I -S -B -X utf8 tests/ota/test_p51_normal_staging_inputs.py
       - name: Admit the original archive and three selected assets without credentials
         id: inputs
         run: node .github/scripts/firmware-candidate-staging.mjs inputs
@@ -241,7 +242,7 @@ jobs:
           TRACE_R2_BUCKET: ${{ vars.FIRMWARE_REHEARSAL_TRACE_R2_BUCKET }}
         run: node .github/scripts/firmware-candidate-staging.mjs execute
       - name: Preserve unchanged selected assets and separate staging evidence
-        if: always() && steps.inputs.outcome != 'skipped' && steps.inputs.outcome != ''
+        if: always() && steps.inputs.outcome != 'skipped' && steps.inputs.outcome != '' && github.event.inputs.candidate_mode != 'normal-delta'
         uses: actions/upload-artifact@v4
         with:
           name: p51-staging-${{ github.run_id }}-${{ github.run_attempt }}
@@ -249,6 +250,20 @@ jobs:
             .cache/p51-staging/run-${{ github.run_id }}-${{ github.run_attempt }}/assets/e-track-at32f435-v3.3.19-full.etu
             .cache/p51-staging/run-${{ github.run_id }}-${{ github.run_attempt }}/assets/e-track-at32f435-v3.3.18-to-v3.3.19-patch.etu
             .cache/p51-staging/run-${{ github.run_id }}-${{ github.run_attempt }}/assets/recovery-v3.3.19.bin
+            .cache/p51-staging/run-${{ github.run_id }}-${{ github.run_attempt }}/inputs/source-proof.json
+            .cache/p51-staging/run-${{ github.run_id }}-${{ github.run_attempt }}/evidence/
+          include-hidden-files: true
+          retention-days: 14
+          if-no-files-found: error
+      - name: Preserve unchanged normal candidate assets and separate staging evidence
+        if: always() && steps.inputs.outcome != 'skipped' && steps.inputs.outcome != '' && github.event.inputs.candidate_mode == 'normal-delta'
+        uses: actions/upload-artifact@v4
+        with:
+          name: p51-normal-staging-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .cache/p51-staging/run-${{ github.run_id }}-${{ github.run_attempt }}/assets/e-track-at32f435-v3.3.21-full.etu
+            .cache/p51-staging/run-${{ github.run_id }}-${{ github.run_attempt }}/assets/e-track-at32f435-v3.3.20-to-v3.3.21-patch.etu
+            .cache/p51-staging/run-${{ github.run_id }}-${{ github.run_attempt }}/assets/recovery-v3.3.21.bin
             .cache/p51-staging/run-${{ github.run_id }}-${{ github.run_attempt }}/inputs/source-proof.json
             .cache/p51-staging/run-${{ github.run_id }}-${{ github.run_attempt }}/evidence/
           include-hidden-files: true
@@ -275,6 +290,8 @@ jobs:
       INPUT_CANDIDATE_MODE: ${{ github.event.inputs.candidate_mode }}
       INPUT_CANDIDATE_BASE_VERSION: ${{ github.event.inputs.candidate_base_version }}
       INPUT_CANDIDATE_FULL_BASE_VERSION: ${{ github.event.inputs.candidate_full_base_version }}
+      INPUT_APPROVED_REHEARSAL_RUN_ID: ${{ github.event.inputs.approved_rehearsal_run_id }}
+      INPUT_RELEASE_NOTES: ${{ github.event.inputs.release_notes }}
       FIRMWARE_RELEASE_MODE: ${{ github.event.inputs.candidate_mode == 'new-source' && 'artifact-candidate' || github.event.inputs.candidate_mode == 'start-state-supplement' && 'artifact-candidate-supplement' || github.event.inputs.candidate_mode == 'normal-delta' && 'artifact-candidate-normal' || '' }}
       FIRMWARE_CANDIDATE_CONTEXT: ${{ github.event.inputs.candidate_mode == 'new-source' && 'firmware-rehearsal/artifact-only-new-source-v1' || github.event.inputs.candidate_mode == 'start-state-supplement' && 'firmware-rehearsal/artifact-only-start-state-v1' || github.event.inputs.candidate_mode == 'normal-delta' && 'firmware-rehearsal/artifact-only-normal-delta-v1' || '' }}
       HOME: ${{ github.workspace }}/.cache/p51-candidate/home
@@ -474,7 +491,7 @@ jobs:
           PYTHONPATH="$GITHUB_WORKSPACE/Tools:$PYTHONPATH" python3 -B tests/ota-vectors/test_vectors.py
       - name: Check workflow execution graph and configuration gates
         working-directory: .
-        run: node --test tests/ota/test_firmware_workflow.mjs tests/ota/test_firmware_s3.mjs tests/ota/test_firmware_build_profile.mjs tests/ota/test_firmware_staging.mjs
+        run: node --test tests/ota/test_firmware_workflow.mjs tests/ota/test_firmware_s3.mjs tests/ota/test_firmware_build_profile.mjs tests/ota/test_firmware_staging.mjs tests/ota/test_firmware_normal_staging.mjs
       - name: Execute production byte preparation with isolated fixtures
         id: byte_tests
         working-directory: .
@@ -487,6 +504,7 @@ jobs:
         run: |
           python3 -I -S -B -X utf8 tests/ota/test_p51_normal_inputs.py
           node --test tests/ota/test_firmware_normal_candidate.mjs
+          python3 -I -S -B -X utf8 tests/ota/test_p51_normal_staging_inputs.py
       - name: Preserve development byte fixtures and step originals
         if: always() && steps.byte_tests.outcome != 'skipped'
         uses: actions/upload-artifact@v4

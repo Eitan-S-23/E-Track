@@ -1,0 +1,28 @@
+{
+  "schema": "p51-normal-staging-inputs-v1",
+  "task": "P51-DELTA-01",
+  "profile": "p34-v2-candidate",
+  "sourceInputs": {"path": "Tools/ota/p51-normal-inputs.json", "bytes": 1307, "sha256": "54795795a7eadd2ae1441620e3d7ac9509eba954be5a89955a4674f6b4676167"},
+  "archive": {"path": "docs/ota-exec-notes/P5-1-normal-candidate-2026-11-07/artifact.zip", "bytes": 7132193, "sha256": "c04da54ec5bbc247d73a544f4270ac98f0b9654b1ae5dc815b3d6c48f90c9568"},
+  "artifact": {"path": "docs/ota-exec-notes/P5-1-normal-candidate-2026-11-07/github-artifact.json", "bytes": 803, "sha256": "99539be977a8a117b22a3aee8256e9e00d230eea17b11ec208410691bb6237d5"},
+  "run": {"path": "docs/ota-exec-notes/P5-1-normal-candidate-2026-11-07/github-run.json", "bytes": 13334, "sha256": "9296b0001b5e7f9e4762e0f32b5712b6b9b45fbbc8266559c93a9242f86f7c70"},
+  "originalOwner": {"commitSha": "3b90e3b494201fc7bb46d098705adb0dd33bf132", "runId": "42362540910", "runAttempt": "1", "artifactId": 13570446315},
+  "archiveMembersSha256": "16be058fca7a3be5ca04644f04f6bd5148cd6dfbcbf99b30ace2c3bc9bebec57",
+  "serviceUrl": "https://e-track-firmware-p41-test.tangjichentudou.workers.dev",
+  "bucketName": "e-track-firmware-p41-test-releases",
+  "versionName": "3.3.21",
+  "versionCode": 30321,
+  "baseVersionName": "3.3.20",
+  "baseVersionCode": 30320,
+  "baseImageSha256": "5d86c6b3de6535004b4aef2333706511a27cb194b8353712684c9bcc17725741",
+  "candidateMetadata": {"member": "normal/candidate-metadata.json", "bytes": 8301, "sha256": "4cfc25f42b257a4a01cc663022d09d72ea6f62170b221e627c24ffb579ec66fe"},
+  "verification": {"member": "evidence/normal-native.json", "bytes": 10793, "sha256": "e0d455dacd933b5e4bc68aaabf499aea5445b4c8cc211287774286f9f160fcbe"},
+  "registration": {"member": "normal/target/cloudflare-firmware-release-metadata.json", "bytes": 2053, "sha256": "2265f9dad6058d565658d5bd489860835f85d64d2e1d0cb486b0fc36158901a2"},
+  "finalImage": {"member": "normal/target/app-final.bin", "bytes": 615132, "sha256": "1564ccee0a9a6bc019d8877fc832c7542c2e815ce05412b6511bf9f724936af3"},
+  "baseImage": {"member": "normal/base/app-final.bin", "bytes": 614092, "sha256": "5d86c6b3de6535004b4aef2333706511a27cb194b8353712684c9bcc17725741"},
+  "assets": [
+    {"member": "normal/target/e-track-at32f435-v3.3.21-full.etu", "bytes": 291721, "sha256": "59e374c9c51a507d8969628a0e6242a83302ce83db43edabc5f2267e4bf96933", "kind": "full", "fileName": "e-track-at32f435-v3.3.21-full.etu"},
+    {"member": "normal/target/e-track-at32f435-v3.3.20-to-v3.3.21-patch.etu", "bytes": 12439, "sha256": "5a4ce46d8baae438587b4fa2339a66b26d2416326504999fb0d2a0839e438b69", "kind": "patch", "fileName": "e-track-at32f435-v3.3.20-to-v3.3.21-patch.etu"},
+    {"member": "normal/target/recovery-v3.3.21.bin", "bytes": 615140, "sha256": "c5a186226d319c3cfa81f44f08601f8c03e567e8ef88e91fe4695a6272e73bc3", "kind": "recovery", "fileName": "recovery-v3.3.21.bin"}
+  ]
+}

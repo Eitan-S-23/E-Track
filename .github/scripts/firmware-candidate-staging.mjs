@@ -18,17 +18,21 @@ import { registerFirmware } from "../../app/bluetooth_flutter_Trace/cloudflare/u
 export const STAGING_PROTOCOL = "p51-immutable-candidate-staging-v1";
 const inputFile = fileURLToPath(new URL("../../Tools/ota/p51-staging-inputs.json", import.meta.url));
 export const stagingInputs = JSON.parse(await readFile(inputFile));
+export const normalStagingInputs = JSON.parse(await readFile(new URL("../../Tools/ota/p51-normal-staging-inputs.json", import.meta.url)));
+const inputsFor = env => env.INPUT_CANDIDATE_MODE === "normal-delta" ? normalStagingInputs : stagingInputs;
 const cloudKeys = ["CLOUDFLARE_ACCOUNT_ID", "TRACE_R2_ACCESS_KEY_ID", "TRACE_R2_SECRET_ACCESS_KEY",
   "TRACE_UPDATE_SERVICE_URL", "TRACE_R2_BUCKET", "TRACE_DEPLOY_TOKEN"];
 const fail = message => new CliError(message, "INVALID_PARAMETER", 2);
 
 export function stagingAdmission(env, credentials = false) {
+  const inputs = inputsFor(env), normal = env.INPUT_CANDIDATE_MODE === "normal-delta";
   if (env.GITHUB_ACTIONS !== "true" || env.GITHUB_EVENT_NAME !== "workflow_dispatch"
     || env.GITHUB_REPOSITORY !== "Eitan-S-23/E-Track" || env.INPUT_STAGE_CANDIDATE !== "true"
     || ["INPUT_PACKAGE_CANDIDATE", "INPUT_PUBLISH", "INPUT_REHEARSAL", "INPUT_CHECK_BINDINGS"].some(k => env[k] !== "false")
     || env.OTA_BOOT_CHAIN_READY !== "false" || env.INPUT_FIRMWARE_BUILD_PROFILE !== "p34-v2-candidate"
-    || env.INPUT_VERSION_NAME !== "3.3.19" || env.INPUT_CANDIDATE_MODE !== "archived-original"
-    || env.INPUT_CANDIDATE_BASE_VERSION || env.INPUT_CANDIDATE_FULL_BASE_VERSION || env.INPUT_APPROVED_REHEARSAL_RUN_ID
+    || env.INPUT_VERSION_NAME !== inputs.versionName || !["archived-original", "normal-delta"].includes(env.INPUT_CANDIDATE_MODE)
+    || (normal ? env.INPUT_CANDIDATE_BASE_VERSION !== inputs.baseVersionName : env.INPUT_CANDIDATE_BASE_VERSION)
+    || env.INPUT_CANDIDATE_FULL_BASE_VERSION || env.INPUT_APPROVED_REHEARSAL_RUN_ID
     || env.INPUT_RELEASE_NOTES || env.FIRMWARE_RELEASE_MODE !== "immutable-candidate-staging"
     || env.FIRMWARE_CANDIDATE_CONTEXT !== "firmware-rehearsal/immutable-candidate-staging-v1"
     || !/^[0-9a-f]{40}$/.test(env.GITHUB_SHA ?? "") || env.GITHUB_SHA !== env.INPUT_CANDIDATE_REVIEWED_COMMIT
@@ -46,14 +50,16 @@ export function stagingAdmission(env, credentials = false) {
   }
   const delivery = { commitSha: env.GITHUB_SHA, runId: env.GITHUB_RUN_ID, runAttempt: env.GITHUB_RUN_ATTEMPT,
     workflowCommit: env.GITHUB_WORKFLOW_SHA, workflowRef: env.GITHUB_WORKFLOW_REF };
-  if (!credentials) return { delivery };
+  const inputIdentity = { mode: env.INPUT_CANDIDATE_MODE, versionCode: inputs.versionCode,
+    baseVersionCode: inputs.baseVersionCode, schema: inputs.schema };
+  if (!credentials) return { delivery, inputIdentity };
   for (const key of cloudKeys) if (!env[key]) throw fail(`Missing staging binding: ${key}`);
   s3Credentials(env);
   if (!/^[0-9a-f]{32}$/.test(env.CLOUDFLARE_ACCOUNT_ID) || /\s/.test(env.TRACE_DEPLOY_TOKEN)
-    || env.TRACE_UPDATE_SERVICE_URL !== stagingInputs.serviceUrl || env.TRACE_R2_BUCKET !== stagingInputs.bucketName) {
+    || env.TRACE_UPDATE_SERVICE_URL !== inputs.serviceUrl || env.TRACE_R2_BUCKET !== inputs.bucketName) {
     throw fail("Immutable staging requires the exact isolated Worker and test bucket");
   }
-  return { delivery, serviceUrl: stagingInputs.serviceUrl, bucketName: stagingInputs.bucketName,
+  return { delivery, inputIdentity, serviceUrl: inputs.serviceUrl, bucketName: inputs.bucketName,
     accountId: env.CLOUDFLARE_ACCOUNT_ID };
 }
 
@@ -72,7 +78,62 @@ async function pinned(root, record) {
   return bytes;
 }
 
-export async function loadStagingInputs(root, out) {
+async function loadNormalStagingInputs(root, out, inputs) {
+  for (const pin of [inputs.sourceInputs, inputs.archive, inputs.artifact, inputs.run]) await pinned(root, pin);
+  const proofBytes = await readFile(outputPath(root, path.join(out, "inputs/source-proof.json")));
+  const proof = JSON.parse(proofBytes);
+  if (proof.schema !== "p51-normal-staging-source-proof-v1"
+    || canonicalJson(proof.originalOwner) !== canonicalJson(inputs.originalOwner)
+    || canonicalJson(proof.archive) !== canonicalJson(inputs.archive)
+    || canonicalJson(proof.artifactReceipt) !== canonicalJson(inputs.artifact)
+    || proof.configSha256 !== digest(Buffer.from(canonicalJson(inputs) + "\n"))
+    || digest(Buffer.from(canonicalJson(proof.files) + "\n")) !== inputs.archiveMembersSha256
+    || ["sourceCompilations", "finalizations", "packageGenerations", "referenceSearches"].some(k => proof[k] !== 0)) {
+    throw fail("Normal staging original proof/inventory changed");
+  }
+  const originals = new Map();
+  for (const pin of proof.files) {
+    if (!/^[A-Za-z0-9_./-]+$/.test(pin.member) || pin.member.startsWith("/")
+      || pin.member.split("/").some(p => ["", ".", "..", "private"].includes(p))) throw fail("Unsafe normal staging member");
+    const bytes = await readFile(outputPath(root, path.join(out, "originals", pin.member)));
+    if (bytes.length !== pin.bytes || digest(bytes) !== pin.sha256) throw fail("Normal staging original bytes changed");
+    originals.set(pin.member, bytes);
+  }
+  const selected = async (name, pin) => {
+    const bytes = await readFile(outputPath(root, path.join(out, "inputs", name)));
+    if (bytes.length !== pin.bytes || digest(bytes) !== pin.sha256 || !bytes.equals(originals.get(pin.member))) {
+      throw fail("Normal staging selected evidence changed");
+    }
+    return bytes;
+  };
+  const candidate = JSON.parse(await selected("candidate-metadata.json", inputs.candidateMetadata));
+  const registration = JSON.parse(await selected("registration.json", inputs.registration));
+  await selected("app-final.bin", inputs.finalImage);
+  await selected("native-verification.json", inputs.verification);
+  const buildBytes = await readFile(outputPath(root, path.join(out, "inputs/gcc-build-inputs.json")));
+  if (!buildBytes.equals(originals.get("inputs/originals/target/keyed-build/gcc-build-inputs.json"))) throw fail("Normal staging build changed");
+  const build = JSON.parse(buildBytes);
+  verifyBuildConfiguration(build, inputs.profile);
+  if (candidate.schema !== "p51-normal-candidate-v1" || candidate.isFormalRelease !== false || candidate.productionPublishable !== false
+    || candidate.readyRegistered !== false || registration.runId !== inputs.originalOwner.runId
+    || registration.commitSha !== build.commitSha || proof.targetSourceCommit !== build.commitSha
+    || candidate.patchComparison.preferredKindForMatchingBase !== "patch"
+    || candidate.patchComparison.changesOutsideFwHeader !== true) throw fail("Normal staging candidate lineage changed");
+  const bytesByName = new Map();
+  for (const pin of inputs.assets) {
+    if (pin.fileName !== assetFileName(pin.kind, inputs.versionName, pin.kind === "patch" ? inputs.baseVersionCode : 0)) {
+      throw fail("Normal staging asset name changed");
+    }
+    const bytes = await readFile(outputPath(root, path.join(out, "assets", pin.fileName)));
+    if (bytes.length !== pin.bytes || digest(bytes) !== pin.sha256 || !bytes.equals(originals.get(pin.member))) throw fail("Normal staging asset bytes changed");
+    bytesByName.set(pin.fileName, bytes);
+  }
+  verifyStagingMetadata(registration, inputs);
+  return { proof, sourceProofSha256: digest(proofBytes), owner: inputs.originalOwner, build, bytesByName, registration };
+}
+
+export async function loadStagingInputs(root, out, configuration = stagingInputs) {
+  if (configuration.schema === "p51-normal-staging-inputs-v1") return loadNormalStagingInputs(root, out, configuration);
   const original = JSON.parse(await pinned(root, stagingInputs.sourceInputs));
   await pinned(root, original.archive);
   await pinned(root, original.artifact);
@@ -115,15 +176,15 @@ export async function loadStagingInputs(root, out) {
   return { proof, sourceProofSha256: digest(proofBytes), owner, build, bytesByName };
 }
 
-export function verifyStagingMetadata(metadata) {
+export function verifyStagingMetadata(metadata, inputs = stagingInputs) {
   metadata = parseFirmwareRegistration(metadata, "Eitan-S-23/E-Track", false);
-  if (metadata.versionCode !== stagingInputs.versionCode || metadata.targetImageSha256 !== stagingInputs.finalImage.sha256
-    || metadata.assets.length !== stagingInputs.assets.length) throw fail("Staging generated metadata target/inventory mismatch");
+  if (metadata.versionCode !== inputs.versionCode || metadata.targetImageSha256 !== inputs.finalImage.sha256
+    || metadata.assets.length !== inputs.assets.length) throw fail("Staging generated metadata target/inventory mismatch");
   for (const asset of metadata.assets) {
-    const pinnedAsset = stagingInputs.assets.find(a => a.kind === asset.kind);
+    const pinnedAsset = inputs.assets.find(a => a.kind === asset.kind);
     if (!pinnedAsset || asset.fileName !== pinnedAsset.fileName || asset.sha256 !== pinnedAsset.sha256 || asset.sizeBytes !== pinnedAsset.bytes
-      || (asset.kind === "patch" && (asset.baseVersionCode !== stagingInputs.baseVersionCode
-        || asset.baseImageSha256 !== stagingInputs.baseImageSha256))) throw fail("Staging generated metadata asset/base mismatch");
+      || (asset.kind === "patch" && (asset.baseVersionCode !== inputs.baseVersionCode
+        || asset.baseImageSha256 !== inputs.baseImageSha256))) throw fail("Staging generated metadata asset/base mismatch");
   }
   return metadata;
 }
@@ -131,14 +192,15 @@ export function verifyStagingMetadata(metadata) {
 export async function executeStaging({ root, out, env, fetcher = fetch, bucketFactory = withFirmwareBucket, signal, git }) {
   const config = verifyStagingCheckout(root, env, true, git);
   out = outputPath(root, out);
-  const data = await loadStagingInputs(root, out);
-  const metadata = await buildFirmwareMetadata({ repository: env.GITHUB_REPOSITORY,
+  const inputs = inputsFor(env);
+  const data = await loadStagingInputs(root, out, inputs);
+  const metadata = data.registration ?? await buildFirmwareMetadata({ repository: env.GITHUB_REPOSITORY,
     assetsDir: path.join(out, "assets"), finalImage: path.join(out, "inputs/app-final.bin"),
     patchBases: [{ baseVersionCode: stagingInputs.baseVersionCode, baseImageSha256: stagingInputs.baseImageSha256 }],
     release: { releaseTag: "mcu-e-track-at32f435-v3.3.19", runId: data.owner.runId, commitSha: data.owner.commitSha,
       versionName: stagingInputs.versionName, releaseNotes: "P51 isolated staging only; immutable candidate, not production approval",
       targetHardware: "AT32F435RGT7", hardwareRevision: 1, layoutId: 1, minBootVersion: 1, minProtocolVersion: 1, minAppVersionCode: 0 } });
-  verifyStagingMetadata(metadata);
+  verifyStagingMetadata(metadata, inputs);
   const evidenceDir = outputPath(root, path.join(out, "evidence"));
   const stepsPath = path.join(evidenceDir, "staging-delivery-steps.json");
   if (existsSync(stepsPath)) throw fail("Preserve previous staging delivery; reconcile uncertainty before another attempt");
@@ -151,6 +213,7 @@ export async function executeStaging({ root, out, env, fetcher = fetch, bucketFa
   try {
     active();
     await verifyWorkerEnvironment(config.serviceUrl, "rehearsal", fetcher, signal);
+    active();
     const preflight = await preflightFirmware(metadata, { serviceUrl: config.serviceUrl, mode: "rehearsal",
       deployToken: env.TRACE_DEPLOY_TOKEN, fetcher, signal });
     await record({ step: "preflight", ...preflight });
@@ -169,6 +232,7 @@ export async function executeStaging({ root, out, env, fetcher = fetch, bucketFa
         fetcher, retries: 1, signal });
       await record({ step: "registration-ready", ...registration });
       const evidence = { schema: STAGING_PROTOCOL, publicationProtocol: STAGING_PROTOCOL, mode: "immutable-candidate-staging",
+        candidateInputMode: config.inputIdentity.mode,
         productionPublishable: false, approvalEligible: false, environment: "staging", originalOwner: data.owner,
         delivery: config.delivery, sourceProofSha256: data.sourceProofSha256,
         metadataSha256: digest(metadataBytes(ready)), originalArchive: data.proof.archive,
@@ -197,7 +261,7 @@ async function main() {
     for (const name of Object.keys(childEnv)) if (/^(TRACE_|CLOUDFLARE_|CF_|GH_|GITHUB_TOKEN|OTA_)/.test(name)) delete childEnv[name];
     try {
       const result = await promisify(execFile)(options.python ?? "python3", ["-I", "-S", "-B", "-X", "utf8",
-        path.join(root, "Tools/ota/p51-staging-inputs.py"), "--root-out", out],
+        path.join(root, env.INPUT_CANDIDATE_MODE === "normal-delta" ? "Tools/ota/p51-normal-staging-inputs.py" : "Tools/ota/p51-staging-inputs.py"), "--root-out", out],
       { cwd: root, env: childEnv, timeout: 90000, maxBuffer: 16 * 1024 * 1024, windowsHide: true });
       await writeOutput(root, path.join(out, "evidence/inputs-process.json"), JSON.stringify({ exitCode: 0, stdout: result.stdout, stderr: result.stderr }) + "\n");
     } catch (error) {
@@ -205,7 +269,7 @@ async function main() {
         signal: error.signal, stdout: error.stdout, stderr: error.stderr }) + "\n");
       throw fail("Immutable staging input admission failed; original diagnostic retained");
     }
-    await loadStagingInputs(root, out);
+    await loadStagingInputs(root, out, inputsFor(env));
     process.stdout.write("P51_STAGING_ORIGINAL_BYTES_ADMITTED\n");
     return;
   }
