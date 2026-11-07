@@ -7,6 +7,7 @@ import re
 import secrets
 import shlex
 import socket
+import struct
 import sys
 import threading
 import time
@@ -63,16 +64,45 @@ def config(plan, run_id, origin, baud, timeout):
         androidPhyPolicy="off", rebootInfoMaxAttempts=3, ackTimeoutMs=timeout)
 
 
+def reference_binding(plan):
+    binding = plan.get("reference_service")
+    if binding is None:
+        return dict(baseVersion=30286, targetVersion=30287, appVersion=86,
+                    releaseId="p34-reference", purpose="P3-4 controlled reference")
+    h.require(isinstance(binding, dict) and set(binding) == {
+        "baseVersion", "targetVersion", "appVersion", "releaseId", "purpose"} and
+        binding["purpose"] == "P51 fixed-load benchmark only" and
+        (binding["baseVersion"], binding["targetVersion"]) == (30320, 30321) and
+        type(binding["appVersion"]) is int and 0 < binding["appVersion"] <= 0x7fffffff and
+        binding["releaseId"] == "p51-benchmark-30320-30321" and plan["package"]["bytes"] == 1048576,
+        "explicit benchmark service binding required")
+    for role, key in (("base", "baseVersion"), ("target", "targetVersion")):
+        raw = h.pinned(plan["images"][role]["image"]).read_bytes()
+        h.require(len(raw) >= 0x460 and struct.unpack_from("<I", raw, 0x408)[0] == binding[key],
+                  "benchmark service finalized version mismatch")
+    return binding
+
+
+def service_query(plan):
+    binding = reference_binding(plan)
+    return dict(appId="trace", deviceModel="e-track-at32f435", channel="stable",
+        currentVersionCode=binding["baseVersion"], currentImageSha=plan["images"]["base"]["image"]["sha256"],
+        hardwareRevision=1, layoutId=1, bootVersion=1, protocolVersion=1, appVersionCode=binding["appVersion"])
+
+
 def service_config(plan, origin):
     asset = plan["package"]
+    binding = reference_binding(plan)
+    version = lambda code: "%d.%d.%d" % (code // 10000, code // 100 % 100, code % 100)
+    base, target = version(binding["baseVersion"]), version(binding["targetVersion"])
     return dict(publicBaseUrl=origin, token=dict(keyVersion=1, keyHex=secrets.token_hex(32), ttlSeconds=300),
-        channels=dict(stable="reference"), releases=dict(reference=dict(releaseId="p34-reference",
-            versionName="3.2.87", versionCode=30287, releaseTag="mcu-e-track-at32f435-v3.2.87",
-            releaseNotes="P3-4 controlled reference", targetImageSha256=plan["images"]["target"]["image"]["sha256"],
+        channels=dict(stable="reference"), releases=dict(reference=dict(releaseId=binding["releaseId"],
+            versionName=target, versionCode=binding["targetVersion"], releaseTag="mcu-e-track-at32f435-v" + target,
+            releaseNotes=binding["purpose"], targetImageSha256=plan["images"]["target"]["image"]["sha256"],
             targetHardware="e-track-at32f435", minAppVersionCode=0, hardwareRevision=1, layoutId=1,
-            minBootVersion=1, minProtocolVersion=1, asset=dict(assetId="p34-reference-patch", kind="patch",
-                fileName="e-track-at32f435-v3.2.86-to-v3.2.87-patch.etu", path=str(h.pinned(asset)),
-                sizeBytes=asset["bytes"], sha256=asset["sha256"], baseVersionCode=30286,
+            minBootVersion=1, minProtocolVersion=1, asset=dict(assetId=binding["releaseId"] + "-patch", kind="patch",
+                fileName="e-track-at32f435-v%s-to-v%s-patch.etu" % (base, target), path=str(h.pinned(asset)),
+                sizeBytes=asset["bytes"], sha256=asset["sha256"], baseVersionCode=binding["baseVersion"],
                 baseImageSha256=plan["images"]["base"]["image"]["sha256"]))))
 
 
@@ -156,9 +186,7 @@ class Network:
         origin = h.wait_for(ready, min(90, remaining()))
         cfg["publicBaseUrl"] = state.public_base_url = origin
         h.save(self.out / "service-config.json", cfg)
-        query = dict(appId="trace", deviceModel="e-track-at32f435", channel="stable", currentVersionCode=30286,
-            currentImageSha=self.plan["images"]["base"]["image"]["sha256"], hardwareRevision=1,
-            layoutId=1, bootVersion=1, protocolVersion=1, appVersionCode=86)
+        query = service_query(self.plan)
         requests = 0
 
         def read(url, seconds, limit):

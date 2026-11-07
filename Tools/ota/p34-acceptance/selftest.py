@@ -20,6 +20,7 @@ GROUPS = {
     "admission": ("test_ota_link_metrics.py", "test_p34_batch_timing.py", "test_p34_acceptance_stats.py"),
     "service": ("test_p34_service_patch.py",),
     "live": ("test_p34_live_route.py",),
+    "p51-benchmark": ("test_p51_benchmark_execution.py", "test_p51_execution.py", "test_p51_clock.py"),
 }
 SESSION_SOURCES = ("Libraries/OTA/ota_ble_session.c", "Libraries/OTA/ota_ble_frame.c",
     "Libraries/OTA/ota_ble_ring.c", "Libraries/OTA/ota_sd.c", "Libraries/OTA/ota_staging.c",
@@ -59,6 +60,9 @@ def main():
         host.checked(out / (name + ".json"))
         host.checked(out / (name + ".log"))
     env = host.environment(out)
+    if args.group == "p51-benchmark":
+        env["P51_TEST_AREA"] = str(host.checked(out / "fixtures"))
+        env["P51_CLOCK_TEST_OUT"] = str(host.checked(out / "fixtures/clock"))
     if args.compiler_dir:
         env["PATH"] = str(args.compiler_dir.resolve(strict=True)) + os.pathsep + env.get("PATH", "")
     if args.group == "pipeline":

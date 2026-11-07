@@ -177,12 +177,14 @@ class Observer(s.Smoke):
             self.capture_id, = names-old
             self.arm_attempted = True
             self.cursor = s.FileCursor(self.capture_id)
-            self.start_live_stream()
+            if self.stream_capture is None:
+                self.start_live_stream()
             self.recording_deadline = min(self.total-180, time.monotonic()+3000)
             return True
         self.wait(armed)
-        finish_notice(self.pending_notice)
-        self.pending_notice = None
+        if self.pending_notice is not None:
+            finish_notice(self.pending_notice)
+            self.pending_notice = None
         self.phase('first-record', 30)
         self.wait(lambda: (self.pump_stream(), bool(self.live))[1])
         h.save(self.out / 'recording-ready.json', dict(captureId=self.capture_id, pid=self.pid,

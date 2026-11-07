@@ -76,6 +76,58 @@ task_id: P5-1
 - MCU BCB 是升级状态真相，GET_INFO 是重启后设备身份真相，metadata 是目标期望真相。
 - 验收 harness 只采集和注入明确操作，不拥有产品状态，也不得写固定结果。
 
+## 隔离固定负载长测入口
+
+本节仅规定 `OTA-DEC-020` 已区分的基准样本执行方式，不改变正常四组合、共同最终候选、
+30/30、真实四小时或同参数组要求。旧版本化合同及失败原件不回写；正式执行须在后继
+合同中绑定实际前驱、冻结输入与机器计算的最小复验。
+
+- 制包复用 `firmware-build.yml` 的 `candidate_mode=archived-benchmark`：只消费已归档
+  的 30320/30321 finalized 镜像和两份原始 GCC/真实密钥证明，调用既有 progressing-stream、
+  ETU 及 native decoder，不重新编译或封头。输入须为 `fixed-load-benchmark`，完整 ETU
+  恰为 1048576 字节；metadata/source proof/native verification 与实物均须绑定。
+  `benchmark.package_delivery` 必须绑定原始 run/jobs、artifact ZIP 及摘要；
+  `package_binding(plan)` 复算既有归档输入的 GCC/密钥来源，并核对原生编译及 11 个
+  case 的命令、stdout/observation、退出码和进程清理原件。只有成功 JSON 或缺日志不得准入。
+- 交付复用 `Tools/ota/p3-3-service/service.py` 的单资产 HTTPS fixture，不改公共选择器、
+  D1/R2 或正常 full/patch。`Tools/ota/p51-acceptance/fixture.py --inputs INPUT --out OUT
+  --seconds 25200` 维持同一 origin；APK 构建和长测间不得重启隧道换域名。启动/停止及
+  ready/status 原件必须绑定所有者，开测前剩余寿命至少为 18000+180 秒。
+- App 使用现有 `build.yml` 的 `firmware_latest_url`、独立后缀 `.p51benchmark` 和相同
+  `release_ota_link_profile`，`publish_release=false`。绑定实际 release-mode APK、
+  application ID、版本、源码、成功 CI 及编译 endpoint；正常 APK98 准入不改变。
+  `benchmark.app_build` 绑定原始 dispatch、canonical repository/run/jobs、artifact ZIP、
+  双宿主成功结果和 APK 原生 badging/signature 回执。`apk_binding(plan)` 验证实际二进制
+  manifest、两种 ABI 的编译 endpoint/profile、固定签名及应用身份。无 attempt 后缀的
+  `android-apk` 仅接受本次新建 run 的 attempt 1，不用后来重跑的成功状态冒认旧 artifact。
+- 执行复用 `run.py long --inputs INPUT --out OUT --contract CONTRACT --matrix MATRIX
+  --command-id LONG`。后继输入须显式绑定 `benchmark.controls=semantic-v1`；只用既有
+  package-owned UI 控件和已观测状态驱动，点击结果不明时禁止再次点击。
+- 每份 recording 最多两次传输，128 MiB 上限内每次 BEGIN 前留出 64 MiB 传输预算和
+  4 MiB 封存余量，剩余 recording 时间必须超过 1800 秒。开新组须留出 3000 秒；
+  campaign 总计最多 18000 秒、`32-C0` 份新日志和 64 次传输，C0 为实际已有日志数。
+  首组须有至少 15 个空槽，后续只校验剩余槽位；真实空间/字节不足即保留并停止，不删旧档。
+  MCU 子调用共用不晚于 recording/campaign 截止前 180 秒的绝对期限；写入命令须另有
+  其完整原生操作时限加 30 秒所有权检查余量，否则不启动，不将 Flash 写入截短来赶期限。
+- 每次成功先保存最终 INFO、完整镜像和 BCB 原件，再在真实 30321 上查询 fixture 得到
+  NO_UPDATE 清为 idle，随后按既有完整状态恢复到 30320、重连 GET_INFO 并验证
+  `phase=idle,protocol=null,session=0,durable=0`，才可封存或进入下一次传输。GET_INFO
+  自身不能清除 completed。已关闭 recorder 仅经现有已校验的 App 进程重启路径重新开启。
+- 已封存的本地规范原件可在核对手机文件长度/SHA 后引用复用，禁止每组再次复制全部旧档；
+  未知原件仍完整取回并在 seal 校验后加入 `canonicalCaptures`；该映射须包含 C0 并跨重启、
+  跨组完整传递。第一次恢复必须绑定先前真实正常 BLE cell 及 normal-patch 输入，
+  不伪造“先前 benchmark 成功”。旧的未执行恢复动作仍记 NOT_RUN。
+- `test_p51_benchmark_execution.py` 必须覆盖错包/失效 heartbeat/非本包或禁用控件拒绝、
+  一次点击后拒绝不明重试、真实服务 PATCH/target NO_UPDATE、清理前保存成功、恢复 idle、
+  两组及最后可用日志槽、C0 仅下载一次、旧档更改拒绝、fixture 寿命/关闭与双宿主 CI 接线。
+  原始保护包及实际 APK 必须有正例；缺原生日志/非零退出/错原始源码、非 APK/错仓库/
+  错 run 或 artifact/错 endpoint 或 profile 均须离线拒绝。延迟 MCU 调用验证绝对期限和
+  写入启动余量，不能仅检查源码里包含 timeout 设置。
+
+正确：正常小差分用于功能和收益，独立 1 MiB PATCH 用于固定负载，首 30 笔全部保留。
+错误：为测大包隐藏生产 full、把恢复/空闲算成载荷传输、丢失败凑 30/30，或把旧 SD
+不同最终版本改写为四路均到 30321。已有 SD 原件继续独立评估，共同最终候选缺项不豁免。
+
 ## 错误、超时、重试、取消、恢复与幂等
 
 - 非计划断连、超时、卡/Flash 异常或用户误操作均保留实际尝试并先分类、取证、定位；不自动从起点重跑直至成功。只有实际修复或不可补取的必要观察才按执行合同最小复验，不剪掉失败片段拼成成功。

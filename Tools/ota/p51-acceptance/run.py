@@ -16,11 +16,19 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import state_chain as sc
 import observation as obs
 import functional_sample
+import benchmark
 from observation import r
 h, m = sc.h, sc.m
 
 RUNNERS = [
     'Tools/ota/p51-acceptance/run.py', 'Tools/ota/p51-acceptance/state_chain.py',
+    'Tools/ota/p51-acceptance/benchmark.py',
+    'Tools/ota/p51-acceptance/fixture.py',
+    'Tools/ota/p51-benchmark-inputs.py', 'Tools/ota/p51-benchmark-inputs.json',
+    'Tools/ota/p51-normal-staging-inputs.py', 'Tools/ota/p51-normal-staging-inputs.json',
+    'Tools/ota/p51-normal-inputs.py', 'Tools/ota/p51-normal-inputs.json',
+    'Tools/ota/p51-package.py', 'Tools/ota/p51-candidate-inputs.json',
+    'Tools/ota/p51-start-state-inputs.json', 'Tools/ota/p34-acceptance/encoding.py', 'Tools/etu_pack.py',
     'Tools/ota/p51-acceptance/functional_sample.py', '.github/scripts/firmware-byte-check.py',
     'Tools/etu_unpack.py', 'Tools/jlink/prepare-bootstrap-app.py',
     'Tools/ota/p51-acceptance/observation.py', 'Tools/ota/p34-acceptance/live_host.py',
@@ -39,18 +47,22 @@ RUNNERS = [
 def validate(plan):
     h.require(plan['schema'] == 1 and plan['task'] == 'P5-1', 'not a P5 execution input')
     mcu, phone = plan['mcu'], plan['phone']
+    is_benchmark = 'benchmark' in plan
     h.require(mcu['probe_serial'] == 123456 and phone['phone']['serial'] == '10ADA4197U001CK' and
               phone['phone']['model'] == 'V2312A' and phone['phone']['adb_port'] == 5093 and
-              phone['app']['id'] == 'com.wen.gaia.gaia.p35acceptance' and
-              phone['app']['version_code'] == 98 and phone['app']['release'] is True and
+              phone['app']['release'] is True and
               phone['device']['address'] == 'e3:49:e1:14:d6:cb', 'device scope changed')
+    if not is_benchmark:
+        h.require(phone['app']['id'] == 'com.wen.gaia.gaia.p35acceptance' and phone['app']['version_code'] == 98,
+                  'functional APK98 scope changed')
     h.require(mcu['boot']['bytes'] == 65536 and mcu['boot']['sha256'] ==
               '01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527', 'group16 Boot mismatch')
     for pin in (mcu['boot'], mcu['package'], phone['phone']['adb'], phone['phone']['adb_key'],
                 plan['apk'], plan['notify_cli'], *mcu['tools'].values(), *plan['tool_dependencies']):
         h.pinned(pin)
-    h.require(plan['apk']['sha256'] == phone['app']['sha256'] ==
-              'b0a5cd5cbb45ba7e75ad492b65d4843ef70c33fbda365abaea495c48b3ebbcf1', 'APK98 identity changed')
+    if not is_benchmark:
+        h.require(plan['apk']['sha256'] == phone['app']['sha256'] ==
+                  'b0a5cd5cbb45ba7e75ad492b65d4843ef70c33fbda365abaea495c48b3ebbcf1', 'APK98 identity changed')
     for role in ('base', 'target', 'restore'):
         for pin in mcu['images'][role].values():
             h.pinned(pin)
@@ -62,6 +74,8 @@ def validate(plan):
               plan['firmware']['target']['version'] > plan['firmware']['current']['version'], 'package/direction mismatch')
     h.require(3000 <= phone['limits']['total_seconds'] <= 5400 and phone['limits']['cleanup_seconds'] == 180,
               'phone observation/cleanup budget changed')
+    if is_benchmark:
+        benchmark.validate(plan)
     return plan
 
 
@@ -115,6 +129,10 @@ def predecessor_arguments(contract):
 @contextmanager
 def channel(plan, out, enabled):
     if not enabled:
+        yield
+        return
+    if 'benchmark' in plan:
+        benchmark.check_fixture(plan, out / 'fixture-check')
         yield
         return
     import pipeline_cloud as c
@@ -202,24 +220,32 @@ def restore(plan, out, previous):
         restoration=h.record(mcu.out / 'restore-result.json'), base=plan['firmware']['current']))
 
 
-def ble_block(plan, out, max_cells):
-    h.require(plan['kind'] == 'patch' and plan['mcu']['package']['bytes'] == 1048576 and 1 <= max_cells <= 8,
-              'one bound reference group, at most eight cells per recording')
-    phone = obs.Observer(plan['phone'], out / 'phone', plan['notify_cli'])
+def ble_block(plan, out, max_cells, *, known_captures=None):
+    is_benchmark = 'benchmark' in plan
+    cap = benchmark.BUDGET['maxCells'] if is_benchmark else 8
+    h.require(plan['kind'] == 'patch' and plan['mcu']['package']['bytes'] == 1048576 and 1 <= max_cells <= cap,
+              'bound reference group/recording capacity required')
+    phone = benchmark.Observer(plan, out / 'phone', known_captures) if is_benchmark else \
+        obs.Observer(plan['phone'], out / 'phone', plan['notify_cli'])
     completed = []
     try:
         phone.start_recording()
         previous_seq = 0
         for index in range(max_cells):
-            if time.monotonic()+1800 >= phone.recording_deadline:
+            reserve_ok = phone.next_transfer() if is_benchmark else time.monotonic()+1800 < phone.recording_deadline
+            if not reserve_ok:
                 h.require(completed, 'recording budget exhausted before first transfer')
                 break
             folder = h.fresh(out / ('cell-%02d' % (index+1)))
-            mcu = m.MCU(plan['mcu'], folder / 'mcu')
+            mcu = benchmark.MCU(plan['mcu'], folder / 'mcu', deadline=min(phone.recording_deadline,
+                plan.get('_campaign_deadline', phone.recording_deadline))-180) if is_benchmark else \
+                m.MCU(plan['mcu'], folder / 'mcu')
             initial = phone.fresh_identity(plan['firmware']['current'], previous_seq, request=True)
             before = mcu.inspect('base', 'pre-transfer')
             h.require(before['storage']['journal']['expected_begin_durable'] == 0, 'nonzero reference start')
             ready = phone.ready_package(plan['firmware'])
+            if is_benchmark:
+                h.require(phone.next_transfer(), 'recording reserve consumed during package preparation; no BEGIN')
             h.save(folder / 'intent.json', dict(index=index+1, initial=initial, ready=ready,
                 package=plan['mcu']['package'], hostMonoNs=time.monotonic_ns()))
             invite(phone, plan, 'ble', before, folder)
@@ -245,15 +271,27 @@ def ble_block(plan, out, max_cells):
                 hostFinishedMonoNs=time.monotonic_ns(), debuggerHaltsDuringTransfer=0, **boundaries)
             h.save(folder / 'result.json', item)
             completed.append(item)
+            if is_benchmark:
+                phone.clear_at_target(finished)
             phone.phase('verified-base-restoration', 600)
             mcu.restore()
             previous_seq = finished['seq']
+            if is_benchmark:
+                restored = phone.fresh_identity(plan['firmware']['current'], previous_seq, request=True)
+                benchmark.idle_base(restored, plan['firmware'])
+                phone.idle_services()
+                h.save(folder / 'restored-idle.json', dict(state=restored,
+                    restoration=h.record(mcu.out / 'restore-result.json')))
+                previous_seq = restored['seq']
         report = phone.finish(diagnostics=True)
         upgrades = [group for group in report['groups'] if group['label'] == 'upgrade']
         h.require(len(upgrades) == len(completed), 'missing/extra upgrade diagnostic groups')
         result = dict(outcome='BLE_BLOCK_OBSERVED', cells=completed,
             original=h.record(phone.out / 'app-capture.jsonl'), diagnostics=h.record(phone.out / 'observation.json'),
             inputs=plan['firmware'], retained='base', formalVerdict='NOT_ADJUDICATED', allAttemptsPreserved=True)
+        if is_benchmark:
+            result.update(captureId=phone.capture_id, existingCaptures=len(phone.previous_captures),
+                canonicalCaptures=dict(phone.known_captures))
         h.save(out / 'result.json', result)
         return result
     finally:
@@ -277,16 +315,36 @@ def long_campaign(plan, out):
     thread.start()
     end = time.monotonic()+18000
     blocks, count, first_begin, span = [], 0, None, 0
+    is_benchmark = 'benchmark' in plan
+    block_limit, cells_per_block = (32, 2) if is_benchmark else (16, 8)
+    known_captures = {}
     try:
         h.wait_for(lambda: (clock_out / 'monotonic.jsonl').is_file(), 5)
-        for index in range(1, 17):
+        for index in range(1, block_limit+1):
+            if index > block_limit:
+                break
             h.require(not clock_errors and time.monotonic()+3000 < end, 'insufficient complete next-block/cleanup budget')
             current = copy.deepcopy(plan)
+            if is_benchmark:
+                current['_long_execution'] = True
+                current['_campaign_deadline'] = end
             current['phone']['limits']['total_seconds'] = min(5400, int(end-time.monotonic()-180))
             folder = h.fresh(out / ('block-%02d' % index))
             h.save(folder / 'intent.json', dict(index=index, hostMonoNs=time.monotonic_ns(),
-                package=plan['mcu']['package'], maxCells=8))
-            result = ble_block(current, folder, 8)
+                package=plan['mcu']['package'], maxCells=cells_per_block))
+            result = ble_block(current, folder, cells_per_block, known_captures=known_captures) if is_benchmark else \
+                ble_block(current, folder, cells_per_block)
+            if is_benchmark:
+                if index == 1:
+                    block_limit = benchmark.recording_slots(result['existingCaptures'])
+                h.require(result['captureId'] not in known_captures, 'recording reused within campaign')
+                canonical = result['canonicalCaptures']
+                h.require(all(canonical.get(cid) == pin for cid, pin in known_captures.items()) and
+                    canonical.get(result['captureId']) == result['original'] and
+                    len(canonical) == result['existingCaptures']+1, 'canonical archive lineage changed')
+                for pin in canonical.values():
+                    h.pinned(pin)
+                known_captures = dict(canonical)
             blocks.append(h.record(folder / 'result.json'))
             count += len(result['cells'])
             first_begin = first_begin or result['cells'][0]['beginObservedMonoNs']
