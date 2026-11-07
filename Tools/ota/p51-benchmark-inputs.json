@@ -1,0 +1,27 @@
+{
+  "schema": "p51-benchmark-inputs-v1",
+  "task": "P5-1",
+  "mode": "archived-benchmark",
+  "repository": "Eitan-S-23/E-Track",
+  "profile": "p34-v2-candidate",
+  "purpose": "fixed-load-benchmark",
+  "derivation": "protected-finalized-pair/reference-envelope-only",
+  "productionPublishable": false,
+  "representativeFunctionalSample": false,
+  "baseVersion": "3.3.20",
+  "targetVersion": "3.3.21",
+  "normalInputs": {
+    "path": "Tools/ota/p51-normal-staging-inputs.json",
+    "bytes": 2910,
+    "sha256": "196008ecdfa7be4244f0d7d937666454a6d5126a618a7fae516ba2a0aea2cd7e"
+  },
+  "base": {
+    "bytes": 614092,
+    "sha256": "5d86c6b3de6535004b4aef2333706511a27cb194b8353712684c9bcc17725741"
+  },
+  "target": {
+    "bytes": 615132,
+    "sha256": "1564ccee0a9a6bc019d8877fc832c7542c2e815ce05412b6511bf9f724936af3"
+  },
+  "reference": {"totalBytes": 1048576, "seed": 7, "budget": 256}
+}

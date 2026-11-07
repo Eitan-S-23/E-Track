@@ -22,6 +22,28 @@ const rehearsal = workflow.jobs["rehearse-cloudflare"];
 const bindings = workflow.jobs["check-firmware-bindings"];
 const normalize = value => value.trim().replace(/\s+/g, " ");
 
+const benchmarkDependencies = ["Tools/ota/p51-benchmark-inputs.py", "Tools/ota/p51-benchmark-inputs.json",
+  "tests/ota/test_p51_benchmark_inputs.py", "tests/ota/test_firmware_benchmark_candidate.mjs"];
+function assertBenchmarkPaths(events) {
+  for (const name of ["push", "pull_request"]) {
+    for (const file of benchmarkDependencies) {
+      assert.ok(events[name].paths.some(pattern => path.posix.matchesGlob(file, pattern)), `${name} misses ${file}`);
+    }
+  }
+}
+test("benchmark-only implementation/config/test changes trigger automatic firmware checks", () => {
+  assertBenchmarkPaths(workflow.on);
+});
+for (const event of ["push", "pull_request"]) {
+  test(`benchmark ${event} path gate rejects each missing input`, () => {
+    for (const file of benchmarkDependencies) {
+      const events = structuredClone(workflow.on);
+      events[event].paths = events[event].paths.filter(pattern => !path.posix.matchesGlob(file, pattern));
+      assert.throws(() => assertBenchmarkPaths(events), undefined, file);
+    }
+  });
+}
+
 const normalStagingDependencies = ["Tools/ota/p51-normal-staging-inputs.py", "Tools/ota/p51-normal-staging-inputs.json",
   "tests/ota/test_p51_normal_staging_inputs.py"];
 function assertNormalStagingPaths(events) {

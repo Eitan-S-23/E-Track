@@ -17,6 +17,25 @@ export function verifyCandidateCheckout(root, env, config, git = argv =>
   const owner = candidateAdmission(env);
   if (git(["rev-parse", "HEAD"]) !== owner.commitSha) throw new CliError("Candidate checkout differs from reviewed source");
   if (candidateMode(env) === "archived-original") return owner;
+  if (candidateMode(env) === "archived-benchmark") {
+    if (config?.schema !== "p51-benchmark-inputs-v1" || config.mode !== "archived-benchmark"
+        || config.task !== "P5-1" || config.repository !== env.GITHUB_REPOSITORY
+        || config.profile !== "p34-v2-candidate" || config.purpose !== "fixed-load-benchmark"
+        || config.derivation !== "protected-finalized-pair/reference-envelope-only"
+        || config.productionPublishable !== false || config.representativeFunctionalSample !== false
+        || config.baseVersion !== env.INPUT_CANDIDATE_BASE_VERSION || config.targetVersion !== env.INPUT_VERSION_NAME
+        || config.normalInputs?.path !== "Tools/ota/p51-normal-staging-inputs.json"
+        || git(["diff", "--name-only", "HEAD"])) throw new CliError("Archived benchmark contract/checkout drift");
+    const original = "1430c8ff7f3bcd9a35bfe158ba697b99021f75f2";
+    const products = ["USER", "ArduinoAPI", "Libraries", "MDK-ARM_F435", "boot", "cmake",
+      "vendor", "Simulator", "bsdiff_lzma_AES128-main", "segger_rtt"];
+    git(["merge-base", "--is-ancestor", original, owner.commitSha]);
+    if (git(["diff", "--name-only", original, owner.commitSha, "--", ...products])
+        || git(["status", "--porcelain", "--untracked-files=all", "--", ...products])) {
+      throw new CliError("Benchmark decoder/product sources differ from the protected original");
+    }
+    return owner;
+  }
   if (candidateMode(env) === "normal-delta") {
     verifyNormalCheckout(root, env, config, git);
     return owner;
@@ -265,6 +284,7 @@ async function main() {
   }
   const inputMode = candidateMode(env);
   const manifestFile = path.join(root, inputMode === "start-state-supplement" ? "Tools/ota/p51-start-state-inputs.json"
+    : inputMode === "archived-benchmark" ? "Tools/ota/p51-benchmark-inputs.json"
     : inputMode === "normal-delta" ? "Tools/ota/p51-normal-inputs.json"
     : inputMode === "new-source" ? "Tools/ota/p51-new-source-inputs.json" : "Tools/ota/p51-candidate-inputs.json");
   const manifestBytes = await readFile(manifestFile), manifest = JSON.parse(manifestBytes);
@@ -275,8 +295,9 @@ async function main() {
   await mkdir(evidence, { recursive: true });
   const run = async (mode, extra = [], childEnv = env, labelOverride) => {
     const label = labelOverride || (mode.endsWith("command") ? path.basename(extra[1], ".json") : mode);
-    const normal = mode.startsWith("normal-");
-    const argv = ["-I", "-S", "-B", "-X", "utf8", path.join(root, normal ? "Tools/ota/p51-normal-inputs.py" : "Tools/ota/p51-package.py"), normal ? mode.slice(7) : mode,
+    const normal = mode.startsWith("normal-"), benchmark = mode.startsWith("benchmark-");
+    const script = normal ? "Tools/ota/p51-normal-inputs.py" : benchmark ? "Tools/ota/p51-benchmark-inputs.py" : "Tools/ota/p51-package.py";
+    const argv = ["-I", "-S", "-B", "-X", "utf8", path.join(root, script), normal ? mode.slice(7) : benchmark ? mode.slice(10) : mode,
       "--root-out", out, "--cc", options.cc ?? "gcc", ...extra];
     const result = spawnSync(options.python ?? "python3", argv,
       { cwd: root, env: childEnv, encoding: "utf8", windowsHide: true, timeout: 660000, maxBuffer: 16 * 1024 * 1024 });
@@ -290,8 +311,32 @@ async function main() {
   };
   if (mode === "inputs") {
     if (env.OTA_AES_KEY) throw new CliError("Input admission must run without the packaging secret");
-    await run(inputMode === "normal-delta" ? "normal-inputs" : inputMode === "start-state-supplement" ? "supplement-inputs" : inputMode === "new-source" ? "source-inputs" : "inputs");
+    await run(inputMode === "archived-benchmark" ? "benchmark-inputs" : inputMode === "normal-delta" ? "normal-inputs" : inputMode === "start-state-supplement" ? "supplement-inputs" : inputMode === "new-source" ? "source-inputs" : "inputs");
     await writeOutput(root, path.join(evidence, "input-binding.json"), JSON.stringify({ manifestSha256: digest(manifestBytes), owner }) + "\n");
+    return;
+  }
+  if (inputMode === "archived-benchmark") {
+    const binding = JSON.parse(await readFile(path.join(evidence, "input-binding.json")));
+    if (binding.manifestSha256 !== digest(manifestBytes) || JSON.stringify(binding.owner) !== JSON.stringify(owner)) {
+      throw new CliError("Benchmark input/runner owner changed");
+    }
+    const noKey = { ...env }; delete noKey.OTA_AES_KEY;
+    await run("benchmark-check", [], noKey);
+    const proof = JSON.parse(await readFile(path.join(out, "inputs/benchmark-source.json")));
+    for (const build of Object.values(proof.originalBuilds)) {
+      verifyBuildKeyBinding(build, env);
+      verifyBuildConfiguration(build, "p34-v2-candidate");
+    }
+    if (existsSync(privateDir)) throw new CliError("Preserve earlier benchmark private state");
+    await mkdir(privateDir);
+    await writeOutput(root, path.join(privateDir, "owner.json"), JSON.stringify(owner));
+    try {
+      await writeOutput(root, path.join(privateDir, "key.h"), firmwareKeyHeader(env.OTA_AES_KEY));
+      await run("benchmark-package");
+      await run("benchmark-check", [], noKey, "benchmark-check-final");
+      verifyCandidateCheckout(root, env, manifest);
+      process.stdout.write("P51_ARCHIVED_BENCHMARK_PACKAGED; not a normal release or functional sample\n");
+    } finally { await cleanupCandidate(root, env); }
     return;
   }
   if (inputMode === "normal-delta") {
