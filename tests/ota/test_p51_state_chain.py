@@ -36,6 +36,25 @@ def inputs():
     return images, tables, text
 
 
+def distinct_inputs():
+    images, tables, text = inputs()
+    target = bytearray(images['target'] + bytes(0x800))
+    target[:16] = b'new-vector-table'
+    for offset, size in ((0x126, 6), (0x200, 4), (0x208, 4), (0x300, 4), (0x308, 4)):
+        target[offset+0x800:offset+0x800+size] = target[offset:offset+size]
+        target[offset:offset+size] = bytes(size)
+    images['target'] = bytes(target)
+    tables['target']['bcb_arbiter'] = (0x08010900, 48)
+    tables['target']['__StackLimit'] = (0x20054000, 0)
+    tables['target']['__StackTop'] = (0x20056000, 0)
+    for name, value in text['target'].items():
+        for old, new in (('08010128', '08010928'), ('8010100', '8010900'),
+                         ('8010130', '8010930'), ('080102', '08010a'), ('080103', '08010b')):
+            value = value.replace(old, new)
+        text['target'][name] = value
+    return images, tables, text
+
+
 def sample(points, phase, seq=None):
     role = 'base' if phase in s.PHASES[:2] else 'target'
     model, images = points['roles'][role], points['images']
@@ -132,6 +151,41 @@ class StateChainTests(unittest.TestCase):
                 text['base'][name] = text['base'][name].replace(old, new)
             with self.subTest(mutate=mutate), self.assertRaises(RuntimeError):
                 s.bind_points(images, tables, text)
+
+    def test_distinct_executables_use_each_roles_own_code_and_stack(self):
+        images, tables, text = distinct_inputs()
+        points = s.bind_points(images, tables, text)
+        self.assertNotEqual(points['images']['base']['size'], points['images']['target']['size'])
+        self.assertNotEqual(points['images']['base']['sha256'], points['images']['target']['sha256'])
+        self.assertEqual(points['roles']['base']['epilogue'], 0x08010128)
+        self.assertEqual(points['roles']['target']['epilogue'], 0x08010928)
+        self.assertEqual(points['roles']['target']['lower'], 0x20054000)
+        for phase, expected in zip(s.PHASES, (4, 1, 3, 4)):
+            data, console = sample(points, phase)
+            _, value = s.extract(data, console, points, phase)
+            self.assertEqual(value['state'], expected)
+            self.assertEqual(value['currentVersion'], 30319 if phase == 'confirmed' else 30317)
+
+    def test_each_role_rejects_foreign_code_frame_and_symbols(self):
+        for role in ('base', 'target'):
+            for damage in ('opcode', 'frame', 'caller', 'symbols', 'foreign-disassembly'):
+                images, tables, text = distinct_inputs()
+                if damage == 'opcode':
+                    offset = 0x200 if role == 'base' else 0xa00
+                    image = bytearray(images[role])
+                    image[offset] ^= 1
+                    images[role] = bytes(image)
+                elif damage == 'frame':
+                    text[role]['bcb_arbiter'] = text[role]['bcb_arbiter'].replace('sp, #256', 'sp, #252')
+                elif damage == 'caller':
+                    text[role]['ota_backup_stage_impl'] = text[role]['ota_backup_stage_impl'].replace(
+                        'bl 8010100' if role == 'base' else 'bl 8010900', 'bl 8010110')
+                elif damage == 'symbols':
+                    tables[role]['bcb_arbiter'] = (0x08010110, 48)
+                else:
+                    text[role] = text['target' if role == 'base' else 'base']
+                with self.subTest(role=role, damage=damage), self.assertRaises(RuntimeError):
+                    s.bind_points(images, tables, text)
 
     def test_all_four_observed_states(self):
         for phase, expected in zip(s.PHASES, (4, 1, 3, 4)):

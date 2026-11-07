@@ -29,9 +29,8 @@ def calls(text, symbol):
 
 
 def bind_points(images, tables, disassembly):
-    base, target = (images[role] for role in ('base', 'target'))
-    h.require(base[:0x400] == target[:0x400] and base[0x460:] == target[0x460:],
-              'state capture requires the bound common executable, not mixed candidates')
+    # MCU.bind verifies each finalized executable against its own pinned ELF.
+    # Real code deltas may relocate callers and stacks between the two roles.
     result = dict(roles={}, images={})
     for role in ('base', 'target'):
         image, table, text = images[role], tables[role], disassembly[role]
