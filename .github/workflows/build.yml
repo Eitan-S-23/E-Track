@@ -22,6 +22,11 @@ on:
         description: "Optional release tag, for example v1.0.0"
         required: false
         type: string
+      release_prerelease:
+        description: "Mark a test release as prerelease and never as GitHub latest"
+        required: false
+        type: boolean
+        default: false
       replace_existing_release:
         description: "Dangerous: replace assets on an existing GitHub Release"
         required: true
@@ -238,6 +243,10 @@ jobs:
         working-directory: .
         run: python -I -S -B -X utf8 tests/ota/test_android_release_signing.py
 
+      - name: Verify independent App and firmware endpoints
+        working-directory: .
+        run: python -I -S -B -X utf8 tests/ota/test_flutter_update_endpoints.py
+
       - name: Analyze project
         run: flutter analyze
 
@@ -274,6 +283,13 @@ jobs:
             fi
             echo "Release application id suffix enabled: ${TRACE_RELEASE_APP_ID_SUFFIX}"
           fi
+          if [[ -n "${TRACE_PUBLIC_UPDATE_SERVICE_URL:-}" ]]; then
+            update_service_url="${TRACE_PUBLIC_UPDATE_SERVICE_URL%/}"
+            build_args+=(--dart-define="TRACE_CLOUDFLARE_UPDATE_MANIFEST_URL=${update_service_url}/api/public/latest")
+            echo "Cloudflare public update manifest URL is configured for this APK."
+          else
+            echo "Cloudflare update manifest URL is not configured; APK will use the legacy GitHub latest manifest."
+          fi
           if [[ -n "${DISPATCH_FIRMWARE_LATEST_URL:-}" ]]; then
             # 显式 dispatch 输入只覆盖固件 latest endpoint；仅接受不含凭据的
             # 公开 HTTPS URL（校验逻辑与 dev-checks 观测路径同一套口径）。
@@ -292,12 +308,7 @@ jobs:
             build_args+=(--dart-define="TRACE_CLOUDFLARE_FIRMWARE_LATEST_URL=${parsed_url}")
             echo "Firmware latest endpoint injected from dispatch input (firmware endpoint only; update manifest source unchanged)."
           elif [[ -n "${TRACE_PUBLIC_UPDATE_SERVICE_URL:-}" ]]; then
-            update_service_url="${TRACE_PUBLIC_UPDATE_SERVICE_URL%/}"
-            build_args+=(--dart-define="TRACE_CLOUDFLARE_UPDATE_MANIFEST_URL=${update_service_url}/api/public/latest")
             build_args+=(--dart-define="TRACE_CLOUDFLARE_FIRMWARE_LATEST_URL=${update_service_url}/api/public/firmware/latest")
-            echo "Cloudflare public update manifest URL is configured for this APK."
-          else
-            echo "Cloudflare update manifest URL is not configured; APK will use the legacy GitHub latest manifest and no default firmware endpoint."
           fi
           if [[ -n "${TRACE_UPDATE_PAYLOAD_ED25519_PUBLIC_KEY_BASE64:-}" ]]; then
             build_args+=(--dart-define="TRACE_UPDATE_PAYLOAD_ED25519_PUBLIC_KEY_BASE64=${TRACE_UPDATE_PAYLOAD_ED25519_PUBLIC_KEY_BASE64}")
@@ -733,6 +744,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
           RELEASE_TAG: ${{ steps.release_tag.outputs.tag }}
           RELEASE_EXISTS: ${{ steps.release_guard.outputs.exists }}
+          RELEASE_PRERELEASE: ${{ inputs.release_prerelease || 'false' }}
           AUTO_RELEASE_ON_PUSH: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') }}
           RELEASE_NOTES_PATH: ${{ runner.temp }}/trace-release-notes.md
         shell: bash
@@ -740,7 +752,9 @@ jobs:
           set -euo pipefail
 
           release_flags=()
-          if [[ "${AUTO_RELEASE_ON_PUSH}" == "true" ]]; then
+          if [[ "${RELEASE_PRERELEASE:-false}" == "true" ]]; then
+            release_flags+=(--prerelease --latest=false)
+          elif [[ "${AUTO_RELEASE_ON_PUSH}" == "true" ]]; then
             release_flags+=(--latest=false)
           fi
 
@@ -750,7 +764,7 @@ jobs:
           fi
 
           if [[ "${RELEASE_EXISTS}" == "true" ]]; then
-            gh release edit "${RELEASE_TAG}" --target "${GITHUB_SHA}" --notes-file "${RELEASE_NOTES_PATH}"
+            gh release edit "${RELEASE_TAG}" --target "${GITHUB_SHA}" --notes-file "${RELEASE_NOTES_PATH}" "${release_flags[@]}"
             for asset_path in release-assets/*; do
               if [[ -f "${asset_path}" ]]; then
                 gh release delete-asset "${RELEASE_TAG}" "$(basename "${asset_path}")" -y >/dev/null 2>&1 || true
