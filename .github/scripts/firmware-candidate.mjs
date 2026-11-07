@@ -9,6 +9,7 @@ import { firmwareKeyHeader, verifyBuildKeyBinding } from "../../app/bluetooth_fl
 import { verifyBuildConfiguration, readBuildConfiguration } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-build-profile.mjs";
 import { buildKeyedFirmware, cleanupPrivateBuildKey } from "./firmware-gcc-keyed-build.mjs";
 import { candidateAdmission, candidateMode, UI_BASELINE } from "./firmware-candidate-context.mjs";
+import { verifyNormalCheckout, packageNormalCandidate } from "./firmware-normal-candidate.mjs";
 export { candidateAdmission } from "./firmware-candidate-context.mjs";
 
 export function verifyCandidateCheckout(root, env, config, git = argv =>
@@ -16,6 +17,10 @@ export function verifyCandidateCheckout(root, env, config, git = argv =>
   const owner = candidateAdmission(env);
   if (git(["rev-parse", "HEAD"]) !== owner.commitSha) throw new CliError("Candidate checkout differs from reviewed source");
   if (candidateMode(env) === "archived-original") return owner;
+  if (candidateMode(env) === "normal-delta") {
+    verifyNormalCheckout(root, env, config, git);
+    return owner;
+  }
   if (candidateMode(env) === "start-state-supplement") {
     if (config?.schema !== "p51-start-state-inputs-v1" || config.mode !== "start-state-supplement"
         || config.repository !== env.GITHUB_REPOSITORY || config.task !== "P51-START-STATE-01"
@@ -260,6 +265,7 @@ async function main() {
   }
   const inputMode = candidateMode(env);
   const manifestFile = path.join(root, inputMode === "start-state-supplement" ? "Tools/ota/p51-start-state-inputs.json"
+    : inputMode === "normal-delta" ? "Tools/ota/p51-normal-inputs.json"
     : inputMode === "new-source" ? "Tools/ota/p51-new-source-inputs.json" : "Tools/ota/p51-candidate-inputs.json");
   const manifestBytes = await readFile(manifestFile), manifest = JSON.parse(manifestBytes);
   const owner = verifyCandidateCheckout(root, env, manifest);
@@ -267,9 +273,10 @@ async function main() {
   const privateDir = outputPath(root, path.join(out, "private"));
   const evidence = outputPath(root, path.join(out, "evidence"));
   await mkdir(evidence, { recursive: true });
-  const run = async (mode, extra = [], childEnv = env) => {
-    const label = mode === "command" ? path.basename(extra[1], ".json") : mode;
-    const argv = ["-I", "-S", "-B", "-X", "utf8", path.join(root, "Tools/ota/p51-package.py"), mode,
+  const run = async (mode, extra = [], childEnv = env, labelOverride) => {
+    const label = labelOverride || (mode.endsWith("command") ? path.basename(extra[1], ".json") : mode);
+    const normal = mode.startsWith("normal-");
+    const argv = ["-I", "-S", "-B", "-X", "utf8", path.join(root, normal ? "Tools/ota/p51-normal-inputs.py" : "Tools/ota/p51-package.py"), normal ? mode.slice(7) : mode,
       "--root-out", out, "--cc", options.cc ?? "gcc", ...extra];
     const result = spawnSync(options.python ?? "python3", argv,
       { cwd: root, env: childEnv, encoding: "utf8", windowsHide: true, timeout: 660000, maxBuffer: 16 * 1024 * 1024 });
@@ -283,8 +290,44 @@ async function main() {
   };
   if (mode === "inputs") {
     if (env.OTA_AES_KEY) throw new CliError("Input admission must run without the packaging secret");
-    await run(inputMode === "start-state-supplement" ? "supplement-inputs" : inputMode === "new-source" ? "source-inputs" : "inputs");
+    await run(inputMode === "normal-delta" ? "normal-inputs" : inputMode === "start-state-supplement" ? "supplement-inputs" : inputMode === "new-source" ? "source-inputs" : "inputs");
     await writeOutput(root, path.join(evidence, "input-binding.json"), JSON.stringify({ manifestSha256: digest(manifestBytes), owner }) + "\n");
+    return;
+  }
+  if (inputMode === "normal-delta") {
+    const binding = JSON.parse(await readFile(path.join(evidence, "input-binding.json")));
+    if (binding.manifestSha256 !== digest(manifestBytes) || JSON.stringify(binding.owner) !== JSON.stringify(owner)) {
+      throw new CliError("Normal input/runner owner changed");
+    }
+    const noKey = { ...env }; delete noKey.OTA_AES_KEY;
+    await run("normal-check", [], noKey);
+    const proof = JSON.parse(await readFile(path.join(out, "inputs/normal-source-proof.json")));
+    for (const role of ["base", "target"]) verifyBuildKeyBinding(proof.roles[role].originalBuild, env);
+    if (existsSync(privateDir)) throw new CliError("Preserve earlier normal candidate private state");
+    await mkdir(privateDir);
+    await writeOutput(root, path.join(privateDir, "owner.json"), JSON.stringify(owner));
+    try {
+      await writeOutput(root, path.join(privateDir, "key.h"), firmwareKeyHeader(env.OTA_AES_KEY));
+      let counter = 0;
+      const execute = async (tool, argv, options) => {
+        const label = `normal-step-${++counter}`;
+        const request = outputPath(root, path.join(privateDir, label + ".json"));
+        await writeOutput(root, request, JSON.stringify({ label, argv: [tool, ...argv], cwd: options.cwd, timeout: 330 }));
+        await run("normal-command", ["--command-json", request], options.env);
+        const receipt = JSON.parse(await readFile(path.join(evidence, "native", label + ".process.json")));
+        if (!receipt.treeCleanupComplete) throw new CliError("Normal preparer process closure is unconfirmed");
+        return { status: receipt.exitCode,
+          stdout: await readFile(path.join(evidence, "native", label + ".stdout.txt"), "utf8"),
+          stderr: await readFile(path.join(evidence, "native", label + ".stderr.txt"), "utf8") };
+      };
+      const metadata = await packageNormalCandidate({ root, out, env, config: manifest, execute, python: options.python ?? "python3" });
+      await run("normal-native");
+      await run("normal-check", [], noKey, "normal-check-final");
+      verifyCandidateCheckout(root, env, manifest);
+      metadata.nativeVerificationSha256 = digest(await readFile(path.join(evidence, "normal-native.json")));
+      await writeOutput(root, path.join(out, "normal/candidate-metadata.json"), JSON.stringify(metadata, null, 2) + "\n");
+      process.stdout.write("P51_NORMAL_CANDIDATE_PACKAGED; initialization-only base, no publication or device operation\n");
+    } finally { await cleanupCandidate(root, env); }
     return;
   }
   if (inputMode === "start-state-supplement") {

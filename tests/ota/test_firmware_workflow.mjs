@@ -4,6 +4,7 @@ import { mkdir, mkdtemp, readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
+import { runInNewContext } from "node:vm";
 import { outputPath, writeOutput } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-cli.mjs";
 import { releaseConfig } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-release-pipeline.mjs";
 
@@ -19,6 +20,33 @@ const production = workflow.jobs["register-cloudflare"];
 const rehearsal = workflow.jobs["rehearse-cloudflare"];
 const bindings = workflow.jobs["check-firmware-bindings"];
 const normalize = value => value.trim().replace(/\s+/g, " ");
+
+test("normal candidate workflow connects the protected context, producer tool and complete evidence", () => {
+  const job = workflow.jobs["package-candidate"];
+  const github = { event: { inputs: { candidate_mode: "normal-delta" } } };
+  const evaluate = value => runInNewContext(value.trim().slice(3, -2), { github });
+  assert.equal(evaluate(job.env.FIRMWARE_RELEASE_MODE), "artifact-candidate-normal");
+  assert.equal(evaluate(job.env.FIRMWARE_CANDIDATE_CONTEXT), "firmware-rehearsal/artifact-only-normal-delta-v1");
+  assert.equal(job.env.PYTHONPATH, "${{ github.workspace }}/.cache/p51-candidate/python");
+  assert.equal(job.env.BSDIFF_EXE, "${{ github.workspace }}/.cache/bsdiff/bin/bsdiff");
+  const build = job.steps.find(step => step.name === "Build existing vendor bsdiff for normal candidate packaging");
+  const checks = job.steps.find(step => step.name === "Check normal candidate source admission and real packaging without credentials");
+  const normal = job.steps.find(step => step.with?.name?.startsWith("p51-normal-"));
+  assert.equal(build.if, "github.event.inputs.candidate_mode == 'normal-delta'");
+  assert.match(build.run, /cmake --build \.cache\/bsdiff --target bsdiff/);
+  assert.equal(checks.if, build.if);
+  assert.match(checks.run, /python3 -I -S -B -X utf8 tests\/ota\/test_p51_normal_inputs.py/);
+  assert.match(checks.run, /node --test tests\/ota\/test_firmware_normal_candidate.mjs/);
+  assert.deepEqual(normal.with.path.trim().split(/\r?\n/), [".cache/p51-candidate/normal/", ".cache/p51-candidate/inputs/", ".cache/p51-candidate/evidence/"]);
+  assert.match(normal.if, /steps\.cleanup\.outcome == 'success'/);
+  assert.doesNotMatch(normal.with.path, /private|reference-1MiB/);
+  const development = workflow.jobs["release-development-checks"];
+  assert.equal(development.steps.find(step => step.uses === "actions/checkout@v4").with["fetch-depth"], "0");
+  const local = development.steps.find(step => step.name === "Check protected normal candidate wiring and archived source inputs");
+  assert.equal(local["working-directory"], ".");
+  assert.equal(local.env.BSDIFF_EXE, job.env.BSDIFF_EXE);
+  assert.doesNotMatch(JSON.stringify(local), /secrets\./);
+});
 
 // P4-4 checks the actual configuration parser without a build or cloud call.
 const p44Fixture = () => ({

@@ -67,6 +67,7 @@ task_id: P5-1
 - 每轮输入记录 source/target versionCode、source/target image identity、asset kind/hash/size、channel/releaseId、设备/Boot/App artifact hash。
 - 正常 PATCH cell 的 `functional_sample` 必须绑定 `purpose=normal-upgrade`、正常制包 `verification.json` 的 `preparation` 文件摘要，以及同目标 `full_package` 的完整文件摘要。runner 在 channel/device ownership 前复核工具编码、实际包大小与输入身份，并直接比较镜像头之外的内容；缺失、参考/诊断用途、仅改版本头或差分不更小均不得进入代表性功能 cell。该字段不追写旧合同或旧原件。
 - 制包证明须保留同目录的 metadata、`steps.json`、逐步 stdout/stderr、原始 App/base、full/patch apply candidate 及资产文件；制包工具实物由现有 `tool_dependencies` 绑定。准入复算这些原件的摘要、命令输入关系及 candidate 与目标逐字节一致，并复用现有字节校验器核验实际 ETU 的包型、长度、CRC、算法/密钥编号和基版/目标身份，不能只信成功布尔值或自洽的 JSON 声明。原始 CI 命令路径只作关系核验，不在验收机重放；已验证制包原件无需每次设备执行重新制包。
+- `normal-delta` 候选入口只消费受保护原始 GCC 构建与同一受保护 run 的正常制包原件，保持 `isFormalRelease=false`；不得伪装为正式基版或首发 bootstrap。若为安全起点重新封头，原始源码/构建身份、时间戳、派生版本和包装 runner 必须分开记录。初始化 full 不计作重复 full 功能验收；是否需要初始化由真实 App/BCB/备份约束决定，不因现有 runner 方便而增加 OTA。普通发布入口仍拒绝候选来源。
 - 输出记录完整状态轨迹、staging/BCB 关键提交、最终 GET_INFO、fw_header/BCB 对比和人机 UI 结果。
 
 ## 状态机与生命周期所有者

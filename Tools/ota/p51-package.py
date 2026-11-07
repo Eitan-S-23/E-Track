@@ -83,13 +83,13 @@ def redacted(data):
     return text
 
 
-def native_command(label, argv, env, evidence, timeout=90):
+def native_command(label, argv, env, evidence, timeout=90, cwd=None):
     global STAGE
     STAGE = label
     # The supported launcher waits for stdin until the whole tree is job-owned.
     owned = load('p51_owned', 'Tools/flutter/dev_checks.py')
     job = owned.WindowsJob() if os.name == 'nt' else None
-    options = dict(cwd=ROOT, env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    options = dict(cwd=checked(cwd) if cwd is not None else ROOT, env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     options.update(creationflags=subprocess.CREATE_NO_WINDOW) if job else options.update(start_new_session=True)
     private = checked(evidence.parent.parent / 'private')
     active = checked(private / 'native-active.json')
@@ -135,7 +135,7 @@ def native_command(label, argv, env, evidence, timeout=90):
                     cleanup_complete = False
     save(evidence / (label + '.stdout.txt'), redacted(stdout).encode())
     save(evidence / (label + '.stderr.txt'), redacted(stderr).encode())
-    save_json(evidence / (label + '.process.json'), dict(stage=label, argv=argv, exitCode=code,
+    save_json(evidence / (label + '.process.json'), dict(stage=label, argv=argv, cwd=str(options['cwd']), exitCode=code,
         signal=-code if code is not None and code < 0 else None, timeout=expired, limitSeconds=timeout,
         treeCleanupComplete=cleanup_complete, owner='WindowsJob' if job else 'POSIX process group',
         interrupted=type(interrupted).__name__ if interrupted else None, cleanupErrors=cleanup_errors))
@@ -148,7 +148,7 @@ def native_command(label, argv, env, evidence, timeout=90):
     return stdout or b'', stderr or b''
 
 
-def resolve_inputs(manifest):
+def archived_inputs(manifest):
     require(manifest['schema'] == 'p51-candidate-inputs-v1' and manifest['task'] == 'P5-1', 'Candidate schema')
     require(manifest['repository'] == 'Eitan-S-23/E-Track', 'Candidate repository')
     require(manifest['targetVersion'] == '3.3.16' and manifest['originalVersion'] == '3.3.13'
@@ -187,6 +187,12 @@ def resolve_inputs(manifest):
     require(base == files['app'][:0x400] + pack.build_fw_header(files['app'], manifest['originalVersion'],
             build['buildTimestamp']) + files['app'][0x460:], 'Original finalization not reproducible')
     require(recovery.validate_app(base)['version_name'] == manifest['originalVersion'], 'Original App header')
+    return dict(base=base, build=build, files=files, artifact=artifact, archive=objects['archive'])
+
+
+def resolve_inputs(manifest):
+    original = archived_inputs(manifest)
+    base, build, files = original['base'], original['build'], original['files']
     target = base[:0x400] + pack.build_fw_header(base, manifest['targetVersion'], manifest['targetTimestamp']) + base[0x460:]
     require(sha(target) == manifest['targetSha256'] and recovery.validate_app(target)['version_code'] == 30316,
             'Header-only target identity')
@@ -202,7 +208,7 @@ def resolve_inputs(manifest):
             'Reference decompression/patch identity')
     require(raw == encoding.patch_stream(base, target, row['count'], row['seed'], row['salt']), 'Reference progression witness')
     return dict(base=base, target=target, boot=boot_bytes, build=build, buildOriginal=files['build'], row=row, compressed=compressed,
-                artifact=artifact, manifest=manifest)
+                artifact=original['artifact'], manifest=manifest)
 
 
 def resolve_boot(manifest):
@@ -570,6 +576,8 @@ def native_verify(data, out, private, cc, all_assets=False, full_only=None):
         file = checked(private / (prefix + name + '.etu'))
         save(file, value)
         base_file = private / 'wrong-base.bin' if name == 'wrong-base-image' else private.parent / 'inputs/base.bin'
+        if full_only and full_only.get('base') is not None:
+            base_file = checked(full_only['base'])
         if name == 'full-other-start':
             base_file = private.parent / 'inputs/full-base.bin'
         stdout, stderr = native_command(prefix + name, [str(exe), str(file), str(base_file),

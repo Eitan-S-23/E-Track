@@ -4,7 +4,7 @@ import { versionCodeFor } from "../../app/bluetooth_flutter_Trace/cloudflare/upd
 export const UI_BASELINE = "b871d57e66645f43b29a8006a58ca6a3692951f3";
 export function candidateMode(env) {
   const mode = env.INPUT_CANDIDATE_MODE || "archived-original";
-  if (!["archived-original", "new-source", "start-state-supplement"].includes(mode)) throw new CliError("Unknown candidate input mode");
+  if (!["archived-original", "new-source", "start-state-supplement", "normal-delta"].includes(mode)) throw new CliError("Unknown candidate input mode");
   return mode;
 }
 
@@ -29,6 +29,18 @@ export function candidateAdmission(env) {
     if (env.INPUT_VERSION_NAME !== "3.3.16" || env.INPUT_CANDIDATE_BASE_VERSION || env.INPUT_CANDIDATE_FULL_BASE_VERSION
         || env.FIRMWARE_RELEASE_MODE || env.FIRMWARE_CANDIDATE_CONTEXT) {
       throw new CliError("Archived-original candidate requires its unchanged header-only inputs");
+    }
+  } else if (mode === "normal-delta") {
+    if (env.FIRMWARE_RELEASE_MODE !== "artifact-candidate-normal"
+        || env.FIRMWARE_CANDIDATE_CONTEXT !== "firmware-rehearsal/artifact-only-normal-delta-v1"
+        || env.GITHUB_WORKFLOW_SHA !== env.GITHUB_SHA
+        || !/^refs\/heads\/[A-Za-z0-9_./-]+$/.test(env.GITHUB_REF ?? "")
+        || env.GITHUB_WORKFLOW_REF !== `Eitan-S-23/E-Track/.github/workflows/firmware-build.yml@${env.GITHUB_REF}`
+        || env.INPUT_CANDIDATE_FULL_BASE_VERSION || env.INPUT_APPROVED_REHEARSAL_RUN_ID || env.INPUT_RELEASE_NOTES
+        || versionCodeFor(env.INPUT_CANDIDATE_BASE_VERSION) <= 30319
+        || versionCodeFor(env.INPUT_VERSION_NAME) <= versionCodeFor(env.INPUT_CANDIDATE_BASE_VERSION)
+        || env.INPUT_CANDIDATE_BASE_VERSION.length > 16 || env.INPUT_VERSION_NAME.length > 16) {
+      throw new CliError("Normal delta requires the protected artifact-only context and a fresh forward pair above 30319");
     }
   } else if (mode === "start-state-supplement") {
     if (env.INPUT_VERSION_NAME !== "3.3.19" || env.INPUT_CANDIDATE_BASE_VERSION || env.INPUT_CANDIDATE_FULL_BASE_VERSION

@@ -7,8 +7,9 @@ import { pathToFileURL } from "node:url";
 import { buildFirmwareMetadata } from "./build-firmware-release-metadata.mjs";
 import { args, CliError, failure, outputPath, projectRoot, required, writeOutput } from "./firmware-cli.mjs";
 import { assetFileName, canonicalJson, FIRMWARE_MODEL, parseFirmwareRegistration, sha256, versionCodeFor } from "./firmware-schema.mjs";
-import { validateKeyBinding } from "./firmware-release-key.mjs";
+import { validateKeyBinding, verifyBuildKeyBinding } from "./firmware-release-key.mjs";
 import { readBuildConfiguration, validateBuildConfiguration } from "./firmware-build-profile.mjs";
+import { candidateAdmission, candidateMode } from "../../../../../.github/scripts/firmware-candidate-context.mjs";
 
 export const digest = bytes => createHash("sha256").update(bytes).digest("hex");
 export const BOOTSTRAP_PROVENANCE = "inaugural-bootstrap-v1";
@@ -116,9 +117,47 @@ export function validateBootstrapProvenance(base, proof, repository) {
   return proof;
 }
 
-export async function prepareFirmwareRelease({ root, app, boot, build, release, repository,
+export async function prepareFirmwareRelease(inputs) {
+  return prepareFirmware(inputs, validateBaseDescriptor);
+}
+
+export async function prepareFirmwareCandidate({ candidateEnv, basePreparation, ...inputs }) {
+  const owner = candidateAdmission(candidateEnv);
+  verifyBuildKeyBinding(inputs.build, { OTA_AES_KEY: inputs.aesKey ?? candidateEnv.OTA_AES_KEY });
+  if (candidateMode(candidateEnv) !== "normal-delta" || inputs.referenceDir
+      || inputs.repository !== candidateEnv.GITHUB_REPOSITORY
+      || inputs.release.runId !== owner.runId
+      || inputs.release.versionName !== (inputs.base ? candidateEnv.INPUT_VERSION_NAME : candidateEnv.INPUT_CANDIDATE_BASE_VERSION)) {
+    throw badInput("Normal candidate requires its exact artifact-only owner and version role");
+  }
+  let expectedBase;
+  if (inputs.base) {
+    const bytes = await readFile(outputPath(inputs.root, basePreparation));
+    const preparation = JSON.parse(bytes);
+    const image = await fileIdentity(inputs.baseFile);
+    if (preparation.ok !== true || preparation.packagePurpose !== "normal-upgrade"
+        || preparation.fullByteEqual !== true || preparation.patchByteEqual !== null || preparation.base !== null
+        || preparation.recoveryVerified !== true || preparation.runId !== owner.runId
+        || preparation.versionName !== candidateEnv.INPUT_CANDIDATE_BASE_VERSION
+        || preparation.finalImage.sha256 !== image.sha256 || preparation.finalImage.sizeBytes !== image.sizeBytes
+        || !(await readFile(path.join(path.dirname(basePreparation), "work/full-candidate.bin"))).equals(await readFile(inputs.baseFile))) {
+      throw badInput("Normal candidate base must be the same protected run's completed normal initialization image");
+    }
+    expectedBase = { provenanceKind: "p51-normal-candidate-v1", isFormalRelease: false, kind: "app",
+      versionName: preparation.versionName, versionCode: versionCodeFor(preparation.versionName),
+      commitSha: preparation.commitSha, buildTimestamp: preparation.build.buildTimestamp,
+      imageSha256: image.sha256, sourceSha256: image.sha256, sourceSizeBytes: image.sizeBytes,
+      sourcePreparationSha256: digest(bytes), producer: owner };
+  } else if (basePreparation) throw badInput("Initialization cannot consume a base preparation");
+  return prepareFirmware(inputs, base => {
+    if (canonicalJson(base) !== canonicalJson(expectedBase)) throw badInput("Normal candidate base provenance drift");
+    return base;
+  });
+}
+
+async function prepareFirmware({ root, app, boot, build, release, repository,
   base, baseFile, outputDir, referenceDir, buildEvidenceDir, aesKey = process.env.OTA_AES_KEY,
-  bsdiff = process.env.BSDIFF_EXE, python = process.env.PYTHON ?? "python3", execute = spawnSync }) {
+  bsdiff = process.env.BSDIFF_EXE, python = process.env.PYTHON ?? "python3", execute = spawnSync }, validateBase) {
   if (!/^[0-9a-fA-F]{32}$/.test(aesKey ?? "")) throw new CliError("OTA_AES_KEY must be configured as 32 hex characters");
   if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository ?? "")) throw new CliError("Explicit GitHub repository required");
   if (release.releaseTag !== `mcu-${FIRMWARE_MODEL}-v${release.versionName}`
@@ -135,7 +174,7 @@ export async function prepareFirmwareRelease({ root, app, boot, build, release, 
   if (canonicalJson(observedBuild) !== canonicalJson(build)) throw badInput("Cross-stage GCC input identity mismatch");
   if (referenceDir) verifyReferenceBuild(build, await readFile(path.join(referenceDir, "verification.json")), release.runId);
   if (base) {
-    validateBaseDescriptor(base, release.versionName, repository, release.commitSha);
+    validateBase(base, release.versionName, repository, release.commitSha);
     const source = await fileIdentity(baseFile);
     if (source.sha256 !== base.sourceSha256 || source.sizeBytes !== base.sourceSizeBytes) throw badInput("Base source byte identity mismatch");
     if (!bsdiff || !existsSync(bsdiff)) throw new CliError("A validated bsdiff executable is required for patch generation");
@@ -154,7 +193,7 @@ export async function prepareFirmwareRelease({ root, app, boot, build, release, 
     TEMP: path.join(out, "tmp"), TMP: path.join(out, "tmp"), TMPDIR: path.join(out, "tmp") };
   const steps = [];
   async function run(label, script, argv, marker) {
-    const result = execute(python, ["-B", path.join(root, script), ...argv],
+    const result = await execute(python, ["-B", path.join(root, script), ...argv],
       { cwd: path.join(out, "work"), env, encoding: "utf8", windowsHide: true, timeout: 330000, maxBuffer: 8 * 1024 * 1024 });
     await writeOutput(root, path.join(out, "steps", `${label}.stdout.txt`), result.stdout ?? "");
     await writeOutput(root, path.join(out, "steps", `${label}.stderr.txt`), result.stderr ?? "");

@@ -40,6 +40,9 @@ on:
       - "Tools/etu_unpack.py"
       - "Tools/jlink/prepare-bootstrap-app.py"
       - "Tools/ota/p51-staging-inputs.*"
+      - "Tools/ota/p51-normal-inputs.*"
+      - "tests/ota/test_p51_normal_inputs.py"
+      - "tests/ota/test_firmware_normal_candidate.mjs"
       - "tests/ota/test_p51_staging_inputs.py"
       - "tests/ota/*firmware*"
       - "app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/*firmware*"
@@ -73,6 +76,9 @@ on:
       - "Tools/etu_unpack.py"
       - "Tools/jlink/prepare-bootstrap-app.py"
       - "Tools/ota/p51-staging-inputs.*"
+      - "Tools/ota/p51-normal-inputs.*"
+      - "tests/ota/test_p51_normal_inputs.py"
+      - "tests/ota/test_firmware_normal_candidate.mjs"
       - "tests/ota/test_p51_staging_inputs.py"
       - "tests/ota/*firmware*"
       - "app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/*firmware*"
@@ -93,7 +99,7 @@ on:
         required: false
         type: string
       candidate_mode:
-        description: "Archived unchanged; new-source compiles; start-state-supplement only wraps pinned starting images"
+        description: "Archived reference, new-source reference, start-state wrapping, or normal-delta from two pinned real-source builds"
         required: true
         type: choice
         default: archived-original
@@ -101,8 +107,9 @@ on:
           - archived-original
           - new-source
           - start-state-supplement
+          - normal-delta
       candidate_base_version:
-        description: "New-source only: root-approved fresh canonical start version above 3.3.16; target is version_name"
+        description: "New-source or normal-delta: reviewed start version; normal-delta must match its checked-in input contract"
         required: false
         type: string
       candidate_full_base_version:
@@ -268,12 +275,14 @@ jobs:
       INPUT_CANDIDATE_MODE: ${{ github.event.inputs.candidate_mode }}
       INPUT_CANDIDATE_BASE_VERSION: ${{ github.event.inputs.candidate_base_version }}
       INPUT_CANDIDATE_FULL_BASE_VERSION: ${{ github.event.inputs.candidate_full_base_version }}
-      FIRMWARE_RELEASE_MODE: ${{ github.event.inputs.candidate_mode == 'new-source' && 'artifact-candidate' || github.event.inputs.candidate_mode == 'start-state-supplement' && 'artifact-candidate-supplement' || '' }}
-      FIRMWARE_CANDIDATE_CONTEXT: ${{ github.event.inputs.candidate_mode == 'new-source' && 'firmware-rehearsal/artifact-only-new-source-v1' || github.event.inputs.candidate_mode == 'start-state-supplement' && 'firmware-rehearsal/artifact-only-start-state-v1' || '' }}
+      FIRMWARE_RELEASE_MODE: ${{ github.event.inputs.candidate_mode == 'new-source' && 'artifact-candidate' || github.event.inputs.candidate_mode == 'start-state-supplement' && 'artifact-candidate-supplement' || github.event.inputs.candidate_mode == 'normal-delta' && 'artifact-candidate-normal' || '' }}
+      FIRMWARE_CANDIDATE_CONTEXT: ${{ github.event.inputs.candidate_mode == 'new-source' && 'firmware-rehearsal/artifact-only-new-source-v1' || github.event.inputs.candidate_mode == 'start-state-supplement' && 'firmware-rehearsal/artifact-only-start-state-v1' || github.event.inputs.candidate_mode == 'normal-delta' && 'firmware-rehearsal/artifact-only-normal-delta-v1' || '' }}
       HOME: ${{ github.workspace }}/.cache/p51-candidate/home
       XDG_CACHE_HOME: ${{ github.workspace }}/.cache/p51-candidate/cache
       PIP_CACHE_DIR: ${{ github.workspace }}/.cache/p51-candidate/pip
       TMPDIR: ${{ github.workspace }}/.cache/p51-candidate/tmp
+      PYTHONPATH: ${{ github.workspace }}/.cache/p51-candidate/python
+      BSDIFF_EXE: ${{ github.workspace }}/.cache/bsdiff/bin/bsdiff
       PYTHONDONTWRITEBYTECODE: "1"
     steps:
       - name: Checkout exact packaging revision
@@ -296,6 +305,18 @@ jobs:
           python3 -m pip install --disable-pip-version-check --target .cache/p51-candidate/python pycryptodome==3.23.0
       - name: Verify explicit candidate input contract without the key
         run: node .github/scripts/firmware-candidate.mjs inputs
+      - name: Build existing vendor bsdiff for normal candidate packaging
+        if: github.event.inputs.candidate_mode == 'normal-delta'
+        run: |
+          cmake -S .github/scripts/bsdiff -B .cache/bsdiff -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build .cache/bsdiff --target bsdiff
+      - name: Check normal candidate source admission and real packaging without credentials
+        if: github.event.inputs.candidate_mode == 'normal-delta'
+        env:
+          P51_TEST_AREA: ${{ github.workspace }}/.cache/p51-candidate/selftests
+        run: |
+          python3 -I -S -B -X utf8 tests/ota/test_p51_normal_inputs.py
+          node --test tests/ota/test_firmware_normal_candidate.mjs
       - name: Install contained Arm GNU Toolchain for new-source only
         if: github.event.inputs.candidate_mode == 'new-source'
         run: |
@@ -307,6 +328,7 @@ jobs:
           echo "$GITHUB_WORKSPACE/.cache/p51-candidate/toolchain/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin" >> "$GITHUB_PATH"
           command -v ninja
       - name: Run credential-free candidate regression tests
+        if: github.event.inputs.candidate_mode != 'normal-delta'
         run: |
           node --test tests/ota/test_firmware_candidate.mjs
           python3 -I -S -B -X utf8 tests/ota/test_p51_package.py
@@ -321,7 +343,7 @@ jobs:
         if: always() && steps.gate.outcome == 'success'
         run: node .github/scripts/firmware-candidate.mjs cleanup
       - name: Preserve allowlisted candidate artifacts and receipts
-        if: always() && steps.cleanup.outcome == 'success' && github.event.inputs.candidate_mode != 'start-state-supplement'
+        if: always() && steps.cleanup.outcome == 'success' && github.event.inputs.candidate_mode != 'start-state-supplement' && github.event.inputs.candidate_mode != 'normal-delta'
         uses: actions/upload-artifact@v4
         with:
           name: p51-candidate-${{ github.run_id }}-${{ github.run_attempt }}
@@ -371,6 +393,18 @@ jobs:
           include-hidden-files: true
           retention-days: 14
           if-no-files-found: error
+      - name: Preserve complete normal preparations and original source bindings
+        if: always() && steps.cleanup.outcome == 'success' && github.event.inputs.candidate_mode == 'normal-delta'
+        uses: actions/upload-artifact@v4
+        with:
+          name: p51-normal-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .cache/p51-candidate/normal/
+            .cache/p51-candidate/inputs/
+            .cache/p51-candidate/evidence/
+          include-hidden-files: true
+          retention-days: 14
+          if-no-files-found: error
   release-development-checks:
     name: Release tooling development checks (no cloud credentials)
     if: github.event.inputs.package_candidate != 'true' && github.event.inputs.stage_candidate != 'true'
@@ -393,6 +427,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           persist-credentials: false
       - name: Set up Node
         uses: actions/setup-node@v6
@@ -444,6 +479,14 @@ jobs:
         id: byte_tests
         working-directory: .
         run: node --test tests/ota/test_firmware_release.mjs
+      - name: Check protected normal candidate wiring and archived source inputs
+        working-directory: .
+        env:
+          P51_TEST_AREA: ${{ github.workspace }}/.cache/firmware-release-tests/normal-candidate
+          BSDIFF_EXE: ${{ github.workspace }}/.cache/bsdiff/bin/bsdiff
+        run: |
+          python3 -I -S -B -X utf8 tests/ota/test_p51_normal_inputs.py
+          node --test tests/ota/test_firmware_normal_candidate.mjs
       - name: Preserve development byte fixtures and step originals
         if: always() && steps.byte_tests.outcome != 'skipped'
         uses: actions/upload-artifact@v4
