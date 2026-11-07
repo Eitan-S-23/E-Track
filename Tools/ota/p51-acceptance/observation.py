@@ -215,7 +215,9 @@ class Observer(s.Smoke):
 
     def ready_package(self, firmware):
         self.phase('manual-package-download', 300)
-        self.ask('check-download', '\u8bf7\u5728\u539f\u9875\u9762\u68c0\u67e5\u5e76\u4e0b\u8f7d 3.3.19 \u56fa\u4ef6\uff0c\u5148\u4e0d\u70b9\u5f00\u59cb\u5347\u7ea7\u3002\u6211\u4f1a\u6838\u5bf9\u5b9e\u9645\u4e0b\u8f7d\u5305\u7684\u6458\u8981\uff0c\u65e0\u9700\u56de\u590d\u3002')
+        code = firmware['target']['version']
+        version = '%d.%d.%d' % (code // 10000, code // 100 % 100, code % 100)
+        self.ask('check-download', '\u8bf7\u5728\u539f\u9875\u9762\u68c0\u67e5\u5e76\u4e0b\u8f7d ' + version + ' \u56fa\u4ef6\uff0c\u5148\u4e0d\u70b9\u5f00\u59cb\u5347\u7ea7\u3002\u6211\u4f1a\u6838\u5bf9\u5b9e\u9645\u4e0b\u8f7d\u5305\u7684\u6458\u8981\uff0c\u65e0\u9700\u56de\u590d\u3002')
         def ready():
             self.pump_stream()
             if not self.live or self.live[-1]['phase'] != 'readyToInstall':

@@ -294,6 +294,19 @@ class FunctionalSampleGuards(unittest.TestCase):
 
 
 class ExecutionGuards(unittest.TestCase):
+    def test_package_notice_uses_the_actual_target_version(self):
+        for version, text in ((30319, '3.3.19'), (30320, '3.3.20'), (30321, '3.3.21')):
+            with self.subTest(version=version):
+                driver = object.__new__(obs.Observer)
+                with patch.object(driver, 'phase'), patch.object(driver, 'ask') as ask, \
+                        patch.object(driver, 'wait', return_value='ready'):
+                    self.assertEqual(driver.ready_package(dict(target=dict(version=version))), 'ready')
+                ask.assert_called_once()
+                self.assertEqual(ask.call_args.args[0], 'check-download')
+                self.assertIn(text, ask.call_args.args[1])
+                if version != 30319:
+                    self.assertNotIn('3.3.19', ask.call_args.args[1])
+
     def test_p5_uses_explicit_bounded_stream_idle_window(self):
         driver = object.__new__(obs.Observer)
         with patch.object(obs.r.Android, 'start_live_stream', return_value='started') as start:
