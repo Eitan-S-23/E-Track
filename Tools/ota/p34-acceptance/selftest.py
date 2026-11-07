@@ -42,6 +42,8 @@ def main():
         for key in ("TEMP", "TMP", "HOME", "USERPROFILE", "APPDATA", "LOCALAPPDATA"):
             host.checked(Path(os.environ[key]))
         sys.path[:0] = [str(host.ROOT / "tests/ota"), sysconfig.get_path("platlib"), sysconfig.get_path("purelib")]
+        if args.test in GROUPS["p51-benchmark"] and os.environ.get("P51_PYTHON_DEPS"):
+            sys.path.insert(0, str(host.checked(Path(os.environ["P51_PYTHON_DEPS"]))))
         sys.argv = [str(host.ROOT / "tests/ota" / args.test)]
         runpy.run_path(sys.argv[0], run_name="__main__")
         return
@@ -63,6 +65,12 @@ def main():
     if args.group == "p51-benchmark":
         env["P51_TEST_AREA"] = str(host.checked(out / "fixtures"))
         env["P51_CLOCK_TEST_OUT"] = str(host.checked(out / "fixtures/clock"))
+        deps = host.checked(Path(os.environ.get("P51_PYTHON_DEPS", host.ROOT / ".cache/p51-staging/python")))
+        bsdiff = host.checked(Path(os.environ.get("BSDIFF_EXE",
+            host.ROOT / "bsdiff_lzma_AES128-main/bsdiff/build/bin/bsdiff.exe")))
+        if not (deps / "Crypto/Cipher/AES.py").is_file() or not bsdiff.is_file():
+            raise RuntimeError("P51 host tests require project-local pycryptodome and the existing vendor bsdiff")
+        env.update(P51_PYTHON_DEPS=str(deps), BSDIFF_EXE=str(bsdiff))
     if args.compiler_dir:
         env["PATH"] = str(args.compiler_dir.resolve(strict=True)) + os.pathsep + env.get("PATH", "")
     if args.group == "pipeline":

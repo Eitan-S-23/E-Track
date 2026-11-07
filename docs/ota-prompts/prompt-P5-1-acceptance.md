@@ -123,6 +123,9 @@ task_id: P5-1
   原始保护包及实际 APK 必须有正例；缺原生日志/非零退出/错原始源码、非 APK/错仓库/
   错 run 或 artifact/错 endpoint 或 profile 均须离线拒绝。延迟 MCU 调用验证绝对期限和
   写入启动余量，不能仅检查源码里包含 timeout 设置。
+  双宿主 CI 先在 workspace 内准备固定版本 pycryptodome 和既有 vendor bsdiff，显式传递
+  `P51_PYTHON_DEPS`/`BSDIFF_EXE` 到真实正常包 fixture；缺依赖须在入口拒绝，不能依赖
+  开发机全局安装或跳过原有功能门禁测试。失败的 fixture 子进程诊断须随原始日志保留。
 
 正确：正常小差分用于功能和收益，独立 1 MiB PATCH 用于固定负载，首 30 笔全部保留。
 错误：为测大包隐藏生产 full、把恢复/空闲算成载荷传输、丢失败凑 30/30，或把旧 SD

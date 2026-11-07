@@ -14,6 +14,11 @@ on:
       - "tests/ota/test_p51_benchmark_execution.py"
       - "tests/ota/test_p51_execution.py"
       - "tests/ota/test_p51_clock.py"
+      - "tests/ota/p51_preparation_fixture.mjs"
+      - ".github/scripts/bsdiff/**"
+      - "bsdiff_lzma_AES128-main/bsdiff/**"
+      - "Tools/etu_pack.py"
+      - "app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/prepare-firmware-release.mjs"
       - "Tools/ota/p3-3-service/**"
       - "tests/ota/test_p34_live_route.py"
       - "tests/ota/test_p34_service_patch.py"
@@ -64,6 +69,11 @@ on:
       - "tests/ota/test_p51_benchmark_execution.py"
       - "tests/ota/test_p51_execution.py"
       - "tests/ota/test_p51_clock.py"
+      - "tests/ota/p51_preparation_fixture.mjs"
+      - ".github/scripts/bsdiff/**"
+      - "bsdiff_lzma_AES128-main/bsdiff/**"
+      - "Tools/etu_pack.py"
+      - "app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/prepare-firmware-release.mjs"
       - "Tools/ota/p3-3-service/**"
       - "tests/ota/test_p34_live_route.py"
       - "tests/ota/test_p34_service_patch.py"
@@ -114,6 +124,10 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
+    env:
+      P51_PYTHON_DEPS: ${{ github.workspace }}/.cache/p51-staging/python
+      PIP_CACHE_DIR: ${{ github.workspace }}/.cache/p51-host-deps/pip
+      PYTHONDONTWRITEBYTECODE: "1"
     steps:
       - uses: actions/checkout@v4
       - name: Test host helpers (Linux)
@@ -148,10 +162,36 @@ jobs:
           if errorlevel 1 exit /b 1
           python -I -S -B -X utf8 Tools/ota/p34-acceptance/selftest.py live --out "%GITHUB_WORKSPACE%\.cache\p34-live-%GITHUB_RUN_ID%-%GITHUB_RUN_ATTEMPT%"
           if errorlevel 1 exit /b 1
+      - name: Prepare P51 host packaging dependencies (Linux)
+        if: runner.os != 'Windows'
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/.cache/p51-host-deps/tmp"
+          export TMPDIR="$GITHUB_WORKSPACE/.cache/p51-host-deps/tmp"
+          python3 -m pip install --only-binary=:all: --disable-pip-version-check --no-compile --target "$P51_PYTHON_DEPS" pycryptodome==3.23.0
+          cmake -S .github/scripts/bsdiff -B .cache/p51-host-deps/bsdiff -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build .cache/p51-host-deps/bsdiff --target bsdiff
+      - name: Prepare P51 host packaging dependencies (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        working-directory: ${{ github.workspace }}
+        run: |
+          if not exist "%GITHUB_WORKSPACE%\.cache\p51-host-deps\tmp" mkdir "%GITHUB_WORKSPACE%\.cache\p51-host-deps\tmp"
+          set "TEMP=%GITHUB_WORKSPACE%\.cache\p51-host-deps\tmp"
+          set "TMP=%TEMP%"
+          python -m pip install --only-binary=:all: --disable-pip-version-check --no-compile --target "%P51_PYTHON_DEPS%" pycryptodome==3.23.0
+          if errorlevel 1 exit /b 1
+          cmake -S .github/scripts/bsdiff -B .cache/p51-host-deps/bsdiff -G "Visual Studio 17 2022" -A x64
+          if errorlevel 1 exit /b 1
+          cmake --build .cache/p51-host-deps/bsdiff --config Release --target bsdiff
+          if errorlevel 1 exit /b 1
       - name: Test P51 benchmark execution adapters (Linux)
         if: runner.os != 'Windows'
         shell: bash
         working-directory: ${{ github.workspace }}
+        env:
+          BSDIFF_EXE: ${{ github.workspace }}/.cache/p51-host-deps/bsdiff/bin/bsdiff
         run: >-
           python3 -I -S -B -X utf8 Tools/ota/p34-acceptance/selftest.py p51-benchmark
           --out "$GITHUB_WORKSPACE/.cache/p51-benchmark-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
@@ -159,6 +199,8 @@ jobs:
         if: runner.os == 'Windows'
         shell: cmd
         working-directory: ${{ github.workspace }}
+        env:
+          BSDIFF_EXE: ${{ github.workspace }}/.cache/p51-host-deps/bsdiff/bin/Release/bsdiff.exe
         run: >-
           python -I -S -B -X utf8 Tools/ota/p34-acceptance/selftest.py p51-benchmark
           --out "%GITHUB_WORKSPACE%\.cache\p51-benchmark-%GITHUB_RUN_ID%-%GITHUB_RUN_ATTEMPT%"
@@ -174,6 +216,9 @@ jobs:
             .cache/p34-live-${{ github.run_id }}-${{ github.run_attempt }}/*.log
             .cache/p51-benchmark-${{ github.run_id }}-${{ github.run_attempt }}/*.json
             .cache/p51-benchmark-${{ github.run_id }}-${{ github.run_attempt }}/*.log
+            .cache/p51-benchmark-${{ github.run_id }}-${{ github.run_attempt }}/fixtures/normal-*/prepare-*.stdout
+            .cache/p51-benchmark-${{ github.run_id }}-${{ github.run_attempt }}/fixtures/normal-*/prepare-*.stderr
+            .cache/p51-benchmark-${{ github.run_id }}-${{ github.run_attempt }}/fixtures/normal-*/prepare-*.closed.json
           if-no-files-found: error
           include-hidden-files: true
           retention-days: 14

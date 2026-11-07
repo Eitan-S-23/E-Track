@@ -31,11 +31,20 @@ class FunctionalSampleGuards(unittest.TestCase):
         for key in ('SSLKEYLOGFILE', 'NODE_OPTIONS', 'NODE_V8_COVERAGE'):
             env.pop(key, None)
         env.update(PYTHON=sys.executable, NODE_DISABLE_COMPILE_CACHE='1')
+        if os.environ.get('P51_PYTHON_DEPS'):
+            env['PYTHONPATH'] = str(run.h.checked(Path(os.environ['P51_PYTHON_DEPS'])))
         cls.templates = {}
         for label in ('normal', 'header-only'):
             out = run.h.checked(cls.area / label)
-            raw = run.h.command(cls.area, 'prepare-' + label, [shutil.which('node', path=env.get('PATH')),
-                ROOT / 'tests/ota/p51_preparation_fixture.mjs', out, label], env, seconds=120)
+            try:
+                raw = run.h.command(cls.area, 'prepare-' + label, [shutil.which('node', path=env.get('PATH')),
+                    ROOT / 'tests/ota/p51_preparation_fixture.mjs', out, label], env, seconds=120)
+            except RuntimeError:
+                for suffix in ('stdout', 'stderr'):
+                    diagnostic = cls.area / ('prepare-' + label + '.' + suffix)
+                    if diagnostic.is_file():
+                        print(diagnostic.read_text(encoding='utf-8', errors='replace')[-16000:], file=sys.stderr)
+                raise
             cls.templates[label] = json.loads(raw)
 
     def setUp(self):
@@ -90,6 +99,19 @@ class FunctionalSampleGuards(unittest.TestCase):
         with patch.dict(os.environ, {}, clear=True), \
                 patch.object(run.h, 'command', side_effect=AssertionError('admission must not repackage or spawn')):
             run.validate_functional_patch(self.plan)
+
+    def test_fixture_forwards_explicit_python_dependencies_to_both_preparations(self):
+        class Isolated(FunctionalSampleGuards):
+            pass
+        deps = self.root/'python-deps'
+        deps.mkdir()
+        with patch.dict(os.environ, dict(P51_PYTHON_DEPS=str(deps))), \
+                patch.object(run.h, 'command', return_value=b'{}') as prepare:
+            Isolated.setUpClass()
+        self.assertEqual(prepare.call_count, 2)
+        for call in prepare.call_args_list:
+            self.assertEqual(call.args[3]['PYTHONPATH'], str(deps))
+            self.assertEqual(call.args[3]['PYTHON'], sys.executable)
 
     def test_reference_or_unlabelled_input_is_rejected(self):
         for value in (None, {}, dict(purpose='fixed-load-benchmark'), dict(purpose='normal-upgrade-diagnostic')):

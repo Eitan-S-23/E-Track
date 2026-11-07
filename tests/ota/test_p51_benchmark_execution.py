@@ -215,6 +215,31 @@ class BenchmarkTests(unittest.TestCase):
         self.assertIn('.cache/p51-benchmark-${{ github.run_id }}-${{ github.run_attempt }}/*.json', workflow)
         self.assertIn('.cache/p51-benchmark-${{ github.run_id }}-${{ github.run_attempt }}/*.log', workflow)
 
+    def test_ci_prepares_real_fixture_dependencies_on_both_hosts(self):
+        workflow = (ROOT/'.github/workflows/acceptance-governance.yml').read_text(encoding='utf-8')
+        for host in ('Linux', 'Windows'):
+            preparation = workflow.split('      - name: Prepare P51 host packaging dependencies ('+host+')\n')[1].split('      - name:')[0]
+            self.assertIn('pycryptodome==3.23.0', preparation)
+            self.assertIn('--target ', preparation)
+            self.assertIn('cmake -S .github/scripts/bsdiff -B .cache/p51-host-deps/bsdiff', preparation)
+            self.assertIn('--target bsdiff', preparation)
+            self.assertLess(workflow.index('Prepare P51 host packaging dependencies ('+host+')'),
+                workflow.index('Test P51 benchmark execution adapters ('+host+')'))
+            test = workflow.split('      - name: Test P51 benchmark execution adapters ('+host+')\n')[1].split('      - name:')[0]
+            executable = 'bin/Release/bsdiff.exe' if host == 'Windows' else 'bin/bsdiff'
+            self.assertIn('BSDIFF_EXE: ${{ github.workspace }}/.cache/p51-host-deps/bsdiff/'+executable, test)
+        self.assertIn('P51_PYTHON_DEPS: ${{ github.workspace }}/.cache/p51-staging/python', workflow)
+        self.assertIn('/fixtures/normal-*/prepare-*.stderr', workflow)
+
+    def test_ci_entry_rejects_missing_explicit_dependencies_without_ambient_fallback(self):
+        entry = h.host.load('p51_benchmark_missing_dependencies', ROOT/'Tools/ota/p34-acceptance/selftest.py')
+        with patch.dict(os.environ, dict(P51_PYTHON_DEPS=str(self.out/'missing-deps'),
+                BSDIFF_EXE=str(self.out/'missing-bsdiff.exe'))), \
+                patch.object(sys, 'argv', ['selftest.py', 'p51-benchmark', '--out', str(self.out/'missing-entry')]), \
+                patch.object(entry.host, 'run') as execute, self.assertRaisesRegex(RuntimeError, 'project-local pycryptodome'):
+            entry.main()
+        execute.assert_not_called()
+
     def test_phone_space_parse_is_strict(self):
         raw = b'Filesystem 1K-blocks Used Available Use% Mounted on\n/dev/fuse 200 20 180 10% /storage/emulated\n'
         self.assertEqual(b.free_phone_bytes(raw), 180*1024)

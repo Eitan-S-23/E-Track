@@ -33,7 +33,10 @@ const setup = spawnSync(python, argv, { cwd: dir, env: process.env, encoding: "u
 await writeOutput(root, path.join(dir, "base-finalize.stdout"), setup.stdout ?? "");
 await writeOutput(root, path.join(dir, "base-finalize.stderr"), setup.stderr ?? "");
 await writeOutput(root, path.join(dir, "base-finalize.json"), JSON.stringify({ argv, cwd: dir, exit: setup.status }));
-if (setup.status !== 0) throw new Error("Fixture base finalization failed; inspect retained outputs");
+if (setup.status !== 0) {
+  process.stderr.write((setup.stderr ?? "").slice(-16000));
+  throw new Error("Fixture base finalization failed; inspect retained outputs");
+}
 const release = JSON.parse(await readFile(path.join(root,
   "app/bluetooth_flutter_Trace/cloudflare/update-service/worker/test/fixtures/firmware-release-v2.json"), "utf8"));
 delete release.assets;
