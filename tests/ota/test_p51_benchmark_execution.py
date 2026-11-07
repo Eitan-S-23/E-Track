@@ -217,6 +217,8 @@ class BenchmarkTests(unittest.TestCase):
 
     def test_ci_prepares_real_fixture_dependencies_on_both_hosts(self):
         workflow = (ROOT/'.github/workflows/acceptance-governance.yml').read_text(encoding='utf-8')
+        self.assertIn('os: [ubuntu-latest, windows-2022]', workflow)
+        self.assertIn('-G "Visual Studio 17 2022" -A x64', workflow)
         for host in ('Linux', 'Windows'):
             preparation = workflow.split('      - name: Prepare P51 host packaging dependencies ('+host+')\n')[1].split('      - name:')[0]
             self.assertIn('pycryptodome==3.23.0', preparation)
