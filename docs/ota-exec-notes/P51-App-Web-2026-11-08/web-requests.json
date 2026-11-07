@@ -1,0 +1,581 @@
+[
+  {
+    "window": "web-cycle-01",
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/session",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/channels",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/releases",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/storage",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/announcements",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/firmware/releases",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/firmware/channels",
+        "allowed": true
+      },
+      {
+        "method": "POST",
+        "path": "/api/admin/releases/rel_trace_android_p51_web_app_v1_0_74_20261108/notes",
+        "allowed": true,
+        "body": {
+          "releaseNotes": "test(app): P51 isolated website candidate 2; not production\n\nP51 actual website notes check; restore before publication."
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/session",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/channels",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/releases",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/storage",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/announcements",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/firmware/releases",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/firmware/channels",
+        "allowed": true
+      },
+      {
+        "method": "POST",
+        "path": "/api/admin/releases/rel_trace_android_p51_web_app_v1_0_74_20261108/notes",
+        "allowed": true,
+        "body": {
+          "releaseNotes": "test(app): P51 isolated website candidate 2; not production\n"
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/session",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/channels",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/releases",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/storage",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/announcements",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/firmware/releases",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/firmware/channels",
+        "allowed": true
+      }
+    ]
+  },
+  {
+    "window": "web-cycle-02",
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/session",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/channels",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/releases",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/storage",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/announcements",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/firmware/releases",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/firmware/channels",
+        "allowed": true
+      },
+      {
+        "method": "POST",
+        "path": "/api/admin/channels/stable/publish",
+        "allowed": true,
+        "body": {
+          "appId": "trace",
+          "platform": "android",
+          "releaseId": "rel_trace_android_p51_web_app_v1_0_73_20261108",
+          "expectedRevision": 0,
+          "rollback": false
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/session",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/channels",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/releases",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/storage",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/announcements",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/firmware/releases",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/firmware/channels",
+        "allowed": true
+      },
+      {
+        "method": "POST",
+        "path": "/api/admin/channels/beta/publish",
+        "allowed": true,
+        "body": {
+          "appId": "trace",
+          "platform": "android",
+          "releaseId": "rel_trace_android_p51_web_app_v1_0_73_20261108",
+          "expectedRevision": 0,
+          "rollback": false
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/session",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/channels",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/releases",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/storage",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/announcements",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/firmware/releases",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/firmware/channels",
+        "allowed": true
+      }
+    ]
+  },
+  {
+    "window": "web-cycle-03",
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/session",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/channels",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/releases",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/storage",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/announcements",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/firmware/releases",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/firmware/channels",
+        "allowed": true
+      },
+      {
+        "method": "POST",
+        "path": "/api/admin/channels/beta/publish",
+        "allowed": true,
+        "body": {
+          "appId": "trace",
+          "platform": "android",
+          "releaseId": "rel_trace_android_p51_web_app_v1_0_74_20261108",
+          "expectedRevision": 1,
+          "rollback": false
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/session",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/channels",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/releases",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/storage",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/announcements",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/firmware/releases",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/firmware/channels",
+        "allowed": true
+      },
+      {
+        "method": "POST",
+        "path": "/api/admin/channels/stable/publish",
+        "allowed": true,
+        "body": {
+          "appId": "trace",
+          "platform": "android",
+          "releaseId": "rel_trace_android_p51_web_app_v1_0_74_20261108",
+          "expectedRevision": 1,
+          "rollback": false
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/session",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/channels",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/releases",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/storage",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/announcements",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/firmware/releases",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/firmware/channels",
+        "allowed": true
+      },
+      {
+        "method": "POST",
+        "path": "/api/admin/channels/stable/publish",
+        "allowed": true,
+        "body": {
+          "appId": "trace",
+          "platform": "android",
+          "releaseId": "rel_trace_android_p51_web_app_v1_0_73_20261108",
+          "expectedRevision": 2,
+          "rollback": true
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/session",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/channels",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/releases",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/storage",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/announcements",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/firmware/releases",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/firmware/channels",
+        "allowed": true
+      },
+      {
+        "method": "POST",
+        "path": "/api/admin/channels/beta/publish",
+        "allowed": true,
+        "body": {
+          "appId": "trace",
+          "platform": "android",
+          "releaseId": "rel_trace_android_p51_web_app_v1_0_73_20261108",
+          "expectedRevision": 2,
+          "rollback": true
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/session",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/channels",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/releases",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/storage",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/announcements",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/firmware/releases",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/firmware/channels",
+        "allowed": true
+      },
+      {
+        "method": "POST",
+        "path": "/api/admin/releases/rel_trace_android_p51_web_app_v1_0_74_20261108/disable",
+        "allowed": true,
+        "body": {}
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/session",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/channels",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/releases",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/storage",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/announcements",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/firmware/releases",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/firmware/channels",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/session",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/channels",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/releases",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/storage",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/announcements",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/firmware/releases",
+        "allowed": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/firmware/channels",
+        "allowed": true
+      }
+    ]
+  }
+]

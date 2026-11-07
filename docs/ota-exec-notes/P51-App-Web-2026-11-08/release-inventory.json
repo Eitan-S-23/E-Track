@@ -1,0 +1,116 @@
+[
+  {
+    "number": 1,
+    "source": "67fc15541e645cbbde3236157385590ba41144f7",
+    "run": 42398324376,
+    "tag": "p51-web-app-v1.0.73-20261108",
+    "releaseId": 437744712,
+    "prerelease": true,
+    "assets": [
+      {
+        "id": 721484365,
+        "name": "ble-monitor-android.apk",
+        "size": 47741488,
+        "digest": "sha256:5a1696a3f9a1832d78342a42bae131f736287ec17d92202b2ec23917cb10679d"
+      },
+      {
+        "id": 721484383,
+        "name": "ble-monitor-update.json",
+        "size": 313,
+        "digest": "sha256:6b6751783e057408f570ed5a61fb7f230a0481ff93d152c3c99d38e9ee45baf2"
+      },
+      {
+        "id": 721484384,
+        "name": "ble-monitor-windows.exe",
+        "size": 93184,
+        "digest": "sha256:6cfce985d6053184f1d4313c892a90507547f2e589f0cb037dd6a9217060d1d0"
+      },
+      {
+        "id": 721484381,
+        "name": "ble-monitor-windows.zip",
+        "size": 20540315,
+        "digest": "sha256:52211184e2dc4eccc7ce4a63a51126714944d83884585fd604c6dff7059b2641"
+      }
+    ],
+    "artifacts": [
+      {
+        "id": 13584706091,
+        "name": "android-apk",
+        "size_in_bytes": 26033295,
+        "expired": false,
+        "digest": "sha256:5d7c7252557466042d89a7eaf95eebab3f79e5e08976a4f14dd028d44dace8f7"
+      },
+      {
+        "id": 13584053152,
+        "name": "windows-exe",
+        "size_in_bytes": 20570638,
+        "expired": false,
+        "digest": "sha256:badaa69a6bcf2648f00057b9280e004af8c51c23827f9c6195ed4eb0bc5aa344"
+      },
+      {
+        "id": 13583853661,
+        "name": "cloudflare-release-metadata",
+        "size_in_bytes": 881,
+        "expired": false,
+        "digest": "sha256:c4ea5b0b86c3d95b6df80e8530c63b1c9275651ae1e0c0b0c9ede70037fab1da"
+      }
+    ]
+  },
+  {
+    "number": 2,
+    "source": "4474dddf006562f71304d4791e4a5641676bca89",
+    "run": 42398527444,
+    "tag": "p51-web-app-v1.0.74-20261108",
+    "releaseId": 437746785,
+    "prerelease": true,
+    "assets": [
+      {
+        "id": 721494984,
+        "name": "ble-monitor-android.apk",
+        "size": 47741484,
+        "digest": "sha256:a2ea831e60e37697f98667f94642dfa7c7cd175975e70a8d27a36df205f17685"
+      },
+      {
+        "id": 721494989,
+        "name": "ble-monitor-update.json",
+        "size": 314,
+        "digest": "sha256:fee2e35ef5ebb39c9dc3855f0c0f978dd098869574a2cf7ddf30433d5e194203"
+      },
+      {
+        "id": 721494987,
+        "name": "ble-monitor-windows.exe",
+        "size": 93184,
+        "digest": "sha256:e47b8d63dce3c89fcf098bb050affa546e8b1c8b60983c3069871bd89cc6529b"
+      },
+      {
+        "id": 721494985,
+        "name": "ble-monitor-windows.zip",
+        "size": 20540321,
+        "digest": "sha256:165647d369b9137c32055e3cc711c2fc34437e8f20a213de1384dc10d3db8b3b"
+      }
+    ],
+    "artifacts": [
+      {
+        "id": 13584801040,
+        "name": "cloudflare-release-metadata",
+        "size_in_bytes": 883,
+        "expired": false,
+        "digest": "sha256:dd28ebfb081321e2258c8f87619a0a8193c176971f7ff83d0500b6396c6b3ae9"
+      },
+      {
+        "id": 13584477653,
+        "name": "windows-exe",
+        "size_in_bytes": 20570645,
+        "expired": false,
+        "digest": "sha256:f37f3d9524e1928f70d4c397a96391e692305ca207d3e4488462fbecbdcf0c54"
+      },
+      {
+        "id": 13584299644,
+        "name": "android-apk",
+        "size_in_bytes": 26033281,
+        "expired": false,
+        "digest": "sha256:113fd6c17337e4fba0f808366aa646ec247009c0c10f24a2666a2995c90d98f0"
+      }
+    ]
+  }
+]

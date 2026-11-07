@@ -1,0 +1,80 @@
+{
+  "outcome": "TWO_TEST_APKS_AND_PAYLOAD_SIGNATURES_VERIFIED",
+  "versions": [
+    {
+      "source": "67fc15541e645cbbde3236157385590ba41144f7",
+      "run": 42398324376,
+      "tag": "p51-web-app-v1.0.73-20261108",
+      "apk": {
+        "path": ".cache\\p51-app-release-20261108-01\\archive-01\\version-1\\android-apk\\ble-monitor-android.apk",
+        "bytes": 47741488,
+        "sha256": "5a1696a3f9a1832d78342a42bae131f736287ec17d92202b2ec23917cb10679d"
+      },
+      "metadata": {
+        "path": ".cache\\p51-app-release-20261108-01\\archive-01\\version-1\\cloudflare-release-metadata\\cloudflare-release-metadata.json",
+        "bytes": 1419,
+        "sha256": "c0d4992780cd72123c97acfd46c2846f954cc4b33b2077f9765e6c24ff4c7344"
+      },
+      "applicationId": "com.wen.gaia.gaia.p51web",
+      "versionName": "1.0.73",
+      "versionCode": 99,
+      "debuggable": false,
+      "signerSha256": "9e9b89c5e7fdc802b1fe71806a988a866db49cd988a739caeee56cb69f3df579",
+      "compiled": [
+        {
+          "abi": "arm64-v8a",
+          "appLatest": "https://e-track-firmware-p41-public.pages.dev/api/public/latest",
+          "firmwareLatest": "https://e-track-firmware-p41-public.pages.dev/api/public/firmware/latest",
+          "publicVerificationKeyPresent": true
+        },
+        {
+          "abi": "armeabi-v7a",
+          "appLatest": "https://e-track-firmware-p41-public.pages.dev/api/public/latest",
+          "firmwareLatest": "https://e-track-firmware-p41-public.pages.dev/api/public/firmware/latest",
+          "publicVerificationKeyPresent": true
+        }
+      ],
+      "payloadSignatureVerified": true,
+      "tamperNegatives": 2
+    },
+    {
+      "source": "4474dddf006562f71304d4791e4a5641676bca89",
+      "run": 42398527444,
+      "tag": "p51-web-app-v1.0.74-20261108",
+      "apk": {
+        "path": ".cache\\p51-app-release-20261108-01\\archive-01\\version-2\\android-apk\\ble-monitor-android.apk",
+        "bytes": 47741484,
+        "sha256": "a2ea831e60e37697f98667f94642dfa7c7cd175975e70a8d27a36df205f17685"
+      },
+      "metadata": {
+        "path": ".cache\\p51-app-release-20261108-01\\archive-01\\version-2\\cloudflare-release-metadata\\cloudflare-release-metadata.json",
+        "bytes": 1420,
+        "sha256": "382d7266107ed86d44f78cc1910196304cc48b4e7557e1cba118e16c3a324093"
+      },
+      "applicationId": "com.wen.gaia.gaia.p51web",
+      "versionName": "1.0.74",
+      "versionCode": 100,
+      "debuggable": false,
+      "signerSha256": "9e9b89c5e7fdc802b1fe71806a988a866db49cd988a739caeee56cb69f3df579",
+      "compiled": [
+        {
+          "abi": "arm64-v8a",
+          "appLatest": "https://e-track-firmware-p41-public.pages.dev/api/public/latest",
+          "firmwareLatest": "https://e-track-firmware-p41-public.pages.dev/api/public/firmware/latest",
+          "publicVerificationKeyPresent": true
+        },
+        {
+          "abi": "armeabi-v7a",
+          "appLatest": "https://e-track-firmware-p41-public.pages.dev/api/public/latest",
+          "firmwareLatest": "https://e-track-firmware-p41-public.pages.dev/api/public/firmware/latest",
+          "publicVerificationKeyPresent": true
+        }
+      ],
+      "payloadSignatureVerified": true,
+      "tamperNegatives": 2
+    }
+  ],
+  "installed": false,
+  "deviceOperations": 0,
+  "claim": "Offline verification; no App self-update/device acceptance"
+}

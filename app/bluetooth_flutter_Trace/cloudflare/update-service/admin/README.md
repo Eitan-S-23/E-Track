@@ -19,6 +19,17 @@ For the Android API above, `stable` publish/rollback and disable require `owner`
 `beta` publish/rollback and release note edits require `publisher` or `owner`.
 Read-only endpoints allow `viewer`.
 
+Selecting an older Android release explicitly changes the action and confirmation
+to channel rollback. The existing publish endpoint receives `rollback: true`
+only after confirmation; newer and initially empty channels use `false`.
+Stable still requires typing `stable`. Current/equal-code targets, unavailable
+channel identity, disabled/archived releases and stopped latest channels are
+locked. CAS revisions, CSRF and server-side role checks are unchanged. Rollback
+only changes the offered channel version; already-updated clients do not
+downgrade and need a higher `versionCode` for a corrective update. A failed or
+uncertain rollback is never automatically repeated; refresh before confirming
+a new intent.
+
 ## Firmware Controls
 
 The firmware tab consumes the multi-asset DTOs defined by
@@ -127,6 +138,9 @@ blocked. It covers bilingual confirmation/cancel/conflict, role controls,
 independent switches, unknown results, same-key recovery replay, actor changes,
 failed reads and mobile layout. CI preserves screenshots, raw UI output and the
 checkout SHA for 14 days. These are development checks, not independent acceptance.
+`test/app-ui.spec.ts` additionally covers explicit App rollback versus forward
+publish, bilingual labels, cancellation without a POST, stable typed confirmation,
+role and unavailable-target locks, CAS without replay, and mobile confirmation.
 
 ## Source-Bound Deployment Input
 

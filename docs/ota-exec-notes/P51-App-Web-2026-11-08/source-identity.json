@@ -1,0 +1,88 @@
+{
+  "branch": "release/p51-app-web-20261108",
+  "commits": [
+    {
+      "outcome": "EXACT_TEST_SOURCE_COMMITTED",
+      "source": "67fc15541e645cbbde3236157385590ba41144f7",
+      "parent": "faee2f908f3ad55e7c954d44dc5b7a5ed488ed95",
+      "tree": "dbfbd39602a375e733decff440fc7a720a20606c",
+      "branch": "release/p51-app-web-20261108",
+      "files": [
+        {
+          "path": ".github/workflows/build.yml",
+          "gitBlob": "75981dabc080db304014575814d1a7322edf6e59",
+          "sha256": "2cfb1e61699df00b2e3e682eb6a9896742d013203e284c41adae217340845695"
+        },
+        {
+          "path": ".github/workflows/cloudflare-update-service.yml",
+          "gitBlob": "f44b76e03126d4b139c9a9bb89d3f1f86b2cf316",
+          "sha256": "0562bc8cf3a23298a255f1a05d5f3bbe1133bfb21ec84e803f2200b7d3ea011d"
+        },
+        {
+          "path": "tests/ota/test_flutter_update_endpoints.py",
+          "gitBlob": "06eb91db9b231196b58d07addba2f50aff31a321",
+          "sha256": "1fb1f52edefe5ad1f80b366b2851fa953bf92c0118c2d61da34e23d3d47ebd29"
+        },
+        {
+          "path": "tests/ota/test_update_public_proxy.mjs",
+          "gitBlob": "96f7f957f5f7d134509803a9d062e91a56d98288",
+          "sha256": "cee0d1437ae7517bd007b4373b92d67227dfde6a0289306a2a4be5f1bd5b395c"
+        },
+        {
+          "path": "app/bluetooth_flutter_Trace/pubspec.yaml",
+          "gitBlob": "9dbc3c6dc3f2187065f28ef1c61795c8e3b00f36",
+          "sha256": "02426a302299b664fde2fd61b72ef24712deb0e524f1435468ce7d2d578122dd"
+        },
+        {
+          "path": "app/bluetooth_flutter_Trace/cloudflare/update-service/firmware-public/site/_worker.js",
+          "gitBlob": "de3f348dc5871497ca4afefbe2de3d85aec3bf14",
+          "sha256": "475104b5dcc9abffa8ada3f935ac79614e3e7482a3c357f6653cde7bd5f1d599"
+        }
+      ],
+      "version": "1.0.73+99"
+    },
+    {
+      "outcome": "EXACT_TEST_SOURCE_COMMITTED",
+      "source": "4474dddf006562f71304d4791e4a5641676bca89",
+      "parent": "67fc15541e645cbbde3236157385590ba41144f7",
+      "tree": "01db00490564345a8950db975c774e8b54c153c8",
+      "branch": "release/p51-app-web-20261108",
+      "files": [
+        {
+          "path": "app/bluetooth_flutter_Trace/pubspec.yaml",
+          "gitBlob": "b566e4e482026b6e0b72d53b3bfb41e3b6e7fa6c",
+          "sha256": "cd840b80d1bc4f7dfcea609fd16be689ce2df2c35b267ada103edf938071e20f"
+        }
+      ],
+      "version": "1.0.74+100"
+    },
+    {
+      "outcome": "EXACT_TEST_SOURCE_COMMITTED",
+      "source": "54ded0b3dd877346fdae0137fed79c89d4661b27",
+      "parent": "4474dddf006562f71304d4791e4a5641676bca89",
+      "tree": "fbb849d6e38a0f77387d547c475e8479f284a962",
+      "branch": "release/p51-app-web-20261108",
+      "files": [
+        {
+          "path": "app/bluetooth_flutter_Trace/cloudflare/update-service/admin/public/index.html",
+          "gitBlob": "8e52840c6d4b65521dd515107a35ca849052aa8a",
+          "sha256": "c0ed90e650ae187605832eb27e2100956f6428335c4258c8623f94db72b530b0"
+        },
+        {
+          "path": "app/bluetooth_flutter_Trace/cloudflare/update-service/admin/test/app-ui.spec.ts",
+          "gitBlob": "97c6f80837d18e90a4ead720feea3a2fb97ff941",
+          "sha256": "d1c844060f016de0134f10720f39e3265656fdee3fc54dff8367c487f93e83d6"
+        },
+        {
+          "path": "app/bluetooth_flutter_Trace/cloudflare/update-service/admin/README.md",
+          "gitBlob": "d85f0e44ccceffa73e369c3fd27fc41493bf9e16",
+          "sha256": "ce35e5b4024e20381dd249a491fe8670e8fe85a383ca69a755c6cb476e166360"
+        }
+      ],
+      "version": "1.0.74+100",
+      "adminOnly": true
+    }
+  ],
+  "publicDeployment": "4a5b9b20-8b3e-4358-8e08-40c5e850c70c",
+  "adminDeployment": "659ca218-a5ca-4149-8a83-0761481281c8"
+}
