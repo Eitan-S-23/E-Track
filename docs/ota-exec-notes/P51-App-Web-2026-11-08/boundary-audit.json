@@ -1,0 +1,200 @@
+{
+  "root": "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source",
+  "checkedOutputRoots": [
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p51-app-release-20261108-01",
+      "entries": 2572
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.cache\\p51-admin-web-cli-20261108-01",
+      "entries": 3
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\.wrangler",
+      "entries": 2
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\.cache\\p35-integration-20261028\\source\\app\\bluetooth_flutter_Trace\\cloudflare\\update-service\\admin\\node_modules",
+      "entries": 2242
+    }
+  ],
+  "controlledExternalWrites": 0,
+  "sharedCacheChanges": [
+    {
+      "path": "C:\\Users\\SU\\AppData\\LocalLow\\Microsoft\\CryptnetUrlCache\\Content\\2230B05CF7223724580F705D6E8BDF36",
+      "before": {
+        "bytes": 309,
+        "mtimeNs": 1794064257771277700,
+        "sha256": "81524c07e7b3ba5df1e1b6a1b326600af82c24e5f199a48a502822196d269c8b"
+      },
+      "after": {
+        "bytes": 308,
+        "mtimeNs": 1794077387096179800,
+        "sha256": "ac7c3d57cd218b1321c1154dce273e20a1ca85d37fe87cfbeb941985afc6a25f"
+      }
+    },
+    {
+      "path": "C:\\Users\\SU\\AppData\\LocalLow\\Microsoft\\CryptnetUrlCache\\MetaData\\05DDC6AA91765AACACDB0A5F96DF8199",
+      "before": {
+        "bytes": 170,
+        "mtimeNs": 1794070290096882900,
+        "sha256": "9514f38f8acb8e6403aa8d740f51343904bea5b30164b8a8a49774c2d91785c3"
+      },
+      "after": {
+        "bytes": 170,
+        "mtimeNs": 1794077841082140000,
+        "sha256": "679c0dab140bdc74052f839d5c5baa6ea8c00789491db8f0a69016ee78ae445c"
+      }
+    },
+    {
+      "path": "C:\\Users\\SU\\AppData\\LocalLow\\Microsoft\\CryptnetUrlCache\\MetaData\\103621DE9CD5414CC2538780B4B75751",
+      "before": {
+        "bytes": 192,
+        "mtimeNs": 1794071206637615200,
+        "sha256": "5bd7d129ced37eb0aa5244bb984a7777a5985d2621c280a1f72035a84864cade"
+      },
+      "after": {
+        "bytes": 192,
+        "mtimeNs": 1794078492602758600,
+        "sha256": "a3e15e2e915da6824c5cbe1b7dcaa62413b3132135c27eea685bd6e51e59d5a0"
+      }
+    },
+    {
+      "path": "C:\\Users\\SU\\AppData\\LocalLow\\Microsoft\\CryptnetUrlCache\\MetaData\\1B1495DD322A24490E2BF2FAABAE1C61",
+      "before": {
+        "bytes": 192,
+        "mtimeNs": 1794070286152014000,
+        "sha256": "72bbc66d57633039304a32743ef98570a09ed99946bd3adc5829370f0e1ab233"
+      },
+      "after": {
+        "bytes": 192,
+        "mtimeNs": 1794077840455119300,
+        "sha256": "39ea802c09300fdb7e69153bf43644308f86a3754a86b618ea10d6ba209595ea"
+      }
+    },
+    {
+      "path": "C:\\Users\\SU\\AppData\\LocalLow\\Microsoft\\CryptnetUrlCache\\MetaData\\2230B05CF7223724580F705D6E8BDF36",
+      "before": {
+        "bytes": 192,
+        "mtimeNs": 1794064257771277700,
+        "sha256": "be8c432302453db95307b185a47e233ec2e8f28008da66c38f2218b959a67023"
+      },
+      "after": {
+        "bytes": 192,
+        "mtimeNs": 1794077387096179800,
+        "sha256": "951fdbeea8a9c9e7011aee6214781c71c78057f645768a2b17e3dc168adf3601"
+      }
+    },
+    {
+      "path": "C:\\Users\\SU\\AppData\\LocalLow\\Microsoft\\CryptnetUrlCache\\MetaData\\22D536C4B4AD2CEF7AC6B7789FD235E3",
+      "before": {
+        "bytes": 192,
+        "mtimeNs": 1794070288661667900,
+        "sha256": "59456702fd0983696cbdc2b573c5aee7a5085f0f27bc088e9b075a4c93c27389"
+      },
+      "after": {
+        "bytes": 192,
+        "mtimeNs": 1794077840950660100,
+        "sha256": "7a874737de9c623d1c8994e899062882e0f905e0cb7906335eb7bc5c309bc806"
+      }
+    },
+    {
+      "path": "C:\\Users\\SU\\AppData\\LocalLow\\Microsoft\\CryptnetUrlCache\\MetaData\\57C8EDB95DF3F0AD4EE2DC2B8CFD4157",
+      "before": {
+        "bytes": 342,
+        "mtimeNs": 1794073032124377800,
+        "sha256": "d922f1b2d8ae51c48cd81298bc884bdb4bb7aeddfacdea770ab00aaa0a930921"
+      },
+      "after": {
+        "bytes": 342,
+        "mtimeNs": 1794077779525374500,
+        "sha256": "ccafa6c3bf38b013f439fbd8e5c0350a6cd40587fd3d60556b802854eb271eaa"
+      }
+    },
+    {
+      "path": "C:\\Users\\SU\\AppData\\LocalLow\\Microsoft\\CryptnetUrlCache\\MetaData\\77EC63BDA74BD0D0E0426DC8F8008506",
+      "before": {
+        "bytes": 328,
+        "mtimeNs": 1794071080063705500,
+        "sha256": "4b8a4294c9add9c4a920f84a9f0e2bb01d85b870bb257d52cb5dee3548c83889"
+      },
+      "after": {
+        "bytes": 328,
+        "mtimeNs": 1794078492446993300,
+        "sha256": "2e139f2b4ddd86f1ebe3962dd2e56bbd1eec51a7bc6e25059baca1ee728de550"
+      }
+    },
+    {
+      "path": "C:\\Users\\SU\\AppData\\LocalLow\\Microsoft\\CryptnetUrlCache\\MetaData\\8B2B9A00839EED1DFDCCC3BFC2F5DF12",
+      "before": {
+        "bytes": 174,
+        "mtimeNs": 1794072265133206000,
+        "sha256": "84bf8efe7ff1861e3179405b317ae7ea2a6970feecd0b1b5ab9035b6cd782597"
+      },
+      "after": {
+        "bytes": 174,
+        "mtimeNs": 1794076503186665400,
+        "sha256": "7d8747a1a56d8d76e30e53d730f8ad50221f14df5a5f7ba2623ccfa593ed8979"
+      }
+    },
+    {
+      "path": "C:\\Users\\SU\\AppData\\LocalLow\\Microsoft\\CryptnetUrlCache\\MetaData\\B46811C17859FFB409CF0E904A4AA8F8",
+      "before": {
+        "bytes": 170,
+        "mtimeNs": 1794070290168764500,
+        "sha256": "d33d2e9c1d41c9ad08e5566338b94cc92b5f541aaed13747ae3a3f2f2735d6e2"
+      },
+      "after": {
+        "bytes": 170,
+        "mtimeNs": 1794077841184432400,
+        "sha256": "270fbcbc677ae9f139afce775153a83ae587d46ce7d882ceffd212bf8c87c96c"
+      }
+    },
+    {
+      "path": "C:\\Users\\SU\\AppData\\LocalLow\\Microsoft\\CryptnetUrlCache\\MetaData\\F15827BEC5BABE89C21DCDAE77464BF1",
+      "before": {
+        "bytes": 192,
+        "mtimeNs": 1794072273820046200,
+        "sha256": "c5716f257f5c897cb552a514fc63cb45386e446c921a83440a854982a1cea2b7"
+      },
+      "after": {
+        "bytes": 192,
+        "mtimeNs": 1794076503902533000,
+        "sha256": "7afcb4f7d235b77222a954549d7775da4e069cb75bc597085361d1c26aeade83"
+      }
+    },
+    {
+      "path": "C:\\Users\\SU\\AppData\\Local\\Microsoft\\PowerShell\\StartupProfileData-NonInteractive",
+      "before": {
+        "bytes": 72308,
+        "mtimeNs": 1794069820482814000,
+        "sha256": "ca69f02021b64d881eab846415b145c3f0d96bc9bd0ac569c6b2a65b1fee8462"
+      },
+      "after": {
+        "bytes": 71228,
+        "mtimeNs": 1794075678935306500,
+        "sha256": "b9d2c3f0d6ab85e9472f66d38e54bc7928e593821d909b0b50ea27dc4b9f5ac2"
+      }
+    },
+    {
+      "path": "C:\\Users\\SU\\AppData\\Local\\Microsoft\\Windows\\PowerShell\\StartupProfileData-NonInteractive",
+      "before": {
+        "bytes": 1004,
+        "mtimeNs": 1794073035612897000,
+        "sha256": "66c0b4ddfd68f2b567ac6728205e547ddf4ee1b97c18b760ccb4da2083555fa6"
+      },
+      "after": {
+        "bytes": 1004,
+        "mtimeNs": 1794078436014221400,
+        "sha256": "561150be20f9285da31ef6299d208476169c14ffa44c6c565d5fc067985c7e97"
+      }
+    }
+  ],
+  "attribution": "UNKNOWN; observation is not process attribution",
+  "coverage": "From the existing mid-task boundary-before-publication snapshot, not retroactive whole-turn coverage",
+  "overlap": "Includes transport and browser observation windows; do not add overlapping counts",
+  "externalCleanup": false,
+  "firmwareOrDeviceWrites": 0,
+  "localGitIndexOrBranchWrites": 0,
+  "privateFiles": "Kept local; credentials/cookies/signed URLs are not in the delivery set"
+}

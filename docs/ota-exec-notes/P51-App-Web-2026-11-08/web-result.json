@@ -1,0 +1,191 @@
+{
+  "outcome": "REAL_APP_WEBSITE_PUBLISH_ROLLBACK_DISABLE_VERIFIED",
+  "source": "54ded0b3dd877346fdae0137fed79c89d4661b27",
+  "servedHtmlSha256": "c0ed90e650ae187605832eb27e2100956f6428335c4258c8623f94db72b530b0",
+  "realAccessOwner": true,
+  "cancelChecks": [
+    "desktop",
+    "mobile"
+  ],
+  "notesContentRestored": true,
+  "notesByteIdentical": false,
+  "notesNormalization": "Existing API trimmed the original trailing LF",
+  "prior": {
+    "notes": {
+      "failed": {
+        "path": ".cache\\p51-app-release-20261108-01\\web-cycle-01\\failed.json",
+        "bytes": 542,
+        "sha256": "03f0e24cf7ada8682895972656ecbc4c5f02f95874290c68bfbcb95cdd94be79"
+      },
+      "requests": {
+        "path": ".cache\\p51-app-release-20261108-01\\web-cycle-01\\requests.json",
+        "bytes": 2470,
+        "sha256": "9e92a5ba2e994678a666e86a6cc1a39fdb30c3fc9b7c27c1b20d34012af4b175"
+      },
+      "sourceArchive": {
+        "path": ".cache\\p51-app-release-20261108-01\\web-cycle-01-source\\result.json",
+        "bytes": 681,
+        "sha256": "5be1e2c7c87ab14cf887cc5d03d8c4b1338ae8bbe484a39128ef7d16c07287c4"
+      },
+      "reused": "Desktop/mobile cancel and two successful notes POSTs; no channel operation repeated"
+    },
+    "baselineRequests": {
+      "path": ".cache\\p51-app-release-20261108-01\\web-cycle-02\\requests.json",
+      "bytes": 2509,
+      "sha256": "a05cc05e903715e48549763b546e8c4c96e534a70c03924fc9ab7285aa89cadc"
+    },
+    "baselineFailure": {
+      "path": ".cache\\p51-app-release-20261108-01\\web-cycle-02\\failed.json",
+      "bytes": 573,
+      "sha256": "4698d747e1170198e9285afc853684e43c15aa677dd5e4605483fc02ae31554a"
+    },
+    "download": {
+      "path": ".cache\\p51-app-release-20261108-01\\r2-apk99-02\\result.json",
+      "bytes": 685,
+      "sha256": "a06ce39f850539d14000c0517b4b18a2ccf0c60de1826a30b4cf6977a87ec3f4"
+    },
+    "reused": "Two successful baseline publications and the verified OpenSSL R2 download; none is repeated"
+  },
+  "actions": [
+    {
+      "label": "beta-publish100",
+      "channel": "beta",
+      "releaseId": "rel_trace_android_p51_web_app_v1_0_74_20261108",
+      "versionCode": 100,
+      "rollback": false,
+      "revision": 2
+    },
+    {
+      "label": "stable-publish100",
+      "channel": "stable",
+      "releaseId": "rel_trace_android_p51_web_app_v1_0_74_20261108",
+      "versionCode": 100,
+      "rollback": false,
+      "revision": 2
+    },
+    {
+      "label": "stable-rollback99",
+      "channel": "stable",
+      "releaseId": "rel_trace_android_p51_web_app_v1_0_73_20261108",
+      "versionCode": 99,
+      "rollback": true,
+      "revision": 3
+    },
+    {
+      "label": "beta-rollback99",
+      "channel": "beta",
+      "releaseId": "rel_trace_android_p51_web_app_v1_0_73_20261108",
+      "versionCode": 99,
+      "rollback": true,
+      "revision": 3
+    },
+    {
+      "label": "disable100",
+      "releaseId": "rel_trace_android_p51_web_app_v1_0_74_20261108",
+      "state": "disabled"
+    }
+  ],
+  "downloads": [
+    {
+      "outcome": "PUBLISHED_APP_R2_BYTES_VERIFIED",
+      "source": "r2",
+      "versionCode": 99,
+      "bytes": 47741488,
+      "sha256": "5a1696a3f9a1832d78342a42bae131f736287ec17d92202b2ec23917cb10679d",
+      "status": 200,
+      "asset": {
+        "path": ".cache\\p51-app-release-20261108-01\\r2-apk99-02\\asset.apk",
+        "bytes": 47741488,
+        "sha256": "5a1696a3f9a1832d78342a42bae131f736287ec17d92202b2ec23917cb10679d"
+      },
+      "seconds": 63.83229859999847,
+      "latestReceipt": {
+        "path": ".cache\\p51-app-release-20261108-01\\r2-apk99-02\\latest-http.json",
+        "bytes": 303,
+        "sha256": "004653bc53bcd35d9f80fdab177277406e572fba514ac906ac01e1dd71128f87"
+      },
+      "channelMutations": 0,
+      "devices": 0,
+      "reusedOriginalObservation": true
+    },
+    {
+      "outcome": "PUBLISHED_APP_R2_BYTES_VERIFIED",
+      "source": "r2",
+      "versionCode": 100,
+      "bytes": 47741484,
+      "sha256": "a2ea831e60e37697f98667f94642dfa7c7cd175975e70a8d27a36df205f17685",
+      "status": 200,
+      "asset": {
+        "path": ".cache\\p51-app-release-20261108-01\\r2-apk100-web-01\\asset.apk",
+        "bytes": 47741484,
+        "sha256": "a2ea831e60e37697f98667f94642dfa7c7cd175975e70a8d27a36df205f17685"
+      },
+      "seconds": 80.27669580001384,
+      "latestReceipt": {
+        "path": ".cache\\p51-app-release-20261108-01\\r2-apk100-web-01\\latest-http.json",
+        "bytes": 303,
+        "sha256": "7f1a4fdd90931b91b477b65d09a593ecbfd81bb90dbcb434ccc8028c14feb01a"
+      },
+      "channelMutations": 0,
+      "devices": 0
+    }
+  ],
+  "mutationRequests": 5,
+  "combinedMutationRequests": 9,
+  "firmwareUnchanged": true,
+  "finalAppChannels": [
+    {
+      "id": "ch_trace_android_beta",
+      "app_id": "trace",
+      "platform": "android",
+      "name": "beta",
+      "current_release_id": "rel_trace_android_p51_web_app_v1_0_73_20261108",
+      "revision": 3,
+      "disable_latest": 0,
+      "disable_downloads": 0,
+      "maintenance_admin_only": 0,
+      "maintenance_message": null,
+      "last_action": "rollback",
+      "last_actor": "[REDACTED]",
+      "last_actor_type": "[REDACTED]",
+      "last_request_id": "1ed691da-3027-48b0-b7b9-85947f8f365e",
+      "last_before_json": "{\"app_id\":\"trace\",\"current_release_id\":\"rel_trace_android_p51_web_app_v1_0_74_20261108\",\"disable_downloads\":0,\"disable_latest\":0,\"id\":\"ch_trace_android_beta\",\"maintenance_admin_only\":0,\"maintenance_message\":null,\"name\":\"beta\",\"platform\":\"android\",\"revision\":2}",
+      "last_after_json": "{\"app_id\":\"trace\",\"current_release_id\":\"rel_trace_android_p51_web_app_v1_0_73_20261108\",\"disable_downloads\":0,\"disable_latest\":0,\"id\":\"ch_trace_android_beta\",\"maintenance_admin_only\":0,\"maintenance_message\":null,\"name\":\"beta\",\"platform\":\"android\",\"revision\":2}",
+      "created_at": "2026-11-07 18:00:25",
+      "updated_at": "2026-11-07 19:01:58",
+      "release_tag": "p51-web-app-v1.0.73-20261108",
+      "version_name": "1.0.73",
+      "version_code": 99,
+      "release_state": "candidate"
+    },
+    {
+      "id": "ch_trace_android_stable",
+      "app_id": "trace",
+      "platform": "android",
+      "name": "stable",
+      "current_release_id": "rel_trace_android_p51_web_app_v1_0_73_20261108",
+      "revision": 3,
+      "disable_latest": 0,
+      "disable_downloads": 0,
+      "maintenance_admin_only": 0,
+      "maintenance_message": null,
+      "last_action": "rollback",
+      "last_actor": "[REDACTED]",
+      "last_actor_type": "[REDACTED]",
+      "last_request_id": "2f8d5e71-1def-49f2-858f-de7b08354806",
+      "last_before_json": "{\"app_id\":\"trace\",\"current_release_id\":\"rel_trace_android_p51_web_app_v1_0_74_20261108\",\"disable_downloads\":0,\"disable_latest\":0,\"id\":\"ch_trace_android_stable\",\"maintenance_admin_only\":0,\"maintenance_message\":null,\"name\":\"stable\",\"platform\":\"android\",\"revision\":2}",
+      "last_after_json": "{\"app_id\":\"trace\",\"current_release_id\":\"rel_trace_android_p51_web_app_v1_0_73_20261108\",\"disable_downloads\":0,\"disable_latest\":0,\"id\":\"ch_trace_android_stable\",\"maintenance_admin_only\":0,\"maintenance_message\":null,\"name\":\"stable\",\"platform\":\"android\",\"revision\":2}",
+      "created_at": "2026-11-07 18:00:25",
+      "updated_at": "2026-11-07 19:01:47",
+      "release_tag": "p51-web-app-v1.0.73-20261108",
+      "version_name": "1.0.73",
+      "version_code": 99,
+      "release_state": "candidate"
+    }
+  ],
+  "disabledReleaseId": "rel_trace_android_p51_web_app_v1_0_74_20261108",
+  "issuedDownloadDeniedAfterDisable": true,
+  "alreadyUpdatedClientNotOfferedDowngrade": true,
+  "deviceOperations": 0,
+  "independentAcceptance": false
+}

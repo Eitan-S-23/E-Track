@@ -1,0 +1,336 @@
+{
+  "steps": [
+    {
+      "source": {
+        "path": ".cache\\p51-app-release-20261108-01\\archive-01\\version-1\\logs\\Build Android APK\\11_Analyze project.txt",
+        "bytes": 1600,
+        "sha256": "c3d806b93cf9650f3e659b02c0999f9d53c0b2bf3455a50714e2d43202581ec5"
+      },
+      "warningCount": 0,
+      "errorCount": 0,
+      "warnings": [],
+      "errors": [],
+      "flutterAllTestsPassed": false,
+      "analyzerNoIssues": true,
+      "testSummaries": []
+    },
+    {
+      "source": {
+        "path": ".cache\\p51-app-release-20261108-01\\archive-01\\version-1\\logs\\Build Android APK\\12_Run Flutter tests.txt",
+        "bytes": 3077625,
+        "sha256": "6d9db127847f6eb80d81dea9dac9eb559b600f45e14c24cd862434c21775cd22"
+      },
+      "warningCount": 0,
+      "errorCount": 0,
+      "warnings": [],
+      "errors": [],
+      "flutterAllTestsPassed": false,
+      "analyzerNoIssues": false,
+      "testSummaries": [],
+      "flutterSummary": {
+        "passed": 925,
+        "skipped": 16
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p51-app-release-20261108-01\\archive-01\\version-1\\logs\\Build Android APK\\14_Build release APK.txt",
+        "bytes": 16333,
+        "sha256": "ebd32ecd5fd146a87b227eec230343f28561f7acd349369700621df0f453c935"
+      },
+      "warningCount": 10,
+      "errorCount": 0,
+      "warnings": [
+        "2026-11-07T17:56:36.8591125Z Warning: Flutter support for your project's Gradle version (8.14.0) will soon be dropped. Please upgrade your Gradle version to a version of at least 9.1.0 soon.",
+        "2026-11-07T17:56:36.8740218Z Warning: Flutter support for your project's Android Gradle Plugin version (Android Gradle Plugin version 8.11.1) will soon be dropped. Please upgrade your Android Gradle Plugin version to a version of at least Android Gradle Plugin version 9.0.1 soon.",
+        "2026-11-07T17:56:36.8786292Z Warning: Flutter support for your project's Kotlin version (2.2.20) will soon be dropped. Please upgrade your Kotlin version to a version of at least 2.3.20 soon.",
+        "2026-11-07T17:56:37.6458664Z Warning: The plugin flutter_plugin_android_lifecycle requires Android SDK version 36 or higher.",
+        "2026-11-07T17:56:37.7450717Z Warning: The plugin geolocator_android requires Android SDK version 36 or higher.",
+        "2026-11-07T17:56:37.8446440Z Warning: The plugin package_info_plus requires Android SDK version 36 or higher.",
+        "2026-11-07T17:56:37.9443763Z Warning: The plugin path_provider_android requires Android SDK version 36 or higher.",
+        "2026-11-07T17:56:38.1445392Z Warning: The plugin share_plus requires Android SDK version 36 or higher.",
+        "2026-11-07T17:56:38.2440787Z Warning: The plugin shared_preferences_android requires Android SDK version 36 or higher.",
+        "2026-11-07T17:56:38.2443202Z Warning: The plugin sqflite_android requires Android SDK version 36 or higher."
+      ],
+      "errors": [],
+      "flutterAllTestsPassed": false,
+      "analyzerNoIssues": false,
+      "testSummaries": []
+    },
+    {
+      "source": {
+        "path": ".cache\\p51-app-release-20261108-01\\archive-01\\version-1\\logs\\Build Windows EXE\\6_Analyze project.txt",
+        "bytes": 931,
+        "sha256": "9ec85a54870395f5ec308257d602ea46c8c10bc44a1baeff420dad0929eb3811"
+      },
+      "warningCount": 0,
+      "errorCount": 0,
+      "warnings": [],
+      "errors": [],
+      "flutterAllTestsPassed": false,
+      "analyzerNoIssues": true,
+      "testSummaries": []
+    },
+    {
+      "source": {
+        "path": ".cache\\p51-app-release-20261108-01\\archive-01\\version-1\\logs\\Build Windows EXE\\7_Run Flutter tests.txt",
+        "bytes": 3077097,
+        "sha256": "9df0f278262d35f2ff91b3b3e4cfc458a7775f9e28c2a162e38348dd08d4e73f"
+      },
+      "warningCount": 0,
+      "errorCount": 0,
+      "warnings": [],
+      "errors": [],
+      "flutterAllTestsPassed": false,
+      "analyzerNoIssues": false,
+      "testSummaries": [],
+      "flutterSummary": {
+        "passed": 906,
+        "skipped": 35
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p51-app-release-20261108-01\\archive-01\\version-1\\logs\\Build Windows EXE\\8_Build Windows release.txt",
+        "bytes": 1586,
+        "sha256": "486f7d79a7ffc08fed7bc2e6d47456779dee40dcc3e2dd8043619421e066f798"
+      },
+      "warningCount": 0,
+      "errorCount": 0,
+      "warnings": [],
+      "errors": [],
+      "flutterAllTestsPassed": false,
+      "analyzerNoIssues": false,
+      "testSummaries": []
+    },
+    {
+      "source": {
+        "path": ".cache\\p51-app-release-20261108-01\\archive-01\\version-2\\logs\\Build Android APK\\11_Analyze project.txt",
+        "bytes": 1600,
+        "sha256": "5547a66292adf0af037bd83c27f5436ca0d2671fc0ea6a5950a84d41bcf995f0"
+      },
+      "warningCount": 0,
+      "errorCount": 0,
+      "warnings": [],
+      "errors": [],
+      "flutterAllTestsPassed": false,
+      "analyzerNoIssues": true,
+      "testSummaries": []
+    },
+    {
+      "source": {
+        "path": ".cache\\p51-app-release-20261108-01\\archive-01\\version-2\\logs\\Build Android APK\\12_Run Flutter tests.txt",
+        "bytes": 3057515,
+        "sha256": "5ed4cebaccc1ac5ea8346903b73efb732edb274b95a4ff9805b833a78bc2884d"
+      },
+      "warningCount": 0,
+      "errorCount": 0,
+      "warnings": [],
+      "errors": [],
+      "flutterAllTestsPassed": false,
+      "analyzerNoIssues": false,
+      "testSummaries": [],
+      "flutterSummary": {
+        "passed": 925,
+        "skipped": 16
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p51-app-release-20261108-01\\archive-01\\version-2\\logs\\Build Android APK\\14_Build release APK.txt",
+        "bytes": 16333,
+        "sha256": "9f655a18456949803057cd86c66c822b9e3c43b3242474a6eddd2d02b41c6593"
+      },
+      "warningCount": 10,
+      "errorCount": 0,
+      "warnings": [
+        "2026-11-07T17:59:22.5028640Z Warning: Flutter support for your project's Gradle version (8.14.0) will soon be dropped. Please upgrade your Gradle version to a version of at least 9.1.0 soon.",
+        "2026-11-07T17:59:22.5052035Z Warning: Flutter support for your project's Android Gradle Plugin version (Android Gradle Plugin version 8.11.1) will soon be dropped. Please upgrade your Android Gradle Plugin version to a version of at least Android Gradle Plugin version 9.0.1 soon.",
+        "2026-11-07T17:59:22.5057434Z Warning: Flutter support for your project's Kotlin version (2.2.20) will soon be dropped. Please upgrade your Kotlin version to a version of at least 2.3.20 soon.",
+        "2026-11-07T17:59:23.4896284Z Warning: The plugin flutter_plugin_android_lifecycle requires Android SDK version 36 or higher.",
+        "2026-11-07T17:59:23.5915073Z Warning: The plugin geolocator_android requires Android SDK version 36 or higher.",
+        "2026-11-07T17:59:23.7895774Z Warning: The plugin package_info_plus requires Android SDK version 36 or higher.",
+        "2026-11-07T17:59:23.8896576Z Warning: The plugin path_provider_android requires Android SDK version 36 or higher.",
+        "2026-11-07T17:59:24.0896660Z Warning: The plugin share_plus requires Android SDK version 36 or higher.",
+        "2026-11-07T17:59:24.2901162Z Warning: The plugin shared_preferences_android requires Android SDK version 36 or higher.",
+        "2026-11-07T17:59:24.3888867Z Warning: The plugin sqflite_android requires Android SDK version 36 or higher."
+      ],
+      "errors": [],
+      "flutterAllTestsPassed": false,
+      "analyzerNoIssues": false,
+      "testSummaries": []
+    },
+    {
+      "source": {
+        "path": ".cache\\p51-app-release-20261108-01\\archive-01\\version-2\\logs\\Build Windows EXE\\6_Analyze project.txt",
+        "bytes": 931,
+        "sha256": "3f3ef644cc2d04d80bdddec4b50b534dcbde6abe8d7f6e2de76c46e4a9934683"
+      },
+      "warningCount": 0,
+      "errorCount": 0,
+      "warnings": [],
+      "errors": [],
+      "flutterAllTestsPassed": false,
+      "analyzerNoIssues": true,
+      "testSummaries": []
+    },
+    {
+      "source": {
+        "path": ".cache\\p51-app-release-20261108-01\\archive-01\\version-2\\logs\\Build Windows EXE\\7_Run Flutter tests.txt",
+        "bytes": 3092966,
+        "sha256": "9ee9c96bff8232ead49e7858db1b4b2cd3ea5eabffe99582e77cc8f2ab532aa5"
+      },
+      "warningCount": 0,
+      "errorCount": 0,
+      "warnings": [],
+      "errors": [],
+      "flutterAllTestsPassed": false,
+      "analyzerNoIssues": false,
+      "testSummaries": [],
+      "flutterSummary": {
+        "passed": 906,
+        "skipped": 35
+      }
+    },
+    {
+      "source": {
+        "path": ".cache\\p51-app-release-20261108-01\\archive-01\\version-2\\logs\\Build Windows EXE\\8_Build Windows release.txt",
+        "bytes": 1586,
+        "sha256": "0b42e58095ac239ebefaa94cda9a59b36fdfb01d8d65dcc11402e0409ff1cd6d"
+      },
+      "warningCount": 0,
+      "errorCount": 0,
+      "warnings": [],
+      "errors": [],
+      "flutterAllTestsPassed": false,
+      "analyzerNoIssues": false,
+      "testSummaries": []
+    },
+    {
+      "source": {
+        "path": ".cache\\p51-app-release-20261108-01\\ci-logs-01\\originals\\Admin Deployment Input (No Cloud Writes)\\6_Compile Admin Pages input only.txt",
+        "bytes": 2299,
+        "sha256": "a88133fd019f22e7757a94ea7b73367c5f58c668105b8c1da3dca682b0fed4f8"
+      },
+      "warningCount": 0,
+      "errorCount": 0,
+      "warnings": [],
+      "errors": [],
+      "flutterAllTestsPassed": false,
+      "analyzerNoIssues": false,
+      "testSummaries": []
+    },
+    {
+      "source": {
+        "path": ".cache\\p51-app-release-20261108-01\\ci-logs-01\\originals\\Admin Deployment Input (No Cloud Writes)\\7_Check compiled routing in native workerd.txt",
+        "bytes": 2060,
+        "sha256": "3a7ee1a8ad394c8be43e8d67aa0d0cc9d91ea04d1ee90f09e7251f4f5d54c066"
+      },
+      "warningCount": 0,
+      "errorCount": 0,
+      "warnings": [],
+      "errors": [],
+      "flutterAllTestsPassed": false,
+      "analyzerNoIssues": false,
+      "testSummaries": []
+    },
+    {
+      "source": {
+        "path": ".cache\\p51-app-release-20261108-01\\ci-logs-01\\originals\\Admin Typecheck and Mock UI\\6_Typecheck.txt",
+        "bytes": 926,
+        "sha256": "49ae889c7a82e965acca68acd809d14eb55fa0fc1048e17638f7c6e641343861"
+      },
+      "warningCount": 0,
+      "errorCount": 0,
+      "warnings": [],
+      "errors": [],
+      "flutterAllTestsPassed": false,
+      "analyzerNoIssues": false,
+      "testSummaries": []
+    },
+    {
+      "source": {
+        "path": ".cache\\p51-app-release-20261108-01\\ci-logs-01\\originals\\Admin Typecheck and Mock UI\\8_Run mock Admin UI tests.txt",
+        "bytes": 9051,
+        "sha256": "6047b66a77cefcf4bb3a2c166b62f5c1f6ccbf21f7b28267b1bf564d578a30d4"
+      },
+      "warningCount": 0,
+      "errorCount": 0,
+      "warnings": [],
+      "errors": [],
+      "flutterAllTestsPassed": false,
+      "analyzerNoIssues": false,
+      "testSummaries": [
+        "2026-11-07T18:32:01.3023083Z   54 passed (3.5m)"
+      ]
+    },
+    {
+      "source": {
+        "path": ".cache\\p51-app-release-20261108-01\\ci-logs-01\\originals\\Public Pages Typecheck\\5_Typecheck.txt",
+        "bytes": 388,
+        "sha256": "d7c1d7ccad901effe76a57868f202007b987650accfef66db61682a44138fbd9"
+      },
+      "warningCount": 0,
+      "errorCount": 0,
+      "warnings": [],
+      "errors": [],
+      "flutterAllTestsPassed": false,
+      "analyzerNoIssues": false,
+      "testSummaries": []
+    },
+    {
+      "source": {
+        "path": ".cache\\p51-app-release-20261108-01\\ci-logs-01\\originals\\Worker Typecheck and Invariants\\6_Typecheck.txt",
+        "bytes": 388,
+        "sha256": "12f5069fdd1a6ae125483c25862f631d52af51f82216bde699e63c67c4c32c87"
+      },
+      "warningCount": 0,
+      "errorCount": 0,
+      "warnings": [],
+      "errors": [],
+      "flutterAllTestsPassed": false,
+      "analyzerNoIssues": false,
+      "testSummaries": []
+    },
+    {
+      "source": {
+        "path": ".cache\\p51-app-release-20261108-01\\ci-logs-01\\originals\\Worker Typecheck and Invariants\\7_Run invariant tests.txt",
+        "bytes": 19024,
+        "sha256": "c1c56983d86f47c84fddec891ba249765eabfaf4e882af6d3b092568d8bdf664"
+      },
+      "warningCount": 0,
+      "errorCount": 21,
+      "warnings": [],
+      "errors": [
+        "2026-11-07T18:28:39.6440443Z uncaught exception; exception = workerd/io/actor-sqlite.c++:1204: failed: expected false; jsg.Error: Durable Object was reset and rolled back to its last known good state because the application left the database in a state where constraints were violated: FOREIGN KEY constraint failed: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_FOREIGNKEY)",
+        "2026-11-07T18:28:39.6456397Z uncaught exception; exception = workerd/io/actor-sqlite.c++:1204: failed: expected false; jsg.Error: Durable Object was reset and rolled back to its last known good state because the application left the database in a state where constraints were violated: FOREIGN KEY constraint failed: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_FOREIGNKEY)",
+        "2026-11-07T18:28:39.6498037Z uncaught exception; source = Uncaught (in promise); stack = Error: Durable Object was reset and rolled back to its last known good state because the application left the database in a state where constraints were violated: FOREIGN KEY constraint failed: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_FOREIGNKEY)",
+        "2026-11-07T18:28:39.6503558Z uncaught exception; exception = workerd/jsg/_virtual_includes/iterator/workerd/jsg/value.h:1480: failed: jsg.Error: Durable Object was reset and rolled back to its last known good state because the application left the database in a state where constraints were violated: FOREIGN KEY constraint failed: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_FOREIGNKEY)",
+        "2026-11-07T18:28:40.4209048Z SQL_REJECT XC-D1-DUP-FULL: Error: D1_ERROR: UNIQUE constraint failed: firmware_release_assets.release_id, firmware_release_assets.kind, firmware_release_assets.base_image_sha256: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_UNIQUE)",
+        "2026-11-07T18:28:40.4278581Z SQL_REJECT XC-D1-DUP-PATCH: Error: D1_ERROR: UNIQUE constraint failed: firmware_release_assets.release_id, firmware_release_assets.kind, firmware_release_assets.base_image_sha256: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_UNIQUE)",
+        "2026-11-07T18:28:40.4498977Z SQL_REJECT duplicate-recovery: Error: D1_ERROR: UNIQUE constraint failed: firmware_release_assets.release_id, firmware_release_assets.kind, firmware_release_assets.base_image_sha256: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_UNIQUE)",
+        "2026-11-07T18:28:40.4517260Z SQL_REJECT NULL full: Error: D1_ERROR: NOT NULL constraint failed: firmware_release_assets.base_image_sha256: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_NOTNULL)",
+        "2026-11-07T18:28:40.4548600Z SQL_REJECT full with SHA: Error: D1_ERROR: CHECK constraint failed: (kind = 'patch' AND length(base_image_sha256) = 64",
+        "2026-11-07T18:28:40.4637436Z SQL_REJECT full with version: Error: D1_ERROR: CHECK constraint failed: (kind = 'patch' AND length(base_image_sha256) = 64",
+        "2026-11-07T18:28:40.4668918Z SQL_REJECT empty patch: Error: D1_ERROR: CHECK constraint failed: (kind = 'patch' AND length(base_image_sha256) = 64",
+        "2026-11-07T18:28:40.4723358Z SQL_REJECT zero patch version: Error: D1_ERROR: CHECK constraint failed: (kind = 'patch' AND length(base_image_sha256) = 64",
+        "2026-11-07T18:28:40.4757140Z SQL_REJECT uppercase SHA: Error: D1_ERROR: CHECK constraint failed: (kind = 'patch' AND length(base_image_sha256) = 64",
+        "2026-11-07T18:28:40.4798018Z SQL_REJECT unknown kind: Error: D1_ERROR: CHECK constraint failed: kind IN ('full','patch','recovery'): SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_CHECK)",
+        "2026-11-07T18:28:40.4809193Z SQL_REJECT recovery base: Error: D1_ERROR: CHECK constraint failed: (kind = 'patch' AND length(base_image_sha256) = 64",
+        "2026-11-07T18:28:40.4840097Z SQL_REJECT patch ahead of target: Error: D1_ERROR: firmware patch base version must precede target: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_TRIGGER)",
+        "2026-11-07T18:28:40.4874290Z SQL_REJECT XC-D1-NO-FULL-READY: Error: D1_ERROR: firmware ready requires exactly one full and verified assets: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_TRIGGER)",
+        "2026-11-07T18:28:40.4928361Z SQL_REJECT unverified-ready: Error: D1_ERROR: firmware ready requires exactly one full and verified assets: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_TRIGGER)",
+        "2026-11-07T18:28:40.4942343Z SQL_REJECT draft-pointer: Error: D1_ERROR: firmware channel requires same-scope ready release: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_TRIGGER)",
+        "2026-11-07T18:28:40.5330761Z SQL_REJECT channel-CAS: Error: D1_ERROR: firmware channel mutation requires CAS revision: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_TRIGGER)",
+        "2026-11-07T18:28:40.5358588Z SQL_REJECT admin-reason: Error: D1_ERROR: firmware admin reason required: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_TRIGGER)"
+      ],
+      "flutterAllTestsPassed": false,
+      "analyzerNoIssues": false,
+      "testSummaries": [
+        "2026-11-07T18:28:43.0795261Z  Test Files  4 passed (4)",
+        "2026-11-07T18:28:43.0796125Z       Tests  288 passed (288)"
+      ],
+      "diagnosticClassification": "21 raw test-output error diagnostics retained, including SQL_REJECT negatives and workerd constraint exceptions; suite reports 288 passed, not a zero-error-log claim"
+    }
+  ]
+}

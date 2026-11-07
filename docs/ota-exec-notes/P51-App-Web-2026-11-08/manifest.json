@@ -1,0 +1,62 @@
+{
+  "files": [
+    {
+      "path": "docs\\ota-exec-notes\\P51-App-Web-2026-11-08\\mobile-cancel.png",
+      "bytes": 174732,
+      "sha256": "2f9c9598d7dffd9cd2885948f41ec6ecb13c2af783567ee7640166a05bd6e379"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P51-App-Web-2026-11-08\\stable-publish.png",
+      "bytes": 390468,
+      "sha256": "f91c240bcdd0735673f384fa53dae247393e675a2957eb3469e797c63be2a30f"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P51-App-Web-2026-11-08\\stable-rollback.png",
+      "bytes": 392248,
+      "sha256": "c081bec12a5400c73cc181c5dd55725feac11da9e14d9ef8335d4763a7788b2f"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P51-App-Web-2026-11-08\\disabled-final.png",
+      "bytes": 678994,
+      "sha256": "59cf48a7f9d2179c546d38c807bad56b008b1ddaabbbede63a8b5a32ac542874"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P51-App-Web-2026-11-08\\web-result.json",
+      "bytes": 7752,
+      "sha256": "9acc98dd9e4f869b0afd8bed8d3ecf91e8a9f8203d998d2481cd1def20de543e"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P51-App-Web-2026-11-08\\artifact-verification.json",
+      "bytes": 3364,
+      "sha256": "c2eb682ae5438042714b57a2cae7fd1e50ffa701340411cf3d2590b995eabcbb"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P51-App-Web-2026-11-08\\diagnostics.json",
+      "bytes": 17660,
+      "sha256": "1c209773a6053192c4523af2cb82c4e99534eabf4d51c59fc1f438e4b8c04806"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P51-App-Web-2026-11-08\\boundary-audit.json",
+      "bytes": 7523,
+      "sha256": "4e9867d7ba36fd39e7525c2f04ce6f246a0c1ded90bb4d163279c88eece5d3d8"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P51-App-Web-2026-11-08\\release-inventory.json",
+      "bytes": 3499,
+      "sha256": "e08f6c6dc3e6539cfbb980d0b22a6241d333b914ad84603189cfd97b54ae7f67"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P51-App-Web-2026-11-08\\source-identity.json",
+      "bytes": 3733,
+      "sha256": "6ed24ae56c99e06d5f1ad9498cd0ea5e4fe6d8fa2775eb3a4642f580f4384110"
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P51-App-Web-2026-11-08\\web-requests.json",
+      "bytes": 13138,
+      "sha256": "cffd8ac3202008830228b80d5a4007e89385b2a34a341a2f93d61681174ad9ac"
+    }
+  ],
+  "origin": "Selected existing project-local observations; no replay",
+  "privacy": "Actor labels masked in images; no credentials, cookies or signed URLs exported",
+  "formalAcceptance": false
+}

@@ -1,0 +1,290 @@
+{
+  "disposition": "SCOPED_REVIEW_PASS",
+  "reviewer": "/root/app_web_review",
+  "originalSeal": {
+    "report": {
+      "path": ".cache\\p51-app-web-review-20261108-01\\report.md",
+      "bytes": 13351,
+      "sha256": "fc9a741e3d397293596a00b7494ad5bc361daebf9cb31fb0a57f49f8635b7e22"
+    },
+    "audit": {
+      "path": ".cache\\p51-app-web-review-20261108-01\\audit.json",
+      "bytes": 33214,
+      "sha256": "744a74866fb6bcc62a4a0874333684db0b8b672207fbe3243c6ee7bab0d614c2"
+    },
+    "source": {
+      "path": ".cache\\p51-app-web-review-20261108-01\\review.py",
+      "bytes": 20566,
+      "sha256": "aac332922627ed1af6f3d64959586988d3ce3da5a25d6fb17343e8a1f5e96e3d"
+    },
+    "note": "Report-only disclosure update after original audit; no product or original evidence changed"
+  },
+  "evaluation": {
+    "source": {
+      "commits": [
+        "67fc15541e645cbbde3236157385590ba41144f7",
+        "4474dddf006562f71304d4791e4a5641676bca89",
+        "54ded0b3dd877346fdae0137fed79c89d4661b27"
+      ],
+      "files": [
+        {
+          "path": ".github/workflows/build.yml",
+          "gitBlob": "75981dabc080db304014575814d1a7322edf6e59",
+          "sha256": "2cfb1e61699df00b2e3e682eb6a9896742d013203e284c41adae217340845695"
+        },
+        {
+          "path": ".github/workflows/cloudflare-update-service.yml",
+          "gitBlob": "f44b76e03126d4b139c9a9bb89d3f1f86b2cf316",
+          "sha256": "0562bc8cf3a23298a255f1a05d5f3bbe1133bfb21ec84e803f2200b7d3ea011d"
+        },
+        {
+          "path": "tests/ota/test_flutter_update_endpoints.py",
+          "gitBlob": "06eb91db9b231196b58d07addba2f50aff31a321",
+          "sha256": "1fb1f52edefe5ad1f80b366b2851fa953bf92c0118c2d61da34e23d3d47ebd29"
+        },
+        {
+          "path": "tests/ota/test_update_public_proxy.mjs",
+          "gitBlob": "96f7f957f5f7d134509803a9d062e91a56d98288",
+          "sha256": "cee0d1437ae7517bd007b4373b92d67227dfde6a0289306a2a4be5f1bd5b395c"
+        },
+        {
+          "path": "app/bluetooth_flutter_Trace/pubspec.yaml",
+          "gitBlob": "b566e4e482026b6e0b72d53b3bfb41e3b6e7fa6c",
+          "sha256": "cd840b80d1bc4f7dfcea609fd16be689ce2df2c35b267ada103edf938071e20f"
+        },
+        {
+          "path": "app/bluetooth_flutter_Trace/cloudflare/update-service/firmware-public/site/_worker.js",
+          "gitBlob": "de3f348dc5871497ca4afefbe2de3d85aec3bf14",
+          "sha256": "475104b5dcc9abffa8ada3f935ac79614e3e7482a3c357f6653cde7bd5f1d599"
+        },
+        {
+          "path": "app/bluetooth_flutter_Trace/cloudflare/update-service/admin/public/index.html",
+          "gitBlob": "8e52840c6d4b65521dd515107a35ca849052aa8a",
+          "sha256": "c0ed90e650ae187605832eb27e2100956f6428335c4258c8623f94db72b530b0"
+        },
+        {
+          "path": "app/bluetooth_flutter_Trace/cloudflare/update-service/admin/test/app-ui.spec.ts",
+          "gitBlob": "97c6f80837d18e90a4ead720feea3a2fb97ff941",
+          "sha256": "d1c844060f016de0134f10720f39e3265656fdee3fc54dff8367c487f93e83d6"
+        },
+        {
+          "path": "app/bluetooth_flutter_Trace/cloudflare/update-service/admin/README.md",
+          "gitBlob": "d85f0e44ccceffa73e369c3fd27fc41493bf9e16",
+          "sha256": "ce35e5b4024e20381dd249a491fe8670e8fe85a383ca69a755c6cb476e166360"
+        }
+      ],
+      "matched": 9,
+      "manifestFiles": 11,
+      "remoteRead": "Saved original authenticated GitHub replies"
+    },
+    "assets": {
+      "versions": [
+        {
+          "version": 99,
+          "source": "67fc15541e645cbbde3236157385590ba41144f7",
+          "run": 42398324376,
+          "apk": {
+            "path": ".cache\\p51-app-release-20261108-01\\archive-01\\version-1\\android-apk\\ble-monitor-android.apk",
+            "bytes": 47741488,
+            "sha256": "5a1696a3f9a1832d78342a42bae131f736287ec17d92202b2ec23917cb10679d"
+          },
+          "githubReleaseId": 437744712,
+          "compiledAbis": 2,
+          "signatureAndTwoNegatives": true,
+          "apkSigner": "Preserved apksigner original verified; APK not rebuilt or installed"
+        },
+        {
+          "version": 100,
+          "source": "4474dddf006562f71304d4791e4a5641676bca89",
+          "run": 42398527444,
+          "apk": {
+            "path": ".cache\\p51-app-release-20261108-01\\archive-01\\version-2\\android-apk\\ble-monitor-android.apk",
+            "bytes": 47741484,
+            "sha256": "a2ea831e60e37697f98667f94642dfa7c7cd175975e70a8d27a36df205f17685"
+          },
+          "githubReleaseId": 437746785,
+          "compiledAbis": 2,
+          "signatureAndTwoNegatives": true,
+          "apkSigner": "Preserved apksigner original verified; APK not rebuilt or installed"
+        }
+      ],
+      "exactlyTwo": true,
+      "githubLatest": 404
+    },
+    "web": {
+      "originalResponses": 87,
+      "postCount": 9,
+      "channelSequence": [
+        {
+          "channel": "stable",
+          "version": 99,
+          "revision": 1,
+          "rollback": false
+        },
+        {
+          "channel": "beta",
+          "version": 99,
+          "revision": 1,
+          "rollback": false
+        },
+        {
+          "channel": "beta",
+          "version": 100,
+          "revision": 2,
+          "rollback": false
+        },
+        {
+          "channel": "stable",
+          "version": 100,
+          "revision": 2,
+          "rollback": false
+        },
+        {
+          "channel": "stable",
+          "version": 99,
+          "revision": 3,
+          "rollback": true
+        },
+        {
+          "channel": "beta",
+          "version": 99,
+          "revision": 3,
+          "rollback": true
+        }
+      ],
+      "notesRestoredAsTrimmedText": true,
+      "byteIdenticalNotes": false,
+      "finalChannels": "Stable99/Beta99 revision3",
+      "disabledVersion": 100,
+      "issuedDownloadDenial": 410,
+      "firmware": "Every observed full DTO matches Stable90/Beta11 anchor",
+      "lineage": "Two notes writes, two baseline writes, five final writes; no successful POST replay",
+      "liveOperationsByReviewer": 0
+    },
+    "ci": {
+      "app": [
+        {
+          "run": 42398324376,
+          "source": "67fc15541e645cbbde3236157385590ba41144f7",
+          "jobs": [
+            {
+              "name": "Detect changed paths",
+              "conclusion": "success"
+            },
+            {
+              "name": "Build Android APK",
+              "conclusion": "success"
+            },
+            {
+              "name": "Build Windows EXE",
+              "conclusion": "success"
+            },
+            {
+              "name": "Deploy GitHub Pages",
+              "conclusion": "skipped"
+            },
+            {
+              "name": "Create GitHub Release",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "run": 42398527444,
+          "source": "4474dddf006562f71304d4791e4a5641676bca89",
+          "jobs": [
+            {
+              "name": "Detect changed paths",
+              "conclusion": "success"
+            },
+            {
+              "name": "Build Android APK",
+              "conclusion": "success"
+            },
+            {
+              "name": "Build Windows EXE",
+              "conclusion": "success"
+            },
+            {
+              "name": "Deploy GitHub Pages",
+              "conclusion": "skipped"
+            },
+            {
+              "name": "Create GitHub Release",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ],
+      "admin": {
+        "run": 42401395702,
+        "source": "54ded0b3dd877346fdae0137fed79c89d4661b27",
+        "conclusion": "success",
+        "mockTests": 54
+      },
+      "evaluation": "Original CI archives hashed; no rerun/build/dispatch"
+    }
+  },
+  "reviewWindowSharedCacheChanges": [
+    {
+      "path": "C:\\Users\\SU\\AppData\\LocalLow\\Microsoft\\CryptnetUrlCache\\Content\\D1BEC81CCAFDC823A062FF26A89A6B6D_FDA4BA3EAD8ECC04C1D36E59534F506A",
+      "before": {
+        "bytes": 471,
+        "mtimeNs": 1791137153164829500,
+        "sha256": "0ba4bd9efe943b93daca9a8187e2ae5556366830ca41fdc0c4346780c6af8a03"
+      },
+      "after": null
+    },
+    {
+      "path": "C:\\Users\\SU\\AppData\\LocalLow\\Microsoft\\CryptnetUrlCache\\MetaData\\8B2B9A00839EED1DFDCCC3BFC2F5DF12",
+      "before": {
+        "bytes": 174,
+        "mtimeNs": 1794076503186665400,
+        "sha256": "7d8747a1a56d8d76e30e53d730f8ad50221f14df5a5f7ba2623ccfa593ed8979"
+      },
+      "after": {
+        "bytes": 174,
+        "mtimeNs": 1794080292209305300,
+        "sha256": "3b7b5b5d36c30ca923f28077696a9c88411b5beb498807cb5a2020604031a904"
+      }
+    },
+    {
+      "path": "C:\\Users\\SU\\AppData\\LocalLow\\Microsoft\\CryptnetUrlCache\\MetaData\\D1BEC81CCAFDC823A062FF26A89A6B6D_FDA4BA3EAD8ECC04C1D36E59534F506A",
+      "before": {
+        "bytes": 422,
+        "mtimeNs": 1791137468147430800,
+        "sha256": "03db10b8149a5704b3c64ef2ac3f5c75a0afb360341c709b4f4f6f6d6ba22156"
+      },
+      "after": null
+    },
+    {
+      "path": "C:\\Users\\SU\\AppData\\LocalLow\\Microsoft\\CryptnetUrlCache\\MetaData\\F15827BEC5BABE89C21DCDAE77464BF1",
+      "before": {
+        "bytes": 192,
+        "mtimeNs": 1794076503902533000,
+        "sha256": "7afcb4f7d235b77222a954549d7775da4e069cb75bc597085361d1c26aeade83"
+      },
+      "after": {
+        "bytes": 192,
+        "mtimeNs": 1794080292769300600,
+        "sha256": "8e553eebd00db58448131c38d04232796ab2223ca95e72346cde860f336da99b"
+      }
+    },
+    {
+      "path": "C:\\Users\\SU\\AppData\\Local\\Microsoft\\Windows\\PowerShell\\StartupProfileData-NonInteractive",
+      "before": {
+        "bytes": 1004,
+        "mtimeNs": 1794079334709522000,
+        "sha256": "8a1574be1deb0caa1217668abc3a2eeb21e97af3f4d4ac196dc031eb5a300072"
+      },
+      "after": {
+        "bytes": 1004,
+        "mtimeNs": 1794080235218556600,
+        "sha256": "9a30c1a0e58631a7692cd5cd4dc337204b5143664c9171e8af559b77874b6b67"
+      }
+    }
+  ],
+  "attribution": "UNKNOWN",
+  "cleanBoundary": false,
+  "P5Complete": false
+}

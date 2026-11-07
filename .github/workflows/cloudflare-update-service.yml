@@ -55,6 +55,10 @@ jobs:
       - name: Typecheck
         run: npm run check
 
+      - name: Public proxy route isolation
+        working-directory: .
+        run: node --test tests/ota/test_update_public_proxy.mjs
+
   admin:
     name: Admin Typecheck and Mock UI
     runs-on: ubuntu-latest
