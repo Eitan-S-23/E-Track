@@ -880,6 +880,46 @@ class BenchmarkTests(unittest.TestCase):
                     else:
                         self.assertEqual(b.public_proxy.validate_publication(h.record(claim), expected), candidate)
 
+    def test_fixed_proxy_resolves_native_tool_aliases_without_changing_receipts(self):
+        _, expected, value = self.proxy_claim()
+        for index, (key, position) in enumerate((('node', 0), ('wrangler', 1), ('git', 0))):
+            pin = value['tools'][key]
+            original_tool = h.pinned(pin)
+            directory = h.fresh(original_tool.parent/('alias-%d'%index))
+            alias = str(directory) + '/../' + original_tool.name
+            receipt_pin = value['source_commands']['worker'] if key == 'git' else value['deploy_command']
+            original = h.read_json(h.pinned(receipt_pin))
+            command = copy.deepcopy(original)
+            command['argv'][position] = alias
+            receipt = self.out/('alias-%d.closed.json'%index)
+            claim = self.out/('alias-%d-claim.json'%index)
+            h.save(receipt, command)
+            candidate = copy.deepcopy(value)
+            if key == 'git':
+                candidate['source_commands']['worker'] = h.record(receipt)
+            else:
+                candidate['deploy_command'] = h.record(receipt)
+            h.save(claim, candidate)
+            before = receipt.read_bytes()
+            self.assertEqual(b.public_proxy.validate_publication(h.record(claim), expected), candidate)
+            self.assertEqual(receipt.read_bytes(), before)
+            self.assertEqual(h.read_json(receipt)['argv'][position], alias)
+
+    def test_fixed_proxy_rejects_other_native_files_and_relative_tool_arguments(self):
+        _, expected, value = self.proxy_claim()
+        receipt = h.read_json(h.pinned(value['deploy_command']))
+        other = self.out/'different-node'
+        h.raw(other, h.pinned(value['tools']['node']).read_bytes())
+        for index, argument in enumerate((str(other), 'node', str(other.parent/'missing-node'))):
+            command = copy.deepcopy(receipt)
+            command['argv'][0] = argument
+            path = self.out/('wrong-tool-%d.closed.json'%index)
+            claim = self.out/('wrong-tool-%d-claim.json'%index)
+            h.save(path, command)
+            h.save(claim, dict(value, deploy_command=h.record(path)))
+            with self.subTest(argument=argument), self.assertRaises(RuntimeError):
+                b.public_proxy.validate_publication(h.record(claim), expected)
+
     def test_fixed_proxy_generated_configuration_allows_only_upstream_substitution(self):
         _, expected, value = self.proxy_claim()
         original = h.read_json(h.pinned(value['configuration']))

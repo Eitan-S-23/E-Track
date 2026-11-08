@@ -22,11 +22,23 @@ def deployment_config(upstream):
     return config
 
 
+def native_tools_match(argv, pins):
+    if not isinstance(argv, list) or len(argv) < len(pins):
+        return False
+    for argument, pin in zip(argv, pins):
+        if not isinstance(argument, str) or not Path(argument).is_absolute():
+            return False
+        # Preserve the original argv; an installed tool may be invoked through a junction.
+        if h.pinned(dict(pin, path=argument)) != h.pinned(pin):
+            return False
+    return True
+
+
 def source_bytes(value, key):
     command = h.read_json(h.pinned(value['source_commands'][key]))
-    git = str(h.pinned(value['tools']['git']))
-    h.require(command['argv'] == [git, '--no-optional-locks', 'show',
-        value['source'] + ':' + SOURCE_PATHS[key]] and command['exit_code'] == 0 and
+    h.require(command['argv'][1:] == ['--no-optional-locks', 'show',
+        value['source'] + ':' + SOURCE_PATHS[key]] and
+        native_tools_match(command['argv'], [value['tools']['git']]) and command['exit_code'] == 0 and
         command['exit_status'] == 'exited' and command['stopped_while_running'] is False and
         command['cleanup_complete'] is True and command['cleanup_errors'] == [],
         'original successful native Git source receipt required')
@@ -60,11 +72,12 @@ def validate_publication(pin, expected):
     h.require(source_bytes(value, 'worker') == worker.read_bytes().replace(b'\r\n', b'\n') and
         source_bytes(value, 'template') == (PUBLIC / 'wrangler.jsonc').read_bytes().replace(b'\r\n', b'\n'),
         'proxy Git blob content differs from deployed worker or canonical template')
-    tools = [str(h.pinned(value['tools'][key])) for key in ('node', 'wrangler')]
+    tools = [value['tools'][key] for key in ('node', 'wrangler')]
     command = h.read_json(h.pinned(value['deploy_command']))
-    h.require(command['argv'] == tools + ['pages', 'deploy', str(worker.parent),
+    h.require(command['argv'][2:] == ['pages', 'deploy', str(worker.parent),
         '--project-name', PROJECT, '--branch', 'main', '--commit-hash', source,
         '--commit-dirty=false', '--no-bundle', '--upload-source-maps=false', '--cwd', str(config_path.parent)] and
+        native_tools_match(command['argv'], tools) and
         command['exit_code'] == 0 and command['exit_status'] == 'exited' and
         command['stopped_while_running'] is False and command['cleanup_complete'] is True and
         command['cleanup_errors'] == [], 'original successful native Pages deployment required')
