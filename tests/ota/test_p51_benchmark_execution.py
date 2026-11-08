@@ -18,6 +18,7 @@ from unittest.mock import Mock, patch
 from urllib.parse import parse_qsl, urlsplit
 import zipfile
 import zlib
+import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'Tools/ota/p51-acceptance'))
@@ -67,19 +68,23 @@ class BenchmarkTests(unittest.TestCase):
     def driver(self):
         driver = object.__new__(b.Observer)
         driver.p = dict(app=dict(id=b.APP_ID), limits=dict(event_seconds=10),
+            device=dict(address=self.fw['device_address']),
             ui={name: {'resource-id': 'p35-' + name} for name in ('start', 'resume', 'stop')})
         driver.capture_id, driver.arm_attempted = 'd'*32, True
         driver.mutation_unknown, driver.transfer_start_attempted = False, False
         driver.preparation, driver.firmware = driver, self.fw
         driver.live = [state(self.fw)]
+        driver.live[-1]['captureId'] = driver.capture_id
+        driver.capture_resolved, driver.stop_attempted = False, False
+        driver.decoder = SimpleNamespace(closed=None)
         driver.queue, driver.last_state_at = deque([driver.live[-1]]), time.monotonic()
         driver.record, driver.pump, driver.phase, driver.idle_services = Mock(), Mock(), Mock(), Mock()
         driver.cmd = Mock(return_value=b'')
         return driver
 
     def xml(self, *, package=b.APP_ID, enabled='true'):
-        return ('<hierarchy><node package="%s" resource-id="p35-start" enabled="%s" '
-            'clickable="true" bounds="[10,20][30,40]"/></hierarchy>' % (package, enabled)).encode()
+        return SemanticControlTests().tree(action='p35-start').replace(
+            b.APP_ID.encode(), package.encode()).replace(b'enabled="true"', ('enabled="'+enabled+'"').encode())
 
     def test_existing_semantic_driver_taps_exactly_once_then_refuses_uncertainty(self):
         driver = self.driver()
@@ -190,7 +195,8 @@ class BenchmarkTests(unittest.TestCase):
             'Tools/ota/p51-acceptance/run.py', 'Tools/ota/p51-acceptance/observation.py',
             'Tools/ota/p34-acceptance/live_phone.py', 'Tools/ota/p34-acceptance/selftest.py',
             'Tools/ota/p35-automation/smoke.py', 'Tools/ota/p35-automation/runner.py',
-            'tests/ota/test_p51_benchmark_execution.py', 'tests/ota/test_p51_execution.py',
+            'tests/ota/test_p51_benchmark_execution.py', 'tests/ota/fixtures/p51-active-toolbar.hex',
+            'tests/ota/test_p51_execution.py',
             'tests/ota/test_p51_clock.py', 'tests/ota/test_p51_public_proxy.mjs',
             'Tools/ota/p51-acceptance/public_proxy.py', 'Tools/ota/p51-acceptance/public/site/_worker.js')
         for event in ('push', 'pull_request'):
@@ -1096,6 +1102,301 @@ class BenchmarkTests(unittest.TestCase):
                 b.live_phone.service_config(dict(plan, reference_service=dict(binding, **delta)), 'https://fixture.trycloudflare.com')
         self.assertEqual(b.live_phone.reference_binding({})['baseVersion'], 30286)
         self.assertEqual(b.live_phone.reference_binding({})['appVersion'], 86)
+
+
+class SemanticControlTests(unittest.TestCase):
+    LABELS = {
+        'p51-arm-timing': 'Start acknowledged raw link timing recording',
+        'p35-reconnect': '\u91cd\u8fde\u53d6\u8bc1\u76ee\u6807\uff08\u4e0d\u5f00\u59cb\u5347\u7ea7\uff09',
+        'p35-stop': '\u7ed3\u675f\u5e76\u4fdd\u7559\u81ea\u52a8\u5316\u8bb0\u5f55',
+        'p35-check': '\u68c0\u67e5\u66f4\u65b0',
+        'p35-download': '\u4e0b\u8f7d\u56fa\u4ef6',
+        'p35-start': '\u5f00\u59cb BLE \u4f20\u8f93',
+    }
+
+    def setUp(self):
+        # Exact adb-00190.stdout from the failed v17 run, not corrected XML.
+        path = ROOT / 'tests/ota/fixtures/p51-active-toolbar.hex'
+        self.raw = bytes.fromhex(path.read_text(encoding='ascii'))
+        self.assertEqual(hashlib.sha256(self.raw).hexdigest(),
+            'd31703056d90f058b9677e4f25df77404da170aa5bcfb4bf766f08a4c232b2d6')
+
+    def button(self, parent, identifier, label, **attributes):
+        attrs = {'package': b.APP_ID, 'enabled': 'true', 'clickable': 'false',
+            'resource-id': identifier, 'bounds': '[10,20][30,40]'}
+        outer = ET.SubElement(parent, 'node', attrs)
+        attrs = dict(attrs, **{'resource-id': '', 'content-desc': label,
+            'class': 'android.widget.Button', 'clickable': 'true'}, **attributes)
+        return ET.SubElement(outer, 'node', attrs)
+
+    def tree(self, *, active=True, action=None):
+        root = ET.Element('hierarchy')
+        ET.SubElement(root, 'node', {'package': b.APP_ID, 'content-desc': b.s.FIRMWARE})
+        if active:
+            self.button(root, 'p51-arm-timing', 'Idle logging load probe (no OTA)')
+            self.button(root, 'p35-arm-stream', self.LABELS['p35-reconnect'])
+            self.button(root, 'p35-arm', self.LABELS['p35-stop'])
+        else:
+            self.button(root, 'p51-arm-timing', self.LABELS['p51-arm-timing'])
+        if action:
+            self.button(root, action, self.LABELS[action])
+        return ET.tostring(root, encoding='utf-8')
+
+    def driver(self, *, active=True, phase='idle', xml=None):
+        driver = object.__new__(b.Observer)
+        driver.firmware = firmware()
+        driver.p = dict(app=dict(id=b.APP_ID), device=dict(address=driver.firmware['device_address']),
+            limits=dict(event_seconds=10), ui={name: {'resource-id': 'p35-'+name}
+                for name in ('start', 'resume', 'stop')})
+        driver.p['ui']['arm'] = {'resource-id': 'p51-arm-timing'}
+        driver.capture_id = 'd'*32 if active else None
+        driver.arm_attempted, driver.arm_action_count = active, int(active)
+        driver.stop_attempted = driver.mutation_unknown = driver.transfer_start_attempted = False
+        driver.capture_resolved = False
+        driver.decoder = SimpleNamespace(closed=None)
+        row = state(driver.firmware, idle=phase == 'idle')
+        row.update(captureId=driver.capture_id, phase=phase)
+        driver.live = [row] if active else []
+        driver.queue = deque(driver.live)
+        driver.last_state_at = time.monotonic() if active else None
+        driver.preparation, driver.stream_port = driver, 5193
+        driver.record, driver.pump, driver.idle_services = Mock(), Mock(), Mock()
+        driver.cmd, driver.start_live_stream = Mock(return_value=b''), Mock()
+        driver.ui = Mock(return_value=xml if xml is not None else self.tree(active=active))
+        return driver
+
+    def test_recorded_stale_ids_select_exact_active_roles(self):
+        for role, point in (('p35-reconnect', ('864', '180')), ('p35-stop', ('1008', '180'))):
+            with self.subTest(role=role):
+                with self.assertRaises(r.Stop):
+                    r.find_control(self.raw, {'resource-id': role}, b.APP_ID)
+                driver = self.driver(xml=self.raw)
+                driver.tap({'resource-id': role})
+                driver.cmd.assert_called_once_with(['shell', 'input', 'tap', *point], seconds=5)
+                self.assertTrue(driver.mutation_unknown)
+                self.assertFalse(driver.transfer_start_attempted)
+                self.assertEqual(driver.stop_attempted, role == 'p35-stop')
+
+    def test_active_toolbar_never_arms_again_even_without_host_capture_id(self):
+        for active in (False, True):
+            driver = self.driver(active=active, xml=self.raw)
+            with self.subTest(active=active), self.assertRaises((r.Stop, RuntimeError)):
+                driver.ask('recording-arm', '')
+            driver.cmd.assert_not_called()
+            driver.start_live_stream.assert_not_called()
+
+    def test_recording_precheck_rejects_active_and_accepts_exact_idle_control(self):
+        driver = self.driver(active=False, xml=self.raw)
+        with self.assertRaises((r.Stop, RuntimeError)):
+            driver.check_recording_arm()
+        driver.cmd.assert_not_called()
+        driver.ui.return_value = self.tree(active=False)
+        self.assertEqual(driver.check_recording_arm(), (20, 30))
+
+    def test_wrong_role_resource_id_is_not_a_fallback(self):
+        for role in ('p35-start', 'p35-download', 'p35-check'):
+            xml = self.tree(action=role).replace(self.LABELS[role].encode(), b'Wrong action')
+            driver = self.driver(phase='readyToInstall' if role == 'p35-start' else 'idle', xml=xml)
+            with self.subTest(role=role), self.assertRaises(r.Stop):
+                driver.tap({'resource-id': role})
+            self.assertFalse(any(call.args[0][:3] == ['shell', 'input', 'tap'] for call in driver.cmd.call_args_list))
+
+    def test_duplicate_exact_label_never_selects_an_arbitrary_button(self):
+        root = r.hierarchy(self.raw)
+        self.button(root, 'duplicate', self.LABELS['p35-stop'])
+        driver = self.driver(xml=ET.tostring(root))
+        with self.assertRaisesRegex(r.Stop, 'ambiguous'):
+            driver.tap({'resource-id': 'p35-stop'})
+        driver.cmd.assert_not_called()
+
+    def test_disabled_hidden_foreign_or_ambiguous_native_buttons_never_tap(self):
+        for attrs in ({'enabled': 'false'}, {'visible-to-user': 'false'},
+                {'package': 'foreign.app'}, {'bounds': '[0,0][0,0]'}):
+            root = r.hierarchy(self.raw)
+            node = next(n for n in root.iter('node') if n.get('content-desc') == self.LABELS['p35-stop'])
+            node.attrib.update(attrs)
+            driver = self.driver(xml=ET.tostring(root))
+            with self.subTest(attrs=attrs), patch.object(r.time, 'sleep'), self.assertRaises(r.Stop):
+                driver.tap({'resource-id': 'p35-stop'})
+            driver.cmd.assert_not_called()
+
+    def test_foreign_overlay_is_rejected_even_when_target_button_is_valid(self):
+        root = r.hierarchy(self.raw)
+        ET.SubElement(root, 'node', {'package': 'foreign.app', 'text': 'overlay'})
+        driver = self.driver(xml=ET.tostring(root))
+        with self.assertRaises(r.Stop):
+            driver.tap({'resource-id': 'p35-stop'})
+        driver.cmd.assert_not_called()
+
+    def test_disabled_or_hidden_ancestor_does_not_make_child_actionable(self):
+        for attribute in ('enabled', 'visible-to-user'):
+            root = r.hierarchy(self.raw)
+            parents = {child: parent for parent in root.iter() for child in parent}
+            button = next(n for n in root.iter('node') if n.get('content-desc') == self.LABELS['p35-stop'])
+            parents[button].set(attribute, 'false')
+            driver = self.driver(xml=ET.tostring(root))
+            with self.subTest(attribute=attribute), patch.object(r.time, 'sleep'), self.assertRaises(r.Stop):
+                driver.tap({'resource-id': 'p35-stop'})
+            driver.cmd.assert_not_called()
+
+    def test_matching_id_on_wrong_role_cannot_override_correct_label(self):
+        for role, point in (('p35-reconnect', ('864', '180')), ('p35-stop', ('1008', '180'))):
+            raw = self.raw.replace(b'resource-id="p51-arm-timing"', ('resource-id="'+role+'"').encode())
+            driver = self.driver(xml=raw)
+            driver.tap({'resource-id': role})
+            driver.cmd.assert_called_once_with(['shell', 'input', 'tap', *point], seconds=5)
+            driver.record.assert_any_call('semantic-control-resolved', role=role, label=self.LABELS[role],
+                hierarchySha256=hashlib.sha256(raw).hexdigest())
+
+    def test_idle_toolbar_cannot_supply_an_active_action(self):
+        driver = self.driver(xml=self.tree(active=False, action='p35-start'), phase='readyToInstall')
+        with self.assertRaises((r.Stop, RuntimeError)):
+            driver.tap({'resource-id': 'p35-start'})
+        driver.cmd.assert_not_called()
+
+    def test_closed_unowned_or_unhealthy_recording_cannot_mutate_ui(self):
+        for change in ('closed', 'resolved', 'no-id', 'not-armed', 'unhealthy', 'wrong-capture', 'wrong-device', 'no-state'):
+            driver = self.driver(xml=self.raw)
+            if change == 'closed': driver.decoder.closed = {'kind': 'close'}
+            elif change == 'resolved': driver.capture_resolved = True
+            elif change == 'no-id': driver.capture_id = None
+            elif change == 'not-armed': driver.arm_attempted = False
+            elif change == 'unhealthy': driver.live[-1]['healthy'] = False
+            elif change == 'wrong-capture': driver.live[-1]['captureId'] = 'f'*32
+            elif change == 'wrong-device': driver.live[-1]['deviceAddress'] = 'aa:bb:cc:dd:ee:ff'
+            else: driver.live.clear()
+            with self.subTest(change=change), self.assertRaises((r.Stop, RuntimeError)):
+                driver.tap({'resource-id': 'p35-stop'})
+            driver.cmd.assert_not_called()
+
+    def test_busy_ota_state_cannot_reconnect_or_stop_or_start(self):
+        for role in ('p35-reconnect', 'p35-stop', 'p35-start'):
+            driver = self.driver(phase='transferring', xml=self.tree(action='p35-start'))
+            with self.subTest(role=role), self.assertRaises((r.Stop, RuntimeError)):
+                driver.tap({'resource-id': role})
+            driver.cmd.assert_not_called()
+
+    def test_late_telemetry_transition_is_checked_again_before_tap(self):
+        driver = self.driver(xml=self.raw)
+        count = 0
+        def pump():
+            nonlocal count
+            count += 1
+            if count == 2:
+                driver.live[-1]['phase'] = 'transferring'
+        driver.pump.side_effect = pump
+        with self.assertRaises((r.Stop, RuntimeError)):
+            driver.tap({'resource-id': 'p35-stop'})
+        driver.cmd.assert_not_called()
+        self.assertFalse(driver.stop_attempted)
+
+    def test_expired_heartbeat_still_blocks_semantic_action(self):
+        driver = self.driver(xml=self.raw)
+        driver.last_state_at = time.monotonic()-30
+        with self.assertRaisesRegex(r.Stop, 'heartbeat'):
+            driver.tap({'resource-id': 'p35-stop'})
+        driver.cmd.assert_not_called()
+
+    def test_bootstrap_still_rejects_every_business_action(self):
+        for role in ('p35-reconnect', 'p35-stop', 'p35-check', 'p35-download', 'p35-start'):
+            driver = self.driver(active=False)
+            with self.subTest(role=role), self.assertRaises((r.Stop, RuntimeError)):
+                driver.tap({'resource-id': role}, bootstrap=True)
+            driver.cmd.assert_not_called()
+            driver.start_live_stream.assert_not_called()
+
+    def test_prearm_business_controls_cannot_take_the_navigation_route(self):
+        for role in self.LABELS:
+            driver = self.driver(active=False)
+            with self.subTest(role=role), self.assertRaises(RuntimeError):
+                driver.tap({'resource-id': role})
+            driver.cmd.assert_not_called()
+
+    def test_shared_bootstrap_restriction_precedes_optional_lookup_adapter(self):
+        driver = self.driver(active=False)
+        lookup, admit = Mock(), Mock()
+        with self.assertRaises(r.Stop):
+            r.Android.tap(driver, {'resource-id': 'p35-start'}, bootstrap=True,
+                resolve_control=lookup, before_tap=admit)
+        lookup.assert_not_called()
+        admit.assert_not_called()
+        driver.cmd.assert_not_called()
+
+    def test_real_recording_entry_checks_control_before_starting_stream(self):
+        driver = self.driver(active=False, xml=self.raw)
+        driver.start_phone, driver.phase, driver.old_captures = Mock(), Mock(), Mock()
+        driver.navigate, driver.prepare_recorder = Mock(), Mock()
+        driver.prepare_live_stream, driver.ask = Mock(), Mock()
+        driver.cmd.return_value = b'123'
+        with self.assertRaisesRegex(r.Stop, 'existing recording active'):
+            driver.start_recording()
+        driver.prepare_live_stream.assert_not_called()
+        driver.start_live_stream.assert_not_called()
+        driver.ask.assert_not_called()
+
+    def test_timing_arm_is_one_shot_and_keeps_existing_bookkeeping(self):
+        driver = self.driver(active=False)
+        driver.ask('recording-arm', '')
+        driver.cmd.assert_called_once_with(['shell', 'input', 'tap', '20', '30'], seconds=5)
+        driver.start_live_stream.assert_called_once()
+        self.assertTrue(driver.arm_attempted)
+        self.assertEqual(driver.arm_action_count, 1)
+        self.assertFalse(driver.transfer_start_attempted)
+        with self.assertRaisesRegex(RuntimeError, 'unresolved'):
+            driver.ask('recording-arm', '')
+        self.assertEqual(driver.cmd.call_count, 1)
+
+    def test_start_keeps_package_binding_and_transfer_bookkeeping(self):
+        for valid in (True, False):
+            driver = self.driver(phase='readyToInstall', xml=self.tree(action='p35-start'))
+            if not valid: driver.live[-1]['packageSha256'] = 'f'*64
+            if valid:
+                driver.ask('start-ble', '')
+                driver.cmd.assert_called_once()
+                self.assertTrue(driver.transfer_start_attempted)
+            else:
+                with self.assertRaises(r.Stop):
+                    driver.tap({'resource-id': 'p35-start'})
+                driver.cmd.assert_not_called()
+                self.assertFalse(driver.transfer_start_attempted)
+
+    def test_stop_cannot_be_repeated_after_an_uncertain_result(self):
+        driver = self.driver(xml=self.raw)
+        driver.ask('recording-stop', '')
+        self.assertTrue(driver.stop_attempted)
+        with self.assertRaisesRegex(RuntimeError, 'unresolved'):
+            driver.ask('stop-existing-recording', '')
+        self.assertEqual(driver.cmd.call_count, 1)
+
+    def test_recorded_active_toolbar_is_never_proof_of_idle_cleanup(self):
+        driver = self.driver(xml=self.raw)
+        with self.assertRaisesRegex(r.Stop, 'recorder active'):
+            driver.idle_recorder_ui()
+        driver.cmd.assert_not_called()
+
+    def test_recorded_active_toolbar_blocks_shared_smoke_arm(self):
+        driver = self.driver(xml=self.raw)
+        driver.prepare_recorder, driver.enter, driver.control = Mock(), Mock(), Mock()
+        with self.assertRaisesRegex(r.Stop, 'existing recording active'):
+            b.s.Smoke.record_smoke(driver)
+        driver.control.assert_not_called()
+        driver.cmd.assert_not_called()
+
+    def test_closed_hint_cannot_override_stale_active_controls(self):
+        root = r.hierarchy(self.raw)
+        self.button(root, 'closed', b.s.CLOSED_RECORDER)
+        self.button(root, 'hint', b.s.UNREADY_HINT)
+        self.button(root, 'p35-identity', 'identity')
+        with self.assertRaisesRegex(r.Stop, 'closed-recorder'):
+            b.s.sealed_unready_ui(ET.tostring(root), b.APP_ID)
+
+    def test_unknown_selectors_and_plain_labels_do_not_bypass_role_mapping(self):
+        for wanted in ({'resource-id': 'p35-log-probe'}, {'content-desc': self.LABELS['p35-stop']},
+                {'resource-id': 'p35-stop', 'class': 'android.widget.Button'}):
+            driver = self.driver(xml=self.raw)
+            with self.subTest(wanted=wanted), self.assertRaises((r.Stop, RuntimeError)):
+                driver.tap(wanted)
+            driver.cmd.assert_not_called()
 
 
 if __name__ == '__main__':

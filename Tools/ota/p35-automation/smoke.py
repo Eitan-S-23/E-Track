@@ -29,6 +29,9 @@ FIRMWARE = '\u7801\u8868\u56fa\u4ef6'
 DEVICE_ID = '\u8bbe\u5907ID'
 OPEN_FIRMWARE = '\u68c0\u67e5\u5355\u7247\u673a\u56fa\u4ef6\u66f4\u65b0'
 CLOSED_RECORDER = '\u5f00\u59cb\u81ea\u52a8\u5316\u8bb0\u5f55\uff08\u5305\u542b\u8bbe\u5907\u6807\u8bc6\uff0c\u6700\u957f\u4e00\u5c0f\u65f6\uff09: closed'
+RECORDER_STOP = '\u7ed3\u675f\u5e76\u4fdd\u7559\u81ea\u52a8\u5316\u8bb0\u5f55'
+RECORDER_RECONNECT = '\u91cd\u8fde\u53d6\u8bc1\u76ee\u6807\uff08\u4e0d\u5f00\u59cb\u5347\u7ea7\uff09'
+RECORDER_PROBE = 'Idle logging load probe (no OTA)'
 UNREADY_HINT = '\u8bbe\u5907\u8eab\u4efd\u672a\u786e\u8ba4\uff08\u672a\u8bc6\u522b\u5230 OTA \u670d\u52a1\u6216\u8eab\u4efd\u8bfb\u53d6\u5931\u8d25\uff09\uff0c\u6682\u4e0d\u80fd\u68c0\u67e5\u66f4\u65b0'
 
 
@@ -92,6 +95,15 @@ def labels(xml, package):
 
 def has_label(xml, package, value):
     return any(value in v.splitlines() for v in labels(xml, package))
+
+
+def recorder_active(xml, package):
+    # Native identifiers can lag a toolbar transition. Missing p35-stop is not
+    # evidence of an idle recorder when an active action's label is still there.
+    active = {RECORDER_STOP, RECORDER_RECONNECT, RECORDER_PROBE}
+    return any(n.get('resource-id') == 'p35-stop' or any(
+        active.intersection(n.get(key, '').splitlines()) for key in ('text', 'content-desc'))
+        for n in nodes(xml, package).iter('node'))
 
 
 def scroll_viewport(xml, package):
@@ -259,6 +271,12 @@ def semantic_control(xml, package, label, *, token=False):
     r.require(len(matches) <= 1, 'ambiguous target semantic control', 'UI_UNAVAILABLE')
     r.require(matches, 'target semantic control missing', 'UI_WAIT')
     n = matches[0]
+    parents = {child: parent for parent in tree.iter() for child in parent}
+    ancestor = n
+    while ancestor in parents:
+        ancestor = parents[ancestor]
+        r.require(ancestor.get('enabled') != 'false' and ancestor.get('visible-to-user') != 'false',
+                  'semantic ancestor disabled/hidden', 'UI_UNAVAILABLE')
     wanted = {k: n.get(k) for k in ('text', 'content-desc') if n.get(k)}
     return r.find_control(xml, wanted, package)
 
@@ -409,6 +427,7 @@ def sealed_unready_ui(tree, pkg):
     """The installed page's hint excludes upgrading; identity action excludes busy query."""
     controls = nodes(tree, pkg)
     r.require(has_label(tree, pkg, CLOSED_RECORDER) and has_label(tree, pkg, UNREADY_HINT) and
+        not recorder_active(tree, pkg) and
         not any(n.get('resource-id') in {'p35-stop', 'p35-start', 'p35-download', 'p35-resume'}
                 for n in controls.iter('node')), 'unknown/busy closed-recorder UI', 'UNRESOLVED_STATE')
     r.find_control(tree, {'resource-id': 'p35-identity'}, pkg)
@@ -787,8 +806,7 @@ class Smoke:
         self.idle_services()
         tree = self.ui()
         pkg = self.p['app']['id']
-        r.require(has_label(tree, pkg, FIRMWARE) and
-            not any(n.get('resource-id') == 'p35-stop' for n in nodes(tree, pkg).iter('node')),
+        r.require(has_label(tree, pkg, FIRMWARE) and not recorder_active(tree, pkg),
             'APP not at idle firmware page or recorder active; no process stop', 'UNRESOLVED_STATE')
         try:
             r.find_control(tree, {'resource-id': 'p35-check'}, pkg)
@@ -1130,7 +1148,7 @@ class Smoke:
         self.prepare_recorder()
         self.enter('capture-start')
         xml = self.ui()
-        r.require(not any(n.get('resource-id') == 'p35-stop' for n in nodes(xml, self.p['app']['id']).iter('node')),
+        r.require(not recorder_active(xml, self.p['app']['id']),
                   'existing recording active; preserve and reconcile', 'UNRESOLVED_STATE')
         try:
             self.control(ARM)
@@ -1672,7 +1690,7 @@ def reconcile(p, configuration, prior, out, h, *, sealed_original=None, inspect_
                           'previously resolved capture changed/reopened; no release or stop', 'UNRESOLVED_STATE')
                 driver.idle_services()
                 tree = driver.ui()
-                r.require(not any(n.get('resource-id') == 'p35-stop' for n in nodes(tree, p['app']['id']).iter('node')),
+                r.require(not recorder_active(tree, p['app']['id']),
                           'current APP has an active recorder', 'UNRESOLVED_STATE')
                 r.find_control(tree, {'resource-id': 'p35-check'}, p['app']['id'])
                 r.require(r.idle_equivalent(tree, driver.ui()), 'APP state changed before owner release', 'UNRESOLVED_STATE')

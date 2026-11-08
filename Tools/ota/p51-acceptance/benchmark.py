@@ -27,6 +27,12 @@ SIGNER = '9e9b89c5e7fdc802b1fe71806a988a866db49cd988a739caeee56cb69f3df579'
 INSPECTION_TOOLS = dict(java='b3afe83e1ab067da4c56f1a7b2ba4c14ec832d694333f35b2b45178e9ac596ef',
     aapt='db0ba2050b8f6b37185d2ba458d6e25b565aefa3f3b96040adf0a82c3469ce3c',
     signer='00ef9948f843fe395d2440ae3ef41405b8040a6d5d46493bd1902ac0ee6deae7')
+CONTROL_LABELS = {
+    'p51-arm-timing': 'Start acknowledged raw link timing recording',
+    'p35-reconnect': s.RECORDER_RECONNECT, 'p35-stop': s.RECORDER_STOP,
+    'p35-check': '\u68c0\u67e5\u66f4\u65b0', 'p35-download': '\u4e0b\u8f7d\u56fa\u4ef6',
+    'p35-start': '\u5f00\u59cb BLE \u4f20\u8f93',
+}
 
 
 def network_plan(plan):
@@ -378,9 +384,75 @@ class Observer(obs.Observer):
     def tap(self, wanted=None, *, label=None, token=False, bootstrap=False):
         h.require(not self.mutation_unknown, 'previous UI action unresolved; no repeated tap')
         if self.capture_id is None and not bootstrap:
+            h.require(wanted in (s.HOME, s.DEVICES, s.CONNECT) or wanted is None and token and label,
+                'only navigation may precede recording; business controls require telemetry')
             return s.Smoke.tap(self, wanted, label=label, token=token)
         h.require(label is None and not token, 'active recording requires an explicit semantic control')
-        return r.Android.tap(self, wanted, bootstrap=bootstrap)
+        control = self.control_role(wanted)
+        # Keep logical selectors for Android's bootstrap and one-shot accounting;
+        # only native lookup is adapted, never the raw hierarchy or stored logs.
+        return r.Android.tap(self, wanted, bootstrap=bootstrap, resolve_control=self.resolve_control,
+            before_tap=lambda: self.admit_control(control, bootstrap=bootstrap))
+
+    def control_role(self, wanted):
+        r.selector(wanted)
+        h.require(set(wanted) == {'resource-id'} and wanted['resource-id'] in CONTROL_LABELS and
+            self.p['app']['id'] == APP_ID, 'unsupported benchmark control or App; no selector fallback')
+        return wanted['resource-id']
+
+    def admit_control(self, control, *, bootstrap=False):
+        if control == 'p51-arm-timing':
+            r.require(bootstrap and self.capture_id is None and not self.arm_attempted and
+                not self.stop_attempted, 'recording arm is not a fresh one-shot action', 'UNRESOLVED_STATE')
+            return
+        r.require(not bootstrap and self.capture_id is not None and self.arm_attempted and
+            not self.capture_resolved and self.decoder.closed is None and self.live,
+            'active control requires an owned open recording', 'UNRESOLVED_STATE')
+        row = self.live[-1]
+        r.require(row['captureId'] == self.capture_id and row['healthy'] and
+            row['deviceAddress'].lower() == self.p['device']['address'],
+            'active control has unhealthy or foreign recording state', 'UNRESOLVED_STATE')
+        allowed = {'idle', 'readyToInstall', 'completed', 'failed', 'cancelled'}
+        if control == 'p35-start':
+            allowed = {'readyToInstall'}
+            r.bound(row, dict(firmware=self.firmware), package=True)
+            r.require(row['freshConnection'] and row['linkConnected'] and row['session'] == row['durable'] == 0,
+                'benchmark start requires a fresh zero-durable package owner', 'UNRESOLVED_STATE')
+        elif control == 'p35-download':
+            allowed = {'idle'}
+        elif control == 'p35-check':
+            allowed = {'idle', 'readyToInstall', 'completed'}
+        elif control == 'p35-stop':
+            r.require(not self.stop_attempted, 'recording stop already attempted; no replay', 'UNRESOLVED_STATE')
+        r.require(row['phase'] in allowed, 'OTA state does not permit this control', 'DEVICE_BUSY')
+
+    def resolve_control(self, xml, wanted, package):
+        control = self.control_role(wanted)
+        r.require(package == APP_ID and s.has_label(xml, package, s.FIRMWARE),
+            'benchmark firmware page is not visible', 'UI_UNAVAILABLE')
+        if control == 'p51-arm-timing':
+            r.require(not s.recorder_active(xml, package),
+                'existing recording active; preserve and reconcile', 'UNRESOLVED_STATE')
+        else:
+            r.require(s.has_label(xml, package, s.RECORDER_STOP) and
+                not s.has_label(xml, package, CONTROL_LABELS['p51-arm-timing']) and
+                not s.has_label(xml, package, s.CLOSED_RECORDER),
+                'native toolbar is not an active recorder', 'UNRESOLVED_STATE')
+        try:
+            point = s.semantic_control(xml, package, CONTROL_LABELS[control])
+        except r.Stop as error:
+            if error.code != 'UI_WAIT':
+                raise
+            toolbar = control in {'p51-arm-timing', 'p35-reconnect', 'p35-stop'}
+            raise r.Stop('UI_UNAVAILABLE', 'required toolbar role unavailable' if toolbar else
+                'control missing; no blind coordinates') from error
+        self.record('semantic-control-resolved', role=control, label=CONTROL_LABELS[control],
+            hierarchySha256=hashlib.sha256(xml).hexdigest())
+        return point
+
+    def check_recording_arm(self):
+        self.admit_control('p51-arm-timing', bootstrap=True)
+        return self.resolve_control(self.ui(), self.p['ui']['arm'], self.p['app']['id'])
 
     def scroll(self, *args, **kwargs):
         h.require(self.capture_id is None and not self.arm_attempted, 'navigation swipe only before recording')

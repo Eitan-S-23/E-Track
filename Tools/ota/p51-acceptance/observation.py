@@ -149,6 +149,12 @@ class Observer(s.Smoke):
             return None
         return self.wait(page)
 
+    def check_recording_arm(self):
+        raw = self.ui()
+        r.require(not s.recorder_active(raw, self.p['app']['id']),
+                  'existing recording active; preserve and reconcile', 'UNRESOLVED_STATE')
+        return r.find_control(raw, {'resource-id': 'p51-arm-timing'}, self.p['app']['id'])
+
     def start_recording(self):
         self.start_phone()
         self.phase('preserve-originals', 240)
@@ -163,7 +169,7 @@ class Observer(s.Smoke):
         self.navigate()
         self.prepare_recorder()
         self.phase('prepare-recording', 120)
-        r.find_control(self.ui(), {'resource-id': 'p51-arm-timing'}, self.p['app']['id'])
+        self.check_recording_arm()
         self.idle_services()
         self.prepare_live_stream()
         self.phase('manual-recording-arm', 300)

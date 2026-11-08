@@ -1184,7 +1184,7 @@ class Android:
         self.last_ui = self.cmd(['exec-out', 'uiautomator', 'dump', '--compressed', '/dev/tty'])
         return self.last_ui
 
-    def tap(self, wanted, *, bootstrap=False):
+    def tap(self, wanted, *, bootstrap=False, resolve_control=None, before_tap=None):
         arm_id = 'p35-arm-stream' if getattr(self, 'stream_port', None) is not None else 'p35-arm'
         if getattr(self, 'stream_port', None) is not None and getattr(self, 'p', {}).get('ui', {}).get('arm') == {'resource-id': 'p51-arm-timing'}:
             arm_id = 'p51-arm-timing'
@@ -1192,12 +1192,15 @@ class Android:
                 'only the dedicated record control may precede telemetry readiness')
         self.pump()
         point = None
+        lookup = resolve_control or find_control
         # Scroll only within a native, package-owned viewport. No screenshots or
         # absolute screen assumptions, and never retry an uncertain business tap.
         for attempt in range(13):
+            if before_tap is not None:
+                before_tap()
             xml = self.ui()
             try:
-                point = find_control(xml, wanted, self.p['app']['id'])
+                point = lookup(xml, wanted, self.p['app']['id'])
                 break
             except Stop as error:
                 if error.code != 'UI_UNAVAILABLE' or attempt == 12:
@@ -1218,6 +1221,8 @@ class Android:
         require(bootstrap or self.last_state_at is not None and time.monotonic() - self.last_state_at < self.p['limits']['event_seconds'],
                 'producer heartbeat expired before UI action', 'COLLECTOR_FAILED')
         require(not self.queue or self.queue[-1]['healthy'], 'capture unhealthy before UI action')
+        if before_tap is not None:
+            before_tap()
         self.record('tap-intent', selector=wanted, point=list(point))
         if wanted in (self.p['ui']['start'], self.p['ui']['resume']):
             self.transfer_start_attempted = True
