@@ -436,7 +436,7 @@ class Observer(obs.Observer):
         else:
             r.require(s.has_label(xml, package, s.RECORDER_STOP) and
                 not s.has_label(xml, package, CONTROL_LABELS['p51-arm-timing']) and
-                not s.has_label(xml, package, s.CLOSED_RECORDER),
+                s.closed_recorder_status(xml, package) is None,
                 'native toolbar is not an active recorder', 'UNRESOLVED_STATE')
         try:
             point = s.semantic_control(xml, package, CONTROL_LABELS[control])

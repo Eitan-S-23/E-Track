@@ -46,7 +46,7 @@ def state(fw, *, target=False, idle=False, seq=1):
         freshConnection=True, linkConnected=True, healthy=True)
 
 
-def sealed_capture(cid):
+def sealed_capture(cid, *, error=None):
     row = state(firmware(), idle=True)
     row.update(schema=1, captureId=cid, monoUs=1, targetVersionCode=0,
         bitmap=None, sendOffset=None, lost=0, error=None)
@@ -54,7 +54,7 @@ def sealed_capture(cid):
     body = ('OTA_P35_STATE '+json.dumps(row)+'\n').encode()
     opened = dict(schema=1, kind='open', captureId=cid)
     closed = dict(schema=1, kind='close', captureId=cid, records=1,
-        sha256=hashlib.sha256(body).hexdigest(), healthy=True, lost=0, error=None)
+        sha256=hashlib.sha256(body).hexdigest(), healthy=error is None, lost=0, error=error)
     return ('OTA_P35_CAPTURE '+json.dumps(opened)+'\n').encode()+body+('OTA_P35_CAPTURE '+json.dumps(closed)+'\n').encode()
 
 
@@ -332,6 +332,117 @@ class BenchmarkTests(unittest.TestCase):
         driver.stop_app_process.assert_called_once_with('123', 'restart-stop')
         self.assertEqual(sum(args[:2] == ['exec-out', 'cat'] for args in calls), 1)
         self.assertFalse((self.out/'after-restart-captures').exists())
+
+    def closed_recorder_driver(self, *, error=None, status=None, identifier='p35-arm'):
+        driver = self.driver()
+        cid, raw = 'e'*32, sealed_capture('e'*32, error=error)
+        driver.h, driver.out = h, self.out
+        driver.capture_id, driver.arm_attempted, driver.capture_resolved = None, False, False
+        driver.capture_seal = None
+        driver.p['lifecycle'] = dict(restart_closed_recorder=True)
+        driver.previous_captures = {}
+        driver.capture_names = Mock(return_value={cid})
+        driver.original = Mock(return_value=raw)
+        b.s.Smoke.old_captures(driver)
+        if status is None:
+            status = 'closed' if error is None else 'failed:' + error + ':closed'
+        root = ET.Element('hierarchy')
+        ET.SubElement(root, 'node', {'package': b.APP_ID, 'content-desc': b.s.FIRMWARE})
+        arm = ET.SubElement(root, 'node', {'package': b.APP_ID, 'resource-id': identifier})
+        ET.SubElement(arm, 'node', {'package': b.APP_ID,
+            'content-desc': b.s.CLOSED_RECORDER.removesuffix('closed') + status})
+        driver.ui = Mock(return_value=ET.tostring(root))
+        driver.restart_attempted, driver.restart_confirmed, driver.pid = False, False, '123'
+        driver.enter, driver.idle_recorder_ui, driver.stop_app_process, driver.navigate = Mock(), Mock(), Mock(), Mock()
+        driver.launch = Mock(side_effect=lambda **kwargs: setattr(driver, 'pid', '456'))
+        driver.cmd = Mock(return_value=(cid + '.jsonl\n').encode())
+        return driver
+
+    def test_failed_closed_recorder_restarts_without_replacing_its_original(self):
+        driver = self.closed_recorder_driver(error='live-stream-failed')
+        before = copy.deepcopy(driver.previous_captures)
+        b.s.Smoke.prepare_recorder(driver)
+        self.assertTrue(driver.restart_confirmed)
+        driver.stop_app_process.assert_called_once_with('123', 'restart-stop')
+        driver.launch.assert_called_once_with(forbidden_pid='123')
+        self.assertEqual(driver.previous_captures, before)
+        self.assertFalse(driver.previous_captures['e'*32]['healthy'])
+        self.assertIsNone(driver.capture_id)
+        self.assertFalse(driver.arm_attempted)
+        self.assertFalse(driver.transfer_start_attempted)
+
+    def test_closed_recorder_does_not_depend_on_a_cached_native_identifier(self):
+        driver = self.closed_recorder_driver(identifier='stale-native-identifier')
+        b.s.Smoke.prepare_recorder(driver)
+        self.assertTrue(driver.restart_confirmed)
+        driver.stop_app_process.assert_called_once()
+
+    def test_failed_closed_recorder_requires_a_matching_sealed_idle_failure(self):
+        for error, status in ((None, 'failed:live-stream-failed:closed'),
+                              ('duration-limit', 'failed:live-stream-failed:closed')):
+            driver = self.closed_recorder_driver(error=error, status=status)
+            with self.subTest(error=error), self.assertRaises(r.Stop):
+                b.s.Smoke.prepare_recorder(driver)
+            driver.stop_app_process.assert_not_called()
+        driver = self.closed_recorder_driver(error='live-stream-failed')
+        driver.previous_captures['e'*32]['final']['phase'] = 'transferring'
+        with self.assertRaises(r.Stop):
+            b.s.Smoke.prepare_recorder(driver)
+        driver.stop_app_process.assert_not_called()
+
+    def test_closed_recorder_preparation_rechecks_state_and_capture_names(self):
+        for change in ('active', 'different-status', 'new-capture'):
+            driver = self.closed_recorder_driver(error='live-stream-failed')
+            tree = driver.ui.return_value
+            if change == 'active':
+                root = ET.fromstring(tree)
+                ET.SubElement(root, 'node', {'package': b.APP_ID, 'content-desc': b.s.RECORDER_STOP})
+                driver.ui.return_value = ET.tostring(root)
+            elif change == 'different-status':
+                driver.ui.side_effect = [tree, tree.replace(b'live-stream-failed', b'duration-limit')]
+            else:
+                driver.capture_names.return_value = {'e'*32, 'f'*32}
+            with self.subTest(change=change), self.assertRaises(r.Stop):
+                b.s.Smoke.prepare_recorder(driver)
+            driver.stop_app_process.assert_not_called()
+
+    def test_closed_recorder_restart_still_requires_lifecycle_authorization(self):
+        driver = self.closed_recorder_driver(error='live-stream-failed')
+        driver.p['lifecycle']['restart_closed_recorder'] = False
+        b.s.Smoke.prepare_recorder(driver)
+        driver.stop_app_process.assert_not_called()
+        driver.ui.assert_not_called()
+
+    def test_failed_closed_unready_page_uses_verified_prior_without_claiming_new_capture(self):
+        driver = self.closed_recorder_driver(error='live-stream-failed')
+        root = ET.fromstring(driver.ui.return_value)
+        ET.SubElement(root, 'node', {'package': b.APP_ID, 'content-desc': b.s.UNREADY_HINT})
+        for name, enabled in (('p35-check', 'false'), ('p35-identity', 'true')):
+            ET.SubElement(root, 'node', {'package': b.APP_ID, 'resource-id': name, 'enabled': enabled,
+                'clickable': enabled, 'bounds': '[10,20][30,40]'})
+        driver.ui.return_value = ET.tostring(root)
+        driver.idle_recorder_ui = b.s.Smoke.idle_recorder_ui.__get__(driver)
+        b.s.Smoke.prepare_recorder(driver)
+        self.assertTrue(driver.restart_confirmed)
+        self.assertFalse(driver.capture_resolved)
+        self.assertIsNone(driver.capture_id)
+        self.assertIsNone(driver.capture_seal)
+        driver.stop_app_process.assert_called_once()
+
+    def test_apk_source_defines_every_benchmark_control_and_timing_wire_contract(self):
+        app = ROOT / 'app/bluetooth_flutter_Trace/lib'
+        page = (app / 'pages/ota_upgrade_page.dart').read_text(encoding='utf-8')
+        for role, label in b.CONTROL_LABELS.items():
+            with self.subTest(role=role):
+                self.assertIn("'" + label + "'", page)
+        self.assertIn('startP35Recording(reliable: true, linkTimings: true)', page)
+        stream = (app / 'ota/ota_p35_stream.dart').read_text(encoding='utf-8')
+        self.assertIn('this.port = 49135', stream)
+        self.assertIn("'ACK ${bytes.length} ${sha256.convert(bytes)}\\n'", stream)
+        recorder = (app / 'ota/ota_p35_recorder.dart').read_text(encoding='utf-8')
+        self.assertIn("'diagnostics': 'ota-link-v1'", recorder)
+        self.assertIn('this.maxBytes = 128 * 1024 * 1024', recorder)
+        self.assertIn('root.list().length >= 32', recorder)
 
     def test_campaign_carries_all_c0_pins_and_respects_32_minus_c0(self):
         campaign = h.fresh(self.out/'c0-campaign')

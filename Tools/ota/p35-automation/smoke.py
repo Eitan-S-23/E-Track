@@ -106,6 +106,33 @@ def recorder_active(xml, package):
         for n in nodes(xml, package).iter('node'))
 
 
+def closed_recorder_status(xml, package):
+    """Read both APK terminal labels without trusting cached native identifiers."""
+    tree = nodes(xml, package)
+    prefix = CLOSED_RECORDER.removesuffix('closed')
+    matches = []
+    for node in tree.iter('node'):
+        statuses = {value[len(prefix):] for key in ('text', 'content-desc')
+            if (value := node.get(key, '')).startswith(prefix) and
+            re.fullmatch(r'closed|failed:[^\r\n]+:closed', value[len(prefix):])}
+        r.require(len(statuses) <= 1, 'conflicting closed-recorder status', 'UNRESOLVED_STATE')
+        if statuses:
+            matches.append((node, statuses.pop()))
+    matches = [(node, status) for node, status in matches if not any(
+        child is not node and any(child is other for other, _ in matches) for child in node.iter('node'))]
+    r.require(len(matches) <= 1, 'ambiguous closed-recorder status', 'UNRESOLVED_STATE')
+    if not matches:
+        return None
+    node, status = matches[0]
+    parents = {child: parent for parent in tree.iter() for child in parent}
+    while True:
+        if node.get('visible-to-user') == 'false':
+            return None
+        if node not in parents:
+            return status
+        node = parents[node]
+
+
 def scroll_viewport(xml, package):
     tree = nodes(xml, package)
     views = [n for n in tree.iter('node') if n.get('scrollable') == 'true' and
@@ -426,7 +453,7 @@ def sealed_file(raw, capture_id):
 def sealed_unready_ui(tree, pkg):
     """The installed page's hint excludes upgrading; identity action excludes busy query."""
     controls = nodes(tree, pkg)
-    r.require(has_label(tree, pkg, CLOSED_RECORDER) and has_label(tree, pkg, UNREADY_HINT) and
+    r.require(closed_recorder_status(tree, pkg) is not None and has_label(tree, pkg, UNREADY_HINT) and
         not recorder_active(tree, pkg) and
         not any(n.get('resource-id') in {'p35-stop', 'p35-start', 'p35-download', 'p35-resume'}
                 for n in controls.iter('node')), 'unknown/busy closed-recorder UI', 'UNRESOLVED_STATE')
@@ -698,7 +725,8 @@ class Smoke:
             else:
                 r.require(report['final']['phase'] in {'idle', 'completed', 'failed', 'cancelled'},
                           'old capture has unresolved OTA phase', 'UNRESOLVED_STATE')
-            self.previous_captures[cid] = dict(bytes=len(raw), sha256=report['sha256'], final=report['final'], healthy=report['healthy'])
+            self.previous_captures[cid] = dict(bytes=len(raw), sha256=report['sha256'], final=report['final'],
+                healthy=report['healthy'], footer=report['footer'])
 
     def start_phone(self):
         self.enter('preflight')
@@ -802,7 +830,7 @@ class Smoke:
         self.wait(lambda: has_label(self.ui(), pkg, FIRMWARE))
         self.mutation_unknown = False
 
-    def idle_recorder_ui(self):
+    def idle_recorder_ui(self, *, prior=None):
         self.idle_services()
         tree = self.ui()
         pkg = self.p['app']['id']
@@ -811,11 +839,12 @@ class Smoke:
         try:
             r.find_control(tree, {'resource-id': 'p35-check'}, pkg)
         except r.Stop as error:
+            seal = self.capture_seal if self.capture_resolved else prior
             r.require(error.code == 'UI_UNAVAILABLE' and
-                self.capture_resolved and self.capture_seal is not None,
+                seal is not None,
                 'idle state not proved by check control or owned seal', 'UNRESOLVED_STATE')
-            self.check_cleanup_state(self.capture_seal['final'])
-            if self.capture_seal['final']['phase'] == 'readyToInstall':
+            self.check_cleanup_state(seal['final'])
+            if seal['final']['phase'] == 'readyToInstall':
                 r.require('control missing' in str(error) or 'disabled' in str(error),
                           'ambiguous pre-transfer cleanup UI', 'UNRESOLVED_STATE')
                 r.find_control(tree, QUERY, pkg)
@@ -858,16 +887,24 @@ class Smoke:
         self.enter('prepare-recorder')
         tree = self.ui()
         pkg = self.p['app']['id']
-        arms = [n for n in nodes(tree, pkg).iter('node') if n.get('resource-id') == 'p35-arm']
-        if len(arms) != 1 or not any(c.get('content-desc') == CLOSED_RECORDER for c in arms[0].iter('node')):
+        status = closed_recorder_status(tree, pkg)
+        if status is None:
             return  # Fresh recorder uses normal bounded arm admission; unknown states are not restarted.
         r.require(not self.restart_attempted and self.previous_captures,
                   'closed recorder without verified old originals', 'UNRESOLVED_STATE')
-        r.require(any(item['final']['deviceAddress'].lower() == self.p['device']['address'] and
+        r.require(not recorder_active(tree, pkg), 'closed recorder still has active controls', 'UNRESOLVED_STATE')
+        prior = [item for item in self.previous_captures.values() if
+            item['final']['deviceAddress'].lower() == self.p['device']['address'] and
             item['final']['phase'] == 'idle' and item['final']['protocol'] is None and
-            item['final']['session'] == item['final']['durable'] == 0 for item in self.previous_captures.values()),
-            'no sealed idle target capture for lifecycle preparation', 'UNRESOLVED_STATE')
-        self.idle_recorder_ui()
+            item['final']['session'] == item['final']['durable'] == 0 and
+            (item['healthy'] if status == 'closed' else not item['healthy'] and
+             item.get('footer', {}).get('error') == status[len('failed:'):-len(':closed')])]
+        r.require(prior, 'no matching sealed idle target capture for lifecycle preparation', 'UNRESOLVED_STATE')
+        self.idle_recorder_ui(prior=prior[0])
+        current = self.ui()
+        r.require(closed_recorder_status(current, pkg) == status and not recorder_active(current, pkg) and
+            self.capture_names() == set(self.previous_captures),
+            'closed recorder or capture store changed before restart', 'UNRESOLVED_STATE')
         old_pid = self.pid
         self.restart_attempted = True
         self.stop_app_process(old_pid, 'restart-stop')
