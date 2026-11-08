@@ -25,6 +25,7 @@ import observation_capture
 service = h.host.load("p34_live_service", h.ROOT / "Tools/ota/p3-3-service/service.py")
 DNS_RETRY_CODES = {11001, socket.EAI_AGAIN}
 DNS_RETRY_EXIT = 75
+HTTPS_USER_AGENT = "E-Track-Acceptance/1.0"
 HEALTH_FIELDS = {"schema", "captureId", "time", "records", "bytes", "producerLines",
                  "upgradeStarts", "upgradeEnds", "outcome", "lost", "error", "healthy"}
 
@@ -35,7 +36,10 @@ def _https_read(request, output, errors):
         0 < request["timeout"] <= 30 and 0 < request["limit"] <= 8 * 1024 * 1024,
         "invalid bounded HTTPS read")
     try:
-        with build_opener(ProxyHandler({})).open(request["url"], timeout=request["timeout"]) as response:
+        opener = build_opener(ProxyHandler({}))
+        # Pages rejects the urllib default; identify this client, not a browser.
+        opener.addheaders = [("User-Agent", HTTPS_USER_AGENT)]
+        with opener.open(request["url"], timeout=request["timeout"]) as response:
             data = response.read(request["limit"])
     except URLError as error:
         if not isinstance(error.reason, socket.gaierror) or error.reason.errno not in DNS_RETRY_CODES:

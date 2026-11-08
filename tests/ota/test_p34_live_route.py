@@ -1307,6 +1307,7 @@ class NetworkStartupTests(unittest.TestCase):
                 "socket.create_connection=forbidden\n"
                 "class Opener:\n"
                 " def open(self,url,timeout):\n"
+                "  assert self.addheaders == [('User-Agent', 'E-Track-Acceptance/1.0')]\n"
                 "  if " + repr(mode) + " == 'block':\n"
                 "   sys.stderr.write('BLOCKING_RESOLVER_FIXTURE pid=%d\\n'%os.getpid());sys.stderr.flush();time.sleep(60)\n"
                 "  if " + repr(mode) + " == 'dns': raise URLError(socket.gaierror(11001,'fixture'))\n"
@@ -1519,6 +1520,7 @@ class NetworkStartupTests(unittest.TestCase):
 
     def test_tls_http_unknown_dns_and_non_dns_errors_are_not_retried(self):
         errors = [URLError(ssl.SSLCertVerificationError(1, "synthetic certificate")),
+                  HTTPError("https://synthetic.invalid", 403, "synthetic denied", {}, None),
                   HTTPError("https://synthetic.invalid", 503, "synthetic", {}, None),
                   URLError(p.socket.gaierror(11003, "synthetic permanent resolver error")),
                   URLError(ConnectionRefusedError("synthetic connection refusal")),
@@ -1556,6 +1558,18 @@ class NetworkStartupTests(unittest.TestCase):
                 phone.provision.assert_not_called()
                 phone.cmd.assert_not_called()
                 self.assertEqual(world.now, 597 if ready else 600)
+
+    def test_https_reader_identifies_client_without_changing_url_or_read_bounds(self):
+        url = "https://synthetic.invalid/download?token=opaque%2Bvalue&part=1&part=2"
+        opener = SimpleNamespace(open=Mock(return_value=io.BytesIO(b"\x00\xfforiginal")))
+        output, errors = io.BytesIO(), io.StringIO()
+        with patch.object(p, "build_opener", return_value=opener) as build:
+            self.assertEqual(p._https_read(dict(url=url, timeout=5, limit=3), output, errors), 0)
+        self.assertEqual(opener.addheaders, [("User-Agent", "E-Track-Acceptance/1.0")])
+        self.assertEqual(build.call_args.args[0].proxies, {})
+        opener.open.assert_called_once_with(url, timeout=5)
+        self.assertEqual(output.getvalue(), b"\x00\xffo")
+        self.assertEqual(errors.getvalue(), "")
 
     def test_actual_isolated_https_reader_preserves_binary_and_typed_dns_exit(self):
         packet = json.dumps(dict(url="https://synthetic.invalid", timeout=5, limit=100)).encode()
