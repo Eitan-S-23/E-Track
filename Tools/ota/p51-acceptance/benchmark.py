@@ -16,6 +16,7 @@ import zipfile
 import observation as obs
 from observation import h, r, s
 import live_phone
+import public_proxy
 
 BUDGET = dict(maxCells=2, maxRecordings=32, maxAttempts=64, totalSeconds=18000,
     minimumSpanSeconds=14400, nextBlockReserveSeconds=3000, nextCellReserveSeconds=1800,
@@ -250,7 +251,11 @@ def validate(plan):
     asset = package_binding(plan)
     ready = h.read_json(h.pinned(config['fixture_ready']))
     parsed = urlsplit(ready['origin'])
-    h.require(parsed.scheme == 'https' and re.fullmatch(r'[a-z0-9-]+\.trycloudflare\.com', parsed.netloc) and
+    if 'public_proxy' in ready:
+        public_proxy.validate_publication(ready['public_proxy'], ready)
+    origin_ok = ready['origin'] == public_proxy.ORIGIN if 'public_proxy' in ready else \
+        re.fullmatch(r'[a-z0-9-]+\.trycloudflare\.com', parsed.netloc)
+    h.require(parsed.scheme == 'https' and origin_ok and
         not parsed.path and not parsed.query and not parsed.fragment and
         plan['firmware']['latest_url'] == ready['origin'] + live_phone.service.LATEST_PATH and
         plan['firmware']['release_id'] == 'p51-benchmark-30320-30321' and
@@ -275,6 +280,8 @@ def check_fixture(plan, out):
         status['deadlineMonotonicNs']-now >= (BUDGET['totalSeconds']+180)*1_000_000_000,
         'benchmark fixture lifetime is stale or insufficient for the complete campaign')
     h.pinned(status['source'])
+    if 'public_proxy' in ready:
+        public_proxy.validate_publication(ready['public_proxy'], ready)
     query = live_phone.service_query(network_plan(plan))
     count = 0
     def read(url, limit):

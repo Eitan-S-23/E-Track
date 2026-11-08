@@ -93,6 +93,16 @@ task_id: P5-1
   D1/R2 或正常 full/patch。`Tools/ota/p51-acceptance/fixture.py --inputs INPUT --out OUT
   --seconds 25200` 维持同一 origin；APK 构建和长测间不得重启隧道换域名。启动/停止及
   ready/status 原件必须绑定所有者，开测前剩余寿命至少为 18000+180 秒。
+- 可使用独立的 `e-track-p51-benchmark.pages.dev` 固定转发入口，仍由上述单资产服务
+  决定 metadata、签名、Range 和包字节，不修改正常发布服务。fixture 输入须显式声明
+  `public_proxy` 的准确 project/origin；服务先将 `publicBaseUrl` 设为固定入口，再保存
+  `upstream-ready.json`，最多等待 900 秒取得部署原件，且总寿命仍为 25200 秒。
+  `public_proxy.validate_publication` 必须复核原生 Wrangler 命令、退出/关闭回执及结构化
+  deployment ID、Pages API 回读、实际代码/配置/上游与 fixture 包身份，不能只接受 PASS
+  声明。通过固定入口完整下载原包后才记录 ready；旧临时域名模式的检查不能被放宽。
+  固定入口仍依赖本机与网络在线，必须证明真实 fixture 在启动命令结束后继续存活，
+  并在新 APK 构建前验证手机网络可达。冻结 campaign 内禁止重新部署、换上游或延寿；
+  后续 campaign 的显式重新绑定不要求因同一固定网址再次构建 App。
 - App 使用现有 `build.yml` 的 `firmware_latest_url`、独立后缀 `.p51benchmark` 和相同
   `release_ota_link_profile`，`publish_release=false`。绑定实际 release-mode APK、
   application ID、版本、源码、成功 CI 及编译 endpoint；正常 APK98 准入不改变。

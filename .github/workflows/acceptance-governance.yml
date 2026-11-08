@@ -12,6 +12,7 @@ on:
       - "Tools/ota/p51-acceptance/**"
       - "Tools/ota/p35-automation/**"
       - "tests/ota/test_p51_benchmark_execution.py"
+      - "tests/ota/test_p51_public_proxy.mjs"
       - "tests/ota/test_p51_execution.py"
       - "tests/ota/test_p51_clock.py"
       - "tests/ota/p51_preparation_fixture.mjs"
@@ -67,6 +68,7 @@ on:
       - "Tools/ota/p51-acceptance/**"
       - "Tools/ota/p35-automation/**"
       - "tests/ota/test_p51_benchmark_execution.py"
+      - "tests/ota/test_p51_public_proxy.mjs"
       - "tests/ota/test_p51_execution.py"
       - "tests/ota/test_p51_clock.py"
       - "tests/ota/p51_preparation_fixture.mjs"
@@ -130,6 +132,23 @@ jobs:
       PYTHONDONTWRITEBYTECODE: "1"
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Test P51 public proxy (Linux)
+        if: runner.os != 'Windows'
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        env:
+          NODE_DISABLE_COMPILE_CACHE: "1"
+        run: node --test tests/ota/test_p51_public_proxy.mjs
+      - name: Test P51 public proxy (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        working-directory: ${{ github.workspace }}
+        env:
+          NODE_DISABLE_COMPILE_CACHE: "1"
+        run: node --test tests/ota/test_p51_public_proxy.mjs
       - name: Test host helpers (Linux)
         if: runner.os != 'Windows'
         shell: bash

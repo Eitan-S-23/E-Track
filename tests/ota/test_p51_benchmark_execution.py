@@ -191,7 +191,8 @@ class BenchmarkTests(unittest.TestCase):
             'Tools/ota/p34-acceptance/live_phone.py', 'Tools/ota/p34-acceptance/selftest.py',
             'Tools/ota/p35-automation/smoke.py', 'Tools/ota/p35-automation/runner.py',
             'tests/ota/test_p51_benchmark_execution.py', 'tests/ota/test_p51_execution.py',
-            'tests/ota/test_p51_clock.py')
+            'tests/ota/test_p51_clock.py', 'tests/ota/test_p51_public_proxy.mjs',
+            'Tools/ota/p51-acceptance/public_proxy.py', 'Tools/ota/p51-acceptance/public/site/_worker.js')
         for event in ('push', 'pull_request'):
             section = re.search(r'(?ms)^  '+event+r':\n(.*?)(?=^  [a-z_]+:|\Z)', workflow)[1]
             patterns = re.findall(r'^      - "([^"]+)"$', section, re.M)
@@ -750,6 +751,259 @@ class BenchmarkTests(unittest.TestCase):
         with patch.object(h, 'command') as command, self.assertRaisesRegex(RuntimeError, 'lifetime'):
             b.check_fixture(dict(benchmark=dict(fixture_ready=pin)), self.out / 'fixture-check')
         command.assert_not_called()
+
+    def proxy_claim(self):
+        proxy = b.public_proxy
+        upstream = 'https://fixture.trycloudflare.com'
+        selected = self.fixture()
+        cli, owner = self.out / 'proxy-cli', self.out / 'proxy-owner'
+        config = cli / 'wrangler.jsonc'
+        worker = cli / 'site/_worker.js'
+        h.save(config, proxy.deployment_config(upstream))
+        h.raw(worker, (proxy.PUBLIC / 'site/_worker.js').read_bytes())
+        h.save(owner / 'service-config.json', b.live_phone.service_config(selected, proxy.ORIGIN))
+        expected = dict(origin=proxy.ORIGIN, upstream_origin=upstream, package=selected['package'],
+            service_config=h.record(owner / 'service-config.json'))
+        h.save(owner / 'upstream-ready.json', dict(expected, upstream=upstream,
+            source=h.record(Path(fixture.__file__))))
+        tools = {}
+        for name in ('node', 'wrangler', 'git'):
+            h.raw(cli / name, b'synthetic native tool input; never executed\n')
+            tools[name] = h.record(cli / name)
+        source, ident = 'b'*40, '11111111-1111-1111-1111-111111111111'
+        source_commands = {}
+        for key, name in proxy.SOURCE_PATHS.items():
+            label = cli / ('source-'+key)
+            h.raw(label.with_suffix('.stdout'), (ROOT/name).read_bytes().replace(b'\r\n', b'\n'))
+            h.raw(label.with_suffix('.stderr'), b'')
+            h.save(label.with_suffix('.closed.json'), dict(argv=[str(h.pinned(tools['git'])),
+                '--no-optional-locks', 'show', source+':'+name], exit_code=0,
+                exit_status='exited', stopped_while_running=False, cleanup_complete=True,
+                cleanup_errors=[], stdout=h.record(label.with_suffix('.stdout')),
+                stderr=h.record(label.with_suffix('.stderr'))))
+            source_commands[key] = h.record(label.with_suffix('.closed.json'))
+        url = 'https://11111111.' + proxy.PROJECT + '.pages.dev'
+        h.raw(cli / 'deploy.stdout', ('Deployment complete: ' + url).encode())
+        h.raw(cli / 'deploy.stderr', b'')
+        h.save(cli / 'deploy.closed.json', dict(argv=[str(h.pinned(tools[key])) for key in ('node', 'wrangler')] +
+            ['pages', 'deploy', str(worker.parent), '--project-name', proxy.PROJECT, '--branch', 'main',
+             '--commit-hash', source, '--commit-dirty=false', '--no-bundle', '--upload-source-maps=false',
+             '--cwd', str(cli)], exit_code=0, exit_status='exited', stopped_while_running=False,
+            cleanup_complete=True, cleanup_errors=[], stdout=h.record(cli / 'deploy.stdout'),
+            stderr=h.record(cli / 'deploy.stderr')))
+        native = dict(type='pages-deploy-detailed', deployment_id=ident, pages_project=proxy.PROJECT,
+            url=url, environment='production', deployment_trigger=dict(metadata=dict(commit_hash=source)))
+        h.raw(cli / 'output.jsonl', (json.dumps(native)+'\n').encode())
+        variables = dict(P51_UPSTREAM_ORIGIN=dict(type='plain_text', value=upstream))
+        canonical = dict(id=ident, project_name=proxy.PROJECT, environment='production', url=url,
+            latest_stage=dict(status='success'), deployment_trigger=dict(metadata=dict(commit_hash=source, commit_dirty=False)),
+            env_vars=variables, compatibility_date='2026-11-08')
+        project = dict(name=proxy.PROJECT, subdomain=proxy.PROJECT+'.pages.dev', production_branch='main',
+            canonical_deployment=canonical, deployment_configs=dict(production=dict(
+                env_vars=variables, compatibility_date='2026-11-08')))
+        h.save(cli / 'project.json', dict(success=True, result=project))
+        h.save(cli / 'project-http.json', dict(method='GET', status=200, body=h.record(cli / 'project.json'),
+            url='https://api.cloudflare.com/client/v4/accounts/'+'a'*32+'/pages/projects/'+proxy.PROJECT))
+        value = dict(schema='p51-pages-proxy-v1', project=proxy.PROJECT, origin=proxy.ORIGIN, upstream=upstream,
+            configuration=h.record(config), worker=h.record(worker), upstream_ready=h.record(owner/'upstream-ready.json'),
+            source=source, tools=tools, source_commands=source_commands,
+            deploy_command=h.record(cli/'deploy.closed.json'),
+            deploy_output=h.record(cli/'output.jsonl'), project_response=h.record(cli/'project.json'),
+            project_http=h.record(cli/'project-http.json'), account='a'*32)
+        h.save(owner / 'public-proxy.json', value)
+        return h.record(owner / 'public-proxy.json'), expected, value
+
+    def test_fixed_proxy_requires_matching_native_deploy_api_and_fixture_originals(self):
+        pin, expected, value = self.proxy_claim()
+        self.assertEqual(b.public_proxy.validate_publication(pin, expected), value)
+        for index, (key, changed) in enumerate((('project', 'normal-site'),
+                ('origin', 'https://other.pages.dev'), ('upstream', 'https://other.trycloudflare.com'),
+                ('source', 'c'*40), ('account', 'd'*32))):
+            candidate = dict(value, **{key: changed})
+            path = self.out / ('claim-%d.json' % index)
+            h.save(path, candidate)
+            with self.subTest(key=key), self.assertRaises(RuntimeError):
+                b.public_proxy.validate_publication(h.record(path), expected)
+
+    def test_fixed_proxy_rejects_failed_native_receipt_or_unrelated_output(self):
+        _, expected, value = self.proxy_claim()
+        for index, delta in enumerate((dict(exit_code=1), dict(cleanup_complete=False),
+                dict(stopped_while_running=True), dict(argv=['not-the-deployment']))):
+            command = dict(h.read_json(h.pinned(value['deploy_command'])), **delta)
+            receipt = self.out / ('bad-receipt-%d.json' % index)
+            claim = self.out / ('bad-claim-%d.json' % index)
+            h.save(receipt, command)
+            h.save(claim, dict(value, deploy_command=h.record(receipt)))
+            with self.assertRaisesRegex(RuntimeError, 'native Pages deployment'):
+                b.public_proxy.validate_publication(h.record(claim), expected)
+        h.raw(self.out/'unrelated-output.jsonl', b'{"type":"pages-deploy-detailed","deployment_id":"other"}\n')
+        h.save(self.out/'unrelated.json', dict(value, deploy_output=h.record(self.out/'unrelated-output.jsonl')))
+        with self.assertRaisesRegex(RuntimeError, 'identity mismatch'):
+            b.public_proxy.validate_publication(h.record(self.out/'unrelated.json'), expected)
+
+    def test_fixed_proxy_requires_both_exact_successful_git_source_commands(self):
+        _, expected, value = self.proxy_claim()
+        for key in b.public_proxy.SOURCE_PATHS:
+            original = h.read_json(h.pinned(value['source_commands'][key]))
+            deltas = (dict(exit_code=1), dict(exit_status='unknown'), dict(cleanup_complete=False),
+                dict(cleanup_errors=[dict(step='stdout_close')]), dict(stopped_while_running=True),
+                dict(argv=original['argv'][:-1]+['c'*40+':'+b.public_proxy.SOURCE_PATHS[key]]),
+                dict(argv=original['argv'][:-1]+[value['source']+':unrelated-file']))
+            for index, delta in enumerate(deltas):
+                receipt = self.out / ('bad-git-%s-%d.json' % (key, index))
+                claim = self.out / ('bad-git-claim-%s-%d.json' % (key, index))
+                h.save(receipt, dict(original, **delta))
+                h.save(claim, dict(value, source_commands=dict(value['source_commands'], **{key: h.record(receipt)})))
+                with self.subTest(key=key, delta=delta), self.assertRaisesRegex(RuntimeError, 'native Git source'):
+                    b.public_proxy.validate_publication(h.record(claim), expected)
+        h.save(self.out/'missing-git.json', dict(value, source_commands={}))
+        with self.assertRaises(KeyError):
+            b.public_proxy.validate_publication(h.record(self.out/'missing-git.json'), expected)
+
+    def test_fixed_proxy_compares_git_blob_bytes_not_commit_labels(self):
+        _, expected, value = self.proxy_claim()
+        for key in b.public_proxy.SOURCE_PATHS:
+            original = h.read_json(h.pinned(value['source_commands'][key]))
+            for variant, raw in (('changed', b'not the committed source\n'),
+                    ('crlf', h.pinned(original['stdout']).read_bytes().replace(b'\n', b'\r\n'))):
+                output = self.out / ('git-%s-%s.stdout' % (key, variant))
+                receipt = self.out / ('git-%s-%s.closed.json' % (key, variant))
+                claim = self.out / ('git-%s-%s-claim.json' % (key, variant))
+                h.raw(output, raw)
+                h.save(receipt, dict(original, stdout=h.record(output)))
+                candidate = dict(value, source_commands=dict(value['source_commands'], **{key: h.record(receipt)}))
+                h.save(claim, candidate)
+                with self.subTest(key=key, variant=variant):
+                    if variant == 'changed':
+                        with self.assertRaisesRegex(RuntimeError, 'Git blob content'):
+                            b.public_proxy.validate_publication(h.record(claim), expected)
+                    else:
+                        self.assertEqual(b.public_proxy.validate_publication(h.record(claim), expected), candidate)
+
+    def test_fixed_proxy_generated_configuration_allows_only_upstream_substitution(self):
+        _, expected, value = self.proxy_claim()
+        original = h.read_json(h.pinned(value['configuration']))
+        changed = dict(original, compatibility_date='2026-11-07')
+        config = self.out/'changed/wrangler.jsonc'
+        h.save(config, changed)
+        h.save(self.out/'changed-config-claim.json', dict(value, configuration=h.record(config)))
+        with self.assertRaisesRegex(RuntimeError, 'configuration drift'):
+            b.public_proxy.validate_publication(h.record(self.out/'changed-config-claim.json'), expected)
+
+    def test_fixed_proxy_publication_first_visible_bytes_are_complete(self):
+        pin, expected, value = self.proxy_claim()
+        destination = self.out/'published/public-proxy.json'
+        pending = destination.with_suffix('.json.tmp')
+        replace = h.host.io.replace_file
+        def partial_dump(item, stream, **kwargs):
+            stream.write('{')
+            stream.flush()
+            self.assertEqual(pending.read_bytes(), b'{')
+            self.assertFalse(destination.exists())
+            stream.write(json.dumps(item, **kwargs)[1:])
+        def expose(root, source, target):
+            self.assertEqual(source, pending)
+            self.assertEqual(target, destination)
+            self.assertFalse(destination.exists())
+            self.assertEqual(h.read_json(source), value)
+            return replace(root, source, target)
+        with patch.object(h.host.io.json, 'dump', side_effect=partial_dump), \
+                patch.object(h.host.io, 'replace_file', side_effect=expose) as replacement:
+            published = b.public_proxy.publish(pin, expected, destination)
+        replacement.assert_called_once()
+        self.assertEqual(published, h.record(destination))
+        self.assertEqual(destination.read_bytes(), h.pinned(pin).read_bytes())
+        self.assertFalse(pending.exists())
+
+    def test_fixed_proxy_publication_preserves_existing_or_partial_pending_files(self):
+        pin, expected, _ = self.proxy_claim()
+        for name, is_pending in (('existing', False), ('incomplete', True)):
+            destination = self.out/name/'public-proxy.json'
+            pending = destination.with_suffix('.json.tmp')
+            old = pending if is_pending else destination
+            h.raw(old, b'{"unfinished":')
+            with patch.object(h.host.io, 'write_json') as writer, self.assertRaisesRegex(RuntimeError, 'prior/uncertain'):
+                b.public_proxy.publish(pin, expected, destination)
+            writer.assert_not_called()
+            self.assertEqual(old.read_bytes(), b'{"unfinished":')
+            self.assertFalse((destination if is_pending else pending).exists())
+
+    def test_fixed_proxy_publication_validation_or_write_failure_never_exposes_partial_json(self):
+        pin, expected, _ = self.proxy_claim()
+        rejected = self.out/'rejected/public-proxy.json'
+        with self.assertRaises(RuntimeError):
+            b.public_proxy.publish(pin, dict(expected, origin='https://foreign.pages.dev'), rejected)
+        self.assertFalse(rejected.exists())
+        self.assertFalse(rejected.with_suffix('.json.tmp').exists())
+        destination = self.out/'interrupted/public-proxy.json'
+        def interrupted_dump(item, stream, **kwargs):
+            stream.write('{')
+            raise OSError('synthetic interrupted write')
+        with patch.object(h.host.io.json, 'dump', side_effect=interrupted_dump), \
+                self.assertRaisesRegex(OSError, 'interrupted write'):
+            b.public_proxy.publish(pin, expected, destination)
+        self.assertFalse(destination.exists())
+        self.assertEqual(destination.with_suffix('.json.tmp').read_bytes(), b'{')
+
+    def test_fixed_proxy_rejects_redirected_service_urls_and_handwritten_pass(self):
+        _, expected, value = self.proxy_claim()
+        h.save(self.out/'pass-only.json', dict(outcome='PASS'))
+        with self.assertRaises(RuntimeError):
+            b.public_proxy.validate_publication(h.record(self.out/'pass-only.json'), expected)
+        config = h.read_json(h.pinned(expected['service_config']))
+        config['publicBaseUrl'] = 'https://fixture.trycloudflare.com'
+        h.save(self.out/'wrong-service.json', config)
+        upstream = h.read_json(h.pinned(value['upstream_ready']))
+        upstream['service_config'] = h.record(self.out/'wrong-service.json')
+        h.save(self.out/'wrong-upstream.json', upstream)
+        h.save(self.out/'wrong-publication.json', dict(value, upstream_ready=h.record(self.out/'wrong-upstream.json')))
+        with self.assertRaisesRegex(RuntimeError, 'download URLs'):
+            b.public_proxy.validate_publication(h.record(self.out/'wrong-publication.json'),
+                dict(expected, service_config=upstream['service_config']))
+
+    def test_fixed_proxy_rejects_changed_remote_upstream_or_data_bindings(self):
+        _, expected, value = self.proxy_claim()
+        for index, delta in enumerate((dict(env_vars={}), dict(services={'DB': {}}))):
+            response = h.read_json(h.pinned(value['project_response']))
+            response['result']['deployment_configs']['production'].update(delta)
+            path = self.out/('remote-%d.json' % index)
+            http = h.read_json(h.pinned(value['project_http']))
+            h.save(path, response)
+            http['body'] = h.record(path)
+            http_path = self.out/('remote-http-%d.json' % index)
+            claim = self.out/('remote-claim-%d.json' % index)
+            h.save(http_path, http)
+            h.save(claim, dict(value, project_response=h.record(path), project_http=h.record(http_path)))
+            with self.assertRaisesRegex(RuntimeError, 'observed upstream'):
+                b.public_proxy.validate_publication(h.record(claim), expected)
+
+    def test_fixed_fixture_publication_is_checked_before_network_readiness(self):
+        out = self.out / 'fixed-owner'
+        network = Mock(out=out/'network')
+        def start(**kwargs):
+            self.assertEqual(kwargs['public_origin'], b.public_proxy.ORIGIN)
+            h.save(network.out/'service-config.json', dict(publicBaseUrl=kwargs['public_origin']))
+            h.save(network.out/'public-proxy.json', dict(synthetic=True))
+            publication = kwargs['publish']('https://fixture.trycloudflare.com',
+                h.record(network.out/'service-config.json'), kwargs['deadline'])
+            self.assertEqual(publication, h.record(network.out/'public-proxy.json'))
+            check.assert_called_once()
+            h.save(network.out/'ready.json', dict(origin=kwargs['public_origin'], public_proxy=publication))
+            h.save(out/'stop.json', dict(sourceSha256=h.record(Path(fixture.__file__))['sha256'], pid=os.getpid()))
+            return kwargs['public_origin']
+        network.start.side_effect = start
+        network.close.side_effect = lambda: h.save(network.out/'closed.json', dict(cleanup_complete=True))
+        plan = dict(schema='p51-benchmark-fixture-v1', kind='patch', benchmark=dict(purpose='fixed-load-benchmark'),
+            phone=dict(app=dict(id=b.APP_ID)), mcu=dict(package={}),
+            public_proxy=dict(project=b.public_proxy.PROJECT, origin=b.public_proxy.ORIGIN))
+        with patch.object(b, 'package_binding'), patch.object(b, 'network_plan', return_value=dict(tools=dict(cloudflared={}))), \
+                patch.object(h, 'pinned'), patch.object(b.live_phone, 'reference_binding'), \
+                patch.object(b.live_phone, 'Network', return_value=network), patch.object(fixture.signal, 'signal'), \
+                patch.object(b.public_proxy, 'validate_publication') as check:
+            fixture.serve(plan, out, 25200)
+        self.assertTrue((network.out/'upstream-ready.json').is_file())
+        network.start.assert_called_once()
+        network.close.assert_called_once()
 
     def fixture(self):
         images = {}

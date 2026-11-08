@@ -18,11 +18,15 @@ def serve(plan, out, seconds):
         plan['benchmark']['purpose'] == 'fixed-load-benchmark' and plan['phone']['app']['id'] == b.APP_ID,
         'benchmark-only preparation scope required')
     b.package_binding(plan)
+    fixed = plan.get('public_proxy')
+    h.require(fixed is None or fixed == dict(project=b.public_proxy.PROJECT, origin=b.public_proxy.ORIGIN),
+        'only the isolated P51 fixed proxy may publish this fixture')
     selected = b.network_plan(plan)
     h.pinned(selected['tools']['cloudflared'])
     b.live_phone.reference_binding(selected)
     out = h.checked(out)
-    for name in ('network', 'intent.json', 'result.json', 'failed.json', 'status.json', 'status.json.tmp', 'stop.json'):
+    for name in ('network', 'network/upstream-ready.json', 'network/public-proxy.json',
+                 'intent.json', 'result.json', 'failed.json', 'status.json', 'status.json.tmp', 'stop.json'):
         h.checked(out / name)
     h.fresh(out)
     started, stop = time.monotonic(), False
@@ -35,8 +39,23 @@ def serve(plan, out, seconds):
         package=plan['mcu']['package'], devices=0, normalChannelMutations=0))
     network = b.live_phone.Network(selected, out / 'network')
     outcome = 'FIXTURE_EXPIRED'
+    def published(upstream, service_config, deadline):
+        expected = dict(origin=fixed['origin'], upstream=upstream, service_config=service_config,
+            source=source, package=plan['mcu']['package'])
+        h.save(network.out / 'upstream-ready.json', expected)
+        def observe():
+            h.require(not stop and not (out / 'stop.json').exists() and network.tunnel.alive() and
+                network.thread.is_alive(), 'fixture stopped during publication; no readiness')
+            path = network.out / 'public-proxy.json'
+            if not path.is_file():
+                return None
+            pin = h.record(path)
+            b.public_proxy.validate_publication(pin, dict(expected, upstream_origin=upstream))
+            return pin
+        return h.wait_for(observe, deadline-time.monotonic(), interval=1)
     try:
-        origin = network.start(deadline=time.monotonic()+180)
+        options = dict(public_origin=fixed['origin'], publish=published) if fixed else {}
+        origin = network.start(deadline=time.monotonic()+(900 if fixed else 180), **options)
         ready = h.record(network.out / 'ready.json')
         print('P51_BENCHMARK_HTTPS_READY ' + origin, flush=True)
         while not stop and time.monotonic() < started+seconds:

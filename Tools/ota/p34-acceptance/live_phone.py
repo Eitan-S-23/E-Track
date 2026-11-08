@@ -130,10 +130,15 @@ class Network:
         self.server = self.thread = self.tunnel = self.log_handler = None
         self.closed, self.close_attempted, self.close_error = False, False, None
 
-    def start(self, *, deadline):
+    def start(self, *, deadline, public_origin=None, publish=None):
         h.require(not self.closed and not self.close_attempted and self.server is None,
                   "network owner is single-use; do not replay")
         try:
+            h.require((public_origin is None and publish is None) or
+                      (isinstance(public_origin, str) and callable(publish)),
+                      "fixed public origin requires an explicit publication handshake")
+            if public_origin is not None:
+                return self._start(deadline, public_origin=public_origin, publish=publish)
             return self._start(deadline)
         except BaseException as error:
             try:
@@ -152,7 +157,7 @@ class Network:
                 error.add_note("Startup failure receipt (%s): %s" % (type(receipt_error).__name__, receipt_error))
             raise
 
-    def _start(self, deadline):
+    def _start(self, deadline, *, public_origin=None, publish=None):
         h.require(type(deadline) in (int, float), "explicit prepare deadline required")
 
         def remaining():
@@ -161,7 +166,7 @@ class Network:
             return seconds
 
         remaining()
-        cfg = service_config(self.plan, "https://runtime-required.invalid")
+        cfg = service_config(self.plan, public_origin or "https://runtime-required.invalid")
         state = service.V2ServiceState(cfg, str(h.ROOT))
         logger = logging.getLogger("p34-live-" + str(self.out))
         logger.setLevel(logging.INFO)
@@ -183,9 +188,15 @@ class Network:
             urls = set(re.findall(r"https://[a-z0-9-]+\.trycloudflare\.com", text))
             h.require(len(urls) <= 1, "ambiguous HTTPS endpoint")
             return next(iter(urls)) if urls else None
-        origin = h.wait_for(ready, min(90, remaining()))
+        upstream = h.wait_for(ready, min(90, remaining()))
+        origin = public_origin or upstream
         cfg["publicBaseUrl"] = state.public_base_url = origin
         h.save(self.out / "service-config.json", cfg)
+        publication = None
+        if publish is not None:
+            publication = publish(upstream, h.record(self.out / "service-config.json"), deadline)
+            h.pinned(publication)
+            remaining()
         query = service_query(self.plan)
         requests = 0
 
@@ -236,9 +247,10 @@ class Network:
         h.raw(self.out / "https-package.etu", downloaded)
         remaining()
         h.require(self.tunnel.alive(), "HTTPS tunnel stopped before readiness")
+        proxy = dict(public_proxy=publication, upstream_origin=upstream) if publication else {}
         h.save(self.out / "ready.json", dict(origin=origin, package=h.record(self.out / "https-package.etu"),
             service_config=h.record(self.out / "service-config.json"), local_port=self.server.server_address[1],
-            prepare_deadline_monotonic=deadline, https_requests=requests))
+            prepare_deadline_monotonic=deadline, https_requests=requests, **proxy))
         return origin
 
     def close(self):

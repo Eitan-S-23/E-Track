@@ -1419,6 +1419,44 @@ class NetworkStartupTests(unittest.TestCase):
         if world.network.server:
             self.assertFalse(h.listening(world.network.server.server_address[1]))
 
+    def test_fixed_public_origin_is_set_before_publication_and_all_public_reads(self):
+        fixed = "https://e-track-p51-benchmark.pages.dev"
+        with self.network("fixed-public") as world:
+            upstream = world.origin
+            calls = []
+            def publish(actual, config, deadline):
+                calls.append(actual)
+                self.assertEqual(actual, upstream)
+                self.assertEqual(h.read_json(h.pinned(config))["publicBaseUrl"], fixed)
+                self.assertFalse(world.requests)
+                self.assertFalse((world.network.out / "ready.json").exists())
+                self.assertEqual(deadline, 20)
+                world.origin = fixed
+                h.save(world.out / "publication.json", dict(synthetic=True))
+                return h.record(world.out / "publication.json")
+            self.assertEqual(world.network.start(deadline=20, public_origin=fixed, publish=publish), fixed)
+            self.assertEqual(calls, [upstream])
+            self.assertTrue(all(row["url"].startswith(fixed + "/") for row in world.requests))
+            ready = h.read_json(world.network.out / "ready.json")
+            self.assertEqual(ready["upstream_origin"], upstream)
+            self.assertEqual(ready["public_proxy"], h.record(world.out / "publication.json"))
+            self.assertEqual((world.network.out / "https-package.etu").read_bytes(), self.payload)
+
+    def test_fixed_origin_without_publication_or_failed_publication_never_becomes_ready(self):
+        fixed = "https://e-track-p51-benchmark.pages.dev"
+        with self.network("missing-publication") as world:
+            with self.assertRaisesRegex(RuntimeError, "publication handshake"):
+                world.network.start(deadline=20, public_origin=fixed)
+            self.assertFalse(world.tools)
+            self.assert_failed_closed(world)
+        with self.network("failed-publication") as world:
+            publish = Mock(side_effect=RuntimeError("synthetic publication failure"))
+            with self.assertRaisesRegex(RuntimeError, "publication failure"):
+                world.network.start(deadline=20, public_origin=fixed, publish=publish)
+            publish.assert_called_once()
+            self.assertFalse(world.requests)
+            self.assert_failed_closed(world)
+
     def test_actual_start_recovers_dns_on_one_tunnel_with_original_deadline(self):
         with self.network(dns_until=2) as world:
             self.assertEqual(world.network.start(deadline=8), world.origin)

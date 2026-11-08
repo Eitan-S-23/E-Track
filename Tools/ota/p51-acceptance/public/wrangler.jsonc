@@ -1,0 +1,8 @@
+{
+  "name": "e-track-p51-benchmark",
+  "pages_build_output_dir": "./site",
+  "compatibility_date": "2026-11-08",
+  "vars": {
+    "P51_UPSTREAM_ORIGIN": "https://runtime-required.invalid"
+  }
+}
