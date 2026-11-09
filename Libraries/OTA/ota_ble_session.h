@@ -133,6 +133,9 @@ typedef struct ota_ble_session_t
     uint16_t pipeline_first_seq;
     uint16_t pipeline_abort_seq;
     uint8_t pipeline_abort_reply;
+    /* Identity is immutable during transfer; queries must not touch busy IO. */
+    ota_ble_info_t transfer_info;
+    uint8_t transfer_info_valid;
     /* ISR 与泵共享：ISR 读、泵写；为 1 时 ISR 把 UART 字节压入 rx_ring */
     volatile uint8_t isr_active;
 

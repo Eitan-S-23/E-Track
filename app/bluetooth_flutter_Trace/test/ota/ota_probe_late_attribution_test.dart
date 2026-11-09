@@ -170,6 +170,8 @@ class _GatedDiscoverAdapter implements BluetoothAdapter {
 /// [BluetoothService.discoverServicesByAddress]（含其 `recordDiscover` 上报），
 /// 因此用例 2 在双宿主都能执行，不依赖 Windows 专有的 `_adapter` 分支。
 class _HoldBeforePlatformService extends BluetoothService {
+  _HoldBeforePlatformService()
+      : super(reuseOtaCharacteristics: false, preferOtaWithoutResponse: false);
   int holdCall = 0;
   final Completer<void> entered = Completer<void>();
   final Completer<void> _released = Completer<void>();
@@ -424,7 +426,7 @@ void main() {
     // testMode 让它降级为 debugPrint，测试聚焦外壳上报而非 UI 提示。
     Get.testMode = true;
     adapter = _GatedDiscoverAdapter();
-    service = BluetoothService();
+    service = BluetoothService(reuseOtaCharacteristics: false, preferOtaWithoutResponse: false);
     service.adapterForTest = adapter;
   });
 

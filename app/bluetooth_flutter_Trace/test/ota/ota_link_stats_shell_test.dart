@@ -165,7 +165,8 @@ void main() {
     // testMode 让它降级为 debugPrint，测试聚焦外壳上报而非 UI 提示。
     Get.testMode = true;
     adapter = _ShellProbeAdapter();
-    service = BluetoothService();
+    // Exercise per-call discovery instrumentation, not the default GATT cache.
+    service = BluetoothService(reuseOtaCharacteristics: false, preferOtaWithoutResponse: false);
     service.adapterForTest = adapter;
   });
 

@@ -125,7 +125,7 @@ void main() {
     });
 
     test('DATA payload：off 对齐与 128B 约束', () {
-      final ok = OtaBleCodec.encodeData2Payload(7, 
+      final ok = OtaBleCodec.encodeData2Payload(7,
         256,
         List<int>.filled(128, 1),
       );

@@ -420,6 +420,9 @@ extension _PipelineTransfer on OtaBleTransport {
         _checkUsable();
         _checkNoProgress();
         view.check();
+        // An asynchronous final ACK may arrive while the pause check yields.
+        // Do not wait for another ACK after the receiver is already complete.
+        if (window.complete) break;
         if (!_channel.isConnected) {
           throw const OtaTransportException('BLE disconnected', code: 'DISCONNECTED');
         }

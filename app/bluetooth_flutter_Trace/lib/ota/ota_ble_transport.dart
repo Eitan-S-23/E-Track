@@ -114,6 +114,7 @@ class OtaBleTransport {
   int? _pipelineEpoch;
   int? _pipelineObservationEpoch, _pipelineObservationSession;
   _PipelineAckView? _pipelineView;
+  Future<void>? _abortInFlight;
 
   /// 帧等待者队列（一问一答）：注册后才开始发送，响应到达即分发。
   final List<_FrameWaiterBase> _waiters = [];
@@ -321,6 +322,7 @@ class OtaBleTransport {
   /// [_writeFrameAfterCancel] 旁路）。与 `MONO_FAIL_AT`（中止决定）
   /// 的差值就是「决定→业务写停」的收尾时长。
   void cancel() {
+    if (_cancelled) return;
     _cancelled = true;
     otaMonoLog('MONO_WRITE_STOP');
     // 取消必须解除暂停等待（RC3-08）：挂起在 _waitIfPaused 的传输循环
@@ -343,8 +345,15 @@ class OtaBleTransport {
   ///
   /// ABORT 帧走取消旁路写通路（RC2-03）：常规 [_writeFrame] 的可用性
   /// 检查会因 `_cancelled` 拒绝发送，导致 ABORT 被自身拦截。
-  Future<void> abortBestEffort({bool allowResync = true}) async {
+  Future<void> abortBestEffort({bool allowResync = true}) {
+    final active = _abortInFlight;
+    if (active != null) return active;
     cancel();
+    if (_disposed) return Future<void>.value();
+    return _abortInFlight ??= _abortAndSettle(allowResync: allowResync);
+  }
+
+  Future<void> _abortAndSettle({required bool allowResync}) async {
     if (_disposed) return;
     try {
       await _writeSerial;
@@ -374,6 +383,10 @@ class OtaBleTransport {
 
   /// 释放上游订阅并完成待处理等待者（页面退出/重绑时调用）。
   Future<void> dispose() async {
+    // Background fallback can start cancellation without an awaiting caller.
+    // Keep its query/ABORT owner alive until the physical writer settles.
+    final abort = _abortInFlight;
+    if (abort != null) await abort;
     _quarantineUnconfirmedData();
     _disposed = true;
     _releasePauseGate();

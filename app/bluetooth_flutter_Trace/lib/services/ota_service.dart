@@ -1671,7 +1671,20 @@ class OtaService extends GetxController with WidgetsBindingObserver {
               otaMonoLog('MONO_ABORT_DONE', code: e.code);
             }
           }
+          if (generation != _cancelGeneration) return fail('cancelled', 'cancel-window');
+          if (_consumeFailClosedDecision()) return fail('recheck', 'fail-closed');
           otaMonoLog('MONO_TERMINAL', code: e.code);
+          if (e.code == 'ACK_STATUS' && e.status != null && activeTransport?.endStarted == true) {
+            final status = e.status!;
+            _terminalState.value = OtaTerminalState(
+              code: 'MCU_ACK_${status.toRadixString(16).toUpperCase()}',
+              message: 'MCU rejected END2 with status 0x${status.toRadixString(16)}',
+              retryableLater: !OtaBleCodec.abortStatuses.contains(status),
+            );
+            _upgradeStatus.value = '升级失败: ${_terminalState.value!.code}';
+            _phase.value = OtaPhase.failed;
+            return fail('transfer', 'mcu-ack-0x${status.toRadixString(16)}');
+          }
           // P3-4 观测：真实链路失败（非取消、非已决终止）留痕。
           linkStats.recordFailure(
               stage: 'transfer', reason: 'transport:${e.code}');
@@ -1751,6 +1764,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
             otaMonoLog('MONO_ABORT_DONE', code: 'UNKNOWN');
           }
         }
+        if (generation != _cancelGeneration) return fail('cancelled', 'cancel-window');
+        if (_consumeFailClosedDecision()) return fail('recheck', 'fail-closed');
         otaMonoLog('MONO_TERMINAL', code: 'UNKNOWN');
         _phase.value = OtaPhase.failed;
         return false;

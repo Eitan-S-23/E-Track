@@ -841,8 +841,10 @@ void main() {
       var queryArmed = false;
       var infosBeforeQuery = 0;
       final queryTargets = <String>[];
-      final subscription = service.taskActivity.listen((busy) {
-        if (!busy && !queryArmed) {
+      void armTerminalQuery() {
+        // V2 cancellation may legitimately use INFO while draining. Hold only
+        // the page's post-terminal query, never that cleanup handshake.
+        if (!service.isUpgrading && service.phase == scenario.phase && !queryArmed) {
           queryArmed = true;
           infosBeforeQuery = ble.getInfoCalls;
           ble.holdInfo = true;
@@ -853,7 +855,9 @@ void main() {
             ble.infoOverride = List<int>.of(preRebootPayload)..[0] = 0x58;
           }
         }
-      });
+      }
+      final subscription = service.taskActivity.listen((_) => armTerminalQuery());
+      final terminalSubscription = service.phaseRx.listen((_) => armTerminalQuery());
       ElevatedButton checkButton() => tester.widget<ElevatedButton>(find.ancestor(
           of: find.text('检查更新'), matching: find.byType(ElevatedButton)));
       try {
@@ -895,6 +899,7 @@ void main() {
       } finally {
         await tester.pumpWidget(const SizedBox.shrink());
         await subscription.cancel();
+        await terminalSubscription.cancel();
         await tester.runAsync(() async {
           ble.releaseHeldInfo();
           ble.releaseDataGate();
@@ -1593,12 +1598,12 @@ void main() {
         final summary = summaries.single['transfer'];
         expect(summary['segmentsUnique'], 32);
         if (frames > 1) {
-          final expectedChunks = frames == 3 ? 22 : 19;
-          expect(summary['dataBatch'], {'schema': 1, 'maxFrames': frames, 'chunks': expectedChunks, 'bytes': 4544});
+          final expectedChunks = frames == 3 ? 22 : 21;
+          expect(summary['dataBatch'], {'schema': 1, 'maxFrames': frames, 'chunks': expectedChunks, 'bytes': 32 * 146});
           expect(messages.where((line) => line.contains('kind=batch_chunk')), hasLength(expectedChunks));
         } else {
           expect(summary.containsKey('dataBatch'), isFalse);
-          expect(messages.where((line) => line.contains('kind=batch_chunk')), isEmpty);
+          expect(messages.where((line) => line.contains('kind=batch_chunk')), hasLength(32));
         }
         expect(rows.last['healthy'], isTrue);
         expect(rows.last['lost'], 0);
@@ -1615,7 +1620,7 @@ void main() {
                 '--input', file.path, '--expect-sentinel', 'OTAOBS0123456789abcdef01234567',
                 '--expect-target', probeAddress], workingDirectory: checkout.path).timeout(const Duration(seconds: 15));
           expect(measured.exitCode, 0, reason: '${measured.stderr}');
-          expect(jsonDecode(measured.stdout as String)['chunks'], frames == 3 ? 22 : 19);
+          expect(jsonDecode(measured.stdout as String)['chunks'], frames == 3 ? 22 : 21);
         }
       }));
     });

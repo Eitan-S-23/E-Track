@@ -18,7 +18,9 @@ import 'package:flutter/foundation.dart' show debugPrint;
 
 // Protocol peer only: synthetic bytes are never offered to a real device.
 class TestPipelinePeer implements OtaBleChannel {
-  final events = StreamController<List<int>>.broadcast(sync: true);
+  TestPipelinePeer({bool synchronousNotifications = true})
+      : events = StreamController<List<int>>.broadcast(sync: synchronousNotifications);
+  final StreamController<List<int>> events;
   final pending = <int>[];
   final frames = <OtaBleFrame>[];
   final writes = <List<int>>[];
@@ -246,7 +248,7 @@ Future<OtaAckResult> transfer(OtaBleTransport transport, Uint8List bytes,
 
 OtaBleTransport sender(OtaBleChannel peer, {Duration? budget,
     int batch = 1, OtaLinkStats? stats}) =>
-    OtaBleTransport(channel: peer, 
+    OtaBleTransport(channel: peer,
       dataBatchFrames: batch, stats: stats,
       ackTimeout: const Duration(milliseconds: 30),
       noProgressTimeout: budget ?? const Duration(seconds: 3));
@@ -304,7 +306,7 @@ void main() {
   test('negotiated v2 reports actual window and batch only after BEGIN', () async {
     final peer = TestPipelinePeer();
     final selections = <OtaTransportSelection>[];
-    final transport = OtaBleTransport(channel: peer, 
+    final transport = OtaBleTransport(channel: peer,
         dataBatchFrames: 12, onLinkSelection: selections.add);
     expect(selections, isEmpty);
     expect((await transport.transfer(package: package(9000),
@@ -705,6 +707,16 @@ void main() {
     expect(peer.pending, isEmpty);
     await transport.dispose();
     await peer.events.close();
+  });
+
+  test('asynchronous final DATA ACK does not incur a second ACK timeout', () async {
+    final peer = TestPipelinePeer(synchronousNotifications: false);
+    final transport = OtaBleTransport(channel: peer,
+        ackTimeout: const Duration(seconds: 3), dataBatchFrames: 1);
+    addTearDown(peer.events.close);
+    addTearDown(transport.dispose);
+    expect((await transfer(transport, package(1024))
+        .timeout(const Duration(seconds: 1))).isOk, isTrue);
   });
 
   test('missing capability never emits a BEGIN or legacy frame', () async {

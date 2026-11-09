@@ -149,6 +149,7 @@ static void session_teardown(ota_ble_session_t *session)
         session->pipeline = NULL;
     }
     session->caps_nonce = 0u;
+    session->transfer_info_valid = 0u;
     session->isr_active = 0u;
     ota_ble_ring_init(&session->rx_ring, NULL, 0u);
     session->receiver = NULL;
@@ -308,6 +309,12 @@ static void session_handle_get_info(ota_ble_session_t *session,
     {
         return;
     }
+    if (session->pipeline != NULL)
+    {
+        if (session->transfer_info_valid)
+            session_send_info(session, &session->transfer_info, frame->seq);
+        return;
+    }
     if (session->env.info_provider == NULL ||
         session->env.info_provider(&info) == 0)
     {
@@ -398,6 +405,19 @@ static void session_handle_begin(ota_ble_session_t *session,
         session_send_ack_begin(session, OTA_BLE_STATUS_ERR_BUSY, 0u,
                                frame);
         return;
+    }
+
+    session->transfer_info_valid = 0u;
+    if (session->env.info_provider != NULL &&
+        session->env.info_provider(&session->transfer_info) != 0 &&
+        session->transfer_info.cur_vcode == device.current_vcode &&
+        session->transfer_info.hw_rev == device.hardware_rev &&
+        session->transfer_info.layout_id == device.layout_id &&
+        session->transfer_info.boot_ver == device.boot_version &&
+        memcmp(session->transfer_info.image_sha256, device.base_image_sha8,
+               sizeof(device.base_image_sha8)) == 0)
+    {
+        session->transfer_info_valid = 1u;
     }
 
     if (session->env.overlay_acquire == NULL ||
@@ -795,7 +815,7 @@ static void session_handle_frame(ota_ble_session_t *session,
         session_handle_pipeline(session, frame);
         return;
     case OTA_BLE_CMD_GET_INFO:
-        if (session->pipeline == NULL) session_handle_get_info(session, frame);
+        session_handle_get_info(session, frame);
         return;
     default:
         return;

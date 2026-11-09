@@ -103,6 +103,7 @@ static void setup2(void)
     staging_io.erase_4k = guarded_erase;
     staging_io.program = guarded_program;
     begin_case();
+    memcpy(te.device.base_image_sha8, te.image_sha, sizeof(te.device.base_image_sha8));
     session.env.pipeline_io = &payload_io;
     session.env.overlay_workspace = aligned_workspace;
 }
@@ -261,8 +262,18 @@ static void test_pipeline_transfer(void)
         tx_status(&v) == OTA_BLE_STATUS_ERR_CRC && session.expected_seq == 49u);
     deliver2(build_abort_frame(1u, session.session_id), 0u);
     deliver2(build_begin_frame(1u, 9000u, sha, pkg, 1u), 0u);
+    before = flash_fixture.operation_count;
+    session.env.info_provider = NULL;
     deliver2(build_get_info_frame(1u, 0u), 0u);
-    check("late v1 controls cannot release, replace or inspect a busy v2 session",
+    check("busy V2 answers a frame-boundary INFO query from its captured identity",
+        last_tx(&v) && v.cmd == OTA_BLE_CMD_INFO && v.session == 0u && v.seq == 1u &&
+        v.len == OTA_BLE_LEN_INFO && read_u32le(v.payload + 12u) == te.device.current_vcode &&
+        memcmp(v.payload + 16u, te.image_sha, 32u) == 0);
+    check("INFO while Flash is busy performs no new IO or ownership change",
+        flash_fixture.operation_count == before && async_flash.unsafe_read == 0 &&
+        session.pipeline_ack.accepted_off == 8192u && session.expected_seq == 49u);
+    session.env.info_provider = env_info_provider;
+    check("late v1 controls cannot release or replace a busy v2 session",
         session.pipeline != NULL && !session.pipeline->stopped && te.overlay_release_count == 0u);
     async_flash.hold = 0;
     settle(4096u);
@@ -275,6 +286,7 @@ static void test_pipeline_transfer(void)
     check("END2 uses existing SHA, finalize, activate and reset path",
         last_tx(&v) && v.cmd == OTA_BLE_CMD_ACK_END2 && tx_status(&v) == 0u &&
         te.activate_calls == 1u && te.reset_calls == 1u && !ota_ble_session_active(&session));
+    check("transfer identity cache is retired with the session", !session.transfer_info_valid);
     check("staged bytes and whole-package CRC match through seq wrap and duplicate",
         memcmp(flash_fixture.bytes + OTA_STAGING_PAYLOAD_OFFSET, pkg, 9000u) == 0 &&
         read_u32le(flash_fixture.bytes + 12u) == boot_crc32(pkg, 9000u));
