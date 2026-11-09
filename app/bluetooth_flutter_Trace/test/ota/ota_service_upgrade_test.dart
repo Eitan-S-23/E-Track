@@ -210,7 +210,7 @@ void main() {
     Duration? rebootWindow,
     Duration? rebootProbeTimeout,
     Duration? rebootProbeInterval,
-    int? senderWindowSegments,
+    int? senderWindowSegments = 4,
     OtaPhyClient? phyClient,
     OtaBackgroundClient? backgroundClient,
     OtaLinkProfile? linkProfile,
@@ -263,6 +263,7 @@ void main() {
   /// [rebootWindow]/[rebootProbeTimeout]/[rebootProbeInterval] 透传
   /// [makeService] 的重启复核时序注入（O4 整改）：前置阶段不走复核
   /// 路径，注入不影响 read/check/download 的建立。
+  // Use an explicit small V2 cap to hold DATA in fault tests; default-24 is tested separately.
   Future<_UpgradeFakeBle> prepareDownloaded({
     required Directory tempDir,
     required List<String> notifyLog,
@@ -271,7 +272,7 @@ void main() {
     Duration? rebootWindow,
     Duration? rebootProbeTimeout,
     Duration? rebootProbeInterval,
-    int? senderWindowSegments,
+    int? senderWindowSegments = 4,
     int receiverWindowSegments = 32,
     Uint8List? package,
     String address = 'AA:BB',
@@ -678,7 +679,7 @@ void main() {
     });
   }
 
-  for (final profile in [OtaLinkProfile.baseline, OtaLinkProfile.adaptiveCandidate]) {
+  for (final profile in [OtaLinkProfile.adaptiveCandidate]) {
     for (final resumeEarly in [false, true]) {
       test('lifecycle R01 paused END retry ${profile.name} early=$resumeEarly settles with verified target', () async {
         final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
@@ -689,7 +690,7 @@ void main() {
         try {
           await ble.firstEndEntered.future.timeout(const Duration(seconds: 5));
           expect(service.phase, OtaPhase.applying);
-          expect(service.linkSelection!.protocol, 1);
+          expect(service.linkSelection!.protocol, 2);
           expect(service.canCancelTask, isFalse);
           service.didChangeAppLifecycleState(AppLifecycleState.inactive);
           service.didChangeAppLifecycleState(AppLifecycleState.paused);
@@ -728,7 +729,7 @@ void main() {
   for (final failure in ['null-discovery', 'link-changed']) {
     test('lifecycle R01 paused END $failure has bounded safe failure', () async {
       final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
-          linkProfile: OtaLinkProfile.baseline,
+          linkProfile: OtaLinkProfile.adaptiveCandidate,
           backgroundClient: _BackgroundOwnerHarness()..allow = false);
       final service = Get.find<OtaService>();
       ble.dropFirstEnd = true;
@@ -764,7 +765,7 @@ void main() {
 
   test('lifecycle R01 late first END ACK cannot release pause or fabricate success', () async {
     final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
-        linkProfile: OtaLinkProfile.baseline,
+        linkProfile: OtaLinkProfile.adaptiveCandidate,
         backgroundClient: _BackgroundOwnerHarness()..allow = false);
     final service = Get.find<OtaService>();
     ble.deferFirstEnd = true;
@@ -797,7 +798,7 @@ void main() {
 
   test('lifecycle R01 closed END owner ignores late ACK and resumed events', () async {
     final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
-        linkProfile: OtaLinkProfile.baseline,
+        linkProfile: OtaLinkProfile.adaptiveCandidate,
         backgroundClient: _BackgroundOwnerHarness()..allow = false);
     final service = Get.find<OtaService>();
     ble.deferFirstEnd = true;
@@ -1447,111 +1448,31 @@ void main() {
     });
   }
 
-  for (final entry in [(window: 4, receiver: 32), (window: 8, receiver: 32),
-      (window: 16, receiver: 32), (window: 16, receiver: 2)]) {
-    test('runtime prefix window ${entry.window}/${entry.receiver} produces a non-upgrade snapshot', () async {
-      final bytes = assetBytes(40960);
-      final runtime = await probeRuntime(bytes, window: entry.window);
-      final tempDir = tempFirmwareDir();
-      final diagnostics = OtaDiagnostics();
-      addTearDown(diagnostics.close);
-      await diagnostics.initialize(enabled: true, target: probeAddress,
-          sentinel: 'OTAOBS0123456789abcdef01234567', directoryProvider: () async => tempDir);
-      await OtaExperimentRuntime.withInstance(runtime, () => OtaDiagnostics.withInstance(diagnostics, () async {
-        final ble = await prepareDownloaded(tempDir: tempDir, notifyLog: [], package: bytes,
-            address: probeAddress, senderWindowSegments: 1, receiverWindowSegments: entry.receiver);
-        final service = Get.find<OtaService>();
-        ble.dataGate = Completer<void>();
-        final transfer = service.startOtaUpgrade(probeAddress);
-        try {
-          await ble.dataGated.future;
-          final effective = entry.window < entry.receiver ? entry.window : entry.receiver;
-          await expectGatedDataCount(ble, effective);
-          ble.releaseDataGate();
-          expect(await transfer, isFalse, reason: 'a probe is not a completed upgrade');
-          expect(service.phase, OtaPhase.probeCompleted);
-          expect(service.terminalState, isNull);
-          expect(service.isUpgrading, isFalse);
-          expect(service.deviceInfo!.currentVersionCode, 20801);
-          expect(ble.dataOffsets, List.generate(256, (i) => i * 128));
-          expect(ble.stagedDurable, 32768);
-          expect(ble._stagedBytes, bytes.sublist(0, 32768));
-          expect(ble.abortCalls, 1);
-          expect(ble.endCalls, 0);
-          expect(ble.probeCount, 0);
-          expect(ble._notifyController.hasListener, isFalse);
-          expect(service.upgradeStatus, contains('未安装固件'));
-          final file = diagnostics.status.value.lastExport!;
-          final rows = (await file.readAsLines()).map(jsonDecode).toList();
-          final messages = rows.where((row) => row['kind'] == 'line')
-              .map((row) => row['message'] as String).toList();
-          final result = jsonDecode(messages.singleWhere((line) => line.startsWith('OTA_PREFIX_PROBE '))
-              .substring('OTA_PREFIX_PROBE '.length));
-          expect(result['senderWindowSegments'], effective);
-          expect(result['sentUniqueBytes'], 32768);
-          expect(result['sourceVersionCode'], 20801);
-          expect(result['sourceIdentityVerified'], isTrue);
-          expect(result['configSha256'], runtime.config!.sourceSha256);
-          expect(messages.any((line) => line.contains('MONO_END_ACK_OK')), isFalse);
-          expect(messages.any((line) => line.contains('MONO_REBOOT_VERIFIED')), isFalse);
-          expect(rows.last['outcome'], 'not-completed');
-          expect(rows.last['healthy'], isTrue);
-          final checkout = Directory.current.parent.parent;
-          final imported = await Process.run(Platform.isWindows ? 'python' : 'python3',
-            ['-I', '-S', '-B', '-X', 'utf8',
-              '${checkout.path}/Tools/ota/p3-4-link-stats/observation_capture.py',
-              'inspect', '--input', file.path, '--expect-sentinel', 'OTAOBS0123456789abcdef01234567',
-              '--expect-target', probeAddress, '--require-prefix-probe'], workingDirectory: checkout.path,
-          ).timeout(const Duration(seconds: 15));
-          expect(imported.exitCode, 0, reason: '${imported.stderr}');
-          final receipt = jsonDecode(imported.stdout as String);
-          expect(receipt['prefixProbe']['sentUniqueBytes'], 32768);
-          expect(receipt['eligibleForThreshold'], isFalse);
-        } finally {
-          ble.releaseDataGate();
-          if (service.isUpgrading) await service.cancelUpgrade(keepPackage: true);
-          await transfer;
-        }
-      }));
-    });
-  }
-
-  for (final failure in ['abort', 'identity']) {
-    test('prefix $failure failure never emits a successful verdict', () async {
+  for (final diagnostic in [false, true]) {
+    test('retired prefix experiment fails before BEGIN; diagnostics=$diagnostic', () async {
       final bytes = assetBytes(40960);
       final runtime = await probeRuntime(bytes);
-      final tempDir = tempFirmwareDir();
+      final directory = tempFirmwareDir();
       final diagnostics = OtaDiagnostics();
       addTearDown(diagnostics.close);
-      await diagnostics.initialize(enabled: true, target: probeAddress,
-          sentinel: 'OTAOBS0123456789abcdef01234567', directoryProvider: () async => tempDir);
-      await OtaExperimentRuntime.withInstance(runtime, () => OtaDiagnostics.withInstance(diagnostics, () async {
-        final ble = await prepareDownloaded(tempDir: tempDir, notifyLog: [],
+      if (diagnostic) {
+        await diagnostics.initialize(enabled: true, target: probeAddress,
+            sentinel: 'OTAOBS0123456789abcdef01234567', directoryProvider: () async => directory);
+      }
+      await OtaExperimentRuntime.withInstance(runtime, () =>
+          OtaDiagnostics.withInstance(diagnostics, () async {
+        final ble = await prepareDownloaded(tempDir: directory, notifyLog: [],
             package: bytes, address: probeAddress);
-        if (failure == 'abort') ble.abortAckStatusOverride = OtaBleCodec.statusErrState;
-        if (failure == 'identity') ble.identityAfterAbort = postRebootPayload;
         final service = Get.find<OtaService>();
         expect(await service.startOtaUpgrade(probeAddress), isFalse);
-        expect(service.phase, OtaPhase.failed);
+        expect(ble.beginCalls, 0);
+        expect(ble.dataOffsets, isEmpty);
         expect(ble.endCalls, 0);
-        final text = await diagnostics.status.value.lastExport!.readAsString();
-        expect(text, isNot(contains('OTA_PREFIX_PROBE ')));
-        expect(jsonDecode(text.trim().split('\n').last)['outcome'], 'not-completed');
+        expect(service.phase, OtaPhase.failed);
+        expect(await service.downloadedFirmwareFile!.readAsBytes(), bytes);
       }));
     });
   }
-
-  test('prefix mode refuses missing diagnostics before BEGIN', () async {
-    final bytes = assetBytes(40960);
-    final runtime = await probeRuntime(bytes);
-    await OtaExperimentRuntime.withInstance(runtime, () async {
-      final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
-          package: bytes, address: probeAddress);
-      expect(await Get.find<OtaService>().startOtaUpgrade(probeAddress), isFalse);
-      expect(ble.beginCalls, 0);
-      expect(ble.dataOffsets, isEmpty);
-    });
-  });
 
   test('schema 2 full mode still verifies a real full upgrade', () async {
     final bytes = assetBytes();
@@ -1907,10 +1828,10 @@ void main() {
   });
 
   for (final entry in [
-    (receiver: 32, sender: null, expected: 4),
-    (receiver: 2, sender: null, expected: 2),
+    (receiver: 32, sender: null, expected: 8),
+    (receiver: 2, sender: null, expected: 8),
     (receiver: 32, sender: 1, expected: 1),
-    (receiver: 2, sender: 8, expected: 2),
+    (receiver: 2, sender: 8, expected: 8),
   ]) {
     test('sender cap ${entry.sender} and receiver ${entry.receiver} '
         'admit ${entry.expected} outstanding DATA', () async {
@@ -1944,11 +1865,11 @@ void main() {
   }
 
   test('sender cap rejects invalid configuration before any BLE work', () {
-    for (final size in [-1, 0, 33]) {
+    for (final size in [-1, 0, 25, 33]) {
       expect(() => OtaService(senderWindowSegments: size), throwsRangeError);
-      expect(() => OtaService(senderWindowSegments: size, enablePipeline: true), throwsRangeError);
+      expect(() => OtaService(senderWindowSegments: size), throwsRangeError);
     }
-    expect(OtaService.defaultSenderWindowSegments, 4);
+    expect(OtaService.defaultSenderWindowSegments, 24);
     expect(OtaService.defaultPipelineWindowSegments, 24);
   });
 
@@ -2027,7 +1948,7 @@ void main() {
     });
   });
 
-  for (final profile in [OtaLinkProfile.baseline, OtaLinkProfile.adaptiveCandidate]) {
+  for (final profile in [OtaLinkProfile.adaptiveCandidate]) {
     test('P35-READY-01 ${profile.name} binds final identity to actual reboot connection', () async {
       const address = 'aa:bb';
       final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
@@ -2196,14 +2117,14 @@ void main() {
     });
   });
 
-  for (final settings in [(32, 'without', 24, 12), (8, 'without', 8, 12), (32, 'with', 24, 1)]) {
+  for (final settings in [(32, 'without', 24, 12), (8, 'without', 24, 12), (32, 'with', 24, 1)]) {
     test('candidate real service negotiates window ${settings.$1} / ${settings.$2}', () async {
       final lines = <String>[];
       final previous = debugPrint;
       debugPrint = (message, {wrapWidth}) { if (message != null) lines.add(message); };
       addTearDown(() => debugPrint = previous);
       final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
-          receiverWindowSegments: settings.$1, writeMode: settings.$2,
+          receiverWindowSegments: settings.$1, writeMode: settings.$2, senderWindowSegments: null,
           linkProfile: OtaLinkProfile.build.pipeline ? null : OtaLinkProfile.adaptiveCandidate);
       ble.pipelineSupported = true;
       final service = Get.find<OtaService>();
@@ -2213,7 +2134,7 @@ void main() {
       expect(actual.protocol, 2);
       expect(actual.windowSegments, settings.$3);
       expect(actual.dataBatchFrames, settings.$4);
-      if (settings.$1 == 8) expect(actual.summary, contains('receiver-window-limit'));
+      expect(actual.summary, isNot(contains('receiver-window-limit')));
       if (settings.$2 == 'with') expect(actual.summary, contains('without-response-unavailable'));
       final record = jsonDecode(lines.singleWhere((s) => s.startsWith('OTA_LINK_SELECTION '))
           .substring('OTA_LINK_SELECTION '.length)) as Map;
@@ -2226,7 +2147,7 @@ void main() {
       expect(record['actual']['writeMode'], settings.$2);
       expect(ble.beginCalls, 1);
       expect(ble.endCalls, 1);
-      expect(ble._pipeReceived, assetBytes());
+      expect(ble._stagedBytes, assetBytes());
     });
   }
 
@@ -2244,30 +2165,19 @@ void main() {
     expect(ble.endCalls, 0);
   });
 
-  test('candidate real service records v1 fallback and still requires reboot identity', () async {
-    final lines = <String>[];
-    final previous = debugPrint;
-    debugPrint = (message, {wrapWidth}) { if (message != null) lines.add(message); };
-    addTearDown(() => debugPrint = previous);
-    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
-        linkProfile: OtaLinkProfile.build.pipeline ? null : OtaLinkProfile.adaptiveCandidate);
+  test('missing CAPS2 fails visibly without a transfer or legacy fallback', () async {
+    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: []);
+    ble.pipelineSupported = false;
     final service = Get.find<OtaService>();
-    expect(await service.startOtaUpgrade('AA:BB'), isTrue);
-    expect(service.phase, OtaPhase.completed);
-    expect(service.linkSelection!.protocol, 1);
-    expect(service.linkSelection!.dataBatchFrames, 1);
-    expect(service.linkSelection!.fallbackReason, contains('caps2-timeout'));
-    final selection = jsonDecode(lines.singleWhere((s) => s.startsWith('OTA_LINK_SELECTION '))
-        .substring('OTA_LINK_SELECTION '.length)) as Map;
-    expect(selection['requested']['protocol'], 2);
-    expect(selection['requested']['windowSegments'], 24);
-    expect(selection['actual']['protocol'], 1);
-    expect(selection['actual']['windowSegments'], 4);
-    expect(selection['actual']['writeMode'], 'with');
-    expect(selection['fallbackReasons'], contains('caps2-timeout'));
-    expect(selection['fallbackReasons'], isNot(contains('receiver-window-limit')));
-    expect(selection['actual']['fallbackReason'], service.linkSelection!.fallbackReason);
-    expect(ble.dataOffsets, isNotEmpty);
+    expect(await service.startOtaUpgrade('AA:BB'), isFalse);
+    expect(service.phase, OtaPhase.failed);
+    expect(service.linkSelection, isNull);
+    expect(service.upgradeStatus, contains('v2'));
+    expect(ble.beginCalls, 0);
+    expect(ble.dataOffsets, isEmpty);
+    expect(ble.endCalls, 0);
+    expect(ble.abortCalls, 0);
+    expect(service.downloadedFirmwareFile, isNotNull);
   });
 
   test('端到端成功闭环：read → check → download → start → completed', () async {
@@ -3160,7 +3070,7 @@ void main() {
       return bytes;
     }
 
-    /// 裸 DATA payload 组装：绕开 [OtaBleCodec.encodeDataPayload] 的
+    /// 裸 DATA payload 组装：绕开 [OtaBleCodec.encodeData2Payload] 的
     /// 客户端侧参数断言（它会先抛错位/超长），本组测的是 MCU 侧判据。
     Uint8List rawDataPayload(int offset, List<int> content) {
       final p = Uint8List(4 + content.length);
@@ -3179,15 +3089,19 @@ void main() {
         preRebootPayload: preRebootPayload,
         postRebootPayload: postRebootPayload,
       );
+      await ble.writeOtaCharacteristicByAddress('AA:BB', 'fff0', 'fff2',
+          OtaBleCodec.encodeCommand(cmd: OtaBleCodec.cmdCaps2, session: 0, seq: 9,
+              payload: OtaBleCodec.encodeEpoch(1)));
       await ble.writeOtaCharacteristicByAddress(
         'AA:BB',
         'fff0',
         'fff2',
         OtaBleCodec.encodeCommand(
-          cmd: OtaBleCodec.cmdBegin,
+          cmd: OtaBleCodec.cmdBegin2,
           session: 0,
           seq: 10,
-          payload: OtaBleCodec.encodeBeginPayload(
+          payload: OtaBleCodec.encodeBegin2Payload(
+            epoch: 1,
             totalLen: asset.length,
             packageSha256: sha256.convert(asset).bytes,
             etuHeader: Uint8List.fromList(asset.sublist(0, 64)),
@@ -3211,10 +3125,10 @@ void main() {
         'fff0',
         'fff2',
         OtaBleCodec.encodeCommand(
-          cmd: OtaBleCodec.cmdData,
+          cmd: OtaBleCodec.cmdData2,
           session: 1,
           seq: seq,
-          payload: rawDataPayload(offset, content),
+          payload: [1, 0, 0, 0, ...rawDataPayload(offset, content)],
         ),
       );
     }
@@ -3286,7 +3200,7 @@ void main() {
       await writeData(ble, 11, 0, asset.sublist(0, 128));
       // seq 12 = 当前 expected_seq：走 staging 重复段分支，而不是
       // 会话层"seq 落后即幂等回 OK"的分支。
-      await writeData(ble, 12, 0, asset.sublist(0, 128));
+      await writeData(ble, 11, 0, asset.sublist(0, 128));
       expect(ble.dataAckStatuses.last, OtaBleCodec.statusOk);
       expect(ble.stagedDurable, 0, reason: '块未收齐，durable 不前移');
     });
@@ -3302,7 +3216,7 @@ void main() {
       await writeData(ble, 11, 0, asset.sublist(0, 128));
       final corrupted = Uint8List.fromList(asset.sublist(0, 128));
       corrupted[7] ^= 0xFF;
-      await writeData(ble, 12, 0, corrupted);
+      await writeData(ble, 11, 0, corrupted);
       expect(ble.dataAckStatuses.last, OtaBleCodec.statusAborted);
       // teardown 已发生：后续同会话 DATA 落 ERR_STATE。
       await writeData(ble, 13, 128, asset.sublist(128, 256));
@@ -3314,14 +3228,14 @@ void main() {
     test('已提交 offset 的重复 DATA 幂等 OK（真值 :550-558）', () async {
       final asset = assetOfLength(1024);
       final ble = await activeFake(asset);
-      final seq = await fillSegments(ble, asset, 8);
+      await fillSegments(ble, asset, 8);
       expect(ble.stagedDurable, 1024, reason: '8 段收齐 → 块提交');
       // durable 之后重发首段：走会话层幂等分支，不进 staging，因此即便
       // 内容被改也不触发 ERR_DATA（真值同款：已提交区间不再比对 RAM
       // 块缓冲——该区间的正确性由 END 的整包 SHA 兜底）。
       final corrupted = Uint8List.fromList(asset.sublist(0, 128));
       corrupted[3] ^= 0xFF;
-      await writeData(ble, seq, 0, corrupted);
+      await writeData(ble, 11, 0, corrupted);
       expect(ble.dataAckStatuses.last, OtaBleCodec.statusOk);
     });
   });
@@ -4716,32 +4630,6 @@ bool _bytesEqual(List<int> a, List<int> b) {
   return true;
 }
 
-/// BEGIN ACK payload 组包（§5.6，10B）。
-Uint8List packBeginAck(int status, int session, int durableOff, int bitmap) {
-  final p = Uint8List(10);
-  p[0] = status;
-  p[1] = session;
-  _writeU32(p, 2, durableOff);
-  _writeU32(p, 6, bitmap);
-  return p;
-}
-
-/// DATA/END/ABORT ACK payload 组包（§5.6，9B）。
-Uint8List packAck(int status, int durableOff, int bitmap) {
-  final p = Uint8List(9);
-  p[0] = status;
-  _writeU32(p, 1, durableOff);
-  _writeU32(p, 5, bitmap);
-  return p;
-}
-
-void _writeU32(Uint8List p, int at, int v) {
-  p[at] = v & 0xFF;
-  p[at + 1] = (v >> 8) & 0xFF;
-  p[at + 2] = (v >> 16) & 0xFF;
-  p[at + 3] = (v >> 24) & 0xFF;
-}
-
 /// 完整 MCU 应答 fake BLE（extends BluetoothService 覆写 OTA 公开
 /// 方法；onInit 空实现阻止真实平台通道初始化）。
 ///
@@ -4847,11 +4735,9 @@ class _UpgradeFakeBle extends BluetoothService {
   int _state = _idle;
   int _sessionId = 0;
   int _nextSessionId = 1;
-  int _expectedSeq = 0;
   Uint8List _beginSha = Uint8List(0);
   int _totalLen = 0;
   int _stagedDurable = 0;
-  int _stagedBitmap = 0;
   final _segContent = <int, Uint8List>{};
   /// journal 落盘字节（真实提交块追加；erase 清零）。长度恒等于
   /// [_stagedDurable]，是流式 SHA resume 前缀的唯一数据源。
@@ -4990,7 +4876,7 @@ class _UpgradeFakeBle extends BluetoothService {
       data.length >= 3 &&
       data[0] == OtaBleCodec.frameSync0 &&
       data[1] == OtaBleCodec.frameSync1 &&
-      data[2] == OtaBleCodec.cmdData;
+      data[2] == OtaBleCodec.cmdData2;
 
   // ---- 测试注入：后台恢复复核与取消窗口（RC3-04⑦/08⑦）----
   /// 链路代次注入（RC3-08⑦ 一级复核）：resumeFromBackground 经
@@ -5244,7 +5130,7 @@ class _UpgradeFakeBle extends BluetoothService {
       if (data.length >= 3 &&
           data[0] == OtaBleCodec.frameSync0 &&
           data[1] == OtaBleCodec.frameSync1 &&
-          data[2] == OtaBleCodec.cmdAbort) {
+          data[2] == OtaBleCodec.cmdAbort2) {
         final gate = abortWriteGate;
         if (gate != null && !gate.isCompleted) {
           if (!abortWriteEntered.isCompleted) abortWriteEntered.complete();
@@ -5287,27 +5173,29 @@ class _UpgradeFakeBle extends BluetoothService {
         case OtaBleCodec.cmdGetInfo:
           _onGetInfo(f);
           break;
-        case OtaBleCodec.cmdBegin:
+        case OtaBleCodec.cmdCaps2:
+          _onCaps(f);
+          break;
+        case OtaBleCodec.cmdBegin2:
           _onBegin(f);
           break;
-        case OtaBleCodec.cmdData:
+        case OtaBleCodec.cmdData2:
           _onData(f);
           break;
-        case OtaBleCodec.cmdEnd:
+        case OtaBleCodec.cmdEnd2:
           _onEnd(f);
           break;
-        case OtaBleCodec.cmdAbort:
+        case OtaBleCodec.cmdAbort2:
           _onAbort(f);
           break;
         default:
-          if (pipelineSupported) _onPipeline(f);
-          break;
+          fail('Retired or unsupported BLE command: ${f.cmd}');
       }
     }
   }
 
   void _send(int cmd, int session, int seq, List<int> payload) {
-    if (cmd == OtaBleCodec.rspAckBegin && payload.isNotEmpty) {
+    if (cmd == OtaBleCodec.rspAckBegin2 && payload.isNotEmpty) {
       beginAckStatuses.add(payload[0]);
     }
     _notifyController.add(OtaBleCodec.encodeCommand(
@@ -5318,71 +5206,39 @@ class _UpgradeFakeBle extends BluetoothService {
     ));
   }
 
-  // Synthetic v2 peer for real-service wiring. All existing v1 fault tests remain.
-  bool pipelineSupported = false, badPipelineCaps = false;
-  int _pipeEpoch = 0, _pipeAccepted = 0, _pipeDurable = 0, _pipeTotal = 0, _pipeBeginSeq = 0;
-  Uint8List _pipeReceived = Uint8List(0), _pipeSha = Uint8List(0);
+  bool pipelineSupported = true, badPipelineCaps = false;
+  int _pipeEpoch = 0, _pipeAccepted = 0, _pipeBeginSeq = 0, _pipeResume = 0;
+  int _word(List<int> bytes, int offset) =>
+      ByteData.sublistView(Uint8List.fromList(bytes)).getUint32(offset, Endian.little);
 
-  void _pipeAck(int cmd, OtaBleFrame frame) {
-    final base = cmd == 0x91 ? 2 : 1;
-    final payload = ByteData(base + 16)..setUint8(0, 0);
-    if (base == 2) payload.setUint8(1, 7);
-    payload.setUint32(base, _pipeEpoch, Endian.little);
-    payload.setUint32(base + 4, _pipeDurable, Endian.little);
-    payload.setUint32(base + 8, _pipeAccepted, Endian.little);
-    payload.setUint32(base + 12, (_pipeDurable + 8192).clamp(0, _pipeTotal), Endian.little);
-    _send(cmd, 7, frame.seq, payload.buffer.asUint8List());
+  Uint8List _ackPayload(int cmd, int status, int session) {
+    final base = cmd == OtaBleCodec.rspAckBegin2 ? 2 : 1;
+    final bytes = ByteData(base + 16)..setUint8(0, status);
+    if (base == 2) bytes.setUint8(1, session);
+    bytes.setUint32(base, _pipeEpoch, Endian.little);
+    bytes.setUint32(base + 4, _stagedDurable, Endian.little);
+    bytes.setUint32(base + 8, _pipeAccepted, Endian.little);
+    bytes.setUint32(base + 12, (_stagedDurable + 8192).clamp(0, _totalLen), Endian.little);
+    return bytes.buffer.asUint8List();
   }
 
-  void _onPipeline(OtaBleFrame frame) {
-    final payload = ByteData.sublistView(frame.payload);
-    switch (frame.cmd) {
-      case 0x10:
-        _pipeEpoch = payload.getUint32(0, Endian.little);
-        final caps = ByteData(16);
-        caps.buffer.asUint8List().setRange(0, 8, [80, 50, 66, 76, 2, 2, 128, 0]);
-        caps.setUint32(8, _pipeEpoch, Endian.little);
-        caps.setUint32(12, badPipelineCaps ? 28 : 24, Endian.little);
-        _send(0x90, 0, frame.seq, caps.buffer.asUint8List());
-        break;
-      case 0x11:
-        expect(frame.session, 0);
-        expect(payload.getUint32(101, Endian.little), _pipeEpoch);
-        _pipeTotal = payload.getUint32(1, Endian.little);
-        _pipeBeginSeq = frame.seq;
-        _pipeReceived = Uint8List(_pipeTotal);
-        _pipeSha = Uint8List.fromList(frame.payload.sublist(5, 37));
-        _pipeAccepted = _pipeDurable = 0;
-        beginCalls++;
-        _pipeAck(0x91, frame);
-        break;
-      case 0x12:
-        expect(frame.session, 7);
-        expect(payload.getUint32(0, Endian.little), _pipeEpoch);
-        final offset = payload.getUint32(4, Endian.little);
-        expect(frame.seq, (_pipeBeginSeq + 1 + offset ~/ 128) & 0xffff);
-        expect(offset, _pipeAccepted);
-        final end = offset + frame.payload.length - 8;
-        expect(end, lessThanOrEqualTo((_pipeDurable + 8192).clamp(0, _pipeTotal)));
-        _pipeReceived.setRange(offset, end, frame.payload.sublist(8));
-        _pipeAccepted = end;
-        if (end == _pipeTotal) { _pipeDurable = end; }
-        else if (end - _pipeDurable == 8192) { _pipeDurable += 4096; }
-        dataOffsets.add(offset);
-        _pipeAck(0x92, frame);
-        break;
-      case 0x13:
-        expect(_pipeDurable, _pipeTotal);
-        expect(frame.payload.sublist(4), _pipeSha);
-        expect(sha256.convert(_pipeReceived).bytes, _pipeSha);
-        endCalls++;
-        _rebooted = true;
-        _pipeAck(0x93, frame);
-        break;
-    }
+  void _ack(int cmd, OtaBleFrame frame, int status, {int? session}) {
+    final id = session ?? _sessionId;
+    _send(cmd, id, frame.seq, _ackPayload(cmd, status, id));
   }
 
-  // ---- 命令处理（真值语义）----
+  void _onCaps(OtaBleFrame frame) {
+    if (!pipelineSupported) return;
+    expect(frame.session, 0);
+    expect(frame.payload.length, 4);
+    _pipeEpoch = _word(frame.payload, 0);
+    expect(_pipeEpoch, isNot(0));
+    final caps = ByteData(16);
+    caps.buffer.asUint8List().setRange(0, 8, [80, 50, 66, 76, 2, 2, 128, 0]);
+    caps.setUint32(8, _pipeEpoch, Endian.little);
+    caps.setUint32(12, badPipelineCaps ? 28 : 24, Endian.little);
+    _send(OtaBleCodec.rspCaps2, 0, frame.seq, caps.buffer.asUint8List());
+  }
 
   void _onGetInfo(OtaBleFrame f) {
     // INFO 帧：session=0、seq 回显请求 seq（§5.6）。
@@ -5416,196 +5272,98 @@ class _UpgradeFakeBle extends BluetoothService {
 
   void _onBegin(OtaBleFrame f) {
     beginCalls++;
-    final totalLen = f.payload[1] |
-        (f.payload[2] << 8) |
-        (f.payload[3] << 16) |
-        (f.payload[4] << 24);
-    final sha = Uint8List.fromList(f.payload.sublist(5, 37));
-    beginShaBytes = sha;
-    final shaMatch = _beginSha.length == 32 && _bytesEqual(_beginSha, sha);
-    // ---- BEGIN 门禁（RC3-03⑤，真值 session_handle_begin :331-368）----
-    // proto_ver/total_len/inspect 三道门禁 session=0 拒绝且不动现有
-    // 状态。门禁未接入前，恢复正例读到 vcode=20900 后再装 20900 仍
-    // "成功"，与 MCU 真值相悖（target_vcode 门禁必拒）。
-    if (f.payload[0] != 1) {
-      _send(OtaBleCodec.rspAckBegin, 0, f.seq,
-          packBeginAck(OtaBleCodec.statusErrProto, 0, 0, 0));
+    if (f.payload.length != 105 || f.payload[0] != 2 ||
+        _pipeEpoch == 0 || _word(f.payload, 101) != _pipeEpoch) {
+      _ack(OtaBleCodec.rspAckBegin2, f, OtaBleCodec.statusErrProto, session: 0);
       return;
     }
-    if (totalLen == 0 || totalLen > 0x180000) {
-      _send(OtaBleCodec.rspAckBegin, 0, f.seq,
-          packBeginAck(OtaBleCodec.statusErrLen, 0, 0, 0));
+    final total = _word(f.payload, 1);
+    if (total == 0 || total > 0x180000) {
+      _ack(OtaBleCodec.rspAckBegin2, f, OtaBleCodec.statusErrLen, session: 0);
       return;
     }
-    final inspectStatus = fakeInspectEtuHeader(
-        Uint8List.fromList(f.payload.sublist(37, 101)), totalLen);
-    if (inspectStatus != null) {
-      _send(OtaBleCodec.rspAckBegin, 0, f.seq,
-          packBeginAck(inspectStatus, 0, 0, 0));
+    final inspect = fakeInspectEtuHeader(Uint8List.sublistView(f.payload, 37, 101), total);
+    if (inspect != null) {
+      _ack(OtaBleCodec.rspAckBegin2, f, inspect, session: 0);
       return;
     }
-    if (_state == _active && _totalLen == totalLen && shaMatch) {
-      // 重复 BEGIN（同 sha 同包长）：幂等回当前进度，不重置
-      // expected_seq（真值 :377-386）。
-      _send(
-        OtaBleCodec.rspAckBegin,
-        _sessionId,
-        f.seq,
-        packBeginAck(
-            OtaBleCodec.statusOk, _sessionId, _stagedDurable, _stagedBitmap),
-      );
+    final digest = Uint8List.sublistView(f.payload, 5, 37);
+    beginShaBytes = Uint8List.fromList(digest);
+    final same = _totalLen == total && _bytesEqual(digest, _beginSha);
+    if (_state == _active && same && f.seq == _pipeBeginSeq) {
+      _ack(OtaBleCodec.rspAckBegin2, f, OtaBleCodec.statusOk);
       return;
     }
-    // 新会话：不同包先 teardown（真值 :390-393）。
-    if (_state == _active) {
-      _teardown();
-    }
-    // 不同 sha：整页重建，清旧包 journal（真值 erase staging，
-    // RC3-03⑤——缺此分支时新包会从旧包 durable 续传，喂错字节）。
-    if (_stagedBytes.isNotEmpty && !shaMatch) {
-      _eraseStaged();
-    }
-    _beginSha = sha;
-    _totalLen = totalLen;
-    // 流式 SHA 重建（真值 :449-456）：sha_init + journal durable 前缀
-    // 回填（session_digest_resume_prefix 从 staging 读回 [0, durable)）。
+    if (_state == _active) _teardown();
+    if (!same) _eraseStaged();
+    _totalLen = total;
+    _beginSha = Uint8List.fromList(digest);
     _shaBytes..clear()..addAll(_stagedBytes);
+    _pipeAccepted = _pipeResume = _stagedDurable;
+    _pipeBeginSeq = f.seq;
     _sessionId = _nextSessionId;
-    _nextSessionId = (_nextSessionId + 1) & 0xFF;
-    if (_nextSessionId == 0) _nextSessionId = 1;
-    _expectedSeq = (f.seq + 1) & 0xFFFF;
+    _nextSessionId = (_nextSessionId % 255) + 1;
     _state = _active;
-    _send(
-      OtaBleCodec.rspAckBegin,
-      _sessionId,
-      f.seq,
-      packBeginAck(
-          OtaBleCodec.statusOk, _sessionId, _stagedDurable, _stagedBitmap),
-    );
+    _ack(OtaBleCodec.rspAckBegin2, f, OtaBleCodec.statusOk);
   }
 
   void _onData(OtaBleFrame f) {
-    final off = f.payload[0] |
-        (f.payload[1] << 8) |
-        (f.payload[2] << 16) |
-        (f.payload[3] << 24);
+    final off = _word(f.payload, 4);
     dataOffsets.add(off);
     if (_state != _active) {
-      // teardown 后（如 ABORT 已处理）：session=0 的 ERR_STATE NAK。
       _emitDataAck(OtaBleCodec.statusErrState, f);
       return;
     }
-    if (f.session != _sessionId) {
+    if (f.session != _sessionId || _word(f.payload, 0) != _pipeEpoch) {
       _emitDataAck(OtaBleCodec.statusErrSession, f);
       return;
     }
-    final delta = OtaBleCodec.seqCompare(f.seq, _expectedSeq);
-    if (delta > 0) {
-      _emitDataAck(OtaBleCodec.statusErrSeq, f);
-      return;
-    }
-    if (delta < 0) {
-      // 重发帧：幂等重发当前 ACK，不重写 staging（真值 :511-518）。
-      _emitDataAck(OtaBleCodec.statusOk, f);
-      return;
-    }
-    _expectedSeq = (f.seq + 1) & 0xFFFF;
-
-    // 段校验链（真值 ota_ble_session.c:526-548）：三条独立判据，错误码
-    // 互不相同——对齐不符 → ERR_OFFSET；非尾部短段/空段 → ERR_FRAME；
-    // 越包尾 → ERR_OFFSET。旧 fake 把三者并成一条 ERR_LEN，既错分类，
-    // 又把 transport 的可恢复分支（ERR_FRAME/ERR_SEQ 在
-    // _resumeStatuses 里）伪装成不可恢复的终止错误。
-    final content = Uint8List.fromList(f.payload.sublist(4));
-    if (off % OtaBleCodec.dataSegmentSize != 0) {
+    final content = Uint8List.sublistView(f.payload, 8);
+    if (off % 128 != 0 || off >= _totalLen || off + content.length > _totalLen) {
       _emitDataAck(OtaBleCodec.statusErrOffset, f);
       return;
     }
-    if (content.length != OtaBleCodec.dataSegmentSize &&
-        off + content.length != _totalLen) {
+    if (content.isEmpty || content.length > 128 ||
+        (content.length != 128 && off + content.length != _totalLen)) {
       _emitDataAck(OtaBleCodec.statusErrFrame, f);
       return;
     }
-    if (off >= _totalLen || off + content.length > _totalLen) {
+    final expected = (_pipeBeginSeq + 1 + (off - _pipeResume) ~/ 128) & 0xffff;
+    if (off < _pipeResume || f.seq != expected) {
+      _emitDataAck(OtaBleCodec.statusErrSeq, f);
+      return;
+    }
+    if (off > _pipeAccepted || off + content.length > _stagedDurable + 8192) {
       _emitDataAck(OtaBleCodec.statusErrOffset, f);
       return;
     }
-    if (off < _stagedDurable) {
-      // 已提交 offset 的重复 DATA：幂等 OK，不重写 staging、不重复喂
-      // 摘要（真值 :550-558，RC3-03⑤——缺此分支时重发段会经
-      // _segContent 误判 DUPLICATE 或重复喂 SHA，污染内容 oracle）。
-      _emitDataAck(OtaBleCodec.statusOk, f);
-      return;
-    }
-    // staging 层长度判据（真值 ota_staging_receive :485-493）：
-    // expected_len = min(total-off, 128)，不符即 ERR_RANGE → ERR_OFFSET。
-    // 会话层只挡"非尾部短段"，尾部段还要在这里钉死精确长度。
-    final expectedLen = (_totalLen - off) < OtaBleCodec.dataSegmentSize
-        ? (_totalLen - off)
-        : OtaBleCodec.dataSegmentSize;
-    if (content.length != expectedLen) {
-      _emitDataAck(OtaBleCodec.statusErrOffset, f);
-      return;
-    }
-    // 越当前 4KB 窗（RC3-03⑤，真值 ota_staging_receive :499-503）：
-    // durable==total 或 off-durable >= 块长 → ERR_RANGE 映射
-    // ERR_OFFSET。缺此门禁时 fake 照单接收窗口外段，掩盖 transport
-    // 侧窗口纪律的真实性。
-    const windowSize =
-        OtaBleCodec.segmentsPerBlock * OtaBleCodec.dataSegmentSize;
-    if (_stagedDurable == _totalLen || off - _stagedDurable >= windowSize) {
-      _emitDataAck(OtaBleCodec.statusErrOffset, f);
-      return;
-    }
-    final staged = _segContent[off];
-    if (staged != null) {
-      // 位图已置位的同段重发（真值 ota_staging_receive :508-516）：
-      // 内容相同 → DUPLICATE 幂等 OK；内容不同 → ERR_DATA，会话层
-      // 映射 ABORTED 并 teardown（ota_ble_session.c:585-591）。旧 fake
-      // 无条件回 OK，等于把"同 offset 两份不同数据"这类真实损坏
-      // 静默吞掉。
-      if (!_bytesEqual(staged, content)) {
+    if (off < _pipeAccepted) {
+      final previous = _segContent[off];
+      if (previous != null && !_bytesEqual(previous, content)) {
         _emitDataAck(OtaBleCodec.statusAborted, f);
         _teardown();
-        return;
+      } else {
+        _emitDataAck(OtaBleCodec.statusOk, f);
       }
-      _emitDataAck(OtaBleCodec.statusOk, f);
       return;
     }
-    _segContent[off] = content;
-    // 新写入段喂流式 SHA（真值 :571）：以 wire 数据按接收顺序喂，
-    // 与 journal 落盘无关（RAM 摘要与 flash 落盘分离，真值同款）。
+    _segContent[off] = Uint8List.fromList(content);
     _shaBytes.addAll(content);
-
-    // 块收齐提交（真值 :585-598）：先组装块字节（RAM 清空前——journal
-    // 提交需要完整块内容），staging durable 前移、位图清零。
-    const blockSize =
-        OtaBleCodec.segmentsPerBlock * OtaBleCodec.dataSegmentSize;
-    final blockStart = (_stagedDurable ~/ blockSize) * blockSize;
-    final seg = (off - blockStart) ~/ OtaBleCodec.dataSegmentSize;
-    final blockEnd =
-        (blockStart + blockSize) > _totalLen ? _totalLen : blockStart + blockSize;
-    final segsInBlock =
-        ((blockEnd - blockStart) + OtaBleCodec.dataSegmentSize - 1) ~/
-            OtaBleCodec.dataSegmentSize;
-    _stagedBitmap |= 1 << seg;
-    if (_stagedBitmap == (1 << segsInBlock) - 1) {
-      final blockBytes = <int>[];
-      for (var s = 0; s < segsInBlock; s++) {
-        blockBytes.addAll(_segContent[blockStart + s * OtaBleCodec.dataSegmentSize]!);
-      }
-      _stagedDurable = blockEnd;
-      _stagedBitmap = 0;
-      _segContent.removeWhere((k, _) => k >= blockStart && k < blockEnd);
-      // journal 追加块字节（流式 SHA 的 resume 前缀数据源）。
-      _stagedBytes = Uint8List.fromList([..._stagedBytes, ...blockBytes]);
+    _pipeAccepted += content.length;
+    // Delay one block to exercise both receiver buffers, not a v1 bitmap model.
+    final commitTo = _pipeAccepted == _totalLen ? _totalLen
+        : _pipeAccepted - _stagedDurable >= 8192 ? _stagedDurable + 4096 : _stagedDurable;
+    if (commitTo > _stagedDurable) {
+      _stagedBytes = Uint8List.fromList(_shaBytes.sublist(0, commitTo));
+      _stagedDurable = commitTo;
+      _segContent.removeWhere((off, _) => off < commitTo);
     }
     _emitDataAck(OtaBleCodec.statusOk, f);
   }
 
   void _onEnd(OtaBleFrame f) {
     endCalls++;
-    endShaBytes = Uint8List.fromList(f.payload);
+    endShaBytes = Uint8List.fromList(f.payload.sublist(4));
     endSequences.add(f.seq);
     if (endCalls == 1 && (dropFirstEnd || deferFirstEnd)) {
       if (deferFirstEnd) _deferredEnd = f;
@@ -5616,59 +5374,30 @@ class _UpgradeFakeBle extends BluetoothService {
   }
 
   void _handleEnd(OtaBleFrame f) {
-    if (_state != _active || f.session != _sessionId) {
-      _send(OtaBleCodec.rspAckEnd, f.session, f.seq,
-          packAck(OtaBleCodec.statusErrState, _stagedDurable, 0));
+    final expected = (_pipeBeginSeq + 1 + (_totalLen - _pipeResume + 127) ~/ 128) & 0xffff;
+    if (_state != _active || f.session != _sessionId || _word(f.payload, 0) != _pipeEpoch) {
+      _ack(OtaBleCodec.rspAckEnd2, f, OtaBleCodec.statusErrState, session: f.session);
       return;
     }
-    final delta = OtaBleCodec.seqCompare(f.seq, _expectedSeq);
-    if (delta > 0) {
-      _send(OtaBleCodec.rspAckEnd, _sessionId, f.seq,
-          packAck(OtaBleCodec.statusErrSeq, _stagedDurable, 0));
+    if (f.seq != expected) {
+      _ack(OtaBleCodec.rspAckEnd2, f, OtaBleCodec.statusErrSeq);
       return;
     }
-    if (delta < 0) {
-      // END 重发（seq 落后）：幂等回 OK（真值 :636-642）。
-      _send(OtaBleCodec.rspAckEnd, _sessionId, f.seq,
-          packAck(OtaBleCodec.statusOk, _stagedDurable, 0));
-      return;
-    }
-    _expectedSeq = (f.seq + 1) & 0xFFFF;
-
-    // sha 复述 + durable==total 校验（真值 :646-662）。
-    final shaOk = f.payload.length == 32 && _bytesEqual(f.payload, _beginSha);
-    if (!shaOk) {
-      _send(OtaBleCodec.rspAckEnd, _sessionId, f.seq,
-          packAck(OtaBleCodec.statusErrSha, _stagedDurable, 0));
+    if (f.payload.length != 36 || !_bytesEqual(f.payload.sublist(4), _beginSha) ||
+        !_bytesEqual(sha256.convert(_shaBytes).bytes, _beginSha)) {
+      _ack(OtaBleCodec.rspAckEnd2, f, OtaBleCodec.statusErrSha);
       _eraseStaged();
       _teardown();
       return;
     }
     if (_stagedDurable != _totalLen) {
-      _send(OtaBleCodec.rspAckEnd, _sessionId, f.seq,
-          packAck(OtaBleCodec.statusErrState, _stagedDurable, 0));
-      _teardown();
+      _ack(OtaBleCodec.rspAckEnd2, f, OtaBleCodec.statusErrState);
       return;
     }
-    // 内容级流式摘要 final（真值 :664-668）：sha256(journal durable
-    // 前缀 + 顺序新收段) 必须等于 BEGIN 携带的 package_sha256——
-    // 复述一致但内容不符（错字节/漏段）同样 ERR_SHA（RC3-03）。
-    final digest = sha256.convert(_shaBytes);
-    if (!_bytesEqual(digest.bytes, _beginSha)) {
-      _send(OtaBleCodec.rspAckEnd, _sessionId, f.seq,
-          packAck(OtaBleCodec.statusErrSha, _stagedDurable, 0));
-      _eraseStaged();
-      _teardown();
-      return;
-    }
-    // 判定链全部通过：正常回 OK 并切新固件重启。P34-DA02 的注入点在**应答
-    // 状态**上，不改判定链——注入非 OK 时按真实拒绝语义（擦除 staging、
-    // 不重启、保持旧身份）收尾，供 service 侧「非 OK END」路径取证。
-    final endAckStatus = endAckStatusOverride ?? OtaBleCodec.statusOk;
-    _send(OtaBleCodec.rspAckEnd, _sessionId, f.seq,
-        packAck(endAckStatus, _stagedDurable, 0));
+    final status = endAckStatusOverride ?? OtaBleCodec.statusOk;
+    _ack(OtaBleCodec.rspAckEnd2, f, status);
     _teardown();
-    if (endAckStatus == OtaBleCodec.statusOk) {
+    if (status == OtaBleCodec.statusOk) {
       _rebooted = true;
     } else {
       _eraseStaged();
@@ -5677,34 +5406,21 @@ class _UpgradeFakeBle extends BluetoothService {
 
   void _onAbort(OtaBleFrame f) {
     abortCalls++;
-    if (_state == _active && f.session != _sessionId) {
-      // session 不符：不动 durable 状态（真值 :695-702）。
-      _send(OtaBleCodec.rspAckAbort, f.session, f.seq,
-          packAck(OtaBleCodec.statusErrSession, _stagedDurable, 0));
+    if (_word(f.payload, 0) != _pipeEpoch ||
+        (_state == _active && f.session != _sessionId)) {
+      _ack(OtaBleCodec.rspAckAbort2, f, OtaBleCodec.statusErrSession, session: f.session);
       return;
     }
-    // session 匹配或非 ACTIVE：ACK ABORTED + teardown（durable 保留）。
-    _send(OtaBleCodec.rspAckAbort, _sessionId, f.seq,
-        packAck(abortAckStatusOverride ?? OtaBleCodec.statusAborted, _stagedDurable, 0));
+    _ack(OtaBleCodec.rspAckAbort2, f, abortAckStatusOverride ?? OtaBleCodec.statusAborted);
     _teardown();
     if (identityAfterAbort != null) infoOverride = identityAfterAbort;
   }
 
-  /// DATA ACK 发射（应答时刻组装 payload 快照，RC3-03；受 dataGate
-  /// 挂起控制：帧处理照常，仅 ACK 发送挂起）。
   void _emitDataAck(int status, OtaBleFrame f) {
     dataAckStatuses.add(status);
-    final overrideStatus = dataAckStatusOverride;
-    if (overrideStatus != null) {
-      status = overrideStatus;
-    }
-    final payload = packAck(
-        status, _stagedDurable, _state == _active ? _stagedBitmap : 0);
     final session = _sessionId;
-    void emit() {
-      _send(OtaBleCodec.rspAckData, session, f.seq, payload);
-    }
-
+    final payload = _ackPayload(OtaBleCodec.rspAckData2, dataAckStatusOverride ?? status, session);
+    void emit() => _send(OtaBleCodec.rspAckData2, session, f.seq, payload);
     final gate = dataGate;
     if (gate != null && !gate.isCompleted) {
       if (!dataGated.isCompleted) dataGated.complete();
@@ -5714,38 +5430,29 @@ class _UpgradeFakeBle extends BluetoothService {
     emit();
   }
 
-  // Drop earlier ACKs while retaining the latest cumulative bitmap and gate.
   void releaseLatestDataAck() {
     final latest = _gatedAcks.last;
     _gatedAcks.clear();
     latest();
   }
 
-  /// 释放 ACK 闸门：挂起的 ACK 按接收顺序补发。
   void releaseDataGate() {
     dataGate = null;
     final pending = List<void Function()>.of(_gatedAcks);
     _gatedAcks.clear();
-    for (final emit in pending) {
-      emit();
-    }
+    for (final emit in pending) { emit(); }
   }
 
-  /// teardown（真值 ota_staging.c）：RAM 层（段内容 + 会话 SHA 流）
-  /// 清空，journal durable 与字节保留（重新 BEGIN 同 sha 时以前缀
-  /// 重建 SHA resume）。
   void _teardown() {
     _state = _idle;
     _sessionId = 0;
-    _stagedBitmap = 0;
     _segContent.clear();
     _shaBytes.clear();
+    _pipeAccepted = _stagedDurable;
   }
 
-  /// 整页擦除（END sha 不符时）：journal durable 与字节一并归零。
   void _eraseStaged() {
-    _stagedDurable = 0;
-    _stagedBitmap = 0;
+    _stagedDurable = _pipeAccepted = 0;
     _segContent.clear();
     _shaBytes.clear();
     _stagedBytes = Uint8List(0);

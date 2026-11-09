@@ -38,13 +38,13 @@ void main() {
   group('OtaBleCodec.encodeCommand / decodeFrame', () {
     test('编解码往返：字段与 CRC 一致', () {
       final frame = OtaBleCodec.encodeCommand(
-        cmd: OtaBleCodec.cmdData,
+        cmd: OtaBleCodec.cmdData2,
         session: 7,
         seq: 0x1234,
         payload: List<int>.generate(16, (i) => i),
       );
       final decoded = OtaBleCodec.decodeFrame(frame);
-      expect(decoded.cmd, OtaBleCodec.cmdData);
+      expect(decoded.cmd, OtaBleCodec.cmdData2);
       expect(decoded.session, 7);
       expect(decoded.seq, 0x1234);
       expect(decoded.payload, List<int>.generate(16, (i) => i));
@@ -83,19 +83,21 @@ void main() {
   });
 
   group('OtaBleCodec payload 编码', () {
-    test('BEGIN payload：101B、proto_ver=1、字段位置', () {
+    test('BEGIN2 payload: 105 bytes, protocol 2 and epoch', () {
       final sha = List<int>.generate(32, (i) => i);
       final etu = List<int>.generate(64, (i) => 0x40 + (i & 0x3F));
-      final payload = OtaBleCodec.encodeBeginPayload(
-        totalLen: 0x12345678,
+      final payload = OtaBleCodec.encodeBegin2Payload(
+          epoch: 0x12345678,
+        totalLen: 0x123456,
         packageSha256: sha,
         etuHeader: etu,
       );
-      expect(payload.length, 101);
-      expect(payload[0], 1);
+      expect(payload.length, 105);
+      expect(payload.sublist(101), [0x78, 0x56, 0x34, 0x12]);
+      expect(payload[0], 2);
       expect(
         payload.sublist(1, 5),
-        [0x78, 0x56, 0x34, 0x12], // 小端
+        [0x56, 0x34, 0x12, 0x00], // Little-endian length.
       );
       expect(payload.sublist(5, 37), sha);
       expect(payload.sublist(37, 101), etu);
@@ -103,7 +105,8 @@ void main() {
 
     test('BEGIN payload：sha/etu 长度非法必须拒绝', () {
       expect(
-        () => OtaBleCodec.encodeBeginPayload(
+        () => OtaBleCodec.encodeBegin2Payload(
+          epoch: 0x12345678,
           totalLen: 1,
           packageSha256: List<int>.filled(31, 0),
           etuHeader: List<int>.filled(64, 0),
@@ -111,7 +114,8 @@ void main() {
         throwsArgumentError,
       );
       expect(
-        () => OtaBleCodec.encodeBeginPayload(
+        () => OtaBleCodec.encodeBegin2Payload(
+          epoch: 0x12345678,
           totalLen: 1,
           packageSha256: List<int>.filled(32, 0),
           etuHeader: List<int>.filled(63, 0),
@@ -121,29 +125,30 @@ void main() {
     });
 
     test('DATA payload：off 对齐与 128B 约束', () {
-      final ok = OtaBleCodec.encodeDataPayload(
+      final ok = OtaBleCodec.encodeData2Payload(7, 
         256,
         List<int>.filled(128, 1),
       );
-      expect(ok.length, 132);
-      expect(ok.sublist(0, 4), [0x00, 0x01, 0x00, 0x00]);
+      expect(ok.length, 136);
+      expect(ok.sublist(0, 4), [7, 0, 0, 0]);
+      expect(ok.sublist(4, 8), [0x00, 0x01, 0x00, 0x00]);
       expect(
-        () => OtaBleCodec.encodeDataPayload(129, List<int>.filled(128, 1)),
+        () => OtaBleCodec.encodeData2Payload(7, 129, List<int>.filled(128, 1)),
         throwsArgumentError,
       );
       expect(
-        () => OtaBleCodec.encodeDataPayload(0, List<int>.filled(129, 1)),
+        () => OtaBleCodec.encodeData2Payload(7, 0, List<int>.filled(129, 1)),
         throwsArgumentError,
       );
       expect(
-        () => OtaBleCodec.encodeDataPayload(0, <int>[]),
+        () => OtaBleCodec.encodeData2Payload(7, 0, <int>[]),
         throwsArgumentError,
       );
     });
 
     test('END payload：32B sha 复述', () {
       final sha = List<int>.generate(32, (i) => 0xFF - i);
-      expect(OtaBleCodec.encodeEndPayload(sha), sha);
+      expect(OtaBleCodec.encodeEnd2Payload(7, sha), [7, 0, 0, 0, ...sha]);
     });
   });
 
@@ -197,49 +202,51 @@ void main() {
     });
   });
 
-  group('OtaAckPayload.parse', () {
-    test('BEGIN ACK 10B：status/session/durable/bitmap', () {
-      final payload = <int>[
-        0x00, 0x07, 0x10, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00,
-      ];
-      final ack = OtaAckPayload.parse(OtaBleCodec.rspAckBegin, payload);
-      expect(ack.status, 0x00);
-      expect(ack.session, 7);
-      expect(ack.durableOff, 16);
-      expect(ack.blockBitmap, 0xFF);
-    });
+  group('V2 ACK payloads', () {
+    List<int> body(int cmd, {int status = 0}) {
+      final base = cmd == OtaBleCodec.rspAckBegin2 ? 2 : 1;
+      final bytes = ByteData(base + 16)..setUint8(0, status);
+      if (base == 2) bytes.setUint8(1, 7);
+      bytes.setUint32(base, 0x12345678, Endian.little);
+      bytes.setUint32(base + 4, 4096, Endian.little);
+      bytes.setUint32(base + 8, 4224, Endian.little);
+      bytes.setUint32(base + 12, 12288, Endian.little);
+      return bytes.buffer.asUint8List();
+    }
 
-    test('普通 ACK 9B：无 session 字段（status+durable4B LE+bitmap4B LE）', () {
-      final payload = <int>[
-        0x00, 0x00, 0x00, 0x40, 0x00, 0x0F, 0x00, 0x00, 0x00,
-      ];
-      final ack = OtaAckPayload.parse(OtaBleCodec.rspAckData, payload);
-      expect(ack.session, isNull);
-      // durable = payload[1..5) = 00 00 40 00 (LE) = 0x400000。
-      expect(ack.durableOff, 0x400000);
-      // bitmap = payload[5..9) = 0F 00 00 00 (LE) = 0x0F。
-      expect(ack.blockBitmap, 0x0F);
+    for (final cmd in [0x91, 0x92, 0x93, 0x94]) {
+      test('command $cmd decodes epoch, durable, accepted and credit', () {
+        final ack = OtaAckPayload.parse(cmd, body(cmd));
+        expect(ack.status, 0);
+        expect(ack.session, cmd == 0x91 ? 7 : isNull);
+        expect(ack.epoch, 0x12345678);
+        expect(ack.durableOff, 4096);
+        expect(ack.acceptedOff, 4224);
+        expect(ack.creditEnd, 12288);
+      });
+      test('command $cmd rejects unknown status and malformed length', () {
+        expect(() => OtaAckPayload.parse(cmd, body(cmd, status: 0x7f)),
+            throwsFormatException);
+        expect(() => OtaAckPayload.parse(cmd, body(cmd).sublist(1)),
+            throwsFormatException);
+        expect(() => OtaAckPayload.parse(cmd, [...body(cmd), 0]),
+            throwsFormatException);
+      });
+    }
+    test('legacy response IDs never parse as V2', () {
+      for (final cmd in [0x81, 0x82, 0x83, 0x84]) {
+        expect(() => OtaAckPayload.parse(cmd, body(0x92)), throwsFormatException);
+      }
     });
-
-    test('未知 status 必须拒绝（fail closed）', () {
-      final payload = <int>[0x7F, 0, 0, 0, 0, 0, 0, 0, 0];
-      expect(
-        () => OtaAckPayload.parse(OtaBleCodec.rspAckData, payload),
-        throwsFormatException,
-      );
-    });
-
-    test('长度不符必须拒绝', () {
-      expect(
-        () => OtaAckPayload.parse(OtaBleCodec.rspAckBegin,
-            List<int>.filled(9, 0)),
-        throwsFormatException,
-      );
-      expect(
-        () => OtaAckPayload.parse(OtaBleCodec.rspAckData,
-            List<int>.filled(10, 0)),
-        throwsFormatException,
-      );
+    test('invalid epochs and lengths fail before encoding', () {
+      for (final epoch in [-1, 0, 0x100000000]) {
+        expect(() => OtaBleCodec.encodeEpoch(epoch), throwsArgumentError);
+      }
+      for (final length in [0, -1, 0x180001]) {
+        expect(() => OtaBleCodec.encodeBegin2Payload(totalLen: length, epoch: 7,
+            packageSha256: List.filled(32, 0), etuHeader: List.filled(64, 0)),
+            throwsArgumentError);
+      }
     });
   });
 

@@ -223,47 +223,25 @@ OTA_LINK_CANDIDATE_ENV = "TRACE_DEV_OTA_LINK_CANDIDATE"
 
 def ota_link_candidate(env):
     profile = ota_link_profile.selected(env)
-    name = env.get(OTA_LINK_CANDIDATE_ENV, "").strip()
-    if name in ("", "baseline"):
-        return None
+    name = env.get(OTA_LINK_CANDIDATE_ENV, "").strip() or ota_link_profile.RELEASE_CANDIDATE
     if name == ota_link_profile.RELEASE_CANDIDATE:
         return {"name": name, "runtime_config": False, "build_profile": name}
-    if name in ("runtime", "runtime-pipeline"):
-        observation = observation_config(env)
-        if observation is None or not re.fullmatch(r"(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}", observation["target"]):
-            raise ValueError("Runtime OTA experiment requires device observation with a MAC target")
-        config = {"name": name, "runtime_config": True}
-        if name == "runtime-pipeline":
-            config["pipeline"] = True
-        if profile is not None:
-            config["profile"] = profile
-        return config
-    candidates = {
-        "reuse-with": (True, False),
-        "discover-without": (False, True),
-        "reuse-without": (True, True),
-    }
-    if name not in candidates:
-        raise ValueError("Unknown " + OTA_LINK_CANDIDATE_ENV)
-    reuse, without = candidates[name]
-    return {"name": name, "reuse_gatt": reuse, "prefer_without_response": without}
+    if name != "runtime-pipeline":
+        raise ValueError("Unknown " + OTA_LINK_CANDIDATE_ENV + "; BLE V2 only")
+    observation = observation_config(env)
+    if observation is None or not re.fullmatch(r"(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}", observation["target"]):
+        raise ValueError("Runtime OTA experiment requires device observation with a MAC target")
+    config = {"name": name, "runtime_config": True, "pipeline": True}
+    if profile is not None:
+        config["profile"] = profile
+    return config
 
 
 def ota_link_defines(config):
-    if config is None:
-        return []
-    if config.get("build_profile"):
-        return [ota_link_profile.build_profile(config["build_profile"])]
-    if config.get("runtime_config") is True:
-        defines = ["--dart-define=OTA_P34_RUNTIME_CONFIG=true"]
-        if config.get("pipeline") is True:
-            defines.append("--dart-define=P34_OTA_PIPELINE=true")
-        return defines
-    return [
-        "--dart-define=OTA_P34_REUSE_GATT=" + str(config["reuse_gatt"]).lower(),
-        "--dart-define=OTA_P34_PREFER_WITHOUT_RESPONSE=" +
-        str(config["prefer_without_response"]).lower(),
-    ]
+    defines = [ota_link_profile.build_profile(ota_link_profile.RELEASE_CANDIDATE)]
+    if config is not None and config.get("runtime_config") is True:
+        defines.append("--dart-define=OTA_P34_RUNTIME_CONFIG=true")
+    return defines
 
 
 def observation_defines(config):

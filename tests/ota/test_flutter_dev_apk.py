@@ -366,24 +366,14 @@ class DevelopmentApkTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, APK.DEVICE_OTA_NATIVE_TESTS_ENV):
                 APK.plan(self.root, self.run, {**self.env, APK.DEVICE_OTA_NATIVE_TESTS_ENV: value})
 
-    def test_link_candidates_form_an_explicit_bounded_build_matrix(self):
-        for value in ("", "baseline"):
-            self.assertIsNone(APK.ota_link_candidate({APK.OTA_LINK_CANDIDATE_ENV: value}))
-        self.assertEqual([], APK.ota_link_defines(None))
-        for name, reuse, without in (("reuse-with", True, False),
-                                     ("discover-without", False, True),
-                                     ("reuse-without", True, True)):
-            env = {**self.env, APK.OTA_LINK_CANDIDATE_ENV: name}
-            candidate = APK.ota_link_candidate(env)
-            self.assertEqual(dict(name=name, reuse_gatt=reuse,
-                                  prefer_without_response=without), candidate)
-            plan = APK.plan(self.root, self.run, env)
-            build = next(argv for step, argv, _, _ in plan if step == "apk_build")
-            self.assertIn("--dart-define=OTA_P34_REUSE_GATT=" + str(reuse).lower(), build)
-            self.assertIn("--dart-define=OTA_P34_PREFER_WITHOUT_RESPONSE=" + str(without).lower(), build)
-            self.assertIn("--debug", build)
-        for invalid in ("fast", "921600", "reuse-without --release"):
-            with self.assertRaisesRegex(ValueError, "TRACE_DEV_OTA_LINK_CANDIDATE"):
+    def test_link_candidates_are_v2_only(self):
+        candidate = APK.ota_link_candidate({})
+        self.assertEqual(PROFILE.RELEASE_CANDIDATE, candidate["name"])
+        self.assertEqual([PROFILE.build_profile(PROFILE.RELEASE_CANDIDATE)],
+                         APK.ota_link_defines(None))
+        for invalid in ("baseline", "reuse-with", "discover-without", "reuse-without",
+                        "runtime", "fast", "921600", "reuse-without --release"):
+            with self.subTest(name=invalid), self.assertRaisesRegex(ValueError, "TRACE_DEV_OTA_LINK_CANDIDATE"):
                 APK.plan(self.root, self.run, {**self.env, APK.OTA_LINK_CANDIDATE_ENV: invalid})
 
     def test_adaptive_candidate_uses_the_release_entry_without_runtime_identity(self):
@@ -399,11 +389,11 @@ class DevelopmentApkTests(unittest.TestCase):
                 PROFILE.build_profile(invalid)
         workflow = (ROOT / ".github/workflows/build.yml").read_text(encoding="utf-8")
         self.assertEqual(2, workflow.count("--build-profile"))
-        self.assertEqual(2, workflow.count("inputs.release_ota_link_profile || 'baseline'"))
+        self.assertEqual(2, workflow.count("inputs.release_ota_link_profile || 'adaptive-v2-candidate'"))
 
     def test_collect_records_link_candidate_as_intent_not_performance_evidence(self):
         self.write(APK.APK_RELATIVE, self.archive_bytes([("AndroidManifest.xml", b"fixture")]))
-        env = {**self.env, APK.OTA_LINK_CANDIDATE_ENV: "reuse-without"}
+        env = {**self.env, APK.OTA_LINK_CANDIDATE_ENV: PROFILE.RELEASE_CANDIDATE}
         with mock.patch.object(APK, "read_application_id", return_value="com.example.fixture"), \
                 mock.patch("sys.stdout", new_callable=io.StringIO):
             APK.collect(self.root, self.run, "1" * 40, env)
@@ -411,33 +401,18 @@ class DevelopmentApkTests(unittest.TestCase):
         self.assertEqual(APK.ota_link_candidate(env), metadata["requested_ota_link_candidate"])
         self.assertEqual("NOT_RUN", metadata["formal_acceptance"])
 
-    def test_runtime_experiment_requires_mac_observation_and_keeps_rates_out_of_builds(self):
-        env = {**self.observation_env(), APK.OTA_LINK_CANDIDATE_ENV: "runtime",
-               APK.OBSERVATION_TARGET_ENV: "AA:BB:CC:DD:EE:FF"}
-        candidate = APK.ota_link_candidate(env)
-        self.assertEqual(dict(name="runtime", runtime_config=True), candidate)
-        defines = APK.ota_link_defines(candidate)
-        self.assertEqual(["--dart-define=OTA_P34_RUNTIME_CONFIG=true"], defines)
-        build = next(argv for name, argv, _, _ in APK.plan(self.root, self.run, env) if name == "apk_build")
-        self.assertIn(defines[0], build)
-        self.assertNotIn("921600", " ".join(build))
-        for invalid in ({APK.OTA_LINK_CANDIDATE_ENV: "runtime"},
-                        {**env, APK.DEVICE_OBSERVATION_ENV: "false"},
-                        {**env, APK.OBSERVATION_TARGET_ENV: "XTrace"}):
-            with self.subTest(env=invalid), self.assertRaisesRegex(ValueError, "Runtime OTA experiment"):
-                APK.ota_link_candidate(invalid)
-
-    def test_pipeline_build_is_explicit_and_preserves_runtime_observation_guards(self):
+    def test_runtime_v2_requires_mac_and_keeps_rates_out_of_builds(self):
         env = {**self.observation_env(), APK.OTA_LINK_CANDIDATE_ENV: "runtime-pipeline",
                APK.OBSERVATION_TARGET_ENV: "AA:BB:CC:DD:EE:FF"}
         candidate = APK.ota_link_candidate(env)
         self.assertEqual(dict(name="runtime-pipeline", runtime_config=True, pipeline=True), candidate)
+        defines = APK.ota_link_defines(candidate)
+        self.assertEqual([PROFILE.build_profile(PROFILE.RELEASE_CANDIDATE),
+                          "--dart-define=OTA_P34_RUNTIME_CONFIG=true"], defines)
         build = next(argv for name, argv, _, _ in APK.plan(self.root, self.run, env) if name == "apk_build")
-        self.assertIn("--dart-define=P34_OTA_PIPELINE=true", build)
-        self.assertIn("--dart-define=OTA_P34_RUNTIME_CONFIG=true", build)
-        for name in ("baseline", "runtime", "reuse-without"):
-            defines = APK.ota_link_defines(APK.ota_link_candidate({**env, APK.OTA_LINK_CANDIDATE_ENV: name}))
-            self.assertNotIn("--dart-define=P34_OTA_PIPELINE=true", defines)
+        self.assertTrue(all(item in build for item in defines))
+        self.assertNotIn("921600", " ".join(build))
+        self.assertNotIn("--dart-define=P34_OTA_PIPELINE=true", build)
         for invalid in ({APK.OTA_LINK_CANDIDATE_ENV: "runtime-pipeline"},
                         {**env, APK.DEVICE_OBSERVATION_ENV: "false"},
                         {**env, APK.OBSERVATION_TARGET_ENV: "XTrace"}):
@@ -466,7 +441,7 @@ class DevelopmentApkTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Unknown"):
             APK.ota_link_candidate({**self.profile_env(), PROFILE.ENV: "invented-fast"})
         build = next(argv for name, argv, _, _ in APK.plan(self.root, self.run, self.profile_env()) if name == "apk_build")
-        self.assertIn("--dart-define=P34_OTA_PIPELINE=true", build)
+        self.assertIn(PROFILE.build_profile(PROFILE.RELEASE_CANDIDATE), build)
         self.assertEqual(PROFILE.NAME, APK.ota_link_candidate(self.profile_env())["profile"])
 
     def test_named_profile_is_preserved_as_build_intent_in_apk_metadata(self):
@@ -535,7 +510,7 @@ class DevelopmentApkTests(unittest.TestCase):
                 PROFILE.check_observation(stats, config, experiments=stamps)
 
     def test_runtime_build_can_use_an_explicit_non_live_default_endpoint(self):
-        env = {**self.observation_env(), APK.OTA_LINK_CANDIDATE_ENV: "runtime",
+        env = {**self.observation_env(), APK.OTA_LINK_CANDIDATE_ENV: "runtime-pipeline",
                APK.OBSERVATION_TARGET_ENV: "AA:BB:CC:DD:EE:FF",
                APK.OBSERVATION_FIRMWARE_URL_ENV:
                    "https://p34-runtime-required.invalid/api/public/firmware/latest"}
@@ -564,7 +539,8 @@ class DevelopmentApkTests(unittest.TestCase):
         self.assertEqual([], APK.observation_defines(None))
         plan = APK.plan(self.root, self.run, self.env)
         build = next(argv for name, argv, _, _ in plan if name == "apk_build")
-        self.assertFalse([arg for arg in build if arg.startswith("--dart-define")])
+        self.assertEqual([PROFILE.build_profile(PROFILE.RELEASE_CANDIDATE)],
+                         [arg for arg in build if arg.startswith("--dart-define")])
 
     def test_device_observation_injection_reaches_the_build_command(self):
         env = self.observation_env()

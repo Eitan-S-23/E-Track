@@ -18,15 +18,17 @@ class OtaBleCodec {
 
   // 命令表（§5.2）
   static const int cmdGetInfo = 0x00;
-  static const int cmdBegin = 0x01;
-  static const int cmdData = 0x02;
-  static const int cmdEnd = 0x03;
-  static const int cmdAbort = 0x04;
+  static const int cmdCaps2 = 0x10;
+  static const int cmdBegin2 = 0x11;
+  static const int cmdData2 = 0x12;
+  static const int cmdEnd2 = 0x13;
+  static const int cmdAbort2 = 0x14;
   static const int rspInfo = 0x80;
-  static const int rspAckBegin = 0x81;
-  static const int rspAckData = 0x82;
-  static const int rspAckEnd = 0x83;
-  static const int rspAckAbort = 0x84;
+  static const int rspCaps2 = 0x90;
+  static const int rspAckBegin2 = 0x91;
+  static const int rspAckData2 = 0x92;
+  static const int rspAckEnd2 = 0x93;
+  static const int rspAckAbort2 = 0x94;
 
   // 状态码表（§5.7，唯一来源；未知值 fail closed）
   static const int statusOk = 0x00;
@@ -89,8 +91,7 @@ class OtaBleCodec {
   static const int dataSegmentSize = 128;
   /// 4KB 块 = 恰 32 段。
   static const int segmentsPerBlock = 32;
-  /// credit 窗口 = 当前块。
-  static const int creditWindowBlocks = 1;
+  static const int creditWindowBlocks = 2;
 
   /// CRC16-CCITT-FALSE（§0.2：poly 0x1021、初值 0xFFFF、不反射、无最终异或）。
   static int crc16(List<int> bytes, [int start = 0, int? end]) {
@@ -174,11 +175,12 @@ class OtaBleCodec {
     );
   }
 
-  /// BEGIN payload（§5.3，101B）。
-  static Uint8List encodeBeginPayload({
+  /// BEGIN2: protocol, total length, SHA-256, ETU header, negotiated epoch.
+  static Uint8List encodeBegin2Payload({
     required int totalLen,
     required List<int> packageSha256,
     required List<int> etuHeader,
+    required int epoch,
   }) {
     if (packageSha256.length != 32) {
       throw ArgumentError('package_sha256 必须为 32 字节');
@@ -186,39 +188,49 @@ class OtaBleCodec {
     if (etuHeader.length != 64) {
       throw ArgumentError('etu_header 必须为 64 字节');
     }
-    final payload = Uint8List(101);
-    payload[0] = 1; // proto_ver 恒 1
+    if (totalLen <= 0 || totalLen > 0x180000) {
+      throw ArgumentError.value(totalLen, 'totalLen');
+    }
+    final payload = Uint8List(105);
+    payload[0] = 2;
     payload[1] = totalLen & 0xFF;
     payload[2] = (totalLen >> 8) & 0xFF;
     payload[3] = (totalLen >> 16) & 0xFF;
     payload[4] = (totalLen >> 24) & 0xFF;
     payload.setRange(5, 37, packageSha256);
     payload.setRange(37, 101, etuHeader);
+    payload.setRange(101, 105, encodeEpoch(epoch));
     return payload;
   }
 
-  /// END payload：package_sha256 复述（32B）。
-  static Uint8List encodeEndPayload(List<int> packageSha256) {
+  static Uint8List encodeEpoch(int epoch) {
+    if (epoch <= 0 || epoch > 0xffffffff) {
+      throw ArgumentError.value(epoch, 'epoch');
+    }
+    return (ByteData(4)..setUint32(0, epoch, Endian.little))
+        .buffer.asUint8List();
+  }
+
+  /// END2 repeats the negotiated epoch and whole-package SHA-256.
+  static Uint8List encodeEnd2Payload(int epoch, List<int> packageSha256) {
     if (packageSha256.length != 32) {
       throw ArgumentError('package_sha256 必须为 32 字节');
     }
-    return Uint8List.fromList(packageSha256);
+    return Uint8List.fromList([...encodeEpoch(epoch), ...packageSha256]);
   }
 
-  /// DATA payload：u32 off LE + data（恒 128B，仅包尾段可短）。
-  static Uint8List encodeDataPayload(int offset, List<int> data) {
-    if (offset % dataSegmentSize != 0) {
+  /// DATA2: epoch, aligned offset, and at most one 128-byte segment.
+  static Uint8List encodeData2Payload(int epoch, int offset, List<int> data) {
+    if (offset < 0 || offset > 0xffffffff || offset % dataSegmentSize != 0) {
       throw ArgumentError('DATA off 必须按 128 对齐: $offset');
     }
     if (data.isEmpty || data.length > dataSegmentSize) {
       throw ArgumentError('DATA 段净荷必须在 1..128 字节内: ${data.length}');
     }
-    final payload = Uint8List(4 + data.length);
-    payload[0] = offset & 0xFF;
-    payload[1] = (offset >> 8) & 0xFF;
-    payload[2] = (offset >> 16) & 0xFF;
-    payload[3] = (offset >> 24) & 0xFF;
-    payload.setRange(4, payload.length, data);
+    final payload = Uint8List(8 + data.length);
+    payload.setRange(0, 4, encodeEpoch(epoch));
+    ByteData.sublistView(payload).setUint32(4, offset, Endian.little);
+    payload.setRange(8, payload.length, data);
     return payload;
   }
 }
@@ -307,19 +319,27 @@ class OtaAckPayload {
     required this.status,
     this.session,
     required this.durableOff,
-    required this.blockBitmap,
+    required this.epoch,
+    required this.acceptedOff,
+    required this.creditEnd,
   });
 
   final int status;
-  /// 仅 BEGIN ACK（0x81）携带，10B；其余 ACK 为 9B 无该字段。
+  /// BEGIN2 echoes the new session in both its header and payload.
   final int? session;
   final int durableOff;
-  final int blockBitmap;
+  final int epoch;
+  final int acceptedOff;
+  final int creditEnd;
 
   /// 解析 ACK payload；长度不符或 status 未知即抛 [FormatException]。
   static OtaAckPayload parse(int ackCmd, List<int> payload) {
-    final isBeginAck = ackCmd == OtaBleCodec.rspAckBegin;
-    final expectedLen = isBeginAck ? 10 : 9;
+    if (!const {OtaBleCodec.rspAckBegin2, OtaBleCodec.rspAckData2,
+        OtaBleCodec.rspAckEnd2, OtaBleCodec.rspAckAbort2}.contains(ackCmd)) {
+      throw const FormatException('Not a v2 transfer ACK');
+    }
+    final isBeginAck = ackCmd == OtaBleCodec.rspAckBegin2;
+    final expectedLen = isBeginAck ? 18 : 17;
     if (payload.length != expectedLen) {
       throw FormatException(
           'ACK payload 长度非法: ${payload.length}，期望 $expectedLen');
@@ -334,19 +354,14 @@ class OtaAckPayload {
       session = payload[1];
       index = 2;
     }
-    final durableOff = payload[index] |
-        (payload[index + 1] << 8) |
-        (payload[index + 2] << 16) |
-        (payload[index + 3] << 24);
-    final blockBitmap = payload[index + 4] |
-        (payload[index + 5] << 8) |
-        (payload[index + 6] << 16) |
-        (payload[index + 7] << 24);
+    final body = ByteData.sublistView(Uint8List.fromList(payload), index);
     return OtaAckPayload._(
       status: status,
       session: session,
-      durableOff: durableOff,
-      blockBitmap: blockBitmap,
+      epoch: body.getUint32(0, Endian.little),
+      durableOff: body.getUint32(4, Endian.little),
+      acceptedOff: body.getUint32(8, Endian.little),
+      creditEnd: body.getUint32(12, Endian.little),
     );
   }
 }

@@ -1,16 +1,16 @@
 part of 'ota_ble_transport.dart';
 
-/// Negotiated v2 extension. The v1 codec and INFO stay unchanged.
+/// V2 transfer commands; GET_INFO retains its separate identity format.
 class _PipelineWire {
-  static const caps = 0x10;
-  static const begin = 0x11;
-  static const data = 0x12;
-  static const end = 0x13;
-  static const abort = 0x14;
-  static const capsReply = 0x90;
-  static const ackBegin = 0x91;
-  static const ackData = 0x92;
-  static const ackAbort = 0x94;
+  static const caps = OtaBleCodec.cmdCaps2;
+  static const begin = OtaBleCodec.cmdBegin2;
+  static const data = OtaBleCodec.cmdData2;
+  static const end = OtaBleCodec.cmdEnd2;
+  static const abort = OtaBleCodec.cmdAbort2;
+  static const capsReply = OtaBleCodec.rspCaps2;
+  static const ackBegin = OtaBleCodec.rspAckBegin2;
+  static const ackData = OtaBleCodec.rspAckData2;
+  static const ackAbort = OtaBleCodec.rspAckAbort2;
 
   static Uint8List word(int value) =>
       (ByteData(4)..setUint32(0, value, Endian.little)).buffer.asUint8List();
@@ -19,18 +19,19 @@ class _PipelineWire {
 class _PipelineAck {
   _PipelineAck(this.frame, {this.arrivalUs}) {
     final base = frame.cmd == _PipelineWire.ackBegin ? 2 : 1;
-    if (frame.payload.length != base + OtaPipelineWindow.ackBytes ||
-        !OtaBleCodec.knownStatuses.contains(frame.payload[0])) {
+    final OtaAckPayload ack;
+    try {
+      ack = OtaAckPayload.parse(frame.cmd, frame.payload);
+    } on FormatException {
       throw const OtaTransportException('Invalid v2 ACK', code: 'ACK_MALFORMED');
     }
-    status = frame.payload[0];
-    session = base == 2 ? frame.payload[1] : frame.session;
+    status = ack.status;
+    session = ack.session ?? frame.session;
     body = Uint8List.sublistView(frame.payload, base);
-    final bytes = ByteData.sublistView(body);
-    epoch = bytes.getUint32(0, Endian.little);
-    durable = bytes.getUint32(4, Endian.little);
-    accepted = bytes.getUint32(8, Endian.little);
-    credit = bytes.getUint32(12, Endian.little);
+    epoch = ack.epoch;
+    durable = ack.durableOff;
+    accepted = ack.acceptedOff;
+    credit = ack.creditEnd;
     if (session != frame.session ||
         (status == OtaBleCodec.statusOk && session == 0)) {
       throw const OtaTransportException('Invalid v2 session', code: 'ACK_MALFORMED');
@@ -276,7 +277,7 @@ extension _PipelineTransfer on OtaBleTransport {
     }
   }
 
-  Future<OtaAckResult?> _tryPipelineTransfer({
+  Future<OtaAckResult> _pipelineTransfer({
     required Uint8List package,
     required List<int> packageSha256,
     required List<int> etuHeader,
@@ -308,7 +309,11 @@ extension _PipelineTransfer on OtaBleTransport {
             payload: _PipelineWire.word(epoch)),
           _PipelineWire.capsReply, session: 0, seq: querySeq, timeout: ackTimeout);
       } on OtaTransportException catch (error) {
-        if (error.code == 'TIMEOUT' && _channel.isConnected && !_writeChannelPoisoned) return null;
+        if (error.code == 'TIMEOUT') {
+          throw const OtaTransportException(
+            'BLE v2 capability negotiation timed out; legacy fallback is disabled',
+            code: 'V2_REQUIRED');
+        }
         rethrow;
       }
       if (!OtaPipelineWindow.acceptsCapabilities(caps, epoch)) {
@@ -316,17 +321,16 @@ extension _PipelineTransfer on OtaBleTransport {
       }
       negotiated = true;
       // Validate lengths before opening a receiver session.
-      final prefix = OtaBleCodec.encodeBeginPayload(totalLen: package.length,
-        packageSha256: packageSha256, etuHeader: etuHeader);
+      final beginPayload = OtaBleCodec.encodeBegin2Payload(totalLen: package.length,
+        packageSha256: packageSha256, etuHeader: etuHeader, epoch: epoch);
       OtaPipelineWindow(epoch: epoch, totalBytes: package.length, durableOffset: 0);
-      prefix[0] = 2;
       final beginSeq = _nextSeq();
       _noProgressClock = Stopwatch()..start();
       otaMonoLog('MONO_BUDGET_START');
       _inTransfer = true;
       transferStarted = true;
       final beginAck = await _pipelineRoundTrip(cmd: _PipelineWire.begin, seq: beginSeq,
-        epoch: epoch, session: 0, payload: Uint8List.fromList([...prefix, ..._PipelineWire.word(epoch)]));
+        epoch: epoch, session: 0, payload: beginPayload);
       _session = beginAck.session;
       _pipelineObservationSession = _session;
       final window = OtaPipelineWindow(epoch: epoch, totalBytes: package.length,
@@ -379,8 +383,7 @@ extension _PipelineTransfer on OtaBleTransport {
           sequences.add(seq);
           final end = math.min(offset + 128, package.length);
           stream.add(OtaBleCodec.encodeCommand(cmd: _PipelineWire.data, session: _session, seq: seq,
-            payload: [..._PipelineWire.word(epoch),
-              ...OtaBleCodec.encodeDataPayload(offset, package.sublist(offset, end))]));
+            payload: OtaBleCodec.encodeData2Payload(epoch, offset, package.sublist(offset, end))));
           ends.add(stream.length);
         }
         var registered = 0, finished = 0, previousEnd = 0;
@@ -443,7 +446,7 @@ extension _PipelineTransfer on OtaBleTransport {
       final endSeq = (beginSeq + 1 + (package.length - resume + 127) ~/ 128) & 0xffff;
       final endAck = await _pipelineRoundTrip(cmd: _PipelineWire.end, seq: endSeq,
         epoch: epoch, session: _session,
-        payload: Uint8List.fromList([..._PipelineWire.word(epoch), ...packageSha256]));
+        payload: OtaBleCodec.encodeEnd2Payload(epoch, packageSha256));
       view.check();
       _checkUsable();
       if (endAck.durable != package.length || endAck.accepted != package.length ||

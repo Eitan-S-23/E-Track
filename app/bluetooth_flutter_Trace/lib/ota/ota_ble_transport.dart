@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
 
 import 'ota_ble_codec.dart';
 import 'ota_device_info.dart';
@@ -49,13 +48,12 @@ abstract class OtaBleChannel {
 ///
 /// 职责（不含连接管理——特征发现与重连由 OtaService/BluetoothService 编排）：
 /// - 帧分片：单帧按 maxWriteChunkSize() 切片写入；
-/// - credit 窗口：一次只发当前 4KB 块（32 段），在途未确认段数受
-///   INFO.max_window_segs 与冻结 4KB 窗口共同约束；
-/// - durable 进度：只认 MCU ACK 的 durable_off/block_bitmap；
-/// - 断点续传：重连后 BEGIN 同 package_sha256，按 bitmap 补发缺口段；
+/// - V2 credit: two 4KB buffers and at most 24 outstanding segments;
+/// - progress comes only from the receiver's durable offset;
+/// - resume uses BEGIN2's durable prefix and a fresh negotiated epoch;
 /// - ACK 关联：MCU 应答回显请求 seq（BEGIN ACK 帧头 session 是新会话），
 ///   按 cmd+session+seq 精确关联，异步 ACK_ABORT 同样分发；
-/// - 可恢复错误（ERR_SEQ/ERR_SESSION/ERR_STATE）有界重新 BEGIN 续传。
+/// - bounded V2 retransmission never falls back to a legacy transfer.
 class OtaBleTransport {
   OtaBleTransport({
     required OtaBleChannel channel,
@@ -65,10 +63,9 @@ class OtaBleTransport {
     this.noProgressTimeout = defaultNoProgressTimeout,
     this.writeTimeout = defaultWriteTimeout,
     int? dataBatchFrames,
-    this.enablePipeline = false,
     this.onApplyBoundary,
     this.onLinkSelection,
-  })  : dataBatchFrames = dataBatchFrames ?? (enablePipeline ? defaultPipelineBatchFrames : 1),
+  })  : dataBatchFrames = dataBatchFrames ?? defaultPipelineBatchFrames,
         _channel = channel {
     if (this.dataBatchFrames != 1 && this.dataBatchFrames != 3 && this.dataBatchFrames != 12) {
       throw ArgumentError.value(dataBatchFrames, 'dataBatchFrames', 'expected 1, 3 or 12');
@@ -112,19 +109,14 @@ class OtaBleTransport {
   final Duration noProgressTimeout;
   final Duration writeTimeout;
   static const int defaultPipelineBatchFrames = 12;
-  /// V2 defaults to the measured batch. V1 fallback retains single-frame writes.
+  /// BLE v2 is the only transfer path.
   final int dataBatchFrames;
-  final bool enablePipeline;
   int? _pipelineEpoch;
   int? _pipelineObservationEpoch, _pipelineObservationSession;
   _PipelineAckView? _pipelineView;
-  int _observationWindowSegments = 0;
 
   /// 帧等待者队列（一问一答）：注册后才开始发送，响应到达即分发。
   final List<_FrameWaiterBase> _waiters = [];
-  /// 传输期 ACK 视图：持续消费每段 ACK，不占用一问一答等待者。
-  _TransferAckView? _ackView;
-
   int _seq = 0;
   // 会话外查询（GET_INFO，session=0）使用独立 seq 空间（RC3-08⑦）。
   // 合同 §5.1 定义 seq 为「会话内」帧序号，MCU 会话层对 BEGIN/DATA/END
@@ -298,31 +290,10 @@ class OtaBleTransport {
     }
   }
 
-  /// 发送 BEGIN 携带包身份，解析 ACK（10B，含 session）。
-  /// status != OK 时抛 [OtaTransportException]（携带 status）。
-  /// 成功后记录新 session（RC3-03）：独立 begin 的后续 abort/错误帧
-  /// 必须携带本会话 session，而非残留的 0。
-  Future<OtaBeginAck> begin({
-    required int totalLen,
-    required List<int> packageSha256,
-    required List<int> etuHeader,
-    Duration timeout = defaultAckTimeout,
-  }) async {
-    final ack = await _beginRoundTrip(
-      totalLen: totalLen,
-      packageSha256: packageSha256,
-      etuHeader: etuHeader,
-      timeout: timeout,
-    );
-    _session = ack.session;
-    return ack;
-  }
-
   /// 传输完整包：credit 窗口推进 + 断点续传消费。
   ///
   /// [package] 是已通过 SHA-256 校验的完整 ETU 包字节；
-  /// [windowSegments] 是 INFO.max_window_segs 报告的在途段上限（内部
-  /// clamp 到 1..32；缺省 32 = 冻结 4KB 块窗口）；
+  /// [windowSegments] is a sender cap within the CAPS2 limit of 24 segments.
   /// [onDurableProgress] 只在 ACK durable_off 前进时回调（UI durable 进度）；
   /// [onSent] 在每个段写入后回调（GATT 写入活跃度参考，含重发）。
   /// 返回最终 END ACK（status==OK 即包传输完成；成功重启与目标身份
@@ -337,575 +308,9 @@ class OtaBleTransport {
   }) async {
     if (_busy) throw const OtaTransportException('transport busy', code: 'BUSY');
     _checkUsable();
-    if (enablePipeline) {
-      final result = await _tryPipelineTransfer(package: package,
-        packageSha256: packageSha256, etuHeader: etuHeader,
-        windowSegments: windowSegments, onDurableProgress: onDurableProgress, onSent: onSent);
-      if (result != null) return result;
-      _checkUsable();
-    }
-    return _transferCore<OtaAckResult>(
-    package: package,
-    packageSha256: packageSha256,
-    etuHeader: etuHeader,
-    windowSegments: enablePipeline ? math.min(windowSegments ?? 4, 4) : windowSegments,
-    batchFrames: enablePipeline ? 1 : dataBatchFrames,
-    onDurableProgress: onDurableProgress,
-    onSent: onSent,
-    onFullResult: (ack) => ack,
-    );
-  }
-
-  /// Debug-only staging probe. It never sends END or reports a full OTA result.
-  Future<OtaPrefixProbeResult> probePrefix({
-    required Uint8List package,
-    required List<int> packageSha256,
-    required List<int> etuHeader,
-    required int prefixBytes,
-    int? windowSegments,
-    void Function(int durableOff, int total)? onDurableProgress,
-    void Function(int sentBytes, int total)? onSent,
-  }) async {
-    const blockSize = OtaBleCodec.segmentsPerBlock * OtaBleCodec.dataSegmentSize;
-    if (!kDebugMode || prefixBytes <= 0 || prefixBytes > 32768 ||
-        prefixBytes % blockSize != 0 || prefixBytes >= package.length) {
-      throw const OtaTransportException('Invalid debug prefix probe', code: 'PROBE_CONFIG');
-    }
-    if (stats == null || stats!.transferStartUs != null) {
-      throw const OtaTransportException('Fresh probe observations required', code: 'PROBE_CONFIG');
-    }
-    return _transferCore<OtaPrefixProbeResult>(
-      package: package,
-      packageSha256: packageSha256,
-      etuHeader: etuHeader,
-      prefixBytes: prefixBytes,
-      windowSegments: windowSegments,
-      onDurableProgress: onDurableProgress,
-      onSent: onSent,
-      onFullResult: (ack) => throw OtaTransportException(
-        'Prefix probe terminated before verified closure',
-        code: 'PROBE_TERMINATED', status: ack.status,
-      ),
-      onPrefixResult: (result) => result,
-    );
-  }
-
-  Future<T> _transferCore<T>({
-    required Uint8List package,
-    required List<int> packageSha256,
-    required List<int> etuHeader,
-    required T Function(OtaAckResult) onFullResult,
-    T Function(OtaPrefixProbeResult)? onPrefixResult,
-    int? prefixBytes,
-    int? windowSegments,
-    int? batchFrames,
-    void Function(int durableOff, int total)? onDurableProgress,
-    void Function(int sentBytes, int total)? onSent,
-  }) async {
-    if (_busy) {
-      throw const OtaTransportException('transport 忙：会话进行中', code: 'BUSY');
-    }
-    _checkUsable();
-    _busy = true;
-    _dataWriteDispatched = false;
-    final effectiveWindow = (windowSegments ?? OtaBleCodec.segmentsPerBlock)
-        .clamp(1, OtaBleCodec.segmentsPerBlock);
-    final effectiveBatchFrames = batchFrames ?? dataBatchFrames;
-    _observationWindowSegments = effectiveWindow.toInt();
-    if (stats?.transferStartUs == null) stats?.configureDataBatch(effectiveBatchFrames);
-    final view = _TransferAckView(
-      blockSize:
-          OtaBleCodec.segmentsPerBlock * OtaBleCodec.dataSegmentSize,
-      segmentSize: OtaBleCodec.dataSegmentSize,
-      stats: stats,
-      captureDurableArrival: prefixBytes != null,
-    );
-    _ackView = view;
-    // 无 durable 进展总预算（RC3-07）：单调时钟实例字段，覆盖 transfer
-    // 全部等待点；预算跨 BEGIN/resume 保留（重新 BEGIN 本身不算进展），
-    // 只在 durable 前进时 reset；finally 清空解除对后续命令的约束。
-    _noProgressClock = Stopwatch()..start();
-    otaMonoLog('MONO_BUDGET_START');
-    // P3-4 观测：传输起点改由首个 BEGIN 帧的**写调用**登记（见
-    // [_writeFrame]）。此处只置传输窗口标志：GET_INFO 探针帧与后台复核
-    // 帧在 transfer 之外发生，不得被当作传输起点。
-    _inTransfer = true;
-    // P3-4 观测：终态标记（成功点置 true；fail 由 finally 统一登记）。
-    var transferOk = false;
-    try {
-      final total = package.length;
-      final dataLimit = prefixBytes ?? total;
-      final probeOffsets = prefixBytes == null ? null : <int>{};
-      var firstBegin = true;
-      void validateProbeCoverage(int durable, int bitmap) {
-        if (probeOffsets == null) return;
-        if (durable > dataLimit || (durable == dataLimit && bitmap != 0)) {
-          throw const OtaTransportException('Probe progress exceeds prefix', code: 'ACK_MALFORMED');
-        }
-        for (var offset = 0; offset < durable; offset += OtaBleCodec.dataSegmentSize) {
-          if (!probeOffsets.contains(offset)) {
-            throw const OtaTransportException('Unsent probe bytes confirmed', code: 'PROBE_COVERAGE');
-          }
-        }
-        for (var seg = 0; seg < OtaBleCodec.segmentsPerBlock; seg++) {
-          if ((bitmap >> seg) & 1 == 1 &&
-              !probeOffsets.contains(durable + seg * OtaBleCodec.dataSegmentSize)) {
-            throw const OtaTransportException('Unsent probe bitmap confirmed', code: 'PROBE_COVERAGE');
-          }
-        }
-      }
-      var resumeLeft = retries; // ERR_SEQ/ERR_SESSION/ERR_STATE → ABORT+BEGIN
-      var sentBytes = 0;
-      var lastDurable = 0; // 跨 BEGIN 保留：resume 不得倒退（RC3-06）
-      var needsResume = false;
-      while (true) {
-        _checkUsable();
-        _checkNoProgress();
-        // ---- BEGIN（同 package_sha256 幂等：MCU 返回当前进度）----
-        // 注意 MCU 真值（ota_ble_session.c:377）：同包重复 BEGIN 不重置
-        // expected_seq。因此 resume 必须先 ABORT teardown（staging durable
-        // 保留），让 BEGIN 走新会话分支重置 expected_seq = BEGIN.seq+1。
-        final beginAck = await _beginRoundTrip(
-          totalLen: total,
-          packageSha256: packageSha256,
-          etuHeader: etuHeader,
-          timeout: _capByBudget(ackTimeout),
-        );
-        // P3-4 观测：BEGIN 有效 ACK 的到达时刻由等待者在**分发点**记录
-        // 并随结果带回（P34-DA01）。此前实现是在本 await 返回后立即取
-        // 时钟，取到的是「写结算 + ACK 解析 + 校验」之后的时刻，比真实
-        // 到达晚；它在同一时钟域内仍单调，但会把写结算延迟算进该确认
-        // 覆盖段的 ACK 延迟。
-        final beginAckArrivalUs = beginAck.arrivalUs;
-        final beginTerminal = _abortStatusOf(beginAck.status);
-        if (beginTerminal != null) {
-          return onFullResult(OtaAckResult.terminal(
-              beginTerminal,
-              OtaAckResult(
-                  status: beginAck.status,
-                  durableOff: beginAck.durableOff,
-                  blockBitmap: beginAck.blockBitmap)));
-        }
-        if (beginAck.durableOff < lastDurable) {
-          // BEGIN ACK 权威值校验（RC3-06）：MCU staging durable 单调，
-          // 倒退即状态不可信，fail closed。
-          throw const OtaTransportException(
-              'BEGIN ACK durable_off 倒退（MCU 状态不可信）',
-              code: 'ACK_MALFORMED');
-        }
-        _session = beginAck.session;
-        view.reset(beginAck.durableOff, beginAck.blockBitmap, total);
-        stats?.recordAcceptedState(protocol: 1, session: _session,
-            durable: view.durableOff, bitmap: view.blockBitmap, begin: true);
-        if (firstBegin && prefixBytes == null) {
-          onLinkSelection?.call(OtaTransportSelection(protocol: 1,
-            windowSegments: effectiveWindow.toInt(), dataBatchFrames: effectiveBatchFrames,
-            fallbackReason: enablePipeline ? 'caps2-timeout' : null));
-        }
-        if (prefixBytes != null && firstBegin &&
-            (beginAck.durableOff != 0 || beginAck.blockBitmap != 0)) {
-          throw const OtaTransportException('Probe requires zero initial durable and bitmap',
-              code: 'PROBE_INITIAL_STATE');
-        }
-        firstBegin = false;
-        validateProbeCoverage(beginAck.durableOff, beginAck.blockBitmap);
-        view.durableArrivalUs = beginAck.arrivalUs;
-        // P3-4 观测：BEGIN ACK 权威值同样构成确认——resume 带回的 durable
-        // 前缀 `[0, durable_off)` 与当前块 bitmap 对既往已发送段是「由
-        // durable_off/bitmap 明确确认」的有效 ACK 终点；本实例从未发送过的
-        // 前缀段不制造样本（自然落入早到暂存并记为无效观测）。
-        // 带回的 durable 进展（丢 ACK 期间 MCU 已提交）也如实登记。
-        if (beginAckArrivalUs != null) {
-          stats!.recordResumeConfirm(
-            durableOff: beginAck.durableOff,
-            bitmap: beginAck.blockBitmap,
-            segmentSize: OtaBleCodec.dataSegmentSize,
-            arrivalUs: beginAckArrivalUs,
-          );
-        }
-        stats?.recordDurableAdvance(beginAck.durableOff);
-        var durableOff = beginAck.durableOff;
-        if (beginAck.durableOff > lastDurable) {
-          // resume 后 BEGIN 带回更大 durable（丢 ACK 期间 MCU 已提交）：
-          // 真实 staging 进展同样重置无进展预算窗口，否则刚获得恢复进展
-          // 的传输仍按旧截止时间被判超时（RC3-07）。
-          _noProgressClock?.reset();
-          otaMonoLog('MONO_BUDGET_RESET', durable: beginAck.durableOff);
-        }
-        _notifyDurable(onDurableProgress, durableOff, dataLimit);
-        needsResume = false;
-        // ---- 块循环：块起点按字节换算（durableOff ~/ blockSize）----
-        while (durableOff < dataLimit && !needsResume) {
-          _checkUsable();
-          final blockStart = (view.durableOff ~/ view.blockSize) * view.blockSize;
-          if (blockStart >= dataLimit) break;
-          final blockEnd = (blockStart + view.blockSize).clamp(0, dataLimit);
-          // 尾块段数向上取整（4096+129B → 33 段，最后一段 1B）。
-          final segsInBlock =
-              ((blockEnd - blockStart) + OtaBleCodec.dataSegmentSize - 1) ~/
-                  OtaBleCodec.dataSegmentSize;
-          while (view.durableOff < blockEnd) {
-            _checkUsable();
-            final midErr = view.takeError();
-            if (midErr != null) {
-              final decision = _classifyAckError(midErr, resumeLeft);
-              if (decision.resume) {
-                resumeLeft--;
-                needsResume = true;
-                break;
-              }
-              if (decision.terminal != null) {
-                return onFullResult(OtaAckResult.terminal(
-                    decision.terminal!, view.result()));
-              }
-              throw _ackErrorException(midErr);
-            }
-            // 发送缺口段：受在途未确认段数（窗口）约束；窗口按 ACK/位图
-            // 回收（RC2-05：丢 ACK 后位图确认仍能释放窗口）。
-            // 发窗循环逐段检查预算（RC3-07）：MTU=23 时 32 段发窗本身
-            // 可耗尽剩余预算，不得无截止连发。
-            for (var seg = 0; seg < segsInBlock; seg++) {
-              _checkNoProgress();
-              await _waitIfPaused(); // 后台暂停挂起（RC3-08）
-              if (view.hasTerminalError) break;
-              // 块完成即停（RC3-02⑥）：段间 await 让出期间，块提交 ACK
-              // （advanced）可把 durable 推到块尾并清空 inFlight、bitmap
-              // 被 MCU 提交后的 0 覆盖——循环恢复后若不检查会按
-              // 「无置位/无在途」对已完成块从头重发（新 seq），重发段的
-              // 幂等 ACK（bitmap 不含段）再触发写入确认判定 ERR_STATE，
-              // 引发无谓的 ABORT+BEGIN resume。
-              if (view.durableOff >= blockEnd) break;
-              if (view.inFlightCount >= effectiveWindow) break;
-              if ((view.blockBitmap >> seg) & 1 == 1) continue; // 已收段幂等跳过
-              if (view.isSegmentInFlight(seg)) continue; // 在途未确认
-              if (effectiveBatchFrames > 1) {
-                final selected = <int>[];
-                final free = effectiveWindow - view.inFlightCount;
-                for (var next = seg; next < segsInBlock && selected.length < effectiveBatchFrames && selected.length < free; next++) {
-                  if ((view.blockBitmap >> next) & 1 == 0 && !view.isSegmentInFlight(next)) {
-                    selected.add(next);
-                  }
-                }
-                await _sendSegmentBatch(package, blockStart, selected, view, (segment) {
-                  final offset = blockStart + segment * OtaBleCodec.dataSegmentSize;
-                  final length = _segmentLength(package, blockStart, segment);
-                  probeOffsets?.add(offset);
-                  sentBytes += length;
-                  stats?.recordSegmentSendEnd(offsetBytes: offset, lengthBytes: length);
-                });
-                onSent?.call(sentBytes, dataLimit);
-                seg = selected.last;
-                continue;
-              }
-              final seq = _nextSeq();
-              view.trackSend(seq, seg);
-              await _sendSegment(package, blockStart, seg, seq);
-              probeOffsets?.add(blockStart + seg * OtaBleCodec.dataSegmentSize);
-              final segLen = _segmentLength(package, blockStart, seg);
-              sentBytes += segLen;
-              // P3-4 观测：段发送结束（首发/重发由 stats 按字节偏移去重）。
-              stats?.recordSegmentSendEnd(
-                offsetBytes: blockStart + seg * OtaBleCodec.dataSegmentSize,
-                lengthBytes: segLen,
-              );
-              onSent?.call(sentBytes, dataLimit);
-            }
-            if (view.hasPendingError) continue;
-            if (view.durableOff >= blockEnd) break;
-            _checkNoProgress();
-            final changed =
-                await view.waitForChange(_capByBudget(ackTimeout));
-            if (changed) continue; // 有 ACK/错误到达，回到循环头重估
-            // 无任何 ACK：重发在途且未被位图确认的段（复用原 seq——MCU
-            // 对落后 seq 幂等 ACK，对超前 seq 报 ERR_SEQ，§5.1）。
-            var overLimit = false;
-            final pending =
-                Map<int, int>.of(view.inFlight); // seq → seg 快照
-            for (final entry in pending.entries) {
-              _checkNoProgress();
-              await _waitIfPaused(); // 后台暂停挂起（RC3-08）
-              if (view.hasTerminalError) break;
-              // 块完成即停（RC3-02⑥）：重发段间让出期间块提交 ACK 可能
-              // 已把 durable 推到块尾——此时重发只会得到幂等 ACK 并触发
-              // 写入确认判定 ERR_STATE（RC3-08 判定对「未写 staging 的
-              // 幂等 ACK」fail closed 是对的，但本场景的重发本身不该发生）。
-              if (view.durableOff >= blockEnd) break;
-              final seg = entry.value;
-              if ((view.blockBitmap >> seg) & 1 == 1) continue;
-              view.trackSend(entry.key, seg); // 累计发送计数 +1
-              if (view.sendCountOf(seg) > retries) overLimit = true;
-              if (stats != null) {
-                otaMonoLog('MONO_DATA_RETRY',
-                    code: 'session:$_session,seq:${entry.key},'
-                        'offset:${blockStart + seg * OtaBleCodec.dataSegmentSize},'
-                        'attempt:${view.sendCountOf(seg)}',
-                    durable: view.durableOff);
-              }
-              await _sendSegment(package, blockStart, seg, entry.key);
-              probeOffsets?.add(blockStart + seg * OtaBleCodec.dataSegmentSize);
-              final segLen = _segmentLength(package, blockStart, seg);
-              sentBytes += segLen;
-              // P3-4 观测：重发段同样登记（stats 侧按偏移识别为重传）。
-              stats?.recordSegmentSendEnd(
-                offsetBytes: blockStart + seg * OtaBleCodec.dataSegmentSize,
-                lengthBytes: segLen,
-              );
-              onSent?.call(sentBytes, dataLimit);
-            }
-            if (view.hasPendingError) continue;
-            if (overLimit) {
-              if (resumeLeft > 0) {
-                // ACK 持续丢失（RC3-08③）：MCU 可能仍 ACTIVE 卡在旧
-                // expected_seq（快速掉线重连场景，DATA 幂等 ACK 不写
-                // staging）。ABORT teardown 后 BEGIN 重置 expected_seq
-                // 续传，而非直接放弃。
-                resumeLeft--;
-                needsResume = true;
-                break;
-              }
-              throw const OtaTransportException(
-                  'ACK 重发次数超限，中止传输', code: 'TIMEOUT');
-            }
-          }
-          // 块结束：同步权威 durable（最后一段的 ACK 可能刚到）。
-          if (view.durableOff > durableOff) {
-            durableOff = view.durableOff;
-            validateProbeCoverage(durableOff, view.blockBitmap);
-            _notifyDurable(onDurableProgress, durableOff, dataLimit);
-            _noProgressClock?.reset(); // durable 前进即重置预算窗口
-            otaMonoLog('MONO_BUDGET_RESET', durable: durableOff);
-          }
-          if (durableOff > lastDurable) {
-            lastDurable = durableOff;
-          }
-          // 块结束锁存错误消费（RC3-06⑤）：发窗内 ACK 置 malformed/error
-          // 后，后续合法提交 ACK 可把 durable 推到块尾，段循环经
-          // 「durableOff >= blockEnd」break 直接退出、锁存错误未被消费
-          // 即进入 END——MCU 已报错却被当成功收尾。块结束同步后再消费
-          // 一次，处置链与段循环头一致（resume / terminal / 抛出）。
-          final blockEndErr = view.takeError();
-          if (blockEndErr != null) {
-            final decision = _classifyAckError(blockEndErr, resumeLeft);
-            if (decision.resume) {
-              resumeLeft--;
-              needsResume = true;
-            } else if (decision.terminal != null) {
-              return onFullResult(OtaAckResult.terminal(
-                  decision.terminal!, view.result()));
-            } else {
-              throw _ackErrorException(blockEndErr);
-            }
-          }
-        }
-        if (needsResume) {
-          // MCU 仍 ACTIVE 时同包 BEGIN 不重置 expected_seq：先 ABORT
-          // teardown（durable 保留），再由循环头 BEGIN 续传（RC2-05）。
-          await _abortRoundTrip();
-          _session = 0;
-          continue;
-        }
-        if (prefixBytes != null) {
-          validateProbeCoverage(view.durableOff, view.blockBitmap);
-          final beginWriteUs = stats!.transferStartUs;
-          final durableAckUs = view.durableArrivalUs;
-          if (view.durableOff != prefixBytes || view.blockBitmap != 0 ||
-              probeOffsets!.length * OtaBleCodec.dataSegmentSize != prefixBytes ||
-              beginWriteUs == null || durableAckUs == null || durableAckUs <= beginWriteUs) {
-            throw const OtaTransportException('Incomplete prefix coverage or timing', code: 'PROBE_COVERAGE');
-          }
-          final closure = await _abortProbeStrict(view, prefixBytes);
-          return onPrefixResult!(OtaPrefixProbeResult._(
-            prefixBytes: prefixBytes, sentTotalBytes: sentBytes,
-            senderWindowSegments: effectiveWindow, beginWriteUs: beginWriteUs,
-            durableAckUs: durableAckUs, abortWriteUs: closure.writeUs,
-            abortAckUs: closure.arrivalUs, session: closure.session, abortSeq: closure.seq,
-          ));
-        }
-        // ---- END：复述 package_sha256（seq 复用重试，先注册等待者再发送）----
-        final endSeq = _nextSeq(); // 循环外分配一次：重试复用（MCU 对
-        // 落后 seq 幂等 ACK，新 seq 会因超前被 ERR_SEQ 拒绝，§5.1）。
-        var endAttempts = 0;
-        needsResume = false;
-        while (true) {
-          _checkUsable();
-          await _waitIfPaused(); // 后台暂停挂起（RC3-08）
-          // MCU teardown 后的 NAK 以 session=0 回显 seq：等待者按 cmd+seq
-          // 关联，session 仅在错误态放宽（见 _ResponseWaiter.matches）。
-          final waiter = _ResponseWaiter(OtaBleCodec.rspAckEnd, _session, endSeq);
-          _waiters.add(waiter);
-          try {
-            final frame = OtaBleCodec.encodeCommand(
-              cmd: OtaBleCodec.cmdEnd,
-              session: _session,
-              seq: endSeq,
-              payload: OtaBleCodec.encodeEndPayload(packageSha256),
-            );
-            await _writeFrame(frame);
-            final endFrame = await waiter.future
-                .timeout(_capByBudget(ackTimeout),
-                    onTimeout: () => throw TimeoutException('END ACK 超时'));
-            final endAck = _parseAck(endFrame);
-            final endTerminal = _abortStatusOf(endAck.status);
-            if (endTerminal != null) {
-              return onFullResult(OtaAckResult.terminal(
-                  endTerminal, OtaAckResult.fromAck(endAck)));
-            }
-            if (endAck.status == OtaBleCodec.statusErrState &&
-                resumeLeft > 0) {
-              resumeLeft--; // MCU 缺段 teardown → 重新 BEGIN resume 补齐
-              needsResume = true;
-              break;
-            }
-            if (endAck.status != OtaBleCodec.statusOk) {
-              // 非 OK 且非终态、无可续传预算的 END 应答（ERR_SHA/ERR_SEQ/
-              // ERR_STATE 余额耗尽等）：按协议既有语义**非抛出**返回，由
-              // 调用方按 isOk 判失败（既有用例依赖此形态，不得改抛）。
-              // P3-4 观测：只有 status==OK 才是「本次请求最终采信的成功
-              // END」，这类应答不得落入下方成功块——否则非 OK 的失败传输
-              // 会被登记成功终点并置 outcome=ok（P34-R03 反例：END 错误
-              // 状态仍报成功）。
-              return onFullResult(OtaAckResult.fromAck(endAck));
-            }
-            if (endAck.durableOff != total) {
-              // END OK 核对（RC3-06）：MCU finalize 成功语义是
-              // durable==total 且 ETRJ 匹配；OK 但 durable 不符即
-              // 状态不可信，fail closed，不得当成功上报。
-              throw const OtaTransportException(
-                  'END ACK OK 但 durable_off != total（MCU 状态不可信）',
-                  code: 'ACK_MALFORMED');
-            }
-            if (!view.endBitmapValid(endAck.blockBitmap, total)) {
-              // END ACK 权威位图校验（RC3-06）：MCU 真值 END OK ACK 发送
-              // 时 teardown 尚未执行（ota_ble_session.c:686-689），bitmap
-              // 是活跃块位图残留（可能非 0），故不校验 ==0；但置位段仍
-              // 不得越出尾块有效位——越界即状态不可信，fail closed。
-              throw const OtaTransportException(
-                  'END ACK OK 但 block_bitmap 越出尾块有效位（MCU 状态不可信）',
-                  code: 'ACK_MALFORMED');
-            }
-            // 终点观测（补测轮取证）：END ACK OK 收尾是升级会话的关键
-            // 六状态之一（App 解析到 ACK_END/OK），此前该路径无打点，
-            // 历史轮次采不到证。此处是本次请求的成功终点：帧已由
-            // [_ResponseWaiter]（cmd+session+seq）精确关联，status==OK、
-            // durable==total 与尾块位图均通过上方校验。
-            // P3-4 观测：终点时刻在**采信点**登记，不在帧分发处按 cmd 覆盖
-            // ——无关、重复或非法的 END 应答不得覆盖成功终点的时刻。
-            // 时刻取该应答帧的到达分发点时刻（等待者在采信匹配帧时打戳，
-            // P34-DA01）：写结算、解析与校验都发生在到达之后，此处另取
-            // 时钟会把它们的耗时算进传输时长。
-            // 未绑定观测（stats 为 null）时等待者不带到达戳，本调用点也
-            // 无终点可记：传输语义与插桩前逐字一致。只有绑定了观测却拿不到
-            // 到达戳才是异常状态，那种情况必须 fail closed（见下）。
-            final endStats = stats;
-            final endAckArrivalUs = waiter.arrivalUs;
-            if (endStats != null) {
-              if (endAckArrivalUs == null) {
-                // 不可达：绑定观测时等待者只由 _dispatchFrame 的成功匹配
-                // 完成，该路径必带到达戳。真出现即说明等待者被非分发路径
-                // 完成，禁止用事后时钟补造终点，fail closed。
-                throw const OtaTransportException(
-                    'END ACK 到达时刻缺失（非分发路径完成）',
-                    code: 'ACK_MALFORMED');
-              }
-              endStats.recordEndAckArrival(atUs: endAckArrivalUs);
-            }
-            otaMonoLog('MONO_END_ACK_OK', durable: endAck.durableOff);
-            transferOk = true;
-            return onFullResult(OtaAckResult.fromAck(endAck));
-          } on TimeoutException {
-            _checkNoProgress(); // 预算耗尽优先终止，不再空转重试（RC3-07）
-            if (++endAttempts > retries) {
-              throw const OtaTransportException(
-                  'END 无应答重试超限', code: 'TIMEOUT');
-            }
-          } finally {
-            _waiters.remove(waiter);
-          }
-        }
-        if (needsResume) {
-          await _abortRoundTrip();
-          _session = 0;
-          continue;
-        }
-      }
-    } finally {
-      if (!transferOk) _quarantineUnconfirmedData();
-      _ackView = null;
-      _noProgressClock = null; // 解除预算对 transfer 后命令（ABORT 等）约束
-      _busy = false;
-      _inTransfer = false;
-      // P3-4 观测：终态统一登记（错误码由上层 catch 补记摘要之外的日志）。
-      stats?.recordTransferOutcome(ok: transferOk);
-    }
-  }
-
-  int _segmentLength(Uint8List package, int blockStart, int seg) {
-    final segOffset = blockStart + seg * OtaBleCodec.dataSegmentSize;
-    final segEnd =
-        (segOffset + OtaBleCodec.dataSegmentSize).clamp(0, package.length);
-    return segEnd - segOffset;
-  }
-
-  /// First-send batch; retries retain their original single-frame path.
-  Future<void> _sendSegmentBatch(Uint8List package, int blockStart,
-      List<int> segments, _TransferAckView view, void Function(int) completed) async {
-    final bytes = BytesBuilder(copy: false);
-    final ends = <int>[];
-    final sequences = <int>[];
-    for (final segment in segments) {
-      final offset = blockStart + segment * OtaBleCodec.dataSegmentSize;
-      final seq = _nextSeq();
-      sequences.add(seq);
-      bytes.add(OtaBleCodec.encodeCommand(
-        cmd: OtaBleCodec.cmdData, session: _session, seq: seq,
-        payload: OtaBleCodec.encodeDataPayload(offset,
-            package.sublist(offset, offset + _segmentLength(package, blockStart, segment))),
-      ));
-      ends.add(bytes.length);
-    }
-    var registered = 0;
-    var finished = 0;
-    final stream = bytes.takeBytes();
-    while (finished < ends.length) {
-      // Release stream ownership at a pause boundary so resume INFO can run.
-      await _waitIfPaused();
-      _checkUsable();
-      final base = finished == 0 ? 0 : ends[finished - 1];
-      var previousChunkEnd = 0;
-      await _writeFrameChecked(Uint8List.sublistView(stream, base), allowCancelled: false,
-        frameEnds: ends.skip(finished).map((end) => end - base).toList(),
-        onChunkStarting: (end) {
-          // A reserved frame is not ACK-eligible until its final bytes are dispatched.
-          while (registered < ends.length && ends[registered] <= base + end) {
-            view.trackSend(sequences[registered], segments[registered]);
-            registered++;
-          }
-        },
-        onChunkCompleted: (end) {
-          final completing = ends.skip(finished).takeWhile((boundary) => boundary <= base + end).length;
-          stats?.recordDataBatchChunk(bytes: end - previousChunkEnd, completedFrames: completing);
-          previousChunkEnd = end;
-          while (finished < ends.length && ends[finished] <= base + end) {
-            completed(segments[finished++]);
-          }
-        },
-      );
-    }
-  }
-
-  Future<void> _sendSegment(
-      Uint8List package, int blockStart, int seg, int seq) async {
-    final segOffset = blockStart + seg * OtaBleCodec.dataSegmentSize;
-    final segEnd =
-        (segOffset + OtaBleCodec.dataSegmentSize).clamp(0, package.length);
-    final frame = OtaBleCodec.encodeCommand(
-      cmd: OtaBleCodec.cmdData,
-      session: _session,
-      seq: seq,
-      payload: OtaBleCodec.encodeDataPayload(
-          segOffset, package.sublist(segOffset, segEnd)),
-    );
-    await _writeFrame(frame);
+    return _pipelineTransfer(package: package,
+      packageSha256: packageSha256, etuHeader: etuHeader,
+      windowSegments: windowSegments, onDurableProgress: onDurableProgress, onSent: onSent);
   }
 
   /// 请求取消：停止发送循环、完成所有在途等待者（CANCELLED）。
@@ -927,7 +332,6 @@ class OtaBleTransport {
     _resyncProbeAuthoritative = false;
     const err = OtaTransportException('OTA 传输已取消', code: 'CANCELLED');
     _pipelineView?.fail(err);
-    _ackView?.fail(err);
     for (final w in List<_FrameWaiterBase>.of(_waiters)) {
       w.fail(err);
     }
@@ -954,11 +358,13 @@ class OtaBleTransport {
         await _getDeviceInfo(allowCancelled: true);
         _dataWriteDispatched = false;
       }
+      final epoch = _pipelineEpoch;
+      if (epoch == null) return;
       final frame = OtaBleCodec.encodeCommand(
-        cmd: _pipelineEpoch == null ? OtaBleCodec.cmdAbort : _PipelineWire.abort,
+        cmd: _PipelineWire.abort,
         session: _session,
         seq: _nextSeq(),
-        payload: _pipelineEpoch == null ? const [] : _PipelineWire.word(_pipelineEpoch!),
+        payload: _PipelineWire.word(epoch),
       );
       await _writeFrameAfterCancel(frame);
     } catch (_) {
@@ -976,7 +382,6 @@ class OtaBleTransport {
     _resyncProbeAuthoritative = false;
     const err = OtaTransportException('transport 已释放', code: 'DISPOSED');
     _pipelineView?.fail(err);
-    _ackView?.fail(err);
     for (final w in List<_FrameWaiterBase>.of(_waiters)) {
       w.fail(err);
     }
@@ -996,7 +401,7 @@ class OtaBleTransport {
   /// 不应烧掉无进展预算。幂等；取消/释放会解除等待（不必先恢复）。
   void pauseForBackground() {
     if (_disposed || _cancelled) return;
-    if (_pipelineEpoch != null && _busy) {
+    if (_pipelineEpoch != null && _busy && !_endStarted) {
       unawaited(abortBestEffort());
       return;
     }
@@ -1055,13 +460,6 @@ class OtaBleTransport {
         // but a matching header alone cannot authorize business traffic.
       }
     }
-    // 传输期 ACK 视图只消费 DATA ACK（每段独立应答，一问一答等待者
-    // 无法覆盖）；BEGIN/END/ABORT ACK 由等待者按 cmd+session+seq 精确
-    // 关联，视图不重复消费（RC2-06）。
-    final view = _ackView;
-    if (view != null && _viewAccepts(f)) {
-      view.onAck(f);
-    }
     // P3-4 观测：应答到达时刻在**分发点**取一次，同一分发内的全部等待者
     // 共用（同源）。取时刻与投递在同一同步块内完成，中间不插入 await，
     // 因此该时刻不受后续写结算、ACK 解析或日志开销影响（P34-DA01）。
@@ -1071,253 +469,13 @@ class OtaBleTransport {
     }
   }
 
-  /// 传输期视图过滤：ACK_DATA 按 session 匹配（MCU teardown 后的错误
-  /// NAK 以 session=0 回显，仅错误态放宽接受）；ACK_ABORT 是 MCU 会话
-  /// 超时主动 teardown 的异步通知（§5.7，无请求关联、可能无等待者），
-  /// 传输期到达必须消费终止会话，不得丢弃等超时（RC3-06）。
-  /// seq 与在途段的关联由视图内部校验（未知/迟到 ACK 忽略，RC2-06）。
-  bool _viewAccepts(OtaBleFrame f) {
-    if (f.cmd == OtaBleCodec.rspAckData) {
-      if (f.session == _session) return true;
-      return f.session == 0 &&
-          f.payload.isNotEmpty &&
-          f.payload[0] != OtaBleCodec.statusOk;
-    }
-    if (f.cmd == OtaBleCodec.rspAckAbort) {
-      if (f.seq == _strictAbortSeq && f.session == _session) return false;
-      return f.session == _session || f.session == 0;
-    }
-    return false;
-  }
-
   void _dispatchError(Object e) {
     _quarantineUnconfirmedData();
     _pipelineView?.fail(e);
-    _ackView?.fail(e);
     for (final w in List<_FrameWaiterBase>.of(_waiters)) {
       w.fail(e);
     }
     _waiters.clear();
-  }
-
-  OtaAckPayload _parseAck(OtaBleFrame frame) {
-    try {
-      return OtaAckPayload.parse(frame.cmd, frame.payload);
-    } on FormatException catch (e) {
-      throw OtaTransportException(
-          'ACK 解析失败: ${e.message}', code: 'ACK_MALFORMED');
-    }
-  }
-
-  // ---- 内部：错误分类 ----
-
-  /// 传输期 ACK 错误分类：abortStatuses → 终止返回；
-  /// ERR_SEQ/ERR_SESSION/ERR_STATE → 有界重新 BEGIN 续传；其余 → 异常。
-  _AckErrorDecision _classifyAckError(_AckError err, int resumeLeft) {
-    final terminal = _abortStatusOf(err.status);
-    if (terminal != null) {
-      return _AckErrorDecision(terminal: terminal);
-    }
-    if (_resumeStatuses.contains(err.status)) {
-      if (resumeLeft <= 0) {
-        throw OtaTransportException(
-            '可恢复错误重试次数超限: 0x${err.status.toRadixString(16)}',
-            code: 'ACK_STATUS',
-            status: err.status);
-      }
-      return const _AckErrorDecision(resume: true);
-    }
-    return const _AckErrorDecision();
-  }
-
-  OtaTransportException _ackErrorException(_AckError err) {
-    if (err.status < 0) {
-      return const OtaTransportException(
-          'ACK 解析失败（未知状态或长度非法）', code: 'ACK_MALFORMED');
-    }
-    return OtaTransportException(
-      'ACK 失败: 0x${err.status.toRadixString(16)} (cmd=0x${err.cmd.toRadixString(16)}, seq=${err.seq})',
-      code: 'ACK_STATUS',
-      status: err.status,
-    );
-  }
-
-  /// 可恢复错误 → ABORT teardown + 重新 BEGIN 同 sha 续传：
-  /// - ERR_SEQ（seq 断档）/ ERR_SESSION / ERR_STATE（MCU teardown）；
-  /// - ERR_CRC / ERR_FRAME（帧级 NAK）：MCU expected_seq 停在坏帧处，
-  ///   后续帧将连环 ERR_SEQ，必须 ABORT+BEGIN 重对齐（RC2-05）。
-  static const Set<int> _resumeStatuses = {
-    OtaBleCodec.statusErrSeq,
-    OtaBleCodec.statusErrSession,
-    OtaBleCodec.statusErrState,
-    OtaBleCodec.statusErrCrc,
-    OtaBleCodec.statusErrFrame,
-  };
-
-  // ---- 内部：命令 ----
-
-  Future<OtaBeginAck> _beginRoundTrip({
-    required int totalLen,
-    required List<int> packageSha256,
-    required List<int> etuHeader,
-    required Duration timeout,
-  }) async {
-    final payload = OtaBleCodec.encodeBeginPayload(
-      totalLen: totalLen,
-      packageSha256: packageSha256,
-      etuHeader: etuHeader,
-    );
-    // seq 在循环外分配一次、重试复用（RC2-05）：MCU 对同包重复 BEGIN
-    // 幂等回进度但不重置 expected_seq（ota_ble_session.c:377），重试若
-    // 消耗新 seq，后续 DATA 将因超前被 ERR_SEQ 拒绝。
-    final seq = _nextSeq();
-    var attempts = 0;
-    while (true) {
-      _checkUsable();
-      // BEGIN ACK 帧头 session 是新分配的会话，与请求 session 无关：
-      // 只按 cmd+seq 关联（session 从 payload 解析）。
-      final waiter = _ResponseWaiter(OtaBleCodec.rspAckBegin, -1, seq);
-      _waiters.add(waiter);
-      try {
-        final frame = OtaBleCodec.encodeCommand(
-          cmd: OtaBleCodec.cmdBegin,
-          session: _session,
-          seq: seq,
-          payload: payload,
-        );
-        await _writeFrame(frame);
-        // BEGIN ACK 等待以剩余预算封顶（RC3-07）：重试循环每轮复用同一
-        // timeout 参数，帧外不封顶会让单轮等待固定 2s，多次重试累计
-        // 绕过 30s 总预算。
-        final respFrame = await waiter.future
-            .timeout(_capByBudget(timeout), onTimeout: () => throw TimeoutException('BEGIN ACK 超时'));
-        final ack = _parseAck(respFrame);
-        if (ack.status != OtaBleCodec.statusOk) {
-          if (ack.session != 0 || respFrame.session != 0) {
-            throw const OtaTransportException(
-                'Failed BEGIN ACK must carry session 0',
-                code: 'ACK_MALFORMED');
-          }
-          // Frame rejection grants no session or progress. Retry the same
-          // locally validated frame within the shared timeout/retry budget.
-          final retryable = ack.status == OtaBleCodec.statusErrCrc ||
-              ack.status == OtaBleCodec.statusErrFrame;
-          if (retryable) {
-            _checkNoProgress();
-            if (attempts < retries) {
-              attempts++;
-              continue;
-            }
-          }
-          throw OtaTransportException(
-            'BEGIN ACK 失败: status=0x${ack.status.toRadixString(16)}',
-            code: 'ACK_STATUS',
-            status: ack.status,
-          );
-        }
-        // 成功 ACK 的 payload session 必须非零（MCU 错误态才回 session=0；
-        // session=0 的成功 ACK 不可信，fail closed，RC2-06）。
-        final session = ack.session ?? 0;
-        if (session == 0) {
-          throw const OtaTransportException(
-              'BEGIN ACK 成功但 session 非法（0）', code: 'ACK_MALFORMED');
-        }
-        if (respFrame.session != session) {
-          // BEGIN ACK 帧头/payload session 一致性（RC3-06）：MCU 真值
-          // session_send_ack_begin 帧头与 payload 携带同一新会话值；
-          // 两者不一致即链路损坏或实现缺陷，fail closed 不采信该 ACK。
-          throw const OtaTransportException(
-              'BEGIN ACK 帧头 session 与 payload session 不一致',
-              code: 'ACK_MALFORMED');
-        }
-        if (_inTransfer && waiter.arrivalUs != null) {
-          stats!.recordBeginAck(protocol: 1, session: session, sequence: seq,
-            durableOffset: ack.durableOff, bitmap: ack.blockBitmap, atUs: waiter.arrivalUs!,
-            ackTimeoutMs: ackTimeout.inMilliseconds, maxRetries: retries,
-            windowSegments: _observationWindowSegments);
-        }
-        return OtaBeginAck(
-          status: ack.status,
-          session: session,
-          durableOff: ack.durableOff,
-          blockBitmap: ack.blockBitmap,
-          // P3-4 观测：随结果带回**该应答帧的到达时刻**，避免调用方在
-          // 整个 BEGIN 往返（含写结算与校验）之后另取时钟（P34-DA01）。
-          arrivalUs: waiter.arrivalUs,
-        );
-      } on TimeoutException {
-        _checkNoProgress(); // 预算耗尽优先终止，不再空转重试（RC3-07）
-        if (++attempts > retries) {
-          throw const OtaTransportException('BEGIN 无应答重试超限', code: 'TIMEOUT');
-        }
-      } finally {
-        _waiters.remove(waiter);
-      }
-    }
-  }
-
-  /// 受控 ABORT（resume 前清理 MCU 会话）：MCU 收到 ABORT 即 teardown，
-  /// staging durable 保留；随后同 sha BEGIN 走新会话分支重置
-  /// expected_seq 并按 bitmap 续传（RC2-05）。
-  ///
-  /// ACK 未到不阻断 resume（超时继续 BEGIN——ABORT 帧已达即 teardown；
-  /// 写失败由调用方按断连语义上抛）。
-  Future<void> _abortRoundTrip() async {
-    if (_session == 0) return;
-    final seq = _nextSeq();
-    final waiter = _ResponseWaiter(OtaBleCodec.rspAckAbort, -1, seq);
-    _waiters.add(waiter);
-    try {
-      final frame = OtaBleCodec.encodeCommand(
-        cmd: OtaBleCodec.cmdAbort,
-        session: _session,
-        seq: seq,
-      );
-      await _writeFrame(frame);
-      await waiter.future.timeout(_capByBudget(ackTimeout),
-          onTimeout: () => throw TimeoutException('ABORT ACK 超时'));
-    } on TimeoutException {
-      // 尽力而为：不等待重试，BEGIN 会按新会话语义处理。
-    } finally {
-      _waiters.remove(waiter);
-    }
-  }
-
-  int? _strictAbortSeq;
-
-  Future<({int writeUs, int arrivalUs, int session, int seq})> _abortProbeStrict(
-      _TransferAckView view, int expectedDurable) async {
-    final session = _session;
-    final seq = _nextSeq();
-    final waiter = _ResponseWaiter(OtaBleCodec.rspAckAbort, session, seq);
-    _strictAbortSeq = seq;
-    _waiters.add(waiter);
-    try {
-      _checkUsable();
-      final writeUs = stats!.nowUs();
-      await _writeFrame(OtaBleCodec.encodeCommand(
-        cmd: OtaBleCodec.cmdAbort, session: session, seq: seq,
-      ));
-      final frame = await waiter.future.timeout(_capByBudget(ackTimeout),
-          onTimeout: () => throw const OtaTransportException(
-              'Prefix ABORT ACK missing', code: 'PROBE_ABORT_UNVERIFIED'));
-      _checkUsable();
-      final ack = _parseAck(frame);
-      final pendingError = view.takeError();
-      if (pendingError != null) throw _ackErrorException(pendingError);
-      final arrivalUs = waiter.arrivalUs;
-      if (session == 0 || frame.session != session || ack.status != OtaBleCodec.statusAborted ||
-          ack.durableOff != expectedDurable || ack.blockBitmap != 0 ||
-          arrivalUs == null || arrivalUs < writeUs) {
-        throw const OtaTransportException('Prefix ABORT ACK not authoritative',
-            code: 'PROBE_ABORT_UNVERIFIED');
-      }
-      _session = 0;
-      return (writeUs: writeUs, arrivalUs: arrivalUs, session: session, seq: seq);
-    } finally {
-      _strictAbortSeq = null;
-      _waiters.remove(waiter);
-    }
   }
 
   /// 单帧写 + 等待响应（先注册等待者再发送；按 cmd+session+seq 关联）。
@@ -1480,8 +638,8 @@ class OtaBleTransport {
   /// 是废弃期间唯一放行的重新同步探针（RC3-05⑤）。
   Future<void> _writeFrame(Uint8List frame, {int? resyncProbeSeq}) async {
     if (frame.length > 2) {
-      final applying = frame[2] == OtaBleCodec.cmdEnd || frame[2] == _PipelineWire.end;
-      final beginning = frame[2] == OtaBleCodec.cmdBegin || frame[2] == _PipelineWire.begin;
+      final applying = frame[2] == _PipelineWire.end;
+      final beginning = frame[2] == _PipelineWire.begin;
       if (applying || beginning) {
         _endStarted = applying;
         onApplyBoundary?.call(applying);
@@ -1513,7 +671,7 @@ class OtaBleTransport {
   }
 
   void _observeControlFrame(Uint8List frame, {required bool completed}) {
-    if (frame.length < 10 || frame[2] == OtaBleCodec.cmdData || frame[2] == _PipelineWire.data) return;
+    if (frame.length < 10 || frame[2] == _PipelineWire.data) return;
     stats?.recordControlFrame(completed: completed, command: frame[2], session: frame[3],
         sequence: frame[4] | (frame[5] << 8), bytes: frame.length);
   }
@@ -1577,8 +735,7 @@ class OtaBleTransport {
   void _quarantineUnconfirmedData() {
     // Platform completion does not prove delivery through BLE/UART. Retain the
     // existing device-scoped recovery gate when retiring unconfirmed DATA.
-    final pending = (_ackView?.inFlight.isNotEmpty ?? false) ||
-        (_pipelineView?.unconfirmedSeqs.isNotEmpty ?? false);
+    final pending = _pipelineView?.unconfirmedSeqs.isNotEmpty ?? false;
     if (_dataWriteDispatched && pending && !_writeChannelPoisoned) {
       _poisonWriteChannel();
       _unconfirmedDataEpoch = _deviceWriteLedger.epoch;
@@ -1764,7 +921,7 @@ class OtaBleTransport {
         // 宽限仍取 2×writeTimeout——该路径的终止上界是
         // writeTimeout + 2×writeTimeout，以单次写超时为唯一依据。
         onChunkStarting?.call(end);
-        if (_inTransfer && (frame[2] == OtaBleCodec.cmdData || frame[2] == _PipelineWire.data)) {
+        if (_inTransfer && frame[2] == _PipelineWire.data) {
           _dataWriteDispatched = true;
         }
         final pendingWrite = _channel.writeChunk(frame.sublist(offset, end));
@@ -1840,311 +997,8 @@ class OtaBleTransport {
     }
   }
 
-  void _notifyDurable(
-    void Function(int, int)? cb,
-    int durableOff,
-    int total,
-  ) {
-    cb?.call(durableOff, total);
-  }
-
-  int? _abortStatusOf(int status) {
-    if (OtaBleCodec.abortStatuses.contains(status)) return status;
-    return null;
-  }
 }
 
-/// 传输期 ACK 视图：持续消费 DATA ACK 并维护按段在途窗口。
-///
-/// MCU 对每个 DATA 段独立应答（seq 回显），一问一答等待者无法覆盖。
-/// 窗口按"未确认段"计数（RC2-05）：ACK 按 seq 回收段，MCU 权威位图
-/// 置位的段同样回收（丢 ACK 后位图仍能释放窗口）；重发复用原 seq。
-///
-/// ACK 校验链（RC2-06，任一步失败不得覆盖权威进度）：
-/// 1. payload 可解析（畸形记为错误，由传输循环终止）；
-/// 2. ACK 的 seq 必须关联一个在途段——未知/迟到/重复 ACK 整帧忽略；
-/// 3. status OK 时 durable_off 校验范围（0..total、块对齐或 ==total）
-///    与单调不倒退，block_bitmap 不得越出所属块的有效位。
-class _TransferAckView {
-  _TransferAckView({
-    required this.blockSize,
-    required this.segmentSize,
-    this.stats,
-    this.captureDurableArrival = false,
-  });
-
-  final int blockSize;
-  final int segmentSize;
-  final bool captureDurableArrival;
-  /// P3-4 链路观测（可选；null 时零行为差异）。
-  final OtaLinkStats? stats;
-
-  int durableOff = 0;
-  int blockBitmap = 0;
-  int totalLen = 0;
-  int? durableArrivalUs;
-  /// 在途段：请求 seq → 段号（ACK/位图置位即回收；窗口按此计数）。
-  final Map<int, int> inFlight = {};
-  /// 每段累计发送次数（首发+重发；超限由传输循环终止）。
-  final Map<int, int> segSendCounts = {};
-  _AckError? _error;
-  bool _malformed = false;
-  Completer<void>? _change;
-
-  int get inFlightCount => inFlight.length;
-  bool get hasPendingError => _malformed || _error != null;
-  bool get hasTerminalError => _malformed || (_error != null &&
-      !{OtaBleCodec.statusErrSeq, OtaBleCodec.statusErrSession,
-        OtaBleCodec.statusErrState}.contains(_error!.status));
-
-  /// 段是否在途未确认（未收到 ACK 且未被位图确认）。
-  bool isSegmentInFlight(int seg) => inFlight.containsValue(seg);
-
-  /// 登记一次段发送（首发与重发共用；重发复用原 seq）。
-  void trackSend(int seq, int seg) {
-    inFlight[seq] = seg;
-    segSendCounts[seg] = (segSendCounts[seg] ?? 0) + 1;
-  }
-
-  int sendCountOf(int seg) => segSendCounts[seg] ?? 0;
-
-  /// BEGIN ACK 权威值校验（RC3-06）：durable/bitmap 必须过与 DATA ACK
-  /// 相同的合法性检查，非法即 fail closed，不得盲信写入本地状态。
-  void reset(int durable, int bitmap, int total) {
-    totalLen = total;
-    if (!_durableValid(durable)) {
-      throw const OtaTransportException(
-          'BEGIN ACK durable_off 非法（越界/未对齐）', code: 'ACK_MALFORMED');
-    }
-    if (!_bitmapValid(bitmap, durable)) {
-      throw const OtaTransportException(
-          'BEGIN ACK block_bitmap 越出所属块有效位', code: 'ACK_MALFORMED');
-    }
-    durableOff = durable;
-    blockBitmap = bitmap;
-    inFlight.clear();
-    segSendCounts.clear();
-    _error = null;
-    _malformed = false;
-  }
-
-  void onAck(OtaBleFrame f) {
-    final arrivalUs = captureDurableArrival ? stats?.nowUs() : null;
-    final OtaAckPayload ack;
-    try {
-      ack = OtaAckPayload.parse(f.cmd, f.payload);
-    } on FormatException {
-      stats?.recordAckClass('malformed');
-      _malformed = true;
-      _signal();
-      return;
-    }
-    if (f.cmd != OtaBleCodec.rspAckData) {
-      // 异步 ACK_ABORT（MCU 主动 teardown）：无请求关联，到达即终止。
-      // 首错保留（??=）：迟到的 ERR ACK 不得覆盖已锁存的 terminal ABORTED。
-      stats?.recordAckClass('abort');
-      _error ??= _AckError(ack.status, f.cmd, f.seq);
-      _signal();
-      return;
-    }
-    // 未知/迟到/重复 ACK（seq 不在途）：忽略整帧，不覆盖权威进度。
-    final seg = inFlight.remove(f.seq);
-    if (seg == null) {
-      stats?.recordAckClass('duplicate');
-      _recordAckDiagnostic('MONO_ACK_IGNORED', f, ack);
-      // No state changed. Waking here lets periodic MCU liveness ACKs restart
-      // the ACK timeout forever, starving a missing in-flight segment's retry.
-      return;
-    }
-    if (ack.status != OtaBleCodec.statusOk) {
-      // 首错保留（??=）：不覆盖更早锁存的错误（如异步 ABORTED）。
-      stats?.recordAckClass('error');
-      _recordAckDiagnostic('MONO_DATA_NAK', f, ack);
-      _error ??= _AckError(ack.status, f.cmd, f.seq);
-      _signal();
-      return;
-    }
-    if (!_durableValid(ack.durableOff) || ack.durableOff < durableOff) {
-      // 超范围/未对齐/倒退：不可信 ACK，fail closed 记为畸形。
-      stats?.recordAckClass('malformed');
-      _malformed = true;
-      _signal();
-      return;
-    }
-    if (ack.durableOff - durableOff > blockSize) {
-      // 跨窗伪跳跃（RC3-06）：MCU 逐段处理（一次 ACK 至多 commit 一个
-      // 块），且客户端发下一块段的前提是本块段 ACK/位图已回收窗口并
-      // 更新过 durable——相邻两次被接受的 ACK 之间 durable 前移至多
-      // 一个块。8192B 包首块在途时 ACK 报 durable=8192/bitmap=0 的
-      // 伪造跳跃（可清 inFlight 跳过第二块发 END）在此 fail closed。
-      stats?.recordAckClass('malformed');
-      _malformed = true;
-      _signal();
-      return;
-    }
-    if (!_bitmapValid(ack.blockBitmap, ack.durableOff)) {
-      stats?.recordAckClass('malformed');
-      _malformed = true;
-      _signal();
-      return;
-    }
-    final advanced = ack.durableOff > durableOff;
-    if (!advanced && (ack.blockBitmap >> seg & 1) == 0) {
-      // 写入确认判定（RC3-08）：ACK 回收了在途段但既未推进 durable、
-      // 权威位图也不含该段——这是 MCU 幂等 OK 冒充写入确认的路径
-      // （快速重连 MCU 仍 ACTIVE、低 seq DATA 被幂等 ACK 不写 staging）。
-      // 若误当已确认，客户端会跳过该段不补发，最终 END 校验失败。
-      // fail closed 记 ERR_STATE，由传输循环 ABORT teardown + BEGIN
-      // 重对齐（新会话重置 expected_seq，SHA 从 journal 前缀重建）。
-      // 首错保留（??=）：不覆盖更早锁存的错误（如异步 ABORTED）。
-      stats?.recordAckClass('noProgress');
-      _error ??= _AckError(OtaBleCodec.statusErrState, f.cmd, f.seq);
-      _signal();
-      return;
-    }
-    // P3-4 观测：确认集合快照（先于状态突变，与既有回收语义一致）——
-    // ACK 自身段 ∪ advanced 回收的旧块在途段 ∪ bitmap 置位段；多段共享
-    // 同一 ACK 各自成样本。blockStart = 更新前 durableOff（= 当前块起点，
-    // MCU 只按整块提交）。
-    final statsConfirmedSegs = <int>{seg};
-    if (advanced) {
-      durableArrivalUs = arrivalUs;
-      statsConfirmedSegs.addAll(inFlight.values);
-    } else {
-      for (final s in inFlight.values) {
-        if ((ack.blockBitmap >> s) & 1 == 1) statsConfirmedSegs.add(s);
-      }
-    }
-    stats?.recordAckConfirm(
-      blockStart: durableOff,
-      segs: statsConfirmedSegs,
-      segmentSize: segmentSize,
-    );
-    stats?.recordAckClass('ok');
-    if (advanced) stats?.recordDurableAdvance(ack.durableOff);
-    durableOff = ack.durableOff;
-    blockBitmap = ack.blockBitmap;
-    stats?.recordAcceptedState(durable: durableOff, bitmap: blockBitmap);
-    if (advanced) {
-      // durable 跨块前移（MCU 整块 commit 后推进）：旧块所有在途段
-      // （含丢 ACK 的）一并回收，防跨块残留耗尽窗口；旧块计数同步清
-      // 空（已提交段不再参与重发超限判定）。
-      inFlight.clear();
-      segSendCounts.clear();
-    }
-    _harvestBitmap();
-    _signal();
-  }
-
-  void _recordAckDiagnostic(
-      String event, OtaBleFrame frame, OtaAckPayload ack) {
-    if (stats == null) return;
-    otaMonoLog(event,
-        code: 'status:${ack.status},session:${frame.session},seq:${frame.seq},'
-            'bitmap:0x${ack.blockBitmap.toRadixString(16)},pending:${inFlight.length}',
-        durable: ack.durableOff);
-  }
-
-  /// durable_off 合法性：0..total，且为块边界（4KB 对齐）或包尾。
-  bool _durableValid(int durable) {
-    if (durable < 0 || durable > totalLen) return false;
-    return durable == totalLen || durable % blockSize == 0;
-  }
-
-  /// bitmap 合法性：所属块（durable 所在块起点即 durable 本身）的有效
-  /// 段之外的位不得置位。
-  bool _bitmapValid(int bitmap, int durable) {
-    final blockEnd = (durable + blockSize).clamp(0, totalLen);
-    final segsInBlock =
-        ((blockEnd - durable) + segmentSize - 1) ~/ segmentSize;
-    final validMask = segsInBlock >= 32 ? -1 : (1 << segsInBlock) - 1;
-    return bitmap & ~validMask == 0;
-  }
-
-  /// END ACK 权威位图校验入口（RC3-06）：END OK（durable==total）时
-  /// bitmap 仍不得越出尾块有效位（MCU 真值：END OK ACK 在 teardown 前
-  /// 发送，bitmap 是活跃块位图残留，非 0 合法，越界不合法）。
-  bool endBitmapValid(int bitmap, int durable) => _bitmapValid(bitmap, durable);
-
-  /// 位图确认的段回收在途记录（窗口释放的另一通路，RC2-05）。
-  void _harvestBitmap() {
-    if (blockBitmap == 0) return;
-    inFlight.removeWhere((_, seg) => (blockBitmap >> seg) & 1 == 1);
-    segSendCounts.removeWhere((seg, _) => (blockBitmap >> seg) & 1 == 1);
-  }
-
-  /// 首个非 OK ACK（畸形 ACK 以 status<0 表示）。消费语义（RC3-06）：
-  /// 读取即清除锁存。段循环头已处置（resume/terminal/抛出）的错误在
-  /// 块尾不得再次处置——否则同一错误双扣 resumeLeft，retries=1 时一次
-  /// 可恢复错误即被拒，默认 5 次预算也被两次一组消耗而非五次独立恢复。
-  _AckError? takeError() {
-    if (_malformed) {
-      _malformed = false;
-      return const _AckError(-1, 0, 0);
-    }
-    final err = _error;
-    _error = null;
-    return err;
-  }
-
-  OtaAckResult result() => OtaAckResult(
-        status: _error?.status ?? OtaBleCodec.statusOk,
-        durableOff: durableOff,
-        blockBitmap: blockBitmap,
-      );
-
-  /// 等待任意状态变化（新 ACK/错误/畸形帧）。超时返回 false。
-  Future<bool> waitForChange(Duration timeout) {
-    final c = Completer<void>();
-    _change = c;
-    return c.future.then((_) => true).timeout(timeout, onTimeout: () {
-      // 超时必须注销并收尾孤儿 completer：then 链已被 timeout 绕过，
-      // 留守的 c 会吃掉后续 [_signal]（transport 注册新等待者后等不到
-      // 已发生的 ACK，假性二次超时重发）；更严重的是 cancel/fail 对
-      // 孤儿 completeError 时错误无人消费，以 uncaught async error 从
-      // 无关的 await 点冒出（MTU=23 取消用例：abortBestEffort 的写
-      // await 点收走 CANCELLED，压垮测试的错误处理边界）。
-      if (_change == c) _change = null;
-      if (!c.isCompleted) c.complete();
-      return false;
-    });
-  }
-
-  void fail(Object e) {
-    final c = _change;
-    _change = null;
-    if (c != null && !c.isCompleted) {
-      c.completeError(e);
-    }
-  }
-
-  void _signal() {
-    final c = _change;
-    _change = null;
-    if (c != null && !c.isCompleted) {
-      c.complete();
-    }
-  }
-}
-
-/// 传输期 ACK 错误记录（status/cmd/seq）。
-class _AckError {
-  const _AckError(this.status, this.cmd, this.seq);
-
-  final int status;
-  final int cmd;
-  final int seq;
-}
-
-/// 块循环对 ACK 错误的处置决定。
-class _AckErrorDecision {
-  const _AckErrorDecision({this.resume = false, this.terminal});
-
-  final bool resume;
-  final int? terminal;
-}
-
-/// 帧等待者基类：匹配的帧到达即完成 future。
 abstract class _FrameWaiterBase {
   _FrameWaiterBase() {
     // 命令帧的等待者必须先注册再发送（GET_INFO/BEGIN/END/ABORT 都是
@@ -2219,75 +1073,6 @@ class _ResponseWaiter extends _FrameWaiterBase {
 }
 
 /// BEGIN ACK 结果。
-class OtaBeginAck {
-  OtaBeginAck({
-    required this.status,
-    required this.session,
-    required this.durableOff,
-    required this.blockBitmap,
-    this.arrivalUs,
-  });
-
-  final int status;
-  final int session;
-  final int durableOff;
-  final int blockBitmap;
-
-  /// 该应答帧到达分发点的时刻（同 stats 时钟域；无观测绑定时为 null）。
-  ///
-  /// 调用方必须用它作为该确认覆盖段的终点时刻，不得在 BEGIN 往返之后
-  /// 另取时钟（P34-DA01）。
-  final int? arrivalUs;
-}
-
-/// A durably received, strictly aborted prefix, not an installed firmware image.
-class OtaPrefixProbeResult {
-  const OtaPrefixProbeResult._({
-    required this.prefixBytes,
-    required this.sentTotalBytes,
-    required this.senderWindowSegments,
-    required this.beginWriteUs,
-    required this.durableAckUs,
-    required this.abortWriteUs,
-    required this.abortAckUs,
-    required this.session,
-    required this.abortSeq,
-  });
-
-  final int prefixBytes;
-  final int sentTotalBytes;
-  final int senderWindowSegments;
-  final int beginWriteUs;
-  final int durableAckUs;
-  final int abortWriteUs;
-  final int abortAckUs;
-  final int session;
-  final int abortSeq;
-
-  Map<String, Object> toJson() => {
-    'schema': 1,
-    'outcome': 'durable-prefix-aborted',
-    'prefixBytes': prefixBytes,
-    'sentUniqueBytes': prefixBytes,
-    'uniqueSegments': prefixBytes ~/ OtaBleCodec.dataSegmentSize,
-    'sentTotalBytes': sentTotalBytes,
-    'senderWindowSegments': senderWindowSegments,
-    'beginWriteUs': beginWriteUs,
-    'durableAckUs': durableAckUs,
-    'abortWriteUs': abortWriteUs,
-    'abortAckUs': abortAckUs,
-    'elapsedUs': durableAckUs - beginWriteUs,
-    'abortElapsedUs': abortAckUs - abortWriteUs,
-    'session': session,
-    'abortSeq': abortSeq,
-    'abortStatus': OtaBleCodec.statusAborted,
-    'durableOff': prefixBytes,
-    'blockBitmap': 0,
-    'endSent': false,
-  };
-}
-
-/// ACK 统一结果（BEGIN/DATA/END）。
 class OtaAckResult {
   OtaAckResult({
     required this.status,
@@ -2295,12 +1080,6 @@ class OtaAckResult {
     required this.blockBitmap,
     this.terminal = false,
   });
-
-  factory OtaAckResult.fromAck(OtaAckPayload ack) => OtaAckResult(
-        status: ack.status,
-        durableOff: ack.durableOff,
-        blockBitmap: ack.blockBitmap,
-      );
 
   factory OtaAckResult.terminal(int status, OtaAckResult from) =>
       OtaAckResult(

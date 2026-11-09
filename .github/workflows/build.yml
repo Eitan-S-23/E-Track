@@ -43,12 +43,11 @@ on:
         type: string
         default: ""
       release_ota_link_profile:
-        description: "Explicit candidate build intent, not production qualification; baseline keeps shipping defaults"
+        description: "BLE v2-only build; legacy protocol and automatic fallback are not supported"
         required: false
         type: choice
-        default: baseline
+        default: adaptive-v2-candidate
         options:
-          - baseline
           - adaptive-v2-candidate
 
 env:
@@ -266,7 +265,7 @@ jobs:
           TRACE_UPDATE_PAYLOAD_ED25519_PUBLIC_KEY_BASE64: ${{ secrets.TRACE_UPDATE_PAYLOAD_ED25519_PUBLIC_KEY_BASE64 }}
           DISPATCH_FIRMWARE_LATEST_URL: ${{ inputs.firmware_latest_url || '' }}
           TRACE_RELEASE_APP_ID_SUFFIX: ${{ inputs.release_application_id_suffix || '' }}
-          TRACE_OTA_LINK_PROFILE: ${{ inputs.release_ota_link_profile || 'baseline' }}
+          TRACE_OTA_LINK_PROFILE: ${{ inputs.release_ota_link_profile || 'adaptive-v2-candidate' }}
         run: |
           set +e
           build_args=(apk --release --target-platform=android-arm,android-arm64)
@@ -409,7 +408,7 @@ jobs:
       - name: Build Windows release
         shell: bash
         env:
-          TRACE_OTA_LINK_PROFILE: ${{ inputs.release_ota_link_profile || 'baseline' }}
+          TRACE_OTA_LINK_PROFILE: ${{ inputs.release_ota_link_profile || 'adaptive-v2-candidate' }}
         run: |
           set -euo pipefail
           profile_define="$(python -I -S -B -X utf8 ../../Tools/flutter/ota_link_profile.py --build-profile "${TRACE_OTA_LINK_PROFILE}")"

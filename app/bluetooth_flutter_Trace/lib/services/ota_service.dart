@@ -75,9 +75,8 @@ enum OtaPhase {
 class OtaService extends GetxController with WidgetsBindingObserver {
   static OtaService get to => Get.find();
 
-  // Receiver capacity is not a safe burst size for the BLE return path.
-  static const int defaultSenderWindowSegments = 4;
-  static const int defaultPipelineWindowSegments = 24;
+  static const int defaultSenderWindowSegments = 24;
+  static const int defaultPipelineWindowSegments = defaultSenderWindowSegments;
 
   /// [downloadDio]/[firmwareDirProvider]/[latestUriBuilder]/[onNotify]/
   /// [downloadFileGate]
@@ -105,7 +104,6 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     Duration? rebootProbeTimeout,
     Duration? rebootProbeInterval,
     int? senderWindowSegments,
-    bool? enablePipeline,
     OtaLinkProfile? linkProfile,
     OtaPhyClient? phyClient,
     OtaBackgroundClient? backgroundClient,
@@ -113,17 +111,12 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     OtaP35Recorder? p35Recorder,
     bool Function()? p35PlatformCheck,
   })  : _senderWindowSegments = RangeError.checkValueInInterval(
-          senderWindowSegments ??
-              ((enablePipeline ?? ((linkProfile ?? OtaLinkProfile.build).pipeline ||
-                  const bool.fromEnvironment('P34_OTA_PIPELINE')))
-                  ? defaultPipelineWindowSegments : defaultSenderWindowSegments),
+          senderWindowSegments ?? defaultPipelineWindowSegments,
           1,
-          OtaBleCodec.segmentsPerBlock,
+          defaultPipelineWindowSegments,
           'senderWindowSegments',
         ),
         linkProfile = linkProfile ?? OtaLinkProfile.build,
-        _enablePipeline = enablePipeline ?? ((linkProfile ?? OtaLinkProfile.build).pipeline ||
-            const bool.fromEnvironment('P34_OTA_PIPELINE')),
         _bluetoothService = bluetoothService,
         _phyClient = phyClient ?? OtaPhyClient(),
         _background = backgroundClient ?? OtaBackgroundClient(),
@@ -463,7 +456,6 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     await cancelUpgrade(keepPackage: keepPackage);
   }
   final int _senderWindowSegments;
-  final bool _enablePipeline;
   final OtaLinkProfile linkProfile;
   OtaTransportSelection? _linkSelection;
   OtaTransportSelection? get linkSelection => _linkSelection;
@@ -1339,7 +1331,9 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       }
       try {
         final experiment = OtaExperimentRuntime.current.requireForOta();
-        final prefixBytes = experiment?.isPrefixProbe == true ? experiment!.prefixBytes : null;
+        if (experiment?.isPrefixProbe == true) {
+          throw const OtaTransportException('Legacy prefix probes are not supported', code: 'V2_REQUIRED');
+        }
         // 就地读取并校验包字节（RC2-04）：锁后一次读取，长度+SHA 校验
         // 与传输共用同一份字节快照，替代原先 verifyFileMatchesAsset 二次
         // 读文件 + readAsBytesSync 再读一次的多份文件视图（文件在两次
@@ -1500,9 +1494,9 @@ class OtaService extends GetxController with WidgetsBindingObserver {
 
         final requestedWindow = experiment?.senderWindowSegments ?? _senderWindowSegments;
         _linkSelection = null;
-        final effectiveWindow = recheck.maxWindowSegments < requestedWindow
-              ? recheck.maxWindowSegments
-              : requestedWindow;
+        // INFO's window belongs to the identity format; V2 credit is negotiated
+        // by CAPS2 and constrained by the sender's independent physical cap.
+        final effectiveWindow = requestedWindow.clamp(1, 24).toInt();
         void onDurableProgress(int durableOff, int total) {
             if (generation != _cancelGeneration) return;
             _durableBytes = durableOff.clamp(0, _taskTotal);
@@ -1510,7 +1504,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
             _durableProgress.value = p;
             _upgradeProgress.value = p;
             _upgradeStatus.value =
-                '${prefixBytes == null ? '传输中' : '短测中'}: ${_formatBytes(durableOff)}/${_formatBytes(total)}（MCU 落盘确认）';
+                '传输中: ${_formatBytes(durableOff)}/${_formatBytes(total)}（MCU 落盘确认）';
             if (_linkSelection case final selection?) {
               _upgradeStatus.value += ' ${selection.summary}';
             }
@@ -1519,38 +1513,9 @@ class OtaService extends GetxController with WidgetsBindingObserver {
             // GATT 已写字节只作为传输活性参考，不进 durable 进度。
             debugPrint('OTA sent $sent/$total');
         }
-        _upgradeStatus.value = prefixBytes == null ? 'BLE 传输中...' : 'BLE 短测中，不安装固件...';
+        _upgradeStatus.value = 'BLE v2 传输中...';
         await _waitForForeground(generation);
         if (generation != _cancelGeneration || _closed) return fail('cancelled', 'owner-changed');
-        if (prefixBytes != null) {
-          final result = await transport.probePrefix(
-            package: package, packageSha256: packageSha256, etuHeader: etuHeader,
-            prefixBytes: prefixBytes, windowSegments: effectiveWindow,
-            onDurableProgress: onDurableProgress, onSent: onSent,
-          );
-          if (generation != _cancelGeneration) return fail('cancelled', 'generation-changed');
-          final retained = await transport.getDeviceInfo();
-          if (generation != _cancelGeneration) return fail('cancelled', 'generation-changed');
-          if (!deviceIdentityMatches(retained, info)) {
-            throw const OtaTransportException('Probe source identity changed', code: 'PROBE_IDENTITY');
-          }
-          await transport.dispose();
-          activeTransport = null;
-          _transport = null;
-          if (generation != _cancelGeneration) return fail('cancelled', 'generation-changed');
-          emitOtaObservation('OTA_PREFIX_PROBE ${jsonEncode({
-            ...result.toJson(),
-            'runId': experiment!.runId,
-            'configSha256': experiment.sourceSha256,
-            'deviceAddress': deviceAddress,
-            'sourceVersionCode': retained.currentVersionCode,
-            'sourceImageSha256': retained.currentImageSha256Hex,
-            'sourceIdentityVerified': true,
-          })}');
-          _phase.value = OtaPhase.probeCompleted;
-          _upgradeStatus.value = '短测完成: ${_formatBytes(prefixBytes)} 已落盘，ABORT 已确认；未安装固件';
-          return false;
-        }
         final ack = await transport.transfer(
           package: package,
           packageSha256: packageSha256,
@@ -2006,7 +1971,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     _transport?.pauseForBackground();
   }
 
-  // Applying starts before END ACK; a pending v1 END retry still uses the pause gate.
+  // END2 is not cancellable; its retries still use the foreground pause gate.
   bool get _hasLiveTransferRecoveryOwner =>
       isUpgrading && _operation == _OtaOperation.transfer &&
       (phase == OtaPhase.transferring ||
@@ -2768,7 +2733,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       );
       final experiment = OtaExperimentRuntime.current.requireForOta();
       final batchFrames = experiment?.dataBatchFrames ??
-          (_enablePipeline && !writeWithResponse ? OtaBleTransport.defaultPipelineBatchFrames : 1);
+          (!writeWithResponse ? OtaBleTransport.defaultPipelineBatchFrames : 1);
       if (batchFrames > 1 && writeWithResponse) {
         throw StateError('OTA_BATCH_REQUIRES_WITHOUT_RESPONSE');
       }
@@ -2778,8 +2743,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
             if (bindGeneration != _cancelGeneration || !isUpgrading || !linkCurrent()) return;
             final reasons = <String>[
               if (selection.fallbackReason != null) selection.fallbackReason!,
-              if ((selection.protocol == 2 || !_enablePipeline) &&
-                  selection.windowSegments < (experiment?.senderWindowSegments ?? _senderWindowSegments))
+              if (selection.windowSegments < (experiment?.senderWindowSegments ?? _senderWindowSegments))
                 'receiver-window-limit',
               if (selection.protocol == 2 && selection.dataBatchFrames < linkProfile.batchFrames)
                 'without-response-unavailable',
@@ -2792,10 +2756,10 @@ class OtaService extends GetxController with WidgetsBindingObserver {
               'requested': {
                 ...linkProfile.requested,
                 'source': experiment == null ? 'build' : 'debug-runtime',
-                'protocol': _enablePipeline ? 2 : 1,
+                'protocol': 2,
                 'windowSegments': experiment?.senderWindowSegments ?? _senderWindowSegments,
                 'dataBatchFrames': experiment?.dataBatchFrames ??
-                    (_enablePipeline ? OtaBleTransport.defaultPipelineBatchFrames : 1),
+                    OtaBleTransport.defaultPipelineBatchFrames,
                 'reuseGatt': experiment?.reuseGatt ?? _ble.reuseOtaCharacteristics,
                 'preferWithoutResponse': experiment?.withoutResponse ?? _ble.preferOtaWithoutResponse,
               },
@@ -2811,7 +2775,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
             if (!applying && phase == OtaPhase.applying) _phase.value = OtaPhase.transferring;
           },
           ackTimeout: experiment?.ackTimeout ?? OtaBleTransport.defaultAckTimeout,
-          dataBatchFrames: batchFrames, enablePipeline: _enablePipeline);
+          dataBatchFrames: batchFrames);
       if (!linkCurrent()) {
         await transport.dispose();
         return null;

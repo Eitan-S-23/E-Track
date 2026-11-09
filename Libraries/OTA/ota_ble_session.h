@@ -8,9 +8,7 @@
 #include "OTA/ota_sd.h"
 #include "OTA/ota_staging.h"
 #include "boot_crypto.h"
-#if OTA_BLE_PIPELINE_ENABLED
 #include "OTA/ota_pipeline.h"
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -84,19 +82,15 @@ typedef struct ota_ble_env_t
     /* 激活成功且 ACK END OK 已发出后调用（生产 = 系统复位进入 boot
      * STAGED 流程；host 测试注入打点后正常返回）。 */
     void (*system_reset)(void);
-#if OTA_BLE_PIPELINE_ENABLED
     /* NULL disables CAPS2/BEGIN2. Platform must exclude XIP users while BUSY. */
     const ota_pipeline_io_t *pipeline_io;
-#endif
 } ota_ble_env_t;
 
 typedef enum ota_ble_session_state_t
 {
     OTA_BLE_SESSION_IDLE = 0,
     OTA_BLE_SESSION_ACTIVE = 1
-#if OTA_BLE_PIPELINE_ENABLED
     , OTA_BLE_SESSION_DRAINING = 2
-#endif
 } ota_ble_session_state_t;
 
 typedef struct ota_ble_session_t
@@ -129,7 +123,6 @@ typedef struct ota_ble_session_t
     /* overlay 子分配（仅 ACTIVE 期间有效） */
     ota_ble_ring_t rx_ring;
     ota_staging_receiver_t *receiver;
-#if OTA_BLE_PIPELINE_ENABLED
     ota_pipeline_t *pipeline;
     ota_pipeline_ack_t pipeline_ack;
     uint32_t caps_nonce;
@@ -140,7 +133,6 @@ typedef struct ota_ble_session_t
     uint16_t pipeline_first_seq;
     uint16_t pipeline_abort_seq;
     uint8_t pipeline_abort_reply;
-#endif
     /* ISR 与泵共享：ISR 读、泵写；为 1 时 ISR 把 UART 字节压入 rx_ring */
     volatile uint8_t isr_active;
 

@@ -33,13 +33,8 @@ on:
         description: "P3-4 debug-only screening candidate; not a production baud or performance result"
         required: false
         type: choice
-        default: baseline
+        default: adaptive-v2-candidate
         options:
-          - baseline
-          - reuse-with
-          - discover-without
-          - reuse-without
-          - runtime
           - runtime-pipeline
           - adaptive-v2-candidate
       ota_link_profile:
@@ -95,7 +90,7 @@ jobs:
       FLUTTER_DEV_DEVICE_OTA_NATIVE_TESTS: ${{ github.event_name == 'workflow_dispatch' && inputs.device_ota_native_tests && matrix.os == 'ubuntu-latest' && 'true' || 'false' }}
       # 显式启用的调试包名后缀：push 触发时 inputs 为空 ⇒ 生产 application id 不变。
       TRACE_DEV_APP_ID_SUFFIX: ${{ inputs.app_id_suffix || '' }}
-      TRACE_DEV_OTA_LINK_CANDIDATE: ${{ inputs.ota_link_candidate || 'baseline' }}
+      TRACE_DEV_OTA_LINK_CANDIDATE: ${{ inputs.ota_link_candidate || 'adaptive-v2-candidate' }}
       TRACE_DEV_OTA_LINK_PROFILE: ${{ inputs.ota_link_profile || 'none' }}
       # 显式启用的设备观测：默认全空 ⇒ 不注入任何 dart-define，观测代码不生效。
       TRACE_DEV_DEVICE_OBSERVATION: ${{ inputs.device_observation && 'true' || '' }}

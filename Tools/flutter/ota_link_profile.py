@@ -16,7 +16,7 @@ RELEASE_CANDIDATE = "adaptive-v2-candidate"
 
 def build_profile(name):
     """Credential/device-free selector shared by debug CI and standard builds."""
-    if name not in ("baseline", RELEASE_CANDIDATE):
+    if name != RELEASE_CANDIDATE:
         raise ValueError("Unknown OTA_LINK_PROFILE")
     return "--dart-define=OTA_LINK_PROFILE=" + name
 

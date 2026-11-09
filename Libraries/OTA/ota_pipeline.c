@@ -1,6 +1,5 @@
 #include "ota_pipeline.h"
 
-#if defined(P34_OTA_PIPELINE) && P34_OTA_PIPELINE
 #include <string.h>
 
 #define PIPE_GUARD 0x50325045u
@@ -248,4 +247,3 @@ int ota_pipeline_poll(ota_pipeline_t *pipe, uint32_t now_ms)
     if (result != OTA_PIPELINE_OK) return fail(pipe, OTA_PIPELINE_ERR_IO);
     return operation_done(pipe);
 }
-#endif

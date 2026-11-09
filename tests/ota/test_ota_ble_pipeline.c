@@ -481,15 +481,32 @@ static void test_pipeline_frame_lengths(void)
             wire[7] = (uint8_t)(len >> 8);
             for (j = 0u; j < n && result == OTA_BLE_PARSE_IDLE; ++j)
                 result = ota_ble_parser_feed(&parser, wire[j], &frame);
-            check("frame parser enforces v1/v2 command-specific lengths",
-                result == (variant < 2u ? OTA_BLE_PARSE_FRAME : OTA_BLE_PARSE_ERR_FRAME));
+            check("frame parser enforces v2 lengths and rejects every v1 frame",
+                result == (cases[i].cmd >= OTA_BLE_CMD_CAPS2 && variant < 2u
+                    ? OTA_BLE_PARSE_FRAME : OTA_BLE_PARSE_ERR_FRAME));
         }
     }
 }
 
 int main(void)
 {
-    (void)legacy_session_main();
+    make_staging_io();
+    test_get_info();
+    {
+        uint8_t payload[132] = {0};
+        uint8_t command;
+        for (command = 1u; command <= 4u; ++command)
+        {
+            uint16_t len = command == 1u ? 101u : command == 2u ? 132u :
+                command == 3u ? 32u : 0u;
+            setup2();
+            deliver2(ota_ble_frame_encode(wire, sizeof(wire), command,
+                0u, 1u, payload, len), 1u);
+            check("retired v1 cannot acquire a session or perform payload IO",
+                !ota_ble_session_active(&session) && async_flash.starts == 0u &&
+                te.tx_count == 0u);
+        }
+    }
     test_pipeline_transfer();
     test_pipeline_cancel_faults();
     test_pipeline_resume();

@@ -21,8 +21,7 @@ void main() {
     });
   });
 
-  test('candidate and baseline stay explicit and reject unknown input', () {
-    expect(OtaLinkProfile.parse('baseline'), same(OtaLinkProfile.baseline));
+  test('only the v2 profile is accepted', () {
     final candidate = OtaLinkProfile.parse('adaptive-v2-candidate');
     expect(candidate, same(OtaLinkProfile.adaptiveCandidate));
     expect(candidate.requested, {
@@ -30,17 +29,17 @@ void main() {
       'windowSegments': 24, 'dataBatchFrames': 12,
       'reuseGatt': true, 'preferWithoutResponse': true,
     });
-    for (final name in ['', 'runtime', 'p34-qualified-v1', 'unknown']) {
+    for (final name in ['baseline', '', 'runtime', 'p34-qualified-v1', 'unknown']) {
       expect(() => OtaLinkProfile.parse(name), throwsArgumentError);
     }
   });
 
-  test('candidate build retains explicit baseline injection', () {
-    final bluetooth = BluetoothService(linkProfile: OtaLinkProfile.baseline);
-    final service = OtaService(linkProfile: OtaLinkProfile.baseline,
+  test('default build enables the v2 sender and reusable GATT path', () {
+    final bluetooth = BluetoothService();
+    final service = OtaService(
         bluetoothService: bluetooth);
-    expect(service.linkProfile.pipeline, isFalse);
-    expect(bluetooth.reuseOtaCharacteristics, isFalse);
-    expect(bluetooth.preferOtaWithoutResponse, isFalse);
+    expect(service.linkProfile.pipeline, isTrue);
+    expect(bluetooth.reuseOtaCharacteristics, isTrue);
+    expect(bluetooth.preferOtaWithoutResponse, isTrue);
   });
 }

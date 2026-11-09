@@ -107,13 +107,11 @@ ota_staging_result_t ota_staging_finalize(
     uint32_t payload_crc32,
     uint32_t target_vcode);
 
-#if defined(P34_OTA_PIPELINE) && P34_OTA_PIPELINE
 /* Payload operations must be quiescent. Read back before committing the existing
  * journal; never erase/program payload here or recycle a pipeline-owned buffer. */
 ota_staging_result_t ota_staging_commit_buffer(
     ota_staging_receiver_t *receiver, uint32_t offset,
     const uint8_t *data, uint32_t len, ota_staging_progress_t *progress);
-#endif
 
 #ifdef __cplusplus
 }

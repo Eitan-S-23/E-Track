@@ -101,12 +101,8 @@ void ota_ble_parser_reset(ota_ble_parser_t *parser)
 
 static int ota_ble_cmd_known(uint8_t cmd)
 {
-#if OTA_BLE_PIPELINE_ENABLED
     if (cmd >= OTA_BLE_CMD_CAPS2 && cmd <= OTA_BLE_CMD_ABORT2) return 1;
-#endif
-    return cmd == OTA_BLE_CMD_GET_INFO || cmd == OTA_BLE_CMD_BEGIN ||
-           cmd == OTA_BLE_CMD_DATA || cmd == OTA_BLE_CMD_END ||
-           cmd == OTA_BLE_CMD_ABORT;
+    return cmd == OTA_BLE_CMD_GET_INFO;
 }
 
 /* cmd 对应的合法 payload 长度域。DATA 为 [4,132]（包尾短段语义由
@@ -117,15 +113,6 @@ static int ota_ble_len_accept(uint8_t cmd, uint16_t len)
     {
     case OTA_BLE_CMD_GET_INFO:
         return len == OTA_BLE_LEN_GET_INFO;
-    case OTA_BLE_CMD_BEGIN:
-        return len == OTA_BLE_LEN_BEGIN;
-    case OTA_BLE_CMD_END:
-        return len == OTA_BLE_LEN_END;
-    case OTA_BLE_CMD_ABORT:
-        return len == OTA_BLE_LEN_ABORT;
-    case OTA_BLE_CMD_DATA:
-        return len >= OTA_BLE_LEN_DATA_MIN && len <= 132u;
-#if OTA_BLE_PIPELINE_ENABLED
     case OTA_BLE_CMD_CAPS2:
     case OTA_BLE_CMD_ABORT2:
         return len == 4u;
@@ -135,7 +122,6 @@ static int ota_ble_len_accept(uint8_t cmd, uint16_t len)
         return len == OTA_BLE_LEN_END2;
     case OTA_BLE_CMD_DATA2:
         return len >= 9u && len <= 136u;
-#endif
     default:
         return 0;
     }

@@ -17,7 +17,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart' show debugPrint;
 
 // Protocol peer only: synthetic bytes are never offered to a real device.
-class _Peer implements OtaBleChannel {
+class TestPipelinePeer implements OtaBleChannel {
   final events = StreamController<List<int>>.broadcast(sync: true);
   final pending = <int>[];
   final frames = <OtaBleFrame>[];
@@ -26,7 +26,6 @@ class _Peer implements OtaBleChannel {
   final sequences = <int, List<int>>{};
   bool connected = true, supports = true, badCaps = false, holdDurable = false;
   bool badEnd = false, badBegin = false;
-  bool holdLegacyAcks = false;
   bool deferReplies = false;
   OtaLinkStats? writeStats;
   int? dropOffset;
@@ -156,23 +155,11 @@ class _Peer implements OtaBleChannel {
           ack(0x94, frame.seq, status: 0xff);
           break;
         case 1:
-          total = word(frame.payload, 1);
-          final payload = Uint8List(10)..[1] = 7;
-          reply(0x81, 7, frame.seq, payload);
-          break;
         case 2:
-          accepted = word(frame.payload, 0) + frame.payload.length - 4;
-          if (accepted == total || accepted % 4096 == 0) durable = accepted;
-          if (holdLegacyAcks) break;
-          final bytes = ByteData(9)..setUint32(1, durable, Endian.little);
-          final segments = (accepted - durable + 127) ~/ 128;
-          bytes.setUint32(5, (1 << segments) - 1, Endian.little);
-          reply(0x82, 7, frame.seq, bytes.buffer.asUint8List());
-          break;
         case 3:
-          final bytes = ByteData(9)..setUint32(1, total, Endian.little);
-          reply(0x83, 7, frame.seq, bytes.buffer.asUint8List());
-          break;
+        case 4:
+          fail('Retired v1 request was emitted');
+
       }
     }
     } finally {
@@ -185,7 +172,7 @@ class _Peer implements OtaBleChannel {
 
 // Inject downstream loss without failing or leaving a platform write pending.
 // This is a synthetic boundary fixture, not a replay of the physical R03 bytes.
-class _PrefixLossPeer extends _Peer {
+class _PrefixLossPeer extends TestPipelinePeer {
   bool dropDataTail = true;
   bool dropInfo = false;
   bool failInfo = false;
@@ -213,7 +200,7 @@ class _PrefixLossPeer extends _Peer {
       writes.add(List<int>.of(chunk));
       return;
     }
-    if (dropDataTail && (frame.cmd == 0x12 || frame.cmd == OtaBleCodec.cmdData)) {
+    if (dropDataTail && frame.cmd == OtaBleCodec.cmdData2) {
       dropDataTail = false;
       receiverPrefix = List<int>.of(chunk.sublist(0, chunk.length - 10));
       writes.add(List<int>.of(chunk));
@@ -238,7 +225,7 @@ class _PrefixLossPeer extends _Peer {
 // New characteristic/channel wrappers must retain the physical device scope.
 class _ReboundChannel implements OtaBleChannel {
   _ReboundChannel(this.peer);
-  final _Peer peer;
+  final TestPipelinePeer peer;
   @override
   Object get deviceScope => peer.deviceScope;
   @override
@@ -257,9 +244,9 @@ Future<OtaAckResult> transfer(OtaBleTransport transport, Uint8List bytes,
     {void Function(int, int)? progress}) => transport.transfer(package: bytes,
       packageSha256: List.filled(32, 1), etuHeader: bytes.sublist(0, 64), onDurableProgress: progress);
 
-OtaBleTransport sender(OtaBleChannel peer, {bool enabled = true, Duration? budget,
+OtaBleTransport sender(OtaBleChannel peer, {Duration? budget,
     int batch = 1, OtaLinkStats? stats}) =>
-    OtaBleTransport(channel: peer, enablePipeline: enabled,
+    OtaBleTransport(channel: peer, 
       dataBatchFrames: batch, stats: stats,
       ackTimeout: const Duration(milliseconds: 30),
       noProgressTimeout: budget ?? const Duration(seconds: 3));
@@ -276,11 +263,11 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test('P35 observes accepted protocol state and actual DATA completion', () async {
-    for (final pipeline in [false, true]) {
-      final peer = _Peer();
+    for (final pipeline in [true]) {
+      final peer = TestPipelinePeer();
       final observed = <Map<String, Object?>>[];
       final stats = OtaLinkStats(label: 'p35', onTransferState: observed.add);
-      final transport = sender(peer, enabled: pipeline, stats: stats);
+      final transport = sender(peer, stats: stats);
       expect((await transfer(transport, package(9000))).isOk, isTrue);
       final begin = observed.firstWhere((e) => e['event'] == 'beginAck');
       expect(begin['protocol'], pipeline ? 2 : 1);
@@ -297,7 +284,7 @@ void main() {
   });
 
   test('P35 does not publish invalid v2 ACK state or retired samples', () async {
-    final peer = _Peer();
+    final peer = TestPipelinePeer();
     peer.mutateDataAck = (payload) => ByteData.sublistView(payload)
         .setUint32(9, 0x100000, Endian.little);
     final observed = <Map<String, Object?>>[];
@@ -315,9 +302,9 @@ void main() {
   });
 
   test('negotiated v2 reports actual window and batch only after BEGIN', () async {
-    final peer = _Peer();
+    final peer = TestPipelinePeer();
     final selections = <OtaTransportSelection>[];
-    final transport = OtaBleTransport(channel: peer, enablePipeline: true,
+    final transport = OtaBleTransport(channel: peer, 
         dataBatchFrames: 12, onLinkSelection: selections.add);
     expect(selections, isEmpty);
     expect((await transport.transfer(package: package(9000),
@@ -328,22 +315,21 @@ void main() {
     await peer.events.close();
   });
 
-  test('only a safe CAPS2 timeout can report v1 compatibility fallback', () async {
-    final peer = _Peer()..supports = false;
+  test('CAPS2 timeout fails before BEGIN and never emits a v1 request', () async {
+    final peer = TestPipelinePeer()..supports = false;
     final selections = <OtaTransportSelection>[];
-    final transport = OtaBleTransport(channel: peer, enablePipeline: true,
-        dataBatchFrames: 12, ackTimeout: const Duration(milliseconds: 30),
-        onLinkSelection: selections.add);
-    expect((await transfer(transport, package(1000))).isOk, isTrue);
-    expect(selections.single.toJson(), {'protocol': 1, 'windowSegments': 4,
-      'dataBatchFrames': 1, 'fallbackReason': 'caps2-timeout'});
+    final transport = OtaBleTransport(channel: peer,
+        ackTimeout: const Duration(milliseconds: 30), onLinkSelection: selections.add);
+    await expectLater(transfer(transport, package(1000)), throwsA(
+        isA<OtaTransportException>().having((e) => e.code, 'code', 'V2_REQUIRED')));
+    expect(selections, isEmpty);
+    expect(peer.frames.every((f) => f.cmd == 0x10), isTrue);
     await transport.dispose();
     await peer.events.close();
-    final invalid = _Peer()..badCaps = true;
-    final rejected = OtaBleTransport(channel: invalid, enablePipeline: true,
-        onLinkSelection: selections.add);
+    final invalid = TestPipelinePeer()..badCaps = true;
+    final rejected = OtaBleTransport(channel: invalid, onLinkSelection: selections.add);
     await expectLater(transfer(rejected, package(1000)), throwsA(isA<OtaTransportException>()));
-    expect(selections, hasLength(1));
+    expect(selections, isEmpty);
     expect(invalid.frames.any((f) => f.cmd == 1 || f.cmd == 0x11), isFalse);
     await rejected.dispose();
     await invalid.events.close();
@@ -376,8 +362,8 @@ void main() {
       expect(await diagnostics.beginUpgrade(input), isTrue);
       emitOtaObservation('OTA_EXPERIMENT ${jsonEncode(stamp)}');
       final stats = OtaLinkStats(label: 'upgrade', device: address);
-      final peer = _Peer()..deferReplies = true..writeStats = stats;
-      final transport = OtaBleTransport(channel: peer, enablePipeline: true, stats: stats);
+      final peer = TestPipelinePeer()..deferReplies = true..writeStats = stats;
+      final transport = OtaBleTransport(channel: peer, stats: stats);
       stats.recordMtu(requested: 247, chunkBytes: 244, durationUs: 0, source: 'negotiated');
       stats.recordCharsDiscovery(durationUs: 0, found: true, writeMode: 'writeWithResponse');
       try {
@@ -438,7 +424,7 @@ void main() {
         expect(await diagnostics.beginUpgrade(input), isTrue);
         emitOtaObservation('OTA_IDENTITY ${jsonEncode({'phase': 'pre-transfer',
           'versionCode': 30286, 'imageSha256': 'b' * 64, 'deviceAddress': address})}');
-        final peer = _Peer();
+        final peer = TestPipelinePeer();
         final stats = OtaLinkStats(label: 'upgrade', device: address);
         final transport = sender(peer, stats: stats);
         final progress = <int>[];
@@ -525,8 +511,8 @@ void main() {
   }
 
   test('v2 defaults preserve batch12 without an experiment configuration', () async {
-    final peer = _Peer();
-    final transport = OtaBleTransport(channel: peer, enablePipeline: true);
+    final peer = TestPipelinePeer();
+    final transport = OtaBleTransport(channel: peer, );
     expect(transport.dataBatchFrames, 12);
     final bytes = package(9000);
     expect((await transfer(transport, bytes)).isOk, isTrue);
@@ -537,36 +523,9 @@ void main() {
     await peer.events.close();
   });
 
-  test('v2 default falls back to four v1 credits and single-frame writes', () async {
-    final peer = _Peer()..supports = false..holdLegacyAcks = true;
-    final transport = OtaBleTransport(channel: peer, enablePipeline: true,
-        ackTimeout: const Duration(milliseconds: 300));
-    final bytes = package(1000);
-    final pending = transport.transfer(package: bytes, packageSha256: List.filled(32, 1),
-        etuHeader: bytes.sublist(0, 64), windowSegments: 24);
-    // Observe the pending result even if an assertion below fails.
-    final settled = pending.then<Object>((value) => value, onError: (Object error) => error);
-    try {
-      await until(() => peer.frames.where((frame) => frame.cmd == 2).length >= 4);
-      await Future<void>.delayed(const Duration(milliseconds: 5));
-      expect(peer.frames.where((frame) => frame.cmd == 2).length, 4);
-      peer.holdLegacyAcks = false;
-      final ack = ByteData(9)..setUint32(5, 0x0f, Endian.little);
-      peer.reply(0x82, 7, peer.frames.lastWhere((frame) => frame.cmd == 2).seq,
-          ack.buffer.asUint8List());
-      expect((await pending).isOk, isTrue);
-      expect(peer.writes.where((chunk) => chunk.length >= 3 && chunk[2] == 2)
-          .every((chunk) => chunk.length <= 142), isTrue);
-    } finally {
-      await transport.dispose();
-      await settled;
-      await peer.events.close();
-    }
-  });
-
   for (final status in [0x0f, 0x7e]) {
     test('first matching v2 error preserves raw status $status without credit', () async {
-      final peer = _Peer()..holdDurable = true;
+      final peer = TestPipelinePeer()..holdDurable = true;
       final stats = OtaLinkStats(label: 'upgrade');
       final transport = sender(peer, stats: stats);
       final progress = <int>[];
@@ -591,7 +550,7 @@ void main() {
   }
 
   test('stale epoch and unsent sequence errors cannot poison the active first error', () async {
-    final peer = _Peer();
+    final peer = TestPipelinePeer();
     final stats = OtaLinkStats(label: 'upgrade');
     final transport = sender(peer, stats: stats);
     peer.onData = (frame) {
@@ -605,7 +564,7 @@ void main() {
   });
 
   test('truncated matching ACK preserves missing fields as null, not zero', () async {
-    final peer = _Peer();
+    final peer = TestPipelinePeer();
     final stats = OtaLinkStats(label: 'upgrade');
     final transport = sender(peer, stats: stats);
     peer.onData = (frame) => peer.reply(0x92, 7, frame.seq, [15]);
@@ -624,7 +583,7 @@ void main() {
 
   for (final badBegin in [true, false]) {
     test('invalid v2 ${badBegin ? 'BEGIN' : 'END'} credit is retained', () async {
-      final peer = _Peer()..badBegin = badBegin..badEnd = !badBegin;
+      final peer = TestPipelinePeer()..badBegin = badBegin..badEnd = !badBegin;
       final stats = OtaLinkStats(label: 'upgrade');
       final transport = sender(peer, stats: stats);
       await expectLater(transfer(transport, package(1000)),
@@ -639,16 +598,16 @@ void main() {
     });
   }
 
-  test('v2 success and v1 fallback emit one compatible start and END marker', () async {
+  test('v2 retry emits one start and END marker', () async {
     final previousPrint = debugPrint;
     final logs = <String>[];
     debugPrint = (String? message, {int? wrapWidth}) {
       if (message != null) logs.add(message);
     };
     addTearDown(() => debugPrint = previousPrint);
-    for (final supports in [true, false]) {
+    for (final supports in [true]) {
       logs.clear();
-      final peer = _Peer()..supports = supports..dropBegin = supports ? 1 : 0;
+      final peer = TestPipelinePeer()..supports = supports..dropBegin = supports ? 1 : 0;
       final transport = sender(peer);
       expect((await transfer(transport, package(1000))).isOk, isTrue);
       expect(logs.where((s) => s.startsWith('OTA_MONO MONO_BUDGET_START ')).length, 1);
@@ -666,7 +625,7 @@ void main() {
       if (message != null) logs.add(message);
     };
     addTearDown(() => debugPrint = previousPrint);
-    final peer = _Peer()..badEnd = true;
+    final peer = TestPipelinePeer()..badEnd = true;
     final transport = sender(peer);
     await expectLater(transfer(transport, package(1000)), throwsA(isA<OtaTransportException>()));
     expect(logs.where((s) => s.startsWith('OTA_MONO MONO_BUDGET_START ')).length, 1);
@@ -677,9 +636,9 @@ void main() {
 
   test('v2 END timing uses only validated matched arrival, not later write settlement', () async {
     var clock = 100;
-    final peer = _Peer();
+    final peer = TestPipelinePeer();
     final stats = OtaLinkStats(label: 'pipeline', clockUs: () => clock);
-    final transport = OtaBleTransport(channel: peer, enablePipeline: true, stats: stats);
+    final transport = OtaBleTransport(channel: peer, stats: stats);
     peer.onEnd = (frame) {
       clock = 300;
       peer.ack(0x93, frame.seq);
@@ -694,9 +653,9 @@ void main() {
   });
 
   test('incomplete v2 END does not record a successful transfer endpoint', () async {
-    final peer = _Peer()..badEnd = true;
+    final peer = TestPipelinePeer()..badEnd = true;
     final stats = OtaLinkStats(label: 'pipeline');
-    final transport = OtaBleTransport(channel: peer, enablePipeline: true, stats: stats);
+    final transport = OtaBleTransport(channel: peer, stats: stats);
     await expectLater(transfer(transport, package(1000)), throwsA(isA<OtaTransportException>()));
     expect((stats.toJson()['transfer'] as Map)['endAckUs'], isNull);
     await transport.dispose();
@@ -704,7 +663,7 @@ void main() {
   });
 
   test('batch12 cancellation completes only the partially dispatched frame before ABORT2', () async {
-    final peer = _Peer();
+    final peer = TestPipelinePeer();
     final transport = sender(peer, batch: 12);
     peer.onData = (_) => transport.cancel();
     await expectLater(transfer(transport, package(9000)),
@@ -717,13 +676,13 @@ void main() {
     await peer.events.close();
   });
   test('pipeline preserves measured batch12 and rejects undispatched reservations', () async {
-    final peer = _Peer();
+    final peer = TestPipelinePeer();
     final transport = sender(peer, batch: 12);
     expect((await transfer(transport, package(9000))).isOk, isTrue);
     expect(peer.offsetsBeforeCommit, contains(4096));
     await transport.dispose();
     await peer.events.close();
-    final bad = _Peer();
+    final bad = TestPipelinePeer();
     bad.mutateDataAck = (payload) => ByteData.sublistView(payload).setUint32(9, 12 * 128, Endian.little);
     final rejected = sender(bad, batch: 12);
     await expectLater(transfer(rejected, package(9000)),
@@ -733,7 +692,7 @@ void main() {
     await bad.events.close();
   });
   test('real transport crosses block boundary, fragments frames and waits for durable END', () async {
-    final peer = _Peer()..chunkSize = 20;
+    final peer = TestPipelinePeer()..chunkSize = 20;
     final transport = sender(peer);
     final bytes = package(9000);
     final progress = <int>[];
@@ -748,22 +707,19 @@ void main() {
     await peer.events.close();
   });
 
-  test('missing capability falls back to v1; default makes no probe', () async {
-    for (final enabled in [true, false]) {
-      final peer = _Peer()..supports = false;
-      final transport = sender(peer, enabled: enabled);
-      expect((await transfer(transport, package(1000))).isOk, isTrue);
-      expect(peer.frames.any((f) => f.cmd == 0x10), enabled);
-      expect(peer.frames.any((f) => f.cmd == 1), isTrue);
-      expect(peer.frames.any((f) => f.cmd == 0x11), isFalse);
-      await transport.dispose();
-      await peer.events.close();
-    }
+  test('missing capability never emits a BEGIN or legacy frame', () async {
+    final peer = TestPipelinePeer()..supports = false;
+    final transport = sender(peer);
+    await expectLater(transfer(transport, package(1000)), throwsA(
+        isA<OtaTransportException>().having((e) => e.code, 'code', 'V2_REQUIRED')));
+    expect(peer.frames.every((f) => f.cmd == 0x10), isTrue);
+    await transport.dispose();
+    await peer.events.close();
   });
 
   test('malformed capability or BEGIN never grants DATA or falls back', () async {
     for (final badBegin in [false, true]) {
-      final peer = _Peer()..badCaps = !badBegin..badBegin = badBegin;
+      final peer = TestPipelinePeer()..badCaps = !badBegin..badBegin = badBegin;
       final transport = sender(peer);
       await expectLater(transfer(transport, package(1000)),
           throwsA(isA<OtaTransportException>().having((e) => e.code, 'code', 'ACK_MALFORMED')));
@@ -774,7 +730,7 @@ void main() {
   });
 
   test('lost BEGIN and DATA retries retain sequence and package bytes', () async {
-    final peer = _Peer()..dropBegin = 1..dropOffset = 0;
+    final peer = TestPipelinePeer()..dropBegin = 1..dropOffset = 0;
     final transport = sender(peer);
     final bytes = package(9000);
     expect((await transfer(transport, bytes)).isOk, isTrue);
@@ -787,7 +743,7 @@ void main() {
   });
 
   test('accepted RAM does not report durable progress or authorize END', () async {
-    final peer = _Peer()..holdDurable = true;
+    final peer = TestPipelinePeer()..holdDurable = true;
     final transport = sender(peer);
     final progress = <int>[];
     final pending = transfer(transport, package(8192), progress: (off, _) => progress.add(off));
@@ -802,13 +758,13 @@ void main() {
   });
 
   test('stale epoch is ignored but future accepted credit fails closed', () async {
-    final peer = _Peer();
+    final peer = TestPipelinePeer();
     final transport = sender(peer);
     peer.onData = (frame) => peer.ack(0x92, frame.seq, epoch: peer.nonce ^ 1, receivedOff: 0x100000);
     expect((await transfer(transport, package(1000))).isOk, isTrue);
     await transport.dispose();
     await peer.events.close();
-    final badPeer = _Peer();
+    final badPeer = TestPipelinePeer();
     badPeer.mutateDataAck = (payload) => ByteData.sublistView(payload).setUint32(9, 8192, Endian.little);
     final badTransport = sender(badPeer);
     await expectLater(transfer(badTransport, package(9000)),
@@ -821,7 +777,7 @@ void main() {
 
   test('cancel or background transition stops DATA and sends epoch-bound ABORT2', () async {
     for (final background in [false, true]) {
-      final peer = _Peer()..chunkSize = 20;
+      final peer = TestPipelinePeer()..chunkSize = 20;
       final transport = sender(peer);
       peer.onData = (_) { if (background) { transport.pauseForBackground(); } else { transport.cancel(); } };
       await expectLater(transfer(transport, package(9000)),
@@ -837,7 +793,7 @@ void main() {
   });
 
   test('new transport resumes durable prefix with a fresh epoch', () async {
-    final peer = _Peer()..resume = 4096;
+    final peer = TestPipelinePeer()..resume = 4096;
     var lastEpoch = 0;
     for (var i = 0; i < 2; i++) {
       final transport = sender(peer);
@@ -852,11 +808,11 @@ void main() {
   });
 
   group('P35-R03 unconfirmed downstream delivery', () {
-    for (final pipeline in [false, true]) {
+    for (final pipeline in [true]) {
       for (final failure in ['write', 'identity']) {
       test('v${pipeline ? 2 : 1} failed cancellation $failure probe cannot authorize ABORT', () async {
         final peer = _PrefixLossPeer();
-        final old = sender(_ReboundChannel(peer), enabled: pipeline);
+        final old = sender(_ReboundChannel(peer));
         OtaBleTransport? next;
         addTearDown(() async {
           await old.dispose();
@@ -877,11 +833,11 @@ void main() {
         await old.abortBestEffort();
         await failed;
         expect(peer.infoWrites, 2);
-        expect(peer.frames.any((f) => f.cmd == OtaBleCodec.cmdAbort || f.cmd == 0x14), isFalse);
+        expect(peer.frames.any((f) => f.cmd == OtaBleCodec.cmdAbort2), isFalse);
         await expectLater(old.getDeviceInfo(),
             throwsA(isA<OtaTransportException>().having((e) => e.code, 'code', 'CANCELLED')));
         await old.dispose();
-        final rebound = sender(_ReboundChannel(peer), enabled: pipeline);
+        final rebound = sender(_ReboundChannel(peer));
         next = rebound;
         await expectLater(rebound.begin(totalLen: bytes.length,
             packageSha256: List<int>.filled(32, 1), etuHeader: bytes.sublist(0, 64)),
@@ -899,7 +855,7 @@ void main() {
             '${stayConnected ? ' while still connected' : ''}', () async {
           final peer = _PrefixLossPeer();
           final old = OtaBleTransport(channel: _ReboundChannel(peer),
-              enablePipeline: pipeline, dataBatchFrames: 1,
+              dataBatchFrames: 1,
               ackTimeout: const Duration(milliseconds: 500),
               noProgressTimeout: const Duration(seconds: 3));
           OtaBleTransport? rebound;
@@ -967,7 +923,7 @@ void main() {
 
           // No reset or staging clear: only the connection wrapper changes.
           peer.connected = true;
-          final next = sender(_ReboundChannel(peer), enabled: pipeline);
+          final next = sender(_ReboundChannel(peer));
           rebound = next;
           final beforeQuery = peer.writes.length;
           if (!recoveredOnCancel) {
@@ -1016,7 +972,7 @@ void main() {
 
   test('no durable progress, disconnect and invalid END cannot become success', () async {
     for (final mode in [0, 1, 2]) {
-      final peer = _Peer()..holdDurable = mode == 0..badEnd = mode == 2;
+      final peer = TestPipelinePeer()..holdDurable = mode == 0..badEnd = mode == 2;
       if (mode == 1) peer.onData = (_) => peer.connected = false;
       final transport = sender(peer, budget: const Duration(milliseconds: 150));
       await expectLater(transfer(transport, package(1000)), throwsA(isA<OtaTransportException>()));
