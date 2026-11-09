@@ -28,7 +28,7 @@ void main() {
     await parent.create(recursive: true);
     final root = await parent.createTemp('case-');
     addTearDown(() => root.delete(recursive: true));
-    final bytes = fixtures.package(4096);
+    final bytes = fixtures.package(1024 * 1024);
     const address = 'aa:bb:cc:dd:ee:ff';
     final current = <String, Object?>{
       'phase': 'transferring', 'deviceAddress': address,
@@ -71,6 +71,8 @@ void main() {
     expect(recorder.error, isNull);
     final file = recorder.file!;
     expect(await file.readAsBytes(), stream.bytes);
+    expect(await file.length(), lessThan(64 * 1024 * 1024),
+      reason: 'one complete reference must fit the host next-transfer reserve');
     final checkout = Directory.current.parent.parent;
     Future<ProcessResult> inspect(File input) => Process.run(
       Platform.isWindows ? 'python' : 'python3', ['-I', '-S', '-B', '-X', 'utf8',
