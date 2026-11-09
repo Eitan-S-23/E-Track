@@ -506,6 +506,52 @@ static void test_pipeline_frame_lengths(void)
     }
 }
 
+static uint8_t text_out[32];
+static unsigned text_len;
+
+static void collect_text(void *ctx, uint8_t byte)
+{
+    (void)ctx;
+    if (text_len < sizeof(text_out)) text_out[text_len++] = byte;
+}
+
+static void feed_text(const char *text)
+{
+    while (*text) ota_ble_session_feed_idle(&session, collect_text, NULL, (uint8_t)*text++);
+}
+
+static void test_text_isolation2(void)
+{
+    uint8_t *pkg = make_full_package(5000u);
+    uint8_t sha[32];
+    uint32_t before;
+    unsigned i;
+    if (pkg == NULL) exit(2);
+    sha256_of(pkg, 5000u, sha);
+    setup2();
+    text_len = 0u;
+    feed_text("hello");
+    check("idle-phase text bytes reach the text sink",
+        text_len == 5u && memcmp(text_out, "hello", 5u) == 0);
+    caps2(900u);
+    begin2(900u, 10u, pkg, 5000u, sha);
+    check("V2 text isolation has an admitted receiver", ota_ble_session_active(&session));
+    before = te.tx_count;
+    for (i = 0u; i < 5u; ++i) ota_ble_session_isr_feed(&session, (uint8_t)"world"[i]);
+    pump_once();
+    check("active-phase text bytes are dropped and never reach the sink",
+        text_len == 5u && ota_ble_session_active(&session) && te.tx_count == before);
+    check("active text consumes no frame or durable progress",
+        ota_ble_ring_count(&session.rx_ring) == 0u && session.progress.durable_off == 0u);
+    abort2(900u, session.session_id);
+    feed_text("world");
+    check("text passthrough resumes after teardown",
+        !ota_ble_session_active(&session) && text_len == 10u &&
+        memcmp(text_out, "helloworld", 10u) == 0);
+    check_resources();
+    free(pkg);
+}
+
 int main(void)
 {
     make_staging_io();
@@ -531,6 +577,7 @@ int main(void)
     test_pipeline_admission_digest_failures();
     test_pipeline_io_failures();
     test_pipeline_frame_lengths();
+    test_text_isolation2();
     printf("PIPELINE_SESSION checks=%d failures=%d\n", checks, failures);
     return failures == 0 ? 0 : 1;
 }

@@ -1,7 +1,8 @@
 import { CliError } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-cli.mjs";
 import { versionCodeFor } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-schema.mjs";
 
-export const UI_BASELINE = "b871d57e66645f43b29a8006a58ca6a3692951f3";
+// User-directed V2-only source, development checked; not an acceptance verdict.
+export const UI_BASELINE = "bd751e4431755261d2978e994e24b5009961fca4";
 export function candidateMode(env) {
   const mode = env.INPUT_CANDIDATE_MODE || "archived-original";
   if (!["archived-original", "new-source", "start-state-supplement", "normal-delta", "archived-benchmark"].includes(mode)) throw new CliError("Unknown candidate input mode");
