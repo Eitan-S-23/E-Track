@@ -18,7 +18,7 @@ from observation import h, r, s
 import live_phone
 import public_proxy
 
-BUDGET = dict(maxCells=2, maxRecordings=32, maxAttempts=64, totalSeconds=18000,
+BUDGET = dict(maxCells=8, maxRecordings=32, maxAttempts=256, totalSeconds=18000,
     minimumSpanSeconds=14400, nextBlockReserveSeconds=3000, nextCellReserveSeconds=1800,
     recorderBytes=128*1024*1024, transferReserveBytes=64*1024*1024, sealReserveBytes=4*1024*1024)
 APP_ID = 'com.wen.gaia.gaia.p51benchmark'
@@ -36,8 +36,9 @@ CONTROL_LABELS = {
 
 
 def network_plan(plan):
-    return dict(plan['mcu'], reference_service=dict(baseVersion=30320, targetVersion=30321,
-        appVersion=plan['phone']['app']['version_code'], releaseId='p51-benchmark-30320-30321',
+    fw = plan['firmware']
+    return dict(plan['mcu'], reference_service=dict(baseVersion=fw['current']['version'], targetVersion=fw['target']['version'],
+        appVersion=plan['phone']['app']['version_code'], releaseId=fw['release_id'],
         purpose='P51 fixed-load benchmark only'))
 
 
@@ -148,7 +149,7 @@ def package_binding(plan):
         verification['native']['warnings'] == verification['native']['errors'] == 0 and
         len(verification['native']['checks']) == 11 and all(row['observation']['passed'] for row in verification['native']['checks']),
         'protected benchmark preparation proof required')
-    for field, version, key in (('current', 30320, 'base'), ('target', 30321, 'target')):
+    for field, version, key in (('current', metadata['baseVersionCode'], 'base'), ('target', metadata['versionCode'], 'target')):
         image = plan['firmware'][field]
         prefix = 'base' if key == 'base' else 'target'
         h.require(image['version'] == version and image['sha256'] == proof[key]['sha256'] ==
@@ -247,7 +248,7 @@ def apk_binding(plan):
     return build
 
 
-def validate(plan):
+def validate(plan, *, require_fixture=True):
     config = plan.get('benchmark')
     h.require(isinstance(config, dict) and config.get('purpose') == 'fixed-load-benchmark'
         and config.get('controls') == 'semantic-v1' and config.get('budget') == BUDGET
@@ -255,6 +256,8 @@ def validate(plan):
         'explicit benchmark-only execution input required')
     apk_binding(plan)
     asset = package_binding(plan)
+    if not require_fixture:
+        return config
     ready = h.read_json(h.pinned(config['fixture_ready']))
     parsed = urlsplit(ready['origin'])
     if 'public_proxy' in ready:
@@ -264,7 +267,7 @@ def validate(plan):
     h.require(parsed.scheme == 'https' and origin_ok and
         not parsed.path and not parsed.query and not parsed.fragment and
         plan['firmware']['latest_url'] == ready['origin'] + live_phone.service.LATEST_PATH and
-        plan['firmware']['release_id'] == 'p51-benchmark-30320-30321' and
+        plan['firmware']['release_id'] == 'p51-benchmark-%d-%d' % (plan['firmware']['current']['version'], plan['firmware']['target']['version']) and
         ready['package']['sha256'] == asset['sha256'] and ready['package']['bytes'] == 1048576,
         'immutable benchmark fixture/compiled endpoint binding required')
     h.pinned(ready['package'])
@@ -377,6 +380,8 @@ class Observer(obs.Observer):
             return
         previous = len(self.live)
         self.pump_stream()
+        from v2 import states
+        states(self.live[previous:])
         if len(self.live) > previous:
             self.last_state_at = time.monotonic()
             self.queue.append(self.live[-1])

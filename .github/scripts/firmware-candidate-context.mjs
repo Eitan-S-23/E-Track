@@ -37,7 +37,8 @@ export function candidateAdmission(env) {
         || env.GITHUB_WORKFLOW_SHA !== env.GITHUB_SHA
         || !/^refs\/heads\/[A-Za-z0-9_./-]+$/.test(env.GITHUB_REF ?? "")
         || env.GITHUB_WORKFLOW_REF !== `Eitan-S-23/E-Track/.github/workflows/firmware-build.yml@${env.GITHUB_REF}`
-        || env.INPUT_VERSION_NAME !== "3.3.21" || env.INPUT_CANDIDATE_BASE_VERSION !== "3.3.20"
+        || versionCodeFor(env.INPUT_CANDIDATE_BASE_VERSION) < 30320
+        || versionCodeFor(env.INPUT_VERSION_NAME) <= versionCodeFor(env.INPUT_CANDIDATE_BASE_VERSION)
         || env.INPUT_CANDIDATE_FULL_BASE_VERSION || env.INPUT_APPROVED_REHEARSAL_RUN_ID || env.INPUT_RELEASE_NOTES) {
       throw new CliError("Archived benchmark requires its exact finalized pair and protected artifact-only context");
     }

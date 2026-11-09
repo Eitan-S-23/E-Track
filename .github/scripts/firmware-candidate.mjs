@@ -18,15 +18,17 @@ export function verifyCandidateCheckout(root, env, config, git = argv =>
   if (git(["rev-parse", "HEAD"]) !== owner.commitSha) throw new CliError("Candidate checkout differs from reviewed source");
   if (candidateMode(env) === "archived-original") return owner;
   if (candidateMode(env) === "archived-benchmark") {
-    if (config?.schema !== "p51-benchmark-inputs-v1" || config.mode !== "archived-benchmark"
+    const keyed = config?.schema === "p51-benchmark-inputs-v2";
+    if (!["p51-benchmark-inputs-v1", "p51-benchmark-inputs-v2"].includes(config?.schema) || config.mode !== "archived-benchmark"
         || config.task !== "P5-1" || config.repository !== env.GITHUB_REPOSITORY
         || config.profile !== "p34-v2-candidate" || config.purpose !== "fixed-load-benchmark"
         || config.derivation !== "protected-finalized-pair/reference-envelope-only"
         || config.productionPublishable !== false || config.representativeFunctionalSample !== false
         || config.baseVersion !== env.INPUT_CANDIDATE_BASE_VERSION || config.targetVersion !== env.INPUT_VERSION_NAME
-        || config.normalInputs?.path !== "Tools/ota/p51-normal-staging-inputs.json"
+        || (keyed ? (!/^[0-9a-f]{40}$/.test(config.sourceCommit ?? "") || config.productSource !== UI_BASELINE)
+          : config.normalInputs?.path !== "Tools/ota/p51-normal-staging-inputs.json")
         || git(["diff", "--name-only", "HEAD"])) throw new CliError("Archived benchmark contract/checkout drift");
-    const original = "1430c8ff7f3bcd9a35bfe158ba697b99021f75f2";
+    const original = keyed ? config.sourceCommit : "1430c8ff7f3bcd9a35bfe158ba697b99021f75f2";
     const products = ["USER", "ArduinoAPI", "Libraries", "MDK-ARM_F435", "boot", "cmake",
       "vendor", "Simulator", "bsdiff_lzma_AES128-main", "segger_rtt"];
     git(["merge-base", "--is-ancestor", original, owner.commitSha]);

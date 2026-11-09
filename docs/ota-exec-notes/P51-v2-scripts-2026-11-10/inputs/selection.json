@@ -1,0 +1,21 @@
+{
+  "count": 208447,
+  "seed": 19,
+  "salt": 30,
+  "groups": 208448,
+  "base_sha256": "5820b830e9763ee853f29ff21adb4c43ebd5cf1c7ce00fcff85cef1e05be11bf",
+  "target_sha256": "8224e114a7741dea50b50da50ab94f7f7b33de762c1b827f345d582b1ad6eba0",
+  "decoded_bytes": 5617036,
+  "compressed_bytes": 1048472,
+  "etu_bytes": 1048576,
+  "raw_sha256": "5c03fd37d9fc54ab8e1743285e16ede7d0fedf9c33b767c687785ea39015e8fe",
+  "compressed_sha256": "970edcdd5f91df5f3b9c82773be6932e0edabfd2a2b876b6f8f1a6f93e039342",
+  "props_hex": "0200400000",
+  "elapsed_seconds": 2.5573,
+  "strategy": "isolated-frontier-count-salt-seed-v4",
+  "measurements": 158,
+  "budget": 256,
+  "neighborMeasurements": 26,
+  "mainMeasurements": 138,
+  "foundBy": "main"
+}

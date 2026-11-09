@@ -276,7 +276,7 @@ class FunctionalSampleGuards(unittest.TestCase):
         self.replace_package('patch', b'not-an-etu')
         for plan in (dict(original, functional_sample={}), self.plan):
             with patch.object(sys, 'argv', argv), patch.object(run.h, 'read_json', wraps=run.h.read_json) as read, \
-                    patch.object(run, 'validate', return_value=plan), patch.object(run.h, 'record', return_value={}), \
+                    patch.object(run, 'validate_live', return_value=plan), patch.object(run.h, 'record', return_value={}), \
                     patch.object(run.h, 'fresh', return_value=ROOT / '.cache/not-created'), patch.object(run.h, 'save'), \
                     patch.object(run, 'gate'), \
                     patch.object(run.h, 'device_owner', side_effect=RuntimeError('unexpected device ownership')) as owner, \
@@ -307,7 +307,7 @@ class FunctionalSampleGuards(unittest.TestCase):
         argv = ['run.py', 'cell', '--inputs', '.cache/input.json', '--out', '.cache/not-created',
                 '--contract', 'docs/contract.json', '--matrix', '.cache/matrix.json', '--command-id', 'BLE-PATCH']
         with patch.object(sys, 'argv', argv), patch.object(run.h, 'read_json', return_value={}), \
-                patch.object(run, 'validate', return_value=dict(kind='patch')), patch.object(run.h, 'record', return_value={}), \
+                patch.object(run, 'validate_live', return_value=dict(kind='patch')), patch.object(run.h, 'record', return_value={}), \
                 patch.object(run.h, 'fresh', return_value=ROOT / '.cache/not-created'), patch.object(run.h, 'save'), \
                 patch.object(run, 'gate'), patch.object(run.h, 'device_owner') as owner, \
                 patch.object(run, 'channel') as channel, self.assertRaisesRegex(RuntimeError, 'normal-upgrade'):
@@ -366,7 +366,7 @@ class ExecutionGuards(unittest.TestCase):
             self.assertEqual(path, ROOT / '.cache/input.json')
             return {}
         with patch.object(sys, 'argv', argv), patch.object(run.h, 'read_json', return_value={}), \
-                patch.object(run, 'validate', return_value={}), patch.object(run.h, 'record', side_effect=record), \
+                patch.object(run, 'validate_live', return_value={}), patch.object(run.h, 'record', side_effect=record), \
                 patch.object(run.h, 'fresh', return_value=ROOT / '.cache/not-created'), patch.object(run.h, 'save'), \
                 patch.object(run, 'gate', side_effect=RuntimeError('stop before device')) as gate, \
                 patch.object(run.m, 'MCU') as mcu, self.assertRaisesRegex(RuntimeError, 'stop before device'):
@@ -402,7 +402,7 @@ class ExecutionGuards(unittest.TestCase):
             self.assertEqual(args.previous, ROOT / '.cache/previous-cell')
             raise RuntimeError('stop before device')
         with patch.object(sys, 'argv', argv), patch.object(run.h, 'read_json', return_value={}), \
-                patch.object(run, 'validate', return_value={}), patch.object(run.h, 'record', return_value={}), \
+                patch.object(run, 'validate_live', return_value={}), patch.object(run.h, 'record', return_value={}), \
                 patch.object(run.h, 'fresh', return_value=ROOT / '.cache/not-created'), patch.object(run.h, 'save'), \
                 patch.object(run, 'gate', side_effect=gate), patch.object(run.m, 'MCU') as mcu, \
                 self.assertRaisesRegex(RuntimeError, 'stop before device'):

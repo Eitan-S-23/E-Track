@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { candidateAdmission, candidateMode } from "../../.github/scripts/firmware-candidate-context.mjs";
+import { candidateAdmission, candidateMode, UI_BASELINE } from "../../.github/scripts/firmware-candidate-context.mjs";
 import { verifyCandidateCheckout } from "../../.github/scripts/firmware-candidate.mjs";
 
 const config = JSON.parse(readFileSync(new URL("../../Tools/ota/p51-benchmark-inputs.json", import.meta.url)));
@@ -14,7 +14,7 @@ const env = {
   INPUT_PACKAGE_CANDIDATE: "true", INPUT_PUBLISH: "false", INPUT_REHEARSAL: "false",
   INPUT_CHECK_BINDINGS: "false", INPUT_STAGE_CANDIDATE: "false", OTA_BOOT_CHAIN_READY: "false",
   INPUT_FIRMWARE_BUILD_PROFILE: "p34-v2-candidate", INPUT_CANDIDATE_MODE: "archived-benchmark",
-  INPUT_CANDIDATE_BASE_VERSION: "3.3.20", INPUT_VERSION_NAME: "3.3.21",
+  INPUT_CANDIDATE_BASE_VERSION: config.baseVersion, INPUT_VERSION_NAME: config.targetVersion,
   FIRMWARE_RELEASE_MODE: "artifact-candidate-benchmark",
   FIRMWARE_CANDIDATE_CONTEXT: "firmware-rehearsal/artifact-only-archived-benchmark-v1",
 };
@@ -27,13 +27,14 @@ test("benchmark has explicit nonpublishing context and finalized pair", () => {
     calls.push(args);
     return args[0] === "rev-parse" ? source : "";
   });
-  assert.ok(calls.some(args => args[0] === "merge-base" && args.includes("1430c8ff7f3bcd9a35bfe158ba697b99021f75f2")));
+  assert.equal(config.productSource, UI_BASELINE);
+  assert.ok(calls.some(args => args[0] === "merge-base" && args.includes(config.sourceCommit)));
   assert.ok(calls.some(args => args[0] === "status"));
 });
 
 for (const [key, value] of Object.entries({ INPUT_PUBLISH: "true", INPUT_REHEARSAL: "true",
   INPUT_STAGE_CANDIDATE: "true", INPUT_CHECK_BINDINGS: "true", OTA_BOOT_CHAIN_READY: "true",
-  INPUT_VERSION_NAME: "3.3.22", INPUT_CANDIDATE_BASE_VERSION: "3.3.18", INPUT_CANDIDATE_FULL_BASE_VERSION: "3.3.17",
+  INPUT_VERSION_NAME: config.baseVersion, INPUT_CANDIDATE_BASE_VERSION: "3.3.18", INPUT_CANDIDATE_FULL_BASE_VERSION: "3.3.17",
   GITHUB_WORKFLOW_SHA: "b".repeat(40), INPUT_CANDIDATE_REVIEWED_COMMIT: "b".repeat(40),
   GITHUB_WORKFLOW_REF: "Eitan-S-23/E-Track/.github/workflows/other.yml@refs/heads/benchmark",
   GITHUB_REF: "refs/tags/benchmark", INPUT_APPROVED_REHEARSAL_RUN_ID: "1", INPUT_RELEASE_NOTES: "release",
@@ -44,13 +45,21 @@ for (const [key, value] of Object.entries({ INPUT_PUBLISH: "true", INPUT_REHEARS
 test("benchmark refuses normal-purpose, changed product and dirty checkout", () => {
   const clean = args => args[0] === "rev-parse" ? source : "";
   for (const delta of [{ purpose: "normal-upgrade" }, { representativeFunctionalSample: true },
-    { productionPublishable: true }, { baseVersion: "3.3.18" }, { targetVersion: "3.3.19" }]) {
+    { productionPublishable: true }, { baseVersion: "3.3.18" }, { targetVersion: "3.3.19" },
+    { productSource: "b".repeat(40) }, { sourceCommit: "unbound" }]) {
     assert.throws(() => verifyCandidateCheckout(process.cwd(), env, { ...config, ...delta }, clean));
   }
   for (const when of [args => args[0] === "diff" && args.length === 3,
     args => args[0] === "diff" && args.includes("USER"), args => args[0] === "status"]) {
     assert.throws(() => verifyCandidateCheckout(process.cwd(), env, config, args => when(args) ? "changed.cpp" : clean(args)));
   }
+});
+
+test("forward version drift still fails exact manifest binding", () => {
+  const changed = { ...env, INPUT_VERSION_NAME: "3.3.23" };
+  assert.deepEqual(candidateAdmission(changed), { commitSha: source, runId: "123", runAttempt: "1" });
+  assert.throws(() => verifyCandidateCheckout(process.cwd(), changed, config,
+    args => args[0] === "rev-parse" ? source : ""));
 });
 
 test("workflow archives truthful benchmark metadata and excludes private material", () => {

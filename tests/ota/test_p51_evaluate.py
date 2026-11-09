@@ -36,7 +36,7 @@ class TimingTests(unittest.TestCase):
             bind=dict(writeMode='withoutResponse', mtuChunkBytes=244), transfer=dict(outcome='ok',
                 elapsedUs=100000000, startUs=100, endAckUs=100000100,
                 begin=dict(count=1, first=dict(off=0, bitmap=0, protocol=2, ackTimeoutMs=500,
-                    maxRetries=5, windowSegments=32)), durable=dict(finalOff=1048576),
+                    maxRetries=5, windowSegments=24, epoch=7, session=1, seq=2)), durable=dict(finalOff=1048576),
                 ackSamples='complete', ackEarlyInvalid=0, segmentsUnique=2, retransmitFrames=0)))
 
     def test_uses_reference_bytes_and_same_source_clock(self):
@@ -56,6 +56,20 @@ class TimingTests(unittest.TestCase):
         group['summary']['transfer']['begin']['first']['off'] = 4096
         with self.assertRaises(RuntimeError):
             e.transfer(group, 1048576)
+
+    def test_v1_and_wrong_negotiated_profile_cannot_get_v2_timing_credit(self):
+        for field, value in (('protocol', 1), ('protocol', True), ('epoch', 0),
+                             ('session', 0), ('seq', 65536), ('windowSegments', 32)):
+            group = self.group()
+            group['summary']['transfer']['begin']['first'][field] = value
+            with self.subTest(field=field), self.assertRaises(RuntimeError):
+                e.transfer(group, 1048576)
+        with self.assertRaisesRegex(RuntimeError, 'declared test profile'):
+            e.transfer(self.group(), 1048576, expected_profile=e.v2.PROFILE)
+        group = self.group()
+        group['summary']['transfer']['dataBatch'] = dict(maxFrames=12)
+        self.assertEqual(e.transfer(group, 1048576, expected_profile=e.v2.PROFILE)
+                         ['parameters']['dataBatchFrames'], 12)
 
     def test_package_must_be_really_committed(self):
         fw = dict(package=dict(bytes=1048576), target=dict(version=30319))

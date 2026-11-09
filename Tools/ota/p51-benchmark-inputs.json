@@ -1,5 +1,5 @@
 {
-  "schema": "p51-benchmark-inputs-v1",
+  "schema": "p51-benchmark-inputs-v2",
   "task": "P5-1",
   "mode": "archived-benchmark",
   "repository": "Eitan-S-23/E-Track",
@@ -8,20 +8,48 @@
   "derivation": "protected-finalized-pair/reference-envelope-only",
   "productionPublishable": false,
   "representativeFunctionalSample": false,
-  "baseVersion": "3.3.20",
-  "targetVersion": "3.3.21",
-  "normalInputs": {
-    "path": "Tools/ota/p51-normal-staging-inputs.json",
-    "bytes": 2910,
-    "sha256": "196008ecdfa7be4244f0d7d937666454a6d5126a618a7fae516ba2a0aea2cd7e"
+  "baseVersion": "3.3.21",
+  "targetVersion": "3.3.22",
+  "sourceCommit": "23770494056cc482f78b4074a3c30ee77d351132",
+  "productSource": "bd751e4431755261d2978e994e24b5009961fca4",
+  "sourceDelivery": {
+    "path": "docs/ota-exec-notes/P51-v2-scripts-2026-11-10/inputs/source-delivery.json",
+    "bytes": 76702,
+    "sha256": "6ea1bff06a7851f7ef9ac47d0601118348f56981aacfd86c578631ca5ff35f11"
+  },
+  "sourceArchive": {
+    "path": "docs/ota-exec-notes/P51-v2-scripts-2026-11-10/inputs/source-archive.zip",
+    "bytes": 1863643,
+    "sha256": "7097d75a9fdd309b374436a904a3a05134bacfc30018420bdcb1384865ad9c8f"
   },
   "base": {
-    "bytes": 614092,
-    "sha256": "5d86c6b3de6535004b4aef2333706511a27cb194b8353712684c9bcc17725741"
+    "path": "docs/ota-exec-notes/P51-v2-scripts-2026-11-10/inputs/base.bin",
+    "bytes": 614284,
+    "sha256": "5820b830e9763ee853f29ff21adb4c43ebd5cf1c7ce00fcff85cef1e05be11bf"
   },
   "target": {
-    "bytes": 615132,
-    "sha256": "1564ccee0a9a6bc019d8877fc832c7542c2e815ce05412b6511bf9f724936af3"
+    "path": "docs/ota-exec-notes/P51-v2-scripts-2026-11-10/inputs/target.bin",
+    "bytes": 614284,
+    "sha256": "8224e114a7741dea50b50da50ab94f7f7b33de762c1b827f345d582b1ad6eba0"
   },
-  "reference": {"totalBytes": 1048576, "seed": 7, "budget": 256}
+  "boot": {
+    "path": "docs/ota-exec-notes/P51-v2-scripts-2026-11-10/inputs/boot.bin",
+    "bytes": 65536,
+    "sha256": "01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527"
+  },
+  "reference": {
+    "totalBytes": 1048576,
+    "seed": 19,
+    "budget": 256,
+    "selection": {
+      "path": "docs/ota-exec-notes/P51-v2-scripts-2026-11-10/inputs/selection.json",
+      "bytes": 730,
+      "sha256": "b1cee66b014394e8d519c3a93be02e0680f3178c556a32e00cd211d1ec07fd0d"
+    },
+    "stream": {
+      "path": "docs/ota-exec-notes/P51-v2-scripts-2026-11-10/inputs/reference.lzma",
+      "bytes": 1048472,
+      "sha256": "970edcdd5f91df5f3b9c82773be6932e0edabfd2a2b876b6f8f1a6f93e039342"
+    }
+  }
 }

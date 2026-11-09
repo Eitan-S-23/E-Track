@@ -9,6 +9,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import run
 import state_chain as sc
+import v2
 from observation import r
 h, m = sc.h, sc.m
 sys.path.insert(0, str(h.ROOT / 'Tools/ota/p3-4-link-stats'))
@@ -78,10 +79,11 @@ def four_cell(folder, p):
         archive=archive, finalNative=final)
 
 
-def transfer(group, package_bytes):
+def transfer(group, package_bytes, *, expected_profile=None):
     summary, samples = group['summary'], group['ackLatencyUs']
     t = summary['transfer']
     first = t['begin']['first']
+    profile = v2.summary(summary, expected=expected_profile)
     elapsed = t['elapsedUs']
     h.require(group['label'] == 'upgrade' and t['outcome'] == 'ok' and
               type(elapsed) is int and elapsed > 0 and elapsed == t['endAckUs']-t['startUs'] and
@@ -90,6 +92,7 @@ def transfer(group, package_bytes):
     h.require(t['ackSamples'] == 'complete' and t['ackEarlyInvalid'] == 0 and
               t['segmentsUnique'] == len(samples) and t['segmentsUnique'] > 0, 'incomplete ACK population')
     parameters = {key: first[key] for key in ('protocol', 'ackTimeoutMs', 'maxRetries', 'windowSegments')}
+    parameters['dataBatchFrames'] = profile['dataBatchFrames']
     parameters.update({key: summary['bind'][key] for key in ('writeMode', 'mtuChunkBytes')})
     return dict(elapsedUs=elapsed, throughputKiBps=package_bytes*1e6/1024/elapsed,
         retransmissionRate=t['retransmitFrames']/t['segmentsUnique'], ackSamplesUs=samples,
@@ -106,17 +109,17 @@ def long_group(blocks, p, clock):
         header = r.strict_json(raw.splitlines()[0][len('OTA_P35_CAPTURE '):])
         h.require(header['captureId'] not in captures, 'duplicate original capture')
         captures.add(header['captureId'])
-        report = r.audit_link_diagnostics(raw, header['captureId'])
+        expected = p.get('benchmark', {}).get('link')
+        report, states = v2.recording(raw, header['captureId'], expected=expected)
         groups = [group for group in report['groups'] if group['label'] == 'upgrade']
         h.require(len(groups) == len(value['cells']), 'missing/extra actual attempt')
-        states = r.Decoder().feed(raw)
         for index, (cell, group) in enumerate(zip(value['cells'], groups), 1):
             h.require(cell['index'] == index and cell['initial'] in states and cell['finalInfo'] in states,
                       'result is not backed by original device events')
             r.bound(cell['finalInfo'], dict(firmware=p['firmware']), package=True, final=True)
             h.require(cell['finalInfo']['freshConnection'] and cell['finalInfo']['linkConnected'], 'no fresh completion')
             final_native(folder / ('cell-%02d' % index) / 'mcu', p)
-            timing = transfer(group, p['mcu']['package']['bytes'])
+            timing = transfer(group, p['mcu']['package']['bytes'], expected_profile=expected)
             timing.update(captureId=header['captureId'], cell=index)
             rows.append(timing)
             intent = h.read_json(folder / ('cell-%02d' % index) / 'intent.json')

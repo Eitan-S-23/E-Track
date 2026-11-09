@@ -1,0 +1,1547 @@
+{
+  "source": "23770494056cc482f78b4074a3c30ee77d351132",
+  "run": 42630717730,
+  "artifact": {
+    "id": 13681597130,
+    "node_id": "MDg6QXJ0aWZhY3QxMzY4MTU5NzEzMA==",
+    "name": "p51-candidate-42630717730-1",
+    "size_in_bytes": 1863643,
+    "url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/artifacts/13681597130",
+    "archive_download_url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/artifacts/13681597130/zip",
+    "expired": false,
+    "digest": "sha256:7097d75a9fdd309b374436a904a3a05134bacfc30018420bdcb1384865ad9c8f",
+    "created_at": "2026-11-09T14:17:05Z",
+    "updated_at": "2026-11-09T14:17:05Z",
+    "expires_at": "2026-11-23T14:17:03Z",
+    "workflow_run": {
+      "id": 42630717730,
+      "repository_id": 1310649784,
+      "head_repository_id": 1310649784,
+      "head_branch": "dev/firmware/p51-packaging-20261104",
+      "head_sha": "23770494056cc482f78b4074a3c30ee77d351132"
+    }
+  },
+  "archive": {
+    "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\zip-firmware.stdout",
+    "bytes": 1863643,
+    "sha256": "7097d75a9fdd309b374436a904a3a05134bacfc30018420bdcb1384865ad9c8f"
+  },
+  "files": [
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\compiler-1-process.json",
+      "bytes": 361,
+      "sha256": "63239d5af6aed10a6903fbf44356fbaa912aa2d0916d5a17d786773ef63899ce"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\compiler-1.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\cleanup.json",
+      "bytes": 23,
+      "sha256": "c7258e877c4a99e9b8048cff876c71af7e55ec5bec2bde8e575b7ea481ae15bd"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\compiler-1.stdout.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\compiler-2-process.json",
+      "bytes": 361,
+      "sha256": "c97fffb3a0cc5c2a12d6cb7a48638e45c027101f849b0322565cdd8d2587c9ff"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\compiler-2.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\compiler-2.stdout.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\compiler-3-process.json",
+      "bytes": 361,
+      "sha256": "678950e27b1a1558d1196a0f834afa90cb86c83b282199a17db2321f9d580810"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\compiler-3.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\compiler-3.stdout.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\input-binding.json",
+      "bytes": 190,
+      "sha256": "ee93b5430e38a211061175529762199e219f9a1ed504fdb8bcf53e99074ec8d8"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\native\\compiler-1.process.json",
+      "bytes": 1095,
+      "sha256": "c958eb2fdae12a79defebb8ccee6cb8596bb79701994f9f8ebe80ff834ab5fd2"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\native\\compiler-1.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\native\\compiler-1.stdout.txt",
+      "bytes": 937,
+      "sha256": "8a41691ab2a59c923eef8c1dcff968f06e34203731057a9719df35697ce0d2e7"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\native\\compiler-2.process.json",
+      "bytes": 438,
+      "sha256": "e8bfcdbc1cf07581406bada97fbd0a1cb7e6400f4f1df85a25089393ec4d26e2"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\native\\compiler-2.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\native\\compiler-2.stdout.txt",
+      "bytes": 330665,
+      "sha256": "8402b26e9f33bdca1f39dfc9138ab4456bf611028db3b8ddcaba83d97df7529d"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\native\\compiler-3.process.json",
+      "bytes": 488,
+      "sha256": "7eb7d4a4d7cd4cdb6ced6e62d4d52df0ad21d7c8e1acfd9872758da58526f0a8"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\native\\compiler-3.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\native\\compiler-3.stdout.txt",
+      "bytes": 273,
+      "sha256": "afa5e51dd76c8714c710b578d73a1098534a98c3c2ea095b051f7bb19e521706"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-131072-7-0.json",
+      "bytes": 554,
+      "sha256": "908ba21a056aef61466a4706099a3bb387963660cff6f32289e7f6d2e69412d7"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-0-7-0.json",
+      "bytes": 543,
+      "sha256": "f1ea114da664e21468ce436a3813b3cdfe80b96ac29716ba0f04f5fecc31e331"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-196608-7-0.json",
+      "bytes": 556,
+      "sha256": "84c9fe80e85f70a90fa82980452bbe6f9a98f2c72a40aebba4aa49dc44598d7a"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-200704-7-0.json",
+      "bytes": 556,
+      "sha256": "d3a82c07fc4673266ce4a18887df11844c88880e63e7b406f25e7c15970da38c"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-202752-7-0.json",
+      "bytes": 556,
+      "sha256": "e85b8e6f6c15f9f71e73e1a8247bb8a7df7e4b3928b020649cb7efd1f260c071"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203008-7-0.json",
+      "bytes": 556,
+      "sha256": "f3724e717c90cbfbe37b3ae21a87cb053aaf62d1274ce9f810289845155db0c8"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203070-7-42.json",
+      "bytes": 556,
+      "sha256": "bc8a52cac88e1eaa8f6c5dda0668041ef51d9bf5a51261c7441583943a3784be"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203078-7-30.json",
+      "bytes": 557,
+      "sha256": "60dcf6aeb19ed86901be7306da04bf57a09bc08cd9615d4436ebd16917241386"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203079-7-43.json",
+      "bytes": 557,
+      "sha256": "bfdb77cf2cb024d2dbbb6073a560e55bdb99c46a42f7521c8ee1c205fc2b4011"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203080-7-10.json",
+      "bytes": 557,
+      "sha256": "7d60436e0928dc169ca90edc4410b491fba3b4ccae65c8bea506266e65981460"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203081-7-32.json",
+      "bytes": 557,
+      "sha256": "eea093df870e76e66a0f4bd4b36fab4367c269a936d4b3264ea6b0836e368646"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203082-7-34.json",
+      "bytes": 557,
+      "sha256": "6499c7419fab86620f5b53f3fc26c984baf2535b36f869a4875afaf903f11019"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203084-7-43.json",
+      "bytes": 557,
+      "sha256": "c1a313b35050ab4e4a533dc1c5b72faf5819502cd0d1ba472a1f58928b11ef95"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203086-7-8.json",
+      "bytes": 556,
+      "sha256": "ed959fdb02baf422d5e1c6e7dd8b939ebe540e75865e4af8de2839702814d4d1"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203087-7-25.json",
+      "bytes": 557,
+      "sha256": "71c892d3395dfbf605777d772592454d1f7e6a4d57a04af7335fc39a1c7a11ce"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203087-7-34.json",
+      "bytes": 557,
+      "sha256": "8ca66bd1e10d3057e27f07a5ac3770282dc7b34f73c892fef82070cec07954d3"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203088-7-11.json",
+      "bytes": 557,
+      "sha256": "b8b0db6480c0428e05cc55d54a17fc8e127f221d63371402ddaae245fef12585"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203089-7-40.json",
+      "bytes": 556,
+      "sha256": "294f733866d33bd9ef82a32599f1bbc0ec51b5fb319cb0359483e7425b158966"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203090-7-18.json",
+      "bytes": 557,
+      "sha256": "1fb801002e731b19061013d1e9da807745efdcb9681c89ec2cad2dea0be0a6cd"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203090-7-27.json",
+      "bytes": 557,
+      "sha256": "5e3796b0e0eebb158de882122d89100a98750122c17311cd38bb9e12a626ce4b"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203090-7-4.json",
+      "bytes": 556,
+      "sha256": "ca22f2de740c7373759eb2da31807235da786ba6d0ed47a9b48c0cddd9ed189e"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203091-7-27.json",
+      "bytes": 557,
+      "sha256": "005052fab99a3be6aa0e027917562c915cce8c790bee6eaf9cc5b796a2145b52"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203093-7-6.json",
+      "bytes": 556,
+      "sha256": "416f4b954976b807aa91050bcd2d1436469784afd3324effbe40dd7743a8161b"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203093-7-8.json",
+      "bytes": 556,
+      "sha256": "ec0cea1b3f0db5515d354795dee57ef50df24d65dfa0d48bc321c23dd2175a65"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203094-7-17.json",
+      "bytes": 557,
+      "sha256": "f1a1105f2ddf5a8f0c56a8f52fd33bd57224d5710214d8801cec994f9a74d114"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203094-7-6.json",
+      "bytes": 556,
+      "sha256": "3a35e6e7648ada3688a0ec688d3d638b0ebd770442a0e634756ebe114d67a456"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203094-7-8.json",
+      "bytes": 555,
+      "sha256": "a5f31ee017001af284f519dbaf173fe4403f4754058b64ff6951f6f3f3606245"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203095-7-22.json",
+      "bytes": 557,
+      "sha256": "ee9ef2c151764b0537b75ad44603fcb74f20601be0d2422022403155ac7bd717"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203095-7-32.json",
+      "bytes": 557,
+      "sha256": "15531788a38a140b8ed1700dea6064708e3743616807316d7b5ba5ebcde069cb"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203095-7-6.json",
+      "bytes": 556,
+      "sha256": "3723574659ed2539d1031c92c9f80fc52e272fd3f5b99a0e075424cb4ca5fbb6"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203095-7-7.json",
+      "bytes": 556,
+      "sha256": "477ceab82c47eb2612195e3c54c6a4a388417bc5cbe4950eba86db95be13e511"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203095-7-8.json",
+      "bytes": 556,
+      "sha256": "c37b9a3b8d5687045b8dc533728f60b983a9ef3343976b6284ca5829c10f5ae5"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203095-7-9.json",
+      "bytes": 556,
+      "sha256": "0b81784e230599ed9117c9564174397bcc276f566f074ad50664eb280588eacb"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203096-7-24.json",
+      "bytes": 557,
+      "sha256": "22950400548b0da0372efff00fe6133401bb51fe8aa5d4420cb18e90d0aa6065"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203096-7-6.json",
+      "bytes": 556,
+      "sha256": "1318e4545dacc7cdc484fa05410203e8a142f9e457276cb551f08d5038c160c7"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203097-7-15.json",
+      "bytes": 557,
+      "sha256": "9472145dae2f0332784da725b56a6cc541fd3f107fe459b2adce9cd4ad5dd5b3"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203096-7-8.json",
+      "bytes": 556,
+      "sha256": "a4a16c02a29268d8d6046582e4d2c125eea360df3bc0b73c89bbeddb4b567247"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203097-7-19.json",
+      "bytes": 557,
+      "sha256": "0ff476648203597d0054ec33b4546f35799bbb91174b3431aba6c0325427de11"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203097-7-21.json",
+      "bytes": 557,
+      "sha256": "89ec836f8fbae5a0d1e27400d93be7034ea4724373e0fd7b5626ae42eac3e89e"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203097-7-23.json",
+      "bytes": 557,
+      "sha256": "5285e2f0a542abcd6767219f19ccfb0167376612cee4dde34f2a94b7d0009c0b"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203097-7-29.json",
+      "bytes": 556,
+      "sha256": "e722489cbbb3429db071b7e2541b7343875b24223dd256cf515b2767af29b40f"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203097-7-41.json",
+      "bytes": 557,
+      "sha256": "35e5cbf4714c9756ef6277158e0e4bfaa45f36c9f4f480758bcd2d144d184e3c"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203097-7-35.json",
+      "bytes": 556,
+      "sha256": "f1895cc3df734e6b9a6b723fa8f2ed27e21077a363481e98d18a91d17639cdcc"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203097-7-6.json",
+      "bytes": 556,
+      "sha256": "2102b111768a826c2ce17a448b791629d4f7f458d745f45c771daf6fa9bf1aa9"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203097-7-7.json",
+      "bytes": 556,
+      "sha256": "7395441c8c0a3ef52f68a2feed72631113bcae5d3d5cdc6f2b57a92c185cdb87"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203097-7-8.json",
+      "bytes": 556,
+      "sha256": "cc9d7927a405507917d3b7af24b028dbbd9c6230edd318fd90d8bc4b118a7625"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203098-7-30.json",
+      "bytes": 557,
+      "sha256": "2a535aca3eb991ee81b87c5466ec3f359b506d293ac235e228fe67ad88c4aeca"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203098-7-33.json",
+      "bytes": 557,
+      "sha256": "78d835428f079f1adb703327faa564f27a70ef86a6fde4a55732e316ff4e707b"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203099-7-22.json",
+      "bytes": 557,
+      "sha256": "3c935651c64cf1be6524806efeb71317ebe1be724444227b49f4fb907c665f6c"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203100-7-10.json",
+      "bytes": 556,
+      "sha256": "4e2e65b89865ed026ceafa73403f4ff5140829a4a8e5b0b912d3c4580b73aa03"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203101-7-1.json",
+      "bytes": 556,
+      "sha256": "ba8527170fb466db8c54eedb8c996986ac5bb79e1bfad1f9a7059cf43cf181f3"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203100-7-30.json",
+      "bytes": 557,
+      "sha256": "ccb406c9ce7492d4f155f04e5e05aedd37aeb2f38bbef27b52ce3333263b5897"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203101-7-38.json",
+      "bytes": 557,
+      "sha256": "06238c485aa98a3ea0269ff81f9b828df43c5a5e1f69bc81918902b4e1fa6505"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203101-7-9.json",
+      "bytes": 556,
+      "sha256": "19a9aa76d5b7486ba4107173d473cd6f5761ef3016e78c3c07f0512de7ad471a"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203102-7-14.json",
+      "bytes": 557,
+      "sha256": "5d86545657cc5f981ef48ce6eec987bb0560d67a87db7a14e49c7527488bdb53"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203102-7-15.json",
+      "bytes": 557,
+      "sha256": "89e91a471a89e07e30953545e39d494f94ff035c69ade835438409eb27b15abb"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203102-7-19.json",
+      "bytes": 557,
+      "sha256": "544c365b496cbf179ce2a651a6cde80e8b76f3af2e07a4fb4051c349c3ac7830"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203102-7-29.json",
+      "bytes": 557,
+      "sha256": "5a9868a37ab18e5b87274cd07276c43dcd801a2d5f833d0833240645c72f8ed7"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203102-7-31.json",
+      "bytes": 556,
+      "sha256": "2285a017f8c9c96d4a205793582ce033bb4981180b75e388bcaccb3df687c7f2"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203102-7-4.json",
+      "bytes": 556,
+      "sha256": "52691b5466a718ed864cd96de785268fee5dae8250aebf25109a45c900c749b8"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203102-7-5.json",
+      "bytes": 556,
+      "sha256": "f231fcf08b81144b7e230c6d07cd793a2c6a0978213347451dc13805f3f63161"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203103-7-28.json",
+      "bytes": 557,
+      "sha256": "311f40085fade9d62c3443dc54f21ced5bb25560f0b64bd76a076e4dd6b651fd"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203103-7-34.json",
+      "bytes": 557,
+      "sha256": "6180ae2530bfb4ee5cf672def6f71b23dff7f8f54504749c3d2041de959fc70a"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203103-7-35.json",
+      "bytes": 557,
+      "sha256": "a0a75438d0f9735036adabe1ae3466f296599d04a6bd3d6d638c13ff270f8ef6"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203104-7-1.json",
+      "bytes": 556,
+      "sha256": "a9e9b2bd7af2910cd0619fd804498466c35b920a7d0f8ee3f05a51466302ba9f"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203105-7-14.json",
+      "bytes": 557,
+      "sha256": "3202db8d3421442db52d110071b15440923d52fa598938cba1ce0bf15136dc82"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203105-7-29.json",
+      "bytes": 557,
+      "sha256": "8a63c83060fbfd679dd94c1ace1f0dc7f723fc6fffec4325288abe9b55140899"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203105-7-31.json",
+      "bytes": 557,
+      "sha256": "b7a3d42c4ce060cc6e6a3be8cd3213edee4b7365276b225123bdc7f11f262d32"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203105-7-39.json",
+      "bytes": 557,
+      "sha256": "319c2c9aced17fd81d4d0b674868c6df65d6dac414344c62e8502789519f3664"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203106-7-14.json",
+      "bytes": 557,
+      "sha256": "01077d4ef809e990fc7ecf4b4272fc2ec1a6e38ea035c9d974ef76dece63a411"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203106-7-38.json",
+      "bytes": 557,
+      "sha256": "96b1bb3cbf473b3678823237b3f818387113f756f76fd78b42e87dc3aa8326fb"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203106-7-42.json",
+      "bytes": 557,
+      "sha256": "0cff7d5a97c2217fb1391327123b32b940596b5ed4211af39b6bb53c0525de29"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203107-7-12.json",
+      "bytes": 557,
+      "sha256": "41c2481b360531ae976bcd52bbb50109f01aa56eb79ad10b351a3a3c33237bd4"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203107-7-13.json",
+      "bytes": 557,
+      "sha256": "7c372a22d0e1210623a756165e251b6e8b32daded22c4acf3626410e75559e70"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203107-7-42.json",
+      "bytes": 557,
+      "sha256": "59558aa3cb84ddf2a74515bedd442ce0bff0a72c884aa60bff86cdc031a8cd70"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203108-7-25.json",
+      "bytes": 557,
+      "sha256": "56966e024846b72799f633b32dfffa9875373b4935b64bc26deb963df4129317"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203108-7-23.json",
+      "bytes": 557,
+      "sha256": "43d3ebeaab75ccf3e8a9ad461172aac3ec4d2daa18cbb3d0188f3db2e0f0b456"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203108-7-26.json",
+      "bytes": 557,
+      "sha256": "c9aea7ff4bebe2795ed94730b1af639aae6d5691563662d024076fba3507670f"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203108-7-39.json",
+      "bytes": 557,
+      "sha256": "097bfc2109045db6d45530038df312721542a6ce03a2f66581d6eb60ef63a374"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203109-7-27.json",
+      "bytes": 557,
+      "sha256": "55b8221e4e8e10f245eb30985c8447ca7b3027953db8c1b8a581cec957ecccb7"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203109-7-33.json",
+      "bytes": 555,
+      "sha256": "263cf4cdc457fab6e7d5d559b93afe7d2fb066da3e6075fdd3b47d0e2a433ab4"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203109-7-36.json",
+      "bytes": 557,
+      "sha256": "77d37e2135c2259ca4558e14805f8ed46c1ff48e87063593d77a4b5b60399d25"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203109-7-41.json",
+      "bytes": 557,
+      "sha256": "37a62a12a1f07d0ac6261604526efb10d9416aca43de78395cd187fcf4e409a6"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203109-7-8.json",
+      "bytes": 556,
+      "sha256": "611123a530d879c7d0dbb7f0a08dea1e1d9dbf9540bc55682ddd9a240d22783f"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203110-7-16.json",
+      "bytes": 557,
+      "sha256": "c9774251cd6f872e25f4b114569e3c81b37f83f158f56abc713ed841149100d1"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203110-7-33.json",
+      "bytes": 557,
+      "sha256": "38dc0af32ac1b312849cc4e89e54d02f73a25bbadbc1f40e6b8babb3a1253cb9"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203110-7-39.json",
+      "bytes": 557,
+      "sha256": "17fe06fa7f3104219890c17f818d5b00daac5987d72534deb84df73a6c4bf231"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203111-7-17.json",
+      "bytes": 557,
+      "sha256": "6b636d16d5305f8c7fd6ef11741ca1d1df1d26ca72acfd24e16cd0237ffc168f"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203111-7-2.json",
+      "bytes": 556,
+      "sha256": "610298fa1f2ba0410e01f8b19faf59a85656c02ff07cf2fd68b60eeca0be5e32"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203111-7-22.json",
+      "bytes": 557,
+      "sha256": "5299ce9d20d18a8bdd08565ac5964c8a7594138e8b2c61963b843b492832ff8d"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203111-7-28.json",
+      "bytes": 556,
+      "sha256": "dd502a66512a1705498d93fec0014b1804ff270ed5d2d50da3ebdc1f39a3af51"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203111-7-36.json",
+      "bytes": 557,
+      "sha256": "f75042851974358b8b3e3cf61b7fea01b81c714a1b3d259d88c39709ed5120e2"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203111-7-4.json",
+      "bytes": 556,
+      "sha256": "ed6d9e1ad0ed4346f91fec29a2f117884c4c74cb9326d7fdc6b0426fc34aad04"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203111-7-6.json",
+      "bytes": 556,
+      "sha256": "897bc5c1291a98634c30b33488777f301c7584600adafe78c8a2ea1f1f4c298f"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203112-7-17.json",
+      "bytes": 557,
+      "sha256": "918d9fec5ccf7678599716d352473ff349c13ecb4bb0108ac36b4b72c6b8cc56"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203112-7-3.json",
+      "bytes": 556,
+      "sha256": "9762715f88245319a0c9fffce67ee0316541f4edc37221e593bf52518d7301ff"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203112-7-2.json",
+      "bytes": 556,
+      "sha256": "8e5a0f3e5b0afe3b930652569a327c49bf09886852bc044696205abe6fb2f7fe"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203112-7-37.json",
+      "bytes": 557,
+      "sha256": "255ee7bd04693fe67c9ddfb7b6b9bf5515bf8efb5e8ad5b8740cd8c829b70fe9"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203112-7-4.json",
+      "bytes": 555,
+      "sha256": "900574ae8d3b07256612292443e90aecc99c141116e41634bb11c64eb15fbbc4"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203112-7-43.json",
+      "bytes": 557,
+      "sha256": "61f2dc4f7fc1401acff22645293112cd15d91b63e99c6faab2784bb214df0ed3"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203112-7-6.json",
+      "bytes": 556,
+      "sha256": "cd13e728c93e2d725a812008de3a0f1ec7940d068a3d43a94645088d28516afd"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203113-7-2.json",
+      "bytes": 555,
+      "sha256": "6e415e5231d933de80ddae79787ef5af9bd94fc4e03c22c7b1c618243ea546b4"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203113-7-11.json",
+      "bytes": 556,
+      "sha256": "404584449d3d4968b8276c9022d901ff444dd92b92f4c9f22659cfa2f05d176e"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203113-7-24.json",
+      "bytes": 557,
+      "sha256": "619a0f3e5290c411ff983f9a2ac9b6c43f0868186dcce477e1636ae0426a6e51"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203113-7-3.json",
+      "bytes": 556,
+      "sha256": "68af87ebaba6b858ce301988127b3345a8b7269f3be6269712f37541d46b6133"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203113-7-4.json",
+      "bytes": 556,
+      "sha256": "17c82657e375fb62976b8ee25a5adef7983ef166ef8532367eb7505e432fc106"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203113-7-5.json",
+      "bytes": 555,
+      "sha256": "2725afb7b59c48ae4222eb2d5794c3b34c51fe0a4e4aede2489cc5d3a1e55831"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203113-7-6.json",
+      "bytes": 556,
+      "sha256": "aa17d58d7f494365f0437bfa63f1801f72c6b6fbcfb2a469710b37a478825d30"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203114-7-11.json",
+      "bytes": 556,
+      "sha256": "10f26445f15174fc0b57f321680ec3f4f8e3bb08347cd44e0bae50a70ef6e9ad"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203114-7-2.json",
+      "bytes": 556,
+      "sha256": "d5ca59bcd9fa0ae2505197fd8ef6531ea41ea0365336bbfd1217aaabf41980d1"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203114-7-26.json",
+      "bytes": 557,
+      "sha256": "d8d962e35ddb2a3a4c7a811ce464ec802b1c9c038386ebc1e3ec5585ca38f9ce"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203114-7-36.json",
+      "bytes": 557,
+      "sha256": "108943f4148a417408013c184bb9c7b894ac35592b71110e2962b4bfe91dff70"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203114-7-4.json",
+      "bytes": 556,
+      "sha256": "9bafa07d1bb129f0f4993128ec0562a2f3d7637749d65d70897d403fcb725213"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203114-7-6.json",
+      "bytes": 556,
+      "sha256": "faa9c955812cda2ca3ae1af0fb2faaefdeeee2d669747fab74b55ca939cd0b17"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203115-7-11.json",
+      "bytes": 557,
+      "sha256": "5583e72558e489255adf1c99a3c2082d78c949b3088a1ed67af0976c68bdab28"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203115-7-15.json",
+      "bytes": 557,
+      "sha256": "50d6ce5a4529971054b9af7afa2252f8ad2a87f9ede80a2bf80a53f6cb896f4e"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203115-7-16.json",
+      "bytes": 557,
+      "sha256": "47ed590c75a7ec3ce3c55fb110e8b836cc60fd3aa8210349c1685f13a4617c41"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203115-7-2.json",
+      "bytes": 556,
+      "sha256": "9fd4a3166091a53f21d5b16e8b1bb2819db142b4ee99099092eced076af64878"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203115-7-25.json",
+      "bytes": 556,
+      "sha256": "5185652b79a3e771316bd6d4bc1e10c12c3c434cb23a3337b7c2da733223f752"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203115-7-3.json",
+      "bytes": 556,
+      "sha256": "3e1e18cbd00307a874e61e58b971b8b7cc577fc395ffcb89b2da593a73e426a9"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203115-7-37.json",
+      "bytes": 557,
+      "sha256": "1515934986cfa734dc6fa9e56e9c3d71ad676dd11f5491a1993d9ce12d750e28"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203115-7-4.json",
+      "bytes": 556,
+      "sha256": "5cb1e03642a05a024232b1b02e5f8505fc572b4b99cfbea06960ee12948a8e2a"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203115-7-6.json",
+      "bytes": 556,
+      "sha256": "bff16e6f55bfceb54d9db71a546048ba50ce78ee207397e7c471004408852429"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203116-7-12.json",
+      "bytes": 557,
+      "sha256": "b9d4c1b6b2e643afbc8f5d2928a4815eb637e96f914096c86bdd82cafda75d70"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203116-7-31.json",
+      "bytes": 557,
+      "sha256": "c87d0cb7da1a2ccf38798c51ecc21f5498dbafbed46d43f70e7b9d0e04284f3e"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203116-7-24.json",
+      "bytes": 556,
+      "sha256": "0d90e1fa496ff861f4eb9e6a5b825c830fc07e67058d2d6725317b0d174f617c"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203117-7-12.json",
+      "bytes": 557,
+      "sha256": "5401382a31bea2b34e20ab26cde497fb2280ce93e476406992df074a22c917bd"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203117-7-2.json",
+      "bytes": 556,
+      "sha256": "ebef22bf669fa402b92c246474c918f1d05cfe23ac7de92a40e59314b8590248"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203117-7-21.json",
+      "bytes": 557,
+      "sha256": "f87893d317ba6d27f1eeb57c3903ea03f497a08ebf65b96118cba1b0dc7f3e46"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203117-7-5.json",
+      "bytes": 556,
+      "sha256": "cbd02ff1b2ecb2c4bf84964335e9f7749e9ee31ffcf8e144047cbd8edd3c8afc"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203118-7-1.json",
+      "bytes": 556,
+      "sha256": "a01dde1f16344f829690a15ee0bc9dcb2e831ffa6349ff557913b20dbb7a6cbc"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203118-7-18.json",
+      "bytes": 557,
+      "sha256": "a73125a588a4b4a43ba3856f2f83a96359dab0474bcc1ed33c55d251159e7fa2"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203118-7-20.json",
+      "bytes": 557,
+      "sha256": "e2b6ef458f2e369b8538d40634070c4525181305aa7ed63d26e181fdd6a707e6"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203118-7-38.json",
+      "bytes": 557,
+      "sha256": "23fda2070a218095d9d3630d89f73fe594e6afae468828abd0042fbe5f47d190"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203118-7-5.json",
+      "bytes": 556,
+      "sha256": "89945c71cb835a65a3d09be9691a75b3f7738129c111883ca3afac0b94bafa9b"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203119-7-16.json",
+      "bytes": 557,
+      "sha256": "35e2526fc15c98b5c240bd752186f682d70f6c50167e5f58c2862b13b5d34371"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203119-7-3.json",
+      "bytes": 556,
+      "sha256": "ff67a97b396de5ee07ad4a55afd9a0081e20386efa32df4a28011b0153ccaa7e"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203119-7-26.json",
+      "bytes": 557,
+      "sha256": "c3f4eeb59b6a6fb6dc9f3b7025c023cb51efe771e5d2df5d67e5bb891974f6ca"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203119-7-35.json",
+      "bytes": 557,
+      "sha256": "7e404d25780dd078aa9fa3442c2125977d1b0b9874f2a2bdc229b0bacf7e2f0b"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203121-7-19.json",
+      "bytes": 557,
+      "sha256": "9fae7cd655a39680b6ec649c2bbd4040f0278be90e14442beece323b6320a1f2"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203121-7-7.json",
+      "bytes": 556,
+      "sha256": "b6fcace77bf189c8a9c2417ab82da2cf287774e2bcce6a93709dba8f322f9473"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203124-7-13.json",
+      "bytes": 557,
+      "sha256": "af5f7f92acf091352163f312d760b7249cce6a74fc770edafb09286fb431506e"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203124-7-40.json",
+      "bytes": 557,
+      "sha256": "85fdebdaaa311b42b794f455fea9adccee332074623db5b6abe8a1e4815e7671"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203126-7-28.json",
+      "bytes": 557,
+      "sha256": "5d907321ee28fc2128a2d69ca820d88c5c7221edb288ddd301f53de039e1e930"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203125-7-37.json",
+      "bytes": 557,
+      "sha256": "30aa4b2128d20e2d640937cad0e86f0324c1414f57644a53de2a6e633ab6dfea"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203127-7-13.json",
+      "bytes": 557,
+      "sha256": "9ca029b5c4f76e4f4565d68c90adbefefb0d07a9cd0b1850a6152f37a38ca357"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203127-7-40.json",
+      "bytes": 557,
+      "sha256": "e099d6576b56ad9de43c8f138215449b488a8d8870d916a2ce19520368c6d859"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203127-7-41.json",
+      "bytes": 557,
+      "sha256": "3ff89bd05e55d60ccb6c631d657bee80f41ff1c824fab0caaeb67f65be211832"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203128-7-10.json",
+      "bytes": 557,
+      "sha256": "2752f23986685a8427508cd3b9472cf04c011a0d931ae78094380d291e4d9147"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203129-7-18.json",
+      "bytes": 557,
+      "sha256": "54d8f078cafe905475647f199991f5fe0b81a7ec3768a02974dafafe5bef96cc"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203130-7-20.json",
+      "bytes": 557,
+      "sha256": "b6df0152fe914471ba2b3b215861a3cc96eed0acb1ac0ea9d8f106860b96162e"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203130-7-32.json",
+      "bytes": 557,
+      "sha256": "577ae319f6be19df52e92b01164ac03d0722000c4f5b1b08597a99e806dc5d1e"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203131-7-11.json",
+      "bytes": 557,
+      "sha256": "9570ea7200df06b553878374df225cb233a0a5936f3933666e6c8f81168f412d"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203131-7-20.json",
+      "bytes": 557,
+      "sha256": "cccc0404be0059a729aab45b16ab2a38475046a4ea29fbc3f5834af80d4177e5"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203132-7-21.json",
+      "bytes": 557,
+      "sha256": "7da2baafec6c520e2cad7e6a2dfb3741127eff3dc7cc6b3add54c1549233a571"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203132-7-23.json",
+      "bytes": 557,
+      "sha256": "d52165cd6f45f3f9d765e9ed2278e95330fdaad07d17e8fdd12e3277c8641f77"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203134-7-7.json",
+      "bytes": 556,
+      "sha256": "c571ddcf22bda2ba1ba0a665eeb6d9b26bda2a5f3380080c22a511e598620cf1"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203134-7-9.json",
+      "bytes": 556,
+      "sha256": "819dc192a2919c7b0a4b23400e174d07c976f8ee0967622b956f1debb5eafe26"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203135-7-9.json",
+      "bytes": 556,
+      "sha256": "6b61d6d65af542fa844940c7971a98d4ea9be7583a3c2c1c9df044d3e885406d"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-0.json",
+      "bytes": 555,
+      "sha256": "46188740f77de2d6764c39d2c63fdcaed0415ee1cea7c64f26223a4b01ef6d30"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-1.json",
+      "bytes": 556,
+      "sha256": "3111211ff3dc2b7375c6489e86c829be36d5819873b24241a5545e18000e607a"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-10.json",
+      "bytes": 557,
+      "sha256": "c19193849f3608795846a98c0380d9aa4b2ba403904b2dd58cdaa81cb30f0ebb"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-11.json",
+      "bytes": 557,
+      "sha256": "cb0e1ced88ed7ebb2bc6a13ed1b67cc81c306b35ad105c871da2837e0b28e1b9"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-13.json",
+      "bytes": 557,
+      "sha256": "0ef8fd9545baceec05cbe5df10e1ddf3de6ccdbeeb149b415d150f687b491213"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-12.json",
+      "bytes": 557,
+      "sha256": "05926bb93d847b5bf66e7d370346b0d81fce39d97dfe817d5a5e732ad32f0423"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-14.json",
+      "bytes": 557,
+      "sha256": "e60ad8529611d7fef2e8de45510fca401ed6891f8cd8a71a52b1f883a5bf1d30"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-15.json",
+      "bytes": 557,
+      "sha256": "dbb93c7e998933cd1e6217b84e489aa70927a6a94f78c9118e69d9df29897b07"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-16.json",
+      "bytes": 557,
+      "sha256": "666a39d5706e74c97b58028163e0ab458d0f923ee1e44879523eef37d940cf5e"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-17.json",
+      "bytes": 557,
+      "sha256": "593ea6f9a95e46043f9c6963e7f157bba2974a34c7496d57cd621a111f951d61"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-18.json",
+      "bytes": 557,
+      "sha256": "cb330f8b7adcb18178f59a2562a8ea7ee1b3f7b634f9a9d37fc461dcf9ccb0f2"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-19.json",
+      "bytes": 556,
+      "sha256": "1ce14398653ef966232d4fc3361ef74baaef57c4c02055c5fa4eb217ed84a15c"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-2.json",
+      "bytes": 556,
+      "sha256": "dafd483f20a1dc54c58b91cbcd9d3c0fe7d17bef512190fe8586536d7abf577e"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-20.json",
+      "bytes": 556,
+      "sha256": "6e7a634b54dc71cb8f08fe56c78dfbb16982c9b661fef9167a5a4a01feb3b1b8"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-21.json",
+      "bytes": 557,
+      "sha256": "09311074b820eb955e51c6dacf27f42ca02c3aa00c015cd601dc0380b89fecd4"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-22.json",
+      "bytes": 557,
+      "sha256": "5e5d665ee1f669da573fb34ec196f3eab68034a2b3bc67b11bbc1609354968b3"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-23.json",
+      "bytes": 557,
+      "sha256": "29bdb6a7d040de9746eca626ef24cad18984ffce3bac27d71bfcd52a455ed4d7"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-24.json",
+      "bytes": 557,
+      "sha256": "c65f314fb5f3d7bbc06d958abb4dbf144ada51b54b43982da14b48ce46e3ef85"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-25.json",
+      "bytes": 557,
+      "sha256": "636ff9286ea52ef5b3a90932a42f5eb3de4e17b4484f636099c4e78aeda3cf67"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-26.json",
+      "bytes": 556,
+      "sha256": "5d308489b6f8b2098f90d6f7af9d52fe064d05e6c69c18171f73a9225f683b72"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-27.json",
+      "bytes": 557,
+      "sha256": "b367b2ed7783a7df815bb080514d0fb695d846e51c13795ba0d6ca3dd555d720"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-28.json",
+      "bytes": 557,
+      "sha256": "f7d7fbe3f442489c9ade346c9f27d0b90e022f0e946c0e81cd21fa74a9c0ee55"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-29.json",
+      "bytes": 557,
+      "sha256": "4b47729114e4656629acb58acacdbe899c1588ce99fe5b797f730b50760ab39e"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-30.json",
+      "bytes": 557,
+      "sha256": "64847837f5c928c686c15a33975cee48a2d7b77ddeafb9d6079a3bf29d00fde0"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-31.json",
+      "bytes": 557,
+      "sha256": "56e92cbbcf9fb6443812ac1daea3fc6e79ef66f80b1db5fbd407385e688396b4"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-32.json",
+      "bytes": 557,
+      "sha256": "820e10b6d8766ff8dfe6e24edeecbd5ceab9533ffd9a6d8283ca1b12f3da0fdd"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-33.json",
+      "bytes": 557,
+      "sha256": "a22c67f2b9cd01afd5de23f08647d261216a7885c5561e27b0609e8c0c5e2caf"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-34.json",
+      "bytes": 557,
+      "sha256": "faa7cdd0dc40fd594c36658984147ae0b3a8a8a01d7ca7d351fcbc4b91b13b7b"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-35.json",
+      "bytes": 557,
+      "sha256": "707877551cdb0b40284a34e4c59e4bfe8f69e903b96264e3be8d500f2abd5d59"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-36.json",
+      "bytes": 557,
+      "sha256": "2cf1b90946eaeea58f4564c38b4d497b49ac139580862ce1335cebbe05f27e33"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-37.json",
+      "bytes": 557,
+      "sha256": "1dae8881834c9654edd1899fdfe93403451df9f0232a5df3b1543cc9ecdccbb8"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-38.json",
+      "bytes": 557,
+      "sha256": "7afe2ca9e572b9cab9909606a10fb4bbdc6457d522e1d51d62691b685c435996"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-39.json",
+      "bytes": 557,
+      "sha256": "609e9177a44742aed984e41017649c0592def447aed8db932f1046a979afe15f"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-40.json",
+      "bytes": 557,
+      "sha256": "2843202cd3b1edc9db27647de48706549c0b2e980d4043db5a53519d0df9d28c"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-41.json",
+      "bytes": 557,
+      "sha256": "5e448bfbeef3418a9dab9007d435bf2f3b0b650b6309b2984f512d6d34b22ae6"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-43.json",
+      "bytes": 557,
+      "sha256": "06e50b184800975fd294ea0126f3b178e3fde8d6b0a94b3dc0703f41e62dfda8"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-9.json",
+      "bytes": 556,
+      "sha256": "0df8a20decb069d215a9b9ade97cb7b28ee4dfaf6c2e028dd34e79bcd57f3ac0"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-7-42.json",
+      "bytes": 557,
+      "sha256": "69c0810d3c95700dbda3d98d70099b35a167e9c542ebc529720c46a34d92a459"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203136-8-0.json",
+      "bytes": 556,
+      "sha256": "5340c58ddb99ccd5c0a7f2e89c20a12fe32b7490e7c3f7483f8e65a1727b63b6"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203137-7-0.json",
+      "bytes": 556,
+      "sha256": "9dfc9fb565a7e0b564323e310ed89e5f092cda83da8707fb715737e76db7e7eb"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203137-7-9.json",
+      "bytes": 556,
+      "sha256": "0f502ee72f6f269281c5ee630ef818f1c65b1a23140cd17228d0fd7f0e766794"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203138-7-0.json",
+      "bytes": 556,
+      "sha256": "2aa2f5643b5efd8380faca31e0086045b16710c0de7547de5f0f28a778d9bb3f"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203138-7-9.json",
+      "bytes": 556,
+      "sha256": "3648889df901201598d5eee9c0b1b74bc8f2c92bff7c750151decfc69c282788"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203140-7-0.json",
+      "bytes": 554,
+      "sha256": "ebdf757c62251732e42bebcfd204acd5af9cc2e8bd3658b49f6c8cabb8f2f842"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203144-7-0.json",
+      "bytes": 556,
+      "sha256": "60797b02a0fc8fe6e876e4e84eaf4ec9961df1a860345e700585002baac6b4cd"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203152-7-0.json",
+      "bytes": 556,
+      "sha256": "596ef9fe8b564adaceb4082cbf15bc132533e0861aad92dce55ed1067868c15e"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203168-7-0.json",
+      "bytes": 556,
+      "sha256": "0fbe18f0d94e200573d8b66192af784b8f4aab299a82c58004aa9679501cd48d"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203776-7-0.json",
+      "bytes": 556,
+      "sha256": "89a6d30342f7dd17775ceba68d3e24d2227817f7c61e08d396147983836d7b15"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203264-7-0.json",
+      "bytes": 556,
+      "sha256": "9039a9655a0d9b17ea0ccaf272f71a5912564d545686e0fc159a82dd7c0519e9"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-203200-7-0.json",
+      "bytes": 556,
+      "sha256": "f3840d1025622da5cd460722a9ad3eecf70c3740c2e91ff18ed660f4301b3f32"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-204800-7-0.json",
+      "bytes": 556,
+      "sha256": "07976f42fe84ffa6fbc13ec191e24d7dc382a95a39aaf261a24720d1458b7949"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208811-8-10.json",
+      "bytes": 557,
+      "sha256": "288e465216f714d29c232be61d298abcc4c44d9b2c0aae6539907fa3575649e5"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208650-8-0.json",
+      "bytes": 556,
+      "sha256": "c3980f45aa91a24550b52491dcb8daebacdaa763d35375088d242161c4e89847"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208814-8-9.json",
+      "bytes": 556,
+      "sha256": "594ae4762d057237e8d1119a6d010ff8ff0a48905a6ca882d219a63332955748"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208815-8-0.json",
+      "bytes": 556,
+      "sha256": "41cc72fdb6c8cf8ae48cba42bef099985dfc4283616099d117bcb3200e0d9b78"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208818-8-2.json",
+      "bytes": 556,
+      "sha256": "e2240bf656979321952f5dff5fb2e4de472eb3e3aad1d2d48c32664082128dc1"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208823-8-7.json",
+      "bytes": 556,
+      "sha256": "b635e7316c04379a7a08a4db4057730a0660d47d907e54566e792f30cc61397f"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208833-8-9.json",
+      "bytes": 555,
+      "sha256": "d2ba79f7c604e476da3e2ab540c86630437f60e3bb835a384a42940a9f129c52"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208835-8-1.json",
+      "bytes": 556,
+      "sha256": "393b35ca70226a1e7f0c95aa5c2005e6e31d019bc9f56537cd3c311a139b5897"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208830-8-1.json",
+      "bytes": 556,
+      "sha256": "5412266740318515b9a7740812d14f81081334149e1b25a947f35ee0ecd85ce6"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208835-8-2.json",
+      "bytes": 556,
+      "sha256": "4ae971bb97462a58956b254555fabbb8b9297a5d946684e4fbf081ef1d6152a9"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208835-8-3.json",
+      "bytes": 555,
+      "sha256": "a2123826887b6d5dc35aad8c9a15987a6db4760ca0a80c3381c72f5119e8bffa"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208835-8-7.json",
+      "bytes": 556,
+      "sha256": "c703f8f7d522420d4081ac902f6194feeefb10b9bedf7ea47f17af48ee97ff96"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208837-8-1.json",
+      "bytes": 556,
+      "sha256": "b125a777e2e57732e8ff80b5de13ab1e2aaf0e7b45d3baa8185ebb7773620906"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208837-8-4.json",
+      "bytes": 556,
+      "sha256": "be97afdd347e14bf72b71ed6224c3fcaa2a537b600555802e07137de834c1386"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208838-8-6.json",
+      "bytes": 556,
+      "sha256": "897a7f0c17b1d4386026ee654635206913c500a6feceb500850841371303eb50"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208839-8-10.json",
+      "bytes": 557,
+      "sha256": "73e58b2a89ac178811a4e99ba6b172946d0e17d07b65920cbb4ebf76c170d7fa"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208840-8-2.json",
+      "bytes": 556,
+      "sha256": "112ca8bc8a704df62429508c7f98cbc700e00d5e4678438e9ed5d879e6081ef0"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208842-8-3.json",
+      "bytes": 556,
+      "sha256": "cfb6a9a2bffbc9e0f8f91f33fe651fbb3e924a6415b1bbe4de0b2de9b6e5057a"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208842-8-5.json",
+      "bytes": 556,
+      "sha256": "9c4615b31100e084b67571ab907996972716317d011cfc8c8c380f2ce8938fa6"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208839-8-6.json",
+      "bytes": 556,
+      "sha256": "233f3d57ccf39a60a8c117ecac54cbe624f129013efd47c3d64c7f21268aa541"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208843-8-5.json",
+      "bytes": 556,
+      "sha256": "7e5ddca5b38b6202046e67d365648fa40847ba7c27a9e18a8ce1b644e89fb061"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208844-8-10.json",
+      "bytes": 557,
+      "sha256": "ce1ffc3122c667c7a5f60cbda1b7a5ec5b174a0a9bdab61692b3afa7038ac2f2"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208844-8-8.json",
+      "bytes": 556,
+      "sha256": "dcfb12b9b386106b0a0fdcf118ad22211cee58a5878f410207416f24a887a66d"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208845-8-0.json",
+      "bytes": 556,
+      "sha256": "544a7a6962de321ce26ee75099f310d7c0abec9a4392b277d1c8b5663a493643"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208845-8-1.json",
+      "bytes": 556,
+      "sha256": "c528a91fed785c98cf26c28092eff018ee9f62b9b331144df5f1ec74b19cfaa8"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208845-8-3.json",
+      "bytes": 556,
+      "sha256": "1f94ae67dbc56fb6cec72472414965296f13260b4f640bf636f65e5d580f21ad"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208845-8-4.json",
+      "bytes": 556,
+      "sha256": "8cf33ed7b35e90db910fea9695175a52c821942e984756ff017987cc5efb8a39"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208845-8-8.json",
+      "bytes": 556,
+      "sha256": "7af13af4e2d5d09db7e28eb0146b26b6c62779894ab1b24079cedb27652161ba"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208846-8-10.json",
+      "bytes": 557,
+      "sha256": "bea57e9dbcb2383d4a8f2470da78d6fab8d8d53baa010aa3fadb8af9035a1503"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208846-8-4.json",
+      "bytes": 555,
+      "sha256": "4bf94b33d4281f96bd3830393e2e22e3db3d1c842fd9b1d7b533de8ca6fbbaaa"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208846-8-5.json",
+      "bytes": 556,
+      "sha256": "d51bc7ebf11d96b09731334324ad581555dcac8345dc7dad1cbbb0d8f6fc2086"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208846-8-6.json",
+      "bytes": 556,
+      "sha256": "6bc27d83c0f98a9a2a2387f1d74b72f0357542cf74f8b3f028fce6de8e239642"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208846-8-7.json",
+      "bytes": 555,
+      "sha256": "0c95c2319a4eec969842275e562fc4c22ae6588769d3415cb5d39317cda7bbfe"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208846-8-9.json",
+      "bytes": 556,
+      "sha256": "801539f63de43ad524f4ba215923d67739c846567e1cd5b6fe44bf5b406084a0"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208846-8-8.json",
+      "bytes": 556,
+      "sha256": "7f082328f2a5bd1ad556dfea0f328a5f742b806206966113ee54c5754250a0d9"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208847-8-4.json",
+      "bytes": 556,
+      "sha256": "4e67fd6b7e011b1b8ebfdd832c81983897329bbb34f4f00021af0c3f0da892c7"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208849-8-2.json",
+      "bytes": 556,
+      "sha256": "dd63569cbe9e80344cfde87542266696a9becc9992bda99cfcf184f3cd82474e"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208852-8-5.json",
+      "bytes": 556,
+      "sha256": "e42ac135914db2fe7b893f287b49da846f24df0a7cd73cbb33261a9746f1fa8f"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208852-8-9.json",
+      "bytes": 556,
+      "sha256": "708aaa2be401dd9b00b17d3996455618b30d2b44938d91744dd89415bc81b5c7"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208856-8-7.json",
+      "bytes": 556,
+      "sha256": "f2475ad8e87ab48335d6da712be5d4b2fe611adfba6b2bd686c4943757d0917d"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208858-8-8.json",
+      "bytes": 556,
+      "sha256": "ace494cadfc87104c72153a93df00438541484804303082167340ff8f1f727e7"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208859-8-6.json",
+      "bytes": 556,
+      "sha256": "5e054201d3f0a9d0c45eef12a849b9296cd45a37725ec6de032d067a3e6b025e"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-208863-8-3.json",
+      "bytes": 556,
+      "sha256": "4ebe82be6ad53ec5b81e715b1ae22d5f2afc37d246897dfeccd1148b3f767d0a"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-212992-7-0.json",
+      "bytes": 556,
+      "sha256": "a51175ea86757545b0e5fef92dadcbd9a0d7eb03a8e2bcb31944627eda10898c"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-262144-7-0.json",
+      "bytes": 556,
+      "sha256": "0e2841e42462d9288074ab5d2c5f654575943a924bb69f7c6059ab2233435bc3"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\logs\\measure-229376-7-0.json",
+      "bytes": 556,
+      "sha256": "4cfd3dc22b9ae6a516bec23ad8a36d9c418f1b88af751a0a6335282aac949234"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\reference\\search-report.json",
+      "bytes": 304213,
+      "sha256": "b8625ffea222a550edb5dff0da9305ab0ddddcefc0e4572f0190c444091dbaa8"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\source-inputs-process.json",
+      "bytes": 275,
+      "sha256": "b3f61b4cc41c16240bd9341d70d8d77e41f3939d3265dc3b10f6fbea5c6985ce"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\source-inputs.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\source-package-process.json",
+      "bytes": 278,
+      "sha256": "4f0fb7bda55666b66b46efbcbea2a84b8caa4fe87dccf5619bd373195bca2266"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\source-inputs.stdout.txt",
+      "bytes": 36,
+      "sha256": "58f2d8f8777734e80fbcd64d17345c1cf8514eb2941fc84a0f8149c1681e8a72"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\source-package.stderr.txt",
+      "bytes": 217,
+      "sha256": "c3ee0f3a3399aeb77fc25655a4b11c7c4f6b9f8890aefe05ddd14f3079f8e3d9"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\evidence\\source-package.stdout.txt",
+      "bytes": 135268,
+      "sha256": "022ea3995b7eec1de3498ac369657ff39bdcf6243fba8c6507af2e7a4a1df784"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\keyed-build\\app\\X-Track-App-GCC.bin",
+      "bytes": 614284,
+      "sha256": "366ec1c8c1dcde18467c6bede76189e00b704f88c4fb26bd7f77eed63f79d134"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\keyed-build\\app\\X-Track-App-GCC.elf",
+      "bytes": 886060,
+      "sha256": "905defc598440ce67516b0975203181a3da595d1f5834a68ec6d24b6a31ef271"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\keyed-build\\app\\X-Track-App-GCC.hex",
+      "bytes": 1723899,
+      "sha256": "ea8fa6e0873cbf6e7b8f47d5f4cafaadd3177aa8be752abd008f02af71b6e290"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\keyed-build\\app\\X-Track-App-GCC.map",
+      "bytes": 2694935,
+      "sha256": "f4c558b80d19ba11cbf2477ff1448984abe5eab083c5547672a7bf6d417e8ce6"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\keyed-build\\boot\\X-Track-Boot.bin",
+      "bytes": 14724,
+      "sha256": "3554e193f498d23210f5ef32e09de64575b7cd39104fafcc950740e5e8a7ec34"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\keyed-build\\boot\\X-Track-Boot.hex",
+      "bytes": 41485,
+      "sha256": "dc4931290503fb9c47ca4b7a6754225a787e6103db022331c1b5d303c7a4ad64"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\keyed-build\\boot\\X-Track-Boot.elf",
+      "bytes": 36856,
+      "sha256": "1bb6165ab417e73c93a67dcdf0376a71ae899ff0a91120349d52a959a1d2b1d0"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\keyed-build\\boot\\X-Track-Boot.map",
+      "bytes": 108011,
+      "sha256": "3a75a3973e9d271a589de296e5d385da9953a2bf939c488d78a281fd0d6eb8a1"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\keyed-build\\gcc-build-inputs.json",
+      "bytes": 2396,
+      "sha256": "2ee2033224f7d13f634ab3734465d353be5fa4bc61f0277ef866f27cd3c4b44b"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\keyed-build\\keyed-build-evidence.json",
+      "bytes": 13480,
+      "sha256": "e24339ff77973bf9ab441d09a8e46c52c65eea790e81cf664ba493c182113e6d"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\keyed-build\\CMakeCache.txt",
+      "bytes": 20792,
+      "sha256": "a62ebb80e4c0b4497109b9407a1ebf43d15e328f6e2185d6df4810664da6ae9b"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\keyed-build\\compile_commands.json",
+      "bytes": 5010105,
+      "sha256": "74f9ac1c03e826678fc56b422987d736149358c65abfa70a34afd2568d47d2c5"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\keyed-build\\compiler-launchers.ninja",
+      "bytes": 6962,
+      "sha256": "10adb8bfdb51e6aa62676722fca25db7952e485020c46b21ead309525a6ad52e"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\keyed-build\\steps.json",
+      "bytes": 2161,
+      "sha256": "ff0dfd443a66c6681ed1ed34b65ccd0f246927772ff115857a6e2f7803706c1f"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\keyed-build\\steps\\build.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\keyed-build\\steps\\build.stdout.txt",
+      "bytes": 330665,
+      "sha256": "8402b26e9f33bdca1f39dfc9138ab4456bf611028db3b8ddcaba83d97df7529d"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\keyed-build\\steps\\configure.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\keyed-build\\steps\\configure.stdout.txt",
+      "bytes": 937,
+      "sha256": "8a41691ab2a59c923eef8c1dcff968f06e34203731057a9719df35697ce0d2e7"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\keyed-build\\steps\\size.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".cache\\p51-v2-only-20261109-01\\ci\\firmware-artifacts-01\\files\\keyed-build\\steps\\size.stdout.txt",
+      "bytes": 273,
+      "sha256": "afa5e51dd76c8714c710b578d73a1098534a98c3c2ea095b051f7bb19e521706"
+    }
+  ],
+  "overallCi": "FAIL"
+}

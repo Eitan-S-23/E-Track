@@ -17,12 +17,14 @@ import state_chain as sc
 import observation as obs
 import functional_sample
 import benchmark
+import v2
 from observation import r
 h, m = sc.h, sc.m
 
 RUNNERS = [
     'Tools/ota/p51-acceptance/run.py', 'Tools/ota/p51-acceptance/state_chain.py',
     'Tools/ota/p51-acceptance/benchmark.py',
+    'Tools/ota/p51-acceptance/v2.py',
     'Tools/ota/p51-acceptance/fixture.py',
     'Tools/ota/p51-benchmark-inputs.py', 'Tools/ota/p51-benchmark-inputs.json',
     'Tools/ota/p51-normal-staging-inputs.py', 'Tools/ota/p51-normal-staging-inputs.json',
@@ -44,7 +46,7 @@ RUNNERS = [
     'Tools/provenance/manifest_profiles.json', 'Tools/acceptance/validate_bundle.py']
 
 
-def validate(plan):
+def validate(plan, *, require_fixture=True):
     h.require(plan['schema'] == 1 and plan['task'] == 'P5-1', 'not a P5 execution input')
     mcu, phone = plan['mcu'], plan['phone']
     is_benchmark = 'benchmark' in plan
@@ -75,8 +77,13 @@ def validate(plan):
     h.require(3000 <= phone['limits']['total_seconds'] <= 5400 and phone['limits']['cleanup_seconds'] == 180,
               'phone observation/cleanup budget changed')
     if is_benchmark:
-        benchmark.validate(plan)
+        benchmark.validate(plan, require_fixture=require_fixture)
     return plan
+
+
+def validate_live(plan):
+    v2.live_plan(plan)
+    return validate(plan)
 
 
 def validate_functional_patch(plan):
@@ -254,6 +261,7 @@ def ble_block(plan, out, max_cells, *, known_captures=None):
             def terminal():
                 phone.pump_stream()
                 rows = [row for row in phone.live if row['seq'] > ready['seq']]
+                v2.states(rows)
                 if 'beginObservedMonoNs' not in boundaries and any(row['event'] == 'beginAck' for row in rows):
                     boundaries['beginObservedMonoNs'] = time.monotonic_ns()
                     h.save(folder / 'begin-observed.json', boundaries)
@@ -285,6 +293,7 @@ def ble_block(plan, out, max_cells, *, known_captures=None):
                 previous_seq = restored['seq']
         report = phone.finish(diagnostics=True)
         upgrades = [group for group in report['groups'] if group['label'] == 'upgrade']
+        v2.diagnostics(report['groups'], expected=plan['benchmark']['link'] if is_benchmark else None)
         h.require(len(upgrades) == len(completed), 'missing/extra upgrade diagnostic groups')
         result = dict(outcome='BLE_BLOCK_OBSERVED', cells=completed,
             original=h.record(phone.out / 'app-capture.jsonl'), diagnostics=h.record(phone.out / 'observation.json'),
@@ -316,7 +325,8 @@ def long_campaign(plan, out):
     end = time.monotonic()+18000
     blocks, count, first_begin, span = [], 0, None, 0
     is_benchmark = 'benchmark' in plan
-    block_limit, cells_per_block = (32, 2) if is_benchmark else (16, 8)
+    block_limit, cells_per_block = (benchmark.BUDGET['maxRecordings'], benchmark.BUDGET['maxCells']) \
+        if is_benchmark else (16, 8)
     known_captures = {}
     try:
         h.wait_for(lambda: (clock_out / 'monotonic.jsonl').is_file(), 5)
@@ -383,7 +393,8 @@ def main():
     args.inputs = (h.ROOT / args.inputs).resolve()
     if args.previous is not None:
         args.previous = (h.ROOT / args.previous).resolve()
-    plan = validate(h.read_json(args.inputs))
+    validator = validate if args.action == 'clock' else validate_live
+    plan = validator(h.read_json(args.inputs))
     for name in ('host', 'phone', 'mcu', 'cloud', 'result.json', 'failed.json'):
         h.checked(args.out / name)
     out = h.fresh(args.out)

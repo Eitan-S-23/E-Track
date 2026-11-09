@@ -42,7 +42,7 @@ def state(fw, *, target=False, idle=False, seq=1):
         targetVersionCode=None if idle else fw['target']['version'], targetImageSha256=None if idle else fw['target']['sha256'],
         packageSha256=None if idle else fw['package']['sha256'], packageBytes=0 if idle else 1048576,
         packageVerified=not idle, releaseId=None if idle else fw['release_id'], latestUrl=fw['latest_url'],
-        protocol=None if idle else 2, session=0 if idle or not target else 1, durable=0 if idle or not target else 1048576,
+        protocol=None if idle else 2, bitmap=None, session=0 if idle or not target else 1, durable=0 if idle or not target else 1048576,
         freshConnection=True, linkConnected=True, healthy=True)
 
 
@@ -173,7 +173,7 @@ class BenchmarkTests(unittest.TestCase):
                     mcu=dict(package=self.fw['package']), firmware=self.fw, notify_cli={})
         def observed(current, folder, count, *, known_captures):
             index = len(known_captures)+1
-            self.assertEqual(count, 2)
+            self.assertEqual(count, b.BUDGET['maxCells'])
             with patch.object(b.obs.Observer, '__init__', return_value=None):
                 driver = b.Observer(current, folder / 'phone', known_captures)
             self.assertEqual(driver.minimum_slots, 15 if index == 1 else 1)
@@ -458,7 +458,7 @@ class BenchmarkTests(unittest.TestCase):
         def observed(current, folder, max_cells, *, known_captures):
             nonlocal count
             count += 1
-            self.assertEqual(max_cells, 2)
+            self.assertEqual(max_cells, b.BUDGET['maxCells'])
             if count > 1:
                 self.assertTrue(all(known_captures.get(cid) == pin for cid, pin in old.items()))
             h.save(folder/'cell-02/intent.json', dict(hostMonoNs=(14402 if count == 15 else count)*1_000_000_000))
@@ -738,9 +738,10 @@ class BenchmarkTests(unittest.TestCase):
         driver.ready_package.assert_not_called()
         driver.close.assert_called_once()
 
-    def test_more_than_two_benchmark_cells_rejected_before_phone_creation(self):
+    def test_more_than_declared_benchmark_cells_rejected_before_phone_creation(self):
         with patch.object(b, 'Observer') as phone, self.assertRaises(RuntimeError):
-            run.ble_block(dict(kind='patch', benchmark={}, mcu=dict(package=dict(bytes=1048576))), self.out, 3)
+            run.ble_block(dict(kind='patch', benchmark={}, mcu=dict(package=dict(bytes=1048576))),
+                          self.out, b.BUDGET['maxCells'] + 1)
         phone.assert_not_called()
 
     def test_benchmark_channel_uses_fixture_without_public_channel_mutation(self):
@@ -755,7 +756,7 @@ class BenchmarkTests(unittest.TestCase):
 
     def test_two_blocks_save_success_then_clear_restore_idle_and_reuse_archive(self):
         trace, created = [], []
-        plan = dict(kind='patch', benchmark={}, mcu=dict(package=self.fw['package']),
+        plan = dict(kind='patch', benchmark=dict(link=run.v2.PROFILE), mcu=dict(package=self.fw['package']),
                     firmware=self.fw, notify_cli={}, _campaign_deadline=time.monotonic()+2700)
         def phone_factory(plan, out, known):
             phone = Mock(out=out, capture_id=('%032x' % (len(created)+1)), capture_resolved=True,
@@ -776,7 +777,7 @@ class BenchmarkTests(unittest.TestCase):
             phone.ready_package.side_effect = lambda fw: emit()
             def wait(check):
                 begin = emit()
-                begin.update(event='beginAck', phase='transferring')
+                begin.update(event='beginAck', phase='transferring', protocol=2, session=7, bitmap=None)
                 emit(target=True)
                 return check()
             phone.wait.side_effect = wait
@@ -790,7 +791,9 @@ class BenchmarkTests(unittest.TestCase):
                 phone.known_captures[phone.capture_id] = h.record(out / 'app-capture.jsonl')
                 h.save(out / 'observation.json', dict(synthetic=True))
                 trace.append('seal-idle')
-                return dict(groups=[dict(label='upgrade')]*2)
+                summary = dict(transfer=dict(begin=dict(first=dict(protocol=2, epoch=1,
+                    session=7, seq=1, windowSegments=24)), dataBatch=dict(maxFrames=12)))
+                return dict(groups=[dict(label='upgrade', lines=[], summary=summary)]*2)
             phone.finish.side_effect = finish
             created.append(phone)
             return phone

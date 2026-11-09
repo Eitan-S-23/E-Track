@@ -1,11 +1,13 @@
 """One benchmark envelope over an admitted protected finalized pair; no MCU build."""
 import argparse
 import importlib.util
+import io
 import json
 import os
 from pathlib import Path
 import signal
 import sys
+import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location('p51_benchmark_originals', ROOT / 'Tools/ota/p51-normal-staging-inputs.py')
@@ -16,18 +18,95 @@ MANIFEST = 'Tools/ota/p51-benchmark-inputs.json'
 
 
 def validate_config(config):
-    m.require(config['schema'] == 'p51-benchmark-inputs-v1' and config['task'] == 'P5-1'
+    m.require(config['schema'] in ('p51-benchmark-inputs-v1', 'p51-benchmark-inputs-v2') and config['task'] == 'P5-1'
         and config['mode'] == 'archived-benchmark' and config['repository'] == 'Eitan-S-23/E-Track'
         and config['profile'] == 'p34-v2-candidate' and config['purpose'] == 'fixed-load-benchmark'
         and config['derivation'] == 'protected-finalized-pair/reference-envelope-only'
-        and config['productionPublishable'] is False and config['representativeFunctionalSample'] is False
-        and (config['baseVersion'], config['targetVersion']) == ('3.3.20', '3.3.21')
-        and config['normalInputs']['path'] == 'Tools/ota/p51-normal-staging-inputs.json'
-        and config['reference'] == dict(totalBytes=1048576, seed=7, budget=256), 'Benchmark input contract')
+        and config['productionPublishable'] is False and config['representativeFunctionalSample'] is False,
+        'Benchmark input contract')
+    if config['schema'] == 'p51-benchmark-inputs-v1':
+        m.require((config['baseVersion'], config['targetVersion']) == ('3.3.20', '3.3.21')
+            and config['normalInputs']['path'] == 'Tools/ota/p51-normal-staging-inputs.json'
+            and config['reference'] == dict(totalBytes=1048576, seed=7, budget=256), 'Historical benchmark contract')
+    else:
+        m.require(m.pack.parse_version_name(config['targetVersion']) > m.pack.parse_version_name(config['baseVersion']) >= 30321
+            and m.re.fullmatch(r'[0-9a-f]{40}', config['sourceCommit'])
+            and m.re.fullmatch(r'[0-9a-f]{40}', config['productSource'])
+            and config['reference']['totalBytes'] == 1048576 and config['reference']['budget'] == 256
+            and type(config['reference']['seed']) is int and 0 <= config['reference']['seed'] <= 0xffffffff,
+            'V2 archived keyed-source contract')
+
+
+def keyed_original(config):
+    """Reuse a successful keyed build stage, even if its later package job failed."""
+    delivery = json.loads(m.read(config['sourceDelivery']))
+    archive = m.read(config['sourceArchive'])
+    artifact = delivery['artifact']
+    m.require(delivery['source'] == config['sourceCommit'] == artifact['workflow_run']['head_sha']
+        and delivery['run'] == artifact['workflow_run']['id']
+        and artifact['digest'] == 'sha256:' + m.sha(archive)
+        and artifact['size_in_bytes'] == len(archive), 'Keyed source archive identity')
+    with zipfile.ZipFile(io.BytesIO(archive)) as z:
+        m.require(len(z.namelist()) == len(set(z.namelist())) <= 10000
+            and sum(row.file_size for row in z.infolist()) <= 300*1024*1024 and z.testzip() is None,
+            'Invalid keyed archive')
+        files = {row.filename: z.read(row) for row in z.infolist() if not row.is_dir()}
+    build = json.loads(files['keyed-build/gcc-build-inputs.json'])
+    evidence = json.loads(files['keyed-build/keyed-build-evidence.json'])
+    m.require(build['commitSha'] == evidence['commitSha'] == config['sourceCommit']
+        and build['keyBinding'] == evidence['keyBinding']
+        and build['buildConfiguration'] == evidence['buildConfiguration']
+        and build['buildConfiguration']['actualProfile'] == 'p34-v2-candidate'
+        and build['keyBinding']['source'] == 'approved-ci-key-v1'
+        and evidence['steps'] == json.loads(files['keyed-build/steps.json'])
+        and [row['label'] for row in evidence['steps']] == ['configure', 'build', 'size']
+        and all(row['exitCode'] == row['errorLines'] == 0 for row in evidence['steps'])
+        and json.loads(files['evidence/cleanup.json']) == {'privateAbsent': True},
+        'Original keyed build stage or cleanup failed')
+    for row in evidence['artifacts']:
+        m.verified(files['keyed-build/' + row['path']], dict(bytes=row['sizeBytes'], sha256=row['sha256']))
+    raw = files['keyed-build/app/X-Track-App-GCC.bin']
+    expected_base, expected_target = m.source_images(raw, build, config['baseVersion'], config['targetVersion'])
+    base, target, boot = (m.read(config[name]) for name in ('base', 'target', 'boot'))
+    m.require(base == expected_base and target == expected_target and len(boot) == 65536
+        and m.sha(boot) == '01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527',
+        'Archived finalized pair or retained group16 Boot differs')
+    proof = dict(schema='p51-benchmark-source-v2', config=config,
+        original=dict(sourceCommit=config['sourceCommit'], productSource=config['productSource'],
+            archive=config['sourceArchive'], delivery=config['sourceDelivery'],
+            keyedBuildStage='PASS', priorWholePackageResult='NOT_RECLASSIFIED'),
+        originalBuilds=dict(base=build, target=build), base=config['base'], target=config['target'], boot=config['boot'],
+        sourceCompilations=0, finalizations=0, normalPackageGenerations=0,
+        packagePurpose='fixed-load-benchmark', productionPublishable=False, representativeFunctionalSample=False)
+    row, compressed = reference_input(base, target, config)
+    return dict(base=base, target=target, boot=boot, proof=proof, row=row, compressed=compressed)
+
+
+def reference_input(base, target, config):
+    """Check the already selected keyless stream instead of repeating its search."""
+    reference = config['reference']
+    row = json.loads(m.read(reference['selection']))
+    compressed = m.read(reference['stream'])
+    m.require(type(row['count']) is int and 0 <= row['count'] < len(target)
+        and type(row['salt']) is int and 0 <= row['salt'] < 65536
+        and row['seed'] == reference['seed'] and row['props_hex'] == '0200400000'
+        and row['base_sha256'] == m.sha(base) and row['target_sha256'] == m.sha(target)
+        and row['decoded_bytes'] == len(target) + 24*(row['count']+1)
+        and row['compressed_bytes'] == len(compressed) == 1048472
+        and row['etu_bytes'] == reference['totalBytes'] == 1048576
+        and row['compressed_sha256'] == m.sha(compressed), 'Selected reference identity')
+    raw = m.encoding.strict_lzma(bytes.fromhex(row['props_hex']), compressed, row['decoded_bytes'])
+    m.require(m.sha(raw) == row['raw_sha256']
+        and raw == m.encoding.patch_stream(base, target, row['count'], row['seed'], row['salt'])
+        and m.unpack.bspatch_apply(base, len(target), raw) == target,
+        'Selected reference full-consumption/byte identity')
+    return row, compressed
 
 
 def resolve(config):
     validate_config(config)
+    if config['schema'] == 'p51-benchmark-inputs-v2':
+        return keyed_original(config)
     original_config = json.loads(m.read(config['normalInputs']))
     original = s.resolve(original_config)
     candidate = json.loads(original['candidate'])
@@ -76,8 +155,10 @@ def check_materialized(config_bytes, out):
 
 
 def protected_owner(env, config_bytes, out):
-    expected = dict(INPUT_CANDIDATE_MODE='archived-benchmark', INPUT_VERSION_NAME='3.3.21',
-        INPUT_CANDIDATE_BASE_VERSION='3.3.20', INPUT_PUBLISH='false', INPUT_REHEARSAL='false',
+    config = json.loads(config_bytes)
+    validate_config(config)
+    expected = dict(INPUT_CANDIDATE_MODE='archived-benchmark', INPUT_VERSION_NAME=config['targetVersion'],
+        INPUT_CANDIDATE_BASE_VERSION=config['baseVersion'], INPUT_PUBLISH='false', INPUT_REHEARSAL='false',
         INPUT_CHECK_BINDINGS='false', INPUT_PACKAGE_CANDIDATE='true', OTA_BOOT_CHAIN_READY='false',
         FIRMWARE_RELEASE_MODE='artifact-candidate-benchmark',
         FIRMWARE_CANDIDATE_CONTEXT='firmware-rehearsal/artifact-only-archived-benchmark-v1',
@@ -110,7 +191,11 @@ def package(config_bytes, out, cc):
     m.require((out / 'private/key.h').read_bytes() == header, 'Benchmark private header drift')
     m.require(not (out / 'prepared').exists() and not (out / 'evidence/reference').exists(), 'Preserve previous benchmark package')
     config = json.loads(config_bytes)
-    data['row'], data['compressed'] = m.source_reference(data['base'], data['target'], config, out / 'evidence/reference')
+    if config['schema'] == 'p51-benchmark-inputs-v2':
+        m.save_json(out / 'evidence/reference/selection.json', data['row'])
+        m.save(out / 'evidence/reference/reference.lzma', data['compressed'])
+    else:
+        data['row'], data['compressed'] = m.source_reference(data['base'], data['target'], config, out / 'evidence/reference')
     result = m.package(data, key, out / 'prepared')
     m.save(out / 'prepared/app-start.bin', data['base'])
     result['native'] = m.native_verify(data, out / 'prepared', out / 'private', cc, all_assets=True)
@@ -129,8 +214,8 @@ def package(config_bytes, out, cc):
         productionPublishable=False, readyRegistered=False, sourceCompilations=0, finalizations=0,
         originalSourceProof=data['proof'], sourceProofSha256=m.sha((out / 'inputs/benchmark-source.json').read_bytes()),
         verificationSha256=m.sha((out / 'evidence/benchmark-verification.json').read_bytes()),
-        versionName=config['targetVersion'], versionCode=30321, targetImageSha256=m.sha(data['target']),
-        baseVersionName=config['baseVersion'], baseVersionCode=30320, baseImageSha256=m.sha(data['base']),
+        versionName=config['targetVersion'], versionCode=m.pack.parse_version_name(config['targetVersion']), targetImageSha256=m.sha(data['target']),
+        baseVersionName=config['baseVersion'], baseVersionCode=m.pack.parse_version_name(config['baseVersion']), baseImageSha256=m.sha(data['base']),
         assets=assets, reference=dict(aliasOf='patch.etu', totalLength=1048576, fullConsumption=True),
         noCloudMutation=True, noDeviceOperation=True, normalAssetsUnchanged=True, hardwareAcceptance='NOT_RUN')
     m.save_json(out / 'prepared/benchmark-metadata.json', metadata)
