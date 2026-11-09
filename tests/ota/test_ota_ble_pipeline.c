@@ -1,6 +1,4 @@
-#define main legacy_session_main
-#include "test_ota_ble_session.c"
-#undef main
+#include "ota_ble_session_fixture.h"
 
 /* Real parser/session/staging, asynchronous payload port, no device access. */
 static struct
@@ -103,7 +101,6 @@ static void setup2(void)
     staging_io.erase_4k = guarded_erase;
     staging_io.program = guarded_program;
     begin_case();
-    memcpy(te.device.base_image_sha8, te.image_sha, sizeof(te.device.base_image_sha8));
     session.env.pipeline_io = &payload_io;
     session.env.overlay_workspace = aligned_workspace;
 }
@@ -206,6 +203,8 @@ static void test_pipeline_transfer(void)
 {
     uint8_t *pkg;
     uint8_t sha[32];
+    uint8_t retired_begin[101];
+    size_t wire_len;
     tx_view_t v;
     uint32_t before;
     setup2();
@@ -260,8 +259,15 @@ static void test_pipeline_transfer(void)
     check("bad DATA2 CRC yields v2 NAK without advancing state",
         last_tx(&v) && v.cmd == OTA_BLE_CMD_ACK_DATA2 &&
         tx_status(&v) == OTA_BLE_STATUS_ERR_CRC && session.expected_seq == 49u);
-    deliver2(build_abort_frame(1u, session.session_id), 0u);
-    deliver2(build_begin_frame(1u, 9000u, sha, pkg, 1u), 0u);
+    /* Valid historical wire bytes are negative inputs, not a supported sender. */
+    deliver2(ota_ble_frame_encode(wire, sizeof(wire), 0x04u,
+        session.session_id, 1u, NULL, 0u), 0u);
+    retired_begin[0] = 1u;
+    write_u32le(retired_begin + 1u, 9000u);
+    memcpy(retired_begin + 5u, sha, 32u);
+    memcpy(retired_begin + 37u, pkg, 64u);
+    deliver2(ota_ble_frame_encode(wire, sizeof(wire), 0x01u,
+        0u, 1u, retired_begin, sizeof(retired_begin)), 0u);
     before = flash_fixture.operation_count;
     session.env.info_provider = NULL;
     deliver2(build_get_info_frame(1u, 0u), 0u);
@@ -471,7 +477,7 @@ static void test_pipeline_frame_lengths(void)
     static const struct {uint8_t cmd; uint16_t low, high;} cases[] = {
         {OTA_BLE_CMD_CAPS2, 4u, 4u}, {OTA_BLE_CMD_BEGIN2, 105u, 105u},
         {OTA_BLE_CMD_DATA2, 9u, 136u}, {OTA_BLE_CMD_END2, 36u, 36u},
-        {OTA_BLE_CMD_ABORT2, 4u, 4u}, {OTA_BLE_CMD_DATA, 4u, 132u}
+        {OTA_BLE_CMD_ABORT2, 4u, 4u}, {0x02u, 4u, 132u}
     };
     unsigned i, variant;
     for (i = 0u; i < sizeof(cases) / sizeof(cases[0]); ++i)

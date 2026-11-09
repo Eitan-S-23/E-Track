@@ -94,22 +94,24 @@ static void test_encode_parse_roundtrip(void)
 
     check("GET_INFO frame with empty payload round-trips",
           roundtrip_once(OTA_BLE_CMD_GET_INFO, 0u, 0u, NULL, 0u));
-    check("ABORT frame with empty payload round-trips",
-          roundtrip_once(OTA_BLE_CMD_ABORT, 0u, 0xFFFFu, NULL, 0u));
-    check("BEGIN frame with the fixed 101-byte payload round-trips",
-          roundtrip_once(OTA_BLE_CMD_BEGIN, 0u, 0x1234u, payload,
-                         OTA_BLE_LEN_BEGIN));
-    check("END frame with the fixed 32-byte payload round-trips",
-          roundtrip_once(OTA_BLE_CMD_END, 0x7Fu, 42u, payload,
-                         OTA_BLE_LEN_END));
-    check("DATA frame with the minimal 4-byte payload round-trips",
-          roundtrip_once(OTA_BLE_CMD_DATA, 0x01u, 11u, payload,
-                         OTA_BLE_LEN_DATA_MIN));
-    check("DATA frame with the maximal 132-byte payload round-trips",
-          roundtrip_once(OTA_BLE_CMD_DATA, 0xFFu, 0xFFFEu, payload,
+    check("CAPS2 nonce payload round-trips",
+          roundtrip_once(OTA_BLE_CMD_CAPS2, 0u, 1u, payload, OTA_BLE_LEN_CAPS2));
+    check("ABORT2 epoch payload round-trips",
+          roundtrip_once(OTA_BLE_CMD_ABORT2, 1u, 0xFFFFu, payload, OTA_BLE_LEN_ABORT2));
+    check("BEGIN frame with the fixed 105-byte payload round-trips",
+          roundtrip_once(OTA_BLE_CMD_BEGIN2, 0u, 0x1234u, payload,
+                         OTA_BLE_LEN_BEGIN2));
+    check("END frame with the fixed 36-byte payload round-trips",
+          roundtrip_once(OTA_BLE_CMD_END2, 0x7Fu, 42u, payload,
+                         OTA_BLE_LEN_END2));
+    check("DATA frame with the minimal 9-byte payload round-trips",
+          roundtrip_once(OTA_BLE_CMD_DATA2, 0x01u, 11u, payload,
+                         OTA_BLE_LEN_DATA2_MIN));
+    check("DATA frame with the maximal 136-byte payload round-trips",
+          roundtrip_once(OTA_BLE_CMD_DATA2, 0xFFu, 0xFFFEu, payload,
                          OTA_BLE_MAX_PAYLOAD));
     check("session and seq echo covers the full 16-bit range",
-          roundtrip_once(OTA_BLE_CMD_DATA, 0xA5u, 0x5A5Au, payload, 132u));
+          roundtrip_once(OTA_BLE_CMD_DATA2, 0xA5u, 0x5A5Au, payload, OTA_BLE_MAX_PAYLOAD));
 }
 
 static void test_encode_guards(void)
@@ -123,20 +125,20 @@ static void test_encode_guards(void)
     payload[3] = 4u;
 
     check("encode rejects a NULL destination",
-          ota_ble_frame_encode(NULL, sizeof(wire), OTA_BLE_CMD_DATA, 0u, 0u,
+          ota_ble_frame_encode(NULL, sizeof(wire), OTA_BLE_CMD_DATA2, 0u, 0u,
                                payload, 4u) == 0u);
-    check("encode rejects a payload beyond the 132-byte cap",
-          ota_ble_frame_encode(wire, sizeof(wire), OTA_BLE_CMD_DATA, 0u, 0u,
+    check("encode rejects a payload beyond the 136-byte cap",
+          ota_ble_frame_encode(wire, sizeof(wire), OTA_BLE_CMD_DATA2, 0u, 0u,
                                payload, (uint16_t)(OTA_BLE_MAX_PAYLOAD + 1u)) ==
               0u);
     check("encode rejects a NULL payload with a non-zero length",
-          ota_ble_frame_encode(wire, sizeof(wire), OTA_BLE_CMD_DATA, 0u, 0u,
+          ota_ble_frame_encode(wire, sizeof(wire), OTA_BLE_CMD_DATA2, 0u, 0u,
                                NULL, 4u) == 0u);
     check("encode accepts a NULL payload only with length zero",
-          ota_ble_frame_encode(wire, sizeof(wire), OTA_BLE_CMD_ABORT, 0u, 0u,
+          ota_ble_frame_encode(wire, sizeof(wire), OTA_BLE_CMD_GET_INFO, 0u, 0u,
                                NULL, 0u) != 0u);
     check("encode refuses to write a half frame into a short buffer",
-          ota_ble_frame_encode(wire, OTA_BLE_HEADER_SIZE, OTA_BLE_CMD_DATA, 0u,
+          ota_ble_frame_encode(wire, OTA_BLE_HEADER_SIZE, OTA_BLE_CMD_DATA2, 0u,
                                0u, payload, 4u) == 0u);
 }
 
@@ -161,7 +163,7 @@ static void feed_all(const uint8_t *wire, size_t len,
 
 static void test_parser_error_paths(void)
 {
-    uint8_t payload[4];
+    uint8_t payload[9] = {0};
     uint8_t wire[OTA_BLE_MAX_FRAME];
     ota_ble_parser_t parser;
     ota_ble_frame_t frame;
@@ -173,8 +175,8 @@ static void test_parser_error_paths(void)
     payload[1] = 2u;
     payload[2] = 3u;
     payload[3] = 4u;
-    wire_len = ota_ble_frame_encode(wire, sizeof(wire), OTA_BLE_CMD_DATA,
-                                    0x07u, 0x1234u, payload, 4u);
+    wire_len = ota_ble_frame_encode(wire, sizeof(wire), OTA_BLE_CMD_DATA2,
+                                    0x07u, 0x1234u, payload, sizeof(payload));
 
     wire[2] = 0x07u;
     parser_start(&parser);
@@ -184,40 +186,40 @@ static void test_parser_error_paths(void)
               frame.session == 0u && frame.seq == 0u && frame.len == 0u &&
               parser.bad_frames == 1u);
 
-    wire[2] = OTA_BLE_CMD_DATA;
+    wire[2] = OTA_BLE_CMD_DATA2;
     wire[6] = 200u;
     parser_start(&parser);
     feed_all(wire, wire_len, &parser, &frame, &result, &got);
-    check("DATA length above the 132-byte cap is rejected with header echo",
+    check("DATA length above the 136-byte cap is rejected with header echo",
           got && result == OTA_BLE_PARSE_ERR_FRAME &&
-              frame.cmd == OTA_BLE_CMD_DATA && frame.session == 0x07u &&
+              frame.cmd == OTA_BLE_CMD_DATA2 && frame.session == 0x07u &&
               frame.seq == 0x1234u && frame.len == 0u);
 
-    wire[6] = 3u;
+    wire[6] = 8u;
     parser_start(&parser);
     feed_all(wire, wire_len, &parser, &frame, &result, &got);
-    check("DATA length below the 4-byte minimum is rejected",
+    check("DATA length below the 9-byte minimum is rejected",
           got && result == OTA_BLE_PARSE_ERR_FRAME &&
-              frame.cmd == OTA_BLE_CMD_DATA && frame.seq == 0x1234u);
+              frame.cmd == OTA_BLE_CMD_DATA2 && frame.seq == 0x1234u);
 
-    wire[6] = 4u;
+    wire[6] = (uint8_t)sizeof(payload);
     parser_start(&parser);
     wire[wire_len - 1u] ^= 0x55u;
     feed_all(wire, wire_len, &parser, &frame, &result, &got);
     check("a corrupted trailing CRC byte is rejected as ERR_CRC with echo",
           got && result == OTA_BLE_PARSE_ERR_CRC &&
-              frame.cmd == OTA_BLE_CMD_DATA && frame.session == 0x07u &&
+              frame.cmd == OTA_BLE_CMD_DATA2 && frame.session == 0x07u &&
               frame.seq == 0x1234u && frame.len == 0u &&
               parser.bad_frames == 1u);
 
-    /* BEGIN 长度不是定长 101：结构性拒绝 */
-    wire_len = ota_ble_frame_encode(wire, sizeof(wire), OTA_BLE_CMD_BEGIN, 0u,
+    /* BEGIN2 requires its full 105-byte payload. */
+    wire_len = ota_ble_frame_encode(wire, sizeof(wire), OTA_BLE_CMD_BEGIN2, 0u,
                                     9u, payload, 4u);
     parser_start(&parser);
     feed_all(wire, wire_len, &parser, &frame, &result, &got);
     check("BEGIN with a wrong fixed length is rejected",
           got && result == OTA_BLE_PARSE_ERR_FRAME &&
-              frame.cmd == OTA_BLE_CMD_BEGIN && frame.seq == 9u);
+              frame.cmd == OTA_BLE_CMD_BEGIN2 && frame.seq == 9u);
 }
 
 static void test_parser_resync_after_noise(void)
@@ -263,7 +265,7 @@ static void test_parser_resync_after_noise(void)
                 break;
             }
         }
-        wire_len = ota_ble_frame_encode(wire, sizeof(wire), OTA_BLE_CMD_DATA,
+        wire_len = ota_ble_frame_encode(wire, sizeof(wire), OTA_BLE_CMD_DATA2,
                                         0x03u, seq, payload,
                                         (uint16_t)sizeof(payload));
         for (i = 0u; i < (uint32_t)wire_len; ++i)
@@ -280,7 +282,7 @@ static void test_parser_resync_after_noise(void)
           frames_seen == 2u && seqs[0] == 0x1100u && seqs[1] == 0x1101u);
 
     /* 截断帧 + 纯零噪声 + 新帧：parser 终将回 SYNC1 并解析后续帧 */
-    wire_len = ota_ble_frame_encode(wire, sizeof(wire), OTA_BLE_CMD_DATA, 0x01u,
+    wire_len = ota_ble_frame_encode(wire, sizeof(wire), OTA_BLE_CMD_DATA2, 0x01u,
                                     0x0200u, payload,
                                     (uint16_t)sizeof(payload));
     parser_start(&parser);
@@ -343,7 +345,7 @@ static void test_demux_text_and_binary(void)
     ota_ble_demux_t demux;
     ota_ble_frame_t frame;
     ota_ble_parse_result_t result;
-    uint8_t payload[8];
+    uint8_t payload[9];
     uint8_t wire[OTA_BLE_MAX_FRAME];
     size_t wire_len;
     uint32_t i;
@@ -355,7 +357,7 @@ static void test_demux_text_and_binary(void)
     {
         payload[i] = (uint8_t)(0x40u + i);
     }
-    wire_len = ota_ble_frame_encode(wire, sizeof(wire), OTA_BLE_CMD_DATA, 0x09u,
+    wire_len = ota_ble_frame_encode(wire, sizeof(wire), OTA_BLE_CMD_DATA2, 0x09u,
                                     0x0707u, payload,
                                     (uint16_t)sizeof(payload));
 

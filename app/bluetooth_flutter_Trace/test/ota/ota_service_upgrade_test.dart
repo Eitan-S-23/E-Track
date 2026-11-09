@@ -1618,7 +1618,7 @@ void main() {
           final measured = await Process.run(Platform.isWindows ? 'python' : 'python3',
               ['-I', '-S', '-B', '-X', 'utf8', '${checkout.path}/Tools/ota/p3-4-link-stats/batch_timing.py',
                 '--input', file.path, '--expect-sentinel', 'OTAOBS0123456789abcdef01234567',
-                '--expect-target', probeAddress], workingDirectory: checkout.path).timeout(const Duration(seconds: 15));
+                '--expect-target', probeAddress, '--protocol', '2'], workingDirectory: checkout.path).timeout(const Duration(seconds: 15));
           expect(measured.exitCode, 0, reason: '${measured.stderr}');
           expect(jsonDecode(measured.stdout as String)['chunks'], frames == 3 ? 22 : 21);
         }
@@ -2254,12 +2254,8 @@ void main() {
     final notifyLog = <String>[];
     final ble = await prepareDownloaded(tempDir: tempDir, notifyLog: notifyLog);
     final service = Get.find<OtaService>();
-    // MCU 整包校验不通过 → END 应答非 OK。真值 transport 对这类应答**不抛**
-    // （非 OK、非终态、无可续传预算 → 按 isOk 交调用方判失败），因此这条路径
-    // 既不进 typed catch 的 recordFailure，也没有 ABORT 收尾段——失败阶段与
-    // 原因的唯一来源就是 service 的 `!ack.isOk` 分支。摘要在该分支之前封存
-    // （P34-DA02 的原始缺陷）会让 failure 域永远停在空值：emitSummary 幂等，
-    // finally 的收尾摘要无法补写已经发布的那一份。
+    // V2 rejects END2 through the typed failure path and settles ownership with
+    // ABORT2. Cleanup must preserve the original MCU status in the one summary.
     ble.endAckStatusOverride = OtaBleCodec.statusErrSha;
 
     final statsLines = <String>[];
@@ -2281,8 +2277,8 @@ void main() {
     expect(ble.stagedDurable, 0,
         reason: 'MCU 拒绝整包后擦除 staging（真实 ERR_SHA 语义）');
     expect(ble.probeCount, 0, reason: 'END 未被采信，不得伪造设备已重启');
-    expect(ble.abortCalls, 0,
-        reason: '非 OK END 是正常回包而非异常：不触发异常路径的 ABORT');
+    expect(ble.abortCalls, 1,
+        reason: 'Rejected END2 performs one bounded V2 cleanup, without replaying END2');
 
     // 唯一终结摘要：早退/取消/异常/成功都走 finally，emitSummary 幂等必须
     // 保证同一轮只有一份——两份会把一轮失败读成两次运行。

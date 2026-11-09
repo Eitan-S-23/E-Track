@@ -1,5 +1,9 @@
 # BLE V2 Two-Block Supplement
 
+Current implementation policy (2026-11-09): [V2 only](ota-ble-v2-only.md).
+Its user-directed removal of V1 supersedes the future compatibility/fallback
+provisions below, without changing historical frozen bundles or V2 wire fields.
+
 Revision: 1 (2026-10-09). Decision: `OTA-DEC-015`. Task: P3-4.
 Status: prospective scope approved; implementation, independent verification,
 production freeze and release are NOT approved by this document alone.

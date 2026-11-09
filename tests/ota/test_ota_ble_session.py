@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compile and run the P3-1 BLE session host unit tests.
+"""Compile and run the current V2-only BLE session host unit tests.
 
 Links the real session/frame/ring transport against the real staging, SD
 header inspection, and boot crypto sources with an injected in-memory NOR

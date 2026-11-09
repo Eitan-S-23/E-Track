@@ -105,8 +105,7 @@ static int ota_ble_cmd_known(uint8_t cmd)
     return cmd == OTA_BLE_CMD_GET_INFO;
 }
 
-/* cmd 对应的合法 payload 长度域。DATA 为 [4,132]（包尾短段语义由
- * 会话层按 total_len 判定，parser 只做结构性上限）。 */
+/* DATA2 tail alignment is checked by the session; framing bounds come first. */
 static int ota_ble_len_accept(uint8_t cmd, uint16_t len)
 {
     switch (cmd)
@@ -114,14 +113,15 @@ static int ota_ble_len_accept(uint8_t cmd, uint16_t len)
     case OTA_BLE_CMD_GET_INFO:
         return len == OTA_BLE_LEN_GET_INFO;
     case OTA_BLE_CMD_CAPS2:
+        return len == OTA_BLE_LEN_CAPS2;
     case OTA_BLE_CMD_ABORT2:
-        return len == 4u;
+        return len == OTA_BLE_LEN_ABORT2;
     case OTA_BLE_CMD_BEGIN2:
         return len == OTA_BLE_LEN_BEGIN2;
     case OTA_BLE_CMD_END2:
         return len == OTA_BLE_LEN_END2;
     case OTA_BLE_CMD_DATA2:
-        return len >= 9u && len <= 136u;
+        return len >= OTA_BLE_LEN_DATA2_MIN && len <= OTA_BLE_MAX_PAYLOAD;
     default:
         return 0;
     }

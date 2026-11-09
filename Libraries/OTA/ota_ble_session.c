@@ -93,7 +93,7 @@ static void session_send_ack_begin(ota_ble_session_t *session,
     uint32_t epoch;
     if (session == NULL || request->cmd != OTA_BLE_CMD_BEGIN2) return;
     epoch = request->len == OTA_BLE_LEN_BEGIN2
-        ? pipeline_u32(request->payload + OTA_BLE_LEN_BEGIN) : 0u;
+        ? pipeline_u32(request->payload + OTA_BLE_BEGIN2_EPOCH_OFFSET) : 0u;
     session_pipeline_ack(session, OTA_BLE_CMD_ACK_BEGIN2, status,
         request->seq, epoch, sess);
 }
@@ -339,7 +339,7 @@ static void session_handle_begin(ota_ble_session_t *session,
     uint8_t *ws = NULL;
     uint32_t now;
     uint32_t receiver_size = sizeof(ota_pipeline_t);
-    uint32_t epoch = pipeline_u32(payload + OTA_BLE_LEN_BEGIN);
+    uint32_t epoch = pipeline_u32(payload + OTA_BLE_BEGIN2_EPOCH_OFFSET);
 
     proto_ver = payload[0];
     total_len = (uint32_t)payload[1] | ((uint32_t)payload[2] << 8) |
@@ -753,8 +753,8 @@ static void session_handle_pipeline(ota_ble_session_t *session,
             session_teardown(session);
             return;
         }
-        end.len = OTA_BLE_LEN_END;
-        memcpy(end.payload, frame->payload + 4u, OTA_BLE_LEN_END);
+        end.len = OTA_BLE_SHA256_SIZE;
+        memcpy(end.payload, frame->payload + 4u, OTA_BLE_SHA256_SIZE);
         session_handle_end(session, &end);
     }
 }

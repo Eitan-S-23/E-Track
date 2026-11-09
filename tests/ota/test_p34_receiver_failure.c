@@ -241,7 +241,7 @@ int main(int argc, char **argv)
     long length;
     uint8_t *bytes;
     unsigned mode;
-    (void)legacy_main;
+    (void)test_get_info;
     (void)transfer_and_faults;
     (void)invalid_adapter_calls;
     if (argc != 2 && (argc != 3 || strcmp(argv[2], "--mutate-source") != 0)) return 2;

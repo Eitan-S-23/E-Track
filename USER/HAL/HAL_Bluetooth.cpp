@@ -269,47 +269,29 @@ static int ble_env_send(const uint8_t *frame, uint16_t len)
 {
 #if CONFIG_OTA_LINK_METRICS
     if (g_ota_link_metrics.active && frame[8] == OTA_BLE_STATUS_OK) {
-        const bool begin1 = len == 20u && frame[2] == OTA_BLE_CMD_ACK_BEGIN;
         const bool begin2 = len == 28u && frame[2] == OTA_BLE_CMD_ACK_BEGIN2;
-        if ((begin1 || begin2) && g_ota_link_metrics.initial_durable == UINT32_MAX) {
-            g_ota_link_metrics.protocol = begin2 ? 2u : 1u;
+        if (begin2 && g_ota_link_metrics.initial_durable == UINT32_MAX) {
+            g_ota_link_metrics.protocol = 2u;
             g_ota_link_metrics.session = frame[3];
-            g_ota_link_metrics.epoch = begin2 ? ble_ack_u32(frame + 10) : 0u;
-            g_ota_link_metrics.initial_durable = ble_ack_u32(frame + (begin2 ? 14 : 10));
+            g_ota_link_metrics.epoch = ble_ack_u32(frame + 10);
+            g_ota_link_metrics.initial_durable = ble_ack_u32(frame + 14);
         }
-        if ((len == 19u && frame[2] == OTA_BLE_CMD_ACK_END) ||
-            (len == 27u && frame[2] == OTA_BLE_CMD_ACK_END2))
+        if (len == 27u && frame[2] == OTA_BLE_CMD_ACK_END2)
             g_ota_link_metrics.terminal = 0u;
     }
 #endif
-    const bool data_ok = len == 19u && frame[2] == OTA_BLE_CMD_ACK_DATA &&
-                         frame[8] == OTA_BLE_STATUS_OK;
-#if OTA_BLE_PIPELINE_ENABLED
     const bool data2_ok = len == 27u && frame[2] == OTA_BLE_CMD_ACK_DATA2 &&
                          frame[8] == OTA_BLE_STATUS_OK;
-    const uint32_t durable = data2_ok ? ble_ack_u32(frame + 13) :
-        data_ok ? ble_ack_u32(frame + 9) : s_p34_ack_durable;
-#else
-    const uint32_t durable = data_ok ? ble_ack_u32(frame + 9) : s_p34_ack_durable;
-#endif
+    const uint32_t durable = data2_ok ? ble_ack_u32(frame + 13) : s_p34_ack_durable;
     /* Commit advancement and control/error responses flush immediately. All
      * other ACK frames keep their original bytes and FIFO order. */
     const int result = s_p34_ack_batch.send(frame, len,
-        (data_ok
-#if OTA_BLE_PIPELINE_ENABLED
-         || data2_ok
-#endif
-        ) && durable == s_p34_ack_durable, millis(), ble_uart_send);
+        data2_ok && durable == s_p34_ack_durable, millis(), ble_uart_send);
     if (result == 0)
     {
-        if (data_ok) s_p34_ack_durable = durable;
-        else if (len == 20u && frame[2] == OTA_BLE_CMD_ACK_BEGIN)
-            s_p34_ack_durable = ble_ack_u32(frame + 10);
-#if OTA_BLE_PIPELINE_ENABLED
-        else if (data2_ok) s_p34_ack_durable = durable;
+        if (data2_ok) s_p34_ack_durable = durable;
         else if (len == 28u && frame[2] == OTA_BLE_CMD_ACK_BEGIN2 && frame[8] == 0u)
             s_p34_ack_durable = ble_ack_u32(frame + 14);
-#endif
     }
     return result;
 }

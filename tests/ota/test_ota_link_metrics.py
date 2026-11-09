@@ -44,8 +44,10 @@ class Tests(unittest.TestCase):
             raise RuntimeError("native C compiler required")
         sources = ["tests/ota/test_ota_link_metrics.c", "Libraries/OTA/ota_ble_session.c",
             "Libraries/OTA/ota_ble_frame.c", "Libraries/OTA/ota_ble_ring.c", "Libraries/OTA/ota_sd.c",
+            "Libraries/OTA/ota_pipeline.c", "Libraries/OTA/ota_pipeline_sync.c",
             "Libraries/OTA/ota_staging.c", "boot/src/boot_crc32.c", "boot/src/boot_sha256.c"]
         command = [cc, "-std=c99", "-Wall", "-Wextra", "-Werror", "-O2",
+            "-DP34_OTA_PIPELINE_SYNC=1",
             *("-I" + str(ROOT / name) for name in ("USER/HAL", "Libraries", "boot/include")),
             *(str(ROOT / name) for name in sources), "-o", str(exe)]
         print("METRICS_COMPILE " + subprocess.list2cmdline(command), flush=True)
@@ -78,6 +80,8 @@ class Tests(unittest.TestCase):
         print(log.decode("ascii"), end="")
         value = m.from_rtt(log)
         self.assertTrue(value["clean"])
+        self.assertEqual(value["protocol"], 2)
+        self.assertEqual(value["epoch"], 123)
         self.assertEqual(value["initial_durable"], 0)
         self.assertEqual(value["final_durable"], 8192)
         self.assertEqual(value["phase"]["payload_read"]["calls"], 0)

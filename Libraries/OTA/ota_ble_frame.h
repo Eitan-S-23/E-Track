@@ -21,25 +21,16 @@ extern "C" {
 #define OTA_BLE_SYNC1 0x5Au
 #define OTA_BLE_HEADER_SIZE 8u
 #define OTA_BLE_CRC_SIZE 2u
-/* DATA payload 上限 = u32 off + 128B 段净荷（合同 §5.4/§5.5） */
+/* V2 DATA payload: epoch:u32 + offset:u32 + data[1..128]. */
 #define OTA_BLE_PIPELINE_ENABLED 1
 #define OTA_BLE_MAX_PAYLOAD 136u
 #define OTA_BLE_MAX_FRAME \
     (OTA_BLE_HEADER_SIZE + OTA_BLE_MAX_PAYLOAD + OTA_BLE_CRC_SIZE)
 
-/* 下行命令（合同 §5.2）；0x80..0x84 为上行，parser 层拒绝其余保留值 */
+/* Identity query plus V2-only transfer commands. */
 #define OTA_BLE_CMD_GET_INFO 0x00u
-#define OTA_BLE_CMD_BEGIN 0x01u
-#define OTA_BLE_CMD_DATA 0x02u
-#define OTA_BLE_CMD_END 0x03u
-#define OTA_BLE_CMD_ABORT 0x04u
 #define OTA_BLE_CMD_INFO 0x80u
-#define OTA_BLE_CMD_ACK_BEGIN 0x81u
-#define OTA_BLE_CMD_ACK_DATA 0x82u
-#define OTA_BLE_CMD_ACK_END 0x83u
-#define OTA_BLE_CMD_ACK_ABORT 0x84u
 
-/* Development extension: v1 INFO and command lengths remain unchanged. */
 #define OTA_BLE_CMD_CAPS2 0x10u
 #define OTA_BLE_CMD_BEGIN2 0x11u
 #define OTA_BLE_CMD_DATA2 0x12u
@@ -50,19 +41,19 @@ extern "C" {
 #define OTA_BLE_CMD_ACK_DATA2 0x92u
 #define OTA_BLE_CMD_ACK_END2 0x93u
 #define OTA_BLE_CMD_ACK_ABORT2 0x94u
+#define OTA_BLE_LEN_CAPS2 4u
+#define OTA_BLE_LEN_CAPS2_REPLY 16u
 #define OTA_BLE_LEN_BEGIN2 105u
+#define OTA_BLE_LEN_DATA2_MIN 9u
 #define OTA_BLE_LEN_END2 36u
+#define OTA_BLE_LEN_ABORT2 4u
 #define OTA_BLE_LEN_ACK_BEGIN2 18u
 #define OTA_BLE_LEN_ACK_OTHER2 17u
+#define OTA_BLE_BEGIN2_EPOCH_OFFSET 101u
+#define OTA_BLE_SHA256_SIZE 32u
 
-/* payload 定长（合同 §5.2.1/§5.3/§5.6） */
+/* INFO layout is independent of the transfer protocol version. */
 #define OTA_BLE_LEN_GET_INFO 0u
-#define OTA_BLE_LEN_BEGIN 101u
-#define OTA_BLE_LEN_END 32u
-#define OTA_BLE_LEN_ABORT 0u
-#define OTA_BLE_LEN_DATA_MIN 4u
-#define OTA_BLE_LEN_ACK_BEGIN 10u
-#define OTA_BLE_LEN_ACK_OTHER 9u
 #define OTA_BLE_LEN_INFO 50u
 /* INFO 固定字段（合同 §5.2.1） */
 #define OTA_BLE_INFO_PROTO_VER 1u

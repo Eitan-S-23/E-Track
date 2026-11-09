@@ -1,5 +1,6 @@
 #include "ota_link_metrics.h"
 #include "OTA/ota_ble_session.h"
+#include "OTA/ota_pipeline_sync.h"
 #include <stdio.h>
 
 static unsigned checks, failures;
@@ -146,6 +147,15 @@ static int get_device(ota_sd_device_t *device)
     return 1;
 }
 
+static int get_info(ota_ble_info_t *info)
+{
+    memset(info, 0, sizeof(*info));
+    memcpy(info->model, "E-Track", 8u);
+    info->cur_vcode = 20700u;
+    info->hw_rev = info->layout_id = info->boot_ver = 1u;
+    return 1;
+}
+
 static int send_ack(const uint8_t *frame, uint16_t len)
 {
     CHECK(len >= OTA_BLE_HEADER_SIZE + 1u + OTA_BLE_CRC_SIZE);
@@ -180,7 +190,8 @@ static void feed(uint8_t cmd, uint16_t seq, const uint8_t *payload, uint16_t len
         else ota_ble_session_feed_idle(&session, NULL, NULL, wire[i]);
     }
     ota_ble_session_pump(&session);
-    CHECK(last_status == OTA_BLE_STATUS_OK);
+    if (cmd == OTA_BLE_CMD_CAPS2) CHECK(last_ack == OTA_BLE_CMD_CAPS2_REPLY);
+    else CHECK(last_status == OTA_BLE_STATUS_OK);
 }
 
 static int test_zero_verify(void)
@@ -190,15 +201,18 @@ static int test_zero_verify(void)
     uint16_t seq = 1u;
     boot_sha256_ctx_t digest;
     ota_staging_io_t io;
+    ota_pipeline_io_t pipeline_io;
     ota_ble_env_t env;
     memset(&io, 0, sizeof(io));
     io.read = read_memory; io.program = program_memory;
     io.erase_4k = erase_memory; io.verify = verify_memory;
+    CHECK(ota_pipeline_sync_init(&pipeline_io, &io) == OTA_PIPELINE_OK);
     memset(&env, 0, sizeof(env));
     env.now_ms = now_ms; env.send = send_ack; env.bcb_confirmed = yes;
     env.ota_disabled = no; env.overlay_acquire = yes;
     env.overlay_release = release_workspace; env.overlay_workspace = get_workspace;
-    env.get_device = get_device; env.activate_staged = activate; env.staging_io = &io;
+    env.get_device = get_device; env.info_provider = get_info;
+    env.activate_staged = activate; env.staging_io = &io; env.pipeline_io = &pipeline_io;
     memset(storage, 0xff, sizeof(storage));
     ota_ble_session_init(&session, &env);
     ota_metrics_reset(&path_metrics, 1u, 288000000u, 1u, 921600u, 921600u, 10u);
@@ -220,21 +234,31 @@ static int test_zero_verify(void)
     boot_sha256_update(&digest, package, sizeof(package));
     boot_sha256_final(&digest, sha);
 
-    payload[0] = 1u;
+    put_u32(payload, 123u);
+    feed(OTA_BLE_CMD_CAPS2, 0u, payload, OTA_BLE_LEN_CAPS2);
+    payload[0] = 2u;
     put_u32(payload + 1u, sizeof(package));
     memcpy(payload + 5u, sha, 32u); memcpy(payload + 37u, package, 64u);
-    feed(OTA_BLE_CMD_BEGIN, seq++, payload, OTA_BLE_LEN_BEGIN);
-    CHECK(last_ack == OTA_BLE_CMD_ACK_BEGIN && ota_ble_session_active(&session));
+    put_u32(payload + OTA_BLE_BEGIN2_EPOCH_OFFSET, 123u);
+    feed(OTA_BLE_CMD_BEGIN2, seq++, payload, OTA_BLE_LEN_BEGIN2);
+    CHECK(last_ack == OTA_BLE_CMD_ACK_BEGIN2 && ota_ble_session_active(&session));
     CHECK(session.progress.durable_off == 0u);
     path_metrics.initial_durable = session.progress.durable_off;
-    path_metrics.protocol = 1u; path_metrics.session = session.session_id;
+    path_metrics.protocol = 2u; path_metrics.session = session.session_id;
+    path_metrics.epoch = session.pipeline_ack.epoch;
     for (offset = 0u; offset < sizeof(package); offset += OTA_STAGING_SEGMENT_SIZE) {
-        put_u32(payload, offset);
-        memcpy(payload + 4u, package + offset, OTA_STAGING_SEGMENT_SIZE);
-        feed(OTA_BLE_CMD_DATA, seq++, payload, 4u + OTA_STAGING_SEGMENT_SIZE);
+        put_u32(payload, path_metrics.epoch);
+        put_u32(payload + 4u, offset);
+        memcpy(payload + 8u, package + offset, OTA_STAGING_SEGMENT_SIZE);
+        feed(OTA_BLE_CMD_DATA2, seq++, payload, 8u + OTA_STAGING_SEGMENT_SIZE);
     }
-    feed(OTA_BLE_CMD_END, seq, sha, OTA_BLE_LEN_END);
-    CHECK(last_ack == OTA_BLE_CMD_ACK_END && !ota_ble_session_active(&session) && activated == 1u);
+    for (offset = 0u; offset < 100u && session.progress.durable_off < sizeof(package); ++offset)
+        ota_ble_session_pump(&session);
+    CHECK(session.progress.durable_off == sizeof(package));
+    put_u32(payload, path_metrics.epoch);
+    memcpy(payload + 4u, sha, sizeof(sha));
+    feed(OTA_BLE_CMD_END2, seq, payload, OTA_BLE_LEN_END2);
+    CHECK(last_ack == OTA_BLE_CMD_ACK_END2 && !ota_ble_session_active(&session) && activated == 1u);
     CHECK(session.progress.durable_off == sizeof(package));
     CHECK(boot_crc32_final(&session.pkg_crc) == boot_crc32(package, sizeof(package)));
     CHECK(memcmp(storage + OTA_STAGING_PAYLOAD_OFFSET, package, sizeof(package)) == 0);
@@ -248,7 +272,7 @@ static int test_zero_verify(void)
     path_metrics.final_durable = session.progress.durable_off;
     path_metrics.package_crc32 = boot_crc32_final(&session.pkg_crc);
     memcpy(path_metrics.package_sha256, session.package_sha256, 32u);
-    path_metrics.terminal = last_ack == OTA_BLE_CMD_ACK_END && last_status == OTA_BLE_STATUS_OK ? 0u : 1u;
+    path_metrics.terminal = last_ack == OTA_BLE_CMD_ACK_END2 && last_status == OTA_BLE_STATUS_OK ? 0u : 1u;
     ota_metrics_freeze(&path_metrics, 20u);
     print_metrics(&path_metrics);
     return failures != 0u;
