@@ -21,7 +21,9 @@ class _ControlledPeer extends TestPipelinePeer {
   @override
   void reply(int cmd, int session, int seq, List<int> payload) {
     if ((dropDataAck && cmd == OtaBleCodec.rspAckData2) ||
-        (dropInfo && cmd == OtaBleCodec.rspInfo)) return;
+        (dropInfo && cmd == OtaBleCodec.rspInfo)) {
+      return;
+    }
     if (garbagePrefix) events.add([0, 7, 0xa5, 0]);
     super.reply(cmd, session, seq, payload);
   }

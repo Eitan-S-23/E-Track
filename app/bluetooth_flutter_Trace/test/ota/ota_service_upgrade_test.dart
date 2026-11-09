@@ -321,7 +321,7 @@ void main() {
     }
     await Future<void>.delayed(const Duration(milliseconds: 30));
     expect(ble.dataOffsets.length, count,
-        reason: 'new DATA must wait for MCU bitmap credit');
+        reason: 'new DATA must wait for V2 accepted credit');
   }
 
   Future<void> waitUntil(bool Function() condition) async {
@@ -616,67 +616,6 @@ void main() {
         }
       });
     }
-  }
-
-  for (final holdInfo in [false, true]) {
-    test('lifecycle matrix late transfer ${holdInfo ? 'INFO' : 'discovery'} cannot overwrite successor', () async {
-      final notifications = <String>[];
-      final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: notifications,
-          backgroundClient: _BackgroundOwnerHarness()..allow = false);
-      final service = Get.find<OtaService>();
-      ble.dataGate = Completer<void>();
-      final transfer = service.startOtaUpgrade('AA:BB');
-      final recoveryGate = Completer<void>();
-      Future<void>? recovery;
-      try {
-        await ble.dataGated.future;
-        service.pauseForBackground();
-        final infos = ble.getInfoCalls;
-        if (holdInfo) {
-          ble.holdInfo = true;
-        } else {
-          ble.rediscoverGate = recoveryGate;
-        }
-        recovery = service.resumeFromBackground();
-        if (holdInfo) {
-          await waitUntil(() => ble.getInfoCalls > infos);
-        } else {
-          await ble.rediscoverEntered.future;
-        }
-        await service.cancelUpgrade(keepPackage: true);
-        expect(await transfer, isFalse);
-        // Only the captured old discovery/INFO remains delayed, not the new bind.
-        ble.rediscoverGate = null;
-        ble.holdInfo = false;
-        expect(await service.readDeviceInfo('AA:BB'), isNotNull);
-        expect(await service.checkFirmwareUpdate(), isNotNull);
-        final file = service.downloadedFirmwareFile!;
-        final calls = (ble.discoverCalls, ble.getInfoCalls, ble.platformWriteCalls, ble.abortCalls);
-        final status = service.upgradeStatus;
-        final published = List<String>.of(notifications);
-        ble.releaseHeldInfo();
-        recoveryGate.complete();
-        await recovery;
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-        expect(service.phase, OtaPhase.readyToInstall);
-        expect(service.terminalState, isNull);
-        expect(service.upgradeStatus, status);
-        expect(notifications, published);
-        expect((ble.discoverCalls, ble.getInfoCalls, ble.platformWriteCalls, ble.abortCalls), calls);
-        expect(service.downloadedFirmwareFile!.path, file.path);
-        expect(await file.readAsBytes(), assetBytes());
-        expect(ble.beginCalls, 1);
-        expect(ble.endCalls, 0);
-      } finally {
-        ble.rediscoverGate = null;
-        ble.releaseHeldInfo();
-        if (!recoveryGate.isCompleted) recoveryGate.complete();
-        ble.releaseDataGate();
-        if (service.isUpgrading) await service.cancelUpgrade(keepPackage: true);
-        await transfer;
-        await recovery;
-      }
-    });
   }
 
   for (final profile in [OtaLinkProfile.adaptiveCandidate]) {
@@ -1008,83 +947,36 @@ void main() {
   });
 
   for (final acquired in [true, false]) {
-    test('background ${acquired ? 'owner loss' : 'denial'} pauses until strict foreground recheck', () async {
+    test('V2 background owner loss/denial aborts and cannot resume from late ACKs: $acquired', () async {
       final host = _BackgroundOwnerHarness()..allow = acquired;
-      final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+      final directory = tempFirmwareDir();
+      final ble = await prepareDownloaded(tempDir: directory, notifyLog: [],
           backgroundClient: host);
       final service = Get.find<OtaService>();
       ble.dataGate = Completer<void>();
       final operation = service.startOtaUpgrade('AA:BB');
       try {
-        await ble.dataGated.future;
         await expectGatedDataCount(ble, 4);
         service.didChangeAppLifecycleState(AppLifecycleState.paused);
         if (acquired) host.lose();
         expect(service.backgroundAcquired, isFalse);
-        expect(service.backgroundUnavailableReason, isNotNull);
-        expect(service.taskSnapshot!.phase, 'paused');
-        ble.releaseLatestDataAck();
-        await expectGatedDataCount(ble, 4);
-        final discoveries = ble.discoverCalls;
-        service.didChangeAppLifecycleState(AppLifecycleState.resumed);
-        await waitUntil(() => ble.discoverCalls > discoveries);
-        await expectGatedDataCount(ble, 8);
+        expect(await operation.timeout(const Duration(seconds: 5)), isFalse);
+        await waitUntil(() => ble.abortCalls == 1);
+        expect(service.phase, OtaPhase.cancelled);
+        expect(ble.dataOffsets.length, 4);
+        expect(ble.endCalls, 0);
+        final calls = (ble.discoverCalls, ble.getInfoCalls, ble.platformWriteCalls);
         ble.releaseDataGate();
-        expect(await operation, isTrue);
-        expect(ble.beginCalls, 1);
+        service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+        await service.resumeFromBackground();
+        await Future<void>.delayed(const Duration(milliseconds: 30));
+        expect((ble.discoverCalls, ble.getInfoCalls, ble.platformWriteCalls), calls);
+        expect(service.phase, OtaPhase.cancelled);
+        expect(await service.downloadedFirmwareFile!.readAsBytes(), assetBytes());
         expect(host.acquired, isFalse);
       } finally {
-        service.didChangeAppLifecycleState(AppLifecycleState.resumed);
         ble.releaseDataGate();
-        if (service.isUpgrading) await service.cancelUpgrade(keepPackage: true);
-        await operation;
-      }
-    });
-  }
-
-  for (final holdInfo in [false, true]) {
-    test('P38-R01 late ${holdInfo ? 'INFO' : 'discovery'} cannot undo a second pause', () async {
-      final host = _BackgroundOwnerHarness()..allow = false;
-      final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
-          backgroundClient: host);
-      final service = Get.find<OtaService>();
-      ble.dataGate = Completer<void>();
-      final operation = service.startOtaUpgrade('AA:BB');
-      try {
-        await ble.dataGated.future;
-        await expectGatedDataCount(ble, 4);
-        service.didChangeAppLifecycleState(AppLifecycleState.paused);
-        ble.releaseLatestDataAck();
-        final infos = ble.getInfoCalls;
-        if (holdInfo) {
-          ble.holdInfo = true;
-        } else {
-          ble.rediscoverGate = Completer<void>();
-        }
         service.didChangeAppLifecycleState(AppLifecycleState.resumed);
-        if (holdInfo) {
-          await waitUntil(() => ble.getInfoCalls > infos);
-        } else {
-          await ble.rediscoverEntered.future;
-        }
-        service.didChangeAppLifecycleState(AppLifecycleState.paused);
-        ble.releaseHeldInfo();
-        ble.rediscoverGate?.complete();
-        await expectGatedDataCount(ble, 4);
-        expect(service.taskSnapshot!.phase, 'paused');
-        expect(ble.endCalls, 0);
-        if (!holdInfo) expect(ble.getInfoCalls, infos);
-        service.didChangeAppLifecycleState(AppLifecycleState.resumed);
-        await expectGatedDataCount(ble, 8);
-        ble.releaseDataGate();
-        expect(await operation, isTrue);
-        expect(ble.beginCalls, 1);
-        expect(ble.endCalls, 1);
-      } finally {
-        ble.releaseHeldInfo();
-        if (ble.rediscoverGate?.isCompleted == false) ble.rediscoverGate!.complete();
-        service.didChangeAppLifecycleState(AppLifecycleState.resumed);
-        ble.releaseDataGate();
         if (service.isUpgrading) await service.cancelUpgrade(keepPackage: true);
         await operation;
       }
@@ -1275,7 +1167,7 @@ void main() {
 
   test('service disconnect and durable resume snapshots reach formal recovery accounting', () async {
     final bytes = assetBytes(8192);
-    final runtime = await probeRuntime(bytes, window: 32, prefix: false,
+    final runtime = await probeRuntime(bytes, window: 24, prefix: false,
         rebootInfoTimeoutMs: 2000, pauseScan: false, batchFrames: 12,
         reuseInfoLink: true, phyPolicy: 'off', infoMaxAttempts: 3, ackTimeoutMs: 2000);
     final tempDir = tempFirmwareDir();
@@ -1291,7 +1183,9 @@ void main() {
       ble.dataGate = Completer<void>();
       final upgrade = service.startOtaUpgrade(probeAddress);
       try {
-        await expectGatedDataCount(ble, 32);
+        await expectGatedDataCount(ble, 24);
+        ble.releaseLatestDataAck();
+        await expectGatedDataCount(ble, 48);
         expect(ble.stagedDurable, 4096);
         // Fail the first write after a real durable ACK. Only the service writes
         // the failure record; the test does not manufacture its stage/reason.
@@ -1873,7 +1767,7 @@ void main() {
     expect(OtaService.defaultPipelineWindowSegments, 24);
   });
 
-  test('one cumulative bitmap ACK releases four credits without durable progress',
+  test('one cumulative accepted-offset ACK releases four credits without durable progress',
       () async {
     final ble = await prepareDownloaded(
       tempDir: tempFirmwareDir(), notifyLog: <String>[]);
@@ -1888,7 +1782,7 @@ void main() {
       await expectGatedDataCount(ble, 8);
       expect(ble.stagedDurable, 1024);
       expect(service.durableProgress, 0,
-          reason: 'sent bytes and non-durable bitmap credit are not UI progress');
+          reason: 'sent bytes and non-durable accepted credit are not UI progress');
       expect(ble.endCalls, 0);
       ble.releaseDataGate();
       expect(await transfer, isTrue);
@@ -3484,7 +3378,7 @@ void main() {
       // 四阶段打点所在的路径，与 CANCELLED（无 ABORT 段）以及
       // failClosed（独立打点链）都不同。覆写从传输开始前生效，不经
       // dataGate（闸门在应答时刻组装 payload 快照，事后再覆写无效）。
-      ble.dataAckStatusOverride = OtaBleCodec.statusErrOffset;
+      ble.dataAckStatusOverride = OtaBleCodec.statusErrFlash;
       // ABORT 物理写闸门：service 侧 catch 决定终止后将停在
       // `await abortTransport.abortBestEffort()`——ABORT 帧在途未送达。
       ble.abortWriteGate = Completer<void>();
@@ -3997,283 +3891,61 @@ void main() {
       expect(successorDone, isTrue);
     }, timeout: const Timeout(Duration(seconds: 30)));
 
-    test('后台恢复一级复核：链路代次变化 → DEVICE_LINK_CHANGED 可重试终止（RC3-08⑦）',
-        () async {
-      final tempDir = tempFirmwareDir();
-      final notifyLog = <String>[];
-      final ble = await prepareDownloaded(
-        tempDir: tempDir,
-        notifyLog: notifyLog,
-      );
-      final service = Get.find<OtaService>();
-
-      ble.dataGate = Completer<void>();
-      final startFuture = service.startOtaUpgrade('AA:BB');
-      await ble.dataGated.future;
-      // 基线：readDeviceInfo 绑定 + startOtaUpgrade 绑定复核各一次。
-      expect(ble.discoverCalls, 2);
-      expect(ble.getInfoCalls, 2);
-
-      // 后台 → 绑定后链路代次前进（模拟系统断开重连）。
-      notifyLog.clear();
-      service.pauseForBackground();
-      ble.linkGeneration = 1;
-      await service.resumeFromBackground();
-
-      // 一级复核即终止：不得触发重新发现、不得发 INFO。
-      expect(ble.discoverCalls, 2,
-          reason: '链路代次不符时不得继续二三级复核');
-      expect(ble.getInfoCalls, 2);
-      expect(service.terminalState?.code, 'DEVICE_LINK_CHANGED');
-      expect(service.terminalState?.retryableLater, isTrue);
-      expect(notifyLog.any((l) => l.startsWith('错误: ') && l.contains('已终止')),
-          isTrue, reason: 'fail closed 必须经通知暴露终止事实');
-      expect(await startFuture, isFalse);
-      expect(service.phase, OtaPhase.cancelled);
-      // RC3-12：终止文案由 failClosed 发布，旧 owner 的退出路径不得再写一次
-      // 通用链路失败文案覆盖它——旧实现无条件写
-      // 「BLE 传输失败: ${e.message}」（CANCELLED 时即「OTA 传输已取消」），
-      // 把「可重试续传」这条可操作信息冲掉。startFuture 已完成，证明旧
-      // owner 的 catch 已经跑过，此处不是竞态窗口。
-      expect(service.upgradeStatus, '设备复核失败（后台恢复），升级已终止，可重试续传',
-          reason: 'fail closed 的可重试终止文案不得被旧 owner 的通用失败文案覆盖');
-      expect(ble.abortCalls, 0, reason: '链路已变，旧通道不得向新链路发送 ABORT');
-    });
-
-    test('failClosed 已决终止不被迟到在途写原生错误覆盖：DEVICE_LINK_CHANGED'
-        '保持、phase/文案不回跳（RC3-08/12②）', () async {
-      final tempDir = tempFirmwareDir();
-      final notifyLog = <String>[];
-      final ble = await prepareDownloaded(
-        tempDir: tempDir,
-        notifyLog: notifyLog,
-      );
-      final service = Get.find<OtaService>();
-
-      // 慢速写在途（200ms）：DATA 首片进入 native 写调用尚未结算。与既有
-      // RC3-08⑦ 用例不同，本用例不设 dataGate——在途写会真正以原生异常
-      // 退出，覆盖「failClosed 决定终止之后」的迟到错误路径（既有用例的
-      // dataGate 把写全闸住，错误根本到不了 catch）。
-      ble.writeChunkDelay = const Duration(milliseconds: 200);
-      final startFuture = service.startOtaUpgrade('AA:BB');
-      await ble.dataWriteEntered.future;
-
-      // 后台 → 链路代次前进。failClosed 在 resumeFromBackground 调用的
-      // 同步前缀里发布终止态（不前进代次，见 _failClosedDecided 注释），
-      // 在途写随后以非 CANCELLED 错误退出正是要防的覆盖路径。
-      service.pauseForBackground();
-      ble.linkGeneration = 1;
-      final resumeFuture = service.resumeFromBackground();
-      // 此刻在途 DATA 写仍在 200ms 延迟中未结算：注错让它在 failClosed
-      // 决定终止**之后**以原生异常（StateError，非 CANCELLED）退出。
-      ble.dataWriteError = StateError('native GATT write failed');
-      await resumeFuture;
-      expect(service.terminalState?.code, 'DEVICE_LINK_CHANGED',
-          reason: 'failClosed 必须发布终止态，终止不依赖在途写的退出方式');
-
-      // 旧 owner 的在途写以原生异常退出（走非 CANCELLED catch 分支）。
-      expect(await startFuture, isFalse);
-      // RC3-08/12② 鉴别点：终止原因/可重试语义/收尾相位/文案全部保持
-      // failClosed 已发布的结论，不得被通用失败覆盖——旧实现按
-      // `e.code != 'CANCELLED'` 分流会在这里发布「升级失败: ...」+ failed，
-      // 把「可重试续传」这条可操作信息冲掉。
-      expect(service.terminalState?.code, 'DEVICE_LINK_CHANGED',
-          reason: '迟到在途写原生错误不得覆盖 failClosed 已决定的终止原因');
-      expect(service.terminalState?.retryableLater, isTrue,
-          reason: '可重试续传语义不得被迟到错误冲掉');
-      expect(service.phase, OtaPhase.cancelled,
-          reason: '迟到在途写原生错误不得把收尾相位打回 failed');
-      expect(service.upgradeStatus, '设备复核失败（后台恢复），升级已终止，可重试续传',
-          reason: 'failClosed 的可重试终止文案不得被通用失败文案覆盖');
-      expect(notifyLog.any((l) => l.startsWith('错误: ') && l.contains('已终止')),
-          isTrue, reason: 'fail closed 必须经通知暴露终止事实');
-    }, timeout: const Timeout(Duration(seconds: 30)));
-
-    test('后台恢复一级复核补位：复核 await 期间链路代次前进 → DEVICE_LINK_CHANGED（RC3-08⑦）',
-        () async {
-      final tempDir = tempFirmwareDir();
-      final notifyLog = <String>[];
-      final ble = await prepareDownloaded(
-        tempDir: tempDir,
-        notifyLog: notifyLog,
-      );
-      final service = Get.find<OtaService>();
-
-      ble.dataGate = Completer<void>();
-      final startFuture = service.startOtaUpgrade('AA:BB');
-      await ble.dataGated.future;
-      expect(ble.discoverCalls, 2);
-      expect(ble.getInfoCalls, 2);
-
-      service.pauseForBackground();
-      // 入口那次一级复核读到的代次还没变，链路代次在**重新发现 await
-      // 期间**才前进（系统断开重连正好落在两个 await 之间）。只在入口
-      // 同步读一次挡不住这种交错：旧会话会继续在绑定于旧链路的
-      // transport 上发送字节，正是本节要防的情形。
-      ble.rediscoverGate = Completer<void>();
-      final resumeFuture = service.resumeFromBackground();
-      await ble.rediscoverEntered.future;
-      ble.linkGeneration = 1;
-      ble.rediscoverGate!.complete();
-      await resumeFuture;
-
-      // 二级复核已进入并返回了一致的结果，仍必须以新代次作废。
-      expect(ble.discoverCalls, 3);
-      expect(ble.getInfoCalls, 2, reason: '链路已变时不得继续三级复核');
-      expect(service.terminalState?.code, 'DEVICE_LINK_CHANGED');
-      expect(service.terminalState?.retryableLater, isTrue);
-      expect(notifyLog.any((l) => l.startsWith('错误: ') && l.contains('已终止')),
-          isTrue, reason: 'fail closed 必须经通知暴露终止事实');
-      expect(await startFuture, isFalse);
-      expect(service.phase, OtaPhase.cancelled);
-      expect(ble.abortCalls, 0, reason: '链路已变，旧通道不得向新链路发送 ABORT');
-    }, timeout: const Timeout(Duration(seconds: 30)));
-
-    test('后台恢复二级复核：特征重发现不一致 → DEVICE_LINK_CHANGED（RC3-08⑦）',
-        () async {
-      final tempDir = tempFirmwareDir();
-      final notifyLog = <String>[];
-      final ble = await prepareDownloaded(
-        tempDir: tempDir,
-        notifyLog: notifyLog,
-      );
-      final service = Get.find<OtaService>();
-
-      ble.dataGate = Completer<void>();
-      final startFuture = service.startOtaUpgrade('AA:BB');
-      await ble.dataGated.future;
-
-      service.pauseForBackground();
-      // 链路代次未变，但重新发现返回了不同的写模式（GATT 重建后语义
-      // 变化）——旧句柄/写模式沿用会把帧写进非 OTA 通道。
-      ble.discoverReplies.add({
-        'serviceId': 'fff0',
-        'writeCharId': 'fff2',
-        'notifyCharId': 'fff1',
-        'writeMode': 'without',
+    for (final fault in ['generation', 'discovery', 'characteristics', 'identity',
+        'generation-during-discovery', 'generation-during-info']) {
+      test('paused END2 rejects $fault before retry and preserves the failure', () async {
+        final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+            backgroundClient: _BackgroundOwnerHarness()..allow = false);
+        final service = Get.find<OtaService>();
+        ble.dropFirstEnd = true;
+        final operation = service.startOtaUpgrade('AA:BB');
+        Future<void>? recovery;
+        try {
+          await ble.firstEndEntered.future.timeout(const Duration(seconds: 5));
+          service.pauseForBackground();
+          final infos = ble.getInfoCalls;
+          if (fault == 'generation') ble.linkGeneration++;
+          if (fault == 'discovery') ble.discoverReplies.add(null);
+          if (fault == 'characteristics') {
+            ble.discoverReplies.add({'serviceId': 'fff0', 'writeCharId': 'fff2',
+                'notifyCharId': 'fff1', 'writeMode': 'without'});
+          }
+          if (fault == 'identity') ble.infoOverride = postRebootOtherHardwarePayload;
+          if (fault == 'generation-during-discovery') ble.rediscoverGate = Completer<void>();
+          if (fault == 'generation-during-info') ble.holdInfo = true;
+          recovery = service.resumeFromBackground();
+          if (fault == 'generation-during-discovery') {
+            await ble.rediscoverEntered.future;
+            ble.linkGeneration++;
+            ble.rediscoverGate!.complete();
+          }
+          if (fault == 'generation-during-info') {
+            await waitUntil(() => ble.getInfoCalls > infos);
+            ble.linkGeneration++;
+            ble.releaseHeldInfo();
+          }
+          await recovery;
+          expect(await operation.timeout(const Duration(seconds: 5)), isFalse);
+          expect(service.terminalState?.code,
+              fault == 'identity' ? 'DEVICE_IDENTITY_CHANGED' : 'DEVICE_LINK_CHANGED');
+          expect(service.terminalState?.retryableLater, fault != 'identity');
+          expect(service.phase, OtaPhase.cancelled);
+          expect(ble.endCalls, 1);
+          expect(ble.beginCalls, 1);
+          expect(ble.dataOffsets.toSet().length, 8);
+          final status = service.upgradeStatus;
+          await service.resumeFromBackground();
+          expect(service.upgradeStatus, status);
+          expect(ble.endCalls, 1);
+        } finally {
+          ble.releaseHeldInfo();
+          if (ble.rediscoverGate?.isCompleted == false) ble.rediscoverGate!.complete();
+          if (service.isUpgrading) service.onClose();
+          await recovery;
+          await operation.timeout(const Duration(seconds: 5));
+        }
       });
-      await service.resumeFromBackground();
-
-      expect(ble.discoverCalls, 3, reason: '二级复核确实执行了重新发现');
-      expect(ble.getInfoCalls, 2, reason: '特征不一致时不得发 INFO');
-      expect(service.terminalState?.code, 'DEVICE_LINK_CHANGED');
-      expect(service.terminalState?.retryableLater, isTrue);
-      expect(await startFuture, isFalse);
-      expect(ble.abortCalls, 0,
-          reason: 'Unconfirmed DATA and rejected characteristics forbid resync or ABORT');
-    });
-
-    test('后台恢复三级复核：INFO 身份漂移 → DEVICE_IDENTITY_CHANGED（RC3-08⑦）',
-        () async {
-      final tempDir = tempFirmwareDir();
-      final notifyLog = <String>[];
-      final ble = await prepareDownloaded(
-        tempDir: tempDir,
-        notifyLog: notifyLog,
-      );
-      final service = Get.find<OtaService>();
-
-      ble.dataGate = Completer<void>();
-      final startFuture = service.startOtaUpgrade('AA:BB');
-      await ble.dataGated.future;
-
-      service.pauseForBackground();
-      // 链路代次与特征都一致，但 INFO 报出了另一台设备的硬件身份：
-      // 继续发送会把旧包字节写进新设备，必须 fail closed 且不可重试。
-      ble.infoOverride = postRebootOtherHardwarePayload;
-      await service.resumeFromBackground();
-
-      expect(ble.discoverCalls, 3, reason: '二级复核通过后才轮到 INFO');
-      expect(ble.getInfoCalls, 3, reason: '三级复核确实发了 INFO');
-      expect(service.terminalState?.code, 'DEVICE_IDENTITY_CHANGED');
-      expect(service.terminalState?.retryableLater, isFalse,
-          reason: '身份漂移是稳定拒绝，不得标成可重试');
-      expect(await startFuture, isFalse);
-      expect(service.phase, OtaPhase.cancelled);
-      expect(ble.abortCalls, 0,
-          reason: 'Unconfirmed DATA and rejected identity forbid resync or ABORT');
-    });
-
-    test('后台复检迟到发布：取消后的复核结论不得覆盖取消终态（RC3-04⑦）',
-        () async {
-      final tempDir = tempFirmwareDir();
-      final notifyLog = <String>[];
-      final ble = await prepareDownloaded(
-        tempDir: tempDir,
-        notifyLog: notifyLog,
-      );
-      final service = Get.find<OtaService>();
-
-      ble.dataGate = Completer<void>();
-      final startFuture = service.startOtaUpgrade('AA:BB');
-      await ble.dataGated.future;
-
-      service.pauseForBackground();
-      // 把 resume 停在二级复核（重新发现）中途，然后用户取消——
-      // 若无迟到发布屏障，闸门释放后 mismatch 结论会以旧会话的
-      // 终止态覆盖取消终态。
-      ble.discoverReplies.add({
-        'serviceId': 'fff0',
-        'writeCharId': 'fff2',
-        'notifyCharId': 'fff1',
-        'writeMode': 'without',
-      });
-      ble.rediscoverGate = Completer<void>();
-      final resumeFuture = service.resumeFromBackground();
-      await ble.rediscoverEntered.future;
-
-      notifyLog.clear();
-      await service.cancelUpgrade(keepPackage: true);
-      expect(service.phase, OtaPhase.cancelled);
-      expect(service.upgradeStatus, '操作已取消');
-      expect(await startFuture, isFalse);
-
-      // 释放复核闸门：迟到的复核结论必须静默丢弃。
-      ble.rediscoverGate!.complete();
-      await resumeFuture;
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-      expect(service.terminalState, isNull,
-          reason: '迟到复核结论不得覆盖取消终态');
-      expect(notifyLog.any((l) => l.contains('已终止')), isFalse,
-          reason: '迟到复核结论不得再发终止通知');
-      expect(service.phase, OtaPhase.cancelled);
-      expect(service.upgradeStatus, '操作已取消');
-    }, timeout: const Timeout(Duration(seconds: 30)));
-
-    test('后台恢复三级复核通过：恢复发送并完成传输（RC3-08⑦ 正例）', () async {
-      final tempDir = tempFirmwareDir();
-      final notifyLog = <String>[];
-      final ble = await prepareDownloaded(
-        tempDir: tempDir,
-        notifyLog: notifyLog,
-      );
-      final service = Get.find<OtaService>();
-
-      ble.dataGate = Completer<void>();
-      final startFuture = service.startOtaUpgrade('AA:BB');
-      await ble.dataGated.future;
-
-      service.pauseForBackground();
-      await service.resumeFromBackground();
-
-      // 三级复核全部真实执行（重新发现 + INFO），且不置终止态。
-      expect(ble.discoverCalls, 3);
-      expect(ble.getInfoCalls, 3);
-      expect(service.terminalState, isNull, reason: '复核通过不得置终止态');
-
-      // 恢复后释放挂起 ACK：传输走完全程（含 END 与重启后身份复核）。
-      ble.releaseDataGate();
-      expect(await startFuture, isTrue);
-      expect(service.phase, OtaPhase.completed);
-      expect(ble.endCalls, 1);
-      expect(ble.abortCalls, 0, reason: '复核通过不得发 ABORT');
-      // 复核的 GET_INFO 不得消耗会话 seq（RC3-08⑦）：会话外查询混入
-      // 会话计数器会让恢复后的 DATA 整体跳号被 ERR_SEQ 拒绝，触发内部
-      // ABORT+BEGIN 重对齐并整段重发（beginCalls>1 / 段重复）。
-      expect(ble.beginCalls, 1, reason: '复核通过不得触发内部恢复重对齐');
-      expect(ble.dataOffsets.length, 8, reason: '1024B 包恰好 8 段，不得重发');
-      expect(ble.dataOffsets.toSet().length, 8, reason: '段偏移不得重复');
-    }, timeout: const Timeout(Duration(seconds: 30)));
+    }
   });
 }
 
@@ -5350,9 +5022,10 @@ class _UpgradeFakeBle extends BluetoothService {
     _segContent[off] = Uint8List.fromList(content);
     _shaBytes.addAll(content);
     _pipeAccepted += content.length;
-    // Delay one block to exercise both receiver buffers, not a v1 bitmap model.
+    // Model synchronous block commit independently from ACK delivery; V2
+    // still advertises two blocks and tracks accepted separately from durable.
     final commitTo = _pipeAccepted == _totalLen ? _totalLen
-        : _pipeAccepted - _stagedDurable >= 8192 ? _stagedDurable + 4096 : _stagedDurable;
+        : (_pipeAccepted ~/ 4096) * 4096;
     if (commitTo > _stagedDurable) {
       _stagedBytes = Uint8List.fromList(_shaBytes.sublist(0, commitTo));
       _stagedDurable = commitTo;

@@ -839,8 +839,7 @@ void main() {
         await old.dispose();
         final rebound = sender(_ReboundChannel(peer));
         next = rebound;
-        await expectLater(rebound.begin(totalLen: bytes.length,
-            packageSha256: List<int>.filled(32, 1), etuHeader: bytes.sublist(0, 64)),
+        await expectLater(transfer(rebound, bytes),
             throwsA(isA<OtaTransportException>().having((e) => e.code, 'code', 'WRITE_TIMEOUT')));
         peer.failInfo = false;
         peer.badInfo = false;
@@ -927,8 +926,7 @@ void main() {
           rebound = next;
           final beforeQuery = peer.writes.length;
           if (!recoveredOnCancel) {
-          await expectLater(next.begin(totalLen: bytes.length,
-              packageSha256: List<int>.filled(32, 1), etuHeader: bytes.sublist(0, 64)),
+          await expectLater(transfer(next, bytes),
               throwsA(isA<OtaTransportException>().having((e) => e.code, 'code', 'WRITE_TIMEOUT')));
           expect(peer.writes.length, beforeQuery,
               reason: 'A new wrapper cannot bypass the receiver recovery gate');

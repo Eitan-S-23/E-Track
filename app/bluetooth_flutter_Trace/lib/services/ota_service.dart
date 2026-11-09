@@ -1374,11 +1374,6 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           _upgradeStatus.value = '实验配置与设备或固件包不符，未开始传输';
           return fail('experiment', 'input-mismatch');
         }
-        if (prefixBytes != null && !diagnostics.enabled) {
-          _phase.value = OtaPhase.failed;
-          _upgradeStatus.value = '短测需要完整诊断记录，未开始传输';
-          return fail('observation', 'probe-capture-required');
-        }
         if (diagnostics.enabled) {
           diagnosticStarted = await diagnostics.beginUpgrade(observationInput);
           if (generation != _cancelGeneration) {
