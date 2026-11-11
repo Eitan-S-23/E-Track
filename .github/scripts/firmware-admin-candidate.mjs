@@ -2,8 +2,8 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { args, CliError, failure, outputPath, projectRoot, required, writeOutput } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-cli.mjs";
-import { canonicalJson, parseFirmwareRegistration, versionCodeFor } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-schema.mjs";
-import { digest, metadataBytes, prepareFirmwareRelease, readyProjection } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/prepare-firmware-release.mjs";
+import { canonicalJson, parseFirmwareRegistration } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-schema.mjs";
+import { digest, metadataBytes, prepareOriginalAdminCandidate, readyProjection } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/prepare-firmware-release.mjs";
 import { verifyBuildKeyBinding } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-release-key.mjs";
 import { verifyBuildConfiguration } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-build-profile.mjs";
 import { createFirmwareS3Bucket } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-s3.mjs";
@@ -11,26 +11,9 @@ import { uploadFirmwareAsset } from "../../app/bluetooth_flutter_Trace/cloudflar
 import { preflightFirmware } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-preflight-client.mjs";
 import { registerFirmware } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/register-firmware-release.mjs";
 import { verifyWorkerEnvironment } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-release-pipeline.mjs";
+import { adminCandidateAdmission, ADMIN_CANDIDATE_ORIGIN, ADMIN_CANDIDATE_BUCKET } from "./firmware-admin-context.mjs";
 
-export const ADMIN_CANDIDATE_ORIGIN = "https://trace-update-service-staging.tangjichentudou.workers.dev";
-export const ADMIN_CANDIDATE_BUCKET = "trace-update-staging-releases";
-
-export function adminCandidateAdmission(env) {
-  if (env.GITHUB_ACTIONS !== "true" || env.GITHUB_EVENT_NAME !== "workflow_dispatch"
-      || env.GITHUB_REPOSITORY !== "Eitan-S-23/E-Track" || env.INPUT_PREPARE_ADMIN_CANDIDATE !== "true"
-      || env.OTA_BOOT_CHAIN_READY !== "false" || env.INPUT_FIRMWARE_BUILD_PROFILE !== "p34-v2-candidate"
-      || !/^[0-9a-f]{40}$/.test(env.GITHUB_SHA ?? "") || env.INPUT_CANDIDATE_REVIEWED_COMMIT !== env.GITHUB_SHA
-      || !/^[1-9][0-9]*$/.test(env.GITHUB_RUN_ID ?? "") || env.GITHUB_RUN_ATTEMPT !== "1"
-      || ["INPUT_PUBLISH", "INPUT_REHEARSAL", "INPUT_CHECK_BINDINGS", "INPUT_PACKAGE_CANDIDATE", "INPUT_STAGE_CANDIDATE"]
-        .some(name => env[name] !== "false")
-      || env.INPUT_CANDIDATE_BASE_VERSION || env.INPUT_CANDIDATE_FULL_BASE_VERSION || env.INPUT_APPROVED_REHEARSAL_RUN_ID) {
-    throw new CliError("Normal Admin candidates require an explicit locked-production-gate dispatch; no mixed mode or automatic rerun");
-  }
-  const versionCode = versionCodeFor(env.INPUT_VERSION_NAME);
-  if (versionCode !== 30321 && versionCode <= 30322) throw new CliError("Select the actual installed V2 baseline or a fresh normal version above 3.3.22");
-  if (!env.INPUT_RELEASE_NOTES?.trim() || env.INPUT_RELEASE_NOTES.length > 8000) throw new CliError("Candidate release notes are required");
-  return { workflowCommit: env.GITHUB_SHA, runId: env.GITHUB_RUN_ID, versionName: env.INPUT_VERSION_NAME, versionCode };
-}
+export { adminCandidateAdmission, ADMIN_CANDIDATE_ORIGIN, ADMIN_CANDIDATE_BUCKET };
 
 export async function apiTokenS3Credentials(token, fetcher = fetch) {
   if (!token || /\s/.test(token)) throw new CliError("Existing R2-capable API credential is required");
@@ -45,7 +28,7 @@ export async function apiTokenS3Credentials(token, fetcher = fetch) {
   return { accessKeyId: value.result.id, secretAccessKey: digest(Buffer.from(token)) };
 }
 
-async function packageCandidate(root, out, env) {
+export async function packageCandidate(root, out, env) {
   const owner = adminCandidateAdmission(env);
   if (Object.entries(env).some(([name, value]) => value && /^(CLOUDFLARE_|CF_|TRACE_|GH_|GITHUB_TOKEN)/.test(name))) {
     throw new CliError("Packaging must not receive cloud or publishing credentials");
@@ -68,9 +51,12 @@ async function packageCandidate(root, out, env) {
     commitSha: original.commitSha, versionName: owner.versionName, releaseNotes: env.INPUT_RELEASE_NOTES,
     hardwareRevision: 1, layoutId: 1, minBootVersion: 1, minProtocolVersion: 1,
     targetHardware: "AT32F435RGT7", minAppVersionCode: 100 };
-  const result = await prepareFirmwareRelease({ root, app: path.join(source, "app/X-Track-App-GCC.bin"),
+  const result = await prepareOriginalAdminCandidate({ root, app: path.join(source, "app/X-Track-App-GCC.bin"),
     boot: path.join(source, "boot/X-Track-Boot.bin"), build, release, repository: env.GITHUB_REPOSITORY,
-    buildEvidenceDir: source, outputDir: path.join(out, "prepared"), aesKey: env.OTA_AES_KEY });
+    buildEvidenceDir: source, outputDir: path.join(out, "prepared"), aesKey: env.OTA_AES_KEY,
+    candidateEnv: env, sourceProof: path.join(source, "source-proof.json"),
+    bsdiff: env.BSDIFF_EXE ?? process.env.BSDIFF_EXE });
+  verifyAdminCandidateAssets(result.metadata, result.summary, owner);
   if (owner.versionCode === 30321 && !(await readFile(path.join(result.outputDir, "app-final.bin")))
     .equals(await readFile(path.join(source, "installed-baseline.bin")))) throw new CliError("Installed baseline identity changed");
   await writeOutput(root, path.join(out, "package-result.json"), JSON.stringify({ ...owner,
@@ -82,6 +68,24 @@ async function packageCandidate(root, out, env) {
   return { ok: true, versionName: owner.versionName, assetsPrepared: result.metadata.assets.length };
 }
 
+export function verifyAdminCandidateAssets(metadata, preparation, owner) {
+  const patches = metadata.assets.filter(asset => asset.kind === "patch");
+  if (owner.baseVersionName === null) {
+    if (patches.length || preparation.base !== null || preparation.patchByteEqual !== null) {
+      throw new CliError("Unexpected delta in a full-only Admin candidate");
+    }
+  } else if (patches.length !== 1 || preparation.patchByteEqual !== true
+      || preparation.base?.provenanceKind !== "original-admin-pinned-base-v1"
+      || preparation.base.versionName !== owner.baseVersionName
+      || preparation.base.versionCode !== owner.baseVersionCode
+      || patches[0].baseVersionCode !== owner.baseVersionCode
+      || patches[0].baseImageSha256 !== preparation.base.imageSha256
+      || preparation.patchComparison?.baseImageSha256 !== preparation.base.imageSha256
+      || preparation.patchComparison?.targetImageSha256 !== metadata.targetImageSha256) {
+    throw new CliError("Admin delta metadata must match the verified base and reconstruction");
+  }
+}
+
 async function registerCandidate(root, out, env) {
   const owner = adminCandidateAdmission(env);
   if (env.OTA_AES_KEY || env.TRACE_UPDATE_SERVICE_URL !== ADMIN_CANDIDATE_ORIGIN || env.TRACE_R2_BUCKET !== ADMIN_CANDIDATE_BUCKET
@@ -91,13 +95,16 @@ async function registerCandidate(root, out, env) {
   const prepared = path.join(out, "prepared");
   const metadata = parseFirmwareRegistration(JSON.parse(await readFile(path.join(prepared, "cloudflare-firmware-release-metadata.json"))), env.GITHUB_REPOSITORY, false);
   const result = JSON.parse(await readFile(path.join(out, "package-result.json")));
+  const preparation = JSON.parse(await readFile(path.join(prepared, "verification.json")));
   if (result.workflowCommit !== owner.workflowCommit || result.runId !== owner.runId || metadata.runId !== owner.runId
       || metadata.versionCode !== owner.versionCode || metadata.commitSha !== result.sourceCommit
+      || result.baseVersionName !== owner.baseVersionName || result.baseVersionCode !== owner.baseVersionCode
       || result.metadataSha256 !== digest(metadataBytes(metadata)) || result.normalPackages !== true
       || result.verificationSha256 !== digest(await readFile(path.join(prepared, "verification.json")))
       || result.sourceProofSha256 !== digest(await readFile(path.join(out, "source/source-proof.json")))) {
     throw new CliError("Normal package evidence does not belong to this dispatch");
   }
+  verifyAdminCandidateAssets(metadata, preparation, owner);
   await verifyWorkerEnvironment(ADMIN_CANDIDATE_ORIGIN, "rehearsal");
   const preflight = await preflightFirmware(metadata, { serviceUrl: ADMIN_CANDIDATE_ORIGIN, mode: "rehearsal", deployToken: env.TRACE_DEPLOY_TOKEN });
   await writeOutput(root, path.join(out, "preflight.json"), JSON.stringify(preflight, null, 2) + "\n");

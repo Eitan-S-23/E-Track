@@ -26,6 +26,8 @@ def materialize(out):
     assert not os.environ.get('OTA_AES_KEY'), 'Source admission must not receive the packaging key'
     config = h.read_json(ROOT / 'Tools/ota/admin-candidate-inputs.json')
     assert config['schema'] == 'original-admin-normal-source-v1'
+    requested_base = os.environ.get('INPUT_CANDIDATE_BASE_VERSION', '')
+    assert not requested_base or requested_base == config['installedBaseline']['versionName'], 'Requested delta base is not the pinned original-Admin baseline'
     delivery = json.loads(read_pin(config['sourceDelivery']))
     archive = read_pin(config['sourceArchive'])
     artifact = delivery['artifact']
@@ -72,7 +74,7 @@ def materialize(out):
         keyedBuildStage='PASS', originalWholeRun='FAIL_AFTER_SUCCESSFUL_BUILD_NOT_RECLASSIFIED',
         priorBuildWarnings=sum(row['warningLines'] for row in evidence['steps']),
         importedBenchmarkPackages=0, sourceCompilations=0,
-        files=[h.record(out / name) for name in names]))
+        files=[h.record(out / name) for name in (*names, 'installed-baseline.bin')]))
     print('NORMAL_GCC_SOURCE_MATCHES_CURRENT_CHECKOUT; no benchmark package imported', flush=True)
 
 

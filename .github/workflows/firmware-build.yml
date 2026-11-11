@@ -124,7 +124,7 @@ on:
           - normal-delta
           - archived-benchmark
       candidate_base_version:
-        description: "New-source or normal-delta: reviewed start version; normal-delta must match its checked-in input contract"
+        description: "Delta base: must match the selected normal/Admin candidate's checked-in baseline; omit for full-only Admin packages"
         required: false
         type: string
       candidate_full_base_version:
@@ -219,6 +219,7 @@ jobs:
       PYTHONDONTWRITEBYTECODE: "1"
       WRANGLER_SEND_METRICS: "false"
       WRANGLER_LOG_PATH: ${{ github.workspace }}/.cache/admin-candidate/wrangler-logs
+      BSDIFF_EXE: ${{ github.workspace }}/.cache/admin-candidate/bsdiff/bin/bsdiff
     steps:
       - name: Checkout exact requested source
         uses: actions/checkout@v4
@@ -238,15 +239,18 @@ jobs:
           mkdir -p "$HOME" "$TMPDIR" "$PIP_CACHE_DIR"
           python3 -m pip install --only-binary=:all: --disable-pip-version-check --target .cache/admin-candidate/python pycryptodome==3.23.0
           npm ci --ignore-scripts --prefix app/bluetooth_flutter_Trace/cloudflare/update-service/worker
+          cmake -S .github/scripts/bsdiff -B .cache/admin-candidate/bsdiff -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build .cache/admin-candidate/bsdiff --target bsdiff
       - name: Test source and firmware registration contracts without credentials
         run: |
           set -euo pipefail
           node --test tests/ota/test_firmware_admin_candidate.mjs
+          node --test tests/ota/test_firmware_release.mjs
           npm run check --prefix app/bluetooth_flutter_Trace/cloudflare/update-service/worker
           npm test --prefix app/bluetooth_flutter_Trace/cloudflare/update-service/worker
       - name: Admit exact current GCC originals, excluding all benchmark packages
         run: python3 -I -S -B -X utf8 .github/scripts/firmware-admin-candidate.py --out .cache/admin-candidate/run/source
-      - name: Prepare and byte-verify normal full and recovery packages
+      - name: Prepare and byte-verify normal full, optional delta and recovery packages
         id: package
         env:
           OTA_AES_KEY: ${{ secrets.FIRMWARE_REHEARSAL_OTA_AES_KEY }}

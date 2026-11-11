@@ -12,6 +12,8 @@ import { captureBuildInputs, digest, metadataBytes, prepareFirmwareRelease, read
 import { outputPath, writeOutput } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-cli.mjs";
 import { parseFirmwareRegistration } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-schema.mjs";
 import { captureBuildConfiguration, firmwareCMakeOptions } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-build-profile.mjs";
+import { firmwareKeyBinding } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-release-key.mjs";
+import { packageCandidate } from "../../.github/scripts/firmware-admin-candidate.mjs";
 
 const root = path.resolve(fileURLToPath(new URL("../../", import.meta.url)));
 const python = process.env.PYTHON ?? (process.platform === "win32" ? "python" : "python3");
@@ -81,6 +83,95 @@ async function bindBuildConfiguration(options, profile = "baseline") {
   await writeOutput(root, path.join(options.buildEvidenceDir, "compile_commands.json"), JSON.stringify(commands));
   options.build.buildConfiguration = captureBuildConfiguration({ profile, cache, commands });
 }
+
+async function adminInputs() {
+  const options = await input();
+  options.release = { ...options.release, versionName: "3.3.24", versionCode: 30324,
+    releaseTag: "mcu-e-track-at32f435-v3.3.24" };
+  const key = "ab".repeat(16); // Public synthetic key; these images are not installable.
+  options.build = { ...options.build, versionName: "3.3.24", versionCode: 30324,
+    keyBinding: firmwareKeyBinding(key, "approved-ci-key-v1") };
+  await bindBuildConfiguration(options, "p34-v2-candidate");
+  const workflowCommit = "a".repeat(40), source = path.join(options.dir, "source");
+  const files = {
+    "app/X-Track-App-GCC.bin": await readFile(options.app),
+    "boot/X-Track-Boot.bin": await readFile(options.boot),
+    "installed-baseline.bin": await readFile(options.baseFile),
+    "gcc-build-inputs.json": Buffer.from(JSON.stringify(options.build)),
+    "CMakeCache.txt": await readFile(path.join(options.buildEvidenceDir, "CMakeCache.txt")),
+    "compile_commands.json": await readFile(path.join(options.buildEvidenceDir, "compile_commands.json"))
+  };
+  const pins = [];
+  for (const [name, bytes] of Object.entries(files)) {
+    const file = path.join(source, name);
+    await writeOutput(root, file, bytes);
+    pins.push({ path: path.relative(root, file).replaceAll(path.sep, "/"), bytes: bytes.length, sha256: digest(bytes) });
+  }
+  const proof = { schema: "original-admin-normal-source-proof-v1", sourceCommit: options.build.commitSha,
+    verifiedAgainst: workflowCommit, sourceMatches: true, importedBenchmarkPackages: 0, files: pins,
+    config: { schema: "original-admin-normal-source-v1", profile: "p34-v2-candidate", sourceCommit: options.build.commitSha,
+      installedBaseline: { versionName: options.base.versionName, commitSha: options.base.commitSha,
+        bytes: files["installed-baseline.bin"].length, sha256: digest(files["installed-baseline.bin"]) } } };
+  await writeOutput(root, path.join(source, "source-proof.json"), JSON.stringify(proof));
+  const env = { GITHUB_ACTIONS: "true", GITHUB_EVENT_NAME: "workflow_dispatch", GITHUB_REPOSITORY: "Eitan-S-23/E-Track",
+    GITHUB_SHA: workflowCommit, GITHUB_RUN_ID: "54321", GITHUB_RUN_ATTEMPT: "1",
+    INPUT_PREPARE_ADMIN_CANDIDATE: "true", OTA_BOOT_CHAIN_READY: "false", INPUT_FIRMWARE_BUILD_PROFILE: "p34-v2-candidate",
+    INPUT_CANDIDATE_REVIEWED_COMMIT: workflowCommit, INPUT_PUBLISH: "false", INPUT_REHEARSAL: "false",
+    INPUT_CHECK_BINDINGS: "false", INPUT_PACKAGE_CANDIDATE: "false", INPUT_STAGE_CANDIDATE: "false",
+    INPUT_VERSION_NAME: "3.3.24", INPUT_CANDIDATE_BASE_VERSION: options.base.versionName,
+    INPUT_RELEASE_NOTES: "Synthetic original-Admin delta, not installable", OTA_AES_KEY: key, BSDIFF_EXE: bsdiff };
+  return { out: options.dir, env, source, proof };
+}
+
+test("actual original-Admin entry emits full, delta and recovery with byte-equal reconstruction", async () => {
+  const options = await adminInputs();
+  const result = await packageCandidate(root, options.out, options.env);
+  assert.equal(result.assetsPrepared, 3);
+  const dir = path.join(options.out, "prepared");
+  const verified = JSON.parse(await readFile(path.join(dir, "verification.json")));
+  const metadata = JSON.parse(await readFile(path.join(dir, "cloudflare-firmware-release-metadata.json")));
+  assert.deepEqual(metadata.assets.map(asset => asset.kind).sort(), ["full", "patch", "recovery"]);
+  assert.equal(verified.patchByteEqual, true);
+  assert.equal(verified.base.provenanceKind, "original-admin-pinned-base-v1");
+  assert.equal(verified.base.isFormalRelease, false);
+  assert.deepEqual(await readFile(path.join(dir, "work/patch-candidate.bin")), await readFile(path.join(dir, "app-final.bin")));
+  assert.equal(metadata.assets.find(asset => asset.kind === "patch").baseImageSha256, options.proof.config.installedBaseline.sha256);
+  assert.throws(() => validateBaseDescriptor(verified.base, "3.3.24", "Eitan-S-23/E-Track", metadata.commitSha), /formal/);
+});
+
+test("original-Admin full-only mode does not silently add a delta", async () => {
+  const options = await adminInputs();
+  const result = await packageCandidate(root, options.out, { ...options.env, INPUT_CANDIDATE_BASE_VERSION: "" });
+  assert.equal(result.assetsPrepared, 2);
+  const verified = JSON.parse(await readFile(path.join(options.out, "prepared/verification.json")));
+  assert.equal(verified.base, null);
+  assert.equal(verified.patchByteEqual, null);
+});
+
+test("original-Admin unknown, changed or unbound base fails before package output", async () => {
+  const unknown = await adminInputs();
+  await assert.rejects(packageCandidate(root, unknown.out, { ...unknown.env, INPUT_CANDIDATE_BASE_VERSION: "3.3.21" }), /pinned.*baseline/);
+  assert.equal(existsSync(path.join(unknown.out, "prepared")), false);
+  const changed = await adminInputs();
+  await writeOutput(root, path.join(changed.source, "installed-baseline.bin"), Buffer.alloc(8192));
+  await assert.rejects(packageCandidate(root, changed.out, changed.env), /input changed/);
+  assert.equal(existsSync(path.join(changed.out, "prepared")), false);
+  const unbound = await adminInputs();
+  unbound.proof.files = unbound.proof.files.filter(pin => !pin.path.endsWith("installed-baseline.bin"));
+  await writeOutput(root, path.join(unbound.source, "source-proof.json"), JSON.stringify(unbound.proof));
+  await assert.rejects(packageCandidate(root, unbound.out, unbound.env), /base bytes.*pin/);
+  assert.equal(existsSync(path.join(unbound.out, "prepared")), false);
+});
+
+test("original-Admin delta cannot reuse another dispatch or benchmark source proof", async () => {
+  for (const change of [{ verifiedAgainst: "b".repeat(40) }, { importedBenchmarkPackages: 1 },
+    { sourceMatches: false }, { config: { schema: "wrong" } }]) {
+    const options = await adminInputs();
+    await writeOutput(root, path.join(options.source, "source-proof.json"), JSON.stringify({ ...options.proof, ...change }));
+    await assert.rejects(packageCandidate(root, options.out, options.env), /provenance mismatch|source proof/);
+    assert.equal(existsSync(path.join(options.out, "prepared")), false);
+  }
+});
 
 test("preparation retains actual build configuration without extending registration metadata", async () => {
   const options = await input(); await bindBuildConfiguration(options, "p34-v2-candidate");

@@ -14,6 +14,7 @@
   },
   "installedBaseline": {
     "versionName": "3.3.21",
+    "commitSha": "23770494056cc482f78b4074a3c30ee77d351132",
     "path": "docs/ota-exec-notes/P51-v2-scripts-2026-11-10/inputs/base.bin",
     "bytes": 614284,
     "sha256": "5820b830e9763ee853f29ff21adb4c43ebd5cf1c7ce00fcff85cef1e05be11bf"

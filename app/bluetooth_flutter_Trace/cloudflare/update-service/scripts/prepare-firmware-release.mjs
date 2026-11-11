@@ -8,8 +8,9 @@ import { buildFirmwareMetadata } from "./build-firmware-release-metadata.mjs";
 import { args, CliError, failure, outputPath, projectRoot, required, writeOutput } from "./firmware-cli.mjs";
 import { assetFileName, canonicalJson, FIRMWARE_MODEL, parseFirmwareRegistration, sha256, versionCodeFor } from "./firmware-schema.mjs";
 import { validateKeyBinding, verifyBuildKeyBinding } from "./firmware-release-key.mjs";
-import { readBuildConfiguration, validateBuildConfiguration } from "./firmware-build-profile.mjs";
+import { readBuildConfiguration, validateBuildConfiguration, verifyBuildConfiguration } from "./firmware-build-profile.mjs";
 import { candidateAdmission, candidateMode } from "../../../../../.github/scripts/firmware-candidate-context.mjs";
+import { adminCandidateAdmission } from "../../../../../.github/scripts/firmware-admin-context.mjs";
 
 export const digest = bytes => createHash("sha256").update(bytes).digest("hex");
 export const BOOTSTRAP_PROVENANCE = "inaugural-bootstrap-v1";
@@ -119,6 +120,56 @@ export function validateBootstrapProvenance(base, proof, repository) {
 
 export async function prepareFirmwareRelease(inputs) {
   return prepareFirmware(inputs, validateBaseDescriptor);
+}
+
+export async function prepareOriginalAdminCandidate({ candidateEnv, sourceProof, ...inputs }) {
+  const owner = adminCandidateAdmission(candidateEnv);
+  if (inputs.base !== undefined || inputs.baseFile !== undefined || inputs.referenceDir
+      || inputs.repository !== candidateEnv.GITHUB_REPOSITORY
+      || inputs.release.runId !== owner.runId || inputs.release.versionName !== owner.versionName) {
+    throw badInput("Original Admin preparation requires its exact dispatch and source-owned base");
+  }
+  verifyBuildKeyBinding(inputs.build, { OTA_AES_KEY: inputs.aesKey ?? candidateEnv.OTA_AES_KEY });
+  verifyBuildConfiguration(inputs.build, "p34-v2-candidate");
+  const proofPath = outputPath(inputs.root, sourceProof);
+  const bytes = await readFile(proofPath), proof = JSON.parse(bytes);
+  if (proof.schema !== "original-admin-normal-source-proof-v1" || proof.verifiedAgainst !== owner.workflowCommit
+      || proof.sourceMatches !== true || proof.importedBenchmarkPackages !== 0
+      || proof.config?.schema !== "original-admin-normal-source-v1" || proof.config.profile !== "p34-v2-candidate"
+      || proof.sourceCommit !== proof.config.sourceCommit || proof.sourceCommit !== inputs.release.commitSha
+      || proof.sourceCommit !== inputs.build.commitSha) {
+    throw badInput("Original Admin source proof does not match this candidate");
+  }
+  let base, baseFile;
+  if (owner.baseVersionName !== null) {
+    const pin = proof.config.installedBaseline;
+    if (!pin || pin.versionName !== owner.baseVersionName || !/^[0-9a-f]{40}$/.test(pin.commitSha ?? "")
+        || !Number.isSafeInteger(pin.bytes) || pin.bytes < 0x460 || pin.bytes > 0xf0000) {
+      throw badInput("Requested delta base is not the pinned original-Admin baseline");
+    }
+    sha256(pin.sha256, "original Admin base SHA");
+    baseFile = outputPath(inputs.root, path.join(path.dirname(proofPath), "installed-baseline.bin"));
+    const identity = await fileIdentity(baseFile);
+    const materialized = proof.files?.find(row => path.resolve(inputs.root, row.path) === baseFile);
+    if (identity.sha256 !== pin.sha256 || identity.sizeBytes !== pin.bytes
+        || materialized?.sha256 !== pin.sha256 || materialized.bytes !== pin.bytes) {
+      throw badInput("Original Admin base bytes differ from the admitted source pin");
+    }
+    // This is an explicit pinned staging base, never a fabricated formal Release.
+    base = { provenanceKind: "original-admin-pinned-base-v1", isFormalRelease: false, kind: "app",
+      versionName: owner.baseVersionName, versionCode: owner.baseVersionCode, commitSha: pin.commitSha,
+      imageSha256: pin.sha256, sourceSha256: pin.sha256, sourceSizeBytes: pin.bytes,
+      sourceProofSha256: digest(bytes), producer: owner };
+  }
+  const result = await prepareFirmware({ ...inputs, base, baseFile }, value => {
+    if (canonicalJson(value) !== canonicalJson(base)) throw badInput("Original Admin base provenance drift");
+    return value;
+  });
+  if (!(await readFile(proofPath)).equals(bytes)
+      || (baseFile && (await fileIdentity(baseFile)).sha256 !== base.sourceSha256)) {
+    throw badInput("Original Admin source proof or base changed during preparation");
+  }
+  return result;
 }
 
 export async function prepareFirmwareCandidate({ candidateEnv, basePreparation, ...inputs }) {
