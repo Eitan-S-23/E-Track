@@ -132,5 +132,7 @@ void main() {
       await bad.writeAsString('${lines.join('\n')}\n', flush: true);
       expect((await inspect(bad)).exitCode, isNot(0), reason: fault);
     }
-  });
+    // Five bounded parser processes plus a full 1 MiB recording exceed the
+    // ordinary 30-second unit-test budget on the parallel release CI runners.
+  }, timeout: const Timeout(Duration(minutes: 3)));
 }

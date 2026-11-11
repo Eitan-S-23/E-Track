@@ -43,6 +43,10 @@ async function main() {
 
   const projectName = args.projectName ?? process.env.TRACE_CF_ADMIN_PROJECT_NAME ?? DEFAULTS.projectName;
   const branch = args.branch ?? process.env.TRACE_CF_ADMIN_BRANCH ?? DEFAULTS.branch;
+  const commitHash = args.commitHash ?? process.env.TRACE_CF_ADMIN_COMMIT_HASH;
+  if (commitHash && !/^[0-9a-f]{40}$/.test(commitHash)) {
+    throw new Error("The deployed source commit must be a full lowercase Git SHA.");
+  }
   const accessSecrets = collectAccessSecrets();
 
   printPlan({ projectName, branch, args, accessSecrets });
@@ -84,7 +88,8 @@ async function main() {
       projectName,
       "--branch",
       branch,
-      "--commit-dirty=true"
+      "--commit-dirty=true",
+      ...(commitHash ? ["--commit-hash", commitHash] : [])
     ]);
     deploymentUrl = extractPagesUrl(deployOutput);
   }
@@ -101,6 +106,7 @@ function parseArgs(argv) {
     skipDeploy: false,
     projectName: undefined,
     branch: undefined,
+    commitHash: undefined,
     help: false
   };
 
@@ -129,6 +135,10 @@ function parseArgs(argv) {
         break;
       case "--branch":
         args.branch = requiredValue(argv, index, arg);
+        index += 1;
+        break;
+      case "--commit-hash":
+        args.commitHash = requiredValue(argv, index, arg);
         index += 1;
         break;
       case "--help":
@@ -330,6 +340,7 @@ Options:
   --skip-deploy         Create project/secrets but do not deploy Pages.
   --project-name <name> Override the staging Pages project name.
   --branch <branch>     Override the deployed branch name.
+  --commit-hash <sha>   Bind deployment metadata to the verified source commit.
   --help, -h            Show this help.
 
 Required environment variables unless using --skip-secrets:

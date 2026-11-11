@@ -532,9 +532,65 @@ describe("P4-2 existing Access Pages facade", () => {
     return onRequest({ request: req, params: { path: route }, env: { ...adminEnv, APP_ID: "trace", ENVIRONMENT: "dev",
       ACCESS_JWT_ISSUER: issuer, ACCESS_JWT_AUD: "p42", ADMIN_OWNER_EMAILS: "owner@example.com", ADMIN_PUBLISHER_EMAILS: "publisher@example.com",
       ADMIN_VIEWER_EMAILS: "viewer@example.com",
+      VERSION_INVENTORY_ENABLED: "true",
       ASSETS: { fetch: async () => new Response() } },
       data: {}, functionPath: "/api/admin", next: async () => new Response(), waitUntil() {}, passThroughOnException() {} } as Parameters<typeof onRequest>[0]);
   }
+  it("inventory uses the existing authenticated viewer facade and never invents physical-device counts", async () => {
+    const response = await page("unused", { route: ["version-inventory"], method: "GET", email: "viewer@example.com" });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ ok: true, coverage: "reporting-installations-only",
+      firmwareIdentityScope: "installation", uniqueDeviceCount: null });
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(response.headers.get("X-Request-Id")).toBeTruthy();
+  });
+  it.each([
+    ["version-inventory", "refresh"], ["delta", "jobs"]
+  ])("new mutation %s/%s retains Access, viewer, origin and CSRF guards", async (first, second) => {
+    const control = await env.DB.prepare("SELECT * FROM version_inventory_control").all();
+    const jobs = await env.DB.prepare("SELECT id FROM delta_jobs ORDER BY id").all();
+    const rejected: Array<{ email?: string; header?: Record<string, string>; token?: null; status: number }> = [
+      { email: "viewer@example.com", status: 403 },
+      { header: { "X-CSRF-Token": "wrong" }, status: 403 },
+      { header: { Origin: "https://untrusted.example.com" }, status: 403 },
+      { token: null, status: 401 }
+    ];
+    for (const options of rejected) {
+      const response = await page("unused", { ...options, route: [first, second], body: { requestId: crypto.randomUUID() } });
+      expect(response.status).toBe(options.status);
+      expect((await env.DB.prepare("SELECT * FROM version_inventory_control").all()).results).toEqual(control.results);
+      expect((await env.DB.prepare("SELECT id FROM delta_jobs ORDER BY id").all()).results).toEqual(jobs.results);
+    }
+  });
+  it("publisher inventory refresh is idempotent through the real facade", async () => {
+    await env.DB.prepare("UPDATE version_inventory_control SET refresh_id='initial',requested_at=0,requested_by='system' WHERE id=1").run();
+    const requestId = crypto.randomUUID();
+    const options = { route: ["version-inventory", "refresh"], email: "publisher@example.com", body: { requestId } };
+    const first = await page("unused", options);
+    expect(first.status).toBe(200);
+    expect(await first.json()).toMatchObject({ refreshId: requestId, idempotent: false });
+    const second = await page("unused", options);
+    expect(second.status).toBe(200);
+    expect(await second.json()).toMatchObject({ refreshId: requestId, idempotent: true });
+  });
+  it.each(["enable", "disable"])("delta asset %s is owner-only before any job lookup or mutation", async action => {
+    const response = await page("unused", { route: ["delta", "jobs", "unknown", action], email: "publisher@example.com",
+      body: { expectedRevision: 0, reason: "publisher must not distribute an asset" } });
+    expect(response.status).toBe(403);
+  });
+  it("unconfigured delta dispatch fails explicitly without creating a job", async () => {
+    const before = await env.DB.prepare("SELECT id FROM delta_jobs ORDER BY id").all();
+    const response = await page("unused", { route: ["delta", "jobs"], email: "publisher@example.com",
+      body: { kind: "firmware", targetReleaseId: "target", baseReleaseIds: ["base"], reason: "configuration check" } });
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({ errorCode: "BACKEND_UNAVAILABLE" });
+    expect((await env.DB.prepare("SELECT id FROM delta_jobs ORDER BY id").all()).results).toEqual(before.results);
+  });
+  it("delta candidates preserve structured validation errors", async () => {
+    const response = await page("unused", { route: ["delta", "candidates"], method: "GET", query: "?kind=windows&targetId=target" });
+    expect(response.status).toBe(400);
+    expect(await response.json()).toMatchObject({ errorCode: "INVALID_PARAMETER" });
+  });
   it("catalog notes update only editable text and create one audit, preserving registration and assets", async () => {
     const target = await registered(false);
     const before = await env.DB.prepare("SELECT * FROM firmware_releases WHERE id=?").bind(target.releaseId).first<any>();
