@@ -5,6 +5,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ble_monitor/ota/ota_ble_transport.dart';
 import 'package:ble_monitor/ota/ota_link_stats.dart';
+import 'package:ble_monitor/ota/ota_observation_log.dart';
 import 'package:ble_monitor/ota/ota_p35_recorder.dart';
 import 'package:ble_monitor/ota/ota_p35_stream.dart';
 
@@ -18,6 +19,21 @@ class _MemoryStream extends OtaP35Stream {
   Future<void> send(List<int> value) async { bytes.addAll(value); }
   @override
   Future<void> close() async {}
+}
+
+// This is a parser contract, not a disk-throughput test. The unpaced memory
+// peer must not overflow the production queue solely because Windows fsync is
+// slower. Recorder pressure/failure behavior has its own tests.
+class _ContractWriter implements OtaObservationWriter {
+  _ContractWriter(this.file);
+  final File file;
+  final bytes = <int>[];
+  @override
+  Future<void> append(List<int> value) async { bytes.addAll(value); }
+  @override
+  Future<void> flush() async {}
+  @override
+  Future<void> close() async { await file.writeAsBytes(bytes, flush: true); }
 }
 
 void main() {
@@ -42,7 +58,8 @@ void main() {
         'active': false, 'paused': false, 'ownerEpoch': 7, 'revision': 1, 'task': null},
     };
     final stream = _MemoryStream();
-    final recorder = OtaP35Recorder(emit: (_) {}, directoryProvider: () async => root);
+    final recorder = OtaP35Recorder(emit: (_) {}, directoryProvider: () async => root,
+        writerFactory: (file) async => _ContractWriter(file));
     expect(await recorder.start(() => {...current}, reliable: true, stream: stream,
         stateSchema: 2, linkTimings: true), isTrue);
     final stats = OtaLinkStats(label: 'upgrade', device: address,

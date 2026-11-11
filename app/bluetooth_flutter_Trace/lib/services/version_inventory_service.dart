@@ -55,9 +55,10 @@ class VersionInventoryService extends GetxService with WidgetsBindingObserver {
   Timer? _deferred;
   bool _running = false;
   bool _closed = false;
+  bool _foreground = true;
 
   static Uri? _configuredEndpoint() {
-    final source = ShareLinks.cloudflareUpdateManifestUrl;
+    const source = ShareLinks.cloudflareUpdateManifestUrl;
     final uri = Uri.tryParse(source);
     if (uri == null || uri.scheme != 'https' || uri.host.isEmpty || uri.userInfo.isNotEmpty) return null;
     return uri.replace(path: '/api/public/version-inventory', query: '', fragment: '');
@@ -125,8 +126,13 @@ class VersionInventoryService extends GetxService with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) _schedule();
-    else { _deferred?.cancel(); }
+    _foreground = state == AppLifecycleState.resumed;
+    if (_foreground) {
+      _schedule();
+    } else {
+      _deferred?.cancel();
+      _cancel?.cancel('Reporting deferred until foreground');
+    }
   }
 
   void _schedule() {
@@ -140,7 +146,11 @@ class VersionInventoryService extends GetxService with WidgetsBindingObserver {
     enabled.value = value;
     await _prefs!.setBool('${_prefix}enabled', value);
     if (!value) { _deferred?.cancel(); _cancel?.cancel('Reporting disabled'); }
-    else { _retryAfter = null; _schedule(); }
+    else {
+      _retryAfter = null;
+      await _prefs!.remove('${_prefix}retry');
+      _schedule();
+    }
   }
 
   void observeDevice(String address, DeviceOtaInfo info) {
@@ -177,21 +187,24 @@ class VersionInventoryService extends GetxService with WidgetsBindingObserver {
   }
 
   Future<void> poll() async {
-    if (_running || _closed || !_supported || endpoint == null) return;
+    if (_running || _closed || !_foreground || !_supported || endpoint == null) return;
     _running = true;
     try {
       await initialize();
       final now = _clock().toUtc();
-      if (!enabled.value || _closed || !canReport() || (_retryAfter?.isAfter(now) ?? false)) return;
+      if (!enabled.value || _closed || !_foreground || !canReport() || (_retryAfter?.isAfter(now) ?? false)) return;
       _app ??= await readAppIdentity();
-      if (!enabled.value || _closed || !canReport()) return;
+      if (!enabled.value || _closed || !_foreground || !canReport()) return;
       final app = _app!;
       if (app['versionCode'] is! int || app['versionName'] is! String ||
-          !RegExp(r'^[0-9a-f]{64}$').hasMatch(app['imageSha256']?.toString() ?? '')) return;
+          !RegExp(r'^[0-9a-f]{64}$').hasMatch(app['imageSha256']?.toString() ?? '')) {
+        return;
+      }
       final devices = _devices.values.where((d) {
         final age = now.difference(DateTime.parse(d['observedAt'] as String));
         return !age.isNegative && age <= const Duration(days: 90);
       }).map((d) => Map<String, dynamic>.from(d)).toList();
+      devices.sort((a, b) => (a['deviceKey'] as String).compareTo(b['deviceKey'] as String));
       // Daily coalescing ignores a fresh read of an otherwise unchanged MCU.
       final state = jsonEncode([app, devices.map((d) => {...d}..remove('observationId')..remove('observedAt')).toList()]);
       var due = state != _lastState || _lastReport == null || now.isBefore(_lastReport!) || now.difference(_lastReport!) >= _day;
@@ -203,7 +216,7 @@ class VersionInventoryService extends GetxService with WidgetsBindingObserver {
         _lastControl = now;
         await _prefs!.setString('${_prefix}control', now.toIso8601String());
       }
-      if (!due || !enabled.value || _closed || !canReport()) return;
+      if (!due || !enabled.value || _closed || !_foreground || !canReport()) return;
       final sequence = (_prefs!.getInt('${_prefix}sequence') ?? 0) + 1;
       await _prefs!.setInt('${_prefix}sequence', sequence);
       final body = <String, dynamic>{'appId': ShareLinks.appId, 'platform': 'android', 'sequence': sequence,

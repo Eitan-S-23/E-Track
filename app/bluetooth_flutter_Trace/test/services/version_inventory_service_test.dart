@@ -1,8 +1,8 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ble_monitor/ota/ota_device_info.dart';
 import 'package:ble_monitor/services/version_inventory_service.dart';
@@ -113,5 +113,12 @@ void main() {
   test('concurrent triggers share one in-flight operation', () async {
     await Future.wait([service.poll(), service.poll(), service.poll()]);
     expect(sent, hasLength(1));
+  });
+  test('background callbacks do not hash or report until foreground', () async {
+    service.didChangeAppLifecycleState(AppLifecycleState.paused);
+    await service.poll();
+    expect(sent, isEmpty); expect(reads, 0);
+    service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+    await service.poll(); expect(sent, hasLength(1));
   });
 }
