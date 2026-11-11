@@ -80,6 +80,9 @@
       <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
       <div class="quick-action-backdrop" id="quickActionBackdrop" hidden></div>
       <section class="quick-action-sheet" id="quickActionSheet" role="dialog" aria-modal="true" aria-labelledby="quickActionTitle" hidden>
+        <button type="button" class="quick-sheet-close" id="quickActionClose" aria-label="Close release actions" data-i18n-aria-label="quick.close">
+          <svg class="ui-icon" aria-hidden="true"><use href="#i-close"></use></svg>
+        </button>
         <span class="quick-sheet-handle" aria-hidden="true"></span>
         <header class="quick-sheet-header">
           <div>
@@ -87,10 +90,8 @@
             <h2 id="quickActionTitle">No release selected</h2>
             <p id="quickActionSubtitle" data-i18n="quick.hint">Tap an action to publish or disable this version.</p>
           </div>
-          <button type="button" class="quick-sheet-close" id="quickActionClose" aria-label="Close release actions" data-i18n-aria-label="quick.close">
-            <svg class="ui-icon" aria-hidden="true"><use href="#i-close"></use></svg>
-          </button>
         </header>
+        <div class="quick-sheet-scroll" id="quickActionScroll">
         <div class="quick-sheet-meta" id="quickActionMeta"></div>
         <div class="quick-sheet-actions">
           <button type="button" class="big-action action-beta" data-action="publish" data-channel="beta">
@@ -130,7 +131,37 @@
             <span class="action-copy"><strong data-i18n="actions.deleteRelease">Delete Release</strong><span data-i18n="actions.quickDeleteHint">Delete R2 objects and D1 rows</span></span>
           </button>
         </div>
+        <button type="button" class="secondary-button delta-entry" data-action="delta" data-i18n="operations.delta">Manage delta packages</button>
         <div class="quick-detail-surface" id="quickDetailSurface"></div>
+        </div>
+      </section>
+
+      <div class="quick-action-backdrop firmware-detail-backdrop" id="firmwareDetailBackdrop" hidden></div>
+      <section class="quick-action-sheet firmware-detail-sheet" id="firmwareDetailSheet" role="dialog" aria-modal="true" aria-labelledby="firmwareDetailTitle" aria-describedby="firmwareDetailSubtitle" hidden>
+        <button type="button" class="quick-sheet-close" id="firmwareDetailClose" aria-label="Close version details" data-i18n-aria-label="catalog.closeDetails">
+          <svg class="ui-icon" aria-hidden="true"><use href="#i-close"></use></svg>
+        </button>
+        <span class="quick-sheet-handle" aria-hidden="true"></span>
+        <header class="quick-sheet-header">
+          <div>
+            <p class="eyebrow" data-i18n="catalog.details">Version details</p>
+            <h2 id="firmwareDetailTitle"></h2>
+            <p id="firmwareDetailSubtitle"></p>
+          </div>
+        </header>
+        <div class="quick-sheet-scroll" id="firmwareDetailScroll">
+          <section id="firmwareDetail" aria-label="Version details" data-i18n-aria-label="catalog.details"></section>
+        </div>
+      </section>
+
+      <div class="quick-action-backdrop delta-backdrop" id="deltaBackdrop" hidden></div>
+      <section class="quick-action-sheet delta-sheet" id="deltaSheet" role="dialog" aria-modal="true" aria-labelledby="deltaTitle" hidden>
+        <button type="button" class="quick-sheet-close" id="deltaClose" aria-label="Close delta packages" data-i18n-aria-label="operations.close">
+          <svg class="ui-icon" aria-hidden="true"><use href="#i-close"></use></svg>
+        </button>
+        <span class="quick-sheet-handle" aria-hidden="true"></span>
+        <header class="quick-sheet-header"><div><p class="eyebrow" data-i18n="operations.delta">Manage delta packages</p><h2 id="deltaTitle"></h2></div></header>
+        <div class="quick-sheet-scroll" id="deltaScroll"><div id="deltaContent"></div></div>
       </section>
 
       <div class="confirm-backdrop" id="confirmBackdrop" hidden></div>
@@ -206,6 +237,7 @@
         <div class="app-tabs" id="appTabs" role="tablist" aria-label="App management" data-i18n-aria-label="app.management">
           <button type="button" id="appReleasesTab" role="tab" data-app-section="releases" aria-controls="appReleasesPanel" aria-selected="true" data-i18n="app.versions">Versions</button>
           <button type="button" id="appAnnouncementsTab" role="tab" data-app-section="announcements" aria-controls="announcements" aria-selected="false" tabindex="-1" data-i18n="announcements.title">Announcements</button>
+          <button type="button" id="appInventoryTab" role="tab" data-app-section="inventory" aria-controls="appInventoryPanel" aria-selected="false" tabindex="-1" data-i18n="operations.inventoryTab">Distribution</button>
         </div>
         <section class="app-panel" id="appReleasesPanel" data-app-panel="releases" role="tabpanel" aria-labelledby="appReleasesTab">
         <section class="filters" aria-label="Release filters" data-i18n-aria-label="filters.releaseFilters">
@@ -357,6 +389,7 @@
           </div>
         </section>
 
+        <section class="panel inventory-panel" id="appInventoryPanel" data-app-panel="inventory" role="tabpanel" aria-labelledby="appInventoryTab" hidden></section>
         <p class="footer-note">
           <span data-i18n="footer.note">This admin page only changes the Pages UI. Release mutations still go through the Access-protected same-origin facade.</span>
         </p>
@@ -375,7 +408,9 @@
             <button type="button" id="firmwareVersionsTab" role="tab" data-firmware-section="releases" aria-controls="firmwareVersionsPanel" aria-selected="true" data-i18n="catalog.versionsTab">Versions</button>
             <button type="button" id="firmwareChannelsTab" role="tab" data-firmware-section="channels" aria-controls="firmwareChannelsPanel" aria-selected="false" tabindex="-1" data-i18n="catalog.channelsTab">Channels</button>
             <button type="button" id="firmwareHistoryTab" role="tab" data-firmware-section="history" aria-controls="firmwareHistoryPanel" aria-selected="false" tabindex="-1" data-i18n="catalog.historyTab">History</button>
+            <button type="button" id="firmwareInventoryTab" role="tab" data-firmware-section="inventory" aria-controls="firmwareInventoryPanel" aria-selected="false" tabindex="-1" data-i18n="operations.inventoryTab">Distribution</button>
           </div>
+          <section class="panel inventory-panel" id="firmwareInventoryPanel" data-firmware-panel="inventory" role="tabpanel" aria-labelledby="firmwareInventoryTab" hidden></section>
           <section class="firmware-tab-panel" id="firmwareChannelsPanel" role="tabpanel" data-firmware-panel="channels" aria-labelledby="firmwareChannelsTab" hidden>
           <div class="firmware-toolbar firmware-channel-target">
             <p class="firmware-hint" id="firmwareChannelTarget"></p>
@@ -434,7 +469,6 @@
                 <button type="button" class="secondary-button" id="firmwarePageNext" data-i18n="pagination.next">Next</button>
               </nav>
             </aside>
-            <section class="panel firmware-panel" id="firmwareDetail" aria-label="Version details" data-i18n-aria-label="catalog.details"></section>
           </section>
           </section>
           <section class="panel firmware-panel firmware-tab-panel" id="firmwareHistoryPanel" role="tabpanel" data-firmware-panel="history" aria-labelledby="firmwareHistoryTab" hidden>
@@ -536,8 +570,11 @@
         selectedReleaseId: null,
         selectedAnnouncementId: null,
         selectedFirmwareId: null,
+        firmwareDetailsOpen: false,
         detailsOpen: false,
-        queries: { releases: "", announcements: "", firmware: "", firmwareChannels: "", firmwareHistory: "" },
+        queries: { releases: "", announcements: "", firmware: "", firmwareChannels: "", firmwareHistory: "", inventory: "", firmwareInventory: "" },
+        inventory: { value: null, error: null, loading: false, window: 30, pages: { android: 0, firmware: 0 }, refreshId: null },
+        delta: null,
         appSection: "releases",
         releasePage: 0,
         announcementDrafts: new Map(),
@@ -558,6 +595,11 @@
 
       const I18N = {
         en: {
+          "operations.inventoryTab": "Distribution",
+          "operations.inventory": "Version distribution",
+          "operations.delta": "Manage delta packages",
+          "operations.close": "Close delta packages",
+          "operations.search": "Search reported versions or image hashes...",
           "page.title": "Trace Update Admin",
           "language.toggle": "Switch language",
           "language.next": "中文",
@@ -914,6 +956,11 @@
           "footer.note": "This admin page only changes the Pages UI. Release mutations still go through the Access-protected same-origin facade."
         },
         zh: {
+          "operations.inventoryTab": "版本分布",
+          "operations.inventory": "版本分布",
+          "operations.delta": "管理差分包",
+          "operations.close": "关闭差分包管理",
+          "operations.search": "搜索上报版本或镜像哈希...",
           "page.title": "Trace 更新后台",
           "language.toggle": "切换语言",
           "language.next": "EN",
@@ -1275,6 +1322,7 @@
       const RELEASE_PAGE_SIZE = 6;
       const R2_FREE_QUOTA_BYTES = 10 * 1000 * 1000 * 1000;
       let quickActionCloseTimer = 0;
+      let firmwareDetailCloseTimer = 0;
       let activeConfirmDialog = null;
       let resourcePanelCloseTimer = 0;
       let resourceFloatViewportMode = resourceFloatMode();
@@ -1306,7 +1354,7 @@
         "help.releaseMessage": "Choose a version from the compact, paginated list to open its details.",
 
         "nav.close": "Close navigation", "notes.unsaved": "Unsaved draft", "notes.discard": "Discard draft",
-        "announcements.bodyLabel": "Message", "catalog.back": "Back to versions",
+        "announcements.bodyLabel": "Message", "catalog.closeDetails": "Close version details",
         "footer.note": "Protected by Cloudflare Access. Publication and deletion always require your confirmation.",
         "catalog.subtitle": "Select a version, review changes, then publish to a channel.",
         "catalog.filters": "Firmware version filters", "catalog.status": "Version status",
@@ -1376,7 +1424,7 @@
         "timeline.hint": "选择版本，查看更新说明、包信息与发布操作。",
         "storage.floatHint": "拖动悬浮球调整位置，点击查看资源；也可用 Shift 加方向键移动。",
         "nav.close": "关闭导航", "notes.unsaved": "有未保存草稿", "notes.discard": "放弃草稿",
-        "announcements.bodyLabel": "公告正文", "catalog.back": "返回版本列表",
+        "announcements.bodyLabel": "公告正文", "catalog.closeDetails": "关闭版本详情",
         "footer.note": "由 Cloudflare Access 保护。发布和删除操作均需明确确认。",
         "catalog.subtitle": "选择版本、查看差异，再发布到指定通道。",
         "catalog.filters": "固件版本筛选", "catalog.status": "版本状态", "catalog.candidate": "候选版本",
@@ -1436,6 +1484,12 @@
         drawerBackdrop: document.querySelector("#drawerBackdrop"),
         quickActionBackdrop: document.querySelector("#quickActionBackdrop"),
         quickActionSheet: document.querySelector("#quickActionSheet"),
+        deltaSheet: document.querySelector("#deltaSheet"),
+        deltaBackdrop: document.querySelector("#deltaBackdrop"),
+        deltaClose: document.querySelector("#deltaClose"),
+        deltaTitle: document.querySelector("#deltaTitle"),
+        deltaContent: document.querySelector("#deltaContent"),
+        quickActionScroll: document.querySelector("#quickActionScroll"),
         quickActionTitle: document.querySelector("#quickActionTitle"),
         quickActionSubtitle: document.querySelector("#quickActionSubtitle"),
         quickActionMeta: document.querySelector("#quickActionMeta"),
@@ -1526,6 +1580,12 @@
         firmwarePageNext: document.querySelector("#firmwarePageNext"),
         firmwarePageStatus: document.querySelector("#firmwarePageStatus"),
         firmwareDetail: document.querySelector("#firmwareDetail"),
+        firmwareDetailSheet: document.querySelector("#firmwareDetailSheet"),
+        firmwareDetailScroll: document.querySelector("#firmwareDetailScroll"),
+        firmwareDetailBackdrop: document.querySelector("#firmwareDetailBackdrop"),
+        firmwareDetailClose: document.querySelector("#firmwareDetailClose"),
+        firmwareDetailTitle: document.querySelector("#firmwareDetailTitle"),
+        firmwareDetailSubtitle: document.querySelector("#firmwareDetailSubtitle"),
         firmwareHistoryScope: document.querySelector("#firmwareHistoryScope"),
         firmwareHistoryList: document.querySelector("#firmwareHistoryList"),
         firmwareHistoryStatus: document.querySelector("#firmwareHistoryStatus"),
@@ -1563,6 +1623,8 @@
         els.drawerBackdrop.addEventListener("click", () => setMobileNav(false));
         els.quickActionBackdrop.addEventListener("click", () => closeQuickActions());
         els.quickActionClose.addEventListener("click", () => closeQuickActions());
+        els.firmwareDetailBackdrop.addEventListener("click", () => closeFirmwareDetails());
+        els.firmwareDetailClose.addEventListener("click", () => closeFirmwareDetails());
         els.confirmBackdrop.addEventListener("click", () => closeConfirmDialog(false));
         els.confirmCancel.addEventListener("click", () => closeConfirmDialog(false));
         els.confirmAccept.addEventListener("click", () => closeConfirmDialog(true));
@@ -1605,8 +1667,10 @@
         els.appTabs.addEventListener("keydown", event => {
           if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
           event.preventDefault();
-          switchAppSection(event.key === "Home" ? "releases" : event.key === "End" ? "announcements"
-            : state.appSection === "releases" ? "announcements" : "releases");
+          const sections = ["releases", "announcements", "inventory"];
+          const index = sections.indexOf(state.appSection);
+          switchAppSection(event.key === "Home" ? sections[0] : event.key === "End" ? sections.at(-1)
+            : sections[(index + (event.key === "ArrowLeft" ? sections.length - 1 : 1)) % sections.length]);
         });
         new ResizeObserver(updateToolbarGeometry).observe(els.topbar);
         els.firmwareTabs.addEventListener("click", event => {
@@ -1616,10 +1680,10 @@
         els.firmwareTabs.addEventListener("keydown", event => {
           if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
           event.preventDefault();
-          const sections = ["releases", "channels", "history"];
+          const sections = ["releases", "channels", "history", "inventory"];
           const index = sections.indexOf(state.firmwareSection);
-          switchFirmwareSection(event.key === "Home" ? sections[0] : event.key === "End" ? sections[2]
-            : sections[(index + (event.key === "ArrowLeft" ? 2 : 1)) % sections.length]);
+          switchFirmwareSection(event.key === "Home" ? sections[0] : event.key === "End" ? sections.at(-1)
+            : sections[(index + (event.key === "ArrowLeft" ? sections.length - 1 : 1)) % sections.length]);
         });
         els.firmwarePagePrev.addEventListener("click", () => changeFirmwarePage(-1));
         els.firmwarePageNext.addEventListener("click", () => changeFirmwarePage(1));
@@ -1648,10 +1712,28 @@
           });
         });
         els.refreshButton.addEventListener("click", () => refreshAll());
+        els.deltaClose.addEventListener("click", closeDelta);
+        els.deltaBackdrop.addEventListener("click", closeDelta);
+        els.deltaContent.addEventListener("input", event => {
+          if (state.delta && event.target.id === "deltaReason") state.delta.reason = event.target.value;
+        });
+        els.deltaContent.addEventListener("change", event => {
+          if (!state.delta || !event.target.matches("[data-delta-base]")) return;
+          const chosen = state.delta.selected;
+          if (event.target.checked && chosen.size < 5) chosen.add(event.target.dataset.deltaBase);
+          else chosen.delete(event.target.dataset.deltaBase);
+          renderDelta();
+        });
+        document.addEventListener("click", event => {
+          const operation = event.target.closest("[data-version-operation]");
+          if (operation && !operation.disabled) handleVersionOperation(operation);
+        });
         els.searchInput.addEventListener("input", () => {
           state.queries[searchScope()] = els.searchInput.value.trim();
           if (searchScope() === "releases") state.releasePage = 0;
           if (searchScope() === "firmware") state.firmwarePage = 0;
+          if (searchScope() === "inventory") state.inventory.pages.android = 0;
+          if (searchScope() === "firmwareInventory") state.inventory.pages.firmware = 0;
           render();
         });
         for (const [element, field] of [[els.firmwareStatusFilter, "firmwareStatusFilter"],
@@ -1726,6 +1808,7 @@
             if (firmwareButton.disabled || state.busy || activeConfirmDialog) return;
             const firmwareId = firmwareButton.dataset.firmwareId ?? state.selectedFirmwareId;
             const action = firmwareButton.dataset.firmwareAction;
+            if (action === "delta") { openDelta("firmware", firmwareId); return; }
             if (action === "choose-version") { switchFirmwareSection("releases"); return; }
             if (action === "history-refresh") { loadFirmwareHistory(); return; }
             if (action === "history-more") { loadFirmwareHistory(false); return; }
@@ -1736,16 +1819,11 @@
               render(); return;
             }
             if (action.startsWith("notes-")) { handleFirmwareNotes(action, firmwareId); return; }
-            if (action === "back-to-versions") {
-              const selected = els.firmwareReleaseList.querySelector('[aria-pressed="true"]');
-              selected?.focus({ preventScroll: true });
-              selected?.scrollIntoView({ block: "center" });
-              return;
-            }
-            if (firmwareId) selectFirmware(firmwareId, { reveal: action === "select" });
+            if (firmwareId) selectFirmware(firmwareId, { openDetails: action === "select" });
             if (action === "select") return;
             if (action === "refresh") { refreshFirmwareState(); return; }
             if (action === "retry-release") { runFirmwareReleaseAction(null, null, true); return; }
+            closeFirmwareDetails({ immediate: true, restoreFocus: false });
             if (action === "delete") { runFirmwareDelete(firmwareId); return; }
             if (["disable", "recovery-download"].includes(action)) runFirmwareReleaseAction(firmwareId, action);
             else runFirmwareChannelAction(firmwareButton.dataset.channel, action, firmwareId);
@@ -1755,6 +1833,7 @@
           if (!button) return;
           const selected = activeReleaseForAction();
           if (!selected) return;
+          if (button.dataset.action === "delta") { openDelta("android", selected.id); return; }
           if (els.quickActionSheet.contains(button)) closeQuickActions();
           if (button.dataset.action === "publish") {
             publishRelease(button.dataset.channel, selected.id);
@@ -1808,6 +1887,8 @@
         document.addEventListener("keydown", (event) => {
           if (event.isComposing) return;
           const layer = activeConfirmDialog ? els.confirmDialog
+            : state.delta ? els.deltaSheet
+            : els.body.classList.contains("firmware-details-open") ? els.firmwareDetailSheet
             : els.body.classList.contains("quick-actions-open") ? els.quickActionSheet
             : els.body.classList.contains("nav-open") ? els.sidebar : null;
           if (event.key === "Tab" && layer) {
@@ -1817,6 +1898,8 @@
           if (event.key === "Escape") {
             event.preventDefault();
             if (activeConfirmDialog) closeConfirmDialog(false);
+            else if (layer === els.deltaSheet) closeDelta();
+            else if (layer === els.firmwareDetailSheet) closeFirmwareDetails();
             else if (layer === els.quickActionSheet) closeQuickActions();
             else if (layer === els.sidebar) setMobileNav(false);
             else if (els.resourceFloat.classList.contains("open")) closeResourcePanel({ restoreFocus: true });
@@ -1863,21 +1946,26 @@
 
       function syncOverlayState() {
         const quick = els.body.classList.contains("quick-actions-open");
+        const firmware = els.body.classList.contains("firmware-details-open");
         const nav = els.body.classList.contains("nav-open");
         const confirm = Boolean(activeConfirmDialog);
-        els.workspace.inert = confirm || quick || nav;
-        els.resourceFloat.inert = confirm || quick || nav;
-        els.sidebar.inert = confirm || quick || (window.matchMedia("(max-width: 1000px)").matches && !nav);
-        els.quickActionSheet.inert = confirm || !quick;
+        const delta = Boolean(state.delta);
+        els.workspace.inert = confirm || quick || firmware || nav || delta;
+        els.resourceFloat.inert = confirm || quick || firmware || nav || delta;
+        els.sidebar.inert = confirm || quick || firmware || delta || (window.matchMedia("(max-width: 1000px)").matches && !nav);
+        els.quickActionSheet.inert = confirm || firmware || delta || !quick;
+        els.firmwareDetailSheet.inert = confirm || quick || delta || !firmware;
+        els.deltaSheet.inert = confirm || !delta;
         els.confirmDialog.inert = !confirm;
       }
 
       function restoreWorkspaceFocus(preferred) {
         if (activeConfirmDialog || els.body.classList.contains("nav-open")) return;
-        const fallback = els.body.classList.contains("quick-actions-open") ? els.quickActionClose
+        const fallback = state.delta ? els.deltaClose : els.body.classList.contains("quick-actions-open") ? els.quickActionClose
+          : els.body.classList.contains("firmware-details-open") ? els.firmwareDetailClose
           : state.activeView === "firmware" ? (state.firmwareSection === "releases"
             ? els.firmwareReleaseList.querySelector('[aria-pressed="true"]') : null) ?? els.firmwareTabs.querySelector('[aria-selected="true"]')
-          : state.appSection === "announcements" ? els.appTabs.querySelector('[aria-selected="true"]')
+          : state.appSection !== "releases" ? els.appTabs.querySelector('[aria-selected="true"]')
           : els.versionStrip.querySelector(".version-card.active");
         const target = preferred?.matches("button, a[href], input, textarea, select, summary, [tabindex]")
           && preferred.isConnected && !preferred.disabled && !preferred.closest("[hidden], [inert]")
@@ -2167,6 +2255,7 @@
         const minimumSpin = new Promise((resolve) => window.setTimeout(resolve, 520));
         try {
           await Promise.all([loadAll(), minimumSpin]);
+          if (searchScope() === "inventory" || searchScope() === "firmwareInventory") await loadInventory();
         } finally {
           els.refreshButton.classList.remove("is-refreshing");
         }
@@ -2287,6 +2376,9 @@
         ]);
         setFirmwareData(releases, channels);
         renderFirmware();
+        renderInventory("android");
+        renderInventory("firmware");
+        if (state.delta) renderDelta();
         renderSessions();
       }
 
@@ -2666,6 +2758,211 @@
         }
       }
 
+      function opText(zh, en) { return state.language === "zh" ? zh : en; }
+      function inventoryDate(seconds) {
+        return seconds ? new Date(seconds * 1000).toLocaleString(state.language === "zh" ? "zh-CN" : "en-GB") : opText("尚无上报", "No reports yet");
+      }
+      async function loadInventory() {
+        const inventory = state.inventory;
+        if (inventory.loading) return;
+        inventory.loading = true; inventory.error = null;
+        renderInventory("android"); renderInventory("firmware");
+        try {
+          const value = await api("/api/admin/version-inventory");
+          if (value.ok !== true || !Array.isArray(value.app) || !Array.isArray(value.firmware)
+            || value.coverage !== "reporting-installations-only" || value.firmwareIdentityScope !== "installation") throw new Error(t("firmware.invalidResponse"));
+          inventory.value = value;
+        } catch (error) { inventory.error = error.message; }
+        finally {
+          inventory.loading = false;
+          renderInventory("android"); renderInventory("firmware");
+          if (state.delta) renderDelta();
+        }
+      }
+      function inventoryRows(kind) {
+        return state.inventory.value?.[kind === "android" ? "app" : "firmware"] ?? [];
+      }
+      function renderInventory(kind) {
+        const panel = document.querySelector(kind === "android" ? "#appInventoryPanel" : "#firmwareInventoryPanel");
+        const inventory = state.inventory, value = inventory.value;
+        const unit = kind === "android" ? opText("上报安装实例", "Reporting installations") : opText("手机侧设备记录（可能重复）", "Phone-scoped device records (may duplicate)");
+        const query = state.queries[kind === "android" ? "inventory" : "firmwareInventory"].toLowerCase();
+        const rows = inventoryRows(kind).filter(row => `${row.versionCode} ${row.versionName ?? ""} ${row.imageSha256}`.toLowerCase().includes(query));
+        rows.sort((a, b) => Number(b[`active${inventory.window}`]) - Number(a[`active${inventory.window}`]) || b.versionCode - a.versionCode);
+        inventory.pages[kind] = clamp(inventory.pages[kind], 0, Math.max(0, Math.ceil(rows.length / 10) - 1));
+        const page = inventory.pages[kind], visible = rows.slice(page * 10, (page + 1) * 10);
+        const pendingRefresh = value?.refreshRequestedAt && Date.now() / 1000 - value.refreshRequestedAt < 900;
+        panel.innerHTML = `<header class="panel-head"><div><h2>${escapeHtml(t("operations.inventory"))}</h2><p>${escapeHtml(unit)}</p></div>
+          <div class="operations-buttons"><button type="button" class="secondary-button" data-version-operation="inventory-reload" ${inventory.loading ? "disabled" : ""}>${escapeHtml(opText("读取统计", "Reload counts"))}</button>
+          <button type="button" class="secondary-button" data-version-operation="inventory-refresh" ${inventory.loading || pendingRefresh || !canRole("publisher") ? "disabled" : ""}>${escapeHtml(opText("请求更新上报", "Request fresh reports"))}</button></div></header>
+          <div class="inventory-body"><p class="firmware-hint">${escapeHtml(opText("只统计已上报的安装实例，不等于人数。离线、关闭上报或未升级的客户端未知，不代表零用户。单片机记录只在同一手机内去重。", "Counts cover reporting installations, not people. Offline, opted-out and older clients are unknown, not zero users. MCU records are deduplicated only within each phone."))}</p>
+          <div class="operations-buttons inventory-window" role="group" aria-label="${escapeHtml(opText("统计窗口", "Observation window"))}">${[7,30,90].map(days => `<button type="button" class="filter-chip ${inventory.window === days ? "active" : ""}" data-version-operation="inventory-window" data-days="${days}" aria-pressed="${inventory.window === days}">${escapeHtml(opText(`近 ${days} 天`, `Last ${days} days`))}</button>`).join("")}</div>
+          ${inventory.loading ? `<p role="status">${escapeHtml(opText("正在读取统计...", "Loading counts..."))}</p>` : ""}
+          ${inventory.error ? `<p class="error" role="alert">${escapeHtml(inventory.error)} ${escapeHtml(opText("以下为上次读数，不作为自动选包依据。", "Any counts below are stale; automatic selection is disabled."))}</p>` : ""}
+          <div class="inventory-table-wrap"><table class="inventory-table"><thead><tr><th>${escapeHtml(opText("版本 / 镜像", "Version / Image"))}</th><th>${escapeHtml(unit)}</th><th>${escapeHtml(opText("最近上报 / 观测", "Last reported / observed"))}</th></tr></thead><tbody>
+          ${visible.map(row => `<tr><td><strong>${escapeHtml(row.versionName ?? row.versionCode)}</strong><span class="inventory-hash" title="${escapeHtml(row.imageSha256)}">${escapeHtml(String(row.imageSha256).slice(0,16))}</span></td><td>${formatNumber(row[`active${inventory.window}`])}</td><td>${escapeHtml(inventoryDate(row.lastSeen))}</td></tr>`).join("")}
+          </tbody></table></div>${!rows.length ? `<p class="empty">${escapeHtml(opText("暂无匹配的上报记录；不能据此认定没有用户。", "No matching reports. This does not mean there are no users."))}</p>` : ""}
+          ${rows.length > 10 ? `<nav class="release-pagination"><button type="button" data-version-operation="inventory-prev" data-kind="${kind}" ${page === 0 ? "disabled" : ""}>${escapeHtml(t("pagination.previous"))}</button><span>${page + 1} / ${Math.ceil(rows.length / 10)}</span><button type="button" data-version-operation="inventory-next" data-kind="${kind}" ${(page + 1) * 10 >= rows.length ? "disabled" : ""}>${escapeHtml(t("pagination.next"))}</button></nav>` : ""}
+          <p class="firmware-hint" role="status">${escapeHtml(opText("统计读取时间：", "Counts loaded: "))}${escapeHtml(inventoryDate(value?.generatedAt))}<br>
+          ${escapeHtml(opText("上次请求更新：", "Last refresh request: "))}${escapeHtml(inventoryDate(value?.refreshRequestedAt))} · ${escapeHtml(opText("本次已响应：", "Responses: "))}${formatNumber(value?.refreshResponses ?? 0)}</p>
+          <p class="firmware-hint">${escapeHtml(opText("请求更新不会唤醒手机。支持上报的 APP 回到前台且空闲时，按低频检查响应；后台无需常驻服务器。", "A refresh does not wake phones. Supported apps respond during low-frequency foreground checks while idle; no always-running server is needed."))}</p></div>`;
+      }
+      function closeDelta() {
+        if (!state.delta) return;
+        clearTimeout(state.delta.timer);
+        state.delta = null;
+        els.body.classList.remove("delta-open");
+        els.deltaSheet.hidden = true; els.deltaBackdrop.hidden = true;
+        syncOverlayState(); restoreWorkspaceFocus();
+      }
+      async function openDelta(kind, releaseId) {
+        if (state.busy || activeConfirmDialog) return;
+        closeDelta();
+        closeQuickActions({ immediate: true, restoreFocus: false });
+        closeFirmwareDetails({ immediate: true, restoreFocus: false });
+        closeResourcePanel();
+        const delta = state.delta = { kind, releaseId, actor: state.session?.actor, selected: new Set(), reason: "", data: null,
+          busy: false, loading: false, notice: "", timer: null };
+        els.deltaSheet.hidden = false; els.deltaBackdrop.hidden = false;
+        els.body.classList.add("delta-open");
+        document.querySelector("#deltaScroll").scrollTop = 0;
+        syncOverlayState(); renderDelta(); els.deltaClose.focus({ preventScroll: true });
+        await loadInventory();
+        if (state.delta === delta) await loadDelta(delta);
+      }
+      async function loadDelta(delta = state.delta) {
+        if (!delta || delta.loading) return;
+        clearTimeout(delta.timer); delta.loading = true; renderDelta();
+        try {
+          const data = await api(`/api/admin/delta/candidates?kind=${delta.kind}&targetId=${encodeURIComponent(delta.releaseId)}`);
+          if (data.ok !== true || data.kind !== delta.kind || data.target?.releaseId !== delta.releaseId
+            || !Array.isArray(data.bases) || !Array.isArray(data.jobs)) throw new Error(t("firmware.invalidResponse"));
+          if (state.delta !== delta) return;
+          delta.data = data;
+          for (const id of delta.selected) if (!data.bases.some(base => base.releaseId === id && base.eligible && !base.existing && !base.job)) delta.selected.delete(id);
+        } catch (error) { if (state.delta === delta) delta.notice = error.message; }
+        finally {
+          delta.loading = false;
+          if (state.delta === delta) {
+            renderDelta();
+            if (!delta.notice && delta.data?.jobs.some(job => ["dispatching", "queued", "running"].includes(job.status))) {
+              delta.timer = setTimeout(() => loadDelta(delta), 15000);
+            }
+          }
+        }
+      }
+      function baseReports(base, kind) {
+        if (state.inventory.error || !state.inventory.value) return null;
+        const rows = inventoryRows(kind).filter(row => row.versionCode === base.versionCode && row.imageSha256 === base.imageSha256);
+        return rows.length ? rows.reduce((sum, row) => sum + Number(row.active30), 0) : null;
+      }
+      function deltaStatus(job) {
+        return ({ dispatching: opText("正在提交", "Submitting"), queued: opText("等待构建 / 审批", "Queued / approval required"),
+          dispatch_unknown: opText("提交结果未知，需核对", "Dispatch uncertain; reconcile"), running: opText("构建中", "Building"),
+          ready: job.enabled ? opText("已启用", "Enabled") : opText("已验证，未启用", "Verified, disabled"),
+          failed: opText("失败", "Failed") })[job.status] ?? job.status;
+      }
+      function renderDelta() {
+        const delta = state.delta;
+        if (!delta) return;
+        const focused = document.activeElement;
+        const selectedBase = focused?.dataset?.deltaBase;
+        const editingReason = focused?.id === "deltaReason";
+        const caret = editingReason ? [focused.selectionStart, focused.selectionEnd] : null;
+        const data = delta.data, locked = delta.busy || delta.loading || !canRole("publisher") || delta.actor !== state.session?.actor;
+        els.deltaTitle.textContent = data ? `${data.target.versionName} / ${data.target.versionCode}` : opText("正在读取版本...", "Loading version...");
+        const canBuild = !locked && data?.dispatchConfigured && (delta.kind !== "android" || data.appSigningConfigured);
+        els.deltaContent.innerHTML = `<p class="firmware-hint">${escapeHtml(opText("选择起始旧版本，只新增差分文件。不会重新构建原包、替换现有文件或自动发布 Stable/Beta。", "Select source versions to append delta files. Originals are not rebuilt or replaced, and Stable/Beta is never published automatically."))}</p>
+          ${delta.notice ? `<p class="error" role="alert">${escapeHtml(delta.notice)}</p>` : ""}
+          ${!data ? `<p role="status">${escapeHtml(opText("等待版本数据", "Waiting for version data"))}</p>` : `
+          ${!canBuild && !locked ? `<p class="firmware-help">${escapeHtml(opText("构建通道或签名配置未就绪，不能提交任务。现有下载不受影响。", "Dispatch or signing configuration is not ready. Existing downloads are unaffected."))}</p>` : ""}
+          <div class="operations-buttons"><button type="button" class="secondary-button" data-version-operation="delta-recommend" ${!canBuild || !state.inventory.value || state.inventory.error ? "disabled" : ""}>${escapeHtml(opText("选择有上报的版本（最多 5 个）", "Select reported versions (up to 5)"))}</button>
+          <span>${escapeHtml(opText("近 30 天读数；未上报不等于无人使用。", "30-day counts; unreported does not mean unused."))}</span></div>
+          <div class="delta-base-list">${data.bases.map(base => {
+            const count = baseReports(base, delta.kind), selectable = canBuild && base.eligible && !base.existing && !base.job;
+            return `<label class="delta-base-row"><input type="checkbox" data-delta-base="${escapeHtml(base.releaseId)}" ${delta.selected.has(base.releaseId) ? "checked" : ""} ${selectable && (delta.selected.has(base.releaseId) || delta.selected.size < 5) ? "" : "disabled"}>
+              <span><strong>${escapeHtml(base.versionName ?? base.releaseId)} / ${escapeHtml(base.versionCode ?? "")}</strong><small>${escapeHtml(String(base.imageSha256 ?? "").slice(0,16))}</small></span>
+              <span>${escapeHtml(count === null ? opText("未上报", "Unreported") : `${count} ${opText(delta.kind === "android" ? "安装实例" : "手机侧记录", delta.kind === "android" ? "installations" : "phone records")}`)}<small>${escapeHtml(base.existing ? opText("已有原始差分包", "Original patch exists") : base.job ? deltaStatus(base.job) : base.eligible ? opText("可生成", "Eligible") : base.reason)}</small></span></label>`;
+          }).join("") || `<p class="empty">${escapeHtml(opText("没有可用的旧版本原包。", "No original base packages available."))}</p>`}</div>
+          ${data.truncated ? `<p class="firmware-hint">${escapeHtml(opText("当前展示最近 200 个旧版本。", "Showing the latest 200 source versions."))}</p>` : ""}
+          <label class="firmware-field"><span>${escapeHtml(t("firmware.reason"))}</span><textarea id="deltaReason" rows="2" maxlength="500" ${locked ? "disabled" : ""}>${escapeHtml(delta.reason)}</textarea></label>
+          <div class="operations-buttons"><button type="button" class="pill-button primary" data-version-operation="delta-create" ${canBuild && delta.selected.size ? "" : "disabled"}>${escapeHtml(opText(`生成 ${delta.selected.size} 个差分包`, `Generate ${delta.selected.size} deltas`))}</button><button type="button" class="secondary-button" data-version-operation="delta-reload" ${delta.busy || delta.loading ? "disabled" : ""}>${escapeHtml(opText("刷新任务状态", "Refresh jobs"))}</button></div>
+          <h3 class="delta-jobs-title">${escapeHtml(opText("构建任务与差分文件", "Build jobs and delta files"))}</h3>
+          <div class="delta-job-list">${data.jobs.map(job => {
+            const run = /^https:\/\/github\.com\/Eitan-S-23\/E-Track\/actions\/runs\/\d+$/.test(job.runUrl ?? "") ? job.runUrl : null;
+            const control = job.status === "ready" ? job.enabled ? "disable" : "enable" : job.status === "failed" ? "retry" : "reconcile";
+            const usable = !["enable", "disable"].includes(control) || (canRole("owner") && (control === "disable" || (data.distributionEnabled && job.sizeBytes < data.target.fullBytes)));
+            return `<article class="delta-job-row"><div><strong>${escapeHtml(job.baseVersionCode)} → ${escapeHtml(job.targetVersionCode)}</strong><span>${escapeHtml(deltaStatus(job))}</span><small>${escapeHtml(job.fileName ?? job.errorCode ?? "")} ${job.sizeBytes ? escapeHtml(formatBytes(job.sizeBytes)) : ""}</small>
+              ${job.status === "ready" && job.sizeBytes >= data.target.fullBytes ? `<small>${escapeHtml(opText("不比全量包小，不能启用。", "Not smaller than full; cannot enable."))}</small>` : ""}</div><div class="operations-buttons">
+              ${run ? `<a href="${escapeHtml(run)}" target="_blank" rel="noopener noreferrer">GitHub Actions</a>` : ""}
+              <button type="button" class="secondary-button" data-version-operation="delta-${control}" data-job-id="${escapeHtml(job.id)}" ${locked || !usable || (control === "retry" && !data.dispatchConfigured) ? "disabled" : ""}>${escapeHtml(({ enable: opText("启用", "Enable"), disable: opText("停用", "Disable"), retry: opText("重试失败任务", "Retry failed job"), reconcile: opText("核对构建结果", "Reconcile run") })[control])}</button></div></article>`;
+          }).join("") || `<p class="empty">${escapeHtml(opText("尚未生成差分任务。", "No delta jobs yet."))}</p>`}</div>`}`;
+        const restore = editingReason ? document.querySelector("#deltaReason")
+          : selectedBase ? [...els.deltaContent.querySelectorAll("[data-delta-base]")].find(node => node.dataset.deltaBase === selectedBase) : null;
+        if (restore && !restore.disabled && !activeConfirmDialog) {
+          restore.focus({ preventScroll: true });
+          if (caret) restore.setSelectionRange(...caret);
+        }
+      }
+      async function handleVersionOperation(button) {
+        const action = button.dataset.versionOperation;
+        if (action === "inventory-reload") { await loadInventory(); return; }
+        if (action === "inventory-window") { state.inventory.window = Number(button.dataset.days); renderInventory("android"); renderInventory("firmware"); return; }
+        if (action === "inventory-prev" || action === "inventory-next") {
+          state.inventory.pages[button.dataset.kind] += action === "inventory-prev" ? -1 : 1;
+          renderInventory(button.dataset.kind); return;
+        }
+        if (action === "inventory-refresh") {
+          if (!canRole("publisher") || state.inventory.loading || activeConfirmDialog) return;
+          const confirmed = await openConfirmDialog({ title: opText("请求版本上报", "Request version reports"),
+            message: opText("手机下次前台检查时响应，不会立即唤醒离线手机。", "Phones respond on a later foreground check, not by remote wake-up."),
+            detail: opText("现有上报保留。15 分钟内不重复发送新的请求。", "Existing reports remain. New refresh requests are limited to one per 15 minutes.") });
+          if (!confirmed) return;
+          state.inventory.loading = true;
+          state.inventory.refreshId ??= crypto.randomUUID();
+          renderInventory("android"); renderInventory("firmware");
+          try {
+            await mutate("/api/admin/version-inventory/refresh", { requestId: state.inventory.refreshId });
+            state.inventory.refreshId = null;
+            state.inventory.loading = false; await loadInventory();
+          } catch (error) {
+            state.inventory.error = error.message; state.inventory.loading = false;
+            renderInventory("android"); renderInventory("firmware");
+          }
+          return;
+        }
+        const delta = state.delta;
+        if (!delta || delta.busy || activeConfirmDialog) return;
+        if (action === "delta-reload") { delta.notice = ""; await loadDelta(delta); return; }
+        if (!canRole("publisher") || delta.actor !== state.session?.actor) return;
+        if (action === "delta-recommend") {
+          delta.selected = new Set(delta.data.bases.filter(base => base.eligible && !base.existing && !base.job && baseReports(base, delta.kind) > 0)
+            .sort((a,b) => baseReports(b,delta.kind)-baseReports(a,delta.kind)).slice(0,5).map(base=>base.releaseId));
+          renderDelta(); return;
+        }
+        const job = delta.data?.jobs.find(row => row.id === button.dataset.jobId);
+        const operation = action.slice(6);
+        if (operation === "create" && (!delta.selected.size || !delta.reason.trim())) {
+          delta.notice = opText("请填写生成原因，并选择 1 至 5 个旧版本。", "Select 1 to 5 bases and enter a reason."); renderDelta(); document.querySelector("#deltaReason")?.focus(); return;
+        }
+        if (operation !== "create" && !job) return;
+        const confirmed = await openConfirmDialog({ title: button.textContent, reasonRequired: operation !== "create",
+          message: opText("仅修改该目标版本的差分任务或差分选择，不改变发布通道。", "Only this target's delta jobs or selection will change; channels remain untouched."),
+          detail: operation === "create" ? `${delta.selected.size} ${opText("个旧版本", "source versions")} · ${delta.reason}` : `${job.baseVersionCode} → ${job.targetVersionCode}` });
+        if (!confirmed || state.delta !== delta || delta.actor !== state.session?.actor) return;
+        delta.busy = true; delta.notice = ""; clearTimeout(delta.timer); renderDelta();
+        try {
+          const body = operation === "create" ? { kind: delta.kind, targetReleaseId: delta.releaseId, baseReleaseIds: [...delta.selected], reason: delta.reason.trim() }
+            : { expectedRevision: job.revision, reason: confirmed.reason };
+          await mutate(operation === "create" ? "/api/admin/delta/jobs" : `/api/admin/delta/jobs/${encodeURIComponent(job.id)}/${operation}`, body);
+          if (operation === "create") delta.selected.clear();
+        } catch (error) { delta.notice = `${error.message} ${opText("请核对当前任务，不会自动重发。", "Reconcile the current job; it will not be replayed automatically.")}`; }
+        finally {
+          delta.busy = false;
+          if (state.delta === delta) await loadDelta(delta);
+        }
+      }
+
       async function mutate(path, body, headers = {}) {
         if (!state.session?.csrfToken) {
           state.session = await api("/api/admin/session");
@@ -2743,6 +3040,8 @@
         renderStorage();
         renderChannels(detailRelease);
         renderFirmware();
+        renderInventory("android"); renderInventory("firmware");
+        if (state.delta) renderDelta();
         renderActionLocks(detailRelease);
         if (els.body.classList.contains("quick-actions-open")) {
           detailRelease ? renderQuickActionSheet(detailRelease) : closeQuickActions({ immediate: true });
@@ -3161,6 +3460,7 @@
         const releases = filteredFirmware();
         const rows = firmwarePageRows(releases);
         if (!rows.some(release => release.releaseId === state.selectedFirmwareId)) {
+          if (state.firmwareDetailsOpen) closeFirmwareDetails({ immediate: true, restoreFocus: false });
           state.selectedFirmwareId = rows[0]?.releaseId ?? null;
           if (state.firmwareHistoryScope === "selected") invalidateFirmwareHistory();
         }
@@ -3169,7 +3469,7 @@
         els.firmwareSort.value = state.firmwareSort;
         els.firmwareListCount.textContent = t("catalog.count", { shown: releases.length, total: state.firmwareReleases.length });
         els.firmwareReleaseList.innerHTML = rows.length ? rows.map(firmwareReleaseCard).join("")
-          : `<div class="empty">${escapeHtml(t(state.firmwareReconcileRequired ? "firmware.loadFailed" : state.firmwareReleases.length ? "timeline.noMatches" : "firmware.noReleases"))}</div>`;
+          : firmwareEmptyState();
         const pages = Math.max(1, Math.ceil(releases.length / RELEASE_PAGE_SIZE));
         els.firmwarePagination.hidden = pages <= 1;
         els.firmwarePagePrev.disabled = state.firmwarePage === 0;
@@ -3181,8 +3481,10 @@
         });
         const selected = state.firmwareReleases.find(release => release.releaseId === state.selectedFirmwareId);
         els.firmwareDetail.innerHTML = selected ? firmwareReleaseDetail(selected)
-          : firmwareEmptyState();
+          : "";
         els.firmwareDetail.dataset.releaseId = selected?.releaseId ?? "";
+        els.firmwareDetailTitle.textContent = selected?.versionName ?? t("catalog.details");
+        els.firmwareDetailSubtitle.textContent = selected?.releaseTag ?? "";
         els.firmwareChannelTarget.textContent = t("catalog.channelTarget", { tag: selected?.releaseTag ?? t("catalog.noTarget") });
         els.firmwareChannelSummary.innerHTML = state.firmwareChannels.map(channel => {
           const release = state.firmwareReleases.find(row => row.releaseId === channel.currentReleaseId);
@@ -3288,7 +3590,7 @@
         const published = firmwarePublishedChannels(release);
         const active = release.releaseId === state.selectedFirmwareId;
         return `<article class="firmware-release-card ${active ? "active" : ""}" data-release-id="${escapeHtml(release.releaseId)}">
-          <button type="button" class="text-button" data-firmware-action="select" data-firmware-id="${escapeHtml(release.releaseId)}" aria-pressed="${active}">
+          <button type="button" class="text-button" data-firmware-action="select" data-firmware-id="${escapeHtml(release.releaseId)}" aria-pressed="${active}" aria-haspopup="dialog" aria-controls="firmwareDetailSheet" aria-expanded="${active && state.firmwareDetailsOpen}">
             <span class="firmware-list-title"><strong>${escapeHtml(release.versionName)}</strong>
               <span class="tag ${firmwareStatus(release)}">${escapeHtml(firmwareStatusLabel(release))}</span></span>
             <span class="firmware-list-tag">${release.releaseTag !== release.versionName ? escapeHtml(release.releaseTag) + " / " : ""}VC ${release.versionCode} / ${escapeHtml(formatBytes(firmwareSize(release)))}</span>
@@ -3338,14 +3640,12 @@
             ${firmwareMeta(t("firmware.sha"), asset.sha256)}
             ${asset.kind === "patch" ? `${firmwareMeta(t("catalog.base"), asset.baseVersionCode)}${firmwareMeta(t("catalog.baseSha"), asset.baseImageSha256)}` : ""}</div></div>`).join("");
         return `<article class="firmware-detail-card" data-release-id="${escapeHtml(release.releaseId)}">
-          <button type="button" class="firmware-back" data-firmware-action="back-to-versions"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg>${escapeHtml(t("catalog.back"))}</button>
-          <div class="firmware-card-top"><div><p class="eyebrow">${escapeHtml(t("catalog.details"))}</p>
-            <h2>${escapeHtml(release.versionName)} <span class="tag ${firmwareStatus(release)}">${escapeHtml(firmwareStatusLabel(release))}</span></h2>
-            <p class="firmware-hint">${escapeHtml(release.releaseTag)}</p></div></div>
+          <span class="tag ${firmwareStatus(release)}">${escapeHtml(firmwareStatusLabel(release))}</span>
           <div class="firmware-meta-grid">${firmwareMeta(t("firmware.versionCode"), release.versionCode)}
             ${firmwareMeta(t("firmware.model"), release.deviceModel)}${firmwareMeta(t("catalog.created"), firmwareDate(release.createdAt))}
             ${firmwareMeta(t("catalog.updated"), firmwareDate(release.updatedAt))}</div>
           <div class="firmware-actions">
+            <button type="button" class="pill-button" data-firmware-action="delta" ${release.state === "ready" && !release.archived && !state.busy ? "" : "disabled"}>${escapeHtml(t("operations.delta"))}</button>
             ${firmwareActionButton(release, "publish", "firmware.publishBeta", "beta")}
             ${firmwareActionButton(release, "publish", "firmware.publishStable", "stable")}
             ${firmwareActionButton(release, "disable", "firmware.disable")}
@@ -3601,18 +3901,49 @@
         );
       }
 
-      function selectFirmware(firmwareId, { reveal = false } = {}) {
+      function selectFirmware(firmwareId, { openDetails = false } = {}) {
         if (!state.firmwareReleases.some((release) => release.releaseId === firmwareId)) return;
         const index = filteredFirmware().findIndex(release => release.releaseId === firmwareId);
         if (index >= 0) state.firmwarePage = Math.floor(index / RELEASE_PAGE_SIZE);
         if (state.selectedFirmwareId !== firmwareId && state.firmwareHistoryScope === "selected") invalidateFirmwareHistory();
         state.selectedFirmwareId = firmwareId;
         renderFirmware();
-        if (reveal && window.matchMedia("(max-width: 720px)").matches) {
-          els.firmwareDetail.tabIndex = -1;
-          els.firmwareDetail.focus({ preventScroll: true });
-          els.firmwareDetail.scrollIntoView({ block: "start" });
-        }
+        if (openDetails) openFirmwareDetails();
+      }
+
+      function openFirmwareDetails() {
+        if (!state.selectedFirmwareId || activeConfirmDialog || state.activeView !== "firmware") return;
+        closeQuickActions({ immediate: true, restoreFocus: false });
+        closeResourcePanel();
+        window.clearTimeout(firmwareDetailCloseTimer);
+        state.firmwareDetailsOpen = true;
+        renderFirmware();
+        els.firmwareDetailBackdrop.hidden = false;
+        els.firmwareDetailSheet.hidden = false;
+        els.firmwareDetailScroll.scrollTop = 0;
+        requestAnimationFrame(() => {
+          if (!state.firmwareDetailsOpen) return;
+          els.body.classList.add("firmware-details-open");
+          syncOverlayState();
+          els.firmwareDetailClose.focus({ preventScroll: true });
+        });
+      }
+
+      function closeFirmwareDetails({ immediate = false, restoreFocus = true } = {}) {
+        const wasOpen = state.firmwareDetailsOpen;
+        window.clearTimeout(firmwareDetailCloseTimer);
+        state.firmwareDetailsOpen = false;
+        els.body.classList.remove("firmware-details-open");
+        els.firmwareReleaseList.querySelector('[aria-expanded="true"]')?.setAttribute("aria-expanded", "false");
+        syncOverlayState();
+        const hide = () => {
+          if (state.firmwareDetailsOpen) return;
+          els.firmwareDetailBackdrop.hidden = true;
+          els.firmwareDetailSheet.hidden = true;
+          if (wasOpen && restoreFocus) restoreWorkspaceFocus();
+        };
+        if (immediate) hide();
+        else firmwareDetailCloseTimer = window.setTimeout(hide, 220);
       }
 
       function renderStorage() {
@@ -3696,6 +4027,7 @@
         const noRelease = !release;
         const disabled = noRelease || release.state === "disabled";
         const published = publishedChannels(release).length > 0;
+        document.querySelector('[data-action="delta"]').disabled = state.busy || disabled || Number(release?.archived) === 1 || release?.platform !== "android";
         document.querySelectorAll("[data-action='publish']").forEach((button) => {
           const channel = button.dataset.channel;
           const mode = appChannelMode(release, state.channels.find((item) => item.name === channel));
@@ -3724,6 +4056,7 @@
       function openQuickActions(releaseId) {
         const release = state.releases.find((item) => item.id === releaseId);
         if (!release) return;
+        closeFirmwareDetails({ immediate: true, restoreFocus: false });
         state.selectedReleaseId = releaseId;
         state.detailsOpen = true;
         renderQuickActionSheet(release);
@@ -3734,6 +4067,7 @@
         window.clearTimeout(quickActionCloseTimer);
         els.quickActionBackdrop.hidden = false;
         els.quickActionSheet.hidden = false;
+        els.quickActionScroll.scrollTop = 0;
         requestAnimationFrame(() => {
           if (!state.detailsOpen) return;
           els.body.classList.add("quick-actions-open");
@@ -4057,6 +4391,7 @@
         if (!["phone", "firmware"].includes(view)) return;
         state.activeView = view;
         closeQuickActions({ immediate: true, restoreFocus: false });
+        closeFirmwareDetails({ immediate: true, restoreFocus: false });
         setSortMenuOpen(false);
         closeResourcePanel();
         applyAdminView();
@@ -4073,7 +4408,7 @@
 
       function searchScope() {
         return state.activeView === "firmware"
-          ? state.firmwareSection === "channels" ? "firmwareChannels" : state.firmwareSection === "history" ? "firmwareHistory" : "firmware"
+          ? state.firmwareSection === "inventory" ? "firmwareInventory" : state.firmwareSection === "channels" ? "firmwareChannels" : state.firmwareSection === "history" ? "firmwareHistory" : "firmware"
           : state.appSection;
       }
 
@@ -4081,18 +4416,19 @@
         const scope = searchScope();
         els.searchInput.value = state.queries[scope];
         const label = t({ announcements: "search.announcements", firmware: "search.firmware",
-          firmwareChannels: "search.firmwareChannels", firmwareHistory: "search.firmwareHistory" }[scope] ?? "search.placeholder");
+          firmwareChannels: "search.firmwareChannels", firmwareHistory: "search.firmwareHistory", inventory: "operations.search", firmwareInventory: "operations.search" }[scope] ?? "search.placeholder");
         els.searchInput.placeholder = label;
         els.searchInput.setAttribute("aria-label", label);
       }
 
       function switchAppSection(section) {
-        if (!["releases", "announcements"].includes(section)) return;
+        if (!["releases", "announcements", "inventory"].includes(section)) return;
         state.appSection = section;
         closeQuickActions({ immediate: true, restoreFocus: false });
         setSortMenuOpen(false);
         applyAppSection();
         syncSearchInput();
+        if (section === "inventory") loadInventory();
         window.scrollTo({ top: 0 });
         els.appTabs.querySelector('[data-app-section="' + section + '"]').focus({ preventScroll: true });
       }
@@ -4107,11 +4443,13 @@
       }
 
       function switchFirmwareSection(section) {
-        if (!["releases", "channels", "history"].includes(section)) return;
+        if (!["releases", "channels", "history", "inventory"].includes(section)) return;
+        closeFirmwareDetails({ immediate: true, restoreFocus: false });
         state.firmwareSection = section;
         closeResourcePanel();
         applyFirmwareSection();
         syncSearchInput();
+        if (section === "inventory") loadInventory();
         renderFirmware();
         window.scrollTo({ top: 0 });
         els.firmwareTabs.querySelector('[data-firmware-section="' + section + '"]').focus({ preventScroll: true });

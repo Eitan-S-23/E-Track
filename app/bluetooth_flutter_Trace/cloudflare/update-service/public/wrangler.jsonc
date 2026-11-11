@@ -9,11 +9,14 @@
   "vars": {
     "ENVIRONMENT": "staging",
     "APP_ID": "trace",
+    "VERSION_INVENTORY_ENABLED": "true",
+    "DELTA_ASSETS_ENABLED": "false",
     "GITHUB_OWNER": "Eitan-S-23",
     "GITHUB_REPO": "Trace",
     "MANIFEST_CACHE_TTL_SECONDS": "60",
     "DOWNLOAD_TOKEN_TTL_SECONDS": "300",
     "DOWNLOAD_TOKEN_KEY_VERSION": "staging-public",
+    "FIRMWARE_V2_CUTOVER_EPOCH": "1794333692",
     "RATE_LIMIT_WINDOW_SECONDS": "60",
     "RATE_LIMIT_MAX_REQUESTS": "60",
     "ENABLE_DIRECT_ADMIN_API": "false"

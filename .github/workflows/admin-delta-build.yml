@@ -1,0 +1,176 @@
+name: Admin Selected Delta Packages
+run-name: delta:${{ inputs.job_id }}:${{ inputs.attempt }}
+on:
+  push:
+    branches: ["dev/admin/version-inventory-*"]
+  workflow_dispatch:
+    inputs:
+      job_id:
+        description: "Immutable job ID issued by the original Admin"
+        type: string
+        required: true
+      attempt:
+        description: "Exact Admin attempt; use Admin retry instead of GitHub rerun"
+        type: string
+        required: true
+      kind:
+        type: choice
+        options: [android, firmware]
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: admin-delta-${{ inputs.job_id || github.ref }}
+  cancel-in-progress: false
+env:
+  PYTHONDONTWRITEBYTECODE: "1"
+  NODE_DISABLE_COMPILE_CACHE: "1"
+  npm_config_cache: ${{ github.workspace }}/.cache/admin-delta/npm
+  PIP_CACHE_DIR: ${{ github.workspace }}/.cache/admin-delta/pip
+  TMPDIR: ${{ github.workspace }}/.cache/admin-delta/tmp
+  TMP: ${{ github.workspace }}/.cache/admin-delta/tmp
+  TEMP: ${{ github.workspace }}/.cache/admin-delta/tmp
+  XDG_CACHE_HOME: ${{ github.workspace }}/.cache/admin-delta/cache
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - name: Prepare contained caches
+        run: mkdir -p "$TMPDIR" "$PIP_CACHE_DIR" "$XDG_CACHE_HOME"
+      - name: Verify delta orchestration
+        run: node --test tests/ota/test_admin_delta_job.mjs
+      - name: Install locked backend dependencies
+        run: npm ci --prefix app/bluetooth_flutter_Trace/cloudflare/update-service/worker
+      - name: Typecheck and test the real Workers runtime
+        run: |
+          npm run check --prefix app/bluetooth_flutter_Trace/cloudflare/update-service/worker
+          npm test --prefix app/bluetooth_flutter_Trace/cloudflare/update-service/worker
+  public-key:
+    if: github.event_name == 'push'
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Export only the existing client verification public key
+        env:
+          PUBLIC_KEY_BASE64: ${{ secrets.TRACE_UPDATE_PAYLOAD_ED25519_PUBLIC_KEY_BASE64 }}
+        run: |
+          node --input-type=module - <<'JS'
+          import { mkdirSync, writeFileSync } from 'node:fs';
+          import { createHash } from 'node:crypto';
+          const key = Buffer.from(process.env.PUBLIC_KEY_BASE64 || '', 'base64');
+          if (key.length !== 32) throw new Error('Existing App verification public key is unavailable');
+          mkdirSync('.cache/admin-delta', {recursive:true});
+          writeFileSync('.cache/admin-delta/public-key.json', JSON.stringify({
+            publicKeyBase64:key.toString('base64'), sha256:createHash('sha256').update(key).digest('hex'),
+            sourceCommit:process.env.GITHUB_SHA, privateKeyExported:false
+          })+'\n', {flag:'wx'});
+          JS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: admin-delta-public-key-${{ github.run_id }}
+          path: .cache/admin-delta/public-key.json
+          include-hidden-files: true
+          retention-days: 14
+          if-no-files-found: error
+  android:
+    if: github.event_name == 'workflow_dispatch' && inputs.kind == 'android'
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - name: Prepare a project-local xdelta3 executable
+        run: |
+          mkdir -p "$TMPDIR" .cache/admin-delta/tools
+          cd .cache/admin-delta/tools
+          apt-get download xdelta3
+          for package in ./*.deb; do dpkg-deb -x "$package" .; done
+          echo "$GITHUB_WORKSPACE/.cache/admin-delta/tools/usr/bin" >> "$GITHUB_PATH"
+      - name: Generate from original APKs, verify and append a disabled delta
+        id: generate
+        env:
+          INPUT_JOB_ID: ${{ inputs.job_id }}
+          INPUT_ATTEMPT: ${{ inputs.attempt }}
+          INPUT_KIND: android
+          TRACE_UPDATE_SERVICE_URL: https://trace-update-service-staging.tangjichentudou.workers.dev
+          TRACE_DEPLOY_TOKEN: ${{ secrets.TRACE_DEPLOY_TOKEN }}
+          TRACE_UPDATE_PAYLOAD_ED25519_PRIVATE_KEY_BASE64: ${{ secrets.TRACE_UPDATE_PAYLOAD_ED25519_PRIVATE_KEY_BASE64 }}
+          TRACE_UPDATE_PAYLOAD_KEY_VERSION: ${{ vars.TRACE_UPDATE_PAYLOAD_KEY_VERSION || 'staging' }}
+        run: node app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/generate-delta-job.mjs --out .cache/admin-delta/run
+      - name: Preserve attempt receipts, excluding downloaded originals
+        if: always() && steps.generate.outcome != 'skipped'
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-delta-android-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .cache/admin-delta/run/*.json
+            .cache/admin-delta/run/*.stdout
+            .cache/admin-delta/run/*.stderr
+            .cache/admin-delta/run/patch
+          include-hidden-files: true
+          retention-days: 14
+          if-no-files-found: error
+  firmware:
+    if: github.event_name == 'workflow_dispatch' && inputs.kind == 'firmware'
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: firmware-rehearsal
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - name: Install existing isolated packaging tools
+        run: |
+          mkdir -p "$TMPDIR" "$PIP_CACHE_DIR"
+          python3 -m pip install --only-binary=:all: --disable-pip-version-check --target .cache/admin-delta/python pycryptodome==3.23.0
+          cmake -S .github/scripts/bsdiff -B .cache/admin-delta/bsdiff -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build .cache/admin-delta/bsdiff --target bsdiff
+      - name: Generate from original ETU packages, verify and append a disabled delta
+        id: generate
+        env:
+          INPUT_JOB_ID: ${{ inputs.job_id }}
+          INPUT_ATTEMPT: ${{ inputs.attempt }}
+          INPUT_KIND: firmware
+          PYTHONPATH: ${{ github.workspace }}/.cache/admin-delta/python
+          BSDIFF_EXE: ${{ github.workspace }}/.cache/admin-delta/bsdiff/bin/bsdiff
+          OTA_AES_KEY: ${{ secrets.FIRMWARE_REHEARSAL_OTA_AES_KEY }}
+          TRACE_DEPLOY_TOKEN: ${{ secrets.ORIGINAL_ADMIN_FIRMWARE_DEPLOY_TOKEN }}
+          TRACE_UPDATE_SERVICE_URL: https://trace-update-service-staging.tangjichentudou.workers.dev
+        run: node app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/generate-delta-job.mjs --out .cache/admin-delta/run
+      - name: Preserve attempt receipts, excluding unpacked firmware
+        if: always() && steps.generate.outcome != 'skipped'
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-delta-firmware-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .cache/admin-delta/run/*.json
+            .cache/admin-delta/run/*.stdout
+            .cache/admin-delta/run/*.stderr
+            .cache/admin-delta/run/patch
+          include-hidden-files: true
+          retention-days: 14
+          if-no-files-found: error

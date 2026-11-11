@@ -12,6 +12,8 @@ import {
 } from "./firmware";
 import { handleLatest } from "./latest";
 import { cleanupFirmwareIdempotency } from "./firmware_admin";
+import { cleanupInventory, inventoryControl, reportInventory } from "./version_inventory";
+import { deltaCi } from "./delta_jobs";
 import type { WorkerEnv } from "./types";
 
 export { RateLimiter } from "./rate_limiter";
@@ -43,6 +45,10 @@ app.get("/api/public/latest", async (c) =>
 app.get("/api/public/announcements", async (c) =>
   handleAnnouncements(c.req.raw, c.env, c.get("requestId"))
 );
+
+app.get("/api/public/version-inventory/control", c => inventoryControl(c.req.raw, c.env));
+app.post("/api/public/version-inventory", c => reportInventory(c.req.raw, c.env));
+app.all("/api/ci/delta/jobs/*", c => deltaCi(c.req.raw, c.env));
 
 app.get("/api/public/firmware/latest", async (c) =>
   handleFirmwareLatest(c.req.raw, c.env, c.get("requestId"))
@@ -87,6 +93,8 @@ app.onError((error, c) => errorJson(error, c.get("requestId") ?? crypto.randomUU
 export default {
   fetch: app.fetch,
   async scheduled(_event, env) {
-    await cleanupFirmwareIdempotency(env.DB);
+    // The inventory-only staging schedule must not start pruning old OTA receipts.
+    if (_event.cron !== "17 * * * *") await cleanupFirmwareIdempotency(env.DB);
+    await cleanupInventory(env);
   }
 } satisfies ExportedHandler<WorkerEnv>;

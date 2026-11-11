@@ -63,7 +63,7 @@
   "env": {
     "staging": {
       "name": "trace-update-service-staging",
-      "triggers": { "crons": [] },
+      "triggers": { "crons": ["17 * * * *"] },
       "observability": {
         "enabled": true,
         "head_sampling_rate": 1,
@@ -75,6 +75,8 @@
         "GITHUB_OWNER": "Eitan-S-23",
         "GITHUB_REPO": "Trace",
         "FIRMWARE_GITHUB_REPOSITORY": "Eitan-S-23/E-Track",
+        "VERSION_INVENTORY_ENABLED": "true",
+        "DELTA_ASSETS_ENABLED": "false",
         "MANIFEST_CACHE_TTL_SECONDS": "60",
         "DOWNLOAD_TOKEN_TTL_SECONDS": "300",
         "DOWNLOAD_TOKEN_KEY_VERSION": "staging",

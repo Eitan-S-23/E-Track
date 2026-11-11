@@ -1,5 +1,6 @@
 import { ApiError, backendUnavailable, invalidParameter } from "./errors";
 import { sha256Hex, verifyBearerToken } from "./crypto";
+import { supplementalFirmwareAsset, supplementalFirmwareAssets } from "./delta_assets";
 import { clientIpFrom, json } from "./http";
 import { enforceRateLimit } from "./rate_limiter";
 import { signFirmwareDownload, streamFirmwareObject, verifyFirmwareDownload, verifyFirmwareObject } from "./firmware_download";
@@ -116,6 +117,7 @@ export function handleFirmwareLatest(request: Request, env: WorkerEnv, requestId
       { ...compatibility, minProtocolVersion: release.min_protocol_version, protocolVersion: protocol });
     const assets = await firmwareAssets(env.DB, release.id);
     const full = requireFirmwareFull(release, assets);
+    if (env.DELTA_ASSETS_ENABLED === "true") assets.push(...await supplementalFirmwareAssets(env.DB, release.id));
     const patches = assets.filter((a) => a.kind === "patch" && a.base_image_sha256 === get("currentImageSha"));
     if (patches.length > 1) throw backendUnavailable("Ambiguous patch base");
     const asset = patches.length === 1 && usableFirmwareAsset(patches[0])
@@ -157,7 +159,8 @@ export function handleFirmwareDownload(request: Request, env: WorkerEnv, request
   return firmwareOperation(async () => {
     const token = await verifyFirmwareDownload(request, env);
     const asset = await env.DB.prepare("SELECT * FROM firmware_release_assets WHERE id=? AND release_id=?")
-      .bind(token.assetId, token.releaseId).first<FirmwareAssetRow>();
+      .bind(token.assetId, token.releaseId).first<FirmwareAssetRow>()
+      ?? (env.DELTA_ASSETS_ENABLED === "true" ? await supplementalFirmwareAsset(env.DB, token.assetId, token.releaseId) : null);
     if (!asset) throw new ApiError("ASSET_DISABLED", "Firmware asset unavailable", 410);
     if ((token.kind && token.kind !== asset.kind) || (token.purpose === "admin-recovery") !== (asset.kind === "recovery")) {
       throw new ApiError("TOKEN_INVALID", "Firmware token asset/purpose mismatch", 401);

@@ -27,6 +27,12 @@ export interface WorkerEnv {
   DOWNLOAD_HMAC_KEY_CURRENT?: string;
   DOWNLOAD_HMAC_KEY_PREVIOUS?: string;
   FIRMWARE_V2_CUTOVER_EPOCH?: string;
+  VERSION_INVENTORY_ENABLED?: string;
+  DELTA_GITHUB_TOKEN?: string;
+  DELTA_WORKFLOW_REF?: string;
+  DELTA_WORKFLOW_COMMIT?: string;
+  DELTA_APP_PUBLIC_KEY_BASE64?: string;
+  DELTA_ASSETS_ENABLED?: string;
 }
 
 export type FirmwareStorageEnv = Pick<WorkerEnv, "DB" | "RELEASES_BUCKET">;

@@ -150,6 +150,45 @@ summary::marker { color: var(--muted); }
 .app-tabs > button[aria-selected="true"] { color: var(--accent); box-shadow: inset 0 -2px var(--accent); }
 .app-tabs > button:hover { background: transparent; color: var(--accent); }
 .app-panel { min-width: 0; }
+.app-tabs { overflow-x: auto; scrollbar-width: thin; gap: clamp(12px, 2vw, 24px); }
+.app-tabs > button { white-space: nowrap; flex: 0 0 auto; }
+.inventory-body { padding: 0 24px 24px; }
+.operations-buttons { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.operations-buttons > span, .operations-buttons > a { font-size: 12px; }
+.inventory-window { margin: 18px 0; }
+.inventory-table-wrap { overflow-x: auto; }
+.inventory-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
+.inventory-table th, .inventory-table td { padding: 13px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.inventory-table th { font-weight: 500; color: var(--muted); }
+.inventory-table td:nth-child(2) { font-variant-numeric: tabular-nums; }
+.inventory-hash, .delta-base-row small, .delta-job-row small { display: block; color: var(--muted); font-size: 11px; overflow-wrap: anywhere; }
+.inventory-body > .firmware-hint { margin-top: 14px; }
+.delta-entry { margin-bottom: 24px; }
+.delta-open .delta-backdrop { opacity: 1; }
+.delta-open .delta-sheet { opacity: 1; transform: translate(-50%, 0); }
+body.delta-open { overflow: hidden; }
+body.delta-open .resource-float { visibility: hidden; pointer-events: none; }
+.delta-sheet .firmware-hint { margin-bottom: 18px; }
+.delta-base-list { max-height: 330px; overflow-y: auto; overscroll-behavior: contain; margin: 14px 0 20px; border-block: 1px solid var(--line); }
+.delta-base-row { display: grid; grid-template-columns: 20px minmax(0, 1fr) minmax(100px, .7fr); align-items: center; gap: 14px; padding: 14px 4px; border-bottom: 1px solid var(--line); font-size: 12px; }
+.delta-base-row input { width: 17px; height: 17px; accent-color: var(--accent); }
+.delta-base-row > span { overflow-wrap: anywhere; }
+.delta-base-row:has(input:checked) { background: var(--accent-soft); }
+.delta-sheet textarea { width: 100%; min-height: 64px; margin-bottom: 16px; }
+.delta-jobs-title { margin-top: 28px; font-size: 15px; }
+.delta-job-list { max-height: 320px; overflow-y: auto; }
+.delta-job-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--line); font-size: 12px; }
+.delta-job-row > div { min-width: 0; }
+.delta-job-row strong, .delta-job-row span { display: block; }
+@media (max-width: 720px) {
+  .inventory-panel .panel-head { flex-direction: column; }
+  .inventory-body { padding: 0 14px 18px; }
+  .inventory-table th, .inventory-table td { padding-inline: 4px; font-size: 11px; }
+  .delta-base-row { grid-template-columns: 18px minmax(0, 1fr); gap: 8px; }
+  .delta-base-row > span:last-child { grid-column: 2; }
+  .delta-job-row { align-items: flex-start; flex-direction: column; gap: 10px; }
+  .delta-sheet textarea { font-size: 16px; }
+}
 .filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 18px 28px; padding: 0 0 20px; }
 .filters > div:first-child { flex: 1 1 100%; }
 .filter-group { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -249,7 +288,7 @@ summary::marker { color: var(--muted); }
 .announcement-flags label { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; }
 .announcement-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 
-/* Firmware shares the same surface, with a version rail and an inspector. */
+/* Firmware uses the same version-list and modal-detail pattern as App releases. */
 .firmware-view { display: grid; gap: 22px; }
 .firmware-tabs { margin-bottom: 0; }
 .firmware-tab-panel { min-width: 0; }
@@ -284,10 +323,8 @@ summary::marker { color: var(--muted); }
 .firmware-field select { width: 100%; font-size: 12px; color: var(--ink); padding-right: 28px; min-height: 40px; }
 .firmware-filters .firmware-field { flex: 1 1 170px; }
 .firmware-filters > .pill-button { background: transparent; border-color: transparent; color: var(--muted); margin-bottom: 0; }
-.firmware-workspace { display: grid; grid-template-columns: minmax(210px, .75fr) minmax(0, 2fr); align-items: start; border-top: 1px solid var(--line); }
+.firmware-workspace { border-top: 1px solid var(--line); }
 .firmware-workspace > .panel { padding: 22px 0; border: 0; min-width: 0; }
-.firmware-workspace > aside { padding-right: 24px; }
-.firmware-workspace > #firmwareDetail { scroll-margin-top: calc(var(--toolbar-height, 90px) + 64px); border-left: 1px solid var(--line); padding-left: 28px; }
 #firmwareListCount { margin-top: 5px; margin-bottom: 18px; font-size: 11px; }
 .firmware-release-list { display: grid; max-height: min(440px, 55dvh); overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
 .firmware-release-card { min-width: 0; border-bottom: 1px solid var(--line); }
@@ -301,8 +338,6 @@ summary::marker { color: var(--muted); }
 .firmware-list-tag { display: block; color: var(--muted); font-size: 11px; line-height: 1.6; overflow-wrap: anywhere; }
 .firmware-release-card .version-tags:empty { display: none; }
 .firmware-detail-card { min-width: 0; }
-.firmware-detail-card > .firmware-card-top h2 { font-size: 26px; }
-.firmware-detail-card > .firmware-card-top .tag { margin-left: 8px; font-size: 10px; letter-spacing: 0; }
 .firmware-meta-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 24px; margin-block: 16px; }
 .firmware-meta-grid > div { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
 .firmware-meta-grid span { color: var(--muted); font-size: 11px; overflow-wrap: anywhere; }
@@ -334,28 +369,33 @@ summary::marker { color: var(--muted); }
 .firmware-compare-row > * { min-width: 0; overflow-wrap: anywhere; white-space: pre-wrap; font-weight: 400; }
 .firmware-compare-row > span { color: var(--muted); }
 .firmware-compare-row.changed { background: var(--accent-soft); }
-.firmware-back { display: none; }
 
 /* Overlays have a single focus owner; underlying surfaces are made inert in JS. */
 .drawer-backdrop, .quick-action-backdrop, .confirm-backdrop { position: fixed; inset: 0; background: #28302952; }
 .drawer-backdrop { z-index: 40; }
 .quick-action-backdrop { z-index: 60; opacity: 0; transition: opacity .18s ease-out; }
 .confirm-backdrop { z-index: 80; opacity: 0; transition: opacity .16s ease-out; }
-.quick-actions-open .quick-action-backdrop, .confirm-open .confirm-backdrop { opacity: 1; }
+.quick-actions-open #quickActionBackdrop, .firmware-details-open .firmware-detail-backdrop, .confirm-open .confirm-backdrop { opacity: 1; }
 .quick-action-sheet {
+  --sheet-pad-top: 28px; --sheet-pad-x: 32px; --sheet-pad-bottom: 32px; --sheet-close-top: 28px;
+  display: flex; flex-direction: column;
   position: fixed; top: 4vh; left: 50%; z-index: 70;
   width: min(1040px, calc(100vw - 48px)); max-height: 92vh; max-height: 92dvh;
-  padding: 28px 32px 32px; border: 1px solid var(--line); border-radius: 12px;
-  background: var(--surface); box-shadow: 0 22px 80px #1d2a2529; overflow-y: auto; overscroll-behavior: contain;
+  padding: 0; border: 1px solid var(--line); border-radius: 12px;
+  background: var(--surface); box-shadow: 0 22px 80px #1d2a2529; overflow: hidden;
   opacity: 0; transform: translate(-50%, 14px); transition: opacity .18s ease-out, transform .18s ease-out;
 }
-.quick-actions-open .quick-action-sheet { opacity: 1; transform: translate(-50%, 0); }
+.quick-actions-open #quickActionSheet, .firmware-details-open .firmware-detail-sheet { opacity: 1; transform: translate(-50%, 0); }
+.quick-sheet-scroll { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 var(--sheet-pad-x) var(--sheet-pad-bottom); }
 .quick-sheet-handle { display: none; }
-.quick-sheet-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+.quick-sheet-header { display: flex; flex: 0 0 auto; align-items: flex-start; justify-content: space-between; gap: 16px; padding: var(--sheet-pad-top) calc(var(--sheet-pad-x) + 56px) 22px var(--sheet-pad-x); }
 .quick-sheet-header > div { min-width: 0; }
+.quick-sheet-header p { overflow-wrap: anywhere; }
 .quick-sheet-header h2 { font-size: 28px; overflow-wrap: anywhere; }
 .quick-sheet-header p:not(.eyebrow) { margin-top: 5px; color: var(--muted); font-size: 12px; }
 .quick-sheet-close, .resource-close { padding: 10px; border: 0; background: var(--wash); flex: 0 0 auto; }
+/* The close control belongs to the shell, not the scrolling details. */
+.quick-sheet-close { position: absolute; top: var(--sheet-close-top); right: var(--sheet-pad-x); z-index: 2; }
 .quick-sheet-meta { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 17px 0; gap: 18px; }
 .quick-meta-card { display: grid; gap: 4px; min-width: 0; }
 .quick-meta-card > span { color: var(--muted); font-size: 11px; }
@@ -393,7 +433,7 @@ summary::marker { color: var(--muted); }
 .confirm-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
 .confirm-actions > button { min-width: 86px; }
 .confirm-dialog > a { display: flex; text-decoration: none; }
-body.quick-actions-open, body.confirm-open, body.nav-open { overflow: hidden; }
+body.quick-actions-open, body.firmware-details-open, body.confirm-open, body.nav-open { overflow: hidden; }
 
 /* The resource ball is movable again, and stays behind modal surfaces. */
 .resource-float { position: fixed; z-index: 45; right: 22px; bottom: 22px; width: 72px; height: 72px; }
@@ -413,7 +453,7 @@ body.quick-actions-open, body.confirm-open, body.nav-open { overflow: hidden; }
 .resource-water-wave { fill: url(#resourceWaterGradient); animation: resource-wave 8s ease-in-out infinite alternate; }
 .resource-water-wave.back { opacity: .5; animation-direction: alternate-reverse; }
 .resource-water-foam { fill: none; stroke: #edf4e7; stroke-width: 1; opacity: .7; animation: resource-wave 8s ease-in-out infinite alternate; }
-body.quick-actions-open .resource-float, body.confirm-open .resource-float, body.nav-open .resource-float { visibility: hidden; pointer-events: none; }
+body.quick-actions-open .resource-float, body.firmware-details-open .resource-float, body.confirm-open .resource-float, body.nav-open .resource-float { visibility: hidden; pointer-events: none; }
 @keyframes resource-wave { from { transform: translateX(0); } to { transform: translateX(-38px); } }
 .resource-panel { position: fixed; z-index: 45; width: min(420px, calc(100vw - 32px)); max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); overflow-y: auto; padding: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 16px 60px #1b2f2424; }
 .resource-panel-head { display: flex; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line); padding-bottom: 18px; margin-bottom: 18px; }
@@ -438,9 +478,6 @@ body.quick-actions-open .resource-float, body.confirm-open .resource-float, body
 @media (max-width: 1180px) {
   .topbar { gap: 6px; }
   .workspace { padding-inline: 28px; }
-  .firmware-workspace { grid-template-columns: minmax(190px, .85fr) minmax(0, 1.8fr); }
-  .firmware-workspace > aside { padding-right: 16px; }
-  .firmware-workspace > #firmwareDetail { padding-left: 20px; }
   .firmware-channel-summary-states > span { display: grid; gap: 0; }
 }
 @media (max-width: 1000px) {
@@ -507,21 +544,16 @@ body.quick-actions-open .resource-float, body.confirm-open .resource-float, body
   .firmware-filters .firmware-field { flex-basis: calc(50% - 6px); }
   .firmware-filters > .pill-button { flex: 1 1 calc(50% - 6px); }
   .firmware-field select { font-size: 14px; }
-  .firmware-workspace { grid-template-columns: 1fr; }
-  .firmware-workspace > aside { padding-right: 0; }
-  .firmware-workspace > #firmwareDetail { border-left: 0; border-top: 1px solid var(--line); padding: 24px 0; scroll-margin-top: calc(var(--toolbar-height, 90px) + 62px); }
   .firmware-release-list { max-height: min(330px, 48dvh); overflow-y: auto; overscroll-behavior: contain; }
-  .firmware-back { display: inline-flex; gap: 8px; align-items: center; background: transparent; border-color: transparent; padding: 8px 0; min-height: 40px; color: var(--accent); font-size: 12px; margin-bottom: 12px; }
-  .firmware-detail-card > .firmware-card-top h2 { font-size: 24px; }
   .firmware-meta-grid { gap: 14px 18px; }
   .firmware-actions { gap: 10px; }
   .firmware-actions > div { flex-basis: calc(50% - 5px); }
   .firmware-channel-card .firmware-actions > button { flex: 1 1 100%; }
   .firmware-compare-row { gap: 8px; padding-inline: 8px; font-size: 10px; }
   .firmware-section textarea { font-size: 16px; }
-  .quick-action-sheet { width: 100%; top: auto; bottom: 0; max-height: 94vh; max-height: 94dvh; border-radius: 16px 16px 0 0; padding: 14px 20px 28px; padding-bottom: max(28px, env(safe-area-inset-bottom)); }
-  .quick-sheet-handle { display: block; width: 32px; height: 3px; margin: 0 auto 18px; border-radius: 4px; background: #ccd2c6; }
-  .quick-sheet-header { margin-bottom: 18px; }
+  .quick-action-sheet { --sheet-pad-top: 18px; --sheet-pad-x: 20px; --sheet-pad-bottom: max(28px, env(safe-area-inset-bottom)); --sheet-close-top: 35px; width: 100%; top: auto; bottom: 0; max-height: 94vh; max-height: 94dvh; border-radius: 16px 16px 0 0; }
+  .quick-sheet-handle { display: block; flex: 0 0 3px; width: 32px; height: 3px; margin: 14px auto 0; border-radius: 4px; background: #ccd2c6; }
+  .quick-sheet-header { padding-bottom: 18px; }
   .quick-sheet-header h2 { font-size: 24px; }
   .quick-sheet-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
   .quick-sheet-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding-block: 20px; }
@@ -543,7 +575,7 @@ body.quick-actions-open .resource-float, body.confirm-open .resource-float, body
   .firmware-filters > .pill-button { flex: 0 1 auto; padding-left: 0; }
   .firmware-meta-grid { grid-template-columns: 1fr; }
   .big-action { padding: 12px 10px; gap: 7px; }
-  .quick-action-sheet { padding-inline: 16px; }
+  .quick-action-sheet { --sheet-pad-x: 16px; }
   .confirm-dialog { padding: 20px; }
 }
 @media (prefers-reduced-motion: reduce) {

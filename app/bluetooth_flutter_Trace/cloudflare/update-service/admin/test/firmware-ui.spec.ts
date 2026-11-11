@@ -12,6 +12,7 @@ function manyFirmware(count: number) {
   }));
 }
 async function refreshMcu(page: Page) {
+  await closeFirmwareDetails(page);
   await page.locator("#refreshButton").click();
   await expect(page.locator("#refreshButton")).toBeEnabled();
 }
@@ -105,8 +106,10 @@ test("mcu interaction tabs preserve draft and target while searches remain indep
     reason: "Reviewed reason", requestId: "history-note-request", before: {}, after: {} }];
   expect(data.events.some(event => event.endsWith("/history"))).toBe(false);
   await page.locator("#searchInput").fill("fw-new-patch");
+  await clickRelease(page, "fw-new", "select");
   await page.locator('[data-firmware-action="notes-edit"]').click();
   await page.locator("#firmwareNotesEditor").fill("Unsaved MCU notes");
+  await closeFirmwareDetails(page);
   await page.locator("#firmwareVersionsTab").focus();
   await page.keyboard.press("ArrowRight");
   await expect(page.locator("#firmwareChannelsTab")).toBeFocused();
@@ -116,7 +119,7 @@ test("mcu interaction tabs preserve draft and target while searches remain indep
   await expect(page.locator("#firmwareChannelList .firmware-channel-card")).toHaveCount(1);
   await expect(page.locator("#firmwareChannelTarget")).toContainText(data.releases[0].releaseTag);
   await page.locator("#firmwareChannelsTab").focus();
-  await page.keyboard.press("End");
+  await page.keyboard.press("ArrowRight");
   await expect(page.locator("#firmwareHistoryTab")).toBeFocused();
   await expect(page.locator("#firmwareHistoryList .firmware-history-item")).toHaveCount(1);
   await expect(page.locator("#searchInput")).toHaveValue("");
@@ -166,7 +169,7 @@ for (const language of ["en", "zh"]) {
     await refreshMcu(page);
     await expect(page.locator("#firmwareNotice")).toBeVisible();
     await expect(page.locator("#firmwareSetup")).toHaveCount(0);
-    await expect(page.locator("#firmwareDetail")).toContainText(language === "zh" ? "不能据此判断版本库为空" : "before deciding whether this catalogue is empty");
+    await expect(page.locator("#firmwareReleaseList")).toContainText(language === "zh" ? "不能据此判断版本库为空" : "before deciding whether this catalogue is empty");
     expect(data.writes).toHaveLength(0);
   });
 }
@@ -338,13 +341,27 @@ const channelButton = (page: Page, channel: string, action: string) => page.loca
 const releaseButton = (page: Page, id: string, action: string) => page.locator(action === "select"
   ? `#firmwareReleaseList .firmware-release-card[data-release-id="${id}"] [data-firmware-action="select"]`
   : `#firmwareDetail[data-release-id="${id}"] [data-firmware-action="${action}"]`);
+async function closeFirmwareDetails(page: Page) {
+  if (await page.locator("#firmwareDetailSheet").isVisible()) {
+    await page.locator("#firmwareDetailClose").click();
+    await expect(page.locator("#firmwareDetailSheet")).toBeHidden();
+  }
+}
 async function firmwareTab(page: Page, section: "releases" | "channels" | "history") {
+  await closeFirmwareDetails(page);
   const tab = page.locator('[data-firmware-section="' + section + '"]');
   if (await tab.getAttribute("aria-selected") !== "true") await tab.click();
   await expect(tab).toHaveAttribute("aria-selected", "true");
 }
 async function clickRelease(page: Page, id: string, action: string) {
-  await firmwareTab(page, "releases");
+  const open = await page.locator("#firmwareDetailSheet").isVisible();
+  const selected = await page.locator("#firmwareDetail").getAttribute("data-release-id");
+  if (action === "select" || !open || selected !== id) {
+    await firmwareTab(page, "releases");
+    await releaseButton(page, id, "select").click();
+    await expect(page.locator("body")).toHaveClass(/\bfirmware-details-open\b/);
+  }
+  if (action === "select") return;
   await releaseButton(page, id, action).click();
 }
 async function clickChannel(page: Page, channel: string, action: string) {
@@ -375,6 +392,126 @@ async function closeResult(page: Page) {
   await expect(page.locator("#refreshButton")).toBeEnabled();
 }
 
+for (const language of ["en", "zh"]) for (const width of [1440, 1024, 390, 320]) {
+  test(`mcu modal ${language} ${width}px matches the App overlay instead of inline details`, async ({ page }, info) => {
+    await page.setViewportSize({ width, height: 844 });
+    const data = await mockAdmin(page, language);
+    const sheet = page.locator("#firmwareDetailSheet");
+    const row = releaseButton(page, "fw-old", "select");
+    await expect(sheet).toBeHidden();
+    await expect(page.locator("#firmwareVersionsPanel #firmwareDetail")).toHaveCount(0);
+    const documentHeight = await page.evaluate(() => document.documentElement.scrollHeight);
+    await clickRelease(page, "fw-old", "select");
+    await expect(sheet).toHaveAttribute("role", "dialog");
+    await expect(sheet).toHaveAttribute("aria-modal", "true");
+    await expect(page.locator("#firmwareDetailTitle")).toHaveText(data.releases[2].versionName);
+    await expect(row).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator("#firmwareDetailClose")).toBeFocused();
+    await expect.poll(() => sheet.evaluate(node => Number(getComputedStyle(node).opacity))).toBe(1);
+    const geometry = await sheet.evaluate(node => {
+      const reference = document.querySelector<HTMLElement>("#quickActionSheet")!;
+      const hidden = reference.hidden;
+      // Resolve the App's percentage width through layout too, not display:none.
+      reference.hidden = false;
+      const firmware = getComputedStyle(node), app = getComputedStyle(reference);
+      const equal = ["width", "maxHeight", "borderRadius", "padding", "overflowY"].every(key =>
+        firmware[key as keyof CSSStyleDeclaration] === app[key as keyof CSSStyleDeclaration]);
+      reference.hidden = hidden;
+      return { position: firmware.position, equal,
+        outsideWorkspace: !document.querySelector(".workspace")!.contains(node),
+        backgroundInert: (document.querySelector(".workspace") as HTMLElement).inert,
+        bodyOverflow: getComputedStyle(document.body).overflow };
+    });
+    expect(geometry).toEqual({ position: "fixed", equal: true, outsideWorkspace: true,
+      backgroundInert: true, bodyOverflow: "hidden" });
+    expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(documentHeight + 1);
+    await expect(page.locator("#resourceOrb")).toBeHidden();
+    const box = (await sheet.boundingBox())!;
+    expect(box.x).toBeGreaterThanOrEqual(0);
+    expect(box.x + box.width).toBeLessThanOrEqual(width + 1);
+    expect(box.y).toBeGreaterThanOrEqual(0);
+    expect(box.y + box.height).toBeLessThanOrEqual(845);
+    await page.screenshot({ path: info.outputPath(`mcu-modal-${language}-${width}-mock.png`), animations: "disabled" });
+    const close = page.locator("#firmwareDetailClose");
+    const closeStart = (await close.boundingBox())!;
+    const content = page.locator("#firmwareDetailScroll");
+    expect((await content.boundingBox())!.y).toBeGreaterThanOrEqual(closeStart.y + closeStart.height);
+    const scroll = await page.evaluate(() => scrollY);
+    await page.mouse.move(box.x + box.width / 2, box.y + Math.min(200, box.height / 2));
+    await page.mouse.wheel(0, 450);
+    await expect.poll(() => content.evaluate(node => node.scrollTop)).toBeGreaterThan(0);
+    expect(await page.evaluate(() => scrollY)).toBe(scroll);
+    await content.evaluate(node => { node.scrollTop = node.scrollHeight; });
+    await expect(close).toBeInViewport({ ratio: 1 });
+    const closeEnd = (await close.boundingBox())!;
+    expect((await content.boundingBox())!.y).toBeGreaterThanOrEqual(closeEnd.y + closeEnd.height);
+    expect(Math.abs(closeEnd.x - closeStart.x)).toBeLessThan(1);
+    expect(Math.abs(closeEnd.y - closeStart.y)).toBeLessThan(1);
+    const point = { x: closeEnd.x + closeEnd.width / 2, y: closeEnd.y + closeEnd.height / 2 };
+    expect(await page.evaluate(p => document.elementFromPoint(p.x, p.y)?.closest("button")?.id, point)).toBe("firmwareDetailClose");
+    await page.screenshot({ path: info.outputPath(`mcu-close-at-bottom-${language}-${width}-mock.png`), animations: "disabled" });
+    // A coordinate click cannot auto-scroll a hidden close button back into view.
+    await page.mouse.click(point.x, point.y);
+    await expect(sheet).toBeHidden();
+    await expect(row).toBeFocused();
+    await expect(row).toHaveAttribute("aria-expanded", "false");
+    await expect(page.locator("#resourceOrb")).toBeVisible();
+    await clickRelease(page, "fw-old", "select");
+    expect(await content.evaluate(node => node.scrollTop)).toBe(0);
+    await page.locator("#firmwareDetailBackdrop").click({ position: { x: 4, y: 4 } });
+    await expect(sheet).toBeHidden();
+    await expect(row).toBeFocused();
+    await clickRelease(page, "fw-old", "select");
+    await page.locator("#firmwareCompare").focus();
+    await page.keyboard.press("Tab");
+    await expect(page.locator("#firmwareDetailClose")).toBeFocused();
+    await page.keyboard.press("Shift+Tab");
+    await expect(page.locator("#firmwareCompare")).toBeFocused();
+    await page.keyboard.press("Escape");
+    await expect(sheet).toBeHidden();
+    await expect(row).toBeFocused();
+    expect(data.writes).toHaveLength(0);
+  });
+}
+
+test("mcu modal retains drafts across closing and gives nested confirmation the only focus", async ({ page }) => {
+  const data = await mockAdmin(page);
+  await clickRelease(page, "fw-new", "select");
+  await page.locator('[data-firmware-action="notes-edit"]').click();
+  await page.locator("#firmwareNotesEditor").fill("Draft stays with this firmware version");
+  await page.locator('[data-firmware-action="notes-save"]').click();
+  await expect(page.locator("body")).toHaveClass(/\bconfirm-open\b/);
+  await expect(page.locator("#firmwareDetailSheet")).toHaveJSProperty("inert", true);
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#confirmDialog")).toBeHidden();
+  await expect(page.locator("#firmwareDetailSheet")).toBeVisible();
+  await expect(page.locator("#firmwareDetailSheet")).toHaveJSProperty("inert", false);
+  expect(await page.locator("#firmwareDetailSheet").evaluate(node => node.contains(document.activeElement))).toBe(true);
+  await closeFirmwareDetails(page);
+  await clickRelease(page, "fw-old", "select");
+  await expect(page.locator("#firmwareNotesEditor")).toHaveCount(0);
+  await closeFirmwareDetails(page);
+  await page.locator("#languageToggle").click();
+  await clickRelease(page, "fw-new", "select");
+  await expect(page.locator("#firmwareNotesEditor")).toHaveValue("Draft stays with this firmware version");
+  await expect(page.locator("#firmwareDetailClose")).toHaveAttribute("aria-label", "关闭版本详情");
+  expect(data.writes).toHaveLength(0);
+});
+
+test("mcu modal hands publication to the existing explicit confirmation without submitting on close", async ({ page }) => {
+  const data = await mockAdmin(page);
+  await clickRelease(page, "fw-new", "select");
+  await page.locator('#firmwareDetail [data-firmware-action="publish"][data-channel="beta"]').click();
+  await expect(page.locator("#firmwareDetailSheet")).toBeHidden();
+  await expect(page.locator("#confirmDialog")).toBeVisible();
+  await page.locator("#confirmReason").fill("Cancelled test intent");
+  await page.locator("#confirmCancel").click();
+  await expect(page.locator("#confirmDialog")).toBeHidden();
+  await expect(page.locator("#firmwareDetail")).toHaveAttribute("data-release-id", "fw-new");
+  await expect(page.locator(".workspace")).toHaveJSProperty("inert", false);
+  expect(data.writes).toHaveLength(0);
+});
+
 for (const language of ["en", "zh"]) for (const width of [1440, 390]) {
   test(`workspace ${language} normal ${width}px starts with versions and compact channel controls`, async ({ page }, info) => {
     await page.setViewportSize({ width, height: 1000 });
@@ -384,6 +521,9 @@ for (const language of ["en", "zh"]) for (const width of [1440, 390]) {
     await expect(page.locator("#firmwareChannelSummary")).toContainText(data.releases[1].versionName);
     await expect(channelButton(page, "stable", "stop-latest")).toBeHidden();
     await expect(releaseButton(page, "fw-new", "select")).toBeInViewport();
+    await expect(page.locator("#firmwareDetailSheet")).toBeHidden();
+    await expect(page.locator("#firmwareDetail")).toBeHidden();
+    await expect(page.locator("#firmwareVersionsPanel #firmwareDetail")).toHaveCount(0);
     await expect(page.locator("#resourceOrb")).toBeVisible();
     await expect(page.locator("#drawerBackdrop")).toBeHidden();
     await page.screenshot({ path: info.outputPath(`workspace-normal-${language}-${width}-mock.png`), fullPage: false, animations: "disabled" });
@@ -413,6 +553,7 @@ test("workspace filters, sorting, selection and comparison use actual version da
   await expect(page.locator("#firmwareComparison")).toContainText("20801");
   await expect(page.locator("#firmwareComparison")).toContainText("20803");
   await expect(page.locator("#firmwareComparison .changed")).not.toHaveCount(0);
+  await closeFirmwareDetails(page);
   await page.locator("#searchInput").fill("fw-old-patch");
   await expect(page.locator("#firmwareReleaseList .firmware-release-card")).toHaveCount(1);
   await page.locator('[data-firmware-action="clear-filters"]').click();
@@ -424,6 +565,7 @@ test("workspace filters, sorting, selection and comparison use actual version da
 
 test("workspace update notes save through the real-shaped API and retain immutable identity", async ({ page }) => {
   const data = await mockAdmin(page); const original = structuredClone(data.releases[0]);
+  await clickRelease(page, "fw-new", "select");
   await page.locator('[data-firmware-action="notes-edit"]').click();
   await page.locator("#firmwareNotesEditor").fill("## New notes\n- Current firmware behavior");
   await page.locator('[data-firmware-action="notes-save"]').click();
@@ -441,6 +583,7 @@ test("workspace update notes save through the real-shaped API and retain immutab
 
 test("workspace notes conflict preserves draft and requires an explicit new confirmation", async ({ page }) => {
   const data = await mockAdmin(page); data.mode = "notes-conflict";
+  await clickRelease(page, "fw-new", "select");
   await page.locator('[data-firmware-action="notes-edit"]').click();
   await page.locator("#firmwareNotesEditor").fill("My unsaved description");
   await page.locator('[data-firmware-action="notes-save"]').click(); await fillConfirmation(page);
@@ -458,6 +601,7 @@ test("workspace notes conflict preserves draft and requires an explicit new conf
 
 test("workspace unknown notes outcome never repeats a write and preserves the draft", async ({ page }) => {
   const data = await mockAdmin(page); data.mode = "unknown-notes";
+  await clickRelease(page, "fw-new", "select");
   await page.locator('[data-firmware-action="notes-edit"]').click();
   await page.locator("#firmwareNotesEditor").fill("Committed but response lost");
   await page.locator('[data-firmware-action="notes-save"]').click(); await fillConfirmation(page);
@@ -495,9 +639,11 @@ test("workspace history paginates, filters by version and isolates read failures
 
 test("workspace unavailable recovery and read-only notes explain why actions are disabled", async ({ page }) => {
   const data = await mockAdmin(page, "en", "viewer");
+  await clickRelease(page, "fw-new", "select");
   await expect(page.locator('[data-firmware-action="notes-edit"]')).toBeDisabled();
   data.role = "owner"; data.actor = "owner@example.test"; data.recoveryDownload = false;
-  await page.locator("#refreshButton").click();
+  await refreshMcu(page);
+  await clickRelease(page, "fw-new", "select");
   await expect(releaseButton(page, "fw-new", "recovery-download")).toBeDisabled();
   await expect(page.locator("#firmwareDetail")).toContainText("Recovery download is not configured");
   expect(data.writes).toHaveLength(0);
@@ -527,11 +673,20 @@ for (const language of ["en", "zh"]) {
       data.releases[0].releaseNotes = "# " + (language === "zh" ? "较长的固件更新说明" : "Long firmware update description ").repeat(8)
         + "\n- " + "LongUnbrokenIdentifier".repeat(15) + "\n<img src=x onerror=alert(1)>";
       data.channels[0].maintenanceMessage = (language === "zh" ? "这是需要完整展示的维护说明。" : "A maintenance message that must remain fully readable. ").repeat(6);
-      await page.locator("#refreshButton").click();
+      await refreshMcu(page);
+      await clickRelease(page, "fw-new", "select");
       await expect(page.locator("#firmwareDetail")).toContainText("LongUnbrokenIdentifier");
       await page.locator("#firmwareCompare").selectOption("fw-old");
-      await expect(page.locator("#resourceOrb")).toBeVisible();
+      await expect(page.locator("#resourceOrb")).toBeHidden();
       await expect(page.locator("#firmwareDetail img")).toHaveCount(0);
+      const detailOverflow = await page.locator("#firmwareDetailSheet").evaluate(root =>
+        [...root.querySelectorAll<HTMLElement>("strong, .quick-sheet-header p, .quick-sheet-header h2, .firmware-notes, .firmware-compare-row, button")]
+          .filter(element => element.getClientRects().length > 0)
+          .filter(element => { const box = element.getBoundingClientRect();
+            return box.left < -1 || box.right > innerWidth + 1 || element.scrollWidth > element.clientWidth + 2; })
+          .map(element => element.className));
+      expect(detailOverflow).toEqual([]);
+      await page.screenshot({ path: info.outputPath(`workspace-details-${language}-${width}-mock.png`), animations: "disabled" });
       for (const section of ["releases", "channels"] as const) {
         await firmwareTab(page, section);
         const overflow = await page.locator("#firmwareView").evaluate(root => {
@@ -620,7 +775,7 @@ test("viewer and unavailable/reference-protected releases cannot write", async (
   expect(data.writes).toHaveLength(0);
   data.role = "owner"; data.actor = "owner@example.test";
   data.releases[0].state = "draft"; data.releases[2].archived = true;
-  await page.locator("#refreshButton").click();
+  await refreshMcu(page);
   await expect(releaseButton(page, "fw-new", "publish").first()).toBeDisabled();
   await clickRelease(page, "fw-old", "select");
   await expect(releaseButton(page, "fw-old", "disable")).toBeDisabled();
@@ -636,7 +791,7 @@ for (const language of ["en", "zh"]) {
     await clickRelease(page, "fw-new", "select");
     await expect(releaseButton(page, "fw-new", "delete")).toBeDisabled();
     data.releases[0].state = "disabled";
-    await page.locator("#refreshButton").click();
+    await refreshMcu(page);
     await clickRelease(page, "fw-new", "delete");
     await expect(page.locator("body")).toHaveClass(/\bconfirm-open\b/);
     await page.locator("#confirmReason").fill("remove disposable files");
@@ -662,7 +817,7 @@ for (const language of ["en", "zh"]) {
 test("partial file deletion requires a fresh explicit confirmation instead of automatic retry", async ({ page }) => {
   const data = await mockAdmin(page);
   data.releases[0].state = "disabled"; data.mode = "partial-delete";
-  await page.locator("#refreshButton").click();
+  await refreshMcu(page);
   await clickRelease(page, "fw-new", "delete");
   await expect(page.locator("body")).toHaveClass(/\bconfirm-open\b/);
   await page.locator("#confirmInput").fill(data.releases[0].releaseTag);
@@ -761,7 +916,7 @@ for (const action of ["recovery-download", "disable"]) for (const failure of int
       await clickRelease(page, "fw-old", "select");
       await expect(releaseButton(page, "fw-old", "recovery-download")).toBeDisabled();
       await expect(releaseButton(page, "fw-old", "disable")).toBeDisabled();
-      await page.locator("#refreshButton").click(); await expect(page.locator("#refreshButton")).toBeEnabled();
+      await refreshMcu(page);
       await expect(page.locator('[data-firmware-action="retry-release"]')).toBeVisible();
       await expect(releaseButton(page, "fw-old", "recovery-download")).toBeDisabled();
       expect(data.writes).toHaveLength(writes + 1); expect(data.results.size).toBe(1);
@@ -877,15 +1032,16 @@ test("design firmware confirmation traps Tab and Escape does not alter selection
 });
 
 for (const language of ["en", "zh"]) {
-  test("design firmware " + language + " mobile selects details and returns to the chosen version", async ({ page }, info) => {
+  test("design firmware " + language + " mobile opens a detail dialog and returns to the chosen version", async ({ page }, info) => {
     await page.setViewportSize({ width: 390, height: 844 });
     const data = await mockAdmin(page, language, "owner");
     await clickRelease(page, "fw-old", "select");
-    await expect(page.locator("#firmwareDetail")).toBeFocused();
+    await expect(page.locator("#firmwareDetailSheet")).toBeVisible();
+    await expect(page.locator("#firmwareDetailClose")).toBeFocused();
     await expect(page.locator("#firmwareDetail")).toHaveAttribute("data-release-id", "fw-old");
-    await expect(page.locator(".firmware-back")).toBeInViewport();
+    await expect(page.locator("#firmwareDetailClose")).toBeInViewport();
     await page.screenshot({ path: info.outputPath("firmware-mobile-details-mock.png"), animations: "disabled" });
-    await page.locator(".firmware-back").click();
+    await closeFirmwareDetails(page);
     await expect(releaseButton(page, "fw-old", "select")).toBeFocused();
     await expect(releaseButton(page, "fw-old", "select")).toBeInViewport();
     expect(data.writes).toHaveLength(0);

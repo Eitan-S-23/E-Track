@@ -3,6 +3,8 @@ import { FIRMWARE_CHANNEL_ACTIONS, firmwareReleaseAction, listFirmware, mutateFi
 import { deleteFirmwareFiles } from "../../../../worker/src/firmware_delete";
 import { editFirmwareNotes, firmwareHistory } from "../../../../worker/src/firmware_catalog";
 import { readFirmwareJson, requireFirmwareJsonHeaders } from "../../../../worker/src/firmware";
+import { boundedJson, inventorySummary, refreshInventory } from "../../../../worker/src/version_inventory";
+import { createDeltaJobs, deltaCandidates, deltaJobAction } from "../../../../worker/src/delta_jobs";
 
 type Platform = "android" | "windows";
 type ChannelName = "stable" | "beta";
@@ -25,6 +27,12 @@ interface AdminEnv {
   DOWNLOAD_HMAC_KEY_PREVIOUS?: string;
   FIRMWARE_V2_CUTOVER_EPOCH?: string;
   FIRMWARE_DOWNLOAD_ORIGIN?: string;
+  VERSION_INVENTORY_ENABLED?: string;
+  DELTA_GITHUB_TOKEN?: string;
+  DELTA_WORKFLOW_REF?: string;
+  DELTA_WORKFLOW_COMMIT?: string;
+  DELTA_APP_PUBLIC_KEY_BASE64?: string;
+  DELTA_ASSETS_ENABLED?: string;
 }
 
 interface Actor {
@@ -203,6 +211,31 @@ async function routeAdminRequest(
   if (method === "GET" && route.length === 1 && route[0] === "channels") {
     requireRole(actor, "viewer");
     return listChannels(context.env, url);
+  }
+
+  if (route[0] === "version-inventory" && route.length === 1 && method === "GET") {
+    requireRole(actor, "viewer");
+    return inventorySummary(context.env);
+  }
+
+  if (route[0] === "delta" && route[1] === "candidates" && route.length === 2 && method === "GET") {
+    requireRole(actor, "viewer");
+    const kind = url.searchParams.get("kind");
+    if (kind !== "android" && kind !== "firmware") throw new AdminError("INVALID_PARAMETER", "Invalid delta kind", 400);
+    return deltaCandidates(context.env, kind, url.searchParams.get("targetId") ?? "");
+  }
+  if (route[0] === "delta" && route[1] === "jobs" && method === "POST") {
+    requireRole(actor, "publisher");
+    const body = await boundedJson(context.request);
+    if (route.length === 2) return createDeltaJobs(context.env, actor.email, body);
+    if (route.length === 4) {
+      if (["enable", "disable"].includes(route[3])) requireRole(actor, "owner");
+      return deltaJobAction(context.env, actor.email, route[2], route[3], body);
+    }
+  }
+  if (route[0] === "version-inventory" && route[1] === "refresh" && route.length === 2 && method === "POST") {
+    requireRole(actor, "publisher");
+    return refreshInventory(context.env, actor.email, await boundedJson(context.request));
   }
 
   if (method === "GET" && route.length === 1 && route[0] === "releases") {
