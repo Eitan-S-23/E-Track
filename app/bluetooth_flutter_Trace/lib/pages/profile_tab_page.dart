@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import '../services/app_update_service.dart';
+import '../services/version_inventory_service.dart';
 import '../services/database_service.dart';
 import 'trace_ui.dart';
 
@@ -135,12 +136,28 @@ class ProfileTabPage extends StatelessWidget {
 
   void _showSettingsDialog() {
     _showTraceDialog(
-      const TraceDialog(
+      TraceDialog(
         title: '应用设置',
         icon: Icons.settings,
         color: TraceColors.mint,
-        message: '设置功能开发中。当前版本先保留入口，后续会接入个性化配置。',
-        actions: [
+        content: Get.isRegistered<VersionInventoryService>() &&
+                Get.find<VersionInventoryService>().available
+            ? Obx(() {
+                final inventory = Get.find<VersionInventoryService>();
+                return Column(mainAxisSize: MainAxisSize.min, children: [
+                  SwitchListTile.adaptive(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('参与版本统计'),
+                    value: inventory.enabled.value,
+                    onChanged: inventory.ready.value
+                        ? (value) => unawaited(inventory.setEnabled(value))
+                        : null,
+                  ),
+                  const Text('低频上报 APP 和已连接设备的版本、文件校验值及去重标识，用于选择差分升级包。不上传位置、联系人或骑行记录。关闭后停止上报，历史记录最多保留 90 天。'),
+                ]);
+              })
+            : const Text('当前平台未启用版本统计。'),
+        actions: const [
           TraceDialogAction(
             label: '知道了',
             isPrimary: true,

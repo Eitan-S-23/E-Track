@@ -28,6 +28,7 @@ import '../ota/ota_mono.dart';
 import '../ota/ota_probe_retry.dart';
 import '../ota/ota_radio_lease.dart';
 import 'app_update_service.dart';
+import 'version_inventory_service.dart';
 import 'bluetooth_service.dart';
 
 /// OTA 升级领域阶段（PR16：UI 由 phase 驱动，不解析状态文本）。
@@ -763,6 +764,9 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           }
         }
         p35.record('identity');
+        if (Get.isRegistered<VersionInventoryService>()) {
+          Get.find<VersionInventoryService>().observeDevice(deviceAddress, info);
+        }
         return info;
       } on OtaDeviceIdentityException catch (e) {
         _deviceInfo = null;
@@ -1586,6 +1590,9 @@ class OtaService extends GetxController with WidgetsBindingObserver {
             // 刷新本地快照为升级后身份。
             _deviceInfo = outcome.info;
             _deviceInfoAddress = deviceAddress;
+            if (Get.isRegistered<VersionInventoryService>() && outcome.info != null) {
+              Get.find<VersionInventoryService>().observeDevice(deviceAddress, outcome.info!);
+            }
             _identityLinkGeneration = outcome.identityLinkGeneration;
             if (_p35Address == deviceAddress.toLowerCase()) _p35Identity = outcome.info;
             diagnosticCompleted = true;

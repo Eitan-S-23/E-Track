@@ -18,6 +18,7 @@ import 'services/database_service.dart';
 import 'services/scan_settings_service.dart';
 import 'services/alert_service.dart';
 import 'services/app_update_service.dart';
+import 'services/version_inventory_service.dart';
 import 'services/background_optimization_service.dart';
 import 'services/deep_link_service.dart';
 import 'services/ota_service.dart';
@@ -113,6 +114,11 @@ class MyApp extends StatelessWidget {
               if (Get.currentRoute != '/device-ota') Get.toNamed('/device-ota');
             }), permanent: true);
             Get.put(AppUpdateService(), permanent: true);
+            Get.put(VersionInventoryService(
+              readAppIdentity: Get.find<AppUpdateService>().getInstalledInventoryIdentity,
+              canReport: () => !Get.find<OtaService>().isUpgrading &&
+                  !Get.find<AppUpdateService>().isUpdating.value,
+            ), permanent: true);
             Get.put(bt_service.BluetoothService(),
                 permanent: true); // 注册跨平台蓝牙服务
             Get.put(BleController(), permanent: true);

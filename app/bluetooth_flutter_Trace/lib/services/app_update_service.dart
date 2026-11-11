@@ -309,6 +309,15 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
     return localInfo.versionCode;
   }
 
+  Future<Map<String, dynamic>> getInstalledInventoryIdentity() async {
+    final info = await _getLocalAppInfo();
+    return {
+      'versionCode': info.versionCode,
+      'versionName': info.versionName,
+      'imageSha256': await _sha256File(File(info.sourceApkPath)),
+    };
+  }
+
   Future<bool> _openInstaller(
     String apkPath, {
     int? expectedVersionCode,
