@@ -161,7 +161,8 @@ async function dispatch(env: DeltaEnv, job: DeltaJob, fetcher: typeof fetch): Pr
       method: "POST", headers: { Authorization: `Bearer ${env.DELTA_GITHUB_TOKEN}`, Accept: "application/vnd.github+json",
         "Content-Type": "application/json", "User-Agent": "E-Track-Admin-Delta" },
       body: JSON.stringify({ ref: job.workflow_ref, inputs: { job_id: job.id, attempt: String(job.attempt), kind: job.kind } }),
-      signal: AbortSignal.timeout(15000), redirect: "error"
+      // Workers rejects redirect:"error" before sending; manual never forwards the token.
+      signal: AbortSignal.timeout(15000), redirect: "manual"
     });
     await response.body?.cancel();
     if (response.status !== 204) {
@@ -227,7 +228,7 @@ export async function deltaJobAction(env: DeltaEnv, actor: string, id: string, a
     if (!env.DELTA_GITHUB_TOKEN) throw new ApiError("BACKEND_UNAVAILABLE","Project GitHub read access is not configured",503);
     const response=await fetcher(`https://api.github.com/repos/${REPOSITORY}/actions/workflows/${WORKFLOW}/runs?event=workflow_dispatch&branch=${encodeURIComponent(job.workflow_ref)}&per_page=100`,{
       headers:{Authorization:`Bearer ${env.DELTA_GITHUB_TOKEN}`,Accept:"application/vnd.github+json","User-Agent":"E-Track-Admin-Delta"},
-      redirect:"error",signal:AbortSignal.timeout(15000)});
+      redirect:"manual",signal:AbortSignal.timeout(15000)});
     if (!response.ok) {await response.body?.cancel();throw new ApiError("BACKEND_UNAVAILABLE","GitHub run reconciliation failed",503);}
     const data=await boundedJson({headers:new Headers({"Content-Type":"application/json"}),body:response.body},2*1024*1024);
     const runs=Array.isArray(data.workflow_runs)?data.workflow_runs as Array<Record<string,unknown>>:[];

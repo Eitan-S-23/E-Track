@@ -96,6 +96,7 @@ describe("operator-selected supplemental delta jobs",()=>{
   it("accepts MCU originals without requiring an APK signature",async()=>{
     const p=await pair(),job=await create(p);
     expect(job.status).toBe("queued"); expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(dispatch.mock.calls[0][1]?.redirect).toBe("manual");
     const sent=JSON.parse(String(dispatch.mock.calls[0][1]?.body));
     expect(sent).toEqual({ref:configured.DELTA_WORKFLOW_REF,inputs:{job_id:job.id,attempt:"1",kind:"firmware"}});
     const candidates=await (await deltaCandidates(configured,p.kind,p.target)).json<{bases:Array<{releaseId:string;eligible:boolean}>}>();
@@ -103,6 +104,17 @@ describe("operator-selected supplemental delta jobs",()=>{
   });
   it("reuses a duplicate request without another dispatch",async()=>{
     const p=await pair(); expect((await create(p)).id).toBe((await create(p)).id);
+    expect(dispatch).toHaveBeenCalledTimes(1);
+  });
+  it.each([302,307])("does not follow a GitHub dispatch redirect (%i) or forward its token",async(status)=>{
+    dispatch.mockImplementationOnce(async(input,init)=>{
+      const request=new Request(input,init);
+      expect(request.redirect).toBe("manual");
+      return new Response(null,{status,headers:{Location:"https://other.example/dispatch"}});
+    });
+    const job=await create(await pair());
+    expect(job.status).toBe("failed");
+    expect(job.error_code).toBe(`GITHUB_HTTP_${status}`);
     expect(dispatch).toHaveBeenCalledTimes(1);
   });
   it("does not dispatch anything for an invalid base selection",async()=>{
@@ -131,9 +143,23 @@ describe("operator-selected supplemental delta jobs",()=>{
     await deltaJobAction(configured,"owner",job.id,"reconcile",{expectedRevision:job.revision,reason:"Read actual run"},runs);
     expect(runs).toHaveBeenCalledTimes(1);
     expect(runs.mock.calls[0][1]?.method).toBeUndefined();
+    expect(runs.mock.calls[0][1]?.redirect).toBe("manual");
     expect(dispatch).toHaveBeenCalledTimes(1);
     const stored=await env.DB.prepare("SELECT status,run_id FROM delta_jobs WHERE id=?").bind(job.id).first();
     expect(stored).toEqual({status:"failed",run_id:"123456"});
+  });
+  it("does not follow a reconciliation redirect or resolve an unknown dispatch",async()=>{
+    dispatch.mockRejectedValueOnce(new TypeError("lost dispatch response"));
+    const job=await create(await pair());
+    const runs=vi.fn<typeof fetch>(async(input,init)=>{
+      expect(new Request(input,init).redirect).toBe("manual");
+      return new Response(null,{status:302,headers:{Location:"https://other.example/runs"}});
+    });
+    await expect(deltaJobAction(configured,"owner",job.id,"reconcile",{expectedRevision:job.revision,reason:"Read actual run"},runs))
+      .rejects.toMatchObject({code:"BACKEND_UNAVAILABLE"});
+    expect(runs).toHaveBeenCalledTimes(1);
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect((await env.DB.prepare("SELECT status FROM delta_jobs WHERE id=?").bind(job.id).first())?.status).toBe("dispatch_unknown");
   });
   it("does not resolve unknown dispatch using a different workflow commit",async()=>{
     dispatch.mockRejectedValueOnce(new TypeError("lost dispatch response"));
