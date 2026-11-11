@@ -3,6 +3,7 @@ import { applyD1Migrations, createExecutionContext } from "cloudflare:test";
 import { describe, expect, it, vi } from "vitest";
 import worker from "../src/index";
 import { firmwareReleaseInsert } from "../src/firmware";
+import { sha256Hex } from "../src/crypto";
 import { canonicalJson } from "../../scripts/firmware-schema.mjs";
 import { metadata, uploadFixture } from "./firmware-fixture";
 
@@ -21,6 +22,26 @@ async function snapshot(db = env.DB) {
 }
 
 describe("authenticated fixed-query firmware preflight", () => {
+  it("isolates firmware registration credentials from the existing App CI credential", async () => {
+    const configured = { ...env, ENVIRONMENT: "staging", FIRMWARE_DEPLOY_TOKEN_SHA256: await sha256Hex("firmware-only-token") };
+    const request = (route: string, token: string, body: unknown) => worker.fetch(new Request(`https://example.com/api/ci/${route}`, {
+      method: "POST", headers: { Authorization: `Bearer ${token}`, Accept: "application/json", "Content-Type": "application/json" },
+      body: JSON.stringify(body) }), configured, createExecutionContext());
+    const input = metadata();
+    expect((await request("firmware/preflight", "test-deploy-token", envelope(input))).status).toBe(401);
+    expect((await request("firmware/preflight", "firmware-only-token", envelope(input))).status).toBe(200);
+    await uploadFixture(input);
+    expect((await request("firmware/releases", "test-deploy-token", input)).status).toBe(401);
+    expect((await request("firmware/releases", "firmware-only-token", input)).status).toBe(201);
+    expect((await request("releases", "firmware-only-token", {})).status).toBe(401);
+    expect((await request("releases", "test-deploy-token", {})).status).toBe(400);
+  });
+  it("does not fall back to the App token when a firmware token is configured incorrectly", async () => {
+    const response = await worker.fetch(new Request("https://example.com/api/ci/firmware/preflight", {
+      method: "POST", headers: { Authorization: "Bearer test-deploy-token", Accept: "application/json", "Content-Type": "application/json" },
+      body: JSON.stringify(envelope()) }), { ...env, ENVIRONMENT: "staging", FIRMWARE_DEPLOY_TOKEN_SHA256: "" }, createExecutionContext());
+    expect(response.status).toBe(401);
+  });
   it("uses the explicitly configured firmware repository without changing the App repository", async () => {
     const input = metadata();
     for (const asset of input.assets) asset.githubUrl = asset.githubUrl.replace("/Eitan-S-23/Trace/", "/Eitan-S-23/E-Track/");

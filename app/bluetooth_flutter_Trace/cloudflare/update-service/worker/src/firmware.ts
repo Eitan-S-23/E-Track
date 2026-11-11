@@ -182,7 +182,9 @@ export function handleFirmwareDownload(request: Request, env: WorkerEnv, request
 async function requireFirmwareCiToken(request: Request, env: WorkerEnv): Promise<void> {
   const authorization = request.headers.get("Authorization");
   const token = authorization && /^Bearer [^\s,]+$/.test(authorization) ? authorization.slice(7) : null;
-  if (!await verifyBearerToken(token, env.DEPLOY_TOKEN_SHA256)) throw new ApiError("TOKEN_INVALID", "Invalid CI token", 401);
+  if (!await verifyBearerToken(token, env.FIRMWARE_DEPLOY_TOKEN_SHA256 ?? env.DEPLOY_TOKEN_SHA256)) {
+    throw new ApiError("TOKEN_INVALID", "Invalid CI token", 401);
+  }
 }
 
 function firmwareRepository(env: WorkerEnv): string {

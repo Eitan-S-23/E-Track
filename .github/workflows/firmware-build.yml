@@ -253,11 +253,11 @@ jobs:
         run: node .github/scripts/firmware-admin-candidate.mjs package --out .cache/admin-candidate/run
       - name: Upload immutable R2 objects and register original-Admin candidate
         env:
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          TRACE_DEPLOY_TOKEN: ${{ secrets.TRACE_DEPLOY_TOKEN }}
-          TRACE_UPDATE_SERVICE_URL: ${{ secrets.TRACE_UPDATE_SERVICE_URL }}
-          TRACE_R2_BUCKET: ${{ vars.TRACE_R2_BUCKET }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.FIRMWARE_REHEARSAL_CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.FIRMWARE_REHEARSAL_CLOUDFLARE_API_TOKEN }}
+          TRACE_DEPLOY_TOKEN: ${{ secrets.ORIGINAL_ADMIN_FIRMWARE_DEPLOY_TOKEN }}
+          TRACE_UPDATE_SERVICE_URL: https://trace-update-service-staging.tangjichentudou.workers.dev
+          TRACE_R2_BUCKET: trace-update-staging-releases
         run: node .github/scripts/firmware-admin-candidate.mjs register --out .cache/admin-candidate/run
       - name: Preserve original normal candidate and registration receipts
         if: always() && steps.package.outcome != '' && steps.package.outcome != 'skipped'
