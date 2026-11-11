@@ -5,6 +5,7 @@ name: MCU Firmware Build
 # - workflow_dispatch(rehearsal=true): isolated staging, never GitHub Release
 # - workflow_dispatch(publish=true): approved rehearsal rebuild and production gate
 # - workflow_dispatch(check_bindings=true): protected existing-object readback, not rehearsal
+# - workflow_dispatch(prepare_admin_candidate=true): normal candidate in the original staging Admin, never production/channel publication
 # - 仅固件路径触发本工作流；Flutter 侧由 build.yml 的 changes job 隔离，互不触发
 # - 正式发布后在 CF admin 端将候选晋升为 stable 渠道当前版本
 # mcu-firmware-release.yml is an out-of-scope legacy consumer, not a v2 fallback.
@@ -92,6 +93,11 @@ on:
       - "app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/*firmware*"
   workflow_dispatch:
     inputs:
+      prepare_admin_candidate:
+        description: "Prepare normal current-V2 firmware and register an unpublished candidate in the original Admin"
+        required: true
+        type: boolean
+        default: false
       stage_candidate:
         description: "Deliver the pinned P51 candidate unchanged to isolated staging only; no build or production approval"
         required: true
@@ -165,8 +171,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: firmware-build-${{ github.event_name == 'workflow_dispatch' && (inputs.publish || inputs.rehearsal || inputs.check_bindings || inputs.package_candidate || inputs.stage_candidate) && 'release' || github.ref }}
-  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' || (!inputs.publish && !inputs.rehearsal && !inputs.check_bindings && !inputs.package_candidate && !inputs.stage_candidate) }}
+  group: firmware-build-${{ github.event_name == 'workflow_dispatch' && (inputs.publish || inputs.rehearsal || inputs.check_bindings || inputs.package_candidate || inputs.stage_candidate || inputs.prepare_admin_candidate) && 'release' || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' || (!inputs.publish && !inputs.rehearsal && !inputs.check_bindings && !inputs.package_candidate && !inputs.stage_candidate && !inputs.prepare_admin_candidate) }}
 
 env:
   DEVICE_MODEL: e-track-at32f435
@@ -178,9 +184,93 @@ env:
   SOURCE_DATE_EPOCH: "1786320000"
 
 jobs:
+  original-admin-candidate:
+    name: Normal V2 candidate in the original Admin (not production approval)
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.prepare_admin_candidate == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: firmware-rehearsal
+    permissions:
+      contents: read
+    env:
+      INPUT_PREPARE_ADMIN_CANDIDATE: ${{ github.event.inputs.prepare_admin_candidate }}
+      INPUT_STAGE_CANDIDATE: ${{ github.event.inputs.stage_candidate }}
+      INPUT_PACKAGE_CANDIDATE: ${{ github.event.inputs.package_candidate }}
+      INPUT_PUBLISH: ${{ github.event.inputs.publish }}
+      INPUT_REHEARSAL: ${{ github.event.inputs.rehearsal }}
+      INPUT_CHECK_BINDINGS: ${{ github.event.inputs.check_bindings }}
+      INPUT_VERSION_NAME: ${{ github.event.inputs.version_name }}
+      INPUT_FIRMWARE_BUILD_PROFILE: ${{ github.event.inputs.firmware_build_profile }}
+      INPUT_CANDIDATE_REVIEWED_COMMIT: ${{ github.event.inputs.candidate_reviewed_commit }}
+      INPUT_CANDIDATE_BASE_VERSION: ${{ github.event.inputs.candidate_base_version }}
+      INPUT_CANDIDATE_FULL_BASE_VERSION: ${{ github.event.inputs.candidate_full_base_version }}
+      INPUT_APPROVED_REHEARSAL_RUN_ID: ${{ github.event.inputs.approved_rehearsal_run_id }}
+      INPUT_RELEASE_NOTES: ${{ github.event.inputs.release_notes }}
+      OTA_BOOT_CHAIN_READY: ${{ vars.OTA_BOOT_CHAIN_READY }}
+      HOME: ${{ github.workspace }}/.cache/admin-candidate/home
+      TEMP: ${{ github.workspace }}/.cache/admin-candidate/tmp
+      TMP: ${{ github.workspace }}/.cache/admin-candidate/tmp
+      TMPDIR: ${{ github.workspace }}/.cache/admin-candidate/tmp
+      XDG_CONFIG_HOME: ${{ github.workspace }}/.cache/admin-candidate/config
+      XDG_CACHE_HOME: ${{ github.workspace }}/.cache/admin-candidate/cache
+      npm_config_cache: ${{ github.workspace }}/.cache/admin-candidate/npm
+      PIP_CACHE_DIR: ${{ github.workspace }}/.cache/admin-candidate/pip
+      PYTHONPATH: ${{ github.workspace }}/.cache/admin-candidate/python
+      PYTHONDONTWRITEBYTECODE: "1"
+      WRANGLER_SEND_METRICS: "false"
+      WRANGLER_LOG_PATH: ${{ github.workspace }}/.cache/admin-candidate/wrangler-logs
+    steps:
+      - name: Checkout exact requested source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - name: Check mode before using protected credentials
+        run: node .github/scripts/firmware-admin-candidate.mjs gate --out .cache/admin-candidate/run
+      - name: Install pinned contained dependencies
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME" "$TMPDIR" "$PIP_CACHE_DIR"
+          python3 -m pip install --only-binary=:all: --disable-pip-version-check --target .cache/admin-candidate/python pycryptodome==3.23.0
+          npm ci --ignore-scripts --prefix app/bluetooth_flutter_Trace/cloudflare/update-service/worker
+      - name: Test source and firmware registration contracts without credentials
+        run: |
+          set -euo pipefail
+          node --test tests/ota/test_firmware_admin_candidate.mjs
+          npm run check --prefix app/bluetooth_flutter_Trace/cloudflare/update-service/worker
+          npm test --prefix app/bluetooth_flutter_Trace/cloudflare/update-service/worker
+      - name: Admit exact current GCC originals, excluding all benchmark packages
+        run: python3 -I -S -B -X utf8 .github/scripts/firmware-admin-candidate.py --out .cache/admin-candidate/run/source
+      - name: Prepare and byte-verify normal full and recovery packages
+        id: package
+        env:
+          OTA_AES_KEY: ${{ secrets.FIRMWARE_REHEARSAL_OTA_AES_KEY }}
+        run: node .github/scripts/firmware-admin-candidate.mjs package --out .cache/admin-candidate/run
+      - name: Upload immutable R2 objects and register original-Admin candidate
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TRACE_DEPLOY_TOKEN: ${{ secrets.TRACE_DEPLOY_TOKEN }}
+          TRACE_UPDATE_SERVICE_URL: ${{ secrets.TRACE_UPDATE_SERVICE_URL }}
+          TRACE_R2_BUCKET: ${{ vars.TRACE_R2_BUCKET }}
+        run: node .github/scripts/firmware-admin-candidate.mjs register --out .cache/admin-candidate/run
+      - name: Preserve original normal candidate and registration receipts
+        if: always() && steps.package.outcome != '' && steps.package.outcome != 'skipped'
+        uses: actions/upload-artifact@v4
+        with:
+          name: original-admin-candidate-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .cache/admin-candidate/run/
+          include-hidden-files: true
+          retention-days: 14
+          if-no-files-found: error
   stage-candidate:
     name: Deliver immutable P51 candidate to isolated staging (not approval)
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.stage_candidate == 'true'
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.stage_candidate == 'true' && github.event.inputs.prepare_admin_candidate != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment: firmware-rehearsal
@@ -280,7 +370,7 @@ jobs:
           if-no-files-found: error
   package-candidate:
     name: Protected P5 candidate artifacts (no release or device operation)
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.package_candidate == 'true'
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.package_candidate == 'true' && github.event.inputs.prepare_admin_candidate != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 40
     environment: firmware-rehearsal
@@ -461,7 +551,7 @@ jobs:
           if-no-files-found: error
   release-development-checks:
     name: Release tooling development checks (no cloud credentials)
-    if: github.event.inputs.package_candidate != 'true' && github.event.inputs.stage_candidate != 'true'
+    if: github.event.inputs.package_candidate != 'true' && github.event.inputs.stage_candidate != 'true' && github.event.inputs.prepare_admin_candidate != 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -567,7 +657,7 @@ jobs:
 
   build:
     name: Build firmware (arm-none-eabi-gcc)
-    if: github.event.inputs.package_candidate != 'true' && github.event.inputs.stage_candidate != 'true'
+    if: github.event.inputs.package_candidate != 'true' && github.event.inputs.stage_candidate != 'true' && github.event.inputs.prepare_admin_candidate != 'true'
     runs-on: ubuntu-latest
     outputs:
       version_name: ${{ steps.version.outputs.version_name }}
@@ -981,7 +1071,7 @@ jobs:
     needs: [release-development-checks]
     timeout-minutes: 10
     if: >-
-      github.event_name == 'workflow_dispatch' && github.event.inputs.check_bindings == 'true' && github.event.inputs.publish != 'true' && github.event.inputs.rehearsal != 'true' && github.event.inputs.package_candidate != 'true' && github.event.inputs.stage_candidate != 'true'
+      github.event_name == 'workflow_dispatch' && github.event.inputs.check_bindings == 'true' && github.event.inputs.publish != 'true' && github.event.inputs.rehearsal != 'true' && github.event.inputs.package_candidate != 'true' && github.event.inputs.stage_candidate != 'true' && github.event.inputs.prepare_admin_candidate != 'true'
     environment: firmware-rehearsal
     permissions:
       contents: read
@@ -1064,7 +1154,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build, release-development-checks]
     if: >-
-      github.event_name == 'workflow_dispatch' && github.event.inputs.rehearsal == 'true' && github.event.inputs.publish != 'true' && github.event.inputs.package_candidate != 'true' && github.event.inputs.stage_candidate != 'true'
+      github.event_name == 'workflow_dispatch' && github.event.inputs.rehearsal == 'true' && github.event.inputs.publish != 'true' && github.event.inputs.package_candidate != 'true' && github.event.inputs.stage_candidate != 'true' && github.event.inputs.prepare_admin_candidate != 'true'
     environment: firmware-rehearsal
     permissions:
       contents: read
@@ -1217,7 +1307,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build, release-development-checks]
     if: >-
-      github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true' && github.event.inputs.package_candidate != 'true' && github.event.inputs.stage_candidate != 'true'
+      github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true' && github.event.inputs.package_candidate != 'true' && github.event.inputs.stage_candidate != 'true' && github.event.inputs.prepare_admin_candidate != 'true'
     environment: firmware-production
     permissions:
       contents: write

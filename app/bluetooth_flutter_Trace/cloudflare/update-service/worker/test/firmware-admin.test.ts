@@ -535,6 +535,135 @@ describe("P4-2 existing Access Pages facade", () => {
       ASSETS: { fetch: async () => new Response() } },
       data: {}, functionPath: "/api/admin", next: async () => new Response(), waitUntil() {}, passThroughOnException() {} } as Parameters<typeof onRequest>[0]);
   }
+  it("catalog notes update only editable text and create one audit, preserving registration and assets", async () => {
+    const target = await registered(false);
+    const before = await env.DB.prepare("SELECT * FROM firmware_releases WHERE id=?").bind(target.releaseId).first<any>();
+    const assets = await firmwareAssets(env.DB, target.releaseId);
+    const requestId = crypto.randomUUID();
+    const body = { ...firmwareScope, releaseNotes: "## Updated operator notes\n- Firmware identity unchanged",
+      expectedNotes: before.release_notes, reason: "correct release description" };
+    const response = await page(target.releaseId, { route: ["firmware", "releases", target.releaseId, "notes"], body,
+      email: "publisher@example.com", header: { "X-Request-Id": requestId } });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ action: "edit_notes", releaseId: target.releaseId, releaseNotes: body.releaseNotes, idempotent: false });
+    const after = await env.DB.prepare("SELECT * FROM firmware_releases WHERE id=?").bind(target.releaseId).first<any>();
+    expect({ ...after, release_notes: before.release_notes, updated_at: before.updated_at }).toEqual(before);
+    expect(await firmwareAssets(env.DB, target.releaseId)).toEqual(assets);
+    expect(await count("SELECT count(*) AS n FROM audit_logs WHERE request_id=?", requestId)).toBe(1);
+    const noOpId = crypto.randomUUID();
+    const noOp = await page(target.releaseId, { route: ["firmware", "releases", target.releaseId, "notes"],
+      body: { ...body, expectedNotes: body.releaseNotes }, header: { "X-Request-Id": noOpId } });
+    expect(await noOp.json()).toMatchObject({ idempotent: true });
+    expect(await count("SELECT count(*) AS n FROM audit_logs WHERE request_id=?", noOpId)).toBe(0);
+    const stale = await page(target.releaseId, { route: ["firmware", "releases", target.releaseId, "notes"], body });
+    expect(stale.status).toBe(409); expect(await stale.json()).toMatchObject({ errorCode: "CAS_CONFLICT" });
+  });
+  it.each(["viewer", "bad csrf", "bad origin", "extra identity", "oversized", "invalid Unicode", "missing expected"])(
+    "catalog notes rejects %s without modification", async kind => {
+      const target = await registered(false);
+      const body: Record<string, unknown> = { ...firmwareScope, expectedNotes: target.input.releaseNotes,
+        releaseNotes: "Changed text", reason: "notes test" };
+      if (kind === "extra identity") body.targetImageSha256 = "f".repeat(64);
+      if (kind === "oversized") body.releaseNotes = "x".repeat(8001);
+      if (kind === "invalid Unicode") body.releaseNotes = "\ud800";
+      if (kind === "missing expected") delete body.expectedNotes;
+      const response = await page(target.releaseId, { route: ["firmware", "releases", target.releaseId, "notes"], body,
+        email: kind === "viewer" ? "viewer@example.com" : "owner@example.com",
+        header: kind === "bad csrf" ? { "X-CSRF-Token": "bad" } : kind === "bad origin" ? { Origin: "https://other.example.com" } : {} });
+      expect(response.status).toBe(["viewer", "bad csrf", "bad origin"].includes(kind) ? 403 : 400);
+      expect((await env.DB.prepare("SELECT release_notes FROM firmware_releases WHERE id=?").bind(target.releaseId).first<any>())!.release_notes)
+        .toBe(target.input.releaseNotes);
+    });
+  it.each(["disabled", "archived"])("catalog notes reject a %s release without modification", async state => {
+    const target = await registered(false);
+    if (state === "disabled") await act(target.releaseId, crypto.randomUUID(), "disable");
+    else await env.DB.prepare("UPDATE firmware_releases SET archived=1 WHERE id=?").bind(target.releaseId).run();
+    const before = await env.DB.prepare("SELECT * FROM firmware_releases WHERE id=?").bind(target.releaseId).first<any>();
+    const requestId = crypto.randomUUID();
+    const response = await page(target.releaseId, { route: ["firmware", "releases", target.releaseId, "notes"],
+      body: { ...firmwareScope, expectedNotes: target.input.releaseNotes, releaseNotes: "rejected update", reason: "state gate" },
+      header: { "X-Request-Id": requestId } });
+    expect(response.status).toBe(410);
+    expect(await response.json()).toMatchObject({ errorCode: state === "disabled" ? "RELEASE_DISABLED" : "RELEASE_ARCHIVED" });
+    expect(await env.DB.prepare("SELECT * FROM firmware_releases WHERE id=?").bind(target.releaseId).first<any>()).toEqual(before);
+    expect(await count("SELECT count(*) AS n FROM audit_logs WHERE request_id=?", requestId)).toBe(0);
+  });
+  it("catalog notes roll back when the corresponding audit cannot be recorded", async () => {
+    const target = await registered(false);
+    const before = await env.DB.prepare("SELECT * FROM firmware_releases WHERE id=?").bind(target.releaseId).first<any>();
+    const requestId = crypto.randomUUID();
+    await env.DB.prepare(`CREATE TRIGGER catalog_notes_audit_failure BEFORE INSERT ON audit_logs
+      WHEN NEW.action='edit_notes' BEGIN SELECT RAISE(ABORT,'injected notes audit failure'); END`).run();
+    try {
+      const response = await page(target.releaseId, { route: ["firmware", "releases", target.releaseId, "notes"],
+        body: { ...firmwareScope, expectedNotes: target.input.releaseNotes, releaseNotes: "must roll back", reason: "atomic audit" },
+        header: { "X-Request-Id": requestId } });
+      expect(response.status).toBe(503);
+      expect(await response.json()).toMatchObject({ errorCode: "BACKEND_UNAVAILABLE" });
+      expect(await env.DB.prepare("SELECT * FROM firmware_releases WHERE id=?").bind(target.releaseId).first<any>()).toEqual(before);
+      expect(await count("SELECT count(*) AS n FROM audit_logs WHERE request_id=?", requestId)).toBe(0);
+    } finally { await env.DB.prepare("DROP TRIGGER catalog_notes_audit_failure").run(); }
+  });
+  it("catalog notes recheck the expected value inside the atomic update", async () => {
+    const target = await registered(false); const batch = env.DB.batch.bind(env.DB);
+    let inject = true; const requestId = crypto.randomUUID();
+    const spy = vi.spyOn(env.DB, "batch").mockImplementation(async statements => {
+      if (inject) {
+        inject = false;
+        await env.DB.prepare("UPDATE firmware_releases SET release_notes='competing value' WHERE id=?").bind(target.releaseId).run();
+      }
+      return batch(statements);
+    });
+    try {
+      const response = await page(target.releaseId, { route: ["firmware", "releases", target.releaseId, "notes"],
+        body: { ...firmwareScope, expectedNotes: target.input.releaseNotes, releaseNotes: "losing value", reason: "race test" },
+        header: { "X-Request-Id": requestId } });
+      expect(response.status).toBe(409);
+      expect((await env.DB.prepare("SELECT release_notes FROM firmware_releases WHERE id=?").bind(target.releaseId).first<any>())!.release_notes)
+        .toBe("competing value");
+      expect(await count("SELECT count(*) AS n FROM audit_logs WHERE request_id=?", requestId)).toBe(0);
+    } finally { spy.mockRestore(); }
+  });
+  it("catalog history pages deterministically, filters releases and excludes capabilities and App audits", async () => {
+    const target = await registered(false);
+    for (const [id, type] of [["catalog-history-z", "firmware_release"], ["catalog-history-y", "firmware_release"], ["catalog-history-app", "release"]]) {
+      await env.DB.prepare(`INSERT INTO audit_logs(id,app_id,actor,actor_type,action,target_type,target_id,request_id,reason,before_json,after_json,created_at)
+        VALUES (?,'trace','owner@example.com','access','edit_notes',?,?,'catalog-history-request','history test',?,?, '2099-01-01 00:00:00')`)
+        .bind(id, type, target.releaseId, JSON.stringify({ state: "ready", downloadUrl: "https://secret.example/?signature=must-not-leak" }),
+          JSON.stringify({ releaseNotes: "safe new description", assetCount: 3, signature: "must-not-leak" })).run();
+    }
+    const query = `?appId=trace&deviceModel=e-track-at32f435&releaseId=${target.releaseId}&limit=1`;
+    const first = await page("unused", { route: ["firmware", "history"], method: "GET", email: "viewer@example.com", query });
+    expect(first.status).toBe(200);
+    const a = await first.json<any>();
+    expect(a.history).toHaveLength(1); expect(a.history[0].id).toBe("catalog-history-z");
+    expect(a.history[0].before).toEqual({ state: "ready" });
+    expect(a.history[0].after).toEqual({ releaseNotes: "safe new description", assetCount: 3 });
+    expect(JSON.stringify(a)).not.toContain("must-not-leak");
+    const second = await page("unused", { route: ["firmware", "history"], method: "GET", query: query + "&cursor=" + encodeURIComponent(a.nextCursor) });
+    const b = await second.json<any>(); expect(b.history[0].id).toBe("catalog-history-y");
+    expect(JSON.stringify(b)).not.toContain("catalog-history-app");
+    const other = await page("unused", { route: ["firmware", "history"], method: "GET",
+      query: "?appId=trace&deviceModel=e-track-at32f435&releaseId=not-registered" });
+    expect(await other.json()).toMatchObject({ history: [], nextCursor: null });
+  });
+  it.each(["&limit=0", "&limit=51", "&limit=1&limit=2", "&cursor=broken", "&releaseId=../other", "&unknown=1"])(
+    "catalog history rejects malformed or unbounded query %s", async suffix => {
+      const response = await page("unused", { route: ["firmware", "history"], method: "GET",
+        query: "?appId=trace&deviceModel=e-track-at32f435" + suffix });
+      expect(response.status).toBe(400);
+    });
+  it("catalog history is authenticated, scoped and contains channel pointer changes for the selected version", async () => {
+    const target = await freshChannel(); const requestId = crypto.randomUUID();
+    await changeChannel("stable", "stop_latest", { maintenanceMessage: "recorded pause" }, requestId);
+    const query = `?appId=trace&deviceModel=e-track-at32f435&releaseId=${target.releaseId}&limit=50`;
+    const response = await page("unused", { route: ["firmware", "history"], method: "GET", query });
+    const result = await response.json<any>();
+    expect(result.history.find((row: any) => row.requestId === requestId)).toMatchObject({ channel: "stable", action: "stop_latest",
+      before: { disableLatest: false }, after: { disableLatest: true } });
+    expect((await page("unused", { route: ["firmware", "history"], method: "GET", query, token: null })).status).toBe(401);
+    expect((await page("unused", { route: ["firmware", "history"], method: "GET", query: "?appId=other&deviceModel=e-track-at32f435" })).status).toBe(400);
+  });
   it("keeps a session CSRF token usable when another tab reads the session", async () => {
     const first = await page("unused", { route: ["session"], method: "GET", header: { Cookie: "" } });
     const initial = await first.json<any>();
@@ -564,6 +693,26 @@ describe("P4-2 existing Access Pages facade", () => {
     expect(response.status).toBe(401);
     expect(response.headers.get("Set-Cookie")).toBeNull();
     expect(await response.json()).not.toHaveProperty("csrfToken");
+  });
+  it.each(["viewer", "publisher"])("keeps firmware file deletion owner-only for %s", async role => {
+    const selected = await registered(false);
+    await act(selected.releaseId, crypto.randomUUID(), "disable");
+    const response = await page(selected.releaseId, { email: `${role}@example.com`,
+      route: ["firmware", "releases", selected.releaseId, "delete"] });
+    expect(response.status).toBe(403);
+    expect(await response.json()).toMatchObject({ errorCode: "ROLE_FORBIDDEN" });
+    expect(await env.RELEASES_BUCKET.head(selected.input.assets[0].r2Key)).not.toBeNull();
+  });
+  it("requires same-origin CSRF before firmware file deletion", async () => {
+    const selected = await registered(false);
+    await act(selected.releaseId, crypto.randomUUID(), "disable");
+    const route = ["firmware", "releases", selected.releaseId, "delete"];
+    expect((await page(selected.releaseId, { route, header: { "X-CSRF-Token": "wrong" } })).status).toBe(403);
+    expect((await page(selected.releaseId, { route, header: { Origin: "https://other.example.com" } })).status).toBe(403);
+    expect((await page(selected.releaseId, { route, token: null })).status).toBe(401);
+    const response = await page(selected.releaseId, { route });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ action: "delete_files", retainedHistory: true });
   });
   it.each(["stable", "beta"])("reaches %s CAS after a second tab and winner refresh read the session", async channel => {
     await freshChannel(channel);

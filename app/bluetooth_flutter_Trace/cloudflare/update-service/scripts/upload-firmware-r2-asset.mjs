@@ -45,7 +45,18 @@ export async function verifyStoredFirmwareAsset(metadata, fileName, bucket) {
 export async function uploadFirmwareAsset(metadata, fileName, bytes, bucket, requestId = crypto.randomUUID()) {
   const parsed = parseFirmwareRegistration(metadata, undefined, false);
   const asset = parsed.assets.find((a) => a.fileName === fileName);
-  if (!asset || bytes.byteLength !== asset.sizeBytes || sha(bytes) !== asset.sha256) {
+  return uploadImmutableFirmwareAsset(asset, bytes, bucket, requestId);
+}
+
+// Storage-only primitive. The public release entry above still requires formal metadata.
+export async function uploadImmutableFirmwareAsset(asset, bytes, bucket, requestId = crypto.randomUUID()) {
+  if (!asset || !["full", "patch", "recovery"].includes(asset.kind)
+    || typeof asset.fileName !== "string" || !/^[A-Za-z0-9._-]{1,128}$/.test(asset.fileName)
+    || typeof asset.r2Key !== "string" || !/^[A-Za-z0-9._/-]{1,1024}$/.test(asset.r2Key)
+    || asset.r2Key.split("/").some(part => !part || part === "." || part === "..")
+    || typeof asset.sha256 !== "string" || !/^[0-9a-f]{64}$/.test(asset.sha256)
+    || !Number.isSafeInteger(asset.sizeBytes) || asset.sizeBytes <= 0
+    || bytes.byteLength !== asset.sizeBytes || sha(bytes) !== asset.sha256) {
     throw new CliError("Local asset does not match metadata", "INVALID_PARAMETER", 1);
   }
   let head = await bucket.head(asset.r2Key);

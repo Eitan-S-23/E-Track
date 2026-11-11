@@ -14,6 +14,7 @@ export interface WorkerEnv {
   APP_ID: string;
   GITHUB_OWNER: string;
   GITHUB_REPO: string;
+  FIRMWARE_GITHUB_REPOSITORY?: string;
   MANIFEST_CACHE_TTL_SECONDS: string;
   DOWNLOAD_TOKEN_TTL_SECONDS: string;
   DOWNLOAD_TOKEN_KEY_VERSION: string;

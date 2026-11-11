@@ -63,14 +63,22 @@
   "env": {
     "staging": {
       "name": "trace-update-service-staging",
+      "triggers": { "crons": [] },
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1,
+        "logs": { "enabled": true, "invocation_logs": false }
+      },
       "vars": {
         "ENVIRONMENT": "staging",
         "APP_ID": "trace",
         "GITHUB_OWNER": "Eitan-S-23",
         "GITHUB_REPO": "Trace",
+        "FIRMWARE_GITHUB_REPOSITORY": "Eitan-S-23/E-Track",
         "MANIFEST_CACHE_TTL_SECONDS": "60",
         "DOWNLOAD_TOKEN_TTL_SECONDS": "300",
         "DOWNLOAD_TOKEN_KEY_VERSION": "staging",
+        "FIRMWARE_V2_CUTOVER_EPOCH": "1794333692",
         "RATE_LIMIT_WINDOW_SECONDS": "60",
         "RATE_LIMIT_MAX_REQUESTS": "60",
         "ENABLE_DIRECT_ADMIN_API": "false"

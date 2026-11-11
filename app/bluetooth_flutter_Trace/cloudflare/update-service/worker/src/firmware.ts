@@ -185,6 +185,12 @@ async function requireFirmwareCiToken(request: Request, env: WorkerEnv): Promise
   if (!await verifyBearerToken(token, env.DEPLOY_TOKEN_SHA256)) throw new ApiError("TOKEN_INVALID", "Invalid CI token", 401);
 }
 
+function firmwareRepository(env: WorkerEnv): string {
+  const repository = env.FIRMWARE_GITHUB_REPOSITORY ?? `${env.GITHUB_OWNER}/${env.GITHUB_REPO}`;
+  if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository)) throw backendUnavailable();
+  return repository;
+}
+
 export function handleFirmwarePreflight(request: Request, env: WorkerEnv, requestId: string): Promise<Response> {
   return firmwareOperation(async () => {
     await requireFirmwareCiToken(request, env);
@@ -198,7 +204,7 @@ export function handleFirmwarePreflight(request: Request, env: WorkerEnv, reques
     if (!["staging", "prod"].includes(env.ENVIRONMENT) || envelope.environment !== env.ENVIRONMENT) {
       throw new ApiError("RELEASE_CONFLICT", "Preflight environment mismatch", 409);
     }
-    const input = parseFirmwareRegistration(envelope.metadata, `${env.GITHUB_OWNER}/${env.GITHUB_REPO}`, false);
+    const input = parseFirmwareRegistration(envelope.metadata, firmwareRepository(env), false);
     let summary;
     try { summary = await verifyMonotonic(env.DB, input); }
     catch (error) {
@@ -217,7 +223,7 @@ export function handleRegisterFirmwareRelease(request: Request, env: WorkerEnv, 
   return firmwareOperation(async () => {
     await requireFirmwareCiToken(request, env);
     requireFirmwareJsonHeaders(request);
-    const input = parseFirmwareRegistration(await readFirmwareJson(request), `${env.GITHUB_OWNER}/${env.GITHUB_REPO}`);
+    const input = parseFirmwareRegistration(await readFirmwareJson(request), firmwareRepository(env));
     const canonical = canonicalJson(input);
     const existing = () => env.DB.prepare("SELECT * FROM firmware_releases WHERE app_id=? AND device_model=? AND release_tag=?")
       .bind(input.appId, input.deviceModel, input.releaseTag).first<FirmwareReleaseRow>();

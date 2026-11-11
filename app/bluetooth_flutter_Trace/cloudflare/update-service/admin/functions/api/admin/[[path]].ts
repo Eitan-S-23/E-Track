@@ -1,5 +1,7 @@
 import { ApiError } from "../../../../worker/src/errors";
 import { FIRMWARE_CHANNEL_ACTIONS, firmwareReleaseAction, listFirmware, mutateFirmwareChannel } from "../../../../worker/src/firmware_admin";
+import { deleteFirmwareFiles } from "../../../../worker/src/firmware_delete";
+import { editFirmwareNotes, firmwareHistory } from "../../../../worker/src/firmware_catalog";
 import { readFirmwareJson, requireFirmwareJsonHeaders } from "../../../../worker/src/firmware";
 
 type Platform = "android" | "windows";
@@ -242,12 +244,25 @@ async function routeAdminRequest(
 
   if (method === "GET" && route.length === 2 && route[0] === "firmware" && route[1] === "releases") {
     requireRole(actor, "viewer");
-    return listFirmware(context.env, url, actor.requestId, false);
+    return listFirmware(context.env, url, actor.requestId, false, { recoveryDownload: Boolean(
+      context.env.FIRMWARE_DOWNLOAD_ORIGIN?.startsWith("https://")
+      && context.env.DOWNLOAD_TOKEN_KEY_VERSION && context.env.DOWNLOAD_HMAC_KEY_CURRENT) });
   }
 
   if (method === "GET" && route.length === 2 && route[0] === "firmware" && route[1] === "channels") {
     requireRole(actor, "viewer");
     return listFirmware(context.env, url, actor.requestId, true);
+  }
+
+  if (method === "GET" && route.length === 2 && route[0] === "firmware" && route[1] === "history") {
+    requireRole(actor, "viewer");
+    return firmwareHistory(context.env, url, actor.requestId);
+  }
+
+  if (method === "POST" && route.length === 4 && route[0] === "firmware"
+    && route[1] === "releases" && route[3] === "notes") {
+    requireRole(actor, "publisher");
+    return editFirmwareNotes(context.env, actor, route[2], await readFirmwareJson(context.request));
   }
 
   if (
@@ -318,6 +333,12 @@ async function routeAdminRequest(
   ) {
     requireRole(actor, "owner");
     return firmwareReleaseAction(context.request, context.env, actor, route[2], route[3]);
+  }
+
+  if (method === "POST" && route.length === 4 && route[0] === "firmware"
+    && route[1] === "releases" && route[3] === "delete") {
+    requireRole(actor, "owner");
+    return deleteFirmwareFiles(context.request, context.env, actor, route[2]);
   }
 
   if (route[0] === "firmware") throw new AdminError("INVALID_PARAMETER", "Unsupported firmware endpoint or method", 400);

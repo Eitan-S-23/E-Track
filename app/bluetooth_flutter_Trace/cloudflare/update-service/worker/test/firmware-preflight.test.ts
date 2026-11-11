@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import worker from "../src/index";
 import { firmwareReleaseInsert } from "../src/firmware";
 import { canonicalJson } from "../../scripts/firmware-schema.mjs";
-import { metadata } from "./firmware-fixture";
+import { metadata, uploadFixture } from "./firmware-fixture";
 
 function call(value: unknown, headers: Record<string, string> = {}, db = env.DB) {
   return worker.fetch(new Request("https://example.com/api/ci/firmware/preflight", { method: "POST",
@@ -21,6 +21,32 @@ async function snapshot(db = env.DB) {
 }
 
 describe("authenticated fixed-query firmware preflight", () => {
+  it("uses the explicitly configured firmware repository without changing the App repository", async () => {
+    const input = metadata();
+    for (const asset of input.assets) asset.githubUrl = asset.githubUrl.replace("/Eitan-S-23/Trace/", "/Eitan-S-23/E-Track/");
+    expect((await call(envelope(input))).status).toBe(400);
+    const configured = { ...env, ENVIRONMENT: "staging", FIRMWARE_GITHUB_REPOSITORY: "Eitan-S-23/E-Track" };
+    const request = (route: string, body: unknown) => worker.fetch(new Request(`https://example.com/api/ci/firmware/${route}`, {
+      method: "POST", headers: { Authorization: "Bearer test-deploy-token", Accept: "application/json", "Content-Type": "application/json" },
+      body: JSON.stringify(body) }), configured, createExecutionContext());
+    expect(configured.GITHUB_REPO).toBe("Trace");
+    expect((await request("preflight", envelope(input))).status).toBe(200);
+    expect((await request("preflight", envelope(metadata()))).status).toBe(400);
+    await uploadFixture(input);
+    expect((await request("releases", input)).status).toBe(201);
+    expect((await request("releases", input)).status).toBe(200);
+    expect((await request("releases", metadata())).status).toBe(400);
+  });
+  it.each(["", "https://github.com/Eitan-S-23/E-Track", "Eitan-S-23/E-Track/extra"])("fails closed for invalid firmware repository configuration %s", async repository => {
+    const prepare = vi.spyOn(env.DB, "prepare");
+    try {
+      const response = await worker.fetch(new Request("https://example.com/api/ci/firmware/preflight", {
+        method: "POST", headers: { Authorization: "Bearer test-deploy-token", Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify(envelope()) }), { ...env, ENVIRONMENT: "staging", FIRMWARE_GITHUB_REPOSITORY: repository }, createExecutionContext());
+      expect(response.status).toBe(503);
+      expect(prepare).not.toHaveBeenCalled();
+    } finally { prepare.mockRestore(); }
+  });
   it.each(["", "Bearer wrong-token", "Basic invalid", "Bearer test-deploy-token,other"])("rejects %s before parsing or querying", async Authorization => {
     const prepare = vi.spyOn(env.DB, "prepare");
     try {
