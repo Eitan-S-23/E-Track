@@ -4,7 +4,7 @@ import { createHash, generateKeyPairSync, sign } from "node:crypto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import worker from "../src/index";
 import { canonicalJson, sha256Hex } from "../src/crypto";
-import { createDeltaJobs, deltaCandidates, deltaJobAction } from "../src/delta_jobs";
+import { createDeltaJobs, deltaCandidates, deltaJobAction, jobView, workflowLocation } from "../src/delta_jobs";
 import type { DeltaJob, DeltaKind, DeltaSpec } from "../src/delta_jobs";
 import { supplementalAppManifest, supplementalFirmwareAssets } from "../src/delta_assets";
 import type { SecurityPayload, WorkerEnv } from "../src/types";
@@ -22,6 +22,7 @@ beforeEach(async () => {
   await env.DB.batch(["delta_job_events","delta_job_attempts","delta_jobs"].map(t => env.DB.prepare(`DELETE FROM ${t}`)));
   configured = {...env, DELTA_GITHUB_TOKEN:"scoped-dispatch-test", DELTA_WORKFLOW_COMMIT:"c".repeat(40),
     DELTA_WORKFLOW_REF:"dev/admin/delta-test", DELTA_APP_PUBLIC_KEY_BASE64:publicKey, DELTA_ASSETS_ENABLED:"true",
+    DELTA_APP_WORKFLOW_REF:"dev/admin/original-delta-test", DELTA_APP_WORKFLOW_COMMIT:"c".repeat(40),
     FIRMWARE_DEPLOY_TOKEN_SHA256:await sha256Hex("firmware-test-token")};
   dispatch.mockReset(); dispatch.mockResolvedValue(new Response(null,{status:204}));
 });
@@ -40,6 +41,8 @@ async function original(kind: DeltaKind, version?: number) {
   await env.DB.prepare("INSERT OR IGNORE INTO apps(id,name) VALUES ('trace','trace')").run();
   await env.DB.prepare(`INSERT INTO releases(id,app_id,platform,version_name,version_code,release_tag,commit_sha,run_id,security_payload_json,capabilities_json)
     VALUES (?,'trace','android',?,?,?,'original',?,?,?)`).bind(id,payload.versionName,code,tag,id,JSON.stringify(payload),JSON.stringify(payload.capabilities)).run();
+  await env.DB.prepare("UPDATE releases SET payload_signature_json=? WHERE id=?").bind(JSON.stringify({algorithm:"ed25519",keyVersion:"test",
+    signature:sign(null,Buffer.from(canonicalJson(payload)),keys.privateKey).toString("base64")}),id).run();
   await env.RELEASES_BUCKET.put(id,bytes);
   await env.DB.prepare(`INSERT INTO release_assets(id,release_id,app_id,platform,asset_type,file_name,sha256,size_bytes,r2_key,r2_state,github_url)
     VALUES (?,?,'trace','android','apk','app.apk',?,?,?,'available',?)`)
@@ -52,7 +55,7 @@ async function create(p:Awaited<ReturnType<typeof pair>>) {
   const body=await response.json<{jobs:Array<{id:string}>}>();
   return (await env.DB.prepare("SELECT * FROM delta_jobs WHERE id=?").bind(body.jobs[0].id).first<DeltaJob>())!;
 }
-function binding(job:DeltaJob) {return {attempt:job.attempt,workflowCommit:job.workflow_commit,runId:String(parseInt(job.id.slice(6,18),16))};}
+function binding(job:DeltaJob) {return {attempt:job.attempt,workflowCommit:job.workflow_commit,workflowRepository:workflowLocation(job).repository,runId:String(parseInt(job.id.slice(6,18),16))};}
 async function ci(job:DeltaJob, action:string, body:unknown=binding(job), token?:string) {
   return worker.fetch(new Request(`https://example.com/api/ci/delta/jobs/${job.id}/${action}`,{
     method:action==="spec"?"GET":"POST",headers:{Accept:"application/json","Content-Type":"application/json",
@@ -63,7 +66,7 @@ async function upload(job:DeltaJob, bytes=patchBytes, sha?:string, length=bytes.
   return worker.fetch(new Request(`https://example.com/api/ci/delta/jobs/${job.id}/asset`,{method:"POST",body:bytes,
     headers:{Authorization:`Bearer ${job.kind==="firmware"?"firmware-test-token":"test-deploy-token"}`,
       "Content-Length":String(length),"X-Delta-Attempt":String(job.attempt),"X-Delta-Run":binding(job).runId,
-      "X-Delta-Commit":job.workflow_commit,"X-Delta-Sha256":sha ?? bytesHash(bytes)}}),configured,createExecutionContext());
+      "X-Delta-Commit":job.workflow_commit,"X-Delta-Repository":workflowLocation(job).repository,"X-Delta-Sha256":sha ?? bytesHash(bytes)}}),configured,createExecutionContext());
 }
 async function completion(job:DeltaJob, size=patchBytes.length) {
   const input=JSON.parse(job.input_json) as DeltaSpec, sha=bytesHash(patchBytes);
@@ -93,6 +96,49 @@ async function action(job:DeltaJob,name:string,revision=job.revision) {
 }
 
 describe("operator-selected supplemental delta jobs",()=>{
+  it("dispatches original APK jobs to their signing repository, not the MCU test repository",async()=>{
+    const job=await create(await pair("android"));
+    expect(job.workflow_ref).toBe("Eitan-S-23/Trace@dev/admin/original-delta-test");
+    expect(String(dispatch.mock.calls[0][0])).toContain("/repos/Eitan-S-23/Trace/actions/workflows/");
+    expect(JSON.parse(String(dispatch.mock.calls[0][1]?.body)).ref).toBe("dev/admin/original-delta-test");
+    expect(jobView({...job,run_id:"123456"}).runUrl).toBe("https://github.com/Eitan-S-23/Trace/actions/runs/123456");
+    expect((await ci(job,"spec")).status).toBe(200);
+    expect((await ci(job,"claim",{...binding(job),workflowRepository:"Eitan-S-23/E-Track"})).status).toBe(409);
+  });
+  it("requires explicit original-App workflow bindings without disabling MCU dispatch",async()=>{
+    delete configured.DELTA_APP_WORKFLOW_REF;
+    const app=await pair("android");
+    await expect(create(app)).rejects.toMatchObject({code:"BACKEND_UNAVAILABLE"});
+    expect(dispatch).not.toHaveBeenCalled();
+    expect((await create(await pair())).status).toBe("queued");
+  });
+  it("rejects a test signing key that does not verify the original published App",async()=>{
+    const p=await pair("android");
+    configured.DELTA_APP_PUBLIC_KEY_BASE64=generateKeyPairSync("ed25519").publicKey.export({format:"der",type:"spki"}).subarray(-32).toString("base64");
+    const candidates=await (await deltaCandidates(configured,"android",p.target)).json<{appSigningConfigured:boolean}>();
+    expect(candidates.appSigningConfigured).toBe(false);
+    await expect(create(p)).rejects.toMatchObject({code:"SIGNING_REQUIRED"});
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+  it("retains a legacy App attempt's repository when an explicit retry moves to Trace",async()=>{
+    const created=await create(await pair("android"));
+    await env.DB.prepare("DELETE FROM delta_job_attempts WHERE job_id=?").bind(created.id).run();
+    await env.DB.prepare("DELETE FROM delta_jobs WHERE id=?").bind(created.id).run();
+    const legacy={...created,status:"failed",workflow_ref:"dev/admin/old-app-test",run_id:"123456"};
+    const fields=Object.keys(legacy);
+    await env.DB.prepare(`INSERT INTO delta_jobs(${fields.join(",")}) VALUES (${fields.map(()=>"?").join(",")})`).bind(...Object.values(legacy)).run();
+    expect(jobView(legacy).runUrl).toBe("https://github.com/Eitan-S-23/E-Track/actions/runs/123456");
+    configured.DELTA_APP_WORKFLOW_COMMIT="d".repeat(40);
+    await action(legacy,"retry");
+    const attempts=await env.DB.prepare("SELECT attempt,workflow_ref,workflow_commit FROM delta_job_attempts WHERE job_id=? ORDER BY attempt").bind(legacy.id).all();
+    expect(attempts.results).toEqual([
+      {attempt:1,workflow_ref:"dev/admin/old-app-test",workflow_commit:"c".repeat(40)},
+      {attempt:2,workflow_ref:"Eitan-S-23/Trace@dev/admin/original-delta-test",workflow_commit:"d".repeat(40)}]);
+  });
+  it("never accepts an arbitrary repository or runs firmware in the App repository",()=>{
+    expect(()=>workflowLocation({kind:"android",workflow_ref:"attacker/other@main"})).toThrow();
+    expect(()=>workflowLocation({kind:"firmware",workflow_ref:"Eitan-S-23/Trace@main"})).toThrow();
+  });
   it("accepts MCU originals without requiring an APK signature",async()=>{
     const p=await pair(),job=await create(p);
     expect(job.status).toBe("queued"); expect(dispatch).toHaveBeenCalledTimes(1);

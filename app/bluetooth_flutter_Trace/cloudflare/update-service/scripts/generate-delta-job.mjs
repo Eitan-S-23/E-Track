@@ -31,10 +31,13 @@ export function validateJob(job, env) {
   requireValue(job?.ok===true && /^delta_[0-9a-f]{64}$/.test(job.jobId),"Invalid delta job identity");
   requireValue(job.jobId===env.INPUT_JOB_ID && Number(env.INPUT_ATTEMPT)===job.attempt && Number.isSafeInteger(job.attempt) && job.attempt>0,"Stale delta attempt");
   requireValue(job.workflowCommit===env.GITHUB_SHA && /^[0-9a-f]{40}$/.test(env.GITHUB_SHA ?? ""),"Workflow source differs from the pinned job");
-  requireValue(env.GITHUB_REPOSITORY==="Eitan-S-23/E-Track" && env.GITHUB_RUN_ATTEMPT==="1"
+  const repository=job.workflowRepository??"Eitan-S-23/E-Track";
+  requireValue(["Eitan-S-23/E-Track","Eitan-S-23/Trace"].includes(repository)
+    && env.GITHUB_REPOSITORY===repository && env.GITHUB_RUN_ATTEMPT==="1"
     && /^[1-9][0-9]{0,19}$/.test(env.GITHUB_RUN_ID ?? ""),"Use a new Admin attempt, not GitHub rerun");
   const input=job.input;
   requireValue(input?.schema==="operator-delta-v1" && ["android","firmware"].includes(input.kind) && input.kind===env.INPUT_KIND,"Invalid delta scope");
+  requireValue(input.kind==="android" || repository==="Eitan-S-23/E-Track","Firmware must use its protected original repository");
   requireValue(job.inputSha256===digest(canonical(input)),"Delta input hash mismatch");
   for(const part of [input.base,input.target]) {
     requireValue(part && typeof part.releaseId==="string" && /^[A-Za-z0-9_-]{1,160}$/.test(part.releaseId)
@@ -138,7 +141,7 @@ export async function generatePatch({root,out,job,env=process.env,execute=spawnS
     requireValue(got.sha256===input[part].file.sha256 && got.bytes===input[part].file.bytes,"A packaging tool modified original input bytes");
   }
   const patch=await identity(files.patch);
-  const proof={attempt:job.attempt,runId:env.GITHUB_RUN_ID,workflowCommit:env.GITHUB_SHA,inputSha256:job.inputSha256,
+  const proof={attempt:job.attempt,runId:env.GITHUB_RUN_ID,workflowCommit:env.GITHUB_SHA,workflowRepository:env.GITHUB_REPOSITORY,inputSha256:job.inputSha256,
     baseImageSha256:input.base.imageSha256,targetImageSha256:input.target.imageSha256,reconstructedSha256:reconstructed.sha256,
     byteEqual:true,sha256:patch.sha256,sizeBytes:patch.bytes};
   if(input.kind==="android") {
@@ -185,13 +188,20 @@ export async function runDeltaJob({root,out,env=process.env,fetcher=fetch,execut
   const request=(action,body)=>fetcher(new URL(action,route),{method:body?"POST":"GET",headers:{...headers,"Content-Type":"application/json"},
     body:body?JSON.stringify(body):undefined,redirect:"error",signal:AbortSignal.timeout(60000)}).then(responseJson);
   const save=(name,value)=>writeFile(outputPath(root,path.join(out,name)),JSON.stringify(value,null,2)+"\n",{flag:"wx"});
-  const job=await request("spec");
-  validateJob(job,env);await save("job.json",job);
-  const binding={attempt:job.attempt,runId:env.GITHUB_RUN_ID,workflowCommit:env.GITHUB_SHA};
-  await save("claim.json",await request("claim",binding));
+  let job,binding,claimStarted=false;
+  try {
+    job=await request("spec");
+    validateJob(job,env);await save("job.json",job);
+    binding={attempt:job.attempt,runId:env.GITHUB_RUN_ID,workflowCommit:env.GITHUB_SHA,workflowRepository:env.GITHUB_REPOSITORY};
+    claimStarted=true;
+    await save("claim.json",await request("claim",binding));
+  } catch(error) {
+    await save("failure.json",{stage:claimStarted?"claim":"admission",errorCode:error?.code??"CI_ADMISSION_FAILED",claimOutcome:claimStarted?"unknown":"not_sent",automaticReplay:false});
+    throw error;
+  }
   let completionStarted=false;
   try {
-    const assetHeaders={...headers,"X-Delta-Attempt":String(job.attempt),"X-Delta-Run":env.GITHUB_RUN_ID,"X-Delta-Commit":env.GITHUB_SHA};
+    const assetHeaders={...headers,"X-Delta-Attempt":String(job.attempt),"X-Delta-Run":env.GITHUB_RUN_ID,"X-Delta-Commit":env.GITHUB_SHA,"X-Delta-Repository":env.GITHUB_REPOSITORY};
     for(const part of ["base","target"]) {
       const response=await fetcher(new URL(part,route),{headers:assetHeaders,redirect:"error",signal:AbortSignal.timeout(240000)});
       requireValue(response.ok && response.body && !response.headers.has("Content-Encoding"),"Original download failed");

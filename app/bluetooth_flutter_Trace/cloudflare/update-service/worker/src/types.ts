@@ -31,6 +31,8 @@ export interface WorkerEnv {
   DELTA_GITHUB_TOKEN?: string;
   DELTA_WORKFLOW_REF?: string;
   DELTA_WORKFLOW_COMMIT?: string;
+  DELTA_APP_WORKFLOW_REF?: string;
+  DELTA_APP_WORKFLOW_COMMIT?: string;
   DELTA_APP_PUBLIC_KEY_BASE64?: string;
   DELTA_ASSETS_ENABLED?: string;
 }

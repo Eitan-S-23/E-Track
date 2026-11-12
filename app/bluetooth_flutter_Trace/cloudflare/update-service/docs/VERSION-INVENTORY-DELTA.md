@@ -92,7 +92,8 @@ Original channel pointers and original sealed manifests are not rewritten.
 | --- | --- |
 | `VERSION_INVENTORY_ENABLED` | Worker, Public Pages, Admin Pages |
 | `DELTA_GITHUB_TOKEN` | Admin Pages secret; existing authorized GitHub credential with Actions dispatch/read access |
-| `DELTA_WORKFLOW_REF`, `DELTA_WORKFLOW_COMMIT` | Admin; exact execution ref and full commit |
+| `DELTA_WORKFLOW_REF`, `DELTA_WORKFLOW_COMMIT` | Admin; exact MCU execution ref and full commit in Eitan-S-23/E-Track |
+| `DELTA_APP_WORKFLOW_REF`, `DELTA_APP_WORKFLOW_COMMIT` | Admin; exact App execution ref and full commit in Eitan-S-23/Trace |
 | `DELTA_APP_PUBLIC_KEY_BASE64` | Admin admission and Worker completion verifier |
 | `DELTA_ASSETS_ENABLED` | Worker, Public Pages, Admin Pages; false until qualified |
 
@@ -106,6 +107,28 @@ account scopes are not a minimum permission requirement. App signing stays in th
 firmware keys stay behind the existing `firmware-rehearsal` environment. The
 retrieved client verification key is public. Ref registration and protected
 environment branch eligibility must be verified without removing reviewer gates.
+
+Original App deltas run in `Eitan-S-23/Trace`, where the original registration
+bearer and payload-signing private key already live. E-Track's isolated test
+secrets are not interchangeable with them. The tracked
+`scripts/admin-app-delta-workflow.template.yml` is installed as the original
+repository's `admin-delta-build.yml` with `__DELTA_SOURCE_COMMIT__` replaced by
+one verified full E-Track source SHA. It checks out only that pinned generator;
+it does not rebuild Apps, copy secrets between repositories, or publish channels.
+Its push job exports only the existing public key. Verify that key against an
+original published manifest before configuring either verifier.
+
+New App attempts store `Eitan-S-23/Trace@<ref>` in the existing immutable-attempt
+`workflow_ref` field. Unqualified historical refs retain their original E-Track
+meaning. Dispatch, reconciliation and run links use the repository of that
+specific attempt, not the current environment binding. Repository changes are
+therefore possible only during an explicit retry of a known failed job; old
+attempts and ready MCU artifacts are not rewritten. No schema migration is needed.
+The spec returns `workflowRepository`; JSON callbacks and binary transfer headers
+(`X-Delta-Repository`) must match it. Missing repository fields are accepted only
+for legacy E-Track callbacks. The generator rejects another repository or a
+firmware job outside E-Track. Original App key mismatch fails admission before
+dispatch; early CI admission/claim failures retain a receipt without blind retry.
 
 ## Validation And Errors
 

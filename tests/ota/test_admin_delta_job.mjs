@@ -22,9 +22,9 @@ async function fixture() {
     securityPayload:{appId:"trace",platform:"android",versionName:"1.0.74",versionCode:100,releaseTag:"v1.0.74",apkAssetName:"app.apk",
       apkSha256:sha(target),apkSize:target.length,patches:[],assetHashes:[{assetType:"apk",fileName:"app.apk",sha256:sha(target),size:target.length}],
       minClientVersionCode:41,capabilities:["full","patch","payloadSignature","vcdiff"]}}};
-  const job={ok:true,jobId:`delta_${"a".repeat(64)}`,attempt:1,workflowCommit:"c".repeat(40),status:"queued",input,inputSha256:sha(canonical(input))};
+  const job={ok:true,jobId:`delta_${"a".repeat(64)}`,attempt:1,workflowCommit:"c".repeat(40),workflowRepository:"Eitan-S-23/Trace",status:"queued",input,inputSha256:sha(canonical(input))};
   const env={INPUT_JOB_ID:job.jobId,INPUT_ATTEMPT:"1",INPUT_KIND:"android",GITHUB_SHA:job.workflowCommit,
-    GITHUB_RUN_ID:"123456",GITHUB_RUN_ATTEMPT:"1",GITHUB_REPOSITORY:"Eitan-S-23/E-Track",PYTHON:"fake-python",
+    GITHUB_RUN_ID:"123456",GITHUB_RUN_ATTEMPT:"1",GITHUB_REPOSITORY:"Eitan-S-23/Trace",PYTHON:"fake-python",
     DELTA_AAPT:"fake-aapt",DELTA_APKSIGNER:"fake-signer",XDELTA3:"fake-xdelta",TRACE_UPDATE_SERVICE_URL:"https://worker.test/",TRACE_DEPLOY_TOKEN:"test-ci-only",
     TRACE_UPDATE_PAYLOAD_ED25519_PRIVATE_KEY_BASE64:keys.privateKey.export({format:"der",type:"pkcs8"}).toString("base64")};
   for(const part of ["base","target"]) await writeFile(outputPath(root,path.join(out,part)),part==="base"?base:target,{flag:"wx"});
@@ -107,6 +107,31 @@ test("a corrupt download reports failure without generating, uploading or replay
 test("workflow keeps the original MCU approval gate and does not build or publish originals",async()=>{
   const workflow=await readFile(path.join(root,".github/workflows/admin-delta-build.yml"),"utf8");
   assert.match(workflow,/environment: firmware-rehearsal/);assert.match(workflow,/ORIGINAL_ADMIN_FIRMWARE_DEPLOY_TOKEN/);
-  assert.match(workflow,/TRACE_UPDATE_PAYLOAD_ED25519_PRIVATE_KEY_BASE64/);assert.match(workflow,/cancel-in-progress: false/);
+  assert.doesNotMatch(workflow,/TRACE_UPDATE_PAYLOAD_ED25519_PRIVATE_KEY_BASE64/);assert.match(workflow,/cancel-in-progress: false/);
   assert.doesNotMatch(workflow,/flutter build|pack-full|finalize|firmware-release\.mjs execute|contents: write/);
+});
+test("original APK workflow retains its repository secrets and pins only generator code",async()=>{
+  const workflow=await readFile(path.join(root,"app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/admin-app-delta-workflow.template.yml"),"utf8");
+  assert.match(workflow,/github.repository == 'Eitan-S-23\/Trace'/);
+  assert.match(workflow,/ref: __DELTA_SOURCE_COMMIT__/);
+  assert.match(workflow,/secrets\.TRACE_DEPLOY_TOKEN/);
+  assert.match(workflow,/secrets\.TRACE_UPDATE_PAYLOAD_ED25519_PRIVATE_KEY_BASE64/);
+  assert.doesNotMatch(workflow,/flutter build|contents: write|gh secret|privateKeyBase64/);
+});
+test("preserves a pre-claim authentication failure without replay or a false failed-claim report",async()=>{
+  const f=await fixture(),out=path.join(f.out,"admission-failure"),requests=[];
+  await assert.rejects(()=>runDeltaJob({...f,out,fetcher:async url=>{
+    requests.push(url.pathname.split('/').at(-1));return Response.json({ok:false},{status:401});
+  }}),/HTTP 401/);
+  assert.deepEqual(requests,["spec"]);
+  const failure=JSON.parse(await readFile(path.join(out,"failure.json"),"utf8"));
+  assert.equal(failure.stage,"admission");assert.equal(failure.claimOutcome,"not_sent");assert.equal(failure.automaticReplay,false);
+});
+test("a lost claim response remains unknown, not falsely recorded as unclaimed",async()=>{
+  const f=await fixture(),out=path.join(f.out,"claim-failure");
+  await assert.rejects(()=>runDeltaJob({...f,out,fetcher:async url=>{
+    if(url.pathname.endsWith('/spec'))return Response.json(f.job);throw new Error('lost claim reply');
+  }}),/lost claim reply/);
+  const failure=JSON.parse(await readFile(path.join(out,"failure.json"),"utf8"));
+  assert.equal(failure.stage,"claim");assert.equal(failure.claimOutcome,"unknown");
 });

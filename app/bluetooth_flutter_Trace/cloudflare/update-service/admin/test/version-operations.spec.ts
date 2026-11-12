@@ -58,7 +58,7 @@ async function setup(page:Page,language="zh",role="owner") {
     if(url.pathname==="/api/admin/delta/jobs") {
       expect(body.kind).toMatch(/^(android|firmware)$/);expect(String(body.reason).trim()).not.toBe("");
       data.jobs=(body.baseReleaseIds as string[]).map((id,index)=>({id:`delta-${index}`,baseReleaseId:id,baseVersionCode:99-index,targetVersionCode:100,
-        status:data.abortCreate?"dispatch_unknown":"queued",enabled:false,revision:1,sizeBytes:5000,runUrl:"https://github.com/Eitan-S-23/E-Track/actions/runs/123456",fileName:"delta.vcdiff"}));
+        status:data.abortCreate?"dispatch_unknown":"queued",enabled:false,revision:1,sizeBytes:5000,runUrl:`https://github.com/Eitan-S-23/${body.kind==="android"?"Trace":"E-Track"}/actions/runs/123456`,fileName:"delta.vcdiff"}));
       if(data.abortCreate){await route.abort("failed");return;}
       await reply({ok:true,jobs:data.jobs});return;
     }
@@ -138,6 +138,7 @@ for(const kind of ["android","firmware"]) test(`selects only reported eligible $
   await expect.poll(()=>data.writes.length).toBe(1);
   expect(data.writes[0].body).toEqual({kind,targetReleaseId:kind==="android"?"app-target":"fw-target",baseReleaseIds:["base-0"],reason:"Generate for reported installations"});
   await expect(page.locator('[data-delta-base="base-0"]')).toBeDisabled();
+  await expect(page.locator('.delta-job-row a')).toHaveAttribute('href',`https://github.com/Eitan-S-23/${kind==="android"?"Trace":"E-Track"}/actions/runs/123456`);
   expect(errors).toEqual([]);
 });
 test("refresh explicitly requests future reports rather than pretending all phones replied",async({page})=>{

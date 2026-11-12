@@ -1,0 +1,112 @@
+name: Original App Selected Delta Packages
+run-name: ${{ github.event_name == 'push' && 'Original App delta public key' || format('delta:{0}:{1}', inputs.job_id, inputs.attempt) }}
+on:
+  push:
+    branches: ["dev/admin/original-delta-*"]
+  workflow_dispatch:
+    inputs:
+      job_id:
+        description: "Immutable original-Admin App delta job"
+        type: string
+        required: true
+      attempt:
+        description: "Exact Admin attempt; do not use GitHub rerun"
+        type: string
+        required: true
+      kind:
+        type: choice
+        options: [android]
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: original-app-delta-${{ inputs.job_id || github.ref }}
+  cancel-in-progress: false
+env:
+  PYTHONDONTWRITEBYTECODE: "1"
+  NODE_DISABLE_COMPILE_CACHE: "1"
+  TMPDIR: ${{ github.workspace }}/.cache/tmp
+  TMP: ${{ github.workspace }}/.cache/tmp
+  TEMP: ${{ github.workspace }}/.cache/tmp
+jobs:
+  public-key:
+    if: github.repository == 'Eitan-S-23/Trace' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - name: Export only the existing original-App public key
+        env:
+          PUBLIC_KEY_BASE64: ${{ secrets.TRACE_UPDATE_PAYLOAD_ED25519_PUBLIC_KEY_BASE64 }}
+        run: |
+          mkdir -p "$TMPDIR" .cache/admin-delta
+          node --input-type=module - <<'JS'
+          import { writeFileSync } from 'node:fs';
+          import { createHash } from 'node:crypto';
+          const key=Buffer.from(process.env.PUBLIC_KEY_BASE64 || '', 'base64');
+          if(key.length!==32) throw new Error('Original App public key is unavailable');
+          writeFileSync('.cache/admin-delta/public-key.json',JSON.stringify({
+            publicKeyBase64:key.toString('base64'),sha256:createHash('sha256').update(key).digest('hex'),
+            sourceCommit:process.env.GITHUB_SHA,generatorCommit:'__DELTA_SOURCE_COMMIT__',privateKeyExported:false
+          })+'\n',{flag:'wx'});
+          JS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: original-app-delta-public-key-${{ github.run_id }}
+          path: .cache/admin-delta/public-key.json
+          include-hidden-files: true
+          retention-days: 14
+          if-no-files-found: error
+  android:
+    if: github.repository == 'Eitan-S-23/Trace' && github.event_name == 'workflow_dispatch' && inputs.kind == 'android'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out only the reviewed generator source
+        uses: actions/checkout@v4
+        with:
+          repository: Eitan-S-23/E-Track
+          ref: __DELTA_SOURCE_COMMIT__
+          path: .cache/delta-source
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - name: Prepare a project-local xdelta3 executable
+        run: |
+          mkdir -p "$TMPDIR" .cache/delta-source/.cache/admin-delta/tools
+          cd .cache/delta-source/.cache/admin-delta/tools
+          apt-get download xdelta3
+          for package in ./*.deb; do dpkg-deb -x "$package" .; done
+          echo "$GITHUB_WORKSPACE/.cache/delta-source/.cache/admin-delta/tools/usr/bin" >> "$GITHUB_PATH"
+      - name: Generate, reconstruct and sign with the original App credentials
+        id: generate
+        working-directory: .cache/delta-source
+        env:
+          INPUT_JOB_ID: ${{ inputs.job_id }}
+          INPUT_ATTEMPT: ${{ inputs.attempt }}
+          INPUT_KIND: android
+          TRACE_UPDATE_SERVICE_URL: https://trace-update-service-staging.tangjichentudou.workers.dev
+          TRACE_DEPLOY_TOKEN: ${{ secrets.TRACE_DEPLOY_TOKEN }}
+          TRACE_UPDATE_PAYLOAD_ED25519_PRIVATE_KEY_BASE64: ${{ secrets.TRACE_UPDATE_PAYLOAD_ED25519_PRIVATE_KEY_BASE64 }}
+          TRACE_UPDATE_PAYLOAD_KEY_VERSION: ${{ vars.TRACE_UPDATE_PAYLOAD_KEY_VERSION || 'staging' }}
+        run: node app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/generate-delta-job.mjs --out .cache/admin-delta/run
+      - name: Preserve receipts and delta, never originals or private keys
+        if: always() && steps.generate.outcome != 'skipped'
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-delta-android-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .cache/delta-source/.cache/admin-delta/run/*.json
+            .cache/delta-source/.cache/admin-delta/run/*.stdout
+            .cache/delta-source/.cache/admin-delta/run/*.stderr
+            .cache/delta-source/.cache/admin-delta/run/patch
+          include-hidden-files: true
+          retention-days: 14
+          if-no-files-found: error

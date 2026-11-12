@@ -6,7 +6,8 @@ import type { AssetRow, FirmwareAssetRow, FirmwareReleaseRow, ReleaseRow, Securi
 
 export type DeltaKind = "android" | "firmware";
 export type DeltaEnv = Pick<WorkerEnv, "DB" | "RELEASES_BUCKET" | "APP_ID" | "DELTA_GITHUB_TOKEN" |
-  "DELTA_WORKFLOW_REF" | "DELTA_WORKFLOW_COMMIT" | "DELTA_APP_PUBLIC_KEY_BASE64" | "DELTA_ASSETS_ENABLED">;
+  "DELTA_WORKFLOW_REF" | "DELTA_WORKFLOW_COMMIT" | "DELTA_APP_WORKFLOW_REF" | "DELTA_APP_WORKFLOW_COMMIT" |
+  "DELTA_APP_PUBLIC_KEY_BASE64" | "DELTA_ASSETS_ENABLED">;
 interface FilePin { id: string; key: string; fileName: string; sha256: string; bytes: number }
 export interface DeltaInput {
   releaseId: string; versionCode: number; versionName: string; imageSha256: string; file: FilePin;
@@ -22,6 +23,7 @@ export interface DeltaJob {
   actor: string; reason: string; error_code: string | null; created_at: number; updated_at: number;
 }
 const REPOSITORY = "Eitan-S-23/E-Track";
+const APP_REPOSITORY = "Eitan-S-23/Trace";
 const WORKFLOW = "admin-delta-build.yml";
 const HEX = /^[0-9a-f]{64}$/;
 const ID = /^[A-Za-z0-9_-]{1,160}$/;
@@ -39,9 +41,24 @@ function reasonOf(value: unknown): string {
   if (typeof value !== "string" || !value.trim() || value.length > 500) throw invalidParameter("A reason of at most 500 characters is required");
   return value.trim();
 }
-export function deltaDispatchConfigured(env: DeltaEnv): boolean {
-  return !!env.DELTA_GITHUB_TOKEN && /^[0-9a-f]{40}$/.test(env.DELTA_WORKFLOW_COMMIT ?? "")
-    && /^(?:main|dev\/[a-zA-Z0-9/_.-]+)$/.test(env.DELTA_WORKFLOW_REF ?? "");
+function configuredWorkflow(env: DeltaEnv, kind: DeltaKind) {
+  const ref = kind === "android" ? env.DELTA_APP_WORKFLOW_REF : env.DELTA_WORKFLOW_REF;
+  const commit = kind === "android" ? env.DELTA_APP_WORKFLOW_COMMIT : env.DELTA_WORKFLOW_COMMIT;
+  return { ref: ref ?? "", commit: commit ?? "", storedRef: kind === "android" ? `${APP_REPOSITORY}@${ref ?? ""}` : ref ?? "" };
+}
+export function deltaDispatchConfigured(env: DeltaEnv, kind: DeltaKind = "firmware"): boolean {
+  const workflow = configuredWorkflow(env, kind);
+  return !!env.DELTA_GITHUB_TOKEN && /^[0-9a-f]{40}$/.test(workflow.commit)
+    && /^(?:main|dev\/[a-zA-Z0-9/_.-]+)$/.test(workflow.ref);
+}
+export function workflowLocation(job: Pick<DeltaJob, "kind" | "workflow_ref">) {
+  // Qualified refs retain each attempt's repository without rewriting legacy rows.
+  const app = job.workflow_ref.startsWith(`${APP_REPOSITORY}@`);
+  const ref = app ? job.workflow_ref.slice(APP_REPOSITORY.length + 1) : job.workflow_ref;
+  if ((app && job.kind !== "android") || !/^(?:main|dev\/[a-zA-Z0-9/_.-]+)$/.test(ref)) {
+    throw invalidParameter("Invalid bound delta workflow repository/ref");
+  }
+  return { repository: app ? APP_REPOSITORY : REPOSITORY, ref };
 }
 export function jobView(job: DeltaJob) {
   const result = job.result_json ? JSON.parse(job.result_json) as Record<string, unknown> : null;
@@ -50,12 +67,28 @@ export function jobView(job: DeltaJob) {
     status: job.status, enabled: job.enabled===1, attempt: job.attempt, revision: job.revision, errorCode: job.error_code,
     createdAt: job.created_at, updatedAt: job.updated_at, fileName: result?.fileName ?? null,
     sizeBytes: result?.sizeBytes ?? null, sha256: result?.sha256 ?? null,
-    runUrl: job.run_id ? `https://github.com/${REPOSITORY}/actions/runs/${job.run_id}` : null };
+    runUrl: job.run_id ? `https://github.com/${workflowLocation(job).repository}/actions/runs/${job.run_id}` : null };
 }
 async function getJob(env: DeltaEnv, id: string): Promise<DeltaJob> {
   const job = await env.DB.prepare("SELECT * FROM delta_jobs WHERE id=?").bind(idOf(id)).first<DeltaJob>();
   if (!job) throw new ApiError("RELEASE_NOT_FOUND", "Delta job not found", 404);
   return job;
+}
+async function appSignatureValid(env: DeltaEnv, payload: SecurityPayload, signature: string): Promise<boolean> {
+  try {
+    const raw=Uint8Array.from(atob(env.DELTA_APP_PUBLIC_KEY_BASE64??""),c=>c.charCodeAt(0));
+    const key=await crypto.subtle.importKey("raw",raw,{name:"Ed25519"},false,["verify"]);
+    return await crypto.subtle.verify("Ed25519",key,Uint8Array.from(atob(signature),c=>c.charCodeAt(0)),new TextEncoder().encode(canonicalJson(payload)));
+  } catch { return false; }
+}
+async function originalAppSigningConfigured(env: DeltaEnv, target: DeltaInput): Promise<boolean> {
+  const row=await env.DB.prepare("SELECT payload_signature_json FROM releases WHERE id=?").bind(target.releaseId)
+    .first<{payload_signature_json:string|null}>();
+  try {
+    const signature=JSON.parse(row?.payload_signature_json??"null") as {algorithm:string;signature:string}|null;
+    return !!target.securityPayload && signature?.algorithm==="ed25519"
+      && typeof signature.signature==="string" && await appSignatureValid(env,target.securityPayload,signature.signature);
+  } catch { return false; }
 }
 async function loadInput(env: DeltaEnv, kind: DeltaKind, id: string, verifyObject = true): Promise<DeltaInput> {
   let input: DeltaInput;
@@ -149,18 +182,20 @@ export async function deltaCandidates(env: DeltaEnv, kind: DeltaKind, targetId: 
   }
   return json({ ok: true, kind, target: { releaseId: targetId, versionName: target.versionName,
     versionCode: target.versionCode, imageSha256: target.imageSha256, fullBytes: target.file.bytes }, bases,
-    jobs: jobs.map(jobView), dispatchConfigured: deltaDispatchConfigured(env),
-    appSigningConfigured: !!env.DELTA_APP_PUBLIC_KEY_BASE64, distributionEnabled: env.DELTA_ASSETS_ENABLED === "true",
+    jobs: jobs.map(jobView), dispatchConfigured: deltaDispatchConfigured(env, kind),
+    appSigningConfigured: kind === "android" ? await originalAppSigningConfigured(env,target) : false,
+    distributionEnabled: env.DELTA_ASSETS_ENABLED === "true",
     maximumBases: 5, truncated: sourceRows.results.length === 200 });
 }
 
 async function dispatch(env: DeltaEnv, job: DeltaJob, fetcher: typeof fetch): Promise<void> {
+  const workflow = workflowLocation(job);
   // Dispatch once. A transport failure is an unknown outcome, never an automatic retry.
   try {
-    const response = await fetcher(`https://api.github.com/repos/${REPOSITORY}/actions/workflows/${WORKFLOW}/dispatches`, {
+    const response = await fetcher(`https://api.github.com/repos/${workflow.repository}/actions/workflows/${WORKFLOW}/dispatches`, {
       method: "POST", headers: { Authorization: `Bearer ${env.DELTA_GITHUB_TOKEN}`, Accept: "application/vnd.github+json",
         "Content-Type": "application/json", "User-Agent": "E-Track-Admin-Delta" },
-      body: JSON.stringify({ ref: job.workflow_ref, inputs: { job_id: job.id, attempt: String(job.attempt), kind: job.kind } }),
+      body: JSON.stringify({ ref: workflow.ref, inputs: { job_id: job.id, attempt: String(job.attempt), kind: job.kind } }),
       // Workers rejects redirect:"error" before sending; manual never forwards the token.
       signal: AbortSignal.timeout(15000), redirect: "manual"
     });
@@ -180,13 +215,17 @@ async function dispatch(env: DeltaEnv, job: DeltaJob, fetcher: typeof fetch): Pr
 }
 
 export async function createDeltaJobs(env: DeltaEnv, actor: string, body: Record<string, unknown>, fetcher = fetch): Promise<Response> {
-  if (!deltaDispatchConfigured(env)) throw new ApiError("BACKEND_UNAVAILABLE", "Project-scoped GitHub delta dispatcher is not configured", 503);
   const kind = kindOf(body.kind), targetId = idOf(body.targetReleaseId), reason = reasonOf(body.reason);
+  if (!deltaDispatchConfigured(env, kind)) throw new ApiError("BACKEND_UNAVAILABLE", "Project-scoped GitHub delta dispatcher is not configured", 503);
+  const workflow = configuredWorkflow(env, kind);
   if (kind === "android" && !env.DELTA_APP_PUBLIC_KEY_BASE64) throw new ApiError("SIGNING_REQUIRED", "APK delta signing key binding is not configured", 503);
   if (!Array.isArray(body.baseReleaseIds) || !body.baseReleaseIds.length || body.baseReleaseIds.length>5) throw invalidParameter("Select one to five base releases");
   const ids = body.baseReleaseIds.map(idOf);
   if (new Set(ids).size !== ids.length) throw invalidParameter("Duplicate delta base");
   const target = await loadInput(env, kind, targetId);
+  if (kind === "android" && !await originalAppSigningConfigured(env,target)) {
+    throw new ApiError("SIGNING_REQUIRED", "Delta verification key does not match the original App manifest", 503);
+  }
   const plans = [];
   for (const id of ids) {
     const base = await loadInput(env, kind, id);
@@ -207,7 +246,7 @@ export async function createDeltaJobs(env: DeltaEnv, actor: string, body: Record
          status,input_json,input_sha256,workflow_commit,workflow_ref,actor,reason,created_at,updated_at)
          VALUES (?,?,?,?,?,?,?,?,'dispatching',?,?,?,?,?,?,?,?)`)
         .bind(id,kind,targetId,base.releaseId,target.imageSha256,base.imageSha256,base.versionCode,target.versionCode,
-          text,hash,env.DELTA_WORKFLOW_COMMIT!,env.DELTA_WORKFLOW_REF!,actor,reason,now,now).run();
+          text,hash,workflow.commit,workflow.storedRef,actor,reason,now,now).run();
       if (inserted.meta.changes) await dispatch(env, await getJob(env,id), fetcher);
     } catch (error) {
       if (String(error).includes("daily budget")) throw new ApiError("RATE_LIMITED", "Daily delta job limit reached", 429);
@@ -226,7 +265,8 @@ export async function deltaJobAction(env: DeltaEnv, actor: string, id: string, a
   if (action === "reconcile") {
     if (["ready","failed"].includes(job.status)) return json({ok:true,job:jobView(job)});
     if (!env.DELTA_GITHUB_TOKEN) throw new ApiError("BACKEND_UNAVAILABLE","Project GitHub read access is not configured",503);
-    const response=await fetcher(`https://api.github.com/repos/${REPOSITORY}/actions/workflows/${WORKFLOW}/runs?event=workflow_dispatch&branch=${encodeURIComponent(job.workflow_ref)}&per_page=100`,{
+    const workflow=workflowLocation(job);
+    const response=await fetcher(`https://api.github.com/repos/${workflow.repository}/actions/workflows/${WORKFLOW}/runs?event=workflow_dispatch&branch=${encodeURIComponent(workflow.ref)}&per_page=100`,{
       headers:{Authorization:`Bearer ${env.DELTA_GITHUB_TOKEN}`,Accept:"application/vnd.github+json","User-Agent":"E-Track-Admin-Delta"},
       redirect:"manual",signal:AbortSignal.timeout(15000)});
     if (!response.ok) {await response.body?.cancel();throw new ApiError("BACKEND_UNAVAILABLE","GitHub run reconciliation failed",503);}
@@ -248,15 +288,19 @@ export async function deltaJobAction(env: DeltaEnv, actor: string, id: string, a
     if (!changed[0].meta.changes) throw new ApiError("CAS_CONFLICT","Delta reconciliation changed",409);
   } else if (action === "retry") {
     if (job.status !== "failed") throw new ApiError("RELEASE_CONFLICT", "Only known failed jobs may retry; reconcile unknown dispatches first", 409);
-    if (!deltaDispatchConfigured(env)) throw new ApiError("RELEASE_CONFLICT", "Workflow binding is unavailable", 409);
+    if (!deltaDispatchConfigured(env,job.kind)) throw new ApiError("RELEASE_CONFLICT", "Workflow binding is unavailable", 409);
+    const workflow=configuredWorkflow(env,job.kind);
     const currentTarget = await loadInput(env,job.kind,job.target_release_id);
     const currentBase = await loadInput(env,job.kind,job.base_release_id);
     if (canonicalJson(currentTarget)!==canonicalJson(spec.target) || canonicalJson(currentBase)!==canonicalJson(spec.base)) throw new ApiError("RELEASE_CONFLICT", "Original source binding changed",409);
+    if (job.kind==="android" && !await originalAppSigningConfigured(env,currentTarget)) {
+      throw new ApiError("SIGNING_REQUIRED","Delta verification key does not match the original App manifest",503);
+    }
     const mutation = crypto.randomUUID();
     let changed: D1Result[];
     try { changed = await env.DB.batch([
       env.DB.prepare("UPDATE delta_jobs SET status='dispatching',attempt=attempt+1,workflow_commit=?,workflow_ref=?,mutation_id=?,run_id=NULL,error_code=NULL,result_json=NULL,revision=revision+1,updated_at=? WHERE id=? AND revision=? AND status='failed'")
-        .bind(env.DELTA_WORKFLOW_COMMIT!,env.DELTA_WORKFLOW_REF!,mutation,nowSeconds(),id,job.revision),
+        .bind(workflow.commit,workflow.storedRef,mutation,nowSeconds(),id,job.revision),
       eventStatement(env, id, mutation, "retry", actor, reason, job.revision+1)
     ]); } catch (error) {
       if (String(error).includes("daily budget")) throw new ApiError("RATE_LIMITED","Daily delta attempt limit reached",429);
@@ -301,7 +345,8 @@ async function ciJob(request: Request, env: WorkerEnv, id: string): Promise<Delt
   return job;
 }
 function checkAttempt(job: DeltaJob, body: Record<string,unknown>) {
-  if (body.attempt!==job.attempt || body.workflowCommit!==job.workflow_commit || !/^[1-9][0-9]{0,19}$/.test(String(body.runId))) {
+  if ((body.workflowRepository??REPOSITORY)!==workflowLocation(job).repository || body.attempt!==job.attempt
+    || body.workflowCommit!==job.workflow_commit || !/^[1-9][0-9]{0,19}$/.test(String(body.runId))) {
     throw new ApiError("RELEASE_CONFLICT","Delta attempt or workflow binding changed",409);
   }
   if (job.run_id && job.run_id!==String(body.runId)) throw new ApiError("RELEASE_CONFLICT","Delta run changed",409);
@@ -313,9 +358,9 @@ export async function deltaCi(request: Request, env: WorkerEnv): Promise<Respons
   if (!match) throw invalidParameter("Unknown delta CI route");
   const job=await ciJob(request,env,match[1]), action=match[2], spec=JSON.parse(job.input_json) as DeltaSpec;
   if (request.method==="GET" && action==="spec") return json({ok:true,jobId:job.id,attempt:job.attempt,status:job.status,
-    workflowCommit:job.workflow_commit,inputSha256:job.input_sha256,input:spec});
+    workflowCommit:job.workflow_commit,workflowRepository:workflowLocation(job).repository,inputSha256:job.input_sha256,input:spec});
   if (request.method==="GET" && (action==="base" || action==="target")) {
-    checkAttempt(job,{attempt:Number(request.headers.get("X-Delta-Attempt")),runId:request.headers.get("X-Delta-Run"),workflowCommit:request.headers.get("X-Delta-Commit")});
+    checkAttempt(job,{attempt:Number(request.headers.get("X-Delta-Attempt")),runId:request.headers.get("X-Delta-Run"),workflowCommit:request.headers.get("X-Delta-Commit"),workflowRepository:request.headers.get("X-Delta-Repository")});
     if (job.status!=="running") throw new ApiError("RELEASE_CONFLICT","Claim the job before reading inputs",409);
     const file=spec[action].file, object=await env.RELEASES_BUCKET.get(file.key);
     if (!object || object.size!==file.bytes) throw new ApiError("R2_VERIFY_FAILED","Original input unavailable",409);
@@ -323,7 +368,7 @@ export async function deltaCi(request: Request, env: WorkerEnv): Promise<Respons
   }
   if (request.method!=="POST") throw invalidParameter("Delta CI requires POST");
   if (action==="asset") {
-    const header={attempt:Number(request.headers.get("X-Delta-Attempt")),runId:request.headers.get("X-Delta-Run"),workflowCommit:request.headers.get("X-Delta-Commit")};
+    const header={attempt:Number(request.headers.get("X-Delta-Attempt")),runId:request.headers.get("X-Delta-Run"),workflowCommit:request.headers.get("X-Delta-Commit"),workflowRepository:request.headers.get("X-Delta-Repository")};
     checkAttempt(job,header);
     if (job.status!=="running") throw new ApiError("RELEASE_CONFLICT","Delta job is not running",409);
     const length=Number(request.headers.get("Content-Length")), sha=request.headers.get("X-Delta-Sha256")??"";
@@ -401,12 +446,9 @@ export async function deltaCi(request: Request, env: WorkerEnv): Promise<Respons
       || typeof signature.signature!=="string" || typeof signature.keyVersion!=="string" || !/^[\w.-]{1,64}$/.test(signature.keyVersion)) {
       throw new ApiError("SIGNING_REQUIRED","Signed per-base APK manifest does not match original target",409);
     }
-    try {
-      const raw=Uint8Array.from(atob(env.DELTA_APP_PUBLIC_KEY_BASE64??""),c=>c.charCodeAt(0));
-      const key=await crypto.subtle.importKey("raw",raw,{name:"Ed25519"},false,["verify"]);
-      const valid=await crypto.subtle.verify("Ed25519",key,Uint8Array.from(atob(signature.signature),c=>c.charCodeAt(0)),new TextEncoder().encode(canonicalJson(payload)));
-      if (!valid) throw new Error();
-    } catch {throw new ApiError("SIGNING_REQUIRED","APK delta manifest signature rejected",409);}
+    if (!await appSignatureValid(env,payload,signature.signature) || !await originalAppSigningConfigured(env,currentTarget)) {
+      throw new ApiError("SIGNING_REQUIRED","APK delta manifest signature rejected",409);
+    }
     result.securityPayload=payload;result.payloadSignature=signature;
   }
   const mutation=crypto.randomUUID();
@@ -415,7 +457,7 @@ export async function deltaCi(request: Request, env: WorkerEnv): Promise<Respons
   if (job.kind==="android") statements.push(env.DB.prepare(`INSERT INTO release_assets
     (id,release_id,app_id,platform,asset_type,file_name,sha256,size_bytes,r2_key,r2_state,github_url,disabled)
     SELECT ?,?,?,'android','patch',?,?,?,?,'available',?,1 WHERE EXISTS(SELECT 1 FROM delta_jobs WHERE id=? AND mutation_id=? AND status='ready')`)
-    .bind(assetId,job.target_release_id,env.APP_ID,fileName,sha,size,outputKey(job),`https://github.com/${REPOSITORY}/actions/runs/${job.run_id}`,job.id,mutation));
+    .bind(assetId,job.target_release_id,env.APP_ID,fileName,sha,size,outputKey(job),`https://github.com/${workflowLocation(job).repository}/actions/runs/${job.run_id}`,job.id,mutation));
   statements.push(eventStatement(env,job.id,mutation,"complete","github-actions",`Verified run ${job.run_id}`,job.revision+1));
   const changed=await env.DB.batch(statements);
   if (!changed[0].meta.changes) throw new ApiError("CAS_CONFLICT","Delta completion changed",409);

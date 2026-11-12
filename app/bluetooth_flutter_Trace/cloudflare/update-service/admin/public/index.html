@@ -2889,7 +2889,7 @@
           <div class="operations-buttons"><button type="button" class="pill-button primary" data-version-operation="delta-create" ${canBuild && delta.selected.size ? "" : "disabled"}>${escapeHtml(opText(`生成 ${delta.selected.size} 个差分包`, `Generate ${delta.selected.size} deltas`))}</button><button type="button" class="secondary-button" data-version-operation="delta-reload" ${delta.busy || delta.loading ? "disabled" : ""}>${escapeHtml(opText("刷新任务状态", "Refresh jobs"))}</button></div>
           <h3 class="delta-jobs-title">${escapeHtml(opText("构建任务与差分文件", "Build jobs and delta files"))}</h3>
           <div class="delta-job-list">${data.jobs.map(job => {
-            const run = /^https:\/\/github\.com\/Eitan-S-23\/E-Track\/actions\/runs\/\d+$/.test(job.runUrl ?? "") ? job.runUrl : null;
+            const run = /^https:\/\/github\.com\/Eitan-S-23\/(?:E-Track|Trace)\/actions\/runs\/\d+$/.test(job.runUrl ?? "") ? job.runUrl : null;
             const control = job.status === "ready" ? job.enabled ? "disable" : "enable" : job.status === "failed" ? "retry" : "reconcile";
             const usable = !["enable", "disable"].includes(control) || (canRole("owner") && (control === "disable" || (data.distributionEnabled && job.sizeBytes < data.target.fullBytes)));
             return `<article class="delta-job-row"><div><strong>${escapeHtml(job.baseVersionCode)} → ${escapeHtml(job.targetVersionCode)}</strong><span>${escapeHtml(deltaStatus(job))}</span><small>${escapeHtml(job.fileName ?? job.errorCode ?? "")} ${job.sizeBytes ? escapeHtml(formatBytes(job.sizeBytes)) : ""}</small>
