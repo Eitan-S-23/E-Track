@@ -47,22 +47,14 @@ jobs:
         run: |
           mkdir -p "$TMPDIR" .cache/admin-delta
           node --input-type=module - <<'JS'
-          import { writeFileSync } from 'node:fs';
           import { createHash } from 'node:crypto';
           const key=Buffer.from(process.env.PUBLIC_KEY_BASE64 || '', 'base64');
           if(key.length!==32) throw new Error('Original App public key is unavailable');
-          writeFileSync('.cache/admin-delta/public-key.json',JSON.stringify({
-            publicKeyBase64:key.toString('base64'),sha256:createHash('sha256').update(key).digest('hex'),
+          process.stdout.write('TRACE_DELTA_PUBLIC_KEY '+JSON.stringify({
+            publicKeyHex:key.toString('hex'),sha256:createHash('sha256').update(key).digest('hex'),
             sourceCommit:process.env.GITHUB_SHA,generatorCommit:'__DELTA_SOURCE_COMMIT__',privateKeyExported:false
-          })+'\n',{flag:'wx'});
+          })+'\n');
           JS
-      - uses: actions/upload-artifact@v4
-        with:
-          name: original-app-delta-public-key-${{ github.run_id }}
-          path: .cache/admin-delta/public-key.json
-          include-hidden-files: true
-          retention-days: 14
-          if-no-files-found: error
   android:
     if: github.repository == 'Eitan-S-23/Trace' && github.event_name == 'workflow_dispatch' && inputs.kind == 'android'
     runs-on: ubuntu-latest
@@ -97,16 +89,32 @@ jobs:
           TRACE_UPDATE_PAYLOAD_ED25519_PRIVATE_KEY_BASE64: ${{ secrets.TRACE_UPDATE_PAYLOAD_ED25519_PRIVATE_KEY_BASE64 }}
           TRACE_UPDATE_PAYLOAD_KEY_VERSION: ${{ vars.TRACE_UPDATE_PAYLOAD_KEY_VERSION || 'staging' }}
         run: node app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/generate-delta-job.mjs --out .cache/admin-delta/run
-      - name: Preserve receipts and delta, never originals or private keys
+      - name: Preserve bounded receipts; verified delta already resides in R2
         if: always() && steps.generate.outcome != 'skipped'
-        uses: actions/upload-artifact@v4
-        with:
-          name: admin-delta-android-${{ github.run_id }}-${{ github.run_attempt }}
-          path: |
-            .cache/delta-source/.cache/admin-delta/run/*.json
-            .cache/delta-source/.cache/admin-delta/run/*.stdout
-            .cache/delta-source/.cache/admin-delta/run/*.stderr
-            .cache/delta-source/.cache/admin-delta/run/patch
-          include-hidden-files: true
-          retention-days: 14
-          if-no-files-found: error
+        run: |
+          node --input-type=module - <<'JS'
+          import assert from 'node:assert/strict';
+          import {existsSync,readFileSync,statSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          import path from 'node:path';
+          const out=process.env.DELTA_RECEIPTS_DIR || '.cache/delta-source/.cache/admin-delta/run';
+          const receipts={};
+          for(const name of ['job.json','claim.json','steps.json','proof.json','upload.json','complete.json','failure.json']) {
+            const file=path.join(out,name);
+            if(!existsSync(file)) continue;
+            assert(statSync(file).size<=65536,'Oversized delta receipt');
+            const raw=readFileSync(file),value=JSON.parse(raw);
+            receipts[name]=value;
+            process.stdout.write('TRACE_DELTA_RECEIPT '+JSON.stringify({name,sha256:createHash('sha256').update(raw).digest('hex'),value})+'\n');
+          }
+          const complete=receipts['complete.json'];
+          if(complete) {
+            const proof=receipts['proof.json'];
+            assert(proof && receipts['job.json'] && receipts['upload.json']);
+            const patch=readFileSync(path.join(out,'patch'));
+            assert.equal(createHash('sha256').update(patch).digest('hex'),proof.sha256);
+            assert.equal(patch.length,proof.sizeBytes);
+            assert.equal(complete.job?.status,'ready');assert.equal(complete.job.enabled,false);
+            assert.equal(complete.job.sha256,proof.sha256);assert.equal(complete.channelPublished,false);
+          }
+          JS

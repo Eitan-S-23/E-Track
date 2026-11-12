@@ -188,6 +188,16 @@ bound workflow, execute a real disabled job for each format (APK and MCU), prese
 their originals/runs/receipts, and verify the resulting objects and registered read models. Do not publish a
 channel, install an APK or perform an OTA just to check this server-side path.
 
+The original-App workflow does not depend on GitHub artifact storage. Its public
+verification key and a fixed list of bounded, non-secret JSON receipts are retained
+in native run logs. The generator must still upload the exact delta to R2 and
+complete the backend's hash, signature and immutable-input checks. The receipt
+step verifies that the completed, disabled asset matches the local patch. It does
+not print environment variables, original APKs or private keys, and does not
+suppress a generation or receipt failure. Retrieve the raw logs and exact R2 object
+for qualification; retain earlier artifact-quota failures rather than rerunning
+an already-completed delta simply to produce another archive.
+
 Current actual observations and source/run/deployment identities are in
 `docs/ota-exec-notes/VERSION-INVENTORY-DELTA-2026-11-11.md` at the repository root.
 

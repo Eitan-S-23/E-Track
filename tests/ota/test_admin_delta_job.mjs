@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash, generateKeyPairSync, verify } from "node:crypto";
+import { spawnSync } from "node:child_process";
 import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -117,6 +118,35 @@ test("original APK workflow retains its repository secrets and pins only generat
   assert.match(workflow,/secrets\.TRACE_DEPLOY_TOKEN/);
   assert.match(workflow,/secrets\.TRACE_UPDATE_PAYLOAD_ED25519_PRIVATE_KEY_BASE64/);
   assert.doesNotMatch(workflow,/flutter build|contents: write|gh secret|privateKeyBase64/);
+  assert.doesNotMatch(workflow,/upload-artifact|continue-on-error/);
+});
+test("App workflow exports only a public key without an artifact storage dependency",async()=>{
+  const workflow=await readFile(path.join(root,"app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/admin-app-delta-workflow.template.yml"),"utf8");
+  const scripts=[...workflow.matchAll(/node --input-type=module - <<'JS'\n([\s\S]*?)\n {10}JS/g)].map(m=>m[1].replace(/^ {10}/gm,""));
+  assert.equal(scripts.length,2);
+  const pub=keys.publicKey.export({format:"der",type:"spki"}).subarray(-32);
+  const f=await fixture();
+  const result=spawnSync(process.execPath,["--input-type=module","--eval",scripts[0]],{cwd:f.out,encoding:"utf8",windowsHide:true,
+    env:{...process.env,PUBLIC_KEY_BASE64:pub.toString("base64"),GITHUB_SHA:"c".repeat(40),TRACE_DEPLOY_TOKEN:"must-not-be-exported"}});
+  assert.equal(result.status,0,result.stderr);
+  const value=JSON.parse(result.stdout.trim().slice("TRACE_DELTA_PUBLIC_KEY ".length));
+  assert.equal(value.publicKeyHex,pub.toString("hex"));assert.equal(value.sha256,sha(pub));
+  assert.equal(value.privateKeyExported,false);assert.doesNotMatch(result.stdout,/must-not-be-exported/);
+});
+test("App workflow preserves only named receipts and rejects a mismatched completed delta",async()=>{
+  const workflow=await readFile(path.join(root,"app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/admin-app-delta-workflow.template.yml"),"utf8");
+  const script=[...workflow.matchAll(/node --input-type=module - <<'JS'\n([\s\S]*?)\n {10}JS/g)][1][1].replace(/^ {10}/gm,"");
+  const f=await fixture(),{proof}=await generatePatch(f);
+  for(const [name,value] of Object.entries({"job.json":f.job,"upload.json":{ok:true},
+    "complete.json":{ok:true,channelPublished:false,job:{status:"ready",enabled:false,sha256:proof.sha256}},
+    "private.json":{secret:"must-not-be-exported"}})) await writeFile(outputPath(root,path.join(f.out,name)),JSON.stringify(value));
+  const run=()=>spawnSync(process.execPath,["--input-type=module","--eval",script],{cwd:f.out,encoding:"utf8",windowsHide:true,
+    env:{...process.env,DELTA_RECEIPTS_DIR:f.out,TRACE_DEPLOY_TOKEN:"must-not-be-exported"}});
+  const result=run();assert.equal(result.status,0,result.stderr);assert.doesNotMatch(result.stdout,/must-not-be-exported|private\.json/);
+  const receipts=result.stdout.trim().split("\n").map(line=>JSON.parse(line.slice("TRACE_DELTA_RECEIPT ".length)));
+  assert(receipts.some(r=>r.name==="proof.json" && r.value.sha256===proof.sha256));
+  await writeFile(outputPath(root,path.join(f.out,"patch")),"corrupt");
+  assert.notEqual(run().status,0);
 });
 test("preserves a pre-claim authentication failure without replay or a false failed-claim report",async()=>{
   const f=await fixture(),out=path.join(f.out,"admission-failure"),requests=[];
