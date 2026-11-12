@@ -76,7 +76,7 @@
         "GITHUB_REPO": "Trace",
         "FIRMWARE_GITHUB_REPOSITORY": "Eitan-S-23/E-Track",
         "VERSION_INVENTORY_ENABLED": "true",
-        "DELTA_ASSETS_ENABLED": "false",
+        "DELTA_ASSETS_ENABLED": "true",
         "MANIFEST_CACHE_TTL_SECONDS": "60",
         "DOWNLOAD_TOKEN_TTL_SECONDS": "300",
         "DOWNLOAD_TOKEN_KEY_VERSION": "staging",

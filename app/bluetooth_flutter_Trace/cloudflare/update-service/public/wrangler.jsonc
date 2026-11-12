@@ -10,7 +10,7 @@
     "ENVIRONMENT": "staging",
     "APP_ID": "trace",
     "VERSION_INVENTORY_ENABLED": "true",
-    "DELTA_ASSETS_ENABLED": "false",
+    "DELTA_ASSETS_ENABLED": "true",
     "GITHUB_OWNER": "Eitan-S-23",
     "GITHUB_REPO": "Trace",
     "MANIFEST_CACHE_TTL_SECONDS": "60",

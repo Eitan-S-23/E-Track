@@ -10,7 +10,7 @@
     "ENVIRONMENT": "staging",
     "APP_ID": "trace",
     "VERSION_INVENTORY_ENABLED": "true",
-    "DELTA_ASSETS_ENABLED": "false"
+    "DELTA_ASSETS_ENABLED": "true"
   },
   "d1_databases": [
     {
