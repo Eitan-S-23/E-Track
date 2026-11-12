@@ -1,0 +1,167 @@
+name: Original Admin Candidates
+run-name: Original Admin candidates from ${{ github.sha }}
+on:
+  push:
+    branches: [release/candidates]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: original-admin-candidates
+  cancel-in-progress: false
+env:
+  PYTHONDONTWRITEBYTECODE: "1"
+  NODE_DISABLE_COMPILE_CACHE: "1"
+  TEMP: ${{ github.workspace }}/.cache/original-admin-candidate/tmp
+  TMP: ${{ github.workspace }}/.cache/original-admin-candidate/tmp
+  TMPDIR: ${{ github.workspace }}/.cache/original-admin-candidate/tmp
+  BEFORE_SHA: ${{ github.event.before }}
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHONPATH: ${{ github.workspace }}/.cache/original-admin-candidate/python
+    outputs:
+      app: ${{ steps.plan.outputs.app }}
+      firmware: ${{ steps.plan.outputs.firmware }}
+      firmware_version: ${{ steps.plan.outputs.firmware_version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - name: Prepare existing native packaging test dependencies
+        env:
+          PIP_CACHE_DIR: ${{ github.workspace }}/.cache/original-admin-candidate/pip
+        run: |
+          set -euo pipefail
+          mkdir -p "$TMPDIR"
+          python3 -m pip install --disable-pip-version-check --target .cache/original-admin-candidate/python pycryptodome==3.23.0
+          cmake -S .github/scripts/bsdiff -B .cache/original-admin-candidate/bsdiff -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build .cache/original-admin-candidate/bsdiff --target bsdiff
+      - name: Candidate and existing release regressions, without credentials
+        env:
+          BSDIFF_EXE: ${{ github.workspace }}/.cache/original-admin-candidate/bsdiff/bin/bsdiff
+        run: |
+          set -euo pipefail
+          mkdir -p "$TMPDIR"
+          node --test tests/ota/test_original_admin_candidate.mjs tests/ota/test_firmware_admin_candidate.mjs tests/ota/test_firmware_build_profile.mjs tests/ota/test_firmware_release.mjs
+          python3 -I -S -B -X utf8 tests/ota/test_original_app_candidate.py
+      - name: Plan only new versions; preserve already delivered packages
+        id: plan
+        if: github.event_name == 'push'
+        run: node .github/scripts/original-admin-candidate.mjs plan
+      - name: Explain checks-only invocation
+        if: github.event_name == 'workflow_dispatch'
+        run: echo "Checks only. Candidates are created only by new versioned pushes to release/candidates."
+
+  app:
+    needs: checks
+    if: needs.checks.outputs.app == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 95
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - name: Build exact E-Track source using original Trace signing, then await candidate delivery
+        env:
+          ORIGINAL_ADMIN_ACTIONS_TOKEN: ${{ secrets.ORIGINAL_ADMIN_ACTIONS_TOKEN }}
+        run: node .github/scripts/original-admin-candidate.mjs dispatch-app
+
+  firmware:
+    needs: checks
+    if: needs.checks.outputs.firmware == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    environment: firmware-rehearsal
+    env:
+      FIRMWARE_RELEASE_MODE: original-admin-candidate
+      INPUT_PREPARE_ADMIN_CANDIDATE: "true"
+      INPUT_STAGE_CANDIDATE: "false"
+      INPUT_PACKAGE_CANDIDATE: "false"
+      INPUT_PUBLISH: "false"
+      INPUT_REHEARSAL: "false"
+      INPUT_CHECK_BINDINGS: "false"
+      INPUT_VERSION_NAME: ${{ needs.checks.outputs.firmware_version }}
+      INPUT_FIRMWARE_BUILD_PROFILE: p34-v2-candidate
+      INPUT_CANDIDATE_REVIEWED_COMMIT: ${{ github.sha }}
+      INPUT_RELEASE_NOTES: Automatic full-only V2 candidate; channel publication and selected deltas remain operator-controlled.
+      OTA_BOOT_CHAIN_READY: ${{ vars.OTA_BOOT_CHAIN_READY }}
+      npm_config_cache: ${{ github.workspace }}/.cache/original-admin-candidate/npm
+      PIP_CACHE_DIR: ${{ github.workspace }}/.cache/original-admin-candidate/pip
+      PYTHONPATH: ${{ github.workspace }}/.cache/original-admin-candidate/python
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - name: Check protected mode before using credentials
+        run: node .github/scripts/firmware-admin-candidate.mjs gate --out .cache/original-admin-candidate/run
+      - uses: carlosperate/arm-none-eabi-gcc-action@v1
+        with:
+          release: "13.3.Rel1"
+      - name: Install the existing packaging and R2 dependencies
+        run: |
+          set -euo pipefail
+          mkdir -p "$TMPDIR"
+          python3 -m pip install --only-binary=:all: --disable-pip-version-check --target .cache/original-admin-candidate/python pycryptodome==3.23.0
+          cd app/bluetooth_flutter_Trace/cloudflare/update-service/worker
+          npm ci
+      - name: Run firmware protocol and boot regressions
+        run: |
+          set -euo pipefail
+          python3 -B tests/boot/test_fw_header_vectors.py
+          python3 -B tests/boot/test_boot_protocols.py
+          python3 -B tests/boot/test_boot_state_machine.py
+          python3 -B tests/ota/test_ota_staging.py
+          python3 -B tests/ota/test_ota_package.py
+          python3 -B tests/ota/test_ota_patch.py
+          python3 -B tests/ota/test_ota_ble_frame.py
+          python3 -B tests/ota/test_ota_ble_session.py
+          python3 -B tests/ota/test_ota_ble_contract.py
+      - name: Compile this exact push and prepare normal full and recovery packages
+        id: package
+        env:
+          OTA_AES_KEY: ${{ secrets.FIRMWARE_REHEARSAL_OTA_AES_KEY }}
+        run: |
+          set -euo pipefail
+          export INPUT_RELEASE_NOTES="$(node -p "JSON.parse(require('node:fs').readFileSync('Tools/ota/original-admin-release.json','utf8')).firmware.releaseNotes")"
+          node .github/scripts/original-admin-candidate.mjs firmware-source
+          node .github/scripts/firmware-admin-candidate.mjs package --out .cache/original-admin-candidate/run
+      - name: Verify private build key cleanup
+        if: always() && steps.package.outcome != '' && steps.package.outcome != 'skipped'
+        run: node .github/scripts/firmware-gcc-keyed-build.mjs cleanup --build-dir .cache/original-admin-candidate/run/private-build
+      - name: Upload and register the unpublished original-Admin firmware candidate
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.FIRMWARE_REHEARSAL_CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.FIRMWARE_REHEARSAL_CLOUDFLARE_API_TOKEN }}
+          TRACE_DEPLOY_TOKEN: ${{ secrets.ORIGINAL_ADMIN_FIRMWARE_DEPLOY_TOKEN }}
+          TRACE_UPDATE_SERVICE_URL: https://trace-update-service-staging.tangjichentudou.workers.dev
+          TRACE_R2_BUCKET: trace-update-staging-releases
+        run: node .github/scripts/firmware-admin-candidate.mjs register --out .cache/original-admin-candidate/run
+      - name: Preserve candidate receipts in the native run log
+        if: always()
+        run: |
+          node --input-type=module - <<'JS'
+          import {existsSync,readFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          for(const name of ['source/source-proof.json','source/keyed-build-evidence.json','package-result.json','prepared/verification.json','ready-metadata.json','register-receipt.json']) {
+            const file='.cache/original-admin-candidate/run/'+name;
+            if(!existsSync(file)) continue;
+            const raw=readFileSync(file);
+            if(raw.length>262144) throw new Error('Oversized candidate receipt');
+            console.log('ORIGINAL_ADMIN_RECEIPT '+JSON.stringify({name,sha256:createHash('sha256').update(raw).digest('hex'),value:JSON.parse(raw)}));
+          }
+          JS

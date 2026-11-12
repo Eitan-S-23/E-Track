@@ -1,0 +1,301 @@
+# Install as Trace/.github/workflows/build.yml on release/candidates, not on main.
+name: Original App Automatic Candidate
+run-name: candidate:${{ inputs.source_sha }}:${{ inputs.source_run }}
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact integrated E-Track source on release/candidates
+        type: string
+        required: true
+      source_run:
+        description: Originating E-Track push run ID, or the checks-only request ID
+        type: string
+        required: true
+      check_only:
+        description: Validate source and identity without building or changing any package
+        type: boolean
+        default: true
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: original-app-candidate-${{ inputs.source_sha }}
+  cancel-in-progress: false
+env:
+  PUB_HOSTED_URL: https://pub.dev
+  FLUTTER_STORAGE_BASE_URL: https://storage.googleapis.com
+  PYTHONDONTWRITEBYTECODE: "1"
+  NODE_DISABLE_COMPILE_CACHE: "1"
+  TRACE_CANDIDATE_SOURCE: ${{ inputs.source_sha }}
+  TRACE_CANDIDATE_PUBLIC_KEY_BASE64: TZNxTj9lyvlyE87On6hS1O73NO8QMxYh5/ahv0WoqPw=
+jobs:
+  admission:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      version_name: ${{ steps.source.outputs.version_name }}
+      version_code: ${{ steps.source.outputs.version_code }}
+    steps:
+      - name: Admit trusted source before checkout, code execution or signing
+        id: source
+        uses: actions/github-script@v8
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          SOURCE_RUN: ${{ inputs.source_run }}
+          CHECK_ONLY: ${{ inputs.check_only }}
+        with:
+          script: |
+            const source=process.env.SOURCE_SHA;
+            if(context.repo.owner!=='Eitan-S-23'||context.repo.repo!=='Trace'||context.ref!=='refs/heads/release/candidates'
+              ||!/^[0-9a-f]{40}$/.test(source)||!/^[1-9][0-9]*$/.test(process.env.SOURCE_RUN)
+              ||process.env.GITHUB_RUN_ATTEMPT!=='1') throw new Error('Unexpected candidate owner or request');
+            const common={owner:'Eitan-S-23',repo:'E-Track'};
+            for(const [base,head] of [['34495140d28ce401616cc19b6b62bb6bba1d764c',source],[source,'release/candidates']]) {
+              const {data}=await github.rest.repos.compareCommitsWithBasehead({...common,basehead:`${base}...${head}`});
+              if(!['identical','ahead'].includes(data.status)) throw new Error('Source is not integrated history on the candidate branch');
+            }
+            const {data:file}=await github.rest.repos.getContent({...common,path:'app/bluetooth_flutter_Trace/pubspec.yaml',ref:source});
+            const text=Buffer.from(file.content,'base64').toString('utf8');
+            const matches=[...text.matchAll(/^version:\s*((?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*))\+([1-9]\d*)\s*$/gm)];
+            if(matches.length!==1) throw new Error('Invalid App version');
+            const [,name,code]=matches[0];
+            if(!Number.isSafeInteger(Number(code))||Number(code)<102||Number(code)>2100000000) throw new Error('Invalid versionCode');
+            const checks=process.env.CHECK_ONLY==='true';
+            if(!checks) {
+              if(Number(code)<=102) throw new Error('Already delivered App version must not be rebuilt');
+              const {data:run}=await github.rest.actions.getWorkflowRun({...common,run_id:Number(process.env.SOURCE_RUN)});
+              if(run.event!=='push'||run.head_branch!=='release/candidates'||run.head_sha!==source
+                ||run.path!=='.github/workflows/original-admin-candidate.yml') throw new Error('Originating push run mismatch');
+              try {
+                await github.rest.repos.getReleaseByTag({...context.repo,tag:`v${name}`});
+                throw new Error('Version already exists; reconcile it, never overwrite or rebuild');
+              } catch(error) { if(error.status!==404) throw error; }
+            }
+            core.setOutput('version_name',name);core.setOutput('version_code',code);
+            core.info(JSON.stringify({source,versionName:name,versionCode:Number(code),checkOnly:checks,channelPublished:false}));
+      - uses: actions/checkout@v4
+        with:
+          repository: Eitan-S-23/E-Track
+          ref: ${{ inputs.source_sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - name: Verify original candidate contract without credentials
+        run: |
+          node --test tests/ota/test_original_admin_candidate.mjs
+          python3 -I -S -B -X utf8 tests/ota/test_original_app_candidate.py
+
+  windows:
+    needs: admission
+    if: inputs.check_only == false
+    runs-on: windows-2022
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: app/bluetooth_flutter_Trace
+    env:
+      VERSION_NAME: ${{ needs.admission.outputs.version_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: Eitan-S-23/E-Track
+          ref: ${{ inputs.source_sha }}
+          persist-credentials: false
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: "3.47.9"
+          cache: true
+      - run: flutter config --enable-windows-desktop
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+      - name: Build Windows from the same original-backend V2 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          profile_define="$(python -I -S -B -X utf8 ../../Tools/flutter/ota_link_profile.py --build-profile adaptive-v2-candidate)"
+          flutter build windows --release "$profile_define" \
+            --dart-define=TRACE_CLOUDFLARE_UPDATE_MANIFEST_URL=https://trace-update-public-staging.pages.dev/api/public/latest \
+            --dart-define=TRACE_CLOUDFLARE_FIRMWARE_LATEST_URL=https://trace-update-public-staging.pages.dev/api/public/firmware/latest \
+            --dart-define="TRACE_UPDATE_PAYLOAD_ED25519_PUBLIC_KEY_BASE64=$TRACE_CANDIDATE_PUBLIC_KEY_BASE64"
+      - name: Prepare Windows assets
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force release | Out-Null
+          Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath release/ble-monitor-windows.zip
+          Copy-Item build/windows/x64/runner/Release/ble_monitor.exe release/ble-monitor-windows.exe
+      - name: Reserve an immutable unpublished draft, never overwrite another candidate
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: Eitan-S-23/Trace
+        run: |
+          set -euo pipefail
+          gh release create "v$VERSION_NAME" release/ble-monitor-windows.exe release/ble-monitor-windows.zip \
+            --draft --prerelease --latest=false --target "$GITHUB_SHA" --title "Trace $VERSION_NAME candidate" \
+            --notes "Original Admin candidate from Eitan-S-23/E-Track@$TRACE_CANDIDATE_SOURCE. Not channel publication."
+
+  android:
+    needs: [admission, windows]
+    if: inputs.check_only == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: app/bluetooth_flutter_Trace
+    env:
+      VERSION_NAME: ${{ needs.admission.outputs.version_name }}
+      VERSION_CODE: ${{ needs.admission.outputs.version_code }}
+      TMPDIR: ${{ github.workspace }}/.cache/original-app-candidate/tmp
+      npm_config_cache: ${{ github.workspace }}/.cache/original-app-candidate/npm
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: Eitan-S-23/E-Track
+          ref: ${{ inputs.source_sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: "8.14"
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: "3.47.9"
+          cache: true
+      - name: Prepare contained output and dependencies
+        run: |
+          mkdir -p "$TMPDIR" release-assets
+          flutter pub get
+      - name: Restore Android Gradle wrapper
+        working-directory: app/bluetooth_flutter_Trace/android
+        run: |
+          printf 'flutter.sdk=%s\n' "$FLUTTER_ROOT" > local.properties
+          gradle wrapper --gradle-version 8.14 --distribution-type all
+      - name: Configure only the original release signer; no development-key fallback
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$KEYSTORE" && test -n "$STORE_PASSWORD" && test -n "$KEY_ALIAS" && test -n "$KEY_PASSWORD"
+          printf '%s' "$KEYSTORE" | base64 --decode > android/release-keystore.jks
+          keytool -exportcert -keystore android/release-keystore.jks -storepass "$STORE_PASSWORD" -alias "$KEY_ALIAS" > android/release-signing.cer
+          test "$(sha256sum android/release-signing.cer | cut -d ' ' -f 1)" = 3cecee6330a930e020b454b6d4a79568f4494ca324ae7bcf2c1914e51b04ab47
+          printf 'storePassword=%s\nkeyPassword=%s\nkeyAlias=%s\nstoreFile=release-keystore.jks\n' "$STORE_PASSWORD" "$KEY_PASSWORD" "$KEY_ALIAS" > android/key.properties
+      - run: flutter analyze
+      - run: flutter test
+      - name: Build original-backend, original-package, BLE V2 APK
+        run: |
+          set -euo pipefail
+          profile_define="$(python3 -I -S -B -X utf8 ../../Tools/flutter/ota_link_profile.py --build-profile adaptive-v2-candidate)"
+          flutter build apk --release --target-platform=android-arm,android-arm64 "$profile_define" \
+            --dart-define=TRACE_CLOUDFLARE_UPDATE_MANIFEST_URL=https://trace-update-public-staging.pages.dev/api/public/latest \
+            --dart-define=TRACE_CLOUDFLARE_FIRMWARE_LATEST_URL=https://trace-update-public-staging.pages.dev/api/public/firmware/latest \
+            --dart-define="TRACE_UPDATE_PAYLOAD_ED25519_PUBLIC_KEY_BASE64=$TRACE_CANDIDATE_PUBLIC_KEY_BASE64"
+      - name: Native APK signature, package, ABI and compiled-configuration verification
+        run: |
+          set -euo pipefail
+          apk=build/app/outputs/flutter-apk/app-release.apk
+          build_tools="$(find "${ANDROID_SDK_ROOT:-$ANDROID_HOME}/build-tools" -name apksigner -type f | sort -V | tail -n 1)"
+          build_tools="$(dirname "$build_tools")"
+          "$build_tools/apksigner" verify --verbose --print-certs "$apk" > release-assets/signatures.txt
+          "$build_tools/aapt" dump badging "$apk" > release-assets/badging.txt
+          python3 -I -S -B -X utf8 ../../Tools/flutter/original_candidate.py verify \
+            --apk "$PWD/$apk" --signatures "$PWD/release-assets/signatures.txt" --badging "$PWD/release-assets/badging.txt" \
+            --out "$PWD/release-assets/apk-inspection.json"
+          cp "$apk" release-assets/ble-monitor-android.apk
+      - name: Prepare full-only manifest and retrieve this draft's Windows outputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: Eitan-S-23/Trace
+        run: |
+          set -euo pipefail
+          test "$(gh release view "v$VERSION_NAME" --json isDraft --jq .isDraft)" = true
+          test "$(gh release view "v$VERSION_NAME" --json targetCommitish --jq .targetCommitish)" = "$GITHUB_SHA"
+          gh release download "v$VERSION_NAME" --pattern 'ble-monitor-windows.*' --dir release-assets
+          python3 -I -S -B -X utf8 ../../Tools/flutter/original_candidate.py manifest \
+            --apk "$PWD/release-assets/ble-monitor-android.apk" --out "$PWD/release-assets/ble-monitor-update.json"
+          printf 'Trace %s (%s)\n\nApp source: Eitan-S-23/E-Track@%s\nFull candidate; choose publication and deltas in the original Admin.\n' \
+            "$VERSION_NAME" "$VERSION_CODE" "$TRACE_CANDIDATE_SOURCE" > release-assets/release-notes.md
+      - name: Sign metadata using the original payload key
+        env:
+          TRACE_UPDATE_PAYLOAD_ED25519_PRIVATE_KEY_BASE64: ${{ secrets.TRACE_UPDATE_PAYLOAD_ED25519_PRIVATE_KEY_BASE64 }}
+          TRACE_UPDATE_PAYLOAD_KEY_VERSION: staging
+        run: |
+          set -euo pipefail
+          node --input-type=module - <<'JS'
+          import assert from 'node:assert/strict';
+          import {createPrivateKey,createPublicKey} from 'node:crypto';
+          const key=createPrivateKey({key:Buffer.from(process.env.TRACE_UPDATE_PAYLOAD_ED25519_PRIVATE_KEY_BASE64,'base64'),format:'der',type:'pkcs8'});
+          assert.equal(createPublicKey(key).export({format:'der',type:'spki'}).subarray(-32).toString('base64'),process.env.TRACE_CANDIDATE_PUBLIC_KEY_BASE64);
+          JS
+          node cloudflare/update-service/scripts/build-github-release-metadata.mjs \
+            --assets-dir release-assets --release-tag "v$VERSION_NAME" --run-id "$GITHUB_RUN_ID" \
+            --commit-sha "$TRACE_CANDIDATE_SOURCE" --repository Eitan-S-23/Trace \
+            --release-notes-file release-assets/release-notes.md --fixed-signing-configured true \
+            --output release-assets/cloudflare-release-metadata.json
+      - name: Preserve exact built assets before any upload continuation
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: Eitan-S-23/Trace
+        run: |
+          set -euo pipefail
+          gh release upload "v$VERSION_NAME" release-assets/ble-monitor-android.apk release-assets/ble-monitor-update.json \
+            release-assets/cloudflare-release-metadata.json release-assets/apk-inspection.json
+          gh release edit "v$VERSION_NAME" --notes-file release-assets/release-notes.md
+      - name: Install pinned uploader in its own package, without deployment credentials
+        working-directory: app/bluetooth_flutter_Trace/cloudflare/update-service/worker
+        run: npm ci
+      - name: Upload and fully read back candidate bytes in the original R2 bucket
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          WRANGLER_SEND_METRICS: "false"
+          WRANGLER_LOG_PATH: ${{ github.workspace }}/.cache/original-app-candidate/wrangler-logs
+        run: |
+          node cloudflare/update-service/scripts/upload-r2-assets.mjs \
+            --assets-dir release-assets --metadata release-assets/cloudflare-release-metadata.json \
+            --bucket trace-update-staging-releases --wrangler-cwd cloudflare/update-service/worker \
+            --r2-retries 1 --output release-assets/cloudflare-release-metadata.json
+      - name: Make downloads available as a prerelease, never GitHub latest
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: Eitan-S-23/Trace
+        run: gh release edit "v$VERSION_NAME" --draft=false --prerelease --latest=false
+      - name: Register candidate only; no channel publication
+        env:
+          TRACE_UPDATE_SERVICE_URL: https://trace-update-service-staging.tangjichentudou.workers.dev
+          TRACE_DEPLOY_TOKEN: ${{ secrets.TRACE_DEPLOY_TOKEN }}
+          TRACE_REGISTER_RETRIES: "1"
+        run: node cloudflare/update-service/scripts/register-release.mjs release-assets/cloudflare-release-metadata.json
+      - name: Remove only this runner's private signing inputs
+        if: always()
+        run: rm -f android/release-keystore.jks android/key.properties
+      - name: Preserve bounded candidate metadata in the native CI log
+        if: always()
+        run: |
+          node --input-type=module - <<'JS'
+          import {existsSync,readFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          for(const name of ['apk-inspection.json','cloudflare-release-metadata.json','ble-monitor-update.json']) {
+            const file='release-assets/'+name;
+            if(!existsSync(file)) continue;
+            const raw=readFileSync(file);
+            if(raw.length>65536) throw new Error('Oversized receipt');
+            console.log('CANDIDATE_FILE '+JSON.stringify({name,sha256:createHash('sha256').update(raw).digest('hex'),value:JSON.parse(raw)}));
+          }
+          JS

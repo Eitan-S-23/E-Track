@@ -26,10 +26,11 @@ function inputs(profile = "baseline") {
     { file: "HAL_Bluetooth.cpp", command: command("HAL_Bluetooth.cpp") }] };
 }
 
-test("baseline default and CMake candidate invariants stay explicit", () => {
+test("CMake requires V2 while historical baseline evidence remains explicitly identified", () => {
   assert.equal(firmwareBuildProfile(), "baseline");
   assert.equal(firmwareCMakeOptions().P34_OTA_CANDIDATE, "OFF");
-  assert.match(source, /option\(P34_OTA_CANDIDATE[^\n]* OFF\)/);
+  assert.match(source, /option\(P34_OTA_CANDIDATE[^\n]* ON\)/);
+  assert.match(source, /if\(NOT P34_OTA_CANDIDATE\)[\s\S]*?message\(FATAL_ERROR/);
   assert.match(block, /P3_4_LINK_PROFILE OR NOT P34_EARLY_FAULT_VECTORS/);
   assert.match(block, /message\(FATAL_ERROR/);
   for (const value of ["P34_OTA_PIPELINE_WAIT_RX=1", "CONFIG_BT_BAUD_EXPERIMENT=0", "CONFIG_RTT_DEBUG_CMD_ENABLE=0"]) {

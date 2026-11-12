@@ -9,6 +9,7 @@ import { captureBuildInputs, digest } from "../../app/bluetooth_flutter_Trace/cl
 import { approvedFirmwareKey, DEVELOPMENT_PACKAGING_KEY, firmwareKeyBinding, firmwareKeyHeader } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-release-key.mjs";
 import { captureBuildConfiguration, firmwareBuildProfile, firmwareCMakeOptions } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-build-profile.mjs";
 import { candidateAdmission } from "./firmware-candidate-context.mjs";
+import { adminCandidateAdmission } from "./firmware-admin-context.mjs";
 
 function ownerIdentity(env) {
   if (!/^[0-9a-f]{40}$/.test(env.GITHUB_SHA ?? "") || !/^[1-9][0-9]*$/.test(env.GITHUB_RUN_ID ?? "")
@@ -50,7 +51,12 @@ export async function buildKeyedFirmware({ root, buildDir, evidenceDir, versionN
     keyBinding = firmwareKeyBinding(key, "development-ci-key-v1");
   } else {
     const mode = env.FIRMWARE_RELEASE_MODE;
-    if (mode === "artifact-candidate") {
+    if (mode === "original-admin-candidate") {
+      const owner = adminCandidateAdmission(env);
+      if (profile !== "p34-v2-candidate" || versionName !== owner.versionName) {
+        throw new CliError("Original Admin compilation must match the new V2 candidate version");
+      }
+    } else if (mode === "artifact-candidate") {
       candidateAdmission(env);
       if (env.INPUT_CANDIDATE_MODE !== "new-source" || development || profile !== "p34-v2-candidate"
           || versionName !== env.INPUT_VERSION_NAME || execute === spawnSync) {

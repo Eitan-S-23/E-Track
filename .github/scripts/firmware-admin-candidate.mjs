@@ -40,6 +40,10 @@ export async function packageCandidate(root, out, env) {
       || proof.sourceMatches !== true || proof.importedBenchmarkPackages !== 0 || proof.sourceCommit !== original.commitSha) {
     throw new CliError("Normal candidate GCC provenance mismatch");
   }
+  if (env.FIRMWARE_RELEASE_MODE === "original-admin-candidate"
+      && (proof.sourceCommit !== owner.workflowCommit || proof.sourceCompilations !== 1)) {
+    throw new CliError("Automatic candidates must compile this push, not reuse a historical executable");
+  }
   for (const pin of proof.files) {
     const bytes = await readFile(outputPath(root, pin.path));
     if (bytes.length !== pin.bytes || digest(bytes) !== pin.sha256) throw new CliError("Admitted GCC input changed");
@@ -63,7 +67,7 @@ export async function packageCandidate(root, out, env) {
     sourceCommit: original.commitSha, metadataSha256: digest(metadataBytes(result.metadata)),
     verificationSha256: digest(await readFile(path.join(result.outputDir, "verification.json"))),
     sourceProofSha256: digest(await readFile(path.join(source, "source-proof.json"))),
-    normalPackages: true, sourceCompilations: 0, importedBenchmarkPackages: 0, githubReleaseCreated: false,
+    normalPackages: true, sourceCompilations: proof.sourceCompilations ?? 0, importedBenchmarkPackages: 0, githubReleaseCreated: false,
     productionApproved: false, channelPublished: false }, null, 2) + "\n");
   return { ok: true, versionName: owner.versionName, assetsPrepared: result.metadata.assets.length };
 }

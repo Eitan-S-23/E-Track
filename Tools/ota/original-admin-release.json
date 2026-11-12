@@ -1,0 +1,7 @@
+{
+  "schema": "original-admin-automatic-candidates-v1",
+  "firmware": {
+    "versionName": "3.3.24",
+    "releaseNotes": "Normal BLE V2 firmware. Full and recovery packages only; select delta bases and publish channels in the original Admin."
+  }
+}
