@@ -13,6 +13,7 @@ void main() {
   late DateTime now;
   DateTime Function()? timerClock;
   late List<Map<String, dynamic>> sent;
+  late List<String> sentTokens;
   late VersionInventoryService service;
   late StreamController<bool> activity;
   Completer<void>? gate;
@@ -28,6 +29,7 @@ void main() {
     now = DateTime.utc(2026, 11, 11);
     timerClock = null;
     sent = [];
+    sentTokens = [];
     allowed = true; fail = false; refresh = 'initial'; controls = 0; reads = 0;
     activity = StreamController<bool>.broadcast(sync: true);
     gate = null;
@@ -46,13 +48,18 @@ void main() {
         if (gate != null) await gate!.future;
         if (fail) throw StateError('offline');
         if (body == null) { controls++; return {'ok': true, 'refreshId': refresh}; }
-        expect(token, matches(RegExp(r'^[0-9a-f]{64}$')));
+        sentTokens.add(token);
         sent.add(jsonDecode(jsonEncode(body)) as Map<String, dynamic>);
         return acknowledgement ?? {'ok': true, 'accepted': true, 'refreshId': refresh};
       },
     );
   });
-  tearDown(() async { service.onClose(); await activity.close(); });
+  tearDown(() async {
+    service.onClose();
+    await activity.close();
+    // Timer callbacks run inside pump's guarded scope, not an expectation scope.
+    expect(sentTokens, everyElement(matches(RegExp(r'^[0-9a-f]{64}$'))));
+  });
 
   void inventoryWidgetTest(String description, WidgetTesterCallback body) {
     testWidgets(description, (tester) async {

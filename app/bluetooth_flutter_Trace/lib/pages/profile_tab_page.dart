@@ -149,50 +149,53 @@ class ProfileTabPage extends StatelessWidget {
             ? Obx(() {
                 final inventory = Get.find<VersionInventoryService>();
                 return Column(mainAxisSize: MainAxisSize.min, children: [
-                  SwitchListTile.adaptive(
-                    key: const ValueKey('version-inventory-toggle'),
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text(
-                      '参与版本统计',
-                      style: TextStyle(
-                        color: TraceColors.text,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        height: 1.35,
+                  Material(
+                    type: MaterialType.transparency,
+                    child: SwitchListTile.adaptive(
+                      key: const ValueKey('version-inventory-toggle'),
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text(
+                        '参与版本统计',
+                        style: TextStyle(
+                          color: TraceColors.text,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          height: 1.35,
+                        ),
                       ),
-                    ),
-                    subtitle: Text(
-                      !inventory.ready.value
-                          ? '正在读取设置'
-                          : inventory.enabled.value ? '已开启' : '已关闭',
-                      style: TextStyle(
-                        color: inventory.ready.value && inventory.enabled.value
-                            ? TraceColors.mint
-                            : TraceColors.muted,
-                        fontSize: 13,
-                        height: 1.5,
+                      subtitle: Text(
+                        !inventory.ready.value
+                            ? '正在读取设置'
+                            : inventory.enabled.value ? '已开启' : '已关闭',
+                        style: TextStyle(
+                          color: inventory.ready.value && inventory.enabled.value
+                              ? TraceColors.mint
+                              : TraceColors.muted,
+                          fontSize: 13,
+                          height: 1.5,
+                        ),
                       ),
+                      // This dialog stays dark even with a light Material theme.
+                      thumbColor: WidgetStateProperty.resolveWith((states) =>
+                          states.contains(WidgetState.selected) &&
+                                  !states.contains(WidgetState.disabled)
+                              ? TraceColors.deep
+                              : TraceColors.muted),
+                      trackColor: WidgetStateProperty.resolveWith((states) =>
+                          states.contains(WidgetState.selected) &&
+                                  !states.contains(WidgetState.disabled)
+                              ? TraceColors.mint
+                              : TraceColors.ocean),
+                      trackOutlineColor: WidgetStateProperty.resolveWith((states) =>
+                          states.contains(WidgetState.selected) &&
+                                  !states.contains(WidgetState.disabled)
+                              ? Colors.transparent
+                              : TraceColors.muted),
+                      value: inventory.enabled.value,
+                      onChanged: inventory.ready.value
+                          ? (value) => unawaited(inventory.setEnabled(value))
+                          : null,
                     ),
-                    // This dialog stays dark even with a light Material theme.
-                    thumbColor: WidgetStateProperty.resolveWith((states) =>
-                        states.contains(WidgetState.selected) &&
-                                !states.contains(WidgetState.disabled)
-                            ? TraceColors.deep
-                            : TraceColors.muted),
-                    trackColor: WidgetStateProperty.resolveWith((states) =>
-                        states.contains(WidgetState.selected) &&
-                                !states.contains(WidgetState.disabled)
-                            ? TraceColors.mint
-                            : TraceColors.ocean),
-                    trackOutlineColor: WidgetStateProperty.resolveWith((states) =>
-                        states.contains(WidgetState.selected) &&
-                                !states.contains(WidgetState.disabled)
-                            ? Colors.transparent
-                            : TraceColors.muted),
-                    value: inventory.enabled.value,
-                    onChanged: inventory.ready.value
-                        ? (value) => unawaited(inventory.setEnabled(value))
-                        : null,
                   ),
                   const Text('低频上报 APP 和已连接设备的版本、文件校验值及去重标识，用于选择差分升级包。不上传位置、联系人或骑行记录。关闭后停止上报，历史记录最多保留 90 天。',
                       style: TextStyle(color: TraceColors.muted, height: 1.5)),

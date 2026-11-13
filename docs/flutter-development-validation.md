@@ -142,7 +142,7 @@ by adding this entry.
 
 | Step | Command | Timeout |
 |---|---|---|
-| SDK checkout | `git clone --config core.longpaths=true --depth 1 --branch stable https://github.com/flutter/flutter.git <run>/sdk` | 180 s |
+| SDK checkout | `git clone --config core.longpaths=true --depth 1 --branch 3.47.9 https://github.com/flutter/flutter.git <run>/sdk` | 180 s |
 | SDK identity | `flutter --version --machine` | 300 s |
 | Dependencies | `flutter pub get --enforce-lockfile` | 300 s |
 | Analysis | `flutter analyze --no-pub` | 300 s |
@@ -154,11 +154,15 @@ device integration tests or other repository components. Targeted green tests
 do not stand in for app-wide validation of a stable batch. Choose scope according
 to affected callers, codecs, tests and dependencies, not just one file's hash.
 
-The SDK follows the same stable channel as `build.yml`; the raw version command
-records the resolved Flutter/Dart revisions. This is not a pinned environment
-or a formal evidence-reuse decision. A future acceptance profile must bind its
-actual SDK/environment inputs separately. Each development run is cold and
-workspace-local rather than relying on undocumented third-party cache settings.
+`Tools/flutter/dev_checks.py` selects the previously validated stable release
+`3.47.9` through `SDK_REF`, rather than following the moving `stable` branch.
+The report records the selected ref and the raw version command records the
+actual Flutter/Dart revisions; a tag checkout may report `[user-branch]` as its
+channel. Do not rewrite that observed identity. SDK upgrades are a separately
+reviewed toolchain/dependency change, not a side effect of unrelated UI fixes.
+This does not pin the entire environment or authorize formal evidence reuse. A
+future acceptance profile must bind its actual SDK/environment inputs separately.
+Each development run remains cold and workspace-local.
 
 Setup/dependency failure leaves downstream steps NOT_RUN. Analysis failure or
 timeout still collects tests if process cleanup succeeded, but the overall run
@@ -308,6 +312,28 @@ that they compile or pass. The host regression is also wired into both this
 workflow and Acceptance Governance CI. The development workflow belongs to the
 Validation profile and this guide to Governance; historical frozen profile
 blobs and bundles are not rewritten.
+
+### Widget Regression Pitfalls
+
+- Use the binding's fake clock for scheduled deadlines as well as timer delivery.
+  Dispose long-lived services in the widget test body's `finally` block, before
+  binding timer-invariant checks; package-level teardown can run too late.
+- Mock transports should capture requests/tokens and assert in the test body or
+  teardown. Flutter's guarded `expect` can throw during a timer callback inside
+  `tester.pump`; a best-effort service may then catch the test-framework error
+  and report a misleading network/backoff status. Do not loosen service error
+  handling to accommodate an assertion placed in the wrong execution scope.
+- Tap actual interactive children. A `TraceGlowNode` caption is outside its
+  circular `InkWell`. Exercise the real settings entry rather than calling its
+  callback directly or treating a caption tap as proof of dialog behavior.
+- A `ListTile` under a painted dialog container needs its own transparent
+  `Material` surface so the container does not hide its ink feedback. Check
+  rendered text contrast, selected/unselected/loading colors, preference
+  persistence and narrow layouts with large text without changing the app theme.
+
+These cases are covered by `test/services/version_inventory_service_test.dart`
+and `test/profile_inventory_settings_test.dart` under the Flutter app. They use
+mock preferences/transports, not a real inventory endpoint or connected device.
 
 ## Artifact Maintenance
 
