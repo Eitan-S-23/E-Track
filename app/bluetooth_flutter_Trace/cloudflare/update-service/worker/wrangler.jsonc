@@ -63,7 +63,7 @@
   "env": {
     "staging": {
       "name": "trace-update-service-staging",
-      "triggers": { "crons": ["17 * * * *"] },
+      "triggers": { "crons": ["17 * * * *", "*/5 * * * *"] },
       "observability": {
         "enabled": true,
         "head_sampling_rate": 1,
@@ -71,6 +71,8 @@
       },
       "vars": {
         "ENVIRONMENT": "staging",
+        "ADMIN_PUSH_PUBLIC_KEY": "BKDxVxLb7FUvREw-vSVtZ0ATtrEgQck2q3f7r-VSQfDRfxFnavm8g2xxg_mZ6QjgX3k6TJpIPhhX0rNzW_lc97c",
+        "ADMIN_PUSH_SUBJECT": "https://trace-update-admin-staging.pages.dev",
         "APP_ID": "trace",
         "GITHUB_OWNER": "Eitan-S-23",
         "GITHUB_REPO": "Trace",

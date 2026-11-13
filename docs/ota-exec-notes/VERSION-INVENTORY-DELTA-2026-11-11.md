@@ -541,3 +541,81 @@ runner selects its installed Python explicitly. Original raw results remain in
 The new two-workflow structure passed native `actionlint` in
 `auto-candidate-lint-01`. Runtime CI delivery and the final test results are
 recorded below when observed, not inferred from this source description.
+
+The corrected local run `auto-candidate-tests-02` passed all 110 Node tests and
+eight Python tests. Native actionlint also passed again on the delivered workflow
+bytes during `auto-candidate-prepare-01`. Only four pre-existing tooling/test
+files changed, checked against their original Git blobs before delivery; App and
+firmware product source stayed at the integrated parent.
+
+Operational source commit `d69f6e3df7a8a55e4721f85b63c42de25f2d488a` and Trace
+workflow commit `7eaa1dc3a5b2eaa54b921b2baa9a339acc29fbd0` are on their respective
+`release/candidates` branches. Source push CI `43278610509` passed and skipped
+both package jobs because versions are unchanged. Trace checks-only CI
+`43278896945` passed exact-source admission and candidate guard regressions;
+Android/Windows builds were intentionally skipped. This is verified wiring and
+no-replay behavior, not a claim of an executed new-version build/upload.
+
+The existing GitHub credential was stored as `ORIGINAL_ADMIN_ACTIONS_TOKEN` for
+the source repository's cross-repository dispatch, without creating a token,
+expanding scopes or exporting either signing key. The exact candidate branch
+was added to `firmware-rehearsal`'s allowlist; existing required reviewers and
+production-gate rules were preserved. New firmware signing still waits for that
+existing environment approval. Neither repository's `main` was modified.
+
+No Cloudflare deployment, new release/package, channel publication, APK install,
+MCU operation or review agent occurred in this follow-up. The next user-owned
+step remains publication/testing of the already available 1.0.76+102 candidate.
+This closing observation is local; the operational code and developer guide are
+already on the branch/commits above.
+
+## Delegated Beta Publication, 2026-11-13
+
+After the recommended Beta option and repeated delegation to continue without
+unnecessary intervention, the root used the existing owner session and original
+Admin UI to publish the existing 1.0.76+102 candidate to Beta only. Exactly one
+`POST /api/admin/channels/beta/publish` succeeded (HTTP 200), advancing revision
+13 to 14. The public Beta response returns 102 with the original APK SHA-256.
+Stable remains 1.0.60+86 with its row unchanged; MCU channels are unchanged.
+No build, upload, new Release, installation or long test occurred.
+
+Source inspection corrected an earlier user instruction: App updates read the
+compile-time `ShareLinks.updateChannel`, default `stable`; there is no runtime
+Beta selector. Publishing Beta therefore does not make the original App's
+ordinary Check Updates offer it. This test uses direct download and same-package,
+original-signature installation, not another specially built APK. Do not tell the
+user to switch to a nonexistent Beta setting or uninstall/clear App data.
+
+Evidence is under
+`.cache/version-inventory-delta-20261111-01/app-candidate-beta-01/`. The original
+candidate signature, R2 availability, UI confirmation and post-publication
+channel/public reads passed, with no page errors. A bounded download probe
+received HTTP 200, the expected APK content type/name, `X-Trace-Asset-Source: r2`
+and length 47,745,568. This endpoint ignored Range; curl exited 63 at the explicit
+1 KiB cap before downloading the full object. That preserved probe is not an
+HTTPS failure, a successful range check or a new full-file hash observation.
+The earlier complete CI download/hash remains the full-byte evidence.
+
+## Admin Interaction Follow-up, 2026-11-13
+
+The user independently published 1.0.76+102 to Beta and Stable and reported a
+successful 1.0.60/86 -> 102 delta upgrade. Do not repeat that upgrade, restore
+either channel, rebuild the APK or start the old long campaign for this UI task.
+The authorized follow-up is shared sheet dismissal (downward/header-horizontal
+drag and topmost Back), persistent delta progress/results and optional background
+browser notifications for both App and MCU.
+
+Fresh read-only Admin observations are in
+`.cache/version-inventory-delta-20261111-01/admin-interactions-20261113-01/live-before-01/`.
+They confirm the 86 -> 102 job is ready/enabled, an MCU delta job is already ready,
+and version 102 has one reporting installation. MCU inventory currently has no
+reports; this is unknown coverage, not zero users. No business mutations or device
+operations were used for this observation.
+
+The new notification implementation uses an additive D1 migration, actual CI
+callback phases, actor-scoped unread records and payloadless VAPID wake-ups with
+authenticated service-worker reads. Permission must come from a user's browser
+click. It is not granted by development authorization. Existing signatures,
+workflow inputs, original artifacts, channel revisions and publication rules stay
+unchanged. Self-tests are not an independent acceptance campaign or proof of
+delivery through every browser vendor/phone notification policy.

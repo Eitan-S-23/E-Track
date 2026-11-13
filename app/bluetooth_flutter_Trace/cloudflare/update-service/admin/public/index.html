@@ -164,6 +164,15 @@
         <div class="quick-sheet-scroll" id="deltaScroll"><div id="deltaContent"></div></div>
       </section>
 
+      <div class="quick-action-backdrop" id="taskBackdrop" hidden></div>
+      <section class="quick-action-sheet task-sheet" id="taskSheet" role="dialog" aria-modal="true" aria-labelledby="taskTitle" hidden>
+        <button type="button" class="quick-sheet-close" id="taskClose" aria-label="Close tasks"><svg class="ui-icon" aria-hidden="true"><use href="#i-close"></use></svg></button>
+        <span class="quick-sheet-handle" aria-hidden="true"></span>
+        <header class="quick-sheet-header"><div><p class="eyebrow">Trace</p><h2 id="taskTitle">Tasks and notifications</h2></div></header>
+        <div class="quick-sheet-scroll" id="taskScroll"><div id="taskContent"></div></div>
+      </section>
+      <div class="task-toast" id="taskToast" role="status" aria-live="polite" hidden><span></span><button type="button">View tasks</button></div>
+
       <div class="confirm-backdrop" id="confirmBackdrop" hidden></div>
       <section class="confirm-dialog" id="confirmDialog" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmMessage" hidden>
         <header class="confirm-head">
@@ -210,6 +219,7 @@
             <span class="lang-code" id="languageLabel">中文</span>
           </button>
           <button type="button" class="icon-button refresh-button" id="refreshButton" aria-label="Refresh" data-i18n-aria-label="actions.refresh" data-i18n-tooltip="actions.refresh"><svg class="ui-icon" aria-hidden="true"><use href="#i-refresh"></use></svg><span class="label-text" data-i18n="actions.refresh">Refresh</span></button>
+          <button type="button" class="icon-button task-button" id="taskButton" aria-label="Delta tasks" aria-haspopup="dialog" aria-controls="taskSheet" disabled><svg class="ui-icon" aria-hidden="true"><use href="#i-note"></use></svg><span class="task-label">Tasks</span><span class="task-badge" hidden></span></button>
           <div class="sidebar-user" id="topSession">
             <span class="avatar">A</span>
             <div>
@@ -537,6 +547,9 @@
       </section>
     </section>
 
+    <script src="/sheet-gestures.js"></script>
+    <script src="/overlay-history.js"></script>
+    <script src="/delta-activity.js"></script>
     <script>
       const state = {
         session: null,
@@ -575,6 +588,8 @@
         queries: { releases: "", announcements: "", firmware: "", firmwareChannels: "", firmwareHistory: "", inventory: "", firmwareInventory: "" },
         inventory: { value: null, error: null, loading: false, window: 30, pages: { android: 0, firmware: 0 }, refreshId: null },
         delta: null,
+        deltaDrafts: new Map(),
+        taskOpen: false,
         appSection: "releases",
         releasePage: 0,
         announcementDrafts: new Map(),
@@ -593,6 +608,8 @@
         busy: false
       };
 
+      let taskActivity = null;
+      let overlayHistory = null;
       const I18N = {
         en: {
           "operations.inventoryTab": "Distribution",
@@ -1609,14 +1626,72 @@
       applyAppSection();
       applyFirmwareSection();
       attachEvents();
+      taskActivity = new TraceDeltaActivity({ api, mutate, text: opText, escape: escapeHtml, formatBytes,
+        openPanel: openTasks, openTarget: (kind,id) => {
+          if (state.busy || activeConfirmDialog || state.delta?.busy) return;
+          closeTasks(); openDelta(kind,id);
+        }, onJobs: jobs => {
+          const delta = state.delta;
+          if (!delta?.data || delta.busy || delta.loading) return;
+          const updates = jobs.filter(job => job.kind === delta.kind && job.targetReleaseId === delta.releaseId);
+          for (const job of updates) {
+            const index = delta.data.jobs.findIndex(row=>row.id === job.id);
+            if (index < 0) delta.data.jobs.push(job); else delta.data.jobs[index] = job;
+            const base = delta.data.bases.find(row=>row.releaseId === job.baseReleaseId);
+            if (base) base.job = job;
+          }
+          renderDelta();
+        } });
+      overlayHistory = new TraceOverlayHistory({ layers: overlayLayers,
+        canDismiss: layer => layer === "confirm" || (!state.busy && !state.delta?.busy), dismiss: dismissOverlay });
+      for (const [sheet,scroll,backdrop,layer] of [
+        [els.quickActionSheet,els.quickActionScroll,els.quickActionBackdrop,"app"],
+        [els.firmwareDetailSheet,document.querySelector("#firmwareDetailScroll"),els.firmwareDetailBackdrop,"firmware"],
+        [els.deltaSheet,document.querySelector("#deltaScroll"),els.deltaBackdrop,"delta"],
+        [document.querySelector("#taskSheet"),document.querySelector("#taskScroll"),document.querySelector("#taskBackdrop"),"tasks"]
+      ]) new TraceSheetGestures({sheet,scroll,backdrop,canClose:()=>!state.busy && !state.delta?.busy && !activeConfirmDialog,close:()=>dismissOverlay(layer)});
       syncOverlayState();
       loadAll();
+
+      function overlayLayers() {
+        return [state.detailsOpen && "app",state.firmwareDetailsOpen && "firmware",state.delta && "delta",
+          state.taskOpen && "tasks",els.body.classList.contains("nav-open") && "nav",activeConfirmDialog && "confirm"].filter(Boolean);
+      }
+      function dismissOverlay(layer) {
+        if (layer === "confirm") closeConfirmDialog(false);
+        else if (layer === "app") closeQuickActions({immediate:true});
+        else if (layer === "firmware") closeFirmwareDetails({immediate:true});
+        else if (layer === "delta") closeDelta();
+        else if (layer === "tasks") closeTasks();
+        else if (layer === "nav") setMobileNav(false);
+      }
+      function openTasks() {
+        if (state.busy || state.delta?.busy || activeConfirmDialog) return;
+        closeDelta(); closeQuickActions({immediate:true,restoreFocus:false}); closeFirmwareDetails({immediate:true,restoreFocus:false});
+        closeResourcePanel(); setMobileNav(false,{restoreFocus:false});
+        state.taskOpen = true;
+        document.querySelector("#taskSheet").hidden = false;
+        document.querySelector("#taskBackdrop").hidden = false;
+        document.querySelector("#taskScroll").scrollTop = 0;
+        els.body.classList.add("task-open"); syncOverlayState();
+        taskActivity.render(); taskActivity.refresh(); document.querySelector("#taskClose").focus();
+      }
+      function closeTasks() {
+        const wasOpen = state.taskOpen; state.taskOpen = false;
+        document.querySelector("#taskSheet").hidden = true;
+        document.querySelector("#taskBackdrop").hidden = true;
+        els.body.classList.remove("task-open"); syncOverlayState();
+        if (wasOpen) restoreWorkspaceFocus(document.querySelector("#taskButton"));
+      }
 
       function mountReleaseDetailSheet() {
         els.quickDetailSurface.append(els.releaseDetailGrid, els.releaseInspector);
       }
 
       function attachEvents() {
+        document.querySelector("#taskButton").addEventListener("click",openTasks);
+        document.querySelector("#taskClose").addEventListener("click",closeTasks);
+        document.querySelector("#taskBackdrop").addEventListener("click",closeTasks);
         els.collapseNav.addEventListener("click", toggleNavCollapse);
         els.mobileMenu.addEventListener("click", () => setMobileNav(true));
         els.closeNav.addEventListener("click", () => setMobileNav(false));
@@ -1887,6 +1962,7 @@
         document.addEventListener("keydown", (event) => {
           if (event.isComposing) return;
           const layer = activeConfirmDialog ? els.confirmDialog
+            : state.taskOpen ? document.querySelector("#taskSheet")
             : state.delta ? els.deltaSheet
             : els.body.classList.contains("firmware-details-open") ? els.firmwareDetailSheet
             : els.body.classList.contains("quick-actions-open") ? els.quickActionSheet
@@ -1898,6 +1974,7 @@
           if (event.key === "Escape") {
             event.preventDefault();
             if (activeConfirmDialog) closeConfirmDialog(false);
+            else if (state.taskOpen) closeTasks();
             else if (layer === els.deltaSheet) closeDelta();
             else if (layer === els.firmwareDetailSheet) closeFirmwareDetails();
             else if (layer === els.quickActionSheet) closeQuickActions();
@@ -1950,18 +2027,21 @@
         const nav = els.body.classList.contains("nav-open");
         const confirm = Boolean(activeConfirmDialog);
         const delta = Boolean(state.delta);
-        els.workspace.inert = confirm || quick || firmware || nav || delta;
-        els.resourceFloat.inert = confirm || quick || firmware || nav || delta;
-        els.sidebar.inert = confirm || quick || firmware || delta || (window.matchMedia("(max-width: 1000px)").matches && !nav);
-        els.quickActionSheet.inert = confirm || firmware || delta || !quick;
-        els.firmwareDetailSheet.inert = confirm || quick || delta || !firmware;
-        els.deltaSheet.inert = confirm || !delta;
+        const tasks = state.taskOpen;
+        els.workspace.inert = confirm || quick || firmware || nav || delta || tasks;
+        els.resourceFloat.inert = confirm || quick || firmware || nav || delta || tasks;
+        els.sidebar.inert = confirm || quick || firmware || delta || tasks || (window.matchMedia("(max-width: 1000px)").matches && !nav);
+        els.quickActionSheet.inert = confirm || firmware || delta || tasks || !quick;
+        els.firmwareDetailSheet.inert = confirm || quick || delta || tasks || !firmware;
+        els.deltaSheet.inert = confirm || tasks || !delta;
+        document.querySelector("#taskSheet").inert = confirm || !tasks;
         els.confirmDialog.inert = !confirm;
+        overlayHistory?.sync();
       }
 
       function restoreWorkspaceFocus(preferred) {
         if (activeConfirmDialog || els.body.classList.contains("nav-open")) return;
-        const fallback = state.delta ? els.deltaClose : els.body.classList.contains("quick-actions-open") ? els.quickActionClose
+        const fallback = state.taskOpen ? document.querySelector("#taskClose") : state.delta ? els.deltaClose : els.body.classList.contains("quick-actions-open") ? els.quickActionClose
           : els.body.classList.contains("firmware-details-open") ? els.firmwareDetailClose
           : state.activeView === "firmware" ? (state.firmwareSection === "releases"
             ? els.firmwareReleaseList.querySelector('[aria-pressed="true"]') : null) ?? els.firmwareTabs.querySelector('[aria-selected="true"]')
@@ -2189,6 +2269,7 @@
         els.languageToggle.setAttribute("aria-label", t("language.toggle"));
         els.languageToggle.title = t("language.toggle");
         if (rerender) render();
+        taskActivity?.render();
         syncSearchInput();
         renderStatus();
       }
@@ -2212,8 +2293,10 @@
           if (session.actor !== state.session?.actor) {
             state.appNoteDrafts.clear();
             state.announcementDrafts.clear();
+            state.deltaDrafts.clear();
           }
           state.session = session;
+          taskActivity?.setActor(session.actor);
           const [channels, releases, storage, announcements, firmwareReleases, firmwareChannels] = await Promise.all([
             api("/api/admin/channels?appId=trace&platform=android"),
             api("/api/admin/releases?appId=trace&platform=android"),
@@ -2247,6 +2330,9 @@
           setStatus(error.message, "error");
         } finally {
           setBusy(false);
+          if (new URLSearchParams(location.search).get("tasks") === "1" && !state.taskLinkConsumed) {
+            state.taskLinkConsumed = true; openTasks();
+          }
         }
       }
 
@@ -2809,6 +2895,9 @@
       }
       function closeDelta() {
         if (!state.delta) return;
+        if (state.delta.busy || activeConfirmDialog) return;
+        state.deltaDrafts.set(`${state.delta.actor}:${state.delta.kind}:${state.delta.releaseId}`,
+          {selected:[...state.delta.selected],reason:state.delta.reason});
         clearTimeout(state.delta.timer);
         state.delta = null;
         els.body.classList.remove("delta-open");
@@ -2816,13 +2905,16 @@
         syncOverlayState(); restoreWorkspaceFocus();
       }
       async function openDelta(kind, releaseId) {
-        if (state.busy || activeConfirmDialog) return;
+        if (state.busy || state.delta?.busy || activeConfirmDialog) return;
+        closeTasks();
         closeDelta();
         closeQuickActions({ immediate: true, restoreFocus: false });
         closeFirmwareDetails({ immediate: true, restoreFocus: false });
         closeResourcePanel();
         const delta = state.delta = { kind, releaseId, actor: state.session?.actor, selected: new Set(), reason: "", data: null,
           busy: false, loading: false, notice: "", timer: null };
+        const draft = state.deltaDrafts.get(`${delta.actor}:${kind}:${releaseId}`);
+        if (draft) { delta.selected = new Set(draft.selected); delta.reason = draft.reason; }
         els.deltaSheet.hidden = false; els.deltaBackdrop.hidden = false;
         els.body.classList.add("delta-open");
         document.querySelector("#deltaScroll").scrollTop = 0;
@@ -2873,6 +2965,7 @@
         els.deltaTitle.textContent = data ? `${data.target.versionName} / ${data.target.versionCode}` : opText("正在读取版本...", "Loading version...");
         const canBuild = !locked && data?.dispatchConfigured && (delta.kind !== "android" || data.appSigningConfigured);
         els.deltaContent.innerHTML = `<p class="firmware-hint">${escapeHtml(opText("选择起始旧版本，只新增差分文件。不会重新构建原包、替换现有文件或自动发布 Stable/Beta。", "Select source versions to append delta files. Originals are not rebuilt or replaced, and Stable/Beta is never published automatically."))}</p>
+          <p class="firmware-hint">${escapeHtml(opText("关闭此弹窗不会取消任务。顶部“任务”可查看进度、历史结果并开启系统提醒。", "Closing does not cancel builds. Open Tasks in the toolbar for progress, results and system alerts."))}</p>
           ${delta.notice ? `<p class="error" role="alert">${escapeHtml(delta.notice)}</p>` : ""}
           ${!data ? `<p role="status">${escapeHtml(opText("等待版本数据", "Waiting for version data"))}</p>` : `
           ${!canBuild && !locked ? `<p class="firmware-help">${escapeHtml(opText("构建通道或签名配置未就绪，不能提交任务。现有下载不受影响。", "Dispatch or signing configuration is not ready. Existing downloads are unaffected."))}</p>` : ""}
@@ -2892,7 +2985,7 @@
             const run = /^https:\/\/github\.com\/Eitan-S-23\/(?:E-Track|Trace)\/actions\/runs\/\d+$/.test(job.runUrl ?? "") ? job.runUrl : null;
             const control = job.status === "ready" ? job.enabled ? "disable" : "enable" : job.status === "failed" ? "retry" : "reconcile";
             const usable = !["enable", "disable"].includes(control) || (canRole("owner") && (control === "disable" || (data.distributionEnabled && job.sizeBytes < data.target.fullBytes)));
-            return `<article class="delta-job-row"><div><strong>${escapeHtml(job.baseVersionCode)} → ${escapeHtml(job.targetVersionCode)}</strong><span>${escapeHtml(deltaStatus(job))}</span><small>${escapeHtml(job.fileName ?? job.errorCode ?? "")} ${job.sizeBytes ? escapeHtml(formatBytes(job.sizeBytes)) : ""}</small>
+            return `<article class="delta-job-row"><div><strong>${escapeHtml(job.baseVersionCode)} → ${escapeHtml(job.targetVersionCode)}</strong><span>${escapeHtml(deltaStatus(job))}</span>${taskActivity?.progress(job) ?? ""}<small>${escapeHtml(job.fileName ?? job.errorCode ?? "")} ${job.sizeBytes ? escapeHtml(formatBytes(job.sizeBytes)) : ""}</small>
               ${job.status === "ready" && job.sizeBytes >= data.target.fullBytes ? `<small>${escapeHtml(opText("不比全量包小，不能启用。", "Not smaller than full; cannot enable."))}</small>` : ""}</div><div class="operations-buttons">
               ${run ? `<a href="${escapeHtml(run)}" target="_blank" rel="noopener noreferrer">GitHub Actions</a>` : ""}
               <button type="button" class="secondary-button" data-version-operation="delta-${control}" data-job-id="${escapeHtml(job.id)}" ${locked || !usable || (control === "retry" && !data.dispatchConfigured) ? "disabled" : ""}>${escapeHtml(({ enable: opText("启用", "Enable"), disable: opText("停用", "Disable"), retry: opText("重试失败任务", "Retry failed job"), reconcile: opText("核对构建结果", "Reconcile run") })[control])}</button></div></article>`;
@@ -2959,6 +3052,7 @@
         } catch (error) { delta.notice = `${error.message} ${opText("请核对当前任务，不会自动重发。", "Reconcile the current job; it will not be replayed automatically.")}`; }
         finally {
           delta.busy = false;
+          taskActivity?.refresh();
           if (state.delta === delta) await loadDelta(delta);
         }
       }

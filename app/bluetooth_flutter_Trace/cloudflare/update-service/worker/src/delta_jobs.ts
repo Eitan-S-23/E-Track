@@ -21,6 +21,7 @@ export interface DeltaJob {
   input_sha256: string; workflow_commit: string; workflow_ref: string; mutation_id: string;
   run_id: string | null; result_json: string | null;
   actor: string; reason: string; error_code: string | null; created_at: number; updated_at: number;
+  progress_phase?: "building" | "uploading" | "verifying";
 }
 const REPOSITORY = "Eitan-S-23/E-Track";
 const APP_REPOSITORY = "Eitan-S-23/Trace";
@@ -66,6 +67,7 @@ export function jobView(job: DeltaJob) {
     baseVersionCode: job.base_version_code, targetVersionCode: job.target_version_code, baseImageSha256: job.base_sha256,
     status: job.status, enabled: job.enabled===1, attempt: job.attempt, revision: job.revision, errorCode: job.error_code,
     createdAt: job.created_at, updatedAt: job.updated_at, fileName: result?.fileName ?? null,
+    phase: job.status === "running" ? job.progress_phase ?? "building" : job.status,
     sizeBytes: result?.sizeBytes ?? null, sha256: result?.sha256 ?? null,
     runUrl: job.run_id ? `https://github.com/${workflowLocation(job).repository}/actions/runs/${job.run_id}` : null };
 }
@@ -379,6 +381,8 @@ export async function deltaCi(request: Request, env: WorkerEnv): Promise<Respons
       await request.body.cancel();
       return json({ok:true,sha256:sha,sizeBytes:length,idempotent:true});
     }
+    await env.DB.prepare("UPDATE delta_jobs SET progress_phase='uploading',updated_at=? WHERE id=? AND status='running' AND attempt=? AND progress_phase='building'")
+      .bind(nowSeconds(),job.id,job.attempt).run();
     const stream=new FixedLengthStream(length), abort=new AbortController();
     const upload=request.body.pipeTo(stream.writable,{signal:abort.signal});
     const writing=env.RELEASES_BUCKET.put(key,stream.readable,{onlyIf:{etagDoesNotMatch:"*"},sha256:sha,
@@ -389,6 +393,8 @@ export async function deltaCi(request: Request, env: WorkerEnv): Promise<Respons
     const object=written.value;
     if (piped.status==="rejected" && object) throw invalidParameter("Delta length mismatch");
     if (!object || object.size!==length) throw new ApiError("R2_OBJECT_CONFLICT","Delta upload did not complete",409);
+    await env.DB.prepare("UPDATE delta_jobs SET progress_phase='verifying',updated_at=? WHERE id=? AND status='running' AND attempt=?")
+      .bind(nowSeconds(),job.id,job.attempt).run();
     return json({ok:true,sha256:sha,sizeBytes:length,idempotent:false});
   }
   const body=await boundedJson(request,65536);
@@ -396,7 +402,7 @@ export async function deltaCi(request: Request, env: WorkerEnv): Promise<Respons
   if (action==="claim") {
     if (job.status==="running") return json({ok:true,job:jobView(job),idempotent:true});
     if (!["dispatching","queued","dispatch_unknown"].includes(job.status)) throw new ApiError("RELEASE_CONFLICT","Delta job cannot be claimed",409);
-    const result=await env.DB.prepare("UPDATE delta_jobs SET status='running',run_id=?,revision=revision+1,updated_at=? WHERE id=? AND revision=?")
+    const result=await env.DB.prepare("UPDATE delta_jobs SET status='running',progress_phase='building',run_id=?,revision=revision+1,updated_at=? WHERE id=? AND revision=?")
       .bind(String(body.runId),nowSeconds(),job.id,job.revision).run();
     if (!result.meta.changes) throw new ApiError("CAS_CONFLICT","Delta claim changed",409);
     return json({ok:true});

@@ -1,0 +1,168 @@
+window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, openTarget, openPanel, onJobs }) {
+  const button = document.querySelector("#taskButton");
+  const content = document.querySelector("#taskContent");
+  const toast = document.querySelector("#taskToast");
+  const active = job => !["ready", "failed"].includes(job.status);
+  let actor = null, data = null, loading = false, error = "", timer = null, page = 0;
+  let generation = 0, pushInfo = null, pushBusy = false, toastTimer = null;
+  const readLocal = key => { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } };
+  const saveLocal = (key,value) => { try { localStorage.setItem(key,JSON.stringify(value)); } catch { /* Server history still works without local storage. */ } };
+  const key = suffix => `trace-admin-tasks:${actor}:${suffix}`;
+  function supported() { return isSecureContext && "Notification" in window && "serviceWorker" in navigator && "PushManager" in window; }
+  function phase(job) {
+    return ({ dispatching: text("正在提交", "Submitting"), queued: text("等待构建 / 审批", "Queued / awaiting approval"),
+      dispatch_unknown: text("提交结果未知，请核对", "Dispatch uncertain; reconcile"),
+      building: text("构建与重建校验", "Building and reconstruction checks"), running: text("构建与重建校验", "Building and reconstruction checks"),
+      uploading: text("上传差分文件", "Uploading delta"), verifying: text("等待校验登记", "Awaiting verification and registration"),
+      ready: job.enabled ? text("已生成并启用", "Ready and enabled") : text("已生成，待启用", "Ready, not enabled"),
+      failed: text("生成失败", "Build failed") })[job.phase ?? job.status] ?? job.status;
+  }
+  function elapsed(job) {
+    if (!job.createdAt) return "";
+    const end = active(job) ? Math.floor(Date.now()/1000) : job.updatedAt;
+    const seconds = Math.max(0, (end ?? job.createdAt) - job.createdAt);
+    return text("耗时 ", "Elapsed ") + (seconds < 60 ? `${seconds}s` : `${Math.floor(seconds/60)}m ${seconds%60}s`);
+  }
+  function progress(job) {
+    const phases = ["queued", "building", "uploading", "verifying", "ready"];
+    const current = job.phase ?? (job.status === "running" ? "building" : job.status);
+    const index = phases.indexOf(current);
+    const labels = [text("排队", "Queue"),text("构建", "Build"),text("上传", "Upload"),text("登记", "Verify"),text("完成", "Ready")];
+    return `<div class="task-progress" data-state="${escape(job.status)}" aria-label="${escape(phase(job))}">
+      ${labels.map((label,i)=>`<span class="${index >= 0 && i < index ? "done" : i === index ? "current" : ""}" ${i === index ? 'aria-current="step"' : ""}><i></i>${escape(label)}</span>`).join("")}</div>
+      <small class="task-time">${escape(elapsed(job))}${job.updatedAt ? ` · ${escape(text("更新于 ","Updated "))}${escape(new Date(job.updatedAt*1000).toLocaleTimeString())}` : ""}</small>`;
+  }
+  function notify(message) {
+    clearTimeout(toastTimer);
+    toast.querySelector("span").textContent = message;
+    toast.hidden = false;
+    toastTimer = setTimeout(()=>{ toast.hidden = true; },10000);
+  }
+  function render() {
+    const focused = content.contains(document.activeElement) ? document.activeElement : null;
+    const focusAction = focused?.dataset.taskAction, focusTarget = focused?.dataset.taskTarget;
+    const jobs = data?.jobs ?? [], running = jobs.filter(active).length, unread = data?.unreadCount ?? 0;
+    button.disabled = !actor;
+    button.querySelector(".task-label").textContent = text("任务", "Tasks");
+    button.setAttribute("aria-label", `${text("差分任务", "Delta tasks")}: ${running} ${text("进行中", "active")}, ${unread} ${text("未读", "unread")}`);
+    const badge = button.querySelector(".task-badge");
+    badge.textContent = String(unread || running); badge.hidden = !(unread || running);
+    button.dataset.running = String(running > 0);
+    document.querySelector("#taskTitle").textContent = text("任务与通知", "Tasks and notifications");
+    document.querySelector("#taskClose").setAttribute("aria-label",text("关闭任务", "Close tasks"));
+    toast.querySelector("button").textContent = text("查看任务", "View tasks");
+    const enabled = supported() && Notification.permission === "granted" && pushInfo?.expiresAt > Date.now()/1000;
+    const pushText = !supported() ? text("此浏览器不支持后台系统提醒，结果仍保留在这里。", "This browser does not support background push. Results remain here.")
+      : Notification.permission === "denied" ? text("浏览器已阻止通知，可在网站权限中允许；任务照常生成。", "Notifications are blocked in site settings. Builds are unaffected.")
+      : enabled ? text("已开启后台提醒。系统省电或浏览器限制可能延迟通知。", "Background alerts enabled. Browser or battery policies can delay delivery.")
+      : text("开启系统提醒后，切到后台也可接收结果。首次需要允许浏览器通知。", "Enable system alerts for background results. Browser permission is required once.");
+    page = Math.max(0,Math.min(page,Math.ceil(jobs.length/8)-1));
+    content.innerHTML = `<section class="task-notification-settings"><div><strong>${escape(text("系统提醒", "System alerts"))}</strong><p>${escape(pushText)}</p></div>
+      <button type="button" class="secondary-button" data-task-action="${enabled ? "push-off" : "push-on"}" ${pushBusy || !supported() || !data?.pushPublicKey || (!enabled && Notification.permission === "denied") ? "disabled" : ""}>${escape(enabled ? text("关闭提醒", "Turn off") : text("开启提醒", "Enable alerts"))}</button></section>
+      ${data && !data.pushPublicKey ? `<p class="firmware-hint">${escape(text("服务器推送尚未配置，站内通知仍可使用。", "Server push is not configured. In-app notifications still work."))}</p>` : ""}
+      <div class="operations-buttons task-toolbar"><button type="button" class="secondary-button" data-task-action="refresh" ${loading ? "disabled" : ""}>${escape(text("刷新", "Refresh"))}</button>
+      <button type="button" class="secondary-button" data-task-action="read" ${!unread || loading ? "disabled" : ""}>${escape(text("全部标为已读", "Mark all read"))}</button><span>${running} ${escape(text("进行中", "active"))} · ${unread} ${escape(text("未读", "unread"))}</span></div>
+      ${error ? `<p class="error" role="alert">${escape(error)} ${escape(text("上次状态已保留，恢复连接后重新读取，不会重发构建。", "Previous status retained; reconnecting only rereads, never redispatches builds."))}</p>` : ""}
+      ${loading && !data ? `<p role="status">${escape(text("正在读取任务...", "Loading tasks..."))}</p>` : ""}
+      <div class="task-notifications">${(data?.notifications ?? []).slice(0,6).map(n=>`<button type="button" class="task-notification ${n.unread ? "unread" : ""}" data-task-kind="${escape(n.kind)}" data-task-target="${escape(n.targetReleaseId)}"><span>${escape(n.kind === "firmware" ? text("单片机", "MCU") : "App")} · ${escape(n.baseVersionCode)} → ${escape(n.targetVersionCode)}</span><strong>${escape(n.status === "ready" ? text("差分包已生成", "Delta ready") : text("差分生成失败", "Delta failed"))}</strong><small>${escape(new Date(n.createdAt*1000).toLocaleString())}</small></button>`).join("")}</div>
+      <h3 class="delta-jobs-title">${escape(text("我的差分任务", "My delta jobs"))}</h3>
+      <p class="firmware-hint">${escape(text("App 与单片机共用任务记录；关闭弹窗不会取消任务。成功后仍需手动启用，不会自动发布渠道。", "App and MCU jobs share this history. Closing does not cancel. Verified deltas still need manual enabling; channels are never auto-published."))}</p>
+      <div class="task-job-list">${jobs.slice(page*8,(page+1)*8).map(job=>`<article class="task-job" data-job-id="${escape(job.id)}"><div class="task-job-title"><strong>${escape(job.kind === "firmware" ? text("单片机", "MCU") : "App")} · ${escape(job.baseVersionCode)} → ${escape(job.targetVersionCode)}</strong><span>${escape(phase(job))}</span></div>${progress(job)}
+        ${job.errorCode ? `<p class="error">${escape(job.errorCode)}</p>` : ""}<div class="task-job-footer"><span>${job.sizeBytes ? escape(formatBytes(job.sizeBytes)) : escape(text("进度按真实阶段显示，不估算百分比。", "Actual stages, not estimated percentages."))}</span><button type="button" class="text-button" data-task-kind="${escape(job.kind)}" data-task-target="${escape(job.targetReleaseId)}">${escape(text("查看差分", "Open deltas"))}</button></div></article>`).join("") || `<p class="empty">${escape(text("还没有你的差分任务。", "No delta jobs submitted by this account yet."))}</p>`}</div>
+      ${jobs.length > 8 ? `<nav class="release-pagination"><button type="button" data-task-action="prev" ${page === 0 ? "disabled" : ""}>${escape(text("上一页", "Previous"))}</button><span>${page+1} / ${Math.ceil(jobs.length/8)}</span><button type="button" data-task-action="next" ${(page+1)*8 >= jobs.length ? "disabled" : ""}>${escape(text("下一页", "Next"))}</button></nav>` : ""}`;
+    if (focused && !content.closest("[hidden], [inert]")) {
+      [...content.querySelectorAll("button")].find(node=>!node.disabled && (focusAction ? node.dataset.taskAction === focusAction
+        : focusTarget && node.dataset.taskTarget === focusTarget && node.dataset.taskKind === focused.dataset.taskKind))?.focus({preventScroll:true});
+    }
+  }
+  function schedule() {
+    clearTimeout(timer);
+    if (!actor) return;
+    timer = setTimeout(refresh, document.hidden ? 120000 : data?.jobs.some(active) ? 15000 : 60000);
+  }
+  async function refresh() {
+    if (!actor || loading) return;
+    const current = generation, identity = actor;
+    loading = true; render();
+    try {
+      const value = await api("/api/admin/delta/activity");
+      if (current !== generation) return;
+      if (value.actor && value.actor !== identity) {
+        setActor(null); error = text("登录账号已变化，请刷新后台。", "Account changed. Refresh Admin."); render(); return;
+      }
+      if (value.ok !== true || value.actor !== identity || value.scope !== "own-jobs" || !Array.isArray(value.jobs) || !Array.isArray(value.notifications)) throw new Error(text("任务状态读取失败", "Invalid task response"));
+      data = value; error = "";
+      if (pushInfo && !pushBusy && !value.pushSubscriptions?.some(row=>row.id === pushInfo.id)) {
+        pushInfo = null; saveLocal(key("push"),null);
+      }
+      const last = Number(readLocal(key("noticed")) ?? 0);
+      const fresh = value.notifications.filter(n=>n.unread && n.id > last);
+      if (fresh.length) {
+        notify(text(`${fresh.length} 条新任务结果，可在任务中查看。`, `${fresh.length} new task result(s). Open Tasks to review.`));
+        saveLocal(key("noticed"),Math.max(...fresh.map(n=>n.id)));
+      }
+      onJobs(value.jobs);
+    } catch (e) { if (current === generation) error = e.message; }
+    finally { if (current === generation) { loading = false; render(); schedule(); } }
+  }
+  async function enablePush() {
+    if (!supported() || !data?.pushPublicKey || pushBusy) return;
+    const current = generation;
+    // Permission is requested in the user's click, not on page load or during a build.
+    const permission = await Notification.requestPermission();
+    if (current !== generation || permission !== "granted") { render(); return; }
+    pushBusy = true; error = ""; render();
+    try {
+      const registration = await navigator.serviceWorker.register("/admin-sw.js",{scope:"/",updateViaCache:"none"});
+      await navigator.serviceWorker.ready;
+      let subscription = await registration.pushManager.getSubscription();
+      if (current !== generation) return;
+      if (subscription && !pushInfo) { await subscription.unsubscribe(); subscription = null; }
+      subscription ??= await registration.pushManager.subscribe({userVisibleOnly:true,
+        applicationServerKey:Uint8Array.from(atob(data.pushPublicKey.replace(/-/g,"+").replace(/_/g,"/")+"="),c=>c.charCodeAt(0))});
+      if (current !== generation) return;
+      const result = await mutate("/api/admin/delta/notifications/subscribe",{endpoint:subscription.endpoint,applicationServerKey:data.pushPublicKey});
+      if (current !== generation) return;
+      pushInfo = {id:result.id,expiresAt:result.expiresAt}; saveLocal(key("push"),pushInfo);
+    } catch (e) { if (current === generation) error = e.message; }
+    finally { if (current === generation) { pushBusy = false; render(); } }
+  }
+  content.addEventListener("click", async event => {
+    const target = event.target.closest("button");
+    if (!target || target.disabled) return;
+    if (target.dataset.taskTarget) { openTarget(target.dataset.taskKind,target.dataset.taskTarget); return; }
+    const action = target.dataset.taskAction;
+    if (action === "push-on") { await enablePush(); return; }
+    try {
+      if (action === "refresh") await refresh();
+      if (action === "prev" || action === "next") { page += action === "prev" ? -1 : 1; render(); }
+      if (action === "read") {
+        await mutate("/api/admin/delta/notifications/read",{throughId:Math.max(0,...(data?.notifications ?? []).map(n=>n.id))}); await refresh();
+      }
+      if (action === "push-off" && pushInfo && !pushBusy) {
+        pushBusy = true; render();
+        await mutate("/api/admin/delta/notifications/unsubscribe",{id:pushInfo.id});
+        const registration = await navigator.serviceWorker.getRegistration("/");
+        await (await registration?.pushManager.getSubscription())?.unsubscribe();
+        pushInfo = null; saveLocal(key("push"),null);
+      }
+    } catch (e) { error = e.message; }
+    finally { pushBusy = false; render(); }
+  });
+  toast.querySelector("button").addEventListener("click",()=>{ openPanel(); toast.hidden = true; });
+  document.addEventListener("visibilitychange",()=>{ if (!document.hidden) refresh(); else schedule(); });
+  window.addEventListener("online",refresh);
+  window.addEventListener("pageshow",refresh);
+  navigator.serviceWorker?.addEventListener("message",event=>{
+    if (event.data?.type === "trace-delta-updated") refresh();
+    if (event.data?.type === "trace-delta-open") { refresh(); openPanel(); }
+  });
+  function setActor(value) {
+    if (actor === value) { refresh(); return; }
+    actor = value; generation++; data = null; loading = false; error = ""; page = 0; pushBusy = false;
+    clearTimeout(timer); toast.hidden = true;
+    pushInfo = actor ? readLocal(key("push")) : null;
+    render(); if (actor) refresh();
+  }
+  return { refresh, render, setActor, progress, phase };
+};

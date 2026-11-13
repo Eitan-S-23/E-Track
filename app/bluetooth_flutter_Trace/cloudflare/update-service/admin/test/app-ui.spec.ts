@@ -39,6 +39,9 @@ async function mockApp(page: Page, language = "en", role = "owner", firmwareFail
     if (url.origin !== origin) { await route.abort(); return; }
     if (url.pathname === "/") { await route.fulfill({ contentType: "text/html", body: html }); return; }
     if (url.pathname === "/admin.css") { await route.fulfill({ contentType: "text/css", body: css }); return; }
+    if (["/sheet-gestures.js","/overlay-history.js","/delta-activity.js"].includes(url.pathname)) {
+      await route.fulfill({contentType:"text/javascript",body:readFileSync(new URL("../public"+url.pathname,import.meta.url),"utf8")}); return;
+    }
     const requestId = `mock-app-request-${++serial}`;
     const reply = (body: object, status = 200) => route.fulfill({ status, contentType: "application/json",
       headers: { "X-Request-Id": requestId }, body: JSON.stringify(body) });
@@ -117,6 +120,41 @@ async function mockApp(page: Page, language = "en", role = "owner", firmwareFail
 }
 
 const action = (page: Page, channel: string) => page.locator(`[data-action="publish"][data-channel="${channel}"]:visible`);
+
+for (const language of ["en", "zh"]) for (const width of [1440, 390, 320]) {
+  test(`pinned close App ${language} ${width}px remains clickable after scrolling to the bottom`, async ({ page }, info) => {
+    await page.setViewportSize({ width, height: 844 });
+    const data = await mockApp(page, language);
+    data.releases[0].release_notes = "Long release notes with enough content to require independent scrolling. ".repeat(60);
+    await refreshApp(page);
+    await select(page, "app-new");
+    const sheet = page.locator("#quickActionSheet"), content = page.locator("#quickActionScroll");
+    const close = page.locator("#quickActionClose");
+    await expect.poll(() => sheet.evaluate(node => Number(getComputedStyle(node).opacity))).toBe(1);
+    const start = (await close.boundingBox())!;
+    expect((await content.boundingBox())!.y).toBeGreaterThanOrEqual(start.y + start.height);
+    const background = await page.evaluate(() => scrollY);
+    await content.evaluate(node => { node.scrollTop = node.scrollHeight; });
+    expect(await content.evaluate(node => node.scrollTop)).toBeGreaterThan(0);
+    await expect(close).toBeInViewport({ ratio: 1 });
+    const end = (await close.boundingBox())!;
+    expect((await content.boundingBox())!.y).toBeGreaterThanOrEqual(end.y + end.height);
+    expect(Math.abs(end.x - start.x)).toBeLessThan(1);
+    expect(Math.abs(end.y - start.y)).toBeLessThan(1);
+    const point = { x: end.x + end.width / 2, y: end.y + end.height / 2 };
+    expect(await page.evaluate(p => document.elementFromPoint(p.x, p.y)?.closest("button")?.id, point)).toBe("quickActionClose");
+    expect(await page.evaluate(() => scrollY)).toBe(background);
+    await page.screenshot({ path: info.outputPath(`app-close-at-bottom-${language}-${width}-mock.png`), animations: "disabled" });
+    await page.mouse.click(point.x, point.y);
+    await expect(sheet).toBeHidden();
+    await expect(page.locator('#versionStrip .version-card[data-release-id="app-new"]')).toBeFocused();
+    await select(page, "app-new");
+    expect(await content.evaluate(node => node.scrollTop)).toBe(0);
+    await page.keyboard.press("Escape");
+    await expect(sheet).toBeHidden();
+    expect(data.writes).toHaveLength(0);
+  });
+}
 
 test("firmware read failure cannot take down the existing App manager", async ({ page }) => {
   const data = await mockApp(page, "zh", "owner", true);

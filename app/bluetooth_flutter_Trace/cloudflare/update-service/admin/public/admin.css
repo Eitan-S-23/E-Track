@@ -390,6 +390,9 @@ body.delta-open .resource-float { visibility: hidden; pointer-events: none; }
 .quick-sheet-handle { display: none; }
 .quick-sheet-header { display: flex; flex: 0 0 auto; align-items: flex-start; justify-content: space-between; gap: 16px; padding: var(--sheet-pad-top) calc(var(--sheet-pad-x) + 56px) 22px var(--sheet-pad-x); }
 .quick-sheet-header > div { min-width: 0; }
+.quick-sheet-header, .quick-sheet-handle { touch-action: none; cursor: grab; user-select: none; }
+.sheet-dragging { transition: none !important; cursor: grabbing; }
+.sheet-dragging .quick-sheet-header { cursor: grabbing; }
 .quick-sheet-header p { overflow-wrap: anywhere; }
 .quick-sheet-header h2 { font-size: 28px; overflow-wrap: anywhere; }
 .quick-sheet-header p:not(.eyebrow) { margin-top: 5px; color: var(--muted); font-size: 12px; }
@@ -434,6 +437,45 @@ body.delta-open .resource-float { visibility: hidden; pointer-events: none; }
 .confirm-actions > button { min-width: 86px; }
 .confirm-dialog > a { display: flex; text-decoration: none; }
 body.quick-actions-open, body.firmware-details-open, body.confirm-open, body.nav-open { overflow: hidden; }
+body.task-open { overflow: hidden; }
+.task-open #taskBackdrop { opacity: 1; }
+.task-open #taskSheet { opacity: 1; transform: translate(-50%, 0); }
+.task-open .resource-float { visibility: hidden; pointer-events: none; }
+.task-sheet { width: min(780px, calc(100vw - 48px)); }
+.task-button { position: relative; gap: 6px; flex-shrink: 0; }
+.task-badge { font-size: 10px; min-width: 17px; padding: 1px 4px; color: var(--surface); background: var(--accent); border-radius: 9px; }
+.task-button[data-running="true"] .ui-icon { color: var(--accent); }
+.task-notification-settings { display: flex; align-items: center; gap: 16px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+.task-notification-settings > div { flex: 1; min-width: 0; }
+.task-notification-settings p { margin-top: 6px; color: var(--muted); font-size: 12px; }
+.task-notification-settings button { flex-shrink: 0; }
+.task-toolbar { margin: 18px 0; flex-wrap: wrap; font-size: 12px; }
+.task-notifications { display: grid; gap: 0; }
+.task-notification { display: grid; gap: 4px; width: 100%; padding: 12px; text-align: left; border: 0; border-bottom: 1px solid var(--line); background: transparent; }
+.task-notification.unread { border-left: 3px solid var(--accent); background: var(--accent-soft); }
+.task-notification small, .task-notification > span { color: var(--muted); font-size: 11px; }
+.task-job { padding: 18px 0; border-bottom: 1px solid var(--line); min-width: 0; }
+.task-job-title, .task-job-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; }
+.task-job-title > span, .task-job-footer, .task-time { font-size: 11px; color: var(--muted); }
+.task-job-footer { margin-top: 10px; align-items: center; }
+.task-progress { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 6px; margin: 12px 0 6px; }
+.task-progress > span { display: grid; gap: 5px; font-size: 10px; color: var(--muted); overflow-wrap: anywhere; }
+.task-progress i { display: block; height: 3px; background: var(--line); border-radius: 2px; }
+.task-progress .done i, .task-progress .current i { background: var(--accent); }
+.task-progress .current { color: var(--ink); font-weight: 600; }
+.task-progress[data-state="failed"] i { background: var(--danger); opacity: .4; }
+.task-time { display: block; }
+.delta-job-row > div:first-child { flex: 1; min-width: 0; }
+.task-toast { position: fixed; left: 50%; bottom: max(24px,env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 75; width: max-content; max-width: calc(100vw - 32px); padding: 12px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: 0 8px 36px #1d2a2529; display: flex; gap: 16px; align-items: center; font-size: 12px; }
+.task-toast button { flex-shrink: 0; background: transparent; border: 0; color: var(--accent); font-weight: 600; }
+@media (max-width: 720px) {
+  .task-label { display: none; }
+  .task-sheet { width: 100%; }
+  .task-button { min-width: 36px; padding: 8px; }
+  .task-badge { position: absolute; top: -2px; right: -3px; }
+  .task-notification-settings { align-items: flex-start; flex-wrap: wrap; }
+  .task-notification-settings p { max-width: 100%; }
+}
 
 /* The resource ball is movable again, and stays behind modal surfaces. */
 .resource-float { position: fixed; z-index: 45; right: 22px; bottom: 22px; width: 72px; height: 72px; }

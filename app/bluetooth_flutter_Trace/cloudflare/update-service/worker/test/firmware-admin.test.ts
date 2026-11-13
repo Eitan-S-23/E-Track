@@ -544,6 +544,25 @@ describe("P4-2 existing Access Pages facade", () => {
     expect(response.headers.get("Cache-Control")).toBe("no-store");
     expect(response.headers.get("X-Request-Id")).toBeTruthy();
   });
+  it("notification history uses the Access actor and never exposes subscription endpoints", async () => {
+    const response=await page("unused",{route:["delta","activity"],method:"GET",email:"viewer@example.com"});
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ok:true,actor:"viewer@example.com",scope:"own-jobs",pushPublicKey:null});
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect((await page("unused",{route:["delta","activity"],method:"GET",token:null})).status).toBe(401);
+  });
+  it("notification settings retain same-origin and CSRF guards, including viewer-owned reads", async () => {
+    const before=await env.DB.prepare("SELECT * FROM admin_notification_reads ORDER BY actor").all();
+    const rejected: Array<{token?:null;header?:Record<string,string>;status:number}> = [
+      {token:null,status:401},{header:{Origin:"https://untrusted.example.com"},status:403},
+      {header:{"X-CSRF-Token":"wrong"},status:403}];
+    for(const options of rejected) {
+      const response=await page("unused",{...options,route:["delta","notifications","read"],body:{throughId:0}});
+      expect(response.status).toBe(options.status);
+    }
+    expect((await env.DB.prepare("SELECT * FROM admin_notification_reads ORDER BY actor").all()).results).toEqual(before.results);
+    expect((await page("unused",{route:["delta","notifications","read"],email:"viewer@example.com",body:{throughId:0}})).status).toBe(200);
+  });
   it.each([
     ["version-inventory", "refresh"], ["delta", "jobs"]
   ])("new mutation %s/%s retains Access, viewer, origin and CSRF guards", async (first, second) => {

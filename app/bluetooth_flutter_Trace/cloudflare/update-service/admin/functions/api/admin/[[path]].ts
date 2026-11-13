@@ -5,6 +5,7 @@ import { editFirmwareNotes, firmwareHistory } from "../../../../worker/src/firmw
 import { readFirmwareJson, requireFirmwareJsonHeaders } from "../../../../worker/src/firmware";
 import { boundedJson, inventorySummary, refreshInventory } from "../../../../worker/src/version_inventory";
 import { createDeltaJobs, deltaCandidates, deltaJobAction } from "../../../../worker/src/delta_jobs";
+import { deltaActivity, readNotifications, subscribeNotifications, unsubscribeNotifications } from "../../../../worker/src/admin_notifications";
 
 type Platform = "android" | "windows";
 type ChannelName = "stable" | "beta";
@@ -35,6 +36,7 @@ interface AdminEnv {
   DELTA_APP_WORKFLOW_COMMIT?: string;
   DELTA_APP_PUBLIC_KEY_BASE64?: string;
   DELTA_ASSETS_ENABLED?: string;
+  ADMIN_PUSH_PUBLIC_KEY?: string;
 }
 
 interface Actor {
@@ -220,6 +222,18 @@ async function routeAdminRequest(
     return inventorySummary(context.env);
   }
 
+  if (route[0] === "delta" && route[1] === "activity" && route.length === 2 && method === "GET") {
+    requireRole(actor, "viewer");
+    return deltaActivity(context.env, actor.email);
+  }
+  if (route[0] === "delta" && route[1] === "notifications" && route.length === 3 && method === "POST") {
+    requireRole(actor, "viewer");
+    const body = await boundedJson(context.request, 8192);
+    if (route[2] === "read") return readNotifications(context.env, actor.email, body);
+    if (route[2] === "subscribe") return subscribeNotifications(context.env, actor.email, body);
+    if (route[2] === "unsubscribe") return unsubscribeNotifications(context.env, actor.email, body);
+    throw new AdminError("INVALID_PARAMETER", "Unknown notification operation", 400);
+  }
   if (route[0] === "delta" && route[1] === "candidates" && route.length === 2 && method === "GET") {
     requireRole(actor, "viewer");
     const kind = url.searchParams.get("kind");

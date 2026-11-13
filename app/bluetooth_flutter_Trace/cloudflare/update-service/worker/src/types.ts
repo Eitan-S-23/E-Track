@@ -35,6 +35,9 @@ export interface WorkerEnv {
   DELTA_APP_WORKFLOW_COMMIT?: string;
   DELTA_APP_PUBLIC_KEY_BASE64?: string;
   DELTA_ASSETS_ENABLED?: string;
+  ADMIN_PUSH_PUBLIC_KEY?: string;
+  ADMIN_PUSH_PRIVATE_JWK?: string;
+  ADMIN_PUSH_SUBJECT?: string;
 }
 
 export type FirmwareStorageEnv = Pick<WorkerEnv, "DB" | "RELEASES_BUCKET">;

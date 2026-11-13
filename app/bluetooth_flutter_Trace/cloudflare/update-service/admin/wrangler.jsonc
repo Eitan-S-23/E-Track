@@ -9,6 +9,7 @@
   "vars": {
     "ENVIRONMENT": "staging",
     "APP_ID": "trace",
+    "ADMIN_PUSH_PUBLIC_KEY": "BKDxVxLb7FUvREw-vSVtZ0ATtrEgQck2q3f7r-VSQfDRfxFnavm8g2xxg_mZ6QjgX3k6TJpIPhhX0rNzW_lc97c",
     "VERSION_INVENTORY_ENABLED": "true",
     "DELTA_ASSETS_ENABLED": "true"
   },

@@ -207,3 +207,53 @@ Wrong: treat a successful dispatch as a ready patch, or an empty inventory as
 proof that nobody uses a version. Correct: wait for verified completion and
 label missing client observations as unknown. Generated assets are disabled
 until an owner acts; generating a delta never silently publishes its target.
+
+## Task Progress And Notifications
+
+Migration `0009_delta_notifications.sql` adds progress phases and an actor-scoped
+notification/outbox model. It does not alter release files, channels, workflow
+bindings, signatures or existing job identities. Old terminal jobs remain visible
+in task history but are not backfilled as new alerts.
+
+The existing CI callbacks report actual stages: claim means building and local
+reconstruction checks; an accepted asset upload enters uploading; stored bytes
+await verification/registration; only successful completion becomes ready. No
+estimated percentage is returned. Dispatch uncertainty remains uncertainty and
+requires reconciliation. A read, reload, gesture or notification never dispatches
+another build, retries a failed job, enables an asset or changes a channel.
+
+The Access-protected facade adds these same-origin, actor-bound routes:
+
+- `GET /api/admin/delta/activity`: up to 100 own jobs (active first), the latest
+  30 own terminal notifications, total unread count, public push key and active
+  subscription IDs/expiry. It never exposes push endpoints or private keys.
+- `POST /api/admin/delta/notifications/read`: `{throughId}`; monotonic and clamped
+  to existing notifications for this actor, so it cannot hide future results.
+- `POST /api/admin/delta/notifications/subscribe`: `{endpoint,applicationServerKey}`;
+  explicit browser consent, supported HTTPS vendor endpoints, at most five active
+  subscriptions per actor, 30-day expiry, no reassignment across accounts.
+- `POST /api/admin/delta/notifications/unsubscribe`: `{id}`; actor-scoped removal.
+
+All POST routes retain the existing Access/role, same-origin JSON and CSRF guards.
+Job completion/failure and its notification/outbox insert are atomic SQLite
+trigger operations. Completion sends a bounded background delivery; the distinct
+five-minute Worker schedule retries only notifications, never firmware cleanup
+or builds. Deliveries use a lease, at most five tries, no redirect following and
+remove expired vendor subscriptions on 404/410. A push failure cannot turn a
+successful delta into a failed delta or remove its unread result.
+
+`ADMIN_PUSH_PUBLIC_KEY` is shared by the Admin and Worker. Only the Worker receives
+the `ADMIN_PUSH_PRIVATE_JWK` secret; `ADMIN_PUSH_SUBJECT` is a contact HTTPS URL.
+VAPID is ES256/P-256 (RFC 8292). The RFC 8030 push is payloadless: it wakes the
+service worker, which reads protected task details with the browser Access session.
+Expired sessions receive a generic alert with no version detail. No authenticated
+page/API cache is installed. The worker uses a notification tag and durable local
+receipts to suppress duplicate completion alerts; clicking opens Tasks, not an API
+mutation. Browser/platform suspension and denied permission can prevent or delay
+OS delivery. Durable in-app results and foreground reconnection are the fallback.
+
+The toolbar task list does not depend on an open delta dialog. It polls while the
+page is alive, refreshes on online/foreground return and preserves stale results
+with an explicit error if reads fail. The server owns task state; page timers are
+not the background-notification guarantee. Notification consent is requested only
+from the Enable alerts button, never on load or as a prerequisite for generation.
