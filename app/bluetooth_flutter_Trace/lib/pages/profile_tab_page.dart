@@ -146,13 +146,45 @@ class ProfileTabPage extends StatelessWidget {
                 final inventory = Get.find<VersionInventoryService>();
                 return Column(mainAxisSize: MainAxisSize.min, children: [
                   SwitchListTile.adaptive(
+                    key: const ValueKey('version-inventory-toggle'),
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('参与版本统计',
-                        style: TextStyle(color: TraceColors.text, fontWeight: FontWeight.w600)),
-                    activeThumbColor: TraceColors.mint,
-                    activeTrackColor: TraceColors.ocean,
-                    inactiveThumbColor: TraceColors.muted,
-                    inactiveTrackColor: TraceColors.deep,
+                    title: const Text(
+                      '参与版本统计',
+                      style: TextStyle(
+                        color: TraceColors.text,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        height: 1.35,
+                      ),
+                    ),
+                    subtitle: Text(
+                      !inventory.ready.value
+                          ? '正在读取设置'
+                          : inventory.enabled.value ? '已开启' : '已关闭',
+                      style: TextStyle(
+                        color: inventory.ready.value && inventory.enabled.value
+                            ? TraceColors.mint
+                            : TraceColors.muted,
+                        fontSize: 13,
+                        height: 1.5,
+                      ),
+                    ),
+                    // This dialog stays dark even with a light Material theme.
+                    thumbColor: WidgetStateProperty.resolveWith((states) =>
+                        states.contains(WidgetState.selected) &&
+                                !states.contains(WidgetState.disabled)
+                            ? TraceColors.deep
+                            : TraceColors.muted),
+                    trackColor: WidgetStateProperty.resolveWith((states) =>
+                        states.contains(WidgetState.selected) &&
+                                !states.contains(WidgetState.disabled)
+                            ? TraceColors.mint
+                            : TraceColors.ocean),
+                    trackOutlineColor: WidgetStateProperty.resolveWith((states) =>
+                        states.contains(WidgetState.selected) &&
+                                !states.contains(WidgetState.disabled)
+                            ? Colors.transparent
+                            : TraceColors.muted),
                     value: inventory.enabled.value,
                     onChanged: inventory.ready.value
                         ? (value) => unawaited(inventory.setEnabled(value))
