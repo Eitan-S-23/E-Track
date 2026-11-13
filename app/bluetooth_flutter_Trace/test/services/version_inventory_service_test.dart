@@ -52,6 +52,20 @@ void main() {
   });
   tearDown(() async { service.onClose(); await activity.close(); });
 
+  void inventoryWidgetTest(String description, WidgetTesterCallback body) {
+    testWidgets(description, (tester) async {
+      addTearDown(service.onClose);
+      await body(tester);
+    });
+  }
+
+  Future<void> advance(WidgetTester tester, Duration elapsed) async {
+    now = now.add(elapsed);
+    await tester.pump(elapsed);
+    // The scheduled report also awaits preference writes before sending.
+    await tester.pump();
+  }
+
   DeviceOtaInfo info([int version = 30321]) {
     final bytes = Uint8List(50);
     bytes.setRange(0, 8, DeviceOtaInfo.wireModelETrack);
@@ -134,34 +148,31 @@ void main() {
     await service.poll(); expect(sent, hasLength(1));
   });
 
-  testWidgets('automatically resumes a pending snapshot when the runtime becomes idle', (tester) async {
+  inventoryWidgetTest('automatically resumes a pending snapshot when the runtime becomes idle', (tester) async {
     allowed = false;
     service.onInit();
     await tester.pump();
-    now = now.add(const Duration(seconds: 5));
-    await tester.pump(const Duration(seconds: 5));
+    await advance(tester, const Duration(seconds: 5));
     expect(sent, isEmpty);
     expect(service.status.value, InventoryReportStatus.busy);
     allowed = true;
     activity.add(false);
-    now = now.add(const Duration(seconds: 5));
-    await tester.pump(const Duration(seconds: 5));
+    await advance(tester, const Duration(seconds: 5));
     expect(sent, hasLength(1));
     expect(service.status.value, InventoryReportStatus.reported);
   });
 
-  testWidgets('retries at the backoff deadline without another tap or restart', (tester) async {
+  inventoryWidgetTest('retries at the backoff deadline without another tap or restart', (tester) async {
     fail = true;
     await service.poll();
     expect(service.status.value, InventoryReportStatus.retrying);
     fail = false;
-    now = now.add(const Duration(hours: 1));
-    await tester.pump(const Duration(hours: 1));
+    await advance(tester, const Duration(hours: 1));
     expect(sent, hasLength(1));
     expect(service.failureCode.value, isNull);
   });
 
-  testWidgets('retains a changed device that arrives during an in-flight report', (tester) async {
+  inventoryWidgetTest('retains a changed device that arrives during an in-flight report', (tester) async {
     await service.initialize();
     gate = Completer<void>();
     final pending = service.poll();
@@ -171,13 +182,12 @@ void main() {
     gate!.complete();
     await pending;
     gate = null;
-    now = now.add(const Duration(seconds: 5));
-    await tester.pump(const Duration(seconds: 5));
+    await advance(tester, const Duration(seconds: 5));
     expect(sent, hasLength(2));
     expect((sent.last['devices'] as List).single['versionCode'], 30324);
   });
 
-  testWidgets('background interruption does not impose an hour of backoff', (tester) async {
+  inventoryWidgetTest('background interruption does not impose an hour of backoff', (tester) async {
     await service.initialize();
     gate = Completer<void>();
     final pending = service.poll();
@@ -190,23 +200,21 @@ void main() {
     gate = null;
     fail = false;
     service.didChangeAppLifecycleState(AppLifecycleState.resumed);
-    now = now.add(const Duration(seconds: 5));
-    await tester.pump(const Duration(seconds: 5));
+    await advance(tester, const Duration(seconds: 5));
     expect(sent, hasLength(1));
   });
 
-  testWidgets('opt-out cancels an already scheduled retry', (tester) async {
+  inventoryWidgetTest('opt-out cancels an already scheduled retry', (tester) async {
     fail = true;
     await service.poll();
     await service.setEnabled(false);
     fail = false;
-    now = now.add(const Duration(hours: 2));
-    await tester.pump(const Duration(hours: 2));
+    await advance(tester, const Duration(hours: 2));
     expect(sent, isEmpty);
     expect(service.status.value, InventoryReportStatus.disabled);
   });
 
-  testWidgets('a quick foreground return does not reinterpret cancelled work as failure', (tester) async {
+  inventoryWidgetTest('a quick foreground return does not reinterpret cancelled work as failure', (tester) async {
     await service.initialize();
     gate = Completer<void>();
     final pending = service.poll();
@@ -219,17 +227,15 @@ void main() {
     expect(service.failureCode.value, isNull);
     gate = null;
     fail = false;
-    now = now.add(const Duration(seconds: 5));
-    await tester.pump(const Duration(seconds: 5));
+    await advance(tester, const Duration(seconds: 5));
     expect(sent, hasLength(1));
   });
 
-  testWidgets('a lagging duplicate receipt cannot create a zero-delay reporting loop', (tester) async {
+  inventoryWidgetTest('a lagging duplicate receipt cannot create a zero-delay reporting loop', (tester) async {
     acknowledgement = {'ok': true, 'accepted': false, 'acknowledged': true,
       'refreshId': refresh, 'reportedAt': now.subtract(const Duration(days: 2)).millisecondsSinceEpoch ~/ 1000};
     await service.poll();
-    now = now.add(const Duration(minutes: 1));
-    await tester.pump(const Duration(minutes: 1));
+    await advance(tester, const Duration(minutes: 1));
     expect(sent, hasLength(1));
     expect(service.nextAttemptAt.value!.isAfter(now), isTrue);
   });

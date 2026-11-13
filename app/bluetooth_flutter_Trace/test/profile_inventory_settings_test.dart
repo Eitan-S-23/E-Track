@@ -34,13 +34,20 @@ void main() {
     );
   });
 
-  tearDown(() async {
+  tearDown(() {
     inventory.onClose();
-    await Get.reset();
+    Get.reset();
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(const MethodChannel('trace/app_update'), null);
     expect(requests, 0);
   });
+
+  void settingsTest(String description, WidgetTesterCallback body) {
+    testWidgets(description, (tester) async {
+      addTearDown(inventory.onClose);
+      await body(tester);
+    });
+  }
 
   Future<void> openSettings(
     WidgetTester tester, {
@@ -86,7 +93,7 @@ void main() {
 
   for (final brightness in Brightness.values) {
     for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
-      testWidgets('statistics consent stays readable for $brightness / $platform',
+      settingsTest('statistics consent stays readable for $brightness / $platform',
           (tester) async {
         await openSettings(tester, brightness: brightness, platform: platform);
         expect(renderedTextColor(tester, '参与版本统计'), TraceColors.text);
@@ -133,7 +140,7 @@ void main() {
     }
   }
 
-  testWidgets('saved opt-out is displayed without enabling reporting', (tester) async {
+  settingsTest('saved opt-out is displayed without enabling reporting', (tester) async {
     SharedPreferences.setMockInitialValues({preference: false});
     await openSettings(tester);
     expect(tester.widget<SwitchListTile>(find.byKey(toggleKey)).value, isFalse);
@@ -144,7 +151,7 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
-  testWidgets('loading state is readable and cannot change consent', (tester) async {
+  settingsTest('loading state is readable and cannot change consent', (tester) async {
     await openSettings(tester);
     inventory.ready.value = false;
     await tester.pump();
@@ -166,7 +173,7 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
-  testWidgets('reporting status updates without dimming the opt-in label', (tester) async {
+  settingsTest('reporting status updates without dimming the opt-in label', (tester) async {
     await openSettings(tester);
     inventory.status.value = InventoryReportStatus.busy;
     await tester.pump();
@@ -185,7 +192,7 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
-  testWidgets('narrow settings dialog supports large text without overflow', (tester) async {
+  settingsTest('narrow settings dialog supports large text without overflow', (tester) async {
     await openSettings(tester, width: 320);
     tester.platformDispatcher.textScaleFactorTestValue = 2;
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);

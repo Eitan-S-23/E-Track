@@ -164,11 +164,15 @@ class VersionInventoryService extends GetxService with WidgetsBindingObserver {
 
   void _arm(DateTime when) {
     if (_closed || !_foreground || !_supported || endpoint == null ||
-        (ready.value && !enabled.value)) return;
+        (ready.value && !enabled.value)) {
+      return;
+    }
     if (_retryAfter != null && _retryAfter!.isAfter(when)) when = _retryAfter!;
     // Keep the earliest wake-up so repeated identity events cannot starve it.
     if ((_deferred?.isActive ?? false) && nextAttemptAt.value != null &&
-        !nextAttemptAt.value!.isAfter(when)) return;
+        !nextAttemptAt.value!.isAfter(when)) {
+      return;
+    }
     _deferred?.cancel();
     nextAttemptAt.value = when;
     final delay = when.difference(_clock().toUtc());
