@@ -4,11 +4,40 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
   const toast = document.querySelector("#taskToast");
   const active = job => !["ready", "failed"].includes(job.status);
   let actor = null, data = null, loading = false, error = "", timer = null, page = 0;
-  let generation = 0, pushInfo = null, pushBusy = false, toastTimer = null;
+  let generation = 0, pushInfo = null, pushBusy = false, pushChecking = false, pushRevision = 0, pushError = "", toastTimer = null;
   const readLocal = key => { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } };
   const saveLocal = (key,value) => { try { localStorage.setItem(key,JSON.stringify(value)); } catch { /* Server history still works without local storage. */ } };
   const key = suffix => `trace-admin-tasks:${actor}:${suffix}`;
   function supported() { return isSecureContext && "Notification" in window && "serviceWorker" in navigator && "PushManager" in window; }
+  const keyBytes = value => Uint8Array.from(atob(value.replace(/-/g,"+").replace(/_/g,"/")+"="),c=>c.charCodeAt(0));
+  function matchingKey(subscription, publicKey) {
+    const existing = subscription.options?.applicationServerKey;
+    if (!existing) return true;
+    const expected = keyBytes(publicKey), actual = new Uint8Array(existing);
+    return expected.length === actual.length && expected.every((byte,index)=>byte === actual[index]);
+  }
+  async function subscriptionId(subscription) {
+    const digest = await crypto.subtle.digest("SHA-256",new TextEncoder().encode(subscription.endpoint));
+    return [...new Uint8Array(digest)].map(byte=>byte.toString(16).padStart(2,"0")).join("");
+  }
+  async function reconcilePush(value, current, revision) {
+    const unchanged = ()=>current === generation && revision === pushRevision && !pushBusy;
+    if (!unchanged()) return;
+    if (!supported() || Notification.permission !== "granted" || !value.pushPublicKey) { pushInfo = null; return; }
+    pushChecking = true; render();
+    try {
+      const registration = await navigator.serviceWorker.getRegistration("/");
+      const subscription = await registration?.pushManager.getSubscription();
+      const id = subscription && matchingKey(subscription,value.pushPublicKey) ? await subscriptionId(subscription) : null;
+      const registered = value.pushSubscriptions?.find(row=>row.id === id && row.expiresAt > Date.now()/1000);
+      if (unchanged()) pushInfo = registered ? {id:registered.id,expiresAt:registered.expiresAt} : null;
+    } catch (e) {
+      if (unchanged()) {
+        pushInfo = null;
+        pushError = text("暂时无法核对浏览器订阅，未更改已有订阅。", "Unable to check the browser subscription. Existing subscriptions were not changed.") + " " + e.message;
+      }
+    } finally { if (unchanged()) { pushChecking = false; render(); } }
+  }
   function phase(job) {
     return ({ dispatching: text("正在提交", "Submitting"), queued: text("等待构建 / 审批", "Queued / awaiting approval"),
       dispatch_unknown: text("提交结果未知，请核对", "Dispatch uncertain; reconcile"),
@@ -54,11 +83,14 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
     const enabled = supported() && Notification.permission === "granted" && pushInfo?.expiresAt > Date.now()/1000;
     const pushText = !supported() ? text("此浏览器不支持后台系统提醒，结果仍保留在这里。", "This browser does not support background push. Results remain here.")
       : Notification.permission === "denied" ? text("浏览器已阻止通知，可在网站权限中允许；任务照常生成。", "Notifications are blocked in site settings. Builds are unaffected.")
-      : enabled ? text("已开启后台提醒。系统省电或浏览器限制可能延迟通知。", "Background alerts enabled. Browser or battery policies can delay delivery.")
+      : pushChecking ? text("正在核对浏览器与服务器的推送订阅...", "Checking browser and server push subscriptions...")
+      : enabled ? text("已开启提醒，浏览器与服务器订阅已核对。系统或浏览器限制仍可能阻止通知。", "Alerts enabled; browser and server subscriptions match. Browser or OS policies can still block notifications.")
+      : Notification.permission === "granted" ? text("浏览器已允许通知，但尚未确认有效的推送订阅。请点击开启提醒。", "Browser permission is allowed, but no matching push subscription is confirmed. Select Enable alerts.")
       : text("开启系统提醒后，切到后台也可接收结果。首次需要允许浏览器通知。", "Enable system alerts for background results. Browser permission is required once.");
     page = Math.max(0,Math.min(page,Math.ceil(jobs.length/8)-1));
-    content.innerHTML = `<section class="task-notification-settings"><div><strong>${escape(text("系统提醒", "System alerts"))}</strong><p>${escape(pushText)}</p></div>
-      <button type="button" class="secondary-button" data-task-action="${enabled ? "push-off" : "push-on"}" ${pushBusy || !supported() || !data?.pushPublicKey || (!enabled && Notification.permission === "denied") ? "disabled" : ""}>${escape(enabled ? text("关闭提醒", "Turn off") : text("开启提醒", "Enable alerts"))}</button></section>
+    content.innerHTML = `<section class="task-notification-settings"><div><strong>${escape(text("系统提醒", "System alerts"))}</strong><p>${escape(pushText)}</p>
+      ${pushError ? `<p class="error" role="alert">${escape(pushError)}</p>` : ""}</div>
+      <button type="button" class="secondary-button" data-task-action="${enabled ? "push-off" : "push-on"}" ${pushBusy || pushChecking || !supported() || !data?.pushPublicKey || (!enabled && Notification.permission === "denied") ? "disabled" : ""}>${escape(enabled ? text("关闭提醒", "Turn off") : text("开启提醒", "Enable alerts"))}</button></section>
       ${data && !data.pushPublicKey ? `<p class="firmware-hint">${escape(text("服务器推送尚未配置，站内通知仍可使用。", "Server push is not configured. In-app notifications still work."))}</p>` : ""}
       <div class="operations-buttons task-toolbar"><button type="button" class="secondary-button" data-task-action="refresh" ${loading ? "disabled" : ""}>${escape(text("刷新", "Refresh"))}</button>
       <button type="button" class="secondary-button" data-task-action="read" ${!unread || loading ? "disabled" : ""}>${escape(text("全部标为已读", "Mark all read"))}</button><span>${running} ${escape(text("进行中", "active"))} · ${unread} ${escape(text("未读", "unread"))}</span></div>
@@ -82,7 +114,7 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
   }
   async function refresh() {
     if (!actor || loading) return;
-    const current = generation, identity = actor;
+    const current = generation, identity = actor, pushSnapshot = pushRevision;
     loading = true; render();
     try {
       const value = await api("/api/admin/delta/activity");
@@ -92,9 +124,9 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
       }
       if (value.ok !== true || value.actor !== identity || value.scope !== "own-jobs" || !Array.isArray(value.jobs) || !Array.isArray(value.notifications)) throw new Error(text("任务状态读取失败", "Invalid task response"));
       data = value; error = "";
-      if (pushInfo && !pushBusy && !value.pushSubscriptions?.some(row=>row.id === pushInfo.id)) {
-        pushInfo = null; saveLocal(key("push"),null);
-      }
+      // A response started before a subscription change cannot undo its result.
+      await reconcilePush(value,current,pushSnapshot);
+      if (current !== generation) return;
       const last = Number(readLocal(key("noticed")) ?? 0);
       const fresh = value.notifications.filter(n=>n.unread && n.id > last);
       if (fresh.length) {
@@ -106,25 +138,41 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
     finally { if (current === generation) { loading = false; render(); schedule(); } }
   }
   async function enablePush() {
-    if (!supported() || !data?.pushPublicKey || pushBusy) return;
-    const current = generation;
-    // Permission is requested in the user's click, not on page load or during a build.
-    const permission = await Notification.requestPermission();
-    if (current !== generation || permission !== "granted") { render(); return; }
-    pushBusy = true; error = ""; render();
+    if (!supported() || !data?.pushPublicKey || pushBusy || pushChecking) return;
+    const current = generation, publicKey = data.pushPublicKey;
+    pushRevision++; pushBusy = true; pushError = ""; render();
+    let stage = "permission";
     try {
+      // Permission is requested only from the user's click, never from a poll.
+      const permission = Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
+      if (current !== generation || permission !== "granted") return;
+      stage = "worker";
       const registration = await navigator.serviceWorker.register("/admin-sw.js",{scope:"/",updateViaCache:"none"});
       await navigator.serviceWorker.ready;
       let subscription = await registration.pushManager.getSubscription();
       if (current !== generation) return;
-      if (subscription && !pushInfo) { await subscription.unsubscribe(); subscription = null; }
-      subscription ??= await registration.pushManager.subscribe({userVisibleOnly:true,
-        applicationServerKey:Uint8Array.from(atob(data.pushPublicKey.replace(/-/g,"+").replace(/_/g,"/")+"="),c=>c.charCodeAt(0))});
+      stage = "provider";
+      if (subscription && !matchingKey(subscription,publicKey)) throw new Error(text(
+        "浏览器保留了使用不同密钥的订阅。请在网站通知设置中取消旧授权后重新允许；已有订阅未被自动取消。",
+        "The browser subscription uses a different key. Reset this site's notification permission, then allow it again. The existing subscription was not automatically removed."));
+      subscription ??= await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:keyBytes(publicKey)});
       if (current !== generation) return;
-      const result = await mutate("/api/admin/delta/notifications/subscribe",{endpoint:subscription.endpoint,applicationServerKey:data.pushPublicKey});
+      stage = "server";
+      const expectedId = await subscriptionId(subscription);
       if (current !== generation) return;
-      pushInfo = {id:result.id,expiresAt:result.expiresAt}; saveLocal(key("push"),pushInfo);
-    } catch (e) { if (current === generation) error = e.message; }
+      const result = await mutate("/api/admin/delta/notifications/subscribe",{endpoint:subscription.endpoint,applicationServerKey:publicKey});
+      if (current !== generation) return;
+      if (result.ok !== true || result.id !== expectedId || !(result.expiresAt > Date.now()/1000)) throw new Error(text("后台未返回有效订阅确认。", "The server did not confirm a valid subscription."));
+      pushInfo = {id:result.id,expiresAt:result.expiresAt};
+    } catch (e) {
+      if (current === generation) {
+        const detail = String(e.message ?? e);
+        pushError = /Registration failed.*push service error/i.test(detail)
+          ? text("浏览器向推送服务注册失败，系统提醒尚未开启。请检查浏览器及网络；差分任务和站内结果不受影响。", "Browser registration with the push service failed. System alerts are not enabled. Check the browser and network; builds and in-app results are unaffected.") + " " + detail
+          : (stage === "server" ? text("浏览器订阅已保留，但后台登记未成功；再次开启会复用订阅，不会重发构建。", "The browser subscription was preserved, but server registration failed. Enabling again reuses it and never restarts builds.")
+            : text("系统提醒设置未完成，差分任务不受影响。", "System alert setup did not complete. Delta builds are unaffected.")) + " " + detail;
+      }
+    }
     finally { if (current === generation) { pushBusy = false; render(); } }
   }
   content.addEventListener("click", async event => {
@@ -133,21 +181,23 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
     if (target.dataset.taskTarget) { openTarget(target.dataset.taskKind,target.dataset.taskTarget); return; }
     const action = target.dataset.taskAction;
     if (action === "push-on") { await enablePush(); return; }
+    const current = generation;
     try {
       if (action === "refresh") await refresh();
       if (action === "prev" || action === "next") { page += action === "prev" ? -1 : 1; render(); }
       if (action === "read") {
         await mutate("/api/admin/delta/notifications/read",{throughId:Math.max(0,...(data?.notifications ?? []).map(n=>n.id))}); await refresh();
       }
-      if (action === "push-off" && pushInfo && !pushBusy) {
-        pushBusy = true; render();
+      if (action === "push-off" && pushInfo && !pushBusy && !pushChecking) {
+        pushRevision++; pushBusy = true; pushError = ""; render();
         await mutate("/api/admin/delta/notifications/unsubscribe",{id:pushInfo.id});
+        if (current !== generation) return;
+        pushInfo = null;
         const registration = await navigator.serviceWorker.getRegistration("/");
         await (await registration?.pushManager.getSubscription())?.unsubscribe();
-        pushInfo = null; saveLocal(key("push"),null);
       }
-    } catch (e) { error = e.message; }
-    finally { pushBusy = false; render(); }
+    } catch (e) { if (current === generation) { if (action === "push-off") pushError = e.message; else error = e.message; } }
+    finally { if (current === generation) { if (action === "push-off") pushBusy = false; render(); } }
   });
   toast.querySelector("button").addEventListener("click",()=>{ openPanel(); toast.hidden = true; });
   document.addEventListener("visibilitychange",()=>{ if (!document.hidden) refresh(); else schedule(); });
@@ -159,9 +209,9 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
   });
   function setActor(value) {
     if (actor === value) { refresh(); return; }
-    actor = value; generation++; data = null; loading = false; error = ""; page = 0; pushBusy = false;
+    actor = value; generation++; data = null; loading = false; error = ""; page = 0; pushBusy = false; pushChecking = false; pushError = "";
     clearTimeout(timer); toast.hidden = true;
-    pushInfo = actor ? readLocal(key("push")) : null;
+    pushInfo = null;
     render(); if (actor) refresh();
   }
   return { refresh, render, setActor, progress, phase };

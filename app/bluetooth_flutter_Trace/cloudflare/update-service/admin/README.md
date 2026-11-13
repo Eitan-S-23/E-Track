@@ -83,6 +83,22 @@ proof of OS delivery or a real package generation. The Windows Headless Shell
 denies notification permission, so real vendor/OS delivery remains a separate check
 in a supported browser after its user grants notification permission.
 
+Push enrollment has three separate boundaries: notification permission, the
+browser's actual PushManager subscription, and the actor-bound server record.
+An enabled label requires the latter two to match by endpoint SHA-256 with a
+current expiry. A cached localStorage flag is not evidence of registration.
+Page load/refresh checks subscriptions without requesting permission or changing
+them. Explicit Enable reuses an existing matching-key browser subscription;
+missing local/server metadata must never cause automatic unsubscribe.
+
+Activity responses are tied to the subscription revision at request start so
+an older response cannot undo a later successful enable/disable. Task refresh
+cannot release another pending enrollment's busy lock. Browser/provider and
+server-registration errors remain in the reminder settings independently of
+task-fetch errors; successful task polling must not hide an enrollment failure.
+The enrollment regressions in `test/version-operations.spec.ts` mock the browser
+push boundary explicitly and do not establish actual vendor/OS delivery.
+
 The root page loads the current Access session, Android channels, and Android releases. It supports release note edits, beta/stable publish actions, disabling unpublished releases, and viewing R2-ready versus fallback-only asset counts through the API below.
 
 - `GET /api/admin/session`

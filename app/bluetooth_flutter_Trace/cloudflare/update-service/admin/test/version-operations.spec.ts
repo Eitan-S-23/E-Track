@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { test, expect, type Page } from "@playwright/test";
 
 const origin="https://version-operations.test";
@@ -9,10 +10,12 @@ const hash="a".repeat(64);
 type Job={id:string;baseReleaseId:string;baseVersionCode:number;targetVersionCode:number;status:string;enabled:boolean;revision:number;sizeBytes:number;runUrl:string;fileName:string;
   kind?:string;targetReleaseId?:string;phase?:string;createdAt?:number;updatedAt?:number};
 
-export async function setup(page:Page,language="zh",role="owner") {
+export async function setup(page:Page,language="zh",role="owner",push?:{publicKey:string;subscriptions:Array<{id:string;expiresAt:number}>}) {
   const data={role,dispatchConfigured:true,inventoryFails:false,abortCreate:false,inventoryReads:0,
     refreshRequestedAt:0,refreshId:"initial",baseCount:4,jobs:[] as Job[],writes:[] as Array<{path:string;body:Record<string,unknown>}>,
-    notifications:[] as Array<Record<string,unknown>>,unreadCount:0,activityReads:0,activityFails:false,pushPublicKey:null as string|null,createGate:null as Promise<void>|null};
+    notifications:[] as Array<Record<string,unknown>>,unreadCount:0,activityReads:0,activityFails:false,pushPublicKey:null as string|null,
+    pushSubscriptions:[] as Array<{id:string;expiresAt:number}>,pushRegisterFails:false,activityGate:null as Promise<void>|null,createGate:null as Promise<void>|null};
+  if(push){data.pushPublicKey=push.publicKey;data.pushSubscriptions=push.subscriptions;}
   await page.addInitScript(lang=>localStorage.setItem("trace-admin-language",lang),language);
   const errors:string[]=[];page.on("pageerror",error=>errors.push(error.message));
   let serial=0;
@@ -29,7 +32,10 @@ export async function setup(page:Page,language="zh",role="owner") {
       if(url.pathname==="/api/admin/delta/activity") {
         data.activityReads++;
         if(data.activityFails){await reply({ok:false,message:"Activity unavailable"},503);return;}
-        await reply({ok:true,actor:`${data.role}@example.test`,scope:"own-jobs",jobs:data.jobs,notifications:data.notifications,unreadCount:data.unreadCount,pushPublicKey:data.pushPublicKey});return;
+        const snapshot={ok:true,actor:`${data.role}@example.test`,scope:"own-jobs",jobs:data.jobs,notifications:data.notifications,
+          unreadCount:data.unreadCount,pushPublicKey:data.pushPublicKey,pushSubscriptions:[...data.pushSubscriptions]};
+        if(data.activityGate) await data.activityGate;
+        await reply(snapshot);return;
       }
       if(url.pathname==="/api/admin/session"){await reply({ok:true,role:data.role,actor:`${data.role}@example.test`,csrfToken:"version-csrf",appId:"trace",environment:"MOCK"});return;}
       if(url.pathname==="/api/admin/version-inventory") {
@@ -61,6 +67,14 @@ export async function setup(page:Page,language="zh",role="owner") {
     expect(request.headers()["content-type"]).toBe("application/json");
     const body=request.postDataJSON() as Record<string,unknown>;
     data.writes.push({path:url.pathname,body});
+    if(url.pathname==="/api/admin/delta/notifications/subscribe") {
+      if(data.pushRegisterFails){await reply({ok:false,errorCode:"BACKEND_UNAVAILABLE",message:"Subscription registration unavailable"},503);return;}
+      const entry={id:createHash("sha256").update(String(body.endpoint)).digest("hex"),expiresAt:Math.floor(Date.now()/1000)+86400};
+      data.pushSubscriptions=[entry];await reply({ok:true,...entry});return;
+    }
+    if(url.pathname==="/api/admin/delta/notifications/unsubscribe") {
+      data.pushSubscriptions=data.pushSubscriptions.filter(row=>row.id!==body.id);await reply({ok:true});return;
+    }
     if(url.pathname==="/api/admin/delta/notifications/read") {
       data.unreadCount=0; data.notifications.forEach(n=>n.unread=0); await reply({ok:true});return;
     }
@@ -306,6 +320,107 @@ test("notification permission is requested only by a click and denial never star
   await page.locator('[data-task-action="push-on"]').click();
   await expect(page.locator("#taskContent")).toContainText("浏览器已阻止通知");
   await expect(page.locator('[data-task-action="push-on"]')).toBeDisabled();expect(data.writes).toHaveLength(0);
+});
+
+const pushEndpoint="https://fcm.googleapis.com/fcm/send/mock-enrollment";
+const pushPublicKey="B".repeat(87);
+const pushId=createHash("sha256").update(pushEndpoint).digest("hex");
+async function mockBrowserPush(page:Page,existing=false,fail=false) {
+  await page.addInitScript(({endpoint,publicKey,existing,fail})=>{
+    const calls={register:0,subscribe:0,unsubscribe:0,permission:0};
+    const state={pause:false,release:null as (()=>void)|null};
+    let present=existing;
+    const subscription={endpoint,options:{applicationServerKey:Uint8Array.from(atob(publicKey+"="),c=>c.charCodeAt(0)).buffer},
+      unsubscribe:async()=>{calls.unsubscribe++;present=false;return true;}};
+    const registration={active:{state:"activated"},pushManager:{getSubscription:async()=>present?subscription:null,
+      subscribe:async()=>{calls.subscribe++;if(state.pause) await new Promise<void>(resolve=>{state.release=resolve;});
+        if(fail) throw new DOMException("Registration failed - push service error","AbortError");present=true;return subscription;}}};
+    Object.defineProperty(window,"Notification",{configurable:true,value:{permission:"granted",
+      requestPermission:async()=>{calls.permission++;return "granted";}}});
+    Object.defineProperty(window,"PushManager",{configurable:true,value:function(){}});
+    Object.defineProperty(navigator,"serviceWorker",{configurable:true,value:{
+      ready:Promise.resolve(registration),register:async()=>{calls.register++;return registration;},getRegistration:async()=>registration,addEventListener(){}}});
+    Object.assign(window,{pushMockCalls:calls,pushMockState:state});
+  },{endpoint:pushEndpoint,publicKey:pushPublicKey,existing,fail});
+}
+
+test("push enrollment restores a registered browser without relying on local storage",async({page})=>{
+  await mockBrowserPush(page,true);const {data,errors}=await setup(page);data.pushPublicKey=pushPublicKey;
+  data.pushSubscriptions=[{id:pushId,expiresAt:Math.floor(Date.now()/1000)+86400}];
+  await page.locator("#taskButton").click();await expect(page.locator('[data-task-action="push-off"]')).toBeVisible();
+  expect(await page.evaluate("pushMockCalls")).toMatchObject({register:0,subscribe:0,unsubscribe:0,permission:0});
+  expect(data.writes).toHaveLength(0);expect(errors).toEqual([]);
+});
+
+test("push enrollment reuses a live browser subscription when the server registration is missing",async({page})=>{
+  await mockBrowserPush(page,true,true);const {data}=await setup(page);data.pushPublicKey=pushPublicKey;
+  await page.locator("#taskButton").click();await page.locator('[data-task-action="push-on"]').click();
+  await expect(page.locator('[data-task-action="push-off"]')).toBeVisible();
+  expect(await page.evaluate("pushMockCalls")).toMatchObject({subscribe:0,unsubscribe:0});
+  expect(data.writes.map(row=>row.path)).toEqual(["/api/admin/delta/notifications/subscribe"]);
+});
+
+test("push enrollment ignores an activity response captured before successful registration",async({page})=>{
+  await mockBrowserPush(page);const {data}=await setup(page);data.pushPublicKey=pushPublicKey;
+  await page.locator("#taskButton").click();await expect(page.locator('[data-task-action="push-on"]')).toBeEnabled();
+  let release!:()=>void;data.activityGate=new Promise<void>(resolve=>{release=resolve;});
+  const before=data.activityReads;await page.evaluate(()=>window.dispatchEvent(new Event("online")));
+  await expect.poll(()=>data.activityReads).toBeGreaterThan(before);
+  await page.locator('[data-task-action="push-on"]').click();await expect(page.locator('[data-task-action="push-off"]')).toBeVisible();
+  data.activityGate=null;release();await expect(page.locator('[data-task-action="refresh"]')).toBeEnabled();
+  await expect(page.locator('[data-task-action="push-off"]')).toBeVisible();
+  expect(await page.evaluate("pushMockCalls")).toMatchObject({subscribe:1,unsubscribe:0});
+  expect(data.writes).toHaveLength(1);
+});
+
+test("push enrollment reports provider registration failure separately and retains it on task refresh",async({page})=>{
+  await mockBrowserPush(page,false,true);const {data}=await setup(page);data.pushPublicKey=pushPublicKey;
+  await page.locator("#taskButton").click();await page.locator('[data-task-action="push-on"]').click();
+  const error=page.locator('.task-notification-settings [role="alert"]');
+  await expect(error).toContainText("Registration failed - push service error");
+  await expect(error).toContainText("推送服务");await expect(error).not.toContainText("上次状态已保留");
+  await page.locator('[data-task-action="refresh"]').click();await expect(error).toContainText("Registration failed");
+  await expect(page.locator('[data-task-action="push-off"]')).toHaveCount(0);
+  expect(data.writes).toHaveLength(0);
+});
+
+test("push enrollment does not trust a cached enabled flag when the browser subscription disappeared",async({page})=>{
+  await mockBrowserPush(page);await page.addInitScript(({id})=>localStorage.setItem("trace-admin-tasks:owner@example.test:push",
+    JSON.stringify({id,expiresAt:Math.floor(Date.now()/1000)+86400})),{id:pushId});
+  const {data}=await setup(page,"zh","owner",{publicKey:pushPublicKey,subscriptions:[{id:pushId,expiresAt:Math.floor(Date.now()/1000)+86400}]});
+  await page.locator("#taskButton").click();await expect(page.locator('[data-task-action="refresh"]')).toBeEnabled();
+  await expect(page.locator('[data-task-action="push-off"]')).toHaveCount(0);
+  expect(await page.evaluate("pushMockCalls")).toMatchObject({subscribe:0,unsubscribe:0});expect(data.writes).toHaveLength(0);
+});
+
+test("push enrollment keeps a pending setup locked while task refresh finishes",async({page})=>{
+  await mockBrowserPush(page);const {data}=await setup(page);data.pushPublicKey=pushPublicKey;
+  await page.locator("#taskButton").click();await page.evaluate("pushMockState.pause=true");
+  await page.locator('[data-task-action="push-on"]').click();await expect.poll(()=>page.evaluate("pushMockCalls.subscribe")).toBe(1);
+  const reads=data.activityReads;await page.locator('[data-task-action="refresh"]').click();
+  await expect.poll(()=>data.activityReads).toBeGreaterThan(reads);await expect(page.locator('[data-task-action="refresh"]')).toBeEnabled();
+  await expect(page.locator('[data-task-action="push-on"]')).toBeDisabled();
+  await page.evaluate("pushMockState.release()");await expect(page.locator('[data-task-action="push-off"]')).toBeVisible();
+  expect(data.writes).toHaveLength(1);
+});
+
+test("push enrollment preserves the browser subscription when server registration fails",async({page})=>{
+  await mockBrowserPush(page,true,true);const {data}=await setup(page);data.pushPublicKey=pushPublicKey;data.pushRegisterFails=true;
+  await page.locator("#taskButton").click();await page.locator('[data-task-action="push-on"]').click();
+  await expect(page.locator('.task-notification-settings [role="alert"]')).toContainText("浏览器订阅已保留");
+  data.pushRegisterFails=false;await page.locator('[data-task-action="push-on"]').click();
+  await expect(page.locator('[data-task-action="push-off"]')).toBeVisible();
+  expect(await page.evaluate("pushMockCalls")).toMatchObject({subscribe:0,unsubscribe:0});
+  expect(data.writes.every(row=>row.path==="/api/admin/delta/notifications/subscribe")).toBe(true);
+});
+
+test("push enrollment removes a subscription only after an explicit turn-off action",async({page})=>{
+  await mockBrowserPush(page,true);const {data}=await setup(page,"zh","owner",{publicKey:pushPublicKey,
+    subscriptions:[{id:pushId,expiresAt:Math.floor(Date.now()/1000)+86400}]});
+  await page.locator("#taskButton").click();await expect(page.locator('[data-task-action="push-off"]')).toBeEnabled();
+  await page.locator('[data-task-action="push-off"]').click();await expect(page.locator('[data-task-action="push-on"]')).toBeEnabled();
+  expect(await page.evaluate("pushMockCalls")).toMatchObject({subscribe:0,unsubscribe:1});
+  expect(data.writes.map(row=>row.path)).toEqual(["/api/admin/delta/notifications/unsubscribe"]);
 });
 
 for(const language of ["zh","en"]) for(const width of [320,390]) test(`mobile task toolbar stays on one row ${language} ${width}`,async({page},info)=>{

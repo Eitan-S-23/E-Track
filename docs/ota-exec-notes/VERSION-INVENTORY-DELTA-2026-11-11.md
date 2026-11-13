@@ -619,3 +619,104 @@ click. It is not granted by development authorization. Existing signatures,
 workflow inputs, original artifacts, channel revisions and publication rules stay
 unchanged. Self-tests are not an independent acceptance campaign or proof of
 delivery through every browser vendor/phone notification policy.
+
+### Delivered Interaction Changes And Verification
+
+Implementation `f57a6ffe0d47c6cc4d1713b0fb505d3cf3197f5c` and the final mobile
+toolbar correction `5126f55fb30dab6a850284bcf84fe47589d40966` are delivered on
+`release/candidates`; neither repository's `main` was changed. The follow-up
+changes only Admin CSS and its regression test, so the Worker was not redeployed.
+
+| Original Service | Final Deployment | Source |
+| --- | --- | --- |
+| Admin Pages | `fb6d3526-b092-4b4c-af2d-f103581b44a3` | `5126f55fb30dab6a850284bcf84fe47589d40966` |
+| Worker | `dd3b187a-a237-4650-bf81-7f90949e8424` | `f57a6ffe0d47c6cc4d1713b0fb505d3cf3197f5c` |
+
+App details, MCU details, delta management and Tasks share sheet dismissal:
+downward dragging from scroll-top, downward/left/right header dragging, and
+topmost Back handling. Inputs, nested scrolling, short gestures, multiple touches
+and busy submission retain their guards. Fixed close controls and draft retention
+remain. Closing a sheet never cancels or repeats its server-side build.
+
+The sticky toolbar's Tasks entry shows both App and MCU jobs, real stages,
+elapsed time and unread terminal results. Results survive closing the dialog,
+refresh and background/foreground transitions. Enabling a delta or publishing a
+channel remains an explicit operator action. Migration
+`0009_delta_notifications.sql` was applied and read back; rehearsing against the
+current database backup preserved all original columns/data and created no
+historical notifications. Existing Access/signing bindings were preserved.
+
+All receipts below are under
+`.cache/version-inventory-delta-20261111-01/admin-interactions-20261113-01/`:
+
+- `worker-final-02`: 424 backend tests passed.
+- `ui-final-01`: 163 full Admin UI tests passed.
+- `ui-toolbar-01`: 28 focused follow-up tests passed; these overlap the full suite.
+- `admin-types-final`, `worker-types-final-02` and `binding-types-01`: type checks
+  and current Worker binding generation passed, without modifying source types.
+- `rehearsal-01` and `migration-01`: additive migration rehearsal and live readback.
+- `ci-01` and `ci-02`: source CI `43344133290` and final CI `43345920546` passed;
+  both skipped App/firmware package jobs rather than rebuilding unchanged versions.
+- `live-after-02`: authenticated, read-only checks on the original deployed Admin
+  verified all five CSS/JS asset hashes, App/MCU downward dismissal, Tasks Back,
+  a single mobile toolbar row, no horizontal overflow and no page errors.
+
+Real OS/browser-vendor push delivery is **NOT_OBSERVED**. This SYSTEM headless
+environment denied notification permission; failed full-Chrome attempts are
+preserved. Service-worker tests use the actual worker, native CDP push injection,
+fetch and IndexedDB, but explicitly mock the OS notification sink, including
+closed-page and expired-Access cases. The operator must click Tasks -> Enable
+alerts in a supported browser and grant permission there. In-app durable results
+do not depend on that permission; browser/OS policy can still delay or block push.
+
+Final live reads preserve the user's Beta/Stable 1.0.76+102 publication and enabled
+86 -> 102 App delta. The existing MCU delta remains ready. No package/channel
+mutation, delta generation, APK reinstall, device operation, new review agent or
+four-hour campaign occurred in this interaction task. Empty MCU reporting remains
+unknown coverage, not zero users, and historical P5 obligations remain open.
+
+The closing result and controlled-write audit are in `closeout-01/`. Product
+delivery is already on the source commits above; this final task-note update is
+local follow-up documentation and does not trigger another deployment.
+
+## Notification Enrollment Follow-up, 2026-11-13
+
+The operator reported a successful new 85 -> 102 delta, visible progress and a
+return-to-page result toast, but no background system alert. The reminder state
+subsequently changed, and another Enable click returned
+`Registration failed - push service error`. Do not repeat that delta or its
+upgrade to diagnose browser enrollment.
+
+`admin-interactions-20261113-01/push-observe-01/result.json` records a read-only
+D1 observation at 2026-11-13 02:41:44 UTC: event 1 is the successful 85 -> 102 job,
+completed at 01:53:38 UTC; current subscription and delivery tables are empty.
+The existing sender deletes rejected/expired subscriptions and cascades their
+delivery rows, so this snapshot cannot establish whether an earlier send was
+attempted. Do not invent a push-provider HTTP status or blame phone power policy.
+The reported registration error occurs at the browser/provider boundary before
+the Admin subscription POST; the browser/device and its network remain relevant.
+
+The source investigation independently reproduced missing enrollment coverage:
+the UI treated a cached local record as subscription truth, a late activity read
+could clear a newly successful registration, and explicit re-enable cancelled
+an existing browser subscription solely because that local record was missing.
+These are implicit-state/concurrency assumptions and test-coverage gaps, not
+evidence that a new APK or signing key is needed. The preserved red run
+`push-ui-red-01` has four failing reproductions and one passing control.
+
+The repair checks the actual browser subscription against the actor's server
+records, reuses matching subscriptions without cancelling them, serializes setup
+against refresh, and keeps provider-registration errors separate from task-read
+errors. Permission remains a user click and real system delivery remains an
+unobserved boundary. The initial targeted `push-ui-green-01` passed all five
+cases; the expanded suite also covers pending setup, server-registration failure
+and explicit turn-off. The executable contract is in the Admin README and tests,
+not a new review or hardware acceptance workflow.
+
+The final `push-ui-full-01` run passed all 175 Admin UI tests, including the eight
+enrollment regressions; `push-admin-types-01` passed. `push-live-before-01`
+preserves the actual pre-deployment catalogue: the new 85 -> 102 delta is ready
+and disabled, 86 -> 102 remains enabled, and existing MCU state is unchanged.
+The scoped source/deployment and closing receipts are recorded separately under
+the same interaction directory. No backend schema/Worker change or new device
+test is part of this enrollment repair.
