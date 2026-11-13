@@ -307,3 +307,16 @@ test("notification permission is requested only by a click and denial never star
   await expect(page.locator("#taskContent")).toContainText("浏览器已阻止通知");
   await expect(page.locator('[data-task-action="push-on"]')).toBeDisabled();expect(data.writes).toHaveLength(0);
 });
+
+for(const language of ["zh","en"]) for(const width of [320,390]) test(`mobile task toolbar stays on one row ${language} ${width}`,async({page},info)=>{
+  await page.setViewportSize({width,height:844});await setup(page,language);
+  const controls=await page.locator('#mobileMenu, #languageToggle, #refreshButton, #taskButton').evaluateAll(nodes=>nodes.map(node=>{
+    const box=node.getBoundingClientRect();return {top:box.top,bottom:box.bottom,left:box.left,right:box.right};
+  }));
+  expect(Math.max(...controls.map(r=>r.top))-Math.min(...controls.map(r=>r.top))).toBeLessThan(2);
+  for(const box of controls){expect(box.left).toBeGreaterThanOrEqual(0);expect(box.right).toBeLessThanOrEqual(width);}
+  for(let i=1;i<controls.length;i++)expect(controls[i].left).toBeGreaterThanOrEqual(controls[i-1].right);
+  await expect(page.locator('#taskButton .task-label')).toBeVisible();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.screenshot({path:info.outputPath('mobile-task-toolbar.png'),animations:'disabled'});
+});
