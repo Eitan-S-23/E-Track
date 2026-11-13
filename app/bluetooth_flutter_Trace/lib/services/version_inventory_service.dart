@@ -15,6 +15,8 @@ import '../ota/ota_device_info.dart';
 typedef InventorySender = Future<Map<String, dynamic>> Function(
     Uri uri, Map<String, dynamic>? body, String token, CancelToken cancel);
 
+enum InventoryReportStatus { waiting, busy, sending, reported, retrying, disabled }
+
 /// Optional telemetry, independent of the update or BLE task's success path.
 class VersionInventoryService extends GetxService with WidgetsBindingObserver {
   VersionInventoryService({
@@ -24,6 +26,7 @@ class VersionInventoryService extends GetxService with WidgetsBindingObserver {
     InventorySender? sender,
     DateTime Function()? clock,
     bool? supported,
+    this.runtimeActivity = const [],
   })  : endpoint = endpoint ?? _configuredEndpoint(),
         _sender = sender ?? _send,
         _clock = clock ?? DateTime.now,
@@ -38,8 +41,14 @@ class VersionInventoryService extends GetxService with WidgetsBindingObserver {
   final InventorySender _sender;
   final DateTime Function() _clock;
   final bool _supported;
+  final List<Stream<bool>> runtimeActivity;
+  final List<StreamSubscription<bool>> _activitySubscriptions = [];
   final enabled = true.obs;
   final ready = false.obs;
+  final status = InventoryReportStatus.waiting.obs;
+  final lastReportedAt = Rxn<DateTime>();
+  final nextAttemptAt = Rxn<DateTime>();
+  final failureCode = RxnString();
   bool get available => _supported && endpoint != null;
   final Map<String, Map<String, dynamic>> _devices = {};
   Future<void>? _initialization;
@@ -56,6 +65,7 @@ class VersionInventoryService extends GetxService with WidgetsBindingObserver {
   bool _running = false;
   bool _closed = false;
   bool _foreground = true;
+  bool _pending = false;
 
   static Uri? _configuredEndpoint() {
     const source = ShareLinks.cloudflareUpdateManifestUrl;
@@ -101,6 +111,11 @@ class VersionInventoryService extends GetxService with WidgetsBindingObserver {
     _lastReport = DateTime.tryParse(prefs.getString('${_prefix}reported') ?? '');
     _lastControl = DateTime.tryParse(prefs.getString('${_prefix}control') ?? '');
     _retryAfter = DateTime.tryParse(prefs.getString('${_prefix}retry') ?? '');
+    lastReportedAt.value = _lastReport;
+    failureCode.value = prefs.getString('${_prefix}failure');
+    status.value = !enabled.value ? InventoryReportStatus.disabled
+        : (_retryAfter?.isAfter(_clock().toUtc()) ?? false) ? InventoryReportStatus.retrying
+        : _lastReport != null ? InventoryReportStatus.reported : InventoryReportStatus.waiting;
     try {
       final stored = jsonDecode(prefs.getString('${_prefix}devices') ?? '[]');
       if (stored is List && stored.length <= 4) {
@@ -121,6 +136,11 @@ class VersionInventoryService extends GetxService with WidgetsBindingObserver {
     if (!_supported || endpoint == null) return;
     unawaited(initialize().catchError((Object error) {}));
     WidgetsBinding.instance.addObserver(this);
+    for (final activity in runtimeActivity) {
+      _activitySubscriptions.add(activity.listen((busy) {
+        if (!busy) _schedule();
+      }));
+    }
     _schedule();
   }
 
@@ -131,24 +151,70 @@ class VersionInventoryService extends GetxService with WidgetsBindingObserver {
       _schedule();
     } else {
       _deferred?.cancel();
+      nextAttemptAt.value = null;
       _cancel?.cancel('Reporting deferred until foreground');
     }
   }
 
   void _schedule() {
-    if (_closed || !_supported || endpoint == null) return;
+    _pending = true;
+    if (_running) return;
+    _arm(_clock().toUtc().add(const Duration(seconds: 5)));
+  }
+
+  void _arm(DateTime when) {
+    if (_closed || !_foreground || !_supported || endpoint == null ||
+        (ready.value && !enabled.value)) return;
+    if (_retryAfter != null && _retryAfter!.isAfter(when)) when = _retryAfter!;
+    // Keep the earliest wake-up so repeated identity events cannot starve it.
+    if ((_deferred?.isActive ?? false) && nextAttemptAt.value != null &&
+        !nextAttemptAt.value!.isAfter(when)) return;
     _deferred?.cancel();
-    _deferred = Timer(const Duration(seconds: 5), () { unawaited(poll()); });
+    nextAttemptAt.value = when;
+    final delay = when.difference(_clock().toUtc());
+    _deferred = Timer(delay.isNegative ? Duration.zero : delay, () {
+      _deferred = null;
+      nextAttemptAt.value = null;
+      unawaited(poll());
+    });
+  }
+
+  void _scheduleNext() {
+    if (_closed || !_foreground || !enabled.value) return;
+    if (!canReport()) {
+      status.value = InventoryReportStatus.busy;
+      return; // The runtime's idle event resumes the pending snapshot.
+    }
+    final now = _clock().toUtc();
+    if (_retryAfter?.isAfter(now) ?? false) {
+      _arm(_retryAfter!);
+    } else if (_pending) {
+      _schedule();
+    } else {
+      final control = (_lastControl ?? now).add(_controlInterval);
+      var report = (_lastReport ?? now).add(_day);
+      // Server receipt time can lag the phone clock. Never spin on an old receipt.
+      if (!report.isAfter(now)) report = now.add(_controlInterval);
+      _arm(control.isBefore(report) ? control : report);
+    }
   }
 
   Future<void> setEnabled(bool value) async {
     await initialize();
     enabled.value = value;
     await _prefs!.setBool('${_prefix}enabled', value);
-    if (!value) { _deferred?.cancel(); _cancel?.cancel('Reporting disabled'); }
+    if (!value) {
+      _deferred?.cancel();
+      nextAttemptAt.value = null;
+      status.value = InventoryReportStatus.disabled;
+      _cancel?.cancel('Reporting disabled');
+    }
     else {
       _retryAfter = null;
+      failureCode.value = null;
+      status.value = InventoryReportStatus.waiting;
       await _prefs!.remove('${_prefix}retry');
+      await _prefs!.remove('${_prefix}failure');
       _schedule();
     }
   }
@@ -187,8 +253,12 @@ class VersionInventoryService extends GetxService with WidgetsBindingObserver {
   }
 
   Future<void> poll() async {
-    if (_running || _closed || !_foreground || !_supported || endpoint == null) return;
+    if (_closed || !_foreground || !_supported || endpoint == null) return;
+    if (_running) { _pending = true; return; }
     _running = true;
+    _pending = false;
+    _deferred?.cancel();
+    nextAttemptAt.value = null;
     try {
       await initialize();
       final now = _clock().toUtc();
@@ -198,7 +268,8 @@ class VersionInventoryService extends GetxService with WidgetsBindingObserver {
       final app = _app!;
       if (app['versionCode'] is! int || app['versionName'] is! String ||
           !RegExp(r'^[0-9a-f]{64}$').hasMatch(app['imageSha256']?.toString() ?? '')) {
-        return;
+        _app = null;
+        throw StateError('APP_IDENTITY_UNAVAILABLE');
       }
       final devices = _devices.values.where((d) {
         final age = now.difference(DateTime.parse(d['observedAt'] as String));
@@ -211,41 +282,89 @@ class VersionInventoryService extends GetxService with WidgetsBindingObserver {
       _cancel = CancelToken();
       if (!due && (_lastControl == null || now.difference(_lastControl!) >= _controlInterval)) {
         final result = await _sender(endpoint!.replace(path: '${endpoint!.path}/control'), null, '', _cancel!);
+        if (_closed || !enabled.value || !_foreground || _cancel!.isCancelled) return;
         if (result['refreshId'] is! String) throw StateError('Missing refresh identity');
         due = result['refreshId'] != _refreshId;
         _lastControl = now;
         await _prefs!.setString('${_prefix}control', now.toIso8601String());
       }
-      if (!due || !enabled.value || _closed || !_foreground || !canReport()) return;
+      if (!due) {
+        status.value = _lastReport != null ? InventoryReportStatus.reported : InventoryReportStatus.waiting;
+        return;
+      }
+      if (!enabled.value || _closed || !_foreground || !canReport()) return;
+      status.value = InventoryReportStatus.sending;
       final sequence = (_prefs!.getInt('${_prefix}sequence') ?? 0) + 1;
       await _prefs!.setInt('${_prefix}sequence', sequence);
+      if (_closed || !enabled.value || !_foreground || !canReport() || _cancel!.isCancelled) return;
       final body = <String, dynamic>{'appId': ShareLinks.appId, 'platform': 'android', 'sequence': sequence,
         ...app, 'devices': devices.map((d) {
           final observed = DateTime.parse(d.remove('observedAt') as String);
           return {...d, 'ageSeconds': now.difference(observed).inSeconds};
         }).toList()};
       final result = await _sender(endpoint!, body, _token, _cancel!);
-      if (result['ok'] != true || result['refreshId'] is! String) throw StateError('Invalid inventory acknowledgement');
+      if (_closed || !enabled.value || !_foreground || _cancel!.isCancelled) return;
+      final accepted = result['accepted'] == true;
+      final reportedAt = result['reportedAt'];
+      final validReceipt = reportedAt is int && reportedAt > 0 && reportedAt <= 8640000000000;
+      final receivedSequence = result['sequence'];
+      if (result['ok'] == true && receivedSequence is int &&
+          receivedSequence > sequence && receivedSequence <= 9007199254740991) {
+        await _prefs!.setInt('${_prefix}sequence', receivedSequence);
+      }
+      final acknowledged = accepted || (result['acknowledged'] == true && validReceipt);
+      if (result['ok'] != true || !acknowledged || result['refreshId'] is! String ||
+          (reportedAt != null && !validReceipt)) {
+        throw StateError('REPORT_NOT_ACCEPTED');
+      }
       _refreshId = result['refreshId'] as String;
-      _lastReport = now;
+      _lastReport = validReceipt
+          ? DateTime.fromMillisecondsSinceEpoch(reportedAt * 1000, isUtc: true) : now;
       _lastControl = now;
       _lastState = state;
       _retryAfter = null;
+      lastReportedAt.value = _lastReport;
+      failureCode.value = null;
+      status.value = InventoryReportStatus.reported;
       await _prefs!.setString('${_prefix}refresh', _refreshId);
-      await _prefs!.setString('${_prefix}reported', now.toIso8601String());
+      await _prefs!.setString('${_prefix}reported', _lastReport!.toIso8601String());
       await _prefs!.setString('${_prefix}control', now.toIso8601String());
       await _prefs!.setString('${_prefix}state', state);
       await _prefs!.remove('${_prefix}retry');
-    } catch (_) {
+      await _prefs!.remove('${_prefix}failure');
+    } catch (error) {
+      // Lifecycle/consent cancellation is not a failed endpoint or an hour ban.
+      if (_closed || !_foreground || !enabled.value || (_cancel?.isCancelled ?? false)) return;
       _retryAfter = _clock().toUtc().add(const Duration(hours: 1));
-      try { await _prefs?.setString('${_prefix}retry', _retryAfter!.toIso8601String()); } catch (_) { /* Best-effort telemetry only. */ }
-    } finally { _running = false; _cancel = null; }
+      var code = 'REPORT_UNAVAILABLE';
+      if (error is DioException) {
+        final data = error.response?.data;
+        final serverCode = data is Map ? data['errorCode'] : null;
+        code = serverCode is String && RegExp(r'^[A-Z_]{1,64}$').hasMatch(serverCode)
+            ? serverCode : 'NETWORK_ERROR';
+      } else if (error is StateError &&
+          ['REPORT_NOT_ACCEPTED', 'APP_IDENTITY_UNAVAILABLE'].contains(error.message)) {
+        code = error.message;
+      }
+      failureCode.value = code;
+      status.value = InventoryReportStatus.retrying;
+      try {
+        await _prefs?.setString('${_prefix}retry', _retryAfter!.toIso8601String());
+        await _prefs?.setString('${_prefix}failure', code);
+      } catch (_) { /* Best-effort telemetry only. */ }
+    } finally {
+      _running = false;
+      _cancel = null;
+      _scheduleNext();
+    }
   }
 
   @override
   void onClose() {
     _closed = true;
     _deferred?.cancel();
+    nextAttemptAt.value = null;
+    for (final subscription in _activitySubscriptions) { unawaited(subscription.cancel()); }
     _cancel?.cancel('Reporting service closed');
     if (_supported && endpoint != null) WidgetsBinding.instance.removeObserver(this);
     super.onClose();

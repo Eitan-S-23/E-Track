@@ -506,7 +506,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
     final canInstall = await _canRequestPackageInstalls();
     if (!canInstall) {
       if (showMessage) {
-        Get.snackbar('仍需授权', '安装包已保留，请开启安装未知应用权限后返回 Trace');
+        Get.snackbar('仍需授权', '安装包已保留，请开启安装未知应用权限后返回 ${ShareLinks.appName}');
       }
       return;
     }
@@ -525,12 +525,12 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
         _markInstallerReadyForForegroundRetry();
       }
       if (!launched && showMessage) {
-        Get.snackbar('安装包已就绪', '请点按通知里的“继续安装”，或再次回到 Trace 自动打开系统安装器');
+        Get.snackbar('安装包已就绪', '请点按通知里的“继续安装”，或再次回到 ${ShareLinks.appName} 自动打开系统安装器');
       }
     } on PlatformException catch (e) {
       if (e.code == _unknownAppSourcesCode) {
         if (showMessage) {
-          Get.snackbar('仍需授权', '安装包已保留，请开启安装未知应用权限后返回 Trace');
+          Get.snackbar('仍需授权', '安装包已保留，请开启安装未知应用权限后返回 ${ShareLinks.appName}');
         }
         return;
       }
@@ -554,7 +554,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
 
   void _markInstallerReadyForForegroundRetry() {
     updateProgress.value = 1;
-    updateStatus.value = '安装包已就绪，请点按通知或回到 Trace 继续安装';
+    updateStatus.value = '安装包已就绪，请点按通知或回到 ${ShareLinks.appName} 继续安装';
     unawaited(_showInstallReadyNotification());
   }
 
@@ -604,7 +604,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
       await _openInstaller(apkPath);
     } on PlatformException catch (e) {
       if (e.code == _unknownAppSourcesCode) {
-        Get.snackbar('需要授权', '请开启安装未知应用权限，返回 Trace 后会自动继续安装');
+        Get.snackbar('需要授权', '请开启安装未知应用权限，返回 ${ShareLinks.appName} 后会自动继续安装');
         return true;
       }
       Get.snackbar('安装失败', _formatUpdateFailure(e));
@@ -973,7 +973,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
     if (failure == null) return;
     if (failure is PlatformException &&
         failure.code == _unknownAppSourcesCode) {
-      Get.snackbar('需要授权', '请开启安装未知应用权限，返回 Trace 后会自动继续安装');
+      Get.snackbar('需要授权', '请开启安装未知应用权限，返回 ${ShareLinks.appName} 后会自动继续安装');
       return;
     }
     _showIncrementalUpdateFailedDialog(
@@ -1076,7 +1076,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
     if (failure == null) return;
     if (failure is PlatformException &&
         failure.code == _unknownAppSourcesCode) {
-      Get.snackbar('需要授权', '请开启安装未知应用权限，返回 Trace 后会自动继续安装');
+      Get.snackbar('需要授权', '请开启安装未知应用权限，返回 ${ShareLinks.appName} 后会自动继续安装');
       return;
     }
     _showFullUpdateFailedDialog(localInfo, updateInfo, error: failure);

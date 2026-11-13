@@ -158,7 +158,7 @@ class DeviceOtaService : Service() {
         })
         val builder = NotificationCompat.Builder(this, DeviceOtaBridge.CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle("Trace device OTA")
+            .setContentTitle("E-Track device OTA")
             .setContentText(if (progress >= 0) "$label: $progress%" else label)
             .setContentIntent(PendingIntent.getActivity(this, 2408, open,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))

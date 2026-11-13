@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:io';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'config/share_links.dart';
 import 'controllers/ble_controller.dart';
 import 'controllers/monitor_controller.dart';
 import 'ota/ota_device_observation.dart';
@@ -77,7 +78,7 @@ class MyApp extends StatelessWidget {
         }
 
         return GetMaterialApp(
-          title: 'BLE 广播接收器',
+          title: ShareLinks.appName,
           theme: ThemeData(
             primarySwatch: Colors.blue,
             fontFamily: 'Roboto',
@@ -118,6 +119,10 @@ class MyApp extends StatelessWidget {
               readAppIdentity: Get.find<AppUpdateService>().getInstalledInventoryIdentity,
               canReport: () => !Get.find<OtaService>().isUpgrading &&
                   !Get.find<AppUpdateService>().isUpdating.value,
+              runtimeActivity: [
+                Get.find<OtaService>().taskActivity,
+                Get.find<AppUpdateService>().isUpdating.stream,
+              ],
             ), permanent: true);
             Get.put(bt_service.BluetoothService(),
                 permanent: true); // 注册跨平台蓝牙服务

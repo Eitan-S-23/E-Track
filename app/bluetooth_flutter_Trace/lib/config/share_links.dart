@@ -2,7 +2,7 @@ class ShareLinks {
   ShareLinks._();
 
   static const String appId = 'trace';
-  static const String appName = 'Trace';
+  static const String appName = 'E-Track';
   static const String appPackageName = 'com.wen.gaia.gaia';
   static const String appSchemeUrl = 'trace://speedometer';
   static const String landingPageUrl = 'https://eitan-s-23.github.io/Trace/';

@@ -147,13 +147,30 @@ class ProfileTabPage extends StatelessWidget {
                 return Column(mainAxisSize: MainAxisSize.min, children: [
                   SwitchListTile.adaptive(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('参与版本统计'),
+                    title: const Text('参与版本统计',
+                        style: TextStyle(color: TraceColors.text, fontWeight: FontWeight.w600)),
+                    activeThumbColor: TraceColors.mint,
+                    activeTrackColor: TraceColors.ocean,
+                    inactiveThumbColor: TraceColors.muted,
+                    inactiveTrackColor: TraceColors.deep,
                     value: inventory.enabled.value,
                     onChanged: inventory.ready.value
                         ? (value) => unawaited(inventory.setEnabled(value))
                         : null,
                   ),
-                  const Text('低频上报 APP 和已连接设备的版本、文件校验值及去重标识，用于选择差分升级包。不上传位置、联系人或骑行记录。关闭后停止上报，历史记录最多保留 90 天。'),
+                  const Text('低频上报 APP 和已连接设备的版本、文件校验值及去重标识，用于选择差分升级包。不上传位置、联系人或骑行记录。关闭后停止上报，历史记录最多保留 90 天。',
+                      style: TextStyle(color: TraceColors.muted, height: 1.5)),
+                  const SizedBox(height: 12),
+                  Align(alignment: Alignment.centerLeft, child: Text(
+                    switch (inventory.status.value) {
+                      InventoryReportStatus.disabled => '版本统计已关闭',
+                      InventoryReportStatus.busy => '等待更新任务结束后上报',
+                      InventoryReportStatus.sending => '正在上报版本信息',
+                      InventoryReportStatus.reported => '最近上报：${inventory.lastReportedAt.value?.toLocal().toString().split('.').first ?? '未上报'}',
+                      InventoryReportStatus.retrying => '上报暂未成功（${inventory.failureCode.value ?? 'UNKNOWN'}），将在前台自动重试',
+                      InventoryReportStatus.waiting => '等待上报版本信息',
+                    }, style: const TextStyle(color: TraceColors.text, fontSize: 13, height: 1.5),
+                  )),
                 ]);
               })
             : const Text('当前平台未启用版本统计。'),

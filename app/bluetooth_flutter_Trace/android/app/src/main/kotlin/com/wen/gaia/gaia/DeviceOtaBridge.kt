@@ -134,7 +134,7 @@ object DeviceOtaBridge {
         if (Build.VERSION.SDK_INT >= 26) {
             val manager = context.getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(NotificationChannel(CHANNEL_ID,
-                "Trace device firmware", NotificationManager.IMPORTANCE_LOW))
+                "E-Track device firmware", NotificationManager.IMPORTANCE_LOW))
             if (manager.getNotificationChannel(CHANNEL_ID)?.importance == NotificationManager.IMPORTANCE_NONE)
                 return "CHANNEL_DISABLED"
         }

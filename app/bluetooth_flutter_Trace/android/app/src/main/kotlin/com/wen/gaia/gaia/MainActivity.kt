@@ -150,7 +150,7 @@ class MainActivity: FlutterActivity() {
         if (!lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
             result.error(
                 "APP_NOT_FOREGROUND",
-                "Trace must be foreground before launching the package installer",
+                "E-Track must be foreground before launching the package installer",
                 null,
             )
             return
