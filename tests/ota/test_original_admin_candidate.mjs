@@ -21,7 +21,8 @@ const firmware = () => ({ ...env(), FIRMWARE_RELEASE_MODE: "original-admin-candi
   INPUT_STAGE_CANDIDATE: "false", INPUT_VERSION_NAME: "3.3.25", INPUT_RELEASE_NOTES: "A real new source version" });
 
 test("bootstrap and tooling/docs-only pushes do not rebuild delivered candidates", () => {
-  const plan = candidatePlan({ ...inputs(), changed: ["docs/original-admin-candidates.md", ".github/workflows/original-admin-candidate.yml"] });
+  const plan = candidatePlan({ ...inputs(), changed: ["docs/original-admin-candidates.md", ".github/workflows/original-admin-candidate.yml",
+    "Simulator/LVGL.Simulator/LVGL.Simulator.vcxproj", "app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/original-app-candidate.template.yml"] });
   assert.equal(plan.app.required, false);
   assert.equal(plan.firmware.required, false);
   assert.equal(plan.channelPublished, false);
@@ -102,7 +103,94 @@ test("both workflow routes keep publication and original secret stores separate"
   assert.equal((app.match(/ota_link_profile\.py --build-profile adaptive-v2-candidate/g) ?? []).length, 2);
   assert.doesNotMatch(app, /dart-define=TRACE_OTA_LINK_PROFILE/);
   assert.doesNotMatch(app, /--clobber|ETRACK_DEV_SIGNING_KEYSTORE|generate-delta|api\/admin\/.*publish/);
+  const android = app.slice(app.indexOf("\n  android:"));
+  assert.match(android, /sparse-checkout-cone-mode: false/);
+  assert.match(android, /minimum=12\*1024\*\*3/);
+  assert.match(android, /cache-disabled: true/);
+  assert.doesNotMatch(android, /sudo|rm -rf \/usr/);
+  assert.match(android, /needs\.windows\.result == 'success' \|\| needs\.admission\.outputs\.resume_android == 'true'/);
 });
+
+function resumeFixture() {
+  const source = "a".repeat(40), workflow = "b".repeat(40);
+  return { source, resume: "456", checkOnly: "false", sourceRun: "123",
+    previous: { id: 456, status: "completed", conclusion: "failure", event: "workflow_dispatch", run_attempt: 1,
+      head_branch: CANDIDATE_BRANCH, path: ".github/workflows/build.yml", head_sha: workflow,
+      display_title: `candidate:${source}:123` },
+    jobs: [{ name: "admission", conclusion: "success" }, { name: "windows", conclusion: "success" },
+      { name: "android", conclusion: "failure", steps: [{ name: "Build original-backend, original-package, BLE V2 APK",
+        status: "in_progress", conclusion: null }] }],
+    releases: [{ id: 789, tag_name: "v1.0.77", draft: true, prerelease: true, target_commitish: workflow,
+      body: `Original Admin candidate from Eitan-S-23/E-Track@${source}. Not channel publication.`,
+      assets: ["ble-monitor-windows.exe", "ble-monitor-windows.zip"].map((name, index) => ({
+        id: 100 + index, name, size: 200 + index, state: "uploaded", digest: "sha256:" + String(index).repeat(64) })) }] };
+}
+
+async function runAppAdmission(fixture) {
+  const template = await readFile(new URL("../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/original-app-candidate.template.yml", import.meta.url), "utf8");
+  const block = template.match(/          script: \|\n([\s\S]*?)\n      - uses: actions\/checkout@v4/);
+  assert.ok(block, "Execute the actual pre-checkout admission script");
+  const script = block[1].split("\n").map(line => line.replace(/^            /, "")).join("\n");
+  const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+  const outputs = {};
+  const listReleases = Symbol("list-releases"), listJobs = Symbol("list-jobs");
+  const github = { rest: { repos: { listReleases,
+    compareCommitsWithBasehead: async () => ({ data: { status: "ahead" } }),
+    getContent: async () => ({ data: { content: Buffer.from("version: 1.0.77+103\n").toString("base64") } }) },
+    actions: { listJobsForWorkflowRun: listJobs, getWorkflowRun: async ({ repo }) => ({ data: repo === "E-Track"
+      ? { event: "push", head_branch: CANDIDATE_BRANCH, head_sha: fixture.source, path: ".github/workflows/original-admin-candidate.yml" }
+      : fixture.previous }) } },
+    paginate: async operation => operation === listReleases ? fixture.releases : operation === listJobs ? fixture.jobs
+      : assert.fail("Unexpected API operation") };
+  await new AsyncFunction("github", "context", "core", "process", script)(github,
+    { repo: { owner: "Eitan-S-23", repo: "Trace" }, ref: `refs/heads/${CANDIDATE_BRANCH}`, sha: "c".repeat(40) },
+    { setOutput: (key, value) => { outputs[key] = value; }, info: () => {} },
+    { env: { SOURCE_SHA: fixture.source, SOURCE_RUN: fixture.sourceRun, CHECK_ONLY: fixture.checkOnly,
+      RESUME_ANDROID_RUN: fixture.resume, GITHUB_RUN_ATTEMPT: "1" } });
+  return outputs;
+}
+
+test("Android-only continuation preserves the exact successful Windows draft", async () => {
+  const fixture = resumeFixture();
+  const outputs = await runAppAdmission(fixture);
+  assert.equal(outputs.resume_android, "true");
+  assert.equal(outputs.draft_target, fixture.previous.head_sha);
+  assert.equal(outputs.draft_id, "789");
+  assert.deepEqual(JSON.parse(outputs.windows_assets), fixture.releases[0].assets);
+});
+
+test("normal fresh admission remains fresh, and existing unpublished drafts reject it", async () => {
+  const fixture = resumeFixture(); fixture.resume = "";
+  await assert.rejects(runAppAdmission(fixture), /Version already exists/);
+  fixture.releases = [];
+  const outputs = await runAppAdmission(fixture);
+  assert.equal(outputs.resume_android, "false");
+  assert.equal(outputs.draft_target, "c".repeat(40));
+});
+
+for (const [name, mutate] of [
+  ["checks-only", fixture => { fixture.checkOnly = "true"; }],
+  ["invalid run ID", fixture => { fixture.resume = "1e3"; }],
+  ["different source", fixture => { fixture.previous.display_title = "candidate:" + "d".repeat(40) + ":123"; }],
+  ["different source request", fixture => { fixture.previous.display_title = "candidate:" + fixture.source + ":124"; }],
+  ["wrong branch", fixture => { fixture.previous.head_branch = "main"; }],
+  ["repeated original run", fixture => { fixture.previous.run_attempt = 2; }],
+  ["already successful run", fixture => { fixture.previous.conclusion = "success"; }],
+  ["failed Windows build", fixture => { fixture.jobs[1].conclusion = "failure"; }],
+  ["successful APK build", fixture => { fixture.jobs[2].steps[0].conclusion = "success"; }],
+  ["published draft", fixture => { fixture.releases[0].draft = false; }],
+  ["different workflow", fixture => { fixture.releases[0].target_commitish = "e".repeat(40); }],
+  ["different draft source", fixture => { fixture.releases[0].body = "unrelated"; }],
+  ["already retained APK", fixture => { fixture.releases[0].assets.push({ name: "ble-monitor-android.apk" }); }],
+  ["missing Windows digest", fixture => { delete fixture.releases[0].assets[0].digest; }],
+  ["duplicate Windows asset", fixture => { fixture.releases[0].assets[1].name = fixture.releases[0].assets[0].name; }],
+  ["multiple drafts", fixture => { fixture.releases.push(structuredClone(fixture.releases[0])); }]
+]) {
+  test(`reject unsafe Android continuation: ${name}`, async () => {
+    const fixture = resumeFixture(); mutate(fixture);
+    await assert.rejects(runAppAdmission(fixture));
+  });
+}
 
 test("new protected firmware owner uses the existing keyed GCC builder and cleans its private header", async () => {
   const root = fileURLToPath(new URL("../../", import.meta.url));

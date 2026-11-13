@@ -88,3 +88,31 @@ build, R2 upload, registration or channel change. These checks qualify the new
 wiring, not an unexecuted new-version build or device update. The previous
 1.0.76+102 native build, signature and R2 delivery evidence remains the original
 package evidence.
+
+## Android-Only Recovery
+
+The Trace workflow accepts optional `resume_android_run` for an original failed
+run whose Windows job succeeded but whose APK build did not succeed. Keep the
+same `source_sha` and originating E-Track `source_run`; the continuation is a new
+explicit dispatch, not a replay of the source push or the successful Windows job.
+Both Android analysis and tests still run, and original signing, native APK
+inspection, R2 readback and candidate registration remain mandatory.
+
+Admission checks the failed run's source, branch, workflow, first attempt and job
+outcomes, then requires exactly one unpublished source-bound draft containing
+only the two completed Windows assets. Asset IDs, lengths and SHA-256 digests
+are retained as job outputs, rechecked before Android work, and verified against
+the downloaded Windows bytes. A successful APK build, retained APK, published or
+changed draft, missing digest or failed Windows job rejects continuation. No
+existing asset can be overwritten. The draft keeps its original workflow target.
+
+Draft reservations must be checked through `listReleases`, including unpublished
+drafts: `getReleaseByTag` may return 404 for a real draft. Treating that 404 as a
+free version slot can accidentally request a duplicate build.
+
+Android checkout reuses the development workflow's sparse App/test dependency
+set and its 12 GiB pre-SDK disk check. It does not retrieve firmware archives,
+restore two overlapping Gradle caches, delete hosted-machine system directories,
+change dependencies, or purchase a larger runner. Original runner disk failures
+and partial logs remain failures, even when the bounded continuation succeeds.
+Executable admission regressions are in `tests/ota/test_original_admin_candidate.mjs`.

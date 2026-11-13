@@ -1,6 +1,6 @@
 # Install as Trace/.github/workflows/build.yml on release/candidates, not on main.
 name: Original App Automatic Candidate
-run-name: candidate:${{ inputs.source_sha }}:${{ inputs.source_run }}
+run-name: candidate:${{ inputs.source_sha }}:${{ inputs.source_run }}${{ inputs.resume_android_run != '' && format(':android-resume-{0}', inputs.resume_android_run) || '' }}
 on:
   workflow_dispatch:
     inputs:
@@ -16,6 +16,11 @@ on:
         description: Validate source and identity without building or changing any package
         type: boolean
         default: true
+      resume_android_run:
+        description: Failed original run with a successful Windows draft and no successful APK build
+        type: string
+        required: false
+        default: ""
 permissions:
   contents: write
   actions: read
@@ -36,6 +41,10 @@ jobs:
     outputs:
       version_name: ${{ steps.source.outputs.version_name }}
       version_code: ${{ steps.source.outputs.version_code }}
+      resume_android: ${{ steps.source.outputs.resume_android }}
+      draft_id: ${{ steps.source.outputs.draft_id }}
+      draft_target: ${{ steps.source.outputs.draft_target }}
+      windows_assets: ${{ steps.source.outputs.windows_assets }}
     steps:
       - name: Admit trusted source before checkout, code execution or signing
         id: source
@@ -44,9 +53,10 @@ jobs:
           SOURCE_SHA: ${{ inputs.source_sha }}
           SOURCE_RUN: ${{ inputs.source_run }}
           CHECK_ONLY: ${{ inputs.check_only }}
+          RESUME_ANDROID_RUN: ${{ inputs.resume_android_run }}
         with:
           script: |
-            const source=process.env.SOURCE_SHA;
+            const source=process.env.SOURCE_SHA, resume=process.env.RESUME_ANDROID_RUN || '';
             if(context.repo.owner!=='Eitan-S-23'||context.repo.repo!=='Trace'||context.ref!=='refs/heads/release/candidates'
               ||!/^[0-9a-f]{40}$/.test(source)||!/^[1-9][0-9]*$/.test(process.env.SOURCE_RUN)
               ||process.env.GITHUB_RUN_ATTEMPT!=='1') throw new Error('Unexpected candidate owner or request');
@@ -62,18 +72,50 @@ jobs:
             const [,name,code]=matches[0];
             if(!Number.isSafeInteger(Number(code))||Number(code)<102||Number(code)>2100000000) throw new Error('Invalid versionCode');
             const checks=process.env.CHECK_ONLY==='true';
+            if(resume && (checks || !/^[1-9][0-9]*$/.test(resume) || !Number.isSafeInteger(Number(resume)))) {
+              throw new Error('Invalid Android continuation');
+            }
+            let draftTarget=context.sha, draftId='', windowsAssets=[];
             if(!checks) {
               if(Number(code)<=102) throw new Error('Already delivered App version must not be rebuilt');
               const {data:run}=await github.rest.actions.getWorkflowRun({...common,run_id:Number(process.env.SOURCE_RUN)});
               if(run.event!=='push'||run.head_branch!=='release/candidates'||run.head_sha!==source
                 ||run.path!=='.github/workflows/original-admin-candidate.yml') throw new Error('Originating push run mismatch');
-              try {
-                await github.rest.repos.getReleaseByTag({...context.repo,tag:`v${name}`});
-                throw new Error('Version already exists; reconcile it, never overwrite or rebuild');
-              } catch(error) { if(error.status!==404) throw error; }
+              // The by-tag API omits unpublished drafts. List them to preserve reservations.
+              const releases=await github.paginate(github.rest.repos.listReleases,{...context.repo,per_page:100});
+              const matches=releases.filter(release=>release.tag_name===`v${name}`);
+              if(!resume && matches.length) throw new Error('Version already exists; reconcile it, never overwrite or rebuild');
+              if(resume) {
+                const {data:previous}=await github.rest.actions.getWorkflowRun({...context.repo,run_id:Number(resume)});
+                if(previous.status!=='completed'||previous.conclusion!=='failure'||previous.event!=='workflow_dispatch'
+                  ||previous.run_attempt!==1||previous.head_branch!=='release/candidates'||previous.path!=='.github/workflows/build.yml'
+                  ||previous.display_title!==`candidate:${source}:${process.env.SOURCE_RUN}`) throw new Error('Unqualified original failed run');
+                const jobs=await github.paginate(github.rest.actions.listJobsForWorkflowRun,{...context.repo,run_id:previous.id,filter:'latest',per_page:100});
+                const find=name=>jobs.filter(job=>job.name===name);
+                const android=find('android');
+                if(find('admission').length!==1||find('admission')[0].conclusion!=='success'
+                  ||find('windows').length!==1||find('windows')[0].conclusion!=='success'
+                  ||android.length!==1||android[0].conclusion!=='failure') throw new Error('Successful original Windows build required');
+                const build=android[0].steps.find(step=>step.name==='Build original-backend, original-package, BLE V2 APK');
+                if(!build||build.conclusion==='success') throw new Error('A successful APK build must not be rebuilt');
+                if(matches.length!==1) throw new Error('One original Windows-only draft required');
+                const draft=matches[0];
+                if(!draft.draft||!draft.prerelease||draft.target_commitish!==previous.head_sha
+                  ||draft.body!==`Original Admin candidate from Eitan-S-23/E-Track@${source}. Not channel publication.`
+                  ||draft.assets.length!==2) throw new Error('Draft identity or asset set changed');
+                windowsAssets=draft.assets.map(({id,name,size,digest,state})=>({id,name,size,digest,state}));
+                if(new Set(windowsAssets.map(asset=>asset.name)).size!==2
+                  ||!windowsAssets.every(asset=>['ble-monitor-windows.exe','ble-monitor-windows.zip'].includes(asset.name)
+                    &&asset.state==='uploaded'&&Number.isSafeInteger(asset.id)&&asset.id>0&&asset.size>0
+                    &&/^sha256:[a-f0-9]{64}$/.test(asset.digest))) throw new Error('Unverified or partial Windows assets');
+                draftTarget=draft.target_commitish;draftId=String(draft.id);
+              }
             }
             core.setOutput('version_name',name);core.setOutput('version_code',code);
-            core.info(JSON.stringify({source,versionName:name,versionCode:Number(code),checkOnly:checks,channelPublished:false}));
+            core.setOutput('resume_android',String(Boolean(resume)));core.setOutput('draft_id',draftId);
+            core.setOutput('draft_target',draftTarget);core.setOutput('windows_assets',JSON.stringify(windowsAssets));
+            core.info(JSON.stringify({source,versionName:name,versionCode:Number(code),checkOnly:checks,resumeAndroidRun:resume||null,
+              retainedWindowsAssets:windowsAssets,channelPublished:false}));
       - uses: actions/checkout@v4
         with:
           repository: Eitan-S-23/E-Track
@@ -89,7 +131,7 @@ jobs:
 
   windows:
     needs: admission
-    if: inputs.check_only == false
+    if: inputs.check_only == false && needs.admission.outputs.resume_android != 'true'
     runs-on: windows-2022
     timeout-minutes: 35
     defaults:
@@ -140,7 +182,7 @@ jobs:
 
   android:
     needs: [admission, windows]
-    if: inputs.check_only == false
+    if: ${{ !cancelled() && inputs.check_only == false && needs.admission.result == 'success' && (needs.windows.result == 'success' || needs.admission.outputs.resume_android == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     defaults:
@@ -149,6 +191,8 @@ jobs:
     env:
       VERSION_NAME: ${{ needs.admission.outputs.version_name }}
       VERSION_CODE: ${{ needs.admission.outputs.version_code }}
+      CANDIDATE_DRAFT_TARGET: ${{ needs.admission.outputs.draft_target }}
+      RETAINED_WINDOWS_ASSETS: ${{ needs.admission.outputs.windows_assets }}
       TMPDIR: ${{ github.workspace }}/.cache/original-app-candidate/tmp
       npm_config_cache: ${{ github.workspace }}/.cache/original-app-candidate/npm
     steps:
@@ -157,6 +201,55 @@ jobs:
           repository: Eitan-S-23/E-Track
           ref: ${{ inputs.source_sha }}
           persist-credentials: false
+          # Reuse the development route's App/test dependencies, not firmware archives.
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.gitattributes
+            /.gitignore
+            /AGENTS.md
+            /PLAN-OTA-EXEC.md
+            /.github/
+            /app/bluetooth_flutter_Trace/
+            /Tools/flutter/
+            /Tools/ota/p3-4-link-stats/observation_capture.py
+            /Tools/ota/p3-4-link-stats/batch_timing.py
+            /Tools/ota/p3-4-link-stats/acceptance_stats.py
+            /Tools/ota/p35-automation/
+            /Tools/ota/p51-acceptance/v2.py
+            /Tools/ota/p34-acceptance/live_host.py
+            /Tools/ota/p34-acceptance/build.py
+            /.agents/skills/e-track-flutter-debug/scripts/host_io.py
+            /Tools/provenance/manifest_profiles.json
+            /tests/ota/test_flutter_dev_checks.py
+            /tests/ota/test_flutter_dev_apk.py
+            /tests/ota/test_p3_4_observation_capture.py
+            /tests/ota/test_p34_batch_timing.py
+            /tests/ota/test_p34_acceptance_stats.py
+            /docs/flutter-development-validation.md
+            /docs/acceptance-execution-contract.md
+      - name: Check cold Android build disk budget before SDK setup
+        working-directory: .
+        run: |
+          python3 -I -S -B - <<'PY'
+          import os, shutil
+          usage=shutil.disk_usage(os.environ['GITHUB_WORKSPACE'])
+          minimum=12*1024**3
+          print(f'DISK_PREFLIGHT free={usage.free} minimum={minimum}',flush=True)
+          if usage.free<minimum:
+              raise SystemExit('CI_DISK_SPACE_INSUFFICIENT: need 12 GiB before cold SDK/Gradle setup')
+          PY
+      - name: Recheck inherited Windows-only draft before Android work
+        if: needs.admission.outputs.resume_android == 'true'
+        uses: actions/github-script@v8
+        env:
+          DRAFT_ID: ${{ needs.admission.outputs.draft_id }}
+        with:
+          script: |
+            const {data:draft}=await github.rest.repos.getRelease({...context.repo,release_id:Number(process.env.DRAFT_ID)});
+            const original=JSON.parse(process.env.RETAINED_WINDOWS_ASSETS);
+            const current=draft.assets.map(({id,name,size,digest,state})=>({id,name,size,digest,state}));
+            if(!draft.draft||!draft.prerelease||draft.target_commitish!==process.env.CANDIDATE_DRAFT_TARGET
+              ||JSON.stringify(current)!==JSON.stringify(original)) throw new Error('Retained Windows draft changed');
       - uses: actions/setup-node@v6
         with:
           node-version: "24"
@@ -164,10 +257,10 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-          cache: gradle
       - uses: gradle/actions/setup-gradle@v6
         with:
           gradle-version: "8.14"
+          cache-disabled: true
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -198,6 +291,8 @@ jobs:
           printf 'storePassword=%s\nkeyPassword=%s\nkeyAlias=%s\nstoreFile=release-keystore.jks\n' "$STORE_PASSWORD" "$KEY_PASSWORD" "$KEY_ALIAS" > android/key.properties
       - run: flutter analyze
       - run: flutter test
+      - name: Record disk use before native APK build
+        run: df -h "$GITHUB_WORKSPACE"
       - name: Build original-backend, original-package, BLE V2 APK
         run: |
           set -euo pipefail
@@ -225,8 +320,18 @@ jobs:
         run: |
           set -euo pipefail
           test "$(gh release view "v$VERSION_NAME" --json isDraft --jq .isDraft)" = true
-          test "$(gh release view "v$VERSION_NAME" --json targetCommitish --jq .targetCommitish)" = "$GITHUB_SHA"
+          test "$(gh release view "v$VERSION_NAME" --json targetCommitish --jq .targetCommitish)" = "$CANDIDATE_DRAFT_TARGET"
           gh release download "v$VERSION_NAME" --pattern 'ble-monitor-windows.*' --dir release-assets
+          node --input-type=module - <<'JS'
+          import assert from 'node:assert/strict';
+          import {readFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          for(const asset of JSON.parse(process.env.RETAINED_WINDOWS_ASSETS)) {
+            const raw=readFileSync('release-assets/'+asset.name);
+            assert.equal(raw.length,asset.size);
+            assert.equal('sha256:'+createHash('sha256').update(raw).digest('hex'),asset.digest);
+          }
+          JS
           python3 -I -S -B -X utf8 ../../Tools/flutter/original_candidate.py manifest \
             --apk "$PWD/release-assets/ble-monitor-android.apk" --out "$PWD/release-assets/ble-monitor-update.json"
           printf 'Trace %s (%s)\n\nApp source: Eitan-S-23/E-Track@%s\nFull candidate; choose publication and deltas in the original Admin.\n' \
@@ -285,6 +390,9 @@ jobs:
       - name: Remove only this runner's private signing inputs
         if: always()
         run: rm -f android/release-keystore.jks android/key.properties
+      - name: Report final workspace disk use
+        if: always()
+        run: df -h "$GITHUB_WORKSPACE"
       - name: Preserve bounded candidate metadata in the native CI log
         if: always()
         run: |

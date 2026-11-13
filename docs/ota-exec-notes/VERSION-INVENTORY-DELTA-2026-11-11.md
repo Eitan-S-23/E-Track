@@ -1674,3 +1674,61 @@ not select Stable/Beta, replace older packages or claim device acceptance.
 At this preparation checkpoint, candidate build/delivery and device verification
 are pending, not completed. Access login customization remains independently
 blocked on a usable provider management route, not on repeated user authorization.
+
+### Candidate Results And Bounded Android Recovery
+
+Source `9623cc43d6cb48a922caedbe08b82b5492afd7be` was delivered once, without the
+shared local index or a main merge. Original run `43517863599` passed candidate
+checks and the protected firmware job. Its normal reviewer approval was made
+through the existing authorized account; the environment configuration is byte
+equivalent before/after. MCU 3.3.25 is registered ready but unpublished.
+
+Cloud checks `43519152580` passed: public checks, 423 native Worker tests and
+211 Admin browser tests. Trace run `43518046702` passed its admission and Windows
+analysis/tests/EXE build, then failed on Android with the provider annotation
+`System.IO.IOException: No space left on device`. Android's raw log is truncated
+and its APK build has no successful completion. Do not invent terminal counts or
+label the aggregate workflows successful.
+
+The version's immutable draft is release `444802803`, still draft/prerelease,
+targeting original Trace workflow `7eaa1dc3a5b2eaa54b921b2baa9a339acc29fbd0`.
+It contains only Windows EXE asset `745410815` and ZIP asset `745410816`; no APK
+or App D1 registration exists. The by-tag release API returned 404, but the
+authenticated release list found this real draft. Preserve the draft and assets.
+
+The evidenced tooling gap is continuing the missing Android build without
+rebuilding successful Windows bytes. A blind failed-job rerun would retain the
+same full checkout/disk setup; a full new dispatch would conflict with the draft.
+The bounded fix extends the existing template with `resume_android_run`, strict
+original-run/Windows-only-draft guards and native hash readback, and reuses the
+already-tested development sparse checkout and disk preflight. It keeps full
+Android tests and original secrets in Trace. It neither creates a new release
+system nor changes App dependencies, signing, billing or channel selection.
+
+MCU native receipts were recovered byte-exactly against all six logged hashes.
+The full ETU and recovery binary were read back from original R2 and matched
+their registered hashes. The existing recovery parser validated the exact
+614416-byte final image, version 30325, SHA-256
+`8f0014f9de43b913a4157a543c12d83e1cf78bec1367e015cc0847a86c95a4cb`.
+The normal arrival created one notification and two provider-accepted deliveries,
+each on its first attempt. This is not an observation of either OS displaying it.
+
+The local default build failed at an existing USB header lookup despite the
+header's presence. Its original logs remain in `C/native-build-01`; exact-source
+GCC App/Boot compilation is supplied by the successful native candidate CI, not
+a substituted local image. Sparse simulator inputs were restored from matching
+existing Git blobs without changing the shared index. The simulator now includes
+the shared `USER` header root; `C/simulator-02` built successfully with 78 warnings
+and zero errors. This configuration-only fix does not rebuild the MCU candidate.
+
+Access application `0d826613-3097-41ea-ba20-a8174d6822dd` now has name `E-Track`
+and the existing public PNG as `logo_url`. Original policies, audience, session,
+cookie and destination settings compared equal after the update. Actual anonymous
+HTML now shows the new name, but its title/favicon remain Cloudflare's and the
+application logo is not used on this hosted login page. The custom-page management
+403s were not replayed; no organization-wide design or subscription changed.
+
+`C/phone-status-01` found the expected phone not connected to its contained ADB
+server. The server closed normally, with zero installation, UI or MCU operations.
+Finish Android delivery and prepare its verified artifacts before requesting the
+necessary phone connection. No previous successful OTA is repeated for logs.

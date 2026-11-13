@@ -42,7 +42,7 @@
   <Import Project="Mile.Project\Mile.Project.Cpp.props" />
   <Import Project="Mile.Project\Mile.Project.Cpp.VC-LTL.props" />
   <PropertyGroup>
-    <IncludePath>$(MSBuildThisFileDirectory);$(IncludePath)</IncludePath>
+    <IncludePath>$(MSBuildThisFileDirectory);$(MSBuildThisFileDirectory)..\..\USER;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <LinkIncremental>false</LinkIncremental>
