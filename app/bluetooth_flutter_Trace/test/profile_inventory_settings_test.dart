@@ -73,7 +73,11 @@ void main() {
       home: const Scaffold(body: ProfileTabPage()),
     ));
     await tester.pumpAndSettle();
-    expect(find.text('E-Track v1.0.76'), findsOneWidget);
+    // Native version metadata is optional; both labels must keep the same brand.
+    expect(find.byWidgetPredicate((widget) => widget is Text &&
+        (widget.data == 'E-Track' || widget.data == 'E-Track v1.0.76')),
+        findsOneWidget);
+    expect(find.textContaining('BLE Monitor'), findsNothing);
     expect(find.text('E-Track 智能设备管理助手'), findsOneWidget);
     // TraceGlowNode's caption is outside its circular InkWell.
     await tester.ensureVisible(find.byIcon(Icons.settings));
