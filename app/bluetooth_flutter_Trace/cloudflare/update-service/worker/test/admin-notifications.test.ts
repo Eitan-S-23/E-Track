@@ -61,6 +61,32 @@ describe("durable Admin notifications",()=>{
     await unsubscribeNotifications(config,"owner",{id:result.id});
     expect(await env.DB.prepare("SELECT id FROM admin_push_subscriptions").first()).toBeNull();
   });
+  it("marks only the viewed App or MCU result, preserving unseen, foreign and future results",async()=>{
+    await finish(await insert("owner","android",1));
+    await finish(await insert("owner","firmware",2));
+    await finish(await insert("other","android",3));
+    const activity = async(actor="owner")=>(await deltaActivity(config,actor)).json<{unreadCount:number;notifications:Array<{id:number;unread:number}>}>();
+    const own = await activity(), foreign = await activity("other"), viewed = own.notifications[0].id;
+    const body = await (await readNotifications(config,"owner",{ids:[viewed,foreign.notifications[0].id,Number.MAX_SAFE_INTEGER]})).json<{readIds:number[]}>();
+    expect(body.readIds).toEqual([viewed]);
+    expect((await activity()).unreadCount).toBe(1);
+    expect((await activity()).notifications.map(n=>n.unread)).toEqual([0,1]);
+    expect((await activity("other")).unreadCount).toBe(1);
+    await readNotifications(config,"owner",{ids:[viewed]});
+    expect((await activity()).unreadCount).toBe(1);
+    await finish(await insert("owner","android",4));
+    expect((await activity()).unreadCount).toBe(2);
+    await readNotifications(config,"owner",{throughId:viewed});
+    expect((await activity()).unreadCount).toBe(1);
+  });
+  it("rejects malformed or unbounded per-result reads without changing any read state",async()=>{
+    await finish(await insert());
+    for (const ids of [[],[0],[-1],[1.5],["1"],[1,1],Array.from({length:31},(_,i)=>i+1)]) {
+      await expect(readNotifications(config,"owner",{ids})).rejects.toThrow();
+    }
+    await expect(readNotifications(config,"owner",{ids:[1],throughId:1})).rejects.toThrow();
+    expect((await (await deltaActivity(config,"owner")).json<{unreadCount:number}>()).unreadCount).toBe(1);
+  });
   it("caps active browser subscriptions without replaying old notifications",async()=>{
     await finish(await insert());
     for(let i=0;i<5;i++) await subscribe("owner",endpoint+i);

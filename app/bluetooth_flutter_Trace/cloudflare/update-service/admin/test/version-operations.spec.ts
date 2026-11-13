@@ -14,7 +14,8 @@ export async function setup(page:Page,language="zh",role="owner",push?:{publicKe
   const data={role,dispatchConfigured:true,inventoryFails:false,abortCreate:false,inventoryReads:0,
     refreshRequestedAt:0,refreshId:"initial",baseCount:4,jobs:[] as Job[],writes:[] as Array<{path:string;body:Record<string,unknown>}>,
     notifications:[] as Array<Record<string,unknown>>,unreadCount:0,activityReads:0,activityFails:false,pushPublicKey:null as string|null,
-    pushSubscriptions:[] as Array<{id:string;expiresAt:number}>,pushRegisterFails:false,activityGate:null as Promise<void>|null,createGate:null as Promise<void>|null};
+    pushSubscriptions:[] as Array<{id:string;expiresAt:number}>,pushRegisterFails:false,readFails:false,
+    readGate:null as Promise<void>|null,activityGate:null as Promise<void>|null,createGate:null as Promise<void>|null,catalogueGate:null as Promise<void>|null};
   if(push){data.pushPublicKey=push.publicKey;data.pushSubscriptions=push.subscriptions;}
   await page.addInitScript(lang=>localStorage.setItem("trace-admin-language",lang),language);
   const errors:string[]=[];page.on("pageerror",error=>errors.push(error.message));
@@ -29,10 +30,11 @@ export async function setup(page:Page,language="zh",role="owner",push?:{publicKe
     }
     const reply=(body:object,status=200)=>route.fulfill({status,contentType:"application/json",headers:{"X-Request-Id":requestId},body:JSON.stringify({requestId,...body})});
     if(request.method()==="GET") {
+      if(url.pathname==="/api/admin/channels" && data.catalogueGate) await data.catalogueGate;
       if(url.pathname==="/api/admin/delta/activity") {
         data.activityReads++;
         if(data.activityFails){await reply({ok:false,message:"Activity unavailable"},503);return;}
-        const snapshot={ok:true,actor:`${data.role}@example.test`,scope:"own-jobs",jobs:data.jobs,notifications:data.notifications,
+        const snapshot={ok:true,actor:`${data.role}@example.test`,scope:"own-jobs",jobs:structuredClone(data.jobs),notifications:structuredClone(data.notifications),
           unreadCount:data.unreadCount,pushPublicKey:data.pushPublicKey,pushSubscriptions:[...data.pushSubscriptions]};
         if(data.activityGate) await data.activityGate;
         await reply(snapshot);return;
@@ -76,7 +78,13 @@ export async function setup(page:Page,language="zh",role="owner",push?:{publicKe
       data.pushSubscriptions=data.pushSubscriptions.filter(row=>row.id!==body.id);await reply({ok:true});return;
     }
     if(url.pathname==="/api/admin/delta/notifications/read") {
-      data.unreadCount=0; data.notifications.forEach(n=>n.unread=0); await reply({ok:true});return;
+      if(data.readGate) await data.readGate;
+      if(data.readFails){await reply({ok:false,message:"Read acknowledgement unavailable"},503);return;}
+      const readIds:number[]=[];
+      for(const n of data.notifications) if(Array.isArray(body.ids)?body.ids.includes(n.id):Number(n.id)<=Number(body.throughId)) {
+        if(n.unread) data.unreadCount--;n.unread=0;readIds.push(Number(n.id));
+      }
+      await reply(Array.isArray(body.ids)?{ok:true,readIds}:{ok:true,throughId:body.throughId});return;
     }
     if(url.pathname==="/api/admin/version-inventory/refresh") {
       expect(String(body.requestId)).toMatch(/^[0-9a-f-]{36}$/);data.refreshId=String(body.requestId);data.refreshRequestedAt=Math.floor(Date.now()/1000);
@@ -293,10 +301,11 @@ for(const kind of ["android","firmware"]) test(`${kind} completion survives clos
   await page.evaluate(()=>document.dispatchEvent(new Event("visibilitychange")));
   await expect(page.locator("#taskToast")).toBeVisible();await expect(page.locator(".task-badge")).toHaveText("1");
   await page.locator("#taskButton").click();await expect(page.locator("#taskContent")).toContainText("差分包已生成");
-  await expect(page.locator("#taskContent")).toContainText("待启用");await page.locator("#taskClose").click();
+  await expect(page.locator("#taskContent")).toContainText("待启用");
+  await expect(page.locator(".task-notification.unread")).toHaveCount(0);await page.locator("#taskClose").click();
   await page.reload();await expect(page.locator("#taskButton")).toBeEnabled();
-  await page.locator("#taskButton").click();await expect(page.locator(".task-notification.unread")).toHaveCount(1);
-  await page.locator('[data-task-action="read"]').click();await expect(page.locator(".task-notification.unread")).toHaveCount(0);
+  await page.locator("#taskButton").click();await expect(page.locator(".task-notification.unread")).toHaveCount(0);
+  await expect(page.locator(".task-badge")).toBeHidden();
   expect(data.writes.filter(write=>write.path==="/api/admin/delta/jobs")).toHaveLength(1);
   expect(data.writes.some(write=>write.path.includes("/channels/")||write.path.endsWith("/enable"))).toBe(false);expect(errors).toEqual([]);
 });
@@ -308,6 +317,109 @@ test("activity failures retain the last task and recover without redispatch",asy
   data.activityFails=false;data.jobs[0].status="failed";data.jobs[0].phase="failed";
   await page.evaluate(()=>window.dispatchEvent(new Event("online")));await expect(page.locator("#taskContent")).toContainText("生成失败");
   expect(data.writes).toHaveLength(0);
+});
+
+function notification(id:number,kind="android") {
+  return {id,kind,targetReleaseId:kind==="android"?"app-target":"fw-target",baseVersionCode:99,targetVersionCode:100,
+    status:"ready",createdAt:Math.floor(Date.now()/1000),unread:1};
+}
+async function requestTasksFromWorker(page:Page) {
+  return page.evaluate(()=>new Promise(resolve=>{
+    const channel=new MessageChannel();
+    channel.port1.onmessage=event=>{channel.port1.close();channel.port2.close();resolve(event.data.type);};
+    navigator.serviceWorker.dispatchEvent(new MessageEvent("message",{data:{type:"trace-delta-open"},ports:[channel.port2]}));
+  }));
+}
+for(const kind of ["android","firmware"]) test(`viewed ${kind} notifications become durably read without consuming unseen pages`,async({page})=>{
+  const {data,errors}=await setup(page);data.notifications=Array.from({length:10},(_,i)=>notification(10-i,kind));data.unreadCount=10;
+  await page.evaluate(()=>window.dispatchEvent(new Event("online")));
+  await expect(page.locator(".task-badge")).toHaveText("10");await page.waitForTimeout(650);
+  expect(data.writes).toHaveLength(0);
+  await page.locator("#taskButton").click();await page.locator('[data-notification-id="10"]').click();
+  await expect(page.locator("#deltaSheet")).toBeVisible();
+  await expect.poll(()=>data.notifications.find(n=>n.id===10)?.unread).toBe(0);
+  expect(data.notifications.find(n=>n.id===1)?.unread).toBe(1);
+  expect(data.writes.every(write=>write.path==="/api/admin/delta/notifications/read" &&
+    (write.body.ids as number[]).every(id=>id>=5))).toBe(true);
+  await page.locator("#deltaClose").click();await page.locator("#taskButton").click();
+  await page.locator('[data-task-action="notice-next"]').click();
+  await page.locator('[data-notification-id="1"]').scrollIntoViewIfNeeded();
+  await expect.poll(()=>data.notifications.find(n=>n.id===1)?.unread).toBe(0);
+  await page.reload();await page.locator("#taskButton").click();
+  await expect(page.locator('[data-notification-id="10"]')).not.toHaveClass(/unread/);
+  expect(errors).toEqual([]);
+});
+test("a background task panel does not consume new notifications or confuse running jobs with unread",async({page})=>{
+  const {data}=await setup(page);
+  data.jobs=[{id:"running",kind:"android",targetReleaseId:"app-target",baseReleaseId:"base-0",baseVersionCode:99,targetVersionCode:100,
+    status:"running",phase:"building",enabled:false,revision:1,sizeBytes:0,runUrl:"",fileName:""}];
+  await page.locator("#taskButton").click();await expect(page.locator("#taskButton")).toHaveAttribute("data-running","true");
+  await expect(page.locator(".task-badge")).toBeHidden();
+  await page.evaluate(()=>{Object.defineProperty(document,"hidden",{configurable:true,value:true});document.dispatchEvent(new Event("visibilitychange"));});
+  data.notifications=[notification(1)];data.unreadCount=1;await page.evaluate(()=>window.dispatchEvent(new Event("online")));
+  await expect(page.locator(".task-badge")).toHaveText("1");await page.waitForTimeout(650);expect(data.writes).toHaveLength(0);
+  await page.evaluate(()=>{Object.defineProperty(document,"hidden",{configurable:true,value:false});document.dispatchEvent(new Event("visibilitychange"));});
+  await expect(page.locator(".task-badge")).toBeHidden();
+  await expect(page.locator("#taskButton")).toHaveAttribute("data-running","true");
+  await expect(page.locator("#taskButton")).toHaveAttribute("aria-label",/1 进行中, 0 未读/);
+});
+test("failed read acknowledgement retains unread state until an explicit refresh recovers",async({page})=>{
+  const {data}=await setup(page);data.notifications=[notification(1)];data.unreadCount=1;data.readFails=true;
+  await page.locator("#taskButton").click();await expect(page.locator("#taskContent")).toContainText("已读状态保存失败");
+  await expect(page.locator(".task-badge")).toHaveText("1");await page.waitForTimeout(1100);
+  expect(data.writes).toHaveLength(1);expect(data.unreadCount).toBe(1);
+  data.readFails=false;await page.locator('[data-task-action="refresh"]').click();
+  await expect(page.locator(".task-badge")).toBeHidden();expect(data.unreadCount).toBe(0);
+});
+test("an activity response captured before a read acknowledgement cannot resurrect unread results",async({page})=>{
+  const {data}=await setup(page);data.notifications=[notification(1)];data.unreadCount=1;
+  let releaseRead!:()=>void,releaseActivity!:()=>void;
+  data.readGate=new Promise<void>(resolve=>{releaseRead=resolve;});
+  await page.locator("#taskButton").click();await expect.poll(()=>data.writes.length).toBe(1);
+  data.activityGate=new Promise<void>(resolve=>{releaseActivity=resolve;});
+  const before=data.activityReads;await page.evaluate(()=>window.dispatchEvent(new Event("online")));
+  await expect.poll(()=>data.activityReads).toBeGreaterThan(before);
+  data.readGate=null;releaseRead();await expect(page.locator(".task-badge")).toBeHidden();
+  await page.evaluate(()=>{
+    const badge=document.querySelector(".task-badge")!,regressions:Array<string|null>=[];Object.assign(window,{unreadRegressions:regressions});
+    new MutationObserver(()=>{if(!badge.hasAttribute("hidden")) regressions.push(badge.textContent);}).observe(badge,{attributes:true,childList:true});
+  });
+  data.activityGate=null;releaseActivity();await expect.poll(()=>data.activityReads).toBeGreaterThan(before+1);
+  await expect(page.locator('[data-task-action="refresh"]')).toBeEnabled();
+  await expect(page.locator(".task-badge")).toBeHidden();expect(await page.evaluate("unreadRegressions")).toEqual([]);
+  expect(data.writes).toHaveLength(1);
+});
+test("mark all read uses the observed boundary and does not consume a later result",async({page})=>{
+  const {data}=await setup(page);data.notifications=[notification(3),notification(2),notification(1)];data.unreadCount=3;
+  let releaseRead!:()=>void;data.readGate=new Promise<void>(resolve=>{releaseRead=resolve;});
+  await page.locator("#taskButton").click();await page.locator('[data-task-action="read"]').click();
+  await expect.poll(()=>data.writes.length).toBe(1);expect(data.writes[0].body).toEqual({throughId:3});
+  await page.locator("#taskClose").click();data.notifications.unshift(notification(4));data.unreadCount++;
+  data.readGate=null;releaseRead();await expect.poll(()=>data.unreadCount).toBe(1);
+  await expect(page.locator(".task-badge")).toHaveText("1");expect(data.notifications[0].unread).toBe(1);
+});
+test("notification navigation survives loading and consumes its cold-start URL only after opening",async({page})=>{
+  const {data,errors}=await setup(page);
+  let release!:()=>void;data.catalogueGate=new Promise<void>(resolve=>{release=resolve;});
+  await page.locator("#refreshButton").click();await expect(page.locator("#refreshButton")).toBeDisabled();
+  expect(await requestTasksFromWorker(page)).toBe("trace-delta-open-accepted");
+  await expect(page.locator("#taskSheet")).toBeHidden();
+  data.catalogueGate=null;release();await expect(page.locator("#taskSheet")).toBeVisible();
+  await page.locator("#taskClose").click();await page.goto(origin+"/?tasks=1");
+  await expect(page.locator("#taskSheet")).toBeVisible();await expect(page).not.toHaveURL(/tasks=1/);
+  await page.locator("#taskClose").click();await page.reload();await expect(page.locator("#taskButton")).toBeEnabled();
+  await expect(page.locator("#taskSheet")).toBeHidden();expect(errors).toEqual([]);expect(data.writes).toHaveLength(0);
+});
+test("notification navigation waits for confirmation without losing the current delta draft",async({page})=>{
+  const {data}=await setup(page);await openDelta(page);await page.locator('[data-delta-base="base-0"]').check();
+  await page.locator("#deltaReason").fill("Keep my unsent draft");
+  await page.locator('[data-version-operation="delta-create"]').click();await expect(page.locator("#confirmDialog")).toBeVisible();
+  expect(await requestTasksFromWorker(page)).toBe("trace-delta-open-accepted");
+  await expect(page.locator("#taskSheet")).toBeHidden();await expect(page.locator("#confirmDialog")).toBeVisible();
+  await page.locator("#confirmCancel").click();await expect(page.locator("#taskSheet")).toBeVisible();
+  await page.locator("#taskClose").click();await openDelta(page);
+  await expect(page.locator("#deltaReason")).toHaveValue("Keep my unsent draft");
+  await expect(page.locator('[data-delta-base="base-0"]')).toBeChecked();expect(data.writes).toHaveLength(0);
 });
 
 test("notification permission is requested only by a click and denial never starts a subscription or build",async({page})=>{
@@ -327,12 +439,12 @@ const pushPublicKey="B".repeat(87);
 const pushId=createHash("sha256").update(pushEndpoint).digest("hex");
 async function mockBrowserPush(page:Page,existing=false,fail=false) {
   await page.addInitScript(({endpoint,publicKey,existing,fail})=>{
-    const calls={register:0,subscribe:0,unsubscribe:0,permission:0};
+    const calls={register:0,subscribe:0,unsubscribe:0,permission:0,update:0};
     const state={pause:false,release:null as (()=>void)|null};
     let present=existing;
     const subscription={endpoint,options:{applicationServerKey:Uint8Array.from(atob(publicKey+"="),c=>c.charCodeAt(0)).buffer},
       unsubscribe:async()=>{calls.unsubscribe++;present=false;return true;}};
-    const registration={active:{state:"activated"},pushManager:{getSubscription:async()=>present?subscription:null,
+    const registration={active:{state:"activated",scriptURL:location.origin+"/admin-sw.js"},update:async()=>{calls.update++;},pushManager:{getSubscription:async()=>present?subscription:null,
       subscribe:async()=>{calls.subscribe++;if(state.pause) await new Promise<void>(resolve=>{state.release=resolve;});
         if(fail) throw new DOMException("Registration failed - push service error","AbortError");present=true;return subscription;}}};
     Object.defineProperty(window,"Notification",{configurable:true,value:{permission:"granted",
@@ -350,6 +462,13 @@ test("push enrollment restores a registered browser without relying on local sto
   await page.locator("#taskButton").click();await expect(page.locator('[data-task-action="push-off"]')).toBeVisible();
   expect(await page.evaluate("pushMockCalls")).toMatchObject({register:0,subscribe:0,unsubscribe:0,permission:0});
   expect(data.writes).toHaveLength(0);expect(errors).toEqual([]);
+});
+test("existing notification workers update in place without changing the working subscription",async({page})=>{
+  await mockBrowserPush(page,true);const {data}=await setup(page,"zh","owner",{publicKey:pushPublicKey,subscriptions:[{id:pushId,expiresAt:Math.floor(Date.now()/1000)+86400}]});
+  await page.locator("#taskButton").click();await expect(page.locator('[data-task-action="push-off"]')).toBeVisible();
+  await page.locator('[data-task-action="refresh"]').click();await expect(page.locator('[data-task-action="refresh"]')).toBeEnabled();
+  expect(await page.evaluate("pushMockCalls")).toMatchObject({update:1,register:0,subscribe:0,unsubscribe:0,permission:0});
+  expect(data.writes).toHaveLength(0);
 });
 
 test("push enrollment reuses a live browser subscription when the server registration is missing",async({page})=>{

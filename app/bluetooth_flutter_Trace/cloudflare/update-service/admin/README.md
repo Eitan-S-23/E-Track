@@ -99,6 +99,29 @@ task-fetch errors; successful task polling must not hide an enrollment failure.
 The enrollment regressions in `test/version-operations.spec.ts` mock the browser
 push boundary explicitly and do not establish actual vendor/OS delivery.
 
+Notification clicks focus an existing same-origin Admin document and require a
+MessageChannel acknowledgement of the open-Tasks intent. The page retains that
+intent through loading, suspension and an active confirmation/operation; it does
+not discard a draft or interrupt a mutation. A missing, non-Admin or unresponsive
+client falls back to the absolute original-origin `/?tasks=1` URL. The URL intent
+is consumed only after Tasks opens. Existing registrations are updated in place
+on an authorized page visit, never unregistered to install a click-handler fix.
+
+The Tasks badge counts unread results only; active jobs use the separate icon
+state and accessible label. Notifications page in groups of six. A result is
+marked read when clicked or at least 75% visible in the foreground task scroller
+after a 500 ms settling delay. Hidden/inert panels, background pages and unseen
+pages do not consume results. The server must acknowledge each read before the
+badge changes; failed reads retain an error and do not spin an automatic retry.
+Older activity responses cannot overwrite an acknowledged read. The explicit
+Mark all read action retains the existing observed-ID cursor, not a future ID.
+
+Migration `0010_notification_read_state.sql` must precede the Admin deployment.
+It adds per-notification read timestamps without changing prior cursors, tasks,
+subscriptions or deliveries. The API contract and error cases are documented in
+`../docs/VERSION-INVENTORY-DELTA.md`. Tests use mock window APIs for notification
+click routing; they do not simulate a physical Android notification tap.
+
 The root page loads the current Access session, Android channels, and Android releases. It supports release note edits, beta/stable publish actions, disabling unpublished releases, and viewing R2-ready versus fallback-only asset counts through the API below.
 
 - `GET /api/admin/session`

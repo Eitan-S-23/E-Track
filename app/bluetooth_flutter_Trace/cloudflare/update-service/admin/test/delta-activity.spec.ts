@@ -1,6 +1,38 @@
 import {readFileSync,writeFileSync} from "node:fs";
 import {createServer} from "node:http";
+import {runInNewContext} from "node:vm";
+import {MessageChannel, type MessagePort} from "node:worker_threads";
 import {test,expect} from "@playwright/test";
+
+for(const scenario of ["closed","existing","focus-failed","frozen","non-admin","second-client","list-failed"]) {
+  test(`notification click ${scenario} uses an acknowledged Admin or an absolute fallback (mock window APIs)`,async()=>{
+    const source=readFileSync(new URL("../public/admin-sw.js",import.meta.url),"utf8");
+    const origin="https://admin.example.test",calls:string[]=[];
+    type ClickEvent={notification:{close:()=>void;data:{url:string}};waitUntil:(promise:Promise<void>)=>void};
+    const handlers=new Map<string,(event:ClickEvent)=>void>();
+    const client=(name:string,accept=true,fail=false,path="/")=>({url:origin+path,focused:false,
+      async focus(){calls.push("focus:"+name);if(fail) throw new Error("Client disappeared");},
+      postMessage(message:{type:string},ports:MessagePort[]){
+        expect(message.type).toBe("trace-delta-open");calls.push("message:"+name);
+        if(accept) ports[0].postMessage({type:"trace-delta-open-accepted"});
+      }});
+    const windows=scenario==="closed"?[]:scenario==="non-admin"?[client("api",true,false,"/api/admin/session")]
+      :scenario==="second-client"?[client("gone",true,true),client("active")]
+      :[client("first",scenario!=="frozen",scenario==="focus-failed")];
+    runInNewContext(source,{URL,MessageChannel,setTimeout,clearTimeout,self:{location:{origin},
+      addEventListener:(name:string,handler:(event:ClickEvent)=>void)=>handlers.set(name,handler),
+      clients:{matchAll:async()=>{if(scenario==="list-failed") throw new Error("No list");return windows;},
+        openWindow:async(url:string)=>{calls.push("open:"+url);}}}});
+    let done:Promise<void>|undefined;
+    handlers.get("notificationclick")!({notification:{close:()=>calls.push("close"),data:{url:"https://untrusted.example.test/"}},waitUntil:promise=>{done=promise;}});
+    await done;expect(calls[0]).toBe("close");
+    if(scenario==="existing"||scenario==="second-client") {
+      expect(calls.some(call=>call.startsWith("open:"))).toBe(false);
+      expect(calls.at(-1)).toBe("message:"+(scenario==="existing"?"first":"active"));
+    } else expect(calls.at(-1)).toBe("open:"+origin+"/?tasks=1");
+    if(scenario==="non-admin") expect(calls).toEqual(["close","open:"+origin+"/?tasks=1"]);
+  });
+}
 
 test("service worker handles push, closed pages and expired Access with an explicit mock OS notification sink",async({browser},info)=>{
   const source=readFileSync(new URL("../public/admin-sw.js",import.meta.url),"utf8");

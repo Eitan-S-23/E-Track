@@ -227,8 +227,9 @@ The Access-protected facade adds these same-origin, actor-bound routes:
 - `GET /api/admin/delta/activity`: up to 100 own jobs (active first), the latest
   30 own terminal notifications, total unread count, public push key and active
   subscription IDs/expiry. It never exposes push endpoints or private keys.
-- `POST /api/admin/delta/notifications/read`: `{throughId}`; monotonic and clamped
-  to existing notifications for this actor, so it cannot hide future results.
+- `POST /api/admin/delta/notifications/read`: `{ids:[1,2]}` for individually viewed
+  results, or `{throughId}` for explicit Mark all read. The latter is monotonic
+  and clamped to existing notifications for this actor, never future results.
 - `POST /api/admin/delta/notifications/subscribe`: `{endpoint,applicationServerKey}`;
   explicit browser consent, supported HTTPS vendor endpoints, at most five active
   subscriptions per actor, 30-day expiry, no reassignment across accounts.
@@ -257,3 +258,42 @@ page is alive, refreshes on online/foreground return and preserves stale results
 with an explicit error if reads fail. The server owns task state; page timers are
 not the background-notification guarantee. Notification consent is requested only
 from the Enable alerts button, never on load or as a prerequisite for generation.
+
+### Read State And Click Navigation
+
+Migration `0010_notification_read_state.sql` adds nullable `read_at` to each
+actor-owned notification. A notification is unread only when above the existing
+actor cursor AND `read_at IS NULL`. Old cursors and timestamps are preserved.
+Per-result reads accept 1..30 distinct positive safe-integer IDs, reject mixed
+`ids`/`throughId` or invalid input, update only matching actor-owned rows, and
+return `{ok:true,readIds:[...]}`. Unknown/foreign IDs are not acknowledged and
+cannot change another account. Repeating a read preserves its original timestamp.
+Cursor responses return `{ok:true,throughId:<actual stored cursor>}`.
+
+The UI sends only actually visible or clicked IDs. An old successful activity
+response is discarded and reread if an intervening read acknowledgement changed
+the local revision. Read failures never silently zero the badge. The badge is
+unread count, not `unread || activeJobs`; running jobs keep a distinct icon state.
+
+| Case | Expected behavior |
+| --- | --- |
+| Foreground visible result / explicit result click | Save that ID; acknowledge before clearing unread |
+| Hidden page, inert/closed sheet, another notification page | No automatic read mutation |
+| Network/server read failure | Retain unread/error; explicit refresh may recover |
+| Late pre-ack activity response | Discard notification snapshot and reread |
+| Explicit Mark all read followed by a new result | Newer result remains unread |
+| Notification click while loading or confirming | Acknowledge queued intent; open when safe |
+| Closed, unresponsive or non-Admin window | Open absolute original-origin `/?tasks=1` |
+
+Regression oracles are in `admin/test/version-operations.spec.ts`,
+`admin/test/delta-activity.spec.ts`, and `worker/test/admin-notifications.test.ts`.
+Good: read one result, retain older unseen and future results. Base: explicit
+Mark all read consumes the currently observed boundary. Bad: using the global
+cursor on a single clicked result would silently mark unseen results read.
+
+Android Chrome system push uses Google's push transport independently of the
+Cloudflare webpage. Working Play Store downloads do not establish that transport's
+connectivity. The operator reported registration AND delivery succeeding with VPN
+on 2026-11-13; this is real user-reported evidence, not a local headless test.
+Turning VPN off can affect later delivery too. The webpage cannot replace Chrome's
+push provider or guarantee its reachability; in-page durable results still work.

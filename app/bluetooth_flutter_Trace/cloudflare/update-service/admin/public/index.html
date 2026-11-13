@@ -1628,8 +1628,8 @@
       attachEvents();
       taskActivity = new TraceDeltaActivity({ api, mutate, text: opText, escape: escapeHtml, formatBytes,
         openPanel: openTasks, openTarget: (kind,id) => {
-          if (state.busy || activeConfirmDialog || state.delta?.busy) return;
-          closeTasks(); openDelta(kind,id);
+          if (state.busy || activeConfirmDialog || state.delta?.busy) return false;
+          closeTasks(); openDelta(kind,id); return true;
         }, onJobs: jobs => {
           const delta = state.delta;
           if (!delta?.data || delta.busy || delta.loading) return;
@@ -1666,7 +1666,8 @@
         else if (layer === "nav") setMobileNav(false);
       }
       function openTasks() {
-        if (state.busy || state.delta?.busy || activeConfirmDialog) return;
+        if (!state.session?.actor || state.busy || state.delta?.busy || activeConfirmDialog) return false;
+        if (state.taskOpen) return true;
         closeDelta(); closeQuickActions({immediate:true,restoreFocus:false}); closeFirmwareDetails({immediate:true,restoreFocus:false});
         closeResourcePanel(); setMobileNav(false,{restoreFocus:false});
         state.taskOpen = true;
@@ -1675,6 +1676,7 @@
         document.querySelector("#taskScroll").scrollTop = 0;
         els.body.classList.add("task-open"); syncOverlayState();
         taskActivity.render(); taskActivity.refresh(); document.querySelector("#taskClose").focus();
+        return true;
       }
       function closeTasks() {
         const wasOpen = state.taskOpen; state.taskOpen = false;
@@ -2037,6 +2039,7 @@
         document.querySelector("#taskSheet").inert = confirm || !tasks;
         els.confirmDialog.inert = !confirm;
         overlayHistory?.sync();
+        setTimeout(()=>taskActivity?.resume(),0);
       }
 
       function restoreWorkspaceFocus(preferred) {
@@ -2330,9 +2333,6 @@
           setStatus(error.message, "error");
         } finally {
           setBusy(false);
-          if (new URLSearchParams(location.search).get("tasks") === "1" && !state.taskLinkConsumed) {
-            state.taskLinkConsumed = true; openTasks();
-          }
         }
       }
 
@@ -3054,6 +3054,7 @@
           delta.busy = false;
           taskActivity?.refresh();
           if (state.delta === delta) await loadDelta(delta);
+          taskActivity?.resume();
         }
       }
 
@@ -4420,6 +4421,7 @@
         renderActionLocks(activeReleaseForAction());
         renderFirmware();
         setAnnouncementEditorEnabled(!state.announcementsError);
+        if (!isBusy) taskActivity?.resume();
       }
 
       function setStatus(message, tone = "info", options = {}) {

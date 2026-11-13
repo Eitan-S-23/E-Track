@@ -42,14 +42,34 @@ self.addEventListener("push",event=>event.waitUntil((async()=>{
   if (receipt) await remembered("put",receipt).catch(()=>{});
   for (const client of await self.clients.matchAll({type:"window",includeUncontrolled:true})) client.postMessage({type:"trace-delta-updated"});
 })()));
+function requestTaskPanel(client) {
+  return new Promise(resolve=>{
+    const channel = new MessageChannel();
+    const finish = accepted=>{
+      clearTimeout(timeout); channel.port1.close(); channel.port2.close(); resolve(accepted);
+    };
+    const timeout = setTimeout(()=>finish(false),600);
+    channel.port1.onmessage = event=>finish(event.data?.type === "trace-delta-open-accepted");
+    try { client.postMessage({type:"trace-delta-open"},[channel.port2]); }
+    catch { finish(false); }
+  });
+}
+
 self.addEventListener("notificationclick",event=>{
   event.notification.close();
   event.waitUntil((async()=>{
-    for (const client of await self.clients.matchAll({type:"window",includeUncontrolled:true})) {
-      if (new URL(client.url).origin === self.location.origin) {
-        await client.focus(); client.postMessage({type:"trace-delta-open"}); return;
-      }
+    const windows = await self.clients.matchAll({type:"window",includeUncontrolled:true}).catch(()=>[]);
+    const candidates = windows.filter(client=>{
+      const url = new URL(client.url);
+      return url.origin === self.location.origin && ["/","/index.html"].includes(url.pathname);
+    }).sort((a,b)=>Number(b.focused)-Number(a.focused));
+    for (const client of candidates.slice(0,2)) {
+      try {
+        await client.focus();
+        if (await requestTaskPanel(client)) return;
+      } catch { /* A closed/frozen client must not swallow the notification click. */ }
     }
-    await self.clients.openWindow("/?tasks=1");
+    // Never reload an existing Admin tab: it may contain an unsaved draft.
+    await self.clients.openWindow(new URL("/?tasks=1",self.location.origin).href);
   })());
 });

@@ -720,3 +720,106 @@ and disabled, 86 -> 102 remains enabled, and existing MCU state is unchanged.
 The scoped source/deployment and closing receipts are recorded separately under
 the same interaction directory. No backend schema/Worker change or new device
 test is part of this enrollment repair.
+
+Repair source `1dc15e906fa89e9ae3f3edd6234ce2b7458469f1` is delivered on
+`release/candidates`; CI `43356214620` passed with both package jobs skipped.
+Original Admin deployment `5313c60f-fae1-440d-a78c-6a48bc792ac7` preserves its
+runtime bindings. `live-push-after-01` verified current asset bytes and actual
+read-only UI behavior with no page errors; the new disabled 85 -> 102 delta and
+existing enabled 86 -> 102 delta remain intact. Worker, schema and packages were
+not redeployed. Existing owned OAuth credentials were renewed without another
+interactive login. `push-closeout-01` binds final receipts and controlled writes.
+
+The provider registration error is not claimed resolved by these UI tests or
+this deployment. No real push subscription/delivery was created by the agent.
+The next diagnostic input is the operator's device/browser and its registration
+result after refreshing the repaired page; no further package build is required.
+This final closing paragraph is local follow-up documentation.
+
+### Android Chrome Registration Diagnosis
+
+The operator identified an Android vivo/iQOO phone on mobile data, with Google
+Play services installed and the Play Store working. This does not establish the
+cause of Chrome's generic registration error; do not attribute it to connectivity
+or exclude our code solely from that message. Chromium's Android InstanceID
+bridge catches IOException, returns an empty token and maps it to UNKNOWN_ERROR,
+which the push service exposes as SERVICE_ERROR. Its distinct desktop/general
+NETWORK_ERROR enum is not proof that Android network errors remain distinguishable.
+
+The bounded follow-up reuses the actual protected Admin/browser route to validate
+the delivered P-256 key and decode, then checks the existing private ADB route.
+If the previously identified V2312A is connected and authorized, read only its
+Chrome/GMS versions and a bounded warning/error log snapshot. Keep raw logs in
+the protected task-local private directory; report error codes, not tokens.
+No APK install, notification enrollment, UI tap, configuration change, log clear,
+firmware operation or new delta is authorized by this diagnostic runner. Its
+private server closes after the read or absence check; a missing phone requires
+a real connection, not another synthetic product test.
+
+`push-config-check-01` retrieved the live key through the existing authenticated
+Chromium route. Its 65-byte uncompressed P-256 point imported successfully in
+both Node and Chromium; the actual frontend decoding produced identical bytes.
+Fingerprint `4b16aac3cd031179`; active server subscriptions were zero. This checks
+configuration, not a successful native push registration or delivered alert.
+An earlier direct urllib GET was rejected with HTTP 403; that host-client failure
+is separate from the phone's Chrome error and did not change authorization.
+
+`push-phone-check-01` used the pinned existing ADB binary/key on private port
+5093 and found no connected expected phone. It closed its server and ownership
+lock with zero phone/package/settings/UI operations. The read-only collector is
+ready in `.cache/version-inventory-delta-20261111-01/push-phone-check.py`; the next
+run needs a fresh output label and the operator's USB connection. Do not replay
+an upgrade or claim the phone-specific root cause has already been established.
+
+Chromium source references inspected for this diagnostic:
+
+- `chrome/browser/push_messaging/push_messaging_service_impl.cc`, `DidSubscribe`.
+- `components/gcm_driver/instance_id/android/java/src/org/chromium/components/gcm_driver/instance_id/InstanceIDBridge.java`, `getToken`.
+- `components/gcm_driver/instance_id/instance_id_android.cc`, `DidGetToken`.
+
+These are upstream-main observations, not proof of the operator's exact Chrome
+version. Device-specific logs/version remain required to distinguish causes.
+
+## Notification Click And Read-State Repair, 2026-11-13
+
+The operator subsequently confirmed successful Chrome enrollment AND real system
+notification delivery with VPN enabled. That supersedes the preceding request
+for USB registration diagnostics: no USB action or repeated delta is needed.
+This establishes network dependence of the observed Google push path, not a
+promise that delivery will persist after VPN disconnection. Play Store downloads
+and Cloudflare page access are separate network paths.
+
+Two reported UI defects were reproduced in source: notification clicks only
+posted once to any same-origin window, with no acknowledgement or focus fallback;
+viewing/clicking notifications never saved their read state. The badge also used
+the active-job count when unread was zero. Repairs add an acknowledged, retained
+open-Tasks intent with absolute-URL fallback; foreground visible/clicked per-ID
+read acknowledgements; independent unread and running indicators; notification
+pagination; and a read revision guard against late activity snapshots.
+
+Migration `0010_notification_read_state.sql` adds one nullable read timestamp.
+The global cursor remains only for explicit Mark all read. It would be incorrect
+to use that cursor for an individual viewed result, because older unseen events
+would disappear too. Existing notification subscriptions, keys, tasks, package
+bytes and channel state must remain unchanged. The read functions live in the
+shared Worker source module but are served by Admin Pages Functions; no change
+to the running Worker's sender or redeployment of that Worker is required.
+
+Under `admin-interactions-20261113-01/`, `notification-ui-01` passed 53 focused
+browser cases and `notification-worker-01` passed 426 backend tests. Both Admin
+and Worker type checks passed. Window navigation tests explicitly mock client
+focus/openWindow, and the push integration still mocks the OS notification sink;
+physical Android tap behavior is not claimed measured by these tests. Full UI,
+source delivery, additive migration and live read-only receipts follow under
+fresh `notification-*` labels. No review agent, device test or new package build
+is part of this repair.
+
+`notification-ui-full-01` subsequently passed all 191 Admin UI regressions.
+The current authenticated `notification-live-before-01` observes the user's
+additional ready, disabled App deltas from 80..85 to 102; 86 to 102 remains
+enabled and the existing MCU delta is ready. Preserve this newer live baseline,
+not the older catalogue with only 85 and 86. Both Beta/Stable remain operator-owned.
+The earlier renewal and D1 export commands produced terminal output but retained
+their native processes; originals and closed timeout receipts remain intact.
+The renewed OAuth expiry and a fresh authenticated read are checked separately;
+the existing export is verified rather than exported again.

@@ -27,10 +27,10 @@ export async function deltaActivity(env: NotificationEnv, actor: string): Promis
     env.DB.prepare("SELECT * FROM delta_jobs WHERE actor=? ORDER BY CASE WHEN status IN ('ready','failed') THEN 1 ELSE 0 END,updated_at DESC,id LIMIT 100").bind(actor),
     env.DB.prepare(`SELECT n.id,n.job_id AS jobId,n.attempt,n.status,n.error_code AS errorCode,n.created_at AS createdAt,
       j.kind,j.target_release_id AS targetReleaseId,j.base_version_code AS baseVersionCode,j.target_version_code AS targetVersionCode,
-      CASE WHEN n.id>COALESCE(r.through_id,0) THEN 1 ELSE 0 END AS unread
+      CASE WHEN n.id>COALESCE(r.through_id,0) AND n.read_at IS NULL THEN 1 ELSE 0 END AS unread
       FROM delta_notifications n JOIN delta_jobs j ON j.id=n.job_id
       LEFT JOIN admin_notification_reads r ON r.actor=n.actor WHERE n.actor=? ORDER BY n.id DESC LIMIT 30`).bind(actor),
-    env.DB.prepare(`SELECT COUNT(*) AS count FROM delta_notifications WHERE actor=? AND id>
+    env.DB.prepare(`SELECT COUNT(*) AS count FROM delta_notifications WHERE actor=? AND read_at IS NULL AND id>
       COALESCE((SELECT through_id FROM admin_notification_reads WHERE actor=?),0)`).bind(actor,actor),
     env.DB.prepare("SELECT id,expires_at AS expiresAt FROM admin_push_subscriptions WHERE actor=? AND expires_at>?").bind(actor,nowSeconds())
   ]);
@@ -42,13 +42,27 @@ export async function deltaActivity(env: NotificationEnv, actor: string): Promis
 }
 
 export async function readNotifications(env: NotificationEnv, actor: string, body: Record<string, unknown>): Promise<Response> {
+  if ("ids" in body) {
+    const ids = body.ids;
+    if ("throughId" in body || !Array.isArray(ids) || !ids.length || ids.length > 30 ||
+      ids.some(id => !Number.isSafeInteger(id) || id <= 0) || new Set(ids).size !== ids.length) {
+      throw invalidParameter("Expected 1 to 30 distinct notification IDs");
+    }
+    // Viewing one result must not consume older, unseen results from this actor.
+    const read = await env.DB.prepare(`UPDATE delta_notifications SET read_at=COALESCE(read_at,?)
+      WHERE actor=? AND id IN (${ids.map(()=>"?").join(",")}) RETURNING id`)
+      .bind(nowSeconds(),actor,...ids).all<{id:number}>();
+    return json({ok:true,readIds:read.results.map(row=>row.id)});
+  }
   const through = body.throughId;
   if (!Number.isSafeInteger(through) || Number(through) < 0) throw invalidParameter("Invalid notification cursor");
   await env.DB.prepare(`INSERT INTO admin_notification_reads(actor,through_id)
     VALUES (?,MIN(?,COALESCE((SELECT MAX(id) FROM delta_notifications WHERE actor=?),0)))
     ON CONFLICT(actor) DO UPDATE SET through_id=MAX(through_id,excluded.through_id)`)
     .bind(actor,through,actor).run();
-  return json({ ok: true });
+  const cursor = await env.DB.prepare("SELECT through_id FROM admin_notification_reads WHERE actor=?")
+    .bind(actor).first<{through_id:number}>();
+  return json({ ok: true, throughId: cursor?.through_id ?? 0 });
 }
 
 export async function subscribeNotifications(env: NotificationEnv, actor: string, body: Record<string, unknown>): Promise<Response> {
