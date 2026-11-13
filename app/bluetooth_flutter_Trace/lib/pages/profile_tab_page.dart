@@ -10,7 +10,7 @@ import '../services/version_inventory_service.dart';
 import '../services/database_service.dart';
 import 'trace_ui.dart';
 
-const String _appName = 'BLE Monitor';
+const String _appName = 'E-Track';
 const MethodChannel _appUpdateChannel = MethodChannel('trace/app_update');
 final Future<String> _appVersionLabelFuture = _loadAppVersionLabel();
 
@@ -830,23 +830,29 @@ class _ProfileFooter extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(
-          children: [
-            Expanded(child: _buildFadeLine(reverse: false)),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Text(
-                'BLE Monitor 智能设备管理助手',
-                style: TextStyle(
-                  color: TraceColors.muted.withValues(alpha: 0.85),
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1,
+        LayoutBuilder(
+          builder: (context, constraints) => Row(
+            children: [
+              Expanded(child: _buildFadeLine(reverse: false)),
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: constraints.maxWidth),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Text(
+                    'E-Track 智能设备管理助手',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: TraceColors.muted.withValues(alpha: 0.85),
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1,
+                    ),
+                  ),
                 ),
               ),
-            ),
-            Expanded(child: _buildFadeLine(reverse: true)),
-          ],
+              Expanded(child: _buildFadeLine(reverse: true)),
+            ],
+          ),
         ),
         const SizedBox(height: 12),
         Row(

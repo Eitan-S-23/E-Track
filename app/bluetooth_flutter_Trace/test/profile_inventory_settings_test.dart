@@ -73,6 +73,8 @@ void main() {
       home: const Scaffold(body: ProfileTabPage()),
     ));
     await tester.pumpAndSettle();
+    expect(find.text('E-Track v1.0.76'), findsOneWidget);
+    expect(find.text('E-Track 智能设备管理助手'), findsOneWidget);
     // TraceGlowNode's caption is outside its circular InkWell.
     await tester.ensureVisible(find.byIcon(Icons.settings));
     await tester.tap(find.byIcon(Icons.settings));
