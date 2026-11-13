@@ -823,3 +823,14 @@ The earlier renewal and D1 export commands produced terminal output but retained
 their native processes; originals and closed timeout receipts remain intact.
 The renewed OAuth expiry and a fresh authenticated read are checked separately;
 the existing export is verified rather than exported again.
+
+Notification repair source `ace860f0280c92fad9791988fe7b3b1309a665ad` was deployed
+to original Admin version `711108df-65e5-4cbb-8d19-c0e3fc1342db`; migration 0010
+was applied/read back with no read acknowledgements or package/channel changes.
+Native CI `43390824908` passed Public checks and 385 Worker tests, but failed two
+existing resource-panel UI checks (189 UI passes). It is not a green workflow.
+The panel deferred positioning/focus to requestAnimationFrame, exposing an
+unpositioned panel and allowing a late callback to take focus after Escape.
+`notification-panel-red-01` deterministically reproduced this by deferring page
+animation callbacks. The correction positions/focuses synchronously and preserves
+the existing close behavior. It changes no notification, task or mutation logic.

@@ -437,6 +437,29 @@ test("design App drafts never cross actor identity and viewer editor is read-onl
   expect(data.writes).toHaveLength(0);
 });
 
+test("delayed-resource-frame cannot expose an unpositioned panel or steal focus after Escape", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 844 });
+  const data = await mockApp(page);
+  await page.evaluate(() => {
+    const original = window.requestAnimationFrame, frames: FrameRequestCallback[] = [];
+    window.requestAnimationFrame = callback => frames.push(callback);
+    Object.assign(window, { releaseResourceFrames: () => {
+      window.requestAnimationFrame = original;
+      for (const frame of frames) frame(performance.now());
+    } });
+    document.querySelector<HTMLButtonElement>("#resourceOrb")!.click();
+  });
+  const panel = (await page.locator("#resourcePanel").boundingBox())!;
+  expect(panel.x).toBeGreaterThanOrEqual(0); expect(panel.x + panel.width).toBeLessThanOrEqual(1440);
+  expect(panel.y).toBeGreaterThanOrEqual(0); expect(panel.y + panel.height).toBeLessThanOrEqual(844);
+  await expect(page.locator("#resourceClose")).toBeFocused();
+  await page.keyboard.press("Escape");
+  await page.evaluate("releaseResourceFrames()");
+  await expect(page.locator("#resourcePanel")).toBeHidden();
+  await expect(page.locator("#resourceOrb")).toBeFocused();
+  expect(data.writes).toHaveLength(0);
+});
+
 test("design mobile navigation, storage Escape and reduced motion stay usable", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ reducedMotion: "reduce" });

@@ -2069,7 +2069,8 @@
         els.resourcePanel.hidden = false;
         els.resourceFloat.classList.add("open");
         els.resourceOrb.setAttribute("aria-expanded", "true");
-        requestAnimationFrame(() => { positionResourcePanel(); els.resourceClose.focus({ preventScroll: true }); });
+        positionResourcePanel();
+        els.resourceClose.focus({ preventScroll: true });
       }
 
       function closeResourcePanel({ restoreFocus = false } = {}) {

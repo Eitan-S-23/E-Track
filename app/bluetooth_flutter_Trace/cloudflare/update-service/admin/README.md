@@ -173,6 +173,10 @@ search cannot silently select a different release. The history list is bounded
 and still uses the existing cursor-based load-more route. History is first read
 when its tab is opened, not on every catalogue visit.
 The resources panel opens from the restored shared movable resource ball.
+Its placement and initial focus are synchronous with opening. Deferring them to
+an animation frame can briefly expose the panel below the viewport or steal
+focus after the operator has already closed it. A delayed-frame regression keeps
+both the panel bounds and Escape focus restoration covered.
 Selecting a firmware version opens the same fixed dialog surface used by App
 versions: a centered overlay on desktop and a bottom sheet on narrow screens.
 Details never occupy a column beside the list or a section underneath it.
