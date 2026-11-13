@@ -437,6 +437,24 @@ test("design App drafts never cross actor identity and viewer editor is read-onl
   expect(data.writes).toHaveLength(0);
 });
 
+test("delayed-modal-frame still establishes focus and handles immediate Escape", async ({ page }) => {
+  const data = await mockApp(page);
+  await page.evaluate(() => {
+    const original = window.requestAnimationFrame, frames: FrameRequestCallback[] = [];
+    window.requestAnimationFrame = callback => frames.push(callback);
+    Object.assign(window, { releaseModalFrames: () => {
+      window.requestAnimationFrame = original;
+      for (const frame of frames) frame(performance.now());
+    } });
+  });
+  await select(page, "app-new");
+  await page.keyboard.press("Escape");
+  await page.evaluate("releaseModalFrames()");
+  await expect(page.locator("#quickActionSheet")).toBeHidden();
+  await expect(page.locator('#versionStrip [data-release-id="app-new"]')).toBeFocused();
+  expect(data.writes).toHaveLength(0);
+});
+
 test("delayed-resource-frame cannot expose an unpositioned panel or steal focus after Escape", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 844 });
   const data = await mockApp(page);
@@ -720,6 +738,12 @@ test("interaction invalid saved resource position is clamped and resize keeps it
   expect(ball.x + ball.width).toBeLessThanOrEqual(1440);
   expect(ball.y).toBeGreaterThanOrEqual(bar.y + bar.height);
   await page.setViewportSize({ width: 390, height: 600 });
+  // DevTools acknowledges the viewport before the page receives its resize event.
+  await expect.poll(async () => {
+    const resized = (await page.locator("#resourceOrb").boundingBox())!;
+    const toolbar = (await page.locator(".topbar").boundingBox())!;
+    return resized.x >= 0 && resized.x + resized.width <= 390 && resized.y >= toolbar.y + toolbar.height;
+  }).toBe(true);
   ball = (await page.locator("#resourceOrb").boundingBox())!;
   bar = (await page.locator(".topbar").boundingBox())!;
   expect(ball.x + ball.width).toBeLessThanOrEqual(390);

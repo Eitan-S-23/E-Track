@@ -4017,12 +4017,10 @@
         els.firmwareDetailBackdrop.hidden = false;
         els.firmwareDetailSheet.hidden = false;
         els.firmwareDetailScroll.scrollTop = 0;
-        requestAnimationFrame(() => {
-          if (!state.firmwareDetailsOpen) return;
-          els.body.classList.add("firmware-details-open");
-          syncOverlayState();
-          els.firmwareDetailClose.focus({ preventScroll: true });
-        });
+        els.firmwareDetailSheet.getBoundingClientRect();
+        els.body.classList.add("firmware-details-open");
+        syncOverlayState();
+        els.firmwareDetailClose.focus({ preventScroll: true });
       }
 
       function closeFirmwareDetails({ immediate = false, restoreFocus = true } = {}) {
@@ -4164,12 +4162,11 @@
         els.quickActionBackdrop.hidden = false;
         els.quickActionSheet.hidden = false;
         els.quickActionScroll.scrollTop = 0;
-        requestAnimationFrame(() => {
-          if (!state.detailsOpen) return;
-          els.body.classList.add("quick-actions-open");
-          syncOverlayState();
-          els.quickActionClose.focus({ preventScroll: true });
-        });
+        // Establish keyboard ownership before another input can reach the page.
+        els.quickActionSheet.getBoundingClientRect();
+        els.body.classList.add("quick-actions-open");
+        syncOverlayState();
+        els.quickActionClose.focus({ preventScroll: true });
       }
 
       function closeQuickActions({ immediate = false, restoreFocus = true } = {}) {

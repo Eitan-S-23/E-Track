@@ -834,3 +834,20 @@ unpositioned panel and allowing a late callback to take focus after Escape.
 `notification-panel-red-01` deterministically reproduced this by deferring page
 animation callbacks. The correction positions/focuses synchronously and preserves
 the existing close behavior. It changes no notification, task or mutation logic.
+
+Follow-up `aacb803430dd6529fd7dc6fa32ef0589296d344c` deployed as
+`0cb5f710-a504-41d4-a753-8385435f72c1`. `notification-panel-tests-01` passed all
+55 App UI tests. Native CI `43414505154` passed 385 backend tests and 188 UI cases,
+but exposed three immediate-Escape variants and one too-early resize measurement.
+These failures are preserved, not reported as a green run. The new
+`notification-modal-red-01` deterministically holds animation frames to reproduce
+the immediate-Escape hole. App/MCU opening now establishes keyboard ownership
+synchronously; the resize test polls the same exact bounds after the asynchronous
+resize event instead of sampling before it. No assertions are relaxed.
+
+`notification-live-after-02` already verified deployed notification assets and
+real read-only task/modal behavior. The first probe's separate Node HTTP client
+had ECONNRESET after successful asset checks; the successor uses browser-owned
+GETs and keeps the all-non-GET barrier. Raw Playwright diagnostics can include
+request cookies: the old failure file is access-restricted, its bytes preserved,
+and subsequent diagnostics emit only sanitized error summaries.
