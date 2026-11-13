@@ -49,13 +49,17 @@ class ProfileTabPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const _ProfileTitle(),
-                  const Spacer(),
-                  _ProfileAvatar(onTap: _showUserInfoDialog),
-                ],
+              SizedBox(
+                width: double.infinity,
+                child: Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  spacing: 12,
+                  runSpacing: 16,
+                  children: [
+                    const _ProfileTitle(),
+                    _ProfileAvatar(onTap: _showUserInfoDialog),
+                  ],
+                ),
               ).animate().fadeIn(duration: 420.ms).slideY(begin: 0.14, end: 0),
               const SizedBox(height: 30),
               _ProfilePanel(
@@ -691,7 +695,7 @@ class _ProfilePanel extends StatelessWidget {
                             size: topNode,
                             icon: action.icon,
                             label: action.label,
-                            labelWidth: 120,
+                            labelWidth: math.min(120.0, innerWidth / 2),
                             onTap: action.onTap,
                           ),
                       ],
@@ -706,7 +710,7 @@ class _ProfilePanel extends StatelessWidget {
                             size: bottomNode,
                             icon: action.icon,
                             label: action.label,
-                            labelWidth: 98,
+                            labelWidth: math.min(98.0, innerWidth / 3),
                             onTap: action.onTap,
                           ),
                       ],

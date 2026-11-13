@@ -44,8 +44,12 @@ void main() {
 
   void settingsTest(String description, WidgetTesterCallback body) {
     testWidgets(description, (tester) async {
-      addTearDown(inventory.onClose);
-      await body(tester);
+      try {
+        await body(tester);
+      } finally {
+        inventory.onClose();
+        await tester.pumpWidget(const SizedBox.shrink());
+      }
     });
   }
 
@@ -68,11 +72,11 @@ void main() {
       ),
       home: const Scaffold(body: ProfileTabPage()),
     ));
-    await tester.pump(const Duration(seconds: 1));
-    await tester.ensureVisible(find.text('应用设置'));
-    await tester.tap(find.text('应用设置'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pumpAndSettle();
+    // TraceGlowNode's caption is outside its circular InkWell.
+    await tester.ensureVisible(find.byIcon(Icons.settings));
+    await tester.tap(find.byIcon(Icons.settings));
+    await tester.pumpAndSettle();
     expect(find.byKey(toggleKey), findsOneWidget);
     expect(tester.takeException(), isNull);
   }

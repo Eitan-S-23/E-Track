@@ -11,6 +11,7 @@ import 'package:ble_monitor/services/version_inventory_service.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late DateTime now;
+  DateTime Function()? timerClock;
   late List<Map<String, dynamic>> sent;
   late VersionInventoryService service;
   late StreamController<bool> activity;
@@ -25,6 +26,7 @@ void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
     now = DateTime.utc(2026, 11, 11);
+    timerClock = null;
     sent = [];
     allowed = true; fail = false; refresh = 'initial'; controls = 0; reads = 0;
     activity = StreamController<bool>.broadcast(sync: true);
@@ -33,7 +35,7 @@ void main() {
     invalidIdentity = false;
     service = VersionInventoryService(
       supported: true, endpoint: Uri.parse('https://example.test/api/public/version-inventory'),
-      clock: () => now, canReport: () => allowed,
+      clock: () => timerClock?.call() ?? now, canReport: () => allowed,
       runtimeActivity: [activity.stream],
       readAppIdentity: () async {
         reads++;
@@ -54,16 +56,30 @@ void main() {
 
   void inventoryWidgetTest(String description, WidgetTesterCallback body) {
     testWidgets(description, (tester) async {
-      addTearDown(service.onClose);
-      await body(tester);
+      // Deadlines and Timer delivery must use the same fake clock.
+      timerClock = tester.binding.clock.now;
+      now = timerClock!();
+      try {
+        await body(tester);
+      } finally {
+        service.onClose();
+        timerClock = null;
+      }
     });
   }
 
   Future<void> advance(WidgetTester tester, Duration elapsed) async {
-    now = now.add(elapsed);
     await tester.pump(elapsed);
+    now = tester.binding.clock.now();
     // The scheduled report also awaits preference writes before sending.
     await tester.pump();
+  }
+
+  void expectReports(int count) {
+    expect(sent, hasLength(count), reason:
+        'ready=${service.ready.value}, status=${service.status.value}, '
+        'failure=${service.failureCode.value}, next=${service.nextAttemptAt.value}, '
+        'now=$now, reads=$reads, activityListener=${activity.hasListener}');
   }
 
   DeviceOtaInfo info([int version = 30321]) {
@@ -158,7 +174,7 @@ void main() {
     allowed = true;
     activity.add(false);
     await advance(tester, const Duration(seconds: 5));
-    expect(sent, hasLength(1));
+    expectReports(1);
     expect(service.status.value, InventoryReportStatus.reported);
   });
 
@@ -168,7 +184,7 @@ void main() {
     expect(service.status.value, InventoryReportStatus.retrying);
     fail = false;
     await advance(tester, const Duration(hours: 1));
-    expect(sent, hasLength(1));
+    expectReports(1);
     expect(service.failureCode.value, isNull);
   });
 
@@ -183,7 +199,7 @@ void main() {
     await pending;
     gate = null;
     await advance(tester, const Duration(seconds: 5));
-    expect(sent, hasLength(2));
+    expectReports(2);
     expect((sent.last['devices'] as List).single['versionCode'], 30324);
   });
 
@@ -201,7 +217,7 @@ void main() {
     fail = false;
     service.didChangeAppLifecycleState(AppLifecycleState.resumed);
     await advance(tester, const Duration(seconds: 5));
-    expect(sent, hasLength(1));
+    expectReports(1);
   });
 
   inventoryWidgetTest('opt-out cancels an already scheduled retry', (tester) async {
@@ -228,7 +244,7 @@ void main() {
     gate = null;
     fail = false;
     await advance(tester, const Duration(seconds: 5));
-    expect(sent, hasLength(1));
+    expectReports(1);
   });
 
   inventoryWidgetTest('a lagging duplicate receipt cannot create a zero-delay reporting loop', (tester) async {
