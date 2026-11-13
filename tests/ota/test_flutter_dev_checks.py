@@ -146,6 +146,8 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
                 [item[0] for item in plan],
             )
             self.assertEqual(["pub", "get", "--enforce-lockfile"], plan[2][1][1:])
+            self.assertEqual("3.47.9", plan[0][1][plan[0][1].index("--branch") + 1])
+            self.assertNotIn("stable", plan[0][1])
             self.assertEqual(["analyze", "--no-pub"], plan[3][1][1:])
             self.assertEqual(directory, plan[4][1][-1])
             self.assertIn("--no-pub", plan[4][1])

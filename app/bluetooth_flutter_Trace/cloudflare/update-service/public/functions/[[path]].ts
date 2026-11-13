@@ -30,6 +30,12 @@ async function routePublicRequest(
     return new Response(null, { status: 204 });
   }
 
+  // The catch-all function must explicitly hand known site assets back to Pages.
+  if ((method === "GET" || method === "HEAD") &&
+      ["/", "/index.html", "/favicon.ico", "/favicon.png", "/favicon.svg"].includes(url.pathname)) {
+    return context.next();
+  }
+
   if (method === "GET" && url.pathname === "/healthz") {
     return json({
       ok: true,

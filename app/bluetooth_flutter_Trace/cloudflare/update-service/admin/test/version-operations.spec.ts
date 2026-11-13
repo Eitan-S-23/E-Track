@@ -25,7 +25,7 @@ export async function setup(page:Page,language="zh",role="owner",push?:{publicKe
     if(url.origin!==origin){await route.abort();return;}
     if(url.pathname==="/"){await route.fulfill({contentType:"text/html",body:html});return;}
     if(url.pathname==="/admin.css"){await route.fulfill({contentType:"text/css",body:css});return;}
-    if (["/sheet-gestures.js","/overlay-history.js","/delta-activity.js"].includes(url.pathname)) {
+    if (["/sheet-gestures.js","/overlay-history.js","/delta-activity.js","/resource-usage.js"].includes(url.pathname)) {
       await route.fulfill({contentType:"text/javascript",body:readFileSync(new URL("../public"+url.pathname,import.meta.url),"utf8")}); return;
     }
     const reply=(body:object,status=200)=>route.fulfill({status,contentType:"application/json",headers:{"X-Request-Id":requestId},body:JSON.stringify({requestId,...body})});
@@ -114,6 +114,78 @@ export async function setup(page:Page,language="zh",role="owner",push?:{publicKe
   await expect(page.locator("#versionStrip .version-card")).toHaveCount(1);
   return {data,errors};
 }
+
+for (const kind of ["android","firmware"]) {
+  test(`candidate arrival ${kind} shows once and opens registered release details, not delta creation`,async({page})=>{
+    const {data,errors}=await setup(page);
+    await page.evaluate("state.appSection='inventory';state.firmwareSection='inventory';applyAppSection();applyFirmwareSection()");
+    data.notifications=[{id:101,type:"candidate",kind,targetReleaseId:kind==="android"?"app-target":"fw-target",
+      versionName:kind==="android"?"1.0.74":"3.3.24",targetVersionCode:kind==="android"?100:30324,status:"ready",createdAt:Math.floor(Date.now()/1000),unread:1}];
+    data.unreadCount=1;
+    await page.evaluate("taskActivity.refresh()");
+    await expect(page.locator("#taskToast")).toContainText("新构建包已入库");
+    await expect(page.locator("#taskToast")).toContainText(String(data.notifications[0].versionName));
+    await page.locator("#taskToast button").click();
+    await page.locator('[data-notification-id="101"]').click();
+    await expect(page.locator(kind==="android"?"#quickActionSheet":"#firmwareDetailSheet")).toBeVisible();
+    await expect(page.locator("#deltaSheet")).toBeHidden();
+    expect(data.writes.every(row=>row.path.endsWith("/notifications/read"))).toBe(true);
+    expect(errors).toEqual([]);
+    await page.evaluate("taskActivity.refresh()");
+    await expect(page.locator("#taskToast")).toBeHidden();
+  });
+}
+
+test("candidate arrivals wait behind a dialog without stealing focus or losing the unread result",async({page})=>{
+  const {data,errors}=await setup(page);
+  await page.evaluate("void openResultDialog({title:'Active dialog',message:'Do not interrupt'})");
+  await expect(page.locator("#confirmAccept")).toBeFocused();
+  const focus=await page.evaluate("document.activeElement.id");
+  data.notifications=[{id:102,type:"candidate",kind:"firmware",targetReleaseId:"fw-target",versionName:"3.3.24",status:"ready",createdAt:Math.floor(Date.now()/1000),unread:1}];
+  data.unreadCount=1;await page.evaluate("taskActivity.refresh()");
+  await expect(page.locator("#taskToast")).toBeHidden();
+  expect(await page.evaluate("document.activeElement.id")).toBe(focus);
+  expect(data.unreadCount).toBe(1);
+  await page.locator("#confirmAccept").click();
+  await expect(page.locator("#taskToast")).toContainText("3.3.24");
+  expect(errors).toEqual([]);
+});
+
+test("candidate detail lookup failure does not pretend to open a release or submit a build",async({page})=>{
+  const {data,errors}=await setup(page);
+  data.notifications=[{id:103,type:"candidate",kind:"android",targetReleaseId:"removed",versionName:"old",status:"ready",createdAt:Math.floor(Date.now()/1000),unread:1}];
+  data.unreadCount=1;await page.evaluate("taskActivity.refresh()");
+  await page.locator("#taskButton").click();await page.locator('[data-notification-id="103"]').click();
+  await expect(page.locator("#taskContent")).toContainText("此构建包已移除");
+  await expect(page.locator("#quickActionSheet")).toBeHidden();
+  expect(data.writes.every(row=>row.path.endsWith("/notifications/read"))).toBe(true);expect(errors).toEqual([]);
+});
+
+test("provider usage is loaded on demand and distinguishes zero, unavailable and stale data on mobile",async({page})=>{
+  const {errors}=await setup(page);await page.setViewportSize({width:360,height:760});
+  let calls=0,fail=false;
+  const now=Math.floor(Date.now()/1000);
+  await page.route("**/api/admin/resource-usage",async route=>{
+    calls++;
+    if(fail){await route.fulfill({status:503,contentType:"application/json",body:JSON.stringify({message:"Offline"})});return;}
+    await route.fulfill({contentType:"application/json",body:JSON.stringify({ok:true,checkedAt:now,nextRefreshAt:now+900,
+      safeguards:{clientReportsPerUtcDay:8,backendReportsPerUtcDay:1000},metrics:[
+        {key:"workerRequests",group:"workers",used:0,unit:"requests",state:"ok",scope:"test-worker",periodStart:now-3600,periodEnd:now-300,periodRolloverAt:now+3600,lastSuccessAt:now,sampledAt:null},
+        {key:"workerCpu",group:"workers",used:null,unit:"ms",state:"permission_denied",scope:"test-worker",periodStart:now-3600,periodEnd:now-300,lastSuccessAt:null,sampledAt:null}
+      ]})});
+  });
+  expect(calls).toBe(0);await page.locator("#resourceOrb").click();
+  await expect(page.locator('[data-usage-key="workerRequests"] strong')).toHaveText("0 requests");
+  await expect(page.locator('[data-usage-key="workerCpu"]')).toContainText("无读取权限");
+  await expect(page.locator('[data-usage-key="workerCpu"] strong')).toHaveText("未知");
+  await expect(page.locator("#providerUsage")).toContainText("套餐、额度及剩余：未知");
+  await expect(page.locator("#providerUsage")).toContainText("GitHub Actions");
+  expect(await page.locator("#resourcePanel").evaluate(node=>node.scrollWidth<=node.clientWidth+1)).toBe(true);
+  fail=true;await page.locator("[data-usage-refresh]").click();
+  await expect(page.locator('[data-usage-key="workerRequests"]')).toHaveAttribute("data-state","stale");
+  await expect(page.locator('[data-usage-key="workerRequests"] strong')).toHaveText("0 requests");
+  expect(errors).toEqual([]);
+});
 export async function firmwareView(page:Page) {
   if(await page.locator("#mobileMenu").isVisible()) await page.locator("#mobileMenu").click();
   await page.locator('[data-view-target="firmware"]').click();

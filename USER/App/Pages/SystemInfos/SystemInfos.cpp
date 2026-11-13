@@ -137,7 +137,7 @@ void SystemInfos::Update()
     /* System */
     DataProc::MakeTimeString(lv_tick_get(), buf, sizeof(buf));
     View.SetSystem(
-        VERSION_FIRMWARE_NAME " " VERSION_SOFTWARE,
+        Model.GetFirmwareName(),
         VERSION_AUTHOR_NAME,
         VERSION_LVGL,
         buf,

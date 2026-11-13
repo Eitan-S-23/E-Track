@@ -1,4 +1,4 @@
-window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, openTarget, openPanel, onJobs }) {
+window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, openTarget, openPanel, onJobs, canNotify = () => true }) {
   const button = document.querySelector("#taskButton");
   const content = document.querySelector("#taskContent");
   const toast = document.querySelector("#taskToast");
@@ -7,6 +7,7 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
   let generation = 0, pushInfo = null, pushBusy = false, pushChecking = false, pushRevision = 0, pushError = "", toastTimer = null;
   let noticePage = 0, readRevision = 0, readBusy = false, readError = "", viewTimer = null, refreshAgain = false, workerUpdate = false;
   let readQueue = new Set(), pendingOpen = new URLSearchParams(location.search).get("tasks") === "1";
+  let pendingNotices = [];
   try { pendingOpen ||= sessionStorage.getItem("trace-admin-open-tasks") === "1"; } catch { /* The URL still covers cold starts. */ }
   const readLocal = key => { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } };
   const saveLocal = (key,value) => { try { localStorage.setItem(key,JSON.stringify(value)); } catch { /* Server history still works without local storage. */ } };
@@ -75,6 +76,7 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
     toastTimer = setTimeout(()=>{ toast.hidden = true; },10000);
   }
   function resume() {
+    announce();
     if (!pendingOpen || !actor || document.hidden) return;
     pendingOpen = false;
     if (openPanel() === false) { pendingOpen = true; return; }
@@ -83,6 +85,17 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
     if (url.searchParams.get("tasks") === "1") {
       url.searchParams.delete("tasks"); history.replaceState(history.state,"",url.href);
     }
+  }
+  function announce() {
+    if (!actor || document.hidden || !canNotify()) return;
+    const last = Number(readLocal(key("noticed")) ?? 0);
+    const fresh = pendingNotices.filter(n=>n.unread && n.id > last);
+    if (!fresh.length) return;
+    const arrival = fresh.length === 1 && fresh[0].type === "candidate" ? fresh[0] : null;
+    notify(arrival ? `${arrival.kind === "firmware" ? "MCU" : arrival.kind === "windows" ? "Windows App" : "Android App"} ${arrival.versionName} · ${text("新构建包已入库，待发布", "New candidate registered, not published")}`
+      : text(`${fresh.length} 条新结果，可在任务与通知中查看。`, `${fresh.length} new results. Open Tasks and notifications to review.`));
+    saveLocal(key("noticed"),Math.max(...fresh.map(n=>n.id)));
+    pendingNotices = [];
   }
   function requestPanel() {
     pendingOpen = true;
@@ -142,7 +155,7 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
     const jobs = data?.jobs ?? [], running = jobs.filter(active).length, unread = data?.unreadCount ?? 0;
     button.disabled = !actor;
     button.querySelector(".task-label").textContent = text("任务", "Tasks");
-    button.setAttribute("aria-label", `${text("差分任务", "Delta tasks")}: ${running} ${text("进行中", "active")}, ${unread} ${text("未读", "unread")}`);
+    button.setAttribute("aria-label", `${text("任务与通知", "Tasks and notifications")}: ${running} ${text("进行中", "active")}, ${unread} ${text("未读", "unread")}`);
     const badge = button.querySelector(".task-badge");
     badge.textContent = String(unread); badge.hidden = !unread;
     button.dataset.running = String(running > 0);
@@ -169,7 +182,7 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
       ${readError ? `<p class="error" role="alert">${escape(readError)}</p>` : ""}
       ${error ? `<p class="error" role="alert">${escape(error)} ${escape(text("上次状态已保留，恢复连接后重新读取，不会重发构建。", "Previous status retained; reconnecting only rereads, never redispatches builds."))}</p>` : ""}
       ${loading && !data ? `<p role="status">${escape(text("正在读取任务...", "Loading tasks..."))}</p>` : ""}
-      <div class="task-notifications">${notifications.slice(noticePage*6,(noticePage+1)*6).map(n=>`<button type="button" class="task-notification ${n.unread ? "unread" : ""}" data-notification-id="${n.id}" data-task-kind="${escape(n.kind)}" data-task-target="${escape(n.targetReleaseId)}"><span>${escape(n.kind === "firmware" ? text("单片机", "MCU") : "App")} · ${escape(n.baseVersionCode)} → ${escape(n.targetVersionCode)}</span><strong>${escape(n.status === "ready" ? text("差分包已生成", "Delta ready") : text("差分生成失败", "Delta failed"))}</strong><small>${escape(new Date(n.createdAt*1000).toLocaleString())}</small></button>`).join("")}</div>
+      <div class="task-notifications">${notifications.slice(noticePage*6,(noticePage+1)*6).map(n=>`<button type="button" class="task-notification ${n.unread ? "unread" : ""}" data-notification-id="${n.id}" data-task-type="${escape(n.type ?? "delta")}" data-task-kind="${escape(n.kind)}" data-task-target="${escape(n.targetReleaseId)}"><span>${escape(n.kind === "firmware" ? text("单片机", "MCU") : n.kind === "windows" ? "Windows App" : "Android App")} · ${n.type === "candidate" ? escape(n.versionName) : `${escape(n.baseVersionCode)} → ${escape(n.targetVersionCode)}`}</span><strong>${escape(n.type === "candidate" ? text("新构建包已入库，查看详情", "New candidate registered, open details") : n.status === "ready" ? text("差分包已生成", "Delta ready") : text("差分生成失败", "Delta failed"))}</strong><small>${escape(new Date(n.createdAt*1000).toLocaleString())}</small></button>`).join("")}</div>
       ${notifications.length > 6 ? `<nav class="release-pagination" aria-label="${escape(text("通知分页", "Notification pages"))}"><button type="button" data-task-action="notice-prev" ${noticePage === 0 ? "disabled" : ""}>${escape(text("上一页通知", "Previous notifications"))}</button><span>${noticePage+1} / ${Math.ceil(notifications.length/6)}</span><button type="button" data-task-action="notice-next" ${(noticePage+1)*6 >= notifications.length ? "disabled" : ""}>${escape(text("下一页通知", "Next notifications"))}</button></nav>` : ""}
       <h3 class="delta-jobs-title">${escape(text("我的差分任务", "My delta jobs"))}</h3>
       <p class="firmware-hint">${escape(text("App 与单片机共用任务记录；关闭弹窗不会取消任务。成功后仍需手动启用，不会自动发布渠道。", "App and MCU jobs share this history. Closing does not cancel. Verified deltas still need manual enabling; channels are never auto-published."))}</p>
@@ -205,12 +218,8 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
       await reconcilePush(value,current,pushSnapshot);
       if (current !== generation) return;
       if (readSnapshot !== readRevision) { refreshAgain = true; return; }
-      const last = Number(readLocal(key("noticed")) ?? 0);
-      const fresh = value.notifications.filter(n=>n.unread && n.id > last);
-      if (fresh.length) {
-        notify(text(`${fresh.length} 条新任务结果，可在任务中查看。`, `${fresh.length} new task result(s). Open Tasks to review.`));
-        saveLocal(key("noticed"),Math.max(...fresh.map(n=>n.id)));
-      }
+      pendingNotices = value.notifications;
+      announce();
       onJobs(value.jobs);
     } catch (e) { if (current === generation) error = e.message; }
     finally {
@@ -263,7 +272,11 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
     const target = event.target.closest("button");
     if (!target || target.disabled) return;
     if (target.dataset.taskTarget) {
-      if (openTarget(target.dataset.taskKind,target.dataset.taskTarget) !== false && target.dataset.notificationId) void markRead([Number(target.dataset.notificationId)]);
+      const current = generation;
+      try {
+        if (await openTarget(target.dataset.taskKind,target.dataset.taskTarget,target.dataset.taskType ?? "delta") !== false
+          && current === generation && target.dataset.notificationId) void markRead([Number(target.dataset.notificationId)]);
+      } catch (e) { if (current === generation) { error = e.message; render(); } }
       return;
     }
     const action = target.dataset.taskAction;
@@ -305,7 +318,7 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
     if (actor === value) { refresh(); return; }
     actor = value; generation++; data = null; loading = false; error = ""; page = 0; pushBusy = false; pushChecking = false; pushError = "";
     noticePage = 0; readRevision = 0; readBusy = false; readError = ""; readQueue = new Set(); refreshAgain = false; clearTimeout(viewTimer);
-    clearTimeout(timer); toast.hidden = true;
+    clearTimeout(timer); clearTimeout(toastTimer); toast.hidden = true; pendingNotices = [];
     pushInfo = null;
     render(); if (actor) { refresh(); resume(); }
   }

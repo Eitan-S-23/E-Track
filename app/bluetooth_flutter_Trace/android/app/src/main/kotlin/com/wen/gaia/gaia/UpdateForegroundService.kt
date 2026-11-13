@@ -70,18 +70,18 @@ class UpdateForegroundService : Service() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val updateChannel = NotificationChannel(
             CHANNEL_ID,
-            "Trace 更新",
+            "E-Track 更新",
             NotificationManager.IMPORTANCE_LOW,
         ).apply {
-            description = "Trace 应用更新下载与安装包合成"
+            description = "E-Track 应用更新下载与安装包合成"
             setShowBadge(false)
         }
         val installChannel = NotificationChannel(
             INSTALL_CHANNEL_ID,
-            "Trace 安装",
+            "E-Track 安装",
             NotificationManager.IMPORTANCE_HIGH,
         ).apply {
-            description = "Trace 更新完成后的安装入口"
+            description = "E-Track 更新完成后的安装入口"
             setShowBadge(false)
         }
         val manager = getSystemService(NotificationManager::class.java)
@@ -101,7 +101,7 @@ class UpdateForegroundService : Service() {
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle("Trace 正在更新")
+            .setContentTitle("E-Track 正在更新")
             .setContentText(status)
             .setStyle(NotificationCompat.BigTextStyle().bigText(status))
             .setContentIntent(contentIntent)
@@ -138,7 +138,7 @@ class UpdateForegroundService : Service() {
 
         return NotificationCompat.Builder(this, INSTALL_CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle("Trace 更新已就绪")
+            .setContentTitle("E-Track 更新已就绪")
             .setContentText(status)
             .setStyle(NotificationCompat.BigTextStyle().bigText(status))
             .setContentIntent(installPendingIntent)
@@ -208,7 +208,7 @@ class UpdateForegroundService : Service() {
                 setDataAndType(uri, "application/vnd.android.package-archive")
                 clipData = ClipData.newUri(
                     context.contentResolver,
-                    "Trace update APK",
+                    "E-Track update APK",
                     uri,
                 )
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)

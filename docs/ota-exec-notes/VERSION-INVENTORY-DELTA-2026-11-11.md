@@ -851,3 +851,826 @@ had ECONNRESET after successful asset checks; the successor uses browser-owned
 GETs and keeps the all-non-GET barrier. Raw Playwright diagnostics can include
 request cookies: the old failure file is access-restricted, its bytes preserved,
 and subsequent diagnostics emit only sanitized error summaries.
+
+### Final Notification Repair Delivery
+
+Final source `1b75d3921244642127f6aaa980ac308baf797b66` is deployed on the
+original Admin as version `c0ed148b-04fa-40b7-a2a5-f93c34482719`. Native CI
+`43417157076` completed successfully: the retrieved original log records 193
+Admin UI tests and 385 Worker tests passed, with both Pages type checks green.
+`notification-modal-native-03` retains that completed observation and log;
+the earlier in-progress observations and failed prior-source runs are preserved.
+Push CI `43416739592` also succeeded, with App/firmware package jobs skipped.
+The 426-test host backend result remains separate from the native 385-test run.
+
+`notification-live-after-03` verified the final deployed asset hashes, synchronous
+panel/modal ownership and task/gesture behavior using authenticated browser GETs.
+The probe allowed no server mutation, blocked its one attempted read POST, and
+left notification read state unchanged. Existing package/channel observations
+are retained for closeout comparison. Worker version
+`dd3b187a-a237-4650-bf81-7f90949e8424` at source
+`f57a6ffe0d47c6cc4d1713b0fb505d3cf3197f5c` was not redeployed.
+
+No repeated migration/export, new delta/package, subscription reset, APK install
+or device operation is part of this closeout. A normal Admin page refresh loads
+the fix and updates its existing service-worker registration in place. Actual
+Android notification-tap navigation still needs the operator's phone check;
+headless tests are not evidence of that physical OS interaction. This closing
+note is local documentation and does not trigger another commit or deployment.
+
+### Operator Confirmation And Deferred App UI Finding
+
+The operator confirmed the notification repair works on the phone after the
+deployment above. Record this as operator-reported real-device confirmation,
+separate from the headless test evidence; do not repeat the completed notification
+or delta-generation tests to replace it.
+
+APP-UI-INV-01, OPEN / DEFERRED BY OPERATOR: in the App settings dialog, the
+version-statistics opt-in label ("Participate in version statistics") is too dim
+against the current background, and its color is inconsistent with the switch
+and surrounding surface. The operator explicitly requested recording only and
+batching this with later UI findings. Do not change the App theme, label, build
+version or APK for this issue now. A later fix should follow the existing dialog
+palette, maintain readable text contrast in each supported theme, and keep the
+reporting opt-in behavior unchanged.
+
+The operator has now connected the MCU and successfully read its current version
+in the existing App. The reported version number itself has not been supplied in
+chat; the next step is a read-only check of actual backend inventory and package
+eligibility. A successful local INFO read is not by itself proof of a received
+server report. Preserve the current device, App, package and channel state while
+reconciling this observation.
+
+### MCU Inventory Intake And Channel Boundary
+
+`admin-interactions-20261113-01/mcu-inventory-read-01` received the real current
+inventory through authenticated Admin GETs: one reporting installation on App
+102 and one MCU observation, version 30321, hardware revision 1, layout 1, image
+SHA-256 `5820b830e9763ee853f29ff21adb4c43ebd5cf1c7ce00fcff85cef1e05be11bf`.
+The observation matches the existing 30321 base of the 30324 firmware catalogue,
+including its image hash, not merely its version label. The installed App's MCU
+reporting path is now observed end-to-end. This is one installation-scoped MCU
+observation, not a globally deduplicated user or device count.
+
+The original 3.3.24 candidate and 30321-to-30324 delta already exist. The fresh
+channel read still shows 30324 on Beta and an empty MCU Stable channel. The
+ordinary installed App queries Stable; its update page has no Beta selector.
+Do not prescribe a nonexistent selector, change request/signature checks, or
+reinstall the App solely to hide this mismatch. Serving this candidate through
+the ordinary installed-App path requires an explicit MCU Stable publication,
+which affects all eligible clients of that channel and is a release decision,
+not an inventory read. No publication, device upgrade, new package, build,
+subscription change or UI source change was performed in this observation.
+The existing tiny delta proves package eligibility, not representative BLE speed.
+
+### Additional Deferred UI And Branding Findings
+
+The operator explicitly requested recording the following observations only,
+then fixing them together after the exploratory testing batch. These are
+operator-reported findings, not newly reproduced or repaired in this session.
+APP-UI-INV-01 remains open in the same deferred batch. Do not change UI assets,
+App versions, authentication settings or deployed services for this note.
+
+- ADMIN-UI-SHEET-01, OPEN / DEFERRED: the panel opened by the floating resource
+  ball does not dismiss on a left/right screen swipe, unlike the other dialogs.
+  Bring its swipe-to-close behavior into line with the other overlays. The top
+  overlay should own dismissal without navigating the underlying page; retain
+  existing nested-scroll, draft and busy-operation protections and ball dragging.
+- ADMIN-UI-LOGIN-01, OPEN / DEFERRED: the current login page looks inconsistent
+  and unattractive. Optimize its layout, typography, colors and mobile behavior
+  together with the existing Admin/App visual language. At implementation time,
+  identify whether each visible login surface belongs to the project or the
+  Cloudflare Access page; appearance changes must preserve authentication and
+  access policies.
+- BRAND-ETRACK-01, OPEN / DEFERRED: replace the website's current icon/favicon
+  with an identity appropriate to this project, and set its displayed slogan/name
+  to exactly `E-Track`. Audit the Admin and phone App for remaining user-visible
+  `Trace` branding and consistently replace it with `E-Track`, including relevant
+  titles, login copy, dialogs and notifications. This is a visible-branding scope,
+  not a blind replacement of compatibility-sensitive technical identifiers such
+  as application IDs, signing identities, API fields, storage keys, repository
+  names or existing service domains. The exact icon design is deferred too.
+
+Only this existing task note was updated. No image was generated, product source
+was edited, package/channel state changed, or build/deployment was triggered.
+The operator retains control of the ongoing MCU publication/upgrade test.
+
+### Operator MCU Upgrade Result, Patch Provenance And Stale System Info
+
+The operator reported a successful 3.3.21-to-3.3.24 upgrade and asked why its
+patch already existed without a new delta-management action. The original
+`mcu-admin-delta-20261111-01/candidate-dispatch-01/dispatch-intent.json` binds an
+agent-initiated `firmware-build.yml` dispatch with `prepare_admin_candidate=true`,
+`version_name=3.3.24` and `candidate_base_version=3.3.21`. Native run
+`43027319926` generated, verified, uploaded and registered the 307-byte patch
+together with the full/recovery assets. It was not generated by the operator's
+current session or by an unrequested new build. This older, original-package
+patch becomes available with its release's channel publication; supplemental
+patches generated later through delta jobs have a separate enable/disable step.
+Explain this distinction; do not delete, regenerate or relabel the originals.
+This is not new evidence of a version-bump push completing the newer automatic
+candidate workflow.
+
+MCU-UI-INFO-01, OPEN / DEFERRED WITH THE UI BATCH: the operator reports stale
+information on the MCU device/system-information display. Source confirms
+`USER/App/Pages/SystemInfos/SystemInfos.cpp` passes `VERSION_FIRMWARE_NAME` and
+`VERSION_SOFTWARE` to `View.SetSystem`; `USER/App/Version.h` still fixes these to
+`X-TRACK` and `v2.7`, with the upstream author/project metadata. The displayed
+software version does not come from the running OTA firmware header. The
+30324 package's preserved byte comparison has `changesOutsideFwHeader=false`:
+it reuses the verified V2 executable and updates the finalized header, not this
+old information-page implementation. Treat the constant label as a real display
+defect, not evidence that an OTA did or did not succeed. A later batched fix
+should use the actual running firmware identity, coordinate visible E-Track
+branding, and retain required upstream license/attribution notices. Hardware,
+library/compiler versions and build/release dates must remain factual, not be
+blindly replaced with the OTA version or current date. No MCU/UI code was edited.
+
+The new authenticated GET-only `admin-interactions-20261113-01/mcu-inventory-read-02`
+confirms MCU Stable now points to 30324 at revision 1, with query/download enabled;
+Beta remains revision 9. This was the operator's publication, not an agent write.
+Inventory still contains the prior 30321 observation at `lastSeen=1794570798`,
+unchanged from `mcu-inventory-read-01`. Preserve the operator's successful-upgrade
+report separately: this stale inventory is neither a new 30324 readback nor
+proof of an upgrade failure. A later ordinary foreground App observation can
+reconcile the new version/hash; no repeat upgrade, reset or reinstall is justified.
+
+### Post-Upgrade Reporting Budget Check And Deferred Admin Additions
+
+The operator reports checking for updates several more times after the successful
+upgrade, asks whether reporting has exhausted its daily allowance, and requests
+recording the two Admin additions below for the existing batched remediation.
+Do not implement these changes or replay the completed upgrade for this inquiry.
+
+The read-only observation at `2026-11-13T12:31:15Z` (20:31:15 Asia/Shanghai) is
+preserved in
+`.cache/version-inventory-delta-20261111-01/admin-interactions-20261113-01/inventory-budget-read-01/`.
+One authenticated D1 query request executed four SELECT statements against the
+original `trace-update-staging` database. The native response records six rows
+read, zero rows written and no changed database. It submitted no inventory report
+and did not request a refresh, modify limits, or touch release/channel state.
+
+| Observed field | Value |
+| --- | --- |
+| UTC budget day | 2026-11-13 |
+| Global accepted reports / configured daily limit | 2 / 1000 |
+| Existing App 102 installation accepted reports / daily limit | 2 / 8 |
+| Latest accepted installation sequence | 2 |
+| Latest report received | 2026-11-13T11:53:23Z (19:53:23 Asia/Shanghai) |
+| Latest MCU observation | 30321, observed 2026-11-13T11:53:18Z |
+| MCU image SHA-256 | `5820b830e9763ee853f29ff21adb4c43ebd5cf1c7ce00fcff85cef1e05be11bf` |
+
+APP-INV-POSTOTA-01, OPEN / DEFERRED INVESTIGATION: no 30324 observation has reached
+the inventory at this checkpoint. Neither the installation daily cap nor the
+global accepted-report budget is exhausted. This does not establish spare
+account-wide Cloudflare quota, absence of ingress rate limiting, or the exact
+phone-side cause. Preserve the operator's upgrade success separately; stale
+telemetry must not downgrade it to an OTA failure.
+
+Source observations, not a confirmed diagnosis of this phone: successful
+`OtaService.readDeviceInfo` and verified post-reboot completion both call
+`VersionInventoryService.observeDevice`. The inventory service debounces for
+five seconds, coalesces unchanged identities for 24 hours, checks refresh control
+at most every four hours, and waits one hour after a reporting exception. A
+changed version/hash makes a report due, but foreground, opt-in, busy and retry
+guards still apply. A timer that returns while busy does not itself schedule an
+idle retry. The public control/report endpoints also share a 120 requests/hour
+per-IP ingress limit, separate from the two daily accepted-report limits. Merely
+pressing Check for updates is not a forced reporting acknowledgement.
+
+Next implementation owner: inspect the existing phone's latest observed identity,
+report scheduling/attempt/result and retry deadline through an authorized ordinary
+observation, without another upgrade or reinstall. Use the installed App identity
+when comparing with source. If the new identity is local but unsent, repair the
+pending-report/foreground-idle-retry path; if a request is rejected, preserve its
+real HTTP/error reason and address that condition instead. Add sanitized status
+visibility rather than silently swallowing the reason. The later oracle is a
+backend-acknowledged 30324 observation with the expected image hash, plus tests
+for busy-to-idle, foreground return, failure backoff, opt-out and unchanged-state
+coalescing. Do not raise limits, clear consent/state, or invent a phone result to
+hide this gap. No phone logs or new physical observations were collected here.
+
+ADMIN-NOTIFY-BUILD-01, OPEN / DEFERRED: when a GitHub Actions App or MCU candidate
+has actually finished upload, validation and registration in this original
+backend, show an in-page arrival popup and a browser/system notification through
+the existing authorized notification route. A successful compile alone is not
+proof that the backend received a package. Existing actor-scoped delta-job
+notifications do not cover every newly registered CI candidate. Reuse the
+notification/outbox/read-state infrastructure, preserve role/audience boundaries,
+and deduplicate repeated registration callbacks by immutable candidate identity.
+Include package type/version and an entry to the correct release details; do not
+auto-publish it. Retain an unread arrival when the page is closed or notification
+permission/vendor delivery is unavailable. Respect active dialogs and drafts;
+do not replay old packages as new arrivals or request browser permission on load.
+Later checks must distinguish foreground popup, actual browser delivery,
+idempotent callback, failed upload/registration, and click navigation. No new
+build, subscription mutation or test notification was triggered for this note.
+
+ADMIN-RESOURCE-USAGE-01, OPEN / DEFERRED: expand the floating resource panel to
+show real usage for the resources consumed by reporting and the existing update
+service. Include Workers/Pages Functions requests and CPU, D1 rows read/written
+and storage, Durable Objects requests/duration/SQLite usage, and existing R2
+storage/Class A/Class B usage. Keep GitHub Actions usage separate from Cloudflare.
+Show used/allowance/remaining, applicable account or project scope, actual plan,
+period, reset time and last successful measurement. Distinguish provider quotas
+from the App's 8/day and backend's 1000/day safeguards. Use bounded cached
+server-side provider metrics where available; do not expose credentials, invent
+unsupported counters, treat stale/missing data as zero, or infer provider usage
+by multiplying accepted reports. Flag permission gaps and statistical delay.
+Do not auto-upgrade plans or delete assets to satisfy a displayed quota.
+
+Reporting directly invokes Pages Functions/Workers and the inventory D1 queries;
+its ingress limiter makes a Durable Object RPC and SQLite operations. One accepted
+report is not one database write: budget triggers, snapshots and indexes can add
+writes. Rejected, control and coalesced network requests can still consume
+compute/limiter/read resources. This report handler does not directly read/write
+R2 or KV; package upload/download and other update routes are separate consumers.
+
+Official free-tier references retrieved on 2026-11-13, not a measurement of this
+account's subscription or remaining allowance:
+
+| Resource | Reference allowance and period |
+| --- | --- |
+| Workers / Pages Functions | 100000 requests/day; 10 ms CPU per invocation |
+| D1 | 5 million rows read/day; 100000 rows written/day; 5 GB total storage |
+| Durable Objects compute | 100000 requests/day; 13000 GB-s duration/day |
+| Durable Objects SQLite | 5 million rows read/day; 100000 rows written/day; 5 GB total storage |
+| R2 Standard free tier | 10 GB-month storage; 1 million Class A and 10 million Class B operations/month |
+
+These services do not share a single weekly quota. Daily provider allowances
+reset at 00:00 UTC (08:00 Asia/Shanghai); the application daily caps also use UTC.
+Rolling client intervals and per-IP hourly windows are different clocks. Paid
+included usage and R2 free usage are monthly, with service/billing-period rules;
+an included allowance is not necessarily a hard stop, since overage may be billed.
+The panel must use the actual service/plan instead of presenting this reference
+table as a verified account balance. No subscription or account-wide analytics
+query was made in this investigation.
+
+Sources: [Workers pricing](https://developers.cloudflare.com/workers/platform/pricing/),
+[D1 pricing](https://developers.cloudflare.com/d1/platform/pricing/),
+[Durable Objects pricing](https://developers.cloudflare.com/durable-objects/platform/pricing/),
+and [R2 pricing](https://developers.cloudflare.com/r2/pricing/).
+This continuation writes only the existing task note and the project-local query
+receipts. Product source, UI, limits, packages and deployments remain unchanged;
+there was no Git commit/push, new CI run, device operation or external cleanup.
+
+### Post-Restart MCU Report Received
+
+After the operator restarted the App, reconnected the MCU and read its firmware
+identity, the SELECT-only `inventory-budget-read-02` observation at
+`2026-11-13T13:06:18Z` confirmed a newly received 30324 report. The App 102
+installation advanced from sequence 2 to 3; its daily accepted count is 3/8 and
+the global count is 3/1000. MCU observation time is `2026-11-13T13:02:47Z`; report
+receipt is `2026-11-13T13:02:52Z` (21:02:52 Asia/Shanghai). The reported image hash
+is `bdca1ebcb40e39c0f108dc2c4eb49b1acd9621d4ac9563192720c6fd5ae0a7ae`, exactly
+matching the preserved 30324 candidate binding, with hardware revision/layout 1.
+Original response, comparison and write audit are under the existing
+`admin-interactions-20261113-01/inventory-budget-read-02/` evidence directory.
+
+APP-INV-POSTOTA-01 now has a successful new-version reporting observation; the
+earlier missing-report checkpoints remain unchanged. Its scheduling/backoff
+investigation remains OPEN / DEFERRED: this recovery does not identify the earlier
+cause, prove that restarting is required, or constitute a code repair. Do not
+repeat the upgrade or restart to replace this successful observation. The agent
+only read the backend and updated local evidence/this note; no report was
+fabricated, device operated, limit changed or product source modified.
+
+## UI Remediation Continuation, 2026-11-13
+
+The recovered thread resumed the eight-item remediation batch. Existing upgrade,
+inventory, notification-delivery and publication observations were retained, not
+replayed. Work remains incomplete. No new firmware/App release, deployment,
+publication, device operation or destructive cleanup was performed.
+
+All local changes and command outputs stay in the active worktree
+`.cache/p35-integration-20261028/source` relative to the authorized E-Track root.
+Within that worktree, `.cache/ui-remediation-20261113-01/` retains the preceding
+agent's 17 baseline files and the additional before-images, original command
+streams, development source binding and continuation write audit. The task
+worktree's unrelated dirty files and shared Git index were not rewritten.
+
+### Bounded Implementation Status
+
+| Finding | Current continuation status |
+| --- | --- |
+| APP-INV-POSTOTA-01 | Retained the prior scheduling patch; added quick background/foreground cancellation handling, re-reading invalid App identity, bounded scheduling of old receipts, sequence reconciliation and truthful duplicate acknowledgements. Worker host tests pass; Dart tests added but NOT_RUN in CI. |
+| APP-UI-INV-01 | Retained explicit readable opt-in colors and sanitized last-report/retry status. App runtime/visual verification remains pending. |
+| ADMIN-UI-SHEET-01 | Resource panel now reuses sheet gestures with its own positioning origin/header, and participates in same-document overlay history. Ten resource browser tests pass, including both horizontal swipe directions, scrolling, Back/Forward and dragging. |
+| BRAND-ETRACK-01 | Display names, share copy, native notification text, Windows title/description, website titles and SVG favicons changed to E-Track. Technical IDs, package/signing identities, URLs, storage keys and protocol fields remain unchanged. App/package verification pending. |
+| MCU-UI-INFO-01 | System information reads the running App's validated firmware header once when opening the model. Invalid identity shows unknown; simulator/legacy builds are labelled explicitly. Library/compiler/build metadata and upstream attribution remain intact. Native formatter fixtures pass; full MCU/simulator build and device verification NOT_RUN. |
+| ADMIN-UI-LOGIN-01 | Current official customization options reviewed only; no login template, plan or Access configuration changed. |
+| ADMIN-NOTIFY-BUILD-01 | Not implemented in this continuation. Existing delta notifications remain unchanged. |
+| ADMIN-RESOURCE-USAGE-01 | Not implemented in this continuation. No provider quota, plan, remaining balance or usage measurement has been invented. |
+
+### Original Verification And CI Stop
+
+`verification-02/result.json` and its original streams record:
+
+- Worker inventory host suite: 19 tests passed.
+- Worker and Admin TypeScript checks: exit 0.
+- Resource browser suite: 10 mocked Playwright tests passed.
+- Firmware-info C/C++ compilation: `-Wall -Wextra -Werror`, exit 0. Separate
+  3.3.24 and 3.3.25 fixture runs each passed 11 checks, including truncated
+  output, missing input and corrupt header cases. These are host fixtures, not
+  installed MCU evidence.
+- A scoped `git diff --check` passed. An earlier whole-tree check reported
+  pre-existing task-board whitespace; those unrelated lines were not modified.
+
+Development-only source delivery under the standing Flutter self-test authority:
+
+- Repository/account: `Eitan-S-23/E-Track`, authenticated `Eitan-S-23`.
+- Parent: `ce458416cb96dc9be41981aa9cd3098198b21c1f`. All 16 selected App
+  before-images matched the parent; there were no baseline differences.
+- New exclusive branch: `dev/flutter/ui-remediation-20261113-01`.
+- WIP commit: `6e25bbac607f413c463071494f41cd5967c09bea`.
+- Workflow: `flutter-dev-checks.yml`, push event, checks only, no APK requested.
+- Run: https://github.com/Eitan-S-23/E-Track/actions/runs/43446806308
+- Both Ubuntu and Windows jobs FAILED at dependency resolution, exit 65.
+  Flutter was `3.50.0`, revision
+  `ab2912035e160d9cad6306df307576da6128ebdb`, Dart `3.14.0`.
+  The original log says `Would change 6 dependencies` and
+  `Unable to satisfy pubspec.yaml using pubspec.lock`.
+  The six reported differences are clock 1.1.2 -> 1.1.3, stack_trace
+  1.12.1 -> 1.12.2, test_api 0.7.12 -> 0.7.14, vector_math 2.4.2 -> 2.4.4,
+  new listen 1.0.1, and classification of the existing local
+  flutter_blue_plus_android override as a dev dependency.
+- App analysis/tests and candidate tests: NOT_RUN, not failed App assertions.
+  Android APK and Windows EXE: NOT_BUILT. Both diagnostic artifact uploads
+  succeeded; the combined original console log is preserved locally.
+
+No blind rerun, lock-file check removal, SDK downgrade or dependency upgrade was
+performed. Next owner is the user for the dependency-baseline decision: the
+preferred bounded continuation is to allow only the lock-file changes required
+by the current CI SDK, review the exact resolver diff, then retain the strict
+lock-file gate for the normal dual-host development run. Do not turn this into
+a broad dependency upgrade or production workflow. Continue the original eight
+findings after that decision, rather than claiming source-only remediation is
+finished or repeating already successful physical tests.
+The WIP branch and run already exist: reconcile or advance that branch by an
+ordinary reviewed commit; do not replay branch creation or the original push.
+
+### Credential And Login Findings
+
+The direct GitHub CLI call under SYSTEM could not read the owner's credential.
+The older whole-process SU launcher then failed importing Python `_ctypes` before
+any GitHub request. Both failures remain preserved. The later existing
+`existing-credentials.py` route successfully read the named owner credential
+under its already-qualified SU context, with commands remaining SYSTEM. It
+verified the authenticated GitHub identity and performed the scoped development
+delivery above. No replacement credential, login, credential export, ACL change,
+service or scheduled task was created. The new `ui-remediation-ci.py` is only a
+thin adapter over those existing credential/API/receipt helpers.
+
+Official Access docs retrieved during this continuation distinguish two routes:
+the basic organization login design affects every Access application, while
+application-specific HTML/Liquid login templates require a Zero Trust
+Pay-as-you-go or Enterprise plan and exactly one visible
+`cf-access-authbox` control. The actual account plan was not queried, so neither
+availability nor a need to upgrade is established. Preserve authentication
+policies and avoid an organization-wide appearance change under an E-Track-only
+scope without a separate decision. Sources:
+https://developers.cloudflare.com/cloudflare-one/reusable-components/custom-pages/access-login-page/
+and https://developers.cloudflare.com/cloudflare-one/reusable-components/custom-pages/access-custom-pages/.
+
+Cloud/UI/MCU source and these notes remain local and uncommitted. Only the listed
+App WIP files were delivered to the new development branch; no mainline delivery
+or independent acceptance is claimed.
+
+## Authorized App UI And Dependency Follow-up, 2026-11-14
+
+The operator authorized the dependency correction and explicitly requested the
+version-statistics control's display/color repair. This follow-up changed only
+the assigned App UI/tests, the development SDK selector and its guide. It did
+not replay an upgrade, publication, notification or device observation.
+
+### Final Development Result
+
+- Validation branch: `dev/flutter/ui-remediation-20261113-01`.
+- Final commit: `2c3a4e41ba402cb2c047b62f6bd809f735473bf0`.
+- Actions: https://github.com/Eitan-S-23/E-Track/actions/runs/43470268506 .
+  Both host jobs and diagnostic uploads completed successfully.
+- SDK: Flutter `3.47.9`, framework revision
+  `c197ca5199e9ee5661e865596c9c07294dfab51c`, Dart `3.13.7`.
+  The tag checkout truthfully reports channel `[user-branch]`.
+- Strict dependency resolution and analysis: PASS on both hosts. Full App tests:
+  Linux 789 passed / 16 skipped / 0 failed; Windows 770 passed / 35 skipped /
+  0 failed. Eight additional candidate checks passed on each host.
+- Local contained runner regression: 65 passed. No local Flutter build occurred.
+- APK/EXE builds, publishing, deployment and device operations: NOT_RUN.
+  These are development results, not shipping or independent acceptance.
+
+APP-UI-INV-01 now has explicit readable label/state colors, selected/unselected/
+loading switch colors and its own transparent Material surface, so the dialog's
+painted background cannot hide ink feedback. Eight widget cases cover both theme
+brightnesses, adaptive controls, saved opt-out, loading, reporting status and a
+320-pixel layout at 200% text scale. The profile header, button captions and
+footer fit narrow layouts without clipping; remaining profile display names
+use E-Track. Privacy text, opt-in defaults, stored preferences and package IDs
+were not changed. No installed phone UI has been claimed updated.
+
+### Baseline And Test Lessons
+
+The first lock refresh passed strict resolution with Flutter 3.50.0, but that
+SDK also introduced unrelated Material-library migration diagnostics. Instead
+of migrating the whole App or suppressing checks, the development runner now
+selects the already verified 3.47.9 baseline recorded above in runs 43049945504
+and 43258693636. All five hosted-package changes were removed. The final lock
+diff only reclassifies the existing vendored `flutter_blue_plus_android` as a
+direct dev dependency; its version and source remain unchanged.
+
+The inherited scheduling tests used Flutter's guarded `expect` inside a mock
+transport invoked by a Timer during `tester.pump`. The resulting test-framework
+exception was caught by the optional telemetry service and appeared as
+`REPORT_UNAVAILABLE`. Mock requests/tokens are now recorded and asserted outside
+that callback. Timers and deadlines share the binding's clock; services close
+in the test body's `finally`, before invariant checks. Automatic retry/idle and
+foreground-cancellation assertions all pass without changing the production
+retry behavior in this follow-up. Two service lint findings were corrected.
+
+UI tests now tap the actual settings icon, not the non-interactive caption.
+The optional native version label is checked in both loading and resolved
+states; color, preference, status and overflow assertions remain intact. The
+development guide records these concrete pitfalls. Earlier failed runs and
+transport failures remain in the evidence; none were relabelled PASS.
+
+### Write Audit And Remaining Work
+
+Evidence is under `.cache/ui-remediation-20261113-01/dependency-ui-02`, with CI
+receipts in the sibling `github-*-ui02-*` directories. Explicit source/output
+paths and host-test fixtures are project-local; the shared Git index/branch was
+not switched or staged. Only ordinary reviewed fast-forward validation commits
+were made, with no mainline or release operation.
+
+The audit found a missed native-TLS side effect: six new certificate-revocation
+cache/metadata files under
+`C:/Windows/System32/config/systemprofile/AppData/LocalLow/Microsoft/CryptnetUrlCache`.
+Creation times and Google CRL/OCSP URLs match the initial Windows HTTPS lookup;
+the exact six paths, hashes and timestamps are recorded in
+`dependency-ui-02/external-cache-audit.json`. Their combined size is 224192 bytes.
+No cleanup was performed. Native gh/curl network calls were stopped after this
+discovery; the existing credential reader is now used with Python/OpenSSL HTTPS,
+with credentials excluded from redirected log downloads. Readback found no
+further change to the six files. Do not claim every write was project-contained;
+deleting any of these files requires the operator's explicit path-scoped approval.
+
+The original login-page, CI candidate-arrival notification and provider-usage
+panel findings remain unimplemented. Prior cloud/MCU changes and observations
+are retained, not repeated. App release-mode APK/EXE verification and real-device
+visual verification still require their applicable authorized delivery route.
+
+## Authorized Original Admin UI Deployment, 2026-11-14
+
+The operator explicitly authorized deployment after the source-versus-online
+status clarification. The original Admin at
+`https://trace-update-admin-staging.pages.dev` now serves deployment
+`cc6b9de2-bf77-4238-b263-5b3eb55c313b`, replacing
+`c0ed148b-04fa-40b7-a2a5-f93c34482719`.
+
+Only the four static UI files `index.html`, `admin.css`, `sheet-gestures.js` and
+`favicon.svg` changed relative to the previous deployment. This delivers the
+E-Track title/name/icon and resource-panel dismissal fix. Screenshot inspection
+also caught the new name wrapping beside the icon; the bounded correction keeps
+it on one line, shows only the icon in collapsed desktop navigation and restores
+the name in mobile navigation. Seven new branding regressions cover both locales,
+desktop/mobile widths, the title/favicon and collapsed-to-mobile restoration.
+
+The deployment is an explicitly dirty UI patch on base
+`1b75d3921244642127f6aaa980ac308baf797b66`, not a new Git commit. The authoritative
+source manifest is
+`.cache/ui-remediation-20261113-01/admin-deploy-01/source-publish.json`, SHA-256
+`0c980fadd16cd1f25113cad11b532cd43c7ac5a4913bd69f4f31a1abdca06144`.
+Backend sources, including the prior inventory handler, match the deployed base;
+the pending local inventory-handler change was deliberately excluded. The first
+native attempt failed locally because the isolated bundle omitted two runtime
+script dependencies. Their exact bytes were checked against the deployed Git
+commit before adding them; remote readback confirmed the old deployment and
+bindings remained unchanged before the successful retry. Failed originals remain
+preserved, not relabelled as a successful deployment.
+
+Verification under the same `admin-deploy-01` directory:
+
+- The original App/firmware Admin UI regression run passed all 144 tests.
+- After the small layout correction, all 49 selected branding/design/workspace
+  checks passed, including the seven new cases. Desktop/mobile screenshots were
+  inspected. These are mocked browser self-tests, not device acceptance.
+- `after-public.json` records HTTP 200 and exact deployed-byte matches for all
+  seven static assets, the E-Track title in both locale tables and the SVG MIME.
+- The existing owner session remains valid; unauthenticated Admin session access
+  still redirects with HTTP 302 to the existing Access issuer. Verification made
+  no business mutations and required no interactive login.
+- Pages production/preview deployment configurations and existing bindings match
+  the pre-deployment snapshot. No Worker/public-site deployment, D1 migration,
+  package/channel mutation, Git push, App/MCU build or device action occurred.
+
+The Cloudflare Access login appearance is still unimplemented and was not changed
+by this static-site publication. Candidate-arrival notifications and the expanded
+provider-usage panel also remain pending. The earlier six-file certificate-cache
+cleanup was completed under its separate exact-file authorization; its original
+receipt remains in `dependency-ui-02/external-cache-cleanup-01/result.json`.
+
+## Browser Favicon Clarification And Partial Correction, 2026-11-14
+
+The operator clarified that the requested icon is the browser favicon, not the
+in-page brand mark. Fresh anonymous navigation reaches the Access-hosted login
+page, whose title is `Sign in` / `Cloudflare Access` and whose favicon is an
+inline Cloudflare SVG data URL. That page never referenced the Admin's new icon.
+The authenticated Admin used the new SVG favicon, but `/favicon.ico` and
+`/favicon.png` both returned the SPA HTML with status 200. The preceding asset
+check did not cover these compatibility entries or the login-page favicon;
+do not attribute the operator's observation to browser caching without evidence.
+
+Deployment `0eb9a0d8-9383-45ce-a4ec-d25c1112929a` replaces `cc6b9de2...` on the
+same original Admin. It adds a real four-frame ICO (16/32/48/64 pixels), a 64-pixel
+PNG and versioned icon links, using the existing artwork. Browser decoding and
+all eight targeted branding/favicon tests passed. `verification.json` under
+`.cache/ui-remediation-20261113-01/favicon-login-01/` confirms the bare and
+versioned ICO/PNG URLs return their exact image bytes and correct MIME types,
+not HTML, and that the existing owner session remains valid. Backend sources,
+bindings, other static assets and Access configuration were preserved. No Git
+push, App/MCU build, package/channel action or device operation occurred.
+
+The Access login favicon and appearance remain UNRESOLVED, not deployed. The
+existing CI credential can read the target Access application and organization,
+but custom-page and subscription GETs return 403 / 10000. The registered local
+provisioning credential was also checked only for those two read operations and
+returned the same denial; it was not exported or substituted into CI. The
+separate Pages OAuth credential has Pages-write scope, not Access customization
+scope. These observations establish an unavailable management route, not the
+absence of credentials or proof of the account's plan.
+
+Current official documentation says application-specific HTML/Liquid Access
+custom pages require Pay-as-you-go or Enterprise. The actual subscription could
+not be read, so no plan or entitlement is inferred. Basic organization-wide login
+design changes affect all Access applications and do not by themselves replace
+the observed built-in favicon. Do not expand scope to other applications, weaken
+authentication, create a replacement credential, or upgrade a plan to hide this
+remaining gap. Next step is an owner-confirmed available Access custom-page
+management route/entitlement for this application. The favicon correction above
+does not complete the original login-page finding.
+
+## Remaining Admin Features, 2026-11-14
+
+The operator requested completion of the remaining work. This continuation
+implemented the two independent deferred Admin features rather than repeating
+the completed favicon deployment or the unchanged Access-permission probes.
+The active Git root was reconfirmed as
+`D:/github/my/E-Track/.cache/p35-integration-20261028/source`.
+Execution evidence is under
+`.cache/ui-remediation-20261113-01/remaining-20261114-01/` (abbreviated A below).
+
+### Delivered Scope
+
+| ID | Current status and boundary |
+| --- | --- |
+| ADMIN-NOTIFY-BUILD-01 | Implemented, self-tested and deployed. New App/MCU candidate registrations create durable, deduplicated arrivals in the same validated registration transaction. Existing subscriptions/read state remain intact. No candidate was manufactured and no real vendor/OS delivery was triggered for this continuation. |
+| ADMIN-RESOURCE-USAGE-01 | Implemented and deployed, with 20 real metrics returned by the live protected API and rendered on desktop/mobile. Includes the original Worker, Admin Pages, public update API Pages, D1, Durable Objects/SQLite and R2. Plan/allowance/remaining remain unknown; GitHub Actions remains separately not connected. |
+| ADMIN-UI-SHEET-01 follow-up | Fixed the existing delayed resource-panel hide: after the panel grew taller, its 190 ms delayed removal intercepted the next orb drag. The panel has no exit transition and now hides immediately. |
+| ADMIN-UI-LOGIN-01 | Still unresolved. No Access application/policy, account-wide login design, custom page or plan was changed. The earlier authenticated custom-page/subscription 403 evidence remains applicable; it was not blindly repeated. |
+
+The new events do not auto-publish, enable a delta, move a channel or backfill old
+packages. Active push subscribers get payloadless wakeups; an authorized reader
+without push also gets persistent unread arrivals on return. Candidate clicks
+open package details, including when navigating from the distribution tab.
+Windows details are read-only and cannot operate the Android channels. Modal
+work retains keyboard ownership and drafts. The existing push permission flow
+still requires an explicit user click.
+
+### Deployment And Provenance
+
+- D1 migrations `0011_candidate_notifications.sql` and `0012_resource_usage.sql`
+  applied once to `trace-update-staging`. Old notification IDs, per-item reads,
+  read cursors, sequence high-water mark and delivery leases were preserved in
+  the unified stream. Legacy tables were retained. The pre-migration outbox was
+  empty and the new candidate-event table remained empty after migration.
+- Original Worker version: `7844dddc-0087-464a-ba13-f3f6701c23d9`. All existing
+  bindings and checked runtime settings were preserved with `--keep-vars` and
+  no staged variable overrides. This also includes the previously local,
+  tested inventory acknowledgement change in the Worker bundle.
+- Initial Admin deployment: `e508d580-755c-40e4-80d5-47f5dddd15e9`, replacing
+  `0eb9a0d8-9383-45ce-a4ec-d25c1112929a`.
+- Current Admin deployment: `e998c204-7df9-4814-b185-47d78bc3f442`, correcting
+  only the resource reader's Workers request mode and cache namespace. This
+  correction did not rerun migrations, redeploy the Worker or change secrets.
+- Only two Pages production secrets were added: `RESOURCE_USAGE_API_TOKEN`
+  using the existing dedicated CI credential, and `RESOURCE_USAGE_CONFIG_JSON`
+  identifying the measured resources. Existing variables/bindings and preview
+  configuration were verified unchanged. No token was exposed to the browser.
+- Both Admin publications are explicitly dirty source patches on base commit
+  `1b75d3921244642127f6aaa980ac308baf797b66`, not new Git commits. The final source
+  manifest is `A/resource-runtime-fix/source.json`, SHA-256
+  `f81a3207c896ab7b738dc3e9775a92805699740f6eba5e3660db783ca4de4501`.
+  Its predecessor is `A/rollout/source.json`; the older staged inputs remain
+  unchanged. Source and this note are still pending authorized Git integration.
+
+Before/after D1 snapshots verified the same App/MCU releases, asset counts,
+channel pointers and revisions. No GitHub write, new CI build, package upload,
+publication, device operation, billing change or external cleanup occurred.
+The original ICO/PNG bytes were retained and verified on the final deployment.
+
+### Verification And Corrections
+
+`A/checks-09` records 181 passing host tests across eight affected suites,
+including CI registration invariants, firmware, deltas, inventory, notifications
+and migration preservation. Subsequent focused resource tests cover the final
+12-query scope and runtime correction; `checks-19` has eight passes. Final Admin
+and Worker TypeScript checks are `checks-20` and `checks-21`, both exit zero.
+These are self-tests, not independent runtime or device acceptance.
+
+`checks-07` records 58 passing notification/operations browser tests. The wider
+page regression initially had 20 mock-script failures because two older fixtures
+served API JSON for the new JavaScript asset; the fixtures now serve the actual
+module. The next 47-case targeted run had 46 passes and exposed the real delayed
+hide/drag issue, rather than justifying a blind retry. After its repair,
+`checks-16` passed all 17 resource/provider/candidate cases. `checks-13` also
+passed five candidate cases, including a mock OS notification sink. The initial
+132 unaffected browser passes and all failed originals remain preserved.
+
+The first isolated Worker dry build could not resolve the installed `hono` from
+the staged source. The already installed 4.12.27 package was copied, pinned and
+qualified inside the isolated bundle; no dependency was upgraded or installed.
+Worker and Pages bundle checks then passed. An expired Pages OAuth was renewed
+in the owned project-private copy via the existing session, without a new login.
+
+The first live resource probe returned explicit unavailable/null metrics, not
+fake zeroes. Root-cause categories B/D/E: the new code assumed Node/browser fetch
+semantics and its host mock accepted `redirect: "error"`. Current Workers docs
+confirm that mode throws before a network request. Existing `delta_jobs.ts` and
+push delivery already used the correct `manual` contract; propagating that known
+pattern would have prevented the repeat. The corrective patch uses `manual`,
+rejects 3xx without forwarding credentials, and namespaces the corrected cache.
+A hostile-redirect regression and the package code-spec now preserve this rule.
+The failed first deployment/probe and its cache row were not rewritten.
+
+`A/live-verification.json` records the final live result:
+
+- Owner access succeeds; anonymous navigation still redirects to Access.
+- All 20 requested metric fields returned measured values, including a genuine
+  provider-reported zero for Infrequent Access storage. The immediately repeated
+  request reused the same cache snapshot. No account allowance was inferred.
+- HTML, notification JavaScript, resource JavaScript and ICO/PNG responses match
+  the staged bytes and correct content types. No old candidate alert appeared.
+- `A/rollout/private/live-browser-settled/result.json` and its desktop/mobile
+  screenshots show the real deployment, 20 rendered metric rows, no browser
+  errors, and no mobile overflow. An earlier mobile capture caught the resize
+  transition; the final capture waits for the sidebar transition and loading
+  state to finish rather than treating an intermediate frame as final proof.
+
+The write audit and owned-process close receipts are recorded in A. Expected
+tool warnings (SQLite experimental, color environment, proxy/OAuth scope notices,
+and Git line-ending notices) are not firmware or independent-acceptance results.
+
+### Remaining Decisions And Delivery
+
+Login appearance/favicon still needs an owner-confirmed usable Access custom-page
+management route and entitlement for this application. Do not widen account-wide
+branding, alter authentication policies or upgrade billing merely to hide that
+gap. Actual system-notification delivery must be observed with a future normal
+candidate and the existing browser subscription; the mock OS sink is not that
+observation, and no extra package should be created solely to manufacture one.
+
+The prior Flutter source changes and passing development CI remain as recorded
+above, with no new APK/EXE built or installed here. MCU information-page full
+firmware/simulator build and physical validation remain NOT_RUN. Public update
+site branding and its own shared reporting-handler deployment were not included
+in these original Admin/Worker publications. Do not label all earlier findings
+complete or infer package publication/hardware authority from this web rollout.
+
+### Final Write-Audit Qualification
+
+`A/write-audit.json` closed all 38 owned native command trees, found no credential
+bytes outside private outputs, and confirmed the six previously cleaned SYSTEM
+certificate-cache entries remained absent. All selected source, build, test,
+browser and evidence outputs were inside the active worktree; no external cleanup
+was attempted. This is a controlled-path review, not a process-level filesystem
+trace, and its status remains REVIEW_REQUIRED rather than an unconditional PASS.
+
+The expanded read-only check found 17 *pre-existing* files with modification
+timestamps in this task window. None was created after the first project write.
+`A/external-cache-observations.json` records every exact path, creation/modification
+time, size, hash and certificate source URL. They are under:
+
+- `C:/Windows/System32/config/systemprofile/AppData/LocalLow/Microsoft/CryptnetUrlCache/Content/`
+  and `MetaData/`: one DigiCert CRL cache object and existing certificate lookup
+  metadata for DigiCert, Google, Let's Encrypt and Windows trust-list updates.
+- `C:/Users/SU/AppData/LocalLow/Microsoft/CryptnetUrlCache/MetaData/`: existing
+  certificate lookup metadata for the same public certificate services.
+- `C:/Users/SU/AppData/Local/Microsoft/Windows/PowerShell/StartupProfileData-NonInteractive`:
+  an existing startup-profile cache. No PowerShell command was intentionally
+  invoked in this continuation.
+
+Timestamps alone do not identify the writer. Windows certificate validation and
+other concurrent host activity are possible causes, not established attribution
+to these tool calls. There is no before-image or writer-process trace for these
+17 files, so do not declare them newly generated agent debris or delete them.
+Recommended handling is to retain them and require a scoped attribution review
+before any path-specific cleanup request. Product deployment and live verification
+remain valid; the external-cache attribution is a separate unresolved audit item.
+
+## Public Website Follow-up, 2026-11-14
+
+The next continuation reused the completed Admin/Worker rollout and did not repeat
+migrations, notification enrollment, package generation or Access-permission
+probes. Work remains in the same active worktree. Evidence for this addition is
+`.cache/ui-remediation-20261113-01/public-followup-01/` (B below).
+
+### Root Cause And Bounded Repair
+
+The original public Pages endpoint still served deployment
+`028e98d2-9135-4f0d-b832-8b5ff0d16cc2`. Browser-style GET `/` returned JSON 404
+`Public route not found`, while the reporting-control API returned 200. The
+catch-all function intercepted the homepage and favicon requests, so changing
+the static HTML alone could not expose its title or icon. Initial requests using
+Python's default User-Agent returned 403; the qualified browser-style request
+distinguished that edge response from the actual application routing defect.
+No authentication policy was weakened to obtain the latter observation.
+
+Categories B/C/D/E: the earlier source-only branding change missed the Functions
+routing layer and the separate public deployment. The repair delegates only
+known GET/HEAD static paths to Pages. Unknown/private API routes and POST requests
+retain their JSON errors. Versioned ICO/PNG/SVG entries reuse the already verified
+Admin artwork, not a new logo or only an in-page image. The shared inventory
+acknowledgement implementation now reaches the public endpoint used by Apps.
+
+### Delivery And Verification
+
+- Current public deployment: `64b91cec-99c5-4c30-84de-eb61de52e0e9` at
+  `https://trace-update-public-staging.pages.dev`.
+- This is an explicitly dirty six-file runtime/static patch on the prior public
+  base `9dd858fc8f9943d444060169291ea5131d63489b`, not a Git commit. `B/source.json`
+  records every input and staged hash. Other runtime dependencies match the
+  original public deployment's source pins, including the retained firmware
+  handler. No unrelated current registration/notification change was bundled.
+- Existing Pages OAuth was renewed only in a new project-private copy. Pages
+  production/preview configuration and bindings were equal before and after.
+  D1 readback confirmed unchanged release/asset counts and channel pointers/revisions.
+- `remaining-20261114-01/checks-22` passed 41 public-router/inventory host tests.
+  `checks-23` found a missing `ASSETS` field in the new Pages test fixture. The
+  fixture was corrected rather than weakening types: `checks-24` passed Worker
+  TypeScript, and `checks-25` passed all 22 affected public-router tests.
+- Public TypeScript and the isolated Pages Functions bundle passed. Existing
+  installed Worker/Admin tooling was reused without installing dependencies.
+  Proxy notices and Git line-ending warnings are retained in the original logs.
+- `B/live-verification.json` passed 12 original-origin reads: real homepage,
+  canonical index behavior, bare/versioned favicon image bytes/MIMEs, health,
+  inventory control and rejection of Admin/CI routes. No synthetic report was sent.
+- `B/browser/result.json` passed desktop/mobile checks, decoded all three image
+  formats, recorded no page errors/overflow and confirmed Stable/Beta still
+  offer build 102. Screenshots were inspected. No APK/package was downloaded.
+
+The code-spec now records the actual static/API boundary and corrects its stale
+statement that Dart tests were blocked on the old SDK. Existing failed observations
+remain unchanged. The new files, script outputs, caches and screenshots are
+project-local; `B/write-audit.json` and `B/closeout.json` contain the final bounded
+audit/closeout, without treating the earlier cache-attribution uncertainty as PASS.
+
+### Remaining Owner Boundaries
+
+The Admin favicon/title, candidate arrivals and measured resource panel remain
+deployed as previously recorded. The public website/reporting deployment is now
+delivered too. The Access-hosted login favicon/appearance is still NOT_CHANGED:
+the existing 403s remain applicable, and an owner-confirmed usable custom-page
+management route and eligible entitlement are still required. No plan, billing,
+organization-wide design, Access policy or replacement credential was changed.
+
+Flutter CI results remain valid, but no new release APK/EXE was built, published
+or installed. MCU full firmware/simulator compilation and physical verification
+remain NOT_RUN. Website rollout authority is not package/channel/hardware
+authority. Actual OS delivery of a normal future candidate notification remains
+unobserved; do not create a package solely to manufacture that observation.
+Source integration remains pending its own Git authorization. Provider plan,
+allowance and GitHub billing remain unknown/not connected. Earlier external-cache
+writer attribution stays open; no external cleanup was performed.
+
+## Authorized Completion And Candidate Delivery, 2026-11-14
+
+The operator explicitly instructed the agent to continue until real human
+intervention is necessary and granted the remaining required task authorization.
+Do not ask again for routine source delivery, builds or the scoped existing-device
+verification route. This does not grant account/billing changes, authentication
+bypass, unrelated work, external-cache cleanup or arbitrary filesystem outputs.
+
+Work stays in the same active worktree. New execution records are under
+`.cache/ui-remediation-20261113-01/completion-20261114-01/` (C below). The existing
+Admin/Worker/public deployments and their completed migrations are not repeated.
+
+`C/inspect/result.json` confirms the existing `release/candidates` branch remains
+at `1b75d3921244642127f6aaa980ac308baf797b66`; no original candidate run is active.
+The App remediation files match tested development source
+`2c3a4e41ba402cb2c047b62f6bd809f735473bf0`. The candidate branch's already-fixed
+three-minute P51 parser test timeout is retained, not reverted to the older
+development test timeout. Dependency declarations match the tested baseline.
+
+The original database's maximum versions are App 102 and MCU 30324. The Trace
+`v1.0.77` tag is absent. The next original candidates are therefore
+`1.0.77+103` and `3.3.25`, with the original package/signing/backend identities.
+They use the existing automatic candidate workflow and its protected firmware
+environment. Actual CI approval must use its legitimate current reviewer route;
+required reviewers, production gates and signing-key isolation remain intact.
+
+Source integration is bounded to the earlier remediation, its tests/docs and
+these version increments. The shared local Git index is not used. The candidate
+branch, not `main`, is the established delivery route. Candidate ingestion does
+not select Stable/Beta, replace older packages or claim device acceptance.
+At this preparation checkpoint, candidate build/delivery and device verification
+are pending, not completed. Access login customization remains independently
+blocked on a usable provider management route, not on repeated user authorization.

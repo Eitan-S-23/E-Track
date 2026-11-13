@@ -270,6 +270,7 @@ export function handleRegisterFirmwareRelease(request: Request, env: WorkerEnv, 
     statements.push(env.DB.prepare(`INSERT INTO audit_logs(id,app_id,actor,actor_type,action,target_type,target_id,request_id,after_json)
       VALUES (?,?,'github-actions','ci','register_firmware_release','firmware_release',?,?,?)`)
       .bind(crypto.randomUUID(), input.appId, releaseId, requestId, canonicalJson({ releaseId, state: "ready", assetsRegistered: input.assets.length })));
+    statements.push(candidateArrival(env, { ...input, kind: "firmware", releaseId }));
     try { await env.DB.batch(statements); } catch (error) {
       const concurrent = await existing();
       if (concurrent) return replay(concurrent);
@@ -290,3 +291,4 @@ export function firmwareReleaseInsert(db: D1Database, input: FirmwareRegistratio
       input.runId, input.releaseNotes, input.targetImageSha256, input.hardwareRevision, input.layoutId,
       input.minBootVersion, input.minProtocolVersion, input.targetHardware, input.transport, input.minAppVersionCode, canonical);
 }
+import { candidateArrival } from "./admin_notifications";

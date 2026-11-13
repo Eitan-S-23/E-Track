@@ -4,6 +4,20 @@ import {runInNewContext} from "node:vm";
 import {MessageChannel, type MessagePort} from "node:worker_threads";
 import {test,expect} from "@playwright/test";
 
+test("candidate push renders the registered package type and version (mock OS notification sink)",async()=>{
+  const source=readFileSync(new URL("../public/admin-sw.js",import.meta.url),"utf8");
+  const notices:Array<{title:string;body:string}>=[];
+  const handlers=new Map<string,(event:{waitUntil:(p:Promise<void>)=>void})=>void>();
+  runInNewContext(source,{AbortSignal,fetch:async()=>Response.json({ok:true,actor:"owner",notifications:[
+    {id:500,type:"candidate",kind:"firmware",versionName:"3.3.25",status:"ready",unread:1}]}),self:{
+    navigator:{language:"zh-CN"},addEventListener:(name:string,handler:(event:{waitUntil:(p:Promise<void>)=>void})=>void)=>handlers.set(name,handler),
+    registration:{showNotification:async(title:string,options:{body:string})=>{notices.push({title,body:options.body});}},
+    clients:{matchAll:async()=>[]}}});
+  let done:Promise<void>|undefined;
+  handlers.get("push")!({waitUntil:p=>{done=p;}});await done;
+  expect(notices).toEqual([{title:"新构建包已入库",body:"MCU · 3.3.25"}]);
+});
+
 for(const scenario of ["closed","existing","focus-failed","frozen","non-admin","second-client","list-failed"]) {
   test(`notification click ${scenario} uses an acknowledged Admin or an absolute fallback (mock window APIs)`,async()=>{
     const source=readFileSync(new URL("../public/admin-sw.js",import.meta.url),"utf8");

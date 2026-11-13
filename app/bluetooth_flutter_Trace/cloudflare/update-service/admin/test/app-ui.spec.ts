@@ -39,7 +39,11 @@ async function mockApp(page: Page, language = "en", role = "owner", firmwareFail
     if (url.origin !== origin) { await route.abort(); return; }
     if (url.pathname === "/") { await route.fulfill({ contentType: "text/html", body: html }); return; }
     if (url.pathname === "/admin.css") { await route.fulfill({ contentType: "text/css", body: css }); return; }
-    if (["/sheet-gestures.js","/overlay-history.js","/delta-activity.js"].includes(url.pathname)) {
+    if (["/favicon.svg", "/favicon.png", "/favicon.ico"].includes(url.pathname)) {
+      const contentType = url.pathname.endsWith(".svg") ? "image/svg+xml" : url.pathname.endsWith(".png") ? "image/png" : "image/x-icon";
+      await route.fulfill({ contentType, body: readFileSync(new URL("../public" + url.pathname, import.meta.url)) }); return;
+    }
+    if (["/sheet-gestures.js","/overlay-history.js","/delta-activity.js","/resource-usage.js"].includes(url.pathname)) {
       await route.fulfill({contentType:"text/javascript",body:readFileSync(new URL("../public"+url.pathname,import.meta.url),"utf8")}); return;
     }
     const requestId = `mock-app-request-${++serial}`;
@@ -120,6 +124,63 @@ async function mockApp(page: Page, language = "en", role = "owner", firmwareFail
 }
 
 const action = (page: Page, channel: string) => page.locator(`[data-action="publish"][data-channel="${channel}"]:visible`);
+
+for (const language of ["en", "zh"]) for (const width of [1440, 390, 320]) {
+  test(`branding ${language} ${width}px keeps the title and icon readable`, async ({ page }, info) => {
+    await page.setViewportSize({ width, height: 844 });
+    const data = await mockApp(page, language);
+    if (width < 980) await page.locator("#mobileMenu").click();
+    await expect(page).toHaveTitle("E-Track");
+    await expect(page.locator('link[rel="icon"][type="image/x-icon"]')).toHaveAttribute("href", "/favicon.ico?v=f38780fb184c");
+    await expect(page.locator('link[rel="icon"][type="image/png"]')).toHaveAttribute("href", "/favicon.png?v=f38780fb184c");
+    const title = page.locator(".brand-text > strong"), icon = page.locator(".brand-mark");
+    await expect(title).toHaveText("E-Track");
+    await expect(icon).toBeVisible();
+    await expect.poll(() => icon.evaluate(node => (node as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+    expect(await title.evaluate(node => {
+      const range = document.createRange(); range.selectNodeContents(node);
+      return { lines: range.getClientRects().length, overflow: node.scrollWidth > node.clientWidth + 1 };
+    })).toEqual({ lines: 1, overflow: false });
+    const mark = (await icon.boundingBox())!, name = (await title.boundingBox())!;
+    const sidebar = (await page.locator("#sidebar").boundingBox())!;
+    expect(mark.x + mark.width).toBeLessThanOrEqual(name.x);
+    expect(name.x + name.width).toBeLessThanOrEqual(sidebar.x + sidebar.width - 16);
+    await page.screenshot({ path: info.outputPath("branding-mock.png"), animations: "disabled" });
+    expect(data.writes).toHaveLength(0);
+  });
+}
+
+test("branding favicon fallbacks contain image bytes at every declared size", () => {
+  const png = readFileSync(new URL("../public/favicon.png", import.meta.url));
+  expect(png.subarray(0, 8).toString("hex")).toBe("89504e470d0a1a0a");
+  expect([png.readUInt32BE(16), png.readUInt32BE(20)]).toEqual([64, 64]);
+  const ico = readFileSync(new URL("../public/favicon.ico", import.meta.url));
+  expect([ico.readUInt16LE(0), ico.readUInt16LE(2), ico.readUInt16LE(4)]).toEqual([0, 1, 4]);
+  for (const [index, size] of [16, 32, 48, 64].entries()) {
+    const entry = 6 + index * 16;
+    expect([ico[entry], ico[entry + 1]]).toEqual([size, size]);
+    const length = ico.readUInt32LE(entry + 8), offset = ico.readUInt32LE(entry + 12);
+    expect(offset + length).toBeLessThanOrEqual(ico.length);
+    expect(ico.subarray(offset, offset + 8).toString("hex")).toBe("89504e470d0a1a0a");
+    expect([ico.readUInt32BE(offset + 16), ico.readUInt32BE(offset + 20)]).toEqual([size, size]);
+  }
+});
+
+test("branding collapsed sidebar keeps only the icon and restores the mobile name", async ({ page }) => {
+  const data = await mockApp(page);
+  await page.locator(".collapse-button").click();
+  await expect(page.locator(".brand-text")).toBeHidden();
+  await expect(page.locator(".brand-mark")).toBeVisible();
+  const mark = (await page.locator(".brand-mark").boundingBox())!;
+  const sidebar = (await page.locator("#sidebar").boundingBox())!;
+  expect(mark.x).toBeGreaterThanOrEqual(sidebar.x);
+  expect(mark.x + mark.width).toBeLessThanOrEqual(sidebar.x + sidebar.width);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.locator("#mobileMenu").click();
+  await expect(page.locator(".brand-text > strong")).toBeVisible();
+  await expect(page.locator(".brand-text > strong")).toHaveText("E-Track");
+  expect(data.writes).toHaveLength(0);
+});
 
 for (const language of ["en", "zh"]) for (const width of [1440, 390, 320]) {
   test(`pinned close App ${language} ${width}px remains clickable after scrolling to the bottom`, async ({ page }, info) => {
@@ -754,6 +815,61 @@ test("interaction invalid saved resource position is clamped and resize keeps it
 
 test.describe("interaction touch resource control", () => {
   test.use({ hasTouch: true });
+  for (const direction of [-1, 1]) test(`resource panel dismisses a horizontal touch swipe ${direction}`, async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const data = await mockApp(page);
+    await page.locator("#resourceOrb").tap();
+    const header = (await page.locator(".resource-panel-head").boundingBox())!;
+    const x = header.x + header.width / 2, y = header.y + 30;
+    const background = await page.evaluate(() => scrollY);
+    const cdp = await page.context().newCDPSession(page);
+    try {
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
+      for (const distance of [25, 55, 90, 120]) {
+        await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: x + direction * distance, y }] });
+      }
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+      await expect(page.locator("#resourcePanel")).toBeHidden();
+      await expect(page.locator("#resourceOrb")).toBeFocused();
+      expect(await page.evaluate(() => scrollY)).toBe(background);
+      expect(new URL(page.url()).pathname).toBe("/");
+      expect(data.writes).toHaveLength(0);
+    } finally { await cdp.detach(); }
+  });
+
+  test("resource history dismisses only the panel and does not replay it on Forward", async ({ page }) => {
+    const data = await mockApp(page);
+    await page.locator("#resourceOrb").tap();
+    await expect.poll(() => page.evaluate(() => history.state?.traceAdminOverlay?.depth)).toBe(1);
+    await page.evaluate(() => history.back());
+    await expect(page.locator("#resourcePanel")).toBeHidden();
+    await expect(page.locator("#resourceOrb")).toBeFocused();
+    await page.evaluate(() => history.forward());
+    await expect(page.locator("#resourcePanel")).toBeHidden();
+    expect(new URL(page.url()).pathname).toBe("/");
+    expect(data.writes).toHaveLength(0);
+  });
+
+  test("resource content scrolling does not dismiss the panel or move its orb", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 600 });
+    const data = await mockApp(page);
+    await page.locator("#resourceOrb").tap();
+    await page.locator("#storageSummary").evaluate(node => { node.append(document.createElement("div")); node.lastElementChild!.setAttribute("style", "height:1500px"); });
+    const panel = page.locator("#resourcePanel"), orb = (await page.locator("#resourceOrb").boundingBox())!;
+    await panel.evaluate(node => { node.scrollTop = 100; });
+    const box = (await panel.boundingBox())!;
+    const cdp = await page.context().newCDPSession(page);
+    try {
+      const x = box.x + 40, y = box.y + Math.min(box.height - 30, 250);
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x, y: y - 100 }] });
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+      await expect(panel).toBeVisible();
+      expect((await page.locator("#resourceOrb").boundingBox())!.x).toBe(orb.x);
+      expect(data.writes).toHaveLength(0);
+    } finally { await cdp.detach(); }
+  });
+
   test("touch drag does not open the panel and the next tap still works", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     const data = await mockApp(page);

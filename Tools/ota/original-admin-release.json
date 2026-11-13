@@ -1,7 +1,7 @@
 {
   "schema": "original-admin-automatic-candidates-v1",
   "firmware": {
-    "versionName": "3.3.24",
-    "releaseNotes": "Normal BLE V2 firmware. Full and recovery packages only; select delta bases and publish channels in the original Admin."
+    "versionName": "3.3.25",
+    "releaseNotes": "System information now shows the validated running firmware version and E-Track name. Normal BLE V2 full and recovery candidate; select deltas and publish channels in the original Admin."
   }
 }

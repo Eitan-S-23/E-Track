@@ -6,12 +6,15 @@ import { readFirmwareJson, requireFirmwareJsonHeaders } from "../../../../worker
 import { boundedJson, inventorySummary, refreshInventory } from "../../../../worker/src/version_inventory";
 import { createDeltaJobs, deltaCandidates, deltaJobAction } from "../../../../worker/src/delta_jobs";
 import { deltaActivity, readNotifications, subscribeNotifications, unsubscribeNotifications } from "../../../../worker/src/admin_notifications";
+import { resourceUsage } from "../../../../worker/src/resource_usage";
 
 type Platform = "android" | "windows";
 type ChannelName = "stable" | "beta";
 type ActorRole = "viewer" | "publisher" | "owner";
 
 interface AdminEnv {
+  RESOURCE_USAGE_API_TOKEN?: string;
+  RESOURCE_USAGE_CONFIG_JSON?: string;
   DB: D1Database;
   RELEASES_BUCKET: R2Bucket;
   ENVIRONMENT: string;
@@ -262,6 +265,11 @@ async function routeAdminRequest(
   if (method === "GET" && route.length === 1 && route[0] === "storage") {
     requireRole(actor, "viewer");
     return storageSummary(context.env, url);
+  }
+
+  if (method === "GET" && route.length === 1 && route[0] === "resource-usage") {
+    requireRole(actor, "viewer");
+    return resourceUsage(context.env);
   }
 
   if (method === "GET" && route.length === 1 && route[0] === "announcements") {

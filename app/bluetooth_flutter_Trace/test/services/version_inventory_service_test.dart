@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -10,35 +11,83 @@ import 'package:ble_monitor/services/version_inventory_service.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late DateTime now;
+  DateTime Function()? timerClock;
   late List<Map<String, dynamic>> sent;
+  late List<String> sentTokens;
   late VersionInventoryService service;
+  late StreamController<bool> activity;
+  Completer<void>? gate;
+  Map<String, dynamic>? acknowledgement;
   var allowed = true;
   var fail = false;
   var refresh = 'initial';
   var controls = 0;
   var reads = 0;
+  var invalidIdentity = false;
   setUp(() {
     SharedPreferences.setMockInitialValues({});
     now = DateTime.utc(2026, 11, 11);
+    timerClock = null;
     sent = [];
+    sentTokens = [];
     allowed = true; fail = false; refresh = 'initial'; controls = 0; reads = 0;
+    activity = StreamController<bool>.broadcast(sync: true);
+    gate = null;
+    acknowledgement = null;
+    invalidIdentity = false;
     service = VersionInventoryService(
       supported: true, endpoint: Uri.parse('https://example.test/api/public/version-inventory'),
-      clock: () => now, canReport: () => allowed,
+      clock: () => timerClock?.call() ?? now, canReport: () => allowed,
+      runtimeActivity: [activity.stream],
       readAppIdentity: () async {
         reads++;
-        return {'versionCode': 100, 'versionName': '1.0.74', 'imageSha256': 'a' * 64};
+        return {'versionCode': 100, 'versionName': '1.0.74',
+          'imageSha256': invalidIdentity ? '' : 'a' * 64};
       },
       sender: (uri, body, token, cancel) async {
+        if (gate != null) await gate!.future;
         if (fail) throw StateError('offline');
         if (body == null) { controls++; return {'ok': true, 'refreshId': refresh}; }
-        expect(token, matches(RegExp(r'^[0-9a-f]{64}$')));
+        sentTokens.add(token);
         sent.add(jsonDecode(jsonEncode(body)) as Map<String, dynamic>);
-        return {'ok': true, 'accepted': true, 'refreshId': refresh};
+        return acknowledgement ?? {'ok': true, 'accepted': true, 'refreshId': refresh};
       },
     );
   });
-  tearDown(() { service.onClose(); });
+  tearDown(() async {
+    service.onClose();
+    await activity.close();
+    // Timer callbacks run inside pump's guarded scope, not an expectation scope.
+    expect(sentTokens, everyElement(matches(RegExp(r'^[0-9a-f]{64}$'))));
+  });
+
+  void inventoryWidgetTest(String description, WidgetTesterCallback body) {
+    testWidgets(description, (tester) async {
+      // Deadlines and Timer delivery must use the same fake clock.
+      timerClock = tester.binding.clock.now;
+      now = timerClock!();
+      try {
+        await body(tester);
+      } finally {
+        service.onClose();
+        timerClock = null;
+      }
+    });
+  }
+
+  Future<void> advance(WidgetTester tester, Duration elapsed) async {
+    await tester.pump(elapsed);
+    now = tester.binding.clock.now();
+    // The scheduled report also awaits preference writes before sending.
+    await tester.pump();
+  }
+
+  void expectReports(int count) {
+    expect(sent, hasLength(count), reason:
+        'ready=${service.ready.value}, status=${service.status.value}, '
+        'failure=${service.failureCode.value}, next=${service.nextAttemptAt.value}, '
+        'now=$now, reads=$reads, activityListener=${activity.hasListener}');
+  }
 
   DeviceOtaInfo info([int version = 30321]) {
     final bytes = Uint8List(50);
@@ -120,5 +169,130 @@ void main() {
     expect(sent, isEmpty); expect(reads, 0);
     service.didChangeAppLifecycleState(AppLifecycleState.resumed);
     await service.poll(); expect(sent, hasLength(1));
+  });
+
+  inventoryWidgetTest('automatically resumes a pending snapshot when the runtime becomes idle', (tester) async {
+    allowed = false;
+    service.onInit();
+    await tester.pump();
+    await advance(tester, const Duration(seconds: 5));
+    expect(sent, isEmpty);
+    expect(service.status.value, InventoryReportStatus.busy);
+    allowed = true;
+    activity.add(false);
+    await advance(tester, const Duration(seconds: 5));
+    expectReports(1);
+    expect(service.status.value, InventoryReportStatus.reported);
+  });
+
+  inventoryWidgetTest('retries at the backoff deadline without another tap or restart', (tester) async {
+    fail = true;
+    await service.poll();
+    expect(service.status.value, InventoryReportStatus.retrying);
+    fail = false;
+    await advance(tester, const Duration(hours: 1));
+    expectReports(1);
+    expect(service.failureCode.value, isNull);
+  });
+
+  inventoryWidgetTest('retains a changed device that arrives during an in-flight report', (tester) async {
+    await service.initialize();
+    gate = Completer<void>();
+    final pending = service.poll();
+    await tester.pump();
+    service.observeDevice('AA:BB:CC:DD:EE:FF', info(30324));
+    await tester.pump();
+    gate!.complete();
+    await pending;
+    gate = null;
+    await advance(tester, const Duration(seconds: 5));
+    expectReports(2);
+    expect((sent.last['devices'] as List).single['versionCode'], 30324);
+  });
+
+  inventoryWidgetTest('background interruption does not impose an hour of backoff', (tester) async {
+    await service.initialize();
+    gate = Completer<void>();
+    final pending = service.poll();
+    await tester.pump();
+    service.didChangeAppLifecycleState(AppLifecycleState.paused);
+    fail = true;
+    gate!.complete();
+    await pending;
+    expect((await SharedPreferences.getInstance()).getString('version_inventory_v1_retry'), isNull);
+    gate = null;
+    fail = false;
+    service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+    await advance(tester, const Duration(seconds: 5));
+    expectReports(1);
+  });
+
+  inventoryWidgetTest('opt-out cancels an already scheduled retry', (tester) async {
+    fail = true;
+    await service.poll();
+    await service.setEnabled(false);
+    fail = false;
+    await advance(tester, const Duration(hours: 2));
+    expect(sent, isEmpty);
+    expect(service.status.value, InventoryReportStatus.disabled);
+  });
+
+  inventoryWidgetTest('a quick foreground return does not reinterpret cancelled work as failure', (tester) async {
+    await service.initialize();
+    gate = Completer<void>();
+    final pending = service.poll();
+    await tester.pump();
+    service.didChangeAppLifecycleState(AppLifecycleState.paused);
+    service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+    fail = true;
+    gate!.complete();
+    await pending;
+    expect(service.failureCode.value, isNull);
+    gate = null;
+    fail = false;
+    await advance(tester, const Duration(seconds: 5));
+    expectReports(1);
+  });
+
+  inventoryWidgetTest('a lagging duplicate receipt cannot create a zero-delay reporting loop', (tester) async {
+    acknowledgement = {'ok': true, 'accepted': false, 'acknowledged': true,
+      'refreshId': refresh, 'reportedAt': now.subtract(const Duration(days: 2)).millisecondsSinceEpoch ~/ 1000};
+    await service.poll();
+    await advance(tester, const Duration(minutes: 1));
+    expect(sent, hasLength(1));
+    expect(service.nextAttemptAt.value!.isAfter(now), isTrue);
+  });
+
+  test('a temporary missing APK identity is re-read after backoff', () async {
+    invalidIdentity = true;
+    await service.poll();
+    expect(service.failureCode.value, 'APP_IDENTITY_UNAVAILABLE');
+    invalidIdentity = false;
+    now = now.add(const Duration(hours: 1));
+    await service.poll();
+    expect(reads, 2);
+    expect(sent, hasLength(1));
+  });
+
+  test('does not turn an unacknowledged stale sequence into a successful report', () async {
+    acknowledgement = {'ok': true, 'accepted': false, 'acknowledged': false, 'refreshId': refresh, 'sequence': 4};
+    await service.poll();
+    expect(service.lastReportedAt.value, isNull);
+    expect(service.failureCode.value, 'REPORT_NOT_ACCEPTED');
+    acknowledgement = null;
+    now = now.add(const Duration(hours: 1));
+    await service.poll();
+    expect(sent.last['sequence'], 5);
+  });
+
+  test('a matching duplicate retains the server receipt time rather than making it fresh', () async {
+    final receipt = now.subtract(const Duration(minutes: 5));
+    acknowledgement = {'ok': true, 'accepted': false, 'acknowledged': true, 'refreshId': refresh,
+      'reportedAt': receipt.millisecondsSinceEpoch ~/ 1000, 'sequence': 4};
+    await service.poll();
+    expect(service.lastReportedAt.value, receipt);
+    expect((await SharedPreferences.getInstance()).getInt('version_inventory_v1_sequence'), 4);
+    await service.poll();
+    expect(sent, hasLength(1));
   });
 }

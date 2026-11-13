@@ -25,6 +25,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 APP = Path("app/bluetooth_flutter_Trace")
 SCOPES = {"all": "test", "ota": "test/ota"}
 SDK_URL = "https://github.com/flutter/flutter.git"
+# Match the existing App validation baseline; SDK migration is a separate change.
+SDK_REF = "3.47.9"
 WINDOWS_LAUNCHER = (
     "import json,subprocess,sys; "
     "command=json.loads(sys.stdin.readline()); "
@@ -672,7 +674,7 @@ def command_plan(root, run_dir, scope, *, build_apk=False, env=None):
     app = checked_path(root, root / APP)
     commands = [
         ("sdk_checkout", ["git", "clone", "--config", "core.longpaths=true",
-                          "--depth", "1", "--branch", "stable",
+                          "--depth", "1", "--branch", SDK_REF,
                           SDK_URL, str(sdk)], root, 180),
         ("sdk_version", [flutter, "--version", "--machine"], app, 300),
         ("dependencies", [flutter, "pub", "get", "--enforce-lockfile"], app, 300),
@@ -747,6 +749,7 @@ def run_checks(root, scope, *, build_apk=False, execute=run_command,
         "host": platform.platform(),
         "python": sys.version,
         "sdk_channel": "stable",
+        "sdk_ref": SDK_REF,
         "github_run_url": (
             f"{os.environ.get('GITHUB_SERVER_URL', 'https://github.com')}/"
             f"{os.environ.get('GITHUB_REPOSITORY', '')}/actions/runs/"

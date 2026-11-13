@@ -20,7 +20,7 @@ function remembered(action, value) {
 }
 self.addEventListener("push",event=>event.waitUntil((async()=>{
   const zh = self.navigator.language.startsWith("zh");
-  let title = zh ? "差分任务有新结果" : "Delta task updated";
+  let title = zh ? "后台有新结果" : "Admin update available";
   let body = zh ? "打开后台查看。若登录已过期，请重新登录。" : "Open Admin to review. Sign in again if your session expired.";
   let tag = "trace-delta-update", receipt = null;
   try {
@@ -31,8 +31,9 @@ self.addEventListener("push",event=>event.waitUntil((async()=>{
     const last = Number(await remembered("get",value.actor).catch(()=>0) ?? 0);
     const latest = value.notifications.find(n=>n.id>last && n.unread);
     if (latest) {
-      title = latest.status === "ready" ? (zh ? "差分包已生成" : "Delta package ready") : (zh ? "差分生成失败" : "Delta build failed");
-      body = `${latest.kind === "firmware" ? "MCU" : "App"} · ${latest.baseVersionCode} → ${latest.targetVersionCode}`;
+      title = latest.type === "candidate" ? (zh ? "新构建包已入库" : "New candidate registered")
+        : latest.status === "ready" ? (zh ? "差分包已生成" : "Delta package ready") : (zh ? "差分生成失败" : "Delta build failed");
+      body = `${latest.kind === "firmware" ? "MCU" : latest.kind === "windows" ? "Windows App" : "Android App"} · ${latest.type === "candidate" ? latest.versionName : `${latest.baseVersionCode} → ${latest.targetVersionCode}`}`;
       tag = `trace-delta-${latest.id}`; receipt = {actor:value.actor,id:latest.id};
     } else if (value.notifications.length && last >= value.notifications[0].id) {
       return;

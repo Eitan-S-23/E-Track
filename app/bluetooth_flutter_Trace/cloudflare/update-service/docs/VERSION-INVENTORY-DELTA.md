@@ -297,3 +297,254 @@ connectivity. The operator reported registration AND delivery succeeding with VP
 on 2026-11-13; this is real user-reported evidence, not a local headless test.
 Turning VPN off can affect later delivery too. The webpage cannot replace Chrome's
 push provider or guarantee its reachability; in-page durable results still work.
+
+## Reporting Receipt And Scheduler Update
+
+Receipt support must reach both the Worker and the separately bundled public
+Pages endpoint before a new client relies on duplicate confirmation. Both server
+bundles were deployed on 2026-11-14; the client change has passed development CI
+but has not been shipped in a new APK/EXE. The existing accepted-report response
+remains compatible. Server deployment does not update an installed client.
+
+### Signatures And Invariants
+
+`reportInventory` adds `acknowledged: boolean`, `reportedAt: number | null`
+(server Unix seconds), and `sequence: number` to its response. `accepted` keeps
+its original meaning: a new snapshot was written. A matching duplicate can be
+acknowledged without being accepted, but retains the stored receipt time and
+stored refresh identity. A different stale snapshot cannot be acknowledged.
+If a concurrent sequence wins the guarded transaction, reread the stored
+installation before returning its receipt. No reporting limit, device identity,
+retention policy or channel state changes.
+
+`VersionInventoryService` consumes runtime activity streams and exposes
+`status`, `lastReportedAt`, `nextAttemptAt` and a sanitized `failureCode`. These
+do not expose tokens or raw BLE addresses. Idle/foreground events resume the
+pending snapshot; an endpoint failure retains one-hour backoff. The service
+owns and cancels all retry/control timers and activity subscriptions. An old
+server receipt cannot cause a zero-delay polling loop if the phone clock is
+ahead. Unchanged observations remain coalesced instead of raising report limits.
+
+### Validation Matrix
+
+| Case | Expected behavior |
+| --- | --- |
+| Upgrade busy, then idle | No hashing/reporting while busy; retry the pending identity after idle |
+| Background cancellation, including a quick foreground return | Ignore the cancelled request outcome; no invented one-hour network penalty |
+| Endpoint error | Preserve last successful receipt, show sanitized reason, schedule bounded retry |
+| Explicit opt-out or service close | Cancel timers, request and listeners; no further report |
+| Matching server duplicate | Keep original server receipt time; do not manufacture new freshness |
+| Stale different sequence | Reconcile server sequence but retain failure, not a successful local report |
+| Temporarily unavailable APK identity | Do not cache the invalid identity forever; reread after backoff |
+| Fresh read of unchanged MCU | Retain daily coalescing and installation-scoped identity |
+
+Good: a post-upgrade identity waits for idle, then becomes reported only after
+the backend acknowledges its snapshot. Base: an unchanged daily snapshot sends
+no extra report. Bad: treating every HTTP 200 as acceptance, or resetting the
+retry clock on every UI event, hides stale state and can starve or flood reporting.
+
+Tests live in `worker/test/version-inventory.test.ts` and
+`test/services/version_inventory_service_test.dart` relative to the update-service
+and Flutter package respectively. The Worker host suite and the dual-host Dart
+development checks have passed. The earlier SDK/lock failure was resolved using
+the documented supported SDK baseline; no APK/EXE or device result follows from
+those checks. `worker/test/public-pages.test.ts` also tests duplicate receipts
+through the public Pages router. See the continuation in
+`docs/ota-exec-notes/VERSION-INVENTORY-DELTA-2026-11-11.md` at the repository root
+for the exact source/run and remaining gate. Neither a host fixture nor a stale
+previous device observation proves this new client scheduling fix on a phone.
+
+## Registered Candidate Arrivals
+
+### Scope And Signatures
+
+`ADMIN-NOTIFY-BUILD-01` covers newly registered App/MCU candidates, not successful
+compiles. `candidateArrival(env, input): D1PreparedStatement` is appended to the
+existing App or firmware registration batch after object validation. The input
+binds `appId`, `kind`, `releaseId`, `versionName`, `versionCode`, `commitSha`,
+`runId`, and optional `deviceModel`. Only the configured `APP_ID` emits events.
+No channel, publication or asset-enabling operation is added.
+
+Migration `0011_candidate_notifications.sql` creates `admin_candidate_events`,
+`admin_notifications` and `admin_notification_deliveries`. It copies existing
+notification IDs, read timestamps and delivery leases, preserves read cursors
+and the old sequence high-water mark, and moves the terminal-job trigger to the
+shared stream. The legacy tables remain as evidence, but are no longer live.
+Do not blindly roll back to a legacy consumer after new events have arrived.
+Reconcile pending deliveries before the coordinated Worker/Pages rollout.
+
+### Response And Audience Contract
+
+`GET /api/admin/delta/activity` keeps its existing own-job and actor checks.
+Notifications now include `type: "delta" | "candidate"`; candidate entries have
+`kind`, `targetReleaseId`, `versionName`, `targetVersionCode`, `deviceModel`,
+`createdAt`, and the existing actor-specific `id`/`unread` fields. Candidate
+identity is unique by kind/release; actor delivery is unique by actor/event.
+Registration replay and R2 backfill never produce another arrival.
+
+Existing, unexpired subscriptions receive payloadless outbox wakeups. An
+Access-authorized reader without push also materializes up to 100 unseen event
+records per poll, with independent read state. The event log starts empty: old
+releases are not backfilled. Subscriptions created after an event are not sent
+retrospective pushes. Browser permission is still requested only by a click.
+
+In-page alerts wait until the page is visible and busy/modal work has finished.
+They do not replace drafts or auto-open a release. A selected candidate opens its
+registered App/MCU details, not a delta-build form. Windows details are read-only
+and do not operate the Android channels. Missing/removed targets show an error.
+System notifications use the same protected activity fetch and existing task
+navigation route; no package or account data is sent to the push vendor.
+
+### Validation, Cases And Tests
+
+| Input/outcome | Required result |
+| --- | --- |
+| Compiled but upload/validation fails | No event, no push, no publication |
+| Registration batch rolls back | Event and outbox roll back together |
+| Successful new registration | One arrival with exact package identity |
+| Repeated callback or old registered tag | No duplicate or historical arrival |
+| Push unavailable, denied or page closed | Durable unread record remains |
+| Different authorized readers | Independent read cursors and notification IDs |
+| Modal, draft or in-flight write | No focus theft or automatic navigation |
+
+Tests: `worker/test/candidate-notifications.test.ts`,
+`worker/test/candidate-migration.host.test.ts`, the existing notification suite,
+and candidate cases in `admin/test/version-operations.spec.ts` and
+`admin/test/delta-activity.spec.ts`. Assert both positive and negative database
+effects, package-detail navigation, and exact label/version rendering. Browser
+OS sinks and host R2/SQLite doubles are not real vendor-delivery evidence.
+
+Wrong: notify from a GitHub build-success callback. Correct:
+`statements.push(candidateArrival(env, { ...input, kind: input.platform, releaseId }))`
+inside the validated registration transaction, followed by a best-effort wakeup
+after commit. The scheduled outbox retry remains the recovery route.
+
+## Provider Resource Usage
+
+### Scope And Signatures
+
+`ADMIN-RESOURCE-USAGE-01` adds Access/role-protected `GET /api/admin/resource-usage`.
+`resourceUsage(env, now?, fetcher?): Promise<Response>` uses D1 only for its shared
+cache and lease. Provider queries are fixed, scoped Cloudflare GraphQL requests;
+request parameters cannot choose an account, URL, script or SQL query.
+
+The Pages-only secret `RESOURCE_USAGE_API_TOKEN` must have the applicable analytics
+read access. `RESOURCE_USAGE_CONFIG_JSON` identifies `accountId`, `workerScript`,
+`pagesScript` (Admin), `publicPagesScript` (public update API), `databaseId`,
+`namespaceId`, and `bucketName`. IDs and names are validated and serialized, not
+interpolated as raw GraphQL. Never expose either credential to the browser.
+
+Migration `0012_resource_usage.sql` creates `admin_resource_usage_cache`. A shared
+90-second lease allows one refresh across isolates/tabs. A refresh makes at most
+12 provider requests, at most three concurrently, with seven-second timeouts and
+256 KiB response limits. Results, including failures, cache for 15 minutes.
+
+### Measurement And Error Contract
+
+Metrics report `key`, `group`, `unit`, `used`, `state`, `reason`, `scope`,
+`periodStart`, `periodEnd`, `periodRolloverAt`, `sampledAt`, and `lastSuccessAt`.
+Unknown `allowance`, `remaining`, `quotaResetAt` and plan stay null. Scope is the
+configured project resources, not all account consumption. A project measurement
+does not establish a remaining account allowance.
+
+Workers expose requests and CPU sum (microseconds converted to milliseconds).
+Admin and public Pages expose requests and per-invocation CPU P50/P99, never an
+invented total. D1 exposes rows read/written and latest storage samples. Durable
+Objects expose requests, GB-s duration, SQLite reads/writes and storage. R2
+exposes calendar-month Class A/B operation counts and separate latest Standard
+and Infrequent Access storage samples. Never take a maximum across storage classes
+and call it total storage. These samples/counts are not an authoritative bill.
+
+Daily windows roll over at 00:00 UTC; R2 operation windows at the calendar month.
+These are measurement windows, not verified billing/reset periods. Queries exclude
+the most recent five minutes and disclose provider delay/sampling. On failure,
+retain the last measurement *and its original period*, marked stale. No samples,
+missing numeric fields, configuration gaps and permission failures are not zero.
+GitHub Actions remains separately labelled not connected. App 8/UTC-day and backend
+1000/UTC-day reporting safeguards are shown separately and are not provider quotas.
+
+| Case | Expected response |
+| --- | --- |
+| Missing/invalid config or credential | `not_configured`, null used; no provider request |
+| Provider 401/403 or authorization error | `permission_denied`; never a zero balance |
+| Empty dataset | `no_samples`, null used |
+| Explicit provider zero | `ok`, used zero |
+| Timeout, malformed or oversized response | `unavailable`; preserve older successful data as stale |
+| Simultaneous readers | One leased refresh, no unbounded provider fanout |
+| Resource scope changes | Separate cache identity, no old-scope values |
+| Failure after UTC rollover | Old window retained, never labelled as today's count |
+
+### Examples And Verification
+
+Good: show a measured D1 read count with its scope, window and unknown allowance.
+Base: reuse a fresh cached response when another tab opens the panel.
+Bad: multiply report counts to estimate D1 usage, infer a Free plan, or divide
+bucket bytes by a reference 10 GB allowance and present it as account utilization.
+The old reference-quota water level was replaced with decoration, not a meter.
+
+`worker/test/resource-usage.test.ts` covers scope/units, credentials, cache/lease,
+bounded bodies, null versus zero and stale-window preservation. Browser cases
+verify lazy loading, mobile layout and visible unavailable/stale states. Test
+fixtures must serve `resource-usage.js` as JavaScript. The resource panel now hides
+synchronously on close: an obsolete 190 ms delay intercepted the next drag when
+the taller panel overlapped its orb. Keep the immediate-close/drag regression.
+
+GraphQL dataset fields/units were introspected from the provider during the
+2026-11-14 continuation, in addition to the current Workers, D1, Durable Objects
+analytics and R2 pricing documentation. Live account plan/custom-login access
+remains unavailable; do not turn that capability gap into a billing assumption.
+
+Runtime correction: Cloudflare Workers does not implement `redirect: "error"`;
+it throws during Request construction, unlike Node/browser fetch. Provider calls
+must use `manual`, reject 3xx and never forward the credential. A host mock that
+accepts `error` is not a Workers compatibility check. The initial live probe
+caught this before metrics were claimed successful; the regression explicitly
+checks the supported mode and a hostile redirect. Browser service-worker fetch
+is a different runtime and retains its existing `error` policy. The corrected
+reader uses the `resource-usage-v1` cache namespace, preserving the failed snapshot
+without serving that incompatible cached failure after the correction.
+
+## Public Website And Favicon Boundary
+
+### Scope And Signatures
+
+`public/functions/[[path]].ts` is a catch-all Pages function, not just an API
+handler. `onRequest(context)` must pass GET/HEAD requests for `/`, `/index.html`,
+`/favicon.ico`, `/favicon.png` and `/favicon.svg` to `context.next()` so that Pages
+can serve `public/site`. Query strings such as `?v=20261114` do not change that
+pathname decision. Other routes retain the explicit public API routing table.
+
+### Contracts And Validation
+
+No credentials, bindings, release state or API permissions change. The static
+response retains its body, status and asset headers; the existing request-ID
+wrapper remains. The ICO, PNG and SVG share the Admin's existing artwork.
+
+| Input | Expected result |
+| --- | --- |
+| GET `/` | Actual E-Track HTML, not API error JSON |
+| GET a bare/versioned favicon URL | Exact image bytes with the matching image MIME type |
+| HEAD a listed static URL | Pages metadata with an empty body |
+| `/index.html` canonical redirect | May redirect to this origin's `/`; no cross-origin redirect required |
+| POST a listed static URL | Existing JSON 404, no static fallback |
+| Unknown route, `/api/admin/*` or `/api/ci/*` | Existing JSON 404, no static fallback |
+| Known public API | Existing handler, rate limits, validation and error contract |
+
+### Cases And Required Tests
+
+Good: validate original-domain HTML, versioned and bare ICO/PNG/SVG responses,
+image decoding and desktop/mobile rendering. Base: an existing client continues
+using the unchanged public update and reporting APIs. Bad: modify only static
+files while the catch-all still returns JSON, or route every unknown API to HTML.
+
+`worker/test/public-pages.test.ts` checks GET/HEAD delegation, exact bytes and
+headers, POST/unknown/private-route rejection, health/control routing and the
+shared duplicate receipt. The fixture must include the Pages `env.ASSETS` binding,
+not hide its absence behind an `unknown` cast. Type checks and a Pages bundle
+build complement host tests; live asset readback is still required after deployment.
+
+Wrong: treat an Admin favicon deployment as an Access login-page change, or
+assume a Worker deployment refreshes the separately compiled public Pages handler.
+Correct: verify each delivered origin/bundle independently. Cloudflare's hosted
+Access login remains a separate management/entitlement boundary; do not change
+organization-wide branding, authentication policy or billing to bypass it.

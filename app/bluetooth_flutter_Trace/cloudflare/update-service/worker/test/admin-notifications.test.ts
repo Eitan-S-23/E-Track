@@ -8,7 +8,7 @@ const endpoint = "https://fcm.googleapis.com/fcm/send/unit-test-endpoint";
 const encode = (bytes: ArrayBuffer) => Buffer.from(bytes).toString("base64url");
 let verificationKey: CryptoKey;
 beforeEach(async()=>{
-  await env.DB.batch(["admin_push_deliveries","delta_notifications","admin_notification_reads","admin_push_subscriptions","delta_job_events","delta_job_attempts","delta_jobs"]
+  await env.DB.batch(["admin_notification_deliveries","admin_notifications","admin_candidate_events","admin_push_deliveries","delta_notifications","admin_notification_reads","admin_push_subscriptions","delta_job_events","delta_job_attempts","delta_jobs"]
     .map(table=>env.DB.prepare(`DELETE FROM ${table}`)));
   const keys = await crypto.subtle.generateKey({name:"ECDSA",namedCurve:"P-256"},true,["sign","verify"]);
   verificationKey = keys.publicKey;
@@ -91,7 +91,7 @@ describe("durable Admin notifications",()=>{
     await finish(await insert());
     for(let i=0;i<5;i++) await subscribe("owner",endpoint+i);
     await expect(subscribe("owner",endpoint+"six")).rejects.toMatchObject({status:429});
-    expect((await env.DB.prepare("SELECT * FROM admin_push_deliveries").all()).results).toHaveLength(0);
+    expect((await env.DB.prepare("SELECT * FROM admin_notification_deliveries").all()).results).toHaveLength(0);
   });
   it("signs valid ES256 VAPID claims and sends no task data in the push body",async()=>{
     const header=await vapidAuthorization(config,endpoint);
@@ -104,7 +104,7 @@ describe("durable Admin notifications",()=>{
     await deliverNotifications(config,send);await deliverNotifications(config,send);
     expect(send).toHaveBeenCalledTimes(1);expect(send.mock.calls[0][1]?.body).toBeUndefined();
     expect(send.mock.calls[0][1]?.redirect).toBe("manual");
-    expect((await env.DB.prepare("SELECT status FROM admin_push_deliveries").first<{status:string}>())?.status).toBe("sent");
+    expect((await env.DB.prepare("SELECT status FROM admin_notification_deliveries").first<{status:string}>())?.status).toBe("sent");
   });
   it("retains results and bounds push retries when the push service is offline",async()=>{
     vi.useFakeTimers();vi.setSystemTime(new Date("2026-11-13T00:00:00Z"));
@@ -112,7 +112,7 @@ describe("durable Admin notifications",()=>{
     const send=vi.fn<typeof fetch>(async()=>new Response(null,{status:503}));
     for(let i=0;i<6;i++) {await deliverNotifications(config,send);vi.setSystemTime(Date.now()+301000);}
     expect(send).toHaveBeenCalledTimes(5);
-    expect((await env.DB.prepare("SELECT status FROM admin_push_deliveries").first<{status:string}>())?.status).toBe("failed");
+    expect((await env.DB.prepare("SELECT status FROM admin_notification_deliveries").first<{status:string}>())?.status).toBe("failed");
     expect((await (await deltaActivity(config,"owner")).json<{unreadCount:number}>()).unreadCount).toBe(1);
   });
   it("expired subscriptions are removed without losing the completion event",async()=>{

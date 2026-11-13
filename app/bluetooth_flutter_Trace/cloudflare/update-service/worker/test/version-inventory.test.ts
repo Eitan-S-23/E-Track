@@ -41,6 +41,26 @@ describe("optional version inventory", () => {
     await reportInventory(req({ ...p, sequence: 3, versionCode: 101, imageSha256: "e".repeat(64) }), enabled, now + 20);
     expect((await summary()).app).toMatchObject([{ active7: 1, versionCode: 101 }]);
   });
+  it("acknowledges only an already stored matching snapshot and preserves its receipt time", async () => {
+    const p = payload();
+    expect(await (await reportInventory(req(p), enabled, now)).json()).toMatchObject({
+      accepted: true, acknowledged: true, reportedAt: now, sequence: 1 });
+    expect(await (await reportInventory(req({ ...p, sequence: 2 }), enabled, now + 10)).json()).toMatchObject({
+      accepted: false, acknowledged: true, reportedAt: now, sequence: 1 });
+    await reportInventory(req({ ...p, sequence: 4, versionCode: 102 }), enabled, now + 20);
+    expect(await (await reportInventory(req({ ...p, sequence: 3 }), enabled, now + 30)).json()).toMatchObject({
+      accepted: false, acknowledged: false, reportedAt: null, sequence: 4 });
+  });
+  it("does not claim a delayed duplicate answered a newer refresh request", async () => {
+    const p = payload();
+    await reportInventory(req(p), enabled, now);
+    const requestId = crypto.randomUUID();
+    await refreshInventory(enabled, "owner@example.com", { requestId }, now + 1);
+    expect(await (await reportInventory(req(p), enabled, now + 2)).json()).toMatchObject({
+      accepted: false, acknowledged: true, refreshId: "initial", reportedAt: now });
+    expect(await (await reportInventory(req({ ...p, sequence: 2 }), enabled, now + 3)).json()).toMatchObject({
+      accepted: true, acknowledged: true, refreshId: requestId, reportedAt: now + 3 });
+  });
   it("does not pretend installation-scoped MCU observations are globally unique devices", async () => {
     const p = payload();
     await reportInventory(req(p), enabled, now);

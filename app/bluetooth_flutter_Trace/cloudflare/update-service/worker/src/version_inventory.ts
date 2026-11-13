@@ -116,9 +116,17 @@ export async function reportInventory(request: Request, env: PublicInventoryEnv,
   const stateHash = await sha256Text(JSON.stringify([versionCode, versionName, imageSha,
     devices.map(({ ageSeconds: _age, ...identity }) => identity).sort((a, b) => a.deviceKey.localeCompare(b.deviceKey))]));
   const current = await control(env);
-  const previous = await env.DB.prepare("SELECT sequence,state_hash,last_seen,report_day,day_count,refresh_id FROM version_inventory_installations WHERE install_key=?")
+  const readInstallation = () => env.DB.prepare("SELECT sequence,state_hash,last_seen,report_day,day_count,refresh_id FROM version_inventory_installations WHERE install_key=?")
     .bind(key).first<Installation>();
-  const response = (accepted: boolean, next = DAY) => json({ ok: true, accepted, refreshId: current.refresh_id, nextReportSeconds: next });
+  let previous = await readInstallation();
+  const response = (accepted: boolean, next = DAY) => {
+    const acknowledged = accepted || previous?.state_hash === stateHash;
+    return json({ ok: true, accepted, acknowledged,
+      reportedAt: accepted ? now : acknowledged ? previous!.last_seen : null,
+      sequence: accepted ? sequence : previous?.sequence ?? sequence,
+      refreshId: !accepted && acknowledged ? previous!.refresh_id : current.refresh_id,
+      nextReportSeconds: next });
+  };
   if (previous && sequence <= previous.sequence) {
     if (sequence === previous.sequence && stateHash !== previous.state_hash) throw new ApiError("IDEMPOTENCY_CONFLICT", "Sequence payload changed", 409);
     return response(false);
@@ -151,6 +159,8 @@ export async function reportInventory(request: Request, env: PublicInventoryEnv,
     .bind(key, ...devices.map(d => d.deviceKey), key, sequence, stateHash));
   try {
     const written = await env.DB.batch(statements);
+    // A newer sequence may win after the initial read. Acknowledge only stored state.
+    if (!written[0].meta.changes) previous = await readInstallation();
     return response(written[0].meta.changes > 0);
   } catch (error) {
     if (String(error).includes("inventory daily budget") || String(error).includes("day_count")) {

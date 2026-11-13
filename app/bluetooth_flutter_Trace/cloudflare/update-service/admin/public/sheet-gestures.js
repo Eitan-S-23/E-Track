@@ -1,5 +1,6 @@
 /* One gesture owner for every sheet. Native content scrolling keeps priority. */
-window.TraceSheetGestures = function ({ sheet, scroll, backdrop, canClose, close }) {
+window.TraceSheetGestures = function ({ sheet, scroll, backdrop, canClose, close,
+  headerSelector = ".quick-sheet-header, .quick-sheet-handle", centered = true }) {
   let gesture = null;
   let suppressClickUntil = 0;
   const controls = "button, a, input, textarea, select, label, summary, [contenteditable], [data-no-sheet-drag]";
@@ -7,13 +8,13 @@ window.TraceSheetGestures = function ({ sheet, scroll, backdrop, canClose, close
     gesture = null;
     sheet.classList.remove("sheet-dragging");
     sheet.style.removeProperty("transform");
-    backdrop.style.removeProperty("opacity");
+    backdrop?.style.removeProperty("opacity");
   }
   function available() { return !sheet.hidden && !sheet.inert && canClose(); }
   function begin(x, y, target, pointerId = null) {
     reset();
     if (!available() || !(target instanceof Element) || target.closest(controls)) return;
-    const header = Boolean(target.closest(".quick-sheet-header, .quick-sheet-handle"));
+    const header = Boolean(target.closest(headerSelector));
     if (!header && (!scroll.contains(target) || scroll.scrollTop > 0)) return;
     // Nested scroll regions and text editors must never hand a swipe to the sheet.
     for (let node = target; !header && node && node !== scroll; node = node.parentElement) {
@@ -40,8 +41,9 @@ window.TraceSheetGestures = function ({ sheet, scroll, backdrop, canClose, close
     const position = g.axis === "x" ? Math.abs(dx) : Math.max(0, dy);
     g.velocity = (position - g.lastPosition) / Math.max(1, now - g.lastTime);
     g.lastPosition = position; g.lastTime = now; g.distance = position;
-    sheet.style.transform = g.axis === "x" ? `translate(calc(-50% + ${dx}px), 0)` : `translate(-50%, ${position}px)`;
-    backdrop.style.opacity = String(Math.max(.35, 1 - g.distance / Math.max(1, sheet.clientHeight)));
+    const origin = centered ? "-50%" : "0px";
+    sheet.style.transform = g.axis === "x" ? `translate(calc(${origin} + ${dx}px), 0)` : `translate(${origin}, ${position}px)`;
+    if (backdrop) backdrop.style.opacity = String(Math.max(.35, 1 - g.distance / Math.max(1, sheet.clientHeight)));
   }
   function end(cancelled = false) {
     const g = gesture;
@@ -66,7 +68,7 @@ window.TraceSheetGestures = function ({ sheet, scroll, backdrop, canClose, close
   sheet.addEventListener("touchend", () => end());
   sheet.addEventListener("touchcancel", () => end(true));
   sheet.addEventListener("pointerdown", event => {
-    if (event.pointerType === "touch" || event.button !== 0 || !event.target.closest(".quick-sheet-header, .quick-sheet-handle")) return;
+    if (event.pointerType === "touch" || event.button !== 0 || !event.target.closest(headerSelector)) return;
     begin(event.clientX, event.clientY, event.target, event.pointerId);
     if (gesture) sheet.setPointerCapture(event.pointerId);
   });

@@ -73,13 +73,19 @@ app.get("/api/public/github-fallback", async (c) =>
   handleDownload(c.req.raw, c.env, c.get("requestId"), "github-fallback")
 );
 
-app.post("/api/ci/releases", async (c) =>
-  handleRegisterRelease(c.req.raw, c.env, c.get("requestId"))
-);
+app.post("/api/ci/releases", async (c) => {
+  const response = await handleRegisterRelease(c.req.raw, c.env, c.get("requestId"));
+  if (response.status === 201) c.executionCtx.waitUntil(deliverNotifications(c.env)
+    .catch(() => console.warn("Candidate notification delivery deferred")));
+  return response;
+});
 
-app.post("/api/ci/firmware/releases", async (c) =>
-  handleRegisterFirmwareRelease(c.req.raw, c.env, c.get("requestId"))
-);
+app.post("/api/ci/firmware/releases", async (c) => {
+  const response = await handleRegisterFirmwareRelease(c.req.raw, c.env, c.get("requestId"));
+  if (response.status === 201) c.executionCtx.waitUntil(deliverNotifications(c.env)
+    .catch(() => console.warn("Candidate notification delivery deferred")));
+  return response;
+});
 
 app.post("/api/ci/firmware/preflight", async (c) =>
   handleFirmwarePreflight(c.req.raw, c.env, c.get("requestId"))

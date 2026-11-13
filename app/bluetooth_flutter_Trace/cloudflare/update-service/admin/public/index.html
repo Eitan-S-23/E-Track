@@ -3,7 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Trace Update Admin</title>
+    <title>E-Track</title>
+    <link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48 64x64" href="/favicon.ico?v=f38780fb184c" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png?v=f38780fb184c" />
     <link rel="stylesheet" href="/admin.css" />
     <meta name="theme-color" content="#faf9f6" />
   </head>
@@ -41,8 +43,9 @@
       <aside class="sidebar" id="sidebar" aria-label="Admin navigation">
         <button type="button" class="icon-button nav-close" id="closeNav" aria-label="Close navigation" data-i18n-aria-label="nav.close"><svg class="ui-icon" aria-hidden="true"><use href="#i-close"></use></svg></button>
         <div class="brand">
+          <img class="brand-mark" src="/favicon.svg" width="32" height="32" alt="" />
           <span class="brand-text">
-            <strong>Trace</strong>
+            <strong>E-Track</strong>
             <span data-i18n="brand.subtitle">Release console</span>
           </span>
         </div>
@@ -168,7 +171,7 @@
       <section class="quick-action-sheet task-sheet" id="taskSheet" role="dialog" aria-modal="true" aria-labelledby="taskTitle" hidden>
         <button type="button" class="quick-sheet-close" id="taskClose" aria-label="Close tasks"><svg class="ui-icon" aria-hidden="true"><use href="#i-close"></use></svg></button>
         <span class="quick-sheet-handle" aria-hidden="true"></span>
-        <header class="quick-sheet-header"><div><p class="eyebrow">Trace</p><h2 id="taskTitle">Tasks and notifications</h2></div></header>
+        <header class="quick-sheet-header"><div><p class="eyebrow">E-Track</p><h2 id="taskTitle">Tasks and notifications</h2></div></header>
         <div class="quick-sheet-scroll" id="taskScroll"><div id="taskContent"></div></div>
       </section>
       <div class="task-toast" id="taskToast" role="status" aria-live="polite" hidden><span></span><button type="button">View tasks</button></div>
@@ -234,7 +237,7 @@
         <section class="admin-view" id="phoneView" data-admin-view="phone">
         <section class="header-row" id="overview">
           <div>
-            <p class="breadcrumbs">Trace / <strong data-i18n="nav.updateAdmin">Update Admin</strong></p>
+            <p class="breadcrumbs">E-Track / <strong data-i18n="nav.updateAdmin">Update Admin</strong></p>
             <div class="page-title-line">
               <h1 data-i18n="nav.releases">Releases</h1>
               <button type="button" class="release-help-button" id="releaseHelpButton" aria-label="Release panel help" data-i18n-aria-label="help.releaseTooltip" data-i18n-tooltip="help.releaseTooltip">
@@ -408,7 +411,7 @@
         <section class="admin-view firmware-view" id="firmwareView" data-admin-view="firmware" hidden>
           <header class="firmware-heading">
             <div>
-              <p class="breadcrumbs">Trace / <strong data-i18n="nav.mcuFirmware">MCU Firmware</strong></p>
+              <p class="breadcrumbs">E-Track / <strong data-i18n="nav.mcuFirmware">MCU Firmware</strong></p>
               <h1 data-i18n="firmware.title">MCU Firmware Management</h1>
               <p class="firmware-hint" data-i18n="catalog.subtitle">Select a version, review changes, then publish to a channel.</p>
             </div>
@@ -541,6 +544,7 @@
             <svg class="ui-icon" aria-hidden="true"><use href="#i-close"></use></svg>
           </button>
         </header>
+        <div id="providerUsage"></div>
         <div id="storageSummary">
           <div class="empty" data-i18n="storage.loading">Loading R2 usage...</div>
         </div>
@@ -550,6 +554,7 @@
     <script src="/sheet-gestures.js"></script>
     <script src="/overlay-history.js"></script>
     <script src="/delta-activity.js"></script>
+    <script src="/resource-usage.js"></script>
     <script>
       const state = {
         session: null,
@@ -609,6 +614,7 @@
       };
 
       let taskActivity = null;
+      let resourceUsagePanel = null;
       let overlayHistory = null;
       const I18N = {
         en: {
@@ -617,7 +623,7 @@
           "operations.delta": "Manage delta packages",
           "operations.close": "Close delta packages",
           "operations.search": "Search reported versions or image hashes...",
-          "page.title": "Trace Update Admin",
+          "page.title": "E-Track",
           "language.toggle": "Switch language",
           "language.next": "中文",
           "brand.subtitle": "Release console",
@@ -941,8 +947,8 @@
           "storage.title": "R2 Storage",
           "storage.floatLabel": "Open R2 and D1 resources",
           "storage.floatEyebrow": "Cloudflare resources",
-          "storage.floatTitle": "R2 / D1 Resources",
-          "storage.floatHint": "Storage usage and registered release assets.",
+          "storage.floatTitle": "Resource Usage",
+          "storage.floatHint": "Provider metrics and registered release assets.",
           "storage.close": "Close R2 and D1 resources",
           "storage.miniMeta": "R2 / D1",
           "storage.quotaPercent": "R2 {percent}%",
@@ -978,7 +984,7 @@
           "operations.delta": "管理差分包",
           "operations.close": "关闭差分包管理",
           "operations.search": "搜索上报版本或镜像哈希...",
-          "page.title": "Trace 更新后台",
+          "page.title": "E-Track",
           "language.toggle": "切换语言",
           "language.next": "EN",
           "brand.subtitle": "设备更新后台",
@@ -1302,8 +1308,8 @@
           "storage.title": "R2 存储",
           "storage.floatLabel": "打开 R2 和 D1 资源信息",
           "storage.floatEyebrow": "Cloudflare 资源",
-          "storage.floatTitle": "R2 / D1 资源",
-          "storage.floatHint": "可拖动小圆窗；点击查看存储和索引状态。",
+          "storage.floatTitle": "资源用量",
+          "storage.floatHint": "可拖动小圆窗；点击查看服务商用量和已登记资源。",
           "storage.close": "关闭 R2 和 D1 资源信息",
           "storage.miniMeta": "R2 / D1",
           "storage.quotaPercent": "R2 {percent}%",
@@ -1337,7 +1343,6 @@
 
       const roleRank = { viewer: 0, publisher: 1, owner: 2 };
       const RELEASE_PAGE_SIZE = 6;
-      const R2_FREE_QUOTA_BYTES = 10 * 1000 * 1000 * 1000;
       let quickActionCloseTimer = 0;
       let firmwareDetailCloseTimer = 0;
       let activeConfirmDialog = null;
@@ -1626,9 +1631,13 @@
       applyAppSection();
       applyFirmwareSection();
       attachEvents();
+      resourceUsagePanel = window.TraceResourceUsage?.({ element: document.querySelector("#providerUsage"),
+        api, text: opText, escape: escapeHtml, formatBytes, onResize: positionResourcePanel });
       taskActivity = new TraceDeltaActivity({ api, mutate, text: opText, escape: escapeHtml, formatBytes,
-        openPanel: openTasks, openTarget: (kind,id) => {
+        canNotify: () => !state.busy && overlayLayers().length === 0,
+        openPanel: openTasks, openTarget: (kind,id,type) => {
           if (state.busy || activeConfirmDialog || state.delta?.busy) return false;
+          if (type === "candidate") return openCandidateDetails(kind,id);
           closeTasks(); openDelta(kind,id); return true;
         }, onJobs: jobs => {
           const delta = state.delta;
@@ -1650,15 +1659,21 @@
         [els.deltaSheet,document.querySelector("#deltaScroll"),els.deltaBackdrop,"delta"],
         [document.querySelector("#taskSheet"),document.querySelector("#taskScroll"),document.querySelector("#taskBackdrop"),"tasks"]
       ]) new TraceSheetGestures({sheet,scroll,backdrop,canClose:()=>!state.busy && !state.delta?.busy && !activeConfirmDialog,close:()=>dismissOverlay(layer)});
+      new TraceSheetGestures({ sheet: els.resourcePanel, scroll: els.resourcePanel,
+        headerSelector: ".resource-panel-head", centered: false,
+        canClose: () => overlayLayers().at(-1) === "resources" && !state.busy && !state.delta?.busy,
+        close: () => dismissOverlay("resources") });
       syncOverlayState();
       loadAll();
 
       function overlayLayers() {
-        return [state.detailsOpen && "app",state.firmwareDetailsOpen && "firmware",state.delta && "delta",
+        return [els.resourceFloat.classList.contains("open") && "resources",
+          state.detailsOpen && "app",state.firmwareDetailsOpen && "firmware",state.delta && "delta",
           state.taskOpen && "tasks",els.body.classList.contains("nav-open") && "nav",activeConfirmDialog && "confirm"].filter(Boolean);
       }
       function dismissOverlay(layer) {
         if (layer === "confirm") closeConfirmDialog(false);
+        else if (layer === "resources") closeResourcePanel({restoreFocus:true});
         else if (layer === "app") closeQuickActions({immediate:true});
         else if (layer === "firmware") closeFirmwareDetails({immediate:true});
         else if (layer === "delta") closeDelta();
@@ -1676,6 +1691,44 @@
         document.querySelector("#taskScroll").scrollTop = 0;
         els.body.classList.add("task-open"); syncOverlayState();
         taskActivity.render(); taskActivity.refresh(); document.querySelector("#taskClose").focus();
+        return true;
+      }
+
+      async function openCandidateDetails(kind, id) {
+        if (!["android", "windows", "firmware"].includes(kind)) return false;
+        const actor = state.session?.actor;
+        const generation = state.candidateNavigation = (state.candidateNavigation ?? 0) + 1;
+        const url = kind === "firmware" ? "/api/admin/firmware/releases?appId=trace"
+          : `/api/admin/releases?appId=trace&platform=${kind}`;
+        const value = await api(url);
+        if (actor !== state.session?.actor || generation !== state.candidateNavigation || state.busy || activeConfirmDialog || state.delta?.busy) return false;
+        const release = kind === "firmware" ? value.firmwareReleases?.find(row=>row.releaseId === id)
+          : value.releases?.find(row=>row.id === id);
+        if (!release) throw new Error(opText("此构建包已移除或不在当前可见列表中。", "This candidate was removed or is outside the current visible list."));
+        closeTasks(); closeDelta();
+        if (kind === "windows") {
+          void openResultDialog({ title: `Windows App ${release.version_name}`,
+            message: opText("构建包详情（只读，不操作 Android 渠道）", "Candidate details (read-only; Android channels are unchanged)"),
+            detail: `${release.release_tag}\n${release.commit_sha ?? ""}\n${release.release_notes ?? ""}` });
+          return true;
+        }
+        if (kind === "firmware") {
+          state.firmwareReleases = [release, ...state.firmwareReleases.filter(row=>row.releaseId !== id)];
+          state.firmwareSection = "releases";
+          state.queries.firmware = "";
+          state.firmwareStatusFilter = "all"; state.firmwareChannelFilter = "all";
+          state.selectedFirmwareId = id;
+          switchAdminView("firmware"); applyFirmwareSection();
+          openFirmwareDetails();
+        } else {
+          state.releases = [release, ...state.releases.filter(row=>row.id !== id)];
+          state.appSection = "releases"; state.queries.releases = "";
+          state.statusFilter = "all"; state.channelFilter = "all";
+          state.selectedReleaseId = id;
+          state.releasePage = Math.max(0,Math.floor(filteredReleases().findIndex(row=>row.id === id)/RELEASE_PAGE_SIZE));
+          switchAdminView("phone"); applyAppSection(); render();
+          openQuickActions(id);
+        }
         return true;
       }
       function closeTasks() {
@@ -2065,23 +2118,26 @@
       }
 
       function openResourcePanel() {
+        if (els.resourceFloat.inert || activeConfirmDialog) return;
         window.clearTimeout(resourcePanelCloseTimer);
         els.resourcePanel.hidden = false;
         els.resourceFloat.classList.add("open");
         els.resourceOrb.setAttribute("aria-expanded", "true");
+        overlayHistory?.sync();
         positionResourcePanel();
         els.resourceClose.focus({ preventScroll: true });
+        void resourceUsagePanel?.load();
       }
 
       function closeResourcePanel({ restoreFocus = false } = {}) {
         if (!els.resourceFloat.classList.contains("open")) return;
         els.resourceFloat.classList.remove("open");
         els.resourceOrb.setAttribute("aria-expanded", "false");
+        overlayHistory?.sync();
         if (restoreFocus) els.resourceOrb.focus({ preventScroll: true });
         window.clearTimeout(resourcePanelCloseTimer);
-        resourcePanelCloseTimer = window.setTimeout(() => {
-          if (!els.resourceFloat.classList.contains("open")) els.resourcePanel.hidden = true;
-        }, 190);
+        // This panel has no exit transition. A delayed hide intercepts the next drag.
+        els.resourcePanel.hidden = true;
       }
 
       function positionResourcePanel() {
@@ -2197,8 +2253,8 @@
       }
 
       function syncResourceWaterLevel(bytes) {
-        const level = 33 + 67 * Math.pow(r2QuotaRatio(bytes), .82);
-        els.resourceOrb.style.setProperty("--resource-water-shift", (100 - level).toFixed(1) + "px");
+        // Decorative water is not an account quota meter; the allowance is unknown.
+        els.resourceOrb.style.setProperty("--resource-water-shift", "67px");
       }
 
       function viewportRect() {
@@ -2300,6 +2356,7 @@
             state.deltaDrafts.clear();
           }
           state.session = session;
+          resourceUsagePanel?.setActor(session.actor);
           taskActivity?.setActor(session.actor);
           const [channels, releases, storage, announcements, firmwareReleases, firmwareChannels] = await Promise.all([
             api("/api/admin/channels?appId=trace&platform=android"),
@@ -3117,6 +3174,7 @@
       }
 
       function render() {
+        resourceUsagePanel?.render();
         const visible = filteredReleases();
         const pageRows = releasePageRows(visible);
         let selected = selectedRelease(pageRows);
@@ -4065,9 +4123,7 @@
         syncResourceWaterLevel(r2Bytes);
         els.resourceOrbMeta.textContent = t("storage.miniMeta");
         els.resourceOrbSize.textContent = formatBytes(r2Bytes);
-        els.resourceOrb.title = t("storage.quotaPercent", {
-          percent: formatPercent(r2QuotaRatio(r2Bytes, { clamp: false }))
-        });
+        els.resourceOrb.title = `R2 ${formatBytes(r2Bytes)} · ${opText("账户额度未知", "Account allowance unknown")}`;
         const typeRows = byType.length
           ? byType
               .map((row) =>
@@ -4677,11 +4733,6 @@
           minute: "2-digit",
           hour12: false
         }).format(date);
-      }
-
-      function r2QuotaRatio(bytes, { clamp = true } = {}) {
-        const ratio = Math.max(0, Number(bytes ?? 0)) / R2_FREE_QUOTA_BYTES;
-        return clamp ? Math.min(1, ratio) : ratio;
       }
 
       function storageTypeLabel(type) {

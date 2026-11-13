@@ -4,7 +4,7 @@ import { sha256Text } from "./version_inventory";
 import { jobView, type DeltaJob } from "./delta_jobs";
 import type { WorkerEnv } from "./types";
 
-type NotificationEnv = Pick<WorkerEnv, "DB" | "ADMIN_PUSH_PUBLIC_KEY" | "ADMIN_PUSH_PRIVATE_JWK" | "ADMIN_PUSH_SUBJECT">;
+type NotificationEnv = Pick<WorkerEnv, "DB" | "ADMIN_PUSH_PUBLIC_KEY" | "ADMIN_PUSH_PRIVATE_JWK" | "ADMIN_PUSH_SUBJECT"> & { APP_ID?: string };
 const nowSeconds = () => Math.floor(Date.now() / 1000);
 const publicKeyPattern = /^[A-Za-z0-9_-]{87}$/;
 
@@ -23,14 +23,24 @@ export function pushEndpoint(value: unknown): string {
 }
 
 export async function deltaActivity(env: NotificationEnv, actor: string): Promise<Response> {
+  // Non-subscribers also retain arrivals while away. Materialization is bounded;
+  // only Access-authorized readers reach this function, and no old releases seed it.
+  if (env.APP_ID) await env.DB.prepare(`INSERT OR IGNORE INTO admin_notifications(candidate_id,actor,status,created_at)
+    SELECT e.id,?,'ready',e.created_at FROM admin_candidate_events e WHERE e.app_id=?
+    AND NOT EXISTS(SELECT 1 FROM admin_notifications n WHERE n.actor=? AND n.candidate_id=e.id)
+    ORDER BY e.id LIMIT 100`).bind(actor,env.APP_ID,actor).run();
   const [jobs, notifications, unread, subscriptions] = await env.DB.batch<DeltaJob | Record<string, unknown>>([
     env.DB.prepare("SELECT * FROM delta_jobs WHERE actor=? ORDER BY CASE WHEN status IN ('ready','failed') THEN 1 ELSE 0 END,updated_at DESC,id LIMIT 100").bind(actor),
     env.DB.prepare(`SELECT n.id,n.job_id AS jobId,n.attempt,n.status,n.error_code AS errorCode,n.created_at AS createdAt,
-      j.kind,j.target_release_id AS targetReleaseId,j.base_version_code AS baseVersionCode,j.target_version_code AS targetVersionCode,
+      CASE WHEN n.candidate_id IS NULL THEN 'delta' ELSE 'candidate' END AS type,
+      COALESCE(e.kind,j.kind) AS kind,COALESCE(e.release_id,j.target_release_id) AS targetReleaseId,
+      j.base_version_code AS baseVersionCode,COALESCE(e.version_code,j.target_version_code) AS targetVersionCode,
+      e.version_name AS versionName,e.device_model AS deviceModel,
       CASE WHEN n.id>COALESCE(r.through_id,0) AND n.read_at IS NULL THEN 1 ELSE 0 END AS unread
-      FROM delta_notifications n JOIN delta_jobs j ON j.id=n.job_id
+      FROM admin_notifications n LEFT JOIN delta_jobs j ON j.id=n.job_id
+      LEFT JOIN admin_candidate_events e ON e.id=n.candidate_id
       LEFT JOIN admin_notification_reads r ON r.actor=n.actor WHERE n.actor=? ORDER BY n.id DESC LIMIT 30`).bind(actor),
-    env.DB.prepare(`SELECT COUNT(*) AS count FROM delta_notifications WHERE actor=? AND read_at IS NULL AND id>
+    env.DB.prepare(`SELECT COUNT(*) AS count FROM admin_notifications WHERE actor=? AND read_at IS NULL AND id>
       COALESCE((SELECT through_id FROM admin_notification_reads WHERE actor=?),0)`).bind(actor,actor),
     env.DB.prepare("SELECT id,expires_at AS expiresAt FROM admin_push_subscriptions WHERE actor=? AND expires_at>?").bind(actor,nowSeconds())
   ]);
@@ -49,7 +59,7 @@ export async function readNotifications(env: NotificationEnv, actor: string, bod
       throw invalidParameter("Expected 1 to 30 distinct notification IDs");
     }
     // Viewing one result must not consume older, unseen results from this actor.
-    const read = await env.DB.prepare(`UPDATE delta_notifications SET read_at=COALESCE(read_at,?)
+    const read = await env.DB.prepare(`UPDATE admin_notifications SET read_at=COALESCE(read_at,?)
       WHERE actor=? AND id IN (${ids.map(()=>"?").join(",")}) RETURNING id`)
       .bind(nowSeconds(),actor,...ids).all<{id:number}>();
     return json({ok:true,readIds:read.results.map(row=>row.id)});
@@ -57,7 +67,7 @@ export async function readNotifications(env: NotificationEnv, actor: string, bod
   const through = body.throughId;
   if (!Number.isSafeInteger(through) || Number(through) < 0) throw invalidParameter("Invalid notification cursor");
   await env.DB.prepare(`INSERT INTO admin_notification_reads(actor,through_id)
-    VALUES (?,MIN(?,COALESCE((SELECT MAX(id) FROM delta_notifications WHERE actor=?),0)))
+    VALUES (?,MIN(?,COALESCE((SELECT MAX(id) FROM admin_notifications WHERE actor=?),0)))
     ON CONFLICT(actor) DO UPDATE SET through_id=MAX(through_id,excluded.through_id)`)
     .bind(actor,through,actor).run();
   const cursor = await env.DB.prepare("SELECT through_id FROM admin_notification_reads WHERE actor=?")
@@ -117,14 +127,14 @@ export async function vapidAuthorization(env: NotificationEnv, endpoint: string)
 export async function deliverNotifications(env: NotificationEnv, fetcher = fetch): Promise<void> {
   if (!env.ADMIN_PUSH_PRIVATE_JWK || !env.ADMIN_PUSH_PUBLIC_KEY) return;
   const now = nowSeconds();
-  await env.DB.prepare("UPDATE admin_push_deliveries SET status='failed' WHERE status='pending' AND attempts>=5 AND next_at<=?").bind(now).run();
-  const due = await env.DB.prepare(`SELECT d.event_id,d.subscription_id,s.endpoint FROM admin_push_deliveries d
+  await env.DB.prepare("UPDATE admin_notification_deliveries SET status='failed' WHERE status='pending' AND attempts>=5 AND next_at<=?").bind(now).run();
+  const due = await env.DB.prepare(`SELECT d.event_id,d.subscription_id,s.endpoint FROM admin_notification_deliveries d
     JOIN admin_push_subscriptions s ON s.id=d.subscription_id
     WHERE d.status='pending' AND d.next_at<=? AND d.attempts<5 AND s.expires_at>? ORDER BY d.next_at LIMIT 3`)
     .bind(now,now).all<{event_id:number;subscription_id:string;endpoint:string}>();
   for (const row of due.results) {
     const lease = crypto.randomUUID();
-    const claimed = await env.DB.prepare(`UPDATE admin_push_deliveries SET lease=?,next_at=?,attempts=attempts+1
+    const claimed = await env.DB.prepare(`UPDATE admin_notification_deliveries SET lease=?,next_at=?,attempts=attempts+1
       WHERE event_id=? AND subscription_id=? AND status='pending' AND next_at<=? AND attempts<5`)
       .bind(lease,now+300,row.event_id,row.subscription_id,now).run();
     if (!claimed.meta.changes) continue;
@@ -137,13 +147,25 @@ export async function deliverNotifications(env: NotificationEnv, fetcher = fetch
         await env.DB.prepare("DELETE FROM admin_push_subscriptions WHERE id=?").bind(row.subscription_id).run();
       } else {
         const status = response.ok ? "sent" : response.status === 429 || response.status >= 500 ? "pending" : "failed";
-        await env.DB.prepare("UPDATE admin_push_deliveries SET status=CASE WHEN ?='pending' AND attempts>=5 THEN 'failed' ELSE ? END WHERE event_id=? AND subscription_id=? AND lease=?")
+        await env.DB.prepare("UPDATE admin_notification_deliveries SET status=CASE WHEN ?='pending' AND attempts>=5 THEN 'failed' ELSE ? END WHERE event_id=? AND subscription_id=? AND lease=?")
           .bind(status,status,row.event_id,row.subscription_id,lease).run();
       }
     } catch {
-      await env.DB.prepare("UPDATE admin_push_deliveries SET status=CASE WHEN attempts>=5 THEN 'failed' ELSE 'pending' END WHERE event_id=? AND subscription_id=? AND lease=?")
+      await env.DB.prepare("UPDATE admin_notification_deliveries SET status=CASE WHEN attempts>=5 THEN 'failed' ELSE 'pending' END WHERE event_id=? AND subscription_id=? AND lease=?")
         .bind(row.event_id,row.subscription_id,lease).run();
     }
   }
   await env.DB.prepare("DELETE FROM admin_push_subscriptions WHERE expires_at<=?").bind(now).run();
+}
+
+export function candidateArrival(env: Pick<WorkerEnv, "DB" | "APP_ID">, input: {
+  appId: string; kind: "android" | "windows" | "firmware"; releaseId: string;
+  versionName: string; versionCode: number; deviceModel?: string; commitSha: string; runId: string;
+}): D1PreparedStatement {
+  // Must be part of the registration batch, after asset verification. A failed
+  // asset insert or audit write rolls the event and its outbox back as well.
+  return env.DB.prepare(`INSERT OR IGNORE INTO admin_candidate_events
+    (app_id,kind,release_id,version_name,version_code,device_model,commit_sha,run_id,created_at)
+    SELECT ?,?,?,?,?,?,?,?,? WHERE ?=?`).bind(input.appId,input.kind,input.releaseId,input.versionName,
+      input.versionCode,input.deviceModel ?? null,input.commitSha,input.runId,nowSeconds(),input.appId,env.APP_ID);
 }
