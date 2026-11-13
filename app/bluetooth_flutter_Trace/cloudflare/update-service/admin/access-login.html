@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#faf9f6" />
+    <title>E-Track</title>
+    <link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48 64x64" href="https://trace-update-public-staging.pages.dev/favicon.ico?v=f38780fb184c" />
+    <link rel="icon" type="image/png" sizes="64x64" href="https://trace-update-public-staging.pages.dev/favicon.png?v=f38780fb184c" />
+    <style>
+      :root {
+        color-scheme: light;
+        --paper: #faf9f6;
+        --ink: #282d29;
+        --muted: #666d65;
+        --accent: #3c5b49;
+        --line: #e0e3da;
+        font-family: "Aptos", "Trebuchet MS", "Microsoft YaHei", sans-serif;
+        color: var(--ink);
+        background: var(--paper);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-width: 280px;
+        min-height: 100vh;
+        background: radial-gradient(ellipse at 50% 0, #e9efe8 0, var(--paper) 65%);
+      }
+      main {
+        width: min(440px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: clamp(40px, 10vh, 104px) 0 32px;
+        animation: arrive 300ms ease-out both;
+      }
+      .brand { display: flex; align-items: center; gap: 15px; }
+      .brand img { width: 46px; height: 46px; flex: 0 0 46px; }
+      h1 { margin: 0; font: 46px/1.15 Georgia, "Times New Roman", serif; letter-spacing: -.055em; overflow-wrap: anywhere; }
+      .eyebrow { margin: 28px 0 8px; color: var(--accent); font-size: 11px; letter-spacing: .15em; text-transform: uppercase; }
+      h2 { margin: 0; font-size: 23px; line-height: 1.35; font-weight: 600; letter-spacing: -.025em; }
+      .hint { margin: 10px 0 26px; color: var(--muted); font-size: 14px; line-height: 1.6; }
+      .auth { border-top: 1px solid var(--line); padding-top: 26px; transition: border-color 160ms ease; }
+      .auth:focus-within { border-color: var(--accent); }
+      cf-access-authbox { display: block; width: 100%; min-width: 0; min-height: 200px; }
+      .message { margin: 0 0 20px; border-left: 3px solid var(--accent); padding: 10px 14px; background: #e9efe8; font-size: 14px; line-height: 1.6; overflow-wrap: anywhere; }
+      footer { margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; line-height: 1.6; }
+      @keyframes arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+      @media (max-width: 480px) { main { width: calc(100% - 32px); } h1 { font-size: 40px; } }
+      @media (prefers-reduced-motion: reduce) { main { animation: none; } .auth { transition: none; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="brand">
+          <img src="https://trace-update-public-staging.pages.dev/favicon.png?v=f38780fb184c" width="46" height="46" alt="" />
+          <h1>{{ app_name }}</h1>
+        </div>
+        <p class="eyebrow">Release console</p>
+        <h2>Sign in</h2>
+        <p class="hint">Use your approved account to manage app and firmware releases.</p>
+      </header>
+      {% if message.text.size > 0 %}
+      <p class="message" role="status">{{ message.text }}</p>
+      {% endif %}
+      <section class="auth" aria-label="Sign in to E-Track">
+        <cf-access-authbox></cf-access-authbox>
+      </section>
+      <footer>Protected by Cloudflare Access. Your existing sign-in and access rules apply.</footer>
+    </main>
+  </body>
+</html>

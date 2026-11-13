@@ -1,4 +1,4 @@
-# Trace Update Admin
+# E-Track Update Admin
 
 An Access-protected Pages Functions facade serves a shared App and MCU release
 console. The lightweight HTML/JavaScript UI uses the same self-hosted
@@ -12,6 +12,36 @@ Dispatch and supplemental distribution have separate configuration gates;
 showing a management dialog does not mean a real delta job has been qualified.
 
 No direct admin mutation route is exposed on the standalone Worker. During the no-custom-domain phase, mutations go through this Pages Functions same-origin facade.
+
+## Hosted Login Branding
+
+The Admin and public Pages sites own their HTML titles and versioned ICO/PNG/SVG
+favicons. Cloudflare Access serves the anonymous login document on another origin;
+changing `public/index.html` or the Access application's `logo_url` does not change
+that document's browser title or favicon. The application name is visible there,
+but it is separate from the hosted login design.
+
+`access-login.html` is the prepared HTML/Liquid login template, not a Pages asset
+or an already assigned custom page. It retains exactly one unconditional official
+`<cf-access-authbox>`, visible escaped provider messages, and the existing Admin
+palette. It has no customer authentication forms or scripts. Its icons come from
+the already public original Pages origin, not the Access-protected Admin origin.
+
+The official creation route is `POST /accounts/{account_id}/access/custom_pages`
+with `name`, `type: "login"`, `contract_version: 1` and `custom_html`. It requires
+`Access: Custom Pages Write` and the account's applicable custom-page entitlement.
+Check the current provider documentation and actual account capability; do not
+infer its plan from an API denial or change billing. After creation, assignment
+must be limited to the existing Admin application, preserving its policies,
+audience, destinations and session/cookie settings, not an account-wide default.
+
+On 2026-11-14 both existing scoped credential routes returned 403/10000 for
+creation. No page was created or assigned. The application name is `E-Track`,
+but the hosted login's browser favicon and title remain Cloudflare's. Resume
+creation only after usable custom-page management capability is available.
+Contract tests run via `node --test tests/ota/test_access_login_template.mjs`
+from the repository root and are included in Cloudflare CI. These static checks
+are not proof of hosted Liquid rendering or live authentication.
 
 ## Shared UI And Keyboard Behavior
 

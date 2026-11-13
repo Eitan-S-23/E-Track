@@ -100,6 +100,9 @@ test("both workflow routes keep publication and original secret stores separate"
   assert.match(app, /flutter-version: ["']?3\.47\.9/);
   assert.match(app, /node-version: ["']?24/);
   assert.match(app, /--prerelease --latest=false/);
+  assert.ok(app.includes('--title "E-Track $VERSION_NAME candidate"'));
+  assert.ok(app.includes("printf 'E-Track %s (%s)\\n\\nApp source: Eitan-S-23/E-Track@%s"));
+  assert.doesNotMatch(app, /--title "Trace |printf 'Trace /);
   assert.equal((app.match(/ota_link_profile\.py --build-profile adaptive-v2-candidate/g) ?? []).length, 2);
   assert.doesNotMatch(app, /dart-define=TRACE_OTA_LINK_PROFILE/);
   assert.doesNotMatch(app, /--clobber|ETRACK_DEV_SIGNING_KEYSTORE|generate-delta|api\/admin\/.*publish/);

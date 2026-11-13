@@ -37,15 +37,17 @@ credentials or client coverage is reported as missing, not simulated success.
 
 ## Status
 
-Inventory and original-Admin UI deployed and checked with the real owner session.
-The updated APK and Windows EXE have passed Actions builds. Both real delta
-formats are now qualified: MCU 30323 to 30324 and original App 83 to 86. The
-original App repository/key boundary is fixed; no replacement credentials or
-original-package rebuild were required. Owner controls are active on all three
-original services at `9dd858fc8f9943d444060169291ea5131d63489b`; neither verified
-asset is enabled. The final real owner UI and public-offer checks passed.
-No device operation or channel publication occurred. Older blocked statements
-below are retained history, superseded by the continuation recorded at the end.
+Admin/public-site branding, reporting repairs, candidate notifications and the
+resource panel are deployed. Original App `1.0.77+103`, Windows `1.0.77.103` and
+MCU `3.3.25` candidates were built, delivered and byte-verified; Stable/Beta were
+not changed by this work. The earlier qualified optional deltas remain separate.
+The hosted Access login shows the E-Track application name, but its title/favicon
+remain Cloudflare's because custom-page creation is denied by both existing
+credential routes. A tested template is prepared, not activated. Installation
+and physical UI verification remain pending the actual phone connection.
+The final continuation below records exact commits, failed originals, successful
+recovery and remaining external intervention. Earlier checkpoints are history,
+not a claim that the candidates are installed or every finding is closed.
 
 ## Implemented Contract
 
@@ -1732,3 +1734,122 @@ application logo is not used on this hosted login page. The custom-page manageme
 server. The server closed normally, with zero installation, UI or MCU operations.
 Finish Android delivery and prepare its verified artifacts before requesting the
 necessary phone connection. No previous successful OTA is repeated for logs.
+
+### Final Candidate Delivery And Verification
+
+The Android-only recovery was delivered as E-Track
+`c985ea9eb6a856e946bd28fa4e11e23f2b4681e1` and Trace workflow
+`64e07b345bb5a3de39a933f505bf466f78331cc4`, both on `release/candidates`, not main.
+E-Track checks run `43524424407` passed and correctly skipped both package jobs.
+Trace continuation `43524678459` completed successfully, including Android job
+`132227700250`; the already successful Windows job was not rerun. The App/MCU
+source remains `9623cc43d6cb48a922caedbe08b82b5492afd7be`.
+
+The original E-Track aggregate run `43517863599` and original Trace run
+`43518046702` remain failed. Recovery does not rewrite their disk-exhaustion
+annotation or truncated Android log. The successful continuation had 15381098496
+bytes free before SDK setup, 5.4 GiB before APK build and 2.7 GiB after delivery.
+No dependency upgrade, larger paid runner or hosted system-directory deletion
+was used to recover it. Full Android analysis/tests and original signing checks
+were retained; a missing terminal test count is not invented from step success.
+
+`C/android-assets-01/result.json` binds the downloaded 47827484-byte APK to the
+native CI inspection, package `com.wen.gaia.gaia`, version `1.0.77+103`, original
+signer `3cecee6330a930e020b454b6d4a79568f4494ca324ae7bcf2c1914e51b04ab47`
+and SHA-256 `bff1dce207c438194b8d2a524e294729893b88569606d31fc1bda080642747a8`.
+Both ARM libraries retain the original endpoints/public key, BLE V2, inventory
+and E-Track display markers. The APK is not installed. GitHub release `444802803`
+is now a prerelease rather than a draft, and the original Admin contains
+`rel_trace_android_v1_0_77` as a candidate, not a selected channel release.
+
+The original Windows EXE/ZIP asset IDs `745410815`/`745410816` and all their
+digests remained unchanged. The standalone EXE is 93184 bytes, SHA-256
+`8b447e6cc586b29d0f7555c938e9f15bea30d852ee1ae3db314417f0d31f40ef`; the
+20532147-byte ZIP has SHA-256
+`b365cf180416ca7ee5c6bb8f4d5e2679fe0acbede31f03015c848d4a46937272`.
+`C/windows-reconcile-01` validates native PE version `1.0.77.103` and applicable
+compiled markers. An earlier optional host check incorrectly demanded the
+Android-only public-key literal in Windows AOT code. That failed observation is
+preserved, not used as grounds to rebuild Windows or claim its Android-only
+self-update/reporting runtime was exercised.
+
+MCU release
+`fw_558bc61e09297044b4608eff79ac7976bc859d94321b0b23c5f321cd41815bd6`
+remains ready and unpublished. `C/firmware-display-01` runs all 11 information
+formatter checks against the actual registered final image and obtains
+`E-Track 3.3.25`. This is not physical display evidence. The separate successful
+simulator EXE hash is
+`e171d47dfc20242c6cdd7850f00ba94456a3c1130254e76f8ea37eb9e44428a7`;
+its 78 warnings and zero errors remain reported, not hidden as a clean build.
+
+`C/database-state-02` and `C/candidate-browser-01` verify both real candidates,
+desktop/mobile details and no overflow/page errors. Candidate notifications
+10 (MCU) and 11 (App) each have provider-accepted deliveries to the two existing
+subscriptions on the first attempt. The closed Tasks markup was inspected without
+marking notifications read. Neither provider acceptance nor the headless browser
+proves OS notification display. Channel pointers/revisions remained unchanged.
+
+The archived GitHub `cloudflare-release-metadata.json` is the pre-upload
+1443-byte record; the byte-exact native 1650-byte receipt contains the final R2
+verification state. Both originals are preserved. This normal workflow staging
+difference is not an APK hash mismatch and must not trigger another build.
+
+### Closing Branding And Login Boundary
+
+`C/branding-notes-01` changed only this new App candidate's generated first line
+to `E-Track 1.0.77 (103)` and its GitHub title to `E-Track 1.0.77 candidate`.
+The protected existing notes API used a valid owner session and normal CSRF;
+the old text was compared exactly before the edit. One `edit_notes` audit entry
+was added. All other release rows, all assets, firmware and channels were equal
+before/after. GitHub asset IDs/digests, tag, source target and prerelease state
+were preserved. Signed metadata and older release history were not rewritten.
+The two future workflow display strings now use E-Track too; repository/package
+identifiers continue to use their original Trace names where required.
+
+The complete `admin/access-login.html` template uses the existing design and
+public ICO/PNG assets, exactly one unconditional `<cf-access-authbox>`, and
+visible escaped Liquid messages. It adds no customer scripts or sign-in forms.
+The root `tests/ota/test_access_login_template.mjs` is now included in the normal
+Cloudflare workflow and its test-only path filters. `C/closeout-checks-01` passed
+66 checks across candidate admission, Access template and public routing, plus
+actionlint for both affected workflows. Existing 423 Worker and 211 Admin runtime
+tests remain the unchanged runtime evidence; no web redeployment or package
+rebuild is needed for this documentation/template/workflow-only closing diff.
+
+The current official creation API requires `Access: Custom Pages Write`.
+`C/custom-page-create-01` records one scoped create attempt per existing CI and
+provisioning credential, both explicitly denied with HTTP 403 / code 10000.
+No custom page was created, assigned or made an account default. The earlier
+read denials alone had not proved the exact write permission; these actual create
+responses do. Do not replay them unless the available capability changes.
+Current plan/entitlement remains unknown: official HTML/Liquid documentation
+names Pay-as-you-go/Enterprise, but a permission denial does not prove this
+account's plan or authorize an upgrade. Application name/logo configuration is
+not evidence that the hosted login's browser icon or layout changed.
+
+### Required External Intervention And Audit
+
+Only real external prerequisites remain for the blocked observations: connect
+the actual authorized phone for the already prepared install/UI route, and make
+the existing Admin application's custom-login management capability usable.
+Another generic verbal authorization cannot supply a missing USB connection or
+platform permission. Preserve normal authentication, billing, release gates and
+operator channel choices. Do not ask for another blanket authorization, operate
+an unrelated device, repeat a successful OTA or auto-read notifications.
+
+The final read-only ADB audit resolves the misleading `loaded new key` wording.
+The checked executable is x86 (PE machine `0x14c`), so its logged System32 path
+maps to `C:/Windows/SysWOW64/config/systemprofile/.android/adbkey` and `.pub`.
+Both files were created/modified at `2026-11-13 12:26:02 +08:00`, before the
+phone-status check at `2026-11-14 06:41:33 +08:00`. The two files under
+`C:/Users/SU/.android/` date from `2022-02-21`. Private key contents were not read
+for this metadata audit, and no key was deleted, rotated or copied. These are
+loaded pre-existing files, not evidence of key creation by this phone check.
+
+`C/closeout-before-01` retains the metadata, source before-images and shared-index
+hash. Controllable outputs stay inside the active worktree, including restored
+sparse simulator inputs, native build directories, `.cache/original-admin-tests`,
+browser caches and HTTP/test evidence. Earlier external certificate/PowerShell
+cache attribution remains qualified: timestamps do not prove which process wrote
+those pre-existing files. No external cleanup occurred. The final controlled-path
+audit is not a machine-wide filesystem trace or unconditional external-write PASS.

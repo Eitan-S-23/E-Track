@@ -177,7 +177,7 @@ jobs:
         run: |
           set -euo pipefail
           gh release create "v$VERSION_NAME" release/ble-monitor-windows.exe release/ble-monitor-windows.zip \
-            --draft --prerelease --latest=false --target "$GITHUB_SHA" --title "Trace $VERSION_NAME candidate" \
+            --draft --prerelease --latest=false --target "$GITHUB_SHA" --title "E-Track $VERSION_NAME candidate" \
             --notes "Original Admin candidate from Eitan-S-23/E-Track@$TRACE_CANDIDATE_SOURCE. Not channel publication."
 
   android:
@@ -334,7 +334,7 @@ jobs:
           JS
           python3 -I -S -B -X utf8 ../../Tools/flutter/original_candidate.py manifest \
             --apk "$PWD/release-assets/ble-monitor-android.apk" --out "$PWD/release-assets/ble-monitor-update.json"
-          printf 'Trace %s (%s)\n\nApp source: Eitan-S-23/E-Track@%s\nFull candidate; choose publication and deltas in the original Admin.\n' \
+          printf 'E-Track %s (%s)\n\nApp source: Eitan-S-23/E-Track@%s\nFull candidate; choose publication and deltas in the original Admin.\n' \
             "$VERSION_NAME" "$VERSION_CODE" "$TRACE_CANDIDATE_SOURCE" > release-assets/release-notes.md
       - name: Sign metadata using the original payload key
         env:
