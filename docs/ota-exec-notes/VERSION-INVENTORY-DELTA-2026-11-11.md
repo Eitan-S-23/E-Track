@@ -41,10 +41,12 @@ Admin/public-site branding, reporting repairs, candidate notifications and the
 resource panel are deployed. Original App `1.0.77+103`, Windows `1.0.77.103` and
 MCU `3.3.25` candidates were built, delivered and byte-verified; Stable/Beta were
 not changed by this work. The earlier qualified optional deltas remain separate.
-The hosted Access login shows the E-Track application name, but its title/favicon
-remain Cloudflare's because custom-page creation is denied by both existing
-credential routes. A tested template is prepared, not activated. Installation
-and physical UI verification remain pending the actual phone connection.
+The owner has confirmed a Free account and a free-only requirement. The hosted
+Access login retains Cloudflare's title/favicon and its already updated E-Track
+application name. Paid HTML login customization is out of scope, not waiting
+for another credential or subscription check. The prepared template stays
+inactive. Installation and physical UI verification remain pending the actual
+phone connection.
 The final continuation below records exact commits, failed originals, successful
 recovery and remaining external intervention. Earlier checkpoints are history,
 not a claim that the candidates are installed or every finding is closed.
@@ -1920,3 +1922,32 @@ guide says it affects all Access applications, and its fields are name, logo,
 header/footer and background, not browser favicon. Original organization defaults,
 policies, application settings, billing and website deployments were unchanged.
 No custom-page creation was retried and no package, phone or MCU operation ran.
+
+## LOGIN-FREE-ONLY-01, 2026-11-14
+
+The operator explicitly confirms that this is a Free account and that the
+required solution has always been free. Paid features are not an acceptable
+completion route. This owner statement resolves the previously unknown plan
+for this task; it is not a new provider API observation.
+
+Disposition: DECIDED. Stop the paid HTML/Liquid login-template route. Do not
+upgrade a plan, start a paid trial, enable billing or pursue expanded token
+permissions to revive that route. The earlier request for a console screenshot,
+subscription information or another credential is withdrawn. The exact cause
+of the historical 403s remains unproven, but it no longer matters to choosing
+the free-only route; do not relabel those original failures as a proved billing
+error.
+
+Retain the current free Access sign-in flow, existing policies and sessions, and
+the already changed E-Track application name. The Cloudflare-hosted login page's
+browser favicon/title remain the provider default. Record that limitation
+honestly, not as an implemented favicon change or a blocker for unrelated work.
+Do not proxy or replace authentication, or alter account-wide login branding,
+just to hide the limitation.
+
+The Admin and public websites keep their already deployed E-Track favicon,
+title and other changes. The unused `admin/access-login.html` and its checks are
+retained as inactive reference, not deployed or scheduled work. This decision
+requires no new build, migration, website deployment, package replacement or
+device operation. Evidence and source-delivery records are under
+`.cache/ui-remediation-20261113-01/free-only-20261114-01/`.

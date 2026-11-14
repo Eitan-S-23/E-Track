@@ -15,14 +15,20 @@ No direct admin mutation route is exposed on the standalone Worker. During the n
 
 ## Hosted Login Branding
 
+**Current decision, 2026-11-14: Free account, free-only solution.** The owner has
+confirmed the plan and disallowed paid features. Keep the existing free Access
+login flow and its provider favicon/title. Paid HTML login customization is out
+of scope, not blocked on another credential, permission or console screenshot.
+Do not upgrade billing or retry this route without an explicit change of scope.
+
 The Admin and public Pages sites own their HTML titles and versioned ICO/PNG/SVG
 favicons. Cloudflare Access serves the anonymous login document on another origin;
 changing `public/index.html` or the Access application's `logo_url` does not change
 that document's browser title or favicon. The application name is visible there,
 but it is separate from the hosted login design.
 
-`access-login.html` is the prepared HTML/Liquid login template, not a Pages asset
-or an already assigned custom page. It retains exactly one unconditional official
+`access-login.html` is an inactive reference template, not a Pages asset or an
+assigned custom page. It retains exactly one unconditional official
 `<cf-access-authbox>`, visible escaped provider messages, and the existing Admin
 palette. It has no customer authentication forms or scripts. Its icons come from
 the already public original Pages origin, not the Access-protected Admin origin.
@@ -37,8 +43,8 @@ audience, destinations and session/cookie settings, not an account-wide default.
 
 On 2026-11-14 both existing scoped credential routes returned 403/10000 for
 creation. No page was created or assigned. The application name is `E-Track`,
-but the hosted login's browser favicon and title remain Cloudflare's. Resume
-creation only after usable custom-page management capability is available.
+but the hosted login's browser favicon and title remain Cloudflare's. The later
+owner-confirmed free-only decision closes this route; do not resume creation.
 Contract tests run via `node --test tests/ota/test_access_login_template.mjs`
 from the repository root and are included in Cloudflare CI. These static checks
 are not proof of hosted Liquid rendering or live authentication.
@@ -53,12 +59,12 @@ the custom-page 403 is not evidence of an expired/lost SSO, and a replacement
 token must not be demanded on that basis. The existing Wrangler OAuth grant is
 Pages-only plus account/user read, not custom-page or billing administration.
 
-When the API cannot distinguish the missing permission from account entitlement,
-check the existing account's **Reusable components > Custom pages > Access custom
-pages** control and the existing token's permission assignment. Do not infer a
-Free plan, change billing, or substitute the account-wide basic login designer:
-that designer affects all applications and does not expose a browser favicon
-setting. Preserve original credentials and use their existing authorized routes.
+The prior request to inspect the account's custom-page control and token grants
+is superseded by the owner's Free-plan confirmation. No further credential or
+console check is needed for this route. Do not substitute the account-wide basic
+login designer: it affects all applications and does not expose a browser favicon
+setting. Preserve original credentials and use their existing authorized routes
+for the remaining free features.
 
 ## Shared UI And Keyboard Behavior
 
