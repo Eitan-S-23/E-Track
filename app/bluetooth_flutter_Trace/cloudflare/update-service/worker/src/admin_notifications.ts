@@ -1,10 +1,10 @@
 import { ApiError, invalidParameter } from "./errors";
 import { json } from "./http";
 import { sha256Text } from "./version_inventory";
-import { jobView, type DeltaJob } from "./delta_jobs";
+import { deltaJobViews, type DeltaJob } from "./delta_jobs";
 import type { WorkerEnv } from "./types";
 
-type NotificationEnv = Pick<WorkerEnv, "DB" | "ADMIN_PUSH_PUBLIC_KEY" | "ADMIN_PUSH_PRIVATE_JWK" | "ADMIN_PUSH_SUBJECT"> & { APP_ID?: string };
+type NotificationEnv = Pick<WorkerEnv, "DB" | "ADMIN_PUSH_PUBLIC_KEY" | "ADMIN_PUSH_PRIVATE_JWK" | "ADMIN_PUSH_SUBJECT" | "DELTA_GITHUB_TOKEN"> & { APP_ID?: string };
 const nowSeconds = () => Math.floor(Date.now() / 1000);
 const publicKeyPattern = /^[A-Za-z0-9_-]{87}$/;
 
@@ -44,7 +44,7 @@ export async function deltaActivity(env: NotificationEnv, actor: string): Promis
       COALESCE((SELECT through_id FROM admin_notification_reads WHERE actor=?),0)`).bind(actor,actor),
     env.DB.prepare("SELECT id,expires_at AS expiresAt FROM admin_push_subscriptions WHERE actor=? AND expires_at>?").bind(actor,nowSeconds())
   ]);
-  return json({ ok: true, actor, jobs: (jobs.results as DeltaJob[]).map(jobView), notifications: notifications.results,
+  return json({ ok: true, actor, jobs: await deltaJobViews(env, jobs.results as DeltaJob[]), notifications: notifications.results,
     unreadCount: (unread.results[0] as { count: number }).count,
     pushSubscriptions: subscriptions.results,
     pushPublicKey: publicKeyPattern.test(env.ADMIN_PUSH_PUBLIC_KEY ?? "") ? env.ADMIN_PUSH_PUBLIC_KEY : null,

@@ -55,6 +55,13 @@ async function mockApp(page: Page, language = "en", role = "owner", firmwareFail
       if (url.pathname === "/api/admin/session") {
         await reply({ ok: true, appId: "trace", environment: "MOCK", actor: `${data.role}@example.test`, role: data.role, csrfToken: "mock-csrf" }); return;
       }
+      if (url.pathname === "/api/admin/delta/activity") {
+        await reply({ ok: true, actor: `${data.role}@example.test`, scope: "own-jobs", jobs: [], notifications: [],
+          unreadCount: 0, pushPublicKey: null, pushSubscriptions: [] }); return;
+      }
+      if (url.pathname === "/api/admin/resource-usage") {
+        await reply({ ok: true, metrics: [], safeguards: {}, checkedAt: 1794652000, nextRefreshAt: 1794652900 }); return;
+      }
       if (url.pathname.startsWith("/api/admin/firmware/")) {
         if (data.firmwareFailure) {
           await reply({ errorCode: "BACKEND_UNAVAILABLE", message: "Firmware migration unavailable", requestId }, 503); return;
@@ -219,6 +226,9 @@ for (const language of ["en", "zh"]) for (const width of [1440, 390, 320]) {
 
 test("firmware read failure cannot take down the existing App manager", async ({ page }) => {
   const data = await mockApp(page, "zh", "owner", true);
+  await expect(page.locator('#confirmDialog[role="alertdialog"]')).toContainText("Firmware migration unavailable");
+  await page.locator("#confirmAccept").click();
+  await expect(page.locator("#confirmDialog")).toBeHidden();
   await expect(page.locator("#versionStrip .version-card")).toHaveCount(3);
   await select(page, "app-new");
   await expect(action(page, "beta")).toBeEnabled();

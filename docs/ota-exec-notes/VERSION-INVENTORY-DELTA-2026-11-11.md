@@ -2072,3 +2072,73 @@ Controlled-path, owned-process and credential checks are recorded in
 `A/write-audit.json`; they are not a machine-wide filesystem trace. The previous
 App user-confirmed results, pending MCU information-page observation and deferred
 browser-icon inquiry keep their existing dispositions.
+
+## ADMIN-DELTA-APPROVAL-WAIT-01, 2026-11-14
+
+DECIDED: the operator's new MCU 3.3.24-to-3.3.25 delta was waiting for the
+existing `firmware-rehearsal` required-reviewer gate, not a stalled computation.
+Original job `delta_50ee22d988ff13c2eef7c28a65c6b98d2178263f68718930e02437f7906f3a9e`,
+attempt 1, maps uniquely to GitHub run `43584158880` and pinned workflow commit
+`9dd858fc8f9943d444060169291ea5131d63489b`. The checks job passed at 10:13:16 UTC;
+the firmware job had no runner or steps while its environment awaited review.
+Admin `queued` means dispatched but not yet claimed, so its generic waiting
+label does not distinguish this gate from runner queueing.
+
+Using the existing authorized account's legitimate reviewer route, root approved
+only environment `24458272742` on that original run. Before/after environment
+configuration is identical. No redispatch, GitHub rerun, protection removal,
+paid service, source/deployment change, asset enablement or device action occurred.
+
+The firmware job ran from 10:45:42 to 10:46:17 UTC and the aggregate run succeeded.
+The original Admin independently reports `ready`, revision 3, attempt 1,
+`enabled: false`: `delta-30324-30325-bdca1ebcb40e.etu`, 7,301 bytes, SHA-256
+`59bbbf54c134c131ff4bec0a8375ab5f52684cbc88f9e0a043bcc39ef34eecaf`.
+App/MCU channel rows and all other delta jobs are unchanged. Evidence is under
+`.cache/delta-wait-20261114-01/`, especially `approval-result.json`,
+`observe-01/result.json` and `closeout.json`. Initial read-only probe corrections
+(missing firmware scope and one SSL EOF) are retained in the closeout record;
+neither caused a task replay. This is operational diagnosis, not new hardware
+acceptance. The UI waiting label and normal gate remain unchanged: future
+waiting tasks must be matched to their existing run before any new action.
+
+## DELTA-SCHEMA-FEEDBACK-01, 2026-11-14
+
+The operator reported schema v2 rejection of the existing 30324-to-30325 delta,
+requested an explicit approval reminder, and asked for visible error dialogs
+with the established swipe behavior. Scope remains the original backend/Admin
+and free services. No App/MCU rebuild, package regeneration, channel publication,
+asset enablement, new approval, dependency change or device operation is included.
+
+The delta completion path invented a filename without the schema's `-patch.etu`
+suffix. A latest-plus-download regression also exposed raw `R2Object.etag` being
+stored where streaming needs quoted `httpEtag`. New results now use the shared
+firmware schema name and HTTP ETag. A read adapter repairs both fields for sealed
+legacy results without mutating their JSON, object bytes or package identity.
+Worker, Public Pages and Admin must all receive their affected bundles.
+
+Admin activity/candidates now observe exact GitHub run identities and actual
+pending reviewer gates. A separate 30-second D1 lease/cache, migration 0013,
+avoids repeated provider polling. It does not alter job state or grant approval.
+Errors and real approval reminders use the existing result dialog, with actor
+binding, deduplication, draft retention, focus/history ownership and dismiss-only
+swipes. The service code-spec and Admin README contain the executable contracts.
+
+Local evidence is preserved under `.cache/delta-followup-20261114-01/`:
+`worker-all-01` passed 483 host tests; `browser-04` passed 73 selected browser
+tests; `types-02` and `types-03` passed Worker/Admin type checks. Earlier failed
+receipts are retained, including the regression that found the ETag defect and
+old browser fixtures/expectations corrected for the now-visible error dialogs.
+`browser-all-01` then passed the complete 232-test Admin browser suite.
+
+`runtime-01` crashed before native Windows tests started (`0xc0000005`), so it is
+NOT_RUN rather than a runtime pass. `types-04` could not find Public Pages' local
+TypeScript installation; no packages were installed or locks changed. Existing
+Linux `cloudflare-update-service.yml` is the remaining real-runtime/Public check.
+
+The already successful original job/run and immutable 7,301-byte patch from
+`ADMIN-DELTA-APPROVAL-WAIT-01` will be reused for post-deploy readback. Deployment
+preparation only has reconciled current configuration, business state and
+existing credentials; no source delivery, migration or deployment is claimed
+at this point. Source delivery targets only `release/candidates`, never `main`.
+The rollout preserves current user-controlled enablement/channel values rather
+than restoring the older job snapshot. Later receipts below own final outcomes.

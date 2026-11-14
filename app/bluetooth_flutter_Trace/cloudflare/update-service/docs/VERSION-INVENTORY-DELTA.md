@@ -548,3 +548,91 @@ assume a Worker deployment refreshes the separately compiled public Pages handle
 Correct: verify each delivered origin/bundle independently. Cloudflare's hosted
 Access login remains a separate management/entitlement boundary; do not change
 organization-wide branding, authentication policy or billing to bypass it.
+
+## Delta Schema And Visible Feedback
+
+### Scope And Signatures
+
+`DELTA-SCHEMA-FEEDBACK-01` repairs supplemental firmware metadata and Admin
+feedback without regenerating artifacts, publishing channels, approving builds
+or changing the installed App. `deltaFileName(job): string` delegates firmware
+names to the existing schema's `assetFileName("patch", versionNameFor(target),
+base)`. Android VCDIFF names remain unchanged.
+
+`deltaJobViews(env, jobs, fetcher?)` enriches Admin activity/candidate results.
+`inspectDeltaRuns(env, identities, fetcher?, now?)` reads GitHub and caches only
+observations in `admin_delta_run_status`, created by migration
+`0013_delta_run_status.sql`. These are not additional job states or mutations.
+
+### Contracts
+
+New firmware results use names such as
+`e-track-at32f435-v3.3.24-to-v3.3.25-patch.etu` and quoted HTTP ETags from
+`R2Object.httpEtag`. The read model adapts already sealed results with legacy
+names/raw ETags without updating their JSON, object bytes, hashes, IDs or
+enablement. Both the Worker and independently bundled Public Pages must deploy
+the adapter; changing only the Admin label cannot fix an App's latest/download.
+
+The optional `ci` result contains `phase`, `checkedAt`, `runUrl`,
+`approvalEnvironments`, `conclusion` and `errorCode`. It never includes a token,
+reviewer identity or service-token `current_user_can_approve`. The phase is one
+of `awaiting_approval`, `ci_queued`, `ci_preparing`, `ci_waiting`, `ci_finished`,
+`ci_pending` or `ci_unavailable`; canonical `status`, attempt and revision stay
+unchanged. Matching requires the exact repository/ref, workflow commit,
+`delta:<job ID>:<attempt>` run title and any stored run ID. Ambiguous matches
+fail closed instead of linking an arbitrary build.
+
+Only the existing Admin `DELTA_GITHUB_TOKEN` performs read-only observation.
+A 30-second D1 lease/cache bounds repeated tabs; at most five pre-claim jobs are
+inspected per request, sharing run listings by repository/ref. GitHub requests
+use six-second timeouts, 2 MiB body limits and manual redirects without forwarding
+credentials. Running and terminal jobs need no provider lookup. No new token or
+permission scope is required when the configured credential already supports reads.
+
+`showErrorDialog(error, {scope?})` queues a visible `role="alertdialog"` in the
+existing confirmation/result component. `queueFeedback` defers behind active
+confirmations, mutations and hidden documents, and binds notices to the actor.
+Scoped background failures are deduplicated until recovery/explicit refresh.
+`observeDeltaJobs` queues approval reminders with validated GitHub links; stale
+queued reminders are dropped. Result dialogs preserve drafts and the underlying
+sheet's focus/history ownership. The shared gesture handler's `verticalCentered`
+option preserves centered-dialog geometry. Swipes only dismiss.
+
+### Validation And Error Matrix
+
+| Input or observation | Required result |
+| --- | --- |
+| New firmware delta | Schema v2 `-patch.etu` name and quoted download ETag |
+| Existing sealed legacy result | Adapt latest/download view, leave stored bytes/JSON unchanged |
+| Matching run with pending reviewers | `awaiting_approval`, environment names, one visible reminder |
+| Runner queue or environment timer without reviewers | Separate waiting label, no invented approval |
+| Wrong commit/title/ref, duplicate match or wrong stored run ID | No unsafe run link or approval claim |
+| Provider 3xx/403/429/error | Explicit unavailable observation, not a failed/restarted job |
+| Fresh operation error beneath a sheet | Visible top-layer error, retained draft and request detail |
+| Same passive error after dismissal | No periodic popup loop; recover/reset the relevant error scope |
+| Approval state advances before a queued reminder opens | Drop the stale reminder |
+| Left/right/downward header swipe or Back | Dismiss only; no business request |
+
+### Cases And Required Tests
+
+Good: an existing 30324-to-30325 delta passes latest selection and signed download
+without a rebuild, and a different queued run shows its real reviewer gate.
+Base: terminal/disabled jobs keep their original controls and ordinary labels.
+Bad: rename only a UI field, expose raw R2 ETags to `If-Match`, or infer approval
+from elapsed time. Correct: use the shared schema and public read adapter, and
+query the exact run's `pending_deployments` before claiming reviewer action.
+
+`worker/test/delta-jobs.test.ts` asserts legacy latest/download bytes, filename,
+ETag and unchanged sealed storage. `worker/test/delta-run-status.test.ts` covers
+identity, provider failures, gate versus timer, cache expiry, concurrency and the
+five-job bound. Admin feedback regressions in `version-operations.spec.ts` cover
+visible errors, approval deduplication/staleness, actor changes, retained drafts,
+long mobile messages and dismissal gestures with zero mutation. Existing App/MCU
+tests must explicitly dismiss expected errors before operating the underlying
+sheet, not weaken modal behavior to preserve an obsolete test assumption.
+
+Host SQLite/R2 doubles and browser mocks are self-tests, not deployed runtime or
+device acceptance. Use the existing Linux Cloudflare checks for real workerd
+when native Windows workerd cannot start; do not change system tooling or App
+dependencies as a workaround. Verify the deployed latest and bounded download
+on both serving origins without starting OTA or generating another delta.

@@ -218,6 +218,13 @@ async function mockAdmin(page: Page, language = "en", role = "owner") {
       if (url.pathname === "/api/admin/session") {
         await reply({ ok: true, appId: "trace", environment: "MOCK", actor: data.actor, role: data.role, csrfToken: "mock-csrf" }); return;
       }
+      if (url.pathname === "/api/admin/delta/activity") {
+        await reply({ ok: true, actor: data.actor, scope: "own-jobs", jobs: [], notifications: [],
+          unreadCount: 0, pushPublicKey: null, pushSubscriptions: [] }); return;
+      }
+      if (url.pathname === "/api/admin/resource-usage") {
+        await reply({ ok: true, metrics: [], safeguards: {}, checkedAt: 1794652000, nextRefreshAt: 1794652900 }); return;
+      }
       if (url.pathname.startsWith("/api/admin/firmware/")) {
         if (data.failReads) { await fail("BACKEND_UNAVAILABLE", 503); return; }
         if (url.pathname.endsWith("/history")) {
@@ -635,6 +642,8 @@ test("workspace history paginates, filters by version and isolates read failures
   await firmwareTab(page, "history");
   await page.locator('[data-firmware-action="history-refresh"]').click();
   await expect(page.locator("#firmwareHistoryStatus")).toContainText("could not be loaded");
+  await expect(page.locator('#confirmDialog[role="alertdialog"]')).toBeVisible();
+  await closeResult(page);
   await clickRelease(page, "fw-new", "select");
   await expect(releaseButton(page, "fw-new", "publish").first()).toBeEnabled();
   expect(data.writes).toHaveLength(0);
@@ -962,6 +971,8 @@ test("owner identity changes cannot replay a pending request in another actor sc
   data.actor = "different-owner@example.test";
   await page.locator('[data-firmware-action="retry-release"]').click();
   await expect(page.locator("#firmwareNotice")).toBeVisible();
+  await expect(page.locator('#confirmDialog[role="alertdialog"]')).toBeVisible();
+  await closeResult(page);
   await expect(page.locator("#confirmDialog")).toBeHidden();
   expect(data.writes).toHaveLength(1); expect(data.mutations).toBe(1);
 });

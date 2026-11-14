@@ -6,9 +6,11 @@ import worker from "../src/index";
 import { canonicalJson, sha256Hex } from "../src/crypto";
 import { createDeltaJobs, deltaCandidates, deltaJobAction, jobView, workflowLocation } from "../src/delta_jobs";
 import type { DeltaJob, DeltaKind, DeltaSpec } from "../src/delta_jobs";
-import { supplementalAppManifest, supplementalFirmwareAssets } from "../src/delta_assets";
+import { supplementalAppManifest, supplementalFirmwareAsset, supplementalFirmwareAssets } from "../src/delta_assets";
+import { assetFileName, versionNameFor } from "../../scripts/firmware-schema.mjs";
+import { publishFirmware } from "../src/firmware_admin";
 import type { SecurityPayload, WorkerEnv } from "../src/types";
-import { registered } from "./firmware-fixture";
+import { registered, type LatestBody } from "./firmware-fixture";
 
 let sequence = 1000;
 let configured: WorkerEnv;
@@ -250,6 +252,8 @@ describe("operator-selected supplemental delta jobs",()=>{
   });
   it("appends a disabled MCU patch, then enables/withdraws without changing channels or sealed originals",async()=>{
     const {p,job}=await ready();
+    expect(JSON.parse(job.result_json!).fileName).toBe(assetFileName("patch", versionNameFor(job.target_version_code), job.base_version_code));
+    expect(JSON.parse(job.result_json!).etag).toBe((await env.RELEASES_BUCKET.head(JSON.parse(job.result_json!).key))?.httpEtag);
     const snapshot=async()=>(await env.DB.prepare("SELECT * FROM firmware_release_assets WHERE release_id=?").bind(p.target).all()).results;
     const before=await snapshot(), channels=(await env.DB.prepare("SELECT * FROM firmware_channels").all()).results;
     expect(await supplementalFirmwareAssets(env.DB,p.target)).toHaveLength(0);
@@ -261,6 +265,43 @@ describe("operator-selected supplemental delta jobs",()=>{
     expect(await supplementalFirmwareAssets(env.DB,p.target)).toHaveLength(0);
     expect(await snapshot()).toEqual(before);
     expect((await env.DB.prepare("SELECT * FROM firmware_channels").all()).results).toEqual(channels);
+  });
+  it("serves schema-v2 names for sealed legacy MCU deltas without changing their bytes or receipts", async () => {
+    const p = await pair(), created = await create(p);
+    await ci(created, "claim"); await upload(created);
+    const key = `trace/delta/v1/firmware/${created.id}/1/patch`;
+    const object = (await env.RELEASES_BUCKET.head(key))!;
+    const legacy = JSON.stringify({ assetId: `asset_${created.id}`, key, etag: object.etag,
+      fileName: `delta-${created.base_version_code}-${created.target_version_code}-${created.base_sha256.slice(0,12)}.etu`,
+      sha256: bytesHash(patchBytes), sizeBytes: patchBytes.length });
+    // Simulate the previously deployed completion before its ready-artifact seal.
+    await env.DB.prepare("UPDATE delta_jobs SET status='ready',result_json=?,revision=revision+1 WHERE id=? AND status='running'")
+      .bind(legacy, created.id).run();
+    const job = (await env.DB.prepare("SELECT * FROM delta_jobs WHERE id=?").bind(created.id).first<DeltaJob>())!;
+    await action(job, "enable");
+    const expected = assetFileName("patch", versionNameFor(job.target_version_code), job.base_version_code);
+    expect(expected).toMatch(/-patch\.etu$/);
+    expect(jobView(job).fileName).toBe(expected);
+    const asset = (await supplementalFirmwareAssets(env.DB, p.target))[0];
+    expect(asset.file_name).toBe(expected);
+    expect(await supplementalFirmwareAsset(env.DB, asset.id, p.target)).toEqual(asset);
+    const channel = (await env.DB.prepare("SELECT revision FROM firmware_channels WHERE app_id='trace' AND device_model='e-track-at32f435' AND name='stable'").first<{revision:number}>())!;
+    await publishFirmware(configured, { email: "owner", requestId: crypto.randomUUID() }, "stable", {
+      appId: "trace", deviceModel: "e-track-at32f435", releaseId: p.target, expectedRevision: channel.revision, reason: "fixture publication" });
+    const query = new URLSearchParams({ appId: "trace", deviceModel: "e-track-at32f435", channel: "stable",
+      currentVersionCode: String(job.base_version_code), currentImageSha: job.base_sha256,
+      hardwareRevision: "1", layoutId: "1", bootVersion: "1", protocolVersion: "1", appVersionCode: "103" });
+    const response = await worker.fetch(new Request(`https://example.com/api/public/firmware/latest?${query}`), configured, createExecutionContext());
+    expect(response.status).toBe(200);
+    const latest = await response.json<LatestBody>();
+    expect(latest.asset).toMatchObject({ kind: "patch", fileName: expected, sha256: bytesHash(patchBytes),
+      sizeBytes: patchBytes.length, baseVersionCode: job.base_version_code, baseImageSha256: job.base_sha256 });
+    const download = await worker.fetch(new Request(latest.asset.downloadUrl), configured, createExecutionContext());
+    expect(download.status, download.status === 200 ? "download succeeded" : await download.clone().text()).toBe(200);
+    expect(download.headers.get("Content-Disposition")).toContain(expected);
+    expect(new Uint8Array(await download.arrayBuffer())).toEqual(patchBytes);
+    expect((await env.DB.prepare("SELECT result_json FROM delta_jobs WHERE id=?").bind(job.id).first())?.result_json).toBe(legacy);
+    expect((await env.RELEASES_BUCKET.head(key))?.etag).toBe(object.etag);
   });
   it("uses a signed per-base App manifest while leaving the original full manifest unchanged",async()=>{
     const {p,job}=await ready("android");

@@ -1,5 +1,6 @@
 import type { FirmwareAssetRow, PatchRow, SecurityPayload, WorkerEnv } from "./types";
 import type { DeltaJob } from "./delta_jobs";
+import { deltaFileName } from "./delta_files";
 
 interface Result {
   assetId: string; fileName: string; sha256: string; sizeBytes: number; key: string; etag: string;
@@ -7,8 +8,11 @@ interface Result {
 }
 function firmwareAsset(job: DeltaJob): FirmwareAssetRow {
   const r = JSON.parse(job.result_json!) as Result;
-  return { id: r.assetId, release_id: job.target_release_id, kind: "patch", file_name: r.fileName,
-    sha256: r.sha256, size_bytes: r.sizeBytes, r2_key: r.key, r2_etag: r.etag, r2_state: "available",
+  const etag = /^"[\x21\x23-\x7e\x80-\xff]+"$/.test(r.etag) ? r.etag
+    : /^[\x21\x23-\x7e\x80-\xff]+$/.test(r.etag) ? `"${r.etag}"` : null;
+  // Repair legacy display names at the boundary, without rewriting sealed bytes or receipts.
+  return { id: r.assetId, release_id: job.target_release_id, kind: "patch", file_name: deltaFileName(job),
+    sha256: r.sha256, size_bytes: r.sizeBytes, r2_key: r.key, r2_etag: etag, r2_state: "available",
     base_image_sha256: job.base_sha256, base_vcode: job.base_version_code,
     github_url: `https://github.com/Eitan-S-23/E-Track/actions/runs/${job.run_id}` };
 }

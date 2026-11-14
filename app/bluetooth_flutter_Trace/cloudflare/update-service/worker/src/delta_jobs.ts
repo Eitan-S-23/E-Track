@@ -2,6 +2,8 @@ import { canonicalJson, verifyBearerToken } from "./crypto";
 import { ApiError, invalidParameter } from "./errors";
 import { json } from "./http";
 import { boundedJson, sha256Text } from "./version_inventory";
+import { deltaFileName } from "./delta_files";
+import { inspectDeltaRuns } from "./delta_run_status";
 import type { AssetRow, FirmwareAssetRow, FirmwareReleaseRow, ReleaseRow, SecurityPayload, WorkerEnv } from "./types";
 
 export type DeltaKind = "android" | "firmware";
@@ -66,10 +68,21 @@ export function jobView(job: DeltaJob) {
   return { id: job.id, kind: job.kind, targetReleaseId: job.target_release_id, baseReleaseId: job.base_release_id,
     baseVersionCode: job.base_version_code, targetVersionCode: job.target_version_code, baseImageSha256: job.base_sha256,
     status: job.status, enabled: job.enabled===1, attempt: job.attempt, revision: job.revision, errorCode: job.error_code,
-    createdAt: job.created_at, updatedAt: job.updated_at, fileName: result?.fileName ?? null,
+    createdAt: job.created_at, updatedAt: job.updated_at,
+    fileName: result ? job.kind === "firmware" ? deltaFileName(job) : result.fileName : null,
     phase: job.status === "running" ? job.progress_phase ?? "building" : job.status,
     sizeBytes: result?.sizeBytes ?? null, sha256: result?.sha256 ?? null,
     runUrl: job.run_id ? `https://github.com/${workflowLocation(job).repository}/actions/runs/${job.run_id}` : null };
+}
+export async function deltaJobViews(env: Pick<WorkerEnv, "DB" | "DELTA_GITHUB_TOKEN">, jobs: DeltaJob[], fetcher = fetch) {
+  const identities = jobs.filter(job => ["dispatching", "queued", "dispatch_unknown"].includes(job.status)).map(job => ({
+    id: job.id, attempt: job.attempt, workflowCommit: job.workflow_commit, runId: job.run_id, ...workflowLocation(job)
+  }));
+  const states = await inspectDeltaRuns(env, identities, fetcher);
+  return jobs.map(job => {
+    const view = jobView(job), ci = states.get(job.id);
+    return ci ? { ...view, ci, phase: ci.phase, runUrl: ci.runUrl ?? view.runUrl } : view;
+  });
 }
 async function getJob(env: DeltaEnv, id: string): Promise<DeltaJob> {
   const job = await env.DB.prepare("SELECT * FROM delta_jobs WHERE id=?").bind(idOf(id)).first<DeltaJob>();
@@ -145,7 +158,7 @@ async function existingPatch(env: DeltaEnv, kind: DeltaKind, target: string, bas
   return !!await env.DB.prepare(query).bind(target, base.imageSha256).first();
 }
 
-export async function deltaCandidates(env: DeltaEnv, kind: DeltaKind, targetId: string): Promise<Response> {
+export async function deltaCandidates(env: DeltaEnv, kind: DeltaKind, targetId: string, inspectRuns = false): Promise<Response> {
   const target = await loadInput(env, kind, targetId);
   const sourceRows = await env.DB.prepare(kind === "firmware"
     ? `SELECT r.id,r.version_code,r.version_name,r.target_image_sha256 AS image_sha256,r.hardware_rev,r.layout_id,r.state,r.archived,
@@ -163,6 +176,7 @@ export async function deltaCandidates(env: DeltaEnv, kind: DeltaKind, targetId: 
   const patchBases=new Set(patches.results.map(p=>p.sha));
   const jobs = (await env.DB.prepare("SELECT * FROM delta_jobs WHERE kind=? AND target_release_id=? ORDER BY created_at DESC")
     .bind(kind, targetId).all<DeltaJob>()).results;
+  const views = inspectRuns ? await deltaJobViews(env, jobs) : jobs.map(jobView);
   const bases = [];
   for (const row of sourceRows.results) {
     try {
@@ -175,7 +189,7 @@ export async function deltaCandidates(env: DeltaEnv, kind: DeltaKind, targetId: 
       const job = jobs.find(j => j.base_sha256 === row.image_sha256);
       bases.push({ releaseId: row.id, versionCode: row.version_code, versionName: row.version_name,
         imageSha256: row.image_sha256, bytes: row.size_bytes, eligible: true,
-        existing: patchBases.has(row.image_sha256), job: job ? jobView(job) : null });
+        existing: patchBases.has(row.image_sha256), job: job ? views.find(view => view.id === job.id) : null });
     } catch (error) {
       if (!(error instanceof ApiError)) throw error;
       bases.push({ releaseId: row.id, versionCode: row.version_code, versionName: row.version_name,
@@ -184,7 +198,7 @@ export async function deltaCandidates(env: DeltaEnv, kind: DeltaKind, targetId: 
   }
   return json({ ok: true, kind, target: { releaseId: targetId, versionName: target.versionName,
     versionCode: target.versionCode, imageSha256: target.imageSha256, fullBytes: target.file.bytes }, bases,
-    jobs: jobs.map(jobView), dispatchConfigured: deltaDispatchConfigured(env, kind),
+    jobs: views, dispatchConfigured: deltaDispatchConfigured(env, kind),
     appSigningConfigured: kind === "android" ? await originalAppSigningConfigured(env,target) : false,
     distributionEnabled: env.DELTA_ASSETS_ENABLED === "true",
     maximumBases: 5, truncated: sourceRows.results.length === 200 });
@@ -436,9 +450,9 @@ export async function deltaCi(request: Request, env: WorkerEnv): Promise<Respons
   if (canonicalJson(currentTarget)!==canonicalJson(spec.target) || canonicalJson(currentBase)!==canonicalJson(spec.base)) {
     throw new ApiError("RELEASE_CONFLICT","Original source binding changed",409);
   }
-  const fileName=`delta-${spec.base.versionCode}-${spec.target.versionCode}-${job.base_sha256.slice(0,12)}.${job.kind==="android"?"vcdiff":"etu"}`;
+  const fileName = deltaFileName(job);
   const assetId=`asset_${job.id}`;
-  const result: Record<string,unknown>={sha256:sha,sizeBytes:size,key:outputKey(job),etag:object.etag,fileName,assetId,
+  const result: Record<string,unknown>={sha256:sha,sizeBytes:size,key:outputKey(job),etag:job.kind === "firmware" ? object.httpEtag : object.etag,fileName,assetId,
     inputSha256:job.input_sha256,reconstructedSha256:job.target_sha256,byteEqual:true,completionHash};
   if (job.kind==="android") {
     const payload=body.securityPayload as SecurityPayload | undefined;

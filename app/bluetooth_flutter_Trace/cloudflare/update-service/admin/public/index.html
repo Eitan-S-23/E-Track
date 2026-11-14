@@ -184,7 +184,7 @@
           </span>
           <div>
             <h2 class="confirm-title" id="confirmTitle">Confirm action</h2>
-            <p class="confirm-message" id="confirmMessage"></p>
+            <p class="confirm-message" id="confirmMessage" data-no-sheet-drag></p>
           </div>
         </header>
         <p class="confirm-detail" id="confirmDetail"></p>
@@ -201,6 +201,7 @@
           <input id="confirmMaintenance" type="text" autocomplete="off" />
         </div>
         <a id="confirmDownload" class="pill-button primary" target="_blank" rel="noopener noreferrer" hidden></a>
+        <a id="confirmExternal" class="pill-button primary" target="_blank" rel="noopener noreferrer" hidden></a>
         <div class="confirm-actions">
           <button type="button" class="confirm-button" id="confirmCancel" data-i18n="dialog.cancel">Cancel</button>
           <button type="button" class="confirm-button primary" id="confirmAccept" data-i18n="dialog.confirm">Confirm</button>
@@ -1351,6 +1352,9 @@
       let quickActionCloseTimer = 0;
       let firmwareDetailCloseTimer = 0;
       let activeConfirmDialog = null;
+      let feedbackQueue = [];
+      const feedbackSeen = new Set();
+      let observedDeltaJobs = new Map();
       let resourcePanelCloseTimer = 0;
       let resourceFloatViewportMode = resourceFloatMode();
       const resourceDrag = { active: false, moved: false, pointerId: null, suppressClick: false,
@@ -1637,14 +1641,17 @@
       applyFirmwareSection();
       attachEvents();
       resourceUsagePanel = window.TraceResourceUsage?.({ element: document.querySelector("#providerUsage"),
-        api, text: opText, escape: escapeHtml, formatBytes, onResize: positionResourcePanel });
+        api, text: opText, escape: escapeHtml, formatBytes, onResize: positionResourcePanel,
+        onError: error => showErrorDialog(error, { scope: "resource-usage" }), onRecovered: () => clearFeedbackError("resource-usage") });
       taskActivity = new TraceDeltaActivity({ api, mutate, text: opText, escape: escapeHtml, formatBytes,
+        onError: (error, scope) => showErrorDialog(error, { scope }), onRecovered: clearFeedbackError,
         canNotify: () => !state.busy && overlayLayers().length === 0,
         openPanel: openTasks, openTarget: (kind,id,type) => {
           if (state.busy || activeConfirmDialog || state.delta?.busy) return false;
           if (type === "candidate") return openCandidateDetails(kind,id);
           closeTasks(); openDelta(kind,id); return true;
         }, onJobs: jobs => {
+          observeDeltaJobs(jobs, true);
           const delta = state.delta;
           if (!delta?.data || delta.busy || delta.loading) return;
           const updates = jobs.filter(job => job.kind === delta.kind && job.targetReleaseId === delta.releaseId);
@@ -1668,6 +1675,10 @@
         headerSelector: ".resource-panel-head", centered: false,
         canClose: () => overlayLayers().at(-1) === "resources" && !state.busy && !state.delta?.busy,
         close: () => dismissOverlay("resources") });
+      new TraceSheetGestures({ sheet: els.confirmDialog, scroll: els.confirmDialog, backdrop: els.confirmBackdrop,
+        headerSelector: ".confirm-head", verticalCentered: true,
+        canClose: () => Boolean(activeConfirmDialog), close: () => closeConfirmDialog(false) });
+      document.addEventListener("visibilitychange", () => { if (!document.hidden) flushFeedback(); });
       syncOverlayState();
       loadAll();
 
@@ -1945,7 +1956,7 @@
             const action = firmwareButton.dataset.firmwareAction;
             if (action === "delta") { openDelta("firmware", firmwareId); return; }
             if (action === "choose-version") { switchFirmwareSection("releases"); return; }
-            if (action === "history-refresh") { loadFirmwareHistory(); return; }
+            if (action === "history-refresh") { clearFeedbackError("history-read"); loadFirmwareHistory(); return; }
             if (action === "history-more") { loadFirmwareHistory(false); return; }
             if (action === "clear-filters") {
               state.firmwareStatusFilter = "all"; state.firmwareChannelFilter = "all";
@@ -2097,7 +2108,7 @@
         document.querySelector("#taskSheet").inert = confirm || !tasks;
         els.confirmDialog.inert = !confirm;
         overlayHistory?.sync();
-        setTimeout(()=>taskActivity?.resume(),0);
+        setTimeout(() => { flushFeedback(); taskActivity?.resume(); }, 0);
       }
 
       function restoreWorkspaceFocus(preferred) {
@@ -2359,6 +2370,7 @@
             state.appNoteDrafts.clear();
             state.announcementDrafts.clear();
             state.deltaDrafts.clear();
+            feedbackQueue = []; feedbackSeen.clear(); observedDeltaJobs.clear();
           }
           state.session = session;
           resourceUsagePanel?.setActor(session.actor);
@@ -2389,6 +2401,9 @@
             state.detailsOpen = false;
           }
           render();
+          const partialErrors = [state.storageError, state.announcementsError, state.firmwareError].filter(Boolean);
+          if (partialErrors.length) showErrorDialog(partialErrors.map(error => error.message).join("\n"), { scope: "load-partial" });
+          else clearFeedbackError("load-partial");
           setStatus(state.firmwareError ? "firmware.loadFailed" : "status.operational", state.firmwareError ? "warn" : "ok");
         } catch (error) {
           state.firmwareReconcileRequired = true;
@@ -2921,7 +2936,8 @@
           if (value.ok !== true || !Array.isArray(value.app) || !Array.isArray(value.firmware)
             || value.coverage !== "reporting-installations-only" || value.firmwareIdentityScope !== "installation") throw new Error(t("firmware.invalidResponse"));
           inventory.value = value;
-        } catch (error) { inventory.error = error.message; }
+          clearFeedbackError("inventory-read");
+        } catch (error) { inventory.error = error.message; showErrorDialog(error, { scope: "inventory-read" }); }
         finally {
           inventory.loading = false;
           renderInventory("android"); renderInventory("firmware");
@@ -2994,8 +3010,10 @@
             || !Array.isArray(data.bases) || !Array.isArray(data.jobs)) throw new Error(t("firmware.invalidResponse"));
           if (state.delta !== delta) return;
           delta.data = data;
+          clearFeedbackError("delta-load");
+          observeDeltaJobs(data.jobs);
           for (const id of delta.selected) if (!data.bases.some(base => base.releaseId === id && base.eligible && !base.existing && !base.job)) delta.selected.delete(id);
-        } catch (error) { if (state.delta === delta) delta.notice = error.message; }
+        } catch (error) { if (state.delta === delta) { delta.notice = error.message; showErrorDialog(error, { scope: "delta-load" }); } }
         finally {
           delta.loading = false;
           if (state.delta === delta) {
@@ -3012,7 +3030,8 @@
         return rows.length ? rows.reduce((sum, row) => sum + Number(row.active30), 0) : null;
       }
       function deltaStatus(job) {
-        return ({ dispatching: opText("正在提交", "Submitting"), queued: opText("等待构建 / 审批", "Queued / approval required"),
+        if (job.phase === "awaiting_approval" || job.phase?.startsWith("ci_")) return taskActivity?.phase(job) ?? job.phase;
+        return ({ dispatching: opText("正在提交", "Submitting"), queued: opText("等待构建状态", "Awaiting build status"),
           dispatch_unknown: opText("提交结果未知，需核对", "Dispatch uncertain; reconcile"), running: opText("构建中", "Building"),
           ready: job.enabled ? opText("已启用", "Enabled") : opText("已验证，未启用", "Verified, disabled"),
           failed: opText("失败", "Failed") })[job.status] ?? job.status;
@@ -3041,6 +3060,7 @@
               <span>${escapeHtml(count === null ? opText("未上报", "Unreported") : `${count} ${opText(delta.kind === "android" ? "安装实例" : "手机侧记录", delta.kind === "android" ? "installations" : "phone records")}`)}<small>${escapeHtml(base.existing ? opText("已有原始差分包", "Original patch exists") : base.job ? deltaStatus(base.job) : base.eligible ? opText("可生成", "Eligible") : base.reason)}</small></span></label>`;
           }).join("") || `<p class="empty">${escapeHtml(opText("没有可用的旧版本原包。", "No original base packages available."))}</p>`}</div>
           ${data.truncated ? `<p class="firmware-hint">${escapeHtml(opText("当前展示最近 200 个旧版本。", "Showing the latest 200 source versions."))}</p>` : ""}
+          ${delta.kind === "firmware" ? `<p class="firmware-help">${escapeHtml(opText("固件差分需要 GitHub 仓库审批人手动审批。后台检测到等待审批后会弹窗提醒；关闭提醒不会取消构建。", "Firmware deltas require a GitHub repository reviewer's approval. A dialog will link to the waiting run; dismissing it does not cancel the build."))}</p>` : ""}
           <label class="firmware-field"><span>${escapeHtml(t("firmware.reason"))}</span><textarea id="deltaReason" rows="2" maxlength="500" ${locked ? "disabled" : ""}>${escapeHtml(delta.reason)}</textarea></label>
           <div class="operations-buttons"><button type="button" class="pill-button primary" data-version-operation="delta-create" ${canBuild && delta.selected.size ? "" : "disabled"}>${escapeHtml(opText(`生成 ${delta.selected.size} 个差分包`, `Generate ${delta.selected.size} deltas`))}</button><button type="button" class="secondary-button" data-version-operation="delta-reload" ${delta.busy || delta.loading ? "disabled" : ""}>${escapeHtml(opText("刷新任务状态", "Refresh jobs"))}</button></div>
           <h3 class="delta-jobs-title">${escapeHtml(opText("构建任务与差分文件", "Build jobs and delta files"))}</h3>
@@ -3050,7 +3070,7 @@
             const usable = !["enable", "disable"].includes(control) || (canRole("owner") && (control === "disable" || (data.distributionEnabled && job.sizeBytes < data.target.fullBytes)));
             return `<article class="delta-job-row"><div><strong>${escapeHtml(job.baseVersionCode)} → ${escapeHtml(job.targetVersionCode)}</strong><span>${escapeHtml(deltaStatus(job))}</span>${taskActivity?.progress(job) ?? ""}<small>${escapeHtml(job.fileName ?? job.errorCode ?? "")} ${job.sizeBytes ? escapeHtml(formatBytes(job.sizeBytes)) : ""}</small>
               ${job.status === "ready" && job.sizeBytes >= data.target.fullBytes ? `<small>${escapeHtml(opText("不比全量包小，不能启用。", "Not smaller than full; cannot enable."))}</small>` : ""}</div><div class="operations-buttons">
-              ${run ? `<a href="${escapeHtml(run)}" target="_blank" rel="noopener noreferrer">GitHub Actions</a>` : ""}
+              ${run ? `<a href="${escapeHtml(run)}" target="_blank" rel="noopener noreferrer">${escapeHtml(job.phase === "awaiting_approval" ? opText("前往 GitHub 审批", "Review in GitHub") : "GitHub Actions")}</a>` : ""}
               <button type="button" class="secondary-button" data-version-operation="delta-${control}" data-job-id="${escapeHtml(job.id)}" ${locked || !usable || (control === "retry" && !data.dispatchConfigured) ? "disabled" : ""}>${escapeHtml(({ enable: opText("启用", "Enable"), disable: opText("停用", "Disable"), retry: opText("重试失败任务", "Retry failed job"), reconcile: opText("核对构建结果", "Reconcile run") })[control])}</button></div></article>`;
           }).join("") || `<p class="empty">${escapeHtml(opText("尚未生成差分任务。", "No delta jobs yet."))}</p>`}</div>`}`;
         const restore = editingReason ? document.querySelector("#deltaReason")
@@ -3062,7 +3082,7 @@
       }
       async function handleVersionOperation(button) {
         const action = button.dataset.versionOperation;
-        if (action === "inventory-reload") { await loadInventory(); return; }
+        if (action === "inventory-reload") { clearFeedbackError("inventory-read"); await loadInventory(); return; }
         if (action === "inventory-window") { state.inventory.window = Number(button.dataset.days); renderInventory("android"); renderInventory("firmware"); return; }
         if (action === "inventory-prev" || action === "inventory-next") {
           state.inventory.pages[button.dataset.kind] += action === "inventory-prev" ? -1 : 1;
@@ -3083,13 +3103,14 @@
             state.inventory.loading = false; await loadInventory();
           } catch (error) {
             state.inventory.error = error.message; state.inventory.loading = false;
+            showErrorDialog(error);
             renderInventory("android"); renderInventory("firmware");
           }
           return;
         }
         const delta = state.delta;
         if (!delta || delta.busy || activeConfirmDialog) return;
-        if (action === "delta-reload") { delta.notice = ""; await loadDelta(delta); return; }
+        if (action === "delta-reload") { delta.notice = ""; clearFeedbackError("delta-load"); await loadDelta(delta); return; }
         if (!canRole("publisher") || delta.actor !== state.session?.actor) return;
         if (action === "delta-recommend") {
           delta.selected = new Set(delta.data.bases.filter(base => base.eligible && !base.existing && !base.job && baseReports(base, delta.kind) > 0)
@@ -3099,12 +3120,12 @@
         const job = delta.data?.jobs.find(row => row.id === button.dataset.jobId);
         const operation = action.slice(6);
         if (operation === "create" && (!delta.selected.size || !delta.reason.trim())) {
-          delta.notice = opText("请填写生成原因，并选择 1 至 5 个旧版本。", "Select 1 to 5 bases and enter a reason."); renderDelta(); document.querySelector("#deltaReason")?.focus(); return;
+          delta.notice = opText("请填写生成原因，并选择 1 至 5 个旧版本。", "Select 1 to 5 bases and enter a reason."); renderDelta(); document.querySelector("#deltaReason")?.focus(); showErrorDialog(delta.notice); return;
         }
         if (operation !== "create" && !job) return;
         const confirmed = await openConfirmDialog({ title: button.textContent, reasonRequired: operation !== "create",
           message: opText("仅修改该目标版本的差分任务或差分选择，不改变发布通道。", "Only this target's delta jobs or selection will change; channels remain untouched."),
-          detail: operation === "create" ? `${delta.selected.size} ${opText("个旧版本", "source versions")} · ${delta.reason}` : `${job.baseVersionCode} → ${job.targetVersionCode}` });
+          detail: operation === "create" ? `${delta.selected.size} ${opText("个旧版本", "source versions")} · ${delta.reason}${delta.kind === "firmware" ? "\n" + opText("提交后还需要 GitHub 审批，请按后续弹窗前往审批。", "GitHub approval is required after submission; follow the approval dialog.") : ""}` : `${job.baseVersionCode} → ${job.targetVersionCode}` });
         if (!confirmed || state.delta !== delta || delta.actor !== state.session?.actor) return;
         delta.busy = true; delta.notice = ""; clearTimeout(delta.timer); renderDelta();
         try {
@@ -3112,7 +3133,10 @@
             : { expectedRevision: job.revision, reason: confirmed.reason };
           await mutate(operation === "create" ? "/api/admin/delta/jobs" : `/api/admin/delta/jobs/${encodeURIComponent(job.id)}/${operation}`, body);
           if (operation === "create") delta.selected.clear();
-        } catch (error) { delta.notice = `${error.message} ${opText("请核对当前任务，不会自动重发。", "Reconcile the current job; it will not be replayed automatically.")}`; }
+        } catch (error) {
+          delta.notice = `${error.message} ${opText("请核对当前任务，不会自动重发。", "Reconcile the current job; it will not be replayed automatically.")}`;
+          showErrorDialog(delta.notice);
+        }
         finally {
           delta.busy = false;
           taskActivity?.refresh();
@@ -3962,8 +3986,11 @@
               || !row.after || typeof row.after !== "object" || Array.isArray(row.after))) throw new Error(t("firmware.invalidResponse"));
           state.firmwareHistory = [...new Map([...state.firmwareHistory, ...result.history].map(row => [row.id, row])).values()];
           state.firmwareHistoryCursor = result.nextCursor;
+          clearFeedbackError("history-read");
         } catch (error) {
-          if (generation === state.firmwareHistoryGeneration && actor === state.session?.actor) state.firmwareHistoryError = error;
+          if (generation === state.firmwareHistoryGeneration && actor === state.session?.actor) {
+            state.firmwareHistoryError = error; showErrorDialog(error, { scope: "history-read" });
+          }
         } finally {
           if (generation === state.firmwareHistoryGeneration) {
             state.firmwareHistoryLoaded = true; state.firmwareHistoryLoading = false; renderFirmwareHistory();
@@ -4393,6 +4420,54 @@
         );
       }
 
+      function clearFeedbackError(scope) {
+        const key = `error:${state.session?.actor ?? ""}:${scope}`;
+        feedbackSeen.delete(key);
+        feedbackQueue = feedbackQueue.filter(item => item.key !== key);
+      }
+
+      function queueFeedback(options, { key = null, valid = () => true } = {}) {
+        if ((key && feedbackSeen.has(key)) || feedbackQueue.some(item => key ? item.key === key : item.options.message === options.message)) return;
+        feedbackQueue.push({ options, key, valid, actor: state.session?.actor });
+        setTimeout(flushFeedback, 0);
+      }
+
+      function flushFeedback() {
+        if (document.hidden || activeConfirmDialog || state.busy || state.delta?.busy) return;
+        while (feedbackQueue.length) {
+          const item = feedbackQueue.shift();
+          if (item.actor !== state.session?.actor || !item.valid()) continue;
+          if (item.key) feedbackSeen.add(item.key);
+          void openResultDialog(item.options).then(() => setTimeout(flushFeedback, 0));
+          return;
+        }
+      }
+
+      function showErrorDialog(error, { scope = null } = {}) {
+        const message = String(error?.message ?? error);
+        queueFeedback({ tone: "danger", icon: "i-block", title: opText("操作未完成", "Action not completed"), message,
+          confirmClass: "danger" }, { key: scope ? `error:${state.session?.actor ?? ""}:${scope}` : null });
+      }
+
+      function observeDeltaJobs(jobs, replace = false) {
+        if (replace) observedDeltaJobs = new Map();
+        for (const job of jobs) {
+          observedDeltaJobs.set(job.id, job);
+          const scope = `ci-status:${job.id}:${job.attempt}`;
+          if (job.ci?.phase === "ci_unavailable" && job.ci.errorCode !== "CI_STATUS_REFRESHING") {
+            showErrorDialog(`${job.baseVersionCode} → ${job.targetVersionCode}\n${opText("暂时无法读取 GitHub 构建状态，任务未被重发或取消。", "GitHub build status could not be read. The job was not restarted or cancelled.")}\n${job.ci.errorCode}`, { scope });
+          } else clearFeedbackError(scope);
+          if (job.phase !== "awaiting_approval" || !job.ci?.approvalEnvironments?.length
+            || !/^https:\/\/github\.com\/Eitan-S-23\/(?:E-Track|Trace)\/actions\/runs\/\d+$/.test(job.runUrl ?? "")) continue;
+          const key = `approval:${state.session?.actor}:${job.id}:${job.attempt}:${job.ci.approvalEnvironments.join(",")}`;
+          queueFeedback({ title: opText("差分构建等待审批", "Delta build awaiting approval"), icon: "i-lock",
+            message: `${job.baseVersionCode} → ${job.targetVersionCode}\n${opText("请由有权限的仓库审批人在 GitHub 打开 Review deployments 并批准，之后才会继续构建。", "An authorized repository reviewer must open Review deployments in GitHub and approve before the build can continue.")}`,
+            detail: `${job.ci.approvalEnvironments.join(", ")}\n${opText("不是构建失败，无需重新生成。左右滑动仅关闭提醒，不会审批或取消任务。", "The build has not failed. Do not resubmit. Swiping only dismisses this reminder; it never approves or cancels the job.")}`,
+            externalLink: { url: job.runUrl, label: opText("前往 GitHub 审批", "Review in GitHub") } },
+          { key, valid: () => { const current = observedDeltaJobs.get(job.id); return current?.attempt === job.attempt && current.phase === "awaiting_approval"; } });
+        }
+      }
+
       function openConfirmDialog(options) {
         if (activeConfirmDialog) closeConfirmDialog(false);
         const returnFocus = document.activeElement;
@@ -4406,6 +4481,9 @@
         els.confirmMessage.textContent = options.message ?? "";
         els.confirmDetail.textContent = options.detail ?? "";
         els.confirmDetail.hidden = !options.detail;
+        els.confirmDialog.scrollTop = 0;
+        els.confirmDetail.scrollTop = 0;
+        els.confirmDialog.setAttribute("role", options.tone === "danger" && options.hideCancel ? "alertdialog" : "dialog");
         els.confirmInput.value = "";
         els.confirmInputWrap.hidden = !requiredText;
         els.confirmInputLabel.textContent = options.inputLabel ?? t("dialog.typeToConfirm");
@@ -4416,6 +4494,11 @@
         els.confirmMaintenanceWrap.hidden = !options.maintenance;
         els.confirmDownload.hidden = true;
         els.confirmDownload.removeAttribute("href");
+        const external = document.querySelector("#confirmExternal");
+        external.hidden = true; external.removeAttribute("href");
+        if (options.externalLink && /^https:\/\/github\.com\/Eitan-S-23\/(?:E-Track|Trace)\/actions\/runs\/\d+$/.test(options.externalLink.url)) {
+          external.href = options.externalLink.url; external.textContent = options.externalLink.label; external.hidden = false;
+        }
         if (options.download && Math.floor(Date.now() / 1000) < options.download.expiresAt) {
           els.confirmDownload.href = options.download.url;
           els.confirmDownload.download = options.download.fileName;
@@ -4464,6 +4547,8 @@
         activeConfirmDialog = null;
         els.confirmDownload.removeAttribute("href");
         els.confirmDownload.hidden = true;
+        document.querySelector("#confirmExternal").hidden = true;
+        document.querySelector("#confirmExternal").removeAttribute("href");
         els.body.classList.remove("confirm-open");
         syncOverlayState();
         window.setTimeout(() => {
@@ -4498,7 +4583,7 @@
         renderActionLocks(activeReleaseForAction());
         renderFirmware();
         setAnnouncementEditorEnabled(!state.announcementsError);
-        if (!isBusy) taskActivity?.resume();
+        if (!isBusy) { flushFeedback(); taskActivity?.resume(); }
       }
 
       function setStatus(message, tone = "info", options = {}) {
@@ -4509,6 +4594,17 @@
           translate: options.translate !== false
         };
         renderStatus();
+        if (tone === "error" && options.dialog !== false) {
+          const text = options.translate === false ? message : t(message, options.values ?? {});
+          const actor = state.session?.actor;
+          // Existing operation-specific result dialogs retain their richer detail.
+          setTimeout(() => {
+            if (actor !== state.session?.actor) return;
+            if (activeConfirmDialog && els.confirmDialog.classList.contains("danger")
+              && `${els.confirmMessage.textContent}\n${els.confirmDetail.textContent}`.includes(text)) return;
+            showErrorDialog(text);
+          }, 0);
+        }
       }
 
       function renderStatus() {

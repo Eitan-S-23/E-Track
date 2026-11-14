@@ -8,7 +8,8 @@ const html=readFileSync(new URL("../public/index.html",import.meta.url),"utf8").
 const css=readFileSync(new URL("../public/admin.css",import.meta.url),"utf8");
 const hash="a".repeat(64);
 type Job={id:string;baseReleaseId:string;baseVersionCode:number;targetVersionCode:number;status:string;enabled:boolean;revision:number;sizeBytes:number;runUrl:string;fileName:string;
-  kind?:string;targetReleaseId?:string;phase?:string;createdAt?:number;updatedAt?:number};
+  kind?:string;targetReleaseId?:string;phase?:string;createdAt?:number;updatedAt?:number;attempt?:number;
+  ci?:{phase:string;approvalEnvironments:string[];errorCode?:string;checkedAt?:number}};
 
 export async function setup(page:Page,language="zh",role="owner",push?:{publicKey:string;subscriptions:Array<{id:string;expiresAt:number}>}) {
   const data={role,dispatchConfigured:true,inventoryFails:false,abortCreate:false,inventoryReads:0,
@@ -216,10 +217,16 @@ export async function openDelta(page:Page,kind="android") {
   await expect(page.locator("#deltaSheet")).toBeVisible();
   await expect(page.locator('[data-delta-base="base-0"]')).toBeVisible();
 }
-async function confirm(page:Page,reason=false) {
+async function dismissError(page:Page) {
+  await expect(page.locator('#confirmDialog[role="alertdialog"]')).toBeVisible();
+  await page.locator("#confirmAccept").click();
+  await expect(page.locator("#confirmDialog")).toBeHidden();
+}
+async function confirm(page:Page,reason=false,failure=false) {
   await expect(page.locator("#confirmDialog")).toBeVisible();
   if(reason) await page.locator("#confirmReason").fill("Operator selected this action");
   await page.locator("#confirmAccept").click();
+  if (failure) await dismissError(page);
   await expect(page.locator("#confirmDialog")).toBeHidden();
 }
 
@@ -246,7 +253,7 @@ test("CSRF refresh failure sends no mutation and retains the draft for an explic
   const {data,errors}=await setup(page);await openDelta(page,"firmware");
   await page.locator('[data-delta-base="base-0"]').check();await page.locator("#deltaReason").fill("Retain this firmware request");
   data.sessionFails=true;
-  await page.locator('[data-version-operation="delta-create"]').click();await confirm(page);
+  await page.locator('[data-version-operation="delta-create"]').click();await confirm(page,false,true);
   await expect(page.locator("#deltaSheet")).toContainText("Session unavailable");
   await expect(page.locator('[data-version-operation="delta-create"]')).toBeEnabled();
   expect(data.mutationAttempts).toBe(0);expect(data.writes).toHaveLength(0);
@@ -261,7 +268,7 @@ test("CSRF rejection after refresh is not replayed and does not consume the sele
   const {data,errors}=await setup(page);await openDelta(page,"firmware");
   await page.locator('[data-delta-base="base-0"]').check();await page.locator("#deltaReason").fill("Do not replay this request");
   data.rejectCsrf=true;
-  await page.locator('[data-version-operation="delta-create"]').click();await confirm(page);
+  await page.locator('[data-version-operation="delta-create"]').click();await confirm(page,false,true);
   await expect(page.locator("#deltaSheet")).toContainText("TOKEN_INVALID: CSRF token is invalid");
   await expect(page.locator("#deltaSheet")).toContainText("Request ID:");
   await expect(page.locator("#deltaSheet")).toContainText("不会自动重发");
@@ -287,7 +294,7 @@ test("CSRF refresh does not submit an old confirmation under a changed account",
   const {data,errors}=await setup(page);await openDelta(page,"firmware");
   await page.locator('[data-delta-base="base-0"]').check();await page.locator("#deltaReason").fill("Confirmed by the original account");
   data.role="publisher";
-  await page.locator('[data-version-operation="delta-create"]').click();await confirm(page);
+  await page.locator('[data-version-operation="delta-create"]').click();await confirm(page,false,true);
   await expect(page.locator("#deltaSheet")).toContainText("登录账号已变化");
   expect(data.mutationAttempts).toBe(0);expect(data.writes).toHaveLength(0);expect(errors).toEqual([]);
 });
@@ -296,7 +303,7 @@ test("CSRF refresh rejects an unusable session response before sending the mutat
   const {data,errors}=await setup(page);await openDelta(page,"firmware");
   await page.locator('[data-delta-base="base-0"]').check();await page.locator("#deltaReason").fill("Require a valid session");
   data.csrfToken="";
-  await page.locator('[data-version-operation="delta-create"]').click();await confirm(page);
+  await page.locator('[data-version-operation="delta-create"]').click();await confirm(page,false,true);
   await expect(page.locator("#deltaSheet")).toContainText("有效的管理会话");
   expect(data.mutationAttempts).toBe(0);expect(data.writes).toHaveLength(0);expect(errors).toEqual([]);
 });
@@ -353,7 +360,7 @@ test("refresh explicitly requests future reports rather than pretending all phon
 test("unknown create outcome is reconciled without automatic redispatch",async({page})=>{
   const {data}=await setup(page);data.abortCreate=true;await openDelta(page);
   await page.locator('[data-delta-base="base-0"]').check();await page.locator("#deltaReason").fill("Retain uncertain attempt");
-  await page.locator('[data-version-operation="delta-create"]').click();await confirm(page);
+  await page.locator('[data-version-operation="delta-create"]').click();await confirm(page,false,true);
   await expect(page.locator("#deltaContent")).toContainText("不会自动重发");
   await expect(page.locator('[data-version-operation="delta-reconcile"]')).toBeVisible();
   await page.locator('[data-version-operation="delta-reload"]').click();
@@ -478,6 +485,7 @@ test("activity failures retain the last task and recover without redispatch",asy
   const {data}=await setup(page);data.jobs=[{id:"progress",kind:"firmware",targetReleaseId:"fw-target",baseReleaseId:"base-0",baseVersionCode:99,targetVersionCode:100,status:"running",phase:"uploading",enabled:false,revision:1,sizeBytes:0,runUrl:"",fileName:""}];
   await page.locator("#taskButton").click();await expect(page.locator("#taskContent")).toContainText("上传差分文件");
   data.activityFails=true;await page.locator('[data-task-action="refresh"]').click();await expect(page.locator("#taskContent .error")).toContainText("上次状态已保留");
+  await dismissError(page);
   await expect(page.locator(".task-job")).toHaveCount(1);
   data.activityFails=false;data.jobs[0].status="failed";data.jobs[0].phase="failed";
   await page.evaluate(()=>window.dispatchEvent(new Event("online")));await expect(page.locator("#taskContent")).toContainText("生成失败");
@@ -533,6 +541,7 @@ test("failed read acknowledgement retains unread state until an explicit refresh
   await page.locator("#taskButton").click();await expect(page.locator("#taskContent")).toContainText("已读状态保存失败");
   await expect(page.locator(".task-badge")).toHaveText("1");await page.waitForTimeout(1100);
   expect(data.writes).toHaveLength(1);expect(data.unreadCount).toBe(1);
+  await dismissError(page);
   data.readFails=false;await page.locator('[data-task-action="refresh"]').click();
   await expect(page.locator(".task-badge")).toBeHidden();expect(data.unreadCount).toBe(0);
 });
@@ -663,6 +672,7 @@ test("push enrollment reports provider registration failure separately and retai
   const error=page.locator('.task-notification-settings [role="alert"]');
   await expect(error).toContainText("Registration failed - push service error");
   await expect(error).toContainText("推送服务");await expect(error).not.toContainText("上次状态已保留");
+  await dismissError(page);
   await page.locator('[data-task-action="refresh"]').click();await expect(error).toContainText("Registration failed");
   await expect(page.locator('[data-task-action="push-off"]')).toHaveCount(0);
   expect(data.writes).toHaveLength(0);
@@ -692,6 +702,7 @@ test("push enrollment preserves the browser subscription when server registratio
   await mockBrowserPush(page,true,true);const {data}=await setup(page);data.pushPublicKey=pushPublicKey;data.pushRegisterFails=true;
   await page.locator("#taskButton").click();await page.locator('[data-task-action="push-on"]').click();
   await expect(page.locator('.task-notification-settings [role="alert"]')).toContainText("浏览器订阅已保留");
+  await dismissError(page);
   data.pushRegisterFails=false;await page.locator('[data-task-action="push-on"]').click();
   await expect(page.locator('[data-task-action="push-off"]')).toBeVisible();
   expect(await page.evaluate("pushMockCalls")).toMatchObject({subscribe:0,unsubscribe:0});
@@ -718,4 +729,128 @@ for(const language of ["zh","en"]) for(const width of [320,390]) test(`mobile ta
   await expect(page.locator('#taskButton .task-label')).toBeVisible();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await page.screenshot({path:info.outputPath('mobile-task-toolbar.png'),animations:'disabled'});
+});
+
+function approvalJob(): Job {
+  return { id:"approval-job", kind:"firmware", targetReleaseId:"fw-target", baseReleaseId:"base-0",
+    baseVersionCode:30324, targetVersionCode:30325, status:"queued", phase:"awaiting_approval", enabled:false,
+    revision:1, attempt:1, sizeBytes:0, fileName:"", runUrl:"https://github.com/Eitan-S-23/E-Track/actions/runs/12345",
+    ci:{phase:"awaiting_approval",approvalEnvironments:["firmware-rehearsal"],checkedAt:Math.floor(Date.now()/1000)} };
+}
+
+test.describe("visible operation feedback", () => {
+  test.use({hasTouch:true,viewport:{width:390,height:844}});
+  for (const direction of [-140,140]) test(`CSRF errors open above the current sheet and swipe ${direction} only dismisses`,async({page})=>{
+    const {data,errors}=await setup(page);data.baseCount=45;
+    await openDelta(page,"firmware");
+    await page.locator('[data-delta-base="base-0"]').check();
+    await page.locator("#deltaReason").fill("Preserve this MCU request");
+    data.rejectCsrf=true;
+    await page.locator('[data-version-operation="delta-create"]').click();
+    await page.locator("#confirmAccept").click();
+    const dialog=page.locator('#confirmDialog[role="alertdialog"]');
+    await expect(dialog).toBeVisible();
+    await expect(dialog).toContainText("CSRF token is invalid");
+    await expect(dialog).toContainText("Request ID:");
+    await expect(dialog).toContainText("不会自动重发");
+    await expect(page.locator("#confirmAccept")).toBeFocused();
+    expect(await page.locator("#deltaSheet").evaluate(node=>node.inert)).toBe(true);
+    const rect=(await dialog.boundingBox())!;
+    expect(rect.y).toBeGreaterThanOrEqual(0);expect(rect.y+rect.height).toBeLessThanOrEqual(844);
+    await swipe(page,"#confirmDialog .confirm-head",direction,0);
+    await expect(page.locator("#confirmDialog")).toBeHidden();
+    await expect(page.locator("#deltaSheet")).toBeVisible();
+    await expect(page.locator("#deltaReason")).toHaveValue("Preserve this MCU request");
+    await expect(page.locator('[data-delta-base="base-0"]')).toBeChecked();
+    expect(data.mutationAttempts).toBe(1);expect(data.writes).toHaveLength(0);expect(errors).toEqual([]);
+  });
+  for (const direction of [-140,140]) test(`real approval state opens a safe run link and swipe ${direction} never approves`,async({page})=>{
+    const {data,errors}=await setup(page);data.jobs=[approvalJob()];
+    await page.evaluate("taskActivity.refresh()");
+    await expect(page.locator("#confirmTitle")).toHaveText("差分构建等待审批");
+    await expect(page.locator("#confirmExternal")).toHaveAttribute("href",data.jobs[0].runUrl);
+    await expect(page.locator("#confirmExternal")).toHaveAttribute("rel","noopener noreferrer");
+    await expect(page.locator("#confirmMessage")).toContainText("Review deployments");
+    await swipe(page,"#confirmDialog .confirm-head",direction,0);
+    await expect(page.locator("#confirmDialog")).toBeHidden();
+    await page.evaluate("taskActivity.refresh()");
+    await expect(page.locator("#confirmDialog")).toBeHidden();
+    await page.locator("#taskButton").click();
+    await expect(page.locator("#taskContent")).toContainText("等待 GitHub 手动审批");
+    await expect(page.locator('#taskContent a[href*="/actions/runs/12345"]')).toHaveText("前往 GitHub 审批");
+    expect(data.writes).toHaveLength(0);expect(errors).toEqual([]);
+  });
+  test("queueing does not invent a review requirement and provider failures are separate",async({page})=>{
+    const {data}=await setup(page);
+    data.jobs=[{...approvalJob(),phase:"ci_queued",ci:{phase:"ci_queued",approvalEnvironments:[]}}];
+    await page.evaluate("taskActivity.refresh()");
+    await expect(page.locator("#confirmDialog")).toBeHidden();
+    data.jobs[0].phase="ci_unavailable";
+    data.jobs[0].ci={phase:"ci_unavailable",approvalEnvironments:[],errorCode:"GITHUB_HTTP_503"};
+    await page.evaluate("taskActivity.refresh()");
+    await expect(page.locator('#confirmDialog[role="alertdialog"]')).toContainText("GITHUB_HTTP_503");
+    await expect(page.locator("#confirmExternal")).toBeHidden();
+    expect(data.jobs[0].status).toBe("queued");expect(data.writes).toHaveLength(0);
+  });
+  test("approval waits behind an active confirmation without replacing the draft",async({page})=>{
+    const {data}=await setup(page);await openDelta(page,"firmware");
+    await page.locator('[data-delta-base="base-0"]').check();await page.locator("#deltaReason").fill("Keep my draft");
+    await page.locator('[data-version-operation="delta-create"]').click();
+    const title=await page.locator("#confirmTitle").textContent();
+    data.jobs=[approvalJob()];await page.evaluate("taskActivity.refresh()");
+    await expect(page.locator("#confirmTitle")).toHaveText(title!);
+    await expect(page.locator("#confirmAccept")).toBeFocused();
+    await page.locator("#confirmCancel").click();
+    await expect(page.locator("#confirmTitle")).toHaveText("差分构建等待审批");
+    await page.locator("#confirmAccept").click();
+    await expect(page.locator("#deltaReason")).toHaveValue("Keep my draft");
+    expect(data.writes).toHaveLength(0);
+  });
+  test("an obsolete queued approval reminder disappears when the run has moved on",async({page})=>{
+    const {data}=await setup(page);await page.evaluate("void openResultDialog({title:'Current dialog'})");
+    data.jobs=[approvalJob()];await page.evaluate("taskActivity.refresh()");
+    data.jobs=[{...approvalJob(),status:"running",phase:"building",ci:undefined}];
+    await page.evaluate("taskActivity.refresh()");await page.locator("#confirmAccept").click();
+    await expect(page.locator("#confirmDialog")).toBeHidden();expect(data.writes).toHaveLength(0);
+  });
+  test("repeated polling errors are shown once until the connection recovers",async({page})=>{
+    const {data}=await setup(page);data.activityFails=true;
+    await page.evaluate("taskActivity.refresh()");await expect(page.locator("#confirmMessage")).toContainText("Activity unavailable");
+    await page.locator("#confirmAccept").click();await expect(page.locator("#confirmDialog")).toBeHidden();
+    await page.evaluate("taskActivity.refresh()");await expect(page.locator("#confirmDialog")).toBeHidden();
+    data.activityFails=false;await page.evaluate("taskActivity.refresh()");
+    data.activityFails=true;await page.evaluate("taskActivity.refresh()");
+    await expect(page.locator('#confirmDialog[role="alertdialog"]')).toBeVisible();expect(data.writes).toHaveLength(0);
+  });
+  test("a background error is surfaced on return without replaying the operation",async({page})=>{
+    const {data}=await setup(page);
+    await page.evaluate(()=>Object.defineProperty(document,"hidden",{configurable:true,get:()=>true}));
+    data.activityFails=true;await page.evaluate("taskActivity.refresh()");await expect(page.locator("#confirmDialog")).toBeHidden();
+    await page.evaluate(()=>{Object.defineProperty(document,"hidden",{configurable:true,get:()=>false});document.dispatchEvent(new Event("visibilitychange"));});
+    await expect(page.locator('#confirmDialog[role="alertdialog"]')).toBeVisible();expect(data.writes).toHaveLength(0);
+  });
+  test("unsafe approval links and another account's queued error are not displayed",async({page})=>{
+    const {data}=await setup(page);data.jobs=[{...approvalJob(),runUrl:"https://evil.example/actions/runs/12345"}];
+    await page.evaluate("taskActivity.refresh()");await expect(page.locator("#confirmDialog")).toBeHidden();
+    await page.evaluate("state.busy=true;showErrorDialog('previous-account-private-detail');state.session={...state.session,actor:'another@example.test'};state.busy=false;flushFeedback()");
+    await expect(page.locator("#confirmDialog")).toBeHidden();expect(data.writes).toHaveLength(0);
+  });
+  test("old noticed failures do not reopen alerts, while a fresh failed result does",async({page})=>{
+    await page.addInitScript(()=>localStorage.setItem("trace-admin-tasks:owner@example.test:noticed","100"));
+    const {data}=await setup(page);
+    data.notifications=[{...notification(90),jobId:"old-job",attempt:1,status:"failed",errorCode:"CI_BUILD_FAILED"}];
+    data.unreadCount=1;await page.evaluate("taskActivity.refresh()");
+    await expect(page.locator("#confirmDialog")).toBeHidden();
+    data.notifications=[{...notification(101),jobId:"new-job",attempt:1,status:"failed",errorCode:"CI_BUILD_FAILED"}];
+    await page.evaluate("taskActivity.refresh()");
+    await expect(page.locator('#confirmDialog[role="alertdialog"]')).toContainText("CI_BUILD_FAILED");
+    expect(data.unreadCount).toBe(1);expect(data.writes).toHaveLength(0);
+  });
+  test("a confirmation swipe cancels rather than submitting the requested mutation",async({page})=>{
+    const {data}=await setup(page);await openDelta(page,"firmware");
+    await page.locator('[data-delta-base="base-0"]').check();await page.locator("#deltaReason").fill("Unsubmitted request");
+    await page.locator('[data-version-operation="delta-create"]').click();
+    await swipe(page,"#confirmDialog .confirm-head",140,0);await expect(page.locator("#confirmDialog")).toBeHidden();
+    expect(data.mutationAttempts).toBe(0);await expect(page.locator("#deltaReason")).toHaveValue("Unsubmitted request");
+  });
 });

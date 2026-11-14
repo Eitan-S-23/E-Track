@@ -118,6 +118,23 @@ nested scrollers, text selection, upward scrolling and multi-touch retain their
 normal behavior. Busy submissions and an overlaid confirmation block sheet drag.
 Drafts are retained, not submitted or discarded by closing a sheet.
 
+Operation errors also open the shared result dialog above the current workspace
+or sheet. Long messages scroll within the viewport; keyboard focus, Back, Escape
+and left/right header swipes follow the existing modal rules. A swipe only
+dismisses the message, never submits, retries, approves or cancels a build.
+Background errors wait behind an active confirmation or mutation. Repeated
+polling failures alert once until recovery or an explicit refresh, while the
+inline status remains available. Dismissing an error retains unsaved drafts.
+
+Delta jobs distinguish actual GitHub runner queueing from a protected environment
+awaiting manual approval. Only a matching run with pending reviewers gets the
+"awaiting approval" label and a reminder linking to that run's **Review
+deployments** control. The site's role does not imply GitHub reviewer authority.
+The reminder never approves automatically or weakens an environment gate. It is
+shown once per job/attempt/environment in the current page, and stale queued
+reminders are discarded after the run advances. Apply
+`0013_delta_run_status.sql` before deploying the new Admin Functions bundle.
+
 Same-document history gives each visible modal layer one Back step. Browser/Android
 Back cancels the top confirmation or closes the top sheet, without mutation.
 Explicit closure consumes that layer too, so the next Back reaches normal browser

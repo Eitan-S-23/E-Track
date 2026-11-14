@@ -1,4 +1,4 @@
-window.TraceResourceUsage = function ({ element, api, text, escape, formatBytes, onResize = () => {} }) {
+window.TraceResourceUsage = function ({ element, api, text, escape, formatBytes, onResize = () => {}, onError = () => {}, onRecovered = () => {} }) {
   let actor = null, generation = 0, data = null, busy = false, error = "";
   const groups = {workers:"Workers",pages:"Pages Functions",d1:"D1",durableObjects:"Durable Objects / SQLite",r2:"R2"};
   const labels = {
@@ -52,7 +52,8 @@ window.TraceResourceUsage = function ({ element, api, text, escape, formatBytes,
       if (current !== generation) return;
       if (value.ok !== true || !Array.isArray(value.metrics)) throw new Error(text("用量响应无效。","Invalid usage response."));
       data = value;
-    } catch (e) { if (current === generation) error = e.message; }
+      onRecovered();
+    } catch (e) { if (current === generation) { error = e.message; onError(e); } }
     finally { if (current === generation) { busy = false; render(); } }
   }
   element.addEventListener("click",event=>{ if (event.target.closest("[data-usage-refresh]")) void load(); });

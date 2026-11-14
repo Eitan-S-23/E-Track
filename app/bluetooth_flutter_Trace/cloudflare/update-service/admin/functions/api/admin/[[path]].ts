@@ -241,7 +241,7 @@ async function routeAdminRequest(
     requireRole(actor, "viewer");
     const kind = url.searchParams.get("kind");
     if (kind !== "android" && kind !== "firmware") throw new AdminError("INVALID_PARAMETER", "Invalid delta kind", 400);
-    return deltaCandidates(context.env, kind, url.searchParams.get("targetId") ?? "");
+    return deltaCandidates(context.env, kind, url.searchParams.get("targetId") ?? "", true);
   }
   if (route[0] === "delta" && route[1] === "jobs" && method === "POST") {
     requireRole(actor, "publisher");

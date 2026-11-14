@@ -1,6 +1,6 @@
 /* One gesture owner for every sheet. Native content scrolling keeps priority. */
 window.TraceSheetGestures = function ({ sheet, scroll, backdrop, canClose, close,
-  headerSelector = ".quick-sheet-header, .quick-sheet-handle", centered = true }) {
+  headerSelector = ".quick-sheet-header, .quick-sheet-handle", centered = true, verticalCentered = false }) {
   let gesture = null;
   let suppressClickUntil = 0;
   const controls = "button, a, input, textarea, select, label, summary, [contenteditable], [data-no-sheet-drag]";
@@ -42,7 +42,9 @@ window.TraceSheetGestures = function ({ sheet, scroll, backdrop, canClose, close
     g.velocity = (position - g.lastPosition) / Math.max(1, now - g.lastTime);
     g.lastPosition = position; g.lastTime = now; g.distance = position;
     const origin = centered ? "-50%" : "0px";
-    sheet.style.transform = g.axis === "x" ? `translate(calc(${origin} + ${dx}px), 0)` : `translate(${origin}, ${position}px)`;
+    const originY = verticalCentered ? "-50%" : "0px";
+    sheet.style.transform = g.axis === "x" ? `translate(calc(${origin} + ${dx}px), ${originY})`
+      : `translate(${origin}, calc(${originY} + ${position}px))`;
     if (backdrop) backdrop.style.opacity = String(Math.max(.35, 1 - g.distance / Math.max(1, sheet.clientHeight)));
   }
   function end(cancelled = false) {
