@@ -24,11 +24,11 @@ void SystemInfosModel::Init()
 {
 #if defined(OTA_TARGET_APP)
     const boot_image_reader_t reader = { ReadRunningFirmware, NULL };
-    OtaUpdate::FormatFirmwareInfo(&reader, VERSION_FIRMWARE_NAME, firmwareName, sizeof(firmwareName));
+    OtaUpdate::FormatFirmwareVersion(&reader, firmwareVersion, sizeof(firmwareVersion));
 #elif defined(_WIN32)
-    snprintf(firmwareName, sizeof(firmwareName), "%s Simulator", VERSION_FIRMWARE_NAME);
+    snprintf(firmwareVersion, sizeof(firmwareVersion), "%s", "Simulator");
 #else
-    snprintf(firmwareName, sizeof(firmwareName), "%s Legacy", VERSION_FIRMWARE_NAME);
+    snprintf(firmwareVersion, sizeof(firmwareVersion), "%s", "Legacy");
 #endif
     account = new Account("SystemInfosModel", DataProc::Center(), 0, this);
 

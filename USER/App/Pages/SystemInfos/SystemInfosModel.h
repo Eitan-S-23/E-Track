@@ -11,7 +11,7 @@ class SystemInfosModel
 public:
     void Init();
     void Deinit();
-    const char* GetFirmwareName() const { return firmwareName; }
+    const char* GetFirmwareVersion() const { return firmwareVersion; }
 
     void GetSportInfo(
         float* trip,
@@ -60,7 +60,7 @@ public:
 
 private:
     Account* account;
-    char firmwareName[48];
+    char firmwareVersion[48];
 
 private:
 
