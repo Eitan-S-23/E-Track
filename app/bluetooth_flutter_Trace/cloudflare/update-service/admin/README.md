@@ -43,6 +43,23 @@ Contract tests run via `node --test tests/ota/test_access_login_template.mjs`
 from the repository root and are included in Cloudflare CI. These static checks
 are not proof of hosted Liquid rendering or live authentication.
 
+The existing one-month organization SSO is a different credential from the
+Cloudflare account API tokens. It remains available for the official Access
+exchange and site login; it is not an account-management token. A live check on
+2026-11-14 returned HTTP 200 and the site's `owner` role. Both existing API tokens
+also verified `active`, and the registered CI token could read this exact Access
+application. Its token-policy metadata request was separately denied. Therefore
+the custom-page 403 is not evidence of an expired/lost SSO, and a replacement
+token must not be demanded on that basis. The existing Wrangler OAuth grant is
+Pages-only plus account/user read, not custom-page or billing administration.
+
+When the API cannot distinguish the missing permission from account entitlement,
+check the existing account's **Reusable components > Custom pages > Access custom
+pages** control and the existing token's permission assignment. Do not infer a
+Free plan, change billing, or substitute the account-wide basic login designer:
+that designer affects all applications and does not expose a browser favicon
+setting. Preserve original credentials and use their existing authorized routes.
+
 ## Shared UI And Keyboard Behavior
 
 Both workspaces use warm light surfaces, charcoal text and a single muted green

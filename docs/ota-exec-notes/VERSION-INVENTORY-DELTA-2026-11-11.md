@@ -1853,3 +1853,70 @@ browser caches and HTTP/test evidence. Earlier external certificate/PowerShell
 cache attribution remains qualified: timestamps do not prove which process wrote
 those pre-existing files. No external cleanup occurred. The final controlled-path
 audit is not a machine-wide filesystem trace or unconditional external-write PASS.
+
+## LOGIN-CREDENTIAL-RECONCILE-01, 2026-11-14
+
+The operator corrected the request for another credential: the earlier one-month
+login is still present and must be reused. The blanket implication that the
+custom-page 403 required a replacement credential is withdrawn. This correction
+does not reinterpret the failed API calls as success or claim the hosted login
+favicon has changed.
+
+Read-only evidence is under
+`.cache/ui-remediation-20261113-01/access-capability-20261114-01/` (D below).
+The protected CI input was compared under its authorized Windows identity and
+matches the registered `CF-CI-01` input exactly; there was no wrong-token lookup.
+The earlier inability to list that protected directory under SYSTEM is not
+evidence that its contents are absent. No new credential was requested, copied
+to CI, rotated, edited or created in this investigation.
+
+| Check | Actual observation |
+| --- | --- |
+| Existing organization SSO | Present, type `org`, issuer `sulovehuang.cloudflareaccess.com`, expiration `2026-11-28T02:43:53Z`; not expired |
+| Existing original-Admin token | Present, type `app`, expiration `2026-11-14T11:20:58Z`; live `GET /api/admin/session` returned HTTP 200 / site role `owner` |
+| Registered CI token verify | HTTP 200, `active`; no expiration was returned, which is not a perpetual-validity claim |
+| Local provisioning token verify | HTTP 200, `active`; no expiration returned |
+| CI read of the exact existing Access application | HTTP 200, `E-Track`, original domain and self-hosted type |
+| Provisioning read of that application | HTTP 403, `1010 / auth.forbidden`; an active token does not imply this operation is authorized |
+| Each token's own policy-metadata read | HTTP 403 / 9109, `Unauthorized to access requested resource`; the complete grants were not disclosed |
+| Existing Wrangler OAuth scope | `user:read`, `offline_access`, `account:read`, `pages:write`; not an alternate Access custom-page or Billing grant |
+
+Fresh official documentation confirms that the previous create URL and JSON
+shape were correct: account-scoped `POST /access/custom_pages` with `name`,
+`type: "login"`, `custom_html` and `contract_version: 1`. The required permission
+is `Access: Custom Pages Write`. HTML/Liquid custom pages separately require
+Zero Trust Pay-as-you-go or Enterprise. Account subscription reads require
+`Billing Read` or `Billing Write`, neither supplied by the Pages OAuth grant.
+The earlier subscription and custom-page denials were reused, not repeated.
+No expired OAuth token was needlessly refreshed for scopes it does not grant.
+
+The month-long SSO grants Access site authentication, not Cloudflare account/API
+administration. The website's `owner` role similarly does not prove Cloudflare
+platform-admin permissions. Conversely, the management API's 403 does not prove
+that the SSO expired, the account is Free, or a replacement token is necessary.
+The same-account successful CI control also rules out a mistyped target account
+or a generally invalid CI credential as the explanation for the earlier request.
+
+Disposition: NEED_EVIDENCE of the provider's current custom-page capability, not
+a new blanket authorization. Existing API access does not reveal the full token
+policy or subscription, so the precise split between missing permission and
+entitlement remains unknown. The smallest next observation is the existing
+Cloudflare account's **Reusable components > Custom pages > Access custom pages**
+view: is Create/Publish available, or does it show an entitlement/upgrade notice?
+Also inspect the existing `e-track-ci` token's target-account permission selection;
+do not create a replacement token just to answer that question.
+
+If the feature is available and the existing token can perform the scoped create,
+reuse the prepared template and assign it only to the original Admin application,
+then verify anonymous title/favicon and unchanged authentication settings. If
+the feature is plan-gated, return that actual provider observation for an owner
+decision; do not upgrade billing or proxy/replace authentication. If only the
+existing token's grant is missing, correct that grant through a legitimate
+account-management route rather than demanding a new secret value. No usable
+account-management session is established by the month-long Access SSO alone.
+
+The basic organization login designer is not a silent workaround: the official
+guide says it affects all Access applications, and its fields are name, logo,
+header/footer and background, not browser favicon. Original organization defaults,
+policies, application settings, billing and website deployments were unchanged.
+No custom-page creation was retried and no package, phone or MCU operation ran.
