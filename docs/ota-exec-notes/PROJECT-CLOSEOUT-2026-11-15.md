@@ -9,6 +9,11 @@ for the user's manual upgrade between these independent work items. This scope
 does not mark P5 complete, publish a channel, start a four-hour run, or rewrite
 historical acceptance evidence.
 
+Current closeout: MCU candidate ingestion is complete. Main-board/rule delivery,
+main CI and preserving local-main synchronization are complete. P51 immutable
+input and current cloud checks pass; live device qualification is pending the
+designated phone connection. `canStartFourHour=false` remains explicit.
+
 Working root: `D:/github/my/E-Track/.cache/p35-integration-20261028/source`.
 New receipts are under `.cache/project-closeout-20261115-01/` in that worktree.
 Remote-main baseline before this documentation update:
@@ -74,6 +79,21 @@ AGENTS.md, with PROJECT-08 in the shared index. It requires current-main status,
 precise task/evidence locations and preserving local synchronization; it does
 not merge unrelated product branches or create another tracking framework.
 
+Board/rule commit: `07dafdb8c53d63b15d20e0749c6ea1cc60bf7681`. All 34 local
+documentation checks and 36 existing governance regressions passed. These are
+self-tests, not an invented independent acceptance. The original governance CI
+`43637479097` passed all three jobs; its original log and job results are retained
+in `main-ci-details-01`. Main App workflow `43637479128` ran path detection only;
+APK, EXE, Pages and Release jobs were skipped. No extra product build was caused
+by this documentation change.
+
+The existing `.cache/p34-final` worktree fast-forwarded from
+`b42d3e25db85d6aba397cb4d0fb34bb5b653904f` to that exact remote main commit.
+Its tracked tree is clean, all six updated document contents match, and all
+18426 untracked evidence files retain their size/mtime. No overlaps, deletions,
+reset, archive-branch switch or task-worktree replacement occurred. Original
+fetch/merge and comparison receipts are in `local-main-01`.
+
 ## P51 Preparation Carried Forward
 
 The current detailed local notes are `docs/ota-exec-notes/P51-v2-scripts-2026-11-10.md`
@@ -97,12 +117,41 @@ Existing verified inputs/results, to reuse when still applicable:
   71 HTTP checks and 30/30 complete downloads passed, but are not 30 OTA upgrades
   or a four-hour stability observation. No paid service is introduced.
 
-Pending in this closeout: recheck immutable bindings and live service, inspect
-actual phone/MCU/ownership state, qualify only the necessary V2 short cycle and
-recovery/log retrieval, then leave explicit runnable long-test inputs and real
-remaining prerequisites. Preserve earlier failed short attempts and their
-pre-device resolution records. Do not replay historical v20 execution contracts
-or count preparation as formal acceptance.
+Current checks are in `p51-network-01/result.json`: the actual existing runner
+validated its immutable APK/package/restoration/cloud bindings and performed
+fresh health/latest/full-byte-download checks. The original 1 MiB download is
+byte-identical. No source rebuild, package generation, deployment or installation
+was necessary.
+
+The private-ADB check is `p51-phone-01/result.json`, status
+`P51_PHONE_CONNECTION_REQUIRED`. Its original client reports
+`device '10ADA4197U001CK' not found`; the separate connected-device enumeration
+also found no matching phone. The owned ADB server was closed, port 5093 is free,
+and the read-only device lease was released. No App installation, UI action,
+MCU operation, short transfer or four-hour campaign ran.
+
+The existing current-session notification route delivered a real connection
+reminder, recorded in `p51-user-action/notifications/connect-phone/result.json`.
+It requests USB connection/unlock and the existing debug authorization if prompted,
+not a manual firmware upgrade or chat reply. Delivery is not evidence that the
+phone was connected. `p51-ready.json` records exact input/observation pins and
+`canStartFourHour=false` rather than declaring preparation fully complete.
+
+Remaining order: observe the phone connection, rerun only current readiness using
+a fresh output label, reconcile actual MCU/Boot/BCB/staging state, then qualify
+one existing V2 upgrade/restore cycle and original-log retrieval. If installed
+state has changed, reconcile that real difference before mutation; do not assume
+the old receiver remains installed. Reuse old successful checks and preserve
+failed short attempts/pre-device resolution records. Do not replay historical
+v20 contracts or count preparation as formal acceptance.
+
+Readiness continuation from the working root:
+
+    python -I -S -B -X utf8 .cache/project-closeout-20261115-01/p51.py preflight phone p51-phone-02
+    python -I -S -B -X utf8 .cache/project-closeout-20261115-01/p51.py run phone p51-phone-02
+
+These commands only inspect the designated phone. They do not start an OTA or
+four-hour run; the actual short-cycle admission remains a separate next step.
 
 The user confirmed the browser notification problem was VPN-related and requested
 no further investigation. The deferred favicon outcome remains outside this batch;
