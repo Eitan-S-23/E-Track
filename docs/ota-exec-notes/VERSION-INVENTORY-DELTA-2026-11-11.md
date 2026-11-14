@@ -2142,3 +2142,71 @@ existing credentials; no source delivery, migration or deployment is claimed
 at this point. Source delivery targets only `release/candidates`, never `main`.
 The rollout preserves current user-controlled enablement/channel values rather
 than restoring the older job snapshot. Later receipts below own final outcomes.
+
+### Deployed Outcome And Readback
+
+COMPLETE for the bounded backend/Admin repair. Source commit
+`50335639c3863a2fa96dd504cdfaa159a172955f` was delivered to
+`Eitan-S-23/E-Track:release/candidates`. Cloudflare checks run `43602972553`
+passed Worker type/invariant tests in real Linux workerd, Public Pages checks
+and the complete Admin browser suite. The automatic candidate check
+`43602618960` also passed, with both App and firmware build jobs skipped.
+This closes the local Windows native-runtime/Public-tooling gaps above; it is
+self-test/deployment evidence, not a new independent hardware acceptance.
+
+Only migration `0013_delta_run_status.sql` was applied. Wrangler reported the
+successful migration but did not exit before its bound; the owned process was
+closed and remote schema plus migration inventory were independently read back.
+The migration was not replayed. The failed native receipt remains preserved.
+Deployed versions, with existing configuration verified unchanged:
+
+| Surface | Deployed version |
+| --- | --- |
+| Worker | `bae6201e-d3db-4c41-ba9b-6d0751c7eaa2` |
+| Public Pages | `cf310624-3e43-415c-8591-935c0d00d428` |
+| Admin Pages | `4f2b15c8-36bd-4060-8f62-0ac627b1cf15` |
+
+`A/live-readback-02/result.json`, where
+`A=.cache/delta-followup-20261114-01`, verifies both actual serving origins and
+the original Admin. The existing enabled stable-channel delta is exposed as
+`e-track-at32f435-v3.3.24-to-v3.3.25-patch.etu`, remains 7,301 bytes with SHA-256
+`59bbbf54c134c131ff4bec0a8375ab5f52684cbc88f9e0a043bcc39ef34eecaf`, and succeeds
+with a quoted ETag and signed full/range downloads. Its sealed result JSON,
+all sampled App/MCU channel rows and delta-job rows match the pre-deploy snapshot.
+User enablement remains true and was not written by this task.
+
+The first readback already verified the Worker's full download, then used an
+unsupported closed Range form. Existing firmware downloads accept only
+`bytes=N-`; the corrected probe used `bytes=7237-` with `If-Range`, verified
+HTTP 206 and the exact final 64 bytes, and reused the successful full download.
+This was a probe correction, not a change to the download protocol or another
+artifact generation. Both observations remain in A.
+
+`A/live-ui-02/result.json` and its private screenshots verify actual deployed
+HTML/CSS/JS and the actual Access session/catalogue at 390x844. Error/approval
+states were simulated in an isolated browser, with all mutation requests blocked.
+The error stays above MCU details, both swipe directions only dismiss, the
+GitHub review link is correct and the same approval reminder does not reopen.
+There were no browser errors or attempted mutation requests. Screenshots await
+full opacity; the earlier behavior pass's transition frames are not the settled
+visual reference. No new real build or approval was created to test the reminder.
+
+Existing credentials were reused. One private OAuth renewal encountered a
+transient failure; the later renewal succeeded without a new login or changed
+scope. Failed Git uploads were reconciled by their exact blob hashes; successful
+uploads were reused, and the remaining upload used the installed GitHub CLI.
+Only checks were dispatched. No main merge, App/MCU/dependency changes, package
+regeneration, new approval, paid feature, channel publication or device action
+occurred in this repair.
+
+`A/write-audit.json` records the scoped controllable-output, credential and owned
+process review. All selected output roots are in this worktree. This is not a
+machine-wide filesystem trace: no complete baseline was taken, and earlier
+external Windows crypto/PowerShell cache observations remain unattributed and
+untouched. Credentials and authenticated screenshots remain in protected
+project-private directories; no project-external cleanup was performed.
+
+The operator can refresh the original Admin and repeat App **Check for updates**;
+the existing delta requires neither regeneration nor another approval. Future
+firmware jobs still obey their original GitHub reviewer gate and now surface it
+explicitly. A device OTA was not run or claimed by this verification.
