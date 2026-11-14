@@ -311,3 +311,34 @@ CI dispatch, remote configuration or publication is granted by this change.
 The p34-final worktree, its frozen bundles/tools/lock, original product work and
 Git index remain outside the edit scope. Do not claim another worktree or running
 agent has received these rules until an authorized delivery actually occurs.
+
+## PROJECT-08: Main Board Is The Shared Progress Entry
+
+Date: 2026-11-15. Owner: root. User-approved documentation/process correction;
+no change to frozen product criteria or a grant for extra hardware campaigns.
+
+The root directory was on `archive/p34-root-before-delivery-20261014`, not main.
+The actual local main worktree was `.cache/p34-final`, also behind remote main.
+The newer task board and evidence were in
+`.cache/p35-integration-20261028/source` on `acceptance/p5-1-long-20261108`, with
+both committed task results and additional uncommitted records. A read-only
+inventory covered 20 registered worktrees, 66 local branches and 81 remote
+branches. The root board could not represent all work already performed.
+
+Remote main `339af3a095ae42ee3442de3fb6dc1449525205ba` already recorded P3/P4
+completion, but did not contain the P1-7-v4 PASS or P1-6-v3 partial matrix.
+Both originals exist on `dev/firmware/p51-packaging-20261104` at
+`362653bb38d6fd1f9fb9bdca0339c1a6d6e77547`. P1-6 still lacks six physical rows;
+no reviewed board or latest P5 record closes the four-hour campaign.
+
+The correction is one main progress entry, not a ban on branches or another
+tracking system. At milestones, record acceptance, source delivery, backend
+ingestion, channel publication and actual installation separately, with precise
+evidence addresses and outstanding work. Keep historical failures and frozen
+bundles intact. Update local main only through an authorized, preserving sync;
+do not replace another worktree's product changes or assume cached refs are fresh.
+
+The user also clarified that a successfully built, automatically ingested MCU
+candidate does not require their manual upgrade before board and P51 preparation
+work continues. Actual hardware admission must still inspect the installed state.
+See [the current closeout](../ota-exec-notes/PROJECT-CLOSEOUT-2026-11-15.md).

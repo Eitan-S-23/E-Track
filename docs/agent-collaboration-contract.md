@@ -42,6 +42,43 @@ resolved, directly applicable decision and states how it applies here.
   task board. Put normative changes here or in the relevant governed contract;
   a task note cannot grant permissions or redefine acceptance criteria.
 
+## Main Progress Board
+
+User decision, 2026-11-15: `PLAN-OTA-EXEC.md` on the repository's remote `main`
+is the shared project progress entry. Task branches and worktrees are valid
+working locations, but their boards, private caches and chat are not a substitute
+for updating that entry.
+
+- At task entry or handoff, identify the actual branch/worktree and check current
+  remote main. A directory named after the project, a local `main`, or an old
+  `origin/main` ref does not establish freshness. If remote access is unavailable,
+  state the exact last checked revision and do not describe it as current.
+- At a milestone, scoped delivery or handoff, the task owner supplies the current
+  state, working branch/worktree, exact delivered commit, original evidence
+  locations, remaining work and next owner. Root integrates that bounded record
+  into main under existing authorization. If integration is not authorized or
+  has not happened, label it pending; do not claim the main board was updated.
+- Keep stage totals, task-card status and the latest handoff consistent. Record
+  implementation, self-tests, independent acceptance, CI/build, backend ingestion,
+  channel publication, device installation and main integration separately.
+  An accepted task can have pending main delivery; a ready candidate is not an
+  installed firmware or a passed four-hour campaign.
+- Update the actual local main worktree after authorized main delivery, preserving
+  unrelated changes and untracked evidence. Verify its exact HEAD and board
+  against the fresh remote revision. Other active worktrees must consume the new
+  rule and current board; do not overwrite every historical board or frozen bundle.
+- Reconcile existing observations before declaring work missing or repeating it.
+  A board update neither merges unrelated product branches nor changes acceptance
+  criteria, evidence, device permissions or production gates. Summaries of work
+  outside main must identify that branch, commit and repository-relative path.
+- Backend candidate ingestion is sufficient to continue independent documentation
+  and preparation work. Do not wait for the user's manual upgrade unless the
+  next actual device operation requires it; retain real version/state checks.
+
+Use the existing task note and this board, not a new tracking framework. The
+incident and current worktree map are recorded in
+[PROJECT-08](agent-collaboration/project-workflow.md#project-08-main-board-is-the-shared-progress-entry).
+
 ## User Intervention Notifications
 
 When the current session uses cc-connect, distinguish an out-of-chat action from

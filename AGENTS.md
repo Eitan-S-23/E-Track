@@ -7,6 +7,13 @@ promote AC5 artifacts to OTA or CI release artifacts.
 
 ## Project-Wide Agent Workflow
 
+- `main:PLAN-OTA-EXEC.md` is the shared progress board. Follow **Main Progress
+  Board** in `docs/agent-collaboration-contract.md`: check the actual branch,
+  worktree and current remote main before interpreting status; synchronize
+  milestones and evidence locations to main, not only a task branch or cache.
+  Keep acceptance, deployment, installation and main integration distinct.
+  Preserve archived worktrees and frozen evidence; do not rerun completed work
+  merely because its progress was not consolidated.
 - `docs/agent-collaboration-contract.md` applies to every component and every
   implementation, review, acceptance and root agent, not only OTA or P3-4.
   Read `docs/agent-collaboration/index.md` for shared decisions and handoffs.
