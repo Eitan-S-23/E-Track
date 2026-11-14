@@ -2318,3 +2318,59 @@ The Admin deployment must retain the newly configured automatic-delta bindings;
 updating UI copy must not restore the old execution branch or secret values.
 Existing completed packages and the separately active legacy build are not
 regenerated just to produce test evidence. Results follow below.
+
+### DELTA-TEST-01 Delivered Outcome
+
+Source `a68ca7dfb57e01ec777e02dd8f9eb81922328790` was delivered to
+`release/candidates`, without a main merge or local Git-index change. The
+73 scoped Admin browser cases passed, including both-language absence checks
+and retained real-approval/error/dismissal behavior. Admin TypeScript and all
+46 original candidate-orchestration tests passed too.
+
+The exact legacy run `43616196436` was approved once through its legitimate
+pending deployment and completed successfully, with the original attempt 1.
+The resulting `e-track-at32f435-v3.3.23-to-v3.3.25-patch.etu` is ready, 7,298
+bytes, SHA-256
+`fd7e2815efc2a8fea50e90751099ee03bfbe216f56686fe8f847f406389ae5dc`.
+It remains disabled; no automatic enablement, redispatch or policy change was
+performed. See `legacy-approve-01` and `legacy-result-01` under the fresh area.
+
+The new full/recovery candidate ran in `43622061954`, attempt 1. Checks passed,
+the App job was skipped, and the exact source-bound firmware job passed after
+the normal authorized reviewer step. It built fresh GCC App/Boot artifacts;
+no old executable or new firmware feature was substituted. The original job
+log is retained by `build-log-01/result.json`. The compile/package step contains
+641 warning diagnostic lines and zero error diagnostic lines, not a warning-free
+build. These are line counts, not deduplicated findings. The size output reports
+App FLASH 614,416 B of 960 KB and Boot FLASH 14,724 B of 64 KB. Warning cleanup
+was not added to this version-only test scope.
+
+Firmware 3.3.26 (30326), release
+`fw_3d32ac12136153e99e93d1802ef98800f5f9a06d2160eb095aad553fddcef9f5`,
+was published through the real original Admin to Beta, revision 9 to 10.
+Stable retains 3.3.25 at revision 2. The first publication request was rejected
+by the required `Accept: application/json` header check before mutation; its
+response remains in `beta-publish-01`. The corrected request used a fresh CSRF
+receipt and rechecked unchanged channel revisions, without rebuilding or an
+automatic retry. `beta-publish-02` records the successful CAS and Stable readback.
+
+`beta-verify-01/result.json` records real Worker and Public Pages latest responses
+for Beta 3.3.26, schema v2, and full-byte signed downloads through both serving
+origins. Both returned the same 291,149-byte full ETU with SHA-256
+`8944df73cb6dc197d7cdd62264a62515cede4c404aa176670701851b4cc73e27`.
+No 3.3.26 delta was generated on the operator's behalf, leaving the new
+3.3.25-to-3.3.26 selection available for their automatic-flow test. No device
+installation, OTA run or independent hardware acceptance is claimed.
+
+Admin deployment `ae18b008-6f5a-4ccb-9387-aa64973eb2b0` removes only the obsolete
+fixed Chinese/English approval paragraph. Backend source and every deployment
+configuration entry, including the automatic MCU-delta bindings, compare equal.
+Live authenticated HTML matches the edited source. Existing historic approval
+dialogs are retained, not replaced with a claim that all jobs require approval.
+Deployment emits only the configured-network-proxy warning. Evidence is in
+`ui-rollout/deployed.json` and `ui-rollout/live-result.json`.
+
+All chosen host output/caches remain within this worktree; credentials are reused
+without new login or key rotation and private records remain access-restricted.
+The final scoped output, credential and owned-process audit is recorded in the
+fresh area's `write-audit.json`; it is not a machine-wide filesystem trace.
