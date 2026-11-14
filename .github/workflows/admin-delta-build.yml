@@ -54,11 +54,11 @@ jobs:
           npm run check --prefix app/bluetooth_flutter_Trace/cloudflare/update-service/worker
           npm test --prefix app/bluetooth_flutter_Trace/cloudflare/update-service/worker
   firmware:
-    if: github.event_name == 'workflow_dispatch' && inputs.kind == 'firmware'
+    if: github.event_name == 'workflow_dispatch' && github.repository == 'Eitan-S-23/E-Track' && inputs.kind == 'firmware'
     needs: checks
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    environment: firmware-rehearsal
+    environment: firmware-delta
     steps:
       - uses: actions/checkout@v4
         with:
@@ -81,7 +81,7 @@ jobs:
           INPUT_KIND: firmware
           PYTHONPATH: ${{ github.workspace }}/.cache/admin-delta/python
           BSDIFF_EXE: ${{ github.workspace }}/.cache/admin-delta/bsdiff/bin/bsdiff
-          OTA_AES_KEY: ${{ secrets.FIRMWARE_REHEARSAL_OTA_AES_KEY }}
+          OTA_AES_KEY: ${{ secrets.FIRMWARE_DELTA_OTA_AES_KEY }}
           TRACE_DEPLOY_TOKEN: ${{ secrets.ORIGINAL_ADMIN_FIRMWARE_DEPLOY_TOKEN }}
           TRACE_UPDATE_SERVICE_URL: https://trace-update-service-staging.tangjichentudou.workers.dev
         run: node app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/generate-delta-job.mjs --out .cache/admin-delta/run

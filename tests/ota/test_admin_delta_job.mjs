@@ -105,11 +105,22 @@ test("a corrupt download reports failure without generating, uploading or replay
   await assert.rejects(()=>runDeltaJob({...f,out:path.join(f.out,"network"),fetcher}),/download hash mismatch/);
   assert.deepEqual(requests,["spec","claim","base","fail"]);assert.equal(f.calls.length,0);
 });
-test("workflow keeps the original MCU approval gate and does not build or publish originals",async()=>{
+test("MCU deltas use their dedicated automatic environment without building or publishing originals",async()=>{
   const workflow=await readFile(path.join(root,".github/workflows/admin-delta-build.yml"),"utf8");
-  assert.match(workflow,/environment: firmware-rehearsal/);assert.match(workflow,/ORIGINAL_ADMIN_FIRMWARE_DEPLOY_TOKEN/);
+  assert.match(workflow,/environment: firmware-delta\s/);
+  assert.match(workflow,/github\.repository == 'Eitan-S-23\/E-Track'/);
+  assert.match(workflow,/secrets\.FIRMWARE_DELTA_OTA_AES_KEY/);
+  assert.match(workflow,/secrets\.ORIGINAL_ADMIN_FIRMWARE_DEPLOY_TOKEN/);
+  assert.match(workflow,/needs: checks/);
+  assert.doesNotMatch(workflow,/firmware-rehearsal|firmware-production|FIRMWARE_REHEARSAL_OTA_AES_KEY|pending_deployments/);
   assert.doesNotMatch(workflow,/TRACE_UPDATE_PAYLOAD_ED25519_PRIVATE_KEY_BASE64/);assert.match(workflow,/cancel-in-progress: false/);
   assert.doesNotMatch(workflow,/flutter build|pack-full|finalize|firmware-release\.mjs execute|contents: write/);
+});
+test("ordinary firmware builds and publication retain their original protected environments",async()=>{
+  const workflow=await readFile(path.join(root,".github/workflows/firmware-build.yml"),"utf8");
+  assert.match(workflow,/environment: firmware-rehearsal\s/);
+  assert.match(workflow,/environment: firmware-production\s/);
+  assert.doesNotMatch(workflow,/environment: firmware-delta\s|secrets\.FIRMWARE_DELTA_OTA_AES_KEY/);
 });
 test("original APK workflow retains its repository secrets and pins only generator code",async()=>{
   const workflow=await readFile(path.join(root,"app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/admin-app-delta-workflow.template.yml"),"utf8");

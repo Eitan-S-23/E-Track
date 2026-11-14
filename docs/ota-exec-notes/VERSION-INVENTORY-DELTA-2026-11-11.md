@@ -2210,3 +2210,35 @@ The operator can refresh the original Admin and repeat App **Check for updates**
 the existing delta requires neither regeneration nor another approval. Future
 firmware jobs still obey their original GitHub reviewer gate and now surface it
 explicitly. A device OTA was not run or claimed by this verification.
+
+## DELTA-AUTO-01: Match The App Generation Flow, 2026-11-15
+
+The operator explicitly requested that MCU delta generation work like App delta
+generation: the existing Admin reason and confirmation are sufficient, without
+an additional trip to GitHub for approval. This supersedes only the preceding
+future-MCU-delta reviewer requirement, not ordinary firmware build/publication
+approval or the ability to display a real historical pending gate.
+
+The change is limited to `.github/workflows/admin-delta-build.yml`, its
+orchestration regression, this record and the existing service contract. No
+Flutter, installed firmware, package dependency or UI change is required.
+Use a dedicated `firmware-delta` environment with no reviewer/timer and only
+the exact `dev/admin/version-inventory-delta-auto` branch. Reuse the existing
+AES key and original-Admin upload bearer as environment secrets; do not rotate
+them, expose them, grant repository-wide key access or modify the protected
+`firmware-rehearsal` / `firmware-production` environments.
+
+The generator still uses immutable original packages, reconstruction checks,
+attempt/source identity and a disabled result that an operator enables
+separately. Do not retry/regenerate the completed 30324-to-30325 job. Historical
+attempt bindings and sealed results are not migrated. Only new MCU execution
+bindings in the original Admin change; App execution bindings are retained.
+
+Fresh contained records are under `.cache/delta-auto-20261115-01/`. The live
+`release/candidates` baseline is `b605d70df554d3f6fa2e034df6e63d29b5118bb9`.
+`snapshot-03/result.json` reuses the earlier successful small reads and checks
+the four exact file object IDs. A redirected content request and truncated
+recursive tree response remain preserved in `snapshot-01` / `snapshot-02`;
+neither caused a remote write or a repeated package generation. The remaining
+verification uses bounded per-file identities instead of downloading the whole
+repository tree. Implementation/testing/activation results follow below.

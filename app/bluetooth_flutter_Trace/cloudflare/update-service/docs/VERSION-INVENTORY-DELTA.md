@@ -103,10 +103,34 @@ token when an existing credential is usable and authorized. On 2026-11-12 the
 owner explicitly authorized reuse of the existing GitHub CLI OAuth credential
 in the original Admin's production configuration; preview is unchanged and
 that credential is not copied to Public Pages or the Worker. Its broader
-account scopes are not a minimum permission requirement. App signing stays in the existing Actions secret;
-firmware keys stay behind the existing `firmware-rehearsal` environment. The
-retrieved client verification key is public. Ref registration and protected
-environment branch eligibility must be verified without removing reviewer gates.
+account scopes are not a minimum permission requirement. App signing stays in
+the existing Actions secret. MCU delta generation uses the dedicated
+`firmware-delta` environment, without required reviewers or a wait timer, as
+authorized by the operator on 2026-11-15. Only
+`dev/admin/version-inventory-delta-auto` is admitted by its exact branch policy.
+It contains the existing AES key as `FIRMWARE_DELTA_OTA_AES_KEY` and the existing
+`ORIGINAL_ADMIN_FIRMWARE_DEPLOY_TOKEN`, not repository-wide secrets or cloud
+administration credentials. The retrieved client verification key is public.
+
+Admin reason/confirmation and the existing publisher role authorize generation;
+GitHub approval is not a second operator step for new MCU delta attempts.
+`DELTA_WORKFLOW_REF` and `DELTA_WORKFLOW_COMMIT` must bind the verified dedicated
+branch and its full source SHA. The workflow still requires checks, original
+input integrity, byte-equal reconstruction and a disabled completed asset.
+Enabling the result remains a separate explicit Admin action. Never implement
+automatic approval of the old environment or rewrite historical attempts to
+hide a pending approval. `firmware-rehearsal` and `firmware-production`, their
+secrets, branch policies and reviewer gates remain unchanged for ordinary
+firmware builds and publication.
+
+Regression tests in `tests/ota/test_admin_delta_job.mjs` enforce this workflow
+separation and retain the original no-build/no-publication assertions. Activation
+requires live readback of the exact branch/commit, environment branch policy,
+zero reviewers/timer, required secret names and the Admin production bindings.
+A missing secret or wrong branch is a configuration failure, not permission to
+remove the remaining key restrictions. Old ready jobs and their original
+workflow identities must remain byte-for-byte unchanged; no regeneration or
+device operation is needed to verify this configuration-only transition.
 
 Original App deltas run in `Eitan-S-23/Trace`, where the original registration
 bearer and payload-signing private key already live. E-Track's isolated test
