@@ -2242,3 +2242,50 @@ recursive tree response remain preserved in `snapshot-01` / `snapshot-02`;
 neither caused a remote write or a repeated package generation. The remaining
 verification uses bounded per-file identities instead of downloading the whole
 repository tree. Implementation/testing/activation results follow below.
+
+### DELTA-AUTO-01 Completion And Verification
+
+Source `3135a06e92a9165158cac49abdb789732fcd6842` is delivered to the dedicated
+execution branch and `release/candidates`; `main` and the local Git index were
+not changed. `provision-01/result.json` verifies the new `firmware-delta`
+environment: no required reviewers or timer, one exact allowed branch, and only
+the two required existing credentials. The original protected environment
+documents compare equal before/after. Keys were passed to `gh secret set` on
+stdin, not printed, rotated or stored in repository-wide secrets.
+
+The 19 local orchestration tests passed. The initial receipt parser expected
+TAP while Node emitted its default spec reporter; the successful original
+execution was evaluated directly, not rerun. `checks-01/result.json` preserves
+that distinction. GitHub run `43619002759` passed the workflow checks including
+TypeScript and native Linux workerd. The push intentionally skipped generation.
+Candidate workflow `43619017635` also passed with both App and firmware jobs
+skipped: no original version was rebuilt by delivery of this change.
+
+The existing Wrangler OAuth was renewed in a fresh protected project-local
+copy, leaving its input unchanged. Only the original Admin production
+`DELTA_WORKFLOW_REF` and `DELTA_WORKFLOW_COMMIT` were set to the dedicated branch
+and source above. Cloudflare hides encrypted values on GET; their exact request
+is bound by `cloud/binding-intent.json`, the native stdin digest and the successful
+two-setting upload receipt. Readback verifies the retained secret types and
+unchanged App, preview, authentication and storage configuration. No claim is
+made that an API GET reveals secret values.
+
+Admin deployment `7f29300a-8ed9-4fc7-8866-5192335eea81` activates those settings
+using the byte-identical previously verified Admin runtime/static source. The
+native bundle build and deployment succeeded; the deployment warning only
+reports use of the configured local network proxy. No Worker/Public deployment
+or migration was necessary. `cloud/verified.json` confirms unchanged Worker
+bindings/deployment and exact unchanged rows in `channels`, `firmware_channels`,
+`delta_jobs` and `delta_job_attempts`.
+
+`cloud/live-verified.json` records real authenticated HTTP 200 responses for the
+owner session and MCU delta candidates, with dispatch configured and the HTML
+unchanged. The existing 30324-to-30325 patch remains ready, enabled and attempt
+1. No new package, approval request, billing change or device operation was used
+as a probe. This is configuration/live-readback verification plus development
+self-tests, not a newly executed delta-generation or hardware acceptance.
+
+The operator now refreshes the Admin and uses the existing reason/confirmation
+flow. New MCU delta jobs build automatically; generated results still require
+manual enablement. Historic pending jobs keep their original immutable attempt
+bindings and are not silently restarted or moved to another approval policy.
