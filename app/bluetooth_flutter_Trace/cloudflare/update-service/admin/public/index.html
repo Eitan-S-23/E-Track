@@ -616,6 +616,7 @@
       let taskActivity = null;
       let resourceUsagePanel = null;
       let overlayHistory = null;
+      let pendingSessionRead = null;
       const I18N = {
         en: {
           "operations.inventoryTab": "Distribution",
@@ -869,6 +870,8 @@
           "status.deletedWithHistory": "{tag} storage deleted. Removed {objects} R2 object(s), {size}, and {rows} D1 row(s). Retained {history} append-only history row(s).",
           "status.deleteCancelled": "Delete cancelled. Release tag did not match.",
           "status.expectedJson": "Expected JSON from {path}, got HTTP {status}.",
+          "status.sessionUnavailable": "Could not obtain a valid admin session. This operation was not submitted; refresh the page and confirm again.",
+          "status.sessionChanged": "The signed-in account changed. This operation was not submitted; refresh the page and confirm again.",
           "status.requestFailed": "Request failed",
           "confirm.publish": "Publish {tag} to {channel}?",
           "confirm.publishDetail": "The selected release becomes the current {channel} version after CAS revision validation.",
@@ -1230,6 +1233,8 @@
           "status.deletedWithHistory": "{tag} 存储已删除。移除 {objects} 个 R2 对象（{size}）和 {rows} 行 D1 记录。保留 {history} 行只追加历史记录。",
           "status.deleteCancelled": "删除已取消，发布标签不匹配。",
           "status.expectedJson": "{path} 返回的不是 JSON，HTTP {status}。",
+          "status.sessionUnavailable": "无法取得有效的管理会话。本次操作尚未提交，请刷新页面后重新确认。",
+          "status.sessionChanged": "登录账号已变化。本次操作尚未提交，请刷新页面后重新确认。",
           "status.requestFailed": "请求失败",
           "confirm.publish": "将 {tag} 发布到 {channel}？",
           "confirm.publishDetail": "通过 CAS 修订校验后，所选版本会成为 {channel} 当前版本。",
@@ -2349,7 +2354,7 @@
       async function loadAll() {
         setBusy(true, "status.loadingReleaseData");
         try {
-          const session = await api("/api/admin/session");
+          const session = await readAdminSession();
           if (session.actor !== state.session?.actor) {
             state.appNoteDrafts.clear();
             state.announcementDrafts.clear();
@@ -2513,7 +2518,7 @@
 
       async function refreshFirmware() {
         state.firmwareReconcileRequired = true;
-        state.session = await api("/api/admin/session");
+        state.session = await readAdminSession();
         const [releases, channels] = await Promise.all([
           api("/api/admin/firmware/releases?appId=trace&deviceModel=e-track-at32f435"),
           api("/api/admin/firmware/channels?appId=trace&deviceModel=e-track-at32f435")
@@ -3116,18 +3121,36 @@
         }
       }
 
-      async function mutate(path, body, headers = {}) {
-        if (!state.session?.csrfToken) {
-          state.session = await api("/api/admin/session");
+      function readAdminSession() {
+        if (!pendingSessionRead) {
+          pendingSessionRead = api("/api/admin/session", { cache: "no-store" }).then((session) => {
+            if (session?.ok !== true || session.appId !== "trace"
+              || !["viewer", "publisher", "owner"].includes(session.role)
+              || typeof session.actor !== "string" || !session.actor.trim()
+              || typeof session.csrfToken !== "string" || !session.csrfToken.trim()) {
+              throw new Error(t("status.sessionUnavailable"));
+            }
+            return session;
+          }).finally(() => { pendingSessionRead = null; });
         }
+        return pendingSessionRead;
+      }
+
+      async function mutate(path, body, headers = {}) {
+        const actor = state.session?.actor;
+        const requestBody = JSON.stringify(body);
+        // Renew the expiring HttpOnly cookie before sending, never by replaying a POST.
+        const session = await readAdminSession();
+        if (actor && session.actor !== actor) throw new Error(t("status.sessionChanged"));
+        state.session = session;
         return api(path, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-CSRF-Token": state.session.csrfToken,
+            "X-CSRF-Token": session.csrfToken,
             ...headers
           },
-          body: JSON.stringify(body)
+          body: requestBody
         });
       }
 

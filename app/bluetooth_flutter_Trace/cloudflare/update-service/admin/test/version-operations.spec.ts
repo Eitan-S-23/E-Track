@@ -12,6 +12,8 @@ type Job={id:string;baseReleaseId:string;baseVersionCode:number;targetVersionCod
 
 export async function setup(page:Page,language="zh",role="owner",push?:{publicKey:string;subscriptions:Array<{id:string;expiresAt:number}>}) {
   const data={role,dispatchConfigured:true,inventoryFails:false,abortCreate:false,inventoryReads:0,
+    csrfToken:"version-csrf",sessionReads:0,sessionFails:false,sessionGate:null as Promise<void>|null,
+    mutationAttempts:0,csrfRejections:0,rejectCsrf:false,
     refreshRequestedAt:0,refreshId:"initial",baseCount:4,jobs:[] as Job[],writes:[] as Array<{path:string;body:Record<string,unknown>}>,
     notifications:[] as Array<Record<string,unknown>>,unreadCount:0,activityReads:0,activityFails:false,pushPublicKey:null as string|null,
     pushSubscriptions:[] as Array<{id:string;expiresAt:number}>,pushRegisterFails:false,readFails:false,
@@ -28,7 +30,7 @@ export async function setup(page:Page,language="zh",role="owner",push?:{publicKe
     if (["/sheet-gestures.js","/overlay-history.js","/delta-activity.js","/resource-usage.js"].includes(url.pathname)) {
       await route.fulfill({contentType:"text/javascript",body:readFileSync(new URL("../public"+url.pathname,import.meta.url),"utf8")}); return;
     }
-    const reply=(body:object,status=200)=>route.fulfill({status,contentType:"application/json",headers:{"X-Request-Id":requestId},body:JSON.stringify({requestId,...body})});
+    const reply=(body:object,status=200,headers:Record<string,string>={})=>route.fulfill({status,contentType:"application/json",headers:{"X-Request-Id":requestId,...headers},body:JSON.stringify({requestId,...body})});
     if(request.method()==="GET") {
       if(url.pathname==="/api/admin/channels" && data.catalogueGate) await data.catalogueGate;
       if(url.pathname==="/api/admin/delta/activity") {
@@ -39,7 +41,13 @@ export async function setup(page:Page,language="zh",role="owner",push?:{publicKe
         if(data.activityGate) await data.activityGate;
         await reply(snapshot);return;
       }
-      if(url.pathname==="/api/admin/session"){await reply({ok:true,role:data.role,actor:`${data.role}@example.test`,csrfToken:"version-csrf",appId:"trace",environment:"MOCK"});return;}
+      if(url.pathname==="/api/admin/session") {
+        data.sessionReads++;
+        if(data.sessionGate) await data.sessionGate;
+        if(data.sessionFails){await reply({ok:false,errorCode:"BACKEND_UNAVAILABLE",message:"Session unavailable"},503);return;}
+        await reply({ok:true,role:data.role,actor:`${data.role}@example.test`,csrfToken:data.csrfToken,appId:"trace",environment:"MOCK"},200,
+          {"Set-Cookie":`trace_admin_csrf=${data.csrfToken}; Path=/api/admin; HttpOnly; Secure; SameSite=Strict; Max-Age=3600`});return;
+      }
       if(url.pathname==="/api/admin/version-inventory") {
         data.inventoryReads++;
         if(data.inventoryFails){await reply({ok:false,errorCode:"BACKEND_UNAVAILABLE",message:"inventory unavailable"},503);return;}
@@ -65,7 +73,13 @@ export async function setup(page:Page,language="zh",role="owner",push?:{publicKe
       await reply({ok:true,channels:[],announcements:[],storage:null,releases:[{id:"app-target",app_id:"trace",platform:"android",version_code:100,version_name:"1.0.74",
         release_tag:"v1.0.74",state:"candidate",archived:0,release_notes:"Original App fixture",asset_count:2,r2_available_count:2,apk_count:1,manifest_count:1,patch_count:0}]});return;
     }
-    expect(request.method()).toBe("POST");expect(request.headers()["x-csrf-token"]).toBe("version-csrf");
+    expect(request.method()).toBe("POST");data.mutationAttempts++;
+    const cookie=(await request.headerValue("cookie"))?.split(";").map(part=>part.trim())
+      .find(part=>part.startsWith("trace_admin_csrf="))?.slice("trace_admin_csrf=".length);
+    if(data.rejectCsrf || !cookie || cookie!==data.csrfToken || request.headers()["x-csrf-token"]!==cookie) {
+      data.csrfRejections++;await reply({ok:false,errorCode:"TOKEN_INVALID",message:"CSRF token is invalid"},403);return;
+    }
+    expect(request.headers()["x-csrf-token"]).toBe(data.csrfToken);
     expect(request.headers()["content-type"]).toBe("application/json");
     const body=request.postDataJSON() as Record<string,unknown>;
     data.writes.push({path:url.pathname,body});
@@ -208,6 +222,85 @@ async function confirm(page:Page,reason=false) {
   await page.locator("#confirmAccept").click();
   await expect(page.locator("#confirmDialog")).toBeHidden();
 }
+
+for(const kind of ["android","firmware"]) for(const condition of ["expiry","another tab"]) {
+  test(`CSRF ${condition} refreshes ${kind} before submitting the confirmed delta exactly once`,async({page})=>{
+    const {data,errors}=await setup(page);await openDelta(page,kind);
+    await page.locator('[data-delta-base="base-0"]').check();
+    await page.locator("#deltaReason").fill("Keep this confirmed delta selection");
+    data.csrfToken="renewed-csrf";
+    if(condition==="expiry") await page.context().clearCookies({name:"trace_admin_csrf"});
+    else await page.context().addCookies([{name:"trace_admin_csrf",value:data.csrfToken,domain:new URL(origin).hostname,
+      path:"/api/admin",httpOnly:true,secure:true,sameSite:"Strict"}]);
+    const reads=data.sessionReads;
+    await page.locator('[data-version-operation="delta-create"]').click();await confirm(page);
+    await expect.poll(()=>data.writes.length).toBe(1);
+    expect(data.sessionReads).toBe(reads+1);expect(data.mutationAttempts).toBe(1);expect(data.csrfRejections).toBe(0);
+    expect(data.writes[0]).toEqual({path:"/api/admin/delta/jobs",body:{kind,targetReleaseId:kind==="android"?"app-target":"fw-target",
+      baseReleaseIds:["base-0"],reason:"Keep this confirmed delta selection"}});
+    expect(data.jobs).toHaveLength(1);expect(errors).toEqual([]);
+  });
+}
+
+test("CSRF refresh failure sends no mutation and retains the draft for an explicit new confirmation",async({page})=>{
+  const {data,errors}=await setup(page);await openDelta(page,"firmware");
+  await page.locator('[data-delta-base="base-0"]').check();await page.locator("#deltaReason").fill("Retain this firmware request");
+  data.sessionFails=true;
+  await page.locator('[data-version-operation="delta-create"]').click();await confirm(page);
+  await expect(page.locator("#deltaSheet")).toContainText("Session unavailable");
+  await expect(page.locator('[data-version-operation="delta-create"]')).toBeEnabled();
+  expect(data.mutationAttempts).toBe(0);expect(data.writes).toHaveLength(0);
+  await expect(page.locator('[data-delta-base="base-0"]')).toBeChecked();
+  await expect(page.locator("#deltaReason")).toHaveValue("Retain this firmware request");
+  data.sessionFails=false;
+  await page.locator('[data-version-operation="delta-create"]').click();await confirm(page);
+  await expect.poll(()=>data.writes.length).toBe(1);expect(data.mutationAttempts).toBe(1);expect(errors).toEqual([]);
+});
+
+test("CSRF rejection after refresh is not replayed and does not consume the selected base",async({page})=>{
+  const {data,errors}=await setup(page);await openDelta(page,"firmware");
+  await page.locator('[data-delta-base="base-0"]').check();await page.locator("#deltaReason").fill("Do not replay this request");
+  data.rejectCsrf=true;
+  await page.locator('[data-version-operation="delta-create"]').click();await confirm(page);
+  await expect(page.locator("#deltaSheet")).toContainText("TOKEN_INVALID: CSRF token is invalid");
+  await expect(page.locator("#deltaSheet")).toContainText("Request ID:");
+  await expect(page.locator("#deltaSheet")).toContainText("不会自动重发");
+  await expect(page.locator('[data-version-operation="delta-create"]')).toBeEnabled();
+  await page.evaluate("loadDelta(state.delta)");
+  expect(data.mutationAttempts).toBe(1);expect(data.csrfRejections).toBe(1);expect(data.writes).toHaveLength(0);expect(data.jobs).toHaveLength(0);
+  await expect(page.locator('[data-delta-base="base-0"]')).toBeChecked();
+  await expect(page.locator("#deltaReason")).toHaveValue("Do not replay this request");expect(errors).toEqual([]);
+});
+
+test("CSRF refresh shares an in-flight session read between concurrent distinct mutations",async({page})=>{
+  const {data,errors}=await setup(page);
+  let release!:()=>void;data.sessionGate=new Promise<void>(resolve=>{release=resolve;});
+  const reads=data.sessionReads;
+  const pending=page.evaluate("Promise.all([mutate('/api/admin/delta/notifications/read',{ids:[1]}),mutate('/api/admin/delta/notifications/read',{ids:[2]})])");
+  await expect.poll(()=>data.sessionReads).toBe(reads+1);expect(data.mutationAttempts).toBe(0);
+  data.sessionGate=null;release();await pending;
+  expect(data.sessionReads).toBe(reads+1);expect(data.mutationAttempts).toBe(2);expect(data.csrfRejections).toBe(0);
+  expect(data.writes.map(row=>row.body)).toEqual([{ids:[1]},{ids:[2]}]);expect(errors).toEqual([]);
+});
+
+test("CSRF refresh does not submit an old confirmation under a changed account",async({page})=>{
+  const {data,errors}=await setup(page);await openDelta(page,"firmware");
+  await page.locator('[data-delta-base="base-0"]').check();await page.locator("#deltaReason").fill("Confirmed by the original account");
+  data.role="publisher";
+  await page.locator('[data-version-operation="delta-create"]').click();await confirm(page);
+  await expect(page.locator("#deltaSheet")).toContainText("登录账号已变化");
+  expect(data.mutationAttempts).toBe(0);expect(data.writes).toHaveLength(0);expect(errors).toEqual([]);
+});
+
+test("CSRF refresh rejects an unusable session response before sending the mutation",async({page})=>{
+  const {data,errors}=await setup(page);await openDelta(page,"firmware");
+  await page.locator('[data-delta-base="base-0"]').check();await page.locator("#deltaReason").fill("Require a valid session");
+  data.csrfToken="";
+  await page.locator('[data-version-operation="delta-create"]').click();await confirm(page);
+  await expect(page.locator("#deltaSheet")).toContainText("有效的管理会话");
+  expect(data.mutationAttempts).toBe(0);expect(data.writes).toHaveLength(0);expect(errors).toEqual([]);
+});
+
 for(const language of ["zh","en"]) for(const width of [1440,390,320]) {
   test(`inventory and pinned delta close ${language} ${width}`,async({page},info)=>{
     await page.setViewportSize({width,height:844});const {data,errors}=await setup(page,language);

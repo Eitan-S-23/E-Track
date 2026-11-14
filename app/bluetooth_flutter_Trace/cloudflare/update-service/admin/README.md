@@ -368,6 +368,23 @@ Every mutation requires:
 - Same-origin `Origin`.
 - `X-CSRF-Token` matching the `trace_admin_csrf` cookie from `GET /api/admin/session`.
 
+The CSRF cookie is HttpOnly and expires after one hour independently of the
+Cloudflare Access login. A token retained in page memory is not proof that its
+cookie is still present or unchanged. Before every mutation, `mutate()` snapshots
+the confirmed body and obtains a fresh, non-cached session through
+`readAdminSession()`. Concurrent reads share one in-flight request; normal page
+and firmware refreshes use the same reader. The server continues to reuse a
+valid existing cookie and enforce the original same-origin, CSRF and role checks.
+
+A failed or unusable session read sends no mutation. If the signed-in actor
+changed, the previous confirmation is not submitted under the new account;
+refresh the page and confirm a new intent. Mutation errors are never repaired by
+automatically replaying the POST. Delta selection/reason remain available for
+reconciliation and an explicit new confirmation. Browser regressions in
+`test/version-operations.spec.ts` model the actual cookie/header pair, expiry,
+another tab changing the cookie, failed refresh, concurrent reads and no-replay
+behavior rather than accepting a permanently valid mock header alone.
+
 ## Required Configuration
 
 Configure these Pages secrets before deployment. Prefer the staging deployment script below, which writes them as Pages secrets so account-specific Access values are not committed. Do not also define these names in `wrangler.jsonc` `vars`; Pages rejects duplicate binding names.

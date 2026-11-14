@@ -1951,3 +1951,124 @@ retained as inactive reference, not deployed or scheduled work. This decision
 requires no new build, migration, website deployment, package replacement or
 device operation. Evidence and source-delivery records are under
 `.cache/ui-remediation-20261113-01/free-only-20261114-01/`.
+
+## App Operator Confirmation And Deferred Browser Icon, 2026-11-14
+
+The operator reports that the latest App is already installed, its displayed
+latest-report time matches the receipt time shown in the Admin, and the version
+inventory participation control displays normally. These are user-observed
+results, not a new agent package readback or device test. The message does not
+provide an exact installed version, APK digest or report timestamp.
+
+Disposition: DECIDED. APP-UI-INV-01 is resolved for the reported control-display
+issue, and the App/Admin report-time agreement is operator-confirmed. This
+supersedes the earlier uninstalled-App/USB prerequisite for these observations.
+Do not reinstall the App, reset consent, force another report or repeat an OTA
+to obtain evidence of what the operator has already confirmed. The report-time
+agreement does not independently establish every offline-retry, background or
+post-OTA scheduling case under APP-INV-POSTOTA-01; retain the existing software
+test evidence without claiming those cases were physically exercised here.
+
+MCU-UI-INFO-01 still lacks confirmation of the actual device information page;
+the existing final-image formatter checks are not a physical display observation.
+Use any existing operator observation before proposing another device operation.
+The operator explicitly defers the browser-icon inquiry, including the disputed
+post-login icon. Keep that visible outcome deferred, not completed or a blocker
+for unrelated work. The free-only authentication decision remains unchanged.
+
+This continuation updates only the task note. No package installation, MCU
+flash, rebuild, deployment, remote publication, channel change or billing action
+is performed, and the earlier failed and successful evidence is preserved.
+
+## ADMIN-CSRF-LIFETIME-01, 2026-11-14
+
+The operator reports `TOKEN_INVALID: CSRF token is invalid` while confirming MCU
+delta generation, request ID `7dfa53c9-725a-4e7d-81c1-4a797bcc82a5`. The UI says
+to reconcile the task and does not automatically resend it. Disposition:
+DECIDED, repair the Admin session lifecycle without replaying the requested job.
+Evidence below is under
+`.cache/ui-remediation-20261113-01/csrf-20261114-01/` (A).
+
+### Root Cause And Existing Evidence
+
+Categories E/D: implicit lifetime assumption and missing browser coverage. The
+server's HttpOnly CSRF cookie has `Max-Age=3600`, independently of Access login.
+The old `mutate()` reused a nonempty in-memory token indefinitely and fetched a
+session only when that value was absent. Cookie expiry or replacement by another
+tab therefore leaves a visible signed-in page unable to submit. Earlier mocks
+accepted a constant header without modeling the cookie, hiding this condition.
+The operator's exact cookie age was not captured; expiry and replacement are
+reproduced failure modes, not a fabricated readback of that browser.
+
+The facade checks CSRF before reading the delta body or calling `createDeltaJobs`.
+That rejection cannot create a job. Read-only live observations found 13 existing
+jobs, including only the old completed MCU 30323-to-30324 job. No generation,
+retry, enable or notification-read action was sent during diagnosis.
+
+### Repair And Propagation
+
+The shared `readAdminSession()` performs a non-cached session GET, validates its
+shape/scope, and coalesces concurrent reads. Initial load, firmware refresh and
+every mutation now use it. `mutate()` snapshots the confirmed body before waiting,
+refreshes the cookie/header pair before sending, and refuses an old confirmation
+when the signed-in actor changes. Failed refresh sends no POST. Delta selection
+and reason remain available for reconciliation and explicit confirmation.
+
+The original CSRF, origin, role, cookie attributes and Access checks remain in
+place. No automatic POST retry was added. The repair is shared by App and MCU
+management instead of special-casing the reported MCU button. No App or firmware
+source, dependency, version or package was changed.
+
+### Regression Results
+
+The existing contained browser runner was reused with fresh output labels under
+`remaining-20261114-01/`: `checks-26` intentionally reproduces both expired-cookie
+failures against the old UI; `checks-27` passes all nine new cases; `checks-28`
+passes all 220 Admin browser tests; `checks-29` passes the Admin type check.
+The new cases cover expiry, another tab's token, failed refresh, failed CSRF
+after refresh without replay, shared concurrent reads, changed actor and unusable
+session responses. This is self-test and operator-error diagnosis, not a new
+independent or physical-device acceptance campaign.
+
+The local Pages compiler printed success and produced all expected artifacts,
+but did not exit within its deadline. `A/pages-build.closed.json` preserves that
+timeout and nonzero exit with complete process cleanup; it is not relabeled as
+a clean command PASS. The existing artifacts passed `node --check`, their route
+configuration matched the predecessor, and pinned inputs were rechecked. No
+second standalone compile was used to replace that original receipt.
+
+### Deployment And Live Verification
+
+The original Admin Pages project now serves deployment
+`7bd5ef34-59c9-46ca-abc1-053aa3f3914a`, replacing
+`e998c204-7df9-4814-b185-47d78bc3f442`. Only `admin/public/index.html` differs in
+the runtime input; backend inputs are reused byte-for-byte from the prior
+deployment. The native deployment completed and the Pages configuration is
+unchanged. Worker/public deployments, migrations, Access/billing changes and
+package/channel mutations are all zero.
+
+An isolated browser loaded the deployed page, removed only its own CSRF cookie,
+then used the real session API and MCU delta confirmation UI. One fresh session
+GET preceded one attempted POST with matching cookie/header. The browser route
+blocked that POST before network transmission. The retained selection and
+no-replay notice were checked; no real delta build was started for verification.
+`A/private/browser/result.json` records this distinction explicitly. Subsequent
+GETs verify the deployed HTML hash and unchanged jobs/App channels/MCU channels
+in `A/live-after.json`.
+
+### Knowledge Capture And Delivery
+
+The Admin README now documents this session/CSRF lifetime contract and its
+regression cases. There is no Trellis tree in this worktree; no parallel task or
+spec hierarchy was created. The nine lifecycle tests replace the misleading
+constant-header-only assumption while retaining the existing operation tests.
+Scoped source delivery is recorded in `A/delivery.json` on `release/candidates`,
+not a main merge. Original failed receipts and unrelated dirty files are retained.
+
+The existing Pages authorization was renewed only in
+`A/private/xdg-config/.wrangler/config/default.toml`; the source credential file
+was not modified and no new interactive login or user credential was requested.
+Controlled-path, owned-process and credential checks are recorded in
+`A/write-audit.json`; they are not a machine-wide filesystem trace. The previous
+App user-confirmed results, pending MCU information-page observation and deferred
+browser-icon inquiry keep their existing dispositions.
