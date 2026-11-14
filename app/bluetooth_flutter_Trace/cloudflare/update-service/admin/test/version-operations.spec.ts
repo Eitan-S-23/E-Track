@@ -738,6 +738,17 @@ function approvalJob(): Job {
     ci:{phase:"awaiting_approval",approvalEnvironments:["firmware-rehearsal"],checkedAt:Math.floor(Date.now()/1000)} };
 }
 
+for (const language of ["zh", "en"]) test(`new MCU delta selection has no obsolete approval requirement in ${language}`,async({page})=>{
+  const {data,errors}=await setup(page,language);
+  await openDelta(page,"firmware");
+  await expect(page.locator("#deltaSheet")).not.toContainText("固件差分需要 GitHub 仓库审批人手动审批");
+  await expect(page.locator("#deltaSheet")).not.toContainText("Firmware deltas require a GitHub repository reviewer's approval");
+  await expect(page.locator("#deltaReason")).toBeVisible();
+  await expect(page.locator('[data-version-operation="delta-create"]')).toBeVisible();
+  await expect(page.locator("#confirmDialog")).toBeHidden();
+  expect(data.writes).toHaveLength(0);expect(errors).toEqual([]);
+});
+
 test.describe("visible operation feedback", () => {
   test.use({hasTouch:true,viewport:{width:390,height:844}});
   for (const direction of [-140,140]) test(`CSRF errors open above the current sheet and swipe ${direction} only dismisses`,async({page})=>{

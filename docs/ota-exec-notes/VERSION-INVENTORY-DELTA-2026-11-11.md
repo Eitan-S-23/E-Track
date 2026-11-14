@@ -2289,3 +2289,32 @@ The operator now refreshes the Admin and uses the existing reason/confirmation
 flow. New MCU delta jobs build automatically; generated results still require
 manual enablement. Historic pending jobs keep their original immutable attempt
 bindings and are not silently restarted or moved to another approval policy.
+
+## DELTA-TEST-01: Legacy Approval, UI Copy And Test Firmware, 2026-11-15
+
+The operator explicitly authorized approval of the remaining historic delta
+and requested a new MCU firmware for testing the automatic flow. They also
+identified the obsolete fixed approval requirement still shown in the delta
+sheet. Remove that static Chinese/English copy, retain actual historic approval
+dialogs, and verify both languages plus existing feedback regressions.
+
+The exact legacy job is
+`delta_6be640ae59a359a49957ae3429423305a16e70408fd3aa6ff3f4f1f4ecb1cd6a`,
+3.3.23 to 3.3.25, attempt 1, run `43616196436`, still bound to source
+`9dd858fc8f9943d444060169291ea5131d63489b`. Only its already-pending
+`firmware-rehearsal` review is approved. Do not redispatch it, change its attempt
+identity or alter environment policies.
+
+Fresh state in `.cache/delta-test-20261115-01/inspect-01/result.json` binds the
+delivered baseline `9b0595fdcd83dfee2b4a04d9c52bbf1f4ce68632` and the next
+available firmware version 3.3.26 (30326). Only the existing release request
+version/notes change; firmware features, App sources and dependencies do not.
+Use the existing `release/candidates` GCC full/recovery workflow and legitimate
+reviewer route. Register and publish the completed new firmware to Beta for
+testing, preserving the current Stable 3.3.25 pointer/revision. A new device
+installation or automatically enabled delta is not part of this request.
+
+The Admin deployment must retain the newly configured automatic-delta bindings;
+updating UI copy must not restore the old execution branch or secret values.
+Existing completed packages and the separately active legacy build are not
+regenerated just to produce test evidence. Results follow below.
