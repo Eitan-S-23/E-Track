@@ -1,7 +1,7 @@
 {
   "schema": "original-admin-automatic-candidates-v1",
   "firmware": {
-    "versionName": "3.3.28",
-    "releaseNotes": "Normal BLE V2 forward candidate for an automated short OTA test. Existing product source is unchanged. Full and recovery originals are registered automatically; selected delta and Beta publication are verified by the short-test runner. Stable is unchanged."
+    "versionName": "3.3.29",
+    "releaseNotes": "Normal BLE V2 forward candidate for an automated short OTA test. Existing product source is unchanged. Full and recovery originals are registered automatically; selected delta and publication use the operator-authorized channel; other channels are unchanged."
   }
 }
