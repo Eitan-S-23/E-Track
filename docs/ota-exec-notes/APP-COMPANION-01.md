@@ -1,5 +1,73 @@
 # APP-COMPANION-01 Implementation Record
 
+## Current Verified Milestone, 2026-11-16
+
+This section supersedes historical pending-access/local-only statements below;
+those original observations remain intact. The card is still in progress.
+
+- Root-main entry/governance/card delivery: `278042636699067dd95c61160d2e1900d9dcbe33`,
+  remote checked with MAIN_MATCHED. Governance run
+  `https://github.com/Eitan-S-23/E-Track/actions/runs/43768837547` passed.
+- Product branch `dev/flutter/app-companion-01-20261116`, worktree
+  `.worktrees/app-companion-01`, submitted current batch
+  `c822765a99b83735685e251d9a289f97e6d291e4`. Earlier menu/icon batch
+  `8e2804e59d4402267bd8e5718f61c8bf439e05bf`, lock reconciliation
+  `1701bc48a5ee11d99260e8c7f124fe03479d0eb3`, first App implementation
+  `eaa27847f3873083e5b7e8bff68cafa05800ef52` remain in history.
+- Implemented scope now includes SDK-specific onboarding, CDM association,
+  persisted 6/12/24-hour checks (default 12), bounded connection recovery,
+  acknowledged connectedDevice/retained-engine execution, one shared OTA sender,
+  headless saved-sensor collection (8 seconds/minute on Android 12+), real
+  GET_INFO/latest/cache checks, MCU control/confirmation, encoder modal focus
+  restoration and the selected icon. These are implemented, not accepted.
+- Additive protocol/runtime contract is at product commit above,
+  `docs/companion-control-contract.md`. It preserves foreground-only legacy
+  admission and frozen binary OTA/Boot semantics; background admission separately
+  requires actual runtime/GATT/permission ownership. MCU receives storage and
+  actual-display receipts separately; stale/expired device consent is rechecked
+  after asynchronous pre-BEGIN work. Control writes no longer replace the idle
+  CCCD receiver. Unknown peripherals remain explicitly unsupported for OTA.
+- Native service tests were added to the existing opt-in CI native-test step.
+  No local Flutter/Gradle compile/package command was run. The debug request
+  explicitly uses isolated application suffix `.companion`; dispatch receipt:
+  `.cache/app-companion-01-20261116/development/keyring-apk-01/dispatch.json`.
+
+### Original Validation Results
+
+| Original | Result And Boundary |
+| --- | --- |
+| Earlier `checks-01/02` | 40 entry/governance/icon/menu unittest cases PASS, selected source unchanged. |
+| Product `.cache/flutter-dev-checks-tests/run-ba674512be7a4481b3398c5b55bf7258` | Development runner 66/66 PASS. |
+| Product `.cache/native-runner-tests-01.log` | APK helper 46/46 PASS, includes companion native-test selection. |
+| CI 43769801181, 1701bc48 | Locked dependencies and App tests passed (Windows 898/35 skipped; Linux 917/16 skipped), but strict analysis failed on 46 new Flutter 3.50 Material migration diagnostics. Whole run FAIL. |
+| CI 43773033275, eaa27847 | Flutter 3.47.8/framework 737ba8f885dc774b53b442759999a312c9461e4e, Dart 3.13.7, dependencies PASS. Analysis had 29 new-code diagnostics; App tests failed to compile two entry files. Whole run FAIL, not a successful first App batch. |
+| Product `.cache/companion-tests-03.log` | 16 MCU protocol cases PASS on original header include layout. |
+| Product `.cache/companion-tests-04.log` | Same 16 behavior cases PASS after include correction; process exit 1 due WinError 5 removing the completed test EXE. HARNESS cleanup failure retained for scoped repair, not a product failure or whole-run PASS. |
+| Product `.cache/companion-build-03/04` | Preserved compiler failures (header include resolution, missing direct UI header and unavailable LVGL getter). No firmware installed. |
+| Product `.cache/companion-build-05/result.json` and `build.log` | GCC App/Boot and simulator PASS, all modified source hashes stable, 468 warning-containing lines, zero errors. Unchanged Boot outputs are incremental, not newly linked. |
+
+The Flutter SDK pin is shared by development and standard APK/EXE entries;
+strict analysis and `--enforce-lockfile` remain enabled. This deliberately avoids
+an unrelated UI-library migration or diagnostic suppression. Latest App CI and
+debug/native-build outcomes must still be read before claiming they passed.
+
+Current GCC App: text 609968, data 940, bss 563096 (size-tool section totals,
+not physical SRAM usage). App BIN 611408 bytes,
+SHA-256 `f30424d7f6f7ee72a99426bc337a58c59efc4decce9e499e2320062da2d7df63`.
+Simulator EXE SHA-256 `678644dc75b615e11893583391fe951a6912c9b29a1488cb57a2db705e58f712`.
+Full ELF/HEX/MAP/Boot sizes, times and hashes are in the build receipt.
+
+### Remaining Work And Next Owner
+
+Current root/implementation session continues CI/native remediation, remaining
+cross-layer tests and finite device preparation. Real permission/association,
+background/lock/restart, actual rotary operation and MCU-confirmed OTA remain
+NOT_RUN for this implementation. Standard Android APK/Flutter Windows EXE,
+independent acceptance and product main integration are also unfinished.
+P3/P4 remain complete; P1/P5 and production gates are not reopened or bypassed.
+No production publishing/deployment, new firmware install, phone data clearing
+or historical evidence rewrite has occurred in this batch.
+
 ## Ownership And Scope
 
 The user approved the six-step plan on 2026-11-16 and assigned implementation
