@@ -22,7 +22,7 @@ class PermissionHelper {
   static Future<bool> requestBluetoothPermissions() async {
     try {
       if (WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) {
-        return checkBluetoothPermissions();
+        return await checkBluetoothPermissions();
       }
       final permissions = await requiredBluetoothPermissions();
 

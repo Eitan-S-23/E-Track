@@ -338,16 +338,36 @@ void main() {
     final service = Get.find<OtaService>();
     final latest = service.latestInfo!;
     final writes = ble.platformWriteCalls;
-    for (final drift in ['address', 'generation', 'base', 'version', 'package', 'target']) {
+    for (final drift in ['address', 'generation', 'base', 'version', 'package', 'target', 'expiry']) {
       final consent = OtaUpgradeConsent(address: drift == 'address' ? 'OTHER' : 'AA:BB',
         linkGeneration: ble.otaLinkGeneration('AA:BB') + (drift == 'generation' ? 1 : 0),
         baseImageSha256: drift == 'base' ? '00' * 32 : service.deviceInfo!.currentImageSha256Hex,
         versionCode: latest.versionCode! + (drift == 'version' ? 1 : 0),
         packageSha256: drift == 'package' ? '00' * 32 : latest.asset!.sha256,
-        targetImageSha256: drift == 'target' ? '00' * 32 : latest.targetImageSha256!);
+        targetImageSha256: drift == 'target' ? '00' * 32 : latest.targetImageSha256!,
+        expiresAt: drift == 'expiry' ? DateTime.now().subtract(const Duration(seconds: 1)) : null);
       expect(await service.startOtaUpgrade('AA:BB', consent: consent), isFalse, reason: drift);
       expect(ble.platformWriteCalls, writes, reason: drift);
     }
+  });
+
+  test('consent is checked again after the asynchronous pre-BEGIN identity query', () async {
+    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: []);
+    final service = Get.find<OtaService>();
+    final latest = service.latestInfo!;
+    final consent = OtaUpgradeConsent(address: 'AA:BB', linkGeneration: ble.otaLinkGeneration('AA:BB'),
+      baseImageSha256: service.deviceInfo!.currentImageSha256Hex, versionCode: latest.versionCode!,
+      packageSha256: latest.asset!.sha256, targetImageSha256: latest.targetImageSha256!,
+      expiresAt: DateTime.now().add(const Duration(seconds: 1)));
+    final before = ble.getInfoCalls;
+    ble.holdInfo = true;
+    final operation = service.startOtaUpgrade('AA:BB', consent: consent);
+    await waitUntil(() => ble.getInfoCalls > before);
+    await Future<void>.delayed(const Duration(milliseconds: 1100));
+    ble.releaseHeldInfo();
+    expect(await operation, isFalse);
+    expect(ble.beginCalls, 0);
+    expect(service.upgradeStatus, 'STALE_DEVICE_CONSENT');
   });
 
   test('companion idle control is excluded from binary INFO ownership', () async {
@@ -363,7 +383,9 @@ void main() {
     expect(ble.platformWriteCalls, writes);
     ble.releaseHeldInfo();
     expect(await operation, isNotNull);
+    final subscriptions = ble.subscribeCalls;
     expect(await service.sendCompanionMessage('AA:BB', message), isTrue);
+    expect(ble.subscribeCalls, subscriptions, reason: 'Control writes must not replace the idle CCCD receiver');
     expect(ble.getInfoCalls, before + 1);
     expect(ble.dataOffsets, isEmpty);
   });

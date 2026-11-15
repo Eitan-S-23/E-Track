@@ -34,7 +34,7 @@ void main() {
   test('corruption, unknown schema, invalid numbers and extra fields fail closed', () {
     final valid = ascii.decode(messages[2].encode());
     for (final malformed in [valid.replaceFirst('CHECK', 'CHACK'), valid.replaceFirst('ETC1', 'ETC2'),
-      valid.replaceFirst('|7*', '|07*'), valid + 'junk', '!ETC1|CHECK*0000\n']) {
+      valid.replaceFirst('|7*', '|07*'), '${valid}junk', '!ETC1|CHECK*0000\n']) {
       expect(CompanionMessage.parse(malformed), isNull);
     }
     for (final invalid in [CompanionMessage('STATE', session, 7, ['SOMETHING_NEW']),

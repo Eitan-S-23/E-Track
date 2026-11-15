@@ -374,7 +374,8 @@ def plan(root, run_dir, env):
         commands.append(("apk_device_ota_native", [str(gradle), "--no-daemon",
                          "--console=plain", "-p", str(root / APP / "android"),
                          ":app:testDebugUnitTest", "--tests",
-                         "com.wen.gaia.gaia.DeviceOtaServiceTest"], root, 1200))
+                         "com.wen.gaia.gaia.DeviceOtaServiceTest", "--tests",
+                         "com.wen.gaia.gaia.CompanionServiceTest"], root, 1200))
     commands.extend([
         ("apk_verify", [str(sdk / "build-tools/35.0.0/apksigner"), "verify", "--verbose",
                         str(root / APK_RELATIVE)], root, 60),

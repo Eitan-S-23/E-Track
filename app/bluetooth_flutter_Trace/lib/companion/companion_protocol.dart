@@ -20,7 +20,7 @@ class CompanionMessage {
     if (!_hex32.hasMatch(session) || request < 0 || request > 0xffffffff) return false;
     bool version(String s) => _number.hasMatch(s) && int.parse(s) > 0 && int.parse(s) <= 2100000000;
     return switch (kind) {
-      'HELLO' || 'PING' || 'PONG' => fields.isEmpty && request == 0,
+      'HELLO' => fields.isEmpty && request == 0,
       'CAPS' => request == 0 && fields.length == 1 && fields[0] == '1',
       'CHECK' => request > 0 && fields.isEmpty,
       'STATE' => fields.length == 1 && states.contains(fields[0]),
@@ -52,7 +52,7 @@ class CompanionMessage {
     if (!RegExp(r'^[0-9a-f]{4}$').hasMatch(sum)) return null;
     final body = line.substring(0, marker);
     if (body.codeUnits.any((n) => n < 33 || n > 126) ||
-        checksum(ascii.encode(body)) != int.parse(sum, radix: 16)) return null;
+        checksum(ascii.encode(body)) != int.parse(sum, radix: 16)) { return null; }
     final parts = body.split('|');
     if (parts.length < 4 || !_number.hasMatch(parts[3])) return null;
     final message = CompanionMessage(parts[1], parts[2], int.parse(parts[3]), parts.sublist(4));

@@ -81,6 +81,8 @@ object CompanionBridge {
         val permission = if (Build.VERSION.SDK_INT >= 31) Manifest.permission.BLUETOOTH_CONNECT else Manifest.permission.BLUETOOTH
         if (ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED)
             return "BLUETOOTH_PERMISSION_DENIED"
+        if (Build.VERSION.SDK_INT >= 31 && ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED)
+            return "BLUETOOTH_SCAN_PERMISSION_DENIED"
         val manager = context.getSystemService(BluetoothManager::class.java)
         if (manager?.adapter?.isEnabled != true) return "BLUETOOTH_OFF"
         DeviceOtaBridge.notificationProblem(context)?.let { return it }
@@ -97,6 +99,7 @@ object CompanionBridge {
         return mapOf("sdk" to Build.VERSION.SDK_INT, "enabled" to enabled(context),
             "address" to address(context), "associated" to associated(context),
             "presenceSupported" to (Build.VERSION.SDK_INT >= 31),
+            "sensorBackgroundSupported" to (Build.VERSION.SDK_INT >= 31),
             "serviceRunning" to (CompanionService.active?.healthy() == true),
             "runtimeId" to CompanionService.active?.runtimeId,
             "revision" to revision(context), "problem" to problem(context),
@@ -236,7 +239,7 @@ object CompanionBridge {
         val prefs = preferences(context)
         val component = ComponentName(context, CompanionJobService::class.java)
         val hours = prefs.getInt("intervalHours", 12).coerceIn(6, 24)
-        val network = if (prefs.getBoolean("wifiOnly", true)) JobInfo.NETWORK_TYPE_UNMETERED else JobInfo.NETWORK_TYPE_ANY
+        val network = JobInfo.NETWORK_TYPE_ANY
         val existing = scheduler.getPendingJob(CHECK_JOB)
         if (existing == null || existing.intervalMillis != hours * 3600000L || existing.networkType != network)
             check(scheduler.schedule(JobInfo.Builder(CHECK_JOB, component).setPersisted(true)

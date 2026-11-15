@@ -71,7 +71,7 @@ class _MainAppPageState extends State<MainAppPage> with WidgetsBindingObserver {
     try {
       final prefs = await SharedPreferences.getInstance();
       if (!mounted || prefs.getBool('companion_setup_seen') == true ||
-          WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) return;
+          WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) { return; }
       await prefs.setBool('companion_setup_seen', true);
       if (mounted) await Get.toNamed<void>('/companion-setup');
     } finally { _setupPending = false; }

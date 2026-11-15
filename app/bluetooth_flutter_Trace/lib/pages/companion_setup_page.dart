@@ -81,9 +81,9 @@ class _CompanionSetupPageState extends State<CompanionSetupPage> with WidgetsBin
 
   Future<void> _settings(String kind) async {
     final opened = await _platform.openSettings(kind);
-    if (!opened && mounted) setState(() {
+    if (!opened && mounted) { setState(() {
       _error = '\u8be5\u7cfb\u7edf\u6ca1\u6709\u53ef\u7528\u7684\u4e13\u7528\u5165\u53e3\u3002\u8bf7\u5728\u5e94\u7528\u4fe1\u606f\u3001\u7535\u6c60\u6216\u81ea\u542f\u52a8\u8bbe\u7f6e\u4e2d\u67e5\u627e E-Track\uff1b\u6253\u5f00\u8bbe\u7f6e\u4e0d\u4ee3\u8868\u5df2\u6388\u6743\u3002';
-    });
+    }); }
   }
 
   Future<void> _configure({bool? enabled, int? hours, bool? wifi}) async {
@@ -95,7 +95,7 @@ class _CompanionSetupPageState extends State<CompanionSetupPage> with WidgetsBin
   Widget _section(String number, String title, String detail, List<Widget> children) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 16),
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(number + ' / ' + title, style: const TextStyle(color: TraceColors.cyan, fontSize: 20, fontWeight: FontWeight.w600)),
+      Text('$number / $title', style: const TextStyle(color: TraceColors.cyan, fontSize: 20, fontWeight: FontWeight.w600)),
       const SizedBox(height: 10),
       Text(detail, style: const TextStyle(color: TraceColors.muted, height: 1.6)),
       const SizedBox(height: 12),
@@ -153,7 +153,7 @@ class _CompanionSetupPageState extends State<CompanionSetupPage> with WidgetsBin
                 hint: const Text('\u5148\u626b\u63cf\uff0c\u518d\u9009\u62e9\u8bbe\u5907', style: TextStyle(color: TraceColors.muted)),
                 style: const TextStyle(color: TraceColors.text),
                 items: choices.entries.map((e) => DropdownMenuItem(value: e.key,
-                  child: Text(e.value + ' / ' + e.key, overflow: TextOverflow.ellipsis))).toList(),
+                  child: Text('${e.value} / ${e.key}', overflow: TextOverflow.ellipsis))).toList(),
                 onChanged: _busy || _snapshot['enabled'] == true ? null : (value) => setState(() { _selected = value; }));
             }),
             Wrap(spacing: 12, children: [
@@ -173,11 +173,11 @@ class _CompanionSetupPageState extends State<CompanionSetupPage> with WidgetsBin
               value: _snapshot['enabled'] == true,
               onChanged: _busy ? null : (value) => _run(() => _configure(enabled: value))),
             Text(_snapshot['serviceRunning'] == true ? '\u540e\u53f0\u6267\u884c\u6240\u6709\u8005\u5df2\u54cd\u5e94' : '\u540e\u53f0\u6267\u884c\u5c1a\u672a\u786e\u8ba4\uff0c\u6216\u8bbe\u5907\u6682\u4e0d\u53ef\u8fbe', style: const TextStyle(color: TraceColors.muted)),
-            if (_snapshot['problem'] != null) Text('\u5f53\u524d\u9650\u5236\uff1a' + _snapshot['problem'].toString(), style: const TextStyle(color: TraceColors.amber)),
-            if (_snapshot['lastResult'] != null) Text('\u6700\u8fd1\u72b6\u6001\uff1a' + _snapshot['lastResult'].toString(), style: const TextStyle(color: TraceColors.muted)),
+            if (_snapshot['problem'] != null) Text('\u5f53\u524d\u9650\u5236\uff1a${_snapshot['problem']}', style: const TextStyle(color: TraceColors.amber)),
+            if (_snapshot['lastResult'] != null) Text('\u6700\u8fd1\u72b6\u6001\uff1a${_snapshot['lastResult']}', style: const TextStyle(color: TraceColors.muted)),
             DropdownButton<int>(value: _snapshot['intervalHours'] as int? ?? 12, dropdownColor: TraceColors.deep,
               style: const TextStyle(color: TraceColors.text),
-              items: [6, 12, 24].map((n) => DropdownMenuItem(value: n, child: Text('\u7ea6\u6bcf ' + n.toString() + ' \u5c0f\u65f6\u68c0\u67e5'))).toList(),
+              items: [6, 12, 24].map((n) => DropdownMenuItem(value: n, child: Text('\u7ea6\u6bcf $n \u5c0f\u65f6\u68c0\u67e5'))).toList(),
               onChanged: _busy ? null : (n) { if (n != null) _run(() => _configure(hours: n)); }),
             SwitchListTile(contentPadding: EdgeInsets.zero,
               title: const Text('\u4ec5\u5728\u975e\u8ba1\u8d39\u7f51\u7edc\u81ea\u52a8\u4e0b\u8f7d', style: TextStyle(color: TraceColors.text)),

@@ -221,7 +221,6 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   @visibleForTesting
   int? get identityLinkGeneration => _identityLinkGeneration;
 
-  @visibleForTesting
   bool hasCurrentDeviceIdentity(String? address) =>
       address != null && _deviceInfo != null && _deviceInfoAddress == address &&
       _identityLinkGeneration != null &&
@@ -691,8 +690,17 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         final link = _ble.otaLinkGeneration(address);
         final chars = await _ble.findExactOtaCharacteristicsByAddress(address);
         if (chars == null || generation != _cancelGeneration || !hasCurrentDeviceIdentity(address)) return false;
-        final transport = await _bindTransport(address, chars);
-        if (transport == null) return false;
+        final binding = _ble.otaGattBindingToken(address);
+        final chunk = await _ble.requestOtaMtu(address);
+        if (generation != _cancelGeneration || link != _ble.otaLinkGeneration(address) ||
+            !identical(binding, _ble.otaGattBindingToken(address))) return false;
+        // A write-only transport shares the binary writer ledger, but must not
+        // replace/disable the idle receiver's CCCD while a CHOICE is arriving.
+        final transport = OtaBleTransport(channel: _ChannelAdapter(ble: _ble,
+          linkGeneration: link, bindingToken: binding, deviceAddress: address,
+          serviceId: chars['serviceId']!, writeCharId: chars['writeCharId']!,
+          chunkSize: chunk, notifyStream: const Stream<List<int>>.empty(),
+          writeWithResponse: chars['writeMode'] != 'without'));
         try {
           if (generation != _cancelGeneration || _ble.otaLinkGeneration(address) != link) return false;
           await transport.writeIdleControl(bytes);
@@ -1311,13 +1319,14 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     final file = _firmwareFile;
     final info = _deviceInfo;
     final asset = _asset;
-    if (consent != null && (consent.address != deviceAddress ||
-        !hasCurrentDeviceIdentity(deviceAddress) ||
-        consent.linkGeneration != _ble.otaLinkGeneration(deviceAddress) ||
-        consent.baseImageSha256 != info?.currentImageSha256Hex ||
-        consent.versionCode != _latestInfo?.versionCode ||
-        consent.targetImageSha256 != _latestInfo?.targetImageSha256 ||
-        consent.packageSha256 != asset?.sha256 || consent.packageSha256 != _verified?.sha256)) {
+    bool consentCurrent() => consent == null || (!consent.expired && consent.address == deviceAddress &&
+        hasCurrentDeviceIdentity(deviceAddress) &&
+        consent.linkGeneration == _ble.otaLinkGeneration(deviceAddress) &&
+        consent.baseImageSha256 == _deviceInfo?.currentImageSha256Hex &&
+        consent.versionCode == _latestInfo?.versionCode &&
+        consent.targetImageSha256 == _latestInfo?.targetImageSha256 &&
+        consent.packageSha256 == _asset?.sha256 && consent.packageSha256 == _verified?.sha256);
+    if (!consentCurrent()) {
       _upgradeStatus.value = 'STALE_DEVICE_CONSENT';
       return false;
     }
@@ -1578,6 +1587,11 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         _upgradeStatus.value = prefixBytes == null ? 'BLE 传输中...' : 'BLE 短测中，不安装固件...';
         await _waitForForeground(generation);
         if (generation != _cancelGeneration || _closed) return fail('cancelled', 'owner-changed');
+        if (!consentCurrent()) {
+          _upgradeStatus.value = 'STALE_DEVICE_CONSENT';
+          _phase.value = OtaPhase.failed;
+          return fail('consent', 'expired-or-link-changed');
+        }
         if (prefixBytes != null) {
           final result = await transport.probePrefix(
             package: package, packageSha256: packageSha256, etuHeader: etuHeader,

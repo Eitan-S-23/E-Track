@@ -26,6 +26,9 @@
 #include "Pages/AppFactory.h"
 #include "Pages/StatusBar/StatusBar.h"
 #include "Utils/PageManager/PageManager.h"
+#if defined(OTA_TARGET_APP) || defined(_WIN32)
+#include "Pages/FirmwareUpdate/FirmwareUpdate.h"
+#endif
 
 #if defined(ARDUINO) && CONFIG_RTT_DEBUG_CMD_ENABLE
 #include "SEGGER_RTT.h"
@@ -171,6 +174,7 @@ void App_Init()
     manager.Install("RouteImport", "Pages/RouteImport");
 #if defined(OTA_TARGET_APP) || defined(_WIN32)
     manager.Install("FirmwareUpdate", "Pages/FirmwareUpdate");
+    Page::FirmwareCompanion_Init(&manager);
 #endif
 
     manager.SetGlobalLoadAnimType(PageManager::LOAD_ANIM_OVER_LEFT);

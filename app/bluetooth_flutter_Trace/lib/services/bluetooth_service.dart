@@ -2,6 +2,8 @@ import 'dart:async';
 import '../utils/safe_snackbar.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver, AppLifecycleState;
+import '../companion/companion_scan_policy.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get/get.dart';
 
@@ -466,7 +468,7 @@ class WinBleAdapter implements BluetoothAdapter {
 
 /// 跨平台蓝牙服务
 /// 为不同平台提供统一的蓝牙接口
-class BluetoothService extends GetxController {
+class BluetoothService extends GetxController with WidgetsBindingObserver {
   BluetoothService({
     bool? reuseOtaCharacteristics,
     bool? preferOtaWithoutResponse,
@@ -547,6 +549,32 @@ class BluetoothService extends GetxController {
   final _mobileConnects = <String, Future<bool>>{};
   final _connectEpochs = <String, int>{};
   bool _closed = false;
+  final _scanClock = Stopwatch()..start();
+  late final CompanionScanPolicy _companionScan = CompanionScanPolicy(nowMs: () => _scanClock.elapsedMilliseconds);
+  Timer? _companionScanTimer;
+  bool get foregroundScanningAllowed => !Platform.isAndroid || WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
+  bool get companionScanningAllowed => _companionScan.allowed;
+  bool get _scanningAllowed => !_closed && (foregroundScanningAllowed || companionScanningAllowed);
+
+  void companionOwnerChanged(String? runtimeId) {
+    _companionScan.ownerChanged(runtimeId);
+    if (!_scanningAllowed) unawaited(stopScan());
+  }
+
+  Future<void> startCompanionScan(String runtimeId) async {
+    if (_closed || foregroundScanningAllowed || !_companionScan.open(runtimeId)) return;
+    _companionScanTimer?.cancel();
+    _companionScanTimer = Timer(CompanionScanPolicy.window, () {
+      _companionScan.close();
+      if (!foregroundScanningAllowed) unawaited(stopScan());
+    });
+    await startScan();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!_scanningAllowed) unawaited(stopScan());
+  }
 
   void Function() holdAutomaticReconnect() => _reconnect.hold();
   Future<void> get automaticReconnectSettled => _reconnect.settled;
@@ -796,12 +824,16 @@ class BluetoothService extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addObserver(this);
     initBluetooth();
   }
 
   @override
   void onClose() {
     _closed = true;
+    WidgetsBinding.instance.removeObserver(this);
+    _companionScanTimer?.cancel();
+    _companionScan.ownerChanged(null);
     _reconnect.dispose();
     final pause = _otaScanPause;
     if (pause != null) {
@@ -913,6 +945,7 @@ class BluetoothService extends GetxController {
 
   /// 开始扫描设备
   Future<void> startScan({Duration? timeout}) async {
+    if (!_scanningAllowed) return;
     if (_scanPauseEnabled || _otaScanPause != null) {
       try {
         await _scanPause.start(timeout: timeout);
@@ -939,6 +972,7 @@ class BluetoothService extends GetxController {
 
   /// 通用蓝牙扫描（适用于所有平台）
   Future<void> _startScan(Duration? timeout) async {
+    if (!_scanningAllowed) return;
     isScanning.value = true;
     _scanTimeoutTimer?.cancel();
     await _scanSubscription?.cancel();
@@ -951,7 +985,9 @@ class BluetoothService extends GetxController {
       debugPrint('${Platform.isWindows ? "Windows" : "Mobile"}蓝牙扫描已启动');
 
       // 使用适配器进行扫描
+      if (!_scanningAllowed) { isScanning.value = false; return; }
       await _adapter.startScan();
+      if (!_scanningAllowed) { await _stopScanNative(); return; }
 
       // 监听扫描结果
       _scanSubscription = _adapter.scanResults.listen((results) {

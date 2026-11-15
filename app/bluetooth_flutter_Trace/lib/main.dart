@@ -39,6 +39,8 @@ void showApplication() {
 void registerCoreServices() {
   if (!Get.isRegistered<ScanSettingsService>()) Get.put(ScanSettingsService(), permanent: true);
   if (!Get.isRegistered<bt_service.BluetoothService>()) Get.put(bt_service.BluetoothService(), permanent: true);
+  if (!Get.isRegistered<BleController>()) Get.put(BleController(), permanent: true);
+  if (!Get.isRegistered<MonitorController>()) Get.put(MonitorController(loadHistory: false), permanent: true);
   if (!Get.isRegistered<AppUpdateService>()) Get.put(AppUpdateService(), permanent: true);
   if (!Get.isRegistered<OtaService>()) {
     Get.put(OtaService(onOpenTask: () {
@@ -138,8 +140,7 @@ class MyApp extends StatelessWidget {
             Get.put(ResponsiveService(), permanent: true); // 首先注册响应式服务
             registerCoreServices();
             Get.put(AlertService(), permanent: true);
-            Get.put(BleController(), permanent: true);
-            Get.put(MonitorController(), permanent: true);
+            Get.find<MonitorController>().attachHistoryForUi();
             Get.put(BackgroundOptimizationService(), permanent: true);
 
             // 初始化通知服务

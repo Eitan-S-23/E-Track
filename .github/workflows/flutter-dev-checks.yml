@@ -193,6 +193,7 @@ jobs:
             .cache/p34-phy-native/runs/*/result.json
             .cache/p34-phy-native/runs/*/logs/*.log
             app/bluetooth_flutter_Trace/build/app/test-results/testDebugUnitTest/TEST-com.wen.gaia.gaia.DeviceOtaServiceTest.xml
+            app/bluetooth_flutter_Trace/build/app/test-results/testDebugUnitTest/TEST-com.wen.gaia.gaia.CompanionServiceTest.xml
             app/bluetooth_flutter_Trace/build/app/reports/tests/testDebugUnitTest/**
           include-hidden-files: true
           if-no-files-found: error

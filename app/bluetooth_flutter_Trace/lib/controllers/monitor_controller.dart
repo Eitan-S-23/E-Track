@@ -7,12 +7,34 @@ import '../models/device_data.dart';
 import '../services/database_service.dart';
 import '../services/scan_settings_service.dart';
 import '../services/alert_service.dart';
+import '../services/bluetooth_service.dart' as bt;
+import '../utils/safe_snackbar.dart';
 import 'ble_controller.dart';
 
 // 定义数据记录的最大条数
 const int maxDataRecords = 2592000;
 
 class MonitorController extends GetxController {
+  MonitorController({bool loadHistory = true}) : _loadHistory = loadHistory;
+  bool _loadHistory;
+  Future<void>? _initialLoad;
+  bool _closed = false;
+  bool get _foreground => !Platform.isAndroid || WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
+  bool get _mayCollect => _foreground || (Get.isRegistered<bt.BluetoothService>() && Get.find<bt.BluetoothService>().companionScanningAllowed);
+  Future<void> attachHistoryForUi() async {
+    if (_loadHistory) return;
+    await _initialLoad;
+    if (_closed || _loadHistory) return;
+    _loadHistory = true;
+    await _loadSavedDevices();
+  }
+
+  void _appendSample(SelectedDevice device, DeviceData data) {
+    device.addData(data);
+    if (!_foreground && device.dataHistory.length > 300) {
+      device.dataHistory.removeRange(0, device.dataHistory.length - 300);
+    }
+  }
   static MonitorController get to => Get.find();
 
   final DatabaseService _dbService = DatabaseService();
@@ -49,16 +71,26 @@ class MonitorController extends GetxController {
   // 数据缓存，用于去重和批量保存
   final Map<String, DeviceData> _latestDataCache = {}; // 设备ID -> 最新数据
   final List<DeviceData> _pendingSaveData = []; // 待保存的数据列表
+  Future<void>? _saveFlight;
+  final persistenceError = RxnString();
 
   @override
   void onInit() {
     super.onInit();
-    _loadSavedDevices();
+    _initialLoad = _loadSavedDevices().then((_) {
+      if (_closed) return;
+      if (monitoringDevices.isNotEmpty) {
+        isMonitoring.value = true;
+        _startBatchSaveTimer();
+        _restartActiveScanTimer();
+      }
+    });
     _startAutoMonitoring();
   }
 
   @override
   void onClose() {
+    _closed = true;
     stopMonitoring();
     _monitorTimer?.cancel();
     _activeScanTimer?.cancel();
@@ -92,7 +124,9 @@ class MonitorController extends GetxController {
 
         final List<DeviceData> historyData;
 
-        if (totalCount <= maxDataRecords) {
+        if (!_loadHistory) {
+          historyData = await _dbService.getLatestDeviceData(device.deviceId, 300);
+        } else if (totalCount <= maxDataRecords) {
           // 如果数据量小于等于最大记录数，获取全部数据（不指定limit）
           historyData = await _dbService.getDeviceData(device.deviceId);
           debugPrint('加载了 ${historyData.length} 条历史数据');
@@ -114,9 +148,8 @@ class MonitorController extends GetxController {
 
         // 如果设备正在监控，添加到选中列表
         if (device.isMonitoring.value) {
-          if (!selectedDevices.any((d) => d.deviceId == device.deviceId)) {
-            selectedDevices.add(device);
-          }
+          selectedDevices.removeWhere((d) => d.deviceId == device.deviceId);
+          selectedDevices.add(device);
         }
       }
     } catch (e) {
@@ -140,7 +173,7 @@ class MonitorController extends GetxController {
         debugPrint('扫描结果监听错误: $error');
         // 错误后重新订阅
         Future.delayed(const Duration(seconds: 1), () {
-          _startAutoMonitoring();
+          if (!_closed) _startAutoMonitoring();
         });
       },
       cancelOnError: false, // 出错时不取消订阅
@@ -168,9 +201,10 @@ class MonitorController extends GetxController {
 
   /// 检查扫描健康状态
   void _checkScanHealth() {
+    if (_closed || !_foreground) return;
     // 如果正在监控但扫描已停止，尝试重新启动
     if (isMonitoring.value && !_bleController.isScanning.value) {
-      _bleController.startScan();
+      _bleController.startScan(requestPermission: false);
     }
 
     // 如果订阅丢失，重新订阅
@@ -181,10 +215,13 @@ class MonitorController extends GetxController {
 
   /// 处理扫描结果
   void _processScenResults(List<ScanResult> results) {
+    if (_closed || !_mayCollect) return;
+    if (_pendingSaveData.length >= 2048) { persistenceError.value = 'DATA_BUFFER_FULL'; return; }
     debugPrint('处理扫描结果: ${results.length} 个设备');
     final Set<String> uniqueIds = {};
 
     for (var result in results) {
+      if (!_foreground && DateTime.now().difference(result.timeStamp).inSeconds > 15) continue;
       final deviceId = result.device.remoteId.toString();
       // 去重：相同地址只处理一次
       if (!uniqueIds.add(deviceId)) continue;
@@ -192,7 +229,7 @@ class MonitorController extends GetxController {
       //debugPrint('检查设备: $deviceId');
 
       // 检查是否是已保存或选中的设备
-      bool isTargetDevice = savedDevices.any((d) => d.deviceId == deviceId) ||
+      bool isTargetDevice = savedDevices.any((d) => d.deviceId == deviceId && d.isMonitoring.value) ||
           selectedDevices.any((d) => d.deviceId == deviceId);
 
       //debugPrint('是否为目标设备: $isTargetDevice');
@@ -252,8 +289,7 @@ class MonitorController extends GetxController {
     // 打印制造商数据内容
     if (!Platform.isWindows) {
       for (var entry in result.advertisementData.manufacturerData.entries) {
-        debugPrint(
-            '制造商ID: 0x${(entry.value[1] | (entry.value[0] << 8)).toRadixString(16).padLeft(4, '0')}');
+        debugPrint('制造商ID: 0x${entry.key.toRadixString(16).padLeft(4, '0')}');
         debugPrint(
             '数据内容 (16进制): ${entry.value.map((b) => b.toRadixString(16).padLeft(2, '0')).join(' ')}');
         debugPrint('数据内容 (10进制): ${entry.value.join(', ')}');
@@ -270,8 +306,7 @@ class MonitorController extends GetxController {
     }
 
     for (var entry in result.advertisementData.manufacturerData.entries) {
-      debugPrint(
-          '制造商ID: 0x${(entry.value[1] | (entry.value[0] << 8)).toRadixString(16).padLeft(4, '0')}');
+      debugPrint('制造商ID: 0x${entry.key.toRadixString(16).padLeft(4, '0')}');
       debugPrint(
           '数据内容 (16进制): ${entry.value.map((b) => b.toRadixString(16).padLeft(2, '0')).join(' ')}');
       debugPrint('数据内容 (10进制): ${entry.value.join(', ')}');
@@ -414,7 +449,7 @@ class MonitorController extends GetxController {
           final selectedDevice =
               selectedDevices.firstWhereOrNull((d) => d.deviceId == deviceId);
           if (selectedDevice != null) {
-            selectedDevice.addData(data);
+            _appendSample(selectedDevice, data);
 
             // 添加到待保存队列（批量保存）
             _addToPendingSave(data);
@@ -426,14 +461,16 @@ class MonitorController extends GetxController {
           final savedDevice =
               savedDevices.firstWhereOrNull((d) => d.deviceId == deviceId);
           if (savedDevice != null) {
-            savedDevice.addData(data);
+            if (!identical(savedDevice, selectedDevice)) _appendSample(savedDevice, data);
 
             // 添加到待保存队列（批量保存）
             _addToPendingSave(data);
 
             // 无论是否保存到数据库，都进行阈值检查（内部有冷却与开关控制）
             final powerConsumption = savedDevice.powerConsumption;
-            _alertService.checkThresholds(data, powerConsumption);
+            if (_foreground && Get.isRegistered<AlertService>()) {
+              _alertService.checkThresholds(data, powerConsumption);
+            }
 
             savedDevices.refresh(); // 强制刷新列表
           }
@@ -481,7 +518,7 @@ class MonitorController extends GetxController {
 
   /// 执行主动扫描
   void _performActiveScan() async {
-    if (!isMonitoring.value) return;
+    if (_closed || !_foreground || !isMonitoring.value) return;
 
     // 获取所有需要监控的设备
     final monitoringDevices = this.monitoringDevices;
@@ -490,14 +527,14 @@ class MonitorController extends GetxController {
     try {
       // 保持扫描持续进行，不频繁开始/停止
       if (!_bleController.isScanning.value) {
-        await _bleController.startScan();
+        await _bleController.startScan(requestPermission: false);
       }
     } catch (e) {
       // 主动扫描失败，尝试恢复
       try {
         await Future.delayed(const Duration(milliseconds: 500));
-        if (!_bleController.isScanning.value) {
-          await _bleController.startScan();
+        if (!_closed && _foreground && !_bleController.isScanning.value) {
+          await _bleController.startScan(requestPermission: false);
         }
       } catch (retryError) {
         // 重试扫描失败
@@ -602,7 +639,7 @@ class MonitorController extends GetxController {
       _saveConsumptionArraysToDatabase(selectedDevices);
     }
 
-    Get.snackbar('提示', '已停止监控', snackPosition: SnackPosition.BOTTOM);
+    safeSnackbar('提示', '已停止监控', snackPosition: SnackPosition.BOTTOM);
   }
 
   /// 保存选中的设备
@@ -858,6 +895,7 @@ class MonitorController extends GetxController {
 
   /// 显示格式错误通知
   void _showFormatErrorNotification(String deviceName, String error) {
+    if (!_foreground) return;
     // 避免重复显示同一个错误
     final key = '${deviceName}_$error';
     if (_shownErrors.contains(key)) return;
@@ -1057,13 +1095,21 @@ class MonitorController extends GetxController {
   }
 
   /// 保存待保存的数据到数据库
-  Future<void> _savePendingData() async {
+  Future<void> _savePendingData() {
+    final pending = _saveFlight;
+    if (pending != null) return pending;
+    late final Future<void> flight;
+    flight = _persistPendingData().whenComplete(() { if (identical(_saveFlight, flight)) _saveFlight = null; });
+    _saveFlight = flight;
+    return flight;
+  }
+
+  Future<void> _persistPendingData() async {
     if (_pendingSaveData.isEmpty) return;
 
     try {
       // 复制待保存数据并清空队列
       final dataToSave = List<DeviceData>.from(_pendingSaveData);
-      _pendingSaveData.clear();
 
       debugPrint('批量保存 ${dataToSave.length} 条数据到数据库');
 
@@ -1100,6 +1146,8 @@ class MonitorController extends GetxController {
         if (uniqueData.isNotEmpty) {
           // 批量保存到数据库 - 使用追加方式而不是替换
           await _dbService.appendDeviceDataBatch(uniqueData);
+          final saved = deviceDataList.toSet();
+          _pendingSaveData.removeWhere(saved.contains);
           debugPrint('成功保存设备 $deviceId 的 ${uniqueData.length} 条唯一数据');
         }
       }
@@ -1110,7 +1158,9 @@ class MonitorController extends GetxController {
             .where((d) => groupedData.containsKey(d.deviceId))
             .toList(),
       );
+      persistenceError.value = null;
     } catch (e) {
+      persistenceError.value = 'DATA_SAVE_FAILED';
       debugPrint('批量保存数据失败: $e');
     }
   }

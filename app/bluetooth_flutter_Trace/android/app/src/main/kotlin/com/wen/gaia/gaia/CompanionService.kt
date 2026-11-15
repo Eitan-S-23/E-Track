@@ -20,6 +20,26 @@ import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import java.util.UUID
 
+internal interface CompanionExecution {
+    fun problem(context: Context): String?
+    fun initialize(context: Context)
+    fun dispatch(payload: Map<String, Any>, done: (Boolean) -> Unit)
+    fun probe(id: String, done: (Boolean) -> Unit)
+    fun live(): Boolean
+    fun connected(context: Context): Boolean
+    fun lost(id: String)
+}
+
+private object AndroidCompanionExecution : CompanionExecution {
+    override fun problem(context: Context) = CompanionBridge.problem(context)
+    override fun initialize(context: Context) = CompanionBridge.ensureEngine(context)
+    override fun dispatch(payload: Map<String, Any>, done: (Boolean) -> Unit) = CompanionBridge.dispatch(payload, done)
+    override fun probe(id: String, done: (Boolean) -> Unit) = CompanionBridge.probe(id, done)
+    override fun live() = DeviceOtaBridge.engineLive()
+    override fun connected(context: Context) = CompanionBridge.gattConnected(context)
+    override fun lost(id: String) = CompanionBridge.runtimeLost(id)
+}
+
 class CompanionService : Service() {
     companion object {
         const val NOTIFICATION_ID = 2410
@@ -45,6 +65,7 @@ class CompanionService : Service() {
     }
 
     val runtimeId: String = UUID.randomUUID().toString()
+    internal var execution: CompanionExecution = AndroidCompanionExecution
     private val handler = Handler(Looper.getMainLooper())
     private var closed = false
     private var foregroundStarted = false
@@ -54,6 +75,7 @@ class CompanionService : Service() {
     private var revision = ""
     private var reason = "recovery"
     private var dispatching = false
+    private var redispatch = false
     private var wakeLock: PowerManager.WakeLock? = null
     private val startupDeadline = Runnable {
         if (!runtimeAcknowledged) stopCompanion("RUNTIME_START_TIMEOUT")
@@ -61,13 +83,13 @@ class CompanionService : Service() {
     private val heartbeat = object : Runnable {
         override fun run() {
             if (closed) return
-            if (CompanionBridge.problem(this@CompanionService) != null || !CompanionBridge.enabled(this@CompanionService)) {
+            if (execution.problem(this@CompanionService) != null || !CompanionBridge.enabled(this@CompanionService)) {
                 stopCompanion("PERMISSION_OR_ASSOCIATION_LOST"); return
             }
             var settled = false
             val deadline = Runnable { if (!settled) { settled = true; stopCompanion("RUNTIME_PROBE_TIMEOUT") } }
             handler.postDelayed(deadline, 5000)
-            CompanionBridge.probe(runtimeId) { ok ->
+            execution.probe(runtimeId) { ok ->
                 if (settled || closed) return@probe
                 settled = true
                 handler.removeCallbacks(deadline)
@@ -84,7 +106,7 @@ class CompanionService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (closed) return START_NOT_STICKY
-        if (!CompanionBridge.enabled(this) || CompanionBridge.problem(this) != null) {
+        if (!CompanionBridge.enabled(this) || execution.problem(this) != null) {
             stopCompanion("START_PRECONDITION_FAILED"); return START_NOT_STICKY
         }
         reason = intent?.getStringExtra("reason") ?: "recovery"
@@ -106,7 +128,7 @@ class CompanionService : Service() {
             if (wakeLock == null) wakeLock = getSystemService(PowerManager::class.java)
                 .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ETrack:companion-start").apply { setReferenceCounted(false) }
             wakeLock?.acquire(120000)
-            CompanionBridge.ensureEngine(this)
+            execution.initialize(this)
             handler.removeCallbacks(startupDeadline)
             handler.postDelayed(startupDeadline, 20000)
             dispatch()
@@ -115,10 +137,11 @@ class CompanionService : Service() {
     }
 
     fun dispatch() {
-        if (closed || !foregroundStarted || dispatching) return
+        if (closed || !foregroundStarted) return
+        if (dispatching) { redispatch = true; return }
         val target = CompanionBridge.address(this) ?: return
         dispatching = true
-        CompanionBridge.dispatch(mapOf("runtimeId" to runtimeId, "revision" to revision,
+        execution.dispatch(mapOf("runtimeId" to runtimeId, "revision" to revision,
             "address" to target, "reason" to reason,
             "checkPending" to CompanionBridge.preferences(this).getBoolean("checkPending", false))) { ok ->
             dispatching = false
@@ -128,17 +151,18 @@ class CompanionService : Service() {
             handler.removeCallbacks(startupDeadline)
             handler.removeCallbacks(heartbeat)
             handler.postDelayed(heartbeat, 30000)
+            if (redispatch) { redispatch = false; dispatch() }
         }
     }
 
     fun healthy(): Boolean = !closed && foregroundStarted && runtimeAcknowledged &&
-        DeviceOtaBridge.engineLive() && SystemClock.elapsedRealtime() - lastProbe < 60000 &&
+        execution.live() && SystemClock.elapsedRealtime() - lastProbe < 60000 &&
         revision == CompanionBridge.revision(this)
 
     fun ownsDevice(key: DeviceOtaKey, requestedRuntime: String?): Boolean =
         requestedRuntime == runtimeId && healthy() && linkedToken == key.deviceToken &&
-            CompanionBridge.enabled(this) && CompanionBridge.problem(this) == null &&
-            CompanionBridge.gattConnected(this)
+            CompanionBridge.enabled(this) && execution.problem(this) == null &&
+            execution.connected(this)
 
     fun state(value: Map<*, *>?): Boolean {
         if (closed || value?.get("runtimeId") != runtimeId || value["revision"] != revision) return false
@@ -146,10 +170,11 @@ class CompanionService : Service() {
         if (!Regex("[A-Z_]{1,64}").matches(status)) return false
         val connected = value["connected"] == true
         val target = CompanionBridge.address(this) ?: return false
-        if (connected && (value["deviceToken"] != CompanionBridge.deviceToken(target) || !CompanionBridge.gattConnected(this))) return false
+        if (connected && (value["deviceToken"] != CompanionBridge.deviceToken(target) || !execution.connected(this))) return false
         linkedToken = if (connected) CompanionBridge.deviceToken(target) else null
         val prefs = CompanionBridge.preferences(this)
         prefs.edit().putString("lastResult", status).apply()
+        if (status == "CHECKING") prefs.edit().putBoolean("checkPending", true).apply()
         if (value["checkFinished"] == true) prefs.edit().putBoolean("checkPending", false).apply()
         if (connected) {
             prefs.edit().putInt("failures", 0).putLong("nextAttempt", 0).apply()
@@ -170,7 +195,7 @@ class CompanionService : Service() {
         handler.removeCallbacksAndMessages(null)
         if (wakeLock?.isHeld == true) wakeLock?.release()
         CompanionBridge.preferences(this).edit().putString("lastResult", reason).apply()
-        CompanionBridge.runtimeLost(runtimeId)
+        execution.lost(runtimeId)
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
@@ -188,7 +213,7 @@ class CompanionJobService : JobService() {
         val prefs = CompanionBridge.preferences(this)
         val check = params.jobId == CompanionBridge.CHECK_JOB
         if (check) prefs.edit().putBoolean("checkPending", true).apply()
-        if (!check && CompanionService.active?.healthy() == true) return false
+        if (!check && !prefs.getBoolean("checkPending", false) && CompanionService.active?.healthy() == true) return false
         if (System.currentTimeMillis() < prefs.getLong("nextAttempt", 0)) return false
         // The short system job hands off to an acknowledged connectedDevice owner.
         // A start request is deliberately not recorded as a completed firmware check.
