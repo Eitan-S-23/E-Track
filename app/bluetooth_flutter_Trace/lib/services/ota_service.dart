@@ -693,13 +693,14 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         final binding = _ble.otaGattBindingToken(address);
         final chunk = await _ble.requestOtaMtu(address);
         if (generation != _cancelGeneration || link != _ble.otaLinkGeneration(address) ||
-            !identical(binding, _ble.otaGattBindingToken(address))) return false;
+            !identical(binding, _ble.otaGattBindingToken(address))) { return false; }
         // A write-only transport shares the binary writer ledger, but must not
         // replace/disable the idle receiver's CCCD while a CHOICE is arriving.
+        final idleNotifications = StreamController<List<int>>.broadcast();
         final transport = OtaBleTransport(channel: _ChannelAdapter(ble: _ble,
           linkGeneration: link, bindingToken: binding, deviceAddress: address,
           serviceId: chars['serviceId']!, writeCharId: chars['writeCharId']!,
-          chunkSize: chunk, notifyStream: const Stream<List<int>>.empty(),
+          chunkSize: chunk, notifyStream: idleNotifications.stream,
           writeWithResponse: chars['writeMode'] != 'without'));
         try {
           if (generation != _cancelGeneration || _ble.otaLinkGeneration(address) != link) return false;
@@ -707,6 +708,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           return generation == _cancelGeneration && _ble.otaLinkGeneration(address) == link;
         } finally {
           await transport.dispose();
+          await idleNotifications.close();
           if (identical(_transport, transport)) _transport = null;
         }
       }) ?? false;

@@ -1,5 +1,6 @@
 #include "FirmwareUpdate.h"
 #include "Common/HAL/CompanionUpdate.h"
+#include "Common/DataProc/DataProc.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -1322,6 +1323,11 @@ namespace
     bool companionOpening = false;
     bool companionCanCheck = false, companionCanInstall = false;
 
+    bool CompanionCanInstall()
+    {
+        return !DataProc::Recorder_IsOpen() && HAL::BT_CompanionCanInstall();
+    }
+
     const char* CompanionStatusText(const char* code)
     {
         if (strcmp(code, "READY") == 0) return "Verified package is ready.\nInstall this firmware?";
@@ -1364,7 +1370,7 @@ namespace
         lv_obj_t* button = lv_event_get_current_target(event);
         if (lv_obj_has_state(button, LV_STATE_DISABLED)) return;
         if (button == companionCheck) { (void)HAL::BT_CompanionCheck(); }
-        else if (button == companionInstall) { (void)HAL::BT_CompanionChoose(true, &companionDisplayed); }
+        else if (button == companionInstall && CompanionCanInstall()) { (void)HAL::BT_CompanionChoose(true, &companionDisplayed); }
         else if (button == companionLater)
         {
             if (companionDisplayed.hasOffer) (void)HAL::BT_CompanionChoose(false, &companionDisplayed);
@@ -1397,13 +1403,13 @@ namespace
         char text[240];
         if (companionDisplayed.hasOffer)
             snprintf(text, sizeof(text), "Firmware %lu\n\n%s\n\n%s", (unsigned long)companionDisplayed.version,
-                CompanionStatusText(companionDisplayed.status), HAL::BT_CompanionCanInstall() ?
-                "Choose Update now or Later." : "Park first; charge or battery >= 30%.");
+                CompanionStatusText(companionDisplayed.status), CompanionCanInstall() ?
+                "Choose Update now or Later." : "Park and finish recording; charge or battery >= 30%.");
         else snprintf(text, sizeof(text), "%s", CompanionStatusText(companionDisplayed.status));
         lv_label_set_text(companionMessage, text);
         bool check = !companionDisplayed.checking && strcmp(companionDisplayed.status, "UPGRADING") != 0 &&
             strcmp(companionDisplayed.status, "STARTING") != 0;
-        bool install = companionDisplayed.hasOffer && HAL::BT_CompanionCanInstall();
+        bool install = companionDisplayed.hasOffer && CompanionCanInstall();
         if (check != companionCanCheck || install != companionCanInstall)
         {
             lv_obj_t* focused = lv_group_get_focused(companionGroup);
@@ -1434,7 +1440,7 @@ namespace
             strcmp(page, "Pages/SystemInfos") != 0)) return;
         HAL::CompanionUpdateInfo info;
         HAL::BT_CompanionGetInfo(&info);
-        if (info.hasOffer && info.prompt && HAL::BT_CompanionCanInstall()) Page::FirmwareCompanion_Show();
+        if (info.hasOffer && info.prompt && CompanionCanInstall()) Page::FirmwareCompanion_Show();
     }
 }
 

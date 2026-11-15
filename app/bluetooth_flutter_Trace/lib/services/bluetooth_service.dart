@@ -552,7 +552,8 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
   final _scanClock = Stopwatch()..start();
   late final CompanionScanPolicy _companionScan = CompanionScanPolicy(nowMs: () => _scanClock.elapsedMilliseconds);
   Timer? _companionScanTimer;
-  bool get foregroundScanningAllowed => !Platform.isAndroid || WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
+  WidgetsBinding? _lifecycleBinding;
+  bool get foregroundScanningAllowed => !Platform.isAndroid || _lifecycleBinding?.lifecycleState == AppLifecycleState.resumed;
   bool get companionScanningAllowed => _companionScan.allowed;
   bool get _scanningAllowed => !_closed && (foregroundScanningAllowed || companionScanningAllowed);
 
@@ -824,14 +825,18 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
   @override
   void onInit() {
     super.onInit();
-    WidgetsBinding.instance.addObserver(this);
+    if (Platform.isAndroid) {
+      _lifecycleBinding = WidgetsBinding.instance;
+      _lifecycleBinding!.addObserver(this);
+    }
     initBluetooth();
   }
 
   @override
   void onClose() {
     _closed = true;
-    WidgetsBinding.instance.removeObserver(this);
+    _lifecycleBinding?.removeObserver(this);
+    _lifecycleBinding = null;
     _companionScanTimer?.cancel();
     _companionScan.ownerChanged(null);
     _reconnect.dispose();
@@ -871,10 +876,16 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
 
   /// 初始化蓝牙
   Future<void>? _initialization;
-  Future<void> initBluetooth() => _initialization ??= _initializeBluetooth();
+  bool _initialized = false;
+  Future<void> initBluetooth() {
+    if (_initialized || _closed) return Future.value();
+    return _initialization ??= _initializeBluetooth().whenComplete(() { _initialization = null; });
+  }
 
   Future<void> _initializeBluetooth() async {
     try {
+      await _adapterSubscription?.cancel();
+      _adapterSubscription = null;
       // 根据平台选择适配器
       if (Platform.isWindows) {
         _adapter = WinBleAdapter();
@@ -890,6 +901,7 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
       } else {
         await _initMobileBluetooth();
       }
+      _initialized = true;
     } catch (e) {
       debugPrint('初始化蓝牙失败: $e');
       safeSnackbar('错误', '初始化蓝牙失败: $e', snackPosition: SnackPosition.BOTTOM);

@@ -6,6 +6,9 @@
 
 using namespace DataProc;
 
+static bool recorderFileOpen = false;
+bool DataProc::Recorder_IsOpen() { return recorderFileOpen; }
+
 #define RECORDER_GPX_TIME_FMT    "%d-%02d-%02dT%02d:%02d:%02dZ"
 #define RECORDER_GPX_FILE_NAME   "/" CONFIG_TRACK_RECORD_FILE_DIR_NAME "/TRK_%d%02d%02d_%02d%02d%02d.gpx"
 #define RECORDER_GPX_META_NAME   VERSION_FIRMWARE_NAME " " VERSION_SOFTWARE
@@ -111,6 +114,7 @@ static void Recorder_RecStart(Recorder_t* recorder, uint16_t time)
 
     if (res == LV_FS_RES_OK)
     {
+        recorderFileOpen = true;
         LV_LOG_USER("Track file %s open success", filepath);
 
         GPX* gpx = &(recorder->gpx);
@@ -144,7 +148,7 @@ static void Recorder_RecStop(Recorder_t* recorder)
     Recorder_FileWriteString(file_p, gpx->getTrakSegClose().c_str());;
     Recorder_FileWriteString(file_p, gpx->getTrakClose().c_str());
     Recorder_FileWriteString(file_p, gpx->getClose().c_str());
-    lv_fs_close(file_p);
+    if (lv_fs_close(file_p) == LV_FS_RES_OK) recorderFileOpen = false;
 
     LV_LOG_USER("Track record end");
 }
@@ -235,6 +239,7 @@ DATA_PROC_INIT_DEF(Recorder)
     memset(&recorder.file, 0, sizeof(recorder.file));
     recorder.active = false;
     recorder.account = account;
+    recorderFileOpen = false;
     account->UserData = &recorder;
 
     account->Subscribe("GPS");

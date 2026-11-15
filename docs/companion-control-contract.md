@@ -97,7 +97,9 @@ new-connection target version AND full raw SHA verification, not END ACK.
    CRC failures, nonce/hash/version/request mismatches fail closed.
 5. The MCU checks the displayed offer snapshot again at activation. Motion
    (valid GPS speed >=3 km/h) and battery below 30% without charging disallow
-   installation. Automatic prompts are limited to stable Dialplate, MainMenu
+   installation. An open GPX recording, including pause with the file still open,
+   also blocks the modal's install action and automatic prompt until closed.
+   Automatic prompts are limited to stable Dialplate, MainMenu
    and SystemInfos, not navigation or SD-import screens. Later never starts OTA.
 6. App consumes CHOICE before awaits, then rechecks address, connection generation,
    full base identity, refreshed metadata, target/package hashes and expiry.

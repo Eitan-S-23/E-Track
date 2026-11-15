@@ -131,7 +131,7 @@ class CompanionRuntime extends GetxService {
     if (check != null) { unawaited(_check('device', check)); return; }
     final next = _pendingWake;
     _pendingWake = null;
-    if (next != null) _queueWake(next);
+    if (next != null) { _queueWake(next); }
     else { unawaited(_collectTelemetry()); }
   }
 
@@ -155,6 +155,8 @@ class CompanionRuntime extends GetxService {
   Future<void> _wake(Map<String, dynamic> wake) async {
     final epoch = _epoch;
     final address = _address!;
+    await _ble.initBluetooth();
+    if (!_current(epoch)) return;
     if (!await _state('CONNECTING', busy: true) || !_current(epoch)) return;
     if (!_sameLink()) {
       _invalidateLink();

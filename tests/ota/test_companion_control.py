@@ -26,10 +26,11 @@ class CompanionControlTests(unittest.TestCase):
         compiler = shutil.which("g++")
         if compiler is None:
             raise RuntimeError("Host g++ required")
-        cls.directory = tempfile.TemporaryDirectory(dir=cache)
-        cls.addClassCleanup(cls.directory.cleanup)
-        cls.env = dict(os.environ, TEMP=cls.directory.name, TMP=cls.directory.name, TMPDIR=cls.directory.name)
-        cls.executable = str(Path(cls.directory.name) / "companion-control.exe")
+        # Retain the small compiled fixture as source-bound development evidence.
+        # Windows can keep a completed EXE image mapped briefly after process exit.
+        directory = tempfile.mkdtemp(prefix="run-", dir=cache)
+        cls.env = dict(os.environ, TEMP=directory, TMP=directory, TMPDIR=directory)
+        cls.executable = str(Path(directory) / "companion-control.exe")
         command = [compiler, "-std=c++11", "-Wall", "-Wextra", "-Werror", "-static-libgcc", "-static-libstdc++",
                    "-I", str(ROOT / "Libraries"), "-I", str(ROOT / "USER/App"),
                    str(ROOT / "tests/ota/companion_control_test.cpp"), "-o", cls.executable]
@@ -37,6 +38,7 @@ class CompanionControlTests(unittest.TestCase):
         if build.returncode:
             raise RuntimeError(build.stdout + build.stderr)
         print("Control source SHA-256: " + hashlib.sha256((ROOT / "Libraries/Bluetooth/CompanionControl.h").read_bytes()).hexdigest())
+        print("Retained fixture: " + cls.executable)
 
 
 def test_case(name):
