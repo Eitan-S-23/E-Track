@@ -114,6 +114,21 @@ test("both workflow routes keep publication and original secret stores separate"
   assert.match(android, /needs\.windows\.result == 'success' \|\| needs\.admission\.outputs\.resume_android == 'true'/);
 });
 
+test("normal firmware retains only verification originals after private-key cleanup", async () => {
+  const source = await readFile(new URL("../../.github/workflows/original-admin-candidate.yml", import.meta.url), "utf8");
+  const block = source.slice(source.indexOf("      - name: Retain exact normal-firmware verification artifacts"),
+    source.indexOf("      - name: Preserve candidate receipts in the native run log"));
+  assert.match(source, /id: key_cleanup/);
+  assert.match(block, /steps\.package\.outcome == 'success' && steps\.key_cleanup\.outcome == 'success'/);
+  assert.match(block, /original-admin-firmware-\$\{\{ github\.run_id \}\}-\$\{\{ github\.run_attempt \}\}/);
+  assert.match(block, /retention-days: 14/);
+  assert.match(block, /if-no-files-found: error/);
+  assert.equal((block.match(/^            \.cache\//gm) ?? []).length, 9);
+  assert.match(block, /source\/app\/X-Track-App-GCC\.elf/);
+  assert.match(block, /source\/app\/X-Track-App-GCC\.map/);
+  assert.doesNotMatch(block, /private-build|private-key|\*\*/);
+});
+
 function resumeFixture() {
   const source = "a".repeat(40), workflow = "b".repeat(40);
   return { source, resume: "456", checkOnly: "false", sourceRun: "123",
