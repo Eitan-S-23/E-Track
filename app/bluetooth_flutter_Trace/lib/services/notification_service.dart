@@ -43,7 +43,7 @@ class NotificationService {
   Future<void> _initialize() async {
 
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('ic_stat_e_track');
 
     const DarwinInitializationSettings initializationSettingsIOS =
         DarwinInitializationSettings(

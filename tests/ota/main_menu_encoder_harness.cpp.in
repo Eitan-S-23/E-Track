@@ -1,0 +1,111 @@
+#include <algorithm>
+#include <cstdint>
+#include <iostream>
+#include <vector>
+
+struct lv_obj_t;
+struct lv_group_t { std::vector<lv_obj_t*> items; lv_obj_t* focused = nullptr; bool editing = true; };
+struct lv_obj_t { lv_group_t* group = nullptr; bool hidden = false; bool disabled = false; };
+enum lv_event_code_t { LV_EVENT_FOCUSED, LV_EVENT_LEAVE, LV_EVENT_GESTURE,
+    LV_EVENT_SHORT_CLICKED, LV_EVENT_CLICKED };
+struct lv_event_t { void* user; lv_obj_t* object; lv_event_code_t code; };
+struct lv_indev_t {};
+enum lv_dir_t { LV_DIR_NONE, LV_DIR_LEFT, LV_DIR_RIGHT };
+const int LV_OBJ_FLAG_HIDDEN = 1, LV_STATE_DISABLED = 2;
+const int MENU_ITEM_COUNT = 7, MENU_ACTION_NONE = -1, SETTING_ACTION_NONE = 0;
+const int MENU_CONFIRM_DUP_MS = 60, SCREEN_MAIN = 0, SCREEN_SUBPAGE = 1;
+#define LV_ASSERT_NULL(x) ((void)0)
+lv_group_t defaultGroup;
+bool encoder = true;
+lv_group_t* lv_group_get_default() { return &defaultGroup; }
+void lv_group_remove_all_objs(lv_group_t* g) { for (auto* o : g->items) o->group = nullptr; g->items.clear(); g->focused = nullptr; }
+void lv_group_set_focus_cb(lv_group_t*, void*) {}
+void lv_group_set_wrap(lv_group_t*, bool) {}
+void lv_group_set_editing(lv_group_t* g, bool value) { g->editing = value; }
+void lv_group_add_obj(lv_group_t* g, lv_obj_t* o) { g->items.push_back(o); o->group = g; }
+void lv_group_remove_obj(lv_obj_t* o) { auto& v = o->group->items; v.erase(std::remove(v.begin(), v.end(), o), v.end()); o->group = nullptr; }
+lv_group_t* lv_obj_get_group(lv_obj_t* o) { return o->group; }
+void lv_group_focus_obj(lv_obj_t* o) { o->group->focused = o; }
+bool lv_obj_has_flag(lv_obj_t* o, int) { return o->hidden; }
+bool lv_obj_has_state(lv_obj_t* o, int) { return o->disabled; }
+void lv_obj_add_flag(lv_obj_t* o, int) { o->hidden = true; }
+void ClearFocusState(lv_obj_t*) {}
+void FocusHaloYAnimCb(void*, int) {}
+void lv_anim_del(lv_obj_t*, void (*)(void*, int)) {}
+void* lv_event_get_user_data(lv_event_t* e) { return e->user; }
+lv_obj_t* lv_event_get_current_target(lv_event_t* e) { return e->object; }
+lv_event_code_t lv_event_get_code(lv_event_t* e) { return e->code; }
+lv_indev_t* lv_indev_get_act() { return nullptr; }
+lv_dir_t lv_indev_get_gesture_dir(lv_indev_t*) { return LV_DIR_NONE; }
+bool IsEncoderEvent() { return encoder; }
+uint32_t lv_tick_get() { return 100; }
+uint32_t lv_tick_elaps(uint32_t then) { return 100 - then; }
+
+class MainMenu {
+public:
+    lv_obj_t* focusItems[8] = {};
+    lv_obj_t* itemButtons[MENU_ITEM_COUNT] = {};
+    int focusItemCount = 0, currentScreen = SCREEN_MAIN;
+    lv_obj_t* backButton = nullptr;
+    lv_obj_t* focusHalo = nullptr;
+    lv_obj_t* _root = nullptr;
+    lv_obj_t* listCont = nullptr;
+    lv_obj_t* haloTarget = nullptr;
+    lv_obj_t* encoderShortClickObj = nullptr;
+    uint32_t encoderShortClickTick = 0;
+    int backs = 0, rows = 0, cancellations = 0;
+    bool IsFocusItem(lv_obj_t*);
+    void RefreshEncoderGroup();
+    void ClearEncoderGroup();
+    static void onEvent(lv_event_t*);
+    void MoveFocusHaloTo(lv_obj_t* o, bool) { haloTarget = o; }
+    void RequestBack() { ++backs; }
+    void CancelEncoderClick() { ++cancellations; encoderShortClickObj = nullptr; encoderShortClickTick = 0; }
+    int FindActionByObj(lv_obj_t*) { return MENU_ACTION_NONE; }
+    int FindSettingActionByObj(lv_obj_t*) { return SETTING_ACTION_NONE; }
+    void HandleEncoderClick(int, bool = false) { ++rows; }
+    void OpenAction(int) { ++rows; }
+    void OpenSettingAction(int) { ++rows; }
+};
+
+// INSERT_PRODUCTION_METHODS
+
+#define CHECK(value) do { if (!(value)) { std::cerr << "check failed at " << __LINE__ << "\n"; return 1; } } while (0)
+int main() {
+    MainMenu menu;
+    lv_obj_t back, row, halo;
+    menu.backButton = &back; menu.focusHalo = &halo;
+    menu.focusItems[0] = &row; menu.focusItemCount = 1;
+    menu.RefreshEncoderGroup();
+    CHECK(defaultGroup.items.size() == 2 && defaultGroup.items.back() == &back);
+    CHECK(menu.focusItemCount == 1 && defaultGroup.focused == &row);
+    CHECK(!defaultGroup.editing);
+    lv_event_t focus = { &menu, &back, LV_EVENT_FOCUSED };
+    MainMenu::onEvent(&focus);
+    CHECK(menu.haloTarget == &back);
+    menu.ClearEncoderGroup();
+    CHECK(back.group == nullptr && row.group == nullptr && halo.hidden);
+    menu.focusItemCount = 0; menu.RefreshEncoderGroup();
+    CHECK(defaultGroup.items.size() == 1 && defaultGroup.focused == &back);
+    back.hidden = true; menu.RefreshEncoderGroup();
+    CHECK(defaultGroup.items.empty());
+    back.hidden = false; back.disabled = true; menu.RefreshEncoderGroup();
+    CHECK(defaultGroup.items.empty());
+    back.disabled = false;
+    for (bool rotary : {true, false}) {
+        encoder = rotary; menu.backs = 0; menu.cancellations = 0;
+        lv_event_t press = { &menu, &back, LV_EVENT_SHORT_CLICKED };
+        MainMenu::onEvent(&press);
+        press.code = LV_EVENT_CLICKED; MainMenu::onEvent(&press);
+        CHECK(menu.backs == 1 && menu.cancellations == 1);
+        back.disabled = true; MainMenu::onEvent(&press); CHECK(menu.backs == 1);
+        back.disabled = false; back.hidden = true; MainMenu::onEvent(&press); CHECK(menu.backs == 1);
+        back.hidden = false;
+    }
+    encoder = true; menu.focusItemCount = 1; menu.currentScreen = SCREEN_SUBPAGE;
+    menu.backs = 0; menu.rows = 0; menu.encoderShortClickObj = nullptr;
+    lv_event_t press = { &menu, &row, LV_EVENT_SHORT_CLICKED };
+    MainMenu::onEvent(&press); press.code = LV_EVENT_CLICKED; MainMenu::onEvent(&press);
+    CHECK(menu.rows == 1 && menu.backs == 0);
+    std::cout << "PASS: group, focus, cleanup, empty list, visibility, rotary/touch single activation, row routing\n";
+}
