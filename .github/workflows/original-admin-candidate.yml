@@ -157,6 +157,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: original-admin-firmware-${{ github.run_id }}-${{ github.run_attempt }}
+          include-hidden-files: true
           retention-days: 14
           if-no-files-found: error
           path: |

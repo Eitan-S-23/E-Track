@@ -122,6 +122,7 @@ test("normal firmware retains only verification originals after private-key clea
   assert.match(block, /steps\.package\.outcome == 'success' && steps\.key_cleanup\.outcome == 'success'/);
   assert.match(block, /original-admin-firmware-\$\{\{ github\.run_id \}\}-\$\{\{ github\.run_attempt \}\}/);
   assert.match(block, /retention-days: 14/);
+  assert.match(block, /include-hidden-files: true/);
   assert.match(block, /if-no-files-found: error/);
   assert.equal((block.match(/^            \.cache\//gm) ?? []).length, 9);
   assert.match(block, /source\/app\/X-Track-App-GCC\.elf/);
