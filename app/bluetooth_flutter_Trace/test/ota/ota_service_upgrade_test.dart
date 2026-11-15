@@ -13,6 +13,8 @@ import 'package:get/get.dart';
 import 'package:ble_monitor/ota/ota_ble_codec.dart';
 import 'package:ble_monitor/ota/ota_ble_transport.dart';
 import 'package:ble_monitor/ota/ota_background.dart';
+import 'package:ble_monitor/ota/ota_upgrade_consent.dart';
+import 'package:ble_monitor/companion/companion_protocol.dart';
 import 'package:ble_monitor/ota/ota_device_info.dart';
 import 'package:ble_monitor/ota/ota_diagnostics.dart';
 import 'package:ble_monitor/ota/ota_download.dart';
@@ -330,6 +332,54 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 5));
     }
   }
+
+  test('companion consent rejects stale bindings before any write', () async {
+    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: []);
+    final service = Get.find<OtaService>();
+    final latest = service.latestInfo!;
+    final writes = ble.platformWriteCalls;
+    for (final drift in ['address', 'generation', 'base', 'version', 'package', 'target']) {
+      final consent = OtaUpgradeConsent(address: drift == 'address' ? 'OTHER' : 'AA:BB',
+        linkGeneration: ble.otaLinkGeneration('AA:BB') + (drift == 'generation' ? 1 : 0),
+        baseImageSha256: drift == 'base' ? '00' * 32 : service.deviceInfo!.currentImageSha256Hex,
+        versionCode: latest.versionCode! + (drift == 'version' ? 1 : 0),
+        packageSha256: drift == 'package' ? '00' * 32 : latest.asset!.sha256,
+        targetImageSha256: drift == 'target' ? '00' * 32 : latest.targetImageSha256!);
+      expect(await service.startOtaUpgrade('AA:BB', consent: consent), isFalse, reason: drift);
+      expect(ble.platformWriteCalls, writes, reason: drift);
+    }
+  });
+
+  test('companion idle control is excluded from binary INFO ownership', () async {
+    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: []);
+    final service = Get.find<OtaService>();
+    final message = CompanionMessage('HELLO', 'ab' * 16, 0);
+    ble.holdInfo = true;
+    final before = ble.getInfoCalls;
+    final operation = service.readDeviceInfo('AA:BB');
+    await waitUntil(() => ble.getInfoCalls > before);
+    final writes = ble.platformWriteCalls;
+    expect(await service.sendCompanionMessage('AA:BB', message), isFalse);
+    expect(ble.platformWriteCalls, writes);
+    ble.releaseHeldInfo();
+    expect(await operation, isNotNull);
+    expect(await service.sendCompanionMessage('AA:BB', message), isTrue);
+    expect(ble.getInfoCalls, before + 1);
+    expect(ble.dataOffsets, isEmpty);
+  });
+
+  test('a refused companion background owner never waits forever or downloads', () async {
+    final background = _BackgroundOwnerHarness();
+    await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [], backgroundClient: background);
+    final service = Get.find<OtaService>();
+    background.allow = false;
+    service.didChangeAppLifecycleState(AppLifecycleState.paused);
+    try {
+      expect(await service.downloadFirmware(companionRuntimeId: 'runtime').timeout(const Duration(seconds: 2)), isFalse);
+      expect(service.backgroundAcquired, isFalse);
+      expect(service.isUpgrading, isFalse);
+    } finally { service.didChangeAppLifecycleState(AppLifecycleState.resumed); }
+  });
 
   test('lifecycle query INFO completion cannot schedule a transport recovery', () async {
     final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: []);
@@ -4768,6 +4818,7 @@ class _BackgroundOwnerHarness extends OtaBackgroundClient {
     required void Function(String) onLost,
     required Future<void> Function() onCancel,
     required void Function() onOpen,
+    String? companionRuntimeId,
   }) async {
     key = initial.key;
     lost = onLost;

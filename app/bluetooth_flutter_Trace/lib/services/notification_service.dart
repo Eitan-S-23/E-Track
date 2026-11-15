@@ -25,7 +25,6 @@ class NotificationService {
   bool _isInitialized = false;
   Future<void>? _initializing;
   Future<bool?>? _permissionRequest;
-  bool? _permissionGranted;
 
   /// 初始化通知服务
   Future<void> initialize() {
@@ -47,9 +46,9 @@ class NotificationService {
 
     const DarwinInitializationSettings initializationSettingsIOS =
         DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
     );
 
     const InitializationSettings initializationSettings =
@@ -67,9 +66,6 @@ class NotificationService {
       },
     );
 
-    // 请求权限
-    await _requestPermissions();
-
     _isInitialized = true;
   }
 
@@ -77,7 +73,6 @@ class NotificationService {
   Future<bool?> requestNotificationPermission() async {
     if (!_isInitialized) {
       await initialize();
-      return _permissionGranted;
     }
     return _requestPermissions();
   }
@@ -86,10 +81,7 @@ class NotificationService {
     final pending = _permissionRequest;
     if (pending != null) return pending;
     late final Future<bool?> future;
-    future = _requestPermissionsImpl().then((granted) {
-      _permissionGranted = granted;
-      return granted;
-    }).whenComplete(() {
+    future = _requestPermissionsImpl().whenComplete(() {
       if (identical(_permissionRequest, future)) _permissionRequest = null;
     });
     _permissionRequest = future;

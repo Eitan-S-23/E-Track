@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'dart:io';
+import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'device_tab_page.dart';
 import 'discover_tab_page.dart';
 import 'profile_tab_page.dart';
@@ -11,7 +15,8 @@ class MainAppPage extends StatefulWidget {
   State<MainAppPage> createState() => _MainAppPageState();
 }
 
-class _MainAppPageState extends State<MainAppPage> {
+class _MainAppPageState extends State<MainAppPage> with WidgetsBindingObserver {
+  bool _setupPending = false;
   int _selectedIndex = 0;
   bool _deviceOrbitActive = false;
   late final PageController _pageController;
@@ -44,12 +49,32 @@ class _MainAppPageState extends State<MainAppPage> {
   void initState() {
     super.initState();
     _pageController = PageController();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(_offerSetup()));
   }
 
   @override
   void dispose() {
     _pageController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) unawaited(_offerSetup());
+  }
+
+  Future<void> _offerSetup() async {
+    if (!Platform.isAndroid || _setupPending || WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) return;
+    _setupPending = true;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (!mounted || prefs.getBool('companion_setup_seen') == true ||
+          WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) return;
+      await prefs.setBool('companion_setup_seen', true);
+      if (mounted) await Get.toNamed<void>('/companion-setup');
+    } finally { _setupPending = false; }
   }
 
   void _selectPage(int index) {

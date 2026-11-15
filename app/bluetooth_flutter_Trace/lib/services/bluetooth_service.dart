@@ -838,7 +838,10 @@ class BluetoothService extends GetxController {
   }
 
   /// 初始化蓝牙
-  Future<void> initBluetooth() async {
+  Future<void>? _initialization;
+  Future<void> initBluetooth() => _initialization ??= _initializeBluetooth();
+
+  Future<void> _initializeBluetooth() async {
     try {
       // 根据平台选择适配器
       if (Platform.isWindows) {

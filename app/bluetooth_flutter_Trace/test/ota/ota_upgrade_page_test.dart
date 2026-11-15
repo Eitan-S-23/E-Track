@@ -1213,7 +1213,7 @@ class _FakeOtaService extends OtaService {
   }
 
   @override
-  Future<bool> downloadFirmware() async {
+  Future<bool> downloadFirmware({String? companionRuntimeId}) async {
     downloadCalls++;
     isUpgrading$.value = true;
     phase$.value = OtaPhase.downloading;

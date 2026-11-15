@@ -149,6 +149,20 @@ class OtaBleTransport {
   /// 本实例是否已被取消（取消后代次失效，禁止复用，由上层重建）。
   bool get isCancelled => _cancelled;
 
+  /// Uses the same device-scoped writer/late-write quarantine as binary frames.
+  /// The service owner admits this only outside binary queries and transfers.
+  Future<void> writeIdleControl(Uint8List line) async {
+    if (_busy || _session != 0 || _disposed || _cancelled || line.length > 320 ||
+        line.length < 7 || line.last != 10 ||
+        String.fromCharCodes(line.take(6)) != '!ETC1|' ||
+        line.take(line.length - 1).any((b) => b < 33 || b > 126)) {
+      throw const OtaTransportException('Idle control unavailable', code: 'CONTROL_NOT_IDLE');
+    }
+    _busy = true;
+    try { await _writeFrameChecked(line, allowCancelled: false); }
+    finally { _busy = false; }
+  }
+
   /// 发送 GET_INFO 并解析身份。连接不可用或超时抛 [OtaTransportException]。
   /// INFO payload 链路损坏（MALFORMED_INFO）有界重发；身份不符是确定性
   /// 错误，直接抛 [OtaDeviceIdentityException]。

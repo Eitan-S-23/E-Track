@@ -134,22 +134,7 @@ class ProfileTabPage extends StatelessWidget {
   }
 
   void _showSettingsDialog() {
-    _showTraceDialog(
-      const TraceDialog(
-        title: '应用设置',
-        icon: Icons.settings,
-        color: TraceColors.mint,
-        message: '设置功能开发中。当前版本先保留入口，后续会接入个性化配置。',
-        actions: [
-          TraceDialogAction(
-            label: '知道了',
-            isPrimary: true,
-            color: TraceColors.mint,
-            onPressed: TraceDialog.close,
-          ),
-        ],
-      ),
-    );
+    Get.toNamed('/companion-setup');
   }
 
   void _showUserInfoDialog() {

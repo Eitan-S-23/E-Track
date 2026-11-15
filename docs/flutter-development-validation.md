@@ -142,7 +142,7 @@ by adding this entry.
 
 | Step | Command | Timeout |
 |---|---|---|
-| SDK checkout | `git clone --config core.longpaths=true --depth 1 --branch stable https://github.com/flutter/flutter.git <run>/sdk` | 180 s |
+| SDK checkout | `git clone --config core.longpaths=true --depth 1 --branch 3.47.8 https://github.com/flutter/flutter.git <run>/sdk` | 180 s |
 | SDK identity | `flutter --version --machine` | 300 s |
 | Dependencies | `flutter pub get --enforce-lockfile` | 300 s |
 | Analysis | `flutter analyze --no-pub` | 300 s |
@@ -154,10 +154,15 @@ device integration tests or other repository components. Targeted green tests
 do not stand in for app-wide validation of a stable batch. Choose scope according
 to affected callers, codecs, tests and dependencies, not just one file's hash.
 
-The SDK follows the same stable channel as `build.yml`; the raw version command
-records the resolved Flutter/Dart revisions. This is not a pinned environment
-or a formal evidence-reuse decision. A future acceptance profile must bind its
-actual SDK/environment inputs separately. Each development run is cold and
+The SDK and `build.yml` pin Flutter 3.47.8 (the existing P3-8 software originals
+record framework `737ba8f885dc774b53b442759999a312c9461e4e`). The raw version
+command still records the actual Flutter/Dart revisions. On 2026-11-16 floating
+stable resolved to 3.50.0, changing SDK dependencies and reporting 46 Material
+library migration diagnostics on the otherwise passing baseline. This bounded
+pin retains strict analysis and lockfile enforcement, rather than suppressing
+diagnostics or introducing an unrelated UI-library migration. Upgrades need an
+explicit dependency/API validation batch; the pin does not reuse acceptance for
+changed app code. Acceptance must bind actual SDK/environment inputs. Each run is cold and
 workspace-local rather than relying on undocumented third-party cache settings.
 
 Setup/dependency failure leaves downstream steps NOT_RUN. Analysis failure or
