@@ -553,6 +553,7 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
   late final CompanionScanPolicy _companionScan = CompanionScanPolicy(nowMs: () => _scanClock.elapsedMilliseconds);
   Timer? _companionScanTimer;
   WidgetsBinding? _lifecycleBinding;
+  void Function()? _backgroundReconnectRelease;
   bool get foregroundScanningAllowed => !Platform.isAndroid || _lifecycleBinding?.lifecycleState == AppLifecycleState.resumed;
   bool get companionScanningAllowed => _companionScan.allowed;
   bool get _scanningAllowed => !_closed && (foregroundScanningAllowed || companionScanningAllowed);
@@ -574,7 +575,29 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (Platform.isAndroid) {
+      if (state == AppLifecycleState.resumed) {
+        _backgroundReconnectRelease?.call();
+        _backgroundReconnectRelease = null;
+      } else {
+        _backgroundReconnectRelease ??= _reconnect.hold();
+      }
+    }
     if (!_scanningAllowed) unawaited(stopScan());
+  }
+
+  Future<bool> connectCompanionDeviceByAddress(String address) async {
+    _reconnect.forget(address);
+    final connected = await connectOtaDeviceByAddress(address);
+    _reconnect.forget(address);
+    return connected;
+  }
+
+  Future<void> disconnectCompanionDeviceByAddress(String address) async {
+    final key = address.toLowerCase();
+    _reconnect.forget(key);
+    _connectEpochs[key] = (_connectEpochs[key] ?? 0) + 1;
+    await disconnectOtaDeviceByAddress(address);
   }
 
   void Function() holdAutomaticReconnect() => _reconnect.hold();
@@ -828,6 +851,7 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
     if (Platform.isAndroid) {
       _lifecycleBinding = WidgetsBinding.instance;
       _lifecycleBinding!.addObserver(this);
+      didChangeAppLifecycleState(_lifecycleBinding!.lifecycleState ?? AppLifecycleState.detached);
     }
     initBluetooth();
   }
@@ -840,6 +864,8 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
     _companionScanTimer?.cancel();
     _companionScan.ownerChanged(null);
     _reconnect.dispose();
+    _backgroundReconnectRelease?.call();
+    _backgroundReconnectRelease = null;
     final pause = _otaScanPause;
     if (pause != null) {
       unawaited(pause.dispose().catchError((Object error) {

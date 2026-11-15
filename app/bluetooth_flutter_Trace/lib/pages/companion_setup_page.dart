@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../companion/companion_platform.dart';
+import '../companion/companion_runtime.dart';
 import '../controllers/ble_controller.dart';
 import '../services/bluetooth_service.dart';
 import '../utils/permission_helper.dart';
@@ -24,18 +25,24 @@ class _CompanionSetupPageState extends State<CompanionSetupPage> with WidgetsBin
   bool _busy = false;
   int _readEpoch = 0;
   String? _error, _selected;
+  Worker? _statusWorker;
 
   @override
   void initState() {
     super.initState();
     _platform = widget.platform ?? CompanionPlatform();
     WidgetsBinding.instance.addObserver(this);
+    if (Get.isRegistered<CompanionRuntime>()) {
+      _statusWorker = debounce(Get.find<CompanionRuntime>().status, (_) => unawaited(_refresh()),
+        time: const Duration(milliseconds: 200));
+    }
     unawaited(_refresh());
   }
 
   @override
   void dispose() {
     _readEpoch++;
+    _statusWorker?.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }

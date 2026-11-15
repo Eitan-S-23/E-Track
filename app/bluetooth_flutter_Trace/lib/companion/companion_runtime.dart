@@ -114,7 +114,9 @@ class CompanionRuntime extends GetxService {
       return;
     }
     late final Future<void> flight;
+    _ownsOta = true;
     flight = _wake(wake).catchError((Object _) async { await _state('FAILED', busy: false); }).whenComplete(() {
+      _ownsOta = false;
       if (identical(_wakeFlight, flight)) _wakeFlight = null;
       _drainWake();
     });
@@ -160,7 +162,7 @@ class CompanionRuntime extends GetxService {
     if (!await _state('CONNECTING', busy: true) || !_current(epoch)) return;
     if (!_sameLink()) {
       _invalidateLink();
-      if (!await _ble.connectOtaDeviceByAddress(address) || !_current(epoch)) {
+      if (!await _ble.connectCompanionDeviceByAddress(address) || !_current(epoch)) {
         await _state('DEVICE_OFFLINE', busy: false); return;
       }
       final info = await _ota.readDeviceInfo(address);
@@ -294,10 +296,11 @@ class CompanionRuntime extends GetxService {
     if (pending != null) return pending;
     if (_runtime == null || !_sameLink() || _ota.isUpgrading || _choiceFlight != null) return Future.value();
     late final Future<void> flight;
+    _ownsOta = true;
     flight = _prepare(source, request).catchError((Object _) async {
       await _deviceState('FAILED', request);
       await _state('FAILED', busy: false);
-    }).whenComplete(() { if (identical(_checkFlight, flight)) _checkFlight = null; _drainWake(); });
+    }).whenComplete(() { _ownsOta = false; if (identical(_checkFlight, flight)) _checkFlight = null; _drainWake(); });
     _checkFlight = flight;
     return flight;
   }
@@ -437,7 +440,7 @@ class CompanionRuntime extends GetxService {
     await _text?.cancel(); _text = null;
     await _connection?.cancel(); _connection = null;
     if (_ownsOta && _ota.canCancelTask) await _ota.cancelCurrentTask(keepPackage: true);
-    if (disconnect && address != null && !_ota.isUpgrading) await _ble.disconnectOtaDeviceByAddress(address);
+    if (disconnect && address != null && !_ota.isUpgrading) await _ble.disconnectCompanionDeviceByAddress(address);
     status.value = 'STOPPED';
   }
 
