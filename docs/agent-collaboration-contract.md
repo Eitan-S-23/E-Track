@@ -44,6 +44,16 @@ resolved, directly applicable decision and states how it applies here.
 
 ## Main Progress Board
 
+Local entry decision, 2026-11-16: the primary project checkout hosts `main` and
+its root `PLAN-OTA-EXEC.md`. New task checkouts use `.worktrees/`; `.cache/` is
+not the permanent main entry. Historical evidence and worktrees stay in place
+unless an explicitly scoped preservation/migration operation accounts for them.
+Run the primary checkout's `Tools/workflow/main_board.py --repo-root <caller>`
+before interpreting progress, claiming a task or handing work over. It is a
+read-only check of Git's actual worktree mapping and fresh remote main, not a
+second status database. Its `LOCAL_PENDING` result distinguishes local board
+edits from published progress; an unavailable remote is never called current.
+
 User decision, 2026-11-15: `PLAN-OTA-EXEC.md` on the repository's remote `main`
 is the shared project progress entry. Task branches and worktrees are valid
 working locations, but their boards, private caches and chat are not a substitute

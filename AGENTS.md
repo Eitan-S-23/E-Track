@@ -7,6 +7,13 @@ promote AC5 artifacts to OTA or CI release artifacts.
 
 ## Project-Wide Agent Workflow
 
+- The primary checkout is the local `main` entry. Before progress reports,
+  task claims or handoffs, run `python -B Tools/workflow/main_board.py --repo-root .`
+  from the primary checkout (or invoke that script by its primary-root path from
+  a task worktree). Read the reported authoritative board, not the caller's copy.
+  A failed freshness check must be reported; local pending edits are not remote
+  delivery. New task worktrees belong under `.worktrees/`, not `.cache/`.
+  Do not move or clean historical worktrees/evidence just to match this layout.
 - `main:PLAN-OTA-EXEC.md` is the shared progress board. Follow **Main Progress
   Board** in `docs/agent-collaboration-contract.md`: check the actual branch,
   worktree and current remote main before interpreting status; synchronize
