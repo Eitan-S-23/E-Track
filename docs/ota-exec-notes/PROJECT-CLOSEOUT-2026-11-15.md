@@ -9,10 +9,12 @@ for the user's manual upgrade between these independent work items. This scope
 does not mark P5 complete, publish a channel, start a four-hour run, or rewrite
 historical acceptance evidence.
 
-Current closeout: MCU candidate ingestion is complete. Main-board/rule delivery,
-main CI and preserving local-main synchronization are complete. P51 immutable
-input and current cloud checks pass; live device qualification is pending the
-designated phone connection. `canStartFourHour=false` remains explicit.
+Current closeout: MCU candidate ingestion and the original main-board/rule
+delivery are complete. The latest original App and MCU 3.3.27 have now been
+observed; safe App restart/reconnection and recording originals are verified.
+The complete upgrade short cycle still lacks compatible current-backend reference
+inputs. `canStartFourHour=false`. See the superseding
+[current-App follow-up](P51-CURRENT-APP-2026-11-15.md).
 
 Working root: `D:/github/my/E-Track/.cache/p35-integration-20261028/source`.
 New receipts are under `.cache/project-closeout-20261115-01/` in that worktree.
@@ -137,21 +139,14 @@ not a manual firmware upgrade or chat reply. Delivery is not evidence that the
 phone was connected. `p51-ready.json` records exact input/observation pins and
 `canStartFourHour=false` rather than declaring preparation fully complete.
 
-Remaining order: observe the phone connection, rerun only current readiness using
-a fresh output label, reconcile actual MCU/Boot/BCB/staging state, then qualify
-one existing V2 upgrade/restore cycle and original-log retrieval. If installed
-state has changed, reconcile that real difference before mutation; do not assume
-the old receiver remains installed. Reuse old successful checks and preserve
-failed short attempts/pre-device resolution records. Do not replay historical
-v20 contracts or count preparation as formal acceptance.
-
-Readiness continuation from the working root:
-
-    python -I -S -B -X utf8 .cache/project-closeout-20261115-01/p51.py preflight phone p51-phone-02
-    python -I -S -B -X utf8 .cache/project-closeout-20261115-01/p51.py run phone p51-phone-02
-
-These commands only inspect the designated phone. They do not start an OTA or
-four-hour run; the actual short-cycle admission remains a separate next step.
+The phone-absent state and old readiness inputs above are historical, not the
+current continuation command. Do not rerun the old benchmark-App readiness route.
+The current original App is 1.0.77 / 103 and its connected MCU reports 3.3.27.
+Both normal channels currently return NO_UPDATE for that identity. Follow
+[P51 current-App/backend preparation](P51-CURRENT-APP-2026-11-15.md) for the
+verified recorder lifecycle, deferred navigation bug and actual remaining inputs.
+Native App/Boot/BCB/staging admission, the complete upgrade/restore short cycle
+and four hours remain outstanding; historical v20 inputs are not a shortcut.
 
 The user confirmed the browser notification problem was VPN-related and requested
 no further investigation. The deferred favicon outcome remains outside this batch;
