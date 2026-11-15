@@ -342,3 +342,20 @@ The user also clarified that a successfully built, automatically ingested MCU
 candidate does not require their manual upgrade before board and P51 preparation
 work continues. Actual hardware admission must still inspect the installed state.
 See [the current closeout](../ota-exec-notes/PROJECT-CLOSEOUT-2026-11-15.md).
+
+### Local Entry Follow-up, 2026-11-16
+
+The user subsequently approved restoring the primary root to main and assigned
+the same session implementation of APP-COMPANION-01. The root now checks out
+remote-verified `bd146e6b7dc6d1c2616c823f1e3668b671c8076d`. The prior cache main
+is detached and retained; archive changes are preserved in a tracked-only stash
+plus verified raw copies, and its 18,426 untracked evidence files are unchanged.
+New implementation work uses `.worktrees/app-companion-01`, not a cache entry.
+
+The primary `Tools/workflow/main_board.py` resolves the real Git common root and
+main binding, performs a fresh remote query and explicitly reports local pending
+board edits. Task-branch boards are not authority. An unavailable remote or a
+stale/local-cache main produces a failed check, not a guessed progress answer.
+These new rule/card changes remain local pending main delivery. See the single
+[implementation record](../ota-exec-notes/APP-COMPANION-01.md); do not rewrite
+this section's historical incident or any frozen original.

@@ -8,6 +8,8 @@ on:
     paths:
       - "Tools/acceptance/**"
       - "Tools/provenance/**"
+      - "Tools/workflow/**"
+      - "tests/ota/test_main_board.py"
       - "Tools/ota/p34-acceptance/**"
       - "Tools/ota/p3-3-service/**"
       - "tests/ota/test_p34_live_route.py"
@@ -53,6 +55,8 @@ on:
     paths:
       - "Tools/acceptance/**"
       - "Tools/provenance/**"
+      - "Tools/workflow/**"
+      - "tests/ota/test_main_board.py"
       - "Tools/ota/p34-acceptance/**"
       - "Tools/ota/p3-3-service/**"
       - "tests/ota/test_p34_live_route.py"
@@ -97,6 +101,24 @@ permissions:
   contents: read
 
 jobs:
+  main-board-entry:
+    name: Main board entry (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check entry behavior (Linux)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: python3 -B tests/ota/test_main_board.py
+      - name: Check entry behavior (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: python -B tests/ota/test_main_board.py
+
   flutter-debug-skill:
     name: Flutter debugging skill (${{ matrix.os }})
     strategy:

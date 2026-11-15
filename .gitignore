@@ -105,4 +105,5 @@ MDK-ARM_F435/cmake-generated/build-pre4-verify/
 # Local OTA verification scratch
 /.cache/
 /.local-archive/
+/.worktrees/
 /.claude/test_bcb_arbiter.exe

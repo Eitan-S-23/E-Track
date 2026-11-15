@@ -50,9 +50,11 @@
 | P4 | CI/CF | 完成 | 4/4 | P5 前实现、配置与隔离 rehearsal 已完成；生产晋升仍须 P5 与原审批 |
 | P5 | 联调验收 | 进行中 | 0/3 | 已有非断电观察、V2 脚本和云下载服务准备；真实四小时、同组 30/30 及剩余故障验收未完成，不解除正式准入或生产门槛 |
 
-### 当前入口与交付边界（2026-11-15）
+### 当前入口与交付边界（2026-11-16）
 
-- 主目录当前为归档分支；本机 main worktree 是 `.cache/p34-final`。任务工作目录是 `.cache/p35-integration-20261028/source`，包含较新的任务记录及未提交内容，不整体覆盖到 main。
+- 项目根目录现已检出 `main`，本地主看板为根目录 `PLAN-OTA-EXEC.md`。入口修正基线为 `bd146e6b7dc6d1c2616c823f1e3668b671c8076d`。使用根目录 `Tools/workflow/main_board.py` 重新检查实际映射、当前远端和本地待交付差异，不能仅凭目录名、历史提交或这段说明判断已经同步。
+- 旧 `.cache/p34-final` 已解除 `main` 绑定并原地保留，18,426 个未跟踪证据文件的大小、修改时间和 SHA-256 已核对未变。根目录历史改动已保存为本地 stash 和原始文件备份，详见 [综合任务实施记录](docs/ota-exec-notes/APP-COMPANION-01.md)。不清理旧 worktree 或冻结原件。
+- P51 任务工作目录仍为 `.cache/p35-integration-20261028/source`，其较新任务记录及未提交内容不整体覆盖到 main。新综合任务使用 `.worktrees/app-companion-01`；主看板、任务实现和历史证据三个位置不得混同。
 - P1-7-v4 的五项 PASS 与 P1-6-v3 的 14 项 AUTO PASS / 六项 PHYSICAL NOT_OBSERVED 原件，已核对远端 `dev/firmware/p51-packaging-20261104` 的 `362653bb38d6fd1f9fb9bdca0339c1a6d6e77547`；相对路径分别为 `docs/acceptance-contracts/P1-7-v4/final-matrix-02.json`、`docs/acceptance-contracts/P1-6-v3/final-matrix.json`。本次只汇总，不重跑或重写原件，也不把其产品分支整体合入。
 - 修复版本栏多余品牌文字的 MCU `3.3.27` 已通过原候选流程构建并自动入库后台，来源 `7574ed7e29551c163643120b42c355bac23cb3a9`，CI `43634976957`。后续已从设备读取到 `3.3.27`；本轮脚本适配没有再次安装固件或发布通道。
 - 当前主线之外的 App/后台修复及 P51 准备、原始证据入口和剩余工作，统一见 [本轮项目收尾记录](docs/ota-exec-notes/PROJECT-CLOSEOUT-2026-11-15.md)。浏览器通知问题已由用户确认与 VPN 有关，不再排查；网页图标仍按用户决定暂缓，不启用付费 Access 定制。
@@ -883,6 +885,23 @@
 - 验证: 离线宿主回归、远端清单与删除回执、治理 CI 分别记录；独立复核/验收不由实施者代签。
 - 证据: docs/ota-exec-notes/CI-ARTIFACT-02-agent-cleanup-2026-09-18.md；项目内 .cache/artifact-agent-20260918/。
 
+### 8.3 综合体验任务（单卡）
+
+<a id="app-companion-01"></a>
+#### APP-COMPANION-01 E-Track 后台伴侣运行、OTA 交互与基础体验完善
+状态: 进行中 ｜ 认领: Codex(当前主会话兼实现者) / 2026-11-16 ｜ 更新: 2026-11-16(本地主线入口和单卡基线已纠正；菜单返回与图标第一批实现已完成宿主自测，GCC App/Boot 与 LVGL 模拟器构建通过；已有 GitHub 凭据访问已恢复，继续权限/后台/MCU 检查交互与开发 CI；产品主线交付与独立验收未完成)
+- 唯一 Spec: [prompt-APP-COMPANION-01.md](docs/ota-prompts/prompt-APP-COMPANION-01.md)。本卡统一维护状态和完成勾选，不拆子卡、不增加阶段分母。
+- 开工前置: 保护旧改动、恢复根目录主线、入口检查及 Spec 纠偏统一在本卡记录；不另建治理卡。实现基线为已核对的 main，不使用归档工作区或 P3-8 预审版本代替当前产品。
+- 复用: P3-8-v5 和 P3-5-v5 已完成，P4 为既有完成基础；只补新增能力和受影响回归，不重开历史任务，不改变 P1/P5 剩余要求或生产发布门槛。
+- [ ] C1 首次授权向导、持久权限/后台设置入口、状态复检与明确降级。
+- [ ] C2 Android 后台伴侣连接、开机恢复、持久调度和真实执行所有者。
+- [ ] C3 App 网关检查/下载/校验，MCU 主动检查、就绪通知与绑定用户确认。
+- [ ] C4 当前 MCU 多级菜单的波轮焦点、返回事件及单次返回行为修复。
+- [ ] C5 接入用户选定的 `generated-images/29.png`，适配平台图标并保持应用身份。
+- [ ] C6 受影响自测、必要构建、获准设备验证及非实现会话独立验收。
+- 记录与原件索引: [APP-COMPANION-01.md](docs/ota-exec-notes/APP-COMPANION-01.md)。自测、构建、现场观测、独立验收和主线交付分别报告，不以目录迁移或静态检查勾选产品完成。
+- 当前验证: 9 项入口测试、27 项既有 Spec 治理测试、3 项图标测试和 1 项含旧版失败/新版通过的菜单行为测试通过。GCC/模拟器构建成功，742 条含警告行、0 条错误；真实波轮、后台运行和 Flutter APK/EXE 未验证。已通过现有 SU 用户的准确 GitHub CLI 凭据槽恢复访问并核对 `Eitan-S-23` 身份与项目推送权限，没有创建、修改或落盘密钥；CI 结果另行记录，不以鉴权成功冒充通过。
+
 ## 9. 契约变更登记表(回审通道)
 
 | 日期 | 发起(卡ID/agent) | 冲突点 | 提议 | 处置(用户/审查结论) | 状态 |
@@ -936,6 +955,8 @@
 | 2026-10-19 | P4-4 / Codex root / `P44-CREDENTIAL-01` | 新链两项产品整改与 Worker 部署已完成，但严格桶凭据的 account-owned/user-owned 创建 POST 均返回 403/9109，最终十项只读核对仍缺四个 S3 secrets | 保持两套独立桶限定 Object Read and Write，不替换旧 CI/provisioning token、不扩大权限；由 O1 直接配置或提供受保护来源与脱敏范围/有效期 | 按 §0.6 必需外部依赖缺失置阻塞；独立预审 10/10 和非发布 CI 通过不等于正式 PASS。保留实际部署异常/恢复和外部缓存未决；root 待凭据后冻结并组织新链/真实 reviewer 观测，gate=false，正式轮次零，未改 main | 已登记/外部凭据阻塞 |
 
 ## 10. 会话日志(每会话一行:日期 ｜ agent ｜ 动了哪些卡 ｜ 一句话结果)
+
+- 2026-11-16 | Codex 主会话兼实现者 | APP-COMPANION-01 进行中 | 按用户授权先完成根目录 main 入口迁移；57 项 tracked 改动保存为 stash，1,238 项原变更和 34 个覆盖冲突已备份，旧 main 的 18,426 个证据文件与选定图标不变。修正单卡的当前产品基线，继续实现；本地记录待提交，未发布或部署，不重开 P3/P4。
 
 - 2026-11-08 | Codex root scoped App web delivery | P51-ADMIN-WEB-APP-01 reviewed and merged; P5 remains open | PR34 contains only eight reviewed code/test/docs blobs and sixteen evidence/docs files, not the pending firmware branch. Independent scoped review passed; PR and main CI each passed54 Admin/283 Worker tests, governance and App path detection, with APK/EXE/Release/deploy skipped. Original operations were not replayed, releases unchanged, main App version unchanged. Historical boundary anomalies and literal-final-target/first30/four-hour/physical gaps remain. Local main synchronization is not claimed. See docs/ota-exec-notes/P51-App-Web-integration-2026-11-08.md.
 
