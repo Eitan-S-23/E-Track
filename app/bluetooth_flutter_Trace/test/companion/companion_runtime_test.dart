@@ -397,8 +397,10 @@ class _Ota extends OtaService {
     owners.add(companionRuntimeId);
     messages.add(message);
     if (message.kind == 'HELLO') ble.emit(CompanionMessage('CAPS', message.session, 0, ['1']));
-    if (message.kind == 'OFFER') ble.emit(CompanionMessage('SEEN', message.session, message.request,
-      [message.fields[0], message.fields[2]]));
+    if (message.kind == 'OFFER') {
+      ble.emit(CompanionMessage('SEEN', message.session, message.request,
+        [message.fields[0], message.fields[2]]));
+    }
     return true;
   }
   @override
