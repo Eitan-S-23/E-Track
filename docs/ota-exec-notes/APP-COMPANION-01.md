@@ -7,12 +7,14 @@ pending-CI statements. The single card remains IN PROGRESS; C1-C6 are not signed
 off. Implementation, device observation, independent acceptance and main product
 integration are separate.
 
-Latest independent remediation review on `f48bd193`, 2026-11-16: R01, R02, R04
-and R05 are CLOSED for the reviewed source defects; R03 remains OPEN/P1 because
-baseline mobile discovery still awaits after the new admission check and before
-the first platform write. See [Independent Remediation Re-Review](#independent-remediation-re-review-f48bd193).
-T01/T02 and D0-D5 remain open/NOT_RUN. This new reviewer record is local pending
-delivery, not whole-card acceptance or product integration.
+Latest independent remediation review on `f463649f`, 2026-11-16: R03 is CLOSED
+for the identified source defect, so R01-R05 are now CLOSED at source-review
+scope. No new blocking defect was found in the bounded 11-file delta. See
+[Independent R03 Closure](#independent-r03-closure-f463649f).
+T01/T02 and D0-D5 remain open/NOT_RUN. Root owns the authorized documentation
+delivery below; its submission receipt and fresh main-board check establish
+publication. Historical LOCAL_PENDING entries retain their point-in-time meaning.
+This is not whole-card acceptance or product integration.
 
 Independent offline review, 2026-11-16: AC01-R01 through AC01-R05 below are open
 on `7fa86c2c`. Two production-method host probes reproduce product failures;
@@ -1253,3 +1255,132 @@ earlier reviewer additions are included in this authorized root delivery with
 their original findings and point-in-time LOCAL_PENDING wording preserved.
 Next owner is the original independent reviewer for the bounded R03 re-review;
 the software/hardware/formal obligations above are not self-signed as PASS.
+
+## Independent R03 Closure, f463649f
+
+Reviewer: Codex, the original non-implementation reviewer. Result: AC01-R03 is
+CLOSED for the previously identified source defect. No new blocking defect was
+found in `f48bd193..f463649f`; this is an offline source/original-evidence review,
+not formal acceptance or an on-device execution.
+
+### Inputs And Boundary Verification
+
+- Fresh authoritative entry was MAIN_MATCHED: local and remote main
+  `e58c059daddde396d5aa79b889266fa978bc29b6`. Product worktree and fresh remote
+  branch both identify `f463649fc0a71945bff36c3ec57cbaecbd0fa9ef`; the worktree is
+  clean. The reviewed product delta is 11 files, without MCU, simulator, Android
+  native or lockfile changes. All following source references are to that
+  product worktree/commit, not the main product copy.
+- `lib/ota/ota_write_admission.dart:14` is a synchronous, one-shot, revocable
+  admission token. `lib/services/ota_service.dart:3339` forwards it unchanged;
+  `lib/services/bluetooth_service.dart:1775` dispatches it after the baseline
+  discovery and connection checks, immediately before `ch.write()`. The Windows
+  branch at `:1710` also has no project-owned await between dispatch and its
+  platform API. This closes the exact extra-discovery window from the last review.
+- `lib/ota/ota_ble_transport.dart:1814` records initial dispatch only inside the
+  gate. Timeout retires a pending gate, pre-dispatch pause releases the serial
+  writer for INFO recovery, and rejection retains its original exception without
+  marking a healthy binding disconnected. An unstarted guarded transfer sends no
+  cleanup ABORT/resync. Actual write failures still follow quarantine; already
+  admitted DATA/recovery/END do not re-expire consent. No second sender, wire
+  change, forced adaptive profile or new cancellation of irreversible apply.
+
+### Regression And Original Evidence
+
+Evidence: `.cache/app-companion-01-20261116/review-f463649f/evidence.json`, SHA-256
+`2cf2f855132233596b4777ecb23539bcad27395a52299ace435ec9c987ac37c1`.
+The independent audit verified 84 source/log/artifact files against their bound
+hashes and parsed the original CI results and raw logs. No successful CI, host
+test, firmware build or hardware operation was rerun in this review.
+
+- The eight new service scenarios at
+  `test/ota/ota_service_upgrade_test.dart:434` instantiate actual BluetoothService
+  in uncached mode. Only the device/characteristic edges and existing MCU model
+  are fake. v1/v2 each cover expiry during discovery, owner retirement, valid
+  consent and expiry after platform dispatch. They assert zero characteristic
+  writes/BEGIN/DATA/END/ABORT on rejection, reject duplicate starts, and verify
+  final target version/raw SHA in admitted positive controls. All eight names
+  are individually present in both original Linux execution logs.
+- Four direct writer variants cover baseline/reuse and statistics on/off,
+  exception identity and healthy binding preservation. Four further cases cover
+  one-shot/retired gates, timeout with late completion, and lower-writer pause
+  with allowed/refused resume. Source inspection and the unfiltered full-suite
+  commands/counts account for all 16 additions. Both expanded concurrent logs
+  show 13 of these names literally; the synchronous gate test and two stats=false
+  names are not individually printed. Do not claim per-case raw lines for those
+  three. The first review parser incorrectly required all 16 literal names;
+  `audit-failure-01.txt` preserves that collector failure. Only the reader was
+  corrected, retaining exact source/full-command/count and eight-critical-case
+  checks; no original or product test was altered and no CI was replayed.
+- Exact-source development `43829923594` and debug `43830892509` each have Linux
+  999 passed/16 skipped and Windows 967 passed/48 skipped, zero failures, strict
+  analysis and 11 additional candidate tests per host. Twelve new mobile-path
+  cases run on Linux and are explicitly skipped on Windows, not Windows PASS.
+  SDK originals bind Flutter 3.47.8/Dart 3.13.7. Windows' one regenerated
+  registrar-header EOL-only delta satisfies the existing semantic-state contract;
+  it is not described as a literally clean restored worktree.
+- Actual passive debug APK, metadata, standard APK, Windows EXE and runtime ZIP
+  hashes/lengths match their successful source-bound receipts. The debug APK's
+  74,581,856-byte kernel contains the target, endpoint, sentinel and passive token.
+  Standard `43830974185` and main governance `43835079308` originals pass on their
+  respective product/main sources. Signer/package observations remain original
+  CI evidence, not new local signing or installed-device proof.
+- The `15faa55c..f463649f` delta changes only the two test-fixture issues; the
+  original failed `43829000008` is retained. Unchanged build-09's 15 inputs and
+  nine outputs still match, including 465 warning-containing lines, zero errors
+  and incremental Boot. The prior independent 42 host cases and original native
+  27 cases remain applicable to their unchanged inputs, not new executions or
+  evidence of Android lifecycle reliability. Earlier reviewer evidence is intact.
+
+### Remaining Acceptance And Ownership
+
+| Criterion | Status After This Source Review |
+| --- | --- |
+| A1 | R05 remains source-closed. T01 permission-page denial/lifecycle/settings-return coverage and real permission observations remain open. |
+| A2 | R04 remains source-closed. T02 chooser/Bridge/boot/job/headless and telemetry/database-failure coverage, plus real background lifecycle observations, remain open. |
+| A3 | R01/R02/R03/R04 source findings closed. Actual gateway/consent/OTA/final identity observations remain D3/D4 NOT_RUN. |
+| A4 | R01 remains source-closed. Per-page real wheel/navigation/focus observation remains D5 NOT_RUN. |
+| A5 | Unchanged offline icon evidence remains applicable; installed appearance and compatibility remain unobserved. |
+| A6 | R01-R05 source closure is not whole-card PASS. T01/T02, D0-D5 and formal freeze/execution/final adjudication remain outstanding. |
+
+Next owner: implementation supplies the remaining T01/T02 coverage; the
+independent acceptance owner prepares only the missing D0-D5 observations and
+existing formal contract when the actual collection/device/authorization
+prerequisites are satisfied. This review did not enumerate or operate devices,
+and does not assert the current phone connection state. C1-C6 stay unchecked;
+P3/P4 completion, P1/P5 and production gates are unchanged.
+
+This reviewer changed only the root note/board and the new project-local review
+directory. The product worktree is untouched; no commit, push, merge, install,
+release, deployment or external cleanup occurred. This update is LOCAL_PENDING.
+`write-audit.json` binds selected outputs and verifies reviewed originals remain
+unchanged. Handoff audit-09's 13 Cryptnet metadata differences are preserved;
+this review's named-file comparison is separate, not process attribution or a
+whole-OS audit. Attribution remains UNRESOLVED and no zero-native-external-write
+claim is made.
+
+## Root-Owned Review Delivery, 2026-11-16
+
+The user assigned submission of the review record to the primary agent. This
+documentation-only delivery carries the independent R03 closure and current
+board status to main. Its tracked scope is exactly `PLAN-OTA-EXEC.md` and this
+note; product source remains `f463649fc0a71945bff36c3ec57cbaecbd0fa9ef` on the
+unmerged development branch. The original non-implementation review above is
+not rewritten as an implementation self-test or whole-card PASS.
+
+The next implementation batch is the outstanding coverage, not another repair
+of closed R01-R05: T01 needs setup-page skip, permanent denial, revocation,
+disabled notification channel and return-from-settings cases. T02 needs real
+Bridge/chooser/boot/job/headless integration paths and headless telemetry with
+database-failure retention; keep fakes at external boundaries rather than
+replacing the behavior being tested. Preserve the existing task, criteria and
+development-validation route. Return the source changes and original regression
+results for independent review. D0-D5 and final independent acceptance remain
+separate, unexecuted obligations; no device action or product merge is granted.
+
+Submission and CI receipts are in the project-local `development/` directories
+named `keyring-submit-notes-review-01` and `keyring-ci-review-*`, under
+`.cache/app-companion-01-20261116/`. The separate submission write audit is
+`review-submission-01/write-audit.json` under that same base. These delivery
+receipts do not overwrite the preceding review evidence, failed originals or
+write audits. No external cleanup or zero-native-external-write claim is made.

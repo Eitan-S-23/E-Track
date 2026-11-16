@@ -889,7 +889,7 @@
 
 <a id="app-companion-01"></a>
 #### APP-COMPANION-01 E-Track 后台伴侣运行、OTA 交互与基础体验完善
-状态: 进行中 ｜ 认领: Codex(当前主会话兼实现者) / 2026-11-16 ｜ 更新: 2026-11-16(开发分支 f463649f 已补齐 R03 首次平台写入准入及真实 writer 回归，双平台全量自测通过；新被动调试 APK、标准 APK/EXE 验证通过，原始日志、实际文件及哈希已归档核对。R01/R02/R04/R05 的源码问题保持独立关闭，R03 等待独立复审，不由实现方签发关闭；T01/T02、D0-D5、整卡验收及产品主线合入未完成。本轮未重新枚举或操作设备)
+状态: 进行中 ｜ 认领: Codex(当前主会话兼实现者) / 2026-11-16 ｜ 更新: 2026-11-16(开发分支 f463649f 已补齐 R03 首次平台写入准入及真实 writer 回归，双平台全量自测通过；新被动调试 APK、标准 APK/EXE 验证通过，原始日志、实际文件及哈希已归档核对。R03 经原非实现会话离线复审关闭，R01-R05 的已识别源码问题均独立关闭；T01/T02、D0-D5、整卡验收及产品主线合入未完成。本轮未重新枚举或操作设备)
 - 唯一 Spec: [prompt-APP-COMPANION-01.md](docs/ota-prompts/prompt-APP-COMPANION-01.md)。本卡统一维护状态和完成勾选，不拆子卡、不增加阶段分母。
 - 开工前置: 保护旧改动、恢复根目录主线、入口检查及 Spec 纠偏统一在本卡记录；不另建治理卡。实现基线为已核对的 main，不使用归档工作区或 P3-8 预审版本代替当前产品。
 - 复用: P3-8-v5 和 P3-5-v5 已完成，P4 为既有完成基础；只补新增能力和受影响回归，不重开历史任务，不改变 P1/P5 剩余要求或生产发布门槛。
@@ -909,6 +909,8 @@
 - Independent remediation re-review: R01/R02/R04/R05 source findings CLOSED on `f48bd193`; R03 remains OPEN/P1 because baseline mobile discovery still awaits after the new consent guard and before the first platform write. Independently ran 42 host cases and reconciled current CI/build/package originals; no new device observation or formal PASS. [Residual boundary, repair oracle and remaining A1-A6 obligations](docs/ota-exec-notes/APP-COMPANION-01.md#independent-remediation-re-review-f48bd193). This reviewer update is LOCAL_PENDING, without product edits or commit/push.
 
 - R03 final-writer remediation: `f463649f` carries one-shot admission through real discovery to platform dispatch, preserves pre-dispatch errors/zero writes, and retains admitted transfer safety. Full dual-host checks, passive debug APK and standard APK/EXE verification pass; actual files and originals are archived. [Exact source, original results and remaining ownership](docs/ota-exec-notes/APP-COMPANION-01.md#r03-platform-dispatch-source-and-self-test-handoff). This authorized root documentation delivery includes the earlier pending review records without rewriting their point-in-time wording; independent R03 closure and whole-card acceptance remain separate.
+
+- Independent R03 closure: CLOSED on `f463649f` for the identified source defect; no new blocking finding in the 11-file delta. The original reviewer verified actual dispatch/timeout/pause boundaries, real-writer regressions and 84 source/log/artifact originals without replaying successful CI or device work. R01-R05 are source-closed, but T01/T02, D0-D5 and formal whole-card acceptance remain open/NOT_RUN. [Independent closure and evidence boundaries](docs/ota-exec-notes/APP-COMPANION-01.md#independent-r03-closure-f463649f). [Root-owned documentation delivery and next implementation batch](docs/ota-exec-notes/APP-COMPANION-01.md#root-owned-review-delivery-2026-11-16) do not integrate product code or sign off C1-C6.
 
 ## 9. 契约变更登记表(回审通道)
 
@@ -963,6 +965,10 @@
 | 2026-10-19 | P4-4 / Codex root / `P44-CREDENTIAL-01` | 新链两项产品整改与 Worker 部署已完成，但严格桶凭据的 account-owned/user-owned 创建 POST 均返回 403/9109，最终十项只读核对仍缺四个 S3 secrets | 保持两套独立桶限定 Object Read and Write，不替换旧 CI/provisioning token、不扩大权限；由 O1 直接配置或提供受保护来源与脱敏范围/有效期 | 按 §0.6 必需外部依赖缺失置阻塞；独立预审 10/10 和非发布 CI 通过不等于正式 PASS。保留实际部署异常/恢复和外部缓存未决；root 待凭据后冻结并组织新链/真实 reviewer 观测，gate=false，正式轮次零，未改 main | 已登记/外部凭据阻塞 |
 
 ## 10. 会话日志(每会话一行:日期 ｜ agent ｜ 动了哪些卡 ｜ 一句话结果)
+
+- 2026-11-16 | Codex root, original non-implementation reviewer | APP-COMPANION-01 remains in progress | User-authorized main delivery of the board and independent review note only; R01-R05 source findings closed, implementation next owns T01/T02 coverage. Product remains unmerged at `f463649f`; D0-D5 and formal acceptance remain outstanding. Submission, exact-main CI and write-audit receipts are separate from the preceding review originals.
+
+- 2026-11-16 | Codex original non-implementation reviewer | APP-COMPANION-01 remains in progress | R03 CLOSED on `f463649f` after actual platform-boundary source review and independent original-evidence checks; R01-R05 source findings now closed, no new blocking finding. Verified 84 originals and full 999/16 Linux, 967/48 Windows results; no new CI/test/build/device execution. T01/T02, D0-D5 and formal acceptance remain open; local note/board only, no commit/push/merge or external cleanup, Cryptnet attribution unresolved.
 
 - 2026-11-16 | Codex non-implementation re-reviewer | APP-COMPANION-01 remains in progress | Reviewed `7fa86c2c..f48bd193`: R01/R02/R04/R05 source defects closed; R03 retains a baseline post-guard discovery gap. Independent MCU 42/42 and exact-source CI/build/package originals verified. T01/T02, D0-D5 and formal acceptance stay open/NOT_RUN; no product edits, device actions, commit/push/merge or external cleanup. Notes are LOCAL_PENDING; Cryptnet attribution unresolved.
 
