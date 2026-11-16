@@ -1,4 +1,5 @@
 name: Deploy Cloudflare Admin Pages
+run-name: pages:${{ inputs.source_sha || github.sha }}
 
 on:
   workflow_dispatch:
@@ -13,57 +14,185 @@ on:
         required: true
         default: main
         type: string
+      source_sha:
+        description: Full verified source commit (empty uses this workflow revision)
+        required: false
+        type: string
+      include_public:
+        description: Also deploy the matching Public Pages functions
+        default: false
+        type: boolean
+
+concurrency:
+  group: trace-update-pages-staging
+  cancel-in-progress: false
 
 permissions:
   contents: read
 
 jobs:
   deploy:
-    name: Deploy Admin Pages
+    name: Deploy verified Pages source
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SOURCE_SHA: ${{ inputs.source_sha || github.sha }}
+      PROJECT_NAME: ${{ inputs.project_name }}
+      DEPLOY_BRANCH: ${{ inputs.branch }}
+      INCLUDE_PUBLIC: ${{ inputs.include_public }}
+      npm_config_cache: ${{ github.workspace }}/.cache/pages-deploy/npm
+      XDG_CONFIG_HOME: ${{ github.workspace }}/.cache/pages-deploy/config
+      XDG_CACHE_HOME: ${{ github.workspace }}/.cache/pages-deploy/cache
+      WRANGLER_LOG_PATH: ${{ github.workspace }}/.cache/pages-deploy/logs
+      WRANGLER_SEND_METRICS: "false"
+      NODE_DISABLE_COMPILE_CACHE: "1"
+      TMPDIR: ${{ github.workspace }}/.cache/pages-deploy/tmp
     defaults:
       run:
-        working-directory: app/bluetooth_flutter_Trace/cloudflare/update-service/admin
+        shell: bash
+        working-directory: ${{ github.workspace }}
 
     steps:
+      - name: Prepare contained temporary paths
+        run: mkdir -p -- "$TMPDIR" "$XDG_CONFIG_HOME" "$XDG_CACHE_HOME" "$WRANGLER_LOG_PATH"
+
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.source_sha || github.sha }}
+          clean: false
+          persist-credentials: false
 
       - name: Set up Node
         uses: actions/setup-node@v6
         with:
           node-version: "24"
-          cache: npm
-          cache-dependency-path: app/bluetooth_flutter_Trace/cloudflare/update-service/admin/package-lock.json
 
-      - name: Install dependencies
+      - name: Check exact Pages permissions and preserve configuration
+        id: preflight
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import { execFileSync } from 'node:child_process';
+          const env = process.env;
+          if (env.CLOUDFLARE_ACCOUNT_ID !== 'af6dd848e6a21f1cd26d44b1b656af7b' || !env.CLOUDFLARE_API_TOKEN ||
+              env.PROJECT_NAME !== 'trace-update-admin-staging' || env.DEPLOY_BRANCH !== 'main') {
+            throw new Error('Missing credential or unexpected deployment target');
+          }
+          if (!/^[0-9a-f]{40}$/.test(env.SOURCE_SHA) ||
+              execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim() !== env.SOURCE_SHA) {
+            throw new Error('Verified source commit mismatch');
+          }
+          const service = 'app/bluetooth_flutter_Trace/cloudflare/update-service';
+          execFileSync('git', ['diff', '--exit-code', 'HEAD', '--', service], { stdio: 'pipe' });
+          const components = env.INCLUDE_PUBLIC === 'true' ? ['admin', 'public'] : ['admin'];
+          const baseline = { source: env.SOURCE_SHA, projects: [] };
+          for (const component of components) {
+            const config = JSON.parse(fs.readFileSync(`${service}/${component}/wrangler.jsonc`, 'utf8'));
+            const name = `trace-update-${component}-staging`;
+            const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}/pages/projects/${name}`, {
+              headers: { Authorization: `Bearer ${env.CLOUDFLARE_API_TOKEN}` },
+              redirect: 'error', signal: AbortSignal.timeout(30000)
+            });
+            const body = await response.json();
+            if (!response.ok || body.success !== true) {
+              throw new Error(`${component} Pages read denied: HTTP ${response.status}, codes ${JSON.stringify(body.errors?.map(e => e.code))}`);
+            }
+            const project = body.result, production = project.deployment_configs?.production;
+            if (project.name !== name || config.name !== name || project.production_branch !== 'main' ||
+                !project.canonical_deployment?.id || !production) throw new Error(`${component} target configuration mismatch`);
+            for (const [key, value] of Object.entries(config.vars)) {
+              if (production.env_vars?.[key]?.value !== value) throw new Error(`${component} variable differs: ${key}`);
+            }
+            for (const db of config.d1_databases ?? []) {
+              if (production.d1_databases?.[db.binding]?.id !== db.database_id) throw new Error(`${component} database binding differs`);
+            }
+            for (const bucket of config.r2_buckets ?? []) {
+              if (production.r2_buckets?.[bucket.binding]?.name !== bucket.bucket_name) throw new Error(`${component} bucket binding differs`);
+            }
+            baseline.projects.push({ component, name, id: project.canonical_deployment.id, deploymentConfigs: project.deployment_configs });
+            console.log(JSON.stringify({ component, exactPagesRead: true, configurationMatched: true }));
+          }
+          // This private baseline is never uploaded; only comparison results leave the runner.
+          fs.mkdirSync('.cache/pages-deploy', { recursive: true, mode: 0o700 });
+          fs.writeFileSync('.cache/pages-deploy/before.json', JSON.stringify(baseline), { flag: 'wx', mode: 0o600 });
+          NODE
+
+      - name: Install existing Admin dependencies
+        working-directory: app/bluetooth_flutter_Trace/cloudflare/update-service/admin
         run: npm ci
 
-      - name: Typecheck
-        run: npm run check
+      - name: Deploy Admin without changing Access secrets
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        working-directory: app/bluetooth_flutter_Trace/cloudflare/update-service
+        run: node scripts/deploy-admin-staging.mjs --yes --skip-secrets --commit-hash "$SOURCE_SHA"
 
-      - name: Check Cloudflare credentials
-        shell: bash
+      - name: Install existing Public dependencies and typecheck
+        if: inputs.include_public
+        working-directory: app/bluetooth_flutter_Trace/cloudflare/update-service/public
+        run: |
+          npm ci
+          npm run check
+
+      - name: Deploy matching Public Pages functions
+        if: inputs.include_public
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        working-directory: app/bluetooth_flutter_Trace/cloudflare/update-service/public
+        run: node node_modules/wrangler/bin/wrangler.js pages deploy ./site --project-name trace-update-public-staging --branch main --commit-dirty=false --commit-hash "$SOURCE_SHA"
+
+      - name: Read back deployed source and unchanged bindings
+        if: always() && steps.preflight.outcome == 'success'
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           set -euo pipefail
-          if [[ -z "${CLOUDFLARE_ACCOUNT_ID:-}" || -z "${CLOUDFLARE_API_TOKEN:-}" ]]; then
-            echo "::error title=Cloudflare credentials missing::Set CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN repository secrets."
-            exit 1
-          fi
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import { isDeepStrictEqual } from 'node:util';
+          const env = process.env;
+          const before = JSON.parse(fs.readFileSync('.cache/pages-deploy/before.json', 'utf8'));
+          const result = { source: before.source, projects: [] };
+          for (const entry of before.projects) {
+            let project;
+            for (let attempt = 0; attempt < 12; attempt++) {
+              const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}/pages/projects/${entry.name}`, {
+                headers: { Authorization: `Bearer ${env.CLOUDFLARE_API_TOKEN}` },
+                redirect: 'error', signal: AbortSignal.timeout(30000)
+              });
+              const body = await response.json();
+              if (!response.ok || body.success !== true) throw new Error(`${entry.component} deployment readback HTTP ${response.status}`);
+              project = body.result;
+              if (project.canonical_deployment?.id !== entry.id && project.canonical_deployment?.latest_stage?.status === 'success') break;
+              if (attempt < 11) await new Promise(resolve => setTimeout(resolve, 5000));
+            }
+            const deployment = project.canonical_deployment;
+            result.projects.push({ component: entry.component, id: deployment?.id,
+              source: deployment?.deployment_trigger?.metadata?.commit_hash,
+              status: deployment?.latest_stage?.status,
+              configurationUnchanged: isDeepStrictEqual(entry.deploymentConfigs, project.deployment_configs),
+              updated: deployment?.id !== entry.id });
+          }
+          fs.writeFileSync('.cache/pages-deploy/result.json', JSON.stringify(result, null, 2) + '\n', { flag: 'wx' });
+          console.log(JSON.stringify(result));
+          if (result.projects.some(p => !p.configurationUnchanged || !p.updated || p.source !== before.source || p.status !== 'success')) {
+            throw new Error('Pages deployment or configuration verification failed');
+          }
+          NODE
 
-      - name: Deploy Pages admin facade
-        shell: bash
-        env:
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          PROJECT_NAME: ${{ inputs.project_name }}
-          DEPLOY_BRANCH: ${{ inputs.branch }}
-        run: |
-          set -euo pipefail
-          npx wrangler pages deploy ./public \
-            --project-name "${PROJECT_NAME}" \
-            --branch "${DEPLOY_BRANCH}" \
-            --commit-dirty=true
+      - name: Retain sanitized deployment result
+        if: always() && steps.preflight.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pages-deployment-${{ github.run_id }}
+          path: .cache/pages-deploy/result.json
+          if-no-files-found: error
+          retention-days: 14
