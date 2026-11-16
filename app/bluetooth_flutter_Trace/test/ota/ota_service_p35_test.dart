@@ -264,7 +264,8 @@ void main() {
     ble.setLink(false, emit: false);
     gate.complete(root);
     expect(await starting, isTrue);
-    await flush();
+    await waitFor(() => rows().isNotEmpty, 'post-open disconnected snapshot persisted');
+    await service.stopP35Recording();
     expect(rows(), isNotEmpty);
     expect(rows().every((row) => row['linkConnected'] == false), isTrue);
     expect(rows().every((row) => row['freshConnection'] == false), isTrue);
