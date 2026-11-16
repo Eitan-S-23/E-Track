@@ -922,8 +922,9 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
       await _adapterSubscription?.cancel();
       _adapterSubscription = null;
       // 根据平台选择适配器
-      if (_providedAdapter != null) {
-        _adapter = _providedAdapter;
+      final providedAdapter = _providedAdapter;
+      if (providedAdapter != null) {
+        _adapter = providedAdapter;
       } else if (Platform.isWindows) {
         _adapter = WinBleAdapter();
       } else {

@@ -16,7 +16,8 @@ class DatabaseService {
   static Database? _database;
 
   Future<Database> get database async {
-    if (_providedDatabase != null) return _providedDatabase;
+    final providedDatabase = _providedDatabase;
+    if (providedDatabase != null) return providedDatabase;
     if (_database != null) return _database!;
     _database = await _initDatabase();
     return _database!;

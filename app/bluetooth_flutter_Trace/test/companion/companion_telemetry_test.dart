@@ -256,7 +256,7 @@ class _Harness {
     ble.otaDeviceFactoryForTest = (_) => device;
     ota = OtaService(bluetoothService: ble,
       firmwareDirProvider: () async => throw StateError('No package IO in telemetry'),
-      latestUriBuilder: (_, _, _) => throw StateError('Recent recovery must not query HTTP'));
+      latestUriBuilder: (info, appVersion, channel) => throw StateError('Recent recovery must not query HTTP'));
     monitor = _AndroidMonitor(DatabaseService.forDatabase(store));
     runtime = CompanionRuntime(platform: CompanionPlatform(channel: channel, supported: true),
       bluetooth: ble, ota: ota, onShowUi: () { uiRequests++; }, checkBluetoothPermissions: () async {
@@ -352,7 +352,7 @@ class _Harness {
     await pump();
     await adapter.results.close();
     await device.close();
-    await Get.reset();
+    Get.reset();
     messenger.setMockMethodCallHandler(channel, null);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pumpWidget(const SizedBox.shrink());
@@ -490,7 +490,7 @@ fbp.ScanResult _advertisement(String address, {bool stale = false}) => fbp.ScanR
     serviceData: {}, serviceUuids: []),
 );
 
-/** Fake SQLite driver, not DatabaseService or MonitorController persistence. */
+/// Fake SQLite driver, not DatabaseService or MonitorController persistence.
 class _Database extends Fake implements Database {
   _Database({required bool history}) {
     if (history) {
