@@ -439,8 +439,8 @@ void main() {
         final device = _AdmissionDevice(mcu);
         final ble = BluetoothService(linkProfile: OtaLinkProfile.baseline)
           ..adapterForTest = _AdmissionMobileAdapter()
-          ..otaDeviceFactoryForTest = (_) => device
           ..connectedDevices.add(device);
+        ble.otaDeviceFactoryForTest = (_) => device;
         final service = makeService(ble: ble, firmwareDir: tempFirmwareDir(),
           backgroundClient: _BackgroundOwnerHarness(),
           linkProfile: OtaLinkProfile.baseline, enablePipeline: pipeline);
@@ -5089,6 +5089,7 @@ class _AdmissionMobileAdapter extends Fake implements BluetoothAdapter {
 
 class _AdmissionCharacteristic extends Fake implements fbp.BluetoothCharacteristic {
   _AdmissionCharacteristic(this.device, {required this.notify});
+  @override
   final _AdmissionDevice device;
   final bool notify;
   final writes = <List<int>>[];
