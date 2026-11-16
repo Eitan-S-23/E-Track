@@ -11,6 +11,7 @@ import android.app.job.JobScheduler
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
+import android.bluetooth.le.ScanFilter
 import android.companion.BluetoothLeDeviceFilter
 import android.companion.CompanionDeviceManager
 import android.content.Context
@@ -192,8 +193,9 @@ class CompanionIntegrationTest {
         assertEquals(0, selection.replies)
         val request = shadowOf(manager).lastAssociationRequest
         assertTrue(request.isSingleDevice)
-        val filter = request.deviceFilters.single() as BluetoothLeDeviceFilter
-        assertEquals(address.uppercase(), filter.scanFilter.deviceAddress)
+        val filters = ReflectionHelpers.callInstanceMethod<List<BluetoothLeDeviceFilter>>(request, "getDeviceFilters")
+        val scanFilter = ReflectionHelpers.callInstanceMethod<ScanFilter>(filters.single(), "getScanFilter")
+        assertEquals(address.uppercase(), scanFilter.deviceAddress)
         val callback = shadowOf(manager).lastAssociationCallback
         val sender = PendingIntent.getActivity(app, 51, Intent("test.chooser"), PendingIntent.FLAG_IMMUTABLE).intentSender
         callback.onDeviceFound(sender)
@@ -281,11 +283,12 @@ class CompanionIntegrationTest {
             CompanionBootReceiver().onReceive(app, Intent(action))
             val scheduler = app.getSystemService(JobScheduler::class.java)
             assertEquals(2, scheduler.allPendingJobs.size)
-            val check = scheduler.getPendingJob(CompanionBridge.CHECK_JOB)
+            val check = checkNotNull(scheduler.getPendingJob(CompanionBridge.CHECK_JOB))
+            val recovery = checkNotNull(scheduler.getPendingJob(CompanionBridge.RECOVERY_JOB))
             assertEquals(6 * 3600000L, check.intervalMillis)
             assertTrue(check.isPersisted)
             assertEquals(android.app.job.JobInfo.NETWORK_TYPE_ANY, check.networkType)
-            assertEquals(15 * 60000L, scheduler.getPendingJob(CompanionBridge.RECOVERY_JOB).intervalMillis)
+            assertEquals(15 * 60000L, recovery.intervalMillis)
             assertTrue(prefs.getBoolean("checkPending", false))
             assertNull(shadowOf(app).nextStartedActivity)
             assertNull(shadowOf(app).nextStartedService)
