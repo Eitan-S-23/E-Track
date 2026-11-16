@@ -15,6 +15,7 @@ import 'package:vcdiff_decoder/vcdiff_decoder.dart' as vcdiff;
 
 import '../config/share_links.dart';
 import '../pages/trace_ui.dart';
+import 'app_prompt_coordinator.dart';
 
 class AppUpdateService extends GetxService with WidgetsBindingObserver {
   static AppUpdateService get to => Get.find<AppUpdateService>();
@@ -47,6 +48,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
   final updateStatus = ''.obs;
 
   bool _isRetryingPendingInstall = false;
+  final _ownedDialogs = <AppPrompt<dynamic>>{};
   DateTime? _lastForegroundUpdateAt;
   double _lastForegroundProgress = -1;
   String? _lastForegroundStatus;
@@ -64,6 +66,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
 
   @override
   void onClose() {
+    _closeUpdateDialogIfOpen();
     if (Platform.isAndroid) {
       WidgetsBinding.instance.removeObserver(this);
     }
@@ -98,7 +101,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
     if (prefs.getString(_lastDailyCheckKey) == today) return;
 
     await prefs.setString(_lastDailyCheckKey, today);
-    unawaited(checkForUpdates(manual: false));
+    await checkForUpdates(manual: false);
   }
 
   Future<void> checkForUpdates({bool manual = true}) async {
@@ -186,8 +189,6 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
         if (context.mounted) {
           _closeDialogRouteForContext(context);
         }
-      } else if (Get.isDialogOpen == true) {
-        Get.back<void>();
       }
 
       checkingDialogOpen = false;
@@ -211,6 +212,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
       checkingDialogClosed = _showCheckingDialog(
         onCancel: cancelChecking,
         onPresented: markCheckingDialogPresented,
+        relevant: () => !checkingDialogCloseRequested && !cancelledByUser,
       ).whenComplete(() {
         checkingDialogOpen = false;
         checkingDialogContext = null;
@@ -573,12 +575,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
   }
 
   void _closeUpdateDialogIfOpen() {
-    if (Get.isDialogOpen != true) return;
-    try {
-      Get.back<void>();
-    } catch (_) {
-      // Dialog state can be stale after Android background/foreground switches.
-    }
+    for (final prompt in _ownedDialogs.toList()) { prompt.cancel(); }
   }
 
   Future<bool> _handlePendingInstallBeforeUpdateCheck({
@@ -704,12 +701,16 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
   Future<T?> _showTraceUpdateDialog<T>(
     Widget dialog, {
     bool barrierDismissible = true,
+    bool Function()? relevant,
   }) {
-    return Get.dialog<T>(
-      dialog,
+    final prompt = AppPromptCoordinator.instance.enqueue<T>(
+      builder: (_) => dialog,
+      priority: AppPromptCoordinator.updatePriority,
+      relevant: relevant,
       barrierDismissible: barrierDismissible,
-      barrierColor: Colors.black.withValues(alpha: 0.62),
     );
+    _ownedDialogs.add(prompt);
+    return prompt.closed.whenComplete(() => _ownedDialogs.remove(prompt));
   }
 
   void _closeDialogRouteForContext(BuildContext context) {
@@ -728,9 +729,6 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
       return;
     }
 
-    if (navigator.canPop()) {
-      navigator.pop();
-    }
   }
 
   void _showUpdateDialog(
@@ -964,9 +962,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
       if (!keepForegroundService) {
         await _stopUpdateForegroundService();
       }
-      if (Get.isDialogOpen == true) {
-        Get.back<void>();
-      }
+      _closeUpdateDialogIfOpen();
       isUpdating.value = false;
     }
 
@@ -1067,9 +1063,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
       if (!keepForegroundService) {
         await _stopUpdateForegroundService();
       }
-      if (Get.isDialogOpen == true) {
-        Get.back<void>();
-      }
+      _closeUpdateDialogIfOpen();
       isUpdating.value = false;
     }
 
@@ -1294,6 +1288,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
   Future<void> _showCheckingDialog({
     required ValueChanged<BuildContext> onCancel,
     required ValueChanged<BuildContext> onPresented,
+    bool Function()? relevant,
   }) {
     var didNotifyPresented = false;
     return _showTraceUpdateDialog<void>(
@@ -1351,6 +1346,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
         },
       ),
       barrierDismissible: false,
+      relevant: relevant,
     ).then((_) {});
   }
 

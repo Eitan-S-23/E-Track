@@ -61,6 +61,13 @@ class DeviceTabPage extends StatelessWidget {
                       .fadeIn(duration: 420.ms)
                       .slideY(begin: 0.2, end: 0),
                   SizedBox(height: compact ? 18 : 26),
+                  TextButton.icon(
+                    key: const ValueKey('device-home-permissions'),
+                    onPressed: () => Get.toNamed('/companion-setup'),
+                    icon: const Icon(Icons.admin_panel_settings_outlined),
+                    label: const Text('权限与后台运行'),
+                    style: TextButton.styleFrom(foregroundColor: TraceColors.mint),
+                  ),
                   Center(
                     child: _DeviceStage(width: stageWidth),
                   )

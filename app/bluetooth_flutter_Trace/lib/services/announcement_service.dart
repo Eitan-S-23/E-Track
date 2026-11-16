@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/share_links.dart';
 
@@ -15,8 +16,13 @@ class AnnouncementService {
   );
 
   static Future<List<TraceAnnouncement>> fetchAnnouncements() async {
+    final items = await fetchRemoteAnnouncements();
+    return items.isEmpty ? fallbackAnnouncements : items;
+  }
+
+  static Future<List<TraceAnnouncement>> fetchRemoteAnnouncements() async {
     if (!ShareLinks.hasAnnouncementsEndpoint) {
-      return fallbackAnnouncements;
+      return const [];
     }
 
     try {
@@ -24,20 +30,39 @@ class AnnouncementService {
       final data = response.data is String
           ? jsonDecode(response.data as String)
           : response.data;
-      if (data is! Map) return fallbackAnnouncements;
+      if (data is! Map) return const [];
 
       final rawItems = data['announcements'];
-      if (rawItems is! List) return fallbackAnnouncements;
+      if (rawItems is! List) return const [];
 
       final items = rawItems
           .whereType<Map>()
           .map(TraceAnnouncement.fromJson)
-          .where((item) => item.title.isNotEmpty && item.body.isNotEmpty)
-          .toList(growable: false);
-      return items.isEmpty ? fallbackAnnouncements : items;
+          .where((item) => item.id.isNotEmpty && item.title.isNotEmpty && item.body.isNotEmpty)
+          .toList();
+      items.sort(TraceAnnouncement.compare);
+      return items;
     } catch (_) {
-      return fallbackAnnouncements;
+      return const [];
     }
+  }
+
+  static String get _seenKey => 'announcements.seen.v1.${ShareLinks.appId}.'
+      '${ShareLinks.clientPlatform}.${ShareLinks.updateChannel}';
+
+  static Future<List<TraceAnnouncement>> unseen(List<TraceAnnouncement> items) async {
+    final prefs = await SharedPreferences.getInstance();
+    final seen = (prefs.getStringList(_seenKey) ?? const <String>[]).toSet();
+    return items.where((item) => item.type == TraceAnnouncementType.manual &&
+        !item.id.startsWith('local-') && !seen.contains(item.publicationIdentity)).toList();
+  }
+
+  static Future<void> markPresented(TraceAnnouncement item) async {
+    if (item.type != TraceAnnouncementType.manual || item.id.startsWith('local-')) return;
+    final prefs = await SharedPreferences.getInstance();
+    final seen = (prefs.getStringList(_seenKey) ?? const <String>[]).toSet()
+      ..add(item.publicationIdentity);
+    await prefs.setStringList(_seenKey, seen.toList());
   }
 
   static const fallbackAnnouncements = [
@@ -82,6 +107,8 @@ class TraceAnnouncement {
     this.releaseTag,
     this.versionName,
     this.versionCode,
+    this.pinned = false,
+    this.publishedAt,
   });
 
   factory TraceAnnouncement.fromJson(Map<dynamic, dynamic> json) {
@@ -96,6 +123,8 @@ class TraceAnnouncement {
       releaseTag: _optionalString(json['releaseTag']),
       versionName: _optionalString(json['versionName']),
       versionCode: _optionalInt(json['versionCode']),
+      pinned: json['pinned'] == true || json['pinned'] == 1,
+      publishedAt: _publicationTime(json['publishedAt']),
     );
   }
 
@@ -106,6 +135,25 @@ class TraceAnnouncement {
   final String? releaseTag;
   final String? versionName;
   final int? versionCode;
+  final bool pinned;
+  final DateTime? publishedAt;
+
+  String get publicationIdentity => '$id@${publishedAt?.millisecondsSinceEpoch ?? 0}';
+
+  static int compare(TraceAnnouncement a, TraceAnnouncement b) {
+    if (a.pinned != b.pinned) return a.pinned ? -1 : 1;
+    final time = (b.publishedAt?.millisecondsSinceEpoch ?? 0)
+        .compareTo(a.publishedAt?.millisecondsSinceEpoch ?? 0);
+    return time != 0 ? time : a.id.compareTo(b.id);
+  }
+
+  static DateTime? _publicationTime(Object? value) {
+    final seconds = _optionalInt(value);
+    if (seconds != null && seconds > 0 && seconds < 8640000000000) {
+      return DateTime.fromMillisecondsSinceEpoch(seconds * 1000, isUtc: true);
+    }
+    return value is String ? DateTime.tryParse(value)?.toUtc() : null;
+  }
 
   static String? _optionalString(Object? value) {
     final text = value?.toString().trim() ?? '';

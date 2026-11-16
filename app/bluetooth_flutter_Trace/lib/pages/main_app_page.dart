@@ -7,6 +7,9 @@ import 'device_tab_page.dart';
 import 'discover_tab_page.dart';
 import 'profile_tab_page.dart';
 import 'trace_ui.dart';
+import '../services/announcement_presenter.dart';
+import '../services/app_update_service.dart';
+import '../services/ota_service.dart';
 
 class MainAppPage extends StatefulWidget {
   const MainAppPage({super.key});
@@ -17,9 +20,11 @@ class MainAppPage extends StatefulWidget {
 
 class _MainAppPageState extends State<MainAppPage> with WidgetsBindingObserver {
   bool _setupPending = false;
+  bool _startupPending = false;
   int _selectedIndex = 0;
   bool _deviceOrbitActive = false;
   late final PageController _pageController;
+  late final AnnouncementPresenter _announcements;
 
   final List<Widget> _pages = const [
     DeviceTabPage(),
@@ -49,12 +54,21 @@ class _MainAppPageState extends State<MainAppPage> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     _pageController = PageController();
+    _announcements = AnnouncementPresenter(canPresent: () {
+      if (!mounted || _setupPending) return false;
+      if (Get.isRegistered<AppUpdateService>()) {
+        final update = Get.find<AppUpdateService>();
+        if (update.isChecking.value || update.isUpdating.value) return false;
+      }
+      return !Get.isRegistered<OtaService>() || !Get.find<OtaService>().isUpgrading;
+    });
     WidgetsBinding.instance.addObserver(this);
-    WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(_offerSetup()));
+    WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(_offerStartupPrompts()));
   }
 
   @override
   void dispose() {
+    _announcements.dispose();
     _pageController.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -62,7 +76,22 @@ class _MainAppPageState extends State<MainAppPage> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) unawaited(_offerSetup());
+    if (state == AppLifecycleState.resumed) unawaited(_offerStartupPrompts());
+  }
+
+  Future<void> _offerStartupPrompts() async {
+    if (_startupPending) return;
+    _startupPending = true;
+    try {
+      await _offerSetup();
+      if (!mounted) return;
+      if (Get.isRegistered<AppUpdateService>()) {
+        await Get.find<AppUpdateService>().checkDailyOnStartup();
+      }
+      if (mounted) _announcements.start();
+    } finally {
+      _startupPending = false;
+    }
   }
 
   Future<void> _offerSetup() async {

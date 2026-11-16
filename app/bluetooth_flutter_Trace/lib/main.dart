@@ -20,6 +20,7 @@ import 'services/database_service.dart';
 import 'services/scan_settings_service.dart';
 import 'services/alert_service.dart';
 import 'services/app_update_service.dart';
+import 'services/app_prompt_coordinator.dart';
 import 'services/version_inventory_service.dart';
 import 'services/background_optimization_service.dart';
 import 'services/deep_link_service.dart';
@@ -109,6 +110,7 @@ class MyApp extends StatelessWidget {
         }
 
         return GetMaterialApp(
+          navigatorObservers: [AppPromptCoordinator.instance],
           title: ShareLinks.appName,
           theme: ThemeData(
             primarySwatch: Colors.blue,
@@ -163,7 +165,6 @@ class MyApp extends StatelessWidget {
               Get.find<NotificationService>().initialize().catchError((Object error) {
                 debugPrint('Notification initialization failed: $error');
               });
-              Get.find<AppUpdateService>().checkDailyOnStartup();
               if (!OtaExperimentRuntime.current.ready) return;
               // P3-3 T1a 设备观测（dev 分支 + dev APK 专用）。未显式注入
               // TRACE_DEV_DEVICE_OBSERVATION 时返回 null：不启动扫描、不产生
