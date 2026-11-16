@@ -2,8 +2,201 @@
 
 ## Current Verified Milestone, 2026-11-16
 
-This section supersedes historical pending-access/local-only statements below;
-those original observations remain intact. The card is still in progress.
+The implementation and development-validation milestone below supersedes earlier
+pending-CI statements. The single card remains IN PROGRESS; C1-C6 are not signed
+off. Implementation, device observation, independent acceptance and main product
+integration are separate.
+
+- The authoritative board is `D:/github/my/E-Track/PLAN-OTA-EXEC.md`, not a cache
+  or task-worktree copy. The published main before this note delivery is
+  `31ccd0b4f70354501e3fa207d6c5f79467ce1a52`; the fresh entry query verified that
+  remote and correctly reported LOCAL_PENDING for this note/board update.
+  Governance CI `43775817958` passed on that main. Entry delivery `27804263` and
+  preserved history are intact.
+- Current product source is `bedfa12fb6e4b5160602370297a6554cefe4c900` on
+  `dev/flutter/app-companion-01-20261116` in `.worktrees/app-companion-01`.
+  The branch is pushed; its product changes are not merged to main or installed.
+  Earlier source batches, including `9ccea658`, remain in history.
+- Permissions, explicit Android CDM association, 6/12/24-hour scheduling (12-hour
+  default), bounded recovery/scans, retained-engine ownership, headless sensor
+  persistence, MCU check/offer/consent, menu Back and selected icon are implemented.
+  The product-branch contract `docs/companion-control-contract.md` documents the
+  additive text protocol and runtime rules without altering frozen binary OTA.
+- The latest batch also fixes pending-offer renotification inside the long check
+  interval, retryable MCU STARTING/binary-exit states, ownership-safe query
+  cancellation, late callback fencing and manual-check coalescing. An open GPX
+  recording (including paused) blocks install. Scoped stop cancels only its own
+  query and waits for non-cancellable END/apply rather than disconnecting it.
+  `bedfa12f` adds bounded control-session recovery after a failed foreground INFO
+  invalidates shared identity, without triggering another long-interval HTTP
+  check. Its regression passes on both hosts. Native/MCU inputs are unchanged
+  from the preceding validated batch.
+- Android/native APK and nonpublishing standard APK/EXE verification use the
+  existing Actions entries, not local Flutter/Gradle packaging. The side-by-side
+  suffix is `.companion`; shipping package identity, signing configuration and
+  version have not been changed. No release/channel update or deployment is
+  requested by the current standard-build dispatch.
+
+### Latest Validation Originals
+
+Paths beginning `.cache/companion-` below are relative to the product worktree;
+development adapter receipts are below root `.cache/app-companion-01-20261116/`.
+Every listed check is implementation self-validation, not independent acceptance.
+
+| Source / Original | Result And Boundary |
+| --- | --- |
+| `f735993e`, checks `43777114133` | PASS, Linux 941 passed / 16 skipped, Windows 921 passed / 36 skipped; 11 candidate-profile tests also pass on each host. |
+| `f735993e`, debug/native request `43777179312` | PASS. Original CompanionServiceTest XML: 9 tests, zero failures/errors/skips. Linux logs/JUnit preserved in `development/keyring-artifacts-43777179312/logs/`. This earlier APK is not the final candidate. |
+| `a25a746b`, checks `43778687616` | Whole run FAIL on one new-test brace-style diagnostic; both full test suites pass, including 13 new coordinator and four real OtaService retirement tests. Failed console and complete Linux logs are preserved in the matching `keyring-log-` and `keyring-artifacts-` directories. |
+| `9ccea658`, checks `43779357804` | PASS: Linux 958 passed / 16 skipped, Windows 938 passed / 36 skipped; each also passes 11 candidate-profile cases, analysis clean. Full console is `development/keyring-log-43779357804/console.log`. |
+| `9ccea658`, debug/native request `43779455252` | PASS on both hosts, debug APK verified. Native XML: CompanionServiceTest 9/9 and DeviceOtaServiceTest 18/18, no failures/errors/skips. Full Linux logs/JUnit are in `development/keyring-artifacts-43779455252/logs/`; downloaded APK/metadata and local hashes are in `development/keyring-package-43779455252/`. |
+| `9ccea658`, standard build `43779471610` | Attempt 1: Windows EXE PASS; Android wrapper initialization fails on Maven Central HTTP 429 before App compilation/signing. Original job log is `development/keyring-job-43779471610-133013271843-02/console.log`. Only Android job was retried once after the separate hosted debug/native build resolved those dependencies; Windows retains its original 00:17:45..00:26:40 UTC execution. Attempt 2 PASS, full console in `development/keyring-log-43779471610-03/console.log`. No release/deployment. This is an earlier source, not the current artifact. |
+| `bedfa12f`, checks `43782315932` | PASS: Linux 959 passed / 16 skipped, Windows 939 passed / 36 skipped, zero failures; each also passes 11 candidate-profile cases and strict analysis. Both SDK identities are Flutter 3.47.8 / Dart 3.13.7. Console is `development/keyring-log-43782315932/console.log`; full Linux development logs are in `development/keyring-artifacts-43782315932/logs/`. |
+| `bedfa12f`, standard build `43782557046` | PASS on first attempt: Android release-mode APK and Windows release-mode EXE. `publish_release=false`, `replace_existing_release=false`, `.companion`, baseline link profile; Pages and Create GitHub Release are SKIPPED, with no Cloudflare deployment. Console is `development/keyring-log-43782557046/console.log`. Both named artifacts and local hashes are retained in `development/keyring-standard-artifacts-43782557046/`; run/source and build-only jobs are checked before download. |
+| `.cache/companion-tests-06.log` | 18/18 PASS, including STARTING timeout and binary-exit menu recovery. The retained compiled fixture and source SHA are recorded in the log. |
+| `.cache/companion-build-07/result.json` and `build.log` | GCC App/Boot and simulator PASS, source unchanged, 394 warning-containing lines and zero errors. Boot and simulator are unchanged incremental outputs, not newly linked artifacts. |
+| Root `checks-02/` | 40 entry/governance/icon/menu cases PASS; original menu fails the same oracle that the candidate passes. Source-bound originals are retained; no claim of physical rotary testing. |
+| Root `checks-03/04` | Final 40 entry/governance/icon/menu plus 18 MCU cases PASS. The separate rendered-icon check initially fails because contained HOME/AppData hides the user's installed Pillow; only that check is rerun in checks-04 with its existing library as read-only PYTHONPATH input and passes. No global package installation or source/image regeneration. |
+
+### Current Build Artifacts And Collection Boundary
+
+Current-source standard APK: 48318616 bytes, SHA-256
+`540eac4403ad40bbc8cf2d810f8889904f1add75052351aee1d671c86ad9619f`.
+The downloaded file exactly matches the build's SHA-256 and length output.
+CI verifies one fixed signer with certificate SHA-256
+`9e9b89c5e7fdc802b1fe71806a988a866db49cd988a739caeee56cb69f3df579`.
+The actual build log confirms the `.companion` suffix and configured public
+update service/public key; the reviewed workflow injects its separate
+`/api/public/firmware/latest` endpoint. Intended package ID remains
+`com.wen.gaia.gaia.companion`, version `1.0.71+97`. Final manifest and installed
+package identity still require D0 verification; build configuration alone is not
+an observation of the phone. No live endpoint/device compatibility is claimed.
+
+The Windows EXE is 161792 bytes, SHA-256
+`2359a6ab441fca9706f076681084b9a50d0247f0a700419734915569237b2178`.
+Its accompanying runtime ZIP is 20628487 bytes, SHA-256
+`8dc37c4f3c6a78cd8c74adf96c1d5894784b4213f3d593b35ebff358c29e8c69`.
+The EXE alone is not the complete Windows installation. Artifact IDs are
+`14189011510` (Android) and `14189366483` (Windows), both expiring on 2026-11-30;
+the local copies preserve the exact current build independently of that expiry.
+
+The earlier-source downloaded debug APK is 132379951 bytes, SHA-256
+`3a1e17b7112c67b48ec838b926b6e4c6a406f903abfb6e30bfe7700f5588e085`,
+application ID `com.wen.gaia.gaia.companion`, fixed development certificate
+`9e9b89c5e7fdc802b1fe71806a988a866db49cd988a739caeee56cb69f3df579`.
+It uses the unchanged App version `1.0.71+97`. This debug request did not inject
+a firmware-latest URL or an automatic device-observation profile: it is suitable
+for onboarding/runtime observation, not proof of a configured live OTA gateway.
+Before D3/D4 use a validated collection route with the endpoint-bound standard
+artifact, or an explicitly configured development request. The existing Phone
+helper's private-file/snapshot methods use `run-as`; do not assume they work for
+this release-mode APK. Its private ADB owner, identity checks and bounded command
+runner remain reusable, but collector readiness must be proven before OTA.
+The development workflow's current endpoint input also enables an automatic
+device-observation scanner; do not casually enable that second connection owner
+while evaluating companion ownership. Do not install the earlier
+unconfigured debug APK and then misdiagnose an absent endpoint as an OTA defect.
+
+The `keyring-build-02` metadata GET and `keyring-ci-24` follow-up checks GET each
+encountered a transport EOF. The former failed before dispatch; the latter had
+already saved the successful standard-build result. Original receipts remain;
+neither means the build failed or authorizes replaying a completed build.
+
+Build 07 App BIN is 611564 bytes, SHA-256
+`8a6ff0630ed5dd4d929ab5423961f9f1756a27cd8b01bb7af11687840dbc9c9a`;
+ELF `6956b11834cac98e684cda1a3b20b0f4ea9dc6d2cec157269316aa32ca9b5070`;
+simulator EXE `cee8d35a6a882efeb102988610febf634ff4f38473382a255ed2801d327c6056`.
+These are build products, not a finalized/installed candidate. Version/header,
+current App/Boot/BCB/staging and recovery compatibility still need live preflight
+before programming. No App-only downgrade or Boot replacement is implied.
+
+The shared SDK is Flutter 3.47.8, framework
+`737ba8f885dc774b53b442759999a312c9461e4e`, Dart 3.13.7. Strict analysis and the
+development lockfile gate stay enabled. Existing failed runs are not rewritten.
+
+### Menu Inventory And Remaining Observation
+
+| Reachable Page / Mode | Implementation Inspection And Required Observation |
+| --- | --- |
+| MainMenu main list | Back now joins the focus group independently of item capacity; focused/visible state, empty-list fallback and one activation are in the original-red/candidate-green host test. Physical rotation/press remains NOT_RUN. |
+| MainMenu navigation, records, display, sensor, system subpages | All use CreateBase/CreateFooter and RefreshEncoderGroup. Back returns a subpage to the main list, then the main list pops one page. Test long/dynamic lists and re-entry on the device; existing placeholder setting/record data is not upgraded by this task. |
+| RouteSelect | RefreshGroup already includes Back; SHORT_CLICKED is the sole activation event. Empty/long lists and return to navigation require device observation; no unnecessary rewrite. |
+| FirmwareUpdate browser | Back is grouped after file rows; online `@companion` works with no SD. Capacity increased to preserve the 24 existing file slots. Real empty/long/no-SD navigation remains to observe. |
+| FirmwareUpdate SD confirm/result/apply | Cancel/start and result controls have mode-specific groups; working/apply does not expose an unsafe exit. Existing SHORT_CLICKED behavior retained. |
+| New companion modal | Async open/close saves actual input groups/focus, excludes disabled controls and rechecks displayed consent. Verify actual wheel focus/restore, Later and safety-disabled Install on the device. |
+| SystemInfos | Focused icons use the existing single PRESSED exit action, not an explicit Back button. Retained as the original interaction; physical observation remains. |
+| RouteImport | Progress page uses LEAVE/GESTURE cancellation and has no visible Back button to register. Do not invent an ordinary menu Back during critical operations. |
+| Dialplate / LiveMap / Startup / StatusBar | Existing page entry/gesture/zoom or noninteractive behavior, not affected multi-level Back controls; automatic update prompts are limited to safe stable pages. |
+| Legacy FileBrowser helper | Not an AppFactory page, no caller of file_browser_create, and not in the GCC/simulator target. Do not re-enable its legacy .bin updater or count it as a tested production menu. |
+
+### Finite Device Plan
+
+The follow-up authorization covers this task's necessary verification, but not
+production publishing, unrelated devices, data clearing or project-external
+writes. The current session is the sole implementation operator. This is a
+development plan, not an independent frozen acceptance matrix or reused quota.
+
+| Cell | Bounded Work And Oracle |
+| --- | --- |
+| D0 Identity and readiness | Connect/unlock the known test phone; use the existing private-port Phone helper for serial/model/SDK/current package. Verify exact successful-CI APK metadata/hash and existing installation before any install. Read current MCU App/Boot/BCB/staging before choosing finalized receiver/target assets. |
+| D1 Permission and association | On the isolated App, user handles real system dialogs. Observe skip, denial, settings return, association and explicit enable; unknown OEM switches remain unknown. Agent does not automate taps or clear data. |
+| D2 Background ownership | One pass each: foreground to background, lock/unlock, recent-task removal, process recovery and phone restart, only under declared API/OEM conditions. Confirm live owner, actual BLE/data and bounded offline recovery, then disable and confirm resource release. Force-stop is a negative boundary, not a promise of survival. |
+| D3 MCU check and preparation | Trigger the MCU check independently of the long interval, confirm in-flight coalescing and network/metered failures, then verified-package readiness. Later and a stale choice must produce no BEGIN. Reconnect must revalidate before renotification. |
+| D4 Consented update | After exact forward-compatible assets and recovery are ready, one legitimate consent starts the existing sender. Preserve original App/MCU observations and ordinary apply/reboot, then fresh target version/full raw SHA and Boot state. A successful OTA is not replayed just to repair collection. |
+| D5 Navigation and icon | Exercise the menu inventory with actual wheel rotation/press, single-level Back and focus restoration; inspect installed launcher/notification icons and package identity. Simulator/host checks are supporting evidence only. |
+
+Each cell gets a finite device window and original action/result record. Any
+diagnosed fix needs only its affected regression; no full endurance/P5 campaign
+is added here. For receiver installation prefer existing standard J-Link after
+D0 safety checks; no extra provisioning OTA merely to install receiver code.
+Production GCC output must be finalized/verified for the actual retained state,
+not blindly loaded as the raw build HEX. Prepare collectors, package bytes,
+post-reboot retrieval and cleanup before asking for an OTA-start action.
+
+Existing USB preflight is UNAVAILABLE: the expected test phone was not found.
+Original command/error and closed-port/process receipts are under root
+`.cache/app-companion-01-20261116/device-preflight-01/`; no new install, App launch,
+tap, MCU flash or OTA has occurred. Do not repeat this absent-device probe without
+a connection/state change. The next necessary human action is connecting and
+unlocking that phone, followed by its actual system dialogs when prompted.
+
+### Acceptance And Main Integration
+
+The implementation session will not sign its own independent acceptance. A
+non-implementation session must review the stable bounded source, reuse applicable
+P3/P4 originals and execute only genuinely missing A1-A6 observations under the
+existing execution contract. There is no additional task card or invented third
+freezing role. Product main integration follows that independent result; the
+root board/note delivery is not a product merge. P3 8/8, P4 4/4, P1/P5 gaps and
+production gates remain unchanged.
+
+### Host Write Audit
+
+Root `.cache/app-companion-01-20261116/final-write-audit-03.json` retains the
+earlier source/Git/build/test/download/temp inventory, not just Git status.
+The closeout inventory is written as `final-write-audit-04.json` after main-note
+delivery, so its receipt can bind the actual delivered main and product HEAD.
+They resolve within the approved project. The generated Windows compatibility
+junction at product `.cache/build-home/AppData/Local/Microsoft/Windows/INetCache/Content.IE5`
+resolves to sibling `IE` in the same project; it was inspected, not removed.
+Git configuration/hooks and ADB key metadata are unchanged, and no local
+PowerShell was invoked. Archived evidence and the preservation stash remain.
+
+Native-side-effect attribution remains UNRESOLVED: the read-only audit found
+certificate/CRL cache timestamps changing during the task under
+`C:/Windows/System32/config/systemprofile/AppData/LocalLow/Microsoft/CryptnetUrlCache/`
+and `C:/Users/SU/AppData/LocalLow/Microsoft/CryptnetUrlCache/`. Exact file paths,
+sizes and timestamps are in the audit receipt. The two inspected SYSTEM content
+entries are public Google PKI CRLs. Earlier Git post-commit notifications invoked
+native curl and are a possible source, but there is no before-image/process trace
+to attribute all changes. Do not claim zero native external writes on this basis.
+The optional notification is now disabled only in bounded Git subprocesses;
+pre-commit quality checks still run. No external cache was cleaned, moved or
+overwritten. Retain it; any future cleanup needs path-specific user authorization.
+
+## Earlier Milestone, c822765a
+
+The following observations are retained as history, not current completion claims.
 
 - Root-main entry/governance/card delivery: `278042636699067dd95c61160d2e1900d9dcbe33`,
   remote checked with MAIN_MATCHED. Governance run

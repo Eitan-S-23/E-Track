@@ -889,7 +889,7 @@
 
 <a id="app-companion-01"></a>
 #### APP-COMPANION-01 E-Track 后台伴侣运行、OTA 交互与基础体验完善
-状态: 进行中 ｜ 认领: Codex(当前主会话兼实现者) / 2026-11-16 ｜ 更新: 2026-11-16(根目录 main 入口修正已交付；权限引导、Android 伴侣调度/执行、MCU 检查/确认和后台采集已提交开发分支 c822765a；新 GCC 固件/模拟器构建通过；App 检查与原生测试/APK 请求正在核验，真机联调、产品主线合入和独立验收未完成)
+状态: 进行中 ｜ 认领: Codex(当前主会话兼实现者) / 2026-11-16 ｜ 更新: 2026-11-16(根目录 main 入口修正已交付；综合实现已提交开发分支 bedfa12f，含后台停止归属、重连补通知、身份查询失败恢复和状态机回归；最新双平台全量自测及标准 APK/EXE 构建均通过，原件已归档；GCC/模拟器与未变更原生输入验证通过。测试手机不可用，真机联调、独立验收和产品主线合入未完成)
 - 唯一 Spec: [prompt-APP-COMPANION-01.md](docs/ota-prompts/prompt-APP-COMPANION-01.md)。本卡统一维护状态和完成勾选，不拆子卡、不增加阶段分母。
 - 开工前置: 保护旧改动、恢复根目录主线、入口检查及 Spec 纠偏统一在本卡记录；不另建治理卡。实现基线为已核对的 main，不使用归档工作区或 P3-8 预审版本代替当前产品。
 - 复用: P3-8-v5 和 P3-5-v5 已完成，P4 为既有完成基础；只补新增能力和受影响回归，不重开历史任务，不改变 P1/P5 剩余要求或生产发布门槛。
@@ -900,7 +900,7 @@
 - [ ] C5 接入用户选定的 `generated-images/29.png`，适配平台图标并保持应用身份。
 - [ ] C6 受影响自测、必要构建、获准设备验证及非实现会话独立验收。
 - 记录与原件索引: [APP-COMPANION-01.md](docs/ota-exec-notes/APP-COMPANION-01.md)。自测、构建、现场观测、独立验收和主线交付分别报告，不以目录迁移或静态检查勾选产品完成。
-- 当前验证: 入口/既有治理/图标/菜单 40 项原件保留，主入口治理 CI `43768837547` 已通过；Flutter 开发 runner 66 项、APK helper 46 项通过。MCU 控制协议 16 项行为断言通过，第二次宿主执行有 Windows 临时 EXE 清理失败，单列为 harness 缺口，不将其退出码写绿。包含新 MCU 交互的 GCC App/Boot 与 LVGL 模拟器构建通过，468 条含警告行、0 条错误，原件 `.worktrees/app-companion-01/.cache/companion-build-05/`。App 首批 CI `43773033275` 真实失败，已修复诊断并以 `c822765a99b83735685e251d9a289f97e6d291e4` 提交下一批及显式 APK/原生测试请求；新的结果仍须读取，真实波轮、Android 后台、APK/EXE 与独立验收不得据此写完成。
+- 当前验证: `bedfa12fb6e4b5160602370297a6554cefe4c900` 的全量 CI `43782315932` 通过（Linux 959/16 skipped，Windows 939/36 skipped，另各 11 项候选测试）；标准构建 `43782557046` 的 Android APK、Windows EXE 均通过且已下载核对，未发布/部署。未变更的原生输入沿用 `9ccea658` 的 CI `43779455252`（27/27）；该旧调试包未注入固件地址，不作当前 OTA 候选。MCU 协议 18/18、入口/治理/图标/菜单 40 项通过；GCC App/Boot 与模拟器 build-07 通过，394 条含警告行、0 错误。旧标准构建的 Maven 429 经一次 Android-only 重试通过，失败原件保留。USB 预检未发现测试手机且已关闭；C1-C6 不凭自测勾选。当前产物哈希、菜单清单、设备/采集前检和路径审计限制见同卡实施记录。
 
 ## 9. 契约变更登记表(回审通道)
 
@@ -957,6 +957,7 @@
 ## 10. 会话日志(每会话一行:日期 ｜ agent ｜ 动了哪些卡 ｜ 一句话结果)
 
 - 2026-11-16 | Codex 主会话兼实现者 | APP-COMPANION-01 进行中 | 按用户授权先完成根目录 main 入口迁移；57 项 tracked 改动保存为 stash，1,238 项原变更和 34 个覆盖冲突已备份，旧 main 的 18,426 个证据文件与选定图标不变。修正单卡的当前产品基线，继续实现；本地记录待提交，未发布或部署，不重开 P3/P4。
+- 2026-11-16 | Codex 主会话兼实现者（后续验证） | APP-COMPANION-01 进行中 | bedfa12f 的双平台全量自测、标准 APK/EXE 均已通过并保存原件；只交付根目录进度记录，不合并产品分支。测试手机不可用，保留真机与独立验收缺口、未决证书缓存来源审计；不发布、不清理项目外缓存、不重开 P3/P4。
 
 - 2026-11-08 | Codex root scoped App web delivery | P51-ADMIN-WEB-APP-01 reviewed and merged; P5 remains open | PR34 contains only eight reviewed code/test/docs blobs and sixteen evidence/docs files, not the pending firmware branch. Independent scoped review passed; PR and main CI each passed54 Admin/283 Worker tests, governance and App path detection, with APK/EXE/Release/deploy skipped. Original operations were not replayed, releases unchanged, main App version unchanged. Historical boundary anomalies and literal-final-target/first30/four-hour/physical gaps remain. Local main synchronization is not claimed. See docs/ota-exec-notes/P51-App-Web-integration-2026-11-08.md.
 
