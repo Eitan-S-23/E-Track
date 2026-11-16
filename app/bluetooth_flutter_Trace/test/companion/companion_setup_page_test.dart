@@ -86,6 +86,14 @@ void main() {
     messenger.setMockMethodCallHandler(permissions, null);
   });
 
+  Future<void> settle(WidgetTester tester) async {
+    // The production atmosphere repeats forever. Advance a bounded route/action
+    // window and assert the resulting state instead of waiting for zero frames.
+    for (var frame = 0; frame < 30; frame++) {
+      await tester.pump(const Duration(milliseconds: 20));
+    }
+  }
+
   Future<void> open(WidgetTester tester, {int sdk = 34, bool supported = true}) async {
     tester.view.physicalSize = const Size(1200, 3200);
     tester.view.devicePixelRatio = 1;
@@ -99,21 +107,21 @@ void main() {
         ))), child: const Text('Open setup')),
     ))));
     await tester.tap(find.text('Open setup'));
-    await tester.pumpAndSettle();
+    await settle(tester);
   }
 
   Future<void> tap(WidgetTester tester, String text) async {
     final button = find.text(text);
     await tester.ensureVisible(button);
     await tester.tap(button);
-    await tester.pumpAndSettle();
+    await settle(tester);
   }
 
   Future<void> resume(WidgetTester tester) async {
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
     await tester.pump();
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-    await tester.pumpAndSettle();
+    await settle(tester);
   }
 
   void grantBluetooth() {
@@ -131,7 +139,7 @@ void main() {
     expect(find.byType(CompanionSetupPage), findsNothing);
     expect(find.text('Open setup'), findsOneWidget);
     await tester.tap(find.text('Open setup'));
-    await tester.pumpAndSettle();
+    await settle(tester);
     expect(reads, 2);
     expect(requests, isEmpty);
     expect(snapshot['enabled'], isFalse);
@@ -248,7 +256,7 @@ void main() {
     snapshot['problem'] = 'CURRENT_PERMISSION_REVOKED';
     await resume(tester);
     delayed.complete({...snapshot, 'problem': 'STALE_PERMISSION_STATE'});
-    await tester.pumpAndSettle();
+    await settle(tester);
     expect(find.textContaining('CURRENT_PERMISSION_REVOKED'), findsOneWidget);
     expect(find.textContaining('STALE_PERMISSION_STATE'), findsNothing);
     expect(requests, isEmpty);
@@ -262,7 +270,7 @@ void main() {
     await tester.pump();
     await tap(tester, _skip);
     delayed.complete({...snapshot, 'enabled': true});
-    await tester.pumpAndSettle();
+    await settle(tester);
     expect(find.byType(CompanionSetupPage), findsNothing);
     expect(tester.takeException(), isNull);
     expect(requests, isEmpty);
