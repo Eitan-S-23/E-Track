@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "DataProc.h"
+#include "Common/HAL/CompanionUpdate.h"
 #include "Utils/GPX/GPX.h"
 #include "Config/Config.h"
 #include "Version.h"

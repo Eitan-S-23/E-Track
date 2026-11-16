@@ -199,14 +199,15 @@ void main() {
   });
 
   for (final reuse in [false, true]) {
-    for (final discovery in [false, true]) {
-      test('late ${discovery ? 'discovery' : 'subscription'} cannot occupy a new control session; reuse=$reuse', () async {
+    for (final delay in ['discovery', 'subscription', 'completed-subscription']) {
+      test('late $delay cannot occupy a new control session; reuse=$reuse', () async {
         ble.reuse = reuse;
+        ble.completedSubscription = delay == 'completed-subscription';
         await start();
         await until(() => runtime.status.value == 'NO_UPDATE');
         final oldSession = ota.messages.lastWhere((m) => m.kind == 'HELLO').session;
         final gate = _Gate();
-        if (discovery) { ble.discoveryGate = gate; } else { ble.subscriptionGate = gate; }
+        if (delay == 'discovery') { ble.discoveryGate = gate; } else { ble.subscriptionGate = gate; }
         ota.foreignBusy = true;
         ota.activity.add(true);
         ota.foreignBusy = false;
@@ -384,7 +385,7 @@ class _Ble extends BluetoothService {
   final device = _Device();
   final notifications = StreamController<List<int>>.broadcast(sync: true);
   bool connected = false, failFirstInitialization = false;
-  bool reuse = false;
+  bool reuse = false, completedSubscription = false;
   _Gate? discoveryGate, subscriptionGate;
   final _gates = <_Gate>[];
   int _notifyOwner = 0;
@@ -445,8 +446,10 @@ class _Ble extends BluetoothService {
       String serviceId, String characteristicId, {OtaLinkStats? stats}) async {
     final owner = ++_notifyOwner, gate = subscriptionGate;
     subscriptionGate = null;
+    // A stream can already exist when delivery of its Future crosses reconnect.
+    final completed = completedSubscription ? notifications.stream : null;
     await _wait(gate);
-    return owner == _notifyOwner ? notifications.stream : null;
+    return completed ?? (owner == _notifyOwner ? notifications.stream : null);
   }
 }
 
