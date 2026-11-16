@@ -1384,3 +1384,418 @@ named `keyring-submit-notes-review-01` and `keyring-ci-review-*`, under
 `review-submission-01/write-audit.json` under that same base. These delivery
 receipts do not overwrite the preceding review evidence, failed originals or
 write audits. No external cleanup or zero-native-external-write claim is made.
+
+## T01/T02 Coverage Batch, 2026-11-16
+
+Implementation resumes from `f463649fc0a71945bff36c3ec57cbaecbd0fa9ef` in the
+existing `.worktrees/app-companion-01` worktree. The primary entry and fresh
+remote main both identify `5f1a0731fa157cfc64fc39570d0e16455ecd208c`.
+The published independent R03 closure supersedes the older shared-index wording:
+R01-R05 remain source-closed and are not a new remediation batch.
+
+- T01: drive the real setup page through denial/permanent denial, defer/return,
+  revocation, disabled notification channels and resumed/settings-return events.
+  Fake only platform permission/settings responses; opening settings is not a
+  grant. Keep Android requests user-initiated and existing Darwin cases isolated.
+- T02 native: execute real CompanionBridge admission, chooser completion,
+  boot/job restoration and CompanionService headless-engine orchestration with
+  Android/Flutter-embedding boundaries under Robolectric. Do not replace the
+  production CompanionExecution or claim that a service-start request is ownership.
+- T02 Dart: exercise page-independent collection through the real runtime,
+  scan lease, monitor parser and persistence queue, including owner loss,
+  stale advertisements, save failure/retention and retry. Add only narrow external
+  dependency seams if the current constructors cannot express those inputs.
+- Run full Linux/Windows development checks and the affected Android native
+  suite via the existing Actions route. Changed App build inputs also require
+  source-matched nonpublishing APK/EXE verification. Reuse unchanged MCU evidence;
+  neither historical native results nor fixture-only checks qualify new inputs.
+
+This is implementation self-validation, not independent acceptance. No USB
+enumeration, installation, device operation, product main merge, release or
+deployment is included. D0-D5, formal acceptance and C1-C6 remain outstanding.
+The entry metadata will be recorded in
+`.cache/app-companion-01-20261116/t01-t02-entry.json` before product edits/CI.
+It is a named-cache metadata measurement after read-only context checks, not
+process attribution or a whole-OS write audit. Preserve all earlier originals
+and unresolved Cryptnet observations; no external cache cleanup is authorized.
+
+### Development Feedback And New Association Edge
+
+The first coverage source `1830c94c` fails strict analysis in checks
+`43849493314` and the debug/native request `43849849630`. The package declares
+Dart language 3.0: it cannot promote nullable instance fields or use repeated
+wildcard parameters merely because the installed SDK is newer. The new fixture
+also awaited Get.reset (void) and used a nonconforming doc-comment style.
+`f25daecb` corrects those new sites without changing the dependency/SDK baseline.
+Both complete host originals and console logs are preserved under the matching
+`development/keyring-*` directories. Native execution did not occur in the
+analysis-blocked debug request.
+
+`b920f45d` replaces the setup fixture's pumpAndSettle with bounded frame advances:
+the real page has an intentionally repeating atmosphere animation. Its checks
+`43851810123` pass the 11 T01 cases and strict analysis; Linux still fails all
+15 new telemetry cases because guarded expect calls inside external driver
+callbacks conflict with an in-progress WidgetTester.pump. The follow-up uses
+Flutter's synchronous callback assertion API, preserving every assertion, and
+keeps the fake service-reset stream live until teardown. These are fixture
+repairs, not new changes to closed R01-R05.
+
+AC01-T02-NATIVE-01 is a new source finding while inspecting the actual chooser
+path. The page supplies lowercase MAC keys but Android ScanFilter.Builder uses
+BluetoothAdapter.checkBluetoothAddress, which accepts uppercase hex only.
+Previously the builder also ran outside the association cleanup try block.
+The bounded repair uppercases only the OS filter address and moves request
+construction inside that try; stored/correlated addresses retain existing
+semantics. The native integration oracle checks the actual Android validator,
+the normalized filter, the user/system result and absence of automatic enable.
+The source diagnosis was checked against Android 8's ScanFilter/BluetoothAdapter
+implementation; runtime proof remains pending the new native CI, not a claimed
+hardware reproduction or an R01-R05 reopening.
+
+### Real-Path Dart Coverage And Scheduler Diagnosis
+
+The first full green coverage source is
+`8e7907f5d6cd7460534c5e637b5328ec6c52d554`, checks `43862023870`:
+Linux 1025 passed/16 skipped and Windows 978 passed/63 skipped, zero failures,
+strict analysis and 11 additional candidate cases per host. The additions are
+11 real setup-page cases and 15 real headless telemetry/persistence cases.
+The latter execute only on the mobile-adapter Linux host and are explicitly
+skipped on Windows. Both hosts use Flutter 3.47.8/Dart 3.13.7; full original
+reports/logs, not only console excerpts, are retained in the corresponding
+`development/keyring-artifacts-*`, `keyring-windows-artifacts-*` and
+`keyring-log-*` directories under the existing evidence root.
+
+The intervening failures are preserved, not relabeled as product successes:
+`43853759666` has no terminal Linux summary after the earlier fixture hang;
+`43857075064`, `43859544296` and diagnostic `43861138521` expose the subsequent
+bounded failure. On `553d81d2`, the original telemetry log reaches HELLO, the
+fake characteristic returns and the real sender reports write-done, then stops
+at transport dispose-start. The ordinary non-widget control regression in the
+same raw log completes disposal. Only after widget teardown can the delayed
+disposal finish. The SDK's completed stream-cancellation future is rooted in
+the real microtask zone; pumping FakeAsync repeatedly cannot advance that queue.
+
+The repaired fixture yields the root microtask queue with an empty
+`tester.runAsync` callback between controlled pumps. All project operations,
+permission/owner checks and timer advancement stay in the original fake zone;
+the 2000-step bound and every business assertion remain. No deadline extension,
+mocked runtime/scan/save implementation or second sender is used. The fixture
+logs its first error before cleanup and unconditionally retires registrations
+to prevent cascading failures. The temporary production diagnostics are removed;
+`ota_service.dart` has no net difference from the independently reviewed
+`f463649f` baseline. This is a test-scheduling repair, not a change to R01-R05.
+
+Native request `keyring-passive-apk-native-01` binds that first green source.
+The subsequent cross-layer check also found that the new suite was selected by
+the native command but missing from the explicit XML upload list. The bounded
+workflow repair adds its XML and asserts that every selected native suite has an
+upload path. The existing HTML-report upload remains. Native execution/results
+and final source-matched packages are recorded separately below when available;
+this Dart milestone alone does not close T02, D0-D5 or formal acceptance.
+
+### Native Compilation Feedback
+
+The first native request is run `43863022720` on `8e7907f5`. Full Dart checks
+pass on both hosts and the Android `apk_build` command succeeds, but
+`apk_device_ota_native` fails at `compileDebugUnitTestKotlin`. No native test was
+executed, and APK verification/collection were NOT_RUN. Six compiler diagnostics
+identify two hidden SDK inspection getters (`deviceFilters`, `scanFilter`) and
+four accesses through nullable JobInfo results. Both host originals and the full
+console are retained in the corresponding `development/keyring-*43863022720`
+directories, including the original 29168-byte native command log.
+
+`0b2809e764da56eeeb678a2f4cbf6c96edd3704c` fixes only these fixture/collection
+sites: reflection reads the actual constructed Android request/filter, scheduled
+jobs are explicitly required to exist before assertions, and all three selected
+native suites have explicit XML upload paths. The local existing helper tests
+pass, 51 APK-helper and 66 development-runner cases; their raw results are in
+`checks-coverage-02/`, not native execution evidence. The follow-up request is
+`keyring-passive-apk-native-02`; no permissions, admission, runtime ownership or
+test oracle was relaxed to address the compiler failures.
+
+Run `43865948374` compiles the native suite and executes 70 cases: existing
+DeviceOtaServiceTest 18/18, CompanionServiceTest 9/9, and integration 13/43, with
+30 integration failures and no skips. All three original XML files and complete
+host/native logs are archived. The engine-dependent failures share one fixture
+boundary: FlutterEngine's delegated constructor executes before the outer
+Context-only shadow hook and attempts to load unavailable host JNI; service
+startup then has no cached engine. Non-engine Bridge/boot/job/admission paths do
+run, but these results are not a green T02 suite. The follow-up disables real
+call-through only for the three external Flutter embedding shadow classes and
+adds an immediate cached-engine assertion after real service startup. It does
+not substitute CompanionExecution, shadow project behavior, add native libraries
+or relax any permission/ownership test. The new request is
+`keyring-passive-apk-native-03` after its exact source is submitted.
+
+The shadow source is `2496e6649417ad228b86ea9c55a9679398d9cd92`. Its checks-only
+`43868429845` passes both hosts. Debug request `43868695116` instead stops before
+APK/native work: Linux has 1024 passed/16 skipped/1 failed, Windows passes. The
+one failure is the existing P35 test `disconnect during async recorder open
+cannot publish a stale connected flag`, at `ota_service_p35_test.dart:268`:
+after a fixed 20 ms delay the asynchronously flushed observation list is still
+empty. This file runs in a different Flutter-test isolate from the new T02 suite.
+The bounded fixture repair reuses that file's existing five-second `waitFor`
+completion helper and then stops/drains the real recorder before asserting every
+published connected/fresh flag is false. It does not extend that deadline, alter
+recording production code, weaken the assertion or reopen an accepted OTA card.
+All six source-matched checks/debug host originals and console directories are
+preserved; native shadow correctness is still unproved by this prerequisite
+failure. `keyring-passive-apk-native-04` is the next source-bound request.
+
+`a41a9ca8d597f0b019a8a5a712c6bea29d38aaad` passes full checks `43870409744`.
+Debug/native `43870546871` passes Dart and executes all 70 native cases, 63 passed
+and seven failed (integration 36/43; both old suites 27/27). The delegated-engine
+boundary now runs, including all three real chooser/normalized-filter cases.
+Five remaining API-26 failures are at real GATT-state admission: Android 8's
+framework method calls Binder directly while Robolectric 4.14.1 only implements
+`getDevicesMatchingConnectionStates`. A test-only BluetoothManager shadow reuses
+that same external state store for the legacy `getConnectedDevices` entry; the
+production GATT predicate is unchanged. The two API-31/34 OTA-service failures
+use a fixture snapshot missing the required notification `label`; supply that
+input, retaining production rejection of malformed snapshots and every ownership
+assertion. Follow-up request: `keyring-passive-apk-native-05` after submission.
+The first console download for `43870546871` failed with a GitHub GET EOF; it is
+preserved alongside the second retrieval, without replaying CI. Full XML, raw
+host/native artifacts and successful checks originals are retained separately.
+
+### Final Coverage Validation In Progress
+
+The submitted follow-up is `3028a0570bdbc1ed115b8de92bfde47933d1dd4c` on
+`dev/flutter/app-companion-01-20261116`. Checks `43873348049` pass with Linux
+1025 passed/16 skipped and Windows 978 passed/63 skipped, zero failures, strict
+analysis and 11 candidate cases per host. The full downloaded originals contain
+all 11 named T01 setup cases and all 15 named T02 telemetry cases on Linux;
+the mobile-adapter T02 cases are explicitly skipped on Windows. This does not
+establish physical Android permissions, radio behavior or VM/process survival.
+Native/debug request `43873444657` binds this same commit; its result and final
+nonpublishing APK/EXE verification are still pending at this checkpoint.
+
+The coverage delta from independently reviewed `f463649f` is 15 files. Production
+defaults remain unchanged by the narrow permission, radio, monotonic-clock and
+SQLite-driver injection seams. The only new operational repair is the named
+AC01-T02-NATIVE-01 ScanFilter address/cleanup edge. No OTA sender, consent gate,
+wire format, firmware, simulator or dependency-lockfile change is in this batch.
+The old P35 test now waits for its actual recorder publication instead of a fixed
+20 ms delay; its original false-connected/fresh assertions and five-second
+completion bound remain. Failed compilation, scheduler, native-embedding and
+fixture runs above retain their original logs and classifications.
+
+This checkpoint also corrects the shared index's stale R03 review status without
+rewriting any historical reviewer text. T01/T02 remain implementation self-tests
+pending the original independent reviewer's evaluation. D0-D5, final formal
+acceptance and product main integration are not performed, and C1-C6 stay open.
+
+### Native Coverage Passed On The Final Source
+
+Run `43873444657` completes successfully on `3028a057`: both Dart hosts pass with
+the same full-suite counts as checks `43873348049`, and native compilation,
+execution, APK signature verification and collection all return zero. The three
+downloaded original XML files report 70 executed, 70 passed, zero failures,
+errors or skips: DeviceOtaServiceTest 18, CompanionServiceTest 9 and the new
+CompanionIntegrationTest 43. Its 14 cross-SDK methods run on API 26/31/34 plus
+one API-34 notification-revocation method. The final SDK variant has no suffix
+in Robolectric's XML; that is not a missing API-34 execution.
+
+The previously failing API-26 GATT and malformed-notification fixtures now pass
+through actual Bridge/Service admission. The real chooser's filter and matching
+system-association cases also pass on every declared SDK, covering the new
+AC01-T02-NATIVE-01 repair. This is host execution with external OS/embedding
+shadows, not a connected phone, actual Flutter VM recovery or independent source
+closure. The reviewer should evaluate this new edge with the bounded coverage
+delta; R01-R05 remain closed and are not reopened.
+
+Original native XML paths are under
+`development/keyring-artifacts-43873444657/logs/app/bluetooth_flutter_Trace/build/app/test-results/testDebugUnitTest/`
+in the existing evidence root. Complete per-host result/command logs are under
+the matching `keyring-artifacts-43873444657` and
+`keyring-windows-artifacts-43873444657` directories; the full Actions console is
+`development/keyring-log-43873444657/console.log`. These are new executions of
+changed native inputs, not a reuse claim for the old 27 native cases.
+
+`development/keyring-build-08/dispatch.json` requests standard APK/EXE build-only
+verification on the same commit, with `publish_release=false`,
+`replace_existing_release=false`, application suffix `.companion` and the
+baseline OTA link profile. Its final result and actual packages are recorded
+below after retrieval; this dispatch alone is not a successful build or release.
+
+The first final debug-package download hit the adapter's existing 180-second
+deadline, with no collected APK and a nonzero adapter result. Its immutable
+`development/keyring-package-43873444657/{failure.json,download.log}` remains;
+`development/keyring-ci-86/run-list.log` separately records a GitHub API TLS
+handshake timeout. These are local retrieval failures, not failing CI, missing
+credentials or a reason to replay tests. The existing thin download adapter now
+accepts a numbered receipt-directory suffix, as its log/artifact routes already
+do, and the audit can bind that explicit successful receipt. One subsequent
+download uses `keyring-package-43873444657-02`, retaining the same command,
+180-second deadline, source check and artifact-byte hashing. The first directory
+is not moved, overwritten or cleaned.
+
+That second debug retrieval also reaches the unchanged 180-second child limit;
+the first standard-package retrieval reaches its 240-second limit before Android
+collection. Both retain a null child exit and empty download log, not an actual
+server error or a proved throughput diagnosis. The standard failure is under
+`development/keyring-standard-artifacts-43875796816/`. Meanwhile source-matched
+standard build `43875796816` passes Android and Windows; its Pages and Release
+jobs are skipped, and its complete console is archived. Checks/log downloads and
+the subsequent CI query succeed. CI's original debug collector binds a
+132392283-byte APK; no local copy is inferred from that remote result.
+
+The next bounded retrieval-only attempt uses the same gh command with a
+600-second per-archive limit and records artifact ID/digest/size/start time before
+download. The standard action's outer bound is 1500 seconds for its two archives;
+all other outer bounds are unchanged. This is a host collection-budget change,
+not a product/test deadline relaxation or proof that time alone fixes the network.
+Receipts use `keyring-package-43873444657-03` and
+`keyring-standard-artifacts-43875796816-02`; older directories remain immutable.
+No CI, build or device observation is replayed for these retrieval failures.
+
+The 600-second debug attempt also returns `ETIMEDOUT` without collected bytes;
+its pinned intent identifies artifact `14230505837`, a 76099816-byte archive
+with GitHub digest `e036b34af5b86f7ae6ab8c6520ada0f442137c1e25b0a8cb8024ed0bb96d124d`.
+Increasing the wrapper deadline is therefore not a qualified repair. The next
+readback reuses `Tools/flutter/dev_apk.py`'s download/size bound, SHA-256 and
+checked extraction functions through a small project-local API-redirect adapter.
+It sends the existing credential only to the fixed GitHub API origin, retains
+the signed storage URL only in memory, rejects additional/unsafe redirects, and
+requires archive size plus GitHub digest agreement before extraction. Python's
+OpenSSL route avoids deliberately choosing the inspected Git curl's Schannel
+HTTPS path; no TLS validation is disabled and native-cache attribution remains
+unresolved. This is a bounded replacement for the failed host retrieval step,
+not a new artifact producer, ZIP implementation, OTA sender or acceptance suite.
+New debug receipts use `keyring-package-43873444657-04`; the not-yet-run standard
+`keyring-standard-artifacts-43875796816-02` uses the same readback. Original gh
+timeouts remain unchanged. Final package-byte checks are still required.
+
+Readback `-04` receives 30408704 bytes before its actual 650-second process
+deadline; its intent still contains the older 600000-ms field. This collector
+metadata discrepancy is preserved, not silently corrected. The observed bytes
+show the longer transfer is not merely waiting on an unavailable API, but do not
+attribute the earlier gh stalls. The retained prefix and its digest are inputs
+to `keyring-package-43873444657-05`, never an already valid ZIP or APK. A fresh
+request must return HTTP 206 with the exact remaining Content-Range; its tail is
+stored separately and joined into a new archive only after the prefix is checked
+again. Complete size and GitHub SHA-256 still gate extraction. No existing prefix
+or failed directory is modified. Missing/mismatched range support fails closed.
+The observed low transfer rate justifies a 30-minute readback process budget for
+these exact final artifacts, not a changed test or product deadline; intents now
+record the actual process bound. The debug outer bound is 35 minutes, and the
+two-archive standard action is 65 minutes. Unrelated commands retain their bounds.
+
+The range guard's five offline checks pass, covering an exact positive response,
+ordinary non-range download, ignored Range, wrong offset/end/total or missing
+Content-Range, and the HTTPS handler. Original output is
+`artifact-range-selftest-01.log` in the existing evidence root. These are collector
+checks, not additional T01/T02 product or independent acceptance executions.
+The final audit additionally re-hashes all three downloaded archives against
+their source-matched GitHub digests, checks the readback logs, and confirms the
+retained prefix did not change. Package metadata alone does not satisfy it.
+
+## T01/T02 Source And Self-Test Handoff
+
+Product source: `3028a0570bdbc1ed115b8de92bfde47933d1dd4c`, branch
+`dev/flutter/app-companion-01-20261116`, clean worktree
+`D:/github/my/E-Track/.worktrees/app-companion-01`. Review the bounded 15-file
+delta from `f463649fc0a71945bff36c3ec57cbaecbd0fa9ef`. The root delivery contains
+only this note, `PLAN-OTA-EXEC.md` and `docs/agent-collaboration/index.md`.
+It does not merge product source or self-sign independent acceptance.
+
+### Observed Results
+
+| Source-Matched Run | Actual Result |
+| --- | --- |
+| [Full development checks 43873348049](https://github.com/Eitan-S-23/E-Track/actions/runs/43873348049) | Strict analysis passes; Linux 1025 passed/16 skipped, Windows 978 passed/63 skipped, zero failures; 11 additional candidate cases per host. |
+| [Passive debug/native 43873444657](https://github.com/Eitan-S-23/E-Track/actions/runs/43873444657) | Both full Dart hosts pass with the same counts. Native 70/70: new integration 43, existing DeviceOtaService 18 and CompanionService 9. Debug build, signature verification and collection pass. |
+| [Standard build-only 43875796816](https://github.com/Eitan-S-23/E-Track/actions/runs/43875796816) | Android APK and Windows EXE pass. Pages and GitHub Release jobs are skipped; baseline profile and `.companion` suffix, no release/deployment. |
+
+Original SDK identity is Flutter 3.47.8, framework
+`737ba8f885dc774b53b442759999a312c9461e4e`, Dart 3.13.7. The full raw logs of
+both development requests each contain all 11 T01 case names on both hosts and
+all 15 T02 telemetry case names on Linux. The 15 mobile-adapter cases are
+explicit Windows skips, not Windows execution. Its regenerated registrar header
+has the previously allowed EOL-only restored-state difference; semantic and
+untracked source deltas are empty, not a claim of literally clean CI files.
+
+T01 covers no automatic prompts/enable, skip/re-entry, API-specific Bluetooth
+permissions, denial/permanent denial, setting-return revocation, notification
+denial/channel disablement, unknown OEM settings and stale/disposed refreshes.
+T02 exercises actual Runtime/BluetoothService/BleController/MonitorController/
+DatabaseService without a page: real INFO/control setup, bounded scan leases,
+owner/revision/permission/API rejection and recovery, late callbacks, stale and
+duplicate advertisements, exact failed-save retention, partial success and
+single-flight retries. Native tests exercise real Bridge/chooser/Service/boot/job
+paths with only OS and Flutter embedding/VM edges shadowed. No native
+CompanionExecution substitute is used in the new integration suite.
+
+The only new operational repair is AC01-T02-NATIVE-01, the CDM ScanFilter
+uppercase-address and shared failure-cleanup boundary. Narrow dependency seams
+keep production defaults; the old P35 fixture waits for real recorder publication
+without weakening its false-connected/fresh assertions. R01-R05, the OTA sender,
+wire/consent contracts, firmware, simulator and dependency lock remain unchanged
+in this coverage delta. The earlier failure chronology above stays intact.
+
+### Original Evidence
+
+All paths below are relative to
+`D:/github/my/E-Track/.cache/app-companion-01-20261116/`:
+
+- Full host originals: `development/keyring-artifacts-43873348049/`,
+  `development/keyring-windows-artifacts-43873348049/`,
+  `development/keyring-artifacts-43873444657/` and
+  `development/keyring-windows-artifacts-43873444657/`. Each contains its real
+  `result.json` and complete command logs. The native directory also contains all
+  three JUnit XML files under the exact test-results path recorded above.
+- Full Actions consoles: `development/keyring-log-43873348049/console.log`,
+  `development/keyring-log-43873444657/console.log` and
+  `development/keyring-log-43875796816/console.log`.
+- Debug package and metadata: `development/keyring-package-43873444657-05/`.
+  Its 76099816-byte archive matches GitHub's digest after validated range
+  recovery; the earlier 30408704-byte prefix remains unchanged in `-04`.
+- Standard APK/EXE/runtime ZIP:
+  `development/keyring-standard-artifacts-43875796816-02/`. Both original
+  archives match their GitHub digests before checked extraction. The reader
+  reports actual durations of 1263.793 s for debug remainder/readback,
+  686.104 s for Android and 349.071 s for Windows. These are retrieval durations,
+  not build or OTA timings; they do not prove the cause of earlier gh stalls.
+- Earlier failed CI and retrieval directories, the first empty download logs,
+  TLS query failure, `-03` timeout and `-04` partial file are retained. No CI,
+  build or device operation was replayed solely to repair collection.
+
+| Actual Collected File | Bytes | SHA-256 |
+| --- | --- | --- |
+| Passive `trace-dev-debug.apk` | 132392283 | `abd8c6136144f382d9d2b721b34c24288b0184562c94a4425b39f19bba49b26f` |
+| Standard `ble-monitor-android.apk` | 48318616 | `1d4873e47e4bde4d8165036713cbd3cdc342bb4cce1f2c04bdc809d788d09a0a` |
+| `ble-monitor-windows.exe` | 161792 | `e56757c6fbf4953ff7f45df5458ab8f89c3ec8c1f0563b6dbd28cfcd4df1b31a` |
+| `ble-monitor-windows.zip` | 20627891 | `ceb95312bf0b10af5f38b38a9857036e01c0f63ab05d8b45feac174b07b0c987` |
+
+The post-delivery readback/write audit is `final-write-audit-10.json`, with its
+exact source/run/path inputs in `t01-t02-audit-inputs.json`. It must check the
+actual APK kernel constants, package/ZIP hashes, all four full host originals,
+fresh native XML, stage preservation and the final current main/CI receipts.
+Its presence or a path in this note alone is not PASS; read its actual result.
+Main submission/CI originals are separate under `development/`, beginning with
+`keyring-submit-notes-07`; no product-main integration is implied.
+
+### Boundaries And Next Owner
+
+Reuse unchanged build-09 inputs/outputs and the previous independent 42 MCU
+host results; do not repeat firmware or simulator builds. Build-09 retains
+465 warning-containing lines, zero errors and incremental Boot output. The
+new 70 native executions, not the old 27-case run, qualify this changed native
+test/source batch for implementation feedback.
+
+`t01-t02-native-02.json` records 30 named certificate-cache metadata differences
+against this batch's `t01-t02-entry.json`; the earlier `-01` checkpoint had 24
+against that same entry. Do not add these counts to one another or to the
+reviewer's separate historical observations. Exact paths are in the snapshots;
+the final audit takes a fresh comparison. Attribution remains UNRESOLVED, with
+no external cleanup, whole-OS claim or zero-native-external-write assertion.
+Controllable source, Git, cache, archive, test and evidence outputs remain inside
+the authorized project. No PowerShell, local Flutter/Gradle build, USB enumeration,
+installation, data clearing, flash, OTA, production release or deployment occurred.
+
+Next owner: the original independent reviewer evaluates this coverage delta,
+the new CDM repair and these original results. This is not another R01-R05
+remediation request and not self-signed T01/T02 acceptance. D0-D5, real permission
+dialogs/background recovery/radio observations, real wheel navigation, formal
+whole-card adjudication and product main integration remain outstanding.
+C1-C6 stay unchecked; P3/P4 completion, P1/P5 and production gates are unchanged.
