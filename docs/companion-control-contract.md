@@ -317,3 +317,13 @@ on API 26/31/34, with OS and Flutter VM/embedding shadows only. The native runne
 selects it explicitly alongside both existing service suites. None of these
 host tests proves physical permission dialogs, actual Dart VM survival, radio
 reliability, process recovery on an OEM phone, or whole-card acceptance.
+
+The telemetry widget harness advances project timers in FakeAsync and separately
+yields the root microtask queue with an empty `tester.runAsync` callback. Dart's
+already-completed stream-cancellation future belongs to the root zone; repeatedly
+pumping only fake time can starve real stream disposal and falsely leave the OTA
+owner busy after a successful HELLO. Do not solve that fixture boundary by
+extending deadlines, overriding runtime/stream disposal or running project work
+outside the controlled clock. Preserve the first scenario error even when cleanup
+also fails, and always retire controllers/registrations so one failure cannot
+contaminate the next scenario.

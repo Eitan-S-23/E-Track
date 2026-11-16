@@ -720,16 +720,11 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           writeWithResponse: chars['writeMode'] != 'without'));
         try {
           if (generation != _cancelGeneration || _ble.otaLinkGeneration(address) != link) return false;
-          debugPrint('T02_CONTROL write-start');
           await transport.writeIdleControl(bytes);
-          debugPrint('T02_CONTROL write-done');
           return generation == _cancelGeneration && _ble.otaLinkGeneration(address) == link;
         } finally {
-          debugPrint('T02_CONTROL dispose-start');
           await transport.dispose();
-          debugPrint('T02_CONTROL dispose-done');
           await idleNotifications.close();
-          debugPrint('T02_CONTROL close-done');
           if (identical(_transport, transport)) _transport = null;
         }
       }, companionRuntimeId: companionRuntimeId) ?? false;

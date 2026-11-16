@@ -310,14 +310,20 @@ class _Harness {
   }
 
   Future<void> pump() async {
-    // Bounded microtask drain; no wall-clock sleeps or lifecycle overrides.
-    for (var i = 0; i < 30; i++) { await tester.pump(); }
+    for (var i = 0; i < 30; i++) { await tick(); }
+  }
+
+  Future<void> tick([Duration duration = Duration.zero]) async {
+    elapsedMs += duration.inMilliseconds;
+    await tester.pump(duration);
+    // Dart's completed stream-cancellation future schedules in the root zone.
+    // Yield only that microtask queue; project code/timers stay in FakeAsync.
+    await tester.runAsync(() async {});
   }
 
   Future<void> until(bool Function() condition) async {
     for (var i = 0; i < 2000 && !condition(); i++) {
-      elapsedMs++;
-      await tester.pump(const Duration(milliseconds: 1));
+      await tick(const Duration(milliseconds: 1));
     }
     expect(condition(), isTrue, reason: 'runtime=${runtime.status.value}, OTA=${ota.upgradeStatus}, '
         'busy=${ota.isUpgrading}, owner=${runtime.handles(_address)}, '
@@ -327,8 +333,7 @@ class _Harness {
   }
 
   Future<void> elapse(Duration duration) async {
-    elapsedMs += duration.inMilliseconds;
-    await tester.pump(duration);
+    await tick(duration);
     await pump();
   }
 
