@@ -3336,7 +3336,7 @@ class _ChannelAdapter implements OtaBleChannel {
   final Object? deviceScope;
 
   @override
-  Future<void> writeChunk(List<int> chunk) async {
+  Future<void> writeChunk(List<int> chunk, {OtaWriteAdmission? admission}) async {
     try {
       if (!isConnected) throw StateError('STALE_OTA_CHANNEL');
       // OTA 专用严格写入（RC2-08）：UUID 精确匹配 FFF0/FFF2，
@@ -3348,9 +3348,11 @@ class _ChannelAdapter implements OtaBleChannel {
         chunk,
         writeWithResponse: writeWithResponse,
         stats: stats,
+        admission: admission,
       );
       if (!isConnected) throw StateError('STALE_OTA_CHANNEL_COMPLETION');
     } catch (e) {
+      if (admission?.rejected == true) rethrow;
       // 写失败同样标记断连（PR09）：不能只依赖通知流 error/done。
       _connected = false;
       throw OtaTransportException('BLE write failed: $e', code: 'DISCONNECTED');

@@ -10,6 +10,9 @@ import 'ota_link_stats.dart';
 import 'ota_link_profile.dart';
 import 'ota_mono.dart';
 import 'ota_pipeline_window.dart';
+import 'ota_write_admission.dart';
+
+export 'ota_write_admission.dart' show OtaWriteAdmission;
 
 part 'ota_pipeline_transport.dart';
 
@@ -17,7 +20,9 @@ part 'ota_pipeline_transport.dart';
 /// 测试用 fake 模拟 MCU 行为（ACK、丢帧、乱序、断连）。
 abstract class OtaBleChannel {
   /// 向 FFF2（写特征）写入一个分片。返回写入是否成功。
-  Future<void> writeChunk(List<int> chunk);
+  /// Forward [admission] through asynchronous setup; dispatch it immediately
+  /// before the platform write, never before discovery or a queued wait.
+  Future<void> writeChunk(List<int> chunk, {OtaWriteAdmission? admission});
 
   /// 订阅 FFF1（通知特征）的原始字节流（可能一帧跨多个通知分片）。
   Stream<List<int>> get notifications;
@@ -88,7 +93,7 @@ class OtaBleTransport {
 
   final OtaBleChannel _channel;
   final void Function(bool applying)? onApplyBoundary;
-  /// Synchronous admission under the writer lock, after its last asynchronous wait.
+  /// Synchronous admission under the writer lock at the platform write boundary.
   /// Applies only to the first BEGIN byte, never to recovery or irreversible apply.
   final void Function()? beforeInitialBegin;
   bool _initialBeginDispatched = false;
@@ -966,6 +971,8 @@ class OtaBleTransport {
     try {
       await _writeSerial;
       if (_disposed) return;
+      // A guarded transfer rejected before dispatch opened no receiver session.
+      if (beforeInitialBegin != null && !_initialBeginDispatched) return;
       _quarantineUnconfirmedData();
       // Preserve normal cancellation without assuming platform delivery. Only
       // this newly retired DATA uncertainty may recover here; an explicitly
@@ -1804,27 +1811,40 @@ class OtaBleTransport {
         if (_inTransfer && (frame[2] == OtaBleCodec.cmdData || frame[2] == _PipelineWire.data)) {
           _dataWriteDispatched = true;
         }
-        if (_inTransfer && offset == 0 && !_initialBeginDispatched &&
-            (frame[2] == OtaBleCodec.cmdBegin || frame[2] == _PipelineWire.begin)) {
+        final initialBegin = _inTransfer && offset == 0 && !_initialBeginDispatched &&
+            (frame[2] == OtaBleCodec.cmdBegin || frame[2] == _PipelineWire.begin);
+        final admission = initialBegin ? OtaWriteAdmission(() {
+          _checkUsable();
+          if (_paused) {
+            _noProgressClock?.stop();
+            throw const _InitialBeginPaused();
+          }
+          _checkNoProgress();
           beforeInitialBegin?.call();
           _initialBeginDispatched = true;
-        }
-        final pendingWrite = _channel.writeChunk(frame.sublist(offset, end));
-        _trackOutstandingWrite(pendingWrite);
-        dispatchedAny = true;
+          dispatchedAny = true;
+        }) : null;
         try {
-          await pendingWrite.timeout(perChunkTimeout);
-        } on TimeoutException {
-          final settleGrace = _capByBudget(writeTimeout * 2);
-          if (settleGrace > Duration.zero) {
-            try {
-              await pendingWrite.timeout(settleGrace);
-            } catch (_) {} // 迟到错误不覆盖本帧超时语义
+          final pendingWrite = _channel.writeChunk(frame.sublist(offset, end), admission: admission);
+          _trackOutstandingWrite(pendingWrite);
+          if (admission == null) dispatchedAny = true;
+          try {
+            await pendingWrite.timeout(perChunkTimeout);
+          } on TimeoutException {
+            admission?.retire();
+            final settleGrace = _capByBudget(writeTimeout * 2);
+            if (settleGrace > Duration.zero) {
+              try {
+                await pendingWrite.timeout(settleGrace);
+              } catch (_) {} // 迟到错误不覆盖本帧超时语义
+            }
+            otaMonoLog('MONO_FAIL_AT', code: 'WRITE_TIMEOUT');
+            throw OtaTransportException(
+                'BLE 单次写入超时（${writeTimeout.inSeconds}s）',
+                code: 'WRITE_TIMEOUT');
           }
-          otaMonoLog('MONO_FAIL_AT', code: 'WRITE_TIMEOUT');
-          throw OtaTransportException(
-              'BLE 单次写入超时（${writeTimeout.inSeconds}s）',
-              code: 'WRITE_TIMEOUT');
+        } finally {
+          admission?.retire();
         }
         onChunkCompleted?.call(end);
         offset = end;

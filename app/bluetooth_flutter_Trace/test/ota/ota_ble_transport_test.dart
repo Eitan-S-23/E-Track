@@ -140,6 +140,55 @@ void main() {
   /// 撞 END ERR_SHA，使全部正常路径用例失去意义。
   List<int> shaOf(Uint8List package) => sha256.convert(package).bytes;
 
+  test('write admission is synchronous, one-shot and revocable before dispatch', () {
+    var checks = 0;
+    final admission = OtaWriteAdmission(() { checks++; });
+    expect(admission.dispatched, isFalse);
+    admission.dispatch();
+    expect(admission.dispatched, isTrue);
+    expect(admission.rejected, isFalse);
+    expect(admission.dispatch, throwsStateError);
+    expect(checks, 1);
+    final retired = OtaWriteAdmission(() { checks++; })..retire();
+    expect(retired.dispatch, throwsStateError);
+    expect(retired.dispatched, isFalse);
+    expect(retired.rejected, isTrue);
+    expect(checks, 1);
+    final error = StateError('expired');
+    final refused = OtaWriteAdmission(() { checks++; throw error; });
+    expect(refused.dispatch, throwsA(same(error)));
+    expect(refused.dispatched, isFalse);
+    expect(refused.dispatch, throwsStateError);
+    expect(checks, 2, reason: 'A refused gate cannot be rearmed');
+  });
+
+  test('timed-out pre-dispatch preparation cannot write late or poison the channel', () async {
+    final mcu = _McuSim();
+    final channel = _FrameGateChannel(mcu)..preGateCmd = OtaBleCodec.cmdBegin;
+    var guards = 0;
+    final transport = OtaBleTransport(channel: channel,
+      writeTimeout: const Duration(milliseconds: 20),
+      beforeInitialBegin: () { guards++; });
+    addTearDown(mcu.close);
+    addTearDown(transport.dispose);
+    final package = packageBytes(1024);
+    try {
+      await expectLater(transport.transfer(package: package,
+        packageSha256: shaOf(package), etuHeader: etuHeaderOf(package)), throwsA(
+        isA<OtaTransportException>().having((e) => e.code, 'code', 'WRITE_TIMEOUT')));
+      expect(channel.preGateHits, 1);
+      expect(guards, 0);
+      channel.releasePre();
+      await Future<void>.delayed(Duration.zero);
+      expect(mcu.beginCalls, 0);
+      expect(mcu.controlChunkWrites, 0);
+      await transport.getDeviceInfo();
+      expect(mcu.controlChunkWrites, 1, reason: 'Only the explicitly requested INFO, no resync');
+    } finally {
+      channel.releasePre();
+    }
+  });
+
   for (final allow in [false, true]) {
     test('initial admission follows the MTU wait and runs only once: allow=$allow', () async {
       final package = packageBytes(1024);
@@ -239,6 +288,40 @@ void main() {
       } finally {
         channel.releasePost();
         await transport.dispose();
+      }
+    });
+
+    test('initial pause during lower writer preparation yields for INFO: allow=$allow', () async {
+      final mcu = _McuSim();
+      final channel = _FrameGateChannel(mcu)..preGateCmd = OtaBleCodec.cmdBegin;
+      var guards = 0;
+      final transport = OtaBleTransport(channel: channel, beforeInitialBegin: () {
+        guards++;
+        if (!allow) throw const OtaTransportException('expired', code: 'STALE_DEVICE_CONSENT');
+      });
+      addTearDown(mcu.close);
+      addTearDown(transport.dispose);
+      final package = packageBytes(1024);
+      final operation = transport.transfer(package: package,
+        packageSha256: shaOf(package), etuHeader: etuHeaderOf(package));
+      final observed = allow
+          ? expectLater(operation, completion(isA<OtaAckResult>().having((ack) => ack.isOk, 'isOk', isTrue)))
+          : expectLater(operation, throwsA(isA<OtaTransportException>().having((e) => e.code, 'code', 'STALE_DEVICE_CONSENT')));
+      try {
+        await _pumpUntil(() => channel.preGateHits == 1);
+        transport.pauseForBackground();
+        channel.releasePre();
+        await transport.getDeviceInfo(timeout: const Duration(seconds: 1));
+        expect(guards, 0);
+        expect(mcu.beginCalls, 0);
+        transport.resumeFromBackground();
+        await observed;
+        expect(guards, 1);
+        expect(mcu.beginCalls, allow ? 1 : 0);
+      } finally {
+        channel.releasePre();
+        transport.resumeFromBackground();
+        await observed;
       }
     });
   }
@@ -3508,7 +3591,8 @@ class _GatedWriteChannel implements OtaBleChannel {
   void emitNotifyError(Object error) => _notify.addError(error);
 
   @override
-  Future<void> writeChunk(List<int> chunk) {
+  Future<void> writeChunk(List<int> chunk, {OtaWriteAdmission? admission}) {
+    admission?.dispatch();
     final gate = Completer<void>();
     _gates.add(gate);
     return gate.future;
@@ -3537,9 +3621,9 @@ class _BatchTapChannel extends _ReboundWrapper {
   Future<void> Function(List<int>)? afterWrite;
 
   @override
-  Future<void> writeChunk(List<int> chunk) async {
+  Future<void> writeChunk(List<int> chunk, {OtaWriteAdmission? admission}) async {
+    await inner.writeChunk(chunk, admission: admission);
     chunks.add(List<int>.of(chunk));
-    await inner.writeChunk(chunk);
     await afterWrite?.call(chunk);
   }
 }
@@ -3565,7 +3649,8 @@ class _ReboundWrapper implements OtaBleChannel {
   Object? get deviceScope => inner.deviceScope;
 
   @override
-  Future<void> writeChunk(List<int> chunk) => inner.writeChunk(chunk);
+  Future<void> writeChunk(List<int> chunk, {OtaWriteAdmission? admission}) =>
+      inner.writeChunk(chunk, admission: admission);
 
   @override
   Stream<List<int>> get notifications => inner.notifications;
@@ -3638,13 +3723,13 @@ class _FrameGateChannel implements OtaBleChannel {
   }
 
   @override
-  Future<void> writeChunk(List<int> chunk) async {
+  Future<void> writeChunk(List<int> chunk, {OtaWriteAdmission? admission}) async {
     final cmd = _frameCmd(chunk);
     if (cmd != null && cmd == preGateCmd) {
       preGateHits++;
       if (preGateHits == preGateAt) await _preGate.future;
     }
-    await inner.writeChunk(chunk);
+    await inner.writeChunk(chunk, admission: admission);
     if (cmd != null && cmd == postGateCmd) {
       postGateHits++;
       if (postGateHits == postGateAt) await _postGate.future;
@@ -3816,7 +3901,8 @@ abstract class _FakeMcuHost implements OtaBleChannel {
   }
 
   @override
-  Future<void> writeChunk(List<int> chunk) async {
+  Future<void> writeChunk(List<int> chunk, {OtaWriteAdmission? admission}) async {
+    admission?.dispatch();
     // RC3-07⑤：慢写与写错误注入只作用于 DATA 帧分片——控制帧
     // （GET_INFO/BEGIN/END/ABORT）不延迟、不注错。若 BEGIN 也延迟，
     // 小 MTU 下 BEGIN 自身 6 片先吃掉预算，用例测不到「DATA 分片
@@ -4117,9 +4203,9 @@ class _ProbeMcu extends _McuSim {
   bool failAbortWrite = false;
 
   @override
-  Future<void> writeChunk(List<int> chunk) async {
+  Future<void> writeChunk(List<int> chunk, {OtaWriteAdmission? admission}) async {
     final isAbort = _chunkFrameCmd(chunk) == OtaBleCodec.cmdAbort;
-    await super.writeChunk(chunk);
+    await super.writeChunk(chunk, admission: admission);
     if (isAbort) {
       if (!abortWriteStarted.isCompleted) abortWriteStarted.complete();
       await abortWriteGate?.future;

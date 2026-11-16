@@ -134,7 +134,9 @@ new-connection target version AND full raw SHA verification, not END ACK.
    full base identity, refreshed metadata, target/package hashes and expiry.
    The same consent is checked again after asynchronous setup and under the
    transport writer lock, after capability negotiation, queueing and MTU waits,
-   immediately before its first BEGIN/BEGIN2 chunk dispatch. An initial BEGIN
+   immediately before its first BEGIN/BEGIN2 platform write. The gate travels
+   through the channel and BluetoothService, including baseline mobile service
+   discovery; entering `writeChunk` is not dispatch. An initial BEGIN
    paused during setup yields the writer so the existing INFO recovery can run;
    admission is checked only after resume, not while holding a paused writer.
    Reconnect, changed asset, stale callback or consumed offer
@@ -202,9 +204,19 @@ legacy entry are unchanged; this section is not independent acceptance.
   open GPX, valid GPS motion and current power. Unsafe state returns existing
   acquisition failure without changing opcodes or aborting an active apply.
 - `OtaBleTransport(beforeInitialBegin: void Function()?)`: immutable synchronous
-  guard called once before the initial BEGIN/BEGIN2 enters `writeChunk`. The
-  service supplies its original consent/owner check. Throwing refuses all BEGIN
-  bytes; subsequent DATA, recovery and END/apply do not re-expire that consent.
+  guard checked at the first BEGIN/BEGIN2 platform write. The service supplies
+  its original consent/owner check; subsequent DATA, recovery and END/apply do
+  not re-expire that consent.
+- `OtaBleChannel.writeChunk(chunk, admission: OtaWriteAdmission?)` and
+  `BluetoothService.writeOtaCharacteristicByAddress(..., admission: ...)` forward
+  the same one-chunk gate through asynchronous preparation. `dispatch()` executes
+  it synchronously after the last project-owned wait and before `ch.write()` or
+  the Windows adapter call, with no intervening await. Consumption is recorded
+  only there. A rejected/retired gate cannot be reused, and timeout retires a
+  still-pending discovery before releasing its writer. Pre-dispatch rejection
+  preserves the original exception and GATT binding; it is not a partial write,
+  so it neither poisons the channel nor sends cleanup ABORT/resync for an
+  unstarted guarded transfer. Actual dispatched-write failures retain quarantine.
 - `_ControlBinding = (address, session, generation, epoch)`: attachment flights
   are keyed by the captured binding, not just a runtime epoch. All asynchronous
   publication points and control-operation continuations recheck it. Stale
@@ -224,7 +236,9 @@ legacy entry are unchanged; this section is not independent acceptance.
 | Recording active or paused-open, new motion or insufficient power at BEGIN | No overlay acquisition; pending reservation is released on rejection. |
 | Recorder start/resume during NOW reservation or binary ownership | Existing unsupported-request result, no GPX/TrackFilter start and no false REC UI. |
 | Reservation timeout, failed send, failure/new session/new offer | No leaked recording lock; remote STARTING does not renew the original lease. |
-| Consent expires during CAPS, fallback, pause/queue/MTU wait | STALE_DEVICE_CONSENT before any initial BEGIN chunk; no DATA/END. |
+| Consent expires during CAPS, fallback, pause/queue/MTU or baseline writer discovery | STALE_DEVICE_CONSENT before any initial BEGIN chunk; zero new platform writes, including cleanup. |
+| Owner retires during first-BEGIN writer discovery | No platform write/BEGIN; existing cancellation owns the terminal result. |
+| Initial preparation times out, then discovery completes late | The retired gate refuses dispatch; no late BEGIN or false partial-frame quarantine. |
 | Consent valid at initial dispatch, expires afterward | Existing transfer/apply safety and final identity verification continue unchanged. |
 | Old attachment discovery/subscription completes after S2 | Only S2 owns its listener; CHECK succeeds without another disconnect. |
 | Old metadata operation completes after invalidation | No old offer/state is published into the new control session. |
@@ -242,6 +256,12 @@ The Dart service regressions delay CAPS and v1 fallback across consent expiry;
 transport tests delay MTU and queued INFO writes, and prove that a paused initial
 BEGIN releases the writer for INFO recovery before its final admission check.
 They require zero dispatched BEGIN bytes or a single successful admission.
+The service suite also runs the actual BluetoothService writer, discovery and
+subscription code with fake device/characteristic boundaries. It delays the
+last uncached discovery for v1 and v2, covers expiry/owner retirement and valid
+consent, and delays an admitted write's completion across expiry without aborting
+the transfer or final identity verification. Cache tests cover guard-error
+propagation with/without statistics and preserve a valid reused GATT binding.
 Runtime tests cross reconnect during discovery/subscription
 in baseline/reuse dependency modes and preserve partial new-session input.
 Notification tests assert Darwin grant/deny/retry and no implicit Android request.

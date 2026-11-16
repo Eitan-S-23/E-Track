@@ -16,6 +16,7 @@ import '../ota/ota_link_profile.dart';
 import '../ota/ota_experiment_config.dart';
 import '../ota/ota_radio_lease.dart';
 import '../ota/ota_scan_pause.dart';
+import '../ota/ota_write_admission.dart';
 import 'bluetooth_reconnect.dart';
 
 // 抽象蓝牙适配器接口
@@ -1653,6 +1654,7 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
     List<int> data, {
     bool writeWithResponse = false,
     OtaLinkStats? stats,
+    OtaWriteAdmission? admission,
   }) async {
     _experiment.requireForOta()?.requireDevice(deviceAddress);
     if (stats == null) {
@@ -1662,6 +1664,7 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
         characteristicId,
         data,
         writeWithResponse: writeWithResponse,
+        admission: admission,
       );
       return;
     }
@@ -1674,6 +1677,7 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
         data,
         writeWithResponse: writeWithResponse,
         stats: stats,
+        admission: admission,
       );
       stats.recordGattWrite(
         durationUs: sw.elapsedMicroseconds,
@@ -1696,12 +1700,14 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
     List<int> data, {
     bool writeWithResponse = false,
     OtaLinkStats? stats,
+    OtaWriteAdmission? admission,
   }) async {
     final generation = otaLinkGeneration(deviceAddress);
     final startBinding = otaGattBindingToken(deviceAddress);
     try {
       if (Platform.isWindows) {
         final wSw = stats == null ? null : (Stopwatch()..start());
+        admission?.dispatch();
         try {
           await _adapter.writeCharacteristic(
             deviceAddress,
@@ -1765,8 +1771,10 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
             final cid = ch.uuid.toString();
             if (!_strictBleUuidEquals(cid, characteristicId)) continue;
             final wSw = stats == null ? null : (Stopwatch()..start());
+            final bytes = Uint8List.fromList(data);
+            admission?.dispatch();
             try {
-              await ch.write(Uint8List.fromList(data),
+              await ch.write(bytes,
                   withoutResponse: !writeWithResponse);
             } catch (_) {
               stats?.recordPlatformWrite(
@@ -1790,6 +1798,7 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
         throw UnsupportedError('未找到目标OTA特征: $characteristicId');
       }
     } catch (e) {
+      if (admission?.rejected == true) rethrow;
       if (reuseOtaCharacteristics && startBinding != null &&
           identical(startBinding, otaGattBindingToken(deviceAddress))) {
         _invalidateOtaGatt(deviceAddress.toLowerCase());
