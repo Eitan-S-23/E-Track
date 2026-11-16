@@ -38,6 +38,9 @@ void main() {
       try {
         await harness.initialize();
         await body(harness);
+      } catch (error, stack) {
+        debugPrint('T02_PRIMARY_FAILURE $name: $error\n$stack');
+        rethrow;
       } finally {
         await harness.close();
       }
@@ -287,9 +290,12 @@ class _Harness {
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
     messenger.setMockMethodCallHandler(channel, (call) async {
       if (call.method == 'ready') { ready = true; return snapshot; }
-      if (call.method == 'snapshot') return Map<String, Object?>.from(snapshot);
+      if (call.method == 'snapshot') {
+        debugPrint('T02_NATIVE_SNAPSHOT $snapshot');
+        return Map<String, Object?>.from(snapshot);
+      }
       if (call.method == 'state') {
-        debugPrint('T02_NATIVE_STATE ${(call.arguments as Map)['status']}');
+        debugPrint('T02_NATIVE_STATE ${call.arguments}');
         return true;
       }
       fail('Unexpected native call: ${call.method}');
@@ -313,7 +319,10 @@ class _Harness {
       elapsedMs++;
       await tester.pump(const Duration(milliseconds: 1));
     }
-    expect(condition(), isTrue, reason: 'runtime=${runtime.status.value}, OTA=${ota.upgradeStatus}');
+    expect(condition(), isTrue, reason: 'runtime=${runtime.status.value}, OTA=${ota.upgradeStatus}, '
+        'busy=${ota.isUpgrading}, owner=${runtime.handles(_address)}, '
+        'discovery=${device.discoveries}, writes=${device.writes}, scans=${adapter.starts}, '
+        'pendingNative=${messenger.pendingMessageCount}, elapsedMs=$elapsedMs');
     await pump();
   }
 
@@ -328,6 +337,7 @@ class _Harness {
     final completed = Completer<Object?>();
     const codec = StandardMethodCodec();
     messenger.handlePlatformMessage(channel.name, codec.encodeMethodCall(MethodCall(method, value)), (result) {
+      debugPrint('T02_NATIVE_REPLY $method');
       completed.complete(result == null ? null : codec.decodeEnvelope(result));
     });
     await until(() => completed.isCompleted);
@@ -350,19 +360,22 @@ class _Harness {
     if (saveGate != null && !saveGate.isCompleted) saveGate.complete();
     final checkGate = permissionGate;
     if (checkGate != null && !checkGate.isCompleted) checkGate.complete(false);
-    if (ready) await callback('lost', {'runtimeId': snapshot['runtimeId']});
-    runtime.onClose();
-    monitor.onClose();
-    Get.find<BleController>().onClose();
-    ota.onClose();
-    ble.onClose();
-    await pump();
-    await adapter.results.close();
-    await device.close();
-    Get.reset();
-    messenger.setMockMethodCallHandler(channel, null);
-    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-    await tester.pumpWidget(const SizedBox.shrink());
+    try {
+      if (ready) await callback('lost', {'runtimeId': snapshot['runtimeId']});
+    } finally {
+      runtime.onClose();
+      monitor.onClose();
+      if (Get.isRegistered<BleController>()) Get.find<BleController>().onClose();
+      ota.onClose();
+      ble.onClose();
+      Get.reset();
+      messenger.setMockMethodCallHandler(channel, null);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await pump();
+      await adapter.results.close();
+      await device.close();
+      await tester.pumpWidget(const SizedBox.shrink());
+    }
   }
 }
 
@@ -408,7 +421,7 @@ class _Device extends Fake implements fbp.BluetoothDevice {
   final platformName = 'E-Track';
   @override
   bool isConnected = false;
-  int infoRequests = 0;
+  int infoRequests = 0, discoveries = 0, writes = 0;
   final connections = StreamController<fbp.BluetoothConnectionState>.broadcast(sync: true);
   final resets = StreamController<void>.broadcast(sync: true);
   final notifications = StreamController<List<int>>.broadcast(sync: true);
@@ -422,21 +435,31 @@ class _Device extends Fake implements fbp.BluetoothDevice {
   @override
   Future<void> connect({Duration timeout = const Duration(seconds: 35), int? mtu = 512,
       bool autoConnect = false}) async {
+    debugPrint('T02_GATT_CONNECT');
     isConnected = true;
     connections.add(fbp.BluetoothConnectionState.connected);
   }
   @override
   Future<void> disconnect({int timeout = 35, bool queue = true, int androidDelay = 2000}) async {
+    debugPrint('T02_GATT_DISCONNECT');
     isConnected = false;
     connections.add(fbp.BluetoothConnectionState.disconnected);
   }
   @override
-  Future<int> requestMtu(int desiredMtu, {double predelay = 0.35, int timeout = 15}) async => 247;
+  Future<int> requestMtu(int desiredMtu, {double predelay = 0.35, int timeout = 15}) async {
+    debugPrint('T02_GATT_MTU');
+    return 247;
+  }
   @override
   Future<List<fbp.BluetoothService>> discoverServices({bool subscribeToServicesChanged = true,
-      int timeout = 15}) async => [_Gatt([writer, notifier])];
+      int timeout = 15}) async {
+    discoveries++;
+    debugPrint('T02_GATT_DISCOVER $discoveries');
+    return [_Gatt([writer, notifier])];
+  }
 
   void write(List<int> bytes) {
+    writes++;
     if (bytes.first == OtaBleCodec.frameSync0) {
       final frame = OtaBleCodec.decodeFrame(bytes);
       debugPrint('T02_GATT_COMMAND ${frame.cmd}');
@@ -447,6 +470,7 @@ class _Device extends Fake implements fbp.BluetoothDevice {
           hardwareRevision: 3, layoutId: 5, bootVersion: 2, currentVersionCode: 30327,
           imageSha256: List<int>.filled(32, 0x11))));
     } else {
+      debugPrint('T02_GATT_TEXT ${String.fromCharCodes(bytes).trim()}');
       for (final message in text.add(bytes, idleTextAllowed: true)) {
         if (message.kind == 'HELLO') {
           notifications.add(CompanionMessage('CAPS', message.session, 0, ['1']).encode());
@@ -469,7 +493,10 @@ class _Characteristic extends Fake implements fbp.BluetoothCharacteristic {
   @override
   Stream<List<int>> get onValueReceived => device.notifications.stream;
   @override
-  Future<bool> setNotifyValue(bool enable, {int timeout = 15, bool forceIndications = false}) async => true;
+  Future<bool> setNotifyValue(bool enable, {int timeout = 15, bool forceIndications = false}) async {
+    debugPrint('T02_GATT_NOTIFY $enable');
+    return true;
+  }
   @override
   Future<void> write(List<int> value, {bool withoutResponse = false, bool allowLongWrite = false,
       int timeout = 15}) async { device.write(value); }
