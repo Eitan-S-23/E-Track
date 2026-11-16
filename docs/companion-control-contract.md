@@ -335,3 +335,10 @@ embedding shadow methods still model engine count/liveness, method messages and
 destruction callbacks; assert the cached engine exists immediately after the real
 service starts. Project Bridge, Service, receiver, jobs and permission/GATT
 admission must never be shadowed to avoid a missing native library in this test.
+The Android 8-11 BluetoothManager shadow also routes its legacy direct-Binder
+`getConnectedDevices` call through Robolectric's existing GATT-state store;
+Android 12+ retains its framework delegation. This fills a stock OS-shadow gap,
+not a replacement for CompanionBridge.gattConnected or its permission policy.
+Native task fixtures include the real notification snapshot's required `label`;
+a missing field must continue to fail service admission rather than be defaulted
+by production code to satisfy the test.

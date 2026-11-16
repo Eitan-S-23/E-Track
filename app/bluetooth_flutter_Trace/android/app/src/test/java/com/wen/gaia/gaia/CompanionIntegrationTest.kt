@@ -9,6 +9,7 @@ import android.app.PendingIntent
 import android.app.job.JobParameters
 import android.app.job.JobScheduler
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.bluetooth.le.ScanFilter
@@ -42,6 +43,7 @@ import org.robolectric.annotation.Implementation
 import org.robolectric.annotation.Implements
 import org.robolectric.shadow.api.Shadow
 import org.robolectric.shadows.ShadowPowerManager
+import org.robolectric.shadows.ShadowBluetoothManager
 import org.robolectric.util.ReflectionHelpers
 import java.lang.ref.WeakReference
 import java.nio.ByteBuffer
@@ -50,7 +52,8 @@ import java.time.Duration
 /** Real Bridge/Service/receiver/job orchestration. Only OS and embedding edges are fake. */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [26, 31, 34], instrumentedPackages = ["io.flutter"], shadows = [
-    CompanionEngineBoundary::class, CompanionDartBoundary::class, CompanionLoaderBoundary::class])
+    CompanionEngineBoundary::class, CompanionDartBoundary::class, CompanionLoaderBoundary::class,
+    CompanionBluetoothBoundary::class])
 class CompanionIntegrationTest {
     private lateinit var app: Application
     private var host: ActivityController<CompanionChooserActivity>? = null
@@ -141,7 +144,7 @@ class CompanionIntegrationTest {
 
     private fun offerOta(service: CompanionService, runtime: String = service.runtimeId) = incoming(
         "acquireCompanion", key.map() + mapOf("companionRuntimeId" to runtime,
-            "revision" to 1L, "phase" to "transferring", "totalBytes" to 8192,
+            "revision" to 1L, "phase" to "transferring", "label" to "Firmware transfer", "totalBytes" to 8192,
             "durableBytes" to 0, "receivedBytes" to 0, "canCancel" to true), "trace/device_ota")
 
     @Test fun realAdmissionRejectsMissingAssociationPermissionRadioAndChannels() {
@@ -351,7 +354,8 @@ class CompanionIntegrationTest {
         assertEquals(DeviceOtaService::class.java.name, intent.component!!.className)
         val ota = Robolectric.buildService(DeviceOtaService::class.java).create().get()
         ota.onStartCommand(intent, 0, 1)
-        assertEquals("ACQUIRED", (acquired.requireSuccess() as Map<*, *>)["status"])
+        val result = acquired.requireSuccess() as Map<*, *>
+        assertEquals(result.toString(), "ACQUIRED", result["status"])
         assertTrue(ota.owns(key))
         assertNull(shadowOf(app).nextStartedActivity)
         ota.onDestroy()
@@ -450,6 +454,15 @@ class CompanionChooserActivity : Activity() {
         assertEquals(CompanionBridge.ASSOCIATION_REQUEST, requestCode)
         prompts++
     }
+}
+
+// Android 8 calls Binder directly, bypassing the stock shadow's matching method.
+// Keep the same Robolectric GATT state instead of faking project admission.
+@Implements(BluetoothManager::class)
+class CompanionBluetoothBoundary : ShadowBluetoothManager() {
+    @Implementation(minSdk = 26, maxSdk = 30)
+    protected fun getConnectedDevices(profile: Int): List<BluetoothDevice> =
+        getDevicesMatchingConnectionStates(profile, intArrayOf(BluetoothProfile.STATE_CONNECTED))
 }
 
 /** JNI/Dart VM are external to this host test; all project method handlers remain real. */
