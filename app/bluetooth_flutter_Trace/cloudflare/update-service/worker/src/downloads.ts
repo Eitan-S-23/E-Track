@@ -208,6 +208,9 @@ export function ensureDownloadAllowed(
   row: DownloadStateRow,
   mode: "primary" | "github-fallback"
 ): void {
+  if (mode === "github-fallback" && row.id.startsWith("asset_delta_")) {
+    throw new ApiError("FALLBACK_UNAVAILABLE", "Supplemental delta is stored in R2 only; use the full package", 502);
+  }
   if (row.release_state === "disabled" || row.disabled === 1) {
     throw new ApiError("ASSET_DISABLED", "Asset or release is disabled", 410);
   }

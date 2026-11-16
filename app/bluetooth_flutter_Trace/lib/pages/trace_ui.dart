@@ -570,9 +570,13 @@ class TraceDialog extends StatelessWidget {
   final List<TraceDialogAction> actions;
 
   static void close(BuildContext context) {
+    final route = ModalRoute.of(context);
+    if (route == null || !route.isActive) return;
     final navigator = Navigator.of(context, rootNavigator: true);
-    if (navigator.canPop()) {
+    if (route.isCurrent && navigator.canPop()) {
       navigator.pop();
+    } else if (!route.isCurrent) {
+      navigator.removeRoute(route);
     }
   }
 

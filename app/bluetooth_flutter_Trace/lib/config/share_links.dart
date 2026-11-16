@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart';
+
 class ShareLinks {
   ShareLinks._();
 
   static const String appId = 'trace';
-  static const String appName = 'Trace';
+  static const String appName = 'E-Track';
   static const String appPackageName = 'com.wen.gaia.gaia';
   static const String appSchemeUrl = 'trace://speedometer';
   static const String landingPageUrl = 'https://eitan-s-23.github.io/Trace/';
@@ -55,6 +57,15 @@ class ShareLinks {
 
   static bool get hasAnnouncementsEndpoint => announcementsUrl.isNotEmpty;
 
+  static String get clientPlatform {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS: return 'ios';
+      case TargetPlatform.windows: return 'windows';
+      case TargetPlatform.android: return 'android';
+      default: return 'unsupported';
+    }
+  }
+
   static Uri announcementsUri({String? channel, int limit = 10}) {
     final endpoint = announcementsUrl;
     if (endpoint.isEmpty) {
@@ -63,7 +74,7 @@ class ShareLinks {
     final uri = Uri.parse(endpoint);
     final query = Map<String, String>.from(uri.queryParameters);
     query['appId'] = appId;
-    query['platform'] = 'android';
+    query['platform'] = clientPlatform;
     query['channel'] = channel ?? updateChannel;
     query['limit'] = limit.toString();
     return uri.replace(queryParameters: query);

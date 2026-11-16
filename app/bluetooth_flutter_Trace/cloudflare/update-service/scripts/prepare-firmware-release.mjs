@@ -7,8 +7,10 @@ import { pathToFileURL } from "node:url";
 import { buildFirmwareMetadata } from "./build-firmware-release-metadata.mjs";
 import { args, CliError, failure, outputPath, projectRoot, required, writeOutput } from "./firmware-cli.mjs";
 import { assetFileName, canonicalJson, FIRMWARE_MODEL, parseFirmwareRegistration, sha256, versionCodeFor } from "./firmware-schema.mjs";
-import { validateKeyBinding } from "./firmware-release-key.mjs";
-import { readBuildConfiguration, validateBuildConfiguration } from "./firmware-build-profile.mjs";
+import { validateKeyBinding, verifyBuildKeyBinding } from "./firmware-release-key.mjs";
+import { readBuildConfiguration, validateBuildConfiguration, verifyBuildConfiguration } from "./firmware-build-profile.mjs";
+import { candidateAdmission, candidateMode } from "../../../../../.github/scripts/firmware-candidate-context.mjs";
+import { adminCandidateAdmission } from "../../../../../.github/scripts/firmware-admin-context.mjs";
 
 export const digest = bytes => createHash("sha256").update(bytes).digest("hex");
 export const BOOTSTRAP_PROVENANCE = "inaugural-bootstrap-v1";
@@ -116,9 +118,97 @@ export function validateBootstrapProvenance(base, proof, repository) {
   return proof;
 }
 
-export async function prepareFirmwareRelease({ root, app, boot, build, release, repository,
+export async function prepareFirmwareRelease(inputs) {
+  return prepareFirmware(inputs, validateBaseDescriptor);
+}
+
+export async function prepareOriginalAdminCandidate({ candidateEnv, sourceProof, ...inputs }) {
+  const owner = adminCandidateAdmission(candidateEnv);
+  if (inputs.base !== undefined || inputs.baseFile !== undefined || inputs.referenceDir
+      || inputs.repository !== candidateEnv.GITHUB_REPOSITORY
+      || inputs.release.runId !== owner.runId || inputs.release.versionName !== owner.versionName) {
+    throw badInput("Original Admin preparation requires its exact dispatch and source-owned base");
+  }
+  verifyBuildKeyBinding(inputs.build, { OTA_AES_KEY: inputs.aesKey ?? candidateEnv.OTA_AES_KEY });
+  verifyBuildConfiguration(inputs.build, "p34-v2-candidate");
+  const proofPath = outputPath(inputs.root, sourceProof);
+  const bytes = await readFile(proofPath), proof = JSON.parse(bytes);
+  if (proof.schema !== "original-admin-normal-source-proof-v1" || proof.verifiedAgainst !== owner.workflowCommit
+      || proof.sourceMatches !== true || proof.importedBenchmarkPackages !== 0
+      || proof.config?.schema !== "original-admin-normal-source-v1" || proof.config.profile !== "p34-v2-candidate"
+      || proof.sourceCommit !== proof.config.sourceCommit || proof.sourceCommit !== inputs.release.commitSha
+      || proof.sourceCommit !== inputs.build.commitSha) {
+    throw badInput("Original Admin source proof does not match this candidate");
+  }
+  let base, baseFile;
+  if (owner.baseVersionName !== null) {
+    const pin = proof.config.installedBaseline;
+    if (!pin || pin.versionName !== owner.baseVersionName || !/^[0-9a-f]{40}$/.test(pin.commitSha ?? "")
+        || !Number.isSafeInteger(pin.bytes) || pin.bytes < 0x460 || pin.bytes > 0xf0000) {
+      throw badInput("Requested delta base is not the pinned original-Admin baseline");
+    }
+    sha256(pin.sha256, "original Admin base SHA");
+    baseFile = outputPath(inputs.root, path.join(path.dirname(proofPath), "installed-baseline.bin"));
+    const identity = await fileIdentity(baseFile);
+    const materialized = proof.files?.find(row => path.resolve(inputs.root, row.path) === baseFile);
+    if (identity.sha256 !== pin.sha256 || identity.sizeBytes !== pin.bytes
+        || materialized?.sha256 !== pin.sha256 || materialized.bytes !== pin.bytes) {
+      throw badInput("Original Admin base bytes differ from the admitted source pin");
+    }
+    // This is an explicit pinned staging base, never a fabricated formal Release.
+    base = { provenanceKind: "original-admin-pinned-base-v1", isFormalRelease: false, kind: "app",
+      versionName: owner.baseVersionName, versionCode: owner.baseVersionCode, commitSha: pin.commitSha,
+      imageSha256: pin.sha256, sourceSha256: pin.sha256, sourceSizeBytes: pin.bytes,
+      sourceProofSha256: digest(bytes), producer: owner };
+  }
+  const result = await prepareFirmware({ ...inputs, base, baseFile }, value => {
+    if (canonicalJson(value) !== canonicalJson(base)) throw badInput("Original Admin base provenance drift");
+    return value;
+  });
+  if (!(await readFile(proofPath)).equals(bytes)
+      || (baseFile && (await fileIdentity(baseFile)).sha256 !== base.sourceSha256)) {
+    throw badInput("Original Admin source proof or base changed during preparation");
+  }
+  return result;
+}
+
+export async function prepareFirmwareCandidate({ candidateEnv, basePreparation, ...inputs }) {
+  const owner = candidateAdmission(candidateEnv);
+  verifyBuildKeyBinding(inputs.build, { OTA_AES_KEY: inputs.aesKey ?? candidateEnv.OTA_AES_KEY });
+  if (candidateMode(candidateEnv) !== "normal-delta" || inputs.referenceDir
+      || inputs.repository !== candidateEnv.GITHUB_REPOSITORY
+      || inputs.release.runId !== owner.runId
+      || inputs.release.versionName !== (inputs.base ? candidateEnv.INPUT_VERSION_NAME : candidateEnv.INPUT_CANDIDATE_BASE_VERSION)) {
+    throw badInput("Normal candidate requires its exact artifact-only owner and version role");
+  }
+  let expectedBase;
+  if (inputs.base) {
+    const bytes = await readFile(outputPath(inputs.root, basePreparation));
+    const preparation = JSON.parse(bytes);
+    const image = await fileIdentity(inputs.baseFile);
+    if (preparation.ok !== true || preparation.packagePurpose !== "normal-upgrade"
+        || preparation.fullByteEqual !== true || preparation.patchByteEqual !== null || preparation.base !== null
+        || preparation.recoveryVerified !== true || preparation.runId !== owner.runId
+        || preparation.versionName !== candidateEnv.INPUT_CANDIDATE_BASE_VERSION
+        || preparation.finalImage.sha256 !== image.sha256 || preparation.finalImage.sizeBytes !== image.sizeBytes
+        || !(await readFile(path.join(path.dirname(basePreparation), "work/full-candidate.bin"))).equals(await readFile(inputs.baseFile))) {
+      throw badInput("Normal candidate base must be the same protected run's completed normal initialization image");
+    }
+    expectedBase = { provenanceKind: "p51-normal-candidate-v1", isFormalRelease: false, kind: "app",
+      versionName: preparation.versionName, versionCode: versionCodeFor(preparation.versionName),
+      commitSha: preparation.commitSha, buildTimestamp: preparation.build.buildTimestamp,
+      imageSha256: image.sha256, sourceSha256: image.sha256, sourceSizeBytes: image.sizeBytes,
+      sourcePreparationSha256: digest(bytes), producer: owner };
+  } else if (basePreparation) throw badInput("Initialization cannot consume a base preparation");
+  return prepareFirmware(inputs, base => {
+    if (canonicalJson(base) !== canonicalJson(expectedBase)) throw badInput("Normal candidate base provenance drift");
+    return base;
+  });
+}
+
+async function prepareFirmware({ root, app, boot, build, release, repository,
   base, baseFile, outputDir, referenceDir, buildEvidenceDir, aesKey = process.env.OTA_AES_KEY,
-  bsdiff = process.env.BSDIFF_EXE, python = process.env.PYTHON ?? "python3", execute = spawnSync }) {
+  bsdiff = process.env.BSDIFF_EXE, python = process.env.PYTHON ?? "python3", execute = spawnSync }, validateBase) {
   if (!/^[0-9a-fA-F]{32}$/.test(aesKey ?? "")) throw new CliError("OTA_AES_KEY must be configured as 32 hex characters");
   if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository ?? "")) throw new CliError("Explicit GitHub repository required");
   if (release.releaseTag !== `mcu-${FIRMWARE_MODEL}-v${release.versionName}`
@@ -135,7 +225,7 @@ export async function prepareFirmwareRelease({ root, app, boot, build, release, 
   if (canonicalJson(observedBuild) !== canonicalJson(build)) throw badInput("Cross-stage GCC input identity mismatch");
   if (referenceDir) verifyReferenceBuild(build, await readFile(path.join(referenceDir, "verification.json")), release.runId);
   if (base) {
-    validateBaseDescriptor(base, release.versionName, repository, release.commitSha);
+    validateBase(base, release.versionName, repository, release.commitSha);
     const source = await fileIdentity(baseFile);
     if (source.sha256 !== base.sourceSha256 || source.sizeBytes !== base.sourceSizeBytes) throw badInput("Base source byte identity mismatch");
     if (!bsdiff || !existsSync(bsdiff)) throw new CliError("A validated bsdiff executable is required for patch generation");
@@ -154,7 +244,7 @@ export async function prepareFirmwareRelease({ root, app, boot, build, release, 
     TEMP: path.join(out, "tmp"), TMP: path.join(out, "tmp"), TMPDIR: path.join(out, "tmp") };
   const steps = [];
   async function run(label, script, argv, marker) {
-    const result = execute(python, ["-B", path.join(root, script), ...argv],
+    const result = await execute(python, ["-B", path.join(root, script), ...argv],
       { cwd: path.join(out, "work"), env, encoding: "utf8", windowsHide: true, timeout: 330000, maxBuffer: 8 * 1024 * 1024 });
     await writeOutput(root, path.join(out, "steps", `${label}.stdout.txt`), result.stdout ?? "");
     await writeOutput(root, path.join(out, "steps", `${label}.stderr.txt`), result.stderr ?? "");
@@ -203,8 +293,10 @@ export async function prepareFirmwareRelease({ root, app, boot, build, release, 
   await run("full-apply", "Tools/etu_unpack.py", [full, "--out", fullCandidate, "--verify-fw-header"], "unpack(full) OK:");
   if (!(await readFile(fullCandidate)).equals(finalized)) throw badInput("Full roundtrip byte mismatch");
   await verify(finalImage, "app", release.versionName, targetSha, "full-outer-verify", ["--package", full]);
+  let patchComparison = null;
   if (base) {
     const patch = path.join(out, names[1]);
+    const patchTool = await fileIdentity(path.resolve(bsdiff));
     await run("patch-pack", "Tools/etu_pack.py", ["pack-patch", "--old", baseApp, "--new", finalImage, "--out", patch,
       "--ver-name", release.versionName, "--base-ver-name", base.versionName, "--bsdiff-exe", path.resolve(bsdiff),
       ...reproduce(patch)], "pack-patch OK:");
@@ -214,6 +306,18 @@ export async function prepareFirmwareRelease({ root, app, boot, build, release, 
       "--verify-fw-header"], "unpack(patch) OK:");
     if (!(await readFile(candidate)).equals(finalized)) throw badInput("Patch application byte mismatch");
     await verify(finalImage, "app", release.versionName, targetSha, "patch-outer-verify", ["--package", patch, "--base-image", baseApp]);
+    if (canonicalJson(await fileIdentity(path.resolve(bsdiff))) !== canonicalJson(patchTool)) {
+      throw badInput("bsdiff executable changed during preparation");
+    }
+    const old = await readFile(baseApp);
+    const fullBytes = verifiedAssets[0].sizeBytes, patchBytes = verifiedAssets[1].sizeBytes;
+    patchComparison = { encoding: "vendor-bsdiff-lzma", tool: patchTool,
+      baseImageSha256: base.imageSha256, targetImageSha256: targetSha,
+      changesOutsideFwHeader: !old.subarray(0, 0x400).equals(finalized.subarray(0, 0x400))
+        || !old.subarray(0x460).equals(finalized.subarray(0x460)),
+      fullPackageBytes: fullBytes, patchPackageBytes: patchBytes,
+      savedBytes: fullBytes - patchBytes, savingsRatio: (fullBytes - patchBytes) / fullBytes,
+      preferredKindForMatchingBase: patchBytes < fullBytes ? "patch" : "full" };
   }
   const recovery = path.join(out, names.at(-1));
   await run("recovery-create", "Tools/jlink/prepare-bootstrap-app.py", ["prepare", "--input", finalImage,
@@ -234,6 +338,7 @@ export async function prepareFirmwareRelease({ root, app, boot, build, release, 
   const prepared = metadataBytes(metadata);
   await writeOutput(root, path.join(out, "cloudflare-firmware-release-metadata.json"), prepared);
   const summary = { ok: true, commitSha: release.commitSha, runId: release.runId, versionName: release.versionName,
+    packagePurpose: "normal-upgrade", patchComparison,
     build, base: base ?? null, finalImage: await fileIdentity(finalImage), assets: metadata.assets,
     fullByteEqual: true, patchByteEqual: base ? true : null, recoveryVerified: true,
     preparedMetadataSha256: digest(prepared), expectedReadyMetadataSha256: digest(metadataBytes(readyProjection(metadata))),

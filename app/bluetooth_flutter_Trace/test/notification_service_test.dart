@@ -57,4 +57,13 @@ void main() {
     await service.initialize();
     expect(calls, 2);
   });
+
+  test('Android initialization does not request notification permission', () async {
+    final methods = <String>[];
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async { methods.add(call.method); return true; });
+    await NotificationService.forTesting().initialize();
+    expect(methods, ['initialize']);
+  });
+
 }

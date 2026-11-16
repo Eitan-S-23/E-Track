@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'dart:io';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'config/share_links.dart';
 import 'controllers/ble_controller.dart';
 import 'controllers/monitor_controller.dart';
 import 'ota/ota_device_observation.dart';
@@ -18,6 +20,8 @@ import 'services/database_service.dart';
 import 'services/scan_settings_service.dart';
 import 'services/alert_service.dart';
 import 'services/app_update_service.dart';
+import 'services/app_prompt_coordinator.dart';
+import 'services/version_inventory_service.dart';
 import 'services/background_optimization_service.dart';
 import 'services/deep_link_service.dart';
 import 'services/ota_service.dart';
@@ -25,6 +29,29 @@ import 'services/bluetooth_service.dart' as bt_service;
 import 'services/responsive_service.dart';
 import 'services/notification_service.dart';
 import 'services/background_task_service.dart';
+import 'companion/companion_runtime.dart';
+import 'pages/companion_setup_page.dart';
+
+bool _applicationVisible = false;
+void showApplication() {
+  if (_applicationVisible) return;
+  _applicationVisible = true;
+  runApp(const MyApp());
+}
+
+void registerCoreServices() {
+  if (!Get.isRegistered<ScanSettingsService>()) Get.put(ScanSettingsService(), permanent: true);
+  if (!Get.isRegistered<bt_service.BluetoothService>()) Get.put(bt_service.BluetoothService(), permanent: true);
+  if (!Get.isRegistered<BleController>()) Get.put(BleController(), permanent: true);
+  if (!Get.isRegistered<MonitorController>()) Get.put(MonitorController(loadHistory: false), permanent: true);
+  if (!Get.isRegistered<AppUpdateService>()) Get.put(AppUpdateService(), permanent: true);
+  if (!Get.isRegistered<OtaService>()) {
+    Get.put(OtaService(onOpenTask: () {
+      if (Get.currentRoute != '/device-ota') Get.toNamed('/device-ota');
+    }), permanent: true);
+  }
+  if (!Get.isRegistered<CompanionRuntime>()) Get.put(CompanionRuntime(onShowUi: showApplication), permanent: true);
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -52,7 +79,14 @@ void main() async {
     debugPrint('Database initialization error: $e');
   }
 
-  runApp(const MyApp());
+  // This also runs in the native retained engine before any Activity/page exists.
+  registerCoreServices();
+  if (Platform.isAndroid) {
+    final hasActivity = await const MethodChannel('trace/companion').invokeMethod<bool>('hasActivity');
+    if (hasActivity == true) showApplication();
+  } else {
+    showApplication();
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -76,7 +110,8 @@ class MyApp extends StatelessWidget {
         }
 
         return GetMaterialApp(
-          title: 'BLE 广播接收器',
+          navigatorObservers: [AppPromptCoordinator.instance],
+          title: ShareLinks.appName,
           theme: ThemeData(
             primarySwatch: Colors.blue,
             fontFamily: 'Roboto',
@@ -107,16 +142,18 @@ class MyApp extends StatelessWidget {
           initialBinding: BindingsBuilder(() {
             // 按依赖顺序注册服务
             Get.put(ResponsiveService(), permanent: true); // 首先注册响应式服务
-            Get.put(ScanSettingsService(), permanent: true);
+            registerCoreServices();
             Get.put(AlertService(), permanent: true);
-            Get.put(OtaService(onOpenTask: () {
-              if (Get.currentRoute != '/device-ota') Get.toNamed('/device-ota');
-            }), permanent: true);
-            Get.put(AppUpdateService(), permanent: true);
-            Get.put(bt_service.BluetoothService(),
-                permanent: true); // 注册跨平台蓝牙服务
-            Get.put(BleController(), permanent: true);
-            Get.put(MonitorController(), permanent: true);
+            Get.put(VersionInventoryService(
+              readAppIdentity: Get.find<AppUpdateService>().getInstalledInventoryIdentity,
+              canReport: () => !Get.find<OtaService>().isUpgrading &&
+                  !Get.find<AppUpdateService>().isUpdating.value,
+              runtimeActivity: [
+                Get.find<OtaService>().taskActivity,
+                Get.find<AppUpdateService>().isUpdating.stream,
+              ],
+            ), permanent: true);
+            Get.find<MonitorController>().attachHistoryForUi();
             Get.put(BackgroundOptimizationService(), permanent: true);
 
             // 初始化通知服务
@@ -128,7 +165,6 @@ class MyApp extends StatelessWidget {
               Get.find<NotificationService>().initialize().catchError((Object error) {
                 debugPrint('Notification initialization failed: $error');
               });
-              Get.find<AppUpdateService>().checkDailyOnStartup();
               if (!OtaExperimentRuntime.current.ready) return;
               // P3-3 T1a 设备观测（dev 分支 + dev APK 专用）。未显式注入
               // TRACE_DEV_DEVICE_OBSERVATION 时返回 null：不启动扫描、不产生
@@ -155,6 +191,7 @@ class MyApp extends StatelessWidget {
             });
           }),
           getPages: [
+            GetPage(name: '/companion-setup', page: () => const CompanionSetupPage()),
             GetPage(name: '/device-ota', page: () => const OtaUpgradePage()),
             GetPage(name: '/main', page: () => const MainAppPage()),
             GetPage(name: '/', page: () => const HomePage()),

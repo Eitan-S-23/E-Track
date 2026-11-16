@@ -1,0 +1,141 @@
+{
+  "sourceSha256": "fa849d68e0d718a08d8461f2e04caecb6807d1396090ad64201f2a88b0d4cf85",
+  "pillow": "12.2.0",
+  "assets": [
+    {
+      "path": "app/bluetooth_flutter_Trace/branding/e_track_source.png",
+      "size": 1522382,
+      "sha256": "fa849d68e0d718a08d8461f2e04caecb6807d1396090ad64201f2a88b0d4cf85"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/android/app/src/main/res/mipmap-mdpi/ic_launcher.png",
+      "size": 3969,
+      "sha256": "91df5e3d73148843226e01e6af8dfa5205c3d2a2b1efbb2c3e51a13f706c089c"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/android/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png",
+      "size": 14433,
+      "sha256": "e5083cd3ff3d081fe9295a279e95f40f8e0127edc21ef90bf76d2c6d99243b95"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/android/app/src/main/res/mipmap-hdpi/ic_launcher.png",
+      "size": 7779,
+      "sha256": "91b4b8b7259cd901378452b886a3d884a6f92cd642e422dbcb266142f6c48c5f"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/android/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png",
+      "size": 28449,
+      "sha256": "5a346f1fec7c93770d8c40dffccab65e5652e98dc0c6831c4978e43802254b87"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png",
+      "size": 12658,
+      "sha256": "f5c919d521583fc6b3c9a6faee1c5a6bb19d6f00418f7cb615af6c4418b90149"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/android/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.png",
+      "size": 46581,
+      "sha256": "5829af9d48fa32fa77ba387590953487f1a66b686e26067ef55a79032fa59cba"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png",
+      "size": 24852,
+      "sha256": "974b61f47629ad82335cf384619e957629071c46d951b54a21a3f9d9108b9b82"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/android/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png",
+      "size": 95702,
+      "sha256": "2cbff86712088022d0fc180eb5216c2bc99b07ce872bb6378a50c890c3bb4545"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png",
+      "size": 40414,
+      "sha256": "4133abc82740b00efa0827e3dcaccb5ff8100edb5fbab315a62a768f62a79507"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png",
+      "size": 166463,
+      "sha256": "2cb595d528bcfd504cf0c0f38464faf6f17e3db4af4d77969a15ff1f277148d9"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png",
+      "size": 2914,
+      "sha256": "02f76791830292eed873893043f0a972b89e5fbc13b261d56f6a80638566cfde"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png",
+      "size": 5720,
+      "sha256": "979376b85605289a5cc2c635aec62809ee224f3dc88bf7169c1de64c7ec07752"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png",
+      "size": 1731,
+      "sha256": "b8c0ae756a0baa3b994c8f840a0598abdd592ae1385c592041d70b1f3ba7963a"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png",
+      "size": 5389,
+      "sha256": "482cca34faf027c7c2530a77788da2116aa441c3380d6b8462236720a8b8f6e9"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png",
+      "size": 10722,
+      "sha256": "5057509eaaca95349e6b89465313bdd5ab8e190b858bfda7a20cbb81f950f256"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png",
+      "size": 9299,
+      "sha256": "0e3fa6c3c7144128ef86e82acacf26002c75de05badf46f668a9a31833a3c057"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png",
+      "size": 18473,
+      "sha256": "9be833018fb729a816e1348f97cc22bddb53b3e0506d3240cbe5a60c451c1a6d"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png",
+      "size": 18473,
+      "sha256": "9be833018fb729a816e1348f97cc22bddb53b3e0506d3240cbe5a60c451c1a6d"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png",
+      "size": 36314,
+      "sha256": "eb8fe430fcbaf98325d26df31db5bc5b77e2d80a0f16fe54cf1e9e746ad011c1"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png",
+      "size": 964,
+      "sha256": "f160a78ff5e68687b70f056ea6f3c08b89a3b74110b6ad11786f0206fd7f9f8b"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png",
+      "size": 2914,
+      "sha256": "02f76791830292eed873893043f0a972b89e5fbc13b261d56f6a80638566cfde"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png",
+      "size": 8486,
+      "sha256": "0d0b8dac07d9182b52996aac9e45c2d20b0e8c94066eb639a4f7908998cdf286"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png",
+      "size": 27223,
+      "sha256": "28072ee2eb9537c23a55735c5ae5bd21a4898a8836dbac562942c29cb8de5f6b"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png",
+      "size": 31905,
+      "sha256": "a0d4409714ab10c273229aeb12d4fff557aa0096d417eacb76a604ca7140fb91"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png",
+      "size": 918660,
+      "sha256": "f4118d196237bffef9e1feb01b677ad64c1cdb85ea9ca904af4a946bc138f768"
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/windows/runner/resources/app_icon.ico",
+      "size": 102230,
+      "sha256": "263d32476f1f4c16bd936c2192af80ce16380162cac0ae65e2c8a7a36cc7c850"
+    }
+  ]
+}

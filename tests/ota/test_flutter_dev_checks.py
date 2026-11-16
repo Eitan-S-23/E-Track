@@ -62,6 +62,13 @@ def process_running(pid):
 
 
 class FlutterDevelopmentChecksTests(unittest.TestCase):
+    def test_sdk_pin_matches_both_standard_build_hosts(self):
+        plan = RUNNER.command_plan(self.project, self.project / "run", "all")
+        clone = plan[0][1]
+        self.assertEqual(clone[clone.index("--branch") + 1], RUNNER.SDK_REF)
+        workflow = (ROOT / ".github/workflows/build.yml").read_text(encoding="utf-8")
+        self.assertEqual(workflow.count(f'flutter-version: "{RUNNER.SDK_REF}"'), 2)
+
     @classmethod
     def setUpClass(cls):
         cls.output = RUNNER.make_directory(
@@ -146,6 +153,8 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
                 [item[0] for item in plan],
             )
             self.assertEqual(["pub", "get", "--enforce-lockfile"], plan[2][1][1:])
+            self.assertEqual("3.47.9", plan[0][1][plan[0][1].index("--branch") + 1])
+            self.assertNotIn("stable", plan[0][1])
             self.assertEqual(["analyze", "--no-pub"], plan[3][1][1:])
             self.assertEqual(directory, plan[4][1][-1])
             self.assertIn("--no-pub", plan[4][1])

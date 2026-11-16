@@ -37,16 +37,27 @@ class MainActivity: FlutterActivity() {
     override fun onResume() {
         super.onResume()
         DeviceOtaBridge.lifecycle(this, true)
+        CompanionBridge.lifecycle(this, true)
+        if (CompanionBridge.enabled(applicationContext)) {
+            try {
+                CompanionBridge.restore(applicationContext)
+                CompanionService.start(applicationContext, "foreground")
+            } catch (_: Exception) {
+                CompanionBridge.preferences(applicationContext).edit().putString("lastResult", "SCHEDULING_REJECTED").apply()
+            }
+        }
     }
 
     override fun onPause() {
         DeviceOtaBridge.lifecycle(this, false)
+        CompanionBridge.lifecycle(this, false)
         super.onPause()
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         DeviceOtaBridge.install(flutterEngine, this)
+        CompanionBridge.install(flutterEngine, applicationContext, this)
         deepLinkChannel = MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             DEEP_LINK_CHANNEL
@@ -121,20 +132,12 @@ class MainActivity: FlutterActivity() {
         private const val APP_UPDATE_CHANNEL = "trace/app_update"
     }
 
-    private fun getAppInfo(): Map<String, Any> {
-        val packageInfo = packageManager.getPackageInfo(packageName, 0)
-        val versionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            packageInfo.longVersionCode
-        } else {
-            @Suppress("DEPRECATION")
-            packageInfo.versionCode.toLong()
-        }
-        return mapOf(
-            "versionName" to (packageInfo.versionName ?: ""),
-            "versionCode" to versionCode,
-            "sourceApkPath" to applicationInfo.sourceDir
-        )
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        CompanionBridge.activityResult(applicationContext, requestCode, resultCode)
     }
+
+    private fun getAppInfo(): Map<String, Any> = CompanionBridge.appInfo(applicationContext)
 
     private fun installApk(apkPath: String?, result: MethodChannel.Result) {
         if (apkPath.isNullOrBlank()) {
@@ -150,7 +153,7 @@ class MainActivity: FlutterActivity() {
         if (!lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
             result.error(
                 "APP_NOT_FOREGROUND",
-                "Trace must be foreground before launching the package installer",
+                "E-Track must be foreground before launching the package installer",
                 null,
             )
             return

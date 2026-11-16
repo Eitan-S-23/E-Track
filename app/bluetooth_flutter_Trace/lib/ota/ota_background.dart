@@ -105,6 +105,7 @@ class OtaBackgroundClient {
     required void Function(String reason) onLost,
     required Future<void> Function() onCancel,
     required void Function() onOpen,
+    String? companionRuntimeId,
   }) async {
     if (_closed) return false;
     final key = initial.key;
@@ -122,7 +123,11 @@ class OtaBackgroundClient {
     }
     _channel.setMethodCallHandler(_handle);
     try {
-      final reply = await _channel.invokeMethod<Object?>('acquire', initial.toMap())
+      final reply = await _channel.invokeMethod<Object?>(
+          companionRuntimeId == null ? 'acquire' : 'acquireCompanion', {
+            ...initial.toMap(),
+            if (companionRuntimeId != null) 'companionRuntimeId': companionRuntimeId,
+          })
           .timeout(acquireTimeout);
       if (_closed || epoch != _epoch || !identical(_key, key)) {
         await _releaseNative(key);

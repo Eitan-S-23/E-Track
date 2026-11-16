@@ -13,6 +13,7 @@ export default defineConfig({
     viewport: { width: 1440, height: 1000 },
     screenshot: "only-on-failure",
     trace: "off",
-    launchOptions: { args: ["--disable-breakpad", "--disable-crash-reporter", "--disable-component-update"] }
+    launchOptions: { executablePath: process.env.PW_CHROMIUM_EXECUTABLE_PATH,
+      args: ["--disable-breakpad", "--disable-crash-reporter", "--disable-component-update"] }
   }
 });

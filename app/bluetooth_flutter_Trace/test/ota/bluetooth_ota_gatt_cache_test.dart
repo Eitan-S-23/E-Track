@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart' as fbp;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ble_monitor/ota/ota_link_stats.dart';
+import 'package:ble_monitor/ota/ota_write_admission.dart';
 import 'package:ble_monitor/services/bluetooth_service.dart';
 
 class _MobileAdapter extends Fake implements BluetoothAdapter {
@@ -183,6 +184,44 @@ void main() {
           expect((data['platformWrites'] as Map)['calls'], 2);
           expect((data['gattWrites'] as Map)['calls'], 2);
           await sub.cancel();
+        });
+      }
+    }
+
+    for (final reuse in [false, true]) {
+      for (final withStats in [false, true]) {
+        test('admission refusal preserves the link and never calls platform: reuse=$reuse, stats=$withStats', () async {
+          configure(reuse: reuse);
+          await discover();
+          final binding = service.otaGattBindingToken(device.remoteId.str);
+          final stats = withStats ? OtaLinkStats(label: 'admission') : null;
+          final error = StateError('expired-before-platform');
+          var guards = 0;
+          final admission = OtaWriteAdmission(() { guards++; throw error; });
+          final gate = Completer<List<fbp.BluetoothService>>();
+          if (!reuse) device.discoveryGate = gate;
+          final pending = expectLater(service.writeOtaCharacteristicByAddress(
+            device.remoteId.str, 'fff0', 'fff2', [1, 2, 3],
+            writeWithResponse: true, stats: stats, admission: admission), throwsA(same(error)));
+          if (!reuse) {
+            await Future<void>.delayed(Duration.zero);
+            expect(guards, 0);
+            expect(device.writer.writes, isEmpty);
+            gate.complete(device.discoveredServices);
+          }
+          await pending;
+          expect(guards, 1);
+          expect(admission.dispatched, isFalse);
+          expect(admission.rejected, isTrue);
+          expect(device.writer.writes, isEmpty);
+          expect(service.otaGattBindingToken(device.remoteId.str), same(binding));
+          if (stats != null) expect((stats.toJson()['platformWrites'] as Map)['calls'], 0);
+          final allowed = OtaWriteAdmission(() { guards++; });
+          await service.writeOtaCharacteristicByAddress(device.remoteId.str,
+            'fff0', 'fff2', [4, 5, 6], writeWithResponse: true, admission: allowed);
+          expect(guards, 2);
+          expect(allowed.dispatched, isTrue);
+          expect(device.writer.writes, [[4, 5, 6]]);
         });
       }
     }

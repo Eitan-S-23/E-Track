@@ -28,12 +28,30 @@ class HostDigestStream extends WritableStream<ArrayBuffer | ArrayBufferView> {
 }
 Object.defineProperty(crypto, "DigestStream", { value: HostDigestStream, configurable: true });
 
+class HostFixedLengthStream extends TransformStream<Uint8Array, Uint8Array> {
+  constructor(length: number) {
+    let seen=0;
+    super({ transform(chunk,controller) {
+      seen+=chunk.byteLength;
+      if (seen>length) throw new TypeError("FixedLengthStream overflow");
+      controller.enqueue(chunk);
+    }, flush() { if(seen!==length) throw new TypeError("FixedLengthStream underflow"); } });
+  }
+}
+Object.defineProperty(globalThis,"FixedLengthStream",{value:HostFixedLengthStream,configurable:true});
+
 class MemoryBucket {
   objects = new Map<string, { bytes: Uint8Array; options: R2PutOptions; etag: string }>();
   async put(key: string, value: BodyInit, options: R2PutOptions = {}) {
     const bytes = new Uint8Array(await new Response(value).arrayBuffer());
     const onlyIf = options.onlyIf as R2Conditional | undefined;
     if (onlyIf?.etagDoesNotMatch === "*" && this.objects.has(key)) return null;
+    if (options.sha256) {
+      const expected=typeof options.sha256 === "string" ? options.sha256 : Buffer.from(ArrayBuffer.isView(options.sha256)
+        ? new Uint8Array(options.sha256.buffer,options.sha256.byteOffset,options.sha256.byteLength)
+        : new Uint8Array(options.sha256)).toString("hex");
+      if (createHash("sha256").update(bytes).digest("hex")!==expected) throw new TypeError("R2 checksum mismatch");
+    }
     this.objects.set(key, { bytes, options, etag: createHash("md5").update(bytes).digest("hex") });
     return this.head(key);
   }

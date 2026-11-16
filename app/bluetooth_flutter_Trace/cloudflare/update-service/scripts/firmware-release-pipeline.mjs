@@ -19,6 +19,7 @@ export const PUBLICATION_PROTOCOL = "s3-worker-preflight-v1";
 export function releaseConfig(env) {
   const buildProfile = firmwareBuildProfile(env.INPUT_FIRMWARE_BUILD_PROFILE);
   const mode = env.FIRMWARE_RELEASE_MODE;
+  if (env.INPUT_STAGE_CANDIDATE && env.INPUT_STAGE_CANDIDATE !== "false") throw new CliError("Immutable staging cannot use ordinary release configuration");
   if (env.GITHUB_EVENT_NAME !== "workflow_dispatch" || env.INPUT_CHECK_BINDINGS === "true" || !["rehearsal", "production"].includes(mode)
     || (mode === "production" ? env.INPUT_PUBLISH !== "true" || env.INPUT_REHEARSAL === "true"
       : env.INPUT_REHEARSAL !== "true" || env.INPUT_PUBLISH === "true")) throw new CliError("Only an explicit, unambiguous release dispatch can use cloud bindings");
@@ -107,7 +108,7 @@ export async function verifyWorkerEnvironment(serviceUrl, mode, fetcher = fetch,
   if (health.ok !== true || health.environment !== (mode === "rehearsal" ? "staging" : "prod")) throw fail("Worker is not the selected release environment");
 }
 
-async function bounded(operation, signal) {
+export async function bounded(operation, signal) {
   active(signal);
   let timer, abort;
   const stop = new Promise((_, reject) => {

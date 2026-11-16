@@ -77,6 +77,7 @@ def signing_certificate(root, run_dir, apk, run=subprocess.run):
 
 # 设备观测构建开关（P3-3 T1a）。三项都显式启用；默认全部为空 = 不观测。
 DEVICE_OBSERVATION_ENV = "TRACE_DEV_DEVICE_OBSERVATION"
+OBSERVATION_MODE_ENV = "TRACE_DEV_OBSERVATION_MODE"
 OBSERVATION_TARGET_ENV = "TRACE_DEV_OBSERVATION_TARGET"
 OBSERVATION_FIRMWARE_URL_ENV = "TRACE_DEV_OBSERVATION_FIRMWARE_LATEST_URL"
 OBSERVATION_SENTINEL_ENV = "TRACE_DEV_OBSERVATION_SENTINEL"
@@ -189,6 +190,9 @@ def observation_config(env):
         return None
     if enabled not in ("1", "true"):
         raise ValueError(f"{DEVICE_OBSERVATION_ENV} must be exactly 'true' when set")
+    mode = (env.get(OBSERVATION_MODE_ENV) or "automatic").strip()
+    if mode not in ("automatic", "passive"):
+        raise ValueError(f"{OBSERVATION_MODE_ENV} must be 'automatic' or 'passive'")
     target = (env.get(OBSERVATION_TARGET_ENV) or "").strip()
     if not OBSERVATION_TARGET_PATTERN.fullmatch(target):
         raise ValueError(
@@ -208,12 +212,15 @@ def observation_config(env):
             f"{OBSERVATION_FIRMWARE_URL_ENV} must not carry credentials or fragments"
             + (f": {credential_error}" if credential_error else "")
         )
+    # Keep the existing log/host-parser sentinel format and automatic identity.
+    fingerprint = f"{target}\n{url}" + ("\npassive" if mode == "passive" else "")
     return {
+        "mode": mode,
         "target": target,
         "firmware_latest_url": url,
         # 配置指纹：绑定本次注入的确切取值，运行期把它打进日志与 CI 记录比对。
         "sentinel": OBSERVATION_SENTINEL_PREFIX + hashlib.sha256(
-            f"{target}\n{url}".encode("utf-8")
+            fingerprint.encode("utf-8")
         ).hexdigest()[:24],
     }
 
@@ -223,59 +230,44 @@ OTA_LINK_CANDIDATE_ENV = "TRACE_DEV_OTA_LINK_CANDIDATE"
 
 def ota_link_candidate(env):
     profile = ota_link_profile.selected(env)
-    name = env.get(OTA_LINK_CANDIDATE_ENV, "").strip()
-    if name in ("", "baseline"):
-        return None
+    name = env.get(OTA_LINK_CANDIDATE_ENV, "").strip() or ota_link_profile.RELEASE_CANDIDATE
     if name == ota_link_profile.RELEASE_CANDIDATE:
         return {"name": name, "runtime_config": False, "build_profile": name}
-    if name in ("runtime", "runtime-pipeline"):
-        observation = observation_config(env)
-        if observation is None or not re.fullmatch(r"(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}", observation["target"]):
-            raise ValueError("Runtime OTA experiment requires device observation with a MAC target")
-        config = {"name": name, "runtime_config": True}
-        if name == "runtime-pipeline":
-            config["pipeline"] = True
-        if profile is not None:
-            config["profile"] = profile
-        return config
-    candidates = {
-        "reuse-with": (True, False),
-        "discover-without": (False, True),
-        "reuse-without": (True, True),
-    }
-    if name not in candidates:
-        raise ValueError("Unknown " + OTA_LINK_CANDIDATE_ENV)
-    reuse, without = candidates[name]
-    return {"name": name, "reuse_gatt": reuse, "prefer_without_response": without}
+    if name != "runtime-pipeline":
+        raise ValueError("Unknown " + OTA_LINK_CANDIDATE_ENV + "; BLE V2 only")
+    observation = observation_config(env)
+    if observation is None or not re.fullmatch(r"(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}", observation["target"]):
+        raise ValueError("Runtime OTA experiment requires device observation with a MAC target")
+    config = {"name": name, "runtime_config": True, "pipeline": True}
+    if profile is not None:
+        config["profile"] = profile
+    return config
 
 
 def ota_link_defines(config):
-    if config is None:
-        return []
-    if config.get("build_profile"):
-        return [ota_link_profile.build_profile(config["build_profile"])]
-    if config.get("runtime_config") is True:
-        defines = ["--dart-define=OTA_P34_RUNTIME_CONFIG=true"]
-        if config.get("pipeline") is True:
-            defines.append("--dart-define=P34_OTA_PIPELINE=true")
-        return defines
-    return [
-        "--dart-define=OTA_P34_REUSE_GATT=" + str(config["reuse_gatt"]).lower(),
-        "--dart-define=OTA_P34_PREFER_WITHOUT_RESPONSE=" +
-        str(config["prefer_without_response"]).lower(),
-    ]
+    defines = [ota_link_profile.build_profile(ota_link_profile.RELEASE_CANDIDATE)]
+    if config is not None and config.get("runtime_config") is True:
+        defines.append("--dart-define=OTA_P34_RUNTIME_CONFIG=true")
+    return defines
+
+
+def observation_mode_token(config):
+    return f"passive:{config['sentinel']}" if config["mode"] == "passive" else "automatic"
 
 
 def observation_defines(config):
     """观测配置对应的 `--dart-define` 列表；未启用时为空（不注入任何定义）。"""
     if config is None:
         return []
-    return [
+    defines = [
         f"--dart-define={DEVICE_OBSERVATION_ENV}=true",
         f"--dart-define={OBSERVATION_TARGET_ENV}={config['target']}",
         f"--dart-define={OBSERVATION_SENTINEL_ENV}={config['sentinel']}",
         f"--dart-define=TRACE_CLOUDFLARE_FIRMWARE_LATEST_URL={config['firmware_latest_url']}",
     ]
+    if config["mode"] == "passive":
+        defines.append(f"--dart-define={OBSERVATION_MODE_ENV}={observation_mode_token(config)}")
+    return defines
 
 
 def read_kernel_blob(root, apk):
@@ -374,7 +366,9 @@ def plan(root, run_dir, env):
         commands.append(("apk_device_ota_native", [str(gradle), "--no-daemon",
                          "--console=plain", "-p", str(root / APP / "android"),
                          ":app:testDebugUnitTest", "--tests",
-                         "com.wen.gaia.gaia.DeviceOtaServiceTest"], root, 1200))
+                         "com.wen.gaia.gaia.DeviceOtaServiceTest", "--tests",
+                         "com.wen.gaia.gaia.CompanionServiceTest", "--tests",
+                         "com.wen.gaia.gaia.CompanionIntegrationTest"], root, 1200))
     commands.extend([
         ("apk_verify", [str(sdk / "build-tools/35.0.0/apksigner"), "verify", "--verbose",
                         str(root / APK_RELATIVE)], root, 60),
@@ -536,11 +530,14 @@ def collect(root, run_dir, commit, env):
     observation = observation_config(env)
     if observation is not None:
         blob = read_kernel_blob(root, source)
-        for label, value in (
+        constants = [
             ("sentinel", observation["sentinel"]),
             ("firmware-latest URL", observation["firmware_latest_url"]),
             ("target", observation["target"]),
-        ):
+        ]
+        if observation["mode"] == "passive":
+            constants.append(("passive mode token", observation_mode_token(observation)))
+        for label, value in constants:
             if value.encode("utf-8") not in blob:
                 raise ValueError(
                     f"Debug APK does not contain the injected device-observation "
@@ -563,6 +560,8 @@ def collect(root, run_dir, commit, env):
             "sentinel": observation["sentinel"],
             "firmware_latest_url": observation["firmware_latest_url"],
         }
+        if observation["mode"] == "passive":
+            metadata["device_observation"]["mode"] = "passive"
     if link_candidate is not None:
         # Build intent is not a measured or selected production configuration.
         metadata["requested_ota_link_candidate"] = link_candidate

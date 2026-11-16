@@ -15,6 +15,7 @@ import 'package:vcdiff_decoder/vcdiff_decoder.dart' as vcdiff;
 
 import '../config/share_links.dart';
 import '../pages/trace_ui.dart';
+import 'app_prompt_coordinator.dart';
 
 class AppUpdateService extends GetxService with WidgetsBindingObserver {
   static AppUpdateService get to => Get.find<AppUpdateService>();
@@ -47,6 +48,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
   final updateStatus = ''.obs;
 
   bool _isRetryingPendingInstall = false;
+  final _ownedDialogs = <AppPrompt<dynamic>>{};
   DateTime? _lastForegroundUpdateAt;
   double _lastForegroundProgress = -1;
   String? _lastForegroundStatus;
@@ -64,6 +66,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
 
   @override
   void onClose() {
+    _closeUpdateDialogIfOpen();
     if (Platform.isAndroid) {
       WidgetsBinding.instance.removeObserver(this);
     }
@@ -98,7 +101,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
     if (prefs.getString(_lastDailyCheckKey) == today) return;
 
     await prefs.setString(_lastDailyCheckKey, today);
-    unawaited(checkForUpdates(manual: false));
+    await checkForUpdates(manual: false);
   }
 
   Future<void> checkForUpdates({bool manual = true}) async {
@@ -186,8 +189,6 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
         if (context.mounted) {
           _closeDialogRouteForContext(context);
         }
-      } else if (Get.isDialogOpen == true) {
-        Get.back<void>();
       }
 
       checkingDialogOpen = false;
@@ -211,6 +212,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
       checkingDialogClosed = _showCheckingDialog(
         onCancel: cancelChecking,
         onPresented: markCheckingDialogPresented,
+        relevant: () => !checkingDialogCloseRequested && !cancelledByUser,
       ).whenComplete(() {
         checkingDialogOpen = false;
         checkingDialogContext = null;
@@ -307,6 +309,15 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
   Future<int> getLocalAppVersionCode() async {
     final localInfo = await _getLocalAppInfo();
     return localInfo.versionCode;
+  }
+
+  Future<Map<String, dynamic>> getInstalledInventoryIdentity() async {
+    final info = await _getLocalAppInfo();
+    return {
+      'versionCode': info.versionCode,
+      'versionName': info.versionName,
+      'imageSha256': await _sha256File(File(info.sourceApkPath)),
+    };
   }
 
   Future<bool> _openInstaller(
@@ -497,7 +508,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
     final canInstall = await _canRequestPackageInstalls();
     if (!canInstall) {
       if (showMessage) {
-        Get.snackbar('仍需授权', '安装包已保留，请开启安装未知应用权限后返回 Trace');
+        Get.snackbar('仍需授权', '安装包已保留，请开启安装未知应用权限后返回 ${ShareLinks.appName}');
       }
       return;
     }
@@ -516,12 +527,12 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
         _markInstallerReadyForForegroundRetry();
       }
       if (!launched && showMessage) {
-        Get.snackbar('安装包已就绪', '请点按通知里的“继续安装”，或再次回到 Trace 自动打开系统安装器');
+        Get.snackbar('安装包已就绪', '请点按通知里的“继续安装”，或再次回到 ${ShareLinks.appName} 自动打开系统安装器');
       }
     } on PlatformException catch (e) {
       if (e.code == _unknownAppSourcesCode) {
         if (showMessage) {
-          Get.snackbar('仍需授权', '安装包已保留，请开启安装未知应用权限后返回 Trace');
+          Get.snackbar('仍需授权', '安装包已保留，请开启安装未知应用权限后返回 ${ShareLinks.appName}');
         }
         return;
       }
@@ -545,7 +556,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
 
   void _markInstallerReadyForForegroundRetry() {
     updateProgress.value = 1;
-    updateStatus.value = '安装包已就绪，请点按通知或回到 Trace 继续安装';
+    updateStatus.value = '安装包已就绪，请点按通知或回到 ${ShareLinks.appName} 继续安装';
     unawaited(_showInstallReadyNotification());
   }
 
@@ -564,12 +575,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
   }
 
   void _closeUpdateDialogIfOpen() {
-    if (Get.isDialogOpen != true) return;
-    try {
-      Get.back<void>();
-    } catch (_) {
-      // Dialog state can be stale after Android background/foreground switches.
-    }
+    for (final prompt in _ownedDialogs.toList()) { prompt.cancel(); }
   }
 
   Future<bool> _handlePendingInstallBeforeUpdateCheck({
@@ -595,7 +601,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
       await _openInstaller(apkPath);
     } on PlatformException catch (e) {
       if (e.code == _unknownAppSourcesCode) {
-        Get.snackbar('需要授权', '请开启安装未知应用权限，返回 Trace 后会自动继续安装');
+        Get.snackbar('需要授权', '请开启安装未知应用权限，返回 ${ShareLinks.appName} 后会自动继续安装');
         return true;
       }
       Get.snackbar('安装失败', _formatUpdateFailure(e));
@@ -695,12 +701,16 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
   Future<T?> _showTraceUpdateDialog<T>(
     Widget dialog, {
     bool barrierDismissible = true,
+    bool Function()? relevant,
   }) {
-    return Get.dialog<T>(
-      dialog,
+    final prompt = AppPromptCoordinator.instance.enqueue<T>(
+      builder: (_) => dialog,
+      priority: AppPromptCoordinator.updatePriority,
+      relevant: relevant,
       barrierDismissible: barrierDismissible,
-      barrierColor: Colors.black.withValues(alpha: 0.62),
     );
+    _ownedDialogs.add(prompt);
+    return prompt.closed.whenComplete(() => _ownedDialogs.remove(prompt));
   }
 
   void _closeDialogRouteForContext(BuildContext context) {
@@ -719,9 +729,6 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
       return;
     }
 
-    if (navigator.canPop()) {
-      navigator.pop();
-    }
   }
 
   void _showUpdateDialog(
@@ -955,16 +962,14 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
       if (!keepForegroundService) {
         await _stopUpdateForegroundService();
       }
-      if (Get.isDialogOpen == true) {
-        Get.back<void>();
-      }
+      _closeUpdateDialogIfOpen();
       isUpdating.value = false;
     }
 
     if (failure == null) return;
     if (failure is PlatformException &&
         failure.code == _unknownAppSourcesCode) {
-      Get.snackbar('需要授权', '请开启安装未知应用权限，返回 Trace 后会自动继续安装');
+      Get.snackbar('需要授权', '请开启安装未知应用权限，返回 ${ShareLinks.appName} 后会自动继续安装');
       return;
     }
     _showIncrementalUpdateFailedDialog(
@@ -1058,16 +1063,14 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
       if (!keepForegroundService) {
         await _stopUpdateForegroundService();
       }
-      if (Get.isDialogOpen == true) {
-        Get.back<void>();
-      }
+      _closeUpdateDialogIfOpen();
       isUpdating.value = false;
     }
 
     if (failure == null) return;
     if (failure is PlatformException &&
         failure.code == _unknownAppSourcesCode) {
-      Get.snackbar('需要授权', '请开启安装未知应用权限，返回 Trace 后会自动继续安装');
+      Get.snackbar('需要授权', '请开启安装未知应用权限，返回 ${ShareLinks.appName} 后会自动继续安装');
       return;
     }
     _showFullUpdateFailedDialog(localInfo, updateInfo, error: failure);
@@ -1285,6 +1288,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
   Future<void> _showCheckingDialog({
     required ValueChanged<BuildContext> onCancel,
     required ValueChanged<BuildContext> onPresented,
+    bool Function()? relevant,
   }) {
     var didNotifyPresented = false;
     return _showTraceUpdateDialog<void>(
@@ -1342,6 +1346,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
         },
       ),
       barrierDismissible: false,
+      relevant: relevant,
     ).then((_) {});
   }
 

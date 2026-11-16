@@ -10035,7 +10035,7 @@ String _routeSummaryText({
   required String difficulty,
 }) {
   return '''
-Trace 路线分享
+${ShareLinks.appName} 路线分享
 $title
 日期: $date
 距离: $distance km

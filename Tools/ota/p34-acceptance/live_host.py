@@ -102,6 +102,15 @@ def device_owner(out, *, read_only=False):
 
 LAUNCHER = """import base64,json,subprocess,sys
 x=json.loads(sys.stdin.buffer.readline())
+if x.get('interactive'):
+    p=subprocess.Popen(x['argv'],stdin=subprocess.PIPE)
+    try:
+        for line in sys.stdin.buffer:
+            p.stdin.write(line)
+            p.stdin.flush()
+    finally:
+        p.stdin.close()
+    raise SystemExit(p.wait())
 data=base64.b64decode(x['stdin']) if x['stdin'] is not None else None
 options={'input':data} if data is not None else {'stdin':subprocess.DEVNULL}
 p=subprocess.run(x['argv'],**options)
@@ -115,8 +124,10 @@ class ObservationReady(RuntimeError):
 
 class Process:
     """Reuse the existing Windows Job class; preserve split binary stdout/stderr."""
-    def __init__(self, out, label, argv, env, *, stdin=None):
+    def __init__(self, out, label, argv, env, *, stdin=None, interactive=False):
         require(label.replace("-", "").replace("_", "").isalnum(), "unsafe command label")
+        require(not interactive or stdin is None, "interactive input must be streamed, not replayed")
+        self.interactive = interactive
         self.out, self.label = checked(out), label
         self.argv, self.started = list(map(str, argv)), time.monotonic_ns()
         self.paths = {name: checked(self.out / (label + "." + name))
@@ -125,7 +136,8 @@ class Process:
             require(not path.exists(), "duplicate command/unknown prior outcome")
         self.out.mkdir(parents=True, exist_ok=True)
         save(self.paths["started.json"], dict(argv=self.argv, cwd=str(ROOT),
-            monotonic_ns=self.started, stdin_sha256=hashlib.sha256(stdin).hexdigest() if stdin is not None else None))
+            monotonic_ns=self.started, interactive=interactive,
+            stdin_sha256=hashlib.sha256(stdin).hexdigest() if stdin is not None else None))
         self.streams = []
         self.process, self.job, self.closed = None, None, False
         self.close_attempted, self.close_error = False, None
@@ -141,15 +153,24 @@ class Process:
             self.process = subprocess.Popen([sys.executable, "-I", "-S", "-B", "-X", "utf8", "-c", LAUNCHER], **options)
             if self.job:
                 self.job.assign(self.process)
-            packet = dict(argv=self.argv, stdin=base64.b64encode(stdin).decode("ascii") if stdin is not None else None)
+            packet = dict(argv=self.argv, stdin=base64.b64encode(stdin).decode("ascii") if stdin is not None else None,
+                          interactive=interactive)
             self.process.stdin.write((json.dumps(packet, ensure_ascii=True) + "\n").encode("ascii"))
-            self.process.stdin.close()
+            self.process.stdin.flush()
+            if not interactive:
+                self.process.stdin.close()
         except BaseException as error:
             self._close_after_error("launch_failed", error)
             raise
 
     def alive(self):
         return self.process is not None and self.process.poll() is None
+
+    def send(self, data):
+        require(self.interactive and self.alive() and not self.close_attempted and
+                type(data) is bytes and data.endswith(b"\n"), "invalid interactive tool input")
+        self.process.stdin.write(data)
+        self.process.stdin.flush()
 
     def close(self, reason="completed"):
         if self.closed:

@@ -836,7 +836,7 @@ class DeviceDetailPage extends StatelessWidget {
 可连接: ${controller.isConnectable(device) ? '是' : '否'}
 服务数量: ${controller.getServiceUuids(device).length}
 
-打开 Trace: ${ShareLinks.landingPageUrl}
+打开 ${ShareLinks.appName}: ${ShareLinks.landingPageUrl}
 ''';
 
     try {

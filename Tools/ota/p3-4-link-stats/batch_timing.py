@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from observation_capture import require, verify, MAX_BYTES
 
 
-def analyze(messages, total, protocol=1):
+def analyze(messages, total, protocol=2):
     require(type(total) is int and 64 <= total <= 1048576, "bounded package required")
     require(type(protocol) is int and protocol in (1, 2), "explicit v1/v2 geometry required")
     summaries, writes, chunks, segments = [], [], [], []
@@ -43,6 +43,9 @@ def analyze(messages, total, protocol=1):
     require(len(summaries) == 1 and not awaiting and chunks, "incomplete batch capture")
     summary = summaries[0]
     transfer, gatt = summary["transfer"], summary["gattWrites"]
+    actual_protocol = transfer.get("begin", {}).get("first", {}).get("protocol")
+    require(type(actual_protocol) is int and actual_protocol == protocol,
+            "requested geometry differs from the actual BEGIN protocol")
     batch = transfer["dataBatch"]
     count = (total + 127) // 128
     require(summary["schema"] == 1 and summary["clock"] == "stopwatch-mono-us" and
@@ -101,7 +104,8 @@ def main():
     parser.add_argument("--input", required=True, type=Path)
     parser.add_argument("--expect-sentinel", required=True)
     parser.add_argument("--expect-target", required=True)
-    parser.add_argument("--protocol", type=int, choices=(1, 2), default=1)
+    parser.add_argument("--protocol", type=int, choices=(1, 2), default=2,
+                        help="V2 by default; explicit 1 is only for historical offline logs")
     args = parser.parse_args()
     require(args.input.stat().st_size <= MAX_BYTES + 8192, "oversized snapshot")
     envelope, messages = verify(args.input.read_bytes(), sentinel=args.expect_sentinel,

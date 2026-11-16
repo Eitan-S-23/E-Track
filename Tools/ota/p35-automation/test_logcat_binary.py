@@ -19,6 +19,37 @@ def entry(message, header=28, pid=321):
 
 
 class BinaryTests(unittest.TestCase):
+    def test_mixed_original_binary_mirror_covers_states_and_diagnostic_tail(self):
+        original = u.mixed_archive(interleaved=True)
+        rows = r.Decoder().feed(original)
+        lines = original.splitlines()
+        wire = b''.join(entry(line) for line in lines)
+        report, decoded, _ = b.audit_pair(wire, wire, 321, 'a' * 32, original, rows, {})
+        self.assertEqual(decoded, original)
+        self.assertTrue(report['completeCombinedCoverage'])
+        self.assertTrue(report['exactEquality'])
+        self.assertEqual(report['originalRecords'], 5)
+        for missing in (2, 4, 5):
+            incomplete = b''.join(entry(line) for i, line in enumerate(lines) if i != missing)
+            report, _, _ = b.audit_pair(incomplete, incomplete, 321, 'a' * 32, original, rows, {})
+            self.assertFalse(report['completeCombinedCoverage'])
+            self.assertEqual(report['missingSequences'], [missing])
+
+    def test_mixed_partial_tail_recovery_retains_original_and_rejects_changed_owner(self):
+        original = u.mixed_archive(interleaved=True)
+        rows = r.Decoder().feed(original)
+        lines = original.splitlines()
+        live = b''.join(entry(line) for line in lines[:-2]) + entry(lines[-2])[:70]
+        terminal = entry(lines[-2]) + entry(lines[-1])
+        report, _, _ = b.audit_pair(live, terminal, 321, 'a' * 32, original, rows, {})
+        self.assertTrue(report['completeCombinedCoverage'])
+        self.assertFalse(report['exactEquality'])
+        self.assertIsNotNone(report['partialLiveTail'])
+        changed = terminal.replace(b'"ownerEpoch": 7', b'"ownerEpoch": 8')
+        report, _, _ = b.audit_pair(live, changed, 321, 'a' * 32, original, rows, {})
+        self.assertFalse(report['retainedMatch'])
+        self.assertFalse(report['completeCombinedCoverage'])
+
     def test_long_record_is_lossless_for_supported_headers(self):
         import json
         row=s.state();row['runtime']['task']['taskId']='f'*100

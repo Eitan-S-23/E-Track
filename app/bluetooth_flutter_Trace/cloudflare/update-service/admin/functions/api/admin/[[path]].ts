@@ -1,12 +1,20 @@
 import { ApiError } from "../../../../worker/src/errors";
 import { FIRMWARE_CHANNEL_ACTIONS, firmwareReleaseAction, listFirmware, mutateFirmwareChannel } from "../../../../worker/src/firmware_admin";
+import { deleteFirmwareFiles } from "../../../../worker/src/firmware_delete";
+import { editFirmwareNotes, firmwareHistory } from "../../../../worker/src/firmware_catalog";
 import { readFirmwareJson, requireFirmwareJsonHeaders } from "../../../../worker/src/firmware";
+import { boundedJson, inventorySummary, refreshInventory } from "../../../../worker/src/version_inventory";
+import { createDeltaJobs, deltaCandidates, deltaJobAction } from "../../../../worker/src/delta_jobs";
+import { deltaActivity, readNotifications, dismissNotifications, hideCompletedJobs, subscribeNotifications, unsubscribeNotifications } from "../../../../worker/src/admin_notifications";
+import { resourceUsage } from "../../../../worker/src/resource_usage";
 
-type Platform = "android" | "windows";
+type Platform = "android" | "windows" | "ios";
 type ChannelName = "stable" | "beta";
 type ActorRole = "viewer" | "publisher" | "owner";
 
 interface AdminEnv {
+  RESOURCE_USAGE_API_TOKEN?: string;
+  RESOURCE_USAGE_CONFIG_JSON?: string;
   DB: D1Database;
   RELEASES_BUCKET: R2Bucket;
   ENVIRONMENT: string;
@@ -23,6 +31,15 @@ interface AdminEnv {
   DOWNLOAD_HMAC_KEY_PREVIOUS?: string;
   FIRMWARE_V2_CUTOVER_EPOCH?: string;
   FIRMWARE_DOWNLOAD_ORIGIN?: string;
+  VERSION_INVENTORY_ENABLED?: string;
+  DELTA_GITHUB_TOKEN?: string;
+  DELTA_WORKFLOW_REF?: string;
+  DELTA_WORKFLOW_COMMIT?: string;
+  DELTA_APP_WORKFLOW_REF?: string;
+  DELTA_APP_WORKFLOW_COMMIT?: string;
+  DELTA_APP_PUBLIC_KEY_BASE64?: string;
+  DELTA_ASSETS_ENABLED?: string;
+  ADMIN_PUSH_PUBLIC_KEY?: string;
 }
 
 interface Actor {
@@ -203,6 +220,45 @@ async function routeAdminRequest(
     return listChannels(context.env, url);
   }
 
+  if (route[0] === "version-inventory" && route.length === 1 && method === "GET") {
+    requireRole(actor, "viewer");
+    return inventorySummary(context.env);
+  }
+
+  if (route[0] === "delta" && route[1] === "activity" && route.length === 2 && method === "GET") {
+    requireRole(actor, "viewer");
+    return deltaActivity(context.env, actor.email);
+  }
+  if (route[0] === "delta" && route[1] === "notifications" && route.length === 3 && method === "POST") {
+    requireRole(actor, "viewer");
+    const body = await boundedJson(context.request, 8192);
+    if (route[2] === "read") return readNotifications(context.env, actor.email, body);
+    if (route[2] === "dismiss") return dismissNotifications(context.env, actor.email, body);
+    if (route[2] === "hide-jobs") return hideCompletedJobs(context.env, actor.email, body);
+    if (route[2] === "subscribe") return subscribeNotifications(context.env, actor.email, body);
+    if (route[2] === "unsubscribe") return unsubscribeNotifications(context.env, actor.email, body);
+    throw new AdminError("INVALID_PARAMETER", "Unknown notification operation", 400);
+  }
+  if (route[0] === "delta" && route[1] === "candidates" && route.length === 2 && method === "GET") {
+    requireRole(actor, "viewer");
+    const kind = url.searchParams.get("kind");
+    if (kind !== "android" && kind !== "firmware") throw new AdminError("INVALID_PARAMETER", "Invalid delta kind", 400);
+    return deltaCandidates(context.env, kind, url.searchParams.get("targetId") ?? "", true);
+  }
+  if (route[0] === "delta" && route[1] === "jobs" && method === "POST") {
+    requireRole(actor, "publisher");
+    const body = await boundedJson(context.request);
+    if (route.length === 2) return createDeltaJobs(context.env, actor.email, body);
+    if (route.length === 4) {
+      if (["enable", "disable"].includes(route[3])) requireRole(actor, "owner");
+      return deltaJobAction(context.env, actor.email, route[2], route[3], body);
+    }
+  }
+  if (route[0] === "version-inventory" && route[1] === "refresh" && route.length === 2 && method === "POST") {
+    requireRole(actor, "publisher");
+    return refreshInventory(context.env, actor.email, await boundedJson(context.request));
+  }
+
   if (method === "GET" && route.length === 1 && route[0] === "releases") {
     requireRole(actor, "viewer");
     return listReleases(context.env, url);
@@ -211,6 +267,11 @@ async function routeAdminRequest(
   if (method === "GET" && route.length === 1 && route[0] === "storage") {
     requireRole(actor, "viewer");
     return storageSummary(context.env, url);
+  }
+
+  if (method === "GET" && route.length === 1 && route[0] === "resource-usage") {
+    requireRole(actor, "viewer");
+    return resourceUsage(context.env);
   }
 
   if (method === "GET" && route.length === 1 && route[0] === "announcements") {
@@ -242,12 +303,25 @@ async function routeAdminRequest(
 
   if (method === "GET" && route.length === 2 && route[0] === "firmware" && route[1] === "releases") {
     requireRole(actor, "viewer");
-    return listFirmware(context.env, url, actor.requestId, false);
+    return listFirmware(context.env, url, actor.requestId, false, { recoveryDownload: Boolean(
+      context.env.FIRMWARE_DOWNLOAD_ORIGIN?.startsWith("https://")
+      && context.env.DOWNLOAD_TOKEN_KEY_VERSION && context.env.DOWNLOAD_HMAC_KEY_CURRENT) });
   }
 
   if (method === "GET" && route.length === 2 && route[0] === "firmware" && route[1] === "channels") {
     requireRole(actor, "viewer");
     return listFirmware(context.env, url, actor.requestId, true);
+  }
+
+  if (method === "GET" && route.length === 2 && route[0] === "firmware" && route[1] === "history") {
+    requireRole(actor, "viewer");
+    return firmwareHistory(context.env, url, actor.requestId);
+  }
+
+  if (method === "POST" && route.length === 4 && route[0] === "firmware"
+    && route[1] === "releases" && route[3] === "notes") {
+    requireRole(actor, "publisher");
+    return editFirmwareNotes(context.env, actor, route[2], await readFirmwareJson(context.request));
   }
 
   if (
@@ -318,6 +392,12 @@ async function routeAdminRequest(
   ) {
     requireRole(actor, "owner");
     return firmwareReleaseAction(context.request, context.env, actor, route[2], route[3]);
+  }
+
+  if (method === "POST" && route.length === 4 && route[0] === "firmware"
+    && route[1] === "releases" && route[3] === "delete") {
+    requireRole(actor, "owner");
+    return deleteFirmwareFiles(context.request, context.env, actor, route[2]);
   }
 
   if (route[0] === "firmware") throw new AdminError("INVALID_PARAMETER", "Unsupported firmware endpoint or method", 400);
@@ -655,6 +735,7 @@ async function publishRelease(
 ): Promise<Response> {
   const appId = requireString(body.appId ?? env.APP_ID, "appId");
   const platform = parsePlatform(body.platform ?? "android");
+  if (platform === "ios") throw new AdminError("INVALID_PARAMETER", "iOS distribution is not configured; APK publishing is not supported", 400);
   const releaseId = requireString(body.releaseId, "releaseId");
   const expectedRevision = requireInt(body.expectedRevision, "expectedRevision");
   const rollback = body.rollback === true;
@@ -861,6 +942,12 @@ async function disableRelease(env: AdminEnv, actor: Actor, releaseId: string): P
 }
 
 async function deleteRelease(env: AdminEnv, actor: Actor, releaseId: string): Promise<Response> {
+  const dependency = await env.DB.prepare(`SELECT id FROM delta_jobs WHERE kind='android'
+    AND (target_release_id=? OR base_release_id=?) LIMIT 1`).bind(releaseId,releaseId).first();
+  const basePatch = await env.DB.prepare(`SELECT p.id FROM patches p JOIN releases r ON r.id=?
+    WHERE p.app_id=r.app_id AND p.platform=r.platform AND p.from_version_code=r.version_code
+    AND p.to_release_id<>r.id LIMIT 1`).bind(releaseId).first();
+  if (dependency || basePatch) throw new AdminError("RELEASE_IN_USE", "Release is retained by delta dependencies or job history", 409);
   const referenced = await env.DB.prepare(
     "SELECT name FROM channels WHERE current_release_id = ? LIMIT 1"
   )
@@ -892,6 +979,11 @@ async function deleteRelease(env: AdminEnv, actor: Actor, releaseId: string): Pr
       .bind(releaseId)
       .first<{ count: number }>()
   ]);
+  // Seal distribution before deleting bytes; a failed/partial delete stays hidden.
+  const sealed = await env.DB.prepare(`UPDATE releases SET archived=1,state='disabled',updated_at=datetime('now')
+    WHERE id=? AND NOT EXISTS(SELECT 1 FROM channels WHERE current_release_id=?) RETURNING id`)
+    .bind(releaseId,releaseId).first();
+  if (!sealed) throw new AdminError("RELEASE_IN_USE", "Release became published; deletion stopped", 409);
   const deletedR2 = await deleteR2ObjectsForRelease(env, release, assets.results);
   const assetRowCount = assets.results.length;
   const patchRowCount = patchRows?.count ?? 0;
@@ -1207,8 +1299,8 @@ function requireInt(value: unknown, field: string): number {
 }
 
 function parsePlatform(value: unknown): Platform {
-  if (value === "android" || value === "windows") return value;
-  throw new AdminError("INVALID_PARAMETER", "platform must be android or windows", 400);
+  if (value === "android" || value === "windows" || value === "ios") return value;
+  throw new AdminError("INVALID_PARAMETER", "platform must be android, windows or ios", 400);
 }
 
 function parseChannel(value: unknown): ChannelName {

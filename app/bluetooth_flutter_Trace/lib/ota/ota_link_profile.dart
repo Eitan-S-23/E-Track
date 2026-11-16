@@ -3,15 +3,13 @@ class OtaLinkProfile {
   const OtaLinkProfile._(this.name, this.pipeline, this.reuseGatt,
       this.preferWithoutResponse, this.windowSegments, this.batchFrames);
 
-  static const baseline = OtaLinkProfile._('baseline', false, false, false, 4, 1);
   static const adaptiveCandidate = OtaLinkProfile._(
       'adaptive-v2-candidate', true, true, true, 24, 12);
 
   static OtaLinkProfile get build => parse(const String.fromEnvironment(
-      'OTA_LINK_PROFILE', defaultValue: 'baseline'));
+      'OTA_LINK_PROFILE', defaultValue: 'adaptive-v2-candidate'));
 
   static OtaLinkProfile parse(String name) => switch (name) {
-    'baseline' => baseline,
     'adaptive-v2-candidate' => adaptiveCandidate,
     _ => throw ArgumentError.value(name, 'OTA_LINK_PROFILE', 'unknown profile'),
   };
@@ -21,7 +19,7 @@ class OtaLinkProfile {
   final int windowSegments, batchFrames;
 
   Map<String, Object> get requested => {
-    'profile': name, 'protocol': pipeline ? 2 : 1,
+    'profile': name, 'protocol': 2,
     'windowSegments': windowSegments, 'dataBatchFrames': batchFrames,
     'reuseGatt': reuseGatt, 'preferWithoutResponse': preferWithoutResponse,
   };

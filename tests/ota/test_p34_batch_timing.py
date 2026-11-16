@@ -10,30 +10,44 @@ sys.path.insert(0, str(ROOT / "Tools/ota/p3-4-link-stats"))
 import batch_timing as timing
 
 
-def fixture():
+def fixture(protocol=2):
+    begin, end, tail = (115, 46, 194) if protocol == 2 else (111, 42, 182)
     messages = [
         "OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=10 bytes=10",
-        "OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=10 bytes=111",
+        f"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=10 bytes={begin}",
         "OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=100 bytes=244",
         "OTA_LINK_SAMPLE label=upgrade kind=batch_chunk us=200 bytes=244 frames=1",
         "OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=201 off=0 len=128",
-        "OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=100 bytes=182",
-        "OTA_LINK_SAMPLE label=upgrade kind=batch_chunk us=400 bytes=182 frames=2",
+        f"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=100 bytes={tail}",
+        f"OTA_LINK_SAMPLE label=upgrade kind=batch_chunk us=400 bytes={tail} frames=2",
         "OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=401 off=128 len=128",
         "OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=402 off=256 len=128",
-        "OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=10 bytes=42",
+        f"OTA_LINK_SAMPLE label=upgrade kind=gatt_write us=10 bytes={end}",
     ]
     summary = dict(schema=1, label="upgrade", clock="stopwatch-mono-us",
-        gattWrites=dict(calls=5, bytes=589, errors=0),
+        gattWrites=dict(calls=5, bytes=10+begin+244+tail+end, errors=0),
         transfer=dict(startUs=0, endAckUs=1000, elapsedUs=1000, outcome="ok",
+            begin=dict(first=dict(protocol=protocol)),
             segmentsUnique=3, segmentSendTotal=3, retransmitFrames=0,
             acks=dict(duplicate=0, error=0, malformed=0, noProgress=0, abort=0),
             ackSamples="partial:early=1", ackEarlyInvalid=1,
-            dataBatch=dict(schema=1, maxFrames=3, chunks=2, bytes=426)))
+            dataBatch=dict(schema=1, maxFrames=3, chunks=2, bytes=244+tail)))
     return messages + ["OTA_LINK_STATS " + json.dumps(summary)]
 
 
 class Tests(unittest.TestCase):
+    def test_default_is_v2_and_historical_geometry_requires_explicit_protocol(self):
+        self.assertEqual(timing.analyze(fixture(), 384)['protocol'], 2)
+        with self.assertRaisesRegex(ValueError, 'actual BEGIN'):
+            timing.analyze(fixture(1), 384)
+        self.assertEqual(timing.analyze(fixture(1), 384, protocol=1)['protocol'], 1)
+        rows = fixture()
+        value = json.loads(rows[-1].removeprefix('OTA_LINK_STATS '))
+        del value['transfer']['begin']
+        rows[-1] = 'OTA_LINK_STATS ' + json.dumps(value)
+        with self.assertRaisesRegex(ValueError, 'actual BEGIN'):
+            timing.analyze(rows, 384)
+
     def test_v2_data_and_control_geometry_and_schema10(self):
         rows = [s.replace("bytes=111", "bytes=115").replace("bytes=42", "bytes=46")
                  .replace("bytes=182", "bytes=194") for s in fixture()]

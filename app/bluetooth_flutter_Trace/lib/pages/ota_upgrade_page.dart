@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import '../companion/companion_runtime.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get/get.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -290,6 +291,15 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
           ValueListenableBuilder<String>(
             valueListenable: otaService.p35.status,
             builder: (context, status, _) => Obx(() => Row(children: [
+              if (!otaService.p35.active)
+                Semantics(identifier: 'p51-arm-timing', child: IconButton(
+                  tooltip: 'Start acknowledged raw link timing recording',
+                  onPressed: otaService.isUpgrading || status == 'starting' || !_deviceReady ||
+                      otaService.p35.captureId != null ? null : () async {
+                    await otaService.startP35Recording(reliable: true, linkTimings: true);
+                  },
+                  icon: const Icon(Icons.query_stats),
+                )),
               if (!otaService.p35.active)
                 Semantics(identifier: 'p35-arm-stream', child: IconButton(
                   tooltip: 'Start acknowledged live recording',
@@ -1285,7 +1295,11 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
     });
 
     try {
-      await otaService.checkFirmwareUpdate();
+      if (Get.isRegistered<CompanionRuntime>()) {
+        await Get.find<CompanionRuntime>().manualCheck(_deviceAddress);
+      } else {
+        await otaService.checkFirmwareUpdate();
+      }
     } catch (e) {
       if (!mounted) return;
       safeSnackbar('错误', '检查更新失败: $e', context: context,

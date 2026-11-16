@@ -14,6 +14,7 @@ export interface WorkerEnv {
   APP_ID: string;
   GITHUB_OWNER: string;
   GITHUB_REPO: string;
+  FIRMWARE_GITHUB_REPOSITORY?: string;
   MANIFEST_CACHE_TTL_SECONDS: string;
   DOWNLOAD_TOKEN_TTL_SECONDS: string;
   DOWNLOAD_TOKEN_KEY_VERSION: string;
@@ -22,9 +23,21 @@ export interface WorkerEnv {
   RATE_LIMIT_MAX_REQUESTS: string;
   ENABLE_DIRECT_ADMIN_API: string;
   DEPLOY_TOKEN_SHA256?: string;
+  FIRMWARE_DEPLOY_TOKEN_SHA256?: string;
   DOWNLOAD_HMAC_KEY_CURRENT?: string;
   DOWNLOAD_HMAC_KEY_PREVIOUS?: string;
   FIRMWARE_V2_CUTOVER_EPOCH?: string;
+  VERSION_INVENTORY_ENABLED?: string;
+  DELTA_GITHUB_TOKEN?: string;
+  DELTA_WORKFLOW_REF?: string;
+  DELTA_WORKFLOW_COMMIT?: string;
+  DELTA_APP_WORKFLOW_REF?: string;
+  DELTA_APP_WORKFLOW_COMMIT?: string;
+  DELTA_APP_PUBLIC_KEY_BASE64?: string;
+  DELTA_ASSETS_ENABLED?: string;
+  ADMIN_PUSH_PUBLIC_KEY?: string;
+  ADMIN_PUSH_PRIVATE_JWK?: string;
+  ADMIN_PUSH_SUBJECT?: string;
 }
 
 export type FirmwareStorageEnv = Pick<WorkerEnv, "DB" | "RELEASES_BUCKET">;

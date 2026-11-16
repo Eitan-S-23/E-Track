@@ -49,6 +49,7 @@ class OtaLinkStats {
     this.device,
     this.attempt,
     this.onTransferState,
+    this.onObservation,
     int Function()? clockUs,
   }) : _clockUs = clockUs;
 
@@ -65,6 +66,7 @@ class OtaLinkStats {
   final int? attempt;
 
   final void Function(Map<String, Object?>)? onTransferState;
+  final void Function(String)? onObservation;
   Map<String, Object?>? _acceptedState;
 
   /// Called only after the transport accepted the actual ACK/window state.
@@ -251,7 +253,7 @@ class OtaLinkStats {
     if (_retiredReason != null) return;
     _retiredReason = reason;
     _retiredUs = nowUs();
-    emitOtaObservation('OTA_LINK_RETIRE label=$label attempt=${attempt ?? '-'} '
+    _emitObservation('OTA_LINK_RETIRE label=$label attempt=${attempt ?? '-'} '
         'reason=$reason us=$_retiredUs');
   }
 
@@ -570,7 +572,7 @@ class OtaLinkStats {
       'credit': creditEnd, 'us': atUs,
     };
     _ignoredAckFirst[reason] = Map.unmodifiable(record);
-    emitOtaObservation('OTA_LINK_ACK_IGNORED ${convert.jsonEncode(record)}');
+    _emitObservation('OTA_LINK_ACK_IGNORED ${convert.jsonEncode(record)}');
   }
 
   Map<String, Object?> get ignoredAckErrors => {
@@ -583,7 +585,7 @@ class OtaLinkStats {
     if (_ignoredAckSealed) return;
     _ignoredAckSealed = true;
     if (_ignoredAckCounts.isEmpty) return;
-    emitOtaObservation('OTA_LINK_ACK_IGNORED ${convert.jsonEncode({
+    _emitObservation('OTA_LINK_ACK_IGNORED ${convert.jsonEncode({
       ...ignoredAckErrors, 'kind': 'counts', 'label': label, 'attempt': attempt,
       'us': nowUs(),
     })}');
@@ -609,7 +611,7 @@ class OtaLinkStats {
       'epoch': epoch, 'durable': durableOffset, 'accepted': acceptedOffset,
       'credit': creditEnd, 'us': nowUs(),
     });
-    emitOtaObservation('OTA_LINK_ACK_ERROR label=$label ${convert.jsonEncode(_firstAckError)}');
+    _emitObservation('OTA_LINK_ACK_ERROR label=$label ${convert.jsonEncode(_firstAckError)}');
   }
 
   /// ACK 分类：ok / duplicate / error / malformed / noProgress / abort。
@@ -885,7 +887,7 @@ class OtaLinkStats {
   void emitSummary() {
     if (_summaryEmitted) return;
     _summaryEmitted = true;
-    emitOtaObservation('OTA_LINK_STATS ${convert.jsonEncode(toJson())}');
+    _emitObservation('OTA_LINK_STATS ${convert.jsonEncode(toJson())}');
   }
 
   /// 观测入账闸门（封存语义见 [retire]）：未封存返回 true，调用方照常登记
@@ -912,6 +914,13 @@ class OtaLinkStats {
       line.write(' ');
       line.write(extra);
     }
-    emitOtaObservation(line.toString());
+    _emitObservation(line.toString());
+  }
+
+  void _emitObservation(String line) {
+    // Timestamps and statistics are already final. The optional sink owns its
+    // loss/failure latch and cannot change transport behavior by throwing.
+    try { onObservation?.call(line); } catch (_) { /* Observation only. */ }
+    emitOtaObservation(line);
   }
 }

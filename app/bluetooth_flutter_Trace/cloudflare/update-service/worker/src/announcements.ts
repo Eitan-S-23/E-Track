@@ -42,7 +42,8 @@ export async function handleAnnouncements(
   }
 
   const appId = url.searchParams.get("appId") ?? env.APP_ID;
-  const platform = parsePlatform(url.searchParams.get("platform") ?? "android");
+  const rawPlatform = url.searchParams.get("platform") ?? "android";
+  const platform = rawPlatform === "ios" ? "ios" : parsePlatform(rawPlatform);
   const channel = parseChannel(url.searchParams.get("channel") ?? "stable");
   const limit = parseLimit(url.searchParams.get("limit"));
 
@@ -61,7 +62,7 @@ export async function handleAnnouncements(
   try {
     const [manual, release] = await Promise.all([
       loadManualAnnouncements(env, appId, limit),
-      loadReleaseAnnouncement(env, appId, platform, channel)
+      platform === "ios" ? Promise.resolve(null) : loadReleaseAnnouncement(env, appId, platform, channel)
     ]);
 
     const announcements = [

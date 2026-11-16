@@ -1,4 +1,5 @@
 import { ApiError, invalidParameter } from "./errors";
+import { candidateArrival } from "./admin_notifications";
 import { canonicalJson, verifyBearerToken } from "./crypto";
 import { json } from "./http";
 import { requireInt, requireSha256, requireString } from "./validation";
@@ -241,6 +242,7 @@ export async function handleRegisterRelease(
     ).bind(crypto.randomUUID(), input.appId, releaseId, requestId, canonicalJson(securityPayload))
   );
 
+  statements.push(candidateArrival(env, { ...input, kind: input.platform, releaseId }));
   await env.DB.batch(statements);
   return json({ ok: true, releaseId, idempotent: false }, 201);
 }

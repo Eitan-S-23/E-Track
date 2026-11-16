@@ -36,7 +36,7 @@ def receive(peer, sink, *, sync=lambda: None, wire=None):
         size, = struct.unpack('!I', exact(peer, 4, wire))
         r.require(0 < size <= MAX_BATCH, 'invalid live frame length', 'EVIDENCE_GAP')
         data = exact(peer, size, wire)
-        r.require(data.endswith(b'\n') and all(line.startswith((b'OTA_P35_STATE ', b'OTA_P35_CAPTURE '))
+        r.require(data.endswith(b'\n') and all(line.startswith((b'OTA_P35_STATE ', b'OTA_P35_CAPTURE ', r.DIAGNOSTIC_PREFIX.encode()))
                   for line in data.splitlines()), 'noncanonical live frame', 'EVIDENCE_GAP')
         first_states = decoder.previous is None
         states = decoder.feed(data)
@@ -44,19 +44,21 @@ def receive(peer, sink, *, sync=lambda: None, wire=None):
         cid = decoder.opened.get('captureId')
         r.require(isinstance(cid, str) and r.re.fullmatch('[0-9a-f]{32}', cid) and
                   type(decoder.opened.get('schema')) is int and
-                  decoder.opened == dict(schema=1,kind='open',captureId=cid), 'invalid live header', 'EVIDENCE_GAP')
+                  (decoder.opened == dict(schema=1,kind='open',captureId=cid) or
+                   decoder.opened == dict(schema=2,kind='open',captureId=cid,diagnostics='ota-link-v1')),
+                  'invalid live header', 'EVIDENCE_GAP')
         if states:
             r.require(states[0]['captureId'] == cid and (not first_states or states[0]['seq'] == 1),
                       'live capture identity mismatch', 'EVIDENCE_GAP')
         for line in data.splitlines(keepends=True):
-            if line.startswith(r.PREFIX.encode()):
+            if line.startswith((r.PREFIX.encode(), r.DIAGNOSTIC_PREFIX.encode())):
                 body_hash.update(line)
         if decoder.closed is not None:
             r.require(set(decoder.closed) == {'schema','kind','captureId','records','sha256','healthy','lost','error'} and
-                      type(decoder.closed.get('schema')) is int and decoder.closed['schema'] == 1 and
+                      type(decoder.closed.get('schema')) is int and decoder.closed['schema'] == decoder.opened['schema'] and
                       type(decoder.closed.get('records')) is int and type(decoder.closed.get('lost')) is int and
                       decoder.previous is not None and decoder.closed.get('captureId') == decoder.previous['captureId']
-                      and decoder.closed.get('records') == decoder.previous['seq'] and
+                      and decoder.closed.get('records') == decoder.previous_record['seq'] and
                       decoder.closed.get('healthy') is True and decoder.closed.get('lost') == 0 and
                       decoder.closed.get('error') is None and decoder.closed.get('sha256') == body_hash.hexdigest(),
                       'unhealthy live footer/hash', 'EVIDENCE_GAP')
@@ -66,7 +68,7 @@ def receive(peer, sink, *, sync=lambda: None, wire=None):
         peer.sendall(('ACK %d %s\n' % (size, hashlib.sha256(data).hexdigest())).encode('ascii'))
         total += size
         batches += 1
-    return dict(bytes=total, batches=batches, records=decoder.previous['seq'],
+    return dict(bytes=total, batches=batches, records=decoder.previous_record['seq'],
                 captureId=decoder.previous['captureId'], source='acknowledged-stream-v1')
 
 
@@ -74,8 +76,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--port', required=True, type=int)
     parser.add_argument('--wire-out', required=True, type=Path)
+    parser.add_argument('--idle-seconds', type=int, default=5)
     args = parser.parse_args()
     r.require(1024 <= args.port <= 65535 and args.port != 5037, 'invalid local stream port')
+    r.require(1 <= args.idle_seconds <= 180, 'invalid live stream idle timeout')
     h = r.load_host()
     wire_path = h.checked(args.wire_out)
     r.require(not wire_path.exists(), 'existing wire evidence; no replay')
@@ -99,7 +103,7 @@ def main():
     r.require(peer is not None, 'live producer connection deadline', 'CAPABILITY_MISSING')
     with peer:
         peer.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-        peer.settimeout(5)
+        peer.settimeout(args.idle_seconds)
         with wire_path.open('xb') as wire:
             result = receive(peer, sys.stdout.buffer, sync=lambda: os.fsync(sys.stdout.fileno()), wire=wire)
     print(json.dumps(result), file=sys.stderr, flush=True)

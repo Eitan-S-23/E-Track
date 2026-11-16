@@ -6,10 +6,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import '../services/app_update_service.dart';
+import '../services/version_inventory_service.dart';
 import '../services/database_service.dart';
 import 'trace_ui.dart';
 
-const String _appName = 'BLE Monitor';
+const String _appName = 'E-Track';
 const MethodChannel _appUpdateChannel = MethodChannel('trace/app_update');
 final Future<String> _appVersionLabelFuture = _loadAppVersionLabel();
 
@@ -48,13 +49,17 @@ class ProfileTabPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const _ProfileTitle(),
-                  const Spacer(),
-                  _ProfileAvatar(onTap: _showUserInfoDialog),
-                ],
+              SizedBox(
+                width: double.infinity,
+                child: Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  spacing: 12,
+                  runSpacing: 16,
+                  children: [
+                    const _ProfileTitle(),
+                    _ProfileAvatar(onTap: _showUserInfoDialog),
+                  ],
+                ),
               ).animate().fadeIn(duration: 420.ms).slideY(begin: 0.14, end: 0),
               const SizedBox(height: 30),
               _ProfilePanel(
@@ -71,6 +76,16 @@ class ProfileTabPage extends StatelessWidget {
                   .animate(delay: 100.ms)
                   .fadeIn(duration: 520.ms)
                   .slideY(begin: 0.08, end: 0),
+              const SizedBox(height: 16),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () => Get.toNamed('/companion-setup'),
+                  icon: const Icon(Icons.bluetooth_connected),
+                  label: const Text('后台运行与权限'),
+                  style: TextButton.styleFrom(foregroundColor: TraceColors.mint),
+                ),
+              ),
               const SizedBox(height: 24),
               const _ProfileFooter()
                   .animate(delay: 220.ms)
@@ -135,12 +150,80 @@ class ProfileTabPage extends StatelessWidget {
 
   void _showSettingsDialog() {
     _showTraceDialog(
-      const TraceDialog(
+      TraceDialog(
         title: '应用设置',
         icon: Icons.settings,
         color: TraceColors.mint,
-        message: '设置功能开发中。当前版本先保留入口，后续会接入个性化配置。',
-        actions: [
+        content: Get.isRegistered<VersionInventoryService>() &&
+                Get.find<VersionInventoryService>().available
+            ? Obx(() {
+                final inventory = Get.find<VersionInventoryService>();
+                return Column(mainAxisSize: MainAxisSize.min, children: [
+                  Material(
+                    type: MaterialType.transparency,
+                    child: SwitchListTile.adaptive(
+                      key: const ValueKey('version-inventory-toggle'),
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text(
+                        '参与版本统计',
+                        style: TextStyle(
+                          color: TraceColors.text,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          height: 1.35,
+                        ),
+                      ),
+                      subtitle: Text(
+                        !inventory.ready.value
+                            ? '正在读取设置'
+                            : inventory.enabled.value ? '已开启' : '已关闭',
+                        style: TextStyle(
+                          color: inventory.ready.value && inventory.enabled.value
+                              ? TraceColors.mint
+                              : TraceColors.muted,
+                          fontSize: 13,
+                          height: 1.5,
+                        ),
+                      ),
+                      // This dialog stays dark even with a light Material theme.
+                      thumbColor: WidgetStateProperty.resolveWith((states) =>
+                          states.contains(WidgetState.selected) &&
+                                  !states.contains(WidgetState.disabled)
+                              ? TraceColors.deep
+                              : TraceColors.muted),
+                      trackColor: WidgetStateProperty.resolveWith((states) =>
+                          states.contains(WidgetState.selected) &&
+                                  !states.contains(WidgetState.disabled)
+                              ? TraceColors.mint
+                              : TraceColors.ocean),
+                      trackOutlineColor: WidgetStateProperty.resolveWith((states) =>
+                          states.contains(WidgetState.selected) &&
+                                  !states.contains(WidgetState.disabled)
+                              ? Colors.transparent
+                              : TraceColors.muted),
+                      value: inventory.enabled.value,
+                      onChanged: inventory.ready.value
+                          ? (value) => unawaited(inventory.setEnabled(value))
+                          : null,
+                    ),
+                  ),
+                  const Text('低频上报 APP 和已连接设备的版本、文件校验值及去重标识，用于选择差分升级包。不上传位置、联系人或骑行记录。关闭后停止上报，历史记录最多保留 90 天。',
+                      style: TextStyle(color: TraceColors.muted, height: 1.5)),
+                  const SizedBox(height: 12),
+                  Align(alignment: Alignment.centerLeft, child: Text(
+                    switch (inventory.status.value) {
+                      InventoryReportStatus.disabled => '版本统计已关闭',
+                      InventoryReportStatus.busy => '等待更新任务结束后上报',
+                      InventoryReportStatus.sending => '正在上报版本信息',
+                      InventoryReportStatus.reported => '最近上报：${inventory.lastReportedAt.value?.toLocal().toString().split('.').first ?? '未上报'}',
+                      InventoryReportStatus.retrying => '上报暂未成功（${inventory.failureCode.value ?? 'UNKNOWN'}），将在前台自动重试',
+                      InventoryReportStatus.waiting => '等待上报版本信息',
+                    }, style: const TextStyle(color: TraceColors.text, fontSize: 13, height: 1.5),
+                  )),
+                ]);
+              })
+            : const Text('当前平台未启用版本统计。'),
+        actions: const [
           TraceDialogAction(
             label: '知道了',
             isPrimary: true,
@@ -625,7 +708,7 @@ class _ProfilePanel extends StatelessWidget {
                             size: topNode,
                             icon: action.icon,
                             label: action.label,
-                            labelWidth: 120,
+                            labelWidth: math.min(120.0, innerWidth / 2),
                             onTap: action.onTap,
                           ),
                       ],
@@ -640,7 +723,7 @@ class _ProfilePanel extends StatelessWidget {
                             size: bottomNode,
                             icon: action.icon,
                             label: action.label,
-                            labelWidth: 98,
+                            labelWidth: math.min(98.0, innerWidth / 3),
                             onTap: action.onTap,
                           ),
                       ],
@@ -757,23 +840,29 @@ class _ProfileFooter extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(
-          children: [
-            Expanded(child: _buildFadeLine(reverse: false)),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Text(
-                'BLE Monitor 智能设备管理助手',
-                style: TextStyle(
-                  color: TraceColors.muted.withValues(alpha: 0.85),
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1,
+        LayoutBuilder(
+          builder: (context, constraints) => Row(
+            children: [
+              Expanded(child: _buildFadeLine(reverse: false)),
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: constraints.maxWidth),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Text(
+                    'E-Track 智能设备管理助手',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: TraceColors.muted.withValues(alpha: 0.85),
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1,
+                    ),
+                  ),
                 ),
               ),
-            ),
-            Expanded(child: _buildFadeLine(reverse: true)),
-          ],
+              Expanded(child: _buildFadeLine(reverse: true)),
+            ],
+          ),
         ),
         const SizedBox(height: 12),
         Row(

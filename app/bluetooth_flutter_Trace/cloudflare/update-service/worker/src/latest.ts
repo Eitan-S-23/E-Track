@@ -4,6 +4,7 @@ import { clientIpFrom, json } from "./http";
 import { writeLog } from "./logger";
 import { enforceRateLimit } from "./rate_limiter";
 import { signedDownloadUrls } from "./downloads";
+import { supplementalAppManifest } from "./delta_assets";
 import {
   parseCapabilities,
   parseChannel,
@@ -113,6 +114,13 @@ export async function handleLatest(
       assets: state.assets,
       patches: state.patches
     };
+    const extra = env.DELTA_ASSETS_ENABLED === "true"
+      ? await supplementalAppManifest(env, state.release.id, versionCode, request.headers.get("X-Trace-Apk-Sha256")) : null;
+    if (extra) {
+      renderableState.release = { ...state.release, security_payload_json: JSON.stringify(extra.securityPayload),
+        payload_signature_json: JSON.stringify(extra.payloadSignature) };
+      renderableState.patches = [extra.patch];
+    }
     const origin = new URL(request.url).origin;
     const cacheKey = [
       "manifest",
@@ -121,7 +129,8 @@ export async function handleLatest(
       appId,
       platform,
       channel,
-      String(renderableState.channel.revision)
+      String(renderableState.channel.revision),
+      ...(extra ? [extra.cacheKey] : [])
     ].join(":");
     const cached = await env.MANIFEST_CACHE.get(cacheKey, "json");
     const envelope =
@@ -179,7 +188,7 @@ async function renderManifestEnvelope(
       oldSha256: patch.old_sha256,
       newSha256: patch.output_sha256,
       downloadUrl: patchUrls.downloadUrl,
-      fallbackUrl: patchUrls.fallbackUrl
+      fallbackUrl: patch.id.startsWith("delta_") ? undefined : patchUrls.fallbackUrl
     });
   }
 

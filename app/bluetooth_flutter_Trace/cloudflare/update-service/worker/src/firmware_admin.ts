@@ -5,7 +5,7 @@ import { firmwareAssets, firmwareOperation, readFirmwareJson, requireFirmwareFul
   usableFirmwareAsset } from "./firmware";
 import { signFirmwareDownload, verifyFirmwareObject } from "./firmware_download";
 import { json } from "./http";
-import type { FirmwareChannelRow, FirmwareReleaseRow, FirmwareSigningEnv, FirmwareStorageEnv } from "./types";
+import type { FirmwareAssetRow, FirmwareChannelRow, FirmwareReleaseRow, FirmwareSigningEnv, FirmwareStorageEnv } from "./types";
 
 export type FirmwareAdminEnv = FirmwareStorageEnv & FirmwareSigningEnv & { FIRMWARE_DOWNLOAD_ORIGIN?: string };
 export interface FirmwareAdminActor { email: string; requestId: string }
@@ -36,7 +36,8 @@ function ready(release: FirmwareReleaseRow | null): asserts release is FirmwareR
   if (release.state !== "ready") throw new ApiError("RELEASE_NOT_READY", "Firmware release not ready", 409);
 }
 
-export function listFirmware(env: FirmwareStorageEnv, url: URL, requestId: string, channels: boolean): Promise<Response> {
+export function listFirmware(env: FirmwareStorageEnv, url: URL, requestId: string, channels: boolean,
+  capabilities = { recoveryDownload: false }): Promise<Response> {
   return firmwareOperation(async () => {
     for (const key of url.searchParams.keys()) if (!["appId", "deviceModel"].includes(key)) throw invalidParameter("Unknown firmware list parameter");
     for (const key of ["appId", "deviceModel"]) if (url.searchParams.getAll(key).length !== 1) throw invalidParameter("Required firmware scope missing/duplicated");
@@ -48,15 +49,28 @@ export function listFirmware(env: FirmwareStorageEnv, url: URL, requestId: strin
       ...(c.legacy_current_release_id ? { legacyPending: true } : {}) })) });
     const releases = (await env.DB.prepare("SELECT * FROM firmware_releases WHERE app_id=? AND device_model=? ORDER BY version_code DESC")
       .bind("trace", FIRMWARE_MODEL).all<FirmwareReleaseRow>()).results;
+    const assets = (await env.DB.prepare(`SELECT a.* FROM firmware_release_assets a
+      JOIN firmware_releases r ON r.id=a.release_id WHERE r.app_id=? AND r.device_model=?
+      ORDER BY a.kind,a.base_vcode,a.id`).bind("trace", FIRMWARE_MODEL).all<FirmwareAssetRow>()).results;
+    const byRelease = new Map<string, FirmwareAssetRow[]>();
+    for (const asset of assets) {
+      const group = byRelease.get(asset.release_id) ?? [];
+      group.push(asset);
+      byRelease.set(asset.release_id, group);
+    }
     const result = [];
     for (const r of releases) result.push({ releaseId: r.id, appId: r.app_id, deviceModel: r.device_model,
       versionName: r.version_name, versionCode: r.version_code, releaseTag: r.release_tag, state: r.state,
       archived: r.archived === 1, releaseNotes: r.release_notes, targetImageSha256: r.target_image_sha256,
+      createdAt: r.created_at, updatedAt: r.updated_at, commitSha: r.commit_sha, runId: r.run_id,
+      hardwareRevision: r.hardware_rev, layoutId: r.layout_id, minBootVersion: r.min_boot_version,
+      minProtocolVersion: r.min_protocol_version, minAppVersionCode: r.min_app_version_code,
+      targetHardware: r.target_hardware, transport: r.transport,
       publishedChannels: channelRows.filter((c) => c.current_release_id === r.id).map((c) => c.name),
-      assets: (await firmwareAssets(env.DB, r.id)).map((a) => ({ assetId: a.id, kind: a.kind, fileName: a.file_name,
+      assets: (byRelease.get(r.id) ?? []).map((a) => ({ assetId: a.id, kind: a.kind, fileName: a.file_name,
         sha256: a.sha256, sizeBytes: a.size_bytes, r2State: a.r2_state, baseVersionCode: a.base_vcode,
         baseImageSha256: a.kind === "patch" ? a.base_image_sha256 : null })) });
-    return json({ ok: true, requestId, firmwareReleases: result });
+    return json({ ok: true, requestId, firmwareReleases: result, capabilities });
   });
 }
 

@@ -12,6 +12,9 @@ import {
 } from "./firmware";
 import { handleLatest } from "./latest";
 import { cleanupFirmwareIdempotency } from "./firmware_admin";
+import { cleanupInventory, inventoryControl, reportInventory } from "./version_inventory";
+import { advancePendingDeltaCancellations, deltaCi } from "./delta_jobs";
+import { deliverNotifications } from "./admin_notifications";
 import type { WorkerEnv } from "./types";
 
 export { RateLimiter } from "./rate_limiter";
@@ -44,6 +47,16 @@ app.get("/api/public/announcements", async (c) =>
   handleAnnouncements(c.req.raw, c.env, c.get("requestId"))
 );
 
+app.get("/api/public/version-inventory/control", c => inventoryControl(c.req.raw, c.env));
+app.post("/api/public/version-inventory", c => reportInventory(c.req.raw, c.env));
+app.all("/api/ci/delta/jobs/*", async c => {
+  const response = await deltaCi(c.req.raw, c.env);
+  if (response.ok && /\/(complete|fail)$/.test(c.req.path)) {
+    c.executionCtx.waitUntil(deliverNotifications(c.env).catch(() => console.warn("Delta notification delivery deferred")));
+  }
+  return response;
+});
+
 app.get("/api/public/firmware/latest", async (c) =>
   handleFirmwareLatest(c.req.raw, c.env, c.get("requestId"))
 );
@@ -60,13 +73,19 @@ app.get("/api/public/github-fallback", async (c) =>
   handleDownload(c.req.raw, c.env, c.get("requestId"), "github-fallback")
 );
 
-app.post("/api/ci/releases", async (c) =>
-  handleRegisterRelease(c.req.raw, c.env, c.get("requestId"))
-);
+app.post("/api/ci/releases", async (c) => {
+  const response = await handleRegisterRelease(c.req.raw, c.env, c.get("requestId"));
+  if (response.status === 201) c.executionCtx.waitUntil(deliverNotifications(c.env)
+    .catch(() => console.warn("Candidate notification delivery deferred")));
+  return response;
+});
 
-app.post("/api/ci/firmware/releases", async (c) =>
-  handleRegisterFirmwareRelease(c.req.raw, c.env, c.get("requestId"))
-);
+app.post("/api/ci/firmware/releases", async (c) => {
+  const response = await handleRegisterFirmwareRelease(c.req.raw, c.env, c.get("requestId"));
+  if (response.status === 201) c.executionCtx.waitUntil(deliverNotifications(c.env)
+    .catch(() => console.warn("Candidate notification delivery deferred")));
+  return response;
+});
 
 app.post("/api/ci/firmware/preflight", async (c) =>
   handleFirmwarePreflight(c.req.raw, c.env, c.get("requestId"))
@@ -87,6 +106,13 @@ app.onError((error, c) => errorJson(error, c.get("requestId") ?? crypto.randomUU
 export default {
   fetch: app.fetch,
   async scheduled(_event, env) {
-    await cleanupFirmwareIdempotency(env.DB);
+    if (_event.cron === "*/5 * * * *") {
+      await advancePendingDeltaCancellations(env);
+      await deliverNotifications(env);
+      return;
+    }
+    // The inventory-only staging schedule must not start pruning old OTA receipts.
+    if (_event.cron !== "17 * * * *") await cleanupFirmwareIdempotency(env.DB);
+    await cleanupInventory(env);
   }
 } satisfies ExportedHandler<WorkerEnv>;

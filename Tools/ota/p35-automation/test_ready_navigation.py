@@ -148,7 +148,10 @@ class ReadyNavigationTests(unittest.TestCase):
                 d.check_cleanup_state(ready)
 
     def test_closed_ready_ui_uses_bound_owner_oracle_not_default_smoke(self):
-        raw = original_or_fixture().replace(b'p35-stop', b'p35-arm')
+        # This unit fixture tests owner-oracle delegation, not a native stop.
+        # Renaming an active toolbar's resource ID does not close its recorder.
+        raw = xml(node(package=PKG, **{'content-desc': s.FIRMWARE}) +
+            node(package=PKG, **{'resource-id': 'p35-reconnect'}))
         d = object.__new__(s.Smoke)
         d.p = {'app': {'id': PKG}}
         d.capture_resolved = True
@@ -164,6 +167,25 @@ class ReadyNavigationTests(unittest.TestCase):
         d.check_cleanup_state = reject
         with self.assertRaises(r.Stop):
             d.idle_recorder_ui()
+
+    def test_active_labels_still_block_cleanup_after_only_id_changes(self):
+        samples = [xml(node(package=PKG, **{'content-desc': s.FIRMWARE}) +
+            node(package=PKG, **{'resource-id': 'p35-arm', 'content-desc': s.RECORDER_STOP}) +
+            node(package=PKG, **{'resource-id': 'p35-arm-stream', 'content-desc': s.RECORDER_RECONNECT}))]
+        if ORIGINAL.is_file():
+            samples.append(ORIGINAL.read_bytes().replace(b'p35-stop', b'p35-arm'))
+        for raw in samples:
+            d = object.__new__(s.Smoke)
+            d.p = {'app': {'id': PKG}}
+            d.capture_resolved = True
+            d.capture_seal = {'final': {'phase': 'readyToInstall'}}
+            d.idle_services = lambda: None
+            d.ui = lambda: raw
+            calls = []
+            d.check_cleanup_state = lambda state: calls.append(state)
+            with self.subTest(native=len(raw)), self.assertRaisesRegex(r.Stop, 'recorder active'):
+                d.idle_recorder_ui()
+            self.assertEqual(calls, [])
 
 
 if __name__ == '__main__':

@@ -251,6 +251,151 @@ class TelemetryTests(unittest.TestCase):
         self.assertEqual(r.resume_offset(state(durable=4096,bitmap=0xffffffff)),8192)
 
 
+def mixed_archive(lines=None, *, mutate=None, interleaved=False):
+    summary = dict(schema=1, label='upgrade', attempt=None, clock='stopwatch-mono-us', transfer=dict(
+        segmentsUnique=1, segmentSendTotal=1, retransmitFrames=0, outcome='ok',
+        ackSamples='complete', ackEarlyInvalid=0,
+        ackLatency=dict(count=1, minUs=40, p50Us=40, p95Us=40, p99Us=40, maxUs=40)))
+    lines = lines if lines is not None else [
+        'OTA_LINK_SAMPLE label=upgrade kind=segment_first_send us=100 off=0 len=128',
+        'OTA_LINK_SAMPLE label=upgrade kind=ack_latency us=40 off=0',
+        'OTA_LINK_STATS ' + json.dumps(summary)]
+    first = state(captureId='a' * 32, schema=2, runtime=dict(backgrounded=False, acquired=False, reason=None,
+        active=False, paused=False, ownerEpoch=7, revision=1, task=None))
+    records = [(r.PREFIX, first)]
+    for text in lines:
+        index = len(records) + 1
+        value = dict(schema=1, captureId=first['captureId'], seq=index, monoUs=index * 1000,
+            statsId=1, clockId=first['captureId'] + ':1', ownerEpoch=7, ownerStateSeq=1,
+            label='upgrade', attempt=None, line=text)
+        if mutate:
+            mutate(value, index)
+        records.append((r.DIAGNOSTIC_PREFIX, value))
+        if interleaved and len(records) == 2:
+            records.append((r.PREFIX, dict(first, seq=3, monoUs=3000, event='heartbeat')))
+    raw = b''.join((prefix + json.dumps(value) + '\n').encode() for prefix, value in records)
+    header = dict(schema=2, kind='open', captureId=first['captureId'], diagnostics='ota-link-v1')
+    footer = dict(schema=2, kind='close', captureId=first['captureId'], records=len(records),
+                  sha256=hashlib.sha256(raw).hexdigest(), healthy=True, lost=0, error=None)
+    return (('OTA_P35_CAPTURE ' + json.dumps(header) + '\n').encode() + raw +
+            ('OTA_P35_CAPTURE ' + json.dumps(footer) + '\n').encode())
+
+
+class MixedDiagnosticTests(unittest.TestCase):
+    def test_original_lines_have_one_seal_and_source_clock(self):
+        raw = mixed_archive()
+        report = r.audit_link_diagnostics(raw, 'a' * 32)
+        self.assertEqual(report['archive']['records'], 4)
+        self.assertEqual(report['archive']['stateRecords'], 1)
+        self.assertEqual(report['archive']['diagnosticRecords'], 3)
+        self.assertEqual(report['groups'][0]['ackLatencyUs'], [40])
+        self.assertIn('us=100', report['groups'][0]['lines'][0])
+        self.assertIn('us=40', report['groups'][0]['lines'][1])
+
+    def test_fragmentation_keeps_state_api_and_global_sequence(self):
+        raw = mixed_archive()
+        d = r.Decoder()
+        states = []
+        for b in raw:
+            states.extend(d.feed(bytes([b])))
+        self.assertEqual(len(states), 1)
+        self.assertEqual(len(d.diagnostics), 3)
+        self.assertEqual(d.previous['seq'], 1)
+        self.assertEqual(d.previous_record['seq'], 4)
+
+    def test_wrong_clock_owner_anchor_and_instance_drift_reject(self):
+        changes = [dict(clockId='different'), dict(ownerEpoch=8), dict(ownerStateSeq=99),
+                   dict(label='probe'), dict(attempt=0), dict(schema=True)]
+        for change in changes:
+            with self.subTest(change=change), self.assertRaises(r.Stop):
+                r.audit_capture(mixed_archive(mutate=lambda s, i: s.update(change)), 'a' * 32)
+
+    def test_missing_sample_cannot_be_resealed_as_complete_timing(self):
+        d = r.Decoder()
+        d.feed(mixed_archive())
+        lines = [v['line'] for v in d.diagnostics]
+        for removed in range(len(lines)):
+            with self.subTest(removed=removed), self.assertRaises(r.Stop):
+                r.audit_link_diagnostics(mixed_archive(lines[:removed] + lines[removed+1:]), 'a' * 32)
+
+    def test_sequence_loss_and_footer_loss_reject(self):
+        with self.assertRaises(r.Stop):
+            r.audit_capture(mixed_archive(mutate=lambda s, i: s.update(seq=i+1) if i == 3 else None), 'a' * 32)
+        raw = mixed_archive()
+        with self.assertRaises(r.Stop):
+            r.audit_capture(raw[:raw.rfind(b'OTA_P35_CAPTURE ')], 'a' * 32)
+        with self.assertRaises(r.Stop):
+            r.audit_capture(raw.replace(b'us=40 off=0', b'us=41 off=0'), 'a' * 32)
+
+    def test_resealed_wrong_latency_or_early_ack_cannot_pass_timing(self):
+        d = r.Decoder()
+        d.feed(mixed_archive())
+        lines = [v['line'] for v in d.diagnostics]
+        for replacement in ('us=41 off=0', 'us=-1 off=0'):
+            bad = [line.replace('us=40 off=0', replacement) for line in lines]
+            with self.assertRaises(r.Stop):
+                r.audit_link_diagnostics(mixed_archive(bad), 'a' * 32)
+
+    def test_late_old_instance_is_not_a_new_clock_sample(self):
+        d = r.Decoder()
+        d.feed(mixed_archive())
+        lines = [v['line'] for v in d.diagnostics]
+        lines += ['OTA_LINK_RETIRE label=upgrade attempt=- reason=finished us=170',
+                  'OTA_LINK_LATE label=upgrade attempt=- kind=ack_latency us=999 off=0']
+        result = r.audit_link_diagnostics(mixed_archive(lines), 'a' * 32)
+        self.assertEqual(result['groups'][0]['ackLatencyUs'], [40])
+
+    def test_secret_and_url_query_never_enter_healthy_diagnostic(self):
+        for text in ['OTA_LINK_SAMPLE label=upgrade token=secret',
+                     'OTA_LINK_STATS {"label":"upgrade","token":"secret"}',
+                     'OTA_LINK_SAMPLE label=upgrade url=https://example.invalid/?key=x']:
+            with self.subTest(text=text), self.assertRaises(r.Stop):
+                r.audit_capture(mixed_archive([text]), 'a' * 32)
+
+    def test_diagnostic_without_opt_in_header_rejects(self):
+        raw = mixed_archive()
+        raw = raw.replace(b'"schema": 2, "kind": "open"', b'"schema": 1, "kind": "open"')
+        with self.assertRaises(r.Stop):
+            r.Decoder().feed(raw)
+
+    def test_mixed_text_mirror_counts_all_records_and_diagnostic_tail(self):
+        raw = mixed_archive(interleaved=True)
+        states = r.Decoder().feed(raw)
+        report = r.audit_logcat_mirror(raw, 'a' * 32, states, {}, original=raw)
+        self.assertTrue(report['exactEquality'])
+        self.assertEqual(report['originalRecords'], 5)
+        lines = raw.splitlines(keepends=True)
+        for index in (2, 4, 5):
+            mirror = b''.join(lines[:index] + lines[index+1:])
+            report = r.audit_logcat_mirror(mirror, 'a' * 32, states, {}, original=raw)
+            self.assertTrue(report['retainedMatch'])
+            self.assertEqual(report['missingSequences'], [index])
+            self.assertFalse(report['exactEquality'])
+        self.assertFalse(r.audit_logcat_mirror(raw, 'a' * 32, states, {})['referenceComplete'])
+        wrong = raw.replace(b'us=40 off=0', b'us=41 off=0')
+        self.assertFalse(r.audit_logcat_mirror(wrong, 'a' * 32, states, {}, original=raw)['retainedMatch'])
+
+    def test_real_retrieval_consumes_mixed_header_and_checks_all_live_diagnostics(self):
+        from types import SimpleNamespace
+        raw = mixed_archive(interleaved=True)
+        for corrupt in (False, True):
+            driver = object.__new__(r.Android)
+            driver.decoder = r.Decoder()
+            states = driver.decoder.feed(raw)
+            driver.preparation = SimpleNamespace(original=lambda cid, path: raw, live=states)
+            driver.out = r.ROOT / '.cache/unused-mixed-retrieval-test'
+            driver.h = SimpleNamespace(save=lambda path, value: None)
+            driver.stream_port = None
+            driver.confirm_action = lambda: None
+            if corrupt:
+                driver.decoder.diagnostics[-1]['ownerEpoch'] += 1
+                with self.assertRaises(r.Stop): driver.retrieve('a' * 32)
+            else:
+                result = driver.retrieve('a' * 32)
+                self.assertEqual(result['records'], 5)
+                self.assertTrue(driver.preparation.capture_resolved)
+
+
 class CampaignTests(unittest.TestCase):
     def test_case_results_require_whole_run_success_and_preserve_unrun_cases(self):
         c, io = self.run_rows(trace())

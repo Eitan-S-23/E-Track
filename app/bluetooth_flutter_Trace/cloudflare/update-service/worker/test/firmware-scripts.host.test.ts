@@ -15,7 +15,7 @@ import { uploadFirmwareAsset } from "../../scripts/upload-firmware-r2-asset.mjs"
 import { registerFirmware } from "../../scripts/register-firmware-release.mjs";
 import { outputPath, projectRoot } from "../../scripts/firmware-cli.mjs";
 import { canonicalJson, contentDigest, parseFirmwareRegistration } from "../../scripts/firmware-schema.mjs";
-import { bytesFor, metadata, SCHEMA_FIXTURE, uploadFixture } from "./firmware-fixture";
+import { bytesFor, metadata, schemaBytesFor, SCHEMA_FIXTURE, uploadFixture } from "./firmware-fixture";
 
 const root = projectRoot();
 const scripts = fileURLToPath(new URL("../../scripts/", import.meta.url));
@@ -34,7 +34,7 @@ async function files() {
   const base = outputPath(root, path.join(root, ".cache", "p4-2-script-fixtures"));
   await mkdir(base, { recursive: true });
   const dir = await mkdtemp(path.join(base, "case-"));
-  for (const asset of SCHEMA_FIXTURE.assets) await writeFile(outputPath(root, path.join(dir, asset.fileName)), bytesFor(asset.kind));
+  for (const asset of SCHEMA_FIXTURE.assets) await writeFile(outputPath(root, path.join(dir, asset.fileName)), schemaBytesFor(asset.kind));
   await writeFile(outputPath(root, path.join(dir, "app.bin")), bytesFor("final-image"));
   await writeFile(outputPath(root, path.join(dir, "patch-bases.json")), JSON.stringify([{ baseImageSha256: "11".repeat(32), baseVersionCode: 20800 }]));
   return dir;

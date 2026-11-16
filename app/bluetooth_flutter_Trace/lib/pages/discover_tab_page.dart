@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 import '../services/announcement_service.dart';
+import '../services/app_prompt_coordinator.dart';
 import 'trace_ui.dart';
 
 class DiscoverTabPage extends StatelessWidget {
@@ -167,22 +170,7 @@ class DiscoverTabPage extends StatelessWidget {
   }
 
   static void _showAnnouncementsDialog() {
-    Get.dialog<void>(
-      const TraceDialog(
-        title: '公告',
-        icon: Icons.campaign_outlined,
-        color: TraceColors.cyan,
-        content: _AnnouncementsDialogContent(),
-        actions: [
-          TraceDialogAction(
-            label: '确定',
-            isPrimary: true,
-            onPressed: TraceDialog.close,
-          ),
-        ],
-      ),
-      barrierColor: Colors.black.withValues(alpha: 0.62),
-    );
+    unawaited(createAnnouncementPrompt().closed);
   }
 
   static void _showContentDialog(
@@ -218,8 +206,32 @@ class DiscoverTabPage extends StatelessWidget {
   }
 }
 
+AppPrompt<void> createAnnouncementPrompt({
+  List<TraceAnnouncement>? announcements,
+  bool automatic = false,
+  bool Function()? ready,
+}) {
+  return AppPromptCoordinator.instance.enqueue<void>(
+    requireHome: automatic,
+    ready: ready,
+    relevant: () => !automatic || announcements?.any((item) => !AnnouncementService.wasPresented(item)) == true,
+    builder: (_) => TraceDialog(
+      title: automatic ? '新公告' : '公告',
+      icon: Icons.campaign_outlined,
+      content: _AnnouncementsDialogContent(announcements: automatic
+          ? announcements?.where((item) => !AnnouncementService.wasPresented(item)).toList()
+          : announcements),
+      actions: const [TraceDialogAction(
+        label: '知道了', isPrimary: true, onPressed: TraceDialog.close,
+      )],
+    ),
+  );
+}
+
 class _AnnouncementsDialogContent extends StatefulWidget {
-  const _AnnouncementsDialogContent();
+  const _AnnouncementsDialogContent({this.announcements});
+
+  final List<TraceAnnouncement>? announcements;
 
   @override
   State<_AnnouncementsDialogContent> createState() =>
@@ -227,14 +239,50 @@ class _AnnouncementsDialogContent extends StatefulWidget {
 }
 
 class _AnnouncementsDialogContentState
-    extends State<_AnnouncementsDialogContent> {
+    extends State<_AnnouncementsDialogContent> with WidgetsBindingObserver {
   late final Future<List<TraceAnnouncement>> _announcementsFuture =
-      AnnouncementService.fetchAnnouncements();
+      widget.announcements == null ? AnnouncementService.fetchAnnouncements() :
+      Future.value(widget.announcements!);
   final PageController _controller = PageController();
   int _index = 0;
+  final _presented = <String>{};
+  bool _markScheduled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) setState(() {});
+  }
+
+  void _markPresented(List<TraceAnnouncement> items) {
+    if (_markScheduled || items.isEmpty) return;
+    _markScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _markScheduled = false;
+      if (!mounted || ModalRoute.of(context)?.isCurrent != true ||
+          WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) { return; }
+      // A route's first frame can still be fully transparent. Do not consume it.
+      if (ModalRoute.of(context)?.animation?.status != AnimationStatus.completed) {
+        _markPresented(items);
+        return;
+      }
+      final item = items[_index];
+      if (_presented.add(item.publicationIdentity)) {
+        unawaited(AnnouncementService.markPresented(item).catchError((Object _) {
+          _presented.remove(item.publicationIdentity);
+        }));
+      }
+    });
+  }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _controller.dispose();
     super.dispose();
   }
@@ -254,6 +302,7 @@ class _AnnouncementsDialogContentState
         }
 
         final announcements = snapshot.data!;
+        _markPresented(announcements);
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -358,6 +407,27 @@ class _AnnouncementPage extends StatelessWidget {
               fontWeight: FontWeight.w900,
             ),
           ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              if (data.pinned) Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                decoration: BoxDecoration(
+                  color: TraceColors.amber.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text('置顶', style: TextStyle(
+                  color: TraceColors.amber, fontSize: 11, fontWeight: FontWeight.w700,
+                )),
+              ),
+              Text(_publicationLabel(data.publishedAt), style: const TextStyle(
+                color: TraceColors.muted, fontSize: 11,
+              )),
+            ],
+          ),
           const SizedBox(height: 12),
           Expanded(
             child: SingleChildScrollView(
@@ -369,6 +439,14 @@ class _AnnouncementPage extends StatelessWidget {
       ),
     );
   }
+}
+
+String _publicationLabel(DateTime? publishedAt) {
+  if (publishedAt == null) return '发布时间未提供';
+  final time = publishedAt.toLocal();
+  String two(int value) => value.toString().padLeft(2, '0');
+  return '发布于 ${time.year}-${two(time.month)}-${two(time.day)} '
+      '${two(time.hour)}:${two(time.minute)}';
 }
 
 class _AnnouncementBody extends StatelessWidget {

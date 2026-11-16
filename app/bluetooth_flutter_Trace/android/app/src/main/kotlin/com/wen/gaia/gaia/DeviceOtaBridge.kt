@@ -71,10 +71,13 @@ object DeviceOtaBridge {
 
     fun install(engine: FlutterEngine, host: Activity) {
         activity = WeakReference(host)
+        installRuntime(engine, host.applicationContext)
+    }
+
+    fun installRuntime(engine: FlutterEngine, context: Context) {
         if (this.engine === engine) return
         this.engine = engine
         FlutterEngineCache.getInstance().put(ENGINE_ID, engine)
-        val context = host.applicationContext
         channel = MethodChannel(engine.dartExecutor.binaryMessenger, "trace/device_ota").apply {
             setMethodCallHandler { call, result ->
                 val key = DeviceOtaKey.from(call.arguments)
@@ -85,6 +88,8 @@ object DeviceOtaBridge {
                 when (call.method) {
                     "acquire" -> acquire(context, key,
                         call.arguments as Map<*, *>, result)
+                    "acquireCompanion" -> acquire(context, key,
+                        call.arguments as Map<*, *>, result, fromCompanion = true)
                     "check" -> result.success(DeviceOtaService.active?.owns(key) == true)
                     "publish" -> result.success(DeviceOtaService.active?.publish(key,
                         call.arguments as Map<*, *>) == true)
@@ -134,7 +139,7 @@ object DeviceOtaBridge {
         if (Build.VERSION.SDK_INT >= 26) {
             val manager = context.getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(NotificationChannel(CHANNEL_ID,
-                "Trace device firmware", NotificationManager.IMPORTANCE_LOW))
+                "E-Track device firmware", NotificationManager.IMPORTANCE_LOW))
             if (manager.getNotificationChannel(CHANNEL_ID)?.importance == NotificationManager.IMPORTANCE_NONE)
                 return "CHANNEL_DISABLED"
         }
@@ -142,9 +147,12 @@ object DeviceOtaBridge {
     }
 
     private fun acquire(context: Context, key: DeviceOtaKey, snapshot: Map<*, *>,
-        result: MethodChannel.Result) {
+        result: MethodChannel.Result, fromCompanion: Boolean = false) {
+        val companionId = if (fromCompanion) snapshot["companionRuntimeId"] as? String else null
+        val companionOwned = companionId != null && CompanionService.active?.ownsDevice(key, companionId) == true
         val problem = notificationProblem(context) ?: when {
-            !foreground || activity.get() == null -> "APP_NOT_FOREGROUND"
+            fromCompanion && !companionOwned -> "COMPANION_NOT_OWNED"
+            (!foreground || activity.get() == null) && !companionOwned -> "APP_NOT_FOREGROUND"
             !engineLive() -> "ENGINE_UNAVAILABLE"
             pending != null || DeviceOtaService.active?.hasTask() == true -> "OWNER_BUSY"
             else -> null

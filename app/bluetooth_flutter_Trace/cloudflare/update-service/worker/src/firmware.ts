@@ -1,5 +1,6 @@
 import { ApiError, backendUnavailable, invalidParameter } from "./errors";
 import { sha256Hex, verifyBearerToken } from "./crypto";
+import { supplementalFirmwareAsset, supplementalFirmwareAssets } from "./delta_assets";
 import { clientIpFrom, json } from "./http";
 import { enforceRateLimit } from "./rate_limiter";
 import { signFirmwareDownload, streamFirmwareObject, verifyFirmwareDownload, verifyFirmwareObject } from "./firmware_download";
@@ -116,9 +117,11 @@ export function handleFirmwareLatest(request: Request, env: WorkerEnv, requestId
       { ...compatibility, minProtocolVersion: release.min_protocol_version, protocolVersion: protocol });
     const assets = await firmwareAssets(env.DB, release.id);
     const full = requireFirmwareFull(release, assets);
+    if (env.DELTA_ASSETS_ENABLED === "true") assets.push(...await supplementalFirmwareAssets(env.DB, release.id));
     const patches = assets.filter((a) => a.kind === "patch" && a.base_image_sha256 === get("currentImageSha"));
     if (patches.length > 1) throw backendUnavailable("Ambiguous patch base");
-    const asset = patches.length === 1 && usableFirmwareAsset(patches[0]) ? patches[0] : full;
+    const asset = patches.length === 1 && usableFirmwareAsset(patches[0])
+      && patches[0].size_bytes < full.size_bytes ? patches[0] : full;
     const signed = await signFirmwareDownload(env, url.origin, asset, "public-ota");
     return json({ schemaVersion: 2, requestId, updateAvailable: true, appId: release.app_id,
       deviceModel: release.device_model, channel: channel.name, releaseId: release.id,
@@ -156,7 +159,8 @@ export function handleFirmwareDownload(request: Request, env: WorkerEnv, request
   return firmwareOperation(async () => {
     const token = await verifyFirmwareDownload(request, env);
     const asset = await env.DB.prepare("SELECT * FROM firmware_release_assets WHERE id=? AND release_id=?")
-      .bind(token.assetId, token.releaseId).first<FirmwareAssetRow>();
+      .bind(token.assetId, token.releaseId).first<FirmwareAssetRow>()
+      ?? (env.DELTA_ASSETS_ENABLED === "true" ? await supplementalFirmwareAsset(env.DB, token.assetId, token.releaseId) : null);
     if (!asset) throw new ApiError("ASSET_DISABLED", "Firmware asset unavailable", 410);
     if ((token.kind && token.kind !== asset.kind) || (token.purpose === "admin-recovery") !== (asset.kind === "recovery")) {
       throw new ApiError("TOKEN_INVALID", "Firmware token asset/purpose mismatch", 401);
@@ -181,7 +185,15 @@ export function handleFirmwareDownload(request: Request, env: WorkerEnv, request
 async function requireFirmwareCiToken(request: Request, env: WorkerEnv): Promise<void> {
   const authorization = request.headers.get("Authorization");
   const token = authorization && /^Bearer [^\s,]+$/.test(authorization) ? authorization.slice(7) : null;
-  if (!await verifyBearerToken(token, env.DEPLOY_TOKEN_SHA256)) throw new ApiError("TOKEN_INVALID", "Invalid CI token", 401);
+  if (!await verifyBearerToken(token, env.FIRMWARE_DEPLOY_TOKEN_SHA256 ?? env.DEPLOY_TOKEN_SHA256)) {
+    throw new ApiError("TOKEN_INVALID", "Invalid CI token", 401);
+  }
+}
+
+function firmwareRepository(env: WorkerEnv): string {
+  const repository = env.FIRMWARE_GITHUB_REPOSITORY ?? `${env.GITHUB_OWNER}/${env.GITHUB_REPO}`;
+  if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository)) throw backendUnavailable();
+  return repository;
 }
 
 export function handleFirmwarePreflight(request: Request, env: WorkerEnv, requestId: string): Promise<Response> {
@@ -197,7 +209,7 @@ export function handleFirmwarePreflight(request: Request, env: WorkerEnv, reques
     if (!["staging", "prod"].includes(env.ENVIRONMENT) || envelope.environment !== env.ENVIRONMENT) {
       throw new ApiError("RELEASE_CONFLICT", "Preflight environment mismatch", 409);
     }
-    const input = parseFirmwareRegistration(envelope.metadata, `${env.GITHUB_OWNER}/${env.GITHUB_REPO}`, false);
+    const input = parseFirmwareRegistration(envelope.metadata, firmwareRepository(env), false);
     let summary;
     try { summary = await verifyMonotonic(env.DB, input); }
     catch (error) {
@@ -216,7 +228,7 @@ export function handleRegisterFirmwareRelease(request: Request, env: WorkerEnv, 
   return firmwareOperation(async () => {
     await requireFirmwareCiToken(request, env);
     requireFirmwareJsonHeaders(request);
-    const input = parseFirmwareRegistration(await readFirmwareJson(request), `${env.GITHUB_OWNER}/${env.GITHUB_REPO}`);
+    const input = parseFirmwareRegistration(await readFirmwareJson(request), firmwareRepository(env));
     const canonical = canonicalJson(input);
     const existing = () => env.DB.prepare("SELECT * FROM firmware_releases WHERE app_id=? AND device_model=? AND release_tag=?")
       .bind(input.appId, input.deviceModel, input.releaseTag).first<FirmwareReleaseRow>();
@@ -258,6 +270,7 @@ export function handleRegisterFirmwareRelease(request: Request, env: WorkerEnv, 
     statements.push(env.DB.prepare(`INSERT INTO audit_logs(id,app_id,actor,actor_type,action,target_type,target_id,request_id,after_json)
       VALUES (?,?,'github-actions','ci','register_firmware_release','firmware_release',?,?,?)`)
       .bind(crypto.randomUUID(), input.appId, releaseId, requestId, canonicalJson({ releaseId, state: "ready", assetsRegistered: input.assets.length })));
+    statements.push(candidateArrival(env, { ...input, kind: "firmware", releaseId }));
     try { await env.DB.batch(statements); } catch (error) {
       const concurrent = await existing();
       if (concurrent) return replay(concurrent);
@@ -278,3 +291,4 @@ export function firmwareReleaseInsert(db: D1Database, input: FirmwareRegistratio
       input.runId, input.releaseNotes, input.targetImageSha256, input.hardwareRevision, input.layoutId,
       input.minBootVersion, input.minProtocolVersion, input.targetHardware, input.transport, input.minAppVersionCode, canonical);
 }
+import { candidateArrival } from "./admin_notifications";
