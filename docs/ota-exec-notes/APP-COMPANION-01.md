@@ -9,21 +9,21 @@ integration are separate.
 
 - The authoritative board is `D:/github/my/E-Track/PLAN-OTA-EXEC.md`, not a cache
   or task-worktree copy. The published main before this note delivery is
-  `31ccd0b4f70354501e3fa207d6c5f79467ce1a52`; the fresh entry query verified that
-  remote and correctly reported LOCAL_PENDING for this note/board update.
-  Governance CI `43775817958` passed on that main. Entry delivery `27804263` and
+  `5b8724eee59677af5f1f03ecbdf4f32635bdfa14`; the fresh entry query verified that
+  remote with MAIN_MATCHED before these new note edits.
+  Governance CI `43784070134` passed on that main. Entry delivery `27804263` and
   preserved history are intact.
-- Current product source is `bedfa12fb6e4b5160602370297a6554cefe4c900` on
+- Current product source is `7fa86c2cffc3fc7bd611887c0a7c399830445c28` on
   `dev/flutter/app-companion-01-20261116` in `.worktrees/app-companion-01`.
   The branch is pushed; its product changes are not merged to main or installed.
-  Earlier source batches, including `9ccea658`, remain in history.
+  Earlier source batches, including `bedfa12f` and `d402571a`, remain in history.
 - Permissions, explicit Android CDM association, 6/12/24-hour scheduling (12-hour
   default), bounded recovery/scans, retained-engine ownership, headless sensor
   persistence, MCU check/offer/consent, menu Back and selected icon are implemented.
   The product-branch contract `docs/companion-control-contract.md` documents the
   additive text protocol and runtime rules without altering frozen binary OTA.
-- The latest batch also fixes pending-offer renotification inside the long check
-  interval, retryable MCU STARTING/binary-exit states, ownership-safe query
+- The companion implementation also fixes pending-offer renotification inside
+  the long check interval, retryable MCU STARTING/binary-exit states, ownership-safe query
   cancellation, late callback fencing and manual-check coalescing. An open GPX
   recording (including paused) blocks install. Scoped stop cancels only its own
   query and waits for non-cancellable END/apply rather than disconnecting it.
@@ -31,6 +31,15 @@ integration are separate.
   invalidates shared identity, without triggering another long-interval HTTP
   check. Its regression passes on both hosts. Native/MCU inputs are unchanged
   from the preceding validated batch.
+- The follow-up closes a development-collection gap: the old debug endpoint
+  option also started an automatic BLE probe, while standard release-mode private
+  files cannot be assumed readable with `run-as`. The existing observation entry
+  now accepts `observation_mode=passive`: it records the real runtime's producer
+  events without scanning, connecting, reading INFO or disconnecting on its own.
+  Mode/target/endpoint are bound to a verified compiled token and the unchanged
+  log format. No new OTA sender or collector protocol was created. The executable
+  contract is in the product branch's `docs/flutter-development-validation.md`,
+  section Passive Companion Diagnostics.
 - Android/native APK and nonpublishing standard APK/EXE verification use the
   existing Actions entries, not local Flutter/Gradle packaging. The side-by-side
   suffix is `.companion`; shipping package identity, signing configuration and
@@ -53,6 +62,11 @@ Every listed check is implementation self-validation, not independent acceptance
 | `9ccea658`, standard build `43779471610` | Attempt 1: Windows EXE PASS; Android wrapper initialization fails on Maven Central HTTP 429 before App compilation/signing. Original job log is `development/keyring-job-43779471610-133013271843-02/console.log`. Only Android job was retried once after the separate hosted debug/native build resolved those dependencies; Windows retains its original 00:17:45..00:26:40 UTC execution. Attempt 2 PASS, full console in `development/keyring-log-43779471610-03/console.log`. No release/deployment. This is an earlier source, not the current artifact. |
 | `bedfa12f`, checks `43782315932` | PASS: Linux 959 passed / 16 skipped, Windows 939 passed / 36 skipped, zero failures; each also passes 11 candidate-profile cases and strict analysis. Both SDK identities are Flutter 3.47.8 / Dart 3.13.7. Console is `development/keyring-log-43782315932/console.log`; full Linux development logs are in `development/keyring-artifacts-43782315932/logs/`. |
 | `bedfa12f`, standard build `43782557046` | PASS on first attempt: Android release-mode APK and Windows release-mode EXE. `publish_release=false`, `replace_existing_release=false`, `.companion`, baseline link profile; Pages and Create GitHub Release are SKIPPED, with no Cloudflare deployment. Console is `development/keyring-log-43782557046/console.log`. Both named artifacts and local hashes are retained in `development/keyring-standard-artifacts-43782557046/`; run/source and build-only jobs are checked before download. |
+| `d402571a`, checks `43786280669`, debug request `43786444133`, standard build `43786357506` | FAIL on the new passive diagnostic test on both hosts; analysis passed. The fixture sent an `OTA_OBS` status line through the strict OTA producer-record API, causing `observation capture incomplete`. Build gates correctly prevented APK/EXE production. Original failed test log is in `development/keyring-artifacts-43786280669-02/logs/`; debug/standard consoles are in their `keyring-log-` directories. `7fa86c2c` changes only this fixture: status reporting is separate from accepted producer records. No production logger guard was weakened. |
+| `7fa86c2c`, checks `43787172124` | PASS: Linux 962 passed / 16 skipped, Windows 942 passed / 36 skipped, zero failures; strict analysis and 11 additional candidate-profile tests pass on both hosts. Console and full Linux logs are in `development/keyring-log-43787172124/` and `development/keyring-artifacts-43787172124/logs/`. |
+| `7fa86c2c`, passive debug request `43787308531` | PASS on both hosts; debug APK produced with the actual public firmware endpoint and `device_observation.mode=passive`. Manifest application ID, fixed signer and compiled target/endpoint/mode token are verified. APK/metadata are in `development/keyring-package-43787308531/`; console and Linux build logs are in the matching `keyring-log-` and `keyring-artifacts-` directories. Native sources were not changed or retested in this request. |
+| `7fa86c2c`, standard build `43787389782` | PASS: Android release-mode APK and Windows EXE, first attempt. Publishing, replacement, Pages and Cloudflare deployment remain disabled/skipped. Both named artifacts and source/hash checks are in `development/keyring-standard-artifacts-43787389782/`; original console is in `development/keyring-log-43787389782/`. |
+| Root `checks-passive-01/` | PASS: 51 APK-helper tests, 66 development-runner tests and whitespace. Tests cover the new workflow input, default compatibility, malformed modes, missing compiled tokens and rejection of an automatic APK as passive. |
 | `.cache/companion-tests-06.log` | 18/18 PASS, including STARTING timeout and binary-exit menu recovery. The retained compiled fixture and source SHA are recorded in the log. |
 | `.cache/companion-build-07/result.json` and `build.log` | GCC App/Boot and simulator PASS, source unchanged, 394 warning-containing lines and zero errors. Boot and simulator are unchanged incremental outputs, not newly linked artifacts. |
 | Root `checks-02/` | 40 entry/governance/icon/menu cases PASS; original menu fails the same oracle that the candidate passes. Source-bound originals are retained; no claim of physical rotary testing. |
@@ -60,8 +74,23 @@ Every listed check is implementation self-validation, not independent acceptance
 
 ### Current Build Artifacts And Collection Boundary
 
+Current-source passive debug APK: 132382559 bytes, SHA-256
+`90c0910c73f313c54996bb584e2c4a94d91c394b5b765e7b3d81283ea794db80`.
+Its local bytes match the CI metadata. Manifest application ID is
+`com.wen.gaia.gaia.companion`, fixed certificate SHA-256 is
+`9e9b89c5e7fdc802b1fe71806a988a866db49cd988a739caeee56cb69f3df579`.
+Verified sentinel is `OTAOBS6ba2efba386aa57b6c13996c`, with compiled passive token
+`passive:OTAOBS6ba2efba386aa57b6c13996c`. The injected URL is
+`https://e-track-firmware-p41-public.pages.dev/api/public/firmware/latest`, read
+from the existing repository public-service variable, not a placeholder.
+Expected target `E3:49:E1:14:D6:CB` is taken from the hash-verified P3-8-v5 original
+capture bindings; it is a historical expectation, not a current live observation.
+Actual phone/MCU identity, endpoint response and collection readiness remain D0
+checks before installation/OTA. Source version remains `1.0.71+97`; nothing is
+installed yet. This debug package is the prepared private-file retrieval route.
+
 Current-source standard APK: 48318616 bytes, SHA-256
-`540eac4403ad40bbc8cf2d810f8889904f1add75052351aee1d671c86ad9619f`.
+`1cb4da4b7be0da51dd68363f2bdc4465595d035acfb27b73f1586eeffecc324c`.
 The downloaded file exactly matches the build's SHA-256 and length output.
 CI verifies one fixed signer with certificate SHA-256
 `9e9b89c5e7fdc802b1fe71806a988a866db49cd988a739caeee56cb69f3df579`.
@@ -73,11 +102,11 @@ package identity still require D0 verification; build configuration alone is not
 an observation of the phone. No live endpoint/device compatibility is claimed.
 
 The Windows EXE is 161792 bytes, SHA-256
-`2359a6ab441fca9706f076681084b9a50d0247f0a700419734915569237b2178`.
-Its accompanying runtime ZIP is 20628487 bytes, SHA-256
-`8dc37c4f3c6a78cd8c74adf96c1d5894784b4213f3d593b35ebff358c29e8c69`.
+`df9c142eeee7055c8e6145b5898f927f3ed3de1119216d09a812df425ac3b6d7`.
+Its accompanying runtime ZIP is 20628483 bytes, SHA-256
+`0621108739c9ae80c8a560a20d7f295fd643788ccb79224b6bca3a7030f2fbf2`.
 The EXE alone is not the complete Windows installation. Artifact IDs are
-`14189011510` (Android) and `14189366483` (Windows), both expiring on 2026-11-30;
+`14191720158` (Android) and `14191520950` (Windows), both expiring on 2026-11-30;
 the local copies preserve the exact current build independently of that expiry.
 
 The earlier-source downloaded debug APK is 132379951 bytes, SHA-256
@@ -87,20 +116,23 @@ application ID `com.wen.gaia.gaia.companion`, fixed development certificate
 It uses the unchanged App version `1.0.71+97`. This debug request did not inject
 a firmware-latest URL or an automatic device-observation profile: it is suitable
 for onboarding/runtime observation, not proof of a configured live OTA gateway.
-Before D3/D4 use a validated collection route with the endpoint-bound standard
-artifact, or an explicitly configured development request. The existing Phone
-helper's private-file/snapshot methods use `run-as`; do not assume they work for
-this release-mode APK. Its private ADB owner, identity checks and bounded command
-runner remain reusable, but collector readiness must be proven before OTA.
-The development workflow's current endpoint input also enables an automatic
-device-observation scanner; do not casually enable that second connection owner
-while evaluating companion ownership. Do not install the earlier
-unconfigured debug APK and then misdiagnose an absent endpoint as an OTA defect.
+Before D3/D4 use the current passive debug package and prove the existing Phone
+helper's `run-as` private-file/snapshot route on the actual phone. Do not substitute
+the standard release-mode APK for that route or enable the legacy automatic
+observer while evaluating companion ownership. Do not install the earlier
+unconfigured debug APK and misdiagnose an absent endpoint as an OTA defect.
+Earlier `bedfa12f` standard hashes and artifacts remain in their original
+download receipts; they are not overwritten or relabeled as the current build.
 
 The `keyring-build-02` metadata GET and `keyring-ci-24` follow-up checks GET each
 encountered a transport EOF. The former failed before dispatch; the latter had
 already saved the successful standard-build result. Original receipts remain;
 neither means the build failed or authorizes replaying a completed build.
+Later `keyring-ci-30` failed on a `/user` GET EOF; `keyring-ci-31` had already
+saved the current-source results before a historical-main query hit EOF.
+`keyring-ci-32` completed successfully. These were status reads, not repeated
+builds. The bounded adapter now preserves sanitized command-failure diagnostics
+even before its identity receipt and removes credential-bearing URL queries.
 
 Build 07 App BIN is 611564 bytes, SHA-256
 `8a6ff0630ed5dd4d929ab5423961f9f1756a27cd8b01bb7af11687840dbc9c9a`;
@@ -159,6 +191,12 @@ Original command/error and closed-port/process receipts are under root
 tap, MCU flash or OTA has occurred. Do not repeat this absent-device probe without
 a connection/state change. The next necessary human action is connecting and
 unlocking that phone, followed by its actual system dialogs when prompted.
+After preparing the current artifacts, the 2026-11-16 01:51 UTC Windows PnP
+connected-device query still did not identify the expected phone serial.
+`host-usb-presence-02.json` records that result without starting ADB or mutating
+a device. No blind repetition of the failed ADB preflight was made. Authorization
+is not the missing input: the next physical action is connecting/unlocking the
+known test phone and accepting its USB-debugging dialog if shown.
 
 ### Acceptance And Main Integration
 
@@ -174,8 +212,9 @@ production gates remain unchanged.
 
 Root `.cache/app-companion-01-20261116/final-write-audit-03.json` retains the
 earlier source/Git/build/test/download/temp inventory, not just Git status.
-The closeout inventory is written as `final-write-audit-04.json` after main-note
-delivery, so its receipt can bind the actual delivered main and product HEAD.
+`final-write-audit-04.json` binds the earlier delivered main `5b8724ee` and product
+`bedfa12f`. The continuation inventory is written as `final-write-audit-05.json`
+after this main-note delivery to bind the new main and product `7fa86c2c`.
 They resolve within the approved project. The generated Windows compatibility
 junction at product `.cache/build-home/AppData/Local/Microsoft/Windows/INetCache/Content.IE5`
 resolves to sibling `IE` in the same project; it was inspected, not removed.
