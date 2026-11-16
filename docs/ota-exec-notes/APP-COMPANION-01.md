@@ -7,6 +7,13 @@ pending-CI statements. The single card remains IN PROGRESS; C1-C6 are not signed
 off. Implementation, device observation, independent acceptance and main product
 integration are separate.
 
+Latest independent remediation review on `f48bd193`, 2026-11-16: R01, R02, R04
+and R05 are CLOSED for the reviewed source defects; R03 remains OPEN/P1 because
+baseline mobile discovery still awaits after the new admission check and before
+the first platform write. See [Independent Remediation Re-Review](#independent-remediation-re-review-f48bd193).
+T01/T02 and D0-D5 remain open/NOT_RUN. This new reviewer record is local pending
+delivery, not whole-card acceptance or product integration.
+
 Independent offline review, 2026-11-16: AC01-R01 through AC01-R05 below are open
 on `7fa86c2c`. Two production-method host probes reproduce product failures;
 three further findings are source traces, not claimed device observations.
@@ -881,3 +888,368 @@ No cache was cleaned and there is no zero-native-external-write claim. Pinned
 global Git hooks and credential inputs remain read-only; local PowerShell was
 not invoked. A final post-delivery audit will retain the same boundary and
 uncertainty rather than overwrite this original.
+
+## Independent Remediation Re-Review, f48bd193
+
+Reviewer: Codex, the original non-implementation reviewer. This is the bounded
+offline re-review requested after implementation remediation, not a new frozen
+formal acceptance round. No product code was changed by this reviewer.
+
+### Input And Result
+
+- Primary main and a fresh remote query both return
+  `8716eae02107b03f0a06e6bdd699d83ba69a1cc8`; entry was MAIN_MATCHED before these
+  local notes. Product HEAD and a fresh remote branch query both return
+  `f48bd19304a4fc92e193d2465171477683f9756f`, with a clean product worktree.
+- Reviewed delta: `7fa86c2c..f48bd193`, 23 files. All source line anchors below
+  refer to `.worktrees/app-companion-01` at that exact product commit, not main.
+- R01/R02/R04/R05: CLOSED for the source defects identified in the preceding
+  independent review. R03: OPEN/P1, partially repaired but not closed. No other
+  new blocking defect was found in this bounded delta.
+- The original review, failed probes, implementation failures and self-test
+  results are retained. Closure of an individual source finding does not close
+  A1-A6, T01/T02, device observations or C1-C6.
+
+### R03 Residual, P1, A3: Baseline Discovery Still Follows Admission
+
+The new check at
+`app/bluetooth_flutter_Trace/lib/ota/ota_ble_transport.dart:1809` executes before
+`_channel.writeChunk()` and immediately sets `_initialBeginDispatched=true`.
+The production continuation is:
+
+1. `_ChannelAdapter.writeChunk()` at `lib/services/ota_service.dart:3339` calls
+   `BluetoothService.writeOtaCharacteristicByAddress()`.
+2. With `reuseOtaCharacteristics=false`, the real mobile implementation awaits
+   `device.discoverServices()` at `lib/services/bluetooth_service.dart:1748`.
+3. After that await, it checks only connection generation/connected state at
+   `:1758`, then calls `ch.write()` at `:1769`. No consent or owner-admission
+   callback is checked between this last project-owned wait and platform dispatch.
+
+Concrete failing timing: consent is still valid when the transport callback
+runs; first-BEGIN discovery is delayed across the expiry while the same device
+remains connected; discovery then returns successfully and dispatches BEGIN
+without fresh consent. This is not an air-delivery/ACK timing requirement:
+the missing check precedes the first call to the platform characteristic writer,
+after an asynchronous operation still controlled by project code.
+
+The path is supported and relevant, not an invented configuration:
+`lib/ota/ota_link_profile.dart:6` defines baseline with GATT reuse disabled;
+baseline is also the build default and the declared profile of both delivered
+APK requests. Existing unchanged receiver safety checks do not validate the
+App consent expiry, so they do not close this gap.
+
+The new tests correctly cover delayed CAPS, fallback, writer queue and MTU
+admission. However, `test/ota/ota_service_upgrade_test.dart:393` uses the adaptive
+candidate profile, and `_UpgradeFakeBle.writeOtaCharacteristicByAddress()` at
+`:5392` replaces the production writer. The channel tests likewise do not execute
+the production post-guard discovery. Their green results cannot prove this path.
+This residual is established by source tracing; no new local Dart execution or
+device reproduction is claimed. The local PATH still has no Dart executable.
+
+Preferred repair: carry an immutable one-shot initial-admission guard through the
+existing channel to the final project-owned dispatch boundary, after baseline
+discovery and immediately before the first characteristic/platform write.
+Alternatively separate asynchronous writer preparation from synchronous guarded
+dispatch. Keep the existing sender, late-write quarantine, v1/v2 wire protocol,
+pause/INFO recovery and irreversible END/apply protections. Do not silently force
+baseline to use the adaptive/reuse profile as a workaround. Once a chunk is
+actually handed to the platform, do not reinterpret its later completion as a
+reason to interrupt an admitted transfer.
+
+Verification oracle: use the real BluetoothService writer with a fake device and
+characteristic; delay only discovery for the first BEGIN after the upper guard
+has passed, expire consent before resolving discovery, and require zero
+characteristic.write calls, zero BEGIN/DATA/END and a stale-consent result. Add
+the equivalent owner-retirement case and a valid-consent positive control that
+starts exactly once. Retain CAPS/fallback/MTU/queued-INFO/pause and post-admission
+expiry controls. A device is not required for this missing regression.
+
+### Closed Source Findings
+
+| Finding | Independent Disposition And Boundary |
+| --- | --- |
+| R01, A3/A4 | CLOSED. `FirmwareUpdate.cpp:1369` captures PRESSED, consumes once at CLICKED, and compares immutable pressed/display/live snapshots. Shared comparison includes the local revision, so replacement with/without refresh, A-B-A, expiry, lost/disabled press, Later and duplicate events are covered. Existing physical focus/navigation obligations remain. |
+| R02, A3 | CLOSED. `HAL_Bluetooth.cpp:333` rechecks recording, motion and power at actual overlay admission; the bounded NOW reservation and binary owner block recorder START/CONTINUE. Refusal propagates through recorder/model and all three dialplate activation sites. Independent host checks cover active/paused recording, power/motion transitions, timeout/wrap/cleanup, binary protection and no false REC UI. Platform edges are stubs, not hardware evidence. |
+| R04, A2/A3 | CLOSED. `companion_runtime.dart:257` binds flights and publication to address/session/generation/epoch, and stale callbacks cannot reset the successor decoder. Six late-discovery/subscription cases span baseline/reuse; partial S2 input, stale metadata and successful foreign-identity owner return are covered in original full CI. This does not prove actual CDM/boot/headless lifecycle behavior. |
+| R05, A1/A6 | CLOSED. `notification_service.dart:48` restores Darwin initialization requests; the explicit iOS path returns the native result. The isolated Darwin channel tests cover grant, denial and repeated requests, with the Android nonprompting regression retained. No iOS device run is claimed. |
+
+### Evidence Reconciliation
+
+Review directory: `.cache/app-companion-01-20261116/review-f48bd193/`.
+`evidence.json` SHA-256:
+`502a9e7829fb57eca054d5778b2b87eaff185927b59f8465aa17ede0bb98da98`.
+`supplement.json` SHA-256:
+`5a84a006285459e02ae6d2d5e0ddd6f9d85ccc7d562fc8a4cc3fa99f324daec4`.
+
+- Independently executed the existing bounded MCU host suites through
+  `checks.cjs remediation checks-remediation-04`: 24 control and 18
+  production-method cases PASS. The two original unsafe boundaries still fail
+  their expected negative controls. Logs and fresh small fixtures are retained;
+  no firmware/simulator rebuild was repeated.
+- Reconciled both full host originals for `43804159244` and `43805040490`:
+  Linux 983/16 skipped, Windows 963/36 skipped, zero failures, strict analysis and
+  the additional 11 candidate tests per host. These remain implementation CI
+  observations independently reviewed here, not a new CI execution or acceptance.
+- Rehashed the actual passive APK, metadata, standard APK, Windows EXE and runtime
+  ZIP against their successful exact-source receipts; all lengths and hashes
+  match. The real debug kernel contains target/endpoint/sentinel/passive tokens.
+  Signer/package observations are the original CI evidence, not new local signing
+  or installed-device observations. The standard release-mode package does not
+  acquire the debug package's private-log retrieval capability by association.
+- Build-09's 15 input hashes and nine output hashes match. Its recorded HEAD is
+  `56765199`, with the then-uncommitted include accounted for by actual source
+  bytes matching `f48bd193`; the original record was not relabeled. Preserve
+  465 warning-containing lines, zero errors and the unchanged incremental Boot.
+- Native Android/lockfile inputs are unchanged from `9ccea658`; original native
+  XML still reports 9 CompanionService and 18 DeviceOtaService cases without
+  failures. Main governance `43807862798` binds `8716eae0` and succeeds. Original
+  failed CI `43803165474`, build-08 and previous reviewer failure logs remain.
+
+### A1-A6 And Next Owner
+
+| Criterion | Remaining Obligation After This Re-Review |
+| --- | --- |
+| A1 | R05 source regression closed; T01 setup-page denial/lifecycle/return-to-settings tests and D1 actual permission observations remain open. |
+| A2 | R04 source regression closed; T02 real Bridge/chooser/boot/job/headless integration and telemetry/database-failure-retention coverage, plus D2 observations, remain open. |
+| A3 | R01/R02/R04 closed, R03 remains blocking. Foreign-identity owner-return test gap is addressed. D3/D4 actual gateway/consent/OTA/final-version/raw-SHA evidence remains NOT_RUN. |
+| A4 | R01 interaction defect closed; per-page empty/long/re-entry, actual wheel and focus/return behavior remain D5 NOT_RUN. |
+| A5 | Asset inputs are unchanged by this remediation, so the preceding independent offline asset review remains applicable. Installed appearance/compatibility remains unobserved. |
+| A6 | Applicable self-test/build originals verified, but R03, T01/T02 and D0-D5 prevent closure. Formal freeze/precheck/execution/final adjudication remains NOT_RUN. |
+
+Next owner: implementation repairs the residual R03 boundary and supplies the
+real-writer regression plus affected development CI/build evidence. Do not repeat
+unchanged MCU builds or historical hardware campaigns for this Dart-only gap.
+T01/T02 stay separately tracked in the same card. After software gaps are addressed,
+this independent reviewer prepares the existing formal contract and only the
+genuinely missing D0-D5 observations, subject to actual device/collection readiness
+and authorization. No USB probe, installation, launch, system-dialog tap, J-Link,
+OTA or physical wheel operation was performed in this review.
+
+### Write Boundary And Collector Limitation
+
+Selected writes are the new review directory, `checks-remediation-04`, fresh
+`run-*` subdirectories under the existing project-local control/safety test caches,
+this note and the main board. Parent-chain checks and explicit cwd containment
+preceded execution. Product source and historical originals were not edited.
+These notes are LOCAL_PENDING, with no commit, push, merge, release or deployment;
+C1-C6, P3/P4 completion and P1/P5/production gates are unchanged.
+
+The first review metadata collector used the wrong historical cache-list key and
+failed before writing entry.json; `prepare-failure-01.txt` retains that failure.
+The already-preflighted host tests ran once and were not repeated. Consequently
+the new native-cache comparison starts after those tests, not at session start.
+`write-audit.json` records this limitation, exact selected outputs and unchanged
+reviewed originals. The two historical Cryptnet cache locations remain
+UNRESOLVED; timestamps do not identify a responsible process, no external cache
+was cleaned, and no zero-native-external-write claim is made.
+
+## R03 Final-Writer Remediation Plan
+
+Implementation resumes from `f48bd19304a4fc92e193d2465171477683f9756f` on
+`dev/flutter/app-companion-01-20261116`. Primary and freshly queried remote main
+are `8716eae02107b03f0a06e6bdd699d83ba69a1cc8`; the reviewer's pending board/note
+changes are preserved. R01/R02/R04/R05 source closures remain unchanged.
+
+- Carry the initial synchronous admission through the existing channel into the
+  real BluetoothService writer, after discovery and before platform dispatch.
+  Mark it consumed only there. Distinguish pre-dispatch rejection from uncertain
+  physical writes, preserving errors, pause/INFO recovery and late-write quarantine.
+- Exercise real baseline discovery with fake device/characteristic boundaries:
+  expiry and owner retirement must cause zero new platform writes and zero BEGIN;
+  a valid consent must start once. Retain CAPS/fallback/MTU/queue/pause and admitted
+  transfer/END controls. No second sender or frozen binary protocol change.
+- Run affected full dual-host Flutter development checks and nonpublishing
+  APK/EXE builds using the existing scoped CI route. Reuse unchanged MCU/native
+  originals rather than repeat physical or build campaigns. Publish exact source,
+  raw results and root progress separately for independent R03 re-review.
+
+Selected writes remain under the primary project root, in the existing product
+worktree, task evidence directory and root board/note/index. `r03-entry.json`
+records native-cache metadata before product edits/CI, after initial read-only
+entry checks; it covers previously named cache files, not a whole-OS trace.
+No device operation, product merge, release, independent PASS or C1-C6 closure is
+part of this remediation batch. T01/T02 and D0-D5 remain explicit obligations.
+
+### First Development Feedback
+
+Source batch `15faa55c8687f0eb5d037a0035a9d1f9fd845c0e`, development run
+`43829000008`, failed strict analysis on both hosts. The new real-writer fixture
+used a cascade after a closure assignment, binding `connectedDevices` to the
+fake device instead of BluetoothService; its characteristic's inherited `device`
+field also lacked `@override`. The upgrade integration file did not load, so its
+new cases are NOT_EXECUTED for this revision. Other tests reported Linux 820
+passed/16 skipped/1 failed, Windows 796 passed/40 skipped/1 failed; neither host
+is a passed full suite. Console and full-host logs are retained in the existing
+development evidence tree. The follow-up changes only those two fixture sites,
+not production code or test expectations; full development checks must run again.
+
+During the R03 work, a read-only comparison against `r03-entry.json` observed
+mtime drift for
+`C:/Windows/System32/config/systemprofile/AppData/LocalLow/Microsoft/CryptnetUrlCache/MetaData/05DDC6AA91765AACACDB0A5F96DF8199`
+(before `1794812378031.84` ms, observed after `1794816603560.5344` ms). This
+does not identify the writing process or prove an agent-selected output.
+Attribution remains UNRESOLVED, the user was notified, and no external cleanup
+or deliberate external write was performed. The final audit retains this drift
+alongside the earlier cache history; no zero-native-external-write claim is made.
+
+## R03 Platform-Dispatch Source And Self-Test Handoff
+
+Product source: `f463649fc0a71945bff36c3ec57cbaecbd0fa9ef`, branch
+`dev/flutter/app-companion-01-20261116`, worktree
+`.worktrees/app-companion-01`. The production change is in `15faa55c`; `f463649f`
+only corrects the two test-fixture issues recorded above. The bounded delta from
+the independently reviewed `f48bd193` is 11 files. No product main merge.
+
+### Repaired Boundary
+
+- `OtaWriteAdmission` carries the original synchronous guard through
+  `OtaBleChannel.writeChunk`, `_ChannelAdapter` and both BluetoothService writer
+  paths. Mobile dispatch follows baseline `discoverServices()` and the current
+  link check, immediately before `ch.write()`. Windows dispatch immediately
+  precedes its adapter call. There is no project-owned await after admission.
+- `_initialBeginDispatched` and the first-chunk dispatch flag now change at that
+  boundary, not at entry to `writeChunk`. Refusal propagates the original
+  stale-consent/cancellation/pause reason without invalidating a healthy GATT
+  binding or wrapping it as a disconnect. An unstarted guarded transfer sends
+  no cleanup ABORT/resync and does not acquire false partial-frame quarantine.
+- A timed-out gate is retired so delayed discovery cannot send after the writer
+  has yielded. A pre-dispatch pause releases the serial writer for existing INFO
+  recovery. Actual platform-write failures retain quarantine, and an admitted
+  transfer never re-expires consent on DATA, recovery BEGIN or irreversible END.
+  The sender, v1/v2/fallback bytes, durable accounting and final identity checks
+  are unchanged; baseline remains supported and the build default.
+
+The previous fix's root cause was a cross-layer boundary assumption plus a test
+coverage gap: channel entry was treated as platform dispatch, while the test
+replacement omitted lower discovery. The implementation contract now names the
+gate's signatures, rejection/timeout behavior and actual-writer regression
+oracle. No new tracking framework or acceptance rule was introduced.
+
+### Development Results
+
+Full development CI
+`https://github.com/Eitan-S-23/E-Track/actions/runs/43829923594` passed on the
+exact product source. Strict analysis passed on both hosts. Original results:
+
+| Host | Full Suite | Additional Candidate Suite |
+| --- | --- | --- |
+| Linux | 999 passed, 16 skipped, 0 failed | 11 passed, 0 failed |
+| Windows | 967 passed, 48 skipped, 0 failed | 11 passed, 0 failed |
+
+SDK: Flutter `3.47.8`, framework
+`737ba8f885dc774b53b442759999a312c9461e4e`, Dart `3.13.7`, engine
+`cf636b1dfb818dd6a3ff16e390e93b1a036969c8`. Exact commands, SDK originals,
+toolchain-regeneration deltas and restored source checks are in each result.
+The complete originals, not only truncated console tails, are retained under
+`.cache/app-companion-01-20261116/development/`:
+
+- `keyring-artifacts-43829923594/logs/`: Linux result and full raw logs.
+- `keyring-windows-artifacts-43829923594/logs/`: Windows result and full raw logs.
+- `keyring-log-43829923594/console.log`: complete sanitized Actions console.
+- `keyring-ci-47/`: completed run/job conclusions and exact source identity.
+- The same three log/archive prefixes for failed run `43829000008` retain its
+  compilation failure; it is not counted as a successful remediation round.
+
+Sixteen tests were added: eight real uncached writer service cases (v1/v2 crossed
+with expiry, owner retirement, valid consent and expiry after dispatch), four
+direct writer/error/binding cases (reuse/baseline crossed with statistics
+enabled/disabled), and four gate/timeout/lower-writer-pause cases. The service
+cases instantiate actual BluetoothService; only device/characteristic edges are
+fake, and only the MCU byte/ACK model is reused from the older service fixture.
+They count actual `characteristic.write` entries, reject concurrent duplicate
+starts and assert zero new writes including ABORT/resync after rejection, or one
+BEGIN followed by END and full target identity. The eight service and four mobile
+binding cases execute on Linux and are explicitly skipped on Windows. Existing
+CAPS/fallback/MTU/queue, paused INFO, late-write and irreversible-stage tests remain.
+
+### Evidence Reuse And Remaining Ownership
+
+The MCU, simulator, Android native and lockfile inputs are unchanged from
+`f48bd193`; a scoped Git comparison is empty. Reuse build-09's actual input/output
+hashes and 465 warning-containing lines/0 errors, its unchanged incremental Boot,
+the independently rerun 42 host cases, and native run `43779455252`'s 27 originals.
+None is described as a new execution or as proof of the Dart change. The old
+build-08 failure and earlier failed CI/retrieval attempts remain preserved.
+
+R01/R02/R04/R05 remain independently CLOSED for their identified source defects.
+R03 has an implementation repair and successful self-tests, awaiting the original
+independent reviewer; implementation does not self-sign its closure. T01/T02 and
+D0-D5 remain open in the same card, C1-C6 unchecked, and P3/P4 completion and
+P1/P5/production gates unchanged. No new USB enumeration or device operation was
+performed; historical absence is not a claim about current connectivity.
+
+### Audit-Helper Correction
+
+The new pre-delivery audit first stopped before writing its receipt: it required
+`source_after_restored.clean=true`. Both Windows originals instead record one
+EOL-only regenerated `windows/flutter/generated_plugin_registrant.h`, with empty
+semantic/untracked changes and unchanged HEAD. The unchanged development runner's
+`semantic_state` plus bound toolchain-regeneration evidence is the existing source
+contract, not absolute worktree cleanliness after regeneration. The helper was
+corrected to require that semantic state and retain the EOL-only list, without
+waiving source/lockfile/command/result checks or changing any CI original.
+`r03-audit-helper-failure-01.json` preserves the tool-session failure transcription,
+original helper source and affected original report. Only the audit is repeated;
+no successful tests or builds are replayed for this collector correction.
+
+### Build Outputs And Pre-Delivery Audit
+
+Both exact-source requests passed, without installation or publication:
+
+- Passive debug APK: `https://github.com/Eitan-S-23/E-Track/actions/runs/43830892509`.
+  Its required full suites executed again within that development run:
+  Linux 999/16 skipped, Windows 967/48 skipped, zero failures, plus 11 candidate
+  cases each. Strict analysis, debug build/signature verification and collection
+  passed. Full host logs use `keyring-artifacts-43830892509` and
+  `keyring-windows-artifacts-43830892509`; console uses `keyring-log-43830892509`.
+- Standard APK/EXE: `https://github.com/Eitan-S-23/E-Track/actions/runs/43830974185`.
+  Both required platform builds passed; Deploy GitHub Pages and Create GitHub
+  Release were skipped. Dispatch retained `publish_release=false`,
+  `replace_existing_release=false`, `.companion` Android identity and baseline
+  OTA profile. Console is `keyring-log-43830974185/console.log`.
+- Completed job identities are in `keyring-ci-51`. Debug package receipt is
+  `keyring-package-43830892509/artifact.json`; standard receipts are in
+  `keyring-standard-artifacts-43830974185`. All these relative paths are under
+  `.cache/app-companion-01-20261116/development/`, not production distribution.
+
+| Actual Downloaded File | Bytes | SHA-256 |
+| --- | --- | --- |
+| `trace-dev-debug.apk` | 132392775 | `245758644f71a1247d9a037081e03f127fe0042d606990ffb59b9b6a78395248` |
+| `ble-monitor-android.apk` | 48318616 | `0dc1b13a512d461231e7d1e76e26cdae1a514c4fac6dc281f26a8b2453f7a16e` |
+| `ble-monitor-windows.exe` | 161792 | `6501f7c808fa8fc18f383664711e115482c29244a4bf769460cbc4b00c177518` |
+| `ble-monitor-windows.zip` | 20627960 | `b052c8d8165af20b61831cb0457b2835bfabfbe2d9ae4739a7b77dc2eb3fdace` |
+
+These are file hashes, not the outer GitHub artifact ZIP digests. The downloaded
+standard APK hash/length also match its original CI signature/identity log. The
+debug metadata binds source, application ID `com.wen.gaia.gaia.companion`, size
+and hash. Reading the actual APK's 74,581,856-byte kernel verified its sentinel,
+historical target, public endpoint and passive-mode token; no SDK, signer or
+device was invoked locally. This is not installed identity or appearance proof.
+
+Pre-delivery audit:
+`.cache/app-companion-01-20261116/final-write-audit-08.json`, SHA-256
+`779029967762a25df55ba4938dc9e06832707a2dbb88878754ddf6f64339c976`.
+It binds the 11-file source delta, both full host originals for both development
+runs, all package bytes, unchanged firmware/native inputs, old build artifacts
+and the preserved independent review JSONs. Existing stage totals and the single
+card are unchanged; no controlled output link escapes the project. Its primary
+HEAD is the pre-documentation-delivery `8716eae0`, not the later main commit.
+
+The named-cache comparison records six mtime differences since `r03-entry.json`,
+all with unchanged file length but without a content before-image or process
+attribution. Exact before/after metadata is in the audit. Paths:
+
+- `C:/Windows/System32/config/systemprofile/AppData/LocalLow/Microsoft/CryptnetUrlCache/MetaData/05DDC6AA91765AACACDB0A5F96DF8199`
+- `C:/Windows/System32/config/systemprofile/AppData/LocalLow/Microsoft/CryptnetUrlCache/MetaData/77EC63BDA74BD0D0E0426DC8F8008506`
+- `C:/Users/SU/AppData/LocalLow/Microsoft/CryptnetUrlCache/MetaData/05DDC6AA91765AACACDB0A5F96DF8199`
+- `C:/Users/SU/AppData/LocalLow/Microsoft/CryptnetUrlCache/MetaData/103621DE9CD5414CC2538780B4B75751`
+- `C:/Users/SU/AppData/LocalLow/Microsoft/CryptnetUrlCache/MetaData/77EC63BDA74BD0D0E0426DC8F8008506`
+- `C:/Users/SU/AppData/LocalLow/Microsoft/CryptnetUrlCache/MetaData/8B2B9A00839EED1DFDCCC3BFC2F5DF12`
+
+Attribution remains UNRESOLVED; no cache cleanup or zero-native-external-write
+claim. Controlled writes are the product delta, root board/note/index, existing
+bounded adapter, project-local receipts/downloads and Git administration. The
+earlier reviewer additions are included in this authorized root delivery with
+their original findings and point-in-time LOCAL_PENDING wording preserved.
+Next owner is the original independent reviewer for the bounded R03 re-review;
+the software/hardware/formal obligations above are not self-signed as PASS.
