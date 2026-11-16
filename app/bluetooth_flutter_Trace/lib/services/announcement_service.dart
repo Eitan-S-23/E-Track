@@ -49,10 +49,15 @@ class AnnouncementService {
 
   static String get _seenKey => 'announcements.seen.v1.${ShareLinks.appId}.'
       '${ShareLinks.clientPlatform}.${ShareLinks.updateChannel}';
+  static final _presented = <String, Set<String>>{};
+
+  static bool wasPresented(TraceAnnouncement item) =>
+      _presented[_seenKey]?.contains(item.publicationIdentity) ?? false;
 
   static Future<List<TraceAnnouncement>> unseen(List<TraceAnnouncement> items) async {
     final prefs = await SharedPreferences.getInstance();
     final seen = (prefs.getStringList(_seenKey) ?? const <String>[]).toSet();
+    _presented[_seenKey] = seen;
     return items.where((item) => item.type == TraceAnnouncementType.manual &&
         !item.id.startsWith('local-') && !seen.contains(item.publicationIdentity)).toList();
   }
@@ -62,6 +67,7 @@ class AnnouncementService {
     final prefs = await SharedPreferences.getInstance();
     final seen = (prefs.getStringList(_seenKey) ?? const <String>[]).toSet()
       ..add(item.publicationIdentity);
+    _presented[_seenKey] = seen;
     await prefs.setStringList(_seenKey, seen.toList());
   }
 
@@ -152,7 +158,11 @@ class TraceAnnouncement {
     if (seconds != null && seconds > 0 && seconds < 8640000000000) {
       return DateTime.fromMillisecondsSinceEpoch(seconds * 1000, isUtc: true);
     }
-    return value is String ? DateTime.tryParse(value)?.toUtc() : null;
+    if (value is! String) return null;
+    final text = value.trim();
+    // D1 datetime('now') is UTC but its SQLite text has no zone suffix.
+    final sqlUtc = RegExp(r'^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(?:\.\d+)?$').hasMatch(text);
+    return DateTime.tryParse(sqlUtc ? '${text}Z' : text)?.toUtc();
   }
 
   static String? _optionalString(Object? value) {

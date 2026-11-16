@@ -20,6 +20,8 @@ void main() {
     expect(items.first.publishedAt!.millisecondsSinceEpoch, 1700000000000);
     expect(items.first.publishedAt!.isUtc, isTrue);
     expect(TraceAnnouncement.fromJson({'publishedAt': 'bad'}).publishedAt, isNull);
+    expect(TraceAnnouncement.fromJson({'publishedAt': '2026-11-17 03:04:05'}).publishedAt,
+        DateTime.utc(2026, 11, 17, 3, 4, 5));
   });
 
   test('fetching or deferring does not mark a notice as presented', () async {

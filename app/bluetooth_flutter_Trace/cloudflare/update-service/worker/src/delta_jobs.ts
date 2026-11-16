@@ -24,6 +24,11 @@ export interface DeltaJob {
   run_id: string | null; result_json: string | null;
   actor: string; reason: string; error_code: string | null; created_at: number; updated_at: number;
   progress_phase?: "building" | "uploading" | "verifying";
+  cancel_requested_at?: number | null;
+  cancel_restart?: number;
+  cancel_actor?: string | null;
+  cancel_reason?: string | null;
+  cancel_error?: string | null;
 }
 const REPOSITORY = "Eitan-S-23/E-Track";
 const APP_REPOSITORY = "Eitan-S-23/Trace";
@@ -65,12 +70,14 @@ export function workflowLocation(job: Pick<DeltaJob, "kind" | "workflow_ref">) {
 }
 export function jobView(job: DeltaJob) {
   const result = job.result_json ? JSON.parse(job.result_json) as Record<string, unknown> : null;
+  const status = job.status === "failed" && job.error_code === "USER_CANCELLED" ? "cancelled" : job.status;
   return { id: job.id, kind: job.kind, targetReleaseId: job.target_release_id, baseReleaseId: job.base_release_id,
     baseVersionCode: job.base_version_code, targetVersionCode: job.target_version_code, baseImageSha256: job.base_sha256,
-    status: job.status, enabled: job.enabled===1, attempt: job.attempt, revision: job.revision, errorCode: job.error_code,
+    status, enabled: job.enabled===1, attempt: job.attempt, revision: job.revision, errorCode: job.error_code,
+    cancelling: job.cancel_requested_at != null, restartRequested: job.cancel_restart === 1, cancelError: job.cancel_error ?? null,
     createdAt: job.created_at, updatedAt: job.updated_at,
     fileName: result ? job.kind === "firmware" ? deltaFileName(job) : result.fileName : null,
-    phase: job.status === "running" ? job.progress_phase ?? "building" : job.status,
+    phase: job.cancel_requested_at != null ? "cancelling" : job.status === "running" ? job.progress_phase ?? "building" : status,
     sizeBytes: result?.sizeBytes ?? null, sha256: result?.sha256 ?? null,
     runUrl: job.run_id ? `https://github.com/${workflowLocation(job).repository}/actions/runs/${job.run_id}` : null };
 }
@@ -81,7 +88,7 @@ export async function deltaJobViews(env: Pick<WorkerEnv, "DB" | "DELTA_GITHUB_TO
   const states = await inspectDeltaRuns(env, identities, fetcher);
   return jobs.map(job => {
     const view = jobView(job), ci = states.get(job.id);
-    return ci ? { ...view, ci, phase: ci.phase, runUrl: ci.runUrl ?? view.runUrl } : view;
+    return ci ? { ...view, ci, phase: view.cancelling ? "cancelling" : ci.phase, runUrl: ci.runUrl ?? view.runUrl } : view;
   });
 }
 async function getJob(env: DeltaEnv, id: string): Promise<DeltaJob> {
@@ -278,7 +285,40 @@ export async function deltaJobAction(env: DeltaEnv, actor: string, id: string, a
   const reason = reasonOf(body.reason);
   if (body.expectedRevision !== job.revision) throw new ApiError("CAS_CONFLICT", "Delta job changed; reload", 409);
   const spec = JSON.parse(job.input_json) as DeltaSpec;
-  if (action === "reconcile") {
+  if (["cancel", "cancel-restart", "cancel-status"].includes(action)) {
+    if (job.actor !== actor) throw new ApiError("RELEASE_CONFLICT", "Only the task owner may cancel or restart it", 403);
+    if (action === "cancel-status") {
+      await advanceDeltaCancellation(env,job,fetcher);
+    } else if (!["ready","failed"].includes(job.status) && job.cancel_requested_at == null) {
+      const run = await boundRun(env,job,fetcher);
+      if (run.status === "completed") return json({ok:true,job:jobView(job),providerFinished:true,conclusion:run.conclusion});
+      const mutation=crypto.randomUUID();
+      const changed=await env.DB.batch([
+        env.DB.prepare(`UPDATE delta_jobs SET cancel_requested_at=?,cancel_restart=?,cancel_actor=?,cancel_reason=?,
+          cancel_error=NULL,run_id=?,mutation_id=?,revision=revision+1,updated_at=?
+          WHERE id=? AND revision=? AND status NOT IN ('ready','failed') AND cancel_requested_at IS NULL`)
+          .bind(nowSeconds(),action==="cancel-restart"?1:0,actor,reason,String(run.id),mutation,nowSeconds(),job.id,job.revision),
+        eventStatement(env,job.id,mutation,action,actor,reason,job.revision+1)
+      ]);
+      if (!changed[0].meta.changes) throw new ApiError("CAS_CONFLICT","Task changed before cancellation; reload",409);
+      let response: Response;
+      try {
+        response=await fetcher(`https://api.github.com/repos/${workflowLocation(job).repository}/actions/runs/${run.id}/cancel`,{
+          method:"POST",headers:githubHeaders(env),redirect:"manual",signal:AbortSignal.timeout(6000)});
+      } catch {
+        await env.DB.prepare(`UPDATE delta_jobs SET cancel_error='CANCEL_OUTCOME_UNKNOWN' WHERE id=? AND attempt=? AND cancel_requested_at IS NOT NULL`)
+          .bind(job.id,job.attempt).run();
+        return json({ok:true,job:jobView(await getJob(env,job.id))},202);
+      }
+      await response.body?.cancel();
+      if (response.status!==202) {
+        await env.DB.prepare(`UPDATE delta_jobs SET cancel_requested_at=NULL,cancel_restart=0,cancel_error=?,revision=revision+1
+          WHERE id=? AND attempt=? AND cancel_requested_at IS NOT NULL`).bind(`GITHUB_CANCEL_HTTP_${response.status}`,job.id,job.attempt).run();
+        throw new ApiError("RELEASE_CONFLICT",`GitHub rejected cancellation (${response.status}); the task may still run. Nothing was restarted`,409);
+      }
+      await advanceDeltaCancellation(env,await getJob(env,job.id),fetcher);
+    }
+  } else if (action === "reconcile") {
     if (["ready","failed"].includes(job.status)) return json({ok:true,job:jobView(job)});
     if (!env.DELTA_GITHUB_TOKEN) throw new ApiError("BACKEND_UNAVAILABLE","Project GitHub read access is not configured",503);
     const workflow=workflowLocation(job);
@@ -315,7 +355,7 @@ export async function deltaJobAction(env: DeltaEnv, actor: string, id: string, a
     const mutation = crypto.randomUUID();
     let changed: D1Result[];
     try { changed = await env.DB.batch([
-      env.DB.prepare("UPDATE delta_jobs SET status='dispatching',attempt=attempt+1,workflow_commit=?,workflow_ref=?,mutation_id=?,run_id=NULL,error_code=NULL,result_json=NULL,revision=revision+1,updated_at=? WHERE id=? AND revision=? AND status='failed'")
+      env.DB.prepare("UPDATE delta_jobs SET status='dispatching',attempt=attempt+1,workflow_commit=?,workflow_ref=?,mutation_id=?,run_id=NULL,error_code=NULL,result_json=NULL,cancel_requested_at=NULL,cancel_restart=0,cancel_error=NULL,revision=revision+1,updated_at=? WHERE id=? AND revision=? AND status='failed'")
         .bind(workflow.commit,workflow.storedRef,mutation,nowSeconds(),id,job.revision),
       eventStatement(env, id, mutation, "retry", actor, reason, job.revision+1)
     ]); } catch (error) {
@@ -350,6 +390,71 @@ function eventStatement(env: DeltaEnv, id: string, mutation: string, action: str
   // The nonce prevents a losing CAS request from applying another request's side effects.
   return env.DB.prepare("INSERT INTO delta_job_events(id,job_id,action,actor,reason,revision,created_at) SELECT ?,?,?,?,?,?,? WHERE EXISTS(SELECT 1 FROM delta_jobs WHERE id=? AND mutation_id=?)")
     .bind(crypto.randomUUID(),id,action,actor,reason,revision,nowSeconds(),id,mutation);
+}
+
+function githubHeaders(env: Pick<WorkerEnv,"DELTA_GITHUB_TOKEN">) {
+  if (!env.DELTA_GITHUB_TOKEN) throw new ApiError("BACKEND_UNAVAILABLE","Project GitHub access is not configured",503);
+  return {Authorization:`Bearer ${env.DELTA_GITHUB_TOKEN}`,Accept:"application/vnd.github+json",
+    "X-GitHub-Api-Version":"2022-11-28","User-Agent":"E-Track-Admin-Delta"};
+}
+
+async function boundRun(env: DeltaEnv, job: DeltaJob, fetcher: typeof fetch): Promise<Record<string,unknown>> {
+  const workflow=workflowLocation(job);
+  let runId=job.run_id;
+  if (!runId) {
+    const states=await inspectDeltaRuns(env,[{id:job.id,attempt:job.attempt,workflowCommit:job.workflow_commit,runId:null,...workflow}],fetcher);
+    const url=states.get(job.id)?.runUrl;
+    const prefix=`https://github.com/${workflow.repository}/actions/runs/`;
+    if (url?.startsWith(prefix)) runId=url.slice(prefix.length);
+  }
+  if (!runId || !/^[1-9][0-9]{0,19}$/.test(runId)) {
+    throw new ApiError("RELEASE_CONFLICT","The submitted task has no uniquely bound GitHub run yet. Cancellation is not confirmed; nothing was restarted",409);
+  }
+  const response=await fetcher(`https://api.github.com/repos/${workflow.repository}/actions/runs/${runId}`,{
+    headers:githubHeaders(env),redirect:"manual",signal:AbortSignal.timeout(6000)});
+  if (!response.ok) {await response.body?.cancel();throw new ApiError("BACKEND_UNAVAILABLE","Unable to verify the bound GitHub run",503);}
+  const run=await boundedJson({headers:new Headers({"Content-Type":"application/json"}),body:response.body},2*1024*1024);
+  if (String(run.id)!==runId || (typeof run.id==="number" && !Number.isSafeInteger(run.id)) ||
+    run.event!=="workflow_dispatch" || run.head_sha!==job.workflow_commit || run.head_branch!==workflow.ref ||
+    run.display_title!==`delta:${job.id}:${job.attempt}`) throw new ApiError("RELEASE_CONFLICT","GitHub run identity does not match this task attempt",409);
+  return run;
+}
+
+async function advanceDeltaCancellation(env: DeltaEnv, original: DeltaJob, fetcher: typeof fetch): Promise<void> {
+  if (original.cancel_requested_at == null) return;
+  const run=await boundRun(env,original,fetcher);
+  if (run.status!=="completed") return;
+  const job=await getJob(env,original.id);
+  if (job.attempt!==original.attempt || job.cancel_requested_at==null) return;
+  if (job.status==="ready" || run.conclusion!=="cancelled") {
+    await env.DB.prepare(`UPDATE delta_jobs SET cancel_requested_at=NULL,cancel_restart=0,cancel_error='FINISHED_BEFORE_CANCEL',revision=revision+1
+      WHERE id=? AND attempt=? AND revision=?`).bind(job.id,job.attempt,job.revision).run();
+    return;
+  }
+  const mutation=crypto.randomUUID();
+  const result=await env.DB.batch([
+    env.DB.prepare(`UPDATE delta_jobs SET status='failed',error_code='USER_CANCELLED',cancel_requested_at=NULL,cancel_error=NULL,
+      mutation_id=?,revision=revision+1,updated_at=? WHERE id=? AND revision=? AND attempt=? AND status<>'ready'`)
+      .bind(mutation,nowSeconds(),job.id,job.revision,job.attempt),
+    eventStatement(env,job.id,mutation,"cancel-confirmed",job.cancel_actor??job.actor,job.cancel_reason??"Cancel task",job.revision+1)
+  ]);
+  if (!result[0].meta.changes || job.cancel_restart!==1) return;
+  try {
+    await deltaJobAction(env,job.cancel_actor??job.actor,job.id,"retry",{
+      reason:job.cancel_reason??"Restart cancelled task",expectedRevision:job.revision+1},fetcher);
+  } catch (error) {
+    await env.DB.prepare(`UPDATE delta_jobs SET cancel_restart=0,cancel_error='RESTART_NOT_CONFIRMED'
+      WHERE id=? AND attempt=? AND status='failed'`).bind(job.id,job.attempt).run();
+    throw error;
+  }
+}
+
+export async function advancePendingDeltaCancellations(env: DeltaEnv, fetcher = fetch): Promise<void> {
+  const pending=await env.DB.prepare("SELECT * FROM delta_jobs WHERE cancel_requested_at IS NOT NULL ORDER BY cancel_requested_at LIMIT 3").all<DeltaJob>();
+  for (const job of pending.results) {
+    try { await advanceDeltaCancellation(env,job,fetcher); }
+    catch { /* Preserve the intent; a failed read never authorizes a retry. */ }
+  }
 }
 
 async function ciJob(request: Request, env: WorkerEnv, id: string): Promise<DeltaJob> {

@@ -214,10 +214,13 @@ AppPrompt<void> createAnnouncementPrompt({
   return AppPromptCoordinator.instance.enqueue<void>(
     requireHome: automatic,
     ready: ready,
+    relevant: () => !automatic || announcements?.any((item) => !AnnouncementService.wasPresented(item)) == true,
     builder: (_) => TraceDialog(
       title: automatic ? '新公告' : '公告',
       icon: Icons.campaign_outlined,
-      content: _AnnouncementsDialogContent(announcements: announcements),
+      content: _AnnouncementsDialogContent(announcements: automatic
+          ? announcements?.where((item) => !AnnouncementService.wasPresented(item)).toList()
+          : announcements),
       actions: const [TraceDialogAction(
         label: '知道了', isPrimary: true, onPressed: TraceDialog.close,
       )],
@@ -262,7 +265,7 @@ class _AnnouncementsDialogContentState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _markScheduled = false;
       if (!mounted || ModalRoute.of(context)?.isCurrent != true ||
-          WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) return;
+          WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) { return; }
       final item = items[_index];
       if (_presented.add(item.publicationIdentity)) {
         unawaited(AnnouncementService.markPresented(item).catchError((Object _) {

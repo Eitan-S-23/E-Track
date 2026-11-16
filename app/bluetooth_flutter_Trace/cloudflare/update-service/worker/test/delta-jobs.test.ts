@@ -4,7 +4,7 @@ import { createHash, generateKeyPairSync, sign } from "node:crypto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import worker from "../src/index";
 import { canonicalJson, sha256Hex } from "../src/crypto";
-import { createDeltaJobs, deltaCandidates, deltaJobAction, jobView, workflowLocation } from "../src/delta_jobs";
+import { advancePendingDeltaCancellations, createDeltaJobs, deltaCandidates, deltaJobAction, jobView, workflowLocation } from "../src/delta_jobs";
 import type { DeltaJob, DeltaKind, DeltaSpec } from "../src/delta_jobs";
 import { supplementalAppManifest, supplementalFirmwareAsset, supplementalFirmwareAssets } from "../src/delta_assets";
 import { assetFileName, versionNameFor } from "../../scripts/firmware-schema.mjs";
@@ -340,7 +340,78 @@ describe("operator-selected supplemental delta jobs",()=>{
   });
   it("leaves a changed or archived target out of distribution",async()=>{
     const {job,p}=await ready("android");
-    await env.DB.prepare("UPDATE releases SET archived=1 WHERE id=?").bind(p.target).run();
+    await expect(env.DB.prepare("UPDATE releases SET archived=1 WHERE id=?").bind(p.target).run()).rejects.toThrow();
+    await env.DB.prepare("UPDATE releases SET state='disabled' WHERE id=?").bind(p.target).run();
     await expect(action(job,"enable")).rejects.toMatchObject({code:"RELEASE_NOT_READY"});
+  });
+
+  it("cancels the exact run and restarts only after durable confirmed cancellation",async()=>{
+    const job=await create(await pair());
+    await env.DB.prepare("UPDATE delta_jobs SET run_id='12345' WHERE id=?").bind(job.id).run();
+    let stopped=false;
+    const fetcher=vi.fn<typeof fetch>(async(input,init)=>{
+      const url=String(input);
+      if(url.endsWith("/cancel")) return new Response(null,{status:202});
+      if(url.endsWith("/dispatches")) return new Response(null,{status:204});
+      expect(init?.method??"GET").toBe("GET");
+      return Response.json({id:12345,event:"workflow_dispatch",head_sha:job.workflow_commit,head_branch:workflowLocation(job).ref,
+        display_title:`delta:${job.id}:1`,status:stopped?"completed":"queued",conclusion:stopped?"cancelled":null});
+    });
+    await deltaJobAction(configured,"owner",job.id,"cancel-restart",{expectedRevision:job.revision,reason:"restart queued run"},fetcher);
+    let current=(await env.DB.prepare("SELECT * FROM delta_jobs WHERE id=?").bind(job.id).first<DeltaJob>())!;
+    expect(current.attempt).toBe(1);expect(current.cancel_requested_at).not.toBeNull();
+    expect(fetcher.mock.calls.filter(call=>String(call[0]).endsWith("/dispatches"))).toHaveLength(0);
+    stopped=true;
+    await advancePendingDeltaCancellations(configured,fetcher);
+    current=(await env.DB.prepare("SELECT * FROM delta_jobs WHERE id=?").bind(job.id).first<DeltaJob>())!;
+    expect(current.attempt).toBe(2);expect(current.status).toBe("queued");
+    expect(current.input_json).toBe(job.input_json);
+    expect(fetcher.mock.calls.filter(call=>String(call[0]).endsWith("/dispatches"))).toHaveLength(1);
+    expect((await ci(job,"claim")).status).toBe(409);
+    await advancePendingDeltaCancellations(configured,fetcher);
+    expect(fetcher.mock.calls.filter(call=>String(call[0]).endsWith("/dispatches"))).toHaveLength(1);
+  });
+
+  it("a rejected cancellation never marks the task stopped or redispatches",async()=>{
+    const job=await create(await pair());
+    await env.DB.prepare("UPDATE delta_jobs SET run_id='12345' WHERE id=?").bind(job.id).run();
+    const fetcher=vi.fn<typeof fetch>(async(input)=>String(input).endsWith("/cancel")?new Response(null,{status:409}):Response.json({
+      id:12345,event:"workflow_dispatch",head_sha:job.workflow_commit,head_branch:workflowLocation(job).ref,
+      display_title:`delta:${job.id}:1`,status:"queued",conclusion:null}));
+    await expect(deltaJobAction(configured,"owner",job.id,"cancel-restart",{expectedRevision:job.revision,reason:"retry"},fetcher)).rejects.toMatchObject({status:409});
+    const current=(await env.DB.prepare("SELECT * FROM delta_jobs WHERE id=?").bind(job.id).first<DeltaJob>())!;
+    expect(current.status).toBe("queued");expect(current.attempt).toBe(1);expect(current.cancel_requested_at).toBeNull();
+    expect(current.cancel_error).toBe("GITHUB_CANCEL_HTTP_409");
+    expect(fetcher.mock.calls.some(call=>String(call[0]).endsWith("/dispatches"))).toBe(false);
+  });
+
+  it("a successful completion racing cancellation wins over restart",async()=>{
+    const job=await create(await pair());
+    await env.DB.prepare("UPDATE delta_jobs SET run_id='12345' WHERE id=?").bind(job.id).run();
+    let completed=false;
+    const fetcher=vi.fn<typeof fetch>(async(input)=>{
+      if(String(input).endsWith("/cancel")) {
+        await env.DB.prepare("UPDATE delta_jobs SET status='ready',result_json='{}',revision=revision+1 WHERE id=?").bind(job.id).run();
+        completed=true;return new Response(null,{status:202});
+      }
+      return Response.json({id:12345,event:"workflow_dispatch",head_sha:job.workflow_commit,head_branch:workflowLocation(job).ref,
+        display_title:`delta:${job.id}:1`,status:completed?"completed":"queued",conclusion:completed?"success":null});
+    });
+    await deltaJobAction(configured,"owner",job.id,"cancel-restart",{expectedRevision:job.revision,reason:"restart"},fetcher);
+    const current=(await env.DB.prepare("SELECT * FROM delta_jobs WHERE id=?").bind(job.id).first<DeltaJob>())!;
+    expect(current.status).toBe("ready");expect(current.attempt).toBe(1);
+    expect(current.cancel_requested_at).toBeNull();
+    expect(fetcher.mock.calls.some(call=>String(call[0]).endsWith("/dispatches"))).toBe(false);
+  });
+
+  it("foreign actors and mismatched run identities cannot cancel",async()=>{
+    const job=await create(await pair());
+    await env.DB.prepare("UPDATE delta_jobs SET run_id='12345' WHERE id=?").bind(job.id).run();
+    const fetcher=vi.fn<typeof fetch>(async()=>Response.json({id:12345,event:"workflow_dispatch",head_sha:job.workflow_commit,
+      head_branch:workflowLocation(job).ref,display_title:"wrong-attempt",status:"queued"}));
+    await expect(deltaJobAction(configured,"other",job.id,"cancel",{expectedRevision:job.revision,reason:"cancel"},fetcher)).rejects.toMatchObject({status:403});
+    expect(fetcher).not.toHaveBeenCalled();
+    await expect(deltaJobAction(configured,"owner",job.id,"cancel",{expectedRevision:job.revision,reason:"cancel"},fetcher)).rejects.toMatchObject({status:409});
+    expect(fetcher.mock.calls.every(call=>(call[1]?.method??"GET")==="GET")).toBe(true);
   });
 });

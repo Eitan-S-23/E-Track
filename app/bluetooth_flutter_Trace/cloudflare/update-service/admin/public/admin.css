@@ -445,6 +445,24 @@ body.task-open { overflow: hidden; }
 .task-open #taskSheet { opacity: 1; transform: translate(-50%, 0); }
 .task-open .resource-float { visibility: hidden; pointer-events: none; }
 .task-sheet { width: min(780px, calc(100vw - 48px)); }
+.announcement-sheet { width: min(780px, calc(100vw - 48px)); }
+body.announcement-open { overflow: hidden; }
+.announcement-open #announcementBackdrop { opacity: 1; }
+.announcement-open #announcementSheet { opacity: 1; transform: translate(-50%, 0); }
+#announcements .announcement-grid { grid-template-columns: minmax(0,1fr); }
+.announcement-sheet textarea { min-height: 200px; resize: vertical; }
+.app-platform-bar, #releaseBulkActions, #firmwareBulkActions { margin: 14px 0; flex-wrap: wrap; }
+.version-selection-row { display: grid; grid-template-columns: 32px minmax(0,1fr); align-items: center; gap: 8px; }
+.version-selection-row .version-card { width: 100%; }
+.version-selection-row input, .task-notification-row input, .firmware-release-card > input { width: 20px; height: 20px; accent-color: var(--accent); }
+.task-notification-row { display: grid; grid-template-columns: 28px minmax(0,1fr) 44px; align-items: center; gap: 6px; }
+.task-control { position: relative; width: 44px; min-height: 44px; padding: 10px; touch-action: manipulation; }
+.task-control[aria-disabled="true"] { color: var(--muted); cursor: not-allowed; }
+.task-control::after { content: attr(data-tooltip); position: absolute; bottom: calc(100% + 8px); right: 0; z-index: 100;
+  width: max-content; max-width: min(240px, calc(100vw - 48px)); padding: 8px 10px; border: 1px solid var(--line);
+  border-radius: var(--radius); background: var(--surface); color: var(--ink); box-shadow: 0 4px 20px #1d2a2529;
+  font-size: 12px; line-height: 1.5; white-space: normal; pointer-events: none; opacity: 0; visibility: hidden; }
+.task-control:hover::after, .task-control:focus-visible::after, .task-control.tooltip-visible::after { opacity: 1; visibility: visible; }
 .task-button { position: relative; gap: 6px; flex-shrink: 0; }
 .task-badge { font-size: 10px; min-width: 17px; padding: 1px 4px; color: var(--surface); background: var(--accent); border-radius: 9px; }
 .task-button[data-running="true"] .ui-icon { color: var(--accent); }

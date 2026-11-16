@@ -2,6 +2,7 @@ import { env } from "cloudflare:workers";
 import { beforeEach, afterEach, describe, it, expect, vi } from "vitest";
 import { deltaActivity, deliverNotifications, pushEndpoint, readNotifications, subscribeNotifications, unsubscribeNotifications, vapidAuthorization } from "../src/admin_notifications";
 import type { WorkerEnv } from "../src/types";
+import { retainInputs } from "./notification-fixture";
 
 let config: WorkerEnv;
 const endpoint = "https://fcm.googleapis.com/fcm/send/unit-test-endpoint";
@@ -17,6 +18,7 @@ beforeEach(async()=>{
 });
 afterEach(()=>vi.useRealTimers());
 async function insert(actor="owner",kind="android",number=1) {
+  await retainInputs(kind,`target-${number}`);
   const id = "delta_"+String(number).padStart(64,"0"), now=Math.floor(Date.now()/1000), hash="a".repeat(64);
   await env.DB.prepare(`INSERT INTO delta_jobs(id,kind,target_release_id,base_release_id,target_sha256,base_sha256,base_version_code,target_version_code,
     status,input_json,input_sha256,workflow_commit,workflow_ref,actor,reason,created_at,updated_at)

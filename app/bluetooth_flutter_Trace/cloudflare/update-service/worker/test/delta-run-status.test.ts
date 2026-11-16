@@ -2,6 +2,7 @@ import { env } from "cloudflare:workers";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { inspectDeltaRuns, type DeltaRunIdentity } from "../src/delta_run_status";
 import { deltaJobViews, type DeltaJob } from "../src/delta_jobs";
+import { retainInputs } from "./notification-fixture";
 
 const config = { ...env, DELTA_GITHUB_TOKEN: "status-read-test" };
 const now = 1794652000;
@@ -13,6 +14,7 @@ beforeEach(async () => {
 });
 async function identity(): Promise<DeltaRunIdentity> {
   const number = ++count, id = "delta_" + String(number).padStart(64, "0"), sha = "a".repeat(64);
+  await retainInputs("firmware",`target-${number}`);
   await env.DB.prepare(`INSERT INTO delta_jobs(id,kind,target_release_id,base_release_id,target_sha256,base_sha256,
     base_version_code,target_version_code,status,input_json,input_sha256,workflow_commit,workflow_ref,actor,reason,created_at,updated_at)
     VALUES (?,'firmware',?,'base',?,?,30324,30325,'queued','{}',?,?,'dev/admin/status-test','owner','test',?,?)`)

@@ -30,7 +30,10 @@ export async function deltaActivity(env: NotificationEnv, actor: string): Promis
     AND NOT EXISTS(SELECT 1 FROM admin_notifications n WHERE n.actor=? AND n.candidate_id=e.id)
     ORDER BY e.id LIMIT 100`).bind(actor,env.APP_ID,actor).run();
   const [jobs, notifications, unread, subscriptions] = await env.DB.batch<DeltaJob | Record<string, unknown>>([
-    env.DB.prepare("SELECT * FROM delta_jobs WHERE actor=? ORDER BY CASE WHEN status IN ('ready','failed') THEN 1 ELSE 0 END,updated_at DESC,id LIMIT 100").bind(actor),
+    env.DB.prepare(`SELECT j.* FROM delta_jobs j WHERE j.actor=? AND NOT EXISTS(
+      SELECT 1 FROM admin_hidden_delta_jobs h WHERE h.actor=j.actor AND h.job_id=j.id
+      AND h.attempt=j.attempt AND j.status IN ('ready','failed'))
+      ORDER BY CASE WHEN j.status IN ('ready','failed') THEN 1 ELSE 0 END,j.updated_at DESC,j.id LIMIT 100`).bind(actor),
     env.DB.prepare(`SELECT n.id,n.job_id AS jobId,n.attempt,n.status,n.error_code AS errorCode,n.created_at AS createdAt,
       CASE WHEN n.candidate_id IS NULL THEN 'delta' ELSE 'candidate' END AS type,
       COALESCE(e.kind,j.kind) AS kind,COALESCE(e.release_id,j.target_release_id) AS targetReleaseId,
@@ -39,8 +42,8 @@ export async function deltaActivity(env: NotificationEnv, actor: string): Promis
       CASE WHEN n.id>COALESCE(r.through_id,0) AND n.read_at IS NULL THEN 1 ELSE 0 END AS unread
       FROM admin_notifications n LEFT JOIN delta_jobs j ON j.id=n.job_id
       LEFT JOIN admin_candidate_events e ON e.id=n.candidate_id
-      LEFT JOIN admin_notification_reads r ON r.actor=n.actor WHERE n.actor=? ORDER BY n.id DESC LIMIT 30`).bind(actor),
-    env.DB.prepare(`SELECT COUNT(*) AS count FROM admin_notifications WHERE actor=? AND read_at IS NULL AND id>
+      LEFT JOIN admin_notification_reads r ON r.actor=n.actor WHERE n.actor=? AND n.dismissed_at IS NULL ORDER BY n.id DESC LIMIT 30`).bind(actor),
+    env.DB.prepare(`SELECT COUNT(*) AS count FROM admin_notifications WHERE actor=? AND dismissed_at IS NULL AND read_at IS NULL AND id>
       COALESCE((SELECT through_id FROM admin_notification_reads WHERE actor=?),0)`).bind(actor,actor),
     env.DB.prepare("SELECT id,expires_at AS expiresAt FROM admin_push_subscriptions WHERE actor=? AND expires_at>?").bind(actor,nowSeconds())
   ]);
@@ -73,6 +76,45 @@ export async function readNotifications(env: NotificationEnv, actor: string, bod
   const cursor = await env.DB.prepare("SELECT through_id FROM admin_notification_reads WHERE actor=?")
     .bind(actor).first<{through_id:number}>();
   return json({ ok: true, throughId: cursor?.through_id ?? 0 });
+}
+
+export async function dismissNotifications(env: NotificationEnv, actor: string, body: Record<string, unknown>): Promise<Response> {
+  let statement: D1PreparedStatement;
+  if (body.mode === "read") {
+    if (!Number.isSafeInteger(body.throughId) || Number(body.throughId) < 0 || "ids" in body) throw invalidParameter("Invalid dismissal cursor");
+    statement = env.DB.prepare(`UPDATE admin_notifications SET dismissed_at=? WHERE actor=? AND dismissed_at IS NULL
+      AND id<=? AND (read_at IS NOT NULL OR id<=COALESCE((SELECT through_id FROM admin_notification_reads WHERE actor=?),0)) RETURNING id`)
+      .bind(nowSeconds(),actor,body.throughId,actor);
+  } else {
+    const ids=body.ids;
+    if (!Array.isArray(ids) || !ids.length || ids.length>30 || ids.some(id=>!Number.isSafeInteger(id)||id<=0)
+      || new Set(ids).size!==ids.length || "mode" in body) throw invalidParameter("Expected 1 to 30 distinct notification IDs");
+    statement=env.DB.prepare(`UPDATE admin_notifications SET dismissed_at=COALESCE(dismissed_at,?)
+      WHERE actor=? AND id IN (${ids.map(()=>"?").join(",")}) RETURNING id`).bind(nowSeconds(),actor,...ids);
+  }
+  const result=await statement.all<{id:number}>();
+  return json({ok:true,dismissedIds:result.results.map(row=>row.id)});
+}
+
+export async function hideCompletedJobs(env: NotificationEnv, actor: string, body: Record<string, unknown>): Promise<Response> {
+  const ids=body.ids;
+  if (!Array.isArray(ids)||!ids.length||ids.length>100||ids.some(id=>typeof id!=="string"||!/^[A-Za-z0-9_-]{1,160}$/.test(id))
+    || new Set(ids).size!==ids.length) throw invalidParameter("Invalid completed job IDs");
+  const jobs=await env.DB.prepare(`SELECT id,attempt FROM delta_jobs WHERE actor=? AND status IN ('ready','failed')
+    AND cancel_requested_at IS NULL AND id IN (${ids.map(()=>"?").join(",")})`).bind(actor,...ids).all<{id:string;attempt:number}>();
+  if (jobs.results.length!==ids.length) throw invalidParameter("Only your completed jobs can be hidden");
+  const attempts=body.attempts;
+  if (!attempts || typeof attempts!=="object" || Array.isArray(attempts) ||
+      jobs.results.some(job=>(attempts as Record<string,unknown>)[job.id]!==job.attempt)) {
+    throw new ApiError("CAS_CONFLICT","Task attempt changed; refresh before hiding",409);
+  }
+  await env.DB.batch(jobs.results.map(job=>env.DB.prepare(`INSERT OR IGNORE INTO admin_hidden_delta_jobs(actor,job_id,attempt,hidden_at)
+    SELECT ?,id,attempt,? FROM delta_jobs WHERE id=? AND actor=? AND attempt=? AND status IN ('ready','failed') AND cancel_requested_at IS NULL`)
+    .bind(actor,nowSeconds(),job.id,actor,job.attempt)));
+  const hidden=await env.DB.prepare(`SELECT h.job_id FROM admin_hidden_delta_jobs h JOIN delta_jobs j ON j.id=h.job_id
+    WHERE h.actor=? AND h.attempt=j.attempt AND j.status IN ('ready','failed') AND h.job_id IN (${ids.map(()=>"?").join(",")})`)
+    .bind(actor,...ids).all<{job_id:string}>();
+  return json({ok:true,hiddenIds:hidden.results.map(row=>row.job_id)});
 }
 
 export async function subscribeNotifications(env: NotificationEnv, actor: string, body: Record<string, unknown>): Promise<Response> {

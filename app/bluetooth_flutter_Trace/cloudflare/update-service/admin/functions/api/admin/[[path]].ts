@@ -5,10 +5,10 @@ import { editFirmwareNotes, firmwareHistory } from "../../../../worker/src/firmw
 import { readFirmwareJson, requireFirmwareJsonHeaders } from "../../../../worker/src/firmware";
 import { boundedJson, inventorySummary, refreshInventory } from "../../../../worker/src/version_inventory";
 import { createDeltaJobs, deltaCandidates, deltaJobAction } from "../../../../worker/src/delta_jobs";
-import { deltaActivity, readNotifications, subscribeNotifications, unsubscribeNotifications } from "../../../../worker/src/admin_notifications";
+import { deltaActivity, readNotifications, dismissNotifications, hideCompletedJobs, subscribeNotifications, unsubscribeNotifications } from "../../../../worker/src/admin_notifications";
 import { resourceUsage } from "../../../../worker/src/resource_usage";
 
-type Platform = "android" | "windows";
+type Platform = "android" | "windows" | "ios";
 type ChannelName = "stable" | "beta";
 type ActorRole = "viewer" | "publisher" | "owner";
 
@@ -233,6 +233,8 @@ async function routeAdminRequest(
     requireRole(actor, "viewer");
     const body = await boundedJson(context.request, 8192);
     if (route[2] === "read") return readNotifications(context.env, actor.email, body);
+    if (route[2] === "dismiss") return dismissNotifications(context.env, actor.email, body);
+    if (route[2] === "hide-jobs") return hideCompletedJobs(context.env, actor.email, body);
     if (route[2] === "subscribe") return subscribeNotifications(context.env, actor.email, body);
     if (route[2] === "unsubscribe") return unsubscribeNotifications(context.env, actor.email, body);
     throw new AdminError("INVALID_PARAMETER", "Unknown notification operation", 400);
@@ -733,6 +735,7 @@ async function publishRelease(
 ): Promise<Response> {
   const appId = requireString(body.appId ?? env.APP_ID, "appId");
   const platform = parsePlatform(body.platform ?? "android");
+  if (platform === "ios") throw new AdminError("INVALID_PARAMETER", "iOS distribution is not configured; APK publishing is not supported", 400);
   const releaseId = requireString(body.releaseId, "releaseId");
   const expectedRevision = requireInt(body.expectedRevision, "expectedRevision");
   const rollback = body.rollback === true;
@@ -939,6 +942,12 @@ async function disableRelease(env: AdminEnv, actor: Actor, releaseId: string): P
 }
 
 async function deleteRelease(env: AdminEnv, actor: Actor, releaseId: string): Promise<Response> {
+  const dependency = await env.DB.prepare(`SELECT id FROM delta_jobs WHERE kind='android'
+    AND (target_release_id=? OR base_release_id=?) LIMIT 1`).bind(releaseId,releaseId).first();
+  const basePatch = await env.DB.prepare(`SELECT p.id FROM patches p JOIN releases r ON r.id=?
+    WHERE p.app_id=r.app_id AND p.platform=r.platform AND p.from_version_code=r.version_code
+    AND p.to_release_id<>r.id LIMIT 1`).bind(releaseId).first();
+  if (dependency || basePatch) throw new AdminError("RELEASE_IN_USE", "Release is retained by delta dependencies or job history", 409);
   const referenced = await env.DB.prepare(
     "SELECT name FROM channels WHERE current_release_id = ? LIMIT 1"
   )
@@ -970,6 +979,11 @@ async function deleteRelease(env: AdminEnv, actor: Actor, releaseId: string): Pr
       .bind(releaseId)
       .first<{ count: number }>()
   ]);
+  // Seal distribution before deleting bytes; a failed/partial delete stays hidden.
+  const sealed = await env.DB.prepare(`UPDATE releases SET archived=1,state='disabled',updated_at=datetime('now')
+    WHERE id=? AND NOT EXISTS(SELECT 1 FROM channels WHERE current_release_id=?) RETURNING id`)
+    .bind(releaseId,releaseId).first();
+  if (!sealed) throw new AdminError("RELEASE_IN_USE", "Release became published; deletion stopped", 409);
   const deletedR2 = await deleteR2ObjectsForRelease(env, release, assets.results);
   const assetRowCount = assets.results.length;
   const patchRowCount = patchRows?.count ?? 0;
@@ -1285,8 +1299,8 @@ function requireInt(value: unknown, field: string): number {
 }
 
 function parsePlatform(value: unknown): Platform {
-  if (value === "android" || value === "windows") return value;
-  throw new AdminError("INVALID_PARAMETER", "platform must be android or windows", 400);
+  if (value === "android" || value === "windows" || value === "ios") return value;
+  throw new AdminError("INVALID_PARAMETER", "platform must be android, windows or ios", 400);
 }
 
 function parseChannel(value: unknown): ChannelName {

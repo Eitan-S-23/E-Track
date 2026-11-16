@@ -43,7 +43,7 @@ async function mockApp(page: Page, language = "en", role = "owner", firmwareFail
       const contentType = url.pathname.endsWith(".svg") ? "image/svg+xml" : url.pathname.endsWith(".png") ? "image/png" : "image/x-icon";
       await route.fulfill({ contentType, body: readFileSync(new URL("../public" + url.pathname, import.meta.url)) }); return;
     }
-    if (["/sheet-gestures.js","/overlay-history.js","/delta-activity.js","/resource-usage.js"].includes(url.pathname)) {
+    if (["/sheet-gestures.js","/overlay-history.js","/delta-activity.js","/task-controls.js","/resource-usage.js"].includes(url.pathname)) {
       await route.fulfill({contentType:"text/javascript",body:readFileSync(new URL("../public"+url.pathname,import.meta.url),"utf8")}); return;
     }
     const requestId = `mock-app-request-${++serial}`;
@@ -679,6 +679,12 @@ test("interaction keyboard selection crosses page boundaries and returns to that
   expect(data.writes).toHaveLength(0);
 });
 
+async function closeNoticeEditor(page: Page) {
+  await page.locator("#announcementClose").click();
+  if (await page.locator("#confirmDialog").isVisible()) await page.locator("#confirmAccept").click();
+  await expect(page.locator("#announcementSheet")).toBeHidden();
+}
+
 test("interaction App tabs support arrow keys and independent search without losing announcement drafts", async ({ page }) => {
   const data = await mockApp(page);
   data.announcements = Array.from({ length: 12 }, (_, i) => notice(i));
@@ -694,16 +700,19 @@ test("interaction App tabs support arrow keys and independent search without los
   await page.locator("#announcementTitle").fill("Edited local title");
   await page.locator("#announcementBody").fill("Unsaved message\nSecond line");
   await page.locator("#announcementPinned").check();
+  await closeNoticeEditor(page);
   await appTab(page, "releases");
   await expect(page.locator("#searchInput")).toHaveValue("mock-app-100");
   await expect(page.locator("#versionStrip .version-card")).toHaveCount(1);
   await appTab(page, "announcements");
   await expect(page.locator("#searchInput")).toHaveValue("Notice 7");
   await page.locator("#languageToggle").click();
+  await page.locator('[data-announcement-id="notice-7"]').click();
   await expect(page.locator("#announcementTitle")).toHaveValue("Edited local title");
   await expect(page.locator("#announcementBody")).toHaveValue("Unsaved message\nSecond line");
   await expect(page.locator("#announcementPinned")).toBeChecked();
   await expect(page.locator("#announcementDraftStatus")).toBeVisible();
+  await closeNoticeEditor(page);
   await page.locator('[data-view-target="firmware"]').click();
   await expect(page.locator("#searchInput")).toHaveValue("");
   await page.locator("#searchInput").fill("A firmware-only search");
@@ -727,6 +736,7 @@ test("interaction announcements edit/create/delete use the existing API and canc
   expect(data.writes[0]).toEqual({ path: "/api/admin/announcements/notice-1",
     body: { appId: "trace", title: "Notice 1", body: "Updated message", pinned: false, published: true } });
   await expect(page.locator("#announcementDraftStatus")).toBeHidden();
+  await page.locator('[data-announcement-id="notice-1"]').click();
   await page.locator("#deleteAnnouncement").click();
   await page.locator("#confirmCancel").click();
   await expect(page.locator("#confirmDialog")).toBeHidden();
@@ -754,6 +764,7 @@ test("interaction announcement failures retain edits without replay and actor ch
   await page.locator("#saveAnnouncement").click();
   await expect(page.locator("#confirmDetail")).toContainText("BACKEND_UNAVAILABLE");
   await closeResult(page);
+  await closeNoticeEditor(page);
   await appTab(page, "releases"); await appTab(page, "announcements");
   await expect(page.locator("#announcementBody")).toHaveValue("Keep after failed save");
   expect(data.writes).toHaveLength(1); expect(data.mutations).toBe(0);

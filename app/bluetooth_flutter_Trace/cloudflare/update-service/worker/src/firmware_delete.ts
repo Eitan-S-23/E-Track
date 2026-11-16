@@ -22,6 +22,9 @@ export function deleteFirmwareFiles(request: Request, env: FirmwareStorageEnv,
       throw new ApiError("RELEASE_IN_USE", "Move every channel away from this release before deletion", 409);
     }
     if (release.state !== "disabled") throw new ApiError("RELEASE_CONFLICT", "Disable this release before deleting its files", 409);
+    const dependency = await env.DB.prepare(`SELECT id FROM delta_jobs WHERE kind='firmware'
+      AND (target_release_id=? OR base_release_id=?) LIMIT 1`).bind(releaseId,releaseId).first();
+    if (dependency) throw new ApiError("RELEASE_IN_USE", "Firmware files are retained by a delta job or its history", 409);
     const guards = await env.DB.prepare(`SELECT name FROM sqlite_master WHERE type='trigger' AND name IN
       ('firmware_disabled_assets_sealed','firmware_archive_no_reopen','firmware_deleted_asset_no_restore')`).all();
     if (guards.results.length !== 3) throw backendUnavailable("Firmware deletion migration is required");

@@ -13,7 +13,7 @@ import {
 import { handleLatest } from "./latest";
 import { cleanupFirmwareIdempotency } from "./firmware_admin";
 import { cleanupInventory, inventoryControl, reportInventory } from "./version_inventory";
-import { deltaCi } from "./delta_jobs";
+import { advancePendingDeltaCancellations, deltaCi } from "./delta_jobs";
 import { deliverNotifications } from "./admin_notifications";
 import type { WorkerEnv } from "./types";
 
@@ -107,6 +107,7 @@ export default {
   fetch: app.fetch,
   async scheduled(_event, env) {
     if (_event.cron === "*/5 * * * *") {
+      await advancePendingDeltaCancellations(env);
       await deliverNotifications(env);
       return;
     }

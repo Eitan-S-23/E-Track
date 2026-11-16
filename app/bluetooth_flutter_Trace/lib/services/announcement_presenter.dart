@@ -24,7 +24,7 @@ class AnnouncementPresenter {
 
   Future<void> refresh() async {
     if (_disposed || _fetching || _prompt != null ||
-        WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) return;
+        WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) { return; }
     final now = DateTime.now();
     if (_lastFetch != null && now.difference(_lastFetch!) < const Duration(minutes: 1)) return;
     _lastFetch = now;

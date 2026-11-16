@@ -1,9 +1,12 @@
 window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, openTarget, openPanel, onJobs, canNotify = () => true,
+  confirmAction = async () => false, canControl = () => false,
   onError = () => {}, onRecovered = () => {} }) {
   const button = document.querySelector("#taskButton");
   const content = document.querySelector("#taskContent");
   const toast = document.querySelector("#taskToast");
-  const active = job => !["ready", "failed"].includes(job.status);
+  const active = job => !["ready", "failed", "cancelled"].includes(job.status);
+  const selectedNotices = new Set(), controlling = new Set();
+  let dismissBusy = false;
   let actor = null, data = null, loading = false, error = "", timer = null, page = 0;
   let generation = 0, pushInfo = null, pushBusy = false, pushChecking = false, pushRevision = 0, pushError = "", toastTimer = null;
   let noticePage = 0, readRevision = 0, readBusy = false, readError = "", viewTimer = null, refreshAgain = false, workerUpdate = false;
@@ -51,6 +54,7 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
   }
   function phase(job) {
     return ({ dispatching: text("正在提交", "Submitting"), queued: text("等待构建状态", "Awaiting build status"),
+      cancelling: text("正在确认取消结果", "Confirming cancellation"), cancelled: text("已取消", "Cancelled"),
       awaiting_approval: text("等待 GitHub 手动审批", "Awaiting GitHub reviewer approval"),
       ci_queued: text("GitHub 排队中", "Queued in GitHub"), ci_preparing: text("前置检查 / 准备构建", "Prechecks / preparing build"),
       ci_waiting: text("等待 GitHub 环境放行", "Waiting for GitHub environment"),
@@ -104,7 +108,7 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
     if (!fresh.length) return;
     const arrival = fresh.length === 1 && fresh[0].type === "candidate" ? fresh[0] : null;
     notify(arrival ? `${arrival.kind === "firmware" ? "MCU" : arrival.kind === "windows" ? "Windows App" : "Android App"} ${arrival.versionName} · ${text("新构建包已入库，待发布", "New candidate registered, not published")}`
-      : text(`${fresh.length} 条新结果，可在任务与通知中查看。`, `${fresh.length} new results. Open Tasks and notifications to review.`));
+      : text(`${fresh.length} 条新结果，可在通知中心查看。`, `${fresh.length} new results. Open Notification Center to review.`));
     saveLocal(key("noticed"),Math.max(...fresh.map(n=>n.id)));
     pendingNotices = [];
   }
@@ -167,15 +171,15 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
     const focusAction = focused?.dataset.taskAction, focusTarget = focused?.dataset.taskTarget, focusNotice = focused?.dataset.notificationId;
     const jobs = data?.jobs ?? [], running = jobs.filter(active).length, unread = data?.unreadCount ?? 0;
     button.disabled = !actor;
-    button.querySelector(".task-label").textContent = text("任务", "Tasks");
-    button.setAttribute("aria-label", `${text("任务与通知", "Tasks and notifications")}: ${running} ${text("进行中", "active")}, ${unread} ${text("未读", "unread")}`);
+    button.querySelector(".task-label").textContent = text("通知", "Notifications");
+    button.setAttribute("aria-label", `${text("通知中心", "Notification Center")}: ${running} ${text("进行中", "active")}, ${unread} ${text("未读", "unread")}`);
     const badge = button.querySelector(".task-badge");
     badge.textContent = String(unread); badge.hidden = !unread;
     button.dataset.running = String(running > 0);
     button.title = button.getAttribute("aria-label");
-    document.querySelector("#taskTitle").textContent = text("任务与通知", "Tasks and notifications");
-    document.querySelector("#taskClose").setAttribute("aria-label",text("关闭任务", "Close tasks"));
-    toast.querySelector("button").textContent = text("查看任务", "View tasks");
+    document.querySelector("#taskTitle").textContent = text("通知中心", "Notification Center");
+    document.querySelector("#taskClose").setAttribute("aria-label",text("关闭通知", "Close notifications"));
+    toast.querySelector("button").textContent = text("查看通知", "View notifications");
     const enabled = supported() && Notification.permission === "granted" && pushInfo?.expiresAt > Date.now()/1000;
     const pushText = !supported() ? text("此浏览器不支持后台系统提醒，结果仍保留在这里。", "This browser does not support background push. Results remain here.")
       : Notification.permission === "denied" ? text("浏览器已阻止通知，可在网站权限中允许；任务照常生成。", "Notifications are blocked in site settings. Builds are unaffected.")
@@ -185,6 +189,7 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
       : text("开启系统提醒后，切到后台也可接收结果。首次需要允许浏览器通知。", "Enable system alerts for background results. Browser permission is required once.");
     page = Math.max(0,Math.min(page,Math.ceil(jobs.length/8)-1));
     const notifications = data?.notifications ?? [];
+    for (const id of selectedNotices) if (!notifications.some(n=>n.id===id)) selectedNotices.delete(id);
     noticePage = Math.max(0,Math.min(noticePage,Math.ceil(notifications.length/6)-1));
     content.innerHTML = `<section class="task-notification-settings"><div><strong>${escape(text("系统提醒", "System alerts"))}</strong><p>${escape(pushText)}</p>
       ${pushError ? `<p class="error" role="alert">${escape(pushError)}</p>` : ""}</div>
@@ -192,15 +197,19 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
       ${data && !data.pushPublicKey ? `<p class="firmware-hint">${escape(text("服务器推送尚未配置，站内通知仍可使用。", "Server push is not configured. In-app notifications still work."))}</p>` : ""}
       <div class="operations-buttons task-toolbar"><button type="button" class="secondary-button" data-task-action="refresh" ${loading ? "disabled" : ""}>${escape(text("刷新", "Refresh"))}</button>
       <button type="button" class="secondary-button" data-task-action="read" ${!unread || loading || readBusy ? "disabled" : ""}>${escape(text("全部标为已读", "Mark all read"))}</button><span>${running} ${escape(text("进行中", "active"))} · ${unread} ${escape(text("未读", "unread"))}</span></div>
+      <div class="operations-buttons task-toolbar"><button type="button" class="secondary-button" data-task-action="notice-select-page" ${dismissBusy ? "disabled" : ""}>${escape(text("选择/取消选择当前页", "Select / clear current page"))}</button>
+      <button type="button" class="secondary-button" data-task-action="notice-delete-selected" ${dismissBusy || !selectedNotices.size ? "disabled" : ""}>${escape(text(`删除所选 (${selectedNotices.size})`, `Delete selected (${selectedNotices.size})`))}</button>
+      <button type="button" class="secondary-button" data-task-action="notice-clear-read" ${dismissBusy ? "disabled" : ""}>${escape(text("清理已读", "Clear read"))}</button></div>
       ${readError ? `<p class="error" role="alert">${escape(readError)}</p>` : ""}
       ${error ? `<p class="error" role="alert">${escape(error)} ${escape(text("上次状态已保留，恢复连接后重新读取，不会重发构建。", "Previous status retained; reconnecting only rereads, never redispatches builds."))}</p>` : ""}
       ${loading && !data ? `<p role="status">${escape(text("正在读取任务...", "Loading tasks..."))}</p>` : ""}
-      <div class="task-notifications">${notifications.slice(noticePage*6,(noticePage+1)*6).map(n=>`<button type="button" class="task-notification ${n.unread ? "unread" : ""}" data-notification-id="${n.id}" data-task-type="${escape(n.type ?? "delta")}" data-task-kind="${escape(n.kind)}" data-task-target="${escape(n.targetReleaseId)}"><span>${escape(n.kind === "firmware" ? text("单片机", "MCU") : n.kind === "windows" ? "Windows App" : "Android App")} · ${n.type === "candidate" ? escape(n.versionName) : `${escape(n.baseVersionCode)} → ${escape(n.targetVersionCode)}`}</span><strong>${escape(n.type === "candidate" ? text("新构建包已入库，查看详情", "New candidate registered, open details") : n.status === "ready" ? text("差分包已生成", "Delta ready") : text("差分生成失败", "Delta failed"))}</strong><small>${escape(new Date(n.createdAt*1000).toLocaleString())}</small></button>`).join("")}</div>
+      <div class="task-notifications">${notifications.slice(noticePage*6,(noticePage+1)*6).map(n=>`<div class="task-notification-row"><input type="checkbox" data-select-notice="${n.id}" aria-label="${escape(text("选择通知", "Select notification"))}" ${selectedNotices.has(n.id) ? "checked" : ""} ${dismissBusy ? "disabled" : ""}><button type="button" class="task-notification ${n.unread ? "unread" : ""}" data-notification-id="${n.id}" data-task-type="${escape(n.type ?? "delta")}" data-task-kind="${escape(n.kind)}" data-task-target="${escape(n.targetReleaseId)}"><span>${escape(n.kind === "firmware" ? text("单片机", "MCU") : n.kind === "windows" ? "Windows App" : "Android App")} · ${n.type === "candidate" ? escape(n.versionName) : `${escape(n.baseVersionCode)} → ${escape(n.targetVersionCode)}`}</span><strong>${escape(n.type === "candidate" ? text("新构建包已入库，查看详情", "New candidate registered, open details") : n.status === "ready" ? text("差分包已生成", "Delta ready") : n.errorCode === "USER_CANCELLED" ? text("任务已取消", "Task cancelled") : text("差分生成失败", "Delta failed"))}</strong><small>${escape(new Date(n.createdAt*1000).toLocaleString())}</small></button><button type="button" class="icon-button" data-task-action="notice-delete" data-notice-id="${n.id}" aria-label="${escape(text("删除通知", "Delete notification"))}" ${dismissBusy ? "disabled" : ""}><svg class="ui-icon" aria-hidden="true"><use href="#i-trash"></use></svg></button></div>`).join("")}</div>
       ${notifications.length > 6 ? `<nav class="release-pagination" aria-label="${escape(text("通知分页", "Notification pages"))}"><button type="button" data-task-action="notice-prev" ${noticePage === 0 ? "disabled" : ""}>${escape(text("上一页通知", "Previous notifications"))}</button><span>${noticePage+1} / ${Math.ceil(notifications.length/6)}</span><button type="button" data-task-action="notice-next" ${(noticePage+1)*6 >= notifications.length ? "disabled" : ""}>${escape(text("下一页通知", "Next notifications"))}</button></nav>` : ""}
       <h3 class="delta-jobs-title">${escape(text("我的差分任务", "My delta jobs"))}</h3>
       <p class="firmware-hint">${escape(text("App 与单片机共用任务记录；关闭弹窗不会取消任务。成功后仍需手动启用，不会自动发布渠道。", "App and MCU jobs share this history. Closing does not cancel. Verified deltas still need manual enabling; channels are never auto-published."))}</p>
       <div class="task-job-list">${jobs.slice(page*8,(page+1)*8).map(job=>`<article class="task-job" data-job-id="${escape(job.id)}"><div class="task-job-title"><strong>${escape(job.kind === "firmware" ? text("单片机", "MCU") : "App")} · ${escape(job.baseVersionCode)} → ${escape(job.targetVersionCode)}</strong><span>${escape(phase(job))}</span></div>${progress(job)}
-        ${job.errorCode ? `<p class="error">${escape(job.errorCode)}</p>` : ""}<div class="task-job-footer"><span>${job.sizeBytes ? escape(formatBytes(job.sizeBytes)) : escape(text("进度按真实阶段显示，不估算百分比。", "Actual stages, not estimated percentages."))}</span>
+        ${job.errorCode ? `<p class="error">${escape(job.errorCode)}</p>` : ""}${job.cancelError ? `<p class="error">${escape(job.cancelError)}</p>` : ""}<div class="task-job-footer"><span>${job.sizeBytes ? escape(formatBytes(job.sizeBytes)) : escape(text("进度按真实阶段显示，不估算百分比。", "Actual stages, not estimated percentages."))}</span>
+        ${controlButtons(job)}${!active(job) ? `<button type="button" class="icon-button" data-task-action="hide-job" data-hide-job="${escape(job.id)}" aria-label="${escape(text("移除已结束任务记录", "Hide completed task"))}" ${dismissBusy ? "disabled" : ""}><svg class="ui-icon" aria-hidden="true"><use href="#i-trash"></use></svg></button>` : ""}
         ${/^https:\/\/github\.com\/Eitan-S-23\/(?:E-Track|Trace)\/actions\/runs\/\d+$/.test(job.runUrl ?? "") ? `<a href="${escape(job.runUrl)}" target="_blank" rel="noopener noreferrer">${escape(job.phase === "awaiting_approval" ? text("前往 GitHub 审批", "Review in GitHub") : text("查看构建", "Open build"))}</a>` : ""}
         <button type="button" class="text-button" data-task-kind="${escape(job.kind)}" data-task-target="${escape(job.targetReleaseId)}">${escape(text("查看差分", "Open deltas"))}</button></div></article>`).join("") || `<p class="empty">${escape(text("还没有你的差分任务。", "No delta jobs submitted by this account yet."))}</p>`}</div>
       ${jobs.length > 8 ? `<nav class="release-pagination"><button type="button" data-task-action="prev" ${page === 0 ? "disabled" : ""}>${escape(text("上一页", "Previous"))}</button><span>${page+1} / ${Math.ceil(jobs.length/8)}</span><button type="button" data-task-action="next" ${(page+1)*8 >= jobs.length ? "disabled" : ""}>${escape(text("下一页", "Next"))}</button></nav>` : ""}`;
@@ -237,13 +246,20 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
       pendingNotices = value.notifications;
       const previouslyNoticed = Number(readLocal(key("noticed")) ?? 0);
       for (const notice of value.notifications) {
-        if (notice.unread && notice.id > previouslyNoticed && notice.status === "failed" && notice.type !== "candidate") {
+        if (notice.unread && notice.id > previouslyNoticed && notice.status === "failed" && notice.errorCode !== "USER_CANCELLED" && notice.type !== "candidate") {
           onError(new Error(`${text("差分生成失败", "Delta build failed")}: ${notice.baseVersionCode} → ${notice.targetVersionCode}\n${notice.errorCode ?? "CI_BUILD_FAILED"}`),
             `delta-result:${notice.jobId}:${notice.attempt}`);
         }
       }
       announce();
       onJobs(value.jobs);
+      for (const job of value.jobs.filter(j=>j.cancelling).slice(0,3)) {
+        if (controlling.has(job.id) || !canControl()) continue;
+        controlling.add(job.id);
+        try { await mutate(`/api/admin/delta/jobs/${encodeURIComponent(job.id)}/cancel-status`,{expectedRevision:job.revision,reason:"Confirm requested cancellation"}); }
+        catch (e) { if (current===generation) error=e.message; }
+        finally { controlling.delete(job.id); }
+      }
     } catch (e) { if (current === generation) { error = e.message; onError(e, "tasks-refresh"); } }
     finally {
       if (current === generation) {
@@ -293,9 +309,59 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
     }
     finally { if (current === generation) { pushBusy = false; render(); } }
   }
+  function controlButtons(job, locked = false) {
+    return window.TraceTaskControls?.buttons(job,{text,escape,locked:locked||controlling.has(job.id),allowed:canControl()}) ?? "";
+  }
+  async function control(job, action) {
+    if (!job || !active(job) || job.cancelling || controlling.has(job.id) || !canControl()) return;
+    const current=generation;
+    controlling.add(job.id); render();
+    try {
+      const confirmed=await confirmAction({tone:"danger",icon:action==="cancel"?"i-block":"i-refresh",
+        title:action==="cancel"?text("取消任务", "Cancel task"):text("取消并重新触发", "Cancel and restart"),
+        message:`${job.baseVersionCode} → ${job.targetVersionCode}`,
+        detail:text("这会中断当前任务。只有确认取消成功后才会重新运行；如果原任务已经成功，不会重复生成。", "This interrupts the current task. Restart waits for confirmed cancellation. An already successful task is not repeated."),reasonRequired:true});
+      if (!confirmed || current!==generation) return;
+      const result=await mutate(`/api/admin/delta/jobs/${encodeURIComponent(job.id)}/${action}`,
+        {expectedRevision:job.revision,reason:confirmed.reason || "Operator requested task control"});
+      if (current!==generation) return;
+      if (result.ok!==true || result.job?.id!==job.id) throw new Error(text("任务操作未获确认", "Task operation was not confirmed"));
+      if (result.providerFinished) notify(text("原构建已结束，未重新提交，请核对原结果。", "The original run finished. Nothing was restarted; check its result."));
+      else notify(text("操作已提交，请以任务的实际状态为准。", "Request submitted. Check the confirmed task status."));
+    } catch(e) { if(current===generation) {error=e.message;onError(e,"tasks-control");} }
+    finally {controlling.delete(job.id);if(current===generation){render();void refresh();}}
+  }
+  async function dismiss(body, job = null) {
+    if (!actor || dismissBusy) return;
+    const current=generation;
+    dismissBusy=true; render();
+    try {
+      const confirmed=await confirmAction({tone:"danger",icon:"i-trash",title:text("删除显示记录", "Remove display records"),
+        message:text("只移除通知或已结束任务的显示记录，不取消任务、不删除安装包。", "Only notifications or completed task display records are removed. Tasks and packages are not deleted.")});
+      if(!confirmed || current!==generation) return;
+      readRevision++;
+      const result=await mutate(job?"/api/admin/delta/notifications/hide-jobs":"/api/admin/delta/notifications/dismiss",
+        job?{ids:[job.id],attempts:{[job.id]:job.attempt}}:body);
+      if(current!==generation) return;
+      if(result.ok!==true) throw new Error(text("删除未获确认", "Dismissal not confirmed"));
+      const confirmedIds=job?result.hiddenIds:result.dismissedIds,expected=job?[job.id]:(body.ids??[]);
+      if(!Array.isArray(confirmedIds)||!expected.every(id=>confirmedIds.includes(id))) throw new Error(text("部分记录未确认删除，请刷新核对。", "Some records were not confirmed removed; refresh to reconcile."));
+      selectedNotices.clear(); await refresh();
+    } catch(e) {if(current===generation){error=e.message;onError(e,"tasks-dismiss");}}
+    finally {if(current===generation){dismissBusy=false;render();}}
+  }
+  content.addEventListener("change", event => {
+    const id=Number(event.target.dataset.selectNotice);
+    if(!id || dismissBusy) return;
+    if(event.target.checked) selectedNotices.add(id); else selectedNotices.delete(id);
+    render();
+  });
   content.addEventListener("click", async event => {
     const target = event.target.closest("button");
     if (!target || target.disabled) return;
+    if (target.dataset.taskControl) {
+      await control(data?.jobs.find(j=>j.id===target.dataset.controlJob),target.dataset.taskControl); return;
+    }
     if (target.dataset.taskTarget) {
       const current = generation;
       onRecovered("tasks-open");
@@ -306,6 +372,14 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
       return;
     }
     const action = target.dataset.taskAction;
+    if(action==="notice-delete") {await dismiss({ids:[Number(target.dataset.noticeId)]});return;}
+    if(action==="notice-delete-selected") {await dismiss({ids:[...selectedNotices]});return;}
+    if(action==="notice-clear-read") {await dismiss({mode:"read",throughId:Math.max(0,...(data?.notifications??[]).map(n=>n.id))});return;}
+    if(action==="hide-job") {await dismiss({},data?.jobs.find(j=>j.id===target.dataset.hideJob));return;}
+    if(action==="notice-select-page") {
+      const rows=(data?.notifications??[]).slice(noticePage*6,(noticePage+1)*6),remove=rows.every(n=>selectedNotices.has(n.id));
+      for(const n of rows) {if(remove)selectedNotices.delete(n.id);else selectedNotices.add(n.id);} render();return;
+    }
     if (action === "push-on") { await enablePush(); return; }
     const current = generation;
     try {
@@ -346,10 +420,11 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
   function setActor(value) {
     if (actor === value) { refresh(); return; }
     actor = value; generation++; data = null; loading = false; error = ""; page = 0; pushBusy = false; pushChecking = false; pushError = "";
+    selectedNotices.clear(); controlling.clear(); dismissBusy=false;
     noticePage = 0; readRevision = 0; readBusy = false; readError = ""; readQueue = new Set(); refreshAgain = false; clearTimeout(viewTimer);
     clearTimeout(timer); clearTimeout(toastTimer); toast.hidden = true; pendingNotices = [];
     pushInfo = null;
     render(); if (actor) { refresh(); resume(); }
   }
-  return { refresh, render, setActor, progress, phase, resume };
+  return { refresh, render, setActor, progress, phase, resume, controlButtons, control };
 };
