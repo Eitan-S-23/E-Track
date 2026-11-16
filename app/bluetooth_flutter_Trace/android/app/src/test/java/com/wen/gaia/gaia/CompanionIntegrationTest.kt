@@ -112,6 +112,7 @@ class CompanionIntegrationTest {
         assertEquals(reason, intent.getStringExtra("reason"))
         val service = Robolectric.buildService(CompanionService::class.java).create().get()
         service.onStartCommand(intent, 0, 1)
+        assertNotNull("Headless startup: ${prefs.getString("lastResult", null)}", cache.get(DeviceOtaBridge.ENGINE_ID))
         return service
     }
 
@@ -452,7 +453,8 @@ class CompanionChooserActivity : Activity() {
 }
 
 /** JNI/Dart VM are external to this host test; all project method handlers remain real. */
-@Implements(value = FlutterEngine::class, isInAndroidSdk = false)
+// Delegated constructors run before a Context-only shadow hook. Never enter JNI.
+@Implements(value = FlutterEngine::class, isInAndroidSdk = false, callThroughByDefault = false)
 class CompanionEngineBoundary {
     private val executor = Shadow.newInstanceOf(DartExecutor::class.java)
     private val listeners = mutableListOf<FlutterEngine.EngineLifecycleListener>()
@@ -467,13 +469,13 @@ class CompanionEngineBoundary {
     companion object { var created = 0 }
 }
 
-@Implements(value = FlutterLoader::class, isInAndroidSdk = false)
+@Implements(value = FlutterLoader::class, isInAndroidSdk = false, callThroughByDefault = false)
 class CompanionLoaderBoundary {
     @Implementation fun initialized() = true
     @Implementation fun findAppBundlePath() = "flutter_assets"
 }
 
-@Implements(value = DartExecutor::class, isInAndroidSdk = false)
+@Implements(value = DartExecutor::class, isInAndroidSdk = false, callThroughByDefault = false)
 class CompanionDartBoundary {
     val messages = CompanionMessenger()
     val entrypoints = mutableListOf<String>()

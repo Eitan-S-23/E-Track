@@ -327,3 +327,11 @@ extending deadlines, overriding runtime/stream disposal or running project work
 outside the controlled clock. Preserve the first scenario error even when cleanup
 also fails, and always retire controllers/registrations so one failure cannot
 contaminate the next scenario.
+
+Native host shadows disable call-through only for FlutterEngine, FlutterLoader
+and DartExecutor. An outer Context constructor hook alone does not stop the
+delegated FlutterEngine constructor from trying to load JNI. The explicit
+embedding shadow methods still model engine count/liveness, method messages and
+destruction callbacks; assert the cached engine exists immediately after the real
+service starts. Project Bridge, Service, receiver, jobs and permission/GATT
+admission must never be shadowed to avoid a missing native library in this test.
