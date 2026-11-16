@@ -889,7 +889,7 @@
 
 <a id="app-companion-01"></a>
 #### APP-COMPANION-01 E-Track 后台伴侣运行、OTA 交互与基础体验完善
-状态: 进行中 ｜ 认领: Codex(当前主会话兼实现者) / 2026-11-16 ｜ 更新: 2026-11-16(根目录 main 入口修正已交付；综合实现已提交开发分支 7fa86c2c，并补齐不抢占 BLE 的被动记录调试模式。最新双平台全量自测、已配置固件地址的调试 APK、标准 APK/EXE 均通过并归档；GCC/模拟器与未变更原生输入验证通过。Windows 再次未识别到原测试手机；真机联调、独立验收和产品主线合入未完成)
+状态: 进行中 ｜ 认领: Codex(当前主会话兼实现者) / 2026-11-16 ｜ 更新: 2026-11-16(开发分支 f48bd193 已集中整改 R01-R05；双平台全量自测、42 项 MCU 主机回归及 GCC App/Boot/模拟器构建通过。被动调试 APK、标准 APK/EXE 均通过，产物已归档并核对；等待非实现会话复审，T01/T02 覆盖缺口及真机联调、独立验收、产品主线合入未完成。本轮未重新枚举或操作设备)
 - 唯一 Spec: [prompt-APP-COMPANION-01.md](docs/ota-prompts/prompt-APP-COMPANION-01.md)。本卡统一维护状态和完成勾选，不拆子卡、不增加阶段分母。
 - 开工前置: 保护旧改动、恢复根目录主线、入口检查及 Spec 纠偏统一在本卡记录；不另建治理卡。实现基线为已核对的 main，不使用归档工作区或 P3-8 预审版本代替当前产品。
 - 复用: P3-8-v5 和 P3-5-v5 已完成，P4 为既有完成基础；只补新增能力和受影响回归，不重开历史任务，不改变 P1/P5 剩余要求或生产发布门槛。
@@ -900,7 +900,11 @@
 - [ ] C5 接入用户选定的 `generated-images/29.png`，适配平台图标并保持应用身份。
 - [ ] C6 受影响自测、必要构建、获准设备验证及非实现会话独立验收。
 - 记录与原件索引: [APP-COMPANION-01.md](docs/ota-exec-notes/APP-COMPANION-01.md)。自测、构建、现场观测、独立验收和主线交付分别报告，不以目录迁移或静态检查勾选产品完成。
-- 当前验证: `7fa86c2cffc3fc7bd611887c0a7c399830445c28` 的全量 CI `43787172124` 通过（Linux 962/16 skipped，Windows 942/36 skipped，另各 11 项候选测试）；被动记录调试包 `43787308531` 和标准 APK/EXE `43787389782` 均通过，包名/签名/模式标记和本地哈希已核对，未发布/部署。APK 辅助工具 51 项、开发运行器 66 项通过；首次新增日志测试因通道用错失败，已只修正测试，原失败保留。未变更原生输入沿用 CI `43779455252`（27/27）；MCU 协议 18/18、入口/治理/图标/菜单 40 项及 GCC App/Boot/模拟器 build-07 保留原通过记录（394 条含警告行、0 错误）。01:51 UTC 的主机 USB 枚举仍未识别原测试手机，未启动新 ADB/安装/OTA；C1-C6 保持待真机与独立验收。产物、记录通道限制和路径审计见同卡实施记录。
+- 当前验证: `f48bd19304a4fc92e193d2465171477683f9756f` 的全量 CI `43804159244` 通过（Linux 983/16 skipped，Windows 963/36 skipped，另各 11 项候选测试），两端完整日志已归档。MCU 控制 24 项、真实方法抽取的交互/准入 18 项通过，旧边界仍被反证；build-09 的 App/模拟器为新产物，Boot 为未改变的增量产物，465 条含警告行、0 错误。原生输入未变，沿用 `43779455252` 的 27 项原件，不算新集成或真机证据。首轮 CI 的两项 Darwin 测试隔离失败及 build-08 的头文件缺失错误均保留；`43805040490` 被动记录调试 APK、`43805109162` 标准 APK/EXE 均通过，原始日志、实际产物及哈希已归档，不发布/部署。9 项主看板入口测试通过；写入审计保留 Cryptnet 时间戳归因未决，不清理、不声称零原生外部写入。历史 USB 枚举不代表当前连接状态；C1-C6 不勾选，原审核记录不改写。
+
+- Independent offline review (2026-11-16, Codex non-implementation session): source `7fa86c2c` has open AC01-R01..R05 findings, including two reproduced production-method host failures; see [consolidated findings](docs/ota-exec-notes/APP-COMPANION-01.md#independent-offline-review-2026-11-16). Original CI/artifact evidence was reconciled, not counted as independent acceptance. C1-C6 remain unchecked; formal/device acceptance NOT_RUN. This reviewer record is local pending delivery, with no product changes or merge.
+
+- Implementation remediation: `f48bd193` is ready for source/self-test re-review, not self-signed closure of R01-R05. The original review's local-pending record is preserved and included with this root documentation delivery. See [remediation handoff](docs/ota-exec-notes/APP-COMPANION-01.md#r01-r05-source-and-self-test-handoff).
 
 ## 9. 契约变更登记表(回审通道)
 
@@ -955,6 +959,10 @@
 | 2026-10-19 | P4-4 / Codex root / `P44-CREDENTIAL-01` | 新链两项产品整改与 Worker 部署已完成，但严格桶凭据的 account-owned/user-owned 创建 POST 均返回 403/9109，最终十项只读核对仍缺四个 S3 secrets | 保持两套独立桶限定 Object Read and Write，不替换旧 CI/provisioning token、不扩大权限；由 O1 直接配置或提供受保护来源与脱敏范围/有效期 | 按 §0.6 必需外部依赖缺失置阻塞；独立预审 10/10 和非发布 CI 通过不等于正式 PASS。保留实际部署异常/恢复和外部缓存未决；root 待凭据后冻结并组织新链/真实 reviewer 观测，gate=false，正式轮次零，未改 main | 已登记/外部凭据阻塞 |
 
 ## 10. 会话日志(每会话一行:日期 ｜ agent ｜ 动了哪些卡 ｜ 一句话结果)
+
+- 2026-11-16 | Codex implementation remediation | APP-COMPANION-01 remains in progress | R01-R05 repaired on `f48bd193`; 42 MCU host cases, full dual-host CI `43804159244`, GCC App/Boot/simulator build-09, passive APK `43805040490` and standard APK/EXE `43805109162` pass. Actual artifacts, warnings, failures and source bindings are archived. T01/T02, actual devices and independent acceptance remain open. No product main merge, release/deploy, historical rerun or external cleanup; Cryptnet attribution remains unresolved.
+
+- 2026-11-16 | Codex non-implementation reviewer | APP-COMPANION-01 remains in progress | Reviewed `7fa86c2c`, reconciled CI/native/build/icon originals and recorded AC01-R01..R05 plus testing gaps. Two focused production-method host probes reproduce failures; no device operations, full rebuild, product edits or formal PASS. Existing note/board update is local pending delivery; C1-C6, P3/P4 completion, P1/P5 and release gates unchanged.
 
 - 2026-11-16 | Codex 主会话兼实现者 | APP-COMPANION-01 进行中 | 按用户授权先完成根目录 main 入口迁移；57 项 tracked 改动保存为 stash，1,238 项原变更和 34 个覆盖冲突已备份，旧 main 的 18,426 个证据文件与选定图标不变。修正单卡的当前产品基线，继续实现；本地记录待提交，未发布或部署，不重开 P3/P4。
 - 2026-11-16 | Codex 主会话兼实现者（后续验证） | APP-COMPANION-01 进行中 | bedfa12f 的双平台全量自测、标准 APK/EXE 均已通过并保存原件；只交付根目录进度记录，不合并产品分支。测试手机不可用，保留真机与独立验收缺口、未决证书缓存来源审计；不发布、不清理项目外缓存、不重开 P3/P4。

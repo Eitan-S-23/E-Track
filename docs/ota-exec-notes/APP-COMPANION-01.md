@@ -7,6 +7,13 @@ pending-CI statements. The single card remains IN PROGRESS; C1-C6 are not signed
 off. Implementation, device observation, independent acceptance and main product
 integration are separate.
 
+Independent offline review, 2026-11-16: AC01-R01 through AC01-R05 below are open
+on `7fa86c2c`. Two production-method host probes reproduce product failures;
+three further findings are source traces, not claimed device observations.
+See [Independent Offline Review](#independent-offline-review-2026-11-16).
+This reviewer update is local and pending delivery; the original development
+results below remain valid as development results, not whole-card acceptance.
+
 - The authoritative board is `D:/github/my/E-Track/PLAN-OTA-EXEC.md`, not a cache
   or task-worktree copy. The published main before this note delivery is
   `5b8724eee59677af5f1f03ecbdf4f32635bdfa14`; the fresh entry query verified that
@@ -491,3 +498,386 @@ Sanitized receipt: `.cache/app-companion-01-20261116/development/keyring-auth/id
 The bounded adapter/launcher are in the same task cache, not product source.
 This restores the authenticated development route; it does not itself prove a
 CI job ran. Subsequent commits and run results must be recorded separately.
+
+## Independent Offline Review, 2026-11-16
+
+Reviewer: Codex, non-implementation session. This is the consolidated offline
+review requested by the user, under acceptance execution contract sections 0 and
+7.3; it is not a formal frozen acceptance round. No product code was edited.
+
+### Inputs And Original Evidence
+
+- Primary main and fresh remote main both resolve to
+  `e73673a7b2a5a3c2fe909eaca3546b4113e925f9`. The root main board was clean before
+  this review record. Product worktree `.worktrees/app-companion-01` is clean at
+  `7fa86c2cffc3fc7bd611887c0a7c399830445c28`; a fresh `ls-remote` also returns that
+  commit for `dev/flutter/app-companion-01-20261116`. The reviewed product diff
+  has 97 files. Source paths and line anchors below refer to that exact worktree.
+- Root evidence directory for this review is
+  `.cache/app-companion-01-20261116/review-20261116/`. Its `evidence.json` records
+  39 original source/log/artifact files with SHA-256, exact host-probe commands,
+  exit codes, log hashes, and limitations. Its SHA-256 is
+  `6026e8239d94f81f50366c4e52934e567c52b6f1016dd271c70712c884b6722e`.
+- Checks `43787172124`: independently read both original console summaries and
+  the Linux full test/analyze/SDK logs. They bind the reviewed source, full scope,
+  Flutter 3.47.8 / Dart 3.13.7, Linux 962/16 skipped and Windows 942/36 skipped,
+  zero failures, with 11 additional candidate tests on each host. The recorded
+  toolchain-generated analyzer/platform deltas are disclosed in `result.json`;
+  this is not a claim that their effective generated files were unchanged.
+- Debug APK `43787308531`: local size/hash match its source-bound metadata;
+  target, endpoint, sentinel and exact `passive:<sentinel>` token are present in
+  the actual kernel. Standard `43787389782` APK, EXE and runtime ZIP match their
+  recorded hashes. Signer/application ID observations remain the original CI
+  observations, not a new on-device or local apksigner execution. Main governance
+  `43789574218` original console binds `e73673a7` and contains its real checks.
+- Native JUnit from `43779455252` contains CompanionServiceTest 9/9 and
+  DeviceOtaServiceTest 18/18 with no failures/errors/skips. Git comparison of
+  `9ccea658..7fa86c2c` confirms Android and lockfile inputs unchanged. These
+  originals remain applicable to their native host tests, not new CDM/device
+  behavior or the changed Dart/native integration.
+- Build-07's 12 source hashes and all nine artifact hashes match the present
+  originals. It retains 394 warning-containing lines and zero errors; Boot and
+  simulator are earlier unchanged incremental outputs. No firmware or simulator
+  build was repeated. MainMenu's original-red/candidate-green log and the 18-case
+  control log bind the current source hashes and were read without replaying them.
+- The selected icon and 27 manifest-bound assets pass the existing three read-only
+  icon tests in this review. The Android foreground raster was also inspected.
+  No icon was regenerated; actual launcher/notification rendering is still open.
+- `d402571a..7fa86c2c` changes only the passive diagnostic test fixture. The failed
+  original test log still contains `observation capture incomplete`; production
+  logging guards were not relaxed. No historical failure or frozen bundle changed.
+
+### Consolidated Findings
+
+All five findings below require implementation-owner remediation before the
+affected final acceptance. R01/R02 were reproduced with extracted production
+method bodies; the LVGL/platform boundaries were host stubs, not actual inputs,
+radio, Flash writes or physical rotary observations. R03/R04/R05 are source
+findings; their new Dart/platform regression tests were NOT_RUN in this review.
+There is no usable Dart executable on PATH and no local SDK/build was installed.
+
+#### AC01-R01, P1, A3/A4: A Held Press Can Confirm A Replacement Offer
+
+Evidence: `USER/App/Pages/FirmwareUpdate/FirmwareUpdate.cpp:1367` handles only
+CLICKED and uses the global `companionDisplayed` at release. `:1402` overwrites
+that snapshot every refresh. No snapshot is captured at PRESSED or invalidated
+when an offer changes. `Libraries/Bluetooth/CompanionControl.h:241` accepts a
+new offer nonce, so its strict Matches check subsequently compares B with B.
+
+Reproduction: show offer A/version 30328, begin the Install press, deliver and
+refresh offer B/version 30329 before release, then send CLICKED to the real
+handler. `offer_replaced_during_press.log` records CHOICE/NOW for B, not A, and
+exit 1. A lost/intervening CHECKING state or a replacement between refresh ticks
+does not force a button state change to cancel the press. This is a new offer
+being authorized by an interaction begun on the old one, not merely a rejected
+stale message at the App.
+
+Preferred repair: capture the immutable offer at interaction start, and cancel
+that interaction on offer/session/version/hash changes; require a new visible
+confirmation for B. Do not simply refresh the comparison snapshot before CLICKED.
+Verify pointer and encoder press/refresh/release, same-offer retransmission,
+expiry, Later and SHORT_CLICKED/CLICKED de-duplication. Replacing any bound field
+must cause zero NOW/BEGIN for the replacement; a fresh explicit press sends once.
+
+#### AC01-R02, P1, A3: Safety Is Checked At Choice, Not Receiver Admission
+
+Evidence: the GPX-open gate is only in modal `CompanionCanInstall()` at
+`USER/App/Pages/FirmwareUpdate/FirmwareUpdate.cpp:1326`. The HAL choice gate at
+`USER/HAL/HAL_Bluetooth.cpp:669` checks motion/battery only at choice. The later
+BEGIN/BEGIN2 receiver path uses `ble_env_overlay_acquire()` at `:330`, whose only
+admission is the existing free-overlay check. Neither that callback nor the
+recording-start path preserves an installation reservation. Later/Back can close
+the modal after NOW while the App is still rechecking INFO/latest.
+
+Reproduction: send a valid NOW while parked, then make recording open, speed
+5 km/h and battery 10% without charging before receiver admission. The extracted
+real methods report `ui_allows_install=0 receiver_overlay_admitted=1` in
+`unsafe_after_choice.log`, exit 1. Session header/BCB checks do not check these
+conditions either; no hardware transfer was attempted by the probe.
+
+Preferred repair: put the declared safety policy at the actual receiver/install
+admission boundary and preserve a bounded, offer-bound pending-install state, or
+otherwise prevent conflicting recording from starting during that interval.
+Keep the frozen binary wire fields/opcodes and existing safe rejection semantics;
+do not abort an already irreversible END/apply merely to enforce an expired UI
+state. Verify active and paused-open GPX, motion and battery transitions between
+NOW, refreshed metadata and first BEGIN, plus reservation timeout/cancel cleanup.
+
+#### AC01-R03, P1, A3: Consent Can Expire During Transport Negotiation
+
+Evidence: `app/bluetooth_flutter_Trace/lib/services/ota_service.dart:1610` checks
+consent, then `:1644` calls `transport.transfer()`. With v2 enabled,
+`lib/ota/ota_pipeline_transport.dart:302` waits for pause/capability negotiation,
+and `:328` sends BEGIN2 without another consent check. The v1 fallback similarly
+starts after that await. No transport callback checks the offer expiry; the
+existing apply-boundary callback changes phase only.
+
+Thus a consent valid at the service check but expired before the capability
+reply still authorizes the first BEGIN. The added regression at
+`test/ota/ota_service_upgrade_test.dart:354` holds pre-transfer GET_INFO only;
+it does not hold the subsequent CAPS/first-BEGIN boundary.
+
+Preferred repair: pass an immutable, fail-closed initial-admission guard to the
+existing transport and evaluate it after negotiation and immediately before its
+first BEGIN/BEGIN2 dispatch. Do not add another sender or expire a previously
+started, non-cancellable apply. A delayed successful CAPS response and a delayed
+v1 fallback that cross expiry must both yield zero BEGIN; still-valid consent
+must start exactly once. Include the original stale binding/GET_INFO regressions.
+
+#### AC01-R04, P2, A2/A3: Late Control Attachment Can Install An Old Session
+
+Evidence: `lib/companion/companion_runtime.dart:252` captures a session before
+asynchronous cancellation/discovery/subscription, but `:266` validates only the
+runtime epoch and the mutable current link before installing the subscription.
+Disconnect clears `_session`/`_link` at `:226` without advancing the runtime
+epoch. A reconnect can also consume the old `_attachFlight` at `:236`.
+
+In the supported baseline mode, discovery at
+`lib/services/bluetooth_service.dart:2102` deliberately has no tracked-generation
+guard. If the old discovery finishes after reconnect has established new INFO
+and session S2, the final checks see the new valid link and publish a listener
+capturing S1. That listener drops S2 CAPS/CHECK at `companion_runtime.dart:261`,
+while `_controlDirty=false` prevents the next attach from replacing it. This is
+an availability failure, not evidence of a wrong-image transfer.
+
+Preferred repair: bind attachment and its flight to the captured address, link
+generation and session, check all of them after each await and before publication,
+and schedule a fresh attachment when a stale flight retires. Preserve the existing
+CCCD owner-token protections. Test baseline and reuse modes with delayed discovery
+and subscription crossing reconnect; only the S2 listener may remain and a fresh
+MCU CHECK must work without a further disconnect or long-period wait.
+
+#### AC01-R05, P2, A1/A6: iOS Notification Authorization Lost Its Only Entry
+
+Evidence: `lib/services/notification_service.dart:48` now disables all three
+Darwin initialization authorization requests. `_requestPermissionsImpl()` at
+`:91` implements only Android and returns true otherwise; the new permission
+page is Android-only. There is no remaining iOS requestAuthorization caller.
+On a clean iOS installation, initialize/show therefore no longer prompts for or
+obtains notification permission, and the explicit helper can falsely report true.
+This is a non-Android compatibility regression, not a request to implement iOS
+background companion execution.
+
+Preferred repair: keep Android's user-initiated flow, but retain or expose an
+explicit iOS notification request using the Darwin plugin and return its actual
+result. Verify clean-install grant/deny and subsequent requests on a platform
+fake, and preserve the no-automatic-Android-prompt regression. Existing iOS users
+with authorization already granted are not the discriminating case.
+
+### A1-A6 Coverage And Remaining Work
+
+| Criterion | Independent Offline Result | Missing Evidence / Next Oracle |
+| --- | --- | --- |
+| A1 | Version-specific Android permissions, unknown OEM state and settings-return code reviewed; R05 is open. | AC01-T01: no CompanionSetupPage lifecycle/denial widget tests or real permission observations. Add skip, permanent denial, revoked/disabled channel and return-to-settings cases; retain D1 real dialogs. |
+| A2 | CDM/JobScheduler/retained-engine/connectedDevice ownership and cleanup paths reviewed; R04 is open. | AC01-T02: native tests replace problem/initialize/GATT with CompanionExecution fakes and only use SDK 34. They do not execute chooser, real Bridge admission, boot/job restoration or headless engine startup. Runtime tests force foregroundScanningAllowed=true, so headless telemetry and DB-failure retention are also uncovered. Add bounded host integration cases; retain D2 actual lifecycle observations. |
+| A3 | Package/identity guards and single-sender reuse reviewed; R01-R04 prevent acceptance. | Add their delayed-event regressions, plus successful foreign-identity replacement and owner return, not only INFO=null recovery. D3/D4 actual backend/consent/target-version/raw-SHA observations remain NOT_RUN. |
+| A4 | Existing MainMenu original-red/candidate-green evidence is applicable; new modal R01 reproduced. | Existing host menu test extracts four MainMenu methods only. It is not modal/LVGL rendering or the per-page empty/long/re-entry/physical-wheel matrix. D5 remains NOT_RUN. |
+| A5 | Exact source, 27 asset hashes, platform dimensions and monochrome declarations pass the three read-only host checks; APK bytes/mode are verified. | Installed launcher/adaptive/notification appearance and installation compatibility remain NOT_OBSERVED. Do not claim run-as support for the standard release-mode package. |
+| A6 | CI/build originals and applicable unchanged native inputs reconciled; no unnecessary full build repeated. | Open product findings, missing integration tests and D0-D5 prevent closure. Formal contract/freeze/precheck/execution/final adjudication remain NOT_RUN, not an invented partial PASS. |
+
+Environment boundary: the supplied USB originals did not identify the expected
+phone. This review did not repeat that probe or assume it observed the current
+phone state. Phone/MCU identity, candidate finalization and full collection/retrieval
+readiness remain D0 prerequisites; their absence did not stop this offline review.
+No installation, launch, system-dialog tap, J-Link, OTA or physical wheel action
+was performed. P3/P4 accepted cards, frozen evidence, and P1/P5/release gates are
+unchanged. No inherited P3-8 PASS was relabeled as acceptance of the new CDM path.
+
+### Next Owner And Write Boundary
+
+The implementation owner should repair R01-R05 in one scoped batch with the
+specified regressions and affected development CI. T01/T02 are testing gaps,
+not assertions that every untested platform behavior is broken. Return the exact
+new source and original outputs to this independent reviewer; then prepare the
+existing single-card formal contract and only the genuinely missing observations.
+Do not require a second full hardware campaign or reopen P3/P4.
+
+Writes selected in this review are limited to the root review directory above,
+this existing note and the root board. Parent-chain checks rejected reparse
+redirects, subprocess cwd was explicit, and compiler/temp/HOME/AppData were inside
+the review directory. The product worktree and old evidence were not edited.
+This is a local pending record, with no commit, push, merge, publication or
+deployment. Existing Cryptnet cache attribution in `final-write-audit-05.json`
+remains UNRESOLVED; no external cache was cleaned and no zero-native-external-write
+claim is made.
+
+## R01-R05 Remediation In Progress, 2026-11-16
+
+The implementation owner has read the independent review and its original R01/R02
+probe failures. Work continues on `dev/flutter/app-companion-01-20261116` from
+`7fa86c2cffc3fc7bd611887c0a7c399830445c28`; the review record and evidence remain
+unchanged. The root review edits are local pending, not remotely delivered.
+
+- R01: bind an interaction to the offer visible at PRESSED, invalidate it on
+  replacement/expiry/lost focus, and consume it once at CLICKED.
+- R02: recheck recording/motion/battery at receiver acquisition; block a new
+  recording while an offer-bound, bounded install reservation or binary owner
+  exists. Preserve wire rejection and irreversible END/apply behavior.
+- R03: guard the first BEGIN/BEGIN2 chunk dispatch after negotiation, queueing
+  and MTU waits, using the immutable service consent. Do not expire an already
+  started transfer or apply.
+- R04: fence attachment and outstanding control operations by captured address,
+  connection generation and session; a stale attachment cannot occupy the new
+  session's single-flight slot, publish its listener or reset its decoder.
+- R05: restore Darwin initialization authorization and implement the explicit
+  Darwin request's actual result, without automatic Android permission prompts.
+
+Add source-bound MCU interaction/admission tests and delayed Dart/platform
+regressions; validate the affected batch through the existing contained host
+checks and authorized development CI/build routes. Results and the new source
+commit will be recorded after execution, not predeclared here. This is repair
+work, not independent acceptance; C1-C6 and device observations remain open.
+
+Additional initial-BEGIN pause check: the v1 path did not wait for a pause that
+arrived during its MTU await. Waiting for resume while retaining the serial
+writer would deadlock the service's INFO recovery. The correction yields the
+writer before any BEGIN chunk, waits outside that queue, and rechecks admission
+after resume. Targeted tests cover MTU, queued INFO and pause/recovery with both
+expired and valid consent. Channel dispatch is a host observation, not proof of
+physical radio arrival; END/apply and existing throughput timing remain unchanged.
+
+The first remediation GCC build (`.worktrees/app-companion-01/.cache/companion-build-08/`)
+failed because DP_Recorder.cpp included HAL_Def.h indirectly but not the new
+CompanionUpdate.h declaration. Its extracted-method host tests do not compile
+that original include graph. The direct dependency is now included at the caller;
+the failed log, six warning-containing lines, one compiler error, and old artifact
+timestamps remain recorded. No stale artifact from that run is a successful build.
+
+Development CI `43803165474` on `56765199` completed strict analysis on both
+hosts, but the two new Darwin tests failed before their assertions because the
+same file had already constructed the plugin's Android singleton. The Linux
+full test log and both console summaries are retained (979/16/2 and 959/36/2
+passed/skipped/failed); candidate checks were NOT_RUN. The tests are moved to a
+Darwin-only test-file isolate, without relaxing permission assertions or changing
+dependencies. Late-control tests also cover an already-created stream delivered
+after reconnect, in addition to an old subscription rejected by its owner token.
+
+## R01-R05 Source And Self-Test Handoff
+
+Implementation source: `f48bd19304a4fc92e193d2465171477683f9756f`, pushed to
+`dev/flutter/app-companion-01-20261116`, in `.worktrees/app-companion-01`.
+The repair is the bounded `7fa86c2c..f48bd193` delta, including WIP `56765199`.
+No product code has been merged into main. This is implementation remediation
+for independent re-review, not a formal acceptance result or self-closure of the
+reviewer's findings. The preceding independent review is retained verbatim.
+
+### Repairs And Oracles
+
+| Finding | Implemented Boundary | Targeted Verification |
+| --- | --- | --- |
+| R01 | PRESSED captures the displayed offer; CLICKED consumes it once and compares display/live snapshots. Session, request, version, full hashes and local revision must match; checking, replacement, expiry or lost interaction disarms the press. | Held replacement with/without refresh, A-B-A, retransmission, checking/expiry, lost/disabled press, Later and duplicate events. Old production event boundary still fails the replacement oracle. |
+| R02 | Real BEGIN/BEGIN2 overlay acquisition rechecks open/paused GPX, motion and power. NOW creates a nonrenewable 120-second recording reservation; recorder/model/UI propagate refused START/CONTINUE. | Safe choice followed by recording, motion or low power rejects actual admission; charging, paused-open GPX, cleanup/wrap/timeout, binary ownership and no false REC UI. Old overlay boundary still fails the unsafe-admission oracle. |
+| R03 | Immutable service consent and owner checked synchronously before first BEGIN/BEGIN2 chunk dispatch, after negotiation/queue/MTU waits. Initial pause yields the writer for INFO recovery before resume. | Delayed CAPS and v1 fallback cross expiry with zero BEGIN/END; positive controls complete. Queue/MTU/pause tests check once-only admission and preserve already-started DATA/END behavior. |
+| R04 | Control attachment and in-flight requests bind address, connection generation, session and runtime epoch across awaits. A stale completion cannot install/reset the successor's listener/decoder. | Six late discovery/subscription/created-stream cases across baseline/reuse; partial S2 CHECK survives, with no third reconnect. Old metadata cannot publish a new-session offer; successful foreign identity queries return the companion owner. |
+| R05 | Darwin keeps initial alert/badge/sound authorization and explicit permission requests return the native result. Android initialization remains nonprompting. | Darwin-only isolate verifies allow/deny and repeated actual requests; Android initialization and concurrent explicit requests remain covered. |
+
+The product `docs/companion-control-contract.md` records the signatures, failure
+matrix and delayed-event pattern; read it from the above source commit, not an
+unmerged task-board copy. Frozen binary protocol, irreversible END/apply,
+historical bundles and P3/P4 status are unchanged. Cross-layer caller search
+confirmed the three recording START/CONTINUE UI sites all consume refusal.
+
+### Executed Self-Tests
+
+Evidence root below is `.cache/app-companion-01-20261116/`; firmware paths are
+relative to `.worktrees/app-companion-01/`.
+
+- `checks-remediation-03/`: `node .cache/app-companion-01-20261116/checks.cjs remediation checks-remediation-03`
+  ran MCU control 24/24, extracted production interaction/admission/recorder/UI
+  18/18, and task whitespace check, all exit 0. The suite includes two required
+  original-boundary failures as negative controls. Small compiled fixtures and
+  source hashes are retained; platform/LVGL edges are stubs, not hardware input.
+- CI `43804159244`, exact `f48bd193`, scope `all`: strict analysis PASS on Linux
+  and Windows; full tests 983 passed/16 skipped and 963 passed/36 skipped,
+  zero failures; candidate tests 11/11 on each. SDK: Flutter 3.47.8, Dart 3.13.7.
+  Both full artifact directories are `development/keyring-artifacts-43804159244/`
+  and `development/keyring-windows-artifacts-43804159244/`, with source/result/SDK,
+  analyze, tests and candidate logs. Console copy: `development/keyring-log-43804159244/`.
+  The status receipt in `keyring-ci-38/run-43804159244.json` is valid; that adapter
+  later failed with EOF while reading unrelated historical main run 43789574252.
+  Its failure is retained, not misclassified as a failed product CI or retried job.
+- `.cache/companion-build-09/`: `node .cache/app-companion-build.cjs --short-path --batch=09`
+  completed Release/Ninja configure, GCC App/Boot, MSBuild simulator and explicit
+  GNU size, all exit 0. SOURCE_DATE_EPOCH=1786320000; project-local `.cache/b`
+  and CMAKE_OBJECT_PATH_MAX=180 reuse the previously qualified short-path route.
+  There are 465 warning-containing lines and zero errors, not a warning-free build.
+  App size text/data/bss is 610676/940/563352; Boot 14720/4/9780. App and simulator
+  are new outputs; Boot retains its unchanged 2026-11-15 incremental output.
+  Nine artifact sizes/timestamps/full SHA-256 and 15 input hashes are in result.json.
+  Its HEAD field is `56765199`: DP_Recorder's direct include was still uncommitted
+  at execution. The recorded input bytes match the final `f48bd193` checkout;
+  its only later firmware-source delta is that include. Do not label the raw
+  build receipt as a clean `56765199` build or rebuild just to change this label.
+- Native JUnit 27/27 from `43779455252` remains the original observation.
+  `git diff --name-only 9ccea658 HEAD -- app/bluetooth_flutter_Trace/android app/bluetooth_flutter_Trace/pubspec.lock`
+  is empty on the delivered worktree. This permits the narrow original native
+  host-test reference, not new Darwin/CDM/boot/headless integration evidence.
+- Failed `43803165474` and build-08, plus checks-remediation-01/02, are retained.
+  No failed assertion, warning, skipped case, old review probe or frozen input was
+  deleted to produce the passing result. Method-extraction tests cannot validate
+  the original include graph; the actual build caught and qualified that repair.
+
+### Current Packages And Remaining Work
+
+The unchanged `f48bd193` input passed passive debug APK `43805040490` and standard
+APK/EXE `43805109162`. Both requests are build-only, baseline link profile and
+isolated `.companion` Android ID. Release/Pages deployment jobs were skipped.
+Debug mode repeated full checks under its required workflow: 983/16 and 963/36
+passed/skipped, zero failures, and 11 candidate tests per host. Full debug logs
+are in `development/keyring-artifacts-43805040490/` and
+`development/keyring-windows-artifacts-43805040490/`; both build console originals
+are in their `development/keyring-log-<run>/` directories.
+
+| Actual File | Bytes | SHA-256 |
+| --- | --- | --- |
+| Passive debug APK | 132389311 | `55195f33af944db98d466aae15b0ad65827afa65d71251316cf33bc990e190c6` |
+| Standard release-mode APK | 48318616 | `09f43a48ac44da744a0c8d9b5a1d46adf8592d5eab7c79105aea85bf25edc37b` |
+| Windows EXE | 161792 | `ebc0373ebaec86c42821b43cb3f92f7be3c92e0f5eb2ff7b1220cc1999d2e1ea` |
+| Windows runtime ZIP | 20627355 | `54f2c412b6c53082f179f039486792babac1d53a720f5abdfa4f48aa49e5b100` |
+
+Exact local file paths and upstream artifact IDs/digests are in
+`development/keyring-package-43805040490/artifact.json` and
+`development/keyring-standard-artifacts-43805109162-03/artifacts.json`.
+The first two standard-download attempts failed with EOF (blob download, then
+GitHub /user); both failures remain in the unsuffixed and `-02` directories.
+Only artifact retrieval was retried after remote connectivity recovered, not CI,
+installation or OTA. The standard APK is release-mode validation, not a shipped
+production package: its `.companion` ID and fixed development certificate are
+intentional. CI verified the sole signer SHA-256
+`9e9b89c5e7fdc802b1fe71806a988a866db49cd988a739caeee56cb69f3df579`.
+The debug metadata reports the same signer/application ID; no local signer or
+device install was run.
+
+`final-write-audit-06.json` locally rehashes the downloaded files, checks
+debug metadata against the exact source, reconciles build-09's 15 inputs/nine
+outputs with the clean delivered worktree, and finds no Android/lockfile delta
+from the original native-test source. It reuses the supported read-only APK
+reader to inspect the actual 74577040-byte kernel: target, firmware endpoint,
+sentinel and exact `passive:<sentinel>` token all exist. These are compiled asset
+checks, not proof of current phone identity or runtime execution. The nine
+main-board host tests also passed; original output is
+`main-board-tests-remediation.log`.
+
+AC01-T01 remains open for setup-page denial/lifecycle widget tests and actual
+permission dialogs. AC01-T02 remains open for chooser/Bridge/boot/job/headless
+integration and telemetry/database-failure-retention coverage; the native fakes
+do not prove those boundaries. The additional successful foreign-identity/owner
+return scenario under A3 is now covered. D0-D5 current identity, collection route,
+actual permission/lifecycle/OTA/menu/icon observations and independent acceptance
+remain NOT_RUN. This remediation did not enumerate USB, install an APK, launch or
+tap the phone, flash/reset the MCU, transfer firmware or operate its wheel.
+Historical missing-phone evidence is not a claim about the current connection.
+
+Next owner: the independent reviewer should assess `7fa86c2c..f48bd193` against
+R01-R05 using these original results, then define only the remaining required
+observations under the existing single-card Spec. Do not reopen P3/P4, rerun
+successful historical device operations or treat this record as a whole-card PASS.
+Controllable outputs remain project-local. Audit-06 again observes changed native
+certificate-cache timestamps, including during remediation, under
+`C:/Windows/System32/config/systemprofile/AppData/LocalLow/Microsoft/CryptnetUrlCache/`
+and `C:/Users/SU/AppData/LocalLow/Microsoft/CryptnetUrlCache/`. Their exact files,
+sizes and times are recorded there; the responsible process remains UNRESOLVED.
+No cache was cleaned and there is no zero-native-external-write claim. Pinned
+global Git hooks and credential inputs remain read-only; local PowerShell was
+not invoked. A final post-delivery audit will retain the same boundary and
+uncertainty rather than overwrite this original.
