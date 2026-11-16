@@ -71,6 +71,7 @@
 - 原签名 `1.0.79+105`（`59131a3e`）已通过 E-Track `43968850096` 与原 Trace `43969069993`：Android APK、Windows EXE/ZIP、签名检查及 R2 回读/候选入库均成功；固件构建跳过。后台实际存在 `rel_trace_android_v1_0_79`，APK 与清单为 available。未发布 Beta/Stable 通道，未安装设备或生成新差分。
 - App/后台及必要支持文件已按精确源码交付 main `304d01f5`，未带入发布分支的无关固件和冻结证据。迁移 `0014_admin_ux.sql` 已应用一次并回读；原 Worker `54ad084f-1bc3-41a8-bcad-cdc28ff536d4` 已部署，绑定、通道和既有 29 条差分任务保持不变。主线交付复用相同输入的成功 CI/安装包，不重复打包。
 - 管理页面与 Public Pages 仍未部署新版本：原页面 HTML 尚旧，Public iOS 公告接口仍返回 400；Worker 三平台公告接口均为 200。原组织 SSO 和后台 owner 登录已实测正常，但 Pages 部署 OAuth 续期失败；CI 凭据的 Pages 管理接口返回 403。需用户在电脑浏览器恢复部署登录，已发送的首次有效链接等待超时，不能当作授权完成。
+- 续办已核对另一条既有 GitHub 发布凭据路线：页面流程 `40e450c6` 的 18 项保护检查通过，实际 run `43978919787` 在 Pages 只读检查返回 `403/10000`，两个页面部署及依赖安装均未执行。新网页登录 `login-03` 同样未收到回调而超时，链接已失效；`cloud/keyring-cloud-live-02/` 复查原安装包、通道和 29 条差分任务不变。下一步只需恢复浏览器部署登录，不重建安装包、不重跑迁移或成功任务。
 - 需求、原始失败、已交付项和剩余登录步骤见 [本批记录](docs/ota-exec-notes/APP-ADMIN-UX-01.md#authorized-delivery-2026-11-17)。不把候选入库或 Worker 部署当作整批页面已上线；iOS 分类不等于已具备 iOS 包发布能力。
 
 ### ADMIN-ACTION-CONTROLS-01

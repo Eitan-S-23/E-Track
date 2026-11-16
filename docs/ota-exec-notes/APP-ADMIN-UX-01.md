@@ -291,3 +291,40 @@ request to change the selected Beta/Stable channels.
   exact served assets and the iOS feed. Do not rebuild/re-register the successful
   packages, reapply migration 0014 or replay old delta generation for this step.
   APP-COMPANION-01's D0-D5 and independent whole-card obligations remain separate.
+
+### Alternate Deployment Route Check, 2026-11-17
+
+- Read-only secret metadata in `keyring-pagesinventory-01/result.json` confirms
+  the original repository `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`
+  slots exist. This is distinct from proving their values, identity or Pages
+  capability. No secret was read from GitHub, exported, replaced or widened.
+- Main `40e450c6004fdac009a47a5274e1c8dbc188d852` extends the existing manual
+  Pages workflow to use those protected slots, pin the exact verified source,
+  check the original account/projects/branch and live configuration before any
+  deployment, preserve Access secrets and verify configuration afterwards.
+  It can deploy the matching Public Functions in the same serialized operation.
+  Its two actual inline guards pass 18 offline positive/negative checks in
+  `.cache/app-admin-ux-20261117/pages-workflow-check/result.json`. These are
+  deployment-tool self-tests, not another product or independent acceptance run.
+- Actual [Pages run 43978919787](https://github.com/Eitan-S-23/E-Track/actions/runs/43978919787)
+  checks shipping source `59131a3e`, then fails its exact Admin Pages GET with
+  HTTP 403 / code 10000. Dependency installation, Admin/Public deployment and
+  readback steps are skipped. It did not build an App, apply a migration,
+  cancel a job or mutate Cloudflare. Its complete original job log and step
+  conclusions are retained in `keyring-logs-06/`. This closes the untested
+  alternate-route question; repeating the same credential is not a repair.
+- Fresh Wrangler login `cloud/keyring-cloud-login-03/` was presented while its
+  listener was active. Wrangler then reported `Timed out waiting for authorization
+  code`; the saved expiry remains `2026-11-14T19:21:28.012Z`. The adapter's outer
+  600-second timeout did not fire, hence `timedOut=false` in its receipt does not
+  mean a successful callback. This third link is expired and must not be reused.
+- `cloud/keyring-cloud-live-02/result.json` freshly verifies unchanged channel
+  pointers and all 29 existing delta-job rows, the original 1.0.79 candidate/R2
+  hashes, and the real Admin owner session. Worker feeds remain HTTP 200 on all
+  three platforms; Public iOS remains HTTP 400 and Admin HTML is still old.
+- The next required user action is one management-login confirmation in this
+  Windows computer's browser, not another task authorization or new plaintext
+  key. Generate a fresh bounded link when the user is at the computer. On success,
+  use `keyring-cloud-inspect-03`, then the prepared Admin/Public deployments and
+  readbacks. Do not rebuild packages, reapply 0014, redeploy the already delivered
+  Worker or touch the successful historical delta to unblock Pages.
