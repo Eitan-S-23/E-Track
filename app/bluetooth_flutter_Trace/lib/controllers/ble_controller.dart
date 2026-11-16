@@ -105,10 +105,11 @@ class BleController extends GetxController {
   }
 
   /// 开始扫描设备
-  Future<void> startScan() async {
+  Future<void> startScan({bool requestPermission = true}) async {
     try {
+      if (!_bluetoothService.foregroundScanningAllowed) return;
       // 检查权限
-      if (!await requestPermissions()) {
+      if (!(requestPermission ? await requestPermissions() : await PermissionHelper.checkBluetoothPermissions())) {
         return;
       }
 

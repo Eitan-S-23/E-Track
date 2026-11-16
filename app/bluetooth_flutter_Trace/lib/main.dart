@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'dart:io';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -27,6 +28,29 @@ import 'services/bluetooth_service.dart' as bt_service;
 import 'services/responsive_service.dart';
 import 'services/notification_service.dart';
 import 'services/background_task_service.dart';
+import 'companion/companion_runtime.dart';
+import 'pages/companion_setup_page.dart';
+
+bool _applicationVisible = false;
+void showApplication() {
+  if (_applicationVisible) return;
+  _applicationVisible = true;
+  runApp(const MyApp());
+}
+
+void registerCoreServices() {
+  if (!Get.isRegistered<ScanSettingsService>()) Get.put(ScanSettingsService(), permanent: true);
+  if (!Get.isRegistered<bt_service.BluetoothService>()) Get.put(bt_service.BluetoothService(), permanent: true);
+  if (!Get.isRegistered<BleController>()) Get.put(BleController(), permanent: true);
+  if (!Get.isRegistered<MonitorController>()) Get.put(MonitorController(loadHistory: false), permanent: true);
+  if (!Get.isRegistered<AppUpdateService>()) Get.put(AppUpdateService(), permanent: true);
+  if (!Get.isRegistered<OtaService>()) {
+    Get.put(OtaService(onOpenTask: () {
+      if (Get.currentRoute != '/device-ota') Get.toNamed('/device-ota');
+    }), permanent: true);
+  }
+  if (!Get.isRegistered<CompanionRuntime>()) Get.put(CompanionRuntime(onShowUi: showApplication), permanent: true);
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,7 +78,14 @@ void main() async {
     debugPrint('Database initialization error: $e');
   }
 
-  runApp(const MyApp());
+  // This also runs in the native retained engine before any Activity/page exists.
+  registerCoreServices();
+  if (Platform.isAndroid) {
+    final hasActivity = await const MethodChannel('trace/companion').invokeMethod<bool>('hasActivity');
+    if (hasActivity == true) showApplication();
+  } else {
+    showApplication();
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -109,12 +140,8 @@ class MyApp extends StatelessWidget {
           initialBinding: BindingsBuilder(() {
             // 按依赖顺序注册服务
             Get.put(ResponsiveService(), permanent: true); // 首先注册响应式服务
-            Get.put(ScanSettingsService(), permanent: true);
+            registerCoreServices();
             Get.put(AlertService(), permanent: true);
-            Get.put(OtaService(onOpenTask: () {
-              if (Get.currentRoute != '/device-ota') Get.toNamed('/device-ota');
-            }), permanent: true);
-            Get.put(AppUpdateService(), permanent: true);
             Get.put(VersionInventoryService(
               readAppIdentity: Get.find<AppUpdateService>().getInstalledInventoryIdentity,
               canReport: () => !Get.find<OtaService>().isUpgrading &&
@@ -124,10 +151,7 @@ class MyApp extends StatelessWidget {
                 Get.find<AppUpdateService>().isUpdating.stream,
               ],
             ), permanent: true);
-            Get.put(bt_service.BluetoothService(),
-                permanent: true); // 注册跨平台蓝牙服务
-            Get.put(BleController(), permanent: true);
-            Get.put(MonitorController(), permanent: true);
+            Get.find<MonitorController>().attachHistoryForUi();
             Get.put(BackgroundOptimizationService(), permanent: true);
 
             // 初始化通知服务
@@ -166,6 +190,7 @@ class MyApp extends StatelessWidget {
             });
           }),
           getPages: [
+            GetPage(name: '/companion-setup', page: () => const CompanionSetupPage()),
             GetPage(name: '/device-ota', page: () => const OtaUpgradePage()),
             GetPage(name: '/main', page: () => const MainAppPage()),
             GetPage(name: '/', page: () => const HomePage()),

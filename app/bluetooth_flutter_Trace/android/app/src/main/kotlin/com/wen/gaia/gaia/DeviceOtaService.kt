@@ -157,7 +157,7 @@ class DeviceOtaService : Service() {
             addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
         })
         val builder = NotificationCompat.Builder(this, DeviceOtaBridge.CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_stat_e_track)
             .setContentTitle("E-Track device OTA")
             .setContentText(if (progress >= 0) "$label: $progress%" else label)
             .setContentIntent(PendingIntent.getActivity(this, 2408, open,
@@ -169,7 +169,7 @@ class DeviceOtaService : Service() {
                 action = DeviceOtaBridge.CANCEL
                 data = Uri.parse("trace-device-ota://task/${requested.taskId}/${requested.generation}/cancel")
             })
-            builder.addAction(R.mipmap.ic_launcher, "Cancel device OTA",
+            builder.addAction(R.drawable.ic_stat_e_track, "Cancel device OTA",
                 PendingIntent.getService(this, 2409, cancel,
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
         }

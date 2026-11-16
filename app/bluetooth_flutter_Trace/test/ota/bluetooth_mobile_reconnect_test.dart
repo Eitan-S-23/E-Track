@@ -103,6 +103,20 @@ void main() {
   });
 
   group('mobile OTA reconnect boundary', skip: Platform.isWindows, () {
+    test('companion stop invalidates an outstanding native connection', () async {
+      final gate = Completer<void>();
+      final device = _Device(upper)..connectGate = gate;
+      created.add(device);
+      service.connectedDevices.add(device);
+      service.otaDeviceFactoryForTest = (_) => device;
+      final pending = service.connectCompanionDeviceByAddress(lower);
+      await service.disconnectCompanionDeviceByAddress(lower);
+      gate.complete();
+      expect(await pending, isFalse);
+      expect(device.isConnected, isFalse);
+      expect(service.connectedDevices, isEmpty);
+    });
+
     test('simultaneous same-address connects share the native attempt', () async {
       final gate = Completer<void>();
       final device = _Device(upper)..connectGate = gate;

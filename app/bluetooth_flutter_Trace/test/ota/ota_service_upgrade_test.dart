@@ -6,13 +6,15 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart' show BluetoothDevice;
+import 'package:flutter_blue_plus/flutter_blue_plus.dart' as fbp;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 
 import 'package:ble_monitor/ota/ota_ble_codec.dart';
 import 'package:ble_monitor/ota/ota_ble_transport.dart';
 import 'package:ble_monitor/ota/ota_background.dart';
+import 'package:ble_monitor/ota/ota_upgrade_consent.dart';
+import 'package:ble_monitor/companion/companion_protocol.dart';
 import 'package:ble_monitor/ota/ota_device_info.dart';
 import 'package:ble_monitor/ota/ota_diagnostics.dart';
 import 'package:ble_monitor/ota/ota_download.dart';
@@ -194,7 +196,7 @@ void main() {
   }
 
   OtaService makeService({
-    required _UpgradeFakeBle ble,
+    required BluetoothService ble,
     required Directory firmwareDir,
     List<String>? notifyLog,
     HttpClientAdapter? latestAdapter,
@@ -331,6 +333,283 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 5));
     }
   }
+
+  test('companion consent rejects stale bindings before any write', () async {
+    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: []);
+    final service = Get.find<OtaService>();
+    final latest = service.latestInfo!;
+    final writes = ble.platformWriteCalls;
+    for (final drift in ['address', 'generation', 'base', 'version', 'package', 'target', 'expiry']) {
+      final consent = OtaUpgradeConsent(address: drift == 'address' ? 'OTHER' : 'AA:BB',
+        linkGeneration: ble.otaLinkGeneration('AA:BB') + (drift == 'generation' ? 1 : 0),
+        baseImageSha256: drift == 'base' ? '00' * 32 : service.deviceInfo!.currentImageSha256Hex,
+        versionCode: latest.versionCode! + (drift == 'version' ? 1 : 0),
+        packageSha256: drift == 'package' ? '00' * 32 : latest.asset!.sha256,
+        targetImageSha256: drift == 'target' ? '00' * 32 : latest.targetImageSha256!,
+        expiresAt: drift == 'expiry' ? DateTime.now().subtract(const Duration(seconds: 1)) : null);
+      expect(await service.startOtaUpgrade('AA:BB', consent: consent), isFalse, reason: drift);
+      expect(ble.platformWriteCalls, writes, reason: drift);
+    }
+  });
+
+  test('consent is checked again after the asynchronous pre-BEGIN identity query', () async {
+    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: []);
+    final service = Get.find<OtaService>();
+    final latest = service.latestInfo!;
+    final consent = OtaUpgradeConsent(address: 'AA:BB', linkGeneration: ble.otaLinkGeneration('AA:BB'),
+      baseImageSha256: service.deviceInfo!.currentImageSha256Hex, versionCode: latest.versionCode!,
+      packageSha256: latest.asset!.sha256, targetImageSha256: latest.targetImageSha256!,
+      expiresAt: DateTime.now().add(const Duration(seconds: 1)));
+    final before = ble.getInfoCalls;
+    ble.holdInfo = true;
+    final operation = service.startOtaUpgrade('AA:BB', consent: consent);
+    await waitUntil(() => ble.getInfoCalls > before);
+    await Future<void>.delayed(const Duration(milliseconds: 1100));
+    ble.releaseHeldInfo();
+    expect(await operation, isFalse);
+    expect(ble.beginCalls, 0);
+    expect(service.upgradeStatus, 'STALE_DEVICE_CONSENT');
+  });
+
+  test('companion idle control is excluded from binary INFO ownership', () async {
+    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: []);
+    final service = Get.find<OtaService>();
+    final message = CompanionMessage('HELLO', 'ab' * 16, 0);
+    ble.holdInfo = true;
+    final before = ble.getInfoCalls;
+    final operation = service.readDeviceInfo('AA:BB');
+    await waitUntil(() => ble.getInfoCalls > before);
+    final writes = ble.platformWriteCalls;
+    expect(await service.sendCompanionMessage('AA:BB', message), isFalse);
+    expect(ble.platformWriteCalls, writes);
+    ble.releaseHeldInfo();
+    expect(await operation, isNotNull);
+    final subscriptions = ble.subscribeCalls;
+    expect(await service.sendCompanionMessage('AA:BB', message), isTrue);
+    expect(ble.subscribeCalls, subscriptions, reason: 'Control writes must not replace the idle CCCD receiver');
+    expect(ble.getInfoCalls, before + 1);
+    expect(ble.dataOffsets, isEmpty);
+  });
+
+  for (final pipeline in [true]) {
+    for (final expire in [true, false]) {
+      test('consent admission after delayed CAPS2 expired=$expire', () async {
+        final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+          linkProfile: OtaLinkProfile.adaptiveCandidate, writeMode: 'without');
+        final service = Get.find<OtaService>();
+        final latest = service.latestInfo!;
+        ble.pipelineSupported = pipeline;
+        ble.holdCaps = true;
+        final consent = OtaUpgradeConsent(address: 'AA:BB', linkGeneration: ble.otaLinkGeneration('AA:BB'),
+          baseImageSha256: service.deviceInfo!.currentImageSha256Hex, versionCode: latest.versionCode!,
+          packageSha256: latest.asset!.sha256, targetImageSha256: latest.targetImageSha256!,
+          expiresAt: DateTime.now().add(Duration(seconds: expire ? 1 : 30)));
+        final operation = service.startOtaUpgrade('AA:BB', consent: consent);
+        try {
+          await ble.capsEntered.future.timeout(const Duration(seconds: 2));
+          expect(consent.expired, isFalse, reason: 'Consent must initially pass before negotiation');
+          if (expire) {
+            await Future<void>.delayed(consent.expiresAt!.difference(DateTime.now()) + const Duration(milliseconds: 30));
+            expect(consent.expired, isTrue);
+          }
+          ble.releaseHeldCaps();
+          expect(await operation, !expire);
+          expect(ble.beginCalls, expire ? 0 : 1);
+          expect(ble.endCalls, expire ? 0 : 1);
+          if (expire) {
+            expect(service.upgradeStatus, contains('STALE_DEVICE_CONSENT'));
+          } else {
+            expect(service.phase, OtaPhase.completed);
+          }
+        } finally {
+          ble.releaseHeldCaps();
+          if (service.isUpgrading) await service.cancelUpgrade(keepPackage: true);
+          await operation;
+        }
+      });
+    }
+  }
+
+  for (final withoutResponse in [false, true]) {
+    for (final outcome in ['expired', 'retired', 'valid', 'expires-after-dispatch']) {
+      test('real uncached writer BEGIN2 discovery: withoutResponse=$withoutResponse, $outcome', () async {
+        final mcu = _UpgradeFakeBle(preRebootPayload: preRebootPayload,
+          postRebootPayload: postRebootPayload);
+        final device = _AdmissionDevice(mcu);
+        final ble = BluetoothService(linkProfile: OtaLinkProfile.adaptiveCandidate,
+          reuseOtaCharacteristics: false, preferOtaWithoutResponse: withoutResponse)
+          ..adapterForTest = _AdmissionMobileAdapter()
+          ..connectedDevices.add(device);
+        ble.otaDeviceFactoryForTest = (_) => device;
+        final service = makeService(ble: ble, firmwareDir: tempFirmwareDir(),
+          backgroundClient: _BackgroundOwnerHarness(),
+          linkProfile: OtaLinkProfile.adaptiveCandidate);
+        addTearDown(() async {
+          service.onClose();
+          ble.onClose();
+          await device.close();
+          await mcu._notifyController.close();
+        });
+        Get.put<AppUpdateService>(_FakeAppUpdateService());
+        final address = device.remoteId.str;
+        expect(ble.reuseOtaCharacteristics, isFalse);
+        expect(await service.readDeviceInfo(address), isNotNull);
+        expect(await service.checkFirmwareUpdate(), isNotNull);
+        expect(await service.downloadFirmware(), isTrue);
+        final latest = service.latestInfo!;
+        final expires = outcome == 'expired' || outcome == 'expires-after-dispatch';
+        final consent = OtaUpgradeConsent(address: address,
+          linkGeneration: ble.otaLinkGeneration(address),
+          baseImageSha256: service.deviceInfo!.currentImageSha256Hex,
+          versionCode: latest.versionCode!, packageSha256: latest.asset!.sha256,
+          targetImageSha256: latest.targetImageSha256!,
+          expiresAt: DateTime.now().add(Duration(seconds: expires ? 1 : 30)));
+        // Arm at the last pre-BEGIN platform command, not by overriding the writer.
+        device.gateDiscoveryAfterCommand = OtaBleCodec.cmdCaps2;
+        if (outcome == 'expires-after-dispatch') device.writer.beginGate = Completer<void>();
+        final operation = service.startOtaUpgrade(address, consent: consent,
+          companionRuntimeId: 'runtime');
+        Future<bool>? retirement;
+        try {
+          await device.discoveryEntered.future.timeout(const Duration(seconds: 3));
+          expect(consent.expired, isFalse);
+          expect(mcu.beginCalls, 0);
+          final writes = device.writer.writes.length;
+          final generation = ble.otaLinkGeneration(address);
+          expect(await service.startOtaUpgrade(address, consent: consent), isFalse);
+          if (outcome == 'expired') {
+            await Future<void>.delayed(consent.expiresAt!.difference(DateTime.now()) +
+              const Duration(milliseconds: 30));
+            expect(consent.expired, isTrue);
+          } else if (outcome == 'retired') {
+            retirement = service.releaseCompanionTask('runtime');
+            await Future<void>.delayed(Duration.zero);
+          }
+          device.releaseDiscovery();
+          if (outcome == 'expires-after-dispatch') {
+            await device.writer.beginEntered.future.timeout(const Duration(seconds: 2));
+            expect(consent.expired, isFalse);
+            await Future<void>.delayed(consent.expiresAt!.difference(DateTime.now()) +
+              const Duration(milliseconds: 30));
+            expect(consent.expired, isTrue);
+            device.writer.releaseBegin();
+          }
+          final success = outcome == 'valid' || outcome == 'expires-after-dispatch';
+          expect(await operation.timeout(const Duration(seconds: 5)), success);
+          expect(mcu.beginCalls, success ? 1 : 0);
+          expect(mcu.endCalls, success ? 1 : 0);
+          expect(mcu.abortCalls, 0, reason: 'No receiver session exists before admission');
+          if (success) {
+            expect(service.phase, OtaPhase.completed);
+            expect(service.deviceInfo!.currentVersionCode, latest.versionCode);
+            expect(service.deviceInfo!.currentImageSha256Hex, latest.targetImageSha256);
+          } else {
+            if (retirement != null) expect(await retirement, isTrue);
+            expect(device.writer.writes.length, writes,
+              reason: 'Rejection must send no BEGIN prefix, ABORT or resync query');
+            expect(mcu.dataOffsets, isEmpty);
+            expect(ble.otaLinkGeneration(address), generation);
+            if (outcome == 'expired') {
+              expect(service.upgradeStatus, contains('STALE_DEVICE_CONSENT'));
+              expect(service.hasCurrentDeviceIdentity(address), isTrue,
+                reason: 'Consent rejection is not a platform disconnect');
+              final infos = mcu.getInfoCalls;
+              expect(await service.readDeviceInfo(address), isNotNull);
+              expect(mcu.getInfoCalls, infos + 1, reason: 'No false partial-frame poison');
+              expect(device.writer.writes.length, writes + 1);
+            }
+          }
+        } finally {
+          device.releaseDiscovery();
+          device.writer.releaseBegin();
+          if (service.canCancelTask) await service.cancelUpgrade(keepPackage: true);
+          await operation;
+          await retirement;
+        }
+      }, skip: Platform.isWindows);
+    }
+  }
+
+  test('a refused companion background owner never waits forever or downloads', () async {
+    final background = _BackgroundOwnerHarness();
+    await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [], backgroundClient: background);
+    final service = Get.find<OtaService>();
+    background.allow = false;
+    service.didChangeAppLifecycleState(AppLifecycleState.paused);
+    try {
+      expect(await service.downloadFirmware(companionRuntimeId: 'runtime').timeout(const Duration(seconds: 2)), isFalse);
+      expect(service.backgroundAcquired, isFalse);
+      expect(service.isUpgrading, isFalse);
+    } finally { service.didChangeAppLifecycleState(AppLifecycleState.resumed); }
+  });
+
+  for (final companionOwned in [false, true]) {
+    test('companion stop ${companionOwned ? 'cancels its own' : 'preserves foreground'} INFO query', () async {
+      final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: []);
+      final service = Get.find<OtaService>();
+      ble.holdInfo = true;
+      final before = ble.getInfoCalls;
+      final query = service.readDeviceInfo('AA:BB',
+        companionRuntimeId: companionOwned ? 'runtime' : null);
+      await waitUntil(() => ble.getInfoCalls > before);
+      expect(service.canCancelTask, isFalse);
+      expect(await service.releaseCompanionTask('wrong-runtime'), isFalse);
+      expect(service.isUpgrading, isTrue);
+      final aborts = ble.abortCalls;
+      if (companionOwned) {
+        expect(await service.releaseCompanionTask('runtime').timeout(const Duration(seconds: 3)), isTrue);
+        expect(await query, isNull);
+        expect(service.deviceInfo, isNull);
+        expect(service.phase, OtaPhase.cancelled);
+      } else {
+        expect(await service.releaseCompanionTask('runtime'), isFalse);
+        expect(ble.abortCalls, aborts);
+        expect(service.isUpgrading, isTrue);
+        ble.releaseHeldInfo();
+        expect(await query, isNotNull);
+      }
+      ble.releaseHeldInfo();
+      expect(service.downloadedFirmwareFile!.existsSync(), isTrue);
+    });
+  }
+
+  test('companion stop cancels its HTTP query and rejects a late result', () async {
+    final adapter = _LifecycleLatestAdapter(latestBody(assetBytes()));
+    final ble = _UpgradeFakeBle(preRebootPayload: preRebootPayload,
+      postRebootPayload: postRebootPayload);
+    final service = makeService(ble: ble, firmwareDir: tempFirmwareDir(), latestAdapter: adapter);
+    Get.put<AppUpdateService>(_FakeAppUpdateService());
+    expect(await service.readDeviceInfo('AA:BB'), isNotNull);
+    final query = service.checkFirmwareUpdate(companionRuntimeId: 'runtime');
+    await adapter.entered.future;
+    expect(service.canCancelTask, isFalse);
+    expect(await service.releaseCompanionTask('runtime').timeout(const Duration(seconds: 3)), isTrue);
+    adapter.release.complete();
+    expect(await query, isNull);
+    expect(service.latestInfo, isNull);
+    expect(service.phase, OtaPhase.cancelled);
+    expect(service.lastCheckWasNoUpdate, isFalse);
+  });
+
+  test('companion retirement waits for END and target identity without ABORT', () async {
+    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+      backgroundClient: _BackgroundOwnerHarness());
+    final service = Get.find<OtaService>();
+    ble.deferFirstEnd = true;
+    final transfer = service.startOtaUpgrade('AA:BB', companionRuntimeId: 'runtime');
+    await ble.firstEndEntered.future;
+    expect(service.canCancelTask, isFalse);
+    var retired = false;
+    final retirement = service.releaseCompanionTask('runtime').then((value) { retired = true; return value; });
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+    expect(retired, isFalse);
+    expect(ble.abortCalls, 0);
+    ble.releaseFirstEnd();
+    expect(await transfer, isTrue);
+    expect(await retirement, isTrue);
+    expect(service.phase, OtaPhase.completed);
+    expect(ble.abortCalls, 0);
+  });
 
   test('lifecycle query INFO completion cannot schedule a transport recovery', () async {
     final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: []);
@@ -864,7 +1143,7 @@ void main() {
         final beforeMount = ble.getInfoCalls;
         await tester.pumpWidget(GetMaterialApp(home: OtaUpgradePage(
           connectedDevice: scenario.unrelated
-              ? BluetoothDevice.fromId('11:22:33:44:55:66') : null,
+              ? fbp.BluetoothDevice.fromId('11:22:33:44:55:66') : null,
         )));
         await tester.pump();
         expect(ble.getInfoCalls, beforeMount,
@@ -4329,6 +4608,7 @@ class _BackgroundOwnerHarness extends OtaBackgroundClient {
     required void Function(String) onLost,
     required Future<void> Function() onCancel,
     required void Function() onOpen,
+    String? companionRuntimeId,
   }) async {
     key = initial.key;
     lost = onLost;
@@ -4358,6 +4638,120 @@ class _BackgroundOwnerHarness extends OtaBackgroundClient {
 
   @override
   Future<void> close() async { acquired = false; }
+}
+
+class _AdmissionMobileAdapter extends Fake implements BluetoothAdapter {
+  @override
+  bool get supportsCharacteristicValueStream => false;
+  @override
+  Future<void> stopScan() async {}
+}
+
+class _AdmissionCharacteristic extends Fake implements fbp.BluetoothCharacteristic {
+  _AdmissionCharacteristic(this.device, {required this.notify});
+  @override
+  final _AdmissionDevice device;
+  final bool notify;
+  final writes = <List<int>>[];
+  final beginEntered = Completer<void>();
+  Completer<void>? beginGate;
+
+  @override
+  fbp.Guid get uuid => fbp.Guid(notify ? 'fff1' : 'fff2');
+  @override
+  fbp.CharacteristicProperties get properties => fbp.CharacteristicProperties(
+    notify: notify, write: !notify, writeWithoutResponse: !notify);
+  @override
+  Stream<List<int>> get onValueReceived => device.mcu._notifyController.stream;
+  @override
+  Future<bool> setNotifyValue(bool enable, {int timeout = 15, bool forceIndications = false}) async => true;
+
+  @override
+  Future<void> write(List<int> value, {bool withoutResponse = false,
+      bool allowLongWrite = false, int timeout = 15}) async {
+    writes.add(List<int>.of(value));
+    final command = value.length >= 3 && value[0] == OtaBleCodec.frameSync0 &&
+        value[1] == OtaBleCodec.frameSync1 ? value[2] : null;
+    if (command != null && command == device.gateDiscoveryAfterCommand) {
+      device.gateDiscoveryAfterCommand = null;
+      device.discoveryGate = Completer<void>();
+    }
+    if (command == OtaBleCodec.cmdBegin2) {
+      if (!beginEntered.isCompleted) beginEntered.complete();
+      await beginGate?.future;
+    }
+    // Reuse only the existing MCU byte/ACK model, not its overridden BLE writer.
+    device.mcu._feed(value);
+  }
+
+  void releaseBegin() {
+    final gate = beginGate;
+    if (gate != null && !gate.isCompleted) gate.complete();
+  }
+}
+
+class _AdmissionGattService extends Fake implements fbp.BluetoothService {
+  _AdmissionGattService(this.characteristics);
+  @override
+  fbp.Guid get uuid => fbp.Guid('fff0');
+  @override
+  final List<fbp.BluetoothCharacteristic> characteristics;
+}
+
+class _AdmissionDevice extends Fake implements fbp.BluetoothDevice {
+  _AdmissionDevice(this.mcu);
+  final _UpgradeFakeBle mcu;
+  @override
+  final remoteId = const fbp.DeviceIdentifier('AA:BB:CC:DD:EE:01');
+  @override
+  bool isConnected = true;
+  final connections = StreamController<fbp.BluetoothConnectionState>.broadcast(sync: true);
+  final resets = StreamController<void>.broadcast(sync: true);
+  late final writer = _AdmissionCharacteristic(this, notify: false);
+  late final notifier = _AdmissionCharacteristic(this, notify: true);
+  int? gateDiscoveryAfterCommand;
+  Completer<void>? discoveryGate;
+  final discoveryEntered = Completer<void>();
+
+  @override
+  Stream<fbp.BluetoothConnectionState> get connectionState => connections.stream;
+  @override
+  Stream<void> get onServicesReset => resets.stream;
+  @override
+  Future<int> requestMtu(int desiredMtu, {double predelay = 0.35, int timeout = 15}) async => 247;
+  @override
+  Future<List<fbp.BluetoothService>> discoverServices(
+      {bool subscribeToServicesChanged = true, int timeout = 15}) async {
+    final gate = discoveryGate;
+    if (gate != null) {
+      if (!discoveryEntered.isCompleted) discoveryEntered.complete();
+      await gate.future;
+      discoveryGate = null;
+    }
+    return [_AdmissionGattService([writer, notifier])];
+  }
+
+  @override
+  Future<void> disconnect({int timeout = 35, bool queue = true, int androidDelay = 2000}) async {
+    isConnected = false;
+    connections.add(fbp.BluetoothConnectionState.disconnected);
+  }
+  @override
+  Future<void> connect({Duration timeout = const Duration(seconds: 35),
+      int? mtu = 512, bool autoConnect = false}) async {
+    isConnected = true;
+    connections.add(fbp.BluetoothConnectionState.connected);
+  }
+
+  void releaseDiscovery() {
+    final gate = discoveryGate;
+    if (gate != null && !gate.isCompleted) gate.complete();
+  }
+
+  Future<void> close() async {
+    await connections.close();
+    await resets.close();
+  }
 }
 
 class _UpgradeFakeBle extends BluetoothService {
@@ -4775,7 +5169,9 @@ class _UpgradeFakeBle extends BluetoothService {
     List<int> data, {
     bool writeWithResponse = false,
     OtaLinkStats? stats,
+    OtaWriteAdmission? admission,
   }) async {
+    admission?.dispatch();
     platformWriteCalls++;
     // P3-4：fake 覆写的是带计时的外壳（真实外壳成功记 recordGattWrite、
     // 异常补 error 版后 rethrow），此处对齐外壳的 stats 上报语义；
@@ -4880,6 +5276,14 @@ class _UpgradeFakeBle extends BluetoothService {
   }
 
   bool pipelineSupported = true, badPipelineCaps = false;
+  bool holdCaps = false;
+  final capsEntered = Completer<void>();
+  final _heldCapsReplies = <void Function()>[];
+  void releaseHeldCaps() {
+    holdCaps = false;
+    for (final reply in _heldCapsReplies) { reply(); }
+    _heldCapsReplies.clear();
+  }
   int _pipeEpoch = 0, _pipeAccepted = 0, _pipeBeginSeq = 0, _pipeResume = 0;
   int _word(List<int> bytes, int offset) =>
       ByteData.sublistView(Uint8List.fromList(bytes)).getUint32(offset, Endian.little);
@@ -4901,6 +5305,7 @@ class _UpgradeFakeBle extends BluetoothService {
   }
 
   void _onCaps(OtaBleFrame frame) {
+    if (!capsEntered.isCompleted) capsEntered.complete();
     if (!pipelineSupported) return;
     expect(frame.session, 0);
     expect(frame.payload.length, 4);
@@ -4910,7 +5315,12 @@ class _UpgradeFakeBle extends BluetoothService {
     caps.buffer.asUint8List().setRange(0, 8, [80, 50, 66, 76, 2, 2, 128, 0]);
     caps.setUint32(8, _pipeEpoch, Endian.little);
     caps.setUint32(12, badPipelineCaps ? 28 : 24, Endian.little);
-    _send(OtaBleCodec.rspCaps2, 0, frame.seq, caps.buffer.asUint8List());
+    void reply() => _send(OtaBleCodec.rspCaps2, 0, frame.seq, caps.buffer.asUint8List());
+    if (holdCaps) {
+      _heldCapsReplies.add(reply);
+    } else {
+      reply();
+    }
   }
 
   void _onGetInfo(OtaBleFrame f) {

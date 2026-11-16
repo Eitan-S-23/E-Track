@@ -164,6 +164,11 @@ This does not pin the entire environment or authorize formal evidence reuse. A
 future acceptance profile must bind its actual SDK/environment inputs separately.
 Each development run remains cold and workspace-local.
 
+The original-Admin companion candidate keeps this 3.47.9 baseline in development
+and packaging. Earlier companion originals used 3.47.8 and remain unchanged;
+they do not qualify the new integration. Both pins avoid the unrelated moving
+stable API/dependency migration. New source still requires full current checks.
+
 Setup/dependency failure leaves downstream steps NOT_RUN. Analysis failure or
 timeout still collects tests if process cleanup succeeded, but the overall run
 fails. Any test failure, command timeout, launch error or lockfile change fails
@@ -251,6 +256,64 @@ Use the project-wide [shared index](agent-collaboration/index.md) and
 [Flutter debugging skill](../.agents/skills/e-track-flutter-debug/SKILL.md) for
 cross-agent handoffs, collector preparation and original device-log retrieval.
 
+## Passive Companion Diagnostics
+
+### Scope And Signatures
+
+Use this opt-in debug mode to observe the companion runtime without the older
+observer becoming a second BLE owner. It reuses `OtaDiagnostics`, immutable
+snapshots and the private ADB `run-as` retrieval route; no new scanner, transport
+or log format is introduced. It is not device acceptance or an execution grant.
+
+    gh workflow run flutter-dev-checks.yml --ref dev/flutter/TASK -f test_scope=all -f build_apk=true -f app_id_suffix=.companion -f device_observation=true -f observation_mode=passive -f observation_target=EXPECTED_DEVICE -f observation_firmware_latest_url=PUBLIC_HTTPS_FIRMWARE_LATEST_URL
+
+Replace both uppercase inputs with the approved target and credential-free live
+endpoint. Keep the link candidate at `baseline` unless the experiment actually
+needs a different sender. A target in a build record is an expectation, not proof
+of an observed or connected device. Do not use a placeholder endpoint for OTA.
+
+### Contracts
+
+`device_observation=false` still disables both diagnostics and automatic probes.
+With observation enabled, `observation_mode` / `TRACE_DEV_OBSERVATION_MODE` accepts
+only `automatic` (default, previous behavior) or `passive`. Passive keeps the
+diagnostic writer enabled but makes `OtaDeviceObservationConfig.active=false`;
+`startFromBuild` returns null without scanning, connecting, querying, stopping a
+foreign scan or disconnecting. Direct observer callbacks are also inert.
+
+Automatic sentinels/defines/metadata remain compatible. Passive adds its mode to
+the sentinel hash input, retaining the existing `OTAOBS` + 24 lowercase hex log
+format. The helper compiles `TRACE_DEV_OBSERVATION_MODE=passive:<sentinel>` as a
+mode token. The APK kernel must contain that exact token as well as the expected
+target, endpoint and sentinel. A generic `passive` string in source is not proof
+of the selected compiled mode. The runtime rejects malformed/mismatched tokens;
+artifact collection rejects a missing token before producing an APK record.
+Passive metadata includes `device_observation.mode=passive`; omission continues
+to mean the legacy automatic mode. No snapshot schema or parser is changed.
+
+### Validation And Cases
+
+| Input / Case | Required Result |
+| --- | --- |
+| Observation off, including a passive mode selection | No injected observation defines, no diagnostic writer and no automatic observer |
+| Observation on, mode omitted/automatic | Existing bounded automatic probe and metadata remain unchanged |
+| Valid passive configuration | Original producer records/snapshots work; all observer BLE/control callbacks remain unused |
+| Unknown mode or missing/credential-bearing endpoint | Build planning fails before packaging |
+| Automatic APK supplied to passive collection, or missing passive token | No observation-ready artifact record |
+| Runtime token does not match its sentinel | INVALID status, no automatic probe |
+
+Required tests are `tests/ota/test_flutter_dev_apk.py` (workflow wiring, defines,
+configuration and real ZIP collection guards), `ota_device_observation_test.dart`
+(zero automatic ownership including direct callbacks), and
+`ota_diagnostics_test.dart` (real file/snapshot records with passive observation).
+The full dual-host suite and exact compiled debug artifact still need CI checks.
+
+Wrong: use an automatic-connect APK as proof that companion recovery established
+the connection, or assume release-mode private files are readable with `run-as`.
+Correct: verify a passive debug APK's identity/mode, establish actual retrieval
+on the phone, then observe the real companion-owned connection and OTA. Never
+replay a successful upgrade just to repair a failed collection route.
+
 ## Completion And Review
 
 ### P3-8 Native Service Checks
@@ -262,7 +325,12 @@ timeout/cleanup. Pushes and ordinary debug requests remain unchanged.
 
 After debug compilation, the bounded command is `gradle --no-daemon
 --console=plain -p app/bluetooth_flutter_Trace/android :app:testDebugUnitTest
---tests com.wen.gaia.gaia.DeviceOtaServiceTest`. Failure fails the development
+--tests com.wen.gaia.gaia.DeviceOtaServiceTest`, plus explicit filters for
+`com.wen.gaia.gaia.CompanionServiceTest` and
+`com.wen.gaia.gaia.CompanionIntegrationTest`. The integration suite executes the
+production Bridge, chooser, boot/job restoration and Service/engine wiring on
+API 26, 31 and 34, with OS/embedding shadows rather than CompanionExecution fakes.
+Failure fails the development
 run and blocks APK collection; no automatic retry or ignored failure is added.
 The existing development-log upload also preserves its JUnit XML and HTML report
 from `app/bluetooth_flutter_Trace/build/app/` on failure, with 14-day retention.

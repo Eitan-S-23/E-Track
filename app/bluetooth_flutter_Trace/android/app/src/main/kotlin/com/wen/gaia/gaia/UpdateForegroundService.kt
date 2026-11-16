@@ -100,7 +100,7 @@ class UpdateForegroundService : Service() {
         )
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_stat_e_track)
             .setContentTitle("E-Track 正在更新")
             .setContentText(status)
             .setStyle(NotificationCompat.BigTextStyle().bigText(status))
@@ -137,12 +137,12 @@ class UpdateForegroundService : Service() {
         )
 
         return NotificationCompat.Builder(this, INSTALL_CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_stat_e_track)
             .setContentTitle("E-Track 更新已就绪")
             .setContentText(status)
             .setStyle(NotificationCompat.BigTextStyle().bigText(status))
             .setContentIntent(installPendingIntent)
-            .addAction(R.mipmap.ic_launcher, "继续安装", installPendingIntent)
+            .addAction(R.drawable.ic_stat_e_track, "继续安装", installPendingIntent)
             .setOngoing(false)
             .setOnlyAlertOnce(false)
             .setPriority(NotificationCompat.PRIORITY_HIGH)

@@ -3,27 +3,28 @@ import 'safe_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 
 class PermissionHelper {
+  static List<Permission> bluetoothPermissionsFor(int androidSdk) =>
+      androidSdk >= 31
+          ? [Permission.bluetoothScan, Permission.bluetoothConnect]
+          : androidSdk >= 23 ? [Permission.locationWhenInUse] : [];
+
+  static Future<List<Permission>> requiredBluetoothPermissions() async {
+    if (Platform.isAndroid) {
+      return bluetoothPermissionsFor((await DeviceInfoPlugin().androidInfo).version.sdkInt);
+    }
+    return Platform.isIOS ? [Permission.bluetooth] : [];
+  }
+
   /// 请求所有必要的蓝牙权限
   static Future<bool> requestBluetoothPermissions() async {
     try {
-      List<Permission> permissions = [];
-
-      if (Platform.isAndroid) {
-        // Android 权限
-        permissions.addAll([
-          Permission.bluetooth,
-          Permission.bluetoothScan,
-          Permission.bluetoothConnect,
-          Permission.location,
-        ]);
-      } else if (Platform.isIOS) {
-        // iOS 权限
-        permissions.addAll([
-          Permission.bluetooth,
-        ]);
+      if (WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) {
+        return await checkBluetoothPermissions();
       }
+      final permissions = await requiredBluetoothPermissions();
 
       Map<Permission, PermissionStatus> statuses = await permissions.request();
 
@@ -60,20 +61,7 @@ class PermissionHelper {
   /// 检查权限状态
   static Future<bool> checkBluetoothPermissions() async {
     try {
-      List<Permission> permissions = [];
-
-      if (Platform.isAndroid) {
-        permissions.addAll([
-          Permission.bluetooth,
-          Permission.bluetoothScan,
-          Permission.bluetoothConnect,
-          Permission.location,
-        ]);
-      } else if (Platform.isIOS) {
-        permissions.addAll([
-          Permission.bluetooth,
-        ]);
-      }
+      final permissions = await requiredBluetoothPermissions();
 
       for (Permission permission in permissions) {
         PermissionStatus status = await permission.status;
@@ -266,7 +254,7 @@ class PermissionHelper {
             _buildPermissionItem(
               Icons.location_on,
               '访问位置信息',
-              '在Android上蓝牙扫描需要位置权限',
+              'Android 11 及以下扫描需要定位；新系统仅在实际使用定位功能时申请',
             ),
             const SizedBox(height: 16),
             Container(

@@ -10,6 +10,7 @@ import 'package:get/get.dart';
 import 'package:ble_monitor/ota/ota_ble_codec.dart';
 import 'package:ble_monitor/ota/ota_device_info.dart';
 import 'package:ble_monitor/ota/ota_link_stats.dart';
+import 'package:ble_monitor/ota/ota_write_admission.dart';
 import 'package:ble_monitor/services/app_update_service.dart';
 import 'package:ble_monitor/services/bluetooth_service.dart';
 import 'package:ble_monitor/services/ota_service.dart';
@@ -596,7 +597,9 @@ class _FakeBle extends BluetoothService {
     List<int> data, {
     bool writeWithResponse = false,
     OtaLinkStats? stats,
+    OtaWriteAdmission? admission,
   }) async {
+    admission?.dispatch();
     // 只应答 GET_INFO：INFO 帧 session=0、seq 回显请求 seq（§5.6）。
     final f = OtaBleCodec.decodeFrame(data);
     if (f.cmd == OtaBleCodec.cmdGetInfo) {

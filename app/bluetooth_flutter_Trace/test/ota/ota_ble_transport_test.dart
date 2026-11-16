@@ -29,7 +29,7 @@ class _ControlledPeer extends TestPipelinePeer {
   }
 
   @override
-  Future<void> writeChunk(List<int> chunk) async {
+  Future<void> writeChunk(List<int> chunk, {OtaWriteAdmission? admission}) async {
     final data = pending.isNotEmpty
         ? pending.length >= 3 && pending[2] == OtaBleCodec.cmdData2
         : chunk.length >= 3 && chunk[2] == OtaBleCodec.cmdData2;
@@ -42,7 +42,7 @@ class _ControlledPeer extends TestPipelinePeer {
       if (delay != Duration.zero) await Future<void>.delayed(delay);
       if (dataChunks == failChunk) throw StateError('injected native write failure');
     }
-    await super.writeChunk(chunk);
+    await super.writeChunk(chunk, admission: admission);
   }
 }
 
@@ -58,7 +58,7 @@ class _Rebound implements OtaBleChannel {
   @override
   Future<int> maxWriteChunkSize() => peer.maxWriteChunkSize();
   @override
-  Future<void> writeChunk(List<int> chunk) => peer.writeChunk(chunk);
+  Future<void> writeChunk(List<int> chunk, {OtaWriteAdmission? admission}) => peer.writeChunk(chunk, admission: admission);
 }
 
 Future<OtaAckResult> _transfer(OtaBleTransport transport, Uint8List bytes) =>

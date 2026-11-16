@@ -100,6 +100,11 @@ class ProfileTabPage extends StatelessWidget {
         onTap: _showSettingsDialog,
       ),
       _ProfileAction(
+        label: '后台运行与权限',
+        icon: Icons.bluetooth_connected,
+        onTap: () => Get.toNamed('/companion-setup'),
+      ),
+      _ProfileAction(
         label: '检查更新',
         icon: Icons.autorenew,
         onTap: _checkForUpdates,

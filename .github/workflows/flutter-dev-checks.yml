@@ -50,6 +50,14 @@ on:
         required: false
         type: boolean
         default: false
+      observation_mode:
+        description: "automatic: scan/connect/query; passive: record existing runtime without owning BLE (for companion checks)"
+        required: false
+        type: choice
+        default: automatic
+        options:
+          - automatic
+          - passive
       observation_target:
         description: "BLE advertised name or MAC the observation APK binds automatically, such as 'XTrace'; required when device_observation is on"
         required: false
@@ -94,6 +102,7 @@ jobs:
       TRACE_DEV_OTA_LINK_PROFILE: ${{ inputs.ota_link_profile || 'none' }}
       # 显式启用的设备观测：默认全空 ⇒ 不注入任何 dart-define，观测代码不生效。
       TRACE_DEV_DEVICE_OBSERVATION: ${{ inputs.device_observation && 'true' || '' }}
+      TRACE_DEV_OBSERVATION_MODE: ${{ inputs.observation_mode || 'automatic' }}
       TRACE_DEV_OBSERVATION_TARGET: ${{ inputs.observation_target || '' }}
       TRACE_DEV_OBSERVATION_FIRMWARE_LATEST_URL: ${{ inputs.observation_firmware_latest_url || '' }}
     steps:
@@ -192,6 +201,8 @@ jobs:
             .cache/p34-phy-native/runs/*/result.json
             .cache/p34-phy-native/runs/*/logs/*.log
             app/bluetooth_flutter_Trace/build/app/test-results/testDebugUnitTest/TEST-com.wen.gaia.gaia.DeviceOtaServiceTest.xml
+            app/bluetooth_flutter_Trace/build/app/test-results/testDebugUnitTest/TEST-com.wen.gaia.gaia.CompanionServiceTest.xml
+            app/bluetooth_flutter_Trace/build/app/test-results/testDebugUnitTest/TEST-com.wen.gaia.gaia.CompanionIntegrationTest.xml
             app/bluetooth_flutter_Trace/build/app/reports/tests/testDebugUnitTest/**
           include-hidden-files: true
           if-no-files-found: error

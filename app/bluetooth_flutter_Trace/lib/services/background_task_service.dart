@@ -22,7 +22,7 @@ class BackgroundTaskService extends GetxService {
   void onInit() {
     super.onInit();
     _initializeBackgroundTask();
-    _startBackgroundCheck();
+    if (!Platform.isAndroid) _startBackgroundCheck();
   }
 
   @override
@@ -64,6 +64,8 @@ class BackgroundTaskService extends GetxService {
 
   /// 执行后台检查
   Future<void> _performBackgroundCheck() async {
+    // Android background IO belongs to the acknowledged native companion owner.
+    if (Platform.isAndroid) return;
     if (Get.isRegistered<OtaService>() && Get.find<OtaService>().isUpgrading) return;
     try {
       final monitoringDevices = _monitorController.monitoringDevices;

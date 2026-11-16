@@ -71,6 +71,8 @@ void main() {
         useMaterial3: true,
       ),
       home: const Scaffold(body: ProfileTabPage()),
+      getPages: [GetPage(name: '/companion-setup',
+        page: () => const Scaffold(body: Text('Companion destination')))],
     ));
     await tester.pumpAndSettle();
     // Native version metadata is optional; both labels must keep the same brand.
@@ -149,6 +151,25 @@ void main() {
       });
     }
   }
+
+  settingsTest('companion entry preserves the existing settings and reporting opt-out', (tester) async {
+    SharedPreferences.setMockInitialValues({preference: false});
+    await openSettings(tester);
+    await tester.tap(find.text('知道了'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byIcon(Icons.bluetooth_connected));
+    await tester.tap(find.byIcon(Icons.bluetooth_connected));
+    await tester.pumpAndSettle();
+    expect(Get.currentRoute, '/companion-setup');
+    expect(find.text('Companion destination'), findsOneWidget);
+    expect(inventory.enabled.value, isFalse);
+    Get.back<void>();
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.settings));
+    await tester.pumpAndSettle();
+    expect(tester.widget<SwitchListTile>(find.byKey(toggleKey)).value, isFalse);
+    expect((await SharedPreferences.getInstance()).getBool(preference), isFalse);
+  });
 
   settingsTest('saved opt-out is displayed without enabling reporting', (tester) async {
     SharedPreferences.setMockInitialValues({preference: false});

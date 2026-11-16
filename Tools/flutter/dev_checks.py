@@ -750,6 +750,7 @@ def run_checks(root, scope, *, build_apk=False, execute=run_command,
         "python": sys.version,
         "sdk_channel": "stable",
         "sdk_ref": SDK_REF,
+        "sdk_requested_version": SDK_REF,
         "github_run_url": (
             f"{os.environ.get('GITHUB_SERVER_URL', 'https://github.com')}/"
             f"{os.environ.get('GITHUB_REPOSITORY', '')}/actions/runs/"

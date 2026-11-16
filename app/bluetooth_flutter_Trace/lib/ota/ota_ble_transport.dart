@@ -9,6 +9,9 @@ import 'ota_link_stats.dart';
 import 'ota_link_profile.dart';
 import 'ota_mono.dart';
 import 'ota_pipeline_window.dart';
+import 'ota_write_admission.dart';
+
+export 'ota_write_admission.dart' show OtaWriteAdmission;
 
 part 'ota_pipeline_transport.dart';
 
@@ -16,7 +19,9 @@ part 'ota_pipeline_transport.dart';
 /// 测试用 fake 模拟 MCU 行为（ACK、丢帧、乱序、断连）。
 abstract class OtaBleChannel {
   /// 向 FFF2（写特征）写入一个分片。返回写入是否成功。
-  Future<void> writeChunk(List<int> chunk);
+  /// Forward [admission] through asynchronous setup; dispatch it immediately
+  /// before the platform write, never before discovery or a queued wait.
+  Future<void> writeChunk(List<int> chunk, {OtaWriteAdmission? admission});
 
   /// 订阅 FFF1（通知特征）的原始字节流（可能一帧跨多个通知分片）。
   Stream<List<int>> get notifications;
@@ -64,6 +69,7 @@ class OtaBleTransport {
     this.writeTimeout = defaultWriteTimeout,
     int? dataBatchFrames,
     this.onApplyBoundary,
+    this.beforeInitialBegin,
     this.onLinkSelection,
   })  : dataBatchFrames = dataBatchFrames ?? defaultPipelineBatchFrames,
         _channel = channel {
@@ -84,6 +90,10 @@ class OtaBleTransport {
 
   final OtaBleChannel _channel;
   final void Function(bool applying)? onApplyBoundary;
+  /// Synchronous admission under the writer lock at the platform write boundary.
+  /// Applies only to the first BEGIN byte, never to recovery or irreversible apply.
+  final void Function()? beforeInitialBegin;
+  bool _initialBeginDispatched = false;
   final void Function(OtaTransportSelection)? onLinkSelection;
   bool _endStarted = false;
   bool get endStarted => _endStarted;
@@ -141,6 +151,20 @@ class OtaBleTransport {
   int get session => _session;
   /// 本实例是否已被取消（取消后代次失效，禁止复用，由上层重建）。
   bool get isCancelled => _cancelled;
+
+  /// Uses the same device-scoped writer/late-write quarantine as binary frames.
+  /// The service owner admits this only outside binary queries and transfers.
+  Future<void> writeIdleControl(Uint8List line) async {
+    if (_busy || _session != 0 || _disposed || _cancelled || line.length > 320 ||
+        line.length < 7 || line.last != 10 ||
+        String.fromCharCodes(line.take(6)) != '!ETC1|' ||
+        line.take(line.length - 1).any((b) => b < 33 || b > 126)) {
+      throw const OtaTransportException('Idle control unavailable', code: 'CONTROL_NOT_IDLE');
+    }
+    _busy = true;
+    try { await _writeFrameChecked(line, allowCancelled: false); }
+    finally { _busy = false; }
+  }
 
   /// 发送 GET_INFO 并解析身份。连接不可用或超时抛 [OtaTransportException]。
   /// INFO payload 链路损坏（MALFORMED_INFO）有界重发；身份不符是确定性
@@ -309,6 +333,7 @@ class OtaBleTransport {
   }) async {
     if (_busy) throw const OtaTransportException('transport busy', code: 'BUSY');
     _checkUsable();
+    _initialBeginDispatched = false;
     return _pipelineTransfer(package: package,
       packageSha256: packageSha256, etuHeader: etuHeader,
       windowSegments: windowSegments, onDurableProgress: onDurableProgress, onSent: onSent);
@@ -358,6 +383,8 @@ class OtaBleTransport {
     try {
       await _writeSerial;
       if (_disposed) return;
+      // A guarded transfer rejected before dispatch opened no receiver session.
+      if (beforeInitialBegin != null && !_initialBeginDispatched) return;
       _quarantineUnconfirmedData();
       // Preserve normal cancellation without assuming platform delivery. Only
       // this newly retired DATA uncertainty may recover here; an explicitly
@@ -817,14 +844,15 @@ class OtaBleTransport {
     List<int>? frameEnds,
     void Function(int)? onChunkStarting,
     void Function(int)? onChunkCompleted,
-  }) {
-    if (_writeChannelPoisoned && resyncProbeSeq == null) {
-      throw const OtaTransportException(
-          '写通道已废弃：分片写中断后帧边界不可信，'
-          '须由 GET_INFO 探针证明 MCU 已重新同步',
-          code: 'WRITE_TIMEOUT');
-    }
-    final task = _writeSerial.then((_) => _writeFrameLocked(
+  }) async {
+    while (true) {
+      if (_writeChannelPoisoned && resyncProbeSeq == null) {
+        throw const OtaTransportException(
+            '写通道已废弃：分片写中断后帧边界不可信，'
+            '须由 GET_INFO 探针证明 MCU 已重新同步',
+            code: 'WRITE_TIMEOUT');
+      }
+      final task = _writeSerial.then((_) => _writeFrameLocked(
           frame,
           allowCancelled: allowCancelled,
           resyncProbeSeq: resyncProbeSeq,
@@ -832,8 +860,15 @@ class OtaBleTransport {
           onChunkStarting: onChunkStarting,
           onChunkCompleted: onChunkCompleted,
         ));
-    _writeSerial = task.catchError((_) {});
-    return task;
+      _writeSerial = task.catchError((_) {});
+      try {
+        await task;
+        return;
+      } on _InitialBeginPaused {
+        // Resume rechecks INFO through this writer; never hold it while paused.
+        await _waitIfPaused();
+      }
+    }
   }
 
   /// 帧分片写入：按当前可用写净荷上限切片。
@@ -894,6 +929,13 @@ class OtaBleTransport {
       throw const OtaTransportException(
           'MTU 未协商或过小，无法分片写入', code: 'MTU_UNAVAILABLE');
     }
+    if (_inTransfer && !_initialBeginDispatched && frame[2] == _PipelineWire.begin) {
+      _checkUsable();
+      if (_paused) {
+        _noProgressClock?.stop();
+        throw const _InitialBeginPaused();
+      }
+    }
     var dispatchedAny = false;
     var frameComplete = false;
     try {
@@ -937,22 +979,40 @@ class OtaBleTransport {
         if (_inTransfer && frame[2] == _PipelineWire.data) {
           _dataWriteDispatched = true;
         }
-        final pendingWrite = _channel.writeChunk(frame.sublist(offset, end));
-        _trackOutstandingWrite(pendingWrite);
-        dispatchedAny = true;
-        try {
-          await pendingWrite.timeout(perChunkTimeout);
-        } on TimeoutException {
-          final settleGrace = _capByBudget(writeTimeout * 2);
-          if (settleGrace > Duration.zero) {
-            try {
-              await pendingWrite.timeout(settleGrace);
-            } catch (_) {} // 迟到错误不覆盖本帧超时语义
+        final initialBegin = _inTransfer && offset == 0 && !_initialBeginDispatched &&
+            frame[2] == _PipelineWire.begin;
+        final admission = initialBegin ? OtaWriteAdmission(() {
+          _checkUsable();
+          if (_paused) {
+            _noProgressClock?.stop();
+            throw const _InitialBeginPaused();
           }
-          otaMonoLog('MONO_FAIL_AT', code: 'WRITE_TIMEOUT');
-          throw OtaTransportException(
-              'BLE 单次写入超时（${writeTimeout.inSeconds}s）',
-              code: 'WRITE_TIMEOUT');
+          _checkNoProgress();
+          beforeInitialBegin?.call();
+          _initialBeginDispatched = true;
+          dispatchedAny = true;
+        }) : null;
+        try {
+          final pendingWrite = _channel.writeChunk(frame.sublist(offset, end), admission: admission);
+          _trackOutstandingWrite(pendingWrite);
+          if (admission == null) dispatchedAny = true;
+          try {
+            await pendingWrite.timeout(perChunkTimeout);
+          } on TimeoutException {
+            admission?.retire();
+            final settleGrace = _capByBudget(writeTimeout * 2);
+            if (settleGrace > Duration.zero) {
+              try {
+                await pendingWrite.timeout(settleGrace);
+              } catch (_) {} // 迟到错误不覆盖本帧超时语义
+            }
+            otaMonoLog('MONO_FAIL_AT', code: 'WRITE_TIMEOUT');
+            throw OtaTransportException(
+                'BLE 单次写入超时（${writeTimeout.inSeconds}s）',
+                code: 'WRITE_TIMEOUT');
+          }
+        } finally {
+          admission?.retire();
         }
         onChunkCompleted?.call(end);
         offset = end;
@@ -1186,4 +1246,8 @@ class OtaTransportException implements Exception {
 
   @override
   String toString() => 'OtaTransportException($code): $message';
+}
+
+class _InitialBeginPaused implements Exception {
+  const _InitialBeginPaused();
 }

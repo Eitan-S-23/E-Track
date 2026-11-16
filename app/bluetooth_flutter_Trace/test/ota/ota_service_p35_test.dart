@@ -7,6 +7,7 @@ import 'package:ble_monitor/ota/ota_device_info.dart';
 import 'package:ble_monitor/ota/ota_link_stats.dart';
 import 'package:ble_monitor/ota/ota_p35_recorder.dart';
 import 'package:ble_monitor/ota/ota_p35_stream.dart';
+import 'package:ble_monitor/ota/ota_write_admission.dart';
 import 'package:ble_monitor/services/bluetooth_service.dart';
 import 'package:ble_monitor/services/ota_service.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart'
@@ -107,7 +108,9 @@ class _QueryBle extends BluetoothService {
     List<int> data, {
     bool writeWithResponse = false,
     OtaLinkStats? stats,
+    OtaWriteAdmission? admission,
   }) async {
+    admission?.dispatch();
     final request = OtaBleCodec.decodeFrame(data);
     if (request.cmd != OtaBleCodec.cmdGetInfo) {
       throw StateError('P35 regression must never send an upgrade command');
@@ -295,7 +298,8 @@ void main() {
     ble.setLink(false, emit: false);
     gate.complete(root);
     expect(await starting, isTrue);
-    await flush();
+    await waitFor(() => rows().isNotEmpty, 'post-open disconnected snapshot persisted');
+    await service.stopP35Recording();
     expect(rows(), isNotEmpty);
     expect(rows().every((row) => row['linkConnected'] == false), isTrue);
     expect(rows().every((row) => row['freshConnection'] == false), isTrue);

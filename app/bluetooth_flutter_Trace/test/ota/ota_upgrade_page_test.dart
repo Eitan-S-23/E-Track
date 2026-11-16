@@ -1190,7 +1190,8 @@ class _FakeOtaService extends OtaService {
   List<Map<String, dynamic>> getUpgradeHistory() => const [];
 
   @override
-  Future<DeviceOtaInfo?> readDeviceInfo(String deviceAddress) async {
+  Future<DeviceOtaInfo?> readDeviceInfo(String deviceAddress,
+      {String? companionRuntimeId}) async {
     readCalls++;
     lastReadAddress = deviceAddress;
     await readGate?.future;
@@ -1229,13 +1230,14 @@ class _FakeOtaService extends OtaService {
   }
 
   @override
-  Future<FirmwareLatestInfo?> checkFirmwareUpdate({String? channel}) async {
+  Future<FirmwareLatestInfo?> checkFirmwareUpdate({String? channel,
+      String? companionRuntimeId}) async {
     checkCalls++;
     return await checkGate?.future;
   }
 
   @override
-  Future<bool> downloadFirmware() async {
+  Future<bool> downloadFirmware({String? companionRuntimeId}) async {
     downloadCalls++;
     isUpgrading$.value = true;
     phase$.value = OtaPhase.downloading;

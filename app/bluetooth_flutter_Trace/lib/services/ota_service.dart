@@ -3,6 +3,7 @@ import '../utils/safe_snackbar.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
@@ -12,8 +13,10 @@ import 'package:get/get.dart' hide Response;
 import 'package:path_provider/path_provider.dart';
 
 import '../config/share_links.dart';
+import '../companion/companion_protocol.dart';
 import '../ota/ota_ble_codec.dart';
 import '../ota/ota_background.dart';
+import '../ota/ota_upgrade_consent.dart';
 import '../ota/ota_ble_transport.dart';
 import '../ota/ota_device_info.dart';
 import '../ota/ota_diagnostics.dart';
@@ -212,7 +215,6 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   @visibleForTesting
   int? get identityLinkGeneration => _identityLinkGeneration;
 
-  @visibleForTesting
   bool hasCurrentDeviceIdentity(String? address) =>
       address != null && _deviceInfo != null && _deviceInfoAddress == address &&
       _identityLinkGeneration != null &&
@@ -273,6 +275,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   Completer<void>? _foregroundGate;
   int _recoveryEpoch = 0;
   _OtaOperation? _operation;
+  String? _companionTaskRuntime;
   bool _downloadStoppedForBackground = false;
   String? _taskDeviceAddress;
   String? _lastSnapshotPhase;
@@ -322,7 +325,10 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   }
 
   Future<void> _beginBackgroundTask(String address, OtaFirmwareAsset asset,
-      int generation) async {
+      int generation, {String? companionRuntimeId}) async {
+    if (companionRuntimeId != null && WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) {
+      _appBackgrounded = true;
+    }
     _taskDeviceAddress = address.toLowerCase();
     _taskKey = OtaTaskKey(taskId: '${_processNonce}_${_ownerEpoch}_${++_taskSerial}',
         generation: _ownerEpoch,
@@ -342,9 +348,10 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       await _backgroundScanLease!.ready.timeout(const Duration(seconds: 5));
       if (generation != _cancelGeneration || _closed) return;
       final acquired = await _background.acquire(taskSnapshot!,
+        companionRuntimeId: companionRuntimeId,
         ownerLive: () => !_closed && identical(_taskKey, key) && isUpgrading &&
             generation == _cancelGeneration &&
-            (!_appBackgrounded || _background.isAcquired) &&
+            (!_appBackgrounded || _background.isAcquired || companionRuntimeId != null) &&
             (_boundAddress == address && _boundLinkGeneration != null &&
              _ble.otaLinkGeneration(address) == _boundLinkGeneration ||
              phase == OtaPhase.waitingReboot || phase == OtaPhase.reconnectVerify ||
@@ -455,6 +462,20 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     // Recheck after a notification/dialog was displayed; END may have started.
     if (!canCancelTask) return;
     await cancelUpgrade(keepPackage: keepPackage);
+  }
+
+  /// Retire only this companion's owner. END/apply must finish, not be aborted.
+  Future<bool> releaseCompanionTask(String runtimeId) async {
+    final epoch = _ownerEpoch;
+    if (isUpgrading) {
+      if (_companionTaskRuntime != runtimeId) return false;
+      if (_operation == _OtaOperation.query || canCancelTask) {
+        await cancelUpgrade(keepPackage: true);
+      } else {
+        await _ownerDone;
+      }
+    }
+    return _ownerEpoch == epoch && !isUpgrading;
   }
   final int _senderWindowSegments;
   final OtaLinkProfile linkProfile;
@@ -612,8 +633,13 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       _latestUriBuilder != _defaultLatestUriBuilder ||
       ShareLinks.hasFirmwareUpdateEndpoint;
   File? get downloadedFirmwareFile => _firmwareFile;
+  String? get verifiedPackageSha256 => _verified?.sha256;
+  bool _writingCompanionControl = false;
+  bool get companionTextAllowed => !_isUpgrading.value || _writingCompanionControl;
   DeviceOtaInfo? get deviceInfo => _deviceInfo;
   FirmwareLatestInfo? get latestInfo => _latestInfo;
+  bool _lastCheckWasNoUpdate = false;
+  bool get lastCheckWasNoUpdate => _lastCheckWasNoUpdate;
   OtaTerminalState? get terminalState => _terminalState.value;
   /// 当前领域阶段（UI 唯一驱动源）。
   OtaPhase get phase => _phase.value;
@@ -664,6 +690,42 @@ class OtaService extends GetxController with WidgetsBindingObserver {
 
   // ---- 设备身份（GET_INFO） ----
 
+  Future<bool> sendCompanionMessage(String address, CompanionMessage message,
+      {String? companionRuntimeId}) async {
+    if (isUpgrading || !hasCurrentDeviceIdentity(address)) return false;
+    final bytes = Uint8List.fromList(message.encode());
+    _writingCompanionControl = true;
+    try {
+      return await _runExclusive<bool>((generation) async {
+        final link = _ble.otaLinkGeneration(address);
+        final chars = await _ble.findExactOtaCharacteristicsByAddress(address);
+        if (chars == null || generation != _cancelGeneration || !hasCurrentDeviceIdentity(address)) return false;
+        final binding = _ble.otaGattBindingToken(address);
+        final chunk = await _ble.requestOtaMtu(address);
+        if (generation != _cancelGeneration || link != _ble.otaLinkGeneration(address) ||
+            !identical(binding, _ble.otaGattBindingToken(address))) { return false; }
+        // A write-only transport shares the binary writer ledger, but must not
+        // replace/disable the idle receiver's CCCD while a CHOICE is arriving.
+        final idleNotifications = StreamController<List<int>>.broadcast();
+        final transport = OtaBleTransport(channel: _ChannelAdapter(ble: _ble,
+          linkGeneration: link, bindingToken: binding, deviceAddress: address,
+          serviceId: chars['serviceId']!, writeCharId: chars['writeCharId']!,
+          chunkSize: chunk, notifyStream: idleNotifications.stream,
+          writeWithResponse: chars['writeMode'] != 'without'));
+        try {
+          if (generation != _cancelGeneration || _ble.otaLinkGeneration(address) != link) return false;
+          await transport.writeIdleControl(bytes);
+          return generation == _cancelGeneration && _ble.otaLinkGeneration(address) == link;
+        } finally {
+          await transport.dispose();
+          await idleNotifications.close();
+          if (identical(_transport, transport)) _transport = null;
+        }
+      }, companionRuntimeId: companionRuntimeId) ?? false;
+    } catch (_) { return false; }
+    finally { _writingCompanionControl = false; }
+  }
+
   /// 通过 BLE GET_INFO 建立设备身份快照。
   ///
   /// 前置：设备已连接且能发现精确 FFF0/FFF2/FFF1 特征。
@@ -673,7 +735,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   ///
   /// 升级族互斥（RC3-04）：非升级期间与其他入口经同一 owner 锁串行，
   /// 并发 readDeviceInfo 不得互相 dispose 对方的 transport。
-  Future<DeviceOtaInfo?> readDeviceInfo(String deviceAddress) async {
+  Future<DeviceOtaInfo?> readDeviceInfo(String deviceAddress,
+      {String? companionRuntimeId}) async {
     if (_isUpgrading.value) {
       // 升级进行中禁止重建 transport：_bindTransport 会 dispose
       // 在途 transport，打断传输（RC2-04）。返回现有快照。
@@ -787,7 +850,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         stats?.emitSummary();
         await OtaDiagnostics.current.captureNativeWrites();
       }
-    });
+    }, companionRuntimeId: companionRuntimeId);
   }
 
   // ---- 检查更新（latest schema v2） ----
@@ -799,7 +862,9 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   ///
   /// 入口互斥（RC3-04）：与其他升级族入口经同一 owner 锁串行；取消
   /// 代次贯穿 latest 重试与发布，取消后不发布旧状态。
-  Future<FirmwareLatestInfo?> checkFirmwareUpdate({String? channel}) async {
+  Future<FirmwareLatestInfo?> checkFirmwareUpdate({String? channel,
+      String? companionRuntimeId}) async {
+    _lastCheckWasNoUpdate = false;
     if (_isUpgrading.value) {
       _notify('提示', '升级流程进行中，请先取消或等待完成');
       return null;
@@ -835,7 +900,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       if (generation != _cancelGeneration) return null;
       return _checkLatestLocked(info, appVersionCode, channel,
           generation: generation);
-    });
+    }, companionRuntimeId: companionRuntimeId);
   }
 
   /// latest 查询主体（入口互斥/闭锁/身份检查已由调用方完成，RC2-04）。
@@ -886,6 +951,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           return null;
         }
         _upgradeStatus.value = '暂无可用更新';
+        _lastCheckWasNoUpdate = true;
         _phase.value = OtaPhase.idle;
         return null;
       }
@@ -963,7 +1029,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   ///
   /// 下载 URL 过期/资产冲突/本地 partial 损坏会自动重新 latest 一次并
   /// 重下（仅一次，防拉锯）。
-  Future<bool> downloadFirmware() async {
+  Future<bool> downloadFirmware({String? companionRuntimeId}) async {
     if (_isUpgrading.value) {
       _notify('提示', '升级流程进行中，请先取消或等待完成');
       return false;
@@ -987,7 +1053,11 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     // owner 锁在首个 await 前取得（RC3-04）：同步置位无竞态窗口。
     return await _runExclusive((generation) async {
       _phase.value = OtaPhase.downloading;
-      await _beginBackgroundTask(_deviceInfoAddress!, asset, generation);
+      await _beginBackgroundTask(_deviceInfoAddress!, asset, generation, companionRuntimeId: companionRuntimeId);
+      if (companionRuntimeId != null && !backgroundAcquired) {
+        _phase.value = OtaPhase.failed;
+        return false;
+      }
       await _waitForForeground(generation);
       if (generation != _cancelGeneration || _closed) return false;
       var downloaded = await _downloadOnce(asset, releaseId, generation);
@@ -1030,7 +1100,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           final oldTask = _taskKey;
           if (oldTask != null && oldTask.packageSha256 != newAsset.sha256) {
             await _finishBackgroundTask(oldTask);
-            await _beginBackgroundTask(_deviceInfoAddress!, newAsset, generation);
+            await _beginBackgroundTask(_deviceInfoAddress!, newAsset, generation, companionRuntimeId: companionRuntimeId);
+            if (companionRuntimeId != null && !backgroundAcquired) return false;
             await _waitForForeground(generation);
             if (generation != _cancelGeneration || _closed) return false;
           }
@@ -1038,7 +1109,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         }
       }
       return downloaded ?? false;
-    }, operation: _OtaOperation.download) ?? false;
+    }, operation: _OtaOperation.download, companionRuntimeId: companionRuntimeId) ?? false;
   }
 
   bool _needsFreshManifest = false;
@@ -1259,10 +1330,23 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   /// credit 窗口推进 → END → 等待设备重启 → 重连 GET_INFO → 目标身份
   /// （versionCode/raw image SHA）复核（PR07 完整闭环）。
   /// Debug prefix mode returns false (not an upgrade), with phase=probeCompleted.
-  Future<bool> startOtaUpgrade(String deviceAddress) async {
+  Future<bool> startOtaUpgrade(String deviceAddress, {
+    String? companionRuntimeId, OtaUpgradeConsent? consent,
+  }) async {
     final file = _firmwareFile;
     final info = _deviceInfo;
     final asset = _asset;
+    bool consentCurrent() => consent == null || (!consent.expired && consent.address == deviceAddress &&
+        hasCurrentDeviceIdentity(deviceAddress) &&
+        consent.linkGeneration == _ble.otaLinkGeneration(deviceAddress) &&
+        consent.baseImageSha256 == _deviceInfo?.currentImageSha256Hex &&
+        consent.versionCode == _latestInfo?.versionCode &&
+        consent.targetImageSha256 == _latestInfo?.targetImageSha256 &&
+        consent.packageSha256 == _asset?.sha256 && consent.packageSha256 == _verified?.sha256);
+    if (!consentCurrent()) {
+      _upgradeStatus.value = 'STALE_DEVICE_CONSENT';
+      return false;
+    }
     if (file == null) {
       _notify('错误', '固件文件不存在，请先下载固件');
       return false;
@@ -1390,7 +1474,11 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           }
         }
 
-        await _beginBackgroundTask(deviceAddress, asset, generation);
+        await _beginBackgroundTask(deviceAddress, asset, generation, companionRuntimeId: companionRuntimeId);
+        if (companionRuntimeId != null && !backgroundAcquired) {
+          _phase.value = OtaPhase.failed;
+          return fail('background', 'companion-ownership-unavailable');
+        }
         await _waitForForeground(generation);
         if (generation != _cancelGeneration || _closed) return fail('cancelled', 'owner-changed');
 
@@ -1426,7 +1514,14 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         }
         // P3-4 观测：绑定阶段终点 = 订阅流就绪（MTU 协商 + 通知订阅完成）。
         final transport = await _bindTransport(deviceAddress, otaChars,
-            stats: linkStats);
+            stats: linkStats, beforeInitialBegin: consent == null ? null : () {
+              if (generation != _cancelGeneration || _closed) {
+                throw const OtaTransportException('Owner retired before BEGIN', code: 'CANCELLED');
+              }
+              if (!consentCurrent()) {
+                throw const OtaTransportException('STALE_DEVICE_CONSENT', code: 'STALE_DEVICE_CONSENT');
+              }
+            });
         linkStats.phaseEnd('bind');
         if (generation != _cancelGeneration) {
           // RC3-04⑤：迟到完成的 bind 产物无人接管——transport 与其订阅
@@ -1515,6 +1610,11 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         _upgradeStatus.value = 'BLE v2 传输中...';
         await _waitForForeground(generation);
         if (generation != _cancelGeneration || _closed) return fail('cancelled', 'owner-changed');
+        if (!consentCurrent()) {
+          _upgradeStatus.value = 'STALE_DEVICE_CONSENT';
+          _phase.value = OtaPhase.failed;
+          return fail('consent', 'expired-or-link-changed');
+        }
         final ack = await transport.transfer(
           package: package,
           packageSha256: packageSha256,
@@ -1814,7 +1914,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           await diagnostics.finishUpgrade(completed: diagnosticCompleted);
         }
       }
-    }, operation: _OtaOperation.transfer) ?? false;
+    }, operation: _OtaOperation.transfer, companionRuntimeId: companionRuntimeId) ?? false;
   }
 
   /// 消费一次 failClosed 已决终止（RC3-08/12②）。代次未变但在途写在
@@ -2260,7 +2360,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   ///   [cancelUpgrade] 才发布 cancelled 状态，避免晚到的旧状态
   ///   覆盖取消终态。
   Future<T?> _runExclusive<T>(Future<T?> Function(int generation) body,
-      {_OtaOperation operation = _OtaOperation.query}) async {
+      {_OtaOperation operation = _OtaOperation.query, String? companionRuntimeId}) async {
     if (_isUpgrading.value) {
       _notify('提示', '操作进行中，请先取消或等待完成');
       return null;
@@ -2272,6 +2372,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     final epoch = _ownerEpoch;
     _ownerDone = done.future;
     _operation = operation;
+    _companionTaskRuntime = companionRuntimeId;
     _foregroundPaused = false;
     _downloadStoppedForBackground = false;
     ++_recoveryEpoch;
@@ -2300,6 +2401,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         if (!done.isCompleted) done.complete();
         if (identical(_ownerDone, done.future)) {
           _ownerDone = null;
+          _companionTaskRuntime = null;
           _isUpgrading.value = false;
         }
         releaseReconnect?.call();
@@ -2706,6 +2808,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     String deviceAddress,
     Map<String, String> otaChars, {
     OtaLinkStats? stats,
+    void Function()? beforeInitialBegin,
   }) async {
     final linkGeneration = _ble.otaLinkGeneration(deviceAddress);
     final bindingToken = _ble.otaGattBindingToken(deviceAddress);
@@ -2756,6 +2859,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       }
       final bindGeneration = _cancelGeneration;
       final transport = OtaBleTransport(channel: channel, stats: stats,
+          beforeInitialBegin: beforeInitialBegin,
           onLinkSelection: (selection) {
             if (bindGeneration != _cancelGeneration || !isUpgrading || !linkCurrent()) return;
             final reasons = <String>[
@@ -3216,7 +3320,7 @@ class _ChannelAdapter implements OtaBleChannel {
   final Object? deviceScope;
 
   @override
-  Future<void> writeChunk(List<int> chunk) async {
+  Future<void> writeChunk(List<int> chunk, {OtaWriteAdmission? admission}) async {
     try {
       if (!isConnected) throw StateError('STALE_OTA_CHANNEL');
       // OTA 专用严格写入（RC2-08）：UUID 精确匹配 FFF0/FFF2，
@@ -3228,9 +3332,11 @@ class _ChannelAdapter implements OtaBleChannel {
         chunk,
         writeWithResponse: writeWithResponse,
         stats: stats,
+        admission: admission,
       );
       if (!isConnected) throw StateError('STALE_OTA_CHANNEL_COMPLETION');
     } catch (e) {
+      if (admission?.rejected == true) rethrow;
       // 写失败同样标记断连（PR09）：不能只依赖通知流 error/done。
       _connected = false;
       throw OtaTransportException('BLE write failed: $e', code: 'DISCONNECTED');

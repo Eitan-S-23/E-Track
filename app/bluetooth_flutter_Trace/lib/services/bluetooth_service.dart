@@ -2,6 +2,8 @@ import 'dart:async';
 import '../utils/safe_snackbar.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver, AppLifecycleState;
+import '../companion/companion_scan_policy.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get/get.dart';
 
@@ -14,6 +16,7 @@ import '../ota/ota_link_profile.dart';
 import '../ota/ota_experiment_config.dart';
 import '../ota/ota_radio_lease.dart';
 import '../ota/ota_scan_pause.dart';
+import '../ota/ota_write_admission.dart';
 import 'bluetooth_reconnect.dart';
 
 // 抽象蓝牙适配器接口
@@ -466,13 +469,17 @@ class WinBleAdapter implements BluetoothAdapter {
 
 /// 跨平台蓝牙服务
 /// 为不同平台提供统一的蓝牙接口
-class BluetoothService extends GetxController {
+class BluetoothService extends GetxController with WidgetsBindingObserver {
   BluetoothService({
+    BluetoothAdapter? adapter,
+    int Function()? companionClockMs,
     bool? reuseOtaCharacteristics,
     bool? preferOtaWithoutResponse,
     OtaExperimentRuntime? experiment,
     OtaLinkProfile? linkProfile,
-  }) : _experiment = experiment ?? OtaExperimentRuntime.current,
+  }) : _providedAdapter = adapter,
+       _companionClockMs = companionClockMs,
+       _experiment = experiment ?? OtaExperimentRuntime.current,
        reuseOtaCharacteristics =
            (experiment ?? OtaExperimentRuntime.current).config?.reuseGatt ??
            reuseOtaCharacteristics ??
@@ -488,6 +495,8 @@ class BluetoothService extends GetxController {
   final bool reuseOtaCharacteristics;
   final bool preferOtaWithoutResponse;
   final OtaExperimentRuntime _experiment;
+  final BluetoothAdapter? _providedAdapter;
+  final int Function()? _companionClockMs;
   OtaScanPause? _otaScanPause;
   final Map<String, OtaPriorityQueue> _otaPriorityQueues = {};
   bool get _scanPauseEnabled => _experiment.config?.pauseScanDuringOta == true;
@@ -547,6 +556,58 @@ class BluetoothService extends GetxController {
   final _mobileConnects = <String, Future<bool>>{};
   final _connectEpochs = <String, int>{};
   bool _closed = false;
+  final _scanClock = Stopwatch()..start();
+  late final CompanionScanPolicy _companionScan = CompanionScanPolicy(nowMs: _companionClockMs ?? () => _scanClock.elapsedMilliseconds);
+  Timer? _companionScanTimer;
+  WidgetsBinding? _lifecycleBinding;
+  void Function()? _backgroundReconnectRelease;
+  @visibleForTesting
+  bool get usesAndroidLifecycle => Platform.isAndroid;
+  bool get foregroundScanningAllowed => !usesAndroidLifecycle || _lifecycleBinding?.lifecycleState == AppLifecycleState.resumed;
+  bool get companionScanningAllowed => _companionScan.allowed;
+  bool get _scanningAllowed => !_closed && (foregroundScanningAllowed || companionScanningAllowed);
+
+  void companionOwnerChanged(String? runtimeId) {
+    _companionScan.ownerChanged(runtimeId);
+    if (!_scanningAllowed) unawaited(stopScan());
+  }
+
+  Future<void> startCompanionScan(String runtimeId) async {
+    if (_closed || foregroundScanningAllowed || !_companionScan.open(runtimeId)) return;
+    _companionScanTimer?.cancel();
+    _companionScanTimer = Timer(CompanionScanPolicy.window, () {
+      _companionScan.close();
+      if (!foregroundScanningAllowed) unawaited(stopScan());
+    });
+    await startScan();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (usesAndroidLifecycle) {
+      if (state == AppLifecycleState.resumed) {
+        _backgroundReconnectRelease?.call();
+        _backgroundReconnectRelease = null;
+      } else {
+        _backgroundReconnectRelease ??= _reconnect.hold();
+      }
+    }
+    if (!_scanningAllowed) unawaited(stopScan());
+  }
+
+  Future<bool> connectCompanionDeviceByAddress(String address) async {
+    _reconnect.forget(address);
+    final connected = await connectOtaDeviceByAddress(address);
+    _reconnect.forget(address);
+    return connected;
+  }
+
+  Future<void> disconnectCompanionDeviceByAddress(String address) async {
+    final key = address.toLowerCase();
+    _reconnect.forget(key);
+    _connectEpochs[key] = (_connectEpochs[key] ?? 0) + 1;
+    await disconnectOtaDeviceByAddress(address);
+  }
 
   void Function() holdAutomaticReconnect() => _reconnect.hold();
   Future<void> get automaticReconnectSettled => _reconnect.settled;
@@ -796,13 +857,24 @@ class BluetoothService extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    if (usesAndroidLifecycle) {
+      _lifecycleBinding = WidgetsBinding.instance;
+      _lifecycleBinding!.addObserver(this);
+      didChangeAppLifecycleState(_lifecycleBinding!.lifecycleState ?? AppLifecycleState.detached);
+    }
     initBluetooth();
   }
 
   @override
   void onClose() {
     _closed = true;
+    _lifecycleBinding?.removeObserver(this);
+    _lifecycleBinding = null;
+    _companionScanTimer?.cancel();
+    _companionScan.ownerChanged(null);
     _reconnect.dispose();
+    _backgroundReconnectRelease?.call();
+    _backgroundReconnectRelease = null;
     final pause = _otaScanPause;
     if (pause != null) {
       unawaited(pause.dispose().catchError((Object error) {
@@ -838,10 +910,22 @@ class BluetoothService extends GetxController {
   }
 
   /// 初始化蓝牙
-  Future<void> initBluetooth() async {
+  Future<void>? _initialization;
+  bool _initialized = false;
+  Future<void> initBluetooth() {
+    if (_initialized || _closed) return Future.value();
+    return _initialization ??= _initializeBluetooth().whenComplete(() { _initialization = null; });
+  }
+
+  Future<void> _initializeBluetooth() async {
     try {
+      await _adapterSubscription?.cancel();
+      _adapterSubscription = null;
       // 根据平台选择适配器
-      if (Platform.isWindows) {
+      final providedAdapter = _providedAdapter;
+      if (providedAdapter != null) {
+        _adapter = providedAdapter;
+      } else if (Platform.isWindows) {
         _adapter = WinBleAdapter();
       } else {
         _adapter = FlutterBluePlusAdapter();
@@ -855,6 +939,7 @@ class BluetoothService extends GetxController {
       } else {
         await _initMobileBluetooth();
       }
+      _initialized = true;
     } catch (e) {
       debugPrint('初始化蓝牙失败: $e');
       safeSnackbar('错误', '初始化蓝牙失败: $e', snackPosition: SnackPosition.BOTTOM);
@@ -910,6 +995,7 @@ class BluetoothService extends GetxController {
 
   /// 开始扫描设备
   Future<void> startScan({Duration? timeout}) async {
+    if (!_scanningAllowed) return;
     if (_scanPauseEnabled || _otaScanPause != null) {
       try {
         await _scanPause.start(timeout: timeout);
@@ -936,6 +1022,7 @@ class BluetoothService extends GetxController {
 
   /// 通用蓝牙扫描（适用于所有平台）
   Future<void> _startScan(Duration? timeout) async {
+    if (!_scanningAllowed) return;
     isScanning.value = true;
     _scanTimeoutTimer?.cancel();
     await _scanSubscription?.cancel();
@@ -948,7 +1035,9 @@ class BluetoothService extends GetxController {
       debugPrint('${Platform.isWindows ? "Windows" : "Mobile"}蓝牙扫描已启动');
 
       // 使用适配器进行扫描
+      if (!_scanningAllowed) { isScanning.value = false; return; }
       await _adapter.startScan();
+      if (!_scanningAllowed) { await _stopScanNative(); return; }
 
       // 监听扫描结果
       _scanSubscription = _adapter.scanResults.listen((results) {
@@ -1576,6 +1665,7 @@ class BluetoothService extends GetxController {
     List<int> data, {
     bool writeWithResponse = false,
     OtaLinkStats? stats,
+    OtaWriteAdmission? admission,
   }) async {
     _experiment.requireForOta()?.requireDevice(deviceAddress);
     if (stats == null) {
@@ -1585,6 +1675,7 @@ class BluetoothService extends GetxController {
         characteristicId,
         data,
         writeWithResponse: writeWithResponse,
+        admission: admission,
       );
       return;
     }
@@ -1597,6 +1688,7 @@ class BluetoothService extends GetxController {
         data,
         writeWithResponse: writeWithResponse,
         stats: stats,
+        admission: admission,
       );
       stats.recordGattWrite(
         durationUs: sw.elapsedMicroseconds,
@@ -1619,12 +1711,14 @@ class BluetoothService extends GetxController {
     List<int> data, {
     bool writeWithResponse = false,
     OtaLinkStats? stats,
+    OtaWriteAdmission? admission,
   }) async {
     final generation = otaLinkGeneration(deviceAddress);
     final startBinding = otaGattBindingToken(deviceAddress);
     try {
       if (Platform.isWindows) {
         final wSw = stats == null ? null : (Stopwatch()..start());
+        admission?.dispatch();
         try {
           await _adapter.writeCharacteristic(
             deviceAddress,
@@ -1688,8 +1782,10 @@ class BluetoothService extends GetxController {
             final cid = ch.uuid.toString();
             if (!_strictBleUuidEquals(cid, characteristicId)) continue;
             final wSw = stats == null ? null : (Stopwatch()..start());
+            final bytes = Uint8List.fromList(data);
+            admission?.dispatch();
             try {
-              await ch.write(Uint8List.fromList(data),
+              await ch.write(bytes,
                   withoutResponse: !writeWithResponse);
             } catch (_) {
               stats?.recordPlatformWrite(
@@ -1713,6 +1809,7 @@ class BluetoothService extends GetxController {
         throw UnsupportedError('未找到目标OTA特征: $characteristicId');
       }
     } catch (e) {
+      if (admission?.rejected == true) rethrow;
       if (reuseOtaCharacteristics && startBinding != null &&
           identical(startBinding, otaGattBindingToken(deviceAddress))) {
         _invalidateOtaGatt(deviceAddress.toLowerCase());

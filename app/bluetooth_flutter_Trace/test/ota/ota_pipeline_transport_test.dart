@@ -83,7 +83,8 @@ class TestPipelinePeer implements OtaBleChannel {
   }
 
   @override
-  Future<void> writeChunk(List<int> chunk) async {
+  Future<void> writeChunk(List<int> chunk, {OtaWriteAdmission? admission}) async {
+    admission?.dispatch();
     final before = writeStats?.nowUs();
     try {
     if (!connected) throw StateError('disconnected');
@@ -185,7 +186,7 @@ class _PrefixLossPeer extends TestPipelinePeer {
   List<int>? receiverPrefix;
 
   @override
-  Future<void> writeChunk(List<int> chunk) async {
+  Future<void> writeChunk(List<int> chunk, {OtaWriteAdmission? admission}) async {
     final frame = OtaBleCodec.decodeFrame(chunk);
     if (frame.cmd == OtaBleCodec.cmdGetInfo) infoWrites++;
     final prefix = receiverPrefix;
@@ -220,7 +221,7 @@ class _PrefixLossPeer extends TestPipelinePeer {
           currentVersionCode: 30286, imageSha256: List<int>.filled(32, 0xbb)));
       return;
     }
-    await super.writeChunk(chunk);
+    await super.writeChunk(chunk, admission: admission);
   }
 }
 
@@ -237,7 +238,8 @@ class _ReboundChannel implements OtaBleChannel {
   @override
   Future<int> maxWriteChunkSize() => peer.maxWriteChunkSize();
   @override
-  Future<void> writeChunk(List<int> chunk) => peer.writeChunk(chunk);
+  Future<void> writeChunk(List<int> chunk, {OtaWriteAdmission? admission}) =>
+      peer.writeChunk(chunk, admission: admission);
 }
 
 Uint8List package(int len) => Uint8List.fromList(List.generate(len, (i) => i & 255));

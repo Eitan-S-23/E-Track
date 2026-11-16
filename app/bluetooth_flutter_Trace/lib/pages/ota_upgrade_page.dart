@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import '../companion/companion_runtime.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get/get.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -1294,7 +1295,11 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
     });
 
     try {
-      await otaService.checkFirmwareUpdate();
+      if (Get.isRegistered<CompanionRuntime>()) {
+        await Get.find<CompanionRuntime>().manualCheck(_deviceAddress);
+      } else {
+        await otaService.checkFirmwareUpdate();
+      }
     } catch (e) {
       if (!mounted) return;
       safeSnackbar('错误', '检查更新失败: $e', context: context,

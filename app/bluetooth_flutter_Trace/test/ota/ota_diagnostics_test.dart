@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:crypto/crypto.dart';
 import 'package:ble_monitor/ota/ota_diagnostics.dart';
+import 'package:ble_monitor/ota/ota_device_observation.dart';
 import 'package:ble_monitor/ota/ota_link_stats.dart';
 import 'package:ble_monitor/ota/ota_mono.dart';
 import 'package:ble_monitor/ota/ota_experiment_config.dart';
@@ -50,6 +51,45 @@ void main() {
     expect(directoryCalls, 0);
     expect(await root.list().length, 0);
     expect(diagnostics.status.value.enabled, isFalse);
+  });
+
+  test('passive diagnostics retain original producer records without an auto connection', () async {
+    const config = OtaDeviceObservationConfig(
+      enabled: true,
+      target: 'AA:BB:CC:DD:EE:FF',
+      sentinel: 'OTAOBS0123456789abcdef01234567',
+      modeToken: 'passive:OTAOBS0123456789abcdef01234567',
+    );
+    await diagnostics.initialize(enabled: config.enabled, target: config.target,
+      sentinel: config.sentinel, directoryProvider: () async => root);
+    final calls = <String>[];
+    final statusLines = <String>[];
+    await OtaDiagnostics.withInstance(diagnostics, () async {
+      expect(OtaDeviceObserver.startFromBuild(
+        config: config,
+        startScan: () async { calls.add('scan'); return true; },
+        stopScan: () async { calls.add('stop'); },
+        connect: (_) async { calls.add('connect'); return true; },
+        readIdentity: (_) async { calls.add('identity'); return null; },
+        cleanup: (_) async { calls.add('cleanup'); },
+        emit: statusLines.add,
+      ), isNull);
+      OtaLinkStats(label: 'query').recordGetInfo(durationUs: 20);
+      final snapshot = await diagnostics.exportSnapshot();
+      final text = await snapshot.readAsString();
+      expect(statusLines.single, config.statusLine);
+      expect(text, isNot(contains('OTA_OBS ')));
+      expect(text, contains('OTA_LINK_SAMPLE label=query kind=get_info'));
+      expect(text, contains(config.sentinel));
+      final rows = (await snapshot.readAsLines()).map(jsonDecode).toList();
+      expect(rows.last['lost'], 0);
+      expect(rows.last['healthy'], isTrue);
+      expect(rows.last['upgradeStarts'], 0);
+      expect(rows.last['upgradeEnds'], 0);
+    });
+    expect(diagnostics.status.value.ready, isTrue);
+    expect(OtaDeviceObserver.instance, isNull);
+    expect(calls, isEmpty);
   });
 
   test('P35-SMOKE-LOG-01 real UTF-8 summary survives file/export/strict host parser', () async {
