@@ -51,7 +51,8 @@ class DevelopmentApkTests(unittest.TestCase):
         # test_debug_application_id_suffix_... 与 test_device_observation_...
         # 显式覆盖。
         for name in (APK.APPLICATION_ID_ENV, APK.DEVICE_OBSERVATION_ENV,
-                     APK.OBSERVATION_TARGET_ENV, APK.OBSERVATION_FIRMWARE_URL_ENV,
+                     APK.OBSERVATION_MODE_ENV, APK.OBSERVATION_TARGET_ENV,
+                     APK.OBSERVATION_FIRMWARE_URL_ENV,
                      APK.OTA_LINK_CANDIDATE_ENV, PROFILE.ENV, APK.FIXED_SIGNING_ENV,
                      APK.SIGNING_SECRET_ENV, APK.DEVICE_OTA_NATIVE_TESTS_ENV,
                      "TRACE_DEV_SIGNING_STORE_FILE"):
@@ -593,6 +594,34 @@ class DevelopmentApkTests(unittest.TestCase):
             self.assertIn(expected, build)
         self.assertIn("--debug", build)
 
+    def test_passive_observation_is_explicit_and_binds_the_mode_to_its_sentinel(self):
+        automatic = APK.observation_config(self.observation_env())
+        env = {**self.observation_env(), APK.OBSERVATION_MODE_ENV: "passive"}
+        passive = APK.observation_config(env)
+        self.assertEqual("automatic", automatic["mode"])
+        self.assertEqual("passive", passive["mode"])
+        self.assertRegex(passive["sentinel"], r"^OTAOBS[0-9a-f]{24}$")
+        self.assertNotEqual(automatic["sentinel"], passive["sentinel"])
+        self.assertEqual(automatic["firmware_latest_url"], passive["firmware_latest_url"])
+        self.assertFalse(any(APK.OBSERVATION_MODE_ENV in value
+                             for value in APK.observation_defines(automatic)))
+        build = next(argv for name, argv, _, _ in APK.plan(self.root, self.run, env)
+                     if name == "apk_build")
+        self.assertIn(f"--dart-define={APK.OBSERVATION_MODE_ENV}=passive:{passive['sentinel']}", build)
+        self.assertIn(f"--dart-define={APK.OBSERVATION_SENTINEL_ENV}={passive['sentinel']}", build)
+        self.assertFalse(any("OTA_P34_RUNTIME_CONFIG" in value for value in build))
+
+    def test_observation_mode_rejects_unknown_values_and_does_not_enable_observation(self):
+        self.assertIsNone(APK.observation_config({APK.OBSERVATION_MODE_ENV: "passive"}))
+        with self.assertRaisesRegex(ValueError, APK.OBSERVATION_MODE_ENV):
+            APK.observation_config({**self.observation_env(), APK.OBSERVATION_MODE_ENV: "pasive"})
+
+    def test_passive_mode_is_wired_to_the_development_workflow(self):
+        workflow = (ROOT / ".github/workflows/flutter-dev-checks.yml").read_text(encoding="utf-8")
+        self.assertIn("observation_mode:", workflow)
+        self.assertIn("default: automatic", workflow)
+        self.assertIn("TRACE_DEV_OBSERVATION_MODE: ${{ inputs.observation_mode || 'automatic' }}", workflow)
+
     def test_device_observation_rejects_incomplete_or_credentialed_config(self):
         base = {
             APK.DEVICE_OBSERVATION_ENV: "true",
@@ -755,6 +784,42 @@ class DevelopmentApkTests(unittest.TestCase):
             APK.collect(self.root, self.run, "1" * 40, self.env)
         metadata = json.loads((self.run / "artifacts/trace-dev-debug.json").read_text())
         self.assertNotIn("device_observation", metadata)
+
+    def test_collect_passive_observation_rejects_an_automatic_apk_then_records_passive(self):
+        automatic = APK.observation_config(self.observation_env())
+        env = {**self.observation_env(), APK.OBSERVATION_MODE_ENV: "passive"}
+        passive = APK.observation_config(env)
+        for config in (automatic, passive):
+            blob = "\n".join(config.values())
+            if config is passive:
+                blob += "\n" + APK.observation_mode_token(config)
+            self.write(APK.APK_RELATIVE, self.archive_bytes([
+                ("AndroidManifest.xml", b"fixture, not a real APK manifest"),
+                (APK.KERNEL_BLOB, blob.encode("utf-8")),
+            ]))
+            with mock.patch.object(APK, "read_application_id", return_value="com.example.fixture"), \
+                    mock.patch("sys.stdout", new_callable=io.StringIO):
+                if config is automatic:
+                    with self.assertRaisesRegex(ValueError, "sentinel"):
+                        APK.collect(self.root, self.run, "1" * 40, env)
+                    self.assertFalse((self.run / "artifacts").exists())
+                else:
+                    APK.collect(self.root, self.run, "1" * 40, env)
+        metadata = json.loads((self.run / "artifacts/trace-dev-debug.json").read_text())
+        self.assertEqual("passive", metadata["device_observation"]["mode"])
+        self.assertEqual(passive["sentinel"], metadata["device_observation"]["sentinel"])
+
+    def test_collect_rejects_passive_config_without_the_compiled_mode_token(self):
+        env = {**self.observation_env(), APK.OBSERVATION_MODE_ENV: "passive"}
+        config = APK.observation_config(env)
+        self.write(APK.APK_RELATIVE, self.archive_bytes([
+            ("AndroidManifest.xml", b"fixture, not a real APK manifest"),
+            (APK.KERNEL_BLOB, "\n".join(config.values()).encode("utf-8")),
+        ]))
+        with mock.patch.object(APK, "read_application_id", return_value="com.example.fixture"), \
+                self.assertRaisesRegex(ValueError, "passive mode token"):
+            APK.collect(self.root, self.run, "1" * 40, env)
+        self.assertFalse((self.run / "artifacts").exists())
 
     def test_cli_never_builds_or_downloads_locally(self):
         with mock.patch.dict(os.environ, {"GITHUB_ACTIONS": "false"}), \

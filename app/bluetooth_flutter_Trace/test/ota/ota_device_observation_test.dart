@@ -106,6 +106,62 @@ void main() {
     expect(started, 0);
   });
 
+  test('passive observation has valid configuration but no BLE owner', () async {
+    const passive = OtaDeviceObservationConfig(
+      enabled: true,
+      target: _target,
+      sentinel: _fingerprint,
+      modeToken: 'passive:$_fingerprint',
+    );
+    expect(passive.enabled, isTrue);
+    expect(passive.problem, isNull);
+    expect(passive.active, isFalse);
+    final calls = <String>[];
+    final lines = <String>[];
+    final observer = OtaDeviceObserver(
+      config: passive,
+      startScan: () async { calls.add('scan'); return true; },
+      stopScan: () async { calls.add('stop'); },
+      connect: (_) async { calls.add('connect'); return true; },
+      readIdentity: (_) async { calls.add('identity'); return null; },
+      cleanup: (_) async { calls.add('cleanup'); },
+      emit: lines.add,
+    );
+    observer.start();
+    observer.onAdvertisements([advertisement()]);
+    observer.onScanStreamError(StateError('foreign scan failed'));
+    await Future<void>.delayed(Duration.zero);
+    expect(observer.started, isFalse);
+    expect(observer.observedDevices, 0);
+    expect(calls, isEmpty);
+    expect(lines, isEmpty);
+  });
+
+  test('invalid or mismatched passive mode tokens cannot start a probe', () {
+    for (final mode in ['passive', 'pasive:$_fingerprint', 'passive:OTAOBSwrong']) {
+      final invalid = OtaDeviceObservationConfig(
+        enabled: true,
+        target: _target,
+        sentinel: _fingerprint,
+        modeToken: mode,
+      );
+      final calls = <String>[];
+      final lines = <String>[];
+      expect(invalid.problem, 'invalid_mode');
+      expect(OtaDeviceObserver.startFromBuild(
+        config: invalid,
+        startScan: () async { calls.add('scan'); return true; },
+        stopScan: () async { calls.add('stop'); },
+        connect: (_) async { calls.add('connect'); return true; },
+        readIdentity: (_) async { calls.add('identity'); return null; },
+        cleanup: (_) async { calls.add('cleanup'); },
+        emit: lines.add,
+      ), isNull);
+      expect(calls, isEmpty);
+      expect(lines.single, contains('config=INVALID problem=invalid_mode'));
+    }
+  });
+
   test('启用后 target 或 sentinel 缺失即 fail-closed', () {
     final missingTarget = config(target: '   ');
     expect(missingTarget.active, isFalse);

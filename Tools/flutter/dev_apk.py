@@ -77,6 +77,7 @@ def signing_certificate(root, run_dir, apk, run=subprocess.run):
 
 # 设备观测构建开关（P3-3 T1a）。三项都显式启用；默认全部为空 = 不观测。
 DEVICE_OBSERVATION_ENV = "TRACE_DEV_DEVICE_OBSERVATION"
+OBSERVATION_MODE_ENV = "TRACE_DEV_OBSERVATION_MODE"
 OBSERVATION_TARGET_ENV = "TRACE_DEV_OBSERVATION_TARGET"
 OBSERVATION_FIRMWARE_URL_ENV = "TRACE_DEV_OBSERVATION_FIRMWARE_LATEST_URL"
 OBSERVATION_SENTINEL_ENV = "TRACE_DEV_OBSERVATION_SENTINEL"
@@ -189,6 +190,9 @@ def observation_config(env):
         return None
     if enabled not in ("1", "true"):
         raise ValueError(f"{DEVICE_OBSERVATION_ENV} must be exactly 'true' when set")
+    mode = (env.get(OBSERVATION_MODE_ENV) or "automatic").strip()
+    if mode not in ("automatic", "passive"):
+        raise ValueError(f"{OBSERVATION_MODE_ENV} must be 'automatic' or 'passive'")
     target = (env.get(OBSERVATION_TARGET_ENV) or "").strip()
     if not OBSERVATION_TARGET_PATTERN.fullmatch(target):
         raise ValueError(
@@ -208,12 +212,15 @@ def observation_config(env):
             f"{OBSERVATION_FIRMWARE_URL_ENV} must not carry credentials or fragments"
             + (f": {credential_error}" if credential_error else "")
         )
+    # Keep the existing log/host-parser sentinel format and automatic identity.
+    fingerprint = f"{target}\n{url}" + ("\npassive" if mode == "passive" else "")
     return {
+        "mode": mode,
         "target": target,
         "firmware_latest_url": url,
         # 配置指纹：绑定本次注入的确切取值，运行期把它打进日志与 CI 记录比对。
         "sentinel": OBSERVATION_SENTINEL_PREFIX + hashlib.sha256(
-            f"{target}\n{url}".encode("utf-8")
+            fingerprint.encode("utf-8")
         ).hexdigest()[:24],
     }
 
@@ -266,16 +273,23 @@ def ota_link_defines(config):
     ]
 
 
+def observation_mode_token(config):
+    return f"passive:{config['sentinel']}" if config["mode"] == "passive" else "automatic"
+
+
 def observation_defines(config):
     """观测配置对应的 `--dart-define` 列表；未启用时为空（不注入任何定义）。"""
     if config is None:
         return []
-    return [
+    defines = [
         f"--dart-define={DEVICE_OBSERVATION_ENV}=true",
         f"--dart-define={OBSERVATION_TARGET_ENV}={config['target']}",
         f"--dart-define={OBSERVATION_SENTINEL_ENV}={config['sentinel']}",
         f"--dart-define=TRACE_CLOUDFLARE_FIRMWARE_LATEST_URL={config['firmware_latest_url']}",
     ]
+    if config["mode"] == "passive":
+        defines.append(f"--dart-define={OBSERVATION_MODE_ENV}={observation_mode_token(config)}")
+    return defines
 
 
 def read_kernel_blob(root, apk):
@@ -537,11 +551,14 @@ def collect(root, run_dir, commit, env):
     observation = observation_config(env)
     if observation is not None:
         blob = read_kernel_blob(root, source)
-        for label, value in (
+        constants = [
             ("sentinel", observation["sentinel"]),
             ("firmware-latest URL", observation["firmware_latest_url"]),
             ("target", observation["target"]),
-        ):
+        ]
+        if observation["mode"] == "passive":
+            constants.append(("passive mode token", observation_mode_token(observation)))
+        for label, value in constants:
             if value.encode("utf-8") not in blob:
                 raise ValueError(
                     f"Debug APK does not contain the injected device-observation "
@@ -564,6 +581,8 @@ def collect(root, run_dir, commit, env):
             "sentinel": observation["sentinel"],
             "firmware_latest_url": observation["firmware_latest_url"],
         }
+        if observation["mode"] == "passive":
+            metadata["device_observation"]["mode"] = "passive"
     if link_candidate is not None:
         # Build intent is not a measured or selected production configuration.
         metadata["requested_ota_link_candidate"] = link_candidate

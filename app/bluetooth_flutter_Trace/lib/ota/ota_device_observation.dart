@@ -43,6 +43,7 @@ class OtaDeviceObservationConfig {
     required this.enabled,
     required this.target,
     required this.sentinel,
+    this.modeToken = 'automatic',
   });
 
   /// 当前构建的观测配置，全部来自编译期常量。
@@ -62,6 +63,10 @@ class OtaDeviceObservationConfig {
       'TRACE_DEV_OBSERVATION_SENTINEL',
       defaultValue: '',
     ),
+    modeToken: String.fromEnvironment(
+      'TRACE_DEV_OBSERVATION_MODE',
+      defaultValue: 'automatic',
+    ),
   );
 
   /// 是否显式启用。未启用时本文件不产生任何行为。
@@ -75,22 +80,29 @@ class OtaDeviceObservationConfig {
   /// 同一个产物。
   final String sentinel;
 
+  /// Passive diagnostics belong to OtaDiagnostics, never to this BLE owner.
+  final String modeToken;
+
+  bool get passive => modeToken == 'passive:$sentinel';
+
   /// 配置问题；`null` 表示可用。**未启用时恒为 `null`**：默认构建不是"非法
   /// 配置"，它只是不观测。
   String? get problem {
     if (!enabled) return null;
     if (target.trim().isEmpty) return 'missing_target';
     if (sentinel.trim().isEmpty) return 'missing_sentinel';
+    if (modeToken != 'automatic' && !passive) return 'invalid_mode';
     return null;
   }
 
   /// 是否真的执行观测：显式启用且配置完整。
-  bool get active => enabled && problem == null;
+  bool get active => enabled && problem == null && !passive;
 
   /// 启动行。仅在 [enabled] 为真时输出；配置非法时给出 `config=INVALID`，
   /// 让"启用了但没生效"在日志里一眼可见。
   String get statusLine => problem == null
-      ? 'OTA_OBS config=enabled target=$target sentinel=$sentinel'
+      ? 'OTA_OBS config=${passive ? 'passive' : 'enabled'} '
+          'target=$target sentinel=$sentinel'
       : 'OTA_OBS config=INVALID problem=$problem target=$target sentinel=$sentinel';
 
   /// 目标匹配规则（按强度依次尝试，命中即返回）。
@@ -250,6 +262,7 @@ class OtaDeviceObserver {
   /// `config=INVALID` 再返回 null——fail-closed，既不启动观测，也不静默
   /// 装作成功。
   static OtaDeviceObserver? startFromBuild({
+    OtaDeviceObservationConfig config = OtaDeviceObservationConfig.fromBuild,
     required OtaObservationStart startScan,
     required OtaObservationStop stopScan,
     required OtaObservationConnect connect,
@@ -258,7 +271,6 @@ class OtaDeviceObserver {
     String Function()? identityStatus,
     void Function(String line)? emit,
   }) {
-    const config = OtaDeviceObservationConfig.fromBuild;
     if (!config.enabled) return null;
     final reporter = emit ?? debugPrint;
     if (!config.active) {
