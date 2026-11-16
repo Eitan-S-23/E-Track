@@ -14,7 +14,8 @@ async function mount(page: Page) {
   await page.route("**/*",async route=>{
     const req=route.request(),url=new URL(req.url());
     if(url.origin!==origin){await route.abort();return;}
-    const reply=(body:object,status=200)=>route.fulfill({status,contentType:"application/json",body:JSON.stringify(body)});
+    const reply=(body:object,status=200)=>route.fulfill({status,contentType:"application/json",
+      headers:{"X-Request-Id":"ux-request"},body:JSON.stringify({requestId:"ux-request",...body})});
     if(url.pathname==="/"){await route.fulfill({contentType:"text/html",body:readFileSync(new URL("../public/index.html",import.meta.url),"utf8")});return;}
     if(/^\/[a-z-]+\.(js|css|svg|png|ico)$/.test(url.pathname)){
       await route.fulfill({contentType:url.pathname.endsWith(".js")?"text/javascript":url.pathname.endsWith(".css")?"text/css":"image/png",
@@ -25,6 +26,11 @@ async function mount(page: Page) {
       if(url.pathname.endsWith("/session")){await reply({ok:true,actor:"owner",role:"owner",appId:"trace",csrfToken:"ux-csrf",environment:"MOCK"});return;}
       if(url.pathname.endsWith("/delta/activity")){await reply({ok:true,actor:"owner",scope:"own-jobs",jobs:state.jobs,notifications:state.notifications,
         unreadCount:state.notifications.filter(n=>n.unread).length,pushPublicKey:null,pushSubscriptions:[]});return;}
+      if(url.pathname.endsWith("/delta/candidates")){await reply({ok:true,kind:"android",
+        target:{releaseId:"two",versionName:"1.0.2",versionCode:2,fullBytes:100000},bases:[],jobs:state.jobs,
+        dispatchConfigured:true,appSigningConfigured:true,distributionEnabled:true});return;}
+      if(url.pathname.endsWith("/version-inventory")){await reply({ok:true,coverage:"reporting-installations-only",
+        firmwareIdentityScope:"installation",uniqueDeviceCount:null,app:[],firmware:[],generatedAt:1794652000});return;}
       if(url.pathname.endsWith("/resource-usage")){await reply({ok:true,metrics:[],safeguards:{}});return;}
       if(url.pathname.includes("/firmware/")){await reply({ok:true,firmwareReleases:[],firmwareChannels:[]});return;}
       const platform=url.searchParams.get("platform")??"android";
@@ -109,13 +115,65 @@ test("task controls use icons and long press never cancels or restarts",async({p
   await expect(button.locator("svg use")).toHaveAttribute("href","#i-refresh");
   expect((await button.textContent())?.trim()).toBe("");
   await button.dispatchEvent("pointerdown",{pointerId:1,pointerType:"touch",isPrimary:true,clientX:100,clientY:200});
-  await page.waitForTimeout(550);await expect(button).toHaveClass(/tooltip-visible/);
+  // A read acknowledgement/poll can replace the buttons while the finger is down.
+  await page.locator('#taskContent [data-task-action="refresh"]').dispatchEvent("click");
+  await expect(button).toHaveClass(/tooltip-visible/);
+  const tooltip=page.getByRole("tooltip");
+  await expect(tooltip).toContainText("original inputs");
+  await expect(button).toHaveAttribute("aria-describedby","taskControlTooltip");
+  const box=await tooltip.boundingBox();
+  expect(box!.x).toBeGreaterThanOrEqual(0);expect(box!.x+box!.width).toBeLessThanOrEqual(390);
+  expect(box!.y).toBeGreaterThanOrEqual(0);expect(box!.y+box!.height).toBeLessThanOrEqual(900);
   await page.screenshot({path:info.outputPath("task-icons-tooltip.png"),animations:"disabled"});
   await button.dispatchEvent("pointerup",{pointerId:1,pointerType:"touch",isPrimary:true});await button.dispatchEvent("click");
   expect(data.writes.filter(w=>w.path.includes("/delta/jobs/"))).toHaveLength(0);
   await expect(page.locator("#confirmDialog")).toBeHidden();
   await button.click();await page.locator("#confirmReason").fill("Restart this queued attempt");await page.locator("#confirmAccept").click();
   await expect.poll(()=>data.writes.filter(w=>w.path.endsWith("/cancel-restart")).length).toBe(1);
+});
+
+test("task explanations support hover and keyboard focus across a refresh",async({page})=>{
+  const data=await mount(page);await page.locator("#taskButton").click();
+  const button=page.locator('#taskContent [data-task-control="cancel"]');
+  await button.hover();await expect(page.getByRole("tooltip")).toHaveText("Cancel this task");
+  await page.mouse.move(0,0);await expect(page.getByRole("tooltip")).toBeHidden();
+  await page.keyboard.press("Tab");await button.focus();
+  await expect(page.getByRole("tooltip")).toHaveText("Cancel this task");
+  await page.locator('#taskContent [data-task-action="refresh"]').dispatchEvent("click");
+  await expect(button).toBeFocused();await expect(page.getByRole("tooltip")).toBeVisible();
+  await page.keyboard.press("Escape");await expect(page.getByRole("tooltip")).toBeHidden();
+  await expect(page.locator("#taskSheet")).toBeVisible();
+  expect(data.writes.some(w=>w.path.includes("/delta/jobs/"))).toBe(false);
+});
+
+for(const ending of ["move","cancel"]) test(`touch ${ending} dismisses task help without executing an action`,async({page})=>{
+  const data=await mount(page);await page.locator("#taskButton").click();
+  const button=page.locator('#taskContent [data-task-control="cancel"]');
+  const pointer={pointerId:4,pointerType:"touch",isPrimary:true,clientX:100,clientY:200};
+  await button.dispatchEvent("pointerdown",pointer);
+  await expect(page.getByRole("tooltip")).toBeVisible();
+  await button.dispatchEvent(ending==="move"?"pointermove":"pointercancel",{...pointer,clientY:230});
+  await expect(page.getByRole("tooltip")).toBeHidden();
+  await button.dispatchEvent("pointerup",pointer);await button.dispatchEvent("click");
+  await expect(page.locator("#confirmDialog")).toBeHidden();
+  expect(data.writes.some(w=>w.path.includes("/delta/jobs/"))).toBe(false);
+  await button.click();await expect(page.locator("#confirmDialog")).toBeVisible();
+});
+
+test("a failure callback during cancellation stays active and cannot expose retry or hide actions",async({page})=>{
+  const data=await mount(page);
+  Object.assign(data.state.jobs[0],{status:"failed",phase:"cancelling",cancelling:true});
+  await page.locator("#taskButton").click();
+  await page.locator('#taskContent [data-task-action="refresh"]').click();
+  await expect(page.locator("#taskButton")).toHaveAttribute("aria-label",/1 active/);
+  const controls=page.locator("#taskContent [data-task-control]");
+  await expect(controls).toHaveCount(2);
+  for(const button of await controls.all()) await expect(button).toHaveAttribute("aria-disabled","true");
+  await expect(page.locator('[data-task-action="hide-job"]')).toHaveCount(0);
+  await page.locator('#taskContent [data-task-target="two"]').click();
+  await expect(page.locator('[data-version-operation="delta-retry"]')).toBeDisabled();
+  await expect(page.locator("#deltaContent [data-task-control]")).toHaveCount(2);
+  expect(data.writes.every(w=>!w.path.endsWith("/retry")&&!w.path.endsWith("/hide-jobs"))).toBe(true);
 });
 
 test("notification deletion does not cancel a task and stays deleted after refresh",async({page})=>{

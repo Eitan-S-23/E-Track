@@ -4,7 +4,7 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
   const button = document.querySelector("#taskButton");
   const content = document.querySelector("#taskContent");
   const toast = document.querySelector("#taskToast");
-  const active = job => !["ready", "failed", "cancelled"].includes(job.status);
+  const active = job => job.cancelling || !["ready", "failed", "cancelled"].includes(job.status);
   const selectedNotices = new Set(), controlling = new Set();
   let dismissBusy = false;
   let actor = null, data = null, loading = false, error = "", timer = null, page = 0;
@@ -169,6 +169,7 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
   function render() {
     const focused = content.contains(document.activeElement) ? document.activeElement : null;
     const focusAction = focused?.dataset.taskAction, focusTarget = focused?.dataset.taskTarget, focusNotice = focused?.dataset.notificationId;
+    const focusControl = focused?.dataset.taskControl, focusJob = focused?.dataset.controlJob;
     const jobs = data?.jobs ?? [], running = jobs.filter(active).length, unread = data?.unreadCount ?? 0;
     button.disabled = !actor;
     button.querySelector(".task-label").textContent = text("通知", "Notifications");
@@ -214,7 +215,8 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
         <button type="button" class="text-button" data-task-kind="${escape(job.kind)}" data-task-target="${escape(job.targetReleaseId)}">${escape(text("查看差分", "Open deltas"))}</button></div></article>`).join("") || `<p class="empty">${escape(text("还没有你的差分任务。", "No delta jobs submitted by this account yet."))}</p>`}</div>
       ${jobs.length > 8 ? `<nav class="release-pagination"><button type="button" data-task-action="prev" ${page === 0 ? "disabled" : ""}>${escape(text("上一页", "Previous"))}</button><span>${page+1} / ${Math.ceil(jobs.length/8)}</span><button type="button" data-task-action="next" ${(page+1)*8 >= jobs.length ? "disabled" : ""}>${escape(text("下一页", "Next"))}</button></nav>` : ""}`;
     if (focused && !content.closest("[hidden], [inert]")) {
-      [...content.querySelectorAll("button")].find(node=>!node.disabled && (focusNotice ? node.dataset.notificationId === focusNotice : focusAction ? node.dataset.taskAction === focusAction
+      [...content.querySelectorAll("button")].find(node=>!node.disabled && (focusControl ? node.dataset.taskControl === focusControl && node.dataset.controlJob === focusJob
+        : focusNotice ? node.dataset.notificationId === focusNotice : focusAction ? node.dataset.taskAction === focusAction
         : focusTarget && node.dataset.taskTarget === focusTarget && node.dataset.taskKind === focused.dataset.taskKind))?.focus({preventScroll:true});
     }
     scheduleVisibleRead();

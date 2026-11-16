@@ -38,7 +38,9 @@ for (const language of ["en", "zh"]) for (const width of [1440, 390]) {
     await expect(page.locator("#firmwareReleaseList .firmware-release-card")).toHaveCount(6);
     await expect(page.locator("#firmwarePageStatus")).toContainText("600");
     expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(height60 + 8);
-    expect((await page.locator("#firmwareReleaseList").boundingBox())!.height).toBeLessThanOrEqual(width <= 720 ? 330 : 440);
+    const list = await page.locator("#firmwareReleaseList").boundingBox();
+    // Remove bounding-box floating-point noise, well below a CSS layout subpixel.
+    expect(Math.round(list!.height * 1000) / 1000).toBeLessThanOrEqual(width <= 720 ? 330 : 440);
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
     await expect.poll(async () => Math.abs((await page.locator(".topbar").boundingBox())!.y)).toBeLessThan(1);
     await expect.poll(async () => {

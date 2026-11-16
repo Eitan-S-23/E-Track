@@ -458,11 +458,10 @@ body.announcement-open { overflow: hidden; }
 .task-notification-row { display: grid; grid-template-columns: 28px minmax(0,1fr) 44px; align-items: center; gap: 6px; }
 .task-control { position: relative; width: 44px; min-height: 44px; padding: 10px; touch-action: manipulation; }
 .task-control[aria-disabled="true"] { color: var(--muted); cursor: not-allowed; }
-.task-control::after { content: attr(data-tooltip); position: absolute; bottom: calc(100% + 8px); right: 0; z-index: 100;
+.task-control-tooltip { position: fixed; z-index: 150;
   width: max-content; max-width: min(240px, calc(100vw - 48px)); padding: 8px 10px; border: 1px solid var(--line);
   border-radius: var(--radius); background: var(--surface); color: var(--ink); box-shadow: 0 4px 20px #1d2a2529;
-  font-size: 12px; line-height: 1.5; white-space: normal; pointer-events: none; opacity: 0; visibility: hidden; }
-.task-control:hover::after, .task-control:focus-visible::after, .task-control.tooltip-visible::after { opacity: 1; visibility: visible; }
+  font-size: 12px; line-height: 1.5; white-space: normal; pointer-events: none; }
 .task-button { position: relative; gap: 6px; flex-shrink: 0; }
 .task-badge { font-size: 10px; min-width: 17px; padding: 1px 4px; color: var(--surface); background: var(--accent); border-radius: 9px; }
 .task-button[data-running="true"] .ui-icon { color: var(--accent); }

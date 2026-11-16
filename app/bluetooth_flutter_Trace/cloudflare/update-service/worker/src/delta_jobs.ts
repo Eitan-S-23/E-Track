@@ -343,6 +343,7 @@ export async function deltaJobAction(env: DeltaEnv, actor: string, id: string, a
     ]);
     if (!changed[0].meta.changes) throw new ApiError("CAS_CONFLICT","Delta reconciliation changed",409);
   } else if (action === "retry") {
+    if (job.cancel_requested_at != null) throw new ApiError("RELEASE_CONFLICT", "Cancellation is not confirmed; nothing may restart yet", 409);
     if (job.status !== "failed") throw new ApiError("RELEASE_CONFLICT", "Only known failed jobs may retry; reconcile unknown dispatches first", 409);
     if (!deltaDispatchConfigured(env,job.kind)) throw new ApiError("RELEASE_CONFLICT", "Workflow binding is unavailable", 409);
     const workflow=configuredWorkflow(env,job.kind);
@@ -355,7 +356,7 @@ export async function deltaJobAction(env: DeltaEnv, actor: string, id: string, a
     const mutation = crypto.randomUUID();
     let changed: D1Result[];
     try { changed = await env.DB.batch([
-      env.DB.prepare("UPDATE delta_jobs SET status='dispatching',attempt=attempt+1,workflow_commit=?,workflow_ref=?,mutation_id=?,run_id=NULL,error_code=NULL,result_json=NULL,cancel_requested_at=NULL,cancel_restart=0,cancel_error=NULL,revision=revision+1,updated_at=? WHERE id=? AND revision=? AND status='failed'")
+      env.DB.prepare("UPDATE delta_jobs SET status='dispatching',attempt=attempt+1,workflow_commit=?,workflow_ref=?,mutation_id=?,run_id=NULL,error_code=NULL,result_json=NULL,cancel_requested_at=NULL,cancel_restart=0,cancel_error=NULL,revision=revision+1,updated_at=? WHERE id=? AND revision=? AND status='failed' AND cancel_requested_at IS NULL")
         .bind(workflow.commit,workflow.storedRef,mutation,nowSeconds(),id,job.revision),
       eventStatement(env, id, mutation, "retry", actor, reason, job.revision+1)
     ]); } catch (error) {

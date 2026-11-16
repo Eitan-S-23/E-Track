@@ -602,7 +602,8 @@ for (const language of ["en", "zh"]) for (const width of [1440, 390]) {
     await expect(page.locator("#releasePageStatus")).toContainText("60");
     await expect(page.locator("#announcements")).toBeHidden();
     const list = await page.locator("#versionStrip").boundingBox();
-    expect(list!.height).toBeLessThanOrEqual(width <= 720 ? 340 : 440);
+    // Remove bounding-box floating-point noise, well below a CSS layout subpixel.
+    expect(Math.round(list!.height * 1000) / 1000).toBeLessThanOrEqual(width <= 720 ? 340 : 440);
     const height60 = await page.evaluate(() => document.documentElement.scrollHeight);
     data.releases = Array.from({ length: 600 }, (_, i) => release("many-" + i, 1000 + i));
     await refreshApp(page);

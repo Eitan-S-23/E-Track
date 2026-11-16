@@ -171,7 +171,7 @@
       <section class="quick-action-sheet task-sheet" id="taskSheet" role="dialog" aria-modal="true" aria-labelledby="taskTitle" hidden>
         <button type="button" class="quick-sheet-close" id="taskClose" aria-label="Close tasks"><svg class="ui-icon" aria-hidden="true"><use href="#i-close"></use></svg></button>
         <span class="quick-sheet-handle" aria-hidden="true"></span>
-        <header class="quick-sheet-header"><div><p class="eyebrow">E-Track</p><h2 id="taskTitle">Tasks and notifications</h2></div></header>
+        <header class="quick-sheet-header"><div><p class="eyebrow">E-Track</p><h2 id="taskTitle">Notification Center</h2></div></header>
         <div class="quick-sheet-scroll" id="taskScroll"><div id="taskContent"></div></div>
       </section>
       <div class="task-toast" id="taskToast" role="status" aria-live="polite" hidden><span></span><button type="button">View tasks</button></div>
@@ -229,7 +229,7 @@
             <span class="lang-code" id="languageLabel">中文</span>
           </button>
           <button type="button" class="icon-button refresh-button" id="refreshButton" aria-label="Refresh" data-i18n-aria-label="actions.refresh" data-i18n-tooltip="actions.refresh"><svg class="ui-icon" aria-hidden="true"><use href="#i-refresh"></use></svg><span class="label-text" data-i18n="actions.refresh">Refresh</span></button>
-          <button type="button" class="icon-button task-button" id="taskButton" aria-label="Delta tasks" aria-haspopup="dialog" aria-controls="taskSheet" disabled><svg class="ui-icon" aria-hidden="true"><use href="#i-note"></use></svg><span class="task-label">Tasks</span><span class="task-badge" hidden></span></button>
+          <button type="button" class="icon-button task-button" id="taskButton" aria-label="Notifications" aria-haspopup="dialog" aria-controls="taskSheet" disabled><svg class="ui-icon" aria-hidden="true"><use href="#i-note"></use></svg><span class="task-label">Notifications</span><span class="task-badge" hidden></span></button>
           <div class="sidebar-user" id="topSession">
             <span class="avatar">A</span>
             <div>
@@ -2432,6 +2432,7 @@
         try {
           const session = await readAdminSession();
           if (session.actor !== state.session?.actor) {
+            state.selectedVersions.clear(); state.selectedFirmwareVersions.clear();
             state.appNoteDrafts.clear();
             state.announcementDrafts.clear();
             state.deltaDrafts.clear();
@@ -3090,7 +3091,7 @@
           delta.loading = false;
           if (state.delta === delta) {
             renderDelta();
-            if (!delta.notice && delta.data?.jobs.some(job => ["dispatching", "queued", "running"].includes(job.status))) {
+            if (!delta.notice && delta.data?.jobs.some(job => job.cancelling || ["dispatching", "queued", "running"].includes(job.status))) {
               delta.timer = setTimeout(() => loadDelta(delta), 15000);
             }
           }
@@ -3144,10 +3145,12 @@
               ${job.status === "ready" && job.sizeBytes >= data.target.fullBytes ? `<small>${escapeHtml(opText("不比全量包小，不能启用。", "Not smaller than full; cannot enable."))}</small>` : ""}</div><div class="operations-buttons">
               ${run ? `<a href="${escapeHtml(run)}" target="_blank" rel="noopener noreferrer">${escapeHtml(job.phase === "awaiting_approval" ? opText("前往 GitHub 审批", "Review in GitHub") : "GitHub Actions")}</a>` : ""}
               ${taskActivity?.controlButtons(job,locked) ?? ""}
-              <button type="button" class="secondary-button" data-version-operation="delta-${control}" data-job-id="${escapeHtml(job.id)}" ${locked || !usable || (control === "retry" && !data.dispatchConfigured) ? "disabled" : ""}>${escapeHtml(({ enable: opText("启用", "Enable"), disable: opText("停用", "Disable"), retry: opText("重试失败任务", "Retry failed job"), reconcile: opText("核对构建结果", "Reconcile run") })[control])}</button></div></article>`;
+              <button type="button" class="secondary-button" data-version-operation="delta-${control}" data-job-id="${escapeHtml(job.id)}" ${locked || job.cancelling || !usable || (control === "retry" && !data.dispatchConfigured) ? "disabled" : ""}>${escapeHtml(({ enable: opText("启用", "Enable"), disable: opText("停用", "Disable"), retry: opText("重试失败任务", "Retry failed job"), reconcile: opText("核对构建结果", "Reconcile run") })[control])}</button></div></article>`;
           }).join("") || `<p class="empty">${escapeHtml(opText("尚未生成差分任务。", "No delta jobs yet."))}</p>`}</div>`}`;
         const restore = editingReason ? document.querySelector("#deltaReason")
-          : selectedBase ? [...els.deltaContent.querySelectorAll("[data-delta-base]")].find(node => node.dataset.deltaBase === selectedBase) : null;
+          : selectedBase ? [...els.deltaContent.querySelectorAll("[data-delta-base]")].find(node => node.dataset.deltaBase === selectedBase)
+          : focused?.dataset.taskControl ? [...els.deltaContent.querySelectorAll("[data-task-control]")].find(node =>
+            node.dataset.taskControl === focused.dataset.taskControl && node.dataset.controlJob === focused.dataset.controlJob) : null;
         if (restore && !restore.disabled && !activeConfirmDialog) {
           restore.focus({ preventScroll: true });
           if (caret) restore.setSelectionRange(...caret);
@@ -3195,7 +3198,7 @@
         if (operation === "create" && (!delta.selected.size || !delta.reason.trim())) {
           delta.notice = opText("请填写生成原因，并选择 1 至 5 个旧版本。", "Select 1 to 5 bases and enter a reason."); renderDelta(); document.querySelector("#deltaReason")?.focus(); showErrorDialog(delta.notice); return;
         }
-        if (operation !== "create" && !job) return;
+        if (operation !== "create" && (!job || job.cancelling)) return;
         const confirmed = await openConfirmDialog({ title: button.textContent, reasonRequired: operation !== "create",
           message: opText("仅修改该目标版本的差分任务或差分选择，不改变发布通道。", "Only this target's delta jobs or selection will change; channels remain untouched."),
           detail: operation === "create" ? `${delta.selected.size} ${opText("个旧版本", "source versions")} · ${delta.reason}${delta.kind === "firmware" ? "\n" + opText("提交后还需要 GitHub 审批，请按后续弹窗前往审批。", "GitHub approval is required after submission; follow the approval dialog.") : ""}` : `${job.baseVersionCode} → ${job.targetVersionCode}` });
@@ -4739,6 +4742,7 @@
         els.refreshButton.disabled = isBusy;
         if (message) setStatus(message, "info", { values });
         renderActionLocks(activeReleaseForAction());
+        renderTimeline(filteredReleases(),state.releases.find(row=>row.id===state.selectedReleaseId));
         renderFirmware();
         setAnnouncementEditorEnabled(!state.announcementsError);
         if (!isBusy) { flushFeedback(); taskActivity?.resume(); }

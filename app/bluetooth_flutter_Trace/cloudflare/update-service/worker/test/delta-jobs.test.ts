@@ -385,6 +385,49 @@ describe("operator-selected supplemental delta jobs",()=>{
     expect(fetcher.mock.calls.some(call=>String(call[0]).endsWith("/dispatches"))).toBe(false);
   });
 
+  it("a CI failure during pending cancellation cannot escape through the older retry action",async()=>{
+    const job=await create(await pair());
+    expect((await ci(job,"claim")).status).toBe(200);
+    let current=(await env.DB.prepare("SELECT * FROM delta_jobs WHERE id=?").bind(job.id).first<DeltaJob>())!;
+    let stopped=false;
+    const fetcher=vi.fn<typeof fetch>(async(input)=>{
+      if(String(input).endsWith("/cancel")) return new Response(null,{status:202});
+      if(String(input).endsWith("/dispatches")) return new Response(null,{status:204});
+      return Response.json({id:Number(binding(job).runId),event:"workflow_dispatch",head_sha:job.workflow_commit,
+        head_branch:workflowLocation(job).ref,display_title:`delta:${job.id}:1`,
+        status:stopped?"completed":"in_progress",conclusion:stopped?"cancelled":null});
+    });
+    await deltaJobAction(configured,"owner",job.id,"cancel-restart",{expectedRevision:current.revision,reason:"restart"},fetcher);
+    expect((await ci(job,"fail")).status).toBe(200);
+    current=(await env.DB.prepare("SELECT * FROM delta_jobs WHERE id=?").bind(job.id).first<DeltaJob>())!;
+    expect(current.status).toBe("failed");expect(jobView(current).cancelling).toBe(true);
+    await expect(deltaJobAction(configured,"owner",job.id,"retry",{expectedRevision:current.revision,reason:"retry"},fetcher))
+      .rejects.toMatchObject({code:"RELEASE_CONFLICT",status:409});
+    expect(fetcher.mock.calls.some(call=>String(call[0]).endsWith("/dispatches"))).toBe(false);
+    stopped=true;await advancePendingDeltaCancellations(configured,fetcher);
+    current=(await env.DB.prepare("SELECT * FROM delta_jobs WHERE id=?").bind(job.id).first<DeltaJob>())!;
+    expect(current.attempt).toBe(2);expect(current.cancel_requested_at).toBeNull();
+    expect(fetcher.mock.calls.filter(call=>String(call[0]).endsWith("/dispatches"))).toHaveLength(1);
+  });
+
+  it("an uncertain cancellation retains its intent without resending or restarting",async()=>{
+    const job=await create(await pair());
+    await env.DB.prepare("UPDATE delta_jobs SET run_id='12345' WHERE id=?").bind(job.id).run();
+    const fetcher=vi.fn<typeof fetch>(async(input)=>{
+      if(String(input).endsWith("/cancel")) throw new TypeError("Lost response");
+      return Response.json({id:12345,event:"workflow_dispatch",head_sha:job.workflow_commit,
+        head_branch:workflowLocation(job).ref,display_title:`delta:${job.id}:1`,status:"queued",conclusion:null});
+    });
+    const response=await deltaJobAction(configured,"owner",job.id,"cancel-restart",{expectedRevision:job.revision,reason:"restart"},fetcher);
+    expect(response.status).toBe(202);
+    const current=(await env.DB.prepare("SELECT * FROM delta_jobs WHERE id=?").bind(job.id).first<DeltaJob>())!;
+    expect(current.cancel_error).toBe("CANCEL_OUTCOME_UNKNOWN");expect(current.cancel_requested_at).not.toBeNull();
+    await deltaJobAction(configured,"owner",job.id,"cancel-restart",{expectedRevision:current.revision,reason:"restart"},fetcher);
+    await advancePendingDeltaCancellations(configured,fetcher);
+    expect(fetcher.mock.calls.filter(call=>String(call[0]).endsWith("/cancel"))).toHaveLength(1);
+    expect(fetcher.mock.calls.some(call=>String(call[0]).endsWith("/dispatches"))).toBe(false);
+  });
+
   it("a successful completion racing cancellation wins over restart",async()=>{
     const job=await create(await pair());
     await env.DB.prepare("UPDATE delta_jobs SET run_id='12345' WHERE id=?").bind(job.id).run();

@@ -266,6 +266,11 @@ class _AnnouncementsDialogContentState
       _markScheduled = false;
       if (!mounted || ModalRoute.of(context)?.isCurrent != true ||
           WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) { return; }
+      // A route's first frame can still be fully transparent. Do not consume it.
+      if (ModalRoute.of(context)?.animation?.status != AnimationStatus.completed) {
+        _markPresented(items);
+        return;
+      }
       final item = items[_index];
       if (_presented.add(item.publicationIdentity)) {
         unawaited(AnnouncementService.markPresented(item).catchError((Object _) {
