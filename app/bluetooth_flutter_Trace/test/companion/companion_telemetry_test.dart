@@ -403,6 +403,7 @@ class _Device extends Fake implements fbp.BluetoothDevice {
   bool isConnected = false;
   int infoRequests = 0;
   final connections = StreamController<fbp.BluetoothConnectionState>.broadcast(sync: true);
+  final resets = StreamController<void>.broadcast(sync: true);
   final notifications = StreamController<List<int>>.broadcast(sync: true);
   final text = CompanionDecoder();
   late final writer = _Characteristic(this, notify: false);
@@ -410,7 +411,7 @@ class _Device extends Fake implements fbp.BluetoothDevice {
   @override
   Stream<fbp.BluetoothConnectionState> get connectionState => connections.stream;
   @override
-  Stream<void> get onServicesReset => const Stream.empty();
+  Stream<void> get onServicesReset => resets.stream;
   @override
   Future<void> connect({Duration timeout = const Duration(seconds: 35), int? mtu = 512,
       bool autoConnect = false}) async {
@@ -431,7 +432,7 @@ class _Device extends Fake implements fbp.BluetoothDevice {
   void write(List<int> bytes) {
     if (bytes.first == OtaBleCodec.frameSync0) {
       final frame = OtaBleCodec.decodeFrame(bytes);
-      expect(frame.cmd, OtaBleCodec.cmdGetInfo, reason: 'No firmware transfer is authorized by telemetry');
+      expectSync(frame.cmd, OtaBleCodec.cmdGetInfo, reason: 'No firmware transfer is authorized by telemetry');
       infoRequests++;
       notifications.add(OtaBleCodec.encodeCommand(cmd: OtaBleCodec.rspInfo, session: frame.session,
         seq: frame.seq, payload: buildInfoPayload(model: DeviceOtaInfo.wireModelETrack,
@@ -445,7 +446,7 @@ class _Device extends Fake implements fbp.BluetoothDevice {
       }
     }
   }
-  Future<void> close() async { await connections.close(); await notifications.close(); }
+  Future<void> close() async { await connections.close(); await resets.close(); await notifications.close(); }
 }
 
 class _Characteristic extends Fake implements fbp.BluetoothCharacteristic {
@@ -517,12 +518,12 @@ class _Database extends Fake implements Database {
       return [for (final id in [_sensor, _secondSensor])
         {'deviceId': id, 'deviceName': 'Power sensor', 'isMonitoring': 1}];
     }
-    expect(table, anyOf('daily_power_consumption', 'monthly_power_consumption'));
+    expectSync(table, anyOf('daily_power_consumption', 'monthly_power_consumption'));
     return [];
   }
   @override
   Future<List<Map<String, Object?>>> rawQuery(String sql, [List<Object?>? arguments]) async {
-    expect(sql, contains('device_data'));
+    expectSync(sql, contains('device_data'));
     final rows = [...initial, ...saved].where((row) => row['deviceId'] == arguments!.first).toList();
     if (sql.contains('COUNT(*)')) return [{'count': rows.length}];
     final limit = sql.contains('LIMIT ?') ? arguments!.last as int : null;
@@ -564,7 +565,7 @@ class _Batch extends Fake implements Batch {
   void insert(String table, Map<String, Object?> values, {String? nullColumnHack,
       ConflictAlgorithm? conflictAlgorithm}) {
     if (table == 'device_data') {
-      expect(conflictAlgorithm, ConflictAlgorithm.ignore);
+      expectSync(conflictAlgorithm, ConflictAlgorithm.ignore);
       rows.add(Map<String, Object?>.from(values));
     }
   }
