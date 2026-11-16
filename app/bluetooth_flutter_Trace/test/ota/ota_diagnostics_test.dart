@@ -63,6 +63,7 @@ void main() {
     await diagnostics.initialize(enabled: config.enabled, target: config.target,
       sentinel: config.sentinel, directoryProvider: () async => root);
     final calls = <String>[];
+    final statusLines = <String>[];
     await OtaDiagnostics.withInstance(diagnostics, () async {
       expect(OtaDeviceObserver.startFromBuild(
         config: config,
@@ -71,12 +72,13 @@ void main() {
         connect: (_) async { calls.add('connect'); return true; },
         readIdentity: (_) async { calls.add('identity'); return null; },
         cleanup: (_) async { calls.add('cleanup'); },
-        emit: emitOtaObservation,
+        emit: statusLines.add,
       ), isNull);
       OtaLinkStats(label: 'query').recordGetInfo(durationUs: 20);
       final snapshot = await diagnostics.exportSnapshot();
       final text = await snapshot.readAsString();
-      expect(text, contains('OTA_OBS config=passive'));
+      expect(statusLines.single, config.statusLine);
+      expect(text, isNot(contains('OTA_OBS ')));
       expect(text, contains('OTA_LINK_SAMPLE label=query kind=get_info'));
       expect(text, contains(config.sentinel));
       final rows = (await snapshot.readAsLines()).map(jsonDecode).toList();
