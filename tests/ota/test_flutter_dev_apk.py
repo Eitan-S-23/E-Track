@@ -363,7 +363,8 @@ class DevelopmentApkTests(unittest.TestCase):
         self.assertIn(str(self.root / CHECKS.APP / "android"), argv)
         self.assertEqual([":app:testDebugUnitTest", "--tests",
                           "com.wen.gaia.gaia.DeviceOtaServiceTest", "--tests",
-                          "com.wen.gaia.gaia.CompanionServiceTest"], argv[-5:])
+                          "com.wen.gaia.gaia.CompanionServiceTest", "--tests",
+                          "com.wen.gaia.gaia.CompanionIntegrationTest"], argv[-7:])
         for value in ("yes", "1", "TRUE"):
             with self.assertRaisesRegex(ValueError, APK.DEVICE_OTA_NATIVE_TESTS_ENV):
                 APK.plan(self.root, self.run, {**self.env, APK.DEVICE_OTA_NATIVE_TESTS_ENV: value})

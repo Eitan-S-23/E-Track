@@ -271,3 +271,46 @@ current link after awaiting old work. Correct: capture the binding at interactio
 or operation start, recheck it at the side-effect boundary and discard old work
 without touching its successor. Baseline foreground OTA remains supported;
 these guards do not grant background ownership or change frozen wire semantics.
+
+## Permission And Headless Coverage Boundaries
+
+T01/T02 use the existing runtime and storage paths, not parallel implementations.
+Optional dependencies preserve their production defaults:
+
+- `CompanionSetupPage(requiredBluetoothPermissions: Future<List<Permission>> Function()?)`
+  injects only OS permission-list discovery. Status reads, user requests, settings
+  return, refresh epochs and navigation remain the real page implementation.
+- `CompanionRuntime(checkBluetoothPermissions: Future<bool> Function()?)` injects
+  the OS permission query, not telemetry admission or native-owner correlation.
+- `BluetoothService(adapter: BluetoothAdapter?, companionClockMs: int Function()?)`
+  provides the radio edge and monotonic clock. Initialization, scan leases,
+  listeners, reconnect, identity and writes still execute production methods.
+  `usesAndroidLifecycle` is a test-visible platform discriminator; lifecycle
+  state itself is read from the real WidgetsBinding.
+- `MonitorController(database: DatabaseService?, loadHistory: false)` uses a real
+  DatabaseService whose test-only `forDatabase(Database)` constructor substitutes
+  the SQLite driver. Parser, history limit, pending queue, deduplication, batch
+  transaction and failure retention are not overridden. Its test-visible
+  `usesAndroidLifecycle` discriminator also retains the OS default in production.
+
+| Case | Required Oracle |
+| --- | --- |
+| Setup entry, skip, denied or permanent permission | No unsolicited request or enable; unrelated navigation remains usable. |
+| Settings open/return, revocation or disabled notification channel | Re-read actual status; no fabricated grant or live owner; stale refresh cannot overwrite the successor. |
+| CDM chooser cancellation/timeout/late callback | No new persisted target or background opt-in; modern result requires matching system association. |
+| Boot/package replacement, pending check and retry backoff | Restore persisted jobs only; no Activity launch or claim of completed check/engine ownership. |
+| Headless service start, UI return and engine loss/recovery | Ready/wake/heartbeat and real GATT admission remain necessary; reuse one engine, reject old state. |
+| No page, wrong owner/revision, revoked permission or unsupported sensor background API | Collect only through the acknowledged bounded lease; no foreground timer bypass. |
+| SQLite batch failure or partial device success | Keep uncommitted samples, report failure, serialize retries, and do not replay already committed device batches. |
+
+`companion_setup_page_test.dart` drives the page using method-channel permission
+and native-boundary responses. `companion_telemetry_test.dart` drives actual
+Runtime/BluetoothService/BleController/MonitorController/DatabaseService through
+fake device/characteristic, adapter, permission and SQLite-driver edges without
+mounting a page. The mobile-adapter scenarios execute on Linux and explicitly
+skip Windows, rather than pretending a Windows adapter validates Android scans.
+`CompanionIntegrationTest` runs the actual Android Bridge/Service/boot/job paths
+on API 26/31/34, with OS and Flutter VM/embedding shadows only. The native runner
+selects it explicitly alongside both existing service suites. None of these
+host tests proves physical permission dialogs, actual Dart VM survival, radio
+reliability, process recovery on an OEM phone, or whole-card acceptance.

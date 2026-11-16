@@ -471,11 +471,15 @@ class WinBleAdapter implements BluetoothAdapter {
 /// 为不同平台提供统一的蓝牙接口
 class BluetoothService extends GetxController with WidgetsBindingObserver {
   BluetoothService({
+    BluetoothAdapter? adapter,
+    int Function()? companionClockMs,
     bool? reuseOtaCharacteristics,
     bool? preferOtaWithoutResponse,
     OtaExperimentRuntime? experiment,
     OtaLinkProfile? linkProfile,
-  }) : _experiment = experiment ?? OtaExperimentRuntime.current,
+  }) : _providedAdapter = adapter,
+       _companionClockMs = companionClockMs,
+       _experiment = experiment ?? OtaExperimentRuntime.current,
        reuseOtaCharacteristics =
            (experiment ?? OtaExperimentRuntime.current).config?.reuseGatt ??
            reuseOtaCharacteristics ??
@@ -491,6 +495,8 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
   final bool reuseOtaCharacteristics;
   final bool preferOtaWithoutResponse;
   final OtaExperimentRuntime _experiment;
+  final BluetoothAdapter? _providedAdapter;
+  final int Function()? _companionClockMs;
   OtaScanPause? _otaScanPause;
   final Map<String, OtaPriorityQueue> _otaPriorityQueues = {};
   bool get _scanPauseEnabled => _experiment.config?.pauseScanDuringOta == true;
@@ -551,11 +557,13 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
   final _connectEpochs = <String, int>{};
   bool _closed = false;
   final _scanClock = Stopwatch()..start();
-  late final CompanionScanPolicy _companionScan = CompanionScanPolicy(nowMs: () => _scanClock.elapsedMilliseconds);
+  late final CompanionScanPolicy _companionScan = CompanionScanPolicy(nowMs: _companionClockMs ?? () => _scanClock.elapsedMilliseconds);
   Timer? _companionScanTimer;
   WidgetsBinding? _lifecycleBinding;
   void Function()? _backgroundReconnectRelease;
-  bool get foregroundScanningAllowed => !Platform.isAndroid || _lifecycleBinding?.lifecycleState == AppLifecycleState.resumed;
+  @visibleForTesting
+  bool get usesAndroidLifecycle => Platform.isAndroid;
+  bool get foregroundScanningAllowed => !usesAndroidLifecycle || _lifecycleBinding?.lifecycleState == AppLifecycleState.resumed;
   bool get companionScanningAllowed => _companionScan.allowed;
   bool get _scanningAllowed => !_closed && (foregroundScanningAllowed || companionScanningAllowed);
 
@@ -576,7 +584,7 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (Platform.isAndroid) {
+    if (usesAndroidLifecycle) {
       if (state == AppLifecycleState.resumed) {
         _backgroundReconnectRelease?.call();
         _backgroundReconnectRelease = null;
@@ -849,7 +857,7 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
   @override
   void onInit() {
     super.onInit();
-    if (Platform.isAndroid) {
+    if (usesAndroidLifecycle) {
       _lifecycleBinding = WidgetsBinding.instance;
       _lifecycleBinding!.addObserver(this);
       didChangeAppLifecycleState(_lifecycleBinding!.lifecycleState ?? AppLifecycleState.detached);
@@ -914,7 +922,9 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
       await _adapterSubscription?.cancel();
       _adapterSubscription = null;
       // 根据平台选择适配器
-      if (Platform.isWindows) {
+      if (_providedAdapter != null) {
+        _adapter = _providedAdapter;
+      } else if (Platform.isWindows) {
         _adapter = WinBleAdapter();
       } else {
         _adapter = FlutterBluePlusAdapter();

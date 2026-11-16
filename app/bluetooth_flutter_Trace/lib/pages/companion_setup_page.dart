@@ -10,8 +10,9 @@ import '../utils/permission_helper.dart';
 import 'trace_ui.dart';
 
 class CompanionSetupPage extends StatefulWidget {
-  const CompanionSetupPage({super.key, this.platform});
+  const CompanionSetupPage({super.key, this.platform, this.requiredBluetoothPermissions});
   final CompanionPlatform? platform;
+  final Future<List<Permission>> Function()? requiredBluetoothPermissions;
 
   @override
   State<CompanionSetupPage> createState() => _CompanionSetupPageState();
@@ -26,6 +27,8 @@ class _CompanionSetupPageState extends State<CompanionSetupPage> with WidgetsBin
   int _readEpoch = 0;
   String? _error, _selected;
   Worker? _statusWorker;
+  Future<List<Permission>> _requiredBluetoothPermissions() =>
+      (widget.requiredBluetoothPermissions ?? PermissionHelper.requiredBluetoothPermissions)();
 
   @override
   void initState() {
@@ -58,7 +61,7 @@ class _CompanionSetupPageState extends State<CompanionSetupPage> with WidgetsBin
       final snapshot = await _platform.snapshot();
       final permissions = <Permission, PermissionStatus>{};
       if (_platform.supported) {
-        for (final permission in await PermissionHelper.requiredBluetoothPermissions()) {
+        for (final permission in await _requiredBluetoothPermissions()) {
           permissions[permission] = await permission.status;
         }
       }
@@ -137,7 +140,7 @@ class _CompanionSetupPageState extends State<CompanionSetupPage> with WidgetsBin
             Text(granted ? '\u5fc5\u8981\u84dd\u7259\u6743\u9650\u5df2\u6388\u4e88' : permanent ? '\u5df2\u6c38\u4e45\u62d2\u7edd\uff0c\u8bf7\u524d\u5f80\u7cfb\u7edf\u8bbe\u7f6e' : '\u672a\u6388\u6743\u6216\u5df2\u64a4\u9500\uff0c\u53ef\u7ee7\u7eed\u4f7f\u7528\u65e0\u5173\u529f\u80fd', style: const TextStyle(color: TraceColors.text)),
             _button(permanent ? '\u6253\u5f00\u5e94\u7528\u6743\u9650\u8bbe\u7f6e' : '\u6388\u4e88\u84dd\u7259\u6743\u9650', () async {
               if (permanent) { await _settings('permissions'); }
-              else { await (await PermissionHelper.requiredBluetoothPermissions()).request(); }
+              else { await (await _requiredBluetoothPermissions()).request(); }
             }),
             _button('\u68c0\u67e5\u84dd\u7259\u5f00\u5173', () => _settings('bluetooth')),
           ]),

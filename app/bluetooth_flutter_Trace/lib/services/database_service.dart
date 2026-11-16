@@ -8,11 +8,15 @@ import '../models/ride_models.dart';
 class DatabaseService {
   static final DatabaseService _instance = DatabaseService._internal();
   factory DatabaseService() => _instance;
-  DatabaseService._internal();
+  DatabaseService._internal() : _providedDatabase = null;
+  @visibleForTesting
+  DatabaseService.forDatabase(Database database) : _providedDatabase = database;
+  final Database? _providedDatabase;
 
   static Database? _database;
 
   Future<Database> get database async {
+    if (_providedDatabase != null) return _providedDatabase;
     if (_database != null) return _database!;
     _database = await _initDatabase();
     return _database!;

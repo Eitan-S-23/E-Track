@@ -15,11 +15,14 @@ import 'ble_controller.dart';
 const int maxDataRecords = 2592000;
 
 class MonitorController extends GetxController {
-  MonitorController({bool loadHistory = true}) : _loadHistory = loadHistory;
+  MonitorController({bool loadHistory = true, DatabaseService? database})
+      : _loadHistory = loadHistory, _dbService = database ?? DatabaseService();
   bool _loadHistory;
   Future<void>? _initialLoad;
   bool _closed = false;
-  bool get _foreground => !Platform.isAndroid || WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
+  @visibleForTesting
+  bool get usesAndroidLifecycle => Platform.isAndroid;
+  bool get _foreground => !usesAndroidLifecycle || WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
   bool get _mayCollect => _foreground || (Get.isRegistered<bt.BluetoothService>() && Get.find<bt.BluetoothService>().companionScanningAllowed);
   Future<void> attachHistoryForUi() async {
     if (_loadHistory) return;
@@ -37,7 +40,7 @@ class MonitorController extends GetxController {
   }
   static MonitorController get to => Get.find();
 
-  final DatabaseService _dbService = DatabaseService();
+  final DatabaseService _dbService;
   BleController get _bleController => Get.find<BleController>();
   ScanSettingsService get _scanSettings => Get.find<ScanSettingsService>();
   AlertService get _alertService => Get.find<AlertService>();

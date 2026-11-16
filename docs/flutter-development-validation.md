@@ -321,7 +321,12 @@ timeout/cleanup. Pushes and ordinary debug requests remain unchanged.
 
 After debug compilation, the bounded command is `gradle --no-daemon
 --console=plain -p app/bluetooth_flutter_Trace/android :app:testDebugUnitTest
---tests com.wen.gaia.gaia.DeviceOtaServiceTest`. Failure fails the development
+--tests com.wen.gaia.gaia.DeviceOtaServiceTest`, plus explicit filters for
+`com.wen.gaia.gaia.CompanionServiceTest` and
+`com.wen.gaia.gaia.CompanionIntegrationTest`. The integration suite executes the
+production Bridge, chooser, boot/job restoration and Service/engine wiring on
+API 26, 31 and 34, with OS/embedding shadows rather than CompanionExecution fakes.
+Failure fails the development
 run and blocks APK collection; no automatic retry or ignored failure is added.
 The existing development-log upload also preserves its JUnit XML and HTML report
 from `app/bluetooth_flutter_Trace/build/app/` on failure, with 14-day retention.

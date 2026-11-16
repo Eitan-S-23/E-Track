@@ -19,14 +19,17 @@ typedef _ControlBinding = ({String address, String session, int generation, int 
 
 /// Page-independent gateway. Android owns scheduling/liveness; OtaService owns IO.
 class CompanionRuntime extends GetxService {
-  CompanionRuntime({CompanionPlatform? platform, BluetoothService? bluetooth, OtaService? ota, this.onShowUi})
+  CompanionRuntime({CompanionPlatform? platform, BluetoothService? bluetooth, OtaService? ota,
+      Future<bool> Function()? checkBluetoothPermissions, this.onShowUi})
       : platform = platform ?? CompanionPlatform(),
+        _checkBluetoothPermissions = checkBluetoothPermissions ?? PermissionHelper.checkBluetoothPermissions,
         _bluetooth = bluetooth, _otaService = ota;
 
   final CompanionPlatform platform;
   final void Function()? onShowUi;
   final BluetoothService? _bluetooth;
   final OtaService? _otaService;
+  final Future<bool> Function() _checkBluetoothPermissions;
   BluetoothService get _ble => _bluetooth ?? Get.find<BluetoothService>();
   OtaService get _ota => _otaService ?? Get.find<OtaService>();
   final status = 'DISABLED'.obs;
@@ -169,7 +172,7 @@ class CompanionRuntime extends GetxService {
       final snapshot = await platform.snapshot();
       if (!_current(epoch) || snapshot['runtimeId'] != runtime || snapshot['revision'] != _revision ||
           snapshot['serviceRunning'] != true || snapshot['sensorBackgroundSupported'] != true ||
-          snapshot['problem'] != null || !await PermissionHelper.checkBluetoothPermissions()) { return; }
+          snapshot['problem'] != null || !await _checkBluetoothPermissions()) { return; }
       if (!_current(epoch) || _ota.isUpgrading || _wakeFlight != null || _checkFlight != null || _choiceFlight != null) return;
       await _ble.startCompanionScan(runtime);
     } catch (_) { if (_current(epoch)) status.value = 'DATA_SYNC_UNAVAILABLE'; }

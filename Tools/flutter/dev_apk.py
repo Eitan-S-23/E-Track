@@ -389,7 +389,8 @@ def plan(root, run_dir, env):
                          "--console=plain", "-p", str(root / APP / "android"),
                          ":app:testDebugUnitTest", "--tests",
                          "com.wen.gaia.gaia.DeviceOtaServiceTest", "--tests",
-                         "com.wen.gaia.gaia.CompanionServiceTest"], root, 1200))
+                         "com.wen.gaia.gaia.CompanionServiceTest", "--tests",
+                         "com.wen.gaia.gaia.CompanionIntegrationTest"], root, 1200))
     commands.extend([
         ("apk_verify", [str(sdk / "build-tools/35.0.0/apksigner"), "verify", "--verbose",
                         str(root / APK_RELATIVE)], root, 60),
