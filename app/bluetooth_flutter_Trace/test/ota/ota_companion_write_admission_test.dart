@@ -125,22 +125,33 @@ void main() {
           await channel.entered.future.timeout(const Duration(seconds: 2));
         }
         final operation = _transfer(transport, package(1024));
-        final observed = allow
+        final pause = mode.endsWith('-pause');
+        final observed = pause
+            ? expectLater(operation, throwsA(_code('CANCELLED')))
+            : allow
             ? expectLater(operation, completion(isA<OtaAckResult>().having((ack) => ack.isOk, 'isOk', isTrue)))
             : expectLater(operation, throwsA(_code('STALE_DEVICE_CONSENT')));
         try {
           await channel.entered.future.timeout(const Duration(seconds: 2));
           expect(guards, 0);
           expect(_frames(peer, OtaBleCodec.cmdBegin2), 0);
-          final pause = mode.endsWith('-pause');
           if (pause) transport.pauseForBackground();
           valid = allow;
           channel.release();
           if (pause) {
-            await transport.getDeviceInfo(timeout: const Duration(seconds: 1));
-            expect(guards, 0, reason: 'Paused BEGIN must release the writer for INFO');
+            // V2 cancels before END when background ownership is unavailable.
+            await observed;
+            expect(guards, 0);
             expect(_frames(peer, OtaBleCodec.cmdBegin2), 0);
-            transport.resumeFromBackground();
+            expect(_frames(peer, OtaBleCodec.cmdEnd2), 0);
+            expect(peer.pending, isEmpty);
+            expect(peer.frames.map((frame) => frame.cmd), [OtaBleCodec.cmdCaps2]);
+            final replacement = OtaBleTransport(channel: peer);
+            addTearDown(replacement.dispose);
+            await replacement.getDeviceInfo(timeout: const Duration(seconds: 1));
+            expect(_frames(peer, OtaBleCodec.cmdGetInfo), 1,
+                reason: 'Cancelled preparation must not poison the shared writer');
+            return;
           }
           await info;
           await observed;

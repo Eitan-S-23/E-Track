@@ -76,6 +76,16 @@ class ProfileTabPage extends StatelessWidget {
                   .animate(delay: 100.ms)
                   .fadeIn(duration: 520.ms)
                   .slideY(begin: 0.08, end: 0),
+              const SizedBox(height: 16),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () => Get.toNamed('/companion-setup'),
+                  icon: const Icon(Icons.bluetooth_connected),
+                  label: const Text('后台运行与权限'),
+                  style: TextButton.styleFrom(foregroundColor: TraceColors.mint),
+                ),
+              ),
               const SizedBox(height: 24),
               const _ProfileFooter()
                   .animate(delay: 220.ms)
@@ -98,11 +108,6 @@ class ProfileTabPage extends StatelessWidget {
         label: '应用设置',
         icon: Icons.settings,
         onTap: _showSettingsDialog,
-      ),
-      _ProfileAction(
-        label: '后台运行与权限',
-        icon: Icons.bluetooth_connected,
-        onTap: () => Get.toNamed('/companion-setup'),
       ),
       _ProfileAction(
         label: '检查更新',
