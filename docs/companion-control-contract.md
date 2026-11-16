@@ -45,6 +45,9 @@ The existing foreground-only `acquire(taskKey)` contract remains unchanged.
   rather than disconnecting during apply. A new wake cannot replace an owner
   while its stop is settling. Temporary adapter initialization failure does not
   permanently block native readiness or a later retry.
+  A failed foreground INFO that clears the shared device identity triggers
+  connection/control re-establishment after that owner settles, without waiting
+  for the long HTTP interval. It cannot reuse the old session/consent.
 - On Android 12+, saved monitored sensor advertisements may be collected for
   8 seconds per minute while a live companion owner is confirmed. The existing
   parser/database are reused; headless startup loads at most 300 recent records

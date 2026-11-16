@@ -68,7 +68,16 @@ class CompanionRuntime extends GetxService {
         if (_pendingChoice != null || _pendingDeviceCheck != null) { _drainWake(); return; }
         final pending = _pendingWake;
         if (pending != null) { _pendingWake = null; _queueWake(pending); }
-        else if (_runtime != null) { unawaited(_attachControl()); }
+        else if (_runtime != null) {
+          if (!_sameLink() && _ota.deviceInfo == null) {
+            // A failed foreground INFO retires the shared identity even when
+            // GATT stays connected. Re-establish control, not the long HTTP timer.
+            _queueWake({'runtimeId': _runtime, 'revision': _revision,
+              'address': _address, 'reason': 'recovery'});
+          } else {
+            unawaited(_attachControl());
+          }
+        }
       }
     });
     try {

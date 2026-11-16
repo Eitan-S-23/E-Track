@@ -175,6 +175,20 @@ void main() {
     expect(ota.maxConcurrent, 1);
   });
 
+  test('failed foreground identity read restores the MCU control session promptly', () async {
+    await start();
+    await until(() => runtime.status.value == 'NO_UPDATE');
+    final oldSession = ota.messages.firstWhere((m) => m.kind == 'HELLO').session;
+    ota.identityAvailable = false;
+    ota.activity.add(false); // Foreground GET_INFO has failed and released its owner.
+    await until(() => ota.reads == 3 && runtime.status.value == 'CONNECTED');
+    expect(ota.checks, 1, reason: 'Identity recovery does not bypass the HTTP interval');
+    final newSession = ota.messages.lastWhere((m) => m.kind == 'HELLO').session;
+    expect(newSession, isNot(oldSession));
+    ble.emit(CompanionMessage('CHECK', newSession, 1));
+    await until(() => ota.checks == 2 && runtime.status.value == 'NO_UPDATE');
+  });
+
   test('HTTP failure is not published as no-update or a finished check', () async {
     ota.noUpdate = false;
     await start();
@@ -343,7 +357,7 @@ class _Ota extends OtaService {
   FirmwareLatestInfo? latest;
   OtaUpgradeConsent? lastConsent;
   String? verified, owner;
-  bool noUpdate = true, foreignBusy = false, _busy = false;
+  bool noUpdate = true, foreignBusy = false, _busy = false, identityAvailable = false;
   int reads = 0, checks = 0, downloads = 0, upgrades = 0, releases = 0, _concurrent = 0, maxConcurrent = 0;
   Completer<void>? readGate, checkGate, downloadGate, _done;
   List<CompanionMessage> get offers => messages.where((m) => m.kind == 'OFFER').toList();
@@ -372,7 +386,9 @@ class _Ota extends OtaService {
   @override
   Stream<bool> get taskActivity => activity.stream;
   @override
-  bool hasCurrentDeviceIdentity(String? address) => ble.connected && address == _address;
+  bool hasCurrentDeviceIdentity(String? address) => identityAvailable && ble.connected && address == _address;
+  @override
+  DeviceOtaInfo? get deviceInfo => identityAvailable ? info : null;
   @override
   String? get verifiedPackageSha256 => verified;
   @override
@@ -381,7 +397,9 @@ class _Ota extends OtaService {
   bool get lastCheckWasNoUpdate => noUpdate;
   @override
   Future<DeviceOtaInfo?> readDeviceInfo(String address, {String? companionRuntimeId}) =>
-    operation(companionRuntimeId, () async { reads++; await readGate?.future; return info; });
+    operation(companionRuntimeId, () async {
+      reads++; await readGate?.future; identityAvailable = true; return info;
+    });
   @override
   Future<FirmwareLatestInfo?> checkFirmwareUpdate({String? channel, String? companionRuntimeId}) =>
     operation(companionRuntimeId, () async { checks++; await checkGate?.future; return latest; });
