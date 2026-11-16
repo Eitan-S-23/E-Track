@@ -182,6 +182,8 @@ class CompanionIntegrationTest {
     }
 
     @Test fun chooserNeedsForegroundAndConfirmedSystemAssociation() {
+        assertFalse(BluetoothAdapter.checkBluetoothAddress(address))
+        assertTrue(BluetoothAdapter.checkBluetoothAddress(address.uppercase()))
         CompanionBridge.ensureEngine(app)
         val rejected = incoming("associate", mapOf("address" to address))
         assertEquals("APP_NOT_FOREGROUND", rejected.errorMessage)
@@ -191,7 +193,7 @@ class CompanionIntegrationTest {
         val request = shadowOf(manager).lastAssociationRequest
         assertTrue(request.isSingleDevice)
         val filter = request.deviceFilters.single() as BluetoothLeDeviceFilter
-        assertEquals(address, filter.scanFilter.deviceAddress)
+        assertEquals(address.uppercase(), filter.scanFilter.deviceAddress)
         val callback = shadowOf(manager).lastAssociationCallback
         val sender = PendingIntent.getActivity(app, 51, Intent("test.chooser"), PendingIntent.FLAG_IMMUTABLE).intentSender
         callback.onDeviceFound(sender)

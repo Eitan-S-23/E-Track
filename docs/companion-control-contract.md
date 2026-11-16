@@ -13,6 +13,9 @@ The existing foreground-only `acquire(taskKey)` contract remains unchanged.
 - One associated E-Track main controller, one cached Flutter engine and one
   OtaService own the gateway. Pages attach to them rather than creating senders.
 - Android API 26+ uses an explicit foreground CompanionDeviceManager chooser.
+  Normalize the selected MAC to uppercase at ScanFilter's OS boundary; persisted
+  address keys remain lowercase. Request construction and association submission
+  share the same failure cleanup so a rejected request cannot occupy the slot.
   API 31+ presence observation and persisted JobScheduler jobs can request a
   connectedDevice foreground service. Neither association nor start-service
   return is execution ownership: a live Dart handshake and heartbeat are required.

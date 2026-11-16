@@ -267,9 +267,10 @@ object CompanionBridge {
         val manager = context.getSystemService(CompanionDeviceManager::class.java)
         associationResult = result; associationAddress = target; associationPrompted = false
         associationDeadline = Runnable { finishAssociation(context, false, result) }.also { handler.postDelayed(it, 180000) }
-        val request = AssociationRequest.Builder().setSingleDevice(true).addDeviceFilter(
-            BluetoothLeDeviceFilter.Builder().setScanFilter(ScanFilter.Builder().setDeviceAddress(target).build()).build()).build()
         try {
+            val request = AssociationRequest.Builder().setSingleDevice(true).addDeviceFilter(
+                BluetoothLeDeviceFilter.Builder().setScanFilter(
+                    ScanFilter.Builder().setDeviceAddress(target.uppercase()).build()).build()).build()
             manager.associate(request, object : CompanionDeviceManager.Callback() {
                 private fun prompt(sender: IntentSender) {
                     if (associationPrompted || associationResult !== result) return

@@ -123,11 +123,10 @@ void main() {
     h.permissionGate = delayed;
     await h.wake();
     await h.until(() => h.permissionReads == 1);
-    final stopped = h.callback('lost', {'runtimeId': 'runtime-1'});
-    await h.until(() => !h.runtime.handles(_address));
+    await h.callback('lost', {'runtimeId': 'runtime-1'});
+    expect(h.runtime.handles(_address), isFalse);
     delayed.complete(true);
     await h.pump();
-    await stopped;
     await h.elapse(const Duration(minutes: 2));
     expect(h.adapter.starts, 0);
     expect(h.ble.companionScanningAllowed, isFalse);
@@ -289,7 +288,10 @@ class _Harness {
     messenger.setMockMethodCallHandler(channel, (call) async {
       if (call.method == 'ready') { ready = true; return snapshot; }
       if (call.method == 'snapshot') return Map<String, Object?>.from(snapshot);
-      if (call.method == 'state') return true;
+      if (call.method == 'state') {
+        debugPrint('T02_NATIVE_STATE ${(call.arguments as Map)['status']}');
+        return true;
+      }
       fail('Unexpected native call: ${call.method}');
     });
     Get.put<ScanSettingsService>(ScanSettingsService());
@@ -307,7 +309,10 @@ class _Harness {
   }
 
   Future<void> until(bool Function() condition) async {
-    for (var i = 0; i < 200 && !condition(); i++) { await tester.pump(); }
+    for (var i = 0; i < 2000 && !condition(); i++) {
+      elapsedMs++;
+      await tester.pump(const Duration(milliseconds: 1));
+    }
     expect(condition(), isTrue, reason: 'runtime=${runtime.status.value}, OTA=${ota.upgradeStatus}');
     await pump();
   }
@@ -318,12 +323,14 @@ class _Harness {
     await pump();
   }
 
-  Future<Object?> callback(String method, Object? value) {
+  Future<Object?> callback(String method, Object? value) async {
+    debugPrint('T02_NATIVE_EVENT $method');
     final completed = Completer<Object?>();
     const codec = StandardMethodCodec();
     messenger.handlePlatformMessage(channel.name, codec.encodeMethodCall(MethodCall(method, value)), (result) {
       completed.complete(result == null ? null : codec.decodeEnvelope(result));
     });
+    await until(() => completed.isCompleted);
     return completed.future;
   }
 
@@ -432,6 +439,7 @@ class _Device extends Fake implements fbp.BluetoothDevice {
   void write(List<int> bytes) {
     if (bytes.first == OtaBleCodec.frameSync0) {
       final frame = OtaBleCodec.decodeFrame(bytes);
+      debugPrint('T02_GATT_COMMAND ${frame.cmd}');
       expectSync(frame.cmd, OtaBleCodec.cmdGetInfo, reason: 'No firmware transfer is authorized by telemetry');
       infoRequests++;
       notifications.add(OtaBleCodec.encodeCommand(cmd: OtaBleCodec.rspInfo, session: frame.session,
