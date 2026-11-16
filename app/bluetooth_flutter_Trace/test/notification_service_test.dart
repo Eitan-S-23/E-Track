@@ -57,4 +57,40 @@ void main() {
     await service.initialize();
     expect(calls, 2);
   });
+
+  test('Android initialization does not request notification permission', () async {
+    final methods = <String>[];
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async { methods.add(call.method); return true; });
+    await NotificationService.forTesting().initialize();
+    expect(methods, ['initialize']);
+  });
+
+  for (final granted in [false, true]) {
+    test('iOS retains first-install authorization and reports explicit result $granted', () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      final calls = <MethodCall>[];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+        calls.add(call);
+        return call.method == 'requestPermissions' ? granted : true;
+      });
+      final service = NotificationService.forTesting();
+      await service.initialize();
+      final initialization = calls.single.arguments as Map;
+      expect(initialization['requestAlertPermission'], isTrue);
+      expect(initialization['requestBadgePermission'], isTrue);
+      expect(initialization['requestSoundPermission'], isTrue);
+      expect(await service.requestNotificationPermission(), granted);
+      expect(await service.requestNotificationPermission(), granted);
+      final requests = calls.where((call) => call.method == 'requestPermissions').toList();
+      expect(requests, hasLength(2), reason: 'Explicit retries must query the actual native result');
+      for (final request in requests) {
+        expect(request.arguments, containsPair('alert', true));
+        expect(request.arguments, containsPair('badge', true));
+        expect(request.arguments, containsPair('sound', true));
+      }
+      expect(calls.where((call) => call.method == 'requestNotificationsPermission'), isEmpty);
+    });
+  }
 }

@@ -95,6 +95,7 @@ void main() {
   });
 
   tearDown(() async {
+    ble.releaseGates();
     ota.releaseGates();
     await callback('lost', {'runtimeId': runtimeId});
     runtime.onClose();
@@ -195,6 +196,77 @@ void main() {
     await until(() => runtime.status.value == 'CHECK_FAILED');
     expect(states.last['checkFinished'], isFalse);
     expect(ota.messages.where((m) => m.kind == 'STATE').last.fields, ['FAILED']);
+  });
+
+  for (final reuse in [false, true]) {
+    for (final discovery in [false, true]) {
+      test('late ${discovery ? 'discovery' : 'subscription'} cannot occupy a new control session; reuse=$reuse', () async {
+        ble.reuse = reuse;
+        await start();
+        await until(() => runtime.status.value == 'NO_UPDATE');
+        final oldSession = ota.messages.lastWhere((m) => m.kind == 'HELLO').session;
+        final gate = _Gate();
+        if (discovery) { ble.discoveryGate = gate; } else { ble.subscriptionGate = gate; }
+        ota.foreignBusy = true;
+        ota.activity.add(true);
+        ota.foreignBusy = false;
+        ota.activity.add(false);
+        await gate.entered.future;
+        ble.loseConnection();
+        await until(() => ota.messages.where((m) => m.kind == 'HELLO').length == 2 && runtime.status.value == 'CONNECTED');
+        expect(gate.release.isCompleted, isFalse, reason: 'S2 must not wait for the stale attachment');
+        final session = ota.messages.lastWhere((m) => m.kind == 'HELLO').session;
+        expect(session, isNot(oldSession));
+        final request = CompanionMessage('CHECK', session, 1).encode();
+        ble.notifications.add(request.sublist(0, 15));
+        gate.release.complete();
+        await gate.finished.future;
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        ble.notifications.add(request.sublist(15));
+        await until(() => ota.checks == 2 && runtime.status.value == 'NO_UPDATE');
+        ble.emit(CompanionMessage('CHECK', oldSession, 99));
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        expect(ota.checks, 2);
+        expect(ble.connects, 2, reason: 'No third reconnect may be needed to restore CHECK');
+      });
+    }
+  }
+
+  test('a completed foreign identity query restores the companion owner without another HTTP interval', () async {
+    await start();
+    await until(() => runtime.status.value == 'NO_UPDATE');
+    final session = ota.messages.lastWhere((m) => m.kind == 'HELLO').session;
+    ota.identityAddress = 'bb:cc:dd:ee:ff:00';
+    expect(ota.deviceInfo, isNotNull);
+    ota.activity.add(false);
+    await until(() => ota.reads == 3 && runtime.status.value == 'CONNECTED');
+    expect(ota.identityAddress, _address);
+    expect(ota.checks, 1);
+    final restored = ota.messages.lastWhere((m) => m.kind == 'HELLO').session;
+    expect(restored, isNot(session));
+    ble.emit(CompanionMessage('CHECK', restored, 1));
+    await until(() => ota.checks == 2 && runtime.status.value == 'NO_UPDATE');
+  });
+
+  test('an in-flight S1 metadata response cannot publish an offer into S2', () async {
+    await start();
+    await until(() => runtime.status.value == 'NO_UPDATE');
+    final session = ota.messages.lastWhere((m) => m.kind == 'HELLO').session;
+    ota.checkGate = Completer<void>();
+    ble.emit(CompanionMessage('CHECK', session, 1));
+    await until(() => ota.checks == 2);
+    ota.latest = _latest();
+    ble.loseConnection();
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+    ota.checkGate!.complete();
+    await until(() => ota.messages.where((m) => m.kind == 'HELLO').length == 2 && runtime.status.value == 'CONNECTED');
+    expect(ota.offers, isEmpty);
+    expect(ota.downloads, 0);
+    final restored = ota.messages.lastWhere((m) => m.kind == 'HELLO').session;
+    ble.emit(CompanionMessage('CHECK', restored, 1));
+    await until(() => runtime.status.value == 'READY_AWAITING_DEVICE_CHOICE');
+    expect(ota.offers.single.session, restored);
+    expect(ota.maxConcurrent, 1);
   });
 
   test('offer follows verified download; metered policy defers the bytes', () async {
@@ -312,8 +384,31 @@ class _Ble extends BluetoothService {
   final device = _Device();
   final notifications = StreamController<List<int>>.broadcast(sync: true);
   bool connected = false, failFirstInitialization = false;
+  bool reuse = false;
+  _Gate? discoveryGate, subscriptionGate;
+  final _gates = <_Gate>[];
+  int _notifyOwner = 0;
   int connects = 0, disconnects = 0, generation = 0, initializations = 0;
   void emit(CompanionMessage message) => notifications.add(message.encode());
+  void loseConnection() {
+    connected = false;
+    generation++;
+    device.states.add(BluetoothConnectionState.disconnected);
+  }
+  void releaseGates() {
+    for (final gate in _gates) {
+      if (!gate.release.isCompleted) gate.release.complete();
+    }
+  }
+  Future<void> _wait(_Gate? gate) async {
+    if (gate == null) return;
+    _gates.add(gate);
+    gate.entered.complete();
+    await gate.release.future;
+    gate.finished.complete();
+  }
+  @override
+  bool get reuseOtaCharacteristics => reuse;
   @override
   bool get foregroundScanningAllowed => true;
   @override
@@ -338,11 +433,27 @@ class _Ble extends BluetoothService {
   @override
   Future<Map<String, String>?> findExactOtaCharacteristicsByAddress(String address,
       {String serviceUuid = 'fff0', String writeCharUuid = 'fff2', String notifyCharUuid = 'fff1',
-      OtaLinkStats? stats, int? discoveryTimeoutSeconds}) async =>
-    {'serviceId': 'fff0', 'writeCharId': 'fff2', 'notifyCharId': 'fff1', 'writeMode': 'with'};
+      OtaLinkStats? stats, int? discoveryTimeoutSeconds}) async {
+    final captured = generation, gate = discoveryGate;
+    discoveryGate = null;
+    await _wait(gate);
+    if (reuse && captured != generation) return null;
+    return {'serviceId': 'fff0', 'writeCharId': 'fff2', 'notifyCharId': 'fff1', 'writeMode': 'with'};
+  }
   @override
   Future<Stream<List<int>>?> subscribeOtaNotifyByAddress(String address,
-      String serviceId, String characteristicId, {OtaLinkStats? stats}) async => notifications.stream;
+      String serviceId, String characteristicId, {OtaLinkStats? stats}) async {
+    final owner = ++_notifyOwner, gate = subscriptionGate;
+    subscriptionGate = null;
+    await _wait(gate);
+    return owner == _notifyOwner ? notifications.stream : null;
+  }
+}
+
+class _Gate {
+  final entered = Completer<void>();
+  final release = Completer<void>();
+  final finished = Completer<void>();
 }
 
 class _Ota extends OtaService {
@@ -357,6 +468,7 @@ class _Ota extends OtaService {
   FirmwareLatestInfo? latest;
   OtaUpgradeConsent? lastConsent;
   String? verified, owner;
+  String identityAddress = _address;
   bool noUpdate = true, foreignBusy = false, _busy = false, identityAvailable = false;
   int reads = 0, checks = 0, downloads = 0, upgrades = 0, releases = 0, _concurrent = 0, maxConcurrent = 0;
   Completer<void>? readGate, checkGate, downloadGate, _done;
@@ -386,7 +498,7 @@ class _Ota extends OtaService {
   @override
   Stream<bool> get taskActivity => activity.stream;
   @override
-  bool hasCurrentDeviceIdentity(String? address) => identityAvailable && ble.connected && address == _address;
+  bool hasCurrentDeviceIdentity(String? address) => identityAvailable && ble.connected && address == identityAddress;
   @override
   DeviceOtaInfo? get deviceInfo => identityAvailable ? info : null;
   @override
@@ -398,7 +510,7 @@ class _Ota extends OtaService {
   @override
   Future<DeviceOtaInfo?> readDeviceInfo(String address, {String? companionRuntimeId}) =>
     operation(companionRuntimeId, () async {
-      reads++; await readGate?.future; identityAvailable = true; return info;
+      reads++; await readGate?.future; identityAvailable = true; identityAddress = address; return info;
     });
   @override
   Future<FirmwareLatestInfo?> checkFirmwareUpdate({String? channel, String? companionRuntimeId}) =>

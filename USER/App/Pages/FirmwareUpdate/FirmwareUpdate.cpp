@@ -1318,6 +1318,8 @@ namespace
     unsigned companionInputCount = 0;
     lv_group_t* companionGroup = nullptr;
     HAL::CompanionUpdateInfo companionDisplayed = {};
+    HAL::CompanionUpdateInfo companionPressed = {};
+    lv_obj_t* companionPressedButton = nullptr;
     char companionShownOffer[33] = {};
     bool companionClosing = false;
     bool companionOpening = false;
@@ -1357,6 +1359,7 @@ namespace
                 lv_group_focus_obj(saved.focus);
         }
         companionInputCount = 0;
+        companionPressedButton = nullptr;
         lv_group_del(companionGroup);
         companionGroup = nullptr;
         lv_obj_del(companionModal);
@@ -1366,14 +1369,40 @@ namespace
 
     void CompanionButtonEvent(lv_event_t* event)
     {
-        if (lv_event_get_code(event) != LV_EVENT_CLICKED || companionClosing) return;
+        const lv_event_code_t code = lv_event_get_code(event);
         lv_obj_t* button = lv_event_get_current_target(event);
+        if (code == LV_EVENT_PRESS_LOST || code == LV_EVENT_DEFOCUSED || code == LV_EVENT_DELETE)
+        {
+            if (companionPressedButton == button) companionPressedButton = nullptr;
+            return;
+        }
+        if (companionClosing) return;
+        if (code == LV_EVENT_PRESSED)
+        {
+            companionPressedButton = nullptr;
+            if (lv_obj_has_state(button, LV_STATE_DISABLED)) return;
+            HAL::CompanionUpdateInfo current;
+            HAL::BT_CompanionGetInfo(&current);
+            if (HAL::CompanionSameOffer(companionDisplayed, current))
+            {
+                companionPressed = companionDisplayed;
+                companionPressedButton = button;
+            }
+            return;
+        }
+        if (code != LV_EVENT_CLICKED) return;
+        const bool pressed = companionPressedButton == button;
+        companionPressedButton = nullptr; // Consume before HAL work or asynchronous close.
         if (lv_obj_has_state(button, LV_STATE_DISABLED)) return;
+        HAL::CompanionUpdateInfo current;
+        HAL::BT_CompanionGetInfo(&current);
+        const bool matching = pressed && HAL::CompanionSameOffer(companionPressed, companionDisplayed) &&
+            HAL::CompanionSameOffer(companionPressed, current);
         if (button == companionCheck) { (void)HAL::BT_CompanionCheck(); }
-        else if (button == companionInstall && CompanionCanInstall()) { (void)HAL::BT_CompanionChoose(true, &companionDisplayed); }
+        else if (button == companionInstall && matching && CompanionCanInstall()) { (void)HAL::BT_CompanionChoose(true, &companionPressed); }
         else if (button == companionLater)
         {
-            if (companionDisplayed.hasOffer) (void)HAL::BT_CompanionChoose(false, &companionDisplayed);
+            if (matching) (void)HAL::BT_CompanionChoose(false, &companionPressed);
             companionClosing = true;
             lv_async_call(CompanionClose, nullptr);
         }
@@ -1389,7 +1418,7 @@ namespace
         lv_obj_set_style_border_width(button, 2, LV_STATE_FOCUSED);
         lv_obj_set_style_outline_width(button, 2, LV_STATE_FOCUSED);
         lv_obj_set_style_outline_color(button, lv_color_hex(0x20e8f0), LV_STATE_FOCUSED);
-        lv_obj_add_event_cb(button, CompanionButtonEvent, LV_EVENT_CLICKED, nullptr);
+        lv_obj_add_event_cb(button, CompanionButtonEvent, LV_EVENT_ALL, nullptr);
         lv_obj_t* label = lv_label_create(button);
         lv_label_set_text(label, text);
         lv_obj_center(label);
@@ -1400,6 +1429,10 @@ namespace
     {
         if (companionModal == nullptr || companionClosing) return;
         HAL::BT_CompanionGetInfo(&companionDisplayed);
+        if (companionPressedButton != nullptr &&
+            (!HAL::CompanionSameOffer(companionPressed, companionDisplayed) ||
+             (companionPressedButton == companionInstall && !CompanionCanInstall())))
+            companionPressedButton = nullptr;
         char text[240];
         if (companionDisplayed.hasOffer)
             snprintf(text, sizeof(text), "Firmware %lu\n\n%s\n\n%s", (unsigned long)companionDisplayed.version,
@@ -1409,7 +1442,7 @@ namespace
         lv_label_set_text(companionMessage, text);
         bool check = !companionDisplayed.checking && strcmp(companionDisplayed.status, "UPGRADING") != 0 &&
             strcmp(companionDisplayed.status, "STARTING") != 0;
-        bool install = companionDisplayed.hasOffer && CompanionCanInstall();
+        bool install = companionDisplayed.hasOffer && !companionDisplayed.checking && CompanionCanInstall();
         if (check != companionCanCheck || install != companionCanInstall)
         {
             lv_obj_t* focused = lv_group_get_focused(companionGroup);
@@ -1482,6 +1515,7 @@ static void CompanionOpen(void*)
     companionLater = CompanionButton(panel, "Later / Back", 232);
     companionGroup = lv_group_create();
     companionCanCheck = false; companionCanInstall = false; companionShownOffer[0] = '\0';
+    companionPressedButton = nullptr;
     lv_obj_add_state(companionCheck, LV_STATE_DISABLED);
     lv_obj_add_state(companionInstall, LV_STATE_DISABLED);
     lv_group_add_obj(companionGroup, companionLater);

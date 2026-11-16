@@ -67,6 +67,7 @@ class OtaBleTransport {
     int? dataBatchFrames,
     this.enablePipeline = false,
     this.onApplyBoundary,
+    this.beforeInitialBegin,
     this.onLinkSelection,
   })  : dataBatchFrames = dataBatchFrames ?? (enablePipeline ? defaultPipelineBatchFrames : 1),
         _channel = channel {
@@ -87,6 +88,10 @@ class OtaBleTransport {
 
   final OtaBleChannel _channel;
   final void Function(bool applying)? onApplyBoundary;
+  /// Synchronous admission under the writer lock, after its last asynchronous wait.
+  /// Applies only to the first BEGIN byte, never to recovery or irreversible apply.
+  final void Function()? beforeInitialBegin;
+  bool _initialBeginDispatched = false;
   final void Function(OtaTransportSelection)? onLinkSelection;
   bool _endStarted = false;
   bool get endStarted => _endStarted;
@@ -351,6 +356,7 @@ class OtaBleTransport {
   }) async {
     if (_busy) throw const OtaTransportException('transport busy', code: 'BUSY');
     _checkUsable();
+    _initialBeginDispatched = false;
     if (enablePipeline) {
       final result = await _tryPipelineTransfer(package: package,
         packageSha256: packageSha256, etuHeader: etuHeader,
@@ -388,6 +394,7 @@ class OtaBleTransport {
     if (stats == null || stats!.transferStartUs != null) {
       throw const OtaTransportException('Fresh probe observations required', code: 'PROBE_CONFIG');
     }
+    _initialBeginDispatched = false;
     return _transferCore<OtaPrefixProbeResult>(
       package: package,
       packageSha256: packageSha256,
@@ -1661,14 +1668,15 @@ class OtaBleTransport {
     List<int>? frameEnds,
     void Function(int)? onChunkStarting,
     void Function(int)? onChunkCompleted,
-  }) {
-    if (_writeChannelPoisoned && resyncProbeSeq == null) {
-      throw const OtaTransportException(
-          '写通道已废弃：分片写中断后帧边界不可信，'
-          '须由 GET_INFO 探针证明 MCU 已重新同步',
-          code: 'WRITE_TIMEOUT');
-    }
-    final task = _writeSerial.then((_) => _writeFrameLocked(
+  }) async {
+    while (true) {
+      if (_writeChannelPoisoned && resyncProbeSeq == null) {
+        throw const OtaTransportException(
+            '写通道已废弃：分片写中断后帧边界不可信，'
+            '须由 GET_INFO 探针证明 MCU 已重新同步',
+            code: 'WRITE_TIMEOUT');
+      }
+      final task = _writeSerial.then((_) => _writeFrameLocked(
           frame,
           allowCancelled: allowCancelled,
           resyncProbeSeq: resyncProbeSeq,
@@ -1676,8 +1684,15 @@ class OtaBleTransport {
           onChunkStarting: onChunkStarting,
           onChunkCompleted: onChunkCompleted,
         ));
-    _writeSerial = task.catchError((_) {});
-    return task;
+      _writeSerial = task.catchError((_) {});
+      try {
+        await task;
+        return;
+      } on _InitialBeginPaused {
+        // Resume rechecks INFO through this writer; never hold it while paused.
+        await _waitIfPaused();
+      }
+    }
   }
 
   /// 帧分片写入：按当前可用写净荷上限切片。
@@ -1738,6 +1753,14 @@ class OtaBleTransport {
       throw const OtaTransportException(
           'MTU 未协商或过小，无法分片写入', code: 'MTU_UNAVAILABLE');
     }
+    if (_inTransfer && !_initialBeginDispatched &&
+        (frame[2] == OtaBleCodec.cmdBegin || frame[2] == _PipelineWire.begin)) {
+      _checkUsable();
+      if (_paused) {
+        _noProgressClock?.stop();
+        throw const _InitialBeginPaused();
+      }
+    }
     var dispatchedAny = false;
     var frameComplete = false;
     try {
@@ -1780,6 +1803,11 @@ class OtaBleTransport {
         onChunkStarting?.call(end);
         if (_inTransfer && (frame[2] == OtaBleCodec.cmdData || frame[2] == _PipelineWire.data)) {
           _dataWriteDispatched = true;
+        }
+        if (_inTransfer && offset == 0 && !_initialBeginDispatched &&
+            (frame[2] == OtaBleCodec.cmdBegin || frame[2] == _PipelineWire.begin)) {
+          beforeInitialBegin?.call();
+          _initialBeginDispatched = true;
         }
         final pendingWrite = _channel.writeChunk(frame.sublist(offset, end));
         _trackOutstandingWrite(pendingWrite);
@@ -2408,4 +2436,8 @@ class OtaTransportException implements Exception {
 
   @override
   String toString() => 'OtaTransportException($code): $message';
+}
+
+class _InitialBeginPaused implements Exception {
+  const _InitialBeginPaused();
 }

@@ -13,7 +13,9 @@ CASES = ("crc", "phone_missing", "check_timeout", "acknowledged_timeout",
          "download_timeout", "timer_wrap", "offer_choice_once", "later_never_installs",
          "duplicate_expiry", "display_binding", "binary_exclusion", "malformed",
          "parser_recovery", "periodic_after_manual", "stale_session_and_request", "send_failure",
-         "starting_timeout", "binary_end_recovers_menu")
+         "starting_timeout", "binary_end_recovers_menu", "all_display_fields",
+         "offer_revision_reappearance", "reservation_timeout", "reservation_wrap",
+         "reservation_cleanup", "reservation_failed_send")
 
 
 class CompanionControlTests(unittest.TestCase):

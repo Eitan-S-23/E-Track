@@ -555,8 +555,8 @@ void Dialplate::onRecord(bool longPress)
                 return;
             }
 
+            if (!Model.RecorderCommand(Model.REC_START)) { Model.PlayMusic("Error"); return; }
             Model.PlayMusic("Connect");
-            Model.RecorderCommand(Model.REC_START);
             View.SetRecRecording(true);
             recState = RECORD_STATE_RUN;
         }
@@ -580,8 +580,8 @@ void Dialplate::onRecord(bool longPress)
         }
         else
         {
+            if (!Model.RecorderCommand(Model.REC_CONTINUE)) { Model.PlayMusic("Error"); return; }
             Model.PlayMusic("Connect");
-            Model.RecorderCommand(Model.REC_CONTINUE);
             View.SetRecRecording(true);
             recState = RECORD_STATE_RUN;
         }
@@ -596,8 +596,8 @@ void Dialplate::onRecord(bool longPress)
         }
         else
         {
+            if (!Model.RecorderCommand(Model.REC_CONTINUE)) { Model.PlayMusic("Error"); return; }
             Model.PlayMusic("Connect");
-            Model.RecorderCommand(Model.REC_CONTINUE);
             View.SetRecRecording(true);
             recState = RECORD_STATE_RUN;
         }

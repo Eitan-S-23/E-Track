@@ -140,6 +140,109 @@ void main() {
   /// 撞 END ERR_SHA，使全部正常路径用例失去意义。
   List<int> shaOf(Uint8List package) => sha256.convert(package).bytes;
 
+  for (final allow in [false, true]) {
+    test('initial admission follows the MTU wait and runs only once: allow=$allow', () async {
+      final package = packageBytes(1024);
+      final channel = _AdmissionGateChannel(_McuSim());
+      addTearDown((channel.inner as _McuSim).close);
+      var valid = true, guards = 0;
+      final transport = OtaBleTransport(channel: channel, beforeInitialBegin: () {
+        guards++;
+        if (!valid) throw const OtaTransportException('expired', code: 'STALE_DEVICE_CONSENT');
+        valid = false; // Expiry after admission must not interrupt DATA/END.
+      });
+      final operation = transport.transfer(package: package,
+        packageSha256: shaOf(package), etuHeader: etuHeaderOf(package));
+      final observed = allow
+          ? expectLater(operation, completion(isA<OtaAckResult>().having((ack) => ack.isOk, 'isOk', isTrue)))
+          : expectLater(operation, throwsA(isA<OtaTransportException>().having((error) => error.code, 'code', 'STALE_DEVICE_CONSENT')));
+      try {
+        await channel.entered.future;
+        expect(guards, 0);
+        expect(channel.chunks, isEmpty);
+        valid = allow;
+        channel.gate.complete();
+        await observed;
+        expect(guards, 1);
+        if (!allow) expect(channel.chunks, isEmpty, reason: 'Not even a BEGIN prefix may be dispatched');
+      } finally {
+        if (!channel.gate.isCompleted) channel.gate.complete();
+        await transport.dispose();
+      }
+    });
+
+    test('initial pause releases writer for INFO before consent recheck: allow=$allow', () async {
+      final package = packageBytes(1024);
+      final mcu = _McuSim();
+      final channel = _AdmissionGateChannel(mcu);
+      addTearDown(mcu.close);
+      var valid = true, guards = 0;
+      final transport = OtaBleTransport(channel: channel, beforeInitialBegin: () {
+        guards++;
+        if (!valid) throw const OtaTransportException('expired', code: 'STALE_DEVICE_CONSENT');
+        valid = false;
+      });
+      final operation = transport.transfer(package: package,
+        packageSha256: shaOf(package), etuHeader: etuHeaderOf(package));
+      final observed = allow
+          ? expectLater(operation, completion(isA<OtaAckResult>().having((ack) => ack.isOk, 'isOk', isTrue)))
+          : expectLater(operation, throwsA(isA<OtaTransportException>().having((error) => error.code, 'code', 'STALE_DEVICE_CONSENT')));
+      try {
+        await channel.entered.future;
+        transport.pauseForBackground();
+        channel.gate.complete();
+        // This must finish while paused, before releasing BEGIN's gate.
+        await transport.getDeviceInfo(timeout: const Duration(seconds: 1));
+        expect(guards, 0);
+        expect(mcu.beginCalls, 0);
+        valid = allow;
+        transport.resumeFromBackground();
+        await observed;
+        expect(guards, 1);
+        expect(mcu.beginCalls, allow ? 1 : 0);
+        expect(mcu.endCalls, allow ? 1 : 0);
+      } finally {
+        if (!channel.gate.isCompleted) channel.gate.complete();
+        await transport.dispose();
+      }
+    });
+
+    test('initial admission follows a queued INFO write: allow=$allow', () async {
+      final package = packageBytes(1024);
+      final mcu = _McuSim();
+      final channel = _FrameGateChannel(mcu)..postGateCmd = OtaBleCodec.cmdGetInfo;
+      addTearDown(mcu.close);
+      var valid = true, guards = 0;
+      final transport = OtaBleTransport(channel: channel, beforeInitialBegin: () {
+        guards++;
+        if (!valid) throw const OtaTransportException('expired', code: 'STALE_DEVICE_CONSENT');
+        valid = false;
+      });
+      try {
+        final info = transport.getDeviceInfo();
+        await _pumpUntil(() => channel.postGateHits == 1);
+        final operation = transport.transfer(package: package,
+          packageSha256: shaOf(package), etuHeader: etuHeaderOf(package));
+        final observed = allow
+            ? expectLater(operation, completion(isA<OtaAckResult>().having((ack) => ack.isOk, 'isOk', isTrue)))
+            : expectLater(operation, throwsA(isA<OtaTransportException>().having((error) => error.code, 'code', 'STALE_DEVICE_CONSENT')));
+        await Future<void>.delayed(Duration.zero);
+        expect(guards, 0);
+        expect(mcu.beginCalls, 0);
+        valid = allow;
+        channel.releasePost();
+        await info;
+        await observed;
+        expect(guards, 1);
+        expect(mcu.beginCalls, allow ? 1 : 0);
+        expect(mcu.endCalls, allow ? 1 : 0);
+      } finally {
+        channel.releasePost();
+        await transport.dispose();
+      }
+    });
+  }
+
   for (final batchFrames in [3, 12]) {
   group('default-off $batchFrames-frame DATA batching', () {
     Future<OtaAckResult> transfer(OtaBleTransport transport, Uint8List bytes,
@@ -3438,6 +3541,18 @@ class _BatchTapChannel extends _ReboundWrapper {
     chunks.add(List<int>.of(chunk));
     await inner.writeChunk(chunk);
     await afterWrite?.call(chunk);
+  }
+}
+
+class _AdmissionGateChannel extends _BatchTapChannel {
+  _AdmissionGateChannel(super.inner);
+  final entered = Completer<void>();
+  final gate = Completer<void>();
+  @override
+  Future<int> maxWriteChunkSize() async {
+    if (!entered.isCompleted) entered.complete();
+    await gate.future;
+    return super.maxWriteChunkSize();
   }
 }
 

@@ -135,6 +135,51 @@ static void Test(const std::string& name)
         require(!f.control.Check(20) && f.Status("PHONE_REQUIRED"), "failed check TX hidden");
         f.allowSend = true; f.Offer(); f.allowSend = false;
         require(!f.control.Choose(true, 30) && f.control.Info().hasOffer, "failed choice consumed consent");
+    } else if (name == "all_display_fields") {
+        f.Hello(); f.Offer(); const auto display = f.control.Info();
+        for (unsigned field = 0; field < 8; ++field) {
+            auto changed = display;
+            switch (field) {
+                case 0: ++changed.version; break;
+                case 1: ++changed.request; break;
+                case 2: changed.session[0] = 'e'; break;
+                case 3: changed.offer[0] = 'e'; break;
+                case 4: changed.packageSha256[0] = 'e'; break;
+                case 5: changed.targetSha256[0] = 'e'; break;
+                case 6: ++changed.offerRevision; break;
+                case 7: changed.hasOffer = false; break;
+            }
+            require(!f.control.Matches(&changed), "changed display field accepted");
+        }
+    } else if (name == "offer_revision_reappearance") {
+        f.Hello(); f.Offer(); const auto first = f.control.Info();
+        f.Offer(0, 20); require(f.control.Matches(&first), "exact retransmission cancelled display");
+        f.Offer(0, 30, std::string(32, 'e')); f.Offer(0, 40);
+        require(!f.control.Matches(&first), "A-B-A replacement reused an old interaction");
+    } else if (name == "reservation_timeout" || name == "reservation_wrap") {
+        const uint32_t start = name == "reservation_wrap" ? 0xfffffff0u : 20u;
+        f.Hello(); f.Offer(0, start);
+        require(f.control.Choose(true, start), "NOW rejected");
+        require(f.control.InstallPending(start + 119999u), "reservation ended early");
+        f.Message("STATE", 0, "|STARTING", start + 119999u);
+        require(!f.control.InstallPending(start + 120000u), "remote state extended reservation");
+        require(!f.control.Info().checking && f.control.Check(start + 120001u), "expired reservation trapped retry");
+    } else if (name == "reservation_cleanup") {
+        for (unsigned mode = 0; mode < 5; ++mode) {
+            Fixture item; item.Hello(); item.Offer();
+            require(item.control.Choose(true, 20) && item.control.InstallPending(21), "reservation not created");
+            if (mode == 0) item.Message("STATE", 0, "|FAILED", 30);
+            if (mode == 1) item.Feed(Fixture::Frame("!ETC1|HELLO|" + std::string(32, 'e') + "|0"), 30);
+            if (mode == 2) item.Offer(0, 30, std::string(32, 'e'));
+            if (mode == 3) item.control.Poll(30, true);
+            if (mode == 4) item.control.CancelInstall();
+            require(!item.control.InstallPending(31), "reservation leaked after termination/replacement");
+        }
+    } else if (name == "reservation_failed_send") {
+        f.Hello(); f.Offer(); f.allowSend = false;
+        require(!f.control.Choose(true, 20) && !f.control.InstallPending(21), "failed NOW reserved installation");
+        f.allowSend = true;
+        require(f.control.Choose(false, 22) && !f.control.InstallPending(23), "LATER reserved installation");
     } else { throw std::runtime_error("unknown test case"); }
 }
 

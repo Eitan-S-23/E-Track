@@ -14,7 +14,8 @@ public:
     typedef bool (*Send)(void*, const char*, unsigned);
     Control(Send sender, void* context)
         : sender(sender), context(context), length(0), dropping(false), busy(false),
-          sequence(0), offerTick(0), waitTick(0), waitMs(0), byteTick(0)
+          sequence(0), offerTick(0), waitTick(0), waitMs(0), byteTick(0),
+          installPending(false), installTick(0)
     {
         memset(&value, 0, sizeof(value));
         shownSha[0] = '\0';
@@ -42,12 +43,15 @@ public:
         busy = binaryActive;
         if (busy)
         {
+            installPending = false;
             length = 0; dropping = false;
             value.hasOffer = false; value.prompt = false; value.checking = false;
             SetStatus("UPGRADING");
             return;
         }
         if (wasBusy) SetStatus("PHONE_REQUIRED");
+        if (installPending && (uint32_t)(now - installTick) >= 120000u)
+            CancelInstall();
         if (value.hasOffer && (uint32_t)(now - offerTick) >= 300000u)
         {
             value.hasOffer = false; value.prompt = false;
@@ -84,6 +88,7 @@ public:
     {
         if (busy || value.session[0] == '\0') { SetStatus(busy ? "BUSY" : "PHONE_REQUIRED"); return false; }
         if (value.checking) return false;
+        installPending = false;
         if (++sequence == 0) ++sequence;
         value.request = sequence;
         if (!Emit("CHECK", "")) { SetStatus("PHONE_REQUIRED"); return false; }
@@ -102,7 +107,8 @@ public:
         if (count < 0 || (unsigned)count >= sizeof(fields) || !Emit("CHOICE", fields)) return false;
         strcpy(consumedOffer, value.offer);
         value.hasOffer = false; value.prompt = false;
-        if (updateNow) Wait("CHECKING", now, 120000u);
+        installPending = updateNow;
+        if (updateNow) { installTick = now; Wait("CHECKING", now, 120000u); }
         else { value.checking = false; SetStatus("DEFERRED"); }
         return true;
     }
@@ -117,10 +123,21 @@ public:
 
     bool Matches(const HAL::CompanionUpdateInfo* displayed) const
     {
-        return displayed != NULL && displayed->hasOffer && value.hasOffer &&
-            displayed->version == value.version && displayed->request == value.request &&
-            strcmp(displayed->session, value.session) == 0 && strcmp(displayed->offer, value.offer) == 0 &&
-            strcmp(displayed->packageSha256, value.packageSha256) == 0 && strcmp(displayed->targetSha256, value.targetSha256) == 0;
+        return displayed != NULL && HAL::CompanionSameOffer(*displayed, value);
+    }
+
+    bool InstallPending(uint32_t now)
+    {
+        Poll(now, busy);
+        return installPending;
+    }
+
+    void CancelInstall()
+    {
+        if (!installPending) return;
+        installPending = false;
+        value.checking = false;
+        SetStatus("PHONE_REQUIRED");
     }
 
     void SetStatus(const char* status)
@@ -138,6 +155,8 @@ private:
     unsigned length;
     bool dropping, busy;
     uint32_t sequence, offerTick, waitTick, waitMs, byteTick;
+    bool installPending;
+    uint32_t installTick;
 
     static bool Hex(const char* text, unsigned count)
     {
@@ -212,7 +231,10 @@ private:
         {
             if (strcmp(value.session, fields[2]) != 0)
             {
+                const uint32_t revision = value.offerRevision + 1u;
                 memset(&value, 0, sizeof(value));
+                value.offerRevision = revision;
+                installPending = false;
                 strcpy(value.session, fields[2]); sequence = 0;
                 SetStatus("CONNECTED");
             }
@@ -234,6 +256,7 @@ private:
             for (unsigned i = 0; i < sizeof(allowed) / sizeof(allowed[0]); ++i)
                 if (strcmp(state, allowed[i]) == 0)
                 {
+                    installPending = false;
                     value.checking = false; value.hasOffer = false; value.prompt = false;
                     SetStatus(state); return;
                 }
@@ -252,6 +275,8 @@ private:
             if (strcmp(value.offer, fields[4]) == 0 && !same) return;
             if (!same)
             {
+                installPending = false;
+                ++value.offerRevision;
                 strcpy(value.offer, fields[4]); strcpy(value.packageSha256, fields[6]); strcpy(value.targetSha256, fields[7]);
                 value.version = version; value.request = request; offerTick = now;
                 value.hasOffer = true; value.checking = false;

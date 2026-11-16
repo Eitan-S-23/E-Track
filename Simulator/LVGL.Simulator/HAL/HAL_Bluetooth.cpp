@@ -14,6 +14,7 @@ void HAL::BT_CompanionGetInfo(CompanionUpdateInfo* info)
 bool HAL::BT_CompanionCheck() { return false; }
 bool HAL::BT_CompanionChoose(bool, const CompanionUpdateInfo*) { return false; }
 bool HAL::BT_CompanionCanInstall() { return false; }
+bool HAL::BT_CompanionInstallPending() { return false; }
 void HAL::BT_CompanionPresented(const CompanionUpdateInfo*) {}
 
 

@@ -114,16 +114,30 @@ new-connection target version AND full raw SHA verification, not END ACK.
    receipt. Exact retransmission re-acknowledges without extending the MCU's
    5-minute offer validity or rearming consumed consent. Unknown schemas, fields,
    CRC failures, nonce/hash/version/request mismatches fail closed.
-5. The MCU checks the displayed offer snapshot again at activation. Motion
+5. The MCU captures the visible offer at PRESSED and checks that immutable
+   snapshot again at CLICKED, including a local offer revision. Any intervening
+   replacement (including A-B-A), checking state, expiry or lost interaction
+   cancels the press; a replacement requires a new press after display. Exact
+   retransmission does not advance the revision. Motion
    (valid GPS speed >=3 km/h) and battery below 30% without charging disallow
    installation. An open GPX recording, including pause with the file still open,
    also blocks the modal's install action and automatic prompt until closed.
+   The same recording/motion/power policy gates real BEGIN/BEGIN2 overlay
+   acquisition. Successful NOW reserves installation for at most 120 seconds;
+   later STATE messages cannot extend that reservation. New recording/resume is
+   refused during this pending interval and during binary ownership, with failure
+   propagated through the recorder model so the dialplate cannot display REC.
+   Timeout, failure, a new offer/session or binary takeover retires the reservation.
    Automatic prompts are limited to stable Dialplate, MainMenu
    and SystemInfos, not navigation or SD-import screens. Later never starts OTA.
 6. App consumes CHOICE before awaits, then rechecks address, connection generation,
    full base identity, refreshed metadata, target/package hashes and expiry.
-   The same consent is checked again after asynchronous setup immediately before
-   transport begins. Reconnect, changed asset, stale callback or consumed offer
+   The same consent is checked again after asynchronous setup and under the
+   transport writer lock, after capability negotiation, queueing and MTU waits,
+   immediately before its first BEGIN/BEGIN2 chunk dispatch. An initial BEGIN
+   paused during setup yields the writer so the existing INFO recovery can run;
+   admission is checked only after resume, not while holding a paused writer.
+   Reconnect, changed asset, stale callback or consumed offer
    cannot authorize another upgrade. Final success still belongs to existing
    reboot/reconnect GET_INFO verification.
 7. Text and binary queries/transfers share the OtaService exclusive owner and
@@ -168,3 +182,72 @@ main controller; missing peripheral protocols remain a recorded capability gap.
   original device observations. Robolectric is not hardware acceptance.
 - The canonical A1-A6 criteria and remaining observations stay in the single
   APP-COMPANION-01 Spec/card. P3/P4 originals are preserved, not rewritten.
+
+## Delayed-Event Admission Contracts
+
+### Scope And Signatures
+
+AC01-R01..R05 repair delayed UI/connection/transport admission and Darwin
+notification compatibility. The binary wire contract and Android foreground-only
+legacy entry are unchanged; this section is not independent acceptance.
+
+- `HAL::CompanionSameOffer(first, second) -> bool`: both snapshots must have an
+  offer, neither may be checking; compare session, request, offer nonce, version,
+  full package/target hashes and local `offerRevision`. The revision is not sent
+  over BLE. `Control::Matches` and the modal use this single comparison.
+- `HAL::BT_CompanionInstallPending() -> bool`: includes the bounded pending NOW
+  reservation and actual binary ownership. It gates recorder START/CONTINUE,
+  not STOP; `RecorderCommand` returns refusal to its UI caller.
+- `ble_env_overlay_acquire() -> 0/1`: before acquiring the shared overlay, re-read
+  open GPX, valid GPS motion and current power. Unsafe state returns existing
+  acquisition failure without changing opcodes or aborting an active apply.
+- `OtaBleTransport(beforeInitialBegin: void Function()?)`: immutable synchronous
+  guard called once before the initial BEGIN/BEGIN2 enters `writeChunk`. The
+  service supplies its original consent/owner check. Throwing refuses all BEGIN
+  bytes; subsequent DATA, recovery and END/apply do not re-expire that consent.
+- `_ControlBinding = (address, session, generation, epoch)`: attachment flights
+  are keyed by the captured binding, not just a runtime epoch. All asynchronous
+  publication points and control-operation continuations recheck it. Stale
+  listener errors/bytes cannot reset the current decoder or clear dirty state.
+- `requestNotificationPermission() -> Future<bool?>`: iOS calls the Darwin
+  implementation and returns its actual grant/denial/unknown result. Darwin
+  initialization retains the prior alert/badge/sound request; Android
+  initialization still does not request permission automatically.
+
+### Validation And Error Matrix
+
+| Case | Required Result |
+| --- | --- |
+| Unchanged displayed offer, fresh press | One CHOICE; SHORT_CLICKED/CLICKED duplicates do not repeat it. |
+| Offer replacement, checking, expiry or lost focus during press | Zero NOW for the replacement; explicit new press required. |
+| Exact OFFER retransmission during press | Same binding and original expiry; one valid choice remains possible. |
+| Recording active or paused-open, new motion or insufficient power at BEGIN | No overlay acquisition; pending reservation is released on rejection. |
+| Recorder start/resume during NOW reservation or binary ownership | Existing unsupported-request result, no GPX/TrackFilter start and no false REC UI. |
+| Reservation timeout, failed send, failure/new session/new offer | No leaked recording lock; remote STARTING does not renew the original lease. |
+| Consent expires during CAPS, fallback, pause/queue/MTU wait | STALE_DEVICE_CONSENT before any initial BEGIN chunk; no DATA/END. |
+| Consent valid at initial dispatch, expires afterward | Existing transfer/apply safety and final identity verification continue unchanged. |
+| Old attachment discovery/subscription completes after S2 | Only S2 owns its listener; CHECK succeeds without another disconnect. |
+| Old metadata operation completes after invalidation | No old offer/state is published into the new control session. |
+| iOS first authorization or explicit retry | Preserve request entry and return the actual native result, never unconditional true. |
+
+### Tests And Correct Pattern
+
+`test_companion_control.py` covers all snapshot fields/revision, retransmission
+and reservation cleanup/wrap. `test_companion_safety.py` extracts real modal,
+HAL admission, recorder and dialplate methods; the two original unsafe boundaries
+must fail their corresponding oracles, while the candidate passes. The LVGL,
+GPS, power and storage edges are host stubs, not physical-device observations.
+
+The Dart service regressions delay CAPS and v1 fallback across consent expiry;
+transport tests delay MTU and queued INFO writes, and prove that a paused initial
+BEGIN releases the writer for INFO recovery before its final admission check.
+They require zero dispatched BEGIN bytes or a single successful admission.
+Runtime tests cross reconnect during discovery/subscription
+in baseline/reuse dependency modes and preserve partial new-session input.
+Notification tests assert Darwin grant/deny/retry and no implicit Android request.
+
+Wrong: compare the newly refreshed display with itself, or check a mutable
+current link after awaiting old work. Correct: capture the binding at interaction
+or operation start, recheck it at the side-effect boundary and discard old work
+without touching its successor. Baseline foreground OTA remains supported;
+these guards do not grant background ownership or change frozen wire semantics.

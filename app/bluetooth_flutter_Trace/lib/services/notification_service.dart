@@ -46,9 +46,9 @@ class NotificationService {
 
     const DarwinInitializationSettings initializationSettingsIOS =
         DarwinInitializationSettings(
-      requestAlertPermission: false,
-      requestBadgePermission: false,
-      requestSoundPermission: false,
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
     );
 
     const InitializationSettings initializationSettings =
@@ -99,6 +99,11 @@ class NotificationService {
 
     if (androidImplementation != null) {
       return androidImplementation.requestNotificationsPermission();
+    }
+    final iosImplementation = _flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+    if (iosImplementation != null) {
+      return iosImplementation.requestPermissions(alert: true, badge: true, sound: true);
     }
     return true;
   }

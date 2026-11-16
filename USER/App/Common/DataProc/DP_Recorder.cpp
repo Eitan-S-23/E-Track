@@ -155,6 +155,12 @@ static void Recorder_RecStop(Recorder_t* recorder)
 
 static int onNotify(Recorder_t* recorder, Recorder_Info_t* info)
 {
+    if ((info->cmd == RECORDER_CMD_START || info->cmd == RECORDER_CMD_CONTINUE) &&
+        HAL::BT_CompanionInstallPending())
+    {
+        LV_LOG_WARN("Recording cannot start while firmware installation is pending");
+        return Account::RES_UNSUPPORTED_REQUEST;
+    }
     switch (info->cmd)
     {
     case RECORDER_CMD_START:
@@ -216,8 +222,7 @@ static int onEvent(Account* account, Account::EventParam_t* param)
     case Account::EVENT_NOTIFY:
         if (param->size == sizeof(Recorder_Info_t))
         {
-            onNotify(recorder, (Recorder_Info_t*)param->data_p);
-            res = Account::RES_OK;
+            res = (Account::ResCode_t)onNotify(recorder, (Recorder_Info_t*)param->data_p);
         }
         else
         {

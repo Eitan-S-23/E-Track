@@ -1518,7 +1518,14 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         }
         // P3-4 观测：绑定阶段终点 = 订阅流就绪（MTU 协商 + 通知订阅完成）。
         final transport = await _bindTransport(deviceAddress, otaChars,
-            stats: linkStats);
+            stats: linkStats, beforeInitialBegin: consent == null ? null : () {
+              if (generation != _cancelGeneration || _closed) {
+                throw const OtaTransportException('Owner retired before BEGIN', code: 'CANCELLED');
+              }
+              if (!consentCurrent()) {
+                throw const OtaTransportException('STALE_DEVICE_CONSENT', code: 'STALE_DEVICE_CONSENT');
+              }
+            });
         linkStats.phaseEnd('bind');
         if (generation != _cancelGeneration) {
           // RC3-04⑤：迟到完成的 bind 产物无人接管——transport 与其订阅
@@ -2816,6 +2823,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     String deviceAddress,
     Map<String, String> otaChars, {
     OtaLinkStats? stats,
+    void Function()? beforeInitialBegin,
   }) async {
     final linkGeneration = _ble.otaLinkGeneration(deviceAddress);
     final bindingToken = _ble.otaGattBindingToken(deviceAddress);
@@ -2866,6 +2874,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       }
       final bindGeneration = _cancelGeneration;
       final transport = OtaBleTransport(channel: channel, stats: stats,
+          beforeInitialBegin: beforeInitialBegin,
           onLinkSelection: (selection) {
             if (bindGeneration != _cancelGeneration || !isUpgrading || !linkCurrent()) return;
             final reasons = <String>[

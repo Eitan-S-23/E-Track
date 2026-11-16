@@ -390,6 +390,45 @@ void main() {
     expect(ble.dataOffsets, isEmpty);
   });
 
+  for (final pipeline in [true, false]) {
+    for (final expire in [true, false]) {
+      test('consent admission after ${pipeline ? 'delayed CAPS' : 'v1 fallback'} expired=$expire', () async {
+        final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+          linkProfile: OtaLinkProfile.adaptiveCandidate, writeMode: 'without');
+        final service = Get.find<OtaService>();
+        final latest = service.latestInfo!;
+        ble.pipelineSupported = pipeline;
+        ble.holdCaps = true;
+        final consent = OtaUpgradeConsent(address: 'AA:BB', linkGeneration: ble.otaLinkGeneration('AA:BB'),
+          baseImageSha256: service.deviceInfo!.currentImageSha256Hex, versionCode: latest.versionCode!,
+          packageSha256: latest.asset!.sha256, targetImageSha256: latest.targetImageSha256!,
+          expiresAt: DateTime.now().add(Duration(seconds: expire ? 1 : 30)));
+        final operation = service.startOtaUpgrade('AA:BB', consent: consent);
+        try {
+          await ble.capsEntered.future.timeout(const Duration(seconds: 2));
+          expect(consent.expired, isFalse, reason: 'Consent must initially pass before negotiation');
+          if (expire) {
+            await Future<void>.delayed(consent.expiresAt!.difference(DateTime.now()) + const Duration(milliseconds: 30));
+            expect(consent.expired, isTrue);
+          }
+          ble.releaseHeldCaps();
+          expect(await operation, !expire);
+          expect(ble.beginCalls, expire ? 0 : 1);
+          expect(ble.endCalls, expire ? 0 : 1);
+          if (expire) {
+            expect(service.upgradeStatus, contains('STALE_DEVICE_CONSENT'));
+          } else {
+            expect(service.phase, OtaPhase.completed);
+          }
+        } finally {
+          ble.releaseHeldCaps();
+          if (service.isUpgrading) await service.cancelUpgrade(keepPackage: true);
+          await operation;
+        }
+      });
+    }
+  }
+
   test('a refused companion background owner never waits forever or downloads', () async {
     final background = _BackgroundOwnerHarness();
     await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [], backgroundClient: background);
@@ -5441,6 +5480,7 @@ class _UpgradeFakeBle extends BluetoothService {
           _onAbort(f);
           break;
         default:
+          if (f.cmd == 0x10 && !capsEntered.isCompleted) capsEntered.complete();
           if (pipelineSupported) _onPipeline(f);
           break;
       }
@@ -5461,6 +5501,14 @@ class _UpgradeFakeBle extends BluetoothService {
 
   // Synthetic v2 peer for real-service wiring. All existing v1 fault tests remain.
   bool pipelineSupported = false, badPipelineCaps = false;
+  bool holdCaps = false;
+  final capsEntered = Completer<void>();
+  final _heldCapsReplies = <void Function()>[];
+  void releaseHeldCaps() {
+    holdCaps = false;
+    for (final reply in _heldCapsReplies) { reply(); }
+    _heldCapsReplies.clear();
+  }
   int _pipeEpoch = 0, _pipeAccepted = 0, _pipeDurable = 0, _pipeTotal = 0, _pipeBeginSeq = 0;
   Uint8List _pipeReceived = Uint8List(0), _pipeSha = Uint8List(0);
 
@@ -5484,7 +5532,11 @@ class _UpgradeFakeBle extends BluetoothService {
         caps.buffer.asUint8List().setRange(0, 8, [80, 50, 66, 76, 2, 2, 128, 0]);
         caps.setUint32(8, _pipeEpoch, Endian.little);
         caps.setUint32(12, badPipelineCaps ? 28 : 24, Endian.little);
-        _send(0x90, 0, frame.seq, caps.buffer.asUint8List());
+        if (holdCaps) {
+          _heldCapsReplies.add(() => _send(0x90, 0, frame.seq, caps.buffer.asUint8List()));
+        } else {
+          _send(0x90, 0, frame.seq, caps.buffer.asUint8List());
+        }
         break;
       case 0x11:
         expect(frame.session, 0);

@@ -1,6 +1,7 @@
 #include "HAL.h"
 #include "Bluetooth/Bluetooth.h"
 #include "Bluetooth/CompanionControl.h"
+#include "Common/DataProc/DataProc.h"
 #include "HAL/HAL_OTA_Backup.h"
 #include "HAL/HAL_OTA_Package.h"
 #include "HAL/HAL_OTA_Staging.h"
@@ -48,6 +49,7 @@
 static TinyBTPlus bt;
 static uint32_t lastRxTick = 0;
 static bool companion_send(void*, const char*, unsigned);
+static bool companion_install_safe();
 static ETrackCompanion::Control companion_control(companion_send, NULL);
 
 /* ACK batches belong to a real session generation, with or without profiling. */
@@ -329,6 +331,13 @@ static int ble_env_ota_disabled(void)
 
 static int ble_env_overlay_acquire(void)
 {
+    // This is the shared BEGIN/BEGIN2 admission, after the phone's async checks.
+    if (!companion_install_safe())
+    {
+        companion_control.CancelInstall();
+        companion_control.SetStatus("WAIT_SAFE");
+        return 0;
+    }
     int ok = HAL::OTA_OverlayAcquireBle() ? 1 : 0;
 
     if (ok)
@@ -652,13 +661,25 @@ bool HAL::BT_CompanionCheck()
     return companion_control.Check(millis());
 }
 
+static bool companion_install_safe()
+{
+    HAL::Power_Info_t power = {};
+    HAL::GPS_Info_t gps = {};
+    HAL::Power_GetInfo(&power);
+    bool moving = HAL::GPS_GetInfo(&gps) && gps.isVaild && gps.speed >= 3.0f;
+    return !DataProc::Recorder_IsOpen() && !moving && (power.isCharging || power.usage >= 30u);
+}
+
 bool HAL::BT_CompanionCanInstall()
 {
-    Power_Info_t power = {};
-    GPS_Info_t gps = {};
-    Power_GetInfo(&power);
-    bool moving = GPS_GetInfo(&gps) && gps.isVaild && gps.speed >= 3.0f;
-    return !companion_busy() && !moving && (power.isCharging || power.usage >= 30u);
+    return !companion_busy() && companion_install_safe();
+}
+
+bool HAL::BT_CompanionInstallPending()
+{
+    const bool busy = companion_busy();
+    companion_control.Poll(millis(), busy);
+    return busy || companion_control.InstallPending(millis());
 }
 
 static bool companion_display_matches(const HAL::CompanionUpdateInfo* displayed)
