@@ -57,6 +57,16 @@ static void Test(const std::string& name)
         f.Hello(); f.control.Check(20); f.Message("STATE", 1, "|CHECKING", 100);
         f.control.Poll(120099, false); require(f.control.Info().checking, "checking wait shortened");
         f.control.Poll(120100, false); require(!f.control.Info().checking, "checking wait unbounded");
+    } else if (name == "starting_timeout") {
+        f.Hello(); f.Offer(); f.control.Choose(true, 20);
+        f.Message("STATE", 0, "|STARTING", 100);
+        f.control.Poll(120100, false);
+        require(f.Status("PHONE_REQUIRED") && !f.control.Info().checking, "failed background start traps the menu");
+        require(f.control.Check(120101), "cannot retry after refused start");
+    } else if (name == "binary_end_recovers_menu") {
+        f.Hello(); f.Offer(); f.control.Poll(20, true); f.control.Poll(30, false);
+        require(f.Status("PHONE_REQUIRED") && !f.control.Info().hasOffer, "binary abort traps the menu");
+        require(f.control.Check(31), "cannot check after binary end");
     } else if (name == "download_timeout") {
         f.Hello(); f.control.Check(20); f.Message("STATE", 1, "|DOWNLOADING", 100);
         f.control.Poll(600099, false); require(f.control.Info().checking, "download wait shortened");

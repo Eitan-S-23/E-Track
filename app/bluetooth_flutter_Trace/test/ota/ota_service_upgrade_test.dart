@@ -403,6 +403,74 @@ void main() {
     } finally { service.didChangeAppLifecycleState(AppLifecycleState.resumed); }
   });
 
+  for (final companionOwned in [false, true]) {
+    test('companion stop ${companionOwned ? 'cancels its own' : 'preserves foreground'} INFO query', () async {
+      final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: []);
+      final service = Get.find<OtaService>();
+      ble.holdInfo = true;
+      final before = ble.getInfoCalls;
+      final query = service.readDeviceInfo('AA:BB',
+        companionRuntimeId: companionOwned ? 'runtime' : null);
+      await waitUntil(() => ble.getInfoCalls > before);
+      expect(service.canCancelTask, isFalse);
+      expect(await service.releaseCompanionTask('wrong-runtime'), isFalse);
+      expect(service.isUpgrading, isTrue);
+      final aborts = ble.abortCalls;
+      if (companionOwned) {
+        expect(await service.releaseCompanionTask('runtime').timeout(const Duration(seconds: 3)), isTrue);
+        expect(await query, isNull);
+        expect(service.deviceInfo, isNull);
+        expect(service.phase, OtaPhase.cancelled);
+      } else {
+        expect(await service.releaseCompanionTask('runtime'), isFalse);
+        expect(ble.abortCalls, aborts);
+        expect(service.isUpgrading, isTrue);
+        ble.releaseHeldInfo();
+        expect(await query, isNotNull);
+      }
+      ble.releaseHeldInfo();
+      expect(service.downloadedFirmwareFile!.existsSync(), isTrue);
+    });
+  }
+
+  test('companion stop cancels its HTTP query and rejects a late result', () async {
+    final adapter = _LifecycleLatestAdapter(latestBody(assetBytes()));
+    final ble = _UpgradeFakeBle(preRebootPayload: preRebootPayload,
+      postRebootPayload: postRebootPayload);
+    final service = makeService(ble: ble, firmwareDir: tempFirmwareDir(), latestAdapter: adapter);
+    Get.put<AppUpdateService>(_FakeAppUpdateService());
+    expect(await service.readDeviceInfo('AA:BB'), isNotNull);
+    final query = service.checkFirmwareUpdate(companionRuntimeId: 'runtime');
+    await adapter.entered.future;
+    expect(service.canCancelTask, isFalse);
+    expect(await service.releaseCompanionTask('runtime').timeout(const Duration(seconds: 3)), isTrue);
+    adapter.release.complete();
+    expect(await query, isNull);
+    expect(service.latestInfo, isNull);
+    expect(service.phase, OtaPhase.cancelled);
+    expect(service.lastCheckWasNoUpdate, isFalse);
+  });
+
+  test('companion retirement waits for END and target identity without ABORT', () async {
+    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+      backgroundClient: _BackgroundOwnerHarness());
+    final service = Get.find<OtaService>();
+    ble.deferFirstEnd = true;
+    final transfer = service.startOtaUpgrade('AA:BB', companionRuntimeId: 'runtime');
+    await ble.firstEndEntered.future;
+    expect(service.canCancelTask, isFalse);
+    var retired = false;
+    final retirement = service.releaseCompanionTask('runtime').then((value) { retired = true; return value; });
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+    expect(retired, isFalse);
+    expect(ble.abortCalls, 0);
+    ble.releaseFirstEnd();
+    expect(await transfer, isTrue);
+    expect(await retirement, isTrue);
+    expect(service.phase, OtaPhase.completed);
+    expect(ble.abortCalls, 0);
+  });
+
   test('lifecycle query INFO completion cannot schedule a transport recovery', () async {
     final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: []);
     final service = Get.find<OtaService>();

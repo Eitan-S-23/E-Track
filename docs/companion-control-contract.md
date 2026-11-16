@@ -23,6 +23,10 @@ The existing foreground-only `acquire(taskKey)` contract remains unchanged.
 - Metadata can use any network. Default automatic package download requires an
   unmetered network; a user setting can relax that policy. A valid immutable
   cached package may be reused only after current device/metadata checks.
+  A persisted ready-package marker causes a recheck/renotification on a new
+  connection even inside the long interval; SHOWN suppresses repeat popups.
+  Legacy endpoints without CAPS stop retrying a successfully prepared package
+  every recovery tick and keep their explicit App route.
 - `acquireCompanion(taskKey, runtimeId)` is an additive entry, not a weakened
   `acquire`. It requires live companion ownership, matching runtime/device token,
   current GATT connection, confirmed association, visible notification capability
@@ -32,6 +36,15 @@ The existing foreground-only `acquire(taskKey)` contract remains unchanged.
   background scans, discard consent and stop cancellable owned work. Applying is
   not falsely advertised as cancellable. A service does not guarantee survival
   of force-stop, revoked permissions, Bluetooth-off or OEM process restrictions.
+  Each query/control/download/transfer records its companion runtime on the
+  existing exclusive owner. `releaseCompanionTask(runtimeId)` cancels that
+  runtime's INFO/latest work even though the UI cancel button is unavailable for
+  queries; it never cancels another runtime or a foreground task. END/apply waits
+  for the existing owner to finish before connection cleanup. Cleanup has a
+  five-minute observation deadline and reports unconfirmed state on timeout,
+  rather than disconnecting during apply. A new wake cannot replace an owner
+  while its stop is settling. Temporary adapter initialization failure does not
+  permanently block native readiness or a later retry.
 - On Android 12+, saved monitored sensor advertisements may be collected for
   8 seconds per minute while a live companion owner is confirmed. The existing
   parser/database are reused; headless startup loads at most 300 recent records
@@ -87,6 +100,9 @@ new-connection target version AND full raw SHA verification, not END ACK.
    permits 120 seconds; DOWNLOADING/VERIFYING permits 600 seconds. Modular uint32
    elapsed time handles tick wrap. Unreachable phone or timeout says open/connect
    the phone, not that firmware is current.
+   STARTING also has a 120-second deadline, so refused background admission cannot
+   strand the MCU menu. Leaving a binary session restores a retryable phone-needed
+   state, never an invented upgrade-success result.
 3. A device request remains distinct from request=0. An App periodic operation
    cannot overwrite an in-flight MCU request; a later idle periodic operation
    correctly resets request correlation to zero. Overlapping App work coalesces
@@ -137,6 +153,12 @@ main controller; missing peripheral protocols remain a recorded capability gap.
   exclusion. The Dart protocol suite checks the same encoding and field bounds.
 - App integration tests must prove no BEGIN on stale/expired consent, including
   expiration during GET_INFO, and no replacement CCCD during an idle control write.
+- `test/companion/companion_runtime_test.dart` drives native channel events into
+  the actual coordinator with injected BLE/OTA dependencies: interval bypass,
+  pending-manual coalescing, failure versus no-update, verified offers, reconnect
+  suppression, one-shot consent and scoped stop. The real OtaService integration
+  suite separately proves own-query cancellation, foreign-query preservation,
+  late HTTP rejection and uninterrupted END/target verification on retirement.
 - CompanionServiceTest exercises real Android Service/PowerManager lifecycle at
   an injected execution boundary. Native admission, platform chooser/permissions,
   real GATT, boot/lock/process recreation and firmware installation still need

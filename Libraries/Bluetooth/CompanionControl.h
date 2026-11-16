@@ -38,6 +38,7 @@ public:
 
     void Poll(uint32_t now, bool binaryActive)
     {
+        bool wasBusy = busy;
         busy = binaryActive;
         if (busy)
         {
@@ -46,6 +47,7 @@ public:
             SetStatus("UPGRADING");
             return;
         }
+        if (wasBusy) SetStatus("PHONE_REQUIRED");
         if (value.hasOffer && (uint32_t)(now - offerTick) >= 300000u)
         {
             value.hasOffer = false; value.prompt = false;
@@ -224,6 +226,7 @@ private:
         {
             const char* state = fields[4];
             if (strcmp(state, "CHECKING") == 0) { value.request = request; Wait(state, now, 120000u); return; }
+            if (strcmp(state, "STARTING") == 0) { value.request = request; value.hasOffer = false; value.prompt = false; Wait(state, now, 120000u); return; }
             if (strcmp(state, "DOWNLOADING") == 0 || strcmp(state, "VERIFYING") == 0)
                 { value.request = request; Wait(state, now, 600000u); return; }
             const char* allowed[] = {"NO_UPDATE", "DEFERRED", "BUSY", "NO_NETWORK", "PHONE_REQUIRED",

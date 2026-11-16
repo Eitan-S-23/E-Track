@@ -32,13 +32,13 @@ class CompanionRuntime extends GetxService {
   StreamSubscription<List<int>>? _text;
   StreamSubscription<BluetoothConnectionState>? _connection;
   StreamSubscription<bool>? _activity;
-  Future<void>? _wakeFlight, _checkFlight, _attachFlight, _choiceFlight;
+  Future<void>? _wakeFlight, _checkFlight, _attachFlight, _choiceFlight, _stopFlight;
   Map<String, dynamic>? _pendingWake;
   CompanionMessage? _pendingChoice;
   int? _pendingDeviceCheck;
   String? _runtime, _revision, _address, _session;
   int _link = -1, _epoch = 0, _lastDeviceRequest = 0;
-  bool _closed = false, _supportsControl = false, _ownsOta = false, _controlDirty = true;
+  bool _closed = false, _supportsControl = false, _controlDirty = true;
   Completer<bool>? _capabilities;
   Completer<bool>? _offerAcknowledged;
   CompanionOffer? _offer;
@@ -62,19 +62,22 @@ class CompanionRuntime extends GetxService {
 
   Future<void> _initialize() async {
     platform.channel.setMethodCallHandler(_handle);
+    _activity = _ota.taskActivity.listen((busy) {
+      if (busy && !_ota.companionTextAllowed) { _decoder.reset(); _controlDirty = true; }
+      if (!busy && _wakeFlight == null && _checkFlight == null && _choiceFlight == null) {
+        if (_pendingChoice != null || _pendingDeviceCheck != null) { _drainWake(); return; }
+        final pending = _pendingWake;
+        if (pending != null) { _pendingWake = null; _queueWake(pending); }
+        else if (_runtime != null) { unawaited(_attachControl()); }
+      }
+    });
     try {
       _preferences = await SharedPreferences.getInstance();
       await _ble.initBluetooth();
-      if (_closed) return;
-      _activity = _ota.taskActivity.listen((busy) {
-        if (busy && !_ota.companionTextAllowed) { _decoder.reset(); _controlDirty = true; }
-        if (!busy && _wakeFlight == null && _checkFlight == null && _choiceFlight == null) {
-          if (_pendingChoice != null || _pendingDeviceCheck != null) { _drainWake(); return; }
-          final pending = _pendingWake;
-          if (pending != null) { _pendingWake = null; _queueWake(pending); }
-          else if (_runtime != null) { unawaited(_attachControl()); }
-        }
-      });
+    } catch (_) { status.value = 'RUNTIME_INITIALIZATION_FAILED'; }
+    if (_closed) return;
+    // A denied/unavailable adapter must not strand the engine's next wake.
+    try {
       await platform.channel.invokeMethod<Object?>('ready');
     } catch (_) { status.value = 'RUNTIME_INITIALIZATION_FAILED'; }
   }
@@ -93,8 +96,9 @@ class CompanionRuntime extends GetxService {
         args['address'] is! String || !RegExp(r'^[0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){5}$').hasMatch(args['address'] as String)) { return false; }
     final wake = Map<String, dynamic>.from(args);
     if (_runtime != wake['runtimeId']) {
-      if (_ota.isUpgrading || _wakeFlight != null || _checkFlight != null || _choiceFlight != null) return false;
+      if (_ota.isUpgrading || _wakeFlight != null || _checkFlight != null || _choiceFlight != null || _stopFlight != null) return false;
       await _stop(disconnect: false);
+      if (_closed || _runtime != null) return false;
       _runtime = wake['runtimeId'] as String;
       _revision = wake['revision'] as String;
       _address = (wake['address'] as String).toLowerCase();
@@ -114,9 +118,10 @@ class CompanionRuntime extends GetxService {
       return;
     }
     late final Future<void> flight;
-    _ownsOta = true;
-    flight = _wake(wake).catchError((Object _) async { await _state('FAILED', busy: false); }).whenComplete(() {
-      _ownsOta = false;
+    final epoch = _epoch;
+    flight = _wake(wake).catchError((Object _) async {
+      if (_current(epoch)) await _state('FAILED', busy: false);
+    }).whenComplete(() {
       if (identical(_wakeFlight, flight)) _wakeFlight = null;
       _drainWake();
     });
@@ -156,16 +161,21 @@ class CompanionRuntime extends GetxService {
 
   Future<void> _wake(Map<String, dynamic> wake) async {
     final epoch = _epoch;
-    final address = _address!;
+    final address = _address!, runtime = _runtime!;
+    _preferences ??= await SharedPreferences.getInstance();
+    if (!_current(epoch)) return;
     await _ble.initBluetooth();
     if (!_current(epoch)) return;
     if (!await _state('CONNECTING', busy: true) || !_current(epoch)) return;
-    if (!_sameLink()) {
+    final reconnecting = !_sameLink();
+    if (reconnecting) {
       _invalidateLink();
-      if (!await _ble.connectCompanionDeviceByAddress(address) || !_current(epoch)) {
+      final connected = await _ble.connectCompanionDeviceByAddress(address);
+      if (!_current(epoch)) return;
+      if (!connected) {
         await _state('DEVICE_OFFLINE', busy: false); return;
       }
-      final info = await _ota.readDeviceInfo(address);
+      final info = await _ota.readDeviceInfo(address, companionRuntimeId: runtime);
       if (!_current(epoch)) return;
       if (info == null) { await _state('DEVICE_IDENTITY_UNAVAILABLE', busy: false); return; }
       _link = _ble.otaLinkGeneration(address);
@@ -196,7 +206,8 @@ class CompanionRuntime extends GetxService {
     final interval = Duration(hours: settings['intervalHours'] as int? ?? 12);
     final manual = wake['reason'] == 'manual';
     final due = DateTime.now().millisecondsSinceEpoch - last >= interval.inMilliseconds;
-    if (manual || wake['checkPending'] == true || wake['reason'] == 'periodic' || due) {
+    final pendingPackage = reconnecting && _preferences!.containsKey('companion_ready_$address');
+    if (manual || wake['checkPending'] == true || wake['reason'] == 'periodic' || due || pendingPackage) {
       await _check(manual ? 'manual' : 'periodic', 0);
     } else {
       await _state(_supportsControl ? 'CONNECTED' : 'DEVICE_CONTROL_UNSUPPORTED', busy: false);
@@ -276,7 +287,7 @@ class CompanionRuntime extends GetxService {
     if (_runtime == null || !_sameLink() || _ota.isUpgrading ||
         (message.kind != 'HELLO' && !_supportsControl)) { return false; }
     final epoch = _epoch;
-    final sent = await _ota.sendCompanionMessage(_address!, message);
+    final sent = await _ota.sendCompanionMessage(_address!, message, companionRuntimeId: _runtime!);
     if (_current(epoch)) await _attachControl();
     return sent && _current(epoch) && _sameLink();
   }
@@ -287,7 +298,11 @@ class CompanionRuntime extends GetxService {
   }
 
   Future<void> manualCheck(String? address) async {
-    if (handles(address)) { await _check('manual', 0); }
+    if (handles(address)) {
+      _queueWake({'runtimeId': _runtime, 'revision': _revision, 'address': _address,
+        'reason': 'manual', 'checkPending': true});
+      await (_wakeFlight ?? _checkFlight ?? _choiceFlight);
+    }
     else { await _ota.checkFirmwareUpdate(); } // Explicit foreground/old-device fallback.
   }
 
@@ -296,30 +311,33 @@ class CompanionRuntime extends GetxService {
     if (pending != null) return pending;
     if (_runtime == null || !_sameLink() || _ota.isUpgrading || _choiceFlight != null) return Future.value();
     late final Future<void> flight;
-    _ownsOta = true;
+    final epoch = _epoch;
     flight = _prepare(source, request).catchError((Object _) async {
+      if (!_current(epoch)) return;
       await _deviceState('FAILED', request);
       await _state('FAILED', busy: false);
-    }).whenComplete(() { _ownsOta = false; if (identical(_checkFlight, flight)) _checkFlight = null; _drainWake(); });
+    }).whenComplete(() { if (identical(_checkFlight, flight)) _checkFlight = null; _drainWake(); });
     _checkFlight = flight;
     return flight;
   }
 
   Future<void> _prepare(String source, int request) async {
     final epoch = _epoch, generation = _link;
-    final address = _address!;
+    final address = _address!, runtime = _runtime!;
     _offer = null;
     await _deviceState('CHECKING', request);
     if (!await _state('CHECKING', busy: true) || !_current(epoch)) return;
-    final info = await _ota.readDeviceInfo(address);
+    final info = await _ota.readDeviceInfo(address, companionRuntimeId: runtime);
     if (!_current(epoch)) return;
     if (info == null) { await _deviceState('INCOMPATIBLE', request); await _state('DEVICE_IDENTITY_UNAVAILABLE', busy: false); return; }
     if (!_sameLink() || _link != generation) return;
     await _preferences!.setInt('companion_attempt_$address', DateTime.now().millisecondsSinceEpoch);
-    final latest = await _ota.checkFirmwareUpdate();
+    if (!_current(epoch) || !_sameLink()) return;
+    final latest = await _ota.checkFirmwareUpdate(companionRuntimeId: runtime);
     if (!_current(epoch) || !_sameLink()) return;
     if (latest == null) {
       final noUpdate = _ota.lastCheckWasNoUpdate;
+      if (noUpdate) await _preferences!.remove('companion_ready_$address');
       await _attachControl();
       await _deviceState(noUpdate ? 'NO_UPDATE' : 'FAILED', request);
       await _state(noUpdate ? 'NO_UPDATE' : 'CHECK_FAILED', busy: false, checkFinished: noUpdate);
@@ -334,10 +352,8 @@ class CompanionRuntime extends GetxService {
     await _attachControl();
     if (_ota.verifiedPackageSha256 == null) {
       await _deviceState('DOWNLOADING', request);
-      _ownsOta = true;
-      bool downloaded;
-      try { downloaded = await _ota.downloadFirmware(companionRuntimeId: _runtime); }
-      finally { _ownsOta = false; }
+      if (!_current(epoch) || !_sameLink()) return;
+      final downloaded = await _ota.downloadFirmware(companionRuntimeId: runtime);
       if (!_current(epoch)) return;
       if (!downloaded) {
         await _attachControl(); await _deviceState('FAILED', request);
@@ -349,6 +365,8 @@ class CompanionRuntime extends GetxService {
     final verified = _ota.latestInfo;
     if (verified == null || verified.asset == null || verified.versionCode == null || verified.targetImageSha256 == null ||
         verified.asset!.sha256 != _ota.verifiedPackageSha256) { return; }
+    await _preferences!.setString('companion_ready_$address', verified.asset!.sha256);
+    if (!_current(epoch) || !_sameLink()) return;
     final offer = CompanionOffer(session: _session!, request: request, id: _nonce(),
       address: address, linkGeneration: _link, identity: _identity(info),
       version: verified.versionCode!, packageSha: verified.asset!.sha256,
@@ -367,13 +385,16 @@ class CompanionRuntime extends GetxService {
     }
     if (identical(_offerAcknowledged, acknowledged)) _offerAcknowledged = null;
     if (!_current(epoch)) return;
-    await _state(sent ? 'READY_AWAITING_DEVICE_CHOICE' : 'READY_OPEN_APP', busy: false, checkFinished: sent);
+    await _state(sent ? 'READY_AWAITING_DEVICE_CHOICE' : 'READY_OPEN_APP', busy: false, checkFinished: sent || !_supportsControl);
   }
 
   Future<void> _choose(CompanionMessage message) {
     if (_choiceFlight != null) return _choiceFlight!;
     late final Future<void> flight;
-    flight = _acceptChoice(message).catchError((Object _) async { await _state('UPGRADE_FAILED', busy: false); })
+    final epoch = _epoch;
+    flight = _acceptChoice(message).catchError((Object _) async {
+      if (_current(epoch)) await _state('UPGRADE_FAILED', busy: false);
+    })
       .whenComplete(() { if (identical(_choiceFlight, flight)) _choiceFlight = null; _drainWake(); });
     _choiceFlight = flight;
     return flight;
@@ -389,13 +410,13 @@ class CompanionRuntime extends GetxService {
       await _deviceState('DEFERRED', offer.request);
       await _state('DEFERRED', busy: false); return;
     }
-    final epoch = _epoch;
-    _ownsOta = true;
+    final epoch = _epoch, runtime = _runtime!;
     try {
       await _deviceState('CHECKING', offer.request);
-      final info = await _ota.readDeviceInfo(offer.address);
+      if (!_current(epoch) || !_sameLink()) return;
+      final info = await _ota.readDeviceInfo(offer.address, companionRuntimeId: runtime);
       if (!_current(epoch) || !_sameLink() || _link != offer.linkGeneration || info == null || _identity(info) != offer.identity) return;
-      final latest = await _ota.checkFirmwareUpdate();
+      final latest = await _ota.checkFirmwareUpdate(companionRuntimeId: runtime);
       if (!_current(epoch) || !_sameLink() || _link != offer.linkGeneration || !DateTime.now().isBefore(offer.expiresAt) ||
           latest?.versionCode != offer.version || latest?.asset?.sha256 != offer.packageSha ||
           latest?.targetImageSha256 != offer.targetSha || _ota.verifiedPackageSha256 != offer.packageSha) {
@@ -403,19 +424,23 @@ class CompanionRuntime extends GetxService {
       }
       await _attachControl();
       if (!await _send(CompanionMessage('STATE', offer.session, offer.request, ['STARTING']))) return;
-      final success = await _ota.startOtaUpgrade(offer.address, companionRuntimeId: _runtime,
+      if (!_current(epoch) || !_sameLink()) return;
+      final success = await _ota.startOtaUpgrade(offer.address, companionRuntimeId: runtime,
         consent: OtaUpgradeConsent(address: offer.address, linkGeneration: offer.linkGeneration,
           baseImageSha256: info.currentImageSha256Hex, versionCode: offer.version,
           packageSha256: offer.packageSha, targetImageSha256: offer.targetSha,
           expiresAt: offer.expiresAt));
-      if (_current(epoch)) await _state(success ? 'TARGET_IDENTITY_VERIFIED' : 'UPGRADE_FAILED', busy: false);
-    } finally { _ownsOta = false; _drainWake(); }
+      if (_current(epoch)) {
+        if (success) await _preferences!.remove('companion_ready_${offer.address}');
+        await _state(success ? 'TARGET_IDENTITY_VERIFIED' : 'UPGRADE_FAILED', busy: false);
+      }
+    } finally { _drainWake(); }
   }
 
   Future<bool> _state(String value, {required bool busy, bool checkFinished = false}) async {
-    status.value = value;
     final runtime = _runtime, address = _address;
     if (runtime == null || address == null) return false;
+    status.value = value;
     var accepted = false;
     try {
       accepted = await platform.channel.invokeMethod<bool>('state', {'runtimeId': runtime, 'revision': _revision,
@@ -430,18 +455,41 @@ class CompanionRuntime extends GetxService {
     return accepted;
   }
 
-  Future<void> _stop({bool disconnect = true}) async {
-    final address = _address;
+  Future<void> _stop({bool disconnect = true}) {
+    final pending = _stopFlight;
+    if (pending != null) return pending;
+    late final Future<void> flight;
+    flight = _stopNow(disconnect: disconnect).whenComplete(() {
+      if (identical(_stopFlight, flight)) _stopFlight = null;
+    });
+    _stopFlight = flight;
+    return flight;
+  }
+
+  Future<void> _stopNow({required bool disconnect}) async {
+    final address = _address, runtime = _runtime;
     _runtime = null; _revision = null; _address = null; _epoch++;
+    final epoch = _epoch;
     _telemetryTimer?.cancel(); _telemetryTimer = null;
     _ble.companionOwnerChanged(null);
     _pendingWake = null;
     _invalidateLink();
-    await _text?.cancel(); _text = null;
-    await _connection?.cancel(); _connection = null;
-    if (_ownsOta && _ota.canCancelTask) await _ota.cancelCurrentTask(keepPackage: true);
-    if (disconnect && address != null && !_ota.isUpgrading) await _ble.disconnectCompanionDeviceByAddress(address);
-    status.value = 'STOPPED';
+    final text = _text; _text = null;
+    final connection = _connection; _connection = null;
+    await text?.cancel();
+    await connection?.cancel();
+    if (disconnect && address != null && runtime != null) {
+      status.value = 'STOPPING_TASK';
+      try {
+        final released = await _ota.releaseCompanionTask(runtime).timeout(const Duration(minutes: 5));
+        if (epoch != _epoch || _runtime != null) return;
+        if (released && !_ota.isUpgrading) await _ble.disconnectCompanionDeviceByAddress(address);
+      } catch (_) {
+        if (epoch == _epoch) status.value = 'STOP_CLEANUP_UNCONFIRMED';
+        return;
+      }
+    }
+    if (epoch == _epoch) status.value = 'STOPPED';
   }
 
   @override

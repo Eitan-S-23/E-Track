@@ -280,6 +280,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   Completer<void>? _foregroundGate;
   int _recoveryEpoch = 0;
   _OtaOperation? _operation;
+  String? _companionTaskRuntime;
   bool _downloadStoppedForBackground = false;
   String? _taskDeviceAddress;
   String? _lastSnapshotPhase;
@@ -466,6 +467,20 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     // Recheck after a notification/dialog was displayed; END may have started.
     if (!canCancelTask) return;
     await cancelUpgrade(keepPackage: keepPackage);
+  }
+
+  /// Retire only this companion's owner. END/apply must finish, not be aborted.
+  Future<bool> releaseCompanionTask(String runtimeId) async {
+    final epoch = _ownerEpoch;
+    if (isUpgrading) {
+      if (_companionTaskRuntime != runtimeId) return false;
+      if (_operation == _OtaOperation.query || canCancelTask) {
+        await cancelUpgrade(keepPackage: true);
+      } else {
+        await _ownerDone;
+      }
+    }
+    return _ownerEpoch == epoch && !isUpgrading;
   }
   final int _senderWindowSegments;
   final bool _enablePipeline;
@@ -681,7 +696,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
 
   // ---- 设备身份（GET_INFO） ----
 
-  Future<bool> sendCompanionMessage(String address, CompanionMessage message) async {
+  Future<bool> sendCompanionMessage(String address, CompanionMessage message,
+      {String? companionRuntimeId}) async {
     if (isUpgrading || !hasCurrentDeviceIdentity(address)) return false;
     final bytes = Uint8List.fromList(message.encode());
     _writingCompanionControl = true;
@@ -711,7 +727,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           await idleNotifications.close();
           if (identical(_transport, transport)) _transport = null;
         }
-      }) ?? false;
+      }, companionRuntimeId: companionRuntimeId) ?? false;
     } catch (_) { return false; }
     finally { _writingCompanionControl = false; }
   }
@@ -725,7 +741,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   ///
   /// 升级族互斥（RC3-04）：非升级期间与其他入口经同一 owner 锁串行，
   /// 并发 readDeviceInfo 不得互相 dispose 对方的 transport。
-  Future<DeviceOtaInfo?> readDeviceInfo(String deviceAddress) async {
+  Future<DeviceOtaInfo?> readDeviceInfo(String deviceAddress,
+      {String? companionRuntimeId}) async {
     if (_isUpgrading.value) {
       // 升级进行中禁止重建 transport：_bindTransport 会 dispose
       // 在途 transport，打断传输（RC2-04）。返回现有快照。
@@ -836,7 +853,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         stats?.emitSummary();
         await OtaDiagnostics.current.captureNativeWrites();
       }
-    });
+    }, companionRuntimeId: companionRuntimeId);
   }
 
   // ---- 检查更新（latest schema v2） ----
@@ -848,7 +865,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   ///
   /// 入口互斥（RC3-04）：与其他升级族入口经同一 owner 锁串行；取消
   /// 代次贯穿 latest 重试与发布，取消后不发布旧状态。
-  Future<FirmwareLatestInfo?> checkFirmwareUpdate({String? channel}) async {
+  Future<FirmwareLatestInfo?> checkFirmwareUpdate({String? channel,
+      String? companionRuntimeId}) async {
     _lastCheckWasNoUpdate = false;
     if (_isUpgrading.value) {
       _notify('提示', '升级流程进行中，请先取消或等待完成');
@@ -885,7 +903,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       if (generation != _cancelGeneration) return null;
       return _checkLatestLocked(info, appVersionCode, channel,
           generation: generation);
-    });
+    }, companionRuntimeId: companionRuntimeId);
   }
 
   /// latest 查询主体（入口互斥/闭锁/身份检查已由调用方完成，RC2-04）。
@@ -1094,7 +1112,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         }
       }
       return downloaded ?? false;
-    }, operation: _OtaOperation.download) ?? false;
+    }, operation: _OtaOperation.download, companionRuntimeId: companionRuntimeId) ?? false;
   }
 
   bool _needsFreshManifest = false;
@@ -1904,7 +1922,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           await diagnostics.finishUpgrade(completed: diagnosticCompleted);
         }
       }
-    }, operation: _OtaOperation.transfer) ?? false;
+    }, operation: _OtaOperation.transfer, companionRuntimeId: companionRuntimeId) ?? false;
   }
 
   /// 消费一次 failClosed 已决终止（RC3-08/12②）。代次未变但在途写在
@@ -2350,7 +2368,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   ///   [cancelUpgrade] 才发布 cancelled 状态，避免晚到的旧状态
   ///   覆盖取消终态。
   Future<T?> _runExclusive<T>(Future<T?> Function(int generation) body,
-      {_OtaOperation operation = _OtaOperation.query}) async {
+      {_OtaOperation operation = _OtaOperation.query, String? companionRuntimeId}) async {
     if (_isUpgrading.value) {
       _notify('提示', '操作进行中，请先取消或等待完成');
       return null;
@@ -2362,6 +2380,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     final epoch = _ownerEpoch;
     _ownerDone = done.future;
     _operation = operation;
+    _companionTaskRuntime = companionRuntimeId;
     _foregroundPaused = false;
     _downloadStoppedForBackground = false;
     ++_recoveryEpoch;
@@ -2390,6 +2409,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         if (!done.isCompleted) done.complete();
         if (identical(_ownerDone, done.future)) {
           _ownerDone = null;
+          _companionTaskRuntime = null;
           _isUpgrading.value = false;
         }
         releaseReconnect?.call();
