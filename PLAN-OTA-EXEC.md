@@ -60,6 +60,38 @@
 - 当前主线之外的 App/后台修复及 P51 准备、原始证据入口和剩余工作，统一见 [本轮项目收尾记录](docs/ota-exec-notes/PROJECT-CLOSEOUT-2026-11-15.md)。浏览器通知问题已由用户确认与 VPN 有关，不再排查；网页图标仍按用户决定暂缓，不启用付费 Access 定制。
 - 下文历史日志、冻结派单矩阵及旧失败记录保留其原始边界；本节是当前执行进展，不以文档汇总替代正式验收或新增授权。
 
+### APP-ADMIN-UX-01
+
+状态: 安装包已入库、源码与 Worker 已交付；页面上线待恢复部署登录 ｜ 认领: Codex root / 2026-11-17
+
+- 用户已要求开始执行汇总的 App 与后台改进：主页权限入口、公告自动提醒/发布时间/置顶、公告与每日升级弹窗协调、后台公告编辑弹窗、Android/Windows/iOS 分类、版本批量删除、通知中心删除，以及进行中任务的取消/取消并重新触发图标按钮。
+- 所有新增界面沿用现有设计与组件；图标支持触屏长按、鼠标悬停、键盘聚焦提示，长按松手不执行操作。真实取消未确认前不得重新触发，旧任务已成功则直接展示结果。
+- 已发布 App 基线为 `b15017a30413e5bf10ea32a19008503c8bd922ae`（1.0.78 / 104）。保留主目录和分发工作区现有未提交改动，不混入本批；不动固件、不重做已成功差分包。
+- 实施分支 `dev/flutter/app-admin-ux-20261117` 已推送 `80cf8a26`；本地接口回归 493 项、完整浏览器回归 244 项通过。最终 App CI `43964808676` 通过（Linux 905 通过/16 跳过，Windows 858 通过/63 跳过，各另有 8 项候选用例）；后台 CI `43964809804` 通过（451 项原生 Worker、公共 Pages 检查及 244 项页面用例）。本地 493 项含 42 项 host-only，不冒充全部原生执行。
+- 原签名 `1.0.79+105`（`59131a3e`）已通过 E-Track `43968850096` 与原 Trace `43969069993`：Android APK、Windows EXE/ZIP、签名检查及 R2 回读/候选入库均成功；固件构建跳过。后台实际存在 `rel_trace_android_v1_0_79`，APK 与清单为 available。未发布 Beta/Stable 通道，未安装设备或生成新差分。
+- App/后台及必要支持文件已按精确源码交付 main `304d01f5`，未带入发布分支的无关固件和冻结证据。迁移 `0014_admin_ux.sql` 已应用一次并回读；原 Worker `54ad084f-1bc3-41a8-bcad-cdc28ff536d4` 已部署，绑定、通道和既有 29 条差分任务保持不变。主线交付复用相同输入的成功 CI/安装包，不重复打包。
+- 管理页面与 Public Pages 仍未部署新版本：原页面 HTML 尚旧，Public iOS 公告接口仍返回 400；Worker 三平台公告接口均为 200。原组织 SSO 和后台 owner 登录已实测正常，但 Pages 部署 OAuth 续期失败；CI 凭据的 Pages 管理接口返回 403。需用户在电脑浏览器恢复部署登录，已发送的首次有效链接等待超时，不能当作授权完成。
+- 需求、原始失败、已交付项和剩余登录步骤见 [本批记录](docs/ota-exec-notes/APP-ADMIN-UX-01.md#authorized-delivery-2026-11-17)。不把候选入库或 Worker 部署当作整批页面已上线；iOS 分类不等于已具备 iOS 包发布能力。
+
+### ADMIN-ACTION-CONTROLS-01
+
+状态: 已随 APP-ADMIN-UX-01 完成实现/测试并交付 main，管理页面上线待部署登录 ｜ 更新: 2026-11-17
+
+- 最新结果: 用户收到生成成功通知后，回读确认原 run `43932189981/1` 已于 `2026-11-16T19:44:02Z` 成功完成。完整名称现为 `delta:delta_6d3de600d36d64b0660507158efc01315842eb69f22b4a14e66b23c677d31b90:1`，严格对应原后台任务和 attempt 1，不是重新提交。Android job 于 `19:42:55Z` 启动，等待约 57 分 22 秒、实际执行约 67 秒。之前的 queued / 零 job / 409 是当时真实快照，不证明永久卡死或提交失败；人工作废建议过早。用户曾同意一次性恢复，随后明确叫停并报告成功，尚未执行任何恢复写入，该操作现已撤回，不得沿用此前同意再终止此任务。无需重试；功能需求仍待办。新原件为 `.cache/app-companion-distribution-20261117/keyring-run-43932189981-02/run.json`，本次未改后台状态、未再次取消或触发任务。
+- 后续实施: 用户已在 APP-ADMIN-UX-01 授权统一实现；图标、长按提示、真实取消及取消确认后重触发的实现/回归均已交付 main。以下诊断与授权范围保留当时含义，不构成再次处理成功 run `43932189981/1` 的权限。
+- 原始登记时的用户决定: 先处理当前卡住的任务，需求仅登记，留待后续统一实现；当时不开发按钮、不重新触发任务。
+- 需求: 后台每个未结束的 Actions 任务（含 App/MCU 差分包，覆盖排队中和执行中）均提供“取消任务”和“取消并重新触发”两个按钮。执行中的任务取消前提示会中断当前进度；取消/提交期间禁用按钮，防止重复请求。
+- 行为: 必须实际取消对应 GitHub run，不能只修改界面状态；确认旧任务已取消后，才用原参数创建并关联新一次任务。若旧任务在取消期间已经完成，应展示原结果，不再生成；取消失败或结果不确定时，禁止启动新任务，并明确显示尚未停止。
+- 保留边界: 保留历史、已有 APK 和差分产物；不借此重建 App、发布通道或绕过权限。后续实现由后台负责人统一安排，本条不授予实施或发布权限。
+- 本次取消未成功: 对 `Eitan-S-23/Trace` 的 `admin-delta-build.yml` run `43932189981/1` 分别发送一次普通取消和一次强制取消，GitHub 均返回 HTTP 409；强制取消原文为 `Cannot cancel a workflow run that has not been queued yet.`。最终回读 `2026-11-16T19:16:56.685Z` 仍为 `queued`、`conclusion=null`，未确认停止，仍可能自行启动。没有创建替代任务，也未改写后台数据库或声称后台显示已同步；具体平台原因尚未确定。
+- 原件: `.cache/app-companion-distribution-20261117/keyring-cancel-43932189981-01/` 和 `.cache/app-companion-distribution-20261117/keyring-force-cancel-43932189981-01/`，含实际目标、请求意图、拒绝响应及最终回读。后续应覆盖此类“显示排队但取消被拒绝”的失败场景，不得把拒绝当作取消成功。
+- 2026-11-17 继续排查: 原后台实际未结束任务只有 Android `103 -> 104` 的 `delta_6d3de600d36d64b0660507158efc01315842eb69f22b4a14e66b23c677d31b90`，attempt 1、revision 1、`queued`、`run_id=null`。数据库记录在 `18:45:32Z` 创建、`18:45:34Z` 更新，唯一活跃的同仓库/分支/源码 GitHub run 在 `18:45:33Z` 创建。时间与来源吻合，但没有正式 run ID 绑定，不能把相关性写成已完成的严格关联。四项实际 D1 SELECT 均为 `rows_written=0`、`changed_db=false`。
+- GitHub 卡点: 截至 `2026-11-16T19:34:33.950Z`，run 及 check suite 仍为 queued，零 job、零 check run、无待审批项，名称仍是工作流默认名而非 `delta:<job>:<attempt>`。Actions 与工作流处于启用状态，分支仍绑定 `8f6d2ab6`；该相同源码此前 13 次差分 dispatch 均成功，最近 `43624997400` 从提交到完成约 53 秒。当前卡在执行步骤建立之前，没有开始下载、计算或校验这次差分，不是一次已执行的 App 编译失败。
+- 后台为何无法退出等待: `delta_jobs.ts` 的 dispatch 收到 GitHub HTTP 204 就记 queued，并不代表执行器已接手；`delta_run_status.ts` 与 reconcile 均要求完整的 `delta:<job>:<attempt>` 名称进行严格关联。实际状态缓存为 `ci_pending / CI_RUN_NOT_FOUND`、`runUrl=null`，执行器没有认领或结果回写；现有 reconcile 找不到唯一关联时不改变业务状态，retry 又只允许已知 failed，没有覆盖这种长期未关联状态的恢复入口。不得通过“同分支最新 run”或仅时间接近放宽绑定。
+- 仍未证实的触发原因: GitHub 内部为何未推进本次运行，公开接口没有给出原因。当天 Actions 启动延迟事件已于 `16:26:26Z` 宣布恢复，早于本次创建，不能直接归因于该事件。当前用量 API 可读，但不证明账户剩余额度或无硬限制；旧 Actions 账单入口返回 410，所查预算入口返回 404，不据此推断额度耗尽、凭证缺失或全站故障。
+- 待改进补充: 除两个按钮外，还需设计“提交已接受但长时间未关联 / 取消被拒绝”的明确提示及安全恢复，并保证迟到的旧执行不能覆盖新尝试。当前仅登记，未实施作废、放宽关联、重新触发或数据库改写。诊断原件同目录下 `keyring-delta-queue-02/`、`keyring-delta-diagnose-01/diagnosis.json`、`keyring-delta-backend-02/backend-state.json`、`keyring-delta-provider-01/provider.json`；本机受保护凭证直接读取失败原件 `keyring-delta-backend-01/` 保留，后续复用既有 SU 只读通道成功，未改 ACL 或凭证。
+- 记录交付: 原诊断阶段为 `LOCAL_PENDING`；本次随 APP-ADMIN-UX-01 一并交付主看板和索引。历史执行结果、成功任务与原有验收结论不变。
+
 **人工配合点总览(排期时预留)**:
 - git 提交/推送确认:PRE-4 及各阶段收口;
 - CF Secrets 与 `firmware-production` environment 审批人配置:P4-4;
@@ -889,7 +921,7 @@
 
 <a id="app-companion-01"></a>
 #### APP-COMPANION-01 E-Track 后台伴侣运行、OTA 交互与基础体验完善
-状态: 进行中 ｜ 认领: Codex(当前主会话兼实现者) / 2026-11-16 ｜ 更新: 2026-11-16(开发分支 3028a057 已补 T01/T02：11 项真实权限页面、15 项无页面采集/持久化测试，新增原生集成 43 次执行；双平台全量检查和全部 70 项原生测试通过，被动调试 APK、标准 APK/EXE 构建及实际产物核对通过。原始失败保留，等待原独立审核人复核本批；R01-R05 已识别源码问题均独立关闭，不重复整改。D0-D5、整卡验收及产品主线合入未完成，未枚举或操作设备)
+状态: 进行中 ｜ 认领: Codex(当前主会话兼实现者) / 2026-11-16 ｜ 更新: 2026-11-17(原独立复核已核对 3028a057 的 15 文件差异和 116 份原件；T01/T02 主机测试缺口及 CDM 地址/清理源码问题关闭，无新阻断发现。R01-R05 保持源码关闭。D0-D5、整卡正式验收和产品主线合入未完成，C1-C6 不勾选；本次复核记录 LOCAL_PENDING，未提交推送，未新增设备操作)
 - 唯一 Spec: [prompt-APP-COMPANION-01.md](docs/ota-prompts/prompt-APP-COMPANION-01.md)。本卡统一维护状态和完成勾选，不拆子卡、不增加阶段分母。
 - 开工前置: 保护旧改动、恢复根目录主线、入口检查及 Spec 纠偏统一在本卡记录；不另建治理卡。实现基线为已核对的 main，不使用归档工作区或 P3-8 预审版本代替当前产品。
 - 复用: P3-8-v5 和 P3-5-v5 已完成，P4 为既有完成基础；只补新增能力和受影响回归，不重开历史任务，不改变 P1/P5 剩余要求或生产发布门槛。
@@ -900,7 +932,8 @@
 - [ ] C5 接入用户选定的 `generated-images/29.png`，适配平台图标并保持应用身份。
 - [ ] C6 受影响自测、必要构建、获准设备验证及非实现会话独立验收。
 - 记录与原件索引: [APP-COMPANION-01.md](docs/ota-exec-notes/APP-COMPANION-01.md)。自测、构建、现场观测、独立验收和主线交付分别报告，不以目录迁移或静态检查勾选产品完成。
-- 当前验证: `3028a0570bdbc1ed115b8de92bfde47933d1dd4c` 的全量检查 `43873348049`、被动调试/原生 `43873444657` 均通过：Linux 1025/16 skipped，Windows 978/63 skipped，另各 11 项候选测试；15 项移动适配器采集测试在 Windows 明确跳过。原生三套 XML 为 70/70，其中新增 43 次覆盖 API 26/31/34。标准 APK/EXE `43875796816` 通过，发布/部署均跳过；完整日志、三个归档及实际包哈希已取回。下载超时、部分文件及受校验续传原件保留，未为取证重跑 CI。复用输入未变的 build-09（465 条含警告行、0 错误、Boot 增量）与原独立 42 项 MCU 主机结果，不复用旧原生 27 项替代本批执行。新发现并修复 CDM 过滤器地址大小写/失败清理边界；全部 T01/T02 源码与自测待独立复核。Cryptnet 归因未决，不清理、不声称零原生外部写入；C1-C6 不勾选。
+- 后续 App 交付（2026-11-17）: 已发布 1.0.78 的 App 基线及本次 UX 改动随 `304d01f5` 有界交付 main，1.0.79 原签名包已入库；不含未交付固件历史，不等于本卡固件/整卡集成完成，也不把 3028a057 的独立复核扩展为新版本整卡验收。旧复核记录本次一并交付，D0-D5、C1-C6 仍未关闭。
+- 当前验证: `3028a0570bdbc1ed115b8de92bfde47933d1dd4c` 的全量检查 `43873348049`、被动调试/原生 `43873444657` 均通过：Linux 1025/16 skipped，Windows 978/63 skipped，另各 11 项候选测试；15 项移动适配器采集测试在 Windows 明确跳过。原生三套 XML 为 70/70，其中新增 43 次覆盖 API 26/31/34。标准 APK/EXE `43875796816` 通过，发布/部署均跳过；完整日志、三个归档及实际包哈希已取回。下载超时、部分文件及受校验续传原件保留，未为取证重跑 CI。复用输入未变的 build-09（465 条含警告行、0 错误、Boot 增量）与原独立 42 项 MCU 主机结果，不复用旧原生 27 项替代本批执行。2026-11-17 独立复核确认 T01/T02 主机测试缺口及 CDM 过滤器地址大小写/失败清理源码问题关闭；不替代 D0-D5 真机义务。Cryptnet 归因未决，不清理、不声称零原生外部写入；C1-C6 不勾选。
 
 - R03 批次历史验证: `f463649fc0a71945bff36c3ec57cbaecbd0fa9ef` 的全量 CI `43829923594` 通过（Linux 999/16 skipped，Windows 967/48 skipped，另各 11 项候选测试），两端完整日志已归档；新增 16 项回归，含 Linux 实际执行的 8 项真实 uncached writer 服务场景。首次修复批次 `15faa55c` 的夹具编译失败保留于 `43829000008`，后继只改两处夹具。新被动调试 APK `43830892509`、标准 APK/EXE `43830974185` 均通过并完成实际文件/哈希核对，不发布/部署。MCU/模拟器/原生输入未变，复用 build-09（465 条含警告行、0 错误、Boot 增量产物）、独立复跑的 42 项主机回归和 `43779455252` 的 27 项原生原件，不冒充本轮执行。`final-write-audit-08.json` 核对新源码、四份全量日志和产物，保留 Windows 再生头文件的纯换行差异及核对脚本修正原件；Cryptnet 时间戳归因仍未决，不清理、不声称零原生外部写入。历史 USB 枚举不代表当前连接状态；C1-C6 不勾选。
 
@@ -915,6 +948,8 @@
 - Independent R03 closure: CLOSED on `f463649f` for the identified source defect; no new blocking finding in the 11-file delta. The original reviewer verified actual dispatch/timeout/pause boundaries, real-writer regressions and 84 source/log/artifact originals without replaying successful CI or device work. R01-R05 are source-closed, but T01/T02, D0-D5 and formal whole-card acceptance remain open/NOT_RUN. [Independent closure and evidence boundaries](docs/ota-exec-notes/APP-COMPANION-01.md#independent-r03-closure-f463649f). [Root-owned documentation delivery and next implementation batch](docs/ota-exec-notes/APP-COMPANION-01.md#root-owned-review-delivery-2026-11-16) do not integrate product code or sign off C1-C6.
 
 - T01/T02 implementation handoff: the 15-file `f463649f..3028a057` delta has real-path permission, headless integration and persistence-failure coverage with full source-matched self-tests and packages. [Exact source, original results and next owner](docs/ota-exec-notes/APP-COMPANION-01.md#t01t02-source-and-self-test-handoff). This closes the implementation's missing-test work, not independent review, D0-D5 or whole-card acceptance. Root delivers only the board/note/index; product main integration remains pending.
+
+- Independent T01/T02 review (2026-11-17): host-coverage gaps and AC01-T02-NATIVE-01 source defect CLOSED on `3028a057`, no new blocking finding in the 15-file delta. Independently checked 116 originals, four full host results, all 70 native executions, three archives, five package files and actual passive kernel constants, without rerunning CI/build/device work. [Disposition, limits and next owner](docs/ota-exec-notes/APP-COMPANION-01.md#independent-t01t02-review-3028a057). D0-D5 and formal whole-card acceptance remain NOT_RUN; next D0 needs the known phone connected/unlocked, not an unchanged absent-device probe. Board/note/index are LOCAL_PENDING; no commit/push/product merge.
 
 ## 9. 契约变更登记表(回审通道)
 
@@ -969,6 +1004,16 @@
 | 2026-10-19 | P4-4 / Codex root / `P44-CREDENTIAL-01` | 新链两项产品整改与 Worker 部署已完成，但严格桶凭据的 account-owned/user-owned 创建 POST 均返回 403/9109，最终十项只读核对仍缺四个 S3 secrets | 保持两套独立桶限定 Object Read and Write，不替换旧 CI/provisioning token、不扩大权限；由 O1 直接配置或提供受保护来源与脱敏范围/有效期 | 按 §0.6 必需外部依赖缺失置阻塞；独立预审 10/10 和非发布 CI 通过不等于正式 PASS。保留实际部署异常/恢复和外部缓存未决；root 待凭据后冻结并组织新链/真实 reviewer 观测，gate=false，正式轮次零，未改 main | 已登记/外部凭据阻塞 |
 
 ## 10. 会话日志(每会话一行:日期 ｜ agent ｜ 动了哪些卡 ｜ 一句话结果)
+
+- 2026-11-17 | Codex root | APP-ADMIN-UX-01 交付 | 原签名 1.0.79+105 APK/Windows 包成功，原后台候选和 R2 回读确认；精确 App/后台源码交付 main 304d01f5，0014 迁移及 Worker 部署完成，既有通道/差分任务不变。Admin/Public 页面仍待恢复 Cloudflare 部署登录，正常后台 owner 登录已验证；无新差分、通道发布或设备操作。记录并保留旧独立复核及所有失败原件。
+
+- 2026-11-17 | Codex root | ADMIN-ACTION-CONTROLS-01 需求仍待办，原差分任务已成功 | 用户叫停人工恢复并报告成功通知。只读确认原 `43932189981/1` 在等待约 57 分钟后自行启动，67 秒完成，完整标题严格对应原 job / attempt 1。此前未运行是时间快照，不是提交失败或永不运行；撤回未执行的人工终止，无后台写入或重新触发，记录 LOCAL_PENDING。
+
+- 2026-11-17 | Codex root | ADMIN-ACTION-CONTROLS-01 待办 | 只读核对原后台 103 -> 104 任务、GitHub 同源 13 次历史成功及本次零执行步骤状态，定位到 GitHub 启动前卡住和后台长期未关联状态缺少恢复入口；内部触发原因与账户硬限制仍未获证实。四项 D1 SELECT 零业务写入，未再次取消、重新触发、修改产品或提交推送；在原待办补充安全恢复要求。
+
+- 2026-11-17 | Codex root | ADMIN-ACTION-CONTROLS-01 待办 | 按用户要求取消 Trace 差分包任务 `43932189981/1`；普通取消和强制取消均被 GitHub 以 409 拒绝，最终仍为 queued，未成功取消、未重新触发。登记每个进行中任务的取消/取消并重新触发按钮及失败处理需求，留待统一实现；仅本地记录，未提交推送或修改产品。
+
+- 2026-11-17 | Codex original non-implementation reviewer | APP-COMPANION-01 remains in progress | T01/T02 host-coverage gaps and CDM address/cleanup source defect CLOSED on `3028a057` after bounded source review and independent checks of 116 originals. Four full host results, 70 native executions, three archives and actual packages verified; no new product test/build/device run. D0-D5, formal whole-card acceptance and product main integration remain outstanding. Three review documents LOCAL_PENDING, no commit/push; no external cleanup, Cryptnet attribution unresolved.
 
 - 2026-11-16 | Codex root/implementation | APP-COMPANION-01 remains in progress | T01/T02 source `3028a057` adds 11 setup and 15 headless telemetry cases plus 43 native integration executions. Full dual-host checks, 70/70 native tests and nonpublishing APK/EXE verification pass; complete originals/packages and failed retrievals are retained. New CDM address/cleanup repair and the coverage batch await the original independent reviewer. R01-R05 remain source-closed; no device operation, whole-card PASS, product main merge or external cleanup. Only root progress records are delivered; Cryptnet attribution remains unresolved.
 

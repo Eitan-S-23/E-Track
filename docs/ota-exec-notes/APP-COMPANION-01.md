@@ -1,5 +1,22 @@
 # APP-COMPANION-01 Implementation Record
 
+## Current Independent Review, 2026-11-17
+
+The original non-implementation review resumes on `3028a057`. The 15-file
+T01/T02 delta and 116 original source/log/artifact files have been independently
+checked: the identified host-coverage gaps and AC01-T02-NATIVE-01 source defect
+are CLOSED, with no new blocking finding in this bounded review. See
+[the independent result and exact limits](#independent-t01t02-review-3028a057).
+R01-R05 remain source-closed. D0-D5, formal whole-card acceptance and firmware/
+whole-card integration remain outstanding; C1-C6 are not signed off. The review
+was originally LOCAL_PENDING on main `990d8b4d`. Its unchanged findings are now
+delivered with APP-ADMIN-UX-01's root records. That task delivered the existing
+1.0.78 App baseline plus its UX changes to main `304d01f5` and built the original
+signed 1.0.79 candidate, without importing the unrelated firmware history.
+This App-only source delivery is not whole-card integration or independent
+acceptance of the later version. The dated milestones below retain their
+original point-in-time meaning, including their then-pending delivery statements.
+
 ## Current Verified Milestone, 2026-11-16
 
 The implementation and development-validation milestone below supersedes earlier
@@ -1799,3 +1816,103 @@ remediation request and not self-signed T01/T02 acceptance. D0-D5, real permissi
 dialogs/background recovery/radio observations, real wheel navigation, formal
 whole-card adjudication and product main integration remain outstanding.
 C1-C6 stay unchecked; P3/P4 completion, P1/P5 and production gates are unchanged.
+
+## Independent T01/T02 Review, 3028a057
+
+2026-11-17, Codex, resumed original non-implementation review. This is the
+bounded source/original-evidence evaluation allowed by execution-contract
+section 0, not a new formal device campaign or an implementation self-signoff.
+No production source, old reader, prior result or frozen bundle was changed.
+
+### Inputs And Disposition
+
+- Primary root: `D:/github/my/E-Track`, branch `main`, local and freshly queried
+  remote revision `990d8b4d73bde3cdd37316c66800a98481bed38b` at entry.
+- Product: `.worktrees/app-companion-01`, branch
+  `dev/flutter/app-companion-01-20261116`, clean source
+  `3028a0570bdbc1ed115b8de92bfde47933d1dd4c`; remote branch matches. The review
+  delta starts at independently source-reviewed
+  `f463649fc0a71945bff36c3ec57cbaecbd0fa9ef` and contains exactly 15 files.
+- No new blocking source finding was identified. Existing R01-R05 closure is
+  retained, not reissued as whole-card acceptance. Firmware, simulator, OTA
+  sender/consent inputs and the dependency lock are unchanged in this delta.
+
+| ID | Independent Disposition | Evidence And Remaining Boundary |
+| --- | --- | --- |
+| AC01-T01 | Host-coverage gap CLOSED | Eleven real CompanionSetupPage cases cover defer/re-entry, API-specific denial, permanent denial, revoked permissions, notification denial/channel disablement, OEM uncertainty and stale/disposed refreshes. Both host originals contain these cases. Only OS permission/settings responses are substituted. D1 physical dialogs remain required. |
+| AC01-T02 | Host-integration/telemetry coverage gap CLOSED | Fifteen Linux mobile-adapter cases execute Runtime, BluetoothService, BleController, MonitorController and DatabaseService without a page. They cover acknowledged scan leases, owner/revision/permission rejection, late scan completion, stale/duplicate samples, failed-save retention, partial success and single-flight retries. Windows explicitly skips those 15 cases. Forty-three native integration executions cover the real Bridge, chooser, Service, boot/job and engine wiring across API 26/31/34. D2 real lifecycle/radio observations remain required. |
+| AC01-T02-NATIVE-01 | Identified source defect CLOSED | `CompanionBridge.associate` uppercases the MAC only at ScanFilter's OS boundary and places request construction inside the same failure-cleanup try/catch as submission. Persisted keys stay lowercase. Real-Bridge tests verify the filter address, foreground admission, system association matching, cancellation, timeout and stale callbacks. This is not a physical CDM result. |
+
+The optional constructor seams retain production defaults. The telemetry tests
+override the platform discriminator, not the runtime's ownership checks or the
+monitor's save algorithm. The injected Database is the SQLite-driver edge;
+`appendDeviceDataBatch` still executes the production transaction and batch path.
+Native shadows replace OS/Flutter embedding boundaries, not CompanionExecution
+or the project's admission methods. They cannot prove real Dart VM survival or
+database durability across physical process death.
+
+The P35 fixture now waits for actual recorder publication and then closes its
+recording. Its original disconnected/fresh-connection assertions and bounded
+wait remain. Native workflow selection and XML upload include all three suites;
+the added integration suite is not merely an unexecuted source file.
+
+### Independently Checked Originals
+
+The reader and its results are in root
+`.cache/app-companion-01-20261116/review-3028a057/`. It reuses the earlier review's
+path/hash helpers and adds only original JSON/log/XML/ZIP interpretation. It does
+not launch Flutter, Gradle, a compiler, ADB, J-Link, an installer or an OTA sender.
+`review.py run` completed successfully and `review.log` records the result.
+`evidence.json` binds 116 files and the actual read-only commands; its SHA-256 is
+`bedd8f02f1c4742126d24e4bc49bcee3bc10863f6ecbda494fa738b6d0c43bcc`.
+
+| Original | Independently Verified Result |
+| --- | --- |
+| Checks `43873348049` and native/debug `43873444657` | Four complete host result/command-log sets bind source `3028a057`, strict analysis and unfiltered `test` scope. Each Linux run reports 1025 passed / 16 skipped; each Windows run reports 978 passed / 63 skipped; each host also passes 11 candidate cases. Terminal counts and source-derived case names were read from original logs, not only the implementation inventory. |
+| Native XML from `43873444657` | 70 executed / 70 passed, no failure/error/skip: DeviceOtaServiceTest 18, CompanionServiceTest 9, CompanionIntegrationTest 43. The latter matches 14 source methods on API 26/31/34 plus one API-34 notification case. Robolectric names the final SDK variant without a suffix; it is not an omitted execution. |
+| SDK and regenerated files | Flutter 3.47.8, framework `737ba8f885dc774b53b442759999a312c9461e4e`, Dart 3.13.7. Restored semantic/untracked deltas are empty, lock unchanged. Windows retains the previously disclosed registrar-header EOL-only difference. |
+| Standard build `43875796816` | Android APK and Windows EXE jobs succeed; Pages and GitHub Release are skipped. Actual downloaded files and archived run/console evidence are source-matched, not a claim of installation or release. |
+| Debug/standard archives and packages | All three ZIP digests agree with their original GitHub artifact receipts; each selected member hashes to the actual collected package. Five files are checked: debug APK/JSON, standard APK, EXE and runtime ZIP. The retained partial debug prefix is unchanged. Actual debug kernel bytes contain the declared target, endpoint, sentinel and passive-mode token. |
+| Unchanged MCU/simulator evidence | Build-09 input/output hashes and prior independent review anchors remain valid for this delta. Its 465 warning-containing lines, zero errors and incremental Boot output stay explicit. The earlier 42 independent MCU host cases are not relabeled as newly executed. |
+
+The original package hashes and failed-retrieval chronology remain in the
+[implementation handoff](#t01t02-source-and-self-test-handoff). This review does
+not erase failed runs, re-download successful archives, repeat CI or infer a
+transfer root cause. CI signer/application-ID checks qualify the collected
+packages, not an installed phone. No new product test/build/device run occurred.
+
+### Remaining Acceptance And Next Owner
+
+| Scope | Remaining Work |
+| --- | --- |
+| A1 / D1 | Actual permission dialogs, association, settings return and revocation on the declared phone/API/OEM; a settings launch is not a grant. |
+| A2 / D2 | Real ordinary background, lock, recent-task removal, process recovery/restart, offline backoff and resource release. OS/VM shadows do not close these observations. |
+| A3 / D3-D4 | Actual MCU check/readiness/decline/stale-choice behavior and a legitimate consented update with fresh post-reboot identity, full raw SHA and applicable Boot evidence. |
+| A4-A5 / D5 | Actual wheel rotation/press, one-level Back/focus restoration and installed launcher/notification/icon/package checks. |
+| A6 / D0 | Current device identity/readiness and collection route, formal frozen inputs/precheck, missing observations and final adjudication. C1-C6 and product main integration remain open. |
+
+Next owner: root/independent acceptance prepares the existing D0-D5 plan on this
+stable candidate; do not request another unchanged T01/T02 implementation batch.
+The recorded device-preflight failure has no newly confirmed connection-state
+change in this thread. The next human action is connecting/unlocking the known
+test phone and accepting its USB-debugging dialog if shown, before a new bounded
+D0 identity check. No blind repeat of the absent-device probe was performed.
+The same independent owner may prepare/freeze and execute the formal acceptance;
+no additional freezing role or duplicate full campaign is required.
+
+These board/note/index edits are LOCAL_PENDING on primary main, without staging,
+commit, push or product merge. Entry metadata is in `entry.json`; the post-note
+preservation/output audit is separately recorded in `write-audit.json`. All
+selected outputs remain under the project root. Named Cryptnet metadata is only
+a before/after observation, not writer attribution or a whole-OS zero-write
+claim. Historical attribution remains UNRESOLVED and no external cleanup occurs.
+
+The first post-note audit stopped at whitespace checking: its isolated Git
+environment disabled the installed system `core.autocrlf=true` setting and
+reported the shared index's historical CRLF lines as new trailing whitespace.
+`failure-01.txt` and `finish-diagnosis.json` retain that failure and its command
+output. `finish-with-eol.py` reuses the unchanged successful reader, supplying
+the observed EOL setting only to primary-checkout Git commands. It does not
+modify Git configuration, rewrite historical index lines or repeat the product
+review. The separately preserved `whitespace-before.log` precedes normalization
+of only this review's six added/changed board lines.
