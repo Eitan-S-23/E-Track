@@ -474,6 +474,7 @@ class _Device extends Fake implements fbp.BluetoothDevice {
       for (final message in text.add(bytes, idleTextAllowed: true)) {
         if (message.kind == 'HELLO') {
           notifications.add(CompanionMessage('CAPS', message.session, 0, ['1']).encode());
+          debugPrint('T02_GATT_CAPS_SENT');
         }
       }
     }
@@ -499,7 +500,10 @@ class _Characteristic extends Fake implements fbp.BluetoothCharacteristic {
   }
   @override
   Future<void> write(List<int> value, {bool withoutResponse = false, bool allowLongWrite = false,
-      int timeout = 15}) async { device.write(value); }
+      int timeout = 15}) async {
+    device.write(value);
+    debugPrint('T02_GATT_WRITE_RETURN');
+  }
 }
 
 class _Gatt extends Fake implements fbp.BluetoothService {
