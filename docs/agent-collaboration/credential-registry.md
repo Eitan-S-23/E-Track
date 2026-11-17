@@ -44,7 +44,7 @@ production gates. Token values stay in protected inputs, never in chat or eviden
 ### Provenance And Observed Capabilities
 
 - Actions cutover is now executed, not pending: the owner-authorized
-  [44186088340](https://github.com/Eitan-S-23/E-Track/actions/runs/44186088340)
+  Actions run `44186088340`, linked in the deployment memory below,
   uses `E_TRACK_CI` for the original Worker, D1 and both Pages targets on source
   `28459a89fcd6792611052cb601b231bb947bcc6d`. Exact deployed sources, original
   runtime configuration and real owner/Public readbacks pass. The prior run
