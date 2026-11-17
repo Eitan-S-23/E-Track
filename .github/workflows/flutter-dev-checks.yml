@@ -130,6 +130,7 @@ jobs:
             /.agents/skills/e-track-flutter-debug/scripts/host_io.py
             /Tools/provenance/manifest_profiles.json
             /tests/ota/test_flutter_dev_checks.py
+            /tests/ota/test_app_bsdiff_lzma.py
             /tests/ota/test_flutter_dev_apk.py
             /tests/ota/test_p3_4_observation_capture.py
             /tests/ota/test_p34_batch_timing.py
@@ -172,6 +173,10 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: python -I -S -B Tools/flutter/test_phy_native.py --repo-root .
 
+      - name: Verify App bsdiff LZMA decoder
+        working-directory: ${{ github.workspace }}
+        run: python -I -S -B Tools/flutter/test_app_patch.py --repo-root .
+
       - name: Verify App observation snapshot integrity
         timeout-minutes: 5
         working-directory: ${{ github.workspace }}
@@ -199,6 +204,8 @@ jobs:
             .cache/flutter-dev-checks/runs/*/result.json
             .cache/flutter-dev-checks/runs/*/logs/*.log
             .cache/p34-phy-native/runs/*/result.json
+            .cache/app-patch-tests/*/result.json
+            .cache/app-patch-tests/*/logs/*.log
             .cache/p34-phy-native/runs/*/logs/*.log
             app/bluetooth_flutter_Trace/build/app/test-results/testDebugUnitTest/TEST-com.wen.gaia.gaia.DeviceOtaServiceTest.xml
             app/bluetooth_flutter_Trace/build/app/test-results/testDebugUnitTest/TEST-com.wen.gaia.gaia.CompanionServiceTest.xml

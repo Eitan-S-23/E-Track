@@ -4,6 +4,8 @@ import { json } from "./http";
 import { boundedJson, sha256Text } from "./version_inventory";
 import { deltaFileName } from "./delta_files";
 import { inspectDeltaRuns } from "./delta_run_status";
+import { APP_BSDIFF_FORMAT, preferredAppDeltaFormat, storedAppDeltaFormat } from "./app_patch_format";
+import type { AppDeltaFormat } from "./app_patch_format";
 import type { AssetRow, FirmwareAssetRow, FirmwareReleaseRow, ReleaseRow, SecurityPayload, WorkerEnv } from "./types";
 
 export type DeltaKind = "android" | "firmware";
@@ -15,7 +17,7 @@ export interface DeltaInput {
   releaseId: string; versionCode: number; versionName: string; imageSha256: string; file: FilePin;
   hardwareRevision?: number; layoutId?: number; securityPayload?: SecurityPayload;
 }
-export interface DeltaSpec { schema: "operator-delta-v1"; kind: DeltaKind; target: DeltaInput; base: DeltaInput }
+export interface DeltaSpec { schema: "operator-delta-v1"; kind: DeltaKind; target: DeltaInput; base: DeltaInput; patchFormat?: AppDeltaFormat }
 export interface DeltaJob {
   id: string; kind: DeltaKind; target_release_id: string; base_release_id: string;
   target_sha256: string; base_sha256: string; base_version_code: number; target_version_code: number;
@@ -162,10 +164,11 @@ function validatePair(kind: DeltaKind, target: DeltaInput, base: DeltaInput) {
   }
 }
 async function existingPatch(env: DeltaEnv, kind: DeltaKind, target: string, base: DeltaInput): Promise<boolean> {
+  const modern = kind === "android" && preferredAppDeltaFormat(base.versionCode, base.securityPayload?.capabilities ?? []) === APP_BSDIFF_FORMAT;
   const query = kind === "firmware"
     ? "SELECT id FROM firmware_release_assets WHERE release_id=? AND kind='patch' AND base_image_sha256=? AND r2_state='available'"
-    : "SELECT p.id FROM patches p JOIN release_assets a ON a.id=p.asset_id WHERE p.to_release_id=? AND p.old_sha256=? AND a.r2_state='available'";
-  return !!await env.DB.prepare(query).bind(target, base.imageSha256).first();
+    : "SELECT p.id FROM patches p JOIN release_assets a ON a.id=p.asset_id WHERE p.to_release_id=? AND p.old_sha256=? AND a.r2_state='available'" + (modern ? " AND p.patch_format=?" : "");
+  return !!await env.DB.prepare(query).bind(target, base.imageSha256, ...(modern ? [APP_BSDIFF_FORMAT] : [])).first();
 }
 
 export async function deltaCandidates(env: DeltaEnv, kind: DeltaKind, targetId: string, inspectRuns = false): Promise<Response> {
@@ -174,15 +177,15 @@ export async function deltaCandidates(env: DeltaEnv, kind: DeltaKind, targetId: 
     ? `SELECT r.id,r.version_code,r.version_name,r.target_image_sha256 AS image_sha256,r.hardware_rev,r.layout_id,r.state,r.archived,
        a.r2_key,a.r2_state,a.size_bytes FROM firmware_releases r LEFT JOIN firmware_release_assets a ON a.release_id=r.id AND a.kind='full'
        WHERE r.app_id=? AND r.device_model='e-track-at32f435' AND r.version_code<? ORDER BY r.version_code DESC LIMIT 200`
-    : `SELECT r.id,r.version_code,r.version_name,a.sha256 AS image_sha256,NULL AS hardware_rev,NULL AS layout_id,r.state,r.archived,
+    : `SELECT r.id,r.version_code,r.version_name,r.security_payload_json,a.sha256 AS image_sha256,NULL AS hardware_rev,NULL AS layout_id,r.state,r.archived,
        a.r2_key,a.r2_state,a.size_bytes FROM releases r LEFT JOIN release_assets a ON a.release_id=r.id AND a.asset_type='apk' AND a.disabled=0
        WHERE r.app_id=? AND r.platform='android' AND r.version_code<? ORDER BY r.version_code DESC LIMIT 200`)
     .bind(env.APP_ID, target.versionCode).all<{id:string;version_code:number;version_name:string;image_sha256:string;
-      hardware_rev:number;layout_id:number;state:string;archived:number;r2_key:string|null;r2_state:string;size_bytes:number}>();
+      hardware_rev:number;layout_id:number;state:string;archived:number;r2_key:string|null;r2_state:string;size_bytes:number;security_payload_json?:string}>();
   const patches=await env.DB.prepare(kind==="firmware"
     ? "SELECT base_image_sha256 AS sha FROM firmware_release_assets WHERE release_id=? AND kind='patch' AND r2_state='available'"
-    : "SELECT p.old_sha256 AS sha FROM patches p JOIN release_assets a ON a.id=p.asset_id WHERE p.to_release_id=? AND a.r2_state='available'")
-    .bind(targetId).all<{sha:string}>();
+    : "SELECT p.old_sha256 AS sha,p.patch_format FROM patches p JOIN release_assets a ON a.id=p.asset_id WHERE p.to_release_id=? AND a.r2_state='available'")
+    .bind(targetId).all<{sha:string;patch_format?:string}>();
   const patchBases=new Set(patches.results.map(p=>p.sha));
   const jobs = (await env.DB.prepare("SELECT * FROM delta_jobs WHERE kind=? AND target_release_id=? ORDER BY created_at DESC")
     .bind(kind, targetId).all<DeltaJob>()).results;
@@ -197,9 +200,13 @@ export async function deltaCandidates(env: DeltaEnv, kind: DeltaKind, targetId: 
       if (kind==="firmware" && (row.hardware_rev!==target.hardwareRevision || row.layout_id!==target.layoutId)) throw new ApiError("HARDWARE_INCOMPATIBLE","Hardware or layout mismatch",409);
       if (kind==="firmware" && (row.hardware_rev!==1 || row.layout_id!==1)) throw new ApiError("HARDWARE_INCOMPATIBLE","Existing packer supports hardware/layout 1 only",409);
       const job = jobs.find(j => j.base_sha256 === row.image_sha256);
+      const patchFormat = kind === "android" ? preferredAppDeltaFormat(row.version_code,
+        (JSON.parse(row.security_payload_json ?? "{}") as Partial<SecurityPayload>).capabilities ?? []) : undefined;
+      const existing = patchFormat === APP_BSDIFF_FORMAT
+        ? patches.results.some(p => p.sha === row.image_sha256 && p.patch_format === patchFormat) : patchBases.has(row.image_sha256);
       bases.push({ releaseId: row.id, versionCode: row.version_code, versionName: row.version_name,
         imageSha256: row.image_sha256, bytes: row.size_bytes, eligible: true,
-        existing: patchBases.has(row.image_sha256), job: job ? views.find(view => view.id === job.id) : null });
+        patchFormat, existing, job: job ? views.find(view => view.id === job.id) : null });
     } catch (error) {
       if (!(error instanceof ApiError)) throw error;
       bases.push({ releaseId: row.id, versionCode: row.version_code, versionName: row.version_name,
@@ -264,7 +271,8 @@ export async function createDeltaJobs(env: DeltaEnv, actor: string, body: Record
     const id = `delta_${await sha256Text(`${kind}:${targetId}:${base.imageSha256}`)}`;
     const old = await env.DB.prepare("SELECT * FROM delta_jobs WHERE id=?").bind(id).first<DeltaJob>();
     if (old) { result.push(jobView(old)); continue; }
-    const spec: DeltaSpec = { schema: "operator-delta-v1", kind, target, base };
+    const spec: DeltaSpec = { schema: "operator-delta-v1", kind, target, base,
+      ...(kind === "android" ? {patchFormat: preferredAppDeltaFormat(base.versionCode, base.securityPayload?.capabilities ?? [])} : {}) };
     const text = canonicalJson(spec), hash = await sha256Text(text), now = nowSeconds();
     try {
       const inserted = await env.DB.prepare(`INSERT OR IGNORE INTO delta_jobs
@@ -625,7 +633,8 @@ export async function deltaCi(request: Request, env: WorkerEnv): Promise<Respons
     const signature=body.payloadSignature as {algorithm?:string;keyVersion?:string;signature?:string}|undefined;
     const original=spec.target.securityPayload!;
     const expectedPatch={fromVersionCode:spec.base.versionCode,toVersionCode:spec.target.versionCode,assetName:fileName,
-      sha256:sha,size,oldSha256:job.base_sha256,newSha256:job.target_sha256};
+      sha256:sha,size,oldSha256:job.base_sha256,newSha256:job.target_sha256,
+      ...(storedAppDeltaFormat(job) === APP_BSDIFF_FORMAT ? {algorithm: APP_BSDIFF_FORMAT} : {})};
     const expected={...original,patches:[expectedPatch],assetHashes:[...original.assetHashes.filter(a=>a.assetType!=="patch"),
       {fileName,assetType:"patch",sha256:sha,size}]};
     if (!payload || canonicalJson(payload)!==canonicalJson(expected) || signature?.algorithm!=="ed25519"

@@ -115,7 +115,7 @@ export async function handleLatest(
       patches: state.patches
     };
     const extra = env.DELTA_ASSETS_ENABLED === "true"
-      ? await supplementalAppManifest(env, state.release.id, versionCode, request.headers.get("X-Trace-Apk-Sha256")) : null;
+      ? await supplementalAppManifest(env, state.release.id, versionCode, request.headers.get("X-Trace-Apk-Sha256"), wantsV2 ? capabilities : []) : null;
     if (extra) {
       renderableState.release = { ...state.release, security_payload_json: JSON.stringify(extra.securityPayload),
         payload_signature_json: JSON.stringify(extra.payloadSignature) };

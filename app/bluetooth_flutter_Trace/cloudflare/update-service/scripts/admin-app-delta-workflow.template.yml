@@ -84,11 +84,15 @@ jobs:
           INPUT_JOB_ID: ${{ inputs.job_id }}
           INPUT_ATTEMPT: ${{ inputs.attempt }}
           INPUT_KIND: android
+          BSDIFF_EXE: ${{ github.workspace }}/.cache/delta-source/.cache/admin-delta/bsdiff/bin/bsdiff
           TRACE_UPDATE_SERVICE_URL: https://trace-update-service-staging.tangjichentudou.workers.dev
           TRACE_DEPLOY_TOKEN: ${{ secrets.TRACE_DEPLOY_TOKEN }}
           TRACE_UPDATE_PAYLOAD_ED25519_PRIVATE_KEY_BASE64: ${{ secrets.TRACE_UPDATE_PAYLOAD_ED25519_PRIVATE_KEY_BASE64 }}
           TRACE_UPDATE_PAYLOAD_KEY_VERSION: ${{ vars.TRACE_UPDATE_PAYLOAD_KEY_VERSION || 'staging' }}
-        run: node app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/generate-delta-job.mjs --out .cache/admin-delta/run
+        run: |
+          cmake -S .github/scripts/bsdiff -B .cache/admin-delta/bsdiff -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build .cache/admin-delta/bsdiff --target bsdiff
+          node app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/generate-delta-job.mjs --out .cache/admin-delta/run
       - name: Preserve bounded receipts; verified delta already resides in R2
         if: always() && steps.generate.outcome != 'skipped'
         run: |

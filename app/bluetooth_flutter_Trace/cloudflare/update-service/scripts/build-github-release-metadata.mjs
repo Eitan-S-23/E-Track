@@ -32,6 +32,10 @@ if (!output) {
 
 const manifestPath = path.join(assetsDir, "ble-monitor-update.json");
 const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+// This capability describes the installed source decoder, not a server toggle.
+if (integerField(manifest, "versionCode") >= 107 && !capabilities.includes("bsdiff-lzma-v1")) {
+  capabilities.push("bsdiff-lzma-v1");
+}
 const apkAssetName = stringField(manifest, "apkAssetName", "ble-monitor-android.apk");
 assertSafeFileName(apkAssetName);
 const apkPath = path.join(assetsDir, apkAssetName);

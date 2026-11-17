@@ -11,6 +11,14 @@ import { args, CliError, failure, outputPath, projectRoot } from "./firmware-cli
 
 const LIMIT = 256 * 1024 * 1024;
 const HEX = /^[0-9a-f]{64}$/;
+const BSDIFF_FORMAT = "bsdiff-lzma-v1";
+export function appPatchFormat(input) {
+  const format = input.patchFormat ?? "vcdiff";
+  requireValue(["vcdiff", BSDIFF_FORMAT].includes(format), "Unsupported App patch format");
+  requireValue(format !== BSDIFF_FORMAT || (input.base.versionCode >= 107
+    && input.base.securityPayload?.capabilities?.includes(BSDIFF_FORMAT)), "Source APK has no bsdiff/LZMA decoder");
+  return format;
+}
 export function canonical(value) {
   if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
   if (value && typeof value === "object") return `{${Object.entries(value).sort(([a],[b])=>a.localeCompare(b))
@@ -48,6 +56,7 @@ export function validateJob(job, env) {
   }
   requireValue(input.base.versionCode<input.target.versionCode,"Delta base must precede target");
   if(input.kind==="android") {
+    appPatchFormat(input);
     requireValue(input.base.versionCode>=41,"Source APK predates supported VCDIFF decoding");
     requireValue(input.target.securityPayload?.apkSha256===input.target.imageSha256
       && input.target.securityPayload?.versionCode===input.target.versionCode,"Invalid target APK manifest");
@@ -127,10 +136,13 @@ export async function generatePatch({root,out,job,env=process.env,execute=spawnS
       await run(`${part}-package`,tools.aapt,["dump","badging",files[part]]),
       await run(`${part}-signer`,tools.apksigner,["verify","--verbose","--print-certs",files[part]]),input[part]);
     requireValue(canonical(packages.base)===canonical(packages.target),"APK package name or signing certificate changed");
-    await py("pack",".github/scripts/create_vcdiff_patch.py",[base,target,files.patch,
+    const modern = appPatchFormat(input) === BSDIFF_FORMAT;
+    if (modern) requireValue(env.BSDIFF_EXE && existsSync(env.BSDIFF_EXE), "Existing MCU bsdiff tool is required");
+    await py("pack",modern ? ".github/scripts/create_bsdiff_lzma_patch.py" : ".github/scripts/create_vcdiff_patch.py",[base,target,files.patch,
       "--from-version-code",String(input.base.versionCode),"--to-version-code",String(input.target.versionCode),
-      "--metadata-output",files["patch-metadata.json"]]);
-    await run("apply",env.XDELTA3 ?? "xdelta3",["-d","-s",base,files.patch,files.reconstructed]);
+      "--metadata-output",files["patch-metadata.json"], ...(modern ? ["--bsdiff-exe", env.BSDIFF_EXE] : [])]);
+    if (modern) await py("apply", ".github/scripts/create_bsdiff_lzma_patch.py", ["apply", base, files.patch, files.reconstructed]);
+    else await run("apply",env.XDELTA3 ?? "xdelta3",["-d","-s",base,files.patch,files.reconstructed]);
   }
   const targetIdentity=await identity(target), reconstructed=await identity(files.reconstructed), baseIdentity=await identity(base);
   requireValue(targetIdentity.sha256===input.target.imageSha256 && baseIdentity.sha256===input.base.imageSha256
@@ -146,13 +158,15 @@ export async function generatePatch({root,out,job,env=process.env,execute=spawnS
     byteEqual:true,sha256:patch.sha256,sizeBytes:patch.bytes};
   if(input.kind==="android") {
     const metadata=JSON.parse(await readFile(files["patch-metadata.json"],"utf8"));
-    requireValue(metadata.algorithm==="vcdiff" && metadata.sha256===patch.sha256 && metadata.size===patch.bytes
-      && metadata.oldSha256===input.base.imageSha256 && metadata.newSha256===input.target.imageSha256,"VCDIFF metadata drift");
+    const format = appPatchFormat(input);
+    requireValue(metadata.algorithm===format && metadata.sha256===patch.sha256 && metadata.size===patch.bytes
+      && metadata.oldSha256===input.base.imageSha256 && metadata.newSha256===input.target.imageSha256,"App patch metadata drift");
     requireValue(env.TRACE_UPDATE_PAYLOAD_ED25519_PRIVATE_KEY_BASE64,"APK manifest signing key is required");
-    const fileName=`delta-${input.base.versionCode}-${input.target.versionCode}-${input.base.imageSha256.slice(0,12)}.vcdiff`;
+    const fileName=`delta-${input.base.versionCode}-${input.target.versionCode}-${input.base.imageSha256.slice(0,12)}.${format}`;
     const original=input.target.securityPayload;
     proof.securityPayload={...original,patches:[{fromVersionCode:input.base.versionCode,toVersionCode:input.target.versionCode,
-      assetName:fileName,sha256:patch.sha256,size:patch.bytes,oldSha256:input.base.imageSha256,newSha256:input.target.imageSha256}],
+      assetName:fileName,sha256:patch.sha256,size:patch.bytes,oldSha256:input.base.imageSha256,newSha256:input.target.imageSha256,
+      ...(format === BSDIFF_FORMAT ? {algorithm: format} : {})}],
       assetHashes:[...original.assetHashes.filter(a=>a.assetType!=="patch"),{fileName,assetType:"patch",sha256:patch.sha256,size:patch.bytes}]};
     const key=createPrivateKey({key:Buffer.from(env.TRACE_UPDATE_PAYLOAD_ED25519_PRIVATE_KEY_BASE64,"base64"),format:"der",type:"pkcs8"});
     proof.payloadSignature={algorithm:"ed25519",keyVersion:env.TRACE_UPDATE_PAYLOAD_KEY_VERSION??"staging",

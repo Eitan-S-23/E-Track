@@ -152,6 +152,12 @@ jobs:
       - name: Run invariant tests
         run: npm test
 
+      - name: Verify App codec generator contracts
+        working-directory: .
+        run: |
+          node --test tests/ota/test_app_delta_codec.mjs
+          python3 -I -S -B tests/ota/test_app_bsdiff_lzma.py
+
   admin-bundle:
     name: Admin Deployment Input (No Cloud Writes)
     if: github.event_name == 'workflow_dispatch' && inputs.prepare_admin_bundle
