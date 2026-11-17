@@ -8,6 +8,8 @@ import { isDeepStrictEqual } from 'node:util';
 export const target = Object.freeze({
   account: 'af6dd848e6a21f1cd26d44b1b656af7b',
   worker: 'trace-update-service-staging',
+  service: 'trace-update-service-dev',
+  environment: 'staging',
   database: '0133ad9e-d4a2-4fef-a659-4f2bf3d3a645',
   databaseName: 'trace-update-staging',
   cache: 'fe3b08f2e0774072a44bdf140c44174a',
@@ -22,6 +24,7 @@ const schemaSql = 'SELECT name FROM d1_migrations ORDER BY id;'
 
 export function stagingConfig(config, workerDir) {
   const value = structuredClone({ ...config, ...config.env?.staging });
+  assert.equal(config.name, target.service, 'Unexpected original service grouping');
   assert.equal(value.name, target.worker, 'Unexpected Worker target');
   assert.deepEqual(value.d1_databases?.map(b => [b.binding, b.database_name, b.database_id]),
     [['DB', target.databaseName, target.database]], 'Unexpected D1 binding');
@@ -31,22 +34,39 @@ export function stagingConfig(config, workerDir) {
   assert.equal(value.vars?.ENVIRONMENT, 'staging');
   assert.equal(value.vars?.APP_ID, 'trace');
   assert.equal(value.main, 'src/index.ts');
-  delete value.env;
-  delete value.$schema;
-  value.main = path.resolve(workerDir, value.main);
-  value.d1_databases[0].migrations_dir = path.resolve(workerDir, '../migrations');
-  // Dashboard variables and existing secrets are authoritative for this redeploy.
-  value.vars = {};
-  value.keep_vars = true;
-  return value;
+  // Keep the named environment: Wrangler derives the existing cf:service and
+  // cf:environment labels from it, even with legacy per-environment Workers.
+  const output = structuredClone(config);
+  delete output.$schema;
+  output.env = { staging: output.env.staging };
+  output.main = path.resolve(workerDir, value.main);
+  for (const area of [output, output.env.staging]) {
+    area.vars = {};
+    for (const db of area.d1_databases ?? []) db.migrations_dir = path.resolve(workerDir, '../migrations');
+  }
+  output.keep_vars = true;
+  return output;
 }
 
 export function runtimeSettings(settings) {
   const value = structuredClone(settings);
   assert.ok(Array.isArray(value.bindings), 'Worker settings lack bindings');
   value.bindings.sort((a, b) => a.name.localeCompare(b.name));
+  if (Array.isArray(value.tags)) value.tags.sort();
   value.annotations ??= {};
   for (const key of ['workers/tag', 'workers/message', 'workers/triggered_by']) delete value.annotations[key];
+  return value;
+}
+
+function expectedRuntime(settings) {
+  const value = runtimeSettings(settings);
+  const tags = value.tags ?? [];
+  const required = [`cf:service=${target.service}`, `cf:environment=${target.environment}`];
+  assert.ok(tags.every(tag => !/^cf:(service|environment)=/.test(tag) || required.includes(tag)),
+    'Conflicting Worker environment labels');
+  // A previous flattened-config upload removed these two labels. Restore only
+  // missing standard labels; every other setting and custom tag stays strict.
+  value.tags = [...new Set([...tags, ...required])].sort();
   return value;
 }
 
@@ -103,6 +123,8 @@ export async function deployWorker({ source, config, committed, cloud, wrangler,
   try {
     const before = await cloud(`${workerRoute}/settings`);
     assertLiveBindings(before, config);
+    const expectedSettings = expectedRuntime(before);
+    const restoreLabels = !isDeepStrictEqual(runtimeSettings(before), expectedSettings);
     const schedules = await cloud(`${workerRoute}/schedules`);
     assert.deepEqual(crons(schedules), [...config.triggers.crons].sort(), 'Live schedules differ');
     const deployment = currentDeployment(await cloud(`${workerRoute}/deployments`));
@@ -113,7 +135,7 @@ export async function deployWorker({ source, config, committed, cloud, wrangler,
     record('before', { settings: before, schedules, deployment, schema }, true);
     if (result.pendingMigrations.length) {
       result.phase = 'migrate';
-      await wrangler('migrate', ['d1', 'migrations', 'apply', target.databaseName, '--remote']);
+      await wrangler('migrate', ['d1', 'migrations', 'apply', target.databaseName, '--env', 'staging', '--remote']);
       result.migrated = true;
     }
     const afterSchema = readSchema(await query());
@@ -124,8 +146,8 @@ export async function deployWorker({ source, config, committed, cloud, wrangler,
     result.channelsUnchanged = isDeepStrictEqual(schema.slice(1, 3), afterSchema.slice(1, 3));
     assert.ok(result.channelsUnchanged, 'Channel state changed; reconcile before deploying');
     result.phase = 'deploy';
-    if (version.annotations?.['workers/tag'] !== source) {
-      await wrangler('deploy', ['deploy', '--keep-vars', '--tag', source, '--message', `source:${source}`]);
+    if (version.annotations?.['workers/tag'] !== source || restoreLabels) {
+      await wrangler('deploy', ['deploy', '--env', 'staging', '--keep-vars', '--tag', source, '--message', `source:${source}`]);
       result.updated = true;
     }
     result.phase = 'readback';
@@ -140,9 +162,11 @@ export async function deployWorker({ source, config, committed, cloud, wrangler,
     result.sourceVerified = liveVersion.annotations?.['workers/tag'] === source
       && liveVersion.annotations?.['workers/message'] === `source:${source}`;
     result.configurationUnchanged = isDeepStrictEqual(runtimeSettings(before), runtimeSettings(after));
+    result.runtimePreserved = isDeepStrictEqual(expectedSettings, runtimeSettings(after));
+    result.environmentLabelsRestored = restoreLabels && result.runtimePreserved;
     result.schedulesUnchanged = isDeepStrictEqual(crons(schedules), crons(liveSchedules));
     result.channelsUnchanged = isDeepStrictEqual(schema.slice(1, 3), liveSchema.slice(1, 3));
-    assert.ok(result.sourceVerified && result.configurationUnchanged && result.schedulesUnchanged
+    assert.ok(result.sourceVerified && result.runtimePreserved && result.schedulesUnchanged
       && result.channelsUnchanged, 'Worker source/runtime verification failed');
     result.ok = true;
     result.phase = 'complete';
@@ -219,7 +243,8 @@ async function main() {
       }
     } finally { fs.closeSync(log); }
   };
-  console.log(JSON.stringify(await deployWorker({ source: env.SOURCE_SHA, config, committed, cloud, wrangler, record })));
+  const effective = { ...config, ...config.env.staging };
+  console.log(JSON.stringify(await deployWorker({ source: env.SOURCE_SHA, config: effective, committed, cloud, wrangler, record })));
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

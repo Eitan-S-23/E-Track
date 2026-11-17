@@ -9,12 +9,14 @@ const sourceConfig = JSON.parse(await readFile(new URL(
   '../../app/bluetooth_flutter_Trace/cloudflare/update-service/worker/wrangler.jsonc', import.meta.url), 'utf8'));
 const source = 'a'.repeat(40);
 const committed = ['0014_admin_ux.sql', '0015_delta_file_deletion.sql'];
-const config = stagingConfig(sourceConfig, path.resolve('worker-fixture'));
+const deploymentConfig = stagingConfig(sourceConfig, path.resolve('worker-fixture'));
+const config = { ...deploymentConfig, ...deploymentConfig.env.staging };
 
 function fixture(options = {}) {
   const settings = {
     compatibility_date: config.compatibility_date, compatibility_flags: config.compatibility_flags,
     annotations: { 'workers/triggered_by': 'deployment', 'custom/audit': 'preserve' },
+    tags: [`cf:service=${target.service}`, `cf:environment=${target.environment}`],
     observability: { enabled: true, logs: { enabled: true, invocation_logs: false } },
     bindings: [
       { name: 'DB', type: 'd1', database_id: target.database },
@@ -68,18 +70,22 @@ function fixture(options = {}) {
 test('staging-only config preserves infrastructure but never writes live variables or secrets', () => {
   const before = structuredClone(sourceConfig);
   const value = stagingConfig(sourceConfig, path.resolve('worker-fixture'));
-  assert.equal(value.name, target.worker);
+  assert.equal(value.name, sourceConfig.name);
+  assert.equal(value.env.staging.name, target.worker);
   assert.equal(value.keep_vars, true);
   assert.deepEqual(value.vars, {});
-  assert.equal(value.env, undefined);
+  assert.deepEqual(value.env.staging.vars, {});
+  assert.deepEqual(Object.keys(value.env), ['staging']);
   assert.ok(path.isAbsolute(value.main) && path.isAbsolute(value.d1_databases[0].migrations_dir));
-  assert.deepEqual(value.triggers, sourceConfig.env.staging.triggers);
-  assert.deepEqual(value.observability, sourceConfig.env.staging.observability);
+  assert.ok(path.isAbsolute(value.env.staging.d1_databases[0].migrations_dir));
+  assert.deepEqual(value.env.staging.triggers, sourceConfig.env.staging.triggers);
+  assert.deepEqual(value.env.staging.observability, sourceConfig.env.staging.observability);
   assert.deepEqual(sourceConfig, before);
 });
 
 for (const [label, change] of [
   ['Worker', c => { c.env.staging.name = 'different'; }],
+  ['service grouping', c => { c.name = 'different'; }],
   ['D1', c => { c.env.staging.d1_databases[0].database_id = 'different'; }],
   ['KV', c => { c.env.staging.kv_namespaces[0].id = 'different'; }],
   ['R2', c => { c.env.staging.r2_buckets[0].bucket_name = 'different'; }],
@@ -108,8 +114,8 @@ test('real orchestration reads targets, migrates, verifies schema, deploys and v
   assert.equal(result.channelsUnchanged, true);
   const migrate = f.events.findIndex(e => e[0] === 'migrate'), deploy = f.events.findIndex(e => e[0] === 'deploy');
   assert.ok(migrate > 3 && deploy > migrate + 1);
-  assert.deepEqual(f.events[migrate][1], ['d1', 'migrations', 'apply', target.databaseName, '--remote']);
-  assert.deepEqual(f.events[deploy][1], ['deploy', '--keep-vars', '--tag', source, '--message', `source:${source}`]);
+  assert.deepEqual(f.events[migrate][1], ['d1', 'migrations', 'apply', target.databaseName, '--env', 'staging', '--remote']);
+  assert.deepEqual(f.events[deploy][1], ['deploy', '--env', 'staging', '--keep-vars', '--tag', source, '--message', `source:${source}`]);
   assert.ok(f.records.find(r => r.name === 'before').privateValue);
   assert.ok(f.records.find(r => r.name === 'after').privateValue);
   const publicRecord = f.records.filter(r => !r.privateValue);
@@ -123,6 +129,25 @@ test('already applied migration and matching version are not replayed', async ()
   assert.equal(result.ok, true);
   assert.equal(result.updated, false);
   assert.equal(result.migrated, false);
+  assert.ok(f.events.every(e => e[0] === 'read'));
+});
+
+test('restores only missing standard environment labels without repeating an applied migration', async () => {
+  const f = fixture({ migrated: true, deployed: true,
+    before: s => { s.tags = []; },
+    after: s => { s.tags = [`cf:service=${target.service}`, `cf:environment=${target.environment}`]; } });
+  const result = await f.run();
+  assert.equal(result.ok, true);
+  assert.equal(result.configurationUnchanged, false);
+  assert.equal(result.runtimePreserved, true);
+  assert.equal(result.environmentLabelsRestored, true);
+  assert.equal(result.migrated, false);
+  assert.deepEqual(f.events.filter(e => e[0] !== 'read').map(e => e[0]), ['deploy']);
+});
+
+test('conflicting service grouping fails before any remote write', async () => {
+  const f = fixture({ before: s => { s.tags = ['cf:service=another-service']; } });
+  await assert.rejects(f.run(), /Conflicting Worker environment labels/);
   assert.ok(f.events.every(e => e[0] === 'read'));
 });
 
@@ -169,6 +194,7 @@ for (const [label, after] of [
   ['Durable Object', s => { s.bindings.find(b => b.name === 'RATE_LIMITER').namespace_id = 'changed'; }],
   ['observability', s => { s.observability.logs.invocation_logs = true; }],
   ['unknown annotation', s => { s.annotations['custom/audit'] = 'changed'; }],
+  ['service labels', s => { s.tags = ['cf:service=different']; }],
 ]) test(`live ${label} drift keeps deployment red`, async () => {
   const f = fixture({ after });
   await assert.rejects(f.run(), /verification failed/);
