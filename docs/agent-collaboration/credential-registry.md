@@ -2,6 +2,9 @@
 
 Operational inventory, not a secret store or acceptance input. Rules live in
 [Reuse Before Requesting Credentials](../agent-collaboration-contract.md#reuse-before-requesting-credentials).
+The root-level operational entry is
+[CLOUDFLARE-DEPLOYMENT.md](../../CLOUDFLARE-DEPLOYMENT.md); read it before deployment
+or another credential/login request.
 Dates and successful observations below are historical, not perpetual validity
 claims. This inventory is not exhaustive; an unlisted credential is not proved
 absent. Owner-confirmed changes update the same ID with source and date, without
@@ -106,3 +109,25 @@ publishing credential by its name/protected locator or a redacted target/scope
 receipt. Do not conflate task authorization, one token's capability and an OAuth
 copy's status; do not prescribe new login, new credentials or expanded scope as
 the automatic response to the preserved refusals.
+
+### Owning Repository And Standard Input Readbacks
+
+Further 2026-11-17 checks are recorded in
+[APP-ADMIN-UX-01](../ota-exec-notes/APP-ADMIN-UX-01.md#existing-local-and-github-routes-2026-11-17).
+Both repositories' secret names and environment inventories were checked without
+extracting values. Trace's existing slots were last updated on 2026-06-29, versus
+E-Track's 2026-11-07; neither metadata date proves equivalent values or capability.
+Actual Trace run `43996459438` uses its own protected slots and fails the exact
+Admin Pages GET with HTTP 403/code 10000 before installs or deployment. No secret
+was exported, replaced or widened. E-Track's prior `43978919787` remains separate.
+
+Named configurations traced from successful local deployment scripts form three
+distinct OAuth inputs across five files. Exact current Admin GETs return 401/code
+10000; duplicate bytes were compared only in memory and not retried. No source
+configuration was changed or new login started. The supported token/global-key
+environment names are absent from SU's persistent user environment, the machine
+environment and the current process. Legacy `C:/Users/SU/.wrangler/config/default.toml`
+is absent; the official XDG file remains the already checked July-expired input.
+The primary root/App/service `.env` and `.env.local` paths are absent. These are
+bounded named-source checks, not an exhaustive private-file search or proof that
+the owner has no other Pages-capable credential.

@@ -384,3 +384,56 @@ login. Do not repeat the same denied inputs to simulate progress. Shared input
 locations and this correction are indexed under `CF-PAGES-01` in the credential
 registry. Successful package/Worker delivery and all independent device/formal
 acceptance boundaries remain unchanged.
+
+### Existing Local And GitHub Routes, 2026-11-17
+
+The user explicitly requested reuse of credentials on this host or GitHub,
+completion of Pages deployment, and root-level deployment memory. The root agent
+continued the existing task; it did not rebuild App packages or replay deployment
+of the already delivered Worker/schema.
+
+- `.cache/app-admin-ux-20261117/keyring-pagesinventory-02/result.json` records
+  both owning repositories' secret metadata, existing environments and Pages
+  workflow histories. No additional Pages credential slot was identified in
+  those environments. A secret name is not a returned secret or a capability test.
+- `keyring-traceinspect-01/result.json` preserves the original Trace workflow and
+  historical failed Pages runs. The bounded operational branch
+  `Eitan-S-23/Trace:ops/pages-existing-credential-20261117`, commit
+  `53d049b1122edaab476f2fa6a032a405bf6b071e`, changes only the Pages workflow.
+  It reuses the main deployment guards and checks out the already verified
+  E-Track source `59131a3e`, with Trace's existing secrets kept inside its runner.
+  Main/release branches, secret values, protection rules and App sources are
+  unchanged. Branch trigger inspection and `[skip ci]` prevent App/firmware builds.
+- [Trace run 43996459438](https://github.com/Eitan-S-23/Trace/actions/runs/43996459438)
+  actually executes its exact Admin project GET and returns HTTP 403/code 10000.
+  Both dependency installs and both Pages deployments are skipped. This is not
+  a missing-secret assertion, successful deployment or another E-Track-token retry.
+  The original full log is `keyring-tracelogs-01/job-133749622535.log`; dispatch and
+  run/step receipts are in `keyring-tracepages-01/` and `keyring-tracestatus-01/`.
+- `cloud/keyring-cloud-lineage-01/result.json` traces five named inputs directly
+  from successful local deployment scripts. They contain three distinct OAuth
+  inputs; their exact current Admin GETs return HTTP 401/code 10000. Two duplicate
+  inputs were not retried. Only sanitized provenance/expiry/equality observations
+  are public; configuration files were not modified and values/hashes not exposed.
+- `cloud/keyring-cloud-standard-01/result.json` records the installed Wrangler's
+  supported token/global-key environment names for the actual SU user, machine
+  and current process, the legacy/XDG configuration locations and primary
+  root/App/service dotenv paths. No untested input was found at these named
+  locations. There was no arbitrary private-cache scan, new login, token creation,
+  permission expansion or credential export.
+- Source syntax was checked; the new workflow parsed with installed PyYAML after
+  the optional Node YAML package proved unavailable. No package installation or
+  product-test replay was used for that local parser check. The actual Actions
+  run independently parsed and executed the deployment preflight.
+
+Pages remain NOT_DEPLOYED for this batch. The remaining owner-dependent input is
+the protected name/location or restoration of an existing Pages-capable route,
+not another general authorization and not a mandatory new-token request. Preserve
+the successful packages, schema, Worker, historical delta and original failures.
+Do not automatically dispatch either denied repository route again.
+
+The root-level [deployment memory](../../CLOUDFLARE-DEPLOYMENT.md) records the exact
+targets, existing inputs, normal commands, verification and these unresolved
+results. Its successful-deployment checkpoint remains incomplete. Root and App
+`AGENTS.md` now point to it; the App's older automatic-browser-login instruction
+was removed rather than left to contradict the corrected root rule.

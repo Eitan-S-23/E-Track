@@ -1,5 +1,17 @@
 # Agent Build Guide
 
+## Cloudflare Deployment: Read First
+
+Before any Cloudflare backend/Pages deployment or credential/login request,
+read [CLOUDFLARE-DEPLOYMENT.md](CLOUDFLARE-DEPLOYMENT.md) in this project root.
+It identifies existing local/GitHub credential routes, exact targets, supported
+commands and live verification. Reuse existing authority; do not automatically
+request browser login after a 403 or rebuild an App to unblock a Pages deployment.
+Its dated unresolved state is not a successful deployment claim. This entry
+supersedes older automatic-login instructions in component notes.
+
+## Firmware Overview
+
 The production F435 firmware is built with GCC through the generated CMake
 project. Keil ARM Compiler 5 remains an auxiliary path for local hardware
 debugging, toolchain comparison, and compatibility checks. Agents must not

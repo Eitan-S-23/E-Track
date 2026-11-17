@@ -62,7 +62,7 @@
 
 ### APP-ADMIN-UX-01
 
-状态: 安装包已入库、源码与 Worker 已交付；页面部署凭据待核对 ｜ 认领: Codex root / 2026-11-17
+状态: 安装包已入库、源码与 Worker 已交付；现有页面部署入口被拒，Pages 未上线 ｜ 认领: Codex root / 2026-11-17
 
 - 用户已要求开始执行汇总的 App 与后台改进：主页权限入口、公告自动提醒/发布时间/置顶、公告与每日升级弹窗协调、后台公告编辑弹窗、Android/Windows/iOS 分类、版本批量删除、通知中心删除，以及进行中任务的取消/取消并重新触发图标按钮。
 - 所有新增界面沿用现有设计与组件；图标支持触屏长按、鼠标悬停、键盘聚焦提示，长按松手不执行操作。真实取消未确认前不得重新触发，旧任务已成功则直接展示结果。
@@ -73,7 +73,8 @@
 - 管理页面与 Public Pages 仍未部署新版本：原页面 HTML 尚旧，Public iOS 公告接口仍返回 400；Worker 三平台公告接口均为 200。原组织 SSO 和后台 owner 登录已实测正常，但已检查的 Pages OAuth 副本续期失败，已检查 API 凭据的 Pages 接口返回 403。这不等于用户没有授权；此前把“用户重新登录”作为唯一前置的结论已撤回。
 - 续办已核对另一条既有 GitHub 发布凭据路线：页面流程 `40e450c6` 的 18 项保护检查通过，实际 run `43978919787` 在 Pages 只读检查返回 `403/10000`，两个页面部署及依赖安装均未执行。`login-03` 等待回调超时，链接已失效；`cloud/keyring-cloud-live-02/` 复查原安装包、通道和 29 条差分任务不变。失败原件保留，不据此重建安装包、重跑迁移或成功任务。
 - 用户纠正后补查本地管理凭据、正确的原 Trace 目录、原 provisioning 输入及官方 Wrangler 默认配置。当前主项目令牌 active，但直连/代理的 Pages GET 均为 403；原 Trace 输入与已测令牌重复，本地 provisioning 的 Pages GET 也为 403；默认配置只在项目内副本尝试续期，仍失败，未改原文件。当前缺口是定位用户所指的现有 Pages 发布凭据/适用范围，不是重新授权或创建令牌。详见 [CF-PAGES-01](docs/agent-collaboration/credential-registry.md#cf-pages-01-pages-deployment-input-reconciliation)。
-- 需求、原始失败、已交付项和剩余登录步骤见 [本批记录](docs/ota-exec-notes/APP-ADMIN-UX-01.md#authorized-delivery-2026-11-17)。不把候选入库或 Worker 部署当作整批页面已上线；iOS 分类不等于已具备 iOS 包发布能力。
+- 进一步核对了两个仓库的现有 secret/environment 和历史成功的本机 Pages 授权。原 Trace 使用其自有 secret 的 run `43996459438` 也在精确 Pages GET 返回 `403/10000`，未执行依赖安装或部署；五个有来源的本机 OAuth 文件去重为三份，当前 GET 均返回 `401/10000`。标准用户/机器环境和配置位置未发现另一可用入口。没有重建 APP、重新登录、导出/替换密钥或改动已有差分任务。
+- 部署流程与已核实的未完成状态已写入根目录 [CLOUDFLARE-DEPLOYMENT.md](CLOUDFLARE-DEPLOYMENT.md)，根目录和 App 的 AGENTS 入口已统一，不再把“失败就登录”当自动处理。当前需要定位或恢复既有的 Pages 发布凭据，不是再次授权 agent。新增回执见 [现有本机/GitHub 路线核对](docs/ota-exec-notes/APP-ADMIN-UX-01.md#existing-local-and-github-routes-2026-11-17)。不把候选入库或 Worker 部署当作整批页面已上线；iOS 分类不等于已具备 iOS 包发布能力。
 
 ### ADMIN-ACTION-CONTROLS-01
 
