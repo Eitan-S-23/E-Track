@@ -4,12 +4,100 @@ Read this file before deploying the E-Track backend or asking the owner for
 Cloudflare credentials. It lives at the project root deliberately. Read the
 primary checkout's copy, not only an old task worktree's copy.
 
-## Current State: Pages Not Yet Deployed
+## Current State: Actions Deployment Verified 2026-11-18
 
-Updated 2026-11-17. APP-ADMIN-UX-01's App packages, migration 0014 and Worker
-deployment succeeded. Its new Admin and Public Pages have **not** been deployed.
-The procedure below is the supported route, not a claim of a successful new
-Pages deployment. Do not mark this incident complete until the readbacks pass.
+The existing `E_TRACK_CI` repository Secret is now used by the published workflow.
+Actions run [44186088340](https://github.com/Eitan-S-23/E-Track/actions/runs/44186088340)
+successfully deployed the original Worker, Admin and Public targets from
+`28459a89fcd6792611052cb601b231bb947bcc6d`. This is an executed Actions deployment,
+not just a credential probe or a local-source upload. No token was recreated,
+rotated or exported from the provisioning input; legacy R2 consumers are unchanged.
+
+| Component | Verified live identity |
+| --- | --- |
+| Worker version | `153bfa20-6c68-488a-93cc-1f027cc808d0` |
+| Admin deployment | `a5afcc59-b12e-452b-a5a4-0ba0d2aa7def` |
+| Public deployment | `ec8b50c6-b436-41ca-a7b6-0a309a7fef13` |
+| D1 schema | `0015_delta_file_deletion.sql`, applied once; column and both retirement guards verified |
+
+Native backend CI [44184804298](https://github.com/Eitan-S-23/E-Track/actions/runs/44184804298)
+passes on that exact source: 463 native Worker tests, 255 browser tests and
+60 deployment/Public/Access contracts, plus all three TypeScript checks.
+Real owner-session readback verifies the served HTML and all eight JS/CSS files
+against committed bytes. Admin releases, announcements and the 106 delta
+candidate return 200; original App signing and dispatch are configured. Public
+Android/Windows/iOS announcements return 200. Original Worker settings, schedules,
+Pages runtime configuration, four channel pointers and 37 existing delta jobs
+match the pre-deployment snapshot. Generated Pages config hashes are recorded
+separately. No real deletion, cancellation, channel promotion or device operation
+was performed.
+
+App `1.0.80+106`, source `8011709906af2dd8a9178f458759d286b7f89f9f`, has successful
+original-signed APK and Windows builds and is registered as an R2-backed candidate.
+It is not automatically promoted to Stable/Beta. App codec remains VCDIFF; the
+MCU-core size comparison did not implement client decoding or qualify a mobile rollout.
+
+Receipts: `.cache/app-admin-ux-20261117/keyring-artifacts-02/`,
+`keyring-logs-16/`, `cloud/keyring-cloud-delivery-03/04/` in the same parent,
+and [the delivery closeout](docs/ota-exec-notes/APP-ADMIN-UX-01.md#follow-up-delivered-through-actions-2026-11-18).
+Earlier LOCAL_PENDING and denied-route statements below are dated history,
+superseded by this delivery rather than rewritten as successful earlier attempts.
+
+### Preserve Named Worker Environments
+
+The first run `44183120496` applied 0015 and uploaded the intended Worker code,
+then correctly failed its runtime comparison: flattening `env.staging` removed
+`cf:service=trace-update-service-dev` and `cf:environment=staging`. Variables,
+secret slots, bindings, schedules and business rows were unchanged. This was a
+deployment-adapter defect, not a token denial. Pages steps were skipped.
+
+The fix retains the original named configuration and invokes Wrangler with
+`--env staging`. Do not flatten it or ignore all tags to hide the mismatch.
+Missing standard environment labels can be restored from the pinned original
+service/environment; conflicting labels and every other runtime/custom-tag
+change remain errors. The successful repair records `migrated=false`, an empty
+pending-migration list, `environmentLabelsRestored=true` and `runtimePreserved=true`.
+Its `configurationUnchanged=false` is relative to the intervening broken-label
+snapshot; the final separate live readback matches the original pre-deployment
+settings completely. No already-applied SQL or App build was repeated.
+
+The earlier failure and both sanitized artifact sets remain preserved. Failure
+diagnostics retain provider codes without exposing credentials. The regression
+suite covers environment grouping, conflicting/missing labels, migration reuse,
+partial failures and source/runtime verification. This is an operational lesson
+and development regression, not independent product acceptance.
+
+## Earlier Pages Delivery: 59131a3e
+
+Updated 2026-11-17 after the owner's deployment request and retry. Both Pages
+projects now serve source `59131a3ef0712d46e7b17694d585371b751ab7ba`:
+
+| Component | Verified canonical deployment |
+| --- | --- |
+| Admin | `63cdf429-13dc-41b4-aa93-966755ee9d79` |
+| Public | `3865fc8c-8c36-4247-afbf-408b1a8e35b1` |
+
+Both exact project GETs report the expected full source SHA and successful deploy
+stage. Production/preview runtime configuration, Access secret slots, bindings
+and delta workflow references are unchanged. Only generated
+`wrangler_config_hash` metadata changed; both original values are retained.
+The real existing Admin session returns `owner`; served HTML plus all seven
+JS/CSS files match source bytes. Public Android/Windows/iOS announcements return
+HTTP 200, including the previously failing iOS route. Channels, all 29 delta jobs
+and the original 1.0.79 candidate/R2 identities are unchanged.
+
+Original receipts: `.cache/app-admin-ux-20261117/cloud/`, especially
+`pages-deployment-readback-01.json`, `keyring-cloud-admin-02/`,
+`keyring-cloud-public-02/`, `keyring-cloud-renew-03/` and
+`keyring-cloud-live-06/result.json`. See the
+[deployment closeout](docs/ota-exec-notes/APP-ADMIN-UX-01.md#pages-deployed-and-verified-2026-11-17).
+This record is LOCAL_PENDING on primary main `1ff996b6`; deployment is complete,
+but these documentation changes have not been committed or pushed.
+
+### Preserved Earlier Failures
+
+The following observations preceded the successful local deployment. They do not
+describe the current Pages source or establish that the CI credentials recovered.
 
 - E-Track Pages run [43978919787](https://github.com/Eitan-S-23/E-Track/actions/runs/43978919787)
   returned HTTP 403 / code 10000 at the exact Admin project GET.
@@ -17,17 +105,190 @@ Pages deployment. Do not mark this incident complete until the readbacks pass.
   independently used Trace's existing repository secrets and returned the same
   denial. Dependency installation and both deploy steps were skipped.
 - The last successful local Pages deployment used Wrangler OAuth, not either
-  repository's CI token. Access tokens from its named retained configurations
-  now return HTTP 401; the latest recorded **access-token** expiry is
+  repository's CI token. Access tokens from those retained configurations
+  returned HTTP 401; their latest recorded **access-token** expiry was
   `2026-11-14T19:21:28.012Z`. This is not the refresh token's or overall grant's
   expiry. Prior normal refresh failures remain preserved; their exact cause is
   not established by the access-token timestamp.
-- The owner's task authorization already exists. The remaining prerequisite is
-  identifying/restoring an existing Pages-capable protected input, not another
-  general authorization, a new APK, or automatically creating a new token.
+- The owner's task authorization already existed. The fresh user-approved OAuth
+  input below restored exact Admin/Public Pages reads and was subsequently used
+  for the completed deployment. No APK rebuild or new API token was needed.
 
 Full dated observations and original receipts:
 [APP-ADMIN-UX-01](docs/ota-exec-notes/APP-ADMIN-UX-01.md#existing-local-and-github-routes-2026-11-17).
+
+### Actions Credential History Check 2026-11-18
+
+Read-only investigation, LOCAL_PENDING. The currently retained dedicated Pages
+workflow history contains six Trace runs and one E-Track run, all failed. Five
+Trace failures date to July 2-5, before this incident. There is no demonstrated
+transition from successful Pages CI to a newly broken credential in this history.
+The July logs now return HTTP 410, so their individual failure causes remain
+unknown; the November runs explicitly fail the exact Admin GET with 403/10000.
+
+The recent successful Trace run `43969069993`, Android job `133661964252`, used
+`secrets.CLOUDFLARE_API_TOKEN` for R2 upload/readback, not Pages deployment.
+Candidate registration separately used `TRACE_DEPLOY_TOKEN`. The older Pages
+workflow's credential-check step only checked that variables were nonempty.
+None of these results qualifies Pages permissions.
+
+Repository Secret metadata shows no recent replacement: Trace's token was last
+updated `2026-06-29T13:49:09Z`, E-Track's `2026-11-07T17:48:02Z`. Historical setup
+documentation describes the CI input as an R2 token and separately warns about
+Pages permissions versus browser OAuth. A longstanding Pages authorization or
+account-scope gap is the leading explanation, not a confirmed policy diagnosis.
+Metadata cannot establish unchanged Cloudflare policy or the encrypted values;
+expiry, revocation and the precise missing permission remain unproved.
+
+Evidence, limits and the bounded next check are recorded in
+[the task note](docs/ota-exec-notes/APP-ADMIN-UX-01.md#actions-credential-history-check-2026-11-18).
+No Secrets, token policies or remote resources were changed, and no workflow was
+dispatched. Completed local Pages deployment remains separate from CI readiness.
+
+### Historical Green Pages Run Was A Masked Failure
+
+Further read-only history check, 2026-11-18, LOCAL_PENDING. The six-plus-one count
+above covers the dedicated deployment workflow, not every historical job. An
+older `deploy-admin` job briefly existed inside `cloudflare-update-service.yml`.
+Trace run [28539578982](https://github.com/Eitan-S-23/Trace/actions/runs/28539578982),
+job `84609678528`, reports success, but its retained warning says:
+`Cloudflare API token could not deploy Pages.`
+
+At source `7705b36e652e5566c8d11aaaa6443bab44d52805`, the workflow caught a failed
+`npx wrangler pages deploy`, printed that warning, and executed `exit 0`. The
+warning proves this failure branch executed: the green job was not a successful
+Pages deployment. Its suggestion to add Pages Edit was generic workflow wording,
+not a provider-issued token-policy diagnosis. The preceding run `28539132115`
+failed normally; rollback `01ad9854` then removed this automatic deployment job.
+
+No genuine successful Pages deployment via Actions has been established in the
+checked records. Do not repeat the earlier proposal to redeploy merely to diagnose
+the already denied CI route. Investigate the existing input's authorization;
+the current exact Admin GET denial remains distinct from an unconfirmed policy.
+See [the original annotation and source evidence](docs/ota-exec-notes/APP-ADMIN-UX-01.md#historical-green-pages-run-2026-11-18).
+
+### Actions Repair In Progress 2026-11-18
+
+The owner requested resolution, not another deployment probe. Fresh named local
+token verification is active. Reading its user policy with the existing local
+provisioning input returns 403/9109. The account-policy route also returns
+403/9109 through that reader; the target token's account self-read returns
+404/1003. These results do not establish the policy or encrypted GitHub Secret
+values. Owner-side inspection of the existing token remains necessary; no token,
+scope or Secret was changed. Receipts: `cloud/keyring-cloud-policy-01/02/` under
+`.cache/app-admin-ux-20261117/`.
+
+The existing Pages workflow now has a LOCAL, UNPUSHED fix to ignore only each
+environment's generated `wrangler_config_hash` in readback comparison. Runtime
+variables, secret slots and bindings remain strict. The existing checks workflow
+runs the new regression test; 33 local tests pass. Secret names and one-click
+entry are unchanged. This local fix is not CI recovery or a deployment claim.
+
+### E-Track-CI Pages Reads Restored 2026-11-18
+
+The owner explicitly identified `e-track-ci` as the token whose permissions were
+updated. Fresh checks through its registered protected `p41-ci-token.txt` input
+now pass for both exact Admin and Public Pages projects. No OAuth or alternate
+API token was substituted. Original 403 results remain preserved; new receipts
+are `.cache/app-admin-ux-20261117/cloud/keyring-cloud-pagesprobe-04/result.json`
+(Admin) and `keyring-cloud-pagesprobe-05/result.json` (Public) in the same parent.
+
+These are successful project reads, not an executed deployment or proof of all
+write permissions. No GitHub Secret was replaced and no workflow was dispatched.
+The repository-level `CLOUDFLARE_API_TOKEN` value cannot be read back; its local
+source is distinct from `e-track-ci`. Binding the verified token to that existing
+Secret still requires the owner's decision. The local workflow fix above remains
+uncommitted/unpushed. This capability update is also LOCAL_PENDING.
+
+### Named GitHub Secret Created 2026-11-18
+
+The owner requested using the verified local `e-track-ci` and matching its name
+in GitHub. GitHub Secret names allow underscores, not hyphens, and are stored in
+uppercase, so the Actions name is `E_TRACK_CI`; the Cloudflare token remains
+`e-track-ci`. At `2026-11-17T18:01:05Z`, the existing GitHub CLI successfully set
+this repository Secret in `Eitan-S-23/E-Track` from the protected local input via
+stdin. No plaintext token was written to logs or passed in command arguments.
+Metadata readback confirms the new Secret; all other Secret metadata is unchanged.
+Receipt: `.cache/app-admin-ux-20261117/cloud/keyring-cloud-githubsecret-01/result.json`.
+
+The local Pages workflow now maps `secrets.E_TRACK_CI` to Wrangler's standard
+`CLOUDFLARE_API_TOKEN` variable in preflight, both deploy steps and readback.
+Combined workflow/Public/Access regressions pass 34 tests; six fixture-only
+adapter checks cover the bounded secret update and failure handling.
+The old repository `CLOUDFLARE_API_TOKEN` is preserved because App and MCU R2
+release workflows still consume it. No Trace or rehearsal Secret was changed.
+
+The workflow and records remain UNCOMMITTED/UNPUSHED. The remote Pages workflow
+therefore still uses its old Secret reference; do not claim Actions cutover or
+deployment success. Commit/push of the bounded workflow changes is the next
+owner decision. No workflow dispatch, Cloudflare deployment or token rotation
+occurred during this credential-name migration.
+
+### OAuth Restored After Explicit Owner Request
+
+Local observation, 2026-11-17 12:54..13:04 UTC; pending repository delivery.
+The original grant observations below are historical. Later normal renewal was
+verified, most recently by `keyring-cloud-renew-03/` at 15:02 UTC and an exact
+Public Pages GET. This establishes working renewal, not a fixed overall lifetime.
+The owner explicitly requested a fresh login in the already-open Edge, a longer
+callback wait, the longest supported credential authorization and a real Feishu
+mention when browser action was needed. Reused the Huawei bot-creation WMI route,
+not the failed direct cross-session Edge launcher. The current Feishu session's
+requesting user received a native text-message mention through cc-connect.
+
+- New protected input:
+  `.cache/app-admin-ux-20261117/cloud/private/xdg-current/.wrangler/config/default.toml`.
+  Original global and historical source configurations were not overwritten.
+- `/user` confirms `tangjichentudou@gmail.com`; exact existing Admin and Public
+  project GETs in account `af6dd848e6a21f1cd26d44b1b656af7b` both return HTTP 200.
+  Scopes are `account:read`, `user:read`, `pages:write` and `offline_access`.
+  No GitHub secret replacement, new API token, scope expansion, deployment or
+  business mutation was performed.
+- The new access token expires at `2026-11-17T13:54:43.533Z`, which is 21:54:43
+  Asia/Shanghai. Its refresh token is present. OAuth exposes no requested lifetime
+  option here: access-token expiry is provider-controlled, while `offline_access`
+  permits normal renewal. Refresh-grant lifetime and a successful future renewal
+  are not established by the short access-token timestamp or token presence.
+- Wrangler's internal callback deadline was 120 seconds, independently of the
+  outer runner. A login-only preload extends that exact timer to 1800 seconds;
+  outer CLI/adapter bounds are 1920/2040 seconds. No installed dependency or
+  frozen source was edited. Timer and completed-grant regression checks pass.
+- Wrangler logged success and wrote the grant, but its CLI did not exit. After
+  the identity and both Pages GETs passed, only the two owned CLI processes were
+  stopped. The raw exit-1 receipt is retained; it does not revoke or disprove the
+  independently verified grant. Edge remained open. The local wrapper now records
+  authorization completion separately and bounds this post-grant shutdown.
+
+Receipts: `.cache/app-admin-ux-20261117/cloud/keyring-cloud-login-07/`, especially
+`oauth-verification.json` and `cli-closeout.json`; browser/mention receipts are in
+`.cache/app-admin-ux-20261117/edge-wmi-20261117/`. Earlier timeouts, failed native
+launches and their external crash artifacts remain preserved, not cleaned.
+Reuse this named project-private OAuth input for subsequent authorized Pages work.
+Use its current token, not a token copied from an earlier receipt. Renew serially
+in this canonical configuration when needed; do not reopen browser authorization
+merely because an access token expires.
+
+### Deployment Runner Observations
+
+- On this host, the existing proxy intermittently timed out while direct API
+  reads worked. The local wrapper supports `E_TRACK_CLOUD_DIRECT=1`; controllable
+  caches, temporary files and private Wrangler logs remain project-local.
+- Wrangler 4.105.0 `whoami` does not force renewal of a still-valid access token.
+  An early renewal check blocked the first Admin attempt without uploading.
+  Public's first attempt then encountered actual access-token expiry before
+  upload. Normal renewal restored the same grant; no new login/token was created.
+- Both successful upload CLIs logged `Deployment complete` but remained alive.
+  Exact canonical deployment/source/configuration reads passed before only their
+  owned process trees were stopped. Raw exit-1 receipts remain preserved and are
+  reconciled by the independent remote and live readbacks, not rewritten as exit 0.
+- Pages returns the Durable Object script name as `service`, not `script_name`.
+  Match its namespace ID to the original Worker's binding as well as its class.
+  Record generated `wrangler_config_hash` separately from runtime configuration;
+  every other production/preview field must still match. Nine local wrapper
+  regressions cover this narrow metadata allowance and bounded read-only retries.
+- The unchanged Worker was not redeployed. A new Worker-site GET timed out;
+  Pages-only closeout uses the actual Admin/Public origins rather than making an
+  unrelated Worker-site connection a new deployment prerequisite.
 
 ## Exact Targets
 
@@ -59,12 +320,14 @@ capability and task authorization are separate facts.
 
 | Protected input | Locator and use |
 | --- | --- |
-| E-Track CI token | `.cache/p41-dev-20261015/.cache/cf-auth-input/p41-ci-token.txt`; working Worker/D1 route, not currently a verified Pages route |
+| E-Track CI token | `.cache/p41-dev-20261015/.cache/cf-auth-input/p41-ci-token.txt`; named `E_TRACK_CI` Actions route now verified for the original Worker/D1/Admin/Public operations above |
 | Project management input | `app/bluetooth_flutter_Trace/cloudflare/update-service/.github-actions-secrets.staging.local.json`, field `secrets.CLOUDFLARE_API_TOKEN` |
 | Original standalone Trace input | `D:/github/my/bluetooth_flutter_Trace/cloudflare/update-service/.github-actions-secrets.staging.local.json`; read-only, not `D:/github/my/Trace` |
 | GitHub repository secrets | `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` in `Eitan-S-23/E-Track` and `Eitan-S-23/Trace`; use inside the owning repository's Actions runner, never extract their values |
+| Named backend Actions input | `E_TRACK_CI` in `Eitan-S-23/E-Track`, set from protected `e-track-ci` on 2026-11-18; workflow published and actual deployment `44186088340` verified. Old R2/rehearsal/Trace inputs remain unchanged. |
 | Existing Wrangler user input | `C:/Users/SU/AppData/Roaming/xdg.config/.wrangler/config/default.toml`; read-only source, normal refresh only in a checked project-private copy |
 | Last successful local Pages input | `.cache/p35-integration-20261028/source/.cache/admin-copy-version-20261115-01/ui-rollout/private/xdg-config/.wrangler/config/default.toml`; access token expired, refresh-token expiry not established |
+| Fresh explicitly approved Pages OAuth | `.cache/app-admin-ux-20261117/cloud/private/xdg-current/.wrangler/config/default.toml`; owner identity and both exact Pages GETs verified 2026-11-17, `offline_access` present; normal renewal only within this protected project route |
 | Documented one-month Access SSO | `.cache/p35-integration-20261028/source/.cache/p35-release-available/fw93/login-02/private/home/.cloudflared/sulovehuang.cloudflareaccess.com-org-token`; existing organization/site-login route, not a Pages management API token |
 
 ### One-Month Session Is Not Expired
@@ -118,7 +381,9 @@ for dated capability evidence and confidentiality/authorization boundaries.
 3. Prefer the tracked manual workflow
    [.github/workflows/deploy-cloudflare-admin.yml](.github/workflows/deploy-cloudflare-admin.yml).
    It pins `source_sha`, checks existing targets, preserves Access secrets and
-   optionally deploys Public Pages with `include_public=true`.
+   optionally deploys Public Pages with `include_public=true`. When Worker or
+   schema inputs changed, `include_worker=true` applies only pending committed
+   migrations and deploys/verifies Worker before either Pages component.
 4. If using a verified local Pages credential instead, run the tracked Node
    helper from the service directory with `--yes --skip-secrets --commit-hash`.
    Do not use the PowerShell wrapper on this host while its startup-cache writes
@@ -131,14 +396,18 @@ for dated capability evidence and confidentiality/authorization boundaries.
    Do not leave the only working procedure in a task cache or chat.
 
 These command templates require a reviewed full SHA in `VERIFIED_SHA`, verified
-credentials and contained output paths. **Do not rerun the currently denied
-credential unchanged.** A dispatch acknowledgement is not deployment success.
+credentials and contained output paths. **Do not repeat a rejected credential
+unchanged.** A dispatch acknowledgement is not deployment success.
 
 From the project root, with the existing `Eitan-S-23` GitHub identity:
 
 ```bat
 gh workflow run deploy-cloudflare-admin.yml --repo Eitan-S-23/E-Track --ref main -f project_name=trace-update-admin-staging -f branch=main -f source_sha=%VERIFIED_SHA% -F include_public=true
 ```
+
+For an authorized Worker/schema change as well, add `-F include_worker=true`.
+The pinned-source native CI must pass first. Do not use this flag to replay an
+unchanged successful Worker merely because a later Pages step needs recovery.
 
 From the service directory, for an already verified local route:
 
@@ -162,7 +431,7 @@ release channel as a deployment workaround.
 | Observation | Required action / conclusion |
 | --- | --- |
 | New canonical deployment ID, expected full source SHA and successful stage | Deployment identity verified; continue with live checks |
-| Production/preview configuration unchanged | Existing bindings, roles, secrets and execution references preserved |
+| Production/preview runtime configuration unchanged; generated hash metadata recorded separately | Existing bindings, roles, secrets and execution references preserved |
 | Real Admin Access session succeeds and served HTML/JS match the intended bytes | New Admin page actually served; a generic HTTP 200 is not enough |
 | Affected Public APIs pass, including iOS announcements for this batch | Public Functions update verified; a Worker-only HTTP 200 is not enough |
 | Token-management GET returns 403/9109 | That management read is denied; do not infer that publishing credentials are absent |

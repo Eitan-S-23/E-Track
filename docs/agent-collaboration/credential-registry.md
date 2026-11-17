@@ -21,6 +21,7 @@ overwriting old failures or widening authority.
 | Owner | Existing Cloudflare credential owner / user; repository configuration owner `Eitan-S-23`. The GitHub name is not proof of a Cloudflare identity or Admin role. |
 | Protected local input | `D:/github/my/E-Track/.cache/p41-dev-20261015/.cache/cf-auth-input/p41-ci-token.txt` |
 | GitHub consumer | Secret `FIRMWARE_REHEARSAL_CLOUDFLARE_API_TOKEN` in `firmware-rehearsal`; workflow maps it to `CLOUDFLARE_API_TOKEN` |
+| Named backend consumer, 2026-11-18 | Repository Secret `E_TRACK_CI` in `Eitan-S-23/E-Track` is used by the published Worker/D1/Admin/Public workflow. Actual Actions deployment `44186088340` and live source/configuration readbacks succeeded; no secret replacement was needed during deployment. |
 | Other protected input, NOT interchangeable | `D:/github/my/E-Track/.cache/p41-dev-20261015/.cache/cf-auth-input/token.txt` is the local provisioning credential, not the dedicated CI token and not for CI export |
 | Known secret metadata | Rehearsal secret `updated_at=2026-10-16T06:11:27Z`, observed 2026-10-18; metadata does not expose or verify stored bytes |
 | Historical OTA test scope | `P41-CF-CREDENTIAL-02` permits the existing-account dedicated token for the exact P4-1 test Worker/D1/R2; P4-4 consumes that same test configuration. This test-resource exception is distinct from the project-wide agent-use authorization above. |
@@ -41,6 +42,18 @@ different task's approvals, authorize permission expansion/rotation, or remove
 production gates. Token values stay in protected inputs, never in chat or evidence.
 
 ### Provenance And Observed Capabilities
+
+- Actions cutover is now executed, not pending: the owner-authorized
+  [44186088340](https://github.com/Eitan-S-23/E-Track/actions/runs/44186088340)
+  uses `E_TRACK_CI` for the original Worker, D1 and both Pages targets on source
+  `28459a89fcd6792611052cb601b231bb947bcc6d`. Exact deployed sources, original
+  runtime configuration and real owner/Public readbacks pass. The prior run
+  `44183120496` also applied 0015, but failed a Worker environment-label check;
+  the adapter was repaired without reapplying the migration or changing this
+  credential. This is scoped operation evidence, not a promise about token
+  lifetime, account-wide powers or unrelated production authority. No new login,
+  token rotation, legacy R2/Trace/rehearsal Secret change or provisioning-token
+  export occurred. See [current deployment memory](../../CLOUDFLARE-DEPLOYMENT.md#current-state-actions-deployment-verified-2026-11-18).
 
 - Owner-confirmed alias and protected locator:
   [P4-3 Updated E-Track-CI Authorization](../ota-exec-notes/P4-3-implementation-2026-10-17.md#updated-e-track-ci-authorization),
@@ -67,6 +80,44 @@ production gates. Token values stay in protected inputs, never in chat or eviden
   `docs/ota-exec-notes/P4-4-configuration-2026-10-18.md`, E1/E3, and the unchanged
   `docs/ota-exec-notes/P4-4-integration-2026-10-18/initial.zip`. Read via
   `git show COMMIT:PATH` if that task record is not yet on main.
+
+### Pages Reads Restored After Owner Permission Update
+
+2026-11-18, LOCAL_PENDING. The owner explicitly confirmed editing `e-track-ci`.
+Fresh exact Admin and Public Pages project GETs using the registered
+`p41-ci-token.txt` input both pass. No OAuth or repository-source management
+token was substituted. Original denials remain historical; reuse the new
+receipts under `.cache/app-admin-ux-20261117/cloud/`:
+`keyring-cloud-pagesprobe-04/result.json` (Admin) and
+`keyring-cloud-pagesprobe-05/result.json` (Public).
+
+This qualifies project-read access, not a deployment or all write permissions.
+No Secret replacement, token creation/rotation, workflow dispatch or deployment
+was performed. The separate repository `CLOUDFLARE_API_TOKEN` cannot be read
+back; its named local source is not `e-track-ci`. Owner-approved binding of this
+token to that existing Secret is distinct from its current Pages capability.
+See the [updated deployment entry](../../CLOUDFLARE-DEPLOYMENT.md#e-track-ci-pages-reads-restored-2026-11-18).
+
+### Named Pages Secret Migration
+
+Owner-requested migration, 2026-11-18. Cloudflare retains the name `e-track-ci`;
+GitHub uses `E_TRACK_CI` because its Secret names exclude hyphens and normalize
+case. The existing GitHub CLI set that exact repository Actions Secret using
+the protected `p41-ci-token.txt` input through stdin. Metadata readback confirms
+creation/update at `2026-11-17T18:01:05Z`; no value was read back or exposed.
+Receipt: `.cache/app-admin-ux-20261117/cloud/keyring-cloud-githubsecret-01/result.json`.
+
+Only the existing Admin/Public Pages workflow is being migrated. Its four local
+bindings now reference `secrets.E_TRACK_CI`, preserving Wrangler's environment
+variable name. The old `CLOUDFLARE_API_TOKEN` remains untouched for App/MCU R2
+release consumers. The rehearsal environment, original Trace repository,
+provisioning token and Cloudflare token policy were not changed by this action.
+
+GitHub Secret creation is complete; workflow/record commit and push remain
+LOCAL_PENDING. No Actions run or deployment occurred. Do not repeat the secret
+write just because the workflow has not been published. This supersedes the
+earlier undecided Pages binding, not the historical credential-denial receipts
+or separate production/firmware permission boundaries.
 
 ### Recurrence And Correction
 
@@ -104,11 +155,11 @@ New receipts are under `.cache/app-admin-ux-20261117/cloud/keyring-cloud-sourcep
 `keyring-cloud-sourcecheck-01/02/03` and `keyring-cloud-renewglobal-01/`.
 No values, token identifiers or credential-bearing hashes belong in this registry.
 
-Current Pages delivery is unresolved, not complete. Reconcile the owner's known
-publishing credential by its name/protected locator or a redacted target/scope
-receipt. Do not conflate task authorization, one token's capability and an OAuth
-copy's status; do not prescribe new login, new credentials or expanded scope as
-the automatic response to the preserved refusals.
+At that earlier checkpoint Pages delivery was unresolved. The subsequent
+owner-approved restoration and completed deployment below supersede that status,
+not the original refusals. Do not conflate task authorization, one token's
+capability and an OAuth copy's status; new login, credentials or expanded scope
+are not the automatic response to a refusal.
 
 ### Owning Repository And Standard Input Readbacks
 
@@ -131,3 +182,57 @@ is absent; the official XDG file remains the already checked July-expired input.
 The primary root/App/service `.env` and `.env.local` paths are absent. These are
 bounded named-source checks, not an exhaustive private-file search or proof that
 the owner has no other Pages-capable credential.
+
+### Restored OAuth And Completed Pages Deployment
+
+2026-11-17, LOCAL_PENDING operational update. The owner explicitly approved the
+earlier browser authorization, then requested deployment and retry. The canonical
+protected input is
+`.cache/app-admin-ux-20261117/cloud/private/xdg-current/.wrangler/config/default.toml`,
+with `account:read`, `user:read`, `pages:write` and `offline_access` for the existing
+account. Original global/historical configurations remain read-only.
+
+Normal renewal in that canonical project-private configuration succeeded; the
+latest renewal at 15:02 UTC is recorded in `cloud/keyring-cloud-renew-03/` under
+`.cache/app-admin-ux-20261117/`. Exact Pages reads then succeeded. Admin deployment
+`63cdf429-13dc-41b4-aa93-966755ee9d79` and Public deployment
+`3865fc8c-8c36-4247-afbf-408b1a8e35b1` both bind the full source
+`59131a3ef0712d46e7b17694d585371b751ab7ba` and successful stage. Real owner/static
+source and three-platform Public API checks pass; see the
+[deployment closeout](../ota-exec-notes/APP-ADMIN-UX-01.md#pages-deployed-and-verified-2026-11-17).
+
+No new browser login, API token, scope expansion or GitHub secret replacement was
+performed during the retry. These observations qualify the local Pages route,
+not recovery of either denied CI input, Worker write permission for this OAuth,
+or a fixed one-month/permanent grant lifetime. Keep renewal serial, preserve the
+latest rotated configuration, and distinguish a hung CLI's raw exit status from
+the independently verified authorization/deployment. No renewed value belongs in
+this registry or any public log.
+
+### Actions Credential History Check 2026-11-18
+
+Read-only, LOCAL_PENDING. Retained dedicated Pages histories contain six failed
+Trace runs and one failed E-Track run, including five Trace failures from July.
+The recent successful Trace `43969069993` used its repository
+`CLOUDFLARE_API_TOKEN` for R2 upload/readback; registration used the separate
+`TRACE_DEPLOY_TOKEN`. Neither establishes successful Pages deployment.
+
+Secret metadata still records token updates at `2026-06-29T13:49:09Z` (Trace) and
+`2026-11-07T17:48:02Z` (E-Track). These are not token-policy or expiry readbacks.
+The November exact Admin GET denials remain 403/10000; July logs are unavailable
+(HTTP 410). A longstanding Pages authorization/account-scope gap is suspected,
+not a proven precise permission list or a diagnosed recent expiry/revocation.
+The named local token's active result does not verify GitHub's encrypted bytes.
+
+See [original evidence and limits](../ota-exec-notes/APP-ADMIN-UX-01.md#actions-credential-history-check-2026-11-18).
+Next confirmation is a redacted view of the existing token's Pages permissions,
+account scope and conditions, reconciled to its protected CI input, not an
+automatic new token, browser login or unchanged failed deployment retry.
+
+Further history check, 2026-11-18: Trace's older combined checks workflow did
+contain a green `Deploy Admin Pages` job, `84609678528` in run `28539578982`.
+Its retained `Admin Pages deploy unavailable` annotation proves the command
+failed; source `7705b36e` deliberately returned `exit 0` after that warning.
+This is not historical Pages capability evidence. The warning's permission
+suggestion is not an actual token-policy readback. See the
+[historical green-run correction](../ota-exec-notes/APP-ADMIN-UX-01.md#historical-green-pages-run-2026-11-18).

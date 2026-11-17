@@ -62,7 +62,13 @@
 
 ### APP-ADMIN-UX-01
 
-状态: 安装包已入库、源码与 Worker 已交付；现有页面部署入口被拒，Pages 未上线 ｜ 认领: Codex root / 2026-11-17
+状态: 进行中（本批开发与交付完成；独立验收/设备未执行） ｜ 认领: Codex root / 2026-11-17 ｜ 更新: 2026-11-18
+
+- 最新交付：`1.0.80+106`，App 源码 `8011709906af2dd8a9178f458759d286b7f89f9f`，E-Track `44175714326` 与原签名 Trace `44175951793` 均整体成功；APK、Windows EXE/ZIP、签名校验、R2 完整回读和候选入库通过。main 已按边界合入 `e7b990c7`，部署配套修正为 `28459a89`，未重建成功安装包。
+- 最新后台：[CI 44184804298](https://github.com/Eitan-S-23/E-Track/actions/runs/44184804298) 通过 463 项原生 Worker、255 项浏览器、60 项部署/Public/Access 契约及三端类型检查。[Actions 部署 44186088340](https://github.com/Eitan-S-23/E-Track/actions/runs/44186088340) 使用 `E_TRACK_CI` 成功发布 Worker/Admin/Public，源码均为 `28459a89fcd6792611052cb601b231bb947bcc6d`。`0015` 只应用一次；首次适配丢失环境标签的问题已修复，失败原件保留，不归咎于 Token。
+- 线上实证：真实 owner、HTML 与 8 个 JS/CSS 文件逐字节匹配；版本、公告、106 差分候选及三平台公共公告 API 均正常。原运行配置、环境标签、Access/资源绑定、4 个发布通道和 37 条差分任务均保持原状态。未发布 Stable/Beta、未真实删除/取消任务或安装设备。当前 App 仍为 VCDIFF，算法切换与手机性能验证未实施。详见 [追加交付收尾](docs/ota-exec-notes/APP-ADMIN-UX-01.md#follow-up-delivered-through-actions-2026-11-18)。
+
+以下保留各执行阶段的历史快照；其中“尚未部署”“LOCAL_PENDING”等旧状态已由上述最新交付更新，不把旧失败改写为成功。
 
 - 用户已要求开始执行汇总的 App 与后台改进：主页权限入口、公告自动提醒/发布时间/置顶、公告与每日升级弹窗协调、后台公告编辑弹窗、Android/Windows/iOS 分类、版本批量删除、通知中心删除，以及进行中任务的取消/取消并重新触发图标按钮。
 - 所有新增界面沿用现有设计与组件；图标支持触屏长按、鼠标悬停、键盘聚焦提示，长按松手不执行操作。真实取消未确认前不得重新触发，旧任务已成功则直接展示结果。
@@ -70,18 +76,24 @@
 - 实施分支 `dev/flutter/app-admin-ux-20261117` 已推送 `80cf8a26`；本地接口回归 493 项、完整浏览器回归 244 项通过。最终 App CI `43964808676` 通过（Linux 905 通过/16 跳过，Windows 858 通过/63 跳过，各另有 8 项候选用例）；后台 CI `43964809804` 通过（451 项原生 Worker、公共 Pages 检查及 244 项页面用例）。本地 493 项含 42 项 host-only，不冒充全部原生执行。
 - 原签名 `1.0.79+105`（`59131a3e`）已通过 E-Track `43968850096` 与原 Trace `43969069993`：Android APK、Windows EXE/ZIP、签名检查及 R2 回读/候选入库均成功；固件构建跳过。后台实际存在 `rel_trace_android_v1_0_79`，APK 与清单为 available。未发布 Beta/Stable 通道，未安装设备或生成新差分。
 - App/后台及必要支持文件已按精确源码交付 main `304d01f5`，未带入发布分支的无关固件和冻结证据。迁移 `0014_admin_ux.sql` 已应用一次并回读；原 Worker `54ad084f-1bc3-41a8-bcad-cdc28ff536d4` 已部署，绑定、通道和既有 29 条差分任务保持不变。主线交付复用相同输入的成功 CI/安装包，不重复打包。
-- 管理页面与 Public Pages 仍未部署新版本：原页面 HTML 尚旧，Public iOS 公告接口仍返回 400；Worker 三平台公告接口均为 200。原组织 SSO 和后台 owner 登录已实测正常，但已检查的 Pages OAuth 副本续期失败，已检查 API 凭据的 Pages 接口返回 403。这不等于用户没有授权；此前把“用户重新登录”作为唯一前置的结论已撤回。
+- 用户要求部署并重试后，Admin `63cdf429-13dc-41b4-aa93-966755ee9d79`、Public `3865fc8c-8c36-4247-afbf-408b1a8e35b1` 均确认 `59131a3e` 完整源码与 success。真实 owner 登录、HTML 和 7 个 JS/CSS 文件逐字节核验通过；Public Android/Windows/iOS 公告均为 200，原 iOS 400 已消除。运行配置、Access、绑定和差分工作流引用不变，仅生成型 `wrangler_config_hash` 更新。
 - 续办已核对另一条既有 GitHub 发布凭据路线：页面流程 `40e450c6` 的 18 项保护检查通过，实际 run `43978919787` 在 Pages 只读检查返回 `403/10000`，两个页面部署及依赖安装均未执行。`login-03` 等待回调超时，链接已失效；`cloud/keyring-cloud-live-02/` 复查原安装包、通道和 29 条差分任务不变。失败原件保留，不据此重建安装包、重跑迁移或成功任务。
-- 用户纠正后补查本地管理凭据、正确的原 Trace 目录、原 provisioning 输入及官方 Wrangler 默认配置。当前主项目令牌 active，但直连/代理的 Pages GET 均为 403；原 Trace 输入与已测令牌重复，本地 provisioning 的 Pages GET 也为 403；默认配置只在项目内副本尝试续期，仍失败，未改原文件。当前缺口是定位用户所指的现有 Pages 发布凭据/适用范围，不是重新授权或创建令牌。详见 [CF-PAGES-01](docs/agent-collaboration/credential-registry.md#cf-pages-01-pages-deployment-input-reconciliation)。
-- 进一步核对了两个仓库的现有 secret/environment 和历史成功的本机 Pages 授权。原 Trace 使用其自有 secret 的 run `43996459438` 也在精确 Pages GET 返回 `403/10000`，未执行依赖安装或部署；五个有来源的本机 OAuth 文件去重为三份，当前 GET 均返回 `401/10000`。标准用户/机器环境和配置位置未发现另一可用入口。没有重建 APP、重新登录、导出/替换密钥或改动已有差分任务。
-- 部署流程与已核实的未完成状态已写入根目录 [CLOUDFLARE-DEPLOYMENT.md](CLOUDFLARE-DEPLOYMENT.md)，根目录和 App 的 AGENTS 入口已统一，不再把“失败就登录”当自动处理。当前需要定位或恢复既有的 Pages 发布凭据，不是再次授权 agent。新增回执见 [现有本机/GitHub 路线核对](docs/ota-exec-notes/APP-ADMIN-UX-01.md#existing-local-and-github-routes-2026-11-17)。不把候选入库或 Worker 部署当作整批页面已上线；iOS 分类不等于已具备 iOS 包发布能力。
+- 部署前，用户纠正后补查本地管理凭据、正确的原 Trace 目录、原 provisioning 输入及官方 Wrangler 默认配置。当时主项目令牌 active，但直连/代理的 Pages GET 均为 403；原 Trace 输入与已测令牌重复，本地 provisioning 的 Pages GET 也为 403；默认配置只在项目内副本尝试续期，仍失败，未改原文件。当时缺口是定位用户所指的现有 Pages 发布凭据/适用范围，不是重新授权或创建令牌。详见 [CF-PAGES-01](docs/agent-collaboration/credential-registry.md#cf-pages-01-pages-deployment-input-reconciliation)。
+- 部署前进一步核对了两个仓库的现有 secret/environment 和历史成功的本机 Pages 授权。原 Trace 使用其自有 secret 的 run `43996459438` 也在精确 Pages GET 返回 `403/10000`，未执行依赖安装或部署；五个有来源的本机 OAuth 文件去重为三份，当次 GET 均返回 `401/10000`。标准用户/机器环境和配置位置未发现另一可用入口。该轮没有重建 APP、重新登录、导出/替换密钥或改动已有差分任务。
+- 最新成功记录已本地更新到根目录 [CLOUDFLARE-DEPLOYMENT.md](CLOUDFLARE-DEPLOYMENT.md) 和 [Pages 部署收尾](docs/ota-exec-notes/APP-ADMIN-UX-01.md#pages-deployed-and-verified-2026-11-17)，尚未提交推送。复用此前已恢复的项目私有 OAuth，实际续期成功，无新登录/令牌/密钥替换；CLI 收尾超时与已完成部署分别留证。通道、29 条差分任务和原候选/R2 不变，无 Worker/迁移/安装包重跑或设备操作；iOS 分类不等于 iOS 包发布能力。
+
+- 2026-11-18 凭据命名迁移：用户更新的 `e-track-ci` 已通过 Admin/Public Pages 精确读取；按用户要求，将该受保护输入写入 E-Track 仓库新 Secret `E_TRACK_CI`（GitHub 不支持名称含连字符），远端创建与元数据回读成功。本地 Pages 工作流四处引用已同步，34 项回归通过；工作流及记录仍未提交推送，线上 Actions 尚未切换。旧 `CLOUDFLARE_API_TOKEN` 继续供 App/MCU R2 发布使用，未改动；无新部署。详见 [命名迁移记录](docs/ota-exec-notes/APP-ADMIN-UX-01.md#named-pages-credential-migration-2026-11-18)。
+- 2026-11-18 追加改进：`dev/flutter/app-admin-ux-20261117` 已推送 `cbdf99514f48d1f0f85e77c31e0ad8592a84b1c9`。版本/通知/公告/差分文件采用邻近列表的垃圾桶删除模式；新增公告批删与已停用差分文件删除，保留原包及构建历史；同步无需填写原因，未关联 run 的取消/重试会即时查询并明确反馈；列表边缘可外滚。App 权限入口移至“帮助与反馈”，统计详情从简洁设置入口展开。
+- 本批自测：后台主机 505 项、完整浏览器 255 项通过；Worker/Admin/Public 类型检查通过。Flutter CI [44171579034](https://github.com/Eitan-S-23/E-Track/actions/runs/44171579034) 双端成功，Linux 906/16、Windows 859/63（通过/跳过），各另有 8 项候选用例。原两处弹窗上下文编译错误和 Windows SDK 下载超时已分别修复/恢复，原件保留。这不是正式验收或 APK/EXE 构建。
+- 同一原签名 104 -> 105 APK 实测：VCDIFF 7,169,810 字节，MCU bsdiff+LZMA 核心 2,328,597 字节，减少约 67.5%，重建 SHA/大小一致；仅电脑原生工具测量。App 解码适配、兼容协商和手机实测未完成，线上仍用 VCDIFF。本批尚未正式打包、迁移、部署、真实删除或操作设备；部署前需要 `0015_delta_file_deletion.sql`。原件和剩余交付见 [追加改进记录](docs/ota-exec-notes/APP-ADMIN-UX-01.md#list-actions-and-settings-follow-up-2026-11-18)。
 
 ### ADMIN-ACTION-CONTROLS-01
 
-状态: 已随 APP-ADMIN-UX-01 完成实现/测试并交付 main，管理页面上线待部署凭据核对 ｜ 更新: 2026-11-17
+状态: 已随 APP-ADMIN-UX-01 完成实现/测试并交付 main，追加改进已通过 Actions 部署；未执行真实取消/重触发验收 ｜ 更新: 2026-11-18
 
 - 最新结果: 用户收到生成成功通知后，回读确认原 run `43932189981/1` 已于 `2026-11-16T19:44:02Z` 成功完成。完整名称现为 `delta:delta_6d3de600d36d64b0660507158efc01315842eb69f22b4a14e66b23c677d31b90:1`，严格对应原后台任务和 attempt 1，不是重新提交。Android job 于 `19:42:55Z` 启动，等待约 57 分 22 秒、实际执行约 67 秒。之前的 queued / 零 job / 409 是当时真实快照，不证明永久卡死或提交失败；人工作废建议过早。用户曾同意一次性恢复，随后明确叫停并报告成功，尚未执行任何恢复写入，该操作现已撤回，不得沿用此前同意再终止此任务。无需重试；功能需求仍待办。新原件为 `.cache/app-companion-distribution-20261117/keyring-run-43932189981-02/run.json`，本次未改后台状态、未再次取消或触发任务。
 - 后续实施: 用户已在 APP-ADMIN-UX-01 授权统一实现；图标、长按提示、真实取消及取消确认后重触发的实现/回归均已交付 main。以下诊断与授权范围保留当时含义，不构成再次处理成功 run `43932189981/1` 的权限。
+- 2026-11-18 补充：用户确认已关联构建的取消/重试正常。本批只修复关联前的静默禁用与陈旧查询，并将“核对构建结果”改为免填原因的“同步”；已随 `28459a89` 通过 Actions 上线，实际源码/API 回读通过，未重做原成功差分任务。详见 APP-ADMIN-UX-01 追加交付记录。
 - 原始登记时的用户决定: 先处理当前卡住的任务，需求仅登记，留待后续统一实现；当时不开发按钮、不重新触发任务。
 - 需求: 后台每个未结束的 Actions 任务（含 App/MCU 差分包，覆盖排队中和执行中）均提供“取消任务”和“取消并重新触发”两个按钮。执行中的任务取消前提示会中断当前进度；取消/提交期间禁用按钮，防止重复请求。
 - 行为: 必须实际取消对应 GitHub run，不能只修改界面状态；确认旧任务已取消后，才用原参数创建并关联新一次任务。若旧任务在取消期间已经完成，应展示原结果，不再生成；取消失败或结果不确定时，禁止启动新任务，并明确显示尚未停止。
@@ -1007,6 +1019,9 @@
 | 2026-10-19 | P4-4 / Codex root / `P44-CREDENTIAL-01` | 新链两项产品整改与 Worker 部署已完成，但严格桶凭据的 account-owned/user-owned 创建 POST 均返回 403/9109，最终十项只读核对仍缺四个 S3 secrets | 保持两套独立桶限定 Object Read and Write，不替换旧 CI/provisioning token、不扩大权限；由 O1 直接配置或提供受保护来源与脱敏范围/有效期 | 按 §0.6 必需外部依赖缺失置阻塞；独立预审 10/10 和非发布 CI 通过不等于正式 PASS。保留实际部署异常/恢复和外部缓存未决；root 待凭据后冻结并组织新链/真实 reviewer 观测，gate=false，正式轮次零，未改 main | 已登记/外部凭据阻塞 |
 
 ## 10. 会话日志(每会话一行:日期 ｜ agent ｜ 动了哪些卡 ｜ 一句话结果)
+
+- 2026-11-18 | Codex root / implementation | APP-ADMIN-UX-01 追加改进 | 开发分支 `cbdf9951` 完成邻近列表的删除模式、公告/差分文件批删、直接同步、未关联 run 的操作反馈、滚动衔接和 App 设置入口调整；后台 505、浏览器 255、Flutter 双端 CI `44171579034` 通过。相同 APK 的 MCU bsdiff+LZMA 补丁比基线 VCDIFF 小 67.5%，但手机解码适配/实测未完成，未切换格式。正式 APK/EXE、迁移、部署、main 合入及设备操作未执行，根记录 LOCAL_PENDING，保留失败原件与此前凭据迁移改动。
+- 2026-11-18 | Codex root / delivery | APP-ADMIN-UX-01 追加交付 | 原签名 `1.0.80+106`（80117099）APK/EXE 构建与 R2 候选成功；限定 main 合入 e7b990c7、部署适配修复 28459a89；原生后台 CI 44184804298 与实际 E_TRACK_CI Actions 部署 44186088340 成功。0015 仅应用一次，真实 owner/页面/接口及原配置、4 通道、37 差分任务回读通过。未发布通道、真实删除/取消或操作设备；独立验收和 App 编码格式迁移不冒充完成。详见追加交付收尾及新写入审计。
 
 - 2026-11-17 | Codex root | APP-ADMIN-UX-01 交付 | 原签名 1.0.79+105 APK/Windows 包成功，原后台候选和 R2 回读确认；精确 App/后台源码交付 main 304d01f5，0014 迁移及 Worker 部署完成，既有通道/差分任务不变。Admin/Public 页面仍待恢复 Cloudflare 部署登录，正常后台 owner 登录已验证；无新差分、通道发布或设备操作。记录并保留旧独立复核及所有失败原件。
 
