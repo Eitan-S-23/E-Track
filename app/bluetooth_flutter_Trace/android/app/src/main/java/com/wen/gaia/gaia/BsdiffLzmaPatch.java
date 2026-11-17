@@ -1,3 +1,8 @@
+/*
+ * bsdiff control-stream algorithm: Copyright 2003-2005 Colin Percival;
+ * Copyright 2012 Matthew Endsley. BSD-2-Clause terms are retained in
+ * assets/licenses/app_patch.txt, included in source and App distributions.
+ */
 package com.wen.gaia.gaia;
 
 import java.io.BufferedInputStream;

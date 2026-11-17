@@ -51,7 +51,7 @@ class AppPatchProbeActivity : Activity() {
                 require(metadataFile.length() in 1L..16384L) { "Missing/oversized probe metadata" }
                 val input = JSONObject(metadataFile.readText())
                 report.put("input", input)
-                var peakPss = 0
+                var peakPss = 0L
                 var peakJava = 0L
                 var samples = 0
                 var lastSample = 0L
