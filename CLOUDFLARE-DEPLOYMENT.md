@@ -17,9 +17,11 @@ Pages deployment. Do not mark this incident complete until the readbacks pass.
   independently used Trace's existing repository secrets and returned the same
   denial. Dependency installation and both deploy steps were skipped.
 - The last successful local Pages deployment used Wrangler OAuth, not either
-  repository's CI token. Its named retained configurations now return HTTP 401;
-  the latest retained grant expires at `2026-11-14T19:21:28.012Z`. Prior normal
-  refresh failures remain preserved. An expired copy is not missing owner consent.
+  repository's CI token. Access tokens from its named retained configurations
+  now return HTTP 401; the latest recorded **access-token** expiry is
+  `2026-11-14T19:21:28.012Z`. This is not the refresh token's or overall grant's
+  expiry. Prior normal refresh failures remain preserved; their exact cause is
+  not established by the access-token timestamp.
 - The owner's task authorization already exists. The remaining prerequisite is
   identifying/restoring an existing Pages-capable protected input, not another
   general authorization, a new APK, or automatically creating a new token.
@@ -62,7 +64,27 @@ capability and task authorization are separate facts.
 | Original standalone Trace input | `D:/github/my/bluetooth_flutter_Trace/cloudflare/update-service/.github-actions-secrets.staging.local.json`; read-only, not `D:/github/my/Trace` |
 | GitHub repository secrets | `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` in `Eitan-S-23/E-Track` and `Eitan-S-23/Trace`; use inside the owning repository's Actions runner, never extract their values |
 | Existing Wrangler user input | `C:/Users/SU/AppData/Roaming/xdg.config/.wrangler/config/default.toml`; read-only source, normal refresh only in a checked project-private copy |
-| Last successful local Pages input | `.cache/p35-integration-20261028/source/.cache/admin-copy-version-20261115-01/ui-rollout/private/xdg-config/.wrangler/config/default.toml`; historical input, currently expired |
+| Last successful local Pages input | `.cache/p35-integration-20261028/source/.cache/admin-copy-version-20261115-01/ui-rollout/private/xdg-config/.wrangler/config/default.toml`; access token expired, refresh-token expiry not established |
+| Documented one-month Access SSO | `.cache/p35-integration-20261028/source/.cache/p35-release-available/fw93/login-02/private/home/.cloudflared/sulovehuang.cloudflareaccess.com-org-token`; existing organization/site-login route, not a Pages management API token |
+
+### One-Month Session Is Not Expired
+
+Owner clarification, 2026-11-17: a previously supplied credential should last one
+month. The one-month credential explicitly documented in the Admin README is the
+organization Access SSO above. The existing live readback
+`.cache/app-admin-ux-20261117/cloud/keyring-cloud-live-02/result.json` records its
+expiry as `2026-11-28T02:43:53Z` (2026-11-28 10:43:53 Asia/Shanghai), and confirms
+a real Admin owner session at 2026-11-16 23:29 UTC. It has not reached its recorded
+expiry. This named match does not prove that it is the publishing credential the
+owner means; do not silently substitute an SSO identity for an API/OAuth identity.
+
+Wrangler 4.105.0 writes `expiration_time` from `oauth.token.expiry` and stores
+`refresh_token` separately. A short access-token lifetime is not evidence that
+the longer-lived refresh grant expired. HTTP 400 from the previous refresh is a
+failed exchange, not a diagnosed refresh-token expiry. The project API token's
+separate verification records `active` without an expiry field; do not invent one.
+Preserve all these distinctions before requesting login or declaring the owner's
+one-month credential invalid. Never send the Access SSO to the management API.
 
 The provisioning `token.txt` beside `p41-ci-token.txt` is **not** the CI token.
 Never export it to GitHub or use it as an interchangeable CI fallback. Do not
