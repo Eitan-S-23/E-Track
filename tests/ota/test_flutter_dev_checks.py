@@ -518,6 +518,8 @@ class FlutterDevelopmentChecksTests(unittest.TestCase):
             ".github/workflows/build.yml", "app/bluetooth_flutter_Trace/pubspec.yaml",
             "app/bluetooth_flutter_Trace/test/ota/probe_test.dart",
             "Tools/flutter/dev_checks.py", "Tools/flutter/dev_apk.py", "Tools/flutter/ota_link_profile.py",
+            "Tools/flutter/test_app_patch.py", ".github/scripts/create_bsdiff_lzma_patch.py",
+            "tests/ota/test_app_bsdiff_lzma.py",
             "Tools/ota/p3-4-link-stats/observation_capture.py",
             "Tools/ota/p3-4-link-stats/batch_timing.py",
             "Tools/ota/p3-4-link-stats/acceptance_stats.py",

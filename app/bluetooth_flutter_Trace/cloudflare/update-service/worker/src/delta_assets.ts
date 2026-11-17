@@ -1,6 +1,7 @@
 import type { FirmwareAssetRow, PatchRow, SecurityPayload, WorkerEnv } from "./types";
 import type { DeltaJob } from "./delta_jobs";
 import { deltaFileName } from "./delta_files";
+import { clientSupportsAppDelta, storedAppDeltaFormat } from "./app_patch_format";
 
 interface Result {
   assetId: string; fileName: string; sha256: string; sizeBytes: number; key: string; etag: string;
@@ -28,7 +29,7 @@ export async function supplementalFirmwareAsset(db: D1Database, assetId: string,
   return job ? firmwareAsset(job) : null;
 }
 
-export async function supplementalAppManifest(env: Pick<WorkerEnv, "DB">, releaseId: string, versionCode: number, sourceSha?: string | null) {
+export async function supplementalAppManifest(env: Pick<WorkerEnv, "DB">, releaseId: string, versionCode: number, sourceSha?: string | null, capabilities: string[] = []) {
   const jobs = await env.DB.prepare(`SELECT j.* FROM delta_jobs j JOIN release_assets a ON a.id='asset_'||j.id
     WHERE j.kind='android' AND j.target_release_id=? AND j.base_version_code=? AND j.status='ready' AND j.enabled=1 AND j.asset_state='retained'
       AND a.disabled=0 AND a.r2_state='available'`)
@@ -37,8 +38,10 @@ export async function supplementalAppManifest(env: Pick<WorkerEnv, "DB">, releas
   // Older clients without a source hash retain the original manifest on ambiguity.
   if (matches.length!==1) return null;
   const job=matches[0], result=JSON.parse(job.result_json!) as Result;
+  const format = storedAppDeltaFormat(job);
+  if (!clientSupportsAppDelta(format, versionCode, capabilities)) return null;
   const patch: PatchRow={id:job.id,app_id:"trace",platform:"android",to_release_id:releaseId,asset_id:result.assetId,
-    from_version_code:job.base_version_code,old_sha256:job.base_sha256,patch_format:"vcdiff",patch_sha256:result.sha256,
+    from_version_code:job.base_version_code,old_sha256:job.base_sha256,patch_format:format,patch_sha256:result.sha256,
     patch_size_bytes:result.sizeBytes,output_sha256:job.target_sha256,output_size_bytes:result.securityPayload.apkSize,disabled:0,file_name:result.fileName};
   return { cacheKey:`${job.id}:${job.revision}`, securityPayload:result.securityPayload,payloadSignature:result.payloadSignature,patch };
 }

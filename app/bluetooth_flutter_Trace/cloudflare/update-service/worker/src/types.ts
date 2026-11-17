@@ -97,7 +97,7 @@ export interface PatchRow {
   asset_id: string;
   from_version_code: number;
   old_sha256: string;
-  patch_format: "tracepatch" | "vcdiff";
+  patch_format: "tracepatch" | "vcdiff" | "bsdiff-lzma-v1";
   patch_sha256: string;
   patch_size_bytes: number;
   output_sha256: string;

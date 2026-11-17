@@ -2,6 +2,49 @@
 
 This document records the `v1.0.13` through `v1.0.16` incremental-update failure and the release rules that prevent it from recurring.
 
+## App Bsdiff/LZMA V1
+
+The successor source boundary is `1.0.81+107`. This version adds an Android
+file-backed decoder for `bsdiff-lzma-v1`; it does not make older installed Apps
+understand that format. Transition **to** 107 from an older App still uses
+compatible VCDIFF or a full APK. A later update **from** a qualified 107+ source
+can use the smaller MCU-algorithm delta. Do not replace an existing release.
+
+The App format reuses the MCU encoder with `-aes 0 -eos 1`, not its ETU capsule,
+firmware header or encryption. The 40-byte header uses BE u32 CRC/compressed size
+at offsets 0/4, LE u32 base/target sizes at 8/12, BE u32 base/target CRC at 16/20,
+five raw LZMA properties at 24, three zero pad bytes at 29, and LE u64 expanded
+stream size at 32. Header CRC is calculated with its own four bytes zeroed.
+The following raw LZMA stream must terminate with EOS and have no trailing bytes.
+Its bsdiff control triples are three sign-magnitude LE 64-bit integers; diff
+and literal bytes are interleaved after each triple. Negative base seeks and
+old-position-only controls are valid; a zero/zero/zero control is not.
+
+Android uses XZ for Java 1.10 on a single background worker. Base reads and
+output writes are file-backed, with 64 KiB chunks, at most an 8 MiB dictionary,
+256 MiB base/patch/target files, one million control triples, and a 120-second
+deadline. The dictionary/properties and expanded lengths are checked before
+allocation. Cancellation, malformed input, hash/CRC/length mismatch and offset
+overflow fail without an installable partial output. Existing outputs are never
+truncated. The native bridge admits only the installed base APK and app-cache
+patch/output paths; request IDs bind cancellation, progress and completion.
+
+The signed supplemental patch includes `algorithm: bsdiff-lzma-v1`. The App
+requires that signature and rechecks the complete target SHA/length before the
+unchanged foreground installer gate. The backend requires source version >=107
+and that original source's signed capability when planning a new delta. Serving
+also requires the requesting client's v2 capability. Missing/unknown capability
+returns the original signed manifest, not a filtered, now-invalid signature.
+Original release generation remains full/VCDIFF; no new format is inserted into
+an original manifest that old clients must reconstruct for verification.
+
+Python/liblzma reference vectors and both CI JDKs exercise the actual Java
+decoder; Dart bridge tests bind callbacks and cancellation, and backend tests
+cover signed completion, legacy fallback and cache isolation. A source edit or
+desktop result is not phone qualification or deployed distribution. Record the
+actual Actions, original-signed package, phone measurements and rollout in
+`docs/ota-exec-notes/APP-ADMIN-UX-01.md` at the project root before claiming them.
+
 ## Scope / Trigger
 
 Use this runbook when touching any of these areas:

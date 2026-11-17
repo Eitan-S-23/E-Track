@@ -16,6 +16,7 @@ import 'package:vcdiff_decoder/vcdiff_decoder.dart' as vcdiff;
 import '../config/share_links.dart';
 import '../pages/trace_ui.dart';
 import 'app_prompt_coordinator.dart';
+import 'app_patch_decoder.dart';
 
 class AppUpdateService extends GetxService with WidgetsBindingObserver {
   static AppUpdateService get to => Get.find<AppUpdateService>();
@@ -32,7 +33,9 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
   static const String _patchAlgorithmVcdiff = 'vcdiff';
   static const int _manifestSchemaVersion = 2;
   static const String _clientCapabilities =
-      'patch,full,fallback,errorCode,payloadSignature,vcdiff';
+      'patch,full,fallback,errorCode,payloadSignature,vcdiff,bsdiff-lzma-v1';
+
+  final _appPatchDecoder = AppPatchDecoder();
 
   final Dio _dio = Dio(
     BaseOptions(
@@ -66,6 +69,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
 
   @override
   void onClose() {
+    unawaited(_appPatchDecoder.cancel());
     _closeUpdateDialogIfOpen();
     if (Platform.isAndroid) {
       WidgetsBinding.instance.removeObserver(this);
@@ -884,7 +888,8 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
       final tempDir = await getTemporaryDirectory();
       final fileToken = DateTime.now().microsecondsSinceEpoch;
       final patchExtension =
-          patch.algorithm == _patchAlgorithmVcdiff ? 'vcdiff' : 'tpatch';
+          patch.algorithm == appBsdiffLzmaFormat ? appBsdiffLzmaFormat
+              : patch.algorithm == _patchAlgorithmVcdiff ? 'vcdiff' : 'tpatch';
       final patchFile = File(
         '${tempDir.path}/trace_${localInfo.versionCode}_${updateInfo.versionCode}_$fileToken.$patchExtension',
       );
@@ -922,7 +927,18 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
         _queueUpdateForegroundService();
       }
 
-      if (patch.algorithm == _patchAlgorithmVcdiff) {
+      if (patch.algorithm == appBsdiffLzmaFormat) {
+        await _appPatchDecoder.apply(
+          oldApkPath: localInfo.sourceApkPath,
+          patchPath: patchFile.path,
+          outputApkPath: outputApk.path,
+          expectedOldSha256: patch.oldSha256,
+          expectedPatchSha256: patch.sha256,
+          expectedNewSha256: patch.newSha256,
+          expectedNewSize: updateInfo.apkSize,
+          onProgress: onPatchProgress,
+        );
+      } else if (patch.algorithm == _patchAlgorithmVcdiff) {
         await _VcdiffPatchApplier().apply(
           oldApkPath: localInfo.sourceApkPath,
           patchPath: patchFile.path,
@@ -943,6 +959,10 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
         );
       }
 
+      if (await outputApk.length() != updateInfo.apkSize ||
+          await _sha256File(outputApk) != updateInfo.apkSha256) {
+        throw Exception('合成安装包与签名清单不匹配');
+      }
       updateStatus.value = '打开系统安装器...';
       updateProgress.value = 1;
       _queueUpdateForegroundService(force: true);
@@ -1433,6 +1453,9 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
 
   Future<void> _verifyPayloadSignature(_RemoteUpdateInfo updateInfo) async {
     final signature = updateInfo.payloadSignature;
+    if (signature == null && updateInfo.patches.any((patch) => patch.algorithm == appBsdiffLzmaFormat)) {
+      throw const _UpdateException('SIGNATURE_MISSING', '新格式增量清单必须包含签名');
+    }
     if (updateInfo.source == _ManifestSource.emergency && signature == null) {
       throw const _UpdateException('SIGNATURE_MISSING', '紧急更新清单缺少 payloadSignature');
     }
@@ -1909,7 +1932,12 @@ class _RemoteUpdateInfo {
       if (patch.fromVersionCode == versionCode &&
           patch.oldSha256.toLowerCase() == normalizedOldSha &&
           patch.downloadUrls.isNotEmpty) {
-        if (!_isSupportedPatchAlgorithm(patch.algorithm)) continue;
+        if (!supportsAppPatch(patch.algorithm, versionCode) ||
+            patch.toVersionCode != this.versionCode ||
+            patch.newSha256 != apkSha256 || patch.size <= 0 ||
+            patch.size >= apkSize) {
+          continue;
+        }
         if (bestPatch == null ||
             _patchAlgorithmPriority(patch.algorithm) >
                 _patchAlgorithmPriority(bestPatch.algorithm) ||
@@ -1923,12 +1951,8 @@ class _RemoteUpdateInfo {
     return bestPatch;
   }
 
-  bool _isSupportedPatchAlgorithm(String algorithm) {
-    return algorithm == AppUpdateService._patchAlgorithmVcdiff ||
-        algorithm == AppUpdateService._patchAlgorithmTracePatch;
-  }
-
   int _patchAlgorithmPriority(String algorithm) {
+    if (algorithm == appBsdiffLzmaFormat) return 3;
     if (algorithm == AppUpdateService._patchAlgorithmVcdiff) return 2;
     if (algorithm == AppUpdateService._patchAlgorithmTracePatch) return 1;
     return 0;
@@ -1969,6 +1993,7 @@ class _RemoteUpdatePatch {
 
   Map<String, Object?> get signedPayload {
     return {
+      if (algorithm == appBsdiffLzmaFormat) 'algorithm': appBsdiffLzmaFormat,
       'fromVersionCode': fromVersionCode,
       'toVersionCode': toVersionCode,
       'assetName': assetName,
@@ -2008,12 +2033,14 @@ class _RemoteUpdatePatch {
     final raw = (json['algorithm'] ?? json['patchFormat'] ?? json['format'])
         ?.toString()
         .toLowerCase();
+    if (raw == appBsdiffLzmaFormat) return appBsdiffLzmaFormat;
     if (raw == 'vcdiff' || raw == 'xdelta3') {
       return AppUpdateService._patchAlgorithmVcdiff;
     }
     if (raw == 'tracepatch' || raw == 'trace') {
       return AppUpdateService._patchAlgorithmTracePatch;
     }
+    if (raw != null && raw.isNotEmpty) return raw;
     final lowerAssetName = assetName.toLowerCase();
     if (lowerAssetName.endsWith('.vcdiff') ||
         lowerAssetName.endsWith('.xdelta')) {

@@ -107,14 +107,33 @@ The update pipeline prepares Cloudflare release candidates automatically, but it
 
 ## Cloudflare Admin Pages Deployment
 
+- Read the primary project root's `../../CLOUDFLARE-DEPLOYMENT.md` first. It is
+  the shared deployment memory, including current local/GitHub credential routes
+  and dated failures. Do not use an older task worktree's login advice instead.
 - Before deploying or troubleshooting the update admin UI, read `cloudflare/update-service/admin/README.md` and `cloudflare/update-service/docs/STAGING-SETUP.md`. The former `.codex/skills/deploy-update-admin-pages/SKILL.md` reference is not tracked and is not a prerequisite.
-- Normal admin UI/code redeploys must use `.\cloudflare\update-service\scripts\deploy-admin-staging.ps1 -Yes -SkipSecrets` unless the user explicitly asks to update Access secrets and provides current values.
+- Normal admin UI/code redeploys use the tracked `deploy-cloudflare-admin.yml`
+  workflow or `node scripts/deploy-admin-staging.mjs --yes --skip-secrets
+  --commit-hash <verified-full-sha>` from the service directory, after verifying
+  the original project exists. Do not update Access secrets during a UI redeploy.
+  On this Windows host prefer the Node entry; PowerShell startup writes require
+  their own containment or path-specific authorization.
 - Keep the admin Pages `wrangler.jsonc` bindings synchronized with `AdminEnv` in `functions/api/admin/[[path]].ts`; notably, `/api/admin/storage` requires the `RELEASES_BUCKET` R2 binding.
-- Do not treat GitHub Actions deployment attempts as proof that the Admin Pages fix is live. The repository `CLOUDFLARE_API_TOKEN` may lack Pages or D1 permissions; an Actions failure with Cloudflare `Authentication error [code: 10000]` means the token is insufficient, not that the UI code is invalid.
-- If the repository Cloudflare token lacks Pages/D1 permissions, switch to local Wrangler browser authorization instead of repeatedly retrying the Actions deploy. Run `node node_modules/wrangler/bin/wrangler.js login --browser=true` from `cloudflare/update-service/admin`, let the browser open, and ask the user to approve the Cloudflare authorization page.
-- After local browser authorization succeeds, deploy with `.\cloudflare\update-service\scripts\deploy-admin-staging.ps1 -Yes -SkipSecrets`; do not omit `-SkipSecrets` unless intentionally updating Access secrets.
+- Do not treat GitHub Actions deployment attempts as proof that the Admin Pages
+  fix is live. Record the actual target/API and status for credential refusals;
+  an `Authentication error [code: 10000]` does not make the UI code invalid or
+  prove that every existing credential is unavailable.
+- If one repository credential is rejected, preserve that exact result and
+  reconcile the named local and owning-repository inputs from the root memory.
+  An expired OAuth copy or management 403 is not proof that new login is required.
+  Do not repeat an unchanged denied route, export secrets, start another browser
+  login, create tokens or expand scopes as an automatic fallback.
+- Once an existing Pages-capable protected route is verified, deploy the same
+  reviewed source with `--skip-secrets`; no App rebuild or re-signing is needed.
 - After deploying, verify the latest Pages deployment with `wrangler pages deployment list --project-name trace-update-admin-staging` and confirm the `Source` commit is the intended commit.
-- If local Wrangler cannot run because the Windows host blocks Node child processes with `spawn EPERM`, state that deployment is blocked by the local runtime and provide the exact browser-login and deploy commands for the user to run; do not claim the Pages fix is live.
+- If local Wrangler cannot run because the Windows host blocks Node child
+  processes with `spawn EPERM`, diagnose that runtime failure or use a verified
+  existing CI route. Browser login is not a repair for process creation failure;
+  do not claim that the Pages fix is live.
 - If the admin UI reports `BACKEND_UNAVAILABLE: Admin backend unavailable`, first inspect the response `detail` and `requestId`, then verify the production Pages deployment, Access secrets, D1 binding, and R2 binding. A missing binding in an auxiliary endpoint such as `/api/admin/storage` can break the UI even when the release candidate itself is valid.
 - Do not claim the Access-protected admin publish button was verified unless it was tested with a real Cloudflare Access session. Without that session, verify release state through D1 plus the public latest/download path, or use the staging publish wrapper and state clearly that it validates the release pipeline rather than the UI button.
 - After publishing, verify `channels.current_release_id` and `revision` in D1, confirm `/api/public/latest` returns the intended release/versionCode, and confirm at least one patch or full download is served from R2 via `X-Trace-Asset-Source: r2`.

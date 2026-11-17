@@ -11,6 +11,8 @@ import { assetFileName, versionNameFor } from "../../scripts/firmware-schema.mjs
 import { publishFirmware } from "../src/firmware_admin";
 import type { SecurityPayload, WorkerEnv } from "../src/types";
 import { registered, type LatestBody } from "./firmware-fixture";
+import { handleLatest } from "../src/latest";
+import { APP_BSDIFF_FORMAT } from "../src/app_patch_format";
 
 let sequence = 1000;
 let configured: WorkerEnv;
@@ -29,7 +31,7 @@ beforeEach(async () => {
   dispatch.mockReset(); dispatch.mockResolvedValue(new Response(null,{status:204}));
 });
 
-async function original(kind: DeltaKind, version?: number) {
+async function original(kind: DeltaKind, version?: number, extraCapabilities: string[] = []) {
   const n=++sequence, bytes=new TextEncoder().encode(`original-${n}`.repeat(20));
   if(kind==="firmware") {
     const r=await registered(false,{targetImageSha256:await sha256Hex(`image-${n}`)},{full:bytes});
@@ -39,7 +41,7 @@ async function original(kind: DeltaKind, version?: number) {
   const payload:SecurityPayload={appId:"trace",platform:"android",versionName:`2.0.${n}`,versionCode:code,releaseTag:tag,
     apkAssetName:"app.apk",apkSha256:sha,apkSize:bytes.length,patches:[],
     assetHashes:[{assetType:"apk",fileName:"app.apk",sha256:sha,size:bytes.length}],minClientVersionCode:41,
-    capabilities:["patch","full","payloadSignature","vcdiff"]};
+    capabilities:["patch","full","payloadSignature","vcdiff", ...extraCapabilities]};
   await env.DB.prepare("INSERT OR IGNORE INTO apps(id,name) VALUES ('trace','trace')").run();
   await env.DB.prepare(`INSERT INTO releases(id,app_id,platform,version_name,version_code,release_tag,commit_sha,run_id,security_payload_json,capabilities_json)
     VALUES (?,'trace','android',?,?,?,'original',?,?,?)`).bind(id,payload.versionName,code,tag,id,JSON.stringify(payload),JSON.stringify(payload.capabilities)).run();
@@ -75,9 +77,11 @@ async function completion(job:DeltaJob, size=patchBytes.length) {
   const value:Record<string,unknown>={...binding(job),inputSha256:job.input_sha256,baseImageSha256:job.base_sha256,
     targetImageSha256:job.target_sha256,reconstructedSha256:job.target_sha256,byteEqual:true,sha256:sha,sizeBytes:size};
   if(job.kind==="android") {
-    const fileName=`delta-${input.base.versionCode}-${input.target.versionCode}-${job.base_sha256.slice(0,12)}.vcdiff`;
+    const format = input.patchFormat ?? "vcdiff";
+    const fileName=`delta-${input.base.versionCode}-${input.target.versionCode}-${job.base_sha256.slice(0,12)}.${format}`;
     const payload={...input.target.securityPayload!,patches:[{fromVersionCode:input.base.versionCode,toVersionCode:input.target.versionCode,
-      assetName:fileName,sha256:sha,size,oldSha256:job.base_sha256,newSha256:job.target_sha256}],
+      assetName:fileName,sha256:sha,size,oldSha256:job.base_sha256,newSha256:job.target_sha256,
+      ...(format === APP_BSDIFF_FORMAT ? {algorithm: APP_BSDIFF_FORMAT} : {})}],
       assetHashes:[...input.target.securityPayload!.assetHashes,{fileName,assetType:"patch",sha256:sha,size}]};
     value.securityPayload=payload;
     value.payloadSignature={algorithm:"ed25519",keyVersion:"test",signature:sign(null,Buffer.from(canonicalJson(payload)),keys.privateKey).toString("base64")};
@@ -98,6 +102,58 @@ async function action(job:DeltaJob,name:string,revision=job.revision) {
 }
 
 describe("operator-selected supplemental delta jobs",()=>{
+  it("binds the new format to capable source APKs, not a target or server switch", async () => {
+    for (const [version, capabilities, expected] of [
+      [106, [APP_BSDIFF_FORMAT], "vcdiff"], [107, [], "vcdiff"], [108, [APP_BSDIFF_FORMAT], APP_BSDIFF_FORMAT]
+    ] as const) {
+      const base = await original("android", version, [...capabilities]);
+      const target = await original("android", undefined, [APP_BSDIFF_FORMAT]);
+      const job = await create({kind:"android", base, target});
+      expect(JSON.parse(job.input_json).patchFormat).toBe(expected);
+    }
+  });
+  it("keeps legacy signed manifests intact and isolates new-format cache entries", async () => {
+    const base = await original("android", 109, [APP_BSDIFF_FORMAT]);
+    const target = await original("android", 110, [APP_BSDIFF_FORMAT]);
+    const originalRow = await env.DB.prepare("SELECT security_payload_json,payload_signature_json FROM releases WHERE id=?")
+      .bind(target).first<{security_payload_json:string;payload_signature_json:string}>();
+    const created = await create({kind:"android", base, target});
+    expect((await ci(created,"claim")).status).toBe(200);
+    expect((await upload(created)).status).toBe(200);
+    const body = await completion(created);
+    const forged = structuredClone(body);
+    (forged.securityPayload as SecurityPayload).patches[0].algorithm = "vcdiff";
+    expect((await ci(created,"complete",forged)).status).toBe(409);
+    expect((await ci(created,"complete",body)).status).toBe(200);
+    let job = (await env.DB.prepare("SELECT * FROM delta_jobs WHERE id=?").bind(created.id).first<DeltaJob>())!;
+    expect(await supplementalAppManifest(configured,target,109,job.base_sha256,[APP_BSDIFF_FORMAT])).toBeNull();
+    await action(job,"enable");
+    job = (await env.DB.prepare("SELECT * FROM delta_jobs WHERE id=?").bind(created.id).first<DeltaJob>())!;
+    const extra = await supplementalAppManifest(configured,target,109,job.base_sha256,[APP_BSDIFF_FORMAT]);
+    expect(extra?.patch.patch_format).toBe(APP_BSDIFF_FORMAT);
+    expect(extra?.securityPayload.patches[0].algorithm).toBe(APP_BSDIFF_FORMAT);
+    expect(await supplementalAppManifest(configured,target,109,job.base_sha256,["vcdiff"])).toBeNull();
+    expect(await supplementalAppManifest(configured,target,109,job.base_sha256,["bsdiff-lzma-v2"])).toBeNull();
+    expect(await supplementalAppManifest(configured,target,106,job.base_sha256,[APP_BSDIFF_FORMAT])).toBeNull();
+    await env.DB.prepare(`INSERT INTO channels(app_id,platform,name,current_release_id,revision) VALUES ('trace','android','beta',?,1)
+      ON CONFLICT(app_id,platform,name) DO UPDATE SET current_release_id=excluded.current_release_id,disable_latest=0,revision=channels.revision+1`)
+      .bind(target).run();
+    const read = async (capabilities:string, schema=2) => {
+      const response = await handleLatest(new Request(`https://codec.example/api/public/latest?appId=trace&platform=android&channel=beta&versionCode=109&schemaVersion=${schema}&capabilities=${capabilities}`,
+        {headers:{"X-Trace-Apk-Sha256":job.base_sha256}}), configured, "codec-test");
+      expect(response.status).toBe(200);
+      return response.json<{patches:Array<{algorithm:string}>;payloadSignature:unknown}>();
+    };
+    expect((await read(`patch,full,payloadSignature,${APP_BSDIFF_FORMAT}`)).patches[0].algorithm).toBe(APP_BSDIFF_FORMAT);
+    const legacy = await read("patch,full,payloadSignature,vcdiff");
+    expect(legacy.patches).toEqual([]);
+    expect(legacy.payloadSignature).toEqual(JSON.parse(originalRow!.payload_signature_json));
+    expect((await read(APP_BSDIFF_FORMAT, 1)).patches).toEqual([]);
+    expect((await read(APP_BSDIFF_FORMAT)).patches[0].algorithm).toBe(APP_BSDIFF_FORMAT);
+    expect(await env.DB.prepare("SELECT security_payload_json,payload_signature_json FROM releases WHERE id=?").bind(target).first()).toEqual(originalRow);
+    expect((await create({kind:"android",base,target})).id).toBe(job.id);
+    expect(dispatch).toHaveBeenCalledTimes(1);
+  });
   it("dispatches original APK jobs to their signing repository, not the MCU test repository",async()=>{
     const job=await create(await pair("android"));
     expect(job.workflow_ref).toBe("Eitan-S-23/Trace@dev/admin/original-delta-test");

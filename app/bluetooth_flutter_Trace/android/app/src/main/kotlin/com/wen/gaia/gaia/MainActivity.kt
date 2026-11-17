@@ -58,6 +58,7 @@ class MainActivity: FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         DeviceOtaBridge.install(flutterEngine, this)
         CompanionBridge.install(flutterEngine, applicationContext, this)
+        AppPatchBridge.install(flutterEngine, applicationContext)
         deepLinkChannel = MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             DEEP_LINK_CHANNEL

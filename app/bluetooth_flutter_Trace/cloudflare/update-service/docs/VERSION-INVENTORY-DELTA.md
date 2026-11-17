@@ -36,6 +36,29 @@ provider run identity, including the attempt and workflow commit.
 
 ## Contracts
 
+### Negotiated App Codec
+
+New Android job specs bind optional `patchFormat`; missing means historical
+`vcdiff`. A source at versionCode >=107 whose original signed capabilities
+include `bsdiff-lzma-v1` uses the MCU bsdiff + raw-LZMA algorithm through the
+App-specific generator. Lower/unknown sources keep VCDIFF (minimum 41), not a
+forced incompatible patch. Firmware packaging is unchanged. Existing completed
+jobs are reused without rewriting their input, attempts or result bytes.
+
+The original Trace signing workflow checks out the pinned E-Track generator,
+builds the already used vendor encoder, checks both original APK certificates,
+and reconstructs exact target bytes before signing. The new filename extension
+and signed `algorithm` match the immutable job format. An automatic legacy
+VCDIFF patch does not suppress an eligible new-format supplemental request;
+an existing immutable supplemental job still does. New files remain disabled
+until the owner's normal enable action.
+
+The public selector offers that separately signed supplemental manifest only
+to a v2 client advertising the exact format. Old clients and unknown capabilities
+retain the unchanged original signature, VCDIFF/full fallback and cache entry.
+See [App format and validation](VCDIFF-COMPATIBILITY.md#app-bsdifflzma-v1).
+Phone qualification and activation are recorded separately from source support.
+
 Installation reports use `Authorization: Bearer <64 lowercase hex characters>`.
 The service stores its SHA-256 digest, not that raw bearer. Body example:
 

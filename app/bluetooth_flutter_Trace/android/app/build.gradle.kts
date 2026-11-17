@@ -181,6 +181,7 @@ flutter {
 }
 
 dependencies {
+    implementation("org.tukaani:xz:1.10")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.robolectric:robolectric:4.14.1")
     // Core library desugaring for flutter_local_notifications
