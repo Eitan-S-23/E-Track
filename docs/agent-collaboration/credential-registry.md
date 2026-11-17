@@ -78,3 +78,31 @@ operation-specific capability and authorized scope separate.
 underlying 403 receipts. Production target/settings and credential-use boundaries
 remain owner decisions; the registry does not populate absent secrets or qualify
 production. The empty later P4-4 input slot is not evidence that CF-CI-01 is absent.
+
+## CF-PAGES-01: Pages Deployment Input Reconciliation
+
+2026-11-17 operational correction for APP-ADMIN-UX-01. The user reaffirmed existing
+Cloudflare authority. The prior claim that another browser login was the only
+remaining prerequisite is withdrawn. This record adds input locators/observations,
+not a new credential, permission grant, token-management requirement or CI export.
+
+| Existing input | Bounded current observation |
+| --- | --- |
+| `CF-CI-01`, protected `p41-ci-token.txt` above | Working Worker/D1 route; original Admin Pages GET denied with 403/10000. Do not ask again for authority to use this token on authorized project work. |
+| `app/bluetooth_flutter_Trace/cloudflare/update-service/.github-actions-secrets.staging.local.json`, `secrets.CLOUDFLARE_API_TOKEN` | Original P4-4 handoff source, distinct from e-track-ci. Current verify is active; direct and proxied original Admin Pages GETs return 403/10000. Own-policy 403/9109 is a separate management-read result, not proof of account permission absence. |
+| `D:/github/my/bluetooth_flutter_Trace/cloudflare/update-service/.github-actions-secrets.staging.local.json` | Correct standalone Trace input; read-only. Same account and duplicates an already tested token, so no duplicate failed operation. A prior guessed `D:/github/my/Trace` location was wrong. |
+| `.cache/p41-dev-20261015/.cache/cf-auth-input/token.txt` | Local provisioning credential, never a CI fallback/export. Local-only exact Admin Pages GET also returns 403/10000. No token creation or permission change. |
+| Existing task-private Pages OAuth copies named in APP-ADMIN-UX-01 | Normal renewal failed; old interactive links expired. An expired copy is not an exhaustive inventory of available authority. |
+| `C:/Users/SU/AppData/Roaming/xdg.config/.wrangler/config/default.toml` | Official existing user-config location; source read only. Normal noninteractive renewal in a new project-private copy failed. No user-profile write or fresh login in the correction turn. |
+
+Origins: [P4-4 original credential handoff](../ota-exec-notes/P4-4-s3-preacceptance-2026-10-19.md#independent-credential-handoff)
+and [APP-ADMIN-UX-01 correction](../ota-exec-notes/APP-ADMIN-UX-01.md#owner-correction-and-credential-reconciliation).
+New receipts are under `.cache/app-admin-ux-20261117/cloud/keyring-cloud-sourceprobe-01/`,
+`keyring-cloud-sourcecheck-01/02/03` and `keyring-cloud-renewglobal-01/`.
+No values, token identifiers or credential-bearing hashes belong in this registry.
+
+Current Pages delivery is unresolved, not complete. Reconcile the owner's known
+publishing credential by its name/protected locator or a redacted target/scope
+receipt. Do not conflate task authorization, one token's capability and an OAuth
+copy's status; do not prescribe new login, new credentials or expanded scope as
+the automatic response to the preserved refusals.

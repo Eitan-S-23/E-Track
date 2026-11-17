@@ -5,7 +5,8 @@
 - User requested implementation on 2026-11-17 after the consolidated list.
 - Owner: root implementation session. Status: original-signed packages and
   bounded App/backend main delivery complete; Worker/schema deployed. Admin
-  and Public Pages deployment still needs renewed Cloudflare management login.
+  and Public Pages deployment remains pending reconciliation of the existing
+  applicable publishing credential. The prior login-only conclusion is withdrawn.
 - App baseline: delivered 1.0.78 / 104, commit
   `b15017a30413e5bf10ea32a19008503c8bd922ae`.
 - Primary main: `990d8b4d73bde3cdd37316c66800a98481bed38b`.
@@ -265,6 +266,9 @@ request to change the selected Beta/Stable channels.
 
 ### Remaining Pages Login Boundary
 
+Historical checkpoint. Its requirement for another browser login is superseded
+by the owner correction below; the original failures remain unchanged.
+
 - Admin and Public Pages are not yet redeployed. Live Admin HTML still differs
   from the new source. Public Android/Windows announcement feeds return 200;
   Public iOS still returns 400 until that affected Functions bundle is deployed.
@@ -328,3 +332,55 @@ request to change the selected Beta/Stable channels.
   use `keyring-cloud-inspect-03`, then the prepared Admin/Public deployments and
   readbacks. Do not rebuild packages, reapply 0014, redeploy the already delivered
   Worker or touch the successful historical delta to unblock Pages.
+
+### Owner Correction And Credential Reconciliation
+
+The user again confirmed that Cloudflare authority already exists and challenged
+the repeated login request. The root agent withdrew the unsupported conclusion
+that browser login was the only way forward. Authorization to perform this task,
+the identity/capability of a specific credential, and a particular OAuth copy's
+state are separate facts. The earlier inventory omitted named sources, and a CLI
+login suggestion was incorrectly promoted into a user prerequisite.
+
+- The protected primary service `.github-actions-secrets.staging.local.json`
+  was identified through the original P4-4 owner handoff, not a private-cache scan.
+  Its credential differs from `e-track-ci` and currently verifies `active`.
+  Its exact Admin Pages GET returns 403/10000 through the existing proxy and
+  through direct TLS. Its own policy GET returns 403/9109; no policy or absence
+  claim is inferred from that separate management-read denial.
+- The original standalone repository is `D:/github/my/bluetooth_flutter_Trace`,
+  confirmed by its Git remote. The first check of `D:/github/my/Trace` used an
+  incorrect guessed location and does not establish credential absence. The
+  correct original service input exists, matches the approved account and is
+  byte-equivalent in memory to an already tested token, so its failed GET was
+  not repeated. No original repository file or credential was modified.
+- The separately named `token.txt` provisioning input was checked only for a
+  local exact Pages GET, returning 403/10000. It was never passed to GitHub/CI,
+  exported, substituted for `e-track-ci`, or used to change token permissions.
+  `cloud/keyring-cloud-sourceprobe-01/` and `sourcecheck-01/02/03` (each with the
+  `keyring-cloud-` prefix) preserve the bounded observations and distinctions.
+- Official Wrangler config resolution identifies
+  `C:/Users/SU/AppData/Roaming/xdg.config/.wrangler/config/default.toml` as the
+  existing default input. Its expiry is `2026-07-08T05:35:52.973Z`. One normal
+  noninteractive refresh in the new protected project-only `xdg-global-01`
+  copy also fails; `cloud/keyring-cloud-renewglobal-01/` retains the result.
+  The original user file was read only, not overwritten or cleaned. No fresh
+  browser login was launched after this correction.
+- The current SYSTEM process has no Cloudflare environment inputs. A targeted
+  read of SU's existing environment registry values for `CLOUDFLARE_API_TOKEN`,
+  `CF_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` finds none. The primary Admin/Worker
+  `.env` and `.env.local` files are absent. These are named-source observations,
+  not an assertion that every private source on the machine was searched.
+- The live API reference accepts either Pages Read or Pages Write for the
+  project GET. A write-only-versus-read-only explanation is therefore not
+  assumed, and the original 403s are not relabelled as successful deployment.
+  No new token, wider scope, CI secret change, Pages deployment, package build,
+  migration, device action or business mutation occurred during reconciliation.
+
+The remaining question is the name/protected locator or redacted scope receipt
+for the existing Pages publishing credential the owner identifies. Ask for that
+identity, not plaintext, another task-use authorization or a mandatory browser
+login. Do not repeat the same denied inputs to simulate progress. Shared input
+locations and this correction are indexed under `CF-PAGES-01` in the credential
+registry. Successful package/Worker delivery and all independent device/formal
+acceptance boundaries remain unchanged.
