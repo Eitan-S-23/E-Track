@@ -699,3 +699,40 @@ device acceptance. Use the existing Linux Cloudflare checks for real workerd
 when native Windows workerd cannot start; do not change system tooling or App
 dependencies as a workaround. Verify the deployed latest and bounded download
 on both serving origins without starting OTA or generating another delta.
+
+## Same-APK Codec Comparison 2026-11-18
+
+One offline Windows x64 comparison used the original signed `1.0.78+104` APK
+(48,322,808 bytes, SHA-256
+`67cfd542e6e1ba80cb12109898f77bf5ef51c8e3aee2f9ef13bfd92ed5a2356f`)
+and `1.0.79+105` APK (48,486,828 bytes, SHA-256
+`74c5952f5abf8afd08984fee68464e39e72696c0af5b6119b3c2c1a241071826`).
+Neither original was modified or rebuilt.
+
+| Variant | Patch Bytes | Encode Seconds | Native Decode Seconds | Observed Decoder Peak Working Set Bytes |
+| --- | ---: | ---: | ---: | ---: |
+| xdelta3 3.2.2, existing `-e -S none` flags | 7,169,810 | 2.498 | 0.233 | 86,056,960 |
+| xdelta3 3.2.2, `-9 -B 67108864 -S none` | 7,256,484 | 7.972 | 0.233 | 86,151,168 |
+| Existing MCU bsdiff + LZMA core, `-aes 0` | 2,328,597 | 78.398 | 2.419 | 102,342,656 |
+
+All three reconstructions match the exact target size and SHA-256. On this pair,
+the MCU codec core reduces patch bytes by 67.5% versus the baseline VCDIFF flags,
+but encoding and native desktop decoding take longer. Encoder peak working set
+for bsdiff + LZMA was 873,594,880 bytes. These are single-run native-tool
+measurements, not Android/Dart memory or latency results. The official xdelta3
+3.2.2 executable reproduces the project's flags; it is not claimed to be the
+exact binary used by an earlier GitHub runner or the failed historical job.
+
+Original identities, tool hashes, arguments, logs, patches and reconstructed
+APKs remain under project-root `.cache/app-admin-ux-20261117/`, in
+`keyring-benchmark-01/`, `keyring-benchmark-02/` and
+`delta-benchmark-01/result.json`. Reuse these successful observations rather
+than generating the same patches again.
+
+No production codec, manifest, workflow binding or release was changed by this
+comparison. The current App understands VCDIFF, not this MCU-core patch format.
+Adoption needs a bounded App decoder, explicit format/capability negotiation,
+phone performance qualification, and unchanged signed-target/hash verification.
+Old clients must retain compatible VCDIFF or full-package fallback; MCU ETU
+packaging/encryption is not an APK update format. A failure before CI admission
+or generation is not diagnosed by this compression comparison.

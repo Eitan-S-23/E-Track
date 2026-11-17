@@ -592,10 +592,58 @@ describe("P4-2 existing Access Pages facade", () => {
     expect(second.status).toBe(200);
     expect(await second.json()).toMatchObject({ refreshId: requestId, idempotent: true });
   });
-  it.each(["enable", "disable"])("delta asset %s is owner-only before any job lookup or mutation", async action => {
+  it.each(["enable", "disable", "delete"])("delta asset %s is owner-only before any job lookup or mutation", async action => {
     const response = await page("unused", { route: ["delta", "jobs", "unknown", action], email: "publisher@example.com",
       body: { expectedRevision: 0, reason: "publisher must not distribute an asset" } });
     expect(response.status).toBe(403);
+  });
+  it.each(["delete", "reconcile"])("delta %s retains Access, viewer, origin and CSRF guards", async action => {
+    const jobs = await env.DB.prepare("SELECT * FROM delta_jobs ORDER BY id").all();
+    const events = await env.DB.prepare("SELECT * FROM delta_job_events ORDER BY id").all();
+    const rejected: Array<{ email?: string; header?: Record<string, string>; token?: null; status: number }> = [
+      { email: "viewer@example.com", status: 403 },
+      { header: { "X-CSRF-Token": "wrong" }, status: 403 },
+      { header: { Origin: "https://untrusted.example.com" }, status: 403 },
+      { token: null, status: 401 }
+    ];
+    for (const options of rejected) {
+      const response = await page("unused", { ...options, route: ["delta", "jobs", "unknown", action],
+        body: { expectedRevision: 0, ...(action === "delete" ? { reason: "Delete disabled delta" } : {}) } });
+      expect(response.status).toBe(options.status);
+    }
+    expect((await env.DB.prepare("SELECT * FROM delta_jobs ORDER BY id").all()).results).toEqual(jobs.results);
+    expect((await env.DB.prepare("SELECT * FROM delta_job_events ORDER BY id").all()).results).toEqual(events.results);
+  });
+  it("announcement deletion is app-scoped, publisher-only and audited through the real facade", async () => {
+    const own = `ann_${crypto.randomUUID()}`, foreign = `ann_${crypto.randomUUID()}`;
+    const foreignApp = `app_${crypto.randomUUID()}`;
+    await env.DB.batch([
+      env.DB.prepare("INSERT INTO apps(id,name) VALUES(?,'Foreign app')").bind(foreignApp),
+      env.DB.prepare("INSERT INTO announcements(id,app_id,title,body) VALUES(?,'trace','Own notice','Own body')").bind(own),
+      env.DB.prepare("INSERT INTO announcements(id,app_id,title,body) VALUES(?,?,'Foreign notice','Foreign body')").bind(foreign,foreignApp)
+    ]);
+    try {
+      const route = ["announcements", own, "delete"];
+      expect((await page("unused", { route, token: null, body: {} })).status).toBe(401);
+      expect((await page("unused", { route, email: "viewer@example.com", body: {} })).status).toBe(403);
+      expect((await page("unused", { route, header: { "X-CSRF-Token": "wrong" }, body: {} })).status).toBe(403);
+      expect((await page("unused", { route, header: { Origin: "https://untrusted.example.com" }, body: {} })).status).toBe(403);
+      expect((await page("unused", { route: ["announcements", foreign, "delete"], body: {} })).status).toBe(404);
+      expect(await env.DB.prepare("SELECT id FROM announcements WHERE id=?").bind(own).first()).not.toBeNull();
+      expect(await env.DB.prepare("SELECT id FROM announcements WHERE id=?").bind(foreign).first()).not.toBeNull();
+      const response = await page("unused", { route, email: "publisher@example.com", body: {} });
+      expect(response.status).toBe(200);
+      expect(await response.json()).toMatchObject({ ok: true });
+      expect(await env.DB.prepare("SELECT id FROM announcements WHERE id=?").bind(own).first()).toBeNull();
+      expect(await env.DB.prepare("SELECT id FROM announcements WHERE id=?").bind(foreign).first()).not.toBeNull();
+      expect((await env.DB.prepare("SELECT actor,app_id FROM audit_logs WHERE action='delete_announcement' AND target_id=?")
+        .bind(own).all()).results).toEqual([{ actor: "publisher@example.com", app_id: "trace" }]);
+      expect(await env.DB.prepare("SELECT id FROM audit_logs WHERE action='delete_announcement' AND target_id=?")
+        .bind(foreign).first()).toBeNull();
+    } finally {
+      await env.DB.prepare("DELETE FROM announcements WHERE id IN (?,?)").bind(own,foreign).run();
+      await env.DB.prepare("DELETE FROM apps WHERE id=?").bind(foreignApp).run();
+    }
   });
   it("unconfigured delta dispatch fails explicitly without creating a job", async () => {
     const before = await env.DB.prepare("SELECT id FROM delta_jobs ORDER BY id").all();
