@@ -94,6 +94,8 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('version-inventory-entry')));
     await tester.pumpAndSettle();
     expect(find.byKey(toggleKey), findsOneWidget);
+    expect(find.byKey(const ValueKey('version-inventory-entry')), findsNothing);
+    expect(find.byType(ProfileTabPage, skipOffstage: false), findsOneWidget);
     expect(tester.takeException(), isNull);
   }
 
@@ -175,9 +177,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(Get.currentRoute, '/companion-setup');
     expect(find.text('Companion destination'), findsOneWidget);
+    expect(find.byKey(const ValueKey('help-permissions'), skipOffstage: false), findsNothing);
+    expect(find.byType(ProfileTabPage, skipOffstage: false), findsOneWidget);
     expect(inventory.enabled.value, isFalse);
     Get.back<void>();
     await tester.pumpAndSettle();
+    expect(find.byType(ProfileTabPage), findsOneWidget);
     await tester.tap(find.byIcon(Icons.settings));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('version-inventory-entry')));

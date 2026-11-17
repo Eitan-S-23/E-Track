@@ -146,19 +146,21 @@ class ProfileTabPage extends StatelessWidget {
         color: TraceColors.mint,
         content: Get.isRegistered<VersionInventoryService>() &&
                 Get.find<VersionInventoryService>().available
-            ? Material(
-                type: MaterialType.transparency,
-                child: ListTile(
-                  key: const ValueKey('version-inventory-entry'),
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('参与版本统计',
-                      style: TextStyle(color: TraceColors.text, fontSize: 16)),
-                  trailing: const Icon(Icons.chevron_right,
-                      color: TraceColors.mint),
-                  onTap: () {
-                    TraceDialog.close();
-                    _showInventorySettingsDialog();
-                  },
+            ? Builder(
+                builder: (dialogContext) => Material(
+                  type: MaterialType.transparency,
+                  child: ListTile(
+                    key: const ValueKey('version-inventory-entry'),
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('参与版本统计',
+                        style: TextStyle(color: TraceColors.text, fontSize: 16)),
+                    trailing: const Icon(Icons.chevron_right,
+                        color: TraceColors.mint),
+                    onTap: () {
+                      TraceDialog.close(dialogContext);
+                      _showInventorySettingsDialog();
+                    },
+                  ),
                 ),
               )
             : const Text('当前平台未启用版本统计。'),
@@ -383,21 +385,23 @@ class ProfileTabPage extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Material(
-              type: MaterialType.transparency,
-              child: ListTile(
-                key: const ValueKey('help-permissions'),
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.admin_panel_settings_outlined,
-                    color: TraceColors.amber),
-                title: const Text('权限与后台运行',
-                    style: TextStyle(color: TraceColors.text)),
-                trailing: const Icon(Icons.chevron_right,
-                    color: TraceColors.amber),
-                onTap: () {
-                  TraceDialog.close();
-                  Get.toNamed<void>('/companion-setup');
-                },
+            Builder(
+              builder: (dialogContext) => Material(
+                type: MaterialType.transparency,
+                child: ListTile(
+                  key: const ValueKey('help-permissions'),
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.admin_panel_settings_outlined,
+                      color: TraceColors.amber),
+                  title: const Text('权限与后台运行',
+                      style: TextStyle(color: TraceColors.text)),
+                  trailing: const Icon(Icons.chevron_right,
+                      color: TraceColors.amber),
+                  onTap: () {
+                    TraceDialog.close(dialogContext);
+                    Get.toNamed<void>('/companion-setup');
+                  },
+                ),
               ),
             ),
             const SizedBox(height: 16),
