@@ -24,12 +24,15 @@ twice; `uniqueDeviceCount` is always null.
 | `POST /api/admin/version-inventory/refresh` | Request fresh reports on future eligible foreground checks |
 | `GET /api/admin/delta/candidates?kind=android\|firmware&targetId=...` | Original bases and retained jobs |
 | `POST /api/admin/delta/jobs` | Select one to five bases |
-| `POST /api/admin/delta/jobs/{id}/{enable\|disable\|retry\|reconcile}` | Explicit job/asset action |
+| `POST /api/admin/delta/jobs/{id}/{enable\|disable\|delete\|retry\|reconcile}` | Explicit job/asset action |
+| `POST /api/admin/delta/jobs/{id}/{cancel\|cancel-restart\|cancel-status}` | Owner-of-task cancellation and confirmed restart |
 | `/api/ci/delta/jobs/{id}/{spec\|base\|target\|claim\|asset\|complete\|fail}` | Bound Actions execution only |
 
 The original Access facade owns administrator authentication, same-origin and
 CSRF checks. Viewers can read; publishers can request reports and generate,
-retry or reconcile jobs; only owners can enable/disable generated assets.
+retry or reconcile jobs; only owners can enable, disable or delete generated
+assets. Cancellation additionally requires the task's creating actor and exact
+provider run identity, including the attempt and workflow commit.
 
 ## Contracts
 
@@ -75,7 +78,10 @@ immediate push delivery or an exact census of every installation.
 }
 ```
 
-Job actions require `expectedRevision` and a nonblank `reason`. At most 20 new
+Job actions require `expectedRevision` and a nonblank `reason`, except
+`reconcile`: the Sync button sends only the revision and the server records
+`Synchronize GitHub build status` as its audit reason. Sync still authenticates,
+checks CSRF and compares the revision; it is not a read-only GET. At most 20 new
 attempts/day, including explicit retries, are admitted transactionally. Existing
 patches and immutable `(kind, target, base image hash)` jobs are reused.
 
@@ -87,6 +93,39 @@ must equal the exact target bytes before completion. New assets start disabled.
 Enabling requires an owner, a valid current target, the verified R2 object and a
 patch smaller than the full package. Disabling retains the immutable job/output.
 Original channel pointers and original sealed manifests are not rewritten.
+
+### Generated File Deletion
+
+Apply `0015_delta_file_deletion.sql` before deploying the changed Worker, Admin
+and Public Pages handlers. It adds the independent `delta_jobs.asset_state`
+(`retained`, `deleting`, `deleted`) and prevents retired files from being enabled
+again. Canonical successful job status, attempts, result JSON and signing proof
+stay immutable. Admin views expose `status: deleting|deleted` and `assetState`
+without inventing a failed build or erasing history.
+
+`POST /api/admin/delta/jobs/{id}/delete` accepts `{expectedRevision, reason}`.
+It admits only a completed, disabled supplemental delta. Namespace, file size,
+SHA metadata, ETag, App asset binding and other retained references are checked
+before a CAS/audited retirement. Distribution is retired before R2 deletion;
+App asset rows are archived and later marked `r2_deleted`. A lost/failed R2
+response leaves `deleting`; an explicit newly confirmed deletion resumes only
+that same immutable object. Repeated confirmed deletion is idempotent. It does
+not delete original APK/ETU files, releases, channels, tasks or audit history.
+
+All list deletion selection is opt-in through a nearby trash icon. Versions,
+generated delta files, manual announcements and notifications share the control
+layout; page selection means only eligible items on that displayed page. Batch
+file/announcement operations use existing per-item endpoints serially, report
+each result and never automatically replay a failed mutation. Announcement
+selection is paginated in groups of six. Notification deletion remains an
+actor-scoped display dismissal, not package deletion.
+
+An unbound run no longer silently disables cancel/restart controls. After
+confirmation the server performs a fresh bounded identity lookup, rather than
+reusing a cached not-found result. No match, duplicate matches or a changed
+ref/commit fail visibly without cancelling another run or dispatching again.
+Passive observations retain the shared 30-second cache; explicit Sync/cancel
+lookups bypass stale observations, not identity or authorization checks.
 
 | Binding | Consumer |
 | --- | --- |
@@ -660,3 +699,40 @@ device acceptance. Use the existing Linux Cloudflare checks for real workerd
 when native Windows workerd cannot start; do not change system tooling or App
 dependencies as a workaround. Verify the deployed latest and bounded download
 on both serving origins without starting OTA or generating another delta.
+
+## Same-APK Codec Comparison 2026-11-18
+
+One offline Windows x64 comparison used the original signed `1.0.78+104` APK
+(48,322,808 bytes, SHA-256
+`67cfd542e6e1ba80cb12109898f77bf5ef51c8e3aee2f9ef13bfd92ed5a2356f`)
+and `1.0.79+105` APK (48,486,828 bytes, SHA-256
+`74c5952f5abf8afd08984fee68464e39e72696c0af5b6119b3c2c1a241071826`).
+Neither original was modified or rebuilt.
+
+| Variant | Patch Bytes | Encode Seconds | Native Decode Seconds | Observed Decoder Peak Working Set Bytes |
+| --- | ---: | ---: | ---: | ---: |
+| xdelta3 3.2.2, existing `-e -S none` flags | 7,169,810 | 2.498 | 0.233 | 86,056,960 |
+| xdelta3 3.2.2, `-9 -B 67108864 -S none` | 7,256,484 | 7.972 | 0.233 | 86,151,168 |
+| Existing MCU bsdiff + LZMA core, `-aes 0` | 2,328,597 | 78.398 | 2.419 | 102,342,656 |
+
+All three reconstructions match the exact target size and SHA-256. On this pair,
+the MCU codec core reduces patch bytes by 67.5% versus the baseline VCDIFF flags,
+but encoding and native desktop decoding take longer. Encoder peak working set
+for bsdiff + LZMA was 873,594,880 bytes. These are single-run native-tool
+measurements, not Android/Dart memory or latency results. The official xdelta3
+3.2.2 executable reproduces the project's flags; it is not claimed to be the
+exact binary used by an earlier GitHub runner or the failed historical job.
+
+Original identities, tool hashes, arguments, logs, patches and reconstructed
+APKs remain under project-root `.cache/app-admin-ux-20261117/`, in
+`keyring-benchmark-01/`, `keyring-benchmark-02/` and
+`delta-benchmark-01/result.json`. Reuse these successful observations rather
+than generating the same patches again.
+
+No production codec, manifest, workflow binding or release was changed by this
+comparison. The current App understands VCDIFF, not this MCU-core patch format.
+Adoption needs a bounded App decoder, explicit format/capability negotiation,
+phone performance qualification, and unchanged signed-target/hash verification.
+Old clients must retain compatible VCDIFF or full-package fallback; MCU ETU
+packaging/encryption is not an APK update format. A failure before CI admission
+or generation is not diagnosed by this compression comparison.

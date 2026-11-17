@@ -263,7 +263,6 @@
         <div class="operations-buttons app-platform-bar"><label id="appPlatformLabel" for="appPlatform">Platform</label>
           <select id="appPlatform"><option value="android">Android</option><option value="windows">Windows</option><option value="ios">iOS</option></select>
           <span id="appPlatformHint" class="firmware-hint"></span></div>
-        <div class="operations-buttons" id="releaseBulkActions"></div>
         <section class="filters" aria-label="Release filters" data-i18n-aria-label="filters.releaseFilters">
           <div>
             <p class="field-label"><svg class="ui-icon" aria-hidden="true"><use href="#i-filter"></use></svg><span class="label-text" data-i18n="filters.title">Filters</span></p>
@@ -317,6 +316,7 @@
                 <span class="field-label" id="sortLabel">Sorted by version code</span>
               </header>
               <div class="timeline-body">
+                <div class="operations-buttons selection-toolbar" id="releaseBulkActions" role="group" aria-label="Version deletion"></div>
                 <div class="version-strip" id="versionStrip"></div>
               </div>
               <nav class="release-pagination" id="releasePagination" aria-label="Version pages" data-i18n-aria-label="pagination.title" hidden>
@@ -391,7 +391,9 @@
             <button type="button" class="secondary-button announcement-create-button" id="newAnnouncement" data-i18n="announcements.new">New Notice</button>
           </header>
           <div class="announcement-grid">
+            <div class="operations-buttons selection-toolbar" id="announcementBulkActions" role="group" aria-label="Announcement deletion"></div>
             <div class="announcement-list" id="announcementList"></div>
+            <nav class="release-pagination" id="announcementPagination" aria-label="Announcement pages" hidden></nav>
             <div class="announcement-editor">
               <label for="announcementTitle" data-i18n="announcements.titlePlaceholder">Announcement title</label>
               <input class="announcement-title-input" id="announcementTitle" type="text" maxlength="120" placeholder="Announcement title" data-i18n-placeholder="announcements.titlePlaceholder" />
@@ -405,7 +407,7 @@
                 <div class="notes-meta"><span id="announcementMeta">0 / 8000 characters</span><span class="notes-draft" id="announcementDraftStatus" data-i18n="notes.unsaved" hidden>Unsaved draft</span></div>
                 <div class="announcement-actions">
                   <button type="button" class="secondary-button" id="discardAnnouncement" data-i18n="notes.discard" hidden>Discard draft</button>
-                  <button type="button" class="secondary-button" id="deleteAnnouncement" data-i18n="announcements.delete">Delete</button>
+                  <button type="button" class="icon-button" id="deleteAnnouncement" data-i18n-aria-label="announcements.delete" aria-label="Delete"><svg class="ui-icon" aria-hidden="true"><use href="#i-trash"></use></svg></button>
                   <button type="button" class="save-button" id="saveAnnouncement" data-i18n="announcements.save">Save Notice</button>
                 </div>
               </div>
@@ -486,8 +488,8 @@
             <aside class="panel firmware-panel">
               <h2 data-i18n="catalog.versions">Versions</h2>
               <p class="firmware-hint" id="firmwareListCount" role="status"></p>
+              <div class="operations-buttons selection-toolbar" id="firmwareBulkActions" role="group" aria-label="Firmware deletion"></div>
               <div class="firmware-release-list" id="firmwareReleaseList"></div>
-              <div class="operations-buttons" id="firmwareBulkActions"></div>
               <nav class="release-pagination firmware-pagination" id="firmwarePagination" aria-label="Version pages" data-i18n-aria-label="pagination.title" hidden>
                 <button type="button" class="secondary-button" id="firmwarePagePrev" data-i18n="pagination.previous">Previous</button>
                 <span id="firmwarePageStatus" role="status" aria-live="polite"></span>
@@ -565,12 +567,14 @@
 
     <script src="/sheet-gestures.js"></script>
     <script src="/overlay-history.js"></script>
+    <script src="/selection-controls.js"></script>
     <script src="/task-controls.js"></script>
     <script src="/delta-activity.js"></script>
     <script src="/resource-usage.js"></script>
     <script>
       const state = {
         appPlatform: "android", appLoadGeneration: 0, selectedVersions: new Set(), selectedFirmwareVersions: new Set(),
+        deleteModes: { app: false, firmware: false, announcements: false }, selectedAnnouncements: new Set(), announcementPage: 0,
         announcementOpen: false,
         session: null,
         channels: [],
@@ -1700,19 +1704,38 @@
       document.querySelector("#appPlatform").addEventListener("change", async event => {
         if (state.busy) { event.target.value = state.appPlatform; return; }
         state.appPlatform = event.target.value;
+        state.deleteModes.app = false;
         state.selectedVersions.clear(); state.selectedReleaseId = null; state.releasePage = 0;
         state.releases = []; state.channels = []; state.storage = null;
         render(); await loadAll();
       });
       document.addEventListener("change", event => {
         if (event.target.matches("[data-select-version]")) {
-          const set = event.target.dataset.selectKind === "firmware" ? state.selectedFirmwareVersions : state.selectedVersions;
+          const kind = event.target.dataset.selectKind === "firmware" ? "firmware" : "app";
+          if (state.busy || !canRole("owner") || !state.deleteModes[kind] || event.target.disabled) return;
+          const set = kind === "firmware" ? state.selectedFirmwareVersions : state.selectedVersions;
+          const id = event.target.dataset.selectVersion;
           if (event.target.checked) set.add(event.target.dataset.selectVersion); else set.delete(event.target.dataset.selectVersion);
           render();
+          [...document.querySelectorAll("[data-select-version]")].find(node => node.dataset.selectVersion === id
+            && (node.dataset.selectKind === "firmware" ? "firmware" : "app") === kind)?.focus({preventScroll:true});
+        }
+        if (event.target.matches("[data-select-announcement]") && !state.busy && canRole("publisher") && state.deleteModes.announcements) {
+          const id = event.target.dataset.selectAnnouncement;
+          if (event.target.checked) state.selectedAnnouncements.add(id); else state.selectedAnnouncements.delete(id);
+          renderAnnouncements();
+          [...els.announcementList.querySelectorAll("[data-select-announcement]")].find(node => node.dataset.selectAnnouncement === id)?.focus({preventScroll:true});
         }
       });
       document.querySelector("#releaseBulkActions").addEventListener("click", event => {
-        const action = event.target.closest("[data-bulk-action]")?.dataset.bulkAction;
+        const button = event.target.closest("[data-bulk-action]"), action = button?.dataset.bulkAction;
+        if (!button || button.disabled || state.busy || !canRole("owner")) return;
+        if (action === "enter" || action === "exit") {
+          state.deleteModes.app = action === "enter"; state.selectedVersions.clear(); render();
+          document.querySelector(`#releaseBulkActions [data-bulk-action="${action === "enter" ? "exit" : "enter"}"]`)?.focus({preventScroll:true});
+          return;
+        }
+        if (!state.deleteModes.app) return;
         if (action === "select-page") {
           const rows = releasePageRows(filteredReleases()).filter(r => !publishedChannels(r).length);
           const remove = rows.every(r => state.selectedVersions.has(r.id));
@@ -1722,8 +1745,14 @@
         if (action === "delete") void deleteSelectedVersions();
       });
       document.querySelector("#firmwareBulkActions").addEventListener("click", event => {
-        const action=event.target.closest("[data-firmware-bulk]")?.dataset.firmwareBulk;
-        if(state.busy || !canRole("owner")) return;
+        const button=event.target.closest("[data-firmware-bulk]"), action=button?.dataset.firmwareBulk;
+        if(!button || button.disabled || state.busy || !canRole("owner")) return;
+        if(action==="enter" || action==="exit") {
+          state.deleteModes.firmware=action==="enter";state.selectedFirmwareVersions.clear();renderFirmware();
+          document.querySelector(`#firmwareBulkActions [data-firmware-bulk="${action==="enter"?"exit":"enter"}"]`)?.focus({preventScroll:true});
+          return;
+        }
+        if(!state.deleteModes.firmware) return;
         if(action==="select-page") {
           const rows=firmwarePageRows(filteredFirmware()).filter(firmwareDeletable);
           const remove=rows.every(r=>state.selectedFirmwareVersions.has(r.releaseId));
@@ -1731,6 +1760,27 @@
           renderFirmware();
         }
         if(action==="delete") void deleteSelectedFirmware();
+      });
+      document.querySelector("#announcementBulkActions").addEventListener("click", event => {
+        const button=event.target.closest("[data-announcement-bulk]"), action=button?.dataset.announcementBulk;
+        if(!button || button.disabled || state.busy || !canRole("publisher")) return;
+        if(action==="enter" || action==="exit") {
+          state.deleteModes.announcements=action==="enter";state.selectedAnnouncements.clear();renderAnnouncements();
+          document.querySelector(`#announcementBulkActions [data-announcement-bulk="${action==="enter"?"exit":"enter"}"]`)?.focus({preventScroll:true});
+          return;
+        }
+        if(!state.deleteModes.announcements) return;
+        if(action==="select-page") {
+          const rows=announcementPageRows(),remove=rows.every(row=>state.selectedAnnouncements.has(row.id));
+          for(const row of rows) {if(remove) state.selectedAnnouncements.delete(row.id); else state.selectedAnnouncements.add(row.id);}
+          renderAnnouncements();
+        }
+        if(action==="delete") void deleteSelectedAnnouncements();
+      });
+      document.querySelector("#announcementPagination").addEventListener("click", event => {
+        const button=event.target.closest("[data-announcement-page]");
+        if(!button || button.disabled || state.busy) return;
+        state.announcementPage+=Number(button.dataset.announcementPage);renderAnnouncements();els.announcementList.scrollTop=0;
       });
       new TraceSheetGestures({sheet:document.querySelector("#announcementSheet"),scroll:document.querySelector("#announcementEditorHost"),
         backdrop:document.querySelector("#announcementBackdrop"),canClose:()=>state.announcementOpen&&!state.busy&&!activeConfirmDialog,
@@ -1805,6 +1855,7 @@
       }
       function closeTasks() {
         const wasOpen = state.taskOpen; state.taskOpen = false;
+        taskActivity?.exitDeletion();
         document.querySelector("#taskSheet").hidden = true;
         document.querySelector("#taskBackdrop").hidden = true;
         els.body.classList.remove("task-open"); syncOverlayState();
@@ -1920,7 +1971,15 @@
           if (state.delta && event.target.id === "deltaReason") state.delta.reason = event.target.value;
         });
         els.deltaContent.addEventListener("change", event => {
-          if (!state.delta || !event.target.matches("[data-delta-base]")) return;
+          if (!state.delta || state.delta.busy || event.target.disabled) return;
+          if (event.target.matches("[data-delta-file]") && state.delta.deleteMode && canRole("owner")) {
+            const id=event.target.dataset.deltaFile;
+            if(event.target.checked) state.delta.selectedFiles.add(id); else state.delta.selectedFiles.delete(id);
+            renderDelta();
+            [...els.deltaContent.querySelectorAll("[data-delta-file]")].find(node=>node.dataset.deltaFile===id)?.focus({preventScroll:true});
+            return;
+          }
+          if (!event.target.matches("[data-delta-base]")) return;
           const chosen = state.delta.selected;
           if (event.target.checked && chosen.size < 5) chosen.add(event.target.dataset.deltaBase);
           else chosen.delete(event.target.dataset.deltaBase);
@@ -2433,6 +2492,7 @@
           const session = await readAdminSession();
           if (session.actor !== state.session?.actor) {
             state.selectedVersions.clear(); state.selectedFirmwareVersions.clear();
+            state.selectedAnnouncements.clear(); state.deleteModes = { app:false, firmware:false, announcements:false };
             state.appNoteDrafts.clear();
             state.announcementDrafts.clear();
             state.deltaDrafts.clear();
@@ -3064,7 +3124,7 @@
         closeFirmwareDetails({ immediate: true, restoreFocus: false });
         closeResourcePanel();
         const delta = state.delta = { kind, releaseId, actor: state.session?.actor, selected: new Set(), reason: "", data: null,
-          busy: false, loading: false, notice: "", timer: null };
+          busy: false, loading: false, notice: "", message: "", timer: null, deleteMode:false, selectedFiles:new Set(), jobPage:0 };
         const draft = state.deltaDrafts.get(`${delta.actor}:${kind}:${releaseId}`);
         if (draft) { delta.selected = new Set(draft.selected); delta.reason = draft.reason; }
         els.deltaSheet.hidden = false; els.deltaBackdrop.hidden = false;
@@ -3086,12 +3146,13 @@
           clearFeedbackError("delta-load");
           observeDeltaJobs(data.jobs);
           for (const id of delta.selected) if (!data.bases.some(base => base.releaseId === id && base.eligible && !base.existing && !base.job)) delta.selected.delete(id);
+          for (const id of delta.selectedFiles) if (!data.jobs.some(job=>job.id===id && deltaFileDeletable(job))) delta.selectedFiles.delete(id);
         } catch (error) { if (state.delta === delta) { delta.notice = error.message; showErrorDialog(error, { scope: "delta-load" }); } }
         finally {
           delta.loading = false;
           if (state.delta === delta) {
             renderDelta();
-            if (!delta.notice && delta.data?.jobs.some(job => job.cancelling || ["dispatching", "queued", "running"].includes(job.status))) {
+            if (!delta.busy && delta.data?.jobs.some(job => job.cancelling || ["dispatching", "dispatch_unknown", "queued", "running"].includes(job.status))) {
               delta.timer = setTimeout(() => loadDelta(delta), 15000);
             }
           }
@@ -3103,6 +3164,8 @@
         return rows.length ? rows.reduce((sum, row) => sum + Number(row.active30), 0) : null;
       }
       function deltaStatus(job) {
+        if(job.status==="deleted") return opText("差分文件已删除，构建历史保留", "Delta file deleted; build history retained");
+        if(job.status==="deleting") return opText("文件删除未完成，可在删除模式中重试", "File deletion incomplete; retry in deletion mode");
         if(job.cancelling || job.status==="cancelled") return taskActivity?.phase(job) ?? job.status;
         if (job.phase === "awaiting_approval" || job.phase?.startsWith("ci_")) return taskActivity?.phase(job) ?? job.phase;
         return ({ dispatching: opText("正在提交", "Submitting"), queued: opText("等待构建状态", "Awaiting build status"),
@@ -3115,14 +3178,17 @@
         if (!delta) return;
         const focused = document.activeElement;
         const selectedBase = focused?.dataset?.deltaBase;
+        const selectedFile = focused?.dataset?.deltaFile;
         const editingReason = focused?.id === "deltaReason";
         const caret = editingReason ? [focused.selectionStart, focused.selectionEnd] : null;
-        const data = delta.data, locked = delta.busy || delta.loading || !canRole("publisher") || delta.actor !== state.session?.actor;
+        const data = delta.data, locked = delta.busy || !canRole("publisher") || delta.actor !== state.session?.actor;
+        const jobRows=deltaJobPageRows(delta);
         els.deltaTitle.textContent = data ? `${data.target.versionName} / ${data.target.versionCode}` : opText("正在读取版本...", "Loading version...");
-        const canBuild = !locked && data?.dispatchConfigured && (delta.kind !== "android" || data.appSigningConfigured);
+        const canBuild = !locked && !delta.loading && data?.dispatchConfigured && (delta.kind !== "android" || data.appSigningConfigured);
         els.deltaContent.innerHTML = `<p class="firmware-hint">${escapeHtml(opText("选择起始旧版本，只新增差分文件。不会重新构建原包、替换现有文件或自动发布 Stable/Beta。", "Select source versions to append delta files. Originals are not rebuilt or replaced, and Stable/Beta is never published automatically."))}</p>
           <p class="firmware-hint">${escapeHtml(opText("关闭此弹窗不会取消任务。顶部“通知”可查看进度、历史结果并开启系统提醒。", "Closing does not cancel builds. Open Notifications in the toolbar for progress, results and system alerts."))}</p>
           ${delta.notice ? `<p class="error" role="alert">${escapeHtml(delta.notice)}</p>` : ""}
+          ${delta.message ? `<p role="status">${escapeHtml(delta.message)}</p>` : ""}
           ${!data ? `<p role="status">${escapeHtml(opText("等待版本数据", "Waiting for version data"))}</p>` : `
           ${!canBuild && !locked ? `<p class="firmware-help">${escapeHtml(opText("构建通道或签名配置未就绪，不能提交任务。现有下载不受影响。", "Dispatch or signing configuration is not ready. Existing downloads are unaffected."))}</p>` : ""}
           <div class="operations-buttons"><button type="button" class="secondary-button" data-version-operation="delta-recommend" ${!canBuild || !state.inventory.value || state.inventory.error ? "disabled" : ""}>${escapeHtml(opText("选择有上报的版本（最多 5 个）", "Select reported versions (up to 5)"))}</button>
@@ -3137,24 +3203,62 @@
           <label class="firmware-field"><span>${escapeHtml(t("firmware.reason"))}</span><textarea id="deltaReason" rows="2" maxlength="500" ${locked ? "disabled" : ""}>${escapeHtml(delta.reason)}</textarea></label>
           <div class="operations-buttons"><button type="button" class="pill-button primary" data-version-operation="delta-create" ${canBuild && delta.selected.size ? "" : "disabled"}>${escapeHtml(opText(`生成 ${delta.selected.size} 个差分包`, `Generate ${delta.selected.size} deltas`))}</button><button type="button" class="secondary-button" data-version-operation="delta-reload" ${delta.busy || delta.loading ? "disabled" : ""}>${escapeHtml(opText("刷新任务状态", "Refresh jobs"))}</button></div>
           <h3 class="delta-jobs-title">${escapeHtml(opText("构建任务与差分文件", "Build jobs and delta files"))}</h3>
-          <div class="delta-job-list">${data.jobs.map(job => {
+          <div class="operations-buttons selection-toolbar" id="deltaFileActions" role="group" aria-label="Delta file deletion">${selectionToolbar({
+            active:delta.deleteMode,count:delta.selectedFiles.size,locked,allowed:canRole("owner"),attribute:"version-operation",
+            label:opText("删除差分文件", "Delete delta files"),actions:{enter:"delta-delete-enter",exit:"delta-delete-exit",select:"delta-delete-select",remove:"delta-delete-selected"}})}</div>
+          ${delta.deleteMode ? `<p class="firmware-hint">${escapeHtml(opText("只删除已生成且已停用的差分文件，原包和任务历史保留。正在启用的包请先停用。", "Only completed, disabled delta files can be deleted. Originals and build history remain. Disable an enabled delta first."))}</p>` : ""}
+          <div class="delta-job-list">${jobRows.map(job => {
             const run = /^https:\/\/github\.com\/Eitan-S-23\/(?:E-Track|Trace)\/actions\/runs\/\d+$/.test(job.runUrl ?? "") ? job.runUrl : null;
-            const control = job.status === "ready" ? job.enabled ? "disable" : "enable" : ["failed","cancelled"].includes(job.status) ? "retry" : "reconcile";
+            const control = ["deleted","deleting"].includes(job.status) ? null : job.status === "ready" ? job.enabled ? "disable" : "enable" : ["failed","cancelled"].includes(job.status) ? "retry" : "reconcile";
             const usable = !["enable", "disable"].includes(control) || (canRole("owner") && (control === "disable" || (data.distributionEnabled && job.sizeBytes < data.target.fullBytes)));
-            return `<article class="delta-job-row"><div><strong>${escapeHtml(job.baseVersionCode)} → ${escapeHtml(job.targetVersionCode)}</strong><span>${escapeHtml(deltaStatus(job))}</span>${taskActivity?.progress(job) ?? ""}<small>${escapeHtml(job.fileName ?? job.errorCode ?? "")} ${job.sizeBytes ? escapeHtml(formatBytes(job.sizeBytes)) : ""}</small>
-              ${job.status === "ready" && job.sizeBytes >= data.target.fullBytes ? `<small>${escapeHtml(opText("不比全量包小，不能启用。", "Not smaller than full; cannot enable."))}</small>` : ""}</div><div class="operations-buttons">
+            return `<article class="delta-job-row" data-delta-job="${escapeHtml(job.id)}"><div class="delta-job-identity">${delta.deleteMode && canRole("owner") && deltaFileDeletable(job) ? `<input type="checkbox" class="delta-file-selection" data-delta-file="${escapeHtml(job.id)}" aria-label="${escapeHtml(opText("选择差分文件 ", "Select delta file ")+job.baseVersionCode+" → "+job.targetVersionCode)}" ${delta.selectedFiles.has(job.id)?"checked":""} ${locked?"disabled":""}>` : ""}<div><strong>${escapeHtml(job.baseVersionCode)} → ${escapeHtml(job.targetVersionCode)}</strong><span>${escapeHtml(deltaStatus(job))}</span>${taskActivity?.progress(job) ?? ""}<small>${escapeHtml(job.fileName ?? job.errorCode ?? "")} ${job.sizeBytes ? escapeHtml(formatBytes(job.sizeBytes)) : ""}</small>
+              ${job.status === "ready" && job.sizeBytes >= data.target.fullBytes ? `<small>${escapeHtml(opText("不比全量包小，不能启用。", "Not smaller than full; cannot enable."))}</small>` : ""}</div></div><div class="operations-buttons">
               ${run ? `<a href="${escapeHtml(run)}" target="_blank" rel="noopener noreferrer">${escapeHtml(job.phase === "awaiting_approval" ? opText("前往 GitHub 审批", "Review in GitHub") : "GitHub Actions")}</a>` : ""}
               ${taskActivity?.controlButtons(job,locked) ?? ""}
-              <button type="button" class="secondary-button" data-version-operation="delta-${control}" data-job-id="${escapeHtml(job.id)}" ${locked || job.cancelling || !usable || (control === "retry" && !data.dispatchConfigured) ? "disabled" : ""}>${escapeHtml(({ enable: opText("启用", "Enable"), disable: opText("停用", "Disable"), retry: opText("重试失败任务", "Retry failed job"), reconcile: opText("核对构建结果", "Reconcile run") })[control])}</button></div></article>`;
-          }).join("") || `<p class="empty">${escapeHtml(opText("尚未生成差分任务。", "No delta jobs yet."))}</p>`}</div>`}`;
+              ${control ? `<button type="button" class="secondary-button" data-version-operation="delta-${control}" data-job-id="${escapeHtml(job.id)}" ${locked || job.cancelling || !usable || (control === "retry" && !data.dispatchConfigured) ? "disabled" : ""}>${escapeHtml(({ enable: opText("启用", "Enable"), disable: opText("停用", "Disable"), retry: opText("重试失败任务", "Retry failed job"), reconcile: opText("同步", "Sync") })[control])}</button>` : ""}</div></article>`;
+          }).join("") || `<p class="empty">${escapeHtml(opText("尚未生成差分任务。", "No delta jobs yet."))}</p>`}</div>
+          ${data.jobs.length>8 ? `<nav class="release-pagination"><button type="button" data-version-operation="delta-jobs-prev" ${!delta.jobPage || delta.busy?"disabled":""}>${escapeHtml(t("pagination.previous"))}</button><span>${delta.jobPage+1} / ${Math.ceil(data.jobs.length/8)}</span><button type="button" data-version-operation="delta-jobs-next" ${(delta.jobPage+1)*8>=data.jobs.length || delta.busy?"disabled":""}>${escapeHtml(t("pagination.next"))}</button></nav>` : ""}`}`;
         const restore = editingReason ? document.querySelector("#deltaReason")
           : selectedBase ? [...els.deltaContent.querySelectorAll("[data-delta-base]")].find(node => node.dataset.deltaBase === selectedBase)
+          : selectedFile ? [...els.deltaContent.querySelectorAll("[data-delta-file]")].find(node => node.dataset.deltaFile === selectedFile)
           : focused?.dataset.taskControl ? [...els.deltaContent.querySelectorAll("[data-task-control]")].find(node =>
             node.dataset.taskControl === focused.dataset.taskControl && node.dataset.controlJob === focused.dataset.controlJob) : null;
         if (restore && !restore.disabled && !activeConfirmDialog) {
           restore.focus({ preventScroll: true });
           if (caret) restore.setSelectionRange(...caret);
         }
+      }
+      function deltaFileDeletable(job) {
+        return ["ready","deleting"].includes(job.status) && !job.enabled && !job.cancelling && job.fileName;
+      }
+      function deltaJobPageRows(delta) {
+        const jobs=delta.data?.jobs??[];
+        delta.jobPage=clamp(delta.jobPage,0,Math.max(0,Math.ceil(jobs.length/8)-1));
+        return jobs.slice(delta.jobPage*8,(delta.jobPage+1)*8);
+      }
+      async function deleteSelectedDeltaFiles(delta) {
+        if(delta.busy || activeConfirmDialog || !canRole("owner") || delta.actor!==state.session?.actor) return;
+        const rows=delta.data.jobs.filter(job=>delta.selectedFiles.has(job.id) && deltaFileDeletable(job));
+        if(!rows.length) return;
+        const confirmed=await openConfirmDialog({tone:"danger",icon:"i-trash",title:opText("删除所选差分文件", "Delete selected delta files"),
+          message:opText("删除实际差分文件，保留原包、构建结果及历史。此操作不能撤销。", "Delete the delta files, retaining originals, build results and history. This cannot be undone."),
+          detail:rows.map(job=>`${job.baseVersionCode} → ${job.targetVersionCode} / ${job.fileName}`).join("\n"),
+          requiredText:String(rows.length),reasonRequired:true,confirmClass:"danger"});
+        if(!confirmed || state.delta!==delta || delta.actor!==state.session?.actor) return;
+        delta.busy=true;delta.notice="";delta.message="";clearTimeout(delta.timer);renderDelta();
+        const results=[];
+        try {
+          for(const job of rows) {
+            if(delta.actor!==state.session?.actor) break;
+            try {
+              const result=await mutate(`/api/admin/delta/jobs/${encodeURIComponent(job.id)}/delete`,{expectedRevision:job.revision,reason:confirmed.reason});
+              if(result.ok!==true || result.job?.id!==job.id || result.job.status!=="deleted") throw new Error(opText("删除未获确认", "Deletion was not confirmed"));
+              delta.selectedFiles.delete(job.id);results.push(`${job.baseVersionCode} → ${job.targetVersionCode}: ${opText("文件已删除", "File deleted")}`);
+            } catch(error) {results.push(`${job.baseVersionCode} → ${job.targetVersionCode}: ${error.message}`);}
+          }
+          await openResultDialog({title:opText("差分文件删除结果", "Delta deletion results"),
+            message:opText("逐项结果如下，失败项不会自动重试。", "Results are listed per file. Failed deletions are not retried automatically."),detail:results.join("\n")});
+        } finally {delta.busy=false;if(state.delta===delta) await loadDelta(delta);taskActivity?.refresh();}
       }
       async function handleVersionOperation(button) {
         const action = button.dataset.versionOperation;
@@ -3187,6 +3291,23 @@
         const delta = state.delta;
         if (!delta || delta.busy || activeConfirmDialog) return;
         if (action === "delta-reload") { delta.notice = ""; clearFeedbackError("delta-load"); await loadDelta(delta); return; }
+        if(action==="delta-jobs-prev" || action==="delta-jobs-next") {
+          delta.jobPage+=action==="delta-jobs-prev"?-1:1;renderDelta();return;
+        }
+        if(action.startsWith("delta-delete-")) {
+          if(!canRole("owner") || delta.actor!==state.session?.actor) return;
+          if(action==="delta-delete-enter" || action==="delta-delete-exit") {
+            delta.deleteMode=action==="delta-delete-enter";delta.selectedFiles.clear();renderDelta();
+            document.querySelector(`[data-version-operation="${delta.deleteMode?"delta-delete-exit":"delta-delete-enter"}"]`)?.focus({preventScroll:true});return;
+          }
+          if(!delta.deleteMode) return;
+          if(action==="delta-delete-select") {
+            const rows=deltaJobPageRows(delta).filter(deltaFileDeletable),remove=rows.every(job=>delta.selectedFiles.has(job.id));
+            for(const job of rows) {if(remove)delta.selectedFiles.delete(job.id);else delta.selectedFiles.add(job.id);}renderDelta();
+          }
+          if(action==="delta-delete-selected") await deleteSelectedDeltaFiles(delta);
+          return;
+        }
         if (!canRole("publisher") || delta.actor !== state.session?.actor) return;
         if (action === "delta-recommend") {
           delta.selected = new Set(delta.data.bases.filter(base => base.eligible && !base.existing && !base.job && baseReports(base, delta.kind) > 0)
@@ -3199,17 +3320,20 @@
           delta.notice = opText("请填写生成原因，并选择 1 至 5 个旧版本。", "Select 1 to 5 bases and enter a reason."); renderDelta(); document.querySelector("#deltaReason")?.focus(); showErrorDialog(delta.notice); return;
         }
         if (operation !== "create" && (!job || job.cancelling)) return;
-        const confirmed = await openConfirmDialog({ title: button.textContent, reasonRequired: operation !== "create",
+        const confirmed = operation === "reconcile" ? {} : await openConfirmDialog({ title: button.textContent, reasonRequired: operation !== "create",
           message: opText("仅修改该目标版本的差分任务或差分选择，不改变发布通道。", "Only this target's delta jobs or selection will change; channels remain untouched."),
           detail: operation === "create" ? `${delta.selected.size} ${opText("个旧版本", "source versions")} · ${delta.reason}${delta.kind === "firmware" ? "\n" + opText("提交后还需要 GitHub 审批，请按后续弹窗前往审批。", "GitHub approval is required after submission; follow the approval dialog.") : ""}` : `${job.baseVersionCode} → ${job.targetVersionCode}` });
         if (!confirmed || state.delta !== delta || delta.actor !== state.session?.actor) return;
-        delta.busy = true; delta.notice = ""; clearTimeout(delta.timer); renderDelta();
+        delta.busy = true; delta.notice = ""; delta.message = operation === "reconcile" ? opText("正在同步构建结果...", "Synchronizing build results...") : ""; clearTimeout(delta.timer); renderDelta();
         try {
           const body = operation === "create" ? { kind: delta.kind, targetReleaseId: delta.releaseId, baseReleaseIds: [...delta.selected], reason: delta.reason.trim() }
-            : { expectedRevision: job.revision, reason: confirmed.reason };
-          await mutate(operation === "create" ? "/api/admin/delta/jobs" : `/api/admin/delta/jobs/${encodeURIComponent(job.id)}/${operation}`, body);
+            : operation === "reconcile" ? { expectedRevision: job.revision } : { expectedRevision: job.revision, reason: confirmed.reason };
+          const result=await mutate(operation === "create" ? "/api/admin/delta/jobs" : `/api/admin/delta/jobs/${encodeURIComponent(job.id)}/${operation}`, body);
+          if(result.ok!==true || (operation!=="create" && result.job?.id!==job.id)) throw new Error(opText("服务器未确认操作结果", "Server did not confirm this operation"));
+          if(operation==="reconcile") delta.message=opText("已同步构建结果", "Build results synchronized");
           if (operation === "create") delta.selected.clear();
         } catch (error) {
+          delta.message = "";
           delta.notice = `${error.message} ${opText("请核对当前任务，不会自动重发。", "Reconcile the current job; it will not be replayed automatically.")}`;
           showErrorDialog(delta.notice);
         }
@@ -3416,9 +3540,10 @@
         document.querySelector("#appPlatformLabel").textContent = opText("平台", "Platform");
         document.querySelector("#appPlatformHint").textContent = state.appPlatform === "ios"
           ? opText("iOS 分发尚未接通，不支持 APK 安装或差分更新。", "iOS distribution is not configured. APK installation and delta updates are unavailable.") : "";
-        for (const id of state.selectedVersions) if (!state.releases.some(r => r.id === id)) state.selectedVersions.delete(id);
-        document.querySelector("#releaseBulkActions").innerHTML = `<button class="secondary-button" type="button" data-bulk-action="select-page" ${state.busy || !canRole("owner") ? "disabled" : ""}>${escapeHtml(opText("选择/取消选择当前页", "Select / clear current page"))}</button>
-          <button class="secondary-button" type="button" data-bulk-action="delete" ${state.busy || !canRole("owner") || !state.selectedVersions.size ? "disabled" : ""}>${escapeHtml(opText(`删除所选 (${state.selectedVersions.size})`, `Delete selected (${state.selectedVersions.size})`))}</button>`;
+        for (const id of state.selectedVersions) if (!releases.some(r => r.id === id && !publishedChannels(r).length)) state.selectedVersions.delete(id);
+        document.querySelector("#releaseBulkActions").innerHTML = selectionToolbar({ active:state.deleteModes.app,
+          count:state.selectedVersions.size,attribute:"bulk-action",label:opText("删除版本", "Delete versions"),
+          locked:state.busy,allowed:canRole("owner") });
         els.visibleCount.textContent = `(${releases.length})`;
         els.versionStrip.innerHTML = rows.length ? rows.map(release => versionCard(release, selected)).join("")
           : `<div class="empty">${escapeHtml(t("timeline.noMatches"))}</div>`;
@@ -3440,7 +3565,7 @@
         const fallback = Number(release.github_fallback_only_count ?? 0);
         const status = release.state === "disabled" ? "disabled" : published.length ? "published" : "candidate";
         const size = installerSizeBytes(release);
-        return `<div class="version-selection-row"><input type="checkbox" data-select-version="${escapeHtml(release.id)}" aria-label="${escapeHtml(opText("选择版本 ", "Select version ")+release.release_tag)}" ${state.selectedVersions.has(release.id) ? "checked" : ""} ${state.busy || !canRole("owner") || published.length ? "disabled" : ""}>
+        return `<div class="version-selection-row">${state.deleteModes.app && canRole("owner") && !published.length ? `<input type="checkbox" data-select-version="${escapeHtml(release.id)}" aria-label="${escapeHtml(opText("选择版本 ", "Select version ")+release.release_tag)}" ${state.selectedVersions.has(release.id) ? "checked" : ""} ${state.busy ? "disabled" : ""}>` : ""}
           <button type="button" class="version-card ${active ? "active" : ""}" data-release-id="${escapeHtml(release.id)}" aria-pressed="${active}">
           <div class="version-identity">
             <div class="version-heading"><h3>${escapeHtml(release.release_tag)}</h3>
@@ -3550,7 +3675,34 @@
           : escapeHtml(t("notes.previewEmpty"));
       }
 
+      function selectionToolbar(options) {
+        return window.TraceSelectionControls({...options,text:opText,escape:escapeHtml});
+      }
+
+      function filteredAnnouncements() {
+        const query=state.queries.announcements.toLocaleLowerCase();
+        return state.announcements.filter(row=>!query || [row.title,row.body].join(" ").toLocaleLowerCase().includes(query));
+      }
+
+      function announcementPageRows(rows = filteredAnnouncements()) {
+        state.announcementPage=clamp(state.announcementPage,0,Math.max(0,Math.ceil(rows.length/RELEASE_PAGE_SIZE)-1));
+        return rows.slice(state.announcementPage*RELEASE_PAGE_SIZE,(state.announcementPage+1)*RELEASE_PAGE_SIZE);
+      }
+
+      function renderAnnouncementActions(rows = filteredAnnouncements()) {
+        const locked=state.busy || Boolean(state.announcementsError);
+        document.querySelector("#announcementBulkActions").innerHTML=selectionToolbar({active:state.deleteModes.announcements,
+          count:state.selectedAnnouncements.size,attribute:"announcement-bulk",label:opText("删除公告", "Delete announcements"),
+          locked,allowed:canRole("publisher")});
+        announcementPageRows(rows);
+        const pages=Math.max(1,Math.ceil(rows.length/RELEASE_PAGE_SIZE)),pagination=document.querySelector("#announcementPagination");
+        pagination.hidden=pages<=1;
+        pagination.innerHTML=`<button type="button" data-announcement-page="-1" ${!state.announcementPage || locked ? "disabled":""}>${escapeHtml(t("pagination.previous"))}</button>
+          <span>${state.announcementPage+1} / ${pages}</span><button type="button" data-announcement-page="1" ${state.announcementPage>=pages-1 || locked ? "disabled":""}>${escapeHtml(t("pagination.next"))}</button>`;
+      }
+
       function renderAnnouncements() {
+        renderAnnouncementActions();
         if (state.announcementsError) {
           els.announcementList.innerHTML = `<div class="error">${escapeHtml(state.announcementsError.message)}</div>`;
           setAnnouncementEditorEnabled(false);
@@ -3565,10 +3717,12 @@
         }
 
         const query = state.queries.announcements.toLocaleLowerCase();
-        const rows = state.announcements.filter(row => !query || [row.title, row.body].join(" ").toLocaleLowerCase().includes(query));
+        const rows = filteredAnnouncements();
+        for(const id of state.selectedAnnouncements) if(!rows.some(row=>row.id===id)) state.selectedAnnouncements.delete(id);
+        renderAnnouncementActions(rows);
         els.announcementCount.textContent = `(${rows.length})`;
         els.announcementList.innerHTML = rows.length
-          ? rows.map(announcementCard).join("")
+          ? announcementPageRows(rows).map(announcementCard).join("")
           : `<div class="empty">${escapeHtml(t(query ? "timeline.noMatches" : "announcements.empty"))}</div>`;
 
         renderAnnouncementEditor();
@@ -3578,7 +3732,7 @@
         const active = announcement.id === state.selectedAnnouncementId;
         const published = Number(announcement.published ?? 0) === 1;
         const pinned = Number(announcement.pinned ?? 0) === 1;
-        return `
+        return `<div class="announcement-selection-row">${state.deleteModes.announcements && canRole("publisher") ? `<input type="checkbox" data-select-announcement="${escapeHtml(announcement.id)}" aria-label="${escapeHtml(opText("选择公告 ", "Select announcement ")+announcement.title)}" ${state.selectedAnnouncements.has(announcement.id)?"checked":""} ${state.busy?"disabled":""}>` : ""}
           <button type="button" class="announcement-card ${active ? "active" : ""}" data-announcement-id="${escapeHtml(announcement.id)}" aria-pressed="${active}">
             <div class="firmware-card-top">
               <div>
@@ -3592,7 +3746,7 @@
               <span class="tag">${escapeHtml(t("announcements.manual"))}</span>
               ${pinned ? `<span class="tag beta">${escapeHtml(t("announcements.pinned"))}</span>` : ""}
             </div>
-          </button>
+          </button></div>
         `;
       }
 
@@ -3615,7 +3769,7 @@
 
       function renderAnnouncementEditor() {
         const draft = state.announcementDrafts.get(announcementDraftKey());
-        const value = draft?.actor === state.session?.actor ? draft.value : announcementValues();
+        const value = draft && draft.actor === state.session?.actor ? draft.value : announcementValues();
         els.announcementTitle.value = value.title;
         els.announcementBody.value = value.body;
         els.announcementPublished.checked = value.published;
@@ -3626,6 +3780,7 @@
 
       function setAnnouncementEditorEnabled(enabled) {
         const writable = enabled && !state.busy && canRole("publisher");
+        els.announcementList.querySelectorAll("[data-select-announcement]").forEach(input => { input.disabled = !writable; });
         els.announcementTitle.disabled = !writable;
         els.announcementBody.disabled = !writable;
         els.announcementPublished.disabled = !writable;
@@ -3661,6 +3816,31 @@
         els.body.classList.remove("announcement-open");
         syncOverlayState(); els.newAnnouncement.focus({preventScroll:true});
         return true;
+      }
+
+      async function deleteSelectedAnnouncements() {
+        if(state.busy || activeConfirmDialog || !canRole("publisher")) return;
+        const rows=state.announcements.filter(row=>state.selectedAnnouncements.has(row.id)),actor=state.session?.actor;
+        if(!rows.length) return;
+        const confirmed=await openConfirmDialog({tone:"danger",icon:"i-trash",title:opText("删除所选公告", "Delete selected announcements"),
+          message:opText(`删除这 ${rows.length} 条公告及其未保存草稿？`, `Delete these ${rows.length} announcements and their unsaved drafts?`),
+          detail:rows.map(row=>row.title).join("\n"),requiredText:String(rows.length),confirmClass:"danger"});
+        if(!confirmed || actor!==state.session?.actor) return;
+        const results=[];setBusy(true);
+        try {
+          for(const row of rows) {
+            if(actor!==state.session?.actor) break;
+            try {
+              const result=await mutate(`/api/admin/announcements/${encodeURIComponent(row.id)}/delete`,{});
+              if(result.ok!==true) throw new Error(opText("服务器未确认删除", "Server did not confirm deletion"));
+              state.selectedAnnouncements.delete(row.id);state.announcementDrafts.delete(row.id);
+              results.push(`${row.title}: ${opText("已删除", "Deleted")}`);
+            } catch(error) {results.push(`${row.title}: ${error.message}`);}
+          }
+          await loadAll();
+          await openResultDialog({title:opText("删除结果", "Deletion results"),
+            message:opText("未成功删除的公告仍保留选中，不会自动重试。", "Unsuccessful deletions remain selected and are not retried automatically."),detail:results.join("\n")});
+        } finally {setBusy(false);renderAnnouncements();}
       }
 
       async function deleteSelectedVersions() {
@@ -3783,10 +3963,11 @@
       }
 
       function renderFirmware() {
-        for(const id of state.selectedFirmwareVersions) if(!state.firmwareReleases.some(r=>r.releaseId===id)) state.selectedFirmwareVersions.delete(id);
+        for(const id of state.selectedFirmwareVersions) if(!filteredFirmware().some(r=>r.releaseId===id && firmwareDeletable(r))) state.selectedFirmwareVersions.delete(id);
         const bulkLocked=state.busy||state.firmwareReconcileRequired||state.firmwarePendingAction||!canRole("owner");
-        document.querySelector("#firmwareBulkActions").innerHTML=`<button type="button" class="secondary-button" data-firmware-bulk="select-page" ${bulkLocked?"disabled":""}>${escapeHtml(opText("选择/取消选择当前页", "Select / clear current page"))}</button>
-          <button type="button" class="secondary-button" data-firmware-bulk="delete" ${bulkLocked||!state.selectedFirmwareVersions.size?"disabled":""}>${escapeHtml(opText(`删除所选文件 (${state.selectedFirmwareVersions.size})`, `Delete selected files (${state.selectedFirmwareVersions.size})`))}</button>`;
+        document.querySelector("#firmwareBulkActions").innerHTML=selectionToolbar({active:state.deleteModes.firmware,
+          count:state.selectedFirmwareVersions.size,attribute:"firmware-bulk",label:opText("删除固件文件", "Delete firmware files"),
+          locked:bulkLocked,allowed:canRole("owner")});
         els.firmwareCount.textContent = String(state.firmwareReleases.filter(firmwareReady).length);
         els.firmwareNotice.hidden = !state.firmwareReconcileRequired && !state.firmwarePendingAction;
         els.firmwareNotice.innerHTML = `
@@ -3927,7 +4108,7 @@
         const published = firmwarePublishedChannels(release);
         const active = release.releaseId === state.selectedFirmwareId;
         return `<article class="firmware-release-card ${active ? "active" : ""}" data-release-id="${escapeHtml(release.releaseId)}">
-          <input type="checkbox" data-select-kind="firmware" data-select-version="${escapeHtml(release.releaseId)}" aria-label="${escapeHtml(opText("选择版本 ", "Select version ")+release.releaseTag)}" ${state.selectedFirmwareVersions.has(release.releaseId)?"checked":""} ${state.busy||!canRole("owner")||!firmwareDeletable(release)?"disabled":""}>
+          ${state.deleteModes.firmware && canRole("owner") && firmwareDeletable(release) ? `<input type="checkbox" data-select-kind="firmware" data-select-version="${escapeHtml(release.releaseId)}" aria-label="${escapeHtml(opText("选择版本 ", "Select version ")+release.releaseTag)}" ${state.selectedFirmwareVersions.has(release.releaseId)?"checked":""} ${state.busy?"disabled":""}>` : ""}
           <button type="button" class="text-button" data-firmware-action="select" data-firmware-id="${escapeHtml(release.releaseId)}" aria-pressed="${active}" aria-haspopup="dialog" aria-controls="firmwareDetailSheet" aria-expanded="${active && state.firmwareDetailsOpen}">
             <span class="firmware-list-title"><strong>${escapeHtml(release.versionName)}</strong>
               <span class="tag ${firmwareStatus(release)}">${escapeHtml(firmwareStatusLabel(release))}</span></span>
@@ -4745,6 +4926,7 @@
         renderTimeline(filteredReleases(),state.releases.find(row=>row.id===state.selectedReleaseId));
         renderFirmware();
         setAnnouncementEditorEnabled(!state.announcementsError);
+        renderAnnouncementActions();
         if (!isBusy) { flushFeedback(); taskActivity?.resume(); }
       }
 
@@ -4820,6 +5002,7 @@
 
       function switchAdminView(view, { scroll = false } = {}) {
         if (!["phone", "firmware"].includes(view)) return;
+        if(state.activeView!==view) resetDeletionModes();
         state.activeView = view;
         closeQuickActions({ immediate: true, restoreFocus: false });
         closeFirmwareDetails({ immediate: true, restoreFocus: false });
@@ -4827,7 +5010,7 @@
         closeResourcePanel();
         applyAdminView();
         syncSearchInput();
-        if (view === "firmware") renderFirmware();
+        render();
         setMobileNav(false, { restoreFocus: false });
         if (scroll) {
           window.scrollTo({ top: 0 });
@@ -4854,7 +5037,9 @@
 
       function switchAppSection(section) {
         if (!["releases", "announcements", "inventory"].includes(section)) return;
+        if(state.appSection!==section) resetDeletionModes();
         state.appSection = section;
+        render();
         closeQuickActions({ immediate: true, restoreFocus: false });
         setSortMenuOpen(false);
         applyAppSection();
@@ -4875,6 +5060,7 @@
 
       function switchFirmwareSection(section) {
         if (!["releases", "channels", "history", "inventory"].includes(section)) return;
+        if(state.firmwareSection!==section) resetDeletionModes();
         closeFirmwareDetails({ immediate: true, restoreFocus: false });
         state.firmwareSection = section;
         closeResourcePanel();
@@ -4893,6 +5079,11 @@
           tab.setAttribute("aria-selected", String(active));
           tab.tabIndex = active ? 0 : -1;
         });
+      }
+
+      function resetDeletionModes() {
+        state.deleteModes={app:false,firmware:false,announcements:false};
+        state.selectedVersions.clear();state.selectedFirmwareVersions.clear();state.selectedAnnouncements.clear();
       }
 
       function applyAdminView() {

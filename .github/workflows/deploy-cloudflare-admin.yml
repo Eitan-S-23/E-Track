@@ -22,6 +22,10 @@ on:
         description: Also deploy the matching Public Pages functions
         default: false
         type: boolean
+      include_worker:
+        description: Apply pending staging migrations and deploy the matching Worker before Pages
+        default: false
+        type: boolean
 
 concurrency:
   group: trace-update-pages-staging
@@ -34,7 +38,7 @@ jobs:
   deploy:
     name: Deploy verified Pages source
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     env:
       SOURCE_SHA: ${{ inputs.source_sha || github.sha }}
       PROJECT_NAME: ${{ inputs.project_name }}
@@ -72,7 +76,8 @@ jobs:
         id: preflight
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          # Cloudflare token e-track-ci, mapped to Wrangler's standard variable.
+          CLOUDFLARE_API_TOKEN: ${{ secrets.E_TRACK_CI }}
         run: |
           set -euo pipefail
           node --input-type=module <<'NODE'
@@ -122,6 +127,20 @@ jobs:
           fs.writeFileSync('.cache/pages-deploy/before.json', JSON.stringify(baseline), { flag: 'wx', mode: 0o600 });
           NODE
 
+      - name: Install existing Worker dependencies and typecheck
+        if: inputs.include_worker
+        working-directory: app/bluetooth_flutter_Trace/cloudflare/update-service/worker
+        run: |
+          npm ci
+          npm run check
+
+      - name: Apply pending schema and deploy matching Worker before Pages
+        if: inputs.include_worker
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.E_TRACK_CI }}
+        run: node app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/deploy-worker-staging.mjs
+
       - name: Install existing Admin dependencies
         working-directory: app/bluetooth_flutter_Trace/cloudflare/update-service/admin
         run: npm ci
@@ -129,7 +148,7 @@ jobs:
       - name: Deploy Admin without changing Access secrets
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.E_TRACK_CI }}
         working-directory: app/bluetooth_flutter_Trace/cloudflare/update-service
         run: node scripts/deploy-admin-staging.mjs --yes --skip-secrets --commit-hash "$SOURCE_SHA"
 
@@ -144,7 +163,7 @@ jobs:
         if: inputs.include_public
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.E_TRACK_CI }}
         working-directory: app/bluetooth_flutter_Trace/cloudflare/update-service/public
         run: node node_modules/wrangler/bin/wrangler.js pages deploy ./site --project-name trace-update-public-staging --branch main --commit-dirty=false --commit-hash "$SOURCE_SHA"
 
@@ -152,12 +171,20 @@ jobs:
         if: always() && steps.preflight.outcome == 'success'
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.E_TRACK_CI }}
         run: |
           set -euo pipefail
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           import { isDeepStrictEqual } from 'node:util';
+          const samePagesRuntime = (before, after) => {
+            const normalize = configs => {
+              const copy = structuredClone(configs);
+              for (const env of Object.values(copy)) delete env.wrangler_config_hash;
+              return copy;
+            };
+            return isDeepStrictEqual(normalize(before), normalize(after));
+          };
           const env = process.env;
           const before = JSON.parse(fs.readFileSync('.cache/pages-deploy/before.json', 'utf8'));
           const result = { source: before.source, projects: [] };
@@ -178,7 +205,7 @@ jobs:
             result.projects.push({ component: entry.component, id: deployment?.id,
               source: deployment?.deployment_trigger?.metadata?.commit_hash,
               status: deployment?.latest_stage?.status,
-              configurationUnchanged: isDeepStrictEqual(entry.deploymentConfigs, project.deployment_configs),
+              configurationUnchanged: samePagesRuntime(entry.deploymentConfigs, project.deployment_configs),
               updated: deployment?.id !== entry.id });
           }
           fs.writeFileSync('.cache/pages-deploy/result.json', JSON.stringify(result, null, 2) + '\n', { flag: 'wx' });
@@ -194,5 +221,16 @@ jobs:
         with:
           name: pages-deployment-${{ github.run_id }}
           path: .cache/pages-deploy/result.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Retain sanitized Worker deployment result
+        if: always() && inputs.include_worker
+        uses: actions/upload-artifact@v4
+        with:
+          name: worker-deployment-${{ github.run_id }}
+          path: .cache/pages-deploy/worker/result.json
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 14

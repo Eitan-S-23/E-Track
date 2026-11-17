@@ -187,14 +187,16 @@ describe("operator-selected supplemental delta jobs",()=>{
     dispatch.mockRejectedValueOnce(new TypeError("lost dispatch response"));
     const job=await create(await pair());
     const runs=vi.fn<typeof fetch>(async()=>Response.json({workflow_runs:[{id:123456,event:"workflow_dispatch",head_sha:job.workflow_commit,
-      display_title:`delta:${job.id}:${job.attempt}`,status:"completed",conclusion:"failure"}]}));
-    await deltaJobAction(configured,"owner",job.id,"reconcile",{expectedRevision:job.revision,reason:"Read actual run"},runs);
+      head_branch:workflowLocation(job).ref,display_title:`delta:${job.id}:${job.attempt}`,status:"completed",conclusion:"failure"}]}));
+    await deltaJobAction(configured,"owner",job.id,"reconcile",{expectedRevision:job.revision},runs);
     expect(runs).toHaveBeenCalledTimes(1);
     expect(runs.mock.calls[0][1]?.method).toBeUndefined();
     expect(runs.mock.calls[0][1]?.redirect).toBe("manual");
     expect(dispatch).toHaveBeenCalledTimes(1);
     const stored=await env.DB.prepare("SELECT status,run_id FROM delta_jobs WHERE id=?").bind(job.id).first();
     expect(stored).toEqual({status:"failed",run_id:"123456"});
+    expect(await env.DB.prepare("SELECT reason FROM delta_job_events WHERE job_id=? AND action='reconcile'").bind(job.id).first("reason"))
+      .toBe("Synchronize GitHub build status");
   });
   it("does not follow a reconciliation redirect or resolve an unknown dispatch",async()=>{
     dispatch.mockRejectedValueOnce(new TypeError("lost dispatch response"));
@@ -213,7 +215,7 @@ describe("operator-selected supplemental delta jobs",()=>{
     dispatch.mockRejectedValueOnce(new TypeError("lost dispatch response"));
     const job=await create(await pair());
     const runs=vi.fn<typeof fetch>(async()=>Response.json({workflow_runs:[{id:123456,event:"workflow_dispatch",head_sha:"d".repeat(40),
-      display_title:`delta:${job.id}:1`,status:"completed",conclusion:"failure"}]}));
+      head_branch:workflowLocation(job).ref,display_title:`delta:${job.id}:1`,status:"completed",conclusion:"failure"}]}));
     await expect(deltaJobAction(configured,"owner",job.id,"reconcile",{expectedRevision:job.revision,reason:"Read actual run"},runs)).rejects.toMatchObject({code:"RELEASE_CONFLICT"});
     expect((await env.DB.prepare("SELECT status FROM delta_jobs WHERE id=?").bind(job.id).first())?.status).toBe("dispatch_unknown");
   });
@@ -445,6 +447,86 @@ describe("operator-selected supplemental delta jobs",()=>{
     expect(current.status).toBe("ready");expect(current.attempt).toBe(1);
     expect(current.cancel_requested_at).toBeNull();
     expect(fetcher.mock.calls.some(call=>String(call[0]).endsWith("/dispatches"))).toBe(false);
+  });
+
+  it("locates an unbound run for cancellation despite a cached not-found result",async()=>{
+    const job=await create(await pair("android"));
+    await env.DB.prepare(`INSERT INTO admin_delta_run_status(job_id,attempt,workflow_commit,checked_at,result_json)
+      VALUES (?,?,?,?,?)`).bind(job.id,job.attempt,job.workflow_commit,Math.floor(Date.now()/1000),
+      JSON.stringify({phase:"ci_pending",runUrl:null})).run();
+    const run={id:12345,event:"workflow_dispatch",head_sha:job.workflow_commit,head_branch:workflowLocation(job).ref,
+      display_title:`delta:${job.id}:1`,status:"queued",conclusion:null};
+    const fetcher=vi.fn<typeof fetch>(async(input)=>String(input).endsWith("/cancel")?new Response(null,{status:202})
+      :Response.json(String(input).includes("/workflows/")?{workflow_runs:[run]}:run));
+    const response=await deltaJobAction(configured,"owner",job.id,"cancel",{expectedRevision:job.revision,reason:"Cancel queued run"},fetcher);
+    expect((await response.json<{job:{cancelling:boolean;runUrl:string}}>()).job).toMatchObject({cancelling:true,
+      runUrl:"https://github.com/Eitan-S-23/Trace/actions/runs/12345"});
+    expect(fetcher.mock.calls.filter(call=>String(call[0]).endsWith("/cancel"))).toHaveLength(1);
+    expect(fetcher.mock.calls.some(call=>String(call[0]).endsWith("/dispatches"))).toBe(false);
+  });
+
+  it.each(["missing","ambiguous","wrong-branch"])("does not cancel a %s unbound run",async(mode)=>{
+    const job=await create(await pair());
+    const run={id:12345,event:"workflow_dispatch",head_sha:job.workflow_commit,
+      head_branch:mode==="wrong-branch"?"main":workflowLocation(job).ref,display_title:`delta:${job.id}:1`,status:"queued"};
+    const fetcher=vi.fn<typeof fetch>(async()=>Response.json({workflow_runs:mode==="missing"?[]:mode==="ambiguous"?[run,{...run,id:12346}]:[run]}));
+    await expect(deltaJobAction(configured,"owner",job.id,"cancel-restart",{expectedRevision:job.revision,reason:"restart"},fetcher))
+      .rejects.toMatchObject({code:"RELEASE_CONFLICT"});
+    expect(fetcher.mock.calls.every(call=>(call[1]?.method??"GET")==="GET")).toBe(true);
+    expect(await env.DB.prepare("SELECT cancel_requested_at FROM delta_jobs WHERE id=?").bind(job.id).first("cancel_requested_at")).toBeNull();
+  });
+
+  it.each(["android","firmware"] as const)("deletes only the disabled %s delta file, retaining original inputs and build proof",async(kind)=>{
+    const {job}=await ready(kind),result=JSON.parse(job.result_json!),spec=JSON.parse(job.input_json) as DeltaSpec;
+    const response=await action(job,"delete");
+    const view=(await response.json<{job:{status:string;assetState:string}}>()).job;
+    expect(view).toMatchObject({status:"deleted",assetState:"deleted"});
+    expect(await env.RELEASES_BUCKET.head(result.key)).toBeNull();
+    expect(await env.RELEASES_BUCKET.head(spec.base.file.key)).not.toBeNull();
+    expect(await env.RELEASES_BUCKET.head(spec.target.file.key)).not.toBeNull();
+    const current=(await env.DB.prepare("SELECT * FROM delta_jobs WHERE id=?").bind(job.id).first<DeltaJob>())!;
+    expect(current.status).toBe("ready");expect(current.result_json).toBe(job.result_json);expect(current.attempt).toBe(job.attempt);
+    expect((await env.DB.prepare("SELECT action FROM delta_job_events WHERE job_id=? AND action LIKE 'delete-file%' ORDER BY revision")
+      .bind(job.id).all()).results).toEqual([{action:"delete-file-start"},{action:"delete-file"}]);
+    expect((await action(current,"delete")).status).toBe(200);
+    await expect(action(current,"enable")).rejects.toMatchObject({code:"RELEASE_CONFLICT"});
+    await expect(env.DB.prepare("UPDATE delta_jobs SET enabled=1 WHERE id=?").bind(job.id).run()).rejects.toThrow();
+    await expect(env.DB.prepare("UPDATE delta_jobs SET asset_state='retained' WHERE id=?").bind(job.id).run()).rejects.toThrow();
+    if(kind==="android") {
+      expect(await env.DB.prepare("SELECT disabled,r2_state FROM release_assets WHERE id=?").bind(result.assetId).first())
+        .toEqual({disabled:1,r2_state:"r2_deleted"});
+      await expect(env.DB.prepare("UPDATE release_assets SET disabled=0,r2_state='available' WHERE id=?").bind(result.assetId).run()).rejects.toThrow();
+      expect(await supplementalAppManifest(configured,job.target_release_id,job.base_version_code,job.base_sha256)).toBeNull();
+    } else expect(await supplementalFirmwareAssets(env.DB,job.target_release_id)).toEqual([]);
+  });
+
+  it("rejects active, enabled, stale and changed-object deletion without touching R2",async()=>{
+    const queued=await create(await pair());
+    await expect(action(queued,"delete")).rejects.toMatchObject({code:"RELEASE_NOT_READY"});
+    const {job}=await ready(),result=JSON.parse(job.result_json!);
+    await expect(action(job,"delete",job.revision-1)).rejects.toMatchObject({code:"CAS_CONFLICT"});
+    await action(job,"enable");
+    let current=(await env.DB.prepare("SELECT * FROM delta_jobs WHERE id=?").bind(job.id).first<DeltaJob>())!;
+    await expect(action(current,"delete")).rejects.toMatchObject({code:"RELEASE_IN_USE"});
+    expect(await env.RELEASES_BUCKET.head(result.key)).not.toBeNull();
+    await action(current,"disable");
+    current=(await env.DB.prepare("SELECT * FROM delta_jobs WHERE id=?").bind(job.id).first<DeltaJob>())!;
+    await env.RELEASES_BUCKET.put(result.key,"unexpected replacement");
+    await expect(action(current,"delete")).rejects.toMatchObject({code:"R2_OBJECT_CONFLICT"});
+    expect(await env.DB.prepare("SELECT asset_state FROM delta_jobs WHERE id=?").bind(job.id).first("asset_state")).toBe("retained");
+  });
+
+  it("a partial R2 deletion stays retired and resumes only the same immutable output",async()=>{
+    const {job}=await ready("android"),result=JSON.parse(job.result_json!);
+    const remove=vi.spyOn(env.RELEASES_BUCKET,"delete").mockRejectedValueOnce(new Error("R2 unavailable"));
+    await expect(action(job,"delete")).rejects.toThrow("R2 unavailable");
+    const pending=(await env.DB.prepare("SELECT * FROM delta_jobs WHERE id=?").bind(job.id).first<DeltaJob>())!;
+    expect(jobView(pending).status).toBe("deleting");expect(pending.result_json).toBe(job.result_json);
+    await expect(action(pending,"enable")).rejects.toMatchObject({code:"RELEASE_CONFLICT"});
+    expect(await env.RELEASES_BUCKET.head(result.key)).not.toBeNull();
+    remove.mockRestore();
+    expect((await action(pending,"delete")).status).toBe(200);
+    expect(await env.RELEASES_BUCKET.head(result.key)).toBeNull();
   });
 
   it("foreign actors and mismatched run identities cannot cancel",async()=>{

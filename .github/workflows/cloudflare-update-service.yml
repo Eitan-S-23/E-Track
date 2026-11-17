@@ -8,7 +8,10 @@ on:
     paths:
       - "app/bluetooth_flutter_Trace/cloudflare/update-service/**"
       - ".github/workflows/cloudflare-update-service.yml"
+      - ".github/workflows/deploy-cloudflare-admin.yml"
       - "tests/ota/test_access_login_template.mjs"
+      - "tests/ota/test_pages_deployment_workflow.mjs"
+      - "tests/ota/test_worker_deployment.mjs"
       - "app/bluetooth_flutter_Trace/CF-UPDATE-BACKEND-PLAN.md"
       - "CF-UPDATE-BACKEND-REVIEW-LOG.md"
   pull_request:
@@ -18,7 +21,10 @@ on:
     paths:
       - "app/bluetooth_flutter_Trace/cloudflare/update-service/**"
       - ".github/workflows/cloudflare-update-service.yml"
+      - ".github/workflows/deploy-cloudflare-admin.yml"
       - "tests/ota/test_access_login_template.mjs"
+      - "tests/ota/test_pages_deployment_workflow.mjs"
+      - "tests/ota/test_worker_deployment.mjs"
       - "app/bluetooth_flutter_Trace/CF-UPDATE-BACKEND-PLAN.md"
       - "CF-UPDATE-BACKEND-REVIEW-LOG.md"
   workflow_dispatch:
@@ -57,9 +63,9 @@ jobs:
       - name: Typecheck
         run: npm run check
 
-      - name: Public proxy and Access template contracts
+      - name: Public proxy, Access template and Pages deployment contracts
         working-directory: .
-        run: node --test tests/ota/test_update_public_proxy.mjs tests/ota/test_access_login_template.mjs
+        run: node --test tests/ota/test_update_public_proxy.mjs tests/ota/test_access_login_template.mjs tests/ota/test_pages_deployment_workflow.mjs tests/ota/test_worker_deployment.mjs
 
   admin:
     name: Admin Typecheck and Mock UI

@@ -17,6 +17,24 @@ async function refreshMcu(page: Page) {
   await expect(page.locator("#refreshButton")).toBeEnabled();
 }
 
+test("MCU deletion mode selects only deletable files next to the version list",async({page})=>{
+  const data=await mockAdmin(page),target=data.releases[2];
+  data.channels.forEach(channel=>{channel.currentReleaseId=null;});
+  data.releases.forEach(row=>{row.publishedChannels=[];row.state="ready";});
+  target.state="disabled";await refreshMcu(page);
+  await expect(page.locator('#firmwareReleaseList [data-select-version]')).toHaveCount(0);
+  await expect(page.locator('[data-firmware-bulk="select-page"]')).toHaveCount(0);
+  await page.locator('[data-firmware-bulk="enter"]').click();
+  await expect(page.locator('#firmwareReleaseList [data-select-version]')).toHaveCount(1);
+  const list=await page.locator('#firmwareReleaseList').boundingBox(),bar=await page.locator('#firmwareBulkActions').boundingBox();
+  expect(list!.y-bar!.y-bar!.height).toBeLessThanOrEqual(16);
+  await page.locator('[data-firmware-bulk="select-page"]').click();
+  await page.locator('[data-firmware-bulk="delete"]').click();
+  await page.locator('#confirmReason').fill('Remove unused files');await page.locator('#confirmInput').fill('1');
+  await page.locator('#confirmAccept').click();await expect(page.locator('#confirmDetail')).toContainText('Files deleted');
+  expect(data.mutations).toBe(1);expect(target.assets.every(asset=>asset.r2State==='r2_deleted')).toBe(true);
+});
+
 for (const language of ["en", "zh"]) for (const width of [1440, 390]) {
   test("mcu interaction " + language + " " + width + "px bounds hundreds of versions and keeps peer navigation visible", async ({ page }, info) => {
     await page.setViewportSize({ width, height: 800 });
@@ -208,7 +226,7 @@ async function mockAdmin(page: Page, language = "en", role = "owner") {
     if (url.origin !== origin) { await route.abort(); return; }
     if (url.pathname === "/") { await route.fulfill({ contentType: "text/html", body: html }); return; }
     if (url.pathname === "/admin.css") { await route.fulfill({ contentType: "text/css", body: css }); return; }
-    if (["/sheet-gestures.js","/overlay-history.js","/delta-activity.js","/task-controls.js","/resource-usage.js"].includes(url.pathname)) {
+    if (["/sheet-gestures.js","/overlay-history.js","/selection-controls.js","/delta-activity.js","/task-controls.js","/resource-usage.js"].includes(url.pathname)) {
       await route.fulfill({contentType:"text/javascript",body:readFileSync(new URL("../public"+url.pathname,import.meta.url),"utf8")}); return;
     }
     const requestId = `mock-request-${++serial}`;

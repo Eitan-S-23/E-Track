@@ -1,18 +1,18 @@
 window.TraceTaskControls = {
   buttons(job, { text, escape, locked = false, allowed = true }) {
-    if (!job.cancelling && ["ready", "failed", "cancelled"].includes(job.status)) return "";
+    if (!job.cancelling && ["ready", "failed", "cancelled", "deleting", "deleted"].includes(job.status)) return "";
     const bound = /^https:\/\/github\.com\/Eitan-S-23\/(?:E-Track|Trace)\/actions\/runs\/\d+$/.test(job.runUrl ?? "");
-    const unavailable = locked || !allowed || job.cancelling || !bound;
+    const unavailable = locked || !allowed || job.cancelling;
     const reason = !allowed ? text("需要发布者权限", "Publisher access required")
       : job.cancelling ? text("正在确认取消结果", "Waiting for confirmed cancellation")
-      : !bound ? text("尚未关联准确的构建记录，暂不能安全取消", "No uniquely bound run yet; cancellation is unavailable")
+      : !bound ? text("点击后先查找对应构建，再执行操作", "Find the matching build before applying this action")
       : text("操作处理中", "Operation in progress");
     return [
       ["cancel", "i-block", text("取消当前任务", "Cancel this task")],
       ["cancel-restart", "i-refresh", text("取消当前任务后，按原参数重新运行", "Cancel this task, then restart with the original inputs")]
     ].map(([action,icon,label]) => `<button type="button" class="icon-button task-control" data-task-control="${action}"
       data-control-job="${escape(job.id)}" aria-label="${escape(label)}" aria-disabled="${unavailable}"
-      data-tooltip="${escape(unavailable ? `${label}: ${reason}` : label)}">
+      data-tooltip="${escape(unavailable || !bound ? `${label}: ${reason}` : label)}">
       <svg class="ui-icon" aria-hidden="true"><use href="#${icon}"></use></svg></button>`).join("");
   }
 };
@@ -113,6 +113,7 @@ window.TraceTaskControls = {
       event.preventDefault(); event.stopImmediatePropagation(); suppressed = null; clear(); return;
     }
     if (node?.getAttribute("aria-disabled") === "true") {
+      show(identity(node), "focus");
       event.preventDefault(); event.stopImmediatePropagation();
     }
   },true);

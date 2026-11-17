@@ -76,16 +76,6 @@ class ProfileTabPage extends StatelessWidget {
                   .animate(delay: 100.ms)
                   .fadeIn(duration: 520.ms)
                   .slideY(begin: 0.08, end: 0),
-              const SizedBox(height: 16),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  onPressed: () => Get.toNamed('/companion-setup'),
-                  icon: const Icon(Icons.bluetooth_connected),
-                  label: const Text('后台运行与权限'),
-                  style: TextButton.styleFrom(foregroundColor: TraceColors.mint),
-                ),
-              ),
               const SizedBox(height: 24),
               const _ProfileFooter()
                   .animate(delay: 220.ms)
@@ -152,6 +142,44 @@ class ProfileTabPage extends StatelessWidget {
     _showTraceDialog(
       TraceDialog(
         title: '应用设置',
+        icon: Icons.settings,
+        color: TraceColors.mint,
+        content: Get.isRegistered<VersionInventoryService>() &&
+                Get.find<VersionInventoryService>().available
+            ? Builder(
+                builder: (dialogContext) => Material(
+                  type: MaterialType.transparency,
+                  child: ListTile(
+                    key: const ValueKey('version-inventory-entry'),
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('参与版本统计',
+                        style: TextStyle(color: TraceColors.text, fontSize: 16)),
+                    trailing: const Icon(Icons.chevron_right,
+                        color: TraceColors.mint),
+                    onTap: () {
+                      TraceDialog.close(dialogContext);
+                      _showInventorySettingsDialog();
+                    },
+                  ),
+                ),
+              )
+            : const Text('当前平台未启用版本统计。'),
+        actions: const [
+          TraceDialogAction(
+            label: '知道了',
+            isPrimary: true,
+            color: TraceColors.mint,
+            onPressed: TraceDialog.close,
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showInventorySettingsDialog() {
+    _showTraceDialog(
+      TraceDialog(
+        title: '版本统计',
         icon: Icons.settings,
         color: TraceColors.mint,
         content: Get.isRegistered<VersionInventoryService>() &&
@@ -349,7 +377,7 @@ class ProfileTabPage extends StatelessWidget {
 
   void _showHelpDialog() {
     _showTraceDialog(
-      const TraceDialog(
+      TraceDialog(
         title: '帮助与反馈',
         icon: Icons.chat_bubble_outline,
         color: TraceColors.amber,
@@ -357,23 +385,43 @@ class ProfileTabPage extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('功率计功能：'),
-            Text('1. 扫描并选择 BLE 设备'),
-            Text('2. 点击监控查看实时数据'),
-            Text('3. 保存设备以便长期监控'),
-            SizedBox(height: 16),
-            Text('码表功能：'),
-            Text('1. 连接码表设备'),
-            Text('2. 查看骑行数据'),
-            Text('3. OTA 升级固件'),
-            SizedBox(height: 16),
-            Text('遥控功能：'),
-            Text('1. 连接蓝牙设备'),
-            Text('2. 自定义控制按钮'),
-            Text('3. 发送控制指令'),
+            Builder(
+              builder: (dialogContext) => Material(
+                type: MaterialType.transparency,
+                child: ListTile(
+                  key: const ValueKey('help-permissions'),
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.admin_panel_settings_outlined,
+                      color: TraceColors.amber),
+                  title: const Text('权限与后台运行',
+                      style: TextStyle(color: TraceColors.text)),
+                  trailing: const Icon(Icons.chevron_right,
+                      color: TraceColors.amber),
+                  onTap: () {
+                    TraceDialog.close(dialogContext);
+                    Get.toNamed<void>('/companion-setup');
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text('功率计功能：'),
+            const Text('1. 扫描并选择 BLE 设备'),
+            const Text('2. 点击监控查看实时数据'),
+            const Text('3. 保存设备以便长期监控'),
+            const SizedBox(height: 16),
+            const Text('码表功能：'),
+            const Text('1. 连接码表设备'),
+            const Text('2. 查看骑行数据'),
+            const Text('3. OTA 升级固件'),
+            const SizedBox(height: 16),
+            const Text('遥控功能：'),
+            const Text('1. 连接蓝牙设备'),
+            const Text('2. 自定义控制按钮'),
+            const Text('3. 发送控制指令'),
           ],
         ),
-        actions: [
+        actions: const [
           TraceDialogAction(
             label: '确定',
             isPrimary: true,

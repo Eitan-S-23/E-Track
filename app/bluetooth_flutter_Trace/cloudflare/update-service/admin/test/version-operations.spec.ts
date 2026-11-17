@@ -28,7 +28,7 @@ export async function setup(page:Page,language="zh",role="owner",push?:{publicKe
     if(url.origin!==origin){await route.abort();return;}
     if(url.pathname==="/"){await route.fulfill({contentType:"text/html",body:html});return;}
     if(url.pathname==="/admin.css"){await route.fulfill({contentType:"text/css",body:css});return;}
-    if (["/sheet-gestures.js","/overlay-history.js","/delta-activity.js","/task-controls.js","/resource-usage.js"].includes(url.pathname)) {
+    if (["/sheet-gestures.js","/overlay-history.js","/selection-controls.js","/delta-activity.js","/task-controls.js","/resource-usage.js"].includes(url.pathname)) {
       await route.fulfill({contentType:"text/javascript",body:readFileSync(new URL("../public"+url.pathname,import.meta.url),"utf8")}); return;
     }
     const reply=(body:object,status=200,headers:Record<string,string>={})=>route.fulfill({status,contentType:"application/json",headers:{"X-Request-Id":requestId,...headers},body:JSON.stringify({requestId,...body})});
