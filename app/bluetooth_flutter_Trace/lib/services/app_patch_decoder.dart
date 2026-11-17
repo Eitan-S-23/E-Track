@@ -52,10 +52,14 @@ class AppPatchDecoder {
     _channel.setMethodCallHandler((call) async {
       final args = call.arguments;
       if (call.method != 'progress' || args is! Map ||
-          args['id'] != id || _activeId != id || _cancelled) return;
+          args['id'] != id || _activeId != id || _cancelled) {
+        return;
+      }
       final next = args['completed'];
       if (next is! int || args['total'] != expectedNewSize ||
-          next < completed || next > expectedNewSize) return;
+          next < completed || next > expectedNewSize) {
+        return;
+      }
       completed = next;
       onProgress(next / expectedNewSize);
     });

@@ -27,14 +27,14 @@ def header_crc(data):
     return bytes(data)
 
 
-def pack(old, new, stream):
+def pack(old, new, stream, lc=3, pb=2):
     compressed = lzma.compress(stream, format=lzma.FORMAT_RAW,
-        filters=[dict(id=lzma.FILTER_LZMA1, dict_size=4096, lc=3, lp=0, pb=2)])
+        filters=[dict(id=lzma.FILTER_LZMA1, dict_size=4096, lc=lc, lp=0, pb=pb)])
     header = bytearray(40)
     struct.pack_into(">I", header, 4, len(compressed))
     struct.pack_into("<II", header, 8, len(old), len(new))
     struct.pack_into(">II", header, 16, zlib.crc32(old), zlib.crc32(new))
-    header[24] = 93
+    header[24] = lc + 45 * pb
     struct.pack_into("<I", header, 25, 4096)
     struct.pack_into("<Q", header, 32, len(stream))
     return header_crc(header) + compressed
@@ -49,6 +49,7 @@ def vectors():
     stream = control(len(old), 10, 0) + bytes((b - a) & 255 for a, b in zip(old, new)) + new[-10:]
     valid = pack(old, new, stream)
     yield "basic", old, new, valid, "ok"
+    yield "mcu-properties", old, new, pack(old, new, stream, lc=2, pb=0), "ok"
     bordered = bytes(3) + old + bytes(3)
     yield "negative-seek", old, bordered, pack(old, bordered,
         control(0, 0, -3) + control(len(bordered), 0, 0) + bytes(len(bordered))), "ok"

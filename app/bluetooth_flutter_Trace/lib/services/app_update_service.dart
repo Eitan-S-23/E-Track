@@ -1935,7 +1935,9 @@ class _RemoteUpdateInfo {
         if (!supportsAppPatch(patch.algorithm, versionCode) ||
             patch.toVersionCode != this.versionCode ||
             patch.newSha256 != apkSha256 || patch.size <= 0 ||
-            patch.size >= apkSize) continue;
+            patch.size >= apkSize) {
+          continue;
+        }
         if (bestPatch == null ||
             _patchAlgorithmPriority(patch.algorithm) >
                 _patchAlgorithmPriority(bestPatch.algorithm) ||

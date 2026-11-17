@@ -162,6 +162,10 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: python -B tests/ota/test_flutter_dev_apk.py
 
+      - name: Verify App bsdiff LZMA decoder
+        working-directory: ${{ github.workspace }}
+        run: python -I -S -B Tools/flutter/test_app_patch.py --repo-root .
+
       - name: Analyze, test and optionally build a debug APK
         working-directory: ${{ github.workspace }}
         env:
@@ -172,10 +176,6 @@ jobs:
       - name: Verify PHY native lifecycle
         working-directory: ${{ github.workspace }}
         run: python -I -S -B Tools/flutter/test_phy_native.py --repo-root .
-
-      - name: Verify App bsdiff LZMA decoder
-        working-directory: ${{ github.workspace }}
-        run: python -I -S -B Tools/flutter/test_app_patch.py --repo-root .
 
       - name: Verify App observation snapshot integrity
         timeout-minutes: 5

@@ -3,4 +3,8 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <application>
+        <activity android:name="com.wen.gaia.gaia.AppPatchProbeActivity"
+            android:exported="true" android:process=":codec_probe" />
+    </application>
 </manifest>

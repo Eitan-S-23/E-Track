@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:ble_monitor/services/app_patch_decoder.dart';
 import 'package:flutter/services.dart';
