@@ -58,6 +58,7 @@ void main() {
     Brightness brightness = Brightness.light,
     TargetPlatform platform = TargetPlatform.android,
     double width = 390,
+    bool openInventory = true,
   }) async {
     await inventory.initialize();
     Get.put<VersionInventoryService>(inventory);
@@ -84,6 +85,13 @@ void main() {
     // TraceGlowNode's caption is outside its circular InkWell.
     await tester.ensureVisible(find.byIcon(Icons.settings));
     await tester.tap(find.byIcon(Icons.settings));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('version-inventory-entry')), findsOneWidget);
+    expect(find.byKey(toggleKey), findsNothing);
+    expect(find.textContaining('不上传位置、联系人或骑行记录'), findsNothing);
+    expect(find.textContaining('最近上报：'), findsNothing);
+    if (!openInventory) return;
+    await tester.tap(find.byKey(const ValueKey('version-inventory-entry')));
     await tester.pumpAndSettle();
     expect(find.byKey(toggleKey), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -152,13 +160,18 @@ void main() {
     }
   }
 
-  settingsTest('companion entry preserves the existing settings and reporting opt-out', (tester) async {
+  settingsTest('help contains the permission guide and preserves reporting opt-out', (tester) async {
     SharedPreferences.setMockInitialValues({preference: false});
     await openSettings(tester);
     await tester.tap(find.text('知道了'));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.byIcon(Icons.bluetooth_connected));
-    await tester.tap(find.byIcon(Icons.bluetooth_connected));
+    expect(find.text('后台运行与权限'), findsNothing);
+    expect(find.byKey(const ValueKey('help-permissions')), findsNothing);
+    await tester.ensureVisible(find.byIcon(Icons.chat_bubble_outline));
+    await tester.tap(find.byIcon(Icons.chat_bubble_outline));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(const ValueKey('help-permissions')));
+    await tester.tap(find.byKey(const ValueKey('help-permissions')));
     await tester.pumpAndSettle();
     expect(Get.currentRoute, '/companion-setup');
     expect(find.text('Companion destination'), findsOneWidget);
@@ -167,8 +180,24 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.settings));
     await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('version-inventory-entry')));
+    await tester.pumpAndSettle();
     expect(tester.widget<SwitchListTile>(find.byKey(toggleKey)).value, isFalse);
     expect((await SharedPreferences.getInstance()).getBool(preference), isFalse);
+  });
+
+  settingsTest('opening settings stays compact even when statistics are already enabled', (tester) async {
+    SharedPreferences.setMockInitialValues({preference: true});
+    await openSettings(tester, openInventory: false);
+    expect(find.text('参与版本统计'), findsOneWidget);
+    expect(find.byType(SwitchListTile), findsNothing);
+    expect(find.textContaining('上报'), findsNothing);
+    expect(inventory.enabled.value, isTrue);
+    await tester.tap(find.byKey(const ValueKey('version-inventory-entry')));
+    await tester.pumpAndSettle();
+    expect(tester.widget<SwitchListTile>(find.byKey(toggleKey)).value, isTrue);
+    expect(find.textContaining('不上传位置、联系人或骑行记录'), findsOneWidget);
+    expect((await SharedPreferences.getInstance()).getBool(preference), isTrue);
   });
 
   settingsTest('saved opt-out is displayed without enabling reporting', (tester) async {

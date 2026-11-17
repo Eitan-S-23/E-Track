@@ -29,6 +29,7 @@ export interface DeltaJob {
   cancel_actor?: string | null;
   cancel_reason?: string | null;
   cancel_error?: string | null;
+  asset_state?: "retained" | "deleting" | "deleted";
 }
 const REPOSITORY = "Eitan-S-23/E-Track";
 const APP_REPOSITORY = "Eitan-S-23/Trace";
@@ -70,10 +71,12 @@ export function workflowLocation(job: Pick<DeltaJob, "kind" | "workflow_ref">) {
 }
 export function jobView(job: DeltaJob) {
   const result = job.result_json ? JSON.parse(job.result_json) as Record<string, unknown> : null;
-  const status = job.status === "failed" && job.error_code === "USER_CANCELLED" ? "cancelled" : job.status;
+  const assetState = job.asset_state ?? "retained";
+  const status = assetState !== "retained" ? assetState
+    : job.status === "failed" && job.error_code === "USER_CANCELLED" ? "cancelled" : job.status;
   return { id: job.id, kind: job.kind, targetReleaseId: job.target_release_id, baseReleaseId: job.base_release_id,
     baseVersionCode: job.base_version_code, targetVersionCode: job.target_version_code, baseImageSha256: job.base_sha256,
-    status, enabled: job.enabled===1, attempt: job.attempt, revision: job.revision, errorCode: job.error_code,
+    status, assetState, enabled: job.enabled===1, attempt: job.attempt, revision: job.revision, errorCode: job.error_code,
     cancelling: job.cancel_requested_at != null, restartRequested: job.cancel_restart === 1, cancelError: job.cancel_error ?? null,
     createdAt: job.created_at, updatedAt: job.updated_at,
     fileName: result ? job.kind === "firmware" ? deltaFileName(job) : result.fileName : null,
@@ -282,10 +285,12 @@ export async function createDeltaJobs(env: DeltaEnv, actor: string, body: Record
 
 export async function deltaJobAction(env: DeltaEnv, actor: string, id: string, action: string, body: Record<string, unknown>, fetcher = fetch): Promise<Response> {
   const job = await getJob(env,id);
-  const reason = reasonOf(body.reason);
+  const reason = action === "reconcile" ? "Synchronize GitHub build status" : reasonOf(body.reason);
   if (body.expectedRevision !== job.revision) throw new ApiError("CAS_CONFLICT", "Delta job changed; reload", 409);
   const spec = JSON.parse(job.input_json) as DeltaSpec;
-  if (["cancel", "cancel-restart", "cancel-status"].includes(action)) {
+  if (action === "delete") {
+    await deleteDeltaFile(env, actor, job, reason);
+  } else if (["cancel", "cancel-restart", "cancel-status"].includes(action)) {
     if (job.actor !== actor) throw new ApiError("RELEASE_CONFLICT", "Only the task owner may cancel or restart it", 403);
     if (action === "cancel-status") {
       await advanceDeltaCancellation(env,job,fetcher);
@@ -320,20 +325,7 @@ export async function deltaJobAction(env: DeltaEnv, actor: string, id: string, a
     }
   } else if (action === "reconcile") {
     if (["ready","failed"].includes(job.status)) return json({ok:true,job:jobView(job)});
-    if (!env.DELTA_GITHUB_TOKEN) throw new ApiError("BACKEND_UNAVAILABLE","Project GitHub read access is not configured",503);
-    const workflow=workflowLocation(job);
-    const response=await fetcher(`https://api.github.com/repos/${workflow.repository}/actions/workflows/${WORKFLOW}/runs?event=workflow_dispatch&branch=${encodeURIComponent(workflow.ref)}&per_page=100`,{
-      headers:{Authorization:`Bearer ${env.DELTA_GITHUB_TOKEN}`,Accept:"application/vnd.github+json","User-Agent":"E-Track-Admin-Delta"},
-      redirect:"manual",signal:AbortSignal.timeout(15000)});
-    if (!response.ok) {await response.body?.cancel();throw new ApiError("BACKEND_UNAVAILABLE","GitHub run reconciliation failed",503);}
-    const data=await boundedJson({headers:new Headers({"Content-Type":"application/json"}),body:response.body},2*1024*1024);
-    const runs=Array.isArray(data.workflow_runs)?data.workflow_runs as Array<Record<string,unknown>>:[];
-    const matches=runs.filter(run=>run.event==="workflow_dispatch" && run.head_sha===job.workflow_commit
-      && run.display_title===`delta:${job.id}:${job.attempt}` && /^[1-9][0-9]{0,19}$/.test(String(run.id)));
-    if (matches.length!==1 || (job.run_id && job.run_id!==String(matches[0].id))) {
-      throw new ApiError("RELEASE_CONFLICT","No unique bound GitHub run found; nothing was redispatched",409);
-    }
-    const run=matches[0], mutation=crypto.randomUUID();
+    const run=await findBoundRun(env,job,fetcher), mutation=crypto.randomUUID();
     const status=run.status==="completed"?"failed":job.status;
     const code=run.status==="completed"?(run.conclusion==="success"?"CI_RESULT_MISSING":"CI_BUILD_FAILED"):job.error_code;
     const changed=await env.DB.batch([
@@ -367,6 +359,7 @@ export async function deltaJobAction(env: DeltaEnv, actor: string, id: string, a
     await dispatch(env,await getJob(env,id),fetcher);
   } else if (action === "enable" || action === "disable") {
     if (job.status !== "ready" || !job.result_json) throw new ApiError("RELEASE_NOT_READY","Delta is not verified",409);
+    if (job.asset_state && job.asset_state !== "retained") throw new ApiError("RELEASE_CONFLICT","Delta file is being deleted or was deleted; it cannot be enabled",409);
     const result = JSON.parse(job.result_json) as { sizeBytes: number; key: string; sha256: string; assetId: string };
     if (action === "enable") {
       if (env.DELTA_ASSETS_ENABLED!=="true") throw new ApiError("BACKEND_UNAVAILABLE","Supplemental distribution is not enabled",503);
@@ -387,6 +380,58 @@ export async function deltaJobAction(env: DeltaEnv, actor: string, id: string, a
   return json({ok:true,job:jobView(await getJob(env,id))});
 }
 
+async function deleteDeltaFile(env: DeltaEnv, actor: string, job: DeltaJob, reason: string): Promise<void> {
+  if (job.status !== "ready" || !job.result_json || job.cancel_requested_at != null) {
+    throw new ApiError("RELEASE_NOT_READY", "Only a completed delta file may be deleted", 409);
+  }
+  if (job.enabled) throw new ApiError("RELEASE_IN_USE", "Disable this delta before deleting its file", 409);
+  if (!job.asset_state) throw new ApiError("BACKEND_UNAVAILABLE", "Delta file deletion migration is required", 503);
+  if (job.asset_state === "deleted") return;
+  const result = JSON.parse(job.result_json) as { key: string; assetId: string; sha256: string; sizeBytes: number; etag: string };
+  if (result.key !== outputKey(job) || result.assetId !== `asset_${job.id}` || !HEX.test(result.sha256)
+    || !Number.isSafeInteger(result.sizeBytes) || result.sizeBytes <= 0 || !result.etag) {
+    throw new ApiError("R2_OBJECT_CONFLICT", "Delta file identity is invalid; deletion stopped", 409);
+  }
+  const shared = await env.DB.prepare(`SELECT id FROM release_assets WHERE r2_key=? AND id<>?
+    UNION ALL SELECT id FROM firmware_release_assets WHERE r2_key=?
+    UNION ALL SELECT id FROM delta_jobs WHERE id<>? AND json_extract(result_json,'$.key')=? LIMIT 1`)
+    .bind(result.key, result.assetId, result.key, job.id, result.key).first();
+  if (shared) throw new ApiError("RELEASE_IN_USE", "Delta file has another retained reference", 409);
+  if (job.kind === "android") {
+    const asset = await env.DB.prepare("SELECT * FROM release_assets WHERE id=?").bind(result.assetId).first<AssetRow>();
+    if (!asset || asset.release_id !== job.target_release_id || asset.asset_type !== "patch" || asset.disabled !== 1
+      || asset.r2_key !== result.key || asset.sha256 !== result.sha256 || asset.size_bytes !== result.sizeBytes) {
+      throw new ApiError("R2_OBJECT_CONFLICT", "App delta asset binding changed; deletion stopped", 409);
+    }
+  }
+  const object = await env.RELEASES_BUCKET.head(result.key);
+  if (object && (object.size !== result.sizeBytes || object.customMetadata?.sha256 !== result.sha256
+    || (object.etag !== result.etag && object.httpEtag !== result.etag))) {
+    throw new ApiError("R2_OBJECT_CONFLICT", "Delta R2 identity changed; deletion stopped", 409);
+  }
+  // Retire distribution before R2 deletion. A lost response can resume this exact file.
+  const mutation = crypto.randomUUID();
+  const statements = [env.DB.prepare(`UPDATE delta_jobs SET asset_state='deleting',mutation_id=?,revision=revision+1,updated_at=?
+    WHERE id=? AND revision=? AND status='ready' AND enabled=0 AND asset_state IN ('retained','deleting')`)
+    .bind(mutation, nowSeconds(), job.id, job.revision)];
+  if (job.kind === "android") statements.push(env.DB.prepare(`UPDATE release_assets SET disabled=1,r2_state='archived'
+    WHERE id=? AND EXISTS(SELECT 1 FROM delta_jobs WHERE id=? AND mutation_id=?)`).bind(result.assetId,job.id,mutation));
+  statements.push(eventStatement(env,job.id,mutation,"delete-file-start",actor,reason,job.revision+1));
+  const started = await env.DB.batch(statements);
+  if (!started[0].meta.changes) throw new ApiError("CAS_CONFLICT", "Delta changed before file deletion", 409);
+  await env.RELEASES_BUCKET.delete(result.key);
+  if (await env.RELEASES_BUCKET.head(result.key)) throw new ApiError("BACKEND_UNAVAILABLE", "Delta file deletion was not confirmed; synchronize and retry deletion", 503);
+  const finished = [env.DB.prepare(`UPDATE delta_jobs SET asset_state='deleted',revision=revision+1,updated_at=?
+    WHERE id=? AND mutation_id=? AND revision=? AND asset_state='deleting'`)
+    .bind(nowSeconds(),job.id,mutation,job.revision+1)];
+  if (job.kind === "android") finished.push(env.DB.prepare(`UPDATE release_assets SET r2_state='r2_deleted'
+    WHERE id=? AND EXISTS(SELECT 1 FROM delta_jobs WHERE id=? AND mutation_id=? AND asset_state='deleted')`)
+    .bind(result.assetId,job.id,mutation));
+  finished.push(eventStatement(env,job.id,mutation,"delete-file",actor,reason,job.revision+2));
+  const deleted = await env.DB.batch(finished);
+  if (!deleted[0].meta.changes) throw new ApiError("CAS_CONFLICT", "Delta deletion state changed; synchronize the result", 409);
+}
+
 function eventStatement(env: DeltaEnv, id: string, mutation: string, action: string, actor: string, reason: string, revision: number) {
   // The nonce prevents a losing CAS request from applying another request's side effects.
   return env.DB.prepare("INSERT INTO delta_job_events(id,job_id,action,actor,reason,revision,created_at) SELECT ?,?,?,?,?,?,? WHERE EXISTS(SELECT 1 FROM delta_jobs WHERE id=? AND mutation_id=?)")
@@ -403,10 +448,8 @@ async function boundRun(env: DeltaEnv, job: DeltaJob, fetcher: typeof fetch): Pr
   const workflow=workflowLocation(job);
   let runId=job.run_id;
   if (!runId) {
-    const states=await inspectDeltaRuns(env,[{id:job.id,attempt:job.attempt,workflowCommit:job.workflow_commit,runId:null,...workflow}],fetcher);
-    const url=states.get(job.id)?.runUrl;
-    const prefix=`https://github.com/${workflow.repository}/actions/runs/`;
-    if (url?.startsWith(prefix)) runId=url.slice(prefix.length);
+    // An explicit action must not reuse a cached "not found" observation.
+    runId=String((await findBoundRun(env,job,fetcher)).id);
   }
   if (!runId || !/^[1-9][0-9]{0,19}$/.test(runId)) {
     throw new ApiError("RELEASE_CONFLICT","The submitted task has no uniquely bound GitHub run yet. Cancellation is not confirmed; nothing was restarted",409);
@@ -419,6 +462,23 @@ async function boundRun(env: DeltaEnv, job: DeltaJob, fetcher: typeof fetch): Pr
     run.event!=="workflow_dispatch" || run.head_sha!==job.workflow_commit || run.head_branch!==workflow.ref ||
     run.display_title!==`delta:${job.id}:${job.attempt}`) throw new ApiError("RELEASE_CONFLICT","GitHub run identity does not match this task attempt",409);
   return run;
+}
+
+async function findBoundRun(env: DeltaEnv, job: DeltaJob, fetcher: typeof fetch): Promise<Record<string, unknown>> {
+  const workflow = workflowLocation(job);
+  const response = await fetcher(`https://api.github.com/repos/${workflow.repository}/actions/workflows/${WORKFLOW}/runs?event=workflow_dispatch&branch=${encodeURIComponent(workflow.ref)}&per_page=100`, {
+    headers: githubHeaders(env), redirect: "manual", signal: AbortSignal.timeout(6000)
+  });
+  if (!response.ok) { await response.body?.cancel(); throw new ApiError("BACKEND_UNAVAILABLE", "Unable to synchronize GitHub build records", 503); }
+  const data = await boundedJson({ headers: new Headers({ "Content-Type": "application/json" }), body: response.body }, 2*1024*1024);
+  const runs = Array.isArray(data.workflow_runs) ? data.workflow_runs as Array<Record<string, unknown>> : [];
+  const matches = runs.filter(run => run && run.event === "workflow_dispatch" && run.head_sha === job.workflow_commit
+    && run.head_branch === workflow.ref && run.display_title === `delta:${job.id}:${job.attempt}`
+    && /^[1-9][0-9]{0,19}$/.test(String(run.id)) && (typeof run.id !== "number" || Number.isSafeInteger(run.id)));
+  if (matches.length !== 1 || (job.run_id && job.run_id !== String(matches[0].id))) {
+    throw new ApiError("RELEASE_CONFLICT", "No unique GitHub run is available yet. Nothing was cancelled or restarted; wait for the build record and try again", 409);
+  }
+  return matches[0];
 }
 
 async function advanceDeltaCancellation(env: DeltaEnv, original: DeltaJob, fetcher: typeof fetch): Promise<void> {

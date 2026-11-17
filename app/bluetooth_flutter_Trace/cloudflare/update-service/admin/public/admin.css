@@ -213,7 +213,7 @@ body.delta-open .resource-float { visibility: hidden; pointer-events: none; }
 .timeline-panel .panel-head { margin-bottom: 14px; }
 #visibleCount { color: var(--muted); font-size: 12px; margin-left: 6px; }
 .timeline-body { border-top: 1px solid var(--line); }
-.version-strip { display: grid; max-height: min(440px, 55dvh); overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+.version-strip { display: grid; max-height: min(440px, 55dvh); overflow-y: auto; overscroll-behavior-y: auto; scrollbar-gutter: stable; }
 .version-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; width: 100%; padding: 14px 16px; text-align: left; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; scroll-margin-block: 8px; }
 .version-card.active { background: #eef2eb; box-shadow: inset 3px 0 var(--accent); }
 .version-card:not(:disabled):hover { background: #f0f2ec; }
@@ -325,7 +325,7 @@ body.delta-open .resource-float { visibility: hidden; pointer-events: none; }
 .firmware-workspace { border-top: 1px solid var(--line); }
 .firmware-workspace > .panel { padding: 22px 0; border: 0; min-width: 0; }
 #firmwareListCount { margin-top: 5px; margin-bottom: 18px; font-size: 11px; }
-.firmware-release-list { display: grid; max-height: min(440px, 55dvh); overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+.firmware-release-list { display: grid; max-height: min(440px, 55dvh); overflow-y: auto; overscroll-behavior-y: auto; scrollbar-gutter: stable; }
 .firmware-release-card { min-width: 0; border-bottom: 1px solid var(--line); }
 .firmware-release-card .text-button { display: grid; gap: 4px; width: 100%; text-align: left; padding: 12px 10px; border: 0; border-radius: 0; background: transparent; font-weight: 400; }
 .firmware-release-card.active .text-button { background: var(--accent-soft); box-shadow: inset 3px 0 var(--accent); }
@@ -451,11 +451,22 @@ body.announcement-open { overflow: hidden; }
 .announcement-open #announcementSheet { opacity: 1; transform: translate(-50%, 0); }
 #announcements .announcement-grid { grid-template-columns: minmax(0,1fr); }
 .announcement-sheet textarea { min-height: 200px; resize: vertical; }
-.app-platform-bar, #releaseBulkActions, #firmwareBulkActions { margin: 14px 0; flex-wrap: wrap; }
-.version-selection-row { display: grid; grid-template-columns: 32px minmax(0,1fr); align-items: center; gap: 8px; }
-.version-selection-row .version-card { width: 100%; }
-.version-selection-row input, .task-notification-row input, .firmware-release-card > input { width: 20px; height: 20px; accent-color: var(--accent); }
-.task-notification-row { display: grid; grid-template-columns: 28px minmax(0,1fr) 44px; align-items: center; gap: 6px; }
+.app-platform-bar { margin: 14px 0; flex-wrap: wrap; }
+.selection-toolbar { margin: 8px 0; gap: 8px; flex-wrap: wrap; min-height: 44px; }
+.selection-toolbar:empty { display: none; }
+.selection-toolbar .icon-button { width: 44px; min-height: 44px; flex: 0 0 44px; }
+.selection-toolbar .selection-count { color: var(--muted); font-size: 12px; }
+#announcements .announcement-grid { gap: 0; }
+.version-selection-row, .announcement-selection-row { display: grid; grid-template-columns: minmax(0,1fr); align-items: center; gap: 8px; }
+.version-selection-row:has(> input), .announcement-selection-row:has(> input) { grid-template-columns: 32px minmax(0,1fr); }
+.version-selection-row .version-card, .announcement-selection-row .announcement-card { width: 100%; }
+.version-selection-row > input, .task-notification-row > input, .firmware-release-card > input,
+.announcement-selection-row > input, .delta-file-selection { width: 20px; height: 20px; accent-color: var(--accent); }
+.task-notification-row { display: grid; grid-template-columns: minmax(0,1fr); align-items: center; gap: 6px; }
+.task-notification-row:has(> input) { grid-template-columns: 28px minmax(0,1fr) 44px; }
+.delta-job-identity { display: flex; align-items: flex-start; gap: 10px; min-width: 0; }
+.delta-job-identity > div { min-width: 0; }
+.delta-file-selection { flex-shrink: 0; margin-top: 4px; }
 .task-control { position: relative; width: 44px; min-height: 44px; padding: 10px; touch-action: manipulation; }
 .task-control[aria-disabled="true"] { color: var(--muted); cursor: not-allowed; }
 .task-control-tooltip { position: fixed; z-index: 150;
@@ -621,7 +632,7 @@ body.quick-actions-open .resource-float, body.firmware-details-open .resource-fl
   .firmware-filters .firmware-field { flex-basis: calc(50% - 6px); }
   .firmware-filters > .pill-button { flex: 1 1 calc(50% - 6px); }
   .firmware-field select { font-size: 14px; }
-  .firmware-release-list { max-height: min(330px, 48dvh); overflow-y: auto; overscroll-behavior: contain; }
+  .firmware-release-list { max-height: min(330px, 48dvh); overflow-y: auto; overscroll-behavior-y: auto; }
   .firmware-meta-grid { gap: 14px 18px; }
   .firmware-actions { gap: 10px; }
   .firmware-actions > div { flex-basis: calc(50% - 5px); }

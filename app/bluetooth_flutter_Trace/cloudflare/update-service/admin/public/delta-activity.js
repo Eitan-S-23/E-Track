@@ -4,9 +4,9 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
   const button = document.querySelector("#taskButton");
   const content = document.querySelector("#taskContent");
   const toast = document.querySelector("#taskToast");
-  const active = job => job.cancelling || !["ready", "failed", "cancelled"].includes(job.status);
+  const active = job => job.cancelling || !["ready", "failed", "cancelled", "deleting", "deleted"].includes(job.status);
   const selectedNotices = new Set(), controlling = new Set();
-  let dismissBusy = false;
+  let dismissBusy = false, noticeDeleteMode = false;
   let actor = null, data = null, loading = false, error = "", timer = null, page = 0;
   let generation = 0, pushInfo = null, pushBusy = false, pushChecking = false, pushRevision = 0, pushError = "", toastTimer = null;
   let noticePage = 0, readRevision = 0, readBusy = false, readError = "", viewTimer = null, refreshAgain = false, workerUpdate = false;
@@ -58,12 +58,13 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
       awaiting_approval: text("等待 GitHub 手动审批", "Awaiting GitHub reviewer approval"),
       ci_queued: text("GitHub 排队中", "Queued in GitHub"), ci_preparing: text("前置检查 / 准备构建", "Prechecks / preparing build"),
       ci_waiting: text("等待 GitHub 环境放行", "Waiting for GitHub environment"),
-      ci_finished: text("GitHub 流程已结束，请核对结果", "GitHub run finished; reconcile the result"),
+      ci_finished: text("GitHub 流程已结束，可同步结果", "GitHub run finished; sync the result"),
       ci_pending: text("正在查询构建记录", "Looking up the build run"), ci_unavailable: text("暂时无法读取构建状态", "Build status temporarily unavailable"),
       dispatch_unknown: text("提交结果未知，请核对", "Dispatch uncertain; reconcile"),
       building: text("构建与重建校验", "Building and reconstruction checks"), running: text("构建与重建校验", "Building and reconstruction checks"),
       uploading: text("上传差分文件", "Uploading delta"), verifying: text("等待校验登记", "Awaiting verification and registration"),
       ready: job.enabled ? text("已生成并启用", "Ready and enabled") : text("已生成，待启用", "Ready, not enabled"),
+      deleting: text("差分文件删除未完成", "Delta file deletion incomplete"), deleted: text("差分文件已删除，历史保留", "Delta file deleted; history retained"),
       failed: text("生成失败", "Build failed") })[job.phase ?? job.status] ?? job.status;
   }
   function elapsed(job) {
@@ -170,6 +171,7 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
     const focused = content.contains(document.activeElement) ? document.activeElement : null;
     const focusAction = focused?.dataset.taskAction, focusTarget = focused?.dataset.taskTarget, focusNotice = focused?.dataset.notificationId;
     const focusControl = focused?.dataset.taskControl, focusJob = focused?.dataset.controlJob;
+    const focusSelection = focused?.dataset.selectNotice;
     const jobs = data?.jobs ?? [], running = jobs.filter(active).length, unread = data?.unreadCount ?? 0;
     button.disabled = !actor;
     button.querySelector(".task-label").textContent = text("通知", "Notifications");
@@ -198,13 +200,14 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
       ${data && !data.pushPublicKey ? `<p class="firmware-hint">${escape(text("服务器推送尚未配置，站内通知仍可使用。", "Server push is not configured. In-app notifications still work."))}</p>` : ""}
       <div class="operations-buttons task-toolbar"><button type="button" class="secondary-button" data-task-action="refresh" ${loading ? "disabled" : ""}>${escape(text("刷新", "Refresh"))}</button>
       <button type="button" class="secondary-button" data-task-action="read" ${!unread || loading || readBusy ? "disabled" : ""}>${escape(text("全部标为已读", "Mark all read"))}</button><span>${running} ${escape(text("进行中", "active"))} · ${unread} ${escape(text("未读", "unread"))}</span></div>
-      <div class="operations-buttons task-toolbar"><button type="button" class="secondary-button" data-task-action="notice-select-page" ${dismissBusy ? "disabled" : ""}>${escape(text("选择/取消选择当前页", "Select / clear current page"))}</button>
-      <button type="button" class="secondary-button" data-task-action="notice-delete-selected" ${dismissBusy || !selectedNotices.size ? "disabled" : ""}>${escape(text(`删除所选 (${selectedNotices.size})`, `Delete selected (${selectedNotices.size})`))}</button>
-      <button type="button" class="secondary-button" data-task-action="notice-clear-read" ${dismissBusy ? "disabled" : ""}>${escape(text("清理已读", "Clear read"))}</button></div>
+      <div class="operations-buttons selection-toolbar" id="notificationDeleteActions" role="group" aria-label="${escape(text("通知删除", "Notification deletion"))}">${window.TraceSelectionControls({active:noticeDeleteMode,
+        count:selectedNotices.size,locked:dismissBusy,attribute:"task-action",text,escape,label:text("删除通知", "Delete notifications"),
+        actions:{enter:"notice-enter",exit:"notice-exit",select:"notice-select-page",remove:"notice-delete-selected"}})}
+      ${noticeDeleteMode ? `<button type="button" class="secondary-button" data-task-action="notice-clear-read" ${dismissBusy ? "disabled" : ""}>${escape(text("清理已读", "Clear read"))}</button>` : ""}</div>
       ${readError ? `<p class="error" role="alert">${escape(readError)}</p>` : ""}
       ${error ? `<p class="error" role="alert">${escape(error)} ${escape(text("上次状态已保留，恢复连接后重新读取，不会重发构建。", "Previous status retained; reconnecting only rereads, never redispatches builds."))}</p>` : ""}
       ${loading && !data ? `<p role="status">${escape(text("正在读取任务...", "Loading tasks..."))}</p>` : ""}
-      <div class="task-notifications">${notifications.slice(noticePage*6,(noticePage+1)*6).map(n=>`<div class="task-notification-row"><input type="checkbox" data-select-notice="${n.id}" aria-label="${escape(text("选择通知", "Select notification"))}" ${selectedNotices.has(n.id) ? "checked" : ""} ${dismissBusy ? "disabled" : ""}><button type="button" class="task-notification ${n.unread ? "unread" : ""}" data-notification-id="${n.id}" data-task-type="${escape(n.type ?? "delta")}" data-task-kind="${escape(n.kind)}" data-task-target="${escape(n.targetReleaseId)}"><span>${escape(n.kind === "firmware" ? text("单片机", "MCU") : n.kind === "windows" ? "Windows App" : "Android App")} · ${n.type === "candidate" ? escape(n.versionName) : `${escape(n.baseVersionCode)} → ${escape(n.targetVersionCode)}`}</span><strong>${escape(n.type === "candidate" ? text("新构建包已入库，查看详情", "New candidate registered, open details") : n.status === "ready" ? text("差分包已生成", "Delta ready") : n.errorCode === "USER_CANCELLED" ? text("任务已取消", "Task cancelled") : text("差分生成失败", "Delta failed"))}</strong><small>${escape(new Date(n.createdAt*1000).toLocaleString())}</small></button><button type="button" class="icon-button" data-task-action="notice-delete" data-notice-id="${n.id}" aria-label="${escape(text("删除通知", "Delete notification"))}" ${dismissBusy ? "disabled" : ""}><svg class="ui-icon" aria-hidden="true"><use href="#i-trash"></use></svg></button></div>`).join("")}</div>
+      <div class="task-notifications">${notifications.slice(noticePage*6,(noticePage+1)*6).map(n=>`<div class="task-notification-row">${noticeDeleteMode ? `<input type="checkbox" data-select-notice="${n.id}" aria-label="${escape(text("选择通知", "Select notification"))}" ${selectedNotices.has(n.id) ? "checked" : ""} ${dismissBusy ? "disabled" : ""}>` : ""}<button type="button" class="task-notification ${n.unread ? "unread" : ""}" data-notification-id="${n.id}" data-task-type="${escape(n.type ?? "delta")}" data-task-kind="${escape(n.kind)}" data-task-target="${escape(n.targetReleaseId)}"><span>${escape(n.kind === "firmware" ? text("单片机", "MCU") : n.kind === "windows" ? "Windows App" : "Android App")} · ${n.type === "candidate" ? escape(n.versionName) : `${escape(n.baseVersionCode)} → ${escape(n.targetVersionCode)}`}</span><strong>${escape(n.type === "candidate" ? text("新构建包已入库，查看详情", "New candidate registered, open details") : n.status === "ready" ? text("差分包已生成", "Delta ready") : n.errorCode === "USER_CANCELLED" ? text("任务已取消", "Task cancelled") : text("差分生成失败", "Delta failed"))}</strong><small>${escape(new Date(n.createdAt*1000).toLocaleString())}</small></button>${noticeDeleteMode ? `<button type="button" class="icon-button" data-task-action="notice-delete" data-notice-id="${n.id}" aria-label="${escape(text("删除通知", "Delete notification"))}" ${dismissBusy ? "disabled" : ""}><svg class="ui-icon" aria-hidden="true"><use href="#i-trash"></use></svg></button>` : ""}</div>`).join("")}</div>
       ${notifications.length > 6 ? `<nav class="release-pagination" aria-label="${escape(text("通知分页", "Notification pages"))}"><button type="button" data-task-action="notice-prev" ${noticePage === 0 ? "disabled" : ""}>${escape(text("上一页通知", "Previous notifications"))}</button><span>${noticePage+1} / ${Math.ceil(notifications.length/6)}</span><button type="button" data-task-action="notice-next" ${(noticePage+1)*6 >= notifications.length ? "disabled" : ""}>${escape(text("下一页通知", "Next notifications"))}</button></nav>` : ""}
       <h3 class="delta-jobs-title">${escape(text("我的差分任务", "My delta jobs"))}</h3>
       <p class="firmware-hint">${escape(text("App 与单片机共用任务记录；关闭弹窗不会取消任务。成功后仍需手动启用，不会自动发布渠道。", "App and MCU jobs share this history. Closing does not cancel. Verified deltas still need manual enabling; channels are never auto-published."))}</p>
@@ -215,7 +218,9 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
         <button type="button" class="text-button" data-task-kind="${escape(job.kind)}" data-task-target="${escape(job.targetReleaseId)}">${escape(text("查看差分", "Open deltas"))}</button></div></article>`).join("") || `<p class="empty">${escape(text("还没有你的差分任务。", "No delta jobs submitted by this account yet."))}</p>`}</div>
       ${jobs.length > 8 ? `<nav class="release-pagination"><button type="button" data-task-action="prev" ${page === 0 ? "disabled" : ""}>${escape(text("上一页", "Previous"))}</button><span>${page+1} / ${Math.ceil(jobs.length/8)}</span><button type="button" data-task-action="next" ${(page+1)*8 >= jobs.length ? "disabled" : ""}>${escape(text("下一页", "Next"))}</button></nav>` : ""}`;
     if (focused && !content.closest("[hidden], [inert]")) {
-      [...content.querySelectorAll("button")].find(node=>!node.disabled && (focusControl ? node.dataset.taskControl === focusControl && node.dataset.controlJob === focusJob
+      const selection=focusSelection ? content.querySelector(`[data-select-notice="${Number(focusSelection)}"]`) : null;
+      if(selection && !selection.disabled) selection.focus({preventScroll:true});
+      else [...content.querySelectorAll("button")].find(node=>!node.disabled && (focusControl ? node.dataset.taskControl === focusControl && node.dataset.controlJob === focusJob
         : focusNotice ? node.dataset.notificationId === focusNotice : focusAction ? node.dataset.taskAction === focusAction
         : focusTarget && node.dataset.taskTarget === focusTarget && node.dataset.taskKind === focused.dataset.taskKind))?.focus({preventScroll:true});
     }
@@ -324,6 +329,8 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
         message:`${job.baseVersionCode} → ${job.targetVersionCode}`,
         detail:text("这会中断当前任务。只有确认取消成功后才会重新运行；如果原任务已经成功，不会重复生成。", "This interrupts the current task. Restart waits for confirmed cancellation. An already successful task is not repeated."),reasonRequired:true});
       if (!confirmed || current!==generation) return;
+      notify(job.runUrl ? text("正在提交任务操作...", "Submitting task action...")
+        : text("正在查找对应构建，确认后执行操作...", "Finding the matching build before applying this action..."));
       const result=await mutate(`/api/admin/delta/jobs/${encodeURIComponent(job.id)}/${action}`,
         {expectedRevision:job.revision,reason:confirmed.reason || "Operator requested task control"});
       if (current!==generation) return;
@@ -354,9 +361,10 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
   }
   content.addEventListener("change", event => {
     const id=Number(event.target.dataset.selectNotice);
-    if(!id || dismissBusy) return;
+    if(!id || dismissBusy || !noticeDeleteMode) return;
     if(event.target.checked) selectedNotices.add(id); else selectedNotices.delete(id);
     render();
+    content.querySelector(`[data-select-notice="${id}"]`)?.focus({preventScroll:true});
   });
   content.addEventListener("click", async event => {
     const target = event.target.closest("button");
@@ -374,6 +382,11 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
       return;
     }
     const action = target.dataset.taskAction;
+    if(action==="notice-enter" || action==="notice-exit") {
+      if(dismissBusy) return;
+      noticeDeleteMode=action==="notice-enter";selectedNotices.clear();render();
+      content.querySelector(`[data-task-action="${noticeDeleteMode?"notice-exit":"notice-enter"}"]`)?.focus({preventScroll:true});return;
+    }
     if(action==="notice-delete") {await dismiss({ids:[Number(target.dataset.noticeId)]});return;}
     if(action==="notice-delete-selected") {await dismiss({ids:[...selectedNotices]});return;}
     if(action==="notice-clear-read") {await dismiss({mode:"read",throughId:Math.max(0,...(data?.notifications??[]).map(n=>n.id))});return;}
@@ -422,11 +435,12 @@ window.TraceDeltaActivity = function ({ api, mutate, text, escape, formatBytes, 
   function setActor(value) {
     if (actor === value) { refresh(); return; }
     actor = value; generation++; data = null; loading = false; error = ""; page = 0; pushBusy = false; pushChecking = false; pushError = "";
-    selectedNotices.clear(); controlling.clear(); dismissBusy=false;
+    selectedNotices.clear(); controlling.clear(); dismissBusy=false; noticeDeleteMode=false;
     noticePage = 0; readRevision = 0; readBusy = false; readError = ""; readQueue = new Set(); refreshAgain = false; clearTimeout(viewTimer);
     clearTimeout(timer); clearTimeout(toastTimer); toast.hidden = true; pendingNotices = [];
     pushInfo = null;
     render(); if (actor) { refresh(); resume(); }
   }
-  return { refresh, render, setActor, progress, phase, resume, controlButtons, control };
+  function exitDeletion() { if(!dismissBusy) {noticeDeleteMode=false;selectedNotices.clear();render();} }
+  return { refresh, render, setActor, progress, phase, resume, controlButtons, control, exitDeletion };
 };

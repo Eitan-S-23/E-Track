@@ -17,20 +17,20 @@ function firmwareAsset(job: DeltaJob): FirmwareAssetRow {
     github_url: `https://github.com/Eitan-S-23/E-Track/actions/runs/${job.run_id}` };
 }
 export async function supplementalFirmwareAssets(db: D1Database, releaseId: string): Promise<FirmwareAssetRow[]> {
-  const jobs = await db.prepare("SELECT * FROM delta_jobs WHERE kind='firmware' AND target_release_id=? AND status='ready' AND enabled=1")
+  const jobs = await db.prepare("SELECT * FROM delta_jobs WHERE kind='firmware' AND target_release_id=? AND status='ready' AND enabled=1 AND asset_state='retained'")
     .bind(releaseId).all<DeltaJob>();
   return jobs.results.map(firmwareAsset);
 }
 export async function supplementalFirmwareAsset(db: D1Database, assetId: string, releaseId: string): Promise<FirmwareAssetRow | null> {
   if (!/^asset_delta_[0-9a-f]{64}$/.test(assetId)) return null;
-  const job = await db.prepare("SELECT * FROM delta_jobs WHERE id=? AND kind='firmware' AND target_release_id=? AND status='ready' AND enabled=1")
+  const job = await db.prepare("SELECT * FROM delta_jobs WHERE id=? AND kind='firmware' AND target_release_id=? AND status='ready' AND enabled=1 AND asset_state='retained'")
     .bind(assetId.slice(6), releaseId).first<DeltaJob>();
   return job ? firmwareAsset(job) : null;
 }
 
 export async function supplementalAppManifest(env: Pick<WorkerEnv, "DB">, releaseId: string, versionCode: number, sourceSha?: string | null) {
   const jobs = await env.DB.prepare(`SELECT j.* FROM delta_jobs j JOIN release_assets a ON a.id='asset_'||j.id
-    WHERE j.kind='android' AND j.target_release_id=? AND j.base_version_code=? AND j.status='ready' AND j.enabled=1
+    WHERE j.kind='android' AND j.target_release_id=? AND j.base_version_code=? AND j.status='ready' AND j.enabled=1 AND j.asset_state='retained'
       AND a.disabled=0 AND a.r2_state='available'`)
     .bind(releaseId,versionCode).all<DeltaJob>();
   const matches = sourceSha ? jobs.results.filter(j=>j.base_sha256===sourceSha) : jobs.results;

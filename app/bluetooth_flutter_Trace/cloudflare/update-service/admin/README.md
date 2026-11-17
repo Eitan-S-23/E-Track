@@ -109,6 +109,33 @@ concurrency semantics; MCU notes keep their separate expected-notes/CAS contract
 
 ## Current API
 
+### List Deletion And Synchronization
+
+Browsing does not show deletion checkboxes. Use the trash icon immediately next
+to the relevant list to reveal eligible checkboxes, current-page selection,
+selected count, the trash action and an exit control. Leaving a workspace/list
+or changing the App platform clears deletion selection. App/MCU versions,
+supplemental delta files, announcements and notifications use the same control.
+Announcements have six rows per page; failed batch items remain available for an
+explicit retry. Normal editor actions and actor-scoped drafts are preserved.
+
+Generated delta deletion removes only a completed, disabled supplemental R2
+file. Task/proof/audit history and original packages stay intact. A partial
+deletion remains retired and can be explicitly resumed. The new migration and
+operation contract are documented in
+[Version Inventory And Operator Delta Jobs](../docs/VERSION-INVENTORY-DELTA.md#generated-file-deletion).
+This is different from dismissing a notification or hiding a completed task.
+
+The former reconciliation control is now Sync. It executes directly without a
+reason dialog and displays progress/result feedback; the server supplies the
+audit reason. Cancel/restart can be requested while build association is still
+pending, but the server must find and verify the exact run before cancellation.
+Missing/ambiguous runs fail visibly and cannot trigger another build.
+
+At either end of an App/MCU version list, continued wheel/touch movement can
+scroll its outer page. Modal background locks and sheet-drag ownership remain
+separate: reaching a nested list boundary must not dismiss a sheet.
+
 ### Sheet Gestures And Task History
 
 App details, MCU details, delta management and Tasks share a drag owner. The fixed

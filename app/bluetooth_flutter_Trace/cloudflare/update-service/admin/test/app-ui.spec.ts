@@ -43,7 +43,7 @@ async function mockApp(page: Page, language = "en", role = "owner", firmwareFail
       const contentType = url.pathname.endsWith(".svg") ? "image/svg+xml" : url.pathname.endsWith(".png") ? "image/png" : "image/x-icon";
       await route.fulfill({ contentType, body: readFileSync(new URL("../public" + url.pathname, import.meta.url)) }); return;
     }
-    if (["/sheet-gestures.js","/overlay-history.js","/delta-activity.js","/task-controls.js","/resource-usage.js"].includes(url.pathname)) {
+    if (["/sheet-gestures.js","/overlay-history.js","/selection-controls.js","/delta-activity.js","/task-controls.js","/resource-usage.js"].includes(url.pathname)) {
       await route.fulfill({contentType:"text/javascript",body:readFileSync(new URL("../public"+url.pathname,import.meta.url),"utf8")}); return;
     }
     const requestId = `mock-app-request-${++serial}`;

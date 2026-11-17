@@ -250,7 +250,7 @@ async function routeAdminRequest(
     const body = await boundedJson(context.request);
     if (route.length === 2) return createDeltaJobs(context.env, actor.email, body);
     if (route.length === 4) {
-      if (["enable", "disable"].includes(route[3])) requireRole(actor, "owner");
+      if (["enable", "disable", "delete"].includes(route[3])) requireRole(actor, "owner");
       return deltaJobAction(context.env, actor.email, route[2], route[3], body);
     }
   }
@@ -689,8 +689,8 @@ async function saveAnnouncement(
 }
 
 async function deleteAnnouncement(env: AdminEnv, actor: Actor, announcementId: string): Promise<Response> {
-  const announcement = await env.DB.prepare("SELECT * FROM announcements WHERE id = ? LIMIT 1")
-    .bind(announcementId)
+  const announcement = await env.DB.prepare("SELECT * FROM announcements WHERE id = ? AND app_id = ? LIMIT 1")
+    .bind(announcementId, env.APP_ID)
     .first<AnnouncementRow>();
   if (!announcement) {
     throw new AdminError("NOT_FOUND", "Announcement not found", 404);
