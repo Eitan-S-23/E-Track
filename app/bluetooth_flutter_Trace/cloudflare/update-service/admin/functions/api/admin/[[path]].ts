@@ -7,6 +7,7 @@ import { boundedJson, inventorySummary, refreshInventory } from "../../../../wor
 import { createDeltaJobs, deltaCandidates, deltaJobAction } from "../../../../worker/src/delta_jobs";
 import { deltaActivity, readNotifications, dismissNotifications, hideCompletedJobs, subscribeNotifications, unsubscribeNotifications } from "../../../../worker/src/admin_notifications";
 import { resourceUsage } from "../../../../worker/src/resource_usage";
+import { feedbackDetail, listFeedback, updateFeedback } from "../../../../worker/src/feedback";
 
 type Platform = "android" | "windows" | "ios";
 type ChannelName = "stable" | "beta";
@@ -218,6 +219,20 @@ async function routeAdminRequest(
   if (method === "GET" && route.length === 1 && route[0] === "channels") {
     requireRole(actor, "viewer");
     return listChannels(context.env, url);
+  }
+
+  if (route[0] === "feedback") {
+    requireRole(actor, "viewer");
+    if (method === "GET" && route.length === 1) return listFeedback(context.env, url);
+    if (route.length === 2 && /^[1-9][0-9]{0,14}$/.test(route[1])) {
+      const id = Number(route[1]);
+      if (method === "GET") return feedbackDetail(context.env, id);
+      if (method === "POST") {
+        requireRole(actor, "publisher");
+        return updateFeedback(context.env, id, actor.email, await boundedJson(context.request, 16 * 1024));
+      }
+    }
+    throw new AdminError("INVALID_PARAMETER", "Invalid feedback route", 400);
   }
 
   if (route[0] === "version-inventory" && route.length === 1 && method === "GET") {

@@ -258,6 +258,7 @@
           <button type="button" id="appReleasesTab" role="tab" data-app-section="releases" aria-controls="appReleasesPanel" aria-selected="true" data-i18n="app.versions">Versions</button>
           <button type="button" id="appAnnouncementsTab" role="tab" data-app-section="announcements" aria-controls="announcements" aria-selected="false" tabindex="-1" data-i18n="announcements.title">Announcements</button>
           <button type="button" id="appInventoryTab" role="tab" data-app-section="inventory" aria-controls="appInventoryPanel" aria-selected="false" tabindex="-1" data-i18n="operations.inventoryTab">Distribution</button>
+          <button type="button" id="appFeedbackTab" role="tab" data-app-section="feedback" aria-controls="appFeedbackPanel" aria-selected="false" tabindex="-1" data-i18n="app.feedback">Feedback</button>
         </div>
         <section class="app-panel" id="appReleasesPanel" data-app-panel="releases" role="tabpanel" aria-labelledby="appReleasesTab">
         <div class="operations-buttons app-platform-bar"><label id="appPlatformLabel" for="appPlatform">Platform</label>
@@ -416,6 +417,7 @@
         </section>
 
         <section class="panel inventory-panel" id="appInventoryPanel" data-app-panel="inventory" role="tabpanel" aria-labelledby="appInventoryTab" hidden></section>
+        <section class="panel feedback-panel" id="appFeedbackPanel" data-app-panel="feedback" role="tabpanel" aria-labelledby="appFeedbackTab" hidden></section>
         <p class="footer-note">
           <span data-i18n="footer.note">This admin page only changes the Pages UI. Release mutations still go through the Access-protected same-origin facade.</span>
         </p>
@@ -571,6 +573,7 @@
     <script src="/task-controls.js"></script>
     <script src="/delta-activity.js"></script>
     <script src="/resource-usage.js"></script>
+    <script src="/feedback-management.js"></script>
     <script>
       const state = {
         appPlatform: "android", appLoadGeneration: 0, selectedVersions: new Set(), selectedFirmwareVersions: new Set(),
@@ -609,7 +612,7 @@
         selectedFirmwareId: null,
         firmwareDetailsOpen: false,
         detailsOpen: false,
-        queries: { releases: "", announcements: "", firmware: "", firmwareChannels: "", firmwareHistory: "", inventory: "", firmwareInventory: "" },
+        queries: { releases: "", announcements: "", firmware: "", firmwareChannels: "", firmwareHistory: "", inventory: "", firmwareInventory: "", feedback: "" },
         inventory: { value: null, error: null, loading: false, window: 30, pages: { android: 0, firmware: 0 }, refreshId: null },
         delta: null,
         deltaDrafts: new Map(),
@@ -634,6 +637,7 @@
 
       let taskActivity = null;
       let resourceUsagePanel = null;
+      let feedbackInbox = null;
       let overlayHistory = null;
       let pendingSessionRead = null;
       const I18N = {
@@ -1379,6 +1383,7 @@
         startX: 0, startY: 0, startLeft: 0, startTop: 0 };
 
       Object.assign(I18N.en, {
+        "app.feedback": "Feedback", "search.feedback": "Search feedback text...",
         "app.management": "App management", "app.versions": "Versions", "nav.phoneApp": "App",
         "nav.releases": "App management", "pagination.title": "Version pages",
         "pagination.previous": "Previous", "pagination.next": "Next",
@@ -1447,6 +1452,7 @@
         "catalog.actionHint": "Disabled actions show the unmet condition. File deletion is separate from disabling a release."
       });
       Object.assign(I18N.zh, {
+        "app.feedback": "用户反馈", "search.feedback": "搜索反馈正文...",
         "app.management": "App 管理", "app.versions": "版本",
         "pagination.title": "版本分页", "pagination.previous": "上一页", "pagination.next": "下一页",
         "pagination.status": "{start}-{end} / {total} 个，第 {page} / {pages} 页",
@@ -1658,6 +1664,9 @@
       applyAppSection();
       applyFirmwareSection();
       attachEvents();
+      feedbackInbox = window.TraceFeedbackInbox?.({ element: document.querySelector("#appFeedbackPanel"),
+        api, mutate, session: () => state.session, text: opText, escape: escapeHtml,
+        confirm: options => openConfirmDialog(options) });
       resourceUsagePanel = window.TraceResourceUsage?.({ element: document.querySelector("#providerUsage"),
         api, text: opText, escape: escapeHtml, formatBytes, onResize: positionResourcePanel,
         onError: error => showErrorDialog(error, { scope: "resource-usage" }), onRecovered: () => clearFeedbackError("resource-usage") });
@@ -1920,7 +1929,7 @@
         els.appTabs.addEventListener("keydown", event => {
           if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
           event.preventDefault();
-          const sections = ["releases", "announcements", "inventory"];
+          const sections = ["releases", "announcements", "inventory", "feedback"];
           const index = sections.indexOf(state.appSection);
           switchAppSection(event.key === "Home" ? sections[0] : event.key === "End" ? sections.at(-1)
             : sections[(index + (event.key === "ArrowLeft" ? sections.length - 1 : 1)) % sections.length]);
@@ -1996,6 +2005,7 @@
         });
         els.searchInput.addEventListener("input", () => {
           state.queries[searchScope()] = els.searchInput.value.trim();
+          if (searchScope() === "feedback") { feedbackInbox?.search(els.searchInput.value.trim()); return; }
           if (searchScope() === "releases") state.releasePage = 0;
           if (searchScope() === "firmware") state.firmwarePage = 0;
           if (searchScope() === "inventory") state.inventory.pages.android = 0;
@@ -2023,7 +2033,7 @@
           document.querySelector('[data-firmware-action="notes-save"]').disabled = !firmwareNotesSavable();
         });
         window.addEventListener("beforeunload", (event) => {
-          if (state.appNoteDrafts.size || state.announcementDrafts.size || [...state.firmwareNoteDrafts.values()].some(draft => draft.value !== draft.expectedNotes)) {
+          if (feedbackInbox?.dirty() || state.appNoteDrafts.size || state.announcementDrafts.size || [...state.firmwareNoteDrafts.values()].some(draft => draft.value !== draft.expectedNotes)) {
             event.preventDefault(); event.returnValue = "";
           }
         });
@@ -2499,6 +2509,7 @@
             feedbackQueue = []; feedbackSeen.clear(); observedDeltaJobs.clear();
           }
           state.session = session;
+          feedbackInbox?.setSession(session);
           resourceUsagePanel?.setActor(session.actor);
           taskActivity?.setActor(session.actor);
           const [channels, releases, storage, announcements, firmwareReleases, firmwareChannels] = await Promise.all([
@@ -3422,6 +3433,7 @@
 
       function render() {
         resourceUsagePanel?.render();
+        feedbackInbox?.render();
         const visible = filteredReleases();
         const pageRows = releasePageRows(visible);
         let selected = selectedRelease(pageRows);
@@ -5029,14 +5041,14 @@
       function syncSearchInput() {
         const scope = searchScope();
         els.searchInput.value = state.queries[scope];
-        const label = t({ announcements: "search.announcements", firmware: "search.firmware",
+        const label = t({ feedback: "search.feedback", announcements: "search.announcements", firmware: "search.firmware",
           firmwareChannels: "search.firmwareChannels", firmwareHistory: "search.firmwareHistory", inventory: "operations.search", firmwareInventory: "operations.search" }[scope] ?? "search.placeholder");
         els.searchInput.placeholder = label;
         els.searchInput.setAttribute("aria-label", label);
       }
 
       function switchAppSection(section) {
-        if (!["releases", "announcements", "inventory"].includes(section)) return;
+        if (!["releases", "announcements", "inventory", "feedback"].includes(section)) return;
         if(state.appSection!==section) resetDeletionModes();
         state.appSection = section;
         render();
@@ -5045,6 +5057,7 @@
         applyAppSection();
         syncSearchInput();
         if (section === "inventory") loadInventory();
+        if (section === "feedback") feedbackInbox?.load();
         window.scrollTo({ top: 0 });
         els.appTabs.querySelector('[data-app-section="' + section + '"]').focus({ preventScroll: true });
       }

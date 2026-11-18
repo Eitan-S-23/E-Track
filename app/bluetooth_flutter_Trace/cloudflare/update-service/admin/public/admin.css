@@ -669,3 +669,15 @@ body.quick-actions-open .resource-float, body.firmware-details-open .resource-fl
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+/* Feedback uses the existing panel, action and typography primitives. */
+.feedback-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 24px; align-items: start; }
+.feedback-item { display: block; width: 100%; text-align: left; border: 1px solid var(--line, #ddd9cf); background: transparent; color: inherit; padding: 16px; margin-bottom: 12px; border-radius: 12px; cursor: pointer; }
+.feedback-item.active { border-color: var(--accent, #526a59); background: rgba(82, 106, 89, .07); }
+.feedback-meta { display: block; font-size: 12px; opacity: .7; margin: 8px 0; overflow-wrap: anywhere; }
+.feedback-body, .feedback-history p { display: block; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.6; }
+.feedback-detail { min-width: 0; padding: 20px; border: 1px solid var(--line, #ddd9cf); border-radius: 14px; }
+.feedback-detail label { display: block; margin: 14px 0 8px; }
+.feedback-detail textarea { width: 100%; min-height: 140px; padding: 12px; font: inherit; color: inherit; resize: vertical; box-sizing: border-box; }
+.feedback-history { padding-left: 20px; font-size: 13px; }
+.feedback-history li { margin: 12px 0; }
+@media (max-width: 760px) { .feedback-layout { grid-template-columns: minmax(0, 1fr); } }

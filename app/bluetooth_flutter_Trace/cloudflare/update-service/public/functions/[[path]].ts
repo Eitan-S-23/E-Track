@@ -5,6 +5,7 @@ import { handleFirmwareDownload, handleFirmwareLatest } from "../../worker/src/f
 import { errorJson, json, requestIdFrom, withRequestId } from "../../worker/src/http";
 import { handleLatest } from "../../worker/src/latest";
 import { inventoryControl, reportInventory } from "../../worker/src/version_inventory";
+import { submitFeedback } from "../../worker/src/feedback";
 import type { WorkerEnv } from "../../worker/src/types";
 
 type PublicEnv = WorkerEnv;
@@ -57,6 +58,9 @@ async function routePublicRequest(
   }
   if (method === "POST" && url.pathname === "/api/public/version-inventory") {
     return reportInventory(context.request, context.env);
+  }
+  if (method === "POST" && url.pathname === "/api/public/feedback") {
+    return submitFeedback(context.request, context.env);
   }
 
   if (method === "GET" && url.pathname === "/api/public/firmware/latest") {

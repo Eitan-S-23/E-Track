@@ -9,6 +9,7 @@ import '../services/app_update_service.dart';
 import '../services/version_inventory_service.dart';
 import '../services/database_service.dart';
 import 'trace_ui.dart';
+import 'feedback_page.dart';
 
 const String _appName = 'E-Track';
 const MethodChannel _appUpdateChannel = MethodChannel('trace/app_update');
@@ -157,7 +158,6 @@ class ProfileTabPage extends StatelessWidget {
                     trailing: const Icon(Icons.chevron_right,
                         color: TraceColors.mint),
                     onTap: () {
-                      TraceDialog.close(dialogContext);
                       _showInventorySettingsDialog();
                     },
                   ),
@@ -180,6 +180,7 @@ class ProfileTabPage extends StatelessWidget {
     _showTraceDialog(
       TraceDialog(
         title: '版本统计',
+        showBackButton: true,
         icon: Icons.settings,
         color: TraceColors.mint,
         content: Get.isRegistered<VersionInventoryService>() &&
@@ -398,27 +399,22 @@ class ProfileTabPage extends StatelessWidget {
                   trailing: const Icon(Icons.chevron_right,
                       color: TraceColors.amber),
                   onTap: () {
-                    TraceDialog.close(dialogContext);
                     Get.toNamed<void>('/companion-setup');
                   },
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-            const Text('功率计功能：'),
-            const Text('1. 扫描并选择 BLE 设备'),
-            const Text('2. 点击监控查看实时数据'),
-            const Text('3. 保存设备以便长期监控'),
-            const SizedBox(height: 16),
-            const Text('码表功能：'),
-            const Text('1. 连接码表设备'),
-            const Text('2. 查看骑行数据'),
-            const Text('3. OTA 升级固件'),
-            const SizedBox(height: 16),
-            const Text('遥控功能：'),
-            const Text('1. 连接蓝牙设备'),
-            const Text('2. 自定义控制按钮'),
-            const Text('3. 发送控制指令'),
+            Material(
+              type: MaterialType.transparency,
+              child: ListTile(
+                key: const ValueKey('help-feedback'),
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.feedback_outlined, color: TraceColors.amber),
+                title: const Text('提交反馈', style: TextStyle(color: TraceColors.text)),
+                trailing: const Icon(Icons.chevron_right, color: TraceColors.amber),
+                onTap: () => Get.to<void>(() => const FeedbackPage()),
+              ),
+            ),
           ],
         ),
         actions: const [

@@ -123,9 +123,11 @@ class _CompanionSetupPageState extends State<CompanionSetupPage> with WidgetsBin
   Widget build(BuildContext context) {
     final granted = _permissions.isNotEmpty && _permissions.values.every((s) => s.isGranted);
     final permanent = _permissions.values.any((s) => s.isPermanentlyDenied || s.isRestricted);
-    return Scaffold(
+    return TraceBackGesture(child: Scaffold(
       backgroundColor: TraceColors.ink,
       appBar: AppBar(title: const Text('\u540e\u53f0\u8fd0\u884c\u4e0e\u6743\u9650'), backgroundColor: TraceColors.ink,
+        leading: IconButton(key: const ValueKey('detail-back'), tooltip: '\u8fd4\u56de',
+          onPressed: () => Navigator.of(context).maybePop(), icon: const Icon(Icons.arrow_back)),
         foregroundColor: TraceColors.text,
         actions: [IconButton(tooltip: '\u91cd\u65b0\u68c0\u67e5', onPressed: _busy ? null : _refresh, icon: const Icon(Icons.refresh))]),
       body: TracePageScaffold(child: SafeArea(child: ListView(padding: const EdgeInsets.all(24), children: [
@@ -209,6 +211,6 @@ class _CompanionSetupPageState extends State<CompanionSetupPage> with WidgetsBin
         if (_busy) const LinearProgressIndicator(),
         TextButton(onPressed: () => Navigator.of(context).maybePop(), child: const Text('\u8fd4\u56de / \u6682\u65f6\u8df3\u8fc7')),
       ]))),
-    );
+    ));
   }
 }

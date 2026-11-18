@@ -1,4 +1,5 @@
 import 'package:ble_monitor/pages/profile_tab_page.dart';
+import 'package:ble_monitor/pages/companion_setup_page.dart';
 import 'package:ble_monitor/pages/trace_ui.dart';
 import 'package:ble_monitor/services/version_inventory_service.dart';
 import 'package:flutter/material.dart';
@@ -73,7 +74,7 @@ void main() {
       ),
       home: const Scaffold(body: ProfileTabPage()),
       getPages: [GetPage(name: '/companion-setup',
-        page: () => const Scaffold(body: Text('Companion destination')))],
+        page: () => const CompanionSetupPage())],
     ));
     await tester.pumpAndSettle();
     // Native version metadata is optional; both labels must keep the same brand.
@@ -94,14 +95,14 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('version-inventory-entry')));
     await tester.pumpAndSettle();
     expect(find.byKey(toggleKey), findsOneWidget);
-    expect(find.byKey(const ValueKey('version-inventory-entry')), findsNothing);
+    expect(find.byKey(const ValueKey('version-inventory-entry'), skipOffstage: false), findsOneWidget);
     expect(find.byType(ProfileTabPage, skipOffstage: false), findsOneWidget);
     expect(tester.takeException(), isNull);
   }
 
   Color renderedTextColor(WidgetTester tester, String text) {
     final richText = find.descendant(
-      of: find.text(text),
+      of: find.text(text).last,
       matching: find.byType(RichText),
     );
     return tester.renderObject<RenderParagraph>(richText).text.style!.color!;
@@ -130,7 +131,7 @@ void main() {
         expect(contrast(on.thumbColor!.resolve(selected)!,
             on.trackColor!.resolve(selected)!), greaterThan(3));
 
-        await tester.tap(find.text('参与版本统计'));
+        await tester.tap(find.text('参与版本统计').last);
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 300));
         expect(inventory.enabled.value, isFalse);
@@ -165,6 +166,9 @@ void main() {
   settingsTest('help contains the permission guide and preserves reporting opt-out', (tester) async {
     SharedPreferences.setMockInitialValues({preference: false});
     await openSettings(tester);
+    await tester.tap(find.byKey(const ValueKey('detail-back')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('version-inventory-entry')), findsOneWidget);
     await tester.tap(find.text('知道了'));
     await tester.pumpAndSettle();
     expect(find.text('后台运行与权限'), findsNothing);
@@ -176,11 +180,18 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('help-permissions')));
     await tester.pumpAndSettle();
     expect(Get.currentRoute, '/companion-setup');
-    expect(find.text('Companion destination'), findsOneWidget);
-    expect(find.byKey(const ValueKey('help-permissions'), skipOffstage: false), findsNothing);
+    expect(find.text('后台运行与权限'), findsOneWidget);
+    expect(find.byKey(const ValueKey('help-permissions'), skipOffstage: false), findsOneWidget);
     expect(find.byType(ProfileTabPage, skipOffstage: false), findsOneWidget);
     expect(inventory.enabled.value, isFalse);
     Get.back<void>();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('help-permissions')), findsOneWidget);
+    expect(find.text('功率计功能：'), findsNothing);
+    expect(find.text('码表功能：'), findsNothing);
+    expect(find.text('遥控功能：'), findsNothing);
+    expect(find.byKey(const ValueKey('help-feedback')), findsOneWidget);
+    await tester.tap(find.text('确定'));
     await tester.pumpAndSettle();
     expect(find.byType(ProfileTabPage), findsOneWidget);
     await tester.tap(find.byIcon(Icons.settings));
@@ -228,7 +239,7 @@ void main() {
     expect(loading.thumbColor!.resolve(disabled), TraceColors.muted);
     expect(loading.trackColor!.resolve(disabled), TraceColors.ocean);
     expect(loading.trackOutlineColor!.resolve(disabled), TraceColors.muted);
-    await tester.tap(find.text('参与版本统计'));
+    await tester.tap(find.text('参与版本统计').last);
     await tester.pump();
     expect(inventory.enabled.value, isTrue);
     expect((await SharedPreferences.getInstance()).getBool(preference), isNull);
@@ -262,14 +273,42 @@ void main() {
     tester.platformDispatcher.textScaleFactorTestValue = 2;
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
     await tester.pump();
-    expect(find.text('参与版本统计'), findsOneWidget);
+    expect(find.text('参与版本统计').last, findsOneWidget);
     expect(tester.takeException(), isNull);
-    await tester.ensureVisible(find.text('知道了'));
-    await tester.tap(find.text('知道了'));
+    await tester.ensureVisible(find.byKey(const ValueKey('detail-back')));
+    await tester.tap(find.byKey(const ValueKey('detail-back')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.byKey(toggleKey), findsNothing);
     expect(inventory.enabled.value, isTrue);
     await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  for (final direction in [-1.0, 1.0]) {
+    settingsTest('statistics swipe $direction returns to its settings parent', (tester) async {
+      await openSettings(tester);
+      await tester.drag(find.text('版本统计'), Offset(direction * 180, 0));
+      await tester.pumpAndSettle();
+      expect(find.byKey(toggleKey), findsNothing);
+      expect(find.byKey(const ValueKey('version-inventory-entry')), findsOneWidget);
+    });
+  }
+
+  settingsTest('permission Back icon and swipe restore Help rather than home', (tester) async {
+    await openSettings(tester, openInventory: false);
+    await tester.tap(find.text('知道了')); await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byIcon(Icons.chat_bubble_outline));
+    await tester.tap(find.byIcon(Icons.chat_bubble_outline)); await tester.pumpAndSettle();
+    for (final useButton in [true, false]) {
+      await tester.tap(find.byKey(const ValueKey('help-permissions'))); await tester.pumpAndSettle();
+      if (useButton) {
+        await tester.tap(find.byKey(const ValueKey('detail-back')));
+      } else {
+        await tester.drag(find.text('后台运行与权限'), const Offset(-180, 0));
+      }
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('help-permissions')), findsOneWidget);
+      expect(find.byType(CompanionSetupPage), findsNothing);
+    }
   });
 }

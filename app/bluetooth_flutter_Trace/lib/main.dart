@@ -22,6 +22,7 @@ import 'services/alert_service.dart';
 import 'services/app_update_service.dart';
 import 'services/app_prompt_coordinator.dart';
 import 'services/version_inventory_service.dart';
+import 'services/feedback_service.dart';
 import 'services/background_optimization_service.dart';
 import 'services/deep_link_service.dart';
 import 'services/ota_service.dart';
@@ -154,6 +155,8 @@ class MyApp extends StatelessWidget {
               ],
             ), permanent: true);
             Get.find<MonitorController>().attachHistoryForUi();
+            Get.put(FeedbackService(canSend: () => !Get.find<OtaService>().isUpgrading &&
+              !Get.find<AppUpdateService>().isUpdating.value), permanent: true);
             Get.put(BackgroundOptimizationService(), permanent: true);
 
             // 初始化通知服务
