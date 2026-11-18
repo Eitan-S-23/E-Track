@@ -19,15 +19,19 @@ const _other = 'AA:BB:CC:DD:EE:01';
 const _broadcastOnly = '\u6b64\u8bbe\u5907\u4e0d\u652f\u6301\u8fde\u63a5\uff0c\u4ec5\u5e7f\u64ad\u6570\u636e';
 
 class _Device extends BluetoothDevice {
-  _Device(String address, {this.label = ''}) : super.fromId(address);
+  _Device(super.remoteId, {this.label = ''}) : super.fromId();
 
   String label;
+  bool nameUnavailable = false;
   bool linked = false;
   int connects = 0;
   final events = StreamController<BluetoothConnectionState>.broadcast();
 
   @override
-  String get platformName => label;
+  String get platformName {
+    if (nameUnavailable) throw StateError('native name unavailable');
+    return label;
+  }
   @override
   bool get isConnected => linked;
   @override
@@ -87,7 +91,7 @@ void main() {
   });
 
   tearDown(() async {
-    await Get.reset();
+    Get.reset();
     for (final item in devices) {
       await item.events.close();
     }
@@ -243,6 +247,21 @@ void main() {
     gate.completeError(StateError('name query unavailable'));
     await ble.refreshConnectedDeviceMetadata();
     expect(ble.isDeviceConnected(current), isTrue);
+    await ble.deviceMetadata.settled;
+  }, skip: Platform.isWindows);
+
+  test('a failed native name read cannot turn a successful companion connection into failure', () async {
+    final ble = service(reader: () async => throw StateError('system names unavailable'));
+    final current = device(_address)..nameUnavailable = true;
+    ble.deviceMetadata.rememberConnection(_address, name: 'E-Track Retained');
+    await ble.deviceMetadata.settled;
+    ble.otaDeviceFactoryForTest = (_) => current;
+    expect(await ble.connectCompanionDeviceByAddress(_address), isTrue);
+    await ble.refreshConnectedDeviceMetadata();
+    expect(current.connects, 1);
+    expect(ble.isDeviceConnected(current), isTrue);
+    expect(ble.getDeviceConnectability(current), isTrue);
+    expect(ble.getDeviceName(current), 'E-Track Retained');
     await ble.deviceMetadata.settled;
   }, skip: Platform.isWindows);
 

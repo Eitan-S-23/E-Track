@@ -1514,9 +1514,17 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
     );
   }
 
-  String? _freshDeviceName(BluetoothDevice device) =>
-      BluetoothDeviceMetadata.usableName(getScanResult(device)?.advertisementData.advName) ??
-      BluetoothDeviceMetadata.usableName(device.platformName);
+  String? _freshDeviceName(BluetoothDevice device) {
+    final advertised = BluetoothDeviceMetadata.usableName(
+        getScanResult(device)?.advertisementData.advName);
+    if (advertised != null) return advertised;
+    try {
+      return BluetoothDeviceMetadata.usableName(device.platformName);
+    } catch (_) {
+      // Optional native metadata must never change a successful connection result.
+      return null;
+    }
+  }
 
   String getDeviceName(BluetoothDevice device) {
     final remembered = deviceMetadata.nameOf(device.remoteId.str);

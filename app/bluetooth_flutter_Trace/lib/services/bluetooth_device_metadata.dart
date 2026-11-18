@@ -77,7 +77,7 @@ class BluetoothDeviceMetadata {
       if (_closed) return;
       final prefs = await _preferences().timeout(const Duration(seconds: 2));
       if (_closed) return;
-      final ok = await prefs.setString(storageKey, jsonEncode(_names.value))
+      final ok = await prefs.setString(storageKey, jsonEncode(Map<String, String>.from(_names)))
           .timeout(const Duration(seconds: 2));
       if (!ok) throw StateError('Device metadata write rejected');
     }).catchError((Object _) {
