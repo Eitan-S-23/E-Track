@@ -8,6 +8,9 @@
 namespace Page
 {
 
+void FirmwareCompanion_Init(PageManager* manager);
+void FirmwareCompanion_Show();
+
 class FirmwareUpdate : public PageBase
 {
 public:
@@ -23,7 +26,7 @@ public:
 private:
     enum
     {
-        ROW_MAX = 24,
+        ROW_MAX = 25, // The online entry does not consume an existing file slot.
         SCAN_MAX = 256
     };
 

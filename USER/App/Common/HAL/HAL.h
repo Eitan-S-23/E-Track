@@ -25,6 +25,7 @@
 
 #include <stdint.h>
 #include "HAL_Def.h"
+#include "CompanionUpdate.h"
 
 namespace HAL {
     

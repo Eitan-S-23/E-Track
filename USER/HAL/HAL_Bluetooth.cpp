@@ -1,5 +1,7 @@
 #include "HAL.h"
 #include "Bluetooth/Bluetooth.h"
+#include "Bluetooth/CompanionControl.h"
+#include "Common/DataProc/DataProc.h"
 #include "HAL/HAL_OTA_Backup.h"
 #include "HAL/HAL_OTA_Package.h"
 #include "HAL/HAL_OTA_Staging.h"
@@ -46,6 +48,9 @@
 
 static TinyBTPlus bt;
 static uint32_t lastRxTick = 0;
+static bool companion_send(void*, const char*, unsigned);
+static bool companion_install_safe();
+static ETrackCompanion::Control companion_control(companion_send, NULL);
 
 /* ACK batches belong to a real session generation, with or without profiling. */
 static volatile uint32_t s_ble_epoch = 0;
@@ -308,6 +313,13 @@ static int ble_env_ota_disabled(void)
 
 static int ble_env_overlay_acquire(void)
 {
+    // This is the shared BEGIN/BEGIN2 admission, after the phone's async checks.
+    if (!companion_install_safe())
+    {
+        companion_control.CancelInstall();
+        companion_control.SetStatus("WAIT_SAFE");
+        return 0;
+    }
     int ok = HAL::OTA_OverlayAcquireBle() ? 1 : 0;
 
     if (ok)
@@ -597,8 +609,82 @@ static void bt_text_sink(void *ctx, uint8_t byte)
 #if CONFIG_BT_BAUD_EXPERIMENT
     (void)byte;
 #else
-    bt.encode((char)byte);
+    companion_control.Poll(millis(), ota_ble_session_active(&s_ble_session) || ota_ble_session_isr_active(&s_ble_session));
+    if (!companion_control.Feed(byte, millis())) bt.encode((char)byte);
 #endif
+}
+
+static bool companion_busy()
+{
+    return ota_ble_session_active(&s_ble_session) || ota_ble_session_isr_active(&s_ble_session);
+}
+
+static bool companion_send(void*, const char* bytes, unsigned count)
+{
+#if CONFIG_BT_BAUD_EXPERIMENT
+    (void)bytes; (void)count;
+    return false;
+#else
+    if (companion_busy() || count > 320u) return false;
+    for (unsigned i = 0; i < count; ++i) BT_SERIAL.write((uint8_t)bytes[i]);
+    return true;
+#endif
+}
+
+void HAL::BT_CompanionGetInfo(CompanionUpdateInfo* info)
+{
+    companion_control.Poll(millis(), companion_busy());
+    if (info != NULL) *info = companion_control.Info();
+}
+
+bool HAL::BT_CompanionCheck()
+{
+    companion_control.Poll(millis(), companion_busy());
+    return companion_control.Check(millis());
+}
+
+static bool companion_install_safe()
+{
+    HAL::Power_Info_t power = {};
+    HAL::GPS_Info_t gps = {};
+    HAL::Power_GetInfo(&power);
+    bool moving = HAL::GPS_GetInfo(&gps) && gps.isVaild && gps.speed >= 3.0f;
+    return !DataProc::Recorder_IsOpen() && !moving && (power.isCharging || power.usage >= 30u);
+}
+
+bool HAL::BT_CompanionCanInstall()
+{
+    return !companion_busy() && companion_install_safe();
+}
+
+bool HAL::BT_CompanionInstallPending()
+{
+    const bool busy = companion_busy();
+    companion_control.Poll(millis(), busy);
+    return busy || companion_control.InstallPending(millis());
+}
+
+static bool companion_display_matches(const HAL::CompanionUpdateInfo* displayed)
+{
+    return companion_control.Matches(displayed);
+}
+
+bool HAL::BT_CompanionChoose(bool updateNow, const CompanionUpdateInfo* displayed)
+{
+    companion_control.Poll(millis(), companion_busy());
+    if (!companion_display_matches(displayed)) return false;
+    if (updateNow && !BT_CompanionCanInstall())
+    {
+        companion_control.SetStatus("WAIT_SAFE");
+        return false;
+    }
+    return companion_control.Choose(updateNow, millis());
+}
+
+void HAL::BT_CompanionPresented(const CompanionUpdateInfo* displayed)
+{
+    companion_control.Poll(millis(), companion_busy());
+    if (companion_display_matches(displayed)) companion_control.Presented();
 }
 
 #if CONFIG_BT_BAUD_EXPERIMENT
@@ -1018,6 +1104,7 @@ void HAL::BT_Update()
 /* P3-1 BLE OTA 泵（HAL.cpp 以 CONFIG_OTA_BLE_PUMP_PERIOD_MS 注册） */
 void HAL::BT_OtaPump()
 {
+    companion_control.Poll(millis(), companion_busy());
     (void)s_p34_ack_batch.begin(s_ble_epoch);
 #if CONFIG_OTA_BLE_PROFILE
     s_p34_pump_start = p34_clock();

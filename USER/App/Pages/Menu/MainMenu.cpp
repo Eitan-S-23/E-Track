@@ -407,6 +407,7 @@ void MainMenu::CreateFooter()
     lv_obj_set_style_radius(backButton, 4, 0);
     lv_obj_clear_flag(backButton, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_add_flag(backButton, LV_OBJ_FLAG_CLICKABLE);
+    ApplyFocusStyle(backButton);
     AttachEvent(backButton);
 
     lv_obj_t* iconLabel = lv_label_create(backButton);
@@ -827,6 +828,11 @@ bool MainMenu::IsFocusItem(lv_obj_t* obj)
         return false;
     }
 
+    if (obj == backButton)
+    {
+        return true;
+    }
+
     for (int i = 0; i < focusItemCount; i++)
     {
         if (focusItems[i] == obj)
@@ -859,10 +865,23 @@ void MainMenu::RefreshEncoderGroup()
         }
     }
 
+    // The footer is not a setting row and must not consume the row array.
+    if (backButton != nullptr &&
+        !lv_obj_has_flag(backButton, LV_OBJ_FLAG_HIDDEN) &&
+        !lv_obj_has_state(backButton, LV_STATE_DISABLED))
+    {
+        lv_group_add_obj(group, backButton);
+    }
+
     if (focusItemCount > 0 && focusItems[0] != nullptr)
     {
         MoveFocusHaloTo(focusItems[0], false);
         lv_group_focus_obj(focusItems[0]);
+    }
+    else if (backButton != nullptr && lv_obj_get_group(backButton) == group)
+    {
+        MoveFocusHaloTo(backButton, false);
+        lv_group_focus_obj(backButton);
     }
 }
 
@@ -884,6 +903,14 @@ void MainMenu::ClearEncoderGroup()
                 }
                 ClearFocusState(focusItems[i]);
             }
+        }
+        if (backButton != nullptr)
+        {
+            if (lv_obj_get_group(backButton) == group)
+            {
+                lv_group_remove_obj(backButton);
+            }
+            ClearFocusState(backButton);
         }
     }
 
@@ -1078,6 +1105,20 @@ void MainMenu::onEvent(lv_event_t* event)
         return;
     }
 
+    if (obj == instance->backButton)
+    {
+        // LVGL emits SHORT_CLICKED and CLICKED for one short press. Act once,
+        // before encoder row dispatch, for both pointer and rotary input.
+        if (code == LV_EVENT_CLICKED &&
+            !lv_obj_has_flag(obj, LV_OBJ_FLAG_HIDDEN) &&
+            !lv_obj_has_state(obj, LV_STATE_DISABLED))
+        {
+            instance->CancelEncoderClick();
+            instance->RequestBack();
+        }
+        return;
+    }
+
     if (IsEncoderEvent())
     {
         if (code == LV_EVENT_SHORT_CLICKED || code == LV_EVENT_CLICKED)
@@ -1125,12 +1166,6 @@ void MainMenu::onEvent(lv_event_t* event)
 
     if (obj == instance->_root || obj == instance->listCont || obj == instance->focusHalo)
     {
-        return;
-    }
-
-    if (obj == instance->backButton)
-    {
-        instance->RequestBack();
         return;
     }
 

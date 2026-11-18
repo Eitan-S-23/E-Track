@@ -117,6 +117,8 @@ public:
     bool Pop();
     bool BackHome();
     const char* GetPagePrevName();
+    const char* GetCurrentPageName() const { return _PageCurrent ? _PageCurrent->_Name : nullptr; }
+    bool IsSwitching() const { return _AnimState.IsBusy || _AnimState.IsSwitchReq; }
 
     /* Global Animation */
     void SetGlobalLoadAnimType(

@@ -1,7 +1,7 @@
 {
   "schema": "original-admin-automatic-candidates-v1",
   "firmware": {
-    "versionName": "3.3.29",
-    "releaseNotes": "Normal BLE V2 forward candidate for an automated short OTA test. Existing product source is unchanged. Full and recovery originals are registered automatically; selected delta and publication use the operator-authorized channel; other channels are unchanged."
+    "versionName": "3.3.30",
+    "releaseNotes": "MCU companion update support for the current mobile App: firmware check, download-ready notification and device consent; safe install admission and recorder exclusion; one-level menu and encoder Back. Preserves the existing BLE V2 receiver, long-filename display and scrolling fixes. Full and recovery candidate only; channel publication and selected delta generation remain operator-controlled."
   }
 }
