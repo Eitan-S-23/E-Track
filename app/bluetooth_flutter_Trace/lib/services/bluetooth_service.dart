@@ -18,6 +18,7 @@ import '../ota/ota_radio_lease.dart';
 import '../ota/ota_scan_pause.dart';
 import '../ota/ota_write_admission.dart';
 import 'bluetooth_reconnect.dart';
+import 'bluetooth_device_metadata.dart';
 
 // 抽象蓝牙适配器接口
 abstract class BluetoothAdapter {
@@ -477,7 +478,11 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
     bool? preferOtaWithoutResponse,
     OtaExperimentRuntime? experiment,
     OtaLinkProfile? linkProfile,
+    BluetoothDeviceMetadata? deviceMetadata,
+    Future<List<BluetoothDevice>> Function()? systemDeviceReader,
   }) : _providedAdapter = adapter,
+       deviceMetadata = deviceMetadata ?? BluetoothDeviceMetadata(),
+       _systemDeviceReader = systemDeviceReader,
        _companionClockMs = companionClockMs,
        _experiment = experiment ?? OtaExperimentRuntime.current,
        reuseOtaCharacteristics =
@@ -497,6 +502,12 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
   final OtaExperimentRuntime _experiment;
   final BluetoothAdapter? _providedAdapter;
   final int Function()? _companionClockMs;
+  final BluetoothDeviceMetadata deviceMetadata;
+  final Future<List<BluetoothDevice>> Function()? _systemDeviceReader;
+  final List<Worker> _metadataWorkers = [];
+  Future<void>? _metadataRefresh;
+  Set<String> _metadataRefreshIds = {};
+  bool _metadataRefreshAgain = false;
   OtaScanPause? _otaScanPause;
   final Map<String, OtaPriorityQueue> _otaPriorityQueues = {};
   bool get _scanPauseEnabled => _experiment.config?.pauseScanDuringOta == true;
@@ -857,6 +868,11 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
   @override
   void onInit() {
     super.onInit();
+    unawaited(deviceMetadata.restore());
+    _metadataWorkers.add(ever(connectedDevices, (_) {
+      unawaited(refreshConnectedDeviceMetadata());
+    }));
+    _metadataWorkers.add(ever(scanResults, (_) => _rememberKnownScanNames()));
     if (usesAndroidLifecycle) {
       _lifecycleBinding = WidgetsBinding.instance;
       _lifecycleBinding!.addObserver(this);
@@ -868,6 +884,11 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
   @override
   void onClose() {
     _closed = true;
+    for (final worker in _metadataWorkers) {
+      worker.dispose();
+    }
+    _metadataWorkers.clear();
+    deviceMetadata.close();
     _lifecycleBinding?.removeObserver(this);
     _lifecycleBinding = null;
     _companionScanTimer?.cancel();
@@ -1489,13 +1510,79 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
   /// 获取扫描结果
   ScanResult? getScanResult(BluetoothDevice device) {
     return scanResults.firstWhereOrNull(
-      (result) => result.device.remoteId == device.remoteId,
+      (result) => result.device.remoteId.str.toLowerCase() == device.remoteId.str.toLowerCase(),
     );
+  }
+
+  String? _freshDeviceName(BluetoothDevice device) =>
+      BluetoothDeviceMetadata.usableName(getScanResult(device)?.advertisementData.advName) ??
+      BluetoothDeviceMetadata.usableName(device.platformName);
+
+  String getDeviceName(BluetoothDevice device) {
+    final remembered = deviceMetadata.nameOf(device.remoteId.str);
+    return _freshDeviceName(device) ?? remembered ?? '未知设备';
+  }
+
+  bool? getDeviceConnectability(BluetoothDevice device) {
+    if (isDeviceConnected(device)) return true;
+    return getScanResult(device)?.advertisementData.connectable ??
+        (deviceMetadata.wasConnected(device.remoteId.str) ? true : null);
+  }
+
+  void _rememberKnownScanNames() {
+    for (final result in scanResults) {
+      final device = result.device;
+      if (isDeviceConnected(device) || deviceMetadata.wasConnected(device.remoteId.str)) {
+        deviceMetadata.rememberConnection(device.remoteId.str, name: _freshDeviceName(device));
+      }
+    }
+  }
+
+  Future<void> refreshConnectedDeviceMetadata() {
+    if (_closed || connectedDevices.isEmpty) return Future.value();
+    for (final device in connectedDevices) {
+      deviceMetadata.rememberConnection(device.remoteId.str, name: _freshDeviceName(device));
+    }
+    final ids = connectedDevices.map((d) => d.remoteId.str.toLowerCase()).toSet();
+    final pending = _metadataRefresh;
+    if (pending != null) {
+      if (!setEquals(ids, _metadataRefreshIds)) _metadataRefreshAgain = true;
+      return pending;
+    }
+    return _metadataRefresh = _refreshDeviceNamesUntilCurrent().whenComplete(() {
+      _metadataRefresh = null;
+    });
+  }
+
+  Future<void> _refreshDeviceNamesUntilCurrent() async {
+    do {
+      _metadataRefreshAgain = false;
+      _metadataRefreshIds = connectedDevices.map((d) => d.remoteId.str.toLowerCase()).toSet();
+      await _refreshSystemDeviceNames();
+    } while (_metadataRefreshAgain && !_closed && connectedDevices.isNotEmpty);
+  }
+
+  Future<void> _refreshSystemDeviceNames() async {
+    if (connectedDevices.isEmpty || (!Platform.isAndroid && _systemDeviceReader == null)) return;
+    try {
+      // This query also includes other apps' links. Use names only for our existing links.
+      final devices = await (_systemDeviceReader?.call() ?? FlutterBluePlus.systemDevices([]))
+          .timeout(const Duration(seconds: 2));
+      if (_closed) return;
+      for (final device in connectedDevices) {
+        final native = devices.firstWhereOrNull((d) =>
+            d.remoteId.str.toLowerCase() == device.remoteId.str.toLowerCase());
+        deviceMetadata.rememberConnection(device.remoteId.str,
+            name: _freshDeviceName(device) ?? BluetoothDeviceMetadata.usableName(native?.platformName));
+      }
+    } catch (_) {
+      debugPrint('Bluetooth platform name refresh unavailable');
+    }
   }
 
   /// 检查设备是否已连接
   bool isDeviceConnected(BluetoothDevice device) {
-    return connectedDevices.any((d) => d.remoteId == device.remoteId);
+    return connectedDevices.any((d) => d.remoteId.str.toLowerCase() == device.remoteId.str.toLowerCase());
   }
 
   /// 启用蓝牙
@@ -2529,6 +2616,7 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
             .map((state) => state == BluetoothConnectionState.connected),
       );
       _reconnect.remember(deviceAddress);
+      unawaited(refreshConnectedDeviceMetadata());
       return true;
     } catch (e) {
       debugPrint('OTA重连失败($deviceAddress): $e');

@@ -180,9 +180,7 @@ class BleController extends GetxController {
   /// 名称关键词（广播名优先、平台名兜底）优先于标准 GATT 服务 UUID 兜底。
   String getDeviceCategory(BluetoothDevice device) {
     final result = getScanResult(device);
-    final names =
-        '${result?.advertisementData.advName ?? ''} ${device.platformName}'
-            .toLowerCase();
+    final names = '${getDeviceName(device)} ${device.platformName}'.toLowerCase();
 
     bool has(List<String> keys) => keys.any(names.contains);
 
@@ -222,29 +220,22 @@ class BleController extends GetxController {
 
   /// 检查设备是否可连接
   bool isConnectable(BluetoothDevice device) {
-    final result = getScanResult(device);
-    return result?.advertisementData.connectable ?? false;
+    return getDeviceConnectability(device) == true;
   }
+
+  bool? getDeviceConnectability(BluetoothDevice device) =>
+      _bluetoothService.getDeviceConnectability(device);
+
+  String getConnectabilityDescription(BluetoothDevice device) =>
+      switch (getDeviceConnectability(device)) {
+        true => '是',
+        false => '否',
+        null => '待确认',
+      };
 
   /// 格式化设备名称
   String getDeviceName(BluetoothDevice device) {
-    debugPrint('获取设备名称，设备ID: ${device.remoteId}');
-
-    // 通过扫描结果获取设备名称
-    final scanResult = getScanResult(device);
-    if (scanResult != null) {
-      final advName = scanResult.advertisementData.advName;
-      debugPrint('扫描结果中设备名称: $advName');
-      if (advName.isNotEmpty) {
-        return advName;
-      }
-    }
-
-    // 如果扫描结果中没有名称，回退到平台提供的设备名称。
-    final deviceName = device.platformName;
-
-    debugPrint('最终设备名称: $deviceName');
-    return deviceName.isNotEmpty ? deviceName : '未知设备';
+    return _bluetoothService.getDeviceName(device);
   }
 
   /// 格式化设备ID

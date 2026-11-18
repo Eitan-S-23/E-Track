@@ -7467,7 +7467,7 @@ class _AvailableDevicesPanel extends StatelessWidget {
       bars: _rssiBars(bleController.getDeviceRssi(device)),
       iconCategory: bleController.getDeviceCategory(device),
       onTap: () => Get.to(
-        () => _SpeedometerDeviceDetailPage(device: device),
+        () => SpeedometerDeviceDetailPage(device: device),
       ),
       onConnect: connected || !bleController.isConnectable(device)
           ? null
@@ -7679,8 +7679,8 @@ class _CategoryDeviceThumbnail extends StatelessWidget {
 
 /// 码表线设备详情页：与码表页同风格（深色玻璃拟态），承载连接控制与
 /// 固件升级入口；功率计线继续使用独立的 DeviceDetailPage。
-class _SpeedometerDeviceDetailPage extends StatelessWidget {
-  const _SpeedometerDeviceDetailPage({required this.device});
+class SpeedometerDeviceDetailPage extends StatelessWidget {
+  const SpeedometerDeviceDetailPage({super.key, required this.device});
 
   final BluetoothDevice device;
 
@@ -7692,9 +7692,14 @@ class _SpeedometerDeviceDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ble = Get.put(BleController(), permanent: true);
+    return Obx(() => _buildPage(ble));
+  }
+
+  Widget _buildPage(BleController ble) {
     final name = ble.getDeviceName(device);
     final category = ble.getDeviceCategory(device);
     final connectable = ble.isConnectable(device);
+    final capability = ble.getDeviceConnectability(device);
 
     return Scaffold(
       backgroundColor: _RideColors.background,
@@ -7767,7 +7772,7 @@ class _SpeedometerDeviceDetailPage extends StatelessWidget {
                                 child: Text(
                                   connected
                                       ? '已连接'
-                                      : (connectable ? '未连接' : '仅广播，不支持连接'),
+                                      : (connectable ? '未连接' : capability == false ? '仅广播，不支持连接' : '连接能力待确认'),
                                   style: TextStyle(
                                     color: Colors.white.withValues(alpha: 0.72),
                                     fontSize: 13,
@@ -7793,7 +7798,7 @@ class _SpeedometerDeviceDetailPage extends StatelessWidget {
                     ),
                     _DetailInfoRow(
                       label: '可连接',
-                      value: connectable ? '是' : '否',
+                      value: ble.getConnectabilityDescription(device),
                     ),
                     _DetailInfoRow(
                       label: '信号强度',
@@ -7857,7 +7862,9 @@ class _SpeedometerDeviceDetailPage extends StatelessWidget {
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              '此设备不支持连接，仅广播数据',
+                              capability == false
+                                  ? '此设备不支持连接，仅广播数据'
+                                  : '连接能力暂未确认',
                               style: TextStyle(
                                 color: Colors.white.withValues(alpha: 0.66),
                                 fontSize: 13,
@@ -10052,7 +10059,7 @@ void _openFirstConnectedDeviceDetail() {
     _showUiMessage('设备详情', '尚未连接设备，请先在设备页扫描并连接');
     return;
   }
-  Get.to(() => _SpeedometerDeviceDetailPage(device: connected.first));
+  Get.to(() => SpeedometerDeviceDetailPage(device: connected.first));
 }
 
 Future<void> _showDeviceSyncActions(BuildContext context) {

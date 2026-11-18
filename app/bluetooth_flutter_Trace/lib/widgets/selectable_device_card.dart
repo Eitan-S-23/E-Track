@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:get/get.dart';
 import '../controllers/ble_controller.dart';
 import '../controllers/monitor_controller.dart';
 
@@ -28,6 +29,10 @@ class SelectableDeviceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Obx(() => _buildCard(context));
+  }
+
+  Widget _buildCard(BuildContext context) {
     final rssi = bleController.getDeviceRssi(device);
     final deviceName = bleController.getDeviceName(device);
     final deviceId = bleController.getDeviceId(device);

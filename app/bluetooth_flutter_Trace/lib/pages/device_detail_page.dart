@@ -36,6 +36,10 @@ class DeviceDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(BleController(), permanent: true);
+    return Obx(() => _buildPage(context, controller));
+  }
+
+  Widget _buildPage(BuildContext context, BleController controller) {
     final scanResult = controller.getScanResult(device);
     final isConnected =
         controller.connectedDevices.any((d) => d.remoteId == device.remoteId);
@@ -301,7 +305,7 @@ class DeviceDetailPage extends StatelessWidget {
               '设备ID', controller.getDeviceId(device), Icons.fingerprint),
           const SizedBox(height: 12),
           _buildInfoRow(
-              '可连接', controller.isConnectable(device) ? '是' : '否', Icons.link),
+              '可连接', controller.getConnectabilityDescription(device), Icons.link),
         ],
       ),
     );
@@ -751,7 +755,9 @@ class DeviceDetailPage extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      '此设备不支持连接，仅广播数据',
+                      controller.getDeviceConnectability(device) == false
+                          ? '此设备不支持连接，仅广播数据'
+                          : '连接能力暂未确认',
                       style: TextStyle(
                         color: Colors.orange.shade800,
                         fontSize: 14,
@@ -833,7 +839,7 @@ class DeviceDetailPage extends StatelessWidget {
 设备名称: ${controller.getDeviceName(device)}
 设备ID: ${controller.getDeviceId(device)}
 信号强度: ${controller.getDeviceRssi(device)} dBm
-可连接: ${controller.isConnectable(device) ? '是' : '否'}
+可连接: ${controller.getConnectabilityDescription(device)}
 服务数量: ${controller.getServiceUuids(device).length}
 
 打开 ${ShareLinks.appName}: ${ShareLinks.landingPageUrl}

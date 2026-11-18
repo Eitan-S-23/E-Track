@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:get/get.dart';
 import '../controllers/ble_controller.dart';
 
 class DeviceCard extends StatelessWidget {
@@ -21,6 +22,10 @@ class DeviceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Obx(() => _buildCard(context));
+  }
+
+  Widget _buildCard(BuildContext context) {
     final rssi = controller.getDeviceRssi(device);
     final deviceName = controller.getDeviceName(device);
     final deviceId = controller.getDeviceId(device);
