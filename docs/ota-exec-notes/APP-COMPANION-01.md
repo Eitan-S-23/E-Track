@@ -1,5 +1,62 @@
 # APP-COMPANION-01 Implementation Record
 
+## MCU Main Migration, 2026-11-18
+
+The owner requested main-based MCU development and automatic candidate delivery.
+Source/workflow integration `0b7e1275f91f0c6c0a2f89e19f664d60d5ffee9e` is now on
+local and remote main. This bounded 67-file change imports the already delivered
+3.3.30 MCU/paired-simulator source and necessary tooling/tests, not the candidate
+branch's unrelated experiment history or old deployment/governance workflows.
+All ten MCU/simulator input directory trees match `cb360b76`; the App tree remains
+`b8be80cfd70dc9d05e4905821b4aae81dd8a1fa8` (`1.0.82+108`). The existing
+3.3.30 native build/registration remains Actions `44276457821`, not a new build.
+
+`Original Admin Candidates` now routes main pushes to firmware only and
+`release/candidates` pushes to App only. Exact source, first-attempt admission,
+mandatory version increments, V2 profile, private-key cleanup and unpublished
+full/recovery registration remain enforced. Main no longer starts the duplicate
+build-only firmware push workflow; pull-request/master and protected manual
+routes retain their gates. Future MCU work starts from current main, updates
+`Tools/ota/original-admin-release.json`, and is integrated to main before the
+final push. The original Trace signing route is unchanged.
+
+The six-file App routing update is
+`1564d5886bf248c83b87afa9c991ab5404a6f73b`, with no product/version changes.
+Actual push run [44295658568](https://github.com/Eitan-S-23/E-Track/actions/runs/44295658568)
+passes checks and skips both builds. Existing environment `firmware-candidates`
+now permits only main, with no required reviewer/wait timer. Readbacks confirm
+unchanged Secrets, `OTA_BOOT_CHAIN_READY=false`, repository Secret metadata and
+both protected rehearsal/production environments. No Cloudflare credential was
+read/exported, no key rotated, and no channel or device operation was performed.
+
+Local checks pass: 229 Node tests, eight original-App boundary tests, 43 MCU
+control/safety/encoder tests, nine BLE contracts, 11 link-metrics tests, real
+host frame/session/staging/package/patch suites, and actionlint for both workflows.
+The planner regressions execute actual temporary Git checkouts: main requires
+no historical App-branch ancestry, versioned firmware schedules only firmware,
+source edits without a new version fail, and documentation never rebuilds 3.3.30.
+Packaging tests use synthetic non-installable inputs, not a native firmware build.
+
+The source/baseline commit deliberately uses `[skip ci]` because the old main
+did not contain the versioned release configuration. This recording-only follow-up
+does not skip CI: its actual before-SHA now has 3.3.30 and must select no package.
+Main push verification is pending at this checkpoint, not reported as PASS.
+No permanent bootstrap exception was added to the planner. The next real firmware
+version must be greater than 3.3.30; this migration does not replay that release.
+
+Original receipts are under `.cache/firmware-main-migration-20261118/`:
+`import-before.json`, `import-after.json`, `check-03/`, `keyring-app-01/`,
+`keyring-policy-02/`, `keyring-main-02/`, `keyring-verify-01/` and `keyring-logs-01/`.
+The initial local test, unsupported policy-update field (HTTP 422) and imported
+fixture-whitespace check failures are retained, not relabeled as successes.
+The corrected policy update changed only its name, not its type or Secrets.
+
+Firmware product main integration is no longer outstanding. D0-D5 and formal
+whole-card acceptance remain outstanding; C1-C6 remain unchecked. This delivery
+does not extend the independent R01-R05/T01/T02 source-review conclusions or
+replace their original evidence. Earlier dated pending-main statements below
+retain their point-in-time meaning and are superseded only for this integration.
+
 ## MCU Delivered And Candidate Approval Removed, 2026-11-18
 
 The owner performed the final push of `816b1888be2dfaa632e4e802e6b680ec85ed5aec`

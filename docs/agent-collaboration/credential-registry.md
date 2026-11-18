@@ -143,6 +143,24 @@ Environment and Secret metadata readbacks pass; configuration-only Actions
 native build through the new environment or a channel release. See
 [the bounded delivery record](../ota-exec-notes/APP-COMPANION-01.md#mcu-delivered-and-candidate-approval-removed-2026-11-18).
 
+### Main Firmware Candidate Branch
+
+Owner-approved migration, 2026-11-18: the existing `firmware-candidates`
+environment now allows only `main`, superseding the earlier `release/candidates`
+policy above. Its ID, branch-policy ID, no-review/no-wait behavior, locked
+`OTA_BOOT_CHAIN_READY=false` and both Secret metadata records are unchanged.
+Repository Secrets and the full rehearsal/production protection, policy, gate
+and Secret metadata also match the pre-migration snapshot. No credential value
+was read, copied, regenerated or rotated for this branch change.
+
+Main source/workflow baseline is `0b7e1275f91f0c6c0a2f89e19f664d60d5ffee9e`.
+App routing commit `1564d5886bf248c83b87afa9c991ab5404a6f73b` keeps original Trace
+signing; actual checks-only push `44295658568` succeeds with both builds skipped.
+The documentation-only main push is the remaining routing check at this record.
+Native 3.3.30 remains the original successful `44276457821`, not a new build
+under the migrated branch. See [the migration record](../ota-exec-notes/APP-COMPANION-01.md#mcu-main-migration-2026-11-18)
+and `.cache/firmware-main-migration-20261118/keyring-policy-02/configuration.json`.
+
 ### Recurrence And Correction
 
 On 2026-10-18 the user identified a repeat of the P4-3 discovery error: the alias
