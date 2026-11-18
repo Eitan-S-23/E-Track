@@ -4,7 +4,55 @@ Read this file before deploying the E-Track backend or asking the owner for
 Cloudflare credentials. It lives at the project root deliberately. Read the
 primary checkout's copy, not only an old task worktree's copy.
 
-## Current State: Actions Deployment Verified 2026-11-18
+## Current State: Feedback Backend Deployed 2026-11-18
+
+Actions [44245893967](https://github.com/Eitan-S-23/E-Track/actions/runs/44245893967)
+deployed source `344abd6d297c80b37b4a8c4ec0096c2932d6b88b` using the unchanged
+`E_TRACK_CI` Secret. This supersedes the older codec/USB rollout wait below.
+Only pending migration `0016_feedback.sql` was applied; 0015 was not replayed.
+
+| Component | Current verified identity |
+| --- | --- |
+| Worker version | `eebb1354-2e8b-485a-b960-2fcd131b4f6a` |
+| Admin deployment | `02848862-864d-4591-8aea-9a7dd354f027` |
+| Public deployment | `7c8fc56c-15cb-496c-8396-73f20e758677` |
+
+Exact-source App CI `44243311453` and backend CI `44243622777` pass. Backend
+checks include 483 native Worker tests, 261 browser tests and all typechecks.
+Real owner-session readback matches HTML and nine JS/CSS assets to committed
+bytes. Feedback acceptance, idempotent replay, second-batch daily rejection,
+Admin detail/processing and the audit event passed using one explicitly synthetic
+record, now resolved. The shared 50-batch/IP boundary is covered by native tests,
+not by exhausting a real network's quota. Four channel pointers and all 37 prior
+delta jobs were unchanged by deployment and this feedback check.
+
+The two Admin production App-generator reference slots were updated together,
+using the same partial PATCH as pinned Wrangler's Pages secret-bulk operation,
+to Trace `dev/admin/original-delta-codec-20261118` / `4745aeadf2b526c6ff640539b401ff3fc1623cdb`.
+They remain `secret_text`; preview, original public key, Access, named Worker
+environment, bindings, schedules and other settings are preserved. Actual use
+is now verified by new delta run `44250220531`, bound to that exact workflow
+commit and the unchanged E-Track generator `73e6022f`.
+
+Original-signed `1.0.82+108`, candidate source
+`a977c848e03a2798a7b5c46319cd126a292395b4`, passes E-Track `44245598054` and Trace
+APK/Windows `44245743035`. Its App tree equals `344abd6d`; original package,
+signer, signed capabilities, hashes and Android R2 candidate are verified.
+The new 107-to-108 `bsdiff-lzma-v1` delta is 2,439,333 bytes versus 48,684,713
+full bytes (94.99% smaller). The exact R2 bytes, Ed25519 per-base signature and
+reconstruction proof pass; only this new delta was enabled (attempt 1, revision 4).
+There are now 38 delta jobs: all 37 originals and four channels remain unchanged.
+
+No Stable/Beta promotion or phone operation occurred. USB is not a delivery
+prerequisite; actual phone upgrade/performance is still unmeasured. This record
+accompanies the bounded 25-file product/main integration. Use the authoritative
+main-board check for local/remote delivery, not the older pending statements.
+Receipts: `.cache/app-codec-20261118/keyring-cloud-bind-01/`,
+`keyring-cloud-live-01/02/03/04/`, `keyring-logs-17/18/19/20/21/22/`,
+`candidate-verification-02.json` and
+[the feedback/delta delivery](docs/ota-exec-notes/APP-ADMIN-UX-01.md#feedback-and-delta-delivered-2026-11-18).
+
+## Earlier Actions Delivery: 28459a89
 
 The existing `E_TRACK_CI` repository Secret is now used by the published workflow.
 Actions run [44186088340](https://github.com/Eitan-S-23/E-Track/actions/runs/44186088340)
@@ -44,6 +92,9 @@ Earlier LOCAL_PENDING and denied-route statements below are dated history,
 superseded by this delivery rather than rewritten as successful earlier attempts.
 
 ### App Codec Source Ready; Rollout Still Pending
+
+Historical checkpoint: the current feedback/delta delivery above supersedes this
+rollout wait. Preserve its original observations; do not restore the old USB gate.
 
 The later codec continuation has integrated product source
 `73e6022fe66adb77855e22984309bfaece8cc9fc` into primary and remote `main`.

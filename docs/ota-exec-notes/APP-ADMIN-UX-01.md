@@ -1,5 +1,183 @@
 # App And Admin UX Improvements
 
+## Feedback And Navigation Follow-Up 2026-11-18
+
+The owner reports completing the full App update and approves the next update
+with a feedback workflow. USB is not a release prerequisite: it was a proposed
+measurement route, not a requirement for full installation or backend delivery.
+The earlier USB-wait checkpoints remain historical. Actual new-format update
+success must still be distinguished from a successful full-download fallback.
+
+Continue in the owned `.worktrees/app-codec-20261118` worktree on
+`dev/flutter/app-codec-20261118`, now based on published main `f10c725e`.
+Do not rebuild or replace the completed `1.0.81+107` artifacts. The new immutable
+candidate is `1.0.82+108`, providing the delivered 107-to-108 test target below.
+
+- Help retains permissions/background setup and a new feedback entry, removing
+  the unrelated power-meter, cycling-computer and remote-control instructions.
+- Detail navigation preserves its parent. Horizontal dismissal, system Back
+  and the upper-left Back icon return one level, not directly to the home page.
+- Feedback is text-only, independent of version-inventory consent. A persistent
+  installation token survives App upgrades. One accepted batch per installation
+  per Beijing calendar day; each exact outbound IP shares 50 accepted batches
+  per day. IP is an ingress budget, never a version or person identifier.
+- Each batch contains at most 10 messages of at most 2,000 characters and has
+  a bounded encoded size. A bounded local outbox retains overflow/offline items;
+  it never silently discards unsent feedback. The next foreground opportunity
+  after the server retry time submits pending content without background wakeups.
+- Server-side atomic budgets and immutable batch/message IDs prevent concurrent
+  overspend and duplicate ingestion after a lost response. Short-window request
+  limits and body bounds also apply to rejected/retried requests. Do not log
+  bearer values, message bodies or raw IPs. No telemetry opt-in dependency.
+- Existing Access roles/CSRF protect the management list, filtering, detail,
+  processing state and notes. Persist changes with optimistic concurrency and
+  an audit trail; no new login, external UI dependencies or automatic attachments.
+
+Verification: native D1/quota/concurrency/replay tests, browser CRUD/security and
+stale-response cases, App outbox/restart/day-boundary/navigation tests, complete
+dual-host development CI, then original-signed APK/EXE and source-matched Actions
+deployment. Preserve original channels/jobs and frozen evidence. No new device
+operation or independent acceptance is claimed. Executed outcomes follow below;
+the initial plan is not a claim of phone validation.
+
+### Feedback And Delta Delivered 2026-11-18
+
+Product source `344abd6d297c80b37b4a8c4ec0096c2932d6b88b` has successful full
+dual-host App CI `44243311453`, backend CI `44243622777` and Actions deployment
+`44245893967`. Detailed counts and live feedback checks are preserved below.
+The same 25-file App/backend delta is integrated into main with these records;
+unrelated firmware, historical worktrees and frozen acceptance evidence are not
+merged or modified. Final Git receipts are `keyring-main-02` in the task cache.
+The record commit uses the existing skip-CI mechanism to avoid duplicate 108
+packages; exact source-qualified builds are reused, with main governance checked
+separately. No workflow, credential or validation requirement is weakened.
+
+Original-signed candidate `a977c848e03a2798a7b5c46319cd126a292395b4` passes both
+[E-Track 44245598054](https://github.com/Eitan-S-23/E-Track/actions/runs/44245598054)
+and [Trace 44245743035](https://github.com/Eitan-S-23/Trace/actions/runs/44245743035).
+Android APK and Windows EXE/ZIP jobs are successful. App-tree equality, immutable
+Release metadata, the original `com.wen.gaia.gaia` identity and signer
+`3cecee6330a930e020b454b6d4a79568f4494ca324ae7bcf2c1914e51b04ab47` are verified.
+The Ed25519 capability signature includes `bsdiff-lzma-v1`. Android release
+`rel_trace_android_v1_0_82` is an R2-backed candidate; Windows artifacts are in
+the same original [v1.0.82 Release](https://github.com/Eitan-S-23/Trace/releases/tag/v1.0.82).
+
+| Artifact | Bytes | SHA-256 |
+| --- | --- | --- |
+| APK | 48,684,713 | `8567bf5b93294b7df46247ba7bf23a8eb8b1d64128731ae6ae017b1acc441a65` |
+| Windows EXE | 161,792 | `b4c5893d98ffa4b468cbd307dc0cea15c137f1d3b5f043bad19dd62943dc2602` |
+| Windows ZIP bundle | 20,672,747 | `1250fea46735b4fc999a3a93c05d8be842999af310b8ad104dfdfa8f8e417b11` |
+| 107-to-108 delta | 2,439,333 | `14153370fe69d9ac3d2d4abee1f3d7da8306777526324d95980c1ac5dd667872` |
+
+The new job
+`delta_7b226f369966082455e971518d2d0744f5555182f5935bb8f7e0a4cf8e17152b`
+completed on attempt 1 in [Trace 44250220531](https://github.com/Eitan-S-23/Trace/actions/runs/44250220531).
+The actual run uses workflow `4745aeadf2b526c6ff640539b401ff3fc1623cdb`, backed by
+the already-reviewed E-Track generator `73e6022f`. No old successful job or
+104-to-105 benchmark was replayed. Format is `bsdiff-lzma-v1`, reusing the MCU
+bsdiff/LZMA encoder without MCU encryption. Reconstruction matches the exact
+108 APK; the per-base Ed25519 signature and complete R2 download hash pass.
+The delta is 94.99% smaller than this full APK, not a measured phone speedup or
+a new same-pair comparison against VCDIFF.
+
+Only this new verified delta is enabled, ready at revision 4. Four App/firmware
+channel rows and all 37 pre-existing delta jobs retain their original values;
+the job count increases only to 38. Existing Access, runtime settings, named
+environment and other bindings remain unchanged. Stable/Beta publication is
+still an operator choice. Actual 107-to-108 phone execution, performance and
+independent acceptance are not claimed; no USB or phone operation was requested.
+
+Originals under `.cache/app-codec-20261118`: `keyring-release-01`,
+`candidate-verification-02.json`, `keyring-cloud-read-05`,
+`keyring-cloud-live-02/03/04`, `keyring-status-46/47/48` and
+`keyring-logs-20/21/22`. The exact delta bytes are retained privately with the
+readback receipt. Final contained-output audit: `feedback-write-audit-01.json`.
+No secret values are included in the tracked records.
+
+### Feedback Backend Delivered 2026-11-18
+
+This intermediate checkpoint is retained; the final package/delta delivery above
+supersedes its Android-wait and remaining-work statements.
+
+Qualified product source: `344abd6d297c80b37b4a8c4ec0096c2932d6b88b`, on the
+owned `dev/flutter/app-codec-20261118` branch. App CI `44243311453` passes both
+hosts: Linux 927 passed / 16 skipped, Windows 880 passed / 63 skipped, clean
+analysis and eight additional candidate cases per host. Backend `44243622777`
+passes 483 native Worker tests, 261 browser tests and three typechecks. The
+controlled announcement-focus regression is red in `feedback-ui-05`, green
+with the fix in `feedback-ui-06` (26 targeted cases) and in that full CI suite.
+Raw originals: `keyring-logs-17/18` in `.cache/app-codec-20261118`.
+
+The original-signed candidate branch advanced to
+`a977c848e03a2798a7b5c46319cd126a292395b4` by replacing only the authorized App
+subtree/related inputs. Its App tree equals `344abd6d`; unrelated candidate
+firmware is preserved. E-Track `44245598054` is awaiting Trace `44245743035`.
+Windows is successful; Android and final R2/candidate delivery are not yet
+claimed. Old 107 artifacts and successful deltas were not rebuilt.
+
+One paired Admin production update selects prepared Trace workflow
+`dev/admin/original-delta-codec-20261118` at `4745aeadf2b526c6ff640539b401ff3fc1623cdb`.
+The exact request matches pinned Wrangler 4.105.0 Pages secret bulk: only the
+two `secret_text` references and the current generated config hash. Readback
+preserves every unrelated field, preview, public key, source and business row.
+Redacted values are not claimed as plaintext readback; the new job must prove
+its actual ref/SHA. Receipt: `keyring-cloud-bind-01`.
+
+Actions `44245893967` successfully deploys the qualified source through unchanged
+`E_TRACK_CI`. Worker version `eebb1354-2e8b-485a-b960-2fcd131b4f6a`, Admin
+`02848862-864d-4591-8aea-9a7dd354f027`, Public
+`7c8fc56c-15cb-496c-8396-73f20e758677`. Only 0016 was pending/applied; named
+environment labels, runtime settings, bindings and schedules match the baseline.
+The deployment original is `keyring-logs-19/job-134604641057.log`.
+
+`keyring-cloud-live-01` verifies the real owner, HTML plus nine JS/CSS byte
+identities, three-platform public announcements and feedback schema/list/detail.
+One agent-owned synthetic feedback batch is accepted, its replay is idempotent,
+and a new batch from the same installation receives the intended daily 429.
+Only that synthetic row (ID 1) was marked resolved, with a matching audit event.
+The IP=50 boundary is native-test evidence, not 50 live submissions. Existing
+four channels and 37 delta jobs are unchanged. No browser login, token rotation,
+real user-feedback edit, release promotion, phone operation or formal acceptance.
+
+Remaining: inspect Android/final original-signing delivery, verify immutable
+108 assets and registered candidate, generate the new 107-to-108 delta once,
+and integrate bounded source/records into main. No USB gate is imposed.
+These records remain LOCAL_PENDING at this checkpoint. One malformed helper
+check-dispatch input was rejected with 422 (`keyring-dispatch-08`); the corrected
+`prepare_admin_bundle=false` checks-only dispatch succeeds. This was not a
+Cloudflare credential/deployment failure and did not create a deployment.
+
+### Feedback Development Findings (Historical)
+
+Backend run `44237918164` passes on `fc0f1cd5`: native Worker tests, all browser
+tests and three TypeScript checks. App run `44237750769` has clean analysis and
+passing navigation/service tests, but two feedback widget tests remain red.
+Original logs are preserved under `.cache/app-codec-20261118/keyring-logs-13/14`.
+
+The widget fixture created its serialized edit Future in ordinary `setUp`,
+outside the widget test's FakeAsync zone; pumping widget frames cannot drain
+that real-zone microtask. Construct the service inside the widget test instead,
+then assert both the saved notice and persisted queue through real UI taps.
+Earlier fixes covered controller-triggered rebuilds and bounded pumping for the
+continuously animated atmosphere; neither alone addressed this separate zone
+boundary. Other new service tests already construct their service in the test.
+Keep these three fixture rules together rather than increasing settle timeouts
+or weakening production storage/navigation guards. The correction still needs
+fresh full dual-host CI; it is not a passed package or deployment claim.
+
+Full App run `44239825392` closes the widget-fixture failures on `2842c88b`:
+Linux 927 passed / 16 skipped, Windows 880 passed / 63 skipped, clean analysis,
+plus eight candidate checks on each host. Logs: `keyring-logs-15` in that cache.
+Backend run `44240241632` passed Worker/types and 259 browser cases but exposed
+one intermittent pre-existing announcement-editor failure. It is not ignored.
+The new controlled delayed-frame case in `feedback-ui-05` reproduces a focus
+steal: `startNewAnnouncement` schedules a redundant title focus after
+`selectAnnouncement` already focused synchronously. A delayed callback can move
+focus between the browser driver's focus and text insertion, leaving the body
+empty. Remove only that redundant callback; the regression verifies subsequent
+typing and cancelling Close retain the body. The original CI/local failures
+remain preserved; source-matched full validation must pass before shipping.
+
 ## App Codec Continuation 2026-11-18
 
 Owner: Codex root. The user explicitly requested continued implementation and
