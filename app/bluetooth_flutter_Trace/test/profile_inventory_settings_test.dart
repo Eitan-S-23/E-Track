@@ -185,7 +185,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.ensureVisible(find.byKey(const ValueKey('help-permissions')));
     await tester.tap(find.byKey(const ValueKey('help-permissions')));
-    await tester.pumpAndSettle();
+    await settleSetup(tester);
     expect(Get.currentRoute, '/companion-setup');
     expect(find.text('后台运行与权限'), findsOneWidget);
     expect(find.byKey(const ValueKey('help-permissions'), skipOffstage: false), findsOneWidget);

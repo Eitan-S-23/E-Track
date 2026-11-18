@@ -41,6 +41,8 @@ void main() {
     try {
       await open(tester);
       await tester.enterText(find.byKey(const ValueKey('feedback-text')), 'My first feedback');
+      await tester.pump();
+      expect(tester.widget<FilledButton>(find.byKey(const ValueKey('feedback-submit'))).onPressed, isNotNull);
       await tester.ensureVisible(find.byKey(const ValueKey('feedback-submit')));
       await tester.tap(find.byKey(const ValueKey('feedback-submit'))); await settle(tester);
       expect(service.pending.single['body'], 'My first feedback');
@@ -58,6 +60,8 @@ void main() {
     try {
       await open(tester);
       await tester.enterText(find.byKey(const ValueKey('feedback-text')), 'Unsaved');
+      await tester.pump();
+      expect(tester.widget<PopScope<void>>(find.byType(PopScope<void>)).canPop, isFalse);
       await tester.tap(find.byKey(const ValueKey('detail-back'))); await settle(tester);
       expect(find.textContaining('\u653e\u5f03\u5c1a\u672a\u63d0\u4ea4'), findsOneWidget);
       await tester.tap(find.text('\u53d6\u6d88')); await settle(tester);
@@ -73,6 +77,8 @@ void main() {
       await open(tester, width: 320, scale: 2);
       expect(find.byKey(const ValueKey('detail-back')), findsOneWidget);
       await tester.enterText(find.byKey(const ValueKey('feedback-text')), 'A short issue');
+      await tester.pump();
+      expect(tester.widget<FilledButton>(find.byKey(const ValueKey('feedback-submit'))).onPressed, isNotNull);
       await tester.ensureVisible(find.byKey(const ValueKey('feedback-submit')));
       await tester.tap(find.byKey(const ValueKey('feedback-submit'))); await settle(tester);
       expect(service.pending, hasLength(1)); expect(tester.takeException(), isNull);
