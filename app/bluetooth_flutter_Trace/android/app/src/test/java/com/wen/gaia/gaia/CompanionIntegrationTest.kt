@@ -181,10 +181,10 @@ class CompanionIntegrationTest {
         assertEquals(0, CompanionEngineBoundary.created)
     }
 
-    @Test fun launcherAndApplicationResolveTheSameExplicitBrandedIcon() {
+    @Test @Config(sdk = [26, 31, 33, 34]) fun launcherAndApplicationResolveTheSameExplicitBrandedIcon() {
         val info = app.packageManager.getActivityInfo(ComponentName(app, MainActivity::class.java), 0)
-        assertEquals(R.mipmap.e_track_launcher, app.applicationInfo.icon)
-        assertEquals(R.mipmap.e_track_launcher, info.icon)
+        assertEquals(R.mipmap.launcher_e_track, app.applicationInfo.icon)
+        assertEquals(R.mipmap.launcher_e_track, info.icon)
         assertNotEquals(R.mipmap.ic_launcher, info.icon)
         assertNotNull(app.packageManager.getApplicationIcon(app.packageName))
         assertNotNull(app.packageManager.getActivityIcon(ComponentName(app, MainActivity::class.java)))
