@@ -111,6 +111,15 @@ jobs:
             fi
           fi
 
+          # A versioned main push is built once through the original signing route.
+          if [[ "${GITHUB_REPOSITORY}" == "Eitan-S-23/E-Track" && "${EVENT_NAME}" == "push" && "${REF_NAME}" == "refs/heads/main" && -n "${base_sha:-}" ]]; then
+            app_candidate_required="$(node .github/scripts/original-admin-candidate.mjs app-candidate-needed "${base_sha}" "${CURRENT_SHA}")"
+            if [[ "${app_candidate_required}" == "true" ]]; then
+              app_build_required=false
+              echo "Original Admin Candidates owns this versioned App build and candidate delivery."
+            fi
+          fi
+
           echo "docs_changed=${docs_changed}" >> "$GITHUB_OUTPUT"
           echo "app_build_required=${app_build_required}" >> "$GITHUB_OUTPUT"
 

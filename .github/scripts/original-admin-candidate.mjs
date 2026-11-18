@@ -6,9 +6,10 @@ import { createHash } from "node:crypto";
 import { CliError, failure, outputPath, projectRoot, writeOutput } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-cli.mjs";
 import { versionCodeFor } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-schema.mjs";
 
-export const CANDIDATE_BRANCH = "release/candidates";
+export const CANDIDATE_BRANCH = "main";
+export const ORIGINAL_APP_WORKFLOW_BRANCH = "release/candidates";
 export const FIRMWARE_CANDIDATE_BRANCH = "main";
-export const INTEGRATED_SOURCE = "34495140d28ce401616cc19b6b62bb6bba1d764c";
+export const INTEGRATED_SOURCE = "a377846c1dbf966ca3f03a46872f905eb28b87a4";
 export const APP_PUBSPEC = "app/bluetooth_flutter_Trace/pubspec.yaml";
 export const RELEASE_CONFIG = "Tools/ota/original-admin-release.json";
 const sha = value => /^[0-9a-f]{40}$/.test(value ?? "");
@@ -45,23 +46,32 @@ export function releaseConfig(value) {
   return { ...value.firmware, versionCode: versionCodeFor(value.firmware.versionName) };
 }
 
+export function appCandidateRequired(beforeText, afterText) {
+  const before = appVersion(beforeText), after = appVersion(afterText);
+  const previousParts = before.versionName.split(".").map(Number);
+  const parts = after.versionName.split(".").map(Number);
+  const difference = parts.findIndex((part, i) => part !== previousParts[i]);
+  const nameAdvanced = difference >= 0 && parts[difference] > previousParts[difference];
+  if (after.versionCode < before.versionCode || after.versionCode < 102
+      || (difference >= 0 && !nameAdvanced)) throw new CliError("Candidate versions must never move backward");
+  const required = after.versionCode !== before.versionCode || after.versionName !== before.versionName;
+  if (required && (after.versionCode <= before.versionCode || !nameAdvanced)) {
+    throw new CliError("App release: increment both pubspec version name and code; existing APKs are immutable");
+  }
+  return required;
+}
+
 export function candidatePlan({ changed, beforeApp, afterApp, beforeFirmware, afterFirmware, source, component = "both" }) {
   if (!sha(source)) throw new CliError("Exact candidate source required");
   if (!["app", "firmware", "both"].includes(component)) throw new CliError("Unknown candidate component");
-  const app = appVersion(afterApp), previousApp = appVersion(beforeApp);
+  const app = appVersion(afterApp), appVersionChanged = appCandidateRequired(beforeApp, afterApp);
   const firmware = releaseConfig(afterFirmware), previousFirmware = releaseConfig(beforeFirmware);
-  const appChanged = changed.some(name => /^app\/bluetooth_flutter_Trace\/(?:pubspec\.(?:yaml|lock)$|analysis_options\.yaml$|lib\/|android\/|windows\/|assets\/|third_party\/|test\/)/.test(name)
-    || name === "Tools/flutter/ota_link_profile.py");
   const firmwareChanged = changed.some(name => /^(?:USER|ArduinoAPI|Libraries|MDK-ARM_F435|boot|cmake|vendor|bsdiff_lzma_AES128-main|segger_rtt)\//.test(name));
-  if (app.versionCode < previousApp.versionCode || app.versionCode < 102
-      || firmware.versionCode < previousFirmware.versionCode || firmware.versionCode < 30324) {
+  if (firmware.versionCode < previousFirmware.versionCode || firmware.versionCode < 30324) {
     throw new CliError("Candidate versions must never move backward");
   }
-  const appRequired = component !== "firmware" && (appChanged || app.versionCode !== previousApp.versionCode || app.versionName !== previousApp.versionName);
+  const appRequired = component !== "firmware" && appVersionChanged;
   const firmwareRequired = component !== "app" && (firmwareChanged || firmware.versionCode !== previousFirmware.versionCode);
-  if (appRequired && (app.versionCode <= previousApp.versionCode || app.versionName === previousApp.versionName)) {
-    throw new CliError("App changed: increment both pubspec version name and code; existing APKs are immutable");
-  }
   if (firmwareRequired && firmware.versionCode <= previousFirmware.versionCode) {
     throw new CliError("Firmware changed: increment Tools/ota/original-admin-release.json firmware.versionName");
   }
@@ -70,21 +80,17 @@ export function candidatePlan({ changed, beforeApp, afterApp, beforeFirmware, af
 }
 
 export async function planFromCheckout(root, env = process.env) {
-  const firmwareMain = env.GITHUB_REF === `refs/heads/${FIRMWARE_CANDIDATE_BRANCH}`;
-  (firmwareMain ? automaticFirmwareCandidateAdmission : automaticCandidateAdmission)(env);
+  automaticCandidateAdmission(env);
   if (git(root, ["rev-parse", "HEAD"]) !== env.GITHUB_SHA) throw new CliError("Checkout differs from push source");
-  if (!firmwareMain) git(root, ["merge-base", "--is-ancestor", INTEGRATED_SOURCE, env.GITHUB_SHA]);
-  if (firmwareMain && /^0{40}$/.test(env.BEFORE_SHA ?? "")) throw new CliError("Main firmware requires an existing versioned baseline");
-  const before = /^0{40}$/.test(env.BEFORE_SHA ?? "") ? INTEGRATED_SOURCE : env.BEFORE_SHA;
+  if (/^0{40}$/.test(env.BEFORE_SHA ?? "")) throw new CliError("Main candidates require an existing versioned baseline");
+  const before = env.BEFORE_SHA;
   if (!sha(before)) throw new CliError("Push before-SHA is required; do not guess a comparison base");
   git(root, ["merge-base", "--is-ancestor", before, env.GITHUB_SHA]);
   const afterFirmware = JSON.parse(await readFile(path.join(root, RELEASE_CONFIG)));
-  const beforeFirmware = before === INTEGRATED_SOURCE
-    ? { schema: "original-admin-automatic-candidates-v1", firmware: { versionName: "3.3.24", releaseNotes: "Already delivered" } }
-    : JSON.parse(git(root, ["show", `${before}:${RELEASE_CONFIG}`]));
+  const beforeFirmware = JSON.parse(git(root, ["show", `${before}:${RELEASE_CONFIG}`]));
   return candidatePlan({ changed: git(root, ["diff", "--name-only", "--no-renames", before, env.GITHUB_SHA, "--"]).split(/\r?\n/),
     beforeApp: git(root, ["show", `${before}:${APP_PUBSPEC}`]), afterApp: await readFile(path.join(root, APP_PUBSPEC), "utf8"),
-    beforeFirmware, afterFirmware, source: env.GITHUB_SHA, component: firmwareMain ? "firmware" : "app" });
+    beforeFirmware, afterFirmware, source: env.GITHUB_SHA });
 }
 
 export async function githubJson(route, token, { method = "GET", body, fetcher = fetch } = {}) {
@@ -102,19 +108,19 @@ export async function dispatchApp(plan, env, request = githubJson) {
       || plan.app.versionCode <= 102 || !env.ORIGINAL_ADMIN_ACTIONS_TOKEN) throw new CliError("New App candidate and existing dispatcher credential required");
   const name = `candidate:${plan.source}:${env.GITHUB_RUN_ID}`;
   const route = "Eitan-S-23/Trace/actions/workflows/build.yml";
-  const runs = await request(`${route}/runs?branch=${CANDIDATE_BRANCH}&event=workflow_dispatch&per_page=100`, env.ORIGINAL_ADMIN_ACTIONS_TOKEN);
+  const runs = await request(`${route}/runs?branch=${ORIGINAL_APP_WORKFLOW_BRANCH}&event=workflow_dispatch&per_page=100`, env.ORIGINAL_ADMIN_ACTIONS_TOKEN);
   if (runs.workflow_runs.some(run => run.display_title === name)) throw new CliError("Candidate request already exists; do not dispatch twice");
-  const ref = await request(`Eitan-S-23/Trace/git/ref/heads/${CANDIDATE_BRANCH}`, env.ORIGINAL_ADMIN_ACTIONS_TOKEN);
+  const ref = await request(`Eitan-S-23/Trace/git/ref/heads/${ORIGINAL_APP_WORKFLOW_BRANCH}`, env.ORIGINAL_ADMIN_ACTIONS_TOKEN);
   if (!sha(ref.object?.sha)) throw new CliError("Original App workflow identity is unavailable");
   await request(`${route}/dispatches`, env.ORIGINAL_ADMIN_ACTIONS_TOKEN, { method: "POST", body: {
-    ref: CANDIDATE_BRANCH, inputs: { source_sha: plan.source, source_run: env.GITHUB_RUN_ID, check_only: "false" } } });
+    ref: ORIGINAL_APP_WORKFLOW_BRANCH, inputs: { source_sha: plan.source, source_run: env.GITHUB_RUN_ID, check_only: "false" } } });
   return { source: plan.source, workflowCommit: ref.object.sha, request: name, accepted: true, completed: false, channelPublished: false };
 }
 
 async function observeApp(receipt, env) {
   const end = Date.now() + 90 * 60 * 1000;
   while (Date.now() < end) {
-    const value = await githubJson(`Eitan-S-23/Trace/actions/workflows/build.yml/runs?branch=${CANDIDATE_BRANCH}&event=workflow_dispatch&per_page=100`, env.ORIGINAL_ADMIN_ACTIONS_TOKEN);
+    const value = await githubJson(`Eitan-S-23/Trace/actions/workflows/build.yml/runs?branch=${ORIGINAL_APP_WORKFLOW_BRANCH}&event=workflow_dispatch&per_page=100`, env.ORIGINAL_ADMIN_ACTIONS_TOKEN);
     const matches = value.workflow_runs.filter(run => run.display_title === receipt.request);
     if (matches.length > 1) throw new CliError("Ambiguous duplicate candidate runs");
     const run = matches[0];
@@ -154,9 +160,15 @@ async function freshFirmwareSource(root, out, env) {
 }
 
 async function main() {
-  const [action] = process.argv.slice(2), root = projectRoot();
+  const [action, before, after] = process.argv.slice(2), root = projectRoot();
   const out = outputPath(root, ".cache/original-admin-candidate/run");
-  if (action === "plan") {
+  if (action === "app-candidate-needed") {
+    if (!sha(before) || !sha(after) || git(root, ["rev-parse", "HEAD"]) !== after) {
+      throw new CliError("Exact before/current checkout commits required");
+    }
+    process.stdout.write(String(appCandidateRequired(git(root, ["show", `${before}:${APP_PUBSPEC}`]),
+      git(root, ["show", `${after}:${APP_PUBSPEC}`]))) + "\n");
+  } else if (action === "plan") {
     const plan = await planFromCheckout(root);
     await writeOutput(root, path.join(out, "plan.json"), JSON.stringify(plan, null, 2) + "\n");
     if (process.env.GITHUB_OUTPUT) await appendFile(process.env.GITHUB_OUTPUT,
@@ -170,6 +182,6 @@ async function main() {
     await writeOutput(root, path.join(out, "app-complete.json"), JSON.stringify(complete) + "\n");
     process.stdout.write(JSON.stringify(complete) + "\n");
   } else if (action === "firmware-source") await freshFirmwareSource(root, out, process.env);
-  else throw new CliError("Expected plan, dispatch-app or firmware-source");
+  else throw new CliError("Expected plan, app-candidate-needed, dispatch-app or firmware-source");
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) main().catch(failure);

@@ -2,7 +2,7 @@ name: Original Admin Candidates
 run-name: Original Admin candidates from ${{ github.sha }}
 on:
   push:
-    branches: [main, release/candidates]
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
@@ -68,11 +68,11 @@ jobs:
         run: node .github/scripts/original-admin-candidate.mjs plan
       - name: Explain checks-only invocation
         if: github.event_name == 'workflow_dispatch'
-        run: echo "Checks only. New versioned main pushes create firmware candidates; release/candidates pushes create App candidates."
+        run: echo "Checks only. Versioned main pushes create the independently selected App and firmware candidates."
 
   app:
     needs: checks
-    if: github.ref == 'refs/heads/release/candidates' && needs.checks.outputs.app == 'true'
+    if: github.ref == 'refs/heads/main' && needs.checks.outputs.app == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 95
     steps:

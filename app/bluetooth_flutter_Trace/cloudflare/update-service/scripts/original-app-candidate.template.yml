@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       source_sha:
-        description: Exact integrated E-Track source on release/candidates
+        description: Exact integrated E-Track source on main
         type: string
         required: true
       source_run:
@@ -61,9 +61,9 @@ jobs:
               ||!/^[0-9a-f]{40}$/.test(source)||!/^[1-9][0-9]*$/.test(process.env.SOURCE_RUN)
               ||process.env.GITHUB_RUN_ATTEMPT!=='1') throw new Error('Unexpected candidate owner or request');
             const common={owner:'Eitan-S-23',repo:'E-Track'};
-            for(const [base,head] of [['34495140d28ce401616cc19b6b62bb6bba1d764c',source],[source,'release/candidates']]) {
+            for(const [base,head] of [['a377846c1dbf966ca3f03a46872f905eb28b87a4',source],[source,'main']]) {
               const {data}=await github.rest.repos.compareCommitsWithBasehead({...common,basehead:`${base}...${head}`});
-              if(!['identical','ahead'].includes(data.status)) throw new Error('Source is not integrated history on the candidate branch');
+              if(!['identical','ahead'].includes(data.status)) throw new Error('Source is not integrated history on main');
             }
             const {data:file}=await github.rest.repos.getContent({...common,path:'app/bluetooth_flutter_Trace/pubspec.yaml',ref:source});
             const text=Buffer.from(file.content,'base64').toString('utf8');
@@ -79,7 +79,7 @@ jobs:
             if(!checks) {
               if(Number(code)<=102) throw new Error('Already delivered App version must not be rebuilt');
               const {data:run}=await github.rest.actions.getWorkflowRun({...common,run_id:Number(process.env.SOURCE_RUN)});
-              if(run.event!=='push'||run.head_branch!=='release/candidates'||run.head_sha!==source
+              if(run.event!=='push'||run.head_branch!=='main'||run.head_sha!==source
                 ||run.path!=='.github/workflows/original-admin-candidate.yml') throw new Error('Originating push run mismatch');
               // The by-tag API omits unpublished drafts. List them to preserve reservations.
               const releases=await github.paginate(github.rest.repos.listReleases,{...context.repo,per_page:100});

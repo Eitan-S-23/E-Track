@@ -17,12 +17,12 @@ project. Keil ARM Compiler 5 remains an auxiliary path for local hardware
 debugging, toolchain comparison, and compatibility checks. Agents must not
 promote AC5 artifacts to OTA or CI release artifacts.
 
-### MCU Main And Automatic Candidates
+### Main And Automatic Candidates
 
-- `main` is the authoritative MCU source and automatic firmware candidate branch.
-  Start MCU work from current main, directly or in a task branch. Integrate the
-  bounded changes back to main before the final delivery push; do not copy MCU
-  changes to the App's `release/candidates` branch to obtain a build.
+- `main` is the authoritative App/MCU source and automatic candidate branch.
+  Start work from current main, directly or in a task branch. Integrate the
+  bounded changes back to main before the final delivery push; do not copy
+  changes to E-Track's historical `release/candidates` branch to obtain a build.
 - A new MCU delivery must increment `firmware.versionName` and update release
   notes in `Tools/ota/original-admin-release.json`. A main push runs
   `original-admin-candidate.yml`, builds the exact versioned GCC source and
@@ -32,13 +32,18 @@ promote AC5 artifacts to OTA or CI release artifacts.
   Existing keys, `OTA_BOOT_CHAIN_READY=false`, protected rehearsal/production
   routes and manual Stable/Beta publication remain unchanged. Documentation or
   workflow-only pushes do not rebuild an already delivered version.
-- App delivery remains `release/candidates` -> original Trace signing. Main
-  cannot dispatch App packages, and the App delivery branch cannot build MCU
-  candidates. See `docs/original-admin-candidates.md` for the shared workflow.
+- App delivery also starts from main. Increment both version name and code in
+  `app/bluetooth_flutter_Trace/pubspec.yaml` to request an original-signed App
+  candidate. Ordinary App edits without a version change run verification only.
+  Trace's existing `release/candidates` workflow remains the signing executor,
+  but accepts exact E-Track main source and its originating main push only.
+  Existing keys and manual channel publication are unchanged. App and firmware
+  versions select their jobs independently; versioned App pushes skip the
+  duplicate ordinary APK/EXE build. See `docs/original-admin-candidates.md`.
 - This procedure does not grant general agent commit/push authority. When the
   user reserves the final push, prepare the main commit and provide
   `git push origin main` without executing it. Do not rebuild the existing
-  3.3.30 candidate solely to validate this migration.
+  3.3.34 firmware candidate solely to validate this App migration.
 
 ## Project-Wide Agent Workflow
 

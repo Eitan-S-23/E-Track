@@ -1,5 +1,319 @@
 # APP-COMPANION-01 Implementation Record
 
+## App Main Candidate Migration And 1.0.83, 2026-11-19
+
+The owner authorized migration of the App candidate entry to main, integration
+of the validated repairs and the final main push. They explicitly retain the
+subsequent backend publication/delta and phone operations. No manual package
+dispatch, channel change or device action is part of this delivery.
+
+This integration preserves the commits of validated App source
+`ab0ef2c589a07b04776e3483c7bf9b7af9407efd`, including immediate guarded boot
+recovery, independent branded launcher resources and reconnected-device name/
+capability restoration. Its development evidence remains run `44406058730`:
+Linux 941/16 and Windows 892/65 passed/skipped, both analysis/candidate checks,
+84/84 native checks and the verified debug APK. Only the shipping version changes
+to `1.0.83+109`; a fresh original-signed APK/EXE build remains the automatic
+pipeline's responsibility, not an inferred result from the debug package.
+
+The main push now independently selects an App candidate when both App version
+name and code increase. Ordinary App edits with unchanged version remain normal
+verification commits. Invalid/backward/partially reused versions fail. The same
+version predicate lets the ordinary build workflow skip a duplicate APK/EXE
+build only for versioned E-Track main pushes. MCU `3.3.34`, its explicit version
+rule, protected environments, keys and publication gates are unchanged.
+
+Trace's signing executor stays on its existing `release/candidates` workflow;
+current App source is no longer delivered through E-Track's branch of that name.
+Only the source description, trusted baseline, main-history membership and
+originating source-run branch checks changed. The remote workflow update is
+`12ff41fc11eb4920ab32d69ae0f7e1cc095f996e`, replacing `8797520045ddedbdcff9c7fe66a83c7a36882256`.
+The API readback and commit comparison confirm that only `.github/workflows/build.yml`
+changed. No signing/backend Secret or existing draft/release was changed.
+
+The old App delivery ancestor `34495140` is not an ancestor of current main.
+Instead of deleting the history check or merging unrelated history, the new
+guard pins the freshly verified pre-migration main
+`a377846c1dbf966ca3f03a46872f905eb28b87a4`. Its entire App tree equals original-signed
+1.0.82 source `a977c848e03a2798a7b5c46319cd126a292395b4`, tree
+`b8be80cfd70dc9d05e4905821b4aae81dd8a1fa8`. The obsolete synthetic firmware
+baseline fallback was removed; the planner reads the actual before-commit's
+firmware version and must not rebuild already delivered MCU 3.3.34.
+
+Evidence is under `.cache/app-main-20261119/`: `source-baseline.json`,
+`keyring-inspect-01`, `keyring-integrate-01`, `keyring-trace-01` and
+`host-tests-02`. Final host regression passes 65 workflow/planner/admission cases
+and eight original-App identity cases. Tests include real temporary Git checkouts,
+the actual read-only build selector, both-component selection, ordinary App
+commits, rejected legacy branches, wrong history and retained immutable-draft
+continuation. All three affected workflow YAML files parse successfully.
+
+The shared workflow guide, agent entries and board are delivered with this
+integration; older LOCAL_PENDING checkpoints below are superseded only for main
+source delivery. Original-signed build completion, candidate ingestion, channel
+publication and actual phone startup/icon/display validation remain separate.
+At this integration checkpoint the automatic build/ingestion result is not yet
+confirmed. Follow the push's `Original Admin Candidates` run; the owner requested
+handoff after the push rather than an agent-driven publication or installation.
+
+## Android Boot And Desktop Icon Repair, 2026-11-19
+
+The owner reported no prompt recovery after a phone reboot and the Flutter
+template icon on the home-screen launcher. They subsequently clarified that
+the recent-tasks icon is normal; no screenshot is required to restate that
+observation. This is separate from the completed MCU 3.3.34 publication below.
+
+The first observation is read-only, without starting an Activity/service,
+sending a boot broadcast, reinstalling an APK, resetting the phone or operating
+the MCU. Original evidence is `.cache/app-boot-icon-20261119/inspect-01/`.
+It binds Vivo V2312A, Android API 33, original App 1.0.82/108 and the installed
+48684713-byte APK SHA-256
+`8567bf5b93294b7df46247ba7bf23a8eb8b1d64128731ae6ae017b1acc441a65`.
+Bluetooth/notification/boot permissions and the battery exemption are present.
+The phone had been up about 759 seconds. JobScheduler records job 2412 running
+at 03:40:57 local time; the companion foreground service was created then,
+during collection, not by an agent launch command. Earlier boot-delivery detail
+was not present in the retained bounded log and is not fabricated.
+
+BOOT-01: the existing receiver calls `restore`, which recreates the persisted
+15-minute recovery and periodic-check jobs but never immediately requests the
+background runtime. The repair adds immediate guarded startup after boot or
+package replacement. Transient Bluetooth initialization gets a non-persisted
+five-second-minimum retry job with a fixed two-minute elapsed-time deadline;
+system scheduling is not a real-time guarantee. Disabled/missing association,
+denied permissions and a healthy existing runtime do not create duplicate
+owners. Periodic fallback, pending checks and actual runtime acknowledgment
+remain intact. Native logs name the system event/result, not device addresses.
+
+ICON-01: the exact installed APK was read back, then parsed with Google's aapt2
+without building or repacking it. Its legacy PNG, adaptive foreground and
+Android 13 monochrome binding all contain/reference E-Track artwork. The home
+screen's Flutter icon is therefore inconsistent with those installed resources;
+the precise OEM cache/theme writer is not proved. The repair declares an explicit
+branded launcher resource for Application, MainActivity and roundIcon while
+preserving the package/component names, artwork and user data. Physical launcher
+refresh and reboot persistence still need the updated installed package; this
+entry does not claim that changing XML alone repaired the phone.
+
+Implementation is on owned sparse worktree `.worktrees/app-boot-icon-20261119`,
+branch `dev/flutter/app-boot-icon-20261119`, source
+`0efd19aa2cd17c241e94c8a4056e3fb335e47119`. Five scoped Android files are pushed.
+The push skips duplicate checks in favor of one explicit full/native dispatch:
+[44387264148](https://github.com/Eitan-S-23/E-Track/actions/runs/44387264148),
+both hosts, `build_apk=true`, `device_ota_native_tests=true`, debug-only suffix
+`.bootcheck`. The new tests exercise actual receiver/job/service orchestration,
+cold headless startup, radio delay/deadline/disable, permission denial, duplicate
+ownership and manifest icon resolution. At this checkpoint CI is RUNNING;
+release APK/EXE verification, main integration and installation are NOT_RUN.
+
+The owner has been asked for bounded original-signed App build/install authority,
+preserving data and permissions, and whether they will perform the final phone
+reboot. No new original-signed release or device mutation precedes that answer.
+The proposed physical check is one installed candidate, then one reboot after
+baseline collection, followed by startup/service/BLE and home-screen icon checks.
+Do not clear launcher/App data, replace the launcher component, uninstall the
+normal App, retest the completed MCU OTA or infer whole-card D0-D5/C1-C6 acceptance.
+
+### Native Validation And Icon Resource Correction
+
+The first run `44387264148` completed with Windows success and Linux failure.
+Both hosts passed analysis and their full Dart tests: Linux 927 passed/16 skipped,
+Windows 880 passed/63 skipped; each also passed eight candidate tests. Flutter
+was 3.47.9 (`c197ca5199e9ee5661e865596c9c07294dfab51c`), Dart 3.13.7. Debug APK
+compilation passed, but native failure correctly blocked verification/collection.
+
+The original JUnit reports in `keyring-artifacts-01/extracted/` show 83 native
+tests, 80 passing and three icon assertion failures. All new boot/radio/deadline/
+permission cases passed. `CompanionServiceTest` is 9/9 and `DeviceOtaServiceTest`
+18/18. On API 26/31/34, Android resolved the new icon alias to the underlying
+resource ID rather than the independently expected launcher ID. This is a real
+limitation of the initial icon approach, not evidence that the phone's OEM cache
+has been inspected. The assertions are retained rather than changed to accept
+the alias collapse.
+
+Source `82c56986ad71a7dabdd14693baccfdd676f99b31` replaces that approach with
+independent `launcher_e_track` adaptive XML resources for Android 8+ and 13+,
+retaining the original artwork and a legacy fallback. Application, roundIcon
+and MainActivity reference the same distinct resource. The icon test now also
+executes on the actual phone's API 33. Startup implementation is unchanged.
+The changed-input full/native validation is
+[44390811240](https://github.com/Eitan-S-23/E-Track/actions/runs/44390811240),
+RUNNING at this checkpoint. This remains development-only; no App installation,
+phone reboot or release APK/EXE invocation has occurred.
+
+Retained first-run Linux log artifact `14466744168` is 342194 bytes with ZIP
+SHA-256 `4c5859b22d9147a463fa6c382a75abeb46c8c914224da3b1fd1e2e00639d38b1`,
+matching GitHub metadata. Original console logs are in `keyring-logs-01`.
+
+### Compiled Drawable Validation
+
+The second run `44390811240` completed with Windows success and Linux failure.
+Analysis and full Dart tests still pass; debug compilation passes. The original
+native reports contain 84 tests, 80 passing and four failures at the subsequent
+`getApplicationIcon` non-null assertion, not at the manifest/resource-ID checks.
+All four API 26/31/33/34 bindings now resolve the distinct branded resource.
+The startup tests remain passing. APK verification/collection is correctly
+NOT_RUN after the native failure.
+
+This failure is a test-boundary defect: the pinned Robolectric 4.14.1
+[`ShadowApplicationPackageManager`](https://github.com/robolectric/robolectric/blob/robolectric-4.14.1/shadows/framework/src/main/java/org/robolectric/shadows/ShadowApplicationPackageManager.java#L1286)
+implements `getApplicationIcon(String)` as `applicationIcons.get(packageName)`.
+That is an uninjected stub map, not the installed/compiled resource loader.
+Do not fill the map with a fabricated passing icon or reinterpret this failure
+as an observed OEM launcher defect.
+
+Source `4d82427ccce91662642f5b8c0894588b3fe74cf3` keeps every resource-ID and
+old-ID rejection assertion. It loads the actual compiled resource through
+`Resources.getDrawable`, requiring an adaptive icon, foreground/background and
+the API 33+ monochrome layer. Production inputs are unchanged from `82c56986`.
+The full two-host/native debug run is
+[44393287786](https://github.com/Eitan-S-23/E-Track/actions/runs/44393287786),
+RUNNING at this checkpoint. This is a changed-test-input validation, not a blind
+retry or an installation/release claim.
+
+Second-run originals are in `keyring-logs-02` and `keyring-artifacts-02/extracted`
+under `.cache/app-boot-icon-20261119/`. The Linux archive is artifact
+`14468947052`, 319197 bytes, ZIP SHA-256
+`b9bc59e79fe02f863845b33506459592b1e9fd91fb675dc50deba7b04d95fcb7`, verified
+against GitHub metadata. The existing bounded collector is extended only to
+retain the exact successful run's debug APK and validate its source, suffix,
+development-only classification, length and both archive/APK digests before
+offline resource inspection. It performs no device operation or local build.
+
+### Development Validation Passed
+
+Run `44393287786/1` on `4d82427ccce91662642f5b8c0894588b3fe74cf3` completed
+successfully on both hosts. Original console logs are `keyring-logs-03`; original
+Linux logs and JUnit reports are `keyring-artifacts-03/extracted` under the same
+task evidence root. Flutter/Dart revisions match those recorded above.
+
+| Executed Check | Result |
+| --- | --- |
+| Linux analysis/full Dart tests/candidate tests | PASS; 927 passed, 16 skipped; 8 candidate tests passed |
+| Windows analysis/full Dart tests/candidate tests | PASS; 880 passed, 63 skipped; 8 candidate tests passed |
+| CompanionIntegrationTest | 57/57, including actual receiver/job/service paths and all four icon API variants |
+| CompanionServiceTest / DeviceOtaServiceTest | 9/9 and 18/18; total native 84/84, zero skips/errors/failures |
+| Linux debug APK build/verification/collection/upload | PASS; not an original-signed release or EXE build |
+
+The retained Linux archive is artifact `14470105335`, 346537 bytes, SHA-256
+`a7fabaf51ddcfaf673536ff9e466b8d9c39b9cf58160f55b5716f1377cce4aee`.
+Debug archive `14470425126` is 76244553 bytes, SHA-256
+`db64939efe264aab7c50e817891c3437483be07765fc1be7ce6a051486c1d8a4`.
+Both match GitHub's archive digests. Its actual APK is 132538720 bytes, SHA-256
+`e6c8d31a1ac549515d6c06832823a17a14cce1d6b233e7f22af9720d230cbf1a`, package
+`com.wen.gaia.gaia.bootcheck`. The fixed development signer is not the installed
+original App signer; this APK is retained for inspection, not installed.
+
+`compiled-icon-01/result.json` records read-only aapt2 inspection of that actual
+APK. Application, MainActivity and roundIcon reference new resource
+`0x7f0c0002`, distinct from legacy `0x7f0c0000`. Both Android 8+ and Android 13+
+adaptive XMLs resolve the original foreground/background, with the 13+ monochrome
+layer intact. Raw PNG file bytes differ between release/debug packaging; the
+initial byte-comparison failure is retained, not hidden. The existing Playwright
+PNG decoder then confirms identical dimensions and RGBA pixels for all ten
+legacy/foreground density images in `compiled-icon-01/artwork-pixels.json`.
+No new image dependency, local build or old APK rebuild was needed.
+
+Product source remains on the clean development branch, pending main integration.
+The board and this note remain local uncommitted main edits. Original-signed
+APK/EXE delivery, installation, real post-reboot startup time and desktop-icon
+persistence remain NOT_RUN, pending the owner's build/install/reboot decision.
+No Activity/service start, boot broadcast, installation, phone reboot, App/launcher
+data clearing, MCU operation or channel publication occurred in this repair.
+The selected-output inventory/closure audit is `write-audit-01.json` in the task
+evidence root. The inherited PowerShell-cache timestamp observation remains
+attribution-unresolved; no cleanup or whole-OS zero-write claim is made.
+
+### Reconnected Device Metadata Follow-Up
+
+The owner additionally reported that automatic reconnection after an MCU/phone
+restart works, including updates, while the device name becomes unknown and
+details incorrectly claim that the device only broadcasts. No new physical
+experiment is needed to reproduce the source-level display contradiction.
+
+METADATA-01: `BleController.isConnectable` treated a missing scan result as
+`false`. Direct address-based reconnection does not require a scan, so this is
+not evidence of an unsupported device. Name lookup also depended exclusively on
+this process's advertisement/platform-name caches. Both detail pages captured
+some display values outside reactive observers.
+
+The repair on `dev/flutter/app-boot-icon-20261119` adds bounded, local-only
+connected-device name history. It retains at most 64 previously connected
+identities, normalizes address lookup and merges delayed restoration without
+overwriting a newer name or erasing an older name on a nameless reconnect.
+Android's existing `FlutterBluePlus.systemDevices([])` query hydrates names only
+for this App's already-connected addresses. It does not scan, connect, discover
+services or adopt another App's connections. The locked 1.35.5 API was checked
+against the official package archive and lockfile SHA-256 in `metadata-api-01`.
+Storage/native waits are bounded; metadata is never live GATT/OTA authority.
+
+Display connectability now prefers the current App connection, then an explicit
+advertisement flag, then a prior successful connection; otherwise it is unknown.
+Unknown is not described as broadcast-only. Both real detail pages and the two
+device-card widgets observe metadata changes without replacing the device handle.
+
+First metadata source `c66fb9ff64ef7e0a53be9783ca38fdaaa943b381` failed run
+`44402690231/1`: Windows 880 passed/63 skipped/1 failed; Linux 923 passed/16
+skipped/5 failed. The new test file could not load because `Get.reset()` returns
+void. Analyzer also found a protected `RxMap.value` access and a super-parameter
+lint. The Linux originals additionally exposed four existing OTA-test timeouts:
+an unavailable native `platformName` read escaped the new metadata refresh and
+made a successful reconnect return false. These are retained failures, not PASS
+or an unexplained flaky run. Original consoles are `keyring-logs-06`; the Linux
+archive `keyring-artifacts-04` has artifact ID `14472688593`, 304270 bytes and
+verified SHA-256 `da674fe659b918391c997ecd0fa00c1228f24c20d497605b2c854821792e429c`.
+
+Source `53213d5ba2f8945667023fe09da28eea0669f850` fixes those three static issues
+and isolates optional platform-name lookup failure from connection results. A
+new regression drives the real companion connection while native metadata fails;
+the existing OTA tests are unchanged. Fourteen new unit/widget scenarios cover
+persistence, races, capacity/corruption, storage/native failure, truthful
+connectability, address matching, foreign-connection exclusion, late completion,
+real companion connection and reactive real UI paths.
+
+Run `44404940589/1` passed analysis and the prior OTA regressions on both hosts.
+Linux recorded 940 passed/16 skipped/1 failed and Windows 891 passed/65 skipped/
+1 failed. The only remaining failure was widget-test teardown: the real detail
+page's existing `flutter_animate` delayed entry timers had not fired yet.
+All name/capability assertions executed; `pumpAndSettle` alone can stop while a
+future animation delay has no scheduled frame. `keyring-logs-09` and
+`keyring-artifacts-05` preserve the originals. No production animation or assertion
+was removed. Source `ab0ef2c589a07b04776e3483c7bf9b7af9407efd` changes only the
+test wait: first build the changed tree, advance beyond the existing entry delay,
+then settle its actual frames. Full/native debug run
+[44406058730](https://github.com/Eitan-S-23/E-Track/actions/runs/44406058730)
+completed successfully on both hosts. Linux passed 941 tests with 16 platform
+skips; Windows passed 892 with 65 skips. Both passed analysis and eight candidate
+tests. The two new mobile-only connection cases are skipped only on Windows.
+The compiled native JUnit reports pass 57 CompanionIntegration, 9 CompanionService
+and 18 DeviceOtaService tests: 84/84, zero skips/errors/failures. SDK identity is
+unchanged from the earlier successful boot/icon run (Flutter 3.47.9, Dart 3.13.7).
+
+Final original consoles are `keyring-logs-12`. Linux archive
+`keyring-artifacts-06`, artifact `14476106317`, is 343922 bytes with verified
+SHA-256 `4345bd4f1d82ace507743a283626bd1226cfa1e5b4619c7c88242c4bcee6b203`.
+The debug archive `keyring-apk-02`, artifact `14476491083`, is 76248267 bytes,
+SHA-256 `8640c35cae0f7db9e1640b47b871eb157d2e6e641fb949ad5240b903a7759e11`.
+Its extracted APK is 132544296 bytes, SHA-256
+`74bd8b90071b054dc4cf0517d2e78799ffe4d1c6b7d105d5de12c1aeb5b1460a`, package
+`com.wen.gaia.gaia.bootcheck`, fixed development signing, not original release
+signing. Archive digests match GitHub, and the extracted APK matches its CI
+metadata. The actual extraction path is retained in `keyring-apk-02/apk-paths.json`.
+No local Flutter/Gradle build, installation or replacement of the normal App ran.
+Android inputs are byte-unchanged from `4d82427c`; earlier compiled-icon/artwork
+checks are reused alongside this run's actual compiled-resource native tests.
+
+Cross-layer lesson: absent discovery metadata is not negative capability, and
+display-history retrieval must not be on the transport success/failure path.
+Regression coverage exercises the real connection plus both real detail pages,
+not only a standalone formatter. The earlier boot/icon source and green evidence
+remain intact. Main integration, original-signed APK/EXE, installation and real
+post-restart display verification remain pending. This follow-up performs no
+phone launch, installation, reboot, boot broadcast, MCU operation or publication.
+The selected-output/source/CI/APK audit is `write-audit-02.json` under the same
+evidence root. Main board and this note remain local pending records, not a
+mainline commit or a whole-card independent acceptance claim.
+
 ## Check Update Release 3.3.34, 2026-11-19
 
 The owner explicitly requested a new MCU firmware version, delta-compatible

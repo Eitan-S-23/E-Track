@@ -4,8 +4,8 @@ import { execFileSync } from "node:child_process";
 import { readFile, mkdir, mkdtemp, access } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { appVersion, automaticCandidateAdmission, automaticFirmwareCandidateAdmission, candidatePlan, CANDIDATE_BRANCH, FIRMWARE_CANDIDATE_BRANCH, dispatchApp,
-  githubJson, planFromCheckout, APP_PUBSPEC, RELEASE_CONFIG } from "../../.github/scripts/original-admin-candidate.mjs";
+import { appVersion, appCandidateRequired, automaticCandidateAdmission, automaticFirmwareCandidateAdmission, candidatePlan, CANDIDATE_BRANCH, ORIGINAL_APP_WORKFLOW_BRANCH, FIRMWARE_CANDIDATE_BRANCH, dispatchApp,
+  githubJson, planFromCheckout, INTEGRATED_SOURCE, APP_PUBSPEC, RELEASE_CONFIG } from "../../.github/scripts/original-admin-candidate.mjs";
 import { adminCandidateAdmission } from "../../.github/scripts/firmware-admin-context.mjs";
 import { buildKeyedFirmware } from "../../.github/scripts/firmware-gcc-keyed-build.mjs";
 import { firmwareCMakeOptions } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-build-profile.mjs";
@@ -41,7 +41,7 @@ test("a versioned firmware edit requests a fresh firmware build", () => {
   assert.equal(plan.app.required, false);
 });
 
-test("main plans only firmware, even when App code or version also changes", () => {
+test("an explicit firmware-only component filter stays isolated", () => {
   const plan = candidatePlan({ ...inputs(), component: "firmware", afterApp: "version: 1.0.77+103\n",
     afterFirmware: config("3.3.25"), changed: ["USER/HAL/HAL_Bluetooth.cpp", "app/bluetooth_flutter_Trace/lib/main.dart"] });
   assert.equal(plan.branch, "main");
@@ -52,7 +52,7 @@ test("main plans only firmware, even when App code or version also changes", () 
   assert.equal(appOnly.app.required, false);
 });
 
-test("the App delivery branch cannot schedule a firmware candidate", () => {
+test("an explicit App-only component filter cannot schedule firmware", () => {
   const plan = candidatePlan({ ...inputs(), component: "app", afterFirmware: config("3.3.25"),
     afterApp: "version: 1.0.77+103\n", changed: ["USER/HAL/HAL_Bluetooth.cpp", "app/bluetooth_flutter_Trace/lib/main.dart"] });
   assert.equal(plan.branch, CANDIDATE_BRANCH);
@@ -72,14 +72,14 @@ test("main firmware keeps version increments mandatory and never rebuilds a conf
 
 test("automatic firmware admission accepts only first-attempt main pushes", () => {
   automaticFirmwareCandidateAdmission(firmware());
-  for (const change of [{ GITHUB_REF: `refs/heads/${CANDIDATE_BRANCH}` }, { GITHUB_REF: "refs/heads/dev/firmware/task" },
+  for (const change of [{ GITHUB_REF: "refs/heads/release/candidates" }, { GITHUB_REF: "refs/heads/dev/firmware/task" },
     { GITHUB_EVENT_NAME: "workflow_dispatch" }, { GITHUB_REPOSITORY: "someone/fork" }, { GITHUB_RUN_ATTEMPT: "2" }]) {
     assert.throws(() => automaticFirmwareCandidateAdmission({ ...firmware(), ...change }));
     assert.throws(() => adminCandidateAdmission({ ...firmware(), ...change }));
   }
 });
 
-async function mainCheckout({ changed = "docs/example.md", version = "3.3.30" } = {}) {
+async function mainCheckout({ changed = "docs/example.md", version = "3.3.30", app = "1.0.82+108" } = {}) {
   const root = fileURLToPath(new URL("../../", import.meta.url));
   const area = outputPath(root, path.join(root, ".cache/original-admin-tests"));
   await mkdir(area, { recursive: true });
@@ -95,6 +95,7 @@ async function mainCheckout({ changed = "docs/example.md", version = "3.3.30" } 
   git("commit", "-m", "Existing versioned main baseline");
   const before = git("rev-parse", "HEAD");
   await writeOutput(root, path.join(dir, changed), "Synthetic planner input, not product code.\n");
+  await writeOutput(root, path.join(dir, APP_PUBSPEC), `version: ${app}\n`);
   await writeOutput(root, path.join(dir, RELEASE_CONFIG), JSON.stringify(config(version)) + "\n");
   git("add", ".");
   git("commit", "-m", "Candidate planning fixture");
@@ -120,7 +121,52 @@ test("actual main checkout planner selects only a versioned firmware change", as
   assert.equal(plan.channelPublished, false);
   assert.equal(plan.automaticDeltas, false);
   await assert.rejects(dispatchApp(plan, { ...context, ORIGINAL_ADMIN_ACTIONS_TOKEN: "unused-test-value" },
-    async () => assert.fail("Main must never call the App dispatcher")), /release\/candidates/);
+    async () => assert.fail("An unchanged App must never be dispatched")), /New App candidate/);
+});
+
+test("actual main checkout independently selects the new App and keeps firmware unchanged", async () => {
+  const { dir, context } = await mainCheckout({ changed: "app/bluetooth_flutter_Trace/lib/example.dart", app: "1.0.83+109" });
+  const plan = await planFromCheckout(dir, context);
+  assert.equal(plan.branch, "main");
+  assert.equal(plan.app.required, true);
+  assert.equal(plan.app.versionCode, 109);
+  assert.equal(plan.firmware.required, false);
+});
+
+test("one main push can select both independently versioned components", async () => {
+  const { dir, context } = await mainCheckout({ changed: "USER/example.c", version: "3.3.31", app: "1.0.83+109" });
+  const plan = await planFromCheckout(dir, context);
+  assert.equal(plan.app.required, true);
+  assert.equal(plan.firmware.required, true);
+  assert.equal(plan.channelPublished, false);
+  assert.equal(plan.automaticDeltas, false);
+});
+
+test("ordinary main App edits remain checks-only until an explicit version change", async () => {
+  const { dir, context } = await mainCheckout({ changed: "app/bluetooth_flutter_Trace/lib/example.dart" });
+  const plan = await planFromCheckout(dir, context);
+  assert.equal(plan.app.required, false);
+  assert.equal(plan.firmware.required, false);
+});
+
+for (const [app, expected] of [["1.0.82+108", "false"], ["1.0.83+109", "true"]]) {
+  test(`the real read-only build selector matches main candidate planning: ${app}`, async () => {
+    const { dir, context } = await mainCheckout({ changed: "app/bluetooth_flutter_Trace/lib/example.dart", app });
+    const script = fileURLToPath(new URL("../../.github/scripts/original-admin-candidate.mjs", import.meta.url));
+    const result = execFileSync(process.execPath, [script, "app-candidate-needed", context.BEFORE_SHA, context.GITHUB_SHA],
+      { cwd: dir, encoding: "utf8", windowsHide: true });
+    assert.equal(result.trim(), expected);
+    assert.equal(String((await planFromCheckout(dir, context)).app.required), expected);
+  });
+}
+
+test("the build selector rejects reused identities and non-exact checkout revisions", async () => {
+  const { dir, context } = await mainCheckout({ app: "1.0.82+109" });
+  const script = fileURLToPath(new URL("../../.github/scripts/original-admin-candidate.mjs", import.meta.url));
+  for (const revisions of [[context.BEFORE_SHA, context.GITHUB_SHA], [context.BEFORE_SHA, "main"]]) {
+    assert.throws(() => execFileSync(process.execPath, [script, "app-candidate-needed", ...revisions],
+      { cwd: dir, encoding: "utf8", windowsHide: true, stdio: "pipe" }));
+  }
 });
 
 test("actual main checkout planner rejects source edits without a new firmware version", async () => {
@@ -134,17 +180,24 @@ test("actual main checkout planner rejects a missing baseline, wrong checkout, a
   await assert.rejects(planFromCheckout(dir, { ...context, GITHUB_SHA: context.BEFORE_SHA }), /Checkout differs/);
   await assert.rejects(planFromCheckout(dir, { ...context, BEFORE_SHA: "f".repeat(40) }));
 });
-for (const name of ["app/bluetooth_flutter_Trace/lib/main.dart", "app/bluetooth_flutter_Trace/pubspec.lock", "Tools/flutter/ota_link_profile.py", "Libraries/OTA/ota_ble_frame.c", "USER/HAL/HAL_Bluetooth.cpp", "boot/main.c"]) {
+for (const name of ["Libraries/OTA/ota_ble_frame.c", "USER/HAL/HAL_Bluetooth.cpp", "boot/main.c"]) {
   test(`changed build input requires an explicit version increment: ${name}`, () => assert.throws(() => candidatePlan({ ...inputs(), changed: [name] })));
 }
+for (const name of ["app/bluetooth_flutter_Trace/lib/main.dart", "app/bluetooth_flutter_Trace/pubspec.lock", "Tools/flutter/ota_link_profile.py"]) {
+  test(`ordinary App input does not create a release: ${name}`, () => {
+    const plan = candidatePlan({ ...inputs(), changed: [name] });
+    assert.equal(plan.app.required, false);
+    assert.equal(plan.firmware.required, false);
+  });
+}
 for (const change of [{ afterApp: "version: 1.0.75+101\n" }, { afterApp: "version: 1.0.77+102\n" },
-  { afterApp: "version: 1.0.76+103\n" }, { afterFirmware: config("3.3.23") }]) {
+  { afterApp: "version: 1.0.76+103\n" }, { afterApp: "version: 1.0.75+103\n" }, { afterFirmware: config("3.3.23") }]) {
   test(`reject reused or backward identity: ${JSON.stringify(change)}`, () => assert.throws(() => candidatePlan({ ...inputs(), ...change })));
 }
 for (const value of ["version: 1.2.3", "version: 1.2.3+01", "version: 1.2.3+999999999999", "version: 1.2.3+103\nversion: 1.2.4+104"]) {
   test(`invalid App version: ${value}`, () => assert.throws(() => appVersion(value)));
 }
-for (const change of [{ GITHUB_EVENT_NAME: "pull_request" }, { GITHUB_REF: "refs/heads/main" },
+for (const change of [{ GITHUB_EVENT_NAME: "pull_request" }, { GITHUB_REF: "refs/heads/release/candidates" },
   { GITHUB_REPOSITORY: "someone/fork" }, { GITHUB_RUN_ATTEMPT: "2" }, { GITHUB_SHA: "main" }]) {
   test(`untrusted automatic context is rejected: ${JSON.stringify(change)}`, () => assert.throws(() => automaticCandidateAdmission({ ...env(), ...change })));
 }
@@ -164,7 +217,9 @@ test("App dispatch sends the exact source to Trace, with no signing secrets or c
   });
   assert.equal(calls.length, 3);
   assert.equal(calls[2].route, "Eitan-S-23/Trace/actions/workflows/build.yml/dispatches");
-  assert.deepEqual(calls[2].options.body, { ref: CANDIDATE_BRANCH, inputs: { source_sha: plan.source, source_run: "123", check_only: "false" } });
+  assert.equal(plan.branch, "main");
+  assert.equal(calls[1].route, "Eitan-S-23/Trace/git/ref/heads/" + ORIGINAL_APP_WORKFLOW_BRANCH);
+  assert.deepEqual(calls[2].options.body, { ref: ORIGINAL_APP_WORKFLOW_BRANCH, inputs: { source_sha: plan.source, source_run: "123", check_only: "false" } });
   assert.equal(result.workflowCommit, "b".repeat(40));
   assert.equal(result.completed, false);
   assert.equal(result.channelPublished, false);
@@ -213,9 +268,9 @@ test("both workflow routes keep publication and original secret stores separate"
 test("automatic firmware candidates have their own environment without changing protected firmware routes", async () => {
   const source = await readFile(new URL("../../.github/workflows/original-admin-candidate.yml", import.meta.url), "utf8");
   const protectedWorkflow = await readFile(new URL("../../.github/workflows/firmware-build.yml", import.meta.url), "utf8");
-  assert.match(source, /branches: \[main, release\/candidates\]/);
+  assert.match(source, /branches: \[main\]/);
   assert.match(source, /if: github\.ref == 'refs\/heads\/main' && needs\.checks\.outputs\.firmware == 'true'/);
-  assert.match(source, /if: github\.ref == 'refs\/heads\/release\/candidates' && needs\.checks\.outputs\.app == 'true'/);
+  assert.match(source, /if: github\.ref == 'refs\/heads\/main' && needs\.checks\.outputs\.app == 'true'/);
   assert.match(source, /OTA_AES_KEY: \$\{\{ secrets\.FIRMWARE_CANDIDATE_OTA_AES_KEY \}\}/);
   assert.match(source, /CLOUDFLARE_ACCOUNT_ID: \$\{\{ secrets\.CLOUDFLARE_ACCOUNT_ID \}\}/);
   assert.match(source, /CLOUDFLARE_API_TOKEN: \$\{\{ secrets\.E_TRACK_CI \}\}/);
@@ -225,6 +280,17 @@ test("automatic firmware candidates have their own environment without changing 
   assert.match(protectedWorkflow, /environment: firmware-rehearsal/);
   assert.match(protectedWorkflow, /firmware-production/);
   assert.doesNotMatch(protectedWorkflow, /environment: firmware-candidates/);
+});
+
+test("versioned main builds use only the original signer while ordinary builds retain their verification route", async () => {
+  const source = await readFile(new URL("../../.github/workflows/build.yml", import.meta.url), "utf8");
+  const block = source.slice(source.indexOf("          # A versioned main push"), source.indexOf('          echo "docs_changed='));
+  assert.match(block, /GITHUB_REPOSITORY.*Eitan-S-23\/E-Track.*EVENT_NAME.*push.*REF_NAME.*refs\/heads\/main/);
+  assert.match(block, /app-candidate-needed "\$\{base_sha\}" "\$\{CURRENT_SHA\}"/);
+  assert.match(block, /if \[\[ "\$\{app_candidate_required\}" == "true" \]\]; then\s+app_build_required=false/);
+  assert.equal(appCandidateRequired("version: 1.0.82+108", "version: 1.0.82+108"), false);
+  assert.equal(appCandidateRequired("version: 1.0.82+108", "version: 1.0.83+109"), true);
+  assert.match(source, /main\/master push builds artifacts only/);
 });
 
 test("normal firmware retains only verification originals after private-key cleanup", async () => {
@@ -247,7 +313,7 @@ function resumeFixture() {
   const source = "a".repeat(40), workflow = "b".repeat(40);
   return { source, resume: "456", checkOnly: "false", sourceRun: "123",
     previous: { id: 456, status: "completed", conclusion: "failure", event: "workflow_dispatch", run_attempt: 1,
-      head_branch: CANDIDATE_BRANCH, path: ".github/workflows/build.yml", head_sha: workflow,
+      head_branch: ORIGINAL_APP_WORKFLOW_BRANCH, path: ".github/workflows/build.yml", head_sha: workflow,
       display_title: `candidate:${source}:123` },
     jobs: [{ name: "admission", conclusion: "success" }, { name: "windows", conclusion: "success" },
       { name: "android", conclusion: "failure", steps: [{ name: "Build original-backend, original-package, BLE V2 APK",
@@ -265,17 +331,21 @@ async function runAppAdmission(fixture) {
   const script = block[1].split("\n").map(line => line.replace(/^            /, "")).join("\n");
   const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
   const outputs = {};
+  fixture.comparisons = [];
   const listReleases = Symbol("list-releases"), listJobs = Symbol("list-jobs");
   const github = { rest: { repos: { listReleases,
-    compareCommitsWithBasehead: async () => ({ data: { status: "ahead" } }),
+    compareCommitsWithBasehead: async ({basehead}) => {
+      fixture.comparisons.push(basehead);
+      return { data: { status: fixture.comparisonStatus ?? "ahead" } };
+    },
     getContent: async () => ({ data: { content: Buffer.from("version: 1.0.77+103\n").toString("base64") } }) },
     actions: { listJobsForWorkflowRun: listJobs, getWorkflowRun: async ({ repo }) => ({ data: repo === "E-Track"
-      ? { event: "push", head_branch: CANDIDATE_BRANCH, head_sha: fixture.source, path: ".github/workflows/original-admin-candidate.yml" }
+      ? { event: "push", head_branch: fixture.sourceBranch ?? CANDIDATE_BRANCH, head_sha: fixture.source, path: ".github/workflows/original-admin-candidate.yml" }
       : fixture.previous }) } },
     paginate: async operation => operation === listReleases ? fixture.releases : operation === listJobs ? fixture.jobs
       : assert.fail("Unexpected API operation") };
   await new AsyncFunction("github", "context", "core", "process", script)(github,
-    { repo: { owner: "Eitan-S-23", repo: "Trace" }, ref: `refs/heads/${CANDIDATE_BRANCH}`, sha: "c".repeat(40) },
+    { repo: { owner: "Eitan-S-23", repo: "Trace" }, ref: `refs/heads/${ORIGINAL_APP_WORKFLOW_BRANCH}`, sha: "c".repeat(40) },
     { setOutput: (key, value) => { outputs[key] = value; }, info: () => {} },
     { env: { SOURCE_SHA: fixture.source, SOURCE_RUN: fixture.sourceRun, CHECK_ONLY: fixture.checkOnly,
       RESUME_ANDROID_RUN: fixture.resume, GITHUB_RUN_ATTEMPT: "1" } });
@@ -298,6 +368,17 @@ test("normal fresh admission remains fresh, and existing unpublished drafts reje
   const outputs = await runAppAdmission(fixture);
   assert.equal(outputs.resume_android, "false");
   assert.equal(outputs.draft_target, "c".repeat(40));
+  assert.deepEqual(fixture.comparisons, [INTEGRATED_SOURCE + "..." + fixture.source,
+    fixture.source + "...main"]);
+});
+
+test("the real original-signer admission rejects legacy source branches and history outside main", async () => {
+  for (const sourceBranch of ["release/candidates", "dev/flutter/unmerged"]) {
+    const fixture = resumeFixture(); fixture.resume = ""; fixture.releases = []; fixture.sourceBranch = sourceBranch;
+    await assert.rejects(runAppAdmission(fixture), /Originating push run mismatch/);
+  }
+  const fixture = resumeFixture(); fixture.resume = ""; fixture.releases = []; fixture.comparisonStatus = "behind";
+  await assert.rejects(runAppAdmission(fixture), /integrated history on main/);
 });
 
 for (const [name, mutate] of [

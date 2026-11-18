@@ -2,28 +2,39 @@
 
 ## Developer Workflow
 
-`main` in `Eitan-S-23/E-Track` is the authoritative MCU source and automatic
-firmware candidate branch. Develop there, or in a task branch based on current
+`main` in `Eitan-S-23/E-Track` is the authoritative App/MCU source and automatic
+candidate branch. Develop there, or in a task branch based on current
 main and integrate the bounded changes back before delivery. Do not move MCU
-changes to `release/candidates` to trigger a build.
+or App changes to E-Track's historical `release/candidates` branch to trigger a build.
 
-The App keeps its separate `release/candidates` delivery route and original
-Trace signing. That source line descends from integrated source
-`34495140d28ce401616cc19b6b62bb6bba1d764c`, not the older standalone Trace App.
-Main pushes never dispatch an App package; App-branch pushes never build firmware.
+App delivery retains original Trace signing. Trace's `release/candidates` branch
+hosts only the signing executor; it is not where current App source is developed.
+It accepts an exact E-Track main SHA descending from integrated source
+`a377846c1dbf966ca3f03a46872f905eb28b87a4` and the matching main push run.
+App and firmware versions independently select their jobs on the same main push.
+
+This main anchor's complete App tree is byte-identical to the original-signed
+1.0.82 candidate `a977c848e03a2798a7b5c46319cd126a292395b4` (tree
+`b8be80cfd70dc9d05e4905821b4aae81dd8a1fa8`). Main integrated that source without
+the old candidate branch's commit ancestry. The migration therefore pins the
+verified main baseline instead of removing the ancestry check or requiring an
+unrelated history merge. The former `34495140` anchor remains historical.
 
 1. For MCU delivery, update the code and increment `firmware.versionName` in
    `Tools/ota/original-admin-release.json`, including the release notes. Version
    codes use the existing `major * 10000 + minor * 100 + patch` encoding.
-2. Validate and integrate the MCU changes to main. Commit and push `main` under
+2. Validate and integrate the bounded changes to main. Commit and push `main` under
    the owner's authorization. No candidate-branch copy or manual dispatch is
    needed. If the owner wants the final push, leave the prepared main commit
    locally and provide `git push origin main`; do not push on their behalf.
 3. For App delivery, increment both the name and code in
    `app/bluetooth_flutter_Trace/pubspec.yaml` and deliver the exact integrated App
-   source through `release/candidates`, as before.
-4. `Original Admin Candidates` runs host regressions and plans only the branch's
-   component. Changed MCU inputs without a new version fail before packaging.
+   source through `main`. App code edits without a version change remain normal
+   verification commits, not candidate builds.
+4. `Original Admin Candidates` runs host regressions and independently plans the
+   versioned components. Changed MCU inputs without a new version still fail
+   before packaging. A versioned App push is built through the original signer
+   only; the ordinary `build.yml` skips its duplicate APK/EXE verification build.
 5. Inspect that run. The App job waits for the corresponding Trace workflow;
    a dispatch being accepted is not reported as a completed candidate delivery.
    Firmware uses the dedicated `firmware-candidates` environment without a
@@ -33,19 +44,23 @@ Main pushes never dispatch an App package; App-branch pushes never build firmwar
    an unpublished candidate. Generate selected deltas there if desired, then
    choose Beta or Stable and publish. Automatic ingestion never chooses a channel.
 
-Changed build inputs without a version increment fail on that component's
-delivery branch, rather than overwriting an installed version. Documentation,
-workflow and backend-only changes do not create App or firmware packages.
-An App and MCU release now use their respective branch pushes, not a combined
-candidate-branch push. `MCU Firmware Build` no longer duplicates main push builds;
+App version identity changes must increase both the name and code. An unchanged
+App version does not create a new candidate; a backward or partially reused
+identity fails instead of overwriting installed bytes. MCU inputs retain their
+existing explicit-version requirement. Documentation, workflow and backend-only
+changes do not create packages. `MCU Firmware Build` does not duplicate main builds;
 its pull-request, master build-only and protected manual routes remain available.
 
-The main migration preserves the already delivered MCU `3.3.30 / 30330` and
+The earlier MCU main migration preserved the already delivered `3.3.30 / 30330` and
 App `1.0.82+108`. Its source/baseline integration is explicitly CI-skipped, followed
 by a documentation-only main push that exercises checks and skips both builds.
 This one-time baseline establishment is not a version-check bypass in the planner.
-The next real MCU release must have a higher version. Main integration and
-candidate delivery do not complete P5 or outstanding hardware/formal acceptance.
+The owner-approved App main migration on 2026-11-19 supersedes the former separate
+App source-branch rule. It prepares `1.0.83+109` with the validated boot, icon and
+reconnected-device display fixes, without changing MCU `3.3.34`. Only the trusted
+source admission changes in Trace; no signing key, backend secret, channel or
+existing package is moved. Main integration and candidate delivery do not complete
+P5 or outstanding hardware/formal acceptance.
 
 ## Candidate Environment
 
@@ -78,7 +93,7 @@ and all earlier release assets are left intact. Trace's normal `main` build is
 not replaced by this branch's workflow.
 
 Before executing source or accessing signing secrets, the Trace workflow checks
-the exact E-Track SHA against the integrated ancestor and candidate branch, and
+the exact E-Track SHA against the integrated ancestor and current main history, and
 checks the originating push run. It pins Flutter 3.47.9 and Node 24. Both host
 platforms run strict analysis/tests and APK/EXE builds for a new App version.
 
