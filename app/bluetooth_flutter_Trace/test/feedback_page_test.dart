@@ -11,10 +11,6 @@ void main() {
   setUp(() {
     Get.testMode = true;
     SharedPreferences.setMockInitialValues({});
-    service = FeedbackService(endpoint: Uri.parse('https://feedback.test/api/public/feedback'), supported: true,
-      canSend: () => false,
-      readIdentity: () async => {'platform': 'android', 'versionName': '1.0.82', 'versionCode': 108},
-      sender: (_, body, token, cancel) async => throw StateError('UI must not send real requests'));
   });
   tearDown(() { service.onClose(); Get.reset(); });
 
@@ -26,6 +22,11 @@ void main() {
   }
 
   Future<void> open(WidgetTester tester, {double width = 390, double scale = 1}) async {
+    // The serialized edit future must belong to this test's FakeAsync zone.
+    service = FeedbackService(endpoint: Uri.parse('https://feedback.test/api/public/feedback'), supported: true,
+      canSend: () => false,
+      readIdentity: () async => {'platform': 'android', 'versionName': '1.0.82', 'versionCode': 108},
+      sender: (_, body, token, cancel) async => throw StateError('UI must not send real requests'));
     await service.initialize();
     tester.view.physicalSize = Size(width, 900); tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -44,7 +45,9 @@ void main() {
       await tester.pump();
       expect(tester.widget<FilledButton>(find.byKey(const ValueKey('feedback-submit'))).onPressed, isNotNull);
       await tester.ensureVisible(find.byKey(const ValueKey('feedback-submit')));
+      await tester.pump();
       await tester.tap(find.byKey(const ValueKey('feedback-submit'))); await settle(tester);
+      expect(find.textContaining('\u5df2\u4fdd\u5b58\u3002'), findsOneWidget);
       expect(service.pending.single['body'], 'My first feedback');
       expect(service.sent, isEmpty);
       expect(tester.widget<TextField>(find.byKey(const ValueKey('feedback-text'))).controller!.text, '');
@@ -80,7 +83,9 @@ void main() {
       await tester.pump();
       expect(tester.widget<FilledButton>(find.byKey(const ValueKey('feedback-submit'))).onPressed, isNotNull);
       await tester.ensureVisible(find.byKey(const ValueKey('feedback-submit')));
+      await tester.pump();
       await tester.tap(find.byKey(const ValueKey('feedback-submit'))); await settle(tester);
+      expect(find.textContaining('\u5df2\u4fdd\u5b58\u3002'), findsOneWidget);
       expect(service.pending, hasLength(1)); expect(tester.takeException(), isNull);
     } finally { service.onClose(); await tester.pumpWidget(const SizedBox.shrink()); }
   });
