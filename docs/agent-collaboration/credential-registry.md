@@ -119,6 +119,30 @@ write just because the workflow has not been published. This supersedes the
 earlier undecided Pages binding, not the historical credential-denial receipts
 or separate production/firmware permission boundaries.
 
+### Unattended Firmware Candidate Environment
+
+Owner-requested configuration, 2026-11-18: `release/candidates` workflow commit
+`cb360b762cdd571ceef0d1de881a0de313b95f3c` uses the dedicated `firmware-candidates`
+environment, with no required reviewer or wait timer and only that exact branch
+allowed. `OTA_BOOT_CHAIN_READY=false` and manual channel publication remain.
+It consumes the unchanged repository `E_TRACK_CI` and `CLOUDFLARE_ACCOUNT_ID`
+Secrets. The original `firmware-rehearsal` configuration and all its Secrets
+remain unchanged; this is not a removal of other tasks' approval requirements.
+
+Two existing protected values are installed in the new environment, without
+generation or rotation: `FIRMWARE_CANDIDATE_OTA_AES_KEY` comes from the named
+`p41-rehearsal-ota-key.json` source in
+`.cache/p41-dev-20261015/.cache/cf-auth-input/`; its identity matches successful
+native build `44276457821`. `ORIGINAL_ADMIN_FIRMWARE_DEPLOY_TOKEN` comes from
+`.cache/p35-integration-20261028/source/.cache/mcu-release-flow-20261111-01/private/original-firmware-deploy-token.txt`,
+the original setup source for that same rehearsal Secret. Both inputs remain
+read-only, owner-protected sources; no plaintext copies or values are published.
+
+Environment and Secret metadata readbacks pass; configuration-only Actions
+`44283291086` passes with App/firmware jobs skipped. This does not claim a new
+native build through the new environment or a channel release. See
+[the bounded delivery record](../ota-exec-notes/APP-COMPANION-01.md#mcu-delivered-and-candidate-approval-removed-2026-11-18).
+
 ### Recurrence And Correction
 
 On 2026-10-18 the user identified a repeat of the P4-3 discovery error: the alias

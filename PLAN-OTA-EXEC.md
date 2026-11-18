@@ -943,7 +943,9 @@
 
 <a id="app-companion-01"></a>
 #### APP-COMPANION-01 E-Track 后台伴侣运行、OTA 交互与基础体验完善
-状态: 进行中 ｜ 认领: Codex(当前主会话兼实现者) / 2026-11-16 ｜ 更新: 2026-11-17(原独立复核已核对 3028a057 的 15 文件差异和 116 份原件；T01/T02 主机测试缺口及 CDM 地址/清理源码问题关闭，无新阻断发现。R01-R05 保持源码关闭。D0-D5、整卡正式验收和产品主线合入未完成，C1-C6 不勾选；本次复核记录 LOCAL_PENDING，未提交推送，未新增设备操作)
+状态: 进行中 ｜ 认领: Codex(当前主会话兼实现者) / 2026-11-16 ｜ 更新: 2026-11-18（用户推送的 MCU 3.3.30 已由 Actions 构建并入库为 ready 候选；后续候选流程已切至独立免审批环境。未晋升渠道或安装设备，固件产品未合入 main。R01-R05/T01/T02 原复核结论不变，D0-D5 与整卡正式验收仍未完成，C1-C6 不勾选）
+- 2026-11-18 固件交付：用户推送 `816b1888be2dfaa632e4e802e6b680ec85ed5aec` 至 `release/candidates`，Actions `44276457821` 的 checks/firmware 成功、App 跳过。原始注册回执确认 `3.3.30 / 30330` 两个资产及 ready 候选；沿用原成功构建，没有重跑。此前 43 项 MCU 主机回归及 74 项候选检查通过，原 23 文件配套变更保留已有文件名/滚动/BLE V2 修复，App 108 不变。
+- 2026-11-18 候选免审批：配置提交 `cb360b76` 已推送上述候选分支；独立 `firmware-candidates` 仅允许 `release/candidates`，无人工审批/等待时间，复用原密钥和上传凭据、保留 `OTA_BOOT_CHAIN_READY=false`。原 rehearsal/production 审批及原 Secret 元数据不变。100 项 Node、8 项 Python 及 actionlint 通过，实际 Actions `44283291086` 成功且两项构建均跳过；没有改版本或重建既有包，Stable/Beta 仍由用户发布。详见[固件交付及免审批记录](docs/ota-exec-notes/APP-COMPANION-01.md#mcu-delivered-and-candidate-approval-removed-2026-11-18)。
 - 唯一 Spec: [prompt-APP-COMPANION-01.md](docs/ota-prompts/prompt-APP-COMPANION-01.md)。本卡统一维护状态和完成勾选，不拆子卡、不增加阶段分母。
 - 开工前置: 保护旧改动、恢复根目录主线、入口检查及 Spec 纠偏统一在本卡记录；不另建治理卡。实现基线为已核对的 main，不使用归档工作区或 P3-8 预审版本代替当前产品。
 - 复用: P3-8-v5 和 P3-5-v5 已完成，P4 为既有完成基础；只补新增能力和受影响回归，不重开历史任务，不改变 P1/P5 剩余要求或生产发布门槛。

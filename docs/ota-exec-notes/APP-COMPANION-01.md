@@ -1,5 +1,80 @@
 # APP-COMPANION-01 Implementation Record
 
+## MCU Delivered And Candidate Approval Removed, 2026-11-18
+
+The owner performed the final push of `816b1888be2dfaa632e4e802e6b680ec85ed5aec`
+to `release/candidates`. Original Actions run
+[44276457821](https://github.com/Eitan-S-23/E-Track/actions/runs/44276457821)
+completed successfully: checks and firmware passed; App was skipped. The native
+registration receipt confirms two assets and ready firmware `3.3.30 / 30330`,
+release `fw_6149475085189032dd38065a5e12d50697d51b564b9533a6ca87e5b939466ceb`.
+This reuses the successful original run and its six source/package/registration
+receipts; no package was rebuilt to obtain this observation. Registration is not
+channel publication, a device installation, or whole-card acceptance.
+
+The owner then requested removing the manual approval from automatic candidate
+delivery. Configuration commit `cb360b762cdd571ceef0d1de881a0de313b95f3c` is now
+on `release/candidates`. Its three-file delta changes only the candidate workflow,
+its regression test and `docs/original-admin-candidates.md`. Firmware/App versions,
+product trees and `.github/workflows/firmware-build.yml` are unchanged.
+
+The dedicated GitHub environment `firmware-candidates` has no required reviewers
+or wait timer and exactly one branch policy, `release/candidates`. Its production
+gate remains `OTA_BOOT_CHAIN_READY=false`. The existing AES key is reused as
+`FIRMWARE_CANDIDATE_OTA_AES_KEY`, with its identity matched to the successful
+3.3.30 build. The existing `ORIGINAL_ADMIN_FIRMWARE_DEPLOY_TOKEN` is reused;
+the uploader inherits repository Secrets `CLOUDFLARE_ACCOUNT_ID` and `E_TRACK_CI`.
+No key or token was generated, rotated or printed. Readbacks verify unchanged
+rehearsal/production approvals, rehearsal Secrets and repository Secret metadata.
+
+Local validation passes 100 Node checks, eight Python checks and actionlint.
+The actual candidate planner selects neither App nor firmware for this
+configuration-only change. Actions
+[44283291086](https://github.com/Eitan-S-23/E-Track/actions/runs/44283291086)
+passes its checks; both build jobs are skipped. No existing package, original
+successful run, channel or device operation was replayed. The new environment's
+next real versioned build has not been executed just to test the configuration.
+
+Receipts are under `.cache/firmware-candidate-automation-20261118/`, principally
+`keyring-inputs-03/`, `keyring-configure-01/`, `check-01/`, `keyring-deliver-02/`
+and `keyring-verify-02/`. Earlier diagnostic failures are preserved separately.
+This milestone supersedes the pending-push/build statements in the historical
+preparation below. D0-D5, formal whole-card acceptance and firmware product
+integration into main remain outstanding; these are documentation-only main
+records, not a merge of the candidate product tree.
+
+## MCU Candidate Locally Prepared, 2026-11-18
+
+The owner requested local preparation and will perform the final push. Candidate
+`816b1888be2dfaa632e4e802e6b680ec85ed5aec`, branch
+`prep/firmware-companion-3.3.30`, is clean in
+`.worktrees/firmware-companion-candidate-20261118`, based on fresh remote
+`release/candidates` source `a977c848e03a2798a7b5c46319cd126a292395b4`.
+Only the reviewed `3028a057` MCU/paired-simulator delta, six host test files,
+the `3.3.30 / 30330` release request and a bounded candidate note are committed.
+Existing candidate filename/scrolling fixes and V2-only ACK handling are retained.
+App 108, publishing workflow, Boot, OTA implementation and control contract
+have identical Git objects to the candidate base.
+
+Local development results: control 24, production-method safety 18 and encoder
+1 pass; all 74 candidate/profile checks pass. Windows template CRLF initially
+caused two extraction failures; formatting to its existing Git LF bytes restores
+the checks without changing content or assertions. The initial commit closeout
+only found stale index stat for that identical template blob; a scoped stat refresh
+leaves the candidate clean without another commit or any App tree change.
+
+The actual candidate planner, simulated locally for a first push, reports
+`firmware.required=true`, version `3.3.30 / 30330`, `app.required=false`,
+`channelPublished=false` and `automaticDeltas=false`. No push, Actions dispatch,
+native firmware build, Cloudflare mutation or device operation was performed.
+Those delivery results remain for the owner's final push and its resulting run.
+D0-D5, whole-card acceptance and product main integration remain outstanding.
+
+Candidate record: `docs/ota-exec-notes/APP-COMPANION-01-firmware-candidate-20261118.md`
+in the named commit. Original preparation receipts are under primary-root
+`.cache/firmware-companion-prep-20261118/`. This primary board/note/index update
+is LOCAL_PENDING, uncommitted and unpushed; it does not claim backend delivery.
+
 ## Current Independent Review, 2026-11-17
 
 The original non-implementation review resumes on `3028a057`. The 15-file
