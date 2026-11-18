@@ -34,7 +34,11 @@ namespace Page
 
         enum
         {
+#if defined(OTA_TARGET_APP) || defined(_WIN32)
+            MENU_ITEM_COUNT = 8,
+#else
             MENU_ITEM_COUNT = 7,
+#endif
             MENU_FOCUS_ITEM_MAX = 16
         };
 

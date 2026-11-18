@@ -1,0 +1,230 @@
+// Only the phone/recorder/page-manager boundaries are fake. LVGL is unmodified.
+#include "lvgl.h"
+#include "Common/HAL/CompanionUpdate.h"
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <fstream>
+#include <string>
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
+LV_FONT_DECLARE(font_cn_16);
+LV_FONT_DECLARE(font_bahnschrift_13);
+LV_FONT_DECLARE(font_bahnschrift_17);
+
+static HAL::CompanionUpdateInfo phone = {};
+static bool safe = true;
+static unsigned checks, installations, declines, presentations;
+namespace HAL {
+void BT_CompanionGetInfo(CompanionUpdateInfo* out) { *out = phone; }
+bool BT_CompanionCheck() { ++checks; return true; }
+bool BT_CompanionChoose(bool now, const CompanionUpdateInfo*) {
+    if (now) ++installations; else ++declines;
+    return true;
+}
+bool BT_CompanionCanInstall() { return safe; }
+void BT_CompanionPresented(const CompanionUpdateInfo*) { ++presentations; }
+}
+namespace DataProc { bool Recorder_IsOpen() { return false; } }
+namespace ResourcePool {
+const lv_font_t* GetFont(const char* name) {
+    if (strcmp(name, "bahnschrift_13") == 0) return &font_bahnschrift_13;
+    if (strcmp(name, "bahnschrift_17") == 0) return &font_bahnschrift_17;
+    return &font_cn_16;
+}
+}
+class PageManager {
+public:
+    bool switching = false;
+    const char* page = "Pages/MainMenu";
+    bool IsSwitching() const { return switching; }
+    const char* GetCurrentPageName() const { return page; }
+};
+namespace Page { void FirmwareCompanion_Show(); }
+
+// INSERT_PRODUCTION_MODAL
+
+static lv_color32_t frame[240 * 320];
+static void Flush(lv_disp_drv_t* display, const lv_area_t* area, lv_color_t* pixels) {
+    for (int y = area->y1; y <= area->y2; ++y)
+        for (int x = area->x1; x <= area->x2; ++x)
+            frame[y * 240 + x].full = lv_color_to32(*pixels++);
+    lv_disp_flush_ready(display);
+}
+static void ReadInput(lv_indev_drv_t*, lv_indev_data_t* data) {
+    data->state = LV_INDEV_STATE_RELEASED;
+    data->key = LV_KEY_ENTER;
+    data->enc_diff = 0;
+}
+static lv_indev_t* Input(lv_indev_type_t type, lv_group_t* group) {
+    static lv_indev_drv_t drivers[8];
+    static unsigned count;
+    lv_indev_drv_t* driver = &drivers[count++];
+    lv_indev_drv_init(driver);
+    driver->type = type;
+    driver->read_cb = ReadInput;
+    lv_indev_t* input = lv_indev_drv_register(driver);
+    lv_indev_set_group(input, group);
+    return input;
+}
+static void Require(bool condition, const char* message) {
+    if (!condition) { fprintf(stderr, "%s\n", message); std::exit(1); }
+}
+static void Pump() {
+    for (int i = 0; i < 20; ++i) { lv_tick_inc(20); lv_timer_handler(); }
+}
+static void Snapshot(const std::string& directory, const char* name) {
+    Pump();
+    lv_refr_now(nullptr);
+    std::ofstream out(directory + "/" + name + ".ppm", std::ios::binary);
+    out << "P6\n240 320\n255\n";
+    for (const auto& pixel : frame) {
+        out.put(pixel.ch.red); out.put(pixel.ch.green); out.put(pixel.ch.blue);
+    }
+    Require(out.good(), "snapshot write failed");
+}
+static void Click(lv_obj_t* button) {
+    lv_event_send(button, LV_EVENT_PRESSED, nullptr);
+    lv_event_send(button, LV_EVENT_RELEASED, nullptr);
+    lv_event_send(button, LV_EVENT_CLICKED, nullptr);
+}
+static void Ready() {
+    phone = {};
+    strcpy(phone.status, "READY");
+    strcpy(phone.offer, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    phone.version = 30331;
+    phone.offerRevision = 1;
+    phone.hasOffer = true;
+}
+static void GroupOwnsOnlyValidObjects(lv_group_t* group) {
+    for (lv_obj_t** item = static_cast<lv_obj_t**>(_lv_ll_get_head(&group->obj_ll)); item != nullptr;
+         item = static_cast<lv_obj_t**>(_lv_ll_get_next(&group->obj_ll, item))) {
+        Require(lv_obj_is_valid(*item), "page group contains a freed object");
+        Require(lv_obj_get_group(*item) == group, "page group owns modal buttons");
+    }
+}
+
+int main(int argc, char** argv) {
+#ifdef _WIN32
+    SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
+    SetUnhandledExceptionFilter([](EXCEPTION_POINTERS*) -> LONG {
+        fputs("unhandled native modal exception\n", stderr);
+        ExitProcess(1);
+        return EXCEPTION_EXECUTE_HANDLER;
+    });
+#endif
+    Require(argc == 3, "case and snapshot directory required");
+    const std::string test = argv[1];
+    lv_init();
+    static lv_color_t draw[240 * 16];
+    static lv_disp_draw_buf_t drawBuffer;
+    lv_disp_draw_buf_init(&drawBuffer, draw, nullptr, 240 * 16);
+    lv_disp_drv_t driver;
+    lv_disp_drv_init(&driver);
+    driver.hor_res = 240; driver.ver_res = 320;
+    driver.draw_buf = &drawBuffer; driver.flush_cb = Flush;
+    lv_disp_drv_register(&driver);
+    lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x02080b), 0);
+    lv_obj_t* page = lv_obj_create(lv_scr_act());
+    lv_obj_set_size(page, 240, 320);
+    lv_obj_set_style_bg_color(page, lv_color_hex(0x031419), 0);
+    lv_group_t* original = lv_group_create();
+    lv_group_set_default(original);
+    lv_obj_t* first = lv_btn_create(page);
+    lv_obj_t* second = lv_btn_create(page);
+    lv_group_focus_obj(first);
+    lv_group_t* keypadGroup = lv_group_create();
+    lv_obj_t* keypadFocus = lv_btn_create(page);
+    lv_group_remove_obj(keypadFocus);
+    lv_group_add_obj(keypadGroup, keypadFocus);
+    lv_group_set_editing(keypadGroup, true);
+    lv_indev_t* encoder = Input(LV_INDEV_TYPE_ENCODER, original);
+    lv_indev_t* keypad = Input(LV_INDEV_TYPE_KEYPAD, keypadGroup);
+    lv_indev_t* ungrouped = Input(LV_INDEV_TYPE_KEYPAD, nullptr);
+    PageManager manager;
+    companionManager = &manager;
+    strcpy(phone.status, "DISCONNECTED");
+
+    if (test == "ownership" || test == "repeat" || test == "snapshots") {
+        for (unsigned round = 0; round < (test == "repeat" ? 100u : 1u); ++round) {
+            manager.page = round % 2 ? "Pages/FirmwareUpdate" : "Pages/MainMenu";
+            CompanionOpen(nullptr);
+            Require(companionModal != nullptr, "modal did not open");
+            GroupOwnsOnlyValidObjects(original);
+            Require(lv_group_get_obj_count(original) == 2, "page group changed on modal open");
+            Require(lv_group_get_default() == original, "default group was not preserved");
+            Require(encoder->group == companionGroup && keypad->group == companionGroup,
+                "modal did not own both inputs");
+            if (test == "snapshots") Snapshot(argv[2], "offline");
+            Ready(); CompanionRefresh();
+            Require(!lv_obj_has_state(companionInstall, LV_STATE_DISABLED), "ready offer not installable");
+            if (test == "snapshots") Snapshot(argv[2], "ready");
+            lv_group_focus_obj(companionInstall);
+            safe = false; CompanionRefresh();
+            Require(lv_obj_has_state(companionInstall, LV_STATE_DISABLED), "unsafe install enabled");
+            Require(lv_group_get_focused(companionGroup) != companionInstall, "disabled control kept focus");
+            if (test == "snapshots") Snapshot(argv[2], "unsafe");
+            safe = true; phone.hasOffer = false; phone.checking = true;
+            strcpy(phone.status, "CHECKING"); CompanionRefresh();
+            Require(lv_group_get_obj_count(companionGroup) == 1, "checking focus includes disabled action");
+            if (test == "snapshots") Snapshot(argv[2], "checking");
+            phone.checking = false; strcpy(phone.status, "FAILED"); CompanionRefresh();
+            if (test == "snapshots") Snapshot(argv[2], "failed");
+            Click(companionLater); Pump();
+            Require(companionModal == nullptr, "modal did not close asynchronously");
+            Require(encoder->group == original && keypad->group == keypadGroup && ungrouped->group == nullptr,
+                "input groups were not restored");
+            Require(lv_group_get_focused(original) == first && lv_group_get_focused(keypadGroup) == keypadFocus,
+                "original input focus was not restored");
+            Require(lv_group_get_editing(keypadGroup), "keypad editing state was lost");
+            GroupOwnsOnlyValidObjects(original);
+            Require(lv_group_get_obj_count(original) == 2, "modal leaked into page focus chain");
+            lv_group_focus_next(original);
+            Require(lv_group_get_focused(original) == second, "page navigation failed after close");
+            lv_group_focus_prev(original);
+            Require(lv_group_get_focused(original) == first, "page return navigation failed");
+            Require(lv_mem_test() == LV_RES_OK, "LVGL heap corrupted");
+        }
+    } else if (test == "offer_replacement") {
+        Ready(); CompanionOpen(nullptr);
+        lv_event_send(companionInstall, LV_EVENT_PRESSED, nullptr);
+        ++phone.offerRevision; ++phone.version; CompanionRefresh();
+        lv_event_send(companionInstall, LV_EVENT_CLICKED, nullptr);
+        Require(installations == 0, "held press installed a replaced offer");
+        Click(companionInstall);
+        Require(installations == 1, "fresh press did not install exactly once");
+        lv_event_send(companionInstall, LV_EVENT_CLICKED, nullptr);
+        Require(installations == 1, "duplicate click installed twice");
+        CompanionClose(nullptr);
+    } else if (test == "deleted_focus") {
+        CompanionOpen(nullptr);
+        GroupOwnsOnlyValidObjects(original);
+        lv_obj_del(first);
+        CompanionClose(nullptr);
+        Require(lv_group_get_focused(original) == second, "deleted focus was restored");
+        lv_group_focus_next(original);
+        GroupOwnsOnlyValidObjects(original);
+    } else if (test == "escape") {
+        CompanionOpen(nullptr);
+        uint32_t key = LV_KEY_ESC;
+        lv_event_send(companionLater, LV_EVENT_KEY, &key);
+        Pump();
+        Require(companionModal == nullptr, "Escape did not close modal");
+        Require(installations == 0, "Escape triggered installation");
+    } else if (test == "async_open") {
+        Page::FirmwareCompanion_Show(); Page::FirmwareCompanion_Show(); Pump();
+        Require(companionModal && !companionOpening, "asynchronous open failed");
+        GroupOwnsOnlyValidObjects(original);
+        Click(companionLater); Click(companionLater); Pump();
+        Require(!companionModal && !companionClosing, "duplicate close did not settle");
+        manager.switching = true;
+        Page::FirmwareCompanion_Show(); Pump();
+        Require(!companionModal && !companionOpening, "modal opened during page transition");
+    } else {
+        Require(false, "unknown test");
+    }
+    printf("%s: PASS\n", test.c_str());
+    return 0;
+}

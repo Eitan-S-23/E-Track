@@ -1,6 +1,7 @@
 #include "HAL.h"
 #include "Bluetooth/Bluetooth.h"
 #include "Bluetooth/CompanionControl.h"
+#include "Bluetooth/StartupReset.h"
 #include "Common/DataProc/DataProc.h"
 #include "HAL/HAL_OTA_Backup.h"
 #include "HAL/HAL_OTA_Package.h"
@@ -931,6 +932,22 @@ static void bt_rx_service(void)
 
 /* ================= HAL 接口 ================= */
 
+#if !CONFIG_BT_BAUD_EXPERIMENT
+static ETrackBluetooth::StartupReset s_bt_startup_reset;
+struct BtStartupPort
+{
+    uint32_t now() { return millis(); }
+    int available() { return BT_SERIAL.available(); }
+    int read() { return BT_SERIAL.read(); }
+    bool writable() { return usart_flag_get(BT_SERIAL.getUSART(), USART_TDBE_FLAG) != RESET; }
+    unsigned write(const char* bytes, unsigned count)
+    {
+        return BT_SERIAL.write((const uint8_t*)bytes, count);
+    }
+    void wait() { delay_ms(1); }
+};
+#endif
+
 void HAL::BT_Init()
 {
     ota_ble_env_t env;
@@ -975,6 +992,13 @@ void HAL::BT_Init()
 #endif
     BT_NormalMode();
 		delay_ms(50);
+#if !CONFIG_BT_BAUD_EXPERIMENT
+    BtStartupPort startupPort;
+    const ETrackBluetooth::StartupReset::Result reset = s_bt_startup_reset.Run(startupPort);
+    SEGGER_RTT_printf(0, "BTSTART: reset=%u elapsed=%lu\r\n", (unsigned)reset,
+        (unsigned long)s_bt_startup_reset.elapsed());
+    // Stop at READY: bytes from the new link remain for the normal OTA demux.
+#endif
 		BT_SetName();
 		delay_ms(50);
     CONFIG_DEBUG_SERIAL.print("Bluetooth library v. ");

@@ -1,7 +1,7 @@
 {
   "schema": "original-admin-automatic-candidates-v1",
   "firmware": {
-    "versionName": "3.3.30",
-    "releaseNotes": "MCU companion update support for the current mobile App: firmware check, download-ready notification and device consent; safe install admission and recorder exclusion; one-level menu and encoder Back. Preserves the existing BLE V2 receiver, long-filename display and scrolling fixes. Full and recovery candidate only; channel publication and selected delta generation remain operator-controlled."
+    "versionName": "3.3.33",
+    "releaseNotes": "Resets the Bluetooth module once during MCU startup so MCU-only restarts invalidate the old phone connection. Uses a bounded software reset, preserves the selected baud and module configuration, and leaves new-link bytes for the normal protocol. Retains the standalone Check Update menu, styled Chinese dialog and focus-group exit fix. Preserves explicit firmware consent, recorder exclusion, BLE V2 and file management. Full and recovery candidate only; channel publication and selected delta generation remain operator-controlled."
   }
 }

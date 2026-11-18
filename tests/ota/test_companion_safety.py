@@ -31,6 +31,7 @@ METHODS = (
     (HAL, "void HAL::BT_CompanionPresented"),
     (UI, "bool CompanionCanInstall"),
     (UI, "const char* CompanionStatusText"),
+    (UI, "void CompanionRequestClose"),
     (UI, "void CompanionButtonEvent"),
     (UI, "void CompanionRefresh"),
     (RECORDER, "static int onNotify"),

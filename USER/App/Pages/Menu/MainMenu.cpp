@@ -1,5 +1,8 @@
 #include "MainMenu.h"
 #include "Common/DataProc/DataProc.h"
+#if defined(OTA_TARGET_APP) || defined(_WIN32)
+#include "../FirmwareUpdate/FirmwareUpdate.h"
+#endif
 
 #include <string.h>
 
@@ -21,6 +24,7 @@ struct SettingItem
 #define MENU_ACTION_SENSOR     4
 #define MENU_ACTION_SYSTEM     5
 #define MENU_ACTION_ABOUT      6
+#define MENU_ACTION_UPDATE     7
 #define SETTING_ACTION_NONE    0
 #define SETTING_ACTION_ROUTE_SELECT  1
 #define SETTING_ACTION_NAV_TOGGLE    2
@@ -34,6 +38,7 @@ struct SettingItem
 #define ICON_BACK       "\xEE\x94\x81" /* U+E501 iconfont: back */
 
 #define TXT_DEVICE          "\xE8\xAE\xBE\xE5\xA4\x87\xE4\xBF\xA1\xE6\x81\xAF"
+#define TXT_UPDATE          "\xE6\xA3\x80\xE6\x9F\xA5\xE6\x9B\xB4\xE6\x96\xB0"
 #define TXT_RECORDS         "\xE9\xAA\x91\xE8\xA1\x8C\xE8\xAE\xB0\xE5\xBD\x95"
 #define TXT_NAV             "\xE5\xAF\xBC\xE8\x88\xAA\xE8\xAE\xBE\xE7\xBD\xAE"
 #define TXT_DISPLAY         "\xE6\x98\xBE\xE7\xA4\xBA\xE8\xAE\xBE\xE7\xBD\xAE"
@@ -124,6 +129,9 @@ namespace
     const MenuItem kMenuItems[] =
     {
         { ICON_DETAIL,     TXT_DEVICE,  MENU_ACTION_DEVICE  },
+#if defined(OTA_TARGET_APP) || defined(_WIN32)
+        { LV_SYMBOL_REFRESH, TXT_UPDATE, MENU_ACTION_UPDATE },
+#endif
         { ICON_RECORD,     TXT_RECORDS, MENU_ACTION_RECORDS },
         { ICON_NAV,        TXT_NAV,     MENU_ACTION_NAV     },
         { ICON_BRIGHTNESS, TXT_DISPLAY, MENU_ACTION_DISPLAY },
@@ -466,7 +474,7 @@ lv_obj_t* MainMenu::CreateMenuRow(lv_coord_t y, const char* icon, const char* te
     AttachEvent(row);
 
     lv_obj_t* iconLabel = lv_label_create(row);
-    lv_obj_set_style_text_font(iconLabel, FontIcon(), 0);
+    lv_obj_set_style_text_font(iconLabel, action == MENU_ACTION_UPDATE ? LV_FONT_DEFAULT : FontIcon(), 0);
     lv_obj_set_style_text_color(iconLabel, lv_color_hex(0x00eaff), 0);
     lv_label_set_text(iconLabel, icon);
     lv_obj_align(iconLabel, LV_ALIGN_LEFT_MID, 20, 0);
@@ -714,6 +722,11 @@ void MainMenu::OpenAction(int action)
         SetStatusBarAppear(true);
         _Manager->Push("Pages/SystemInfos");
         break;
+#if defined(OTA_TARGET_APP) || defined(_WIN32)
+    case MENU_ACTION_UPDATE:
+        FirmwareCompanion_Show();
+        break;
+#endif
     case MENU_ACTION_ABOUT:
         SetStatusBarAppear(true);
 #if defined(OTA_TARGET_APP) || defined(_WIN32)

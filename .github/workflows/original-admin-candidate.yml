@@ -55,7 +55,9 @@ jobs:
         run: |
           set -euo pipefail
           python3 -B tests/ota/test_companion_control.py
+          python3 -B tests/ota/test_bt_startup_reset.py
           python3 -B tests/ota/test_companion_safety.py
+          python3 -B tests/ota/test_companion_modal.py
           python3 -B tests/ota/test_main_menu_encoder.py
           python3 -B tests/ota/test_ota_ble_frame.py
           python3 -B tests/ota/test_ota_ble_session.py

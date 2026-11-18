@@ -943,7 +943,11 @@
 
 <a id="app-companion-01"></a>
 #### APP-COMPANION-01 E-Track 后台伴侣运行、OTA 交互与基础体验完善
-状态: 进行中 ｜ 认领: Codex(当前主会话兼实现者) / 2026-11-16 ｜ 更新: 2026-11-18（MCU 3.3.30 已构建入库，现有产品源码及自动候选入口已随 0b7e1275 合入 main；免审批环境只允许 main，App 保留原候选分支/Trace 签名。main 实际推送检查 44299234275 与治理 44299234383 已通过，两项打包跳过、不重建旧包；未晋升渠道或安装设备。R01-R05/T01/T02 原复核结论不变，D0-D5 与整卡正式验收仍未完成，C1-C6 不勾选）
+
+- 2026-11-19 后台重连修复（LOCAL_PENDING）：MCU 3.3.33 已仅烧录 App 并完整回读，Boot 和手机原 App 1.0.82/108 不变。MCU 启动时有界重启蓝牙模块一次；初次启动及两次普通 MCU 重启均成功，手机保持后台，真实断开/重连和 GET_INFO/HELLO 后会话恢复，两次约 40 秒观测无额外复位或故障。MCU“检查更新”实际收到 NO_UPDATE。122 项相关自测通过；GCC App/Boot/模拟器构建 447 条既有警告、0 错误，无新增不同警告。早期探测的看门狗复位原因仍未确认，未混入最终成功结果。未提交/推送、未运行 Actions 或后台发布，不关闭 D0-D5/C1-C6；外部 PowerShell 缓存 mtime 变化未归因且未清理。见[实测结果与写入审计](docs/ota-exec-notes/APP-COMPANION-01.md#verified-startup-and-background-recovery)。
+- 2026-11-18 后台重连诊断（LOCAL_PENDING）：USB 两次确认原签名 App 1.0.82/108 的伴随前台服务、权限和系统关联正常，Android 仍列主控已连接；中间的非暂停 J-Link 回读确认 3.3.31 完整镜像、正常运行及 MCU 会话为空/PHONE_REQUIRED。RECONNECT-01 指向缺少独立于 GATT 断连的会话恢复；原始重启时序未捕获，不能单独归因于 23:13 的手机进程回收。只诊断，未修改产品、重启、安装或 OTA，D0-D5 不关闭；见[现场证据与修复方向](docs/ota-exec-notes/APP-COMPANION-01.md#background-reconnection-diagnosis-2026-11-18)。
+- 2026-11-18 检查更新修复（LOCAL_PENDING）：主菜单首屏新增独立“检查更新”，中文弹窗沿用原有深色/青色风格并补齐字库；修复按钮重复归属焦点组导致退出后悬空引用。52 项主机测试、81 项候选测试、actionlint、100 次真实 LVGL 退出/导航及 20 次调试器驱动的 MCU UI 循环通过。GCC App/Boot/模拟器构建成功，743 条未改动代码警告、0 错误；3.3.31 已通过 J-Link 仅烧录 App，完整回读、Boot 保留和最终健康检查通过。源码与记录未提交/推送，没有新 Actions/后台候选/通道发布，不关闭 D0-D5 或整卡验收。另有 PowerShell 缓存 mtime 变化未归因，未清理；详见[本地修复与审计](docs/ota-exec-notes/APP-COMPANION-01.md#local-repair-complete)。
+状态: 进行中 ｜ 认领: Codex(当前主会话兼实现者) / 2026-11-16 ｜ 更新: 2026-11-19（远端 MCU 3.3.30 候选及 main 自动构建入口已交付；本地 3.3.33 含检查更新 UI/退出修复和蓝牙随 MCU 启动重置，已安装并通过两次后台重连及主动检查实测，源码与记录 LOCAL_PENDING、未推送或发布。手机 App/物理 Boot 保持不变。R01-R05/T01/T02 原复核结论不变，D0-D5 与整卡正式验收仍未完成，C1-C6 不勾选）
 - 2026-11-18 main 迁移：`0b7e1275` 有界集成 67 文件，十个 MCU/模拟器目录的 Git tree 与已交付候选一致，App 108 tree 不变。main 新固件版本自动构建并上传未发布候选，`release/candidates` 只负责 App；原 main 重复构建入口已取消。229 项 Node、8 项 App 边界、43 项 MCU 控制/安全/菜单、9 项 BLE 契约、11 项链路指标及其余主机套件/actionlint 通过。App 路由提交 `1564d588` 的实际 Actions `44295658568` 已通过；main 后续提交 `84a41a61` 的候选检查 `44299234275`、治理 `44299234383` 也通过，两项打包跳过，初始基线没有触发 Actions。免审批环境原密钥、Secret 元数据、gate=false 和其他环境审批均保持。固件产品 main 集成及入口迁移已完成，尚不代表设备/整卡验收；见 [main 迁移记录](docs/ota-exec-notes/APP-COMPANION-01.md#mcu-main-migration-2026-11-18)。
 - 2026-11-18 固件交付：用户推送 `816b1888be2dfaa632e4e802e6b680ec85ed5aec` 至 `release/candidates`，Actions `44276457821` 的 checks/firmware 成功、App 跳过。原始注册回执确认 `3.3.30 / 30330` 两个资产及 ready 候选；沿用原成功构建，没有重跑。此前 43 项 MCU 主机回归及 74 项候选检查通过，原 23 文件配套变更保留已有文件名/滚动/BLE V2 修复，App 108 不变。
 - 2026-11-18 候选免审批：配置提交 `cb360b76` 已推送上述候选分支；独立 `firmware-candidates` 仅允许 `release/candidates`，无人工审批/等待时间，复用原密钥和上传凭据、保留 `OTA_BOOT_CHAIN_READY=false`。原 rehearsal/production 审批及原 Secret 元数据不变。100 项 Node、8 项 Python 及 actionlint 通过，实际 Actions `44283291086` 成功且两项构建均跳过；没有改版本或重建既有包，Stable/Beta 仍由用户发布。详见[固件交付及免审批记录](docs/ota-exec-notes/APP-COMPANION-01.md#mcu-delivered-and-candidate-approval-removed-2026-11-18)。
@@ -1029,6 +1033,10 @@
 | 2026-10-19 | P4-4 / Codex root / `P44-CREDENTIAL-01` | 新链两项产品整改与 Worker 部署已完成，但严格桶凭据的 account-owned/user-owned 创建 POST 均返回 403/9109，最终十项只读核对仍缺四个 S3 secrets | 保持两套独立桶限定 Object Read and Write，不替换旧 CI/provisioning token、不扩大权限；由 O1 直接配置或提供受保护来源与脱敏范围/有效期 | 按 §0.6 必需外部依赖缺失置阻塞；独立预审 10/10 和非发布 CI 通过不等于正式 PASS。保留实际部署异常/恢复和外部缓存未决；root 待凭据后冻结并组织新链/真实 reviewer 观测，gate=false，正式轮次零，未改 main | 已登记/外部凭据阻塞 |
 
 ## 10. 会话日志(每会话一行:日期 ｜ agent ｜ 动了哪些卡 ｜ 一句话结果)
+
+- 2026-11-19 | Codex root / MCU startup repair | APP-COMPANION-01 局部修复 | 3.3.33 启动时有界重启蓝牙模块，已 J-Link 仅安装 App；初始启动、两次 MCU 重启后手机后台自动重连及 MCU 主动检查 NO_UPDATE 通过，App/Boot 不变。122 项自测、GCC App/Boot/模拟器通过，447 条既有警告、0 错误。早期失败原件和未归因 PowerShell mtime 变化保留，无项目外清理；本地未提交/推送/发布，不作整卡验收。
+
+- 2026-11-18 | Codex root / MCU UI repair | APP-COMPANION-01 局部修复 | 独立中文“检查更新”、弹窗样式与焦点组生命周期修复完成，3.3.31 已 J-Link 安装；52 主机/81 候选检查及 20 次原生 UI 循环通过，最终 App/Boot/健康回读通过。743 编译警告、0 错误；无远端推送或后台发布，记录 LOCAL_PENDING，正式验收不变。PowerShell 缓存 mtime 变化未归因并已告知用户，未进行项目外清理。
 
 - 2026-11-18 | Codex root / implementation | APP-ADMIN-UX-01 追加改进 | 开发分支 `cbdf9951` 完成邻近列表的删除模式、公告/差分文件批删、直接同步、未关联 run 的操作反馈、滚动衔接和 App 设置入口调整；后台 505、浏览器 255、Flutter 双端 CI `44171579034` 通过。相同 APK 的 MCU bsdiff+LZMA 补丁比基线 VCDIFF 小 67.5%，但手机解码适配/实测未完成，未切换格式。正式 APK/EXE、迁移、部署、main 合入及设备操作未执行，根记录 LOCAL_PENDING，保留失败原件与此前凭据迁移改动。
 - 2026-11-18 | Codex root / delivery | APP-ADMIN-UX-01 追加交付 | 原签名 `1.0.80+106`（80117099）APK/EXE 构建与 R2 候选成功；限定 main 合入 e7b990c7、部署适配修复 28459a89；原生后台 CI 44184804298 与实际 E_TRACK_CI Actions 部署 44186088340 成功。0015 仅应用一次，真实 owner/页面/接口及原配置、4 通道、37 差分任务回读通过。未发布通道、真实删除/取消或操作设备；独立验收和 App 编码格式迁移不冒充完成。详见追加交付收尾及新写入审计。

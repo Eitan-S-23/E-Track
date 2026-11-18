@@ -1,5 +1,386 @@
 # APP-COMPANION-01 Implementation Record
 
+## Coupled Bluetooth Startup Repair, 2026-11-19
+
+The owner selected MCU-startup Bluetooth-module reset as the preferred repair,
+with App retry changes only where the actual restart observation requires them.
+`Doc/ble.pdf` identifies XY-MBO35A and documents `AT+UART?` and `AT+REBOOT=1`
+with `OK` / `+READY` responses (PDF pages 11 and 13). `AT+RESET=1` is factory
+reset and is explicitly excluded. The PCB netlist connects U13 pin 4 / RST to
+3V3_MCU, not a controllable MCU reset output; the old commented PA15 enable
+definition must not be enabled. No UART rate, advertising or persistent module
+setting will be changed to make this test work.
+
+Root is the sole operator in `D:/github/my/E-Track`. The finite repair matrix is:
+one connected-state UART query; one module-only software reset if that query
+establishes the live control route; source/host regression and GCC verification
+of a bounded startup reset if the probe succeeds; then the minimum paired
+background reconnection observations on the repaired firmware. Additional App
+changes use the existing development CI route, not local Flutter/Gradle builds.
+No protocol extension is the default while the simpler module route is viable.
+
+At entry, the installed input was the fully verified 3.3.31 App and original Boot.
+Before debugger calls, recheck image, running health, confirmed state and idle
+BLE/storage ownership. Reuse the proven standard SEGGER/GDB method at HAL_Update,
+temporarily pause the watchdog only while halted, call the existing serial writer
+with a small LVGL allocation, retain original replies and release the allocation,
+debugger and watchdog setting. Never reset the MCU merely to recover a failed
+collector. J-Link programming, if needed for the repair, remains App-only with
+full readback/Boot checks and a new firmware version, not overwritten 3.3.31 bytes.
+ADB observes the original App without installation, launch, UI taps or settings
+changes. Evidence is `.cache/companion-reconnect-20261119/`; all controllable
+outputs stay inside the project. The standing SEGGER native-history exception
+is unchanged. No commit/push, candidate publication or independent PASS is implied.
+
+The first connected-state UART query completed its exact ten-byte write, but
+GDB halted between the serial write and the separate wait call. Its retained
+ring contains only `+`, with one new hardware overrun event (flag 8), so this is
+an invalid response capture, not evidence that online AT is unsupported. The
+MCU resumed fault-free, UART divisor 156 unchanged, phone still backgrounded and
+connected; no module/MCU reset or Flash write occurred. Preserve `probe-query-01`.
+The bounded follow-up `probe-query-02` uses a 32-byte-or-smaller RAM call adapter
+around the same installed serial writer and one-second wait, with no intervening
+debugger halt. This is not a new UART driver or production AT console. The
+allocation is freed, register/fault/receive-error checks and debugger cleanup
+remain required. A successful module reset is followed by a separate UART query
+to establish retained baud before firmware implementation.
+
+Online results are now retained: `probe-query-02` received `+UART:8`,
+`probe-reboot-01` received the complete `OK` / `+READY`, and
+`probe-after-query-01` confirmed the same 921600 module rate and MCU divisor 156.
+No rate/factory/configuration command was issued. Android observed a real
+disconnect/reconnect while the original App remained backgrounded. However,
+the subsequent MCU counters restarted; `observe-reset-01` retains `Reset: NRST
+WDT`. Thus this cell proves module control, not successful end-to-end companion
+recovery, and does not establish an App-only defect. No MCU reset command was
+requested in that cell. Further observations must keep uninterrupted MCU uptime
+and the actual companion session, not just OS connection, as the success oracle.
+
+The first firmware candidate 3.3.32 adds a single startup reset with a finite
+response wait and retains RX bytes after READY. Fifteen policy tests pass; the
+standard GCC App/Boot/simulator build passes with 447 historical warnings and
+zero errors (`build-01/artifacts`). Full App/Boot readbacks and health/storage
+admission pass for App-only `install-01`. The initial validator lacked an
+explicit installed Python dependency path; its failure is preserved and the
+same original readback was validated offline, not recaptured to hide the error.
+`observe-01` shows stable health but `BTSTART: reset=2 elapsed=1000`, no UART RX
+bytes and no companion session. This is an unsuccessful startup repair, not a
+completed fix. `probe-late-init-01` diagnostically admits one repeat of the same
+initializer after startup and also times out; `probe-query-03` still receives a
+valid UART query through the previously qualified contiguous Print writer.
+Do not attribute the difference solely to early startup or extend delays blindly.
+The next version, 3.3.33, sends the command through that same complete-buffer
+writer instead of interleaving per-byte clock/ready checks. The same fifteen host
+cases pass. The subsequent successful device observations are recorded below.
+
+Additional host regressions in `regression-01`: control 24, safety 18, BLE
+contract 9 and candidate workflow 56 PASS. Node 24 emitted its human-readable
+`tests 56` summary; the wrapper's zero count is an unrecognized-format metadata
+field, not zero executed tests. Original stdout is retained. The install
+adapter's old `ClrBP 0` did not match the returned native breakpoint handle 1;
+the subsequent reset/readback has all FPB comparator registers clear, and the
+adapter now clears the actual first handle. No foreign debugger was stopped.
+
+### Verified Startup And Background Recovery
+
+RECONNECT-01's MCU-startup repair is implemented and installed as 3.3.33.
+`build-02/artifacts/result.json` records the standard GCC App/Boot/simulator
+build, original-key verification and private-header removal. It has 447 warning
+lines and zero errors; normalized comparison with the preceding UI-repair build
+found no new distinct warning messages. The installed `app-final.bin` is 630100
+bytes, SHA-256 `19ba4b030c567cee6e1a2b1dc7b24ba216049ed6d6b843adc3bdceb5205ff3fd`.
+The matching ELF/map are retained under `build-02/artifacts/app-gcc/`.
+`install-02/native/result.json` verifies every App byte and the unchanged physical
+65536-byte Boot, SHA-256
+`01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527`.
+Building a matching Boot did not program it.
+
+| Original Device Observation | Executed Result |
+| --- | --- |
+| `observe-02/native/result.json` | Initial startup reset Ready in 129 ms; actual companion session established, CONNECTED, advancing tick/main-loop/watchdog counters and clear fault registers. |
+| `restart-01/native/result.json` | Ordinary MCU software reset; module Ready in 128 ms, initially PHONE_REQUIRED with no session, then CONNECTED with a session. Nine samples over approximately 40 seconds remain healthy with no additional restart. |
+| `restart-02/native/result.json` | Second ordinary MCU reset; Ready in 129 ms, the same empty-to-established session transition and approximately 40-second healthy observation. |
+| `check-01/native/result.json` | Existing MCU Check Update function queued onto the normal LVGL loop; actual phone reply NO_UPDATE, request 0 -> 1, checking=false, session retained, sameBoot=true, unchanged UART and clear faults. |
+
+The original phone App 1.0.82/108 remained in the background with its real
+CompanionService; retained Android observations show disconnect/reconnect and
+the actual GET_INFO/HELLO exchange. No App launch, UI tap, installation, setting
+change or synthetic protocol reply was used. The final two reset cells do not
+reproduce the preliminary `probe-reboot-01` watchdog restart; that earlier
+restart's cause remains unconfirmed rather than being erased by the final PASS.
+Likewise, no logic-analyzer trace establishes the precise electrical/inter-byte
+cause of the rejected 3.3.32 writer. Its timeout and the failed collectors remain
+original evidence, not successful runs.
+
+The product resets XY-MBO35A only once per MCU startup, with the existing
+complete-buffer writer and exact `AT+REBOOT=1\r\n`, a bounded TX-ready wait and
+at most 1000 ms response wait. It requires complete OK/+READY lines, discards
+stale pre-command RX and stops reading at READY so new-link bytes reach the
+normal demultiplexer. It never calls the RX-clearing `HardwareSerial::flush`,
+changes persistent module settings or schedules periodic resets. Experimental
+baud builds retain their existing AT gate. No App-side repair was necessary for
+this observed restart failure; broader process-death/radio coverage is not
+claimed by these two tests.
+
+Relevant development checks total 122: startup policy/wiring 15, companion
+control 24, safety 18, BLE contract 9 and candidate workflow 56. The final
+test-only wiring assertion requires the qualified complete-buffer HAL writer;
+`closeout-checks-01/startup.log` retains its 15-test rerun, with no product change
+or repeat build/flash. Other originals remain in `regression-01`, including the
+Node summary/count discrepancy described above.
+
+### Repair Closeout And Write Audit
+
+Source and records remain LOCAL_PENDING on primary main `74fa4bcb`; no commit,
+push, Actions dispatch, Cloudflare candidate registration, channel publication
+or OTA transfer occurred. Earlier UI/menu/font repairs remain intact. This is
+the bounded repair's implementation/device result, not D0-D5, C1-C6 or whole-card
+independent acceptance. No further physical replay is needed merely to document
+these results. Remote delivery is a separate owner-authorized step.
+
+`closeout-01.json` records actual source/evidence hashes, selected output paths,
+final main freshness and process/port/lock checks. All agent-selected build,
+test, log, temporary, helper and documentation outputs are project-local.
+J-Link/ADB/GDB processes and ports 5048/23485/23486/23487 are closed; the device
+lock and both temporary private-key headers are absent. No external cleanup,
+overwrite or restoration was performed.
+
+The separately monitored existing file
+`C:/Users/SU/AppData/Local/Microsoft/Windows/PowerShell/StartupProfileData-NonInteractive`
+remained 1004 bytes, but its mtimeNs changed from `1795018093789849500` to
+`1795022591045326600` during the repair. The selected commands did not invoke
+PowerShell; limited checks of the relevant build entries found no such call.
+Writer/content attribution remains UNCONFIRMED and was disclosed to the owner.
+The original ADB key, SEGGER JLinkDLL.ini and the other monitored PowerShell
+cache retained their recorded metadata. These scoped checks do not establish
+that the whole operating system was unchanged; no cleanup is authorized.
+
+## Background Reconnection Diagnosis, 2026-11-18
+
+RECONNECT-01: required session-recovery fix, not a new permission request.
+The user connected the phone by USB to diagnose the missing background recovery.
+This round made read-only phone queries and a non-halting J-Link observation of
+the already-authorized board. No App launch, UI tap, setting change, install,
+explicit halt/reset, Flash write, OTA, CI or release was performed.
+
+- Phone snapshots at 23:20 and 23:31 Asia/Shanghai: V2312A / Android 13,
+  original signed App 1.0.82 / 108, PID 5121 unchanged. Installed APK SHA-256 is
+  `8567bf5b93294b7df46247ba7bf23a8eb8b1d64128731ae6ae017b1acc441a65`, matching
+  the existing release receipt. Bluetooth scan/connect and notification grants
+  are present. `CompanionService` is a foreground service, the system association
+  has presence observation enabled, and Android lists that associated MCU among
+  connected Bluetooth devices. This is not merely an App in the recent-task list.
+- Between those phone reads, J-Link verifies the entire installed 629,732-byte
+  App against the retained 3.3.31 image and matching ELF layout. MCU main-loop
+  counters advance, the core is running and fault registers are clear. The actual
+  companion control has `status=PHONE_REQUIRED`, an empty session, no offer and
+  no pending check. `lastRxTick` is zero; this is an idle UART receive marker,
+  not proof about every ISR-handled binary packet. No debugger reset fallback
+  occurred. The OS-level connection and MCU-level session are demonstrably not
+  equivalent in this observation.
+- `CompanionRuntime._wake` sends `HELLO` only inside its new-link branch.
+  `_sameLink` uses the phone's link generation and cached identity; the native
+  heartbeat probes the Dart runtime, not MCU session liveness. MCU `Control`
+  starts with an empty session, accepts it through `HELLO`, and cannot send
+  `CHECK` until that happens. There is no independent idle session-recovery
+  mechanism for a restarted MCU behind a surviving BLE module connection.
+- Android also records an App process reclamation at 23:13:18, reason
+  `LOW_MEMORY`, description `single-cleaner`. The current process/service has
+  already recovered. Do not attribute the original report solely to this event:
+  the original MCU reboot/connection timeline was not captured. Production
+  `run-as` correctly denies private preferences, the filtered App log is empty,
+  and the vendor Bluetooth-manager dump is empty; none is a successful protocol
+  trace or proof of a specific lost callback.
+
+Root should next repair bounded peer/session liveness and fresh identity/session
+establishment independently of GATT disconnect, including the initial handshake
+timeout case. Preserve OTA exclusivity, fresh-session/replay protection, offer
+identity and explicit user installation consent. The minimum regression cases
+are MCU-only restart with retained GATT, real radio disconnect/reappearance, and
+background service/process recovery; do not replace the release App or replay
+an OTA merely to collect missing historical logs. This is a diagnosis, not a
+completed repair or D0-D5/whole-card acceptance.
+
+Originals and adapters are under `.cache/companion-reconnect-20261118/`:
+`phone-01`, `mcu-01`, `phone-02`, and `closeout.json`. The standard ADB/J-Link
+tools, existing owned-process helper and contained WMI launcher were reused.
+Private ADB port and all owned native processes closed; the original ADB key
+is unchanged. Controllable outputs remain under the project; automatic
+`C:/Users/SU/AppData/Roaming/SEGGER/JLinkDLL.ini` updates use the standing exception.
+The separately watched file
+`C:/Users/SU/AppData/Local/Microsoft/Windows/PowerShell/StartupProfileData-NonInteractive`
+remains 1,004 bytes but its mtime changed from `2026-11-18T15:08:10.940Z` to
+`2026-11-18T15:23:10.662Z`. No selected command invoked PowerShell, its writer
+and content changes remain unconfirmed, and no cleanup/restoration was attempted.
+Preserve it unless a separately scoped attribution/cleanup is requested.
+The existing MCU repair and these additional records remain LOCAL_PENDING on
+primary main `74fa4bcb`; no product source was changed by this diagnosis.
+
+## Check Update UI And Frozen Device, 2026-11-18
+
+Owner request: use the four-character Chinese Check Update label as a separate
+MCU menu action, replace the rudimentary companion modal with the existing MCU
+visual language, and fix the observed freeze after leaving it. The user reports
+the board is currently frozen and explicitly supplies the connected J-Link.
+Active write root is primary `D:/github/my/E-Track`, starting at `74fa4bcb`.
+This is local development/device debugging, not a new GitHub push, channel
+publication or independent whole-card acceptance authorization.
+
+Finite development matrix:
+
+- Preserve the current fault first with one standard J-Link halt/register/RAM/
+  internal-Flash capture, then resume without reset. Root is the sole operator;
+  no competing debugger/RTT process was present at entry. Decode only against
+  the matching original ELF after checking the running App header and bytes.
+- Diagnose the modal/input-group/page lifecycle and reproduce its failure with
+  actual LVGL host code. Cover touch and encoder exit, repeated open/close,
+  navigation after close, unavailable phone and ready/deferred update states.
+- Use the existing dark/cyan surfaces, Chinese/number fonts, separators and
+  focused controls. One clear title, a short status body and clear actions;
+  restrained focus/entrance transitions only, no separate UI theme.
+- Validate code/font coverage and build the production GCC App plus matching
+  Boot and simulator through the supported contained build route. Keep the
+  historical 3.3.30 package and original evidence unchanged.
+- Before any candidate programming, verify App/Boot identity, BCB/pending
+  transition/staging state and complete recovery inputs. Program only admitted
+  App bounds with standard J-Link, preserve Boot and persistent records, and
+  verify readback and running health. No mass erase or arbitrary BCB edits.
+- On the repaired target, check the independent menu entry, readable Chinese
+  status/actions, repeated exit/re-entry and continued navigation/heartbeat.
+  Stop dependent mutations if identity, persistent state or recovery is unclear.
+
+Each native helper has a finite deadline and original receipts under
+`.cache/mcu-check-update-20261118/`; initial capture is bounded to 120 seconds.
+Only the standing SEGGER native-history exception applies outside the project:
+`C:/Users/SU/AppData/Roaming/SEGGER/`. Run native J-Link as the existing SU owner,
+contain command/log/temp/readback paths, and audit that exception without cleanup.
+Initial register capture establishes a 3.3.30 HardFault (CFSR 0x8200,
+BFAR 0x19191935); originals are `capture-03/`. The generic CORTEX-M4 route works
+after the device-specific connect failed and the vendor tried its reset fallback.
+The slow halted RAM read did not preserve a stable original stack: later RAM and
+`backup-01` registers show normal execution, consistent with watchdog recovery.
+Do not attribute a precise faulting instruction from that mixed-time RAM image.
+`backup-01` contains a complete 1 MiB Flash read, but eight zero bytes in the
+libc code differ from original 3.3.30; a fresh non-halting inspection must reconcile
+that read before it can be used as a recovery image. No firmware has been written.
+
+The source defect is independently reproducible with the bundled LVGL: button
+creation joins the default group, and this version's `lv_group_add_obj` does not
+unlink the old group. Closing the companion modal leaves stale page-list entries.
+The repaired controls explicitly leave the default group, and close resets the
+input transaction while restoring each input's focus/editing state. The main-menu
+entry is separate and visible in the first six rows; the file-browser shortcut is
+removed. Existing Chinese subset generation supplies all new labels.
+
+Development results: real LVGL nine tests PASS, including the original red oracle,
+100 open/close/navigation cycles, two distinct input groups plus an ungrouped input,
+expired/replaced press protection, deleted focus, Escape, async duplicates and
+five rendered states. Original control 24 and safety 18 tests PASS. Evidence is
+under `.cache/companion-modal-tests/run-23rs_r6u`, `.cache/companion-control-tests/run-2ifinz_n`
+and `.cache/companion-safety-tests/run-i1f2g4_e`; the first harness's temporary
+input-driver lifetime error and missing-glyph failures are retained separately.
+No native crash dumps were created by that failed harness. The composite preview
+is `.cache/mcu-check-update-20261118/ui-preview.png`.
+
+The local version is now 3.3.31, not an overwrite of 3.3.30. The supported default
+App/Boot/simulator batch is being run with the existing original firmware key;
+this local wrapper reuses the official key-header primitive without pretending to
+be a GitHub release run. It removes its private header and restores the local
+compiler flags after preserving artifacts. All build/test outputs remain inside
+the primary root, including the existing `.cache/companion-*-tests`, production
+CMake output and `Simulator/Output`. Build, native installation and live UI checks
+remain pending; no push, backend registration or channel publication is implied.
+
+The supported batch now passes (GCC 641 warning lines, MSBuild 102 warning lines,
+zero errors; no diagnostics in the changed UI/font files). App size is 629,732
+bytes. `inspect-02` independently verifies the original App header/image SHA and
+exact original executable, resolving the earlier eight-zero-byte read error;
+its Boot backup matches the first Flash capture. Current BCB snapshot is confirmed
+state 4, staging is the already-consumed 30330, and storage/BLE owners are idle.
+The standard AT32F435RGT7/1000 kHz route succeeds from this running state.
+`prepare-01` halts at HAL_Update with idle SDIO and watchdog debug pause; `install-01`
+programs only App, deliberately restarts, and verifies every candidate App byte,
+unchanged Boot and clear fault registers. `health-01` observes live confirmed
+30331, healthy SD and advancing main-loop/watchdog counters after restart.
+
+Remaining native UI matrix: use the installed SEGGER GDB Server and exact ELF to
+call existing menu/event methods only at the HAL main-loop boundary; no debug
+firmware, Flash download, phone check or install choice is required. Run ten
+main-menu and ten original file-page modal close/navigation cycles, then return
+to the menu, close owned debugger processes, restore the watchdog debug register
+and read back final image/health. This supplements, not replaces, the actual-LVGL
+host regressions and is not a claim of physical touch/rotary or D0-D5 acceptance.
+
+### Local Repair Complete
+
+The local repair and authorized installation are complete. Final checks in
+`.cache/mcu-check-update-20261118/checks-01/` pass all 52 control/safety/menu/real-LVGL
+tests, 81 automatic-candidate tests and actionlint. The real-LVGL suite retains the
+original failing ownership oracle and 100 repaired close/navigation cycles; five
+Chinese rendered states were inspected. The main-menu item retains action-keyed
+button storage, so inserting it on the first screen does not renumber existing
+actions. The menu and dialog both use the requested four-character label.
+
+Native `gdb-ui-01` executes ten main-menu and ten file-page modal cycles on the
+installed production-configuration image. Each closes through the real button
+event and asynchronous cleanup, restores the original group count/focus and
+traverses that group without HardFault. This uses debugger-driven native UI, not
+a claim of 20 physical taps. The GDB attach emitted one initial MSP-alias warning;
+native calls were admitted only after the exact HAL_Update breakpoint and register
+refresh. The final readback independently checks the resulting device state.
+
+`final-01` and `final-verification.json` confirm every App byte is still the
+3.3.31 candidate after debugging, Boot remains identical, confirmed state is 4,
+the modal is closed, SD is healthy, owners are idle, fault registers are clear,
+watchdog/main-loop counters advance and the debugger pause register is restored.
+No J-Link/GDB processes remain. The App is 629,732 bytes; GCC App/Boot and simulator
+builds passed with 641 GCC plus 102 MSBuild warning lines and zero errors. Changed
+UI/font files emitted no diagnostics; the broader existing warnings are not waived.
+
+Source, version metadata, CI regression entry and these records remain uncommitted
+on primary main, based on `74fa4bcb`. No remote push, new Actions run, Cloudflare
+registration, channel publication, App package or OTA transfer was performed.
+The earlier candidate/main migration and D0-D5/whole-card obligations are unchanged.
+
+### Bug Analysis: Modal Focus Ownership
+
+1. Root cause: an implicit ownership assumption plus a coverage gap. This bundled
+   LVGL auto-adds buttons to its default group but does not unlink that group when
+   adding them elsewhere. The old modal freed controls still referenced by the page.
+2. Validation correction: simplified safety stubs never modeled default-group
+   insertion. The first new host harness also used a temporary input-driver object;
+   LVGL retains that pointer. Static driver storage fixes the harness without
+   changing product behavior, and its failed originals are retained.
+3. Prevention: explicitly detach modal controls, restore each real input transaction,
+   retain a genuine old-code failure and run the real-LVGL regression in candidate CI.
+4. Expansion: inspected the other page group users. They reuse the default group;
+   the companion modal is the separate transient group. Do not replace the vendor
+   library globally or confuse this local repair with an independent OTA campaign.
+5. Knowledge capture: this existing component record, adjacent ownership comment
+   and executable test are the project-local references. Trellis is absent; no
+   parallel task/spec hierarchy or unauthorized documentation commit was created.
+
+### Write Audit
+
+Controllable tools, fonts, sources, tests, images, logs and temporary/build outputs
+were preflighted inside `D:/github/my/E-Track`. The generated private key header
+was removed after the build; registered key inputs were not changed. Only owned
+test temporary directories and that generated header were deleted. Existing
+untracked work, failed captures and prior worktrees were preserved.
+
+The authorized native history update remains under
+`C:/Users/SU/AppData/Roaming/SEGGER/`. SU CrashDumps metadata is unchanged from
+2026-11-17 and the SYSTEM CrashDumps directory remains absent. However the final
+audit observes a changed modification time, `2026-11-18T14:23:26.443Z`, on
+`C:/Users/SU/AppData/Local/Microsoft/Windows/PowerShell/StartupProfileData-NonInteractive`
+(1004 bytes). Its writer is unconfirmed: selected commands used cmd/Python/Node
+and native tools, and the reused WMI launch function contains no PowerShell call.
+This is not claimed as a zero-external-write session. The user was informed; no
+cleanup, overwrite or restoration of that cache was performed or authorized.
+The separate Microsoft/PowerShell cache remains at its previous 2026-11-11 mtime.
+Detailed output inventory and final references are in
+`.cache/mcu-check-update-20261118/write-audit.json`.
+
 ## MCU Main Migration, 2026-11-18
 
 The owner requested main-based MCU development and automatic candidate delivery.

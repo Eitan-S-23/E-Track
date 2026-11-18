@@ -3,7 +3,7 @@
 
 enum lv_event_code_t { LV_EVENT_PRESSED, LV_EVENT_RELEASED, LV_EVENT_SHORT_CLICKED,
     LV_EVENT_CLICKED, LV_EVENT_PRESS_LOST, LV_EVENT_DEFOCUSED, LV_EVENT_DELETE };
-enum { LV_STATE_DISABLED = 1 };
+enum { LV_RES_OK = 0, LV_STATE_DISABLED = 1 };
 struct lv_obj_t;
 struct lv_group_t { lv_obj_t* focus; };
 struct lv_obj_t { bool disabled; lv_group_t* group; };
@@ -64,6 +64,7 @@ static void lv_group_set_editing(lv_group_t*, bool) {}
 static void lv_label_set_text(lv_obj_t*, const char* value) { rendered = value; }
 static void CompanionClose(void*) {}
 static int lv_async_call(void (*)(void*), void*) { ++closes; return 0; }
+void CompanionRenderStatus() { lv_label_set_text(companionMessage, ""); }
 
 enum Recorder_Cmd_t { RECORDER_CMD_START, RECORDER_CMD_PAUSE, RECORDER_CMD_CONTINUE, RECORDER_CMD_STOP };
 typedef Recorder_Cmd_t TrackFilter_Cmd_t;
