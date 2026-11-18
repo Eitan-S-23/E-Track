@@ -93,7 +93,8 @@ test("failed or ambiguous HTTP dispatch is not retried and does not expose crede
 test("both workflow routes keep publication and original secret stores separate", async () => {
   const source = await readFile(new URL("../../.github/workflows/original-admin-candidate.yml", import.meta.url), "utf8");
   const app = await readFile(new URL("../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/original-app-candidate.template.yml", import.meta.url), "utf8");
-  assert.match(source, /environment: firmware-rehearsal/);
+  assert.match(source, /environment: firmware-candidates/);
+  assert.doesNotMatch(source, /environment: firmware-rehearsal/);
   assert.match(source, /ORIGINAL_ADMIN_ACTIONS_TOKEN/);
   assert.doesNotMatch(source, /ANDROID_RELEASE_KEYSTORE_BASE64/);
   assert.match(app, /repository: Eitan-S-23\/E-Track/);
@@ -112,6 +113,21 @@ test("both workflow routes keep publication and original secret stores separate"
   assert.match(android, /cache-disabled: true/);
   assert.doesNotMatch(android, /sudo|rm -rf \/usr/);
   assert.match(android, /needs\.windows\.result == 'success' \|\| needs\.admission\.outputs\.resume_android == 'true'/);
+});
+
+test("automatic firmware candidates have their own environment without changing protected firmware routes", async () => {
+  const source = await readFile(new URL("../../.github/workflows/original-admin-candidate.yml", import.meta.url), "utf8");
+  const protectedWorkflow = await readFile(new URL("../../.github/workflows/firmware-build.yml", import.meta.url), "utf8");
+  assert.match(source, /branches: \[release\/candidates\]/);
+  assert.match(source, /OTA_AES_KEY: \$\{\{ secrets\.FIRMWARE_CANDIDATE_OTA_AES_KEY \}\}/);
+  assert.match(source, /CLOUDFLARE_ACCOUNT_ID: \$\{\{ secrets\.CLOUDFLARE_ACCOUNT_ID \}\}/);
+  assert.match(source, /CLOUDFLARE_API_TOKEN: \$\{\{ secrets\.E_TRACK_CI \}\}/);
+  assert.match(source, /TRACE_DEPLOY_TOKEN: \$\{\{ secrets\.ORIGINAL_ADMIN_FIRMWARE_DEPLOY_TOKEN \}\}/);
+  assert.match(source, /OTA_BOOT_CHAIN_READY: \$\{\{ vars\.OTA_BOOT_CHAIN_READY \}\}/);
+  assert.match(source, /INPUT_PUBLISH: "false"/);
+  assert.match(protectedWorkflow, /environment: firmware-rehearsal/);
+  assert.match(protectedWorkflow, /firmware-production/);
+  assert.doesNotMatch(protectedWorkflow, /environment: firmware-candidates/);
 });
 
 test("normal firmware retains only verification originals after private-key cleanup", async () => {

@@ -18,9 +18,9 @@ of P5/hardware acceptance.
    host regressions and prepares only the changed component's new version.
 5. Inspect that run. The App job waits for the corresponding Trace workflow;
    a dispatch being accepted is not reported as a completed candidate delivery.
-   Firmware signing keeps the `firmware-rehearsal` environment's existing
-   reviewer protection. A waiting approval is not a successful build, and this
-   workflow does not approve itself or unlock production.
+   Firmware uses the dedicated `firmware-candidates` environment without a
+   manual reviewer step. Existing `firmware-rehearsal` and production approvals
+   remain unchanged; candidate automation does not unlock production.
 6. Open `https://trace-update-admin-staging.pages.dev`. The new full package is
    an unpublished candidate. Generate selected deltas there if desired, then
    choose Beta or Stable and publish. Automatic ingestion never chooses a channel.
@@ -30,6 +30,22 @@ than overwriting an installed version. Docs/backend-only changes do not rebuild
 the App or firmware. The initial automation delivery changes neither version,
 so it does not rebuild or upload the already delivered `1.0.76+102` or `3.3.24`.
 Both components may be advanced together in one push.
+
+## Candidate Environment
+
+The owner requested unattended firmware candidate delivery on 2026-11-18.
+`firmware-candidates` has no required reviewers or wait timer and allows only
+the exact `release/candidates` branch. Its `OTA_BOOT_CHAIN_READY` variable stays
+`false`. Version checks, native package verification and explicit channel
+publication remain mandatory; removing the manual wait removes none of them.
+
+The environment reuses the existing firmware AES key as
+`FIRMWARE_CANDIDATE_OTA_AES_KEY` and the existing
+`ORIGINAL_ADMIN_FIRMWARE_DEPLOY_TOKEN`. The uploader consumes the repository's
+unchanged `CLOUDFLARE_ACCOUNT_ID` and `E_TRACK_CI` Secrets. No key or token is
+generated or rotated, and the shared rehearsal environment is not modified.
+Configuration-only pushes still run checks without rebuilding an existing App
+or firmware version. Manual workflow dispatch remains checks-only.
 
 ## Original App Boundary
 

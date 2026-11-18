@@ -82,7 +82,7 @@ jobs:
     if: needs.checks.outputs.firmware == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 35
-    environment: firmware-rehearsal
+    environment: firmware-candidates
     env:
       FIRMWARE_RELEASE_MODE: original-admin-candidate
       INPUT_PREPARE_ADMIN_CANDIDATE: "true"
@@ -134,7 +134,7 @@ jobs:
       - name: Compile this exact push and prepare normal full and recovery packages
         id: package
         env:
-          OTA_AES_KEY: ${{ secrets.FIRMWARE_REHEARSAL_OTA_AES_KEY }}
+          OTA_AES_KEY: ${{ secrets.FIRMWARE_CANDIDATE_OTA_AES_KEY }}
         run: |
           set -euo pipefail
           export INPUT_RELEASE_NOTES="$(node -p "JSON.parse(require('node:fs').readFileSync('Tools/ota/original-admin-release.json','utf8')).firmware.releaseNotes")"
@@ -146,8 +146,8 @@ jobs:
         run: node .github/scripts/firmware-gcc-keyed-build.mjs cleanup --build-dir .cache/original-admin-candidate/run/private-build
       - name: Upload and register the unpublished original-Admin firmware candidate
         env:
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.FIRMWARE_REHEARSAL_CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.FIRMWARE_REHEARSAL_CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.E_TRACK_CI }}
           TRACE_DEPLOY_TOKEN: ${{ secrets.ORIGINAL_ADMIN_FIRMWARE_DEPLOY_TOKEN }}
           TRACE_UPDATE_SERVICE_URL: https://trace-update-service-staging.tangjichentudou.workers.dev
           TRACE_R2_BUCKET: trace-update-staging-releases
