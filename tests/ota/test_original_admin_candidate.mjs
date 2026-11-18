@@ -1,10 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { readFile, mkdir, mkdtemp, access } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { appVersion, automaticCandidateAdmission, candidatePlan, CANDIDATE_BRANCH, dispatchApp,
-  githubJson } from "../../.github/scripts/original-admin-candidate.mjs";
+import { appVersion, automaticCandidateAdmission, automaticFirmwareCandidateAdmission, candidatePlan, CANDIDATE_BRANCH, FIRMWARE_CANDIDATE_BRANCH, dispatchApp,
+  githubJson, planFromCheckout, APP_PUBSPEC, RELEASE_CONFIG } from "../../.github/scripts/original-admin-candidate.mjs";
 import { adminCandidateAdmission } from "../../.github/scripts/firmware-admin-context.mjs";
 import { buildKeyedFirmware } from "../../.github/scripts/firmware-gcc-keyed-build.mjs";
 import { firmwareCMakeOptions } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-build-profile.mjs";
@@ -15,7 +16,7 @@ const inputs = () => ({ changed: [], beforeApp: "version: 1.0.76+102\n", afterAp
   beforeFirmware: config("3.3.24"), afterFirmware: config("3.3.24"), source: "a".repeat(40) });
 const env = () => ({ GITHUB_ACTIONS: "true", GITHUB_REPOSITORY: "Eitan-S-23/E-Track", GITHUB_EVENT_NAME: "push",
   GITHUB_REF: `refs/heads/${CANDIDATE_BRANCH}`, GITHUB_SHA: "a".repeat(40), GITHUB_RUN_ID: "123", GITHUB_RUN_ATTEMPT: "1" });
-const firmware = () => ({ ...env(), FIRMWARE_RELEASE_MODE: "original-admin-candidate", INPUT_PREPARE_ADMIN_CANDIDATE: "true",
+const firmware = () => ({ ...env(), GITHUB_REF: `refs/heads/${FIRMWARE_CANDIDATE_BRANCH}`, FIRMWARE_RELEASE_MODE: "original-admin-candidate", INPUT_PREPARE_ADMIN_CANDIDATE: "true",
   OTA_BOOT_CHAIN_READY: "false", INPUT_FIRMWARE_BUILD_PROFILE: "p34-v2-candidate", INPUT_CANDIDATE_REVIEWED_COMMIT: "a".repeat(40),
   INPUT_PUBLISH: "false", INPUT_REHEARSAL: "false", INPUT_CHECK_BINDINGS: "false", INPUT_PACKAGE_CANDIDATE: "false",
   INPUT_STAGE_CANDIDATE: "false", INPUT_VERSION_NAME: "3.3.25", INPUT_RELEASE_NOTES: "A real new source version" });
@@ -38,6 +39,100 @@ test("a versioned firmware edit requests a fresh firmware build", () => {
   const plan = candidatePlan({ ...inputs(), afterFirmware: config("3.3.25"), changed: ["Libraries/OTA/ota_ble_session.c"] });
   assert.equal(plan.firmware.required, true);
   assert.equal(plan.app.required, false);
+});
+
+test("main plans only firmware, even when App code or version also changes", () => {
+  const plan = candidatePlan({ ...inputs(), component: "firmware", afterApp: "version: 1.0.77+103\n",
+    afterFirmware: config("3.3.25"), changed: ["USER/HAL/HAL_Bluetooth.cpp", "app/bluetooth_flutter_Trace/lib/main.dart"] });
+  assert.equal(plan.branch, "main");
+  assert.equal(plan.firmware.required, true);
+  assert.equal(plan.app.required, false);
+  const appOnly = candidatePlan({ ...inputs(), component: "firmware", changed: ["app/bluetooth_flutter_Trace/lib/main.dart"] });
+  assert.equal(appOnly.firmware.required, false);
+  assert.equal(appOnly.app.required, false);
+});
+
+test("the App delivery branch cannot schedule a firmware candidate", () => {
+  const plan = candidatePlan({ ...inputs(), component: "app", afterFirmware: config("3.3.25"),
+    afterApp: "version: 1.0.77+103\n", changed: ["USER/HAL/HAL_Bluetooth.cpp", "app/bluetooth_flutter_Trace/lib/main.dart"] });
+  assert.equal(plan.branch, CANDIDATE_BRANCH);
+  assert.equal(plan.app.required, true);
+  assert.equal(plan.firmware.required, false);
+  assert.throws(() => candidatePlan({ ...inputs(), component: "unknown" }), /component/);
+});
+
+test("main firmware keeps version increments mandatory and never rebuilds a configuration-only change", () => {
+  assert.throws(() => candidatePlan({ ...inputs(), component: "firmware", changed: ["USER/HAL/HAL_Bluetooth.cpp"] }), /increment/);
+  const plan = candidatePlan({ ...inputs(), component: "firmware", changed: [".github/workflows/original-admin-candidate.yml"] });
+  assert.equal(plan.firmware.required, false);
+  assert.equal(plan.app.required, false);
+  assert.equal(plan.channelPublished, false);
+  assert.equal(plan.automaticDeltas, false);
+});
+
+test("automatic firmware admission accepts only first-attempt main pushes", () => {
+  automaticFirmwareCandidateAdmission(firmware());
+  for (const change of [{ GITHUB_REF: `refs/heads/${CANDIDATE_BRANCH}` }, { GITHUB_REF: "refs/heads/dev/firmware/task" },
+    { GITHUB_EVENT_NAME: "workflow_dispatch" }, { GITHUB_REPOSITORY: "someone/fork" }, { GITHUB_RUN_ATTEMPT: "2" }]) {
+    assert.throws(() => automaticFirmwareCandidateAdmission({ ...firmware(), ...change }));
+    assert.throws(() => adminCandidateAdmission({ ...firmware(), ...change }));
+  }
+});
+
+async function mainCheckout({ changed = "docs/example.md", version = "3.3.30" } = {}) {
+  const root = fileURLToPath(new URL("../../", import.meta.url));
+  const area = outputPath(root, path.join(root, ".cache/original-admin-tests"));
+  await mkdir(area, { recursive: true });
+  const dir = await mkdtemp(path.join(area, "main-plan-"));
+  const git = (...args) => execFileSync("git", ["-c", `safe.directory=${dir}`,
+    "-c", "core.autocrlf=false", "-c", "commit.gpgsign=false", "-c", `core.hooksPath=${dir}/empty-hooks`,
+    "-c", "user.name=Candidate Planner Test", "-c", "user.email=candidate-test@example.invalid", ...args],
+  { cwd: dir, encoding: "utf8", windowsHide: true }).trim();
+  git("init", "--initial-branch=main");
+  await writeOutput(root, path.join(dir, APP_PUBSPEC), "version: 1.0.82+108\n");
+  await writeOutput(root, path.join(dir, RELEASE_CONFIG), JSON.stringify(config("3.3.30")) + "\n");
+  git("add", ".");
+  git("commit", "-m", "Existing versioned main baseline");
+  const before = git("rev-parse", "HEAD");
+  await writeOutput(root, path.join(dir, changed), "Synthetic planner input, not product code.\n");
+  await writeOutput(root, path.join(dir, RELEASE_CONFIG), JSON.stringify(config(version)) + "\n");
+  git("add", ".");
+  git("commit", "-m", "Candidate planning fixture");
+  return { dir, context: { ...firmware(), GITHUB_SHA: git("rev-parse", "HEAD"), BEFORE_SHA: before } };
+}
+
+test("actual main checkout planner needs no historical App branch ancestry and skips documentation", async () => {
+  const { dir, context } = await mainCheckout();
+  const plan = await planFromCheckout(dir, context);
+  assert.equal(plan.source, context.GITHUB_SHA);
+  assert.equal(plan.branch, "main");
+  assert.equal(plan.firmware.versionName, "3.3.30");
+  assert.equal(plan.firmware.required, false);
+  assert.equal(plan.app.required, false);
+});
+
+test("actual main checkout planner selects only a versioned firmware change", async () => {
+  const { dir, context } = await mainCheckout({ changed: "USER/example.c", version: "3.3.31" });
+  const plan = await planFromCheckout(dir, context);
+  assert.equal(plan.firmware.required, true);
+  assert.equal(plan.firmware.versionCode, 30331);
+  assert.equal(plan.app.required, false);
+  assert.equal(plan.channelPublished, false);
+  assert.equal(plan.automaticDeltas, false);
+  await assert.rejects(dispatchApp(plan, { ...context, ORIGINAL_ADMIN_ACTIONS_TOKEN: "unused-test-value" },
+    async () => assert.fail("Main must never call the App dispatcher")), /release\/candidates/);
+});
+
+test("actual main checkout planner rejects source edits without a new firmware version", async () => {
+  const { dir, context } = await mainCheckout({ changed: "Libraries/OTA/example.c" });
+  await assert.rejects(planFromCheckout(dir, context), /increment/);
+});
+
+test("actual main checkout planner rejects a missing baseline, wrong checkout, and unrelated before-SHA", async () => {
+  const { dir, context } = await mainCheckout();
+  await assert.rejects(planFromCheckout(dir, { ...context, BEFORE_SHA: "0".repeat(40) }), /versioned baseline/);
+  await assert.rejects(planFromCheckout(dir, { ...context, GITHUB_SHA: context.BEFORE_SHA }), /Checkout differs/);
+  await assert.rejects(planFromCheckout(dir, { ...context, BEFORE_SHA: "f".repeat(40) }));
 });
 for (const name of ["app/bluetooth_flutter_Trace/lib/main.dart", "app/bluetooth_flutter_Trace/pubspec.lock", "Tools/flutter/ota_link_profile.py", "Libraries/OTA/ota_ble_frame.c", "USER/HAL/HAL_Bluetooth.cpp", "boot/main.c"]) {
   test(`changed build input requires an explicit version increment: ${name}`, () => assert.throws(() => candidatePlan({ ...inputs(), changed: [name] })));
@@ -118,7 +213,9 @@ test("both workflow routes keep publication and original secret stores separate"
 test("automatic firmware candidates have their own environment without changing protected firmware routes", async () => {
   const source = await readFile(new URL("../../.github/workflows/original-admin-candidate.yml", import.meta.url), "utf8");
   const protectedWorkflow = await readFile(new URL("../../.github/workflows/firmware-build.yml", import.meta.url), "utf8");
-  assert.match(source, /branches: \[release\/candidates\]/);
+  assert.match(source, /branches: \[main, release\/candidates\]/);
+  assert.match(source, /if: github\.ref == 'refs\/heads\/main' && needs\.checks\.outputs\.firmware == 'true'/);
+  assert.match(source, /if: github\.ref == 'refs\/heads\/release\/candidates' && needs\.checks\.outputs\.app == 'true'/);
   assert.match(source, /OTA_AES_KEY: \$\{\{ secrets\.FIRMWARE_CANDIDATE_OTA_AES_KEY \}\}/);
   assert.match(source, /CLOUDFLARE_ACCOUNT_ID: \$\{\{ secrets\.CLOUDFLARE_ACCOUNT_ID \}\}/);
   assert.match(source, /CLOUDFLARE_API_TOKEN: \$\{\{ secrets\.E_TRACK_CI \}\}/);
@@ -162,7 +259,7 @@ function resumeFixture() {
 }
 
 async function runAppAdmission(fixture) {
-  const template = await readFile(new URL("../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/original-app-candidate.template.yml", import.meta.url), "utf8");
+  const template = (await readFile(new URL("../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/original-app-candidate.template.yml", import.meta.url), "utf8")).replaceAll("\r\n", "\n");
   const block = template.match(/          script: \|\n([\s\S]*?)\n      - uses: actions\/checkout@v4/);
   assert.ok(block, "Execute the actual pre-checkout admission script");
   const script = block[1].split("\n").map(line => line.replace(/^            /, "")).join("\n");

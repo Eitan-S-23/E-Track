@@ -7,18 +7,27 @@ import { CliError, failure, outputPath, projectRoot, writeOutput } from "../../a
 import { versionCodeFor } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-schema.mjs";
 
 export const CANDIDATE_BRANCH = "release/candidates";
+export const FIRMWARE_CANDIDATE_BRANCH = "main";
 export const INTEGRATED_SOURCE = "34495140d28ce401616cc19b6b62bb6bba1d764c";
 export const APP_PUBSPEC = "app/bluetooth_flutter_Trace/pubspec.yaml";
 export const RELEASE_CONFIG = "Tools/ota/original-admin-release.json";
 const sha = value => /^[0-9a-f]{40}$/.test(value ?? "");
 const git = (root, args) => execFileSync("git", args, { cwd: root, encoding: "utf8", windowsHide: true }).trim();
 
-export function automaticCandidateAdmission(env) {
+function automaticPushAdmission(env, branch) {
   if (env.GITHUB_ACTIONS !== "true" || env.GITHUB_REPOSITORY !== "Eitan-S-23/E-Track"
-      || env.GITHUB_EVENT_NAME !== "push" || env.GITHUB_REF !== `refs/heads/${CANDIDATE_BRANCH}`
+      || env.GITHUB_EVENT_NAME !== "push" || env.GITHUB_REF !== `refs/heads/${branch}`
       || !sha(env.GITHUB_SHA) || !/^[1-9][0-9]*$/.test(env.GITHUB_RUN_ID ?? "") || env.GITHUB_RUN_ATTEMPT !== "1") {
-    throw new CliError("Automatic candidates require a first-attempt push to E-Track release/candidates");
+    throw new CliError(`Automatic candidates require a first-attempt push to E-Track ${branch}`);
   }
+}
+
+export function automaticCandidateAdmission(env) {
+  automaticPushAdmission(env, CANDIDATE_BRANCH);
+}
+
+export function automaticFirmwareCandidateAdmission(env) {
+  automaticPushAdmission(env, FIRMWARE_CANDIDATE_BRANCH);
 }
 
 export function appVersion(text) {
@@ -36,8 +45,9 @@ export function releaseConfig(value) {
   return { ...value.firmware, versionCode: versionCodeFor(value.firmware.versionName) };
 }
 
-export function candidatePlan({ changed, beforeApp, afterApp, beforeFirmware, afterFirmware, source }) {
+export function candidatePlan({ changed, beforeApp, afterApp, beforeFirmware, afterFirmware, source, component = "both" }) {
   if (!sha(source)) throw new CliError("Exact candidate source required");
+  if (!["app", "firmware", "both"].includes(component)) throw new CliError("Unknown candidate component");
   const app = appVersion(afterApp), previousApp = appVersion(beforeApp);
   const firmware = releaseConfig(afterFirmware), previousFirmware = releaseConfig(beforeFirmware);
   const appChanged = changed.some(name => /^app\/bluetooth_flutter_Trace\/(?:pubspec\.(?:yaml|lock)$|analysis_options\.yaml$|lib\/|android\/|windows\/|assets\/|third_party\/|test\/)/.test(name)
@@ -47,22 +57,24 @@ export function candidatePlan({ changed, beforeApp, afterApp, beforeFirmware, af
       || firmware.versionCode < previousFirmware.versionCode || firmware.versionCode < 30324) {
     throw new CliError("Candidate versions must never move backward");
   }
-  const appRequired = appChanged || app.versionCode !== previousApp.versionCode || app.versionName !== previousApp.versionName;
-  const firmwareRequired = firmwareChanged || firmware.versionCode !== previousFirmware.versionCode;
+  const appRequired = component !== "firmware" && (appChanged || app.versionCode !== previousApp.versionCode || app.versionName !== previousApp.versionName);
+  const firmwareRequired = component !== "app" && (firmwareChanged || firmware.versionCode !== previousFirmware.versionCode);
   if (appRequired && (app.versionCode <= previousApp.versionCode || app.versionName === previousApp.versionName)) {
     throw new CliError("App changed: increment both pubspec version name and code; existing APKs are immutable");
   }
   if (firmwareRequired && firmware.versionCode <= previousFirmware.versionCode) {
     throw new CliError("Firmware changed: increment Tools/ota/original-admin-release.json firmware.versionName");
   }
-  return { source, branch: CANDIDATE_BRANCH, app: { ...app, required: appRequired },
+  return { source, branch: component === "firmware" ? FIRMWARE_CANDIDATE_BRANCH : CANDIDATE_BRANCH, app: { ...app, required: appRequired },
     firmware: { ...firmware, required: firmwareRequired }, channelPublished: false, automaticDeltas: false };
 }
 
 export async function planFromCheckout(root, env = process.env) {
-  automaticCandidateAdmission(env);
+  const firmwareMain = env.GITHUB_REF === `refs/heads/${FIRMWARE_CANDIDATE_BRANCH}`;
+  (firmwareMain ? automaticFirmwareCandidateAdmission : automaticCandidateAdmission)(env);
   if (git(root, ["rev-parse", "HEAD"]) !== env.GITHUB_SHA) throw new CliError("Checkout differs from push source");
-  git(root, ["merge-base", "--is-ancestor", INTEGRATED_SOURCE, env.GITHUB_SHA]);
+  if (!firmwareMain) git(root, ["merge-base", "--is-ancestor", INTEGRATED_SOURCE, env.GITHUB_SHA]);
+  if (firmwareMain && /^0{40}$/.test(env.BEFORE_SHA ?? "")) throw new CliError("Main firmware requires an existing versioned baseline");
   const before = /^0{40}$/.test(env.BEFORE_SHA ?? "") ? INTEGRATED_SOURCE : env.BEFORE_SHA;
   if (!sha(before)) throw new CliError("Push before-SHA is required; do not guess a comparison base");
   git(root, ["merge-base", "--is-ancestor", before, env.GITHUB_SHA]);
@@ -72,7 +84,7 @@ export async function planFromCheckout(root, env = process.env) {
     : JSON.parse(git(root, ["show", `${before}:${RELEASE_CONFIG}`]));
   return candidatePlan({ changed: git(root, ["diff", "--name-only", "--no-renames", before, env.GITHUB_SHA, "--"]).split(/\r?\n/),
     beforeApp: git(root, ["show", `${before}:${APP_PUBSPEC}`]), afterApp: await readFile(path.join(root, APP_PUBSPEC), "utf8"),
-    beforeFirmware, afterFirmware, source: env.GITHUB_SHA });
+    beforeFirmware, afterFirmware, source: env.GITHUB_SHA, component: firmwareMain ? "firmware" : "app" });
 }
 
 export async function githubJson(route, token, { method = "GET", body, fetcher = fetch } = {}) {
@@ -120,7 +132,7 @@ async function observeApp(receipt, env) {
 async function freshFirmwareSource(root, out, env) {
   const { adminCandidateAdmission } = await import("./firmware-admin-context.mjs");
   const owner = adminCandidateAdmission(env);
-  automaticCandidateAdmission(env);
+  automaticFirmwareCandidateAdmission(env);
   const plan = await planFromCheckout(root, env);
   if (!plan.firmware.required || plan.firmware.versionName !== owner.versionName) throw new CliError("Firmware is not a new planned version");
   const { buildKeyedFirmware } = await import("./firmware-gcc-keyed-build.mjs");

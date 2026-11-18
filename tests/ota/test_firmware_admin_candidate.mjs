@@ -45,12 +45,15 @@ for (const value of [{ success: false }, { success: true, result: { id: "a".repe
     await assert.rejects(apiTokenS3Credentials("token", async () => Response.json(value)));
   });
 }
-test("normal source pins contain no fixed-load reference or imported ETU asset", async () => {
-  const config = JSON.parse(await readFile(new URL("../../Tools/ota/admin-candidate-inputs.json", import.meta.url)));
-  assert.equal(config.schema, "original-admin-normal-source-v1");
-  assert.equal(config.profile, "p34-v2-candidate");
-  assert.ok(!JSON.stringify(config).includes("reference.lzma"));
-  assert.ok(!JSON.stringify(config).includes(".etu"));
+test("automatic source compiles this push instead of importing historical executables or benchmark packages", async () => {
+  const source = await readFile(new URL("../../.github/scripts/original-admin-candidate.mjs", import.meta.url), "utf8");
+  const build = source.slice(source.indexOf("async function freshFirmwareSource("), source.indexOf("async function main("));
+  assert.match(build, /automaticFirmwareCandidateAdmission\(env\)/);
+  assert.match(build, /await buildKeyedFirmware\(/);
+  assert.match(build, /commitSha: env\.GITHUB_SHA/);
+  assert.match(build, /profile: "p34-v2-candidate"/);
+  assert.match(build, /importedBenchmarkPackages: 0, sourceCompilations: 1/);
+  assert.doesNotMatch(build, /admin-candidate-inputs|download-artifact|reference\.lzma|\.etu/);
 });
 
 test("explicit original-Admin delta selects a lower base without enabling another release mode", () => {

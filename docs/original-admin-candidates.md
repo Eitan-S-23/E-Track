@@ -2,20 +2,28 @@
 
 ## Developer Workflow
 
-The delivery branch is `release/candidates` in `Eitan-S-23/E-Track`. It starts
-from integrated source `34495140d28ce401616cc19b6b62bb6bba1d764c`, not the older
-standalone Trace application. Other branches retain their existing behavior.
-This is an operational candidate branch, not a merge into `main` or completion
-of P5/hardware acceptance.
+`main` in `Eitan-S-23/E-Track` is the authoritative MCU source and automatic
+firmware candidate branch. Develop there, or in a task branch based on current
+main and integrate the bounded changes back before delivery. Do not move MCU
+changes to `release/candidates` to trigger a build.
 
-1. Make the App and/or firmware changes on this integrated source line.
-2. For an App change, increment both the name and code in
-   `app/bluetooth_flutter_Trace/pubspec.yaml`.
-3. For a firmware change, increment `firmware.versionName` in
-   `Tools/ota/original-admin-release.json`. Version codes use the existing
-   `major * 10000 + minor * 100 + patch` encoding.
-4. Commit and push to `release/candidates`. `Original Admin Candidates` runs
-   host regressions and prepares only the changed component's new version.
+The App keeps its separate `release/candidates` delivery route and original
+Trace signing. That source line descends from integrated source
+`34495140d28ce401616cc19b6b62bb6bba1d764c`, not the older standalone Trace App.
+Main pushes never dispatch an App package; App-branch pushes never build firmware.
+
+1. For MCU delivery, update the code and increment `firmware.versionName` in
+   `Tools/ota/original-admin-release.json`, including the release notes. Version
+   codes use the existing `major * 10000 + minor * 100 + patch` encoding.
+2. Validate and integrate the MCU changes to main. Commit and push `main` under
+   the owner's authorization. No candidate-branch copy or manual dispatch is
+   needed. If the owner wants the final push, leave the prepared main commit
+   locally and provide `git push origin main`; do not push on their behalf.
+3. For App delivery, increment both the name and code in
+   `app/bluetooth_flutter_Trace/pubspec.yaml` and deliver the exact integrated App
+   source through `release/candidates`, as before.
+4. `Original Admin Candidates` runs host regressions and plans only the branch's
+   component. Changed MCU inputs without a new version fail before packaging.
 5. Inspect that run. The App job waits for the corresponding Trace workflow;
    a dispatch being accepted is not reported as a completed candidate delivery.
    Firmware uses the dedicated `firmware-candidates` environment without a
@@ -25,17 +33,25 @@ of P5/hardware acceptance.
    an unpublished candidate. Generate selected deltas there if desired, then
    choose Beta or Stable and publish. Automatic ingestion never chooses a channel.
 
-Changed code without a version increment fails before package creation, rather
-than overwriting an installed version. Docs/backend-only changes do not rebuild
-the App or firmware. The initial automation delivery changes neither version,
-so it does not rebuild or upload the already delivered `1.0.76+102` or `3.3.24`.
-Both components may be advanced together in one push.
+Changed build inputs without a version increment fail on that component's
+delivery branch, rather than overwriting an installed version. Documentation,
+workflow and backend-only changes do not create App or firmware packages.
+An App and MCU release now use their respective branch pushes, not a combined
+candidate-branch push. `MCU Firmware Build` no longer duplicates main push builds;
+its pull-request, master build-only and protected manual routes remain available.
+
+The main migration preserves the already delivered MCU `3.3.30 / 30330` and
+App `1.0.82+108`. Its source/baseline integration is explicitly CI-skipped, followed
+by a documentation-only main push that exercises checks and skips both builds.
+This one-time baseline establishment is not a version-check bypass in the planner.
+The next real MCU release must have a higher version. Main integration and
+candidate delivery do not complete P5 or outstanding hardware/formal acceptance.
 
 ## Candidate Environment
 
 The owner requested unattended firmware candidate delivery on 2026-11-18.
 `firmware-candidates` has no required reviewers or wait timer and allows only
-the exact `release/candidates` branch. Its `OTA_BOOT_CHAIN_READY` variable stays
+the exact `main` branch. Its `OTA_BOOT_CHAIN_READY` variable stays
 `false`. Version checks, native package verification and explicit channel
 publication remain mandatory; removing the manual wait removes none of them.
 
@@ -80,7 +96,7 @@ full-byte readback implementation. Successful downloads become a prerelease with
 
 ## Firmware Boundary
 
-Each new firmware candidate compiles the exact pushed GCC App and matching Boot
+Each new firmware candidate compiles the exact main-push GCC App and matching Boot
 through the existing key-bound builder with `p34-v2-candidate`, then runs the
 existing full/recovery packaging and native byte verification. It does not reuse
 the old pinned executable for new firmware source. The compiler and uploader
