@@ -71,6 +71,13 @@ ScanResult _scan(_Device device, {String name = '', bool connectable = true}) =>
   timeStamp: DateTime.now(),
 );
 
+Future<void> _settleDetail(WidgetTester tester) async {
+  await tester.pump();
+  // Delayed entry animations may not schedule a frame until their timer fires.
+  await tester.pump(const Duration(seconds: 2));
+  await tester.pumpAndSettle();
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late List<_Device> devices;
@@ -273,7 +280,7 @@ void main() {
       final current = device(_address);
       await tester.pumpWidget(GetMaterialApp(home: kind == 'device'
           ? DeviceDetailPage(device: current) : SpeedometerDeviceDetailPage(device: current)));
-      await tester.pumpAndSettle();
+      await _settleDetail(tester);
       expect(find.text(_broadcastOnly), findsNothing);
 
       ble.connectedDevices.add(current);
@@ -283,20 +290,20 @@ void main() {
       gate.complete([device(_address, name: 'E-Track Restored')]);
       await ble.refreshConnectedDeviceMetadata();
       await ble.deviceMetadata.settled;
-      await tester.pumpAndSettle();
+      await _settleDetail(tester);
       expect(find.text('E-Track Restored'), findsWidgets);
 
       ble.scanResults.assignAll([_scan(current, name: 'E-Track Renamed')]);
       await ble.deviceMetadata.settled;
-      await tester.pumpAndSettle();
+      await _settleDetail(tester);
       expect(find.text('E-Track Renamed'), findsWidgets);
       ble.scanResults.clear();
-      await tester.pumpAndSettle();
+      await _settleDetail(tester);
       expect(find.text('E-Track Renamed'), findsWidgets);
 
       ble.connectedDevices.clear();
       ble.scanResults.assignAll([_scan(current, name: 'E-Track Renamed', connectable: false)]);
-      await tester.pumpAndSettle();
+      await _settleDetail(tester);
       expect(find.text(_broadcastOnly), findsOneWidget);
       expect(find.byType(ElevatedButton), findsNothing);
     });
