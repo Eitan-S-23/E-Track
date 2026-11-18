@@ -1,5 +1,49 @@
 # APP-COMPANION-01 Implementation Record
 
+## Check Update Release 3.3.34, 2026-11-19
+
+The owner explicitly requested a new MCU firmware version, delta-compatible
+with the currently installed image, to test the MCU Check Update function.
+This authorizes bounded source commits/push, original-Admin candidate/delta
+delivery and publication on the current App's MCU Stable channel. It does not
+authorize a phone update, Boot programming, OTA installation on the device,
+unrelated channel/configuration changes or bypassing protected production gates.
+
+Entry inspection confirms original MCU Stable 3.3.30 (revision 7), Beta 3.3.26
+(revision 10), no registered 3.3.33 and 40 retained delta jobs. The current App
+uses Stable. Retain App channels, Beta and every earlier artifact/job. Source
+anchor `53ebe07e78430d541a24f87c40e84adbbd33b126` contains the bounded 20-file
+repair/test/record change already installed locally; it is not a new CI build.
+
+The base is the exact installed 630100-byte 3.3.33 image, SHA-256
+`19ba4b030c567cee6e1a2b1dc7b24ba216049ed6d6b843adc3bdceb5205ff3fd`.
+Recompiling the same version would not establish matching bytes. The high-level
+CI preparer requires a numeric Actions run, while this image has an existing
+local GCC build and complete device readback. The smallest adapter therefore
+reuses `etu_pack.py`, `etu_unpack.py`, the native byte/recovery verifiers and
+`buildFirmwareMetadata` without recompiling or re-finalizing the base. Its
+registration run ID is explicitly `local-gcc-companion-reconnect-20261119-build-02`,
+not an invented GitHub run. The ordinary schema, immutable S3 uploader,
+preflight, verified R2 readback and registration module remain unchanged.
+
+Base packaging and byte-equal reconstruction pass. Register it without channel
+publication before creating the higher target, preserving the monotonic catalog.
+Then push target version 3.3.34 through the normal main Actions entry, use the
+existing operator-selected MCU delta workflow for this exact base, verify exact
+reconstruction/R2 bytes, enable that patch and publish only MCU Stable. Stop
+before claiming success if the actual Public latest query does not select the
+30333/base-SHA patch. No device installation is part of this delivery.
+
+Evidence root: `.cache/firmware-check-update-release-20261119/`. Publication is
+pending at this checkpoint. The source-matched release checks comprise 138
+passing cases: 136 original passes in `keyring-check-02` and the two actual
+original-Admin packaging cases in `keyring-check-03`. Earlier failed host
+receipts are retained: the first wrapper omitted process-local Git ownership
+configuration, and the remaining two native entries found the WindowsApps
+`python3` alias. Selecting installed `python` repairs the host invocation,
+without changing product tests, relaxing assertions or modifying global Git.
+The first read adapter's HEAD/null-body failure is likewise retained separately.
+
 ## Coupled Bluetooth Startup Repair, 2026-11-19
 
 The owner selected MCU-startup Bluetooth-module reset as the preferred repair,

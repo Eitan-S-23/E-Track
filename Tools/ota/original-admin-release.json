@@ -1,7 +1,7 @@
 {
   "schema": "original-admin-automatic-candidates-v1",
   "firmware": {
-    "versionName": "3.3.33",
-    "releaseNotes": "Resets the Bluetooth module once during MCU startup so MCU-only restarts invalidate the old phone connection. Uses a bounded software reset, preserves the selected baud and module configuration, and leaves new-link bytes for the normal protocol. Retains the standalone Check Update menu, styled Chinese dialog and focus-group exit fix. Preserves explicit firmware consent, recorder exclusion, BLE V2 and file management. Full and recovery candidate only; channel publication and selected delta generation remain operator-controlled."
+    "versionName": "3.3.34",
+    "releaseNotes": "Check Update validation release for the installed 3.3.33 firmware. Retains the one-shot Bluetooth module reset at MCU startup, automatic companion reconnection, standalone Check Update menu, styled Chinese dialog and focus-group exit fix. Preserves explicit installation consent, recorder exclusion, BLE V2, module settings and file management. The operator-selected 3.3.33 delta must match the exact installed base image; other bases retain full-package fallback."
   }
 }
