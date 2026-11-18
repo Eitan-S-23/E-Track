@@ -43,6 +43,34 @@ and [the delivery closeout](docs/ota-exec-notes/APP-ADMIN-UX-01.md#follow-up-del
 Earlier LOCAL_PENDING and denied-route statements below are dated history,
 superseded by this delivery rather than rewritten as successful earlier attempts.
 
+### App Codec Source Ready; Rollout Still Pending
+
+The later codec continuation has integrated product source
+`73e6022fe66adb77855e22984309bfaece8cc9fc` into primary and remote `main`.
+Full App CI `44198825893` and exact-source backend CI `44202412682` pass.
+Original-signed `1.0.81+107`, packaging source
+`11fbf0b899568977e312d5e1820d89d06a21f5a7`, passes E-Track `44202448846` and Trace
+`44202598314`; its App tree equals the validated source. The original signer,
+Ed25519 capability signature and R2-backed candidate are verified. This does
+not deploy the new backend or qualify the decoder on a phone.
+
+Prepared Trace branch `dev/admin/original-delta-codec-20261118`, commit
+`4745aeadf2b526c6ff640539b401ff3fc1623cdb`, installs only the reviewed App delta
+template pinned to generator `73e6022f`. Its public-key push run `44204047891`
+succeeds; no Android delta job was generated. Existing production App workflow
+ref/commit slots are `secret_text`: API values are redacted, not absent.
+Their bindings have NOT been switched, and preview/public-key/credential slots
+are unchanged. Wait for the prepared phone measurements before activation.
+
+After phone qualification, change only Admin production's two App workflow
+ref/commit bindings, then use the existing Actions workflow to deploy this
+verified source with Worker and Public included. Keep `E_TRACK_CI`, named
+`env.staging`, Access and every other binding. No new migration, App rebuild,
+channel promotion or replay of a successful delta is needed. Cloud snapshots
+`keyring-cloud-read-01/02` under `.cache/app-codec-20261118/` still verify live
+source `28459a89`, four unchanged channel rows and 37 unchanged jobs.
+See [candidate delivery and remaining work](docs/ota-exec-notes/APP-ADMIN-UX-01.md#codec-candidate-delivered-phone-qualification-pending).
+
 ### Preserve Named Worker Environments
 
 The first run `44183120496` applied 0015 and uploaded the intended Worker code,

@@ -1,5 +1,178 @@
 # App And Admin UX Improvements
 
+## App Codec Continuation 2026-11-18
+
+Owner: Codex root. The user explicitly requested continued implementation and
+necessary same-task authorization. Baseline `ff65b56f66d103d5ae5c3eae7753a4912e670746`
+is verified against fresh remote main. Worktree `.worktrees/app-codec-20261118`,
+branch `dev/flutter/app-codec-20261118`; previous delivered UI, original-signed
+1.0.80+106 and Cloudflare deployment are not repeated.
+
+Research: the current Android updater supports VCDIFF/tracepatch only. Its
+VCDIFF path loads the base, patch and output in memory. The existing MCU
+generator emits a 40-byte mixed-endian CRC/size header followed by raw LZMA,
+containing interleaved bsdiff sign-magnitude control triples, diff and extra
+bytes. It is not BSDIFF40/bzip2 and not an App ETU/encryption format. The earlier
+104-to-105 benchmark is reused; bsdiff/LZMA native desktop decode was 2.419 s,
+versus VCDIFF 0.233 s, not a claim of faster decoding or measured phone behavior.
+
+Implementation direction: reuse the exact MCU encoder with AES disabled;
+normalize/check its header in an App-specific generator. On Android reuse
+XZ for Java 1.10 raw LZMA (Maven Central POM verified, 0BSD), with file-backed
+base reads, bounded chunks/dictionary/control budget, SHA/CRC/length checks,
+deadline and cancellation. Do not port LZMA or add an NDK/FFI build just for
+decompression. A small Java bsdiff stream adapter is required because the
+existing vendor bspatch allocates/writes whole in-memory images and cannot
+satisfy bounded phone memory. Preserve existing target-signature/installer gates.
+
+New `bsdiff-lzma-v1` is explicitly negotiated for supplemental App deltas only.
+Original signed release manifests retain their legacy patches; filtering a
+signed patch list without re-signing would invalidate old clients' full fallback.
+New supplemental manifests require the new capability and a source version
+that actually includes the decoder; old/unknown clients retain original
+VCDIFF/full. New attempts bind their format, existing completed jobs remain
+immutable, and assets start disabled. VCDIFF source boundary 41 is unchanged.
+
+Verification: generated-fixture/native Java decoder tests, malformed/resource/
+identity/cancellation cases, Dart bridge/selection tests, backend admission and
+signed-manifest/cache compatibility tests, full dual-host Flutter development
+CI, native backend CI and original-signed APK/EXE. Phone memory/latency must be
+measured before enabling new-format distribution; no Stable/Beta promotion,
+original-asset replacement, firmware change or replay of successful jobs.
+Initial checkpoint: research only; implementation and measurements were NOT_RUN.
+
+Implementation checkpoint: development source `d5c12ba0` passed all Flutter
+tests (Linux 910/16 skipped; Windows 863/63 skipped, each plus 8 candidate tests),
+but strict analysis found four style diagnostics. They are repaired in
+`612983cf`; original run `44195171220` remains FAIL. The Python reference and
+actual existing vendor encoder pass local small-vector checks; 42 delta-job
+host checks pass after correcting a duplicate-version fixture. These are not
+phone or independent acceptance evidence.
+
+Phone qualification plan: one separately signed, side-by-side debug package
+`com.wen.gaia.gaia.codec`, built only by the explicit full-checks Actions
+dispatch on `612983cf`. Its debug-only native Activity directly uses the
+production Java decoder, does not start Flutter/BLE or install synthesized APKs,
+and refuses the normal package ID. Read current USB model/serial, normal App
+identity and service state before installation/launch. Do not interrupt an
+active upgrade. Reuse the existing 104-to-105 benchmark base and MCU-core patch,
+not another generation. Three fresh cells: cold decode, warm decode, cancellation
+after 64 KiB. Each checks exact output SHA/size or cancelled output removal;
+record runtime and observed 100 ms PSS/Java samples, not an exact peak claim.
+No firmware action, release-channel change, original-App replacement/uninstall
+or data clearing. Decoder deadline 120 s, bounded host windows, existing private
+ADB server/Windows Job primitives, all host outputs under this task cache.
+Phone inputs and results are confined to this debug package's `files/codec-probe`.
+Keep receipts and reconcile uncertain outcomes before retrying. No device
+mutation has executed at this checkpoint.
+
+### Codec CI And Candidate Checkpoint
+
+Implementation source `73e6022fe66adb77855e22984309bfaece8cc9fc` is committed and
+pushed on the owned development branch. The source version is `1.0.81+107`.
+Full development run [44198825893](https://github.com/Eitan-S-23/E-Track/actions/runs/44198825893)
+passes both hosts: Linux 910 passed/16 skipped, Windows 863 passed/63 skipped,
+each plus eight candidate cases. Both JDKs pass 29 actual Java decoder cases;
+Android debug compilation, signer/package checks and the existing native
+service/companion tests also pass. SDK: Flutter 3.47.9, Dart 3.13.7.
+The earlier style failure and debug PSS Long/Int compilation failure remain
+preserved, not counted as successful APK builds.
+
+Exact-source backend run [44202412682](https://github.com/Eitan-S-23/E-Track/actions/runs/44202412682)
+passes three component typechecks, 465 native Worker tests, 255 browser tests
+and the existing/new codec/deployment contracts. The existing real benchmark
+patch also reconstructs its exact 48,486,828-byte target through the independent
+Python decoder; receipt `.cache/app-codec-20261118/reference-real-01.json`.
+No successful benchmark generation was repeated, and desktop measurements are
+not phone-performance evidence.
+
+Debug artifact `9411023082096abcc2a4e3ce66e25be6bce6357d4463b891dc08e9e3dd340a6c`
+is 132,501,396 bytes and declares `com.wen.gaia.gaia.codec`, with the fixed
+development signer. It is retained under
+`.cache/app-codec-20261118/keyring-artifacts-01/`. The source-bound debug probe
+plan above now uses `73e6022f`, not the failed `612983cf` artifact request.
+The device adapter's mutation route uses exclusive ownership; exceptional
+probe exits force-stop only that isolated package and preserve evidence.
+Modern contained ADB found no device in `device-inspect-03` or the completed
+15-minute `device-wait-01`. One real current-session Feishu USB reminder was
+successfully sent (`notify-phone-01/result.json`). No normal App installation,
+phone data change, synthesized-APK installation or MCU operation occurred.
+
+The original-signing candidate source is the separate merge commit
+`11fbf0b899568977e312d5e1820d89d06a21f5a7` on `release/candidates`. Its complete
+App tree equals `73e6022f`; the prior candidate's firmware and unrelated tree
+remain unchanged. E-Track run `44202448846` dispatched Trace run `44202598314`.
+Windows is successful; Android/candidate completion is still pending at this
+checkpoint. No existing release was overwritten and no channel was promoted.
+
+The new Trace execution branch `dev/admin/original-delta-codec-20261118` contains
+only the reviewed `admin-delta-build.yml` template update at
+`4745aeadf2b526c6ff640539b401ff3fc1623cdb`, pinned to E-Track generator `73e6022f`.
+Push/public-key run `44204047891` succeeds; its Android generation job is skipped.
+The old execution branch and all existing jobs are untouched. Admin production
+bindings have NOT been switched: phone qualification remains required first.
+Cloud snapshot `keyring-cloud-read-01/result.json` confirms deployed source
+`28459a89`, four channel rows and 37 jobs. Ref/commit bindings are existing
+`secret_text` slots, so their empty API values are redaction, not missing config.
+
+Receipts/logs and request files stay within `.cache/app-codec-20261118/`.
+Three local sanitizer checks fixed JSON URL-redaction damage in GitHub content
+read receipts; the malformed `keyring-read-04` originals remain preserved and
+fresh read-only `keyring-read-05` receipts parse correctly. No credential was
+rotated/exported and no Cloudflare mutation has occurred in this continuation.
+Main source integration, final package readback, mobile cells and live codec
+rollout remain separate unfinished work; independent acceptance is not claimed.
+
+### Codec Candidate Delivered; Phone Qualification Pending
+
+The checkpoint above is superseded for source/package delivery. Primary local
+and freshly checked remote `main` now contain the exact validated product source
+`73e6022fe66adb77855e22984309bfaece8cc9fc`; the 31-file fast-forward preserves
+the two existing pending records byte-for-byte and does not merge the candidate
+branch's unrelated firmware tree. Receipt: `keyring-main-01/` in the task cache.
+
+Both [E-Track 44202448846](https://github.com/Eitan-S-23/E-Track/actions/runs/44202448846)
+and original-signing [Trace 44202598314](https://github.com/Eitan-S-23/Trace/actions/runs/44202598314)
+finish successfully. The original-package `1.0.81+107` candidate is available at
+[the original prerelease](https://github.com/Eitan-S-23/Trace/releases/tag/v1.0.81).
+The separate packaging source remains `11fbf0b8`, with an App tree identical to
+`73e6022f`. The firmware job is skipped. No old release bytes are replaced.
+
+| Asset | Bytes | SHA-256 |
+| --- | --- | --- |
+| Android APK | 48,520,773 | `bdbebba0c1afa0beb8f58ee98d8077db0d8a3cd94c10c5fd5c4d50ffba059f1b` |
+| Windows EXE | 161,792 | `2e97520b08b47563c21aece0701e19a6f637778962569ca20dd8b427b04cc7a3` |
+| Windows ZIP | 20,633,559 | `0cd26196d3fc7bfd4613f3fe39f32b8403b21dd94e4ffd4d27bcd55385165ff2` |
+
+Native CI verifies the unchanged original Android signer, package, ARM32/ARM64
+libraries and compiled endpoints. The downloaded release metadata hashes match
+GitHub asset digests. A separate Ed25519 verification of the reconstructed full
+security payload succeeds against the original key exported by `44204047891`;
+the decoder capability is signed, not inferred from a version label alone.
+The full-only 107 candidate preserves older-client transition semantics.
+Original metadata readback is under
+`.cache/app-admin-ux-20261117/keyring-release-03/`; the current task's
+`candidate-verification-01.json` and `keyring-logs-07/` bind the result.
+
+The original R2 upload/full-readback and candidate registration complete in CI.
+Fresh D1 reads find `rel_trace_android_v1_0_81`, version 107, state `candidate`,
+the signed `bsdiff-lzma-v1` capability, and matching available APK/manifest assets.
+`keyring-cloud-read-02/result.json` confirms unchanged Worker/Pages runtime,
+deployed source `28459a89`, all four channel rows and all 37 existing delta jobs.
+No new delta job, channel publication or Cloudflare code deployment occurred.
+
+Remaining required intervention is the physical USB/debug connection of the
+test phone. The prepared three-cell native decoder measurement is not a full
+Dart-to-installer self-update test or independent acceptance. Do not claim phone
+latency, memory or cancellation results until its original receipts exist.
+After those cells pass, switch only Admin production's existing
+`DELTA_APP_WORKFLOW_REF` / `DELTA_APP_WORKFLOW_COMMIT` to the prepared new Trace
+ref / `4745aead`, preserving preview, secret types, public key and every other
+binding. Then use the existing Actions deployment with the verified source and
+Worker/Public included, followed by real owner/API/source and business readback.
+Do not promote channels, regenerate successful jobs, rotate credentials, repeat
+the completed 107 builds or reapply migration 0015 to finish that rollout.
+
 ## Entry
 
 - User requested implementation on 2026-11-17 after the consolidated list.

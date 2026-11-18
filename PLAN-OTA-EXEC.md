@@ -62,9 +62,10 @@
 
 ### APP-ADMIN-UX-01
 
-状态: 进行中（本批开发与交付完成；独立验收/设备未执行） ｜ 认领: Codex root / 2026-11-17 ｜ 更新: 2026-11-18
+状态: 进行中（UI/设置已交付；新差分解码及候选包完成，手机验证和线上切换待完成） ｜ 认领: Codex root / 2026-11-17 ｜ 更新: 2026-11-18
 
-- 最新交付：`1.0.80+106`，App 源码 `8011709906af2dd8a9178f458759d286b7f89f9f`，E-Track `44175714326` 与原签名 Trace `44175951793` 均整体成功；APK、Windows EXE/ZIP、签名校验、R2 完整回读和候选入库通过。main 已按边界合入 `e7b990c7`，部署配套修正为 `28459a89`，未重建成功安装包。
+- 差分迁移源码与候选包完成：`73e6022f` 已合入本地主入口及远端 `main`，实现有界 bsdiff/LZMA 解码、签名格式协商、生成器及旧客户端回退。双平台完整 App CI `44198825893` 与后台 CI `44202412682` 成功（465 Worker、255 浏览器）。原签名 `1.0.81+107` 候选源码 `11fbf0b8` 的 E-Track `44202448846` / Trace `44202598314` 整体成功；APK、Windows EXE/ZIP、原签名和 Ed25519 清单复验、R2 回读/候选入库完成，App 树与 main 产品源码一致。新版 Trace 工作流 `4745aead` 已准备但未切换线上绑定；手机 USB 仍不可见，已实际飞书提醒。剩余手机实测及线上算法切换，当前线上仍为 VCDIFF；不宣称整卡/独立验收完成。详见 [候选交付和剩余手机验证](docs/ota-exec-notes/APP-ADMIN-UX-01.md#codec-candidate-delivered-phone-qualification-pending)。
+- 前批交付：`1.0.80+106`，App 源码 `8011709906af2dd8a9178f458759d286b7f89f9f`，E-Track `44175714326` 与原签名 Trace `44175951793` 均整体成功；APK、Windows EXE/ZIP、签名校验、R2 完整回读和候选入库通过。main 已按边界合入 `e7b990c7`，部署配套修正为 `28459a89`，未重建成功安装包。
 - 最新后台：[CI 44184804298](https://github.com/Eitan-S-23/E-Track/actions/runs/44184804298) 通过 463 项原生 Worker、255 项浏览器、60 项部署/Public/Access 契约及三端类型检查。[Actions 部署 44186088340](https://github.com/Eitan-S-23/E-Track/actions/runs/44186088340) 使用 `E_TRACK_CI` 成功发布 Worker/Admin/Public，源码均为 `28459a89fcd6792611052cb601b231bb947bcc6d`。`0015` 只应用一次；首次适配丢失环境标签的问题已修复，失败原件保留，不归咎于 Token。
 - 线上实证：真实 owner、HTML 与 8 个 JS/CSS 文件逐字节匹配；版本、公告、106 差分候选及三平台公共公告 API 均正常。原运行配置、环境标签、Access/资源绑定、4 个发布通道和 37 条差分任务均保持原状态。未发布 Stable/Beta、未真实删除/取消任务或安装设备。当前 App 仍为 VCDIFF，算法切换与手机性能验证未实施。详见 [追加交付收尾](docs/ota-exec-notes/APP-ADMIN-UX-01.md#follow-up-delivered-through-actions-2026-11-18)。
 
