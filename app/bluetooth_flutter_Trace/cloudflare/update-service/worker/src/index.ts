@@ -15,6 +15,7 @@ import { cleanupFirmwareIdempotency } from "./firmware_admin";
 import { cleanupInventory, inventoryControl, reportInventory } from "./version_inventory";
 import { advancePendingDeltaCancellations, deltaCi } from "./delta_jobs";
 import { deliverNotifications } from "./admin_notifications";
+import { cleanupFeedback, submitFeedback } from "./feedback";
 import type { WorkerEnv } from "./types";
 
 export { RateLimiter } from "./rate_limiter";
@@ -49,6 +50,7 @@ app.get("/api/public/announcements", async (c) =>
 
 app.get("/api/public/version-inventory/control", c => inventoryControl(c.req.raw, c.env));
 app.post("/api/public/version-inventory", c => reportInventory(c.req.raw, c.env));
+app.post("/api/public/feedback", c => submitFeedback(c.req.raw, c.env));
 app.all("/api/ci/delta/jobs/*", async c => {
   const response = await deltaCi(c.req.raw, c.env);
   if (response.ok && /\/(complete|fail)$/.test(c.req.path)) {
@@ -114,5 +116,6 @@ export default {
     // The inventory-only staging schedule must not start pruning old OTA receipts.
     if (_event.cron !== "17 * * * *") await cleanupFirmwareIdempotency(env.DB);
     await cleanupInventory(env);
+    await cleanupFeedback(env);
   }
 } satisfies ExportedHandler<WorkerEnv>;

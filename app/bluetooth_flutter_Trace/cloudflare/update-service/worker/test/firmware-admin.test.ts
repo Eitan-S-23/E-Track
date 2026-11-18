@@ -544,6 +544,30 @@ describe("P4-2 existing Access Pages facade", () => {
     expect(response.headers.get("Cache-Control")).toBe("no-store");
     expect(response.headers.get("X-Request-Id")).toBeTruthy();
   });
+  async function feedbackFixture() {
+    const batch = crypto.randomUUID(), install = crypto.randomUUID();
+    await env.DB.batch([
+      env.DB.prepare("INSERT INTO feedback_batches(id,install_key,payload_hash,report_day,ip_key,received_at) VALUES(?,?,?,1,?,1)")
+        .bind(batch, install, "fixture", install),
+      env.DB.prepare(`INSERT INTO feedback_messages(client_id,install_key,batch_id,body,client_created_at,received_at,platform,version_name,version_code,updated_at)
+        VALUES(?,?,?,'Real facade fixture',1,1,'android','1.0.82',108,1)`).bind(crypto.randomUUID(), install, batch),
+    ]);
+    return (await env.DB.prepare("SELECT id FROM feedback_messages WHERE batch_id=?").bind(batch).first<number>("id"))!;
+  }
+  it("feedback viewing needs Access and processing needs publisher, same origin and CSRF", async () => {
+    const id = await feedbackFixture(), route = ["feedback", String(id)];
+    expect((await page("unused", { route: ["feedback"], method: "GET", token: null })).status).toBe(401);
+    const read = await page("unused", { route, method: "GET", email: "viewer@example.com" });
+    expect(read.status).toBe(200); expect(read.headers.get("Cache-Control")).toBe("no-store");
+    const body = { status: "processing", note: "Owner note", revision: 1 };
+    expect((await page("unused", { route, email: "viewer@example.com", body })).status).toBe(403);
+    expect((await page("unused", { route, header: { Origin: "https://foreign.example" }, body })).status).toBe(403);
+    expect((await page("unused", { route, header: { "X-CSRF-Token": "wrong" }, body })).status).toBe(403);
+    expect(await env.DB.prepare("SELECT revision FROM feedback_messages WHERE id=?").bind(id).first("revision")).toBe(1);
+    expect((await page("unused", { route, email: "publisher@example.com", body })).status).toBe(200);
+    expect((await page("unused", { route, email: "owner@example.com", body })).status).toBe(409);
+    expect(await env.DB.prepare("SELECT COUNT(*) AS n FROM feedback_events WHERE feedback_id=?").bind(id).first("n")).toBe(1);
+  });
   it("notification history uses the Access actor and never exposes subscription endpoints", async () => {
     const response=await page("unused",{route:["delta","activity"],method:"GET",email:"viewer@example.com"});
     expect(response.status).toBe(200);

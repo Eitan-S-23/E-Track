@@ -123,15 +123,17 @@ class _CompanionSetupPageState extends State<CompanionSetupPage> with WidgetsBin
   Widget build(BuildContext context) {
     final granted = _permissions.isNotEmpty && _permissions.values.every((s) => s.isGranted);
     final permanent = _permissions.values.any((s) => s.isPermanentlyDenied || s.isRestricted);
-    return Scaffold(
+    return TraceBackGesture(child: Scaffold(
       backgroundColor: TraceColors.ink,
       appBar: AppBar(title: const Text('\u540e\u53f0\u8fd0\u884c\u4e0e\u6743\u9650'), backgroundColor: TraceColors.ink,
+        leading: IconButton(key: const ValueKey('detail-back'), tooltip: '\u8fd4\u56de',
+          onPressed: () => TraceBackGesture.back(context), icon: const Icon(Icons.arrow_back)),
         foregroundColor: TraceColors.text,
         actions: [IconButton(tooltip: '\u91cd\u65b0\u68c0\u67e5', onPressed: _busy ? null : _refresh, icon: const Icon(Icons.refresh))]),
       body: TracePageScaffold(child: SafeArea(child: ListView(padding: const EdgeInsets.all(24), children: [
         const Text('\u8ba9\u624b\u673a\u6210\u4e3a\u8bbe\u5907\u7684\u8054\u7f51\u4f19\u4f34', style: TextStyle(color: TraceColors.text, fontSize: 26, fontWeight: FontWeight.w600)),
         const SizedBox(height: 12),
-        const Text('\u81ea\u52a8\u68c0\u67e5\u548c\u51c6\u5907\u56fa\u4ef6\uff0c\u4e0d\u81ea\u52a8\u5237\u673a\u3002\u8bbe\u5907\u4e0a\u786e\u8ba4\u201c\u7acb\u5373\u66f4\u65b0\u201d\u540e\u624d\u5f00\u59cb\u5347\u7ea7\u3002\u53ef\u4ee5\u8df3\u8fc7\uff0c\u7a0d\u540e\u5728\u201c\u6211\u7684 / \u5e94\u7528\u8bbe\u7f6e\u201d\u4e2d\u7ee7\u7eed\u3002',
+        const Text('\u81ea\u52a8\u68c0\u67e5\u548c\u51c6\u5907\u56fa\u4ef6\uff0c\u4e0d\u81ea\u52a8\u5237\u673a\u3002\u8bbe\u5907\u4e0a\u786e\u8ba4\u201c\u7acb\u5373\u66f4\u65b0\u201d\u540e\u624d\u5f00\u59cb\u5347\u7ea7\u3002\u53ef\u4ee5\u8df3\u8fc7\uff0c\u7a0d\u540e\u5728\u201c\u6211\u7684 / \u5e2e\u52a9\u4e0e\u53cd\u9988\u201d\u4e2d\u7ee7\u7eed\u3002',
           style: TextStyle(color: TraceColors.muted, height: 1.6)),
         if (!_platform.supported) const Padding(padding: EdgeInsets.symmetric(vertical: 24),
           child: Text('\u6b64\u540e\u53f0\u4f34\u4fa3\u529f\u80fd\u4ec5\u9002\u7528\u4e8e Android\u3002\u5176\u4ed6\u5e73\u53f0\u7ee7\u7eed\u4f7f\u7528\u524d\u53f0\u8fde\u63a5\u4e0e\u5347\u7ea7\u3002', style: TextStyle(color: TraceColors.amber))),
@@ -209,6 +211,6 @@ class _CompanionSetupPageState extends State<CompanionSetupPage> with WidgetsBin
         if (_busy) const LinearProgressIndicator(),
         TextButton(onPressed: () => Navigator.of(context).maybePop(), child: const Text('\u8fd4\u56de / \u6682\u65f6\u8df3\u8fc7')),
       ]))),
-    );
+    ));
   }
 }

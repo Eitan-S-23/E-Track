@@ -560,6 +560,7 @@ class TraceDialog extends StatelessWidget {
     this.icon,
     this.color = TraceColors.cyan,
     this.actions = const [],
+    this.showBackButton = false,
   }) : assert(message != null || content != null);
 
   final String title;
@@ -568,6 +569,7 @@ class TraceDialog extends StatelessWidget {
   final IconData? icon;
   final Color color;
   final List<TraceDialogAction> actions;
+  final bool showBackButton;
 
   static void close(BuildContext context) {
     final route = ModalRoute.of(context);
@@ -584,7 +586,7 @@ class TraceDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final body = content ?? Text(message!);
 
-    return Dialog(
+    final dialog = Dialog(
       elevation: 0,
       insetPadding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
       backgroundColor: Colors.transparent,
@@ -616,7 +618,14 @@ class TraceDialog extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Container(
+                  if (showBackButton)
+                    IconButton(
+                      key: const ValueKey('detail-back'),
+                      tooltip: '\u8fd4\u56de',
+                      onPressed: () => TraceBackGesture.back(context),
+                      icon: Icon(Icons.arrow_back, color: color),
+                    )
+                  else Container(
                     width: 46,
                     height: 46,
                     decoration: BoxDecoration(
@@ -670,7 +679,48 @@ class TraceDialog extends StatelessWidget {
         ),
       ),
     );
+    return showBackButton ? TraceBackGesture(child: dialog) : dialog;
   }
+}
+
+/// Only detail routes opt in; a gesture can pop its own current route once.
+class TraceBackGesture extends StatefulWidget {
+  const TraceBackGesture({super.key, required this.child});
+  final Widget child;
+
+  static Future<void> back(BuildContext context) async {
+    if (ModalRoute.of(context)?.isCurrent == true) {
+      await Navigator.of(context).maybePop();
+    }
+  }
+
+  @override
+  State<TraceBackGesture> createState() => _TraceBackGestureState();
+}
+
+class _TraceBackGestureState extends State<TraceBackGesture> {
+  double _distance = 0;
+  bool _popping = false;
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    behavior: HitTestBehavior.deferToChild,
+    onHorizontalDragStart: (_) => _distance = 0,
+    onHorizontalDragUpdate: (event) => _distance += event.delta.dx,
+    onHorizontalDragCancel: () => _distance = 0,
+    onHorizontalDragEnd: (event) async {
+      final distance = _distance.abs();
+      _distance = 0;
+      if (_popping || ModalRoute.of(context)?.isCurrent != true ||
+          (distance < 80 && !(distance > 24 && event.velocity.pixelsPerSecond.dx.abs() > 700))) {
+        return;
+      }
+      _popping = true;
+      try { await Navigator.of(context).maybePop(); }
+      finally { _popping = false; }
+    },
+    child: widget.child,
+  );
 }
 
 class _TraceDialogButton extends StatelessWidget {
