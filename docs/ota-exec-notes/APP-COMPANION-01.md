@@ -34,7 +34,7 @@ reconstruction/R2 bytes, enable that patch and publish only MCU Stable. Stop
 before claiming success if the actual Public latest query does not select the
 30333/base-SHA patch. No device installation is part of this delivery.
 
-Evidence root: `.cache/firmware-check-update-release-20261119/`. Publication is
+Evidence root: `.cache/firmware-check-update-release-20261119/`. Publication was
 pending at this checkpoint. The source-matched release checks comprise 138
 passing cases: 136 original passes in `keyring-check-02` and the two actual
 original-Admin packaging cases in `keyring-check-03`. Earlier failed host
@@ -43,6 +43,78 @@ configuration, and the remaining two native entries found the WindowsApps
 `python3` alias. Selecting installed `python` repairs the host invocation,
 without changing product tests, relaxing assertions or modifying global Git.
 The first read adapter's HEAD/null-body failure is likewise retained separately.
+
+### Published And Byte-Verified
+
+MCU **3.3.34 is published on the original Stable channel**, revision 8.
+Source `c85b39c65594c6683b163454f071f805273a65c5` is delivered on main, together
+with the preceding repair-source anchor `53ebe07e`. Candidate Actions
+[44369848861](https://github.com/Eitan-S-23/E-Track/actions/runs/44369848861)
+passes checks, fresh keyed GCC App/Boot compilation, native package verification,
+private-header cleanup, R2 readback and registration. App packaging is skipped.
+Governance run `44369848829` also passes. The GCC evidence reports **641 warning
+lines, zero error lines**; configure and size have zero warnings/errors.
+
+| Delivered Item | Exact Identity |
+| --- | --- |
+| Target release | `fw_c2f51d02fa5398f4f432607a6fefc2f401a9e9e50c53ea842dcbe9083b7d06f0`, 3.3.34 / 30334 |
+| Target raw App | 630176 bytes, SHA-256 `06554819f0b140a3aeb64ec7fe253df697659dd6fcaa72d3c22f0d76fb6330b9` |
+| Full ETU | 301051 bytes, SHA-256 `271ef96a93fe04ebd3212f9ce01dfe0f93183155737e5e7b86122c3ae11c078b` |
+| 3.3.33-to-3.3.34 patch | 8066 bytes, SHA-256 `c6b42b8ec64b3391ba3f65d0de467abdaad5bebe78bc3ba943a14339fa4bec3e`; 97.32% smaller than full |
+| Original installed base registration | `fw_b5be874cc7279e41cbfd18ecbdd799a239318ae7884005a0383788ab1bacb6ad`; exact installed raw SHA remains unchanged; unpublished |
+| New delta job | `delta_d34dd9d1b9e6b5af2446808328b549854a0f8504ce23175b96202f4d9b32388d`, attempt 1, ready/enabled, revision 4 |
+| Delta Actions | [44372037247](https://github.com/Eitan-S-23/E-Track/actions/runs/44372037247), exact existing generator `3135a06e92a9165158cac49abdb789732fcd6842` |
+
+`keyring-verify-01/result.json` verifies the actual R2 full and patch bytes,
+decrypts/applies them with the original key and installed base, and requires
+byte-equal target reconstruction. Both native outer/inner checks pass. The
+finalized target also matches the exact archived CI GCC placeholder outside its
+finalized firmware header; a tag/version string alone is not the source oracle.
+Artifact `14458613310` is retained in `keyring-artifacts-01`: the 982676-byte
+ZIP matches GitHub digest
+`e6aee7e98ae1ef08e503022059363a54c5a976061a29a593d2e1aa7e1abc8a31`.
+Its nine originals include the matching ELF/map and source/key/registration
+proofs. Complete candidate job logs are in `keyring-logs-01`.
+
+`keyring-enable-02` enables only this verified patch. `keyring-publish-02`
+advances only MCU Stable, using its original revision 7 as the CAS precondition.
+`keyring-public-02/result.json` then executes the real Public Pages route:
+
+- Current 30333 and the installed raw SHA select the new 30334 **patch**. Its
+  signed download returns HTTP 200, correct ETU content type and exact bytes/hash.
+- A nonmatching base SHA selects the full package; that signed download also
+  returns HTTP 200 with the exact verified bytes/hash.
+- Current 30334 and its actual target SHA return NO_UPDATE.
+- Both App channel rows and MCU Beta remain unchanged. All 40 previous delta
+  rows are identical; only the new job is added, 41 total.
+
+No phone install, MCU reset/flash, OTA transfer, Boot programming, backend
+redeployment or credential/configuration change was performed for this release.
+The last device-verified input remains 3.3.33; publication is not an assertion
+that the device has installed 3.3.34. The owner can now keep the original App
+connected in the background and select MCU Check Update. Actual positive device
+interaction/installation and independent D0-D5/C1-C6 adjudication remain separate.
+
+The first S3 adapter's Fetch/proxy request failed. A read-only native-SDK HEAD
+confirmed the object was absent, then the same credential and immutable files
+uploaded/read back successfully through the standard SDK transport. The exact
+earlier transport cause was not established. An enable read failed before any
+mutation; its successor enabled the same job once. The first publication POST
+returned 400 because the adapter omitted `Accept: application/json`; the server
+rejected it before business mutation. The corrected request preserved all other
+headers, CSRF/role checks and the original CAS revision. `keyring-public-01`
+stopped locally for lack of a successful publication receipt, with no HTTP call.
+All failures are retained; no successful build or delta was regenerated.
+
+The final local audit is `final-write-audit.json` in this release evidence root.
+Selected source/Git/cache/test/archive/log outputs remain project-contained.
+Compared with the preceding repair audit, the existing 1004-byte file
+`C:/Users/SU/AppData/Local/Microsoft/Windows/PowerShell/StartupProfileData-NonInteractive`
+has mtimeNs `1795027991791634000`, previously `1795023492761699400`.
+Local selected commands did not invoke PowerShell; attribution/content changes
+remain unconfirmed. No external cleanup/restoration was attempted. ADB key,
+SEGGER history and the other monitored PowerShell-cache metadata are unchanged.
+This is a scoped comparison, not a whole-operating-system no-write claim.
 
 ## Coupled Bluetooth Startup Repair, 2026-11-19
 
