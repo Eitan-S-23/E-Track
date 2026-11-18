@@ -40,16 +40,26 @@ Packaging tests use synthetic non-installable inputs, not a native firmware buil
 The source/baseline commit deliberately uses `[skip ci]` because the old main
 did not contain the versioned release configuration. This recording-only follow-up
 does not skip CI: its actual before-SHA now has 3.3.30 and must select no package.
-Main push verification is pending at this checkpoint, not reported as PASS.
+The follow-up is `84a41a613e5a2ef314fa3c90f44e96a33efe79ac`. Actual main push
+[44299234275](https://github.com/Eitan-S-23/E-Track/actions/runs/44299234275)
+passes checks and skips both build jobs; its original log confirms `branch=main`,
+`firmware.required=false`, `app.required=false` and no channel publication.
+Governance run [44299234383](https://github.com/Eitan-S-23/E-Track/actions/runs/44299234383)
+also passes on that exact source. The source/baseline commit has no Actions runs,
+and the old duplicate firmware workflow did not start on the follow-up.
 No permanent bootstrap exception was added to the planner. The next real firmware
 version must be greater than 3.3.30; this migration does not replay that release.
 
 Original receipts are under `.cache/firmware-main-migration-20261118/`:
 `import-before.json`, `import-after.json`, `check-03/`, `keyring-app-01/`,
-`keyring-policy-02/`, `keyring-main-02/`, `keyring-verify-01/` and `keyring-logs-01/`.
+`keyring-policy-02/`, `keyring-main-02/`, `keyring-followup-02/`,
+`keyring-verify-04/` and `keyring-logs-01/02/`.
 The initial local test, unsupported policy-update field (HTTP 422) and imported
 fixture-whitespace check failures are retained, not relabeled as successes.
 The corrected policy update changed only its name, not its type or Secrets.
+The main board's mixed line endings were preserved; only the edited lines were
+returned to their original LF convention. Final verification records are a
+documentation-only `[skip ci]` commit, not another build or workflow replay.
 
 Firmware product main integration is no longer outstanding. D0-D5 and formal
 whole-card acceptance remain outstanding; C1-C6 remain unchecked. This delivery

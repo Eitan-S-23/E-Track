@@ -150,13 +150,16 @@ environment now allows only `main`, superseding the earlier `release/candidates`
 policy above. Its ID, branch-policy ID, no-review/no-wait behavior, locked
 `OTA_BOOT_CHAIN_READY=false` and both Secret metadata records are unchanged.
 Repository Secrets and the full rehearsal/production protection, policy, gate
-and Secret metadata also match the pre-migration snapshot. No credential value
-was read, copied, regenerated or rotated for this branch change.
+and Secret metadata also match the pre-migration snapshot. No firmware or
+Cloudflare credential value was read, copied, regenerated or rotated for this
+branch change; GitHub administration reuses the existing owner keyring route.
 
 Main source/workflow baseline is `0b7e1275f91f0c6c0a2f89e19f664d60d5ffee9e`.
 App routing commit `1564d5886bf248c83b87afa9c991ab5404a6f73b` keeps original Trace
 signing; actual checks-only push `44295658568` succeeds with both builds skipped.
-The documentation-only main push is the remaining routing check at this record.
+Documentation-only main push `84a41a61` passes actual candidate run `44299234275`
+and governance `44299234383`; both App and firmware builds are skipped. No
+duplicate main firmware build or baseline replay was started.
 Native 3.3.30 remains the original successful `44276457821`, not a new build
 under the migrated branch. See [the migration record](../ota-exec-notes/APP-COMPANION-01.md#mcu-main-migration-2026-11-18)
 and `.cache/firmware-main-migration-20261118/keyring-policy-02/configuration.json`.
