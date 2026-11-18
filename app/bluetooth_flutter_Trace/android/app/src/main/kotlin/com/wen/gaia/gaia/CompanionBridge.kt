@@ -23,8 +23,11 @@ import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.PersistableBundle
 import android.os.PowerManager
+import android.os.SystemClock
 import android.provider.Settings
+import android.util.Log
 import androidx.core.content.ContextCompat
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.FlutterEngineCache
@@ -41,6 +44,9 @@ object CompanionBridge {
     const val ASSOCIATION_REQUEST = 2410
     const val CHECK_JOB = 2411
     const val RECOVERY_JOB = 2412
+    const val STARTUP_JOB = 2413
+    internal const val STARTUP_DEADLINE = "startupDeadlineElapsed"
+    internal const val STARTUP_WINDOW_MS = 120000L
     private val handler = Handler(Looper.getMainLooper())
     private var activity = WeakReference<Activity>(null)
     private var foreground = false
@@ -229,7 +235,7 @@ object CompanionBridge {
     fun restore(context: Context) {
         val scheduler = context.getSystemService(JobScheduler::class.java)
         if (!enabled(context) || !associated(context)) {
-            scheduler.cancel(CHECK_JOB); scheduler.cancel(RECOVERY_JOB)
+            scheduler.cancel(CHECK_JOB); scheduler.cancel(RECOVERY_JOB); scheduler.cancel(STARTUP_JOB)
             if (Build.VERSION.SDK_INT >= 31) address(context)?.let {
                 try { context.getSystemService(CompanionDeviceManager::class.java).stopObservingDevicePresence(it) }
                 catch (_: Exception) { /* No active observation is also a stopped state. */ }
@@ -251,6 +257,42 @@ object CompanionBridge {
             try { context.getSystemService(CompanionDeviceManager::class.java).startObservingDevicePresence(address(context)!!) }
             catch (_: Exception) { prefs.edit().putString("lastResult", "PRESENCE_UNAVAILABLE_PERIODIC_FALLBACK").apply() }
         }
+    }
+
+    fun restoreAfterSystemRestart(context: Context) {
+        restore(context)
+        recoverStartup(context, SystemClock.elapsedRealtime() + STARTUP_WINDOW_MS)
+    }
+
+    internal fun recoverStartup(context: Context, deadlineElapsed: Long) {
+        val scheduler = context.getSystemService(JobScheduler::class.java)
+        if (!enabled(context) || !associated(context) || CompanionService.active?.healthy() == true) {
+            scheduler.cancel(STARTUP_JOB)
+            return
+        }
+        val prefs = preferences(context)
+        val remaining = deadlineElapsed - SystemClock.elapsedRealtime()
+        if (remaining <= 0 || remaining > STARTUP_WINDOW_MS) {
+            scheduler.cancel(STARTUP_JOB)
+            prefs.edit().putString("lastResult", "STARTUP_RECOVERY_TIMEOUT").apply()
+            return
+        }
+        if (CompanionService.start(context, "recovery")) {
+            scheduler.cancel(STARTUP_JOB)
+            Log.i("ETrackCompanion", "System recovery requested the foreground runtime")
+            return
+        }
+        val problem = prefs.getString("lastResult", "START_REJECTED")
+        Log.i("ETrackCompanion", "System recovery deferred: $problem")
+        if (problem !in listOf("BLUETOOTH_OFF", "PLATFORM_STATE_UNAVAILABLE")) {
+            scheduler.cancel(STARTUP_JOB)
+            return
+        }
+        // This non-persisted job spans radio initialization, not another boot or an endless loop.
+        val extras = PersistableBundle().apply { putLong(STARTUP_DEADLINE, deadlineElapsed) }
+        check(scheduler.schedule(JobInfo.Builder(STARTUP_JOB, ComponentName(context, CompanionJobService::class.java))
+            .setMinimumLatency(minOf(5000L, remaining)).setOverrideDeadline(minOf(15000L, remaining))
+            .setExtras(extras).build()) == JobScheduler.RESULT_SUCCESS) { "SCHEDULING_REJECTED" }
     }
 
     private fun requireForeground(): Activity {

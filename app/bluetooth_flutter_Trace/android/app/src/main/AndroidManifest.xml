@@ -2,9 +2,11 @@
    <application
         android:label="E-Track"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/e_track_launcher"
+        android:roundIcon="@mipmap/e_track_launcher">
         <activity
             android:name=".MainActivity"
+            android:icon="@mipmap/e_track_launcher"
             android:exported="true"
             android:launchMode="singleTop"
             android:theme="@style/LaunchTheme"

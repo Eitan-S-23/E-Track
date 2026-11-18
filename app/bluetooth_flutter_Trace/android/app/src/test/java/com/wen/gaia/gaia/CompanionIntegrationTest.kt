@@ -16,10 +16,12 @@ import android.bluetooth.le.ScanFilter
 import android.companion.BluetoothLeDeviceFilter
 import android.companion.CompanionDeviceManager
 import android.content.Context
+import android.content.ComponentName
 import android.content.Intent
 import android.content.IntentSender
 import android.os.Build
 import android.os.Looper
+import android.os.PersistableBundle
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.FlutterEngineCache
 import io.flutter.embedding.engine.dart.DartExecutor
@@ -138,8 +140,9 @@ class CompanionIntegrationTest {
         "runtimeId" to service.runtimeId, "revision" to revision, "status" to status,
         "connected" to true, "busy" to false, "deviceToken" to key.deviceToken)
 
-    private fun job(id: Int): JobParameters = Shadow.newInstanceOf(JobParameters::class.java).also {
+    private fun job(id: Int, extras: PersistableBundle = PersistableBundle()): JobParameters = Shadow.newInstanceOf(JobParameters::class.java).also {
         ReflectionHelpers.setField(it, "jobId", id)
+        ReflectionHelpers.setField(it, "extras", extras)
     }
 
     private fun offerOta(service: CompanionService, runtime: String = service.runtimeId) = incoming(
@@ -176,6 +179,15 @@ class CompanionIntegrationTest {
         assertEquals("COMPANION_CHANNEL_DISABLED", CompanionBridge.problem(app))
         assertFalse(CompanionService.start(app, "periodic"))
         assertEquals(0, CompanionEngineBoundary.created)
+    }
+
+    @Test fun launcherAndApplicationResolveTheSameExplicitBrandedIcon() {
+        val info = app.packageManager.getActivityInfo(ComponentName(app, MainActivity::class.java), 0)
+        assertEquals(R.mipmap.e_track_launcher, app.applicationInfo.icon)
+        assertEquals(R.mipmap.e_track_launcher, info.icon)
+        assertNotEquals(R.mipmap.ic_launcher, info.icon)
+        assertNotNull(app.packageManager.getApplicationIcon(app.packageName))
+        assertNotNull(app.packageManager.getActivityIcon(ComponentName(app, MainActivity::class.java)))
     }
 
     @Test @Config(sdk = [34]) fun notificationRuntimeRevocationIsNotAChannelGrant() {
@@ -280,7 +292,7 @@ class CompanionIntegrationTest {
         assertTrue(app.getSystemService(JobScheduler::class.java).allPendingJobs.isEmpty())
     }
 
-    @Test fun bootAndPackageReplacementRestoreOnlyPersistedJobsNotAnActivityOrEngine() {
+    @Test fun bootAndPackageReplacementRequestImmediateRecoveryWithoutLaunchingUi() {
         associated()
         prefs.edit().putInt("intervalHours", 6).putBoolean("checkPending", true).commit()
         for (action in listOf(Intent.ACTION_BOOT_COMPLETED, Intent.ACTION_MY_PACKAGE_REPLACED)) {
@@ -295,12 +307,89 @@ class CompanionIntegrationTest {
             assertEquals(15 * 60000L, recovery.intervalMillis)
             assertTrue(prefs.getBoolean("checkPending", false))
             assertNull(shadowOf(app).nextStartedActivity)
-            assertNull(shadowOf(app).nextStartedService)
+            val requested = checkNotNull(shadowOf(app).nextStartedService)
+            assertEquals(CompanionService::class.java.name, requested.component!!.className)
+            assertEquals("recovery", requested.getStringExtra("reason"))
+            assertFalse("A service request is not runtime ownership", CompanionService.active?.healthy() == true)
             assertEquals(0, CompanionEngineBoundary.created)
         }
         prefs.edit().putBoolean("enabled", false).commit()
         CompanionBootReceiver().onReceive(app, Intent(Intent.ACTION_BOOT_COMPLETED))
         assertTrue(app.getSystemService(JobScheduler::class.java).allPendingJobs.isEmpty())
+        assertNull(shadowOf(app).nextStartedService)
+    }
+
+    @Test @Config(sdk = [33]) fun realBootRequestStartsHeadlessRuntimeAndDoesNotDuplicateHealthyOwnership() {
+        associated()
+        CompanionBootReceiver().onReceive(app, Intent(Intent.ACTION_BOOT_COMPLETED))
+        val requested = checkNotNull(shadowOf(app).nextStartedService)
+        val service = Robolectric.buildService(CompanionService::class.java).create().get()
+        service.onStartCommand(requested, 0, 1)
+        assertEquals(1, CompanionEngineBoundary.created)
+        assertEquals(listOf("main"), dart.entrypoints)
+        ready(service); linked(service)
+        assertTrue(service.healthy())
+        assertNull(shadowOf(app).nextStartedActivity)
+        CompanionBootReceiver().onReceive(app, Intent(Intent.ACTION_BOOT_COMPLETED))
+        assertNull(shadowOf(app).nextStartedService)
+        assertEquals(1, CompanionEngineBoundary.created)
+    }
+
+    @Test fun bootRecoveryWaitsBrieflyForRadioInsteadOfThePeriodicJob() {
+        associated()
+        val bluetooth = app.getSystemService(BluetoothManager::class.java).adapter
+        shadowOf(bluetooth).setState(BluetoothAdapter.STATE_OFF)
+        CompanionBootReceiver().onReceive(app, Intent(Intent.ACTION_BOOT_COMPLETED))
+        assertNull(shadowOf(app).nextStartedService)
+        val scheduler = app.getSystemService(JobScheduler::class.java)
+        val pending = checkNotNull(scheduler.getPendingJob(CompanionBridge.STARTUP_JOB))
+        assertFalse(pending.isPersisted)
+        assertEquals(5000L, pending.minLatencyMillis)
+        assertEquals(15000L, pending.maxExecutionDelayMillis)
+        assertEquals("BLUETOOTH_OFF", prefs.getString("lastResult", null))
+        shadowOf(bluetooth).setState(BluetoothAdapter.STATE_ON)
+        val jobs = Robolectric.buildService(CompanionJobService::class.java).create().get()
+        assertFalse(jobs.onStartJob(job(CompanionBridge.STARTUP_JOB, pending.extras)))
+        assertEquals("recovery", checkNotNull(shadowOf(app).nextStartedService).getStringExtra("reason"))
+        assertNull(scheduler.getPendingJob(CompanionBridge.STARTUP_JOB))
+        assertNotNull(scheduler.getPendingJob(CompanionBridge.RECOVERY_JOB))
+        jobs.onDestroy()
+    }
+
+    @Test fun startupRetryRetainsItsDeadlineAndStopsWhenExpiredOrDisabled() {
+        associated()
+        shadowOf(app.getSystemService(BluetoothManager::class.java).adapter).setState(BluetoothAdapter.STATE_OFF)
+        CompanionBootReceiver().onReceive(app, Intent(Intent.ACTION_BOOT_COMPLETED))
+        val scheduler = app.getSystemService(JobScheduler::class.java)
+        val pending = checkNotNull(scheduler.getPendingJob(CompanionBridge.STARTUP_JOB))
+        val jobs = Robolectric.buildService(CompanionJobService::class.java).create().get()
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(5))
+        assertFalse(jobs.onStartJob(job(CompanionBridge.STARTUP_JOB, pending.extras)))
+        assertEquals(pending.extras.getLong(CompanionBridge.STARTUP_DEADLINE),
+            checkNotNull(scheduler.getPendingJob(CompanionBridge.STARTUP_JOB)).extras.getLong(CompanionBridge.STARTUP_DEADLINE))
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(CompanionBridge.STARTUP_WINDOW_MS))
+        assertFalse(jobs.onStartJob(job(CompanionBridge.STARTUP_JOB, pending.extras)))
+        assertNull(shadowOf(app).nextStartedService)
+        assertNull(scheduler.getPendingJob(CompanionBridge.STARTUP_JOB))
+        assertEquals("STARTUP_RECOVERY_TIMEOUT", prefs.getString("lastResult", null))
+        CompanionBootReceiver().onReceive(app, Intent(Intent.ACTION_BOOT_COMPLETED))
+        assertNotNull(scheduler.getPendingJob(CompanionBridge.STARTUP_JOB))
+        prefs.edit().putBoolean("enabled", false).commit()
+        CompanionBridge.restore(app)
+        assertTrue(scheduler.allPendingJobs.isEmpty())
+        jobs.onDestroy()
+    }
+
+    @Test fun bootPermissionDenialDoesNotStartOrCreateAStartupRetryLoop() {
+        associated()
+        val permission = if (Build.VERSION.SDK_INT >= 31) Manifest.permission.BLUETOOTH_CONNECT else Manifest.permission.BLUETOOTH
+        shadowOf(app).denyPermissions(permission)
+        CompanionBootReceiver().onReceive(app, Intent(Intent.ACTION_BOOT_COMPLETED))
+        assertNull(shadowOf(app).nextStartedService)
+        assertNull(shadowOf(app).nextStartedActivity)
+        assertNull(app.getSystemService(JobScheduler::class.java).getPendingJob(CompanionBridge.STARTUP_JOB))
+        assertEquals("BLUETOOTH_PERMISSION_DENIED", prefs.getString("lastResult", null))
+        assertEquals(0, CompanionEngineBoundary.created)
     }
 
     @Test fun lostAssociationCancelsRestoredJobs() {

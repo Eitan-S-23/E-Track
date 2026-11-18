@@ -15,6 +15,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.PowerManager
 import android.os.SystemClock
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
@@ -210,6 +211,10 @@ class CompanionService : Service() {
 class CompanionJobService : JobService() {
     override fun onStartJob(params: JobParameters): Boolean {
         if (!CompanionBridge.enabled(this)) return false
+        if (params.jobId == CompanionBridge.STARTUP_JOB) {
+            CompanionBridge.recoverStartup(this, params.extras.getLong(CompanionBridge.STARTUP_DEADLINE, 0))
+            return false
+        }
         val prefs = CompanionBridge.preferences(this)
         val check = params.jobId == CompanionBridge.CHECK_JOB
         if (check) prefs.edit().putBoolean("checkPending", true).apply()
@@ -226,7 +231,8 @@ class CompanionJobService : JobService() {
 class CompanionBootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED || intent.action == Intent.ACTION_MY_PACKAGE_REPLACED) {
-            try { CompanionBridge.restore(context) }
+            Log.i("ETrackCompanion", "Restoring companion after ${intent.action}")
+            try { CompanionBridge.restoreAfterSystemRestart(context) }
             catch (_: Exception) { CompanionBridge.preferences(context).edit().putString("lastResult", "BOOT_RESTORE_FAILED").apply() }
         }
     }
