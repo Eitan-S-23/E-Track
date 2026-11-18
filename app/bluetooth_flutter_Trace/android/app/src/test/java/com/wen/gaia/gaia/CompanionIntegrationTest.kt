@@ -19,6 +19,7 @@ import android.content.Context
 import android.content.ComponentName
 import android.content.Intent
 import android.content.IntentSender
+import android.graphics.drawable.AdaptiveIconDrawable
 import android.os.Build
 import android.os.Looper
 import android.os.PersistableBundle
@@ -186,8 +187,13 @@ class CompanionIntegrationTest {
         assertEquals(R.mipmap.launcher_e_track, app.applicationInfo.icon)
         assertEquals(R.mipmap.launcher_e_track, info.icon)
         assertNotEquals(R.mipmap.ic_launcher, info.icon)
-        assertNotNull(app.packageManager.getApplicationIcon(app.packageName))
-        assertNotNull(app.packageManager.getActivityIcon(ComponentName(app, MainActivity::class.java)))
+        // Robolectric's application-icon lookup only reads a stub map, not compiled resources.
+        val drawable = app.resources.getDrawable(info.icon, app.theme)
+        assertTrue(drawable is AdaptiveIconDrawable)
+        val adaptive = drawable as AdaptiveIconDrawable
+        assertNotNull(adaptive.foreground)
+        assertNotNull(adaptive.background)
+        if (Build.VERSION.SDK_INT >= 33) assertNotNull(adaptive.monochrome)
     }
 
     @Test @Config(sdk = [34]) fun notificationRuntimeRevocationIsNotAChannelGrant() {
