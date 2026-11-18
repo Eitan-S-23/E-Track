@@ -59,9 +59,11 @@ class _FeedbackPageState extends State<FeedbackPage> {
       _text.clear();
       setState(() { _notice = '\u5df2\u4fdd\u5b58\u3002\u53d1\u9001\u6210\u529f\u540e\u4f1a\u79fb\u5165\u201c\u5df2\u63d0\u4ea4\u201d\u3002'; });
     } catch (error) {
-      if (mounted) setState(() { _notice = error.toString().contains('FEEDBACK_OUTBOX_FULL')
+      if (mounted) {
+        setState(() { _notice = error.toString().contains('FEEDBACK_OUTBOX_FULL')
         ? '\u5f85\u53d1\u9001\u5217\u8868\u5df2\u6ee1\uff0850 \u6761\uff09\u3002\u8bf7\u7b49\u5f85\u53d1\u9001\u6216\u5220\u9664\u4e0d\u518d\u9700\u8981\u7684\u53cd\u9988\uff0c\u5f53\u524d\u6587\u5b57\u5df2\u4fdd\u7559\u3002'
         : '\u672a\u80fd\u4fdd\u5b58\uff0c\u8bf7\u68c0\u67e5\u5b57\u6570\u6216\u7a0d\u540e\u91cd\u8bd5\uff0c\u5f53\u524d\u6587\u5b57\u5df2\u4fdd\u7559\u3002'; });
+      }
     } finally { if (mounted) setState(() { _saving = false; }); }
   }
 
@@ -100,7 +102,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
       appBar: AppBar(backgroundColor: TraceColors.ink, foregroundColor: TraceColors.text,
         title: const Text('\u63d0\u4ea4\u53cd\u9988'),
         leading: IconButton(key: const ValueKey('detail-back'), tooltip: '\u8fd4\u56de',
-          onPressed: () => Navigator.of(context).maybePop(), icon: const Icon(Icons.arrow_back))),
+          onPressed: () => TraceBackGesture.back(context), icon: const Icon(Icons.arrow_back))),
       body: TracePageScaffold(child: SafeArea(child: SingleChildScrollView(
         padding: const EdgeInsets.all(24), child: Obx(() {
           final pending = _service.pending, sent = _service.sent;

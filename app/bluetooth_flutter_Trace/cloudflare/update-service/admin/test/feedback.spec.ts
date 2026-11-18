@@ -67,6 +67,9 @@ for (const width of [1440, 390]) test(`feedback read/process flow at ${width}px 
   expect(fixture.writes).toHaveLength(1); expect(fixture.writes[0].body.revision).toBe(1);
   await page.locator("#feedbackFilter").selectOption("processing");
   await expect(page.locator("[data-feedback-id]")).toHaveCount(1);
+  await page.locator("#feedbackState").selectOption("resolved");
+  await page.locator("#feedbackSave").click();
+  await expect(page.locator("[data-feedback-id]")).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.screenshot({ path: info.outputPath("feedback.png"), animations: "disabled" });
   expect(fixture.errors).toEqual([]);

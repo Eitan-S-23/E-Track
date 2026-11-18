@@ -50,6 +50,15 @@ it("uses the Beijing midnight boundary, not device time or a rolling day", async
   expect((await submitFeedback(request(data(), key), env, midnight)).status).toBe(201);
 });
 
+it("normalizes IPv6 spellings into the same shared pool and rejects invalid IPs", async () => {
+  await submitFeedback(request(data(), token(), "2001:0db8:0:0:0:0:0:123"), env, now);
+  await submitFeedback(request(data(), token(), "2001:db8::123"), env, now);
+  expect(await env.DB.prepare("SELECT COUNT(DISTINCT ip_key) AS n FROM feedback_batches").first("n")).toBe(1);
+  for (const invalid of ["999.1.2.3", "1.2.3.4:80", "2001:db8::xyz", "012.1.2.3"]) {
+    await expect(submitFeedback(request(data(), token(), invalid), env, now)).rejects.toMatchObject({ code: "INVALID_PARAMETER" });
+  }
+});
+
 it("acknowledges a lost-response replay without spending another day or duplicating messages", async () => {
   const key = token(), payload = data();
   await submitFeedback(request(payload, key), env, now);

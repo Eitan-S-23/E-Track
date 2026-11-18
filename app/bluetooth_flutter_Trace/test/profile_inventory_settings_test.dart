@@ -54,6 +54,13 @@ void main() {
     });
   }
 
+  Future<void> settleSetup(WidgetTester tester) async {
+    // Match the existing setup-page tests: the production background never settles.
+    for (var frame = 0; frame < 30; frame++) {
+      await tester.pump(const Duration(milliseconds: 20));
+    }
+  }
+
   Future<void> openSettings(
     WidgetTester tester, {
     Brightness brightness = Brightness.light,
@@ -294,13 +301,22 @@ void main() {
     });
   }
 
+  settingsTest('repeated Back taps cannot also dismiss the parent settings', (tester) async {
+    await openSettings(tester);
+    await tester.tap(find.byKey(const ValueKey('detail-back')));
+    await tester.tap(find.byKey(const ValueKey('detail-back')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(toggleKey), findsNothing);
+    expect(find.byKey(const ValueKey('version-inventory-entry')), findsOneWidget);
+  });
+
   settingsTest('permission Back icon and swipe restore Help rather than home', (tester) async {
     await openSettings(tester, openInventory: false);
     await tester.tap(find.text('知道了')); await tester.pumpAndSettle();
     await tester.ensureVisible(find.byIcon(Icons.chat_bubble_outline));
     await tester.tap(find.byIcon(Icons.chat_bubble_outline)); await tester.pumpAndSettle();
     for (final useButton in [true, false]) {
-      await tester.tap(find.byKey(const ValueKey('help-permissions'))); await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('help-permissions'))); await settleSetup(tester);
       if (useButton) {
         await tester.tap(find.byKey(const ValueKey('detail-back')));
       } else {

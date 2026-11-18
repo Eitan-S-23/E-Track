@@ -622,7 +622,7 @@ class TraceDialog extends StatelessWidget {
                     IconButton(
                       key: const ValueKey('detail-back'),
                       tooltip: '\u8fd4\u56de',
-                      onPressed: () => Navigator.of(context).maybePop(),
+                      onPressed: () => TraceBackGesture.back(context),
                       icon: Icon(Icons.arrow_back, color: color),
                     )
                   else Container(
@@ -688,6 +688,12 @@ class TraceBackGesture extends StatefulWidget {
   const TraceBackGesture({super.key, required this.child});
   final Widget child;
 
+  static Future<void> back(BuildContext context) async {
+    if (ModalRoute.of(context)?.isCurrent == true) {
+      await Navigator.of(context).maybePop();
+    }
+  }
+
   @override
   State<TraceBackGesture> createState() => _TraceBackGestureState();
 }
@@ -706,7 +712,9 @@ class _TraceBackGestureState extends State<TraceBackGesture> {
       final distance = _distance.abs();
       _distance = 0;
       if (_popping || ModalRoute.of(context)?.isCurrent != true ||
-          (distance < 80 && !(distance > 24 && event.velocity.pixelsPerSecond.dx.abs() > 700))) return;
+          (distance < 80 && !(distance > 24 && event.velocity.pixelsPerSecond.dx.abs() > 700))) {
+        return;
+      }
       _popping = true;
       try { await Navigator.of(context).maybePop(); }
       finally { _popping = false; }

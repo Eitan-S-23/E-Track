@@ -18,6 +18,13 @@ void main() {
   });
   tearDown(() { service.onClose(); Get.reset(); });
 
+  Future<void> settle(WidgetTester tester) async {
+    // The real page atmosphere repeats; assert state after a bounded frame window.
+    for (var frame = 0; frame < 30; frame++) {
+      await tester.pump(const Duration(milliseconds: 20));
+    }
+  }
+
   Future<void> open(WidgetTester tester, {double width = 390, double scale = 1}) async {
     await service.initialize();
     tester.view.physicalSize = Size(width, 900); tester.view.devicePixelRatio = 1;
@@ -27,7 +34,7 @@ void main() {
     await tester.pumpWidget(GetMaterialApp(home: Scaffold(body: Builder(builder: (context) => TextButton(
       onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => FeedbackPage(service: service))),
       child: const Text('Help parent'))))));
-    await tester.tap(find.text('Help parent')); await tester.pumpAndSettle();
+    await tester.tap(find.text('Help parent')); await settle(tester);
   }
 
   testWidgets('feedback is persisted with a clear queued status and survives reopening', (tester) async {
@@ -35,13 +42,13 @@ void main() {
       await open(tester);
       await tester.enterText(find.byKey(const ValueKey('feedback-text')), 'My first feedback');
       await tester.ensureVisible(find.byKey(const ValueKey('feedback-submit')));
-      await tester.tap(find.byKey(const ValueKey('feedback-submit'))); await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('feedback-submit'))); await settle(tester);
       expect(service.pending.single['body'], 'My first feedback');
       expect(service.sent, isEmpty);
       expect(tester.widget<TextField>(find.byKey(const ValueKey('feedback-text'))).controller!.text, '');
-      await tester.tap(find.byKey(const ValueKey('detail-back'))); await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('detail-back'))); await settle(tester);
       expect(find.text('Help parent'), findsOneWidget);
-      await tester.tap(find.text('Help parent')); await tester.pumpAndSettle();
+      await tester.tap(find.text('Help parent')); await settle(tester);
       expect(find.text('\u5f85\u53d1\u9001\uff081\uff09'), findsOneWidget); expect(find.text('My first feedback'), findsOneWidget);
       expect(tester.takeException(), isNull);
     } finally { service.onClose(); await tester.pumpWidget(const SizedBox.shrink()); }
@@ -51,12 +58,12 @@ void main() {
     try {
       await open(tester);
       await tester.enterText(find.byKey(const ValueKey('feedback-text')), 'Unsaved');
-      await tester.tap(find.byKey(const ValueKey('detail-back'))); await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('detail-back'))); await settle(tester);
       expect(find.textContaining('\u653e\u5f03\u5c1a\u672a\u63d0\u4ea4'), findsOneWidget);
-      await tester.tap(find.text('\u53d6\u6d88')); await tester.pumpAndSettle();
+      await tester.tap(find.text('\u53d6\u6d88')); await settle(tester);
       expect(tester.widget<TextField>(find.byKey(const ValueKey('feedback-text'))).controller!.text, 'Unsaved');
-      await tester.tap(find.byKey(const ValueKey('detail-back'))); await tester.pumpAndSettle();
-      await tester.tap(find.text('\u786e\u5b9a')); await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('detail-back'))); await settle(tester);
+      await tester.tap(find.text('\u786e\u5b9a')); await settle(tester);
       expect(find.text('Help parent'), findsOneWidget); expect(service.pending, isEmpty);
     } finally { service.onClose(); await tester.pumpWidget(const SizedBox.shrink()); }
   });
@@ -67,7 +74,7 @@ void main() {
       expect(find.byKey(const ValueKey('detail-back')), findsOneWidget);
       await tester.enterText(find.byKey(const ValueKey('feedback-text')), 'A short issue');
       await tester.ensureVisible(find.byKey(const ValueKey('feedback-submit')));
-      await tester.tap(find.byKey(const ValueKey('feedback-submit'))); await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('feedback-submit'))); await settle(tester);
       expect(service.pending, hasLength(1)); expect(tester.takeException(), isNull);
     } finally { service.onClose(); await tester.pumpWidget(const SizedBox.shrink()); }
   });

@@ -680,4 +680,7 @@ body.quick-actions-open .resource-float, body.firmware-details-open .resource-fl
 .feedback-detail textarea { width: 100%; min-height: 140px; padding: 12px; font: inherit; color: inherit; resize: vertical; box-sizing: border-box; }
 .feedback-history { padding-left: 20px; font-size: 13px; }
 .feedback-history li { margin: 12px 0; }
-@media (max-width: 760px) { .feedback-layout { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 760px) {
+  .feedback-layout { grid-template-columns: minmax(0, 1fr); }
+  .feedback-detail { grid-row: 1; }
+}

@@ -27,7 +27,7 @@
           <span class="tag">${esc(label(item.status))}</span><span class="feedback-meta">${esc(item.platform)} / ${esc(item.versionName)} / ${esc(stamp(item.receivedAt))}</span>
           <span class="feedback-body">${esc(String(item.body).slice(0, 180))}</span></button>`).join("") || `<p class="empty">${esc(loading ? text("\u6b63\u5728\u8bfb\u53d6", "Loading") : text("\u6ca1\u6709\u5339\u914d\u7684\u53cd\u9988", "No matching feedback"))}</p>`}</div>
           <button type="button" class="secondary-button" id="feedbackMore" ${nextCursor == null ? "hidden" : ""} ${loading ? "disabled" : ""}>${esc(text("\u52a0\u8f7d\u66f4\u591a", "Load more"))}</button></div>
-          <section id="feedbackDetail" class="feedback-detail" ${selected ? "" : "hidden"}>
+          <section id="feedbackDetail" class="feedback-detail" tabindex="-1" ${selected ? "" : "hidden"}>
           ${selected ? `<div class="panel-head"><h3>${esc(text("\u53cd\u9988", "Feedback"))} #${Number(selected.id)}</h3>
             <button type="button" class="secondary-button" id="feedbackDetailReload" ${saving ? "disabled" : ""}>${esc(text("\u91cd\u65b0\u8bfb\u53d6", "Reload detail"))}</button></div>
             <p class="feedback-meta">${esc(text("\u63d0\u4ea4\u65f6\u95f4", "Received"))}: ${esc(stamp(selected.receivedAt))}</p>
@@ -91,6 +91,11 @@
         if (value.feedback?.id !== id || !Number.isInteger(value.feedback.revision)) throw Error(text("\u53cd\u9988\u54cd\u5e94\u683c\u5f0f\u65e0\u6548", "Invalid feedback response"));
         selected = value.feedback; history = value.history || [];
         draft = { status: selected.status, note: selected.note }; notice = ""; render();
+        if (!element.hidden && element.closest("[data-admin-view]")?.hidden !== true) {
+          const detail = element.querySelector("#feedbackDetail");
+          detail.scrollIntoView({ block: "nearest" });
+          detail.focus({ preventScroll: true });
+        }
       } catch (error) { if (ticket === detailTicket && generation === epoch) { notice = error.message; } }
       finally { if (ticket === detailTicket && generation === epoch) { detailLoading = false; render(); } }
     }
@@ -106,7 +111,8 @@
         if (value.feedback?.id !== id || value.feedback.revision <= revision) throw Error(text("\u672a\u6536\u5230\u6709\u6548\u4fdd\u5b58\u786e\u8ba4", "Missing save acknowledgement"));
         selected = value.feedback; history = value.history || [];
         draft = { status: selected.status, note: selected.note };
-        rows = rows.map(item => item.id === id ? selected : item);
+        rows = rows.map(item => item.id === id ? selected : item)
+          .filter(item => filter === "all" || item.status === filter);
         notice = text("\u5904\u7406\u7ed3\u679c\u5df2\u4fdd\u5b58", "Outcome saved");
       } catch (error) {
         if (generation === epoch) notice = error.code === "CAS_CONFLICT"

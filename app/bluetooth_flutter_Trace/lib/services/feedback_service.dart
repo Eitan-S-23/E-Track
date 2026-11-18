@@ -215,7 +215,9 @@ class FeedbackService extends GetxService with WidgetsBindingObserver {
     try {
       await initialize();
       if (_closed || !_foreground || !_canSend() || pending.isEmpty || _data['blocked'] == true ||
-          _clock().toUtc().millisecondsSinceEpoch < (_data['notBefore'] as int)) return;
+          _clock().toUtc().millisecondsSinceEpoch < (_data['notBefore'] as int)) {
+        return;
+      }
       late Map<String, dynamic> flight;
       late bool canThaw;
       var prepared = false;

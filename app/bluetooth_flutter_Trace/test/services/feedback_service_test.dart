@@ -31,7 +31,7 @@ void main() {
         expect(uri.host, 'feedback.test');
         final captured = jsonDecode(jsonEncode(body)) as Map<String, dynamic>;
         requests.add(captured); tokens.add(token);
-        return responder == null ? receipt(captured) : responder!(captured);
+        return responder == null ? receipt(captured) : await responder!(captured);
       });
     services.add(service);
     return service;
