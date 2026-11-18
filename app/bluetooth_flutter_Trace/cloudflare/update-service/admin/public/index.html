@@ -3883,9 +3883,6 @@
       function startNewAnnouncement() {
         playAnnouncementCreateFeedback();
         selectAnnouncement(null);
-        window.requestAnimationFrame(() => {
-          if (!els.announcementTitle.disabled) els.announcementTitle.focus({ preventScroll: true });
-        });
       }
 
       function playAnnouncementCreateFeedback() {

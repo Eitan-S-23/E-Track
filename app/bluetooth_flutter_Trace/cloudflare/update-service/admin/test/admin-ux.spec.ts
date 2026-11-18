@@ -100,6 +100,31 @@ for(const width of [1440,390]) test(`announcement editor is a matching modal at 
   expect(data.writes.filter(w=>w.path.includes("announcements"))).toHaveLength(1);
 });
 
+test("a delayed announcement frame cannot steal focus from an edited body",async({page})=>{
+  await page.setViewportSize({width:390,height:900});const data=await mount(page);
+  await page.locator("#appAnnouncementsTab").click();
+  await page.evaluate(()=>{
+    const original=window.requestAnimationFrame,frames:FrameRequestCallback[]=[];
+    window.requestAnimationFrame=callback=>frames.push(callback);
+    Object.assign(window,{releaseAnnouncementFrames:()=>{
+      window.requestAnimationFrame=original;
+      for(const frame of frames) frame(performance.now());
+    }});
+  });
+  await page.locator("#newAnnouncement").click();
+  await page.locator("#announcementTitle").fill("Keep this title");
+  await page.locator("#announcementBody").fill("Keep this body");
+  await page.evaluate("releaseAnnouncementFrames()");
+  await expect(page.locator("#announcementBody")).toBeFocused();
+  await page.keyboard.type(" and later typing");
+  await expect(page.locator("#announcementTitle")).toHaveValue("Keep this title");
+  await expect(page.locator("#announcementBody")).toHaveValue("Keep this body and later typing");
+  await page.locator("#announcementClose").click();
+  await page.locator("#confirmCancel").click();
+  await expect(page.locator("#announcementBody")).toHaveValue("Keep this body and later typing");
+  expect(data.writes).toHaveLength(0);
+});
+
 test("platform selection scopes reads and clears cross-platform selections",async({page})=>{
   const data=await mount(page);
   await page.locator('[data-bulk-action="enter"]').click();
