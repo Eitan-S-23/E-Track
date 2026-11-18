@@ -1,10 +1,35 @@
 #include "SystemInfosModel.h"
+#include "App/Version.h"
 #include <stdio.h>
+#include <string.h>
+
+#if defined(OTA_TARGET_APP)
+#include "Utils/OtaUpdate/FirmwareInfo.h"
+
+static int ReadRunningFirmware(void* ctx, uint32_t offset, uint8_t* dst, size_t len)
+{
+    (void)ctx;
+    if (dst == NULL || offset > OTA_APP_LENGTH || len > (size_t)(OTA_APP_LENGTH - offset))
+    {
+        return -1;
+    }
+    memcpy(dst, (const void*)(uintptr_t)(OTA_APP_ORIGIN + offset), len);
+    return 0;
+}
+#endif
 
 using namespace Page;
 
 void SystemInfosModel::Init()
 {
+#if defined(OTA_TARGET_APP)
+    const boot_image_reader_t reader = { ReadRunningFirmware, NULL };
+    OtaUpdate::FormatFirmwareVersion(&reader, firmwareVersion, sizeof(firmwareVersion));
+#elif defined(_WIN32)
+    snprintf(firmwareVersion, sizeof(firmwareVersion), "%s", "Simulator");
+#else
+    snprintf(firmwareVersion, sizeof(firmwareVersion), "%s", "Legacy");
+#endif
     account = new Account("SystemInfosModel", DataProc::Center(), 0, this);
 
     account->Subscribe("SportStatus");

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compile and run the P3-1 BLE session host unit tests.
+"""Compile and run the current V2-only BLE session host unit tests.
 
 Links the real session/frame/ring transport against the real staging, SD
 header inspection, and boot crypto sources with an injected in-memory NOR
@@ -20,12 +20,13 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def compile_test(output: Path) -> None:
     sources = [
-        ROOT / "tests/ota/test_ota_ble_session.c",
+        ROOT / "tests/ota/test_ota_ble_pipeline.c",
         ROOT / "Libraries/OTA/ota_ble_session.c",
         ROOT / "Libraries/OTA/ota_ble_frame.c",
         ROOT / "Libraries/OTA/ota_ble_ring.c",
         ROOT / "Libraries/OTA/ota_sd.c",
         ROOT / "Libraries/OTA/ota_staging.c",
+        ROOT / "Libraries/OTA/ota_pipeline.c",
         ROOT / "boot/src/boot_crc32.c",
         ROOT / "boot/src/boot_sha256.c",
     ]

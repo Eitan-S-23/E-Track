@@ -50,7 +50,7 @@ public:
     bool GetBluetoothConnected();
     bool GetPowerInfo(HAL::Power_Info_t* info);
 
-    void RecorderCommand(RecCmd_t cmd);
+    bool RecorderCommand(RecCmd_t cmd);
     void PlayMusic(const char* music);
     void SetStatusBarStyle(DataProc::StatusBar_Style_t style);
     void SetStatusBarAppear(bool en);

@@ -105,7 +105,7 @@ if(P2_3_TEST_ENABLE)
 endif()
 
 
-option(P34_EARLY_FAULT_VECTORS "Use reviewed early exception Flash vectors" OFF)
+option(P34_EARLY_FAULT_VECTORS "Use reviewed early exception Flash vectors" ON)
 set(P34_EARLY_LINKER_DEFINE)
 if(P34_EARLY_FAULT_VECTORS)
     set(P34_EARLY_LINKER_DEFINE "-DP34_EARLY_FAULT_VECTORS=1")
@@ -736,7 +736,10 @@ target_compile_definitions(X_Track_App_GCC PRIVATE
     "OTA_TARGET_APP"
 )
 option(P3_4_LINK_PROFILE "Development-only runtime baud and BLE staging counters" OFF)
-option(P34_OTA_CANDIDATE "V2/WAIT_RX candidate without runtime experiment controls" OFF)
+option(P34_OTA_CANDIDATE "Required V2/WAIT_RX receiver without runtime experiment controls" ON)
+if(NOT P34_OTA_CANDIDATE)
+    message(FATAL_ERROR "BLE v1 was removed; the V2 receiver must not be disabled")
+endif()
 set(P34_OTA_UART_BAUD "921600" CACHE STRING "Fallback UART rate without a valid retained setting; module must match")
 if(P34_OTA_CANDIDATE)
     if(P3_4_LINK_PROFILE OR NOT P34_EARLY_FAULT_VECTORS)
@@ -1010,7 +1013,7 @@ set_property(SOURCE "${CMAKE_CURRENT_LIST_DIR}/../../boot/src/boot_sha256.c"
     "$<$<STREQUAL:$<TARGET_PROPERTY:NAME>,X_Track_App_GCC>:-O2>")
 
 # Reviewed isolated App experiment; OFF is production-equivalent.
-option(P34_EARLY_FAULT_VECTORS "Use reviewed early exception Flash vectors" OFF)
+option(P34_EARLY_FAULT_VECTORS "Use reviewed early exception Flash vectors" ON)
 if(P34_EARLY_FAULT_VECTORS)
     target_compile_definitions(X_Track_App_GCC PRIVATE P34_EARLY_FAULT_VECTORS=1)
     target_sources(X_Track_App_GCC PRIVATE

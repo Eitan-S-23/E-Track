@@ -448,7 +448,6 @@ static ota_staging_result_t clear_persistent_block_bit(
                       block, committed);
 }
 
-#if defined(P34_OTA_PIPELINE) && P34_OTA_PIPELINE
 ota_staging_result_t ota_staging_commit_buffer(
     ota_staging_receiver_t *receiver, uint32_t offset,
     const uint8_t *data, uint32_t len, ota_staging_progress_t *progress)
@@ -477,7 +476,6 @@ ota_staging_result_t ota_staging_commit_buffer(
     set_progress(receiver, 0, progress);
     return result;
 }
-#endif
 
 static ota_staging_result_t commit_current_block(
     ota_staging_receiver_t *receiver)

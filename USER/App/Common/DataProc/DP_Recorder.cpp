@@ -1,10 +1,14 @@
 #include <stdio.h>
 #include "DataProc.h"
+#include "Common/HAL/CompanionUpdate.h"
 #include "Utils/GPX/GPX.h"
 #include "Config/Config.h"
 #include "Version.h"
 
 using namespace DataProc;
+
+static bool recorderFileOpen = false;
+bool DataProc::Recorder_IsOpen() { return recorderFileOpen; }
 
 #define RECORDER_GPX_TIME_FMT    "%d-%02d-%02dT%02d:%02d:%02dZ"
 #define RECORDER_GPX_FILE_NAME   "/" CONFIG_TRACK_RECORD_FILE_DIR_NAME "/TRK_%d%02d%02d_%02d%02d%02d.gpx"
@@ -111,6 +115,7 @@ static void Recorder_RecStart(Recorder_t* recorder, uint16_t time)
 
     if (res == LV_FS_RES_OK)
     {
+        recorderFileOpen = true;
         LV_LOG_USER("Track file %s open success", filepath);
 
         GPX* gpx = &(recorder->gpx);
@@ -144,13 +149,19 @@ static void Recorder_RecStop(Recorder_t* recorder)
     Recorder_FileWriteString(file_p, gpx->getTrakSegClose().c_str());;
     Recorder_FileWriteString(file_p, gpx->getTrakClose().c_str());
     Recorder_FileWriteString(file_p, gpx->getClose().c_str());
-    lv_fs_close(file_p);
+    if (lv_fs_close(file_p) == LV_FS_RES_OK) recorderFileOpen = false;
 
     LV_LOG_USER("Track record end");
 }
 
 static int onNotify(Recorder_t* recorder, Recorder_Info_t* info)
 {
+    if ((info->cmd == RECORDER_CMD_START || info->cmd == RECORDER_CMD_CONTINUE) &&
+        HAL::BT_CompanionInstallPending())
+    {
+        LV_LOG_WARN("Recording cannot start while firmware installation is pending");
+        return Account::RES_UNSUPPORTED_REQUEST;
+    }
     switch (info->cmd)
     {
     case RECORDER_CMD_START:
@@ -212,8 +223,7 @@ static int onEvent(Account* account, Account::EventParam_t* param)
     case Account::EVENT_NOTIFY:
         if (param->size == sizeof(Recorder_Info_t))
         {
-            onNotify(recorder, (Recorder_Info_t*)param->data_p);
-            res = Account::RES_OK;
+            res = (Account::ResCode_t)onNotify(recorder, (Recorder_Info_t*)param->data_p);
         }
         else
         {
@@ -235,6 +245,7 @@ DATA_PROC_INIT_DEF(Recorder)
     memset(&recorder.file, 0, sizeof(recorder.file));
     recorder.active = false;
     recorder.account = account;
+    recorderFileOpen = false;
     account->UserData = &recorder;
 
     account->Subscribe("GPS");

@@ -1,7 +1,8 @@
 name: MCU Firmware Build
 
 # 单片机固件 GCC 构建工作流（monorepo 路径隔离）：
-# - push 到 main/master 且固件相关路径变更 → 仅构建 + 上传 Actions artifact（14 天；不建 Release、不注册 CF）
+# - main uses original-admin-candidate.yml for versioned automatic candidate delivery.
+# - master pushes and pull requests retain build-only validation (no registration).
 # - workflow_dispatch(rehearsal=true): isolated staging, never GitHub Release
 # - workflow_dispatch(publish=true): approved rehearsal rebuild and production gate
 # - workflow_dispatch(check_bindings=true): protected existing-object readback, not rehearsal
@@ -12,7 +13,6 @@ name: MCU Firmware Build
 on:
   push:
     branches:
-      - main
       - master
     paths:
       - "USER/**"
@@ -536,7 +536,7 @@ jobs:
         shell: bash
         env:
           VERSION_NAME: ${{ steps.version.outputs.version_name }}
-          INPUT_FIRMWARE_BUILD_PROFILE: ${{ github.event.inputs.firmware_build_profile || 'baseline' }}
+          INPUT_FIRMWARE_BUILD_PROFILE: ${{ github.event.inputs.firmware_build_profile || 'p34-v2-candidate' }}
         run: |
           set -euo pipefail
           cleanup_key() {

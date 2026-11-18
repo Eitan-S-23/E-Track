@@ -1,6 +1,4 @@
-#define main legacy_main
-#include "test_ota_ble_session.c"
-#undef main
+#include "ota_ble_session_fixture.h"
 #include "OTA/ota_pipeline_sync.h"
 
 static union { uint64_t align; uint8_t bytes[40960]; } workspace2;
@@ -200,7 +198,7 @@ static void invalid_adapter_calls(void)
 #ifndef P34_PIPELINE_SYNC_HELPERS_ONLY
 int main(void)
 {
-    (void)legacy_main();
+    test_get_info();
     transfer_and_faults();
     invalid_adapter_calls();
     printf("PIPELINE_SYNC checks=%d failures=%d\n", checks, failures);

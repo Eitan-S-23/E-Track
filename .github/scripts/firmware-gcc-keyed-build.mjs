@@ -8,6 +8,7 @@ import { versionCodeFor } from "../../app/bluetooth_flutter_Trace/cloudflare/upd
 import { captureBuildInputs, digest } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/prepare-firmware-release.mjs";
 import { approvedFirmwareKey, DEVELOPMENT_PACKAGING_KEY, firmwareKeyBinding, firmwareKeyHeader } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-release-key.mjs";
 import { captureBuildConfiguration, firmwareBuildProfile, firmwareCMakeOptions } from "../../app/bluetooth_flutter_Trace/cloudflare/update-service/scripts/firmware-build-profile.mjs";
+import { adminCandidateAdmission } from "./firmware-admin-context.mjs";
 
 function ownerIdentity(env) {
   if (!/^[0-9a-f]{40}$/.test(env.GITHUB_SHA ?? "") || !/^[1-9][0-9]*$/.test(env.GITHUB_RUN_ID ?? "")
@@ -46,7 +47,12 @@ export async function buildKeyedFirmware({ root, buildDir, evidenceDir, versionN
     keyBinding = firmwareKeyBinding(key, "development-ci-key-v1");
   } else {
     const mode = env.FIRMWARE_RELEASE_MODE;
-    if (env.GITHUB_EVENT_NAME !== "workflow_dispatch" || !["rehearsal", "production"].includes(mode)
+    if (mode === "original-admin-candidate") {
+      const owner = adminCandidateAdmission(env);
+      if (profile !== "p34-v2-candidate" || versionName !== owner.versionName) {
+        throw new CliError("Original Admin compilation must match the new V2 candidate version");
+      }
+    } else if (env.GITHUB_EVENT_NAME !== "workflow_dispatch" || !["rehearsal", "production"].includes(mode)
       || env.INPUT_CHECK_BINDINGS === "true" || env.OTA_BOOT_CHAIN_READY !== (mode === "production" ? "true" : "false")
       || (mode === "production" ? env.INPUT_PUBLISH !== "true" || env.INPUT_REHEARSAL === "true"
         : env.INPUT_REHEARSAL !== "true" || env.INPUT_PUBLISH === "true")) throw new CliError("Key-bound compilation requires the gated protected release context");

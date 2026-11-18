@@ -153,11 +153,11 @@ static void frame_stream(bool inject_overlap)
     HardwareSerial serial(USART1);
     serial.attachInterrupt(collect);
     std::vector<uint8_t> wire;
-    uint8_t payload[132], encoded[142];
+    uint8_t payload[OTA_BLE_MAX_PAYLOAD], encoded[OTA_BLE_MAX_FRAME];
     memset(payload, 0x39, sizeof(payload));
     for (unsigned seq = 0; seq < 32u; ++seq)
     {
-        const size_t length = ota_ble_frame_encode(encoded, sizeof(encoded), OTA_BLE_CMD_DATA,
+        const size_t length = ota_ble_frame_encode(encoded, sizeof(encoded), OTA_BLE_CMD_DATA2,
                                                     1u, (uint16_t)seq, payload, sizeof(payload));
         CHECK(length == sizeof(encoded));
         wire.insert(wire.end(), encoded, encoded + length);

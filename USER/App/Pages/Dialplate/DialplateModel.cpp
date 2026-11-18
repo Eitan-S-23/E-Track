@@ -117,11 +117,11 @@ int DialplateModel::onEvent(Account* account, Account::EventParam_t* param)
     return Account::RES_OK;
 }
 
-void DialplateModel::RecorderCommand(RecCmd_t cmd)
+bool DialplateModel::RecorderCommand(RecCmd_t cmd)
 {
     if(account == nullptr)
     {
-        return;
+        return false;
     }
 
     if (cmd != REC_READY_STOP)
@@ -130,7 +130,8 @@ void DialplateModel::RecorderCommand(RecCmd_t cmd)
         DATA_PROC_INIT_STRUCT(recInfo);
         recInfo.cmd = (DataProc::Recorder_Cmd_t)cmd;
         recInfo.time = 1000;
-        account->Notify("Recorder", &recInfo, sizeof(recInfo));
+        if (account->Notify("Recorder", &recInfo, sizeof(recInfo)) != Account::RES_OK)
+            return false;
     }
 
     DataProc::StatusBar_Info_t statInfo;
@@ -160,6 +161,7 @@ void DialplateModel::RecorderCommand(RecCmd_t cmd)
     }
 
     account->Notify("StatusBar", &statInfo, sizeof(statInfo));
+    return true;
 }
 
 void DialplateModel::PlayMusic(const char* music)

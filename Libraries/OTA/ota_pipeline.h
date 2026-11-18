@@ -3,7 +3,6 @@
 
 #include "ota_staging.h"
 
-#if defined(P34_OTA_PIPELINE) && P34_OTA_PIPELINE
 #if defined(P34_STAGING_EARLY_ERASE) && P34_STAGING_EARLY_ERASE
 #error Pipeline and the paused early-erase experiment are separate candidates
 #endif
@@ -116,6 +115,5 @@ int ota_pipeline_ack_encode(const ota_pipeline_t *pipe, uint8_t out[OTA_PIPELINE
 
 #ifdef __cplusplus
 }
-#endif
 #endif
 #endif

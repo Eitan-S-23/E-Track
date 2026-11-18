@@ -1,4 +1,7 @@
 #include "FirmwareUpdate.h"
+#include "Utils/lv_ext/lv_file_browser_label.h"
+#include "Common/HAL/CompanionUpdate.h"
+#include "Common/DataProc/DataProc.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -42,6 +45,7 @@ using namespace Page;
 #define FOCUS_PAD_X      2
 #define FOCUS_PAD_Y      2
 #define WORK_STEP_BYTES  4096u
+#define VERSION_VALUE_W  (LV_HOR_RES - 20 - 24 - 72)
 
 namespace
 {
@@ -49,6 +53,7 @@ namespace
     lv_style_t btnStyle;
     lv_style_t btnFocusedStyle;
     lv_style_t iconStyle;
+    lv_font_t versionFont;
     lv_style_transition_dsc_t btnTransition;
     bool stylesReady = false;
 
@@ -94,6 +99,10 @@ namespace
             return;
         }
         stylesReady = true;
+        /* Local descriptor only: retain the large numeric glyphs and resolve
+         * the missing prefix from the same font family without changing it. */
+        versionFont = *ResourcePool::GetFont("bahnschrift_24");
+        versionFont.fallback = ResourcePool::GetFont("bahnschrift_17");
 
         lv_style_init(&listStyle);
         lv_style_set_bg_opa(&listStyle, LV_OPA_0);
@@ -186,6 +195,39 @@ namespace
         lv_label_set_text(label, text);
         lv_obj_align(label, LV_ALIGN_CENTER, 0, 1);
     }
+
+    void SetVersionText(lv_obj_t* label, const char* text)
+    {
+        const lv_font_t* fonts[] = {
+            &versionFont, ResourcePool::GetFont("bahnschrift_17"),
+            ResourcePool::GetFont("bahnschrift_13")
+        };
+        const lv_font_t* font = fonts[2];
+        for (uint8_t i = 0u; i < sizeof(fonts) / sizeof(fonts[0]); ++i)
+        {
+            lv_point_t size;
+            lv_txt_get_size(&size, text, fonts[i],
+                            lv_obj_get_style_text_letter_space(label, 0), 0,
+                            LV_COORD_MAX, LV_TEXT_FLAG_EXPAND);
+            if (size.x <= VERSION_VALUE_W)
+            {
+                font = fonts[i];
+                break;
+            }
+        }
+        lv_obj_set_style_text_font(label, font, 0);
+        lv_obj_set_size(label, VERSION_VALUE_W, lv_font_get_line_height(font));
+        lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_RIGHT, 0);
+        lv_label_set_long_mode(label, LV_LABEL_LONG_CLIP);
+        lv_label_set_text(label, text);
+    }
+
+    void SetScrollingText(lv_obj_t* label, const char* text)
+    {
+        lv_label_set_long_mode(label, LV_LABEL_LONG_CLIP);
+        lv_label_set_text(label, text);
+        lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL);
+    }
 }
 
 FirmwareUpdate::FirmwareUpdate()
@@ -197,6 +239,7 @@ FirmwareUpdate::FirmwareUpdate()
       focusHalo(nullptr),
       list(nullptr),
       confirmPanel(nullptr),
+      confirmNameArea(nullptr),
       confirmNameLabel(nullptr),
       confirmKindLabel(nullptr),
       currentVersionLabel(nullptr),
@@ -252,6 +295,12 @@ void FirmwareUpdate::onViewLoad()
 
 void FirmwareUpdate::onViewWillAppear()
 {
+    if (workNameLabel != nullptr &&
+        (mode == MODE_WORKING || mode == MODE_RESULT))
+    {
+        lv_label_set_long_mode(workNameLabel, LV_LABEL_LONG_SCROLL);
+        lv_label_set_long_mode(workStatusLabel, LV_LABEL_LONG_SCROLL);
+    }
     RefreshGroup();
 }
 
@@ -402,37 +451,57 @@ void FirmwareUpdate::CreateConfirmUI()
     lv_label_set_text(confirmKindLabel, "FULL");
     lv_obj_align(confirmKindLabel, LV_ALIGN_TOP_RIGHT, -12, 9);
 
-    confirmNameLabel = lv_label_create(confirmPanel);
+    confirmNameArea = lv_obj_create(confirmPanel);
+    lv_obj_remove_style_all(confirmNameArea);
+    lv_obj_set_pos(confirmNameArea, 12, 39);
+    lv_obj_set_size(confirmNameArea, LV_HOR_RES - 46, 56);
+    lv_obj_set_style_pad_all(confirmNameArea, 3, 0);
+    lv_obj_set_style_pad_right(confirmNameArea, 8, 0);
+    lv_obj_set_style_border_width(confirmNameArea, 1, 0);
+    lv_obj_set_style_border_color(confirmNameArea, lv_color_hex(0x17333b), 0);
+    lv_obj_set_style_border_opa(confirmNameArea, LV_OPA_COVER, 0);
+    lv_obj_set_scroll_dir(confirmNameArea, LV_DIR_VER);
+    lv_obj_set_scrollbar_mode(confirmNameArea, LV_SCROLLBAR_MODE_AUTO);
+    lv_obj_set_style_width(confirmNameArea, 3, LV_PART_SCROLLBAR);
+    lv_obj_set_style_bg_color(confirmNameArea, lv_color_hex(0x20e8f0),
+                              LV_PART_SCROLLBAR);
+    lv_obj_set_style_bg_opa(confirmNameArea, LV_OPA_80, LV_PART_SCROLLBAR);
+    lv_obj_add_flag(confirmNameArea, LV_OBJ_FLAG_SCROLL_WITH_ARROW);
+    lv_obj_clear_flag(confirmNameArea, LV_OBJ_FLAG_SCROLL_CHAIN |
+                                       LV_OBJ_FLAG_SCROLL_ELASTIC);
+    lv_obj_add_event_cb(confirmNameArea, onEvent, LV_EVENT_ALL, this);
+
+    confirmNameLabel = lv_label_create(confirmNameArea);
     lv_obj_set_style_text_font(confirmNameLabel, ResourcePool::GetFont("cn_16"), 0);
     lv_obj_set_style_text_color(confirmNameLabel, lv_color_white(), 0);
-    lv_label_set_long_mode(confirmNameLabel, LV_LABEL_LONG_DOT);
-    lv_obj_set_width(confirmNameLabel, LV_HOR_RES - 54);
+    lv_label_set_long_mode(confirmNameLabel, LV_LABEL_LONG_WRAP);
+    lv_obj_set_width(confirmNameLabel, LV_PCT(100));
     lv_label_set_text(confirmNameLabel, "");
-    lv_obj_align(confirmNameLabel, LV_ALIGN_TOP_LEFT, 12, 43);
+    lv_obj_align(confirmNameLabel, LV_ALIGN_TOP_LEFT, 0, 0);
 
     lv_obj_t* currentCaption = lv_label_create(confirmPanel);
     lv_obj_set_style_text_font(currentCaption, ResourcePool::GetFont("cn_16"), 0);
     lv_obj_set_style_text_color(currentCaption, lv_color_hex(0x70a5ad), 0);
     lv_label_set_text(currentCaption, TXT_CURRENT_VER);
-    lv_obj_align(currentCaption, LV_ALIGN_TOP_LEFT, 12, 79);
+    lv_obj_align(currentCaption, LV_ALIGN_TOP_LEFT, 12, 105);
 
     currentVersionLabel = lv_label_create(confirmPanel);
     lv_obj_set_style_text_font(currentVersionLabel, ResourcePool::GetFont("bahnschrift_24"), 0);
     lv_obj_set_style_text_color(currentVersionLabel, lv_color_white(), 0);
-    lv_label_set_text(currentVersionLabel, "v0.0.0");
-    lv_obj_align(currentVersionLabel, LV_ALIGN_TOP_RIGHT, -12, 75);
+    SetVersionText(currentVersionLabel, "v0.0.0");
+    lv_obj_align(currentVersionLabel, LV_ALIGN_TOP_RIGHT, -12, 101);
 
     lv_obj_t* targetCaption = lv_label_create(confirmPanel);
     lv_obj_set_style_text_font(targetCaption, ResourcePool::GetFont("cn_16"), 0);
     lv_obj_set_style_text_color(targetCaption, lv_color_hex(0x70a5ad), 0);
     lv_label_set_text(targetCaption, TXT_FILE_VER);
-    lv_obj_align(targetCaption, LV_ALIGN_TOP_LEFT, 12, 119);
+    lv_obj_align(targetCaption, LV_ALIGN_TOP_LEFT, 12, 141);
 
     targetVersionLabel = lv_label_create(confirmPanel);
     lv_obj_set_style_text_font(targetVersionLabel, ResourcePool::GetFont("bahnschrift_24"), 0);
     lv_obj_set_style_text_color(targetVersionLabel, lv_color_hex(0x52f58a), 0);
-    lv_label_set_text(targetVersionLabel, "v0.0.0");
-    lv_obj_align(targetVersionLabel, LV_ALIGN_TOP_RIGHT, -12, 115);
+    SetVersionText(targetVersionLabel, "v0.0.0");
+    lv_obj_align(targetVersionLabel, LV_ALIGN_TOP_RIGHT, -12, 137);
 
     cancelButton = lv_obj_create(confirmPanel);
     ConfigurePlainButton(cancelButton, TXT_BACK, 12, 181, 82);
@@ -462,7 +531,9 @@ void FirmwareUpdate::CreateWorkUI()
     workStatusLabel = lv_label_create(workPanel);
     lv_obj_set_style_text_font(workStatusLabel, ResourcePool::GetFont("cn_16"), 0);
     lv_obj_set_style_text_color(workStatusLabel, lv_color_hex(0x20e8f0), 0);
-    lv_label_set_text(workStatusLabel, TXT_IMPORTING);
+    lv_obj_set_size(workStatusLabel, LV_HOR_RES - 20 - 24 - 60,
+                    lv_font_get_line_height(ResourcePool::GetFont("cn_16")));
+    SetScrollingText(workStatusLabel, TXT_IMPORTING);
     lv_obj_align(workStatusLabel, LV_ALIGN_TOP_LEFT, 12, 11);
 
     workKindLabel = lv_label_create(workPanel);
@@ -474,8 +545,9 @@ void FirmwareUpdate::CreateWorkUI()
     workNameLabel = lv_label_create(workPanel);
     lv_obj_set_style_text_font(workNameLabel, ResourcePool::GetFont("cn_16"), 0);
     lv_obj_set_style_text_color(workNameLabel, lv_color_white(), 0);
-    lv_label_set_long_mode(workNameLabel, LV_LABEL_LONG_DOT);
-    lv_obj_set_width(workNameLabel, LV_HOR_RES - 54);
+    lv_obj_set_size(workNameLabel, LV_HOR_RES - 54,
+                    lv_font_get_line_height(ResourcePool::GetFont("cn_16")));
+    lv_label_set_long_mode(workNameLabel, LV_LABEL_LONG_SCROLL);
     lv_label_set_text(workNameLabel, "");
     lv_obj_align(workNameLabel, LV_ALIGN_TOP_LEFT, 12, 49);
 
@@ -555,12 +627,14 @@ void FirmwareUpdate::ClearRows()
 void FirmwareUpdate::LoadFiles()
 {
     ClearRows();
+    AddRow("Phone firmware update", "@companion", false, false);
     SetBrowserMessage("", "");
     lv_label_set_text(pathLabel, currentPath);
     if (!IsRootPath(currentPath))
     {
         AddRow("..", "", true, true);
     }
+    const uint8_t navigationRows = rowCount;
 
     lv_fs_dir_t dir;
     if (lv_fs_dir_open(&dir, currentPath) != LV_FS_RES_OK)
@@ -627,7 +701,7 @@ void FirmwareUpdate::LoadFiles()
     {
         SetBrowserMessage(TXT_SCAN_LIMIT, "");
     }
-    else if (rowCount == 0u || (rowCount == 1u && rows[0].isUp))
+    else if (rowCount == navigationRows)
     {
         SetBrowserMessage(pathTooLong ? TXT_PATH_LONG : TXT_EMPTY, "");
     }
@@ -685,8 +759,8 @@ void FirmwareUpdate::AddRow(const char* name, const char* path,
     if (lv_obj_get_child_cnt(row) > 1u)
     {
         lv_obj_t* label = lv_obj_get_child(row, 1);
-        lv_label_set_long_mode(label, LV_LABEL_LONG_DOT);
-        lv_obj_set_width(label, LIST_W - 76);
+        FileBrowserLabel::Configure(row, label, LIST_W - 76,
+                                    ResourcePool::GetFont("cn_16"));
         lv_obj_set_style_text_color(label, lv_color_white(), 0);
         lv_obj_set_style_text_font(label, ResourcePool::GetFont("cn_16"), 0);
         lv_obj_align(label, LV_ALIGN_LEFT_MID, 42, 0);
@@ -796,6 +870,11 @@ void FirmwareUpdate::GoUp()
 
 void FirmwareUpdate::SelectRow(uint8_t index)
 {
+    if (index < rowCount && strcmp(rows[index].path, "@companion") == 0 && mode == MODE_BROWSER)
+    {
+        FirmwareCompanion_Show();
+        return;
+    }
     if (index >= rowCount || mode != MODE_BROWSER)
     {
         return;
@@ -826,29 +905,31 @@ void FirmwareUpdate::ShowConfirm(const Row_t& row)
         CreateConfirmUI();
     }
 
-    char currentVersion[20];
-    char targetVersion[20];
+    char currentVersion[20] = "v";
+    char targetVersion[20] = "v";
 
     strncpy(selectedPath, row.path, sizeof(selectedPath));
     selectedPath[sizeof(selectedPath) - 1u] = '\0';
     strncpy(selectedName, row.name, sizeof(selectedName));
     selectedName[sizeof(selectedName) - 1u] = '\0';
     OtaUpdate::Session::FormatVersion(updater.CurrentVersionCode(),
-                                      currentVersion,
-                                      sizeof(currentVersion));
+                                      currentVersion + 1,
+                                      sizeof(currentVersion) - 1u);
     OtaUpdate::Session::FormatVersion(selectedInfo.target_vcode,
-                                      targetVersion,
-                                      sizeof(targetVersion));
+                                      targetVersion + 1,
+                                      sizeof(targetVersion) - 1u);
     lv_label_set_text(confirmNameLabel, selectedName);
     lv_label_set_text(confirmKindLabel,
                       selectedInfo.kind == OTA_SD_KIND_PATCH
                           ? "PATCH" : "FULL");
-    lv_label_set_text(currentVersionLabel, currentVersion);
-    lv_label_set_text(targetVersionLabel, targetVersion);
+    SetVersionText(currentVersionLabel, currentVersion);
+    SetVersionText(targetVersionLabel, targetVersion);
     lv_obj_add_flag(pathLabel, LV_OBJ_FLAG_HIDDEN);
     lv_obj_clear_flag(confirmPanel, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(backButton, LV_OBJ_FLAG_HIDDEN);
     lv_obj_move_foreground(confirmPanel);
+    lv_obj_update_layout(confirmPanel);
+    lv_obj_scroll_to_y(confirmNameArea, 0, LV_ANIM_OFF);
     mode = MODE_CONFIRM;
     RefreshGroup();
 }
@@ -887,8 +968,10 @@ void FirmwareUpdate::StartImport()
     lv_obj_add_flag(backButton, LV_OBJ_FLAG_HIDDEN);
     lv_obj_clear_flag(workPanel, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(resultButton, LV_OBJ_FLAG_HIDDEN);
-    lv_label_set_text(workStatusLabel, TXT_IMPORTING);
-    lv_label_set_text(workNameLabel, selectedName);
+    SetScrollingText(workStatusLabel, TXT_IMPORTING);
+    lv_obj_set_style_text_color(workStatusLabel, lv_color_hex(0x20e8f0), 0);
+    /* Reset the previous filename's native offset before starting a new one. */
+    SetScrollingText(workNameLabel, selectedName);
     lv_label_set_text(workKindLabel,
                       selectedInfo.kind == OTA_SD_KIND_PATCH
                           ? "PATCH" : "FULL");
@@ -968,7 +1051,7 @@ void FirmwareUpdate::FinishImport(bool success)
     if (success)
     {
         /* STAGED 已原子提交且读回通过，才允许显示成功并提示重启 */
-        lv_label_set_text(workStatusLabel, TXT_STAGED_READY);
+        SetScrollingText(workStatusLabel, TXT_STAGED_READY);
         lv_obj_set_style_text_color(workStatusLabel,
                                     lv_color_hex(0x52f58a), 0);
         lv_bar_set_value(progressBar, 100, LV_ANIM_OFF);
@@ -977,7 +1060,7 @@ void FirmwareUpdate::FinishImport(bool success)
     }
     else
     {
-        lv_label_set_text(workStatusLabel, TXT_FAILED);
+        SetScrollingText(workStatusLabel, TXT_FAILED);
         lv_obj_set_style_text_color(workStatusLabel,
                                     lv_color_hex(0xff6b57), 0);
         lv_label_set_text(workDetailLabel, updater.LastError());
@@ -993,7 +1076,7 @@ bool FirmwareUpdate::IsFocusTarget(lv_obj_t* obj)
         return false;
     }
     if (obj == backButton || obj == cancelButton || obj == startButton ||
-        obj == resultButton)
+        obj == resultButton || obj == confirmNameArea)
     {
         return true;
     }
@@ -1083,6 +1166,7 @@ void FirmwareUpdate::ReleaseUI()
     focusHalo = nullptr;
     list = nullptr;
     confirmPanel = nullptr;
+    confirmNameArea = nullptr;
     confirmNameLabel = nullptr;
     confirmKindLabel = nullptr;
     currentVersionLabel = nullptr;
@@ -1138,6 +1222,11 @@ void FirmwareUpdate::RefreshGroup()
     {
         lv_group_add_obj(group, cancelButton);
         lv_group_add_obj(group, startButton);
+        if (lv_obj_get_scroll_top(confirmNameArea) > 0 ||
+            lv_obj_get_scroll_bottom(confirmNameArea) > 0)
+        {
+            lv_group_add_obj(group, confirmNameArea);
+        }
         first = cancelButton;
     }
     else if (mode == MODE_RESULT)
@@ -1174,7 +1263,8 @@ void FirmwareUpdate::ClearGroup()
             }
         }
         lv_obj_t* owned[] = {
-            backButton, cancelButton, startButton, resultButton
+            backButton, cancelButton, startButton, resultButton,
+            confirmNameArea
         };
         for (uint8_t i = 0u;
              i < sizeof(owned) / sizeof(owned[0]); ++i)
@@ -1188,6 +1278,15 @@ void FirmwareUpdate::ClearGroup()
                 ClearFocusState(owned[i]);
             }
         }
+    }
+    for (uint8_t i = 0u; i < rowCount; ++i)
+    {
+        FileBrowserLabel::SetFocused(rows[i].row, false);
+    }
+    if (workNameLabel != nullptr)
+    {
+        lv_label_set_long_mode(workNameLabel, LV_LABEL_LONG_CLIP);
+        lv_label_set_long_mode(workStatusLabel, LV_LABEL_LONG_CLIP);
     }
     if (focusHalo != nullptr)
     {
@@ -1289,4 +1388,243 @@ void FirmwareUpdate::onWorkTimer(lv_timer_t* timer)
     {
         instance->RunWorkStep();
     }
+}
+
+namespace
+{
+    PageManager* companionManager = nullptr;
+    lv_obj_t* companionModal = nullptr;
+    lv_obj_t* companionMessage = nullptr;
+    lv_obj_t* companionCheck = nullptr;
+    lv_obj_t* companionInstall = nullptr;
+    lv_obj_t* companionLater = nullptr;
+    struct CompanionInput
+    {
+        lv_indev_t* input;
+        lv_group_t* group;
+        lv_obj_t* focus;
+    };
+    CompanionInput companionInputs[8];
+    unsigned companionInputCount = 0;
+    lv_group_t* companionGroup = nullptr;
+    HAL::CompanionUpdateInfo companionDisplayed = {};
+    HAL::CompanionUpdateInfo companionPressed = {};
+    lv_obj_t* companionPressedButton = nullptr;
+    char companionShownOffer[33] = {};
+    bool companionClosing = false;
+    bool companionOpening = false;
+    bool companionCanCheck = false, companionCanInstall = false;
+
+    bool CompanionCanInstall()
+    {
+        return !DataProc::Recorder_IsOpen() && HAL::BT_CompanionCanInstall();
+    }
+
+    const char* CompanionStatusText(const char* code)
+    {
+        if (strcmp(code, "READY") == 0) return "Verified package is ready.\nInstall this firmware?";
+        if (strcmp(code, "NO_UPDATE") == 0) return "No update available.";
+        if (strcmp(code, "CHECKING") == 0) return "Checking with your phone...";
+        if (strcmp(code, "DOWNLOADING") == 0) return "Phone is downloading firmware...";
+        if (strcmp(code, "VERIFYING") == 0) return "Phone is verifying the package...";
+        if (strcmp(code, "WAIT_WIFI") == 0) return "Waiting for an unmetered network.";
+        if (strcmp(code, "DEFERRED") == 0) return "Deferred. Check again when ready.";
+        if (strcmp(code, "STARTING") == 0 || strcmp(code, "UPGRADING") == 0) return "Updating. Keep device powered.\nSuccess requires identity verification.";
+        if (strcmp(code, "WAIT_SAFE") == 0) return "Park first. Battery must be at least 30%, or charging.";
+        if (strcmp(code, "SIMULATOR_NO_PHONE") == 0) return "Simulator: no phone link.\nNo device update was performed.";
+        if (strcmp(code, "FAILED") == 0 || strcmp(code, "INCOMPATIBLE") == 0) return "Check failed. Open the phone app for details. This is NOT 'up to date'.";
+        if (strcmp(code, "CONNECTED") == 0) return "Phone connected. Check for firmware.";
+        return "Phone unavailable or request expired.\nConnect phone / open E-Track, then retry.";
+    }
+
+    void CompanionClose(void*)
+    {
+        if (companionModal == nullptr) return;
+        for (unsigned i = 0; i < companionInputCount; ++i)
+        {
+            const CompanionInput& saved = companionInputs[i];
+            if (saved.input->group != companionGroup) continue;
+            lv_indev_set_group(saved.input, saved.group);
+            if (saved.focus != nullptr && lv_obj_is_valid(saved.focus) && lv_obj_get_group(saved.focus) == saved.group)
+                lv_group_focus_obj(saved.focus);
+        }
+        companionInputCount = 0;
+        companionPressedButton = nullptr;
+        lv_group_del(companionGroup);
+        companionGroup = nullptr;
+        lv_obj_del(companionModal);
+        companionModal = nullptr;
+        companionClosing = false;
+    }
+
+    void CompanionButtonEvent(lv_event_t* event)
+    {
+        const lv_event_code_t code = lv_event_get_code(event);
+        lv_obj_t* button = lv_event_get_current_target(event);
+        if (code == LV_EVENT_PRESS_LOST || code == LV_EVENT_DEFOCUSED || code == LV_EVENT_DELETE)
+        {
+            if (companionPressedButton == button) companionPressedButton = nullptr;
+            return;
+        }
+        if (companionClosing) return;
+        if (code == LV_EVENT_PRESSED)
+        {
+            companionPressedButton = nullptr;
+            if (lv_obj_has_state(button, LV_STATE_DISABLED)) return;
+            HAL::CompanionUpdateInfo current;
+            HAL::BT_CompanionGetInfo(&current);
+            if (HAL::CompanionSameOffer(companionDisplayed, current))
+            {
+                companionPressed = companionDisplayed;
+                companionPressedButton = button;
+            }
+            return;
+        }
+        if (code != LV_EVENT_CLICKED) return;
+        const bool pressed = companionPressedButton == button;
+        companionPressedButton = nullptr; // Consume before HAL work or asynchronous close.
+        if (lv_obj_has_state(button, LV_STATE_DISABLED)) return;
+        HAL::CompanionUpdateInfo current;
+        HAL::BT_CompanionGetInfo(&current);
+        const bool matching = pressed && HAL::CompanionSameOffer(companionPressed, companionDisplayed) &&
+            HAL::CompanionSameOffer(companionPressed, current);
+        if (button == companionCheck) { (void)HAL::BT_CompanionCheck(); }
+        else if (button == companionInstall && matching && CompanionCanInstall()) { (void)HAL::BT_CompanionChoose(true, &companionPressed); }
+        else if (button == companionLater)
+        {
+            if (matching) (void)HAL::BT_CompanionChoose(false, &companionPressed);
+            companionClosing = true;
+            lv_async_call(CompanionClose, nullptr);
+        }
+    }
+
+    lv_obj_t* CompanionButton(lv_obj_t* parent, const char* text, int y)
+    {
+        lv_obj_t* button = lv_btn_create(parent);
+        lv_obj_set_pos(button, 12, y);
+        lv_obj_set_size(button, LV_HOR_RES - 48, 32);
+        lv_obj_set_style_bg_color(button, lv_color_hex(0x063039), 0);
+        lv_obj_set_style_border_color(button, lv_color_hex(0x20e8f0), LV_STATE_FOCUSED);
+        lv_obj_set_style_border_width(button, 2, LV_STATE_FOCUSED);
+        lv_obj_set_style_outline_width(button, 2, LV_STATE_FOCUSED);
+        lv_obj_set_style_outline_color(button, lv_color_hex(0x20e8f0), LV_STATE_FOCUSED);
+        lv_obj_add_event_cb(button, CompanionButtonEvent, LV_EVENT_ALL, nullptr);
+        lv_obj_t* label = lv_label_create(button);
+        lv_label_set_text(label, text);
+        lv_obj_center(label);
+        return button;
+    }
+
+    void CompanionRefresh()
+    {
+        if (companionModal == nullptr || companionClosing) return;
+        HAL::BT_CompanionGetInfo(&companionDisplayed);
+        if (companionPressedButton != nullptr &&
+            (!HAL::CompanionSameOffer(companionPressed, companionDisplayed) ||
+             (companionPressedButton == companionInstall && !CompanionCanInstall())))
+            companionPressedButton = nullptr;
+        char text[240];
+        if (companionDisplayed.hasOffer)
+            snprintf(text, sizeof(text), "Firmware %lu\n\n%s\n\n%s", (unsigned long)companionDisplayed.version,
+                CompanionStatusText(companionDisplayed.status), CompanionCanInstall() ?
+                "Choose Update now or Later." : "Park and finish recording; charge or battery >= 30%.");
+        else snprintf(text, sizeof(text), "%s", CompanionStatusText(companionDisplayed.status));
+        lv_label_set_text(companionMessage, text);
+        bool check = !companionDisplayed.checking && strcmp(companionDisplayed.status, "UPGRADING") != 0 &&
+            strcmp(companionDisplayed.status, "STARTING") != 0;
+        bool install = companionDisplayed.hasOffer && !companionDisplayed.checking && CompanionCanInstall();
+        if (check != companionCanCheck || install != companionCanInstall)
+        {
+            lv_obj_t* focused = lv_group_get_focused(companionGroup);
+            lv_group_remove_all_objs(companionGroup);
+            if (check) { lv_obj_clear_state(companionCheck, LV_STATE_DISABLED); lv_group_add_obj(companionGroup, companionCheck); }
+            else lv_obj_add_state(companionCheck, LV_STATE_DISABLED);
+            if (install) { lv_obj_clear_state(companionInstall, LV_STATE_DISABLED); lv_group_add_obj(companionGroup, companionInstall); }
+            else lv_obj_add_state(companionInstall, LV_STATE_DISABLED);
+            lv_group_add_obj(companionGroup, companionLater);
+            if (focused != nullptr && lv_obj_get_group(focused) == companionGroup) lv_group_focus_obj(focused);
+            else lv_group_focus_obj(companionLater);
+            lv_group_set_editing(companionGroup, false);
+            companionCanCheck = check; companionCanInstall = install;
+        }
+        if (companionDisplayed.hasOffer && strcmp(companionShownOffer, companionDisplayed.offer) != 0)
+        {
+            strcpy(companionShownOffer, companionDisplayed.offer);
+            HAL::BT_CompanionPresented(&companionDisplayed);
+        }
+    }
+
+    void CompanionPoll(lv_timer_t*)
+    {
+        if (companionModal != nullptr) { CompanionRefresh(); return; }
+        if (companionManager == nullptr || companionManager->IsSwitching()) return;
+        const char* page = companionManager->GetCurrentPageName();
+        if (page == nullptr || (strcmp(page, "Pages/Dialplate") != 0 && strcmp(page, "Pages/MainMenu") != 0 &&
+            strcmp(page, "Pages/SystemInfos") != 0)) return;
+        HAL::CompanionUpdateInfo info;
+        HAL::BT_CompanionGetInfo(&info);
+        if (info.hasOffer && info.prompt && CompanionCanInstall()) Page::FirmwareCompanion_Show();
+    }
+}
+
+static void CompanionOpen(void*)
+{
+    companionOpening = false;
+    if (companionModal != nullptr || companionManager == nullptr || companionManager->IsSwitching()) return;
+    // Save each input's actual group before changing any input. Refuse overflow.
+    companionInputCount = 0;
+    for (lv_indev_t* input = lv_indev_get_next(nullptr); input != nullptr; input = lv_indev_get_next(input))
+    {
+        if (lv_indev_get_type(input) != LV_INDEV_TYPE_ENCODER && lv_indev_get_type(input) != LV_INDEV_TYPE_KEYPAD) continue;
+        if (companionInputCount >= sizeof(companionInputs) / sizeof(companionInputs[0])) return;
+        lv_group_t* group = input->group;
+        companionInputs[companionInputCount++] = {input, group, group == nullptr ? nullptr : lv_group_get_focused(group)};
+    }
+    companionModal = lv_obj_create(lv_layer_top());
+    lv_obj_remove_style_all(companionModal);
+    lv_obj_set_size(companionModal, LV_HOR_RES, LV_VER_RES);
+    lv_obj_set_style_bg_color(companionModal, lv_color_black(), 0);
+    lv_obj_set_style_bg_opa(companionModal, LV_OPA_80, 0);
+    lv_obj_add_flag(companionModal, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_clear_flag(companionModal, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_t* panel = lv_obj_create(companionModal);
+    lv_obj_set_pos(panel, 12, 30);
+    lv_obj_set_size(panel, LV_HOR_RES - 24, 278);
+    lv_obj_set_style_pad_all(panel, 0, 0);
+    lv_obj_set_style_bg_color(panel, lv_color_hex(0x02080b), 0);
+    lv_obj_set_style_border_color(panel, lv_color_hex(0x00b7c8), 0);
+    lv_obj_set_style_text_color(panel, lv_color_white(), 0);
+    lv_obj_set_style_text_font(panel, ResourcePool::GetFont("bahnschrift_13"), 0);
+    lv_obj_clear_flag(panel, LV_OBJ_FLAG_SCROLLABLE);
+    companionMessage = lv_label_create(panel);
+    lv_obj_set_pos(companionMessage, 12, 12);
+    lv_obj_set_width(companionMessage, LV_HOR_RES - 48);
+    lv_label_set_long_mode(companionMessage, LV_LABEL_LONG_WRAP);
+    companionCheck = CompanionButton(panel, "Check update", 150);
+    companionInstall = CompanionButton(panel, "Update now", 191);
+    companionLater = CompanionButton(panel, "Later / Back", 232);
+    companionGroup = lv_group_create();
+    companionCanCheck = false; companionCanInstall = false; companionShownOffer[0] = '\0';
+    companionPressedButton = nullptr;
+    lv_obj_add_state(companionCheck, LV_STATE_DISABLED);
+    lv_obj_add_state(companionInstall, LV_STATE_DISABLED);
+    lv_group_add_obj(companionGroup, companionLater);
+    lv_group_set_editing(companionGroup, false);
+    for (unsigned i = 0; i < companionInputCount; ++i)
+        lv_indev_set_group(companionInputs[i].input, companionGroup);
+    CompanionRefresh();
+}
+
+void Page::FirmwareCompanion_Show()
+{
+    if (companionModal != nullptr || companionOpening) return;
+    companionOpening = true;
+    if (lv_async_call(CompanionOpen, nullptr) != LV_RES_OK) companionOpening = false;
+}
+
+void Page::FirmwareCompanion_Init(PageManager* manager)
+{
+    if (companionManager != nullptr) return;
+    companionManager = manager;
+    lv_timer_create(CompanionPoll, 250, nullptr);
 }

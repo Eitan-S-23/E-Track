@@ -17,6 +17,29 @@ project. Keil ARM Compiler 5 remains an auxiliary path for local hardware
 debugging, toolchain comparison, and compatibility checks. Agents must not
 promote AC5 artifacts to OTA or CI release artifacts.
 
+### MCU Main And Automatic Candidates
+
+- `main` is the authoritative MCU source and automatic firmware candidate branch.
+  Start MCU work from current main, directly or in a task branch. Integrate the
+  bounded changes back to main before the final delivery push; do not copy MCU
+  changes to the App's `release/candidates` branch to obtain a build.
+- A new MCU delivery must increment `firmware.versionName` and update release
+  notes in `Tools/ota/original-admin-release.json`. A main push runs
+  `original-admin-candidate.yml`, builds the exact versioned GCC source and
+  registers an unpublished full/recovery candidate in the original Admin.
+  Changed firmware inputs without a version increment fail before packaging.
+- `firmware-candidates` admits only main and has no manual reviewer/wait timer.
+  Existing keys, `OTA_BOOT_CHAIN_READY=false`, protected rehearsal/production
+  routes and manual Stable/Beta publication remain unchanged. Documentation or
+  workflow-only pushes do not rebuild an already delivered version.
+- App delivery remains `release/candidates` -> original Trace signing. Main
+  cannot dispatch App packages, and the App delivery branch cannot build MCU
+  candidates. See `docs/original-admin-candidates.md` for the shared workflow.
+- This procedure does not grant general agent commit/push authority. When the
+  user reserves the final push, prepare the main commit and provide
+  `git push origin main` without executing it. Do not rebuild the existing
+  3.3.30 candidate solely to validate this migration.
+
 ## Project-Wide Agent Workflow
 
 - The primary checkout is the local `main` entry. Before progress reports,

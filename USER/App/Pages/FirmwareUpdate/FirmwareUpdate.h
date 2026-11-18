@@ -8,6 +8,9 @@
 namespace Page
 {
 
+void FirmwareCompanion_Init(PageManager* manager);
+void FirmwareCompanion_Show();
+
 class FirmwareUpdate : public PageBase
 {
 public:
@@ -23,7 +26,7 @@ public:
 private:
     enum
     {
-        ROW_MAX = 24,
+        ROW_MAX = 25, // The online entry does not consume an existing file slot.
         SCAN_MAX = 256
     };
 
@@ -39,7 +42,7 @@ private:
     {
         lv_obj_t* row;
         char path[NAV_PATH_MAX];
-        char name[NAV_ROUTE_NAME_MAX];
+        char name[LV_FS_MAX_FN_LENGTH];
         bool isDir;
         bool isUp;
     } Row_t;
@@ -54,6 +57,7 @@ private:
     lv_obj_t* focusHalo;
     lv_obj_t* list;
     lv_obj_t* confirmPanel;
+    lv_obj_t* confirmNameArea;
     lv_obj_t* confirmNameLabel;
     lv_obj_t* confirmKindLabel;
     lv_obj_t* currentVersionLabel;
@@ -73,7 +77,7 @@ private:
     char currentPath[NAV_PATH_MAX];
     char pendingPath[NAV_PATH_MAX];
     char selectedPath[NAV_PATH_MAX];
-    char selectedName[NAV_ROUTE_NAME_MAX];
+    char selectedName[LV_FS_MAX_FN_LENGTH];
     bool pendingGoUp;
     bool pendingBack;
     bool pendingAsync;

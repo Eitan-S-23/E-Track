@@ -1,6 +1,4 @@
-#define main legacy_session_main
-#include "test_ota_ble_session.c"
-#undef main
+#include "ota_ble_session_fixture.h"
 
 /* Real parser/session/staging, asynchronous payload port, no device access. */
 static struct
@@ -205,6 +203,8 @@ static void test_pipeline_transfer(void)
 {
     uint8_t *pkg;
     uint8_t sha[32];
+    uint8_t retired_begin[101];
+    size_t wire_len;
     tx_view_t v;
     uint32_t before;
     setup2();
@@ -259,10 +259,27 @@ static void test_pipeline_transfer(void)
     check("bad DATA2 CRC yields v2 NAK without advancing state",
         last_tx(&v) && v.cmd == OTA_BLE_CMD_ACK_DATA2 &&
         tx_status(&v) == OTA_BLE_STATUS_ERR_CRC && session.expected_seq == 49u);
-    deliver2(build_abort_frame(1u, session.session_id), 0u);
-    deliver2(build_begin_frame(1u, 9000u, sha, pkg, 1u), 0u);
+    /* Valid historical wire bytes are negative inputs, not a supported sender. */
+    deliver2(ota_ble_frame_encode(wire, sizeof(wire), 0x04u,
+        session.session_id, 1u, NULL, 0u), 0u);
+    retired_begin[0] = 1u;
+    write_u32le(retired_begin + 1u, 9000u);
+    memcpy(retired_begin + 5u, sha, 32u);
+    memcpy(retired_begin + 37u, pkg, 64u);
+    deliver2(ota_ble_frame_encode(wire, sizeof(wire), 0x01u,
+        0u, 1u, retired_begin, sizeof(retired_begin)), 0u);
+    before = flash_fixture.operation_count;
+    session.env.info_provider = NULL;
     deliver2(build_get_info_frame(1u, 0u), 0u);
-    check("late v1 controls cannot release, replace or inspect a busy v2 session",
+    check("busy V2 answers a frame-boundary INFO query from its captured identity",
+        last_tx(&v) && v.cmd == OTA_BLE_CMD_INFO && v.session == 0u && v.seq == 1u &&
+        v.len == OTA_BLE_LEN_INFO && read_u32le(v.payload + 12u) == te.device.current_vcode &&
+        memcmp(v.payload + 16u, te.image_sha, 32u) == 0);
+    check("INFO while Flash is busy performs no new IO or ownership change",
+        flash_fixture.operation_count == before && async_flash.unsafe_read == 0 &&
+        session.pipeline_ack.accepted_off == 8192u && session.expected_seq == 49u);
+    session.env.info_provider = env_info_provider;
+    check("late v1 controls cannot release or replace a busy v2 session",
         session.pipeline != NULL && !session.pipeline->stopped && te.overlay_release_count == 0u);
     async_flash.hold = 0;
     settle(4096u);
@@ -275,6 +292,7 @@ static void test_pipeline_transfer(void)
     check("END2 uses existing SHA, finalize, activate and reset path",
         last_tx(&v) && v.cmd == OTA_BLE_CMD_ACK_END2 && tx_status(&v) == 0u &&
         te.activate_calls == 1u && te.reset_calls == 1u && !ota_ble_session_active(&session));
+    check("transfer identity cache is retired with the session", !session.transfer_info_valid);
     check("staged bytes and whole-package CRC match through seq wrap and duplicate",
         memcmp(flash_fixture.bytes + OTA_STAGING_PAYLOAD_OFFSET, pkg, 9000u) == 0 &&
         read_u32le(flash_fixture.bytes + 12u) == boot_crc32(pkg, 9000u));
@@ -459,7 +477,7 @@ static void test_pipeline_frame_lengths(void)
     static const struct {uint8_t cmd; uint16_t low, high;} cases[] = {
         {OTA_BLE_CMD_CAPS2, 4u, 4u}, {OTA_BLE_CMD_BEGIN2, 105u, 105u},
         {OTA_BLE_CMD_DATA2, 9u, 136u}, {OTA_BLE_CMD_END2, 36u, 36u},
-        {OTA_BLE_CMD_ABORT2, 4u, 4u}, {OTA_BLE_CMD_DATA, 4u, 132u}
+        {OTA_BLE_CMD_ABORT2, 4u, 4u}, {0x02u, 4u, 132u}
     };
     unsigned i, variant;
     for (i = 0u; i < sizeof(cases) / sizeof(cases[0]); ++i)
@@ -481,21 +499,85 @@ static void test_pipeline_frame_lengths(void)
             wire[7] = (uint8_t)(len >> 8);
             for (j = 0u; j < n && result == OTA_BLE_PARSE_IDLE; ++j)
                 result = ota_ble_parser_feed(&parser, wire[j], &frame);
-            check("frame parser enforces v1/v2 command-specific lengths",
-                result == (variant < 2u ? OTA_BLE_PARSE_FRAME : OTA_BLE_PARSE_ERR_FRAME));
+            check("frame parser enforces v2 lengths and rejects every v1 frame",
+                result == (cases[i].cmd >= OTA_BLE_CMD_CAPS2 && variant < 2u
+                    ? OTA_BLE_PARSE_FRAME : OTA_BLE_PARSE_ERR_FRAME));
         }
     }
 }
 
+static uint8_t text_out[32];
+static unsigned text_len;
+
+static void collect_text(void *ctx, uint8_t byte)
+{
+    (void)ctx;
+    if (text_len < sizeof(text_out)) text_out[text_len++] = byte;
+}
+
+static void feed_text(const char *text)
+{
+    while (*text) ota_ble_session_feed_idle(&session, collect_text, NULL, (uint8_t)*text++);
+}
+
+static void test_text_isolation2(void)
+{
+    uint8_t *pkg = make_full_package(5000u);
+    uint8_t sha[32];
+    uint32_t before;
+    unsigned i;
+    if (pkg == NULL) exit(2);
+    sha256_of(pkg, 5000u, sha);
+    setup2();
+    text_len = 0u;
+    feed_text("hello");
+    check("idle-phase text bytes reach the text sink",
+        text_len == 5u && memcmp(text_out, "hello", 5u) == 0);
+    caps2(900u);
+    begin2(900u, 10u, pkg, 5000u, sha);
+    check("V2 text isolation has an admitted receiver", ota_ble_session_active(&session));
+    before = te.tx_count;
+    for (i = 0u; i < 5u; ++i) ota_ble_session_isr_feed(&session, (uint8_t)"world"[i]);
+    pump_once();
+    check("active-phase text bytes are dropped and never reach the sink",
+        text_len == 5u && ota_ble_session_active(&session) && te.tx_count == before);
+    check("active text consumes no frame or durable progress",
+        ota_ble_ring_count(&session.rx_ring) == 0u && session.progress.durable_off == 0u);
+    abort2(900u, session.session_id);
+    feed_text("world");
+    check("text passthrough resumes after teardown",
+        !ota_ble_session_active(&session) && text_len == 10u &&
+        memcmp(text_out, "helloworld", 10u) == 0);
+    check_resources();
+    free(pkg);
+}
+
 int main(void)
 {
-    (void)legacy_session_main();
+    make_staging_io();
+    test_get_info();
+    {
+        uint8_t payload[132] = {0};
+        uint8_t command;
+        for (command = 1u; command <= 4u; ++command)
+        {
+            uint16_t len = command == 1u ? 101u : command == 2u ? 132u :
+                command == 3u ? 32u : 0u;
+            setup2();
+            deliver2(ota_ble_frame_encode(wire, sizeof(wire), command,
+                0u, 1u, payload, len), 1u);
+            check("retired v1 cannot acquire a session or perform payload IO",
+                !ota_ble_session_active(&session) && async_flash.starts == 0u &&
+                te.tx_count == 0u);
+        }
+    }
     test_pipeline_transfer();
     test_pipeline_cancel_faults();
     test_pipeline_resume();
     test_pipeline_admission_digest_failures();
     test_pipeline_io_failures();
     test_pipeline_frame_lengths();
+    test_text_isolation2();
     printf("PIPELINE_SESSION checks=%d failures=%d\n", checks, failures);
     return failures == 0 ? 0 : 1;
 }

@@ -1,0 +1,255 @@
+// Source-bound modal/HAL/recorder methods with host-only platform boundaries.
+// INSERT_CONTROL_FIXTURE
+
+enum lv_event_code_t { LV_EVENT_PRESSED, LV_EVENT_RELEASED, LV_EVENT_SHORT_CLICKED,
+    LV_EVENT_CLICKED, LV_EVENT_PRESS_LOST, LV_EVENT_DEFOCUSED, LV_EVENT_DELETE };
+enum { LV_STATE_DISABLED = 1 };
+struct lv_obj_t;
+struct lv_group_t { lv_obj_t* focus; };
+struct lv_obj_t { bool disabled; lv_group_t* group; };
+struct lv_event_t { lv_event_code_t code; lv_obj_t* target; };
+static Fixture* fixture;
+#define companion_control (fixture->control)
+static uint32_t nowTick = 30;
+static uint32_t millis() { return nowTick; }
+static bool binaryActive = false, recorderFileOpen = false;
+static bool companion_busy() { return binaryActive; }
+namespace DataProc { bool Recorder_IsOpen(); }
+namespace HAL {
+struct Power_Info_t { bool isCharging; unsigned usage; };
+struct GPS_Info_t { bool isVaild; float speed; };
+static Power_Info_t power = {false, 100};
+static GPS_Info_t gps = {true, 0.0f};
+static void Power_GetInfo(Power_Info_t* out) { *out = power; }
+static bool GPS_GetInfo(GPS_Info_t* out) { *out = gps; return true; }
+static unsigned overlayAcquisitions;
+static bool OTA_OverlayAcquireBle() { ++overlayAcquisitions; return true; }
+}
+static unsigned s_ble_epoch = 0;
+struct AckBatch { void rebind(unsigned) {} };
+static AckBatch s_p34_ack_batch;
+
+static lv_group_t group = {nullptr};
+static lv_obj_t modal = {false, nullptr}, messageLabel = {false, nullptr};
+static lv_obj_t checkButton = {false, nullptr}, installButton = {false, nullptr}, laterButton = {false, nullptr};
+static lv_obj_t* companionModal = &modal;
+static lv_obj_t* companionMessage = &messageLabel;
+static lv_obj_t* companionCheck = &checkButton;
+static lv_obj_t* companionInstall = &installButton;
+static lv_obj_t* companionLater = &laterButton;
+static lv_group_t* companionGroup = &group;
+static HAL::CompanionUpdateInfo companionDisplayed = {}, companionPressed = {};
+static lv_obj_t* companionPressedButton = nullptr;
+static char companionShownOffer[33] = {};
+static bool companionClosing = false, companionCanCheck = false, companionCanInstall = false;
+static std::string rendered;
+static unsigned closes = 0;
+static lv_event_code_t lv_event_get_code(lv_event_t* e) { return e->code; }
+static lv_obj_t* lv_event_get_current_target(lv_event_t* e) { return e->target; }
+static bool lv_obj_has_state(lv_obj_t* obj, int) { return obj->disabled; }
+static void lv_obj_clear_state(lv_obj_t* obj, int) { obj->disabled = false; }
+static void lv_obj_add_state(lv_obj_t* obj, int) { obj->disabled = true; }
+static lv_obj_t* lv_group_get_focused(lv_group_t* value) { return value->focus; }
+static lv_group_t* lv_obj_get_group(lv_obj_t* obj) { return obj->group; }
+static void lv_group_remove_all_objs(lv_group_t* value) {
+    checkButton.group = installButton.group = laterButton.group = nullptr;
+    value->focus = nullptr;
+}
+static void lv_group_add_obj(lv_group_t* value, lv_obj_t* obj) {
+    obj->group = value;
+    if (value->focus == nullptr) value->focus = obj;
+}
+static void lv_group_focus_obj(lv_obj_t* obj) { obj->group->focus = obj; }
+static void lv_group_set_editing(lv_group_t*, bool) {}
+static void lv_label_set_text(lv_obj_t*, const char* value) { rendered = value; }
+static void CompanionClose(void*) {}
+static int lv_async_call(void (*)(void*), void*) { ++closes; return 0; }
+
+enum Recorder_Cmd_t { RECORDER_CMD_START, RECORDER_CMD_PAUSE, RECORDER_CMD_CONTINUE, RECORDER_CMD_STOP };
+typedef Recorder_Cmd_t TrackFilter_Cmd_t;
+struct Recorder_Info_t { Recorder_Cmd_t cmd; unsigned time; };
+struct TrackFilter_Info_t { TrackFilter_Cmd_t cmd; };
+struct Account {
+    enum ResCode_t { RES_OK = 0, RES_UNKNOW = -1, RES_SIZE_MISMATCH = -2, RES_UNSUPPORTED_REQUEST = -3 };
+    enum EventCode_t { EVENT_PUB_PUBLISH, EVENT_SUB_PULL, EVENT_NOTIFY };
+    struct EventParam_t { EventCode_t event; unsigned size; void* data_p; };
+    void* UserData;
+    unsigned notifications;
+    int Notify(const char*, const void*, unsigned);
+};
+struct Recorder_t { bool active; Account* account; Recorder_Info_t recInfo; };
+static Recorder_t* activeRecorder;
+namespace DataProc {
+typedef ::Recorder_Info_t Recorder_Info_t;
+typedef ::Recorder_Cmd_t Recorder_Cmd_t;
+enum { STATUS_BAR_CMD_SET_LABEL_REC };
+struct StatusBar_Info_t { int cmd; struct { struct { bool show; const char* str; } labelRec; } param; };
+}
+class DialplateModel {
+public:
+    enum RecCmd_t { REC_START, REC_PAUSE, REC_CONTINUE, REC_STOP, REC_READY_STOP };
+    Account* account = nullptr;
+    std::string music;
+    bool RecorderCommand(RecCmd_t cmd);
+    bool GetGPSReady() { return true; }
+    void PlayMusic(const char* value) { music = value; }
+};
+class Dialplate {
+public:
+    enum { RECORD_STATE_READY, RECORD_STATE_RUN, RECORD_STATE_PAUSE, RECORD_STATE_STOP };
+    int recState = RECORD_STATE_READY;
+    DialplateModel Model;
+    struct { bool recording = false; void SetRecRecording(bool value) { recording = value; } } View;
+    void onRecord(bool longPress);
+};
+static unsigned recordingStarts, recordingPoints;
+static void Recorder_RecStart(Recorder_t* recorder, unsigned) { ++recordingStarts; recorderFileOpen = recorder->active = true; }
+static void Recorder_RecStop(Recorder_t* recorder) { recorderFileOpen = recorder->active = false; }
+static void Recorder_RecPoint(Recorder_t*, HAL::GPS_Info_t*) { ++recordingPoints; }
+#define LV_LOG_USER(...) ((void)0)
+#define LV_LOG_WARN(...) ((void)0)
+#define DATA_PROC_INIT_STRUCT(value) ((void)(value))
+
+// INSERT_PRODUCTION_METHODS
+
+int Account::Notify(const char* destination, const void* payload, unsigned bytes) {
+    if (strcmp(destination, "Recorder") == 0) {
+        Account::EventParam_t event = {EVENT_NOTIFY, bytes, const_cast<void*>(payload)};
+        return onEvent(activeRecorder->account, &event);
+    }
+    ++notifications;
+    return RES_OK;
+}
+
+static void Event(lv_event_code_t code, lv_obj_t* button = companionInstall) {
+    lv_event_t event = {code, button};
+    CompanionButtonEvent(&event);
+}
+static unsigned Choices(const Fixture& f, const char* choice) {
+    unsigned count = 0;
+    for (const auto& line : f.sent)
+        if (line.find("|CHOICE|") != std::string::npos && line.find(choice) != std::string::npos) ++count;
+    return count;
+}
+static void Replacement(Fixture& f, const std::string& id = std::string(32, 'e')) {
+    f.Message("OFFER", 0, "|" + id + "|30329|" + std::string(64, 'f') + "|" + target + "|1", ++nowTick);
+}
+static void Click(lv_obj_t* button = companionInstall) {
+    Event(LV_EVENT_PRESSED, button);
+    Event(LV_EVENT_RELEASED, button);
+    Event(LV_EVENT_SHORT_CLICKED, button);
+    Event(LV_EVENT_CLICKED, button);
+}
+static int Record(Recorder_t& recorder, Recorder_Cmd_t command) {
+    Recorder_Info_t request = {command, 0};
+    Account::EventParam_t event = {Account::EVENT_NOTIFY, sizeof(request), &request};
+    return onEvent(recorder.account, &event);
+}
+
+int main(int argc, char** argv) {
+    try {
+        require(argc == 2, "one test name required");
+        const std::string name = argv[1];
+        Fixture current;
+        fixture = &current;
+        (void)companionPressed; (void)companionPressedButton;
+        current.Hello(); current.Offer(); CompanionRefresh();
+        if (name == "replacement_refresh" || name == "replacement_before_refresh") {
+            Event(LV_EVENT_PRESSED);
+            Replacement(current);
+            if (name == "replacement_refresh") CompanionRefresh();
+            Event(LV_EVENT_RELEASED); Event(LV_EVENT_SHORT_CLICKED); Event(LV_EVENT_CLICKED);
+            require(Choices(current, "|NOW*") == 0, "held press confirmed replacement");
+            CompanionRefresh(); Click(); Event(LV_EVENT_CLICKED);
+            require(Choices(current, "|NOW*") == 1, "fresh press must confirm replacement exactly once");
+            require(current.sent.back().find("|30329|") != std::string::npos, "fresh press selected wrong version");
+        } else if (name == "same_offer_retransmission") {
+            Event(LV_EVENT_PRESSED); current.Offer(0, ++nowTick); CompanionRefresh();
+            Event(LV_EVENT_SHORT_CLICKED); Event(LV_EVENT_CLICKED); Event(LV_EVENT_CLICKED);
+            require(Choices(current, "|NOW*") == 1, "retransmission broke single explicit activation");
+        } else if (name == "offer_expires_held") {
+            Event(LV_EVENT_PRESSED); nowTick = 300010;
+            Event(LV_EVENT_CLICKED);
+            require(Choices(current, "|NOW*") == 0, "expired offer confirmed before refresh");
+        } else if (name == "checking_during_press") {
+            Event(LV_EVENT_PRESSED); current.Message("STATE", 0, "|CHECKING", ++nowTick);
+            Event(LV_EVENT_CLICKED);
+            require(Choices(current, "|NOW*") == 0, "checking state retained a held confirmation");
+            CompanionRefresh(); require(installButton.disabled, "checking state enabled install");
+        } else if (name == "offer_reappears_held") {
+            Event(LV_EVENT_PRESSED); Replacement(current); current.Offer(0, ++nowTick);
+            Event(LV_EVENT_CLICKED);
+            require(Choices(current, "|NOW*") == 0, "A-B-A replacement retained old press");
+        } else if (name == "lost_or_disabled_press") {
+            Event(LV_EVENT_PRESSED); Event(LV_EVENT_PRESS_LOST); Event(LV_EVENT_CLICKED);
+            Event(LV_EVENT_PRESSED); Event(LV_EVENT_DEFOCUSED); Event(LV_EVENT_CLICKED);
+            Event(LV_EVENT_PRESSED); installButton.disabled = true; Event(LV_EVENT_CLICKED);
+            installButton.disabled = false; Event(LV_EVENT_CLICKED);
+            require(Choices(current, "|NOW*") == 0, "lost/disabled interaction remained armed");
+        } else if (name == "later_binding") {
+            Event(LV_EVENT_PRESSED, companionLater); Replacement(current); CompanionRefresh();
+            Event(LV_EVENT_CLICKED, companionLater);
+            require(Choices(current, "|LATER*") == 0 && Choices(current, "|NOW*") == 0 && closes == 1,
+                "Later acted on an unseen replacement or failed to close");
+        } else if (name == "later_once") {
+            Click(companionLater); Event(LV_EVENT_CLICKED, companionLater);
+            require(Choices(current, "|LATER*") == 1 && Choices(current, "|NOW*") == 0 && closes == 1,
+                "Later duplicated or started an installation");
+        } else if (name == "unsafe_after_choice" || name == "motion_after_choice" ||
+                   name == "battery_after_choice" || name == "paused_recording") {
+            Click(); require(Choices(current, "|NOW*") == 1, "safe NOW missing");
+            if (name == "unsafe_after_choice" || name == "paused_recording") recorderFileOpen = true;
+            if (name == "unsafe_after_choice" || name == "motion_after_choice") HAL::gps.speed = 5;
+            if (name == "unsafe_after_choice" || name == "battery_after_choice") HAL::power.usage = 10;
+            require(!CompanionCanInstall(), "unsafe UI admission");
+            require(ble_env_overlay_acquire() == 0 && HAL::overlayAcquisitions == 0, "unsafe receiver acquired overlay");
+            require(!HAL::BT_CompanionInstallPending(), "rejected admission leaked reservation");
+        } else if (name == "safe_receiver_admission") {
+            HAL::power.usage = 10; HAL::power.isCharging = true;
+            require(ble_env_overlay_acquire() == 1 && s_ble_epoch == 1, "safe charging admission failed");
+        } else if (name == "recording_reservation") {
+            Account account = {}; Recorder_t recorder = {false, &account, {RECORDER_CMD_STOP, 0}};
+            account.UserData = &recorder;
+            Click(); require(HAL::BT_CompanionInstallPending(), "NOW not reserved");
+            require(Record(recorder, RECORDER_CMD_START) == Account::RES_UNSUPPORTED_REQUEST, "pending NOW allowed recording");
+            require(recordingStarts == 0 && account.notifications == 0, "blocked recording changed TrackFilter");
+            nowTick += 120000;
+            require(Record(recorder, RECORDER_CMD_START) == Account::RES_OK && recorderFileOpen, "timeout did not release recording");
+            require(Record(recorder, RECORDER_CMD_PAUSE) == Account::RES_OK && !recorder.active && recorderFileOpen, "pause closed recording");
+            require(ble_env_overlay_acquire() == 0, "paused-open file admitted OTA");
+            Record(recorder, RECORDER_CMD_STOP);
+        } else if (name == "recording_ui_conflict") {
+            Account account = {}; Recorder_t recorder = {false, &account, {RECORDER_CMD_STOP, 0}};
+            account.UserData = &recorder; activeRecorder = &recorder;
+            Dialplate page; page.Model.account = &account;
+            Click(); page.onRecord(true);
+            require(page.recState == Dialplate::RECORD_STATE_READY && !page.View.recording &&
+                page.Model.music == "Error" && recordingStarts == 0 && account.notifications == 0,
+                "rejected recording falsely updated the dialplate/status bar");
+            nowTick += 120000; page.onRecord(true);
+            require(page.recState == Dialplate::RECORD_STATE_RUN && page.View.recording, "recording did not recover");
+            page.onRecord(false);
+            require(page.recState == Dialplate::RECORD_STATE_PAUSE, "pause failed");
+            binaryActive = true; page.onRecord(false);
+            require(page.recState == Dialplate::RECORD_STATE_PAUSE && !page.View.recording, "rejected continue changed UI");
+            page.recState = Dialplate::RECORD_STATE_STOP; page.onRecord(false);
+            require(page.recState == Dialplate::RECORD_STATE_STOP && !page.View.recording, "rejected stop-page continue changed UI");
+        } else if (name == "recording_binary_owner") {
+            Account account = {}; Recorder_t recorder = {false, &account, {RECORDER_CMD_STOP, 0}};
+            account.UserData = &recorder;
+            binaryActive = true;
+            require(Record(recorder, RECORDER_CMD_START) == Account::RES_UNSUPPORTED_REQUEST, "binary owner allowed recording");
+            require(Record(recorder, RECORDER_CMD_CONTINUE) == Account::RES_UNSUPPORTED_REQUEST, "binary owner allowed resume");
+            require(binaryActive && recordingStarts == 0 && account.notifications == 0, "record request interrupted binary apply");
+            binaryActive = false;
+            require(Record(recorder, RECORDER_CMD_START) == Account::RES_OK, "binary release left recording blocked");
+        } else {
+            throw std::runtime_error("unknown test case");
+        }
+        std::cout << name << ": PASS\n";
+        return 0;
+    } catch (const std::exception& error) {
+        std::cerr << error.what() << '\n';
+        return 1;
+    }
+}

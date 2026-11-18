@@ -17,6 +17,22 @@ recovery = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(recovery)
 
 
+def validate_package(package, image, old=None):
+    """Check the actual envelope without a key or another unpack operation."""
+    fields = recovery.validate_app(image)
+    outer = etu_unpack.parse_etu_header(package)
+    base_version = recovery.validate_app(old)["version_code"] if old is not None else 0
+    base_sha8 = hashlib.sha256(old).digest()[:8] if old is not None else bytes(8)
+    flags = etu_unpack.FLAG_AES | etu_unpack.FLAG_LZMA | (etu_unpack.FLAG_DIFF if old is not None else etu_unpack.FLAG_FULL)
+    if (len(package) != etu_unpack.ETU_HEADER_LEN + outer["payload_len"]
+            or outer["flags"] != flags or outer["alg_id"] != 1 or outer["key_id"] != 1
+            or outer["target_vcode"] != fields["version_code"]
+            or outer["base_vcode"] != base_version or outer["base_sha8"] != base_sha8
+            or outer["hw_rev"] != 1 or outer["layout_id"] != 1 or outer["min_boot_ver"] != 1):
+        raise ValueError("ETU outer identity/length does not match the verified App/base")
+    return outer
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", type=Path, required=True)
@@ -49,17 +65,8 @@ def main():
                 raise ValueError("finalize changed bytes outside fw_header")
         if args.package is not None:
             package = args.package.read_bytes()
-            outer = etu_unpack.parse_etu_header(package)
             old = args.base_image.read_bytes() if args.base_image is not None else None
-            base_version = recovery.validate_app(old)["version_code"] if old is not None else 0
-            base_sha8 = hashlib.sha256(old).digest()[:8] if old is not None else bytes(8)
-            flags = etu_unpack.FLAG_AES | etu_unpack.FLAG_LZMA | (etu_unpack.FLAG_DIFF if old is not None else etu_unpack.FLAG_FULL)
-            if (len(package) != etu_unpack.ETU_HEADER_LEN + outer["payload_len"]
-                    or outer["flags"] != flags or outer["alg_id"] != 1 or outer["key_id"] != 1
-                    or outer["target_vcode"] != fields["version_code"]
-                    or outer["base_vcode"] != base_version or outer["base_sha8"] != base_sha8
-                    or outer["hw_rev"] != 1 or outer["layout_id"] != 1 or outer["min_boot_ver"] != 1):
-                raise ValueError("ETU outer identity/length does not match the verified App/base")
+            validate_package(package, image, old)
         print(json.dumps({"ok": True, "kind": kind, "sha256": digest, **fields}))
         return 0
     except (OSError, ValueError) as error:

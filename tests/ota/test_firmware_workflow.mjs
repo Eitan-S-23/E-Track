@@ -11,7 +11,7 @@ const root = fileURLToPath(new URL("../../", import.meta.url));
 const python = process.env.PYTHON ?? (process.platform === "win32" ? "python" : "python3");
 const text = await readFile(path.join(root, ".github/workflows/firmware-build.yml"), "utf8");
 // BaseLoader preserves YAML's "on" key rather than YAML 1.1's boolean alias.
-const workflow = JSON.parse(execFileSync(python, ["-B", "-c",
+const workflow = JSON.parse(execFileSync(python, ["-B", "-X", "utf8", "-c",
   "import json,sys,yaml; print(json.dumps(yaml.load(sys.stdin, Loader=yaml.BaseLoader)))"],
   { cwd: root, input: text, encoding: "utf8", windowsHide: true }));
 const production = workflow.jobs["register-cloudflare"];
@@ -50,7 +50,7 @@ test("P35 explicit protected profile is a baseline-default allowlist passed iden
   }
   assert.equal(releaseConfig({ ...p44Fixture(), INPUT_FIRMWARE_BUILD_PROFILE: "p34-v2-candidate" }).buildProfile, "p34-v2-candidate");
   const development = workflow.jobs.build.steps.find(step => step.id === "keyed_development");
-  assert.equal(development.env.INPUT_FIRMWARE_BUILD_PROFILE, "${{ github.event.inputs.firmware_build_profile || 'baseline' }}");
+  assert.equal(development.env.INPUT_FIRMWARE_BUILD_PROFILE, "${{ github.event.inputs.firmware_build_profile || 'p34-v2-candidate' }}");
   assert.match(development.run, /--development/);
   assert.match(development.run, /--profile "\$INPUT_FIRMWARE_BUILD_PROFILE"/);
   assert.doesNotMatch(JSON.stringify(development.env), /secrets\./);
@@ -93,6 +93,12 @@ for (const [name, value] of [
     });
   });
 }
+
+test("main no longer starts the duplicate build-only workflow, while pull request and protected routes remain", () => {
+  assert.deepEqual(workflow.on.push.branches, ["master"]);
+  assert.deepEqual(workflow.on.pull_request.branches, ["main", "master"]);
+  assert.ok(workflow.on.workflow_dispatch);
+});
 
 test("production remains explicit dispatch/publish with a first-step hard gate and protected environment", () => {
   assert.equal(normalize(production.if), "github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true'");
