@@ -41,7 +41,7 @@ METHODS = (
 )
 CASES = ("replacement_refresh", "replacement_before_refresh", "same_offer_retransmission",
          "offer_expires_held", "checking_during_press", "offer_reappears_held", "lost_or_disabled_press",
-         "later_binding", "later_once", "unsafe_after_choice", "motion_after_choice",
+         "later_binding", "later_once", "unsafe_after_choice", "motion_after_choice", "motion_before_choice",
          "battery_after_choice", "paused_recording", "safe_receiver_admission",
          "recording_reservation", "recording_binary_owner", "recording_ui_conflict")
 

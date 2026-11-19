@@ -362,6 +362,73 @@ class CompanionIntegrationTest {
         jobs.onDestroy()
     }
 
+    @Test fun radioOnResumesExistingAssociationImmediatelyWithoutWaitingForBackoff() {
+        associated()
+        val until = System.currentTimeMillis() + 600000
+        prefs.edit().putLong("nextAttempt", until).putBoolean("checkPending", true).commit()
+        CompanionBootReceiver().onReceive(app, Intent(BluetoothAdapter.ACTION_STATE_CHANGED)
+            .putExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.STATE_ON))
+        assertEquals("recovery", checkNotNull(shadowOf(app).nextStartedService).getStringExtra("reason"))
+        assertEquals(until, prefs.getLong("nextAttempt", 0))
+        assertTrue(prefs.getBoolean("checkPending", false))
+        assertNull(shadowOf(app).nextStartedActivity)
+        assertNull(app.getSystemService(JobScheduler::class.java).getPendingJob(CompanionBridge.STARTUP_JOB))
+    }
+
+    @Test fun radioOffAndUnrelatedBroadcastsDoNotWakeOrSchedule() {
+        associated()
+        for (state in listOf(BluetoothAdapter.ERROR, BluetoothAdapter.STATE_OFF, BluetoothAdapter.STATE_TURNING_ON,
+            BluetoothAdapter.STATE_TURNING_OFF)) {
+            CompanionBootReceiver().onReceive(app, Intent(BluetoothAdapter.ACTION_STATE_CHANGED)
+                .putExtra(BluetoothAdapter.EXTRA_STATE, state))
+        }
+        CompanionBootReceiver().onReceive(app, Intent("test.unrelated")
+            .putExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.STATE_ON))
+        assertNull(shadowOf(app).nextStartedService)
+        assertTrue(app.getSystemService(JobScheduler::class.java).allPendingJobs.isEmpty())
+    }
+
+    @Test fun radioOnDoesNotBypassUserDisablePermissionOrAssociation() {
+        val intent = Intent(BluetoothAdapter.ACTION_STATE_CHANGED)
+            .putExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.STATE_ON)
+        CompanionBootReceiver().onReceive(app, intent)
+        assertNull(shadowOf(app).nextStartedService)
+        associated(enabled = false)
+        CompanionBootReceiver().onReceive(app, intent)
+        assertNull(shadowOf(app).nextStartedService)
+        prefs.edit().putBoolean("enabled", true).commit()
+        val permission = if (Build.VERSION.SDK_INT >= 31) Manifest.permission.BLUETOOTH_CONNECT else Manifest.permission.BLUETOOTH
+        shadowOf(app).denyPermissions(permission)
+        CompanionBootReceiver().onReceive(app, intent)
+        assertNull(shadowOf(app).nextStartedService)
+        assertEquals("BLUETOOTH_PERMISSION_DENIED", prefs.getString("lastResult", null))
+        assertNull(app.getSystemService(JobScheduler::class.java).getPendingJob(CompanionBridge.STARTUP_JOB))
+        assertEquals(0, CompanionEngineBoundary.created)
+    }
+
+    @Test fun realBridgeRetriesOfflineWakeInOneHeadlessEngineBeforeLongBackoff() {
+        associated()
+        val service = start()
+        ready(service)
+        val original = engine
+        val offline = state(service, "DEVICE_OFFLINE") + ("connected" to false)
+        for ((index, seconds) in listOf(2L, 4L, 8L).withIndex()) {
+            assertEquals(true, incoming("state", offline).requireSuccess())
+            shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(seconds))
+            val wakes = messages.sent.filter { it.call.method == "wake" }
+            assertEquals(index + 2, wakes.size)
+            assertEquals(service.runtimeId, (wakes.last().call.arguments as Map<*, *>)["runtimeId"])
+            wakes.last().answer(true)
+            assertSame(original, engine)
+            assertEquals(0, prefs.getInt("failures", 0))
+        }
+        assertEquals(true, incoming("state", offline).requireSuccess())
+        assertFalse(service.healthy())
+        assertEquals(1, prefs.getInt("failures", 0))
+        assertEquals(1, CompanionEngineBoundary.created)
+        assertNull(shadowOf(app).nextStartedActivity)
+    }
+
     @Test fun startupRetryRetainsItsDeadlineAndStopsWhenExpiredOrDisabled() {
         associated()
         shadowOf(app.getSystemService(BluetoothManager::class.java).adapter).setState(BluetoothAdapter.STATE_OFF)

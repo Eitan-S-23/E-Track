@@ -21,7 +21,6 @@ struct GPS_Info_t { bool isVaild; float speed; };
 static Power_Info_t power = {false, 100};
 static GPS_Info_t gps = {true, 0.0f};
 static void Power_GetInfo(Power_Info_t* out) { *out = power; }
-static bool GPS_GetInfo(GPS_Info_t* out) { *out = gps; return true; }
 static unsigned overlayAcquisitions;
 static bool OTA_OverlayAcquireBle() { ++overlayAcquisitions; return true; }
 }
@@ -196,11 +195,23 @@ int main(int argc, char** argv) {
             Click(companionLater); Event(LV_EVENT_CLICKED, companionLater);
             require(Choices(current, "|LATER*") == 1 && Choices(current, "|NOW*") == 0 && closes == 1,
                 "Later duplicated or started an installation");
-        } else if (name == "unsafe_after_choice" || name == "motion_after_choice" ||
+        } else if (name == "motion_after_choice" || name == "motion_before_choice") {
+            if (name == "motion_after_choice") Click();
+            HAL::gps.speed = 60;
+            CompanionRefresh();
+            require(CompanionCanInstall(), "motion still blocks the install policy");
+            if (name == "motion_before_choice") {
+                require(!installButton.disabled, "motion still blocks the install UI");
+                Click();
+            } else require(installButton.disabled, "consumed consent was rearmed");
+            require(Choices(current, "|NOW*") == 1, "moving device did not accept explicit consent");
+            require(ble_env_overlay_acquire() == 1 && HAL::overlayAcquisitions == 1,
+                "motion still blocks binary receiver admission");
+        } else if (name == "unsafe_after_choice" ||
                    name == "battery_after_choice" || name == "paused_recording") {
             Click(); require(Choices(current, "|NOW*") == 1, "safe NOW missing");
             if (name == "unsafe_after_choice" || name == "paused_recording") recorderFileOpen = true;
-            if (name == "unsafe_after_choice" || name == "motion_after_choice") HAL::gps.speed = 5;
+            if (name == "unsafe_after_choice") HAL::gps.speed = 5;
             if (name == "unsafe_after_choice" || name == "battery_after_choice") HAL::power.usage = 10;
             require(!CompanionCanInstall(), "unsafe UI admission");
             require(ble_env_overlay_acquire() == 0 && HAL::overlayAcquisitions == 0, "unsafe receiver acquired overlay");

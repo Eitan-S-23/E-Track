@@ -21,8 +21,21 @@ The existing foreground-only `acquire(taskKey)` contract remains unchanged.
   return is execution ownership: a live Dart handshake and heartbeat are required.
 - The default metadata interval is 12 hours, configurable to 6/12/24 hours.
   A 15-minute recovery job considers persisted failures/checkPending. Connection
-  failures back off from 2 minutes to at most 60 minutes. No exact alarm or boot
-  Activity launch is used. Boot/package-replaced receivers restore scheduling.
+  recovery first attempts the saved address immediately. Transient offline or
+  missing-identity results keep the acknowledged service/engine and retry after
+  2, 4 and 8 seconds, within one 60-second monotonic scheduling window. Duplicate
+  failures do not stack timers; success resets the budget, and a fresh wake
+  replaces a pending timer without extending it. An in-flight bounded connection
+  or INFO operation may settle after the scheduling window, not be interrupted
+  by a second owner. Only after exhaustion do failures back off from 2 minutes to
+  at most 60 minutes. Later disconnections reacquire a bounded CPU wake lock;
+  success/stop releases it. Authority/revision/runtime loss stops recovery, and
+  an active OTA task is never interrupted by a connection retry.
+  Boot/package replacement and Bluetooth STATE_ON request immediate recovery of
+  an existing enabled association, including after a previous offline backoff.
+  They do not create installation consent or clear persisted failures/pending work. Boot radio initialization
+  retains its separate two-minute bounded startup job. No exact alarm or Activity
+  launch is used, and off/turning/unrelated broadcasts do not start a runtime.
 - Metadata can use any network. Default automatic package download requires an
   unmetered network; a user setting can relax that policy. A valid immutable
   cached package may be reused only after current device/metadata checks.
@@ -121,11 +134,12 @@ new-connection target version AND full raw SHA verification, not END ACK.
    snapshot again at CLICKED, including a local offer revision. Any intervening
    replacement (including A-B-A), checking state, expiry or lost interaction
    cancels the press; a replacement requires a new press after display. Exact
-   retransmission does not advance the revision. Motion
-   (valid GPS speed >=3 km/h) and battery below 30% without charging disallow
-   installation. An open GPX recording, including pause with the file still open,
+   retransmission does not advance the revision. Per the owner's 2026-11-19
+   decision, GPS motion does not gate installation, including simulated motion.
+   Battery below 30% without charging disallows installation. An open GPX
+   recording, including pause with the file still open,
    also blocks the modal's install action and automatic prompt until closed.
-   The same recording/motion/power policy gates real BEGIN/BEGIN2 overlay
+   The same recording/power policy gates real BEGIN/BEGIN2 overlay
    acquisition. Successful NOW reserves installation for at most 120 seconds;
    later STATE messages cannot extend that reservation. New recording/resume is
    refused during this pending interval and during binary ownership, with failure
@@ -157,6 +171,22 @@ new-connection target version AND full raw SHA verification, not END ACK.
    paths and remains available without an SD directory.
 
 ## Compatibility Inventory
+
+At MCU startup, the production and fixed candidate profiles query the real
+module name using `AT+NAME?`. If it is not `E-Track` (or the query times out),
+one `AT+NAME=E-Track` request follows. Only an exact OK acknowledges the write;
+silence, malformed replies, rejected or partial writes remain reported failures.
+Each transmit wait is at most 50 ms and each reply window at most 300 ms; stale
+input draining is also bounded. A matching name skips the persistent write.
+`Doc/ble.pdf` specifies that the name takes effect after reboot, so naming runs
+before the existing one-shot `AT+REBOOT=1`, not after it. This does not add another
+reset or change MAC, UUIDs, baud, binding, binary protocol or the legacy text
+marker. Baud experiments still suppress automatic naming/reset. Module failures
+do not strand boot; RTT reports the outcome. Live advertisement/platform names
+supersede stored legacy names in the App without changing device identity.
+
+Development tests cover these policies; real radio timing and wireless upgrade
+behavior still require owner testing, not a phone USB prerequisite.
 
 | Device | Current Implementation |
 | --- | --- |

@@ -1,7 +1,7 @@
 {
   "schema": "original-admin-automatic-candidates-v1",
   "firmware": {
-    "versionName": "3.3.34",
-    "releaseNotes": "Check Update validation release for the installed 3.3.33 firmware. Retains the one-shot Bluetooth module reset at MCU startup, automatic companion reconnection, standalone Check Update menu, styled Chinese dialog and focus-group exit fix. Preserves explicit installation consent, recorder exclusion, BLE V2, module settings and file management. The operator-selected 3.3.33 delta must match the exact installed base image; other bases retain full-package fallback."
+    "versionName": "3.3.35",
+    "releaseNotes": "Set the Bluetooth module advertising name to E-Track before its single startup reboot, without changing the address, baud or service UUIDs. Permit explicitly confirmed firmware installation while GPS reports motion; retain the open-recording exclusion, battery or charging requirement, consent reservation and complete firmware validation. Keep the standalone Check Update menu, styled Chinese dialog, BLE V2 and file management. Candidate only: the operator chooses channel publication and any exact-base delta."
   }
 }

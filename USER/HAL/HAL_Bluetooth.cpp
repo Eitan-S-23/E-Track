@@ -2,6 +2,7 @@
 #include "Bluetooth/Bluetooth.h"
 #include "Bluetooth/CompanionControl.h"
 #include "Bluetooth/StartupReset.h"
+#include "Bluetooth/StartupName.h"
 #include "Common/DataProc/DataProc.h"
 #include "HAL/HAL_OTA_Backup.h"
 #include "HAL/HAL_OTA_Package.h"
@@ -647,10 +648,8 @@ bool HAL::BT_CompanionCheck()
 static bool companion_install_safe()
 {
     HAL::Power_Info_t power = {};
-    HAL::GPS_Info_t gps = {};
     HAL::Power_GetInfo(&power);
-    bool moving = HAL::GPS_GetInfo(&gps) && gps.isVaild && gps.speed >= 3.0f;
-    return !DataProc::Recorder_IsOpen() && !moving && (power.isCharging || power.usage >= 30u);
+    return !DataProc::Recorder_IsOpen() && (power.isCharging || power.usage >= 30u);
 }
 
 bool HAL::BT_CompanionCanInstall()
@@ -934,6 +933,7 @@ static void bt_rx_service(void)
 
 #if !CONFIG_BT_BAUD_EXPERIMENT
 static ETrackBluetooth::StartupReset s_bt_startup_reset;
+static ETrackBluetooth::StartupName s_bt_startup_name;
 struct BtStartupPort
 {
     uint32_t now() { return millis(); }
@@ -992,6 +992,7 @@ void HAL::BT_Init()
 #endif
     BT_NormalMode();
 		delay_ms(50);
+    BT_SetName();
 #if !CONFIG_BT_BAUD_EXPERIMENT
     BtStartupPort startupPort;
     const ETrackBluetooth::StartupReset::Result reset = s_bt_startup_reset.Run(startupPort);
@@ -999,7 +1000,6 @@ void HAL::BT_Init()
         (unsigned long)s_bt_startup_reset.elapsed());
     // Stop at READY: bytes from the new link remain for the normal OTA demux.
 #endif
-		BT_SetName();
 		delay_ms(50);
     CONFIG_DEBUG_SERIAL.print("Bluetooth library v. ");
     CONFIG_DEBUG_SERIAL.print(TinyBTPlus::libraryVersion());
@@ -1067,13 +1067,14 @@ void HAL::BT_NormalMode()
 
 void HAL::BT_SetName()
 {
-#if CONFIG_BT_BAUD_EXPERIMENT || defined(P34_OTA_FIXED_CONFIG)
-    /* 实验构型：抑制自动改名。AT+NAME=XTrace 是实验期间的非预期 UART TX，
-     * 且会改变模块配置，违反单变量纪律。抑制点放在本函数内以覆盖全部调用者
-     * （当前仅 BT_Init）。生产构型行为不变。 */
+#if CONFIG_BT_BAUD_EXPERIMENT
+    // Keep baud experiments isolated; the fixed production profile is not an experiment.
     return;
 #else
-    BT_SERIAL.printf("AT+NAME=XTrace\r\n");
+    BtStartupPort port;
+    const ETrackBluetooth::StartupName::Result name = s_bt_startup_name.Run(port);
+    SEGGER_RTT_printf(0, "BTSTART: name=%u elapsed=%lu\r\n", (unsigned)name,
+        (unsigned long)s_bt_startup_name.elapsed());
 #endif
 }
 

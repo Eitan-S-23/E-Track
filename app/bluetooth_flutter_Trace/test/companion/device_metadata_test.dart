@@ -213,6 +213,23 @@ void main() {
     expect(ble.deviceMetadata.wasConnected(_other), isFalse);
   });
 
+  test('fresh E-Track advertising replaces legacy X-Trace metadata without changing the binding', () async {
+    final ble = service();
+    final current = device(_address);
+    ble.deviceMetadata.rememberConnection(_address, name: 'X-Trace');
+    await ble.deviceMetadata.settled;
+    expect(ble.getDeviceName(current), 'X-Trace');
+    ble.connectedDevices.add(current);
+    ble.scanResults.assignAll([_scan(current, name: 'E-Track')]);
+    await ble.deviceMetadata.settled;
+    expect(ble.getDeviceName(current), 'E-Track');
+    expect(ble.connectedDevices.single, same(current));
+    ble.scanResults.clear();
+    expect(ble.getDeviceName(current), 'E-Track');
+    expect(ble.getDeviceConnectability(current), isTrue);
+    expect(ble.deviceMetadata.wasConnected(_other), isFalse);
+  });
+
   test('a connection arriving during a name query receives its own refresh', () async {
     final first = Completer<List<BluetoothDevice>>();
     var queries = 0;

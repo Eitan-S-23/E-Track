@@ -31,11 +31,13 @@ class CompanionServiceTest {
         var reply: ((Boolean) -> Unit)? = null
         var probeReply: ((Boolean) -> Unit)? = null
         var starts = 0
+        var dispatches = 0
+        var autoProbe = false
         val events = mutableListOf<String>()
         override fun problem(context: Context) = failure
         override fun initialize(context: Context) { starts++ }
-        override fun dispatch(payload: Map<String, Any>, done: (Boolean) -> Unit) { reply = done }
-        override fun probe(id: String, done: (Boolean) -> Unit) { probeReply = done }
+        override fun dispatch(payload: Map<String, Any>, done: (Boolean) -> Unit) { dispatches++; reply = done }
+        override fun probe(id: String, done: (Boolean) -> Unit) { probeReply = done; if (autoProbe) done(true) }
         override fun live() = engineLive
         override fun connected(context: Context) = gatt
         override fun lost(id: String) { events.add(id) }
@@ -98,14 +100,115 @@ class CompanionServiceTest {
         CompanionBridge.preferences(service).edit().putString("revision", "replacement").commit()
         assertFalse(service.healthy()); assertFalse(service.ownsDevice(key, service.runtimeId))
     }
-    @Test fun offlineResultBacksOffAndReleasesWakeLock() {
+    @Test fun offlineResultRetriesAtTwoFourEightSecondsBeforeBackingOffOnce() {
         start(); runtime.reply!!(true)
+        service.state(state("CONNECTING", false, true))
+        val prefs = CompanionBridge.preferences(service)
+        for ((index, delay) in listOf(2L, 4L, 8L).withIndex()) {
+            assertTrue(service.state(state("DEVICE_OFFLINE", false)))
+            assertTrue(service.healthy())
+            assertEquals(0, prefs.getInt("failures", 0))
+            assertTrue(ShadowPowerManager.getLatestWakeLock().isHeld)
+            shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(delay * 1000 - 1))
+            assertEquals(index + 1, runtime.dispatches)
+            shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(1))
+            assertEquals(index + 2, runtime.dispatches)
+            runtime.reply!!(true)
+        }
         assertTrue(service.state(state("DEVICE_OFFLINE", false)))
         assertFalse(service.healthy())
-        val prefs = CompanionBridge.preferences(service)
         assertEquals(1, prefs.getInt("failures", 0))
         assertTrue(prefs.getLong("nextAttempt", 0) > System.currentTimeMillis())
         assertFalse(ShadowPowerManager.getLatestWakeLock().isHeld)
+        assertEquals(1, runtime.starts)
+    }
+    @Test fun duplicateFailureDoesNotStackRetriesAndSuccessCancelsTheTimer() {
+        start(); runtime.reply!!(true)
+        repeat(3) { service.state(state("DEVICE_OFFLINE", false)) }
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(2))
+        assertEquals(2, runtime.dispatches); runtime.reply!!(true)
+        service.state(state("DEVICE_IDENTITY_UNAVAILABLE", false))
+        service.state(state())
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(10))
+        assertEquals(2, runtime.dispatches)
+        assertTrue(service.ownsDevice(key, service.runtimeId))
+        assertEquals(0L, CompanionBridge.preferences(service).getLong("nextAttempt", 0))
+    }
+    @Test fun identityFailureRetriesWithoutReplacingTheAcknowledgedRuntime() {
+        start(); runtime.reply!!(true)
+        val id = service.runtimeId
+        service.state(state("DEVICE_IDENTITY_UNAVAILABLE", false))
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(2))
+        assertEquals(2, runtime.dispatches); runtime.reply!!(true)
+        service.state(state())
+        assertEquals(id, service.runtimeId)
+        assertTrue(runtime.events.isEmpty())
+        assertEquals(1, runtime.starts)
+    }
+    @Test fun successfulConnectionResetsTheNextRecoveryWindow() {
+        start(); runtime.reply!!(true)
+        service.state(state("DEVICE_OFFLINE", false))
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(2))
+        runtime.reply!!(true); service.state(state())
+        service.state(state("CONNECTING", false, true))
+        service.state(state("DEVICE_OFFLINE", false))
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(2))
+        assertEquals(3, runtime.dispatches)
+    }
+    @Test fun laterDisconnectReacquiresABoundedLockAndSuccessReleasesIt() {
+        start(); runtime.reply!!(true); service.state(state())
+        assertFalse(ShadowPowerManager.getLatestWakeLock().isHeld)
+        service.state(state("CONNECTING", false, true))
+        assertTrue(ShadowPowerManager.getLatestWakeLock().isHeld)
+        service.state(state("DEVICE_OFFLINE", false))
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(2))
+        assertEquals(2, runtime.dispatches); runtime.reply!!(true)
+        service.state(state())
+        assertFalse(ShadowPowerManager.getLatestWakeLock().isHeld)
+    }
+    @Test fun quickRecoveryWindowDoesNotGrowAfterSlowConnectionAttempts() {
+        start(); runtime.reply!!(true); runtime.autoProbe = true
+        service.state(state("CONNECTING", false, true))
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(59))
+        service.state(state("DEVICE_OFFLINE", false))
+        assertFalse(service.healthy())
+        assertEquals(1, runtime.dispatches)
+        assertEquals(1, CompanionBridge.preferences(service).getInt("failures", 0))
+    }
+    private fun stopBeforeRetry(change: () -> Unit) {
+        start(); runtime.reply!!(true)
+        service.state(state("DEVICE_OFFLINE", false))
+        change()
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(10))
+        assertFalse(service.healthy())
+        assertEquals(1, runtime.dispatches)
+        assertEquals(1, runtime.events.size)
+        assertFalse(ShadowPowerManager.getLatestWakeLock().isHeld)
+    }
+    @Test fun permissionLossCancelsFastRecovery() = stopBeforeRetry {
+        runtime.failure = "BLUETOOTH_PERMISSION_DENIED"
+    }
+    @Test fun userDisableCancelsFastRecovery() = stopBeforeRetry {
+        CompanionBridge.preferences(service).edit().putBoolean("enabled", false).commit()
+    }
+    @Test fun associationRevisionChangeCancelsFastRecovery() = stopBeforeRetry {
+        CompanionBridge.preferences(service).edit().putString("revision", "replacement").commit()
+    }
+    @Test fun runtimeLossCancelsFastRecovery() = stopBeforeRetry { runtime.engineLive = false }
+    @Test fun terminalFailureDoesNotStartFastRecovery() {
+        start(); runtime.reply!!(true)
+        service.state(state("FAILED", false))
+        assertFalse(service.healthy())
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(10))
+        assertEquals(1, runtime.dispatches)
+    }
+    @Test fun newPresenceWakeReplacesPendingRetryWithoutASecondDelayedDispatch() {
+        start(); runtime.reply!!(true)
+        service.state(state("DEVICE_OFFLINE", false))
+        service.onStartCommand(Intent().putExtra("reason", "presence"), 0, 2)
+        runtime.reply!!(true); service.state(state())
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(10))
+        assertEquals(2, runtime.dispatches)
     }
     @Test fun failedCheckRemainsPendingButCompletedCheckClearsIt() {
         start(); runtime.reply!!(true)

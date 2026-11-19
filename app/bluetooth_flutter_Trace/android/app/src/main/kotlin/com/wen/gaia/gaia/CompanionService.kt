@@ -4,6 +4,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.app.job.JobParameters
 import android.app.job.JobService
+import android.bluetooth.BluetoothAdapter
 import android.companion.CompanionDeviceService
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -78,6 +79,33 @@ class CompanionService : Service() {
     private var dispatching = false
     private var redispatch = false
     private var wakeLock: PowerManager.WakeLock? = null
+    private var reconnectStartedAt: Long? = null
+    private var reconnectAttempts = 0
+    private var reconnectPending = false
+    private var reconnectStatus = "DEVICE_OFFLINE"
+    private val reconnectWindowMs = 60000L
+    private val reconnectDelays = longArrayOf(2000, 4000, 8000)
+    private val reconnect = Runnable {
+        reconnectPending = false
+        if (closed) return@Runnable
+        if (!CompanionBridge.enabled(this) || execution.problem(this) != null ||
+            revision != CompanionBridge.revision(this)) {
+            stopCompanion("PERMISSION_OR_ASSOCIATION_LOST"); return@Runnable
+        }
+        if (!runtimeAcknowledged || !execution.live()) {
+            stopCompanion("RUNTIME_LOST"); return@Runnable
+        }
+        if (linkedToken != null && execution.connected(this)) {
+            resetReconnect(); return@Runnable
+        }
+        if (DeviceOtaService.active?.hasTask() == true) return@Runnable
+        if (SystemClock.elapsedRealtime() - (reconnectStartedAt ?: 0) >= reconnectWindowMs) {
+            backOffAndStop(reconnectStatus); return@Runnable
+        }
+        reason = "recovery"
+        Log.i("ETrackCompanion", "Retrying device connection (${reconnectAttempts + 1}/4)")
+        dispatch()
+    }
     private val startupDeadline = Runnable {
         if (!runtimeAcknowledged) stopCompanion("RUNTIME_START_TIMEOUT")
     }
@@ -114,6 +142,9 @@ class CompanionService : Service() {
         if (reason !in listOf("foreground", "manual", "periodic", "presence", "recovery")) {
             stopCompanion("INVALID_START_REASON"); return START_NOT_STICKY
         }
+        // A fresh wake supersedes a pending timer, without extending its retry budget.
+        handler.removeCallbacks(reconnect)
+        reconnectPending = false
         revision = CompanionBridge.revision(this)
         try {
             val open = PendingIntent.getActivity(this, NOTIFICATION_ID,
@@ -178,21 +209,65 @@ class CompanionService : Service() {
         if (status == "CHECKING") prefs.edit().putBoolean("checkPending", true).apply()
         if (value["checkFinished"] == true) prefs.edit().putBoolean("checkPending", false).apply()
         if (connected) {
+            resetReconnect()
             prefs.edit().putInt("failures", 0).putLong("nextAttempt", 0).apply()
             if (value["busy"] != true && wakeLock?.isHeld == true) wakeLock?.release()
+        } else if (status == "CONNECTING" && value["busy"] == true) {
+            handler.removeCallbacks(reconnect)
+            reconnectPending = false
+            beginReconnectWindow()
         } else if (value["busy"] != true && DeviceOtaService.active?.hasTask() != true) {
-            val failures = (prefs.getInt("failures", 0) + 1).coerceAtMost(6)
-            val delay = (60000L * (1L shl failures)).coerceAtMost(3600000L)
-            prefs.edit().putInt("failures", failures).putLong("nextAttempt", System.currentTimeMillis() + delay).apply()
-            stopCompanion(status)
+            if (!scheduleReconnect(status)) backOffAndStop(status)
         }
         return true
+    }
+
+    private fun scheduleReconnect(status: String): Boolean {
+        if (status !in listOf("DEVICE_OFFLINE", "DEVICE_IDENTITY_UNAVAILABLE") ||
+            !CompanionBridge.enabled(this) || execution.problem(this) != null ||
+            revision != CompanionBridge.revision(this)) return false
+        if (reconnectPending) return true
+        val now = SystemClock.elapsedRealtime()
+        val started = beginReconnectWindow()
+        val delay = reconnectDelays.getOrNull(reconnectAttempts) ?: return false
+        if (now - started + delay >= reconnectWindowMs) return false
+        reconnectAttempts++
+        reconnectStatus = status
+        reconnectPending = true
+        // Keep the acknowledged engine/radio owner; do not wait for the 15-minute job.
+        handler.postDelayed(reconnect, delay)
+        return true
+    }
+
+    private fun beginReconnectWindow(): Long {
+        reconnectStartedAt?.let { return it }
+        val started = SystemClock.elapsedRealtime()
+        reconnectStartedAt = started
+        // An established connection released the startup lock; later recovery needs its own bound.
+        if (wakeLock?.isHeld != true) wakeLock?.acquire(reconnectWindowMs)
+        return started
+    }
+
+    private fun resetReconnect() {
+        handler.removeCallbacks(reconnect)
+        reconnectPending = false
+        reconnectStartedAt = null
+        reconnectAttempts = 0
+    }
+
+    private fun backOffAndStop(status: String) {
+        val prefs = CompanionBridge.preferences(this)
+        val failures = (prefs.getInt("failures", 0) + 1).coerceAtMost(6)
+        val delay = (60000L * (1L shl failures)).coerceAtMost(3600000L)
+        prefs.edit().putInt("failures", failures).putLong("nextAttempt", System.currentTimeMillis() + delay).apply()
+        stopCompanion(status)
     }
 
     fun stopCompanion(reason: String) {
         if (closed) return
         closed = true
         linkedToken = null
+        resetReconnect()
         handler.removeCallbacksAndMessages(null)
         if (wakeLock?.isHeld == true) wakeLock?.release()
         CompanionBridge.preferences(this).edit().putString("lastResult", reason).apply()
@@ -230,7 +305,9 @@ class CompanionJobService : JobService() {
 
 class CompanionBootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action == Intent.ACTION_BOOT_COMPLETED || intent.action == Intent.ACTION_MY_PACKAGE_REPLACED) {
+        val radioReady = intent.action == BluetoothAdapter.ACTION_STATE_CHANGED &&
+            intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR) == BluetoothAdapter.STATE_ON
+        if (intent.action == Intent.ACTION_BOOT_COMPLETED || intent.action == Intent.ACTION_MY_PACKAGE_REPLACED || radioReady) {
             Log.i("ETrackCompanion", "Restoring companion after ${intent.action}")
             try { CompanionBridge.restoreAfterSystemRestart(context) }
             catch (_: Exception) { CompanionBridge.preferences(context).edit().putString("lastResult", "BOOT_RESTORE_FAILED").apply() }
