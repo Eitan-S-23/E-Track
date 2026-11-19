@@ -576,3 +576,93 @@ The follow-up also makes notification-safe failure text an explicit terminal
 field. Generic backend/transport error details are not automatically forwarded
 to the notification; this avoids leaking an exception's signed URL or token.
 This is an internal projection change, not a native notification schema change.
+
+Second development run `44638689257`, source `80fd49e02c8c1832249aed95e5ebbb73f8024f22`,
+passes analysis on both hosts. Linux reports 971 passed / 16 skipped / 2 failed;
+Windows reports 919 passed / 68 skipped / 2 failed. Both failures are old-identity
+and wrong-full-SHA regression expectations still naming REBOOT_RECONNECT_FAILED.
+Update those two assertions to TARGET_FIRMWARE_NOT_CONFIRMED, retaining their
+false-success/current-identity guards. Reuse the stronger existing full-SHA
+case rather than retaining a duplicate new fixture. The new rejection, cleanup,
+notification and stale/late-response cases pass in this failed batch. Original
+full logs/reports are retained in `keyring-artifacts-01/02`; no failed run is
+relabelled successful and no tests are disabled.
+
+### Passive Watch Result
+
+`passive-watch-01/result.json` completes one standard-Commander observation.
+Thirteen samples cover 121508 firmware milliseconds with advancing main-loop
+and watchdog-feed counters, clear fault registers, SD ready and idle receiver/
+overlay. No counter discontinuity is observed. Reported core clock is 288 MHz,
+SysTick reload is 287999 and DWT deltas agree with approximately 288000 cycles
+per millisecond. There is no evidence here of a clock-rate defect or a new reset;
+this short interval does not establish the cause of the earlier WDT boot.
+
+Every sample reports ADC 2040..2042, clamped 3300 mV / zero percent, no charging
+and recording closed. The power admission predicate remains false. Full original
+30335 App and unchanged Boot match before/after, confirmation remains 30335,
+all owned debugger commands close and the shared lock is absent. No phone,
+reset, halt or RAM/Flash write occurs. Watched SEGGER and PowerShell metadata
+remain unchanged during this watch. Do not repeat it merely to obtain a reset.
+
+### Recorded Feedback Contract
+
+#### Scope And Trigger
+
+This is the implementation record for rejected BLE commands and post-transfer
+identity feedback, not a change to frozen OTA acceptance or the wire protocol.
+The defect combines lost cross-layer error metadata with the false assumption
+that failing to verify a target always means the device never responded.
+
+#### Signatures
+
+- `OtaTransportException(message, {code, status, ackCommand})` preserves the
+  matched response command at the receive boundary.
+- `OtaTerminalState.mcuRejection({required status, ackCommand})` maps safe text
+  and the existing status-specific retryability.
+- `OtaTerminalState.taskFailureReason` and `OtaTaskSnapshot.failureReason` are
+  optional owner-produced text; `toMap()['label']` remains the native interface.
+- `_probeTargetIdentity(..., onNonTargetIdentity)` reports only validated,
+  current-link, same-hardware non-target identities within the active wait.
+
+#### Contracts
+
+Do not infer an ACK command from the phase after ABORT. Publish failed terminal
+state only after bounded cleanup and owner-generation rechecks. Error snapshots
+do not grant credit or durable progress. Keep valid non-target observations local
+to the wait: they do not refresh the service's current identity. Target success
+still requires both version and the complete raw SHA. Retain the full window and
+stable probe statistics outcome names. Raw backend/transport strings are not
+notification-safe by default.
+
+#### Validation And Error Matrix
+
+| Input | Feedback / invariant |
+| --- | --- |
+| BEGIN2 ERR_BUSY | Named command/status, recording/power/idle guidance; zero DATA/END, no automatic retry |
+| DATA2/END2 rejection | Original command/status survives ABORT; no reboot-success claim |
+| Valid non-target responses until deadline | TARGET_FIRMWARE_NOT_CONFIRMED; last observed version, not a claim of current connectivity |
+| No usable identity response | REBOOT_RECONNECT_FAILED; retain uncertainty and later recheck |
+| Wrong hardware | Existing DEVICE_IDENTITY_CHANGED, not a non-target observation |
+| Cancelled, abandoned or stale-link callback | Cannot alter the current owner's feedback, identity or success |
+
+#### Good, Base And Bad Cases
+
+Good: an old response followed by the correct target within the window succeeds.
+Base: no reply times out without inventing an identity. Bad: the target version
+with a different full raw SHA remains unconfirmed, never completed.
+
+#### Tests Required
+
+`ota_pipeline_transport_test.dart` checks matched BEGIN/DATA/END/ABORT metadata.
+`ota_service_upgrade_test.dart` exercises the real owner flow, ABORT/cancel
+ordering, notification projection and all identity cases above.
+`ota_background_test.dart` checks failed-only projection with no invented percent.
+Full Linux/Windows Actions checks and original-signed APK/EXE builds remain
+distinct from a phone installation or successful physical OTA.
+
+#### Wrong Versus Correct
+
+Wrong: remove the battery guard, call END ACK success, or label every timeout a
+disconnected device. Correct: preserve the original rejection, finish cleanup,
+retain only valid observations and report exactly what was or was not verified.

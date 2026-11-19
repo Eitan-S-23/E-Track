@@ -1984,7 +1984,8 @@ void main() {
           rebootWindow: const Duration(milliseconds: 700));
       final service = Get.find<OtaService>();
       expect(await service.startOtaUpgrade(probeAddress), isFalse);
-      expect(service.terminalState?.code, 'REBOOT_RECONNECT_FAILED');
+      expect(service.terminalState?.code, 'TARGET_FIRMWARE_NOT_CONFIRMED');
+      expect(service.taskSnapshot!.targetVerified, isFalse);
       expect(ble.probeCount, greaterThan(1));
       expect(ble.endCalls, 1);
     });
@@ -2230,10 +2231,12 @@ void main() {
     final service = Get.find<OtaService>();
     ble.advanceGenerationOnConnection = true;
     expect(await service.startOtaUpgrade(address), isFalse);
-    expect(service.terminalState?.code, 'REBOOT_RECONNECT_FAILED');
+    expect(service.terminalState?.code, 'TARGET_FIRMWARE_NOT_CONFIRMED');
     expect(service.phase, OtaPhase.failed);
     expect(service.deviceInfo!.currentVersionCode, 20801);
     expect(service.hasCurrentDeviceIdentity(address), isFalse);
+    expect(service.taskSnapshot!.targetVerified, isFalse);
+    expect(service.taskSnapshot!.label, service.terminalState!.userMessage);
   });
 
   test('real service produces a saved trace and actual reboot identity', () async {
@@ -2908,19 +2911,6 @@ void main() {
     expect(service.taskSnapshot!.label, terminal.userMessage);
     expect(service.taskSnapshot!.targetVerified, isFalse);
   }, timeout: const Timeout(Duration(seconds: 30)));
-
-  test('target version with a different raw hash is not confirmed', () async {
-    final wrongHash = Uint8List.fromList(postRebootPayload)..[16] ^= 1;
-    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
-        rebootPayload: wrongHash, rebootWindow: const Duration(milliseconds: 400),
-        rebootProbeInterval: const Duration(milliseconds: 50));
-    final service = Get.find<OtaService>();
-    expect(await service.startOtaUpgrade('AA:BB'), isFalse);
-    expect(ble.probeCount, greaterThan(1));
-    expect(service.terminalState!.code, 'TARGET_FIRMWARE_NOT_CONFIRMED');
-    expect(service.taskSnapshot!.targetVerified, isFalse);
-    expect(service.deviceInfo!.currentVersionCode, 20801);
-  });
 
   test('no identity response retains the uncertain reconnect timeout', () async {
     final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
