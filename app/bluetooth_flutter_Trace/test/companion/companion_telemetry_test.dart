@@ -54,6 +54,7 @@ void main() {
     await h.until(() => h.adapter.starts == 1 && h.ble.isScanning.value);
     expect(h.device.infoRequests, 1, reason: 'The real OtaService verifies the MCU before idle collection');
     expect(h.nativeRecoveryCalls, ['companionBegin', 'connect', 'companionFinish']);
+    expect(h.diagnosticStates, ['RECOVERY_STARTED', 'RECOVERY_CONNECTED']);
     expect(h.ota.hasCurrentDeviceIdentity(_address), isTrue);
     expect(h.ble.foregroundScanningAllowed, isFalse);
     expect(find.byType(Scaffold), findsNothing);
@@ -282,6 +283,7 @@ class _Harness {
   final channel = const MethodChannel('test/companion-telemetry');
   final bleChannel = const MethodChannel('flutter_blue_plus/methods');
   final nativeRecoveryCalls = <String>[];
+  final diagnosticStates = <String>[];
   String? nativeAttempt;
   final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
   final snapshot = <String, Object?>{'runtimeId': 'runtime-1', 'revision': 'revision-1',
@@ -324,6 +326,12 @@ class _Harness {
     });
     messenger.setMockMethodCallHandler(channel, (call) async {
       if (call.method == 'ready') { ready = true; return snapshot; }
+      if (call.method == 'diagnostic') {
+        final args = Map<String, dynamic>.from(call.arguments as Map);
+        expectSync(args['runtimeId'], snapshot['runtimeId']);
+        diagnosticStates.add(args['status'] as String);
+        return true;
+      }
       if (call.method == 'snapshot') {
         debugPrint('T02_NATIVE_SNAPSHOT $snapshot');
         return Map<String, Object?>.from(snapshot);
