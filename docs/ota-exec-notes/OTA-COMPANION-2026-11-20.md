@@ -397,3 +397,129 @@ Do not infer that a concurrent agent caused it or relabel it as unchanged.
 The final post-delivery audit uses a fresh successor directory, not a rewrite
 of the original investigation or native receipts. This is implementation
 verification, not independent acceptance or whole APP-COMPANION card completion.
+
+## Authorized USB Handoff And OTA Window
+
+The user explicitly permits stopping only the identified LDPlayer ADB service.
+`adb-release-01` stops before any action because WMIC's piped UTF-16 output was
+decoded incorrectly; `adb-release-02` is blocked by that preserved no-stop lock.
+The third cell reconciles the dead, zero-operation owner and uses the exact
+old executable's standard `kill-server` once. PID 19052 and port 5037 close.
+No emulator or phone is restarted. `phone-05` now sees V2312A and verifies the
+original 1.0.85/111 APK hash above, PID 15804; the old empty private inventory
+was an ADB ownership issue. Original keys and App data are unchanged.
+
+The prepared functional observation reuses `live_mcu.MCU` binding/inspection,
+standard Commander/RTTLogger, the existing private ADB/Windows Job primitives
+and qualified SU launcher. This ARM-OB reports S/N -1, so the thin argument
+adapter retains the proven default USB selection; exact full App/Boot reads
+and the absence of another debugger gate it. No new flashing/storage protocol,
+firmware build, AT tuning, debugger write or explicit reset is introduced.
+
+One window captures original PID-bound logcat and one RTT reader, first checks
+the running 30335/Boot/health and both original ELF/maps, then waits for the
+user's device-originated update. Preparation is bounded to 900 seconds; arming
+the actual test starts a separate 600-second transfer/reboot/verification budget.
+No automatic phone UI input occurs. The preserved 313-byte staging package may
+resume; this is a functional activation check, not a fresh-throughput comparison.
+After fresh target Boot confirmation, allow App reconnect, close the reader and
+perform full original-30336/unchanged-Boot plus health readback. Retain the target.
+An unknown result stops mutations for reconciliation, never another OTA to
+recreate lost logs. Outputs stay in `ota-inputs-01/` and `ota-session-01..03/` under
+the existing task cache; sensitive raw phone logs use a private ACL. The normal
+release has no development snapshot, so no footer is fabricated or bypassed.
+
+## First Post-Repair Attempt
+
+`ota-session-01` stopped before device inspection because the authorized LDPlayer
+ADB had restarted. `ota-session-02` could not qualify that SYSTEM-owned process
+from SU and did not stop it. The third adapter keeps identity/stop admission in
+the SYSTEM parent and native capture in the existing SU desktop. It qualifies
+and stops only the same authorized service, now PID 25296, then retains private
+port 5048. The failed preparations are not OTA attempts.
+
+The successful collector starts at 22:10:35 UTC, acknowledges the arm at
+22:21:21 UTC, and delivers the one start reminder at 22:21:39 UTC. Original
+App 1.0.85/111, PID 15804, then performs GET_INFO/CAPS2 and one BEGIN2. At
+06:21:56.176 Shanghai time it receives ACK_BEGIN2 status 14 (`ERR_BUSY`), epoch
+4202504752, with durable/accepted/credit all zero. The original log contains
+no DATA2 or END2 write. App abort/terminal records complete without a transfer.
+This is a real failed start, not NOT_RUN: the collector's `otaObserved=false`
+only means its narrower BLEACT activation marker was not observed.
+
+The collector closes at 22:25:28 UTC. Full original 30335 App and unchanged
+Boot, confirmed state, SD/runtime and idle receiver/overlay checks pass. Staging
+headers/journal remain unchanged; no target confirmation occurs. Original App
+PID and key are preserved, all owned tools close and private ADB stops. The
+terminal handle is subsequently unavailable; verify both recorded owner PIDs
+are gone and preserve its completed receipts before reconciling any leftover
+owner lock. No phone restart, APK installation, automatic UI input or MCU reset
+was requested. The user is told USB can be disconnected; no further phone
+operation is needed for this diagnosis.
+
+`ERR_BUSY` has several BEGIN admission sites; it does not uniquely establish a
+battery failure or an old session. Current 30335 source no longer checks GPS
+speed, but still requires recording to be closed and either charging or at
+least 30 percent battery, as well as available overlay memory. The relevant
+files are byte-identical to original 48ad9f03. One additional passive snapshot,
+`busy-read-01`, reuses the original observer and exact ELF/map to read those
+runtime predicates. Its Power ADC offset is verified from the original ELF;
+PH2 charging input follows the board configuration and vendor GPIO layout.
+It neither requires USB phone access nor changes device state. It can identify
+the current blocker but cannot reconstruct a transient predicate at the exact
+earlier BEGIN instant. No retry, rebuild or safety-guard removal is planned.
+
+## Current Admission And Remaining Boundary
+
+`busy-read-01/result.json` completes the passive check: ADC 2043 maps to the
+firmware's clamped 3300 mV and 0 percent, PH2 does not indicate charging,
+recording is closed, receiver state is IDLE and overlay owner is FREE. The
+current safety predicate is therefore false. This is a definite current
+admission blocker, not proof of the exact earlier BEGIN branch. Both App and
+device-originated BLE entry points use the same receiver guard; simulated GPS
+speed is absent from 30335's predicate. Do not bypass the guard based on USB or
+J-Link supply alone. A further OTA requires the MCU to recognize charging or
+report at least 30 percent, with recording stopped, and a newly prepared window.
+
+The later snapshot also contains `Reset: NRST WDT`, and its initialized health
+tick is 148997 versus 1981441 at the prior observation's end. A later boot has
+occurred; its timing and cause are unknown. Neither collector issued a reset,
+halt, Flash write or RAM write. This is not the target-activation reset: full
+App remains the original 30335, full Boot is unchanged and BCB confirmation
+remains 30335. The new boot explicitly prevents treating the later RAM snapshot
+as the earlier BEGIN's instantaneous state. No new reset or retry is performed
+to reconstruct the missing interval.
+
+Original App logs preserve the complete ACK error and terminal records. Android
+truncates the long `OTA_LINK_STATS` JSON; it is not a complete statistics export
+or a usable throughput sample. The attempted read-only UI observer first missed
+Android's `topResumedActivity=` spelling; its successor could not establish a
+focused window from that device's `dumpsys window windows` output. No screenshot
+was taken and those false/inconclusive foreground receipts do not override the
+real foreground/GATT records. No UI input, relaunch or replacement App was used
+to repair observation, and USB was released after the original log retrieval.
+
+The Admin scrolling work remains deployed and verified on 2ad213fa. The
+functional 30335 -> 30336 upgrade is still unsuccessful, not whole-card PASS.
+Retain original 30335 and its repaired control state. Current work is limited
+to original-evidence analysis and scoped main documentation delivery; no more
+phone use, firmware/App rebuild, backend deployment or channel/delta change.
+
+## Observation Closure Audit
+
+`observation-audit-01/result.json` independently recomputes the failed start
+from the original complete ACK record, checks 160 recorded owned command
+closures, and verifies the absent device lock and closed private ADB port.
+The old parent and SU child PIDs both exited; `busy-read-01/reconciled-owner.json`
+preserves their completed outcome before the leftover lock was removed. The
+remaining ADB PID belongs to a separate server, not the closed private collector;
+no further stop or phone command is performed.
+
+All selected outputs remain in the active root: task-cache originals, the three
+shared documentation files and authorized Git metadata. The prior audit files
+and completed repair/collection sources remain immutable. No credentials were
+copied. The PowerShell startup cache again changed without an attributed writer;
+no selected command launched PowerShell and no external file was cleaned. The
+passive follow-up's watched SEGGER files were unchanged; its native-history
+exception remains the only authorized external output boundary. A fresh
+post-delivery audit is required instead of overwriting this checkpoint.
