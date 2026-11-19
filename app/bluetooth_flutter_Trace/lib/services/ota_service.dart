@@ -494,7 +494,9 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   /// retirement acknowledge. Never close a transfer, END/apply or another owner.
   Future<bool> retireCompanionConnection(String runtimeId, Future<bool> Function() closeGatt) async {
     if (_retiringCompanionConnection != null ||
-        (isUpgrading && (_companionTaskRuntime != runtimeId || _operation != _OtaOperation.query))) return false;
+        (isUpgrading && (_companionTaskRuntime != runtimeId || _operation != _OtaOperation.query))) {
+      return false;
+    }
     _retiringCompanionConnection = runtimeId;
     final epoch = _ownerEpoch;
     try {

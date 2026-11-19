@@ -2,6 +2,25 @@
 
 ## Recovery Diagnostics And Inventory Details 2026-11-19
 
+Continuation reconciled the completed local commit `2d893a28` and `ui-03`:
+all seven focused browser cases and the three original desktop/mobile screenshots
+already passed. They were not rerun after the interruption. The first full
+development run `44521208947` fails on both hosts: Linux 938 passed / 16 skipped /
+19 failed; Windows 901 passed / 68 skipped / 4 failed. Its original console and
+full artifacts are preserved in `keyring-logs-01` and `keyring-artifacts-01/02`.
+Both used Flutter 3.47.9 / Dart 3.13.7; APK compilation was not requested.
+
+The failures are consolidated before another batch: two multiline-if lint errors,
+a repeated `_` parameter unsupported by the package's language version, a guarded
+widget expectation running concurrently with `pump`, two outdated privacy-copy
+expectations, and 15 Linux telemetry scenarios whose shared native-channel fake
+did not implement the newly scoped GATT admission. The repair retains the real
+Dart runtime/INFO/scanning/database path and adds only the native admission,
+connection and retirement responses, including exact-address/attempt checks.
+The deadline assertion is made after its async operation completes. No product
+deadline, permission, ownership or privacy assertion is weakened. The next full
+CI validates the repaired batch; these edits alone are not a PASS.
+
 The owner approved implementation, consistent existing frontend styling and a
 new MCU test candidate. This batch uses the exclusively owned
 `.worktrees/companion-insights-20261119` worktree on

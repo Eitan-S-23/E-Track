@@ -95,7 +95,9 @@ class VersionInventoryService extends GetxService with WidgetsBindingObserver {
       final snapshot = await const MethodChannel('trace/companion').invokeMapMethod<String, dynamic>('diagnostics');
       final value = snapshot?['quality'];
       if (value is! Map || value['scope'] != 'companion-day' ||
-          !RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(value['day']?.toString() ?? '')) return null;
+          !RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(value['day']?.toString() ?? '')) {
+        return null;
+      }
       return Map<String, dynamic>.from(value);
     } catch (_) { return null; }
   }

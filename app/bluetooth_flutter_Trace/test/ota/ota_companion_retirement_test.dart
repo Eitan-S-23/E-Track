@@ -27,7 +27,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   test('query cancellation and GATT cleanup jointly fence new OTA admission', () async {
     final ble = _Discovery();
-    final ota = OtaService(bluetoothService: ble, onNotify: (_, _) {});
+    final ota = OtaService(bluetoothService: ble, onNotify: (title, message) {});
     expect(ota.beginCompanionConnection('runtime'), isTrue);
     expect(await ota.readDeviceInfo('aa:bb:cc:dd:ee:ff'), isNull);
     expect(ble.discoveries, 0, reason: 'A foreground task cannot race the recovering owner');

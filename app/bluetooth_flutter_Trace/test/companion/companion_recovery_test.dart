@@ -14,12 +14,14 @@ void main() {
     attempt.stage = 'VERIFYING_DEVICE';
     final pending = Completer<int>();
     var published = 0;
+    CompanionRecoveryExpired? expired;
     final operation = () async {
       try { published = await attempt.wait(pending.future); }
-      on CompanionRecoveryExpired catch (error) { expect(error.stage, 'VERIFYING_DEVICE'); }
+      on CompanionRecoveryExpired catch (error) { expired = error; }
     }();
     await tester.pump(const Duration(seconds: 3));
     await operation;
+    expect(expired?.stage, 'VERIFYING_DEVICE');
     expect(attempt.current, isFalse);
     pending.complete(42); await tester.pump();
     expect(published, 0);

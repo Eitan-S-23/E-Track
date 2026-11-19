@@ -53,6 +53,7 @@ void main() {
     await h.wake();
     await h.until(() => h.adapter.starts == 1 && h.ble.isScanning.value);
     expect(h.device.infoRequests, 1, reason: 'The real OtaService verifies the MCU before idle collection');
+    expect(h.nativeRecoveryCalls, ['companionBegin', 'connect', 'companionFinish']);
     expect(h.ota.hasCurrentDeviceIdentity(_address), isTrue);
     expect(h.ble.foregroundScanningAllowed, isFalse);
     expect(find.byType(Scaffold), findsNothing);
@@ -256,6 +257,7 @@ class _Harness {
   _Harness(this.tester, {required bool history}) : store = _Database(history: history) {
     ble = _AndroidBluetooth(adapter, () => elapsedMs);
     ble.otaDeviceFactoryForTest = (_) => device;
+    ble.companionConnectionEventsForTest = (_) => device.connections.stream;
     ota = OtaService(bluetoothService: ble,
       firmwareDirProvider: () async => throw StateError('No package IO in telemetry'),
       latestUriBuilder: (info, appVersion, channel) => throw StateError('Recent recovery must not query HTTP'));
@@ -278,6 +280,9 @@ class _Harness {
   late final _AndroidMonitor monitor;
   late final CompanionRuntime runtime;
   final channel = const MethodChannel('test/companion-telemetry');
+  final bleChannel = const MethodChannel('flutter_blue_plus/methods');
+  final nativeRecoveryCalls = <String>[];
+  String? nativeAttempt;
   final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
   final snapshot = <String, Object?>{'runtimeId': 'runtime-1', 'revision': 'revision-1',
     'serviceRunning': true, 'sensorBackgroundSupported': true, 'problem': null,
@@ -288,6 +293,35 @@ class _Harness {
 
   Future<void> initialize() async {
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    // Fake only the new native GATT boundary; keep the real Dart owner,
+    // identity query, telemetry lease and persistence path under test.
+    messenger.setMockMethodCallHandler(bleChannel, (call) async {
+      final args = Map<String, dynamic>.from(call.arguments as Map);
+      expectSync(args['remote_id'], _address.toUpperCase());
+      nativeRecoveryCalls.add(call.method);
+      if (call.method == 'companionBegin') {
+        if (nativeAttempt != null) return false;
+        nativeAttempt = args['attempt'] as String;
+        return true;
+      }
+      if (call.method == 'connect') {
+        if (nativeAttempt != args['companion_attempt']) return false;
+        await device.connect(mtu: null);
+        return true;
+      }
+      if (call.method == 'companionFinish') {
+        if (nativeAttempt != args['attempt'] || !device.isConnected) return false;
+        nativeAttempt = null;
+        return true;
+      }
+      if (call.method == 'companionClose') {
+        if (nativeAttempt != args['attempt']) return false;
+        await device.disconnect();
+        nativeAttempt = null;
+        return {'closed': true, 'replaced': false};
+      }
+      fail('Unexpected BLE native call: ${call.method}');
+    });
     messenger.setMockMethodCallHandler(channel, (call) async {
       if (call.method == 'ready') { ready = true; return snapshot; }
       if (call.method == 'snapshot') {
@@ -375,6 +409,7 @@ class _Harness {
       ble.onClose();
       Get.reset();
       messenger.setMockMethodCallHandler(channel, null);
+      messenger.setMockMethodCallHandler(bleChannel, null);
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await pump();
       await adapter.results.close();

@@ -96,7 +96,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('version-inventory-entry')), findsOneWidget);
     expect(find.byKey(toggleKey), findsNothing);
-    expect(find.textContaining('不上传位置、联系人或骑行记录'), findsNothing);
+    expect(find.textContaining('不上传位置、联系人、骑行记录或诊断日志'), findsNothing);
     expect(find.textContaining('最近上报：'), findsNothing);
     if (!openInventory) return;
     await tester.tap(find.byKey(const ValueKey('version-inventory-entry')));
@@ -219,7 +219,9 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('version-inventory-entry')));
     await tester.pumpAndSettle();
     expect(tester.widget<SwitchListTile>(find.byKey(toggleKey)).value, isTrue);
-    expect(find.textContaining('不上传位置、联系人或骑行记录'), findsOneWidget);
+    expect(find.textContaining('不上传位置、联系人、骑行记录或诊断日志'), findsOneWidget);
+    expect(find.textContaining('服务器记录上报出口 IP'), findsOneWidget);
+    expect(find.textContaining('单日质量摘要'), findsOneWidget);
     expect((await SharedPreferences.getInstance()).getBool(preference), isTrue);
   });
 
@@ -229,7 +231,7 @@ void main() {
     expect(tester.widget<SwitchListTile>(find.byKey(toggleKey)).value, isFalse);
     expect(find.text('已关闭'), findsOneWidget);
     expect(find.text('版本统计已关闭'), findsOneWidget);
-    expect(find.textContaining('不上传位置、联系人或骑行记录'), findsOneWidget);
+    expect(find.textContaining('不上传位置、联系人、骑行记录或诊断日志'), findsOneWidget);
     expect(find.textContaining('历史记录最多保留 90 天'), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());
   });
