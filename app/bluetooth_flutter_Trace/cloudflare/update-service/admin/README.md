@@ -132,9 +132,13 @@ audit reason. Cancel/restart can be requested while build association is still
 pending, but the server must find and verify the exact run before cancellation.
 Missing/ambiguous runs fail visibly and cannot trigger another build.
 
-At either end of an App/MCU version list, continued wheel/touch movement can
-scroll its outer page. Modal background locks and sheet-drag ownership remain
-separate: reaching a nested list boundary must not dismiss a sheet.
+At either end of an App/MCU version list, announcement list or firmware history,
+continued wheel/touch movement can scroll its outer page. App/MCU delta base
+lists and long confirmation/error text similarly hand off to their modal's
+outer scroller. The modal boundary still contains scrolling and locks the
+background; reaching a nested list boundary must not dismiss a sheet. Error
+messages keep native vertical touch scrolling even inside the confirmation
+header, and never start the header's dismiss gesture.
 
 ### Sheet Gestures And Task History
 

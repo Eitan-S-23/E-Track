@@ -968,6 +968,35 @@ static void t12_block_erase_fail_closed(void)
           g_block_attempts == 0 && g_erase_count == 0 && g_eeprom_write_count == 0);
 }
 
+/* A correct J-Link App image alone does not reconcile the persisted boot state. */
+static void t13_app_only_install_stale_bcb(void)
+{
+    ota_backup_info_t info;
+    uint8_t before[EEPROM_BYTES];
+
+    reset_all();
+    build_valid_image(g_current, 30335u, "3.3.35");
+    build_valid_image(g_candidate, 30336u, "3.3.36");
+    setup_flash_with_candidate();
+    setup_eeprom_confirmed(30330u);
+    memcpy(before, g_eeprom, sizeof(before));
+
+    check("T13 stale confirmed version rejects activation",
+          ota_backup_stage(&g_flash_io, &g_bcb_hal, &info) == OTA_BACKUP_ERR_APP_HEADER);
+    check("T13 no flash erase", g_erase_count == 0u);
+    check("T13 no flash program", g_program_count == 0u);
+    check("T13 no EEPROM write", g_eeprom_write_count == 0u);
+    check("T13 persistent boot records unchanged", memcmp(before, g_eeprom, sizeof(before)) == 0);
+    check("T13 no STAGED commit", info.commit_state == OTA_BACKUP_COMMIT_NONE);
+
+    /* Positive fixture, not an on-device state-repair procedure. */
+    setup_eeprom_confirmed(30335u);
+    check("T13 consistent fixture admits the same target",
+          ota_backup_stage(&g_flash_io, &g_bcb_hal, &info) == OTA_BACKUP_OK);
+    check("T13 backup and candidate identities", info.backup_vcode == 30335u &&
+          info.candidate_vcode == 30336u && info.commit_state == OTA_BACKUP_COMMIT_VERIFIED_STAGED);
+}
+
 int main(int argc, char** argv)
 {
     (void)argc;
@@ -993,6 +1022,7 @@ int main(int argc, char** argv)
     t10_copy_mid_failure();
     t11_block_erase_normal_and_fallback();
     t12_block_erase_fail_closed();
+    t13_app_only_install_stale_bcb();
 
     printf("P2_5_OTA_BACKUP checks=%d failures=%d\n", checks, failures);
     return failures == 0 ? 0 : 1;

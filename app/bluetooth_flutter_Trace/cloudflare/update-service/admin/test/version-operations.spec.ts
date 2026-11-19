@@ -16,6 +16,7 @@ export async function setup(page:Page,language="zh",role="owner",push?:{publicKe
     csrfToken:"version-csrf",sessionReads:0,sessionFails:false,sessionGate:null as Promise<void>|null,
     mutationAttempts:0,csrfRejections:0,rejectCsrf:false,
     refreshRequestedAt:0,refreshId:"initial",baseCount:4,jobs:[] as Job[],writes:[] as Array<{path:string;body:Record<string,unknown>}>,
+    announcements:[] as Array<Record<string,unknown>>,history:[] as Array<Record<string,unknown>>,
     notifications:[] as Array<Record<string,unknown>>,unreadCount:0,activityReads:0,activityFails:false,pushPublicKey:null as string|null,
     pushSubscriptions:[] as Array<{id:string;expiresAt:number}>,pushRegisterFails:false,readFails:false,
     readGate:null as Promise<void>|null,activityGate:null as Promise<void>|null,createGate:null as Promise<void>|null,catalogueGate:null as Promise<void>|null};
@@ -94,12 +95,13 @@ export async function setup(page:Page,language="zh",role="owner",push?:{publicKe
             job:data.jobs.find(job=>job.baseReleaseId===`base-${index}`)??null})),jobs:data.jobs});return;
       }
       if(url.pathname.startsWith("/api/admin/firmware/")) {
+        if(url.pathname.endsWith("/history")) {await reply({ok:true,history:data.history,nextCursor:null});return;}
         await reply({ok:true,firmwareChannels:[],firmwareReleases:[{appId:"trace",deviceModel:"e-track-at32f435",releaseId:"fw-target",versionName:"3.3.24",versionCode:30324,
           releaseTag:"mcu-e-track-at32f435-v3.3.24",state:"ready",archived:false,releaseNotes:"Original fixture",targetImageSha256:hash,publishedChannels:[],
           hardwareRevision:1,layoutId:1,minBootVersion:1,minAppVersionCode:86,minProtocolVersion:1,transport:"ble",assets:[{assetId:"full",kind:"full",fileName:"full.etu",
             sha256:hash,sizeBytes:100000,r2State:"available",baseVersionCode:0,baseImageSha256:""}]}]});return;
       }
-      await reply({ok:true,channels:[],announcements:[],storage:null,releases:[{id:"app-target",app_id:"trace",platform:"android",version_code:100,version_name:"1.0.74",
+      await reply({ok:true,channels:[],announcements:data.announcements,storage:null,releases:[{id:"app-target",app_id:"trace",platform:"android",version_code:100,version_name:"1.0.74",
         release_tag:"v1.0.74",state:"candidate",archived:0,release_notes:"Original App fixture",asset_count:2,r2_available_count:2,apk_count:1,manifest_count:1,patch_count:0}]});return;
     }
     expect(request.method()).toBe("POST");data.mutationAttempts++;
@@ -511,6 +513,121 @@ async function swipe(page:Page,selector:string,dx:number,dy:number) {
   await session.send("Input.dispatchTouchEvent",{type:"touchEnd",touchPoints:[]});
   await session.detach();
 }
+
+async function scrollBoundary(page:Page,inner:string,outer:string,direction:1|-1,touch:boolean) {
+  const list=page.locator(inner),owner=page.locator(outer);
+  await expect.poll(()=>list.evaluate(node=>node.scrollHeight>node.clientHeight+1)).toBe(true);
+  await list.scrollIntoViewIfNeeded();
+  await list.evaluate((node,d)=>{node.scrollTop=d>0?node.scrollHeight:0;},direction);
+  // The compositor must observe this boundary before a new native gesture starts.
+  await page.waitForTimeout(200);
+  const before=await owner.evaluate(node=>node.scrollTop);
+  if(direction<0) expect(before).toBeGreaterThan(0);
+  else expect(await owner.evaluate(node=>node.scrollHeight-node.clientHeight-node.scrollTop)).toBeGreaterThan(0);
+  const box=(await list.boundingBox())!,parent=(await owner.boundingBox())!;
+  const top=Math.max(box.y,outer==="html"?0:parent.y),bottom=Math.min(box.y+box.height,page.viewportSize()!.height,outer==="html"?Infinity:parent.y+parent.height);
+  const x=box.x+box.width/2,y=(top+bottom)/2;
+  const geometry=await list.evaluate((node,point)=>{
+    const hit=document.elementFromPoint(point.x,point.y);
+    const parents=[];
+    for(let item:Element|null=node;item;item=item.parentElement) {
+      const style=getComputedStyle(item);
+      parents.push({id:item.id,tag:item.tagName,height:item.clientHeight,content:item.scrollHeight,top:item.scrollTop,
+        overflow:style.overflowY,overscroll:style.overscrollBehaviorY,touch:style.touchAction});
+    }
+    return {hitInside:node.contains(hit),hit:hit?.outerHTML.slice(0,200),point,parents};
+  },{x,y});
+  expect(geometry.hitInside,JSON.stringify(geometry)).toBe(true);
+  await test.info().attach(`scroll-${inner}-${direction}`,{body:JSON.stringify(geometry,null,2),contentType:"application/json"});
+  // Chromium may retain the first gesture on the inner scroller. Verify a
+  // continued, separate gesture too; never scroll the owner programmatically.
+  for(let continuation=0;continuation<2;continuation++) {
+    if(touch) {
+      const session=await page.context().newCDPSession(page);
+      try {
+        await session.send("Input.dispatchTouchEvent",{type:"touchStart",touchPoints:[{x,y}]});
+        for(let step=1;step<=6;step++) {
+          await session.send("Input.dispatchTouchEvent",{type:"touchMove",touchPoints:[{x,y:y-direction*step*18}]});
+          await page.waitForTimeout(30);
+        }
+        await session.send("Input.dispatchTouchEvent",{type:"touchEnd",touchPoints:[]});
+      } finally {await session.detach();}
+    } else {
+      await page.mouse.move(x,y);await page.mouse.wheel(0,direction*240);
+    }
+    await page.waitForTimeout(300);
+    if(await owner.evaluate(node=>node.scrollTop)!==before) break;
+  }
+  if(direction>0) await expect.poll(()=>owner.evaluate(node=>node.scrollTop),{message:JSON.stringify(geometry)}).toBeGreaterThan(before);
+  else await expect.poll(()=>owner.evaluate(node=>node.scrollTop),{message:JSON.stringify(geometry)}).toBeLessThan(before);
+  await page.waitForTimeout(300);
+}
+
+test.describe("scroll chaining",()=>{
+  test.use({hasTouch:true,viewport:{width:390,height:700}});
+  for(const kind of ["android","firmware"]) for(const touch of [false,true]) {
+    test(`${kind} delta bases pass ${touch?"touch":"wheel"} at both edges to their sheet only`,async({page})=>{
+      if(!touch) await page.setViewportSize({width:1440,height:700});
+      const {data,errors}=await setup(page);data.baseCount=40;
+      data.jobs=Array.from({length:12},(_,i)=>({id:`ready-${i}`,baseReleaseId:`base-${i}`,baseVersionCode:99-i,
+        targetVersionCode:100,status:"ready",enabled:false,revision:1,sizeBytes:5000,runUrl:"",fileName:"test.patch"}));
+      await openDelta(page,kind);
+      const background=await page.evaluate(()=>scrollY);
+      await expect(page.locator("#deltaScroll")).toHaveCSS("overscroll-behavior-y","contain");
+      await scrollBoundary(page,".delta-base-list","#deltaScroll",1,touch);
+      await scrollBoundary(page,".delta-base-list","#deltaScroll",-1,touch);
+      await expect(page.locator("#deltaSheet")).toBeVisible();
+      expect(await page.evaluate(()=>scrollY)).toBe(background);
+      expect(data.writes).toHaveLength(0);expect(errors).toEqual([]);
+    });
+  }
+  for(const kind of ["announcements","history"]) for(const touch of [false,true]) {
+    test(`${kind} passes ${touch?"touch":"wheel"} at both edges to the page`,async({page})=>{
+      if(!touch) await page.setViewportSize({width:1440,height:700});
+      const {data,errors}=await setup(page);
+      let inner:string;
+      if(kind==="announcements") {
+        data.announcements=Array.from({length:12},(_,i)=>({id:`notice-${i}`,title:`Notice ${i}`,
+          body:"Announcement details ".repeat(12),published:1,pinned:0,created_at:"2026-11-20T00:00:00Z"}));
+        await page.locator("#refreshButton").click();await expect(page.locator("#refreshButton")).toBeEnabled();
+        await page.locator("#appAnnouncementsTab").click();inner="#announcementList";
+        await expect(page.locator(".announcement-card")).toHaveCount(6);
+      } else {
+        data.history=Array.from({length:25},(_,i)=>({id:`history-${i}`,action:"publish",actor:"owner@example.test",
+          createdAt:"2026-11-20T00:00:00Z",reason:"An earlier release publication",before:{revision:i},after:{revision:i+1}}));
+        await firmwareView(page);await page.locator('[data-firmware-section="history"]').click();inner="#firmwareHistoryList";
+        await expect(page.locator(".firmware-history-item")).toHaveCount(25);
+      }
+      await scrollBoundary(page,inner,"html",1,touch);
+      await scrollBoundary(page,inner,"html",-1,touch);
+      await expect(page.locator('[role="dialog"]:visible')).toHaveCount(0);
+      expect(data.writes).toHaveLength(0);expect(errors).toEqual([]);
+    });
+  }
+  for(const touch of [false,true]) test(`long confirmation details pass ${touch?"touch":"wheel"} to the dialog without scrolling its background`,async({page})=>{
+    const {data,errors}=await setup(page);await page.setViewportSize({width:390,height:420});
+    await page.evaluate("void openConfirmDialog({title:'Long confirmation',message:'Check the complete details',detail:'Detail line\\n'.repeat(80),reasonRequired:true})");
+    await expect(page.locator("#confirmDialog")).toBeVisible();
+    const background=await page.evaluate(()=>scrollY);
+    await scrollBoundary(page,"#confirmDetail","#confirmDialog",1,touch);
+    await scrollBoundary(page,"#confirmDetail","#confirmDialog",-1,touch);
+    await expect(page.locator("#confirmDialog")).toBeVisible();
+    expect(await page.evaluate(()=>scrollY)).toBe(background);
+    expect(data.writes).toHaveLength(0);expect(errors).toEqual([]);
+  });
+  for(const touch of [false,true]) test(`long error messages pass ${touch?"touch":"wheel"} to the alert dialog without dismissing it`,async({page})=>{
+    const {data,errors}=await setup(page);await page.setViewportSize({width:390,height:320});
+    await page.evaluate("void openConfirmDialog({tone:'danger',hideCancel:true,title:'Error',message:'Failure line\\n'.repeat(80),detail:'Diagnostic context\\n'.repeat(80)})");
+    await expect(page.locator('#confirmDialog[role="alertdialog"]')).toBeVisible();
+    const background=await page.evaluate(()=>scrollY);
+    await scrollBoundary(page,"#confirmMessage","#confirmDialog",1,touch);
+    await scrollBoundary(page,"#confirmMessage","#confirmDialog",-1,touch);
+    await expect(page.locator("#confirmDialog")).toBeVisible();
+    expect(await page.evaluate(()=>scrollY)).toBe(background);
+    expect(data.writes).toHaveLength(0);expect(errors).toEqual([]);
+  });
+});
+
 test.describe("sheet touch and navigation",()=>{
   test.use({hasTouch:true,viewport:{width:390,height:844}});
   for(const kind of ["app","firmware","delta"]) test(`${kind} drags down or sideways from its header without stealing body scrolling`,async({page})=>{

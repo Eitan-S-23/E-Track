@@ -181,7 +181,8 @@ body.inventory-details-open .resource-float { visibility: hidden; pointer-events
 body.delta-open { overflow: hidden; }
 body.delta-open .resource-float { visibility: hidden; pointer-events: none; }
 .delta-sheet .firmware-hint { margin-bottom: 18px; }
-.delta-base-list { max-height: 330px; overflow-y: auto; overscroll-behavior: contain; margin: 14px 0 20px; border-block: 1px solid var(--line); }
+/* Inner lists pass boundary scrolling to their owning page or modal scroller. */
+.delta-base-list { max-height: 330px; overflow-y: auto; overscroll-behavior-y: auto; margin: 14px 0 20px; border-block: 1px solid var(--line); }
 .delta-base-row { display: grid; grid-template-columns: 20px minmax(0, 1fr) minmax(100px, .7fr); align-items: center; gap: 14px; padding: 14px 4px; border-bottom: 1px solid var(--line); font-size: 12px; }
 .delta-base-row input { width: 17px; height: 17px; accent-color: var(--accent); }
 .delta-base-row > span { overflow-wrap: anywhere; }
@@ -287,7 +288,7 @@ body.delta-open .resource-float { visibility: hidden; pointer-events: none; }
 .announcement-panel > .panel-head p { max-width: 650px; }
 .announcement-create-button { flex-shrink: 0; }
 .announcement-grid { display: grid; grid-template-columns: minmax(210px, 1fr) minmax(0, 1.45fr); gap: 32px; }
-.announcement-list { min-width: 0; max-height: min(520px, 62dvh); overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; border-right: 1px solid var(--line); padding-right: 20px; }
+.announcement-list { min-width: 0; max-height: min(520px, 62dvh); overflow-y: auto; overscroll-behavior-y: auto; scrollbar-gutter: stable; border-right: 1px solid var(--line); padding-right: 20px; }
 .announcement-list:has(> .empty) { background: var(--wash); border: 0; padding: 10px; border-radius: var(--radius); align-self: start; }
 .announcement-card { width: 100%; text-align: left; padding: 16px; background: transparent; border-width: 0 0 1px; border-radius: 0; overflow-wrap: anywhere; }
 .announcement-card.active { background: var(--accent-soft); }
@@ -368,7 +369,7 @@ body.delta-open .resource-float { visibility: hidden; pointer-events: none; }
 .firmware-help { border: 1px solid #e7d8b7; background: var(--warning-soft); color: #644e28; padding: 16px; border-radius: var(--radius); overflow-wrap: anywhere; font-size: 12px; }
 .firmware-help p + p, .firmware-help .pill-button { margin-top: 10px; }
 .firmware-notice { margin-block: 0; }
-.firmware-history-list { display: grid; max-height: min(640px, 65dvh); overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+.firmware-history-list { display: grid; max-height: min(640px, 65dvh); overflow-y: auto; overscroll-behavior-y: auto; scrollbar-gutter: stable; }
 .firmware-history-item { padding: 18px 0; border-bottom: 1px solid var(--line); min-width: 0; font-size: 12px; overflow-wrap: anywhere; }
 .firmware-history-item .firmware-toolbar { margin-bottom: 6px; }
 .firmware-history-item details { margin-top: 12px; }
@@ -434,17 +435,18 @@ body.delta-open .resource-float { visibility: hidden; pointer-events: none; }
   transition: opacity .16s ease-out, transform .16s ease-out;
 }
 .confirm-open .confirm-dialog { opacity: 1; transform: translate(-50%, -50%); }
-.confirm-head { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 20px; touch-action: none; }
+/* Long error text inside the header must retain native vertical touch scrolling. */
+.confirm-head { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 20px; touch-action: pan-y; }
 .confirm-dialog.sheet-dragging { transition: none; }
 .confirm-head > div { min-width: 0; }
 .confirm-mark { display: grid; place-items: center; flex: 0 0 38px; width: 38px; height: 38px; border-radius: 50%; color: var(--accent); background: var(--accent-soft); }
 .confirm-dialog.danger .confirm-mark { color: var(--danger); background: var(--danger-soft); }
 .confirm-dialog[role="alertdialog"] { border-top: 3px solid var(--danger); }
-.confirm-dialog[role="alertdialog"] .confirm-message { max-height: 35vh; max-height: 35dvh; overflow-y: auto; overscroll-behavior: contain; }
+.confirm-dialog[role="alertdialog"] .confirm-message { max-height: 35vh; max-height: 35dvh; overflow-y: auto; overscroll-behavior-y: auto; }
 .confirm-title { font-size: 20px; overflow-wrap: anywhere; }
 .confirm-message { margin-top: 8px; font-size: 13px; color: var(--muted); overflow-wrap: anywhere; white-space: pre-wrap; }
 .confirm-detail { padding: 14px 16px; border-radius: var(--radius); background: var(--wash); font-size: 12px; color: var(--muted); overflow-wrap: anywhere; white-space: pre-wrap; margin: 16px 0; }
-.confirm-detail { max-height: 35vh; max-height: 35dvh; overflow-y: auto; overscroll-behavior: contain; }
+.confirm-detail { max-height: 35vh; max-height: 35dvh; overflow-y: auto; overscroll-behavior-y: auto; }
 .confirm-input-wrap { display: grid; gap: 8px; margin: 16px 0; }
 .confirm-input-wrap label { font-size: 12px; font-weight: 600; overflow-wrap: anywhere; }
 .confirm-input-wrap input, .confirm-input-wrap textarea { width: 100%; }
