@@ -1,5 +1,31 @@
 # APP-COMPANION-01 Implementation Record
 
+## Complete Public APK Readback 2026-11-19
+
+The owner's next autonomous-completion follow-up closes the remaining remote
+whole-file check without another build, deployment, channel change or device
+operation. A fresh Stable manifest selects the original signed `1.0.84+110` APK.
+The actual signed `/api/public/download` response was streamed completely to a
+project-private file, then that closed file was independently hashed:
+
+- Bytes: 48,718,441; HTTP 200; original R2-backed Public download route.
+- SHA-256: `de4ce7c0c3f1d9dc4a753ddd7d397e1192fea25d13a057a97fd4374fadfadf6a`,
+  matching the exact original signing CI and registered candidate.
+- Direct-route download/hash time: 194.350 seconds, within the new bounded
+  900-second verification window. No system proxy setting was changed.
+
+The previous 180-second timeout and bounded probe remain historical evidence,
+not retroactively marked complete. A further proxy-route transfer was stopped
+while comparing routes; its 15,480,320-byte partial file is retained and is not
+an APK verification pass. The succeeding direct-route whole-file result now
+supersedes the earlier Public-body coverage limitation below.
+
+Originals: `.cache/companion-fast-20261119/public-apk-complete-01/interrupted.json`
+and `public-apk-complete-02/result.json`; the latter directory retains the full
+APK in `private/` and the final write audit. No new update is needed for this
+verification. Actual phone/MCU installation and radio/UI observations remain
+outside this remote check; this does not close whole-card physical acceptance.
+
 ## Stable Rollout Completed 2026-11-19
 
 The owner's follow-up requests autonomous completion and grants the needed

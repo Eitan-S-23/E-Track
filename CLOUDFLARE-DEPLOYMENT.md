@@ -37,9 +37,11 @@ staging Stable rollout: Android `1.0.84+110` at channel revision 60 and MCU
 deltas were generated and enabled; both Beta channels and 42 existing jobs are
 preserved, with 44 total jobs. This is separate from the successful Admin deploy
 above: no backend was redeployed and no credentials/configuration were changed.
-Public patch selection/download and MCU full fallback are verified. App full
-fallback uses a bounded HTTP/body probe plus the original CI's full R2 hash
-evidence; the later whole-file public-download timeout remains recorded.
+Public patch selection/download and MCU full fallback are verified. The later
+direct-route App full download also completes: all 48,718,441 public-response
+bytes are saved and hash-matched to the original signed APK in 194.350 seconds.
+Earlier timeout, bounded-probe and partial-transfer evidence remains recorded;
+see the [complete APK readback](docs/ota-exec-notes/APP-COMPANION-01.md#complete-public-apk-readback-2026-11-19).
 See [the rollout record](docs/ota-exec-notes/APP-COMPANION-01.md#stable-rollout-completed-2026-11-19)
 for exact Actions, hashes, scope and retained failures. Device installation and
 measured reconnection behavior are not claimed.
