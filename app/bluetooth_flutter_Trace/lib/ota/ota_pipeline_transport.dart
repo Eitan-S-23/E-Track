@@ -135,7 +135,8 @@ class _PipelineAckView {
           _signal();
           return; // Error snapshots never grant credit.
         }
-        throw OtaTransportException('v2 receiver stopped', code: 'ACK_STATUS', status: ack.status);
+        throw OtaTransportException('v2 receiver stopped', code: 'ACK_STATUS',
+            status: ack.status, ackCommand: frame.cmd);
       }
       if (frame.cmd != _PipelineWire.ackData) {
         throw const OtaTransportException('Invalid v2 ABORT ACK', code: 'ACK_MALFORMED');
@@ -265,7 +266,8 @@ extension _PipelineTransfer on OtaBleTransport {
             (ack.status == OtaBleCodec.statusErrCrc || ack.status == OtaBleCodec.statusErrFrame)) {
           continue;
         }
-        throw OtaTransportException('v2 command rejected', code: 'ACK_STATUS', status: ack.status);
+        throw OtaTransportException('v2 command rejected', code: 'ACK_STATUS',
+            status: ack.status, ackCommand: response.cmd);
       } on TimeoutException {
         _checkNoProgress();
         if (attempt >= retries) {

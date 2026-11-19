@@ -523,3 +523,41 @@ no selected command launched PowerShell and no external file was cleaned. The
 passive follow-up's watched SEGGER files were unchanged; its native-history
 exception remains the only authorized external output boundary. A fresh
 post-delivery audit is required instead of overwriting this checkpoint.
+
+## Autonomous Remediation Authorization
+
+The user's latest instruction authorizes continuing necessary scoped work,
+including its required authorization, without stopping for routine approval.
+The preceding analysis-only boundary is superseded for this remediation batch.
+Root remains the sole operator; no subagents, channel promotion, firmware safety
+bypass, Boot replacement, App-data clearing or unrelated cleanup is included.
+
+Use the exclusive sparse worktree `.worktrees/ota-companion-fix-20261120`, branch
+`dev/flutter/ota-companion-fix-20261120`, from current main `2db67b95`.
+Controllable outputs stay in `.cache/ota-companion-fix-20261120` and this worktree;
+the prior originals and completed helpers stay immutable. There is no Trellis
+tree. Existing main records remain authoritative until this batch is integrated.
+
+The finite batch preserves matched ACK command/status through transport and
+service, explains BEGIN/DATA/END rejection without claiming ERR_BUSY uniquely
+identifies battery, and projects safe owner-produced failure text through the
+existing notification label. Reboot probes retain valid non-target responses
+for deadline feedback without shortening the window or weakening target
+version/full raw SHA checks. Cancelled, stale-link and abandoned callbacks may
+not replace current owner state. ABORT ordering, durable/credit, retry limits
+and statistics outcome names remain unchanged.
+
+Add transport/service/snapshot regression cases, then run full Ubuntu/Windows
+Flutter development CI and required exact-source APK/EXE verification. Shipping
+uses a new App version and the existing original-signed candidate route; do not
+rebuild immutable 1.0.85 or MCU 3.3.35/3.3.36, publish channels or regenerate a
+delta merely to test feedback. Necessary main integration/push is in this scope.
+
+Separately prepare one MCU-only passive watch (at most 240 seconds) using the
+standard Commander, original 30335 ELF/map and existing contained host/observer
+primitives. Verify idle state, sample health/power and clock registers, preserve
+RTT memory without consuming its reader pointer, and inspect whether a fresh
+boot occurs. No reset, halt, RAM/Flash write, OTA or phone is required. A missing
+device or no reset in this bounded interval does not establish the historical
+watchdog cause. Any further hardware change must follow discriminating evidence;
+real OTA remains gated on firmware-reported safe power and a prepared phone.

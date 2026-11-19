@@ -2527,6 +2527,94 @@ void main() {
         reason: '发现失败同样登记在绑定字段上');
   });
 
+  for (final (command, status, name) in [
+    (OtaBleCodec.rspAckBegin2, OtaBleCodec.statusErrBusy, 'ERR_BUSY'),
+    (OtaBleCodec.rspAckBegin2, OtaBleCodec.statusErrVersion, 'ERR_VERSION'),
+    (OtaBleCodec.rspAckData2, OtaBleCodec.statusErrFlash, 'ERR_FLASH'),
+    (OtaBleCodec.rspAckEnd2, OtaBleCodec.statusErrSha, 'ERR_SHA'),
+  ]) {
+    test('MCU rejection $command/$name reaches UI and the owner snapshot', () async {
+      final host = _FakeBackgroundClient();
+      final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+          backgroundClient: host);
+      if (command == OtaBleCodec.rspAckBegin2) {
+        ble.beginRejectStatus = status;
+      } else if (command == OtaBleCodec.rspAckData2) {
+        ble.dataAckStatusOverride = status;
+      } else {
+        ble.endAckStatusOverride = status;
+      }
+      final service = Get.find<OtaService>();
+      expect(await service.startOtaUpgrade('AA:BB'), isFalse);
+      final terminal = service.terminalState!;
+      final operation = switch (command) {
+        OtaBleCodec.rspAckBegin2 => 'BEGIN2',
+        OtaBleCodec.rspAckData2 => 'DATA2',
+        _ => 'END2',
+      };
+      expect(terminal.code, 'MCU_ACK_${status.toRadixString(16).toUpperCase()}');
+      expect(terminal.message, contains('$operation / $name'));
+      expect(terminal.retryableLater, !OtaBleCodec.abortStatuses.contains(status));
+      expect(service.upgradeStatus, contains(terminal.userMessage));
+      expect(service.phase, OtaPhase.failed);
+      expect(service.taskSnapshot!.label, terminal.userMessage);
+      expect(service.taskSnapshot!.toMap()['label'], terminal.userMessage);
+      expect(service.taskSnapshot!.targetVerified, isFalse);
+      expect(service.canCancelTask, isFalse);
+      expect(host.snapshots.where((s) => s.phase == 'failed').last.label,
+          terminal.userMessage);
+      expect(host.acquired, isFalse);
+      expect(ble.probeCount, 0);
+      expect(ble.abortCalls, 1);
+      if (command == OtaBleCodec.rspAckBegin2) {
+        expect(ble.beginCalls, 1);
+        expect(ble.dataOffsets, isEmpty);
+        expect(ble.endCalls, 0);
+        expect(service.durableProgress, 0);
+      }
+      if (status == OtaBleCodec.statusErrBusy) {
+        expect(terminal.message, contains('骑行记录'));
+        expect(terminal.message, contains('充电'));
+        expect(terminal.message, contains('30%'));
+        expect(terminal.message, contains('空闲'));
+      }
+    });
+  }
+
+  test('all known MCU rejections are named; unknown status remains fail-closed', () {
+    for (final status in OtaBleCodec.knownStatuses.where((s) => s != OtaBleCodec.statusOk)) {
+      final terminal = OtaTerminalState.mcuRejection(status: status,
+          ackCommand: OtaBleCodec.rspAckBegin2);
+      expect(terminal.message, isNot(contains('UNKNOWN_STATUS')));
+      expect(terminal.retryableLater, !OtaBleCodec.abortStatuses.contains(status));
+    }
+    final unknown = OtaTerminalState.mcuRejection(status: 0x7e);
+    expect(unknown.code, 'MCU_ACK_7E');
+    expect(unknown.message, contains('UNKNOWN_STATUS (0x7E)'));
+    expect(unknown.retryableLater, isFalse);
+  });
+
+  test('BEGIN rejection waits for ABORT; cancellation retains terminal ownership', () async {
+    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: []);
+    ble.beginRejectStatus = OtaBleCodec.statusErrBusy;
+    ble.abortWriteGate = Completer<void>();
+    final service = Get.find<OtaService>();
+    final running = service.startOtaUpgrade('AA:BB');
+    await ble.abortWriteEntered.future.timeout(const Duration(seconds: 2));
+    expect(service.phase, isNot(OtaPhase.failed));
+    expect(service.terminalState, isNull);
+    final cancelled = service.cancelUpgrade(keepPackage: true);
+    ble.abortWriteGate!.complete();
+    await cancelled;
+    expect(await running, isFalse);
+    expect(service.phase, OtaPhase.cancelled);
+    expect(service.terminalState, isNull);
+    expect(service.taskSnapshot!.phase, 'cancelled');
+    expect(service.taskSnapshot!.label, isNot(contains('ERR_BUSY')));
+    expect(ble.abortCalls, 1);
+    expect(ble.dataOffsets, isEmpty);
+  });
+
   test('P3-4 非 OK END：失败元数据先于终结摘要封存，且整轮只有一份摘要（P34-DA02）',
       () async {
     final tempDir = tempFirmwareDir();
@@ -2785,32 +2873,86 @@ void main() {
     expect(ble.probeCount, 4, reason: '三轮旧身份丢弃后第四轮确认目标');
   }, timeout: const Timeout(Duration(seconds: 30)));
 
-  test('窗口耗尽 timedOut：文案说明升级可能已完成且可稍后重试（O4 整改）',
+  test('窗口耗尽且旧固件持续响应：未确认目标，不误报未重连',
       () async {
     final tempDir = tempFirmwareDir();
     final notifyLog = <String>[];
     final ble = await prepareDownloaded(
       tempDir: tempDir,
       notifyLog: notifyLog,
-      rebootDelayProbes: 1 << 30, // 恒报旧身份：设备在窗口内永不恢复。
+      rebootDelayProbes: 1 << 30, // 设备始终响应，但没有切换到目标固件。
       rebootWindow: const Duration(milliseconds: 600),
       rebootProbeInterval: const Duration(milliseconds: 100),
     );
     final service = Get.find<OtaService>();
 
+    final watch = Stopwatch()..start();
     final ok = await service.startOtaUpgrade('AA:BB');
     expect(ok, isFalse);
     expect(service.phase, OtaPhase.failed);
     // 轮询真实发生（非直接超时）：窗口内多轮探测都读到旧身份。
     expect(ble.probeCount, greaterThanOrEqualTo(1));
     final terminal = service.terminalState!;
-    expect(terminal.code, 'REBOOT_RECONNECT_FAILED');
+    expect(terminal.code, 'TARGET_FIRMWARE_NOT_CONFIRMED');
     expect(terminal.retryableLater, isTrue,
         reason: '复核超时是「未确认」而非「升级失败」，稍后重连可解锁');
-    expect(terminal.message, contains('升级可能已完成'),
-        reason: '假阴性修复：文案必须区分「设备未恢复」与「升级失败」');
-    expect(service.upgradeStatus, contains('升级可能已完成'));
+    expect(terminal.message, contains('已响应'));
+    expect(terminal.message, contains('2.8.1'));
+    expect(terminal.message, contains('2.9.0'));
+    expect(terminal.message, isNot(contains('恢复连接')));
+    expect(watch.elapsed, greaterThanOrEqualTo(const Duration(milliseconds: 600)),
+        reason: 'A valid old identity must not shorten the verification window');
+    expect(service.taskSnapshot!.label, terminal.userMessage);
+    expect(service.taskSnapshot!.targetVerified, isFalse);
   }, timeout: const Timeout(Duration(seconds: 30)));
+
+  test('target version with a different raw hash is not confirmed', () async {
+    final wrongHash = Uint8List.fromList(postRebootPayload)..[16] ^= 1;
+    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+        rebootPayload: wrongHash, rebootWindow: const Duration(milliseconds: 400),
+        rebootProbeInterval: const Duration(milliseconds: 50));
+    final service = Get.find<OtaService>();
+    expect(await service.startOtaUpgrade('AA:BB'), isFalse);
+    expect(ble.probeCount, greaterThan(1));
+    expect(service.terminalState!.code, 'TARGET_FIRMWARE_NOT_CONFIRMED');
+    expect(service.taskSnapshot!.targetVerified, isFalse);
+    expect(service.deviceInfo!.currentVersionCode, 20801);
+  });
+
+  test('no identity response retains the uncertain reconnect timeout', () async {
+    final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+        rebootWindow: const Duration(milliseconds: 150),
+        rebootProbeInterval: const Duration(milliseconds: 20));
+    ble.onRebootInfo = () { ble.holdInfo = true; };
+    final service = Get.find<OtaService>();
+    expect(await service.startOtaUpgrade('AA:BB'), isFalse);
+    expect(ble.probeCount, 1);
+    expect(service.terminalState!.code, 'REBOOT_RECONNECT_FAILED');
+    expect(service.terminalState!.message, contains('升级可能已完成'));
+    final snapshot = service.taskSnapshot!;
+    ble.releaseHeldInfo();
+    await Future<void>.delayed(const Duration(milliseconds: 30));
+    expect(service.taskSnapshot!.label, snapshot.label);
+    expect(service.taskSnapshot!.targetVerified, isFalse);
+  });
+
+  for (final stale in ['link', 'binding']) {
+    test('non-target identity on a stale $stale is not retained', () async {
+      final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
+          rebootDelayProbes: 1 << 30,
+          rebootWindow: const Duration(milliseconds: 250),
+          rebootProbeInterval: const Duration(milliseconds: 30));
+      ble.onRebootInfo = () {
+        if (stale == 'link') { ble.linkGeneration++; }
+        else { ble.gattBindingToken = Object(); }
+      };
+      final service = Get.find<OtaService>();
+      expect(await service.startOtaUpgrade('AA:BB'), isFalse);
+      expect(ble.probeCount, greaterThan(0));
+      expect(service.terminalState!.code, 'REBOOT_RECONNECT_FAILED');
+      expect(service.taskSnapshot!.label, isNot(contains('已响应')));
+    });
+  }
 
   test('传输在途二次 start：同步段忙锁拒绝，不打断在途传输（RC3-04）',
       () async {
@@ -5012,6 +5154,8 @@ class _UpgradeFakeBle extends BluetoothService {
   /// 分支——四阶段打点（DECIDED→ABORT_BEGIN→ABORT_DONE→TERMINAL）
   /// 的反例鉴别就在这条路径上，CANCELLED 路径测不到。
   int? dataAckStatusOverride;
+  // Synthetic admission failure: reject before opening a session or granting credit.
+  int? beginRejectStatus;
   /// END ACK 状态覆写（P34-DA02）：非 null 时 END 的最终应答改用该状态回
   /// （durable 仍按 fake 真实 staging 快照组装）。用于构造「整包已送达、
   /// MCU 校验不通过」的真实现场——真实 ERR_SHA/ERR_LEN 语义是擦除 staging
@@ -5358,6 +5502,10 @@ class _UpgradeFakeBle extends BluetoothService {
     if (f.payload.length != 105 || f.payload[0] != 2 ||
         _pipeEpoch == 0 || _word(f.payload, 101) != _pipeEpoch) {
       _ack(OtaBleCodec.rspAckBegin2, f, OtaBleCodec.statusErrProto, session: 0);
+      return;
+    }
+    if (beginRejectStatus != null) {
+      _ack(OtaBleCodec.rspAckBegin2, f, beginRejectStatus!, session: 0);
       return;
     }
     final total = _word(f.payload, 1);

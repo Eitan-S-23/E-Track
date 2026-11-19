@@ -1237,12 +1237,14 @@ class _DeviceWriteLedger {
 
 /// 传输层稳定领域异常。
 class OtaTransportException implements Exception {
-  const OtaTransportException(this.message, {this.code, this.status});
+  const OtaTransportException(this.message, {this.code, this.status, this.ackCommand});
 
   final String message;
   final String? code;
   /// BLE ACK 状态码（ACK_STATUS 时非空；-1 表示畸形 ACK）。
   final int? status;
+  /// Matched response command, not inferred from a later cleanup phase.
+  final int? ackCommand;
 
   @override
   String toString() => 'OtaTransportException($code): $message';

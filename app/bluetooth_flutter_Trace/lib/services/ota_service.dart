@@ -312,7 +312,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         receivedBytes: _receivedBytes, canCancel: canCancelTask,
         targetVerified: phase == OtaPhase.completed,
         backgroundAcquired: backgroundAcquired,
-        backgroundReason: backgroundUnavailableReason);
+        backgroundReason: backgroundUnavailableReason,
+        failureReason: stage == 'failed' ? _terminalState.value?.userMessage : null);
   }
 
   void _publishSnapshot() {
@@ -1679,14 +1680,10 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           return fail('cancelled', 'generation-changed');
         }
         if (!ack.isOk) {
-          final terminal = OtaTerminalState(
-            code: 'MCU_ACK_${ack.status.toRadixString(16).toUpperCase()}',
-            message: 'MCU 返回失败状态 0x${ack.status.toRadixString(16)}，'
-                'durable=${ack.durableOff}',
-            retryableLater: !OtaBleCodec.abortStatuses.contains(ack.status),
-          );
+          final terminal = OtaTerminalState.mcuRejection(
+              status: ack.status, ackCommand: OtaBleCodec.rspAckEnd2);
           _terminalState.value = terminal;
-          _upgradeStatus.value = '升级失败: ${terminal.code}';
+          _upgradeStatus.value = 'BLE 传输失败: ${terminal.userMessage}';
           _phase.value = OtaPhase.failed;
           return fail('transfer', 'mcu-ack-0x${ack.status.toRadixString(16)}');
         }
@@ -1757,10 +1754,25 @@ class OtaService extends GetxController with WidgetsBindingObserver {
                 '固件升级完成: 设备已运行 ${latest.versionName}（vcode ${latest.versionCode}）';
             return true;
           case _RebootKind.timedOut:
+            final observed = outcome.info;
+            if (observed != null) {
+              final terminal = OtaTerminalState(
+                code: 'TARGET_FIRMWARE_NOT_CONFIRMED',
+                message: '设备在复核窗口内已响应，最近一次返回 ${observed.versionName}'
+                    '（vcode ${observed.currentVersionCode}），但版本或镜像摘要与目标 '
+                    '${latest.versionName} 不匹配，未确认升级成功。'
+                    '传输完成不代表固件已应用，请查看设备升级提示并重新连接核验',
+                retryableLater: true,
+              );
+              _terminalState.value = terminal;
+              _upgradeStatus.value = terminal.userMessage;
+              _phase.value = OtaPhase.failed;
+              return fail('reboot', 'target-firmware-not-confirmed');
+            }
             _terminalState.value = OtaTerminalState(
               code: 'REBOOT_RECONNECT_FAILED',
               message: '设备未在 ${_rebootWindow.inSeconds} 秒复核窗口内'
-                  '恢复连接确认目标固件——升级可能已完成（设备重启恢复'
+                  '返回可核验的固件身份，升级可能已完成（设备重启恢复'
                   '慢于窗口），请稍后重新连接设备确认版本',
               retryableLater: true,
             );
@@ -1814,7 +1826,12 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           // 收尾完成后才打 MONO_TERMINAL——旧打点把决定提前宣告成终态，
           // 延迟 ABORT 期间的真机日志会被误读为「已终止」。
           otaMonoLog('MONO_TERMINAL_DECIDED', code: e.code);
-          _upgradeStatus.value = 'BLE 传输失败: ${e.message}';
+          final rejection = e.code == 'ACK_STATUS' && e.status != null
+              ? OtaTerminalState.mcuRejection(status: e.status!,
+                  ackCommand: e.ackCommand ?? (activeTransport?.endStarted == true
+                      ? OtaBleCodec.rspAckEnd2 : null))
+              : null;
+          _upgradeStatus.value = 'BLE 传输失败: ${rejection?.userMessage ?? e.message}';
           // 连接仍在时尽力 ABORT（清理 MCU 侧会话）。
           final abortTransport = activeTransport;
           if (abortTransport != null) {
@@ -1828,14 +1845,10 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           if (generation != _cancelGeneration) return fail('cancelled', 'cancel-window');
           if (_consumeFailClosedDecision()) return fail('recheck', 'fail-closed');
           otaMonoLog('MONO_TERMINAL', code: e.code);
-          if (e.code == 'ACK_STATUS' && e.status != null && activeTransport?.endStarted == true) {
+          if (rejection != null) {
             final status = e.status!;
-            _terminalState.value = OtaTerminalState(
-              code: 'MCU_ACK_${status.toRadixString(16).toUpperCase()}',
-              message: 'MCU rejected END2 with status 0x${status.toRadixString(16)}',
-              retryableLater: !OtaBleCodec.abortStatuses.contains(status),
-            );
-            _upgradeStatus.value = '升级失败: ${_terminalState.value!.code}';
+            _terminalState.value = rejection;
+            _upgradeStatus.value = 'BLE 传输失败: ${rejection.userMessage}';
             _phase.value = OtaPhase.failed;
             return fail('transfer', 'mcu-ack-0x${status.toRadixString(16)}');
           }
@@ -2495,7 +2508,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   ///      连接继续等——**不得把重启后的第一次可连接误当已重启**；
   ///    - 硬件身份变化（非同一台设备）→ identityChanged 终止。
   ///    vcode/sha 非目标也非旧身份的中间态按「未重启完成」继续等待，
-  ///    由总截止兜底为 REBOOT_RECONNECT_FAILED（可稍后重试）。
+  ///    总截止区分未收到身份与已响应但未确认目标（均可稍后核验）。
   /// 取消代次变化立即静默退出（cancelled）。
   Future<_RebootOutcome> _waitForTargetIdentity(
     String deviceAddress,
@@ -2541,6 +2554,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       }
     }
     var attemptNo = 0;
+    DeviceOtaInfo? lastObservedInfo;
     while (DateTime.now().isBefore(deadline)) {
       if (!await _waitForForeground(generation, deadline: deadline)) break;
       if (_appBackgrounded && !backgroundAcquired) continue;
@@ -2592,6 +2606,12 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           reuseInfoLink: reuseInfoLink,
           infoMaxAttempts: infoMaxAttempts,
           infoRetryInterval: interval,
+          onNonTargetIdentity: (observed) {
+            if (probeAborted() || !DateTime.now().isBefore(deadline)) return;
+            lastObservedInfo = observed;
+            _upgradeStatus.value = '设备已响应 ${observed.versionName}，'
+                '尚未确认目标 ${latest.versionName}，继续核验...';
+          },
         ).timeout(
           roundCap < const Duration(seconds: 1)
               ? const Duration(seconds: 1)
@@ -2660,7 +2680,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     roundStats.recordAttemptOutcome('timedOut');
     roundStats.phaseEnd('reconnect');
     roundStats.emitSummary();
-    return const _RebootOutcome(_RebootKind.timedOut);
+    return _RebootOutcome.timedOut(info: lastObservedInfo);
   }
 
   /// 轮次结论文本（P3-4 观测字段；取值稳定，已发布后勿改）。
@@ -2695,6 +2715,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     bool reuseInfoLink = false,
     Duration infoRetryInterval = const Duration(milliseconds: 500),
     int infoMaxAttempts = defaultRebootInfoAttempts,
+    void Function(DeviceOtaInfo)? onNonTargetIdentity,
   }) async {
     OtaBleTransport? probe;
     int? connectedGeneration;
@@ -2754,6 +2775,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
             }
             // 旧身份/中间态：MCU 尚未重启完成，本轮连接由 finally
             // 统一释放后继续轮询。
+            onNonTargetIdentity?.call(target);
           }
         }
       }
@@ -3241,8 +3263,12 @@ class _RebootOutcome {
   const _RebootOutcome.targetVerified({required this.info,
     required this.identityLinkGeneration}) : kind = _RebootKind.targetVerified;
 
+  const _RebootOutcome.timedOut({this.info})
+      : kind = _RebootKind.timedOut, identityLinkGeneration = null;
+
   final _RebootKind kind;
-  /// targetVerified 时携带升级后的设备身份快照。
+  /// Verified target, or the last valid non-target response before the deadline.
+  /// A timed-out observation never refreshes the service's current identity.
   final DeviceOtaInfo? info;
   // Captured by the probe and checked after GET_INFO, never sampled at publication.
   final int? identityLinkGeneration;
@@ -3283,6 +3309,50 @@ class OtaTerminalState {
     this.actualValue,
     this.requestId,
   });
+
+  factory OtaTerminalState.mcuRejection({required int status, int? ackCommand}) {
+    final command = switch (ackCommand) {
+      OtaBleCodec.rspAckBegin2 => 'BEGIN2',
+      OtaBleCodec.rspAckData2 => 'DATA2',
+      OtaBleCodec.rspAckEnd2 => 'END2',
+      OtaBleCodec.rspAckAbort2 => 'ABORT2',
+      _ => 'ACK',
+    };
+    final (name, reason) = switch (status) {
+      OtaBleCodec.statusErrBusy => ('ERR_BUSY',
+          '设备暂不允许升级。请结束骑行记录，确认设备正在充电或电量不低于 30%；'
+          '若已满足条件，请等待设备空闲后重试'),
+      OtaBleCodec.statusErrBase => ('ERR_BASE',
+          '差分包基线与设备固件不匹配，请重新检查更新或选择匹配的完整包'),
+      OtaBleCodec.statusErrVersion => ('ERR_VERSION',
+          '目标版本不高于设备当前版本，设备拒绝重复升级或降级，请重新检查更新'),
+      OtaBleCodec.statusErrHwRev => ('ERR_HW_REV', '固件与设备硬件版本不兼容，请选择匹配的固件'),
+      OtaBleCodec.statusErrLayout => ('ERR_LAYOUT', '固件与设备分区布局不兼容，请选择匹配的固件'),
+      OtaBleCodec.statusErrBootVer => ('ERR_BOOT_VER', '设备 Bootloader 版本过低，无法安装此固件'),
+      OtaBleCodec.statusErrProto => ('ERR_PROTO', '设备不支持本次升级协议，请检查 App 和设备版本'),
+      OtaBleCodec.statusErrOtaDisabled => ('ERR_OTA_DISABLED', '设备未启用 OTA 升级'),
+      OtaBleCodec.statusErrFlash => ('ERR_FLASH', '设备固件存储读写失败，请保持稳定供电并检查设备存储状态'),
+      OtaBleCodec.statusErrSha => ('ERR_SHA', '设备校验升级包失败，请重新下载固件包后重试'),
+      OtaBleCodec.statusErrHdr => ('ERR_HDR', '设备拒绝升级包格式，请重新检查更新并下载匹配的固件'),
+      OtaBleCodec.statusErrLen => ('ERR_LEN', '升级包长度不符合设备要求，请重新下载匹配的固件'),
+      OtaBleCodec.statusErrFrame => ('ERR_FRAME', 'BLE 数据帧无效，请重新连接设备后重试'),
+      OtaBleCodec.statusErrCrc => ('ERR_CRC', 'BLE 数据校验失败，请重新连接设备后重试'),
+      OtaBleCodec.statusErrSeq => ('ERR_SEQ', 'BLE 数据顺序校验失败，请重新连接设备后重试'),
+      OtaBleCodec.statusErrOffset => ('ERR_OFFSET', 'BLE 数据偏移校验失败，请重新连接设备后重试'),
+      OtaBleCodec.statusErrSession => ('ERR_SESSION', '设备升级会话已失效，请重新连接并检查更新'),
+      OtaBleCodec.statusErrState => ('ERR_STATE', '设备升级状态已变化，请重新连接并检查更新'),
+      OtaBleCodec.statusAborted => ('ABORTED', '设备已中止升级，请检查设备状态后重试'),
+      _ => ('UNKNOWN_STATUS', '设备返回未识别的升级状态，已安全停止，请检查 App 和设备版本'),
+    };
+    final hex = status.toRadixString(16).toUpperCase();
+    return OtaTerminalState(
+      code: 'MCU_ACK_$hex',
+      message: '$command / $name (0x${hex.padLeft(2, '0')}): $reason',
+      retryableLater: status != OtaBleCodec.statusOk &&
+          OtaBleCodec.knownStatuses.contains(status) &&
+          !OtaBleCodec.abortStatuses.contains(status),
+    );
+  }
 
   final String code;
   final String message;

@@ -11,10 +11,10 @@ void main() {
   final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
   final key = OtaTaskKey(taskId: 'process_1', generation: 1,
       deviceToken: 'a' * 64, packageSha256: 'b' * 64);
-  OtaTaskSnapshot snapshot({String phase = 'transferring'}) => OtaTaskSnapshot(
+  OtaTaskSnapshot snapshot({String phase = 'transferring', String? failureReason}) => OtaTaskSnapshot(
       key: key, revision: 1, phase: phase, totalBytes: 8192,
       durableBytes: 4096, receivedBytes: 8192, canCancel: true,
-      targetVerified: false, backgroundAcquired: false);
+      targetVerified: false, backgroundAcquired: false, failureReason: failureReason);
 
   Future<Object?> callback(String method, Object args) async {
     final result = Completer<Object?>();
@@ -27,6 +27,21 @@ void main() {
   }
 
   tearDown(() => messenger.setMockMethodCallHandler(channel, null));
+
+  test('failure label uses owner feedback only in the failed phase', () {
+    const reason = 'BEGIN2 / ERR_BUSY (0x0E): check device readiness';
+    final failed = snapshot(phase: 'failed', failureReason: reason);
+    expect(failed.label, reason);
+    expect(failed.toMap()['label'], reason);
+    expect(failed.progress, isNull);
+    expect(failed.targetVerified, isFalse);
+    expect(snapshot(phase: 'failed').label, contains('Device OTA failed'));
+    for (final phase in ['transferring', 'applying', 'reconnecting',
+      'verifying', 'completed', 'cancelled', 'ready']) {
+      expect(snapshot(phase: phase, failureReason: reason).label,
+          snapshot(phase: phase).label);
+    }
+  });
 
   test('snapshot transfer is durable; apply/reboot have no invented percentage', () {
     expect(snapshot().progress, .5);

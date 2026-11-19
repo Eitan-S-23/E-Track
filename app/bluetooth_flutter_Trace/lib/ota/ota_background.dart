@@ -30,7 +30,7 @@ class OtaTaskSnapshot {
     required this.phase, required this.totalBytes, required this.durableBytes,
     required this.receivedBytes, required this.canCancel,
     required this.targetVerified, required this.backgroundAcquired,
-    this.backgroundReason});
+    this.backgroundReason, this.failureReason});
 
   final OtaTaskKey key;
   final int revision;
@@ -42,6 +42,8 @@ class OtaTaskSnapshot {
   final bool targetVerified;
   final bool backgroundAcquired;
   final String? backgroundReason;
+  /// Safe owner-produced feedback, never a raw transport exception or URL.
+  final String? failureReason;
 
   double? get progress => totalBytes <= 0 ? null : switch (phase) {
     'downloading' => (receivedBytes / totalBytes).clamp(0.0, 1.0),
@@ -60,6 +62,7 @@ class OtaTaskSnapshot {
     'cancelled' => 'Cancelled',
     'paused' => 'Safely paused; return to foreground',
     'ready' => 'Package verified; ready to transfer',
+    'failed' => failureReason ?? 'Device OTA failed; check the firmware page',
     _ => 'Device OTA stopped',
   };
 

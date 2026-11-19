@@ -32,6 +32,7 @@ class TestPipelinePeer implements OtaBleChannel {
   OtaLinkStats? writeStats;
   int? dropOffset;
   int dropBegin = 0;
+  int? beginRejectStatus;
   int chunkSize = 244, notifySize = 3;
   int nonce = 0, total = 0, durable = 0, accepted = 0, beginSeq = 0, lastSeq = 0;
   int resume = 0;
@@ -114,6 +115,10 @@ class TestPipelinePeer implements OtaBleChannel {
           break;
         case 0x11:
           expect(word(frame.payload, 101), nonce);
+          if (beginRejectStatus != null) {
+            ack(0x91, frame.seq, status: beginRejectStatus!, session: 0);
+            break;
+          }
           total = word(frame.payload, 1);
           durable = accepted = resume;
           received = Uint8List(total);
@@ -265,6 +270,46 @@ Future<void> until(bool Function() condition) async {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  for (final (command, status) in [
+    (OtaBleCodec.rspAckBegin2, OtaBleCodec.statusErrBusy),
+    (OtaBleCodec.rspAckData2, OtaBleCodec.statusErrFlash),
+    (OtaBleCodec.rspAckEnd2, OtaBleCodec.statusErrSha),
+    (OtaBleCodec.rspAckAbort2, OtaBleCodec.statusAborted),
+  ]) {
+    test('matched rejection preserves ACK command $command and status $status', () async {
+      final peer = TestPipelinePeer();
+      if (command == OtaBleCodec.rspAckBegin2) {
+        peer.beginRejectStatus = status;
+      } else if (command == OtaBleCodec.rspAckData2) {
+        peer.mutateDataAck = (payload) => payload[0] = status;
+      } else if (command == OtaBleCodec.rspAckEnd2) {
+        peer.onEnd = (frame) => peer.ack(command, frame.seq, status: status);
+      } else {
+        peer.onData = (frame) => peer.ack(command, frame.seq, status: status);
+      }
+      final transport = sender(peer);
+      final progress = <int>[];
+      try {
+        await expectLater(transfer(transport, package(1024),
+            progress: (off, _) => progress.add(off)), throwsA(
+            isA<OtaTransportException>()
+                .having((e) => e.code, 'code', 'ACK_STATUS')
+                .having((e) => e.status, 'status', status)
+                .having((e) => e.ackCommand, 'ackCommand', command)));
+        if (command == OtaBleCodec.rspAckBegin2) {
+          expect(progress, isEmpty);
+          expect(peer.frames.where((f) => f.cmd == OtaBleCodec.cmdBegin2), hasLength(1));
+          expect(peer.frames.any((f) => f.cmd == OtaBleCodec.cmdData2 ||
+              f.cmd == OtaBleCodec.cmdEnd2), isFalse);
+        }
+        await transport.abortBestEffort();
+      } finally {
+        await transport.dispose();
+        await peer.events.close();
+      }
+    });
+  }
 
   test('P35 observes accepted protocol state and actual DATA completion', () async {
     for (final pipeline in [true]) {
