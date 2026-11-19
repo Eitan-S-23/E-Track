@@ -29,6 +29,21 @@ remain under `.cache/companion-fast-20261119/`: `ui-02/03`, `keyring-logs-01/03`
 and `keyring-cloud-live-01/02`. The earlier local UI dependency-resolution failure
 is retained separately in `ui-01`; locked installation did not change the lockfile.
 
+### Same-Day Stable Rollout
+
+The owner's later completion authorization also finishes this batch's original
+staging Stable rollout: Android `1.0.84+110` at channel revision 60 and MCU
+`3.3.35` at revision 9. Only the selected `109 -> 110` and `3.3.34 -> 3.3.35`
+deltas were generated and enabled; both Beta channels and 42 existing jobs are
+preserved, with 44 total jobs. This is separate from the successful Admin deploy
+above: no backend was redeployed and no credentials/configuration were changed.
+Public patch selection/download and MCU full fallback are verified. App full
+fallback uses a bounded HTTP/body probe plus the original CI's full R2 hash
+evidence; the later whole-file public-download timeout remains recorded.
+See [the rollout record](docs/ota-exec-notes/APP-COMPANION-01.md#stable-rollout-completed-2026-11-19)
+for exact Actions, hashes, scope and retained failures. Device installation and
+measured reconnection behavior are not claimed.
+
 ### Firmware Notification Scope Contract
 
 `openCandidateDetails(kind, id)` must use

@@ -1,5 +1,76 @@
 # APP-COMPANION-01 Implementation Record
 
+## Stable Rollout Completed 2026-11-19
+
+The owner's follow-up requests autonomous completion and grants the needed
+authorization. This supersedes the preceding handoff's reservation of this
+batch's delta generation and channel publication. The bounded continuation uses
+only the existing original staging Stable channels: Android 109 to 110 and MCU
+3.3.34 to 3.3.35. Beta, configuration, credentials, signing infrastructure and
+devices remain untouched; protected production gates are not bypassed.
+
+Fresh owner/D1 inspection found App Stable 1.0.83 at revision 59, MCU Stable
+3.3.34 at revision 8 and 42 existing delta jobs. Both new full candidates were
+already available from exact main product source `48ad9f03`; neither was rebuilt.
+The existing selected-base workflows generated exactly two new jobs, both on
+attempt 1 with successful source-bound reconstruction and R2 readback:
+
+| Update | Actions | Patch Bytes | Reduction From Full | SHA-256 |
+| --- | --- | --- | --- | --- |
+| Android 109 to 110 | [44450526439](https://github.com/Eitan-S-23/Trace/actions/runs/44450526439) | 778654 | 98.40% | `70a4ed92a16dc4d1902cae64518c4f07e5422b6f76e24fd3aeccf43df16a28fb` |
+| MCU 3.3.34 to 3.3.35 | [44450532113](https://github.com/Eitan-S-23/E-Track/actions/runs/44450532113) | 8236 | 97.27% | `233cb19d66d2f04a194768314b2c0f7b9ac5042d1695dc7bd0554f13515ab73a` |
+
+Android uses the unchanged original Trace generator `4745aead`, bsdiff/LZMA and
+the original Ed25519 key. Its exact base APK SHA is
+`b5e28b14de5bd6b956ac54a9c27053a4c1873077bec6513487b764d6668ce47d`.
+MCU uses the unchanged E-Track generator `3135a06e` and exact 3.3.34 raw-image
+SHA `06554819f0b140a3aeb64ec7fe253df697659dd6fcaa72d3c22f0d76fb6330b9`.
+Both result/input hashes and target hashes match their selected pairs. The App
+signature was independently checked locally; both actual stored patch objects
+were completely read and hash-matched before enabling them. Original Actions
+logs are retained without redispatching either successful job.
+
+Both patches are enabled, revision 4. App Stable now points to
+`rel_trace_android_v1_0_84` at revision 60; MCU Stable points to
+`fw_64679463f44154bc305a755a32492463dc6937338d7633614b787dccd9af52f4`
+at revision 9. The original revision checks guarded both publications. Both Beta
+rows, channel stop/download flags and all 42 prior delta identities are unchanged;
+there are 44 jobs in total. Windows assets retain the preceding successful build
+and original prerelease; no nonexistent Windows update channel was created.
+
+Real Public checks confirm that the current base selects its new patch, an
+unmatched base selects the full fallback, and the new version returns NO_UPDATE.
+Both signed patch downloads and the MCU full download complete with exact byte
+counts and hashes. App full fallback returns HTTP 200, the expected 48,718,441-byte
+length, R2 source and valid APK prefix. A whole-file public APK download exceeded
+the host's 180-second bound; that failure is retained. The follow-up reads 4,623
+bytes and reuses the original signing CI's full upload/readback and exact GitHub/
+R2 hash evidence. It is explicitly not a new whole-file Public hash check.
+
+Two earlier read-only transport failures did not dispatch or enable anything.
+The first publication successfully advanced Android, then the strict firmware
+route rejected a missing `Accept: application/json` header. Repairing the host
+caller preserved that validation; the follow-up read back Android's completed
+publication and performed only the pending MCU publication. An prematurely
+invoked Public probe lacked the final publication receipt and made no mutation.
+All failed receipts are retained, not rewritten as success.
+
+Evidence is under `.cache/companion-fast-20261119/rollout/`: the immutable plan,
+`keyring-rollout-inspect-01`, `create-01`, `status-01/02`, `verify-01`,
+`enable-01/02`, `publish-01/02` and `public-01/02/03` (each with the full
+`keyring-rollout-` prefix). The decisive final Public result is
+`keyring-rollout-public-03/result.json`. Original job logs are in sibling
+`keyring-logs-09/10`; initial live discovery reused the established reader and
+saved a new `keyring-inspect-03` under
+`.cache/firmware-check-update-release-20261119/`, without altering older receipts.
+The host adapter's eight mutation-boundary cases pass. All controlled writes are
+project-local, and the final write audit is retained beside the rollout records.
+
+No phone/MCU installation, reset, flash, OTA execution or measured radio timing
+was performed. Users can now request the new update over the existing wireless
+route without USB. D0-D5, C1-C6 and whole-card independent acceptance retain their
+existing scope; deployment and host checks do not close those physical obligations.
+
 ## Fast Reconnect And Candidate Delivery 2026-11-19
 
 The owner authorized this bounded implementation, main integration/push, new
