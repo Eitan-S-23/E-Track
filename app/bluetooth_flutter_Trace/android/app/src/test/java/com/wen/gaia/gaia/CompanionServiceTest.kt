@@ -2,6 +2,8 @@ package com.wen.gaia.gaia
 
 import android.content.Context
 import android.content.Intent
+import android.app.Notification
+import android.app.NotificationManager
 import android.os.Looper
 import org.junit.After
 import org.junit.Assert.*
@@ -48,6 +50,7 @@ class CompanionServiceTest {
         runtime = Runtime(); service.execution = runtime
         CompanionBridge.preferences(service).edit().clear().putBoolean("enabled", true)
             .putString("revision", revision).putString("address", address).commit()
+        service.getSharedPreferences("companion_diagnostics_v1", Context.MODE_PRIVATE).edit().clear().commit()
     }
     @After fun tearDown() { service.onDestroy() }
     private fun start() { service.onStartCommand(Intent().putExtra("reason", "foreground"), 0, 1) }
@@ -227,5 +230,47 @@ class CompanionServiceTest {
         service.stopCompanion("USER_DISABLED"); service.stopCompanion("USER_DISABLED")
         assertFalse(service.ownsDevice(key, service.runtimeId))
         assertEquals(1, runtime.events.size)
+    }
+    @Test fun responsiveRuntimeNeedsAConnectionOrBoundedProgressToSuppressRecovery() {
+        start(); runtime.reply!!(true); runtime.autoProbe = true; runtime.gatt = false
+        assertTrue(service.healthy())
+        assertFalse(service.recoveryHealthy())
+        assertTrue(service.state(state("INITIALIZING", false, true) + mapOf("recoveryBusy" to true, "recoveryId" to "a".repeat(32))))
+        assertTrue(service.recoveryHealthy())
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(31))
+        assertFalse(service.healthy())
+        assertEquals("CONNECTION_PROGRESS_TIMEOUT", CompanionBridge.preferences(service).getString("lastResult", ""))
+        assertFalse(ShadowPowerManager.getLatestWakeLock().isHeld)
+    }
+    @Test fun progressStagesAndLateStateCannotExtendTheRecoveryDeadline() {
+        start(); runtime.reply!!(true); runtime.autoProbe = true; runtime.gatt = false
+        val recovery = mapOf("recoveryBusy" to true, "recoveryId" to "a".repeat(32))
+        service.state(state("INITIALIZING", false, true) + recovery + ("stateSequence" to 1L))
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(20))
+        service.state(state("DISCOVERING", false, true) + recovery + ("stateSequence" to 3L))
+        assertFalse(service.state(state("CONNECTING", false, true) + recovery + ("stateSequence" to 2L)))
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(11))
+        assertFalse(service.healthy())
+    }
+    @Test fun notificationIsChineseAndProjectsActualConnectedAndCheckState() {
+        start(); runtime.reply!!(true)
+        assertEquals("E-Track \u8bbe\u5907\u8fde\u63a5", shadowOf(service).lastForegroundNotification.extras.getString(Notification.EXTRA_TITLE))
+        service.state(state("NO_UPDATE"))
+        val notification = shadowOf(service.getSystemService(NotificationManager::class.java)).getNotification(CompanionService.NOTIFICATION_ID)
+        assertEquals("\u8bbe\u5907\u5df2\u8fde\u63a5\uff0c\u56fa\u4ef6\u5df2\u662f\u6700\u65b0\u7248\u672c", notification.extras.getString(Notification.EXTRA_TEXT))
+    }
+    @Test fun boundedDiagnosticsSurviveStatusChangesWithoutPrivateFields() {
+        start(); runtime.reply!!(true)
+        repeat(100) { CompanionDiagnostics.record(service, "RECOVERY_FAILED", service.runtimeId,
+            details = mapOf("stage" to "DISCOVERING", "errorType" to "PlatformException", "errorCode" to 133,
+                "address" to address, "url" to "https://private.invalid/?token=secret", "payload" to "secret")) }
+        service.state(state())
+        val snapshot = CompanionDiagnostics.snapshot(service)
+        val history = snapshot["history"] as List<*>
+        assertEquals(80, history.size)
+        val text = history.toString()
+        assertTrue(text.contains("133"))
+        assertFalse(text.contains(address)); assertFalse(text.contains("secret")); assertFalse(text.contains("private.invalid"))
+        assertTrue(text.contains("RECOVERY_FAILED"))
     }
 }

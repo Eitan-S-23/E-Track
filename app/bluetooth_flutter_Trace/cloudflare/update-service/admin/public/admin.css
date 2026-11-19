@@ -160,6 +160,19 @@ summary::marker { color: var(--muted); }
 .inventory-table th, .inventory-table td { padding: 13px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
 .inventory-table th { font-weight: 500; color: var(--muted); }
 .inventory-table td:nth-child(2) { font-variant-numeric: tabular-nums; }
+.inventory-table td { overflow-wrap: anywhere; }
+.inventory-table tr[data-version-operation="inventory-detail"] { cursor: pointer; }
+.inventory-table tr[data-version-operation="inventory-detail"]:hover { background: var(--accent-soft); }
+.inventory-version-button { display: inline-flex; align-items: center; gap: 8px; padding: 0; border: 0; text-align: left; background: transparent; color: var(--accent); }
+.inventory-version-button .ui-icon { transform: rotate(180deg); width: 14px; flex-shrink: 0; }
+.inventory-detail-back { flex-shrink: 0; padding: 8px; }
+.inventory-detail-sheet .quick-sheet-header { justify-content: flex-start; }
+.inventory-details-open #inventoryDetailBackdrop { opacity: 1; }
+.inventory-details-open #inventoryDetailSheet { opacity: 1; transform: translate(-50%, 0); }
+body.inventory-details-open { overflow: hidden; }
+body.inventory-details-open .resource-float { visibility: hidden; pointer-events: none; }
+.inventory-quality { margin: 20px 0; }
+.inventory-quality summary { cursor: pointer; font-size: 13px; color: var(--accent); }
 .inventory-hash, .delta-base-row small, .delta-job-row small { display: block; color: var(--muted); font-size: 11px; overflow-wrap: anywhere; }
 .inventory-body > .firmware-hint { margin-top: 14px; }
 .delta-entry { margin-bottom: 24px; }

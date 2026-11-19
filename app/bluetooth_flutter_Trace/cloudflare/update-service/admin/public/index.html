@@ -157,6 +157,17 @@
         </div>
       </section>
 
+      <div class="quick-action-backdrop" id="inventoryDetailBackdrop" hidden></div>
+      <section class="quick-action-sheet inventory-detail-sheet" id="inventoryDetailSheet" role="dialog" aria-modal="true" aria-labelledby="inventoryDetailTitle" hidden>
+        <button type="button" class="quick-sheet-close" id="inventoryDetailClose" aria-label="Close distribution details"><svg class="ui-icon" aria-hidden="true"><use href="#i-close"></use></svg></button>
+        <span class="quick-sheet-handle" aria-hidden="true"></span>
+        <header class="quick-sheet-header">
+          <button type="button" class="secondary-button inventory-detail-back" id="inventoryDetailBack" aria-label="Back"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg></button>
+          <div><p class="eyebrow" data-i18n="operations.inventory">Version distribution</p><h2 id="inventoryDetailTitle"></h2><p id="inventoryDetailSubtitle"></p></div>
+        </header>
+        <div class="quick-sheet-scroll" id="inventoryDetailScroll"><div id="inventoryDetailContent"></div></div>
+      </section>
+
       <div class="quick-action-backdrop delta-backdrop" id="deltaBackdrop" hidden></div>
       <section class="quick-action-sheet delta-sheet" id="deltaSheet" role="dialog" aria-modal="true" aria-labelledby="deltaTitle" hidden>
         <button type="button" class="quick-sheet-close" id="deltaClose" aria-label="Close delta packages" data-i18n-aria-label="operations.close">
@@ -614,6 +625,7 @@
         detailsOpen: false,
         queries: { releases: "", announcements: "", firmware: "", firmwareChannels: "", firmwareHistory: "", inventory: "", firmwareInventory: "", feedback: "" },
         inventory: { value: null, error: null, loading: false, window: 30, pages: { android: 0, firmware: 0 }, refreshId: null },
+        inventoryDetails: [],
         delta: null,
         deltaDrafts: new Map(),
         taskOpen: false,
@@ -1642,6 +1654,14 @@
         firmwareDetailClose: document.querySelector("#firmwareDetailClose"),
         firmwareDetailTitle: document.querySelector("#firmwareDetailTitle"),
         firmwareDetailSubtitle: document.querySelector("#firmwareDetailSubtitle"),
+        inventoryDetailSheet: document.querySelector("#inventoryDetailSheet"),
+        inventoryDetailBackdrop: document.querySelector("#inventoryDetailBackdrop"),
+        inventoryDetailScroll: document.querySelector("#inventoryDetailScroll"),
+        inventoryDetailContent: document.querySelector("#inventoryDetailContent"),
+        inventoryDetailTitle: document.querySelector("#inventoryDetailTitle"),
+        inventoryDetailSubtitle: document.querySelector("#inventoryDetailSubtitle"),
+        inventoryDetailBack: document.querySelector("#inventoryDetailBack"),
+        inventoryDetailClose: document.querySelector("#inventoryDetailClose"),
         firmwareHistoryScope: document.querySelector("#firmwareHistoryScope"),
         firmwareHistoryList: document.querySelector("#firmwareHistoryList"),
         firmwareHistoryStatus: document.querySelector("#firmwareHistoryStatus"),
@@ -1698,6 +1718,7 @@
         [els.quickActionSheet,els.quickActionScroll,els.quickActionBackdrop,"app"],
         [els.firmwareDetailSheet,document.querySelector("#firmwareDetailScroll"),els.firmwareDetailBackdrop,"firmware"],
         [els.deltaSheet,document.querySelector("#deltaScroll"),els.deltaBackdrop,"delta"],
+        [els.inventoryDetailSheet,els.inventoryDetailScroll,els.inventoryDetailBackdrop,"inventory"],
         [document.querySelector("#taskSheet"),document.querySelector("#taskScroll"),document.querySelector("#taskBackdrop"),"tasks"]
       ]) new TraceSheetGestures({sheet,scroll,backdrop,canClose:()=>!state.busy && !state.delta?.busy && !activeConfirmDialog,close:()=>dismissOverlay(layer)});
       new TraceSheetGestures({ sheet: els.resourcePanel, scroll: els.resourcePanel,
@@ -1801,7 +1822,9 @@
       function overlayLayers() {
         return [els.resourceFloat.classList.contains("open") && "resources",
           state.detailsOpen && "app",state.firmwareDetailsOpen && "firmware",state.delta && "delta",
-          state.taskOpen && "tasks",state.announcementOpen && "announcement",els.body.classList.contains("nav-open") && "nav",activeConfirmDialog && "confirm"].filter(Boolean);
+          state.taskOpen && "tasks",state.announcementOpen && "announcement",
+          ...state.inventoryDetails.map((_, index) => `inventory-${index}`),
+          els.body.classList.contains("nav-open") && "nav",activeConfirmDialog && "confirm"].filter(Boolean);
       }
       function dismissOverlay(layer) {
         if (layer === "confirm") closeConfirmDialog(false);
@@ -1811,6 +1834,7 @@
         else if (layer === "delta") closeDelta();
         else if (layer === "tasks") closeTasks();
         else if (layer === "announcement") void closeAnnouncementEditor();
+        else if (layer.startsWith("inventory")) closeInventoryDetails();
         else if (layer === "nav") setMobileNav(false);
       }
       function openTasks() {
@@ -1888,6 +1912,9 @@
         els.quickActionClose.addEventListener("click", () => closeQuickActions());
         els.firmwareDetailBackdrop.addEventListener("click", () => closeFirmwareDetails());
         els.firmwareDetailClose.addEventListener("click", () => closeFirmwareDetails());
+        els.inventoryDetailClose.addEventListener("click", () => closeInventoryDetails());
+        els.inventoryDetailBack.addEventListener("click", () => closeInventoryDetails());
+        els.inventoryDetailBackdrop.addEventListener("click", () => closeInventoryDetails());
         els.confirmBackdrop.addEventListener("click", () => closeConfirmDialog(false));
         els.confirmCancel.addEventListener("click", () => closeConfirmDialog(false));
         els.confirmAccept.addEventListener("click", () => closeConfirmDialog(true));
@@ -2164,6 +2191,7 @@
         document.addEventListener("keydown", (event) => {
           if (event.isComposing) return;
           const layer = activeConfirmDialog ? els.confirmDialog
+            : state.inventoryDetails.length ? els.inventoryDetailSheet
             : state.announcementOpen ? document.querySelector("#announcementSheet")
             : state.taskOpen ? document.querySelector("#taskSheet")
             : state.delta ? els.deltaSheet
@@ -2178,6 +2206,7 @@
             event.preventDefault();
             if (activeConfirmDialog) closeConfirmDialog(false);
             else if (state.announcementOpen) void closeAnnouncementEditor();
+            else if (layer === els.inventoryDetailSheet) closeInventoryDetails();
             else if (state.taskOpen) closeTasks();
             else if (layer === els.deltaSheet) closeDelta();
             else if (layer === els.firmwareDetailSheet) closeFirmwareDetails();
@@ -2232,13 +2261,15 @@
         const confirm = Boolean(activeConfirmDialog) || state.announcementOpen;
         const delta = Boolean(state.delta);
         const tasks = state.taskOpen;
-        els.workspace.inert = confirm || quick || firmware || nav || delta || tasks;
-        els.resourceFloat.inert = confirm || quick || firmware || nav || delta || tasks;
-        els.sidebar.inert = confirm || quick || firmware || delta || tasks || (window.matchMedia("(max-width: 1000px)").matches && !nav);
-        els.quickActionSheet.inert = confirm || firmware || delta || tasks || !quick;
-        els.firmwareDetailSheet.inert = confirm || quick || delta || tasks || !firmware;
-        els.deltaSheet.inert = confirm || tasks || !delta;
-        document.querySelector("#taskSheet").inert = confirm || !tasks;
+        const distribution = state.inventoryDetails.length > 0;
+        els.workspace.inert = confirm || quick || firmware || nav || delta || tasks || distribution;
+        els.resourceFloat.inert = confirm || quick || firmware || nav || delta || tasks || distribution;
+        els.sidebar.inert = confirm || quick || firmware || delta || tasks || distribution || (window.matchMedia("(max-width: 1000px)").matches && !nav);
+        els.quickActionSheet.inert = confirm || firmware || delta || tasks || distribution || !quick;
+        els.firmwareDetailSheet.inert = confirm || quick || delta || tasks || distribution || !firmware;
+        els.deltaSheet.inert = confirm || tasks || distribution || !delta;
+        document.querySelector("#taskSheet").inert = confirm || distribution || !tasks;
+        els.inventoryDetailSheet.inert = confirm || !distribution;
         els.confirmDialog.inert = !confirm;
         document.querySelector("#announcementSheet").inert = !state.announcementOpen || Boolean(activeConfirmDialog);
         overlayHistory?.sync();
@@ -2247,7 +2278,7 @@
 
       function restoreWorkspaceFocus(preferred) {
         if (activeConfirmDialog || els.body.classList.contains("nav-open")) return;
-        const fallback = state.taskOpen ? document.querySelector("#taskClose") : state.delta ? els.deltaClose : els.body.classList.contains("quick-actions-open") ? els.quickActionClose
+        const fallback = state.inventoryDetails.length ? els.inventoryDetailBack : state.taskOpen ? document.querySelector("#taskClose") : state.delta ? els.deltaClose : els.body.classList.contains("quick-actions-open") ? els.quickActionClose
           : els.body.classList.contains("firmware-details-open") ? els.firmwareDetailClose
           : state.activeView === "firmware" ? (state.firmwareSection === "releases"
             ? els.firmwareReleaseList.querySelector('[aria-pressed="true"]') : null) ?? els.firmwareTabs.querySelector('[aria-selected="true"]')
@@ -2502,6 +2533,9 @@
         try {
           const session = await readAdminSession();
           if (session.actor !== state.session?.actor) {
+            state.inventoryDetails = [];
+            els.body.classList.remove("inventory-details-open");
+            els.inventoryDetailSheet.hidden = true; els.inventoryDetailBackdrop.hidden = true;
             state.selectedVersions.clear(); state.selectedFirmwareVersions.clear();
             state.selectedAnnouncements.clear(); state.deleteModes = { app:false, firmware:false, announcements:false };
             state.appNoteDrafts.clear();
@@ -3072,6 +3106,7 @@
         if (inventory.loading) return;
         inventory.loading = true; inventory.error = null;
         renderInventory("android"); renderInventory("firmware");
+        renderInventoryDetails();
         try {
           const value = await api("/api/admin/version-inventory");
           if (value.ok !== true || !Array.isArray(value.app) || !Array.isArray(value.firmware)
@@ -3110,12 +3145,114 @@
           ${inventory.loading ? `<p role="status">${escapeHtml(opText("正在读取统计...", "Loading counts..."))}</p>` : ""}
           ${inventory.error ? `<p class="error" role="alert">${escapeHtml(inventory.error)} ${escapeHtml(opText("以下为上次读数，不作为自动选包依据。", "Any counts below are stale; automatic selection is disabled."))}</p>` : ""}
           <div class="inventory-table-wrap"><table class="inventory-table"><thead><tr><th>${escapeHtml(opText("版本 / 镜像", "Version / Image"))}</th><th>${escapeHtml(unit)}</th><th>${escapeHtml(opText("最近上报 / 观测", "Last reported / observed"))}</th></tr></thead><tbody>
-          ${visible.map(row => `<tr><td><strong>${escapeHtml(row.versionName ?? row.versionCode)}</strong><span class="inventory-hash" title="${escapeHtml(row.imageSha256)}">${escapeHtml(String(row.imageSha256).slice(0,16))}</span></td><td>${formatNumber(row[`active${inventory.window}`])}</td><td>${escapeHtml(inventoryDate(row.lastSeen))}</td></tr>`).join("")}
+          ${visible.map(row => `<tr data-version-operation="inventory-detail" data-kind="${kind}" data-index="${inventoryRows(kind).indexOf(row)}"><td><button type="button" class="inventory-version-button" aria-haspopup="dialog" aria-controls="inventoryDetailSheet"><strong>${escapeHtml(row.versionName ?? row.versionCode)}</strong><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg></button><span class="inventory-hash" title="${escapeHtml(row.imageSha256)}">${escapeHtml(String(row.imageSha256).slice(0,16))}</span></td><td>${formatNumber(row[`active${inventory.window}`])}</td><td>${escapeHtml(inventoryDate(row.lastSeen))}</td></tr>`).join("")}
           </tbody></table></div>${!rows.length ? `<p class="empty">${escapeHtml(opText("暂无匹配的上报记录；不能据此认定没有用户。", "No matching reports. This does not mean there are no users."))}</p>` : ""}
           ${rows.length > 10 ? `<nav class="release-pagination"><button type="button" data-version-operation="inventory-prev" data-kind="${kind}" ${page === 0 ? "disabled" : ""}>${escapeHtml(t("pagination.previous"))}</button><span>${page + 1} / ${Math.ceil(rows.length / 10)}</span><button type="button" data-version-operation="inventory-next" data-kind="${kind}" ${(page + 1) * 10 >= rows.length ? "disabled" : ""}>${escapeHtml(t("pagination.next"))}</button></nav>` : ""}
           <p class="firmware-hint" role="status">${escapeHtml(opText("统计读取时间：", "Counts loaded: "))}${escapeHtml(inventoryDate(value?.generatedAt))}<br>
           ${escapeHtml(opText("上次请求更新：", "Last refresh request: "))}${escapeHtml(inventoryDate(value?.refreshRequestedAt))} · ${escapeHtml(opText("本次已响应：", "Responses: "))}${formatNumber(value?.refreshResponses ?? 0)}</p>
           <p class="firmware-hint">${escapeHtml(opText("请求更新不会唤醒手机。支持上报的 APP 回到前台且空闲时，按低频检查响应；后台无需常驻服务器。", "A refresh does not wake phones. Supported apps respond during low-frequency foreground checks while idle; no always-running server is needed."))}</p></div>`;
+      }
+
+      function distributionScope(kind, row) {
+        const scope = {kind: kind === "android" || kind === "app" ? "app" : "firmware", versionCode: row.versionCode, imageSha256: row.imageSha256};
+        if (scope.kind === "app") return {...scope, platform: "android", versionName: row.versionName};
+        return {...scope, deviceModel: row.deviceModel, hardwareRevision: row.hardwareRevision, layoutId: row.layoutId};
+      }
+      function saveDistributionPosition(entry = state.inventoryDetails.at(-1)) {
+        if (entry && els.inventoryDetailContent.dataset.entry === entry.id) entry.scroll = els.inventoryDetailScroll.scrollTop;
+      }
+      function openInventoryDetails(kind, row, returnFocus) {
+        if (!row || state.busy || activeConfirmDialog || state.inventory.error) return;
+        if (!state.inventoryDetails.length) {
+          closeQuickActions({immediate:true,restoreFocus:false}); closeFirmwareDetails({immediate:true,restoreFocus:false});
+          closeResourcePanel(); closeDelta(); closeTasks();
+        } else saveDistributionPosition();
+        const entry = {id:crypto.randomUUID(), actor:state.session?.actor, scope:distributionScope(kind,row),
+          window:state.inventoryDetails.at(-1)?.window ?? state.inventory.window, data:null, error:null, loading:false,
+          request:0, page:0, cursors:[null], scroll:0, returnFocus};
+        state.inventoryDetails.push(entry);
+        els.inventoryDetailSheet.hidden = false; els.inventoryDetailBackdrop.hidden = false;
+        els.body.classList.add("inventory-details-open");
+        syncOverlayState(); renderInventoryDetails(); els.inventoryDetailBack.focus({preventScroll:true});
+        void loadInventoryDetails(entry);
+      }
+      function closeInventoryDetails() {
+        if (!state.inventoryDetails.length || activeConfirmDialog) return;
+        const old = state.inventoryDetails.pop();
+        const parent = state.inventoryDetails.at(-1);
+        if (parent) {
+          renderInventoryDetails(); els.inventoryDetailScroll.scrollTop = parent.scroll;
+          const focus = els.inventoryDetailContent.querySelector(`[data-version-operation="inventory-linked-app"][data-index="${parent.linkFocus ?? 0}"]`);
+          (focus ?? els.inventoryDetailBack).focus({preventScroll:true});
+        } else {
+          els.body.classList.remove("inventory-details-open");
+          els.inventoryDetailSheet.hidden = true; els.inventoryDetailBackdrop.hidden = true;
+        }
+        syncOverlayState();
+        if (!parent) restoreWorkspaceFocus(old.returnFocus?.querySelector?.("button") ?? old.returnFocus);
+      }
+      async function loadInventoryDetails(entry = state.inventoryDetails.at(-1)) {
+        if (!entry || entry.loading || entry.actor !== state.session?.actor) return;
+        const request = ++entry.request;
+        entry.loading = true; entry.error = null; renderInventoryDetails();
+        try {
+          const query = new URLSearchParams({...entry.scope,windowDays:String(entry.window),limit:"20"});
+          const cursor = entry.cursors[entry.page]; if (cursor) query.set("cursor",cursor);
+          const value = await api(`/api/admin/version-inventory/detail?${query}`);
+          if (value.ok !== true || value.coverage !== "reporting-installations-only" || value.firmwareIdentityScope !== "installation" ||
+              value.windowDays !== entry.window || !Number.isSafeInteger(value.sampleCount) || value.sampleCount < 0 ||
+              !Array.isArray(value.models) || value.models.length > 5 || !Array.isArray(value.ips) || !Array.isArray(value.reports) || value.reports.length > 20 ||
+              !Array.isArray(value.associatedApps) || Object.entries(entry.scope).some(([key,val])=>value.scope?.[key] !== val) ||
+              (value.nextCursor !== null && typeof value.nextCursor !== "string")) throw new Error(t("firmware.invalidResponse"));
+          if (!state.inventoryDetails.includes(entry) || entry.actor !== state.session?.actor || request !== entry.request) return;
+          entry.data = value;
+          entry.cursors[entry.page+1] = value.nextCursor;
+        } catch (error) {
+          if (state.inventoryDetails.includes(entry) && request === entry.request) entry.error = error.message;
+        } finally {
+          if (request === entry.request) entry.loading = false;
+          if (state.inventoryDetails.at(-1) === entry) renderInventoryDetails();
+        }
+      }
+      function renderInventoryDetails() {
+        const entry = state.inventoryDetails.at(-1); if (!entry) return;
+        saveDistributionPosition(entry);
+        const value = entry.actor === state.session?.actor ? entry.data : null;
+        const title = opText(entry.scope.kind === "app" ? "APP 版本分布" : "单片机版本分布", entry.scope.kind === "app" ? "App distribution" : "MCU distribution");
+        els.inventoryDetailTitle.textContent = `${title} · ${entry.scope.versionName ?? entry.scope.versionCode}`;
+        els.inventoryDetailSubtitle.textContent = `${opText("近", "Last")} ${entry.window} ${opText("天", "days")} · ${entry.scope.imageSha256}`;
+        els.inventoryDetailBack.setAttribute("aria-label",opText(state.inventoryDetails.length>1 ? "返回单片机版本分布" : "返回版本列表",state.inventoryDetails.length>1 ? "Back to MCU distribution" : "Back to version list"));
+        els.inventoryDetailClose.setAttribute("aria-label",opText("关闭当前分布详情", "Close current distribution details"));
+        const pct = n => `${(Math.max(0,Math.min(1,Number(n)||0))*100).toFixed(1)}%`;
+        const unknown = opText("未知", "Unknown");
+        const table = (head,rows) => `<div class="inventory-table-wrap"><table class="inventory-table"><thead><tr>${head.map(h=>`<th>${escapeHtml(h)}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table></div>`;
+        const distribution = (rows,label) => table([label,opText("记录", "Records"),opText("占比", "Share")],rows.map(row=>`<tr><td>${escapeHtml(row.label)}</td><td>${formatNumber(row.count)}</td><td>${pct(row.share)}</td></tr>`));
+        els.inventoryDetailContent.dataset.entry = entry.id;
+        els.inventoryDetailContent.innerHTML = `<div class="operations-buttons"><button type="button" class="secondary-button" data-version-operation="inventory-detail-reload" ${entry.loading?"disabled":""}>${escapeHtml(opText("重新读取", "Reload details"))}</button></div>
+          ${entry.loading?`<p role="status">${escapeHtml(opText("正在读取分布详情...", "Loading distribution details..."))}</p>`:""}
+          ${entry.error?`<p class="error" role="alert">${escapeHtml(entry.error)}</p>`:""}
+          ${!value?`<p class="firmware-hint">${escapeHtml(opText("详情尚未读取，不以缺少记录推定没有用户。", "Details are not loaded. Missing reports do not mean no users."))}</p>`:`
+          <div class="quick-sheet-meta"><div class="quick-meta-card"><span>${escapeHtml(opText("样本记录", "Sample records"))}</span><strong>${formatNumber(value.sampleCount)}</strong></div>
+          <div class="quick-meta-card"><span>${escapeHtml(opText("未知机型", "Unknown models"))}</span><strong>${formatNumber(value.unknownModels)}</strong></div>
+          <div class="quick-meta-card"><span>${escapeHtml(opText("未知 IP", "Unknown IP"))}</span><strong>${formatNumber(value.unknownIps)}</strong></div>
+          <div class="quick-meta-card"><span>${escapeHtml(opText("读取时间", "Loaded"))}</span><strong>${escapeHtml(inventoryDate(value.generatedAt))}</strong></div></div>
+          ${entry.scope.kind === "firmware"?`<h3 class="storage-section-title">${escapeHtml(opText("关联手机 APP 版本", "Associated App versions"))}</h3>
+          ${table([opText("APP 版本", "App version"),opText("设备记录", "Device records"),opText("占比", "Share")],value.associatedApps.map((row,index)=>`<tr><td><button type="button" class="inventory-version-button" data-version-operation="inventory-linked-app" data-index="${index}" aria-haspopup="dialog" ${entry.loading?"disabled":""}>${escapeHtml(row.versionName)} / ${row.versionCode}<svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg></button><span class="inventory-hash">${escapeHtml(String(row.imageSha256).slice(0,16))}</span></td><td>${formatNumber(row.count)}</td><td>${pct(row.share)}</td></tr>`))}
+          <p class="firmware-hint">${escapeHtml(opText("关联的是同一上报安装实例最近提供的 APP 版本，不是固件观测时的历史 APP 版本。点击可查看该 APP 版本的全部上报分布。", "These are the reporting installation's latest App versions, not historical versions at MCU observation time. Click to view that App version's full distribution."))} ${value.otherAssociatedApps?`${escapeHtml(opText("其他关联记录", "Other associated records"))}: ${formatNumber(value.otherAssociatedApps)}`:""}</p>`:""}
+          <h3 class="storage-section-title">${escapeHtml(opText("占比最多的 5 个机型", "Top 5 phone models"))}</h3>
+          ${distribution(value.models.map(row=>({...row,label:`${row.brand??unknown} ${row.model}`})),opText("机型", "Model"))}
+          <p class="firmware-hint">${escapeHtml(opText("其他已知机型", "Other known models"))}: ${formatNumber(value.otherModels)} · ${escapeHtml(opText("未知机型", "Unknown models"))}: ${formatNumber(value.unknownModels)}. ${escapeHtml(opText("占比以本版本全部样本为分母。", "Shares use all samples for this version."))}</p>
+          <h3 class="storage-section-title">${escapeHtml(opText("出口 IP 分布（前 10）", "Network IP distribution (top 10)"))}</h3>
+          ${distribution(value.ips.map(row=>({...row,label:row.ip})),"IP")}
+          <p class="firmware-hint">${escapeHtml(opText("其他 IP 记录", "Other IP records"))}: ${formatNumber(value.otherIps)} · ${escapeHtml(opText("IP 来自服务器收到的上报，不是人数或设备标识。", "IP comes from server-observed reports, not a person or device identity."))}</p>
+          <h3 class="storage-section-title">${escapeHtml(opText("最近上报 / 设备观测", "Recent reports / observations"))}</h3>
+          ${table([opText("安装实例", "Installation"),opText("机型 / 系统", "Model / OS"),"IP",opText("APP / 时间", "App / Time")],value.reports.map(row=>`<tr><td>${escapeHtml(row.installationTag)}${row.deviceTag?`<br>${escapeHtml(row.deviceTag)}`:""}</td><td>${escapeHtml(`${row.brand??unknown} ${row.model??unknown}`)}<br>${escapeHtml(row.osVersion??unknown)}</td><td>${escapeHtml(row.ip??unknown)}</td><td>${escapeHtml(row.appVersionName)} / ${row.appVersionCode}<br>${escapeHtml(inventoryDate(row.reportedAt))}${entry.scope.kind==="firmware"?`<br>${escapeHtml(opText("设备观测", "Observed"))}: ${escapeHtml(inventoryDate(row.observedAt))}`:""}</td></tr>`))}
+          <nav class="release-pagination"><button type="button" data-version-operation="inventory-detail-prev" ${entry.page===0||entry.loading?"disabled":""}>${escapeHtml(t("pagination.previous"))}</button><span>${entry.page+1}</span><button type="button" data-version-operation="inventory-detail-next" ${!value.nextCursor||entry.loading?"disabled":""}>${escapeHtml(t("pagination.next"))}</button></nav>
+          <details class="inventory-quality"><summary>${escapeHtml(opText("后台连接与固件更新质量摘要", "Background connection and firmware quality"))}</summary>
+          <p class="firmware-hint">${escapeHtml(opText("每个安装实例最近上报的单日摘要，不是所选窗口的累计，也不代表全部前台操作。", "Latest reported single-day summary per installation, not a window-wide total or all foreground operations."))}</p>
+          ${table([opText("指标", "Metric"),opText("数量", "Count")],[["samples",opText("提供摘要的实例", "Installations with summaries")],["connectionAttempts",opText("后台连接尝试", "Connection attempts")],["connectionSucceeded",opText("连接成功", "Connected")],["connectionFailed",opText("连接失败", "Connection failures")],["checksSucceeded",opText("检查成功", "Successful checks")],["checksFailed",opText("检查失败", "Failed checks")],["updatesSucceeded",opText("固件更新已复核", "Verified firmware updates")],["updatesFailed",opText("固件更新失败", "Failed firmware updates")]].map(([key,label])=>`<tr><td>${escapeHtml(label)}</td><td>${formatNumber(value.quality?.[key]??0)}</td></tr>`))}</details>
+          <p class="firmware-hint">${escapeHtml(opText(entry.scope.kind==="firmware"?"手机内去重的设备记录，可能重复，不是全球唯一单片机数量。":"仅已上报的安装实例，不等于人数。历史客户端未提供的机型和 IP 保持未知。",entry.scope.kind==="firmware"?"Phone-scoped MCU records may duplicate; not globally unique MCU counts.":"Reporting installations, not people. Missing metadata from older clients stays unknown."))}</p>`}`;
+        els.inventoryDetailScroll.scrollTop = entry.scroll;
       }
       function closeDelta() {
         if (!state.delta) return;
@@ -3274,6 +3411,24 @@
       }
       async function handleVersionOperation(button) {
         const action = button.dataset.versionOperation;
+        if (action === "inventory-detail") {
+          openInventoryDetails(button.dataset.kind,inventoryRows(button.dataset.kind)[Number(button.dataset.index)],button); return;
+        }
+        if (action.startsWith("inventory-detail-") || action === "inventory-linked-app") {
+          const entry = state.inventoryDetails.at(-1); if (!entry || entry.loading) return;
+          if (action === "inventory-linked-app") {
+            entry.linkFocus = Number(button.dataset.index);
+            openInventoryDetails("app",entry.data?.associatedApps[entry.linkFocus],button); return;
+          }
+          if (action === "inventory-detail-reload") { await loadInventoryDetails(entry); return; }
+          saveDistributionPosition(entry);
+          if (action === "inventory-detail-next" && entry.data?.nextCursor) entry.page++;
+          else if (action === "inventory-detail-prev" && entry.page>0) entry.page--;
+          else return;
+          await loadInventoryDetails(entry);
+          if (state.inventoryDetails.at(-1) === entry) (els.inventoryDetailContent.querySelector(`[data-version-operation="${action}"]:not(:disabled)`) ?? els.inventoryDetailBack).focus({preventScroll:true});
+          return;
+        }
         if (action === "inventory-reload") { clearFeedbackError("inventory-read"); await loadInventory(); return; }
         if (action === "inventory-window") { state.inventory.window = Number(button.dataset.days); renderInventory("android"); renderInventory("firmware"); return; }
         if (action === "inventory-prev" || action === "inventory-next") {
@@ -3455,6 +3610,7 @@
         renderChannels(detailRelease);
         renderFirmware();
         renderInventory("android"); renderInventory("firmware");
+        renderInventoryDetails();
         if (state.delta) renderDelta();
         renderActionLocks(detailRelease);
         if (els.body.classList.contains("quick-actions-open")) {

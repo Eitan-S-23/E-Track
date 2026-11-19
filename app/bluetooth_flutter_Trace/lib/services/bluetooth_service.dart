@@ -2,6 +2,7 @@ import 'dart:async';
 import '../utils/safe_snackbar.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver, AppLifecycleState;
 import '../companion/companion_scan_policy.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -69,7 +70,8 @@ abstract class BluetoothAdapter {
 class FlutterBluePlusAdapter implements BluetoothAdapter {
   @override
   Future<void> init() async {
-    // FlutterBluePlus不需要显式初始化
+    // Await the plugin's lazy initialization before using scoped native methods.
+    if (!await FlutterBluePlus.isSupported) throw StateError('BLUETOOTH_UNAVAILABLE');
   }
 
   @override
@@ -566,6 +568,11 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
   );
   final _mobileConnects = <String, Future<bool>>{};
   final _connectEpochs = <String, int>{};
+  String? _companionOwner;
+  static const _nativeBle = MethodChannel('flutter_blue_plus/methods');
+  final _companionGattAttempts = <String, ({String id, String runtime, Completer<void> cancelled})>{};
+  @visibleForTesting
+  Stream<BluetoothConnectionState> Function(BluetoothDevice)? companionConnectionEventsForTest;
   bool _closed = false;
   final _scanClock = Stopwatch()..start();
   late final CompanionScanPolicy _companionScan = CompanionScanPolicy(nowMs: _companionClockMs ?? () => _scanClock.elapsedMilliseconds);
@@ -579,6 +586,7 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
   bool get _scanningAllowed => !_closed && (foregroundScanningAllowed || companionScanningAllowed);
 
   void companionOwnerChanged(String? runtimeId) {
+    _companionOwner = runtimeId;
     _companionScan.ownerChanged(runtimeId);
     if (!_scanningAllowed) unawaited(stopScan());
   }
@@ -613,8 +621,94 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
     return connected;
   }
 
+  Future<bool> beginCompanionRecovery(String address, String runtime, String attempt) async {
+    if (!usesAndroidLifecycle) return true;
+    final key = address.toLowerCase();
+    if (_closed || _companionOwner != runtime || _companionGattAttempts.containsKey(key) || _mobileConnects.containsKey(key)) return false;
+    _reconnect.forget(key);
+    final lease = (id: attempt, runtime: runtime, cancelled: Completer<void>());
+    _companionGattAttempts[key] = lease;
+    final accepted = await _nativeBle.invokeMethod<bool>('companionBegin',
+      {'remote_id': address.toUpperCase(), 'attempt': attempt}) == true;
+    if (!accepted && identical(_companionGattAttempts[key]?.cancelled, lease.cancelled)) _companionGattAttempts.remove(key);
+    return accepted && identical(_companionGattAttempts[key]?.cancelled, lease.cancelled) && _companionOwner == runtime;
+  }
+
+  Future<bool> finishCompanionRecovery(String address, String attempt) async {
+    if (!usesAndroidLifecycle) return true;
+    final key = address.toLowerCase(), lease = _companionGattAttempts[address.toLowerCase()];
+    if (lease == null || lease.id != attempt) return false;
+    final accepted = await _nativeBle.invokeMethod<bool>('companionFinish',
+      {'remote_id': address.toUpperCase(), 'attempt': attempt}) == true;
+    if (accepted && identical(_companionGattAttempts[key]?.cancelled, lease.cancelled)) _companionGattAttempts.remove(key);
+    return accepted;
+  }
+
+  Future<bool> cancelCompanionRecovery(String address, String attempt) async {
+    if (!usesAndroidLifecycle) { await disconnectCompanionDeviceByAddress(address); return true; }
+    final key = address.toLowerCase(), lease = _companionGattAttempts[address.toLowerCase()];
+    if (lease == null) return true; // This attempt never acquired a native GATT.
+    if (lease.id != attempt) return false;
+    final oldConnect = _mobileConnects[key];
+    if (!lease.cancelled.isCompleted) lease.cancelled.complete();
+    _connectEpochs[key] = (_connectEpochs[key] ?? 0) + 1;
+    final generation = otaLinkGeneration(key);
+    final result = await _nativeBle.invokeMapMethod<String, dynamic>('companionClose',
+      {'remote_id': address.toUpperCase(), 'attempt': attempt});
+    if (result?['closed'] != true) return false;
+    if (result?['replaced'] == true) return false;
+    if (otaLinkGeneration(key) == generation) {
+      _bumpOtaLinkGeneration(key);
+      connectedDevices.removeWhere((d) => d.remoteId.str.toLowerCase() == key);
+    }
+    try { await oldConnect; }
+    catch (_) { /* A failed or cancelled connect is settled after physical closure. */ }
+    if (identical(_companionGattAttempts[key]?.cancelled, lease.cancelled)) _companionGattAttempts.remove(key);
+    _reconnect.forget(key);
+    return true;
+  }
+
+  Future<void> _connectCompanionGatt(BluetoothDevice device,
+      ({String id, String runtime, Completer<void> cancelled}) lease) async {
+    final connected = Completer<bool>();
+    Object? streamError;
+    StackTrace? streamStack;
+    final events = companionConnectionEventsForTest?.call(device) ?? FlutterBluePlus.events.onConnectionStateChanged
+        .where((event) => event.device.remoteId == device.remoteId).map((event) => event.connectionState);
+    final subscription = events.listen((state) {
+      if (!connected.isCompleted) connected.complete(state == BluetoothConnectionState.connected);
+    }, onError: (Object error, StackTrace stack) {
+      if (!connected.isCompleted) {
+        streamError = error; streamStack = stack; connected.complete(false);
+      }
+    });
+    try {
+      final operation = () async {
+        final pending = await _nativeBle.invokeMethod<bool>('connect',
+          {'remote_id': device.remoteId.str, 'auto_connect': 0, 'companion_attempt': lease.id});
+        if (pending == false && device.isConnected) return;
+        if (pending != true || !await connected.future) {
+          if (streamError != null) Error.throwWithStackTrace(streamError!, streamStack!);
+          final code = await _nativeBle.invokeMethod<Object?>('companionError',
+            {'remote_id': device.remoteId.str, 'attempt': lease.id});
+          throw PlatformException(code: 'GATT_CONNECTION_FAILED', details: code is int ? code : null);
+        }
+      }();
+      await Future.any<void>([operation, lease.cancelled.future.then<void>((_) =>
+        throw PlatformException(code: 'CONNECTION_RETIRED'))]).timeout(const Duration(seconds: 10));
+    } finally {
+      if (!connected.isCompleted) connected.complete(false);
+      await subscription.cancel();
+    }
+  }
+
   Future<void> disconnectCompanionDeviceByAddress(String address) async {
     final key = address.toLowerCase();
+    final attempt = _companionGattAttempts[key];
+    if (attempt != null) {
+      await cancelCompanionRecovery(address, attempt.id);
+      return;
+    }
     _reconnect.forget(key);
     _connectEpochs[key] = (_connectEpochs[key] ?? 0) + 1;
     await disconnectOtaDeviceByAddress(address);
@@ -2591,6 +2685,7 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
   }
 
   Future<bool> _connectOtaDevice(String deviceAddress, int epoch) async {
+    final companion = _companionGattAttempts[deviceAddress.toLowerCase()];
     _invalidateOtaGatt(deviceAddress.toLowerCase());
     try {
       if (Platform.isWindows) {
@@ -2605,9 +2700,14 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
       final device = _mobileOtaDevice(deviceAddress);
       // Negotiate MTU once in requestOtaMtu after connection and discovery.
       // connect() otherwise requests 512 before the probe can bind or observe it.
-      await device.connect(timeout: const Duration(seconds: 10), mtu: null);
+      if (usesAndroidLifecycle && companion != null) {
+        await _connectCompanionGatt(device, companion);
+      } else {
+        await device.connect(timeout: const Duration(seconds: 10), mtu: null);
+      }
       if (_closed || epoch != (_connectEpochs[deviceAddress.toLowerCase()] ?? 0)) {
-        await device.disconnect();
+        // The retiring owner already closed its captured GATT. A late address-wide
+        // disconnect here could tear down the replacement connection.
         return false;
       }
       if (!device.isConnected) return false;
@@ -2628,6 +2728,7 @@ class BluetoothService extends GetxController with WidgetsBindingObserver {
       return true;
     } catch (e) {
       debugPrint('OTA重连失败($deviceAddress): $e');
+      if (companion != null) rethrow;
       return false;
     }
   }

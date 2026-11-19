@@ -3,7 +3,7 @@ import { FIRMWARE_CHANNEL_ACTIONS, firmwareReleaseAction, listFirmware, mutateFi
 import { deleteFirmwareFiles } from "../../../../worker/src/firmware_delete";
 import { editFirmwareNotes, firmwareHistory } from "../../../../worker/src/firmware_catalog";
 import { readFirmwareJson, requireFirmwareJsonHeaders } from "../../../../worker/src/firmware";
-import { boundedJson, inventorySummary, refreshInventory } from "../../../../worker/src/version_inventory";
+import { boundedJson, inventorySummary, inventoryDetails, refreshInventory } from "../../../../worker/src/version_inventory";
 import { createDeltaJobs, deltaCandidates, deltaJobAction } from "../../../../worker/src/delta_jobs";
 import { deltaActivity, readNotifications, dismissNotifications, hideCompletedJobs, subscribeNotifications, unsubscribeNotifications } from "../../../../worker/src/admin_notifications";
 import { resourceUsage } from "../../../../worker/src/resource_usage";
@@ -238,6 +238,10 @@ async function routeAdminRequest(
   if (route[0] === "version-inventory" && route.length === 1 && method === "GET") {
     requireRole(actor, "viewer");
     return inventorySummary(context.env);
+  }
+  if (route[0] === "version-inventory" && route[1] === "detail" && route.length === 2 && method === "GET") {
+    requireRole(actor, "viewer");
+    return inventoryDetails(context.env, url);
   }
 
   if (route[0] === "delta" && route[1] === "activity" && route.length === 2 && method === "GET") {

@@ -5,6 +5,8 @@ import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -26,11 +28,15 @@ class VersionInventoryService extends GetxService with WidgetsBindingObserver {
     InventorySender? sender,
     DateTime Function()? clock,
     bool? supported,
+    Future<Map<String, dynamic>?> Function()? readPhoneMetadata,
+    Future<Map<String, dynamic>?> Function()? readQualitySummary,
     this.runtimeActivity = const [],
   })  : endpoint = endpoint ?? _configuredEndpoint(),
         _sender = sender ?? _send,
         _clock = clock ?? DateTime.now,
-        _supported = supported ?? Platform.isAndroid;
+        _supported = supported ?? Platform.isAndroid,
+        _readPhone = readPhoneMetadata ?? _phoneMetadata,
+        _readQuality = readQualitySummary ?? _qualitySummary;
 
   static const _prefix = 'version_inventory_v1_';
   static const _day = Duration(days: 1);
@@ -41,6 +47,9 @@ class VersionInventoryService extends GetxService with WidgetsBindingObserver {
   final InventorySender _sender;
   final DateTime Function() _clock;
   final bool _supported;
+  final Future<Map<String, dynamic>?> Function() _readPhone, _readQuality;
+  Map<String, dynamic>? _phone;
+  bool _phoneRead = false;
   final List<Stream<bool>> runtimeActivity;
   final List<StreamSubscription<bool>> _activitySubscriptions = [];
   final enabled = true.obs;
@@ -66,6 +75,30 @@ class VersionInventoryService extends GetxService with WidgetsBindingObserver {
   bool _closed = false;
   bool _foreground = true;
   bool _pending = false;
+
+  static Future<Map<String, dynamic>?> _phoneMetadata() async {
+    if (!Platform.isAndroid) return null;
+    try {
+      final phone = await DeviceInfoPlugin().androidInfo;
+      String? bounded(String value, int length) {
+        final clean = value.replaceAll(RegExp(r'[\x00-\x1f\x7f]'), '').trim();
+        return clean.isEmpty ? null : clean.substring(0, clean.length < length ? clean.length : length);
+      }
+      return {'brand': bounded(phone.brand, 80), 'model': bounded(phone.model, 80),
+        'osVersion': bounded('${phone.version.release} (SDK ${phone.version.sdkInt})', 64)};
+    } catch (_) { return null; }
+  }
+
+  static Future<Map<String, dynamic>?> _qualitySummary() async {
+    if (!Platform.isAndroid) return null;
+    try {
+      final snapshot = await const MethodChannel('trace/companion').invokeMapMethod<String, dynamic>('diagnostics');
+      final value = snapshot?['quality'];
+      if (value is! Map || value['scope'] != 'companion-day' ||
+          !RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(value['day']?.toString() ?? '')) return null;
+      return Map<String, dynamic>.from(value);
+    } catch (_) { return null; }
+  }
 
   static Uri? _configuredEndpoint() {
     const source = ShareLinks.cloudflareUpdateManifestUrl;
@@ -268,6 +301,11 @@ class VersionInventoryService extends GetxService with WidgetsBindingObserver {
       final now = _clock().toUtc();
       if (!enabled.value || _closed || !_foreground || !canReport() || (_retryAfter?.isAfter(now) ?? false)) return;
       _app ??= await readAppIdentity();
+      if (!_phoneRead) {
+        try { _phone = await _readPhone().timeout(const Duration(seconds: 2)); }
+        catch (_) { _phone = null; }
+        _phoneRead = true;
+      }
       if (!enabled.value || _closed || !_foreground || !canReport()) return;
       final app = _app!;
       if (app['versionCode'] is! int || app['versionName'] is! String ||
@@ -281,7 +319,7 @@ class VersionInventoryService extends GetxService with WidgetsBindingObserver {
       }).map((d) => Map<String, dynamic>.from(d)).toList();
       devices.sort((a, b) => (a['deviceKey'] as String).compareTo(b['deviceKey'] as String));
       // Daily coalescing ignores a fresh read of an otherwise unchanged MCU.
-      final state = jsonEncode([app, devices.map((d) => {...d}..remove('observationId')..remove('observedAt')).toList()]);
+      final state = jsonEncode([app, _phone, devices.map((d) => {...d}..remove('observationId')..remove('observedAt')).toList()]);
       var due = state != _lastState || _lastReport == null || now.isBefore(_lastReport!) || now.difference(_lastReport!) >= _day;
       _cancel = CancelToken();
       if (!due && (_lastControl == null || now.difference(_lastControl!) >= _controlInterval)) {
@@ -302,10 +340,16 @@ class VersionInventoryService extends GetxService with WidgetsBindingObserver {
       await _prefs!.setInt('${_prefix}sequence', sequence);
       if (_closed || !enabled.value || !_foreground || !canReport() || _cancel!.isCancelled) return;
       final body = <String, dynamic>{'appId': ShareLinks.appId, 'platform': 'android', 'sequence': sequence,
-        ...app, 'devices': devices.map((d) {
+        ...app, if (_phone != null) 'phone': _phone, 'devices': devices.map((d) {
           final observed = DateTime.parse(d.remove('observedAt') as String);
           return {...d, 'ageSeconds': now.difference(observed).inSeconds};
         }).toList()};
+      // Quality is a daily snapshot, not a reason to send on every connection event.
+      Map<String, dynamic>? quality;
+      try { quality = await _readQuality().timeout(const Duration(seconds: 2)); }
+      catch (_) { quality = null; }
+      if (quality != null) body['quality'] = quality;
+      if (_closed || !enabled.value || !_foreground || !canReport() || _cancel!.isCancelled) return;
       final result = await _sender(endpoint!, body, _token, _cancel!);
       if (_closed || !enabled.value || !_foreground || _cancel!.isCancelled) return;
       final accepted = result['accepted'] == true;

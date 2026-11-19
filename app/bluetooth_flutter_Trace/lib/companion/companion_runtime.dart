@@ -14,18 +14,21 @@ import '../controllers/monitor_controller.dart';
 import '../utils/permission_helper.dart';
 import 'companion_platform.dart';
 import 'companion_protocol.dart';
+import 'companion_recovery.dart';
 
 typedef _ControlBinding = ({String address, String session, int generation, int epoch});
 
 /// Page-independent gateway. Android owns scheduling/liveness; OtaService owns IO.
 class CompanionRuntime extends GetxService {
   CompanionRuntime({CompanionPlatform? platform, BluetoothService? bluetooth, OtaService? ota,
-      Future<bool> Function()? checkBluetoothPermissions, this.onShowUi})
+      Future<bool> Function()? checkBluetoothPermissions, this.onShowUi,
+      this.recoveryDeadline = const Duration(seconds: 25)})
       : platform = platform ?? CompanionPlatform(),
         _checkBluetoothPermissions = checkBluetoothPermissions ?? PermissionHelper.checkBluetoothPermissions,
         _bluetooth = bluetooth, _otaService = ota;
 
   final CompanionPlatform platform;
+  final Duration recoveryDeadline;
   final void Function()? onShowUi;
   final BluetoothService? _bluetooth;
   final OtaService? _otaService;
@@ -44,6 +47,7 @@ class CompanionRuntime extends GetxService {
   int? _pendingDeviceCheck;
   String? _runtime, _revision, _address, _session;
   int _link = -1, _epoch = 0, _lastDeviceRequest = 0;
+  int _stateSequence = 0;
   bool _closed = false, _supportsControl = false, _controlDirty = true;
   Completer<bool>? _capabilities;
   Completer<bool>? _offerAcknowledged;
@@ -51,6 +55,9 @@ class CompanionRuntime extends GetxService {
   SharedPreferences? _preferences;
   Timer? _telemetryTimer;
   bool _telemetryBusy = false;
+  CompanionRecoveryAttempt? _recovery;
+  Future<bool>? _recoveryCleanup;
+  bool _recoveryBlocked = false;
 
   static String _nonce() => List.generate(16, (_) => Random.secure().nextInt(256))
       .map((n) => n.toRadixString(16).padLeft(2, '0')).join();
@@ -93,7 +100,7 @@ class CompanionRuntime extends GetxService {
     });
     try {
       _preferences = await SharedPreferences.getInstance();
-      await _ble.initBluetooth();
+      await _ble.initBluetooth().timeout(const Duration(seconds: 8));
     } catch (_) { status.value = 'RUNTIME_INITIALIZATION_FAILED'; }
     if (_closed) return;
     // A denied/unavailable adapter must not strand the engine's next wake.
@@ -115,8 +122,9 @@ class CompanionRuntime extends GetxService {
     if (call.method != 'wake' || args['runtimeId'] is! String || args['revision'] is! String ||
         args['address'] is! String || !RegExp(r'^[0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){5}$').hasMatch(args['address'] as String)) { return false; }
     final wake = Map<String, dynamic>.from(args);
+    if (_recoveryBlocked) return false;
     if (_runtime != wake['runtimeId']) {
-      if (_ota.isUpgrading || _wakeFlight != null || _checkFlight != null || _choiceFlight != null || _stopFlight != null) return false;
+      if (_ota.isUpgrading || _wakeFlight != null || _checkFlight != null || _choiceFlight != null || _stopFlight != null || _recoveryCleanup != null) return false;
       await _stop(disconnect: false);
       if (_closed || _runtime != null) return false;
       _runtime = wake['runtimeId'] as String;
@@ -132,6 +140,7 @@ class CompanionRuntime extends GetxService {
   }
 
   void _queueWake(Map<String, dynamic> wake) {
+    if (_recoveryBlocked) return;
     if (_wakeFlight != null || _checkFlight != null || _choiceFlight != null || _ota.isUpgrading) {
       // Preserve a manual/periodic request while another owner completes.
       if (_pendingWake == null || wake['reason'] == 'manual' || wake['checkPending'] == true) _pendingWake = wake;
@@ -181,55 +190,11 @@ class CompanionRuntime extends GetxService {
 
   Future<void> _wake(Map<String, dynamic> wake) async {
     final epoch = _epoch;
-    final address = _address!, runtime = _runtime!;
+    final address = _address!;
     _preferences ??= await SharedPreferences.getInstance();
     if (!_current(epoch)) return;
-    await _ble.initBluetooth();
-    if (!_current(epoch)) return;
-    if (!await _state('CONNECTING', busy: true) || !_current(epoch)) return;
     final reconnecting = !_sameLink();
-    if (reconnecting) {
-      _invalidateLink();
-      final connected = await _ble.connectCompanionDeviceByAddress(address);
-      if (!_current(epoch)) return;
-      if (!connected) {
-        await _state('DEVICE_OFFLINE', busy: false); return;
-      }
-      final generation = _ble.otaLinkGeneration(address);
-      final info = await _ota.readDeviceInfo(address, companionRuntimeId: runtime);
-      if (!_current(epoch)) return;
-      if (generation != _ble.otaLinkGeneration(address)) {
-        _queueWake({...wake, 'reason': 'recovery'});
-        return;
-      }
-      if (info == null) { await _state('DEVICE_IDENTITY_UNAVAILABLE', busy: false); return; }
-      _link = generation;
-      _session = _nonce();
-      _lastDeviceRequest = 0;
-      final binding = _captureBinding();
-      if (binding == null) return;
-      await _connection?.cancel();
-      if (!_bindingCurrent(binding)) return;
-      _connection = _ble.otaDeviceForObservation(address).connectionState.listen((state) {
-        if (!_ownsBinding(binding)) return;
-        if (state == BluetoothConnectionState.disconnected || _ble.otaLinkGeneration(address) != binding.generation) {
-          _invalidateLink();
-          _queueWake({...wake, 'reason': 'recovery'});
-        }
-      }, onError: (Object _) {
-        if (_ownsBinding(binding)) { _invalidateLink(); _queueWake({...wake, 'reason': 'recovery'}); }
-      });
-      if (!await _state('CONNECTED', busy: true) || !_bindingCurrent(binding)) return;
-      await _attachControl();
-      if (!_bindingCurrent(binding)) return;
-      final capabilities = Completer<bool>();
-      _capabilities = capabilities;
-      await _send(CompanionMessage('HELLO', binding.session, 0));
-      final supported = await capabilities.future.timeout(const Duration(seconds: 3), onTimeout: () => false);
-      if (identical(_capabilities, capabilities)) _capabilities = null;
-      if (!_bindingCurrent(binding)) return;
-      _supportsControl = supported;
-    }
+    if (reconnecting && !await _recoverConnection(wake)) return;
     if (!_current(epoch) || !_sameLink()) return;
     final binding = _captureBinding();
     if (binding == null) return;
@@ -245,6 +210,117 @@ class CompanionRuntime extends GetxService {
     } else {
       await _state(_supportsControl ? 'CONNECTED' : 'DEVICE_CONTROL_UNSUPPORTED', busy: false);
     }
+  }
+
+  Future<bool> _recoverConnection(Map<String, dynamic> wake) async {
+    final epoch = _epoch, address = _address!, runtime = _runtime!;
+    if (!_ota.beginCompanionConnection(runtime)) return false;
+    var releaseAdmission = false;
+    final attempt = CompanionRecoveryAttempt(_nonce(), recoveryDeadline);
+    _recovery = attempt;
+    bool current() => attempt.current && _current(epoch) && identical(_recovery, attempt);
+    Future<void> stage(String value) async {
+      if (!current()) throw CompanionRecoveryExpired(attempt.stage);
+      attempt.stage = value;
+      if (!await attempt.wait(_state(value, busy: true)) || !current()) throw CompanionRecoveryExpired(value);
+    }
+    try {
+      await _diagnostic('RECOVERY_STARTED', attempt, trigger: wake['reason'] as String?);
+      _invalidateLink();
+      await stage('INITIALIZING');
+      await attempt.wait(_ble.initBluetooth());
+      if (!current()) throw CompanionRecoveryExpired(attempt.stage);
+      if (!await attempt.wait(_ble.beginCompanionRecovery(address, runtime, attempt.id))) throw StateError('LINK_OWNER_BUSY');
+      await stage('CONNECTING');
+      if (!await attempt.wait(_ble.connectCompanionDeviceByAddress(address))) throw StateError('DEVICE_OFFLINE');
+      if (!current()) throw CompanionRecoveryExpired(attempt.stage);
+      final generation = _ble.otaLinkGeneration(address);
+      await stage('DISCOVERING');
+      final info = await attempt.wait(_ota.readCompanionDeviceInfo(address, runtime, stage));
+      if (!current()) throw CompanionRecoveryExpired(attempt.stage);
+      if (generation != _ble.otaLinkGeneration(address)) {
+        throw StateError('LINK_GENERATION_CHANGED');
+      }
+      if (info == null) throw StateError('DEVICE_IDENTITY_UNAVAILABLE');
+      _link = generation;
+      _session = _nonce();
+      _lastDeviceRequest = 0;
+      final binding = _captureBinding();
+      if (binding == null) throw StateError('LINK_GENERATION_CHANGED');
+      await attempt.wait(_connection?.cancel() ?? Future<void>.value());
+      if (!current() || !_bindingCurrent(binding)) throw StateError('LINK_GENERATION_CHANGED');
+      _connection = _ble.otaDeviceForObservation(address).connectionState.listen((state) {
+        if (!_ownsBinding(binding)) return;
+        if (state == BluetoothConnectionState.disconnected || _ble.otaLinkGeneration(address) != binding.generation) {
+          _invalidateLink();
+          _queueWake({...wake, 'reason': 'recovery'});
+        }
+      }, onError: (Object _) {
+        if (_ownsBinding(binding)) { _invalidateLink(); _queueWake({...wake, 'reason': 'recovery'}); }
+      });
+      await stage('NEGOTIATING_CONTROL');
+      await attempt.wait(_attachControl());
+      if (!current() || !_bindingCurrent(binding)) throw StateError('LINK_GENERATION_CHANGED');
+      final capabilities = Completer<bool>();
+      _capabilities = capabilities;
+      await attempt.wait(_send(CompanionMessage('HELLO', binding.session, 0)));
+      final supported = await attempt.wait(capabilities.future.timeout(const Duration(seconds: 3), onTimeout: () => false));
+      if (identical(_capabilities, capabilities)) _capabilities = null;
+      if (!current() || !_bindingCurrent(binding)) throw StateError('LINK_GENERATION_CHANGED');
+      _supportsControl = supported;
+      if (!await attempt.wait(_ble.finishCompanionRecovery(address, attempt.id))) throw StateError('GATT_RETIREMENT_UNCONFIRMED');
+      attempt.finish();
+      if (identical(_recovery, attempt)) _recovery = null;
+      releaseAdmission = true;
+      await _diagnostic('RECOVERY_CONNECTED', attempt);
+      return await _state('CONNECTED', busy: true);
+    } catch (error) {
+      final failedStage = attempt.stage;
+      attempt.cancel();
+      _invalidateLink();
+      if (!_current(epoch)) return false; // The stop path owns physical retirement.
+      await _diagnostic('RECOVERY_FAILED', attempt, error: error);
+      final code = error is CompanionRecoveryExpired || error is TimeoutException ? 'CONNECTION_TIMEOUT'
+          : error is StateError && error.message == 'DEVICE_IDENTITY_UNAVAILABLE' ? 'DEVICE_IDENTITY_UNAVAILABLE'
+          : error is StateError && error.message == 'DEVICE_OFFLINE' ? 'DEVICE_OFFLINE' : 'CONNECTION_FAILED';
+      await _state('RECOVERY_CLEANUP', busy: true, stage: failedStage);
+      var cleaned = false;
+      try { cleaned = await _cleanupRecovery(address, runtime, attempt).timeout(const Duration(seconds: 4)); }
+      catch (_) { cleaned = false; }
+      _recoveryBlocked = !cleaned;
+      releaseAdmission = cleaned;
+      if (_current(epoch)) await _state(cleaned ? code : 'RECOVERY_CLEANUP_UNCONFIRMED', busy: false, stage: failedStage);
+      return false;
+    } finally {
+      attempt.finish();
+      if (identical(_recovery, attempt)) _recovery = null;
+      if (releaseAdmission) _ota.endCompanionConnection(runtime);
+    }
+  }
+
+  Future<bool> _cleanupRecovery(String address, String runtime, CompanionRecoveryAttempt attempt) {
+    final active = _recoveryCleanup;
+    if (active != null) return active;
+    late final Future<bool> cleanup;
+    cleanup = _ota.retireCompanionConnection(runtime, () => _ble.cancelCompanionRecovery(address, attempt.id)).then((ok) {
+      if (ok) { _recoveryBlocked = false; _ota.endCompanionConnection(runtime); }
+      return ok;
+    })
+      .whenComplete(() { if (identical(_recoveryCleanup, cleanup)) _recoveryCleanup = null; });
+    _recoveryCleanup = cleanup;
+    return cleanup;
+  }
+
+  Future<void> _diagnostic(String value, CompanionRecoveryAttempt attempt, {Object? error, String? trigger}) async {
+    final runtime = _runtime;
+    if (runtime == null) return;
+    final code = error is PlatformException ? error.details is int ? error.details : error.code
+        : error is StateError ? error.message : null;
+    try {
+      await platform.channel.invokeMethod<Object?>('diagnostic', {'runtimeId': runtime, 'revision': _revision,
+        'status': value, 'stage': attempt.stage, 'elapsedMs': attempt.elapsedMs, 'trigger': trigger,
+        'errorType': error?.runtimeType.toString(), 'errorCode': code}).timeout(const Duration(seconds: 1));
+    } catch (_) { /* Local diagnostics never block recovery. */ }
   }
 
   void _invalidateLink() {
@@ -493,17 +569,21 @@ class CompanionRuntime extends GetxService {
     } finally { _drainWake(); }
   }
 
-  Future<bool> _state(String value, {required bool busy, bool checkFinished = false}) async {
+  Future<bool> _state(String value, {required bool busy, bool checkFinished = false, String? stage}) async {
     final runtime = _runtime, address = _address;
     if (runtime == null || address == null) return false;
+    final sequence = ++_stateSequence;
     status.value = value;
     var accepted = false;
     try {
-      accepted = await platform.channel.invokeMethod<bool>('state', {'runtimeId': runtime, 'revision': _revision,
+      accepted = await platform.channel.invokeMethod<bool>('state', {'runtimeId': runtime, 'revision': _revision, 'stateSequence': sequence,
         'status': value, 'connected': _sameLink(), 'busy': busy,
+        'recoveryBusy': _recovery?.current == true, 'recoveryId': _recovery?.id,
+        'stage': stage ?? _recovery?.stage, 'elapsedMs': _recovery?.elapsedMs,
         'deviceToken': sha256.convert(utf8.encode(address)).toString(), 'checkFinished': checkFinished}) == true;
     } catch (_) { accepted = false; }
     if (_runtime != runtime) return false;
+    if (sequence != _stateSequence) return false;
     if (!accepted) {
       await _stop();
       status.value = 'NATIVE_OWNER_UNAVAILABLE';
@@ -524,7 +604,9 @@ class CompanionRuntime extends GetxService {
 
   Future<void> _stopNow({required bool disconnect}) async {
     final address = _address, runtime = _runtime;
+    final recovery = _recovery;
     _runtime = null; _revision = null; _address = null; _epoch++;
+    recovery?.cancel();
     final epoch = _epoch;
     _telemetryTimer?.cancel(); _telemetryTimer = null;
     _ble.companionOwnerChanged(null);
@@ -537,6 +619,12 @@ class CompanionRuntime extends GetxService {
     if (disconnect && address != null && runtime != null) {
       status.value = 'STOPPING_TASK';
       try {
+        if (recovery != null) {
+          final released = await _cleanupRecovery(address, runtime, recovery).timeout(const Duration(seconds: 4));
+          if (!released) { status.value = 'STOP_CLEANUP_UNCONFIRMED'; return; }
+          if (epoch == _epoch) status.value = 'STOPPED';
+          return;
+        }
         final released = await _ota.releaseCompanionTask(runtime).timeout(const Duration(minutes: 5));
         if (epoch != _epoch || _runtime != null) return;
         if (released && !_ota.isUpgrading) await _ble.disconnectCompanionDeviceByAddress(address);

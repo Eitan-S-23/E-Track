@@ -5,10 +5,13 @@ import 'package:get/get.dart';
 
 import '../services/feedback_service.dart';
 import 'trace_ui.dart';
+import 'companion_diagnostics_page.dart';
 
 class FeedbackPage extends StatefulWidget {
-  const FeedbackPage({super.key, this.service});
+  const FeedbackPage({super.key, this.service, this.diagnosticsSupported, this.readDiagnostics});
   final FeedbackService? service;
+  final bool? diagnosticsSupported;
+  final Future<CompanionDiagnosticSnapshot> Function()? readDiagnostics;
   @override
   State<FeedbackPage> createState() => _FeedbackPageState();
 }
@@ -17,6 +20,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
   late final FeedbackService _service;
   final _text = TextEditingController();
   bool _saving = false, _leaving = false;
+  bool _attachDiagnostics = false;
+  bool get _diagnosticsSupported => widget.diagnosticsSupported ?? companionDiagnosticsSupported;
   String? _notice;
 
   @override
@@ -54,7 +59,12 @@ class _FeedbackPageState extends State<FeedbackPage> {
     if (_saving) return;
     setState(() { _saving = true; _notice = null; });
     try {
-      await _service.add(_text.text);
+      var body = _text.text;
+      if (_attachDiagnostics) {
+        final diagnostics = await (widget.readDiagnostics ?? CompanionDiagnosticSnapshot.read)();
+        body += diagnostics.excerpt(2000 - body.length);
+      }
+      await _service.add(body);
       if (!mounted) return;
       _text.clear();
       setState(() { _notice = '\u5df2\u4fdd\u5b58\u3002\u53d1\u9001\u6210\u529f\u540e\u4f1a\u79fb\u5165\u201c\u5df2\u63d0\u4ea4\u201d\u3002'; });
@@ -111,17 +121,27 @@ class _FeedbackPageState extends State<FeedbackPage> {
             const Text('\u63cf\u8ff0\u9047\u5230\u7684\u95ee\u9898\u6216\u4f60\u7684\u5efa\u8bae', style: TextStyle(color: TraceColors.text, fontSize: 20)),
             const SizedBox(height: 12),
             TextField(key: const ValueKey('feedback-text'), controller: _text,
-              maxLength: 2000, minLines: 5, maxLines: 10, enabled: !_saving,
+              maxLength: _attachDiagnostics ? 1200 : 2000, minLines: 5, maxLines: 10, enabled: !_saving,
               style: const TextStyle(color: TraceColors.text),
               decoration: const InputDecoration(hintText: '\u53ef\u4ee5\u8bf4\u660e\u64cd\u4f5c\u6b65\u9aa4\u3001\u9884\u671f\u7ed3\u679c\u548c\u5b9e\u9645\u8868\u73b0\u3002\u8bf7\u52ff\u586b\u5199\u5bc6\u7801\u7b49\u654f\u611f\u4fe1\u606f\u3002',
                 hintStyle: TextStyle(color: TraceColors.muted), counterStyle: TextStyle(color: TraceColors.muted),
                 border: OutlineInputBorder())),
             const SizedBox(height: 8),
-            const Text('\u4ec5\u63d0\u4ea4\u4f60\u586b\u5199\u7684\u6587\u5b57\u548c App \u7248\u672c\u3001\u5e73\u53f0\u4fe1\u606f\uff0c\u4e0d\u81ea\u52a8\u9644\u5e26\u65e5\u5fd7\u6216\u6587\u4ef6\u3002\u670d\u52a1\u5668\u4fdd\u7559\u53cd\u9988\u6b63\u6587 90 \u5929\u3002',
+            const Text('\u63d0\u4ea4\u586b\u5199\u7684\u6587\u5b57\u548c App \u7248\u672c\u3001\u5e73\u53f0\u4fe1\u606f\u3002\u53ea\u6709\u52fe\u9009\u4e0b\u65b9\u9009\u9879\u624d\u9644\u5e26\u6700\u8fd1\u7684\u8131\u654f\u8fde\u63a5\u8bca\u65ad\u6458\u8981\uff0c\u4e0d\u9644\u5e26\u6587\u4ef6\u3002\u53cd\u9988\u6b63\u6587\u4fdd\u7559 90 \u5929\u3002',
               style: TextStyle(color: TraceColors.muted, height: 1.5)),
+            if (_diagnosticsSupported) CheckboxListTile(
+              key: const ValueKey('feedback-attach-diagnostics'), contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading, activeColor: TraceColors.mint,
+              title: const Text('\u9644\u5e26\u6700\u8fd1\u8fde\u63a5\u8bca\u65ad', style: TextStyle(color: TraceColors.text)),
+              subtitle: const Text('\u4e0d\u5305\u542b\u84dd\u7259\u5730\u5740\u3001\u5bc6\u94a5\u6216\u4e0b\u8f7d\u94fe\u63a5\uff1b\u6b63\u6587\u9884\u7559 800 \u5b57\u7ed9\u6458\u8981\u3002', style: TextStyle(color: TraceColors.muted)),
+              value: _attachDiagnostics, onChanged: _saving ? null : (value) => setState(() { _attachDiagnostics = value == true; })),
+            if (_diagnosticsSupported) TextButton.icon(
+              onPressed: _saving ? null : () => Get.to<void>(() => const CompanionDiagnosticsPage()),
+              icon: const Icon(Icons.manage_search), label: const Text('\u67e5\u770b\u8fde\u63a5\u8bca\u65ad')),
             const SizedBox(height: 12),
             FilledButton.icon(key: const ValueKey('feedback-submit'),
-              onPressed: !_service.available || !_service.ready.value || _saving || _text.text.trim().isEmpty ? null : _save,
+              onPressed: !_service.available || !_service.ready.value || _saving || _text.text.trim().isEmpty ||
+                  (_attachDiagnostics && _text.text.length > 1200) ? null : _save,
               icon: const Icon(Icons.send_outlined), label: Text(_saving ? '\u6b63\u5728\u4fdd\u5b58' : '\u63d0\u4ea4\u53cd\u9988')),
             const Text('\u6bcf\u5929\u6700\u591a\u63d0\u4ea4\u4e00\u6279\uff0810 \u6761\uff09\uff0c\u540c\u4e00\u51fa\u53e3 IP \u6bcf\u5929\u5171\u4eab 50 \u6279\u989d\u5ea6\u3002\u8d85\u989d\u6216\u79bb\u7ebf\u65f6\u5148\u4fdd\u5b58\u5728\u672c\u673a\uff0c\u4e0b\u6b21\u524d\u53f0\u8054\u7f51\u540e\u518d\u53d1\u9001\u3002',
               style: TextStyle(color: TraceColors.muted, fontSize: 12, height: 1.5)),

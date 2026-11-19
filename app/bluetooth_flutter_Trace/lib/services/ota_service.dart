@@ -477,6 +477,45 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     }
     return _ownerEpoch == epoch && !isUpgrading;
   }
+
+  String? _retiringCompanionConnection;
+  String? _recoveringCompanionConnection;
+
+  bool beginCompanionConnection(String runtimeId) {
+    if (isUpgrading || _retiringCompanionConnection != null || _recoveringCompanionConnection != null) return false;
+    _recoveringCompanionConnection = runtimeId;
+    return true;
+  }
+  void endCompanionConnection(String runtimeId) {
+    if (_recoveringCompanionConnection == runtimeId) _recoveringCompanionConnection = null;
+  }
+
+  /// Keep admission closed until both query cancellation and physical GATT
+  /// retirement acknowledge. Never close a transfer, END/apply or another owner.
+  Future<bool> retireCompanionConnection(String runtimeId, Future<bool> Function() closeGatt) async {
+    if (_retiringCompanionConnection != null ||
+        (isUpgrading && (_companionTaskRuntime != runtimeId || _operation != _OtaOperation.query))) return false;
+    _retiringCompanionConnection = runtimeId;
+    final epoch = _ownerEpoch;
+    try {
+      final result = await Future.wait([releaseCompanionTask(runtimeId), closeGatt()]);
+      return result.every((ok) => ok) && _ownerEpoch == epoch && !isUpgrading;
+    } finally { _retiringCompanionConnection = null; }
+  }
+
+  ({String runtime, Future<void> Function(String) stage})? _companionQueryObserver;
+  Future<DeviceOtaInfo?> readCompanionDeviceInfo(String address, String runtime,
+      Future<void> Function(String) stage) async {
+    final observer = (runtime: runtime, stage: stage);
+    _companionQueryObserver = observer;
+    try { return await readDeviceInfo(address, companionRuntimeId: runtime); }
+    finally { if (identical(_companionQueryObserver?.stage, stage)) _companionQueryObserver = null; }
+  }
+
+  Future<void> _queryStage(String value) async {
+    final observer = _companionQueryObserver;
+    if (observer != null && observer.runtime == _companionTaskRuntime) await observer.stage(value);
+  }
   final int _senderWindowSegments;
   final OtaLinkProfile linkProfile;
   OtaTransportSelection? _linkSelection;
@@ -756,6 +795,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
 
       stats?.phaseStart('bind');
       try {
+        await _queryStage('DISCOVERING');
+        if (generation != _cancelGeneration) return null;
         final otaChars = await _ble.findExactOtaCharacteristicsByAddress(
           deviceAddress,
           stats: stats,
@@ -769,6 +810,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           _upgradeStatus.value = '设备未暴露 OTA 服务（FFF0/FFF2/FFF1）';
           return fail('discover', 'ota-chars-missing');
         }
+        await _queryStage('SUBSCRIBING');
+        if (generation != _cancelGeneration) return null;
         final transport = await _bindTransport(deviceAddress, otaChars,
             stats: stats);
         stats?.phaseEnd('bind');
@@ -788,6 +831,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           _upgradeStatus.value = 'OTA 通知订阅失败';
           return fail('bind', 'notify-subscribe-failed');
         }
+        await _queryStage('VERIFYING_DEVICE');
+        if (generation != _cancelGeneration) return null;
         final info = await transport.getDeviceInfo();
         // 发布身份前取消检查（RC3-04）：取消后不发布新快照。
         if (generation != _cancelGeneration) {
@@ -2361,7 +2406,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   ///   覆盖取消终态。
   Future<T?> _runExclusive<T>(Future<T?> Function(int generation) body,
       {_OtaOperation operation = _OtaOperation.query, String? companionRuntimeId}) async {
-    if (_isUpgrading.value) {
+    if (_isUpgrading.value || _retiringCompanionConnection != null ||
+        (_recoveringCompanionConnection != null && companionRuntimeId != _recoveringCompanionConnection)) {
       _notify('提示', '操作进行中，请先取消或等待完成');
       return null;
     }

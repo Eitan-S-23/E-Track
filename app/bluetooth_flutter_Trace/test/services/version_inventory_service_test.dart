@@ -24,6 +24,7 @@ void main() {
   var controls = 0;
   var reads = 0;
   var invalidIdentity = false;
+  Map<String, dynamic>? phoneMetadata, qualitySummary;
   setUp(() {
     SharedPreferences.setMockInitialValues({});
     now = DateTime.utc(2026, 11, 11);
@@ -35,10 +36,13 @@ void main() {
     gate = null;
     acknowledgement = null;
     invalidIdentity = false;
+    phoneMetadata = null; qualitySummary = null;
     service = VersionInventoryService(
       supported: true, endpoint: Uri.parse('https://example.test/api/public/version-inventory'),
       clock: () => timerClock?.call() ?? now, canReport: () => allowed,
       runtimeActivity: [activity.stream],
+      readPhoneMetadata: () async => phoneMetadata,
+      readQualitySummary: () async => qualitySummary,
       readAppIdentity: () async {
         reads++;
         return {'versionCode': 100, 'versionName': '1.0.74',
@@ -103,6 +107,19 @@ void main() {
     // Drain the preference write, without advancing the five-second debounce timer.
     await Future<void>.delayed(Duration.zero);
   }
+
+  test('phone metadata and daily quality travel only with an otherwise due report', () async {
+    phoneMetadata = {'brand': 'Example', 'model': 'Model A', 'osVersion': '16 (SDK 36)'};
+    qualitySummary = {'scope': 'companion-day', 'day': '2026-11-11', 'connectionAttempts': 1};
+    await service.poll();
+    expect(sent.single['phone'], phoneMetadata); expect(sent.single['quality'], qualitySummary);
+    qualitySummary = {...qualitySummary!, 'connectionAttempts': 2};
+    await service.poll();
+    expect(sent, hasLength(1), reason: 'Quality counters must not cause per-connection network writes');
+    now = now.add(const Duration(days: 1));
+    await service.poll();
+    expect(sent, hasLength(2)); expect((sent.last['quality'] as Map)['connectionAttempts'], 2);
+  });
 
   test('coalesces daily reports and hashes the installed APK only once per process', () async {
     await service.poll();

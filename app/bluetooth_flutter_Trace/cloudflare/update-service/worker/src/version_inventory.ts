@@ -18,6 +18,44 @@ const DAY = 86400;
 const RETENTION = 90 * DAY;
 const HEX = /^[0-9a-f]{64}$/;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+const QUALITY_COUNTERS = ["connectionAttempts", "connectionSucceeded", "connectionFailed", "checksSucceeded", "checksFailed", "updatesSucceeded", "updatesFailed"] as const;
+
+function reportAddress(value: string | null): string | null {
+  if (!value || value.length > 45) return null;
+  if (value.includes(":")) {
+    if (!/^[0-9a-f:.]+$/i.test(value)) return null;
+    try { return new URL(`http://[${value}]/`).hostname.slice(1, -1); }
+    catch { return null; }
+  }
+  const octets = value.split(".");
+  return octets.length === 4 && octets.every(part => /^(0|[1-9]\d{0,2})$/.test(part) && Number(part) <= 255) ? value : null;
+}
+
+function textMetadata(value: unknown, name: string, maximum: number): string | null {
+  if (value === undefined || value === null) return null;
+  if (typeof value !== "string" || !value.trim() || value.length > maximum || /[\u0000-\u001f\u007f]/.test(value)) throw invalidParameter(`Invalid ${name}`);
+  return value.trim();
+}
+function phoneMetadata(value: unknown): { brand: string | null; model: string | null; osVersion: string | null } {
+  if (value === undefined || value === null) return { brand: null, model: null, osVersion: null };
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw invalidParameter("Invalid phone metadata");
+  const phone = value as Record<string, unknown>;
+  if (Object.keys(phone).some(key => !["brand", "model", "osVersion"].includes(key))) throw invalidParameter("Unknown phone metadata field");
+  return { brand: textMetadata(phone.brand, "phone brand", 80), model: textMetadata(phone.model, "phone model", 80),
+    osVersion: textMetadata(phone.osVersion, "OS version", 64) };
+}
+function qualityMetadata(value: unknown): Record<string, string | number> | null {
+  if (value === undefined || value === null) return null;
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw invalidParameter("Invalid quality summary");
+  const quality = value as Record<string, unknown>;
+  const date = typeof quality.day === "string" ? new Date(`${quality.day}T00:00:00Z`) : new Date(NaN);
+  if (quality.scope !== "companion-day" || typeof quality.day !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(quality.day) ||
+      !Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== quality.day ||
+      Object.keys(quality).some(key => !["scope", "day", ...QUALITY_COUNTERS].includes(key))) throw invalidParameter("Invalid quality scope");
+  const result: Record<string, string | number> = { scope: "companion-day", day: quality.day };
+  for (const key of QUALITY_COUNTERS) result[key] = integer(quality[key] ?? 0, key, 100000);
+  return result;
+}
 
 export async function sha256Text(value: string): Promise<string> {
   const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
@@ -93,6 +131,9 @@ export async function reportInventory(request: Request, env: PublicInventoryEnv,
   if (!token) throw new ApiError("TOKEN_INVALID", "Installation reporting token required", 401);
   const key = await sha256Text(token);
   const body = await boundedJson(request);
+  if (Object.keys(body).some(key => !["appId", "platform", "sequence", "versionCode", "versionName", "imageSha256", "devices", "phone", "quality"].includes(key))) {
+    throw invalidParameter("Unknown inventory field");
+  }
   if (body.appId !== env.APP_ID || body.platform !== "android") throw invalidParameter("Unsupported reporting scope");
   const sequence = integer(body.sequence, "sequence", Number.MAX_SAFE_INTEGER);
   if (!sequence) throw invalidParameter("Positive sequence required");
@@ -100,6 +141,8 @@ export async function reportInventory(request: Request, env: PublicInventoryEnv,
   const versionName = body.versionName;
   if (typeof versionName !== "string" || !/^[\w.+-]{1,64}$/.test(versionName)) throw invalidParameter("Invalid versionName");
   const imageSha = digest(body.imageSha256, "imageSha256");
+  const phone = phoneMetadata(body.phone), quality = qualityMetadata(body.quality);
+  const reportIp = reportAddress(request.headers.get("CF-Connecting-IP"));
   if (!Array.isArray(body.devices) || body.devices.length > 4) throw invalidParameter("At most four device observations required");
   const devices: DeviceReport[] = body.devices.map((value: unknown) => {
     if (!value || typeof value !== "object" || Array.isArray(value)) throw invalidParameter("Invalid device observation");
@@ -113,8 +156,11 @@ export async function reportInventory(request: Request, env: PublicInventoryEnv,
   });
   if (new Set(devices.map(d => d.deviceKey)).size !== devices.length) throw invalidParameter("Duplicate device observation");
   // Exclude the increasing age of a cached observation from retry identity.
-  const stateHash = await sha256Text(JSON.stringify([versionCode, versionName, imageSha,
-    devices.map(({ ageSeconds: _age, ...identity }) => identity).sort((a, b) => a.deviceKey.localeCompare(b.deviceKey))]));
+  const identity: unknown[] = [versionCode, versionName, imageSha,
+    devices.map(({ ageSeconds: _age, ...deviceIdentity }) => deviceIdentity).sort((a, b) => a.deviceKey.localeCompare(b.deviceKey))];
+  // Preserve the pre-migration retry fingerprint for legacy reports.
+  if (body.phone !== undefined || body.quality !== undefined) identity.push(phone, quality);
+  const stateHash = await sha256Text(JSON.stringify(identity));
   const current = await control(env);
   const readInstallation = () => env.DB.prepare("SELECT sequence,state_hash,last_seen,report_day,day_count,refresh_id FROM version_inventory_installations WHERE install_key=?")
     .bind(key).first<Installation>();
@@ -135,13 +181,17 @@ export async function reportInventory(request: Request, env: PublicInventoryEnv,
   if (previous?.report_day === day && previous.day_count >= 8) throw new ApiError("RATE_LIMITED", "Installation daily reporting limit", 429);
   if (previous && previous.state_hash === stateHash && previous.refresh_id === current.refresh_id && now - previous.last_seen < DAY) return response(false);
   const statements = [env.DB.prepare(`INSERT INTO version_inventory_installations
-    (install_key,platform,version_code,version_name,image_sha256,sequence,state_hash,first_seen,last_seen,refresh_id,report_day,day_count)
-    VALUES (?,'android',?,?,?,?,?,?,?,?,?,1) ON CONFLICT(install_key) DO UPDATE SET
+    (install_key,platform,version_code,version_name,image_sha256,sequence,state_hash,first_seen,last_seen,refresh_id,report_day,day_count,
+      phone_brand,phone_model,os_version,report_ip,quality_json)
+    VALUES (?,'android',?,?,?,?,?,?,?,?,?,1,?,?,?,?,?) ON CONFLICT(install_key) DO UPDATE SET
     version_code=excluded.version_code,version_name=excluded.version_name,image_sha256=excluded.image_sha256,
     sequence=excluded.sequence,state_hash=excluded.state_hash,last_seen=excluded.last_seen,refresh_id=excluded.refresh_id,
+    phone_brand=excluded.phone_brand,phone_model=excluded.phone_model,os_version=excluded.os_version,
+    report_ip=excluded.report_ip,quality_json=excluded.quality_json,
     report_day=excluded.report_day,day_count=CASE WHEN report_day=excluded.report_day THEN day_count+1 ELSE 1 END
     WHERE version_inventory_installations.sequence < excluded.sequence`)
-    .bind(key, versionCode, versionName, imageSha, sequence, stateHash, now, now, current.refresh_id, day)];
+    .bind(key, versionCode, versionName, imageSha, sequence, stateHash, now, now, current.refresh_id, day,
+      phone.brand, phone.model, phone.osVersion, reportIp, quality ? JSON.stringify(quality) : null)];
   for (const d of devices) statements.push(env.DB.prepare(`INSERT INTO version_inventory_devices
     (install_key,device_key,identity_scope,device_model,version_code,image_sha256,hardware_revision,layout_id,observation_id,observed_at)
     SELECT ?,?,'installation',?,?,?,?,?,?,? WHERE EXISTS
@@ -188,6 +238,92 @@ export async function inventorySummary(env: InventoryEnv, now = Math.floor(Date.
     refreshId: current.refresh_id, refreshRequestedAt: current.requested_at, refreshResponses: current.requested_at ? responses?.n ?? 0 : 0,
     coverage: "reporting-installations-only", firmwareIdentityScope: "installation", uniqueDeviceCount: null,
     dailyReportLimit: current.daily_limit, retentionDays: 90 });
+}
+
+/** Access-authenticated, read-only detail. Its window and complete version scope
+ * match the aggregate row; IP is a network observation, never a person count. */
+export async function inventoryDetails(env: InventoryEnv, url: URL, now = Math.floor(Date.now() / 1000)): Promise<Response> {
+  enabled(env);
+  const query = url.searchParams, kind = query.get("kind");
+  const common = ["kind", "versionCode", "imageSha256", "windowDays", "limit", "cursor"];
+  const fields = kind === "app" ? ["platform", "versionName"] : kind === "firmware" ? ["deviceModel", "hardwareRevision", "layoutId"] : [];
+  if (!fields.length || [...query.keys()].some(key => ![...common, ...fields].includes(key) || query.getAll(key).length !== 1)) throw invalidParameter("Invalid inventory detail scope");
+  function number(key: string, maximum: number, fallback?: number) {
+    const value = query.get(key);
+    if (value === null && fallback !== undefined) return fallback;
+    if (value === null || !/^(0|[1-9][0-9]*)$/.test(value)) throw invalidParameter(`Invalid ${key}`);
+    return integer(Number(value), key, maximum);
+  }
+  const versionCode = number("versionCode", kind === "app" ? 2100000000 : 4294967295);
+  const imageSha256 = digest(query.get("imageSha256"), "imageSha256");
+  const windowDays = number("windowDays", 90, 30), limit = number("limit", 50, 20);
+  if (![7, 30, 90].includes(windowDays) || limit < 1) throw invalidParameter("Invalid detail window or limit");
+  const scope: Record<string, string | number> = { kind: kind!, versionCode, imageSha256 };
+  let from: string, where: string, seen: string, device: string;
+  const bindings: Array<string | number> = [versionCode, imageSha256];
+  if (kind === "app") {
+    if (query.get("platform") !== "android" || !/^[\w.+-]{1,64}$/.test(query.get("versionName") ?? "")) throw invalidParameter("Unsupported App detail scope");
+    scope.platform = "android"; scope.versionName = query.get("versionName")!;
+    from = "version_inventory_installations i";
+    where = "i.version_code=? AND i.image_sha256=? AND i.platform='android' AND i.version_name=? AND i.last_seen>=?";
+    bindings.push(scope.versionName, now - windowDays * DAY);
+    seen = "i.last_seen"; device = "''";
+  } else {
+    if (query.get("deviceModel") !== "e-track-at32f435") throw invalidParameter("Unsupported firmware detail scope");
+    scope.deviceModel = "e-track-at32f435";
+    scope.hardwareRevision = number("hardwareRevision", 65535); scope.layoutId = number("layoutId", 65535);
+    from = "version_inventory_devices d JOIN version_inventory_installations i ON i.install_key=d.install_key";
+    where = "d.version_code=? AND d.image_sha256=? AND d.device_model='e-track-at32f435' AND d.hardware_revision=? AND d.layout_id=? AND d.observed_at>=? AND i.last_seen>=?";
+    bindings.push(scope.hardwareRevision, scope.layoutId, now - windowDays * DAY, now - RETENTION);
+    seen = "d.observed_at"; device = "d.device_key";
+  }
+  let cursorWhere = "";
+  const cursorValues: Array<string | number> = [];
+  const cursor = query.get("cursor");
+  if (cursor !== null) {
+    const parts = cursor.split("|");
+    if (parts.length !== 3 || !/^[0-9]{1,12}$/.test(parts[0]) || !HEX.test(parts[1]) ||
+        (kind === "firmware" ? !HEX.test(parts[2]) : parts[2] !== "")) throw invalidParameter("Invalid detail cursor");
+    const timestamp = Number(parts[0]);
+    cursorWhere = ` AND (${seen},i.install_key,${device}) < (?,?,?)`;
+    cursorValues.push(timestamp, parts[1], parts[2]);
+  }
+  const select = (sql: string) => env.DB.prepare(sql).bind(...bindings);
+  const qualitySelect = `SELECT DISTINCT i.install_key,i.quality_json FROM ${from} WHERE ${where}`;
+  const statements = [
+    select(`SELECT COUNT(*) AS n,SUM(i.phone_model IS NULL) AS unknownModels,SUM(i.report_ip IS NULL) AS unknownIps FROM ${from} WHERE ${where}`),
+    select(`SELECT i.phone_brand AS brand,i.phone_model AS model,COUNT(*) AS count FROM ${from} WHERE ${where} AND i.phone_model IS NOT NULL
+      GROUP BY i.phone_brand,i.phone_model ORDER BY count DESC,model,brand LIMIT 5`),
+    select(`SELECT i.report_ip AS ip,COUNT(*) AS count FROM ${from} WHERE ${where} AND i.report_ip IS NOT NULL GROUP BY i.report_ip ORDER BY count DESC,ip LIMIT 10`),
+    select(`SELECT i.platform,i.version_code AS versionCode,i.version_name AS versionName,i.image_sha256 AS imageSha256,COUNT(*) AS count FROM ${from} WHERE ${where}
+      GROUP BY i.platform,i.version_code,i.version_name,i.image_sha256 ORDER BY count DESC,versionCode DESC,imageSha256 LIMIT 50`),
+    env.DB.prepare(`SELECT i.install_key AS installationKey,${device} AS deviceKey,${seen} AS observedAt,i.last_seen AS reportedAt,
+      i.phone_brand AS brand,i.phone_model AS model,i.os_version AS osVersion,i.report_ip AS ip,i.quality_json AS quality,
+      i.platform,i.version_code AS appVersionCode,i.version_name AS appVersionName,i.image_sha256 AS appImageSha256
+      FROM ${from} WHERE ${where}${cursorWhere} ORDER BY ${seen} DESC,i.install_key DESC,${device} DESC LIMIT ?`).bind(...bindings, ...cursorValues, limit + 1),
+    select(`SELECT COUNT(quality_json) AS samples,${QUALITY_COUNTERS.map(key => `COALESCE(SUM(json_extract(quality_json,'$.${key}')),0) AS ${key}`).join(",")}
+      FROM (${qualitySelect})`)
+  ];
+  const result = await env.DB.batch<Record<string, unknown>>(statements);
+  const totals = result[0].results[0] as { n: number; unknownModels: number | null; unknownIps: number | null };
+  const total = totals.n;
+  const withShare = (row: Record<string, unknown>) => ({ ...row, count: Number(row.count), share: total ? Number(row.count) / total : 0 });
+  const models = result[1].results.map(withShare), ips = result[2].results.map(withShare), associatedApps = result[3].results.map(withShare);
+  const records = result[4].results;
+  const visible = records.slice(0, limit), last = visible.at(-1);
+  const reports = visible.map(({ installationKey, deviceKey, quality, ...row }) => ({ ...row,
+    installationTag: String(installationKey).slice(0, 12), deviceTag: deviceKey ? String(deviceKey).slice(0, 12) : null,
+    quality: typeof quality === "string" ? JSON.parse(quality) : null }));
+  return json({ ok: true, generatedAt: now, scope, windowDays, sampleCount: total,
+    coverage: "reporting-installations-only", firmwareIdentityScope: "installation", uniqueDeviceCount: null,
+    models, unknownModels: totals.unknownModels ?? 0,
+    otherModels: total - (totals.unknownModels ?? 0) - models.reduce((sum, row) => sum + Number(row.count), 0),
+    ips, unknownIps: totals.unknownIps ?? 0,
+    otherIps: total - (totals.unknownIps ?? 0) - ips.reduce((sum, row) => sum + Number(row.count), 0),
+    associatedApps: kind === "firmware" ? associatedApps : [],
+    otherAssociatedApps: kind === "firmware" ? total - associatedApps.reduce((sum, row) => sum + Number(row.count), 0) : 0,
+    quality: { ...result[5].results[0], scope: "latest-reported-companion-days" }, reports,
+    nextCursor: records.length > limit && last ? `${last.observedAt}|${last.installationKey}|${last.deviceKey}` : null });
 }
 
 export async function refreshInventory(env: InventoryEnv, actor: string, body: Record<string, unknown>, now = Math.floor(Date.now() / 1000)): Promise<Response> {

@@ -210,6 +210,7 @@ jobs:
             app/bluetooth_flutter_Trace/build/app/test-results/testDebugUnitTest/TEST-com.wen.gaia.gaia.DeviceOtaServiceTest.xml
             app/bluetooth_flutter_Trace/build/app/test-results/testDebugUnitTest/TEST-com.wen.gaia.gaia.CompanionServiceTest.xml
             app/bluetooth_flutter_Trace/build/app/test-results/testDebugUnitTest/TEST-com.wen.gaia.gaia.CompanionIntegrationTest.xml
+            app/bluetooth_flutter_Trace/build/app/test-results/testDebugUnitTest/TEST-com.wen.gaia.gaia.CompanionGattPluginTest.xml
             app/bluetooth_flutter_Trace/build/app/reports/tests/testDebugUnitTest/**
           include-hidden-files: true
           if-no-files-found: error

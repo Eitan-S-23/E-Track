@@ -360,6 +360,42 @@ void main() {
     expect(ota.isUpgrading, isTrue);
     ota.foreignBusy = false;
   });
+
+  test('stalled first connect has an overall deadline and cannot publish a late link', () async {
+    runtime = CompanionRuntime(platform: CompanionPlatform(channel: channel, supported: true),
+      bluetooth: ble, ota: ota, recoveryDeadline: const Duration(milliseconds: 50));
+    ble.connectGate = Completer<void>();
+    await start(reason: 'recovery');
+    await until(() => runtime.status.value == 'CONNECTION_TIMEOUT');
+    expect(ble.connects, 1); expect(ble.disconnects, 1); expect(ota.reads, 0);
+    ble.connectGate!.complete();
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+    expect(ble.connected, isFalse); expect(ota.checks, 0);
+    ble.connectGate = null;
+    await wake('foreground');
+    await until(() => runtime.status.value == 'NO_UPDATE');
+    expect(ble.connects, 2);
+  });
+
+  test('failed INFO retires physical GATT before the next recovery', () async {
+    ota.failIdentity = true;
+    await start();
+    await until(() => runtime.status.value == 'DEVICE_IDENTITY_UNAVAILABLE');
+    expect(ble.disconnects, 1); expect(ota.checks, 0);
+    ota.failIdentity = false;
+    await wake('recovery');
+    await until(() => runtime.status.value == 'NO_UPDATE');
+    expect(ble.connects, 2); expect(ble.connected, isTrue);
+  });
+
+  test('cleanup rejection cannot acknowledge a new wake or start another connection', () async {
+    ota.failIdentity = true; ble.cleanupAccepted = false;
+    await start();
+    await until(() => runtime.status.value == 'RECOVERY_CLEANUP_UNCONFIRMED');
+    expect(await callback('wake', {'runtimeId': runtimeId, 'revision': 'revision-1',
+      'address': _address, 'reason': 'recovery'}), isFalse);
+    expect(ble.connects, 1);
+  });
 }
 
 FirmwareLatestInfo _latest() => FirmwareLatestInfo.parse({
@@ -386,6 +422,8 @@ class _Ble extends BluetoothService {
   final notifications = StreamController<List<int>>.broadcast(sync: true);
   bool connected = false, failFirstInitialization = false;
   bool reuse = false, completedSubscription = false;
+  bool cleanupAccepted = true;
+  Completer<void>? connectGate;
   _Gate? discoveryGate, subscriptionGate;
   final _gates = <_Gate>[];
   int _notifyOwner = 0;
@@ -397,6 +435,7 @@ class _Ble extends BluetoothService {
     device.states.add(BluetoothConnectionState.disconnected);
   }
   void releaseGates() {
+    if (connectGate != null && !connectGate!.isCompleted) connectGate!.complete();
     for (final gate in _gates) {
       if (!gate.release.isCompleted) gate.release.complete();
     }
@@ -421,7 +460,15 @@ class _Ble extends BluetoothService {
   }
   @override
   Future<bool> connectCompanionDeviceByAddress(String address) async {
-    connects++; connected = true; generation++; return true;
+    connects++; final before = generation;
+    await connectGate?.future;
+    if (before != generation) return false;
+    connected = true; generation++; return true;
+  }
+  @override
+  Future<bool> cancelCompanionRecovery(String address, String attempt) async {
+    if (!cleanupAccepted) return false;
+    await disconnectCompanionDeviceByAddress(address); return true;
   }
   @override
   Future<void> disconnectCompanionDeviceByAddress(String address) async {
@@ -473,6 +520,7 @@ class _Ota extends OtaService {
   String? verified, owner;
   String identityAddress = _address;
   bool noUpdate = true, foreignBusy = false, _busy = false, identityAvailable = false;
+  bool failIdentity = false;
   int reads = 0, checks = 0, downloads = 0, upgrades = 0, releases = 0, _concurrent = 0, maxConcurrent = 0;
   Completer<void>? readGate, checkGate, downloadGate, _done;
   List<CompanionMessage> get offers => messages.where((m) => m.kind == 'OFFER').toList();
@@ -513,7 +561,8 @@ class _Ota extends OtaService {
   @override
   Future<DeviceOtaInfo?> readDeviceInfo(String address, {String? companionRuntimeId}) =>
     operation(companionRuntimeId, () async {
-      reads++; await readGate?.future; identityAvailable = true; identityAddress = address; return info;
+      reads++; await readGate?.future; identityAvailable = !failIdentity; identityAddress = address;
+      return failIdentity ? null : info;
     });
   @override
   Future<FirmwareLatestInfo?> checkFirmwareUpdate({String? channel, String? companionRuntimeId}) =>
@@ -541,5 +590,12 @@ class _Ota extends OtaService {
     if (foreignBusy || _busy && owner != runtimeId) return false;
     if (_busy) { releases++; releaseGates(); await _done!.future; }
     return true;
+  }
+  @override
+  Future<bool> retireCompanionConnection(String runtime, Future<bool> Function() closeGatt) async {
+    if (foreignBusy || (_busy && owner != runtime)) return false;
+    final release = releaseCompanionTask(runtime);
+    final closed = await closeGatt();
+    return await release && closed;
   }
 }

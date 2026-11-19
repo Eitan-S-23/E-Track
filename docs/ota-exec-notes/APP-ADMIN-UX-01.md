@@ -1,5 +1,46 @@
 # App And Admin UX Improvements
 
+## Version Distribution Details 2026-11-19
+
+The owner requested clickable App and MCU distribution records, existing UI
+styling and MCU-to-App navigation. Implementation is on
+`dev/flutter/companion-insights-20261119`, based on main `08b4f18c`.
+The bounded local/Actions evidence directory is
+`.cache/companion-insights-20261119/`.
+
+The existing distribution tables now open the same quick-action-sheet design
+used elsewhere. App details show the five leading known phone models, explicit
+unknown/other coverage, IP distribution and cursor-paged recent reports. MCU
+details preserve hardware/layout/image scope and show each reporting phone's
+latest App version, with a link to that App's distribution. This association is
+not a claim about the App version at the historical MCU observation time.
+Nested Back restores the parent detail, pagination, window, focus and scroll,
+without silently switching the workspace. Keyboard, mobile gestures, inert
+background and existing overlay history remain in use. No new UI dependency,
+font, CDN, framework or parallel design system is introduced.
+
+`GET /api/admin/version-inventory/detail` is Access-protected and read-only.
+It validates the complete version scope and 7/30/90-day window. Nullable fields
+in pending migration `0017_inventory_details.sql` preserve old reports; legacy
+same-sequence retry fingerprints are unchanged. IP comes only from the trusted
+edge header, never a client body or X-Forwarded-For. Latest-reported companion-day
+quality summaries are labelled as such, not fabricated window-wide totals or
+all foreground activity. Reporting remains optional and low-frequency, with
+existing retention and caps; installations/IPs are not unique people.
+
+Local type/syntax checks and seven targeted detail cases pass. The original
+six UI failures were test entry errors: setting the visible section alone did
+not invoke its loading handler. Tests now click the real tabs and cover desktop,
+mobile, escaped model text, pagination, nested Back, scope rejection and late
+response after closing. Full native Linux Worker/browser CI and deployment are
+still pending at this checkpoint. The intended route is the existing
+`deploy-cloudflare-admin.yml` using unchanged `E_TRACK_CI`, including Worker,
+Admin and Public; only genuinely pending migration 0017 may be applied.
+No channel promotion, real report insertion or device operation is implied.
+
+App recovery/diagnostics and new App/MCU candidate details are in
+[APP-COMPANION-01](APP-COMPANION-01.md#recovery-diagnostics-and-inventory-details-2026-11-19).
+
 ## Firmware Notification Hotfix 2026-11-19
 
 The owner authorized repairing and deploying the existing MCU full-package

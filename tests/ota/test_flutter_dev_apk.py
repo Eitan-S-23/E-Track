@@ -364,9 +364,10 @@ class DevelopmentApkTests(unittest.TestCase):
         self.assertEqual([":app:testDebugUnitTest", "--tests",
                           "com.wen.gaia.gaia.DeviceOtaServiceTest", "--tests",
                           "com.wen.gaia.gaia.CompanionServiceTest", "--tests",
-                          "com.wen.gaia.gaia.CompanionIntegrationTest"], argv[-7:])
+                          "com.wen.gaia.gaia.CompanionIntegrationTest", "--tests",
+                          "com.wen.gaia.gaia.CompanionGattPluginTest"], argv[-9:])
         workflow = (ROOT / ".github/workflows/flutter-dev-checks.yml").read_text(encoding="utf-8")
-        for suite in argv[-5::2]:
+        for suite in argv[-7::2]:
             self.assertIn(f"app/bluetooth_flutter_Trace/build/app/test-results/testDebugUnitTest/TEST-{suite}.xml", workflow)
         for value in ("yes", "1", "TRUE"):
             with self.assertRaisesRegex(ValueError, APK.DEVICE_OTA_NATIVE_TESTS_ENV):

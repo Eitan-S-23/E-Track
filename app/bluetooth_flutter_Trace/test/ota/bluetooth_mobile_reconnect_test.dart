@@ -19,6 +19,7 @@ class _Device extends BluetoothDevice {
   int? requestedMtu = 999;
   Duration? connectTimeout;
   Completer<void>? connectGate;
+  int _cancelEpoch = 0;
 
   @override
   bool get isConnected => connected;
@@ -33,7 +34,9 @@ class _Device extends BluetoothDevice {
     bool autoConnect = false,
   }) async {
     connects++;
+    final epoch = _cancelEpoch;
     await connectGate?.future;
+    if (epoch != _cancelEpoch) return;
     requestedMtu = mtu;
     connectTimeout = timeout;
     if (failConnect || mtu != null) {
@@ -45,11 +48,18 @@ class _Device extends BluetoothDevice {
   @override
   Future<void> disconnect({int timeout = 35, bool queue = true, int androidDelay = 2000}) async {
     disconnects++;
+    _cancelEpoch++;
     connected = false;
   }
 }
 
+class _AndroidService extends BluetoothService {
+  @override
+  bool get usesAndroidLifecycle => true;
+}
+
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   const lower = 'e3:49:e1:14:d6:cb';
   const upper = 'E3:49:E1:14:D6:CB';
   late BluetoothService service;
@@ -218,6 +228,92 @@ void main() {
       expect(await service.connectOtaDeviceByAddress(lower), isFalse);
       expect(service.connectedDevices, isEmpty);
       expect(service.otaLinkGeneration(lower), 0);
+    });
+  });
+
+  group('Android companion scoped connection', skip: Platform.isWindows, () {
+    const channel = MethodChannel('flutter_blue_plus/methods');
+    const runtime = 'runtime';
+    final attempt = List.filled(32, 'a').join();
+    late _Device device;
+    late Future<Object?> Function(MethodCall) native;
+    final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+
+    setUp(() {
+      service.onClose();
+      service = _AndroidService();
+      device = _Device(upper);
+      created.add(device);
+      service.otaDeviceFactoryForTest = (_) => device;
+      service.companionConnectionEventsForTest = (_) => device.states.stream;
+      service.companionOwnerChanged(runtime);
+      native = (call) async {
+        if (call.method == 'companionClose') {
+          device.connected = false;
+          return {'closed': true, 'replaced': false};
+        }
+        return true;
+      };
+      messenger.setMockMethodCallHandler(channel, (call) => native(call));
+    });
+    tearDown(() => messenger.setMockMethodCallHandler(channel, null));
+
+    test('the first real connected callback is not skipped', () async {
+      native = (call) async {
+        if (call.method == 'connect') {
+          expect((call.arguments as Map)['companion_attempt'], attempt);
+          device.connected = true;
+          device.states.add(BluetoothConnectionState.connected);
+        }
+        return true;
+      };
+      expect(await service.beginCompanionRecovery(lower, runtime, attempt), isTrue);
+      expect(await service.connectCompanionDeviceByAddress(lower), isTrue);
+      expect(await service.finishCompanionRecovery(lower, attempt), isTrue);
+      expect(service.connectedDevices.single, same(device));
+    });
+
+    test('physical closure succeeds even when the captured connect is cancelled', () async {
+      final gate = Completer<Object?>();
+      native = (call) async {
+        if (call.method == 'connect') return gate.future;
+        if (call.method == 'companionClose') return {'closed': true, 'replaced': false};
+        return true;
+      };
+      expect(await service.beginCompanionRecovery(lower, runtime, attempt), isTrue);
+      final pending = service.connectCompanionDeviceByAddress(lower);
+      final cancelled = expectLater(pending, throwsA(isA<PlatformException>()
+          .having((error) => error.code, 'code', 'CONNECTION_RETIRED')));
+      await Future<void>.delayed(Duration.zero);
+      expect(await service.cancelCompanionRecovery(lower, attempt), isTrue);
+      await cancelled;
+      expect(service.connectedDevices, isEmpty);
+      final nextAttempt = List.filled(32, 'b').join();
+      expect(await service.beginCompanionRecovery(lower, runtime, nextAttempt), isTrue);
+      gate.complete(false);
+      await Future<void>.delayed(Duration.zero);
+      expect(service.connectedDevices, isEmpty);
+      expect(await service.cancelCompanionRecovery(lower, nextAttempt), isTrue);
+    });
+
+    test('a late stream error cannot complete an already resolved callback twice', () async {
+      final gate = Completer<Object?>();
+      native = (call) async {
+        if (call.method == 'connect') {
+          device.connected = true;
+          device.states.add(BluetoothConnectionState.connected);
+          return gate.future;
+        }
+        return true;
+      };
+      expect(await service.beginCompanionRecovery(lower, runtime, attempt), isTrue);
+      final pending = service.connectCompanionDeviceByAddress(lower);
+      await Future<void>.delayed(Duration.zero);
+      device.states.addError(StateError('late stream error'));
+      await Future<void>.delayed(Duration.zero);
+      gate.complete(true);
+      expect(await pending, isTrue);
+      expect(await service.finishCompanionRecovery(lower, attempt), isTrue);
     });
   });
 }

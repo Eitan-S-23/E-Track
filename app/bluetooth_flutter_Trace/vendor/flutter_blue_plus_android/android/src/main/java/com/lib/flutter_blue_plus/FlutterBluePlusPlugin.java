@@ -117,6 +117,7 @@ public class FlutterBluePlusPlugin implements
     private final Map<String, byte[]> mBondingPins = new ConcurrentHashMap<>();
     private final Map<String, Integer> mMtu = new ConcurrentHashMap<>();
     private final Map<String, BluetoothGatt> mAutoConnected = new ConcurrentHashMap<>();
+    private final Map<String, CompanionGattLease<BluetoothGatt>> mCompanionGatt = new ConcurrentHashMap<>();
     private final Map<String, byte[]> mWriteChr = new ConcurrentHashMap<>();
     private final Map<String, byte[]> mWriteDesc = new ConcurrentHashMap<>();
     private final Map<String, String> mAdvSeen = new ConcurrentHashMap<>();
@@ -338,6 +339,63 @@ public class FlutterBluePlusPlugin implements
             }
 
             switch (call.method) {
+
+                case "companionBegin":
+                case "companionFinish":
+                case "companionClose":
+                case "companionError":
+                {
+                    HashMap<String, Object> args = call.arguments();
+                    String remoteId = (String) args.get("remote_id");
+                    String attempt = (String) args.get("attempt");
+                    if (remoteId == null || !remoteId.matches("[0-9A-F]{2}(:[0-9A-F]{2}){5}") ||
+                        attempt == null || !attempt.matches("[0-9a-f]{32}")) {
+                        result.error("companion", "Invalid recovery identity", null); break;
+                    }
+                    CompanionGattLease<BluetoothGatt> lease = mCompanionGatt.get(remoteId);
+                    if (call.method.equals("companionBegin")) {
+                        if (lease != null && !lease.matches(attempt)) { result.success(false); break; }
+                        BluetoothGatt current = mConnectedDevices.get(remoteId);
+                        if (current == null) current = mCurrentlyConnectingDevices.get(remoteId);
+                        if (current == null) current = mAutoConnected.get(remoteId);
+                        if (lease == null) mCompanionGatt.put(remoteId, new CompanionGattLease<>(attempt, current));
+                        result.success(true); break;
+                    }
+                    if (lease == null || !lease.matches(attempt)) { result.success(false); break; }
+                    if (call.method.equals("companionError")) { result.success(lease.errorCode); break; }
+                    BluetoothGatt gatt = lease.gatt();
+                    if (call.method.equals("companionFinish")) {
+                        boolean valid = gatt != null && mConnectedDevices.get(remoteId) == gatt;
+                        if (valid) { lease.retire(attempt); mCompanionGatt.remove(remoteId, lease); }
+                        result.success(valid); break;
+                    }
+                    lease.retire(attempt);
+                    mCompanionGatt.remove(remoteId, lease);
+                    // Close only the captured physical object, never an address's replacement.
+                    boolean current = (mConnectedDevices.get(remoteId) == null || mConnectedDevices.get(remoteId) == gatt) &&
+                        (mCurrentlyConnectingDevices.get(remoteId) == null || mCurrentlyConnectingDevices.get(remoteId) == gatt) &&
+                        (mAutoConnected.get(remoteId) == null || mAutoConnected.get(remoteId) == gatt);
+                    if (gatt != null) {
+                        mConnectedDevices.remove(remoteId, gatt);
+                        mCurrentlyConnectingDevices.remove(remoteId, gatt);
+                        mAutoConnected.remove(remoteId, gatt);
+                        phyProbe.disconnected(gatt);
+                        nativeWriteTrace.disconnected(gatt);
+                        try { gatt.disconnect(); } finally { gatt.close(); }
+                    }
+                    if (current) {
+                        mMtu.remove(remoteId);
+                        HashMap<String, Object> response = new HashMap<>();
+                        response.put("remote_id", remoteId);
+                        response.put("connection_state", bmConnectionStateEnum(BluetoothProfile.STATE_DISCONNECTED));
+                        response.put("disconnect_reason_code", 23789258);
+                        response.put("disconnect_reason_string", "companion attempt retired");
+                        invokeConnectionUIThread(gatt, remoteId, BluetoothProfile.STATE_DISCONNECTED, response);
+                    }
+                    HashMap<String, Object> closed = new HashMap<>();
+                    closed.put("closed", true); closed.put("replaced", !current);
+                    result.success(closed); break;
+                }
 
                 case "flutterRestart":
                 {
@@ -707,6 +765,11 @@ public class FlutterBluePlusPlugin implements
                     HashMap<String, Object> args = call.arguments();
                     String remoteId =    (String) args.get("remote_id");
                     boolean autoConnect = ((int) args.get("auto_connect")) != 0;
+                    final String companionAttempt = (String) args.get("companion_attempt");
+                    final CompanionGattLease<BluetoothGatt> companion = mCompanionGatt.get(remoteId);
+                    if (companionAttempt != null && (companion == null || !companion.matches(companionAttempt))) {
+                        result.error("companion", "Recovery attempt retired", null); break;
+                    }
 
                     ArrayList<String> permissions = new ArrayList<>();
 
@@ -715,6 +778,10 @@ public class FlutterBluePlusPlugin implements
                     }
 
                     ensurePermissions(permissions, (granted, perm) -> {
+
+                        if (companionAttempt != null && (mCompanionGatt.get(remoteId) != companion || !companion.matches(companionAttempt))) {
+                            result.error("companion", "Recovery attempt retired", null); return;
+                        }
 
                         if (granted == false) {
                             result.error("connect",
@@ -771,6 +838,10 @@ public class FlutterBluePlusPlugin implements
                         }
 
                         // add to currently connecting peripherals
+                        if (companionAttempt != null && !companion.bind(companionAttempt, gatt)) {
+                            gatt.disconnect(); gatt.close();
+                            result.error("companion", "Recovery GATT identity changed", null); return;
+                        }
                         mCurrentlyConnectingDevices.put(remoteId, gatt);
 
                         // remember autoconnect
@@ -2273,6 +2344,8 @@ public class FlutterBluePlusPlugin implements
                 }
 
                 String remoteId = gatt.getDevice().getAddress();
+                CompanionGattLease<BluetoothGatt> companion = mCompanionGatt.get(remoteId);
+                if (companion != null && companion.gatt() == gatt) companion.errorCode = status;
 
                 // edge case. see function for details
                 if (handleUnexpectedConnectionEvents(gatt, newState, remoteId)) {
@@ -2326,7 +2399,7 @@ public class FlutterBluePlusPlugin implements
                 response.put("disconnect_reason_code", status);
                 response.put("disconnect_reason_string", hciStatusString(status));
 
-                invokeMethodUIThread("OnConnectionStateChanged", response);
+                invokeConnectionUIThread(gatt, remoteId, newState, response);
             } finally {
                 mMethodCallMutex.release();
             }
@@ -2360,20 +2433,19 @@ public class FlutterBluePlusPlugin implements
         {
             boolean unexpectedEvent = false;
             if (newState == BluetoothProfile.STATE_CONNECTED) {
-                if (mCurrentlyConnectingDevices.get(remoteId) == null && mAutoConnected.get(remoteId) == null) {
+                if (!isCurrentGatt(gatt)) {
                     log(LogLevel.DEBUG, "[unexpected connection] disconnecting now");
 
                     // this is an unexpected connection
                     unexpectedEvent = true;
 
                     // remove from connected devices
-                    mConnectedDevices.remove(remoteId);
+                    mConnectedDevices.remove(remoteId, gatt);
 
                     // remove from currently bonding devices
-                    mBondingDevices.remove(remoteId);
+                    // A late old-GATT event must not alter the replacement's bond state.
 
                     // remove from cached PINs
-                    mBondingPins.remove(remoteId);
 
                     // disconnect and close the connection straight away
                     gatt.disconnect();
@@ -2382,9 +2454,7 @@ public class FlutterBluePlusPlugin implements
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
 
-                if (mCurrentlyConnectingDevices.get(remoteId) == null &&
-                    mConnectedDevices.get(remoteId) == null &&
-                    mAutoConnected.get(remoteId) == null) {
+                if (!isCurrentGatt(gatt)) {
 
                     log(LogLevel.DEBUG, "[unexpected connection] disconnect complete");
 
@@ -2392,10 +2462,8 @@ public class FlutterBluePlusPlugin implements
                     unexpectedEvent = true;
 
                     // remove from currently bonding devices
-                    mBondingDevices.remove(remoteId);
 
                     // remove from cached PINs
-                    mBondingPins.remove(remoteId);
 
                     // close the connection
                     gatt.close();
@@ -2407,6 +2475,7 @@ public class FlutterBluePlusPlugin implements
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status)
         {
+            if (!isCurrentGatt(gatt)) return;
             LogLevel level = status == 0 ? LogLevel.DEBUG : LogLevel.ERROR;
             log(level, "onServicesDiscovered:");
             log(level, "  count: " + gatt.getServices().size());
@@ -2428,19 +2497,20 @@ public class FlutterBluePlusPlugin implements
             response.put("error_code", status);
             response.put("error_string", gattErrorString(status));
 
-            invokeMethodUIThread("OnDiscoveredServices", response);
+            invokeGattUIThread(gatt, "OnDiscoveredServices", response, null);
         }
 
         // called for both notifications & reads
         public void onCharacteristicReceived(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value, int status)
         {
+            if (!isCurrentGatt(gatt)) return;
             // GATT Service?
             if (uuidStr(characteristic.getService().getUuid()) == "1800") {
 
                 // services changed
                 if (uuidStr(characteristic.getUuid()) == "2A05") {
                     HashMap<String, Object> response = bmBluetoothDevice(gatt.getDevice());
-                    invokeMethodUIThread("OnServicesReset", response);
+                    invokeGattUIThread(gatt, "OnServicesReset", response, null);
                 }
             }
 
@@ -2460,7 +2530,7 @@ public class FlutterBluePlusPlugin implements
                 response.put("primary_service_uuid", uuidStr(primaryService.getUuid()));
             }
 
-            invokeMethodUIThread("OnCharacteristicReceived", response);
+            invokeGattUIThread(gatt, "OnCharacteristicReceived", response, null);
         }
 
         @Override
@@ -2489,6 +2559,9 @@ public class FlutterBluePlusPlugin implements
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status)
         {
+            acquireMutex(mMethodCallMutex);
+            try {
+            if (!isCurrentGatt(gatt)) return;
             NativeWriteTrace.Entry trace = isOtaWrite(characteristic)
                 ? nativeWriteTrace.callback(gatt, characteristic, status) : null;
             LogLevel level = status == BluetoothGatt.GATT_SUCCESS ? LogLevel.DEBUG : LogLevel.ERROR;
@@ -2528,13 +2601,15 @@ public class FlutterBluePlusPlugin implements
                 response.put("primary_service_uuid", uuidStr(primaryService.getUuid()));
             }
 
-            invokeMethodUIThread("OnCharacteristicWritten", response, trace);
+            invokeGattUIThread(gatt, "OnCharacteristicWritten", response, trace);
+            } finally { mMethodCallMutex.release(); }
         }
 
         @Override
         @TargetApi(33) // newer function, passes byte[] value
         public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status, byte[] value)
         {
+            if (!isCurrentGatt(gatt)) return;
             LogLevel level = status == 0 ? LogLevel.DEBUG : LogLevel.ERROR;
             log(level, "onDescriptorRead:");
             log(level, "  chr: " + uuidStr(descriptor.getCharacteristic().getUuid()));
@@ -2558,12 +2633,15 @@ public class FlutterBluePlusPlugin implements
                 response.put("primary_service_uuid", uuidStr(primaryService.getUuid()));
             }
 
-            invokeMethodUIThread("OnDescriptorRead", response);
+            invokeGattUIThread(gatt, "OnDescriptorRead", response, null);
         }
 
         @Override
         public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status)
         {
+            acquireMutex(mMethodCallMutex);
+            try {
+            if (!isCurrentGatt(gatt)) return;
             LogLevel level = status == 0 ? LogLevel.DEBUG : LogLevel.ERROR;
             log(level, "onDescriptorWrite:");
             log(level, "  chr: " + uuidStr(descriptor.getCharacteristic().getUuid()));
@@ -2599,7 +2677,8 @@ public class FlutterBluePlusPlugin implements
                 response.put("primary_service_uuid", uuidStr(primaryService.getUuid()));
             }
 
-            invokeMethodUIThread("OnDescriptorWritten", response);
+            invokeGattUIThread(gatt, "OnDescriptorWritten", response, null);
+            } finally { mMethodCallMutex.release(); }
         }
 
         @Override
@@ -2613,6 +2692,7 @@ public class FlutterBluePlusPlugin implements
         @Override
         public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status)
         {
+            if (!isCurrentGatt(gatt)) return;
             LogLevel level = status == 0 ? LogLevel.DEBUG : LogLevel.ERROR;
             log(level, "onReadRemoteRssi:");
             log(level, "  rssi: " + rssi);
@@ -2626,12 +2706,15 @@ public class FlutterBluePlusPlugin implements
             response.put("error_code", status);
             response.put("error_string", gattErrorString(status));
 
-            invokeMethodUIThread("OnReadRssi", response);
+            invokeGattUIThread(gatt, "OnReadRssi", response, null);
         }
 
         @Override
         public void onMtuChanged(BluetoothGatt gatt, int mtu, int status)
         {
+            acquireMutex(mMethodCallMutex);
+            try {
+            if (!isCurrentGatt(gatt)) return;
             LogLevel level = status == 0 ? LogLevel.DEBUG : LogLevel.ERROR;
             log(level, "onMtuChanged:");
             log(level, "  mtu: " + mtu );
@@ -2650,7 +2733,8 @@ public class FlutterBluePlusPlugin implements
             response.put("error_code", status);
             response.put("error_string", gattErrorString(status));
 
-            invokeMethodUIThread("OnMtuChanged", response);
+            invokeGattUIThread(gatt, "OnMtuChanged", response, null);
+            } finally { mMethodCallMutex.release(); }
         }
 
         @Override
@@ -2975,6 +3059,30 @@ public class FlutterBluePlusPlugin implements
         return characteristic.getService() != null &&
             characteristic.getUuid().toString().equals("0000fff2-0000-1000-8000-00805f9b34fb") &&
             characteristic.getService().getUuid().toString().equals("0000fff0-0000-1000-8000-00805f9b34fb");
+    }
+
+    private boolean isCurrentGatt(BluetoothGatt gatt) {
+        String remoteId = gatt.getDevice().getAddress();
+        return CompanionGattLease.current(gatt, mCurrentlyConnectingDevices.get(remoteId),
+            mConnectedDevices.get(remoteId), mAutoConnected.get(remoteId));
+    }
+
+    private void invokeGattUIThread(BluetoothGatt gatt, String method, HashMap<String, Object> data,
+                                   NativeWriteTrace.Entry trace) {
+        new Handler(Looper.getMainLooper()).post(() -> {
+            if (isCurrentGatt(gatt) && methodChannel != null) {
+                nativeWriteTrace.dispatched(trace);
+                methodChannel.invokeMethod(method, data);
+            }
+        });
+    }
+
+    private void invokeConnectionUIThread(BluetoothGatt gatt, String remoteId, int state, HashMap<String, Object> data) {
+        new Handler(Looper.getMainLooper()).post(() -> {
+            boolean current = state == BluetoothProfile.STATE_CONNECTED ? gatt != null && isCurrentGatt(gatt) :
+                mCurrentlyConnectingDevices.get(remoteId) == null && mConnectedDevices.get(remoteId) == null;
+            if (current && methodChannel != null) methodChannel.invokeMethod("OnConnectionStateChanged", data);
+        });
     }
 
     private void invokeMethodUIThread(final String method, HashMap<String, Object> data)

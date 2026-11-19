@@ -8,6 +8,7 @@ import '../controllers/ble_controller.dart';
 import '../services/bluetooth_service.dart';
 import '../utils/permission_helper.dart';
 import 'trace_ui.dart';
+import 'companion_diagnostics_page.dart';
 
 class CompanionSetupPage extends StatefulWidget {
   const CompanionSetupPage({super.key, this.platform, this.requiredBluetoothPermissions});
@@ -187,6 +188,7 @@ class _CompanionSetupPageState extends State<CompanionSetupPage> with WidgetsBin
             Text(_snapshot['serviceRunning'] == true ? '\u540e\u53f0\u6267\u884c\u6240\u6709\u8005\u5df2\u54cd\u5e94' : '\u540e\u53f0\u6267\u884c\u5c1a\u672a\u786e\u8ba4\uff0c\u6216\u8bbe\u5907\u6682\u4e0d\u53ef\u8fbe', style: const TextStyle(color: TraceColors.muted)),
             if (_snapshot['problem'] != null) Text('\u5f53\u524d\u9650\u5236\uff1a${_snapshot['problem']}', style: const TextStyle(color: TraceColors.amber)),
             if (_snapshot['lastResult'] != null) Text('\u6700\u8fd1\u72b6\u6001\uff1a${_snapshot['lastResult']}', style: const TextStyle(color: TraceColors.muted)),
+            _button('\u67e5\u770b\u8fde\u63a5\u8bca\u65ad', () async { await Get.to<void>(() => const CompanionDiagnosticsPage()); }),
             DropdownButton<int>(value: _snapshot['intervalHours'] as int? ?? 12, dropdownColor: TraceColors.deep,
               style: const TextStyle(color: TraceColors.text),
               items: [6, 12, 24].map((n) => DropdownMenuItem(value: n, child: Text('\u7ea6\u6bcf $n \u5c0f\u65f6\u68c0\u67e5'))).toList(),

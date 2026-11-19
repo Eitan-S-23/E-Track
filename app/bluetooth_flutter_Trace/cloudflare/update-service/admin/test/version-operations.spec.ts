@@ -19,6 +19,7 @@ export async function setup(page:Page,language="zh",role="owner",push?:{publicKe
     notifications:[] as Array<Record<string,unknown>>,unreadCount:0,activityReads:0,activityFails:false,pushPublicKey:null as string|null,
     pushSubscriptions:[] as Array<{id:string;expiresAt:number}>,pushRegisterFails:false,readFails:false,
     readGate:null as Promise<void>|null,activityGate:null as Promise<void>|null,createGate:null as Promise<void>|null,catalogueGate:null as Promise<void>|null};
+  const details={fails:false,gate:null as Promise<void>|null,queries:[] as string[],invalidScope:false};
   if(push){data.pushPublicKey=push.publicKey;data.pushSubscriptions=push.subscriptions;}
   await page.addInitScript(lang=>localStorage.setItem("trace-admin-language",lang),language);
   const errors:string[]=[];page.on("pageerror",error=>errors.push(error.message));
@@ -54,8 +55,35 @@ export async function setup(page:Page,language="zh",role="owner",push?:{publicKe
         if(data.inventoryFails){await reply({ok:false,errorCode:"BACKEND_UNAVAILABLE",message:"inventory unavailable"},503);return;}
         const rows=Array.from({length:23},(_,index)=>({versionCode:99-index,versionName:`1.0.${99-index}`,imageSha256:index===0?hash:"b".repeat(64),
           active7:index===0?20:0,active30:index===0?40:0,active90:index===0?50:2,lastSeen:1794409200-index*86400}));
-        await reply({ok:true,coverage:"reporting-installations-only",firmwareIdentityScope:"installation",uniqueDeviceCount:null,app:rows,firmware:rows,
+        await reply({ok:true,coverage:"reporting-installations-only",firmwareIdentityScope:"installation",uniqueDeviceCount:null,app:rows,
+          firmware:rows.map(row=>({...row,deviceModel:"e-track-at32f435",hardwareRevision:1,layoutId:1})),
           generatedAt:1794410000,refreshId:data.refreshId,refreshRequestedAt:data.refreshRequestedAt,refreshResponses:0});return;
+      }
+      if(url.pathname==="/api/admin/version-inventory/detail") {
+        details.queries.push(url.search);
+        const kind=url.searchParams.get("kind"),firmware=kind==="firmware";
+        const expected=["kind","versionCode","imageSha256","windowDays","limit",...(firmware?["deviceModel","hardwareRevision","layoutId"]:["platform","versionName"]),
+          ...(url.searchParams.has("cursor")?["cursor"]:[])];
+        expect([...url.searchParams.keys()].sort()).toEqual(expected.sort());
+        expect(kind).toMatch(/^(app|firmware)$/);expect(url.searchParams.get("imageSha256")).toMatch(/^[a-f0-9]{64}$/);
+        expect(url.searchParams.get(firmware?"deviceModel":"platform")).toBe(firmware?"e-track-at32f435":"android");
+        const scope:Record<string,string|number>={};
+        for(const key of expected.filter(key=>!["windowDays","limit","cursor"].includes(key))) {
+          scope[key]=["versionCode","hardwareRevision","layoutId"].includes(key)?Number(url.searchParams.get(key)):String(url.searchParams.get(key));
+        }
+        if(details.gate) await details.gate;
+        if(details.fails){await reply({ok:false,errorCode:"BACKEND_UNAVAILABLE",message:"Details unavailable"},503);return;}
+        if(details.invalidScope) scope.imageSha256="f".repeat(64);
+        const second=url.searchParams.has("cursor");
+        await reply({ok:true,scope,windowDays:Number(url.searchParams.get("windowDays")),generatedAt:1794410000,
+          coverage:"reporting-installations-only",firmwareIdentityScope:"installation",sampleCount:21,unknownModels:3,otherModels:8,
+          models:[{brand:"Example",model:"Top phone <img src=x onerror=alert(1)>",count:10,share:10/21}],
+          ips:[{ip:"2001:db8:1234:5678:90ab:cdef:1234:5678",count:12,share:12/21}],unknownIps:4,otherIps:5,
+          associatedApps:firmware?[{platform:"android",versionCode:98,versionName:"1.0.98",imageSha256:"b".repeat(64),count:21,share:1}]:[],otherAssociatedApps:0,
+          quality:{samples:1,connectionAttempts:4,connectionSucceeded:3,connectionFailed:1,scope:"latest-reported-companion-days"},
+          reports:Array.from({length:second?1:20},(_,index)=>({installationTag:`sample-${second?20:index}`,deviceTag:firmware?"device-sample":null,
+            brand:"Example",model:"Top phone",osVersion:"16 (SDK 36)",ip:second?null:"198.51.100.23",appVersionName:"1.0.98",appVersionCode:98,
+            reportedAt:1794409200,observedAt:1794409100})),nextCursor:second?null:`1794409199|${hash}|${firmware?"c".repeat(64):""}`});return;
       }
       if(url.pathname==="/api/admin/delta/candidates") {
         const kind=url.searchParams.get("kind"),targetId=url.searchParams.get("targetId");
@@ -127,8 +155,85 @@ export async function setup(page:Page,language="zh",role="owner",push?:{publicKe
   await page.goto(origin,{waitUntil:"domcontentloaded"});
   await expect(page.locator("#refreshButton")).toBeEnabled();
   await expect(page.locator("#versionStrip .version-card")).toHaveCount(1);
-  return {data,errors};
+  return {data,errors,details};
 }
+
+for(const width of [1440,390,320]) {
+  test(`App distribution ${width}px opens matching read-only details and pages IP records`,async({page},testInfo)=>{
+    const {data,errors,details}=await setup(page);await page.setViewportSize({width,height:900});
+    await page.locator('#appTabs [data-app-section="inventory"]').click();
+    await expect(page.locator("#appInventoryPanel tbody tr")).toHaveCount(10);
+    await page.locator("#appInventoryPanel tbody tr").first().locator("td").nth(1).click();
+    await expect(page.locator("#inventoryDetailSheet")).toBeVisible();
+    await expect(page.locator("#inventoryDetailTitle")).toContainText("1.0.99");
+    await expect(page.locator("#inventoryDetailContent")).toContainText("Top phone <img src=x onerror=alert(1)>");
+    await expect(page.locator("#inventoryDetailContent")).toContainText("198.51.100.23");
+    await expect(page.locator("#inventoryDetailContent img")).toHaveCount(0);
+    await page.screenshot({path:testInfo.outputPath("inventory-detail.png")});
+    expect(await page.locator(".workspace").evaluate(element=>(element as HTMLElement).inert)).toBe(true);
+    await page.locator('[data-version-operation="inventory-detail-next"]').click();
+    await expect(page.locator('[data-version-operation="inventory-detail-next"]')).toBeDisabled();
+    await expect(page.locator("#inventoryDetailContent")).toContainText("sample-20");
+    expect(details.queries).toHaveLength(2);expect(details.queries[1]).toContain("cursor=");
+    await page.keyboard.press("Escape");await expect(page.locator("#inventoryDetailSheet")).toBeHidden();
+    expect(data.writes).toEqual([]);expect(errors).toEqual([]);
+    expect(await page.evaluate("document.documentElement.scrollWidth <= innerWidth")).toBe(true);
+  });
+}
+
+test("MCU-to-App distribution Back restores parent window, pagination, focus and scroll",async({page})=>{
+  const {data,errors}=await setup(page);
+  await page.locator('[data-view-target="firmware"]').click();
+  await page.locator('#firmwareTabs [data-firmware-section="inventory"]').click();
+  await expect(page.locator("#firmwareInventoryPanel tbody tr")).toHaveCount(10);
+  await page.locator('#firmwareInventoryPanel [data-days="7"]').click();
+  await page.locator('#firmwareInventoryPanel [data-version-operation="inventory-next"]').click();
+  await page.locator("#firmwareInventoryPanel tbody tr").first().locator("button").click();
+  await expect(page.locator('[data-version-operation="inventory-linked-app"]')).toBeVisible();
+  await page.locator('[data-version-operation="inventory-detail-next"]').click();
+  await expect(page.locator("#inventoryDetailContent")).toContainText("sample-20");
+  await page.locator("#inventoryDetailScroll").evaluate(element=>{element.scrollTop=150;});
+  const scroll=await page.locator("#inventoryDetailScroll").evaluate(element=>element.scrollTop);
+  await page.locator('[data-version-operation="inventory-linked-app"]').evaluate(element=>(element as HTMLButtonElement).click());
+  await expect(page.locator("#inventoryDetailTitle")).toContainText("APP");
+  await expect(page.locator("#inventoryDetailTitle")).toContainText("1.0.98");
+  await page.evaluate("history.back()");
+  await expect(page.locator("#inventoryDetailTitle")).toContainText("单片机");
+  await expect(page.locator('[data-version-operation="inventory-detail-next"]')).toBeDisabled();
+  expect(await page.locator("#inventoryDetailScroll").evaluate(element=>element.scrollTop)).toBe(scroll);
+  await expect(page.locator('[data-version-operation="inventory-linked-app"]')).toBeFocused();
+  await page.locator("#inventoryDetailBack").click();
+  await expect(page.locator("#inventoryDetailSheet")).toBeHidden();
+  expect(await page.evaluate("state.inventory.window")).toBe(7);
+  expect(await page.evaluate("state.inventory.pages.firmware")).toBe(1);
+  expect(data.writes).toEqual([]);expect(errors).toEqual([]);
+});
+
+test("distribution read failure or mismatched scope remains an explicit error without writes",async({page})=>{
+  const {data,errors,details}=await setup(page);details.fails=true;
+  await page.locator('#appTabs [data-app-section="inventory"]').click();
+  await page.locator("#appInventoryPanel tbody tr button").first().click();
+  await expect(page.locator("#inventoryDetailContent [role=alert]")).toContainText("Details unavailable");
+  details.fails=false;details.invalidScope=true;
+  await page.locator('[data-version-operation="inventory-detail-reload"]').click();
+  await expect(page.locator("#inventoryDetailContent [role=alert]")).toContainText("响应格式无效");
+  details.invalidScope=false;
+  await page.locator('[data-version-operation="inventory-detail-reload"]').click();
+  await expect(page.locator("#inventoryDetailContent")).toContainText("198.51.100.23");
+  expect(data.writes).toEqual([]);expect(errors).toEqual([]);
+});
+
+test("closed distribution ignores a delayed response and does not reopen itself",async({page})=>{
+  const {data,errors,details}=await setup(page);let release!:()=>void;
+  details.gate=new Promise<void>(resolve=>{release=resolve;});
+  await page.locator('#appTabs [data-app-section="inventory"]').click();
+  await page.locator("#appInventoryPanel tbody tr button").first().click();
+  await expect(page.locator("#inventoryDetailSheet")).toBeVisible();
+  await page.locator("#inventoryDetailBack").click();
+  release();await page.waitForTimeout(100);
+  await expect(page.locator("#inventoryDetailSheet")).toBeHidden();
+  expect(data.writes).toEqual([]);expect(errors).toEqual([]);
+});
 
 for (const kind of ["android","firmware"]) {
   test(`candidate arrival ${kind} shows once and opens registered release details, not delta creation`,async({page})=>{

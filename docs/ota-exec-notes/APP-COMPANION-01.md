@@ -1,5 +1,63 @@
 # APP-COMPANION-01 Implementation Record
 
+## Recovery Diagnostics And Inventory Details 2026-11-19
+
+The owner approved implementation, consistent existing frontend styling and a
+new MCU test candidate. This batch uses the exclusively owned
+`.worktrees/companion-insights-20261119` worktree on
+`dev/flutter/companion-insights-20261119`, based on current main
+`08b4f18c3af97f0c01a372edc2ed813198fc2b6d`.
+
+The reported installed App is 1.0.84: its English ongoing notification appears
+quickly after closing the App, while reconnection can take over ten minutes and
+opening the App connects promptly. A notification remaining after 45 minutes
+does not prove a 45-minute hang. No current phone logs or physical experiment
+were obtained, and neither the 15-minute job nor the old launcher-icon change
+is a proven cause. USB is unavailable and is not a delivery prerequisite.
+
+Source changes bound the complete initialization/connect/discovery/subscribe/INFO
+and control attempt to 25 seconds, with a separate 30-second native progress
+watchdog. Runtime liveness remains distinct from link/progress health. Failed
+INFO retires the captured physical GATT; query cancellation and physical closure
+must both acknowledge before another owner is admitted. Attempt and physical
+GATT fences reject late callbacks, and an acknowledged cancelled connect is not
+misclassified as failed cleanup. Plugin lazy initialization is awaited before
+using scoped native methods. Existing 2/4/8-second retries, 60-second recovery
+window and Android's periodic recovery schedule remain bounded and unchanged.
+
+Chinese ongoing notifications project actual connection/check states. A bounded
+80-event local diagnostic history retains sanitized stages, triggers, elapsed
+times and controller codes across process loss, without addresses, credentials,
+URLs or exception messages. The existing permission/background details page
+owns the diagnostic entry; feedback attaches an excerpt only after an explicit
+checkbox selection. Existing feedback quotas and the 2000-character limit stay.
+Optional phone metadata and companion-day quality counters ride otherwise-due
+low-frequency version reports, not per-connection network traffic.
+
+The prepared App identity is `1.0.85+111`; MCU is `3.3.36`. The MCU change is
+version/release-note only, for a genuinely new exact-source GCC test candidate.
+No firmware protocol, key, layout, Boot gate or signing identity changes.
+Original Actions must build and register both candidates. This authorization
+does not automatically inherit the prior batch's Stable/Beta promotion.
+
+Development checkpoint: local `type-04` passes all three service typechecks and
+inline Admin syntax. `ui-01` passed 267 existing cases and failed six new tests
+that bypassed the real loading tab handlers; corrected `ui-02` passes all seven
+distribution-focused cases. `host-01` deployment/candidate contracts and
+`java-01` pure-Java lifecycle checks pass. `runner-01` passes both development
+runner suites. These are not native Android plugin or physical-device evidence.
+New real-plugin Robolectric tests are wired into the existing opt-in native
+development run. Full dual-host App/native CI, backend CI, main integration,
+Actions deployment and candidate ingestion are pending at this checkpoint.
+
+Evidence lives under `.cache/companion-insights-20261119/`. Failed dependency
+downloads and initial type/UI results remain preserved. Locked dependencies were
+reused only after semantic lockfile and installed integrity/version checks;
+source caches were not modified. All selected outputs remain project-local.
+Related backend/UI scope is recorded in
+[APP-ADMIN-UX-01](APP-ADMIN-UX-01.md#version-distribution-details-2026-11-19).
+Whole-card independent/device obligations remain open; no measured speed claim.
+
 ## Complete Public APK Readback 2026-11-19
 
 The owner's next autonomous-completion follow-up closes the remaining remote

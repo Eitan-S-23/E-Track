@@ -1,6 +1,8 @@
 import 'package:ble_monitor/pages/feedback_page.dart';
+import 'package:ble_monitor/pages/companion_diagnostics_page.dart';
 import 'package:ble_monitor/services/feedback_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,9 +10,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late FeedbackService service;
+  var diagnosticReads = 0;
   setUp(() {
     Get.testMode = true;
     SharedPreferences.setMockInitialValues({});
+    diagnosticReads = 0;
   });
   tearDown(() { service.onClose(); Get.reset(); });
 
@@ -21,7 +25,7 @@ void main() {
     }
   }
 
-  Future<void> open(WidgetTester tester, {double width = 390, double scale = 1}) async {
+  Future<void> open(WidgetTester tester, {double width = 390, double scale = 1, bool diagnostics = false}) async {
     // The serialized edit future must belong to this test's FakeAsync zone.
     service = FeedbackService(endpoint: Uri.parse('https://feedback.test/api/public/feedback'), supported: true,
       canSend: () => false,
@@ -33,7 +37,11 @@ void main() {
     tester.platformDispatcher.textScaleFactorTestValue = scale;
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
     await tester.pumpWidget(GetMaterialApp(home: Scaffold(body: Builder(builder: (context) => TextButton(
-      onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => FeedbackPage(service: service))),
+      onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => FeedbackPage(service: service,
+        diagnosticsSupported: diagnostics, readDiagnostics: () async {
+          diagnosticReads++;
+          return CompanionDiagnosticSnapshot([{'state':'CONNECTION_TIMEOUT','stage':'DISCOVERING','elapsedMs':25000}]);
+        }))),
       child: const Text('Help parent'))))));
     await tester.tap(find.text('Help parent')); await settle(tester);
   }
@@ -88,5 +96,37 @@ void main() {
       expect(find.textContaining('\u5df2\u4fdd\u5b58\u3002'), findsOneWidget);
       expect(service.pending, hasLength(1)); expect(tester.takeException(), isNull);
     } finally { service.onClose(); await tester.pumpWidget(const SizedBox.shrink()); }
+  });
+  testWidgets('connection diagnostics are attached only after explicit opt-in', (tester) async {
+    try {
+      await open(tester, diagnostics:true);
+      expect(diagnosticReads, 0);
+      await tester.enterText(find.byKey(const ValueKey('feedback-text')), 'Background reconnect is slow');
+      await tester.ensureVisible(find.byKey(const ValueKey('feedback-attach-diagnostics')));
+      await tester.tap(find.byKey(const ValueKey('feedback-attach-diagnostics'))); await tester.pump();
+      await tester.ensureVisible(find.byKey(const ValueKey('feedback-submit')));
+      await tester.tap(find.byKey(const ValueKey('feedback-submit'))); await settle(tester);
+      expect(diagnosticReads, 1);
+      expect(service.pending.single['body'], contains('CONNECTION_TIMEOUT'));
+      expect((service.pending.single['body'] as String).length, lessThanOrEqualTo(2000));
+      expect(tester.takeException(), isNull);
+    } finally { service.onClose(); await tester.pumpWidget(const SizedBox.shrink()); }
+  });
+  test('diagnostic export whitelists fields and never includes addresses, URLs or tokens', () async {
+    service = FeedbackService(supported:false, canSend:() => false);
+    const channel = MethodChannel('trace/companion');
+    final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(channel, (_) async => {'history':[
+      {'state':'CONNECTION_TIMEOUT','stage':'DISCOVERING','elapsedMs':25000,'errorCode':133,
+        'address':'aa:bb:cc:dd:ee:ff','url':'https://private.invalid/?token=secret','token':'secret'},
+      {'state':'https://private.invalid/?token=secret'},
+    ]});
+    try {
+      final snapshot = await CompanionDiagnosticSnapshot.read();
+      expect(snapshot.rows, hasLength(1));
+      expect(snapshot.text, contains('133'));
+      expect(snapshot.text, isNot(contains('aa:bb'))); expect(snapshot.text, isNot(contains('secret')));
+      expect(snapshot.text, isNot(contains('private.invalid')));
+    } finally { messenger.setMockMethodCallHandler(channel, null); }
   });
 }

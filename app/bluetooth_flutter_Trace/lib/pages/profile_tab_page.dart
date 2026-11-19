@@ -236,7 +236,7 @@ class ProfileTabPage extends StatelessWidget {
                           : null,
                     ),
                   ),
-                  const Text('低频上报 APP 和已连接设备的版本、文件校验值及去重标识，用于选择差分升级包。不上传位置、联系人或骑行记录。关闭后停止上报，历史记录最多保留 90 天。',
+                  const Text('低频上报 APP、已连接设备的版本、文件校验值及去重标识，以及手机品牌、机型、系统版本和后台连接/固件更新的单日质量摘要。服务器记录上报出口 IP，供受保护后台分析，不作为人数统计。不上传位置、联系人、骑行记录或诊断日志。关闭后停止上报，历史记录最多保留 90 天。',
                       style: TextStyle(color: TraceColors.muted, height: 1.5)),
                   const SizedBox(height: 12),
                   Align(alignment: Alignment.centerLeft, child: Text(

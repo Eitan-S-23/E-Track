@@ -94,7 +94,7 @@ object CompanionBridge {
         DeviceOtaBridge.notificationProblem(context)?.let { return it }
         val notifications = context.getSystemService(NotificationManager::class.java)
         notifications.createNotificationChannel(NotificationChannel(NOTIFICATION_CHANNEL,
-            "E-Track companion", NotificationManager.IMPORTANCE_LOW))
+            "E-Track \u8bbe\u5907\u8fde\u63a5", NotificationManager.IMPORTANCE_LOW))
         if (notifications.getNotificationChannel(NOTIFICATION_CHANNEL)?.importance == NotificationManager.IMPORTANCE_NONE)
             return "COMPANION_CHANNEL_DISABLED"
         return null
@@ -107,6 +107,7 @@ object CompanionBridge {
             "presenceSupported" to (Build.VERSION.SDK_INT >= 31),
             "sensorBackgroundSupported" to (Build.VERSION.SDK_INT >= 31),
             "serviceRunning" to (CompanionService.active?.healthy() == true),
+            "connectionHealthy" to (CompanionService.active?.recoveryHealthy() == true),
             "runtimeId" to CompanionService.active?.runtimeId,
             "revision" to revision(context), "problem" to problem(context),
             "intervalHours" to prefs.getInt("intervalHours", 12),
@@ -139,6 +140,18 @@ object CompanionBridge {
                     when (call.method) {
                         "hasActivity" -> result.success(activity.get() != null)
                         "snapshot" -> result.success(snapshot(app))
+                        "diagnostics" -> result.success(CompanionDiagnostics.snapshot(app))
+                        "diagnostic" -> {
+                            val values = call.arguments as? Map<*, *>
+                            if (values == null || values["runtimeId"] != CompanionService.active?.runtimeId ||
+                                values["revision"] != revision(app)) result.success(false)
+                            else {
+                                CompanionDiagnostics.record(app, values["status"] as? String ?: "UNKNOWN",
+                                    CompanionService.active?.runtimeId, attempt = (values["attempt"] as? Number)?.toInt() ?: 0,
+                                    details = values)
+                                result.success(true)
+                            }
+                        }
                         "ready" -> {
                             ready = true
                             result.success(snapshot(app))
