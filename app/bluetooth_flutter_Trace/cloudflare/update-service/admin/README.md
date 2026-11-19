@@ -140,6 +140,14 @@ background; reaching a nested list boundary must not dismiss a sheet. Error
 messages keep native vertical touch scrolling even inside the confirmation
 header, and never start the header's dismiss gesture.
 
+The shared gesture script forwards only an exhausted vertical wheel from those
+named inner lists/text to an eligible ancestor. This handles Chromium's wheel
+latching above a locked, already-scrolled page; `overscroll-behavior: auto` alone
+is insufficient in that layout. In-range scrolling and touch remain native.
+Zoom, horizontal input, nested scroller ownership and outer containment must
+not be overridden. Regressions include sparse delta jobs over a pre-scrolled
+page for both App and MCU, not only tall fixtures that happen to chain.
+
 ### Sheet Gestures And Task History
 
 App details, MCU details, delta management and Tasks share a drag owner. The fixed

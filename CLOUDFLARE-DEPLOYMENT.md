@@ -4,7 +4,26 @@ Read this file before deploying the E-Track backend or asking the owner for
 Cloudflare credentials. It lives at the project root deliberately. Read the
 primary checkout's copy, not only an old task worktree's copy.
 
-## Current State: Version Insights Deployed 2026-11-19
+## Current State: Initial Scroll Fix Deployed 2026-11-20
+
+Admin-only Actions [44602404051](https://github.com/Eitan-S-23/E-Track/actions/runs/44602404051)
+deploys `9ed63498fd3ba83f2dd454c8c3ccf3ea0791805e` as
+`25aa04d3-155d-4858-979b-28f6e23b2fb2`. Exact-source backend `44599364344`
+passes 501 Worker/285 browser tests and contracts/typechecks. Existing runtime
+configuration, Access/secrets, Worker/Public, schema and channel/delta identities
+are preserved. Candidate `44599364349` skips App/MCU builds as intended.
+
+Real owner touch checks for App/MCU delta bases, announcements and firmware
+history pass at both boundaries, with all ten served assets matching the source
+and zero business mutations. Desktop wheel checks reveal a remaining Chromium
+latching case above a pre-scrolled page with sparse delta jobs. Initial failed
+live probes are preserved; touch-only success is not full scroll qualification.
+The targeted JS follow-up passes 18 local scroll regressions and typecheck but
+still needs its own exact-source full CI, Admin-only deployment and live wheel/
+touch readback. Do not repeat this CSS deployment or rebuild an App to finish it.
+See [the follow-up record](docs/ota-exec-notes/OTA-COMPANION-2026-11-20.md#initial-admin-delivery-and-desktop-follow-up).
+
+## Earlier Version Insights Deployed 2026-11-19
 
 Actions [44531533628](https://github.com/Eitan-S-23/E-Track/actions/runs/44531533628)
 deploys published source `7e088a0807c863f745043f2146d26b2459980851` using the

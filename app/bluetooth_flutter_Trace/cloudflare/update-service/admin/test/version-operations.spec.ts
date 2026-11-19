@@ -565,6 +565,66 @@ async function scrollBoundary(page:Page,inner:string,outer:string,direction:1|-1
 
 test.describe("scroll chaining",()=>{
   test.use({hasTouch:true,viewport:{width:390,height:700}});
+  test("boundary wheel handling leaves in-range list scrolling native",async({page})=>{
+    await page.setViewportSize({width:1440,height:700});
+    const {data,errors}=await setup(page);data.baseCount=62;await openDelta(page);
+    const list=page.locator(".delta-base-list"),owner=page.locator("#deltaScroll");
+    await list.scrollIntoViewIfNeeded();await list.evaluate(node=>{node.scrollTop=100;});
+    const before=await owner.evaluate(node=>node.scrollTop),background=await page.evaluate(()=>scrollY);
+    const box=(await list.boundingBox())!;
+    await page.mouse.move(box.x+box.width/2,box.y+box.height/2);await page.mouse.wheel(0,120);
+    await expect.poll(()=>list.evaluate(node=>node.scrollTop)).toBeGreaterThan(100);
+    expect(await owner.evaluate(node=>node.scrollTop)).toBe(before);
+    expect(await page.evaluate(()=>scrollY)).toBe(background);
+    expect(data.writes).toHaveLength(0);expect(errors).toEqual([]);
+  });
+  test("boundary wheel handling preserves zoom horizontal input units and modal containment",async({page})=>{
+    const {data,errors}=await setup(page);data.baseCount=62;await openDelta(page);
+    const observations=await page.evaluate(()=>{
+      const inner=document.querySelector<HTMLElement>(".delta-base-list")!,owner=document.querySelector<HTMLElement>("#deltaScroll")!;
+      inner.scrollTop=inner.scrollHeight;owner.scrollTop=0;
+      const ignored=[{ctrlKey:true,deltaY:100},{shiftKey:true,deltaY:100},{deltaX:120,deltaY:1}].map(options=>{
+        const event=new WheelEvent("wheel",{bubbles:true,cancelable:true,...options});inner.dispatchEvent(event);
+        return {prevented:event.defaultPrevented,top:owner.scrollTop};
+      });
+      const line=new WheelEvent("wheel",{bubbles:true,cancelable:true,deltaY:2,deltaMode:WheelEvent.DOM_DELTA_LINE});
+      inner.dispatchEvent(line);const lineTop=owner.scrollTop;
+      owner.scrollTop=owner.scrollHeight;const background=scrollY;
+      const end=new WheelEvent("wheel",{bubbles:true,cancelable:true,deltaY:120});inner.dispatchEvent(end);
+      const contained=scrollY===background;
+      owner.scrollTop=0;inner.scrollTop=inner.scrollHeight;
+      const pageDown=new WheelEvent("wheel",{bubbles:true,cancelable:true,deltaY:1,deltaMode:WheelEvent.DOM_DELTA_PAGE});
+      inner.dispatchEvent(pageDown);
+      return {ignored,linePrevented:line.defaultPrevented,lineTop,lineExpected:2*(parseFloat(getComputedStyle(inner).lineHeight)||16),
+        contained,endPrevented:end.defaultPrevented,pagePrevented:pageDown.defaultPrevented,pageTop:owner.scrollTop,
+        pageExpected:Math.min(owner.clientHeight,owner.scrollHeight-owner.clientHeight)};
+    });
+    expect(observations.ignored).toEqual(Array(3).fill({prevented:false,top:0}));
+    expect(observations.linePrevented).toBe(true);expect(observations.lineTop).toBeCloseTo(observations.lineExpected,0);
+    expect(observations.contained).toBe(true);expect(observations.endPrevented).toBe(false);
+    expect(observations.pagePrevented).toBe(true);expect(observations.pageTop).toBe(observations.pageExpected);
+    expect(data.writes).toHaveLength(0);expect(errors).toEqual([]);
+  });
+  for(const kind of ["android","firmware"]) for(const touch of [false,true]) {
+    test(`${kind} sparse delta jobs preserve boundary chaining above a scrolled page with ${touch?"touch":"wheel"}`,async({page})=>{
+      if(!touch) await page.setViewportSize({width:1440,height:700});
+      const {data,errors}=await setup(page);data.baseCount=62;
+      await page.route("**/api/admin/releases?**",route=>route.fulfill({contentType:"application/json",body:JSON.stringify({ok:true,
+        releases:Array.from({length:62},(_,i)=>({id:i?`older-${i}`:"app-target",app_id:"trace",platform:"android",version_code:100-i,
+          version_name:`1.0.${74-i}`,release_tag:`v1.0.${74-i}`,state:"candidate",archived:0,release_notes:"Original App fixture",
+          asset_count:2,r2_available_count:2,apk_count:1,manifest_count:1,patch_count:0}))})}));
+      await page.locator("#refreshButton").click();await expect(page.locator("#refreshButton")).toBeEnabled();
+      await page.evaluate(()=>scrollTo(0,200));
+      await openDelta(page,kind);
+      const background=await page.evaluate(()=>scrollY);
+      await expect(page.locator("#deltaScroll")).toHaveCSS("overscroll-behavior-y","contain");
+      await scrollBoundary(page,".delta-base-list","#deltaScroll",1,touch);
+      await scrollBoundary(page,".delta-base-list","#deltaScroll",-1,touch);
+      await expect(page.locator("#deltaSheet")).toBeVisible();
+      expect(await page.evaluate(()=>scrollY)).toBe(background);
+      expect(data.writes).toHaveLength(0);expect(errors).toEqual([]);
+    });
+  }
   for(const kind of ["android","firmware"]) for(const touch of [false,true]) {
     test(`${kind} delta bases pass ${touch?"touch":"wheel"} at both edges to their sheet only`,async({page})=>{
       if(!touch) await page.setViewportSize({width:1440,height:700});

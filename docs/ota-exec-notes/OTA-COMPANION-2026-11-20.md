@@ -192,3 +192,127 @@ The four full QSPI regions are archived before any repair. An erased candidate
 header means candidate application has not completed; it does not prove that
 backup-version rejection was the first activation error. Keep that distinction
 while investigating the remaining activation path.
+
+### Selected Reconciliation Route
+
+Use standard Commander only for the existing storage-idle main-loop rendezvous
+and deliberate resume/restart. Reuse the qualified CoreSight GPIO/EEPROM ports
+to capture both BCB copies twice and all configuration bytes, then run an
+identity-bound draft of the existing Boot physical-recovery confirmation kernel.
+The C kernel validates the original full 3.3.35 image before deriving one entire
+inactive BCB record; the wire adapter writes its eight 8-byte pages, waits for
+each write cycle and verifies readback. The old active record, configuration
+bytes 128..255, App, Boot and all QSPI regions must remain unchanged.
+
+This reuses `recovery_confirm/{confirm,confirm_io,eeprom_page,gpio_page,read_pair}`
+and the unchanged Boot/BCB implementation rather than adding a flasher or
+temporarily replacing the App. The old model's image/version pins do not fit
+this board; bind a separate task-local host model to 30330 -> 30335 and the
+actual original App/Boot and verified 30329 backup. Its pure-C ABI remains
+host-only; no arbitrary target-function call or executable RAM upload is used.
+The only missing reader capability is configuration bytes 128..255; a read-only
+adapter extends that range and is checked against the existing EEPROM wire
+model. No page write is added to the read-only snapshot interface.
+
+Before EEPROM mutation, require the saved stable pair, fresh identical pair,
+settled CONFIRMED/no-copy/no-resume state, verified backup reference and exact
+full image identity. Test complete/partial writes, drift, invalid identities
+and immutable configuration offline first. Two finite native cells are planned:
+one read-only EEPROM backup/resume (1200 seconds), followed by the admitted
+single transaction/restart (2400 seconds). A changed or uncertain state stops
+the mutation path. No App/Boot/QSPI/SD programming is part of this route.
+
+### EEPROM And Candidate Confirmation
+
+`repair-host-02/result.json` passes 115 assertions for the source-bound adapter
+and exact image pins, including partial-record writes and both native/model
+EEPROM framing. The earlier 115-assertion host run is retained separately;
+the second binds the added actual SDIO2 idle/DATA0 admission checks.
+
+`eeprom-read-01/result.json` completes the authorized read-only EEPROM cell.
+Both records pass CRC and the repeated pair is stable. B is active, sequence
+1003, state CONFIRMED, boot_try/copy_phase/resume_block all zero, current version
+30330 and backup 30329/614416/2010600807. All 256 bytes are saved before repair.
+The ordinary App resumes healthy without a reset; no EEPROM payload, App,
+Boot, QSPI or SD write occurred. Native AP state and debug freeze/breakpoints
+are restored and the shared device lock is released.
+
+The candidate header is not committed, but its complete 630760-byte payload
+already hashes to original 3.3.36
+`44325d8921509881c52e0ba96c65a0c9591181a0f78794ed8cecb7a3154ce49b`.
+This strengthens the diagnosis: the supplied delta has already reconstructed
+the correct target, while the independently read confirmed-version mismatch
+blocks the backup/STAGED transaction. A complete BLEACT log is still not
+claimed. The next cell rechecks all saved Flash/EEPROM bytes before committing
+only the inactive BCB, then performs the authorized restart and readback.
+
+### Reconciliation Completed
+
+`eeprom-repair-01/result.json` completes that transaction. Eight verified 8-byte
+pages commit the whole inactive A record: sequence 1004, CONFIRMED, current
+version 30335, with boot_try/copy_phase/resume_block still zero. The previous
+active B record and all configuration bytes 128..255 remain unchanged. The old
+candidate reference is deliberately preserved by the confirmed-state kernel;
+it is not silently promoted to a new staged candidate.
+
+One authorized ordinary reset then produces the fresh original RTT line
+`OTA: BCB already CONFIRMED vcode=30335`. Full App/Boot readback matches the
+original hashes above, all four QSPI regions are unchanged, and runtime,
+watchdog and SD health pass. No App, Boot, QSPI or SD programming occurred.
+Owned hardware processes closed and the shared device lock was released.
+The exact adapter SHA-256 is
+`c6911ce040b423c99cfe2f1530ba582e7184f4a327a567777ae8002d096fc8e8`;
+do not edit this completed source or replay its read/repair cells.
+
+This removes the demonstrated backup/version prerequisite failure. It is not
+yet evidence that a subsequent wireless OTA succeeds. `phone-01/result.json`
+finds no ready USB phone; its private ADB server closes, the original key is
+unchanged, and no phone launch, install, reset or data mutation occurs. The
+remaining physical check is one prepared device-originated 3.3.35 -> 3.3.36
+OTA using original App 1.0.85, followed by target/Boot confirmation and original
+App-log retrieval. Do not repeat a successful upgrade to recover host logs.
+
+### Initial Admin Delivery And Desktop Follow-Up
+
+Main `9ed63498fd3ba83f2dd454c8c3ccf3ea0791805e` delivers the initial CSS,
+regression and investigation record. Exact-source backend Actions `44599364344`
+passes 501 Worker tests, 285 browser tests and the contracts/typechecks;
+candidate Actions `44599364349` passes with App/MCU builds skipped. Admin-only
+deployment `44602404051` succeeds with deployment ID
+`25aa04d3-155d-4858-979b-28f6e23b2fb2`. Configuration, Worker/Public, schema,
+secrets and channel/delta state are preserved.
+
+Actual live desktop checks nevertheless expose a narrower Chromium wheel gap:
+with a pre-scrolled background and sparse delta jobs, exhausted inner-list
+wheel input can remain latched instead of reaching the sheet. Computed
+overscroll is already auto, events are trusted/not prevented, and both owners
+scroll normally when targeted directly. Diagnostic removal of outer containment
+does not fix it. Preserve `keyring-cloud-live-01..04` as failed probes, not
+successful delivery evidence. `keyring-cloud-live-05` passes real touch at both
+edges for App/MCU deltas, announcements and history; all ten served assets match
+9ed63498 and no business state is changed. Touch-only success does not waive
+desktop verification.
+
+The follow-up in `sheet-gestures.js` forwards only exhausted vertical wheel
+input from the named inner lists/text to an eligible ancestor. In-range native
+scrolling, touch/drag, nested scroll ownership, zoom/horizontal input, modal
+containment and hidden background locks remain intact. Pixel, line and page
+units are handled explicitly. Sparse-job/pre-scrolled fixtures reproduce both
+desktop failures before the fix while their two touch controls pass
+(`ui-sparse-before-01`). After the fix, `ui-scroll-after-01` passes all 18 scroll
+cases and `types-02` passes. The existing Node color-environment warnings remain
+visible. Full exact-source CI and a second Admin deployment/live wheel-and-touch
+readback remain pending for this follow-up; no App or firmware rebuild is needed.
+
+### Continuation Audit Checkpoint
+
+Controllable outputs remain under `.cache/ota-companion-20261120/`. Completed
+native sessions include authorized automatic updates under
+`C:/Users/SU/AppData/Roaming/SEGGER/`. The watched
+`C:/Users/SU/AppData/Local/Microsoft/Windows/PowerShell/StartupProfileData-NonInteractive`
+also changed in both hash and modification time; no selected command invoked
+PowerShell, and its writer is not attributed. Do not declare it unchanged,
+blame another agent or clean it. The other watched PowerShell startup cache
+remained unchanged during those snapshots. A final continuation path/process
+audit is still required; the earlier `final-audit.json` belongs to its original
+checkpoint and must not be overwritten.

@@ -87,3 +87,38 @@ window.TraceSheetGestures = function ({ sheet, scroll, backdrop, canClose, close
     .observe(sheet, { attributes: true, attributeFilter: ["hidden", "inert"] });
   return { reset };
 };
+
+/* Chromium can latch a boundary wheel to an inner list above a locked page.
+ * Forward only that exhausted vertical wheel; native touch/inner scrolling stays intact. */
+(() => {
+  const lists = ".delta-base-list, .announcement-list, .firmware-history-list, .confirm-detail, .confirm-message";
+  const scrollable = style => /^(auto|scroll)$/.test(style.overflowY);
+  const hasRoom = (node, delta) => delta < 0 ? node.scrollTop > 1
+    : node.scrollHeight - node.clientHeight - node.scrollTop > 1;
+  document.addEventListener("wheel", event => {
+    if (event.defaultPrevented || !event.cancelable || event.ctrlKey || event.shiftKey ||
+        !Number.isFinite(event.deltaY) || !event.deltaY || Math.abs(event.deltaX) > Math.abs(event.deltaY) ||
+        !(event.target instanceof Element)) return;
+    const inner = event.target.closest(lists);
+    if (!inner || inner.closest("[inert]")) return;
+    const style = getComputedStyle(inner);
+    if (!scrollable(style) || style.overscrollBehaviorY !== "auto" || hasRoom(inner, event.deltaY)) return;
+    for (let node = event.target; node && node !== inner; node = node.parentElement) {
+      if (scrollable(getComputedStyle(node)) && node.scrollHeight > node.clientHeight + 1) return;
+    }
+    for (let owner = inner.parentElement; owner; owner = owner.parentElement) {
+      const ownerStyle = getComputedStyle(owner);
+      if ((owner === document.body || owner === document.scrollingElement) &&
+          /^(hidden|clip)$/.test(ownerStyle.overflowY)) return;
+      if (!scrollable(ownerStyle) && owner !== document.scrollingElement) continue;
+      if (hasRoom(owner, event.deltaY)) {
+        const unit = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? parseFloat(style.lineHeight) || 16
+          : event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? owner.clientHeight : 1;
+        event.preventDefault();
+        owner.scrollTop += event.deltaY * unit;
+        return;
+      }
+      if (ownerStyle.overscrollBehaviorY !== "auto") return;
+    }
+  }, { passive: false });
+})();
