@@ -4,7 +4,49 @@ Read this file before deploying the E-Track backend or asking the owner for
 Cloudflare credentials. It lives at the project root deliberately. Read the
 primary checkout's copy, not only an old task worktree's copy.
 
-## Current State: MCU Notification Fix Deployed 2026-11-19
+## Current State: Version Insights Deployed 2026-11-19
+
+Actions [44531533628](https://github.com/Eitan-S-23/E-Track/actions/runs/44531533628)
+deploys published source `7e088a0807c863f745043f2146d26b2459980851` using the
+unchanged `E_TRACK_CI` Secret, with Worker and Public included. Only pending
+`0017_inventory_details.sql` is applied; earlier migrations are not replayed.
+
+| Component | Verified live identity |
+| --- | --- |
+| Worker version | `84b2bec5-8302-4994-97a7-e28f85795668` |
+| Admin deployment | `289c9cce-6ea2-41a4-a396-3640389b526d` |
+| Public deployment | `fbc0e58a-a1e9-4f9c-a86e-874433bba38f` |
+
+Exact-source backend `44529237548` passes 501 Worker tests, 273 browser tests,
+60 proxy/Access/deployment contracts and three typechecks. The deployment verifies
+source identity and preserves the named Worker environment, runtime configuration,
+schedules, production/preview Pages configuration, Access and signing/generator
+references. No credential, binding, channel or delta-generator setting is changed.
+
+Real owner-session checks match HTML and all nine JS/CSS assets to source. App
+and MCU distribution details, complete scope validation, associated App navigation,
+Back restoration and desktop/mobile layouts pass. Public inventory control returns
+200. Legacy records have unknown phone/IP fields and no quality summaries; this
+is honest missing coverage, not zero activity. No synthetic report is inserted.
+Both read-only live probes preserve channel and existing delta identities.
+
+The same source's original-signed App `1.0.85+111` and GCC MCU `3.3.36` candidates
+are built and registered, but not published to Stable/Beta. No delta generation,
+phone/MCU operation or measured reconnect improvement is implied by this deploy.
+Candidate and device qualification remain separate from the live Admin checks.
+
+Originals: `.cache/companion-insights-20261119/keyring-logs-04/06`,
+`keyring-cloud-live-01/02`, `backend-verification.json`, and the
+[inventory delivery record](docs/ota-exec-notes/APP-ADMIN-UX-01.md#delivered-source-and-live-readback).
+This supersedes the older notification-only deployment state below; its successful
+and failed original observations remain history, not instructions to redeploy.
+Selected outputs are project-local, but concurrent external PowerShell/Cryptnet
+cache modification times have no process attribution; see the
+[continuation write audit](docs/ota-exec-notes/APP-COMPANION-01.md#continuation-write-audit).
+No external cache was cleaned or declared unchanged.
+
+<a id="current-state-mcu-notification-fix-deployed-2026-11-19"></a>
+## Earlier MCU Notification Fix Deployed 2026-11-19
 
 Admin-only Actions [44437264265](https://github.com/Eitan-S-23/E-Track/actions/runs/44437264265)
 deployed `9e19f9d15e2f3bcc4a99d2203edd59eb592c6395` through the unchanged

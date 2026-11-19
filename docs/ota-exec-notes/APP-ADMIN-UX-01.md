@@ -2,6 +2,47 @@
 
 ## Version Distribution Details 2026-11-19
 
+### Delivered Source And Live Readback
+
+Published source `7e088a0807c863f745043f2146d26b2459980851` passes main backend
+Actions [44529237548](https://github.com/Eitan-S-23/E-Track/actions/runs/44529237548):
+501 Worker, 273 browser and 60 proxy/Access/deployment contracts, plus all three
+typechecks. Existing successful development/UI observations below are reused.
+
+Deployment [44531533628](https://github.com/Eitan-S-23/E-Track/actions/runs/44531533628)
+uses the unchanged `E_TRACK_CI` Secret and original named staging environment.
+Only `0017_inventory_details.sql` was pending and applied. Worker version
+`84b2bec5-8302-4994-97a7-e28f85795668`, Admin deployment
+`289c9cce-6ea2-41a4-a396-3640389b526d` and Public deployment
+`fbc0e58a-a1e9-4f9c-a86e-874433bba38f` match the intended source. Runtime and
+production/preview configuration, Access, signing/generator references and
+schedules are unchanged; no already-applied migration or package was replayed.
+
+The existing real Access exchange returns the original `owner` role. Served
+HTML and all nine JS/CSS assets match committed bytes. Real App and MCU detail
+reads preserve full version/hash/hardware/layout scope and aggregate coverage.
+The first observed App scope has one legacy sample; the first MCU scope has two.
+Their phone/IP fields remain unknown and quality coverage is zero reports,
+not evidence of zero activity. No synthetic report was inserted to make charts
+look populated; new optional metadata awaits an otherwise-due opted-in App report.
+
+The actual Admin opens both distribution sheets at 1440 and 390 pixels without
+horizontal overflow or page errors. The MCU sheet follows an associated App and
+Back restores the parent title/focus, then returns to the original list. Invalid
+MCU detail scope returns 400; Public inventory control returns 200. The browser
+intercepts only notification read acknowledgements and rejects any other write.
+Channel and existing delta identities match before/after the live probes.
+
+Original sanitized deployment/job logs are in `keyring-logs-04/06` under
+`.cache/companion-insights-20261119/`; `backend-verification.json` indexes the
+results. `keyring-cloud-live-01` retains the source/API/navigation receipt and
+private real-data screenshots. These are deployment checks, not independent
+whole-card acceptance or phone reconnection measurements. The same source's
+new App/MCU candidates are [verified separately](APP-COMPANION-01.md#candidate-and-backend-delivery)
+and remain unpublished; no channel, delta or device operation was performed.
+
+### Earlier Development Checkpoint
+
 Development CI `44521459609` on `2d893a28` now passes all three typechecks,
 501 Worker cases, 273 browser cases and 60 proxy/Access/deployment contracts.
 Original sanitized job logs are retained under `keyring-logs-02`. The subsequent

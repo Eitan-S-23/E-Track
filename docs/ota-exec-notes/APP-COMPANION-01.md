@@ -2,6 +2,96 @@
 
 ## Recovery Diagnostics And Inventory Details 2026-11-19
 
+### Candidate And Backend Delivery
+
+The interrupted delivery is complete on published main source
+`7e088a0807c863f745043f2146d26b2459980851`. No completed build or development
+suite was replayed. Original candidate Actions
+[44529237716](https://github.com/Eitan-S-23/E-Track/actions/runs/44529237716)
+and the original Trace signing executor
+[44529522207](https://github.com/Eitan-S-23/Trace/actions/runs/44529522207)
+both finish successfully, including Android APK and Windows EXE/ZIP. The ordinary
+main build correctly skips duplicate packages. Development results below remain
+the original source-bound observations, not new tests performed by this continuation.
+
+| Asset | Bytes | SHA-256 |
+| --- | --- | --- |
+| App 1.0.85+111 APK | 48767717 | `72460beec718e9991d3df82ce3fe8770c4c8fa38108c422c292dfdf583f3bb87` |
+| Windows EXE | 161792 | `fb1889864ff11527cbb09caa82d5b701b0aa4b907bf76ba4296b38749284c069` |
+| Windows ZIP | 20686958 | `74bc12b6317531a73e3357731be8b5a5a89efb0b3d6900c79e4b654c79c68a9e` |
+| MCU 3.3.36 full ETU | 301432 | `075d37f686834c4951d638131d08f36eab030ef501defadf281769e0445b301a` |
+| MCU 3.3.36 recovery | 630768 | `6002d8666f8031d80daf9fe70db4786fe8295afe4dd09a2295bc929dc5738e2a` |
+
+The original package `com.wen.gaia.gaia`, original signer, both ARM libraries,
+original backend, BLE V2 and inventory capability pass native APK inspection.
+Host Ed25519 verification binds the existing public key, full APK
+hash and signed `bsdiff-lzma-v1` capability. The original signing workflow's
+successful complete R2 byte verification is reused; no local APK rebuild or
+second full APK download is claimed. GitHub retains the immutable `v1.0.85`
+prerelease and the two Windows assets, while the original Admin/D1 exposes
+`rel_trace_android_v1_0_85` as an unpublished `candidate` with available APK
+and manifest assets matching those hashes.
+
+The GCC source proof records one exact-source compilation, the established
+`p34-v2-candidate` profile, no imported benchmark packages, and passing native
+full/recovery verification. Configure/build/size all exit zero: firmware GCC
+has 641 warning lines and zero error lines; the separate candidate host-check job
+has six warning lines and zero errors. Matching Boot is built but not programmed.
+The finalized App image is 630760 bytes with SHA-256
+`44325d8921509881c52e0ba96c65a0c9591181a0f78794ed8cecb7a3154ce49b`.
+Real owner/Admin and D1 readbacks confirm MCU release
+`fw_d4d4a91a966889e06abe299eb01ea1be97b2c2f8bba52806982d466874dbe733`
+is `ready`, source/run-bound and unpublished. Actual full/recovery R2 response
+bytes independently match the retained CI package hashes. Firmware source under
+`USER`, `Firmware` and `MDK-ARM_F435` is unchanged from this batch's baseline;
+the new MCU identity is the explicitly requested version/release-note test target.
+
+Backend Actions `44529237548` passes 501 Worker, 273 browser and 60 contract
+tests plus three typechecks. Deployment `44531533628` applies only pending 0017
+and updates Worker/Admin/Public without changing runtime configuration or
+schedules. Real owner source-byte, version-detail and nested navigation checks
+pass; see [the live backend record](APP-ADMIN-UX-01.md#delivered-source-and-live-readback).
+
+Evidence is retained under `.cache/companion-insights-20261119/`: firmware
+`keyring-artifacts-05`, original job logs `keyring-logs-04` through `-09`,
+`firmware-verification.json`, `candidate-verification.json`,
+`backend-verification.json`, and `keyring-cloud-live-01/02`. App receipt JSON
+values are explicitly reserialized from the preserved native log, not passed off
+as byte-exact original files; original digest bindings and metadata-stage
+differences are recorded in `candidate-receipts/provenance.json`.
+
+Both live read-only probes preserve channel and existing delta identities. There
+is no new delta, Stable/Beta promotion, phone/MCU operation or measured reconnect
+speed. New metadata awaits an opted-in, otherwise-due report from the new App;
+legacy unknown fields are not populated with synthetic values. Whole-card/device
+obligations stay open. Next owner decision is whether to publish/install these
+candidates and select an exact delta, not whether to rerun the successful builds.
+
+### Continuation Write Audit
+
+Selected writes are confined to the primary project: five delivery records,
+their Git metadata, and the new `.cache/companion-insights-20261119/` receipts.
+The original 1147 untracked paths are preserved. Existing credential inputs and
+qualified helpers are read only; no local Flutter build, PowerShell, ADB or
+J-Link is launched. The existing headless browser closes normally and its
+controllable profile/cache/screenshot paths are beneath the task evidence root.
+
+The audit does not claim that the whole Windows host was unchanged. Modification
+times within this continuation's write window were observed at:
+
+- `C:/Users/SU/AppData/Local/Microsoft/Windows/PowerShell/StartupProfileData-NonInteractive`
+- `C:/Users/SU/AppData/LocalLow/Microsoft/CryptnetUrlCache/MetaData/`
+- `C:/Windows/System32/config/systemprofile/AppData/LocalLow/Microsoft/CryptnetUrlCache/MetaData/`
+
+`write-audit-observations-01.json` records exact files, sizes and UTC times;
+`final-write-audit-01.json` records the closing selected-path and Git audit.
+These timestamps are not process attribution or before/after content evidence.
+The writer is unknown; neither an agent-caused write nor unchanged cache content
+is asserted. PowerShell's startup optimization mechanism is distinct from a
+profile script or chat history. No external file was intentionally modified,
+moved or cleaned, and no new probe was run to reproduce these cache updates.
+Any cleanup needs separate path-specific authorization; preserve these observations.
+
 ### Recovery Development Passed
 
 The repaired source `d84e915c21b0cc9c4d67ac253dc2a1a86c786afa` passes full
