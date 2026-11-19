@@ -1371,6 +1371,7 @@
 
       const roleRank = { viewer: 0, publisher: 1, owner: 2 };
       const RELEASE_PAGE_SIZE = 6;
+      const FIRMWARE_SCOPE_QUERY = "appId=trace&deviceModel=e-track-at32f435";
       let quickActionCloseTimer = 0;
       let firmwareDetailCloseTimer = 0;
       let activeConfirmDialog = null;
@@ -1830,7 +1831,7 @@
         if (!["android", "windows", "firmware"].includes(kind)) return false;
         const actor = state.session?.actor;
         const generation = state.candidateNavigation = (state.candidateNavigation ?? 0) + 1;
-        const url = kind === "firmware" ? "/api/admin/firmware/releases?appId=trace"
+        const url = kind === "firmware" ? `/api/admin/firmware/releases?${FIRMWARE_SCOPE_QUERY}`
           : `/api/admin/releases?appId=trace&platform=${kind}`;
         const value = await api(url);
         if (actor !== state.session?.actor || generation !== state.candidateNavigation || state.busy || activeConfirmDialog || state.delta?.busy) return false;
@@ -2517,8 +2518,8 @@
             api(`/api/admin/releases?appId=trace&platform=${platform}`),
             api(`/api/admin/storage?appId=trace&platform=${platform}`).catch((error) => ({ error })),
             api("/api/admin/announcements?appId=trace").catch((error) => ({ error })),
-            api("/api/admin/firmware/releases?appId=trace&deviceModel=e-track-at32f435").catch((error) => ({ error })),
-            api("/api/admin/firmware/channels?appId=trace&deviceModel=e-track-at32f435").catch((error) => ({ error }))
+            api(`/api/admin/firmware/releases?${FIRMWARE_SCOPE_QUERY}`).catch((error) => ({ error })),
+            api(`/api/admin/firmware/channels?${FIRMWARE_SCOPE_QUERY}`).catch((error) => ({ error }))
           ]);
           if (loadGeneration !== state.appLoadGeneration || platform !== state.appPlatform) return;
           state.channels = channels.channels ?? [];
@@ -2673,8 +2674,8 @@
         state.firmwareReconcileRequired = true;
         state.session = await readAdminSession();
         const [releases, channels] = await Promise.all([
-          api("/api/admin/firmware/releases?appId=trace&deviceModel=e-track-at32f435"),
-          api("/api/admin/firmware/channels?appId=trace&deviceModel=e-track-at32f435")
+          api(`/api/admin/firmware/releases?${FIRMWARE_SCOPE_QUERY}`),
+          api(`/api/admin/firmware/channels?${FIRMWARE_SCOPE_QUERY}`)
         ]);
         setFirmwareData(releases, channels);
         renderFirmware();
@@ -4317,7 +4318,8 @@
         const actor = state.session.actor;
         if (reset) { state.firmwareHistory = []; state.firmwareHistoryCursor = null; }
         state.firmwareHistoryLoading = true; state.firmwareHistoryError = null;
-        const params = new URLSearchParams({ appId: "trace", deviceModel: "e-track-at32f435", limit: "25" });
+        const params = new URLSearchParams(FIRMWARE_SCOPE_QUERY);
+        params.set("limit", "25");
         if (state.firmwareHistoryScope === "selected") {
           if (!state.selectedFirmwareId) {
             state.firmwareHistoryLoading = false; state.firmwareHistoryLoaded = true;

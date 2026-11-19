@@ -7,7 +7,8 @@ async function mount(page: Page) {
   page.on('pageerror',error=>pageErrors.push(error.stack??error.message));
   const writes:Array<{path:string;body:Record<string,unknown>}>=[],reads:string[]=[];
   const state={failNotice:false,releaseIds:["one","two"],failDeleteIds:new Set<string>(),notices:[] as Array<Record<string,unknown>>,notifications:[{
-    id:1,type:"candidate",kind:"android",targetReleaseId:"one",versionName:"1.0.1",status:"ready",unread:1,createdAt:1794652000}],
+    id:1,type:"candidate",kind:"android",targetReleaseId:"one",versionName:"1.0.1",status:"ready",unread:1,createdAt:1794652000}] as Array<Record<string,unknown>>,
+    firmwareReleases:[] as Array<Record<string,unknown>>,
     jobs:[{id:"ux-job",kind:"android",targetReleaseId:"two",baseReleaseId:"one",baseVersionCode:1,targetVersionCode:2,
       status:"queued",phase:"ci_queued",attempt:1,revision:1,createdAt:1794652000,updatedAt:1794652000,
       runUrl:"https://github.com/Eitan-S-23/Trace/actions/runs/12345",cancelling:false}],
@@ -28,13 +29,19 @@ async function mount(page: Page) {
       if(url.pathname.endsWith("/session")){await reply({ok:true,actor:"owner",role:"owner",appId:"trace",csrfToken:"ux-csrf",environment:"MOCK"});return;}
       if(url.pathname.endsWith("/delta/activity")){await reply({ok:true,actor:"owner",scope:"own-jobs",jobs:state.jobs,notifications:state.notifications,
         unreadCount:state.notifications.filter(n=>n.unread).length,pushPublicKey:null,pushSubscriptions:[]});return;}
-      if(url.pathname.endsWith("/delta/candidates")){await reply({ok:true,kind:"android",
-        target:{releaseId:"two",versionName:"1.0.2",versionCode:2,fullBytes:100000},bases:[],jobs:state.jobs,
+      if(url.pathname.endsWith("/delta/candidates")){await reply({ok:true,kind:url.searchParams.get("kind")??"android",
+        target:{releaseId:url.searchParams.get("targetId")??"two",versionName:"1.0.2",versionCode:2,fullBytes:100000},bases:[],jobs:state.jobs,
         dispatchConfigured:true,appSigningConfigured:true,distributionEnabled:true});return;}
       if(url.pathname.endsWith("/version-inventory")){await reply({ok:true,coverage:"reporting-installations-only",
         firmwareIdentityScope:"installation",uniqueDeviceCount:null,app:[],firmware:[],generatedAt:1794652000});return;}
       if(url.pathname.endsWith("/resource-usage")){await reply({ok:true,metrics:[],safeguards:{}});return;}
-      if(url.pathname.includes("/firmware/")){await reply({ok:true,firmwareReleases:[],firmwareChannels:[]});return;}
+      if(url.pathname.includes("/firmware/")){
+        if(url.searchParams.getAll("appId").length!==1 || url.searchParams.get("appId")!=="trace"
+          || url.searchParams.getAll("deviceModel").length!==1 || url.searchParams.get("deviceModel")!=="e-track-at32f435") {
+          await reply({errorCode:"INVALID_PARAMETER",message:"Required firmware scope missing/duplicated"},400);return;
+        }
+        await reply({ok:true,firmwareReleases:state.firmwareReleases,firmwareChannels:[]});return;
+      }
       const platform=url.searchParams.get("platform")??"android";
       const releases=platform==="ios"?[]:state.releaseIds.filter(id=>!state.removed.has(id)).map((id,i)=>({id,app_id:"trace",platform,
         version_name:`1.0.${i+1}`,version_code:i+1,release_tag:`v-${id}`,state:"candidate",archived:0,release_notes:"Notes",created_at:"2026-11-17T00:00:00Z",
@@ -81,7 +88,42 @@ async function mount(page: Page) {
   await page.goto(origin);expect(pageErrors).toEqual([]);
   await expect(page.locator("#versionStrip .version-card")).toHaveCount(2);
   await expect(page.locator("#refreshButton")).toBeEnabled();
-  return {state,writes,reads};
+  return {state,writes,reads,pageErrors};
+}
+
+for(const kind of ["android","windows","firmware"]) for(const type of ["candidate","delta"]) {
+  test(`notification target ${kind} ${type} opens its package without losing firmware scope`,async({page})=>{
+    const data=await mount(page),id=kind==="firmware"?"fw-notice":"one";
+    data.state.firmwareReleases=[{appId:"trace",deviceModel:"e-track-at32f435",releaseId:id,
+      versionName:"3.3.34",versionCode:30334,releaseTag:"firmware-3.3.34",releaseNotes:"Candidate notes",
+      targetImageSha256:"a".repeat(64),state:"ready",archived:false,publishedChannels:[],assets:[]}];
+    data.state.notifications=[{id:40,type,kind,targetReleaseId:id,versionName:"3.3.34",status:"ready",
+      baseVersionCode:1,targetVersionCode:2,unread:1,createdAt:1794652000}];
+    await page.locator("#taskButton").click();
+    await page.locator('#taskContent [data-task-action="refresh"]').click();
+    const notice=page.locator('.task-notification[data-notification-id="40"]');
+    await expect(notice).toBeVisible();await notice.click();
+    await expect(page.locator("#taskSheet")).toBeHidden();
+    await expect(page.locator("#confirmDialog")).toBeHidden();
+    if(type==="delta") {
+      await expect(page.locator("#deltaSheet")).toBeVisible();
+      await expect.poll(()=>data.reads.some(read=>read.includes("/delta/candidates?")&&read.includes(`kind=${kind}`))).toBe(true);
+    } else if(kind==="firmware") {
+      await expect(page.locator("#firmwareDetailSheet")).toBeVisible();
+      await expect(page.locator("#firmwareDetail")).toHaveAttribute("data-release-id",id);
+      await expect(page.locator("#firmwareDetailTitle")).toHaveText("3.3.34");
+    } else {
+      await expect(page.locator("#quickActionSheet")).toBeVisible();
+      await expect(page.locator("#appPlatform")).toHaveValue(kind);
+    }
+    for(const read of data.reads.filter(read=>read.startsWith("/api/admin/firmware/"))) {
+      const params=new URL(read,"https://ux-admin.test").searchParams;
+      expect(params.getAll("appId")).toEqual(["trace"]);
+      expect(params.getAll("deviceModel")).toEqual(["e-track-at32f435"]);
+    }
+    expect(data.pageErrors).toEqual([]);
+    expect(data.writes.every(write=>write.path.endsWith("/notifications/read"))).toBe(true);
+  });
 }
 
 for(const width of [1440,390]) test(`announcement editor is a matching modal at ${width}px and preserves a failed draft`,async({page},info)=>{
