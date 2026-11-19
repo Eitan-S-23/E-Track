@@ -234,7 +234,8 @@ legacy entry are unchanged; this section is not independent acceptance.
   reservation and actual binary ownership. It gates recorder START/CONTINUE,
   not STOP; `RecorderCommand` returns refusal to its UI caller.
 - `ble_env_overlay_acquire() -> 0/1`: before acquiring the shared overlay, re-read
-  open GPX, valid GPS motion and current power. Unsafe state returns existing
+  open GPX and current power. The owner's 2026-11-19 motion-gate removal applies
+  here as well as to the UI; GPS speed is not admission authority. Unsafe state returns existing
   acquisition failure without changing opcodes or aborting an active apply.
 - `OtaBleTransport(beforeInitialBegin: void Function()?)`: immutable synchronous
   guard checked at the first BEGIN/BEGIN2 platform write. The service supplies
@@ -266,7 +267,8 @@ legacy entry are unchanged; this section is not independent acceptance.
 | Unchanged displayed offer, fresh press | One CHOICE; SHORT_CLICKED/CLICKED duplicates do not repeat it. |
 | Offer replacement, checking, expiry or lost focus during press | Zero NOW for the replacement; explicit new press required. |
 | Exact OFFER retransmission during press | Same binding and original expiry; one valid choice remains possible. |
-| Recording active or paused-open, new motion or insufficient power at BEGIN | No overlay acquisition; pending reservation is released on rejection. |
+| Recording active or paused-open, or insufficient power at BEGIN | No overlay acquisition; pending reservation is released on rejection. |
+| GPS motion before or after explicit NOW, with recording closed and sufficient power | Motion alone does not reject UI/BEGIN admission; one choice remains consumed, not rearmed. |
 | Recorder start/resume during NOW reservation or binary ownership | Existing unsupported-request result, no GPX/TrackFilter start and no false REC UI. |
 | Reservation timeout, failed send, failure/new session/new offer | No leaked recording lock; remote STARTING does not renew the original lease. |
 | Consent expires during CAPS, fallback, pause/queue/MTU or baseline writer discovery | STALE_DEVICE_CONSENT before any initial BEGIN chunk; zero new platform writes, including cleanup. |
@@ -283,7 +285,23 @@ legacy entry are unchanged; this section is not independent acceptance.
 and reservation cleanup/wrap. `test_companion_safety.py` extracts real modal,
 HAL admission, recorder and dialplate methods; the two original unsafe boundaries
 must fail their corresponding oracles, while the candidate passes. The LVGL,
-GPS, power and storage edges are host stubs, not physical-device observations.
+power and storage edges are host stubs, not physical-device observations. Motion
+fixtures prove admission before/after NOW without restoring consumed consent.
+
+`test_bt_startup_reset.py` additionally compiles `StartupName.h`: unchanged names
+skip the set, legacy names receive exactly one E-Track set, and silence/rejection/
+partial writes/overflow/stale replies/wrap remain bounded. The actual fixed
+candidate calls naming before its only reset; no MAC/UART/UUID/factory-reset
+commands are admitted. Wrong: change a suppressed legacy string after reboot.
+Correct: execute the documented name command before the existing startup reset.
+
+`CompanionServiceTest` asserts the exact 2/4/8-second schedule, single failure
+backoff, duplicate-event coalescing, success reset, finite window/wake lock and
+authority/runtime cancellation. `CompanionIntegrationTest` runs the real
+Bluetooth-on receiver/Bridge/headless service across API 26/31/34, including
+negative states and one-engine retries. `device_metadata_test.dart` retains the
+same device handle/address when a fresh E-Track name replaces X-Trace. A green
+host test is not a radio-speed measurement or a guarantee against Android force-stop.
 
 The Dart service regressions delay CAPS and v1 fallback across consent expiry;
 transport tests delay MTU and queued INFO writes, and prove that a paused initial

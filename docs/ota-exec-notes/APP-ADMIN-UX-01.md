@@ -1,5 +1,34 @@
 # App And Admin UX Improvements
 
+## Firmware Notification Hotfix 2026-11-19
+
+The owner authorized repairing and deploying the existing MCU full-package
+notification error, without moving the original Trace signing infrastructure or
+changing channels/delta jobs. Source `9e19f9d15e2f3bcc4a99d2203edd59eb592c6395`
+is delivered on main. `openCandidateDetails` previously omitted `deviceModel`
+while the strict Worker correctly required both firmware-scope parameters.
+The shared query constant now covers notification navigation, loading, refresh
+and history; no server validation or authorization was relaxed.
+
+The six new browser cases reproduce only the firmware/full-candidate failure
+on the old UI. The fixed complete local and Actions suites pass 267 cases;
+backend run `44436135581` also passes 483 Worker cases, 60 deployment contracts
+and all typechecks. Admin-only deployment `44437264265` succeeds through the
+unchanged `E_TRACK_CI` input, producing `9c636437-4327-4471-ae50-20aa6c36b61c`.
+Worker/Public/schema are not redeployed, and runtime configuration is preserved.
+
+Live owner checks match HTML and nine assets to committed source, verify scoped
+firmware reads and open existing notification 55 to its actual package detail.
+The read-only browser intercepts only notification acknowledgements; channel
+pointers and delta IDs/attempts/input hashes are unchanged. Failed probe
+`keyring-cloud-live-01` lacked the mock response's required `readIds`; corrected
+`-02` passes without another deployment or real mutation. This is deployment
+verification, not phone/MCU or whole-card independent acceptance.
+
+Originals: `.cache/companion-fast-20261119/ui-02/03`, `keyring-logs-01/03`,
+`keyring-cloud-live-01/02`. Root [deployment memory](../../CLOUDFLARE-DEPLOYMENT.md)
+contains the exact command/source/scope contract and failure distinction.
+
 ## Feedback And Navigation Follow-Up 2026-11-18
 
 The owner reports completing the full App update and approves the next update

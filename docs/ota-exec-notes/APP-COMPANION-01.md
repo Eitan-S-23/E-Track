@@ -1,5 +1,138 @@
 # APP-COMPANION-01 Implementation Record
 
+## Fast Reconnect And Candidate Delivery 2026-11-19
+
+The owner authorized this bounded implementation, main integration/push, new
+versioned candidates and the separate Admin hotfix. Phone USB is unavailable and
+is not a delivery prerequisite. No phone installation, MCU flash/reset/OTA,
+Stable/Beta promotion, delta generation or Trace signing-infrastructure migration
+is included. The icon-regression hypothesis was explicitly dropped by the owner.
+
+Product source `48ad9f03beccf74feffacdaed303919146fda35f` is now on local and
+remote main, following Admin hotfix `9e19f9d1`. The owned implementation worktree
+is `.worktrees/companion-fast-20261119`, branch
+`dev/flutter/companion-fast-20261119`; exactly 15 App/MCU/test/contract files were
+fast-forward integrated. App `1.0.84+110` and MCU `3.3.35` are new candidate
+versions, not replacements for the successful 109/3.3.34 artifacts.
+
+### Implemented Behavior
+
+- The existing native companion service keeps its acknowledged runtime after
+  transient offline/identity failures and retries at 2/4/8 seconds within one
+  monotonic 60-second window. The original saved-address attempt is immediate;
+  only exhaustion enters long offline backoff. Success cancels/reset retries,
+  duplicate failures do not stack timers, later disconnections reacquire a
+  bounded wake lock, and disable/revision/permission/runtime loss stops recovery.
+  Active OTA ownership is never replaced by a retry or a second BLE loop.
+- Bluetooth STATE_ON restores an existing enabled association without waiting
+  for the periodic job or a previous offline backoff. Off/turning/unrelated
+  broadcasts do nothing; the receiver never opens an Activity or grants consent.
+- GPS motion no longer prevents an explicitly confirmed install, at both the
+  modal and actual BEGIN/BEGIN2 overlay boundary. Open/paused GPX files and low
+  battery without charging still refuse admission. Consent, reservation, overlay
+  ownership, firmware integrity and final target verification are unchanged.
+- The actual module receives bounded `AT+NAME?` / `AT+NAME=E-Track` commands
+  before the existing single startup reboot. A matching name avoids a persistent
+  rewrite. `Doc/ble.pdf` specifies that naming takes effect after reboot. The
+  fixed production candidate profile participates; baud experiments remain
+  isolated. No MAC, UUID, baud, binding or protocol-marker change is included.
+  App metadata regressions retain the same address while a fresh E-Track
+  advertisement supersedes a stored X-Trace name.
+
+### Executed Development Checks
+
+Ordinary dual-host run `44438101219` and full native/debug run `44438330161`
+attempt 2 pass on exact source `48ad9f03`. Flutter is 3.47.9,
+`c197ca5199e9ee5661e865596c9c07294dfab51c`, Dart 3.13.7. Full Linux tests report
+942 passed / 16 skipped; Windows reports 893 / 65. Both strict analysis and
+eight per-host candidate tests pass. The supported native entry requires
+`build_apk=true`; its development APK was built/verified, not installed or used
+as a substitute for the original-signed release build.
+
+Original JUnit reports contain 107 executed native tests, zero failures/errors/
+skips: CompanionIntegration 69, CompanionService 20, DeviceOtaService 18. The
+new retry and Bluetooth-on cases are present on the applicable SDK variants.
+They exercise real Bridge/Service/receiver orchestration at OS/embedding test
+boundaries, not real radio timing. The first native run failed before tests on
+a Maven dependency HTTP 404. An exact-URL read returned 200 with the pinned
+SHA-256; only the failed Linux job was rerun. Original Windows success and the
+failure log remain retained, without a dependency change or test relaxation.
+
+Host checks pass 86 Python cases (33 startup/name, 19 safety, 24 control,
+9 real-LVGL modal, one menu harness) plus 65 candidate/planner cases. The old
+unsafe receiver/UI boundaries still fail their original regression oracles.
+The first new motion fixture incorrectly expected consumed consent to re-enable
+the button; it was corrected to assert one choice and successful receiver
+admission while keeping duplicate consent disabled. An obsolete GPS stub caused
+an earlier harness-only unused-function error. Both generated fixtures remain.
+
+GCC App/Boot and MSBuild simulator builds pass. The standard batch first hit
+Windows dependency-path length errors in unchanged LVGL assets. Reconfiguring
+the same project-local build with `CMAKE_OBJECT_PATH_MAX=200` fixed the host
+path issue; no external short directory or source workaround was used. Successful
+GCC emits 641 warning lines and simulator 102, all with zero errors. Exact
+artifacts, timestamps, sizes and SHA-256 values are in `build-02/result.json`.
+These local binaries are not the keyed production CI candidate artifacts.
+
+All originals are under `.cache/companion-fast-20261119/`: `host-01`,
+`build-01/02`, `keyring-logs-02/04`, `keyring-artifacts-01`,
+`native-verification.json`, and Git integration/push receipts. The XML reader's
+initial classname/filename filtering mistakes are recorded separately; original
+reports were not edited and no CI run was repeated for that offline reader.
+
+### Automatic Candidates Delivered
+
+Main push `48ad9f03` completed original-candidate run
+[44441921617](https://github.com/Eitan-S-23/E-Track/actions/runs/44441921617),
+including checks, firmware and App delivery. The original Trace signing child
+[44442089690](https://github.com/Eitan-S-23/Trace/actions/runs/44442089690) succeeds
+for Android APK and Windows EXE/ZIP. APK verification confirms the original
+`com.wen.gaia.gaia` package, signer
+`3cecee6330a930e020b454b6d4a79568f4494ca324ae7bcf2c1914e51b04ab47`, both supported
+ARM ABIs, original backend, BLE V2 and signed bsdiff/LZMA capability. The original
+workflow fully uploads/readbacks APK and manifest, then registers
+`rel_trace_android_v1_0_84` at 02:32:59 UTC. Its assets remain in the original
+[v1.0.84 prerelease](https://github.com/Eitan-S-23/Trace/releases/tag/v1.0.84),
+not GitHub latest or an Admin Stable/Beta promotion.
+
+The actual keyed GCC profile is `p34-v2-candidate`, including
+`P34_OTA_FIXED_CONFIG=1` and `CONFIG_BT_BAUD_EXPERIMENT=0`. Its archived compiler
+binary contains the real E-Track query/set commands and no legacy XTrace set.
+CI source proof, compiler binary hash and upload receipts agree. MCU registration
+is `fw_64679463f44154bc305a755a32492463dc6937338d7633614b787dccd9af52f4`, ready with
+two assets and no published channel. Target raw image SHA-256 is
+`05d0b280cf2b0df09cff1b4f1bda15a7924d6b1cf44789997a9ac12eba43a55a`.
+Native candidate GCC reports 641 warning lines and zero errors.
+
+| Delivered Asset | Bytes | SHA-256 |
+| --- | --- | --- |
+| Android APK | 48718441 | `de4ce7c0c3f1d9dc4a753ddd7d397e1192fea25d13a057a97fd4374fadfadf6a` |
+| Windows EXE | 161792 | `115f9c9faaa61e5ea9175918f25a07bb4c437be93308a351fa256a6d399a99ec` |
+| Windows ZIP | 20679260 | `e7f2d377d6e81f89ce3a857b3a9b218e0014b3c344836d03575f1ca180eeacc2` |
+| MCU full ETU | 301429 | `0a46e6d97e3c806b5c137d9d9beef250a23a626bccfd47f4deca6b30f9a80288` |
+| MCU recovery BIN | 630768 | `0aeeaf00697e982fb5522c44c55c14e9295203fcf6fdd57966fd3981bad9bcb1` |
+
+Final real-owner/Admin and D1 readbacks confirm both exact source/run/version
+identities, available assets and candidate visibility. Both MCU objects were
+independently read completely from R2 and match the table; App R2 identity
+matches the original signing workflow's full readback and GitHub asset digest.
+Neither new candidate is referenced by a release channel. Channel pointers and
+all existing delta identities are unchanged during verification. No delta was
+generated, no device operated and no successful older candidate rebuilt.
+
+Additional originals: `keyring-logs-05/06/07`, `keyring-artifacts-02`,
+`firmware-verification.json`, `app-ci-evidence.json`, and
+`keyring-cloud-live-03/result.json` in the same task cache. The result reader
+distinguishes actual timestamped receipt JSON from the shell's echoed source.
+All selected output paths remain within the project; existing unrelated files
+and failed receipts are retained. The final filesystem audit is recorded there
+separately, not inferred only from Git status.
+
+R01-R05/T01/T02 historical review, D0-D5, C1-C6 and formal whole-card acceptance
+retain their existing boundaries. Actual wireless recovery time, the displayed
+device name and motion-time upgrade must be tested after the owner installs
+the new candidates; no measured speedup or new physical observation is claimed.
+
 ## App Main Candidate Migration And 1.0.83, 2026-11-19
 
 The owner authorized migration of the App candidate entry to main, integration

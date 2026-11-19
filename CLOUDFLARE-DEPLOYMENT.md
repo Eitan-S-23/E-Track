@@ -4,7 +4,49 @@ Read this file before deploying the E-Track backend or asking the owner for
 Cloudflare credentials. It lives at the project root deliberately. Read the
 primary checkout's copy, not only an old task worktree's copy.
 
-## Current State: Feedback Backend Deployed 2026-11-18
+## Current State: MCU Notification Fix Deployed 2026-11-19
+
+Admin-only Actions [44437264265](https://github.com/Eitan-S-23/E-Track/actions/runs/44437264265)
+deployed `9e19f9d15e2f3bcc4a99d2203edd59eb592c6395` through the unchanged
+`E_TRACK_CI` Secret. Canonical Admin deployment is
+`9c636437-4327-4471-ae50-20aa6c36b61c`, with successful exact-source and unchanged
+production/preview configuration readbacks. Worker, Public Pages, schema, Access,
+signing/delta references and credentials were not changed or redeployed.
+
+Exact-source backend CI `44436135581` passes 483 Worker tests, 267 browser tests,
+60 proxy/Access/deployment contracts and the three typechecks. A real owner
+session verifies the served HTML plus nine JS/CSS assets against committed bytes.
+Opening existing firmware-candidate notification 55 in the live Admin reaches
+its real firmware detail panel; all firmware requests have the exact scope and
+there are no page errors. Only notification read acknowledgements are intercepted
+in this read-only browser check, using their full response contract. Channel
+pointers and existing delta IDs/attempts/input hashes match before and after.
+
+The first live probe supplied an incomplete mocked read acknowledgement and
+timed out behind the resulting UI error. Correcting that probe, not redeploying
+or weakening production checks, produced the successful result. All originals
+remain under `.cache/companion-fast-20261119/`: `ui-02/03`, `keyring-logs-01/03`,
+and `keyring-cloud-live-01/02`. The earlier local UI dependency-resolution failure
+is retained separately in `ui-01`; locked installation did not change the lockfile.
+
+### Firmware Notification Scope Contract
+
+`openCandidateDetails(kind, id)` must use
+`GET /api/admin/firmware/releases?appId=trace&deviceModel=e-track-at32f435` for
+`kind=firmware`; each required parameter occurs exactly once. The API's scope
+validation remains strict. The same `FIRMWARE_SCOPE_QUERY` supplies initial
+loads, refresh and history so the navigation entry cannot silently drift again.
+
+The root cause was a copied App query and a permissive mock: the main firmware
+list supplied the model, but candidate-notification navigation did not. Good
+cases cover Android/Windows/firmware crossed with full-candidate/delta notices;
+the actual package panel must open without other mutations. A removed/invisible
+release remains an explicit error. Missing, duplicated or wrong firmware scope
+must fail the test mock, just as it does the real API. Wrong: relax the server
+validator or request a new token. Correct: preserve the scope at the shared UI
+boundary and assert the real request. These assertions live in `admin-ux.spec.ts`.
+
+## Earlier Feedback Backend Deployment 2026-11-18
 
 Actions [44245893967](https://github.com/Eitan-S-23/E-Track/actions/runs/44245893967)
 deployed source `344abd6d297c80b37b4a8c4ec0096c2932d6b88b` using the unchanged
