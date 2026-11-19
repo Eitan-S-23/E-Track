@@ -316,3 +316,84 @@ blame another agent or clean it. The other watched PowerShell startup cache
 remained unchanged during those snapshots. A final continuation path/process
 audit is still required; the earlier `final-audit.json` belongs to its original
 checkpoint and must not be overwritten.
+
+## Follow-Up Delivery Completed
+
+Main `2ad213fae81f395c0e70efed472d8386e1741564` delivers the exhausted-wheel
+fix and completed state-repair record. Backend Actions `44613804222` passes
+all 291 browser tests, 501 Worker tests, 60 Public/Access/deployment contracts
+and the three typechecks. Original logs are in `keyring-logs-03/`. Candidate
+`44613804107` and ordinary build `44613804194` both skip App/MCU packaging;
+no shipping artifact was rebuilt. Existing test-fixture image/text warnings
+and Actions/Node deprecation warnings are retained, not hidden as zero warnings.
+
+Admin-only Actions `44615534351` succeeds and verifies deployment
+`77ec808f-c927-4d17-af10-401f84c04990` on that exact source, with production and
+preview runtime configuration unchanged. Its originals are in `keyring-logs-04/`.
+Worker/Public, schema, credentials, channel pointers and delta enablement are
+not changed or redeployed.
+
+`keyring-cloud-live-06/result.json` completes the full real-owner readback.
+HTML and all nine JS/CSS assets match Git object bytes. All 16 real native-input
+observations execute and pass: App delta, MCU delta, announcements and history,
+each with wheel/touch at both boundaries. No check is waived for missing rows
+or geometry. Modal backgrounds remain locked; page errors, unexpected writes
+and synthetic business records are all zero. Channel and delta identities match
+before/after. Long confirmation/error dialogs are covered by the exact-source
+browser suite without manufacturing errors or mutations in the live Admin.
+Earlier failed desktop and touch-only probes remain immutable history.
+
+## Current USB Prerequisite
+
+`notify-usb-01/result.json` confirms one delivered real current-user Feishu
+mention requesting cable/unlock only, explicitly not an OTA start. `phone-02`,
+`phone-03` and `phone-04` preserve the later private-5048 read-only attempts:
+zero ready devices, all owned processes/ports closed and the original key
+unchanged. The user's subsequent confirmation that USB is connected is valid;
+an empty private ADB inventory is not proof of a missing cable.
+
+Read-only Windows PnP inspection identifies the exact `10ADA4197U001CK` phone,
+its iQOO Z8x MTP interface and WINUSB ADB interface, all with device error code
+zero. WMIC identifies the existing PID 19052 as
+`D:/install/leidian/LDPlayer4/adb.exe`, serving port 5037. One explicit read-only
+`host:devices-l` inventory request to that already-running socket returns OKAY
+and lists the expected serial as `device`; it performs no phone command and
+cannot start, stop or version-replace the foreign server. These observations
+support an existing ADB/USB-owner conflict, not an App or firmware failure.
+No foreign process was stopped and no automatic UI input was injected.
+
+The next step requires the user to close that ADB service, or explicitly approve
+stopping only this identified service and its current debug connections. Do not
+kill unrelated processes, silently use the global server for device operations,
+clear App data, install a replacement APK or start OTA before collection works.
+After private USB enumeration succeeds, verify V2312A, installed 1.0.85/111 and
+APK SHA-256 `72460beec718e9991d3df82ce3fe8770c4c8fa38108c422c292dfdf583f3bb87`.
+
+Original release 1.0.85 does not enable `TRACE_DEV_DEVICE_OBSERVATION`, so its
+development-only `p34-observations` finished snapshots must not be assumed to
+exist. Use its real PID-bound logcat and native connection diagnostics, paired
+with one RTT reader and full target/Boot/confirmation readback. Do not rebuild
+the release or fabricate a snapshot/footer to satisfy the development collector.
+Both original 3.3.35 and 3.3.36 maps locate `_SEGGER_RTT` at `0x200537a8`; a fresh
+signature and current full-image identity still gate actual capture. The USB
+link is for observation, while the user initiates the real update on the MCU
+and firmware transfer still uses BLE. Real post-repair OTA remains NOT_RUN.
+
+## Continuation Write Audit
+
+`continuation-audit-01/result.json` verifies all 62 recorded owned command
+closures, absent device lock and closed private ADB port. It accounts for 1,010
+task-cache files (217,911,709 bytes) without moving/deleting historical files.
+The only remaining related process is the separately identified foreign ADB;
+it is not an owned collector. Controllable outputs, subprocess homes/caches,
+notification receipts and Git metadata remain under the project root. The
+notification CLI inherited log path is disabled. No credentials are copied.
+
+The completed native adapter still matches its recorded hash. Authorized SEGGER
+history updates remain recorded separately. The Windows PowerShell startup
+cache named above has changed again since the native audit, with no process
+attribution; no selected PowerShell invocation or external cleanup occurred.
+Do not infer that a concurrent agent caused it or relabel it as unchanged.
+The final post-delivery audit uses a fresh successor directory, not a rewrite
+of the original investigation or native receipts. This is implementation
+verification, not independent acceptance or whole APP-COMPANION card completion.

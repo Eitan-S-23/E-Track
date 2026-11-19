@@ -4,7 +4,30 @@ Read this file before deploying the E-Track backend or asking the owner for
 Cloudflare credentials. It lives at the project root deliberately. Read the
 primary checkout's copy, not only an old task worktree's copy.
 
-## Current State: Initial Scroll Fix Deployed 2026-11-20
+## Current State: Full Scroll Fix Verified 2026-11-20
+
+Admin-only Actions [44615534351](https://github.com/Eitan-S-23/E-Track/actions/runs/44615534351)
+deploys `2ad213fae81f395c0e70efed472d8386e1741564` as
+`77ec808f-c927-4d17-af10-401f84c04990`. Exact-source backend `44613804222`
+passes 291 browser tests, 501 Worker tests, 60 contracts and three typechecks.
+The recorded existing fixture/Node/Actions warnings remain visible. No App or
+firmware build, Worker/Public redeploy, schema or credential change occurred.
+Production and preview runtime configuration are unchanged.
+
+Real owner-session readback matches HTML and all nine JS/CSS assets. All 16
+wheel/touch observations execute and pass at both edges of App/MCU delta bases,
+announcements and firmware history. Modal background locks remain intact; no
+page errors, unexpected writes or synthetic records occur, and channel/delta
+identities are preserved. Long confirmation/error text also passes exact-source
+browser regression without creating live errors. The earlier CSS-only desktop
+failures below remain history and are superseded, not retroactively green.
+
+Originals: `.cache/ota-companion-20261120/keyring-logs-03/04/` and
+`keyring-cloud-live-06/result.json`. See [the completed delivery](docs/ota-exec-notes/OTA-COMPANION-2026-11-20.md#follow-up-delivery-completed).
+MCU state reconciliation and pending real OTA are separate device work, not
+prerequisites to serving this verified Admin change.
+
+## Earlier Initial Scroll Fix Deployed 2026-11-20
 
 Admin-only Actions [44602404051](https://github.com/Eitan-S-23/E-Track/actions/runs/44602404051)
 deploys `9ed63498fd3ba83f2dd454c8c3ccf3ea0791805e` as
