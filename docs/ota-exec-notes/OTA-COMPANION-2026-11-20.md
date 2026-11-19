@@ -561,3 +561,18 @@ boot occurs. No reset, halt, RAM/Flash write, OTA or phone is required. A missin
 device or no reset in this bounded interval does not establish the historical
 watchdog cause. Any further hardware change must follow discriminating evidence;
 real OTA remains gated on firmware-reported safe power and a prepared phone.
+
+### Initial Development Feedback
+
+Development source `9e4811f15928f189fad2c62229b8ab38feecaced`, run
+`44637193444`, fails both hosts because the new service test references an
+incorrect harness name. Use the existing `_BackgroundOwnerHarness`; no product
+analysis error is reported. The service integration file did not compile, so
+its new cases are NOT_RUN, not passing. Other test counts are Linux 799 passed /
+16 skipped / 1 failed and Windows 755 passed / 60 skipped / 1 failed. Original
+console logs are preserved in `keyring-logs-01` under the new task cache.
+
+The follow-up also makes notification-safe failure text an explicit terminal
+field. Generic backend/transport error details are not automatically forwarded
+to the notification; this avoids leaking an exception's signed URL or token.
+This is an internal projection change, not a native notification schema change.

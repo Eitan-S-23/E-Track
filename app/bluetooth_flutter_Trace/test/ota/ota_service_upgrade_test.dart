@@ -2534,7 +2534,7 @@ void main() {
     (OtaBleCodec.rspAckEnd2, OtaBleCodec.statusErrSha, 'ERR_SHA'),
   ]) {
     test('MCU rejection $command/$name reaches UI and the owner snapshot', () async {
-      final host = _FakeBackgroundClient();
+      final host = _BackgroundOwnerHarness();
       final ble = await prepareDownloaded(tempDir: tempFirmwareDir(), notifyLog: [],
           backgroundClient: host);
       if (command == OtaBleCodec.rspAckBegin2) {
@@ -2592,6 +2592,9 @@ void main() {
     expect(unknown.code, 'MCU_ACK_7E');
     expect(unknown.message, contains('UNKNOWN_STATUS (0x7E)'));
     expect(unknown.retryableLater, isFalse);
+    expect(OtaTerminalState(code: 'BACKEND_ERROR',
+        message: 'https://localhost/asset?token=private').taskFailureReason, isNull,
+        reason: 'Raw error details are not automatically notification-safe');
   });
 
   test('BEGIN rejection waits for ABORT; cancellation retains terminal ownership', () async {

@@ -313,7 +313,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         targetVerified: phase == OtaPhase.completed,
         backgroundAcquired: backgroundAcquired,
         backgroundReason: backgroundUnavailableReason,
-        failureReason: stage == 'failed' ? _terminalState.value?.userMessage : null);
+        failureReason: stage == 'failed' ? _terminalState.value?.taskFailureReason : null);
   }
 
   void _publishSnapshot() {
@@ -1756,12 +1756,14 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           case _RebootKind.timedOut:
             final observed = outcome.info;
             if (observed != null) {
+              final message = '设备在复核窗口内已响应，最近一次返回 ${observed.versionName}'
+                  '（vcode ${observed.currentVersionCode}），但版本或镜像摘要与目标 '
+                  '${latest.versionName} 不匹配，未确认升级成功。'
+                  '传输完成不代表固件已应用，请查看设备升级提示并重新连接核验';
               final terminal = OtaTerminalState(
                 code: 'TARGET_FIRMWARE_NOT_CONFIRMED',
-                message: '设备在复核窗口内已响应，最近一次返回 ${observed.versionName}'
-                    '（vcode ${observed.currentVersionCode}），但版本或镜像摘要与目标 '
-                    '${latest.versionName} 不匹配，未确认升级成功。'
-                    '传输完成不代表固件已应用，请查看设备升级提示并重新连接核验',
+                message: message,
+                taskFailureReason: message,
                 retryableLater: true,
               );
               _terminalState.value = terminal;
@@ -1774,6 +1776,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
               message: '设备未在 ${_rebootWindow.inSeconds} 秒复核窗口内'
                   '返回可核验的固件身份，升级可能已完成（设备重启恢复'
                   '慢于窗口），请稍后重新连接设备确认版本',
+              taskFailureReason: '复核窗口内未收到可核验的固件身份，请稍后重新连接确认版本',
               retryableLater: true,
             );
             _upgradeStatus.value = '等待设备重启复核超时'
@@ -3308,6 +3311,7 @@ class OtaTerminalState {
     this.requiredValue,
     this.actualValue,
     this.requestId,
+    this.taskFailureReason,
   });
 
   factory OtaTerminalState.mcuRejection({required int status, int? ackCommand}) {
@@ -3345,9 +3349,11 @@ class OtaTerminalState {
       _ => ('UNKNOWN_STATUS', '设备返回未识别的升级状态，已安全停止，请检查 App 和设备版本'),
     };
     final hex = status.toRadixString(16).toUpperCase();
+    final message = '$command / $name (0x${hex.padLeft(2, '0')}): $reason';
     return OtaTerminalState(
       code: 'MCU_ACK_$hex',
-      message: '$command / $name (0x${hex.padLeft(2, '0')}): $reason',
+      message: message,
+      taskFailureReason: message,
       retryableLater: status != OtaBleCodec.statusOk &&
           OtaBleCodec.knownStatuses.contains(status) &&
           !OtaBleCodec.abortStatuses.contains(status),
@@ -3363,6 +3369,8 @@ class OtaTerminalState {
   final int? requiredValue;
   final int? actualValue;
   final String? requestId;
+  /// Explicitly safe owner text; raw backend/transport messages stay off notifications.
+  final String? taskFailureReason;
 
   String get userMessage {
     switch (code) {
