@@ -2,6 +2,41 @@
 
 ## Recovery Diagnostics And Inventory Details 2026-11-19
 
+### Recovery Development Passed
+
+The repaired source `d84e915c21b0cc9c4d67ac253dc2a1a86c786afa` passes full
+dual-host development `44524540524` and opt-in native/debug run `44524692240`.
+The latter's actual reports bind Flutter 3.47.9, framework
+`c197ca5199e9ee5661e865596c9c07294dfab51c`, Dart 3.13.7 and full scope:
+
+| Check | Executed Result |
+| --- | --- |
+| Linux App analysis/tests | PASS; 958 passed, 16 skipped, zero failures |
+| Windows App analysis/tests | PASS; 906 passed, 68 skipped, zero failures |
+| Candidate settings tests | Eight passed on each host |
+| Native Android JUnit | 117 passed, zero failures/errors/skips: plugin 6, integration 69, companion service 24, OTA service 18 |
+| Debug APK | Build, signature verification and collection PASS; development signing only, not installed |
+| Backend CI 44521459609 | 501 Worker, 273 browser, 60 deployment/proxy/Access contracts and three typechecks PASS |
+
+Full original logs, reports and four native XML files are retained under
+`keyring-logs-03` and `keyring-artifacts-03/04`; every downloaded file was hashed
+and rechecked. Native tests exercise the real vendored plugin's method dispatch,
+physical GATT retirement, stale callback delivery and controller error code.
+The telemetry fixture still runs the real Dart owner, INFO, scan and database
+paths; its new native/diagnostic boundary calls are explicitly asserted.
+Toolchain-generated analysis/registrar/Gradle changes are recorded by the runner
+and restored, with unchanged dependency lock and no restored semantic/untracked
+delta. The distinct generated inputs are not described as an unchanged build.
+
+Root fast-forwarded these 41 files from baseline `08b4f18c` into local main.
+The pre/post Git untracked-path list and its SHA-256 match (1,147 paths).
+Original-signed APK/EXE, new GCC candidates, main push and backend deployment
+are still pending at this checkpoint. Debug success is not release, device or
+independent whole-card acceptance. No Stable/Beta promotion is authorized by
+the old batch's publication; retained device/formal obligations remain open.
+
+### Preserved First CI Failure
+
 Continuation reconciled the completed local commit `2d893a28` and `ui-03`:
 all seven focused browser cases and the three original desktop/mobile screenshots
 already passed. They were not rerun after the interruption. The first full

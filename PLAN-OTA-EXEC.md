@@ -62,6 +62,7 @@
 
 ### APP-ADMIN-UX-01
 
+- 2026-11-19 版本分布详情已实现并通过开发 CI：完整 App/MCU 范围、机型前五名、出口 IP、分页上报和 MCU 到 App 逐级返回沿用原界面。后台 `44521459609` 通过 501 Worker / 273 浏览器 / 60 契约；本地 `ui-03` 三个尺寸截图及七项聚焦测试保留复用。产品 `d84e915c` 已合入本地 main，远端推送、0017 迁移及 Worker/Admin/Public 部署待续办，不变更通道或原差分任务。见[本批详情](docs/ota-exec-notes/APP-ADMIN-UX-01.md#version-distribution-details-2026-11-19)。
 - 2026-11-19 单片机全量包通知修复已上线：`9e19f9d1` 补齐统一固件查询范围，后台 CI `44436135581` 通过 483 Worker / 267 浏览器 / 60 契约。Actions `44437264265` 仅部署 Admin，版本 `9c636437`；真实 owner 打开现有通知 55 到正确详情页，HTML/九个资源逐字节匹配，通道和差分任务身份不变。未改凭据、Worker/Public、schema 或发布通道；见[通知修复](docs/ota-exec-notes/APP-ADMIN-UX-01.md#firmware-notification-hotfix-2026-11-19)。
 - 2026-11-18 反馈与导航交付：`344abd6d` 实现精简帮助、逐级返回、持久化反馈队列与后台处理；每安装实例/北京时间自然日一批，同一出口 IP 每天共享 50 批。App CI `44243311453` 双端全通过；后台 `44243622777` 通过 483 Worker / 261 浏览器。Actions `44245893967` 已部署 Worker/Admin/Public 并应用 0016；真实 owner、静态字节、反馈接受/幂等/每日拒绝/处理审计均通过。
 - 原签名 `1.0.82+108` 候选源码 `a977c848` 已通过 E-Track `44245598054` 和 Trace `44245743035`，APK 与 Windows EXE/ZIP 均成功；原包名/签名、Ed25519 能力、文件哈希和 Android R2 候选已核验。产品 App 树与 `344abd6d` 一致；25 个产品文件与本记录一同按边界交付 main，不混入候选分支的无关固件。
@@ -944,6 +945,7 @@
 
 <a id="app-companion-01"></a>
 #### APP-COMPANION-01 E-Track 后台伴侣运行、OTA 交互与基础体验完善
+- 2026-11-19 后台连接边界与诊断批次：`d84e915c` 已合入本地 main，App `1.0.85+111` / MCU `3.3.36` 待主线候选交付。完整开发 `44524540524`、原生/APK `44524692240` 全部通过：Linux 958/16、Windows 906/68（通过/跳过），两端各八项候选检查，117 项原生测试零失败/跳过。25 秒完整连接期限、30 秒原生进度 watchdog、GATT 关闭确认、中文通知及本机诊断保留真实执行边界；初轮失败与修正原件保留。尚未原签名打包、入库、部署或安装，不关闭整卡/真机验收。见[开发闭环](docs/ota-exec-notes/APP-COMPANION-01.md#recovery-development-passed)。
 - 2026-11-19 公开全量 APK 校验已补齐：原 `1.0.84+110` 的 48,718,441 字节已通过 Public 签名下载完整落盘，文件 SHA-256 为 `de4ce7c0...fadfadf6a`，与原签名构建及入库值一致；直连下载/哈希用时 194.350 秒。旧 180 秒超时和未完成文件保留，不改写旧失败。没有重建、重部署、再次发布或操作设备；本批远程交付与下载验证全部完成，实机体验仍待安装观察。见[完整 APK 回读](docs/ota-exec-notes/APP-COMPANION-01.md#complete-public-apk-readback-2026-11-19)。
 - 2026-11-19 按用户续办授权补完更新发布：App `1.0.84+110` 已发布原 Stable（revision 60），MCU `3.3.35` 已发布原 Stable（revision 9）。仅新增/启用 `109 -> 110` 和 `3.3.34 -> 3.3.35` 两组差分，分别 778,654 / 8,236 字节，比全量小 98.40% / 97.27%；Actions `44450526439` / `44450532113` 及实际补丁回读通过。Public 正确选择补丁、全量回退和新版 NO_UPDATE；两个补丁及 MCU 全量完整下载哈希通过，App 全量公开下载超时原件保留，使用有界响应检查并复用原 CI 全量证据。Beta 与原 42 条任务不变，总数 44；未重建全量、未重部署后台或操作设备。见[发布收口](docs/ota-exec-notes/APP-COMPANION-01.md#stable-rollout-completed-2026-11-19)。
 - 2026-11-19 快速重连与命名改进已交付：`48ad9f03` 已在 main，自动候选 `44441921617` 与原签名 Trace `44442089690` 全部成功；App `1.0.84+110` 的 APK/Windows EXE/ZIP、MCU `3.3.35` 全量/恢复包已构建入库并经真实后台回读。短暂离线先立即尝试并在 60 秒窗口内按 2/4/8 秒重试；保留唯一所有者和有界唤醒锁。MCU 移除 GPS 停车门槛但保留记录/电量/确认/完整性检查，单次启动重启前设置真实 `E-Track` 广播名，MAC/UUID/波特率不变。双端开发、107 原生、151 主机检查通过；本地 GCC/模拟器 743 条警告、0 错误，CI GCC 641 条警告、0 错误。两候选均未发布通道，未生成差分、未操作手机/MCU或关闭整卡验收；见[本批记录](docs/ota-exec-notes/APP-COMPANION-01.md#fast-reconnect-and-candidate-delivery-2026-11-19)。
@@ -1041,6 +1043,8 @@
 | 2026-10-19 | P4-4 / Codex root / `P44-CREDENTIAL-01` | 新链两项产品整改与 Worker 部署已完成，但严格桶凭据的 account-owned/user-owned 创建 POST 均返回 403/9109，最终十项只读核对仍缺四个 S3 secrets | 保持两套独立桶限定 Object Read and Write，不替换旧 CI/provisioning token、不扩大权限；由 O1 直接配置或提供受保护来源与脱敏范围/有效期 | 按 §0.6 必需外部依赖缺失置阻塞；独立预审 10/10 和非发布 CI 通过不等于正式 PASS。保留实际部署异常/恢复和外部缓存未决；root 待凭据后冻结并组织新链/真实 reviewer 观测，gate=false，正式轮次零，未改 main | 已登记/外部凭据阻塞 |
 
 ## 10. 会话日志(每会话一行:日期 ｜ agent ｜ 动了哪些卡 ｜ 一句话结果)
+
+- 2026-11-19 | Codex root / companion insights continuation | APP-COMPANION-01、APP-ADMIN-UX-01 | 复用中断前提交与 UI 成功原件；修复集中发现的测试适配/lint 问题，双端全量、117 原生和后台 501/273/60 检查通过；41 文件快进本地 main，原 1,147 个未跟踪路径不变。App 1.0.85+111 / MCU 3.3.36 候选和后台部署待主线推送；未操作设备、改通道、重做旧包或关闭正式验收。
 
 - 2026-11-19 | Codex root / MCU 3.3.34 publication | APP-COMPANION-01 更新验证交付 | main 源码 c85b39c6、候选 Actions 44369848861 与差分 44372037247 均通过；当前 3.3.33 精确基线的 8,066 字节差分已启用，3.3.34 已发布原 MCU Stable revision 8，Public 选择/下载及实际还原通过。保留 40 条原任务、App/Beta 通道和原凭据；641 GCC 警告、0 错误，未执行设备安装。失败适配器原件及未归因 PowerShell 缓存 mtime 变化保留，无项目外清理；正式整卡验收不变。
 - 2026-11-19 | Codex root / MCU startup repair | APP-COMPANION-01 局部修复 | 3.3.33 启动时有界重启蓝牙模块，已 J-Link 仅安装 App；初始启动、两次 MCU 重启后手机后台自动重连及 MCU 主动检查 NO_UPDATE 通过，App/Boot 不变。122 项自测、GCC App/Boot/模拟器通过，447 条既有警告、0 错误。早期失败原件和未归因 PowerShell mtime 变化保留，无项目外清理；本地未提交/推送/发布，不作整卡验收。

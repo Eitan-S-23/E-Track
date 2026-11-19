@@ -21,6 +21,7 @@ twice; `uniqueDeviceCount` is always null.
 | `GET /api/public/version-inventory/control` | Low-frequency reporting control |
 | `POST /api/public/version-inventory` | Installation report |
 | `GET /api/admin/version-inventory` | Aggregated 7/30/90-day observations |
+| `GET /api/admin/version-inventory/detail` | Read-only, complete-version-scoped model/IP/report detail |
 | `POST /api/admin/version-inventory/refresh` | Request fresh reports on future eligible foreground checks |
 | `GET /api/admin/delta/candidates?kind=android\|firmware&targetId=...` | Original bases and retained jobs |
 | `POST /api/admin/delta/jobs` | Select one to five bases |
@@ -35,6 +36,86 @@ assets. Cancellation additionally requires the task's creating actor and exact
 provider run identity, including the attempt and workflow commit.
 
 ## Contracts
+
+### Version Details And Optional Metadata
+
+From App `1.0.85+111`, otherwise-due reports may include nullable `phone` and
+`quality`. Apply pending migration `0017_inventory_details.sql` before deploying
+Worker, Admin and Public: both Pages bundles import the shared inventory module.
+Do not replay already-applied migrations or change Access, bindings or channels.
+
+```json
+{
+  "phone": {"brand": "Example", "model": "Phone", "osVersion": "16 (SDK 36)"},
+  "quality": {"scope": "companion-day", "day": "2026-11-19", "connectionAttempts": 2,
+    "connectionSucceeded": 1, "connectionFailed": 1, "checksSucceeded": 0,
+    "checksFailed": 0, "updatesSucceeded": 0, "updatesFailed": 0}
+}
+```
+
+`phone` accepts only `brand`/`model` (80 characters each) and `osVersion` (64).
+Each value is null or nonblank text without control characters. `quality` accepts
+only the illustrated scope, a real UTC calendar date and those seven integer
+counters in 0..100000; omitted counters become zero. Absent legacy fields remain
+null and preserve the old same-sequence retry fingerprint. There is no additional
+per-connection HTTP reporting or diagnostic-history upload. Existing opt-out,
+budgets, retention and signed update identity are unchanged.
+
+The server captures a validated IPv4/IPv6 address only from `CF-Connecting-IP`,
+never from a report body or `X-Forwarded-For`. Missing/invalid addresses are null.
+An address is an observed network egress, not a person or globally unique device.
+Nullable columns `phone_brand`, `phone_model`, `os_version`, `report_ip` and
+`quality_json` keep historical reports readable without invented metadata.
+
+The detail GET has these exact query contracts; unknown or duplicated keys fail:
+
+| Scope | Required Fields |
+| --- | --- |
+| App | `kind=app`, `platform=android`, `versionCode`, `versionName`, `imageSha256` |
+| MCU | `kind=firmware`, `deviceModel=e-track-at32f435`, `versionCode`, `imageSha256`, `hardwareRevision`, `layoutId` |
+| Both | Optional `windowDays=7\|30\|90` (default 30), `limit=1..50` (default 20), opaque `cursor` returned by the prior response |
+
+App version codes are bounded by 2100000000; MCU codes by 4294967295 and hardware/
+layout fields by 65535. Image digests are exactly 64 lowercase hexadecimal digits;
+App names use 1..64 word/dot/plus/hyphen characters. Report windows use App
+`last_seen` or MCU `observed_at`; a cached MCU observation is never made newer by
+its phone's later report. The internal descending cursor orders observation time,
+installation key and device key (empty for App); clients must not invent offsets.
+
+Responses bind `scope`, `windowDays`, `sampleCount`, five leading known `models`,
+ten leading `ips`, explicit unknown/other counts, paged `reports` and
+`nextCursor`. Shares use all scope samples as denominator, including unknowns.
+Only 12-digit installation/device tags appear in rows; neither the installation
+bearer nor the Bluetooth address is returned. MCU `associatedApps` links the reporting phone's latest App,
+not the App at the historical device observation. `quality.scope` is explicitly
+`latest-reported-companion-days`: sum one latest summary per installation, not
+all activity in the selected window. Missing quality is not zero activity.
+
+| Input / Observation | Required Result |
+| --- | --- |
+| Legacy report without metadata | Existing retry receipt; nullable detail coverage |
+| Valid App/MCU scope with no reports | 200 with zero samples and empty lists |
+| Invalid metadata/date/counter or incomplete/duplicated detail scope | 400, no accepted report/detail query |
+| Inventory disabled | 503; upgrades remain independent |
+| Missing/invalid Access session | Existing authentication failure; no public detail route |
+| Same MCU observed by two phones | Two installation observations; `uniqueDeviceCount=null` |
+| Close sheet or change scope during a pending read | Discard the stale result, do not reopen or overwrite the new sheet |
+
+Good: open a real distribution row and retain full hash/hardware/layout scope;
+follow its associated App, then Back restores the parent window, page, focus and
+scroll. Base: old reports show unknown model/IP without requiring a client update.
+Bad: fabricate unknown models, deduplicate people by IP, infer window-wide success
+rates, or weaken scope validation to make a copied query work.
+
+Required tests: `worker/test/version-inventory.test.ts` covers metadata, trusted
+IP, legacy idempotency, window/scope/cursor isolation and aggregate coverage;
+`admin/test/version-operations.spec.ts` uses real tab handlers for desktop/mobile,
+escaping, nested Back, pagination and stale responses. App inventory, feedback
+and telemetry tests retain opt-out, low-frequency scheduling and explicit consent
+for diagnostic excerpts. Native JUnit covers bounded history and recovery events.
+Wrong: treat a mock screenshot as live coverage or a backend deployment as phone
+installation. Correct: separately check source-bound CI, deployed original-domain
+HTML/API behavior and the actual installed-device observations still outstanding.
 
 ### Negotiated App Codec
 

@@ -2,6 +2,17 @@
 
 ## Version Distribution Details 2026-11-19
 
+Development CI `44521459609` on `2d893a28` now passes all three typechecks,
+501 Worker cases, 273 browser cases and 60 proxy/Access/deployment contracts.
+Original sanitized job logs are retained under `keyring-logs-02`. The subsequent
+App-only repair commits through `d84e915c` have no backend source delta, so that
+successful backend execution is retained, not rerun during remediation.
+The local `ui-03` screenshots cover 1440, 390 and 320 pixels. They are mock UI
+evidence, not a real Access session or live metadata. Root integrated the bounded
+product source into local main; publishing that source, migration 0017 and
+Worker/Admin/Public deployment remain pending at this checkpoint. Public must
+also deploy because its separately compiled handler imports `reportInventory`.
+
 The owner requested clickable App and MCU distribution records, existing UI
 styling and MCU-to-App navigation. Implementation is on
 `dev/flutter/companion-insights-20261119`, based on main `08b4f18c`.
