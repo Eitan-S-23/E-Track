@@ -909,3 +909,358 @@ root remains `D:/github/my/E-Track`. New output, Git metadata, host homes/caches
 logs and artifacts stay inside that root. Reuse the existing original key-bound
 GCC candidate workflow and protected credential routes; no new keys, credentials,
 backend deployment, Boot installation or acceptance-rule changes are needed.
+
+## Background Restart And MCU Progress Follow-Up
+
+The owner reports successful 3.3.38 testing and requests MCU BLE progress plus
+diagnosis of the connected notification after closing App 1.0.86. The precise
+delta/full selection of that owner-run upgrade was not collected. Passive
+readback verifies the finalized 30338 image SHA-256
+`c0b7cf0da62072d2bcad4436d716e1cb987fa4113e2b1d679dcdb0c066f3b44c`, unchanged
+physical Boot, current confirmation, advancing runtime and clear faults.
+
+Evidence root: `.cache/ota-progress-background-20261120/`. The first phone
+capture at 20:55 and MCU capture at 20:59 were **after recovery**, not failure
+evidence: the owner's private diagnostic history subsequently establishes a
+successful 20:51:30 control handshake. The 681 ms negotiation does not support
+the initial lost-CAPS hypothesis. Preserve those snapshots with this correction.
+
+After acknowledged current-session notification `notify-01`, continuous USB
+window 03 and passive MCU trace 02 capture the actual failure:
+
+- 21:38:21.779: Android `single-cleaner` kills App PID 31113; it exits at
+  21:38:22.086. The owner used the same closing action as before.
+- 21:38:23.125: Android starts PID 19302 for `CompanionService`.
+- MCU requests reach `PHONE_REQUIRED` with advancing runtime. There is no
+  MCU halt/reset/Flash write or OTA in this observation.
+- Phone sample 088 at 21:41:24 shows no connected companion device or bound
+  companion-device service, but the restored CompanionService record still
+  has foreground notification 2410. Sample 084 retains the false text
+  `device connected, background service running`.
+- `failure-phone-03` at 21:46 confirms PID 19302 and a responsive native
+  Service dump, but no Flutter initialization in that process's logcat.
+  Recovery job 2412 last ran at 21:36:27 and next becomes eligible at 21:51:27;
+  this is an eligibility window, not a guaranteed exact execution time.
+
+This distinguishes process existence, Service recreation, Flutter execution
+and a working BLE link. Existing Service initialization only occurs in
+`onStartCommand`; `onCreate` merely assigns `active`. Proposed repair is a
+bounded, idempotent Service-creation bootstrap, preserving disable/permission,
+ownership, deadline and cleanup guards, and replacing stale connected text
+before runtime/link acknowledgement. A control-timeout defect is not claimed
+as the observed cause.
+
+The finite follow-up is one query-only invocation of the existing Android
+recovery job 2412 while App UI stays closed, only if it has not already
+recovered. Capture before/after process, original logs, job/connection state;
+no package install, OTA consent, force-stop, reset, firmware/BCB write or
+permission change. This distinguishes delayed task dispatch from a broken
+recovery handler. Window 04 renews the cleanly closed USB observation lease;
+both MCU traces have completed and their native debuggers are closed.
+
+All selected outputs stay inside this project; automatic SEGGER native history
+remains within the existing exception. A new sparse development checkout ran
+out of disk while copying unnecessary history. Only this turn's new copies
+were retired after comparison (including the verified truncated prefix), with
+original main/evidence files preserved. Its initial index setup is incomplete,
+not product progress. No new product version, candidate, channel or delta has
+been generated for this follow-up.
+
+### Natural Recovery And Development Result
+
+The conditional job experiment did **not** force job 2412. Its receipt
+`recovery-job-01/result.json` says `triggered:false`, `AlreadyRecovered`,
+`appOpened:false`. `recovered-phone-01` at 22:01:41-22:01:53 local time finds
+the same PID 19302 with the companion device connected again, and the job dump
+records its last execution at 21:51:27. This supports delayed scheduled recovery;
+it does not establish the exact reconnection instant. Empty logcat alone is not
+proof that no Flutter engine existed. The installed build did not instrument
+every OEM callback, so recreation without a prompt start command remains the
+leading lifecycle explanation, not a directly observed callback trace.
+
+The checkout/index recovery completed. The exclusively owned branch is
+`dev/flutter/ota-progress-background-20261120`, worktree
+`.worktrees/ota-progress-background-20261120`, latest development commit
+`df29425926e3749ca90f1a9c21b829c45747d897`. It contains the creation bootstrap,
+sanitized native dump, MCU progress and their regressions. It is pushed to the
+development branch only. Main integration, a version increment, original-signed
+App release/Windows EXE, firmware candidate generation and installation are not
+performed by this follow-up. Retain installed App 1.0.86 and firmware 3.3.38;
+do not use the unfinalized local build as an OTA/delta baseline.
+
+#### Scope And Signatures
+
+This is the implementation record for the existing background/progress contracts,
+not a new acceptance rule. There is no BLE command or phone control schema change.
+
+- `CompanionService.onCreate()` posts creation recovery. An explicit
+  `onStartCommand()` consumes that callback; both use `startRuntime(reason)`.
+  Enable/permission, runtime acknowledgement, bounded deadlines and cleanup
+  remain required. A recreated service begins with INITIALIZING, not cached
+  CONNECTED text. `dump()` separately exposes service/runtime/GATT/link state
+  and at most the existing bounded sanitized diagnostic history.
+- `HAL::BT_CompanionGetInfo(CompanionUpdateInfo*)` adds local-only `phase`,
+  `totalBytes`, `durableBytes`, `transferVersion` from the receiver, not the
+  phone's sent-byte count. `CompanionTransferPercent(info)` returns `-1` when
+  no valid transfer ratio exists; multiplication uses 64 bits.
+- `BT_CompanionSetProgressRefresh(CompanionProgressRefresh)` registers one
+  main-loop display observer. Applying, backup and reboot boundaries refresh
+  the open modal with `lv_refr_now`, never `lv_timer_handler`, UART ISR or a
+  QSPI operation callback. Original END/overlay/activation/BCB order is retained.
+- `CreateUpdateProgress(...)` shares the existing SD bar/numeric styling with
+  BLE; it does not reuse SD file-import logic. Back closes only the view.
+
+#### Validation And Error Matrix
+
+| Input/event | Required projection/behavior | Executed development oracle |
+| --- | --- | --- |
+| Service created without Activity or start Intent | Initialize once, await actual runtime/link acknowledgements | Native Service and real headless-bridge tests |
+| Explicit start before creation runnable | Consume pending runnable; no duplicate initialization/dispatch | Native lifecycle test |
+| Disabled, permission loss, destroyed or startup timeout | No silent ownership; release resources and reject late reply | Native guard/deadline tests |
+| 4096 durable of 8192 total | 50 percent and actual byte counts | HAL method and real-LVGL tests |
+| Zero total, durable beyond total, inactive session | Unknown/hidden ratio, never fabricated completion | HAL boundary and real-LVGL tests |
+| Apply, backup, reboot | Phase text/indeterminate display; no success claim | Phase observer and synchronous display-flush tests |
+| Activation error or new transfer | Show failure or discard prior phase; preserve activation return value | HAL error and fresh-admission tests |
+| Close/reopen or late phase callback | No task cancellation, stale object access or input-group leak | Real-LVGL lifecycle tests |
+
+Good/base/bad cases: an idle service is not a connected device; an acknowledged
+runtime plus a real GATT link is required. A 50 percent durable transfer is valid;
+100 percent sent by the phone, a stale notification, or a timer-generated apply
+percentage is not. The target is not successful until the normal post-reboot
+identity verification. These checks do not establish physical background
+reliability or display behavior on an installed new image.
+
+#### Executed Tests And Build
+
+- Full dual-host checks and debug APK/native run
+  [44765814170](https://github.com/Eitan-S-23/E-Track/actions/runs/44765814170)
+  pass on the exact development commit. Flutter 3.47.9 / Dart 3.13.7:
+  Linux 972 passed / 16 skipped, Windows 920 passed / 68 skipped, zero failures.
+  Native JUnit originals total 127 passed, zero skipped/failures/errors:
+  Service 31, integration 72, GATT 6 and device OTA 18.
+  Both full original report/log artifacts are archived in `keyring-artifacts-01/02`.
+- Debug APK compilation and signature verification pass. CI metadata records
+  132595964 bytes, SHA-256
+  `c82de927a52d68db441c6a8ba24bcd78850f725c8b1d1414ff78da26e29e7032`.
+  This is a development-signed artifact, not a shipping App or an installed fix.
+  Standard App Windows EXE/release-mode verification remains NOT_RUN.
+- `tests-01`: 61 control/HAL/real-LVGL tests pass. PNGs in `images-01` are
+  lossless conversions of the original LVGL framebuffer, not design mockups.
+  Percentage, byte counts, phase text, focus and layout were checked.
+- `protocol-01`: actual V2 receiver suite reports 221 checks, zero failures.
+  Its SD test failed because the sparse checkout omitted golden vectors.
+  After restoring only required tracked dependencies, `protocol-02` passes
+  29 SD core checks and **7** adapter scenarios. The script's older aggregate
+  footer still says 5; use the actual scenario output rather than that footer.
+- The default build batch was attempted first. `build-01/02` retain missing
+  sparse dependency failures; `build-03` retains include-lookup failures in the
+  deep default output directory despite the required headers being present.
+  `build-04` uses the same GCC Release App/Boot targets in worktree-local
+  `.cache/gcc`, `CMAKE_OBJECT_PATH_MAX=200`, then the standard simulator MSBuild.
+  All pass: 641 GCC warnings plus 102 simulator warnings, zero errors.
+  Artifacts, nanosecond timestamps and full hashes are in `build-04/artifacts.json`.
+  App size is text 629680 / data 940 / bss 560224; Boot 14720 / 4 / 9780.
+
+#### Regression Lesson And Remaining Delivery
+
+The defect category is an implicit lifecycle assumption across native service,
+Flutter runtime and BLE ownership, with missing creation-only test coverage.
+The first two native runs (`44752125648`, `44756194263`) each retain 29 failures:
+the test injected its fake runtime after `ServiceController.create()` had already
+drained the new callback. Merely pausing the looper did not help: Robolectric
+4.14.1 calls `idleIfPaused()` inside `create()`. The corrected fixture attaches
+the service, installs its dependencies and directly invokes the real `onCreate`
+callback before explicitly advancing the queue. No product guard or assertion
+was disabled. Wrong: infer that a paused controller leaves posted work queued.
+Correct: verify the framework callback boundary and test both creation-only and
+explicit-start orderings. The third run's 127/127 originals close this test issue.
+
+The next delivery owner must integrate the bounded development commit under
+actual main authority, increment App/MCU versions for original candidates, and
+retain manual channel/delta decisions. Only after installing those builds can
+the owner validate close-App/background MCU checks and the MCU progress view.
+An upgrade started on old 3.3.38 still runs the old UI: displaying the new progress
+requires an already-installed receiver containing this change. Do not replay the
+successful historical 3.3.38 upgrade merely to repair collection.
+
+#### Observation Closure And Write Audit
+
+Both USB windows have successful closure receipts. The final `audit-01` queries
+the host without starting ADB/J-Link: private port 5048 is closed, original USB
+owner PIDs 900/1600 are absent, the device lock is absent, and no Commander, RTT
+logger or J-Link GDB server is running. No phone UI launch, installation, new OTA,
+reset or firmware/BCB write was performed for this development follow-up.
+
+Selected source, Git, log, build, image, compiler/MSBuild home/cache/temp and
+download outputs remain project-local. The build host's WinINet compatibility
+junction `build-04/host/userprofile/AppData/Local/Microsoft/Windows/INetCache/Content.IE5`
+was inspected with `fsutil reparsepoint query` and canonical resolution: it targets
+the sibling `INetCache/IE` inside the same project-local host profile, not an
+external directory. It was not removed or reused as an output path.
+
+Watched SEGGER metadata and the PowerShell 7 startup sample remain unchanged.
+`C:/Users/SU/AppData/Local/Microsoft/Windows/PowerShell/StartupProfileData-NonInteractive`
+changed in hash/mtime during observation and again before final audit. This is
+an observed external change, not attribution: no PowerShell was invoked by the
+recorded task commands, and no process-level writer evidence was collected.
+It was not cleaned, moved or modified by a remediation command. Do not describe
+the session as proving zero unrelated external filesystem changes. The board,
+index and this task note remain local pending documentation, not remote delivery.
+
+### Global Update Prompt Follow-Up
+
+The owner's 2026-11-21 request authorizes completing the update prompt on every
+MCU page. Continue in the existing exclusive development worktree, based on
+`df29425926e3749ca90f1a9c21b829c45747d897`; primary and remote main remain
+`16d9174005f35deec7957794bf417ea079daec2e`. This is implementation and host
+validation, not a new release, device installation or channel/delta operation.
+
+Source inspection finds the phone's periodic, manual and device-requested checks
+already share `CompanionRuntime._prepare`: the existing OFFER is sent after
+download verification, acknowledged by SEEN, and deduplicated using SHOWN.
+Metered-download policy, verified-package readiness and old-device fallback are
+preserved. The missing behavior is MCU `CompanionPoll`, which allows only three
+pages and incorrectly requires installation eligibility before showing a prompt.
+
+Remove that page/recording/power visibility gate without weakening installation
+admission. Recheck automatic prompts after the asynchronous open boundary so a
+withdrawn, expired or busy offer cannot open a stale dialog. Preserve one modal,
+input ownership, duplicate suppression, Later and fresh-consent checks. SD work
+must not gain a second upgrade action; a LiveMap-originated consent must release
+its snapshot overlay through the existing page lifecycle before BLE can acquire
+that shared workspace. No Flash/BCB/protocol or map-rendering change is planned.
+
+Validation will extend the existing real-LVGL/source-bound regressions for all
+registered pages, unsafe-but-visible offers, asynchronous changes, focus and
+consent, map exit and concurrent SD work. Reuse the existing contained short-path
+GCC App/Boot and simulator build route; prior App CI remains applicable only to
+unchanged App inputs. New findings and actual results will be recorded here.
+
+#### Implemented Behavior And Development Checks
+
+The bounded follow-up changes only `FirmwareUpdate.cpp` and four MCU host-test
+files in the existing development worktree. There are no new App, HAL receiver,
+Boot, wire-format or release-version changes. The product file SHA-256 tested and
+built is `dd1432e16be04124421eca1a4b1977571f7234faaa08060b7a0728692f29956c`.
+These edits are local on top of `df294259`; they are not a new pushed commit or
+main integration. Earlier background/progress development commits remain intact.
+
+`CompanionPromptPending(info)` accepts a live, promptable offer independently of
+page name, recording and battery state. `CompanionQueueOpen(automatic)` keeps a
+single asynchronous opening and promotes an explicit manual request over a
+pending automatic one. `CompanionOpen` rechecks the live offer and page transition
+before creating the top-layer modal. The existing 250 ms poll retries after a
+page transition without consuming SHOWN prematurely.
+
+`CompanionInstallOffer(displayed)` retains fresh offer binding and installation
+eligibility. Only a deliberate Now choice from LiveMap invokes existing
+`PageManager::BackHome`, whose force-unload path releases the snapshot overlay
+before sending CHOICE. The receiver's final recording/power and overlay checks
+remain unchanged. Later and ordinary presentation never navigate or install.
+`companionSdBusy` follows successful SD Begin through FinishImport/ReleaseUI;
+during that work the notification remains visible, but check/install are disabled
+and the dialog explains the active SD task. Dismissal does not cancel that task.
+
+| Event | Required behavior | Development oracle |
+| --- | --- | --- |
+| Offer on any stable page, including a future page name | Top-layer modal, one presentation, no implicit installation | `global_pages`, registry coverage |
+| Low battery or open recording | Show version and safe-condition explanation; Now disabled | `global_unsafe`, actual HAL/control safety suite |
+| Safety or SD state changes after press | No stale action or consent | `global_unsafe`, `global_busy`, `sd_work_blocks_choices` |
+| Page transition before or after queueing | Preserve pending offer; display when stable | `global_transition` |
+| Withdrawn, expired, acknowledged or busy offer before async open | No automatic stale dialog | `global_stale`, control expiry tests |
+| Active BLE transfer/apply | No competing automatic offer or second task | `global_busy`, existing progress/control cases |
+| LiveMap Now or rejected navigation | Release workspace before consent, or send no consent | `global_map_install`, `map_release_before_consent`, lifecycle source bindings |
+| Later, duplicate callbacks, deleted old focus | Single close/choice, original input groups restored, no freed focus | `global_pages`, existing ownership/repeat/focus cases |
+
+Wrong: reuse the installation predicate to decide whether users may learn about
+an update, or send Now while LiveMap still owns BLE's shared workspace. Correct:
+show a current offer globally, preserve its identity and separately enforce
+actual installation readiness and page/resource lifecycle.
+
+Evidence remains under `.cache/ota-progress-background-20261120/`:
+
+- `tests-02` is the deliberate pre-fix reproduction: all six new global-prompt
+  cases fail on the previous product source, with the original 12 modal tests
+  passing. Preserve this red result.
+- `tests-03` passes all 18 modal tests, but the broader command fails because the
+  old source-extraction safety fixture lacks the new helper dependencies and two
+  requested module names do not exist. This is retained as a harness/setup
+  failure, not mislabeled as a complete passing batch. The fixture now extracts
+  the actual helpers, and the invocation uses the four real suites.
+- `tests-04` passes **72 tests**, zero failures/errors: 24 control, 27 actual
+  HAL/control/recorder boundary, 20 real-LVGL/source-lifecycle and one menu test.
+  The real-LVGL cases exercise all nine registered pages plus FileBrowser and an
+  unknown future page. They also retain existing progress and repeated-close
+  coverage. No fake boundary result is called a physical page/encoder test.
+- `images-02` contains lossless PNGs of the actual test framebuffer. The normal
+  global offer, recording-blocked and SD-busy dialogs were visually inspected:
+  complete Chinese glyphs, target version, readable explanation and correct
+  disabled/focused actions, without overlap. The fixture's version 3.3.31 is not
+  a device observation or shipping version.
+- `build-05` reuses the already-qualified contained short build path: GCC Release
+  App and Boot targets plus simulator MSBuild succeed. The incremental run has
+  **396 GCC warning lines, zero simulator warnings and zero errors**; it is not
+  a new clean-build warning count. App size is text/data/bss
+  `630252 / 940 / 560224`; unchanged Boot is `14720 / 4 / 9780`.
+  `build-05/artifacts.json` records all ELF/HEX/BIN/MAP/EXE bytes, timestamps and
+  SHA-256 values. The new unfinalized App BIN is 632624 bytes, SHA-256
+  `2e2f7ed3899009f411633987e2e717d2527272c965fcd9cc5d44b51c9b822b85`.
+  It is not a publishable replacement for existing 3.3.38 or a delta baseline.
+
+No new Flutter build was needed for this MCU-only follow-up. Prior App CI proves
+only its unchanged App inputs. No new version, signed candidate, publication,
+installation, actual phone/MCU operation or formal independent acceptance was
+performed. A newly built receiver must be installed before this global popup can
+be observed on hardware; the previously verified installed 3.3.38 is not changed
+by a host test. Main delivery and the owner's channel/delta decisions remain
+separate from these local source and build results.
+
+`audit-02` confirms the private ADB port, previous USB owners and native debugger
+processes remain closed, with no device lock or new device command. Selected
+source/docs, helper, test fixtures, build outputs, images and compiler/MSBuild
+home/cache/temp locations remain under `D:/github/my/E-Track`. The new
+`build-05/host/userprofile/AppData/Local/Microsoft/Windows/INetCache/Content.IE5`
+junction was inspected with `fsutil` and canonical path resolution; its actual
+target is the sibling project-local `INetCache/IE`. It was neither cleaned nor
+used as an agent output alias. No new project-external controlled output is
+identified. As in the prior audit, the watched Windows PowerShell startup sample
+has changed since `audit-01`; no PowerShell command was invoked here, and the
+writer is unknown without process-level evidence. No external cleanup or
+attribution was performed. Unrelated primary-checkout files remain untouched.
+
+### Authorized Three-Part Delivery, 2026-11-21
+
+The owner's request to complete all three proposed steps authorizes bounded main
+integration/push, original-signed App and production GCC candidate delivery,
+installation and the finite device follow-up below. Channel publication and
+delta generation/selection remain reserved to the owner. No Boot replacement,
+user-data clearing, arbitrary BCB field edit or project-external output is added.
+
+The fresh primary/remote entry is `16d9174005f35deec7957794bf417ea079daec2e`.
+Reuse the existing three development commits through `df294259` and the five
+validated global-popup files; do not replay their successful host/development
+checks. Preserve unrelated disk-cleanup work and all earlier failed receipts.
+Delivery outputs are confined to `.cache/ota-companion-delivery-20261121/`.
+
+`keyring-inspect-01/versions.json` checks the original Admin, D1 and 127 GitHub
+releases, including unpublished drafts: App `1.0.87+113`, receiver `3.3.39` and
+forward target `3.3.40` are all available. The read-only inspection preserves a
+baseline of App/firmware channels and the 50 existing delta jobs. It does not
+reserve versions or change business state.
+
+| Step | Operation | Required result |
+| --- | --- | --- |
+| Source and candidates | Commit the bounded task files, preserve main documentation, merge ancestry, increment both App version fields and firmware release notes, push main once | Exact-source original APK/EXE and GCC candidate jobs succeed; original Admin and stored bytes agree |
+| Install fixed receiver | Prepare original candidate bytes and exact ELF/map; inspect current App/Boot, confirmation, staging and health before standard J-Link installation | Retain Boot/recovery/user data; complete supported installation state, full target hash, matching confirmed version and advancing health, not App-only identity |
+| Install fixed phone App | Use the owner's original backend update route; prepare USB log collection only when useful | Actual original-signed 1.0.87/113 installed; no debug overwrite, data clearing or automated taps |
+| Prepare forward target | Version-only 3.3.40 candidate through the same main pipeline | Genuinely higher immutable target, left unpublished for the owner's channel/delta choice |
+| Global prompt and Later | With the fixed receiver on a non-OTA page, make a verified higher offer available, then choose Later | One top-layer prompt; Later retains the page and never starts an upgrade |
+| Background response | Close App through the owner's normal route, observe acknowledged runtime/link recovery, then check from MCU without reopening App | Original logs distinguish actual usable companion link from stale connected notification; no scheduled ten-minute recovery dependency |
+| Device-originated update | Owner chooses Now with safe admission and the selected package | Durable MCU progress and apply state are visible; post-reboot exact target/confirmation and original phone logs establish outcome |
+
+The last physical observations remain App `1.0.86+112` and finalized 3.3.38;
+current USB/J-Link availability has not yet been probed. A 3.3.38-to-fixed-version
+transfer cannot validate the new receiver UI. No successful OTA is repeated to
+repair a collector; uncertain installation/state is reconciled before proceeding.
+Candidate registration, channel publication, installation, physical observations
+and formal independent acceptance are separate milestones.
