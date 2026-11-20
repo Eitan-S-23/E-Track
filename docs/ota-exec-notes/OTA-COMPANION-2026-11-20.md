@@ -1264,3 +1264,18 @@ transfer cannot validate the new receiver UI. No successful OTA is repeated to
 repair a collector; uncertain installation/state is reconciled before proceeding.
 Candidate registration, channel publication, installation, physical observations
 and formal independent acceptance are separate milestones.
+
+#### Local Integration Prepared
+
+Global-popup commit `0942629eef7b4ba6d82b12fb919dcb481656b11b` preserves the
+existing development history. Main documentation commit `2de42c8f` and the task
+branch are joined by ordinary two-parent merge
+`f954bd01336030171b4482806c9ce13f90fd6528`; no squash, source copying or unrelated
+worktree changes were used. The release inputs now request App `1.0.87+113` and
+GCC receiver `3.3.39`. Official jobs and installation are not yet observed.
+
+The initial documentation commit attempt stopped before staging because a newly
+added board line carried CRLF in the historically mixed-EOL file. Its failed
+receipt remains at `keyring-commit-02/`; the existing scoped formatter changed
+only that line's ending, after which `keyring-commit-03` succeeded. This host
+formatting issue did not change product source or replay a device/build operation.
