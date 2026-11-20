@@ -1,7 +1,7 @@
 {
   "schema": "original-admin-automatic-candidates-v1",
   "firmware": {
-    "versionName": "3.3.37",
-    "releaseNotes": "Owner-requested forward verification target for a device-initiated 3.3.36-to-3.3.37 OTA with the original-signed App 1.0.86. The MCU Check Update and Update Now entry must initiate this test; a phone-page update or direct J-Link installation is not an equivalent observation. This version adds no claimed MCU behavior fix and preserves the 3.3.36 product logic, companion protocol, BLE identity and V2 transport. Explicit device consent, no open recording, sufficient battery or charging, package integrity and post-reboot version plus full-image identity remain mandatory. Normal GCC full/recovery candidate; channel publication and an exact-base delta remain explicit operator actions."
+    "versionName": "3.3.38",
+    "releaseNotes": "Owner-requested next target for device-initiated delta OTA testing from 3.3.37 with the original-signed App 1.0.86, after the owner reported a successful device-initiated full-package upgrade to 3.3.37. This version adds no claimed MCU behavior fix and preserves the existing product logic, companion protocol, BLE identity, V2 transport, keys and layout. Explicit device consent, no open recording, sufficient battery or charging, package integrity and post-reboot version plus full-image identity remain mandatory. Build and register the normal GCC full/recovery candidate only. The owner will generate the exact 3.3.37-to-3.3.38 delta, choose channel publication and perform the physical test; candidate delivery is not evidence that the delta path passed."
   }
 }

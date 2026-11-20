@@ -877,3 +877,35 @@ not blindly retry, bypass admission, downgrade, replace Boot or write BCB.
 Successful publication, device initiation, final installation and formal
 whole-card acceptance remain distinct. The final retained device should be the
 verified forward target, with no restoration to an older App-only image.
+
+## Device-Initiated Full Success And Next Delta Candidate
+
+The owner reports publishing the 3.3.37 full package and successfully upgrading
+from the MCU's own update entry. This supplies the previously missing
+**device-originated full-package** user observation, distinct from the earlier
+phone-page 30335 -> 30336 success. No synchronized collector or fresh physical
+readback was executed for this owner-run cell; precise timing, raw installed
+identity and the delta path are not newly measured or inferred from the report.
+
+The next request authorizes building and registering one newer MCU candidate,
+and explicitly reserves the remaining delta generation, channel publication and
+physical test to the owner. Prepare **3.3.38 / 30338**, with no additional MCU
+behavior change or App rebuild. Do not generate/enable a delta, advance any
+channel, operate the phone/MCU or retry the completed full-package test.
+
+Fresh primary/remote main is `6edaccef096490270b51dbb68512211c6a499499`.
+Existing candidate 30337 comes from successful original-Admin run
+`44727375725`; the owner's Stable publication is visible at channel revision 11,
+release `fw_c1d9c33ca5b4e7f6301f5f4220be3833c689253f8dbae571394dbac8c5ee0259`.
+Its backend target-image SHA-256 is
+`40040046dc334ec8d36f745b6981a3a25056f214a3bb408db278b9e2b2d34f20`.
+This is the packaged target identity, not the unfinalized source-build binary's
+hash. Future delta selection must use this exact backend 30337 release.
+
+The existing Admin and GitHub release listing, including drafts, show no 30338
+reservation. Original read-only inspection and preserved channel/delta rows are
+in `.cache/ota-device-delta-20261120/keyring-inspect-01/`. The selected writable
+root remains `D:/github/my/E-Track`. New output, Git metadata, host homes/caches,
+logs and artifacts stay inside that root. Reuse the existing original key-bound
+GCC candidate workflow and protected credential routes; no new keys, credentials,
+backend deployment, Boot installation or acceptance-rule changes are needed.
