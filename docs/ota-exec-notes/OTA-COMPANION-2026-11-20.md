@@ -727,3 +727,56 @@ recognize charging or at least 30 percent with recording closed, plus a prepared
 phone/BLE session. Simulated GPS speed is not this 3.3.35 admission condition.
 No further reset, firmware programming, BLE retry, package regeneration or
 charging-state spoof is performed to hide that prerequisite.
+
+## Charger Readiness Restored
+
+The owner now confirms that the MCU is connected to a charger. A new passive
+observation starting at `2026-11-20T09:08:08Z`, using the original qualified
+Commander observer and the exact 30335 ELF/map, captures four samples over 7864
+firmware milliseconds. The base App and Boot are byte-identical before/after;
+the running confirmation remains 30335, runtime/watchdog counters advance, SD is
+ready, the receiver and overlay are idle, and fault registers remain clear.
+There is no halt, reset, RAM/Flash write, RTT read-pointer change or phone action.
+
+The actual charger signal is now asserted: PH2 is an input with pull-up and reads
+low. PA0 remains analog; ADC1 is enabled in 12-bit, one-channel/channel-0 mode.
+ADC values 2570-2574 map to 4142-4148 mV before clamping, with reported usage 100
+percent and charging true. Recording is closed. All four evaluations of the
+unchanged shared OTA safety predicate are true. Thus the previous power blocker
+has cleared without any firmware or protection change. This does not prove the
+exact cause of the older BEGIN rejection or the historical WDT reset.
+
+Originals are under `.cache/ota-companion-fix-20261120/charger-check-01`:
+`result.json`, `snapshot.jlink`, raw binary samples, native logs, command closure
+receipts and `audit.json`. The observer closes normally. Its external audit sees
+an unattributed change to
+`C:/Users/SU/AppData/Local/Microsoft/Windows/PowerShell/StartupProfileData-NonInteractive`;
+this entry does not infer the writing process. No PowerShell was invoked by the
+observer and no external cleanup was performed; SEGGER metadata is unchanged.
+
+The original-signed 1.0.86 APK is downloaded once through the standard `gh release
+download` route, with the existing owner keyring, into
+`.cache/ota-companion-fix-20261120/apk-download-01/apk/ble-monitor-android.apk`.
+All 48898789 bytes hash to the already verified
+`556ec00495521745136b9f4709a25bb62bb122930c47469cb710e4161129852f`.
+No rebuild, re-signing, release/channel change, credential copy or phone operation
+is involved. The exact App, original 30335/30336 images, Boot, reference package,
+ADB/key and standard native tools are bound in `ota-ready-01/plan.json` and
+`phone-plan.json` under the same cache; both ELF symbol tables still match.
+
+Prepared entries are `phone_setup.py` and `observe_ota.py` in that cache.
+Their check-only paths pass. Installation reuses the private ADB owner, permits
+only the known 1.0.85 APK to be replaced by these exact 1.0.86 bytes, preserves
+app data, verifies installed bytes/version, and does not use production
+`run-as`, automatic UI taps or an OTA command. The collector reuses original
+logcat/RTT and full final readback, with the new App identity; it does not replay
+historical PID-specific ADB stops, BCB repair or firmware installation.
+
+The next finite cell remains device-originated 30335 -> 30336 after phone
+installation, fresh MCU/connection checks and acknowledged collector readiness.
+The owner keeps the charger/J-Link connected, then supplies the phone USB
+connection and any required unlock/install dialog. The user starts the update
+only after the collectors and actual App query are ready. Phone USB was not
+enumerated during this preparation, so neither installation nor a collector
+window was started. The original 30335 is retained; successful 30336 upgrade,
+disconnect resolution on hardware and whole-card acceptance are still unverified.
