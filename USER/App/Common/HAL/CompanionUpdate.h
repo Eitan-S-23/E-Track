@@ -6,6 +6,16 @@
 
 namespace HAL
 {
+enum CompanionUpdatePhase
+{
+    COMPANION_UPDATE_IDLE,
+    COMPANION_UPDATE_TRANSFERRING,
+    COMPANION_UPDATE_APPLYING,
+    COMPANION_UPDATE_BACKING_UP,
+    COMPANION_UPDATE_REBOOTING,
+    COMPANION_UPDATE_FAILED
+};
+
 struct CompanionUpdateInfo
 {
     char status[32];
@@ -19,7 +29,24 @@ struct CompanionUpdateInfo
     bool hasOffer;
     bool prompt;
     bool checking;
+    // Local receiver projection, not phone-reported or wire-protocol fields.
+    CompanionUpdatePhase phase;
+    uint32_t totalBytes;
+    uint32_t durableBytes;
+    uint32_t transferVersion;
 };
+
+inline bool CompanionUpdateActive(const CompanionUpdateInfo& info)
+{
+    return info.phase >= COMPANION_UPDATE_TRANSFERRING && info.phase <= COMPANION_UPDATE_REBOOTING;
+}
+
+inline int CompanionTransferPercent(const CompanionUpdateInfo& info)
+{
+    if (info.phase != COMPANION_UPDATE_TRANSFERRING || info.totalBytes == 0u ||
+        info.durableBytes > info.totalBytes) return -1;
+    return (int)((uint64_t)info.durableBytes * 100u / info.totalBytes);
+}
 
 inline bool CompanionSameOffer(const CompanionUpdateInfo& first, const CompanionUpdateInfo& second)
 {
@@ -31,6 +58,9 @@ inline bool CompanionSameOffer(const CompanionUpdateInfo& first, const Companion
 }
 
 void BT_CompanionGetInfo(CompanionUpdateInfo* info);
+// Main-loop phase boundaries only, outside storage operations and the UART ISR.
+typedef void (*CompanionProgressRefresh)();
+void BT_CompanionSetProgressRefresh(CompanionProgressRefresh refresh);
 bool BT_CompanionCheck();
 bool BT_CompanionChoose(bool updateNow, const CompanionUpdateInfo* displayed);
 bool BT_CompanionCanInstall();

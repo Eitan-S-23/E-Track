@@ -50,13 +50,15 @@ class CompanionServiceTest {
     }
 
     @Before fun setUp() {
-        // Keep posted lifecycle work queued until the test installs its boundary.
+        // ServiceController.create() drains posted work even on a paused looper.
+        // Attach first, prepare dependencies, then exercise the real callbacks.
         shadowOf(Looper.getMainLooper()).pause()
-        service = Robolectric.buildService(CompanionService::class.java).create().get()
+        service = Robolectric.buildService(CompanionService::class.java).get()
         runtime = Runtime(); service.execution = runtime
         CompanionBridge.preferences(service).edit().clear().putBoolean("enabled", true)
             .putString("revision", revision).putString("address", address).commit()
         service.getSharedPreferences("companion_diagnostics_v1", Context.MODE_PRIVATE).edit().clear().commit()
+        service.onCreate()
     }
     @After fun tearDown() { service.onDestroy() }
     private fun start() { service.onStartCommand(Intent().putExtra("reason", "foreground"), 0, 1) }

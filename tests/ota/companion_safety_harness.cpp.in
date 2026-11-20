@@ -14,6 +14,14 @@ static uint32_t nowTick = 30;
 static uint32_t millis() { return nowTick; }
 static bool binaryActive = false, recorderFileOpen = false;
 static bool companion_busy() { return binaryActive; }
+static HAL::CompanionUpdatePhase s_companion_phase = HAL::COMPANION_UPDATE_IDLE;
+static HAL::CompanionProgressRefresh s_companion_refresh = nullptr;
+struct SessionProgress { uint32_t durable_off; };
+struct BleSession { uint32_t total_len; SessionProgress progress; uint32_t target_vcode; };
+static BleSession s_ble_session = {};
+enum ota_sd_kind_t { OTA_SD_KIND_FULL, OTA_SD_KIND_PATCH };
+static int applyResult;
+static int ble_apply_staged(uint32_t, uint32_t, ota_sd_kind_t);
 namespace DataProc { bool Recorder_IsOpen(); }
 namespace HAL {
 struct Power_Info_t { bool isCharging; unsigned usage; };
@@ -111,6 +119,20 @@ static void Recorder_RecPoint(Recorder_t*, HAL::GPS_Info_t*) { ++recordingPoints
 #define DATA_PROC_INIT_STRUCT(value) ((void)(value))
 
 // INSERT_PRODUCTION_METHODS
+
+static std::vector<HAL::CompanionUpdatePhase> phases;
+static void CapturePhase() {
+    HAL::CompanionUpdateInfo info = {};
+    HAL::BT_CompanionGetInfo(&info);
+    phases.push_back(info.phase);
+}
+static int ble_apply_staged(uint32_t version, uint32_t bytes, ota_sd_kind_t kind) {
+    require(version == 30339 && bytes == 8192 && kind == OTA_SD_KIND_PATCH,
+        "progress wrapper changed activation arguments");
+    require(phases.size() == 1 && phases[0] == HAL::COMPANION_UPDATE_APPLYING,
+        "apply ran before the phase notification");
+    return applyResult;
+}
 
 int Account::Notify(const char* destination, const void* payload, unsigned bytes) {
     if (strcmp(destination, "Recorder") == 0) {
@@ -255,6 +277,66 @@ int main(int argc, char** argv) {
             require(binaryActive && recordingStarts == 0 && account.notifications == 0, "record request interrupted binary apply");
             binaryActive = false;
             require(Record(recorder, RECORDER_CMD_START) == Account::RES_OK, "binary release left recording blocked");
+        } else if (name == "durable_progress") {
+            binaryActive = true;
+            s_ble_session.total_len = 8192;
+            s_ble_session.target_vcode = 30339;
+            for (uint32_t durable : {0u, 4096u, 8192u}) {
+                s_ble_session.progress.durable_off = durable;
+                HAL::CompanionUpdateInfo info = {};
+                HAL::BT_CompanionGetInfo(&info);
+                require(HAL::CompanionTransferPercent(info) == (int)(durable * 100 / 8192),
+                    "display progress did not follow durable bytes");
+                require(info.transferVersion == 30339 && !info.hasOffer,
+                    "binary transfer inherited a stale offer identity");
+            }
+            binaryActive = false;
+            HAL::CompanionUpdateInfo info = {};
+            HAL::BT_CompanionGetInfo(&info);
+            require(info.totalBytes == 0 && HAL::CompanionTransferPercent(info) == -1,
+                "inactive session retained a false complete percentage");
+        } else if (name == "invalid_progress") {
+            HAL::CompanionUpdateInfo info = {};
+            info.phase = HAL::COMPANION_UPDATE_TRANSFERRING;
+            require(HAL::CompanionTransferPercent(info) == -1, "zero total is a percentage");
+            info.totalBytes = 2; info.durableBytes = 3;
+            require(HAL::CompanionTransferPercent(info) == -1, "invalid durable count is a percentage");
+            info.totalBytes = UINT32_MAX; info.durableBytes = UINT32_MAX - 1;
+            require(HAL::CompanionTransferPercent(info) == 99, "percentage multiply overflowed");
+            info.durableBytes = UINT32_MAX;
+            require(HAL::CompanionTransferPercent(info) == 100, "exact complete percentage lost");
+        } else if (name == "phase_progress") {
+            s_ble_session = {8192, {8192}, 30339};
+            for (auto phase : {HAL::COMPANION_UPDATE_APPLYING, HAL::COMPANION_UPDATE_BACKING_UP,
+                    HAL::COMPANION_UPDATE_REBOOTING, HAL::COMPANION_UPDATE_FAILED}) {
+                s_companion_phase = phase;
+                HAL::CompanionUpdateInfo info = {};
+                HAL::BT_CompanionGetInfo(&info);
+                require(info.phase == phase && HAL::CompanionTransferPercent(info) == -1,
+                    "apply/reset/failure exposed an invented percentage");
+                require(HAL::CompanionUpdateActive(info) == (phase != HAL::COMPANION_UPDATE_FAILED),
+                    "terminal failure kept the UI active");
+            }
+            HAL::BT_CompanionCheck();
+            require(s_companion_phase == HAL::COMPANION_UPDATE_IDLE, "new check retained old apply failure");
+        } else if (name == "fresh_transfer_progress") {
+            s_companion_phase = HAL::COMPANION_UPDATE_FAILED;
+            require(ble_env_overlay_acquire() == 1, "fresh receiver admission failed");
+            require(s_companion_phase == HAL::COMPANION_UPDATE_IDLE, "fresh transfer retained old phase");
+        } else if (name == "apply_phase_notifications") {
+            s_ble_session = {8192, {8192}, 30339};
+            HAL::BT_CompanionSetProgressRefresh(CapturePhase);
+            for (int result : {0, -1, -4, -6, -7}) {
+                phases.clear(); applyResult = result;
+                require(ble_env_activate_staged(30339, 8192, OTA_SD_KIND_PATCH) == result,
+                    "progress wrapper changed activation result");
+                require(phases.size() == (result == 0 ? 1u : 2u), "wrong phase notification count");
+                if (result != 0) require(phases.back() == HAL::COMPANION_UPDATE_FAILED,
+                    "activation failure did not reach the UI");
+            }
+            HAL::BT_CompanionSetProgressRefresh(nullptr);
+            companion_update_phase(HAL::COMPANION_UPDATE_IDLE);
+            require(phases.size() == 2, "removed observer still received a callback");
         } else {
             throw std::runtime_error("unknown test case");
         }

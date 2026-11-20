@@ -69,6 +69,14 @@ static uint32_t p34_clock(void)
  * durable staging 事实。本文件只做注入接线，不复制任何协议状态。 */
 static ota_ble_session_t s_ble_session;
 static ota_staging_io_t s_ble_staging_io;
+static HAL::CompanionUpdatePhase s_companion_phase = HAL::COMPANION_UPDATE_IDLE;
+static HAL::CompanionProgressRefresh s_companion_refresh = NULL;
+
+static void companion_update_phase(HAL::CompanionUpdatePhase phase)
+{
+    s_companion_phase = phase;
+    if (s_companion_refresh != NULL) s_companion_refresh();
+}
 #if defined(P34_OTA_PIPELINE_SYNC) && P34_OTA_PIPELINE_SYNC
 #include "OTA/ota_pipeline_sync.h"
 static ota_pipeline_io_t s_ble_pipeline_io;
@@ -326,6 +334,7 @@ static int ble_env_overlay_acquire(void)
 
     if (ok)
     {
+        s_companion_phase = HAL::COMPANION_UPDATE_IDLE;
         /* 真实会话获取边界：代次递增使所有旧 epoch 下行命令与在飞探针失效 */
         s_ble_epoch++;
         (void)s_p34_ack_batch.rebind(s_ble_epoch);
@@ -406,8 +415,8 @@ static int ble_env_info_provider(ota_ble_info_t *out_info)
  * BEGIN inspect 的 kind 分派）→ backup 自拷+BCB STAGED 原子提交 →
  * 身份三元核对。任何环节失败不提交，活动 BCB 保持 CONFIRMED，设备
  * 继续运行旧版。同步长跑（Apply/Backup 内部喂狗，同 SD 路径先例）。 */
-static int ble_env_activate_staged(uint32_t target_vcode, uint32_t total_len,
-                                   ota_sd_kind_t kind)
+static int ble_apply_staged(uint32_t target_vcode, uint32_t total_len,
+                            ota_sd_kind_t kind)
 {
 #if CONFIG_OTA_BLE_PROFILE
     p34_finish(total_len, 0u);
@@ -495,6 +504,7 @@ static int ble_env_activate_staged(uint32_t target_vcode, uint32_t total_len,
     }
     t_apply1 = millis();
 
+    companion_update_phase(HAL::COMPANION_UPDATE_BACKING_UP);
     memset(&stage_info, 0, sizeof(stage_info));
     stage_result = HAL::OTA_BackupStage(&stage_info);
     if (stage_result == OTA_BACKUP_ERR_COMMIT_AMBIGUOUS)
@@ -530,11 +540,23 @@ static int ble_env_activate_staged(uint32_t target_vcode, uint32_t total_len,
 #endif
 }
 
+static int ble_env_activate_staged(uint32_t target_vcode, uint32_t total_len,
+                                   ota_sd_kind_t kind)
+{
+    // END already released BLE's overlay. Flush each phase before synchronous
+    // apply/backup blocks the UI; never refresh from a QSPI callback.
+    companion_update_phase(HAL::COMPANION_UPDATE_APPLYING);
+    const int result = ble_apply_staged(target_vcode, total_len, kind);
+    if (result != 0) companion_update_phase(HAL::COMPANION_UPDATE_FAILED);
+    return result;
+}
+
 /* 激活成功后的系统复位（合同 §4.5：成功路径随后重启进入 boot STAGED
  * 流程；复位函数沿用固件内既有先例 HAL_FaultHandle.cpp 的 CMSIS
  * NVIC_SystemReset）。 */
 static void ble_env_system_reset(void)
 {
+    companion_update_phase(HAL::COMPANION_UPDATE_REBOOTING);
 #if defined(_WIN32)
     /* 模拟器不复位进程，仅留痕。 */
     CONFIG_DEBUG_SERIAL.println("BLEACT: reset (sim)");
@@ -635,12 +657,27 @@ static bool companion_send(void*, const char* bytes, unsigned count)
 
 void HAL::BT_CompanionGetInfo(CompanionUpdateInfo* info)
 {
-    companion_control.Poll(millis(), companion_busy());
-    if (info != NULL) *info = companion_control.Info();
+    const bool busy = companion_busy();
+    companion_control.Poll(millis(), busy);
+    if (info == NULL) return;
+    *info = companion_control.Info();
+    info->phase = busy ? COMPANION_UPDATE_TRANSFERRING : s_companion_phase;
+    if (info->phase != COMPANION_UPDATE_IDLE)
+    {
+        info->totalBytes = s_ble_session.total_len;
+        info->durableBytes = s_ble_session.progress.durable_off;
+        info->transferVersion = s_ble_session.target_vcode;
+    }
+}
+
+void HAL::BT_CompanionSetProgressRefresh(CompanionProgressRefresh refresh)
+{
+    s_companion_refresh = refresh;
 }
 
 bool HAL::BT_CompanionCheck()
 {
+    if (!companion_busy()) s_companion_phase = COMPANION_UPDATE_IDLE;
     companion_control.Poll(millis(), companion_busy());
     return companion_control.Check(millis());
 }

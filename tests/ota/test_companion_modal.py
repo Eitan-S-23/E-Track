@@ -10,10 +10,13 @@ import subprocess
 import tempfile
 import unittest
 
+from test_main_menu_encoder import method
+
 ROOT = Path(__file__).resolve().parents[2]
 UI = "USER/App/Pages/FirmwareUpdate/FirmwareUpdate.cpp"
 BASELINE = "816b1888be2dfaa632e4e802e6b680ec85ed5aec"
-CASES = ("ownership", "repeat", "snapshots", "offer_replacement", "deleted_focus", "escape", "async_open")
+CASES = ("ownership", "repeat", "snapshots", "offer_replacement", "deleted_focus", "escape", "async_open",
+         "transfer_progress", "apply_progress", "progress_close")
 
 
 def checked(path):
@@ -45,6 +48,8 @@ class CompanionModalTests(unittest.TestCase):
         template = (ROOT / "tests/ota/companion_modal_harness.cpp.in").read_text(encoding="utf-8")
         for name, text in (("original", original), ("candidate", source)):
             block = text[text.index("namespace\n{\n    PageManager* companionManager"):]
+            if name == "candidate":
+                block = "#define COMPANION_PROGRESS_TEST 1\n" + method(text, "void CreateUpdateProgress") + "\n" + block
             # Init belongs to Page even when the original fixture has no UI header.
             generated = template.replace("// INSERT_PRODUCTION_MODAL", block).replace(
                 "namespace Page { void FirmwareCompanion_Show(); }",

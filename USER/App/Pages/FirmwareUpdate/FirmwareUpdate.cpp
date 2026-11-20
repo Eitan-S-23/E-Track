@@ -57,6 +57,30 @@ namespace
     lv_style_transition_dsc_t btnTransition;
     bool stylesReady = false;
 
+    void CreateUpdateProgress(lv_obj_t* parent, lv_obj_t** bar, lv_obj_t** label,
+                              int width, int barY, int labelY)
+    {
+        static lv_font_t font;
+        font = *ResourcePool::GetFont("bahnschrift_24");
+        font.fallback = ResourcePool::GetFont("bahnschrift_17");
+        *bar = lv_bar_create(parent);
+        lv_obj_set_size(*bar, width, 16);
+        lv_obj_align(*bar, LV_ALIGN_TOP_MID, 0, barY);
+        lv_obj_set_style_bg_color(*bar, lv_color_hex(0x102a31), 0);
+        lv_obj_set_style_bg_opa(*bar, LV_OPA_COVER, 0);
+        lv_obj_set_style_radius(*bar, 3, 0);
+        lv_obj_set_style_bg_color(*bar, lv_color_hex(0x20e8f0), LV_PART_INDICATOR);
+        lv_obj_set_style_bg_opa(*bar, LV_OPA_COVER, LV_PART_INDICATOR);
+        lv_obj_set_style_radius(*bar, 3, LV_PART_INDICATOR);
+        lv_bar_set_range(*bar, 0, 100);
+        lv_bar_set_value(*bar, 0, LV_ANIM_OFF);
+        *label = lv_label_create(parent);
+        lv_obj_set_style_text_font(*label, &font, 0);
+        lv_obj_set_style_text_color(*label, lv_color_white(), 0);
+        lv_label_set_text(*label, "0");
+        lv_obj_align(*label, LV_ALIGN_TOP_MID, 0, labelY);
+    }
+
     const lv_style_prop_t styleTransProps[] =
     {
         LV_STYLE_BG_COLOR,
@@ -551,25 +575,7 @@ void FirmwareUpdate::CreateWorkUI()
     lv_label_set_text(workNameLabel, "");
     lv_obj_align(workNameLabel, LV_ALIGN_TOP_LEFT, 12, 49);
 
-    progressBar = lv_bar_create(workPanel);
-    lv_obj_set_size(progressBar, LV_HOR_RES - 58, 16);
-    lv_obj_align(progressBar, LV_ALIGN_TOP_MID, 0, 91);
-    lv_obj_set_style_bg_color(progressBar, lv_color_hex(0x102a31), 0);
-    lv_obj_set_style_bg_opa(progressBar, LV_OPA_COVER, 0);
-    lv_obj_set_style_radius(progressBar, 3, 0);
-    lv_obj_set_style_bg_color(progressBar, lv_color_hex(0x20e8f0),
-                              LV_PART_INDICATOR);
-    lv_obj_set_style_bg_opa(progressBar, LV_OPA_COVER,
-                            LV_PART_INDICATOR);
-    lv_obj_set_style_radius(progressBar, 3, LV_PART_INDICATOR);
-    lv_bar_set_range(progressBar, 0, 100);
-    lv_bar_set_value(progressBar, 0, LV_ANIM_OFF);
-
-    progressLabel = lv_label_create(workPanel);
-    lv_obj_set_style_text_font(progressLabel, ResourcePool::GetFont("bahnschrift_24"), 0);
-    lv_obj_set_style_text_color(progressLabel, lv_color_white(), 0);
-    lv_label_set_text(progressLabel, "0");
-    lv_obj_align(progressLabel, LV_ALIGN_TOP_MID, 0, 119);
+    CreateUpdateProgress(workPanel, &progressBar, &progressLabel, LV_HOR_RES - 58, 91, 119);
 
     workDetailLabel = lv_label_create(workPanel);
     lv_obj_set_style_text_font(workDetailLabel, ResourcePool::GetFont("bahnschrift_13"), 0);
@@ -1394,6 +1400,10 @@ namespace
     lv_obj_t* companionCheck = nullptr;
     lv_obj_t* companionInstall = nullptr;
     lv_obj_t* companionLater = nullptr;
+    lv_obj_t* companionProgress = nullptr;
+    lv_obj_t* companionProgressBar = nullptr;
+    lv_obj_t* companionProgressLabel = nullptr;
+    lv_obj_t* companionProgressDetail = nullptr;
     struct CompanionInput
     {
         lv_indev_t* input;
@@ -1461,23 +1471,80 @@ namespace
     {
         const char* code = companionDisplayed.status;
         if (strcmp(code, "READY") == 0 && !companionDisplayed.hasOffer) code = "UNAVAILABLE";
-        if (companionDisplayed.hasOffer && !CompanionCanInstall()) code = "WAIT_SAFE";
-        CompanionSetText(companionStatus, CompanionStatusTitle(code));
-        CompanionSetText(companionMessage, CompanionStatusText(code));
+        const bool progressing = HAL::CompanionUpdateActive(companionDisplayed);
+        if (!progressing && companionDisplayed.hasOffer && !CompanionCanInstall()) code = "WAIT_SAFE";
+        const char* title = CompanionStatusTitle(code);
+        const char* message = CompanionStatusText(code);
+        const char* detail = "";
+        switch (companionDisplayed.phase)
+        {
+        case HAL::COMPANION_UPDATE_TRANSFERRING:
+            title = "BLE \xE6\x9B\xB4\xE6\x96\xB0";
+            break;
+        case HAL::COMPANION_UPDATE_APPLYING:
+            title = CompanionStatusTitle("VERIFYING");
+            detail = "APPLY / VERIFY";
+            break;
+        case HAL::COMPANION_UPDATE_BACKING_UP:
+            title = CompanionStatusTitle("UPGRADING");
+            detail = "BACKUP / COMMIT";
+            break;
+        case HAL::COMPANION_UPDATE_REBOOTING:
+            title = "\xE6\xAD\xA3\xE5\x9C\xA8\xE9\x87\x8D\xE5\x90\xAF";
+            detail = "REBOOT / VERIFY";
+            break;
+        case HAL::COMPANION_UPDATE_FAILED:
+            code = "FAILED";
+            title = "\xE6\x9B\xB4\xE6\x96\xB0\xE5\xA4\xB1\xE8\xB4\xA5";
+            message = CompanionStatusText("FAILED");
+            break;
+        default: break;
+        }
+        if (progressing) message = "\xE8\xAF\xB7\xE4\xBF\x9D\xE6\x8C\x81\xE8\xAE\xBE\xE5\xA4\x87\xE4\xBE\x9B\xE7\x94\xB5";
+        CompanionSetText(companionStatus, title);
+        CompanionSetText(companionMessage, message);
+        if (progressing)
+        {
+            lv_obj_clear_flag(companionProgress, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(companionCheck, LV_OBJ_FLAG_HIDDEN);
+            char text[40];
+            const int percent = HAL::CompanionTransferPercent(companionDisplayed);
+            if (percent >= 0)
+            {
+                lv_obj_clear_flag(companionProgressBar, LV_OBJ_FLAG_HIDDEN);
+                lv_bar_set_value(companionProgressBar, percent, LV_ANIM_OFF);
+                snprintf(text, sizeof(text), "%u%%", (unsigned)percent);
+                CompanionSetText(companionProgressLabel, text);
+                snprintf(text, sizeof(text), "%lu / %lu B", (unsigned long)companionDisplayed.durableBytes,
+                    (unsigned long)companionDisplayed.totalBytes);
+                CompanionSetText(companionProgressDetail, text);
+            }
+            else
+            {
+                lv_obj_add_flag(companionProgressBar, LV_OBJ_FLAG_HIDDEN);
+                CompanionSetText(companionProgressLabel, "...");
+                CompanionSetText(companionProgressDetail, detail);
+            }
+        }
+        else
+        {
+            lv_obj_add_flag(companionProgress, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(companionCheck, LV_OBJ_FLAG_HIDDEN);
+        }
         const bool attention = strcmp(code, "WAIT_SAFE") == 0 || strcmp(code, "FAILED") == 0 ||
             strcmp(code, "INCOMPATIBLE") == 0;
         lv_obj_set_style_text_color(companionStatus, lv_color_hex(attention ? 0xffbd66 : 0x20e8f0), 0);
         char version[64];
-        if (companionDisplayed.hasOffer)
+        if (companionDisplayed.hasOffer || progressing)
         {
-            const unsigned long value = companionDisplayed.version;
+            const unsigned long value = progressing ? companionDisplayed.transferVersion : companionDisplayed.version;
             snprintf(version, sizeof(version), "\xE7\x89\x88\xE6\x9C\xAC %lu.%lu.%lu",
                 value / 10000, (value / 100) % 100, value % 100);
         }
         else snprintf(version, sizeof(version), "%s", "\xE9\x80\x9A\xE8\xBF\x87\xE6\x89\x8B\xE6\x9C\xBA\xE8\x8E\xB7\xE5\x8F\x96\xE5\x9B\xBA\xE4\xBB\xB6");
         CompanionSetText(companionVersion, version);
         CompanionSetText(lv_obj_get_child(companionLater, 0),
-            companionDisplayed.hasOffer ? "\xE7\xA8\x8D\xE5\x90\x8E" : "\xE8\xBF\x94\xE5\x9B\x9E");
+            !progressing && companionDisplayed.hasOffer ? "\xE7\xA8\x8D\xE5\x90\x8E" : "\xE8\xBF\x94\xE5\x9B\x9E");
     }
 
     void CompanionClose(void*)
@@ -1504,6 +1571,7 @@ namespace
         companionModal = nullptr;
         companionMessage = companionStatus = companionVersion = nullptr;
         companionCheck = companionInstall = companionLater = nullptr;
+        companionProgress = companionProgressBar = companionProgressLabel = companionProgressDetail = nullptr;
         companionClosing = false;
     }
 
@@ -1609,9 +1677,10 @@ namespace
              (companionPressedButton == companionInstall && !CompanionCanInstall())))
             companionPressedButton = nullptr;
         CompanionRenderStatus();
-        bool check = !companionDisplayed.checking && strcmp(companionDisplayed.status, "UPGRADING") != 0 &&
+        const bool progressing = HAL::CompanionUpdateActive(companionDisplayed);
+        bool check = !progressing && !companionDisplayed.checking && strcmp(companionDisplayed.status, "UPGRADING") != 0 &&
             strcmp(companionDisplayed.status, "STARTING") != 0;
-        bool install = companionDisplayed.hasOffer && !companionDisplayed.checking && CompanionCanInstall();
+        bool install = !progressing && companionDisplayed.hasOffer && !companionDisplayed.checking && CompanionCanInstall();
         if (check != companionCanCheck || install != companionCanInstall)
         {
             lv_obj_t* focused = lv_group_get_focused(companionGroup);
@@ -1631,6 +1700,14 @@ namespace
             strcpy(companionShownOffer, companionDisplayed.offer);
             HAL::BT_CompanionPresented(&companionDisplayed);
         }
+    }
+
+    void CompanionRefreshProgress()
+    {
+        if (companionModal == nullptr || companionClosing) return;
+        CompanionRefresh();
+        // Flush only; do not re-enter input/timer processing from the BLE pump.
+        lv_refr_now(nullptr);
     }
 
     void CompanionPoll(lv_timer_t*)
@@ -1708,6 +1785,21 @@ static void CompanionOpen(void*)
     const int halfWidth = (LV_HOR_RES - 64) / 2;
     companionInstall = CompanionButton(panel, "\xE7\xAB\x8B\xE5\x8D\xB3\xE6\x9B\xB4\xE6\x96\xB0", 16, 232, halfWidth);
     companionLater = CompanionButton(panel, "\xE8\xBF\x94\xE5\x9B\x9E", 24 + halfWidth, 232, halfWidth);
+    companionProgress = lv_obj_create(panel);
+    lv_obj_remove_style_all(companionProgress);
+    lv_obj_set_pos(companionProgress, 16, 166);
+    lv_obj_set_size(companionProgress, LV_HOR_RES - 56, 60);
+    lv_obj_clear_flag(companionProgress, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_clear_flag(companionProgress, LV_OBJ_FLAG_CLICKABLE);
+    CreateUpdateProgress(companionProgress, &companionProgressBar, &companionProgressLabel,
+        LV_HOR_RES - 56, 0, 20);
+    companionProgressDetail = lv_label_create(companionProgress);
+    lv_obj_set_style_text_font(companionProgressDetail, ResourcePool::GetFont("bahnschrift_13"), 0);
+    lv_obj_set_style_text_color(companionProgressDetail, lv_color_hex(0x70a5ad), 0);
+    lv_obj_set_width(companionProgressDetail, LV_HOR_RES - 56);
+    lv_obj_set_style_text_align(companionProgressDetail, LV_TEXT_ALIGN_CENTER, 0);
+    lv_label_set_long_mode(companionProgressDetail, LV_LABEL_LONG_DOT);
+    lv_obj_align(companionProgressDetail, LV_ALIGN_TOP_MID, 0, 46);
     companionGroup = lv_group_create();
     companionCanCheck = false; companionCanInstall = false; companionShownOffer[0] = '\0';
     companionPressedButton = nullptr;
@@ -1736,5 +1828,6 @@ void Page::FirmwareCompanion_Init(PageManager* manager)
 {
     if (companionManager != nullptr) return;
     companionManager = manager;
+    HAL::BT_CompanionSetProgressRefresh(CompanionRefreshProgress);
     lv_timer_create(CompanionPoll, 250, nullptr);
 }

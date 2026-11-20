@@ -8,6 +8,7 @@ add_subdirectory("${ROOT}/Simulator/LVGL.Simulator/lvgl" lvgl EXCLUDE_FROM_ALL)
 add_library(ui_fonts STATIC
     "${ROOT}/USER/App/Resource/Font/font_cn_16.c"
     "${ROOT}/USER/App/Resource/Font/font_bahnschrift_13.c"
+    "${ROOT}/USER/App/Resource/Font/font_bahnschrift_24.c"
     "${ROOT}/USER/App/Resource/Font/font_bahnschrift_17.c")
 target_link_libraries(ui_fonts PUBLIC lvgl)
 
