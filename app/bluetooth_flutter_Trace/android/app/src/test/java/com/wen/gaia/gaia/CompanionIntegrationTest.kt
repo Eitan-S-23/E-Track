@@ -594,6 +594,23 @@ class CompanionIntegrationTest {
         assertEquals(false, incoming("state", state(service)).requireSuccess())
     }
 
+    @Test fun serviceRecreationAloneStartsTheRealHeadlessBridgeWithoutAnActivity() {
+        associated()
+        val service = Robolectric.buildService(CompanionService::class.java).create().get()
+        assertEquals(0, CompanionEngineBoundary.created)
+        shadowOf(Looper.getMainLooper()).idle()
+        assertEquals(1, CompanionEngineBoundary.created)
+        assertEquals(listOf("main"), dart.entrypoints)
+        assertNotNull(cache.get(DeviceOtaBridge.ENGINE_ID))
+        assertFalse(service.healthy())
+        ready(service)
+        linked(service)
+        assertTrue(service.ownsDevice(key, service.runtimeId))
+        assertNull(shadowOf(app).nextStartedActivity)
+        service.onStartCommand(Intent().putExtra("reason", "presence"), 0, 2)
+        assertEquals(1, CompanionEngineBoundary.created)
+    }
+
     @Test fun healthyRecoveryJobDoesNotStartDuplicateWorkUnlessCheckIsPending() {
         associated()
         val service = start()

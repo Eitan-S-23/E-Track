@@ -21,6 +21,9 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
+import org.json.JSONObject
+import java.io.FileDescriptor
+import java.io.PrintWriter
 import java.util.UUID
 
 internal interface CompanionExecution {
@@ -92,6 +95,11 @@ class CompanionService : Service() {
     private var stateSequence = 0L
     private val reconnectWindowMs = 60000L
     private val reconnectDelays = longArrayOf(2000, 4000, 8000)
+    private val creationRecovery = Runnable {
+        // Some system cleaners recreate the Service without redelivering a start
+        // Intent. An old foreground notification is not an initialized runtime.
+        if (!closed && !foregroundStarted) startRuntime("recovery")
+    }
     private val reconnect = Runnable {
         reconnectPending = false
         if (closed) return@Runnable
@@ -142,17 +150,28 @@ class CompanionService : Service() {
         }
     }
 
-    override fun onCreate() { super.onCreate(); active = this }
+    override fun onCreate() {
+        super.onCreate()
+        active = this
+        CompanionDiagnostics.record(this, "SERVICE_CREATED", runtimeId)
+        handler.post(creationRecovery)
+    }
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (closed) return START_NOT_STICKY
+        handler.removeCallbacks(creationRecovery)
+        startRuntime(intent?.getStringExtra("reason") ?: "recovery")
+        return START_NOT_STICKY
+    }
+
+    private fun startRuntime(requestedReason: String) {
+        if (closed) return
         if (!CompanionBridge.enabled(this) || execution.problem(this) != null) {
-            stopCompanion("START_PRECONDITION_FAILED"); return START_NOT_STICKY
+            stopCompanion("START_PRECONDITION_FAILED"); return
         }
-        reason = intent?.getStringExtra("reason") ?: "recovery"
+        reason = requestedReason
         if (reason !in listOf("foreground", "manual", "periodic", "presence", "recovery")) {
-            stopCompanion("INVALID_START_REASON"); return START_NOT_STICKY
+            stopCompanion("INVALID_START_REASON"); return
         }
         // A fresh wake supersedes a pending timer, without extending its retry budget.
         handler.removeCallbacks(reconnect)
@@ -171,7 +190,19 @@ class CompanionService : Service() {
             handler.postDelayed(startupDeadline, 20000)
             dispatch()
         } catch (_: Exception) { stopCompanion("FOREGROUND_RUNTIME_FAILED") }
-        return START_NOT_STICKY
+    }
+
+    public override fun dump(fd: FileDescriptor, writer: PrintWriter, args: Array<out String>?) {
+        // Readable through Android's existing dumpsys access, without opening UI
+        // (which itself wakes the runtime and can conceal a background failure).
+        writer.println(JSONObject(mapOf(
+            "runtime" to runtimeId.take(8), "closed" to closed,
+            "foregroundStarted" to foregroundStarted, "runtimeAcknowledged" to runtimeAcknowledged,
+            "engineLive" to runCatching { execution.live() }.getOrDefault(false),
+            "gattConnected" to runCatching { execution.connected(this) }.getOrDefault(false),
+            "linkAcknowledged" to (linkedToken != null), "status" to notificationStatus,
+            "diagnostics" to CompanionDiagnostics.snapshot(this)
+        )).toString())
     }
 
     fun dispatch() {

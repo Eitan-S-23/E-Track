@@ -15,6 +15,10 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowPowerManager
+import org.json.JSONObject
+import java.io.FileDescriptor
+import java.io.PrintWriter
+import java.io.StringWriter
 import java.time.Duration
 
 @RunWith(RobolectricTestRunner::class)
@@ -58,6 +62,71 @@ class CompanionServiceTest {
         mapOf("runtimeId" to service.runtimeId, "revision" to revision,
             "deviceToken" to CompanionBridge.deviceToken(address), "status" to status,
             "connected" to connected, "busy" to busy)
+
+    @Test fun recreatedServiceStartsWithoutAnotherIntentOrPeriodicJob() {
+        assertEquals(0, runtime.starts)
+        shadowOf(Looper.getMainLooper()).idle()
+        assertEquals(1, runtime.starts)
+        assertEquals(1, runtime.dispatches)
+        assertEquals("\u6b63\u5728\u542f\u52a8\u8bbe\u5907\u8fde\u63a5",
+            shadowOf(service).lastForegroundNotification.extras.getString(Notification.EXTRA_TEXT))
+        assertFalse(service.healthy())
+        assertFalse(service.ownsDevice(key, service.runtimeId))
+        runtime.reply!!(true)
+        assertTrue(service.healthy())
+        assertFalse(service.ownsDevice(key, service.runtimeId))
+        assertTrue(service.state(state()))
+        assertTrue(service.ownsDevice(key, service.runtimeId))
+    }
+    @Test fun explicitStartConsumesTheCreationBootstrapWithoutDoubleDispatch() {
+        start()
+        runtime.reply!!(true)
+        shadowOf(Looper.getMainLooper()).idle()
+        assertEquals(1, runtime.starts)
+        assertEquals(1, runtime.dispatches)
+    }
+    @Test fun creationBootstrapHonorsDisableAndPermissionGuards() {
+        runtime.failure = "BLUETOOTH_PERMISSION_DENIED"
+        shadowOf(Looper.getMainLooper()).idle()
+        assertEquals(0, runtime.starts)
+        assertEquals(0, runtime.dispatches)
+        assertFalse(service.healthy())
+    }
+    @Test fun disabledRecreatedServiceCannotInitializeTheEngine() {
+        CompanionBridge.preferences(service).edit().putBoolean("enabled", false).commit()
+        shadowOf(Looper.getMainLooper()).idle()
+        assertEquals(0, runtime.starts)
+        assertFalse(service.healthy())
+    }
+    @Test fun destructionBeforeBootstrapCannotResurrectTheService() {
+        service.onDestroy()
+        shadowOf(Looper.getMainLooper()).idle()
+        assertEquals(0, runtime.starts)
+        assertEquals(0, runtime.dispatches)
+    }
+    @Test fun creationBootstrapRetainsTheExistingRuntimeDeadline() {
+        shadowOf(Looper.getMainLooper()).idle()
+        val late = runtime.reply!!
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(21))
+        assertFalse(service.healthy())
+        assertFalse(ShadowPowerManager.getLatestWakeLock().isHeld)
+        late(true)
+        assertFalse(service.healthy())
+        assertEquals(1, runtime.starts)
+    }
+    @Test fun serviceDumpDistinguishesLifecycleFromTheRealLinkWithoutPrivateIdentifiers() {
+        val output = StringWriter()
+        service.dump(FileDescriptor(), PrintWriter(output), emptyArray())
+        val snapshot = JSONObject(output.toString())
+        assertFalse(snapshot.getBoolean("foregroundStarted"))
+        assertFalse(snapshot.getBoolean("runtimeAcknowledged"))
+        assertFalse(snapshot.getBoolean("linkAcknowledged"))
+        assertEquals("INITIALIZING", snapshot.getString("status"))
+        assertTrue(snapshot.has("diagnostics"))
+        assertFalse(output.toString().contains(address))
+        assertFalse(output.toString().contains(key.deviceToken))
+        assertEquals(0, runtime.starts)
+    }
 
     @Test fun notificationAndStartAreNotRuntimeOwnership() {
         start()
