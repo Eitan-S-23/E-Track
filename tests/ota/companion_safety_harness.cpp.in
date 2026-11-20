@@ -13,6 +13,16 @@ static Fixture* fixture;
 static uint32_t nowTick = 30;
 static uint32_t millis() { return nowTick; }
 static bool binaryActive = false, recorderFileOpen = false;
+static bool companionSdBusy = false, mapOverlayOwned = false;
+class PageManager {
+public:
+    const char* page = "Pages/MainMenu";
+    bool IsSwitching() const { return false; }
+    const char* GetCurrentPageName() const { return page; }
+    bool BackHome() { mapOverlayOwned = false; page = "Pages/Dialplate"; return true; }
+};
+static PageManager manager;
+static PageManager* companionManager = &manager;
 static bool companion_busy() { return binaryActive; }
 static HAL::CompanionUpdatePhase s_companion_phase = HAL::COMPANION_UPDATE_IDLE;
 static HAL::CompanionProgressRefresh s_companion_refresh = nullptr;
@@ -30,7 +40,11 @@ static Power_Info_t power = {false, 100};
 static GPS_Info_t gps = {true, 0.0f};
 static void Power_GetInfo(Power_Info_t* out) { *out = power; }
 static unsigned overlayAcquisitions;
-static bool OTA_OverlayAcquireBle() { ++overlayAcquisitions; return true; }
+static bool OTA_OverlayAcquireBle() {
+    if (mapOverlayOwned) return false;
+    ++overlayAcquisitions;
+    return true;
+}
 }
 static unsigned s_ble_epoch = 0;
 struct AckBatch { void rebind(unsigned) {} };
@@ -241,6 +255,25 @@ int main(int argc, char** argv) {
         } else if (name == "safe_receiver_admission") {
             HAL::power.usage = 10; HAL::power.isCharging = true;
             require(ble_env_overlay_acquire() == 1 && s_ble_epoch == 1, "safe charging admission failed");
+        } else if (name == "sd_work_blocks_choices") {
+            Event(LV_EVENT_PRESSED);
+            companionSdBusy = true;
+            Event(LV_EVENT_CLICKED); Click(companionCheck);
+            require(Choices(current, "|NOW*") == 0 && !HAL::BT_CompanionInstallPending(),
+                "SD work admitted a late consent or reserved a BLE task");
+            require(current.control.Info().hasOffer && !current.control.Info().checking,
+                "SD work allowed a second check");
+            CompanionRefresh();
+            require(installButton.disabled && checkButton.disabled, "SD work left another update action enabled");
+            Click(companionLater);
+            require(Choices(current, "|LATER*") == 1 && companionSdBusy, "Later cancelled SD work");
+        } else if (name == "map_release_before_consent") {
+            manager.page = "Pages/LiveMap"; mapOverlayOwned = true;
+            Click();
+            require(!mapOverlayOwned && Choices(current, "|NOW*") == 1 && HAL::BT_CompanionInstallPending(),
+                "map workspace was not released for the explicit consent");
+            require(ble_env_overlay_acquire() == 1 && HAL::overlayAcquisitions == 1,
+                "map consent left the receiver unable to acquire its workspace");
         } else if (name == "recording_reservation") {
             Account account = {}; Recorder_t recorder = {false, &account, {RECORDER_CMD_STOP, 0}};
             account.UserData = &recorder;

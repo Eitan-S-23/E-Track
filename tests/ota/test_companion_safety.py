@@ -33,6 +33,8 @@ METHODS = (
     (HAL, "bool HAL::BT_CompanionChoose"),
     (HAL, "void HAL::BT_CompanionPresented"),
     (UI, "bool CompanionCanInstall"),
+    (UI, "bool CompanionCanCheck"),
+    (UI, "void CompanionInstallOffer"),
     (UI, "const char* CompanionStatusText"),
     (UI, "void CompanionRequestClose"),
     (UI, "void CompanionButtonEvent"),
@@ -48,7 +50,7 @@ CASES = ("replacement_refresh", "replacement_before_refresh", "same_offer_retran
          "battery_after_choice", "paused_recording", "safe_receiver_admission",
          "recording_reservation", "recording_binary_owner", "recording_ui_conflict",
          "durable_progress", "invalid_progress", "phase_progress", "fresh_transfer_progress",
-         "apply_phase_notifications")
+         "apply_phase_notifications", "sd_work_blocks_choices", "map_release_before_consent")
 
 
 def extract(source, signature):
