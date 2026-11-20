@@ -13,41 +13,63 @@
 LV_FONT_DECLARE(font_cn_16);
 LV_FONT_DECLARE(font_bahnschrift_13);
 LV_FONT_DECLARE(font_bahnschrift_17);
+LV_FONT_DECLARE(font_bahnschrift_24);
 
 static HAL::CompanionUpdateInfo phone = {};
 static bool safe = true;
+static bool recording, mapOverlayOwned;
 static unsigned checks, installations, declines, presentations;
+static HAL::CompanionProgressRefresh progressRefresh;
 namespace HAL {
 void BT_CompanionGetInfo(CompanionUpdateInfo* out) { *out = phone; }
+void BT_CompanionSetProgressRefresh(CompanionProgressRefresh refresh) { progressRefresh = refresh; }
 bool BT_CompanionCheck() { ++checks; return true; }
 bool BT_CompanionChoose(bool now, const CompanionUpdateInfo*) {
+    if (now && mapOverlayOwned) return false;
     if (now) ++installations; else ++declines;
+    phone.hasOffer = false; phone.prompt = false; phone.checking = now;
+    strcpy(phone.status, now ? "CHECKING" : "DEFERRED");
     return true;
 }
 bool BT_CompanionCanInstall() { return safe; }
-void BT_CompanionPresented(const CompanionUpdateInfo*) { ++presentations; }
+void BT_CompanionPresented(const CompanionUpdateInfo*) { ++presentations; phone.prompt = false; }
 }
-namespace DataProc { bool Recorder_IsOpen() { return false; } }
+namespace DataProc { bool Recorder_IsOpen() { return recording; } }
 namespace ResourcePool {
 const lv_font_t* GetFont(const char* name) {
     if (strcmp(name, "bahnschrift_13") == 0) return &font_bahnschrift_13;
     if (strcmp(name, "bahnschrift_17") == 0) return &font_bahnschrift_17;
+    if (strcmp(name, "bahnschrift_24") == 0) return &font_bahnschrift_24;
     return &font_cn_16;
 }
 }
 class PageManager {
 public:
     bool switching = false;
+    bool backHomeAllowed = true;
+    unsigned backHomes = 0;
     const char* page = "Pages/MainMenu";
     bool IsSwitching() const { return switching; }
     const char* GetCurrentPageName() const { return page; }
+    bool BackHome() {
+        if (switching || !backHomeAllowed) return false;
+        ++backHomes;
+        // Production BackHome force-unloads LiveMap before returning.
+        mapOverlayOwned = false;
+        lv_group_remove_all_objs(lv_group_get_default());
+        page = "Pages/Dialplate";
+        switching = true;
+        return true;
+    }
 };
 namespace Page { void FirmwareCompanion_Show(); }
 
 // INSERT_PRODUCTION_MODAL
 
 static lv_color32_t frame[240 * 320];
+static unsigned flushes;
 static void Flush(lv_disp_drv_t* display, const lv_area_t* area, lv_color_t* pixels) {
+    ++flushes;
     for (int y = area->y1; y <= area->y2; ++y)
         for (int x = area->x1; x <= area->x2; ++x)
             frame[y * 240 + x].full = lv_color_to32(*pixels++);
@@ -222,7 +244,193 @@ int main(int argc, char** argv) {
         manager.switching = true;
         Page::FirmwareCompanion_Show(); Pump();
         Require(!companionModal && !companionOpening, "modal opened during page transition");
-    } else {
+    }
+#ifdef COMPANION_PROGRESS_TEST
+    else if (test == "transfer_progress" || test == "apply_progress" || test == "progress_close") {
+        companionManager = nullptr;
+        Page::FirmwareCompanion_Init(&manager);
+        Require(progressRefresh != nullptr, "phase refresh was not registered");
+        progressRefresh(); // A closed modal must not be resurrected by activation.
+        Require(companionModal == nullptr, "phase notification opened an unsolicited modal");
+        phone.phase = HAL::COMPANION_UPDATE_TRANSFERRING;
+        phone.transferVersion = 30339;
+        phone.totalBytes = 8192;
+        safe = false; // The binary owner is not eligible for a second installation.
+        CompanionOpen(nullptr); Pump();
+        Require(lv_obj_has_flag(companionCheck, LV_OBJ_FLAG_HIDDEN), "check button overlaps progress");
+        Require(lv_group_get_obj_count(companionGroup) == 1, "active upgrade retained an install/check action");
+        Require(strstr(lv_label_get_text(companionVersion), "3.3.39") != nullptr, "wrong transfer target shown");
+        for (uint32_t bytes : {0u, 4096u, 8192u}) {
+            phone.durableBytes = bytes;
+            progressRefresh();
+            const int expected = (int)(bytes * 100 / 8192);
+            Require(lv_bar_get_value(companionProgressBar) == expected, "progress bar is not durable progress");
+            Require(std::string(lv_label_get_text(companionProgressLabel)) == std::to_string(expected) + "%",
+                "numeric percentage does not match durable progress");
+        }
+        phone.durableBytes = 4096; progressRefresh();
+        Require(std::string(lv_label_get_text(companionProgressDetail)) == "4096 / 8192 B", "wrong byte count");
+        lv_obj_update_layout(companionModal);
+        Require(companionProgress->coords.y2 < companionLater->coords.y1, "progress overlaps buttons");
+        Require(companionProgressLabel->coords.y2 < companionProgressDetail->coords.y1,
+            "numeric progress overlaps byte count");
+        if (test == "transfer_progress") Snapshot(argv[2], "transfer-50");
+        if (test == "apply_progress") {
+            for (auto phase : {HAL::COMPANION_UPDATE_APPLYING, HAL::COMPANION_UPDATE_BACKING_UP,
+                    HAL::COMPANION_UPDATE_REBOOTING}) {
+                phone.phase = phase;
+                const unsigned before = flushes;
+                progressRefresh();
+                Require(flushes > before, "blocking phase was not flushed before storage/reset");
+                Require(lv_obj_has_flag(companionProgressBar, LV_OBJ_FLAG_HIDDEN), "apply invented a percentage");
+                Require(std::string(lv_label_get_text(companionProgressLabel)) == "...", "apply retained transfer percent");
+                Require(lv_group_get_obj_count(companionGroup) == 1, "apply exposed another install action");
+                Snapshot(argv[2], phase == HAL::COMPANION_UPDATE_APPLYING ? "applying" :
+                    phase == HAL::COMPANION_UPDATE_BACKING_UP ? "backup" : "rebooting");
+            }
+            phone.phase = HAL::COMPANION_UPDATE_FAILED; progressRefresh();
+            Require(lv_obj_has_flag(companionProgress, LV_OBJ_FLAG_HIDDEN), "failure retained active progress");
+            Require(!lv_obj_has_flag(companionCheck, LV_OBJ_FLAG_HIDDEN), "failure left check action hidden");
+            Snapshot(argv[2], "apply-failed");
+        }
+        if (test == "transfer_progress") {
+            phone.durableBytes = 9000; progressRefresh();
+            Require(lv_obj_has_flag(companionProgressBar, LV_OBJ_FLAG_HIDDEN), "invalid bytes displayed a valid bar");
+            Require(std::string(lv_label_get_text(companionProgressLabel)) == "...", "invalid bytes made a percentage");
+        }
+        Click(companionLater); Pump();
+        Require(companionModal == nullptr, "Back did not close the upgrade view");
+        Require(installations == 0 && declines == 0, "closing progress changed the upgrade task");
+        progressRefresh();
+        Require(companionModal == nullptr, "late phase callback used a closed view");
+        GroupOwnsOnlyValidObjects(original);
+        Require(lv_mem_test() == LV_RES_OK, "progress damaged LVGL heap");
+    }
+#endif
+#ifdef COMPANION_GLOBAL_PROMPT_TEST
+    else if (test == "global_pages") {
+        const char* pages[] = {"Pages/_Template", "Pages/LiveMap", "Pages/Dialplate", "Pages/MainMenu",
+            "Pages/SystemInfos", "Pages/Startup", "Pages/RouteSelect", "Pages/RouteImport",
+            "Pages/FirmwareUpdate", "Pages/FileBrowser", "Pages/FuturePage"};
+        for (const char* name : pages) {
+            manager.page = name;
+            Ready(); phone.prompt = true;
+            CompanionPoll(nullptr); CompanionPoll(nullptr); Pump();
+            Require(companionModal != nullptr, name);
+            Require(lv_obj_get_parent(companionModal) == lv_layer_top(), "offer is page-local");
+            Require(encoder->group == companionGroup && keypad->group == companionGroup,
+                "automatic prompt did not capture input");
+            Require(installations == 0, "notification installed without consent");
+            if (strcmp(name, "Pages/LiveMap") == 0) Snapshot(argv[2], "global-map");
+            Click(companionLater); Pump();
+            Require(companionModal == nullptr, "Later did not return to the page");
+            Require(manager.page == name && manager.backHomes == 0, "Later navigated away");
+            Require(encoder->group == original && keypad->group == keypadGroup,
+                "automatic prompt did not restore input");
+            CompanionPoll(nullptr); Pump();
+            Require(companionModal == nullptr, "dismissed offer immediately reopened");
+            GroupOwnsOnlyValidObjects(original);
+        }
+        Require(presentations == 11 && declines == 11, "offer receipts or choices duplicated");
+        Require(lv_mem_test() == LV_RES_OK, "global prompt corrupted LVGL heap");
+    } else if (test == "global_unsafe") {
+        manager.page = "Pages/LiveMap";
+        Ready(); phone.prompt = true; safe = false;
+        CompanionPoll(nullptr); Pump();
+        Require(companionModal != nullptr, "low power hid the notification");
+        Require(lv_obj_has_state(companionInstall, LV_STATE_DISABLED), "low power enabled installation");
+        Click(companionInstall);
+        Require(installations == 0, "low power started an upgrade");
+        safe = true; recording = true; CompanionRefresh();
+        Require(lv_obj_has_state(companionInstall, LV_STATE_DISABLED), "recording enabled installation");
+        Snapshot(argv[2], "global-recording");
+        recording = false; CompanionRefresh();
+        Require(!lv_obj_has_state(companionInstall, LV_STATE_DISABLED), "safe offer stayed disabled");
+        lv_event_send(companionInstall, LV_EVENT_PRESSED, nullptr);
+        recording = true;
+        lv_event_send(companionInstall, LV_EVENT_CLICKED, nullptr);
+        Require(installations == 0 && manager.backHomes == 0, "late recording change bypassed safety");
+        Click(companionLater); Pump();
+        Require(declines == 1 && companionModal == nullptr, "unsafe offer cannot be deferred");
+    } else if (test == "global_transition") {
+        Ready(); phone.prompt = true;
+        manager.page = nullptr; CompanionPoll(nullptr); Pump();
+        Require(!companionModal && !companionOpening, "prompt opened without a page");
+        manager.page = "Pages/RouteSelect"; manager.switching = true;
+        CompanionPoll(nullptr); Pump();
+        Require(!companionModal && phone.prompt, "transition consumed the pending prompt");
+        manager.switching = false; CompanionPoll(nullptr);
+        Require(companionOpening && !companionModal, "automatic open was not queued");
+        manager.switching = true; Pump();
+        Require(!companionModal && !companionOpening && phone.prompt, "queued open ignored a new transition");
+        manager.switching = false; manager.page = "Pages/RouteImport";
+        CompanionPoll(nullptr); Pump();
+        Require(companionModal && presentations == 1, "offer was lost across page transition");
+        CompanionClose(nullptr);
+    } else if (test == "global_stale") {
+        for (unsigned state = 0; state < 5; ++state) {
+            Ready(); phone.prompt = true;
+            CompanionPoll(nullptr);
+            Require(companionOpening && !companionModal, "offer did not reach the async boundary");
+            if (state == 0) phone.hasOffer = false;
+            if (state == 1) phone.prompt = false;
+            if (state == 2) phone.checking = true;
+            if (state == 3) phone.phase = HAL::COMPANION_UPDATE_TRANSFERRING;
+            if (state == 4) strcpy(phone.status, "STARTING");
+            Pump();
+            Require(!companionModal && !companionOpening && presentations == 0,
+                "stale or busy offer opened an automatic dialog");
+        }
+        Ready(); phone.prompt = true; CompanionPoll(nullptr);
+        phone.hasOffer = false;
+        Page::FirmwareCompanion_Show(); Pump();
+        Require(companionModal != nullptr, "explicit check was lost behind a stale automatic open");
+        CompanionClose(nullptr);
+    } else if (test == "global_busy") {
+        manager.page = "Pages/FirmwareUpdate";
+        Ready(); phone.prompt = true;
+        phone.phase = HAL::COMPANION_UPDATE_APPLYING;
+        CompanionPoll(nullptr); Pump();
+        Require(!companionModal && phone.prompt, "active BLE update was interrupted by another offer");
+        phone.phase = HAL::COMPANION_UPDATE_IDLE;
+        companionSdBusy = true;
+        CompanionPoll(nullptr); Pump();
+        Require(companionModal != nullptr, "SD page hid an available update");
+        Require(lv_obj_has_state(companionInstall, LV_STATE_DISABLED) &&
+            lv_obj_has_state(companionCheck, LV_STATE_DISABLED), "SD work admitted a second update");
+        Require(lv_group_get_obj_count(companionGroup) == 1, "SD work left unavailable controls focusable");
+        Snapshot(argv[2], "global-sd-busy");
+        Click(companionInstall); Click(companionCheck);
+        Require(installations == 0 && checks == 0, "SD work was interrupted");
+        companionSdBusy = false; CompanionRefresh();
+        Require(!lv_obj_has_state(companionInstall, LV_STATE_DISABLED), "completed SD work kept action disabled");
+        lv_event_send(companionInstall, LV_EVENT_PRESSED, nullptr);
+        companionSdBusy = true;
+        lv_event_send(companionInstall, LV_EVENT_CLICKED, nullptr);
+        Click(companionCheck);
+        Require(installations == 0 && checks == 0, "late SD work bypassed action checks");
+        Click(companionLater); Pump();
+        Require(!companionModal && companionSdBusy && declines == 1, "Later changed the SD task");
+    } else if (test == "global_map_install") {
+        manager.page = "Pages/LiveMap"; mapOverlayOwned = true;
+        Ready(); phone.prompt = true; CompanionPoll(nullptr); Pump();
+        Require(companionModal != nullptr, "map prompt did not open");
+        manager.backHomeAllowed = false;
+        Click(companionInstall);
+        Require(installations == 0 && phone.hasOffer && mapOverlayOwned, "rejected navigation sent consent");
+        manager.backHomeAllowed = true;
+        Click(companionInstall);
+        Require(manager.backHomes == 1 && !mapOverlayOwned && installations == 1,
+            "map consent did not release shared workspace before starting OTA");
+        lv_event_send(companionInstall, LV_EVENT_CLICKED, nullptr);
+        Require(installations == 1 && manager.backHomes == 1, "map consent was replayed");
+        CompanionClose(nullptr);
+        GroupOwnsOnlyValidObjects(original);
+        Require(encoder->group == original && lv_group_get_focused(original) == nullptr,
+            "map exit restored a stale page focus");
+    }
+#endif
+    else {
         Require(false, "unknown test");
     }
     printf("%s: PASS\n", test.c_str());

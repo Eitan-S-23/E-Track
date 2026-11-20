@@ -56,6 +56,31 @@ namespace
     lv_font_t versionFont;
     lv_style_transition_dsc_t btnTransition;
     bool stylesReady = false;
+    bool companionSdBusy = false;
+
+    void CreateUpdateProgress(lv_obj_t* parent, lv_obj_t** bar, lv_obj_t** label,
+                              int width, int barY, int labelY)
+    {
+        static lv_font_t font;
+        font = *ResourcePool::GetFont("bahnschrift_24");
+        font.fallback = ResourcePool::GetFont("bahnschrift_17");
+        *bar = lv_bar_create(parent);
+        lv_obj_set_size(*bar, width, 16);
+        lv_obj_align(*bar, LV_ALIGN_TOP_MID, 0, barY);
+        lv_obj_set_style_bg_color(*bar, lv_color_hex(0x102a31), 0);
+        lv_obj_set_style_bg_opa(*bar, LV_OPA_COVER, 0);
+        lv_obj_set_style_radius(*bar, 3, 0);
+        lv_obj_set_style_bg_color(*bar, lv_color_hex(0x20e8f0), LV_PART_INDICATOR);
+        lv_obj_set_style_bg_opa(*bar, LV_OPA_COVER, LV_PART_INDICATOR);
+        lv_obj_set_style_radius(*bar, 3, LV_PART_INDICATOR);
+        lv_bar_set_range(*bar, 0, 100);
+        lv_bar_set_value(*bar, 0, LV_ANIM_OFF);
+        *label = lv_label_create(parent);
+        lv_obj_set_style_text_font(*label, &font, 0);
+        lv_obj_set_style_text_color(*label, lv_color_white(), 0);
+        lv_label_set_text(*label, "0");
+        lv_obj_align(*label, LV_ALIGN_TOP_MID, 0, labelY);
+    }
 
     const lv_style_prop_t styleTransProps[] =
     {
@@ -551,25 +576,7 @@ void FirmwareUpdate::CreateWorkUI()
     lv_label_set_text(workNameLabel, "");
     lv_obj_align(workNameLabel, LV_ALIGN_TOP_LEFT, 12, 49);
 
-    progressBar = lv_bar_create(workPanel);
-    lv_obj_set_size(progressBar, LV_HOR_RES - 58, 16);
-    lv_obj_align(progressBar, LV_ALIGN_TOP_MID, 0, 91);
-    lv_obj_set_style_bg_color(progressBar, lv_color_hex(0x102a31), 0);
-    lv_obj_set_style_bg_opa(progressBar, LV_OPA_COVER, 0);
-    lv_obj_set_style_radius(progressBar, 3, 0);
-    lv_obj_set_style_bg_color(progressBar, lv_color_hex(0x20e8f0),
-                              LV_PART_INDICATOR);
-    lv_obj_set_style_bg_opa(progressBar, LV_OPA_COVER,
-                            LV_PART_INDICATOR);
-    lv_obj_set_style_radius(progressBar, 3, LV_PART_INDICATOR);
-    lv_bar_set_range(progressBar, 0, 100);
-    lv_bar_set_value(progressBar, 0, LV_ANIM_OFF);
-
-    progressLabel = lv_label_create(workPanel);
-    lv_obj_set_style_text_font(progressLabel, ResourcePool::GetFont("bahnschrift_24"), 0);
-    lv_obj_set_style_text_color(progressLabel, lv_color_white(), 0);
-    lv_label_set_text(progressLabel, "0");
-    lv_obj_align(progressLabel, LV_ALIGN_TOP_MID, 0, 119);
+    CreateUpdateProgress(workPanel, &progressBar, &progressLabel, LV_HOR_RES - 58, 91, 119);
 
     workDetailLabel = lv_label_create(workPanel);
     lv_obj_set_style_text_font(workDetailLabel, ResourcePool::GetFont("bahnschrift_13"), 0);
@@ -950,6 +957,7 @@ void FirmwareUpdate::StartImport()
         return;
     }
 
+    companionSdBusy = true;
     if (workPanel == nullptr)
     {
         CreateWorkUI();
@@ -1035,6 +1043,7 @@ void FirmwareUpdate::RunWorkStep()
 
 void FirmwareUpdate::FinishImport(bool success)
 {
+    companionSdBusy = false;
     resultSuccess = success;
     mode = MODE_RESULT;
     if (workTimer != nullptr)
@@ -1138,6 +1147,7 @@ void FirmwareUpdate::Back()
 
 void FirmwareUpdate::ReleaseUI()
 {
+    companionSdBusy = false;
     ClearGroup();
     if (workTimer != nullptr)
     {
@@ -1388,12 +1398,17 @@ namespace
 {
     PageManager* companionManager = nullptr;
     lv_obj_t* companionModal = nullptr;
+    lv_obj_t* companionTitle = nullptr;
     lv_obj_t* companionMessage = nullptr;
     lv_obj_t* companionStatus = nullptr;
     lv_obj_t* companionVersion = nullptr;
     lv_obj_t* companionCheck = nullptr;
     lv_obj_t* companionInstall = nullptr;
     lv_obj_t* companionLater = nullptr;
+    lv_obj_t* companionProgress = nullptr;
+    lv_obj_t* companionProgressBar = nullptr;
+    lv_obj_t* companionProgressLabel = nullptr;
+    lv_obj_t* companionProgressDetail = nullptr;
     struct CompanionInput
     {
         lv_indev_t* input;
@@ -1410,11 +1425,28 @@ namespace
     char companionShownOffer[33] = {};
     bool companionClosing = false;
     bool companionOpening = false;
+    bool companionAutomatic = false;
     bool companionCanCheck = false, companionCanInstall = false;
+
+    void CompanionOpen(void*);
+    void CompanionQueueOpen(bool automatic);
 
     bool CompanionCanInstall()
     {
-        return !DataProc::Recorder_IsOpen() && HAL::BT_CompanionCanInstall();
+        return !companionSdBusy && !DataProc::Recorder_IsOpen() && HAL::BT_CompanionCanInstall();
+    }
+
+    bool CompanionCanCheck(const HAL::CompanionUpdateInfo& info)
+    {
+        return !companionSdBusy && !HAL::CompanionUpdateActive(info) && !info.checking &&
+            strcmp(info.status, "UPGRADING") != 0 && strcmp(info.status, "STARTING") != 0;
+    }
+
+    bool CompanionPromptPending(const HAL::CompanionUpdateInfo& info)
+    {
+        // An available update is visible even when recording or power blocks installation.
+        return info.hasOffer && info.prompt && !info.checking && !HAL::CompanionUpdateActive(info) &&
+            strcmp(info.status, "UPGRADING") != 0 && strcmp(info.status, "STARTING") != 0;
     }
 
     const char* CompanionStatusText(const char* code)
@@ -1428,6 +1460,7 @@ namespace
         if (strcmp(code, "DEFERRED") == 0) return "\xE6\x9C\xAC\xE6\xAC\xA1\xE6\x9B\xB4\xE6\x96\xB0\xE5\xB7\xB2\xE6\x9A\x82\xE7\xBC\x93\n\xE5\x8F\xAF\xE7\xA8\x8D\xE5\x90\x8E\xE9\x87\x8D\xE6\x96\xB0\xE6\xA3\x80\xE6\x9F\xA5";
         if (strcmp(code, "STARTING") == 0 || strcmp(code, "UPGRADING") == 0) return "\xE6\xAD\xA3\xE5\x9C\xA8\xE6\x9B\xB4\xE6\x96\xB0\xE5\x9B\xBA\xE4\xBB\xB6\n\xE8\xAF\xB7\xE4\xBF\x9D\xE6\x8C\x81\xE8\xAE\xBE\xE5\xA4\x87\xE4\xBE\x9B\xE7\x94\xB5";
         if (strcmp(code, "WAIT_SAFE") == 0) return "\xE8\xAF\xB7\xE5\x85\x88\xE7\xBB\x93\xE6\x9D\x9F\xE8\xAE\xB0\xE5\xBD\x95\n\xE7\x94\xB5\xE9\x87\x8F\xE8\x87\xB3\xE5\xB0\x91 30% \xE6\x88\x96\xE5\x85\x85\xE7\x94\xB5";
+        if (strcmp(code, "SD_BUSY") == 0) return "\xE8\xAF\xB7\xE5\x85\x88\xE5\xAE\x8C\xE6\x88\x90 SD \xE6\x9B\xB4\xE6\x96\xB0\n\xE8\xAF\xB7\xE4\xBF\x9D\xE6\x8C\x81\xE8\xAE\xBE\xE5\xA4\x87\xE4\xBE\x9B\xE7\x94\xB5";
         if (strcmp(code, "SIMULATOR_NO_PHONE") == 0) return "\xE6\xA8\xA1\xE6\x8B\x9F\xE5\x99\xA8\xE6\x97\xA0\xE6\x89\x8B\xE6\x9C\xBA\xE8\xBF\x9E\xE6\x8E\xA5\n\xE6\x9C\xAA\xE6\x89\xA7\xE8\xA1\x8C\xE8\xAE\xBE\xE5\xA4\x87\xE6\x9B\xB4\xE6\x96\xB0";
         if (strcmp(code, "FAILED") == 0) return "\xE6\xA3\x80\xE6\x9F\xA5\xE5\xA4\xB1\xE8\xB4\xA5\n\xE8\xAF\xB7\xE5\x9C\xA8\xE6\x89\x8B\xE6\x9C\xBA\xE6\x9F\xA5\xE7\x9C\x8B\xE8\xAF\xA6\xE6\x83\x85";
         if (strcmp(code, "INCOMPATIBLE") == 0) return "\xE5\x9B\xBA\xE4\xBB\xB6\xE4\xB8\x8D\xE5\x85\xBC\xE5\xAE\xB9\n\xE8\xAF\xB7\xE5\x9C\xA8\xE6\x89\x8B\xE6\x9C\xBA\xE6\x9F\xA5\xE7\x9C\x8B\xE8\xAF\xA6\xE6\x83\x85";
@@ -1446,6 +1479,7 @@ namespace
         if (strcmp(code, "DEFERRED") == 0) return "\xE5\xB7\xB2\xE6\x9A\x82\xE7\xBC\x93";
         if (strcmp(code, "STARTING") == 0 || strcmp(code, "UPGRADING") == 0) return "\xE6\xAD\xA3\xE5\x9C\xA8\xE6\x9B\xB4\xE6\x96\xB0";
         if (strcmp(code, "WAIT_SAFE") == 0) return "\xE7\xAD\x89\xE5\xBE\x85\xE5\xAE\x89\xE5\x85\xA8\xE6\x9D\xA1\xE4\xBB\xB6";
+        if (strcmp(code, "SD_BUSY") == 0) return "SD \xE6\x9B\xB4\xE6\x96\xB0\xE4\xB8\xAD";
         if (strcmp(code, "SIMULATOR_NO_PHONE") == 0) return "\xE6\xA8\xA1\xE6\x8B\x9F\xE5\x99\xA8";
         if (strcmp(code, "FAILED") == 0 || strcmp(code, "INCOMPATIBLE") == 0) return "\xE6\x97\xA0\xE6\xB3\x95\xE6\x9B\xB4\xE6\x96\xB0";
         if (strcmp(code, "CONNECTED") == 0) return "\xE5\xB7\xB2\xE8\xBF\x9E\xE6\x8E\xA5";
@@ -1461,23 +1495,83 @@ namespace
     {
         const char* code = companionDisplayed.status;
         if (strcmp(code, "READY") == 0 && !companionDisplayed.hasOffer) code = "UNAVAILABLE";
-        if (companionDisplayed.hasOffer && !CompanionCanInstall()) code = "WAIT_SAFE";
-        CompanionSetText(companionStatus, CompanionStatusTitle(code));
-        CompanionSetText(companionMessage, CompanionStatusText(code));
-        const bool attention = strcmp(code, "WAIT_SAFE") == 0 || strcmp(code, "FAILED") == 0 ||
+        const bool progressing = HAL::CompanionUpdateActive(companionDisplayed);
+        if (!progressing && companionDisplayed.hasOffer && !CompanionCanInstall()) code = "WAIT_SAFE";
+        if (!progressing && companionSdBusy) code = "SD_BUSY";
+        const char* title = CompanionStatusTitle(code);
+        const char* message = CompanionStatusText(code);
+        const char* detail = "";
+        switch (companionDisplayed.phase)
+        {
+        case HAL::COMPANION_UPDATE_TRANSFERRING:
+            title = "BLE \xE6\x9B\xB4\xE6\x96\xB0";
+            break;
+        case HAL::COMPANION_UPDATE_APPLYING:
+            title = CompanionStatusTitle("VERIFYING");
+            detail = "APPLY / VERIFY";
+            break;
+        case HAL::COMPANION_UPDATE_BACKING_UP:
+            title = CompanionStatusTitle("UPGRADING");
+            detail = "BACKUP / COMMIT";
+            break;
+        case HAL::COMPANION_UPDATE_REBOOTING:
+            title = "\xE6\xAD\xA3\xE5\x9C\xA8\xE9\x87\x8D\xE5\x90\xAF";
+            detail = "REBOOT / VERIFY";
+            break;
+        case HAL::COMPANION_UPDATE_FAILED:
+            code = "FAILED";
+            title = "\xE6\x9B\xB4\xE6\x96\xB0\xE5\xA4\xB1\xE8\xB4\xA5";
+            message = CompanionStatusText("FAILED");
+            break;
+        default: break;
+        }
+        if (progressing) message = "\xE8\xAF\xB7\xE4\xBF\x9D\xE6\x8C\x81\xE8\xAE\xBE\xE5\xA4\x87\xE4\xBE\x9B\xE7\x94\xB5";
+        CompanionSetText(companionTitle, companionDisplayed.hasOffer ? CompanionStatusTitle("READY") :
+            "\xE6\xA3\x80\xE6\x9F\xA5\xE6\x9B\xB4\xE6\x96\xB0");
+        CompanionSetText(companionStatus, title);
+        CompanionSetText(companionMessage, message);
+        if (progressing)
+        {
+            lv_obj_clear_flag(companionProgress, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(companionCheck, LV_OBJ_FLAG_HIDDEN);
+            char text[40];
+            const int percent = HAL::CompanionTransferPercent(companionDisplayed);
+            if (percent >= 0)
+            {
+                lv_obj_clear_flag(companionProgressBar, LV_OBJ_FLAG_HIDDEN);
+                lv_bar_set_value(companionProgressBar, percent, LV_ANIM_OFF);
+                snprintf(text, sizeof(text), "%u%%", (unsigned)percent);
+                CompanionSetText(companionProgressLabel, text);
+                snprintf(text, sizeof(text), "%lu / %lu B", (unsigned long)companionDisplayed.durableBytes,
+                    (unsigned long)companionDisplayed.totalBytes);
+                CompanionSetText(companionProgressDetail, text);
+            }
+            else
+            {
+                lv_obj_add_flag(companionProgressBar, LV_OBJ_FLAG_HIDDEN);
+                CompanionSetText(companionProgressLabel, "...");
+                CompanionSetText(companionProgressDetail, detail);
+            }
+        }
+        else
+        {
+            lv_obj_add_flag(companionProgress, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(companionCheck, LV_OBJ_FLAG_HIDDEN);
+        }
+        const bool attention = strcmp(code, "WAIT_SAFE") == 0 || strcmp(code, "SD_BUSY") == 0 || strcmp(code, "FAILED") == 0 ||
             strcmp(code, "INCOMPATIBLE") == 0;
         lv_obj_set_style_text_color(companionStatus, lv_color_hex(attention ? 0xffbd66 : 0x20e8f0), 0);
         char version[64];
-        if (companionDisplayed.hasOffer)
+        if (companionDisplayed.hasOffer || progressing)
         {
-            const unsigned long value = companionDisplayed.version;
+            const unsigned long value = progressing ? companionDisplayed.transferVersion : companionDisplayed.version;
             snprintf(version, sizeof(version), "\xE7\x89\x88\xE6\x9C\xAC %lu.%lu.%lu",
                 value / 10000, (value / 100) % 100, value % 100);
         }
         else snprintf(version, sizeof(version), "%s", "\xE9\x80\x9A\xE8\xBF\x87\xE6\x89\x8B\xE6\x9C\xBA\xE8\x8E\xB7\xE5\x8F\x96\xE5\x9B\xBA\xE4\xBB\xB6");
         CompanionSetText(companionVersion, version);
         CompanionSetText(lv_obj_get_child(companionLater, 0),
-            companionDisplayed.hasOffer ? "\xE7\xA8\x8D\xE5\x90\x8E" : "\xE8\xBF\x94\xE5\x9B\x9E");
+            !progressing && companionDisplayed.hasOffer ? "\xE7\xA8\x8D\xE5\x90\x8E" : "\xE8\xBF\x94\xE5\x9B\x9E");
     }
 
     void CompanionClose(void*)
@@ -1502,8 +1596,9 @@ namespace
         lv_group_del(companionGroup);
         companionGroup = nullptr;
         companionModal = nullptr;
-        companionMessage = companionStatus = companionVersion = nullptr;
+        companionTitle = companionMessage = companionStatus = companionVersion = nullptr;
         companionCheck = companionInstall = companionLater = nullptr;
+        companionProgress = companionProgressBar = companionProgressLabel = companionProgressDetail = nullptr;
         companionClosing = false;
     }
 
@@ -1525,6 +1620,19 @@ namespace
             if (input != nullptr) lv_indev_wait_release(input);
             CompanionRequestClose();
         }
+    }
+
+    void CompanionInstallOffer(const HAL::CompanionUpdateInfo& displayed)
+    {
+        if (companionManager == nullptr || companionManager->IsSwitching() || !CompanionCanInstall()) return;
+        const char* page = companionManager->GetCurrentPageName();
+        if (page == nullptr) return;
+        // BackHome force-unloads the map and releases its snapshot overlay before BLE starts.
+        if (strcmp(page, "Pages/LiveMap") == 0 && !companionManager->BackHome()) return;
+        HAL::CompanionUpdateInfo current;
+        HAL::BT_CompanionGetInfo(&current);
+        if (HAL::CompanionSameOffer(displayed, current) && !HAL::CompanionUpdateActive(current) && CompanionCanInstall())
+            (void)HAL::BT_CompanionChoose(true, &displayed);
     }
 
     void CompanionButtonEvent(lv_event_t* event)
@@ -1558,8 +1666,8 @@ namespace
         HAL::BT_CompanionGetInfo(&current);
         const bool matching = pressed && HAL::CompanionSameOffer(companionPressed, companionDisplayed) &&
             HAL::CompanionSameOffer(companionPressed, current);
-        if (button == companionCheck) { (void)HAL::BT_CompanionCheck(); }
-        else if (button == companionInstall && matching && CompanionCanInstall()) { (void)HAL::BT_CompanionChoose(true, &companionPressed); }
+        if (button == companionCheck && CompanionCanCheck(current)) { (void)HAL::BT_CompanionCheck(); }
+        else if (button == companionInstall && matching) { CompanionInstallOffer(companionPressed); }
         else if (button == companionLater)
         {
             if (matching) (void)HAL::BT_CompanionChoose(false, &companionPressed);
@@ -1609,9 +1717,9 @@ namespace
              (companionPressedButton == companionInstall && !CompanionCanInstall())))
             companionPressedButton = nullptr;
         CompanionRenderStatus();
-        bool check = !companionDisplayed.checking && strcmp(companionDisplayed.status, "UPGRADING") != 0 &&
-            strcmp(companionDisplayed.status, "STARTING") != 0;
-        bool install = companionDisplayed.hasOffer && !companionDisplayed.checking && CompanionCanInstall();
+        const bool progressing = HAL::CompanionUpdateActive(companionDisplayed);
+        bool check = CompanionCanCheck(companionDisplayed);
+        bool install = !progressing && companionDisplayed.hasOffer && !companionDisplayed.checking && CompanionCanInstall();
         if (check != companionCanCheck || install != companionCanInstall)
         {
             lv_obj_t* focused = lv_group_get_focused(companionGroup);
@@ -1633,23 +1741,37 @@ namespace
         }
     }
 
+    void CompanionRefreshProgress()
+    {
+        if (companionModal == nullptr || companionClosing) return;
+        CompanionRefresh();
+        // Flush only; do not re-enter input/timer processing from the BLE pump.
+        lv_refr_now(nullptr);
+    }
+
     void CompanionPoll(lv_timer_t*)
     {
         if (companionModal != nullptr) { CompanionRefresh(); return; }
         if (companionManager == nullptr || companionManager->IsSwitching()) return;
-        const char* page = companionManager->GetCurrentPageName();
-        if (page == nullptr || (strcmp(page, "Pages/Dialplate") != 0 && strcmp(page, "Pages/MainMenu") != 0 &&
-            strcmp(page, "Pages/SystemInfos") != 0)) return;
+        if (companionManager->GetCurrentPageName() == nullptr) return;
         HAL::CompanionUpdateInfo info;
         HAL::BT_CompanionGetInfo(&info);
-        if (info.hasOffer && info.prompt && CompanionCanInstall()) Page::FirmwareCompanion_Show();
+        if (CompanionPromptPending(info)) CompanionQueueOpen(true);
     }
-}
 
-static void CompanionOpen(void*)
+void CompanionOpen(void*)
 {
+    const bool automatic = companionAutomatic;
     companionOpening = false;
-    if (companionModal != nullptr || companionManager == nullptr || companionManager->IsSwitching()) return;
+    companionAutomatic = false;
+    if (companionModal != nullptr || companionManager == nullptr || companionManager->IsSwitching() ||
+        companionManager->GetCurrentPageName() == nullptr) return;
+    if (automatic)
+    {
+        HAL::CompanionUpdateInfo info;
+        HAL::BT_CompanionGetInfo(&info);
+        if (!CompanionPromptPending(info)) return;
+    }
     // Save each input's actual group before changing any input. Refuse overflow.
     companionInputCount = 0;
     for (lv_indev_t* input = lv_indev_get_next(nullptr); input != nullptr; input = lv_indev_get_next(input))
@@ -1683,9 +1805,8 @@ static void CompanionOpen(void*)
     lv_obj_set_style_text_color(panel, lv_color_white(), 0);
     lv_obj_set_style_text_font(panel, ResourcePool::GetFont("cn_16"), 0);
     lv_obj_clear_flag(panel, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_t* title = lv_label_create(panel);
-    lv_obj_set_pos(title, 16, 16);
-    lv_label_set_text(title, "\xE6\xA3\x80\xE6\x9F\xA5\xE6\x9B\xB4\xE6\x96\xB0");
+    companionTitle = lv_label_create(panel);
+    lv_obj_set_pos(companionTitle, 16, 16);
     companionVersion = lv_label_create(panel);
     lv_obj_set_pos(companionVersion, 16, 43);
     lv_obj_set_style_text_color(companionVersion, lv_color_hex(0x88aab0), 0);
@@ -1708,6 +1829,21 @@ static void CompanionOpen(void*)
     const int halfWidth = (LV_HOR_RES - 64) / 2;
     companionInstall = CompanionButton(panel, "\xE7\xAB\x8B\xE5\x8D\xB3\xE6\x9B\xB4\xE6\x96\xB0", 16, 232, halfWidth);
     companionLater = CompanionButton(panel, "\xE8\xBF\x94\xE5\x9B\x9E", 24 + halfWidth, 232, halfWidth);
+    companionProgress = lv_obj_create(panel);
+    lv_obj_remove_style_all(companionProgress);
+    lv_obj_set_pos(companionProgress, 16, 166);
+    lv_obj_set_size(companionProgress, LV_HOR_RES - 56, 60);
+    lv_obj_clear_flag(companionProgress, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_clear_flag(companionProgress, LV_OBJ_FLAG_CLICKABLE);
+    CreateUpdateProgress(companionProgress, &companionProgressBar, &companionProgressLabel,
+        LV_HOR_RES - 56, 0, 20);
+    companionProgressDetail = lv_label_create(companionProgress);
+    lv_obj_set_style_text_font(companionProgressDetail, ResourcePool::GetFont("bahnschrift_13"), 0);
+    lv_obj_set_style_text_color(companionProgressDetail, lv_color_hex(0x70a5ad), 0);
+    lv_obj_set_width(companionProgressDetail, LV_HOR_RES - 56);
+    lv_obj_set_style_text_align(companionProgressDetail, LV_TEXT_ALIGN_CENTER, 0);
+    lv_label_set_long_mode(companionProgressDetail, LV_LABEL_LONG_DOT);
+    lv_obj_align(companionProgressDetail, LV_ALIGN_TOP_MID, 0, 46);
     companionGroup = lv_group_create();
     companionCanCheck = false; companionCanInstall = false; companionShownOffer[0] = '\0';
     companionPressedButton = nullptr;
@@ -1725,16 +1861,33 @@ static void CompanionOpen(void*)
     lv_obj_fade_in(panel, 160, 0);
 }
 
+void CompanionQueueOpen(bool automatic)
+{
+    if (companionModal != nullptr) return;
+    if (companionOpening)
+    {
+        if (!automatic) companionAutomatic = false;
+        return;
+    }
+    companionOpening = true;
+    companionAutomatic = automatic;
+    if (lv_async_call(CompanionOpen, nullptr) != LV_RES_OK)
+    {
+        companionOpening = false;
+        companionAutomatic = false;
+    }
+}
+}
+
 void Page::FirmwareCompanion_Show()
 {
-    if (companionModal != nullptr || companionOpening) return;
-    companionOpening = true;
-    if (lv_async_call(CompanionOpen, nullptr) != LV_RES_OK) companionOpening = false;
+    CompanionQueueOpen(false);
 }
 
 void Page::FirmwareCompanion_Init(PageManager* manager)
 {
     if (companionManager != nullptr) return;
     companionManager = manager;
+    HAL::BT_CompanionSetProgressRefresh(CompanionRefreshProgress);
     lv_timer_create(CompanionPoll, 250, nullptr);
 }

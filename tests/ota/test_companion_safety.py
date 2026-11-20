@@ -22,7 +22,10 @@ METHODS = (
     (RECORDER, "bool DataProc::Recorder_IsOpen"),
     (HAL, "static bool companion_install_safe"),
     (HAL, "static int ble_env_overlay_acquire"),
+    (HAL, "static void companion_update_phase"),
+    (HAL, "static int ble_env_activate_staged"),
     (HAL, "void HAL::BT_CompanionGetInfo"),
+    (HAL, "void HAL::BT_CompanionSetProgressRefresh"),
     (HAL, "bool HAL::BT_CompanionCheck"),
     (HAL, "bool HAL::BT_CompanionCanInstall"),
     (HAL, "bool HAL::BT_CompanionInstallPending"),
@@ -30,6 +33,8 @@ METHODS = (
     (HAL, "bool HAL::BT_CompanionChoose"),
     (HAL, "void HAL::BT_CompanionPresented"),
     (UI, "bool CompanionCanInstall"),
+    (UI, "bool CompanionCanCheck"),
+    (UI, "void CompanionInstallOffer"),
     (UI, "const char* CompanionStatusText"),
     (UI, "void CompanionRequestClose"),
     (UI, "void CompanionButtonEvent"),
@@ -43,7 +48,9 @@ CASES = ("replacement_refresh", "replacement_before_refresh", "same_offer_retran
          "offer_expires_held", "checking_during_press", "offer_reappears_held", "lost_or_disabled_press",
          "later_binding", "later_once", "unsafe_after_choice", "motion_after_choice", "motion_before_choice",
          "battery_after_choice", "paused_recording", "safe_receiver_admission",
-         "recording_reservation", "recording_binary_owner", "recording_ui_conflict")
+         "recording_reservation", "recording_binary_owner", "recording_ui_conflict",
+         "durable_progress", "invalid_progress", "phase_progress", "fresh_transfer_progress",
+         "apply_phase_notifications", "sd_work_blocks_choices", "map_release_before_consent")
 
 
 def extract(source, signature):
@@ -103,6 +110,17 @@ class CompanionSafetyTests(unittest.TestCase):
             expected = "held press confirmed replacement" if case == "replacement_refresh" else "unsafe receiver acquired overlay"
             self.assertIn(expected, result.stderr)
             print("original boundary " + case + ": expected failure: " + result.stderr.strip())
+
+    def test_phase_refresh_is_outside_blocking_storage_and_before_reset(self):
+        source = (ROOT / HAL).read_text(encoding="utf-8")
+        apply = extract(source, "static int ble_apply_staged")
+        self.assertLess(apply.index("companion_update_phase(HAL::COMPANION_UPDATE_BACKING_UP)"),
+                        apply.index("HAL::OTA_BackupStage"))
+        reset = extract(source, "static void ble_env_system_reset")
+        self.assertLess(reset.index("companion_update_phase(HAL::COMPANION_UPDATE_REBOOTING)"),
+                        reset.index("NVIC_SystemReset"))
+        wait_rx = extract(source, 'extern "C" void HAL_OTA_QspiWaitRx')
+        self.assertNotIn("companion_update_phase", wait_rx)
 
 
 def test_case(name):

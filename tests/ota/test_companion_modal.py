@@ -10,10 +10,14 @@ import subprocess
 import tempfile
 import unittest
 
+from test_main_menu_encoder import method
+
 ROOT = Path(__file__).resolve().parents[2]
 UI = "USER/App/Pages/FirmwareUpdate/FirmwareUpdate.cpp"
 BASELINE = "816b1888be2dfaa632e4e802e6b680ec85ed5aec"
-CASES = ("ownership", "repeat", "snapshots", "offer_replacement", "deleted_focus", "escape", "async_open")
+CASES = ("ownership", "repeat", "snapshots", "offer_replacement", "deleted_focus", "escape", "async_open",
+         "transfer_progress", "apply_progress", "progress_close", "global_pages", "global_unsafe",
+         "global_transition", "global_stale", "global_busy", "global_map_install")
 
 
 def checked(path):
@@ -45,6 +49,11 @@ class CompanionModalTests(unittest.TestCase):
         template = (ROOT / "tests/ota/companion_modal_harness.cpp.in").read_text(encoding="utf-8")
         for name, text in (("original", original), ("candidate", source)):
             block = text[text.index("namespace\n{\n    PageManager* companionManager"):]
+            if name == "candidate":
+                shared = re.search(r"^\s*bool companionSdBusy = false;", text, re.M).group(0).strip()
+                block = ("#define COMPANION_PROGRESS_TEST 1\n#define COMPANION_GLOBAL_PROMPT_TEST 1\n"
+                         "namespace { " + shared + " }\n" +
+                         method(text, "void CreateUpdateProgress") + "\n" + block)
             # Init belongs to Page even when the original fixture has no UI header.
             generated = template.replace("// INSERT_PRODUCTION_MODAL", block).replace(
                 "namespace Page { void FirmwareCompanion_Show(); }",
@@ -93,6 +102,31 @@ class CompanionModalTests(unittest.TestCase):
                         self.assertIn(ord(char), glyphs, "Missing glyph: " + char)
         for char in "\u68c0\u67e5\u66f4\u65b0":
             self.assertIn(ord(char), glyphs)
+
+    def test_sd_busy_tracks_import_lifetime(self):
+        source = (ROOT / UI).read_text(encoding="utf-8")
+        start = method(source, "void FirmwareUpdate::StartImport")
+        self.assertLess(start.index("updater.Begin("), start.index("companionSdBusy = true;"))
+        self.assertLess(start.index("companionSdBusy = true;"), start.index("lv_timer_create("))
+        for signature in ("void FirmwareUpdate::FinishImport", "void FirmwareUpdate::ReleaseUI"):
+            self.assertIn("companionSdBusy = false;", method(source, signature))
+
+    def test_global_cases_cover_registered_pages_and_map_release(self):
+        app = (ROOT / "USER/App/App.cpp").read_text(encoding="utf-8")
+        harness = (ROOT / "tests/ota/companion_modal_harness.cpp.in").read_text(encoding="utf-8")
+        pages = re.findall(r'manager\.Install\("[^"\n]+",\s*"(Pages/[^"\n]+)"\)', app)
+        self.assertTrue(pages)
+        for page in pages:
+            self.assertIn('"' + page + '"', harness)
+        router = (ROOT / "USER/App/Utils/PageManager/PM_Router.cpp").read_text(encoding="utf-8")
+        back = method(router, "bool PageManager::BackHome")
+        self.assertLess(back.index("SetStackClear(true)"), back.index("SwitchTo("))
+        base = (ROOT / "USER/App/Utils/PageManager/PM_Base.cpp").read_text(encoding="utf-8")
+        self.assertIn("FourceUnload(top)", method(base, "void PageManager::SetStackClear"))
+        state = (ROOT / "USER/App/Utils/PageManager/PM_State.cpp").read_text(encoding="utf-8")
+        self.assertIn("onViewDidUnload()", method(state, "PageBase::State_t PageManager::StateUnloadExecute"))
+        live_map = (ROOT / "USER/App/Pages/LiveMap/LiveMap.cpp").read_text(encoding="utf-8")
+        self.assertIn("HAL::OTA_OverlayReleaseLiveMap()", method(live_map, "void LiveMap::onViewDidUnload"))
 
 
 def test_case(name):
