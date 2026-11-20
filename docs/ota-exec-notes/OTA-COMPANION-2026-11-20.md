@@ -834,3 +834,46 @@ phone USB and use the device normally. A future genuine forward firmware update
 can exercise the device-originated entry if needed. Admin scroll and App software
 delivery remain complete; their originals, older failures and separate whole-card
 acceptance obligations are unchanged.
+
+## Device-Initiated Forward Verification Authorized
+
+The owner's next request explicitly asks for a new MCU firmware release and
+verification through the MCU's own update entry. This supersedes the preceding
+recommendation to defer that check. It does not reinterpret the successful
+phone-page 30335 -> 30336 OTA as a device-originated observation or replay it
+to recover missing logs.
+
+Fresh primary and remote main are `e0db1a1e946ae620dc82ab91f208a62925692345`.
+Live original Admin inspection confirms Stable 30336, channel revision 10,
+the exact previously read-back base hash, 48 existing delta jobs and no 30337
+release. The GitHub release listing, including drafts, has no 30337 reservation.
+Original discovery: `.cache/ota-device-init-20261120/keyring-inspect-01/`.
+The writable root is `D:/github/my/E-Track`; no new project-external write
+authority is inferred. The existing SEGGER native-history exception remains.
+
+Prepare 3.3.37 as a version-only forward target from current main. No additional
+MCU behavior defect has yet been established; release notes must not claim one.
+Keep App 1.0.86+112, the original keys, GCC/V2 profile, Boot, layout, BLE identity,
+recording/power admission and all integrity/confirmation gates unchanged. Use
+the normal main-push candidate builder, then verify and publish only this MCU
+release on the existing Stable channel. Preserve both App channels, MCU Beta,
+all previous delta jobs and configuration. If an exact 30336 delta is generated,
+use the original backend base bytes and verify reconstruction before enabling it.
+
+The finite device matrix is one initial 30336 -> 30337 **device-originated**
+screening cell. The MCU checks for the offer and its physical Update Now control
+supplies consent; the phone remains the connected companion, not the initiator.
+Retain 30336 until that actual OTA. Directly flashing 30337 would invalidate the
+required observation, so J-Link is for passive observation/final identity here.
+Prepare the immutable target, current/target ELF and map, original phone-log
+retrieval, bounded MCU observation and owned-process cleanup before asking for
+any short phone window. USB, if needed, collects diagnostics rather than
+reinstalling the already confirmed App. No automatic UI taps or data clearing.
+
+Allow ordinary apply/reboot and reconnect; require exact target image bytes,
+unchanged Boot, confirmed version and advancing healthy runtime. Preserve any
+failure and reconcile device state before an evidence-driven further cell; do
+not blindly retry, bypass admission, downgrade, replace Boot or write BCB.
+Successful publication, device initiation, final installation and formal
+whole-card acceptance remain distinct. The final retained device should be the
+verified forward target, with no restoration to an older App-only image.

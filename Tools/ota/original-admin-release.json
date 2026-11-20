@@ -1,7 +1,7 @@
 {
   "schema": "original-admin-automatic-candidates-v1",
   "firmware": {
-    "versionName": "3.3.36",
-    "releaseNotes": "A new source-matched GCC test target for validating the standalone Check Update feature with App 1.0.85 background connection recovery. Preserve the existing four-character Chinese menu, established firmware dialog style, E-Track advertising name, companion protocol, BLE UUID/address/baud and V2 transport. No new wire command, key, layout or boot gate. Installation still requires explicit device consent, no open recording, sufficient battery or charging, integrity checks and post-reboot identity verification. Original Admin candidate only: the operator chooses channel publication and an exact 3.3.35-to-3.3.36 delta if needed."
+    "versionName": "3.3.37",
+    "releaseNotes": "Owner-requested forward verification target for a device-initiated 3.3.36-to-3.3.37 OTA with the original-signed App 1.0.86. The MCU Check Update and Update Now entry must initiate this test; a phone-page update or direct J-Link installation is not an equivalent observation. This version adds no claimed MCU behavior fix and preserves the 3.3.36 product logic, companion protocol, BLE identity and V2 transport. Explicit device consent, no open recording, sufficient battery or charging, package integrity and post-reboot version plus full-image identity remain mandatory. Normal GCC full/recovery candidate; channel publication and an exact-base delta remain explicit operator actions."
   }
 }
