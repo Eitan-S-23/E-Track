@@ -1279,3 +1279,66 @@ added board line carried CRLF in the historically mixed-EOL file. Its failed
 receipt remains at `keyring-commit-02/`; the existing scoped formatter changed
 only that line's ending, after which `keyring-commit-03` succeeded. This host
 formatting issue did not change product source or replay a device/build operation.
+
+#### Receiver Installation Binding
+
+Main `71166bade110a61d0eb0787531a343e0e2c45df3` is pushed. Candidate run
+`44791221159` has completed its firmware job and registered unpublished 3.3.39
+as `fw_91fc008ead324345e5bc42b20e4e2bd921c3342065175cbf61ac34f996836bc1`.
+The original 632508-byte target SHA-256 is
+`258ccb7969ea0200668dd6ad225eb86c2893fe74e3e4e31503527605e23667ec`.
+`prepare-02` reuses the existing exact-CI finalization route, without compiling
+or repackaging a new release: its finalized App and recovery container match both
+original registered hashes, and its executable bytes match the original ELF/map.
+`keyring-artifacts-01` retains original source/proof/registration artifacts.
+
+`preinstall-01` is a fresh passive full backup: running App is the original
+30338, physical Boot is unchanged, current-boot RTT says CONFIRMED 30338, runtime
+advances, recorder/receiver/debugger owners are idle and all four QSPI regions
+are saved. Candidate and committed staging are 30338, backup is validated 30337
+(630760 bytes, CRC32 2374097487), and recovery remains validated 30276. No halt,
+reset, RAM/Flash or EEPROM mutation occurred in that observation. Its startup
+NRST/WDT marker is preserved, not attributed to a new agent reset.
+
+The definite direct-install constraint is that existing CONFIRMED state does
+not automatically adopt a newly flashed App version. Reuse standard SEGGER 8.18
+Commander for App programming and the existing host-only physical-recovery C
+kernel plus exact eight-page EEPROM transport for complete-state confirmation.
+The small task-bound entry joins these already-qualified operations; it does
+not implement another Flash algorithm or change product Boot/BCB logic.
+
+The one installation cell has a 2400-second outer deadline. Recheck all captured
+Flash bytes and storage ownership, stop at the qualified storage-idle main-loop
+boundary with watchdog freeze, back up repeated A/B and configuration bytes,
+and derive the entire inactive record from the validated target before writing.
+Program only the App through Commander and verify complete target/unchanged Boot
+while still halted. Reassert and verify watchdog freeze, recheck identical EEPROM,
+then use the C-bound 30338 -> 30339 transaction for exactly one inactive 64-byte
+record. Preserve the old active record, all configuration and QSPI bytes. Only a
+fully verified transaction permits the ordinary reset, fresh matching 30339
+confirmation and original-target/runtime readback. Uncertain results retain the
+held state and owner for reconciliation; no blind retry, old-App resume, downgrade
+or arbitrary version-field patch is admitted.
+
+`repair-host-01` passes 115 existing C/EEPROM assertions for these exact identities.
+The final source-bound `repair-host-02` also binds the added post-program watchdog
+freeze check before the physical cell. These are installation-adapter self-tests,
+not independent acceptance or an already installed receiver.
+
+#### App Candidate Delivered And Forward Target Prepared
+
+Original Trace signing run `44791450526` is EXECUTED SUCCESS for source
+`71166bade110a61d0eb0787531a343e0e2c45df3`, with both Android APK and Windows EXE
+jobs successful. Strict analysis/tests, original signer/package/ABI/configuration,
+signed metadata, complete R2 readback and candidate registration all succeed.
+`keyring-logs-01` retains the original run/jobs and sanitized native job logs.
+`keyring-inspect-02` independently sees App 1.0.87/113 and MCU 3.3.39 in the
+original backend; Trace's immutable v1.0.87 release exists. This is not yet an
+installed 1.0.87 observation. No channel or delta operation was performed.
+
+That same fresh inspection confirms 3.3.40 is unoccupied. The next main delivery
+changes only firmware version/release notes plus the current operational record;
+App remains 1.0.87/113 and MCU product behavior remains identical to 3.3.39.
+The receiver installation cell is still running and cannot yet be called a PASS.
+Preparing the forward candidate does not depend on prematurely claiming that
+installation, and does not require rebuilding the successful App.
