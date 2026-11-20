@@ -780,3 +780,57 @@ only after the collectors and actual App query are ready. Phone USB was not
 enumerated during this preparation, so neither installation nor a collector
 window was started. The original 30335 is retained; successful 30336 upgrade,
 disconnect resolution on hardware and whole-card acceptance are still unverified.
+
+## User OTA Completed And Target Verified
+
+The owner reports manually completing the App update to 1.0.86, opening its
+device-firmware page and successfully starting the 30335 -> 30336 update there.
+This is the **phone-App-originated** entry, not a new observation of the MCU's
+own "update now" button. The App version and user-visible completion are owner
+observations; the installed APK was not re-read after that manual update.
+
+Before this success, the bounded USB setup preserved two host failures and an
+actual cancelled installation. `adb-release-01` failed on the localized netstat
+header before any stop. `adb-release-02` released only the identity-bound
+LDPlayer ADB PID 5668. `phone-setup-01` then found no target device and issued no
+installation. A restarted, identity-bound LDPlayer ADB PID 21968 was released
+in `adb-release-03`, immediately followed by `phone-setup-02`. That one actual
+installation returned `INSTALL_FAILED_ABORTED: User rejected permissions`.
+Its private ADB owner closed cleanly, no App data was cleared, and no MCU OTA
+was started. The owner's subsequent cancellation was respected: there was no
+installation retry, logcat/RTT capture window or automatic upgrade command.
+These originals remain in `.cache/ota-companion-fix-20261120`.
+
+After the owner's successful upgrade, `target-verify-01` in that same cache
+starts at `2026-11-20T10:37:29Z`. It reuses the qualified passive observer with
+the exact original **30336** ELF/map and binary, not the old 30335 expectation.
+All 630760 App bytes, before and after sampling, match the original backend
+target SHA-256
+`44325d8921509881c52e0ba96c65a0c9591181a0f78794ed8cecb7a3154ce49b`.
+The full 65536-byte Boot remains unchanged, SHA-256
+`01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527`.
+
+The current retained RTT ring contains `Reset: NRST SW` and
+`OTA: TEST_BOOT confirmed vcode=30336`. The initialized App confirmation snapshot
+is state 4 with confirmation flag 1; this is the current boot's snapshot, not a
+fresh EEPROM dump. Three samples span 2295 firmware milliseconds with increasing
+main-loop/watchdog counts, no counter discontinuity, SD ready, receiver/overlay
+idle, clear fault registers, 288 MHz core and SysTick LOAD 287999. Reported power
+is charging/100 percent. The observer performs no halt, reset, RAM/Flash write,
+RTT pointer update or phone operation. Native command closure is acknowledged;
+the selected SEGGER/PowerShell metadata is unchanged during this observation.
+
+The bounded result is **user-assisted App-originated OTA success with
+passive target/Boot/confirmation verification**. It is not a fresh formal
+independent acceptance campaign. No simultaneous phone log was collected, so
+transfer timings, reconnect internals and actual delta-versus-full selection
+remain unknown. A final target readback does not reconstruct those missing logs,
+isolate the App fix from restored charging readiness, or explain the older WDT
+event. The device-originated entry has not been independently rerun after the fix.
+
+Retain 30336. Do not downgrade, repeat this successful OTA or create a new firmware
+version solely to recover logs or test the other entry. The owner can disconnect
+phone USB and use the device normally. A future genuine forward firmware update
+can exercise the device-originated entry if needed. Admin scroll and App software
+delivery remain complete; their originals, older failures and separate whole-card
+acceptance obligations are unchanged.
