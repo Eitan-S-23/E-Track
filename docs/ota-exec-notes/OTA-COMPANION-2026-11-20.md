@@ -666,3 +666,64 @@ distinct from a phone installation or successful physical OTA.
 Wrong: remove the battery guard, call END ACK success, or label every timeout a
 disconnected device. Correct: preserve the original rejection, finish cleanup,
 retain only valid observations and report exactly what was or was not verified.
+
+## App Remediation Delivery
+
+Source `cc43904369908a1f5c744485d7b84dc8ad9fc134` is integrated and pushed to
+primary/remote main, with only the nine reviewed App/test/version/task-record
+files. The shipping App version is `1.0.86+112`; the installed phone was not
+replaced. Existing MCU 3.3.35/3.3.36 inputs, original signing keys, backend
+deployment and Stable/Beta pointers are unchanged by this batch.
+
+Full development Actions [44640100650](https://github.com/Eitan-S-23/E-Track/actions/runs/44640100650)
+passes both hosts on this exact source. Flutter is 3.47.9
+(`c197ca5199e9ee5661e865596c9c07294dfab51c`), Dart 3.13.7. Linux has 972 passed /
+16 platform skips; Windows has 920 passed / 68 platform skips; both have zero
+failures, successful strict analysis and eight additional candidate checks.
+Original reports/logs are archived under `keyring-artifacts-03/04` and
+`keyring-logs-03` in `.cache/ota-companion-fix-20261120`.
+
+Original candidate parent [44641314474](https://github.com/Eitan-S-23/E-Track/actions/runs/44641314474)
+selects App only and skips firmware. Its original-signing child
+[44641546808](https://github.com/Eitan-S-23/Trace/actions/runs/44641546808) binds
+the exact E-Track source to signing workflow `12ff41fc11eb4920ab32d69ae0f7e1cc095f996e`.
+Windows analysis/tests, EXE/ZIP construction and immutable draft reservation
+pass. Android analysis/tests, original-signed APK construction, native signature/
+package/ABI/configuration verification and candidate registration also pass.
+Both the original-signing child and its parent finish successfully. The ordinary main `build.yml`
+`44641314587` correctly skips duplicate APK/EXE jobs; that skip is not build
+evidence. No successful build was replayed to recover another stage.
+
+The APK is 48898789 bytes, SHA-256
+`556ec00495521745136b9f4709a25bb62bb122930c47469cb710e4161129852f`, package
+`com.wen.gaia.gaia`, version `1.0.86+112`, with only the two original ARM ABIs.
+Its original certificate SHA-256 is
+`3cecee6330a930e020b454b6d4a79568f4494ca324ae7bcf2c1914e51b04ab47`.
+The native inspection matches the immutable GitHub APK asset; the existing
+Windows asset IDs, sizes and digests remain unchanged after Android completes.
+R2 full-byte verification passes for APK and manifest, and the actual backend
+response registers `rel_trace_android_v1_0_86` with `ok=true, idempotent=false`.
+GitHub release 452090111 is an available prerelease, not GitHub latest or a
+Stable/Beta publication. No App or MCU delta was generated.
+
+The GitHub metadata asset records the pre-R2 document; the final native CI
+`CANDIDATE_FILE` records its subsequent R2-verified registration form. Their file
+hashes legitimately differ; do not overwrite the immutable asset to equate them.
+Originals are in `keyring-logs-04/05`, `keyring-read-03/04` and final status
+receipts `keyring-status-18/19` under the same task cache.
+
+The earlier failed development runs remain immutable. Known Actions Node 20
+deprecation, existing `detail-back` widget hit-test warning, and Android
+Gradle/AGP/Kotlin and plugin-SDK compatibility warnings are retained, not
+suppressed or counted as new product failures. No toolchain/dependency change
+was included to hide those warnings. Development/build success
+does not constitute independent whole-card acceptance, an installed phone App
+or a successful physical 3.3.35 -> 3.3.36 upgrade.
+
+All phone collectors remain released. The retained original MCU's last passive
+observation is healthy and confirmed at 30335, but reports zero percent and no
+charging throughout. Physical OTA therefore still requires the device to
+recognize charging or at least 30 percent with recording closed, plus a prepared
+phone/BLE session. Simulated GPS speed is not this 3.3.35 admission condition.
+No further reset, firmware programming, BLE retry, package regeneration or
+charging-state spoof is performed to hide that prerequisite.
