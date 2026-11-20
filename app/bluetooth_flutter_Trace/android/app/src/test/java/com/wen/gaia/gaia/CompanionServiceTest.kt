@@ -50,6 +50,8 @@ class CompanionServiceTest {
     }
 
     @Before fun setUp() {
+        // Keep posted lifecycle work queued until the test installs its boundary.
+        shadowOf(Looper.getMainLooper()).pause()
         service = Robolectric.buildService(CompanionService::class.java).create().get()
         runtime = Runtime(); service.execution = runtime
         CompanionBridge.preferences(service).edit().clear().putBoolean("enabled", true)

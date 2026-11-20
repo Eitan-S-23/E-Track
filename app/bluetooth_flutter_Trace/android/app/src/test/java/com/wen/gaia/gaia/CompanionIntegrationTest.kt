@@ -596,6 +596,7 @@ class CompanionIntegrationTest {
 
     @Test fun serviceRecreationAloneStartsTheRealHeadlessBridgeWithoutAnActivity() {
         associated()
+        shadowOf(Looper.getMainLooper()).pause()
         val service = Robolectric.buildService(CompanionService::class.java).create().get()
         assertEquals(0, CompanionEngineBoundary.created)
         shadowOf(Looper.getMainLooper()).idle()
