@@ -17,6 +17,7 @@ import '../companion/companion_protocol.dart';
 import '../ota/ota_ble_codec.dart';
 import '../ota/ota_background.dart';
 import '../ota/ota_upgrade_consent.dart';
+import '../ota/ota_upgrade_history.dart';
 import '../ota/ota_ble_transport.dart';
 import '../ota/ota_device_info.dart';
 import '../ota/ota_diagnostics.dart';
@@ -161,6 +162,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
             rebootProbeInterval ?? const Duration(seconds: 3);
 
   final BluetoothService? _bluetoothService;
+  late final upgradeHistory = OtaUpgradeHistory(_firmwareDirProvider);
   final OtaPhyClient _phyClient;
   final OtaBackgroundClient _background;
   final void Function()? _onOpenTask;
@@ -694,6 +696,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   @override
   void onInit() {
     super.onInit();
+    unawaited(upgradeHistory.load());
     WidgetsBinding.instance.addObserver(this);
     _snapshotWorker = everAll([_phase, _upgradeStatus, _downloadProgress, _isUpgrading,
       _durableProgress, _backgroundReady, _backgroundReason], (_) {
@@ -875,6 +878,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           }
         }
         p35.record('identity');
+        try { await upgradeHistory.reconcile(deviceAddress, info); }
+        catch (_) { upgradeHistory.problem.value = 'HISTORY_WRITE_FAILED'; }
         if (Get.isRegistered<VersionInventoryService>()) {
           Get.find<VersionInventoryService>().observeDevice(deviceAddress, info);
         }
@@ -1459,13 +1464,28 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       final diagnostics = OtaDiagnostics.current;
       var diagnosticStarted = false;
       var diagnosticCompleted = false;
+      String? historyId;
+      String? failureStage, failureCode;
+      bool endAcknowledged = false;
+      DeviceOtaInfo? historyVerified;
       // P3-4 观测：早退/取消统一留痕（阶段 + 原因）后返回 false——未进入
       // 传输的失败不得伪装成成功传输，也不得从终结摘要里静默消失。
       bool fail(String stage, String reason) {
+        failureStage = stage;
+        failureCode = reason;
         linkStats.recordFailure(stage: stage, reason: reason);
         return false;
       }
       try {
+        final target = _latestInfo;
+        if (target?.versionCode == null || target?.targetImageSha256 == null) {
+          _phase.value = OtaPhase.failed;
+          return fail('manifest', 'TARGET_IDENTITY_MISSING');
+        }
+        historyId = await upgradeHistory.begin(address: deviceAddress, before: info,
+            targetVersion: target!.versionCode!, targetSha: target.targetImageSha256!,
+            packageSha: asset.sha256, kind: asset.kind,
+            initiator: consent == null ? 'app' : 'mcu');
         final experiment = OtaExperimentRuntime.current.requireForOta();
         if (experiment?.isPrefixProbe == true) {
           throw const OtaTransportException('Legacy prefix probes are not supported', code: 'V2_REQUIRED');
@@ -1692,6 +1712,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         // finally 的收尾摘要不会重复输出，整轮仍只有一条 OTA_LINK_STATS。
         linkStats.emitSummary();
         // ---- END OK 只是包传完（PR07）----
+        endAcknowledged = true;
+        await upgradeHistory.update(historyId, status: 'awaitingVerification', stage: 'waitingReboot');
         _durableProgress.value = 1.0;
         _upgradeProgress.value = 1.0;
         _phase.value = OtaPhase.waitingReboot;
@@ -1727,6 +1749,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         }
         switch (outcome.kind) {
           case _RebootKind.targetVerified:
+            historyVerified = outcome.info;
             // 终点观测（补测轮取证）：复核链在新连接上 GET_INFO 比对
             // 全等后唯一到达此分支——它是「原升级调用成功完成」的直接
             // 终态（与 timedOut 后手动查询互斥），此前无打点采不到证。
@@ -1797,6 +1820,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
             return fail('cancelled', 'reboot-wait-cancelled');
         }
       } on OtaTransportException catch (e) {
+        failureStage = 'transfer';
+        failureCode = e.code;
         if (e.code == 'DISCONNECTED') {
           // 断连使旧身份快照失效（PR09）：恢复须重新 GET_INFO。
           _deviceInfo = null;
@@ -1880,6 +1905,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         // 仍是当前 owner）时发布：用户取消窗口已在上面统一让出。
         return false;
       } on OtaDeviceIdentityException catch (e) {
+        failureStage = 'identity';
+        failureCode = e.code;
         if (generation != _cancelGeneration) {
           // 与上面同一条取消窗口让出规则（RC3-12②），也与重启复核的
           // `_RebootKind.identityChanged` 分支保持一致——那条路径在发布前
@@ -1909,6 +1936,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         _phase.value = OtaPhase.failed;
         return false;
       } catch (e) {
+        failureStage = endAcknowledged ? 'verification' : 'preparation';
+        failureCode = e.runtimeType.toString();
         if (generation != _cancelGeneration) {
           // 原生/未知异常同样不得抢在取消清理前发布失败态（RC3-12②）：
           // 取消引发的在途写异常会走这一支，发布职责归属 cancelUpgrade。
@@ -1940,6 +1969,17 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         _phase.value = OtaPhase.failed;
         return false;
       } finally {
+        if (historyId != null) {
+          final cancelled = generation != _cancelGeneration || _phase.value == OtaPhase.cancelled;
+          try {
+            await upgradeHistory.update(historyId,
+                status: historyVerified != null ? 'success' : endAcknowledged ? 'awaitingVerification'
+                    : cancelled ? 'cancelled' : 'failed',
+                stage: historyVerified != null ? 'identityVerified' : failureStage ?? _phase.value.name,
+                errorCode: failureCode ?? _terminalState.value?.code,
+                verified: historyVerified, finish: true);
+          } catch (_) { upgradeHistory.problem.value = 'HISTORY_WRITE_FAILED'; }
+        }
         if (activeTransport != null) {
           // A concurrent cancel owns disposal after its queued ABORT, without
           // preventing this old owner from exiting or touching a later owner.
@@ -2402,7 +2442,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   }
 
   List<Map<String, dynamic>> getUpgradeHistory() {
-    return const [];
+    return upgradeHistory.forDevice(_deviceInfoAddress);
   }
 
   // ---- 内部 ----

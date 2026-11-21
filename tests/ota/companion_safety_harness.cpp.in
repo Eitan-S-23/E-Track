@@ -29,6 +29,8 @@ static HAL::CompanionProgressRefresh s_companion_refresh = nullptr;
 struct SessionProgress { uint32_t durable_off; };
 struct BleSession { uint32_t total_len; SessionProgress progress; uint32_t target_vcode; };
 static BleSession s_ble_session = {};
+struct CachedIdentity { bool valid; struct { uint32_t cur_vcode; } info; };
+static CachedIdentity s_ble_identity = {true, {30341}};
 enum ota_sd_kind_t { OTA_SD_KIND_FULL, OTA_SD_KIND_PATCH };
 static int applyResult;
 static int ble_apply_staged(uint32_t, uint32_t, ota_sd_kind_t);

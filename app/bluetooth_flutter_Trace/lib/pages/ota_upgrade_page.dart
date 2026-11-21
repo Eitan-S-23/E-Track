@@ -436,7 +436,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
             const SizedBox(height: 24),
 
             // 升级历史
-            _buildUpgradeHistoryCard()
+            Obx(() => _buildUpgradeHistoryCard())
                 .animate(delay: 600.ms)
                 .fadeIn(duration: 600.ms)
                 .slideY(begin: 0.3, end: 0),
@@ -1231,6 +1231,9 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
             )
           else
             ...history.map(_buildHistoryItem),
+          if (otaService.upgradeHistory.problem.value != null)
+            Text('历史记录不完整：${otaService.upgradeHistory.problem.value}',
+                style: const TextStyle(color: Colors.orange)),
         ],
       ),
     );
@@ -1238,6 +1241,16 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
 
   Widget _buildHistoryItem(Map<String, dynamic> record) {
     final isSuccess = record['status'] == 'success';
+    final pending = record['status'] == 'awaitingVerification' || record['status'] == 'running';
+    final result = switch (record['status']) {
+      'success' => '成功', 'cancelled' => '已取消',
+      'awaitingVerification' => '等待核验', 'running' => '进行中', _ => '失败',
+    };
+    String version(dynamic code) => code is int
+        ? '${code ~/ 10000}.${code ~/ 100 % 100}.${code % 100}' : '未知';
+    final duration = record['durationMs'];
+    final date = record['startedAt'];
+    final time = date is int ? DateTime.fromMillisecondsSinceEpoch(date).toLocal().toString().split('.').first : '未知';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -1250,8 +1263,8 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
       child: Row(
         children: [
           Icon(
-            isSuccess ? Icons.check_circle : Icons.error,
-            color: isSuccess ? Colors.green : Colors.red,
+            isSuccess ? Icons.check_circle : pending ? Icons.schedule : Icons.info_outline,
+            color: isSuccess ? Colors.green : pending ? Colors.orange : Colors.red,
             size: 20,
           ),
           const SizedBox(width: 12),
@@ -1260,14 +1273,19 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  record['device'],
+                  '${record['device']} · ${record['deviceKey'].toString().substring(0, 8)}',
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 Text(
-                  '版本 ${record['version']} • ${_formatDate(record['date'])}',
+                  '${version(record['beforeVersion'])} → ${version(record['targetVersion'])}\n'
+                  '$time\n${record['kind'] == 'patch' ? '差分' : '全量'} · '
+                  '${record['initiator'] == 'mcu' ? '设备发起' : 'APP 发起'} · '
+                  '${duration is int ? '${(duration / 1000).toStringAsFixed(1)} 秒' : '耗时未知'}\n'
+                  '任务 ${record['taskId']}\n'
+                  '${record['stage']}${record['errorCode'] == null ? '' : ' / ${record['errorCode']}'}',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey.shade600,
@@ -1277,7 +1295,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
             ),
           ),
           Text(
-            isSuccess ? '成功' : '失败',
+            result,
             style: TextStyle(
               fontSize: 12,
               color: isSuccess ? Colors.green : Colors.red,
@@ -1426,7 +1444,4 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
     return '${(kb / 1024).toStringAsFixed(2)} MB';
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.month}月${date.day}日';
-  }
 }

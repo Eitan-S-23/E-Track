@@ -34,6 +34,7 @@ struct CompanionUpdateInfo
     uint32_t totalBytes;
     uint32_t durableBytes;
     uint32_t transferVersion;
+    uint32_t currentVersion; // Validated local running-image identity, zero if unknown.
 };
 
 inline bool CompanionUpdateActive(const CompanionUpdateInfo& info)

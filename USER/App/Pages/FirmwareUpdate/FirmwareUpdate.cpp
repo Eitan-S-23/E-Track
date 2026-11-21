@@ -1398,6 +1398,10 @@ namespace
 {
     PageManager* companionManager = nullptr;
     lv_obj_t* companionModal = nullptr;
+    lv_obj_t* companionPanel = nullptr;
+    lv_obj_t* companionEmblem = nullptr;
+    lv_obj_t* companionRing = nullptr;
+    lv_obj_t* companionDivider = nullptr;
     lv_obj_t* companionTitle = nullptr;
     lv_obj_t* companionMessage = nullptr;
     lv_obj_t* companionStatus = nullptr;
@@ -1491,11 +1495,73 @@ namespace
         if (strcmp(lv_label_get_text(label), text) != 0) lv_label_set_text(label, text);
     }
 
+    lv_obj_t* CompanionRect(lv_obj_t* parent, int x, int y, int w, int h, uint32_t color)
+    {
+        lv_obj_t* obj = lv_obj_create(parent);
+        lv_obj_remove_style_all(obj);
+        lv_obj_set_pos(obj, x, y); lv_obj_set_size(obj, w, h);
+        lv_obj_set_style_bg_color(obj, lv_color_hex(color), 0);
+        lv_obj_set_style_bg_opa(obj, LV_OPA_COVER, 0);
+        lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
+        return obj;
+    }
+
+    void CompanionChip(lv_obj_t* parent, int x, int y)
+    {
+        lv_obj_t* chip = CompanionRect(parent, x, y, 26, 26, 0xbdeff0);
+        lv_obj_set_style_radius(chip, 4, 0);
+        CompanionRect(chip, 3, 3, 20, 20, 0x04151c);
+        CompanionRect(chip, 8, 8, 10, 10, 0xbdeff0);
+        for (int pin = 5; pin <= 21; pin += 8)
+        {
+            CompanionRect(parent, x + pin, y - 5, 2, 5, 0xbdeff0);
+            CompanionRect(parent, x + pin, y + 26, 2, 5, 0xbdeff0);
+            CompanionRect(parent, x - 5, y + pin, 5, 2, 0xbdeff0);
+            CompanionRect(parent, x + 26, y + pin, 5, 2, 0xbdeff0);
+        }
+    }
+
+    void CompanionLayout(bool active)
+    {
+        const int width = active ? LV_HOR_RES : LV_HOR_RES - 20;
+        lv_obj_set_pos(companionPanel, active ? 0 : 10, active ? 0 : 42);
+        lv_obj_set_size(companionPanel, width, active ? LV_VER_RES : 250);
+        lv_obj_set_style_radius(companionPanel, active ? 0 : 12, 0);
+        lv_obj_set_style_border_width(companionPanel, active ? 0 : 1, 0);
+        lv_obj_set_width(companionTitle, width - 16);
+        lv_obj_set_style_text_align(companionTitle, LV_TEXT_ALIGN_CENTER, 0);
+        lv_obj_set_pos(companionTitle, 8, active ? 12 : 83);
+        lv_obj_set_width(companionVersion, width - 16);
+        lv_obj_set_style_text_align(companionVersion, LV_TEXT_ALIGN_CENTER, 0);
+        lv_obj_set_pos(companionVersion, 8, active ? 265 : 110);
+        lv_obj_set_pos(companionDivider, 16, active ? 253 : 137);
+        lv_obj_set_size(companionDivider, width - 32, 1);
+        lv_obj_set_pos(companionStatus, 8, active ? 232 : 151);
+        lv_obj_set_width(companionStatus, width - 16);
+        lv_obj_set_style_text_align(companionStatus, LV_TEXT_ALIGN_CENTER, 0);
+        lv_obj_set_pos(companionMessage, 8, active ? 286 : 178);
+        lv_obj_set_width(companionMessage, width - 16);
+        lv_obj_set_style_text_align(companionMessage, LV_TEXT_ALIGN_CENTER, 0);
+        lv_obj_set_style_text_line_space(companionMessage, 0, 0);
+        lv_label_set_long_mode(companionMessage, LV_LABEL_LONG_DOT);
+        lv_obj_set_pos(companionCheck, 16, 202);
+        lv_obj_set_size(companionCheck, width - 32, 32);
+        lv_obj_set_pos(companionLater, 12, active ? 286 : 208);
+        lv_obj_set_size(companionLater, active ? 34 : 84, active ? 26 : 32);
+        lv_obj_set_pos(companionInstall, 104, 208);
+        lv_obj_set_size(companionInstall, width - 116, 32);
+        if (active) lv_obj_add_flag(companionEmblem, LV_OBJ_FLAG_HIDDEN);
+        else lv_obj_clear_flag(companionEmblem, LV_OBJ_FLAG_HIDDEN);
+        // Later remains a key-accessible back action; it never cancels the OTA.
+        lv_obj_set_style_opa(companionLater, active ? LV_OPA_TRANSP : LV_OPA_COVER, 0);
+    }
+
     void CompanionRenderStatus()
     {
         const char* code = companionDisplayed.status;
         if (strcmp(code, "READY") == 0 && !companionDisplayed.hasOffer) code = "UNAVAILABLE";
         const bool progressing = HAL::CompanionUpdateActive(companionDisplayed);
+        CompanionLayout(progressing);
         if (!progressing && companionDisplayed.hasOffer && !CompanionCanInstall()) code = "WAIT_SAFE";
         if (!progressing && companionSdBusy) code = "SD_BUSY";
         const char* title = CompanionStatusTitle(code);
@@ -1526,7 +1592,7 @@ namespace
         default: break;
         }
         if (progressing) message = "\xE8\xAF\xB7\xE4\xBF\x9D\xE6\x8C\x81\xE8\xAE\xBE\xE5\xA4\x87\xE4\xBE\x9B\xE7\x94\xB5";
-        CompanionSetText(companionTitle, companionDisplayed.hasOffer ? CompanionStatusTitle("READY") :
+        CompanionSetText(companionTitle, progressing ? "E-Track" : companionDisplayed.hasOffer ? CompanionStatusTitle("READY") :
             "\xE6\xA3\x80\xE6\x9F\xA5\xE6\x9B\xB4\xE6\x96\xB0");
         CompanionSetText(companionStatus, title);
         CompanionSetText(companionMessage, message);
@@ -1540,6 +1606,8 @@ namespace
             {
                 lv_obj_clear_flag(companionProgressBar, LV_OBJ_FLAG_HIDDEN);
                 lv_bar_set_value(companionProgressBar, percent, LV_ANIM_OFF);
+                lv_arc_set_bg_angles(companionRing, 0, 360);
+                lv_arc_set_angles(companionRing, 0, (uint16_t)(percent * 360 / 100));
                 snprintf(text, sizeof(text), "%u%%", (unsigned)percent);
                 CompanionSetText(companionProgressLabel, text);
                 snprintf(text, sizeof(text), "%lu / %lu B", (unsigned long)companionDisplayed.durableBytes,
@@ -1549,6 +1617,10 @@ namespace
             else
             {
                 lv_obj_add_flag(companionProgressBar, LV_OBJ_FLAG_HIDDEN);
+                // Activity, not percentage: a constant-length segment follows
+                // the clock only while a real non-quantified stage is active.
+                const uint16_t angle = (uint16_t)((lv_tick_get() / 8u) % 360u);
+                lv_arc_set_angles(companionRing, angle, (uint16_t)((angle + 75u) % 360u));
                 CompanionSetText(companionProgressLabel, "...");
                 CompanionSetText(companionProgressDetail, detail);
             }
@@ -1557,6 +1629,7 @@ namespace
         {
             lv_obj_add_flag(companionProgress, LV_OBJ_FLAG_HIDDEN);
             lv_obj_clear_flag(companionCheck, LV_OBJ_FLAG_HIDDEN);
+            if (companionDisplayed.hasOffer) lv_obj_add_flag(companionCheck, LV_OBJ_FLAG_HIDDEN);
         }
         const bool attention = strcmp(code, "WAIT_SAFE") == 0 || strcmp(code, "SD_BUSY") == 0 || strcmp(code, "FAILED") == 0 ||
             strcmp(code, "INCOMPATIBLE") == 0;
@@ -1565,8 +1638,11 @@ namespace
         if (companionDisplayed.hasOffer || progressing)
         {
             const unsigned long value = progressing ? companionDisplayed.transferVersion : companionDisplayed.version;
-            snprintf(version, sizeof(version), "\xE7\x89\x88\xE6\x9C\xAC %lu.%lu.%lu",
-                value / 10000, (value / 100) % 100, value % 100);
+            const unsigned long current = companionDisplayed.currentVersion;
+            if (!progressing && current != 0u)
+                snprintf(version, sizeof(version), "%lu.%lu.%lu > %lu.%lu.%lu", current / 10000,
+                    (current / 100) % 100, current % 100, value / 10000, (value / 100) % 100, value % 100);
+            else snprintf(version, sizeof(version), "%lu.%lu.%lu", value / 10000, (value / 100) % 100, value % 100);
         }
         else snprintf(version, sizeof(version), "%s", "\xE9\x80\x9A\xE8\xBF\x87\xE6\x89\x8B\xE6\x9C\xBA\xE8\x8E\xB7\xE5\x8F\x96\xE5\x9B\xBA\xE4\xBB\xB6");
         CompanionSetText(companionVersion, version);
@@ -1599,6 +1675,7 @@ namespace
         companionTitle = companionMessage = companionStatus = companionVersion = nullptr;
         companionCheck = companionInstall = companionLater = nullptr;
         companionProgress = companionProgressBar = companionProgressLabel = companionProgressDetail = nullptr;
+        companionPanel = companionEmblem = companionRing = companionDivider = nullptr;
         companionClosing = false;
     }
 
@@ -1718,7 +1795,7 @@ namespace
             companionPressedButton = nullptr;
         CompanionRenderStatus();
         const bool progressing = HAL::CompanionUpdateActive(companionDisplayed);
-        bool check = CompanionCanCheck(companionDisplayed);
+        bool check = CompanionCanCheck(companionDisplayed) && !companionDisplayed.hasOffer;
         bool install = !progressing && companionDisplayed.hasOffer && !companionDisplayed.checking && CompanionCanInstall();
         if (check != companionCanCheck || install != companionCanInstall)
         {
@@ -1793,6 +1870,7 @@ void CompanionOpen(void*)
     lv_obj_clear_flag(companionModal, LV_OBJ_FLAG_GESTURE_BUBBLE);
     lv_obj_add_event_cb(companionModal, CompanionDismissEvent, LV_EVENT_GESTURE, nullptr);
     lv_obj_t* panel = lv_obj_create(companionModal);
+    companionPanel = panel;
     lv_obj_remove_style_all(panel);
     lv_obj_set_pos(panel, 12, (LV_VER_RES - 284) / 2);
     lv_obj_set_size(panel, LV_HOR_RES - 24, 284);
@@ -1805,12 +1883,22 @@ void CompanionOpen(void*)
     lv_obj_set_style_text_color(panel, lv_color_white(), 0);
     lv_obj_set_style_text_font(panel, ResourcePool::GetFont("cn_16"), 0);
     lv_obj_clear_flag(panel, LV_OBJ_FLAG_SCROLLABLE);
+    companionEmblem = lv_obj_create(panel);
+    lv_obj_remove_style_all(companionEmblem);
+    lv_obj_set_size(companionEmblem, 64, 64);
+    lv_obj_set_pos(companionEmblem, (LV_HOR_RES - 20 - 64) / 2, 10);
+    lv_obj_set_style_radius(companionEmblem, LV_RADIUS_CIRCLE, 0);
+    lv_obj_set_style_border_width(companionEmblem, 2, 0);
+    lv_obj_set_style_border_color(companionEmblem, lv_color_hex(0x00e5ee), 0);
+    lv_obj_clear_flag(companionEmblem, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
+    CompanionChip(companionEmblem, 17, 17);
     companionTitle = lv_label_create(panel);
     lv_obj_set_pos(companionTitle, 16, 16);
     companionVersion = lv_label_create(panel);
     lv_obj_set_pos(companionVersion, 16, 43);
     lv_obj_set_style_text_color(companionVersion, lv_color_hex(0x88aab0), 0);
     lv_obj_t* divider = lv_obj_create(panel);
+    companionDivider = divider;
     lv_obj_remove_style_all(divider);
     lv_obj_set_pos(divider, 16, 72);
     lv_obj_set_size(divider, LV_HOR_RES - 56, 1);
@@ -1829,21 +1917,37 @@ void CompanionOpen(void*)
     const int halfWidth = (LV_HOR_RES - 64) / 2;
     companionInstall = CompanionButton(panel, "\xE7\xAB\x8B\xE5\x8D\xB3\xE6\x9B\xB4\xE6\x96\xB0", 16, 232, halfWidth);
     companionLater = CompanionButton(panel, "\xE8\xBF\x94\xE5\x9B\x9E", 24 + halfWidth, 232, halfWidth);
+    lv_obj_set_style_bg_color(companionInstall, lv_color_hex(0x00e5ee), 0);
+    lv_obj_set_style_bg_opa(companionInstall, LV_OPA_COVER, 0);
+    lv_obj_set_style_text_color(lv_obj_get_child(companionInstall, 0), lv_color_hex(0x001116), 0);
     companionProgress = lv_obj_create(panel);
     lv_obj_remove_style_all(companionProgress);
-    lv_obj_set_pos(companionProgress, 16, 166);
-    lv_obj_set_size(companionProgress, LV_HOR_RES - 56, 60);
+    lv_obj_set_pos(companionProgress, 20, 42);
+    lv_obj_set_size(companionProgress, LV_HOR_RES - 40, 180);
     lv_obj_clear_flag(companionProgress, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_clear_flag(companionProgress, LV_OBJ_FLAG_CLICKABLE);
+    companionRing = lv_arc_create(companionProgress);
+    lv_obj_set_size(companionRing, 156, 156);
+    lv_obj_align(companionRing, LV_ALIGN_TOP_MID, 0, 0);
+    lv_obj_remove_style(companionRing, nullptr, LV_PART_KNOB);
+    lv_obj_set_style_arc_color(companionRing, lv_color_hex(0x10363d), LV_PART_MAIN);
+    lv_obj_set_style_arc_color(companionRing, lv_color_hex(0x00e5ee), LV_PART_INDICATOR);
+    lv_obj_set_style_arc_width(companionRing, 2, LV_PART_MAIN);
+    lv_obj_set_style_arc_width(companionRing, 6, LV_PART_INDICATOR);
+    lv_arc_set_rotation(companionRing, 270);
+    lv_arc_set_bg_angles(companionRing, 0, 360);
+    lv_obj_clear_flag(companionRing, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
+    CompanionChip(companionProgress, (LV_HOR_RES - 40 - 26) / 2, 36);
     CreateUpdateProgress(companionProgress, &companionProgressBar, &companionProgressLabel,
-        LV_HOR_RES - 56, 0, 20);
+        LV_HOR_RES - 84, 156, 88);
+    lv_obj_set_height(companionProgressBar, 2);
     companionProgressDetail = lv_label_create(companionProgress);
     lv_obj_set_style_text_font(companionProgressDetail, ResourcePool::GetFont("bahnschrift_13"), 0);
     lv_obj_set_style_text_color(companionProgressDetail, lv_color_hex(0x70a5ad), 0);
-    lv_obj_set_width(companionProgressDetail, LV_HOR_RES - 56);
+    lv_obj_set_width(companionProgressDetail, LV_HOR_RES - 40);
     lv_obj_set_style_text_align(companionProgressDetail, LV_TEXT_ALIGN_CENTER, 0);
     lv_label_set_long_mode(companionProgressDetail, LV_LABEL_LONG_DOT);
-    lv_obj_align(companionProgressDetail, LV_ALIGN_TOP_MID, 0, 46);
+    lv_obj_align(companionProgressDetail, LV_ALIGN_TOP_MID, 0, 162);
     companionGroup = lv_group_create();
     companionCanCheck = false; companionCanInstall = false; companionShownOffer[0] = '\0';
     companionPressedButton = nullptr;

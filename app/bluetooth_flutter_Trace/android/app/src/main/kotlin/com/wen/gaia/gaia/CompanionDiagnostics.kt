@@ -19,6 +19,8 @@ internal object CompanionDiagnostics {
     fun record(context: Context, state: String, runtime: String? = null, trigger: String? = null,
                attempt: Int = 0, details: Map<*, *>? = null) {
         try {
+            CompanionJournal.record(context, state, runtime, trigger, attempt,
+                CompanionLifecycle.decorate(context, state, details))
             val preferences = prefs(context)
             val old = JSONArray(preferences.getString("history", "[]"))
             val row = JSONObject().put("at", System.currentTimeMillis()).put("uptimeMs", SystemClock.elapsedRealtime())

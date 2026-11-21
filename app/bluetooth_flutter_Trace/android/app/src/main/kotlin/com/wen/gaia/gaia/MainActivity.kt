@@ -24,6 +24,7 @@ class MainActivity: FlutterActivity() {
     override fun shouldDestroyEngineWithHost(): Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        CompanionLifecycle.created(applicationContext, intent)
         val original = intent
         val internal = DeviceOtaBridge.isInternalOpen(original)
         if (internal) setIntent(withoutInternalUri(original))
@@ -36,6 +37,7 @@ class MainActivity: FlutterActivity() {
 
     override fun onResume() {
         super.onResume()
+        CompanionLifecycle.ui(applicationContext, "resumed")
         DeviceOtaBridge.lifecycle(this, true)
         CompanionBridge.lifecycle(this, true)
         if (CompanionBridge.enabled(applicationContext)) {
@@ -49,9 +51,20 @@ class MainActivity: FlutterActivity() {
     }
 
     override fun onPause() {
+        CompanionLifecycle.ui(applicationContext, "paused")
         DeviceOtaBridge.lifecycle(this, false)
         CompanionBridge.lifecycle(this, false)
         super.onPause()
+    }
+
+    override fun onStop() {
+        CompanionLifecycle.ui(applicationContext, "stopped")
+        super.onStop()
+    }
+
+    override fun onDestroy() {
+        CompanionLifecycle.ui(applicationContext, if (isChangingConfigurations) "recreated" else "destroyed")
+        super.onDestroy()
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {

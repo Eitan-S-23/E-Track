@@ -661,6 +661,7 @@ void HAL::BT_CompanionGetInfo(CompanionUpdateInfo* info)
     companion_control.Poll(millis(), busy);
     if (info == NULL) return;
     *info = companion_control.Info();
+    info->currentVersion = s_ble_identity.valid ? s_ble_identity.info.cur_vcode : 0u;
     info->phase = busy ? COMPANION_UPDATE_TRANSFERRING : s_companion_phase;
     if (info->phase != COMPANION_UPDATE_IDLE)
     {

@@ -55,6 +55,50 @@ class DeviceOtaServiceTest {
 
     private fun start() = service.onStartCommand(key.put(Intent()), 0, 1)
 
+    private fun journal(filter: Map<String, Any> = emptyMap()): Map<String, Any?> {
+        val done = java.util.concurrent.CountDownLatch(1)
+        var value: Result<Map<String, Any?>>? = null
+        CompanionJournal.query(service, filter) { value = it; done.countDown() }
+        assertTrue("journal query timeout", done.await(5, java.util.concurrent.TimeUnit.SECONDS))
+        return value!!.getOrThrow()
+    }
+
+    @Test fun journalPersistsAndFiltersWithoutSensitiveFields() {
+        val task = "test_journal_${System.nanoTime()}"
+        CompanionDiagnostics.record(service, "CHECK_FAILED", details = mapOf("taskId" to task,
+            "stage" to "DISCOVERING", "errorCode" to 133, "deviceKey" to "a".repeat(64),
+            "address" to "AA:BB:CC:DD:EE:FF", "token" to "private_value", "url" to "https://secret.invalid"))
+        val value = journal(mapOf("taskId" to task, "level" to "error"))
+        val rows = value["history"] as List<*>
+        assertEquals(1, rows.size)
+        assertTrue(rows.toString().contains("133"))
+        assertFalse(rows.toString().contains("AA:BB"))
+        assertFalse(rows.toString().contains("private_value"))
+        assertFalse(rows.toString().contains("secret.invalid"))
+        assertTrue((journal(mapOf("taskId" to task, "level" to "info"))["history"] as List<*>).isEmpty())
+    }
+
+    @Test fun journalPagesHaveStableCursorAndExplicitLossMetadata() {
+        val task = "test_pages_${System.nanoTime()}"
+        for (index in 1..5) CompanionDiagnostics.record(service, "STEP_$index", details = mapOf("taskId" to task))
+        val first = journal(mapOf("taskId" to task, "limit" to 2))
+        assertEquals(2, (first["history"] as List<*>).size)
+        val next = journal(mapOf("taskId" to task, "limit" to 2, "beforeSeq" to first["nextCursor"]!!))
+        assertNotEquals(first["history"], next["history"])
+        val meta = first["metadata"] as Map<*, *>
+        assertEquals(7, meta["retentionDays"])
+        assertEquals(CompanionJournal.MAX_BYTES, meta["maximumBytes"])
+        assertNotNull(meta["processKillLoss"])
+    }
+
+    @Test fun lifecycleDoesNotTreatWakeReasonAsUiVisibility() {
+        CompanionLifecycle.ui(service, "stopped")
+        val fields = CompanionLifecycle.decorate(service, "LINK_REUSED", mapOf("trigger" to "foreground"))
+        assertEquals("stopped", fields["uiState"])
+        assertEquals("not_occurred", fields["reconnection"])
+        assertNull(fields["connectionMs"])
+    }
+
     @Test fun noAcknowledgementUntilOwnerProbe() {
         start()
         assertNotNull(shadowOf(service).lastForegroundNotification)

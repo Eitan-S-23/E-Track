@@ -29,6 +29,7 @@ import android.os.SystemClock
 import android.provider.Settings
 import android.util.Log
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.FlutterEngineCache
 import io.flutter.embedding.engine.dart.DartExecutor
@@ -140,7 +141,34 @@ object CompanionBridge {
                     when (call.method) {
                         "hasActivity" -> result.success(activity.get() != null)
                         "snapshot" -> result.success(snapshot(app))
-                        "diagnostics" -> result.success(CompanionDiagnostics.snapshot(app))
+                        "diagnostics" -> CompanionJournal.query(app, call.arguments as? Map<*, *>) { answer ->
+                            handler.post { answer.fold({ result.success(it) }, { result.error("JOURNAL_READ_FAILED", "Local diagnostic read failed", null) }) }
+                        }
+                        "diagnosticDetail" -> {
+                            requireForeground()
+                            CompanionJournal.detailed(call.argument<Int>("minutes") ?: 0)
+                            result.success(true)
+                        }
+                        "diagnosticExport" -> {
+                            requireForeground()
+                            CompanionJournal.export(app) { answer -> handler.post {
+                                answer.fold({ file ->
+                                    try {
+                                        requireForeground()
+                                        val uri = FileProvider.getUriForFile(app, "${app.packageName}.fileprovider", file)
+                                        activity.get()!!.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND)
+                                            .setType("application/zip").putExtra(Intent.EXTRA_STREAM, uri)
+                                            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION), "E-Track diagnostics"))
+                                        result.success(mapOf("bytes" to file.length(), "complete" to true))
+                                    } catch (_: Exception) { result.error("EXPORT_SHARE_FAILED", "Return to the app and retry export", null) }
+                                }, { result.error("JOURNAL_EXPORT_FAILED", "Local diagnostic export failed", null) })
+                            } }
+                        }
+                        "journal" -> {
+                            val values = call.arguments as? Map<*, *>
+                            CompanionDiagnostics.record(app, values?.get("status") as? String ?: "UNKNOWN", details = values)
+                            result.success(true)
+                        }
                         "diagnostic" -> {
                             val values = call.arguments as? Map<*, *>
                             if (values == null || values["runtimeId"] != CompanionService.active?.runtimeId ||

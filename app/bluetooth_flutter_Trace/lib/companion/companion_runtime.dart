@@ -195,6 +195,7 @@ class CompanionRuntime extends GetxService {
     if (!_current(epoch)) return;
     final reconnecting = !_sameLink();
     if (reconnecting && !await _recoverConnection(wake)) return;
+    if (!reconnecting && _sameLink()) await _journal('LINK_REUSED');
     if (!_current(epoch) || !_sameLink()) return;
     final binding = _captureBinding();
     if (binding == null) return;
@@ -204,10 +205,13 @@ class CompanionRuntime extends GetxService {
     final interval = Duration(hours: settings['intervalHours'] as int? ?? 12);
     final manual = wake['reason'] == 'manual';
     final due = DateTime.now().millisecondsSinceEpoch - last >= interval.inMilliseconds;
+    await _journal('CHECK_SCHEDULE', {'lastCheckAt': last,
+      'nextCheckAt': last + interval.inMilliseconds, 'source': wake['reason']});
     final pendingPackage = reconnecting && _preferences!.containsKey('companion_ready_$address');
     if (manual || wake['checkPending'] == true || wake['reason'] == 'periodic' || due || pendingPackage) {
       await _check(manual ? 'manual' : 'periodic', 0);
     } else {
+      await _journal('CHECK_NOT_EXECUTED', {'reason': 'not_due'});
       await _state(_supportsControl ? 'CONNECTED' : 'DEVICE_CONTROL_UNSUPPORTED', busy: false);
     }
   }
@@ -235,6 +239,7 @@ class CompanionRuntime extends GetxService {
       if (!await attempt.wait(_ble.connectCompanionDeviceByAddress(address))) throw StateError('DEVICE_OFFLINE');
       if (!current()) throw CompanionRecoveryExpired(attempt.stage);
       final generation = _ble.otaLinkGeneration(address);
+      await _diagnostic('GATT_CONNECTED', attempt);
       await stage('DISCOVERING');
       final info = await attempt.wait(_ota.readCompanionDeviceInfo(address, runtime, stage));
       if (!current()) throw CompanionRecoveryExpired(attempt.stage);
@@ -242,6 +247,7 @@ class CompanionRuntime extends GetxService {
         throw StateError('LINK_GENERATION_CHANGED');
       }
       if (info == null) throw StateError('DEVICE_IDENTITY_UNAVAILABLE');
+      await _diagnostic('IDENTITY_VERIFIED', attempt);
       _link = generation;
       _session = _nonce();
       _lastDeviceRequest = 0;
@@ -268,6 +274,7 @@ class CompanionRuntime extends GetxService {
       if (identical(_capabilities, capabilities)) _capabilities = null;
       if (!current() || !_bindingCurrent(binding)) throw StateError('LINK_GENERATION_CHANGED');
       _supportsControl = supported;
+      if (supported) await _diagnostic('CONTROL_READY', attempt);
       if (!await attempt.wait(_ble.finishCompanionRecovery(address, attempt.id))) throw StateError('GATT_RETIREMENT_UNCONFIRMED');
       attempt.finish();
       if (identical(_recovery, attempt)) _recovery = null;
@@ -319,8 +326,17 @@ class CompanionRuntime extends GetxService {
     try {
       await platform.channel.invokeMethod<Object?>('diagnostic', {'runtimeId': runtime, 'revision': _revision,
         'status': value, 'stage': attempt.stage, 'elapsedMs': attempt.elapsedMs, 'trigger': trigger,
+        'recoveryId': attempt.id, 'deviceKey': _address == null ? null : sha256.convert(utf8.encode(_address!.toLowerCase())).toString(),
         'errorType': error?.runtimeType.toString(), 'errorCode': code}).timeout(const Duration(seconds: 1));
     } catch (_) { /* Local diagnostics never block recovery. */ }
+  }
+
+  Future<void> _journal(String event, [Map<String, Object?> details = const {}]) async {
+    try {
+      await platform.channel.invokeMethod<Object?>('journal', {'status': event,
+        'deviceKey': _address == null ? null : sha256.convert(utf8.encode(_address!.toLowerCase())).toString(),
+        ...details}).timeout(const Duration(seconds: 1));
+    } catch (_) { /* Observation failure must not change radio ownership. */ }
   }
 
   void _invalidateLink() {
@@ -457,6 +473,7 @@ class CompanionRuntime extends GetxService {
     await _preferences!.setInt('companion_attempt_$address', DateTime.now().millisecondsSinceEpoch);
     if (!_bindingCurrent(binding)) return;
     final latest = await _ota.checkFirmwareUpdate(companionRuntimeId: runtime);
+    await _journal('CHECK_EXECUTED', {'executedAt': DateTime.now().millisecondsSinceEpoch, 'source': source});
     if (!_bindingCurrent(binding)) return;
     if (latest == null) {
       final noUpdate = _ota.lastCheckWasNoUpdate;
@@ -500,6 +517,7 @@ class CompanionRuntime extends GetxService {
       targetSha: verified.targetImageSha256!, expiresAt: DateTime.now().add(const Duration(minutes: 5)));
     _offer = offer;
     final seen = _preferences!.getString('companion_seen_$address') == '${offer.identity}|${offer.packageSha}';
+    if (source == 'periodic' && seen) await _journal('POPUP_NOT_REQUESTED', {'reason': 'same_package_seen'});
     await _attachControl();
     if (!_bindingCurrent(binding)) return;
     final acknowledged = Completer<bool>();
@@ -513,6 +531,8 @@ class CompanionRuntime extends GetxService {
     }
     if (identical(_offerAcknowledged, acknowledged)) _offerAcknowledged = null;
     if (!_bindingCurrent(binding)) return;
+    await _journal(sent ? 'OFFER_ACKNOWLEDGED' : 'OFFER_NOT_ACKNOWLEDGED',
+      {'reason': sent ? 'awaiting_device_choice' : 'control_ack_missing', 'taskId': offer.id});
     await _state(sent ? 'READY_AWAITING_DEVICE_CHOICE' : 'READY_OPEN_APP', busy: false, checkFinished: sent || !_supportsControl);
   }
 
@@ -580,6 +600,7 @@ class CompanionRuntime extends GetxService {
         'status': value, 'connected': _sameLink(), 'busy': busy,
         'recoveryBusy': _recovery?.current == true, 'recoveryId': _recovery?.id,
         'stage': stage ?? _recovery?.stage, 'elapsedMs': _recovery?.elapsedMs,
+        'deviceKey': sha256.convert(utf8.encode(address.toLowerCase())).toString(),
         'deviceToken': sha256.convert(utf8.encode(address)).toString(), 'checkFinished': checkFinished}) == true;
     } catch (_) { accepted = false; }
     if (_runtime != runtime) return false;

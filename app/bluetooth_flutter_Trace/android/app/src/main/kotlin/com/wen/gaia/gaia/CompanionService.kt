@@ -370,15 +370,25 @@ class CompanionService : Service() {
     }
 
     override fun onDestroy() {
+        CompanionDiagnostics.record(this, "SERVICE_DESTROYED", runtimeId)
         stopCompanion("SERVICE_STOPPED")
         if (active === this) active = null
         super.onDestroy()
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        CompanionDiagnostics.record(this, "TASK_REMOVED", runtimeId,
+            details = mapOf("termination" to "task_removed_not_process_death"))
+        super.onTaskRemoved(rootIntent)
     }
 }
 
 class CompanionJobService : JobService() {
     override fun onStartJob(params: JobParameters): Boolean {
-        if (!CompanionBridge.enabled(this)) return false
+        if (!CompanionBridge.enabled(this)) {
+            CompanionDiagnostics.record(this, "CHECK_NOT_EXECUTED", details = mapOf("reason" to "disabled"))
+            return false
+        }
         if (params.jobId == CompanionBridge.STARTUP_JOB) {
             CompanionBridge.recoverStartup(this, params.extras.getLong(CompanionBridge.STARTUP_DEADLINE, 0))
             return false
@@ -387,7 +397,11 @@ class CompanionJobService : JobService() {
         val check = params.jobId == CompanionBridge.CHECK_JOB
         if (check) prefs.edit().putBoolean("checkPending", true).apply()
         if (!check && !prefs.getBoolean("checkPending", false) && CompanionService.active?.recoveryHealthy() == true) return false
-        if (System.currentTimeMillis() < prefs.getLong("nextAttempt", 0)) return false
+        if (System.currentTimeMillis() < prefs.getLong("nextAttempt", 0)) {
+            CompanionDiagnostics.record(this, "CHECK_NOT_EXECUTED", details = mapOf("reason" to "recovery_backoff",
+                "nextCheckAt" to prefs.getLong("nextAttempt", 0)))
+            return false
+        }
         // The short system job hands off to an acknowledged connectedDevice owner.
         // A start request is deliberately not recorded as a completed firmware check.
         CompanionService.start(this, if (check) "periodic" else "recovery")
