@@ -230,6 +230,7 @@ void main() {
       ..httpClientAdapter =
           downloadAdapter ?? _DownloadOkAdapter(assetBytes());
     final service = OtaService(
+      hardwareUidReader: (_) async => '1234567890abcdef12345678',
       bluetoothService: ble,
       dio: latest,
       downloadDio: download,
@@ -5317,8 +5318,9 @@ class _UpgradeFakeBle extends BluetoothService {
     if ((data.isNotEmpty && data.first == 33 && _pending.isEmpty) || _accountText) {
       _accountText = !data.contains(10);
       for (final request in _accountDecoder.add(data, idleTextAllowed: true)) {
-        if (request.kind == 'IDENTIFY') _notifyController.add(CompanionMessage('UID', request.session, 0,
-          ['1234567890abcdef12345678']).encode());
+        if (request.kind == 'IDENTIFY') {
+          _notifyController.add(CompanionMessage('UID', request.session, 0, ['1234567890abcdef12345678']).encode());
+        }
       }
       return;
     }

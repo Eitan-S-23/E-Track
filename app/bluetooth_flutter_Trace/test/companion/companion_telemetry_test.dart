@@ -407,7 +407,7 @@ class _Harness {
     if (id != 'runtime-1') snapshot['runtimeId'] = id;
     expect(await callback('wake', {'runtimeId': id, 'revision': 'revision-1',
       'address': _address, 'reason': 'recovery'}), isTrue);
-    await until(() => runtime.status.value == 'CONNECTED' && !ota.isUpgrading);
+    await until(() => runtime.status.value == 'LOGIN_REQUIRED' && !ota.isUpgrading);
   }
 
   void emit(List<fbp.ScanResult> results) { adapter.results.add(results); }

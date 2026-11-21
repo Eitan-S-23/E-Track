@@ -108,6 +108,7 @@ void main() {
     // 改为可增长列表；调用方不传时同样可安全收集。
     final log = notifyLog ?? <String>[];
     final service = OtaService(
+      hardwareUidReader: (_) async => '1234567890abcdef12345678',
       bluetoothService: ble,
       dio: latest,
       downloadDio: download,
@@ -607,8 +608,9 @@ class _FakeBle extends BluetoothService {
     admission?.dispatch();
     if (data.isNotEmpty && data.first == 33) {
       final request = CompanionMessage.parse(ascii.decode(data));
-      if (request?.kind == 'IDENTIFY') _notifyController.add(CompanionMessage('UID', request!.session, 0,
-        ['1234567890abcdef12345678']).encode());
+      if (request?.kind == 'IDENTIFY') {
+        _notifyController.add(CompanionMessage('UID', request!.session, 0, ['1234567890abcdef12345678']).encode());
+      }
       return;
     }
     // 只应答 GET_INFO：INFO 帧 session=0、seq 回显请求 seq（§5.6）。

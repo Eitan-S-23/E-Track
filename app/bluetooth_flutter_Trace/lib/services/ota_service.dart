@@ -99,6 +99,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   /// 单轮探测 20s 上限 + 3s 轮询间隔，测试注入短值实测时序行为。
   OtaService({
     AccountService? accountService,
+    Future<String?> Function(String address)? hardwareUidReader,
     BluetoothService? bluetoothService,
     Dio? dio,
     Dio? downloadDio,
@@ -118,6 +119,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     OtaP35Recorder? p35Recorder,
     bool Function()? p35PlatformCheck,
   })  : _accountService = accountService,
+        _hardwareUidReader = hardwareUidReader,
         _senderWindowSegments = RangeError.checkValueInInterval(
           senderWindowSegments ?? defaultPipelineWindowSegments,
           1,
@@ -166,6 +168,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
 
   final BluetoothService? _bluetoothService;
   final AccountService? _accountService;
+  final Future<String?> Function(String address)? _hardwareUidReader;
   AccountService get accounts => _accountService ?? AccountService.to;
   AccountCheck? _accountCheck;
   String? _hardwareUid, _uidAddress;
@@ -183,13 +186,20 @@ class OtaService extends GetxController with WidgetsBindingObserver {
 
   void acceptHardwareUid(String address, String uid) {
     if (!hasCurrentDeviceIdentity(address) || !RegExp(r'^[0-9a-f]{24}$').hasMatch(uid) ||
-        uid == '000000000000000000000000' || uid == 'ffffffffffffffffffffffff') return;
+        uid == '000000000000000000000000' || uid == 'ffffffffffffffffffffffff') { return; }
     _hardwareUid = uid; _uidAddress = address; _uidGeneration = _ble.otaLinkGeneration(address);
   }
 
   Future<String?> readHardwareUid({String? companionRuntimeId}) async {
     if (hardwareUid != null) return hardwareUid;
     final address = _deviceInfoAddress;
+    final reader = _hardwareUidReader;
+    if (address != null && reader != null && hasCurrentDeviceIdentity(address)) {
+      final link = _ble.otaLinkGeneration(address);
+      final uid = await reader(address);
+      if (uid != null && link == _ble.otaLinkGeneration(address)) acceptHardwareUid(address, uid);
+      return hardwareUid;
+    }
     if (address == null || isUpgrading || !hasCurrentDeviceIdentity(address)) return null;
     final link = _ble.otaLinkGeneration(address);
     final chars = await _ble.findExactOtaCharacteristicsByAddress(address);
@@ -975,25 +985,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   /// 代次贯穿 latest 重试与发布，取消后不发布旧状态。
   Future<FirmwareLatestInfo?> checkFirmwareUpdate({String? channel,
       String? companionRuntimeId, bool automatic = false, bool refreshPrepared = false}) async {
-    if (_isUpgrading.value) return null;
     lastCloudError = null;
-    _lastCheckWasNoUpdate = false;
-    AccountCheck? nextCheck;
-    try {
-      await accounts.requireLogin();
-      if (await readHardwareUid(companionRuntimeId: companionRuntimeId) == null) {
-        throw const AccountException('DEVICE_UID_UNAVAILABLE', '当前固件无法读取设备唯一识别码，请先升级支持账号绑定的固件');
-      }
-      if (refreshPrepared) {
-        if (_accountCheck == null || _accountCheck!.accountId != accounts.accountId) {
-          throw const AccountException('LOGIN_REQUIRED', '账号已变化，请重新检查更新');
-        }
-      } else {
-        nextCheck = await accounts.newCheck(automatic: automatic);
-      }
-    } on AccountException catch (e) {
-      lastCloudError = e.code; _upgradeStatus.value = e.message; return null;
-    }
     _lastCheckWasNoUpdate = false;
     if (_isUpgrading.value) {
       _notify('提示', '升级流程进行中，请先取消或等待完成');
@@ -1016,6 +1008,25 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       return null;
     }
     return _runExclusive((generation) async {
+      AccountCheck? nextCheck;
+      try {
+        await accounts.requireLogin();
+        if (generation != _cancelGeneration) return null;
+        // Use the current control/binding UID, never renegotiate GATT from an HTTP task.
+        if (await readHardwareUid(companionRuntimeId: companionRuntimeId) == null) {
+          throw const AccountException('DEVICE_NOT_BOUND', '请先在账号页读取并绑定当前码表');
+        }
+        if (generation != _cancelGeneration) return null;
+        if (refreshPrepared) {
+          if (_accountCheck == null || _accountCheck!.accountId != accounts.accountId) {
+            throw const AccountException('LOGIN_REQUIRED', '账号已变化，请重新检查更新');
+          }
+        } else {
+          nextCheck = await accounts.newCheck(automatic: automatic);
+        }
+      } on AccountException catch (e) {
+        lastCloudError = e.code; _upgradeStatus.value = e.message; return null;
+      }
       final int appVersionCode;
       try {
         appVersionCode =
@@ -1178,14 +1189,6 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   /// 下载 URL 过期/资产冲突/本地 partial 损坏会自动重新 latest 一次并
   /// 重下（仅一次，防拉锯）。
   Future<bool> downloadFirmware({String? companionRuntimeId}) async {
-    try {
-      await accounts.requireLogin();
-      if (_accountCheck?.accountId != accounts.accountId) return false;
-      if (!_cloudDownloadProtected) {
-        accounts.protect(_downloadDio, deviceUid: () => hardwareUid);
-        _cloudDownloadProtected = true;
-      }
-    } on AccountException catch (e) { lastCloudError = e.code; _upgradeStatus.value = e.message; return false; }
     if (_isUpgrading.value) {
       _notify('提示', '升级流程进行中，请先取消或等待完成');
       return false;
@@ -1208,6 +1211,14 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     }
     // owner 锁在首个 await 前取得（RC3-04）：同步置位无竞态窗口。
     return await _runExclusive((generation) async {
+      try {
+        await accounts.requireLogin();
+        if (generation != _cancelGeneration || _accountCheck?.accountId != accounts.accountId) return false;
+        if (!_cloudDownloadProtected) {
+          accounts.protect(_downloadDio, deviceUid: () => hardwareUid);
+          _cloudDownloadProtected = true;
+        }
+      } on AccountException catch (e) { lastCloudError = e.code; _upgradeStatus.value = e.message; return false; }
       _phase.value = OtaPhase.downloading;
       await _beginBackgroundTask(_deviceInfoAddress!, asset, generation, companionRuntimeId: companionRuntimeId);
       if (companionRuntimeId != null && !backgroundAcquired) {

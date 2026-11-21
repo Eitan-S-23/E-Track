@@ -59,7 +59,8 @@ class ProfileTabPage extends StatelessWidget {
                   runSpacing: 16,
                   children: [
                     const _ProfileTitle(),
-                    _ProfileAvatar(onTap: () => Get.to<void>(() => const AccountPage())),
+                    Tooltip(message: '账号与绑定设备',
+                      child: _ProfileAvatar(onTap: () => Get.to<void>(() => const AccountPage()))),
                   ],
                 ),
               ).animate().fadeIn(duration: 420.ms).slideY(begin: 0.14, end: 0),
@@ -91,8 +92,6 @@ class ProfileTabPage extends StatelessWidget {
 
   List<_ProfileAction> _buildActions() {
     return [
-      _ProfileAction(label: '账号与绑定设备', icon: Icons.person_outline,
-        onTap: () => Get.to<void>(() => const AccountPage())),
       _ProfileAction(
         label: '数据统计',
         icon: Icons.bar_chart,
@@ -267,43 +266,6 @@ class ProfileTabPage extends StatelessWidget {
     );
   }
 
-  void _showUserInfoDialog() {
-    _showTraceDialog(
-      TraceDialog(
-        title: '用户信息',
-        icon: Icons.person_outline,
-        color: TraceColors.cyan,
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildUserInfoRow('身份', '智能设备用户'),
-            const SizedBox(height: 10),
-            FutureBuilder<String>(
-              future: _appVersionLabelFuture,
-              builder: (context, snapshot) {
-                return _buildUserInfoRow(
-                  '应用',
-                  snapshot.data ?? _appName,
-                );
-              },
-            ),
-            const SizedBox(height: 10),
-            _buildUserInfoRow('数据', '设备与骑行记录保存在本机'),
-          ],
-        ),
-        actions: const [
-          TraceDialogAction(
-            label: '确定',
-            isPrimary: true,
-            color: TraceColors.cyan,
-            onPressed: TraceDialog.close,
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showDataStatistics() async {
     try {
       final dbService = DatabaseService();
@@ -346,33 +308,6 @@ class ProfileTabPage extends StatelessWidget {
           style: const TextStyle(
             fontWeight: FontWeight.w900,
             color: TraceColors.cyan,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildUserInfoRow(String label, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 52,
-          child: Text(
-            label,
-            style: TextStyle(
-              color: TraceColors.text.withValues(alpha: 0.74),
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(
-              color: TraceColors.cyanSoft,
-              fontWeight: FontWeight.w900,
-            ),
           ),
         ),
       ],

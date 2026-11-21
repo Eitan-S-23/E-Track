@@ -5,7 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class _Http extends HttpClientAdapter {
+class _Http implements HttpClientAdapter {
   final requests = <RequestOptions>[];
   int status = 200;
   Map<String, dynamic> response = {};

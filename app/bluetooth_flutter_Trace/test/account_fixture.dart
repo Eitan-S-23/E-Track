@@ -7,8 +7,6 @@ class TestAccountService extends AccountService {
   bool signedIn;
   int authorizations = 0;
   @override
-  void onInit() {}
-  @override
   Future<void> initialize() async {}
   @override
   String? get accountId => signedIn ? 'test-account' : null;

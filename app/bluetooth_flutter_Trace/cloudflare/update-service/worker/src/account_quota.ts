@@ -40,6 +40,7 @@ function identity(value: Record<string, unknown>): string {
 
 export async function accountCheck(request: Request, db: D1Database, account: string,
   limits: AccountLimits, next: () => Promise<Response>, now = Date.now()): Promise<Response> {
+  const started = performance.now();
   const checkId = request.headers.get('X-Update-Check-Id') ?? '';
   const kind = request.headers.get('X-Update-Check-Kind');
   if (!/^[a-zA-Z0-9_-]{16,80}$/.test(checkId) || (kind !== 'automatic' && kind !== 'manual')) {
@@ -122,14 +123,16 @@ export async function accountCheck(request: Request, db: D1Database, account: st
     const body = response.ok ? await response.clone().text() : null;
     const parsed = body ? JSON.parse(body) as Record<string, unknown> : null;
     const counted = response.ok && parsed !== null &&
-      (!parsed.errorCode || parsed.errorCode === 'NO_UPDATE');
+      ((parsed.updateAvailable === true && !parsed.errorCode) ||
+        (parsed.updateAvailable === false && parsed.errorCode === 'NO_UPDATE'));
+    const completedAt = now + Math.max(0, performance.now() - started);
     const completed = await db.prepare(`UPDATE account_update_checks SET state=?,response_status=?,response_json=?
       WHERE account_id=? AND check_id=? AND state='pending' AND lease_token=? AND lease_until>?
       RETURNING check_id`)
       .bind(counted ? 'complete' : 'failed', counted ? response.status : null, counted ? body : null,
-        account, checkId, leaseToken, now).all();
+        account, checkId, leaseToken, completedAt).all();
     if (!completed.results.length) throw new ApiError('CHECK_IN_PROGRESS', 'Check lease was replaced; retry the same check ID', 409);
-    return withBudget(response, db, account, limits, now);
+    return withBudget(response, db, account, limits, completedAt);
   } catch (error) {
     await db.prepare(`UPDATE account_update_checks SET state='failed' WHERE account_id=? AND check_id=?
       AND state='pending' AND lease_token=?`).bind(account, checkId, leaseToken).run();

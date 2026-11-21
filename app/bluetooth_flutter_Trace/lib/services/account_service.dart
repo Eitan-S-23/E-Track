@@ -62,7 +62,7 @@ class AccountService extends GetxService {
       final token = saved['token'];
       final profile = saved['account'];
       if (token is! String || !RegExp(r'^acct_[0-9a-f]{64}$').hasMatch(token) ||
-          profile is! Map || profile['id'] is! String) return;
+          profile is! Map || profile['id'] is! String) { return; }
       _token = token;
       account.value = Map<String, dynamic>.from(profile);
     } catch (_) { /* An unavailable OS vault leaves cloud features signed out, not Bluetooth. */ }

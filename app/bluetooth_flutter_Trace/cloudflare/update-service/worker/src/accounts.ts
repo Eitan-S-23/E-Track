@@ -94,10 +94,11 @@ async function consumeCode(env: Env, body: Record<string, unknown>, purpose: 're
   const code = field(body, 'code', /^[0-9]{6}$/);
   const id = field(body, 'verificationId', /^[a-zA-Z0-9-]{36}$/);
   const hash = await sha256Hex(id + ':' + code);
-  const found = await env.DB.prepare(`UPDATE account_email_codes SET used_at=? WHERE id=? AND app_id=?
-    AND email=? AND purpose=? AND code_hash=? AND used_at IS NULL AND expires_at>? RETURNING id`)
-    .bind(milliseconds(), id, env.APP_ID, email, purpose, hash, milliseconds()).all();
-  if (!found.results.length) throw new ApiError('EMAIL_VERIFICATION_REQUIRED', 'Verification code is invalid or expired', 400);
+  const found = await env.DB.prepare(`UPDATE account_email_codes SET attempts=attempts+1,
+    used_at=CASE WHEN code_hash=? THEN ? ELSE used_at END WHERE id=? AND app_id=?
+    AND email=? AND purpose=? AND attempts<5 AND used_at IS NULL AND expires_at>? RETURNING used_at`)
+    .bind(hash, milliseconds(), id, env.APP_ID, email, purpose, milliseconds()).first<{ used_at: number | null }>();
+  if (!found?.used_at) throw new ApiError('EMAIL_VERIFICATION_REQUIRED', 'Verification code is invalid or expired', 400);
 }
 
 async function sendCode(request: Request, env: WorkerEnv, body: Record<string, unknown>): Promise<Response> {
@@ -279,8 +280,11 @@ export async function requireBoundDevice(request: Request, env: Env, account: Ac
 }
 
 export async function accountCloudAccess(request: Request, env: WorkerEnv, next: () => Promise<Response>): Promise<Response> {
+  const url = new URL(request.url), path = url.pathname;
+  // Access-authorized recovery is a distinct signed capability, not customer OTA.
+  // The download handler still verifies its signature, expiry, purpose and asset kind.
+  if (path === '/api/public/firmware/download' && url.searchParams.get('purpose') === 'admin-recovery') return next();
   const account = await requireAccount(request, env);
-  const path = new URL(request.url).pathname;
   if (path.startsWith('/api/public/firmware/')) await requireBoundDevice(request, env, account);
   if (path === '/api/public/latest' || path === '/api/public/firmware/latest') {
     const rate = await env.RATE_LIMITER.getByName('account-check:' + account.id).check('check', 12, 60);

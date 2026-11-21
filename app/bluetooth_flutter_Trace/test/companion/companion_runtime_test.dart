@@ -271,20 +271,14 @@ void main() {
     expect(ota.maxConcurrent, 1);
   });
 
-  test('offer follows verified download; metered policy defers the bytes', () async {
+  test('mobile data downloads immediately and offers only verified bytes', () async {
     ota.latest = _latest();
     settings['unmetered'] = false;
-    await start();
-    await until(() => runtime.status.value == 'WAIT_UNMETERED_NETWORK');
-    expect(ota.downloads, 0);
-    expect(ota.offers, isEmpty);
-    settings['unmetered'] = true;
     ota.downloadGate = Completer<void>();
-    final check = runtime.manualCheck(_address);
+    await start();
     await until(() => ota.downloads == 1);
     expect(ota.offers, isEmpty);
     ota.downloadGate!.complete();
-    await check;
     await until(() => runtime.status.value == 'READY_AWAITING_DEVICE_CHOICE');
     expect(ota.offers, hasLength(1));
     expect(preferences.getString('companion_ready_$_address'), ota.latest!.asset!.sha256);
@@ -547,6 +541,7 @@ class _Ota extends OtaService {
   FirmwareLatestInfo? latest;
   OtaUpgradeConsent? lastConsent;
   String? verified, owner;
+  @override
   String identityAddress = _address;
   bool noUpdate = true, foreignBusy = false, _busy = false, identityAvailable = false;
   bool failIdentity = false, rebootOnUpgrade = false;

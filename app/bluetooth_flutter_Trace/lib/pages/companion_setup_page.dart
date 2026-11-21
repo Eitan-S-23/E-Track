@@ -97,7 +97,7 @@ class _CompanionSetupPageState extends State<CompanionSetupPage> with WidgetsBin
     }); }
   }
 
-  Future<void> _configure({bool? enabled, int? hours, bool? wifi}) async {
+  Future<void> _configure({bool? enabled, int? hours}) async {
     await _platform.configure(enabled: enabled ?? _snapshot['enabled'] == true,
       intervalHours: hours ?? (_snapshot['intervalHours'] as int? ?? 12),
       wifiOnly: false);
