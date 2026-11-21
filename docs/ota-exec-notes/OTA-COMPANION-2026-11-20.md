@@ -40,6 +40,49 @@ owner control. Versions remain unreserved until draft/tag/source checks pass.
 Self-tests, source delivery, ingestion, installation and user acceptance remain
 separate. Latest feedback/research above is not a completed implementation claim.
 
+### Follow-Up Development Checkpoint
+
+Local commits `46d28e88` and `b239e70a` are pushed only to
+`dev/flutter/ota-followup-20261122`; remote main remains `fa52d917`.
+Host tests-02: 75 passing tests, including actual LVGL blocker/focus/360-degree
+milestone coverage. Font coverage failed first (new missing glyphs), then six
+needed characters were generated with the existing font tool. Build-01 exposed
+the missing Power_GetInfo declaration; build-02 includes the correct shared HAL
+header and passes GCC App/Boot plus simulator, 396 incremental warnings, 0 errors.
+Retained outputs: `.cache/ota-followup-20261122/`, actual visuals `images-01/`.
+
+First App CI `44936589249` analyzed cleanly but failed 22 tests: 15 sensor fixtures
+still assumed the old check interval, two real scroll-activity failures, and five
+page cases exposed ListTile's missing Material surface. Fixtures now explicitly
+seed the new recent automatic-check budget without weakening telemetry assertions;
+scroll chaining moves only residual distance through the parent's public jumpTo;
+history owns a transparent Material surface. `44938012236` passes full Ubuntu and
+Windows checks on `b239e70a`; native/debug build `44938125700` is still running.
+No debug APK is installed and this is not independent acceptance.
+
+Draft/tag preflight keyring-read-01 covers all E-Track releases and all 127 Trace
+releases, including drafts. 3.3.47 and 1.0.89 are unoccupied; new local version
+inputs are MCU 3.3.47 and App 1.0.89+115, not yet built/ingested on main.
+
+Passive device/preinstall-01 confirms running 3.3.46: full 634380-byte image SHA
+7fe4b594aaa257d5249cc9d222dc2c6256ea20772cf2a9f47f6b7e1b6986e927,
+unchanged Boot SHA 01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527,
+advancing health, confirmed runtime, no recorder/SD/debugger activity or faults.
+Backup slot is 30345 / 634380 bytes / CRC 3909915030. Candidate is 30346; staging
+matches the 30346 full ETU (303729 bytes, SHA prefix 96fef3368bfacd93), corroborating
+the owner's full-transfer report without replay. All regions are backed up.
+No halt/reset/RAM/EEPROM/Flash write occurred and the observer/owner lock closed.
+Direct installation will bind 30346 -> 30347 and the complete inactive BCB record,
+preserving old active BCB, Boot, configuration and all QSPI regions. Two later
+version-only candidates will be 30348 then 30349 if their live reservations pass.
+
+Native/debug development run `44938125700` has now completed successfully on both
+hosts, same `b239e70a` product source. Checks-only run counts were Linux 988 pass /
+16 skip and Windows 936 pass / 68 skip, each plus 8 candidate checks; Flutter
+3.47.9 / Dart 3.13.7. Exact native counts and artifact hashes are being archived
+from the successful original run, not rebuilt. Original failed runs remain.
+Preparing the bounded main versioned delivery; no manual channel/delta action.
+
 ## Scope
 
 User-reported baseline: Android 1.0.85, MCU 3.3.35, target 3.3.36.
