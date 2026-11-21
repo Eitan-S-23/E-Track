@@ -24,7 +24,9 @@ class _ChainedPosition extends ScrollPositionWithSingleContext {
     final remainder = delta - used;
     if (remainder != 0 && outer.hasClients) {
       final parent = outer.position;
-      if (parent is ScrollPositionWithSingleContext) parent.applyUserOffset(remainder);
+      // The parent did not win the gesture arena and has no DragScrollActivity.
+      // Move only the unused distance; calling its applyUserOffset would assert.
+      parent.jumpTo((parent.pixels - remainder).clamp(parent.minScrollExtent, parent.maxScrollExtent));
     }
   }
 
@@ -87,7 +89,7 @@ class _UpgradeHistoryListState extends State<UpgradeHistoryList> {
     final rowHeight = math.max(80.0, MediaQuery.textScalerOf(context).scale(64));
     final height = math.min(widget.records.length * rowHeight,
         math.min(rowHeight * 3.5, MediaQuery.sizeOf(context).height * .45));
-    return SizedBox(height: height, child: ListView.builder(
+    return Material(type: MaterialType.transparency, child: SizedBox(height: height, child: ListView.builder(
       key: const ValueKey('upgrade-history-window'),
       controller: controller, primary: false, padding: EdgeInsets.zero,
       physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
@@ -105,6 +107,6 @@ class _UpgradeHistoryListState extends State<UpgradeHistoryList> {
           onTap: () => details(row),
         );
       },
-    ));
+    )));
   }
 }

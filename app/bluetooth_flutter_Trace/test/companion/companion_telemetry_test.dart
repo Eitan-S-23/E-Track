@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:ble_monitor/companion/companion_platform.dart';
@@ -31,8 +32,15 @@ void main() {
   void scenario(String name, Future<void> Function(_Harness) body, {bool history = false}) {
     testWidgets('T02 $name', (tester) async {
       Get.testMode = true;
+      final now = DateTime.now();
       SharedPreferences.setMockInitialValues({
         'companion_attempt_$_address': DateTime.now().millisecondsSinceEpoch,
+        // These sensor scenarios start after a recent automatic firmware check.
+        // The reconnect policy now shares a separate persistent one-hour budget.
+        'companion_auto_check_budget_v1': jsonEncode({
+          'day': now.year * 10000 + now.month * 100 + now.day,
+          'last': now.millisecondsSinceEpoch, 'count': 1,
+        }),
       });
       final harness = _Harness(tester, history: history);
       try {

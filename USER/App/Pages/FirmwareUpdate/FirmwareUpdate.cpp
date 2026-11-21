@@ -1,6 +1,7 @@
 #include "FirmwareUpdate.h"
 #include "Utils/lv_ext/lv_file_browser_label.h"
 #include "Common/HAL/CompanionUpdate.h"
+#include "Common/HAL/HAL.h"
 #include "Common/DataProc/DataProc.h"
 
 #include <stdio.h>
