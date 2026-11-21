@@ -1904,3 +1904,55 @@ any failure and reconcile before only the missing step, never repeat a successfu
 Flash write for logs. Keep one owner and finite deadlines, project-local outputs,
 and the exact existing SU SEGGER native-history exception. No mass erase, Boot
 or QSPI programming, user-data clearing, forced recording stop or extra agent.
+
+#### Corrected UI Installed
+
+Source `4d8c1bb1112a8195add5c2ada30de30cb53d4281` is delivered on main. Formal
+firmware CI `44910534689` passes, App is skipped; 641 warning lines, zero error
+lines. Automatic registration is ready/unpublished, two assets, release ID
+`fw_b9812370f4789d459f26fd2e9e0797c959896ff11e0a19d681287a87f0a8f058`.
+Raw App is 634380 bytes, SHA-256
+`d44ef10d14af602e1d624f906e002d351483d31301273ddc06a003e050eb4833`.
+Full ETU SHA-256 is `c73f39c4ee842b125f86932dacc2c9090be3d1680a8726ef2de14799dc1073b6`;
+recovery SHA-256 is `4a1f1bdc8f60f07ad2576f6dc7f2df1f7f2bf331df7872899dfc1af576858347`.
+Original receipt/logs are `keyring-artifacts-06` / `keyring-logs-13` under the
+existing task evidence root. No extra backend download, manual publication or App rebuild.
+
+`device-44/preinstall-01` freshly verified original 3.3.41, healthy runtime and
+stored slots without halt/reset/data writes. `prepare-02` reconstructed only the
+exact CI header and matched the raw/recovery hashes; `repair-host-01` passed 115
+existing complete-record/wire assertions. `install-01` completed successfully at
+2026-11-21 14:42:11 UTC. Full App and preserved Boot/QSPI readbacks match; inactive
+BCB B is sequence 1067, currentVersion 30344, CONFIRMED, bootTry/copyPhase/resumeBlock
+zero. Old BCB A and both configuration quarters are byte-identical. Current-map
+RTT says `OTA: BCB already CONFIRMED vcode=30344`; runtime health advances
+1240 -> 36061, CFSR/HFSR are zero, watchdog freeze restored, CPU not held.
+
+Measured Flash programming plus full App/Boot readback: **74.3 seconds**. The much
+longer complete procedure comes from host-driven, individual J-Link GPIO accesses
+for I2C record/configuration reads, eight 8-byte record writes and verification.
+It is not EEPROM's intrinsic write time and must not be described as a normal
+34-minute EEPROM requirement. This known-slow implementation was not changed
+while running. Future acceleration requires a separately qualified supported
+transaction route; do not waive state consistency or improvise a writer mid-run.
+
+The terminal wait handle disappeared and its parent exited while the isolated SU
+native installer continued. WMI identified the same native command/PID 24536;
+no second installer was launched and no process was stopped. `owner-reconcile-01`
+retains a host CSV/null-field parsing failure; private-scoped `owner-reconcile-02`
+rebound only this reservation to the live native process. `finish-01` later
+verified that process exited, checked original bytes/results offline, and removed
+only its exact reservation. No second Flash write or successful-OTA replay.
+
+The preinstall watched paths were unchanged. Installation audit records the
+authorized SU SEGGER history/config update and a changed PowerShell startup
+sampling file at the previously documented path. No reviewed launcher invokes
+PowerShell; process attribution of that concurrent cache change remains UNKNOWN,
+not an inferred authorization or cleanup target. All controllable outputs and
+owned reservation updates/removal stayed project-local; no external cleanup.
+
+Owner may inspect the repaired MCU check page now; visual feedback remains
+pending, not independent acceptance or an OTA PASS. Do not automatically check,
+start OTA, publish channels or create deltas. The current baseline is 3.3.44;
+the old 30341 -> 30342 -> 30343 matrix was not executed and cannot be reused as
+forward updates. Existing candidates and original failures remain intact.
