@@ -2,6 +2,54 @@
 
 ## Developer Workflow
 
+### One-Command Version-Only Candidates
+
+From the primary checkout on Windows, with the existing Git, Python and
+authenticated GitHub CLI installed:
+
+```bat
+release_candidate.bat mcu
+release_candidate.bat app
+```
+
+Each command increments only the selected component, commits only its version
+file and pushes main, then waits for the exact formal CI and unpublished-candidate
+receipt. MCU updates versionName and release notes; App updates the name and code
+in the same pubspec version line. It never builds locally, installs an SDK,
+publishes Stable/Beta, generates/enables a delta, touches a device or clears data.
+It is a candidate preparation command, not an automated physical OTA test.
+
+Use `release_candidate.bat mcu --dry-run` (or `app --dry-run`) to check the next
+version without changing either version file or pushing. Existing main must be
+clean and match fresh remote main; unrelated/untracked files are never staged.
+Occupied Release drafts/tags, divergence and unresolved prior deliveries stop
+the command rather than overwriting assets or silently trying another version.
+The firmware registration job retains its existing backend immutability checks.
+
+Receipts and sanitized logs are under `.cache/candidate-release/`. If observation
+or the network is interrupted after a commit/push, use the printed receipt:
+
+```bat
+release_candidate.bat --resume .cache\candidate-release\RUN\result.json
+```
+
+Resume only observes the existing source and never bumps, commits, pushes,
+dispatches or reruns a build. A failed/absent push requires explicit Git-state
+reconciliation; do not invoke a new release to repair it. A failed formal build
+or partial upload requires inspecting that original run and retained assets.
+The default finite wait is 120 minutes, adjustable with `--timeout-minutes`.
+An existing `active.lock` is not removed automatically: reconcile its owner first.
+Credentials are reused in memory from GH_TOKEN/GITHUB_TOKEN or standard
+`gh auth token`; no token/login/credential configuration is created or printed.
+All controllable child caches/temp/logs and Git outputs stay in the project.
+
+For a full OTA test, the owner publishes the new candidate with no enabled delta
+matching the device's actual current version, and checks that the App selects
+the full package before starting. The script does not assume the currently
+installed version or turn a delivered candidate into an OTA PASS.
+
+### Existing Source And CI Route
+
 `main` in `Eitan-S-23/E-Track` is the authoritative App/MCU source and automatic
 candidate branch. Develop there, or in a task branch based on current
 main and integrate the bounded changes back before delivery. Do not move MCU

@@ -2025,3 +2025,39 @@ An initial inline-shell quoting error made no file output; the existing guarded
 route was used instead. A board-only mixed-EOL diff warning was fixed by
 normalizing only this turn's rows, preserving all unrelated historical bytes.
 The audit is path/environment review, not machine-wide process IO tracing.
+
+#### Full Upgrade Candidate And One-Command Entry
+
+Owner requests another MCU candidate for a full OTA test and a reusable one-command
+version-only App/MCU delivery entry. Root owns this bounded follow-up from current
+main `f2b44a2a0317763132028fc28573e842cebd7755`. Target the next unoccupied MCU
+version, expected 3.3.46; do not infer that the owner has already installed 3.3.45.
+Stable/Beta and delta operations remain owner-only. For this test, the owner
+should publish the new target without an enabled matching delta, and verify
+that the selected package kind is full before upgrading.
+
+Reuse decision: the existing original-admin-candidate workflow already performs
+the formal build, signing, byte verification, upload and unpublished registration.
+The tracked original_candidate.py is an APK verifier, not a version/push entry;
+the current task's qualified Git/CI wrappers are private, source-bound steps.
+Add only a thin tracked CLI and Windows batch launcher using standard Git/gh and
+the existing output guard. No replacement builder, uploader, backend client or
+credential provisioning. The entry changes only the selected version file,
+rejects dirty/diverged main and occupied drafts/tags, binds its push/CI receipts,
+and offers read-only continuation after interruption. It does not run a device
+test, publish a channel, generate a delta or claim OTA success.
+
+Implementation is LOCAL_PENDING: `release_candidate.bat mcu|app` uses the tracked
+`Tools/ota/release_candidate.py`. It stages exactly one version file, checks the
+commit's parent/bytes, sends a normal non-force main push, and waits for the
+source-bound candidate workflow and its completed registration/signer receipt.
+`--dry-run` does not mutate source; `--resume <result.json>` only observes the
+original source. A pending source or active owner blocks a new release.
+
+`oneclick-tests-01` passes 21 offline entry tests and 90 existing candidate tests.
+The new offline suite is also in the candidate workflow's credential-free checks.
+No local Flutter/Gradle/firmware build or SDK installation is introduced. The
+only gap this thin entry fills is version editing and Git/CI orchestration;
+formal builds and backend ingestion are still the existing implementations.
+Next: deliver the tool/docs, then exercise it for the requested full-test MCU
+candidate without changing the App version or touching the installed device.

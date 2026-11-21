@@ -51,6 +51,7 @@ jobs:
           mkdir -p "$TMPDIR"
           node --test tests/ota/test_original_admin_candidate.mjs tests/ota/test_firmware_admin_candidate.mjs tests/ota/test_firmware_build_profile.mjs tests/ota/test_firmware_release.mjs
           python3 -I -S -B -X utf8 tests/ota/test_original_app_candidate.py
+          python3 -I -S -B -X utf8 tests/ota/test_release_candidate.py
       - name: Check the current MCU production methods and BLE V2 host contracts
         run: |
           set -euo pipefail
