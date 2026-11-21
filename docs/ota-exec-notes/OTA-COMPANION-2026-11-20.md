@@ -1342,3 +1342,261 @@ App remains 1.0.87/113 and MCU product behavior remains identical to 3.3.39.
 The receiver installation cell is still running and cannot yet be called a PASS.
 Preparing the forward candidate does not depend on prematurely claiming that
 installation, and does not require rebuilding the successful App.
+
+#### Commander Post-Programming Reconciliation
+
+`install-01` backed up both valid BCB records/configuration and derived the exact
+inactive A record from active B/sequence 1049/CONFIRMED/current 30338. Its one
+Commander write produced the complete correct 632508-byte 30339 image and
+unchanged full Boot. It then stopped before any EEPROM write: the post-program
+DHCSR was `0x01010009`, not a held core. The original Commander log explains the
+host assumption failure: `loadbin` performs an implicit reset/halt and runs its
+loader. The receipt's `resetRequested=false` means no explicit `r` was sent;
+it is not evidence of zero hardware resets. Its `held=true` is bookkeeping from
+the earlier rendezvous and is superseded by the actual DHCSR observation.
+
+`reconcile-01` freshly verifies the entire target/Boot again without writes.
+VTOR is zero, RTT is not initialized, SDIO2 count/status are zero and the
+target-App counters are not a valid running-App observation. These are loader/
+pre-App state, not evidence of a 3.3.39 product crash. No EEPROM payload was
+written by the failed cell, and its full backup/expected inactive record remain
+preserved. Do not repeat the already successful Flash write.
+
+The bounded continuation reuses that exact C draft and transport. It first
+rechecks complete App/Boot and idle SDIO, performs the ordinary bootstrap only
+if VTOR is still zero, then requires initialized advancing target runtime and
+unchanged QSPI before a new storage-idle rendezvous. It reads a fresh repeated
+BCB pair and all configuration, requires exact equality to the captured bytes,
+and completes only the same inactive-record transaction. Final reset/readback
+still requires verified confirmation. `confirm-host-01` checks the exact draft,
+source binding and no-programming-command entry; all 115 original C/EEPROM
+assertions are reused. The 2400-second continuation adopts only the stopped
+installation's ownership receipt and preserves it in the new output. No new
+Flash algorithm, repeated firmware programming, Boot/QSPI write, OTA, channel
+change or weakening of the confirmation gate is introduced.
+
+#### Installed State And Missing-Popup Diagnosis
+
+Installation continuation `confirm-01` succeeded at 2026-11-20T19:47:18Z:
+the already-written original 3.3.39 App was bootstrapped, then the original
+inactive-record transaction wrote and verified exactly eight EEPROM pages.
+Active B/sequence 1049/current 30338 became active A/sequence 1050/current 30339,
+CONFIRMED with zero bootTry/copyPhase/resumeBlock. Old active B, configuration,
+all four QSPI regions and full physical Boot were preserved. Original target
+readback, fresh matching confirmation and advancing runtime passed. There was
+no second App programming operation; `install-01` remains a preserved failure.
+
+Main `145843da78bcf6ce142f75480c450223864654db` delivered version-only forward
+target 3.3.40 through successful candidate run `44798898781`; App was correctly
+skipped. `keyring-inspect-04` observes external publication of Stable App 1.0.87
+(revision 63) and firmware 3.3.40 (revision 14), and 53 delta jobs. The public
+selection for exact installed 30339 is the verified 314-byte patch with SHA-256
+`482c8da4a808532071a8ad990423b7e31e302bd1b566a1bb29418aaf48634ab3`.
+The earlier unpublished-baseline failure in `keyring-inspect-03` is preserved.
+This agent did not publish either channel or generate/enable a delta.
+
+The owner reports correct installed versions but no global update popup. Fresh
+evidence is under `.cache/ota-companion-delivery-20261121/`:
+
+- `popup-phone-01` safely handed off only the authorized phone from the actual
+  LDPlayer ADB PID 18752 after process/port/creation identity and attached-device
+  checks. The emulator was not stopped. Private ADB 5048 then verified original
+  App 1.0.87/113, APK SHA-256
+  `86bc6ec3346ee9daaaefc5e5d5b66ca8ce1ce74d31fd7a4dabd2229ab1a19828`.
+- `popup-phone-02/phone/adb-00006.stdout` invokes Android's singular service dump,
+  unlike the first snapshot's ordinary service inventory. Its native original
+  diagnostics show engineLive/gattConnected/linkAcknowledged/runtimeAcknowledged
+  all true. An acknowledged offer reached READY_AWAITING_DEVICE_CHOICE, a LATER
+  choice reached DEFERRED, and later service recreation recovered and prepared
+  another acknowledged offer without opening the App during collection.
+- `popup-mcu-01` failed its host ABI assertion before any J-Link device command:
+  this GCC build uses a short enum, so Control is 720 bytes, not the assumed 724.
+  Original failure/symbol output remain intact. Its exact dead owner lock was
+  reconciled and released with a receipt before the corrected passive read.
+- `popup-mcu-02` full App readback matches installed original 3.3.39
+  `258ccb7969ea0200668dd6ad225eb86c2893fe74e3e4e31503527605e23667ec`;
+  full Boot remains `01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527`.
+  Confirmation and advancing runtime pass. Both control samples show target
+  30340, request 1, DEFERRED, hasOffer=false, prompt=false and the above selected
+  patch hash equal to shownSha. The global UI manager exists, but no modal or
+  queued opening exists. No halt, reset, RAM/Flash write or OTA was requested.
+
+The current no-popup state is consistent with existing same-package suppression,
+not an absent installed implementation or failed current BLE link. It does not
+establish whether the initial automatic popup appeared: CompanionRefresh marks
+an offer SHOWN when presented inside a manually opened update dialog as well,
+and its Back/Later path sends LATER. The phone persists SHOWN across recreation;
+the MCU additionally suppresses the same package even for a fresh prompt=1 offer.
+Before changing the documented no-continuous-repeat policy, ask whether the owner
+manually opened the MCU update dialog and returned, or the first unsolicited
+prompt never appeared. This observation does not close popup/background/progress
+physical acceptance. No product code, version, build, CI or publication changed
+in this diagnostic follow-up, and no successful OTA was repeated.
+
+Both private ADB collectors closed their owned server/port and verified the
+original key unchanged. The passive debugger closed and released its lock.
+Selected helpers, logs, readbacks, launcher COM generation and child-process
+home/cache/temp outputs are project-local. The native audit reports no changes
+to watched external SEGGER or PowerShell paths; no PowerShell was invoked and no
+external cleanup was performed. These operational-note/board/index updates are
+local pending changes, not a new delivered main revision.
+
+### UI, History And Launch Diagnostics Batch, 2026-11-21
+
+Owner authorization now covers the full implementation, main delivery, original
+App/GCC candidate builds, direct J-Link installation of 3.3.41, and preparation
+of 3.3.42/3.3.43 in the original backend. Do not perform an extra package-download
+verification or initiate a device OTA/manual update check. Retain ordinary build
+integrity checks and retrieve artifacts actually required for installation.
+First deliver the new App; after it is installed, publish 3.3.42 Stable with an
+exact 3.3.41-base delta. Keep 3.3.43 unpublished until the owner completes the
+first OTA, then publish it with a 3.3.42-base delta. Do not advance Stable past
+the first test target prematurely. Full Boot/user data and supported confirmation
+state are preserved during the direct receiver installation.
+
+Implementation starts from main `145843da` in exclusive worktree
+`.worktrees/ota-ui-20261121`, branch `dev/flutter/ota-ui-20261121`. Prior pending
+operational notes and other agents' disk-cleanup work remain untouched. The App
+history API is still a stub; launch diagnostics currently keep only 80 records
+and conflate wake trigger with actual UI visibility. Implement durable per-device
+OTA attempts/outcomes and a bounded searchable/exportable diagnostic journal.
+Record native process/service/UI lifecycle, explicit launch source, task/attempt
+identity and monotonic timing. Missing termination/start-source evidence stays
+unknown; do not infer foreground/background from `presence` alone or invent old
+history. Upgrades become successful only after target identity verification.
+
+Visual thesis: precise, calm cyan telemetry on the existing dark petrol display,
+with one strong firmware/progress focal point and readable native typography.
+Content: concise available-version decision, then durable transfer progress and
+honest apply/reboot phases. Motion: restrained dialog arrival, a small activity
+highlight independent of progress, and phase transitions without fake percentages.
+Use existing LVGL primitives and a small necessary generated asset rather than
+full-screen animation frames or a new graphics stack.
+
+Generate popup groups P01-P05 and process groups U01-U05 with keyframes; retain
+and deliver every design, including unselected ones, with explicit final choices.
+Two owner-provided image APIs may run concurrently. Their keys enter only through
+non-echoing stdin and child environments; public config contains environment
+references only. The unmodified installed image2 CLI is reused through a thin
+project-local config adapter because its CLI has no custom-config switch. Its
+global config/pool remains untouched, and all controllable outputs are under
+`.cache/ota-ui-20261121/` and `generated-images/ota-ui-20261121/`.
+`images-01` is a host metadata-path failure before credentials or requests;
+preserve it. `images-02` is the actual two-provider generation batch.
+
+#### Successor Implementation Scope
+
+The current owner handoff supersedes the wider publication/generation text above:
+only P01 (`popup/1/1.png`) and U01 (`process/1/1.png`) under
+`generated-images/ota-ui-20261121/` are selected. No further generation, backend
+login/API mutation, deployment, channel/delta operation, phone update, manual
+check, OTA, data clearing or additional agents by this session. Owner handles
+those manual backend/phone actions. Agent implements, self-tests, integrates and
+pushes bounded main changes, observes automatic candidate CI, then installs
+exact-source original GCC 3.3.41 through supported complete-state J-Link
+transactions preserving Boot/configuration/user data. 3.3.42 and 3.3.43 are
+immutable candidates; owner tests 30341 -> 30342 before 30342 -> 30343.
+
+Entry: main/remote `145843da78bcf6ce142f75480c450223864654db`; existing task
+worktree clean. Process/cwd inventory found no other task-worktree owner or
+active J-Link/ADB process. Three pending main-note edits were inspected and
+retained. No `.trellis` exists in either checkout. No setup/repair, old tests,
+OTA or installation replay. Git ownership uses per-command `safe.directory`,
+never global configuration. All controllable outputs stay in the project.
+
+Research: `OtaService.startOtaUpgrade` is the shared App/MCU path. Its existing
+targetVerified branch requires new-link version/full raw hash agreement. Persist
+attempts before transfer; preserve indeterminate post-transfer outcomes and
+reconcile only fresh matching identity. Replace the native 80-row preferences
+history with bounded segmented storage/query/export and explicit loss reporting.
+Record real Activity lifecycle independently of wake trigger. Keep creation-only
+Service bootstrap intact; instrumentation does not resolve unproved recurring
+connection timeouts. P01/U01 use LVGL primitives without shadows, fake progress
+or delayed small transfers. Existing safety/deduplication/consent remain intact.
+
+Self-tests: full dual-host development CI and applicable native tests; existing
+MCU/UI host tests and standard GCC/simulator entry. No local Flutter/Gradle build
+or external SDK install. Prepare observation/retrieval before owner testing.
+Implementation, CI, installation and independent acceptance remain distinct.
+
+#### Implementation And Self-Test Delivery
+
+The bounded product/test chain is `6c14b654`, `3c522b65`, `28cdb9fc`,
+`c562d2bc`. Main fast-forward integration is complete locally; `integrate-01`
+checks the three pre-existing main-note files byte-for-byte before/after.
+The exclusive development branch is remotely at `28cdb9fc`; `c562d2bc` changes
+only two MCU font references after real-LVGL inspection, not the tested App tree.
+Main now prepares App **1.0.88+114** and MCU **3.3.41**. Candidate packaging,
+automatic registration and direct installation are still pending at this entry.
+Release occupancy was checked by listing all 126 Trace releases (including
+drafts) and both E-Track releases, not a tag lookup. No 1.0.88 reservation exists;
+the preceding App is 1.0.87+113. Existing assets were not modified.
+
+Contracts implemented:
+- `OtaUpgradeHistory` serializes a per-device append journal before transfer;
+  one task ID binds origin, old/target identity, package kind, stage, monotonic
+  duration, retry count and outcome. END uncertainty/process interruption stays
+  awaitingVerification; successful reconciliation requires target version/full
+  hash/hardware and a fresh connection (or a fresh process), never cached INFO.
+  Corrupt/read/write failures are visible. No historical records are fabricated.
+- P01/U01 use native LVGL objects/arcs and existing subset fonts. Byte progress
+  and phase truth remain in the receiver. A constant-length activity arc is not
+  progress. Screenshot inspection found missing subset glyphs and a disabled
+  button overlapping the active view; both were corrected without animation
+  delays or safety-policy changes. The current-version field is read from the
+  validated MCU identity cache; zero is unknown rather than a build-time guess.
+- Native journal input is allowlisted, disk IO is serialized off the UI/radio
+  path, repeated events carry counts and the pending queue is bounded at 512.
+  Seven-day/20-MiB retention, cursor/time/device/task/level/search queries and ZIP
+  export include explicit pruning/drop/IO/malformed/process-death gaps. Detailed
+  mode adds queue/heap observations for at most 15 minutes/2000 events.
+- Native UI create/resume/pause/stop/destroy, service creation/destruction,
+  task removal and available process-exit reasons are separate observations.
+  `user_requested_or_force_stop` stays ambiguous; a missing callback is not a
+  fabricated force-stop. Missing close/boot evidence yields unknown timing.
+  `LINK_REUSED` explicitly means no reconnect. GATT, identity and acknowledged
+  control readiness are distinct. Existing creation-only bootstrap is unchanged.
+- Check schedule/execution, offer acknowledgement, MCU SHOWN and same-package
+  suppression are recorded. SHOWN origin remains unknown because the existing
+  protocol does not distinguish manual opening from an unsolicited popup.
+  No protocol expansion, dedup reset, schedule change or claimed BLE repair.
+
+Original self-test evidence is under `.cache/ota-ui-20261121/`:
+- `tests-01`: 44 tests execute successfully, with one additional suite setup
+  failure because its host stub lacked the new identity-cache field. This is
+  not a product pass for the entire invocation. `tests-02` fixes the stub and
+  passes all 27 safety tests. `tests-05` passes all 20 actual-LVGL modal tests,
+  including original negative controls, global pages, safety and real progress.
+- `build-01` preserves the standard batch's Windows dependency-path failure.
+  Project-local short builds `build-02`/`03`/`04` pass GCC App+Boot and simulator.
+  Full build has 743 warnings/zero errors; incremental warning counts and all
+  timestamps/hashes are recorded in each `artifacts.json`. Existing wchar/RWX
+  and simulator conversion warnings are not hidden or relabeled as fixed.
+- First development `44882186277` is red: Linux's exact event-order assertion
+  still expected two recovery events, while the new timeline emits five. The
+  updated assertion checks all five in order. `44884790401` retains a Windows
+  P35-R03 cancellation-probe test failure (expected 2 writes, observed 1);
+  untouched transport code and same-source `44885200017` later pass both hosts,
+  native tests and debug build. No transport timing/assertion was weakened.
+- Final App source `28cdb9fc`: checks-only `44889136340` and native/debug
+  `44889483329` both pass on Linux/Windows. The checks-only full suites report
+  Linux 979 passed/16 skipped and Windows 927 passed/68 skipped, plus eight
+  candidate tests per host. Native/debug status is separately verified, not
+  a release-mode APK/EXE claim. SDK is Flutter 3.47.9 / Dart 3.13.7.
+- Current visual evidence is `images-05/` (original rendered PPMs retained in
+  the task worktree). Earlier `images-03/04` preserve the glyph/layout findings.
+  Only the two selected design boards were opened; no new image generation.
+- `keyring-commit-03` is a transport failure before any Git operation; HEAD and
+  empty index were reconciled before the successful successor. Failed log/ZIP
+  retrieval receipts remain preserved; they caused no device action or CI rerun.
+
+The USB observation route now supports read-only service dump pagination:
+`dumpsys activity service com.wen.gaia.gaia/.CompanionService --journal`, then
+`--journal --before <nextCursor>`. Pages carry sequence/loss metadata; a timeout
+is an explicit error. This does not start the App/service or check for updates.
+Prepare the current ADB ownership and bounded retrieval before owner testing;
+if no service exists, preserve that fact rather than opening the App to conceal
+the failure. User-triggered complete ZIP export is the alternate after-test route.
+No phone UI, OTA, data clearing, debugger access or installation has occurred
+during these implementation/self-test operations. Physical automatic discovery,
+global popup, background recovery, history and target confirmation remain open.
