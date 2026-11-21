@@ -2061,3 +2061,12 @@ only gap this thin entry fills is version editing and Git/CI orchestration;
 formal builds and backend ingestion are still the existing implementations.
 Next: deliver the tool/docs, then exercise it for the requested full-test MCU
 candidate without changing the App version or touching the installed device.
+
+Tool source `b944fdca` is delivered on main. First real entry preserved a GitHub
+GET transport EOF in `.cache/candidate-release/20261121T160030Z-2d8286aa`.
+It stopped in PREFLIGHT with no version edit/commit/push. Standard gh did not
+inherit the Windows system proxy, while the existing qualified CI adapter uses
+that same configured loopback proxy. The bounded fix reads the existing system
+proxy and passes it to child processes only when no explicit proxy environment
+variable exists; no system settings or credentials change. This is a host-route
+failure, not a package/MCU/OTA failure, and its original receipt is preserved.

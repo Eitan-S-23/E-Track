@@ -259,6 +259,23 @@ class EntryTests(unittest.TestCase):
         self.assertEqual(Path(host.env['TEMP']), out / 'host')
         self.assertNotIn('private-test-secret', (out / 'command-001.log').read_text())
 
+    def test_existing_system_proxy_is_used_without_changing_configuration(self):
+        out = self.root / '.cache/proxy-test'
+        out.mkdir(parents=True)
+        with patch.object(R.shutil, 'which', return_value='tool'), patch.dict(os.environ, {}, clear=True), \
+                patch.object(R, 'getproxies', return_value={'https': 'http://127.0.0.1:7897'}):
+            host = R.Host(self.root, out)
+        self.assertEqual(host.env['HTTPS_PROXY'], 'http://127.0.0.1:7897')
+
+    def test_explicit_proxy_is_not_overwritten(self):
+        out = self.root / '.cache/explicit-proxy-test'
+        out.mkdir(parents=True)
+        with patch.object(R.shutil, 'which', return_value='tool'), \
+                patch.dict(os.environ, {'HTTPS_PROXY': 'http://127.0.0.1:9999'}), \
+                patch.object(R, 'getproxies', return_value={'https': 'http://127.0.0.1:7897'}):
+            host = R.Host(self.root, out)
+        self.assertEqual(host.env['HTTPS_PROXY'], 'http://127.0.0.1:9999')
+
 
 class ObserveTests(unittest.TestCase):
     def test_ready_mcu_and_completed_original_app_are_distinct_receipts(self):

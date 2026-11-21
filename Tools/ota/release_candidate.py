@@ -12,6 +12,7 @@ import shutil
 import subprocess
 import sys
 import time
+from urllib.request import getproxies
 import uuid
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -115,6 +116,11 @@ class Host:
                    GIT_TERMINAL_PROMPT='0', GCM_INTERACTIVE='never', GH_PROMPT_DISABLED='1',
                    GH_HOST='github.com', GH_PAGER='', GH_NO_UPDATE_NOTIFIER='1',
                    GH_NO_EXTENSION_UPDATE_NOTIFIER='1', PYTHONDONTWRITEBYTECODE='1')
+        # gh does not read Windows Internet Settings; reuse that existing proxy in memory.
+        proxies = getproxies()
+        for scheme in ('http', 'https'):
+            if not (env.get(scheme + '_proxy') or env.get(scheme.upper() + '_PROXY')) and proxies.get(scheme):
+                env[scheme.upper() + '_PROXY'] = proxies[scheme]
         self.env = env
         checked(root, out / 'host').mkdir(parents=True)
         self.gh = shutil.which('gh')

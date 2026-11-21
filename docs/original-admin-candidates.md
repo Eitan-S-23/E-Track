@@ -42,6 +42,9 @@ An existing `active.lock` is not removed automatically: reconcile its owner firs
 Credentials are reused in memory from GH_TOKEN/GITHUB_TOKEN or standard
 `gh auth token`; no token/login/credential configuration is created or printed.
 All controllable child caches/temp/logs and Git outputs stay in the project.
+Existing proxy environment variables take precedence; when absent, the entry
+also passes the already-configured Windows system proxy to gh in memory. It
+does not edit system proxy settings or retry an ambiguous push automatically.
 
 For a full OTA test, the owner publishes the new candidate with no enabled delta
 matching the device's actual current version, and checks that the App selects
