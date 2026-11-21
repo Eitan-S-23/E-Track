@@ -1231,7 +1231,7 @@ class _FakeOtaService extends OtaService {
 
   @override
   Future<FirmwareLatestInfo?> checkFirmwareUpdate({String? channel,
-      String? companionRuntimeId}) async {
+      String? companionRuntimeId, bool automatic = false, bool refreshPrepared = false}) async {
     checkCalls++;
     return await checkGate?.future;
   }

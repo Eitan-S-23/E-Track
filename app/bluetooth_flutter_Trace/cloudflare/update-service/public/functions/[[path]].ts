@@ -7,6 +7,7 @@ import { handleLatest } from "../../worker/src/latest";
 import { inventoryControl, reportInventory } from "../../worker/src/version_inventory";
 import { submitFeedback } from "../../worker/src/feedback";
 import type { WorkerEnv } from "../../worker/src/types";
+import { accountAuthRoute, accountRoute, accountCloudAccess } from '../../worker/src/accounts';
 
 type PublicEnv = WorkerEnv;
 
@@ -45,6 +46,15 @@ async function routePublicRequest(
     });
   }
 
+  if (url.pathname.startsWith('/api/auth/')) return accountAuthRoute(context.request, context.env);
+  if (url.pathname.startsWith('/api/account/')) return accountRoute(context.request, context.env);
+  if (!url.pathname.startsWith('/api/public/')) throw new ApiError('INVALID_PARAMETER', 'Public route not found', 404);
+  return accountCloudAccess(context.request, context.env, () => routeCloudRequest(context, requestId));
+}
+
+async function routeCloudRequest(context: EventContext<PublicEnv, string, unknown>, requestId: string): Promise<Response> {
+  const url = new URL(context.request.url);
+  const method = context.request.method.toUpperCase();
   if (method === "GET" && url.pathname === "/api/public/latest") {
     return handleLatest(context.request, context.env, requestId);
   }

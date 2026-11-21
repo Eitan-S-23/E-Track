@@ -9,7 +9,7 @@ import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
-CASES = ("crc", "phone_missing", "check_timeout", "acknowledged_timeout",
+CASES = ("crc", "uid_preserves_session", "phone_missing", "check_timeout", "acknowledged_timeout",
          "download_timeout", "timer_wrap", "offer_choice_once", "later_never_installs",
          "duplicate_expiry", "display_binding", "binary_exclusion", "malformed",
          "parser_recovery", "periodic_after_manual", "stale_session_and_request", "send_failure",

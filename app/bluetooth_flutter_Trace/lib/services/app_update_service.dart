@@ -17,6 +17,7 @@ import '../config/share_links.dart';
 import '../pages/trace_ui.dart';
 import 'app_prompt_coordinator.dart';
 import 'app_patch_decoder.dart';
+import 'account_service.dart';
 
 class AppUpdateService extends GetxService with WidgetsBindingObserver {
   static AppUpdateService get to => Get.find<AppUpdateService>();
@@ -59,6 +60,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
   @override
   void onInit() {
     super.onInit();
+    AccountService.to.protect(_dio);
     if (!Platform.isAndroid) return;
 
     WidgetsBinding.instance.addObserver(this);
@@ -99,6 +101,8 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
 
   Future<void> checkDailyOnStartup() async {
     if (!Platform.isAndroid) return;
+    await AccountService.to.initialize();
+    if (!AccountService.to.loggedIn) return;
 
     final prefs = await SharedPreferences.getInstance();
     final today = _dateKey(DateTime.now());
@@ -109,6 +113,12 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
   }
 
   Future<void> checkForUpdates({bool manual = true}) async {
+    try { await AccountService.to.requireLogin(); }
+    on AccountException catch (e) {
+      updateStatus.value = e.message;
+      if (manual) Get.snackbar('需要登录', e.message);
+      return;
+    }
     if (!Platform.isAndroid) {
       if (manual) {
         Get.snackbar('暂不支持', '当前平台暂不支持 APK 增量自更新');
@@ -238,6 +248,7 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
       final updateInfo = await _fetchUpdateInfo(
         localInfo,
         cancelToken: manifestCancelToken,
+        check: await AccountService.to.newCheck(automatic: !manual),
       ).timeout(
         const Duration(seconds: 30),
         onTimeout: () {
@@ -618,22 +629,13 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
   Future<_RemoteUpdateInfo> _fetchUpdateInfo(
     _LocalAppInfo localInfo, {
     required CancelToken cancelToken,
+    required AccountCheck check,
   }) async {
     final requests = <_ManifestRequest>[
       if (ShareLinks.cloudflareUpdateManifestUrl.isNotEmpty)
         _ManifestRequest(
           url: _cloudflareManifestUrl(localInfo),
           source: _ManifestSource.cloudflare,
-        ),
-      if (ShareLinks.emergencyUpdateManifestUrl.isNotEmpty)
-        const _ManifestRequest(
-          url: ShareLinks.emergencyUpdateManifestUrl,
-          source: _ManifestSource.emergency,
-        ),
-      if (ShareLinks.cloudflareUpdateManifestUrl.isEmpty)
-        const _ManifestRequest(
-          url: ShareLinks.legacyGithubLatestManifestUrl,
-          source: _ManifestSource.legacyGithubLatest,
         ),
     ];
 
@@ -645,8 +647,9 @@ class AppUpdateService extends GetxService with WidgetsBindingObserver {
         final response = await _dio.get<String>(
           request.url,
           cancelToken: cancelToken,
-          options: Options(responseType: ResponseType.plain),
+          options: Options(responseType: ResponseType.plain, headers: check.headers()),
         );
+        if (check.accountId != AccountService.to.accountId) throw const AccountException('ACCOUNT_CHANGED', '账号已切换，请重新检查');
         final raw = response.data;
         if (raw == null || raw.trim().isEmpty) {
           throw const _UpdateException('EMPTY_MANIFEST', '更新清单为空');

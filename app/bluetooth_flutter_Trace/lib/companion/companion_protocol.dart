@@ -21,6 +21,9 @@ class CompanionMessage {
     bool version(String s) => _number.hasMatch(s) && int.parse(s) > 0 && int.parse(s) <= 2100000000;
     return switch (kind) {
       'HELLO' => fields.isEmpty && request == 0,
+      'IDENTIFY' => fields.isEmpty && request == 0,
+      'UID' => request == 0 && fields.length == 1 && RegExp(r'^[0-9a-f]{24}$').hasMatch(fields[0]) &&
+          fields[0] != '000000000000000000000000' && fields[0] != 'ffffffffffffffffffffffff',
       'CAPS' => request == 0 && fields.length == 1 && fields[0] == '1',
       'CHECK' => request > 0 && fields.isEmpty,
       'STATE' => fields.length == 1 && states.contains(fields[0]),

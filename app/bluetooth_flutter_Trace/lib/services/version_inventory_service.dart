@@ -13,6 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/share_links.dart';
 import '../ota/ota_device_info.dart';
+import 'account_service.dart';
 
 typedef InventorySender = Future<Map<String, dynamic>> Function(
     Uri uri, Map<String, dynamic>? body, String token, CancelToken cancel);
@@ -122,7 +123,7 @@ class VersionInventoryService extends GetxService with WidgetsBindingObserver {
           data: body, cancelToken: cancel,
           options: Options(method: body == null ? 'GET' : 'POST',
               followRedirects: false,
-              headers: body == null ? null : {'Authorization': 'Bearer $token'},
+              headers: {...await AccountService.to.headers(uri), if (body != null) 'X-Install-Token': token},
               contentType: Headers.jsonContentType));
       if (result.data == null || result.data!['ok'] != true) throw StateError('Inventory response rejected');
       return result.data!;

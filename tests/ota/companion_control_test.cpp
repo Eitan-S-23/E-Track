@@ -13,7 +13,8 @@ struct Fixture
     std::vector<std::string> sent;
     bool allowSend;
     Control control;
-    Fixture() : allowSend(true), control(Send, this) {}
+    Fixture(Control::ReadUid uid = NULL) : allowSend(true), control(Send, this, uid) {}
+    static const char* Uid(void*) { return "1234567890abcdef12345678"; }
     static bool Send(void* self, const char* bytes, unsigned count)
     {
         Fixture* f = static_cast<Fixture*>(self);
@@ -46,6 +47,18 @@ static void Test(const std::string& name)
         require(Control::Crc("123456789", 9) == 0x29b1, "CCITT-FALSE mismatch");
         f.Hello();
         require(f.sent.at(0) == Fixture::Frame("!ETC1|CAPS|" + session + "|0|1"), "CAPS wire format");
+    } else if (name == "uid_preserves_session") {
+        Fixture identified(Fixture::Uid);
+        identified.Hello(); identified.Offer();
+        const HAL::CompanionUpdateInfo before = identified.control.Info();
+        const std::string querySession(32, 'e');
+        identified.Feed(Fixture::Frame("!ETC1|IDENTIFY|" + querySession + "|0"));
+        require(identified.sent.back() == Fixture::Frame("!ETC1|UID|" + querySession + "|0|" + Fixture::Uid(NULL)), "UID response binding");
+        require(memcmp(&before, &identified.control.Info(), sizeof(before)) == 0, "UID query changed OTA consent/session");
+        const size_t sent = identified.sent.size();
+        identified.control.Poll(20, true);
+        identified.Feed(Fixture::Frame("!ETC1|IDENTIFY|" + querySession + "|0"), 21);
+        require(identified.sent.size() == sent, "UID query interrupted binary transfer");
     } else if (name == "phone_missing") {
         require(!f.control.Check(10) && f.Status("PHONE_REQUIRED") && f.sent.empty(), "absent phone must not check");
     } else if (name == "check_timeout") {

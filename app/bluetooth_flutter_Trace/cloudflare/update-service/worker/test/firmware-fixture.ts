@@ -1,5 +1,5 @@
 import { env } from "cloudflare:workers";
-import { SELF } from "cloudflare:test";
+import { SELF } from './account-fixture';
 import { expect } from "vitest";
 import { createHash } from "node:crypto";
 import fixture from "./fixtures/firmware-release-v2.json";

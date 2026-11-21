@@ -1,4 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
+import '../account_fixture.dart';
+import 'package:ble_monitor/services/account_service.dart';
+import 'package:ble_monitor/companion/companion_protocol.dart';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -37,6 +41,7 @@ import 'package:ble_monitor/services/ota_service.dart';
 void main() {
   setUp(() {
     Get.testMode = true;
+    Get.put<AccountService>(TestAccountService());
   });
 
   tearDown(() {
@@ -600,6 +605,12 @@ class _FakeBle extends BluetoothService {
     OtaWriteAdmission? admission,
   }) async {
     admission?.dispatch();
+    if (data.isNotEmpty && data.first == 33) {
+      final request = CompanionMessage.parse(ascii.decode(data));
+      if (request?.kind == 'IDENTIFY') _notifyController.add(CompanionMessage('UID', request!.session, 0,
+        ['1234567890abcdef12345678']).encode());
+      return;
+    }
     // 只应答 GET_INFO：INFO 帧 session=0、seq 回显请求 seq（§5.6）。
     final f = OtaBleCodec.decodeFrame(data);
     if (f.cmd == OtaBleCodec.cmdGetInfo) {

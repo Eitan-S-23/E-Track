@@ -12,8 +12,9 @@ class Control
 {
 public:
     typedef bool (*Send)(void*, const char*, unsigned);
-    Control(Send sender, void* context)
-        : sender(sender), context(context), length(0), dropping(false), busy(false),
+    typedef const char* (*ReadUid)(void*);
+    Control(Send sender, void* context, ReadUid readUid = NULL)
+        : sender(sender), context(context), readUid(readUid), length(0), dropping(false), busy(false),
           sequence(0), offerTick(0), waitTick(0), waitMs(0), byteTick(0),
           installPending(false), installTick(0)
     {
@@ -148,6 +149,7 @@ public:
 private:
     Send sender;
     void* context;
+    ReadUid readUid;
     HAL::CompanionUpdateInfo value;
     char line[320];
     char shownSha[65];
@@ -180,6 +182,16 @@ private:
         }
         *output = result;
         return true;
+    }
+
+    void EmitUid(const char* session)
+    {
+        const char* uid = readUid ? readUid(context) : NULL;
+        if (busy || sender == NULL || uid == NULL || !Hex(uid, 24)) return;
+        char body[80], output[88];
+        snprintf(body, sizeof(body), "!ETC1|UID|%s|0|%s", session, uid);
+        snprintf(output, sizeof(output), "%s*%04x\n", body, (unsigned)Crc(body, (unsigned)strlen(body)));
+        (void)sender(context, output, (unsigned)strlen(output));
     }
 
     bool Emit(const char* kind, const char* fields)
@@ -227,6 +239,11 @@ private:
         }
         uint32_t request;
         if (count < 4 || strcmp(fields[0], "!ETC1") != 0 || !Hex(fields[2], 32) || !Number(fields[3], &request)) return;
+        if (strcmp(fields[1], "IDENTIFY") == 0 && count == 4 && request == 0)
+        {
+            EmitUid(fields[2]);
+            return;
+        }
         if (strcmp(fields[1], "HELLO") == 0 && count == 4 && request == 0)
         {
             if (strcmp(value.session, fields[2]) != 0)
@@ -239,7 +256,9 @@ private:
                 SetStatus("CONNECTED");
             }
             uint32_t previous = value.request; value.request = 0;
-            (void)Emit("CAPS", "|1"); value.request = previous;
+            (void)Emit("CAPS", "|1");
+            EmitUid(fields[2]);
+            value.request = previous;
             return;
         }
         if (strcmp(fields[2], value.session) != 0 ||

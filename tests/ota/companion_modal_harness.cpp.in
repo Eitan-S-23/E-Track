@@ -134,6 +134,39 @@ static void GroupOwnsOnlyValidObjects(lv_group_t* group) {
 }
 
 #ifdef COMPANION_PROGRESS_TEST
+static void CheckTextBounds() {
+    lv_obj_update_layout(companionModal);
+    Require(companionPanel->coords.x1 >= 0 && companionPanel->coords.y1 >= 0 &&
+        companionPanel->coords.x2 < 240 && companionPanel->coords.y2 < 320,
+        "modal panel exceeds the physical display");
+    lv_obj_t* labels[] = {companionTitle, companionVersion, companionStatus, companionMessage};
+    lv_obj_t* buttons[] = {companionCheck, companionInstall, companionLater};
+    for (lv_obj_t* label : labels) {
+        if (lv_obj_has_flag(label, LV_OBJ_FLAG_HIDDEN) || !lv_label_get_text(label)[0]) continue;
+        const lv_area_t& a = label->coords;
+        Require(a.x1 >= companionPanel->coords.x1 && a.x2 <= companionPanel->coords.x2 &&
+            a.y1 >= companionPanel->coords.y1 && a.y2 <= companionPanel->coords.y2,
+            "status text clipped by panel bounds");
+        lv_point_t measured;
+        lv_txt_get_size(&measured, lv_label_get_text(label), lv_obj_get_style_text_font(label, 0),
+            lv_obj_get_style_text_letter_space(label, 0), lv_obj_get_style_text_line_space(label, 0),
+            lv_obj_get_content_width(label), LV_TEXT_FLAG_NONE);
+        Require(measured.y <= lv_obj_get_content_height(label), "wrapped status text is clipped");
+        for (lv_obj_t* button : buttons) {
+            if (lv_obj_has_flag(button, LV_OBJ_FLAG_HIDDEN) || lv_obj_get_style_opa(button, 0) == LV_OPA_TRANSP) continue;
+            const lv_area_t& b = button->coords;
+            Require(a.x2 + 4 < b.x1 || b.x2 + 4 < a.x1 || a.y2 + 4 < b.y1 || b.y2 + 4 < a.y1,
+                "status text overlaps a visible button");
+        }
+    }
+    for (unsigned i = 0; i < 4; ++i) for (unsigned j = i + 1; j < 4; ++j) {
+        if (!lv_label_get_text(labels[i])[0] || !lv_label_get_text(labels[j])[0]) continue;
+        const lv_area_t& a = labels[i]->coords;
+        const lv_area_t& b = labels[j]->coords;
+        Require(a.x2 < b.x1 || b.x2 < a.x1 || a.y2 < b.y1 || b.y2 < a.y1, "status text overlaps other text");
+    }
+}
+
 static void CheckButtonBounds() {
     lv_obj_update_layout(companionModal);
     lv_obj_t* buttons[] = {companionCheck, companionInstall, companionLater};
@@ -278,6 +311,24 @@ int main(int argc, char** argv) {
         Require(!companionModal && !companionOpening, "modal opened during page transition");
     }
 #ifdef COMPANION_PROGRESS_TEST
+    else if (test == "all_text_bounds") {
+        CompanionOpen(nullptr); Pump();
+        for (const char* code : {"CONNECTED", "CHECKING", "DOWNLOADING", "VERIFYING", "WAIT_WIFI",
+                "DEFERRED", "STARTING", "UPGRADING", "SD_BUSY", "SIMULATOR_NO_PHONE", "FAILED",
+                "INCOMPATIBLE", "DISCONNECTED", "NO_UPDATE", "CONNECTED"}) {
+            strcpy(phone.status, code); phone.hasOffer = false;
+            CompanionRefresh(); Pump(); Snapshot(argv[2], code); CheckTextBounds(); CheckButtonBounds();
+        }
+        Ready(); CompanionRefresh(); Pump(); CheckTextBounds();
+        recording = true; HAL::power = {false, 10}; companionSdBusy = true; safe = false;
+        CompanionRefresh(); Pump(); Snapshot(argv[2], "all-blockers-layout"); CheckTextBounds();
+        recording = false; HAL::power = {true, 90}; companionSdBusy = false; safe = true;
+        for (auto phase : {HAL::COMPANION_UPDATE_TRANSFERRING, HAL::COMPANION_UPDATE_APPLYING,
+                HAL::COMPANION_UPDATE_BACKING_UP, HAL::COMPANION_UPDATE_REBOOTING, HAL::COMPANION_UPDATE_FAILED,
+                HAL::COMPANION_UPDATE_IDLE}) {
+            phone.phase = phase; CompanionRefresh(); Pump(); CheckTextBounds();
+        }
+    }
     else if (test == "check_layout" || test == "check_copy") {
         strcpy(phone.status, "CONNECTED"); phone.currentVersion = 30341;
         CompanionOpen(nullptr);

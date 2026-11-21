@@ -10,6 +10,7 @@ import '../services/version_inventory_service.dart';
 import '../services/database_service.dart';
 import 'trace_ui.dart';
 import 'feedback_page.dart';
+import 'account_page.dart';
 
 const String _appName = 'E-Track';
 const MethodChannel _appUpdateChannel = MethodChannel('trace/app_update');
@@ -58,7 +59,7 @@ class ProfileTabPage extends StatelessWidget {
                   runSpacing: 16,
                   children: [
                     const _ProfileTitle(),
-                    _ProfileAvatar(onTap: _showUserInfoDialog),
+                    _ProfileAvatar(onTap: () => Get.to<void>(() => const AccountPage())),
                   ],
                 ),
               ).animate().fadeIn(duration: 420.ms).slideY(begin: 0.14, end: 0),
@@ -90,6 +91,8 @@ class ProfileTabPage extends StatelessWidget {
 
   List<_ProfileAction> _buildActions() {
     return [
+      _ProfileAction(label: '账号与绑定设备', icon: Icons.person_outline,
+        onTap: () => Get.to<void>(() => const AccountPage())),
       _ProfileAction(
         label: '数据统计',
         icon: Icons.bar_chart,

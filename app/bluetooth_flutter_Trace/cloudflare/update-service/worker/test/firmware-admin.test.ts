@@ -1,5 +1,5 @@
 import { env } from "cloudflare:workers";
-import { SELF } from "cloudflare:test";
+import { SELF } from './account-fixture';
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { onRequest } from "../../admin/functions/api/admin/[[path]]";
 import { cleanupFirmwareIdempotency, firmwareReleaseAction, listFirmware, mutateFirmwareChannel, publishFirmware,

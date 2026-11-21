@@ -1,15 +1,16 @@
 import { env } from "cloudflare:workers";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { onRequest } from "../../public/functions/[[path]]";
+import { signedInRequest } from './account-fixture';
 
 const enabled = { ...env, VERSION_INVENTORY_ENABLED: "true" };
 
 function page(path: string, init: RequestInit = {}, asset = new Response("site asset")) {
   const next = vi.fn(async () => asset);
-  const response = onRequest({
-    request: new Request(`https://public.example.com${path}`, init), env: { ...enabled, ASSETS: { fetch: next } },
+  const response = signedInRequest(`https://public.example.com${path}`, init).then(request => onRequest({
+    request, env: { ...enabled, ASSETS: { fetch: next } },
     params: {}, data: {}, functionPath: "/", next, waitUntil() {}, passThroughOnException() {}
-  } as Parameters<typeof onRequest>[0]);
+  } as Parameters<typeof onRequest>[0]));
   return { response, next };
 }
 

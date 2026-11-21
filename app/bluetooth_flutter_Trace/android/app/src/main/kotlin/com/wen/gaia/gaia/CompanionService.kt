@@ -16,6 +16,9 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.PowerManager
 import android.os.SystemClock
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -93,6 +96,25 @@ class CompanionService : Service() {
     private var recoveryId: String? = null
     private var notificationStatus = "INITIALIZING"
     private var stateSequence = 0L
+    private var networkManager: ConnectivityManager? = null
+    private var networkResumeQueued = false
+    private val networkResume = Runnable {
+        networkResumeQueued = false
+        if (!closed && notificationStatus in listOf("PACKAGE_PREPARATION_FAILED", "WAIT_UNMETERED_NETWORK", "NO_NETWORK")) {
+            startRuntime("network")
+        }
+    }
+    private val networkCallback = object : ConnectivityManager.NetworkCallback() {
+        override fun onCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) {
+            if (!capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) return
+            handler.post {
+                if (!closed && !networkResumeQueued && notificationStatus in listOf("PACKAGE_PREPARATION_FAILED", "WAIT_UNMETERED_NETWORK", "NO_NETWORK")) {
+                    networkResumeQueued = true
+                    handler.postDelayed(networkResume, 1000)
+                }
+            }
+        }
+    }
     private val reconnectWindowMs = 60000L
     private val reconnectDelays = longArrayOf(2000, 4000, 8000)
     private val creationRecovery = Runnable {
@@ -154,6 +176,13 @@ class CompanionService : Service() {
         super.onCreate()
         active = this
         CompanionDiagnostics.record(this, "SERVICE_CREATED", runtimeId)
+        if (Build.VERSION.SDK_INT >= 24) {
+            try {
+                val manager = getSystemService(ConnectivityManager::class.java)
+                manager.registerDefaultNetworkCallback(networkCallback)
+                networkManager = manager
+            } catch (_: Exception) { /* Periodic recovery remains available. */ }
+        }
         handler.post(creationRecovery)
     }
     override fun onBind(intent: Intent?): IBinder? = null
@@ -170,7 +199,7 @@ class CompanionService : Service() {
             stopCompanion("START_PRECONDITION_FAILED"); return
         }
         reason = requestedReason
-        if (reason !in listOf("foreground", "manual", "periodic", "presence", "recovery")) {
+        if (reason !in listOf("foreground", "manual", "periodic", "presence", "recovery", "network")) {
             stopCompanion("INVALID_START_REASON"); return
         }
         // A fresh wake supersedes a pending timer, without extending its retry budget.
@@ -390,6 +419,8 @@ class CompanionService : Service() {
     }
 
     override fun onDestroy() {
+        try { networkManager?.unregisterNetworkCallback(networkCallback) } catch (_: Exception) { }
+        networkManager = null
         CompanionDiagnostics.record(this, "SERVICE_DESTROYED", runtimeId)
         stopCompanion("SERVICE_STOPPED")
         if (active === this) active = null

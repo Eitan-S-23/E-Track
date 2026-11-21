@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../account_fixture.dart';
 
 import 'package:ble_monitor/companion/companion_platform.dart';
 import 'package:ble_monitor/companion/companion_protocol.dart';
@@ -368,7 +369,7 @@ void main() {
   test('offline automatic wake does not consume quota or block manual checking', () async {
     settings['networkAvailable'] = false;
     await start();
-    await until(() => runtime.status.value == 'CONNECTED');
+    await until(() => runtime.status.value == 'NO_NETWORK');
     expect(ota.checks, 0);
     expect(preferences.containsKey('companion_auto_check_budget_v1'), isFalse);
     settings['networkAvailable'] = true;
@@ -535,7 +536,7 @@ class _Gate {
 }
 
 class _Ota extends OtaService {
-  _Ota(this.ble);
+  _Ota(this.ble) : super(accountService: TestAccountService());
   final _Ble ble;
   final activity = StreamController<bool>.broadcast(sync: true);
   final messages = <CompanionMessage>[];
@@ -587,13 +588,16 @@ class _Ota extends OtaService {
   @override
   bool get lastCheckWasNoUpdate => noUpdate;
   @override
+  bool get canResumePreparation => latest != null && verified != null && identityAvailable;
+  @override
   Future<DeviceOtaInfo?> readDeviceInfo(String address, {String? companionRuntimeId}) =>
     operation(companionRuntimeId, () async {
       reads++; await readGate?.future; identityAvailable = !failIdentity; identityAddress = address;
       return failIdentity ? null : info;
     });
   @override
-  Future<FirmwareLatestInfo?> checkFirmwareUpdate({String? channel, String? companionRuntimeId}) =>
+  Future<FirmwareLatestInfo?> checkFirmwareUpdate({String? channel, String? companionRuntimeId,
+      bool automatic = false, bool refreshPrepared = false}) =>
     operation(companionRuntimeId, () async { checks++; await checkGate?.future; return latest; });
   @override
   Future<bool> downloadFirmware({String? companionRuntimeId}) => operation(companionRuntimeId, () async {

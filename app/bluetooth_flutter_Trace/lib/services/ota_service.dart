@@ -34,6 +34,7 @@ import '../ota/ota_radio_lease.dart';
 import 'app_update_service.dart';
 import 'version_inventory_service.dart';
 import 'bluetooth_service.dart';
+import 'account_service.dart';
 
 /// OTA 升级领域阶段（PR16：UI 由 phase 驱动，不解析状态文本）。
 enum OtaPhase {
@@ -97,6 +98,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   /// 60s 固定窗口造成升级已成功但复核假阴性；生产默认 180s 总窗口 +
   /// 单轮探测 20s 上限 + 3s 轮询间隔，测试注入短值实测时序行为。
   OtaService({
+    AccountService? accountService,
     BluetoothService? bluetoothService,
     Dio? dio,
     Dio? downloadDio,
@@ -115,7 +117,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     void Function()? onOpenTask,
     OtaP35Recorder? p35Recorder,
     bool Function()? p35PlatformCheck,
-  })  : _senderWindowSegments = RangeError.checkValueInInterval(
+  })  : _accountService = accountService,
+        _senderWindowSegments = RangeError.checkValueInInterval(
           senderWindowSegments ?? defaultPipelineWindowSegments,
           1,
           defaultPipelineWindowSegments,
@@ -162,6 +165,51 @@ class OtaService extends GetxController with WidgetsBindingObserver {
             rebootProbeInterval ?? const Duration(seconds: 3);
 
   final BluetoothService? _bluetoothService;
+  final AccountService? _accountService;
+  AccountService get accounts => _accountService ?? AccountService.to;
+  AccountCheck? _accountCheck;
+  String? _hardwareUid, _uidAddress;
+  int? _uidGeneration;
+  String? get hardwareUid => _uidAddress != null && hasCurrentDeviceIdentity(_uidAddress) &&
+      _uidGeneration == _ble.otaLinkGeneration(_uidAddress!) ? _hardwareUid : null;
+  String? get identityAddress => _deviceInfoAddress;
+  String? lastCloudError;
+  bool _cloudDownloadProtected = false;
+  DateTime? _preparedAt;
+  bool get canResumePreparation => _latestInfo?.updateAvailable == true &&
+      _accountCheck?.accountId == accounts.accountId && _preparedAt != null &&
+      DateTime.now().difference(_preparedAt!) < const Duration(hours: 24) &&
+      _deviceInfo != null && _deviceInfoAddress != null && _assetsBelongTo(_deviceInfo!, _deviceInfoAddress!);
+
+  void acceptHardwareUid(String address, String uid) {
+    if (!hasCurrentDeviceIdentity(address) || !RegExp(r'^[0-9a-f]{24}$').hasMatch(uid) ||
+        uid == '000000000000000000000000' || uid == 'ffffffffffffffffffffffff') return;
+    _hardwareUid = uid; _uidAddress = address; _uidGeneration = _ble.otaLinkGeneration(address);
+  }
+
+  Future<String?> readHardwareUid({String? companionRuntimeId}) async {
+    if (hardwareUid != null) return hardwareUid;
+    final address = _deviceInfoAddress;
+    if (address == null || isUpgrading || !hasCurrentDeviceIdentity(address)) return null;
+    final link = _ble.otaLinkGeneration(address);
+    final chars = await _ble.findExactOtaCharacteristicsByAddress(address);
+    if (chars == null || link != _ble.otaLinkGeneration(address)) return null;
+    final stream = await _ble.subscribeOtaNotifyByAddress(address, chars['serviceId']!, chars['notifyCharId']!);
+    if (stream == null) return null;
+    final session = AccountService.nonce(), decoder = CompanionDecoder();
+    final reply = Completer<String?>();
+    final listener = stream.listen((bytes) {
+      for (final message in decoder.add(bytes, idleTextAllowed: companionTextAllowed)) {
+        if (message.kind == 'UID' && message.session == session && !reply.isCompleted) reply.complete(message.fields[0]);
+      }
+    }, onError: (Object _) { if (!reply.isCompleted) reply.complete(null); });
+    try {
+      if (!await sendCompanionMessage(address, CompanionMessage('IDENTIFY', session, 0), companionRuntimeId: companionRuntimeId)) return null;
+      final uid = await reply.future.timeout(const Duration(seconds: 3), onTimeout: () => null);
+      if (uid != null && link == _ble.otaLinkGeneration(address)) acceptHardwareUid(address, uid);
+      return hardwareUid;
+    } finally { await listener.cancel(); }
+  }
   late final upgradeHistory = OtaUpgradeHistory(_firmwareDirProvider);
   String? _historyTask;
   OtaPhase? _historyPhase;
@@ -926,7 +974,26 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   /// 入口互斥（RC3-04）：与其他升级族入口经同一 owner 锁串行；取消
   /// 代次贯穿 latest 重试与发布，取消后不发布旧状态。
   Future<FirmwareLatestInfo?> checkFirmwareUpdate({String? channel,
-      String? companionRuntimeId}) async {
+      String? companionRuntimeId, bool automatic = false, bool refreshPrepared = false}) async {
+    if (_isUpgrading.value) return null;
+    lastCloudError = null;
+    _lastCheckWasNoUpdate = false;
+    AccountCheck? nextCheck;
+    try {
+      await accounts.requireLogin();
+      if (await readHardwareUid(companionRuntimeId: companionRuntimeId) == null) {
+        throw const AccountException('DEVICE_UID_UNAVAILABLE', '当前固件无法读取设备唯一识别码，请先升级支持账号绑定的固件');
+      }
+      if (refreshPrepared) {
+        if (_accountCheck == null || _accountCheck!.accountId != accounts.accountId) {
+          throw const AccountException('LOGIN_REQUIRED', '账号已变化，请重新检查更新');
+        }
+      } else {
+        nextCheck = await accounts.newCheck(automatic: automatic);
+      }
+    } on AccountException catch (e) {
+      lastCloudError = e.code; _upgradeStatus.value = e.message; return null;
+    }
     _lastCheckWasNoUpdate = false;
     if (_isUpgrading.value) {
       _notify('提示', '升级流程进行中，请先取消或等待完成');
@@ -962,7 +1029,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       // 取消，不发 latest 请求。
       if (generation != _cancelGeneration) return null;
       return _checkLatestLocked(info, appVersionCode, channel,
-          generation: generation);
+          generation: generation, refreshPrepared: refreshPrepared,
+          accountCheck: refreshPrepared ? _accountCheck : nextCheck);
     }, companionRuntimeId: companionRuntimeId);
   }
 
@@ -978,19 +1046,24 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     int appVersionCode,
     String? channel, {
     int? generation,
+    bool refreshPrepared = false,
+    AccountCheck? accountCheck,
   }) async {
     _phase.value = OtaPhase.checkingUpdate;
     _terminalState.value = null;
     final gen = generation;
     try {
+      final check = accountCheck ?? _accountCheck;
+      if (check == null) throw const AccountException('LOGIN_REQUIRED', '请登录后重新检查');
       _upgradeStatus.value = '检查固件更新中...';
       _upgradeProgress.value = 0.0;
 
       final uri = _latestUriBuilder(info, appVersionCode, channel);
       _p35LatestUrl = Uri(scheme: uri.scheme, host: uri.host, port: uri.hasPort ? uri.port : null,
           path: uri.path).toString();
-      final response = await _getLatestWithRetry(uri, gen);
+      final response = await _getLatestWithRetry(uri, gen, check: check, refreshPrepared: refreshPrepared);
       if (response == null) return null; // 取消：静默退出，不发布状态
+      if (check.accountId != accounts.accountId) return null;
       final body = _readJsonObject(response.data);
       final latest = FirmwareLatestInfo.parse(
         body,
@@ -1024,6 +1097,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       // 清单变化使旧下载包失效（PR12）：同包重复检查不失效。
       _invalidatePackageIfChanged(latest);
       _latestInfo = latest;
+      _accountCheck = check;
+      if (!refreshPrepared) _preparedAt = DateTime.now();
       _asset = latest.asset;
       _releaseId = latest.releaseId;
       // 登记签署者（RC3-12⑦）：本批资产由本次查询所用的身份/地址签发，
@@ -1065,6 +1140,16 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       _phase.value = OtaPhase.failed;
       return null;
     } catch (error) {
+      if (error is AccountException) {
+        lastCloudError = error.code; _upgradeStatus.value = error.message; _phase.value = OtaPhase.failed; return null;
+      }
+      if (error is DioException && error.response?.data is Map) {
+        final code = (error.response!.data as Map)['errorCode']?.toString();
+        if (code != null && (code.startsWith('CHECK_') || code.startsWith('DEVICE_') ||
+            code == 'LOGIN_REQUIRED' || code == 'ACCOUNT_DISABLED')) {
+          lastCloudError = code; _upgradeStatus.value = AccountService.messageFor(code); _phase.value = OtaPhase.failed; return null;
+        }
+      }
       // retryExhausted=true：到达这里的一定是 _getLatestWithRetry 三次
       // 尝试耗尽后的错误（RC2-04）——BACKEND_UNAVAILABLE/RATE_LIMITED
       // 此时进入可稍后重试终态并清旧资产，避免沿用可能过期的清单。
@@ -1093,6 +1178,14 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   /// 下载 URL 过期/资产冲突/本地 partial 损坏会自动重新 latest 一次并
   /// 重下（仅一次，防拉锯）。
   Future<bool> downloadFirmware({String? companionRuntimeId}) async {
+    try {
+      await accounts.requireLogin();
+      if (_accountCheck?.accountId != accounts.accountId) return false;
+      if (!_cloudDownloadProtected) {
+        accounts.protect(_downloadDio, deviceUid: () => hardwareUid);
+        _cloudDownloadProtected = true;
+      }
+    } on AccountException catch (e) { lastCloudError = e.code; _upgradeStatus.value = e.message; return false; }
     if (_isUpgrading.value) {
       _notify('提示', '升级流程进行中，请先取消或等待完成');
       return false;
@@ -1153,6 +1246,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           appVersionCode,
           _lastCheckedChannel,
           generation: generation,
+          refreshPrepared: true,
         );
         final newAsset = _asset;
         final newReleaseId = _releaseId;
@@ -1446,6 +1540,13 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       return false;
     }
     return await _runExclusive((generation) async {
+      // Authorize once before BEGIN. Session expiry must never interrupt MCU writes.
+      try {
+        final uid = hardwareUid;
+        if (uid == null || _accountCheck?.accountId != accounts.accountId) return false;
+        await accounts.authorizeOta(uid);
+        if (generation != _cancelGeneration || !consentCurrent() || _accountCheck?.accountId != accounts.accountId) return false;
+      } on AccountException catch (e) { lastCloudError = e.code; _upgradeStatus.value = e.message; return false; }
       // 每轮升级重置 failClosed 决策（RC3-08/12②）：上个 owner 未被消费的
       // 残留决策不得沿用到新一轮传输的 catch。
       _failClosedDecided = false;
@@ -3057,13 +3158,15 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   /// 取消）则返回 null，调用方静默退出——禁止把取消前的旧响应发布成
   /// 新状态。请求本身绑定 CancelToken（cancelUpgrade 立即中断在途
   /// latest 请求）。
-  Future<Response<dynamic>?> _getLatestWithRetry(Uri uri, int? generation) async {
+  Future<Response<dynamic>?> _getLatestWithRetry(Uri uri, int? generation, {required AccountCheck check, bool refreshPrepared = false}) async {
+    if (check.accountId != accounts.accountId) throw const AccountException('LOGIN_REQUIRED', '请先登录后重新检查');
+    final headers = {...await accounts.headers(uri, uid: hardwareUid), ...check.headers(refresh: refreshPrepared)};
     var attempts = 0;
     while (true) {
       final token = CancelToken();
       _activeLatestToken = token;
       try {
-        final response = await _dio.getUri(uri, cancelToken: token);
+        final response = await _dio.getUri(uri, cancelToken: token, options: Options(headers: headers, followRedirects: false));
         if (_generationCancelled(generation)) return null;
         return response;
       } on DioException catch (e) {

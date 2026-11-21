@@ -112,7 +112,7 @@ object CompanionBridge {
             "runtimeId" to CompanionService.active?.runtimeId,
             "revision" to revision(context), "problem" to problem(context),
             "intervalHours" to prefs.getInt("intervalHours", 12),
-            "wifiOnly" to prefs.getBoolean("wifiOnly", true),
+            "wifiOnly" to false,
             "unmetered" to (context.getSystemService(ConnectivityManager::class.java)?.isActiveNetworkMetered == false),
             "networkAvailable" to (context.getSystemService(ConnectivityManager::class.java)?.activeNetwork != null),
             "batteryUnrestricted" to context.getSystemService(PowerManager::class.java).isIgnoringBatteryOptimizations(context.packageName),
@@ -197,7 +197,7 @@ object CompanionBridge {
                             if (enable) problem(app)?.let { throw IllegalStateException(it) }
                             val nextRevision = if (enable && enabled(app)) revision(app) else UUID.randomUUID().toString()
                             check(preferences(app).edit().putBoolean("enabled", enable).putInt("intervalHours", hours)
-                                .putBoolean("wifiOnly", call.argument<Boolean>("wifiOnly") != false)
+                                .putBoolean("wifiOnly", false)
                                 .putString("revision", nextRevision).commit()) { "SETTINGS_NOT_PERSISTED" }
                             restore(app)
                             if (enable) CompanionService.start(app, "foreground") else CompanionService.active?.stopCompanion("USER_DISABLED")

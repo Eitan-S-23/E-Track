@@ -17,6 +17,7 @@ import { advancePendingDeltaCancellations, deltaCi } from "./delta_jobs";
 import { deliverNotifications } from "./admin_notifications";
 import { cleanupFeedback, submitFeedback } from "./feedback";
 import type { WorkerEnv } from "./types";
+import { accountAuthRoute, accountRoute, accountCloudAccess, cleanupAccounts } from "./accounts";
 
 export { RateLimiter } from "./rate_limiter";
 
@@ -39,6 +40,12 @@ app.get("/healthz", (c) =>
     environment: c.env.ENVIRONMENT
   })
 );
+
+app.all('/api/auth/*', c => accountAuthRoute(c.req.raw, c.env));
+app.all('/api/account/*', c => accountRoute(c.req.raw, c.env));
+app.use('/api/public/*', async (c, next) => {
+  c.res = await accountCloudAccess(c.req.raw, c.env, async () => { await next(); return c.res; });
+});
 
 app.get("/api/public/latest", async (c) =>
   handleLatest(c.req.raw, c.env, c.get("requestId"))
@@ -117,5 +124,6 @@ export default {
     if (_event.cron !== "17 * * * *") await cleanupFirmwareIdempotency(env.DB);
     await cleanupInventory(env);
     await cleanupFeedback(env);
+    await cleanupAccounts(env);
   }
 } satisfies ExportedHandler<WorkerEnv>;

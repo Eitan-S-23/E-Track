@@ -205,6 +205,7 @@ jobs:
             .cache/flutter-dev-checks/runs/*/logs/*.log
             .cache/p34-phy-native/runs/*/result.json
             .cache/app-patch-tests/*/result.json
+            app/bluetooth_flutter_Trace/pubspec.lock
             .cache/app-patch-tests/*/logs/*.log
             .cache/p34-phy-native/runs/*/logs/*.log
             app/bluetooth_flutter_Trace/build/app/test-results/testDebugUnitTest/TEST-com.wen.gaia.gaia.DeviceOtaServiceTest.xml

@@ -106,7 +106,8 @@ export const hostDb = new SqliteD1();
 const migrationDir = fileURLToPath(new URL("../../../migrations/", import.meta.url));
 export const env = {
   DB: hostDb, PREFLIGHT_LEGACY_DB: new SqliteD1(), RELEASES_BUCKET: new MemoryBucket(), MANIFEST_CACHE: new MemoryKv(),
-  RATE_LIMITER: { getByName() { return { check(key: string, limit: number, window: number) {
+  RATE_LIMITER: { getByName(name: string) { return { check(key: string, limit: number, window: number) {
+    key = name + ':' + key;
     const now = Date.now();
     const times = (hits.get(key) ?? []).filter((time) => time >= now - window * 1000);
     if (times.length >= limit) return { allowed: false, retryAfter: window };

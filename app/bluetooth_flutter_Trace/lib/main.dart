@@ -26,6 +26,7 @@ import 'services/feedback_service.dart';
 import 'services/background_optimization_service.dart';
 import 'services/deep_link_service.dart';
 import 'services/ota_service.dart';
+import 'services/account_service.dart';
 import 'services/bluetooth_service.dart' as bt_service;
 import 'services/responsive_service.dart';
 import 'services/notification_service.dart';
@@ -41,6 +42,7 @@ void showApplication() {
 }
 
 void registerCoreServices() {
+  if (!Get.isRegistered<AccountService>()) Get.put(AccountService(), permanent: true);
   if (!Get.isRegistered<ScanSettingsService>()) Get.put(ScanSettingsService(), permanent: true);
   if (!Get.isRegistered<bt_service.BluetoothService>()) Get.put(bt_service.BluetoothService(), permanent: true);
   if (!Get.isRegistered<BleController>()) Get.put(BleController(), permanent: true);

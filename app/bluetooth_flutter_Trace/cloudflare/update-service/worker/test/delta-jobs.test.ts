@@ -3,6 +3,7 @@ import { createExecutionContext } from "cloudflare:test";
 import { createHash, generateKeyPairSync, sign } from "node:crypto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import worker from "../src/index";
+import { signedInRequest } from './account-fixture';
 import { canonicalJson, sha256Hex } from "../src/crypto";
 import { advancePendingDeltaCancellations, createDeltaJobs, deltaCandidates, deltaJobAction, jobView, workflowLocation } from "../src/delta_jobs";
 import type { DeltaJob, DeltaKind, DeltaSpec } from "../src/delta_jobs";
@@ -349,12 +350,12 @@ describe("operator-selected supplemental delta jobs",()=>{
     const query = new URLSearchParams({ appId: "trace", deviceModel: "e-track-at32f435", channel: "stable",
       currentVersionCode: String(job.base_version_code), currentImageSha: job.base_sha256,
       hardwareRevision: "1", layoutId: "1", bootVersion: "1", protocolVersion: "1", appVersionCode: "103" });
-    const response = await worker.fetch(new Request(`https://example.com/api/public/firmware/latest?${query}`), configured, createExecutionContext());
+    const response = await worker.fetch(await signedInRequest(`https://example.com/api/public/firmware/latest?${query}`), configured, createExecutionContext());
     expect(response.status).toBe(200);
     const latest = await response.json<LatestBody>();
     expect(latest.asset).toMatchObject({ kind: "patch", fileName: expected, sha256: bytesHash(patchBytes),
       sizeBytes: patchBytes.length, baseVersionCode: job.base_version_code, baseImageSha256: job.base_sha256 });
-    const download = await worker.fetch(new Request(latest.asset.downloadUrl), configured, createExecutionContext());
+    const download = await worker.fetch(await signedInRequest(latest.asset.downloadUrl), configured, createExecutionContext());
     expect(download.status, download.status === 200 ? "download succeeded" : await download.clone().text()).toBe(200);
     expect(download.headers.get("Content-Disposition")).toContain(expected);
     expect(new Uint8Array(await download.arrayBuffer())).toEqual(patchBytes);

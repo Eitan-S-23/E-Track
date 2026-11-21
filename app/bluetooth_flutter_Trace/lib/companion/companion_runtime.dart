@@ -15,7 +15,7 @@ import '../utils/permission_helper.dart';
 import 'companion_platform.dart';
 import 'companion_protocol.dart';
 import 'companion_recovery.dart';
-import 'companion_check_budget.dart';
+import '../services/account_service.dart';
 
 typedef _ControlBinding = ({String address, String session, int generation, int epoch});
 
@@ -209,7 +209,8 @@ class CompanionRuntime extends GetxService {
     await _journal('CHECK_SCHEDULE', {'lastCheckAt': last,
       'nextCheckAt': last + interval.inMilliseconds, 'source': wake['reason']});
     final pendingPackage = reconnecting && _preferences!.containsKey('companion_ready_$address');
-    if (manual || reconnecting || wake['checkPending'] == true || wake['reason'] == 'periodic' || due || pendingPackage) {
+    if (manual || reconnecting || wake['checkPending'] == true || wake['reason'] == 'periodic' || due || pendingPackage ||
+        (wake['reason'] == 'network' && _ota.canResumePreparation)) {
       await _check(manual ? 'manual' : reconnecting ? 'reconnect' : 'periodic', 0);
     } else {
       await _journal('CHECK_NOT_EXECUTED', {'reason': 'not_due'});
@@ -397,6 +398,8 @@ class CompanionRuntime extends GetxService {
     if (message.kind == 'CAPS') {
       final capabilities = _capabilities;
       if (capabilities != null && !capabilities.isCompleted) capabilities.complete(true);
+    } else if (message.kind == 'UID') {
+      _ota.acceptHardwareUid(_address!, message.fields[0]);
     } else if (message.kind == 'CHECK' && message.request > _lastDeviceRequest) {
       _lastDeviceRequest = message.request;
       _pendingDeviceCheck = message.request;
@@ -463,17 +466,26 @@ class CompanionRuntime extends GetxService {
   Future<void> _prepare(String source, int request, _ControlBinding binding) async {
     final address = binding.address, runtime = _runtime!;
     final automatic = source != 'manual' && source != 'device';
+    try { await _ota.accounts.requireLogin(); }
+    on AccountException catch (e) {
+      await _journal('CHECK_NOT_EXECUTED', {'source': source, 'reason': e.code});
+      await _deviceState('PHONE_REQUIRED', request, binding: binding);
+      if (_bindingCurrent(binding)) await _state('LOGIN_REQUIRED', busy: false, checkFinished: true);
+      return;
+    }
     if (automatic) {
       final settings = await platform.snapshot();
       if (!_bindingCurrent(binding)) return;
-      final budget = CompanionCheckBudget(_preferences!);
-      final decision = budget.inspect(DateTime.now());
-      final reason = settings['networkAvailable'] == false ? 'network_unavailable' : decision.reason;
+      // Only a request-saving cooldown is local. Daily counts live exclusively on the server.
+      final lastAutomatic = _preferences!.getInt('account_auto_last_${_ota.accounts.accountId}') ?? 0;
+      final elapsed = DateTime.now().millisecondsSinceEpoch - lastAutomatic;
+      final reason = settings['networkAvailable'] == false ? 'network_unavailable' :
+          lastAutomatic > 0 && elapsed >= 0 && elapsed < const Duration(hours: 1).inMilliseconds && !_ota.canResumePreparation
+            ? 'minimum_interval' : null;
       if (reason != null) {
-        await _journal('CHECK_NOT_EXECUTED', {'source': source, 'reason': reason,
-          'nextCheckAt': decision.nextAt});
+        await _journal('CHECK_NOT_EXECUTED', {'source': source, 'reason': reason});
         // Reoffer verified bytes without spending network quota.
-        if (_bindingCurrent(binding)) await _state('CONNECTED', busy: false, checkFinished: true);
+        if (_bindingCurrent(binding)) await _state(reason == 'network_unavailable' ? 'NO_NETWORK' : 'CONNECTED', busy: false, checkFinished: true);
         if (_bindingCurrent(binding) && _preferences!.containsKey('companion_ready_$address') &&
             _ota.deviceInfo != null && _ota.verifiedPackageSha256 != null) {
           await _presentPrepared(source, request, binding, _ota.deviceInfo!);
@@ -492,16 +504,17 @@ class CompanionRuntime extends GetxService {
       return;
     }
     if (!_bindingCurrent(binding)) return;
-    if (automatic && !await CompanionCheckBudget(_preferences!).reserve(DateTime.now())) {
-      await _journal('CHECK_NOT_EXECUTED', {'reason': 'quota_reservation_failed', 'source': source});
-      if (_bindingCurrent(binding)) await _state('CONNECTED', busy: false, checkFinished: true);
-      return;
+    final resume = automatic && _ota.canResumePreparation;
+    final latest = resume ? _ota.latestInfo : await _ota.checkFirmwareUpdate(companionRuntimeId: runtime, automatic: automatic);
+    if (!_bindingCurrent(binding)) return;
+    if (!resume && (latest != null || _ota.lastCheckWasNoUpdate)) {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      await _preferences!.setInt('companion_attempt_$address', now);
+      if (automatic) await _preferences!.setInt('account_auto_last_${_ota.accounts.accountId}', now);
+      await _journal('CHECK_EXECUTED', {'executedAt': now, 'source': source});
+    } else if (!resume && _ota.lastCloudError != null) {
+      await _journal('CHECK_NOT_EXECUTED', {'source': source, 'reason': _ota.lastCloudError});
     }
-    await _preferences!.setInt('companion_attempt_$address', DateTime.now().millisecondsSinceEpoch);
-    if (!_bindingCurrent(binding)) return;
-    await _journal('CHECK_EXECUTED', {'executedAt': DateTime.now().millisecondsSinceEpoch, 'source': source});
-    final latest = await _ota.checkFirmwareUpdate(companionRuntimeId: runtime);
-    if (!_bindingCurrent(binding)) return;
     if (latest == null) {
       final noUpdate = _ota.lastCheckWasNoUpdate;
       if (noUpdate) await _preferences!.remove('companion_ready_$address');
@@ -509,13 +522,6 @@ class CompanionRuntime extends GetxService {
       await _attachControl();
       await _deviceState(noUpdate ? 'NO_UPDATE' : 'FAILED', request, binding: binding);
       if (_bindingCurrent(binding)) await _state(noUpdate ? 'NO_UPDATE' : 'CHECK_FAILED', busy: false, checkFinished: noUpdate);
-      return;
-    }
-    final settings = await platform.snapshot();
-    if (!_bindingCurrent(binding)) return;
-    if (settings['wifiOnly'] != false && settings['unmetered'] != true && _ota.verifiedPackageSha256 == null) {
-      await _attachControl(); await _deviceState('WAIT_WIFI', request, binding: binding);
-      if (_bindingCurrent(binding)) await _state('WAIT_UNMETERED_NETWORK', busy: false);
       return;
     }
     await _attachControl();
@@ -601,7 +607,7 @@ class CompanionRuntime extends GetxService {
       if (!_bindingCurrent(binding)) return;
       final info = await _ota.readDeviceInfo(offer.address, companionRuntimeId: runtime);
       if (!_bindingCurrent(binding) || info == null || _identity(info) != offer.identity) return;
-      final latest = await _ota.checkFirmwareUpdate(companionRuntimeId: runtime);
+      final latest = await _ota.checkFirmwareUpdate(companionRuntimeId: runtime, refreshPrepared: true);
       if (!_bindingCurrent(binding)) return;
       if (!DateTime.now().isBefore(offer.expiresAt) ||
           latest?.versionCode != offer.version || latest?.asset?.sha256 != offer.packageSha ||

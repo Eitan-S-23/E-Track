@@ -52,7 +52,17 @@ static TinyBTPlus bt;
 static uint32_t lastRxTick = 0;
 static bool companion_send(void*, const char*, unsigned);
 static bool companion_install_safe();
-static ETrackCompanion::Control companion_control(companion_send, NULL);
+static const char* companion_uid(void*)
+{
+    // AT32F435 vendor USB descriptors name the three factory UID words at these addresses.
+    static char uid[25];
+    snprintf(uid, sizeof(uid), "%08lx%08lx%08lx",
+        (unsigned long)*(volatile const uint32_t*)0x1FFFF7E8u,
+        (unsigned long)*(volatile const uint32_t*)0x1FFFF7ECu,
+        (unsigned long)*(volatile const uint32_t*)0x1FFFF7F0u);
+    return uid;
+}
+static ETrackCompanion::Control companion_control(companion_send, NULL, companion_uid);
 
 /* ACK batches belong to a real session generation, with or without profiling. */
 static volatile uint32_t s_ble_epoch = 0;

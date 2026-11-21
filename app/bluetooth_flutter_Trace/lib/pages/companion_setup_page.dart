@@ -100,7 +100,7 @@ class _CompanionSetupPageState extends State<CompanionSetupPage> with WidgetsBin
   Future<void> _configure({bool? enabled, int? hours, bool? wifi}) async {
     await _platform.configure(enabled: enabled ?? _snapshot['enabled'] == true,
       intervalHours: hours ?? (_snapshot['intervalHours'] as int? ?? 12),
-      wifiOnly: wifi ?? _snapshot['wifiOnly'] != false);
+      wifiOnly: false);
   }
 
   Widget _section(String number, String title, String detail, List<Widget> children) => Padding(
@@ -193,10 +193,8 @@ class _CompanionSetupPageState extends State<CompanionSetupPage> with WidgetsBin
               style: const TextStyle(color: TraceColors.text),
               items: [6, 12, 24].map((n) => DropdownMenuItem(value: n, child: Text('\u7ea6\u6bcf $n \u5c0f\u65f6\u68c0\u67e5'))).toList(),
               onChanged: _busy ? null : (n) { if (n != null) _run(() => _configure(hours: n)); }),
-            SwitchListTile(contentPadding: EdgeInsets.zero,
-              title: const Text('\u4ec5\u5728\u975e\u8ba1\u8d39\u7f51\u7edc\u81ea\u52a8\u4e0b\u8f7d', style: TextStyle(color: TraceColors.text)),
-              value: _snapshot['wifiOnly'] != false,
-              onChanged: _busy ? null : (value) => _run(() => _configure(wifi: value))),
+            const Text('\u56fa\u4ef6\u4e0b\u8f7d\u652f\u6301 Wi-Fi \u548c\u79fb\u52a8\u6570\u636e\uff0c\u65ad\u7f51\u540e\u53ef\u7ee7\u7eed\u51c6\u5907\uff0c\u4e0d\u91cd\u590d\u6263\u68c0\u67e5\u6b21\u6570\u3002',
+              style: TextStyle(color: TraceColors.muted)),
             _button('\u73b0\u5728\u68c0\u67e5\u4e3b\u63a7\u56fa\u4ef6', _platform.check),
           ]),
           _section('05', '\u7535\u6c60\u4e0e\u5382\u5546\u81ea\u542f\u52a8', '\u4ec5\u5728\u540e\u53f0\u8fde\u63a5\u53d7\u7cfb\u7edf\u9650\u5236\u65f6\u6309\u9700\u8c03\u6574\u3002\u65e0\u9700\u4e00\u5f8b\u5173\u95ed\u6240\u6709\u7701\u7535\u529f\u80fd\u3002\u5382\u5546\u81ea\u542f\u52a8\u5f00\u5173\u65e0\u6cd5\u53ef\u9760\u8bfb\u53d6\uff0c\u59cb\u7ec8\u9700\u8981\u4f60\u6838\u5bf9\uff1b\u8df3\u8f6c\u8fc7\u9875\u9762\u4e0d\u8868\u793a\u5df2\u6388\u6743\u3002', [

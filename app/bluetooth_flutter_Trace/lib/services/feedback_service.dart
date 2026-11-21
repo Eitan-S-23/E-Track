@@ -10,6 +10,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/share_links.dart';
+import 'account_service.dart';
 
 class FeedbackReply {
   const FeedbackReply(this.status, this.body);
@@ -87,7 +88,7 @@ class FeedbackService extends GetxService with WidgetsBindingObserver {
     try {
       final result = await dio.postUri<Map<String, dynamic>>(uri, data: body, cancelToken: cancel,
         options: Options(followRedirects: false, validateStatus: (status) => status != null,
-          headers: {'Authorization': 'Bearer $token'}, contentType: Headers.jsonContentType));
+          headers: {...await AccountService.to.headers(uri), 'X-Install-Token': token}, contentType: Headers.jsonContentType));
       if (result.data == null) throw const FormatException('Missing feedback receipt');
       return FeedbackReply(result.statusCode ?? 0, result.data!);
     } finally { dio.close(); }

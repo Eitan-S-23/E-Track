@@ -1,5 +1,5 @@
 import { env } from "cloudflare:workers";
-import { SELF } from "cloudflare:test";
+import { SELF } from './account-fixture';
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { signHmacSha256 } from "../src/crypto";
 import { firmwareAssets, requireFirmwareFull } from "../src/firmware";

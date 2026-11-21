@@ -127,7 +127,7 @@ export async function inventoryControl(request: Request, env: PublicInventoryEnv
 export async function reportInventory(request: Request, env: PublicInventoryEnv, now = Math.floor(Date.now() / 1000)): Promise<Response> {
   enabled(env);
   await rate(request, env);
-  const token = request.headers.get("Authorization")?.match(/^Bearer ([0-9a-f]{64})$/)?.[1];
+  const token = request.headers.get('X-Install-Token') ?? request.headers.get("Authorization")?.match(/^Bearer ([0-9a-f]{64})$/)?.[1];
   if (!token) throw new ApiError("TOKEN_INVALID", "Installation reporting token required", 401);
   const key = await sha256Text(token);
   const body = await boundedJson(request);

@@ -1,4 +1,6 @@
 import 'dart:async';
+import '../account_fixture.dart';
+import 'package:ble_monitor/services/account_service.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -79,6 +81,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() {
     Get.testMode = true;
+    Get.put<AccountService>(TestAccountService());
   });
 
   tearDown(() {
@@ -4890,6 +4893,8 @@ class _AdmissionDevice extends Fake implements fbp.BluetoothDevice {
 }
 
 class _UpgradeFakeBle extends BluetoothService {
+  final _accountDecoder = CompanionDecoder();
+  bool _accountText = false;
   String defaultWriteMode = 'with';
   final radioCalls = <String>[];
   bool failRadioPause = false;
@@ -5309,6 +5314,14 @@ class _UpgradeFakeBle extends BluetoothService {
     OtaWriteAdmission? admission,
   }) async {
     admission?.dispatch();
+    if ((data.isNotEmpty && data.first == 33 && _pending.isEmpty) || _accountText) {
+      _accountText = !data.contains(10);
+      for (final request in _accountDecoder.add(data, idleTextAllowed: true)) {
+        if (request.kind == 'IDENTIFY') _notifyController.add(CompanionMessage('UID', request.session, 0,
+          ['1234567890abcdef12345678']).encode());
+      }
+      return;
+    }
     platformWriteCalls++;
     // P3-4：fake 覆写的是带计时的外壳（真实外壳成功记 recordGattWrite、
     // 异常补 error 版后 rethrow），此处对齐外壳的 stats 上报语义；

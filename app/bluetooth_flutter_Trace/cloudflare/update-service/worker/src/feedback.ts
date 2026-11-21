@@ -55,7 +55,7 @@ export async function submitFeedback(request: Request, env: PublicFeedbackEnv,
   const ingress = await sha256Text(`feedback-ingress:${ip}`);
   const rate = await env.RATE_LIMITER.getByName(`feedback:${ingress.slice(0, 2)}`).check(ingress, 20, 60);
   if (!rate.allowed) return limited(now, now + Math.max(1, rate.retryAfter), "requests");
-  const token = request.headers.get("Authorization")?.match(/^Bearer ([0-9a-f]{64})$/)?.[1];
+  const token = request.headers.get('X-Install-Token') ?? request.headers.get("Authorization")?.match(/^Bearer ([0-9a-f]{64})$/)?.[1];
   if (!token) throw new ApiError("TOKEN_INVALID", "Installation feedback token required", 401);
   const body = await boundedJson(request, 96 * 1024);
   if (body.appId !== env.APP_ID || typeof body.batchId !== "string" || !UUID.test(body.batchId) ||

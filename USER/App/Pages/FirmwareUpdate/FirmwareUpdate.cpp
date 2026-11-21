@@ -1540,11 +1540,17 @@ namespace
 
     void CompanionLayout(bool active)
     {
-        const bool blocked = !active && companionDisplayed.hasOffer && !CompanionCanInstall();
-        const int extra = blocked ? 32 : 0;
         const int width = active ? LV_HOR_RES : LV_HOR_RES - 20;
-        lv_obj_set_pos(companionPanel, active ? 0 : 10, active ? 0 : 42 - extra / 2);
-        lv_obj_set_size(companionPanel, width, active ? LV_VER_RES : 250 + extra);
+        const lv_font_t* font = ResourcePool::GetFont("cn_16");
+        lv_point_t statusSize, messageSize;
+        lv_txt_get_size(&statusSize, lv_label_get_text(companionStatus), font, 0, 0, width - 16, LV_TEXT_FLAG_NONE);
+        lv_txt_get_size(&messageSize, lv_label_get_text(companionMessage), font, 0, 0, width - 16, LV_TEXT_FLAG_NONE);
+        const int messageY = active ? 286 : 151 + statusSize.y + 8;
+        const int neededHeight = messageY + messageSize.y + 12 + 32 + 12;
+        const int height = active ? LV_VER_RES : LV_MAX(250, neededHeight);
+        const int buttonY = height - 44;
+        lv_obj_set_pos(companionPanel, active ? 0 : 10, active ? 0 : (LV_VER_RES - height) / 2);
+        lv_obj_set_size(companionPanel, width, height);
         lv_obj_set_style_radius(companionPanel, active ? 0 : 12, 0);
         lv_obj_set_style_border_width(companionPanel, active ? 0 : 1, 0);
         lv_obj_set_width(companionTitle, width - 16);
@@ -1559,17 +1565,17 @@ namespace
         lv_obj_set_pos(companionStatus, 8, active ? 232 : 151);
         lv_obj_set_width(companionStatus, width - 16);
         lv_obj_set_style_text_align(companionStatus, LV_TEXT_ALIGN_CENTER, 0);
-        lv_obj_set_pos(companionMessage, 8, active ? 286 : 178);
+        lv_obj_set_pos(companionMessage, 8, messageY);
         lv_obj_set_width(companionMessage, width - 16);
         lv_obj_set_style_text_align(companionMessage, LV_TEXT_ALIGN_CENTER, 0);
         lv_obj_set_style_text_line_space(companionMessage, 0, 0);
         lv_label_set_long_mode(companionMessage, LV_LABEL_LONG_WRAP);
         // Check and Install share one slot but are never visible together.
-        lv_obj_set_pos(companionCheck, 104, 208 + extra);
+        lv_obj_set_pos(companionCheck, 104, buttonY);
         lv_obj_set_size(companionCheck, width - 116, 32);
-        lv_obj_set_pos(companionLater, 12, active ? 286 : 208 + extra);
+        lv_obj_set_pos(companionLater, 12, active ? 286 : buttonY);
         lv_obj_set_size(companionLater, active ? 34 : 84, active ? 26 : 32);
-        lv_obj_set_pos(companionInstall, 104, 208 + extra);
+        lv_obj_set_pos(companionInstall, 104, buttonY);
         lv_obj_set_size(companionInstall, width - 116, 32);
         if (active)
         {
@@ -1591,7 +1597,6 @@ namespace
         const char* code = companionDisplayed.status;
         if (strcmp(code, "READY") == 0 && !companionDisplayed.hasOffer) code = "UNAVAILABLE";
         const bool progressing = HAL::CompanionUpdateActive(companionDisplayed);
-        CompanionLayout(progressing);
         if (!progressing && companionDisplayed.hasOffer && !CompanionCanInstall()) code = "WAIT_SAFE";
         if (!progressing && companionSdBusy && !companionDisplayed.hasOffer) code = "SD_BUSY";
         const char* title = CompanionStatusTitle(code);
@@ -1690,6 +1695,8 @@ namespace
         CompanionSetText(companionVersion, version);
         CompanionSetText(lv_obj_get_child(companionLater, 0),
             !progressing && companionDisplayed.hasOffer ? "\xE7\xA8\x8D\xE5\x90\x8E" : "\xE8\xBF\x94\xE5\x9B\x9E");
+        // Measure the new state's wrapped text, not the previous state's geometry.
+        CompanionLayout(progressing);
     }
 
     void CompanionClose(void*)

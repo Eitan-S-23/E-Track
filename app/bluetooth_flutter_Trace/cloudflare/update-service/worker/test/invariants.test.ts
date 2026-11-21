@@ -1,5 +1,6 @@
 import { env } from "cloudflare:workers";
-import { SELF, createExecutionContext } from "cloudflare:test";
+import { createExecutionContext } from "cloudflare:test";
+import { SELF, signedInRequest } from './account-fixture';
 import { describe, expect, it } from "vitest";
 import { editReleaseNotes, publishRelease } from "../src/admin_actions";
 import { signDownloadToken } from "../src/downloads";
@@ -551,7 +552,7 @@ describe("Phase 1 update-service invariants", () => {
 
     const ctx = createExecutionContext();
     const response = await worker.fetch(
-      new Request(
+      await signedInRequest(
         "http://example.com/api/public/latest?appId=trace&platform=android&channel=stable&versionCode=1"
       ),
       fakeEnv,

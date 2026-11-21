@@ -1,5 +1,45 @@
 # OTA Companion And Admin Scroll Investigation
 
+## Account And Layout Batch, 2026-11-22
+
+Status: LOCAL_PENDING / SELF_TEST_IN_PROGRESS, based on main 409fc640bc86272c34a2a6ce3f85dfef2c8498a9.
+Owner explicitly selected **5 automatic and 5 manual checks per account per day**,
+separate pools shared by devices/phones, not journal-derived or reset by reinstall.
+Server day is Asia/Shanghai; the prior one-hour automatic spacing is retained.
+Client cooldown only saves requests; the server owns daily admission atomically.
+Successful update/no-update responses consume one check; backend failures do not.
+Request IDs deduplicate retries. Download preparation refreshes the same checked
+asset without charging again and never silently changes target/package identity.
+
+Implementation in progress: new-api-referenced login/register/reset controls,
+OS-vault App sessions, Access-protected Admin account/registration/login statistics,
+UID device association, anonymous local Bluetooth with authenticated cloud/OTA
+admission, mobile-data firmware preparation and network-restoration continuation.
+Factory UID is an identifier, **not a cryptographic ownership proof**. The App
+reads it from a current BLE generation and asks the user to confirm association;
+this does not introduce device provisioning/signing keys or an anti-cloning claim.
+Existing BCB, OTA success identity verification and active-write ownership remain.
+
+MCU text-layout regression failed against the old code in `tests-20` and passed
+76 host cases in `tests-21`/`tests-22` (latter adds physical-screen bounds). Source
+and image originals are retained under `.cache/ota-followup-20261122/` and
+`.cache/companion-modal-tests/`. The new additive UID query preserves the legacy
+binary INFO schema; UID behavior tests and firmware/simulator builds are pending.
+
+Backend `accounts-host-01` passed 13 new cases; `accounts-host-03` passed 532 cases
+with one additional script suite not run due host Git ownership. `accounts-check-03`
+passed TypeScript. Native Windows workerd crashed before testing in
+`accounts-test-01`; this is retained as runtime NOT_RUN, not product success.
+Flutter, native Android, Admin browser and native workerd CI are still pending.
+No new formal version, main push, deployment, phone action, J-Link or OTA occurred.
+Owner reported the earlier automatic popup works; do not repeat OTA to recapture it.
+
+Rollout must install UID-capable MCU firmware through the existing OTA route before
+requiring account binding on the cloud side. Older firmware cannot invent a UID.
+Owner retains all Cloudflare migrations/deployment/configuration/channel/delta
+operations. Exact version/source and deployment steps follow successful self-tests;
+this local batch is not independent acceptance or live account availability.
+
 ## Owner Feedback Follow-Up, 2026-11-22
 
 Status: IN_PROGRESS / LOCAL_PENDING. Owner: Codex root, primary main checkout,

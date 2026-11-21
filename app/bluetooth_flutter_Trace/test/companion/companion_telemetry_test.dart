@@ -1,4 +1,6 @@
 import 'dart:async';
+import '../account_fixture.dart';
+import 'package:ble_monitor/services/account_service.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -32,6 +34,7 @@ void main() {
   void scenario(String name, Future<void> Function(_Harness) body, {bool history = false}) {
     testWidgets('T02 $name', (tester) async {
       Get.testMode = true;
+      Get.put<AccountService>(TestAccountService(signedIn: false));
       final now = DateTime.now();
       SharedPreferences.setMockInitialValues({
         'companion_attempt_$_address': DateTime.now().millisecondsSinceEpoch,

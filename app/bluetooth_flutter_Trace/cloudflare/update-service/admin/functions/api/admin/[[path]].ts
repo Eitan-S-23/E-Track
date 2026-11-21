@@ -8,12 +8,15 @@ import { createDeltaJobs, deltaCandidates, deltaJobAction } from "../../../../wo
 import { deltaActivity, readNotifications, dismissNotifications, hideCompletedJobs, subscribeNotifications, unsubscribeNotifications } from "../../../../worker/src/admin_notifications";
 import { resourceUsage } from "../../../../worker/src/resource_usage";
 import { feedbackDetail, listFeedback, updateFeedback } from "../../../../worker/src/feedback";
+import { accountAdmin } from '../../../../worker/src/account_admin';
 
 type Platform = "android" | "windows" | "ios";
 type ChannelName = "stable" | "beta";
 type ActorRole = "viewer" | "publisher" | "owner";
 
 interface AdminEnv {
+  ACCOUNT_MAIL_API_KEY?: string;
+  ACCOUNT_MAIL_FROM?: string;
   RESOURCE_USAGE_API_TOKEN?: string;
   RESOURCE_USAGE_CONFIG_JSON?: string;
   DB: D1Database;
@@ -214,6 +217,11 @@ async function routeAdminRequest(
         "Set-Cookie": csrfCookie(csrfToken)
       }
     );
+  }
+
+  if (route[0] === 'accounts') {
+    requireRole(actor, method === 'GET' ? 'viewer' : 'owner');
+    return accountAdmin(context.request, context.env, actor);
   }
 
   if (method === "GET" && route.length === 1 && route[0] === "channels") {
