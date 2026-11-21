@@ -1,7 +1,7 @@
 {
   "schema": "original-admin-automatic-candidates-v1",
   "firmware": {
-    "versionName": "3.3.42",
-    "releaseNotes": "First owner-controlled OTA target for the P01/U01 3.3.41 receiver and original-signed App 1.0.88+114. Version-only firmware change; all functional inputs remain identical to 3.3.41 from main 50b9af34090214e1a64424d6280352bcfd6aa82f. Keep this as an unpublished candidate until the owner publishes Stable and generates/enables the exact 3.3.41 to 3.3.42 delta. Test autonomous discovery/MCU notification, global prompt, Later, true durable/stage progress, post-reboot target identity, persistent history and native recovery diagnostics. Preserve explicit consent, same-package suppression, recording/power/storage gates, Boot/configuration/user data, keys and protocol. No automatic channel publication or delta generation; 3.3.43 must not skip this first test round. App version is unchanged and must not be rebuilt for this firmware-only delivery."
+    "versionName": "3.3.43",
+    "releaseNotes": "Second owner-controlled OTA target for P01/U01 and original-signed App 1.0.88+114. Version-only firmware change; all functional inputs remain identical to 3.3.41 from main 50b9af34090214e1a64424d6280352bcfd6aa82f and 3.3.42 from main 3dd630ffe6443e6d56d336aecf4941b7488f8c35. Keep this as an unpublished candidate until the owner completes the 3.3.41 to 3.3.42 test round, then publishes Stable and generates/enables the exact 3.3.42 to 3.3.43 delta. Do not skip or replace the first test round. Verify autonomous discovery/MCU notification, global prompt, Later, true durable/stage progress, post-reboot identity, persistent history and native recovery diagnostics. Preserve explicit consent, same-package suppression, recording/power/storage gates, Boot/configuration/user data, keys and protocol. No automatic channel publication or delta generation. App version is unchanged and must not be rebuilt for this firmware-only delivery."
   }
 }

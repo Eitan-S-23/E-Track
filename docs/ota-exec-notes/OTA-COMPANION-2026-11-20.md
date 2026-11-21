@@ -1668,3 +1668,25 @@ executor `12ff41fc`, bound to E-Track main `50b9af34`. Direct installation
 The current main change prepares **3.3.42 only**, preserving App 1.0.88+114 and
 every firmware functional input. This is the first owner-published target from
 3.3.41; no Stable/Beta switch, delta operation or phone instruction is issued.
+
+3.3.42 is now remotely delivered at `3dd630ffe6443e6d56d336aecf4941b7488f8c35`.
+Candidate `44899719630` passes checks and firmware, with App correctly skipped.
+Original log `keyring-logs-09/job-136833116501.log` records registration
+`fw_89dd50a67ce280bae883bda2cede743679d5fe4a9712b7d27edd0df80e1bff3e`,
+`ok=true`, `state=ready`, two assets, `channelPublished=false`,
+`productionApproved=false`. Target raw SHA-256 is
+`cae6f46fbc18a3ef429a170993d0b95dda79b5140fad957992fe42153f34916c`;
+full ETU SHA-256 is
+`f8d5edd825de19eb1d40463b2ebded9468c1b0df792f3eb850b61d4f90a1f337`;
+recovery SHA-256 is
+`edbc1987d9f71d874b4a76c7091d56fa3341a9c1d10c497fa239b5c6190683d9`.
+These are CI receipts, not an additional backend download or channel operation.
+Both ordinary APK/EXE jobs are also skipped. Existing GitHub releases, including
+drafts, were enumerated again in `keyring-read-04`; no MCU 3.3.43 tag is reserved.
+
+The next bounded commit prepares **3.3.43 only**; no functional/App changes.
+It remains unpublished until the owner completes 30341 -> 30342 and authorizes
+the second round through the exact 30342 baseline. The live 30341 installation
+has already verified its sole Flash write/full readback and target bootstrap;
+the complete-state EEPROM transaction/final running verification is still in
+progress. Do not replay the Flash write or alter its source-bound worker.
