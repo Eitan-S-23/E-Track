@@ -1956,3 +1956,38 @@ pending, not independent acceptance or an OTA PASS. Do not automatically check,
 start OTA, publish channels or create deltas. The current baseline is 3.3.44;
 the old 30341 -> 30342 -> 30343 matrix was not executed and cannot be reused as
 forward updates. Existing candidates and original failures remain intact.
+
+#### Owner-Requested Forward Candidate 3.3.45
+
+The owner now confirms that the installed 3.3.44 check-update page is normal.
+This is owner visual feedback for the reported layout/text defects, not an OTA
+PASS or independent acceptance. The owner requests one new upgrade package in
+the backend only, retaining all Stable/Beta and delta generation/enabling actions.
+
+Codex root owns this bounded APP-COMPANION-01 follow-up on primary main, starting
+at `af383fadc17374de3c2ef5aab45059b5bb7c7a9f`, freshly matched to remote main.
+Prepare **3.3.45 / 30345** with identical product functionality to 3.3.44; only
+the firmware release version/notes and these operational records change.
+App 1.0.88+114 is unchanged. The forward test baseline is **3.3.44 -> 3.3.45**,
+not the superseded 3.3.41/42/43 sequence. Prior immutable assets are preserved.
+
+Entry evidence under `.cache/ota-ui-20261121/`: `keyring-read-06` lists all
+E-Track Releases including drafts (two entries, no pagination remainder), and
+`keyring-read-07` checks all E-Track tag refs; neither reserves 3.3.45.
+Existing CI registration retains its immutable backend collision checks; no
+manual Admin API/login, deployment or credential change is allowed. No active
+device/index lock was present. `candidate45-preflight-01` verifies the root and
+controlled output paths before edits. `.trellis` is absent in this checkout;
+the current project contracts and existing task record remain the applicable
+workflow, without introducing a new task system.
+
+`candidate45-tests-01` passes all 90 existing original-Admin/candidate regressions.
+The actual configuration passed the component planner: firmware required with
+version code 30345, App 1.0.88+114 not required, channelPublished=false and
+automaticDeltas=false. This local self-test does not claim a formal build or OTA.
+
+Status: LOCAL_PENDING candidate configuration and owner-feedback record.
+Next: commit the bounded changes, push main once, then observe the formal CI and
+sanitized automatic registration receipt. Do not directly install the target, start a
+collector, trigger a check/OTA or clear reminder state. The owner performs the
+actual upgrade after publishing Stable and enabling the exact-baseline delta.
