@@ -114,6 +114,7 @@ object CompanionBridge {
             "intervalHours" to prefs.getInt("intervalHours", 12),
             "wifiOnly" to prefs.getBoolean("wifiOnly", true),
             "unmetered" to (context.getSystemService(ConnectivityManager::class.java)?.isActiveNetworkMetered == false),
+            "networkAvailable" to (context.getSystemService(ConnectivityManager::class.java)?.activeNetwork != null),
             "batteryUnrestricted" to context.getSystemService(PowerManager::class.java).isIgnoringBatteryOptimizations(context.packageName),
             "vendorAutostart" to "unknown", "lastResult" to prefs.getString("lastResult", "NOT_RUN"))
     }

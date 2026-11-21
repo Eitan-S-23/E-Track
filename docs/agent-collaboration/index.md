@@ -1,5 +1,10 @@
 # Shared Agent Records
 
+Current follow-up: COMPANION-FEEDBACK-20261122, Codex root, IN_PROGRESS / LOCAL_PENDING.
+Original owner ZIP, same-process post-OTA service stop finding, UI/check/history
+scope and direct-install/two-candidate authority are recorded in
+[the existing task note](../ota-exec-notes/OTA-COMPANION-2026-11-20.md#owner-feedback-follow-up-2026-11-22).
+
 Project-wide entry for all E-Track agents and components. Rules live in the
 [collaboration contract](../agent-collaboration-contract.md), not in a task cache.
 This index and its topic records are operational history, not acceptance inputs.

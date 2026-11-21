@@ -91,6 +91,10 @@ class OtaUpgradeHistory {
           'beforeVersion': row['beforeVersion'], 'targetVersion': row['targetVersion'],
           'elapsedMs': row['durationMs'], 'errorCode': row['errorCode'],
           'retryCount': row['retryCount'],
+          'kind': row['kind'], 'packageSha': row['packageSha'],
+          'beforeSha': row['beforeSha'], 'targetSha': row['targetSha'],
+          'afterSha': row['afterSha'], 'afterVersion': row['afterVersion'],
+          'startedAt': row['startedAt'], 'verifiedAt': row['verifiedAt'],
         }).timeout(const Duration(seconds: 1));
       } catch (_) { /* The durable local history is independent of diagnostics. */ }
     }

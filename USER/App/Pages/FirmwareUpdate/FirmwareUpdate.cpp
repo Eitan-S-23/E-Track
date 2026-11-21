@@ -1455,6 +1455,23 @@ namespace
 
     const char* CompanionStatusText(const char* code)
     {
+        if (strcmp(code, "WAIT_SAFE") == 0)
+        {
+            static char reasons[192];
+            reasons[0] = '\0';
+            HAL::Power_Info_t power = {};
+            HAL::Power_GetInfo(&power);
+            if (DataProc::Recorder_IsOpen())
+                strcat(reasons, "\xE8\xAF\xB7\xE5\x85\x88\xE7\xBB\x93\xE6\x9D\x9F\xE8\xAE\xB0\xE5\xBD\x95\n");
+            if (!power.isCharging && power.usage < 30u)
+                strcat(reasons, "\xE7\x94\xB5\xE9\x87\x8F\xE4\xB8\x8D\xE8\xB6\xB3 30%\xEF\xBC\x8C\xE8\xAF\xB7\xE5\x85\x85\xE7\x94\xB5\n");
+            if (companionSdBusy)
+                strcat(reasons, "\xE5\xAD\x98\xE5\x82\xA8\xE5\xBF\x99\xEF\xBC\x8C\xE8\xAF\xB7\xE7\xA8\x8D\xE5\x80\x99\n");
+            if (reasons[0] == '\0')
+                return "\xE8\xAE\xBE\xE5\xA4\x87\xE5\xBF\x99\xEF\xBC\x8C\xE8\xAF\xB7\xE7\xA8\x8D\xE5\x80\x99";
+            reasons[strlen(reasons) - 1] = '\0';
+            return reasons;
+        }
         if (strcmp(code, "READY") == 0) return "\xE5\x9B\xBA\xE4\xBB\xB6\xE5\xB7\xB2\xE5\xB0\xB1\xE7\xBB\xAA\n\xE7\xA1\xAE\xE8\xAE\xA4\xE5\x90\x8E\xE5\xBC\x80\xE5\xA7\x8B\xE6\x9B\xB4\xE6\x96\xB0";
         if (strcmp(code, "NO_UPDATE") == 0) return "\xE5\xBD\x93\xE5\x89\x8D\xE5\xB7\xB2\xE6\x98\xAF\xE6\x9C\x80\xE6\x96\xB0\xE7\x89\x88\xE6\x9C\xAC";
         if (strcmp(code, "CHECKING") == 0) return "\xE6\xAD\xA3\xE5\x9C\xA8\xE9\x80\x9A\xE8\xBF\x87\xE6\x89\x8B\xE6\x9C\xBA\n\xE6\x9F\xA5\xE8\xAF\xA2\xE5\x8F\xAF\xE7\x94\xA8\xE5\x9B\xBA\xE4\xBB\xB6";
@@ -1463,7 +1480,6 @@ namespace
         if (strcmp(code, "WAIT_WIFI") == 0) return "\xE7\xAD\x89\xE5\xBE\x85 Wi-Fi \xE7\xBD\x91\xE7\xBB\x9C\n\xE8\xBF\x9E\xE6\x8E\xA5\xE5\x90\x8E\xE7\xBB\xA7\xE7\xBB\xAD\xE4\xB8\x8B\xE8\xBD\xBD";
         if (strcmp(code, "DEFERRED") == 0) return "\xE6\x9C\xAC\xE6\xAC\xA1\xE6\x9B\xB4\xE6\x96\xB0\xE5\xB7\xB2\xE6\x9A\x82\xE7\xBC\x93\n\xE5\x8F\xAF\xE7\xA8\x8D\xE5\x90\x8E\xE9\x87\x8D\xE6\x96\xB0\xE6\xA3\x80\xE6\x9F\xA5";
         if (strcmp(code, "STARTING") == 0 || strcmp(code, "UPGRADING") == 0) return "\xE6\xAD\xA3\xE5\x9C\xA8\xE6\x9B\xB4\xE6\x96\xB0\xE5\x9B\xBA\xE4\xBB\xB6\n\xE8\xAF\xB7\xE4\xBF\x9D\xE6\x8C\x81\xE8\xAE\xBE\xE5\xA4\x87\xE4\xBE\x9B\xE7\x94\xB5";
-        if (strcmp(code, "WAIT_SAFE") == 0) return "\xE8\xAF\xB7\xE5\x85\x88\xE7\xBB\x93\xE6\x9D\x9F\xE8\xAE\xB0\xE5\xBD\x95\n\xE7\x94\xB5\xE9\x87\x8F\xE8\x87\xB3\xE5\xB0\x91 30% \xE6\x88\x96\xE5\x85\x85\xE7\x94\xB5";
         if (strcmp(code, "SD_BUSY") == 0) return "\xE8\xAF\xB7\xE5\x85\x88\xE5\xAE\x8C\xE6\x88\x90 SD \xE6\x9B\xB4\xE6\x96\xB0\n\xE8\xAF\xB7\xE4\xBF\x9D\xE6\x8C\x81\xE8\xAE\xBE\xE5\xA4\x87\xE4\xBE\x9B\xE7\x94\xB5";
         if (strcmp(code, "SIMULATOR_NO_PHONE") == 0) return "\xE6\xA8\xA1\xE6\x8B\x9F\xE5\x99\xA8\xE6\x97\xA0\xE6\x89\x8B\xE6\x9C\xBA\xE8\xBF\x9E\xE6\x8E\xA5\n\xE6\x9C\xAA\xE6\x89\xA7\xE8\xA1\x8C\xE8\xAE\xBE\xE5\xA4\x87\xE6\x9B\xB4\xE6\x96\xB0";
         if (strcmp(code, "FAILED") == 0) return "\xE6\xA3\x80\xE6\x9F\xA5\xE5\xA4\xB1\xE8\xB4\xA5\n\xE8\xAF\xB7\xE5\x9C\xA8\xE6\x89\x8B\xE6\x9C\xBA\xE6\x9F\xA5\xE7\x9C\x8B\xE8\xAF\xA6\xE6\x83\x85";
@@ -1474,7 +1490,7 @@ namespace
 
     const char* CompanionStatusTitle(const char* code)
     {
-        if (strcmp(code, "READY") == 0) return "\xE5\x8F\xAF\xE7\x94\xA8\xE6\x9B\xB4\xE6\x96\xB0";
+        if (strcmp(code, "READY") == 0) return "\xE6\x9C\x89\xE5\x8F\xAF\xE7\x94\xA8\xE6\x9B\xB4\xE6\x96\xB0";
         if (strcmp(code, "NO_UPDATE") == 0) return "\xE5\xB7\xB2\xE6\x98\xAF\xE6\x9C\x80\xE6\x96\xB0";
         if (strcmp(code, "CHECKING") == 0) return "\xE6\xAD\xA3\xE5\x9C\xA8\xE6\xA3\x80\xE6\x9F\xA5";
         if (strcmp(code, "DOWNLOADING") == 0) return "\xE4\xB8\x8B\xE8\xBD\xBD\xE5\x9B\xBA\xE4\xBB\xB6";
@@ -1523,9 +1539,11 @@ namespace
 
     void CompanionLayout(bool active)
     {
+        const bool blocked = !active && companionDisplayed.hasOffer && !CompanionCanInstall();
+        const int extra = blocked ? 32 : 0;
         const int width = active ? LV_HOR_RES : LV_HOR_RES - 20;
-        lv_obj_set_pos(companionPanel, active ? 0 : 10, active ? 0 : 42);
-        lv_obj_set_size(companionPanel, width, active ? LV_VER_RES : 250);
+        lv_obj_set_pos(companionPanel, active ? 0 : 10, active ? 0 : 42 - extra / 2);
+        lv_obj_set_size(companionPanel, width, active ? LV_VER_RES : 250 + extra);
         lv_obj_set_style_radius(companionPanel, active ? 0 : 12, 0);
         lv_obj_set_style_border_width(companionPanel, active ? 0 : 1, 0);
         lv_obj_set_width(companionTitle, width - 16);
@@ -1544,13 +1562,13 @@ namespace
         lv_obj_set_width(companionMessage, width - 16);
         lv_obj_set_style_text_align(companionMessage, LV_TEXT_ALIGN_CENTER, 0);
         lv_obj_set_style_text_line_space(companionMessage, 0, 0);
-        lv_label_set_long_mode(companionMessage, LV_LABEL_LONG_DOT);
+        lv_label_set_long_mode(companionMessage, LV_LABEL_LONG_WRAP);
         // Check and Install share one slot but are never visible together.
-        lv_obj_set_pos(companionCheck, 104, 208);
+        lv_obj_set_pos(companionCheck, 104, 208 + extra);
         lv_obj_set_size(companionCheck, width - 116, 32);
-        lv_obj_set_pos(companionLater, 12, active ? 286 : 208);
+        lv_obj_set_pos(companionLater, 12, active ? 286 : 208 + extra);
         lv_obj_set_size(companionLater, active ? 34 : 84, active ? 26 : 32);
-        lv_obj_set_pos(companionInstall, 104, 208);
+        lv_obj_set_pos(companionInstall, 104, 208 + extra);
         lv_obj_set_size(companionInstall, width - 116, 32);
         if (active)
         {
@@ -1574,7 +1592,7 @@ namespace
         const bool progressing = HAL::CompanionUpdateActive(companionDisplayed);
         CompanionLayout(progressing);
         if (!progressing && companionDisplayed.hasOffer && !CompanionCanInstall()) code = "WAIT_SAFE";
-        if (!progressing && companionSdBusy) code = "SD_BUSY";
+        if (!progressing && companionSdBusy && !companionDisplayed.hasOffer) code = "SD_BUSY";
         const char* title = CompanionStatusTitle(code);
         const char* message = CompanionStatusText(code);
         if (!progressing && strcmp(code, "READY") == 0)
@@ -1590,15 +1608,15 @@ namespace
             break;
         case HAL::COMPANION_UPDATE_APPLYING:
             title = CompanionStatusTitle("VERIFYING");
-            detail = "APPLY / VERIFY";
+            detail = "EST. / APPLY";
             break;
         case HAL::COMPANION_UPDATE_BACKING_UP:
             title = CompanionStatusTitle("UPGRADING");
-            detail = "BACKUP / COMMIT";
+            detail = "EST. / BACKUP";
             break;
         case HAL::COMPANION_UPDATE_REBOOTING:
             title = "\xE6\xAD\xA3\xE5\x9C\xA8\xE9\x87\x8D\xE5\x90\xAF";
-            detail = "REBOOT / VERIFY";
+            detail = "PREPARED / REBOOT";
             break;
         case HAL::COMPANION_UPDATE_FAILED:
             code = "FAILED";
@@ -1607,7 +1625,8 @@ namespace
             break;
         default: break;
         }
-        if (progressing) message = "\xE8\xAF\xB7\xE4\xBF\x9D\xE6\x8C\x81\xE8\xAE\xBE\xE5\xA4\x87\xE4\xBE\x9B\xE7\x94\xB5";
+        if (progressing) message = companionDisplayed.phase == HAL::COMPANION_UPDATE_TRANSFERRING ?
+            "\xE8\xAF\xB7\xE4\xBF\x9D\xE6\x8C\x81\xE8\xAE\xBE\xE5\xA4\x87\xE4\xBE\x9B\xE7\x94\xB5" : "\xE9\xA2\x84\xE4\xBC\xB0\xE5\xA4\x84\xE7\x90\x86\xE8\xBF\x9B\xE5\xBA\xA6\xEF\xBC\x8C\xE8\xAF\xB7\xE4\xBF\x9D\xE6\x8C\x81\xE4\xBE\x9B\xE7\x94\xB5";
         CompanionSetText(companionTitle, progressing ? "E-Track" : companionDisplayed.hasOffer ? CompanionStatusTitle("READY") :
             "\xE6\xA3\x80\xE6\x9F\xA5\xE6\x9B\xB4\xE6\x96\xB0");
         CompanionSetText(companionStatus, title);
@@ -1633,11 +1652,11 @@ namespace
             else
             {
                 lv_obj_add_flag(companionProgressBar, LV_OBJ_FLAG_HIDDEN);
-                // Activity, not percentage: a constant-length segment follows
-                // the clock only while a real non-quantified stage is active.
-                const uint16_t angle = (uint16_t)((lv_tick_get() / 8u) % 360u);
-                lv_arc_set_angles(companionRing, angle, (uint16_t)((angle + 75u) % 360u));
-                CompanionSetText(companionProgressLabel, "...");
+                const int estimate = HAL::CompanionProcessingPercent(companionDisplayed);
+                lv_arc_set_angles(companionRing, 0, estimate < 0 ? 0 : estimate * 360 / 100);
+                if (estimate < 0) strcpy(text, "...");
+                else snprintf(text, sizeof(text), "~%d%%", estimate);
+                CompanionSetText(companionProgressLabel, text);
                 CompanionSetText(companionProgressDetail, detail);
             }
         }
@@ -1941,7 +1960,9 @@ void CompanionOpen(void*)
     companionLater = CompanionButton(panel, "\xE8\xBF\x94\xE5\x9B\x9E", 24 + halfWidth, 232, halfWidth);
     lv_obj_set_style_bg_color(companionInstall, lv_color_hex(0x00e5ee), 0);
     lv_obj_set_style_bg_opa(companionInstall, LV_OPA_COVER, 0);
-    lv_obj_set_style_text_color(lv_obj_get_child(companionInstall, 0), lv_color_hex(0x001116), 0);
+    lv_obj_set_style_text_color(companionInstall, lv_color_hex(0x001116), 0);
+    lv_obj_set_style_text_color(companionInstall, lv_color_white(), LV_STATE_FOCUSED);
+    lv_obj_set_style_text_color(companionInstall, lv_color_white(), LV_STATE_PRESSED);
     companionProgress = lv_obj_create(panel);
     lv_obj_remove_style_all(companionProgress);
     lv_obj_set_pos(companionProgress, 20, 42);

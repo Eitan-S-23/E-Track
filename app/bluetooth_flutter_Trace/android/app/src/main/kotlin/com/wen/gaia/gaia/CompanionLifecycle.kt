@@ -76,9 +76,12 @@ internal object CompanionLifecycle {
             val p = prefs(c)
             val left = if (p.contains("leftUptime") && p.getInt("boot", -1) >= 0 && p.getInt("boot", -1) == boot(c)) p.getLong("leftUptime", 0) else null
             result["reconnection"] = if (state == "LINK_REUSED") "not_occurred" else "occurred"
-            result["startupWaitMs"] = serviceAt?.let { since(it, left) }
+            result["startupWaitMs"] = if (state == "LINK_REUSED") null else serviceAt?.let { since(it, left) }
             result["connectionMs"] = if (state == "LINK_REUSED") null else since(now, connectAt)
-            result["closeToReadyMs"] = if (resumed) null else since(now, left)
+            result["closeToReadyMs"] = if (resumed || state == "LINK_REUSED") null else since(now, left)
+            // A UI exit belongs to one availability episode, not every later reconnect.
+            p.edit().remove("leftAt").remove("leftUptime").remove("boot").apply()
+            serviceAt = null
             connectAt = null; recoveryId = null
         }
         return result

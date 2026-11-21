@@ -1,5 +1,45 @@
 # OTA Companion And Admin Scroll Investigation
 
+## Owner Feedback Follow-Up, 2026-11-22
+
+Status: IN_PROGRESS / LOCAL_PENDING. Owner: Codex root, primary main checkout,
+baseline fa52d91772126641f7ee23eadf7de8106f2aa5b7. Existing untracked evidence
+and worktrees are preserved. No additional agents, backend manual operations,
+phone actions, reminder resets or repeat OTA for evidence.
+
+Original input: `.cc-connect/attachments/om_x100b7f2966a3aca0cd00ed31aab24f5/companion-diagnostics.zip`.
+541 events confirm MCU-originated 30344 -> 30345 and 30345 -> 30346 identity-verified
+success. Each is followed by service destruction in the same process and delayed
+control recovery (357.895 / 997.857 seconds). Runtime reports success with its old
+link generation; native state handling can classify this as disconnected/idle,
+stop the companion and apply failure backoff. Notification connection reporting
+itself is correct according to the owner. Fix handoff, not merely notification.
+
+MCU safety text currently conflates recording/power/busy reasons; focused install
+label overrides the inherited readable color. The post-transfer arc is a fixed
+75-degree spinner. Owner explicitly approves estimated stage-completion drawing
+on this MCU screen, superseding its former indeterminate-only presentation for
+this bounded change, not BLE durable percentages or final success verification.
+APP state intervals (0.124/0.102 s applying-to-wait, 1.344/1.553 s wait-to-probe,
+22.286/22.310 s probe-to-identity) are coarse observations, not MCU internal step
+timings. MCU apply/backup is synchronous: use actual phase boundaries and label
+estimated weights; never delay reset, introduce unsafe storage callbacks or imply
+that pre-reboot processing is verified whole-upgrade success.
+
+Batch: real blockers/title/focus and stage ring; post-OTA control recovery without
+false stop/backoff; reconnect automatic checks, shared persisted three/day quota
+and one-hour spacing; bounded compact history with details and same-gesture
+scroll chaining; package identity exports and recovery-episode lifecycle timing.
+Development checks: actual LVGL host harness, App full Ubuntu/Windows development
+CI and native regressions, then formal source-bound APK/EXE/MCU candidates.
+User authorizes direct installation of repaired production GCC firmware, retaining
+Boot/config/user data and complete confirmation state; prepare a fresh binding and
+readback route before any device mutation. Then invoke the existing version-only
+candidate CLI twice for two forward MCU candidates, keeping channels/deltas under
+owner control. Versions remain unreserved until draft/tag/source checks pass.
+Self-tests, source delivery, ingestion, installation and user acceptance remain
+separate. Latest feedback/research above is not a completed implementation claim.
+
 ## Scope
 
 User-reported baseline: Android 1.0.85, MCU 3.3.35, target 3.3.36.

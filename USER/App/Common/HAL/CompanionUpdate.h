@@ -58,6 +58,19 @@ inline bool CompanionSameOffer(const CompanionUpdateInfo& first, const Companion
         strcmp(first.packageSha256, second.packageSha256) == 0 && strcmp(first.targetSha256, second.targetSha256) == 0;
 }
 
+// Estimated milestones for pre-reboot preparation, not verified installation.
+// Synchronous storage work advances at real boundaries, never by a timer.
+inline int CompanionProcessingPercent(const CompanionUpdateInfo& info)
+{
+    switch (info.phase)
+    {
+    case COMPANION_UPDATE_APPLYING: return 20;
+    case COMPANION_UPDATE_BACKING_UP: return 75;
+    case COMPANION_UPDATE_REBOOTING: return 100;
+    default: return -1;
+    }
+}
+
 void BT_CompanionGetInfo(CompanionUpdateInfo* info);
 // Main-loop phase boundaries only, outside storage operations and the UART ISR.
 typedef void (*CompanionProgressRefresh)();

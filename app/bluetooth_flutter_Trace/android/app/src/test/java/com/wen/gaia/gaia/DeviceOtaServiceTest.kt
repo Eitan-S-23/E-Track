@@ -97,6 +97,24 @@ class DeviceOtaServiceTest {
         assertEquals("stopped", fields["uiState"])
         assertEquals("not_occurred", fields["reconnection"])
         assertNull(fields["connectionMs"])
+        assertNull(fields["closeToReadyMs"])
+        val later = CompanionLifecycle.decorate(service, "CONTROL_READY", null)
+        assertNull(later["closeToReadyMs"])
+        assertNull(later["startupWaitMs"])
+    }
+
+    @Test fun lifecycleConsumesCloseTimeOnlyOnce() {
+        android.provider.Settings.Global.putInt(service.contentResolver,
+            android.provider.Settings.Global.BOOT_COUNT, 7)
+        CompanionLifecycle.ui(service, "stopped")
+        CompanionLifecycle.decorate(service, "SERVICE_CREATED", null)
+        CompanionLifecycle.decorate(service, "CONNECTING", mapOf("recoveryId" to "a".repeat(32)))
+        val first = CompanionLifecycle.decorate(service, "CONTROL_READY", null)
+        assertNotNull(first["closeToReadyMs"])
+        CompanionLifecycle.decorate(service, "CONNECTING", mapOf("recoveryId" to "b".repeat(32)))
+        val second = CompanionLifecycle.decorate(service, "CONTROL_READY", null)
+        assertNull(second["closeToReadyMs"])
+        assertNull(second["startupWaitMs"])
     }
 
     @Test fun journalEnforcesRetentionAndExportsBothRepresentations() {

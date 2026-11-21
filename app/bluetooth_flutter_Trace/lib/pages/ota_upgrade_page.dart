@@ -11,6 +11,7 @@ import '../ota/ota_experiment_config.dart';
 import '../ota/ota_firmware_latest.dart';
 import '../services/ota_service.dart';
 import '../utils/safe_snackbar.dart';
+import '../widgets/upgrade_history_list.dart';
 
 /// OTA 固件升级页。
 ///
@@ -43,6 +44,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
 
   bool _isChecking = false;
   bool _isExporting = false;
+  final _pageScroll = ScrollController();
   /// 自动解析出的已连接设备（无显式 connectedDevice 参数时，
   /// PR18：speedometer 等入口 `Get.to(OtaUpgradePage())` 不传参）。
   BluetoothDevice? _resolvedDevice;
@@ -131,6 +133,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
 
   @override
   void dispose() {
+    _pageScroll.dispose();
     _connectionSub?.cancel();
     _taskSub?.cancel();
     _taskPhaseSub?.cancel();
@@ -347,6 +350,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
         ],
       ),
       body: SingleChildScrollView(
+        controller: _pageScroll,
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1230,7 +1234,7 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
               ),
             )
           else
-            ...history.map(_buildHistoryItem),
+            UpgradeHistoryList(records: history, outer: _pageScroll),
           if (otaService.upgradeHistory.problem.value != null)
             Text('历史记录不完整：${otaService.upgradeHistory.problem.value}',
                 style: const TextStyle(color: Colors.orange)),
@@ -1239,73 +1243,6 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
     );
   }
 
-  Widget _buildHistoryItem(Map<String, dynamic> record) {
-    final isSuccess = record['status'] == 'success';
-    final pending = record['status'] == 'awaitingVerification' || record['status'] == 'running';
-    final result = switch (record['status']) {
-      'success' => '成功', 'cancelled' => '已取消',
-      'awaitingVerification' => '等待核验', 'running' => '进行中', _ => '失败',
-    };
-    String version(dynamic code) => code is int
-        ? '${code ~/ 10000}.${code ~/ 100 % 100}.${code % 100}' : '未知';
-    final duration = record['durationMs'];
-    final date = record['startedAt'];
-    final time = date is int ? DateTime.fromMillisecondsSinceEpoch(date).toLocal().toString().split('.').first : '未知';
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            isSuccess ? Icons.check_circle : pending ? Icons.schedule : Icons.info_outline,
-            color: isSuccess ? Colors.green : pending ? Colors.orange : Colors.red,
-            size: 20,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${record['device']} · ${record['deviceKey'].toString().substring(0, 8)}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                Text(
-                  '${version(record['beforeVersion'])} → ${version(record['targetVersion'])}\n'
-                  '$time\n${record['kind'] == 'patch' ? '差分' : '全量'} · '
-                  '${record['initiator'] == 'mcu' ? '设备发起' : 'APP 发起'} · '
-                  '${duration is int ? '${(duration / 1000).toStringAsFixed(1)} 秒' : '耗时未知'}\n'
-                  '任务 ${record['taskId']}\n'
-                  '${record['stage']}${record['errorCode'] == null ? '' : ' / ${record['errorCode']}'}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            result,
-            style: TextStyle(
-              fontSize: 12,
-              color: isSuccess ? Colors.green : Colors.red,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   void _checkForUpdate() async {
     setState(() {

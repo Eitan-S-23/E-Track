@@ -21,6 +21,9 @@ static bool recording, mapOverlayOwned;
 static unsigned checks, installations, declines, presentations;
 static HAL::CompanionProgressRefresh progressRefresh;
 namespace HAL {
+struct Power_Info_t { bool isCharging; uint8_t usage; };
+static Power_Info_t power = {false, 50};
+void Power_GetInfo(Power_Info_t* out) { *out = power; }
 void BT_CompanionGetInfo(CompanionUpdateInfo* out) { *out = phone; }
 void BT_CompanionSetProgressRefresh(CompanionProgressRefresh refresh) { progressRefresh = refresh; }
 bool BT_CompanionCheck() { ++checks; return true; }
@@ -31,7 +34,7 @@ bool BT_CompanionChoose(bool now, const CompanionUpdateInfo*) {
     strcpy(phone.status, now ? "CHECKING" : "DEFERRED");
     return true;
 }
-bool BT_CompanionCanInstall() { return safe; }
+bool BT_CompanionCanInstall() { return safe && (power.isCharging || power.usage >= 30); }
 void BT_CompanionPresented(const CompanionUpdateInfo*) { ++presentations; phone.prompt = false; }
 }
 namespace DataProc { bool Recorder_IsOpen() { return recording; } }
@@ -341,7 +344,14 @@ int main(int argc, char** argv) {
                 progressRefresh();
                 Require(flushes > before, "blocking phase was not flushed before storage/reset");
                 Require(lv_obj_has_flag(companionProgressBar, LV_OBJ_FLAG_HIDDEN), "apply invented a percentage");
-                Require(std::string(lv_label_get_text(companionProgressLabel)) == "...", "apply retained transfer percent");
+                const int estimate = HAL::CompanionProcessingPercent(phone);
+                Require(std::string(lv_label_get_text(companionProgressLabel)) == "~" + std::to_string(estimate) + "%",
+                    "processing estimate is not labelled separately from durable progress");
+                Require(lv_arc_get_angle_start(companionRing) == 0 &&
+                    lv_arc_get_angle_end(companionRing) == estimate * 360 / 100, "stage ring has wrong sweep");
+                const int beforeAngle = lv_arc_get_angle_end(companionRing);
+                lv_tick_inc(60000); progressRefresh();
+                Require(lv_arc_get_angle_end(companionRing) == beforeAngle, "time invented a completed stage");
                 Require(lv_group_get_obj_count(companionGroup) == 1, "apply exposed another install action");
                 Snapshot(argv[2], phase == HAL::COMPANION_UPDATE_APPLYING ? "applying" :
                     phase == HAL::COMPANION_UPDATE_BACKING_UP ? "backup" : "rebooting");
@@ -366,6 +376,31 @@ int main(int argc, char** argv) {
     }
 #endif
 #ifdef COMPANION_GLOBAL_PROMPT_TEST
+    else if (test == "blockers_focus") {
+        Ready(); CompanionOpen(nullptr);
+        Require(std::string(lv_label_get_text(companionTitle)) == "\xE6\x9C\x89\xE5\x8F\xAF\xE7\x94\xA8\xE6\x9B\xB4\xE6\x96\xB0", "wrong offer title");
+        HAL::power.usage = 29; CompanionRefresh();
+        Require(strstr(lv_label_get_text(companionMessage), "30%") != nullptr, "missing power blocker");
+        Require(strstr(lv_label_get_text(companionMessage), "\xE8\xAE\xB0\xE5\xBD\x95") == nullptr, "invented recording blocker");
+        Snapshot(argv[2], "blocked-power"); CheckButtonBounds();
+        recording = true; companionSdBusy = true; CompanionRefresh();
+        Require(strstr(lv_label_get_text(companionMessage), "\xE8\xAE\xB0\xE5\xBD\x95") != nullptr, "missing recording blocker");
+        Require(strstr(lv_label_get_text(companionMessage), "\xE5\xAD\x98\xE5\x82\xA8") != nullptr, "missing storage blocker");
+        Snapshot(argv[2], "blocked-all"); CheckButtonBounds();
+        lv_obj_update_layout(companionModal);
+        Require(companionMessage->coords.y2 < companionLater->coords.y1, "blockers overlap buttons");
+        recording = false; companionSdBusy = false;
+        HAL::power.isCharging = true; CompanionRefresh();
+        Require(!lv_obj_has_state(companionInstall, LV_STATE_DISABLED), "charging did not satisfy OR gate");
+        HAL::power.isCharging = false; HAL::power.usage = 30; CompanionRefresh();
+        Require(!lv_obj_has_state(companionInstall, LV_STATE_DISABLED), "30 percent did not satisfy OR gate");
+        lv_group_focus_obj(companionInstall);
+        Snapshot(argv[2], "install-focused");
+        Require(lv_color_to32(lv_obj_get_style_text_color(lv_obj_get_child(companionInstall, 0), LV_PART_MAIN)) ==
+            lv_color_to32(lv_color_white()), "focused install text is not readable white");
+        Click(companionLater); Pump();
+        Require(installations == 0, "presentation installed without consent");
+    }
     else if (test == "global_pages") {
         const char* pages[] = {"Pages/_Template", "Pages/LiveMap", "Pages/Dialplate", "Pages/MainMenu",
             "Pages/SystemInfos", "Pages/Startup", "Pages/RouteSelect", "Pages/RouteImport",

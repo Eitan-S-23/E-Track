@@ -18,7 +18,7 @@ BASELINE = "816b1888be2dfaa632e4e802e6b680ec85ed5aec"
 CASES = ("ownership", "repeat", "snapshots", "offer_replacement", "deleted_focus", "escape", "async_open",
          "transfer_progress", "apply_progress", "progress_close", "global_pages", "global_unsafe",
          "global_transition", "global_stale", "global_busy", "global_map_install",
-         "check_layout", "check_copy")
+         "check_layout", "check_copy", "blockers_focus")
 
 
 def checked(path):

@@ -15,6 +15,7 @@ import '../utils/permission_helper.dart';
 import 'companion_platform.dart';
 import 'companion_protocol.dart';
 import 'companion_recovery.dart';
+import 'companion_check_budget.dart';
 
 typedef _ControlBinding = ({String address, String session, int generation, int epoch});
 
@@ -208,8 +209,8 @@ class CompanionRuntime extends GetxService {
     await _journal('CHECK_SCHEDULE', {'lastCheckAt': last,
       'nextCheckAt': last + interval.inMilliseconds, 'source': wake['reason']});
     final pendingPackage = reconnecting && _preferences!.containsKey('companion_ready_$address');
-    if (manual || wake['checkPending'] == true || wake['reason'] == 'periodic' || due || pendingPackage) {
-      await _check(manual ? 'manual' : 'periodic', 0);
+    if (manual || reconnecting || wake['checkPending'] == true || wake['reason'] == 'periodic' || due || pendingPackage) {
+      await _check(manual ? 'manual' : reconnecting ? 'reconnect' : 'periodic', 0);
     } else {
       await _journal('CHECK_NOT_EXECUTED', {'reason': 'not_due'});
       await _state(_supportsControl ? 'CONNECTED' : 'DEVICE_CONTROL_UNSUPPORTED', busy: false);
@@ -461,6 +462,25 @@ class CompanionRuntime extends GetxService {
 
   Future<void> _prepare(String source, int request, _ControlBinding binding) async {
     final address = binding.address, runtime = _runtime!;
+    final automatic = source != 'manual' && source != 'device';
+    if (automatic) {
+      final settings = await platform.snapshot();
+      if (!_bindingCurrent(binding)) return;
+      final budget = CompanionCheckBudget(_preferences!);
+      final decision = budget.inspect(DateTime.now());
+      final reason = settings['networkAvailable'] == false ? 'network_unavailable' : decision.reason;
+      if (reason != null) {
+        await _journal('CHECK_NOT_EXECUTED', {'source': source, 'reason': reason,
+          'nextCheckAt': decision.nextAt});
+        // Reoffer verified bytes without spending network quota.
+        if (_bindingCurrent(binding)) await _state('CONNECTED', busy: false, checkFinished: true);
+        if (_bindingCurrent(binding) && _preferences!.containsKey('companion_ready_$address') &&
+            _ota.deviceInfo != null && _ota.verifiedPackageSha256 != null) {
+          await _presentPrepared(source, request, binding, _ota.deviceInfo!);
+        }
+        return;
+      }
+    }
     _offer = null;
     await _deviceState('CHECKING', request, binding: binding);
     if (!_bindingCurrent(binding) || !await _state('CHECKING', busy: true) || !_bindingCurrent(binding)) return;
@@ -472,10 +492,15 @@ class CompanionRuntime extends GetxService {
       return;
     }
     if (!_bindingCurrent(binding)) return;
+    if (automatic && !await CompanionCheckBudget(_preferences!).reserve(DateTime.now())) {
+      await _journal('CHECK_NOT_EXECUTED', {'reason': 'quota_reservation_failed', 'source': source});
+      if (_bindingCurrent(binding)) await _state('CONNECTED', busy: false, checkFinished: true);
+      return;
+    }
     await _preferences!.setInt('companion_attempt_$address', DateTime.now().millisecondsSinceEpoch);
     if (!_bindingCurrent(binding)) return;
-    final latest = await _ota.checkFirmwareUpdate(companionRuntimeId: runtime);
     await _journal('CHECK_EXECUTED', {'executedAt': DateTime.now().millisecondsSinceEpoch, 'source': source});
+    final latest = await _ota.checkFirmwareUpdate(companionRuntimeId: runtime);
     if (!_bindingCurrent(binding)) return;
     if (latest == null) {
       final noUpdate = _ota.lastCheckWasNoUpdate;
@@ -507,6 +532,13 @@ class CompanionRuntime extends GetxService {
       }
     }
     if (!_bindingCurrent(binding) || _ota.verifiedPackageSha256 == null) return;
+    await _presentPrepared(source, request, binding, info);
+  }
+
+  Future<void> _presentPrepared(String source, int request, _ControlBinding binding, DeviceOtaInfo info) async {
+    if (!_bindingCurrent(binding)) return;
+    final address = binding.address;
+    final automatic = source != 'manual' && source != 'device';
     // A URL refresh may have selected another asset. Bind the actual verified one.
     final verified = _ota.latestInfo;
     if (verified == null || verified.asset == null || verified.versionCode == null || verified.targetImageSha256 == null ||
@@ -519,7 +551,7 @@ class CompanionRuntime extends GetxService {
       targetSha: verified.targetImageSha256!, expiresAt: DateTime.now().add(const Duration(minutes: 5)));
     _offer = offer;
     final seen = _preferences!.getString('companion_seen_$address') == '${offer.identity}|${offer.packageSha}';
-    if (source == 'periodic' && seen) await _journal('POPUP_NOT_REQUESTED', {'reason': 'same_package_seen'});
+    if (automatic && seen) await _journal('POPUP_NOT_REQUESTED', {'reason': 'same_package_seen'});
     await _attachControl();
     if (!_bindingCurrent(binding)) return;
     final acknowledged = Completer<bool>();
@@ -527,7 +559,7 @@ class CompanionRuntime extends GetxService {
     var sent = false;
     for (var attempt = 0; attempt < 3 && _bindingCurrent(binding); attempt++) {
       if (!await _send(CompanionMessage('OFFER', offer.session, request,
-          [offer.id, '${offer.version}', offer.packageSha, offer.targetSha, source != 'periodic' || !seen ? '1' : '0']))) { break; }
+          [offer.id, '${offer.version}', offer.packageSha, offer.targetSha, !automatic || !seen ? '1' : '0']))) { break; }
       sent = await acknowledged.future.timeout(const Duration(seconds: 2), onTimeout: () => false);
       if (sent) break;
     }
@@ -586,7 +618,14 @@ class CompanionRuntime extends GetxService {
           expiresAt: offer.expiresAt));
       if (_current(epoch)) {
         if (success) await _preferences!.remove('companion_ready_${offer.address}');
-        await _state(success ? 'TARGET_IDENTITY_VERIFIED' : 'UPGRADE_FAILED', busy: false);
+        // Reboot retires the control generation even after OTA verifies its target.
+        // Keep execution ownership until ordinary control is re-established.
+        final needsRecovery = !_sameLink();
+        await _state(success ? 'TARGET_IDENTITY_VERIFIED' : 'UPGRADE_FAILED', busy: needsRecovery);
+        if (_current(epoch) && needsRecovery) {
+          _pendingWake ??= {'runtimeId': runtime, 'revision': _revision,
+            'address': _address, 'reason': 'recovery'};
+        }
       }
     } finally { _drainWake(); }
   }

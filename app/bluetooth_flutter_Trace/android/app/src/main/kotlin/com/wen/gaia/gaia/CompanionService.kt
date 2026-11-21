@@ -307,9 +307,10 @@ class CompanionService : Service() {
         val prefs = CompanionBridge.preferences(this)
         prefs.edit().putString("lastResult", status).apply()
         CompanionDiagnostics.record(this, status, runtimeId, reason, reconnectAttempts + 1, value)
-        if (notificationStatus != status) {
-            notificationStatus = status
-            try { NotificationManagerCompat.from(this).notify(NOTIFICATION_ID, notification(status)) }
+        val presentation = if (!connected && status in listOf("TARGET_IDENTITY_VERIFIED", "UPGRADE_FAILED")) "CONNECTING" else status
+        if (notificationStatus != presentation) {
+            notificationStatus = presentation
+            try { NotificationManagerCompat.from(this).notify(NOTIFICATION_ID, notification(presentation)) }
             catch (_: Exception) { /* Ownership checks independently detect a disabled channel. */ }
         }
         if (status == "CHECKING") prefs.edit().putBoolean("checkPending", true).apply()
@@ -318,6 +319,10 @@ class CompanionService : Service() {
             resetReconnect()
             prefs.edit().putInt("failures", 0).putLong("nextAttempt", 0).apply()
             if (value["busy"] != true && wakeLock?.isHeld == true) wakeLock?.release()
+        } else if (!connected && status in listOf("TARGET_IDENTITY_VERIFIED", "UPGRADE_FAILED")) {
+            // OTA may close its verification GATT before handing control back.
+            // This is a bounded reconnect, not a failed idle service to stop.
+            if (!scheduleReconnect("CONNECTION_FAILED")) backOffAndStop("POST_OTA_RECOVERY_EXHAUSTED")
         } else if (recoveryBusy || (status == "CONNECTING" && value["busy"] == true)) {
             handler.removeCallbacks(reconnect)
             reconnectPending = false
@@ -377,7 +382,8 @@ class CompanionService : Service() {
         handler.removeCallbacksAndMessages(null)
         if (wakeLock?.isHeld == true) wakeLock?.release()
         CompanionBridge.preferences(this).edit().putString("lastResult", reason).apply()
-        CompanionDiagnostics.record(this, reason, runtimeId, this.reason, reconnectAttempts + 1)
+        CompanionDiagnostics.record(this, "SERVICE_STOP_REQUESTED", runtimeId, this.reason,
+            details = mapOf("reason" to reason))
         execution.lost(runtimeId)
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         stopSelf()

@@ -30,9 +30,10 @@ internal object CompanionJournal {
     private fun files(c: Context) = dir(c).listFiles()?.filter { it.name.endsWith(".jsonl") }?.sortedBy { it.name } ?: emptyList()
     private fun safe(value: Any?) = (value as? String)?.takeIf { Regex("[A-Za-z0-9_-]{1,64}").matches(it) }
     private val strings = listOf("stage", "errorType", "errorCode", "taskId", "recoveryId", "deviceKey",
-        "source", "outcome", "reason", "uiState", "launchSource", "termination", "reconnection", "processId")
+        "source", "outcome", "reason", "uiState", "launchSource", "termination", "reconnection", "processId",
+        "kind", "packageSha", "beforeSha", "targetSha", "afterSha")
     private val numbers = listOf("elapsedMs", "startupWaitMs", "connectionMs", "closeToReadyMs", "lastCheckAt",
-        "nextCheckAt", "executedAt", "retryCount", "beforeVersion", "targetVersion")
+        "nextCheckAt", "executedAt", "retryCount", "beforeVersion", "targetVersion", "afterVersion", "startedAt", "verifiedAt")
     init { worker.scheduleWithFixedDelay({ runCatching { context?.let { flush(it) } }.onFailure { errors++ } }, 1, 1, TimeUnit.SECONDS) }
     private fun initialize(c: Context) {
         if (context != null) return

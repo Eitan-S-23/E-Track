@@ -164,7 +164,7 @@ void main() {
     await start();
     await until(() => runtime.status.value == 'NO_UPDATE');
     ota.checkGate = Completer<void>();
-    await wake('periodic');
+    await wake('manual');
     await until(() => ota.checks == 2);
     final first = runtime.manualCheck(_address);
     final second = runtime.manualCheck(_address);
@@ -301,7 +301,7 @@ void main() {
     runtimeId = 'runtime-2';
     await wake('recovery');
     await until(() => ota.offers.length == 2 && runtime.status.value == 'READY_AWAITING_DEVICE_CHOICE');
-    expect(ota.checks, 2);
+    expect(ota.checks, 1, reason: 'Cached offer reattachment consumes no automatic request');
     expect(ota.downloads, 1);
     expect(ota.offers.last.session, isNot(first.session));
     expect(ota.offers.last.fields[4], '0', reason: 'Reconnection does not repeat an already displayed prompt');
@@ -348,6 +348,34 @@ void main() {
     expect(ble.disconnects, 1);
     expect(ota.checks, 0);
     expect(ota.messages, isEmpty);
+  });
+
+  test('OTA reboot hands off to new control without idle disconnected success', () async {
+    ota.latest = _latest(); ota.rebootOnUpgrade = true;
+    await start();
+    await until(() => runtime.status.value == 'READY_AWAITING_DEVICE_CHOICE');
+    final offer = ota.offers.single;
+    ble.emit(choice(offer, 'NOW'));
+    await until(() => ble.connects == 2 && runtime.status.value == 'CONNECTED');
+    final success = states.singleWhere((s) => s['status'] == 'TARGET_IDENTITY_VERIFIED');
+    expect(success['connected'], isFalse);
+    expect(success['busy'], isTrue, reason: 'No disconnected idle gap before control recovery');
+    expect(states.last['connected'], isTrue);
+    expect(runtime.handles(_address), isTrue);
+    expect(ota.upgrades, 1);
+  });
+
+  test('offline automatic wake does not consume quota or block manual checking', () async {
+    settings['networkAvailable'] = false;
+    await start();
+    await until(() => runtime.status.value == 'CONNECTED');
+    expect(ota.checks, 0);
+    expect(preferences.containsKey('companion_auto_check_budget_v1'), isFalse);
+    settings['networkAvailable'] = true;
+    await runtime.manualCheck(_address);
+    await until(() => runtime.status.value == 'NO_UPDATE');
+    expect(ota.checks, 1);
+    expect(preferences.containsKey('companion_auto_check_budget_v1'), isFalse);
   });
 
   test('stopping companion never disconnects a foreign foreground task', () async {
@@ -520,7 +548,7 @@ class _Ota extends OtaService {
   String? verified, owner;
   String identityAddress = _address;
   bool noUpdate = true, foreignBusy = false, _busy = false, identityAvailable = false;
-  bool failIdentity = false;
+  bool failIdentity = false, rebootOnUpgrade = false;
   int reads = 0, checks = 0, downloads = 0, upgrades = 0, releases = 0, _concurrent = 0, maxConcurrent = 0;
   Completer<void>? readGate, checkGate, downloadGate, _done;
   List<CompanionMessage> get offers => messages.where((m) => m.kind == 'OFFER').toList();
@@ -573,7 +601,11 @@ class _Ota extends OtaService {
   });
   @override
   Future<bool> startOtaUpgrade(String address, {String? companionRuntimeId, OtaUpgradeConsent? consent}) =>
-    operation(companionRuntimeId, () async { upgrades++; lastConsent = consent; return true; });
+    operation(companionRuntimeId, () async {
+      upgrades++; lastConsent = consent;
+      if (rebootOnUpgrade) { ble.generation++; identityAvailable = false; verified = null; }
+      return true;
+    });
   @override
   Future<bool> sendCompanionMessage(String address, CompanionMessage message, {String? companionRuntimeId}) async {
     owners.add(companionRuntimeId);

@@ -198,6 +198,25 @@ class CompanionServiceTest {
         assertFalse(ShadowPowerManager.getLatestWakeLock().isHeld)
         assertEquals(1, runtime.starts)
     }
+
+    @Test fun verifiedOtaWithRetiredGattRecoversWithoutStoppingOrFailureBackoff() {
+        start(); runtime.reply!!(true); service.state(state())
+        runtime.gatt = false
+        assertTrue(service.state(state("TARGET_IDENTITY_VERIFIED", false, true)))
+        val prefs = CompanionBridge.preferences(service)
+        assertTrue(service.healthy())
+        assertFalse(service.linkReady())
+        assertEquals(0, prefs.getInt("failures", 0))
+        assertEquals(0L, prefs.getLong("nextAttempt", 0))
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(2))
+        assertEquals(2, runtime.dispatches)
+        runtime.reply!!(true)
+        runtime.gatt = true
+        assertTrue(service.state(state()))
+        assertTrue(service.linkReady())
+        assertTrue(runtime.events.isEmpty())
+        assertEquals(0L, prefs.getLong("nextAttempt", 0))
+    }
     @Test fun duplicateFailureDoesNotStackRetriesAndSuccessCancelsTheTimer() {
         start(); runtime.reply!!(true)
         repeat(3) { service.state(state("DEVICE_OFFLINE", false)) }
