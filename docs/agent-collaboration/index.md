@@ -1,6 +1,6 @@
 # Shared Agent Records
 
-Current follow-up: COMPANION-FEEDBACK-20261122, Codex root, MCU_INSTALL_VERIFIED / RECORD_LOCAL_PENDING.
+Current follow-up: COMPANION-FEEDBACK-20261122, Codex root, MCU_INSTALL_VERIFIED / 3.3.48_CANDIDATE_READY.
 Original owner ZIP, same-process post-OTA service stop finding, UI/check/history
 scope and direct-install/two-candidate authority are recorded in
 [the existing task note](../ota-exec-notes/OTA-COMPANION-2026-11-20.md#owner-feedback-follow-up-2026-11-22).
@@ -9,7 +9,11 @@ was registered as a candidate and is now installed, CONFIRMED and running.
 Interrupted direct-install recovery `device/finish-01` completed in 50.907 s
 without another Flash write; old BCB/configuration preserved and debugger closed.
 Human UI/OTA checks remain; App final signing receipt was not re-queried during
-recovery. No 3.3.48/3.3.49, channel publication or delta operation was performed.
+recovery. Owner-requested 3.3.48 is now DELIVERED by the unchanged one-command
+entry, source `5d81e6b9`, CI `44943905784`: ready, two verified assets, unpublished;
+641 warning lines, zero errors, App skipped. Receipt is under
+`.cache/candidate-release/20261121T195939Z-ea346b99/`. No 3.3.49, channel/delta or
+device operation accompanied this candidate. Last verified device is 3.3.47.
 
 Project-wide entry for all E-Track agents and components. Rules live in the
 [collaboration contract](../agent-collaboration-contract.md), not in a task cache.

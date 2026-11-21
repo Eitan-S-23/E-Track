@@ -154,6 +154,35 @@ These note/index/board updates are local pending, not another product delivery.
 App signer final receipt was not re-queried during this recovery. Versions
 3.3.48/3.3.49 were not generated; channel/delta operations remain with the owner.
 
+### Owner-Requested 3.3.48 One-Command Candidate
+
+Owner subsequently requested one new MCU package immediately. Installation
+records were delivered in `c7a655a26548a67e8c9d44d0d67a3279b524f018`, allowing the
+existing one-command entry to run from clean, current main. The existing keyring
+wrapper invoked `Tools/ota/release_candidate.py mcu --timeout-minutes 10` without
+changing that tool. It checked authenticated Release lists including drafts and
+tags, changed only the MCU version/release notes, and committed/pushed exactly
+`Tools/ota/original-admin-release.json`. App remains 1.0.89+115; no App rebuild.
+
+Result is DELIVERED: **3.3.48 / 30348**, product functionality unchanged from
+3.3.47, source `5d81e6b9be2e666a90723a9997fd3a482f583801`.
+Formal run `44943905784` passed checks and firmware, with App skipped. Original
+source-bound registration confirms ready, two verified assets,
+channelPublished=false and productionApproved=false. CI has 641 warning lines
+and zero error lines. Release ID:
+`fw_5e32a34ce17d47aef851f912d026c8dea51bff22e55f093109e5eef5f343352a`.
+
+Receipt: `.cache/candidate-release/20261121T195939Z-ea346b99/result.json`.
+Raw image SHA: `06c26201ac2de4b21669e7eb8ac1d5ac3406c23e154461c2dd9f4d216883d48f`.
+Full ETU: 304390 bytes, SHA
+`f86fc4046ab6bfec4d33727360f3a26e5e1cc8ae997d5447d3e8cbfe9e738828`.
+Recovery: 635556 bytes, SHA
+`1cab2b7ddedfff5df3d59221916238bb3f504040daccc6bc75c9a48c8cb2614a`.
+No extra package download, device operation, backend manual API, channel or delta
+operation. 3.3.49 was not generated. Last verified device baseline remains 3.3.47;
+the owner chooses channel publication and any 3.3.47 -> 3.3.48 delta.
+The script exited successfully; this candidate is not an OTA test result.
+
 ## Scope
 
 User-reported baseline: Android 1.0.85, MCU 3.3.35, target 3.3.36.
