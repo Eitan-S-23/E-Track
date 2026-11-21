@@ -25,7 +25,7 @@
               `<label>${label(cn,en)} <input type="number" name="${key}" min="0" max="1000" value="${Number(draft[key])}" ${disabled}></label>`).join('')}
             <button class="save-button" ${disabled}>${label('保存设置', 'Save settings')}</button></div>
           <p>${label('邮箱验证需先配置邮件发送；关闭注册不会停用已有账号。', 'Configure email delivery before enabling verification. Closing registration does not disable existing accounts.')}</p></form></details>` : ''}
-        <div class="table-scroll"><table><thead><tr><th>${label('用户', 'User')}</th><th>${label('状态', 'State')}</th>
+        <div class="table-scroll" style="max-width:100%;overflow-x:auto"><table><thead><tr><th>${label('用户', 'User')}</th><th>${label('状态', 'State')}</th>
           <th>${label('设备数', 'Devices')}</th><th>${label('最近登录', 'Last sign-in')}</th><th></th></tr></thead><tbody>
           ${data.users.map(u => `<tr><td>${esc(u.username)}<br><small>${esc(u.email || '')}</small></td><td>${esc(u.state)}</td>
             <td>${Number(u.deviceCount)}</td><td>${esc(stamp(u.lastLoginAt))}</td><td><button class="secondary-button" data-user="${esc(u.id)}">${label('详情', 'Details')}</button></td></tr>`).join('') ||
@@ -39,7 +39,7 @@
           <div class="operations-buttons"><button data-action="state" ${disabled}>${detail.account.state === 'active' ? label('停用账号','Disable account') : label('启用账号','Enable account')}</button>
             <button data-action="revoke-sessions" ${disabled}>${label('撤销全部登录', 'Revoke all sessions')}</button></div>
           <h4>${label('绑定码表', 'Bound devices')}</h4>
-          ${detail.devices.map(d => `<div class="feedback-item"><strong>${esc(d.name)}</strong><code>${esc(d.uid)}</code>
+          ${detail.devices.map(d => `<div class="feedback-item"><strong>${esc(d.name)}</strong><code style="overflow-wrap:anywhere">${esc(d.uid)}</code>
             <span>${esc(d.model)} · HW ${Number(d.hardware_revision)} · FW ${Number(d.firmware_version)}</span>
             <small>${label('绑定时间', 'Bound')}: ${esc(stamp(d.bound_at))}</small><button data-unbind="${esc(d.uid)}" ${disabled}>${label('解绑', 'Unbind')}</button></div>`).join('') || `<p>${label('无绑定设备', 'No bound devices')}</p>`}
           <h4>${label('最近 50 次登录（保留 90 天）', 'Last 50 sign-ins (90-day retention)')}</h4>

@@ -6,6 +6,34 @@ const origin = "https://p51-app-admin.test";
 const html = readFileSync(new URL("../public/index.html", import.meta.url), "utf8").replace(/<body([^>]*)>/,
   '<body$1><div style="position:fixed;bottom:8px;left:12px;z-index:10000;padding:6px 12px;background:#fff2b0;color:#161616;font:12px monospace;pointer-events:none">MOCK UI / NO REAL ACCESS OR D1</div>');
 
+test('account administration lists hardware UID and saves independent 5/5 registration settings', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  const data = await mockApp(page);
+  await page.locator('#appAccountsTab').click();
+  await expect(page.locator('#appAccountsPanel')).toContainText('test-rider');
+  await page.locator('#appAccountsPanel [data-user]').click();
+  await expect(page.locator('#appAccountsPanel')).toContainText('1234567890abcdef12345678');
+  await page.locator('#appAccountsPanel summary').click();
+  await page.locator('[name="registration_enabled"]').uncheck();
+  await page.locator('#accountSettings button').click();
+  await expect.poll(() => data.writes.length).toBe(1);
+  expect(data.writes[0].body).toMatchObject({ registration_enabled: 0, automatic_daily_limit: 5, manual_daily_limit: 5 });
+  expect(errors).toEqual([]);
+});
+
+test('viewer account detail is read-only on a narrow viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const data = await mockApp(page, 'en', 'viewer');
+  await page.locator('#appAccountsTab').click();
+  await page.locator('#appAccountsPanel [data-user]').click();
+  await page.locator('#appAccountsPanel summary').click();
+  await expect(page.locator('#accountSettings button')).toBeDisabled();
+  await expect(page.locator('#appAccountsPanel [data-unbind]')).toBeDisabled();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  expect(data.writes).toHaveLength(0);
+});
+
 function release(id: string, versionCode: number) {
   return { id, app_id: "trace", platform: "android", version_code: versionCode,
     version_name: `1.0.${versionCode - 26}`, release_tag: `mock-app-${versionCode}`,
@@ -17,6 +45,8 @@ function release(id: string, versionCode: number) {
 async function mockApp(page: Page, language = "en", role = "owner", firmwareFailure = false) {
   const data = {
     role, conflict: false, notesFailure: false, announcementFailure: false, mutations: 0, firmwareFailure,
+    accountSettings: { registration_enabled: 1, password_registration_enabled: 1, email_verification_enabled: 0,
+      automatic_daily_limit: 5, manual_daily_limit: 5, revision: 0 },
     announcements: [] as Array<{ id: string; title: string; body: string; published: number; pinned: number; created_at: string; updated_at: string }>,
     releases: [release("app-new", 100), release("app-current", 99), release("app-old", 98)],
     channels: ["stable", "beta"].map((name, index) => ({ name, app_id: "trace", platform: "android",
@@ -43,7 +73,7 @@ async function mockApp(page: Page, language = "en", role = "owner", firmwareFail
       const contentType = url.pathname.endsWith(".svg") ? "image/svg+xml" : url.pathname.endsWith(".png") ? "image/png" : "image/x-icon";
       await route.fulfill({ contentType, body: readFileSync(new URL("../public" + url.pathname, import.meta.url)) }); return;
     }
-    if (["/sheet-gestures.js","/overlay-history.js","/selection-controls.js","/delta-activity.js","/task-controls.js","/resource-usage.js","/feedback-management.js"].includes(url.pathname)) {
+    if (["/sheet-gestures.js","/overlay-history.js","/selection-controls.js","/delta-activity.js","/task-controls.js","/resource-usage.js","/feedback-management.js","/account-management.js"].includes(url.pathname)) {
       await route.fulfill({contentType:"text/javascript",body:readFileSync(new URL("../public"+url.pathname,import.meta.url),"utf8")}); return;
     }
     const requestId = `mock-app-request-${++serial}`;
@@ -52,6 +82,19 @@ async function mockApp(page: Page, language = "en", role = "owner", firmwareFail
     const fail = (errorCode: string, status = 409) => reply({ errorCode, message: `Mock ${errorCode}` }, status);
     if (request.method() === "GET") {
       sync();
+      const account = { id: '11111111-1111-4111-8111-111111111111', username: 'test-rider', state: 'active',
+        email: 'rider@example.test', deviceCount: 1, createdAt: 1795300000000, lastLoginAt: 1795300000000 };
+      if (url.pathname === '/api/admin/accounts') {
+        await reply({ users: [account], total: 1, page: 1, pageSize: 30,
+          stats: { registered: { total: 1 }, today: { users: 1, logins: 2 } } }); return;
+      }
+      if (url.pathname === '/api/admin/accounts/settings') { await reply(data.accountSettings); return; }
+      if (url.pathname === '/api/admin/accounts/' + account.id) {
+        await reply({ account, quota: { automatic: { limit: 5, remaining: 4 }, manual: { limit: 5, remaining: 3 } },
+          devices: [{ uid: '1234567890abcdef12345678', name: 'Test cycling computer', model: 'e-track-at32f435',
+            hardware_revision: 1, firmware_version: 30349, bound_at: 1795300000000 }],
+          logins: [{ occurred_at: 1795300000000, app_version: 'test' }] }); return;
+      }
       if (url.pathname === "/api/admin/session") {
         await reply({ ok: true, appId: "trace", environment: "MOCK", actor: `${data.role}@example.test`, role: data.role, csrfToken: "mock-csrf" }); return;
       }
@@ -73,6 +116,14 @@ async function mockApp(page: Page, language = "en", role = "owner", firmwareFail
     expect(request.method()).toBe("POST");
     expect(request.headers()["content-type"]).toBe("application/json");
     expect(request.headers()["x-csrf-token"]).toBe("mock-csrf");
+    if (url.pathname === '/api/admin/accounts/settings') {
+      const body = request.postDataJSON();
+      data.writes.push({ path: url.pathname, body });
+      if (data.role !== 'owner') { await fail('ROLE_FORBIDDEN', 403); return; }
+      expect(body.revision).toBe(data.accountSettings.revision);
+      data.accountSettings = { ...body, revision: body.revision + 1 };
+      await reply({ ok: true, settings: data.accountSettings }); return;
+    }
     if (/^\/api\/admin\/releases\/[^/]+\/notes$/.test(url.pathname)) {
       const body = request.postDataJSON() as Record<string, unknown>;
       expect(Object.keys(body)).toEqual(["releaseNotes"]);
