@@ -1531,8 +1531,7 @@ namespace
         lv_obj_set_width(companionTitle, width - 16);
         lv_obj_set_style_text_align(companionTitle, LV_TEXT_ALIGN_CENTER, 0);
         lv_obj_set_pos(companionTitle, 8, active ? 12 : 83);
-        lv_obj_set_style_text_font(companionTitle,
-            ResourcePool::GetFont(active ? "bahnschrift_24" : "cn_16"), 0);
+        lv_obj_set_style_text_font(companionTitle, ResourcePool::GetFont("cn_16"), 0);
         lv_obj_set_width(companionVersion, width - 16);
         lv_obj_set_style_text_align(companionVersion, LV_TEXT_ALIGN_CENTER, 0);
         lv_obj_set_pos(companionVersion, 8, active ? 265 : 110);
@@ -1957,7 +1956,7 @@ void CompanionOpen(void*)
         LV_HOR_RES - 84, 156, 88);
     static lv_font_t progressFont;
     progressFont = *ResourcePool::GetFont("bahnschrift_48");
-    progressFont.fallback = ResourcePool::GetFont("bahnschrift_24");
+    progressFont.fallback = ResourcePool::GetFont("bahnschrift_17");
     lv_obj_set_style_text_font(companionProgressLabel, &progressFont, 0);
     lv_obj_set_height(companionProgressBar, 2);
     companionProgressDetail = lv_label_create(companionProgress);
