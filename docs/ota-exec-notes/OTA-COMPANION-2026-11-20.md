@@ -83,6 +83,77 @@ hosts, same `b239e70a` product source. Checks-only run counts were Linux 988 pas
 from the successful original run, not rebuilt. Original failed runs remain.
 Preparing the bounded main versioned delivery; no manual channel/delta action.
 
+### Direct Installation Admission
+
+Formal source `3802e85f0d46c25912bb5389366651a9d1c8927e` is on main. Candidate run
+`44939228682` firmware job `136952954586` passed and registered 3.3.47 ready,
+unpublished, two assets; 643 warning lines / zero compiler errors. App signing is
+tracked independently. Exact 635548-byte target SHA is
+333cd548bb86ca6bf4565d69673e694ef9ad045249bd7187343e60bfdd01bd59;
+full ETU SHA 14e9d30f3020986572c526c54e50e3992d8a3aa4eb9de23820d586a0eda02c68.
+The original CI header finalization reproduces both published raw and recovery
+hashes, with no backend download. Exact current/target ELF/map are bound in
+`device/assets/manifest.json`; no old ABI/RAM addresses are used.
+
+`device/repair-host-01`: 115 complete-record/wire assertions pass for 30346 ->
+30347, backup 30345 / length 634380 / CRC 3909915030. One adapter assertion
+failed before fixtures/device access because the old direct-install candidate
+version was 30340 rather than its running 30341; its failure is preserved and
+the guard is rebound to the actually observed 30346 candidate.
+
+Finite install-01: sole Codex root owner; fresh current image/Boot/region/idle
+checks; standard AT32F435RGT7/SWD 1000 App load; full byte readback; re-establish
+actual post-loader storage-idle halt; exact whole inactive BCB transaction with
+old active record/configuration preserved; deliberate restart and current-map
+RTT signature, full image, CONFIRMED 30347, healthy runtime and unchanged QSPI.
+Existing bounded 2350-second native route is reused, including known slow host
+GPIO EEPROM reads. No new flasher or safety waiver to hide that cost. On any
+uncertain programming outcome, reconcile read-only and resume only missing work.
+User OTA, channel/delta changes and phone actions remain outside this operation.
+
+### Interrupted Installation Continuation
+
+Owner stopped the slow route, then explicitly requested completion of the same
+installation. App programming and full readback succeeded in install-01; the
+worker was stopped during post-program EEPROM reading, before its record write.
+The device was left halted at the new HAL_Update rendezvous. Do not reprogram.
+The observed gap is the host GPIO transport cost, not EEPROM write latency.
+finish.py reuses the exact tested complete-record C draft and SEGGER native
+connection, but calls this exact firmware's existing safe EEPROM HAL at the
+storage-idle breakpoint. It does not introduce a Flash algorithm or replacement
+BCB state machine. A fresh full image/Boot/context check and EEPROM/configuration
+comparison precede the single inactive-record write; an existing hardware
+breakpoint bounds each internal call to two seconds. Stack/core context is saved,
+the interrupted read bus is released, and the complete resulting record plus
+unchanged active record/configuration are verified before a standard reset/run.
+Only then can the exact-map health and CONFIRMED 30347 startup checks complete.
+The continuation has a 180-second owner deadline, project-local finish-01 outputs
+and the existing SEGGER native-history exception. No further candidate or OTA.
+
+Continuation result: `device/finish-01/result.json` is PASS, 50.907 seconds.
+Fresh App/Boot bytes matched before and after; raw App SHA remains
+333cd548bb86ca6bf4565d69673e694ef9ad045249bd7187343e60bfdd01bd59.
+The internal 256-byte read took 43 ms, 64-byte safe write/readback took 45 ms,
+and final 256-byte read took 33 ms (host-observed call intervals). Complete
+inactive-record bytes matched the prior C-generated plan; old active record and
+all configuration bytes were unchanged. Temporary stack/core state was restored,
+then one deliberate reset/run completed. Exact-map RTT contains
+`OTA: BCB already CONFIRMED vcode=30347`; main-loop observations advanced from
+1166 to 7137/7138, CFSR/HFSR are zero, CPU is not halted, watchdog debug freeze is
+restored to zero. No additional App/Boot/QSPI programming or OTA was performed.
+This proves installation/running health, not independent UI/OTA acceptance;
+actual screen/buttons remain for the owner to inspect.
+
+Closure: native/Commander/old installer processes were absent and the owned
+device reservation was removed after success. All 72 finish-01 output entries
+resolve inside the project. The SEGGER/PowerShell metadata audit has no changes;
+PowerShell was not invoked. Original interrupted install evidence is preserved.
+The stop had left the MCU paused; reporting that fact did not restore it. The
+old host bit-bang route is not appropriate for another quick direct installation.
+These note/index/board updates are local pending, not another product delivery.
+App signer final receipt was not re-queried during this recovery. Versions
+3.3.48/3.3.49 were not generated; channel/delta operations remain with the owner.
+
 ## Scope
 
 User-reported baseline: Android 1.0.85, MCU 3.3.35, target 3.3.36.
