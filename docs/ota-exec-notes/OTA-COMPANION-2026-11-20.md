@@ -2080,3 +2080,57 @@ Pin the same per-command autocrlf option as the already-qualified Git adapter.
 Add an actual isolated Git/index CRLF test, since pure mocked command tests do
 not qualify host Git conversion behavior. These host-route failures are not
 firmware defects; there is no skipped or overwritten candidate version.
+
+#### One-Command Delivery Verified And Owner Success Report
+
+2026-11-22 local date: the tracked entry is delivered on main, including proxy
+and real-Git CRLF qualification. `oneclick-tests-03` passes **24 entry tests and
+90 existing candidate tests**. Final tool source before the version-only release
+is `73eef39480fd9c29866489b8a219428a35cc297b`.
+
+The actual one-command MCU invocation succeeds end-to-end. Receipt:
+`.cache/candidate-release/20261121T162320Z-26ffba75/result.json`, phase DELIVERED.
+It changes/commits exactly `Tools/ota/original-admin-release.json`, producing
+**3.3.46 / 30346**, source `1eb1b52b2ff4eb4b317047ff580256e05e8fd2e7`.
+Formal CI **44924357926** succeeds and the source-bound original receipt confirms
+two verified assets, state ready, channelPublished=false and
+productionApproved=false at registration. Firmware logs contain 641 warning
+lines and zero error lines. App is skipped and remains 1.0.88+114.
+
+Release ID: `fw_9719d26f71e7bc268c78176935c6b6c9802fcc00ec1beb0b151537d7a0d66fd1`.
+Target image SHA-256: `7fe4b594aaa257d5249cc9d222dc2c6256ea20772cf2a9f47f6b7e1b6986e927`.
+Full ETU: 303729 bytes, SHA-256
+`96fef3368bfacd93a5283e7fa1511c7f88bd4e7b677326b955e3a1f941e2c6ab`.
+Recovery: 634388 bytes, SHA-256
+`d81e36ff447442d23839aad1cd7a51fbdc7434e1e263d51c53406cac2b52ba65`.
+No additional backend package download or physical device operation. The
+terminal handle was unavailable on later inspection, but the persisted DELIVERED
+receipt and closed owner lock establish completion; no invocation was replayed.
+
+The App command's actual online dry-run also passes:
+`.cache/candidate-release/20261121T171041Z-cfa711fe/result.json`. It selects
+1.0.89+115, but does not edit, commit, push or build it. App's new CLI path has
+offline tests and real preflight, not a newly executed App release. Do not
+produce an extra App merely to claim an end-to-end test.
+
+The owner reports "upgrade succeeded". Record this as OWNER_SUCCESS_REPORTED,
+not as a new agent observation. Target version, full/delta kind and origin were
+not specified; clarification is pending. Do not infer a current installed
+baseline, current channel state, or independent acceptance from the build
+receipt. Do not reflash/repeat the successful OTA or require USB merely for logs.
+
+Remaining scoped validation: correlate existing upgrade history/diagnostics with
+reboot identity, true progress, origin, elapsed time and result; observe automatic
+discovery/notification without opening App or manual checking, map/global popup
+and Later without an install; verify lifecycle recovery and notification versus
+actual control-session readiness, especially recurring Bluetooth timeouts;
+exercise diagnostic persistence/filtering/search/complete exports and bounded
+retention. Use the owner's App-exported logs first. Logging alone does not prove
+Bluetooth repair; the historical watchdog cause remains undetermined. Independent
+acceptance remains distinct from these self-tests and owner feedback.
+
+Output review: all scoped source/docs/Git changes and controllable tests/logs/
+caches remain inside the primary root; test temporary directories are owned and
+contained. No PowerShell, new SDK, global Git/proxy/credential setting, device
+tool or backend manual operation was invoked. Original host failures and receipts
+remain intact. This is output/environment review, not machine-wide IO tracing.
