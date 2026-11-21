@@ -1986,8 +1986,42 @@ The actual configuration passed the component planner: firmware required with
 version code 30345, App 1.0.88+114 not required, channelPublished=false and
 automaticDeltas=false. This local self-test does not claim a formal build or OTA.
 
-Status: LOCAL_PENDING candidate configuration and owner-feedback record.
-Next: commit the bounded changes, push main once, then observe the formal CI and
-sanitized automatic registration receipt. Do not directly install the target, start a
-collector, trigger a check/OTA or clear reminder state. The owner performs the
-actual upgrade after publishing Stable and enabling the exact-baseline delta.
+Status: CANDIDATE_DELIVERED / OWNER_PUBLICATION_AND_OTA_PENDING. Source
+`38560f467144f4d7c43479a1a436287d3b4f3fe0` is pushed to main. Formal CI
+`44917879986` passes checks and firmware; App is skipped. All product sources
+are unchanged from the installed 3.3.44 source `4d8c1bb1`; only version metadata
+and operational records differ. Firmware log has 641 warning lines and zero
+error lines. The existing native verification, upload readback and private-key
+cleanup stages pass; no additional backend download was performed.
+
+`keyring-logs-14` preserves the original CI logs; `candidate45-receipt-01` checks
+the source/run/version binding and automatic receipt. Registration is `ok=true`,
+`state=ready`, `assetsRegistered=2`, `channelPublished=false`, and
+`productionApproved=false`, release ID:
+`fw_9d4829678bebc41c91383f8a0a964da704a38e852edd1c35961bd49f47df4cb3`.
+
+| Artifact | Bytes | SHA-256 |
+| --- | --- | --- |
+| Target App image identity | See CI source proof | `a4b1b2a5cee58883c7048710999fc3e6eb51eb2e97c34f421a0fb601ebd3adaf` |
+| Full ETU | 303728 | `28958f208776c6237616cc86e76297e28495e6ce40da41e513be4a23bd8d06d4` |
+| Recovery | 634388 | `288279f26a3168db0a15c8f797bca00924707b11ea667f06b37839bfa4a9ec8e` |
+
+Next owner action: publish **3.3.45** to Stable and generate/enable exactly the
+**3.3.44 -> 3.3.45** delta, then inspect the OTA interface on the existing
+3.3.44 device. No agent login/Admin API, channel or delta mutation, deployment,
+J-Link/ADB operation, check/OTA trigger or reminder reset was performed. The
+device remains on its previously verified baseline until the owner's upgrade.
+Do not claim this candidate delivery as an OTA PASS; real progress, reboot
+identity, history and diagnostic consistency still need the owner's observation.
+An intentionally small version-only delta may complete quickly; no animation
+delay is introduced to prolong the progress screen.
+
+Output audit: reviewed launcher defaults and child environments keep controllable
+Git files, logs, test fixtures and temporary/cache files under the project.
+Manual edits touch only the four scoped tracked files plus the ignored thin
+test/receipt wrapper; candidate operations reuse the existing Git/CI adapter.
+No local PowerShell, external SDK install, credential write or external cleanup.
+An initial inline-shell quoting error made no file output; the existing guarded
+route was used instead. A board-only mixed-EOL diff warning was fixed by
+normalizing only this turn's rows, preserving all unrelated historical bytes.
+The audit is path/environment review, not machine-wide process IO tracing.
