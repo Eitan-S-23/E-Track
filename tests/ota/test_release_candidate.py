@@ -276,6 +276,27 @@ class EntryTests(unittest.TestCase):
             host = R.Host(self.root, out)
         self.assertEqual(host.env['HTTPS_PROXY'], 'http://127.0.0.1:9999')
 
+    def test_real_git_accepts_preserved_crlf_version_edits(self):
+        executable = R.shutil.which('git')
+        if not executable:
+            self.skipTest('Git is not installed')
+        out = self.root / '.cache/real-git-test'
+        out.mkdir(parents=True)
+        with patch.object(R.shutil, 'which', return_value=executable):
+            host = R.Host(self.root, out)
+        host.git('init')
+        original = raw_config().replace(b'\n', b'\r\n')
+        target = self.root / R.FIRMWARE
+        target.write_bytes(original)
+        host.git('add', '--', R.FIRMWARE)
+        host.git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '-m', 'fixture')
+        _, edited = R.version_edit('mcu', original)
+        target.write_bytes(edited)
+        host.git('diff', '--check')
+        host.git('add', '--', R.FIRMWARE)
+        host.git('diff', '--cached', '--check')
+        self.assertEqual(json.loads(host.git('show', ':' + R.FIRMWARE))['firmware']['versionName'], '3.3.46')
+
 
 class ObserveTests(unittest.TestCase):
     def test_ready_mcu_and_completed_original_app_are_distinct_receipts(self):

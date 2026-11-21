@@ -2070,3 +2070,13 @@ that same configured loopback proxy. The bounded fix reads the existing system
 proxy and passes it to child processes only when no explicit proxy environment
 variable exists; no system settings or credentials change. This is a host-route
 failure, not a package/MCU/OTA failure, and its original receipt is preserved.
+
+Second real entry (`.cache/candidate-release/20261121T160744Z-0b35b56e`) reaches
+the version edit but stops at diff-check before staging/commit/push: isolating
+global Git settings removed the project's required core.autocrlf=true. The exact
+source-bound edit is restored to its original 3.3.45 content, with the failed
+receipt and before-version bytes retained; no 3.3.46 asset/build existed to retry.
+Pin the same per-command autocrlf option as the already-qualified Git adapter.
+Add an actual isolated Git/index CRLF test, since pure mocked command tests do
+not qualify host Git conversion behavior. These host-route failures are not
+firmware defects; there is no skipped or overwritten candidate version.

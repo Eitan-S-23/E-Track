@@ -162,6 +162,7 @@ class Host:
 
     def git(self, *args):
         return self.run(['git', '-c', 'safe.directory=' + self.root.as_posix(), '-c', 'core.fsmonitor=false',
+            '-c', 'core.autocrlf=true',
             '-c', 'core.hooksPath=' + str(checked(self.root, self.out / 'empty-hooks')), '-c', 'gc.auto=0',
             '-c', 'maintenance.auto=false', '-c', 'commit.gpgsign=false', '-c', 'credential.helper=',
             '-c', 'core.askPass=', '-c', 'http.sslBackend=openssl', '--no-optional-locks', *args])
