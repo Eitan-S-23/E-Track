@@ -1,7 +1,7 @@
 {
   "schema": "original-admin-automatic-candidates-v1",
   "firmware": {
-    "versionName": "3.3.45",
-    "releaseNotes": "Version-only forward candidate for owner-controlled OTA interface inspection from the verified installed 3.3.44 baseline. The owner confirms the corrected check-update page is normal. Firmware functionality is unchanged from 3.3.44, including the P01 offer and U01 transfer screens, true MCU-confirmed progress, reboot identity verification, explicit consent, Later/reminder suppression and power/recording/storage gates. Preserve Boot, configuration, user data, keys and protocol. App 1.0.88+114 is unchanged and must not be rebuilt. Automatically upload/register only the unpublished full and recovery candidate; Stable/Beta publication and generation/enabling of the exact 3.3.44 to 3.3.45 delta remain exclusively owner-controlled. Do not directly install this target, trigger checks or OTA, clear reminder state, or overwrite any prior immutable candidate. Actual OTA progress and final identity/history validation remain pending."
+    "versionName": "3.3.46",
+    "releaseNotes": "Version-only 3.3.45 to 3.3.46 candidate for owner-controlled OTA testing. Product functionality unchanged. Full/recovery candidate only; no automatic channel publication, delta generation or device operation. App version unchanged."
   }
 }
