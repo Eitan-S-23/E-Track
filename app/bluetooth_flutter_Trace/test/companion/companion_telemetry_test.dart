@@ -54,7 +54,8 @@ void main() {
     await h.until(() => h.adapter.starts == 1 && h.ble.isScanning.value);
     expect(h.device.infoRequests, 1, reason: 'The real OtaService verifies the MCU before idle collection');
     expect(h.nativeRecoveryCalls, ['companionBegin', 'connect', 'companionFinish']);
-    expect(h.diagnosticStates, ['RECOVERY_STARTED', 'RECOVERY_CONNECTED']);
+    expect(h.diagnosticStates, ['RECOVERY_STARTED', 'GATT_CONNECTED',
+      'IDENTITY_VERIFIED', 'CONTROL_READY', 'RECOVERY_CONNECTED']);
     expect(h.ota.hasCurrentDeviceIdentity(_address), isTrue);
     expect(h.ble.foregroundScanningAllowed, isFalse);
     expect(find.byType(Scaffold), findsNothing);

@@ -1691,6 +1691,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           onDurableProgress: onDurableProgress,
           onSent: onSent,
         );
+        endAcknowledged = ack.isOk;
         // P3-4 观测：传输终态已定（transport finally 已记录 outcome），但
         // 摘要必须等到下面两个**立即失败分支**登记完失败元数据之后再落：
         // 它们调用的 fail() 会记录阶段/原因，而 emitSummary 幂等（仅首次
@@ -1712,7 +1713,6 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         // finally 的收尾摘要不会重复输出，整轮仍只有一条 OTA_LINK_STATS。
         linkStats.emitSummary();
         // ---- END OK 只是包传完（PR07）----
-        endAcknowledged = true;
         await upgradeHistory.update(historyId, status: 'awaitingVerification', stage: 'waitingReboot');
         _durableProgress.value = 1.0;
         _upgradeProgress.value = 1.0;
@@ -1971,9 +1971,12 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       } finally {
         if (historyId != null) {
           final cancelled = generation != _cancelGeneration || _phase.value == OtaPhase.cancelled;
+          final installationUncertain = endAcknowledged ||
+              (activeTransport?.endStarted == true && failureCode != 'ACK_STATUS' &&
+               !(failureCode ?? '').startsWith('mcu-ack-'));
           try {
             await upgradeHistory.update(historyId,
-                status: historyVerified != null ? 'success' : endAcknowledged ? 'awaitingVerification'
+                status: historyVerified != null ? 'success' : installationUncertain ? 'awaitingVerification'
                     : cancelled ? 'cancelled' : 'failed',
                 stage: historyVerified != null ? 'identityVerified' : failureStage ?? _phase.value.name,
                 errorCode: failureCode ?? _terminalState.value?.code,

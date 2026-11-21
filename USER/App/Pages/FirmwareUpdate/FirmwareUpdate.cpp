@@ -1531,6 +1531,8 @@ namespace
         lv_obj_set_width(companionTitle, width - 16);
         lv_obj_set_style_text_align(companionTitle, LV_TEXT_ALIGN_CENTER, 0);
         lv_obj_set_pos(companionTitle, 8, active ? 12 : 83);
+        lv_obj_set_style_text_font(companionTitle,
+            ResourcePool::GetFont(active ? "bahnschrift_24" : "cn_16"), 0);
         lv_obj_set_width(companionVersion, width - 16);
         lv_obj_set_style_text_align(companionVersion, LV_TEXT_ALIGN_CENTER, 0);
         lv_obj_set_pos(companionVersion, 8, active ? 265 : 110);
@@ -1550,8 +1552,16 @@ namespace
         lv_obj_set_size(companionLater, active ? 34 : 84, active ? 26 : 32);
         lv_obj_set_pos(companionInstall, 104, 208);
         lv_obj_set_size(companionInstall, width - 116, 32);
-        if (active) lv_obj_add_flag(companionEmblem, LV_OBJ_FLAG_HIDDEN);
-        else lv_obj_clear_flag(companionEmblem, LV_OBJ_FLAG_HIDDEN);
+        if (active)
+        {
+            lv_obj_add_flag(companionEmblem, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(companionInstall, LV_OBJ_FLAG_HIDDEN);
+        }
+        else
+        {
+            lv_obj_clear_flag(companionEmblem, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(companionInstall, LV_OBJ_FLAG_HIDDEN);
+        }
         // Later remains a key-accessible back action; it never cancels the OTA.
         lv_obj_set_style_opa(companionLater, active ? LV_OPA_TRANSP : LV_OPA_COVER, 0);
     }
@@ -1566,6 +1576,11 @@ namespace
         if (!progressing && companionSdBusy) code = "SD_BUSY";
         const char* title = CompanionStatusTitle(code);
         const char* message = CompanionStatusText(code);
+        if (!progressing && strcmp(code, "READY") == 0)
+        {
+            title = "\xE5\x9B\xBA\xE4\xBB\xB6\xE5\xB7\xB2\xE5\xB0\xB1\xE7\xBB\xAA";
+            message = "";
+        }
         const char* detail = "";
         switch (companionDisplayed.phase)
         {
@@ -1940,6 +1955,10 @@ void CompanionOpen(void*)
     CompanionChip(companionProgress, (LV_HOR_RES - 40 - 26) / 2, 36);
     CreateUpdateProgress(companionProgress, &companionProgressBar, &companionProgressLabel,
         LV_HOR_RES - 84, 156, 88);
+    static lv_font_t progressFont;
+    progressFont = *ResourcePool::GetFont("bahnschrift_48");
+    progressFont.fallback = ResourcePool::GetFont("bahnschrift_24");
+    lv_obj_set_style_text_font(companionProgressLabel, &progressFont, 0);
     lv_obj_set_height(companionProgressBar, 2);
     companionProgressDetail = lv_label_create(companionProgress);
     lv_obj_set_style_text_font(companionProgressDetail, ResourcePool::GetFont("bahnschrift_13"), 0);

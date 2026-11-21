@@ -40,6 +40,9 @@ internal object CompanionJournal {
         val p = prefs(c)
         sequence = p.getLong("sequence", 0); pruned = p.getLong("pruned", 0)
         errors = p.getInt("errors", 0); dropped.addAndGet(p.getInt("dropped", 0))
+        files(c).lastOrNull()?.forEachLine { line ->
+            runCatching { sequence = maxOf(sequence, JSONObject(line).optLong("seq")) }
+        }
     }
     fun record(c: Context, state: String, runtime: String?, trigger: String?, attempt: Int, details: Map<*, *>?) {
         val row = JSONObject().put("at", System.currentTimeMillis()).put("uptimeMs", SystemClock.elapsedRealtime())
@@ -62,7 +65,12 @@ internal object CompanionJournal {
                     flush(c)
                     row.put("seq", ++sequence).put("count", 1)
                     if (SystemClock.elapsedRealtime() < detailUntil && detailBudget > 0) {
-                        row.put("diagnosticMode", "bounded_detail"); detailBudget--
+                        val runtimeMemory = Runtime.getRuntime()
+                        row.put("diagnosticMode", "bounded_detail")
+                            .put("queueDelayMs", (SystemClock.elapsedRealtime() - row.getLong("uptimeMs")).coerceAtLeast(0))
+                            .put("heapUsedBytes", runtimeMemory.totalMemory() - runtimeMemory.freeMemory())
+                            .put("queuedEvents", queued.get())
+                        detailBudget--
                     }
                     pending = row; signature = key
                 }
@@ -76,6 +84,7 @@ internal object CompanionJournal {
         for (f in list) if (f.lastModified() < System.currentTimeMillis() - RETENTION_MS || total + reserve > MAX_BYTES - 131072) {
             val size = f.length(); check(f.delete()) { "RETENTION_FAILED" }; total -= size; pruned += size
         }
+        prefs(c).edit().putLong("pruned", pruned).apply()
     }
     private fun flush(c: Context) {
         val row = pending ?: return
@@ -83,7 +92,10 @@ internal object CompanionJournal {
         prune(c, bytes.size)
         val hour = row.getLong("at") / 3600000
         val last = files(c).lastOrNull()
-        val file = if (last != null && last.name.startsWith("$hour-") && last.length() + bytes.size <= 131072) last
+        val complete = last == null || last.length() == 0L || java.io.RandomAccessFile(last, "r").use {
+            it.seek(it.length() - 1); it.read() == 10
+        }
+        val file = if (last != null && complete && last.name.startsWith("$hour-") && last.length() + bytes.size <= 131072) last
             else File(dir(c), "$hour-${row.getLong("seq").toString().padStart(16, '0')}.jsonl")
         file.appendBytes(bytes); pending = null
         prefs(c).edit().putLong("sequence", sequence).putLong("pruned", pruned)
