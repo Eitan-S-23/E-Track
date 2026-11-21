@@ -71,6 +71,16 @@ void main() {
     expect(http.requests.last.uri.path, '/api/account/logout');
     expect(http.requests.where((r) => r.uri.path.contains('reset-quota')), isEmpty);
   });
+  test('prepared grant survives recreation and remains isolated by account', () async {
+    await login();
+    const uid = '1234567890abcdef12345678';
+    await service.savePreparation(uid, {'id': 'prepared-check-00001', 'accountId': 'one'});
+    final restored = AccountService(dio: dio, endpoint: endpoint);
+    expect((await restored.loadPreparation(uid))?['id'], 'prepared-check-00001');
+    http.response = {'token': 'acct_${'b' * 64}', 'account': {'id': 'two', 'username': 'other'}, 'quota': {}};
+    await restored.login('other', 'test-password');
+    expect(await restored.loadPreparation(uid), isNull);
+  });
   test('server session rejection clears the stale local session with a readable error', () async {
     await login(); http.status = 401; http.response = {'errorCode': 'LOGIN_REQUIRED'};
     await expectLater(service.refresh(), throwsA(isA<AccountException>().having((e) => e.code, 'code', 'LOGIN_REQUIRED')));

@@ -133,6 +133,28 @@ void main() {
     return tempDir;
   }
 
+  test('process recreation refreshes a prepared grant without a second charged check', () async {
+    Get.put<AppUpdateService>(_FakeAppUpdateService());
+    final dir = tempFirmwareDir(), bytes = assetBytes(1024);
+    final firstHttp = latestDio([_LatestBehavior.ok(latestBody(bytes))]);
+    final first = makeService(ble: _FakeBle(infoPayload), latest: firstHttp,
+      download: downloadDio([]), firmwareDir: dir);
+    await first.readDeviceInfo('AA:BB');
+    expect(await first.checkFirmwareUpdate(automatic: true), isNotNull);
+    final id = (firstHttp.httpClientAdapter as _LatestMockAdapter).requests.single.headers['X-Update-Check-Id'];
+    await Get.delete<OtaService>();
+    final secondHttp = latestDio([_LatestBehavior.ok(latestBody(bytes))]);
+    final second = makeService(ble: _FakeBle(infoPayload), latest: secondHttp,
+      download: downloadDio([]), firmwareDir: dir);
+    await second.readDeviceInfo('AA:BB');
+    await second.readHardwareUid();
+    expect(await second.restorePreparation(), isTrue);
+    final refresh = (secondHttp.httpClientAdapter as _LatestMockAdapter).requests.single;
+    expect(refresh.headers['X-Update-Check-Id'], id);
+    expect(refresh.headers['X-Update-Refresh'], '1');
+    expect(second.canResumePreparation, isTrue);
+  });
+
   test('fresh latest restores completed package after service memory was lost', () async {
     final dir = tempFirmwareDir();
     final bytes = assetBytes(1024);
@@ -654,6 +676,7 @@ class _LatestMockAdapter implements HttpClientAdapter {
 
   final List<_LatestBehavior> behaviors;
   int requestCount = 0;
+  final requests = <RequestOptions>[];
 
   @override
   Future<ResponseBody> fetch(
@@ -661,6 +684,7 @@ class _LatestMockAdapter implements HttpClientAdapter {
     Stream<Uint8List>? requestStream,
     Future<void>? cancelFuture,
   ) async {
+    requests.add(options);
     if (requestCount >= behaviors.length) {
       throw StateError('latest 请求数超出预期: ${requestCount + 1}');
     }

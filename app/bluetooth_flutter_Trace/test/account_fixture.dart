@@ -6,6 +6,7 @@ class TestAccountService extends AccountService {
   TestAccountService({this.signedIn = true});
   bool signedIn;
   int authorizations = 0;
+  final preparations = <String, Map<String, dynamic>>{};
   @override
   Future<void> initialize() async {}
   @override
@@ -25,4 +26,8 @@ class TestAccountService extends AccountService {
   void protect(Dio dio, {String? Function()? deviceUid}) {}
   @override
   Future<void> authorizeOta(String uid) async { await requireLogin(); authorizations++; }
+  @override
+  Future<void> savePreparation(String uid, Map<String, dynamic> value) async { preparations[uid] = value; }
+  @override
+  Future<Map<String, dynamic>?> loadPreparation(String uid) async => preparations[uid];
 }

@@ -15,6 +15,7 @@ class AccountException implements Exception {
 
 class AccountCheck {
   AccountCheck(this.accountId, {required this.automatic}) : id = AccountService.nonce();
+  AccountCheck.restored(this.accountId, this.id, {required this.automatic});
   final String accountId, id;
   final bool automatic;
   Map<String, String> headers({bool refresh = false}) => {
@@ -129,7 +130,7 @@ class AccountService extends GetxService {
     'REGISTRATION_DISABLED' => '管理员已关闭注册',
     'DEVICE_NOT_BOUND' => '请先在账号页绑定当前码表',
     'DEVICE_ALREADY_BOUND' => '码表已绑定其他账号，请先由原账号解绑',
-    'CHECK_QUOTA_EXCEEDED' => '该类检查今日已用完 5 次，次日北京时间零点恢复',
+    'CHECK_QUOTA_EXCEEDED' => '该类检查今日额度已用完，次日北京时间零点恢复',
     'CHECK_TOO_SOON' => '距离上次自动检查不足一小时',
     'RATE_LIMITED' => '操作太频繁，请稍后重试',
     'EMAIL_VERIFICATION_REQUIRED' => '邮箱验证码无效或已过期',
@@ -165,6 +166,18 @@ class AccountService extends GetxService {
   }
   Future<void> authorizeOta(String uid) async {
     await call('/api/account/ota/authorize', body: {}, uid: uid);
+  }
+  Future<void> savePreparation(String uid, Map<String, dynamic> value) async {
+    await requireLogin();
+    if (!RegExp(r'^[0-9a-f]{24}$').hasMatch(uid)) return;
+    await _storage.write(key: 'etrack_prepared_${accountId}_$uid', value: jsonEncode(value));
+  }
+  Future<Map<String, dynamic>?> loadPreparation(String uid) async {
+    await requireLogin();
+    if (!RegExp(r'^[0-9a-f]{24}$').hasMatch(uid)) return null;
+    final raw = await _storage.read(key: 'etrack_prepared_${accountId}_$uid');
+    if (raw == null || raw.length > 65536) return null;
+    try { return jsonDecode(raw) as Map<String, dynamic>; } catch (_) { return null; }
   }
   Future<void> logout() async {
     try { if (loggedIn) await call('/api/account/logout', body: {}); }

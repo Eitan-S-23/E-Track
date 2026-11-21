@@ -183,6 +183,34 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       _accountCheck?.accountId == accounts.accountId && _preparedAt != null &&
       DateTime.now().difference(_preparedAt!) < const Duration(hours: 24) &&
       _deviceInfo != null && _deviceInfoAddress != null && _assetsBelongTo(_deviceInfo!, _deviceInfoAddress!);
+  static String _preparationIdentity(DeviceOtaInfo info) => [info.deviceModel, info.hardwareRevision,
+    info.layoutId, info.bootVersion, info.protocolVersion, info.currentVersionCode, info.currentImageSha256Hex].join('|');
+
+  Future<bool> restorePreparation({String? companionRuntimeId}) async {
+    if (_isUpgrading.value || canResumePreparation || hardwareUid == null || _deviceInfo == null) return false;
+    final uid = hardwareUid!, info = _deviceInfo!, account = accounts.accountId;
+    final saved = await accounts.loadPreparation(uid);
+    if (saved == null || saved['accountId'] != account || saved['identity'] != _preparationIdentity(info) ||
+        saved['kind'] is! bool || saved['id'] is! String || !RegExp(r'^[a-zA-Z0-9_-]{16,80}$').hasMatch(saved['id'] as String) ||
+        saved['createdAt'] is! int || saved['body'] is! Map ||
+        DateTime.now().millisecondsSinceEpoch - (saved['createdAt'] as int) >= const Duration(hours: 24).inMilliseconds) { return false; }
+    await _runExclusive<void>((generation) async {
+      if (accounts.accountId != account || hardwareUid != uid || _deviceInfo == null || _preparationIdentity(_deviceInfo!) != saved['identity']) return;
+      final latest = FirmwareLatestInfo.parse(Map<String, dynamic>.from(saved['body'] as Map),
+        expectedDeviceModel: info.deviceModel, expectedChannel: saved['channel'] as String? ?? ShareLinks.updateChannel);
+      if (!latest.updateAvailable || latest.asset == null) return;
+      _accountCheck = AccountCheck.restored(account!, saved['id'] as String, automatic: saved['kind'] as bool);
+      _preparedAt = DateTime.fromMillisecondsSinceEpoch(saved['createdAt'] as int);
+      _latestInfo = latest; _asset = latest.asset; _releaseId = latest.releaseId;
+      _assetOwnerInfo = info; _assetOwnerAddress = _deviceInfoAddress;
+      _lastCheckedChannel = saved['channel'] as String?;
+      final version = await Get.find<AppUpdateService>().getLocalAppVersionCode();
+      if (generation != _cancelGeneration) return;
+      // Restore the same server grant, then refresh its URLs without another charged check.
+      await _checkLatestLocked(info, version, _lastCheckedChannel, generation: generation, refreshPrepared: true);
+    }, companionRuntimeId: companionRuntimeId);
+    return true;
+  }
 
   void acceptHardwareUid(String address, String uid) {
     if (!hasCurrentDeviceIdentity(address) || !RegExp(r'^[0-9a-f]{24}$').hasMatch(uid) ||
@@ -1118,6 +1146,14 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       _assetOwnerAddress = _deviceInfoAddress;
       // 记忆本次查询身份（RC3-10⑤）：URL 过期刷新绑定同一 channel。
       _lastCheckedChannel = channel;
+      final uid = hardwareUid;
+      if (uid != null) {
+        try {
+          await accounts.savePreparation(uid, {'accountId': check.accountId, 'id': check.id, 'kind': check.automatic,
+            'createdAt': (_preparedAt ?? DateTime.now()).millisecondsSinceEpoch,
+            'identity': _preparationIdentity(info), 'channel': channel, 'body': body});
+        } catch (_) { /* In-memory preparation remains valid if the OS vault is temporarily unavailable. */ }
+      }
       _upgradeStatus.value = '发现新固件: ${latest.versionName}';
       await _restoreCachedPackage(latest, gen ?? _cancelGeneration);
       if (gen != null && gen != _cancelGeneration) return null;
@@ -1549,6 +1585,11 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     if (locked != null) {
       _upgradeStatus.value = locked;
       return false;
+    }
+    if (hardwareUid == null) {
+      final before = _cancelGeneration;
+      await readHardwareUid(companionRuntimeId: companionRuntimeId);
+      if (before != _cancelGeneration || _closed || _isUpgrading.value || hardwareUid == null) return false;
     }
     return await _runExclusive((generation) async {
       // Authorize once before BEGIN. Session expiry must never interrupt MCU writes.

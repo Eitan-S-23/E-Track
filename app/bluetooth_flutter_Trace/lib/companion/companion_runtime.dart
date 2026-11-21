@@ -476,6 +476,16 @@ class CompanionRuntime extends GetxService {
     if (automatic) {
       final settings = await platform.snapshot();
       if (!_bindingCurrent(binding)) return;
+      if (settings['networkAvailable'] != false && !_ota.canResumePreparation) {
+        var retained = false;
+        try { retained = await _ota.restorePreparation(companionRuntimeId: runtime); }
+        catch (_) { await _journal('PREPARATION_RESTORE_FAILED', {'source': source}); }
+        if (!_bindingCurrent(binding)) return;
+        if (retained && !_ota.canResumePreparation) {
+          await _state('PACKAGE_PREPARATION_FAILED', busy: false);
+          return;
+        }
+      }
       // Only a request-saving cooldown is local. Daily counts live exclusively on the server.
       final lastAutomatic = _preferences!.getInt('account_auto_last_${_ota.accounts.accountId}') ?? 0;
       final elapsed = DateTime.now().millisecondsSinceEpoch - lastAutomatic;
