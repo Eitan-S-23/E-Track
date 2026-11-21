@@ -1600,3 +1600,71 @@ the failure. User-triggered complete ZIP export is the alternate after-test rout
 No phone UI, OTA, data clearing, debugger access or installation has occurred
 during these implementation/self-test operations. Physical automatic discovery,
 global popup, background recovery, history and target confirmation remain open.
+
+#### Formal Candidates And Installation Matrix
+
+Source **50b9af34090214e1a64424d6280352bcfd6aa82f** is pushed on main.
+Original candidate `44893270196` firmware job passes and registers 3.3.41
+full/recovery with its own R2 verification. Original Trace signer `44893376360`
+passes Android and Windows for App 1.0.88+114. No manual backend action,
+channel publication, delta generation or phone operation by this agent.
+Native development originals now archived: all four JUnit suites total **132**
+tests, zero failures/errors/skips. Full checks are 979 Linux/927 Windows passed
+(16/68 platform skips); the final incremental GCC/simulator build has 396
+warnings, zero errors. All earlier failures remain preserved.
+
+The fresh passive snapshot `device-41/preinstall-01` rejects the assumed 3.3.39:
+the actual full App is already **3.3.40**, SHA-256
+`add8309a32fea14e66c1d70ebd9327d5292085c7efe701d41464c8a998127496`.
+No Flash/RAM/EEPROM write, halt or reset was requested. Offline successor
+`preinstall-02` reuses those exact readbacks, verifies original 3.3.40 CI
+bytes/header and proves all observed symbol addresses/sizes and session accessor
+offsets equal the initial map. It verifies healthy advancing runtime, confirmed
+state, idle ownership, unchanged original Boot and every QSPI slot payload.
+There was no repeated physical read or replay of the owner's successful OTA.
+The old failure stays a version-binding failure, not a fabricated 3.3.39 PASS.
+
+Finite installation cell `device-41/install-01` (Codex sole owner):
+- Input is the original 3.3.41 candidate from `44893270196`, final raw image
+  634372 bytes, SHA-256
+  `c09d26b59130108dd5e53d127cd54301ffd2cc3c4757ec7e5f73ce39bbe6037a`.
+  The exact CI compiler binary/ELF/map, original build timestamp and metadata
+  reconstruct only the fixed FW header. Target and recovery hashes both match
+  CI; no source recompilation or backend download verification was performed.
+- Current input is the observed 3.3.40. Backup is 3.3.39 / 632508 bytes /
+  CRC32 2578887756, validated from its original slot. Boot SHA remains
+  `01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527`.
+  Recheck full App/Boot/QSPI, initialized health, storage/recording inactivity,
+  complete repeated BCB pair and both configuration quarters before mutation.
+- Use standard SEGGER Commander, AT32F435RGT7/SWD 1000, App-only loadbin once.
+  Verify full target/Boot and fresh post-loader execution/storage state, not old
+  held bookkeeping. Normal target bootstrap is followed by a new symbol-bound
+  storage-idle rendezvous. Then use the existing qualified complete inactive
+  64-byte BCB transaction (eight exact pages), preserving old active record and
+  all configuration. No single-field version patch or mass erase.
+- Final restart must prove full target, unchanged Boot/QSPI/configuration,
+  matching confirmed BCB and advancing healthy runtime, with current-map RTT
+  signature/buffer and matching startup confirmation. Any uncertain write stops
+  dependent actions; read-only reconciliation precedes only the missing step,
+  never another successful Flash programming.
+- Existing bounded native runner deadline is 2400 seconds; all controllable
+  outputs/COM caches/settings/logs/readbacks remain in `device-41/`. Adopt only
+  this session's closed read-only reservation after verifying both owned PIDs
+  have exited. Do not touch other locks or kill unrelated debugger processes.
+  SEGGER's existing SU history/config exception is unchanged. No other device,
+  phone UI, OTA, recording stop or data-clearing operation is authorized here.
+
+Preinstall audit observed a hash/mtime change in
+`C:/Users/SU/AppData/Local/Microsoft/Windows/PowerShell/StartupProfileData-NonInteractive`.
+The reviewed launcher uses Python/WMI/Commander, not PowerShell; no process-level
+evidence attributes that concurrent change to this session. Its origin remains
+unknown. Do not infer attribution from the filename/mtime or clean the cache.
+Other watched SEGGER/PowerShell paths were unchanged in that window.
+
+3.3.41 candidate parent `44893270196` is now completely successful (checks,
+App and firmware); Trace `44893376360` succeeds on its unchanged signing
+executor `12ff41fc`, bound to E-Track main `50b9af34`. Direct installation
+`device-41/install-01` has started under the above matrix, not yet verified.
+The current main change prepares **3.3.42 only**, preserving App 1.0.88+114 and
+every firmware functional input. This is the first owner-published target from
+3.3.41; no Stable/Beta switch, delta operation or phone instruction is issued.
