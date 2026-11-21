@@ -1,7 +1,7 @@
 {
   "schema": "original-admin-automatic-candidates-v1",
   "firmware": {
-    "versionName": "3.3.47",
-    "releaseNotes": "Correct update-available title, actual recording/power/storage blockers and focused install contrast. Replace fixed activity arc with explicitly estimated pre-reboot preparation milestones, filling at actual reboot handoff without artificial delay. BLE durable progress, safety admission and post-reboot success verification remain unchanged. Unpublished candidate; channel and delta operations remain owner-controlled."
+    "versionName": "3.3.48",
+    "releaseNotes": "Version-only 3.3.47 to 3.3.48 candidate for owner-controlled OTA testing. Product functionality unchanged. Full/recovery candidate only; no automatic channel publication, delta generation or device operation. App version unchanged."
   }
 }
