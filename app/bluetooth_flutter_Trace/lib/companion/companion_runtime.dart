@@ -473,6 +473,10 @@ class CompanionRuntime extends GetxService {
       if (_bindingCurrent(binding)) await _state('LOGIN_REQUIRED', busy: false, checkFinished: true);
       return;
     }
+    if (_ota.hardwareUid == null) {
+      await _ota.readHardwareUid(companionRuntimeId: runtime);
+      if (!_bindingCurrent(binding)) return;
+    }
     if (automatic) {
       final settings = await platform.snapshot();
       if (!_bindingCurrent(binding)) return;

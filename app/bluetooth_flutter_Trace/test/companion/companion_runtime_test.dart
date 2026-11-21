@@ -583,6 +583,8 @@ class _Ota extends OtaService {
   @override
   bool get lastCheckWasNoUpdate => noUpdate;
   @override
+  String? get hardwareUid => identityAvailable ? '1234567890abcdef12345678' : null;
+  @override
   bool get canResumePreparation => latest != null && verified != null && identityAvailable;
   @override
   Future<DeviceOtaInfo?> readDeviceInfo(String address, {String? companionRuntimeId}) =>
