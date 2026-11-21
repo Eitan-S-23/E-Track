@@ -8,6 +8,7 @@
     "test:ui": "playwright test"
   },
   "devDependencies": {
+    "@types/node": "24.0.7",
     "@playwright/test": "1.64.1",
     "@cloudflare/workers-types": "4.20260628.1",
     "typescript": "6.0.3",
