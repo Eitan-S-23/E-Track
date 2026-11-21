@@ -1690,3 +1690,139 @@ the second round through the exact 30342 baseline. The live 30341 installation
 has already verified its sole Flash write/full readback and target bootstrap;
 the complete-state EEPROM transaction/final running verification is still in
 progress. Do not replay the Flash write or alter its source-bound worker.
+
+#### Verified Delivery And Owner Handoff
+
+This entry supersedes the earlier local-pending/in-progress snapshots above.
+Product and version commits are remotely delivered on main through
+`b8ba677d4e30d34f0c05c70fbc5364db727f488e`. The final note/index/board synchronization
+is documentation-only; its later commit is not the immutable package source.
+
+| Candidate | Exact E-Track source | Original CI | Automatic registration |
+| --- | --- | --- | --- |
+| App 1.0.88+114 | `50b9af34090214e1a64424d6280352bcfd6aa82f` | E-Track `44893270196`; Trace `44893376360` | `rel_trace_android_v1_0_88`, `ok=true`, no channel publication |
+| MCU 3.3.41 | `50b9af34090214e1a64424d6280352bcfd6aa82f` | `44893270196` | `fw_86f323a298198cbac8e5b9aac8ef3b5cbd8a77c12148b47ae38cc1028995b715`, ready, two assets, unpublished |
+| MCU 3.3.42 | `3dd630ffe6443e6d56d336aecf4941b7488f8c35` | `44899719630` | `fw_89dd50a67ce280bae883bda2cede743679d5fe4a9712b7d27edd0df80e1bff3e`, ready, two assets, unpublished |
+| MCU 3.3.43 | `b8ba677d4e30d34f0c05c70fbc5364db727f488e` | `44901056840` | `fw_2dda2fd61b7b7a428dd70dffdb3c44e67adb2f1f98cc9886050e1827da94c5c7`, ready, two assets, unpublished |
+
+Original Trace executor remains `12ff41fc11eb4920ab32d69ae0f7e1cc095f996e`.
+Admission, Windows and Android pass. Complete originals are now retained at
+`keyring-logs-12/`; the Android native log contains the registration response and
+source/version/R2-verified metadata. Immutable GitHub release `v1.0.88`, ID
+453608300, is a non-latest prerelease, not a Stable/Beta publication.
+APK SHA-256: `23309735b69933bd6a3da500cf8527b9ba3aad177135c42f8e0c738f706279b4`
+(49161061 bytes). Windows EXE SHA-256:
+`bba72a681c950ba7fde0d0f9a7b9e2f720b0e46b2bd3778cd8836069cf692c18`
+(161792 bytes); Windows ZIP SHA-256:
+`7fc29960a0d7ac8f4f1515c702f38159f8292c8d48d3f4b4a58b3be187a7656e`
+(20721534 bytes). No debug APK was installed or substituted.
+
+3.3.43 original receipt is `keyring-logs-11/job-136837123942.log`:
+raw SHA-256 `a3a9c50eba6de06825d3d1e134063fbc0e770adb48fa591ee04014b6edc1a357`,
+full ETU SHA-256 `7c6a9f1b762030a246d07998a0a32ecc00c55b1ab93b0f030eed82cc6fa6df42`,
+recovery SHA-256 `c825672feb955e15453bde0953982fcce8589e75a7a816a3af122dcb58cdd884`.
+For 3.3.41 the full ETU hash is
+`092c41cdd2a21d9e2bd54dc4130da8cb077581a02d666354b2464648fa0a9363` and recovery is
+`5ebfe3737523c71f28b1802efc969988e61e0e6a08330be4f3635137652c67db`.
+3.3.42 hashes are recorded immediately above. Both successor runs skip App,
+including ordinary APK/EXE builds. Offline original planner checks also prove
+3.3.43 selects firmware only and all functional inputs are unchanged from 3.3.41.
+
+**Installation completed, not merely programmed:** `device-41/install-01`
+finished 2026-11-21 11:58:36 UTC, once, with `ok=true`. Full post-restart App
+is 634372 bytes, raw SHA-256
+`c09d26b59130108dd5e53d127cd54301ffd2cc3c4757ec7e5f73ce39bbe6037a`.
+Boot remains `01e4b9e162bfaaf9fda070aa13c0cec3f377b8d696db01f731e0ab3d1464e527`.
+All candidate/backup/recovery/staging QSPI regions compare byte-for-byte unchanged;
+no Boot/QSPI/SD programming was requested. Complete inactive BCB A is sequence
+1066, currentVersion 30341, CONFIRMED, with zero bootTry/copyPhase/resumeBlock.
+Its old active B and both configuration quarters remain byte-identical. Historical
+candidateVersion 30340/backupVersion 30339 are retained transaction metadata, not
+the running identity; they are not patched independently. Current-map RTT has the
+verified signature/buffer and `OTA: BCB already CONFIRMED vcode=30341`.
+The current App health counter advances 1274 -> 35840, CFSR/HFSR are zero,
+storage gates pass, watchdog freeze/breakpoints are restored and CPU is not held.
+All owned Commander exits are zero/closed, the SU worker exited and the device
+lock is released. No second Flash write, diagnostic OTA or successful-OTA replay.
+
+Self-test results remain distinct from independent acceptance and user testing:
+Linux 979 passed/16 skipped, Windows 927 passed/68 skipped, eight candidate tests
+per host, native JUnit 132/132, actual LVGL modal 20/20, safety 27/27. Local full
+GCC/simulator build: 743 warnings, zero errors; final incremental: 396 warnings,
+zero errors. Each of the three formal MCU job logs has 641 `warning:` diagnostic
+lines and zero `error:` lines. These are explicit log-line counts, not unique
+defect counts or a warning-free claim. All earlier test/build/retrieval failures
+remain retained, including `keyring-logs-10` fetch failure and a transient
+REMOTE_MAIN_UNVERIFIED result that later reconciled to MAIN_MATCHED.
+
+**Observation route prepared, no phone window consumed:** reuse the qualified
+`live_phone.Phone` private owner via `.cache/ota-ui-20261121/phone_journal.py`.
+`phone-selftest-01` tests two-page original-byte retrieval plus malformed/duplicate/
+cursor/error rejection and rejects install, start, force-stop, clear and tap
+commands. `phone-prepare-01` pins the existing ADB/key and exact release APK;
+there is no SDK install, phone access or newly generated key. A live read uses a
+fresh `phone-read-NN` directory, private port 5048, 600-second deadline, maximum
+160 pages, service-specific dumpsys, original stdout, sequence/loss metadata and
+acknowledged private-server closure. Any existing 5037/5048 owner blocks startup;
+this helper never stops another ADB server. Missing service or wrong installed
+APK is preserved, never concealed by launching/reinstalling the App. Page/deadline
+truncation is explicit; this is not an atomic ZIP or fabricated complete export.
+Owner's post-test diagnostic ZIP is the alternate retrieval route. Live producer
+readiness must be verified after the owner updates the phone, before an OTA test.
+
+Owner sequence:
+1. Publish App **1.0.88+114** in the existing backend and update the phone, without
+   clearing data/deduplication. Do not manually check MCU updates or change MCU
+   Stable yet. Report installation so the prepared passive observation can bind
+   the installed APK, actual runtime, last check and next expected check.
+2. After that observation route is ready, publish MCU **3.3.42 Stable**, generate
+   and enable only **3.3.41 -> 3.3.42** delta. Keep 3.3.43 unpublished. Do not open
+   the App or manually check merely to provoke a notification: the normal roughly
+   12-hour schedule/Android delay remains unchanged, not instant server push.
+3. Observe automatic discovery and an unsolicited prompt on LiveMap/another page.
+   Choose Later once and verify no transfer starts. Preserve its deduplication;
+   later installation may use the MCU update page with explicit consent. Match
+   real stage/progress, reboot/reconnect target identity, history and task-linked
+   logs. Manual-page SHOWN does not prove the earlier automatic popup.
+4. Only after the first round completes, publish **3.3.43 Stable** and generate/
+   enable **3.3.42 -> 3.3.43** delta. Verify App UI close/background/reconstruction
+   with actual lifecycle and usable-link records, not a foreground trigger or
+   notification alone. Do not force-stop or clear state unless a separate case is
+   explicitly chosen. Collect existing originals after failures; never replay a
+   successful OTA merely to fix host logging.
+
+Still open: physical automatic discovery/global popup/Later, App- and MCU-origin
+upgrade history correspondence, process recovery/continued connection timeouts,
+and owner-controlled two-delta OTA results. Logging is not a Bluetooth fix; the
+historical watchdog cause remains undetermined. These are not independent PASS.
+
+Selected design remains **P01/U01**. All original paths (relative to project root)
+are listed here without opening the other eight images:
+
+| ID | Original path | Selection |
+| --- | --- | --- |
+| P01 | `generated-images/ota-ui-20261121/popup/1/1.png` | Implemented |
+| P02 | `generated-images/ota-ui-20261121/popup/2/1.png` | Original only |
+| P03 | `generated-images/ota-ui-20261121/popup/3/1.png` | Original only |
+| P04 | `generated-images/ota-ui-20261121/popup/4/1.png` | Original only |
+| P05 | `generated-images/ota-ui-20261121/popup/5/1.png` | Original only |
+| U01 | `generated-images/ota-ui-20261121/process/1/1.png` | Implemented |
+| U02 | `generated-images/ota-ui-20261121/process/2/1.png` | Original only |
+| U03 | `generated-images/ota-ui-20261121/process/3/1.png` | Original only |
+| U04 | `generated-images/ota-ui-20261121/process/4/1.png` | Original only |
+| U05 | `generated-images/ota-ui-20261121/process/5/1.png` | Original only |
+
+Write audit: controlled edits, Git metadata, output/cache/temp/home directories,
+CI logs, original firmware readbacks and simulator evidence stay within
+`D:/github/my/E-Track`. Three build-host INetCache junctions resolve inside that
+same project; the initial strict audit rejected them and retained `closeout-01`,
+then the read-only audit resolved actual targets without weakening write guards.
+The existing SU SEGGER native-history exception was used and recorded. Both
+preinstall and installation watches observed changes to
+`C:/Users/SU/AppData/Local/Microsoft/Windows/PowerShell/StartupProfileData-NonInteractive`;
+no reviewed command launched PowerShell and no process-level evidence attributes
+the changes to this session. Attribution remains UNKNOWN; no cleanup or external
+write authority is inferred. The audit is a controlled-path/environment review
+plus watched native paths, not machine-wide IO tracing. No unrelated files,
+historical evidence or external caches were cleaned. `closeout-02` rechecks only
+existing original bytes/receipts, not hardware or OTA.
