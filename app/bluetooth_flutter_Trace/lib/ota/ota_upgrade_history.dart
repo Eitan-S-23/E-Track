@@ -20,6 +20,9 @@ class OtaUpgradeHistory {
   Future<void>? _loaded;
   Future<void> _tail = Future<void>.value();
   final Map<String, Stopwatch> _clocks = {};
+  static final _processKey = _token();
+  static String _token() => List.generate(16, (_) => Random.secure().nextInt(256))
+      .map((v) => v.toRadixString(16).padLeft(2, '0')).join();
   static String deviceKey(String address) =>
       sha256.convert(utf8.encode(address.toLowerCase())).toString();
   static String hardwareKey(DeviceOtaInfo info) =>
@@ -38,7 +41,11 @@ class OtaUpgradeHistory {
       await for (final line in file.openRead().transform(utf8.decoder).transform(const LineSplitter())) {
         try {
           final row = Map<String, dynamic>.from(jsonDecode(line) as Map);
-          if (row['schema'] != 1 || row['taskId'] is! String || row['deviceKey'] is! String) {
+          if (row['schema'] != 1 || row['taskId'] is! String ||
+              !RegExp(r'^[0-9a-f]{32}$').hasMatch(row['taskId'] as String) ||
+              row['deviceKey'] is! String || !RegExp(r'^[0-9a-f]{64}$').hasMatch(row['deviceKey'] as String) ||
+              row['startedAt'] is! int || (row['startedAt'] as int) < 0 || (row['startedAt'] as int) > 8640000000000000 ||
+              !['running', 'awaitingVerification', 'success', 'failed', 'cancelled'].contains(row['status'])) {
             throw const FormatException('HISTORY_SCHEMA');
           }
           _rows.removeWhere((old) => old['taskId'] == row['taskId']);
@@ -83,6 +90,7 @@ class OtaUpgradeHistory {
           'source': row['initiator'], 'outcome': row['status'], 'stage': row['stage'],
           'beforeVersion': row['beforeVersion'], 'targetVersion': row['targetVersion'],
           'elapsedMs': row['durationMs'], 'errorCode': row['errorCode'],
+          'retryCount': row['retryCount'],
         }).timeout(const Duration(seconds: 1));
       } catch (_) { /* The durable local history is independent of diagnostics. */ }
     }
@@ -90,11 +98,10 @@ class OtaUpgradeHistory {
 
   Future<String> begin({required String address, required DeviceOtaInfo before,
       required int targetVersion, required String targetSha, required String packageSha,
-      required String kind, required String initiator}) async {
+      required String kind, required String initiator, int? linkGeneration}) async {
     await load();
     if (problem.value != null) throw StateError(problem.value!);
-    final id = List.generate(16, (_) => Random.secure().nextInt(256))
-        .map((v) => v.toRadixString(16).padLeft(2, '0')).join();
+    final id = _token();
     final row = <String, dynamic>{'schema': 1, 'taskId': id,
       'deviceKey': deviceKey(address), 'device': before.wireModel,
       'hardwareKey': hardwareKey(before), 'beforeVersion': before.currentVersionCode,
@@ -102,13 +109,15 @@ class OtaUpgradeHistory {
       'targetSha': targetSha, 'packageSha': packageSha, 'kind': kind,
       'initiator': initiator, 'startedAt': DateTime.now().millisecondsSinceEpoch,
       'status': 'running', 'stage': 'preparing', 'durationMs': null};
+    row['processKey'] = _processKey;
+    row['linkGeneration'] = linkGeneration;
     await _serialize(() => _append(row));
     _clocks[id] = Stopwatch()..start();
     return id;
   }
 
   Future<void> update(String id, {required String status, required String stage,
-      String? errorCode, DeviceOtaInfo? verified, bool finish = false}) => _serialize(() async {
+      String? errorCode, DeviceOtaInfo? verified, int? retryCount, bool finish = false}) => _serialize(() async {
     final index = _rows.indexWhere((r) => r['taskId'] == id);
     final row = index < 0 ? null : _rows[index];
     if (row == null || row['status'] == 'success') return;
@@ -119,6 +128,7 @@ class OtaUpgradeHistory {
     final next = {...row, 'status': status, 'stage': stage,
       'errorCode': errorCode, 'updatedAt': DateTime.now().millisecondsSinceEpoch,
       'durationMs': clock?.elapsedMilliseconds};
+    if (retryCount != null) next['retryCount'] = retryCount;
     if (verified != null) {
       next['afterVersion'] = verified.currentVersionCode;
       next['afterSha'] = verified.currentImageSha256Hex;
@@ -128,6 +138,16 @@ class OtaUpgradeHistory {
     if (finish) _clocks.remove(id)?.stop();
   });
 
+  Future<void> phase(String id, String phase) => _serialize(() async {
+    final index = _rows.indexWhere((r) => r['taskId'] == id);
+    if (index < 0 || !['running', 'awaitingVerification'].contains(_rows[index]['status'])) return;
+    final row = _rows[index];
+    if (row['stage'] == phase) return;
+    await _append({...row, 'stage': phase,
+      'status': ['applying', 'waitingReboot', 'reconnectVerify'].contains(phase) ? 'awaitingVerification' : row['status'],
+      'durationMs': _clocks[id]?.elapsedMilliseconds});
+  });
+
   bool _matches(Map<String, dynamic> row, DeviceOtaInfo info) =>
       row['hardwareKey'] == hardwareKey(info) &&
       row['targetVersion'] != row['beforeVersion'] &&
@@ -135,10 +155,12 @@ class OtaUpgradeHistory {
       row['targetSha'] == info.currentImageSha256Hex;
 
   /// Call only after a fresh GET_INFO, never for a cached/pre-transfer snapshot.
-  Future<void> reconcile(String address, DeviceOtaInfo info) async {
+  Future<void> reconcile(String address, DeviceOtaInfo info, {int? linkGeneration}) async {
     await load();
     final pending = _rows.reversed.where((r) => r['deviceKey'] == deviceKey(address) &&
-        r['status'] == 'awaitingVerification' && _matches(r, info)).take(1).toList();
+        r['status'] == 'awaitingVerification' && _matches(r, info) &&
+        (r['processKey'] != _processKey || r['linkGeneration'] == null ||
+         (linkGeneration != null && r['linkGeneration'] != linkGeneration))).take(1).toList();
     for (final row in pending) {
       await update(row['taskId'] as String, status: 'success',
           stage: 'identityVerified', verified: info, finish: true);

@@ -193,6 +193,18 @@ class CompanionService : Service() {
     }
 
     public override fun dump(fd: FileDescriptor, writer: PrintWriter, args: Array<out String>?) {
+        if (args?.contains("--journal") == true) {
+            val position = args.indexOf("--before")
+            val cursor = if (position >= 0) args.getOrNull(position + 1)?.toLongOrNull() else null
+            val done = java.util.concurrent.CountDownLatch(1)
+            var page: Result<Map<String, Any?>>? = null
+            CompanionJournal.query(this, mapOf("limit" to 200, "beforeSeq" to cursor)) { page = it; done.countDown() }
+            if (done.await(5, java.util.concurrent.TimeUnit.SECONDS)) {
+                page!!.fold({ writer.println(JSONObject(it).toString()) },
+                    { writer.println("{\"error\":\"JOURNAL_READ_FAILED\"}") })
+            } else writer.println("{\"error\":\"JOURNAL_READ_TIMEOUT\"}")
+            return
+        }
         // Readable through Android's existing dumpsys access, without opening UI
         // (which itself wakes the runtime and can conceal a background failure).
         writer.println(JSONObject(mapOf(
@@ -234,6 +246,8 @@ class CompanionService : Service() {
         (linkedToken != null && execution.connected(this)) ||
         (recoveryProgressAt?.let { SystemClock.elapsedRealtime() - it < 30000 } == true) ||
         (reconnectPending && reconnectStartedAt?.let { SystemClock.elapsedRealtime() - it < reconnectWindowMs } == true))
+
+    fun linkReady(): Boolean = healthy() && linkedToken != null && execution.connected(this)
 
     private fun notification(status: String): android.app.Notification {
         val open = PendingIntent.getActivity(this, NOTIFICATION_ID,

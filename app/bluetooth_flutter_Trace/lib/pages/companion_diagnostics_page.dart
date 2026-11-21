@@ -17,7 +17,8 @@ class CompanionDiagnosticSnapshot {
         if (entry is! Map) continue;
         final row = <String, Object>{};
         for (final key in ['at', 'seq', 'count', 'lastAt', 'uptimeMs', 'attempt', 'elapsedMs', 'errorCode',
-          'startupWaitMs', 'connectionMs', 'closeToReadyMs', 'lastCheckAt', 'nextCheckAt', 'executedAt', 'retryCount']) {
+          'startupWaitMs', 'connectionMs', 'closeToReadyMs', 'lastCheckAt', 'nextCheckAt', 'executedAt', 'retryCount',
+          'queueDelayMs', 'heapUsedBytes', 'queuedEvents']) {
           final number = entry[key];
           if (number is int && number >= 0 && number <= (key == 'at' ? 8640000000000000 : 9007199254740991)) row[key] = number;
         }
@@ -121,6 +122,11 @@ class _CompanionDiagnosticsPageState extends State<CompanionDiagnosticsPage> {
             catch (_) { return; }
             if (mounted) _refresh();
           }, child: const Text('开启有界详细诊断（15 分钟 / 2000 事件）')),
+          TextButton(onPressed: () async {
+            try { await const MethodChannel('trace/companion').invokeMethod<Object?>('diagnosticDetail', {'minutes': 0}); }
+            catch (_) { return; }
+            if (mounted) _refresh();
+          }, child: const Text('关闭详细诊断')),
           if (snapshot.connectionState != ConnectionState.done) const LinearProgressIndicator(),
           if (snapshot.hasError) const Text('\u6682\u65f6\u65e0\u6cd5\u8bfb\u53d6\u8bca\u65ad\u8bb0\u5f55\uff0c\u8bf7\u5237\u65b0\u91cd\u8bd5\u3002', style: TextStyle(color: TraceColors.amber)),
           if (value != null) OutlinedButton.icon(key: const ValueKey('copy-connection-diagnostics'),

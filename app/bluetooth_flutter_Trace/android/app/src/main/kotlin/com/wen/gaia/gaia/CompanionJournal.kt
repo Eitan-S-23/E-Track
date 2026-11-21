@@ -53,6 +53,7 @@ internal object CompanionJournal {
         for (key in strings) safe(details?.get(key))?.let { row.put(key, it) }
         for (key in numbers) (details?.get(key) as? Number)?.toLong()?.takeIf { it >= 0 }?.let { row.put(key, it) }
         (details?.get("errorCode") as? Number)?.let { row.put("errorCode", it.toInt()) }
+        if (attempt > 0 && !row.has("retryCount")) row.put("retryCount", attempt - 1)
         if (queued.incrementAndGet() > 512) { queued.decrementAndGet(); dropped.incrementAndGet(); return }
         worker.execute {
             try {

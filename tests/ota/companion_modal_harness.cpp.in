@@ -36,7 +36,9 @@ void BT_CompanionPresented(const CompanionUpdateInfo*) { ++presentations; phone.
 }
 namespace DataProc { bool Recorder_IsOpen() { return recording; } }
 namespace ResourcePool {
+extern "C" const lv_font_t font_bahnschrift_48;
 const lv_font_t* GetFont(const char* name) {
+    if (strcmp(name, "bahnschrift_48") == 0) return &font_bahnschrift_48;
     if (strcmp(name, "bahnschrift_13") == 0) return &font_bahnschrift_13;
     if (strcmp(name, "bahnschrift_17") == 0) return &font_bahnschrift_17;
     if (strcmp(name, "bahnschrift_24") == 0) return &font_bahnschrift_24;

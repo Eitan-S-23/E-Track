@@ -39,6 +39,8 @@ internal object CompanionLifecycle {
         if (state == "stopped") prefs(c).edit().putLong("leftAt", System.currentTimeMillis())
             .putLong("leftUptime", SystemClock.elapsedRealtime()).putInt("boot", boot(c)).apply()
         CompanionDiagnostics.record(c, "UI_${state.uppercase()}", details = mapOf("launchSource" to source))
+        if (state == "stopped" && CompanionService.active?.linkReady() == true)
+            CompanionDiagnostics.record(c, "LINK_REUSED")
     }
 
     @Synchronized
@@ -48,7 +50,7 @@ internal object CompanionLifecycle {
             observed = true
             CompanionJournal.record(c, "PROCESS_OBSERVED", null, null, 0,
                 mapOf("processId" to processId, "elapsedMs" to (now - Process.getStartElapsedRealtime()).coerceAtLeast(0),
-                    "launchSource" to if (state == "SERVICE_CREATED") "background_service" else "unknown"))
+                    "launchSource" to if (state == "SERVICE_CREATED") "background_service" else details?.get("launchSource") ?: "unknown"))
             if (Build.VERSION.SDK_INT >= 30) runCatching {
                 c.getSystemService(ActivityManager::class.java).getHistoricalProcessExitReasons(c.packageName, 0, 1).firstOrNull()?.let {
                     val cause = when (it.reason) {

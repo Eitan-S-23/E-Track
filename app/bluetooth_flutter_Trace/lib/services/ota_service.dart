@@ -163,6 +163,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
 
   final BluetoothService? _bluetoothService;
   late final upgradeHistory = OtaUpgradeHistory(_firmwareDirProvider);
+  String? _historyTask;
+  OtaPhase? _historyPhase;
   final OtaPhyClient _phyClient;
   final OtaBackgroundClient _background;
   final void Function()? _onOpenTask;
@@ -702,6 +704,14 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       _durableProgress, _backgroundReady, _backgroundReason], (_) {
         _publishSnapshot();
         p35.record();
+        final task = _historyTask;
+        if (task != null && _historyPhase != _phase.value &&
+            [OtaPhase.transferring, OtaPhase.applying, OtaPhase.waitingReboot, OtaPhase.reconnectVerify].contains(_phase.value)) {
+          _historyPhase = _phase.value;
+          unawaited(upgradeHistory.phase(task, _phase.value.name).catchError((Object _) {
+            upgradeHistory.problem.value = 'HISTORY_WRITE_FAILED';
+          }));
+        }
       });
     _upgradeStatus.value = isFirmwareServiceConfigured
         ? '固件服务已就绪'
@@ -878,7 +888,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           }
         }
         p35.record('identity');
-        try { await upgradeHistory.reconcile(deviceAddress, info); }
+        try { await upgradeHistory.reconcile(deviceAddress, info, linkGeneration: _boundLinkGeneration); }
         catch (_) { upgradeHistory.problem.value = 'HISTORY_WRITE_FAILED'; }
         if (Get.isRegistered<VersionInventoryService>()) {
           Get.find<VersionInventoryService>().observeDevice(deviceAddress, info);
@@ -1485,7 +1495,9 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         historyId = await upgradeHistory.begin(address: deviceAddress, before: info,
             targetVersion: target!.versionCode!, targetSha: target.targetImageSha256!,
             packageSha: asset.sha256, kind: asset.kind,
-            initiator: consent == null ? 'app' : 'mcu');
+            initiator: consent == null ? 'app' : 'mcu', linkGeneration: _ble.otaLinkGeneration(deviceAddress));
+        _historyTask = historyId;
+        _historyPhase = null;
         final experiment = OtaExperimentRuntime.current.requireForOta();
         if (experiment?.isPrefixProbe == true) {
           throw const OtaTransportException('Legacy prefix probes are not supported', code: 'V2_REQUIRED');
@@ -1980,8 +1992,9 @@ class OtaService extends GetxController with WidgetsBindingObserver {
                     : cancelled ? 'cancelled' : 'failed',
                 stage: historyVerified != null ? 'identityVerified' : failureStage ?? _phase.value.name,
                 errorCode: failureCode ?? _terminalState.value?.code,
-                verified: historyVerified, finish: true);
+                verified: historyVerified, retryCount: linkStats.retransmitFrames, finish: true);
           } catch (_) { upgradeHistory.problem.value = 'HISTORY_WRITE_FAILED'; }
+          if (_historyTask == historyId) _historyTask = null;
         }
         if (activeTransport != null) {
           // A concurrent cancel owns disposal after its queued ABORT, without

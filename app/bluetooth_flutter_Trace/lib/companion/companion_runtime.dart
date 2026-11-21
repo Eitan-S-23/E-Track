@@ -403,6 +403,8 @@ class CompanionRuntime extends GetxService {
     } else if (message.kind == 'SEEN' || message.kind == 'SHOWN') {
       final offer = _offer;
       if (offer != null && message.request == offer.request && message.fields[0] == offer.id && message.fields[1] == offer.packageSha) {
+        unawaited(_journal(message.kind == 'SEEN' ? 'MCU_OFFER_RECEIVED' : 'MCU_OFFER_SHOWN',
+          {'taskId': offer.id, 'reason': message.kind == 'SHOWN' ? 'presentation_origin_unknown' : 'received_not_presented'}));
         if (message.kind == 'SEEN') {
           final acknowledged = _offerAcknowledged;
           if (acknowledged != null && !acknowledged.isCompleted) acknowledged.complete(true);

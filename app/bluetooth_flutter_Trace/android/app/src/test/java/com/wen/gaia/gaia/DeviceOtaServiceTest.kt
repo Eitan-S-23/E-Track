@@ -99,6 +99,42 @@ class DeviceOtaServiceTest {
         assertNull(fields["connectionMs"])
     }
 
+    @Test fun journalEnforcesRetentionAndExportsBothRepresentations() {
+        journal()
+        val directory = java.io.File(service.filesDir, "companion-journal-v2")
+        val expired = java.io.File(directory, "00000000-expired.jsonl")
+        expired.writeText("{\"state\":\"EXPIRED\"}\n")
+        assertTrue(expired.setLastModified(System.currentTimeMillis() - CompanionJournal.RETENTION_MS - 1000))
+        val large = java.io.File(directory, "00000001-budget.jsonl")
+        java.io.RandomAccessFile(large, "rw").use { it.setLength(CompanionJournal.MAX_BYTES + 1) }
+        val result = journal()
+        assertFalse(expired.exists()); assertFalse(large.exists())
+        val metadata = result["metadata"] as Map<*, *>
+        assertTrue((metadata["retainedBytes"] as Long) < CompanionJournal.MAX_BYTES)
+        assertTrue((metadata["prunedBytes"] as Long) >= CompanionJournal.MAX_BYTES)
+        val done = java.util.concurrent.CountDownLatch(1)
+        var exported: Result<java.io.File>? = null
+        CompanionJournal.export(service) { exported = it; done.countDown() }
+        assertTrue(done.await(5, java.util.concurrent.TimeUnit.SECONDS))
+        java.util.zip.ZipFile(exported!!.getOrThrow()).use { zip ->
+            assertNotNull(zip.getEntry("events.jsonl")); assertNotNull(zip.getEntry("readable.txt"))
+            val details = zip.getInputStream(zip.getEntry("metadata.json")).bufferedReader().readText()
+            assertTrue(details.contains("processKillLoss")); assertTrue(details.contains("exportTruncated"))
+        }
+    }
+
+    @Test fun detailedDiagnosticsAreTimeAndCountBounded() {
+        CompanionJournal.detailed(120)
+        CompanionDiagnostics.record(service, "DETAIL_TEST")
+        val value = journal(mapOf("search" to "DETAIL_TEST"))
+        val rows = value["history"] as List<*>
+        assertTrue(rows.toString().contains("heapUsedBytes"))
+        val metadata = value["metadata"] as Map<*, *>
+        assertTrue((metadata["detailRemaining"] as Int) in 0..2000)
+        assertTrue((metadata["detailUntilUptimeMs"] as Long) - android.os.SystemClock.elapsedRealtime() <= 900000)
+        CompanionJournal.detailed(0)
+    }
+
     @Test fun noAcknowledgementUntilOwnerProbe() {
         start()
         assertNotNull(shadowOf(service).lastForegroundNotification)

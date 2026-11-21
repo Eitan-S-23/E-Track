@@ -65,4 +65,24 @@ void main() {
     expect(history.forDevice('AA:BB'), hasLength(1));
     expect(history.problem.value, 'HISTORY_INCOMPLETE');
   });
+  test('phase changes share the task and post-END state survives restart', () async {
+    final id = await begin('mcu');
+    await history.phase(id, 'applying');
+    history = OtaUpgradeHistory(() async => dir);
+    await history.load();
+    expect(history.forDevice('AA:BB').single['taskId'], id);
+    expect(history.forDevice('AA:BB').single['status'], 'awaitingVerification');
+    await history.reconcile('AA:BB', info(30342, 2));
+    expect(history.forDevice('AA:BB').single['status'], 'success');
+  });
+  test('same-process reconciliation requires a new connection generation', () async {
+    final id = await history.begin(address: 'AA:BB', before: info(30341, 1),
+      targetVersion: 30342, targetSha: info(30342, 2).currentImageSha256Hex,
+      packageSha: 'a' * 64, kind: 'full', initiator: 'app', linkGeneration: 4);
+    await history.phase(id, 'waitingReboot');
+    await history.reconcile('AA:BB', info(30342, 2), linkGeneration: 4);
+    expect(history.forDevice('AA:BB').single['status'], 'awaitingVerification');
+    await history.reconcile('AA:BB', info(30342, 2), linkGeneration: 5);
+    expect(history.forDevice('AA:BB').single['status'], 'success');
+  });
 }
