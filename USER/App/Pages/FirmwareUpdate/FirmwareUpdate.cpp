@@ -1468,7 +1468,7 @@ namespace
         if (strcmp(code, "SIMULATOR_NO_PHONE") == 0) return "\xE6\xA8\xA1\xE6\x8B\x9F\xE5\x99\xA8\xE6\x97\xA0\xE6\x89\x8B\xE6\x9C\xBA\xE8\xBF\x9E\xE6\x8E\xA5\n\xE6\x9C\xAA\xE6\x89\xA7\xE8\xA1\x8C\xE8\xAE\xBE\xE5\xA4\x87\xE6\x9B\xB4\xE6\x96\xB0";
         if (strcmp(code, "FAILED") == 0) return "\xE6\xA3\x80\xE6\x9F\xA5\xE5\xA4\xB1\xE8\xB4\xA5\n\xE8\xAF\xB7\xE5\x9C\xA8\xE6\x89\x8B\xE6\x9C\xBA\xE6\x9F\xA5\xE7\x9C\x8B\xE8\xAF\xA6\xE6\x83\x85";
         if (strcmp(code, "INCOMPATIBLE") == 0) return "\xE5\x9B\xBA\xE4\xBB\xB6\xE4\xB8\x8D\xE5\x85\xBC\xE5\xAE\xB9\n\xE8\xAF\xB7\xE5\x9C\xA8\xE6\x89\x8B\xE6\x9C\xBA\xE6\x9F\xA5\xE7\x9C\x8B\xE8\xAF\xA6\xE6\x83\x85";
-        if (strcmp(code, "CONNECTED") == 0) return "\xE6\x89\x8B\xE6\x9C\xBA\xE5\xB7\xB2\xE8\xBF\x9E\xE6\x8E\xA5\n\xE7\x82\xB9\xE5\x87\xBB\xE4\xB8\x8B\xE6\x96\xB9\xE6\xA3\x80\xE6\x9F\xA5\xE6\x9B\xB4\xE6\x96\xB0";
+        if (strcmp(code, "CONNECTED") == 0) return "";
         return "\xE8\xAF\xB7\xE8\xBF\x9E\xE6\x8E\xA5\xE6\x89\x8B\xE6\x9C\xBA\xE8\x93\x9D\xE7\x89\x99\n\xE5\xB9\xB6\xE6\x89\x93\xE5\xBC\x80 E-Track";
     }
 
@@ -1545,8 +1545,9 @@ namespace
         lv_obj_set_style_text_align(companionMessage, LV_TEXT_ALIGN_CENTER, 0);
         lv_obj_set_style_text_line_space(companionMessage, 0, 0);
         lv_label_set_long_mode(companionMessage, LV_LABEL_LONG_DOT);
-        lv_obj_set_pos(companionCheck, 16, 202);
-        lv_obj_set_size(companionCheck, width - 32, 32);
+        // Check and Install share one slot but are never visible together.
+        lv_obj_set_pos(companionCheck, 104, 208);
+        lv_obj_set_size(companionCheck, width - 116, 32);
         lv_obj_set_pos(companionLater, 12, active ? 286 : 208);
         lv_obj_set_size(companionLater, active ? 34 : 84, active ? 26 : 32);
         lv_obj_set_pos(companionInstall, 104, 208);
@@ -1559,7 +1560,8 @@ namespace
         else
         {
             lv_obj_clear_flag(companionEmblem, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_clear_flag(companionInstall, LV_OBJ_FLAG_HIDDEN);
+            if (companionDisplayed.hasOffer) lv_obj_clear_flag(companionInstall, LV_OBJ_FLAG_HIDDEN);
+            else lv_obj_add_flag(companionInstall, LV_OBJ_FLAG_HIDDEN);
         }
         // Later remains a key-accessible back action; it never cancels the OTA.
         lv_obj_set_style_opa(companionLater, active ? LV_OPA_TRANSP : LV_OPA_COVER, 0);
@@ -1658,7 +1660,13 @@ namespace
                     (current / 100) % 100, current % 100, value / 10000, (value / 100) % 100, value % 100);
             else snprintf(version, sizeof(version), "%lu.%lu.%lu", value / 10000, (value / 100) % 100, value % 100);
         }
-        else snprintf(version, sizeof(version), "%s", "\xE9\x80\x9A\xE8\xBF\x87\xE6\x89\x8B\xE6\x9C\xBA\xE8\x8E\xB7\xE5\x8F\x96\xE5\x9B\xBA\xE4\xBB\xB6");
+        else if (companionDisplayed.currentVersion != 0u)
+        {
+            const unsigned long current = companionDisplayed.currentVersion;
+            snprintf(version, sizeof(version), "%lu.%lu.%lu", current / 10000,
+                (current / 100) % 100, current % 100);
+        }
+        else version[0] = '\0';
         CompanionSetText(companionVersion, version);
         CompanionSetText(lv_obj_get_child(companionLater, 0),
             !progressing && companionDisplayed.hasOffer ? "\xE7\xA8\x8D\xE5\x90\x8E" : "\xE8\xBF\x94\xE5\x9B\x9E");

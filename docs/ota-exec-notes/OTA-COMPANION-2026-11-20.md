@@ -1826,3 +1826,81 @@ write authority is inferred. The audit is a controlled-path/environment review
 plus watched native paths, not machine-wide IO tracing. No unrelated files,
 historical evidence or external caches were cleaned. `closeout-02` rechecks only
 existing original bytes/receipts, not hardware or OTA.
+
+#### Check Page Layout Regression
+
+Owner feedback after installing App 1.0.88+114: the physical MCU 3.3.41 check
+page repeats "obtain firmware through phone" / "phone connected" and stacks
+all buttons near Back. This is a real UI failure, not a retraction of the prior
+full-image/Boot/CONFIRMED installation evidence. App installation is owner-reported;
+the agent has not obtained live new-App logs. App export is the preferred manual
+retrieval route now; USB is optional, not a new testing prerequisite.
+
+Root cause in `CompanionLayout(false)`: Check occupied x=16/y=202/w=188/h=32,
+while Back and Install occupied y=208/h=32. Install remained visible with no
+offer. Previous progress/offer tests passed but did not assert idle button bounds;
+the connected idle state was missing from the reviewed screenshot selection.
+The duplicate sentences were separate `companionVersion`/`companionMessage`
+labels, not a Bluetooth status defect.
+
+Local repair on main above `deb11bda`, not committed/pushed or installed:
+- Check and Install use the same right-side slot x=104/y=208/w=104/h=32 at
+  240x320, with mutually exclusive visibility. Back/Later stays x=12/w=84.
+- CONNECTED keeps the existing single status title, with no repeated message.
+  Idle version text uses only validated `currentVersion`; zero stays blank.
+- Safety eligibility, consent, focus ownership, Later behavior, pending offers,
+  transfer bytes/stages and P01/U01 design selection are unchanged.
+
+`layout-red-01` reproduces two failures on the delivered source: "visible buttons
+overlap" and repeated idle instructions. `layout-green-01` passes **74** tests:
+22 actual-LVGL, 24 control, 27 safety, one menu regression. Both render-build
+logs have zero warning/error lines; Git separately reports two LF-to-CRLF
+normalization warnings. Tests check visible-button separation/panel containment
+across connected, disconnected, checking, no-update, failed, offered, unsafe and
+offer-withdrawn states; unknown version, button actions and return are checked.
+Original PPMs are under `.cache/companion-modal-tests/run-x9u3b3z6` (red) and
+`run-q_3lmwa5` (green). `.cache/ota-ui-20261121/images-06` / `images-07` contain
+before/after PNGs. The ready-offer and transfer-50 PNG bytes are unchanged.
+
+The repair has no production GCC/simulator build, CI, new candidate, device
+operation or independent acceptance yet. Existing 3.3.41/42/43 have identical
+affected UI source and remain immutable. Do not overwrite their assets, reuse
+their version identities for corrected bytes or claim they contain this fix.
+A corrected forward version and revised owner-controlled test sequence are
+required before physical validation of the corrected UI; no new version or
+installation authorization is inferred here.
+
+All edits and controllable test/generated-image/temp/home outputs are project-local.
+Only this batch's menu test temporary directory is automatically removed by its
+existing test runner; original evidence and other caches are retained. No
+PowerShell, phone, J-Link, cloud operation, external SDK or extra agent was used.
+
+#### Corrected UI Installation Authorization
+
+The owner now explicitly requests flashing the repaired MCU UI for inspection.
+Deliver it as new immutable **3.3.44**, with App 1.0.88+114 unchanged, then use
+the exact original CI GCC image/ELF/map for standard J-Link App-only installation.
+Retain all existing candidates; no Admin login, channel/delta mutation, backend
+deployment, phone operation or OTA is included. Direct installation advances the
+physical baseline; the old 30341 -> 30342 -> 30343 OTA matrix is not executed or
+claimed complete. Subsequent owner-controlled deltas need a separately agreed
+forward sequence from the verified corrected baseline.
+
+Preparation: main `deb11bda`, seven explicitly scoped repair/test/record/version
+files only. Existing 74 passing host tests and red reproduction are retained.
+`keyring-read-05` enumerates all current E-Track releases including drafts; no
+3.3.44 reservation is present. No active ADB/J-Link/build process or device lock
+was observed. Firmware-only main push uses the established automatic candidate
+route; no local substitute, App rebuild or extra backend download check.
+
+Finite device matrix under `.cache/ota-ui-20261121/device-44/`: fresh passive
+3.3.41 identity/health/ownership/slot snapshot; source-bound input reconstruction
+and existing complete-record/wire host tests; one App-only Commander load at
+AT32F435RGT7/SWD 1000, fresh post-loader state and storage-idle rendezvous, exact
+complete inactive BCB transaction preserving the old active record/configuration,
+then full-image/Boot/QSPI/CONFIRMED/healthy-runtime/current-RTT verification.
+Reuse qualified primitives, not old version-bound execution receipts. Preserve
+any failure and reconcile before only the missing step, never repeat a successful
+Flash write for logs. Keep one owner and finite deadlines, project-local outputs,
+and the exact existing SU SEGGER native-history exception. No mass erase, Boot
+or QSPI programming, user-data clearing, forced recording stop or extra agent.

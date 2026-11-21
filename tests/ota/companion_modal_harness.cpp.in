@@ -130,6 +130,33 @@ static void GroupOwnsOnlyValidObjects(lv_group_t* group) {
     }
 }
 
+#ifdef COMPANION_PROGRESS_TEST
+static void CheckButtonBounds() {
+    lv_obj_update_layout(companionModal);
+    lv_obj_t* buttons[] = {companionCheck, companionInstall, companionLater};
+    unsigned visible = 0;
+    for (unsigned i = 0; i < 3; ++i) {
+        if (lv_obj_has_flag(buttons[i], LV_OBJ_FLAG_HIDDEN)) continue;
+        ++visible;
+        const lv_area_t& a = buttons[i]->coords;
+        Require(a.x1 > companionPanel->coords.x1 && a.x2 < companionPanel->coords.x2 &&
+            a.y1 > companionPanel->coords.y1 && a.y2 < companionPanel->coords.y2,
+            "button clipped by panel bounds");
+        for (unsigned j = i + 1; j < 3; ++j) {
+            if (lv_obj_has_flag(buttons[j], LV_OBJ_FLAG_HIDDEN)) continue;
+            const lv_area_t& b = buttons[j]->coords;
+            Require(a.x2 + 4 < b.x1 || b.x2 + 4 < a.x1 ||
+                a.y2 + 4 < b.y1 || b.y2 + 4 < a.y1, "visible buttons overlap");
+        }
+    }
+    Require(visible == 2, "idle/offer view must have Back/Later and exactly one primary action");
+    Require(lv_obj_has_flag(companionInstall, LV_OBJ_FLAG_HIDDEN) == !phone.hasOffer,
+        "install action visible without an offer");
+    Require(lv_obj_has_flag(companionCheck, LV_OBJ_FLAG_HIDDEN) == phone.hasOffer,
+        "check action visible over offer actions");
+}
+#endif
+
 int main(int argc, char** argv) {
 #ifdef _WIN32
     SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
@@ -248,6 +275,35 @@ int main(int argc, char** argv) {
         Require(!companionModal && !companionOpening, "modal opened during page transition");
     }
 #ifdef COMPANION_PROGRESS_TEST
+    else if (test == "check_layout" || test == "check_copy") {
+        strcpy(phone.status, "CONNECTED"); phone.currentVersion = 30341;
+        CompanionOpen(nullptr);
+        Snapshot(argv[2], test == "check_layout" ? "check-connected" : "check-copy");
+        if (test == "check_copy") {
+            Require(std::string(lv_label_get_text(companionVersion)) == "3.3.41",
+                "idle view repeats phone instructions instead of validated running version");
+            Require(lv_label_get_text(companionMessage)[0] == '\0', "connected view repeats connection/check text");
+            phone.currentVersion = 0; CompanionRefresh();
+            Require(lv_label_get_text(companionVersion)[0] == '\0', "unknown running version was invented");
+        } else {
+            CheckButtonBounds();
+            lv_group_focus_obj(companionCheck); Click(companionCheck);
+            Require(checks == 1 && installations == 0, "primary check triggered the wrong action");
+            for (const char* code : {"DISCONNECTED", "CHECKING", "NO_UPDATE", "FAILED"}) {
+                strcpy(phone.status, code); phone.checking = strcmp(code, "CHECKING") == 0;
+                CompanionRefresh(); Snapshot(argv[2], code); CheckButtonBounds();
+            }
+            Ready(); CompanionRefresh(); CheckButtonBounds();
+            safe = false; CompanionRefresh(); CheckButtonBounds();
+            Require(lv_obj_has_state(companionInstall, LV_STATE_DISABLED), "layout bypassed install safety");
+            safe = true; phone.hasOffer = false; phone.currentVersion = 30341;
+            strcpy(phone.status, "CONNECTED"); CompanionRefresh(); CheckButtonBounds();
+            Snapshot(argv[2], "check-returned");
+        }
+        Click(companionLater); Pump();
+        Require(!companionModal && installations == 0 && declines == 0,
+            "no-offer Back affected an upgrade");
+    }
     else if (test == "transfer_progress" || test == "apply_progress" || test == "progress_close") {
         companionManager = nullptr;
         Page::FirmwareCompanion_Init(&manager);
