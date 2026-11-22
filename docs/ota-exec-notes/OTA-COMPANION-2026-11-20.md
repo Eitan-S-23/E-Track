@@ -42,6 +42,48 @@ candidate ingestion, updated backend deployment and mail activation are distinct
 pending outcomes at this checkpoint. The sender/configuration/real-recipient
 inputs remain missing. See the new supported [email contract](../../app/bluetooth_flutter_Trace/cloudflare/update-service/docs/ACCOUNT-EMAIL.md).
 
+Main delivery source is `3296c633ee005fd6e48d20b51ab8c7b4ade0bd31`. Exact-source
+backend **44996846216** and governance **44996846670** pass. Backend deployment
+**44997943728** succeeds with no pending migration or SQL replay. Live readback
+`keyring-cloud-live-119` verifies Admin `50873c88-50bf-4b39-8fd0-22e6a40d6098`,
+Public `a2b388e3-a824-4dbd-8ea1-282092c58128` and Worker version
+`e3b6c7a9-3b75-4274-866f-0dad40d5528c`, all on that exact source. A real existing
+owner session reads the new HTML/ten assets and account endpoints. Four channels,
+60 delta IDs/attempts/input hashes and runtime/schedules match this operation's
+`keyring-cloud-live-116` baseline. Worker/Public/Admin all explicitly report mail
+unconfigured; no real email or account creation occurred. Earlier counts of 59
+belong to the previous deployment's original observation, not this later baseline.
+Deployment warnings remain Worker 13 dependencies (3 moderate/10 high), Admin/
+Public 4 high each, plus Node/Actions deprecations. Source/CI evidence and local
+outputs remain under the existing task boundary. Audit:
+`.cache/ota-followup-20261122/account-mail-feedback-audit-01.json`.
+
+Formal App **1.0.91+117** delivery is complete: Trace original-signing run
+**44996956524** passes admission/Windows/Android; E-Track parent **44996846280**
+passes checks/App and skips firmware. Native steps confirm full-byte R2 readback
+and candidate registration, with no channel publication. GitHub release metadata
+(`keyring-read-130`) confirms v1.0.91, prerelease/non-draft, exact E-Track source
+and all uploaded original package assets. APK: 49,587,733 bytes, SHA-256
+`0e0bb33d892a38b296cc359e9a49e34419ada5eb26868f3e3de168834e7d45a2`.
+Windows EXE SHA-256:
+`6c94bf99d2b97094924b544aadf3a32e3796ca96cb1a49f2d5450b533961bc55`;
+Windows ZIP SHA-256:
+`3024f88551ec96d29c2f2ee5084f46516d366d91aa919acd5cb1b20fe019691b`.
+Agent did not install the App or publish Stable/Beta. A transient status GET
+failure (`keyring-status-125`) and Android log-read timeout (`keyring-logs-127`)
+are preserved; a fresh read verifies completion and only the missing Android
+log is requested in `keyring-logs-129`. No workflow/build/upload is replayed.
+
+Remaining mandatory external input: approved sender/domain, existing protected
+Resend input locator and an owner-controlled recipient. A normal username/password
+account remains usable; mail verification and password reset remain unavailable
+until configuration and a real delivery/verification test pass. No plaintext
+secret is requested in chat. Source changes and candidate/backend delivery are
+complete, not live mail or phone/MCU acceptance. Documentation changes are scoped
+to the existing task/index/main board/deployment memory; unrelated files remain.
+
+### Initial Account Batch Delivery
+
 Status: SOURCE_CANDIDATES_AND_BACKEND_DELIVERED / PHONE_AND_DEVICE_VALIDATION_PENDING.
 Latest MCU: 3.3.50, source `91916e11469fce94282a9e1a0254048f4e4a9d7f`,
 successful candidate CI `44970721130`. App remains 1.0.90+116; it was not rebuilt.

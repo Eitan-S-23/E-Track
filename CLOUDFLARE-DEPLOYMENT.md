@@ -4,7 +4,39 @@ Read this file before deploying the E-Track backend or asking the owner for
 Cloudflare credentials. It lives at the project root deliberately. Read the
 primary checkout's copy, not only an old task worktree's copy.
 
-## Current State: Account Backend Deployed 2026-11-22
+## Current State: Account Feedback And Email Readiness Deployed 2026-11-22
+
+Actions [44997943728](https://github.com/Eitan-S-23/E-Track/actions/runs/44997943728)
+deploys tested source `3296c633ee005fd6e48d20b51ab8c7b4ade0bd31` to Worker,
+Admin and Public. Account and adjacent feedback-management failures/successes now
+use the existing dialog queue, preserving drafts and actor boundaries. Mail
+readiness, resend limits and explicit provider errors are implemented; **actual
+email sending is still unconfigured**, not a completed delivery claim.
+
+| Component | Verified live identity |
+| --- | --- |
+| Worker version | `e3b6c7a9-3b75-4274-866f-0dad40d5528c` |
+| Admin deployment | `50873c88-50bf-4b39-8fd0-22e6a40d6098` |
+| Public deployment | `a2b388e3-a824-4dbd-8ea1-282092c58128` |
+
+Exact-source backend `44996846216` passes after development `44995837038` (522
+Worker/295 Admin browser tests and all three typechecks). No migration was pending
+or reapplied. `keyring-cloud-live-116/119` under `.cache/ota-followup-20261122/`
+verify exact deployed sources, owner session and committed HTML/ten JS/CSS assets,
+unchanged runtime configuration/schedules, four channels and all 60 delta job
+IDs/attempts/input hashes present at this deployment's baseline. No channel/delta
+mutation, synthetic account or real email send occurred. Both public origins and
+Admin report mail unavailable; login gates and separate 5/5 quotas remain active.
+
+Sender/domain, existing secure Resend input locator and an owner-controlled test
+recipient are needed to activate and actually verify email. Do not invent them,
+scan unrelated credentials or treat mocked provider calls as real delivery. The
+[email contract](app/bluetooth_flutter_Trace/cloudflare/update-service/docs/ACCOUNT-EMAIL.md)
+names the exact settings and verification steps. Preview, Access, signing and
+all existing secrets remain unchanged. Prior dependency-security/Node warnings
+remain visible in `keyring-logs-124`; no unreviewed dependency upgrade was mixed in.
+
+## Earlier Account Backend Deployed 2026-11-22
 
 After the owner's explicit backend-deployment request, Actions
 [44972869444](https://github.com/Eitan-S-23/E-Track/actions/runs/44972869444)

@@ -1,13 +1,18 @@
 # Shared Agent Records
 
-Current follow-up: COMPANION-FEEDBACK-20261122, Codex root, ACCOUNT_MAIL_AND_FEEDBACK_IN_PROGRESS above main 8a9bd9e8.
+Current follow-up: COMPANION-FEEDBACK-20261122, Codex root, ACCOUNT_MAIL_FEEDBACK_DELIVERED / MAIL_ACTIVATION_PENDING, source 3296c633.
 Owner requests actual email completion and consistent App/Admin failure dialogs.
-Account and adjacent feedback prompts are being aligned to existing components;
+Account and adjacent feedback prompts now use the existing dialog components;
 mail sender/domain and controlled real recipient remain missing owner inputs.
 Source 599dc4a3 passes full Flutter 44995783785 (Linux 1007/Windows 955, platform
 skips retained) and backend 44995837038. Local account/mail 21 and related browser
-77 cases pass. App 1.0.91+117 formal delivery and updated backend deployment are
-being prepared; actual mail has not been sent. No MCU rebuild is needed.
+77 cases pass. App 1.0.91+117 formal APK/EXE and candidate delivery succeed in Trace
+44996956524 / E-Track 44996846280; exact-source backend 44996846216 passes.
+Backend 44997943728 is deployed and live-readback verified: unchanged runtime,
+four channels and 60 baseline delta identities. Mail remains unconfigured and
+no message/account was created. No MCU rebuild, phone/device action or channel
+publication occurred. Evidence: keyring-cloud-live-116/119, keyring-logs-124/128,
+keyring-status-126 and keyring-read-130 under .cache/ota-followup-20261122/.
 Prior source/candidates/backend delivery and pending phone/device validation below
 are preserved; no MCU, channel/delta or device action belongs to this follow-up.
 Owner approved separate account-wide automatic/manual daily check limits of 5/5.
