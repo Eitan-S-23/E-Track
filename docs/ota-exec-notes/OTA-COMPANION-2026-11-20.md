@@ -4,7 +4,7 @@
 
 ### Account Relationships And Unified Results
 
-Status: LOCAL_PENDING / DEVELOPMENT_VALIDATION. Owner approved proceeding with
+Status: LOCAL_MAIN_PENDING / FORMAL_DELIVERY_PREPARATION. Owner approved proceeding with
 unified Admin feedback and account/App-terminal/MCU relationships; mailbox SMTP
 activation is explicitly last. Test recipient is owner-provided, not automatically
 an approved sender. No domain purchase, credential configuration or real send.
@@ -30,6 +30,27 @@ accounts-host-201 preserves four fixture failures (missing Content-Type, correct
 without weakening production validation). Expanded browser and dual-host Flutter
 checks are pending. Evidence stays in .cache/ota-followup-20261122/. No new release,
 deployment, channel/delta operation, account creation or physical-device test yet.
+
+Development c8c80bf0 has successful dual-host Flutter run 45010872358. Original
+4badaac8 run 45009223527 passes its tests (Linux 1010/16 skips, Windows 958/68
+skips) but fails analysis because package_info_plus was only transitive. The fix
+declares the existing locked 9.0.1 directly; no dependency version or SDK upgrade.
+Backend 45009338170 passes 528 Worker and 297 browser tests plus three typechecks.
+Local ui-account-links-202 retains six old inline-result oracle failures; the
+same checks now assert the common result dialog and ui-account-links-203 passes
+all 97 version-operation cases. Account desktop/mobile screenshots and six
+targeted tests pass in ui-account-links-204 after scoped typography/button fixes.
+
+SMTP is the final implementation step: native TLS-only QQ/Foxmail adapter,
+one-message deadline, bounded replies, no raw protocol logs, and existing orphan
+code invalidation. accounts-host-215 passes 34 account/terminal/mail tests and
+accounts-check-216 passes. Local Admin typecheck 205 is NOT_RUN successfully:
+its retained dependency tree lacks @types/node; do not confuse that host failure
+with CI's correctly installed dependency tree. Formal source CI remains required.
+No SMTP configuration or real send occurred. ACCOUNT-EMAIL.md specifies the
+remaining owner mailbox steps. All 130 Trace releases including drafts and the
+1.0.92 tag prefix were checked (keyring-read-219/220); 1.0.92+118 is unoccupied
+and selected for original-signed delivery. MCU version/source are unchanged.
 
 ### Mail And Feedback Follow-Up
 

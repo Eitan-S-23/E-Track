@@ -9,14 +9,13 @@ import { deltaActivity, readNotifications, dismissNotifications, hideCompletedJo
 import { resourceUsage } from "../../../../worker/src/resource_usage";
 import { feedbackDetail, listFeedback, updateFeedback } from "../../../../worker/src/feedback";
 import { accountAdmin } from '../../../../worker/src/account_admin';
+import type { AccountMailEnv } from '../../../../worker/src/account_mail';
 
 type Platform = "android" | "windows" | "ios";
 type ChannelName = "stable" | "beta";
 type ActorRole = "viewer" | "publisher" | "owner";
 
-interface AdminEnv {
-  ACCOUNT_MAIL_API_KEY?: string;
-  ACCOUNT_MAIL_FROM?: string;
+interface AdminEnv extends AccountMailEnv {
   RESOURCE_USAGE_API_TOKEN?: string;
   RESOURCE_USAGE_CONFIG_JSON?: string;
   DB: D1Database;

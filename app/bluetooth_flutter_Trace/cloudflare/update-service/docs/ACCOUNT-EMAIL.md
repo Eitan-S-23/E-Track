@@ -2,17 +2,65 @@
 
 ## Current Integration
 
-Account mail uses the existing Resend HTTPS API, not SMTP or Cloudflare Email
-Routing. Cloudflare hosts the application; it does not automatically provide a
-verified sender. Registration/password reset UI must not imply that a message
-was delivered merely because configuration values exist.
+Account mail supports the existing Resend HTTPS API and an explicitly selected
+QQ/Foxmail SMTP mailbox. An unset provider preserves Resend behavior. Cloudflare
+Access administrator OTP is separate and supplies no reusable sender credential.
+Registration/password reset UI must not imply actual inbox delivery merely
+because configuration values exist or the provider accepts a message.
+
+## Owner-Selected Mailbox Route (Activation Last)
+
+The owner selected a mailbox route without purchasing a domain. No mailbox has
+been configured or used for sending. The provided test recipient is not assumed
+to be the sender. Prefer a dedicated project QQ/Foxmail mailbox.
+
+The existing Worker staging and Admin/Public Pages production environments each
+need these encrypted settings (do not change preview or any existing secret):
+
+- `ACCOUNT_MAIL_PROVIDER`: `qq-smtp`.
+- `ACCOUNT_SMTP_USERNAME`: the complete approved `@qq.com` or `@foxmail.com`
+  sender/login address. The From header uses this same mailbox as `E-Track`.
+- `ACCOUNT_SMTP_AUTH_CODE`: its SMTP authorization code, not the mailbox password.
+
+Use Cloudflare encrypted Secrets, not source, chat, command-line arguments, D1,
+ordinary variables or browser storage. A personal backup belongs in the owner's
+password manager. Never send these values to a third-party SMTP test website.
+The application exposes readiness only. Configuration presence is not an inbox
+test, and email verification must remain off until the controlled flow passes.
+
+Owner steps at activation: select the sender; enable SMTP in that mailbox's
+settings and obtain its authorization code; enter the three named encrypted
+settings in the exact existing targets above; confirm the code message reaches
+the approved test inbox (including spam). Then complete controlled registration
+and password-reset verification before enabling required registration mail.
+Do not enable IMAP/POP or change personal mailbox settings beyond what the
+provider actually requires for SMTP. Provider UI labels may change; verify the
+current settings screen when giving the final click-by-click instructions.
+
+The SMTP route uses fixed `smtp.qq.com:465` with TLS from the start, a 15-second
+transaction deadline and a 32 KiB response cap. It sends one text/HTML message,
+waits for post-DATA acceptance, and closes on success, rejection and timeout.
+There is no configurable SMTP target, plaintext fallback, raw protocol logging
+or automatic retry of uncertain delivery. The existing code invalidation and
+mailbox rate limits remain shared across providers. A rejected mailbox can be
+replaced through these settings without an App/MCU rebuild; verify its real
+delivery before switching, and do not assume an unusable old mailbox can roll back.
+
+Reuse review: worker-mailer 1.3.1 was inspected, not installed. Its connect error
+path does not close its socket, and close() only requests socket closure after a
+successful QUIT/read; it also starts an unscoped console.error callback. These
+conflict with bounded cleanup and no protocol/credential logging. This project's
+small one-message LOGIN/TLS transaction uses the native Cloudflare socket API;
+it is not a general SMTP server/client or a replacement deployment tool. Fake
+socket tests cover fragmented multiline replies, auth/recipient/DATA rejection,
+timeout, injection and response bounds. They do not prove real QQ delivery.
 
 The owner must identify an approved sender/domain, the existing protected Resend
 configuration locator, and a real test recipient they control. Never invent a
 domain, scrape unrelated secret files, put keys in chat/argv/Git, send to a guessed
 recipient, or enable a paid service without its owner's decision.
 
-## Configuration Contract
+## Resend Configuration Contract
 
 The current architecture executes account handlers in both Worker and Public
 Pages; Admin independently gates the email-verification setting. The same two

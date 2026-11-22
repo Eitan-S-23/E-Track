@@ -6,6 +6,9 @@ export type ActorType = "ci" | "access" | "system" | "test";
 export type ReleaseState = "candidate" | "disabled";
 
 export interface WorkerEnv {
+  ACCOUNT_MAIL_PROVIDER?: string;
+  ACCOUNT_SMTP_USERNAME?: string;
+  ACCOUNT_SMTP_AUTH_CODE?: string;
   ACCOUNT_MAIL_API_KEY?: string;
   ACCOUNT_MAIL_FROM?: string;
   DB: D1Database;

@@ -4,8 +4,9 @@ import { ApiError, invalidParameter } from './errors';
 import { json } from './http';
 import { boundedJson } from './version_inventory';
 import { accountConnections, sessionList } from './account_terminals';
+import type { AccountMailEnv } from './account_mail';
 
-interface Env { DB: D1Database; APP_ID: string; ACCOUNT_MAIL_API_KEY?: string; ACCOUNT_MAIL_FROM?: string }
+interface Env extends AccountMailEnv { DB: D1Database; APP_ID: string }
 interface Actor { email: string; role: 'viewer' | 'publisher' | 'owner' }
 
 // Caller owns Access authentication, same-origin validation and CSRF enforcement.

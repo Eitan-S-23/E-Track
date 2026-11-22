@@ -6,8 +6,10 @@ import { accountBudget, accountCheck, type AccountLimits } from './account_quota
 import type { WorkerEnv } from './types';
 import { scryptSync } from 'node:crypto';
 import { accountConnections, saveTerminal, sessionList, terminalInput, type Terminal } from './account_terminals';
+import { emailDeliveryAvailable, sendAccountMail, type AccountMailEnv } from './account_mail';
+export { emailDeliveryAvailable } from './account_mail';
 
-type Env = Pick<WorkerEnv, 'DB' | 'APP_ID' | 'ACCOUNT_MAIL_API_KEY' | 'ACCOUNT_MAIL_FROM'>;
+type Env = Pick<WorkerEnv, 'DB' | 'APP_ID'> & AccountMailEnv;
 export interface AccountSettings extends AccountLimits {
   registration_enabled: number; password_registration_enabled: number;
   email_verification_enabled: number; revision: number;
@@ -19,10 +21,6 @@ export interface Account {
 const encoder = new TextEncoder();
 const randomHex = (bytes = 32) => Array.from(crypto.getRandomValues(new Uint8Array(bytes)), b => b.toString(16).padStart(2, '0')).join('');
 const milliseconds = () => Date.now();
-
-export function emailDeliveryAvailable(env: Pick<Env, 'ACCOUNT_MAIL_API_KEY' | 'ACCOUNT_MAIL_FROM'>): boolean {
-  return Boolean(env.ACCOUNT_MAIL_API_KEY?.trim() && env.ACCOUNT_MAIL_FROM?.trim());
-}
 
 export async function accountSettings(env: Env): Promise<AccountSettings> {
   const settings = await env.DB.prepare('SELECT * FROM account_settings WHERE app_id=?').bind(env.APP_ID).first<AccountSettings>();
@@ -135,14 +133,9 @@ async function sendCode(request: Request, env: WorkerEnv, body: Record<string, u
     VALUES(?,?,?,?,?,?,?)`).bind(id, env.APP_ID, email, purpose, await sha256Hex(id + ':' + code), now, now + 600000).run();
   const operation = purpose === 'register' ? 'registration' : 'password reset';
   try {
-    const response = await fetch('https://api.resend.com/emails', { method: 'POST', redirect: 'error',
-      headers: { Authorization: 'Bearer ' + env.ACCOUNT_MAIL_API_KEY!.trim(), 'Content-Type': 'application/json', 'Idempotency-Key': id },
-      body: JSON.stringify({ from: env.ACCOUNT_MAIL_FROM!.trim(), to: [email], subject: 'E-Track ' + operation + ' verification',
+    await sendAccountMail(env, { id, to: email, subject: 'E-Track ' + operation + ' verification',
         text: 'Your E-Track ' + operation + ' code is ' + code + '. It expires in 10 minutes and can be used once. Do not share it. If you did not request this email, ignore it.',
-        html: '<div style="font-family:sans-serif;max-width:480px;padding:24px;background:#061821;color:#e4f5f7"><h1 style="color:#65dbe5">E-Track</h1><p>Your ' + operation + ' verification code:</p><p style="font-size:32px;letter-spacing:6px">' + code + '</p><p>Valid for 10 minutes, one use only. Do not share this code.</p><p>If you did not request this email, ignore it.</p></div>' }),
-      signal: AbortSignal.timeout(15000) });
-    await response.body?.cancel();
-    if (!response.ok) throw new Error('Email provider rejected the request');
+        html: '<div style="font-family:sans-serif;max-width:480px;padding:24px;background:#061821;color:#e4f5f7"><h1 style="color:#65dbe5">E-Track</h1><p>Your ' + operation + ' verification code:</p><p style="font-size:32px;letter-spacing:6px">' + code + '</p><p>Valid for 10 minutes, one use only. Do not share this code.</p><p>If you did not request this email, ignore it.</p></div>' });
   } catch {
     // An uncertain or rejected send must never leave a usable orphan code.
     await env.DB.prepare('DELETE FROM account_email_codes WHERE id=?').bind(id).run();
