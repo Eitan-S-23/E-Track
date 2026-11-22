@@ -1,5 +1,252 @@
 # OTA Companion And Admin Scroll Investigation
 
+## Account Identity And Terminal Follow-Up, 2026-11-23
+
+Status: APP_CANDIDATE_DELIVERED / OWNER_VALIDATION_DEFERRED, Codex root. Owner approves implementation;
+phone/MCU assistance is deferred until the end. Current primary and remote main
+match `fa3e9ac740ddcd21316bca9a9971018fbbab171a`; the existing clean
+`dev/flutter/ota-ui-20261121` worktree is fast-forwarded to that revision.
+The earlier read-only remote freshness failure has recovered, not been hidden.
+Five pre-existing pending documents and all historical evidence remain intact.
+
+Confirmed defects: Profile avatar text is hard-coded, and AccountPage renders
+per-login sessions instead of the endpoint's installation-keyed terminals.
+The installation ID is already secure-store persistent across logout; server
+terminal upsert already keys by account/installation. Do not regenerate identity,
+merge phones by model or delete session history to hide duplicate display rows.
+
+Implement reactive username/email display, separate terminal and session data,
+real retained-session summaries and account-scoped terminal-wide revocation.
+Keep existing bounded lists, detail/confirmation/result dialogs, edge-scroll
+handoff, visible logout, Bluetooth guest access and unchanged account 5/5 quotas.
+Add regression tests for logout/relogin, restoration, account changes, separate
+installations, preserved history and narrow/enlarged-text layouts.
+
+Reuse the prior contained host/CI helpers through fresh thin adapters under
+`.cache/account-identity-20261123/`. Full development checks precede a new,
+draft/tag-checked original-signed App candidate. Existing 3.3.50 is unchanged;
+no device action, mail resend or successful-build replay. Resource queries stay
+read-only with actual usage/unknown limits distinguished. Backend deployment,
+Stable/Beta, deltas, phone actions and real OTA stay owner-operated. Prepare the
+exact-source deployment and final observation/log-retrieval handoff, not a live
+device window while the owner is unavailable. Self-tests are not acceptance.
+
+### Identity Implementation And Development Checkpoint
+
+Status: CODE_ON_MAIN / FORMAL_APP_PENDING / OWNER_VALIDATION_DEFERRED. Product
+source `cc8039e41c13e0300db6d656103b7cefb3579880` is integrated and pushed to main.
+The existing task worktree is clean. Integration verifies unchanged hashes for
+all five already-pending primary files and the same 1,150 untracked entries.
+Only 11 scoped product/rule/test files entered the product commit; no mail,
+historical helper, credential, firmware or unrelated file was staged.
+
+Both Profile and AccountPage now subscribe to the same username/email identity.
+Login, late restoration, account switching and logout update it without reopening
+the page. The Profile label retains normal dimensions and expands only within
+118..180 pixels for enlarged text; long identities have deliberate ellipsis and
+full accessibility text. Terminal rows now use the existing installation-keyed
+response, not per-login history. Same-model phones stay distinct. Shared dialogs,
+full-row selection, bounded windows, two-edge drag handoff and visible logout
+remain in use. Late account responses cannot restore cleared relation views.
+
+| Development check | Actual result | Original evidence |
+| --- | --- | --- |
+| Flutter all, Ubuntu | 1,059 passed / 16 platform skips / 0 failed; analyze clean | `45069815624/1`, `app-logs-01/`, `full-linux-01/` |
+| Flutter all, Windows | 1,007 passed / 68 platform skips / 0 failed; analyze clean | Same run, `full-windows-01/` |
+| Candidate-profile tests | 8 passed on each host | Same full original artifacts |
+| Worker invariants | 575 passed | `45069818091/1`, `backend-logs-01/` |
+| Admin browser regressions | 308 passed | Same backend run |
+| Worker/Admin/Public typechecks | All passed | Same backend run |
+| Local terminal regression / Worker typecheck | 13 passed / passed | `host-terminals-02/`, `node-typecheck-01/` |
+| Main backend checks | Success, no deployment | `45071318738/1` |
+
+Flutter is 3.47.9 / framework c197ca5199e9ee5661e865596c9c07294dfab51c /
+Dart 3.13.7. Two complete artifact archives, IDs 14773002143 and 14772926372,
+match GitHub digests; all 12 full command logs match report lengths and actual
+test footers through the existing full-log parser. Toolchain regeneration and
+Windows header EOL-only restoration are bound rather than called source drift.
+See `log-audit-01/result.json`; console truncation does not mean lost originals.
+No new debug APK, local Flutter/Gradle build, SDK install or physical acceptance.
+
+The first local terminal run has 7 passes / 6 failures: shared fixture IPs exhaust
+the real auth limiter across test cases. Distinct fixture clients fix isolation;
+production rate limits and assertions are unchanged. Original failure/closure is
+`host-terminals-01/`. Artifact-list EOF is retained in `app-artifacts-list-01/`;
+the next read succeeds without rerunning tests or packages. Worker dependencies
+retain 13 advisories (3 moderate, 10 high), Admin/Public four high each, and the
+existing SQLite/Node/Actions warnings. Do not report zero overall warnings.
+
+App `1.0.94+120` is checked against all 132 releases/drafts and tag refs, then
+rechecked before integration. Automatic formal parent `45071318837/1` selects
+only App; firmware and duplicate ordinary APK/EXE builds skip. Its first ten-minute
+observer expires while CI is still building; `formal-candidate-02/` continues
+that same source/run without another dispatch, version bump or build. Final
+candidate receipt is still pending at this checkpoint. Firmware 3.3.50 is unchanged.
+
+### Identity And Terminal Implementation Contract
+
+#### Scope And Signatures
+
+This follow-up fixes active identity presentation and terminal/session confusion,
+not login-token reuse, cloud quotas, online detection or device identity bypasses.
+Normative interface requirements live in `docs/ui-design-contract.md` on main.
+
+- App: `AccountService.identityLabel`, `terminals`, `sessions`, `refresh()` and `revokeTerminal(terminal)`.
+- Existing read: `GET /api/account/sessions` returns independent `sessions` and `terminals` arrays.
+- Terminal summaries: `installationId`, metadata, `state`, `current`, `lastLoginAt`, `sessionCount`, `activeSessionCount`.
+- Existing mutation: `POST /api/account/sessions/revoke` accepts exactly one of `installationId` or legacy `sessionId`, both lower-case 32-hex.
+- Confirmed response: `{ok:true,currentRevoked:boolean}`. App clears the current login only from the server receipt; missing receipts remain unconfirmed, never automatically retried.
+- Database: existing `account_terminals(account_id,installation_id)` key; aggregate `account_sessions` by account/installation. No new schema or environment setting.
+
+#### Contracts
+
+Terminal summaries aggregate all retained sessions, not the 100-row display page.
+Any unrevoked/unexpired session gives valid state; only expired unrevoked sessions
+give expired; only revoked history gives revoked; no retained sessions give unknown.
+Current is derived from the authenticated token hash, which is never returned.
+The secure installation ID survives logout; each login still creates its own
+session and login event. Legacy null IDs stay null and cannot be invented from a
+phone model/address. Terminal revocation is account-scoped and touches only its
+unrevoked/unexpired sessions; other accounts/installations and historical rows
+remain. Existing scheduled retention remains, not a new lifetime-history promise.
+Local view clearing changes neither reminders nor server-owned daily 5/5 quotas.
+
+#### Validation And Error Matrix
+
+| Case | Required result |
+| --- | --- |
+| Signed-out / restored login / logout / actor change | Correct live identity; no stale relation rows |
+| Repeated real-handler login on one installation | One terminal, separate retained login history |
+| Same model on two installations / same installation on two accounts | Separate correctly scoped rows |
+| More than 100 history rows | Accurate active state, current flag and retained counts |
+| Unknown legacy installation | Unknown, not fabricated/online/expired |
+| Terminal-wide logout | All active matching sessions revoked; other scopes usable; history preserved |
+| Missing/both/malformed selectors | INVALID_PARAMETER; no revocation |
+| Missing receipt / failed follow-up refresh | Unconfirmed or REFRESH_FAILED dialog; no mutation retry |
+| 320px and 200% text / row whitespace / both scroll edges | No layout exception; shared details/actions reachable; correct scroll handoff |
+
+#### Good, Base And Bad Cases
+
+Good: two logins yield one stable terminal and two retained sessions. Base: an
+old null installation remains a historical unknown. Bad: merging same-model
+phones or deleting login history to make the terminal list look deduplicated.
+
+#### Tests Required
+
+`account_service_test.dart` covers identity/restoration/actor changes, separate
+arrays, confirmed revocation, receipt/refresh failures and late-response discard.
+`account_page_test.dart` covers terminal rows, detail/confirmation/error dialogs,
+whole-row taps, bounded lists and two-edge parent handoff. Profile settings tests
+cover live identity and long names at 320px/200% text. Worker terminal tests cover
+real auth-handler relogin, cross-account/install isolation, history limits,
+unknown states and all revocation invariants. Green self-tests are not live UI,
+background BLE reliability or independent system acceptance.
+
+#### Wrong Versus Correct
+
+Wrong: interpret per-login sessions as unique phones, merge by appearance, infer
+online state from a valid token, or retry an uncertain logout. Correct: use the
+existing stable terminal key, retain history, aggregate the full retained scope,
+use the real server receipt and surface unknown/error states in shared dialogs.
+
+### Resource Read And Deferred Owner Route
+
+Read-only provider snapshot at 2026-11-22 21:10 UTC (Shanghai 2026-11-23 05:10)
+uses CF-CI-01 and the existing `collectResourceUsage`, not the cache-writing Admin
+route. All 12 GraphQL requests/20 metrics succeed. UTC-day project counts through
+21:05 are Worker 1,859, Admin Functions 352, Public Functions 292, D1 rows read
+127,406 / written 604. D1 storage is 12,791,808 bytes; the latest Standard R2
+sample is 2,215,433,313 bytes, Infrequent Access zero. Monthly R2 Class A/B counts
+are 343/1,716. See `resource-01/result.json` for actual scopes/windows/samples.
+
+Subscription GET returns HTTP 403. Workers default usage model is standard, not
+proof of a billing plan. Account allowance/remaining stay unknown; delayed/sampled
+project analytics cannot be subtracted from an assumed account-wide free limit.
+No new credential, login, permission, billing or cloud configuration change.
+Live Admin/Public remain on source 95470e8e at this snapshot; latest product
+backend changes have not been deployed. Mail activation/user-confirmed account
+flows remain done, not repeated.
+
+After the owner is available, use the existing `deploy-cloudflare-admin.yml`
+with `source_sha=cc8039e41c13e0300db6d656103b7cefb3579880`,
+`project_name=trace-update-admin-staging`, `branch=main`, `include_worker=true`,
+`include_public=true`. This includes the previous still-undeployed Admin/Public
+and legacy-route fixes plus the current terminal aggregation/revocation. There
+is no new migration; preserve applied 0019, mail/verification revision 2, 5/5,
+bindings, credentials, channels and deltas. Verify actual three-component sources
+afterward; dispatch acceptance alone is not a live deployment.
+
+Then publish/install App 1.0.94+120 without clearing data. Confirm live username/
+email, one terminal after logout/relogin, distinct installations, detail dialogs,
+scroll edges and visible logout. Report the actual MCU version before any OTA.
+Only a still-3.3.48 device needs the existing formal 3.3.50 full compatibility
+transition, followed by fresh real UID binding; no replacement firmware build,
+J-Link installation or repeated successful OTA is needed for this follow-up.
+
+Physical observation remains closed until the owner is available. Start with
+App complete export (not just the newest local page), exact App/MCU/account/device
+and target-package identities plus start/end times. Save originals under a fresh
+bounded owner window and correlate reconnect/control-ready, check decisions,
+offer/popup/Later, durable progress, reboot identity and persisted history. Never
+reset quotas/reminder dedup or click checks/OTA for the owner. USB is optional,
+only if a specific missing native/system observation requires a prepared bounded
+collector. Do not repeat successful transfers to repair missing host evidence.
+
+Backend rollout, phone layouts/terminal actions, actual UID/binding and remaining
+background/global-notification/history correlation stay owner-pending, not passed
+by this development batch. No extra agent, PowerShell, device action or channel/
+delta operation. Historical failures and helper-loss incident remain unchanged.
+
+### Identity Formal Candidate Delivered
+
+App `1.0.94+120`, exact product source
+`cc8039e41c13e0300db6d656103b7cefb3579880`, completes automatic parent
+`45071318837/1` and original signer `45071476388/1`. Both Windows and Android jobs
+pass. Signer workflow commit is still 12ff41fc, not product source. Native inspection
+checks original package `com.wen.gaia.gaia`, original certificate 3cecee6330a930e0,
+both ARM ABIs, original backend, BLE V2 and inventory. Existing CI fully uploads
+and read-back verifies APK/manifest, then registers `rel_trace_android_v1_0_94`
+with `ok=true,idempotent=false`. GitHub tag `v1.0.94` is a prerelease/not latest;
+Stable/Beta, deltas and backend deployment remain untouched.
+
+| Immutable asset | Bytes | SHA-256 |
+| --- | --- | --- |
+| `ble-monitor-android.apk` | 49,636,885 | `4b0729c5736e66e47eb1713982e8b5d1d351e3918b5f98ba91ae8d4e48f23a54` |
+| `ble-monitor-windows.exe` | 161,792 | `2088fb4c5fbbaf7e3bd43f79a72ea4d2f9018b1391a2ee77cc360a9eb885ae7e` |
+| `ble-monitor-windows.zip` | 20,886,370 | `af8fc50c7eca1292f999e4726fb054d63e1a79fa58f7a5d9cdfdc81d05c94e89` |
+
+Android has ten build warning lines / zero error lines; Windows zero / zero.
+Existing Gradle/AGP/Kotlin and SDK-36 plugin warnings plus earlier dependency/
+Actions warnings are not hidden or fixed by this batch. Full original/native/R2/
+registration checks are bound in `formal-audit-01/result.json`, with raw signer
+logs in `signer-logs-01/`. Hosted metadata digest differs from post-R2 metadata
+because the uploader adds verified R2 fields; immutable assets were not replaced.
+The APK was not downloaded again or rebuilt to improve evidence.
+
+The first candidate observer times out, the second ends on a GitHub metadata EOF,
+and the third observes the same completed run. Those original failures remain in
+`formal-candidate-01/02/`; no version bump, dispatch or package replay. A metadata
+read mistakenly used the backend release ID as a GitHub tag and got 404; corrected
+`v1.0.94` read succeeds. This was not proof of an unoccupied version, and no asset
+was overwritten. The small offline presenter initially matched an echoed script
+instead of its JSON log line; exact-line parsing then verified the originals.
+
+Owner assistance remains last. When available: deploy the pinned three-component
+backend using the parameters above, then publish/install App 1.0.94+120 and run
+the prepared account/terminal and actual device observation route. No immediate
+phone/MCU/USB action is requested. Firmware 3.3.50 remains the existing candidate;
+only actual still-3.3.48 legacy migration needs that already-built full target.
+Code/self-tests/formal candidate are delivered; live rollout, remaining system
+verification and independent acceptance are not being marked complete.
+
+Closeout selects only this follow-up's three record blocks against main, retaining
+all older pending SMTP/registration records, deployment/mail documentation and
+historical/untracked tools. Selected/controlled output paths are the authorized
+primary/task worktree, Git metadata and `.cache/account-identity-20261123/`.
+The final audit checks real paths, inspected child defaults and owned closures;
+it does not attribute unrelated Windows/kernel activity. No PowerShell, extra
+agent, device, backend mutation, channel/delta action or external cleanup.
+
 ## Account UI And Legacy Migration Follow-Up, 2026-11-23
 
 Status: IN_PROGRESS / LOCAL_PENDING, owner-approved consolidated implementation.

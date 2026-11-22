@@ -1,5 +1,29 @@
 # Shared Agent Records
 
+Latest work, 2026-11-23: ACCOUNT-IDENTITY-01, Codex root, CODE_ON_MAIN /
+APP_CANDIDATE_DELIVERED / OWNER_VALIDATION_DEFERRED. Main product source `cc8039e4`
+fixes reactive username/email and installation-keyed terminal display/revocation,
+preserving login history, distinct scopes, dialogs/scroll/logout and 5/5 quotas.
+Flutter 45069815624 passes Linux 1059/16 and Windows 1007/68 (passed/skipped),
+plus 8 candidate tests per host. Full original artifact digests/12 logs are
+verified. Backend 45069818091 and main 45071318738 pass 575 Worker/308 browser
+tests and three typechecks. Local 13 terminal cases pass; failed shared-IP fixture
+isolation and an artifact-list EOF remain recorded, without weakened limits.
+Automatic parent 45071318837 / Trace 45071476388 deliver App 1.0.94+120, original
+APK/Windows, R2 readback and rel_trace_android_v1_0_94 unpublished. GitHub tag is
+v1.0.94, not the backend release ID; native APK SHA starts 4b0729c5736e66e4.
+Android has 10 build warnings/0 errors; Windows 0/0. Original observer timeout/
+metadata EOF/tag-404 remain, with third same-run observation and formal audit;
+no rebuild or asset overwrite. Full identities are in Identity Formal Candidate Delivered.
+Firmware 3.3.50 and prior successful device/mail operations are unchanged.
+Provider usage reads succeed; subscription HTTP 403 leaves account remaining
+unknown. Admin/Public source remains 95470e8e at the 05:10 snapshot. Owner retains
+backend/channel/delta/device actions and assistance stays last. Existing five
+pending documents/1,150 untracked entries and dependency warnings are preserved.
+Details: Identity Implementation And Development Checkpoint, implementation
+contract and deferred owner route in the companion note; new controlled evidence
+`.cache/account-identity-20261123/`. This is self-test, not physical acceptance.
+
 Latest checkpoint, 2026-11-23: ACCOUNT-UX-LEGACY-01, Codex root, CODE_ON_MAIN /
 APP_CANDIDATE_DELIVERED / BACKEND_AND_PHONE_PENDING. Product source
 `dbcf94cf6424eec00e5fb0d8fae7140e82928ba2` is fast-forwarded and pushed to main.
