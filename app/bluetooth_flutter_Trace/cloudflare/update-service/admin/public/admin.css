@@ -171,6 +171,18 @@ summary::marker { color: var(--muted); }
 .inventory-details-open #inventoryDetailSheet { opacity: 1; transform: translate(-50%, 0); }
 body.inventory-details-open { overflow: hidden; }
 body.inventory-details-open .resource-float { visibility: hidden; pointer-events: none; }
+.account-details-open #accountDetailBackdrop { opacity: 1; }
+.account-details-open #accountDetailSheet { opacity: 1; transform: translate(-50%, 0); }
+body.account-details-open { overflow: hidden; }
+body.account-details-open .resource-float { visibility: hidden; pointer-events: none; }
+.account-list { max-height: min(440px, 55dvh); overflow: auto; overscroll-behavior-y: auto; scrollbar-gutter: stable; }
+.account-detail-list { max-height: min(360px, 45dvh); overflow: auto; overscroll-behavior-y: auto; overflow-wrap: anywhere; }
+.account-list code { overflow-wrap: anywhere; }
+.account-settings-group { border: 1px solid var(--line); padding: 16px 20px; margin: 20px 0; }
+.account-settings-group legend { padding: 0 8px; font-size: 14px; font-weight: 600; }
+.account-setting { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 12px 0; font-size: 13px; }
+.account-setting input[type="number"] { width: 88px; }
+.account-setting input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); }
 .inventory-quality { margin: 20px 0; }
 .inventory-quality summary { cursor: pointer; font-size: 13px; color: var(--accent); }
 .inventory-hash, .delta-base-row small, .delta-job-row small { display: block; color: var(--muted); font-size: 11px; overflow-wrap: anywhere; }

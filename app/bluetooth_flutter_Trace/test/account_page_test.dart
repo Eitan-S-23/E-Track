@@ -180,8 +180,94 @@ void main() {
     await show(tester, scale: 2);
     expect(find.textContaining('自动剩余 4 / 5'), findsOneWidget);
     expect(find.textContaining('手动剩余 3 / 5'), findsOneWidget);
-    await tester.ensureVisible(find.text('UID 1234567890abcdef12345678'));
-    expect(find.text('UID 1234567890abcdef12345678'), findsOneWidget);
+    await tester.ensureVisible(find.byKey(const ValueKey('account-device-1234567890abcdef12345678')));
+    await tester.tap(find.byKey(const ValueKey('account-device-1234567890abcdef12345678')));
+    await frames(tester);
+    expect(find.byType(TraceDialog), findsOneWidget);
+    expect(find.textContaining('UID 1234567890abcdef12345678'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('registration refreshes verification requirements when entering the form', (tester) async {
+    await show(tester);
+    accounts.verification = true;
+    await tester.ensureVisible(find.text('创建账号'));
+    await tester.tap(find.text('创建账号')); await frames(tester);
+    expect(find.text('验证码'), findsOneWidget);
+    expect(find.text('获取邮箱验证码'), findsOneWidget);
+    expect(accounts.calls, isEmpty);
+  });
+
+  testWidgets('a requirement enabled before submit updates the form without an invalid POST', (tester) async {
+    await show(tester);
+    await tester.ensureVisible(find.text('创建账号'));
+    await tester.tap(find.text('创建账号')); await frames(tester);
+    final values = ['rider', 'rider@example.test', 'valid-password', 'valid-password'];
+    for (var i = 0; i < values.length; i++) { await tester.enterText(find.byType(TextFormField).at(i), values[i]); }
+    accounts.verification = true;
+    await tester.ensureVisible(find.widgetWithText(FilledButton, '注册'));
+    await tester.tap(find.widgetWithText(FilledButton, '注册')); await frames(tester);
+    expect(accounts.calls, isEmpty);
+    expect(find.text('注册现在需要验证邮箱，请获取验证码后再提交'), findsOneWidget);
+    await tester.tap(find.text('知道了')); await frames(tester);
+    expect(find.text('获取邮箱验证码'), findsOneWidget);
+    expect(tester.widget<TextFormField>(find.byType(TextFormField).first).controller!.text, 'rider');
+  });
+
+  testWidgets('closing registration after page entry is reported before switching modes', (tester) async {
+    await show(tester);
+    accounts.registration = false;
+    await tester.ensureVisible(find.text('创建账号'));
+    await tester.tap(find.text('创建账号')); await frames(tester);
+    expect(find.text('管理员已关闭注册'), findsOneWidget);
+    expect(accounts.calls, isEmpty);
+  });
+
+  for (final scale in [1.0, 2.0]) testWidgets('logout stays visible with growing lists at text scale $scale', (tester) async {
+    accounts.signedIn = true;
+    accounts.account.value = {'id': 'one', 'displayName': 'Rider'};
+    accounts.devices.assignAll(List.generate(40, (i) => {
+      'uid': i.toRadixString(16).padLeft(24, '0'), 'name': 'Device $i', 'model': 'AT32F435', 'firmware_version': 30350,
+    }));
+    accounts.sessions.assignAll(List.generate(40, (i) => {'id': '$i', 'model': 'Phone $i', 'state': 'valid'}));
+    await show(tester, scale: scale);
+    final logout = find.byKey(const ValueKey('account-logout'));
+    expect(logout.hitTestable(), findsOneWidget);
+    expect(tester.getRect(logout).bottom, lessThanOrEqualTo(568));
+    final window = find.byKey(const ValueKey('account-devices-window'));
+    expect(tester.getSize(window).height, lessThanOrEqualTo(568 * .38));
+    expect(find.textContaining('登录有效不代表当前在线'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('account inner list hands drag movement to the page at both edges', (tester) async {
+    accounts.signedIn = true;
+    accounts.account.value = {'id': 'one', 'displayName': 'Rider'};
+    accounts.devices.assignAll(List.generate(40, (i) => {'uid': '$i', 'name': 'Device $i'}));
+    accounts.sessions.assignAll(List.generate(40, (i) => {'id': '$i', 'model': 'Phone $i'}));
+    await show(tester);
+    final window = find.byKey(const ValueKey('account-devices-window'));
+    final outer = tester.widget<SingleChildScrollView>(find.byKey(const ValueKey('account-page-scroll'))).controller!;
+    final inner = tester.widget<SingleChildScrollView>(window).controller!;
+    outer.jumpTo(50); inner.jumpTo(inner.position.maxScrollExtent); await tester.pump();
+    final before = outer.offset;
+    await tester.drag(window, const Offset(0, -120)); await frames(tester);
+    expect(outer.offset, greaterThan(before));
+    outer.jumpTo(60); inner.jumpTo(0); await tester.pump();
+    await tester.drag(window, const Offset(0, 120)); await frames(tester);
+    expect(outer.offset, lessThan(60));
+    expect(find.byKey(const ValueKey('account-logout')).hitTestable(), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('connected device choice activates across row whitespace', (tester) async {
+    String? selected;
+    await tester.pumpWidget(MaterialApp(home: Scaffold(body: Center(child: SizedBox(width: 300,
+      child: AccountDeviceChoices(choices: const [{'id': 'one', 'name': 'E-Track'}], onSelected: (id) => selected = id))))));
+    final row = find.byKey(const ValueKey('connected-account-device-one'));
+    final bounds = tester.getRect(row);
+    expect(bounds.width, 300);
+    await tester.tapAt(Offset(bounds.right - 8, bounds.center.dy));
+    expect(selected, 'one');
   });
 }

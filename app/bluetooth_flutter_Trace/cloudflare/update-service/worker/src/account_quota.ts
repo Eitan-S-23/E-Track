@@ -35,7 +35,7 @@ function identity(value: Record<string, unknown>): string {
   return JSON.stringify([value.versionCode, value.releaseId, value.releaseTag,
     value.targetImageSha256, value.apkSha256, value.apkSize, value.payloadSignature,
     value.assets, asset?.assetId, asset?.kind, asset?.sha256, asset?.sizeBytes,
-    asset?.baseImageSha256]);
+    asset?.baseImageSha256, value.legacyMigration]);
 }
 
 export async function accountCheck(request: Request, db: D1Database, account: string,

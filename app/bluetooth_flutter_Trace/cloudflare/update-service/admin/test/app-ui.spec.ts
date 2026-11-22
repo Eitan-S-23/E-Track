@@ -6,22 +6,70 @@ const origin = "https://p51-app-admin.test";
 const html = readFileSync(new URL("../public/index.html", import.meta.url), "utf8").replace(/<body([^>]*)>/,
   '<body$1><div style="position:fixed;bottom:8px;left:12px;z-index:10000;padding:6px 12px;background:#fff2b0;color:#161616;font:12px monospace;pointer-events:none">MOCK UI / NO REAL ACCESS OR D1</div>');
 
-test('account administration lists hardware UID and saves independent 5/5 registration settings', async ({ page }) => {
+async function openAccounts(page: Page) {
+  if ((page.viewportSize()?.width ?? 1440) <= 1000) await page.locator('#mobileMenu').click();
+  await page.locator('#accountsNav').click();
+}
+
+test('obsolete unconditional firmware approval copy is absent', () => {
+  expect(html).not.toContain('GitHub approval is required after submission');
+});
+
+for (const width of [1440, 390, 320]) test(`account bounded lists and detail scrolling chain at ${width}px`, async ({ page }) => {
+  await page.setViewportSize({ width, height: 480 });
+  const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
+  const data = await mockApp(page); data.accountRows = 90; data.accountDetailRows = 40; data.accountLongText = true;
+  await openAccounts(page);
+  await expect(page.locator('#accountsPanel .account-list tbody tr')).toHaveCount(30);
+  expect(await page.locator('#accountsPanel .account-list').evaluate(node => node.clientHeight < node.scrollHeight)).toBe(true);
+  await expect(page.locator('#accountNext')).toBeEnabled();
+  await page.locator('#accountNext').click();
+  await expect(page.locator('#accountsPanel')).toContainText('2 / 3');
+  await page.locator('#accountsPanel [aria-haspopup="dialog"]').first().click();
+  const list = page.locator('#accountDetailBody'), outer = page.locator('#accountDetailScroll');
+  const close = page.locator('#accountDetailClose');
+  await expect(list.locator('[data-unbind]')).toHaveCount(40);
+  expect(await list.evaluate(node => node.clientHeight < node.scrollHeight)).toBe(true);
+  await expect(close).toBeInViewport({ ratio: 1 });
+  const start = (await close.boundingBox())!;
+  // An enlarged-text/short-screen fixture must leave room for both scroll owners.
+  await outer.evaluate(node => node.style.fontSize = '24px');
+  await outer.evaluate(node => { node.scrollTop = 60; });
+  await list.evaluate(node => { node.scrollTop = node.scrollHeight; });
+  const beforeDown = await outer.evaluate(node => node.scrollTop);
+  await list.dispatchEvent('wheel', { deltaY: 180, bubbles: true, cancelable: true });
+  expect(await outer.evaluate(node => node.scrollTop)).toBeGreaterThan(beforeDown);
+  await list.evaluate(node => { node.scrollTop = 0; });
+  const beforeUp = await outer.evaluate(node => node.scrollTop);
+  await list.dispatchEvent('wheel', { deltaY: -90, bubbles: true, cancelable: true });
+  expect(await outer.evaluate(node => node.scrollTop)).toBeLessThan(beforeUp);
+  await expect(close).toBeInViewport({ ratio: 1 });
+  const end = (await close.boundingBox())!;
+  expect(Math.abs(end.y - start.y)).toBeLessThan(1);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await close.click(); await expect(page.locator('#accountDetailSheet')).toBeHidden();
+  expect(errors).toEqual([]); expect(data.writes).toHaveLength(0);
+});
+
+test('account administration lists hardware UID in a modal and saves independent 5/5 settings', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   const data = await mockApp(page);
-  await page.locator('#appAccountsTab').click();
-  await expect(page.locator('#appAccountsPanel')).toContainText('test-rider');
-  await page.locator('#appAccountsPanel [data-user]').click();
-  await expect(page.locator('#appAccountsPanel')).toContainText('1234567890abcdef12345678');
-  await page.locator('#appAccountsPanel summary').click();
+  await openAccounts(page);
+  await expect(page.locator('#accountsPanel')).toContainText('test-rider');
+  await page.locator('#accountsPanel [data-user][aria-haspopup="dialog"]').click();
+  await expect(page.locator('#accountDetailSheet')).toBeVisible();
+  await expect(page.locator('#accountDetailContent')).toContainText('1234567890abcdef12345678');
+  await expect(page.locator('.workspace')).toHaveJSProperty('inert', true);
+  await page.locator('#accountDetailClose').click();
+  await page.locator('[data-account-view="settings"]').click();
   await page.locator('[name="registration_enabled"]').uncheck();
   await page.locator('#accountSettings button').click();
   await expect.poll(() => data.writes.length).toBe(1);
   expect(data.writes[0].body).toMatchObject({ registration_enabled: 0, automatic_daily_limit: 5, manual_daily_limit: 5 });
   await expect(page.locator('#confirmDialog')).toBeVisible();
   await expect(page.locator('#confirmMessage')).toContainText('Account settings saved');
-  await expect(page.locator('#appAccountsPanel > [role="status"]')).toBeEmpty();
+  await expect(page.locator('#accountsPanel > [role="status"]')).toBeEmpty();
   await page.locator('#confirmAccept').click();
   expect(errors).toEqual([]);
 });
@@ -29,43 +77,44 @@ test('account administration lists hardware UID and saves independent 5/5 regist
 test('account read and save failures use standard dialogs without losing the draft or retrying writes', async ({ page }) => {
   const data = await mockApp(page);
   data.accountReadFailure = true;
-  await page.locator('#appAccountsTab').click();
+  await openAccounts(page);
   await expect(page.locator('#confirmDialog')).toBeVisible();
   await expect(page.locator('#confirmDialog')).toHaveClass(/danger/);
   await expect(page.locator('#confirmMessage')).toContainText('BACKEND_UNAVAILABLE');
   await page.locator('#confirmAccept').click();
   data.accountReadFailure = false;
   await page.locator('#accountReload').click();
-  await expect(page.locator('#appAccountsPanel [data-user]')).toBeVisible();
-  await page.locator('#appAccountsPanel summary').click();
+  await expect(page.locator('#accountsPanel [data-user][aria-haspopup="dialog"]')).toBeVisible();
+  await page.locator('[data-account-view="settings"]').click();
   await page.locator('[name="manual_daily_limit"]').fill('7');
   data.accountSaveFailure = true;
   await page.locator('#accountSettings button').click();
   await expect(page.locator('#confirmDialog')).toBeVisible();
   await expect(page.locator('#confirmMessage')).toContainText('CAS_CONFLICT');
-  await expect(page.locator('#appAccountsPanel > [role="status"]')).toBeEmpty();
+  await expect(page.locator('#accountsPanel > [role="status"]')).toBeEmpty();
   await page.locator('#confirmAccept').click();
-  await expect(page.locator('#appAccountsPanel details')).toHaveAttribute('open', '');
+  await expect(page.locator('#accountSettings')).toBeVisible();
   await expect(page.locator('[name="manual_daily_limit"]')).toHaveValue('7');
   expect(data.writes).toHaveLength(1);
 });
 
 test('account settings display missing email configuration rather than claiming delivery is ready', async ({ page }) => {
   await mockApp(page);
-  await page.locator('#appAccountsTab').click();
-  await expect(page.locator('#appAccountsPanel [data-user]')).toBeVisible();
-  await page.locator('#appAccountsPanel summary').click();
-  await expect(page.locator('#accountSettings')).toContainText('Email delivery is not configured');
+  await openAccounts(page);
+  await expect(page.locator('#accountsPanel [data-user][aria-haspopup="dialog"]')).toBeVisible();
+  await page.locator('[data-account-view="settings"]').click();
+  await expect(page.locator('#accountSettings')).toContainText('Email not configured');
 });
 
 test('viewer account detail is read-only on a narrow viewport', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const data = await mockApp(page, 'en', 'viewer');
-  await page.locator('#appAccountsTab').click();
-  await page.locator('#appAccountsPanel [data-user]').click();
-  await page.locator('#appAccountsPanel summary').click();
+  await openAccounts(page);
+  await page.locator('#accountsPanel [data-user][aria-haspopup="dialog"]').click();
+  await expect(page.locator('#accountDetailContent [data-unbind]')).toBeDisabled();
+  await page.locator('#accountDetailClose').click();
+  await page.locator('[data-account-view="settings"]').click();
   await expect(page.locator('#accountSettings button')).toBeDisabled();
-  await expect(page.locator('#appAccountsPanel [data-unbind]')).toBeDisabled();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   expect(data.writes).toHaveLength(0);
 });
@@ -73,17 +122,18 @@ test('viewer account detail is read-only on a narrow viewport', async ({ page })
 for (const width of [1440, 390]) test(`account relations link terminals, sessions and hardware at ${width}px`, async ({ page }, info) => {
   await page.setViewportSize({ width, height: 900 });
   const data = await mockApp(page);
-  await page.locator('#appAccountsTab').click();
+  await openAccounts(page);
   await page.locator('[data-account-view="terminals"]').click();
-  await expect(page.locator('#appAccountsPanel .account-stats')).toHaveCount(0);
-  await expect(page.locator('#appAccountsPanel')).toContainText('Test phone');
-  await page.locator('#appAccountsPanel [data-user]').click();
-  await page.locator('#appAccountsPanel [data-detail-tab="terminals"]').first().click();
+  await expect(page.locator('#accountsPanel .account-stats')).toHaveCount(0);
+  await expect(page.locator('#accountsPanel')).toContainText('Test phone');
+  await expect(page.locator('#accountSettings')).toHaveCount(0);
+  await page.locator('#accountsPanel [data-user]').click();
+  await page.locator('#accountDetailContent [data-detail-tab="terminals"]').first().click();
   await expect(page.locator('#accountDetailBody')).toContainText('1.0.91');
   await expect(page.locator('#accountDetailBody')).toContainText('1234567890abcdef12345678');
   await page.locator('#accountDetailBody [data-detail-tab="devices"]').click();
   await expect(page.locator('#accountDetailBody')).toContainText('3.3.49');
-  await page.locator('#appAccountsPanel [data-detail-tab="sessions"]').click();
+  await page.locator('#accountDetailContent [data-detail-tab="sessions"]').click();
   await expect(page.locator('#accountDetailBody')).toContainText('not online');
   await page.locator('[data-revoke-session]').click();
   await expect(page.locator('#confirmDialog')).toBeVisible();
@@ -98,6 +148,72 @@ for (const width of [1440, 390]) test(`account relations link terminals, session
   await page.screenshot({ path: info.outputPath('account-relations.png'), animations: 'disabled' });
 });
 
+for (const width of [1440, 390]) test(`account populated view switches never freeze at ${width}px`, async ({ page }) => {
+  await page.setViewportSize({ width, height: 844 });
+  const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
+  const data = await mockApp(page);
+  await openAccounts(page);
+  await expect(page.locator('#accountsPanel')).toContainText('test-rider');
+  for (let i = 0; i < 4; i++) {
+    for (const view of ['terminals','accounts','devices','accounts']) {
+      await page.locator(`[data-account-view="${view}"]`).click();
+      await expect(page.locator('#accountReload')).toBeEnabled();
+      await expect(page.locator('#accountsPanel')).toContainText(view === 'terminals' ? 'Test phone' : 'test-rider');
+      await expect(page.locator('#accountSettings')).toHaveCount(0);
+    }
+  }
+  expect(errors).toEqual([]); expect(data.writes).toHaveLength(0);
+});
+
+test('account malformed response recovers controls and allows a fresh read', async ({ page }) => {
+  const data = await mockApp(page); data.accountMalformed = true;
+  await openAccounts(page);
+  await expect(page.locator('#confirmDialog')).toBeVisible();
+  await expect(page.locator('#confirmMessage')).toContainText('Invalid account list response');
+  await page.locator('#confirmAccept').click();
+  await expect(page.locator('#accountReload')).toBeEnabled();
+  data.accountMalformed = false;
+  await page.locator('#accountReload').click();
+  await expect(page.locator('#accountsPanel')).toContainText('test-rider');
+  expect(data.writes).toHaveLength(0);
+});
+
+test('account modal contains focus and restores a usable record control on Escape', async ({ page }) => {
+  await mockApp(page); await openAccounts(page);
+  await page.locator('#accountsPanel [data-user][aria-haspopup="dialog"]').click();
+  await expect(page.locator('#accountDetailClose')).toBeFocused();
+  await page.keyboard.press('Shift+Tab');
+  expect(await page.evaluate(() => Boolean(document.activeElement?.closest('#accountDetailSheet')))).toBe(true);
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#accountDetailSheet')).toBeHidden();
+  await expect(page.locator('.workspace')).toHaveJSProperty('inert', false);
+  expect(await page.evaluate(() => Boolean(document.activeElement?.closest('#accountsPanel')))).toBe(true);
+});
+
+test('account lists keep separate queries across relation views', async ({ page }) => {
+  const data = await mockApp(page); await openAccounts(page);
+  await expect(page.locator('#accountReload')).toBeEnabled();
+  await page.locator('#searchInput').fill('rider');
+  await expect(page.locator('#accountReload')).toBeEnabled();
+  await page.locator('[data-account-view="terminals"]').click();
+  await expect(page.locator('#searchInput')).toHaveValue('');
+  await page.locator('#searchInput').fill('phone');
+  await expect(page.locator('#accountReload')).toBeEnabled();
+  await page.locator('[data-account-view="accounts"]').click();
+  await expect(page.locator('#searchInput')).toHaveValue('rider');
+  expect(data.accountQueries.some(row => row.path.endsWith('/terminals') && row.query === 'phone')).toBe(true);
+});
+
+test('account settings are outside APP and MCU modules', async ({ page }) => {
+  await mockApp(page); await openAccounts(page);
+  await expect(page.locator('#accountsView')).toBeVisible();
+  await expect(page.locator('#phoneView')).toBeHidden();
+  await expect(page.locator('#appTabs [data-app-section="accounts"]')).toHaveCount(0);
+  await page.locator('[data-account-view="settings"]').click();
+  await expect(page.locator('#accountSettings')).toBeVisible();
+  await expect(page.locator('#accountSettings legend')).toHaveText(['Sign-in and registration','Update check limits']);
+});
+
 function release(id: string, versionCode: number) {
   return { id, app_id: "trace", platform: "android", version_code: versionCode,
     version_name: `1.0.${versionCode - 26}`, release_tag: `mock-app-${versionCode}`,
@@ -109,7 +225,9 @@ function release(id: string, versionCode: number) {
 async function mockApp(page: Page, language = "en", role = "owner", firmwareFailure = false) {
   const data = {
     role, conflict: false, notesFailure: false, announcementFailure: false, mutations: 0, firmwareFailure,
-    accountReadFailure: false, accountSaveFailure: false,
+    accountReadFailure: false, accountSaveFailure: false, accountMalformed: false,
+    accountRows: 1, accountDetailRows: 1, accountLongText: false,
+    accountQueries: [] as Array<{ path: string; query: string }>,
     accountSettings: { registration_enabled: 1, password_registration_enabled: 1, email_verification_enabled: 0,
       automatic_daily_limit: 5, manual_daily_limit: 5, revision: 0 },
     announcements: [] as Array<{ id: string; title: string; body: string; published: number; pinned: number; created_at: string; updated_at: string }>,
@@ -149,21 +267,28 @@ async function mockApp(page: Page, language = "en", role = "owner", firmwareFail
       sync();
       const account = { id: '11111111-1111-4111-8111-111111111111', username: 'test-rider', state: 'active',
         email: 'rider@example.test', deviceCount: 1, createdAt: 1795300000000, lastLoginAt: 1795300000000 };
+      if (data.accountLongText) account.username += '-long-account-name'.repeat(8);
       if (url.pathname === '/api/admin/accounts') {
+        data.accountQueries.push({ path: url.pathname, query: url.searchParams.get('q') ?? '' });
         if (data.accountReadFailure) { await fail('BACKEND_UNAVAILABLE', 503); return; }
-        await reply({ users: [account], total: 1, page: 1, pageSize: 30,
+        if (data.accountMalformed) { await reply({ rows: [], total: 0 }); return; }
+        await reply({ users: Array.from({ length: Math.min(30, data.accountRows) }, () => ({ ...account })),
+          total: data.accountRows, page: Number(url.searchParams.get('page') || 1), pageSize: 30,
           stats: { registered: { total: 1 }, today: { users: 1, logins: 2 } } }); return;
       }
       if (url.pathname === '/api/admin/accounts/settings') { await reply(data.accountSettings); return; }
       const terminal = { accountId: account.id, username: account.username, installationId: 'a'.repeat(32),
         platform: 'android', model: 'Test phone', versionName: '1.0.91', versionCode: 117, osVersion: 'Android test', lastSeenAt: 1795300000000 };
       if (url.pathname === '/api/admin/accounts/terminals' || url.pathname === '/api/admin/accounts/devices') {
+        data.accountQueries.push({ path: url.pathname, query: url.searchParams.get('q') ?? '' });
         await reply({ rows: [url.pathname.endsWith('/terminals') ? terminal : { ...terminal, uid: '1234567890abcdef12345678', firmwareVersion: 30350 }], total: 1 }); return;
       }
       if (url.pathname === '/api/admin/accounts/' + account.id) {
         await reply({ account, quota: { automatic: { limit: 5, remaining: 4 }, manual: { limit: 5, remaining: 3 } },
-          devices: [{ uid: '1234567890abcdef12345678', name: 'Test cycling computer', model: 'e-track-at32f435',
-            hardware_revision: 1, firmware_version: 30349, bound_at: 1795300000000 }],
+          devices: Array.from({ length: data.accountDetailRows }, (_, index) => ({
+            uid: index === 0 ? '1234567890abcdef12345678' : index.toString(16).padStart(24, '0'),
+            name: 'Test cycling computer' + (data.accountLongText ? '-long-device-name'.repeat(8) : ''),
+            model: 'e-track-at32f435', hardware_revision: 1, firmware_version: 30349, bound_at: 1795300000000 })),
           terminals: [terminal], sessions: [{ ...terminal, id: 'b'.repeat(32), state: 'valid', createdAt: 1795300000000 }],
           observations: [{ installationId: terminal.installationId, uid: '1234567890abcdef12345678', firmwareVersion: 30350, observedAt: 1795300000000 }],
           logins: [{ occurred_at: 1795300000000, app_version: 'test' }] }); return;

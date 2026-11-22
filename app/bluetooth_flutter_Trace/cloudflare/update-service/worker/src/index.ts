@@ -67,7 +67,7 @@ app.all("/api/ci/delta/jobs/*", async c => {
 });
 
 app.get("/api/public/firmware/latest", async (c) =>
-  handleFirmwareLatest(c.req.raw, c.env, c.get("requestId"))
+  handleFirmwareLatest(c.req.raw, c.env, c.get("requestId"), c.req.header('X-Legacy-Migration') === 'uid-v1')
 );
 
 app.get("/api/public/download", async (c) =>

@@ -1,10 +1,14 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../services/account_service.dart';
 import '../services/bluetooth_service.dart';
 import '../services/ota_service.dart';
+import '../ota/ota_legacy_migration.dart';
+import '../widgets/upgrade_history_list.dart' show ChainedScrollController;
+import 'ota_upgrade_page.dart';
 import 'trace_ui.dart';
 
 /// Existing E-Track surfaces; new-api-style forms and server-owned registration switches.
@@ -18,6 +22,9 @@ class _AccountPageState extends State<AccountPage> {
   final _username = TextEditingController(), _password = TextEditingController();
   final _confirm = TextEditingController(), _email = TextEditingController(), _code = TextEditingController();
   final _form = GlobalKey<FormState>();
+  final _pageScroll = ScrollController();
+  late final _devicesScroll = ChainedScrollController(_pageScroll);
+  late final _sessionsScroll = ChainedScrollController(_pageScroll);
   AccountService get service => AccountService.to;
   String _mode = 'login', _message = '';
   String? _verificationId;
@@ -40,7 +47,8 @@ class _AccountPageState extends State<AccountPage> {
     setState(() { _busy = true; _message = ''; });
     var failed = false;
     try { await action(); }
-    on AccountException catch (e) { failed = true; if (mounted) _message = e.message; }
+    on AccountException catch (e) { failed = true; if (mounted) _message =
+      e.requestId == null ? e.message : '${e.message}\n\n请求编号：${e.requestId}'; }
     catch (_) { failed = true; if (mounted) _message = '操作未完成，请稍后重试'; }
     finally { if (mounted) setState(() => _busy = false); }
     if (mounted && _message.isNotEmpty) {
@@ -57,6 +65,9 @@ class _AccountPageState extends State<AccountPage> {
   @override
   void dispose() {
     _resendTimer?.cancel();
+    _devicesScroll.dispose();
+    _sessionsScroll.dispose();
+    _pageScroll.dispose();
     for (final controller in [_username, _password, _confirm, _email, _code]) { controller.dispose(); }
     super.dispose();
   }
@@ -65,9 +76,30 @@ class _AccountPageState extends State<AccountPage> {
   void _changeMode(String mode) {
     setState(() { _mode = mode; _message = ''; _verificationId = null; _password.clear(); _confirm.clear(); _code.clear(); });
   }
+  Future<void> _openMode(String mode) => _run(() async {
+    await service.loadSettings();
+    if (!mounted) return;
+    if (mode == 'register' && !_registerEnabled) {
+      throw const AccountException('REGISTRATION_DISABLED', '管理员已关闭注册');
+    }
+    _changeMode(mode);
+  });
   Future<void> _submit() async {
-    if (!_form.currentState!.validate()) return;
     await _run(() async {
+      if (_mode != 'login') {
+        final neededEmail = _needsEmail;
+        await service.loadSettings();
+        if (!mounted) return;
+        if (_mode == 'register' && !_registerEnabled) {
+          throw const AccountException('REGISTRATION_DISABLED', '管理员已关闭注册');
+        }
+        if (!neededEmail && _needsEmail) {
+          _verificationId = null;
+          _code.clear();
+          throw const AccountException('EMAIL_VERIFICATION_REQUIRED', '注册现在需要验证邮箱，请获取验证码后再提交');
+        }
+      }
+      if (!_form.currentState!.validate()) return;
       if (_mode == 'login') {
         await service.login(_username.text, _password.text);
         if (!mounted) return;
@@ -134,12 +166,22 @@ class _AccountPageState extends State<AccountPage> {
         IconButton(onPressed: _busy ? null : () => _run(_load), icon: const Icon(Icons.refresh, color: TraceColors.muted)),
       ])),
       Expanded(child: Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 520),
-        child: SingleChildScrollView(padding: const EdgeInsets.fromLTRB(24, 24, 24, 36), child: Obx(() => Column(
+        child: SingleChildScrollView(controller: _pageScroll,
+          key: const ValueKey('account-page-scroll'),
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 24), child: Obx(() => Column(
           crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             if (service.account.value == null) ..._authentication() else ..._profile(),
             if (_busy) const Padding(padding: EdgeInsets.symmetric(vertical: 18), child: LinearProgressIndicator(color: TraceColors.cyan)),
           ])),
         )))),
+      Obx(() => service.account.value == null ? const SizedBox.shrink() :
+        Padding(padding: const EdgeInsets.fromLTRB(24, 8, 24, 12),
+          child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 520),
+            child: SizedBox(width: double.infinity, child: TextButton(
+              key: const ValueKey('account-logout'),
+              onPressed: _busy ? null : () => _run(() async {
+                await service.logout(); await service.loadSettings(); _loaded = true;
+              }), child: const Text('退出登录')))))),
     ])))));
 
   List<Widget> _authentication() => [
@@ -147,8 +189,6 @@ class _AccountPageState extends State<AccountPage> {
     const SizedBox(height: 28),
     Text(_mode == 'login' ? '登录账号' : _mode == 'register' ? '创建账号' : '重置密码',
       style: const TextStyle(color: TraceColors.text, fontSize: 24, fontWeight: FontWeight.w700)),
-    const SizedBox(height: 8),
-    const Text('登录后使用云端服务与固件更新。\n不登录也可以连接蓝牙、查看本地数据。', style: TextStyle(color: TraceColors.muted, height: 1.6)),
     const SizedBox(height: 28),
     Form(key: _form, child: Column(children: [
       if (_mode != 'reset') _field(_mode == 'login' ? '用户名或邮箱' : '用户名', _username,
@@ -172,10 +212,10 @@ class _AccountPageState extends State<AccountPage> {
     const SizedBox(height: 12),
     Wrap(alignment: WrapAlignment.spaceBetween, children: [
       if (_mode != 'login') TextButton(onPressed: _busy ? null : () => _changeMode('login'), child: const Text('返回登录')),
-      if (_mode == 'login' && _registerEnabled) TextButton(onPressed: _busy ? null : () => _changeMode('register'), child: const Text('创建账号')),
+      if (_mode == 'login' && _registerEnabled) TextButton(onPressed: _busy ? null : () => _openMode('register'), child: const Text('创建账号')),
       if (_mode == 'login' && !_registerEnabled && _loaded) const Text('暂未开放注册', style: TextStyle(color: TraceColors.muted)),
       if (_mode == 'login' && service.settings['passwordResetAvailable'] == true)
-        TextButton(onPressed: _busy ? null : () => _changeMode('reset'), child: const Text('忘记密码？')),
+        TextButton(onPressed: _busy ? null : () => _openMode('reset'), child: const Text('忘记密码？')),
     ]),
     TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('暂不登录，继续使用蓝牙')),
   ];
@@ -184,7 +224,7 @@ class _AccountPageState extends State<AccountPage> {
     Text(service.account.value?['displayName']?.toString() ?? '',
       style: const TextStyle(color: TraceColors.text, fontSize: 26, fontWeight: FontWeight.w800)),
     const SizedBox(height: 8),
-    const Text('今日检查额度 · 北京时间零点重置', style: TextStyle(color: TraceColors.muted)),
+    const Text('今日检查额度', style: TextStyle(color: TraceColors.muted)),
     const SizedBox(height: 16),
     Text('自动剩余 ${service.quota['automatic']?['remaining'] ?? '-'} / ${service.quota['automatic']?['limit'] ?? 5} 次    '
         '手动剩余 ${service.quota['manual']?['remaining'] ?? '-'} / ${service.quota['manual']?['limit'] ?? 5} 次',
@@ -194,43 +234,84 @@ class _AccountPageState extends State<AccountPage> {
       const Text('绑定的码表', style: TextStyle(color: TraceColors.text, fontSize: 18)),
       TextButton(onPressed: _busy ? null : () => _run(_bind), child: const Text('绑定已连接设备'))]),
     if (service.devices.isEmpty) const Padding(padding: EdgeInsets.symmetric(vertical: 20),
-      child: Text('尚未绑定码表。请先连接蓝牙，再选择绑定。', style: TextStyle(color: TraceColors.muted))),
-    for (final device in service.devices) Padding(padding: const EdgeInsets.symmetric(vertical: 14), child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(device['name'].toString(), style: const TextStyle(color: TraceColors.text, fontWeight: FontWeight.w700)),
-        const SizedBox(height: 6), SelectableText('UID ${device['uid']}', style: const TextStyle(color: TraceColors.cyanSoft, fontSize: 13)),
-        Text('${device['model']} · 硬件 ${device['hardware_revision']} · 固件 ${device['firmware_version']}',
-          style: const TextStyle(color: TraceColors.muted, fontSize: 12)),
-        TextButton(onPressed: _busy ? null : () => _run(() => _unbind(device)), child: const Text('解绑')),
-      ])),
+      child: Text('暂无绑定码表', style: TextStyle(color: TraceColors.muted))),
+    if (service.devices.isNotEmpty) _recordWindow('account-devices-window', _devicesScroll, [
+      for (final device in service.devices) ListTile(
+        key: ValueKey('account-device-${device['uid']}'), contentPadding: EdgeInsets.zero,
+        title: Text(device['name']?.toString() ?? '码表', maxLines: 1, overflow: TextOverflow.ellipsis,
+          style: const TextStyle(color: TraceColors.text)),
+        subtitle: Text('${device['model'] ?? '型号未知'} · ${_version(device['firmware_version'])}',
+          maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: TraceColors.muted, fontSize: 12)),
+        trailing: const Icon(Icons.chevron_right, color: TraceColors.cyanSoft),
+        onTap: _busy ? null : () => _deviceDetails(device)),
+    ]),
     const Divider(color: TraceColors.ocean),
     const Text('登录终端', style: TextStyle(color: TraceColors.text, fontSize: 18)),
-    const Text('登录有效不代表当前在线；旧版终端信息可能未知。最多显示最近 100 条。',
-      style: TextStyle(color: TraceColors.muted, fontSize: 12)),
     if (service.terminalReportProblem.value != null)
-      const Text('最近一次码表信息同步未完成，后台信息可能滞后。', style: TextStyle(color: TraceColors.amber)),
-    SizedBox(height: service.sessions.isEmpty ? 48 : 240, child: SingleChildScrollView(child: Column(children: [
+      const Text('码表信息同步未完成', style: TextStyle(color: TraceColors.amber)),
+    if (service.sessions.isEmpty) const Padding(padding: EdgeInsets.symmetric(vertical: 16),
+      child: Text('暂无终端记录', style: TextStyle(color: TraceColors.muted))),
+    if (service.sessions.isNotEmpty) _recordWindow('account-sessions-window', _sessionsScroll, [
       for (final session in service.sessions) ListTile(
+        key: ValueKey('account-session-${session['id']}'), contentPadding: EdgeInsets.zero,
         title: Text('${session['model'] == null || session['model'] == '' ? '型号未知' : session['model']} · APP ${session['versionName'] ?? '未知'}',
-          style: const TextStyle(color: TraceColors.text)),
+          maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: TraceColors.text)),
         subtitle: Text('${session['current'] == 1 || session['current'] == true ? '本机 · ' : ''}'
-          '${session['state'] == 'valid' ? '登录有效' : session['state'] == 'revoked' ? '已退出' : '已过期'}\n'
-          '最近活动：${session['lastSeenAt'] is num ? DateTime.fromMillisecondsSinceEpoch((session['lastSeenAt'] as num).toInt()).toLocal().toString().split('.').first : '未知'}',
+          '${_sessionState(session)}', maxLines: 1, overflow: TextOverflow.ellipsis,
           style: const TextStyle(color: TraceColors.muted, fontSize: 12)),
-        trailing: session['state'] == 'valid' ? TextButton(onPressed: _busy ? null : () => _run(() async {
-          final confirmed = await showDialog<bool>(context: context, builder: (_) => TraceDialog(title: '退出该终端？',
-            message: '该终端将不能继续使用账号云端功能，本地蓝牙不受影响。', actions: [
-              TraceDialogAction(label: '取消', onPressed: (context) => Navigator.pop(context, false)),
-              TraceDialogAction(label: '退出', isPrimary: true, onPressed: (context) => Navigator.pop(context, true))]));
-          if (confirmed != true || !mounted) return;
-          await service.revokeSession(session); _message = '该终端登录已撤销。';
-        }), child: const Text('退出')) : null),
-    ]))),
-    const Divider(color: TraceColors.ocean),
-    TextButton(onPressed: _busy ? null : () => _run(() async {
-      await service.logout(); await service.loadSettings(); _loaded = true;
-    }), child: const Text('退出登录')),
+        trailing: const Icon(Icons.chevron_right, color: TraceColors.cyanSoft),
+        onTap: _busy ? null : () => _sessionDetails(session)),
+    ]),
   ];
+
+  Widget _recordWindow(String key, ScrollController controller, List<Widget> rows) =>
+    Material(type: MaterialType.transparency, child: SizedBox(
+      height: math.min(260, MediaQuery.sizeOf(context).height * .38),
+      child: SingleChildScrollView(key: ValueKey(key), controller: controller, primary: false,
+        physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
+        child: Column(children: rows))));
+
+  String _version(Object? value) => value is num
+    ? '${value.toInt() ~/ 10000}.${value.toInt() ~/ 100 % 100}.${value.toInt() % 100}' : '版本未知';
+  String _time(Object? value) => value is num
+    ? DateTime.fromMillisecondsSinceEpoch(value.toInt()).toLocal().toString().split('.').first : '未知';
+  String _sessionState(Map<String, dynamic> value) => switch (value['state']) {
+    'valid' => '登录有效', 'revoked' => '已退出', _ => '已过期',
+  };
+
+  Future<void> _deviceDetails(Map<String, dynamic> device) => showDialog<void>(context: context,
+    builder: (_) => TraceDialog(title: '码表详情', content: SelectableText(
+      '${device['name'] ?? '码表'}\n\nUID ${device['uid']}\n\n型号：${device['model'] ?? '未知'}'
+      '\n硬件：${device['hardware_revision'] ?? '未知'}\n固件：${_version(device['firmware_version'])}'
+      '\n绑定时间：${_time(device['bound_at'])}\n最近上报：${_time(device['last_seen_at'])}',
+      style: const TextStyle(color: TraceColors.text)), actions: [
+        TraceDialogAction(label: '解绑', color: TraceColors.amber, onPressed: (context) {
+          Navigator.pop(context); unawaited(_run(() => _unbind(device)));
+        }),
+        TraceDialogAction(label: '关闭', isPrimary: true, onPressed: TraceDialog.close),
+      ]));
+
+  Future<void> _sessionDetails(Map<String, dynamic> value) => showDialog<void>(context: context,
+    builder: (_) => TraceDialog(title: '终端详情', content: SelectableText(
+      '${value['model'] == null || value['model'] == '' ? '型号未知' : value['model']}'
+      '\n\nAPP：${value['versionName'] ?? '未知'} (${value['versionCode'] ?? '未知'})'
+      '\n系统：${value['osVersion'] ?? '未知'}\n状态：${_sessionState(value)}'
+      '\n登录时间：${_time(value['createdAt'])}\n最近活动：${_time(value['lastSeenAt'])}'
+      '\n终端编号：${value['installationId'] ?? '未知'}', style: const TextStyle(color: TraceColors.text)), actions: [
+        if (value['state'] == 'valid') TraceDialogAction(label: '退出该终端', color: TraceColors.amber,
+          onPressed: (context) { Navigator.pop(context); unawaited(_run(() => _revokeSession(value))); }),
+        TraceDialogAction(label: '关闭', isPrimary: true, onPressed: TraceDialog.close),
+      ]));
+
+  Future<void> _revokeSession(Map<String, dynamic> value) async {
+    final confirmed = await showDialog<bool>(context: context, builder: (_) => TraceDialog(title: '退出该终端？',
+      message: '撤销该终端的账号登录，本地蓝牙不受影响。', actions: [
+        TraceDialogAction(label: '取消', onPressed: (context) => Navigator.pop(context, false)),
+        TraceDialogAction(label: '退出', isPrimary: true, onPressed: (context) => Navigator.pop(context, true)),
+      ]));
+    if (confirmed != true || !mounted) return;
+    await service.revokeSession(value); _message = '该终端登录已撤销。';
+  }
 
   Future<void> _bind() async {
     final ota = Get.find<OtaService>();
@@ -238,18 +319,31 @@ class _AccountPageState extends State<AccountPage> {
     final connected = Get.find<BluetoothService>().connectedDevices.toList();
     if (connected.isEmpty) throw const AccountException('DEVICE_OFFLINE', '请先连接码表蓝牙');
     final selected = await showDialog<String>(context: context, builder: (context) => TraceDialog(
-      title: '选择已连接码表', content: Column(mainAxisSize: MainAxisSize.min, children: connected.map((device) => TextButton(
-        style: TextButton.styleFrom(foregroundColor: TraceColors.cyanSoft),
-        onPressed: () => Navigator.pop(context, device.remoteId.str.toLowerCase()),
-        child: Text(device.platformName.isEmpty ? '蓝牙设备' : device.platformName))).toList()),
+      title: '选择已连接码表', content: AccountDeviceChoices(choices: [
+        for (final device in connected) {'id': device.remoteId.str.toLowerCase(),
+          'name': device.platformName.isEmpty ? '蓝牙设备' : device.platformName},
+      ], onSelected: (id) => Navigator.pop(context, id)),
       actions: [TraceDialogAction(label: '取消', onPressed: (context) => Navigator.pop(context))]));
     if (selected == null || !mounted) return;
     final info = await ota.readDeviceInfo(selected);
     final uid = info == null ? null : await ota.readHardwareUid();
+    if (info != null && uid == null && LegacyOtaMigration.supports(info) && mounted) {
+      final upgrade = await showDialog<bool>(context: context, builder: (_) => TraceDialog(
+        title: '码表需要兼容升级', message: '3.3.48 尚不支持账号绑定。可先升级至 3.3.50，完成后再确认绑定。',
+        actions: [TraceDialogAction(label: '稍后', onPressed: (context) => Navigator.pop(context, false)),
+          TraceDialogAction(label: '兼容升级', isPrimary: true,
+            onPressed: (context) => Navigator.pop(context, true))]));
+      if (upgrade != true || !mounted) return;
+      final device = connected.firstWhere((d) => d.remoteId.str.toLowerCase() == selected);
+      await Navigator.of(context).push<void>(MaterialPageRoute(builder: (_) =>
+        OtaUpgradePage(connectedDevice: device, legacyMigration: true)));
+      if (mounted) await service.refresh();
+      return;
+    }
     if (info == null || uid == null) throw const AccountException('DEVICE_UID_UNAVAILABLE', '无法读取码表唯一识别码，请确认已安装支持账号绑定的固件');
     if (!mounted) return;
     final confirm = await showDialog<bool>(context: context, builder: (context) => TraceDialog(title: '确认绑定码表',
-      content: SelectableText('设备：${info.deviceModel}\n唯一识别码：$uid\n\n绑定后由本账号使用云端 OTA。'),
+      content: SelectableText('设备：${info.deviceModel}\n唯一识别码：$uid'),
       actions: [TraceDialogAction(onPressed: (context) => Navigator.pop(context, false), label: '取消'),
         TraceDialogAction(onPressed: (context) => Navigator.pop(context, true), label: '绑定', isPrimary: true)]));
     if (confirm != true) return;
@@ -279,4 +373,19 @@ class _AccountPageState extends State<AccountPage> {
       await service.refresh();
       _message = '码表已解绑。';
   }
+}
+
+class AccountDeviceChoices extends StatelessWidget {
+  const AccountDeviceChoices({super.key, required this.choices, required this.onSelected});
+  final List<Map<String, String>> choices;
+  final ValueChanged<String> onSelected;
+  @override
+  Widget build(BuildContext context) => Column(mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      for (final choice in choices) SizedBox(width: double.infinity, child: TextButton(
+        key: ValueKey('connected-account-device-${choice['id']}'),
+        style: TextButton.styleFrom(foregroundColor: TraceColors.cyanSoft,
+          alignment: Alignment.centerLeft, padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14)),
+        onPressed: () => onSelected(choice['id']!), child: Text(choice['name']!))),
+    ]);
 }

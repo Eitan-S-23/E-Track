@@ -1,5 +1,15 @@
 # Agent Build Guide
 
+## Interface Extensions: Preserve The Existing Design
+
+Before adding or extending App, Admin or MCU interfaces, read
+[docs/ui-design-contract.md](docs/ui-design-contract.md). Reuse the existing
+visual language and interaction components; an extension is not permission to
+redesign adjacent screens. Bounded lists, detail/result dialogs, nested scrolling,
+whole-row hit targets and reachable primary actions are executable requirements,
+not optional polish. Validate populated states, small viewports, enlarged text,
+long labels and asynchronous failures before claiming the interface is complete.
+
 ## Cloudflare Deployment: Read First
 
 Before any Cloudflare backend/Pages deployment or credential/login request,

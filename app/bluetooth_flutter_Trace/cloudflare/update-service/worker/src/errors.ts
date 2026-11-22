@@ -9,6 +9,8 @@ export type ErrorCode =
   | "EMAIL_SEND_COOLDOWN"
   | "DEVICE_NOT_BOUND"
   | "DEVICE_ALREADY_BOUND"
+  | "LEGACY_MIGRATION_UNAVAILABLE"
+  | "LEGACY_MIGRATION_INVALID"
   | "CHECK_QUOTA_EXCEEDED"
   | "CHECK_IN_PROGRESS"
   | "CHECK_TOO_SOON"
@@ -62,6 +64,6 @@ export function backendUnavailable(message = "Update backend unavailable"): ApiE
   return new ApiError("BACKEND_UNAVAILABLE", message, 503);
 }
 
-export function invalidParameter(message: string): ApiError {
-  return new ApiError("INVALID_PARAMETER", message, 400);
+export function invalidParameter(message: string, field?: string): ApiError {
+  return new ApiError("INVALID_PARAMETER", message, 400, field ? { field } : undefined);
 }

@@ -62,7 +62,7 @@ export async function readFirmwareJson(request: Request): Promise<unknown> {
   catch { throw invalidParameter("Invalid JSON body"); }
 }
 
-export function handleFirmwareLatest(request: Request, env: WorkerEnv, requestId: string): Promise<Response> {
+export function handleFirmwareLatest(request: Request, env: WorkerEnv, requestId: string, fullOnly = false): Promise<Response> {
   return firmwareOperation(async () => {
     const url = new URL(request.url);
     const get = (name: string) => url.searchParams.get(name)!;
@@ -119,8 +119,8 @@ export function handleFirmwareLatest(request: Request, env: WorkerEnv, requestId
     const full = requireFirmwareFull(release, assets);
     if (env.DELTA_ASSETS_ENABLED === "true") assets.push(...await supplementalFirmwareAssets(env.DB, release.id));
     const patches = assets.filter((a) => a.kind === "patch" && a.base_image_sha256 === get("currentImageSha"));
-    if (patches.length > 1) throw backendUnavailable("Ambiguous patch base");
-    const asset = patches.length === 1 && usableFirmwareAsset(patches[0])
+    if (!fullOnly && patches.length > 1) throw backendUnavailable("Ambiguous patch base");
+    const asset = !fullOnly && patches.length === 1 && usableFirmwareAsset(patches[0])
       && patches[0].size_bytes < full.size_bytes ? patches[0] : full;
     const signed = await signFirmwareDownload(env, url.origin, asset, "public-ota");
     return json({ schemaVersion: 2, requestId, updateAvailable: true, appId: release.app_id,

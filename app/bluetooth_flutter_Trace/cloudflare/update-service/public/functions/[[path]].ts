@@ -74,7 +74,8 @@ async function routeCloudRequest(context: EventContext<PublicEnv, string, unknow
   }
 
   if (method === "GET" && url.pathname === "/api/public/firmware/latest") {
-    return handleFirmwareLatest(context.request, context.env, requestId);
+    return handleFirmwareLatest(context.request, context.env, requestId,
+      context.request.headers.get('X-Legacy-Migration') === 'uid-v1');
   }
 
   if (method === "GET" && url.pathname === "/api/public/download") {

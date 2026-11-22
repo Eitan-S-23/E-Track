@@ -26,6 +26,7 @@ import '../ota/ota_experiment_config.dart';
 import '../ota/ota_phy.dart';
 import '../ota/ota_download.dart';
 import '../ota/ota_firmware_latest.dart';
+import '../ota/ota_legacy_migration.dart';
 import '../ota/ota_link_stats.dart';
 import '../ota/ota_link_profile.dart';
 import '../ota/ota_mono.dart';
@@ -171,6 +172,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   final Future<String?> Function(String address)? _hardwareUidReader;
   AccountService get accounts => _accountService ?? AccountService.to;
   AccountCheck? _accountCheck;
+  LegacyOtaMigration? _legacyMigration;
   String? _hardwareUid, _uidAddress;
   int? _uidGeneration;
   String? get hardwareUid => _uidAddress != null && hasCurrentDeviceIdentity(_uidAddress) &&
@@ -1016,7 +1018,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
   /// 入口互斥（RC3-04）：与其他升级族入口经同一 owner 锁串行；取消
   /// 代次贯穿 latest 重试与发布，取消后不发布旧状态。
   Future<FirmwareLatestInfo?> checkFirmwareUpdate({String? channel,
-      String? companionRuntimeId, bool automatic = false, bool refreshPrepared = false}) async {
+      String? companionRuntimeId, bool automatic = false, bool refreshPrepared = false,
+      bool legacyMigration = false}) async {
     lastCloudError = null;
     _lastCheckWasNoUpdate = false;
     if (_isUpgrading.value) {
@@ -1045,16 +1048,23 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         await accounts.requireLogin();
         if (generation != _cancelGeneration) return null;
         // Use the current control/binding UID, never renegotiate GATT from an HTTP task.
-        if (await readHardwareUid(companionRuntimeId: companionRuntimeId) == null) {
+        if (legacyMigration) {
+          if (automatic || !LegacyOtaMigration.supports(info) || hardwareUid != null ||
+              !hasCurrentDeviceIdentity(_deviceInfoAddress)) {
+            throw const AccountException('LEGACY_MIGRATION_INVALID', '兼容升级仅适用于尚无 UID 的 3.3.48 码表');
+          }
+        } else if (await readHardwareUid(companionRuntimeId: companionRuntimeId) == null) {
           throw const AccountException('DEVICE_NOT_BOUND', '请先在账号页读取并绑定当前码表');
         }
         if (generation != _cancelGeneration) return null;
         if (refreshPrepared) {
-          if (_accountCheck == null || _accountCheck!.accountId != accounts.accountId) {
+          if (_accountCheck == null || _accountCheck!.accountId != accounts.accountId ||
+              _accountCheck!.legacyMigration != legacyMigration) {
             throw const AccountException('LOGIN_REQUIRED', '账号已变化，请重新检查更新');
           }
         } else {
           nextCheck = await accounts.newCheck(automatic: automatic);
+          if (legacyMigration) nextCheck = AccountCheck.forLegacy(nextCheck);
         }
       } on AccountException catch (e) {
         lastCloudError = e.code; _upgradeStatus.value = e.message; return null;
@@ -1116,6 +1126,10 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         expectedChannel: channel ?? ShareLinks.updateChannel,
       );
 
+      final migration = check.legacyMigration && latest.updateAvailable
+          ? LegacyOtaMigration.parse(body, latest: latest, source: info,
+              accountId: check.accountId, checkId: check.id, now: DateTime.now()) : null;
+
       if (!latest.updateAvailable) {
         _clearFirmwareInfo();
         final code = latest.errorCode ?? 'NO_UPDATE';
@@ -1140,6 +1154,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       // 清单变化使旧下载包失效（PR12）：同包重复检查不失效。
       _invalidatePackageIfChanged(latest);
       _latestInfo = latest;
+      _legacyMigration = migration;
       _accountCheck = check;
       if (!refreshPrepared) _preparedAt = DateTime.now();
       _asset = latest.asset;
@@ -1197,7 +1212,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       if (error is DioException && error.response?.data is Map) {
         final code = (error.response!.data as Map)['errorCode']?.toString();
         if (code != null && (code.startsWith('CHECK_') || code.startsWith('DEVICE_') ||
-            code == 'LOGIN_REQUIRED' || code == 'ACCOUNT_DISABLED')) {
+            code.startsWith('LEGACY_MIGRATION_') || code == 'LOGIN_REQUIRED' || code == 'ACCOUNT_DISABLED')) {
+          _clearFirmwareInfo();
           lastCloudError = code; _upgradeStatus.value = AccountService.messageFor(code); _phase.value = OtaPhase.failed; return null;
         }
       }
@@ -1256,6 +1272,21 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         if (generation != _cancelGeneration || _accountCheck?.accountId != accounts.accountId) return false;
         if (!_cloudDownloadProtected) {
           accounts.protect(_downloadDio, deviceUid: () => hardwareUid);
+          _downloadDio.interceptors.add(InterceptorsWrapper(onRequest: (options, handler) {
+            final migration = _legacyMigration;
+            options.headers.remove('X-Legacy-Migration-Check-Id');
+            if (migration != null && accounts.isCloudUri(options.uri) &&
+                options.uri.path == '/api/public/firmware/download') {
+              if (_deviceInfo == null || !migration.matches(_deviceInfo!, _latestInfo,
+                  accounts.accountId, _accountCheck?.id)) {
+                handler.reject(DioException(requestOptions: options,
+                  type: DioExceptionType.cancel, message: 'LEGACY_MIGRATION_INVALID'));
+                return;
+              }
+              options.headers['X-Legacy-Migration-Check-Id'] = migration.checkId;
+            }
+            handler.next(options);
+          }));
           _cloudDownloadProtected = true;
         }
       } on AccountException catch (e) { lastCloudError = e.code; _upgradeStatus.value = e.message; return false; }
@@ -1590,7 +1621,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       _upgradeStatus.value = locked;
       return false;
     }
-    if (hardwareUid == null) {
+    if (hardwareUid == null && _legacyMigration == null) {
       final before = _cancelGeneration;
       await readHardwareUid(companionRuntimeId: companionRuntimeId);
       if (before != _cancelGeneration || _closed || _isUpgrading.value || hardwareUid == null) return false;
@@ -1599,8 +1630,17 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       // Authorize once before BEGIN. Session expiry must never interrupt MCU writes.
       try {
         final uid = hardwareUid;
-        if (uid == null || _accountCheck?.accountId != accounts.accountId) return false;
-        await accounts.authorizeOta(uid);
+        final migration = _legacyMigration;
+        if (_accountCheck?.accountId != accounts.accountId) return false;
+        if (migration != null) {
+          if (!migration.matches(info, _latestInfo, accounts.accountId, _accountCheck?.id) ||
+              migration.expiresAt <= DateTime.now().millisecondsSinceEpoch ||
+              !hasCurrentDeviceIdentity(deviceAddress)) return false;
+          await accounts.authorizeLegacyOta(migration.authorization());
+        } else {
+          if (uid == null) return false;
+          await accounts.authorizeOta(uid);
+        }
         if (generation != _cancelGeneration || !consentCurrent() || _accountCheck?.accountId != accounts.accountId) return false;
       } on AccountException catch (e) { lastCloudError = e.code; _upgradeStatus.value = e.message; return false; }
       // 每轮升级重置 failClosed 决策（RC3-08/12②）：上个 owner 未被消费的
@@ -3311,6 +3351,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
 
   void _clearFirmwareInfo() {
     _p35Transfer = {};
+    _legacyMigration = null;
     _latestInfo = null;
     _asset = null;
     _releaseId = null;

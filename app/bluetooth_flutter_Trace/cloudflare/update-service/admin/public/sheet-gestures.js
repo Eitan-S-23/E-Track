@@ -91,7 +91,7 @@ window.TraceSheetGestures = function ({ sheet, scroll, backdrop, canClose, close
 /* Chromium can latch a boundary wheel to an inner list above a locked page.
  * Forward only that exhausted vertical wheel; native touch/inner scrolling stays intact. */
 (() => {
-  const lists = ".delta-base-list, .announcement-list, .firmware-history-list, .confirm-detail, .confirm-message";
+  const lists = ".delta-base-list, .announcement-list, .firmware-history-list, .confirm-detail, .confirm-message, .account-list, .account-detail-list";
   const scrollable = style => /^(auto|scroll)$/.test(style.overflowY);
   const hasRoom = (node, delta) => delta < 0 ? node.scrollTop > 1
     : node.scrollHeight - node.clientHeight - node.scrollTop > 1;

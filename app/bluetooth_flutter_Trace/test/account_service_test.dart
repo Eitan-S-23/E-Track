@@ -174,4 +174,49 @@ void main() {
     await expectLater(service.refresh(), throwsA(isA<AccountException>().having((e) => e.code, 'code', 'LOGIN_REQUIRED')));
     expect(service.loggedIn, isFalse);
   });
+  test('registration errors name safe fields and correlate diagnostics without credentials', () async {
+    final events = <Map<String, Object?>>[];
+    service = AccountService(dio: dio, endpoint: endpoint, onDiagnostic: events.add);
+    const requestId = '12345678-1234-1234-1234-123456789abc';
+    http.status = 400;
+    for (final field in ['username', 'password', 'email', 'code', 'verificationId']) {
+      http.response = {'errorCode': 'INVALID_PARAMETER', 'field': field, 'requestId': requestId,
+        'message': 'private-email@example.test private-password private-token'};
+      await expectLater(service.call('/api/auth/register', anonymous: true,
+        body: {'email': 'private-email@example.test', 'password': 'private-password', 'code': '123456'}),
+        throwsA(isA<AccountException>().having((e) => e.field, 'field', field)
+          .having((e) => e.requestId, 'requestId', requestId)
+          .having((e) => e.message, 'message', isNot(contains('private-')))));
+    }
+    expect(events, hasLength(5));
+    expect(events.last['stage'], 'REGISTER');
+    expect(events.last['taskId'], requestId.replaceAll('-', ''));
+    final diagnostic = jsonEncode(events);
+    for (final secret in ['private-', 'Authorization', 'body', 'password=']) {
+      expect(diagnostic, isNot(contains(secret)));
+    }
+    expect(events.last.keys.toSet(), {'status', 'source', 'stage', 'errorCode', 'reason', 'taskId'});
+  });
+  test('unsafe response fields and request IDs are not displayed or recorded', () async {
+    final events = <Map<String, Object?>>[];
+    service = AccountService(dio: dio, endpoint: endpoint, onDiagnostic: events.add);
+    http.status = 400; http.response = {'errorCode': 'INVALID_PARAMETER',
+      'field': 'private-email@example.test', 'requestId': 'token=private-token', 'message': 'private-password'};
+    await expectLater(service.call('/api/auth/register', anonymous: true, body: {}),
+      throwsA(isA<AccountException>().having((e) => e.field, 'field', isNull)
+        .having((e) => e.requestId, 'requestId', isNull)));
+    expect(jsonEncode(events), isNot(contains('private-')));
+  });
+  test('legacy BEGIN authorization requires a real account-scoped acknowledgement', () async {
+    await login();
+    for (final value in <Map<String, dynamic>>[{}, {'ok': true},
+      {'ok': true, 'accountId': 'other', 'legacyMigration': true}]) {
+      http.response = value;
+      await expectLater(service.authorizeLegacyOta({'legacyCheckId': 'manual-check-0001'}),
+        throwsA(isA<AccountException>().having((e) => e.code, 'code', 'LEGACY_MIGRATION_INVALID')));
+    }
+    http.response = {'ok': true, 'accountId': 'one', 'legacyMigration': true};
+    await service.authorizeLegacyOta({'legacyCheckId': 'manual-check-0001'});
+    expect(http.requests.last.headers['X-Device-Uid'], isNull);
+  });
 }

@@ -26,8 +26,9 @@ import '../widgets/upgrade_history_list.dart';
 class OtaUpgradePage extends StatefulWidget {
   final BluetoothDevice? connectedDevice;
   final OtaDiagnostics? diagnostics;
+  final bool legacyMigration;
 
-  const OtaUpgradePage({super.key, this.connectedDevice, this.diagnostics});
+  const OtaUpgradePage({super.key, this.connectedDevice, this.diagnostics, this.legacyMigration = false});
 
   @override
   State<OtaUpgradePage> createState() => _OtaUpgradePageState();
@@ -1250,7 +1251,9 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
     });
 
     try {
-      if (Get.isRegistered<CompanionRuntime>()) {
+      if (widget.legacyMigration) {
+        await otaService.checkFirmwareUpdate(legacyMigration: true);
+      } else if (Get.isRegistered<CompanionRuntime>()) {
         await Get.find<CompanionRuntime>().manualCheck(_deviceAddress);
       } else {
         await otaService.checkFirmwareUpdate();

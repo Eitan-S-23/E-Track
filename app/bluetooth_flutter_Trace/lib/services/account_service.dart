@@ -6,23 +6,30 @@ import 'package:dio/dio.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart' hide Response;
 import '../config/share_links.dart';
 
 class AccountException implements Exception {
-  const AccountException(this.code, this.message);
+  const AccountException(this.code, this.message, {this.requestId, this.field});
   final String code, message;
+  final String? requestId, field;
   @override
   String toString() => message;
 }
 
 class AccountCheck {
-  AccountCheck(this.accountId, {required this.automatic}) : id = AccountService.nonce();
-  AccountCheck.restored(this.accountId, this.id, {required this.automatic});
+  AccountCheck(this.accountId, {required this.automatic}) : id = AccountService.nonce(), legacyMigration = false;
+  AccountCheck.restored(this.accountId, this.id, {required this.automatic}) : legacyMigration = false;
+  AccountCheck.forLegacy(AccountCheck check) : accountId = check.accountId, id = check.id,
+    automatic = false, legacyMigration = true {
+    if (check.automatic) throw ArgumentError('Legacy migration requires an explicit manual check');
+  }
   final String accountId, id;
-  final bool automatic;
+  final bool automatic, legacyMigration;
   Map<String, String> headers({bool refresh = false}) => {
     'X-Update-Check-Id': id, 'X-Update-Check-Kind': automatic ? 'automatic' : 'manual',
+    if (legacyMigration) 'X-Legacy-Migration': 'uid-v1',
     if (refresh) 'X-Update-Refresh': '1',
   };
 }
@@ -30,10 +37,12 @@ class AccountCheck {
 /// Tokens are stored by the OS vault, never in diagnostics or ordinary preferences.
 class AccountService extends GetxService {
   AccountService({Dio? dio, FlutterSecureStorage? storage, Uri? endpoint,
-      Future<Map<String, dynamic>> Function()? readTerminal})
+      Future<Map<String, dynamic>> Function()? readTerminal,
+      void Function(Map<String, Object?>)? onDiagnostic})
       : _dio = dio ?? Dio(BaseOptions(connectTimeout: const Duration(seconds: 15),
           receiveTimeout: const Duration(seconds: 20), sendTimeout: const Duration(seconds: 15))),
         _storage = storage ?? const FlutterSecureStorage(), _readTerminal = readTerminal ?? _terminalMetadata,
+        _diagnostic = onDiagnostic ?? _recordDiagnostic,
         endpoint = endpoint ?? Uri.parse(ShareLinks.cloudflareUpdateManifestUrl);
 
   static AccountService get to => Get.find<AccountService>();
@@ -48,6 +57,7 @@ class AccountService extends GetxService {
   final sessions = <Map<String, dynamic>>[].obs;
   final terminalReportProblem = RxnString();
   final Future<Map<String, dynamic>> Function() _readTerminal;
+  final void Function(Map<String, Object?>) _diagnostic;
   Future<Map<String, dynamic>>? _terminalValue;
   DateTime? _terminalReported;
   final Map<String, DateTime> _deviceReports = {};
@@ -57,6 +67,21 @@ class AccountService extends GetxService {
   int get generation => _generation;
   String? get accountId => account.value?['id'] as String?;
   bool get loggedIn => _token != null && accountId != null;
+
+  static void _recordDiagnostic(Map<String, Object?> value) {
+    if (Platform.isAndroid) unawaited(_writeDiagnostic(value));
+  }
+  static Future<void> _writeDiagnostic(Map<String, Object?> value) async {
+    try {
+      await const MethodChannel('trace/companion').invokeMethod<Object?>('journal', value)
+        .timeout(const Duration(seconds: 1));
+    } catch (_) { /* Observation failure does not alter an account operation. */ }
+  }
+
+  static String? _requestId(Object? value) => value is String &&
+    RegExp(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$').hasMatch(value) ? value : null;
+  static String? _errorField(Object? value) =>
+    const {'username', 'password', 'email', 'code', 'verificationId'}.contains(value) ? value as String : null;
 
   static Future<Map<String, dynamic>> _terminalMetadata() async {
     final value = <String, dynamic>{'platform': Platform.operatingSystem,
@@ -231,19 +256,38 @@ class AccountService extends GetxService {
       return response.data ?? <String, dynamic>{};
     } on DioException catch (error) {
       final data = error.response?.data;
-      final code = data is Map ? data['errorCode']?.toString() ?? 'NETWORK' : 'NETWORK';
+      final rawCode = data is Map ? data['errorCode'] : null;
+      final code = rawCode is String && RegExp(r'^[A-Z][A-Z0-9_]{0,63}$').hasMatch(rawCode) ? rawCode : 'NETWORK';
+      final requestId = _requestId(data is Map ? data['requestId'] : null) ??
+        _requestId(error.response?.headers.value('x-request-id'));
+      var field = _errorField(data is Map ? data['field'] : null);
+      if (field == null && code == 'INVALID_PARAMETER' && data is Map) {
+        field = switch (data['message']) {
+          'Invalid username' => 'username', 'Invalid email' => 'email', 'Invalid code' => 'code',
+          'Invalid verificationId' => 'verificationId', 'Password must contain 8 to 128 characters' => 'password', _ => null,
+        };
+      }
+      try {
+        _diagnostic({'status': 'ACCOUNT_REQUEST_FAILED', 'source': 'account',
+          'stage': const {'/api/auth/register': 'REGISTER', '/api/auth/login': 'LOGIN',
+            '/api/auth/reset-password': 'RESET_PASSWORD', '/api/auth/email-code': 'EMAIL_CODE'}[path] ?? 'CLOUD_REQUEST',
+          'errorCode': code, if (field != null) 'reason': field,
+          if (requestId != null) 'taskId': requestId.replaceAll('-', '')});
+      } catch (_) { /* Never log bodies or let a diagnostic callback replace the error. */ }
       if (captured == _generation && (code == 'LOGIN_REQUIRED' || code == 'ACCOUNT_DISABLED')) await _clear();
-      throw AccountException(code, messageFor(code));
+      throw AccountException(code, messageFor(code, field: field), requestId: requestId, field: field);
     }
   }
 
-  static String messageFor(String code) => switch (code) {
+  static String messageFor(String code, {String? field}) => switch (code) {
     'LOGIN_REQUIRED' => '请先登录，登录过期后需重新登录',
     'INVALID_CREDENTIALS' => '账号或密码不正确',
     'ACCOUNT_DISABLED' => '账号已停用，请联系管理员',
     'REGISTRATION_DISABLED' => '管理员已关闭注册',
     'DEVICE_NOT_BOUND' => '请先在账号页绑定当前码表',
     'DEVICE_ALREADY_BOUND' => '码表已绑定其他账号，请先由原账号解绑',
+    'LEGACY_MIGRATION_UNAVAILABLE' => '兼容升级需要后台已发布的 3.3.50 正式全量包，请稍后重试',
+    'LEGACY_MIGRATION_INVALID' => '兼容升级授权已失效或设备信息已变化，请重新检查更新',
     'CHECK_QUOTA_EXCEEDED' => '该类检查今日额度已用完，次日北京时间零点恢复',
     'CHECK_TOO_SOON' => '距离上次自动检查不足一小时',
     'RATE_LIMITED' => '操作太频繁，请稍后重试',
@@ -253,7 +297,12 @@ class AccountService extends GetxService {
     'EMAIL_SEND_COOLDOWN' => '请等待一分钟后再获取验证码',
     'BACKEND_UNAVAILABLE' => '账号服务暂时不可用，请稍后重试',
     'CAS_CONFLICT' => '账号已存在或设置已变化，请刷新后重试',
-    'INVALID_PARAMETER' => '请检查输入内容',
+    'INVALID_PARAMETER' => switch (field) {
+      'username' => '用户名需为 3 至 32 位字母、数字或下划线',
+      'password' => '密码需为 8 至 128 位', 'email' => '请输入有效邮箱地址',
+      'code' => '请输入邮件中的六位验证码', 'verificationId' => '请先获取邮箱验证码后再提交',
+      _ => '输入内容不符合要求，请检查当前表单',
+    },
     _ => '云端请求未完成，请检查网络后重试',
   };
 
@@ -299,6 +348,13 @@ class AccountService extends GetxService {
   }
   Future<void> authorizeOta(String uid) async {
     await call('/api/account/ota/authorize', body: {}, uid: uid);
+  }
+  Future<void> authorizeLegacyOta(Map<String, dynamic> proof) async {
+    final owner = accountId;
+    final response = await call('/api/account/ota/authorize', body: proof);
+    if (response['ok'] != true || response['accountId'] != owner || response['legacyMigration'] != true) {
+      throw const AccountException('LEGACY_MIGRATION_INVALID', '未收到兼容升级授权，未开始传输');
+    }
   }
   Future<void> savePreparation(String uid, Map<String, dynamic> value) async {
     await requireLogin();

@@ -22,6 +22,7 @@ import 'package:ble_monitor/ota/ota_diagnostics.dart';
 import 'package:ble_monitor/ota/ota_download.dart';
 import 'package:ble_monitor/ota/ota_experiment_config.dart';
 import 'package:ble_monitor/ota/ota_firmware_latest.dart';
+import 'package:ble_monitor/ota/ota_legacy_migration.dart';
 import 'package:ble_monitor/ota/ota_phy.dart';
 import 'package:ble_monitor/ota/ota_radio_lease.dart';
 import 'package:ble_monitor/ota/ota_link_stats.dart';
@@ -219,6 +220,9 @@ void main() {
     OtaPhyClient? phyClient,
     OtaBackgroundClient? backgroundClient,
     OtaLinkProfile? linkProfile,
+    AccountService? accountService,
+    Future<String?> Function(String)? uidReader,
+    Uri? latestEndpoint,
   }) {
     // RC3-02⑤：默认值不得用 const []——记录替身恒 add，const 列表首条
     // 通知即抛 UnsupportedError。默认改为可增长列表。
@@ -230,13 +234,14 @@ void main() {
       ..httpClientAdapter =
           downloadAdapter ?? _DownloadOkAdapter(assetBytes());
     final service = OtaService(
-      hardwareUidReader: (_) async => '1234567890abcdef12345678',
+      accountService: accountService,
+      hardwareUidReader: uidReader ?? (_) async => '1234567890abcdef12345678',
       bluetoothService: ble,
       dio: latest,
       downloadDio: download,
       firmwareDirProvider: firmwareDirProvider ?? () async => firmwareDir,
       latestUriBuilder: (info, appVersionCode, channel) =>
-          Uri.parse('http://localhost:9/api/firmware/latest'),
+          latestEndpoint ?? Uri.parse('http://localhost:9/api/firmware/latest'),
       // onNotify 替身（RC3-02）：通知进 log 供断言，不走 Get.snackbar。
       onNotify: (title, message) => log.add('$title: $message'),
       downloadFileGate: downloadFileGate,
@@ -317,6 +322,96 @@ void main() {
     expect(service.phase, OtaPhase.readyToInstall);
     return ble;
   }
+
+  Future<({OtaService service, _UpgradeFakeBle ble, _LegacyTestAccounts accounts,
+    List<RequestOptions> checks, List<RequestOptions> downloads})> prepareLegacy({bool allowBegin = true}) async {
+    final directory = tempFirmwareDir(), checks = <RequestOptions>[], downloads = <RequestOptions>[];
+    final accounts = _LegacyTestAccounts()..allowBegin = allowBegin;
+    final source = buildInfoPayload(model: DeviceOtaInfo.wireModelETrack,
+      hardwareRevision: 3, layoutId: 5, bootVersion: 2, currentVersionCode: 30348,
+      imageSha256: List.filled(32, 0xaa));
+    final target = buildInfoPayload(model: DeviceOtaInfo.wireModelETrack,
+      hardwareRevision: 3, layoutId: 5, bootVersion: 2, currentVersionCode: 30350,
+      imageSha256: List.generate(32, (i) => int.parse(LegacyOtaMigration.targetImage.substring(i * 2, i * 2 + 2), radix: 16)));
+    final ble = _UpgradeFakeBle(preRebootPayload: source, postRebootPayload: target);
+    final bytes = assetBytes()..setRange(0, 64, buildEtuHeader(960, targetVcode: 30350));
+    final service = makeService(ble: ble, firmwareDir: directory, accountService: accounts,
+      uidReader: (_) async => null, latestEndpoint: Uri.parse('https://account.example/api/public/firmware/latest'),
+      latestAdapter: _MigrationHttp((options) {
+        checks.add(options);
+        final body = jsonDecode(latestBody(bytes)) as Map<String, dynamic>;
+        body['versionCode'] = 30350; body['versionName'] = '3.3.50';
+        body['targetImageSha256'] = LegacyOtaMigration.targetImage;
+        final asset = body['asset'] as Map<String, dynamic>;
+        asset['fileName'] = 'e-track-at32f435-v3.3.50-full.etu';
+        asset['downloadUrl'] = 'https://account.example/api/public/firmware/download?signature=fixture';
+        asset['expiresAt'] = DateTime.now().millisecondsSinceEpoch ~/ 1000 + 300;
+        body['legacyMigration'] = {'mode': 'uid-v1', 'accountId': accounts.accountId,
+          'checkId': options.headers['X-Update-Check-Id'], 'sourceVersionCode': 30348,
+          'sourceImageSha256': 'a' * 64, 'hardwareRevision': 3, 'layoutId': 5,
+          'bootVersion': 2, 'protocolVersion': 1, 'targetVersionCode': 30350,
+          'targetImageSha256': LegacyOtaMigration.targetImage, 'targetReleaseId': body['releaseId'],
+          'assetId': asset['assetId'], 'assetSha256': asset['sha256'],
+          'expiresAt': DateTime.now().add(const Duration(hours: 24)).millisecondsSinceEpoch};
+        return ResponseBody.fromString(jsonEncode(body), 200,
+          headers: {Headers.contentTypeHeader: ['application/json']});
+      }), downloadAdapter: _MigrationHttp((options) {
+        downloads.add(options);
+        return ResponseBody.fromBytes(bytes, 200, headers: {
+          Headers.contentLengthHeader: ['${bytes.length}'], 'etag': ['"fixture"'],
+        });
+      }));
+    Get.put<AppUpdateService>(_FakeAppUpdateService());
+    expect(await service.readDeviceInfo('AA:BB'), isNotNull);
+    return (service: service, ble: ble, accounts: accounts, checks: checks, downloads: downloads);
+  }
+
+  test('legacy migration remains manual, signed and verified after reboot without a fabricated UID', () async {
+    final value = await prepareLegacy(), service = value.service;
+    expect(await service.checkFirmwareUpdate(legacyMigration: true), isNotNull);
+    expect(value.checks.single.headers['X-Legacy-Migration'], 'uid-v1');
+    expect(value.checks.single.headers['X-Device-Uid'], isNull);
+    expect(await service.downloadFirmware(), isTrue);
+    expect(value.downloads.single.headers['X-Legacy-Migration-Check-Id'],
+      value.checks.single.headers['X-Update-Check-Id']);
+    expect(await service.startOtaUpgrade('AA:BB'), isTrue);
+    expect(value.accounts.legacyAuthorizations, 1);
+    expect(value.accounts.authorizations, 0);
+    expect(service.hardwareUid, isNull);
+    expect(service.phase, OtaPhase.completed);
+    expect(value.ble.endCalls, 1);
+    expect(value.accounts.preparations, isEmpty);
+  });
+  test('ordinary and automatic checks cannot use the legacy binding exception', () async {
+    final value = await prepareLegacy();
+    expect(await value.service.checkFirmwareUpdate(automatic: true, legacyMigration: true), isNull);
+    expect(value.service.lastCloudError, 'LEGACY_MIGRATION_INVALID');
+    expect(await value.service.checkFirmwareUpdate(), isNull);
+    expect(value.service.lastCloudError, 'DEVICE_NOT_BOUND');
+    expect(value.checks, isEmpty);
+    expect(value.ble.beginCalls, 0);
+  });
+  test('legacy rejection or account change prevents BEGIN on a downloaded full package', () async {
+    final value = await prepareLegacy(allowBegin: false);
+    expect(await value.service.checkFirmwareUpdate(legacyMigration: true), isNotNull);
+    expect(await value.service.downloadFirmware(), isTrue);
+    expect(await value.service.startOtaUpgrade('AA:BB'), isFalse);
+    expect(value.service.lastCloudError, 'LEGACY_MIGRATION_INVALID');
+    expect(value.ble.beginCalls, 0);
+    value.accounts.allowBegin = true;
+    value.accounts.signedIn = false;
+    expect(await value.service.startOtaUpgrade('AA:BB'), isFalse);
+    expect(value.ble.beginCalls, 0);
+    expect(value.accounts.legacyAuthorizations, 1);
+  });
+  test('legacy package cannot be redirected to another connected device', () async {
+    final value = await prepareLegacy();
+    expect(await value.service.checkFirmwareUpdate(legacyMigration: true), isNotNull);
+    expect(await value.service.downloadFirmware(), isTrue);
+    expect(await value.service.startOtaUpgrade('AA:CC'), isFalse);
+    expect(value.accounts.legacyAuthorizations, 0);
+    expect(value.ble.beginCalls, 0);
+  });
 
   Future<void> expectGatedDataCount(_UpgradeFakeBle ble, int count) async {
     final watch = Stopwatch()..start();
@@ -4891,6 +4986,27 @@ class _AdmissionDevice extends Fake implements fbp.BluetoothDevice {
     await connections.close();
     await resets.close();
   }
+}
+
+class _LegacyTestAccounts extends TestAccountService {
+  bool allowBegin = true;
+  int legacyAuthorizations = 0;
+  @override
+  bool isCloudUri(Uri uri) => uri.scheme == 'https' && uri.host == 'account.example' && uri.path.startsWith('/api/');
+  @override
+  Future<void> authorizeLegacyOta(Map<String, dynamic> proof) async {
+    await requireLogin(); legacyAuthorizations++;
+    if (!allowBegin) throw const AccountException('LEGACY_MIGRATION_INVALID', 'Fixture authorization rejected');
+  }
+}
+
+class _MigrationHttp implements HttpClientAdapter {
+  _MigrationHttp(this.reply);
+  final ResponseBody Function(RequestOptions) reply;
+  @override
+  Future<ResponseBody> fetch(RequestOptions options, Stream<Uint8List>? stream, Future<void>? cancel) async => reply(options);
+  @override
+  void close({bool force = false}) {}
 }
 
 class _UpgradeFakeBle extends BluetoothService {

@@ -61,6 +61,10 @@
               <span class="nav-icon"><svg><use href="#i-chip"></use></svg></span>
               <span class="nav-label" data-i18n="nav.mcuFirmware">MCU Firmware</span>
             </button>
+            <button type="button" class="nav-item" id="accountsNav" data-view-target="accounts" data-i18n-aria-label="app.accounts">
+              <span class="nav-icon"><svg><use href="#i-lock"></use></svg></span>
+              <span class="nav-label" data-i18n="app.accounts">Accounts</span>
+            </button>
           </section>
         </nav>
 
@@ -168,6 +172,14 @@
         <div class="quick-sheet-scroll" id="inventoryDetailScroll"><div id="inventoryDetailContent"></div></div>
       </section>
 
+      <div class="quick-action-backdrop" id="accountDetailBackdrop" hidden></div>
+      <section class="quick-action-sheet inventory-detail-sheet" id="accountDetailSheet" role="dialog" aria-modal="true" aria-labelledby="accountDetailTitle" hidden>
+        <button type="button" class="quick-sheet-close" id="accountDetailClose" aria-label="Close account details" data-i18n-aria-label="dialog.close"><svg class="ui-icon" aria-hidden="true"><use href="#i-close"></use></svg></button>
+        <span class="quick-sheet-handle" aria-hidden="true"></span>
+        <header class="quick-sheet-header"><div><p class="eyebrow">E-Track</p><h2 id="accountDetailTitle" data-i18n="app.accounts">Accounts</h2></div></header>
+        <div class="quick-sheet-scroll" id="accountDetailScroll"><div id="accountDetailContent"></div></div>
+      </section>
+
       <div class="quick-action-backdrop delta-backdrop" id="deltaBackdrop" hidden></div>
       <section class="quick-action-sheet delta-sheet" id="deltaSheet" role="dialog" aria-modal="true" aria-labelledby="deltaTitle" hidden>
         <button type="button" class="quick-sheet-close" id="deltaClose" aria-label="Close delta packages" data-i18n-aria-label="operations.close">
@@ -270,7 +282,6 @@
           <button type="button" id="appAnnouncementsTab" role="tab" data-app-section="announcements" aria-controls="announcements" aria-selected="false" tabindex="-1" data-i18n="announcements.title">Announcements</button>
           <button type="button" id="appInventoryTab" role="tab" data-app-section="inventory" aria-controls="appInventoryPanel" aria-selected="false" tabindex="-1" data-i18n="operations.inventoryTab">Distribution</button>
           <button type="button" id="appFeedbackTab" role="tab" data-app-section="feedback" aria-controls="appFeedbackPanel" aria-selected="false" tabindex="-1" data-i18n="app.feedback">Feedback</button>
-          <button type="button" id="appAccountsTab" role="tab" data-app-section="accounts" aria-controls="appAccountsPanel" aria-selected="false" tabindex="-1" data-i18n="app.accounts">Accounts</button>
         </div>
         <section class="app-panel" id="appReleasesPanel" data-app-panel="releases" role="tabpanel" aria-labelledby="appReleasesTab">
         <div class="operations-buttons app-platform-bar"><label id="appPlatformLabel" for="appPlatform">Platform</label>
@@ -430,10 +441,14 @@
 
         <section class="panel inventory-panel" id="appInventoryPanel" data-app-panel="inventory" role="tabpanel" aria-labelledby="appInventoryTab" hidden></section>
         <section class="panel feedback-panel" id="appFeedbackPanel" data-app-panel="feedback" role="tabpanel" aria-labelledby="appFeedbackTab" hidden></section>
-        <section class="panel" id="appAccountsPanel" data-app-panel="accounts" role="tabpanel" aria-labelledby="appAccountsTab" hidden></section>
         <p class="footer-note">
           <span data-i18n="footer.note">This admin page only changes the Pages UI. Release mutations still go through the Access-protected same-origin facade.</span>
         </p>
+        </section>
+
+        <section class="admin-view" id="accountsView" data-admin-view="accounts" hidden>
+          <header class="header-row"><div><p class="breadcrumbs">E-Track / <strong data-i18n="app.accounts">Accounts</strong></p><h1 data-i18n="app.accounts">Accounts</h1></div></header>
+          <section class="panel" id="accountsPanel" aria-labelledby="accountsNav"></section>
         </section>
 
         <section class="admin-view firmware-view" id="firmwareView" data-admin-view="firmware" hidden>
@@ -626,6 +641,7 @@
         selectedAnnouncementId: null,
         selectedFirmwareId: null,
         firmwareDetailsOpen: false,
+        accountDetailsOpen: false,
         detailsOpen: false,
         queries: { releases: "", announcements: "", firmware: "", firmwareChannels: "", firmwareHistory: "", inventory: "", firmwareInventory: "", feedback: "", accounts: "" },
         inventory: { value: null, error: null, loading: false, window: 30, pages: { android: 0, firmware: 0 }, refreshId: null },
@@ -1697,11 +1713,21 @@
         confirm: options => openConfirmDialog(options),
         onError: (error, scope) => showErrorDialog(error, { scope }), onRecovered: clearFeedbackError,
         onSuccess: message => queueFeedback({ tone: "success", title: opText("操作完成", "Action completed"), message }) });
-      accountPanel = window.TraceAccounts?.({ element: document.querySelector('#appAccountsPanel'),
+      accountPanel = window.TraceAccounts?.({ element: document.querySelector('#accountsPanel'),
+        detailElement: document.querySelector('#accountDetailContent'),
         api, mutate, session: () => state.session, text: opText, escape: escapeHtml,
         confirm: options => openConfirmDialog(options),
         onError: (error, scope) => showErrorDialog(error, { scope }), onRecovered: clearFeedbackError,
-        onSuccess: message => queueFeedback({ tone: "success", title: opText("操作完成", "Action completed"), message }) });
+        onSuccess: message => queueFeedback({ tone: "success", title: opText("操作完成", "Action completed"), message }),
+        onSearchChange: query => { state.queries.accounts = query; syncSearchInput(); },
+        onDetailVisibility: open => {
+          state.accountDetailsOpen = open;
+          document.querySelector('#accountDetailSheet').hidden = !open;
+          document.querySelector('#accountDetailBackdrop').hidden = !open;
+          els.body.classList.toggle('account-details-open', open); syncOverlayState();
+          if (open) { document.querySelector('#accountDetailScroll').scrollTop = 0; document.querySelector('#accountDetailClose').focus({ preventScroll: true }); }
+          else restoreWorkspaceFocus(accountPanel?.returnFocus());
+        } });
       resourceUsagePanel = window.TraceResourceUsage?.({ element: document.querySelector("#providerUsage"),
         api, text: opText, escape: escapeHtml, formatBytes, onResize: positionResourcePanel,
         onError: error => showErrorDialog(error, { scope: "resource-usage" }), onRecovered: () => clearFeedbackError("resource-usage") });
@@ -1733,6 +1759,7 @@
         [els.firmwareDetailSheet,document.querySelector("#firmwareDetailScroll"),els.firmwareDetailBackdrop,"firmware"],
         [els.deltaSheet,document.querySelector("#deltaScroll"),els.deltaBackdrop,"delta"],
         [els.inventoryDetailSheet,els.inventoryDetailScroll,els.inventoryDetailBackdrop,"inventory"],
+        [document.querySelector('#accountDetailSheet'),document.querySelector('#accountDetailScroll'),document.querySelector('#accountDetailBackdrop'),"accounts"],
         [document.querySelector("#taskSheet"),document.querySelector("#taskScroll"),document.querySelector("#taskBackdrop"),"tasks"]
       ]) new TraceSheetGestures({sheet,scroll,backdrop,canClose:()=>!state.busy && !state.delta?.busy && !activeConfirmDialog,close:()=>dismissOverlay(layer)});
       new TraceSheetGestures({ sheet: els.resourcePanel, scroll: els.resourcePanel,
@@ -1838,6 +1865,7 @@
           state.detailsOpen && "app",state.firmwareDetailsOpen && "firmware",state.delta && "delta",
           state.taskOpen && "tasks",state.announcementOpen && "announcement",
           ...state.inventoryDetails.map((_, index) => `inventory-${index}`),
+          state.accountDetailsOpen && "accounts",
           els.body.classList.contains("nav-open") && "nav",activeConfirmDialog && "confirm"].filter(Boolean);
       }
       function dismissOverlay(layer) {
@@ -1848,6 +1876,7 @@
         else if (layer === "delta") closeDelta();
         else if (layer === "tasks") closeTasks();
         else if (layer === "announcement") void closeAnnouncementEditor();
+        else if (layer === "accounts") accountPanel?.closeDetail();
         else if (layer.startsWith("inventory")) closeInventoryDetails();
         else if (layer === "nav") setMobileNav(false);
       }
@@ -1915,6 +1944,8 @@
       }
 
       function attachEvents() {
+        document.querySelector('#accountDetailClose').addEventListener('click', () => accountPanel?.closeDetail());
+        document.querySelector('#accountDetailBackdrop').addEventListener('click', () => { if (!activeConfirmDialog) accountPanel?.closeDetail(); });
         document.querySelector("#taskButton").addEventListener("click",openTasks);
         document.querySelector("#taskClose").addEventListener("click",closeTasks);
         document.querySelector("#taskBackdrop").addEventListener("click",closeTasks);
@@ -1971,7 +2002,7 @@
         els.appTabs.addEventListener("keydown", event => {
           if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
           event.preventDefault();
-          const sections = ["releases", "announcements", "inventory", "feedback", "accounts"];
+          const sections = ["releases", "announcements", "inventory", "feedback"];
           const index = sections.indexOf(state.appSection);
           switchAppSection(event.key === "Home" ? sections[0] : event.key === "End" ? sections.at(-1)
             : sections[(index + (event.key === "ArrowLeft" ? sections.length - 1 : 1)) % sections.length]);
@@ -2207,6 +2238,7 @@
         document.addEventListener("keydown", (event) => {
           if (event.isComposing) return;
           const layer = activeConfirmDialog ? els.confirmDialog
+            : state.accountDetailsOpen ? document.querySelector('#accountDetailSheet')
             : state.inventoryDetails.length ? els.inventoryDetailSheet
             : state.announcementOpen ? document.querySelector("#announcementSheet")
             : state.taskOpen ? document.querySelector("#taskSheet")
@@ -2221,6 +2253,7 @@
           if (event.key === "Escape") {
             event.preventDefault();
             if (activeConfirmDialog) closeConfirmDialog(false);
+            else if (state.accountDetailsOpen) accountPanel?.closeDetail();
             else if (state.announcementOpen) void closeAnnouncementEditor();
             else if (layer === els.inventoryDetailSheet) closeInventoryDetails();
             else if (state.taskOpen) closeTasks();
@@ -2278,14 +2311,16 @@
         const delta = Boolean(state.delta);
         const tasks = state.taskOpen;
         const distribution = state.inventoryDetails.length > 0;
-        els.workspace.inert = confirm || quick || firmware || nav || delta || tasks || distribution;
-        els.resourceFloat.inert = confirm || quick || firmware || nav || delta || tasks || distribution;
-        els.sidebar.inert = confirm || quick || firmware || delta || tasks || distribution || (window.matchMedia("(max-width: 1000px)").matches && !nav);
-        els.quickActionSheet.inert = confirm || firmware || delta || tasks || distribution || !quick;
-        els.firmwareDetailSheet.inert = confirm || quick || delta || tasks || distribution || !firmware;
-        els.deltaSheet.inert = confirm || tasks || distribution || !delta;
-        document.querySelector("#taskSheet").inert = confirm || distribution || !tasks;
-        els.inventoryDetailSheet.inert = confirm || !distribution;
+        const accounts = state.accountDetailsOpen;
+        els.workspace.inert = confirm || quick || firmware || nav || delta || tasks || distribution || accounts;
+        els.resourceFloat.inert = confirm || quick || firmware || nav || delta || tasks || distribution || accounts;
+        els.sidebar.inert = confirm || quick || firmware || delta || tasks || distribution || accounts || (window.matchMedia("(max-width: 1000px)").matches && !nav);
+        els.quickActionSheet.inert = confirm || firmware || delta || tasks || distribution || accounts || !quick;
+        els.firmwareDetailSheet.inert = confirm || quick || delta || tasks || distribution || accounts || !firmware;
+        els.deltaSheet.inert = confirm || tasks || distribution || accounts || !delta;
+        document.querySelector("#taskSheet").inert = confirm || distribution || accounts || !tasks;
+        els.inventoryDetailSheet.inert = confirm || accounts || !distribution;
+        document.querySelector('#accountDetailSheet').inert = confirm || !accounts;
         els.confirmDialog.inert = !confirm;
         document.querySelector("#announcementSheet").inert = !state.announcementOpen || Boolean(activeConfirmDialog);
         overlayHistory?.sync();
@@ -2296,6 +2331,8 @@
         if (activeConfirmDialog || els.body.classList.contains("nav-open")) return;
         const fallback = state.inventoryDetails.length ? els.inventoryDetailBack : state.taskOpen ? document.querySelector("#taskClose") : state.delta ? els.deltaClose : els.body.classList.contains("quick-actions-open") ? els.quickActionClose
           : els.body.classList.contains("firmware-details-open") ? els.firmwareDetailClose
+          : state.accountDetailsOpen ? document.querySelector('#accountDetailClose')
+          : state.activeView === 'accounts' ? document.querySelector('#accountsNav')
           : state.activeView === "firmware" ? (state.firmwareSection === "releases"
             ? els.firmwareReleaseList.querySelector('[aria-pressed="true"]') : null) ?? els.firmwareTabs.querySelector('[aria-selected="true"]')
           : state.appSection !== "releases" ? els.appTabs.querySelector('[aria-selected="true"]')
@@ -3515,7 +3552,7 @@
         if (operation !== "create" && (!job || job.cancelling)) return;
         const confirmed = operation === "reconcile" ? {} : await openConfirmDialog({ title: button.textContent, reasonRequired: operation !== "create",
           message: opText("仅修改该目标版本的差分任务或差分选择，不改变发布通道。", "Only this target's delta jobs or selection will change; channels remain untouched."),
-          detail: operation === "create" ? `${delta.selected.size} ${opText("个旧版本", "source versions")} · ${delta.reason}${delta.kind === "firmware" ? "\n" + opText("提交后还需要 GitHub 审批，请按后续弹窗前往审批。", "GitHub approval is required after submission; follow the approval dialog.") : ""}` : `${job.baseVersionCode} → ${job.targetVersionCode}` });
+          detail: operation === "create" ? `${delta.selected.size} ${opText("个旧版本", "source versions")} · ${delta.reason}` : `${job.baseVersionCode} → ${job.targetVersionCode}` });
         if (!confirmed || state.delta !== delta || delta.actor !== state.session?.actor) return;
         delta.busy = true; delta.notice = ""; delta.message = operation === "reconcile" ? opText("正在同步构建结果...", "Synchronizing build results...") : ""; clearTimeout(delta.timer); renderDelta();
         try {
@@ -5194,8 +5231,8 @@
         els.collapseNav.setAttribute("aria-label", collapseText.textContent);
       }
 
-      function switchAdminView(view, { scroll = false } = {}) {
-        if (!["phone", "firmware"].includes(view)) return;
+      function switchAdminView(view, { scroll = false, loadAccounts = true } = {}) {
+        if (!["phone", "firmware", "accounts"].includes(view)) return;
         if(state.activeView!==view) resetDeletionModes();
         state.activeView = view;
         closeQuickActions({ immediate: true, restoreFocus: false });
@@ -5205,6 +5242,7 @@
         applyAdminView();
         syncSearchInput();
         render();
+        if (view === 'accounts' && loadAccounts) void accountPanel?.load();
         setMobileNav(false, { restoreFocus: false });
         if (scroll) {
           window.scrollTo({ top: 0 });
@@ -5215,6 +5253,7 @@
       }
 
       function searchScope() {
+        if (state.activeView === 'accounts') return 'accounts';
         return state.activeView === "firmware"
           ? state.firmwareSection === "inventory" ? "firmwareInventory" : state.firmwareSection === "channels" ? "firmwareChannels" : state.firmwareSection === "history" ? "firmwareHistory" : "firmware"
           : state.appSection;
@@ -5230,7 +5269,7 @@
       }
 
       function switchAppSection(section) {
-        if (!["releases", "announcements", "inventory", "feedback", "accounts"].includes(section)) return;
+        if (!["releases", "announcements", "inventory", "feedback"].includes(section)) return;
         if(state.appSection!==section) resetDeletionModes();
         state.appSection = section;
         render();
@@ -5240,19 +5279,17 @@
         syncSearchInput();
         if (section === "inventory") loadInventory();
         if (section === "feedback") feedbackInbox?.load();
-        if (section === "accounts") accountPanel?.load();
         window.scrollTo({ top: 0 });
         els.appTabs.querySelector('[data-app-section="' + section + '"]').focus({ preventScroll: true });
       }
 
       async function openAccountRelations(kind, query = '') {
         while (state.inventoryDetails.length) closeInventoryDetails();
-        switchAdminView('phone', { scroll: true });
-        state.appSection = 'accounts'; render(); applyAppSection(); syncSearchInput();
+        switchAdminView('accounts', { scroll: true, loadAccounts: false });
         await accountPanel?.showRelations(kind, query);
         state.queries.accounts = query;
         syncSearchInput();
-        document.querySelector('#appAccountsTab').focus({ preventScroll: true });
+        document.querySelector('#accountsNav').focus({ preventScroll: true });
       }
 
       function applyAppSection() {

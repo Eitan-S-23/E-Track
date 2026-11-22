@@ -569,7 +569,7 @@ class _ProfileAvatar extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         const Text(
-          '智能设备用户',
+          '登录/注册',
           style: TextStyle(
             color: TraceColors.text,
             fontSize: 17,

@@ -3,6 +3,7 @@ import { ApiError, invalidParameter } from './errors';
 import { clientIpFrom, json } from './http';
 import { boundedJson } from './version_inventory';
 import { accountBudget, accountCheck, type AccountLimits } from './account_quota';
+import { authorizeLegacy, legacyDownload, legacyResponse, legacySource } from './account_legacy';
 import type { WorkerEnv } from './types';
 import { scryptSync } from 'node:crypto';
 import { accountConnections, saveTerminal, sessionList, terminalInput, type Terminal } from './account_terminals';
@@ -35,7 +36,7 @@ export function accountPublic(a: Account) {
 
 export function accountPassword(input: unknown): string {
   if (typeof input !== 'string' || input.length < 8 || input.length > 128 || encoder.encode(input).length > 512) {
-    throw invalidParameter('Password must contain 8 to 128 characters');
+    throw invalidParameter('Password must contain 8 to 128 characters', 'password');
   }
   return input;
 }
@@ -67,7 +68,7 @@ export async function requireAccount(request: Request, env: Env): Promise<Accoun
 
 function field(body: Record<string, unknown>, key: string, pattern: RegExp): string {
   const value = body[key];
-  if (typeof value !== 'string' || !pattern.test(value)) throw invalidParameter('Invalid ' + key);
+  if (typeof value !== 'string' || !pattern.test(value)) throw invalidParameter('Invalid ' + key, key);
   return value;
 }
 const emailOf = (body: Record<string, unknown>) => field(body, 'email', /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,30}$/).toLowerCase();
@@ -325,6 +326,7 @@ export async function accountRoute(request: Request, env: WorkerEnv): Promise<Re
     return json({ ok: true });
   }
   if (path === '/api/account/ota/authorize') {
+    if (body.legacyCheckId !== undefined) return authorizeLegacy(env, account.id, body);
     await requireBoundDevice(request, env, account);
     return json({ ok: true, accountId: account.id, authorizedAt: now });
   }
@@ -346,11 +348,21 @@ export async function accountCloudAccess(request: Request, env: WorkerEnv, next:
   // The download handler still verifies its signature, expiry, purpose and asset kind.
   if (path === '/api/public/firmware/download' && url.searchParams.get('purpose') === 'admin-recovery') return next();
   const account = await requireAccount(request, env);
-  if (path.startsWith('/api/public/firmware/')) await requireBoundDevice(request, env, account);
+  const mode = request.headers.get('X-Legacy-Migration');
+  if (mode !== null && (mode !== 'uid-v1' || path !== '/api/public/firmware/latest')) {
+    throw invalidParameter('Legacy migration is only supported by the firmware check');
+  }
+  const source = mode === 'uid-v1' ? await legacySource(request, env) : null;
+  if (path.startsWith('/api/public/firmware/') && !source) {
+    if (path === '/api/public/firmware/download' && request.headers.has('X-Legacy-Migration-Check-Id') &&
+        !request.headers.has('X-Device-Uid')) await legacyDownload(request, env, account.id);
+    else await requireBoundDevice(request, env, account);
+  }
   if (path === '/api/public/latest' || path === '/api/public/firmware/latest') {
     const rate = await env.RATE_LIMITER.getByName('account-check:' + account.id).check('check', 12, 60);
     if (!rate.allowed) throw new ApiError('RATE_LIMITED', 'Too many check attempts', 429, { retryAfter: rate.retryAfter });
-    return accountCheck(request, env.DB, account.id, await accountSettings(env), next);
+    return accountCheck(request, env.DB, account.id, await accountSettings(env), source
+      ? async () => legacyResponse(request, env, account.id, source, await next()) : next);
   }
   return next();
 }
