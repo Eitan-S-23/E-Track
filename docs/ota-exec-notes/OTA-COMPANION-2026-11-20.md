@@ -2,7 +2,9 @@
 
 ## Account And Layout Batch, 2026-11-22
 
-Status: SELF_TEST_PASSED / FORMAL_CANDIDATES_PREPARED, based on remote main 409fc640bc86272c34a2a6ce3f85dfef2c8498a9.
+Status: SOURCE_AND_APP_CANDIDATE_DELIVERED / MCU_INGESTION_FAILED / OWNER_RECONCILIATION_REQUIRED.
+Product source: main `8a6dd4a3f051ba137256795f8d889eef6ece3e2b`, delivered after
+the development checks below; baseline remains `409fc640bc86272c34a2a6ce3f85dfef2c8498a9`.
 Owner explicitly selected **5 automatic and 5 manual checks per account per day**,
 separate pools shared by devices/phones, not journal-derived or reset by reinstall.
 Server day is Asia/Shanghai; the prior one-hour automatic spacing is retained.
@@ -46,16 +48,56 @@ source `1a1c82fefc433868adceb8012569a3f1b3cb796e`. The intermediate `44964618134
 failure was a void-return await in the new UI test teardown; evidence is retained
 in `keyring-logs-47`, not retroactively passed. Backend `accounts-host-07` additionally
 passes the real bind/foreign-account denial/OTA authorization/uncharged-denial case.
-APP 1.0.90+116 and MCU 3.3.49 are prepared after draft/release/tag checks
-(`keyring-read-45`, `keyring-read-50`); formal main push/build/ingestion are pending.
+APP 1.0.90+116 and MCU 3.3.49 use that delivered main source after draft/release/tag
+checks (`keyring-read-45`, `keyring-read-50`). Main backend CI `44965965282` and
+governance CI `44965965329` pass. Formal candidate run: `44965965276`.
+Original-signer run `Eitan-S-23/Trace/44966121776` completed successfully on both
+Windows and Android. Parent `44965965276` confirms App accepted/completed with
+channelPublished=false; its overall result is FAILURE solely because firmware
+upload failed. Android candidate registration succeeded as
+`rel_trace_android_v1_0_90`, idempotent=false. APK inspection confirms original
+package/signing/backend and BLE V2: 49604117 bytes, SHA-256
+`a7c641e28e043770f991fa6d1168a6f0687d01a2831c6bceaae7b0d5884f980b`.
+R2 APK/manifest verification succeeded. App is not published or installed.
+Original logs: `keyring-logs-74` and `keyring-logs-76`; sanitized receipt:
+`.cache/ota-followup-20261122/app-1.0.90-delivery-receipt.json`.
+Main backend logs `keyring-logs-71` confirm 514 Worker tests and 293 Admin cases.
+Latest development counts: Linux 1001 passed/16 platform skips; Windows 949
+passed/68 platform skips; each host also passes eight candidate contract tests.
 No deployment, phone action, J-Link or OTA occurred in this account/layout batch.
 Owner reported the earlier automatic popup works; do not repeat OTA to recapture it.
 
 Rollout must install UID-capable MCU firmware through the existing OTA route before
 requiring account binding on the cloud side. Older firmware cannot invent a UID.
 Owner retains all Cloudflare migrations/deployment/configuration/channel/delta
-operations. Exact version/source and deployment steps follow successful self-tests;
-this local batch is not independent acceptance or live account availability.
+operations. The delivered source/candidate and self-tests are not independent
+acceptance, live account availability or owner phone/device verification.
+
+### Firmware 3.3.49 Delivery Failure
+
+Formal GCC build, full/recovery native byte verification and private-key cleanup
+pass, with 641 compiler warning lines and zero compile errors. The upload stage
+fails with `R2_VERIFY_FAILED`, `R2 S3 request failed: HTTP 500`, request ID
+`329d43b1-7e6b-4443-a51d-131076602363` at 2026-11-22 00:21:15 UTC.
+No ready-metadata or successful registration receipt exists in the retained log.
+R2 object persistence after the error is UNKNOWN, not proved absent or complete.
+The subsequent artifact-retention step was skipped after this failure; the agent
+did not rerun packaging/upload or fabricate a recoverable asset archive.
+
+Original job: `44965965276/job/137035319862`; raw log under
+`.cache/ota-followup-20261122/keyring-logs-62/` and bounded sanitized handoff at
+`.cache/ota-followup-20261122/firmware-3.3.49-failure-receipt.json`.
+Final raw image SHA-256: `0cdaa78e2f6391608b428060d114f339d15ef7fb9d1dcdb2bef7749dc38ca2a8`.
+Full ETU: 304649 bytes, `4fc2fd9d30d03bf20c7cf95aa85d8f3c93330da8c497b70374847fd9650269e2`.
+Recovery: 635868 bytes, `9d8fb8374ec4e8fdd7665c4811fced2beb8d367ffc76ff669393f5b50f6c4d6f`.
+Owner next action: read-only reconcile R2 prefix
+`trace/firmware/e-track-at32f435/30349-mcu-e-track-at32f435-v3.3.49/`
+and any 3.3.49 candidate against these identities. Do not publish an incomplete
+candidate, overwrite immutable assets, rotate credentials on the basis of a 500,
+or deploy the account gate before a usable UID-firmware transition is delivered.
+Recovery must be chosen from the actual preserved object state, not a blind rerun.
+Object metadata (`sha256`, `kind`) and byte lengths are useful initial owner
+reconciliation inputs; they alone do not replace the pipeline's full-byte check.
 
 ### Owner Rollout Order
 
@@ -84,6 +126,16 @@ No mail provider credentials were configured and no message was sent. Default
 registration is open, password registration is on and email verification is off;
 Admin may close registration. Login statistics represent logins, not online users.
 Actual Worker CPU-plan suitability and phone OS-vault behavior remain live checks.
+
+### Account Batch Write Audit
+
+All agent-controlled outputs remain under `D:/github/my/E-Track`: scoped product
+and test files, existing records, Git metadata, contained host/CI adapter outputs,
+and `.cache/ota-followup-20261122/`. No PowerShell, external SDK installation,
+credential/configuration change, manual cloud API/deployment, phone/J-Link/OTA
+operation or unrelated-file cleanup was performed. Prior failed runs/evidence
+remain intact. The final continuation audit is retained at
+`.cache/ota-followup-20261122/account-delivery-audit-01.json`.
 
 ## Owner Feedback Follow-Up, 2026-11-22
 
