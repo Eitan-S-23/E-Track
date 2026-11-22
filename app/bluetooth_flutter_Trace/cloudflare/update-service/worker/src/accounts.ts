@@ -5,6 +5,7 @@ import { boundedJson } from './version_inventory';
 import { accountBudget, accountCheck, type AccountLimits } from './account_quota';
 import type { WorkerEnv } from './types';
 import { scryptSync } from 'node:crypto';
+import { accountConnections, saveTerminal, sessionList, terminalInput, type Terminal } from './account_terminals';
 
 type Env = Pick<WorkerEnv, 'DB' | 'APP_ID' | 'ACCOUNT_MAIL_API_KEY' | 'ACCOUNT_MAIL_FROM'>;
 export interface AccountSettings extends AccountLimits {
@@ -79,12 +80,13 @@ async function authRate(request: Request, env: WorkerEnv, identifier = '') {
   }
 }
 
-async function session(env: Env, a: Account, appVersion: string): Promise<Response> {
+async function session(env: Env, a: Account, appVersion: string, terminal: Terminal | null): Promise<Response> {
   const token = 'acct_' + randomHex();
   const now = milliseconds(), expiresAt = now + 30 * 86400000;
   await env.DB.batch([
-    env.DB.prepare('INSERT INTO account_sessions(token_hash,account_id,created_at,expires_at) VALUES(?,?,?,?)')
-      .bind(await sha256Hex(token), a.id, now, expiresAt),
+    env.DB.prepare(`INSERT INTO account_sessions(token_hash,account_id,created_at,expires_at,session_id,installation_id,last_seen_at)
+      VALUES(?,?,?,?,?,?,?)`).bind(await sha256Hex(token), a.id, now, expiresAt, randomHex(16), terminal?.installationId ?? null, now),
+    ...(terminal ? [saveTerminal(env.DB, a.id, terminal, now)] : []),
     env.DB.prepare('UPDATE accounts SET last_login_at=? WHERE id=?').bind(now, a.id),
     env.DB.prepare('INSERT INTO account_login_events(id,account_id,occurred_at,app_version) VALUES(?,?,?,?)')
       .bind(crypto.randomUUID(), a.id, now, appVersion.slice(0, 64))
@@ -191,7 +193,8 @@ export async function accountAuthRoute(request: Request, env: WorkerEnv): Promis
     const matched = await passwordMatches(password, account?.password_hash ?? dummy);
     if (!account || !matched || account.state === 'deleted') throw new ApiError('INVALID_CREDENTIALS', 'Username or password is incorrect', 401);
     if (account.state !== 'active') throw new ApiError('ACCOUNT_DISABLED', 'Account has been disabled', 403);
-    return session(env, account, typeof body.appVersion === 'string' ? body.appVersion : '');
+    const terminal = terminalInput(body.terminal);
+    return session(env, account, terminal?.versionName ?? (typeof body.appVersion === 'string' ? body.appVersion : ''), terminal);
   }
   if (path === '/api/auth/reset-password') {
     const password = accountPassword(body.password), email = emailOf(body);
@@ -219,9 +222,54 @@ export async function accountRoute(request: Request, env: WorkerEnv): Promise<Re
       bound_at,last_seen_at FROM account_devices WHERE account_id=? AND app_id=? ORDER BY bound_at DESC LIMIT 100`)
       .bind(account.id, env.APP_ID).all()).results });
   }
+  if (request.method === 'GET' && path === '/api/account/sessions') {
+    return json({ sessions: await sessionList(env.DB, account.id, await sha256Hex(request.headers.get('Authorization')!.slice(7))),
+      ...await accountConnections(env.DB, account.id) });
+  }
   if (request.method !== 'POST') throw invalidParameter('Unsupported account operation');
   await authRate(request, env, account.id);
   const body = await boundedJson(request, 8192), now = milliseconds();
+  if (path === '/api/account/terminal') {
+    const terminal = terminalInput(body.terminal);
+    if (!terminal) throw invalidParameter('Terminal is required');
+    const tokenHash = await sha256Hex(request.headers.get('Authorization')!.slice(7));
+    const current = await env.DB.prepare('SELECT installation_id FROM account_sessions WHERE token_hash=?').bind(tokenHash)
+      .first<{ installation_id: string | null }>();
+    if (current?.installation_id && current.installation_id !== terminal.installationId) throw invalidParameter('Session terminal changed');
+    await env.DB.batch([saveTerminal(env.DB, account.id, terminal, now),
+      env.DB.prepare('UPDATE account_sessions SET installation_id=?,last_seen_at=? WHERE token_hash=?')
+        .bind(terminal.installationId, now, tokenHash)]);
+    return json({ ok: true });
+  }
+  if (path === '/api/account/sessions/revoke') {
+    const id = field(body, 'sessionId', /^[0-9a-f]{32}$/);
+    await env.DB.batch([
+      env.DB.prepare('UPDATE account_sessions SET revoked_at=coalesce(revoked_at,?) WHERE account_id=? AND session_id=?').bind(now, account.id, id),
+      env.DB.prepare('INSERT INTO account_audit(id,actor,action,account_id,occurred_at) VALUES(?,?,?,?,?)')
+        .bind(crypto.randomUUID(), account.id, 'revoke-session', account.id, now)
+    ]);
+    return json({ ok: true });
+  }
+  if (path === '/api/account/devices/observe') {
+    const device = await requireBoundDevice(request, env, account);
+    const version = body.firmwareVersion, image = field(body, 'imageSha256', /^[0-9a-f]{64}$/);
+    if (!Number.isSafeInteger(version) || Number(version) < 1 || Number(version) > 0xffffffff) throw invalidParameter('Invalid firmware version');
+    const current = await env.DB.prepare('SELECT installation_id FROM account_sessions WHERE token_hash=?')
+      .bind(await sha256Hex(request.headers.get('Authorization')!.slice(7))).first<{ installation_id: string | null }>();
+    if (!current?.installation_id) throw invalidParameter('Report terminal before device observation');
+    await env.DB.batch([
+      env.DB.prepare(`INSERT INTO account_device_observations(account_id,installation_id,uid,firmware_version,image_sha256,observed_at)
+        SELECT ?,?,?,?,?,? WHERE EXISTS(SELECT 1 FROM account_devices WHERE account_id=? AND app_id=? AND uid=?)
+        ON CONFLICT(account_id,installation_id,uid) DO UPDATE SET firmware_version=excluded.firmware_version,
+        image_sha256=excluded.image_sha256,observed_at=excluded.observed_at`)
+        .bind(account.id, current.installation_id, device.uid, version, image, now, account.id, env.APP_ID, device.uid),
+      env.DB.prepare(`UPDATE account_devices SET firmware_version=?,image_sha256=?,last_seen_at=? WHERE account_id=? AND app_id=? AND uid=?`)
+        .bind(version, image, now, account.id, env.APP_ID, device.uid),
+      env.DB.prepare('UPDATE account_terminals SET last_seen_at=? WHERE account_id=? AND installation_id=?')
+        .bind(now, account.id, current.installation_id)
+    ]);
+    return json({ ok: true, observedAt: now, onlineState: 'unknown' });
+  }
   if (path === '/api/account/logout') {
     const token = request.headers.get('Authorization')!.slice(7);
     await env.DB.prepare('UPDATE account_sessions SET revoked_at=? WHERE token_hash=?').bind(now, await sha256Hex(token)).run();
@@ -233,6 +281,8 @@ export async function accountRoute(request: Request, env: WorkerEnv): Promise<Re
       env.DB.prepare(`UPDATE accounts SET state='deleted',email=NULL,display_name='',password_hash='' WHERE id=?`).bind(account.id),
       env.DB.prepare('DELETE FROM account_sessions WHERE account_id=?').bind(account.id),
       env.DB.prepare('DELETE FROM account_devices WHERE account_id=?').bind(account.id),
+      env.DB.prepare('DELETE FROM account_device_observations WHERE account_id=?').bind(account.id),
+      env.DB.prepare('DELETE FROM account_terminals WHERE account_id=?').bind(account.id),
       env.DB.prepare('DELETE FROM account_email_codes WHERE app_id=? AND email=?').bind(env.APP_ID, account.email ?? '')
     ]);
     return json({ ok: true });
@@ -272,6 +322,7 @@ export async function accountRoute(request: Request, env: WorkerEnv): Promise<Re
     if (!await passwordMatches(accountPassword(body.password), account.password_hash)) throw new ApiError('INVALID_CREDENTIALS', 'Password is incorrect', 401);
     await env.DB.batch([
       env.DB.prepare('DELETE FROM account_devices WHERE app_id=? AND uid=? AND account_id=?').bind(env.APP_ID, uid, account.id),
+      env.DB.prepare('DELETE FROM account_device_observations WHERE uid=? AND account_id=?').bind(uid, account.id),
       env.DB.prepare('INSERT INTO account_audit(id,actor,action,account_id,device_uid,occurred_at) VALUES(?,?,?,?,?,?)')
         .bind(crypto.randomUUID(), account.id, 'device_unbind', account.id, uid, now)
     ]);
@@ -314,6 +365,10 @@ export async function cleanupAccounts(env: Env) {
     env.DB.prepare('DELETE FROM account_sessions WHERE expires_at<? OR revoked_at<?').bind(now - 86400000, now - 86400000),
     env.DB.prepare('DELETE FROM account_email_codes WHERE expires_at<?').bind(now - 86400000),
     env.DB.prepare('DELETE FROM account_update_checks WHERE created_at<?').bind(now - 8 * 86400000),
-    env.DB.prepare('DELETE FROM account_login_events WHERE occurred_at<?').bind(now - 90 * 86400000)
+    env.DB.prepare('DELETE FROM account_login_events WHERE occurred_at<?').bind(now - 90 * 86400000),
+    env.DB.prepare('DELETE FROM account_device_observations WHERE observed_at<?').bind(now - 90 * 86400000),
+    env.DB.prepare(`DELETE FROM account_terminals WHERE last_seen_at<? AND NOT EXISTS
+      (SELECT 1 FROM account_sessions s WHERE s.account_id=account_terminals.account_id
+      AND s.installation_id=account_terminals.installation_id AND s.revoked_at IS NULL AND s.expires_at>?)`).bind(now - 90 * 86400000, now)
   ]);
 }

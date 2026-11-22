@@ -442,6 +442,7 @@
               <p class="breadcrumbs">E-Track / <strong data-i18n="nav.mcuFirmware">MCU Firmware</strong></p>
               <h1 data-i18n="firmware.title">MCU Firmware Management</h1>
               <p class="firmware-hint" data-i18n="catalog.subtitle">Select a version, review changes, then publish to a channel.</p>
+              <button type="button" class="secondary-button" id="firmwareAccountsLink" data-i18n="app.accounts">Accounts</button>
             </div>
           </header>
           <div class="firmware-help firmware-notice" id="firmwareNotice" role="status" hidden></div>
@@ -626,7 +627,7 @@
         selectedFirmwareId: null,
         firmwareDetailsOpen: false,
         detailsOpen: false,
-        queries: { releases: "", announcements: "", firmware: "", firmwareChannels: "", firmwareHistory: "", inventory: "", firmwareInventory: "", feedback: "" },
+        queries: { releases: "", announcements: "", firmware: "", firmwareChannels: "", firmwareHistory: "", inventory: "", firmwareInventory: "", feedback: "", accounts: "" },
         inventory: { value: null, error: null, loading: false, window: 30, pages: { android: 0, firmware: 0 }, refreshId: null },
         inventoryDetails: [],
         delta: null,
@@ -1980,6 +1981,7 @@
           const tab = event.target.closest("[data-firmware-section]");
           if (tab) switchFirmwareSection(tab.dataset.firmwareSection);
         });
+        document.querySelector('#firmwareAccountsLink').addEventListener('click', () => openAccountRelations('devices'));
         els.firmwareTabs.addEventListener("keydown", event => {
           if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
           event.preventDefault();
@@ -3209,7 +3211,7 @@
       async function loadInventoryDetails(entry = state.inventoryDetails.at(-1)) {
         if (!entry || entry.loading || entry.actor !== state.session?.actor) return;
         const request = ++entry.request;
-        entry.loading = true; entry.error = null; renderInventoryDetails();
+        entry.loading = true; entry.error = null; clearFeedbackError('inventory-detail:' + entry.id); renderInventoryDetails();
         try {
           const query = new URLSearchParams({...entry.scope,windowDays:String(entry.window),limit:"20"});
           const cursor = entry.cursors[entry.page]; if (cursor) query.set("cursor",cursor);
@@ -3223,7 +3225,10 @@
           entry.data = value;
           entry.cursors[entry.page+1] = value.nextCursor;
         } catch (error) {
-          if (state.inventoryDetails.includes(entry) && request === entry.request) entry.error = error.message;
+          if (state.inventoryDetails.includes(entry) && entry.actor === state.session?.actor && request === entry.request) {
+            entry.error = error.message;
+            showErrorDialog(error, { scope: 'inventory-detail:' + entry.id });
+          }
         } finally {
           if (request === entry.request) entry.loading = false;
           if (state.inventoryDetails.at(-1) === entry) renderInventoryDetails();
@@ -3243,9 +3248,10 @@
         const table = (head,rows) => `<div class="inventory-table-wrap"><table class="inventory-table"><thead><tr>${head.map(h=>`<th>${escapeHtml(h)}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table></div>`;
         const distribution = (rows,label) => table([label,opText("记录", "Records"),opText("占比", "Share")],rows.map(row=>`<tr><td>${escapeHtml(row.label)}</td><td>${formatNumber(row.count)}</td><td>${pct(row.share)}</td></tr>`));
         els.inventoryDetailContent.dataset.entry = entry.id;
-        els.inventoryDetailContent.innerHTML = `<div class="operations-buttons"><button type="button" class="secondary-button" data-version-operation="inventory-detail-reload" ${entry.loading?"disabled":""}>${escapeHtml(opText("重新读取", "Reload details"))}</button></div>
+        els.inventoryDetailContent.innerHTML = `<div class="operations-buttons"><button type="button" class="secondary-button" data-version-operation="inventory-detail-reload" ${entry.loading?"disabled":""}>${escapeHtml(opText("重新读取", "Reload details"))}</button>
+          <button type="button" class="secondary-button" data-version-operation="inventory-accounts">${escapeHtml(opText("查看账号关联记录", "View account relationships"))}</button></div>
           ${entry.loading?`<p role="status">${escapeHtml(opText("正在读取分布详情...", "Loading distribution details..."))}</p>`:""}
-          ${entry.error?`<p class="error" role="alert">${escapeHtml(entry.error)}</p>`:""}
+          ${entry.error?`<p class="firmware-hint">${escapeHtml(opText("本次读取未完成，已有数据可能过期。", "This read did not complete; existing data may be stale."))}</p>`:""}
           ${!value?`<p class="firmware-hint">${escapeHtml(opText("详情尚未读取，不以缺少记录推定没有用户。", "Details are not loaded. Missing reports do not mean no users."))}</p>`:`
           <div class="quick-sheet-meta"><div class="quick-meta-card"><span>${escapeHtml(opText("样本记录", "Sample records"))}</span><strong>${formatNumber(value.sampleCount)}</strong></div>
           <div class="quick-meta-card"><span>${escapeHtml(opText("未知机型", "Unknown models"))}</span><strong>${formatNumber(value.unknownModels)}</strong></div>
@@ -3351,7 +3357,7 @@
         const canBuild = !locked && !delta.loading && data?.dispatchConfigured && (delta.kind !== "android" || data.appSigningConfigured);
         els.deltaContent.innerHTML = `<p class="firmware-hint">${escapeHtml(opText("选择起始旧版本，只新增差分文件。不会重新构建原包、替换现有文件或自动发布 Stable/Beta。", "Select source versions to append delta files. Originals are not rebuilt or replaced, and Stable/Beta is never published automatically."))}</p>
           <p class="firmware-hint">${escapeHtml(opText("关闭此弹窗不会取消任务。顶部“通知”可查看进度、历史结果并开启系统提醒。", "Closing does not cancel builds. Open Notifications in the toolbar for progress, results and system alerts."))}</p>
-          ${delta.notice ? `<p class="error" role="alert">${escapeHtml(delta.notice)}</p>` : ""}
+          ${delta.notice ? `<p class="firmware-hint">${escapeHtml(opText("任务信息未更新，请核对后重试。", "Task information is not updated; review before retrying."))}</p>` : ""}
           ${delta.message ? `<p role="status">${escapeHtml(delta.message)}</p>` : ""}
           ${!data ? `<p role="status">${escapeHtml(opText("等待版本数据", "Waiting for version data"))}</p>` : `
           ${!canBuild && !locked ? `<p class="firmware-help">${escapeHtml(opText("构建通道或签名配置未就绪，不能提交任务。现有下载不受影响。", "Dispatch or signing configuration is not ready. Existing downloads are unaffected."))}</p>` : ""}
@@ -3426,6 +3432,11 @@
       }
       async function handleVersionOperation(button) {
         const action = button.dataset.versionOperation;
+        if (action === 'inventory-accounts') {
+          const scope = state.inventoryDetails.at(-1)?.scope;
+          if (scope) openAccountRelations(scope.kind === 'app' ? 'terminals' : 'devices', String(scope.kind === 'app' ? scope.versionName : scope.versionCode));
+          return;
+        }
         if (action === "inventory-detail") {
           openInventoryDetails(button.dataset.kind,inventoryRows(button.dataset.kind)[Number(button.dataset.index)],button); return;
         }
@@ -5232,6 +5243,16 @@
         if (section === "accounts") accountPanel?.load();
         window.scrollTo({ top: 0 });
         els.appTabs.querySelector('[data-app-section="' + section + '"]').focus({ preventScroll: true });
+      }
+
+      async function openAccountRelations(kind, query = '') {
+        while (state.inventoryDetails.length) closeInventoryDetails();
+        switchAdminView('phone', { scroll: true });
+        state.appSection = 'accounts'; render(); applyAppSection(); syncSearchInput();
+        await accountPanel?.showRelations(kind, query);
+        state.queries.accounts = query;
+        syncSearchInput();
+        document.querySelector('#appAccountsTab').focus({ preventScroll: true });
       }
 
       function applyAppSection() {

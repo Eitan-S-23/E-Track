@@ -215,10 +215,14 @@ test("distribution read failure or mismatched scope remains an explicit error wi
   const {data,errors,details}=await setup(page);details.fails=true;
   await page.locator('#appTabs [data-app-section="inventory"]').click();
   await page.locator("#appInventoryPanel tbody tr button").first().click();
-  await expect(page.locator("#inventoryDetailContent [role=alert]")).toContainText("Details unavailable");
+  await expect(page.locator('#confirmDialog')).toBeVisible();
+  await expect(page.locator('#confirmMessage')).toContainText('Details unavailable');
+  await page.locator('#confirmAccept').click();
   details.fails=false;details.invalidScope=true;
   await page.locator('[data-version-operation="inventory-detail-reload"]').click();
-  await expect(page.locator("#inventoryDetailContent [role=alert]")).toContainText("响应格式无效");
+  await expect(page.locator('#confirmDialog')).toBeVisible();
+  await expect(page.locator('#confirmMessage')).toContainText('响应格式无效');
+  await page.locator('#confirmAccept').click();
   details.invalidScope=false;
   await page.locator('[data-version-operation="inventory-detail-reload"]').click();
   await expect(page.locator("#inventoryDetailContent")).toContainText("198.51.100.23");
@@ -361,7 +365,7 @@ test("CSRF refresh failure sends no mutation and retains the draft for an explic
   await page.locator('[data-delta-base="base-0"]').check();await page.locator("#deltaReason").fill("Retain this firmware request");
   data.sessionFails=true;
   await page.locator('[data-version-operation="delta-create"]').click();await confirm(page,false,true);
-  await expect(page.locator("#deltaSheet")).toContainText("Session unavailable");
+  await expect(page.locator("#confirmMessage")).toContainText("Session unavailable");
   await expect(page.locator('[data-version-operation="delta-create"]')).toBeEnabled();
   expect(data.mutationAttempts).toBe(0);expect(data.writes).toHaveLength(0);
   await expect(page.locator('[data-delta-base="base-0"]')).toBeChecked();
@@ -376,9 +380,9 @@ test("CSRF rejection after refresh is not replayed and does not consume the sele
   await page.locator('[data-delta-base="base-0"]').check();await page.locator("#deltaReason").fill("Do not replay this request");
   data.rejectCsrf=true;
   await page.locator('[data-version-operation="delta-create"]').click();await confirm(page,false,true);
-  await expect(page.locator("#deltaSheet")).toContainText("TOKEN_INVALID: CSRF token is invalid");
-  await expect(page.locator("#deltaSheet")).toContainText("Request ID:");
-  await expect(page.locator("#deltaSheet")).toContainText("不会自动重发");
+  await expect(page.locator("#confirmMessage")).toContainText("TOKEN_INVALID: CSRF token is invalid");
+  await expect(page.locator("#confirmMessage")).toContainText("Request ID:");
+  await expect(page.locator("#confirmMessage")).toContainText("不会自动重发");
   await expect(page.locator('[data-version-operation="delta-create"]')).toBeEnabled();
   await page.evaluate("loadDelta(state.delta)");
   expect(data.mutationAttempts).toBe(1);expect(data.csrfRejections).toBe(1);expect(data.writes).toHaveLength(0);expect(data.jobs).toHaveLength(0);
@@ -402,7 +406,7 @@ test("CSRF refresh does not submit an old confirmation under a changed account",
   await page.locator('[data-delta-base="base-0"]').check();await page.locator("#deltaReason").fill("Confirmed by the original account");
   data.role="publisher";
   await page.locator('[data-version-operation="delta-create"]').click();await confirm(page,false,true);
-  await expect(page.locator("#deltaSheet")).toContainText("登录账号已变化");
+  await expect(page.locator("#confirmMessage")).toContainText("登录账号已变化");
   expect(data.mutationAttempts).toBe(0);expect(data.writes).toHaveLength(0);expect(errors).toEqual([]);
 });
 
@@ -411,7 +415,7 @@ test("CSRF refresh rejects an unusable session response before sending the mutat
   await page.locator('[data-delta-base="base-0"]').check();await page.locator("#deltaReason").fill("Require a valid session");
   data.csrfToken="";
   await page.locator('[data-version-operation="delta-create"]').click();await confirm(page,false,true);
-  await expect(page.locator("#deltaSheet")).toContainText("有效的管理会话");
+  await expect(page.locator("#confirmMessage")).toContainText("有效的管理会话");
   expect(data.mutationAttempts).toBe(0);expect(data.writes).toHaveLength(0);expect(errors).toEqual([]);
 });
 
@@ -468,7 +472,7 @@ test("unknown create outcome is reconciled without automatic redispatch",async({
   const {data}=await setup(page);data.abortCreate=true;await openDelta(page);
   await page.locator('[data-delta-base="base-0"]').check();await page.locator("#deltaReason").fill("Retain uncertain attempt");
   await page.locator('[data-version-operation="delta-create"]').click();await confirm(page,false,true);
-  await expect(page.locator("#deltaContent")).toContainText("不会自动重发");
+  await expect(page.locator("#confirmMessage")).toContainText("不会自动重发");
   await expect(page.locator('[data-version-operation="delta-reconcile"]')).toBeVisible();
   await page.locator('[data-version-operation="delta-reload"]').click();
   expect(data.writes).toHaveLength(1);

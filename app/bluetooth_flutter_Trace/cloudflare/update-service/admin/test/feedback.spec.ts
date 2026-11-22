@@ -62,7 +62,7 @@ for (const width of [1440, 390]) test(`feedback read/process flow at ${width}px 
   await page.locator("#feedbackState").selectOption("processing");
   await page.locator("#feedbackNote").fill("Investigating the navigation issue");
   await page.locator("#feedbackSave").click();
-  await expect(page.locator("#feedbackNotice")).toHaveText("Outcome saved");
+  await expect(page.locator("#feedbackNotice")).toBeEmpty();
   await expect(page.locator('#confirmDialog')).toBeVisible();
   await expect(page.locator('#confirmMessage')).toContainText('Outcome saved');
   await page.locator('#confirmAccept').click();
@@ -95,14 +95,14 @@ test("failed saves and concurrent edits preserve operator drafts", async ({ page
   const fixture = await mount(page);
   await page.locator('[data-feedback-id="24"]').click(); await page.locator("#feedbackNote").fill("Keep this draft");
   fixture.data.fail = true; await page.locator("#feedbackSave").click();
-  await expect(page.locator("#feedbackNotice")).toContainText("Save was not confirmed");
+  await expect(page.locator("#feedbackNotice")).toBeEmpty();
   await expect(page.locator("#feedbackNote")).toHaveValue("Keep this draft");
   await expect(page.locator('#confirmDialog')).toHaveClass(/danger/);
   await expect(page.locator('#confirmMessage')).toContainText('Save was not confirmed');
   await page.locator('#confirmAccept').click();
   await expect(page.locator('#confirmDialog')).toBeHidden();
   fixture.data.fail = false; fixture.data.stale = true; await page.locator("#feedbackSave").click();
-  await expect(page.locator("#feedbackNotice")).toContainText("changed elsewhere");
+  await expect(page.locator("#feedbackNotice")).toBeEmpty();
   await expect(page.locator("#feedbackNote")).toHaveValue("Keep this draft");
   await expect(page.locator('#confirmMessage')).toContainText('changed elsewhere');
   await page.locator('#confirmAccept').click();

@@ -204,6 +204,29 @@ class _AccountPageState extends State<AccountPage> {
         TextButton(onPressed: _busy ? null : () => _run(() => _unbind(device)), child: const Text('解绑')),
       ])),
     const Divider(color: TraceColors.ocean),
+    const Text('登录终端', style: TextStyle(color: TraceColors.text, fontSize: 18)),
+    const Text('登录有效不代表当前在线；旧版终端信息可能未知。最多显示最近 100 条。',
+      style: TextStyle(color: TraceColors.muted, fontSize: 12)),
+    if (service.terminalReportProblem.value != null)
+      const Text('最近一次码表信息同步未完成，后台信息可能滞后。', style: TextStyle(color: TraceColors.amber)),
+    SizedBox(height: service.sessions.isEmpty ? 48 : 240, child: SingleChildScrollView(child: Column(children: [
+      for (final session in service.sessions) ListTile(
+        title: Text('${session['model'] == null || session['model'] == '' ? '型号未知' : session['model']} · APP ${session['versionName'] ?? '未知'}',
+          style: const TextStyle(color: TraceColors.text)),
+        subtitle: Text('${session['current'] == 1 || session['current'] == true ? '本机 · ' : ''}'
+          '${session['state'] == 'valid' ? '登录有效' : session['state'] == 'revoked' ? '已退出' : '已过期'}\n'
+          '最近活动：${session['lastSeenAt'] is num ? DateTime.fromMillisecondsSinceEpoch((session['lastSeenAt'] as num).toInt()).toLocal().toString().split('.').first : '未知'}',
+          style: const TextStyle(color: TraceColors.muted, fontSize: 12)),
+        trailing: session['state'] == 'valid' ? TextButton(onPressed: _busy ? null : () => _run(() async {
+          final confirmed = await showDialog<bool>(context: context, builder: (_) => TraceDialog(title: '退出该终端？',
+            message: '该终端将不能继续使用账号云端功能，本地蓝牙不受影响。', actions: [
+              TraceDialogAction(label: '取消', onPressed: (context) => Navigator.pop(context, false)),
+              TraceDialogAction(label: '退出', isPrimary: true, onPressed: (context) => Navigator.pop(context, true))]));
+          if (confirmed != true || !mounted) return;
+          await service.revokeSession(session); _message = '该终端登录已撤销。';
+        }), child: const Text('退出')) : null),
+    ]))),
+    const Divider(color: TraceColors.ocean),
     TextButton(onPressed: _busy ? null : () => _run(() async {
       await service.logout(); await service.loadSettings(); _loaded = true;
     }), child: const Text('退出登录')),
@@ -238,6 +261,7 @@ class _AccountPageState extends State<AccountPage> {
       'name': device.platformName.isEmpty ? 'E-Track' : device.platformName,
       'model': info.deviceModel, 'hardwareRevision': info.hardwareRevision,
       'firmwareVersion': info.currentVersionCode, 'imageSha256': info.currentImageSha256Hex});
+    await service.observeDevice(uid, info.currentVersionCode, info.currentImageSha256Hex, force: true);
     await service.refresh();
     _message = '码表已绑定。';
   }

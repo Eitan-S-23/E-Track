@@ -22,7 +22,7 @@
         <button type="button" class="secondary-button" id="feedbackReload" ${loading ? "disabled" : ""}>${esc(text("\u5237\u65b0\u5217\u8868", "Refresh list"))}</button></div>
         <div class="operations-buttons"><label for="feedbackFilter">${esc(text("\u5904\u7406\u72b6\u6001", "Status"))}</label>
           <select id="feedbackFilter">${options(["all", ...states])}</select></div>
-        <p class="firmware-hint" id="feedbackNotice" role="status">${esc(notice || (loading ? text("\u6b63\u5728\u8bfb\u53d6", "Loading") : ""))}</p>
+        <p class="firmware-hint" id="feedbackNotice" role="status">${esc(loading ? text("正在读取", "Loading") : detailLoading ? text("正在读取详情", "Loading detail") : saving ? text("正在保存", "Saving") : '')}</p>
         <div class="feedback-layout"><div><div id="feedbackList">${rows.map(item => `<button type="button" class="feedback-item ${selected?.id === item.id ? "active" : ""}" data-feedback-id="${Number(item.id)}">
           <span class="tag">${esc(label(item.status))}</span><span class="feedback-meta">${esc(item.platform)} / ${esc(item.versionName)} / ${esc(stamp(item.receivedAt))}</span>
           <span class="feedback-body">${esc(String(item.body).slice(0, 180))}</span></button>`).join("") || `<p class="empty">${esc(loading ? text("\u6b63\u5728\u8bfb\u53d6", "Loading") : text("\u6ca1\u6709\u5339\u914d\u7684\u53cd\u9988", "No matching feedback"))}</p>`}</div>

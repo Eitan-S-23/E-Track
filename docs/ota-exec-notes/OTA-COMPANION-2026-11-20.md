@@ -2,6 +2,35 @@
 
 ## Account And Layout Batch, 2026-11-22
 
+### Account Relationships And Unified Results
+
+Status: LOCAL_PENDING / DEVELOPMENT_VALIDATION. Owner approved proceeding with
+unified Admin feedback and account/App-terminal/MCU relationships; mailbox SMTP
+activation is explicitly last. Test recipient is owner-provided, not automatically
+an approved sender. No domain purchase, credential configuration or real send.
+
+The new 0019 migration keeps installation identity separate from account and
+hardware UID. Legacy terminal metadata stays unknown. Account/session ownership
+is checked server-side; public and Admin session views never expose token hashes.
+Latest terminal/device observations are timestamped reports, not proof of online
+presence or cryptographic device ownership. Reports do not consume the 5/5 update
+allowances and failures must not change a BLE/OTA outcome. Unbinding removes the
+corresponding observations. Sessions can be revoked individually; terminal and
+device views link to the owning account. Retention is 90 days for observations.
+
+Admin reuses its existing result/confirmation dialogs. Account/feedback operations
+no longer duplicate the result as inline notices; inventory-detail failures now
+request the common error dialog too. Loading/stale-data status remains inline.
+Mail remains unconfigured, cloud admission remains protected, and the existing
+original-signed 1.0.91 installer remains the bootstrap path for 1.0.89.
+
+Self-tests so far: accounts-host-203 has 27 passing cases; accounts-check-202
+typecheck passes; ui-account-links-201 has 77 browser cases passing. Original
+accounts-host-201 preserves four fixture failures (missing Content-Type, corrected
+without weakening production validation). Expanded browser and dual-host Flutter
+checks are pending. Evidence stays in .cache/ota-followup-20261122/. No new release,
+deployment, channel/delta operation, account creation or physical-device test yet.
+
 ### Mail And Feedback Follow-Up
 
 Owner asks to finish actual email delivery and align account/management notices

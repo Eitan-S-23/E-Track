@@ -3,6 +3,7 @@ import { accountPublic, accountSettings, emailDeliveryAvailable, type Account } 
 import { ApiError, invalidParameter } from './errors';
 import { json } from './http';
 import { boundedJson } from './version_inventory';
+import { accountConnections, sessionList } from './account_terminals';
 
 interface Env { DB: D1Database; APP_ID: string; ACCOUNT_MAIL_API_KEY?: string; ACCOUNT_MAIL_FROM?: string }
 interface Actor { email: string; role: 'viewer' | 'publisher' | 'owner' }
@@ -12,6 +13,23 @@ export async function accountAdmin(request: Request, env: Env, actor: Actor): Pr
   const url = new URL(request.url), method = request.method;
   const suffix = url.pathname.slice('/api/admin/accounts'.length);
   if (method === 'GET' && suffix === '/settings') return json({ ...await accountSettings(env), emailDeliveryAvailable: emailDeliveryAvailable(env) });
+  if (method === 'GET' && (suffix === '/terminals' || suffix === '/devices')) {
+    const page = Number(url.searchParams.get('page') ?? 1), q = (url.searchParams.get('q') ?? '').trim().toLowerCase();
+    if (!Number.isSafeInteger(page) || page < 1 || page > 100000 || q.length > 64) throw invalidParameter('Invalid list scope');
+    const terminal = suffix === '/terminals';
+    const from = terminal ? 'account_terminals t JOIN accounts a ON a.id=t.account_id' : 'account_devices t JOIN accounts a ON a.id=t.account_id';
+    const where = `a.app_id=? AND a.state!='deleted' AND (?='' OR instr(lower(a.username),?)>0 OR ${terminal
+      ? "instr(lower(t.model),?)>0 OR instr(lower(t.version_name),?)>0 OR instr(t.installation_id,?)>0"
+      : "instr(t.uid,?)>0 OR instr(lower(t.name),?)>0 OR instr(CAST(t.firmware_version AS TEXT),?)>0"})`;
+    const fields = terminal ? `t.installation_id AS installationId,t.platform,t.version_name AS versionName,t.version_code AS versionCode,
+      t.model,t.os_version AS osVersion,t.last_seen_at AS lastSeenAt`
+      : `t.uid,t.name,t.model,t.hardware_revision AS hardwareRevision,t.firmware_version AS firmwareVersion,t.last_seen_at AS lastSeenAt`;
+    const args = [env.APP_ID, q, q, q, q, q];
+    const rows = await env.DB.prepare(`SELECT a.id AS accountId,a.username,${fields} FROM ${from} WHERE ${where}
+      ORDER BY t.last_seen_at DESC,a.id,${terminal ? 't.installation_id' : 't.uid'} LIMIT 30 OFFSET ?`).bind(...args, (page - 1) * 30).all();
+    const total = await env.DB.prepare(`SELECT COUNT(*) AS n FROM ${from} WHERE ${where}`).bind(...args).first<{ n: number }>();
+    return json({ rows: rows.results, total: total?.n ?? 0, page, pageSize: 30, onlineState: 'unknown', coverage: 'reported-clients-only' });
+  }
   if (method === 'GET' && suffix === '') {
     const page = Number(url.searchParams.get('page') ?? 1);
     if (!Number.isSafeInteger(page) || page < 1 || page > 100000) throw invalidParameter('Invalid page');
@@ -22,9 +40,10 @@ export async function accountAdmin(request: Request, env: Env, actor: Actor): Pr
     const where = `a.app_id=? AND (?='' OR a.state=?) AND (?='' OR instr(a.username,?)>0 OR instr(coalesce(a.email,''),?)>0
       OR EXISTS(SELECT 1 FROM account_devices d WHERE d.account_id=a.id AND instr(d.uid,?)>0))`;
     const args = [env.APP_ID, state, state, search, search.toLowerCase(), search.toLowerCase(), search.toLowerCase()];
-    const users = (await env.DB.prepare(`SELECT a.*,(SELECT COUNT(*) FROM account_devices d WHERE d.account_id=a.id) AS device_count
+    const users = (await env.DB.prepare(`SELECT a.*,(SELECT COUNT(*) FROM account_devices d WHERE d.account_id=a.id) AS device_count,
+      (SELECT COUNT(*) FROM account_terminals t WHERE t.account_id=a.id) AS terminal_count
       FROM accounts a WHERE ${where} ORDER BY a.created_at DESC,a.id DESC LIMIT 30 OFFSET ?`)
-      .bind(...args, (page - 1) * 30).all<Account & { device_count: number }>()).results;
+      .bind(...args, (page - 1) * 30).all<Account & { device_count: number; terminal_count: number }>()).results;
     const total = await env.DB.prepare(`SELECT COUNT(*) AS n FROM accounts a WHERE ${where}`).bind(...args).first<{ n: number }>();
     const dayStart = accountDay(Date.now()).resetsAt - 86400000;
     const stats = await env.DB.prepare(`SELECT COUNT(*) AS logins,COUNT(DISTINCT e.account_id) AS users FROM account_login_events e
@@ -32,10 +51,10 @@ export async function accountAdmin(request: Request, env: Env, actor: Actor): Pr
       .bind(env.APP_ID, dayStart).first();
     const registered = await env.DB.prepare(`SELECT COUNT(*) AS total,SUM(state='active') AS active,
       SUM(created_at>=?) AS today FROM accounts WHERE app_id=? AND state!='deleted'`).bind(dayStart, env.APP_ID).first();
-    return json({ users: users.map(a => ({ ...accountPublic(a), deviceCount: a.device_count })),
+    return json({ users: users.map(a => ({ ...accountPublic(a), deviceCount: a.device_count, terminalCount: a.terminal_count })),
       total: total?.n ?? 0, page, pageSize: 30, stats: { today: stats, registered, timezone: 'Asia/Shanghai' } });
   }
-  const match = /^\/([a-zA-Z0-9-]{36})(?:\/(state|revoke-sessions|unbind))?$/.exec(suffix);
+  const match = /^\/([a-zA-Z0-9-]{36})(?:\/(state|revoke-sessions|revoke-session|unbind))?$/.exec(suffix);
   if (method === 'GET' && match && !match[2]) {
     const a = await env.DB.prepare('SELECT * FROM accounts WHERE app_id=? AND id=?').bind(env.APP_ID, match[1]).first<Account>();
     if (!a) throw invalidParameter('Account not found');
@@ -43,7 +62,10 @@ export async function accountAdmin(request: Request, env: Env, actor: Actor): Pr
       FROM account_devices WHERE account_id=? AND app_id=? ORDER BY bound_at DESC`).bind(a.id, env.APP_ID).all()).results;
     const logins = (await env.DB.prepare(`SELECT occurred_at,app_version FROM account_login_events WHERE account_id=?
       ORDER BY occurred_at DESC,id DESC LIMIT 50`).bind(a.id).all()).results;
-    return json({ account: accountPublic(a), devices, logins,
+    const audit = (await env.DB.prepare(`SELECT action,device_uid AS uid,occurred_at AS occurredAt FROM account_audit
+      WHERE account_id=? ORDER BY occurred_at DESC,id DESC LIMIT 50`).bind(a.id).all()).results;
+    return json({ account: accountPublic(a), devices, logins, audit,
+      sessions: await sessionList(env.DB, a.id), ...await accountConnections(env.DB, a.id),
       quota: await accountBudget(env.DB, a.id, await accountSettings(env)) });
   }
   if (method !== 'POST') throw invalidParameter('Unsupported account administration operation');
@@ -84,6 +106,11 @@ export async function accountAdmin(request: Request, env: Env, actor: Actor): Pr
     if (typeof body.uid !== 'string' || !/^[0-9a-f]{24}$/.test(body.uid)) throw invalidParameter('Invalid UID');
     uid = body.uid;
     statements.push(env.DB.prepare('DELETE FROM account_devices WHERE account_id=? AND app_id=? AND uid=?').bind(a.id, env.APP_ID, uid));
+    statements.push(env.DB.prepare('DELETE FROM account_device_observations WHERE account_id=? AND uid=?').bind(a.id, uid));
+  } else if (match[2] === 'revoke-session') {
+    if (typeof body.sessionId !== 'string' || !/^[0-9a-f]{32}$/.test(body.sessionId)) throw invalidParameter('Invalid session');
+    statements.push(env.DB.prepare('UPDATE account_sessions SET revoked_at=coalesce(revoked_at,?) WHERE account_id=? AND session_id=?')
+      .bind(now, a.id, body.sessionId));
   } else {
     statements.push(env.DB.prepare('UPDATE account_sessions SET revoked_at=? WHERE account_id=?').bind(now, a.id));
   }

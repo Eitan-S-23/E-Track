@@ -21,6 +21,7 @@ test('account administration lists hardware UID and saves independent 5/5 regist
   expect(data.writes[0].body).toMatchObject({ registration_enabled: 0, automatic_daily_limit: 5, manual_daily_limit: 5 });
   await expect(page.locator('#confirmDialog')).toBeVisible();
   await expect(page.locator('#confirmMessage')).toContainText('Account settings saved');
+  await expect(page.locator('#appAccountsPanel > [role="status"]')).toBeEmpty();
   await page.locator('#confirmAccept').click();
   expect(errors).toEqual([]);
 });
@@ -42,6 +43,7 @@ test('account read and save failures use standard dialogs without losing the dra
   await page.locator('#accountSettings button').click();
   await expect(page.locator('#confirmDialog')).toBeVisible();
   await expect(page.locator('#confirmMessage')).toContainText('CAS_CONFLICT');
+  await expect(page.locator('#appAccountsPanel > [role="status"]')).toBeEmpty();
   await page.locator('#confirmAccept').click();
   await expect(page.locator('#appAccountsPanel details')).toHaveAttribute('open', '');
   await expect(page.locator('[name="manual_daily_limit"]')).toHaveValue('7');
@@ -66,6 +68,33 @@ test('viewer account detail is read-only on a narrow viewport', async ({ page })
   await expect(page.locator('#appAccountsPanel [data-unbind]')).toBeDisabled();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   expect(data.writes).toHaveLength(0);
+});
+
+for (const width of [1440, 390]) test(`account relations link terminals, sessions and hardware at ${width}px`, async ({ page }, info) => {
+  await page.setViewportSize({ width, height: 900 });
+  const data = await mockApp(page);
+  await page.locator('#appAccountsTab').click();
+  await page.locator('[data-account-view="terminals"]').click();
+  await expect(page.locator('#appAccountsPanel')).toContainText('Test phone');
+  await page.locator('#appAccountsPanel [data-user]').click();
+  await page.locator('#appAccountsPanel [data-detail-tab="terminals"]').first().click();
+  await expect(page.locator('#accountDetailBody')).toContainText('1.0.91');
+  await expect(page.locator('#accountDetailBody')).toContainText('1234567890abcdef12345678');
+  await page.locator('#accountDetailBody [data-detail-tab="devices"]').click();
+  await expect(page.locator('#accountDetailBody')).toContainText('3.3.49');
+  await page.locator('#appAccountsPanel [data-detail-tab="sessions"]').click();
+  await expect(page.locator('#accountDetailBody')).toContainText('not online');
+  await page.locator('[data-revoke-session]').click();
+  await expect(page.locator('#confirmDialog')).toBeVisible();
+  await page.locator('#confirmCancel').click();
+  expect(data.writes).toHaveLength(0);
+  await page.locator('[data-revoke-session]').click(); await page.locator('#confirmAccept').click();
+  await expect(page.locator('#confirmMessage')).toContainText('Action completed');
+  expect(data.writes).toHaveLength(1);
+  expect(data.writes[0].body).toEqual({ sessionId: 'b'.repeat(32) });
+  await page.locator('#confirmAccept').click();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: info.outputPath('account-relations.png'), animations: 'disabled' });
 });
 
 function release(id: string, versionCode: number) {
@@ -125,10 +154,17 @@ async function mockApp(page: Page, language = "en", role = "owner", firmwareFail
           stats: { registered: { total: 1 }, today: { users: 1, logins: 2 } } }); return;
       }
       if (url.pathname === '/api/admin/accounts/settings') { await reply(data.accountSettings); return; }
+      const terminal = { accountId: account.id, username: account.username, installationId: 'a'.repeat(32),
+        platform: 'android', model: 'Test phone', versionName: '1.0.91', versionCode: 117, osVersion: 'Android test', lastSeenAt: 1795300000000 };
+      if (url.pathname === '/api/admin/accounts/terminals' || url.pathname === '/api/admin/accounts/devices') {
+        await reply({ rows: [url.pathname.endsWith('/terminals') ? terminal : { ...terminal, uid: '1234567890abcdef12345678', firmwareVersion: 30350 }], total: 1 }); return;
+      }
       if (url.pathname === '/api/admin/accounts/' + account.id) {
         await reply({ account, quota: { automatic: { limit: 5, remaining: 4 }, manual: { limit: 5, remaining: 3 } },
           devices: [{ uid: '1234567890abcdef12345678', name: 'Test cycling computer', model: 'e-track-at32f435',
             hardware_revision: 1, firmware_version: 30349, bound_at: 1795300000000 }],
+          terminals: [terminal], sessions: [{ ...terminal, id: 'b'.repeat(32), state: 'valid', createdAt: 1795300000000 }],
+          observations: [{ installationId: terminal.installationId, uid: '1234567890abcdef12345678', firmwareVersion: 30350, observedAt: 1795300000000 }],
           logins: [{ occurred_at: 1795300000000, app_version: 'test' }] }); return;
       }
       if (url.pathname === "/api/admin/session") {
@@ -152,6 +188,10 @@ async function mockApp(page: Page, language = "en", role = "owner", firmwareFail
     expect(request.method()).toBe("POST");
     expect(request.headers()["content-type"]).toBe("application/json");
     expect(request.headers()["x-csrf-token"]).toBe("mock-csrf");
+    if (url.pathname.endsWith('/revoke-session')) {
+      data.writes.push({ path: url.pathname, body: request.postDataJSON() });
+      await reply({ ok: true }); return;
+    }
     if (url.pathname === '/api/admin/accounts/settings') {
       const body = request.postDataJSON();
       data.writes.push({ path: url.pathname, body });

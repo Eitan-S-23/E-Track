@@ -1,5 +1,13 @@
 # Shared Agent Records
 
+Current local work: ACCOUNT-RELATIONS-20261122, Codex root, LOCAL_PENDING /
+DEVELOPMENT_VALIDATION. Unified Admin result feedback, account-scoped installation
+metadata/sessions and bound-UID observations; new 0019 migration, no fabricated
+legacy history or online state. SMTP mail setup is owner-approved but explicitly
+last; no credential or sender configuration yet. Existing 5/5 limits and cloud
+admission unchanged. See Account Relationships And Unified Results in the current
+OTA companion note. Previous delivered source/candidates below remain distinct.
+
 Current follow-up: COMPANION-FEEDBACK-20261122, Codex root, ACCOUNT_MAIL_FEEDBACK_DELIVERED / MAIL_ACTIVATION_PENDING, source 3296c633.
 Owner requests actual email completion and consistent App/Admin failure dialogs.
 Account and adjacent feedback prompts now use the existing dialog components;

@@ -216,6 +216,10 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     if (!hasCurrentDeviceIdentity(address) || !RegExp(r'^[0-9a-f]{24}$').hasMatch(uid) ||
         uid == '000000000000000000000000' || uid == 'ffffffffffffffffffffffff') { return; }
     _hardwareUid = uid; _uidAddress = address; _uidGeneration = _ble.otaLinkGeneration(address);
+    if (Get.isRegistered<AccountService>() && _deviceInfo != null) {
+      final info = _deviceInfo!;
+      unawaited(AccountService.to.observeDevice(uid, info.currentVersionCode, info.currentImageSha256Hex));
+    }
   }
 
   Future<String?> readHardwareUid({String? companionRuntimeId}) async {

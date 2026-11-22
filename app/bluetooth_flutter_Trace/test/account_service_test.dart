@@ -31,7 +31,9 @@ void main() {
   setUp(() {
     FlutterSecureStorage.setMockInitialValues({});
     dio = Dio(); http = _Http(); dio.httpClientAdapter = http;
-    service = AccountService(dio: dio, endpoint: endpoint);
+    service = AccountService(dio: dio, endpoint: endpoint, readTerminal: () async => {
+      'platform': 'android', 'versionName': '1.0.92', 'versionCode': 118, 'model': 'Test phone', 'osVersion': 'Test OS',
+    });
   });
   Future<void> login() async {
     http.response = {'token': token, 'account': {'id': 'one', 'username': 'rider'}, 'quota': {
@@ -41,6 +43,38 @@ void main() {
   test('anonymous cloud checks fail before HTTP while no Bluetooth service is required', () async {
     await expectLater(service.newCheck(automatic: false), throwsA(isA<AccountException>()));
     expect(http.requests, isEmpty);
+  });
+  test('login reports a random stable installation ID without hardware addresses', () async {
+    await login();
+    final metadata = (http.requests.single.data as Map)['terminal'] as Map;
+    expect(metadata['installationId'], matches(RegExp(r'^[0-9a-f]{32}$')));
+    expect(metadata['versionCode'], 118);
+    expect(metadata.keys.toSet(), {'installationId', 'platform', 'versionName', 'versionCode', 'model', 'osVersion'});
+    http.response = {'ok': true}; await service.logout();
+    await login();
+    expect((http.requests.last.data as Map)['terminal']['installationId'], metadata['installationId']);
+  });
+  test('device observations coalesce without checking updates or consuming a check ID', () async {
+    await login(); http.requests.clear(); http.response = {'ok': true};
+    const uid = '1234567890abcdef12345678';
+    await service.observeDevice(uid, 30350, 'a' * 64);
+    await service.observeDevice(uid, 30350, 'a' * 64);
+    expect(http.requests, hasLength(1));
+    expect(http.requests.single.uri.path, '/api/account/devices/observe');
+    expect(http.requests.single.headers['X-Device-Uid'], uid);
+    expect(http.requests.single.headers['X-Update-Check-Id'], isNull);
+    await service.observeDevice(uid, 30351, 'b' * 64);
+    expect(http.requests, hasLength(2));
+  });
+  test('failed optional observations remain diagnostic, and explicit binding can retry', () async {
+    await login(); http.status = 403; http.response = {'errorCode': 'DEVICE_NOT_BOUND'};
+    const uid = '1234567890abcdef12345678';
+    await service.observeDevice(uid, 30350, 'a' * 64);
+    expect(service.loggedIn, isTrue);
+    expect(service.terminalReportProblem.value, 'DEVICE_NOT_BOUND');
+    http.status = 200; http.response = {'ok': true};
+    await service.observeDevice(uid, 30350, 'a' * 64, force: true);
+    expect(service.terminalReportProblem.value, isNull);
   });
   test('announcements use account admission but do not spend an update check', () async {
     final uri = endpoint.replace(path: '/api/public/announcements');

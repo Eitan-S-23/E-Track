@@ -2,18 +2,44 @@
   'use strict';
   window.TraceAccounts = function ({ element, api, mutate, session, text, escape: esc, confirm, onError, onRecovered, onSuccess }) {
     let epoch = 0, ticket = 0, actor = '', busy = false, notice = '', page = 1, query = '';
-    let data = { users: [], total: 0 }, settings = null, draft = null, detail = null;
+    let data = { users: [], rows: [], total: 0 }, settings = null, draft = null, detail = null;
+    let view = 'accounts', detailTab = 'devices';
     const owner = () => session()?.role === 'owner';
     const dirty = () => draft && settings && JSON.stringify(draft) !== JSON.stringify(settings);
     const stamp = n => n ? new Date(n).toLocaleString() : '-';
     const label = (cn, en) => esc(text(cn, en));
+    const firmware = n => Number.isInteger(n) ? `${Math.floor(n / 10000)}.${Math.floor(n / 100) % 100}.${n % 100}` : '-';
+    const sessionState = s => s === 'valid' ? label('登录有效（非在线）','Valid sign-in (not online)')
+      : s === 'revoked' ? label('已撤销','Revoked') : label('已过期','Expired');
+    function detailBody(disabled) {
+      if (detailTab === 'terminals') return `<p>${label('仅含已上报终端，最多显示最近 100 项；不是在线列表。','Reported terminals only, at most 100 recent entries; not an online list.')}</p>` +
+        (detail.terminals ?? []).map(t => `<div class="feedback-item"><strong>${esc(t.model || text('型号未知','Unknown model'))}</strong>
+          <code>${esc(t.installationId)}</code><span>${esc(t.platform)} · ${esc(t.osVersion || '-')} · APP ${esc(t.versionName || '-')} (${Number(t.versionCode)})</span>
+          <small>${label('最近活动','Last activity')}: ${esc(stamp(t.lastSeenAt))}</small>
+          ${(detail.observations ?? []).filter(o => o.installationId === t.installationId).map(o => `<button class="secondary-button" data-detail-tab="devices">${label('曾连接码表','Observed device')}: ${esc(o.uid)} · ${esc(firmware(o.firmwareVersion))} · ${esc(stamp(o.observedAt))}</button>`).join('')}</div>`).join('');
+      if (detailTab === 'sessions') return `<p>${label('登录有效不代表 APP 正在运行。旧客户端终端信息可能未知。','A valid sign-in does not mean the App is running. Legacy terminal details may be unknown.')}</p>` +
+        (detail.sessions ?? []).map(s => `<div class="feedback-item"><strong>${esc(s.model || text('型号未知','Unknown model'))}</strong>
+          <span>${esc(s.versionName || '-')} · ${sessionState(s.state)}</span><small>${label('登录时间','Signed in')}: ${esc(stamp(s.createdAt))}</small>
+          <small>${label('最近活动','Last activity')}: ${esc(stamp(s.lastSeenAt))}</small>
+          <button class="secondary-button" data-revoke-session="${esc(s.id)}" ${disabled || s.state !== 'valid' ? 'disabled' : ''}>${label('退出该终端','Sign out this session')}</button></div>`).join('');
+      if (detailTab === 'logins') return `<p>${label('最近 50 次登录，保留 90 天。','Last 50 sign-ins, retained for 90 days.')}</p><ol>${detail.logins.map(l => `<li>${esc(stamp(l.occurred_at))} ${esc(l.app_version || text('版本未知','Unknown version'))}</li>`).join('')}</ol>`;
+      if (detailTab === 'audit') return `<p>${label('最近 50 项操作。','Last 50 actions.')}</p><ol>${(detail.audit ?? []).map(a => `<li>${esc(stamp(a.occurredAt))} · ${esc(a.action)} ${esc(a.uid || '')}</li>`).join('')}</ol>`;
+      return detail.devices.map(d => `<div class="feedback-item"><strong>${esc(d.name)}</strong><code style="overflow-wrap:anywhere">${esc(d.uid)}</code>
+        <span>${esc(d.model)} · HW ${Number(d.hardware_revision)} · FW ${esc(firmware(d.firmware_version))}</span>
+        <small>${label('绑定时间','Bound')}: ${esc(stamp(d.bound_at))}</small><small>${label('最近上报（非在线）','Last report (not online)')}: ${esc(stamp(d.last_seen_at))}</small>
+        ${(detail.observations ?? []).filter(o => o.uid === d.uid).map(o => `<button class="secondary-button" data-detail-tab="terminals">${label('关联终端','Related terminal')}: ${esc(o.installationId)} · ${esc(stamp(o.observedAt))}</button>`).join('')}
+        <button data-unbind="${esc(d.uid)}" ${disabled}>${label('解绑','Unbind')}</button></div>`).join('') || `<p>${label('无绑定设备','No bound devices')}</p>`;
+    }
     function render() {
       const settingsOpen = element.querySelector('details')?.open ?? false;
       const disabled = busy || !owner() ? 'disabled' : '';
       element.innerHTML = `<div class="panel-head"><div><h2>${label('账号管理', 'Accounts')}</h2>
         <p>${label('账号、登录统计与绑定码表。统计按北京时间划分，非在线人数。', 'Accounts, login statistics and bound devices. Shanghai calendar day; not concurrent online users.')}</p></div>
         <button id="accountReload" class="secondary-button" ${busy ? 'disabled' : ''}>${label('刷新', 'Refresh')}</button></div>
-        <p role="status">${esc(notice)}</p>
+        <p role="status">${busy ? label('正在读取或保存，请稍候','Loading or saving, please wait') : ''}</p>
+        <div class="operations-buttons" role="group" aria-label="${label('账号关联视图','Account relation views')}">
+          ${[['accounts','账号','Accounts'],['terminals','APP 终端','App terminals'],['devices','绑定码表','Bound devices']].map(([key,cn,en]) =>
+            `<button class="secondary-button" data-account-view="${key}" aria-pressed="${view === key}" ${busy ? 'disabled' : ''}>${label(cn,en)}</button>`).join('')}</div>
         <div class="operations-buttons"><span>${label('有效账号', 'Accounts')}: ${Number(data.stats?.registered?.total ?? 0)}</span>
           <span>${label('今日登录用户', 'Users signed in today')}: ${Number(data.stats?.today?.users ?? 0)}</span>
           <span>${label('今日登录次数', 'Sign-ins today')}: ${Number(data.stats?.today?.logins ?? 0)}</span></div>
@@ -29,11 +55,16 @@
             ? label('邮件参数已配置，实际收信仍需验证。', 'Email parameters are configured; delivery still needs verification.')
             : label('邮件发送未配置，验证码与找回密码暂不可用。', 'Email delivery is not configured; verification and password reset are unavailable.')}
             ${label('关闭注册不会停用已有账号。', 'Closing registration does not disable existing accounts.')}</p></form></details>` : ''}
-        <div class="table-scroll" style="max-width:100%;overflow-x:auto"><table><thead><tr><th>${label('用户', 'User')}</th><th>${label('状态', 'State')}</th>
-          <th>${label('设备数', 'Devices')}</th><th>${label('最近登录', 'Last sign-in')}</th><th></th></tr></thead><tbody>
+        ${view === 'accounts' ? `<div class="table-scroll" style="max-width:100%;overflow-x:auto"><table><thead><tr><th>${label('用户', 'User')}</th><th>${label('状态', 'State')}</th>
+          <th>${label('终端 / 码表','Terminals / devices')}</th><th>${label('最近登录', 'Last sign-in')}</th><th></th></tr></thead><tbody>
           ${data.users.map(u => `<tr><td>${esc(u.username)}<br><small>${esc(u.email || '')}</small></td><td>${esc(u.state)}</td>
-            <td>${Number(u.deviceCount)}</td><td>${esc(stamp(u.lastLoginAt))}</td><td><button class="secondary-button" data-user="${esc(u.id)}">${label('详情', 'Details')}</button></td></tr>`).join('') ||
-            `<tr><td colspan="5">${label('没有匹配账号', 'No matching accounts')}</td></tr>`}</tbody></table></div>
+            <td>${Number(u.terminalCount ?? 0)} / ${Number(u.deviceCount)}</td><td>${esc(stamp(u.lastLoginAt))}</td><td><button class="secondary-button" data-user="${esc(u.id)}">${label('详情', 'Details')}</button></td></tr>`).join('') ||
+            `<tr><td colspan="5">${label('没有匹配账号', 'No matching accounts')}</td></tr>`}</tbody></table></div>` :
+          `<p>${label('可搜索账号、型号、版本或标识。最近活动不是在线状态。','Search account, model, version or identity. Last activity is not online status.')}</p>
+          <div class="feedback-list">${(data.rows ?? []).map(r => `<div class="feedback-item"><strong>${esc(r.model || r.name || '-')}</strong>
+            <code>${esc(r.uid || r.installationId)}</code><span>${esc(r.uid ? firmware(r.firmwareVersion) : `${r.versionName || '-'} (${r.versionCode}) · ${r.osVersion || '-'}`)}</span>
+            <small>${label('最近上报','Last report')}: ${esc(stamp(r.lastSeenAt))}</small>
+            <button class="secondary-button" data-user="${esc(r.accountId)}">${label('所属账号','Account')}: ${esc(r.username)}</button></div>`).join('') || label('没有匹配记录','No matching records')}</div>`}
         <div class="operations-buttons"><button id="accountPrev" ${busy || page <= 1 ? 'disabled' : ''}>${label('上一页', 'Previous')}</button>
           <span>${page} / ${Math.max(1, Math.ceil(data.total / 30))}</span><button id="accountNext" ${busy || page * 30 >= data.total ? 'disabled' : ''}>${label('下一页', 'Next')}</button></div>
         ${detail ? `<section class="feedback-detail"><div class="panel-head"><h3>${esc(detail.account.username)}</h3>
@@ -42,12 +73,10 @@
             ${label('手动剩余', 'Manual remaining')}: ${Number(detail.quota.manual.remaining)} / ${Number(detail.quota.manual.limit)}</p>
           <div class="operations-buttons"><button data-action="state" ${disabled}>${detail.account.state === 'active' ? label('停用账号','Disable account') : label('启用账号','Enable account')}</button>
             <button data-action="revoke-sessions" ${disabled}>${label('撤销全部登录', 'Revoke all sessions')}</button></div>
-          <h4>${label('绑定码表', 'Bound devices')}</h4>
-          ${detail.devices.map(d => `<div class="feedback-item"><strong>${esc(d.name)}</strong><code style="overflow-wrap:anywhere">${esc(d.uid)}</code>
-            <span>${esc(d.model)} · HW ${Number(d.hardware_revision)} · FW ${Number(d.firmware_version)}</span>
-            <small>${label('绑定时间', 'Bound')}: ${esc(stamp(d.bound_at))}</small><button data-unbind="${esc(d.uid)}" ${disabled}>${label('解绑', 'Unbind')}</button></div>`).join('') || `<p>${label('无绑定设备', 'No bound devices')}</p>`}
-          <h4>${label('最近 50 次登录（保留 90 天）', 'Last 50 sign-ins (90-day retention)')}</h4>
-          <ol>${detail.logins.map(l => `<li>${esc(stamp(l.occurred_at))} ${esc(l.app_version || '')}</li>`).join('')}</ol></section>` : ''}`;
+          <div class="operations-buttons" role="group" aria-label="${label('账号详情','Account details')}">
+            ${[['devices','绑定码表','Devices'],['terminals','APP 终端','Terminals'],['sessions','登录会话','Sessions'],['logins','登录记录','Sign-ins'],['audit','操作记录','Actions']].map(([key,cn,en]) =>
+              `<button class="secondary-button" data-detail-tab="${key}" aria-pressed="${detailTab === key}">${label(cn,en)}</button>`).join('')}</div>
+          <div id="accountDetailBody" style="max-height:480px;overflow:auto;overflow-wrap:anywhere">${detailBody(disabled)}</div></section>` : ''}`;
     }
     async function mayDiscard() {
       return !dirty() || await confirm({ title: text('放弃未保存设置？','Discard unsaved settings?'),
@@ -69,7 +98,7 @@
     async function load() {
       if (!await mayDiscard()) return;
       await run(async current => {
-        const result = await api('/api/admin/accounts?page=' + page + '&q=' + encodeURIComponent(query));
+        const result = await api('/api/admin/accounts' + (view === 'accounts' ? '' : '/' + view) + '?page=' + page + '&q=' + encodeURIComponent(query));
         const config = await api('/api/admin/accounts/settings');
         if (current()) { data = result; settings = config; draft = { ...config }; }
       });
@@ -98,6 +127,11 @@
     element.addEventListener('click', async event => {
       const button = event.target.closest('button');
       if (!button || busy) return;
+      if (button.dataset.accountView) {
+        if (!await mayDiscard()) return;
+        view = button.dataset.accountView; page = 1; detail = null; draft = settings ? { ...settings } : null; return void load();
+      }
+      if (button.dataset.detailTab) { detailTab = button.dataset.detailTab; render(); return; }
       if (button.id === 'accountReload') return void load();
       if (button.id === 'accountPrev' || button.id === 'accountNext') {
         if (!await mayDiscard()) return;
@@ -106,11 +140,11 @@
       }
       if (button.id === 'accountClose') { detail = null; render(); return; }
       if (button.dataset.user) return void open(button.dataset.user);
-      const action = button.dataset.unbind ? 'unbind' : button.dataset.action;
+      const action = button.dataset.unbind ? 'unbind' : button.dataset.revokeSession ? 'revoke-session' : button.dataset.action;
       if (!action || !detail || !owner()) return;
       const id = detail.account.id, currentEpoch = epoch;
       const payload = action === 'state' ? { state: detail.account.state === 'active' ? 'disabled' : 'active' }
-        : action === 'unbind' ? { uid: button.dataset.unbind } : {};
+        : action === 'unbind' ? { uid: button.dataset.unbind } : action === 'revoke-session' ? { sessionId: button.dataset.revokeSession } : {};
       if (!await confirm({ title: text('确认账号操作？','Confirm account action?'),
         message: detail.account.username + ' · ' + button.textContent, confirmLabel: text('确认','Confirm'), tone: 'warning' }) || currentEpoch !== epoch) return;
       await run(async current => {
@@ -123,11 +157,16 @@
       });
     });
     return { render, load, dirty,
+      async showRelations(kind, value = '') {
+        if (busy || !['terminals','devices'].includes(kind) || !await mayDiscard()) return;
+        view = kind; query = value.slice(0,64); page = 1; detail = null; draft = settings ? { ...settings } : null;
+        await load();
+      },
       search(value) { query = value.slice(0,64); page = 1; void load(); },
       setSession(value) {
         const identity = value?.actor ? value.actor + ':' + value.role : '';
         if (identity !== actor) {
-          actor = identity; epoch++; ticket++; busy = false; page = 1; query = ''; data = { users: [], total: 0 };
+          actor = identity; epoch++; ticket++; busy = false; page = 1; query = ''; view = 'accounts'; detailTab = 'devices'; data = { users: [], rows: [], total: 0 };
           settings = draft = detail = null; notice = ''; render();
         }
         if (actor && !element.hidden) void load();

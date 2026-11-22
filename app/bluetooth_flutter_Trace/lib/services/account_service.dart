@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart' hide Response;
 import '../config/share_links.dart';
@@ -26,10 +29,11 @@ class AccountCheck {
 
 /// Tokens are stored by the OS vault, never in diagnostics or ordinary preferences.
 class AccountService extends GetxService {
-  AccountService({Dio? dio, FlutterSecureStorage? storage, Uri? endpoint})
+  AccountService({Dio? dio, FlutterSecureStorage? storage, Uri? endpoint,
+      Future<Map<String, dynamic>> Function()? readTerminal})
       : _dio = dio ?? Dio(BaseOptions(connectTimeout: const Duration(seconds: 15),
           receiveTimeout: const Duration(seconds: 20), sendTimeout: const Duration(seconds: 15))),
-        _storage = storage ?? const FlutterSecureStorage(),
+        _storage = storage ?? const FlutterSecureStorage(), _readTerminal = readTerminal ?? _terminalMetadata,
         endpoint = endpoint ?? Uri.parse(ShareLinks.cloudflareUpdateManifestUrl);
 
   static AccountService get to => Get.find<AccountService>();
@@ -41,12 +45,79 @@ class AccountService extends GetxService {
   final quota = <String, dynamic>{}.obs;
   final settings = <String, dynamic>{}.obs;
   final devices = <Map<String, dynamic>>[].obs;
+  final sessions = <Map<String, dynamic>>[].obs;
+  final terminalReportProblem = RxnString();
+  final Future<Map<String, dynamic>> Function() _readTerminal;
+  Future<Map<String, dynamic>>? _terminalValue;
+  DateTime? _terminalReported;
+  final Map<String, DateTime> _deviceReports = {};
   String? _token;
   Future<void>? _initialization;
   int _generation = 0;
   int get generation => _generation;
   String? get accountId => account.value?['id'] as String?;
   bool get loggedIn => _token != null && accountId != null;
+
+  static Future<Map<String, dynamic>> _terminalMetadata() async {
+    final value = <String, dynamic>{'platform': Platform.operatingSystem,
+      'versionName': '', 'versionCode': 0, 'model': '', 'osVersion': ''};
+    try {
+      final package = await PackageInfo.fromPlatform();
+      value['versionName'] = package.version; value['versionCode'] = int.tryParse(package.buildNumber) ?? 0;
+    } catch (_) { /* Legacy or unsupported host metadata stays unknown. */ }
+    try {
+      if (Platform.isAndroid) {
+        final phone = await DeviceInfoPlugin().androidInfo;
+        value['model'] = '${phone.brand} ${phone.model}';
+        value['osVersion'] = '${phone.version.release} (SDK ${phone.version.sdkInt})';
+      }
+    } catch (_) { /* No hardware identifiers or account name are collected. */ }
+    for (final key in ['versionName', 'model', 'osVersion']) {
+      final clean = value[key].toString().replaceAll(RegExp(r'[\x00-\x1f\x7f]'), '').trim();
+      final limit = key == 'versionName' ? 64 : 80;
+      value[key] = clean.substring(0, min(clean.length, limit));
+    }
+    return value;
+  }
+  Future<Map<String, dynamic>> _terminal() => _terminalValue ??= _loadTerminal();
+  Future<Map<String, dynamic>> _loadTerminal() async {
+    const key = 'etrack_account_installation_v1';
+    var id = await _storage.read(key: key);
+    if (id == null || !RegExp(r'^[0-9a-f]{32}$').hasMatch(id)) {
+      id = nonce(); await _storage.write(key: key, value: id);
+    }
+    return {...await _readTerminal(), 'installationId': id};
+  }
+
+  Future<void> reportTerminal() async {
+    if (!loggedIn) return;
+    final captured = _generation, terminal = await _terminal();
+    if (captured != _generation || !loggedIn) return;
+    final now = DateTime.now();
+    if (_terminalReported != null && !now.isBefore(_terminalReported!) && now.difference(_terminalReported!) < const Duration(minutes: 5)) return;
+    await call('/api/account/terminal', body: {'terminal': terminal});
+    if (captured == _generation) _terminalReported = now;
+  }
+
+  /// Best-effort identity observation; never changes the BLE/OTA outcome or quota.
+  Future<void> observeDevice(String uid, int firmwareVersion, String imageSha256, {bool force = false}) async {
+    if (!loggedIn) return;
+    final captured = _generation, key = '$uid:$firmwareVersion:$imageSha256', now = DateTime.now();
+    final previous = _deviceReports[key];
+    if (!force && previous != null && !now.isBefore(previous) && now.difference(previous) < const Duration(minutes: 5)) return;
+    _deviceReports[key] = now;
+    while (_deviceReports.length > 100) { _deviceReports.remove(_deviceReports.keys.first); }
+    try {
+      await reportTerminal();
+      if (captured != _generation || !loggedIn) return;
+      await call('/api/account/devices/observe', uid: uid, body: {'firmwareVersion': firmwareVersion, 'imageSha256': imageSha256});
+      if (captured == _generation) terminalReportProblem.value = null;
+    } on AccountException catch (error) {
+      if (captured == _generation) terminalReportProblem.value = error.code;
+    } catch (_) {
+      if (captured == _generation) terminalReportProblem.value = 'REPORT_UNAVAILABLE';
+    }
+  }
 
   static String nonce() {
     final random = Random.secure();
@@ -151,6 +222,7 @@ class AccountService extends GetxService {
     if (!isCloudUri(uri)) throw const AccountException('INVALID_ENDPOINT', '账号服务地址无效');
     final captured = _generation;
     final auth = anonymous ? <String, String>{} : await headers(uri, uid: uid);
+    if (captured != _generation) throw const AccountException('ACCOUNT_CHANGED', '账号已变化，请重试');
     try {
       final response = await _dio.requestUri<Map<String, dynamic>>(uri, data: body,
         options: Options(method: body == null ? 'GET' : 'POST', headers: auth,
@@ -187,7 +259,10 @@ class AccountService extends GetxService {
 
   Future<void> loadSettings() async => settings.assignAll(await call('/api/auth/status', anonymous: true));
   Future<void> login(String username, String password) async {
-    final result = await call('/api/auth/login', body: {'username': username.trim(), 'password': password}, anonymous: true);
+    await initialize();
+    final before = _generation, terminal = await _terminal();
+    if (before != _generation) throw const AccountException('ACCOUNT_CHANGED', '账号已变化，请重试');
+    final result = await call('/api/auth/login', body: {'username': username.trim(), 'password': password, 'terminal': terminal}, anonymous: true);
     final token = result['token'];
     if (token is! String || !RegExp(r'^acct_[0-9a-f]{64}$').hasMatch(token) || result['account'] is! Map) {
       throw const AccountException('INVALID_RESPONSE', '账号服务响应无效');
@@ -199,16 +274,28 @@ class AccountService extends GetxService {
       throw const AccountException('ACCOUNT_CHANGED', '账号已变化，请重试');
     }
     _generation++;
+    _terminalReported = DateTime.now(); _deviceReports.clear(); sessions.clear();
     _token = token;
     account.value = Map<String, dynamic>.from(result['account'] as Map);
     quota.assignAll(Map<String, dynamic>.from(result['quota'] as Map? ?? {}));
   }
   Future<void> refresh() async {
+    await reportTerminal();
     final result = await call('/api/account/me');
     account.value = Map<String, dynamic>.from(result['account'] as Map);
     quota.assignAll(Map<String, dynamic>.from(result['quota'] as Map));
     final list = await call('/api/account/devices');
     devices.assignAll((list['devices'] as List).map((d) => Map<String, dynamic>.from(d as Map)));
+    final logins = await call('/api/account/sessions');
+    sessions.assignAll((logins['sessions'] as List? ?? []).map((s) => Map<String, dynamic>.from(s as Map)));
+  }
+  Future<void> revokeSession(Map<String, dynamic> session) async {
+    await call('/api/account/sessions/revoke', body: {'sessionId': session['id']});
+    if (session['current'] == true || session['current'] == 1) { await _clear(); }
+    else {
+      try { await refresh(); }
+      catch (_) { throw const AccountException('REFRESH_FAILED', '登录已撤销，但列表刷新失败；请刷新查看，不必重复操作'); }
+    }
   }
   Future<void> authorizeOta(String uid) async {
     await call('/api/account/ota/authorize', body: {}, uid: uid);
@@ -233,7 +320,8 @@ class AccountService extends GetxService {
     _generation++;
     _token = null;
     account.value = null;
-    quota.clear(); devices.clear();
+    quota.clear(); devices.clear(); sessions.clear(); _deviceReports.clear(); _terminalReported = null;
+    terminalReportProblem.value = null;
     await _storage.delete(key: _storageKey);
   }
 }
