@@ -1,14 +1,17 @@
 # Shared Agent Records
 
-Current local work: ACCOUNT-RELATIONS-20261122, Codex root, LOCAL_PENDING /
-DEVELOPMENT_VALIDATION. Unified Admin result feedback, account-scoped installation
-metadata/sessions and bound-UID observations; new 0019 migration, no fabricated
-legacy history or online state. SMTP mail setup is owner-approved but explicitly
-last; no credential or sender configuration yet. Existing 5/5 limits and cloud
-admission unchanged. See Account Relationships And Unified Results in the current
-OTA companion note. Previous delivered source/candidates below remain distinct.
+Current work: ACCOUNT-RELATIONS-20261122, Codex root, REMOTE_DELIVERED /
+MAIL_ACTIVATION_AND_PHONE_VALIDATION_PENDING. App 1.0.92+118 source 29d619ff is
+original-signed and registered by Trace 45013457550. Parent 45013327189 lost its
+post-dispatch receipt and remains failed; no duplicate request/build occurred.
+Backend 95470e8e passes 535 Worker/297 browser cases and deploys in 45016534804;
+live source/owner/list/readiness checks pass, only 0019 applied, runtime/four
+channels/60 delta identities unchanged. Timestamped account/terminal/UID relations
+and shared dialogs are delivered, not live phone acceptance. Mailbox code is
+delivered but unconfigured; real mail and user steps are in ACCOUNT-EMAIL.md.
+See Account Relationships And Unified Results in the current OTA companion note.
 
-Current follow-up: COMPANION-FEEDBACK-20261122, Codex root, ACCOUNT_MAIL_FEEDBACK_DELIVERED / MAIL_ACTIVATION_PENDING, source 3296c633.
+Previous follow-up: COMPANION-FEEDBACK-20261122, Codex root, ACCOUNT_MAIL_FEEDBACK_DELIVERED / MAIL_ACTIVATION_PENDING, source 3296c633.
 Owner requests actual email completion and consistent App/Admin failure dialogs.
 Account and adjacent feedback prompts now use the existing dialog components;
 mail sender/domain and controlled real recipient remain missing owner inputs.

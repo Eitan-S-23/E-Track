@@ -4,7 +4,40 @@ Read this file before deploying the E-Track backend or asking the owner for
 Cloudflare credentials. It lives at the project root deliberately. Read the
 primary checkout's copy, not only an old task worktree's copy.
 
-## Current State: Account Feedback And Email Readiness Deployed 2026-11-22
+## Current State: Account Relationships And SMTP Code Deployed 2026-11-22
+
+Actions [45016534804](https://github.com/Eitan-S-23/E-Track/actions/runs/45016534804)
+deploys source `95470e8e3ea0f9245736f7076a8ff86eaa004925` after exact-source
+checks 45015301099 (535 Worker/297 browser tests and three typechecks). Only
+`0019_account_terminals.sql` was pending and applied. Worker version is
+`8e4b67c2-e14f-457a-8fee-12c8b56d1090`; Admin deployment is
+`53c211c8-f9ca-4eef-959c-ef88df448007`; Public deployment is
+`0ce6b61a-a0a1-4940-b233-a18c799cad63`.
+
+Read-only keyring-cloud-live-240 checks exact deployed source/HTML/ten assets,
+existing owner Access, account/terminal/device list APIs, both public auth status
+routes and anonymous cloud denial. Runtime/production/preview configuration,
+schedules, four channels and all 60 delta identities match pre-deploy snapshot
+224. Lists currently contain no user accounts/terminals/devices; populated
+account behavior was tested with fixtures, not invented live users.
+
+Mailbox SMTP code is deployed but remains UNCONFIGURED. The owner chose QQ/Foxmail
+without buying a domain and explicitly deferred activation until last. No SMTP
+secret has been added and no message has been sent. See
+[ACCOUNT-EMAIL.md](app/bluetooth_flutter_Trace/cloudflare/update-service/docs/ACCOUNT-EMAIL.md)
+for the exact three protected settings and owner verification steps. Access OTP
+is not an outgoing-mail credential. Verification/reset availability remains false,
+registration enabled and separate daily automatic/manual limits remain 5/5.
+
+App 1.0.92+118 uses original source `29d619ffd2c3a00ab6b6be30b67b2efc8a0f1c79`;
+Trace 45013457550 signs/packages/verifies/registers it successfully. Its parent
+45013327189 lost post-dispatch observation and remains failed; no duplicate
+dispatch or build was performed. No MCU rebuild, phone install or channel/delta
+mutation was part of this batch. Existing npm security and Node warnings remain.
+Evidence and controlled-output audit: `.cache/ota-followup-20261122/`, especially
+keyring-logs-237/241/242 and account-relations-delivery-audit-01.json.
+
+## Previous State: Account Feedback And Email Readiness Deployed 2026-11-22
 
 Actions [44997943728](https://github.com/Eitan-S-23/E-Track/actions/runs/44997943728)
 deploys tested source `3296c633ee005fd6e48d20b51ab8c7b4ade0bd31` to Worker,

@@ -4,7 +4,7 @@
 
 ### Account Relationships And Unified Results
 
-Status: LOCAL_MAIN_PENDING / FORMAL_DELIVERY_PREPARATION. Owner approved proceeding with
+Status: REMOTE_DELIVERED / MAIL_ACTIVATION_AND_PHONE_VALIDATION_PENDING. Owner approved proceeding with
 unified Admin feedback and account/App-terminal/MCU relationships; mailbox SMTP
 activation is explicitly last. Test recipient is owner-provided, not automatically
 an approved sender. No domain purchase, credential configuration or real send.
@@ -51,6 +51,45 @@ No SMTP configuration or real send occurred. ACCOUNT-EMAIL.md specifies the
 remaining owner mailbox steps. All 130 Trace releases including drafts and the
 1.0.92 tag prefix were checked (keyring-read-219/220); 1.0.92+118 is unoccupied
 and selected for original-signed delivery. MCU version/source are unchanged.
+
+Final delivery: App source `29d619ffd2c3a00ab6b6be30b67b2efc8a0f1c79`;
+backend source `95470e8e3ea0f9245736f7076a8ff86eaa004925` only adds an Admin
+unknown-total display correction. Original Trace run **45013457550** completes
+admission/Windows/Android successfully and registers **rel_trace_android_v1_0_92**.
+APK **1.0.92+118**, 49,604,117 bytes, SHA-256
+`cc7e9b63756ee59818f8766f890976dd18ff734265db625f7ffa64a37e3f4c85`;
+package `com.wen.gaia.gaia`, original signer SHA-256
+`3cecee6330a930e020b454b6d4a79568f4494ca324ae7bcf2c1914e51b04ab47`.
+Original signing CI verifies complete R2 bytes. GitHub v1.0.92 is non-draft and
+all APK/EXE/ZIP assets are uploaded. Evidence: keyring-status-235,
+keyring-logs-237 and keyring-read-238. No extra APK download or phone install.
+
+Parent **45013327189** failed during post-dispatch observation with generic
+BACKEND_UNAVAILABLE, request 2fbe44e6-ad90-46c9-b994-431401be9b0d. The exact
+child's title binds source and original parent. Its continued run was observed,
+not dispatched again. The parent is NOT green and was not rerun; actual signing
+and automatic candidate registration completed independently of that lost receipt.
+Failure evidence remains keyring-logs-227. Later same-version main pushes skip
+App/firmware packaging, as confirmed by **45015301092**.
+
+Final backend **45015301099** passes 535 Worker/297 browser cases and all three
+typechecks. Deployment **45016534804** succeeds, applying only
+`0019_account_terminals.sql`. Live readback keyring-cloud-live-240 verifies:
+Worker `8e4b67c2-e14f-457a-8fee-12c8b56d1090`, Admin
+`53c211c8-f9ca-4eef-959c-ef88df448007`, Public
+`0ce6b61a-a0a1-4940-b233-a18c799cad63`, exact source/assets and real owner access.
+Runtime/schedules, four channels and 60 delta identities match snapshot 224.
+Account/terminal/device lists are empty on the live service, so real populated
+account details remain owner-validation work; no synthetic live user was created.
+Worker/Public/Admin report mail unavailable and email verification disabled.
+No sender secret was entered, email sent, channel published or device operated.
+
+Warnings retained: Worker dependencies 13 vulnerabilities (3 moderate/10 high),
+Admin/Public 4 high each; Node/Actions deprecations and local experimental SQLite.
+These were not hidden or remediated by unrelated dependency upgrades. Self-tests
+and source/read-only live checks are not independent acceptance or phone/SMTP
+inbox verification. Controlled-output audit:
+`.cache/ota-followup-20261122/account-relations-delivery-audit-01.json`.
 
 ### Mail And Feedback Follow-Up
 

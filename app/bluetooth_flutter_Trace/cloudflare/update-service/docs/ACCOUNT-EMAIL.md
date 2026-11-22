@@ -37,6 +37,22 @@ Do not enable IMAP/POP or change personal mailbox settings beyond what the
 provider actually requires for SMTP. Provider UI labels may change; verify the
 current settings screen when giving the final click-by-click instructions.
 
+Cloudflare entry: Workers & Pages, open each existing target, Settings, Variables
+and Secrets. Add each setting with type Secret, not ordinary text. For Pages,
+select Production (not Preview). The exact targets are:
+
+| Target | Scope |
+| --- | --- |
+| `trace-update-service-staging` | Existing Worker, corresponding to wrangler `env.staging` |
+| `trace-update-public-staging` | Existing Pages project, Production |
+| `trace-update-admin-staging` | Existing Pages project, Production |
+
+After saving, report only "configured" and the approved sender address, never
+the authorization code. Pages settings may require a new deployment to take
+effect; the agent will use the existing pinned-source deployment route only if
+needed, then verify readiness. Do not toggle required registration email yet.
+Provider acceptance and actual recipient inbox receipt are separate checks.
+
 The SMTP route uses fixed `smtp.qq.com:465` with TLS from the start, a 15-second
 transaction deadline and a 32 KiB response cap. It sends one text/HTML message,
 waits for post-DATA acceptance, and closes on success, rejection and timeout.
