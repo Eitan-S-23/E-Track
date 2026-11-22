@@ -79,12 +79,16 @@ class _AccountPageState extends State<AccountPage> {
     ));
 
   @override
-  Widget build(BuildContext context) => Scaffold(backgroundColor: TraceColors.ink,
+  Widget build(BuildContext context) => TextButtonTheme(
+    data: TextButtonThemeData(style: TextButton.styleFrom(
+      foregroundColor: TraceColors.cyanSoft, disabledForegroundColor: TraceColors.muted)),
+    child: Scaffold(backgroundColor: TraceColors.ink,
     body: TracePageScaffold(child: SafeArea(child: Column(children: [
       Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Row(children: [
         IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.arrow_back, color: TraceColors.text)),
-        const Text('账号与设备', style: TextStyle(color: TraceColors.text, fontSize: 18, fontWeight: FontWeight.w700)),
-        const Spacer(), IconButton(onPressed: _busy ? null : () => _run(_load), icon: const Icon(Icons.refresh, color: TraceColors.muted)),
+        const Expanded(child: Text('账号与设备', maxLines: 1, overflow: TextOverflow.ellipsis,
+          style: TextStyle(color: TraceColors.text, fontSize: 18, fontWeight: FontWeight.w700))),
+        IconButton(onPressed: _busy ? null : () => _run(_load), icon: const Icon(Icons.refresh, color: TraceColors.muted)),
       ])),
       Expanded(child: Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 520),
         child: SingleChildScrollView(padding: const EdgeInsets.fromLTRB(24, 24, 24, 36), child: Obx(() => Column(
@@ -95,7 +99,7 @@ class _AccountPageState extends State<AccountPage> {
               key: const ValueKey('account-message'), style: const TextStyle(color: TraceColors.amber))),
           ])),
         )))),
-    ]))));
+    ])))));
 
   List<Widget> _authentication() => [
     const Text('E-Track', style: TextStyle(color: TraceColors.cyan, fontSize: 30, fontWeight: FontWeight.w800)),
@@ -147,7 +151,8 @@ class _AccountPageState extends State<AccountPage> {
         '手动剩余 ${service.quota['manual']?['remaining'] ?? '-'} / ${service.quota['manual']?['limit'] ?? 5} 次',
         style: const TextStyle(color: TraceColors.cyan, fontSize: 16)),
     const SizedBox(height: 28), const Divider(color: TraceColors.ocean),
-    Row(children: [const Text('绑定的码表', style: TextStyle(color: TraceColors.text, fontSize: 18)), const Spacer(),
+    Wrap(alignment: WrapAlignment.spaceBetween, crossAxisAlignment: WrapCrossAlignment.center, children: [
+      const Text('绑定的码表', style: TextStyle(color: TraceColors.text, fontSize: 18)),
       TextButton(onPressed: _busy ? null : () => _run(_bind), child: const Text('绑定已连接设备'))]),
     if (service.devices.isEmpty) const Padding(padding: EdgeInsets.symmetric(vertical: 20),
       child: Text('尚未绑定码表。请先连接蓝牙，再选择绑定。', style: TextStyle(color: TraceColors.muted))),

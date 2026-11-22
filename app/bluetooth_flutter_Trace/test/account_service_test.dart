@@ -9,9 +9,11 @@ class _Http implements HttpClientAdapter {
   final requests = <RequestOptions>[];
   int status = 200;
   Map<String, dynamic> response = {};
+  ResponseBody Function(RequestOptions)? respond;
   @override
   Future<ResponseBody> fetch(RequestOptions options, Stream<Uint8List>? stream, Future<void>? cancel) async {
     requests.add(options);
+    if (respond != null) return respond!(options);
     return ResponseBody.fromString(jsonEncode(response), status, headers: {Headers.contentTypeHeader: ['application/json']});
   }
   @override
@@ -70,6 +72,43 @@ void main() {
     expect(restored.loggedIn, isFalse);
     expect(http.requests.last.uri.path, '/api/account/logout');
     expect(http.requests.where((r) => r.uri.path.contains('reset-quota')), isEmpty);
+  });
+  test('signed fallback downloads stream without forwarding account or device credentials', () async {
+    await login();
+    final download = Dio()..httpClientAdapter = http;
+    service.protect(download, deviceUid: () => '1234567890abcdef12345678');
+    const target = 'https://github.com/Eitan-S-23/Trace/releases/download/v1.0.90/ble-monitor-android.apk';
+    http.respond = (request) => request.uri.host == 'account.example'
+        ? ResponseBody.fromString('', 302, headers: {'location': [target]})
+        : ResponseBody.fromBytes([1, 2, 3], 206);
+    final response = await download.get<ResponseBody>(
+      'https://account.example/api/public/github-fallback?signature=test-signature',
+      options: Options(responseType: ResponseType.stream, headers: {
+        'Range': 'bytes=3-', 'If-Range': '"etag"', 'Cookie': 'private-cookie',
+        'X-Update-Check-Id': 'private-check', 'X-Install-Token': 'private-install',
+      }));
+    expect(response.statusCode, 206);
+    expect(await response.data!.stream.expand((bytes) => bytes).toList(), [1, 2, 3]);
+    final redirected = http.requests.last;
+    expect(redirected.uri.toString(), target);
+    expect(redirected.headers, {'Range': 'bytes=3-', 'If-Range': '"etag"'});
+    expect(redirected.followRedirects, isTrue);
+  });
+  test('fallback rejects foreign, plaintext and mutable targets without a second request', () async {
+    await login();
+    final download = Dio()..httpClientAdapter = http;
+    service.protect(download);
+    for (final target in [
+      'https://unrelated.example/file.apk',
+      'http://github.com/Eitan-S-23/Trace/releases/download/v1/file.apk',
+      'https://github.com/Eitan-S-23/Trace/releases/latest/download/file.apk',
+      'https://github.com/other/project/releases/download/v1/file.apk',
+    ]) {
+      http.requests.clear();
+      http.respond = (_) => ResponseBody.fromString('', 302, headers: {'location': [target]});
+      await expectLater(download.get('https://account.example/api/public/github-fallback'), throwsA(isA<DioException>()));
+      expect(http.requests, hasLength(1));
+    }
   });
   test('prepared grant survives recreation and remains isolated by account', () async {
     await login();

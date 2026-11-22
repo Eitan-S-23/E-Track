@@ -2,7 +2,7 @@
 
 ## Account And Layout Batch, 2026-11-22
 
-Status: LOCAL_PENDING / SELF_TEST_IN_PROGRESS, based on main 409fc640bc86272c34a2a6ce3f85dfef2c8498a9.
+Status: DEV_CI_PASSED / FOLLOWUP_SELF_TEST_IN_PROGRESS, based on remote main 409fc640bc86272c34a2a6ce3f85dfef2c8498a9.
 Owner explicitly selected **5 automatic and 5 manual checks per account per day**,
 separate pools shared by devices/phones, not journal-derived or reset by reinstall.
 Server day is Asia/Shanghai; the prior one-hour automatic spacing is retained.
@@ -20,17 +20,28 @@ reads it from a current BLE generation and asks the user to confirm association;
 this does not introduce device provisioning/signing keys or an anti-cloning claim.
 Existing BCB, OTA success identity verification and active-write ownership remain.
 
-MCU text-layout regression failed against the old code in `tests-20` and passed
-76 host cases in `tests-21`/`tests-22` (latter adds physical-screen bounds). Source
-and image originals are retained under `.cache/ota-followup-20261122/` and
-`.cache/companion-modal-tests/`. The new additive UID query preserves the legacy
-binary INFO schema; UID behavior tests and firmware/simulator builds are pending.
+MCU text-layout regression failed against the old code in `tests-20`; `tests-24`
+passes 77 host cases including physical-screen bounds and additive UID query
+session preservation. Legacy binary INFO and CAPS remain compatible. Real-LVGL
+images in `images-30` were inspected for checking/downloading/blocker/focus states.
+`build-30` passes GCC App/Boot targets and simulator: 396 incremental warning lines,
+zero errors; Boot was up-to-date. App bin SHA-256 is
+`a056315c5c76dbb3bb894aa6177fccddb061cc3156695c616e4ca4097a066024`.
+These are development outputs, not a versioned candidate or an installed image.
 
-Backend `accounts-host-01` passed 13 new cases; `accounts-host-03` passed 532 cases
-with one additional script suite not run due host Git ownership. `accounts-check-03`
-passed TypeScript. Native Windows workerd crashed before testing in
-`accounts-test-01`; this is retained as runtime NOT_RUN, not product success.
-Flutter, native Android, Admin browser and native workerd CI are still pending.
+Backend `accounts-host-03` passed 532 cases; its Git-ownership-blocked script suite
+subsequently passed 24 cases in `accounts-host-05` using per-process safe.directory.
+Native Windows workerd crashed before testing in `accounts-test-01`; failure is
+retained, not retried. Actual Linux workerd CI `44963616712` passes 514 tests,
+Worker/Public/Admin typechecks and 293 Admin browser cases on `2acde4c6045dbcf764be198ac81cb50e1e2118ee`.
+Raw logs: `.cache/ota-followup-20261122/keyring-logs-40/`.
+Flutter checks-only CI `44963472466` passes both hosts on that same source,
+including repaired disconnect/resume and prepared-grant persistence tests.
+Native/debug CI `44963606753` is still running. A further local batch restores
+credential-free immutable GitHub fallback downloads and tests account-page
+registration switches, separate quota display, small screens and readable actions.
+That later batch has not yet passed CI. Scope remains the same development branch
+`dev/flutter/ota-followup-20261122`; local main is ahead, NOT remote main delivery.
 No new formal version, main push, deployment, phone action, J-Link or OTA occurred.
 Owner reported the earlier automatic popup works; do not repeat OTA to recapture it.
 

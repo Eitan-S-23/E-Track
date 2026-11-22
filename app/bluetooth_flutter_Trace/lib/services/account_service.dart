@@ -95,10 +95,52 @@ class AccountService extends GetxService {
       try {
         options.headers.addAll(await headers(options.uri, uid: deviceUid?.call()));
         options.followRedirects = false; // Never forward an account token to a redirect target.
+        if (options.method == 'GET' && options.uri.path == '/api/public/github-fallback') {
+          final validate = options.validateStatus;
+          options.validateStatus = (status) => status == 302 || validate(status);
+        }
         handler.next(options);
       } catch (error) {
         handler.reject(DioException(requestOptions: options, error: error,
           type: DioExceptionType.cancel, message: 'LOGIN_REQUIRED'));
+      }
+    }, onResponse: (response, handler) async {
+      final request = response.requestOptions;
+      if (response.statusCode != 302 || request.method != 'GET' ||
+          !isCloudUri(request.uri) || request.uri.path != '/api/public/github-fallback') {
+        handler.next(response);
+        return;
+      }
+      final locations = response.headers['location'];
+      final target = Uri.tryParse(locations?.length == 1 ? locations!.single : '');
+      final base = Uri.parse(ShareLinks.githubReleaseDownloadBaseUrl);
+      final valid = target != null && target.scheme == 'https' && target.hasAuthority && target.userInfo.isEmpty &&
+          target.origin == base.origin && target.path.startsWith(base.path) &&
+          target.pathSegments.length == base.pathSegments.length + 1 &&
+          !target.pathSegments.contains('latest') && !target.hasQuery && !target.hasFragment;
+      if (!valid) {
+        if (response.data is ResponseBody) await (response.data as ResponseBody).stream.listen(null).cancel();
+        handler.reject(DioException(requestOptions: request, response: response,
+          type: DioExceptionType.badResponse, message: 'Untrusted update download redirect'));
+        return;
+      }
+      try {
+        if (response.data is ResponseBody) await (response.data as ResponseBody).stream.listen(null).cancel();
+        // Only transport headers cross the boundary; no session, UID, check ID or cookies.
+        final headers = <String, dynamic>{
+          for (final entry in request.headers.entries)
+            if (const {'accept', 'accept-encoding', 'range', 'if-range'}.contains(entry.key.toLowerCase()))
+              entry.key: entry.value,
+        };
+        final redirected = await dio.fetch<dynamic>(request.copyWith(
+          path: target.toString(), baseUrl: '', queryParameters: {}, headers: headers,
+          followRedirects: true, validateStatus: (status) => status != null && status >= 200 && status < 300,
+        ));
+        handler.resolve(redirected);
+      } on DioException catch (error) {
+        handler.reject(error);
+      } catch (error) {
+        handler.reject(DioException(requestOptions: request, error: error));
       }
     }));
   }
