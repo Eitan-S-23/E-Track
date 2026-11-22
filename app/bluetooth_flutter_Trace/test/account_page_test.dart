@@ -223,7 +223,8 @@ void main() {
     expect(accounts.calls, isEmpty);
   });
 
-  for (final scale in [1.0, 2.0]) testWidgets('logout stays visible with growing lists at text scale $scale', (tester) async {
+  for (final scale in [1.0, 2.0]) {
+    testWidgets('logout stays visible with growing lists at text scale $scale', (tester) async {
     accounts.signedIn = true;
     accounts.account.value = {'id': 'one', 'displayName': 'Rider'};
     accounts.devices.assignAll(List.generate(40, (i) => {
@@ -239,6 +240,8 @@ void main() {
     expect(find.textContaining('登录有效不代表当前在线'), findsNothing);
     expect(tester.takeException(), isNull);
   });
+
+  }
 
   testWidgets('account inner list hands drag movement to the page at both edges', (tester) async {
     accounts.signedIn = true;

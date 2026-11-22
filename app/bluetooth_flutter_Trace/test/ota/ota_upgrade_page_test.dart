@@ -88,6 +88,7 @@ void main() {
     BluetoothDevice? connectedDevice,
     OtaDiagnostics? diagnostics,
     bool settle = true,
+    bool legacyMigration = false,
   }) async {
     // 升级页按手机竖屏设计：默认 800x600 测试视口下「取消升级」「忽略」
     // 等操作按钮位于视口外（hit test 落空、对话框不弹出）。统一放大
@@ -99,7 +100,7 @@ void main() {
     // GetMaterialApp（非 MaterialApp）：Get.dialog 依赖 Get.key 挂载，
     // 取消对话框交互用例（RC3-05①）需要可用的根导航。
     await tester.pumpWidget(GetMaterialApp(
-      home: OtaUpgradePage(connectedDevice: connectedDevice, diagnostics: diagnostics),
+      home: OtaUpgradePage(connectedDevice: connectedDevice, diagnostics: diagnostics, legacyMigration: legacyMigration),
     ));
     // postFrameCallback（自动解析连接 + 读取身份）与入场动画。
     await tester.pump();
@@ -119,6 +120,30 @@ void main() {
     );
     return button;
   }
+
+  testWidgets('legacy page stays on the selected device when another task finishes', (tester) async {
+    final fake = _FakeOtaService()
+      ..taskAddress = 'aa:bb:cc:dd:ee:ff'
+      ..readResult = deviceInfoOf();
+    fake.isUpgrading$.value = true; fake.phase$.value = OtaPhase.transferring;
+    await pumpPage(tester, fake: fake, settle: false, legacyMigration: true,
+      connectedDevice: BluetoothDevice.fromId('11:22:33:44:55:66'));
+    expect(fake.readCalls, 0);
+    fake.phase$.value = OtaPhase.cancelled; fake.isUpgrading$.value = false;
+    await tester.pumpAndSettle();
+    expect(fake.lastReadAddress, '11:22:33:44:55:66');
+    await tester.tap(find.widgetWithText(ElevatedButton, '检查更新'));
+    await tester.pumpAndSettle();
+    expect(fake.lastLegacyCheck, isTrue);
+    expect(fake.checkCalls, 1);
+  });
+  testWidgets('legacy page without a selected device never resolves a different task', (tester) async {
+    final fake = _FakeOtaService()..taskAddress = 'aa:bb:cc:dd:ee:ff'..readResult = deviceInfoOf();
+    await pumpPage(tester, fake: fake, legacyMigration: true);
+    expect(fake.readCalls, 0);
+    expect(findButton(tester, '检查更新').onPressed, isNull);
+    expect(fake.checkCalls, 0);
+  });
 
   testWidgets('timing arm is explicit and requests reliable raw diagnostics only', (tester) async {
     final fake = _FakeOtaService()..readResult = deviceInfoOf();
@@ -1149,6 +1174,7 @@ class _FakeOtaService extends OtaService {
   String? taskAddress;
   Completer<void>? readGate;
   String? lastReadAddress;
+  bool? lastLegacyCheck;
   int cancelCalls = 0;
   bool? lastKeepPackage;
   int cleanupCalls = 0;
@@ -1182,6 +1208,8 @@ class _FakeOtaService extends OtaService {
   FirmwareLatestInfo? get latestInfo => latest;
   @override
   DeviceOtaInfo? get deviceInfo => info;
+  @override
+  bool hasCurrentDeviceIdentity(String? address) => address != null && address == lastReadAddress && info != null;
   @override
   File? get downloadedFirmwareFile => hasFile ? File('pkg.etu') : null;
   @override
@@ -1231,8 +1259,10 @@ class _FakeOtaService extends OtaService {
 
   @override
   Future<FirmwareLatestInfo?> checkFirmwareUpdate({String? channel,
-      String? companionRuntimeId, bool automatic = false, bool refreshPrepared = false}) async {
+      String? companionRuntimeId, bool automatic = false, bool refreshPrepared = false,
+      bool legacyMigration = false}) async {
     checkCalls++;
+    lastLegacyCheck = legacyMigration;
     return await checkGate?.future;
   }
 

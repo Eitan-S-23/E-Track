@@ -47,8 +47,12 @@ class _AccountPageState extends State<AccountPage> {
     setState(() { _busy = true; _message = ''; });
     var failed = false;
     try { await action(); }
-    on AccountException catch (e) { failed = true; if (mounted) _message =
-      e.requestId == null ? e.message : '${e.message}\n\n请求编号：${e.requestId}'; }
+    on AccountException catch (e) {
+      failed = true;
+      if (mounted) {
+        _message = e.requestId == null ? e.message : '${e.message}\n\n请求编号：${e.requestId}';
+      }
+    }
     catch (_) { failed = true; if (mounted) _message = '操作未完成，请稍后重试'; }
     finally { if (mounted) setState(() => _busy = false); }
     if (mounted && _message.isNotEmpty) {
@@ -288,7 +292,7 @@ class _AccountPageState extends State<AccountPage> {
         TraceDialogAction(label: '解绑', color: TraceColors.amber, onPressed: (context) {
           Navigator.pop(context); unawaited(_run(() => _unbind(device)));
         }),
-        TraceDialogAction(label: '关闭', isPrimary: true, onPressed: TraceDialog.close),
+        const TraceDialogAction(label: '关闭', isPrimary: true, onPressed: TraceDialog.close),
       ]));
 
   Future<void> _sessionDetails(Map<String, dynamic> value) => showDialog<void>(context: context,
@@ -300,7 +304,7 @@ class _AccountPageState extends State<AccountPage> {
       '\n终端编号：${value['installationId'] ?? '未知'}', style: const TextStyle(color: TraceColors.text)), actions: [
         if (value['state'] == 'valid') TraceDialogAction(label: '退出该终端', color: TraceColors.amber,
           onPressed: (context) { Navigator.pop(context); unawaited(_run(() => _revokeSession(value))); }),
-        TraceDialogAction(label: '关闭', isPrimary: true, onPressed: TraceDialog.close),
+        const TraceDialogAction(label: '关闭', isPrimary: true, onPressed: TraceDialog.close),
       ]));
 
   Future<void> _revokeSession(Map<String, dynamic> value) async {

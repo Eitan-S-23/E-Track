@@ -1635,7 +1635,9 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         if (migration != null) {
           if (!migration.matches(info, _latestInfo, accounts.accountId, _accountCheck?.id) ||
               migration.expiresAt <= DateTime.now().millisecondsSinceEpoch ||
-              !hasCurrentDeviceIdentity(deviceAddress)) return false;
+              !hasCurrentDeviceIdentity(deviceAddress)) {
+            return false;
+          }
           await accounts.authorizeLegacyOta(migration.authorization());
         } else {
           if (uid == null) return false;

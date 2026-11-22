@@ -594,7 +594,7 @@ class _Ota extends OtaService {
     });
   @override
   Future<FirmwareLatestInfo?> checkFirmwareUpdate({String? channel, String? companionRuntimeId,
-      bool automatic = false, bool refreshPrepared = false}) =>
+      bool automatic = false, bool refreshPrepared = false, bool legacyMigration = false}) =>
     operation(companionRuntimeId, () async { checks++; await checkGate?.future; return latest; });
   @override
   Future<bool> downloadFirmware({String? companionRuntimeId}) => operation(companionRuntimeId, () async {

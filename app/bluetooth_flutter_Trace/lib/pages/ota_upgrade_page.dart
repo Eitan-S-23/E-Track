@@ -71,12 +71,13 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
 
   /// 当前连接设备地址（GET_INFO/传输的入口；无连接则为 null）。
   String? get _deviceAddress =>
-      _attachedTaskAddress ??
-      (widget.connectedDevice ?? _resolvedDevice)?.remoteId.str.toLowerCase();
+      widget.legacyMigration ? widget.connectedDevice?.remoteId.str.toLowerCase() :
+        _attachedTaskAddress ?? (widget.connectedDevice ?? _resolvedDevice)?.remoteId.str.toLowerCase();
 
   bool get _deviceReady =>
       !_linkDisconnected && !_needsTaskReconcile && !_reconcilingTask &&
-      _deviceAddress != null && otaService.deviceInfo != null;
+      _deviceAddress != null && otaService.deviceInfo != null &&
+      (!widget.legacyMigration || otaService.hasCurrentDeviceIdentity(_deviceAddress));
 
   @override
   void initState() {
@@ -214,6 +215,10 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>
     if (_reconcilingTask) return;
     final address = otaService.taskDeviceAddress;
     if (address == null) return;
+    if (widget.legacyMigration && address != _deviceAddress) {
+      setState(() { _needsTaskReconcile = true; });
+      return;
+    }
     setState(() {
       _attachedTaskAddress = address;
       _resolvedDevice = BluetoothDevice.fromId(address);
