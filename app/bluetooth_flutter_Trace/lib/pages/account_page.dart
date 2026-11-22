@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../services/account_service.dart';
@@ -19,9 +21,14 @@ class _AccountPageState extends State<AccountPage> {
   AccountService get service => AccountService.to;
   String _mode = 'login', _message = '';
   String? _verificationId;
+  Timer? _resendTimer;
+  int _resendSeconds = 0;
   bool _busy = false, _hidden = true, _loaded = false;
   @override
-  void initState() { super.initState(); _run(_load); }
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _run(_load); });
+  }
   Future<void> _load() async {
     await service.initialize();
     if (service.loggedIn) { await service.refresh(); }
@@ -31,13 +38,25 @@ class _AccountPageState extends State<AccountPage> {
   Future<void> _run(Future<void> Function() action) async {
     if (_busy) return;
     setState(() { _busy = true; _message = ''; });
+    var failed = false;
     try { await action(); }
-    on AccountException catch (e) { if (mounted) _message = e.message; }
-    catch (_) { if (mounted) _message = '操作未完成，请稍后重试'; }
+    on AccountException catch (e) { failed = true; if (mounted) _message = e.message; }
+    catch (_) { failed = true; if (mounted) _message = '操作未完成，请稍后重试'; }
     finally { if (mounted) setState(() => _busy = false); }
+    if (mounted && _message.isNotEmpty) {
+      final message = _message;
+      _message = '';
+      await showDialog<void>(context: context, builder: (_) => TraceDialog(
+        key: const ValueKey('account-result'), title: failed ? '操作未完成' : '操作完成',
+        message: message, color: failed ? TraceColors.amber : TraceColors.cyan,
+        icon: failed ? Icons.error_outline : Icons.check_circle_outline,
+        actions: [TraceDialogAction(label: '知道了', isPrimary: true,
+          onPressed: (context) => Navigator.of(context).pop())]));
+    }
   }
   @override
   void dispose() {
+    _resendTimer?.cancel();
     for (final controller in [_username, _password, _confirm, _email, _code]) { controller.dispose(); }
     super.dispose();
   }
@@ -51,6 +70,7 @@ class _AccountPageState extends State<AccountPage> {
     await _run(() async {
       if (_mode == 'login') {
         await service.login(_username.text, _password.text);
+        if (!mounted) return;
         _password.clear();
         await service.refresh();
         return;
@@ -58,15 +78,38 @@ class _AccountPageState extends State<AccountPage> {
       if (_needsEmail && _verificationId == null) throw const AccountException('EMAIL_VERIFICATION_REQUIRED', '请先获取邮箱验证码');
       await service.call('/api/auth/${_mode == 'register' ? 'register' : 'reset-password'}', anonymous: true,
         body: {'username': _username.text.trim(), 'password': _password.text,
-          if (_needsEmail) 'email': _email.text.trim(), if (_needsEmail) 'code': _code.text.trim(),
+          if (_email.text.trim().isNotEmpty) 'email': _email.text.trim(), if (_needsEmail) 'code': _code.text.trim(),
           if (_needsEmail) 'verificationId': _verificationId});
+      if (!mounted) return;
+      final registered = _mode == 'register';
       _changeMode('login');
-      _message = '操作成功，请登录';
+      _message = registered ? '账号已创建，请登录。' : '密码已重置，请使用新密码登录。';
     });
+  }
+  Future<void> _sendCode() async {
+    final email = _email.text.trim();
+    if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(email)) {
+      throw const AccountException('INVALID_PARAMETER', '请输入有效邮箱后再获取验证码');
+    }
+    final result = await service.call('/api/auth/email-code', anonymous: true,
+      body: {'email': email, 'purpose': _mode == 'reset' ? 'reset' : 'register'});
+    if (!mounted) return;
+    final id = result['verificationId'];
+    if (id is! String || id.isEmpty) throw const AccountException('INVALID_RESPONSE', '未收到有效发送确认，请稍后重试');
+    _verificationId = id;
+    _resendSeconds = 60;
+    _resendTimer?.cancel();
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) { timer.cancel(); return; }
+      setState(() { _resendSeconds--; });
+      if (_resendSeconds == 0) timer.cancel();
+    });
+    _message = '如邮箱符合条件，验证码将发送至该邮箱，10 分钟内有效。请检查收件箱和垃圾邮件。';
   }
   Widget _field(String label, TextEditingController controller, {bool secret = false, String? Function(String?)? validate}) =>
     Padding(padding: const EdgeInsets.only(bottom: 16), child: TextFormField(
       controller: controller, obscureText: secret && _hidden, enabled: !_busy,
+      onChanged: controller == _email ? (_) { _verificationId = null; _code.clear(); } : null,
       autocorrect: false, enableSuggestions: !secret,
       style: const TextStyle(color: TraceColors.text),
       decoration: InputDecoration(labelText: label, labelStyle: const TextStyle(color: TraceColors.muted),
@@ -95,8 +138,6 @@ class _AccountPageState extends State<AccountPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             if (service.account.value == null) ..._authentication() else ..._profile(),
             if (_busy) const Padding(padding: EdgeInsets.symmetric(vertical: 18), child: LinearProgressIndicator(color: TraceColors.cyan)),
-            if (_message.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 16), child: Text(_message,
-              key: const ValueKey('account-message'), style: const TextStyle(color: TraceColors.amber))),
           ])),
         )))),
     ])))));
@@ -113,18 +154,16 @@ class _AccountPageState extends State<AccountPage> {
       if (_mode != 'reset') _field(_mode == 'login' ? '用户名或邮箱' : '用户名', _username,
         validate: (v) => _mode == 'register' && !RegExp(r'^[A-Za-z0-9_]{3,32}$').hasMatch(v ?? '')
           ? '使用 3 至 32 位字母、数字或下划线' : (v ?? '').trim().isEmpty ? '请输入账号' : null),
-      if (_needsEmail) _field('邮箱', _email, validate: (v) => (v ?? '').contains('@') ? null : '请输入有效邮箱'),
+      if (_mode != 'login') _field(_needsEmail ? '邮箱' : '邮箱（选填，用于找回密码）', _email,
+        validate: (v) => !_needsEmail && (v ?? '').trim().isEmpty ? null
+          : RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch((v ?? '').trim()) ? null : '请输入有效邮箱'),
       _field(_mode == 'reset' ? '新密码' : '密码', _password, secret: true,
         validate: (v) => (v ?? '').length < 8 || (v ?? '').length > 128 ? '密码长度为 8 至 128 位' : null),
       if (_mode != 'login') _field('确认密码', _confirm, secret: true, validate: (v) => v != _password.text ? '两次密码不一致' : null),
       if (_needsEmail) ...[
         _field('验证码', _code),
-        TextButton(onPressed: _busy ? null : () => _run(() async {
-          final result = await service.call('/api/auth/email-code', anonymous: true,
-            body: {'email': _email.text.trim(), 'purpose': _mode == 'reset' ? 'reset' : 'register'});
-          _verificationId = result['verificationId'] as String?;
-          _message = '如邮箱符合条件，验证码将发送至该邮箱';
-        }), child: const Text('获取邮箱验证码')),
+        TextButton(onPressed: _busy || _resendSeconds > 0 ? null : () => _run(_sendCode),
+          child: Text(_resendSeconds > 0 ? '$_resendSeconds 秒后可重新获取' : '获取邮箱验证码')),
       ],
     ])),
     FilledButton(style: FilledButton.styleFrom(backgroundColor: TraceColors.cyan, foregroundColor: TraceColors.ink,
@@ -175,38 +214,45 @@ class _AccountPageState extends State<AccountPage> {
     if (ota.isUpgrading) throw const AccountException('BUSY', '请等待当前升级完成');
     final connected = Get.find<BluetoothService>().connectedDevices.toList();
     if (connected.isEmpty) throw const AccountException('DEVICE_OFFLINE', '请先连接码表蓝牙');
-    final selected = await showDialog<String>(context: context, builder: (context) => SimpleDialog(
-      title: const Text('选择已连接码表'), children: connected.map((device) => SimpleDialogOption(
+    final selected = await showDialog<String>(context: context, builder: (context) => TraceDialog(
+      title: '选择已连接码表', content: Column(mainAxisSize: MainAxisSize.min, children: connected.map((device) => TextButton(
+        style: TextButton.styleFrom(foregroundColor: TraceColors.cyanSoft),
         onPressed: () => Navigator.pop(context, device.remoteId.str.toLowerCase()),
-        child: Text(device.platformName.isEmpty ? '蓝牙设备' : device.platformName))).toList()));
+        child: Text(device.platformName.isEmpty ? '蓝牙设备' : device.platformName))).toList()),
+      actions: [TraceDialogAction(label: '取消', onPressed: (context) => Navigator.pop(context))]));
     if (selected == null || !mounted) return;
     final info = await ota.readDeviceInfo(selected);
     final uid = info == null ? null : await ota.readHardwareUid();
     if (info == null || uid == null) throw const AccountException('DEVICE_UID_UNAVAILABLE', '无法读取码表唯一识别码，请确认已安装支持账号绑定的固件');
     if (!mounted) return;
-    final confirm = await showDialog<bool>(context: context, builder: (context) => AlertDialog(title: const Text('确认绑定码表'),
+    final confirm = await showDialog<bool>(context: context, builder: (context) => TraceDialog(title: '确认绑定码表',
       content: SelectableText('设备：${info.deviceModel}\n唯一识别码：$uid\n\n绑定后由本账号使用云端 OTA。'),
-      actions: [TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('取消')),
-        TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('绑定'))]));
-    if (confirm != true || ota.hardwareUid != uid || !ota.hasCurrentDeviceIdentity(selected)) return;
+      actions: [TraceDialogAction(onPressed: (context) => Navigator.pop(context, false), label: '取消'),
+        TraceDialogAction(onPressed: (context) => Navigator.pop(context, true), label: '绑定', isPrimary: true)]));
+    if (confirm != true) return;
+    if (ota.hardwareUid != uid || !ota.hasCurrentDeviceIdentity(selected)) {
+      throw const AccountException('DEVICE_CHANGED', '码表连接已变化，请重新选择设备后绑定');
+    }
     final device = connected.firstWhere((d) => d.remoteId.str.toLowerCase() == selected);
     await service.call('/api/account/devices/bind', body: {'uid': uid, 'confirmed': true,
       'name': device.platformName.isEmpty ? 'E-Track' : device.platformName,
       'model': info.deviceModel, 'hardwareRevision': info.hardwareRevision,
       'firmwareVersion': info.currentVersionCode, 'imageSha256': info.currentImageSha256Hex});
     await service.refresh();
+    _message = '码表已绑定。';
   }
   Future<void> _unbind(Map<String, dynamic> device) async {
-    final password = TextEditingController();
-    try {
-      final confirmed = await showDialog<bool>(context: context, builder: (context) => AlertDialog(
-        title: const Text('解绑码表'), content: TextField(controller: password, obscureText: true,
-          decoration: const InputDecoration(labelText: '请输入账号密码')),
-        actions: [TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('取消')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('解绑'))]));
-      if (confirmed != true) return;
-      await service.call('/api/account/devices/unbind', body: {'uid': device['uid'], 'password': password.text});
+    var password = '';
+      final confirmed = await showDialog<bool>(context: context, builder: (context) => TraceDialog(
+        title: '解绑码表', color: TraceColors.amber, content: TextField(obscureText: true,
+          onChanged: (value) => password = value,
+          style: const TextStyle(color: TraceColors.text),
+          decoration: const InputDecoration(labelText: '请输入账号密码', labelStyle: TextStyle(color: TraceColors.muted))),
+        actions: [TraceDialogAction(onPressed: (context) => Navigator.pop(context, false), label: '取消'),
+          TraceDialogAction(onPressed: (context) => Navigator.pop(context, true), label: '解绑', isPrimary: true, color: TraceColors.amber)]));
+      if (confirmed != true || !mounted) return;
+      await service.call('/api/account/devices/unbind', body: {'uid': device['uid'], 'password': password});
       await service.refresh();
-    } finally { password.dispose(); }
+      _message = '码表已解绑。';
   }
 }

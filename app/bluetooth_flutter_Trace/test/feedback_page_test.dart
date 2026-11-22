@@ -1,4 +1,5 @@
 import 'package:ble_monitor/pages/feedback_page.dart';
+import 'package:ble_monitor/pages/trace_ui.dart';
 import 'package:ble_monitor/pages/companion_diagnostics_page.dart';
 import 'package:ble_monitor/services/feedback_service.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,7 @@ void main() {
     }
   }
 
-  Future<void> open(WidgetTester tester, {double width = 390, double scale = 1, bool diagnostics = false}) async {
+  Future<void> open(WidgetTester tester, {double width = 390, double scale = 1, bool diagnostics = false, bool diagnosticsFail = false}) async {
     // The serialized edit future must belong to this test's FakeAsync zone.
     service = FeedbackService(endpoint: Uri.parse('https://feedback.test/api/public/feedback'), supported: true,
       canSend: () => false,
@@ -40,11 +41,29 @@ void main() {
       onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => FeedbackPage(service: service,
         diagnosticsSupported: diagnostics, readDiagnostics: () async {
           diagnosticReads++;
+          if (diagnosticsFail) throw StateError('diagnostic read failed');
           return CompanionDiagnosticSnapshot([{'state':'CONNECTION_TIMEOUT','stage':'DISCOVERING','elapsedMs':25000}]);
         }))),
       child: const Text('Help parent'))))));
     await tester.tap(find.text('Help parent')); await settle(tester);
   }
+
+  testWidgets('failed feedback preparation opens a shared dialog and retains the draft', (tester) async {
+    try {
+      await open(tester, diagnostics: true, diagnosticsFail: true);
+      await tester.enterText(find.byKey(const ValueKey('feedback-text')), 'Retain this issue');
+      await tester.ensureVisible(find.byKey(const ValueKey('feedback-attach-diagnostics')));
+      await tester.tap(find.byKey(const ValueKey('feedback-attach-diagnostics'))); await tester.pump();
+      await tester.ensureVisible(find.byKey(const ValueKey('feedback-submit')));
+      await tester.tap(find.byKey(const ValueKey('feedback-submit'))); await settle(tester);
+      expect(find.byType(TraceDialog), findsOneWidget);
+      expect(find.textContaining('\u5f53\u524d\u6587\u5b57\u5df2\u4fdd\u7559'), findsOneWidget);
+      expect(service.pending, isEmpty);
+      await tester.tap(find.text('\u77e5\u9053\u4e86')); await settle(tester);
+      expect(tester.widget<TextField>(find.byKey(const ValueKey('feedback-text'))).controller!.text, 'Retain this issue');
+      expect(tester.takeException(), isNull);
+    } finally { service.onClose(); await tester.pumpWidget(const SizedBox.shrink()); }
+  });
 
   testWidgets('feedback is persisted with a clear queued status and survives reopening', (tester) async {
     try {

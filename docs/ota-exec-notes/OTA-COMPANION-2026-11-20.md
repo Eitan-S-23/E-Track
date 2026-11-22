@@ -2,6 +2,21 @@
 
 ## Account And Layout Batch, 2026-11-22
 
+### Mail And Feedback Follow-Up
+
+Owner asks to finish actual email delivery and align account/management notices
+with the existing dialog UX. Root owns this bounded change on main above 8a9bd9e8.
+Code inspection confirms App account errors and Admin account/feedback errors are
+inline-only. Reuse TraceDialog and the Admin actor-scoped feedback queue; preserve
+forms/drafts, cancellation, in-flight ownership and no duplicate mutations.
+Mail currently uses Resend but no sender/API input or controlled recipient is
+registered. Ask for the existing secure configuration locator/sender/recipient;
+do not invent a domain, scrape secrets or send to guessed addresses. Complete
+code/test work while this input is pending. No MCU change, device operation,
+Stable/Beta publication or delta generation is included. Self-tests are not
+independent acceptance or real mail delivery. All controlled outputs stay in the
+project, reusing the existing host/CI adapters under .cache/ota-followup-20261122.
+
 Status: SOURCE_CANDIDATES_AND_BACKEND_DELIVERED / PHONE_AND_DEVICE_VALIDATION_PENDING.
 Latest MCU: 3.3.50, source `91916e11469fce94282a9e1a0254048f4e4a9d7f`,
 successful candidate CI `44970721130`. App remains 1.0.90+116; it was not rebuilt.

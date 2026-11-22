@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  window.TraceAccounts = function ({ element, api, mutate, session, text, escape: esc, confirm }) {
+  window.TraceAccounts = function ({ element, api, mutate, session, text, escape: esc, confirm, onError, onRecovered, onSuccess }) {
     let epoch = 0, ticket = 0, actor = '', busy = false, notice = '', page = 1, query = '';
     let data = { users: [], total: 0 }, settings = null, draft = null, detail = null;
     const owner = () => session()?.role === 'owner';
@@ -8,6 +8,7 @@
     const stamp = n => n ? new Date(n).toLocaleString() : '-';
     const label = (cn, en) => esc(text(cn, en));
     function render() {
+      const settingsOpen = element.querySelector('details')?.open ?? false;
       const disabled = busy || !owner() ? 'disabled' : '';
       element.innerHTML = `<div class="panel-head"><div><h2>${label('账号管理', 'Accounts')}</h2>
         <p>${label('账号、登录统计与绑定码表。统计按北京时间划分，非在线人数。', 'Accounts, login statistics and bound devices. Shanghai calendar day; not concurrent online users.')}</p></div>
@@ -16,7 +17,7 @@
         <div class="operations-buttons"><span>${label('有效账号', 'Accounts')}: ${Number(data.stats?.registered?.total ?? 0)}</span>
           <span>${label('今日登录用户', 'Users signed in today')}: ${Number(data.stats?.today?.users ?? 0)}</span>
           <span>${label('今日登录次数', 'Sign-ins today')}: ${Number(data.stats?.today?.logins ?? 0)}</span></div>
-        ${draft ? `<details><summary>${label('注册与检查额度设置', 'Registration and check limits')}</summary>
+        ${draft ? `<details ${settingsOpen ? 'open' : ''}><summary>${label('注册与检查额度设置', 'Registration and check limits')}</summary>
           <form id="accountSettings"><div class="operations-buttons">
             ${[['registration_enabled','开放注册','Registration'],['password_registration_enabled','允许密码注册','Password registration'],
               ['email_verification_enabled','注册验证邮箱','Verify registration email']].map(([key,cn,en]) =>
@@ -24,7 +25,10 @@
             ${[['automatic_daily_limit','自动每日上限','Automatic daily limit'],['manual_daily_limit','手动每日上限','Manual daily limit']].map(([key,cn,en]) =>
               `<label>${label(cn,en)} <input type="number" name="${key}" min="0" max="1000" value="${Number(draft[key])}" ${disabled}></label>`).join('')}
             <button class="save-button" ${disabled}>${label('保存设置', 'Save settings')}</button></div>
-          <p>${label('邮箱验证需先配置邮件发送；关闭注册不会停用已有账号。', 'Configure email delivery before enabling verification. Closing registration does not disable existing accounts.')}</p></form></details>` : ''}
+          <p>${draft.emailDeliveryAvailable === true
+            ? label('邮件参数已配置，实际收信仍需验证。', 'Email parameters are configured; delivery still needs verification.')
+            : label('邮件发送未配置，验证码与找回密码暂不可用。', 'Email delivery is not configured; verification and password reset are unavailable.')}
+            ${label('关闭注册不会停用已有账号。', 'Closing registration does not disable existing accounts.')}</p></form></details>` : ''}
         <div class="table-scroll" style="max-width:100%;overflow-x:auto"><table><thead><tr><th>${label('用户', 'User')}</th><th>${label('状态', 'State')}</th>
           <th>${label('设备数', 'Devices')}</th><th>${label('最近登录', 'Last sign-in')}</th><th></th></tr></thead><tbody>
           ${data.users.map(u => `<tr><td>${esc(u.username)}<br><small>${esc(u.email || '')}</small></td><td>${esc(u.state)}</td>
@@ -52,10 +56,15 @@
     async function run(action) {
       if (busy || !actor) return;
       const current = epoch, request = ++ticket;
+      onRecovered?.('accounts');
       busy = true; notice = ''; render();
+      let failure;
       try { await action(() => current === epoch && request === ticket); }
-      catch (error) { if (current === epoch && request === ticket) notice = error.message; }
+      catch (error) { if (current === epoch && request === ticket) { notice = error.message; failure = error; } }
       finally { if (current === epoch && request === ticket) { busy = false; render(); } }
+      if (current !== epoch || request !== ticket) return;
+      if (failure) onError?.(failure, 'accounts');
+      else { onRecovered?.('accounts'); if (notice) onSuccess?.(notice); }
     }
     async function load() {
       if (!await mayDiscard()) return;
@@ -83,7 +92,7 @@
       const payload = { ...draft };
       void run(async current => {
         const result = await mutate('/api/admin/accounts/settings', payload);
-        if (current()) { settings = result.settings; draft = { ...settings }; notice = text('已保存','Saved'); }
+        if (current()) { settings = result.settings; draft = { ...settings }; notice = text('账号设置已保存','Account settings saved'); }
       });
     });
     element.addEventListener('click', async event => {
@@ -106,7 +115,10 @@
         message: detail.account.username + ' · ' + button.textContent, confirmLabel: text('确认','Confirm'), tone: 'warning' }) || currentEpoch !== epoch) return;
       await run(async current => {
         await mutate('/api/admin/accounts/' + id + '/' + action, payload);
-        const result = await api('/api/admin/accounts/' + id);
+        if (!current()) return;
+        let result;
+        try { result = await api('/api/admin/accounts/' + id); }
+        catch (_) { throw Error(text('操作已完成，但详情刷新失败。请刷新查看，不要重复提交。', 'Action completed, but detail refresh failed. Refresh the page; do not repeat the action.')); }
         if (current()) { detail = result; notice = text('操作完成','Action completed'); }
       });
     });

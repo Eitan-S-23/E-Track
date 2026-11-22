@@ -1,5 +1,5 @@
 import { accountBudget, accountDay } from './account_quota';
-import { accountPublic, accountSettings, type Account } from './accounts';
+import { accountPublic, accountSettings, emailDeliveryAvailable, type Account } from './accounts';
 import { ApiError, invalidParameter } from './errors';
 import { json } from './http';
 import { boundedJson } from './version_inventory';
@@ -11,7 +11,7 @@ interface Actor { email: string; role: 'viewer' | 'publisher' | 'owner' }
 export async function accountAdmin(request: Request, env: Env, actor: Actor): Promise<Response> {
   const url = new URL(request.url), method = request.method;
   const suffix = url.pathname.slice('/api/admin/accounts'.length);
-  if (method === 'GET' && suffix === '/settings') return json(await accountSettings(env));
+  if (method === 'GET' && suffix === '/settings') return json({ ...await accountSettings(env), emailDeliveryAvailable: emailDeliveryAvailable(env) });
   if (method === 'GET' && suffix === '') {
     const page = Number(url.searchParams.get('page') ?? 1);
     if (!Number.isSafeInteger(page) || page < 1 || page > 100000) throw invalidParameter('Invalid page');
@@ -58,8 +58,8 @@ export async function accountAdmin(request: Request, env: Env, actor: Actor): Pr
     const counts = ['automatic_daily_limit', 'manual_daily_limit'] as const;
     for (const key of flags) if (body[key] !== 0 && body[key] !== 1) throw invalidParameter('Invalid ' + key);
     for (const key of counts) if (!Number.isInteger(body[key]) || Number(body[key]) < 0 || Number(body[key]) > 1000) throw invalidParameter('Invalid ' + key);
-    if (body.email_verification_enabled === 1 && (!env.ACCOUNT_MAIL_API_KEY || !env.ACCOUNT_MAIL_FROM)) {
-      throw invalidParameter('Email delivery must be configured before enabling verification');
+    if (body.email_verification_enabled === 1 && !emailDeliveryAvailable(env)) {
+      throw new ApiError('EMAIL_DELIVERY_UNAVAILABLE', 'Email delivery must be configured before enabling verification', 503);
     }
     const results = await env.DB.batch([
       env.DB.prepare(`UPDATE account_settings SET registration_enabled=?,password_registration_enabled=?,email_verification_enabled=?,
@@ -69,7 +69,7 @@ export async function accountAdmin(request: Request, env: Env, actor: Actor): Pr
         SELECT ?,?,'settings_update',? WHERE changes()=1`).bind(crypto.randomUUID(), actor.email, now)
     ]);
     if (!results[0].results.length) throw new ApiError('CAS_CONFLICT', 'Settings changed; reload before saving', 409);
-    return json({ ok: true, settings: await accountSettings(env) });
+    return json({ ok: true, settings: { ...await accountSettings(env), emailDeliveryAvailable: emailDeliveryAvailable(env) } });
   }
   if (!match?.[2]) throw invalidParameter('Unsupported account operation');
   const a = await env.DB.prepare('SELECT id,state FROM accounts WHERE app_id=? AND id=?').bind(env.APP_ID, match[1]).first<{ id: string; state: string }>();

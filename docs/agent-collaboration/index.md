@@ -1,6 +1,11 @@
 # Shared Agent Records
 
-Current follow-up: COMPANION-FEEDBACK-20261122, Codex root, SOURCE_CANDIDATES_AND_BACKEND_DELIVERED / PHONE_AND_DEVICE_VALIDATION_PENDING.
+Current follow-up: COMPANION-FEEDBACK-20261122, Codex root, ACCOUNT_MAIL_AND_FEEDBACK_IN_PROGRESS above main 8a9bd9e8.
+Owner requests actual email completion and consistent App/Admin failure dialogs.
+Account and adjacent feedback prompts are being aligned to existing components;
+mail sender/domain and controlled real recipient remain missing owner inputs.
+Prior source/candidates/backend delivery and pending phone/device validation below
+are preserved; no MCU, channel/delta or device action belongs to this follow-up.
 Owner approved separate account-wide automatic/manual daily check limits of 5/5.
 Login, binding, Admin account views, cloud admission and the MCU text-layout follow-up
 have passed development self-tests and reached main `8a6dd4a3`. The owner's later

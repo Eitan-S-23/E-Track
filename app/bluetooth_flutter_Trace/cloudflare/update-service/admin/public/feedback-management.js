@@ -1,6 +1,6 @@
 (function () {
   "use strict";
-  window.TraceFeedbackInbox = function ({ element, api, mutate, session, text, escape: esc, confirm }) {
+  window.TraceFeedbackInbox = function ({ element, api, mutate, session, text, escape: esc, confirm, onError, onRecovered, onSuccess }) {
     const states = ["pending", "processing", "resolved", "declined"];
     let actor = "", epoch = 0, listTicket = 0, detailTicket = 0, timer = 0;
     let rows = [], nextCursor = null, filter = "all", query = "", selected = null, history = [];
@@ -66,8 +66,9 @@
         if (!Array.isArray(value.feedback)) throw Error(text("\u53cd\u9988\u54cd\u5e94\u683c\u5f0f\u65e0\u6548", "Invalid feedback response"));
         rows = append ? [...rows, ...value.feedback.filter(item => !rows.some(row => row.id === item.id))] : value.feedback;
         nextCursor = value.nextCursor ?? null;
+        onRecovered?.('feedback-list');
       } catch (error) {
-        if (ticket === listTicket && generation === epoch) notice = error.message;
+        if (ticket === listTicket && generation === epoch) { notice = error.message; onError?.(error, 'feedback-list'); }
       } finally {
         if (ticket === listTicket && generation === epoch) { loading = false; render(); }
       }
@@ -91,18 +92,20 @@
         if (value.feedback?.id !== id || !Number.isInteger(value.feedback.revision)) throw Error(text("\u53cd\u9988\u54cd\u5e94\u683c\u5f0f\u65e0\u6548", "Invalid feedback response"));
         selected = value.feedback; history = value.history || [];
         draft = { status: selected.status, note: selected.note }; notice = ""; render();
+        onRecovered?.('feedback-detail');
         if (!element.hidden && element.closest("[data-admin-view]")?.hidden !== true) {
           const detail = element.querySelector("#feedbackDetail");
           detail.scrollIntoView({ block: "nearest" });
           detail.focus({ preventScroll: true });
         }
-      } catch (error) { if (ticket === detailTicket && generation === epoch) { notice = error.message; } }
+      } catch (error) { if (ticket === detailTicket && generation === epoch) { notice = error.message; onError?.(error, 'feedback-detail'); } }
       finally { if (ticket === detailTicket && generation === epoch) { detailLoading = false; render(); } }
     }
 
     async function save() {
       if (!selected || !editAllowed() || saving || detailLoading) return;
       const generation = epoch, id = selected.id, revision = selected.revision;
+      onRecovered?.('feedback-save');
       const payload = { status: draft.status, note: draft.note, revision };
       saving = true; notice = ""; render();
       try {
@@ -114,10 +117,15 @@
         rows = rows.map(item => item.id === id ? selected : item)
           .filter(item => filter === "all" || item.status === filter);
         notice = text("\u5904\u7406\u7ed3\u679c\u5df2\u4fdd\u5b58", "Outcome saved");
+        onRecovered?.('feedback-save');
+        onSuccess?.(notice);
       } catch (error) {
-        if (generation === epoch) notice = error.code === "CAS_CONFLICT"
+        if (generation === epoch) {
+          notice = error.code === "CAS_CONFLICT"
           ? text("\u53cd\u9988\u5df2\u88ab\u5176\u4ed6\u64cd\u4f5c\u4fee\u6539\u3002\u5f53\u524d\u5907\u6ce8\u5df2\u4fdd\u7559\uff0c\u8bf7\u91cd\u65b0\u8bfb\u53d6\u540e\u6838\u5bf9\u3002", "Feedback changed elsewhere. Your notes are retained; reload and reconcile.")
           : text("\u672a\u786e\u8ba4\u4fdd\u5b58\u6210\u529f\uff0c\u5907\u6ce8\u5df2\u4fdd\u7559\u3002\u8bf7\u5148\u91cd\u65b0\u8bfb\u53d6\u72b6\u6001\u518d\u91cd\u8bd5\u3002", "Save was not confirmed. Notes are retained; reload state before retrying.") + " " + error.message;
+          onError?.(notice, 'feedback-save');
+        }
       } finally { if (generation === epoch) { saving = false; render(); } }
     }
 

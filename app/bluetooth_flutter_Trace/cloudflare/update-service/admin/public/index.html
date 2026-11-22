@@ -1693,10 +1693,14 @@
       attachEvents();
       feedbackInbox = window.TraceFeedbackInbox?.({ element: document.querySelector("#appFeedbackPanel"),
         api, mutate, session: () => state.session, text: opText, escape: escapeHtml,
-        confirm: options => openConfirmDialog(options) });
+        confirm: options => openConfirmDialog(options),
+        onError: (error, scope) => showErrorDialog(error, { scope }), onRecovered: clearFeedbackError,
+        onSuccess: message => queueFeedback({ tone: "success", title: opText("操作完成", "Action completed"), message }) });
       accountPanel = window.TraceAccounts?.({ element: document.querySelector('#appAccountsPanel'),
         api, mutate, session: () => state.session, text: opText, escape: escapeHtml,
-        confirm: options => openConfirmDialog(options) });
+        confirm: options => openConfirmDialog(options),
+        onError: (error, scope) => showErrorDialog(error, { scope }), onRecovered: clearFeedbackError,
+        onSuccess: message => queueFeedback({ tone: "success", title: opText("操作完成", "Action completed"), message }) });
       resourceUsagePanel = window.TraceResourceUsage?.({ element: document.querySelector("#providerUsage"),
         api, text: opText, escape: escapeHtml, formatBytes, onResize: positionResourcePanel,
         onError: error => showErrorDialog(error, { scope: "resource-usage" }), onRecovered: () => clearFeedbackError("resource-usage") });

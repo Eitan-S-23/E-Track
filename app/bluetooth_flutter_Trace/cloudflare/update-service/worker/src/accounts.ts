@@ -19,6 +19,10 @@ const encoder = new TextEncoder();
 const randomHex = (bytes = 32) => Array.from(crypto.getRandomValues(new Uint8Array(bytes)), b => b.toString(16).padStart(2, '0')).join('');
 const milliseconds = () => Date.now();
 
+export function emailDeliveryAvailable(env: Pick<Env, 'ACCOUNT_MAIL_API_KEY' | 'ACCOUNT_MAIL_FROM'>): boolean {
+  return Boolean(env.ACCOUNT_MAIL_API_KEY?.trim() && env.ACCOUNT_MAIL_FROM?.trim());
+}
+
 export async function accountSettings(env: Env): Promise<AccountSettings> {
   const settings = await env.DB.prepare('SELECT * FROM account_settings WHERE app_id=?').bind(env.APP_ID).first<AccountSettings>();
   if (!settings) throw new ApiError('BACKEND_UNAVAILABLE', 'Account migration is not installed', 503);
@@ -109,7 +113,12 @@ async function sendCode(request: Request, env: WorkerEnv, body: Record<string, u
     throw new ApiError('REGISTRATION_DISABLED', 'Registration has been closed by the administrator', 403);
   }
   await authRate(request, env, email);
-  if (!env.ACCOUNT_MAIL_API_KEY || !env.ACCOUNT_MAIL_FROM) throw new ApiError('BACKEND_UNAVAILABLE', 'Email delivery is not configured', 503);
+  if (!emailDeliveryAvailable(env)) throw new ApiError('EMAIL_DELIVERY_UNAVAILABLE', 'Email delivery is not configured; contact the administrator', 503);
+  const limiter = env.RATE_LIMITER.getByName('account:email:' + await sha256Hex(email));
+  const spacing = await limiter.check('resend', 1, 60);
+  if (!spacing.allowed) throw new ApiError('EMAIL_SEND_COOLDOWN', 'Wait before requesting another verification email', 429, { retryAfter: spacing.retryAfter });
+  const hourly = await limiter.check('hourly', 5, 3600);
+  if (!hourly.allowed) throw new ApiError('RATE_LIMITED', 'Email request limit reached; try later', 429, { retryAfter: hourly.retryAfter });
   const id = crypto.randomUUID(), now = milliseconds();
   const random = crypto.getRandomValues(new Uint32Array(1))[0];
   const code = String(random % 1000000).padStart(6, '0');
@@ -119,16 +128,21 @@ async function sendCode(request: Request, env: WorkerEnv, body: Record<string, u
   if (purpose === 'reset' && !existing) return json({ ok: true, verificationId: id, expiresIn: 600 });
   await env.DB.prepare(`INSERT INTO account_email_codes(id,app_id,email,purpose,code_hash,created_at,expires_at)
     VALUES(?,?,?,?,?,?,?)`).bind(id, env.APP_ID, email, purpose, await sha256Hex(id + ':' + code), now, now + 600000).run();
-  const response = await fetch('https://api.resend.com/emails', { method: 'POST',
-    headers: { Authorization: 'Bearer ' + env.ACCOUNT_MAIL_API_KEY, 'Content-Type': 'application/json', 'Idempotency-Key': id },
-    body: JSON.stringify({ from: env.ACCOUNT_MAIL_FROM, to: [email], subject: 'E-Track verification code',
-      text: 'Your E-Track verification code is ' + code + '. It expires in 10 minutes. Do not share it.' }),
-    signal: AbortSignal.timeout(15000) });
-  if (!response.ok) {
+  const operation = purpose === 'register' ? 'registration' : 'password reset';
+  try {
+    const response = await fetch('https://api.resend.com/emails', { method: 'POST', redirect: 'error',
+      headers: { Authorization: 'Bearer ' + env.ACCOUNT_MAIL_API_KEY!.trim(), 'Content-Type': 'application/json', 'Idempotency-Key': id },
+      body: JSON.stringify({ from: env.ACCOUNT_MAIL_FROM!.trim(), to: [email], subject: 'E-Track ' + operation + ' verification',
+        text: 'Your E-Track ' + operation + ' code is ' + code + '. It expires in 10 minutes and can be used once. Do not share it. If you did not request this email, ignore it.',
+        html: '<div style="font-family:sans-serif;max-width:480px;padding:24px;background:#061821;color:#e4f5f7"><h1 style="color:#65dbe5">E-Track</h1><p>Your ' + operation + ' verification code:</p><p style="font-size:32px;letter-spacing:6px">' + code + '</p><p>Valid for 10 minutes, one use only. Do not share this code.</p><p>If you did not request this email, ignore it.</p></div>' }),
+      signal: AbortSignal.timeout(15000) });
+    await response.body?.cancel();
+    if (!response.ok) throw new Error('Email provider rejected the request');
+  } catch {
+    // An uncertain or rejected send must never leave a usable orphan code.
     await env.DB.prepare('DELETE FROM account_email_codes WHERE id=?').bind(id).run();
-    throw new ApiError('BACKEND_UNAVAILABLE', 'Unable to send verification email', 503);
+    throw new ApiError('EMAIL_DELIVERY_FAILED', 'Verification email was not confirmed; request a new code later', 502);
   }
-  await response.body?.cancel();
   return json({ ok: true, verificationId: id, expiresIn: 600 });
 }
 
@@ -139,7 +153,7 @@ export async function accountAuthRoute(request: Request, env: WorkerEnv): Promis
     return json({ registrationEnabled: !!s.registration_enabled,
       passwordRegistrationEnabled: !!s.password_registration_enabled,
       emailVerificationEnabled: !!s.email_verification_enabled,
-      passwordResetAvailable: !!env.ACCOUNT_MAIL_API_KEY && !!env.ACCOUNT_MAIL_FROM,
+      emailDeliveryAvailable: emailDeliveryAvailable(env), passwordResetAvailable: emailDeliveryAvailable(env),
       automaticDailyLimit: s.automatic_daily_limit, manualDailyLimit: s.manual_daily_limit, timezone: 'Asia/Shanghai' });
   }
   if (request.method !== 'POST') throw invalidParameter('Unsupported account operation');

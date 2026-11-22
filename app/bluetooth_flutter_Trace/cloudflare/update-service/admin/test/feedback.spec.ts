@@ -63,6 +63,10 @@ for (const width of [1440, 390]) test(`feedback read/process flow at ${width}px 
   await page.locator("#feedbackNote").fill("Investigating the navigation issue");
   await page.locator("#feedbackSave").click();
   await expect(page.locator("#feedbackNotice")).toHaveText("Outcome saved");
+  await expect(page.locator('#confirmDialog')).toBeVisible();
+  await expect(page.locator('#confirmMessage')).toContainText('Outcome saved');
+  await page.locator('#confirmAccept').click();
+  await expect(page.locator('#confirmDialog')).toBeHidden();
   await expect(page.locator(".feedback-history")).toContainText("Investigating the navigation issue");
   expect(fixture.writes).toHaveLength(1); expect(fixture.writes[0].body.revision).toBe(1);
   await page.locator("#feedbackFilter").selectOption("processing");
@@ -70,6 +74,9 @@ for (const width of [1440, 390]) test(`feedback read/process flow at ${width}px 
   await page.locator("#feedbackState").selectOption("resolved");
   await page.locator("#feedbackSave").click();
   await expect(page.locator("[data-feedback-id]")).toHaveCount(0);
+  await expect(page.locator('#confirmDialog')).toBeVisible();
+  await page.locator('#confirmAccept').click();
+  await expect(page.locator('#confirmDialog')).toBeHidden();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.screenshot({ path: info.outputPath("feedback.png"), animations: "disabled" });
   expect(fixture.errors).toEqual([]);
@@ -90,9 +97,16 @@ test("failed saves and concurrent edits preserve operator drafts", async ({ page
   fixture.data.fail = true; await page.locator("#feedbackSave").click();
   await expect(page.locator("#feedbackNotice")).toContainText("Save was not confirmed");
   await expect(page.locator("#feedbackNote")).toHaveValue("Keep this draft");
+  await expect(page.locator('#confirmDialog')).toHaveClass(/danger/);
+  await expect(page.locator('#confirmMessage')).toContainText('Save was not confirmed');
+  await page.locator('#confirmAccept').click();
+  await expect(page.locator('#confirmDialog')).toBeHidden();
   fixture.data.fail = false; fixture.data.stale = true; await page.locator("#feedbackSave").click();
   await expect(page.locator("#feedbackNotice")).toContainText("changed elsewhere");
   await expect(page.locator("#feedbackNote")).toHaveValue("Keep this draft");
+  await expect(page.locator('#confirmMessage')).toContainText('changed elsewhere');
+  await page.locator('#confirmAccept').click();
+  await expect(page.locator('#confirmDialog')).toBeHidden();
   await page.locator('[data-feedback-id="23"]').click(); await expect(page.locator("#confirmDialog")).toBeVisible();
   await page.locator("#confirmCancel").click(); await expect(page.locator("#feedbackNote")).toHaveValue("Keep this draft");
 });

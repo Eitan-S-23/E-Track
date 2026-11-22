@@ -19,7 +19,41 @@ test('account administration lists hardware UID and saves independent 5/5 regist
   await page.locator('#accountSettings button').click();
   await expect.poll(() => data.writes.length).toBe(1);
   expect(data.writes[0].body).toMatchObject({ registration_enabled: 0, automatic_daily_limit: 5, manual_daily_limit: 5 });
+  await expect(page.locator('#confirmDialog')).toBeVisible();
+  await expect(page.locator('#confirmMessage')).toContainText('Account settings saved');
+  await page.locator('#confirmAccept').click();
   expect(errors).toEqual([]);
+});
+
+test('account read and save failures use standard dialogs without losing the draft or retrying writes', async ({ page }) => {
+  const data = await mockApp(page);
+  data.accountReadFailure = true;
+  await page.locator('#appAccountsTab').click();
+  await expect(page.locator('#confirmDialog')).toBeVisible();
+  await expect(page.locator('#confirmDialog')).toHaveClass(/danger/);
+  await expect(page.locator('#confirmMessage')).toContainText('BACKEND_UNAVAILABLE');
+  await page.locator('#confirmAccept').click();
+  data.accountReadFailure = false;
+  await page.locator('#accountReload').click();
+  await expect(page.locator('#appAccountsPanel [data-user]')).toBeVisible();
+  await page.locator('#appAccountsPanel summary').click();
+  await page.locator('[name="manual_daily_limit"]').fill('7');
+  data.accountSaveFailure = true;
+  await page.locator('#accountSettings button').click();
+  await expect(page.locator('#confirmDialog')).toBeVisible();
+  await expect(page.locator('#confirmMessage')).toContainText('CAS_CONFLICT');
+  await page.locator('#confirmAccept').click();
+  await expect(page.locator('#appAccountsPanel details')).toHaveAttribute('open', '');
+  await expect(page.locator('[name="manual_daily_limit"]')).toHaveValue('7');
+  expect(data.writes).toHaveLength(1);
+});
+
+test('account settings display missing email configuration rather than claiming delivery is ready', async ({ page }) => {
+  await mockApp(page);
+  await page.locator('#appAccountsTab').click();
+  await expect(page.locator('#appAccountsPanel [data-user]')).toBeVisible();
+  await page.locator('#appAccountsPanel summary').click();
+  await expect(page.locator('#accountSettings')).toContainText('Email delivery is not configured');
 });
 
 test('viewer account detail is read-only on a narrow viewport', async ({ page }) => {
@@ -45,6 +79,7 @@ function release(id: string, versionCode: number) {
 async function mockApp(page: Page, language = "en", role = "owner", firmwareFailure = false) {
   const data = {
     role, conflict: false, notesFailure: false, announcementFailure: false, mutations: 0, firmwareFailure,
+    accountReadFailure: false, accountSaveFailure: false,
     accountSettings: { registration_enabled: 1, password_registration_enabled: 1, email_verification_enabled: 0,
       automatic_daily_limit: 5, manual_daily_limit: 5, revision: 0 },
     announcements: [] as Array<{ id: string; title: string; body: string; published: number; pinned: number; created_at: string; updated_at: string }>,
@@ -85,6 +120,7 @@ async function mockApp(page: Page, language = "en", role = "owner", firmwareFail
       const account = { id: '11111111-1111-4111-8111-111111111111', username: 'test-rider', state: 'active',
         email: 'rider@example.test', deviceCount: 1, createdAt: 1795300000000, lastLoginAt: 1795300000000 };
       if (url.pathname === '/api/admin/accounts') {
+        if (data.accountReadFailure) { await fail('BACKEND_UNAVAILABLE', 503); return; }
         await reply({ users: [account], total: 1, page: 1, pageSize: 30,
           stats: { registered: { total: 1 }, today: { users: 1, logins: 2 } } }); return;
       }
@@ -119,6 +155,7 @@ async function mockApp(page: Page, language = "en", role = "owner", firmwareFail
     if (url.pathname === '/api/admin/accounts/settings') {
       const body = request.postDataJSON();
       data.writes.push({ path: url.pathname, body });
+      if (data.accountSaveFailure) { await fail('CAS_CONFLICT'); return; }
       if (data.role !== 'owner') { await fail('ROLE_FORBIDDEN', 403); return; }
       expect(body.revision).toBe(data.accountSettings.revision);
       data.accountSettings = { ...body, revision: body.revision + 1 };

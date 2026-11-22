@@ -1,5 +1,5 @@
 import { env } from 'cloudflare:workers';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { accountBudget, accountCheck, accountDay, automaticSpacingMs } from '../src/account_quota';
 import { accountAuthRoute, accountRoute, accountCloudAccess, requireAccount, hashAccountPassword } from '../src/accounts';
 import { accountAdmin } from '../src/account_admin';
@@ -160,5 +160,102 @@ describe('account admission', () => {
     expect(calls).toBe(1);
     const owner = await requireAccount(ownerRequest, env);
     expect((await accountBudget(env.DB, owner.id, limits)).manual.used).toBe(1);
+  });
+});
+
+describe('account verification email', () => {
+  const mailEnv = () => ({ ...env, ACCOUNT_MAIL_API_KEY: 'fixture-mail-key', ACCOUNT_MAIL_FROM: 'E-Track <mail@example.test>' });
+  const address = () => crypto.randomUUID() + '@example.test';
+  const post = (path: string, body: object) => new Request('https://example.com/api/auth/' + path, {
+    method: 'POST', headers: { 'Content-Type': 'application/json', 'CF-Connecting-IP': crypto.randomUUID() },
+    body: JSON.stringify(body),
+  });
+  afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
+  function mailbox() {
+    const messages: Array<{ text: string; html: string; subject: string; to: string[]; from: string }> = [];
+    const transport = vi.fn(async (_url: unknown, options: RequestInit) => {
+      expect(String(_url)).toBe('https://api.resend.com/emails');
+      expect(options.redirect).toBe('error');
+      expect(new Headers(options.headers).get('Idempotency-Key')).toMatch(/^[a-z0-9-]{36}$/);
+      messages.push(JSON.parse(String(options.body)));
+      return Response.json({ id: crypto.randomUUID() });
+    });
+    vi.stubGlobal('fetch', transport);
+    return { messages, transport, code: () => /code is (\d{6})/.exec(messages.at(-1)!.text)![1] };
+  }
+  it('reports configuration without exposing secrets, and refuses sends when unconfigured', async () => {
+    const box = mailbox();
+    const status = await accountAuthRoute(new Request('https://example.com/api/auth/status'), env);
+    expect(await status.json()).toMatchObject({ emailDeliveryAvailable: false, passwordResetAvailable: false });
+    await expect(accountAuthRoute(post('email-code', { email: address(), purpose: 'register' }), env))
+      .rejects.toMatchObject({ code: 'EMAIL_DELIVERY_UNAVAILABLE', status: 503 });
+    const configured = mailEnv();
+    const settings = await accountAdmin(new Request('https://example.com/api/admin/accounts/settings'), configured, { email: 'owner@example.test', role: 'owner' });
+    const text = await settings.text();
+    expect(JSON.parse(text).emailDeliveryAvailable).toBe(true);
+    expect(text).not.toContain(configured.ACCOUNT_MAIL_API_KEY);
+    expect(text).not.toContain(configured.ACCOUNT_MAIL_FROM);
+    expect(box.transport).not.toHaveBeenCalled();
+  });
+  it('sends a one-use registration code with text/HTML and stores only its hash', async () => {
+    const box = mailbox(), email = address(), configured = mailEnv();
+    const response = await accountAuthRoute(post('email-code', { email, purpose: 'register' }), configured);
+    const sent = await response.json() as { verificationId: string; expiresIn: number };
+    const code = box.code();
+    expect(sent.expiresIn).toBe(600); expect(JSON.stringify(sent)).not.toContain(code);
+    expect(box.messages[0]).toMatchObject({ to: [email], from: configured.ACCOUNT_MAIL_FROM });
+    expect(box.messages[0].html).toContain(code); expect(box.messages[0].subject).toContain('registration');
+    const stored = await env.DB.prepare('SELECT code_hash,expires_at,created_at FROM account_email_codes WHERE id=?')
+      .bind(sent.verificationId).first<{ code_hash: string; expires_at: number; created_at: number }>();
+    expect(stored!.code_hash).toMatch(/^[a-f0-9]{64}$/); expect(stored!.code_hash).not.toBe(code);
+    expect(stored!.expires_at - stored!.created_at).toBe(600000);
+    await env.DB.prepare('UPDATE account_settings SET email_verification_enabled=1 WHERE app_id=?').bind(env.APP_ID).run();
+    const body = { username: 'u' + crypto.randomUUID().replaceAll('-', '').slice(0,20), email,
+      verificationId: sent.verificationId, code, password: 'test-password-123' };
+    try {
+      expect((await accountAuthRoute(post('register', body), configured)).status).toBe(201);
+      await expect(accountAuthRoute(post('register', body), configured)).rejects.toMatchObject({ code: 'EMAIL_VERIFICATION_REQUIRED' });
+    } finally { await env.DB.prepare('UPDATE account_settings SET email_verification_enabled=0 WHERE app_id=?').bind(env.APP_ID).run(); }
+  });
+  it.each(['rejected', 'network', 'timeout'])('invalidates orphan codes on %s send failure without leaking provider data', async kind => {
+    const email = address();
+    vi.stubGlobal('fetch', vi.fn(async () => {
+      if (kind === 'rejected') return new Response('private provider diagnostic', { status: 403 });
+      throw new Error(kind + ': fixture-mail-key');
+    }));
+    await expect(accountAuthRoute(post('email-code', { email, purpose: 'register' }), mailEnv()))
+      .rejects.toMatchObject({ code: 'EMAIL_DELIVERY_FAILED', status: 502,
+        message: 'Verification email was not confirmed; request a new code later' });
+    expect((await env.DB.prepare('SELECT COUNT(*) AS n FROM account_email_codes WHERE email=?').bind(email).first<{ n: number }>())!.n).toBe(0);
+  });
+  it('limits resends per mailbox across purposes without sending a duplicate', async () => {
+    const box = mailbox(), email = address(), configured = mailEnv();
+    await accountAuthRoute(post('email-code', { email, purpose: 'register' }), configured);
+    await expect(accountAuthRoute(post('email-code', { email, purpose: 'reset' }), configured))
+      .rejects.toMatchObject({ code: 'EMAIL_SEND_COOLDOWN', status: 429 });
+    expect(box.transport).toHaveBeenCalledTimes(1);
+  });
+  it('does not send to or identify an unknown reset account', async () => {
+    const box = mailbox();
+    const response = await accountAuthRoute(post('email-code', { email: address(), purpose: 'reset' }), mailEnv());
+    expect(await response.json()).toMatchObject({ ok: true, expiresIn: 600 });
+    expect(box.transport).not.toHaveBeenCalled();
+  });
+  it('resets a real account only for its code and revokes existing sessions', async () => {
+    const box = mailbox(), email = address(), configured = mailEnv();
+    const username = 'u' + crypto.randomUUID().replaceAll('-', '').slice(0,20);
+    await accountAuthRoute(post('register', { username, email, password: 'test-password-123' }), configured);
+    const login = await accountAuthRoute(post('login', { username, password: 'test-password-123' }), configured);
+    const old = await login.json() as { token: string };
+    const sent = await (await accountAuthRoute(post('email-code', { email, purpose: 'reset' }), configured)).json() as { verificationId: string };
+    const body = { email, verificationId: sent.verificationId, code: box.code(), password: 'new-password-456' };
+    await expect(accountAuthRoute(post('reset-password', { ...body, email: address() }), configured))
+      .rejects.toMatchObject({ code: 'EMAIL_VERIFICATION_REQUIRED' });
+    expect((await accountAuthRoute(post('reset-password', body), configured)).status).toBe(200);
+    await expect(requireAccount(new Request('https://example.com/api/account/me', { headers: { Authorization: 'Bearer ' + old.token } }), configured))
+      .rejects.toMatchObject({ code: 'LOGIN_REQUIRED' });
+    await expect(accountAuthRoute(post('login', { username, password: 'test-password-123' }), configured))
+      .rejects.toMatchObject({ code: 'INVALID_CREDENTIALS' });
+    expect((await accountAuthRoute(post('login', { username, password: body.password }), configured)).status).toBe(200);
   });
 });

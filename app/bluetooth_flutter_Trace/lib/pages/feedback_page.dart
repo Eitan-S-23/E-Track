@@ -45,6 +45,14 @@ class _FeedbackPageState extends State<FeedbackPage> {
       ]),
   ) == true;
 
+  Future<void> _showFailure(String message) async {
+    if (!mounted) return;
+    await showDialog<void>(context: context, builder: (_) => TraceDialog(
+      title: '\u64cd\u4f5c\u672a\u5b8c\u6210', message: message, color: TraceColors.amber,
+      icon: Icons.error_outline, actions: [TraceDialogAction(label: '\u77e5\u9053\u4e86', isPrimary: true,
+        onPressed: (context) => Navigator.of(context).pop())]));
+  }
+
   Future<void> _leave() async {
     if (_leaving || _saving) return;
     _leaving = true;
@@ -70,9 +78,10 @@ class _FeedbackPageState extends State<FeedbackPage> {
       setState(() { _notice = '\u5df2\u4fdd\u5b58\u3002\u53d1\u9001\u6210\u529f\u540e\u4f1a\u79fb\u5165\u201c\u5df2\u63d0\u4ea4\u201d\u3002'; });
     } catch (error) {
       if (mounted) {
-        setState(() { _notice = error.toString().contains('FEEDBACK_OUTBOX_FULL')
+        final message = error.toString().contains('FEEDBACK_OUTBOX_FULL')
         ? '\u5f85\u53d1\u9001\u5217\u8868\u5df2\u6ee1\uff0850 \u6761\uff09\u3002\u8bf7\u7b49\u5f85\u53d1\u9001\u6216\u5220\u9664\u4e0d\u518d\u9700\u8981\u7684\u53cd\u9988\uff0c\u5f53\u524d\u6587\u5b57\u5df2\u4fdd\u7559\u3002'
-        : '\u672a\u80fd\u4fdd\u5b58\uff0c\u8bf7\u68c0\u67e5\u5b57\u6570\u6216\u7a0d\u540e\u91cd\u8bd5\uff0c\u5f53\u524d\u6587\u5b57\u5df2\u4fdd\u7559\u3002'; });
+        : '\u672a\u80fd\u4fdd\u5b58\uff0c\u8bf7\u68c0\u67e5\u5b57\u6570\u6216\u7a0d\u540e\u91cd\u8bd5\uff0c\u5f53\u524d\u6587\u5b57\u5df2\u4fdd\u7559\u3002';
+        await _showFailure(message);
       }
     } finally { if (mounted) setState(() { _saving = false; }); }
   }
@@ -93,7 +102,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
           onPressed: _service.sending.value ? null : () async {
             if (!await _confirm('\u5220\u9664\u8fd9\u6761\u5c1a\u672a\u53d1\u9001\u7684\u53cd\u9988\uff1f')) return;
             try { await _service.remove(item['id'] as String); }
-            catch (_) { if (mounted) setState(() { _notice = '\u6682\u65f6\u65e0\u6cd5\u5220\u9664\uff0c\u53cd\u9988\u4ecd\u88ab\u4fdd\u7559\u3002'; }); }
+            catch (_) { await _showFailure('\u6682\u65f6\u65e0\u6cd5\u5220\u9664\uff0c\u53cd\u9988\u4ecd\u88ab\u4fdd\u7559\u3002'); }
           },
         ),
       ]),
@@ -159,7 +168,10 @@ class _FeedbackPageState extends State<FeedbackPage> {
             if (pending.isNotEmpty && waiting != null) Text('\u4e0b\u6b21\u53ef\u5c1d\u8bd5\uff1a${waiting.toString().split('.').first}\uff08\u9700 App \u524d\u53f0\u8054\u7f51\uff09',
               style: const TextStyle(color: TraceColors.muted)),
             if (pending.isNotEmpty) TextButton.icon(onPressed: _service.sending.value ? null : () async {
-              try { await _service.retry(); } catch (_) { /* The original queue is retained. */ }
+              try {
+                await _service.retry();
+                if (_service.failure.value != null) await _showFailure('\u6682\u672a\u786e\u8ba4\u53d1\u9001\u6210\u529f\uff0c\u53cd\u9988\u5df2\u4fdd\u7559\u3002\u8bf7\u67e5\u770b\u9875\u9762\u4e0a\u7684\u53d1\u9001\u72b6\u6001\u3002');
+              } catch (_) { await _showFailure('\u6682\u65f6\u65e0\u6cd5\u68c0\u67e5\u53d1\u9001\u72b6\u6001\uff0c\u53cd\u9988\u5df2\u4fdd\u7559\u3002'); }
             }, icon: const Icon(Icons.sync), label: const Text('\u68c0\u67e5\u53d1\u9001\u72b6\u6001')),
             const SizedBox(height: 24),
             Text('\u5f85\u53d1\u9001\uff08${pending.length}\uff09', style: const TextStyle(color: TraceColors.text, fontSize: 18)),
