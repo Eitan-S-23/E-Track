@@ -2,7 +2,7 @@
 
 ## Account And Layout Batch, 2026-11-22
 
-Status: SOURCE_AND_CANDIDATES_DELIVERED / OWNER_ROLLOUT_AND_DEVICE_VALIDATION_PENDING.
+Status: SOURCE_CANDIDATES_AND_BACKEND_DELIVERED / PHONE_AND_DEVICE_VALIDATION_PENDING.
 Latest MCU: 3.3.50, source `91916e11469fce94282a9e1a0254048f4e4a9d7f`,
 successful candidate CI `44970721130`. App remains 1.0.90+116; it was not rebuilt.
 Product source: main `8a6dd4a3f051ba137256795f8d889eef6ece3e2b`, delivered after
@@ -15,7 +15,7 @@ Successful update/no-update responses consume one check; backend failures do not
 Request IDs deduplicate retries. Download preparation refreshes the same checked
 asset without charging again and never silently changes target/package identity.
 
-Implementation in progress: new-api-referenced login/register/reset controls,
+Implementation delivered: new-api-referenced login/register/reset controls,
 OS-vault App sessions, Access-protected Admin account/registration/login statistics,
 UID device association, anonymous local Bluetooth with authenticated cloud/OTA
 admission, mobile-data firmware preparation and network-restoration continuation.
@@ -143,10 +143,64 @@ GitHub job readback `keyring-status-88`, and released CLI lock establish actual
 success; no successful release was repeated to repair the wrapper log. The wrapper
 is a preserved one-use adapter, not the product one-command script.
 
+### Owner-Authorized Account Backend Deployment
+
+2026-11-22: the owner explicitly asks to deploy the new backend now. This changes
+the earlier owner-only deployment boundary, not channel/delta or device authority.
+Fresh primary/remote main is `3dbf49cffef43b4f4484557113c1da1bb09fa553` with no
+tracked pending changes before this operation. Source remains the already-tested
+`8a6dd4a3f051ba137256795f8d889eef6ece3e2b`; no product rebuild/version change.
+
+Read-only preflight `keyring-cloud-live-94` confirms old Admin `2ad213fa` and
+Worker/Public `7e088a08`, migrations through 0017, and Android Stable 1.0.89.
+The user was told that deploying the login gate restricts old App cloud calls;
+installation of App 1.0.90+116 and firmware 3.3.50 is still unconfirmed. Do not
+infer installation from this deployment or publish either channel automatically.
+
+Existing `deploy-cloudflare-admin.yml`, Actions **44972869444**, succeeds on its
+first attempt at 2026-11-22 01:45:41 UTC. Inputs select original Admin/main and
+include Worker and Public. Existing E_TRACK_CI is reused unchanged. Only pending
+**0018_accounts.sql** is applied; prior migrations are not replayed. Live IDs:
+
+- Worker version: `4a6ece7d-d99d-4012-bf74-48aea9eaf5e4`.
+- Admin deployment: `e314773a-497c-41d4-85b6-8d0e8a112d19`.
+- Public deployment: `e87e25c6-e7ff-4503-828f-0bb964067802`.
+
+`keyring-cloud-live-97` independently reads back all source IDs and unchanged
+Worker settings/schedules plus Pages production/preview runtime configuration.
+A real existing Access owner session works; HTML and ten JS/CSS assets match
+committed bytes, including account-management.js. Admin settings/account list/
+login statistics work (zero accounts at observation; no fabricated user history).
+Worker and Public `/api/auth/status` both return registration enabled, password
+registration enabled, email verification disabled, timezone Asia/Shanghai and
+separate daily limits **5 automatic / 5 manual**. Anonymous update checks return
+401 / LOGIN_REQUIRED. No account or quota is created/consumed by these probes.
+All four channel pointers and 59 existing delta IDs/attempts/input hashes match
+the before snapshot. No Stable/Beta or delta operation, package download,
+phone/MCU operation, new credential or credential configuration change occurred.
+
+Deployment warnings remain visible: Worker dependency audit reports 13
+vulnerabilities (3 moderate/10 high); Admin/Public each report 4 high. Node
+punycode/url.parse and upload-artifact runtime deprecations are retained. No
+unreviewed dependency upgrades were mixed into deployment. Live registration/
+login CPU suitability, phone OS-vault behavior, device binding and OTA acceptance
+remain unverified; this is deployment self-verification, not independent acceptance.
+
+Originals under `.cache/ota-followup-20261122/`: `keyring-read-92`,
+`keyring-dispatch-93`, `keyring-cloud-live-94/97`, `keyring-status-95/96`, and
+`keyring-logs-98`. All controlled host outputs, helper files and record edits
+are project-local; the existing hosted workflow confines controllable outputs
+to its checkout. No PowerShell, local package install, profile write, device
+collector or unrelated cleanup was invoked. Thin wrappers reuse the existing
+owner/keyring/CI/readback routes, not a replacement deployer. Scope audit is
+`account-backend-deployment-audit-01.json` in that same evidence directory.
+
 ### Owner Rollout Order
 
-Do not deploy the new account gate ahead of the transition firmware and App.
-After formal candidate delivery, the owner performs these steps, not the agent:
+This was the recommended firmware/App-first sequence. The later explicit owner
+request has now completed step 3 through the agent, as recorded above, without
+confirming steps 1 or 2. Phone/device adoption and real validation remain open;
+do not repeat deployment. The earlier plan is retained for transition context:
 
 1. Publish firmware 3.3.50 using the existing working backend and App. Use the
    device's actual installed version as a delta base, or select full OTA. Verify

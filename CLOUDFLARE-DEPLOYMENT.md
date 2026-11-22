@@ -4,7 +4,48 @@ Read this file before deploying the E-Track backend or asking the owner for
 Cloudflare credentials. It lives at the project root deliberately. Read the
 primary checkout's copy, not only an old task worktree's copy.
 
-## Current State: Full Scroll Fix Verified 2026-11-20
+## Current State: Account Backend Deployed 2026-11-22
+
+After the owner's explicit backend-deployment request, Actions
+[44972869444](https://github.com/Eitan-S-23/E-Track/actions/runs/44972869444)
+successfully deploys the already-tested source
+`8a6dd4a3f051ba137256795f8d889eef6ece3e2b` to all three existing components.
+The unchanged `E_TRACK_CI` route is used; only pending `0018_accounts.sql` is
+applied. No credential, Access, channel, delta or device changes are performed.
+
+| Component | Verified live identity |
+| --- | --- |
+| Worker version | `4a6ece7d-d99d-4012-bf74-48aea9eaf5e4` |
+| Admin deployment | `e314773a-497c-41d4-85b6-8d0e8a112d19` |
+| Public deployment | `e87e25c6-e7ff-4503-828f-0bb964067802` |
+
+Independent readback within this implementation session verifies the exact
+three-component source, unchanged runtime settings/schedules and a real Admin
+owner session. HTML plus ten JS/CSS files match committed bytes. Admin account
+settings/list/statistics respond successfully; Public and Worker auth status
+both expose separate automatic/manual limits of 5/5 and Asia/Shanghai days.
+Anonymous cloud update requests return HTTP 401 / LOGIN_REQUIRED. Registration
+and password registration are enabled; email verification/reset are unavailable
+without owner-configured mail delivery. No synthetic account was registered.
+Four channel pointers and all 59 existing delta IDs/attempts/input hashes match
+the pre-deployment snapshot. This is live deployment verification, not independent
+acceptance or proof of phone login/device binding/OTA.
+
+The prior recommended firmware/App-first rollout was explained to the owner;
+the later explicit instruction authorizes deploying now, but does not confirm
+installation of App 1.0.90+116 or firmware 3.3.50. The pre-deployment Android
+Stable channel still referenced 1.0.89. Older App cloud calls now require the
+new login-capable App; local Bluetooth remains outside this cloud gate. Channel
+publication and device/phone updates remain owner-controlled.
+
+Existing dependency audit warnings remain: Worker reports 13 vulnerabilities
+(3 moderate, 10 high); Admin and Public each report 4 high. Node/Actions
+deprecation warnings are also retained, not treated as resolved by deployment.
+Originals: `.cache/ota-followup-20261122/keyring-dispatch-93/`,
+`keyring-cloud-live-94/97/`, `keyring-status-96/`, `keyring-logs-98/`.
+See [the account deployment record](docs/ota-exec-notes/OTA-COMPANION-2026-11-20.md#owner-authorized-account-backend-deployment).
+
+## Earlier Full Scroll Fix Verified 2026-11-20
 
 Admin-only Actions [44615534351](https://github.com/Eitan-S-23/E-Track/actions/runs/44615534351)
 deploys `2ad213fae81f395c0e70efed472d8386e1741564` as

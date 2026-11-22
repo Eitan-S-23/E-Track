@@ -1,9 +1,14 @@
 # Shared Agent Records
 
-Current follow-up: COMPANION-FEEDBACK-20261122, Codex root, SOURCE_AND_CANDIDATES_DELIVERED / OWNER_ROLLOUT_PENDING.
+Current follow-up: COMPANION-FEEDBACK-20261122, Codex root, SOURCE_CANDIDATES_AND_BACKEND_DELIVERED / PHONE_AND_DEVICE_VALIDATION_PENDING.
 Owner approved separate account-wide automatic/manual daily check limits of 5/5.
 Login, binding, Admin account views, cloud admission and the MCU text-layout follow-up
-have passed development self-tests and reached main `8a6dd4a3`; no backend deployment.
+have passed development self-tests and reached main `8a6dd4a3`. The owner's later
+explicit deployment request is executed by Actions 44972869444: Worker/Admin/Public
+now serve that exact source; only pending migration 0018 was applied. Live owner/
+source/settings/5+5/anonymous-denial readbacks pass and four channels/59 delta jobs
+are unchanged. Evidence: .cache/ota-followup-20261122/keyring-cloud-live-94/97 and
+keyring-logs-98. Existing dependency/Node warnings remain, not silently repaired.
 Latest App source `1a1c82fe` passes both hosts (`44965098761`); native/debug
 `44963606753` and backend/293 Admin UI cases `44963616712` pass on unchanged native
 and backend product inputs. Main backend/governance CI pass. App 1.0.90+116 formal
@@ -14,7 +19,10 @@ CI 44970721130: ready/unpublished, two verified assets, 641 warnings/0 errors,
 App skipped. Existing one-command entry completed; source 02241a0d also fixes
 failure-time artifact retention (65 regression cases). Agent reconciled old objects
 read-only after authorization; owner no longer needs to repeat that check.
-Owner rollout must install UID-capable 3.3.50 before enabling account cloud gates.
+The recommended firmware/App-first order was superseded by the explicit deploy-now
+request, not by evidence of installation. App 1.0.90+116 and UID-capable 3.3.50
+adoption remain unconfirmed; old App cloud requests now require login-capable App.
+No channel publication, delta generation, phone update or device operation occurred.
 See Account And Layout Batch in the existing task note. Prior 3.3.47 install
 and 3.3.48 candidate evidence below remain unchanged.
 Original owner ZIP, same-process post-OTA service stop finding, UI/check/history
