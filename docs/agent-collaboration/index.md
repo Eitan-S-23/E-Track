@@ -1,5 +1,44 @@
 # Shared Agent Records
 
+Latest checkpoint, 2026-11-23: ACCOUNT-UX-LEGACY-01, Codex root, CODE_ON_MAIN /
+APP_CANDIDATE_DELIVERED / BACKEND_AND_PHONE_PENDING. Product source
+`dbcf94cf6424eec00e5fb0d8fae7140e82928ba2` is fast-forwarded and pushed to main.
+Full Flutter 45055320407 passes Linux 1045/16 and Windows 993/68 (passed/skipped),
+with 8 candidate-profile tests on each host. Complete dual-host artifacts and
+12 raw command logs are verified. Backend 45055321435 passes 568 Worker/308
+browser tests and three typechecks. The busy-search defect is fixed; its gated
+regression and the earlier 16-case original are retained without another run.
+App 1.0.93+119 is draft/tag-checked; automatic parent 45057066631 and original
+Trace signer 45057226109 pass Android/Windows and original R2 candidate ingestion,
+`rel_trace_android_v1_0_93`, unpublished. APK SHA-256 starts `95bdc67e7e2ea7e6`;
+full asset identities are in Formal App Delivered, Backend And Phone Pending.
+Windows has zero build warning/error lines; Android has 10 warnings, zero errors.
+No firmware/duplicate App rebuild, backend deployment, mail/configuration,
+channel/delta, phone or device operation. Owner retains all manual backend and
+phone actions. Existing advisories, earlier failed receipts and the four-helper
+loss remain recorded. Current details and exact compatibility-route constraints
+are in Implementation And Development Checkpoint, Legacy Migration Implementation
+Contract and the owner handoff in the existing OTA companion note. Owner first
+deploys the pinned backend and updates the phone; prepare the observation route
+before a real 3.3.48-to-3.3.50 full OTA. This is not physical/independent acceptance.
+
+The initial same-day entry below is retained; its unexecuted-state statements
+are superseded only by the actual checkpoint above, not by independent acceptance.
+
+Latest work, 2026-11-23: ACCOUNT-UX-LEGACY-01, Codex root, IN_PROGRESS /
+LOCAL_PENDING. Owner approves the consolidated interface/registration/legacy
+migration repairs. Existing dev/flutter/ota-ui-20261121 worktree is synchronized
+to current main 6073f443 without rebuilding it. Owner-reported registration/login
+after reopening and password reset succeeded; earlier no-account/pending statements
+below describe their dated checkpoints. Mail remains activated; no resend or
+required-verification change. Firmware 3.3.48 lacks the UID protocol; the existing
+formal 3.3.50 candidate is the proposed full-OTA migration target. No new App,
+deployment, hardware action or acceptance yet. Shared UI rules and bounded
+regressions are part of this batch; see Account UI And Legacy Migration Follow-Up
+in the existing companion note. Preserve the disclosed four-helper loss and all
+existing evidence. Root owns implementation, tests and authorized delivery; owner
+retains phone actions, channel publication and actual OTA.
+
 Current work: ACCOUNT-RELATIONS-20261122, Codex root, REMOTE_DELIVERED /
 MAIL_ACTIVATION_AND_PHONE_VALIDATION_PENDING. App 1.0.92+118 source 29d619ff is
 original-signed and registered by Trace 45013457550. Parent 45013327189 lost its

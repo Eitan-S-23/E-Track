@@ -1,5 +1,231 @@
 # OTA Companion And Admin Scroll Investigation
 
+## Account UI And Legacy Migration Follow-Up, 2026-11-23
+
+Status: IN_PROGRESS / LOCAL_PENDING, owner-approved consolidated implementation.
+Primary main and remote main match 6073f443. Existing task worktree
+`.worktrees/ota-ui-20261121` / `dev/flutter/ota-ui-20261121` was clean and is
+fast-forwarded to that main source; no setup/repair, new worktree or device access.
+The five pending primary document changes were reviewed and preserved in place.
+No extra agent, PowerShell or product-external output is used.
+
+Owner reports registration/login succeeded after reopening the account page and
+forgot-password succeeded. This supersedes prior pending/no-account observations
+at their earlier timestamps, not proof of the original uncaptured request or
+independent acceptance. Required email verification was observed enabled at
+revision 2; retain it. Mailbox configuration and actual received email stay done.
+
+Confirmed current defects: Admin relation views overwrite the account data shape;
+`run()` renders before its protected try/finally, so switching back can throw and
+leave controls busy. Details expand inline; account settings repeat in relation
+views; Accounts is nested under APP. App logout follows all outer-scroll content,
+device picker buttons only fit their labels, redundant explanations remain, and
+registration requirements load only on page entry. Fix these as one bounded batch.
+
+Shared normative rules belong in `docs/ui-design-contract.md`, referenced from
+root AGENTS, not just this task log. Upstream newAPI sources inspected on
+2026-11-23: `web/src/features/users/index.tsx`, `components/users-table.tsx`, and
+`web/src/features/system-settings/auth/basic-auth-section.tsx`; current web subtree
+0f6c90cc7e0a06fe383001bab4ea71951f5da0e7. Reference its separate paginated/filterable
+user table and grouped authentication settings. Do not claim a complete upstream
+visual review or copy its drawer styling over E-Track's established modal design.
+
+Firmware 3.3.48 source 5d81e6b9 lacks IDENTIFY/UID; App's cloud/binding gates need
+that real UID. Existing formal 3.3.50 source 91916e11 / CI 44970721130 supports it.
+Implement an explicit, logged-in, package/device-bound legacy full-OTA migration,
+not a fake UID or global gate bypass. Preserve current account 5/5 quotas, package
+validation, user consent, Boot/data, true reboot identity verification and normal
+binding. No J-Link write, channel publication, delta generation or phone action is
+part of implementation. Owner will publish/install and exercise the prepared route.
+
+Validation must cover populated repeated transitions, failures, modal/focus/scroll
+boundaries, short/enlarged-text App layouts, row-whitespace taps, stale registration
+requirements and the restricted migration allow/deny/verification paths. Full
+Flutter development CI and scoped backend checks precede original-signed App
+delivery and affected backend deployment. New runs are NOT_RUN at this entry.
+Resource-usage checks follow actual provider APIs and existing credential authority;
+unavailable limits/usage stay unknown. Do not alter credentials or billing.
+
+New controlled evidence belongs in `.cache/account-ux-20261123/`, not the four
+overwritten historical helpers. Their loss remains open; no guessed restoration
+or cleanup occurs. Existing primary local edits and all failed receipts remain.
+
+### Implementation And Development Checkpoint
+
+The tested product source is `dbcf94cf6424eec00e5fb0d8fae7140e82928ba2`, now
+fast-forwarded and pushed to primary/remote main. The task branch remains clean.
+All five pre-existing pending document byte hashes and the 1,150-entry untracked
+inventory were unchanged by integration. Only this batch's 28 product/rule/test
+files entered main; historical mail/support-tool changes were not staged.
+
+Admin now owns separate paginated account/terminal/device lists, modal details,
+focus restoration and independent settings. Loading/rendering failures restore
+controls. The last failed browser case exposed a real lost query while a list
+was busy: retain the latest search intent and execute it after the current
+request, resetting it on actor changes. Its deterministic gated-response test
+and all 16 local account browser cases pass; the original 307-case failed run
+and earlier development failures remain preserved, not rewritten or rerun.
+App logout stays outside growing lists, connected-device rows accept whitespace
+taps, registration refreshes requirements before submission, and account errors
+retain validated field/request correlation without recording submitted values.
+
+| Check | Actual result | Original evidence |
+| --- | --- | --- |
+| Flutter all, Ubuntu | 1,045 passed, 16 platform skips, zero failures; analyze clean | `45055320407/1`, `resume-app-logs-01/` |
+| Flutter all, Windows | 993 passed, 68 platform skips, zero failures; analyze clean | Same run and console archive |
+| Candidate-profile tests | 8 passed on each host | Same run |
+| Worker invariants | 568 passed, 18 files | `45055321435/1`, `resume-backend-logs-01/` |
+| Admin browsers | 308 passed | Same backend run |
+| Worker/Admin/Public typechecks | All passed | Same backend run |
+| Targeted account browser regression | 16 passed | Existing `ui-query-01/`, reused without another execution |
+
+Flutter is 3.47.9, framework `c197ca5199e9ee5661e865596c9c07294dfab51c`,
+Dart 3.13.7. Console detailed-test output is explicitly truncated by its budget;
+both full log artifacts are retrieved and verified in `resume-full-linux-01/`
+and `resume-full-windows-01/`, without rerunning either successful self-test.
+Artifact IDs are 14767670670 and 14767466548. All 12 complete command-log byte
+counts/SHA-256 values and the actual test footers match the source-bound reports;
+details are in `resume-records-01/log-evidence.json`. The first offline checker
+mistakenly required literal post-test cleanliness. Windows retains only EOL drift
+in `generated_plugin_registrant.h`, no semantic/untracked drift; the existing
+runner's semantic/source-regeneration contract was applied without changing CI,
+the source or any original log. Both controlled toolchain regeneration records
+and the unchanged lockfile are retained.
+SDK/runner/native inputs unchanged by this batch are not retested on a device.
+These are development self-tests, not independent acceptance or actual OTA.
+
+Version/draft/tag preflight checks all 131 Trace releases, including drafts:
+`1.0.93+119` was unoccupied. Integration receipt is `resume-integration-01/`.
+Automatic formal parent `45057066631` selects only App; firmware and duplicate
+ordinary APK/EXE builds skip. The final completed delivery is recorded below;
+the earlier bounded observation timeout is not a failed CI or another build.
+Firmware 3.3.50 remains unchanged.
+Worker dependencies report 13 advisories (3 moderate, 10 high); Admin/Public
+each report 4 high advisories. Existing install-script and Node/Actions warnings
+remain visible. No dependency upgrade, backend deployment, credential change,
+mail resend, phone action, J-Link write, channel publication or delta operation.
+
+### Legacy Migration Implementation Contract
+
+#### Scope And Trigger
+
+Only an explicitly selected, logged-in, current 3.3.48/protocol-1 device without
+UID may prepare this full-OTA transition to the existing formal 3.3.50. It is not
+an automatic-check, binding or recovery bypass. Ordinary UID-bound routes remain
+unchanged; this description grants no additional deployment or device authority.
+
+#### Signatures
+
+- App: `AccountCheck.forLegacy(check)` and `checkFirmwareUpdate(legacyMigration: true)`.
+- Latest: `GET /api/public/firmware/latest`, manual check ID/kind, `X-Legacy-Migration: uid-v1`, exact source image/version and hardware/layout/Boot/protocol query fields.
+- Download: existing signed `GET /api/public/firmware/download` plus `X-Legacy-Migration-Check-Id`, authenticated to the same account.
+- BEGIN authorization: `POST /api/account/ota/authorize`, `legacyCheckId` and the grant's exact source/target/hardware/asset fields.
+- Storage: completed/manual `account_update_checks.response_json`; authorization writes the existing `account_audit` action `legacy_ota_authorize`, not a new schema or fake binding.
+
+#### Contracts
+
+The server-owned grant binds account/check ID, source version/raw SHA, hardware
+revision, layout, Boot/protocol, target version/raw SHA/release, asset ID/SHA and
+expiry. It expires 24 hours after the original check; refresh does not extend it.
+Source must match a registered formal 3.3.48. Target is only 3.3.50 source
+`91916e11469fce94282a9e1a0254048f4e4a9d7f`, raw image SHA-256
+`6e763fb66958d4a4db3b9cbf7b02351184c189165d5499faf26986421273762a`.
+Both Worker and Public forward full-only selection through the common handler.
+Existing quotas, signed download purpose, package verification, consent, power/
+recording/storage gates and reboot version/raw-image verification remain intact.
+No synthetic UID or automatic binding is written. After a real successful OTA,
+read the target's real factory UID and bind normally; the fake-BLE success test
+intentionally leaves UID null and is not a live identity/binding observation.
+
+#### Validation And Error Matrix
+
+| Input/state | Required result |
+| --- | --- |
+| Exact registered source, published exact full target, logged-in manual check | One account-scoped grant; same check ID follows download and authorization |
+| Ordinary/automatic check, wrong current device, missing login | No legacy bypass or BEGIN |
+| Wrong account/check/source field, duplicate query, expired grant | `LEGACY_MIGRATION_INVALID`; no transfer |
+| Missing/wrong formal source or target, or non-full target asset | `LEGACY_MIGRATION_UNAVAILABLE`; no transfer |
+| Explicitly stopped channel | Existing `CHANNEL_STOPPED` no-update response, no grant or transfer |
+| Invalid existing signed download token | Existing signature verification rejects it |
+| Account/device changes after preparation or authorization rejects | BEGIN remains zero; preparation cannot redirect devices |
+| Reboot identity does not match target version and full raw SHA | Not upgrade success; existing failure/waiting-verification history semantics remain |
+
+#### Good, Base And Bad Cases
+
+Good: the same explicit account/check/device uses the exact signed full package,
+then verifies the target after reboot. Base: ordinary cloud checks still require
+the real UID binding. Bad: pretending a Bluetooth address is UID, accepting an
+arbitrary latest version, or counting END ACK as installation success.
+
+#### Tests Required
+
+`worker/test/account-legacy.test.ts`, `test/ota/ota_legacy_migration_test.dart`
+and the real `OtaService` integration cases cover full-only selection, quota/check
+reuse, signed-download binding, allow/deny/expiry, account/device substitution,
+authorization-before-BEGIN and reboot verification. Account widget/service and
+Admin browser cases cover refresh/errors, full-row taps, short/200%-text layout,
+scroll/focus/modal boundaries, repeated populated views and busy-search coalescing.
+Actual legacy OTA, factory UID/binding and phone layouts remain owner validation.
+
+#### Wrong Versus Correct
+
+Wrong: disable global UID admission, silently use a different package, or drop
+search input while the list is busy. Correct: restrict the persisted grant to
+this one formal transition, retain final identity checks and execute the latest
+queued search once after the protected request ends.
+
+### Formal App Delivered, Backend And Phone Pending
+
+Status: APP_CANDIDATE_DELIVERED / BACKEND_AND_PHONE_PENDING. Exact main App source
+is `dbcf94cf6424eec00e5fb0d8fae7140e82928ba2`, version `1.0.93+119`.
+E-Track parent `45057066631/1` and original Trace signer `45057226109/1` succeed;
+both Android APK and Windows EXE/ZIP jobs pass. Trace workflow commit remains
+`12ff41fc11eb4920ab32d69ae0f7e1cc095f996e`, not the App product source. No new
+MCU or duplicate ordinary App build. Main backend `45057066635` and governance
+`45057066443` pass; no deployment was dispatched by this continuation.
+
+Native inspection verifies package `com.wen.gaia.gaia`, original certificate
+SHA-256 `3cecee6330a930e020b454b6d4a79568f4494ca324ae7bcf2c1914e51b04ab47`,
+both ARM ABIs, original backend, BLE V2 profile and inventory support. The native
+APK/manifest hashes match GitHub assets. CI fully uploads/read-back verifies the
+two original R2 assets, then registers `rel_trace_android_v1_0_93` with
+`ok=true`, `idempotent=false`. The GitHub tag is a prerelease, not latest;
+Stable/Beta are not published. Exact original logs/receipts are retained under
+`resume-candidate-01/02`, `resume-signer-logs-01/`, `resume-formal-metadata-01/`
+and `resume-records-01/formal-candidate.json`. The first observer merely expired;
+the second observes the same parent/signer without dispatching or rebuilding.
+
+| Immutable asset | Bytes | SHA-256 |
+| --- | --- | --- |
+| `ble-monitor-android.apk` | 49,636,885 | `95bdc67e7e2ea7e6f2cd089e8f1fe4bc5d73aa9ba05aa81adceadc95d78035f0` |
+| `ble-monitor-windows.exe` | 161,792 | `2ce1f10c7a54249d1eed78f94c0d5034efc4a89b83abf6379ee4a6761292be19` |
+| `ble-monitor-windows.zip` | 20,886,436 | `52cd8295c8d45968ac356f937c8cb21fc85ac6e0a8a77ccf728e4c788cbdc667` |
+
+Formal Windows/Android full tests pass 993/68 and 1045/16 (passed/skipped), with
+clean analysis. Windows has zero build warning/error lines; Android has ten
+warning lines and zero error lines: existing Gradle/AGP/Kotlin deprecations and
+seven plugins requiring SDK 36. Dependency/Actions warnings remain as recorded
+above; no toolchain/dependency upgrade was added to conceal them. GitHub's hosted
+pre-upload metadata digest differs from CI's post-R2 metadata digest, since the
+uploader adds verified R2 state to its own working metadata. Neither immutable
+GitHub asset nor APK/manifest bytes were replaced; those stages are not conflated.
+No package was downloaded again just to improve this report.
+
+Owner actions, in order:
+
+1. Run the existing `deploy-cloudflare-admin.yml` from main with `source_sha=dbcf94cf6424eec00e5fb0d8fae7140e82928ba2`, `project_name=trace-update-admin-staging`, `branch=main`, `include_worker=true`, `include_public=true`. Verify actual Worker/Admin/Public sources and retain current mail/settings/5+5 quotas. There is no new migration in this batch; do not rerun applied SQL, change secrets or rebuild packages.
+2. Publish App `1.0.93+119` in the original Admin and update the phone without clearing data. Check populated account/terminal/device views, modal/scroll/focus behavior, visible logout and registration requirements. Report the installed App and current MCU versions before the OTA observation window.
+3. Only if the current MCU is 3.3.48, use the existing formal 3.3.50 as the full migration target. Owner publishes it; no delta generation is required. Prepare source/package/task-bound observation and full log retrieval before inviting the real transfer. Account-page binding offers `兼容升级`; `稍后` must not transfer. After reboot verification, read and bind the real UID normally.
+
+Live backend deployment, phone installation/layouts, actual legacy full OTA,
+post-reboot UID/binding, automatic discovery/global popup/Later/recovery and
+history/log correlation remain NOT_RUN by this continuation. Existing P01/U01,
+successful firmware installation/OTA observations and original evidence are not
+replayed. All selected outputs stay project-local; no PowerShell, extra agent,
+device access, backend mutation, email, channel/delta action or external cleanup.
+Historical helper loss remains disclosed and unresolved. Only this batch's
+record blocks are eligible for the scoped main closeout; other local edits stay.
+
 ## Account And Layout Batch, 2026-11-22
 
 ### Account Relationships And Unified Results
