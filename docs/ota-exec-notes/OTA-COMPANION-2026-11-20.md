@@ -1,5 +1,69 @@
 # OTA Companion And Admin Scroll Investigation
 
+## Account Backend Rollout Completed, 2026-11-23
+
+Status: CODE_ON_MAIN / APP_CANDIDATE_DELIVERED / BACKEND_LIVE_VERIFIED /
+OWNER_PHONE_AND_DEVICE_VALIDATION_PENDING, Codex root. Product source remains
+`cc8039e41c13e0300db6d656103b7cefb3579880`; primary/remote main at entry match
+`f2bb573c853f1c97de7cd28c580913606ad8281e`. Existing task worktree is clean;
+no active J-Link/RTT/BLE collector is found. No extra agent, repair, product change,
+rebuild or hardware replay. The owner's explicit backend-deployment request plus
+continued-work authorization narrowly supersedes the earlier deployment-pending
+checkpoint. Channels/deltas, credentials/configuration and phone/device actions
+remain outside this rollout; the earlier candidate adapter guard stays unchanged.
+
+One dispatch of the existing deploy-cloudflare-admin.yml, pinned to tested
+cc8039e4 with Worker/Public included, completes in
+[45076742719](https://github.com/Eitan-S-23/E-Track/actions/runs/45076742719).
+Accepted dispatch, completed CI and actual live verification are now separately
+confirmed. Exact-source checks 45071318738/45069818091 are reused, not rerun.
+Worker version/deployment are 788ecbc4-2191-4508-b996-5dc9aac54db8 /
+9a33119c-0ffe-4aa7-aad3-e0f16179a36e; Admin/Public are
+3831978c-6859-44a2-9068-029c52a29d5f / 6049bb98-146a-475e-87b8-9dad1b8e9191.
+All three sources match cc8039e4. No migration is pending/replayed; 0019 is last.
+Runtime/schedules/production/preview, email-on revision 2 and 5/5 are unchanged.
+Four channel pointers and all 62 delta identities/attempts/input hashes match
+fresh before/after snapshots. No channel/delta/credential/device mutation.
+
+Live readback at 2026-11-22 22:18 UTC / 2026-11-23 06:18 Shanghai passes existing
+owner access, HTML/ten JS-CSS assets, account/detail/terminal/device APIs and both
+Public/Worker auth routes. There is one real account and terminal, zero bound
+devices. Guest cloud calls remain 401/LOGIN_REQUIRED; no synthetic account,
+revocation, mail resend or quota reset. Existing warnings remain Worker 13
+(3 moderate/10 high), Admin/Public four high each and two upload DEP0169 warnings.
+This is live deployment verification, not independent or physical acceptance.
+
+Final owner window, deferred until the owner is available:
+
+1. Publish the existing App 1.0.94+120 candidate and update the phone without
+   clearing data or substituting debug. Android Stable currently remains 1.0.93;
+   no agent publication or actual phone installation is claimed.
+2. Check logged-in username/email, logout/relogin returning one terminal, detail
+   dialogs, both scroll edges, whole-row selection and visible logout. Phone
+   interactions remain pending rather than inferred from CI.
+3. Report actual MCU version and validate its real UID/account binding. Only a
+   still-3.3.48 device needs the existing explicit logged-in formal 3.3.50 full
+   compatibility path. An already-upgraded device must not repeat that OTA or
+   J-Link installation; existing 3.3.50 is not rebuilt.
+4. Agree actual identities/channel/target before one bounded remaining background/
+   global-offer/Later/OTA window. Note start/end times and return App complete
+   export, not only the newest page. Correlate control-ready, check/skip reasons,
+   received versus shown offers, durable progress, reboot identity and history.
+
+Use a fresh project-local evidence directory at the window's preflight. No agent
+check/OTA clicks, quota/reminder reset, data clearing or successful-OTA replay to
+repair collection gaps. USB is optional only for a named missing native/system
+observation, after retrieval/deadline/single-owner/closure preparation. Missing
+close time stays unknown; a reused connection is not a reconnect. Notification
+disappearance alone does not prove process kill. Historical failures and confirmed
+mail/registration/reset/candidate outcomes remain unchanged.
+
+Originals, pre-edit pending document bytes and scoped closeout:
+`.cache/account-identity-20261123/rollout-*` and `keyring-cloud-live-401/402`.
+Only this new rollout block and board lines are staged; older pending content is
+preserved, not cleaned or staged wholesale. Final audit covers selected outputs,
+environment defaults and inspected subprocess routes, not system-wide I/O claims.
+
 ## Account Identity And Terminal Follow-Up, 2026-11-23
 
 Status: APP_CANDIDATE_DELIVERED / OWNER_VALIDATION_DEFERRED, Codex root. Owner approves implementation;

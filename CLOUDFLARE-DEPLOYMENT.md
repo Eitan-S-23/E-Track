@@ -4,6 +4,48 @@ Read this file before deploying the E-Track backend or asking the owner for
 Cloudflare credentials. It lives at the project root deliberately. Read the
 primary checkout's copy, not only an old task worktree's copy.
 
+## Current State: Account Identity And Terminal Fixes Deployed 2026-11-23
+
+Actions [45076742719](https://github.com/Eitan-S-23/E-Track/actions/runs/45076742719)
+successfully deploys tested product source
+`cc8039e41c13e0300db6d656103b7cefb3579880` from main workflow
+`f2bb573c853f1c97de7cd28c580913606ad8281e`. The owner's explicit request to
+deploy the new backend if it was not online, plus continued-work authorization,
+admits this bounded code deployment. The earlier owner-only deployment checkpoint
+is superseded for this rollout, not channel/delta/configuration/credential work.
+
+| Component | Verified deployed identity |
+| --- | --- |
+| Worker version | `788ecbc4-2191-4508-b996-5dc9aac54db8` |
+| Worker deployment | `9a33119c-0ffe-4aa7-aad3-e0f16179a36e` |
+| Admin deployment | `3831978c-6859-44a2-9068-029c52a29d5f` |
+| Public deployment | `6049bb98-146a-475e-87b8-9dad1b8e9191` |
+
+Fresh pre-deploy Admin/Public were still on 95470e8e. Reused exact-source checks
+45071318738/45069818091 pass; no repeated App/MCU build or test campaign. No
+migration is pending or reapplied; 0019 remains last. Worker runtime/schedules
+and Pages production/preview configurations are unchanged. Mail is ready, email
+verification stays on/revision 2, and automatic/manual account limits stay 5/5.
+Four channel pointers and all 62 delta identities/attempts/input hashes match
+before and after. No channel publication, delta generation or device action.
+
+Live readback at 2026-11-22 22:18 UTC / Shanghai 2026-11-23 06:18 verifies three
+exact-source identities, an existing Admin owner session, HTML plus ten JS/CSS
+assets against committed bytes, account/detail/terminal/device APIs and Public/
+Worker auth status. Guest cloud calls remain 401/LOGIN_REQUIRED. One real account
+and one terminal are present, zero bound devices; no synthetic user, revocation,
+email resend, quota reset or credential write. This is not physical/independent
+acceptance. App 1.0.94+120 remains an original-signed unpublished candidate;
+Stable remains 1.0.93 and actual phone installation is unconfirmed. Existing
+firmware 3.3.50 is not rebuilt or reinstalled.
+
+Originals: `.cache/account-identity-20261123/keyring-cloud-live-401/402`,
+`rollout-dispatch-01/`, `rollout-status-01/`, `rollout-logs-01/`. Worker retains
+13 advisories (3 moderate/10 high), Admin/Public four high each, and two upload
+DEP0169 warnings. Historical records below stay unchanged; do not redeploy the
+now-source-matched components to improve evidence. The remaining owner route is
+[recorded in the companion note](docs/ota-exec-notes/OTA-COMPANION-2026-11-20.md#account-backend-rollout-completed-2026-11-23).
+
 ## Current State: Account Relationships And SMTP Code Deployed 2026-11-22
 
 Actions [45016534804](https://github.com/Eitan-S-23/E-Track/actions/runs/45016534804)

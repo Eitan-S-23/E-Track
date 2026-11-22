@@ -1,5 +1,22 @@
 # Shared Agent Records
 
+Latest rollout, 2026-11-23: ACCOUNT-BACKEND-ROLLOUT, Codex root, CODE_ON_MAIN /
+APP_CANDIDATE_DELIVERED / BACKEND_LIVE_VERIFIED / OWNER_PHONE_DEVICE_PENDING.
+Owner-requested exact cc8039e4 backend deployment 45076742719 succeeds once
+from workflow main f2bb573c. Worker 788ecbc4, Admin 3831978c, Public 6049bb98
+and owner/static/API readbacks verify actual sources/runtime. No migration replay,
+configuration/credential/channel/delta/device change; mail/email-on revision 2,
+5/5, schedules, four channels and 62 delta identities are preserved. Warnings
+remain. Existing App 1.0.94+120 candidate is unpublished; Stable remains 1.0.93.
+Phone installation/identity/terminal UI, real MCU UID/binding and remaining
+background/global OTA/history observations still need the owner's final window.
+One actual account/terminal and no bound device are returned. Existing 3.3.50 is
+not rebuilt/reinstalled; check actual MCU before any compatibility OTA. Complete
+App export first; USB optional for specific missing native/system evidence only.
+No collector or independent acceptance. Earlier pending checkpoints are history.
+Originals and scoped pending-preservation audit: `.cache/account-identity-20261123/rollout-*`,
+`keyring-cloud-live-401/402`. See [the live rollout and final owner route](../ota-exec-notes/OTA-COMPANION-2026-11-20.md#account-backend-rollout-completed-2026-11-23).
+
 Latest work, 2026-11-23: ACCOUNT-IDENTITY-01, Codex root, CODE_ON_MAIN /
 APP_CANDIDATE_DELIVERED / OWNER_VALIDATION_DEFERRED. Main product source `cc8039e4`
 fixes reactive username/email and installation-keyed terminal display/revocation,
