@@ -1,7 +1,7 @@
 {
   "schema": "original-admin-automatic-candidates-v1",
   "firmware": {
-    "versionName": "3.3.49",
-    "releaseNotes": "Fix wrapped update-state text overlapping footer buttons on the 240x320 screen. Add backward-compatible factory hardware UID query for account/device association without changing binary INFO or OTA consent. Install this UID-capable firmware with the existing App/backend before enabling account-gated cloud services. Full/recovery candidate only; channel publication, deltas and device OTA remain owner-controlled."
+    "versionName": "3.3.50",
+    "releaseNotes": "Recovery delivery after the unregistered 3.3.49 R2 failure. Same layout and factory-UID functionality as account batch 8a6dd4a3; only MCU version advances. Install with the existing App/backend before enabling account-gated cloud services. Candidate only: no channel publication, deltas or device operation. App 1.0.90+116 unchanged."
   }
 }
