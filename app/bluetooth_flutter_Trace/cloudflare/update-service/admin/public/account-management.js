@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   window.TraceAccounts = function ({ element, detailElement, api, mutate, session, text, escape: esc, confirm, onError, onRecovered, onSuccess, onDetailVisibility, onSearchChange }) {
-    let epoch = 0, ticket = 0, actor = '', busy = false, notice = '';
+    let epoch = 0, ticket = 0, actor = '', busy = false, notice = '', pendingSearch = false;
     const lists = Object.fromEntries(['accounts','terminals','devices'].map(key =>
       [key, { data: { users: [], rows: [], total: 0 }, page: 1, query: '' }]));
     const list = () => lists[view] ?? lists.accounts;
@@ -104,6 +104,7 @@
       if (current !== epoch || request !== ticket) return;
       if (failure) onError?.(failure, 'accounts');
       else { onRecovered?.('accounts'); if (notice) onSuccess?.(notice); }
+      if (pendingSearch) { pendingSearch = false; void load(); }
     }
     async function load() {
       if (!await mayDiscard()) return;
@@ -186,11 +187,16 @@
         onSearchChange?.(list().query);
         await load();
       },
-      search(value) { if (view === 'settings') return; list().query = value.slice(0,64); list().page = 1; void load(); },
+      search(value) {
+        if (view === 'settings') return;
+        list().query = value.slice(0,64); list().page = 1;
+        // Search stays editable while a list loads; retain only its latest intent.
+        if (busy) pendingSearch = true; else void load();
+      },
       setSession(value) {
         const identity = value?.actor ? value.actor + ':' + value.role : '';
         if (identity !== actor) {
-          actor = identity; epoch++; ticket++; busy = false; view = 'accounts'; detailTab = 'devices';
+          actor = identity; epoch++; ticket++; busy = false; pendingSearch = false; view = 'accounts'; detailTab = 'devices';
           for (const item of Object.values(lists)) { item.data = { users: [], rows: [], total: 0 }; item.page = 1; item.query = ''; }
           settings = draft = detail = returnId = null; notice = ''; render(); syncDetail();
         }

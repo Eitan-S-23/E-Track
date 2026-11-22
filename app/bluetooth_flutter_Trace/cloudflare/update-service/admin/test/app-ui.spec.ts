@@ -194,14 +194,33 @@ test('account lists keep separate queries across relation views', async ({ page 
   const data = await mockApp(page); await openAccounts(page);
   await expect(page.locator('#accountReload')).toBeEnabled();
   await page.locator('#searchInput').fill('rider');
+  await expect.poll(() => data.accountQueries.some(row => row.path === '/api/admin/accounts' && row.query === 'rider')).toBe(true);
   await expect(page.locator('#accountReload')).toBeEnabled();
   await page.locator('[data-account-view="terminals"]').click();
   await expect(page.locator('#searchInput')).toHaveValue('');
   await page.locator('#searchInput').fill('phone');
+  await expect.poll(() => data.accountQueries.some(row => row.path.endsWith('/terminals') && row.query === 'phone')).toBe(true);
   await expect(page.locator('#accountReload')).toBeEnabled();
   await page.locator('[data-account-view="accounts"]').click();
   await expect(page.locator('#searchInput')).toHaveValue('rider');
   expect(data.accountQueries.some(row => row.path.endsWith('/terminals') && row.query === 'phone')).toBe(true);
+});
+
+test('account search during an in-flight relation load runs the latest query once', async ({ page }) => {
+  const data = await mockApp(page); await openAccounts(page);
+  await expect(page.locator('#accountReload')).toBeEnabled();
+  let release!: () => void;
+  data.accountReadGate = new Promise<void>(resolve => { release = resolve; });
+  await page.locator('[data-account-view="terminals"]').click();
+  await expect.poll(() => data.accountQueries.some(row => row.path.endsWith('/terminals') && row.query === '')).toBe(true);
+  await expect(page.locator('#accountReload')).toBeDisabled();
+  await page.locator('#searchInput').fill('p');
+  await page.locator('#searchInput').fill('phone');
+  expect(data.accountQueries.filter(row => row.path.endsWith('/terminals'))).toHaveLength(1);
+  data.accountReadGate = null; release();
+  await expect.poll(() => data.accountQueries.filter(row => row.path.endsWith('/terminals')).map(row => row.query)).toEqual(['', 'phone']);
+  await expect(page.locator('#accountReload')).toBeEnabled();
+  await expect(page.locator('#searchInput')).toHaveValue('phone');
 });
 
 test('account settings are outside APP and MCU modules', async ({ page }) => {
@@ -226,6 +245,7 @@ async function mockApp(page: Page, language = "en", role = "owner", firmwareFail
   const data = {
     role, conflict: false, notesFailure: false, announcementFailure: false, mutations: 0, firmwareFailure,
     accountReadFailure: false, accountSaveFailure: false, accountMalformed: false,
+    accountReadGate: null as Promise<void> | null,
     accountRows: 1, accountDetailRows: 1, accountLongText: false,
     accountQueries: [] as Array<{ path: string; query: string }>,
     accountSettings: { registration_enabled: 1, password_registration_enabled: 1, email_verification_enabled: 0,
@@ -270,6 +290,7 @@ async function mockApp(page: Page, language = "en", role = "owner", firmwareFail
       if (data.accountLongText) account.username += '-long-account-name'.repeat(8);
       if (url.pathname === '/api/admin/accounts') {
         data.accountQueries.push({ path: url.pathname, query: url.searchParams.get('q') ?? '' });
+        await data.accountReadGate;
         if (data.accountReadFailure) { await fail('BACKEND_UNAVAILABLE', 503); return; }
         if (data.accountMalformed) { await reply({ rows: [], total: 0 }); return; }
         await reply({ users: Array.from({ length: Math.min(30, data.accountRows) }, () => ({ ...account })),
@@ -281,6 +302,7 @@ async function mockApp(page: Page, language = "en", role = "owner", firmwareFail
         platform: 'android', model: 'Test phone', versionName: '1.0.91', versionCode: 117, osVersion: 'Android test', lastSeenAt: 1795300000000 };
       if (url.pathname === '/api/admin/accounts/terminals' || url.pathname === '/api/admin/accounts/devices') {
         data.accountQueries.push({ path: url.pathname, query: url.searchParams.get('q') ?? '' });
+        await data.accountReadGate;
         await reply({ rows: [url.pathname.endsWith('/terminals') ? terminal : { ...terminal, uid: '1234567890abcdef12345678', firmwareVersion: 30350 }], total: 1 }); return;
       }
       if (url.pathname === '/api/admin/accounts/' + account.id) {
