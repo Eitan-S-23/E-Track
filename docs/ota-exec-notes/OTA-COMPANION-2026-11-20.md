@@ -2,7 +2,9 @@
 
 ## Account And Layout Batch, 2026-11-22
 
-Status: SOURCE_AND_APP_CANDIDATE_DELIVERED / MCU_INGESTION_FAILED / OWNER_RECONCILIATION_REQUIRED.
+Status: SOURCE_AND_CANDIDATES_DELIVERED / OWNER_ROLLOUT_AND_DEVICE_VALIDATION_PENDING.
+Latest MCU: 3.3.50, source `91916e11469fce94282a9e1a0254048f4e4a9d7f`,
+successful candidate CI `44970721130`. App remains 1.0.90+116; it was not rebuilt.
 Product source: main `8a6dd4a3f051ba137256795f8d889eef6ece3e2b`, delivered after
 the development checks below; baseline remains `409fc640bc86272c34a2a6ce3f85dfef2c8498a9`.
 Owner explicitly selected **5 automatic and 5 manual checks per account per day**,
@@ -75,6 +77,9 @@ acceptance, live account availability or owner phone/device verification.
 
 ### Firmware 3.3.49 Delivery Failure
 
+Historical failure, superseded by the 3.3.50 delivery below. Do not use 3.3.49 as
+the rollout target or ask the owner to repeat the completed read-only reconciliation.
+
 Formal GCC build, full/recovery native byte verification and private-key cleanup
 pass, with 641 compiler warning lines and zero compile errors. The upload stage
 fails with `R2_VERIFY_FAILED`, `R2 S3 request failed: HTTP 500`, request ID
@@ -99,18 +104,58 @@ Recovery must be chosen from the actual preserved object state, not a blind reru
 Object metadata (`sha256`, `kind`) and byte lengths are useful initial owner
 reconciliation inputs; they alone do not replace the pipeline's full-byte check.
 
+### Firmware Recovery Completed
+
+Owner's subsequent authorization allowed autonomous completion of the ingestion
+blocker. Existing owner credential was reused in memory; no login, new credential,
+permission change, deployment, channel/delta mutation or device action occurred.
+Read-only `keyring-cloud-live-79` confirms no 30349 candidate/asset rows (zero D1
+writes), and both exact R2 keys return 404/code 10007. This replaces UNKNOWN with
+ABSENT for that observation, not a deletion of earlier evidence.
+
+The implementation agent then attempted GitHub failed-job continuation before
+checking the first-attempt-only contract. Attempt 2 was rejected by admission,
+before compilation/upload; successful App work was preserved. This was an agent
+recovery-entry mistake, not a product failure. Evidence: `keyring-rerun-80`,
+`keyring-logs-83`; no guard was weakened and no further rerun was requested.
+
+Source `02241a0d4545b16e1f550a5f4837f4e5ad4eab43` fixes artifact retention after
+upload failure and includes finalized/full/recovery packages plus partial receipts,
+strictly after successful private-key cleanup. `retention-tests-01` passes 65
+candidate regression cases, retaining intentional negative-test output.
+
+The supported `Tools/ota/release_candidate.py mcu` entry then increments only the
+MCU version, checks drafts/tags, commits/pushes and observes the exact first-attempt
+run. 3.3.50 is DELIVERED: `44970721130`, source `91916e11469fce94282a9e1a0254048f4e4a9d7f`.
+App job is SKIPPED. Both assets were uploaded and full-byte verified; registration
+is ready/unpublished with assetsRegistered=2 and idempotent=false:
+`fw_ac0c77fc2d6252f5eadec5cd995547c100b8de97e4ab3d9808179e63ee4653dc`.
+Target raw SHA-256: `6e763fb66958d4a4db3b9cbf7b02351184c189165d5499faf26986421273762a`.
+Full ETU: 304580 bytes, `8e8617850199e86db3375d07c6bc84b8db4ea24eb1f684c45a13501ee63faca4`.
+Recovery: 635868 bytes, `e137fd75dd54f59c5f304755e01f05dc5dc02d773601d34afe1f3b48699e9a89`.
+Compiler warnings/errors: 641/0. The corrected artifact-retention step succeeds.
+Canonical one-command receipt:
+`.cache/candidate-release/20261122T011631Z-a16389c9/result.json`.
+
+The thin local wrapper returned 1 during its final log write because it did not
+create its own output directory. The supported CLI's DELIVERED receipt, independent
+GitHub job readback `keyring-status-88`, and released CLI lock establish actual
+success; no successful release was repeated to repair the wrapper log. The wrapper
+is a preserved one-use adapter, not the product one-command script.
+
 ### Owner Rollout Order
 
 Do not deploy the new account gate ahead of the transition firmware and App.
 After formal candidate delivery, the owner performs these steps, not the agent:
 
-1. Publish firmware 3.3.49 using the existing working backend and App. Use the
+1. Publish firmware 3.3.50 using the existing working backend and App. Use the
    device's actual installed version as a delta base, or select full OTA. Verify
-   3.3.49 and the repaired text layout. No extra J-Link installation is required.
+   3.3.50 and the repaired text layout. No extra J-Link installation is required.
 2. Publish/install original-signed App 1.0.90+116 through the old backend. Account
    login will only become available after the matching backend rollout below.
-3. Run the existing `deploy-cloudflare-admin.yml` on main with the exact delivered
-   source SHA, `project_name=trace-update-admin-staging`, `branch=main`,
+3. Run the existing `deploy-cloudflare-admin.yml` on main with the verified backend
+   `source_sha=8a6dd4a3f051ba137256795f8d889eef6ece3e2b`,
+   `project_name=trace-update-admin-staging`, `branch=main`,
    `include_worker=true`, `include_public=true`. All three components changed.
    The supported entry applies only pending migrations, including 0018_accounts.sql;
    preserve env.staging, Access, signing, channels and existing credentials.
@@ -129,13 +174,17 @@ Actual Worker CPU-plan suitability and phone OS-vault behavior remain live check
 
 ### Account Batch Write Audit
 
-All agent-controlled outputs remain under `D:/github/my/E-Track`: scoped product
+Initial account-implementation audit: all agent-controlled outputs remained under
+`D:/github/my/E-Track`: scoped product
 and test files, existing records, Git metadata, contained host/CI adapter outputs,
 and `.cache/ota-followup-20261122/`. No PowerShell, external SDK installation,
 credential/configuration change, manual cloud API/deployment, phone/J-Link/OTA
 operation or unrelated-file cleanup was performed. Prior failed runs/evidence
 remain intact. The final continuation audit is retained at
 `.cache/ota-followup-20261122/account-delivery-audit-01.json`.
+The subsequent authorized read-only reconciliation and MCU-only recovery use
+the same project boundary. Their final audit is `account-delivery-audit-02.json`
+in that directory; original failures, fixtures and receipts remain preserved.
 
 ## Owner Feedback Follow-Up, 2026-11-22
 

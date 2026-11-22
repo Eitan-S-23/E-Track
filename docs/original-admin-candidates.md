@@ -180,6 +180,21 @@ workflow unsuccessful. Do not rerun a successful package to obtain cleaner logs.
 Do not replace a GitHub draft/prerelease with the same version or regenerate its
 APK. Reconcile retained assets and continue only the missing delivery stage.
 
+Firmware artifact retention runs even after upload/registration fails, provided
+packaging succeeded and private-key cleanup succeeded. The 14-day source-bound
+artifact includes the exact finalized image, full/recovery envelopes, original
+metadata and verification, and any partial upload/preflight receipts. No private
+build directory or key header is retained. Missing upload success is still a
+failure; retaining bytes only makes a later bounded recovery possible.
+
+Automatic firmware candidate admission is first-attempt-only. GitHub's generic
+rerun-failed-jobs action cannot resume that entry, even if only firmware failed.
+Do not relax the guard or rebuild an immutable package blindly. Reconcile retained
+packages, candidate rows and stored objects first. If an old run retained no
+recoverable package and the candidate/objects are conclusively absent, use a fresh
+unoccupied version through the existing main-push entry, keeping the failed
+version's evidence. A new MCU-only version does not rebuild a successful App.
+
 The source workflow's manual dispatch is checks-only. The Trace workflow also
 has a `check_only=true` dispatch that validates source and guards without an APK
 build, R2 upload, registration or channel change. These checks qualify the new

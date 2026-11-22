@@ -1,6 +1,6 @@
 # Shared Agent Records
 
-Current follow-up: COMPANION-FEEDBACK-20261122, Codex root, SOURCE_AND_APP_CANDIDATE_DELIVERED / MCU_INGESTION_FAILED / OWNER_RECONCILIATION_REQUIRED.
+Current follow-up: COMPANION-FEEDBACK-20261122, Codex root, SOURCE_AND_CANDIDATES_DELIVERED / OWNER_ROLLOUT_PENDING.
 Owner approved separate account-wide automatic/manual daily check limits of 5/5.
 Login, binding, Admin account views, cloud admission and the MCU text-layout follow-up
 have passed development self-tests and reached main `8a6dd4a3`; no backend deployment.
@@ -8,10 +8,13 @@ Latest App source `1a1c82fe` passes both hosts (`44965098761`); native/debug
 `44963606753` and backend/293 Admin UI cases `44963616712` pass on unchanged native
 and backend product inputs. Main backend/governance CI pass. App 1.0.90+116 formal
 Windows/Android builds and ingestion pass in Trace run 44966121776; candidate
-rel_trace_android_v1_0_90 is unpublished and not installed. MCU 3.3.49
-build/package pass (641 warnings/0 errors), but R2 upload returns HTTP 500 in
-44965965276. No successful firmware registration receipt; remote object state
-requires owner reconciliation. See the existing task note's failure receipt.
+rel_trace_android_v1_0_90 is unpublished and not installed. MCU 3.3.49's R2 failure
+is superseded by 3.3.50, source 91916e11469fce94282a9e1a0254048f4e4a9d7f,
+CI 44970721130: ready/unpublished, two verified assets, 641 warnings/0 errors,
+App skipped. Existing one-command entry completed; source 02241a0d also fixes
+failure-time artifact retention (65 regression cases). Agent reconciled old objects
+read-only after authorization; owner no longer needs to repeat that check.
+Owner rollout must install UID-capable 3.3.50 before enabling account cloud gates.
 See Account And Layout Batch in the existing task note. Prior 3.3.47 install
 and 3.3.48 candidate evidence below remain unchanged.
 Original owner ZIP, same-process post-OTA service stop finding, UI/check/history
