@@ -293,19 +293,25 @@ test("versioned main builds use only the original signer while ordinary builds r
   assert.match(source, /main\/master push builds artifacts only/);
 });
 
-test("normal firmware retains only verification originals after private-key cleanup", async () => {
+test("normal firmware retains recoverable originals after upload failure and private-key cleanup", async () => {
   const source = await readFile(new URL("../../.github/workflows/original-admin-candidate.yml", import.meta.url), "utf8");
   const block = source.slice(source.indexOf("      - name: Retain exact normal-firmware verification artifacts"),
     source.indexOf("      - name: Preserve candidate receipts in the native run log"));
   assert.match(source, /id: key_cleanup/);
   assert.match(block, /steps\.package\.outcome == 'success' && steps\.key_cleanup\.outcome == 'success'/);
+  assert.match(block, /if: always\(\) && steps\.package\.outcome == 'success'/);
   assert.match(block, /original-admin-firmware-\$\{\{ github\.run_id \}\}-\$\{\{ github\.run_attempt \}\}/);
   assert.match(block, /retention-days: 14/);
   assert.match(block, /include-hidden-files: true/);
   assert.match(block, /if-no-files-found: error/);
-  assert.equal((block.match(/^            \.cache\//gm) ?? []).length, 9);
+  assert.equal((block.match(/^            \.cache\//gm) ?? []).length, 17);
   assert.match(block, /source\/app\/X-Track-App-GCC\.elf/);
   assert.match(block, /source\/app\/X-Track-App-GCC\.map/);
+  for (const name of ['package-result.json', 'prepared/verification.json',
+    'prepared/cloudflare-firmware-release-metadata.json', 'prepared/app-final.bin',
+    'preflight.json', 'uploads.json']) assert.ok(block.includes('/run/' + name));
+  assert.ok(block.includes('prepared/e-track-at32f435-v${{ needs.checks.outputs.firmware_version }}-full.etu'));
+  assert.ok(block.includes('prepared/recovery-v${{ needs.checks.outputs.firmware_version }}.bin'));
   assert.doesNotMatch(block, /private-build|private-key|\*\*/);
 });
 

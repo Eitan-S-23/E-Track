@@ -165,7 +165,7 @@ jobs:
           TRACE_R2_BUCKET: trace-update-staging-releases
         run: node .github/scripts/firmware-admin-candidate.mjs register --out .cache/original-admin-candidate/run
       - name: Retain exact normal-firmware verification artifacts
-        if: steps.package.outcome == 'success' && steps.key_cleanup.outcome == 'success'
+        if: always() && steps.package.outcome == 'success' && steps.key_cleanup.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: original-admin-firmware-${{ github.run_id }}-${{ github.run_attempt }}
@@ -180,6 +180,14 @@ jobs:
             .cache/original-admin-candidate/run/source/app/X-Track-App-GCC.elf
             .cache/original-admin-candidate/run/source/app/X-Track-App-GCC.map
             .cache/original-admin-candidate/run/source/boot/X-Track-Boot.bin
+            .cache/original-admin-candidate/run/package-result.json
+            .cache/original-admin-candidate/run/prepared/verification.json
+            .cache/original-admin-candidate/run/prepared/cloudflare-firmware-release-metadata.json
+            .cache/original-admin-candidate/run/prepared/app-final.bin
+            .cache/original-admin-candidate/run/prepared/e-track-at32f435-v${{ needs.checks.outputs.firmware_version }}-full.etu
+            .cache/original-admin-candidate/run/prepared/recovery-v${{ needs.checks.outputs.firmware_version }}.bin
+            .cache/original-admin-candidate/run/preflight.json
+            .cache/original-admin-candidate/run/uploads.json
             .cache/original-admin-candidate/run/ready-metadata.json
             .cache/original-admin-candidate/run/register-receipt.json
       - name: Preserve candidate receipts in the native run log
@@ -188,7 +196,7 @@ jobs:
           node --input-type=module - <<'JS'
           import {existsSync,readFileSync} from 'node:fs';
           import {createHash} from 'node:crypto';
-          for(const name of ['source/source-proof.json','source/keyed-build-evidence.json','package-result.json','prepared/verification.json','ready-metadata.json','register-receipt.json']) {
+          for(const name of ['source/source-proof.json','source/keyed-build-evidence.json','package-result.json','prepared/verification.json','preflight.json','uploads.json','ready-metadata.json','register-receipt.json']) {
             const file='.cache/original-admin-candidate/run/'+name;
             if(!existsSync(file)) continue;
             const raw=readFileSync(file);
