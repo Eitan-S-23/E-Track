@@ -17,6 +17,31 @@ Stable/Beta publication or delta generation is included. Self-tests are not
 independent acceptance or real mail delivery. All controlled outputs stay in the
 project, reusing the existing host/CI adapters under .cache/ota-followup-20261122.
 
+Development source `599dc4a3e1b8fbbd91c6b0882b0165ccd72b8fee` passes Flutter CI
+**44995783785**: Linux 1007 passed/16 platform skips, Windows 955 passed/68 skips;
+both analyze and eight candidate contracts pass. No debug APK was requested and
+native Android inputs are unchanged. Backend **44995837038** passes Worker,
+Public and full Admin browser checks. Local originals: `accounts-host-101`
+(21 account/mail cases), `accounts-check-102` (Worker types),
+`ui-account-feedback-101` (77 related browser cases), and `keyring-logs-110`.
+All mail-provider calls in self-tests are mocked; no live message was sent.
+
+Changes also preserve the expanded Admin settings panel and unsaved drafts,
+report acknowledged mutations separately from a failed detail refresh, and avoid
+late App dialogs after the page has closed. App account binding/password dialogs
+now use TraceDialog; explicit feedback-page failures also use that component,
+while passive outbox status remains nonmodal to avoid background popup loops.
+Registration accepts an optional recovery email. Sending is one request per
+mailbox/minute and five/hour, independent of OTA allowances. Rejected/uncertain
+sends invalidate their code; reset flow checks verify old-session revocation.
+
+All 129 Trace releases including drafts and matching tags were read in
+`keyring-read-107/109`; **1.0.91+117** is the new delivery target. Version-only
+metadata and this operational note follow the tested source. Formal APK/EXE,
+candidate ingestion, updated backend deployment and mail activation are distinct
+pending outcomes at this checkpoint. The sender/configuration/real-recipient
+inputs remain missing. See the new supported [email contract](../../app/bluetooth_flutter_Trace/cloudflare/update-service/docs/ACCOUNT-EMAIL.md).
+
 Status: SOURCE_CANDIDATES_AND_BACKEND_DELIVERED / PHONE_AND_DEVICE_VALIDATION_PENDING.
 Latest MCU: 3.3.50, source `91916e11469fce94282a9e1a0254048f4e4a9d7f`,
 successful candidate CI `44970721130`. App remains 1.0.90+116; it was not rebuilt.

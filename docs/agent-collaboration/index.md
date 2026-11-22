@@ -4,6 +4,10 @@ Current follow-up: COMPANION-FEEDBACK-20261122, Codex root, ACCOUNT_MAIL_AND_FEE
 Owner requests actual email completion and consistent App/Admin failure dialogs.
 Account and adjacent feedback prompts are being aligned to existing components;
 mail sender/domain and controlled real recipient remain missing owner inputs.
+Source 599dc4a3 passes full Flutter 44995783785 (Linux 1007/Windows 955, platform
+skips retained) and backend 44995837038. Local account/mail 21 and related browser
+77 cases pass. App 1.0.91+117 formal delivery and updated backend deployment are
+being prepared; actual mail has not been sent. No MCU rebuild is needed.
 Prior source/candidates/backend delivery and pending phone/device validation below
 are preserved; no MCU, channel/delta or device action belongs to this follow-up.
 Owner approved separate account-wide automatic/manual daily check limits of 5/5.
