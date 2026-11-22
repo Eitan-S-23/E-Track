@@ -75,6 +75,7 @@ for (const width of [1440, 390]) test(`account relations link terminals, session
   const data = await mockApp(page);
   await page.locator('#appAccountsTab').click();
   await page.locator('[data-account-view="terminals"]').click();
+  await expect(page.locator('#appAccountsPanel .account-stats')).toHaveCount(0);
   await expect(page.locator('#appAccountsPanel')).toContainText('Test phone');
   await page.locator('#appAccountsPanel [data-user]').click();
   await page.locator('#appAccountsPanel [data-detail-tab="terminals"]').first().click();

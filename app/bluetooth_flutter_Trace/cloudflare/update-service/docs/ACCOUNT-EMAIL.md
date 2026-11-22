@@ -55,8 +55,8 @@ it is not a general SMTP server/client or a replacement deployment tool. Fake
 socket tests cover fragmented multiline replies, auth/recipient/DATA rejection,
 timeout, injection and response bounds. They do not prove real QQ delivery.
 
-The owner must identify an approved sender/domain, the existing protected Resend
-configuration locator, and a real test recipient they control. Never invent a
+For the optional Resend route only, the owner must identify an approved sender/domain,
+the protected Resend configuration locator, and a real test recipient they control. Never invent a
 domain, scrape unrelated secret files, put keys in chat/argv/Git, send to a guessed
 recipient, or enable a paid service without its owner's decision.
 

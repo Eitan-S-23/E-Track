@@ -40,9 +40,9 @@
         <div class="operations-buttons" role="group" aria-label="${label('账号关联视图','Account relation views')}">
           ${[['accounts','账号','Accounts'],['terminals','APP 终端','App terminals'],['devices','绑定码表','Bound devices']].map(([key,cn,en]) =>
             `<button class="secondary-button" data-account-view="${key}" aria-pressed="${view === key}" ${busy ? 'disabled' : ''}>${label(cn,en)}</button>`).join('')}</div>
-        <div class="operations-buttons"><span>${label('有效账号', 'Accounts')}: ${Number(data.stats?.registered?.total ?? 0)}</span>
-          <span>${label('今日登录用户', 'Users signed in today')}: ${Number(data.stats?.today?.users ?? 0)}</span>
-          <span>${label('今日登录次数', 'Sign-ins today')}: ${Number(data.stats?.today?.logins ?? 0)}</span></div>
+        ${view === 'accounts' ? `<div class="operations-buttons account-stats"><span>${label('有效账号', 'Accounts')}: ${data.stats ? Number(data.stats.registered?.total ?? 0) : '-'}</span>
+          <span>${label('今日登录用户', 'Users signed in today')}: ${data.stats ? Number(data.stats.today?.users ?? 0) : '-'}</span>
+          <span>${label('今日登录次数', 'Sign-ins today')}: ${data.stats ? Number(data.stats.today?.logins ?? 0) : '-'}</span></div>` : ''}
         ${draft ? `<details ${settingsOpen ? 'open' : ''}><summary>${label('注册与检查额度设置', 'Registration and check limits')}</summary>
           <form id="accountSettings"><div class="operations-buttons">
             ${[['registration_enabled','开放注册','Registration'],['password_registration_enabled','允许密码注册','Password registration'],
