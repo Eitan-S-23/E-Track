@@ -220,8 +220,9 @@ export async function accountRoute(request: Request, env: WorkerEnv): Promise<Re
       .bind(account.id, env.APP_ID).all()).results });
   }
   if (request.method === 'GET' && path === '/api/account/sessions') {
-    return json({ sessions: await sessionList(env.DB, account.id, await sha256Hex(request.headers.get('Authorization')!.slice(7))),
-      ...await accountConnections(env.DB, account.id) });
+    const tokenHash = await sha256Hex(request.headers.get('Authorization')!.slice(7));
+    return json({ sessions: await sessionList(env.DB, account.id, tokenHash),
+      ...await accountConnections(env.DB, account.id, tokenHash) });
   }
   if (request.method !== 'POST') throw invalidParameter('Unsupported account operation');
   await authRate(request, env, account.id);
@@ -239,13 +240,21 @@ export async function accountRoute(request: Request, env: WorkerEnv): Promise<Re
     return json({ ok: true });
   }
   if (path === '/api/account/sessions/revoke') {
-    const id = field(body, 'sessionId', /^[0-9a-f]{32}$/);
+    const byTerminal = body.installationId !== undefined;
+    if (byTerminal === (body.sessionId !== undefined)) throw invalidParameter('Choose one session or terminal');
+    const key = byTerminal ? 'installationId' : 'sessionId';
+    const column = byTerminal ? 'installation_id' : 'session_id';
+    const id = field(body, key, /^[0-9a-f]{32}$/);
+    const current = await env.DB.prepare('SELECT session_id,installation_id FROM account_sessions WHERE account_id=? AND token_hash=?')
+      .bind(account.id, await sha256Hex(request.headers.get('Authorization')!.slice(7)))
+      .first<{ session_id: string; installation_id: string | null }>();
     await env.DB.batch([
-      env.DB.prepare('UPDATE account_sessions SET revoked_at=coalesce(revoked_at,?) WHERE account_id=? AND session_id=?').bind(now, account.id, id),
+      env.DB.prepare(`UPDATE account_sessions SET revoked_at=? WHERE account_id=? AND ${column}=?
+        AND revoked_at IS NULL AND expires_at>?`).bind(now, account.id, id, now),
       env.DB.prepare('INSERT INTO account_audit(id,actor,action,account_id,occurred_at) VALUES(?,?,?,?,?)')
-        .bind(crypto.randomUUID(), account.id, 'revoke-session', account.id, now)
+        .bind(crypto.randomUUID(), account.id, byTerminal ? 'revoke-terminal' : 'revoke-session', account.id, now)
     ]);
-    return json({ ok: true });
+    return json({ ok: true, currentRevoked: current?.[column] === id });
   }
   if (path === '/api/account/devices/observe') {
     const device = await requireBoundDevice(request, env, account);

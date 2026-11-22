@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import '../services/app_update_service.dart';
+import '../services/account_service.dart';
 import '../services/version_inventory_service.dart';
 import '../services/database_service.dart';
 import 'trace_ui.dart';
@@ -506,6 +507,7 @@ class _ProfileAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final labelWidth = math.min(180.0, math.max(118.0, MediaQuery.textScalerOf(context).scale(118)));
     return Column(
       children: [
         SizedBox(
@@ -568,9 +570,14 @@ class _ProfileAvatar extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        const Text(
-          '登录/注册',
-          style: TextStyle(
+        SizedBox(width: labelWidth, child: Obx(() => Text(
+          AccountService.to.identityLabel,
+          key: const ValueKey('profile-account-identity'),
+          semanticsLabel: AccountService.to.identityLabel,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
             color: TraceColors.text,
             fontSize: 17,
             fontWeight: FontWeight.w900,
@@ -579,7 +586,7 @@ class _ProfileAvatar extends StatelessWidget {
               Shadow(color: Color(0x6624F6DE), blurRadius: 12),
             ],
           ),
-        ),
+        ))),
       ],
     );
   }

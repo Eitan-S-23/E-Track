@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:ble_monitor/services/account_service.dart';
@@ -11,9 +12,11 @@ class _Http implements HttpClientAdapter {
   int status = 200;
   Map<String, dynamic> response = {};
   ResponseBody Function(RequestOptions)? respond;
+  Future<ResponseBody> Function(RequestOptions)? respondAsync;
   @override
   Future<ResponseBody> fetch(RequestOptions options, Stream<Uint8List>? stream, Future<void>? cancel) async {
     requests.add(options);
+    if (respondAsync != null) return respondAsync!(options);
     if (respond != null) return respond!(options);
     return ResponseBody.fromString(jsonEncode(response), status, headers: {Headers.contentTypeHeader: ['application/json']});
   }
@@ -40,6 +43,98 @@ void main() {
       'automatic': {'remaining': 5, 'limit': 5}, 'manual': {'remaining': 5, 'limit': 5}}};
     await service.login('rider', 'test-password');
   }
+  ResponseBody reply(Map<String, dynamic> value, {int status = 200}) =>
+    ResponseBody.fromString(jsonEncode(value), status, headers: {Headers.contentTypeHeader: ['application/json']});
+  Map<String, dynamic> accountResponse(RequestOptions request, {bool currentRevoked = false}) => switch (request.uri.path) {
+    '/api/account/me' => {'account': {'id': 'one', 'username': 'rider'}, 'quota': {}},
+    '/api/account/devices' => {'devices': []},
+    '/api/account/sessions' => {'terminals': [{'installationId': 'a' * 32, 'model': 'Test phone', 'state': 'valid'}],
+      'sessions': [{'id': 'first', 'installationId': 'a' * 32}, {'id': 'second', 'installationId': 'a' * 32}]},
+    '/api/account/sessions/revoke' => {'ok': true, 'currentRevoked': currentRevoked},
+    _ => {'ok': true},
+  };
+  test('identity follows login, restored login, email fallback and logout', () async {
+    expect(service.identityLabel, '登录/注册');
+    await login(); expect(service.identityLabel, 'rider');
+    final restored = AccountService(dio: dio, endpoint: endpoint);
+    await restored.initialize(); expect(restored.identityLabel, 'rider');
+    service.account.value = {'id': 'one', 'username': '  ', 'email': 'rider@example.test'};
+    expect(service.identityLabel, 'rider@example.test');
+    service.account.value = {'id': 'two', 'username': 'other', 'email': 'rider@example.test'};
+    expect(service.identityLabel, 'other');
+    http.response = {'ok': true}; await service.logout();
+    expect(service.identityLabel, '登录/注册');
+  });
+  test('refresh keeps installation terminals separate from repeated login history', () async {
+    await login(); http.respond = (request) => reply(accountResponse(request));
+    await service.refresh();
+    expect(service.terminals, hasLength(1)); expect(service.sessions, hasLength(2));
+    expect(service.terminals.single['installationId'], 'a' * 32);
+    await service.logout();
+    expect(service.terminals, isEmpty); expect(service.sessions, isEmpty);
+    http.respond = null; await login();
+    expect(service.terminals, isEmpty); expect(service.sessions, isEmpty);
+  });
+  test('a replaced login discards the previous account terminal and device views', () async {
+    await login();
+    service.terminals.add({'installationId': 'a' * 32}); service.sessions.add({'id': 'old'});
+    service.devices.add({'uid': 'old'});
+    http.response = {'token': token, 'account': {'id': 'two', 'username': 'other'}, 'quota': {}};
+    await service.login('other', 'test-password');
+    expect(service.identityLabel, 'other'); expect(service.terminals, isEmpty);
+    expect(service.sessions, isEmpty); expect(service.devices, isEmpty);
+  });
+  test('terminal revocation follows the server current-session result, not a stale row', () async {
+    await login(); http.requests.clear();
+    http.response = {'ok': true, 'currentRevoked': true};
+    await service.revokeTerminal({'installationId': 'a' * 32, 'current': false});
+    expect(http.requests.single.data, {'installationId': 'a' * 32});
+    expect(service.loggedIn, isFalse); expect(service.identityLabel, '登录/注册');
+    expect(await const FlutterSecureStorage().read(key: 'etrack_account_session_v1'), isNull);
+    expect(await const FlutterSecureStorage().read(key: 'etrack_account_installation_v1'), isNotNull);
+  });
+  test('revoking another terminal refreshes without logging out the current account', () async {
+    await login(); http.requests.clear();
+    http.respond = (request) => reply(accountResponse(request));
+    await service.revokeTerminal({'installationId': 'b' * 32, 'current': true});
+    expect(service.loggedIn, isTrue); expect(service.terminals, hasLength(1));
+    expect(http.requests.first.data, {'installationId': 'b' * 32});
+    expect(http.requests.where((request) => request.uri.path == '/api/account/sessions/revoke'), hasLength(1));
+  });
+  test('a post-revocation refresh failure never repeats the destructive request', () async {
+    await login(); http.requests.clear();
+    http.respond = (request) => request.uri.path == '/api/account/me'
+      ? reply({'errorCode': 'BACKEND_UNAVAILABLE'}, status: 503) : reply(accountResponse(request));
+    await expectLater(service.revokeTerminal({'installationId': 'b' * 32}),
+      throwsA(isA<AccountException>().having((error) => error.code, 'code', 'REFRESH_FAILED')));
+    expect(http.requests.where((request) => request.uri.path == '/api/account/sessions/revoke'), hasLength(1));
+    expect(service.loggedIn, isTrue);
+  });
+  test('unknown terminal identity fails before sending a revocation request', () async {
+    await login(); http.requests.clear();
+    await expectLater(service.revokeTerminal({'model': 'Test phone'}), throwsA(isA<AccountException>()));
+    expect(http.requests, isEmpty);
+  });
+  test('a missing terminal revocation receipt remains unconfirmed, with no retry', () async {
+    await login(); http.requests.clear(); http.response = {'ok': true};
+    await expectLater(service.revokeTerminal({'installationId': 'a' * 32}),
+      throwsA(isA<AccountException>().having((error) => error.code, 'code', 'INVALID_RESPONSE')));
+    expect(http.requests, hasLength(1)); expect(service.loggedIn, isTrue);
+  });
+  test('a late refresh cannot restore terminal records after logout', () async {
+    await login();
+    final entered = Completer<void>(), pending = Completer<ResponseBody>();
+    http.respondAsync = (request) async {
+      if (request.uri.path == '/api/account/devices') { entered.complete(); return pending.future; }
+      return reply(accountResponse(request));
+    };
+    final refresh = service.refresh();
+    final rejected = expectLater(refresh, throwsA(isA<AccountException>().having((error) => error.code, 'code', 'ACCOUNT_CHANGED')));
+    await entered.future; await service.logout(); pending.complete(reply({'devices': [{'uid': 'old'}]}));
+    await rejected;
+    expect(service.account.value, isNull); expect(service.terminals, isEmpty);
+    expect(service.sessions, isEmpty); expect(service.devices, isEmpty);
+  });
   test('anonymous cloud checks fail before HTTP while no Bluetooth service is required', () async {
     await expectLater(service.newCheck(automatic: false), throwsA(isA<AccountException>()));
     expect(http.requests, isEmpty);

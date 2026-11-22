@@ -54,6 +54,7 @@ class AccountService extends GetxService {
   final quota = <String, dynamic>{}.obs;
   final settings = <String, dynamic>{}.obs;
   final devices = <Map<String, dynamic>>[].obs;
+  final terminals = <Map<String, dynamic>>[].obs;
   final sessions = <Map<String, dynamic>>[].obs;
   final terminalReportProblem = RxnString();
   final Future<Map<String, dynamic>> Function() _readTerminal;
@@ -67,6 +68,15 @@ class AccountService extends GetxService {
   int get generation => _generation;
   String? get accountId => account.value?['id'] as String?;
   bool get loggedIn => _token != null && accountId != null;
+  String get identityLabel {
+    final profile = account.value;
+    if (profile == null) return '登录/注册';
+    for (final key in ['username', 'email']) {
+      final value = profile[key];
+      if (value is String && value.trim().isNotEmpty) return value.trim();
+    }
+    return '账号';
+  }
 
   static void _recordDiagnostic(Map<String, Object?> value) {
     if (Platform.isAndroid) unawaited(_writeDiagnostic(value));
@@ -152,9 +162,10 @@ class AccountService extends GetxService {
   void onInit() { super.onInit(); unawaited(initialize()); }
   Future<void> initialize() => _initialization ??= _restore();
   Future<void> _restore() async {
+    final captured = _generation;
     try {
       final raw = await _storage.read(key: _storageKey);
-      if (raw == null) return;
+      if (raw == null || captured != _generation) return;
       final saved = jsonDecode(raw) as Map<String, dynamic>;
       final token = saved['token'];
       final profile = saved['account'];
@@ -323,20 +334,45 @@ class AccountService extends GetxService {
       throw const AccountException('ACCOUNT_CHANGED', '账号已变化，请重试');
     }
     _generation++;
-    _terminalReported = DateTime.now(); _deviceReports.clear(); sessions.clear();
+    _terminalReported = DateTime.now(); _deviceReports.clear();
+    devices.clear(); terminals.clear(); sessions.clear(); terminalReportProblem.value = null;
     _token = token;
     account.value = Map<String, dynamic>.from(result['account'] as Map);
     quota.assignAll(Map<String, dynamic>.from(result['quota'] as Map? ?? {}));
   }
   Future<void> refresh() async {
+    final captured = _generation;
+    void checkAccount() {
+      if (captured != _generation) throw const AccountException('ACCOUNT_CHANGED', '账号已变化，请刷新');
+    }
     await reportTerminal();
+    checkAccount();
     final result = await call('/api/account/me');
+    checkAccount();
+    final list = await call('/api/account/devices');
+    checkAccount();
+    final logins = await call('/api/account/sessions');
+    checkAccount();
     account.value = Map<String, dynamic>.from(result['account'] as Map);
     quota.assignAll(Map<String, dynamic>.from(result['quota'] as Map));
-    final list = await call('/api/account/devices');
     devices.assignAll((list['devices'] as List).map((d) => Map<String, dynamic>.from(d as Map)));
-    final logins = await call('/api/account/sessions');
+    terminals.assignAll((logins['terminals'] as List? ?? []).map((t) => Map<String, dynamic>.from(t as Map)));
     sessions.assignAll((logins['sessions'] as List? ?? []).map((s) => Map<String, dynamic>.from(s as Map)));
+  }
+  Future<void> revokeTerminal(Map<String, dynamic> terminal) async {
+    final id = terminal['installationId'];
+    if (id is! String || !RegExp(r'^[0-9a-f]{32}$').hasMatch(id)) {
+      throw const AccountException('INVALID_RESPONSE', '终端编号未知，无法退出该终端');
+    }
+    final result = await call('/api/account/sessions/revoke', body: {'installationId': id});
+    if (result['ok'] != true || result['currentRevoked'] is! bool) {
+      throw const AccountException('INVALID_RESPONSE', '未收到退出确认，请刷新核对，不要重复操作');
+    }
+    if (result['currentRevoked'] == true) { await _clear(); }
+    else {
+      try { await refresh(); }
+      catch (_) { throw const AccountException('REFRESH_FAILED', '登录已撤销，但列表刷新失败；请刷新查看，不必重复操作'); }
+    }
   }
   Future<void> revokeSession(Map<String, dynamic> session) async {
     await call('/api/account/sessions/revoke', body: {'sessionId': session['id']});
@@ -376,7 +412,7 @@ class AccountService extends GetxService {
     _generation++;
     _token = null;
     account.value = null;
-    quota.clear(); devices.clear(); sessions.clear(); _deviceReports.clear(); _terminalReported = null;
+    quota.clear(); devices.clear(); terminals.clear(); sessions.clear(); _deviceReports.clear(); _terminalReported = null;
     terminalReportProblem.value = null;
     await _storage.delete(key: _storageKey);
   }

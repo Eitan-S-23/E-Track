@@ -230,7 +230,7 @@ void main() {
     accounts.devices.assignAll(List.generate(40, (i) => {
       'uid': i.toRadixString(16).padLeft(24, '0'), 'name': 'Device $i', 'model': 'AT32F435', 'firmware_version': 30350,
     }));
-    accounts.sessions.assignAll(List.generate(40, (i) => {'id': '$i', 'model': 'Phone $i', 'state': 'valid'}));
+    accounts.terminals.assignAll(List.generate(40, (i) => {'installationId': i.toRadixString(16).padLeft(32, '0'), 'model': 'Phone $i', 'state': 'valid'}));
     await show(tester, scale: scale);
     final logout = find.byKey(const ValueKey('account-logout'));
     expect(logout.hitTestable(), findsOneWidget);
@@ -247,7 +247,7 @@ void main() {
     accounts.signedIn = true;
     accounts.account.value = {'id': 'one', 'displayName': 'Rider'};
     accounts.devices.assignAll(List.generate(40, (i) => {'uid': '$i', 'name': 'Device $i'}));
-    accounts.sessions.assignAll(List.generate(40, (i) => {'id': '$i', 'model': 'Phone $i'}));
+    accounts.terminals.assignAll(List.generate(40, (i) => {'installationId': i.toRadixString(16).padLeft(32, '0'), 'model': 'Phone $i'}));
     await show(tester);
     final window = find.byKey(const ValueKey('account-devices-window'));
     final outer = tester.widget<SingleChildScrollView>(find.byKey(const ValueKey('account-page-scroll'))).controller!;
@@ -259,6 +259,76 @@ void main() {
     outer.jumpTo(60); inner.jumpTo(0); await tester.pump();
     await tester.drag(window, const Offset(0, 120)); await frames(tester);
     expect(outer.offset, lessThan(60));
+    expect(find.byKey(const ValueKey('account-logout')).hitTestable(), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('terminal summaries use installations rather than repeated login sessions', (tester) async {
+    accounts.signedIn = true; accounts.account.value = {'id': 'one', 'username': 'rider'};
+    accounts.terminals.assignAll([
+      {'installationId': 'a' * 32, 'model': 'Same phone', 'versionName': '1.0.94', 'versionCode': 120,
+        'state': 'valid', 'current': 1, 'activeSessionCount': 1, 'sessionCount': 3, 'lastLoginAt': 1000, 'lastSeenAt': 2000},
+      {'installationId': 'b' * 32, 'model': 'Same phone', 'versionName': '1.0.94', 'state': 'unknown'},
+    ]);
+    accounts.sessions.assignAll(List.generate(4, (i) => {'id': '$i', 'installationId': 'a' * 32, 'model': 'Same phone'}));
+    await show(tester, scale: 2);
+    expect(find.byKey(ValueKey('account-terminal-${'a' * 32}')), findsOneWidget);
+    expect(find.byKey(ValueKey('account-terminal-${'b' * 32}')), findsOneWidget);
+    expect(find.text('Same phone · APP 1.0.94'), findsNWidgets(2));
+    final window = find.byKey(const ValueKey('account-terminals-window'));
+    expect(tester.getSize(window).height, lessThanOrEqualTo(568 * .38));
+    final row = find.byKey(ValueKey('account-terminal-${'a' * 32}'));
+    await tester.ensureVisible(row); await frames(tester);
+    final bounds = tester.getRect(row);
+    await tester.tapAt(Offset(bounds.right - 30, bounds.center.dy)); await frames(tester);
+    expect(find.byType(TraceDialog), findsOneWidget);
+    expect(find.textContaining('终端编号：${'a' * 32}'), findsOneWidget);
+    expect(find.textContaining('保留登录记录：3'), findsOneWidget);
+    expect(find.text('关闭').hitTestable(), findsOneWidget);
+    await tester.tap(find.text('关闭')); await frames(tester);
+    expect(find.byKey(const ValueKey('account-logout')).hitTestable(), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('terminal logout confirmation sends the installation and reports failures in a dialog', (tester) async {
+    accounts.signedIn = true; accounts.account.value = {'id': 'one', 'username': 'rider'};
+    accounts.terminals.add({'installationId': 'a' * 32, 'model': 'Test phone', 'state': 'valid'});
+    await show(tester);
+    final row = find.byKey(ValueKey('account-terminal-${'a' * 32}'));
+    await tester.ensureVisible(row); await tester.tap(row); await frames(tester);
+    await tester.tap(find.text('退出该终端')); await frames(tester);
+    expect(find.text('退出该终端？'), findsOneWidget);
+    await tester.tap(find.text('取消')); await frames(tester);
+    expect(accounts.calls, isEmpty);
+    await tester.tap(row); await frames(tester);
+    await tester.tap(find.text('退出该终端')); await frames(tester);
+    accounts.actionError = const AccountException('NETWORK', '账号服务暂时不可用');
+    await tester.tap(find.text('退出')); await frames(tester);
+    expect(accounts.calls.single, {'path': '/api/account/sessions/revoke', 'body': {'installationId': 'a' * 32}});
+    expect(find.byType(TraceDialog), findsOneWidget);
+    expect(find.text('账号服务暂时不可用'), findsOneWidget);
+    await tester.tap(find.text('知道了')); await frames(tester);
+    expect(find.byKey(const ValueKey('account-logout')).hitTestable(), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('terminal window hands remaining drag to the parent at both edges', (tester) async {
+    accounts.signedIn = true; accounts.account.value = {'id': 'one', 'username': 'rider'};
+    accounts.devices.assignAll(List.generate(40, (i) => {'uid': '$i', 'name': 'Device $i'}));
+    accounts.terminals.assignAll(List.generate(40, (i) => {'installationId': i.toRadixString(16).padLeft(32, '0'), 'model': 'Phone $i'}));
+    await show(tester);
+    final window = find.byKey(const ValueKey('account-terminals-window'));
+    final outer = tester.widget<SingleChildScrollView>(find.byKey(const ValueKey('account-page-scroll'))).controller!;
+    final inner = tester.widget<SingleChildScrollView>(window).controller!;
+    outer.jumpTo((outer.position.maxScrollExtent - 80).clamp(0.0, outer.position.maxScrollExtent).toDouble());
+    inner.jumpTo(inner.position.maxScrollExtent); await tester.pump();
+    final before = outer.offset;
+    await tester.drag(window, const Offset(0, -120)); await frames(tester);
+    expect(outer.offset, greaterThan(before));
+    outer.jumpTo(outer.position.maxScrollExtent); inner.jumpTo(0); await tester.pump();
+    final bottom = outer.offset;
+    await tester.drag(window, const Offset(0, 120)); await frames(tester);
+    expect(outer.offset, lessThan(bottom));
     expect(find.byKey(const ValueKey('account-logout')).hitTestable(), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

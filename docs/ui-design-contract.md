@@ -39,6 +39,16 @@ This contract does not rewrite historical frozen acceptance or grant operations.
 - Remove repetitive permanent explanations. Use concise labels and optional
   help for secondary detail, but retain real errors, safety decisions, missing
   information and unverified state. A valid login is not proof of online presence.
+- Account entry labels subscribe to the active identity: signed-out shows the
+  login/register action; signed-in shows username, falling back to email. Logout,
+  restored login and account switches update it without reopening the page.
+  Long identities have bounded width and accessible full text.
+- Terminal lists identify installations by account and persistent installation
+  ID, not by login session, model or display name. Repeated logins stay in history
+  without duplicating the terminal. Missing legacy identities stay unknown.
+  Terminal logout revokes that account's active sessions for the installation,
+  not one arbitrary login or another account/device. State comes from all retained
+  sessions, never a truncated display page; valid login does not mean online.
 - Layout derives from available dimensions, not overlapping fixed coordinates.
   Long text wraps within its allocated region; use a supported smaller font or
   scrolling where necessary. Text must not cross into the footer/button region.

@@ -2,6 +2,7 @@ import 'package:ble_monitor/pages/profile_tab_page.dart';
 import 'package:ble_monitor/pages/companion_setup_page.dart';
 import 'package:ble_monitor/pages/trace_ui.dart';
 import 'package:ble_monitor/services/version_inventory_service.dart';
+import 'package:ble_monitor/services/account_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -9,15 +10,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'account_fixture.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   const toggleKey = ValueKey('version-inventory-toggle');
   const preference = 'version_inventory_v1_enabled';
   late VersionInventoryService inventory;
   late int requests;
+  late TestAccountService accounts;
 
   setUp(() {
     Get.testMode = true;
+    accounts = TestAccountService(signedIn: false);
+    Get.put<AccountService>(accounts);
     requests = 0;
     SharedPreferences.setMockInitialValues({});
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -113,6 +119,36 @@ void main() {
       matching: find.byType(RichText),
     );
     return tester.renderObject<RenderParagraph>(richText).text.style!.color!;
+  }
+
+  for (final scale in [1.0, 2.0]) {
+    testWidgets('profile identity updates without reopening and stays bounded at scale $scale', (tester) async {
+      tester.view.physicalSize = const Size(320, 568); tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(GetMaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(scale)), child: child!),
+        home: const Scaffold(body: ProfileTabPage())));
+      await tester.pumpAndSettle();
+      final label = find.byKey(const ValueKey('profile-account-identity'));
+      expect(tester.widget<Text>(label).data, '登录/注册');
+      accounts.signedIn = true;
+      accounts.account.value = {'id': 'one', 'username': 'rider', 'displayName': 'Alias', 'email': 'rider@example.test'};
+      await tester.pump(); expect(tester.widget<Text>(label).data, 'rider');
+      final email = '${'long' * 20}@example.test';
+      accounts.account.value = {'id': 'two', 'username': '', 'email': email};
+      await tester.pump();
+      final text = tester.widget<Text>(label);
+      expect(text.data, email); expect(text.semanticsLabel, email);
+      expect(text.overflow, TextOverflow.ellipsis); expect(text.maxLines, 1);
+      expect(tester.getSize(label).width, lessThanOrEqualTo(scale == 1 ? 118 : 180));
+      expect(tester.getRect(label).right, lessThanOrEqualTo(320));
+      accounts.account.value = {'id': 'three', 'username': 'another'};
+      await tester.pump(); expect(tester.widget<Text>(label).data, 'another');
+      accounts.signedIn = false; accounts.account.value = null;
+      await tester.pump(); expect(tester.widget<Text>(label).data, '登录/注册');
+      expect(tester.takeException(), isNull);
+    });
   }
 
   double contrast(Color first, Color second) {

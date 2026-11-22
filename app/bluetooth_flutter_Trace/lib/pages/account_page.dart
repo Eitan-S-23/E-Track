@@ -24,7 +24,7 @@ class _AccountPageState extends State<AccountPage> {
   final _form = GlobalKey<FormState>();
   final _pageScroll = ScrollController();
   late final _devicesScroll = ChainedScrollController(_pageScroll);
-  late final _sessionsScroll = ChainedScrollController(_pageScroll);
+  late final _terminalsScroll = ChainedScrollController(_pageScroll);
   AccountService get service => AccountService.to;
   String _mode = 'login', _message = '';
   String? _verificationId;
@@ -70,7 +70,7 @@ class _AccountPageState extends State<AccountPage> {
   void dispose() {
     _resendTimer?.cancel();
     _devicesScroll.dispose();
-    _sessionsScroll.dispose();
+    _terminalsScroll.dispose();
     _pageScroll.dispose();
     for (final controller in [_username, _password, _confirm, _email, _code]) { controller.dispose(); }
     super.dispose();
@@ -225,7 +225,7 @@ class _AccountPageState extends State<AccountPage> {
   ];
 
   List<Widget> _profile() => [
-    Text(service.account.value?['displayName']?.toString() ?? '',
+    Text(service.identityLabel,
       style: const TextStyle(color: TraceColors.text, fontSize: 26, fontWeight: FontWeight.w800)),
     const SizedBox(height: 8),
     const Text('今日检查额度', style: TextStyle(color: TraceColors.muted)),
@@ -253,18 +253,18 @@ class _AccountPageState extends State<AccountPage> {
     const Text('登录终端', style: TextStyle(color: TraceColors.text, fontSize: 18)),
     if (service.terminalReportProblem.value != null)
       const Text('码表信息同步未完成', style: TextStyle(color: TraceColors.amber)),
-    if (service.sessions.isEmpty) const Padding(padding: EdgeInsets.symmetric(vertical: 16),
+    if (service.terminals.isEmpty) const Padding(padding: EdgeInsets.symmetric(vertical: 16),
       child: Text('暂无终端记录', style: TextStyle(color: TraceColors.muted))),
-    if (service.sessions.isNotEmpty) _recordWindow('account-sessions-window', _sessionsScroll, [
-      for (final session in service.sessions) ListTile(
-        key: ValueKey('account-session-${session['id']}'), contentPadding: EdgeInsets.zero,
-        title: Text('${session['model'] == null || session['model'] == '' ? '型号未知' : session['model']} · APP ${session['versionName'] ?? '未知'}',
+    if (service.terminals.isNotEmpty) _recordWindow('account-terminals-window', _terminalsScroll, [
+      for (final terminal in service.terminals) ListTile(
+        key: ValueKey('account-terminal-${terminal['installationId']}'), contentPadding: EdgeInsets.zero,
+        title: Text('${terminal['model'] == null || terminal['model'] == '' ? '型号未知' : terminal['model']} · APP ${terminal['versionName'] ?? '未知'}',
           maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: TraceColors.text)),
-        subtitle: Text('${session['current'] == 1 || session['current'] == true ? '本机 · ' : ''}'
-          '${_sessionState(session)}', maxLines: 1, overflow: TextOverflow.ellipsis,
+        subtitle: Text('${terminal['current'] == 1 || terminal['current'] == true ? '本机 · ' : ''}'
+          '${_terminalState(terminal)}', maxLines: 1, overflow: TextOverflow.ellipsis,
           style: const TextStyle(color: TraceColors.muted, fontSize: 12)),
         trailing: const Icon(Icons.chevron_right, color: TraceColors.cyanSoft),
-        onTap: _busy ? null : () => _sessionDetails(session)),
+        onTap: _busy ? null : () => _terminalDetails(terminal)),
     ]),
   ];
 
@@ -279,8 +279,8 @@ class _AccountPageState extends State<AccountPage> {
     ? '${value.toInt() ~/ 10000}.${value.toInt() ~/ 100 % 100}.${value.toInt() % 100}' : '版本未知';
   String _time(Object? value) => value is num
     ? DateTime.fromMillisecondsSinceEpoch(value.toInt()).toLocal().toString().split('.').first : '未知';
-  String _sessionState(Map<String, dynamic> value) => switch (value['state']) {
-    'valid' => '登录有效', 'revoked' => '已退出', _ => '已过期',
+  String _terminalState(Map<String, dynamic> value) => switch (value['state']) {
+    'valid' => '登录有效', 'revoked' => '已退出', 'expired' => '已过期', _ => '状态未知',
   };
 
   Future<void> _deviceDetails(Map<String, dynamic> device) => showDialog<void>(context: context,
@@ -295,26 +295,29 @@ class _AccountPageState extends State<AccountPage> {
         const TraceDialogAction(label: '关闭', isPrimary: true, onPressed: TraceDialog.close),
       ]));
 
-  Future<void> _sessionDetails(Map<String, dynamic> value) => showDialog<void>(context: context,
+  Future<void> _terminalDetails(Map<String, dynamic> value) => showDialog<void>(context: context,
     builder: (_) => TraceDialog(title: '终端详情', content: SelectableText(
       '${value['model'] == null || value['model'] == '' ? '型号未知' : value['model']}'
       '\n\nAPP：${value['versionName'] ?? '未知'} (${value['versionCode'] ?? '未知'})'
-      '\n系统：${value['osVersion'] ?? '未知'}\n状态：${_sessionState(value)}'
-      '\n登录时间：${_time(value['createdAt'])}\n最近活动：${_time(value['lastSeenAt'])}'
+      '\n系统：${value['osVersion'] ?? '未知'}\n状态：${_terminalState(value)}'
+      '\n最近登录：${_time(value['lastLoginAt'])}\n最近上报：${_time(value['lastSeenAt'])}'
+      '\n有效登录：${value['activeSessionCount'] ?? '未知'}\n保留登录记录：${value['sessionCount'] ?? '未知'}'
       '\n终端编号：${value['installationId'] ?? '未知'}', style: const TextStyle(color: TraceColors.text)), actions: [
         if (value['state'] == 'valid') TraceDialogAction(label: '退出该终端', color: TraceColors.amber,
-          onPressed: (context) { Navigator.pop(context); unawaited(_run(() => _revokeSession(value))); }),
+          onPressed: (context) { Navigator.pop(context); unawaited(_run(() => _revokeTerminal(value))); }),
         const TraceDialogAction(label: '关闭', isPrimary: true, onPressed: TraceDialog.close),
       ]));
 
-  Future<void> _revokeSession(Map<String, dynamic> value) async {
+  Future<void> _revokeTerminal(Map<String, dynamic> value) async {
     final confirmed = await showDialog<bool>(context: context, builder: (_) => TraceDialog(title: '退出该终端？',
       message: '撤销该终端的账号登录，本地蓝牙不受影响。', actions: [
         TraceDialogAction(label: '取消', onPressed: (context) => Navigator.pop(context, false)),
         TraceDialogAction(label: '退出', isPrimary: true, onPressed: (context) => Navigator.pop(context, true)),
       ]));
     if (confirmed != true || !mounted) return;
-    await service.revokeSession(value); _message = '该终端登录已撤销。';
+    await service.revokeTerminal(value);
+    if (!service.loggedIn) { await service.loadSettings(); _loaded = true; }
+    _message = '该终端登录已撤销。';
   }
 
   Future<void> _bind() async {

@@ -44,10 +44,23 @@ export async function sessionList(db: D1Database, accountId: string, tokenHash?:
     .bind(now, tokenHash ?? '', accountId).all()).results;
 }
 
-export async function accountConnections(db: D1Database, accountId: string) {
-  const terminals = (await db.prepare(`SELECT installation_id AS installationId,platform,version_name AS versionName,
-    version_code AS versionCode,model,os_version AS osVersion,first_seen_at AS firstSeenAt,last_seen_at AS lastSeenAt
-    FROM account_terminals WHERE account_id=? ORDER BY last_seen_at DESC,installation_id LIMIT 100`).bind(accountId).all()).results;
+export async function accountConnections(db: D1Database, accountId: string, tokenHash?: string) {
+  // Aggregate all retained sessions, not the truncated history display page.
+  const terminals = (await db.prepare(`WITH retained_sessions AS (
+    SELECT installation_id,MAX(created_at) AS last_login_at,COUNT(*) AS session_count,
+      SUM(CASE WHEN revoked_at IS NULL AND expires_at>? THEN 1 ELSE 0 END) AS active_count,
+      SUM(CASE WHEN revoked_at IS NULL THEN 1 ELSE 0 END) AS unrevoked_count,
+      MAX(CASE WHEN token_hash=? THEN 1 ELSE 0 END) AS current
+    FROM account_sessions WHERE account_id=? AND installation_id IS NOT NULL GROUP BY installation_id
+    ) SELECT t.installation_id AS installationId,t.platform,t.version_name AS versionName,
+    t.version_code AS versionCode,t.model,t.os_version AS osVersion,t.first_seen_at AS firstSeenAt,t.last_seen_at AS lastSeenAt,
+    s.last_login_at AS lastLoginAt,COALESCE(s.session_count,0) AS sessionCount,
+    COALESCE(s.active_count,0) AS activeSessionCount,COALESCE(s.current,0) AS current,
+    CASE WHEN s.active_count>0 THEN 'valid' WHEN s.unrevoked_count>0 THEN 'expired'
+      WHEN s.session_count>0 THEN 'revoked' ELSE 'unknown' END AS state
+    FROM account_terminals t LEFT JOIN retained_sessions s ON s.installation_id=t.installation_id
+    WHERE t.account_id=? ORDER BY t.last_seen_at DESC,t.installation_id LIMIT 100`)
+    .bind(Date.now(), tokenHash ?? '', accountId, accountId).all()).results;
   const observations = (await db.prepare(`SELECT o.installation_id AS installationId,o.uid,o.firmware_version AS firmwareVersion,
     o.observed_at AS observedAt FROM account_device_observations o JOIN account_devices d ON d.account_id=o.account_id AND d.uid=o.uid
     WHERE o.account_id=? ORDER BY o.observed_at DESC,o.uid,o.installation_id LIMIT 100`).bind(accountId).all()).results;
