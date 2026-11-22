@@ -56,11 +56,14 @@ async function passwordMatches(password: string, saved: string): Promise<boolean
 export async function requireAccount(request: Request, env: Env): Promise<Account> {
   const match = /^Bearer (acct_[0-9a-f]{64})$/.exec(request.headers.get('Authorization') ?? '');
   if (!match) throw new ApiError('LOGIN_REQUIRED', 'Please sign in to use cloud features', 401);
+  const tokenHash = await sha256Hex(match[1]), now = milliseconds();
   const account = await env.DB.prepare(`SELECT a.* FROM account_sessions s JOIN accounts a ON a.id=s.account_id
     WHERE s.token_hash=? AND s.expires_at>? AND s.revoked_at IS NULL AND a.app_id=?`)
-    .bind(await sha256Hex(match[1]), milliseconds(), env.APP_ID).first<Account>();
+    .bind(tokenHash, now, env.APP_ID).first<Account>();
   if (!account) throw new ApiError('LOGIN_REQUIRED', 'Your session has expired; sign in again', 401);
   if (account.state !== 'active') throw new ApiError('ACCOUNT_DISABLED', 'Account is not enabled', 403);
+  await env.DB.prepare(`UPDATE account_sessions SET last_seen_at=? WHERE token_hash=?
+    AND (last_seen_at IS NULL OR last_seen_at<?)`).bind(now, tokenHash, now - 300000).run();
   return account;
 }
 

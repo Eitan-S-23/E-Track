@@ -28,7 +28,7 @@
         <span>${esc(d.model)} · HW ${Number(d.hardware_revision)} · FW ${esc(firmware(d.firmware_version))}</span>
         <small>${label('绑定时间','Bound')}: ${esc(stamp(d.bound_at))}</small><small>${label('最近上报（非在线）','Last report (not online)')}: ${esc(stamp(d.last_seen_at))}</small>
         ${(detail.observations ?? []).filter(o => o.uid === d.uid).map(o => `<button class="secondary-button" data-detail-tab="terminals">${label('关联终端','Related terminal')}: ${esc(o.installationId)} · ${esc(stamp(o.observedAt))}</button>`).join('')}
-        <button data-unbind="${esc(d.uid)}" ${disabled}>${label('解绑','Unbind')}</button></div>`).join('') || `<p>${label('无绑定设备','No bound devices')}</p>`;
+        <button class="secondary-button" data-unbind="${esc(d.uid)}" ${disabled}>${label('解绑','Unbind')}</button></div>`).join('') || `<p>${label('无绑定设备','No bound devices')}</p>`;
     }
     function render() {
       const settingsOpen = element.querySelector('details')?.open ?? false;
@@ -65,14 +65,14 @@
             <code>${esc(r.uid || r.installationId)}</code><span>${esc(r.uid ? firmware(r.firmwareVersion) : `${r.versionName || '-'} (${r.versionCode}) · ${r.osVersion || '-'}`)}</span>
             <small>${label('最近上报','Last report')}: ${esc(stamp(r.lastSeenAt))}</small>
             <button class="secondary-button" data-user="${esc(r.accountId)}">${label('所属账号','Account')}: ${esc(r.username)}</button></div>`).join('') || label('没有匹配记录','No matching records')}</div>`}
-        <div class="operations-buttons"><button id="accountPrev" ${busy || page <= 1 ? 'disabled' : ''}>${label('上一页', 'Previous')}</button>
-          <span>${page} / ${Math.max(1, Math.ceil(data.total / 30))}</span><button id="accountNext" ${busy || page * 30 >= data.total ? 'disabled' : ''}>${label('下一页', 'Next')}</button></div>
+        <div class="operations-buttons"><button class="secondary-button" id="accountPrev" ${busy || page <= 1 ? 'disabled' : ''}>${label('上一页', 'Previous')}</button>
+          <span>${page} / ${Math.max(1, Math.ceil(data.total / 30))}</span><button class="secondary-button" id="accountNext" ${busy || page * 30 >= data.total ? 'disabled' : ''}>${label('下一页', 'Next')}</button></div>
         ${detail ? `<section class="feedback-detail"><div class="panel-head"><h3>${esc(detail.account.username)}</h3>
-          <button id="accountClose">${label('关闭详情', 'Close details')}</button></div>
+          <button class="secondary-button" id="accountClose">${label('关闭详情', 'Close details')}</button></div>
           <p>${label('自动剩余', 'Automatic remaining')}: ${Number(detail.quota.automatic.remaining)} / ${Number(detail.quota.automatic.limit)} ·
             ${label('手动剩余', 'Manual remaining')}: ${Number(detail.quota.manual.remaining)} / ${Number(detail.quota.manual.limit)}</p>
-          <div class="operations-buttons"><button data-action="state" ${disabled}>${detail.account.state === 'active' ? label('停用账号','Disable account') : label('启用账号','Enable account')}</button>
-            <button data-action="revoke-sessions" ${disabled}>${label('撤销全部登录', 'Revoke all sessions')}</button></div>
+          <div class="operations-buttons"><button class="secondary-button" data-action="state" ${disabled}>${detail.account.state === 'active' ? label('停用账号','Disable account') : label('启用账号','Enable account')}</button>
+            <button class="secondary-button" data-action="revoke-sessions" ${disabled}>${label('撤销全部登录', 'Revoke all sessions')}</button></div>
           <div class="operations-buttons" role="group" aria-label="${label('账号详情','Account details')}">
             ${[['devices','绑定码表','Devices'],['terminals','APP 终端','Terminals'],['sessions','登录会话','Sessions'],['logins','登录记录','Sign-ins'],['audit','操作记录','Actions']].map(([key,cn,en]) =>
               `<button class="secondary-button" data-detail-tab="${key}" aria-pressed="${detailTab === key}">${label(cn,en)}</button>`).join('')}</div>
