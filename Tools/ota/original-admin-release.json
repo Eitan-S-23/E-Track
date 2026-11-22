@@ -1,7 +1,7 @@
 {
   "schema": "original-admin-automatic-candidates-v1",
   "firmware": {
-    "versionName": "3.3.48",
-    "releaseNotes": "Version-only 3.3.47 to 3.3.48 candidate for owner-controlled OTA testing. Product functionality unchanged. Full/recovery candidate only; no automatic channel publication, delta generation or device operation. App version unchanged."
+    "versionName": "3.3.49",
+    "releaseNotes": "Fix wrapped update-state text overlapping footer buttons on the 240x320 screen. Add backward-compatible factory hardware UID query for account/device association without changing binary INFO or OTA consent. Install this UID-capable firmware with the existing App/backend before enabling account-gated cloud services. Full/recovery candidate only; channel publication, deltas and device OTA remain owner-controlled."
   }
 }

@@ -2,7 +2,7 @@
 
 ## Account And Layout Batch, 2026-11-22
 
-Status: DEV_CI_PASSED / FOLLOWUP_SELF_TEST_IN_PROGRESS, based on remote main 409fc640bc86272c34a2a6ce3f85dfef2c8498a9.
+Status: SELF_TEST_PASSED / FORMAL_CANDIDATES_PREPARED, based on remote main 409fc640bc86272c34a2a6ce3f85dfef2c8498a9.
 Owner explicitly selected **5 automatic and 5 manual checks per account per day**,
 separate pools shared by devices/phones, not journal-derived or reset by reinstall.
 Server day is Asia/Shanghai; the prior one-hour automatic spacing is retained.
@@ -37,12 +37,18 @@ Worker/Public/Admin typechecks and 293 Admin browser cases on `2acde4c6045dbcf76
 Raw logs: `.cache/ota-followup-20261122/keyring-logs-40/`.
 Flutter checks-only CI `44963472466` passes both hosts on that same source,
 including repaired disconnect/resume and prepared-grant persistence tests.
-Native/debug CI `44963606753` is still running. A further local batch restores
+Native/debug CI `44963606753` passes, including device-OTA native tests and a debug
+APK (not installed); logs are in `keyring-logs-51`. A follow-up batch restores
 credential-free immutable GitHub fallback downloads and tests account-page
 registration switches, separate quota display, small screens and readable actions.
-That later batch has not yet passed CI. Scope remains the same development branch
-`dev/flutter/ota-followup-20261122`; local main is ahead, NOT remote main delivery.
-No new formal version, main push, deployment, phone action, J-Link or OTA occurred.
+That batch plus authenticated announcements passes both hosts in `44965098761`,
+source `1a1c82fefc433868adceb8012569a3f1b3cb796e`. The intermediate `44964618134`
+failure was a void-return await in the new UI test teardown; evidence is retained
+in `keyring-logs-47`, not retroactively passed. Backend `accounts-host-07` additionally
+passes the real bind/foreign-account denial/OTA authorization/uncharged-denial case.
+APP 1.0.90+116 and MCU 3.3.49 are prepared after draft/release/tag checks
+(`keyring-read-45`, `keyring-read-50`); formal main push/build/ingestion are pending.
+No deployment, phone action, J-Link or OTA occurred in this account/layout batch.
 Owner reported the earlier automatic popup works; do not repeat OTA to recapture it.
 
 Rollout must install UID-capable MCU firmware through the existing OTA route before
@@ -50,6 +56,34 @@ requiring account binding on the cloud side. Older firmware cannot invent a UID.
 Owner retains all Cloudflare migrations/deployment/configuration/channel/delta
 operations. Exact version/source and deployment steps follow successful self-tests;
 this local batch is not independent acceptance or live account availability.
+
+### Owner Rollout Order
+
+Do not deploy the new account gate ahead of the transition firmware and App.
+After formal candidate delivery, the owner performs these steps, not the agent:
+
+1. Publish firmware 3.3.49 using the existing working backend and App. Use the
+   device's actual installed version as a delta base, or select full OTA. Verify
+   3.3.49 and the repaired text layout. No extra J-Link installation is required.
+2. Publish/install original-signed App 1.0.90+116 through the old backend. Account
+   login will only become available after the matching backend rollout below.
+3. Run the existing `deploy-cloudflare-admin.yml` on main with the exact delivered
+   source SHA, `project_name=trace-update-admin-staging`, `branch=main`,
+   `include_worker=true`, `include_public=true`. All three components changed.
+   The supported entry applies only pending migrations, including 0018_accounts.sql;
+   preserve env.staging, Access, signing, channels and existing credentials.
+4. Confirm deployment/source receipts, open the Admin Accounts tab, verify separate
+   5/5 allowances and registration settings, then register/login in the App and bind
+   the connected device by its 24-hex UID. UID association is not attestation.
+5. Check anonymous local BLE versus cloud denial, account-bound OTA admission,
+   remaining allowances and Admin login/device records. Do not consume an OTA just
+   to reproduce earlier successful device evidence; owner controls actual trials.
+
+Email verification/reset is optional and needs owner-configured mail delivery.
+No mail provider credentials were configured and no message was sent. Default
+registration is open, password registration is on and email verification is off;
+Admin may close registration. Login statistics represent logins, not online users.
+Actual Worker CPU-plan suitability and phone OS-vault behavior remain live checks.
 
 ## Owner Feedback Follow-Up, 2026-11-22
 

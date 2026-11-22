@@ -1,8 +1,9 @@
 import { env } from 'cloudflare:workers';
 import { describe, expect, it } from 'vitest';
 import { accountBudget, accountCheck, accountDay, automaticSpacingMs } from '../src/account_quota';
-import { accountAuthRoute, accountCloudAccess, requireAccount, hashAccountPassword } from '../src/accounts';
+import { accountAuthRoute, accountRoute, accountCloudAccess, requireAccount, hashAccountPassword } from '../src/accounts';
 import { accountAdmin } from '../src/account_admin';
+import { signedInRequest } from './account-fixture';
 import worker from '../src/index';
 import { onRequest as publicRequest } from '../../public/functions/[[path]]';
 
@@ -129,7 +130,35 @@ describe('account admission', () => {
         body: JSON.stringify({ username: 'closed', password: 'test-password-123' }) }), env)).rejects.toMatchObject({ code: 'REGISTRATION_DISABLED' });
     } finally { await env.DB.prepare('UPDATE account_settings SET registration_enabled=1 WHERE app_id=?').bind(env.APP_ID).run(); }
   });
-  it('requires account binding for firmware without invoking the downstream handler', async () => {
-    await expect(accountCloudAccess(request(), env, noUpdate)).rejects.toMatchObject({ code: 'LOGIN_REQUIRED' });
+  it('binds a UID once and blocks other accounts before cloud checks or OTA authorization', async () => {
+    const ownerRequest = await signedInRequest(request());
+    const otherRequest = await signedInRequest(request());
+    const uid = crypto.randomUUID().replaceAll('-', '').slice(0, 24);
+    const device = { uid, confirmed: true, name: 'Rider device', model: 'e-track-at32f435',
+      hardwareRevision: 1, firmwareVersion: 30349, imageSha256: 'b'.repeat(64) };
+    const operation = (from: Request, path: string, body: object) => new Request('https://example.com/api/account/' + path, {
+      method: 'POST', headers: { Authorization: from.headers.get('Authorization')!,
+        'Content-Type': 'application/json', 'X-Device-Uid': uid }, body: JSON.stringify(body),
+    });
+    expect((await accountRoute(operation(ownerRequest, 'devices/bind', device), env)).status).toBe(200);
+    await expect(accountRoute(operation(otherRequest, 'devices/bind', device), env))
+      .rejects.toMatchObject({ code: 'DEVICE_ALREADY_BOUND' });
+    expect((await accountRoute(operation(ownerRequest, 'ota/authorize', {}), env)).status).toBe(200);
+    await expect(accountRoute(operation(otherRequest, 'ota/authorize', {}), env))
+      .rejects.toMatchObject({ code: 'DEVICE_NOT_BOUND' });
+    let calls = 0;
+    const next = () => { calls++; return noUpdate(); };
+    const headers = new Headers(otherRequest.headers);
+    headers.set('X-Device-Uid', uid);
+    await expect(accountCloudAccess(new Request(otherRequest, { headers }), env, next))
+      .rejects.toMatchObject({ code: 'DEVICE_NOT_BOUND' });
+    expect(calls).toBe(0);
+    const other = await requireAccount(otherRequest, env);
+    expect((await accountBudget(env.DB, other.id, limits)).manual.used).toBe(0);
+    headers.set('Authorization', ownerRequest.headers.get('Authorization')!);
+    expect((await accountCloudAccess(new Request(otherRequest, { headers }), env, next)).status).toBe(200);
+    expect(calls).toBe(1);
+    const owner = await requireAccount(ownerRequest, env);
+    expect((await accountBudget(env.DB, owner.id, limits)).manual.used).toBe(1);
   });
 });

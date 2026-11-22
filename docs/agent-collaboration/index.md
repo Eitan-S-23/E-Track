@@ -3,9 +3,10 @@
 Current follow-up: COMPANION-FEEDBACK-20261122, Codex root, ACCOUNT_BATCH_LOCAL_PENDING.
 Owner approved separate account-wide automatic/manual daily check limits of 5/5.
 Login, binding, Admin account views, cloud admission and the MCU text-layout follow-up
-are in development self-test, not remote main delivery or deployment. Source
-`2acde4c6`: Flutter both hosts pass (`44963472466`); backend and 293 Admin UI cases
-pass (`44963616712`). Native/debug CI and a scoped download/UI follow-up remain.
+have passed development self-tests, not yet formal delivery or deployment.
+Latest App source `1a1c82fe` passes both hosts (`44965098761`); native/debug
+`44963606753` and backend/293 Admin UI cases `44963616712` pass on unchanged native
+and backend product inputs. Prepared versions: App 1.0.90+116, MCU 3.3.49.
 See Account And Layout Batch in the existing task note. Prior 3.3.47 install
 and 3.3.48 candidate evidence below remain unchanged.
 Original owner ZIP, same-process post-OTA service stop finding, UI/check/history
