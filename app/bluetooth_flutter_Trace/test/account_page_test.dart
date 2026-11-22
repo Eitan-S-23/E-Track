@@ -27,7 +27,7 @@ void main() {
     accounts = _Accounts();
     Get.put<AccountService>(accounts);
   });
-  tearDown(() async { await Get.reset(); });
+  tearDown(() { Get.reset(); });
 
   Future<void> show(WidgetTester tester, {double scale = 1}) async {
     tester.view.physicalSize = const Size(320, 568);

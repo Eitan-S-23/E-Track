@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/share_links.dart';
+import 'account_service.dart';
 
 class AnnouncementService {
   AnnouncementService._();
@@ -20,13 +21,23 @@ class AnnouncementService {
     return items.isEmpty ? fallbackAnnouncements : items;
   }
 
-  static Future<List<TraceAnnouncement>> fetchRemoteAnnouncements() async {
-    if (!ShareLinks.hasAnnouncementsEndpoint) {
+  static Future<List<TraceAnnouncement>> fetchRemoteAnnouncements({
+    AccountService? accountService, Dio? dio, Uri? endpoint,
+  }) async {
+    if (endpoint == null && !ShareLinks.hasAnnouncementsEndpoint) {
       return const [];
     }
 
     try {
-      final response = await _dio.getUri(ShareLinks.announcementsUri());
+      final accounts = accountService ?? AccountService.to;
+      await accounts.initialize();
+      if (!accounts.loggedIn) return const [];
+      final uri = endpoint ?? ShareLinks.announcementsUri();
+      if (!accounts.isCloudUri(uri)) return const [];
+      final generation = accounts.generation;
+      final response = await (dio ?? _dio).getUri(uri, options: Options(
+        headers: await accounts.headers(uri), followRedirects: false));
+      if (generation != accounts.generation) return const [];
       final data = response.data is String
           ? jsonDecode(response.data as String)
           : response.data;

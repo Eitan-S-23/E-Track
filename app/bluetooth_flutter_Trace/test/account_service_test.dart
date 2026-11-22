@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:ble_monitor/services/account_service.dart';
+import 'package:ble_monitor/services/announcement_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -40,6 +41,20 @@ void main() {
   test('anonymous cloud checks fail before HTTP while no Bluetooth service is required', () async {
     await expectLater(service.newCheck(automatic: false), throwsA(isA<AccountException>()));
     expect(http.requests, isEmpty);
+  });
+  test('announcements use account admission but do not spend an update check', () async {
+    final uri = endpoint.replace(path: '/api/public/announcements');
+    expect(await AnnouncementService.fetchRemoteAnnouncements(
+      accountService: service, dio: dio, endpoint: uri), isEmpty);
+    expect(http.requests, isEmpty);
+    await login();
+    http.response = {'announcements': [{'id': 'notice', 'title': 'News', 'body': 'Details'}]};
+    final items = await AnnouncementService.fetchRemoteAnnouncements(
+      accountService: service, dio: dio, endpoint: uri);
+    expect(items.single.id, 'notice');
+    expect(http.requests.last.headers['Authorization'], 'Bearer $token');
+    expect(http.requests.last.headers['X-Update-Check-Id'], isNull);
+    expect(http.requests.last.followRedirects, isFalse);
   });
   test('secure session survives service recreation and separate check kinds get unique IDs', () async {
     await login();
