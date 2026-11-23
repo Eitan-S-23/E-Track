@@ -1,5 +1,57 @@
 # OTA Companion And Admin Scroll Investigation
 
+## Owner-Confirmed Functional Closeout And 3.3.52 Delivery, 2026-11-23
+
+Status: OWNER_VERIFIED_PASS / CANDIDATE_DELIVERED.
+Owner: Codex root, record reconciliation only. Entry primary/remote main both
+match ba3d5cc44344bfa0c8a2747949789d0380390be8.
+
+The owner reports normal Bluetooth operation in the 23:00 Shanghai test and
+explicitly confirms that both follow-up checklists have already passed:
+- Automatic discovery, cross-page update prompts, Later not starting an upgrade,
+  and the upgrade history/log results.
+- Phone account-name display, logout/relogin terminal deduplication and the
+  previously listed phone-side checks.
+
+These are OWNER_VERIFIED_PASS outcomes from the owner's messages in this thread,
+not new agent-executed tests. No exact installed version, per-case timestamp,
+new raw capture or 3.3.52 installation is inferred from that confirmation.
+The prior request to repeat or further clarify these checks is withdrawn.
+There is no remaining owner test request or Bluetooth remediation in this
+closeout. Earlier connection failures and cooldown observations remain valid
+historical evidence, not current unresolved defects after the owner's report.
+The one-hour automatic-check policy is unchanged; no policy change is requested.
+
+MCU_TEST_3352 is delivered, not still building. The original one-click receipt
+.cache/candidate-release/20261123T132806Z-d8ae7394/result.json reports DELIVERED:
+- MCU 3.3.52 / 30352, source ba3d5cc44344bfa0c8a2747949789d0380390be8.
+- Formal CI [45184334373](https://github.com/Eitan-S-23/E-Track/actions/runs/45184334373).
+- Two R2-verified full/recovery assets registered, state ready; 641 warning
+  lines and zero errors. Registration request e628d0ac-fb3c-48c5-b029-7f81ffbf6776.
+- Target raw SHA-256:
+  1837d78dfa903086c3ebd701b5e69c7976052ed0a2750d392a691ca669fe58b9.
+The owner also confirms that Cloudflare received the package. The receipt's
+channelPublished=false is the registration-time state, not a new live channel
+query. Later publication, delta state and the installed target are not inferred.
+No candidate rebuild, download, publication or OTA is needed to close this record.
+
+The user-facing batch is closed on the owner's verification. Formal whole-card
+independent acceptance is not performed or promoted to PASS by this record;
+existing obligations remain separate, with no new device run or reviewer
+spawned. Earlier pending labels for the confirmed checks and 3.3.52 build are
+superseded by this section, not instructions to repeat successful work.
+Older failures, pending edits and original evidence remain preserved.
+
+The owner authorizes a scoped documentation commit and push to main. Only the
+new closeout blocks in this note, the shared index and the main board/session
+log are selected; older pending edits remain untouched. The exact commit,
+push/readback and preservation checks are recorded in
+.cache/owner-closeout-20261123/delivery/result.json, not inferred from this text.
+Product code, App 1.0.94+120, MCU inputs, credentials, channels, deltas and device
+state are unchanged. Board/receipt, link, whitespace and byte-preservation checks
+cover this documentation closeout; automatic checks may run on the push, but no
+App/MCU rebuild, device test or backend deployment is requested.
+
 ## Owner-Requested MCU Test Candidate, 2026-11-23
 
 Status: CANDIDATE_DELIVERED / OWNER_PUBLICATION_AND_OTA_PENDING, Codex root.

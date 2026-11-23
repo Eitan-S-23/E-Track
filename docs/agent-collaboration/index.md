@@ -1,5 +1,24 @@
 # Shared Agent Records
 
+Latest owner closeout, 2026-11-23: OWNER-CLOSEOUT-2300,
+OWNER_VERIFIED_PASS / CANDIDATE_DELIVERED. The owner
+confirms normal Bluetooth operation at 23:00 Shanghai and both follow-up lists:
+automatic discovery/cross-page prompt/Later/history/logs, plus account-name and
+logout/relogin terminal-deduplication phone checks. These checks are closed,
+not requests for further clarification, remediation or another OTA. Previous
+failures and cooldown observations remain historical evidence; policy unchanged.
+MCU 3.3.52 source ba3d5cc44344bfa0c8a2747949789d0380390be8 is DELIVERED in CI
+45184334373: two verified full/recovery assets ready, 641 warnings/zero errors.
+Original receipt: .cache/candidate-release/20261123T132806Z-d8ae7394/result.json.
+Owner confirms backend receipt; installed version and later channel/delta state
+are not inferred. Formal whole-card independent acceptance is not claimed.
+Owner authorizes scoped main delivery of these three new record blocks only;
+older pending edits remain untouched. Receipt:
+.cache/owner-closeout-20261123/delivery/result.json. No App/MCU rebuild,
+backend/device operation or new independent review is requested.
+This entry supersedes earlier pending labels for the confirmed checks and 3.3.52
+build while preserving older records. See [owner closeout](../ota-exec-notes/OTA-COMPANION-2026-11-20.md#owner-confirmed-functional-closeout-and-3352-delivery-2026-11-23).
+
 Latest owner-directed work, 2026-11-23: MCU-TEST-CANDIDATE, Codex root,
 CANDIDATE_DELIVERED / OWNER_PUBLICATION_AND_OTA_PENDING. Owner reports successful 3.3.48 -> 3.3.50
 compatibility upgrade and device binding, and cancels the old delta-policy
