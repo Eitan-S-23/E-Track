@@ -1,5 +1,78 @@
 # OTA Companion And Admin Scroll Investigation
 
+## Cloudflare Account Quota Display, 2026-11-23
+
+RESOURCE-QUOTA-DISPLAY: LOCAL_PENDING / SELF_TESTED / SOURCE_DELIVERY_PENDING, Codex root. Primary and
+fresh remote main are 504a2eaa. The owner explicitly requests quota display and
+deployment/testing of the existing Admin. This admits bounded source delivery
+and Admin Pages deployment, not credential/configuration changes, channel/delta
+actions, App/MCU rebuilds or device operations. No additional agent is started.
+The six pre-existing dirty document blocks are preserved; pre-edit bytes/hashes
+are in .cache/quota-display-20261123/entry-01/before.json.
+
+Reuse the successful corrected-personal-token billing and account analytics
+probes. The missing R2 storage schema is qualified once in research-04: dimensions
+are date/bucketName, and 81 Standard rows cover 27 billing days. The failed earlier
+query and unavailable workers/limits route remain evidence, not retried routes.
+Subscriptions are a single-page endpoint in the installed Cloudflare SDK. Default
+Workers Free can be classified only from a complete valid subscription list,
+standard account metadata and absence of any unknown Workers/contract plan;
+R2 Paid does not imply Workers Paid. Never use component_values as free quotas.
+
+Implement account-scoped Workers plus Pages requests, D1 rows/storage inventory,
+DO requests/duration/SQLite rows, and billing-period Standard R2 operations and
+daily storage peaks. Only documented limits of an established plan apply. R2
+GB-month is a labelled 30-day daily-peak estimate with coverage, not current bytes
+or an invoice; IA is excluded. Unsupported meters, missing periods, empty samples,
+denials and truncated inventories stay unknown. Failed refreshes retain the old
+values AND their original plan/window/reset time as stale.
+
+Reuse the D1 15-minute cache/90-second refresh lease and response/timeout bounds.
+Extend the existing resource panel without redesign, keep controls reachable and
+exercise narrow/short/enlarged-text, actor/refresh races and failure states. After
+contained self-tests and exact-source backend CI, deploy only Admin with pinned
+source_sha, include_worker=false and include_public=false. Verify source, assets,
+real owner Access, populated quota API/UI and unchanged runtime/channel identities.
+These are implementation self-tests/live checks, not independent acceptance.
+
+### Implementation And Self-Tests
+
+The account/provider collector, v2 cache, separate account/project display and
+published API contract are implemented. Quotas never use subscription component
+values. R2 uses Standard-only actions, actual renewal boundaries and explicitly
+labelled daily peaks / 30 estimates; unsupported storage meters remain unknown.
+The panel preserves its design and now keeps Close reachable while scrolling.
+
+Complete local host run host-full-02 passes 645/645 in 22 files; ui-full-01 passes
+314/314, including narrow/short and 200% text, zero/unknown/overage, failed and
+malformed refresh, actor races, scrolling and close/focus behavior. Worker/Admin/
+Public typechecks and 60 proxy/deployment contracts pass. The missing local Admin
+Node types/Public compiler are reused from project-installed exact locked
+versions; no SDK/package installation or credential/configuration change.
+
+Original host-targeted-01 (33/34, ISO spelling oracle), ui-targeted-01 (5/6,
+test assumed an error dialog left the resource popover open), local missing-type
+commands, and host-full-01 (621 passes plus a SYSTEM/SU Git ownership blocked
+suite) are retained. Corrected lifecycle assertions keep the real shared error
+dialog behavior; a project-only ephemeral safe.directory resolves ownership.
+No global Git config, old evidence or product criterion is altered. Final tested
+product remains unchanged after the complete passes.
+
+One installed-bundler product probe in live-collect-01 uses the registered token
+without raw billing/secret output and returns 11/11 supported balances. Requests
+254/100000, D1 read 27922/5000000, write 101/100000 and storage 0.014147584/5 GB;
+DO request/duration/rows are measured. R2 A 446/1000000, B 2842/10000000; Standard
+storage estimate 1.2709962915/10 GB-month, remaining 8.7290037085, across all 27
+elapsed billing days. These are timestamped account statistics/estimates, not a
+bill or a deployed UI claim. No cloud mutation occurs in this product probe.
+
+Warnings: local Node experimental SQLite, Playwright NO_COLOR/FORCE_COLOR and a
+slow test-file advisory. A whole-worktree diff-check also detects existing mixed
+CRLF/trailing whitespace in older pending board lines; they are not bulk cleaned.
+Scoped product checks pass, and only this task's selected LF record blobs enter
+the delivery commit. Source and live deployment verification remain next.
+
+
 ## Account Backend Rollout Completed, 2026-11-23
 
 Status: CODE_ON_MAIN / APP_CANDIDATE_DELIVERED / BACKEND_LIVE_VERIFIED /

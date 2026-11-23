@@ -556,7 +556,7 @@ body.announcement-open { overflow: hidden; }
 body.quick-actions-open .resource-float, body.firmware-details-open .resource-float, body.confirm-open .resource-float, body.nav-open .resource-float { visibility: hidden; pointer-events: none; }
 @keyframes resource-wave { from { transform: translateX(0); } to { transform: translateX(-38px); } }
 .resource-panel { position: fixed; z-index: 45; width: min(420px, calc(100vw - 32px)); max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); overflow-y: auto; padding: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 16px 60px #1b2f2424; }
-.resource-panel-head { display: flex; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line); padding-bottom: 18px; margin-bottom: 18px; }
+.resource-panel-head { display: flex; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line); padding-bottom: 18px; margin-bottom: 18px; position: sticky; top: 0; z-index: 1; background: var(--surface); }
 .resource-panel-head > div { min-width: 0; }
 .resource-panel-head { touch-action: none; cursor: grab; user-select: none; }
 .resource-panel { overscroll-behavior: contain; }
@@ -579,11 +579,18 @@ body.quick-actions-open .resource-float, body.firmware-details-open .resource-fl
 .usage-group { border-top: 1px solid var(--line); }
 .usage-group summary { padding: 14px 0; cursor: pointer; font-size: 12px; font-weight: 600; }
 .usage-metric { padding: 8px 0 12px; border-bottom: 1px dotted var(--line); }
-.usage-metric > div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 12px; }
-.usage-metric strong { font-variant-numeric: tabular-nums; }
+.usage-metric > div { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 12px; font-size: 12px; overflow-wrap: anywhere; }
+.usage-metric strong { font-variant-numeric: tabular-nums; max-width: 100%; }
 .usage-metric small { display: block; color: var(--muted); font-size: 10px; line-height: 1.7; overflow-wrap: anywhere; }
 .usage-metric[data-state="stale"] strong { color: #976329; }
 .usage-separate h4 { margin: 16px 0 4px; font-size: 12px; }
+.usage-subheading { margin: 12px 0 4px; font-size: 11px; color: var(--muted); font-weight: 600; }
+.usage-plans p { font-size: 11px; line-height: 1.7; overflow-wrap: anywhere; }
+.usage-plans small { display: block; color: var(--muted); }
+.usage-metric .usage-quota-balance { font-size: 11px; margin: 6px 0; }
+.usage-metric .usage-quota-track { display: block; height: 3px; border-radius: 2px; background: var(--line); margin: 8px 0; overflow: hidden; }
+.usage-quota-track span { display: block; height: 100%; background: var(--accent); }
+.usage-metric .usage-overage { color: #976329; }
 
 @keyframes workspace-enter { from { opacity: .6; transform: translateY(5px); } to { opacity: 1; transform: none; } }
 @keyframes refresh-spin { to { transform: rotate(360deg); } }

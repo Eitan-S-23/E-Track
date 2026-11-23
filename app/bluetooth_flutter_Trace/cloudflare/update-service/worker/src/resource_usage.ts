@@ -1,5 +1,7 @@
 import { json } from "./http";
 import { sha256Text } from "./version_inventory";
+import { analyticsAccount, nonnegative, ProviderError, readProviderResponse, UsageState } from "./resource_provider";
+import { AccountQuotaSnapshot, collectAccountQuotas, emptyAccountQuotas, retainAccountQuotas, R2_CLASS_A, R2_CLASS_B } from "./resource_quotas";
 
 export interface ResourceUsageEnv {
   DB: D1Database;
@@ -15,7 +17,7 @@ interface Configuration {
   namespaceId: string;
   bucketName: string;
 }
-type State = "ok" | "stale" | "not_configured" | "permission_denied" | "unavailable" | "no_samples" | "refreshing";
+type State = UsageState;
 interface Metric {
   key: string;
   group: string;
@@ -33,7 +35,7 @@ interface Metric {
   sampledAt: number | null;
   lastSuccessAt: number | null;
 }
-interface Snapshot { metrics: Metric[]; checkedAt: number }
+interface Snapshot { metrics: Metric[]; account: AccountQuotaSnapshot; checkedAt: number }
 interface CacheRow { checked_at: number; lease_until: number; snapshot_json: string | null }
 interface Query {
   dataset: string;
@@ -45,12 +47,6 @@ interface Query {
   sample?: boolean;
 }
 const REFRESH_SECONDS = 900;
-const MAX_RESPONSE_BYTES = 256 * 1024;
-const CLASS_A = ["ListBuckets", "PutBucket", "ListObjects", "PutObject", "CopyObject", "CompleteMultipartUpload",
-  "CreateMultipartUpload", "LifecycleStorageTierTransition", "ListMultipartUploads", "UploadPart", "UploadPartCopy",
-  "ListParts", "PutBucketEncryption", "PutBucketCors", "PutBucketLifecycleConfiguration"];
-const CLASS_B = ["HeadBucket", "HeadObject", "GetObject", "UsageSummary", "GetBucketEncryption", "GetBucketLocation",
-  "GetBucketCors", "GetBucketLifecycleConfiguration"];
 
 function configuration(env: ResourceUsageEnv): Configuration | null {
   if (!env.RESOURCE_USAGE_CONFIG_JSON || env.RESOURCE_USAGE_CONFIG_JSON.length > 4096) return null;
@@ -87,9 +83,9 @@ function queries(config: Configuration | null): Query[] {
         metric("doWrite","durableObjects","rows","sum.rowsWritten")], scope:config?.namespaceId ?? "Durable Objects" },
     { dataset:"durableObjectsSqlStorageGroups", filter:{namespaceId:config?.namespaceId ?? ""}, fields:"dimensions { datetime } max { storedBytes }", sample:true,
       metrics:[metric("doStorage","durableObjects","bytes","max.storedBytes")], scope:config?.namespaceId ?? "Durable Objects" },
-    { dataset:"r2OperationsAdaptiveGroups", filter:{bucketName:config?.bucketName ?? "",actionType_in:CLASS_A}, fields:"sum { requests }", monthly:true,
+    { dataset:"r2OperationsAdaptiveGroups", filter:{bucketName:config?.bucketName ?? "",actionType_in:R2_CLASS_A}, fields:"sum { requests }", monthly:true,
       metrics:[metric("r2ClassA","r2","operations","sum.requests")], scope:config?.bucketName ?? "R2" },
-    { dataset:"r2OperationsAdaptiveGroups", filter:{bucketName:config?.bucketName ?? "",actionType_in:CLASS_B}, fields:"sum { requests }", monthly:true,
+    { dataset:"r2OperationsAdaptiveGroups", filter:{bucketName:config?.bucketName ?? "",actionType_in:R2_CLASS_B}, fields:"sum { requests }", monthly:true,
       metrics:[metric("r2ClassB","r2","operations","sum.requests")], scope:config?.bucketName ?? "R2" },
     ...["Standard","InfrequentAccess"].map(storageClass=>({ dataset:"r2StorageAdaptiveGroups", filter:{bucketName:config?.bucketName ?? "",storageClass},
       fields:"dimensions { datetime } max { payloadSize }", sample:true,
@@ -109,30 +105,6 @@ function blank(query: Query, now: number, state: State): Metric[] {
     state,reason:state === "ok" ? null : state,scope:query.scope,periodStart:window.start,periodEnd:window.end,
     periodRolloverAt:window.rollover,quotaResetAt:null,sampledAt:null,lastSuccessAt:null}));
 }
-class ProviderError extends Error {
-  constructor(readonly state: State) { super(state); }
-}
-async function readResponse(response: Response): Promise<Record<string, unknown>> {
-  if (!response.ok) {
-    await response.body?.cancel();
-    throw new ProviderError([401,403].includes(response.status) ? "permission_denied" : "unavailable");
-  }
-  const reader = response.body?.getReader();
-  if (!reader) throw new ProviderError("unavailable");
-  let size = 0, value = "";
-  const decoder = new TextDecoder();
-  try {
-    for (;;) {
-      const chunk = await reader.read();
-      if (chunk.done) break;
-      size += chunk.value.byteLength;
-      if (size > MAX_RESPONSE_BYTES) throw new ProviderError("unavailable");
-      value += decoder.decode(chunk.value,{stream:true});
-    }
-    value += decoder.decode();
-    return JSON.parse(value) as Record<string, unknown>;
-  } finally { await reader.cancel().catch(()=>{}); reader.releaseLock(); }
-}
 export async function collectResourceUsage(config: Configuration, token: string, now: number, fetcher = fetch): Promise<Metric[]> {
   const specs = queries(config), result: Metric[] = [];
   const queryOne = async (spec: Query): Promise<Metric[]> => {
@@ -145,15 +117,9 @@ export async function collectResourceUsage(config: Configuration, token: string,
       // Workers supports manual/follow only; reject 3xx below without forwarding credentials.
       const response = await fetcher("https://api.cloudflare.com/client/v4/graphql",{method:"POST",redirect:"manual",
         headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"},body:JSON.stringify({query}),signal:AbortSignal.timeout(7000)});
-      const body = await readResponse(response);
-      if (Array.isArray(body.errors) && body.errors.length) {
-        const denied = body.errors.some(error=>/auth|permission|not allowed|not entitled/i.test(String(error?.message)));
-        throw new ProviderError(denied ? "permission_denied" : "unavailable");
-      }
-      const data = body.data as {viewer?:{accounts?:Array<{metrics?:Array<Record<string,Record<string,unknown>>>}>}} | null;
-      const accounts = data?.viewer?.accounts;
-      if (!Array.isArray(accounts) || accounts.length !== 1 || !Array.isArray(accounts[0].metrics)) throw new ProviderError("unavailable");
-      const rows = accounts[0].metrics;
+      const account = analyticsAccount(await readProviderResponse(response));
+      if (!Array.isArray(account.metrics)) throw new ProviderError("unavailable");
+      const rows = account.metrics as Array<Record<string,Record<string,unknown>>>;
       if (!rows.length) return blank(spec,now,"no_samples");
       if (rows.length !== 1) throw new ProviderError("unavailable");
       const row = rows[0];
@@ -162,8 +128,9 @@ export async function collectResourceUsage(config: Configuration, token: string,
       return initial.map((metric,index)=>{
         const definition = spec.metrics[index], [aggregate,field] = definition.field.split(".");
         const value = row[aggregate]?.[field];
-        if (typeof value !== "number" || !Number.isFinite(value) || value < 0) return metric;
-        return {...metric,used:value*(definition.scale ?? 1),state:"ok",reason:null,lastSuccessAt:now,sampledAt};
+        const measured = nonnegative(value);
+        if (measured === null) return metric;
+        return {...metric,used:measured*(definition.scale ?? 1),state:"ok",reason:null,lastSuccessAt:now,sampledAt};
       });
     } catch (error) { return blank(spec,now,error instanceof ProviderError ? error.state : "unavailable"); }
   };
@@ -173,31 +140,39 @@ export async function collectResourceUsage(config: Configuration, token: string,
 }
 export async function resourceUsage(env: ResourceUsageEnv, now = Math.floor(Date.now()/1000), fetcher = fetch): Promise<Response> {
   const config = configuration(env);
-  const empty = (state: State): Snapshot => ({metrics:queries(config).flatMap(query=>blank(query,now,state)),checkedAt:now});
+  const empty = (state: State): Snapshot => ({metrics:queries(config).flatMap(query=>blank(query,now,state)),account:emptyAccountQuotas(now,state),checkedAt:now});
   const respond = (snapshot: Snapshot, refreshing = false) => json({ok:true,...snapshot,generatedAt:now,refreshing,
-    nextRefreshAt:snapshot.checkedAt+REFRESH_SECONDS,source:"Cloudflare GraphQL Analytics",scope:"configured-project-resources",
-    plan:{name:null,state:"unavailable",reason:"Analytics access does not establish billing plan or account allowances"},
+    nextRefreshAt:snapshot.checkedAt+REFRESH_SECONDS,source:"Cloudflare account subscriptions and GraphQL Analytics",scope:"account-quotas-and-configured-project-usage",
+    plan:snapshot.account.plans[0],
     githubActions:{state:"not_connected",used:null,allowance:null,remaining:null},
     safeguards:{clientReportsPerUtcDay:8,backendReportsPerUtcDay:1000,providerQuota:false},
     caveats:["Provider analytics can be delayed or sampled; a five-minute lag is excluded.",
-      "R2 operations are calendar-month API counts, not an authoritative bill; storage is the latest sample, not GB-month.",
-      "Pages CPU is per-invocation P50/P99, not total CPU. Project usage cannot establish account-wide remaining allowance."]});
+      "Account remaining is estimated from documented plan limits and account usage, never from project counts or subscription component_values.",
+      "Standard R2 uses the actual subscription period. GB-month uses daily bucket peaks normalized to 30 days; current-day usage is provisional, not an invoice. IA has no free tier.",
+      "Project R2 operations remain calendar-month API counts; project storage is a sample, not GB-month. Pages CPU is per-invocation P50/P99, not total CPU.",
+      "Durable Objects analytics include actual WebSocket messages; paid billing applies a 20:1 ratio. Remaining request allowance is an analytics estimate."]});
   if (!config || !env.RESOURCE_USAGE_API_TOKEN) return respond(empty("not_configured"));
-  const cacheKey = await sha256Text("resource-usage-v1:" + JSON.stringify(config));
+  const cacheKey = await sha256Text("resource-usage-v2:" + JSON.stringify(config));
   const previous = await env.DB.prepare("SELECT checked_at,lease_until,snapshot_json FROM admin_resource_usage_cache WHERE cache_key=?")
     .bind(cacheKey).first<CacheRow>();
   let snapshot: Snapshot = empty("refreshing");
   if (previous?.snapshot_json) {
-    try { snapshot = JSON.parse(previous.snapshot_json) as Snapshot; } catch { /* Replace a corrupt cache rather than exposing it. */ }
-    if (previous.checked_at > now-REFRESH_SECONDS) return respond(snapshot);
+    let valid = false;
+    try {
+      const cached = JSON.parse(previous.snapshot_json) as Snapshot;
+      if (Array.isArray(cached.metrics) && Array.isArray(cached.account?.quotas) && cached.account?.plans?.length === 2 && Number.isFinite(cached.checkedAt)) { snapshot = cached; valid = true; }
+    } catch { /* Replace a corrupt cache rather than exposing it. */ }
+    if (valid && previous.checked_at > now-REFRESH_SECONDS) return respond(snapshot);
   }
   const lease = crypto.randomUUID();
   const claimed = await env.DB.prepare(`INSERT INTO admin_resource_usage_cache(cache_key,lease_until,lease) VALUES (?,?,?)
     ON CONFLICT(cache_key) DO UPDATE SET lease_until=excluded.lease_until,lease=excluded.lease WHERE lease_until<=?`)
     .bind(cacheKey,now+90,lease,now).run();
-  if (!claimed.meta.changes) return respond({...snapshot,metrics:snapshot.metrics.map(metric=>metric.used === null ? metric : {...metric,state:"stale",reason:"refreshing"})},true);
+  if (!claimed.meta.changes) return respond({...snapshot,account:retainAccountQuotas(emptyAccountQuotas(now,"refreshing"),snapshot.account),
+    metrics:snapshot.metrics.map(metric=>metric.used === null ? metric : {...metric,state:"stale",reason:"refreshing"})},true);
   const metrics = await collectResourceUsage(config,env.RESOURCE_USAGE_API_TOKEN,now,fetcher);
-  snapshot = {checkedAt:now,metrics:metrics.map(metric=>{
+  const account = await collectAccountQuotas(config.accountId,env.RESOURCE_USAGE_API_TOKEN,now,fetcher);
+  snapshot = {checkedAt:now,account:retainAccountQuotas(account,snapshot.account),metrics:metrics.map(metric=>{
     const last = snapshot.metrics.find(row=>row.key === metric.key && row.used !== null && row.lastSuccessAt !== null);
     // Retain the old window as well as the value. Yesterday's count is not today's.
     return metric.state !== "ok" && last ? {...last,state:"stale",reason:metric.state} : metric;

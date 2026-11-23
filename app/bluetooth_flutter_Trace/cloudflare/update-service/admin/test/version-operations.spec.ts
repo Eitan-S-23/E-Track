@@ -304,13 +304,165 @@ test("provider usage is loaded on demand and distinguishes zero, unavailable and
   await expect(page.locator('[data-usage-key="workerRequests"] strong')).toHaveText("0 requests");
   await expect(page.locator('[data-usage-key="workerCpu"]')).toContainText("无读取权限");
   await expect(page.locator('[data-usage-key="workerCpu"] strong')).toHaveText("未知");
-  await expect(page.locator("#providerUsage")).toContainText("套餐、额度及剩余：未知");
+  await expect(page.locator("#providerUsage")).toContainText("账户额度暂不可用");
   await expect(page.locator("#providerUsage")).toContainText("GitHub Actions");
   expect(await page.locator("#resourcePanel").evaluate(node=>node.scrollWidth<=node.clientWidth+1)).toBe(true);
   fail=true;await page.locator("[data-usage-refresh]").click();
   await expect(page.locator('[data-usage-key="workerRequests"]')).toHaveAttribute("data-state","stale");
   await expect(page.locator('[data-usage-key="workerRequests"] strong')).toHaveText("0 requests");
   expect(errors).toEqual([]);
+});
+function quotaFixture() {
+  const now=Date.parse("2026-11-23T12:00:00Z")/1000,day=Math.floor(now/86400)*86400;
+  const billingStart=Date.parse("2026-10-28T00:00:00Z")/1000,billingEnd=Date.parse("2026-11-28T00:00:00Z")/1000;
+  const definitions:Array<[string,string,string,number|null,number,"hard"|"per_invocation"|"included"]>=[
+    ["accountRequests","workers","requests",3000,100000,"hard"],
+    ["accountCpuLimit","workers","ms/invocation",null,10,"per_invocation"],
+    ["accountD1Read","d1","rows",100,5000000,"hard"],
+    ["accountD1Write","d1","rows",10,100000,"hard"],
+    ["accountD1Storage","d1","GB",.003,5,"hard"],
+    ["accountDoRequests","durableObjects","requests",12,100000,"hard"],
+    ["accountDoDuration","durableObjects","GB-s",.25,13000,"hard"],
+    ["accountDoRead","durableObjects","rows",20,5000000,"hard"],
+    ["accountDoWrite","durableObjects","rows",10,100000,"hard"],
+    ["accountDoStorage","durableObjects","GB",null,5,"hard"],
+    ["accountR2ClassA","r2","operations",9,1000000,"included"],
+    ["accountR2ClassB","r2","operations",99,10000000,"included"],
+    ["accountR2Storage","r2","GB-month",.9,10,"included"]
+  ];
+  return {ok:true,checkedAt:now,nextRefreshAt:now+900,safeguards:{clientReportsPerUtcDay:8,backendReportsPerUtcDay:1000},
+    metrics:[{key:"workerRequests",group:"workers",used:12,unit:"requests",state:"ok",scope:"configured-worker",periodStart:day,periodEnd:now-300,
+      lastSuccessAt:now,sampledAt:null,periodRolloverAt:day+86400}],
+    account:{checkedAt:now,plans:[{product:"workers",name:"Workers Free",state:"ok",basis:"default_free",periodStart:null,periodEnd:null,reason:null},
+      {product:"r2",name:"R2 Paid / Standard free tier",state:"ok",basis:"subscription",periodStart:billingStart,periodEnd:billingEnd,reason:null}],
+      quotas:definitions.map(([key,group,unit,used,allowance,limitKind])=>({key,group,unit,used,allowance,
+        remaining:used === null ? null : Math.max(0,allowance-used),overage:used === null ? null : Math.max(0,used-allowance),limitKind,
+        state:key === "accountDoStorage" ? "unavailable" : "ok",reason:key === "accountDoStorage" ? "unsupported_meter" : key === "accountCpuLimit" ? "per_invocation" : null,
+        scope:group === "r2" ? "cloudflare-account/Standard" : "cloudflare-account",planName:group === "r2" ? "R2 Paid / Standard free tier" : "Workers Free",
+        periodStart:group === "r2" ? billingStart : day,periodEnd:now-300,quotaResetAt:group === "r2" ? billingEnd : unit === "GB" || limitKind === "per_invocation" ? null : day+86400,
+        lastSuccessAt:now,sampledAt:null,estimation:key === "accountR2Storage" ? "daily_peaks_30_days" : "analytics",
+        coverage:key === "accountR2Storage" ? {observedDays:27,expectedDays:27,normalizationDays:30,complete:true,bucketDays:27} : null}))}};
+}
+
+for (const viewport of [{width:1440,height:1000,enlarged:false},{width:360,height:520,enlarged:false},{width:320,height:400,enlarged:true}]) {
+  test(`account quotas retain actual billing scope, scroll and reachable close at ${viewport.width}x${viewport.height}, enlarged=${viewport.enlarged}`,async({page})=>{
+    const {errors}=await setup(page);await page.setViewportSize(viewport);let reads=0;
+    await page.route("**/api/admin/resource-usage",async route=>{reads++;await route.fulfill({contentType:"application/json",body:JSON.stringify(quotaFixture())});});
+    expect(reads).toBe(0);await page.locator("#resourceOrb").click();
+    await expect(page.locator('[data-quota-key="accountRequests"] [data-quota-remaining]')).toHaveText("97,000 requests");
+    await expect(page.locator('[data-usage-key="workerRequests"] strong')).toHaveText("12 requests");
+    await expect(page.locator(".usage-plans")).toContainText("Workers Free");
+    await expect(page.locator('[data-quota-key="accountCpuLimit"]')).toContainText("不是账户余额");
+    await page.locator('[data-usage-group="r2"] summary').click();
+    await expect(page.locator('[data-quota-key="accountR2ClassA"] [data-quota-remaining]')).toHaveText("999,991 operations");
+    await expect(page.locator('[data-quota-key="accountR2Storage"]')).toContainText("27/27 天");
+    await expect(page.locator('[data-usage-group="r2"]')).toContainText("Infrequent Access 没有免费额度");
+    const reset=await page.evaluate(value=>new Date(value*1000).toLocaleString(),Date.parse("2026-11-28T00:00:00Z")/1000);
+    await expect(page.locator('[data-quota-key="accountR2ClassA"]')).toContainText(reset);
+    if(viewport.enlarged) await page.evaluate(()=>{
+      const sizes=[...document.querySelectorAll<HTMLElement>("#providerUsage h3,#providerUsage h4,#providerUsage p,#providerUsage summary,#providerUsage span,#providerUsage strong,#providerUsage small,#providerUsage b,#providerUsage button")]
+        .map(node=>({node,size:parseFloat(getComputedStyle(node).fontSize)}));
+      sizes.forEach(({node,size})=>node.style.fontSize=`${size*2}px`);
+    });
+    const panel=page.locator("#resourcePanel");
+    expect(await panel.evaluate(node=>node.scrollWidth<=node.clientWidth+1)).toBe(true);
+    const bounds=await panel.boundingBox();expect(bounds).not.toBeNull();
+    expect(bounds!.x).toBeGreaterThanOrEqual(0);expect(bounds!.y).toBeGreaterThanOrEqual(0);
+    expect(bounds!.x+bounds!.width).toBeLessThanOrEqual(viewport.width);expect(bounds!.y+bounds!.height).toBeLessThanOrEqual(viewport.height);
+    const background=await page.evaluate(()=>scrollY);
+    await panel.evaluate(node=>node.scrollTop=node.scrollHeight);
+    await expect(page.locator("#resourceClose")).toBeInViewport();
+    expect(await page.locator("#resourceClose").evaluate(node=>{
+      const rect=node.getBoundingClientRect();return node.contains(document.elementFromPoint(rect.x+rect.width/2,rect.y+rect.height/2));
+    })).toBe(true);
+    await page.mouse.move(bounds!.x+bounds!.width/2,bounds!.y+bounds!.height-30);await page.mouse.wheel(0,500);
+    expect(await page.evaluate(()=>scrollY)).toBe(background);
+    await page.locator("[data-usage-refresh]").scrollIntoViewIfNeeded();await expect(page.locator("[data-usage-refresh]")).toBeEnabled();
+    await page.locator("#resourceClose").click();await expect(panel).toBeHidden();
+    await page.locator("#resourceOrb").click();await page.keyboard.press("Escape");await expect(panel).toBeHidden();
+    await expect(page.locator("#resourceOrb")).toBeFocused();expect(errors).toEqual([]);
+  });
+}
+
+test("quota zero, missing data, overage and malformed/failed refresh remain explicit rather than fabricated balances",async({page})=>{
+  const {errors}=await setup(page);let failure="";
+  const value=quotaFixture();
+  value.account.quotas.find(row=>row.key === "accountRequests")!.used=0;
+  value.account.quotas.find(row=>row.key === "accountRequests")!.remaining=100000;
+  const r2=value.account.quotas.find(row=>row.key === "accountR2ClassA")!;
+  r2.used=1000001;r2.remaining=0;r2.overage=1;
+  await page.route("**/api/admin/resource-usage",async route=>{
+    await route.fulfill({status:failure === "network" ? 503 : 200,contentType:"application/json",
+      body:JSON.stringify(failure === "network" ? {message:"Offline"} : failure === "shape" ? {...value,account:{plans:{},quotas:[]}} :
+        failure === "row" ? {...value,account:{plans:[null],quotas:[]}} : value)});
+  });
+  await page.locator("#resourceOrb").click();
+  await expect(page.locator('[data-quota-key="accountRequests"] strong')).toHaveText("0 requests");
+  await expect(page.locator('[data-quota-key="accountRequests"] [data-quota-remaining]')).toHaveText("100,000 requests");
+  await page.locator('[data-usage-group="durableObjects"] summary').click();
+  await expect(page.locator('[data-quota-key="accountDoStorage"] [data-quota-remaining]')).toHaveText("未知");
+  await expect(page.locator('[data-quota-key="accountDoStorage"]')).toContainText("暂无法完整查询");
+  await page.locator('[data-usage-group="r2"] summary').click();
+  await expect(page.locator('[data-quota-key="accountR2ClassA"] [data-quota-remaining]')).toHaveText("0 operations");
+  await expect(page.locator('[data-quota-key="accountR2ClassA"]')).toContainText("超出额度：1 operations");
+  await expect(page.locator('[data-quota-key="accountR2ClassA"]')).toContainText("不代表服务停止");
+  for(failure of ["network","shape","row"]) {
+    await page.locator("[data-usage-refresh]").click();await expect(page.locator('#confirmDialog[role="alertdialog"]')).toBeVisible();
+    await page.locator("#confirmAccept").click();
+    await expect(page.locator('[data-quota-key="accountRequests"]')).toHaveAttribute("data-state","stale");
+    await expect(page.locator('[data-quota-key="accountRequests"] [data-quota-remaining]')).toHaveText("100,000 requests");
+    await expect(page.locator("#resourceOrb")).toBeEnabled();
+    failure="";await page.locator("#resourceOrb").click();
+    await expect(page.locator('[data-quota-key="accountRequests"]')).toHaveAttribute("data-state","ok");
+    await expect(page.locator("[data-usage-refresh]")).toBeEnabled();
+  }
+  failure="";await page.locator("[data-usage-refresh]").click();await expect(page.locator('[data-quota-key="accountRequests"]')).toHaveAttribute("data-state","ok");
+  expect(errors).toEqual([]);
+});
+
+test("quota responses cannot leak across actor changes or release a newer in-flight refresh",async({page})=>{
+  await page.setContent('<div id="usage"></div>');
+  await page.addScriptTag({content:readFileSync(new URL("../public/resource-usage.js",import.meta.url),"utf8")});
+  await page.evaluate(()=>{
+    type Owner={setActor(value:string):void;load():Promise<void>};
+    type Harness={owner:Owner;requests:Array<(value:object)=>void>};
+    const target=window as Window & {TraceResourceUsage(options:object):Owner;quotaHarness:Harness};
+    const requests:Array<(value:object)=>void>=[];
+    const owner=target.TraceResourceUsage({element:document.querySelector("#usage"),api:()=>new Promise(resolve=>requests.push(resolve)),
+      text:(zh:string)=>zh,escape:(value:string)=>String(value).replaceAll("<","&lt;").replaceAll('"',"&quot;"),formatBytes:(value:number)=>String(value)});
+    target.quotaHarness={owner,requests};owner.setActor("first");void owner.load();
+  });
+  await page.evaluate(()=>{
+    const target=window as Window & {quotaHarness:{owner:{setActor(value:string):void;load():Promise<void>}}};
+    target.quotaHarness.owner.setActor("second");void target.quotaHarness.owner.load();
+  });
+  await page.evaluate(value=>(window as Window & {quotaHarness:{requests:Array<(value:object)=>void>}}).quotaHarness.requests[0](value),quotaFixture());
+  await expect(page.locator("[data-usage-refresh]")).toBeDisabled();await expect(page.locator("[data-quota-key]")).toHaveCount(0);
+  const current=quotaFixture();current.account.quotas.find(row=>row.key === "accountRequests")!.used=7;
+  current.account.quotas.find(row=>row.key === "accountRequests")!.remaining=99993;
+  await page.evaluate(value=>(window as Window & {quotaHarness:{requests:Array<(value:object)=>void>}}).quotaHarness.requests[1](value),current);
+  await expect(page.locator('[data-quota-key="accountRequests"] [data-quota-remaining]')).toHaveText("99,993 requests");
+  await page.locator("[data-usage-refresh]").click();
+  await page.evaluate(()=>{
+    const target=window as Window & {quotaHarness:{owner:{load():Promise<void>};requests:unknown[]}};
+    void target.quotaHarness.owner.load();if(target.quotaHarness.requests.length !== 3) throw new Error("Duplicate refresh");
+  });
+  await page.evaluate(value=>(window as Window & {quotaHarness:{requests:Array<(value:object)=>void>}}).quotaHarness.requests[2](value),current);
+  await expect(page.locator("[data-usage-refresh]")).toBeEnabled();
+});
+
+test("unconfirmed plans and escaped long names cannot masquerade as a known quota",async({page})=>{
+  const {errors}=await setup(page),value=quotaFixture();
+  value.account.plans[0].name='<img src=x onerror="alert(1)"> Unknown custom contract '+"long ".repeat(30);
+  value.account.plans[0].state="unavailable";
+  const quota=value.account.quotas.find(row=>row.key === "accountRequests")!;
+  await page.route("**/api/admin/resource-usage",route=>route.fulfill({contentType:"application/json",body:JSON.stringify({...value,
+    account:{...value.account,quotas:[{...quota,used:null,allowance:null,remaining:null,state:"permission_denied",reason:"unknown_plan"}]}})}));
+  await page.setViewportSize({width:320,height:480});await page.locator("#resourceOrb").click();
+  await expect(page.locator('[data-quota-key="accountRequests"] [data-quota-remaining]')).toHaveText("未知");
+  await expect(page.locator('[data-quota-key="accountRequests"]')).toContainText("套餐未确认");
+  await expect(page.locator("#providerUsage img")).toHaveCount(0);
+  expect(await page.locator("#resourcePanel").evaluate(node=>node.scrollWidth<=node.clientWidth+1)).toBe(true);expect(errors).toEqual([]);
 });
 export async function firmwareView(page:Page) {
   if(await page.locator("#mobileMenu").isVisible()) await page.locator("#mobileMenu").click();

@@ -1,5 +1,22 @@
 # Shared Agent Records
 
+Latest resource work, 2026-11-23: RESOURCE-QUOTA-DISPLAY, Codex root,
+LOCAL_PENDING / SELF_TESTED / SOURCE_DELIVERY_PENDING. Owner authorizes existing Admin quota display,
+deployment and live testing. Reuse CF-CI-01 and the successful account probes;
+R2 storage qualification returns daily date/bucket peaks for 27 billing days.
+Keep account quotas separate from project analytics, Standard separate from IA,
+hard limits separate from included usage, and estimates separate from invoices.
+Admin-only deployment is intended: resource_usage is not imported by the main
+Worker entry. No credentials/configuration/channel/delta/device change or extra
+agent. Full local 645 service/314 browser checks, three typechecks and 60 deployment
+contracts pass. One real product probe yields all 11 supported balances; R2 A/B
+999554/9997158, storage estimate 8.7290037085 GB-month remaining. CPU is a single-
+invocation limit; unsupported complete DO storage stays unknown. No independent
+acceptance or deployment claim yet. Evidence .cache/quota-display-20261123;
+existing pending originals and failure evidence retained.
+See [quota implementation](../ota-exec-notes/OTA-COMPANION-2026-11-20.md#cloudflare-account-quota-display-2026-11-23).
+
+
 Latest rollout, 2026-11-23: ACCOUNT-BACKEND-ROLLOUT, Codex root, CODE_ON_MAIN /
 APP_CANDIDATE_DELIVERED / BACKEND_LIVE_VERIFIED / OWNER_PHONE_DEVICE_PENDING.
 Owner-requested exact cc8039e4 backend deployment 45076742719 succeeds once
