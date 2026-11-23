@@ -4,6 +4,45 @@ Read this file before deploying the E-Track backend or asking the owner for
 Cloudflare credentials. It lives at the project root deliberately. Read the
 primary checkout's copy, not only an old task worktree's copy.
 
+## Current State: Account Quotas Deployed 2026-11-23
+
+The owner-requested quota display is delivered as product source
+`c503165fe236ebdcf29fa8cd6f7aeb5e55f64515`. Exact-source backend checks
+[45157043450](https://github.com/Eitan-S-23/E-Track/actions/runs/45157043450)
+pass 603 Worker tests, 314 browser tests and all three typechecks. Broader local
+host checks separately pass 645 tests and 60 deployment/proxy contracts.
+
+One Admin-only deployment through the existing workflow succeeds in
+[45160962404](https://github.com/Eitan-S-23/E-Track/actions/runs/45160962404),
+canonical deployment `b6eed4f0-7e4f-4937-b73b-0c7674e2a5c8`. Both include flags
+are false. Worker/Public remain on `cc8039e4`; their deployment identities,
+runtime configurations and schedules are unchanged. No migration, credential,
+Access, channel/delta, App/MCU build or device operation is performed.
+
+Real owner-session readback matches HTML and ten JS/CSS assets to the source.
+The deployed quota API returns all 11 supported account balances. At 11:02:17
+UTC / 19:02:17 Shanghai, Workers/Pages requests have 99,680 remaining; R2 A/B
+have 999,552 / 9,997,153 remaining. Standard storage has an estimated 8.729
+GB-month remaining in the actual 2026-10-28 to 2026-11-28 UTC billing window.
+Account totals never subtract project-only metrics. CPU is a per-invocation
+limit, not a balance; unsupported complete DO storage remains unknown. These
+analytics/storage estimates are not invoices or monetary credits. The original
+15-minute cache is retained, so displayed values are timestamped, not realtime.
+
+Desktop, small mobile and 200% text checks have no horizontal overflow or page
+errors and keep Close reachable. Four channel pointers and all 63 delta
+identities/attempts/input hashes match fresh before/after snapshots; settings
+and all 19 migrations are unchanged. Only the quota GET's own cache refresh is
+permitted; notification acknowledgements are intercepted, with no business write.
+
+Originals: `.cache/quota-display-20261123/ci-logs-01`, `deploy-01`,
+`deploy-status-01`, `deploy-logs-01`, `keyring-cloud-live-501/502`. Initial
+offline verifier composition failure is retained, not a token/product failure.
+Existing dependency advisories remain Worker 13 (3 moderate/10 high),
+Admin/Public four high each; CI/deployment upload DEP0040/DEP0169 and workerd
+fixture diagnostics remain in the original logs. This is implementation/live
+verification, not independent acceptance. Do not redeploy to improve evidence.
+
 ## Current State: Account Identity And Terminal Fixes Deployed 2026-11-23
 
 Actions [45076742719](https://github.com/Eitan-S-23/E-Track/actions/runs/45076742719)

@@ -1,21 +1,23 @@
 # Shared Agent Records
 
 Latest resource work, 2026-11-23: RESOURCE-QUOTA-DISPLAY, Codex root,
-LOCAL_PENDING / SELF_TESTED / SOURCE_DELIVERY_PENDING. Owner authorizes existing Admin quota display,
-deployment and live testing. Reuse CF-CI-01 and the successful account probes;
-R2 storage qualification returns daily date/bucket peaks for 27 billing days.
-Keep account quotas separate from project analytics, Standard separate from IA,
-hard limits separate from included usage, and estimates separate from invoices.
-Admin-only deployment is intended: resource_usage is not imported by the main
-Worker entry. No credentials/configuration/channel/delta/device change or extra
-agent. Full local 645 service/314 browser checks, three typechecks and 60 deployment
-contracts pass. One real product probe yields all 11 supported balances; R2 A/B
-999554/9997158, storage estimate 8.7290037085 GB-month remaining. CPU is a single-
-invocation limit; unsupported complete DO storage stays unknown. No independent
-acceptance or deployment claim yet. Evidence .cache/quota-display-20261123;
-existing pending originals and failure evidence retained.
+CODE_ON_MAIN / ADMIN_LIVE_VERIFIED. Product c503165f, exact-source CI
+45157043450 (603 Worker/314 browser tests and three typechecks), Admin-only
+deployment 45160962404. Local broader host 645 and 60 contracts also pass.
+Real owner/source/11 assets/API/UI verify all 11 supported account balances;
+Workers/Pages remaining 99680, R2 A/B 999552/9997153 and estimated Standard
+storage remaining 8.729 GB-month. Actual R2 period is 2026-10-28 to 2026-11-28
+UTC, with complete 27-day samples. Account totals stay separate from project
+metrics; hard limits, included usage and invoice estimates remain distinct.
+CPU is a per-invocation limit; unsupported complete DO storage stays unknown.
+Desktop/mobile/200% text pass with reachable Close and zero page errors.
+Worker/Public identities/runtime, settings, 19 migrations, four channels and
+63 delta identities are preserved; no credentials/channel/delta/device actions
+or additional agent. Existing warnings and failed offline composition evidence
+are retained. These are implementation/live checks, not independent acceptance.
+Evidence .cache/quota-display-20261123; six older pending documents are preserved
+through scoped closeout rather than staged wholesale.
 See [quota implementation](../ota-exec-notes/OTA-COMPANION-2026-11-20.md#cloudflare-account-quota-display-2026-11-23).
-
 
 Latest rollout, 2026-11-23: ACCOUNT-BACKEND-ROLLOUT, Codex root, CODE_ON_MAIN /
 APP_CANDIDATE_DELIVERED / BACKEND_LIVE_VERIFIED / OWNER_PHONE_DEVICE_PENDING.
