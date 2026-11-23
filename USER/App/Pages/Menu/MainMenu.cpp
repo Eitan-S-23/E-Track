@@ -208,6 +208,7 @@ namespace
     {
         lv_obj_set_style_bg_color(row, lv_color_hex(0x07333b), LV_STATE_FOCUSED);
         lv_obj_set_style_bg_opa(row, LV_OPA_90, LV_STATE_FOCUSED);
+        lv_obj_set_style_border_width(row, 2, LV_STATE_FOCUSED);
         lv_obj_set_style_border_color(row, lv_color_hex(0x00eaff), LV_STATE_FOCUSED);
         lv_obj_set_style_shadow_width(row, 4, LV_STATE_FOCUSED);
         lv_obj_set_style_shadow_color(row, lv_color_hex(0x00eaff), LV_STATE_FOCUSED);

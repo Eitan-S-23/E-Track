@@ -21,6 +21,8 @@ SCREEN_CLASS screen(
 static uint8_t* Disp_DMA_TragetPoint = nullptr;
 static uint8_t* Disp_DMA_CurrentPoint = nullptr;
 static HAL::Display_CallbackFunc_t Disp_Callback = nullptr;
+static volatile bool Disp_DMA_Busy = false;
+static volatile bool Disp_DMA_Notify = true;
 
 #if (DISP_USE_FPS_TEST == 1)
 static float Display_GetFPS(SCREEN_CLASS* scr, uint32_t loopNum)
@@ -89,8 +91,9 @@ extern "C" void DMA1_Channel3_IRQHandler(void)
         else
         {
             digitalWrite_HIGH(CONFIG_SCREEN_CS_PIN);
+            Disp_DMA_Busy = false;
 
-            if(Disp_Callback)
+            if(Disp_DMA_Notify && Disp_Callback)
             {
                 Disp_Callback();
             }
@@ -190,10 +193,37 @@ void HAL::Display_SetAddrWindow(int16_t x0, int16_t y0, int16_t x1, int16_t y1)
 
 void HAL::Display_SendPixels(const uint16_t* pixels, uint32_t len)
 {
+    Disp_DMA_Notify = true;
+    Disp_DMA_Busy = true;
     digitalWrite_LOW(CONFIG_SCREEN_CS_PIN);
     digitalWrite_HIGH(CONFIG_SCREEN_DC_PIN);
 
     Display_SPI_DMA_Send(pixels, len * sizeof(uint16_t));
+}
+
+void HAL::Display_WaitForSendFinish()
+{
+    while(Disp_DMA_Busy)
+    {
+        __wfi();
+    }
+}
+
+void HAL::Display_SendPixelsBlocking(const uint16_t* pixels, uint32_t len)
+{
+    if(pixels == nullptr || len == 0)
+    {
+        return;
+    }
+    Display_WaitForSendFinish();
+    /* A direct HUD transfer must not acknowledge an unrelated LVGL flush. */
+    Disp_DMA_Notify = false;
+    Disp_DMA_Busy = true;
+    digitalWrite_LOW(CONFIG_SCREEN_CS_PIN);
+    digitalWrite_HIGH(CONFIG_SCREEN_DC_PIN);
+    Display_SPI_DMA_Send(pixels, len * sizeof(uint16_t));
+    Display_WaitForSendFinish();
+    Disp_DMA_Notify = true;
 }
 
 void HAL::Display_SetSendFinishCallback(Display_CallbackFunc_t func)

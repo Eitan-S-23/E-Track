@@ -46,6 +46,8 @@ void Display_Init();
 void Display_DumpCrashInfo(const char* info);
 void Display_SetAddrWindow(int16_t x0, int16_t y0, int16_t x1, int16_t y1);
 void Display_SendPixels(const uint16_t* pixels, uint32_t len);
+void Display_WaitForSendFinish();
+void Display_SendPixelsBlocking(const uint16_t* pixels, uint32_t len);
    
 /* Touch */
 void Touch_Init();

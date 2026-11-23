@@ -1,6 +1,7 @@
 #ifndef __DIALPLATE_PRESENTER_H
 #define __DIALPLATE_PRESENTER_H
 
+#include "../Page.h"
 #include "DialplateView.h"
 #include "DialplateModel.h"
 

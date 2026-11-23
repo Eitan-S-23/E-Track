@@ -1,0 +1,463 @@
+#include "Pages/Dialplate/DialplateView.h"
+#include "lv_port/lv_port.h"
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <limits>
+#include <string>
+#include <vector>
+
+extern "C"
+{
+LV_FONT_DECLARE(font_bahnschrift_13);
+LV_FONT_DECLARE(font_bahnschrift_17);
+LV_FONT_DECLARE(font_bahnschrift_24);
+LV_FONT_DECLARE(font_bahnschrift_48);
+LV_FONT_DECLARE(font_agencyb_12);
+LV_FONT_DECLARE(font_iconfont_16);
+LV_FONT_DECLARE(font_iconfont_20);
+LV_FONT_DECLARE(font_cn_16);
+LV_IMG_DECLARE(img_src_dialplate_skin);
+LV_IMG_DECLARE(img_src_gps_arrow_light);
+LV_IMG_DECLARE(img_src_battery);
+LV_IMG_DECLARE(img_src_bluetooth);
+LV_IMG_DECLARE(img_src_satellite);
+}
+
+static const int width = 240;
+static const int height = 320;
+static std::vector<lv_color_t> framebuffer(width * height);
+static unsigned rawTransfers = 0;
+static unsigned normalCallbacks = 0;
+
+static void Require(bool condition, const char* message)
+{
+    if(!condition)
+    {
+        std::fprintf(stderr, "FAIL: %s\n", message);
+        std::exit(1);
+    }
+}
+
+namespace ResourcePool
+{
+lv_font_t* GetFont(const char* name)
+{
+#define FONT_ENTRY(key, value) if(std::strcmp(name, key) == 0) return const_cast<lv_font_t*>(&value)
+    FONT_ENTRY("bahnschrift_13", font_bahnschrift_13);
+    FONT_ENTRY("bahnschrift_17", font_bahnschrift_17);
+    FONT_ENTRY("bahnschrift_24", font_bahnschrift_24);
+    FONT_ENTRY("bahnschrift_48", font_bahnschrift_48);
+    FONT_ENTRY("agencyb_12", font_agencyb_12);
+    FONT_ENTRY("iconfont_16", font_iconfont_16);
+    FONT_ENTRY("iconfont_20", font_iconfont_20);
+    FONT_ENTRY("cn_16", font_cn_16);
+    FONT_ENTRY("montserrat_8", lv_font_montserrat_8);
+#undef FONT_ENTRY
+    return nullptr;
+}
+
+const void* GetImage(const char* name)
+{
+#define IMAGE_ENTRY(key, value) if(std::strcmp(name, key) == 0) return &value
+    IMAGE_ENTRY("dialplate_skin", img_src_dialplate_skin);
+    IMAGE_ENTRY("gps_arrow_light", img_src_gps_arrow_light);
+    IMAGE_ENTRY("battery", img_src_battery);
+    IMAGE_ENTRY("bluetooth", img_src_bluetooth);
+    IMAGE_ENTRY("satellite", img_src_satellite);
+#undef IMAGE_ENTRY
+    return nullptr;
+}
+}
+
+static void CopyPixels(const lv_area_t& area, const uint16_t* pixels, uint32_t count)
+{
+    Require(area.x1 >= 0 && area.y1 >= 0 && area.x2 < width && area.y2 < height,
+            "display transfer stays inside the physical screen");
+    const uint32_t expected = (area.x2 - area.x1 + 1) * (area.y2 - area.y1 + 1);
+    Require(count == expected, "DMA byte count matches its window");
+    uint32_t index = 0;
+    for(int y = area.y1; y <= area.y2; y++)
+        for(int x = area.x1; x <= area.x2; x++)
+            framebuffer[y * width + x].full = pixels[index++];
+}
+
+#if DIALPLATE_HW_EFFECTS
+#include "HAL/HAL.h"
+static uint8_t* Disp_DMA_TragetPoint = nullptr;
+static uint8_t* Disp_DMA_CurrentPoint = nullptr;
+static HAL::Display_CallbackFunc_t Disp_Callback = nullptr;
+static volatile bool Disp_DMA_Busy = false;
+static volatile bool Disp_DMA_Notify = true;
+static bool pendingDma = false;
+static bool dmaCompleteFlag = false;
+static lv_area_t dmaWindow = { 0, 0, 0, 0 };
+static unsigned addressWindows = 0;
+static HAL::Display_CallbackFunc_t lvglFinish = nullptr;
+
+static int dma_flag_get(int) { return dmaCompleteFlag ? 1 : RESET; }
+static void dma_flag_clear(int) { dmaCompleteFlag = false; }
+static void digitalWrite_HIGH(int) {}
+static void digitalWrite_LOW(int) {}
+
+static void Display_SPI_DMA_Send(const void* data, uint32_t bytes)
+{
+    Require(!pendingDma, "a transfer cannot overwrite an outstanding DMA");
+    Require(Disp_DMA_Busy, "busy is published before starting DMA");
+    if(!Disp_DMA_Notify) rawTransfers++;
+    CopyPixels(dmaWindow, static_cast<const uint16_t*>(data), bytes / sizeof(uint16_t));
+    pendingDma = true;
+}
+
+extern "C" void DMA1_Channel3_IRQHandler(void);
+void mock_wait_for_interrupt()
+{
+    Require(pendingDma, "bounded mock wait has an actual DMA to complete");
+    pendingDma = false;
+    dmaCompleteFlag = true;
+    DMA1_Channel3_IRQHandler();
+}
+
+void HAL::Display_SetAddrWindow(int16_t x0, int16_t y0, int16_t x1, int16_t y1)
+{
+    Require(!pendingDma, "address window cannot change before DMA completion");
+    dmaWindow = { x0, y0, x1, y1 };
+    addressWindows++;
+}
+
+// The test runner inserts the exact current IRQ and HAL transfer methods.
+#include "hal_display_methods.inc"
+
+static void TrackLvglFinish()
+{
+    normalCallbacks++;
+    lvglFinish();
+}
+
+static void CountFinish() { normalCallbacks++; }
+
+static void SetupDisplay()
+{
+    lv_port_disp_init();
+    lvglFinish = Disp_Callback;
+    HAL::Display_SetSendFinishCallback(TrackLvglFinish);
+}
+#else
+static void Flush(lv_disp_drv_t* driver, const lv_area_t* area, lv_color_t* colors)
+{
+    CopyPixels(*area, reinterpret_cast<const uint16_t*>(colors),
+               (area->x2 - area->x1 + 1) * (area->y2 - area->y1 + 1));
+    normalCallbacks++;
+    lv_disp_flush_ready(driver);
+}
+
+static void SetupDisplay()
+{
+    static lv_color_t colors[width * 40];
+    static lv_disp_draw_buf_t draw;
+    static lv_disp_drv_t driver;
+    lv_disp_draw_buf_init(&draw, colors, nullptr, width * 40);
+    lv_disp_drv_init(&driver);
+    driver.hor_res = width;
+    driver.ver_res = height;
+    driver.draw_buf = &draw;
+    driver.flush_cb = Flush;
+    lv_disp_drv_register(&driver);
+}
+#endif
+
+static void Render()
+{
+    lv_obj_invalidate(lv_scr_act());
+    lv_refr_now(nullptr);
+#if DIALPLATE_HW_EFFECTS
+    HAL::Display_WaitForSendFinish();
+#endif
+}
+
+static lv_obj_t* CreateRoot(Page::DialplateView& view)
+{
+    lv_obj_t* root = lv_obj_create(lv_scr_act());
+    lv_obj_remove_style_all(root);
+    lv_obj_set_size(root, width, height);
+    lv_obj_clear_flag(root, LV_OBJ_FLAG_SCROLLABLE);
+    view.Create(root);
+    lv_obj_update_layout(root);
+    return root;
+}
+
+static void Animate(Page::DialplateView& view)
+{
+    view.ui.maxBar.spectrumTimer->timer_cb(view.ui.maxBar.spectrumTimer);
+}
+
+static void Save(const std::string& directory, const std::string& name)
+{
+    const std::string path = directory + "/" + name + ".ppm";
+    FILE* file = std::fopen(path.c_str(), "wb");
+    Require(file != nullptr, "project-local render output opens");
+    std::fprintf(file, "P6\n%d %d\n255\n", width, height);
+    std::vector<uint8_t> rgb(framebuffer.size() * 3);
+    for(size_t i = 0; i < framebuffer.size(); i++)
+    {
+        lv_color32_t color;
+        color.full = lv_color_to32(framebuffer[i]);
+        rgb[i * 3] = color.ch.red;
+        rgb[i * 3 + 1] = color.ch.green;
+        rgb[i * 3 + 2] = color.ch.blue;
+    }
+    Require(std::fwrite(rgb.data(), 1, rgb.size(), file) == rgb.size(), "render output is complete");
+    Require(std::fclose(file) == 0, "render output closes");
+}
+
+static void CheckMetrics(Page::DialplateView& view)
+{
+    const int positions[][4] = {{181, 94, 25, 16}, {180, 137, 54, 20},
+                               {181, 184, 26, 16}, {180, 225, 54, 22}};
+    for(int i = 0; i < 4; i++)
+    {
+        lv_obj_t* label = view.ui.metrics.item[i].labelValue;
+        lv_obj_update_layout(label);
+        lv_area_t area;
+        lv_obj_get_coords(label, &area);
+        Require(area.x1 == positions[i][0] && area.y1 == positions[i][1] &&
+                lv_area_get_width(&area) == positions[i][2] &&
+                lv_area_get_height(&area) == positions[i][3], "metric updates retain their fixed slots");
+        Require(area.y2 < 286 && area.x2 < 240, "metrics do not cross the footer or screen");
+        const lv_font_t* font = lv_obj_get_style_text_font(label, 0);
+        lv_point_t size;
+        lv_txt_get_size(&size, lv_label_get_text(label), font, 0, 0, LV_COORD_MAX, LV_TEXT_FLAG_NONE);
+        Require(size.y <= lv_area_get_height(&area), "selected font fits the metric height");
+        Require(size.x <= lv_area_get_width(&area) ||
+                lv_label_get_long_mode(label) == LV_LABEL_LONG_SCROLL_CIRCULAR,
+                "long values fit or scroll within their allocated slot");
+    }
+}
+
+static void CheckControls(Page::DialplateView& view)
+{
+    lv_obj_t* buttons[] = {view.ui.btnCont.btnMap, view.ui.btnCont.btnRec, view.ui.btnCont.btnMenu};
+    lv_group_t* group = lv_group_create();
+    for(lv_obj_t* button : buttons)
+    {
+        lv_area_t area;
+        lv_obj_get_coords(button, &area);
+        Require(area.x1 >= 0 && area.x2 < 240 && area.y1 == 286 && area.y2 < 320,
+                "primary controls stay on screen");
+        lv_point_t point = {(lv_coord_t)(area.x2 - 6), (lv_coord_t)(area.y1 + 15)};
+        Require(lv_indev_search_obj(lv_scr_act(), &point) == button, "button whitespace remains tappable");
+        lv_group_add_obj(group, button);
+        lv_group_focus_obj(button);
+        Require(lv_obj_has_state(button, LV_STATE_FOCUSED), "each primary control is focusable");
+    }
+    lv_group_del(group);
+    view.SetRecRecording(true);
+    Require(lv_color_to32(lv_obj_get_style_bg_color(view.ui.btnCont.recDot, 0)) ==
+            lv_color_to32(lv_color_hex(0xff2a2a)), "recording indicator retains its red state");
+    view.SetRecRecording(false);
+}
+
+static void CheckDma()
+{
+#if DIALPLATE_HW_EFFECTS
+    uint16_t pixels[] = {0, 0};
+    normalCallbacks = 0;
+    HAL::Display_SetSendFinishCallback(CountFinish);
+    HAL::Display_SetAddrWindow(0, 0, 1, 0);
+    HAL::Display_SendPixels(pixels, 2);
+    Require(Disp_DMA_Busy && pendingDma, "normal flush remains asynchronous");
+    HAL::Display_SendPixelsBlocking(pixels, 2);
+    Require(normalCallbacks == 1 && !Disp_DMA_Busy && Disp_DMA_Notify,
+            "blocking transfer drains the prior flush without a second LVGL acknowledgement");
+    HAL::Display_SendPixels(pixels, 2);
+    HAL::Display_WaitForSendFinish();
+    Require(normalCallbacks == 2, "normal completion notifications resume after raw transfer");
+    unsigned before = addressWindows;
+    const lv_area_t invalid[] = {{-1, 0, 0, 0}, {0, -1, 0, 0}, {0, 0, 240, 0},
+                                 {0, 0, 0, 320}, {1, 0, 0, 0}, {0, 1, 0, 0}};
+    for(const lv_area_t& area : invalid) lv_port_disp_blit_blocking(&area, reinterpret_cast<lv_color_t*>(pixels));
+    lv_port_disp_blit_blocking(nullptr, reinterpret_cast<lv_color_t*>(pixels));
+    const lv_area_t valid = {0, 0, 1, 0};
+    lv_port_disp_blit_blocking(&valid, nullptr);
+    HAL::Display_SendPixelsBlocking(nullptr, 1);
+    HAL::Display_SendPixelsBlocking(pixels, 0);
+    Require(addressWindows == before && !pendingDma, "invalid or empty transfers never start DMA");
+    unsigned callbacks = normalCallbacks;
+    lv_port_disp_blit_blocking(&valid, reinterpret_cast<lv_color_t*>(pixels));
+    Require(normalCallbacks == callbacks && addressWindows == before + 1,
+            "valid direct writes do not acknowledge LVGL");
+    HAL::Display_SetSendFinishCallback(TrackLvglFinish);
+#endif
+}
+
+int main(int argc, char** argv)
+{
+    Require(argc == 3, "test case and checked output directory are required");
+    const std::string test = argv[1];
+#if DIALPLATE_HW_EFFECTS
+    const std::string variant = "hardware";
+#elif defined(ARDUINO)
+    const std::string variant = "fallback";
+#else
+    const std::string variant = "desktop";
+#endif
+    lv_init();
+    SetupDisplay();
+    Page::DialplateView view;
+    lv_obj_t* root = CreateRoot(view);
+    Require(rawTransfers == 0, "creation cannot blit before the page owns the display");
+
+    if(test == "layout") CheckMetrics(view);
+    else if(test == "long_values")
+    {
+        const char* values[] = {"999.9", "1234:59:59", "9999.9", "2147483647"};
+        for(uint8_t i = 0; i < 4; i++) view.SetMetricText(i, values[i]);
+        CheckMetrics(view);
+        const std::string extreme(100, '9');
+        view.SetMetricText(0, extreme.c_str());
+        Require(lv_label_get_long_mode(view.ui.metrics.item[0].labelValue) == LV_LABEL_LONG_SCROLL_CIRCULAR,
+                "unbounded values use a bounded scrolling fallback");
+        Require(std::strcmp(lv_label_get_text(view.ui.metrics.item[0].labelValue), extreme.c_str()) == 0,
+                "long values are not silently truncated");
+        view.SetMetricText(4, "ignored");
+        view.SetMetricText(0, nullptr);
+        CheckMetrics(view);
+    }
+    else if(test == "arrow")
+    {
+        Require(view.ui.arrow.img != nullptr, "heading arrow is an independent image");
+        lv_point_t pivot;
+        lv_img_get_pivot(view.ui.arrow.img, &pivot);
+        Require(pivot.x == 8 && pivot.y == 11, "heading pivot matches the baked position");
+        view.SetArrowAngle(90.0f);
+        Require(lv_img_get_angle(view.ui.arrow.img) == 900, "heading rotates in tenths of degrees");
+        view.SetArrowAngle(-1.0f);
+        Require(lv_img_get_angle(view.ui.arrow.img) == 3590, "negative headings normalize");
+        view.SetArrowAngle(359.8f);
+        Require(lv_img_get_angle(view.ui.arrow.img) == 3590, "sub-degree noise does not repaint");
+        view.SetArrowAngle(720.0f);
+        Require(lv_img_get_angle(view.ui.arrow.img) == 0, "heading wrap takes the shortest angular difference");
+        view.SetArrowAngle(std::numeric_limits<float>::infinity());
+        view.SetArrowAngle(std::numeric_limits<float>::quiet_NaN());
+        Require(lv_img_get_angle(view.ui.arrow.img) == 0, "invalid headings are ignored");
+    }
+    else if(test == "controls") CheckControls(view);
+    else if(test == "spectrum")
+    {
+        Require(view.ui.maxBar.spectrumTimer->period == 50 && view.ui.maxBar.spectrumTimer->paused,
+                "50 ms spectrum starts paused");
+        view.SetSpectrumActive(true);
+        unsigned before = normalCallbacks;
+        Animate(view);
+        Require(normalCallbacks == before, "animation does not acknowledge a pending LVGL flush");
+#if DIALPLATE_HW_EFFECTS
+        Require(rawTransfers > 0 && view.ui.borderGlowPhase == 1, "hardware uses sparse direct updates");
+#else
+        Require(view.ui.maxBar.spectrumLit[0] == 1 && view.ui.maxBar.spectrumLit[1] == 2 &&
+                view.ui.maxBar.spectrumLit[2] == 1, "fallback retains stacked segment geometry");
+#endif
+        view.SetSpectrumSpeed(50.0f);
+        Animate(view);
+        Require(view.ui.maxBar.spectrumLevelPct == 100, "full speed retains the full spectrum range");
+        view.SetSpectrumSpeed(std::numeric_limits<float>::quiet_NaN());
+        Require(view.ui.maxBar.spectrumLevelPct == 10, "invalid speed retains the minimum level");
+        Require(lv_obj_get_style_text_opa(view.ui.nav.labelTurnIcon, 0) == LV_OPA_90,
+                "turn indicator follows the pulse frames");
+        uint8_t phase = view.ui.maxBar.spectrumPhase;
+        view.SetSpectrumActive(false);
+        lv_tick_inc(100);
+        lv_timer_handler();
+        Require(view.ui.maxBar.spectrumTimer->paused && view.ui.maxBar.spectrumPhase == phase,
+                "paused timers cannot continue the animation");
+    }
+    else if(test == "foreground")
+    {
+        view.SetSpectrumActive(true);
+        Animate(view);
+        lv_obj_t* modal = lv_obj_create(lv_layer_top());
+        lv_obj_remove_style_all(modal);
+        lv_obj_set_pos(modal, 0, 140);
+        lv_obj_set_size(modal, width, 140);
+        lv_obj_set_style_bg_color(modal, lv_color_hex(0x662222), 0);
+        lv_obj_set_style_bg_opa(modal, LV_OPA_COVER, 0);
+        lv_obj_update_layout(modal);
+        unsigned before = rawTransfers;
+        Animate(view);
+        Render();
+        Require(rawTransfers == before, "top-layer modal suppresses direct DMA animation");
+        for(int y = 141; y < 279; y++)
+            for(int x = 1; x < 239; x++)
+                Require(framebuffer[y * width + x].full == lv_color_hex(0x662222).full,
+                        "display compositor cannot paint glow over a foreground modal");
+        Save(argv[2], variant + "-foreground-modal");
+        view.SetSpectrumActive(false);
+        Require(rawTransfers == before, "cleanup cannot erase a foreground modal");
+        lv_obj_del(modal);
+        view.SetSpectrumActive(true);
+        Animate(view);
+#if DIALPLATE_HW_EFFECTS
+        Require(rawTransfers > before, "direct effects resume when the modal is gone");
+        Render();
+        Require(framebuffer[231 * width + 12].full == lv_color_hex(0x1ad0e0).full,
+                "active spectrum survives a complete LVGL repaint after modal close");
+#endif
+    }
+    else if(test == "transitions")
+    {
+        view.SetSpectrumActive(true);
+        unsigned before = rawTransfers;
+        lv_obj_set_x(root, 30);
+        lv_obj_update_layout(root);
+        Animate(view);
+        Require(rawTransfers == before, "moving pages cannot use absolute screen coordinates");
+        lv_obj_set_x(root, 0);
+        lv_obj_set_style_opa(root, LV_OPA_50, 0);
+        lv_obj_update_layout(root);
+        Animate(view);
+        Require(rawTransfers == before, "fading pages cannot use opaque direct writes");
+        lv_obj_set_style_opa(root, LV_OPA_COVER, 0);
+        lv_obj_t* newer = lv_obj_create(lv_scr_act());
+        lv_obj_set_size(newer, width, height);
+        lv_obj_update_layout(newer);
+        Animate(view);
+        Require(rawTransfers == before, "newer page owns the foreground");
+        lv_obj_add_flag(newer, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_update_layout(root);
+        Animate(view);
+#if DIALPLATE_HW_EFFECTS
+        Require(rawTransfers > before, "hidden cached pages do not block the active display");
+#endif
+        lv_obj_del(newer);
+    }
+    else if(test == "lifecycle")
+    {
+        view.SetSpectrumActive(false);
+        lv_mem_monitor_t initial = {};
+        for(int i = 0; i < 13; i++)
+        {
+            Page::DialplateView temporary;
+            lv_obj_t* temporaryRoot = CreateRoot(temporary);
+            temporary.SetSpectrumActive(true);
+            Animate(temporary);
+            temporary.Delete();
+            Require(temporary.ui.maxBar.spectrumTimer == nullptr, "unload releases the timer");
+            lv_obj_del(temporaryRoot);
+            Render();
+            if(i == 0) lv_mem_monitor(&initial);
+        }
+        lv_mem_monitor_t final = {};
+        lv_mem_monitor(&final);
+        Require(final.free_size + 1024 >= initial.free_size, "repeated creation/deletion has bounded retained memory");
+    }
+    else if(test == "dma") CheckDma();
+    else Require(false, "known test case");
+
+    Render();
+    Save(argv[2], variant + "-" + test);
+    view.Delete();
+    lv_obj_del(root);
+    Render();
+    std::printf("PASS real-LVGL %s %s; raw=%u normal-completions=%u (host self-test, not device evidence)\n",
+                variant.c_str(), test.c_str(), rawTransfers, normalCallbacks);
+    return 0;
+}

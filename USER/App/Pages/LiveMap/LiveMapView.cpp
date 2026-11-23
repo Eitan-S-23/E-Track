@@ -119,7 +119,8 @@ void LiveMapView::Map_Create(lv_obj_t* par, uint32_t tileNum)
 
     lv_obj_t* imgSnap = lv_img_create(cont);
     lv_obj_remove_style_all(imgSnap);
-    lv_obj_set_size(imgSnap, CONFIG_LIVE_MAP_VIEW_WIDTH, CONFIG_LIVE_MAP_VIEW_HEIGHT);
+    /* Match the 256 px snapshot, including its 16 px horizontal grid margin. */
+    lv_obj_set_size(imgSnap, 256, CONFIG_LIVE_MAP_VIEW_HEIGHT);
     ui.map.imgSnapshot = imgSnap;
 #else
     ui.map.imgTiles = (lv_obj_t**)lv_mem_alloc(tileNum * sizeof(lv_obj_t*));

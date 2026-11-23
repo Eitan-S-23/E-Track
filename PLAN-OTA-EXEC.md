@@ -125,6 +125,25 @@
 
 ---
 
+<!-- mcu-ui-sync-20261124:start -->
+### MCU-UI-SYNC-20261124
+
+2026-11-24: implementation/self-tests complete; owner authorized scoped main push.
+Firmware metadata is 3.3.53; App 1.0.94+120 remains unchanged. Migrated compact
+adaptive metrics, heading arrow, foreground-safe spectrum/glow, menu focus and
+snapshot width. OTA companion/file management, recorder admission and navigation
+remain intact. No channel publication, device operation or independent acceptance.
+Local GCC App/Boot and Windows simulator build: 395 warning lines, zero errors.
+Host regressions: 80 passed, two non-F435 DMA skips. Evidence:
+`.cache/mcu-ui-sync-20261124/build-wn3h0qkv`,
+`.cache/mcu-ui-sync-20261124/tests-8ishthcc`,
+`.cache/dialplate-ui-tests/run-lv0sj5zn`.
+GitHub CI/candidate registration is not yet observed; use the exact new main-push
+run and `.cache/candidate-release/ui-sync-3353-20261124/result.json`.
+Host renders are not physical-device or Windows simulator runtime verification.
+
+<!-- mcu-ui-sync-20261124:end -->
+
 ## 2. PRE 前置修正(来自复审报告,先于一切)
 
 #### PRE-1 version_code 编码重定义(契约修订)

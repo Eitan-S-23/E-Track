@@ -65,22 +65,6 @@ static void SetSpeedLabel(lv_obj_t* label, float speed)
     lv_obj_align(label, LV_ALIGN_TOP_LEFT, 10, y);
 }
 
-static void SetCalorieLabel(lv_obj_t* label, int calorie)
-{
-    if (label == nullptr)
-    {
-        return;
-    }
-
-    char text[16];
-    snprintf(text, sizeof(text), "%d", calorie);
-
-    const bool compact = (calorie >= 10000 || calorie <= -1000 || strlen(text) > 4);
-    lv_obj_set_style_text_font(label, ResourcePool::GetFont(compact ? "bahnschrift_13" : "bahnschrift_17"), 0);
-    lv_label_set_text(label, text);
-    lv_obj_align(label, LV_ALIGN_TOP_MID, 84, compact ? 229 : 226);
-}
-
 static void SetMaxSpeedLabel(lv_obj_t* label, float speed)
 {
     if (label == nullptr)
@@ -413,21 +397,20 @@ void Dialplate::Update()
 		
     if (View.ui.metrics.item[0].labelValue)
     {
-        lv_label_set_text_fmt(View.ui.metrics.item[0].labelValue, "%0.1f", Model.GetAvgSpeed());
+        snprintf(buf, sizeof(buf), "%0.1f", Model.GetAvgSpeed());
+        View.SetMetricText(0, buf);
     }
     if (View.ui.metrics.item[1].labelValue)
     {
-        lv_label_set_text(
-            View.ui.metrics.item[1].labelValue,
-            DataProc::MakeTimeString(Model.sportStatusInfo.singleTime, buf, sizeof(buf))
-        );
+        View.SetMetricText(1, DataProc::MakeTimeString(Model.sportStatusInfo.singleTime, buf, sizeof(buf)));
     }
     if (View.ui.metrics.item[2].labelValue)
     {
-        lv_label_set_text_fmt(View.ui.metrics.item[2].labelValue, "%0.1f",
-            Model.sportStatusInfo.singleDistance / 1000);
+        snprintf(buf, sizeof(buf), "%0.1f", Model.sportStatusInfo.singleDistance / 1000);
+        View.SetMetricText(2, buf);
     }
-    SetCalorieLabel(View.ui.metrics.item[3].labelValue, int(Model.sportStatusInfo.singleCalorie));
+    snprintf(buf, sizeof(buf), "%d", int(Model.sportStatusInfo.singleCalorie));
+    View.SetMetricText(3, buf);
 
     bool navGuidanceActive = false;
     DataProc::Navigation_Info_t navInfo;

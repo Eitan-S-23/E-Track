@@ -9,6 +9,11 @@
 
 本文只覆盖当前仪表盘页 `DialplateView`。其他页面的 LVGL 对象不在本文范围内。
 
+2026-11-24 的增量迁移保留当前 OTA 伴随弹窗、文件管理、录制准入和导航数据流，
+仅迁入布局、皮肤、航向箭头和动效。不能用参考目录的业务模型、菜单路由或中文字库
+整目录覆盖当前代码。`DialplateView.h` 仅依赖 LVGL；Presenter 在
+`Dialplate.h` 显式引入页面框架。
+
 ## 基本规则
 
 坐标系为 240 x 320 竖屏，左上角是 `(0, 0)`，`x` 向右增加，`y` 向下增加。
@@ -50,10 +55,10 @@
 | `MAX_VALUE_Y` | `246` | MAX 数值 y |
 | `MAX_VALUE_W` | `58` | MAX 标题和数值固定宽度 |
 | `SPECTRUM_X` | `10` | MAX 上方频谱第 1 列 x |
-| `SPECTRUM_Y` | `170` | 频谱区域顶部 y |
+| `SPECTRUM_Y` | `161` | 频谱区域顶部 y |
 | `SPECTRUM_W` | `25` | 频谱逻辑宽度 |
-| `SPECTRUM_H` | `63` | 频谱逻辑高度 |
-| `SPECTRUM_MASK_X/Y/W/H` | `10/170/25/63` | 频谱背景遮罩位置和尺寸 |
+| `SPECTRUM_H` | `72` | 频谱逻辑高度 |
+| `SPECTRUM_MASK_X/Y/W/H` | `10/161/25/72` | 频谱背景遮罩位置和尺寸 |
 | `SPECTRUM_SEG_H` | `3` | 每个小矩形段的高度 |
 | `SPECTRUM_SEG_GAP` | `1` | 每个小矩形段之间的垂直间距 |
 
@@ -71,6 +76,11 @@
 | `ui.skin` | `lv_img_create(root)` | `src=IMG("dialplate_skin")`，位置 `(0,0)` | 换底图改 `IMG("dialplate_skin")` 对应资源；移动整张皮肤改 `lv_obj_set_pos(skin, 0, 0)` |
 
 皮肤图片资源是 `USER/App/Resource/Image/img_src_dialplate_skin.c`。若需要改静态背景或烘焙元素，优先改 `.claude/fix_dialplate_skin.py` 后重新生成皮肤 C 数组。
+
+当前皮肤已清除固定位置三角，航向标记由独立的 `gps_arrow_light` 图片叠加。
+`ui.arrow.img` 的位置为 `(111,221)`，旋转轴为图片内 `(8,11)`，
+屏幕中心为 `(119,232)`。`SetArrowAngle()` 归一化航向，忽略非有限数值，
+只在最短角度差达到 1 度时更新。不要把箭头重新烘焙进底图。
 
 ## 顶部状态区对象
 
@@ -123,16 +133,16 @@ Tools\图标\convert_iconfont.bat --no-pause font_5t5ay47raff USER\App\Resource\
 
 | 对象 | 当前创建/更新方式 | 当前属性 | 调整方法 |
 |---|---|---|---|
-| `ui.maxBar.spectrumMask` 频谱背景遮罩 | `OverlayBox` | `x=10, y=170, w=25, h=63`，`COL_PANEL_BG` | 改 `SPECTRUM_MASK_X/Y/W/H` 和颜色 |
-| `ui.maxBar.spectrumSegs[i][s]` 频谱小矩形段 | `Spectrum_Create()` 循环创建 | 3 列 x 16 段，每段 `7x3`，段间距 `1`，颜色 `COL_CYAN` | 列数改 `SPECTRUM_BAR_NUM`，段数改 `SPECTRUM_SEG_NUM`；宽度改 `segW=7`；高度/间距改 `SPECTRUM_SEG_H/GAP`；颜色改 `lv_obj_set_style_bg_color(seg, COL_CYAN, 0)` |
-| `ui.maxBar.spectrumTimer` 动画定时器 | `lv_timer_create(onSpectrumTimer, 80, this)` | 80 ms 一帧 | 改 `80` 调整速度 |
+| `ui.maxBar.spectrumMask` 频谱背景遮罩 | `OverlayBox` | `x=10, y=161, w=25, h=72`，`COL_PANEL_BG` | 改 `SPECTRUM_MASK_X/Y/W/H` 和颜色 |
+| `ui.maxBar.spectrumSegs[i][s]` 频谱小矩形段 | 非 F435 DMA 路径由 `Spectrum_Create()` 创建 | 3 列 x 16 段，每段 `7x3`，段间距 `1`，颜色 `COL_CYAN` | 桌面和其他 MCU 保留普通 LVGL 矩形；F435 用相同段形绘入小缓冲区 |
+| `ui.maxBar.spectrumTimer` 动画定时器 | `lv_timer_create(onSpectrumTimer, 50, this)` | 50 ms 目标更新间隔，不代表实测帧率 | 同时驱动频谱、转向图标呼吸和 F435 边框流光 |
 | `ui.maxBar.labelTitle` MAX 标题 | `OverlayLabel` | `x=MAX_LABEL_X(-9), y=MAX_TITLE_Y(236), w=58, h=9` | 改 `MAX_LABEL_X/MAX_TITLE_Y/MAX_VALUE_W`，字体 `montserrat_8`，颜色 `COL_CYAN` |
 | `ui.maxBar.labelMax` MAX 数值 | `Value_Create` | `x=MAX_LABEL_X(-9), y=MAX_VALUE_Y(246), w=58, h=11` | 改 `MAX_LABEL_X/MAX_VALUE_Y/MAX_VALUE_W`，字体 `agencyb_12`，颜色 `COL_WHITE` |
 
-频谱动画高度由 `Spectrum_Update()` 中 `frames` 控制：
+频谱动画高度由普通 LVGL、直接写屏和合成回调共享的 `spectrumFrames` 控制：
 
 ```cpp
-static const uint8_t frames[][SPECTRUM_BAR_NUM] =
+static const uint8_t spectrumFrames[][DialplateView::SPECTRUM_BAR_NUM] =
 {
     { 2, 8, 16 },
     { 4, 16, 6 },
@@ -142,24 +152,49 @@ static const uint8_t frames[][SPECTRUM_BAR_NUM] =
 
 每个数字表示该列点亮多少段。当前最大为 `16/16`，最小为 `2/16`。如果要最低约 10%，保持最小值 `2`；如果要完全熄灭，使用 `0`；如果最高不变，最大仍保持 `16`。
 
+点亮高度还乘以速度等级：`SetSpectrumSpeed()` 将有效速度映射至
+`10..100%`，50 km/h 时达到满量程，非有限速度回落至最小等级。
+
+`DIALPLATE_HW_EFFECTS` 只在 `ARDUINO && AT32F435RGT7` 下启用。
+`DialplateGlowData.inc` 保存 16 帧稀疏像素和有界分段；单段最多 43 像素。
+`Spectrum_Blit()` 分两行写入完整的 `25x72` 区域，与流光共用
+50 个 RGB565 像素、100 字节的 `effectBuffer`。不分配整块频谱缓存，
+不能通过降低系统堆预留、LVGL 内存池或关闭诊断来让链接通过。
+`USER/lv_port/lv_port.h` 统一声明显示叠加和阻塞写屏接口。
+
+直接 DMA 不参与 LVGL 的层级裁剪，因此 `EffectsCanBlit()` 必须确认页面
+位于当前屏幕、原点、全屏和不透明状态，且没有可见的顶层弹窗或更高页面。
+这些条件不满足时，直接写屏和 flush 叠加都停止；退出时注销回调，不能用背景
+恢复块擦掉 OTA 弹窗。HAL 的阻塞传输先排空既有 DMA，并抑制本次 LVGL 完成通知，
+结束后恢复正常异步通知。
+
+`SpectrumColor()` 和 `SpectrumLevels()` 为直接写屏和
+`Spectrum_Compose()` 提供同一段形规则；合成直接写入当前 LVGL 刷新缓冲区。
+合成回调按当前刷新区裁剪恢复频谱，避免完整重绘或关闭弹窗后擦掉已显示的柱形。
+合成使用上一次显示的帧，因为 `Spectrum_Update()` 在绘制后才推进相位。
+
+| 接口/条件 | 可执行约束 | 回归入口 |
+|---|---|---|
+| `lv_port_disp_blit_blocking(area,pixels)` | 空指针、倒置或越过 240 x 320 的区域不启动 DMA | `hardware_dma` |
+| `Display_SendPixelsBlocking(pixels,len)` | 空/零长度不传输；先排空旧 DMA，本次不确认 LVGL，结束恢复异步通知 | `hardware_dma` |
+| 顶层弹窗、移动/淡入或更高页面 | 停止直接写屏及合成覆盖；退出不擦除前景 | `hardware_foreground`、`hardware_transitions` |
+| 弹窗关闭后的完整重绘 | 流光和当前频谱帧仍在；不能等待下一次定时器修复 | `hardware_foreground` |
+| 暂停和卸载 | 暂停定时器、注销叠加回调、重复创建/删除内存有界 | `hardware_spectrum`、`hardware_lifecycle` |
+
 ## 右侧 AVG/TIME/TRIP/CAL 数值对象
 
-四个右栏数值通过循环创建：
+创建和动态更新共用 `metricLayouts`，Presenter 只格式化数值并调用
+`SetMetricText(index, text)`，不再重复定义位置和字体。
 
-```cpp
-const lv_coord_t my[METRIC_NUM] = { 93, 138, 183, 226 };
-const char* mft[METRIC_NUM] = { "bahnschrift_24", "bahnschrift_17", "bahnschrift_24", "bahnschrift_17" };
-Value_Create(root, FONT(mft[i]), ..., LV_ALIGN_TOP_MID, 204 - SCR_CX, my[i], ...);
-```
+| 索引 | 对象 | x/y | 宽/高 | 对齐 | 字体候选 |
+|---:|---|---|---|---|---|
+| `0` | AVG | `181/94` | `25/16` | 右对齐 | bahnschrift_17、agencyb_12、montserrat_8 |
+| `1` | TIME | `180/137` | `54/20` | 居中 | bahnschrift_17、bahnschrift_13、agencyb_12、montserrat_8 |
+| `2` | TRIP | `181/184` | `26/16` | 右对齐 | bahnschrift_17、agencyb_12、montserrat_8 |
+| `3` | CAL | `180/225` | `54/22` | 居中 | bahnschrift_24、bahnschrift_17、agencyb_12、montserrat_8 |
 
-| 索引 | 对象 | 当前 y | 当前字体 | 初始值 | 调整方法 |
-|---:|---|---:|---|---|---|
-| `0` | AVG 数值 | `93` | `bahnschrift_24` | `0.0` | 改 `my[0]`、`mft[0]`、初始值数组 |
-| `1` | TIME 数值 | `138` | `bahnschrift_17` | `0:00:00` | 改 `my[1]`、`mft[1]`、初始值数组 |
-| `2` | TRIP 数值 | `183` | `bahnschrift_24` | `0.0` | 改 `my[2]`、`mft[2]`、初始值数组 |
-| `3` | CAL 数值 | `226` | `bahnschrift_17` | `0` | 改 `my[3]`、`mft[3]`、初始值数组 |
-
-右栏数值统一以屏幕水平中心对齐，`x=204-SCR_CX`。要整体左移/右移，改 `204`。
+字体同时按文字宽度和行高选取。全部候选都无法容纳时，保留完整数值并使用框内
+循环滚动；不能截断原始值，也不能挤到单位或固定底部按钮上。
 
 ## 右侧 AVG/TIME/TRIP/CAL 图标和标签对象
 
@@ -169,21 +204,20 @@ Value_Create(root, FONT(mft[i]), ..., LV_ALIGN_TOP_MID, 204 - SCR_CX, my[i], ...
 | AVG | `OverlayBox(root, 184,87,2,2,COL_BLUE)` | AVG 图标点 | 改对应 box |
 | AVG | `OverlayBox(root, 188,84,2,5,COL_BLUE)` | AVG 图标柱 | 改对应 box |
 | AVG | `AVG` 标签 | `(194,78)`, `COL_BLUE`, `bahnschrift_13` | 改 `OverlayLabel` |
-| AVG | `KM/H` 单位 | `(205,114)`, `COL_BLUE`, `bahnschrift_13` | 改 `OverlayLabel` |
-| TIME | `OverlayOutline(root,182,127,8,8,COL_BLUE,LV_RADIUS_CIRCLE)` | 时间小圆 | 改 `x/y/w/h/color` |
-| TIME | `OverlayBox(root,186,128,1,4,COL_BLUE)` | 时针 | 改对应 box |
-| TIME | `OverlayBox(root,187,131,3,1,COL_BLUE)` | 分针 | 改对应 box |
-| TIME | `TIME` 标签 | `(194,123)`, `COL_BLUE`, `bahnschrift_13` | 改 `OverlayLabel` |
-| TIME | `H:M:S` 单位 | `(205,159)`, `COL_BLUE`, `bahnschrift_13` | 改 `OverlayLabel` |
-| TRIP | `OverlayBox(root,182,173,3,3,COL_BLUE,circle)` | 小点 1 | 改对应 box |
-| TRIP | `OverlayBox(root,187,176,3,3,COL_BLUE,circle)` | 小点 2 | 改对应 box |
-| TRIP | `OverlayBox(root,183,181,7,2,COL_BLUE)` | 横线 | 改对应 box |
-| TRIP | `TRIP` 标签 | `(194,168)`, `COL_BLUE`, `bahnschrift_13` | 改 `OverlayLabel` |
-| TRIP | `KM` 单位 | `(210,204)`, `COL_BLUE`, `bahnschrift_13` | 改 `OverlayLabel` |
-| CAL | `OverlayOutline(root,182,218,8,8,COL_YELLOW,circle)` | CAL 小圆 | 改对应 outline |
-| CAL | `OverlayBox(root,185,215,2,8,COL_YELLOW)` | CAL 火苗/竖线 | 改对应 box |
-| CAL | `CAL` 标签 | `(194,213)`, `COL_YELLOW`, `bahnschrift_13` | 改 `OverlayLabel` |
-| CAL | `KCAL` 单位 | `(205,248)`, `COL_YELLOW`, `bahnschrift_13` | 改 `OverlayLabel` |
+| AVG | `KPH` 单位 | `(208,94)`, `COL_BLUE`, `bahnschrift_13` | 改 `OverlayLabel` |
+| TIME | `OverlayOutline(root,182,124,8,8,COL_BLUE,LV_RADIUS_CIRCLE)` | 时间小圆 | 改 `x/y/w/h/color` |
+| TIME | `OverlayBox(root,186,125,1,4,COL_BLUE)` | 时针 | 改对应 box |
+| TIME | `OverlayBox(root,187,128,3,1,COL_BLUE)` | 分针 | 改对应 box |
+| TIME | `TIME` 标签 | `(194,121)`, `COL_BLUE`, `bahnschrift_13` | 不再添加独立 H:M:S 占位 |
+| TRIP | `OverlayBox(root,182,169,3,3,COL_BLUE,circle)` | 小点 1 | 改对应 box |
+| TRIP | `OverlayBox(root,187,172,3,3,COL_BLUE,circle)` | 小点 2 | 改对应 box |
+| TRIP | `OverlayBox(root,183,177,7,2,COL_BLUE)` | 横线 | 改对应 box |
+| TRIP | `TRIP` 标签 | `(194,166)`, `COL_BLUE`, `bahnschrift_13` | 改 `OverlayLabel` |
+| TRIP | `KM` 单位 | `(214,184)`, `COL_BLUE`, `bahnschrift_13` | 改 `OverlayLabel` |
+| CAL | `OverlayOutline(root,182,214,8,8,COL_YELLOW,circle)` | CAL 小圆 | 改对应 outline |
+| CAL | `OverlayBox(root,185,211,2,8,COL_YELLOW)` | CAL 火苗/竖线 | 改对应 box |
+| CAL | `CAL` 标签 | `(194,211)`, `COL_YELLOW`, `bahnschrift_13` | 改 `OverlayLabel` |
+| CAL | `KCAL` 单位 | `(180,247)`, `54x14` 居中框，`COL_YELLOW` | 单位固定在数值下方 |
 
 ## 地图路点标签对象
 
@@ -231,13 +265,15 @@ Value_Create(root, FONT(mft[i]), ..., LV_ALIGN_TOP_MID, 204 - SCR_CX, my[i], ...
 
 | 函数 | 会修改的对象 | 当前行为 | 调整方法 |
 |---|---|---|---|
-| `SetSpectrumActive(bool active)` | `ui.maxBar.spectrumTimer` | 进入页面启动/退出暂停频谱动画 | 改启动/暂停逻辑 |
+| `SetSpectrumActive(bool active)` | 动画定时器和 F435 叠加回调 | 进入启动，退出暂停并注销回调 | 不得擦除前景弹窗 |
+| `SetMetricText(index,text)` | 右栏数值标签 | 共用槽位、字号适配和有界长值显示 | 改 `metricLayouts`，不能在 Presenter 复制坐标 |
+| `SetArrowAngle(deg)` | `ui.arrow.img` | 归一化航向并旋转独立图片 | 保持旋转轴与皮肤位置一致 |
 | `SetRecRecording(bool active)` | `ui.btnCont.recDot` | 改录制点颜色 | 改 `dotColor` 或 dot 样式 |
 | `SetBluetoothConnected(bool connected)` | `ui.status.imgBt` | 蓝牙图标灰/蓝切换 | 改 `color` 逻辑 |
 | `SetBattery(uint8_t usage, bool charging)` | `ui.status.imgBattery`, `ui.status.labelBattery` | 电池图标和数字改色、数字刷新 | 改颜色阈值、文本格式、位置 |
 | `SetAltitude(int altitude)` | `ui.status.labelAlt`, `labelAltUnit`, `labelAltIcon` | 海拔数字和位置刷新 | 改文本格式或三者位置 |
 | `SetTurnDirection(TurnDirection_t dir)` | `ui.nav.labelTurnIcon`, `ui.nav.labelTurnText` | 改转向图标和文字 | 改 `ICON_TURN_*` 或 `TXT_TURN_*` |
-| `Spectrum_Update()` | `ui.maxBar.spectrumSegs` | 按 `frames` 显示/隐藏小矩形段 | 改 `frames`、透明度或颜色 |
+| `Spectrum_Update()` | 频谱、转向图标、F435 流光 | 普通 LVGL 与 DMA 路径共享 `spectrumFrames` | 直接写屏必须满足 `EffectsCanBlit()` |
 
 ## 字体、图标和资源
 
@@ -262,23 +298,29 @@ Value_Create(root, FONT(mft[i]), ..., LV_ALIGN_TOP_MID, 204 - SCR_CX, my[i], ...
 
 ## 修改后的验证流程
 
-修改仪表盘对象后，建议至少做一次模拟器验证：
+先运行真实 LVGL、实际 View、显示 port 和源码绑定 HAL 方法的宿主回归：
 
-```powershell
-& 'D:\vs2019\MSBuild\Current\Bin\MSBuild.exe' 'Simulator\LVGL.Simulator.sln' /m /p:Configuration=Debug /p:Platform=x64 /v:minimal
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .claude\cap.ps1
+```bat
+python -B -m unittest discover -s tests\ota -p test_dialplate_ui.py -v
 ```
 
-模拟器截图输出在：
+输出位于项目内 `.cache/dialplate-ui-tests/run-*/`，包括源码 SHA-256、
+原始构建日志、每个案例的日志和 240 x 320 PPM 渲染。安装了 Pillow 时另存 PNG。
+覆盖桌面、F435 动效和其他 MCU 回退，检查长数值、底部空白命中、航向归一化、
+暂停/卸载、弹窗/页面遮挡，以及 DMA 不误通知 LVGL。DMA 由宿主边界模拟，
+这些不是实机帧率、SPI 时序或安装验收。
 
-```text
-.claude\sim_new.png
+生产构建使用 GCC App/Boot 和模拟器的默认入口，不把 AC5 当 OTA 产物：
+
+```bat
+build_f435_and_simulator.bat --no-pause
 ```
 
-确认无问题后再构建 F435 固件。项目当前使用 AC5，优先使用：
+核对 GCC size、警告/错误数、产物时间戳和 SHA-256。新增编译源须同时核对
+CMake、模拟器和 Keil 注册；本次复用已有箭头/字体，流光数据为 View 的 include。
+继续运行 `test_main_menu_encoder.py`、`test_companion_safety.py` 和
+`test_companion_modal.py`，不能以布局通过替代现有 OTA/录制回归。
 
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& '.\MDK-ARM_F435\build_f435.ps1' -Sources @('..\USER\App\Pages\Dialplate\DialplateView.cpp','..\USER\App\Resource\ResourcePool.cpp')"
-```
-
-如果新增字体源或图片源，按 `AGENTS.md` 中的 `-NewSources` / `-ExtraLinkObjs` 方式处理，不要手写 ARMCC 参数。
+Windows 集成截图仍使用项目 `.claude/cap.ps1`，但必须先按 `AGENTS.md`
+完成 PowerShell 启动缓存和截图输出预检。宿主 LVGL 渲染不等于 Win32 启动动画
+或真机验证；未执行的观察应明确标为未验证。不要覆盖历史截图或冻结证据。

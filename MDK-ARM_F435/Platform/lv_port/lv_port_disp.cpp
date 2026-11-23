@@ -13,6 +13,30 @@ static volatile uint32_t disp_refr_time_sum = 0;
 static volatile uint32_t disp_refr_cnt = 0;
 static volatile uint32_t disp_refr_px_sum = 0;
 
+static lv_port_disp_overlay_cb_t disp_overlay_cb = nullptr;
+static void* disp_overlay_user_data = nullptr;
+
+void lv_port_disp_set_overlay_cb(lv_port_disp_overlay_cb_t cb, void* user_data)
+{
+    disp_overlay_cb = cb;
+    disp_overlay_user_data = user_data;
+}
+
+void lv_port_disp_blit_blocking(const lv_area_t* area, const lv_color_t* color_p)
+{
+    if(area == nullptr || color_p == nullptr || area->x1 < 0 || area->y1 < 0 ||
+       area->x2 < area->x1 || area->y2 < area->y1 ||
+       area->x2 >= CONFIG_SCREEN_HOR_RES || area->y2 >= CONFIG_SCREEN_VER_RES)
+    {
+        return;
+    }
+    HAL::Display_WaitForSendFinish();
+    HAL::Display_SetAddrWindow(area->x1, area->y1, area->x2, area->y2);
+    const uint32_t len = (uint32_t)(area->x2 - area->x1 + 1) *
+                         (uint32_t)(area->y2 - area->y1 + 1);
+    HAL::Display_SendPixelsBlocking((const uint16_t*)color_p, len);
+}
+
 static void disp_monitor_cb(lv_disp_drv_t* disp_drv, uint32_t time, uint32_t px)
 {
     (void)disp_drv;
@@ -43,6 +67,11 @@ static void disp_flush_cb(lv_disp_drv_t* disp, const lv_area_t* area, lv_color_t
     const lv_coord_t h = (area->y2 - area->y1 + 1);
     const uint32_t len = w * h;
 
+    if(disp_overlay_cb != nullptr)
+    {
+        disp_overlay_cb(area, color_p, disp_overlay_user_data);
+    }
+
     HAL::Display_SetAddrWindow(area->x1, area->y1, area->x2, area->y2);
 
     HAL::Display_SendPixels((uint16_t*)color_p, len);
@@ -55,6 +84,7 @@ static void disp_send_finish_callback()
 
 static void disp_wait_cb(lv_disp_drv_t* disp_drv)
 {
+    (void)disp_drv;
     __wfi();
 }
 

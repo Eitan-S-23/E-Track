@@ -1,7 +1,7 @@
 {
   "schema": "original-admin-automatic-candidates-v1",
   "firmware": {
-    "versionName": "3.3.52",
-    "releaseNotes": "Version-only 3.3.51 to 3.3.52 MCU OTA test candidate. MCU functionality and factory UID unchanged. Full/recovery candidate only; owner controls channel publication, exact installed-version deltas and OTA. App 1.0.94+120 and its automatic-check policy unchanged. No device operation or backend deployment."
+    "versionName": "3.3.53",
+    "releaseNotes": "MCU UI refresh: compact adaptive metrics, rotating heading arrow, 50 ms spectrum, foreground-safe sparse border glow, menu focus border and snapshot grid margin. Preserve OTA companion/file management, recorder admission, navigation, factory UID and App 1.0.94+120. Full/recovery candidate only; owner controls publication and installation. No device operation or backend deployment."
   }
 }

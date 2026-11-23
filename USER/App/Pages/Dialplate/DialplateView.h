@@ -1,7 +1,13 @@
 #ifndef __DIALPLATE_VIEW_H
 #define __DIALPLATE_VIEW_H
 
-#include "../Page.h"
+#include "lvgl/lvgl.h"
+
+#if defined(ARDUINO) && defined(AT32F435RGT7)
+#define DIALPLATE_HW_EFFECTS 1
+#else
+#define DIALPLATE_HW_EFFECTS 0
+#endif
 
 namespace Page
 {
@@ -44,6 +50,14 @@ public:
     struct
     {
         lv_obj_t* skin;       /* 全屏皮肤底图 */
+        uint8_t borderGlowPhase;
+        bool borderGlowActive;
+
+        struct
+        {
+            lv_obj_t* img;
+            int16_t angle;
+        } arrow;
 
         /* 顶部状态：心率(占位) / 海拔(真实) / 坡度(占位) */
         struct
@@ -111,8 +125,9 @@ public:
     void AppearAnimStart(bool reverse = false);
     void SetSpectrumActive(bool active);
     void SetSpectrumSpeed(float speedKph);
+    void SetMetricText(uint8_t index, const char* text);
 
-    /* 当前位置三角由皮肤提供；接口保留给 Presenter 调用。 */
+    /* Rotate the independent position marker without rotating the skin. */
     void SetArrowAngle(float deg);
     void SetRecRecording(bool active);
     void SetBluetoothConnected(bool connected);
@@ -129,6 +144,15 @@ private:
     void Spectrum_Create(lv_obj_t* par);
     void Spectrum_Update();
     static void onSpectrumTimer(lv_timer_t* timer);
+#if DIALPLATE_HW_EFFECTS
+    bool EffectsCanBlit() const;
+    void Spectrum_Blit(const uint8_t* frame);
+    void Spectrum_Compose(const lv_area_t* area, lv_color_t* colors);
+    void BorderGlow_SetActive(bool active);
+    void BorderGlow_Advance();
+    void BorderGlow_BlitFrame(uint8_t phase, bool glow);
+    static void onDisplayOverlay(const lv_area_t* area, lv_color_t* color_p, void* userData);
+#endif
 
 private:
     lv_style_t styleBtn;        /* 按钮常态：全透明 */
