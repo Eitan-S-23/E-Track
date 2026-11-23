@@ -138,8 +138,12 @@ Host regressions: 80 passed, two non-F435 DMA skips. Evidence:
 `.cache/mcu-ui-sync-20261124/build-wn3h0qkv`,
 `.cache/mcu-ui-sync-20261124/tests-8ishthcc`,
 `.cache/dialplate-ui-tests/run-lv0sj5zn`.
-GitHub CI/candidate registration is not yet observed; use the exact new main-push
-run and `.cache/candidate-release/ui-sync-3353-20261124/result.json`.
+Source is integrated on main: `5ff6e53e5627731efb8bb3467d350ab3c486ef26`.
+GitHub candidate run [45264730857](https://github.com/Eitan-S-23/E-Track/actions/runs/45264730857)
+is successful: 639 warning lines, zero errors; App build skipped. Firmware 3.3.53
+full/recovery assets are R2-verified and registered ready/unpublished in the original
+Admin. No channel publication or installation is inferred. Original delivery receipt:
+`.cache/candidate-release/20261123T205956Z-59674acd/result.json`.
 Host renders are not physical-device or Windows simulator runtime verification.
 
 <!-- mcu-ui-sync-20261124:end -->
