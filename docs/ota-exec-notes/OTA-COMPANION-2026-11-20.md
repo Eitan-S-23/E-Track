@@ -1,5 +1,80 @@
 # OTA Companion And Admin Scroll Investigation
 
+## Owner-Requested MCU Test Candidate, 2026-11-23
+
+Status: CANDIDATE_DELIVERED / OWNER_PUBLICATION_AND_OTA_PENDING, Codex root.
+The owner reports that the
+3.3.48 -> 3.3.50 compatibility upgrade and device binding have succeeded and
+explicitly cancels further compatibility-delta remediation. That report
+supersedes the pending policy-choice/upgrade/binding statements below; it is
+OWNER_REPORTED, not a new hardware readback or independent acceptance. The
+original full-only diagnosis and its evidence remain unchanged.
+
+The owner requests one new MCU-only test package through the existing one-click
+entry. Current primary/remote main is bd599c2a; MCU is 3.3.50 and App is
+1.0.94+120. The supported release_candidate.bat / Tools/ota/release_candidate.py
+route owns version selection, Release/draft/tag checks, version-only commit,
+main push and exact-source formal GCC candidate observation. It does not publish
+Stable/Beta, generate/enable deltas, check the App or operate a device.
+
+The entry requires clean tracked files, but six existing pending documents must
+be retained. A task-local thin Host adapter ignores only their exact frozen
+hashes in unstaged-document checks; it rejects staged/other/concurrent changes
+and keeps the original single-version-file commit and first-push guards.
+The default whole-worktree whitespace check flags pre-existing CRLF lines;
+only the selected version file is checked for this delivery. The original
+release/credential-reader files stay unchanged. Evidence and original document
+bytes are under .cache/mcu-test-20261123; formal receipts remain under
+.cache/candidate-release. No App bump, backend deployment, credential change,
+new agent, package download or repeated successful upgrade is requested.
+
+UID provenance: USER/HAL/HAL_Bluetooth.cpp:55 reads the three factory 32-bit
+UID words at 0x1FFFF7E8, 0x1FFFF7EC and 0x1FFFF7F0 and formats them in that
+order as 24 lowercase hexadecimal characters. CompanionControl.h:187 sends
+that value in the session-bound UID reply; OtaService validates and uses it for
+device binding. It is silicon identity, not BLE address, an App-generated UUID
+or account ID. Ordinary firmware/data/account changes do not generate a new
+chip UID; replacing the MCU changes the hardware identity. No actual UID is
+read or exported in this task.
+
+Delivered MCU 3.3.51 / 30351, source
+ddc0a638ecbe34cb874e15dca51f33ed98360182. Formal first-push Actions
+[45176505831](https://github.com/Eitan-S-23/E-Track/actions/runs/45176505831)
+passes checks and firmware; App is skipped. The source differs from formal
+3.3.50 only in the MCU version/notes across the firmware inputs. The original
+entry's 24 offline tests and the bounded document adapter's seven tests pass.
+Firmware logs retain 641 warning lines and zero errors, not warning-free.
+
+Automatic registration is ready/unpublished, two R2-verified full/recovery
+assets, productionApproved=false and channelPublished=false. Release ID:
+fw_052e1b611aa08496839b970aca157038afafa70cb35fb23cf976198892202b4f.
+Target raw image SHA-256:
+7d2af1699caaa5887ed6e07cc9a4ca96e079153e7bea602f9f3362ecba18f89a.
+Full envelope: 304677 bytes, SHA-256
+6ff5bf3d7fee0a9f001f607af12a634fa7b0739367116d00c0dba13b18f9451d.
+Recovery: 635868 bytes, SHA-256
+daf8ed858ec4e88a812753e5a88492c4e60b08f4f17c5dcdd97e5a7907a90cec.
+
+The first script invocation created the correct single-file commit but its
+push received a connection-reset error. Fresh remote readback proved the push
+absent. One reconciled push of that same SHA through the existing Git proxy
+succeeded; the supported --resume then observed the original first-attempt CI.
+No repeated bump/build/dispatch. Failed original receipt and command-038.log:
+.cache/candidate-release/20261123T122841Z-fbec46ab. Push reconciliation:
+.cache/mcu-test-20261123/push-reconcile-01. Delivered source-bound receipt:
+.cache/candidate-release/20261123T124217Z-28d10bbe/result.json; it retains the
+inherited original error as historical context while phase/registration are
+DELIVERED. The dry-run receipt is 20261123T122639Z-a740cb76.
+
+Next owner: publish existing 3.3.51 to the desired channel; for a delta test,
+generate and enable exactly 3.3.50 -> 3.3.51 before checking from the bound
+device. For a full test, leave that matching delta disabled. No agent channel,
+delta, check, OTA or device action occurred. The owner's previous successful
+upgrade/binding is retained without replay; this candidate is not installed
+and does not prove physical or independent OTA acceptance. Only this new
+section/board/index/log record is selected for main; six older pending document
+blocks and their raw snapshots remain preserved.
+
 ## Cloudflare Account Quota Display, 2026-11-23
 
 RESOURCE-QUOTA-DISPLAY: CODE_ON_MAIN / ADMIN_LIVE_VERIFIED, Codex root. Product

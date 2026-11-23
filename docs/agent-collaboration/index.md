@@ -1,5 +1,23 @@
 # Shared Agent Records
 
+Latest owner-directed work, 2026-11-23: MCU-TEST-CANDIDATE, Codex root,
+CANDIDATE_DELIVERED / OWNER_PUBLICATION_AND_OTA_PENDING. Owner reports successful 3.3.48 -> 3.3.50
+compatibility upgrade and device binding, and cancels the old delta-policy
+remediation. These OWNER_REPORTED outcomes supersede the pending choice and
+upgrade/binding statements below, without fabricating a hardware readback.
+The supported one-click entry delivers version-only MCU 3.3.51 / 30351,
+source ddc0a638, first-push CI 45176505831. Original-entry 24 and adapter seven
+offline tests pass; firmware has 641 warning lines, zero errors. Full/recovery
+are R2-verified, ready/unpublished, with App skipped. A connection-reset push
+failure is retained; one reconciled same-SHA push and original --resume complete
+delivery, without another bump/build. Six older pending documents are preserved.
+App 1.0.94+120, migration policy, credentials/backend/channels/deltas and device
+state remain unchanged. UID is the chip's factory 96-bit identifier, formatted
+as 24 lowercase hex characters, not a BLE/account/App identifier. Evidence:
+.cache/mcu-test-20261123 and .cache/candidate-release/20261123T124217Z-28d10bbe;
+owner publishes 3.3.51 and generates/enables exact 3.3.50 -> 3.3.51 if testing
+delta. No device operation or actual/independent OTA acceptance. See [test candidate](../ota-exec-notes/OTA-COMPANION-2026-11-20.md#owner-requested-mcu-test-candidate-2026-11-23).
+
 Latest resource work, 2026-11-23: RESOURCE-QUOTA-DISPLAY, Codex root,
 CODE_ON_MAIN / ADMIN_LIVE_VERIFIED. Product c503165f, exact-source CI
 45157043450 (603 Worker/314 browser tests and three typechecks), Admin-only
