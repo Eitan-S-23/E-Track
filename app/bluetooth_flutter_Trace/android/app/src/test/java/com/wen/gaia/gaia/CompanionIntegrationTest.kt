@@ -423,7 +423,9 @@ class CompanionIntegrationTest {
             assertEquals(0, prefs.getInt("failures", 0))
         }
         assertEquals(true, incoming("state", offline).requireSuccess())
-        assertFalse(service.healthy())
+        assertTrue(service.healthy())
+        assertTrue(service.waitingForRecovery())
+        assertFalse(service.linkReady())
         assertEquals(1, prefs.getInt("failures", 0))
         assertEquals(1, CompanionEngineBoundary.created)
         assertNull(shadowOf(app).nextStartedActivity)

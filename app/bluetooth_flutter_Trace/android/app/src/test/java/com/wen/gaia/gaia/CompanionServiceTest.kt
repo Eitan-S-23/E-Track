@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.app.Notification
 import android.app.NotificationManager
+import android.app.Service
 import android.os.Looper
 import org.junit.After
 import org.junit.Assert.*
@@ -66,6 +67,87 @@ class CompanionServiceTest {
         mapOf("runtimeId" to service.runtimeId, "revision" to revision,
             "deviceToken" to CompanionBridge.deviceToken(address), "status" to status,
             "connected" to connected, "busy" to busy)
+
+    private fun enterBackoff(status: String = "DEVICE_OFFLINE") {
+        runtime.gatt = false
+        runtime.autoProbe = true
+        start(); runtime.reply!!(true)
+        for (seconds in listOf(2L, 4L, 8L)) {
+            assertTrue(service.state(state(status, false)))
+            shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(seconds))
+            runtime.reply!!(true)
+        }
+        assertTrue(service.state(state(status, false)))
+        assertTrue(service.waitingForRecovery())
+    }
+
+    @Test fun enabledServiceRequestsStickySystemRecreationWithoutOpeningUi() {
+        assertEquals(Service.START_STICKY,
+            service.onStartCommand(Intent().putExtra("reason", "recovery"), 0, 1))
+        assertEquals(1, runtime.starts)
+        assertEquals(1, runtime.dispatches)
+        assertNull(shadowOf(service.applicationContext as android.app.Application).nextStartedActivity)
+    }
+    @Test fun rejectedStartDoesNotRequestStickyRecreation() {
+        runtime.failure = "BLUETOOTH_OFF"
+        assertEquals(Service.START_NOT_STICKY, service.onStartCommand(null, 0, 1))
+        assertEquals(0, runtime.starts)
+        assertFalse(service.waitingForRecovery())
+    }
+    @Test fun stickyRecreationRetainsCooldownWithoutStartingTheEngineOrTakingAWakeLock() {
+        val prefs = CompanionBridge.preferences(service)
+        val next = System.currentTimeMillis() + 60000
+        prefs.edit().putLong("nextAttempt", next).commit()
+        assertEquals(Service.START_STICKY, service.onStartCommand(null, 0, 1))
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(21))
+        assertTrue(service.waitingForRecovery())
+        assertFalse(service.healthy())
+        assertFalse(service.linkReady())
+        assertEquals(0, runtime.starts)
+        assertEquals(0, runtime.dispatches)
+        service.dispatch()
+        assertEquals(0, runtime.dispatches)
+        assertFalse(ShadowPowerManager.getLatestWakeLock()?.isHeld == true)
+        val output = StringWriter()
+        service.dump(FileDescriptor(), PrintWriter(output), emptyArray())
+        val snapshot = JSONObject(output.toString())
+        assertFalse(snapshot.getBoolean("closed"))
+        assertTrue(snapshot.getBoolean("recoveryWaiting"))
+        assertEquals(next, snapshot.getLong("nextRecoveryAt"))
+        assertFalse(snapshot.getBoolean("runtimeAcknowledged"))
+        assertFalse(output.toString().contains(address))
+    }
+    @Test fun stickyRecreationStartsAtCooldownExpiryWithoutAnotherIntentOrSystemJob() {
+        val prefs = CompanionBridge.preferences(service)
+        prefs.edit().putLong("nextAttempt", System.currentTimeMillis() + 60000).commit()
+        service.onStartCommand(null, 0, 1)
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(59))
+        assertEquals(0, runtime.dispatches)
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(2))
+        assertEquals(1, runtime.starts)
+        assertEquals(1, runtime.dispatches)
+        runtime.reply!!(true)
+        assertTrue(service.state(state()))
+        assertTrue(service.linkReady())
+        assertEquals(0L, prefs.getLong("nextAttempt", 0))
+    }
+    @Test fun creationOnlyBootstrapAlsoHonorsPersistedCooldown() {
+        CompanionBridge.preferences(service).edit().putLong("nextAttempt", System.currentTimeMillis() + 60000).commit()
+        shadowOf(Looper.getMainLooper()).idle()
+        assertTrue(service.waitingForRecovery())
+        assertEquals(0, runtime.starts)
+        assertEquals(0, runtime.dispatches)
+    }
+    @Test fun radioPermissionLossWhileColdWaitingStopsWithoutStartingTheEngine() {
+        CompanionBridge.preferences(service).edit().putLong("nextAttempt", System.currentTimeMillis() + 3600000).commit()
+        service.onStartCommand(null, 0, 1)
+        runtime.failure = "BLUETOOTH_PERMISSION_DENIED"
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(31))
+        assertFalse(service.waitingForRecovery())
+        assertEquals(0, runtime.starts)
+        assertEquals(0, runtime.dispatches)
+        assertEquals(1, runtime.events.size)
+    }
 
     @Test fun recreatedServiceStartsWithoutAnotherIntentOrPeriodicJob() {
         assertEquals(0, runtime.starts)
@@ -192,11 +274,111 @@ class CompanionServiceTest {
             runtime.reply!!(true)
         }
         assertTrue(service.state(state("DEVICE_OFFLINE", false)))
-        assertFalse(service.healthy())
+        assertTrue(service.healthy())
+        assertTrue(service.waitingForRecovery())
+        assertFalse(service.linkReady())
         assertEquals(1, prefs.getInt("failures", 0))
         assertTrue(prefs.getLong("nextAttempt", 0) > System.currentTimeMillis())
         assertFalse(ShadowPowerManager.getLatestWakeLock().isHeld)
         assertEquals(1, runtime.starts)
+        assertTrue(runtime.events.isEmpty())
+    }
+
+    @Test fun cooldownResumesTheSameOwnerWithoutWaitingForThePeriodicJob() {
+        enterBackoff()
+        val original = service.runtimeId
+        assertEquals(4, runtime.dispatches)
+        assertFalse(ShadowPowerManager.getLatestWakeLock().isHeld)
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(119))
+        assertEquals(4, runtime.dispatches)
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(2))
+        assertEquals(5, runtime.dispatches)
+        assertEquals(original, service.runtimeId)
+        assertTrue(runtime.events.isEmpty())
+        assertTrue(ShadowPowerManager.getLatestWakeLock().isHeld)
+        runtime.reply!!(true)
+        runtime.gatt = true
+        assertTrue(service.state(state()))
+        assertTrue(service.linkReady())
+        assertFalse(service.waitingForRecovery())
+        assertEquals(0, CompanionBridge.preferences(service).getInt("failures", 0))
+        assertFalse(ShadowPowerManager.getLatestWakeLock().isHeld)
+    }
+    @Test fun timeoutAlsoKeepsARecoveryOwnerThroughCooldown() {
+        enterBackoff("CONNECTION_TIMEOUT")
+        assertTrue(service.healthy())
+        assertTrue(runtime.events.isEmpty())
+        assertFalse(ShadowPowerManager.getLatestWakeLock().isHeld)
+    }
+    @Test fun cooldownIsStillCappedAtSixtyMinutes() {
+        val prefs = CompanionBridge.preferences(service)
+        prefs.edit().putInt("failures", 5).commit()
+        enterBackoff()
+        val remaining = prefs.getLong("nextAttempt", 0) - System.currentTimeMillis()
+        assertTrue(remaining > 59 * 60000L)
+        assertTrue(remaining <= 60 * 60000L)
+        assertEquals(6, prefs.getInt("failures", 0))
+    }
+    @Test fun lateFailureAndProgressCannotStackOrExtendCooldown() {
+        enterBackoff()
+        val prefs = CompanionBridge.preferences(service)
+        val next = prefs.getLong("nextAttempt", 0)
+        assertFalse(service.state(state("DEVICE_OFFLINE", false)))
+        assertFalse(service.state(state("CONNECTING", false, true) +
+            mapOf("recoveryBusy" to true, "recoveryId" to "a".repeat(32))))
+        assertEquals(next, prefs.getLong("nextAttempt", 0))
+        assertEquals(1, prefs.getInt("failures", 0))
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(31))
+        assertTrue(service.waitingForRecovery())
+        assertEquals(4, runtime.dispatches)
+    }
+    @Test fun presenceDuringCooldownCanRecoverAndCancelsTheOldTimer() {
+        enterBackoff()
+        service.onStartCommand(Intent().putExtra("reason", "presence"), 0, 2)
+        assertEquals(5, runtime.dispatches)
+        runtime.reply!!(true)
+        runtime.gatt = true
+        assertTrue(service.state(state()))
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(121))
+        assertEquals(5, runtime.dispatches)
+        assertTrue(service.linkReady())
+    }
+    @Test fun periodicWakeDuringCooldownCannotStartAnEarlyRecovery() {
+        enterBackoff()
+        val prefs = CompanionBridge.preferences(service)
+        val next = prefs.getLong("nextAttempt", 0)
+        service.onStartCommand(Intent().putExtra("reason", "periodic"), 0, 2)
+        assertTrue(service.waitingForRecovery())
+        assertEquals(next, prefs.getLong("nextAttempt", 0))
+        assertEquals(4, runtime.dispatches)
+        assertFalse(ShadowPowerManager.getLatestWakeLock().isHeld)
+    }
+    @Test fun disablingDuringCooldownCancelsRecoveryAndDoesNotResurrect() {
+        enterBackoff()
+        CompanionBridge.preferences(service).edit().putBoolean("enabled", false).commit()
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(121))
+        assertFalse(service.waitingForRecovery())
+        assertFalse(service.healthy())
+        assertEquals(4, runtime.dispatches)
+        assertEquals(1, runtime.events.size)
+        assertFalse(ShadowPowerManager.getLatestWakeLock().isHeld)
+    }
+    @Test fun changedAssociationWhileWaitingCannotDispatchToTheOldDevice() {
+        enterBackoff()
+        CompanionBridge.preferences(service).edit().putString("revision", "replacement").commit()
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(121))
+        assertFalse(service.waitingForRecovery())
+        assertEquals(4, runtime.dispatches)
+        assertEquals(1, runtime.events.size)
+    }
+    @Test fun cooldownNotificationDoesNotClaimAnEstablishedConnection() {
+        enterBackoff()
+        val notification = shadowOf(service.getSystemService(NotificationManager::class.java))
+            .getNotification(CompanionService.NOTIFICATION_ID)
+        assertEquals("\u8bbe\u5907\u672a\u8fde\u63a5\uff0c\u7b49\u5f85\u4e0b\u6b21\u91cd\u8bd5",
+            notification.extras.getString(Notification.EXTRA_TEXT))
+        assertFalse(service.ownsDevice(key, service.runtimeId))
+        assertFalse(service.recoveryHealthy())
     }
 
     @Test fun verifiedOtaWithRetiredGattRecoversWithoutStoppingOrFailureBackoff() {
@@ -266,7 +448,8 @@ class CompanionServiceTest {
         service.state(state("CONNECTING", false, true))
         shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(59))
         service.state(state("DEVICE_OFFLINE", false))
-        assertFalse(service.healthy())
+        assertTrue(service.healthy())
+        assertTrue(service.waitingForRecovery())
         assertEquals(1, runtime.dispatches)
         assertEquals(1, CompanionBridge.preferences(service).getInt("failures", 0))
     }
