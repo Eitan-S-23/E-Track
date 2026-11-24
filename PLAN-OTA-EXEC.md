@@ -148,6 +148,25 @@ Host renders are not physical-device or Windows simulator runtime verification.
 
 <!-- mcu-ui-sync-20261124:end -->
 
+<!-- mcu-ui-original-20261124:start -->
+### MCU-UI-ORIGINAL-20261124
+
+2026-11-25: owner authorized this corrected UI-only migration and main push.
+Transplanted the original AT32F435RGT7_SDIO Dialplate View creation and Presenter
+UI refresh code, preserving fonts, layout, placeholders, clipping and animations.
+This supersedes the earlier MCU-UI-SYNC implementation, not its immutable evidence.
+Existing foreground/modal safeguards remain; the spectrum uses a 100-byte transfer
+buffer to preserve the F435 heap gate without changing pixels or HAL/linker code.
+HAL, OTA, recording, navigation and App 1.0.95+121 remain unchanged. Firmware 3.3.54
+requests a new full/recovery candidate; channel publication stays owner-controlled.
+Self-tests: 88 passed, two non-F435 DMA skips; 46 reference/target renders identical.
+Local GCC App/Boot and Windows simulator build: 395 warning lines, zero errors.
+Evidence: `.cache/mcu-ui-original-20261124`, `.cache/dialplate-ui-tests/run-x9l04xcu`.
+Main integration and exact-source candidate delivery are pending this push.
+No physical device operation, simulator runtime or independent acceptance is claimed.
+
+<!-- mcu-ui-original-20261124:end -->
+
 ## 2. PRE 前置修正(来自复审报告,先于一切)
 
 #### PRE-1 version_code 编码重定义(契约修订)

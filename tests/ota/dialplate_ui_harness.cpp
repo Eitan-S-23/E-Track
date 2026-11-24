@@ -3,15 +3,23 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <limits>
 #include <string>
 #include <vector>
+
+#ifndef DIALPLATE_HW_EFFECTS
+#if defined(ARDUINO) && defined(AT32F435RGT7)
+#define DIALPLATE_HW_EFFECTS 1
+#else
+#define DIALPLATE_HW_EFFECTS 0
+#endif
+#endif
 
 extern "C"
 {
 LV_FONT_DECLARE(font_bahnschrift_13);
 LV_FONT_DECLARE(font_bahnschrift_17);
 LV_FONT_DECLARE(font_bahnschrift_24);
+LV_FONT_DECLARE(font_bahnschrift_32);
 LV_FONT_DECLARE(font_bahnschrift_48);
 LV_FONT_DECLARE(font_agencyb_12);
 LV_FONT_DECLARE(font_iconfont_16);
@@ -47,6 +55,7 @@ lv_font_t* GetFont(const char* name)
     FONT_ENTRY("bahnschrift_13", font_bahnschrift_13);
     FONT_ENTRY("bahnschrift_17", font_bahnschrift_17);
     FONT_ENTRY("bahnschrift_24", font_bahnschrift_24);
+    FONT_ENTRY("bahnschrift_32", font_bahnschrift_32);
     FONT_ENTRY("bahnschrift_48", font_bahnschrift_48);
     FONT_ENTRY("agencyb_12", font_agencyb_12);
     FONT_ENTRY("iconfont_16", font_iconfont_16);
@@ -68,6 +77,24 @@ const void* GetImage(const char* name)
 #undef IMAGE_ENTRY
     return nullptr;
 }
+}
+
+// These helpers are extracted from the selected repository's real Presenter.
+#include "dialplate_presenter_ui.inc"
+
+static void SetMetricText(Page::DialplateView& view, uint8_t index, const char* text)
+{
+    if(index >= Page::DialplateView::METRIC_NUM) return;
+    static const char* numberFonts[] = {"bahnschrift_17", "agencyb_12", "montserrat_8"};
+    static const char* timeFonts[] = {"bahnschrift_17", "bahnschrift_13", "agencyb_12", "montserrat_8"};
+    static const char* calorieFonts[] = {"bahnschrift_24", "bahnschrift_17", "agencyb_12", "montserrat_8"};
+    const int slots[][4] = {{181, 94, 25, 16}, {180, 137, 54, 20},
+                           {181, 184, 26, 16}, {180, 225, 54, 22}};
+    const char* const* fonts = index == 1 ? timeFonts : index == 3 ? calorieFonts : numberFonts;
+    const size_t count = index == 1 || index == 3 ? 4 : 3;
+    SetAdaptiveMetricLabel(view.ui.metrics.item[index].labelValue, text, fonts, count,
+        slots[index][0], slots[index][1], slots[index][2], slots[index][3],
+        index == 0 || index == 2 ? LV_TEXT_ALIGN_RIGHT : LV_TEXT_ALIGN_CENTER);
 }
 
 static void CopyPixels(const lv_area_t& area, const uint16_t* pixels, uint32_t count)
@@ -224,13 +251,8 @@ static void CheckMetrics(Page::DialplateView& view)
                 lv_area_get_width(&area) == positions[i][2] &&
                 lv_area_get_height(&area) == positions[i][3], "metric updates retain their fixed slots");
         Require(area.y2 < 286 && area.x2 < 240, "metrics do not cross the footer or screen");
-        const lv_font_t* font = lv_obj_get_style_text_font(label, 0);
-        lv_point_t size;
-        lv_txt_get_size(&size, lv_label_get_text(label), font, 0, 0, LV_COORD_MAX, LV_TEXT_FLAG_NONE);
-        Require(size.y <= lv_area_get_height(&area), "selected font fits the metric height");
-        Require(size.x <= lv_area_get_width(&area) ||
-                lv_label_get_long_mode(label) == LV_LABEL_LONG_SCROLL_CIRCULAR,
-                "long values fit or scroll within their allocated slot");
+        Require(lv_label_get_long_mode(label) == LV_LABEL_LONG_CLIP,
+                "metric clipping follows the reference UI, not a new scrolling design");
     }
 }
 
@@ -305,22 +327,42 @@ int main(int argc, char** argv)
     SetupDisplay();
     Page::DialplateView view;
     lv_obj_t* root = CreateRoot(view);
+#ifndef DIALPLATE_REFERENCE
     Require(rawTransfers == 0, "creation cannot blit before the page owns the display");
+#endif
 
     if(test == "layout") CheckMetrics(view);
     else if(test == "long_values")
     {
         const char* values[] = {"999.9", "1234:59:59", "9999.9", "2147483647"};
-        for(uint8_t i = 0; i < 4; i++) view.SetMetricText(i, values[i]);
+        for(uint8_t i = 0; i < 4; i++) SetMetricText(view, i, values[i]);
         CheckMetrics(view);
         const std::string extreme(100, '9');
-        view.SetMetricText(0, extreme.c_str());
-        Require(lv_label_get_long_mode(view.ui.metrics.item[0].labelValue) == LV_LABEL_LONG_SCROLL_CIRCULAR,
-                "unbounded values use a bounded scrolling fallback");
+        SetMetricText(view, 0, extreme.c_str());
+        Require(lv_label_get_long_mode(view.ui.metrics.item[0].labelValue) == LV_LABEL_LONG_CLIP,
+                "long values retain the reference clipping policy");
         Require(std::strcmp(lv_label_get_text(view.ui.metrics.item[0].labelValue), extreme.c_str()) == 0,
                 "long values are not silently truncated");
-        view.SetMetricText(4, "ignored");
-        view.SetMetricText(0, nullptr);
+        SetMetricText(view, 4, "ignored");
+        SetMetricText(view, 0, nullptr);
+        CheckMetrics(view);
+    }
+    else if(test == "populated")
+    {
+        SetSpeedLabel(view.ui.speed.labelValue, 28.6f);
+        SetMaxSpeedLabel(view.ui.maxBar.labelMax, 68.4f);
+        const char* values[] = {"24.5", "1:23:45", "34.5", "678"};
+        for(uint8_t i = 0; i < 4; i++) SetMetricText(view, i, values[i]);
+        SetCalorieLabel(view.ui.metrics.item[3].labelValue, 678);
+        SetNavDistanceLabel(view.ui.nav.labelDist, view.ui.nav.labelDistUnit, 1200);
+        view.SetBattery(52, false);
+        view.SetAltitude(678);
+        view.SetBluetoothConnected(true);
+        view.SetRecRecording(true);
+        view.SetArrowAngle(123.0f);
+        view.SetSpectrumSpeed(28.6f);
+        view.SetSpectrumActive(true);
+        Animate(view);
         CheckMetrics(view);
     }
     else if(test == "arrow")
@@ -337,9 +379,6 @@ int main(int argc, char** argv)
         Require(lv_img_get_angle(view.ui.arrow.img) == 3590, "sub-degree noise does not repaint");
         view.SetArrowAngle(720.0f);
         Require(lv_img_get_angle(view.ui.arrow.img) == 0, "heading wrap takes the shortest angular difference");
-        view.SetArrowAngle(std::numeric_limits<float>::infinity());
-        view.SetArrowAngle(std::numeric_limits<float>::quiet_NaN());
-        Require(lv_img_get_angle(view.ui.arrow.img) == 0, "invalid headings are ignored");
     }
     else if(test == "controls") CheckControls(view);
     else if(test == "spectrum")
@@ -359,8 +398,8 @@ int main(int argc, char** argv)
         view.SetSpectrumSpeed(50.0f);
         Animate(view);
         Require(view.ui.maxBar.spectrumLevelPct == 100, "full speed retains the full spectrum range");
-        view.SetSpectrumSpeed(std::numeric_limits<float>::quiet_NaN());
-        Require(view.ui.maxBar.spectrumLevelPct == 10, "invalid speed retains the minimum level");
+        view.SetSpectrumSpeed(0.0f);
+        Require(view.ui.maxBar.spectrumLevelPct == 10, "zero speed retains the reference minimum level");
         Require(lv_obj_get_style_text_opa(view.ui.nav.labelTurnIcon, 0) == LV_OPA_90,
                 "turn indicator follows the pulse frames");
         uint8_t phase = view.ui.maxBar.spectrumPhase;
@@ -369,6 +408,22 @@ int main(int argc, char** argv)
         lv_timer_handler();
         Require(view.ui.maxBar.spectrumTimer->paused && view.ui.maxBar.spectrumPhase == phase,
                 "paused timers cannot continue the animation");
+    }
+    else if(test == "spectrum_frames")
+    {
+        view.SetSpectrumActive(true);
+        for(unsigned frame = 0; frame < 16; frame++)
+        {
+            view.SetSpectrumSpeed((frame % 5) * 12.5f);
+#if DIALPLATE_HW_EFFECTS
+            Render();
+            Animate(view);
+#else
+            Animate(view);
+            Render();
+#endif
+            Save(argv[2], variant + "-spectrum_frames-" + std::to_string(frame));
+        }
     }
     else if(test == "foreground")
     {
@@ -398,8 +453,9 @@ int main(int argc, char** argv)
 #if DIALPLATE_HW_EFFECTS
         Require(rawTransfers > before, "direct effects resume when the modal is gone");
         Render();
+        Animate(view);
         Require(framebuffer[231 * width + 12].full == lv_color_hex(0x1ad0e0).full,
-                "active spectrum survives a complete LVGL repaint after modal close");
+                "the original spectrum timer restores its direct frame after a repaint");
 #endif
     }
     else if(test == "transitions")

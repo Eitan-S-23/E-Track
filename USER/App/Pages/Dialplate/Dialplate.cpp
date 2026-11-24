@@ -35,6 +35,48 @@ static float NormalizeCourseDiff(float diff)
     return diff;
 }
 
+static void SetAdaptiveMetricLabel(
+    lv_obj_t* label,
+    const char* text,
+    const char* const* fontNames,
+    size_t fontCount,
+    lv_coord_t x,
+    lv_coord_t y,
+    lv_coord_t width,
+    lv_coord_t height,
+    lv_text_align_t textAlign)
+{
+    if (label == nullptr || text == nullptr || fontNames == nullptr || fontCount == 0)
+    {
+        return;
+    }
+
+    const lv_font_t* selectedFont = ResourcePool::GetFont(fontNames[fontCount - 1]);
+    for (size_t i = 0; i < fontCount; i++)
+    {
+        const lv_font_t* candidate = ResourcePool::GetFont(fontNames[i]);
+        if (candidate == nullptr)
+        {
+            continue;
+        }
+
+        lv_point_t textSize;
+        lv_txt_get_size(&textSize, text, candidate, 0, 0, LV_COORD_MAX, LV_TEXT_FLAG_NONE);
+        if (textSize.x <= width)
+        {
+            selectedFont = candidate;
+            break;
+        }
+    }
+
+    lv_obj_set_style_text_font(label, selectedFont, 0);
+    lv_label_set_text(label, text);
+    lv_label_set_long_mode(label, LV_LABEL_LONG_CLIP);
+    lv_obj_set_size(label, width, height);
+    lv_obj_set_style_text_align(label, textAlign, 0);
+    lv_obj_align(label, LV_ALIGN_TOP_LEFT, x, y);
+}
+
 static void SetSpeedLabel(lv_obj_t* label, float speed)
 {
     if (label == nullptr)
@@ -63,6 +105,28 @@ static void SetSpeedLabel(lv_obj_t* label, float speed)
     lv_obj_set_style_text_font(label, ResourcePool::GetFont(fontName), 0);
     lv_label_set_text(label, text);
     lv_obj_align(label, LV_ALIGN_TOP_LEFT, 10, y);
+}
+
+static void SetCalorieLabel(lv_obj_t* label, int calorie)
+{
+    if (label == nullptr)
+    {
+        return;
+    }
+
+    char text[16];
+    snprintf(text, sizeof(text), "%d", calorie);
+
+    static const char* fonts[] =
+    {
+        "bahnschrift_24",
+        "bahnschrift_17",
+        "agencyb_12",
+        "montserrat_8"
+    };
+    SetAdaptiveMetricLabel(
+        label, text, fonts, sizeof(fonts) / sizeof(fonts[0]),
+        180, 225, 54, 22, LV_TEXT_ALIGN_CENTER);
 }
 
 static void SetMaxSpeedLabel(lv_obj_t* label, float speed)
@@ -398,19 +462,38 @@ void Dialplate::Update()
     if (View.ui.metrics.item[0].labelValue)
     {
         snprintf(buf, sizeof(buf), "%0.1f", Model.GetAvgSpeed());
-        View.SetMetricText(0, buf);
+        static const char* fonts[] = { "bahnschrift_17", "agencyb_12", "montserrat_8" };
+        SetAdaptiveMetricLabel(
+            View.ui.metrics.item[0].labelValue, buf,
+            fonts, sizeof(fonts) / sizeof(fonts[0]),
+            181, 94, 25, 16, LV_TEXT_ALIGN_RIGHT);
     }
     if (View.ui.metrics.item[1].labelValue)
     {
-        View.SetMetricText(1, DataProc::MakeTimeString(Model.sportStatusInfo.singleTime, buf, sizeof(buf)));
+        const char* timeText = DataProc::MakeTimeString(
+            Model.sportStatusInfo.singleTime, buf, sizeof(buf));
+        static const char* fonts[] =
+        {
+            "bahnschrift_17",
+            "bahnschrift_13",
+            "agencyb_12",
+            "montserrat_8"
+        };
+        SetAdaptiveMetricLabel(
+            View.ui.metrics.item[1].labelValue, timeText,
+            fonts, sizeof(fonts) / sizeof(fonts[0]),
+            180, 137, 54, 20, LV_TEXT_ALIGN_CENTER);
     }
     if (View.ui.metrics.item[2].labelValue)
     {
         snprintf(buf, sizeof(buf), "%0.1f", Model.sportStatusInfo.singleDistance / 1000);
-        View.SetMetricText(2, buf);
+        static const char* fonts[] = { "bahnschrift_17", "agencyb_12", "montserrat_8" };
+        SetAdaptiveMetricLabel(
+            View.ui.metrics.item[2].labelValue, buf,
+            fonts, sizeof(fonts) / sizeof(fonts[0]),
+            181, 184, 26, 16, LV_TEXT_ALIGN_RIGHT);
     }
-    snprintf(buf, sizeof(buf), "%d", int(Model.sportStatusInfo.singleCalorie));
-    View.SetMetricText(3, buf);
+    SetCalorieLabel(View.ui.metrics.item[3].labelValue, int(Model.sportStatusInfo.singleCalorie));
 
     bool navGuidanceActive = false;
     DataProc::Navigation_Info_t navInfo;

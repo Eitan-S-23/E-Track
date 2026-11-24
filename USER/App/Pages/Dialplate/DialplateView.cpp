@@ -2,11 +2,6 @@
 #include "Resource/ResourcePool.h"
 #include <stdio.h>
 #include <string.h>
-#include <cmath>
-
-#if DIALPLATE_HW_EFFECTS
-#include "lv_port/lv_port.h"
-#endif
 
 using namespace Page;
 
@@ -25,6 +20,8 @@ using namespace Page;
 
 #define SCR_W         240
 #define SCR_H         320
+#define SCR_CX        120                       /* 屏幕水平中心，供 TOP_MID 居中偏移换算 */
+
 #define ARROW_CENTER_X 119
 #define ARROW_CENTER_Y 232
 #define ARROW_PIVOT_X  8
@@ -48,18 +45,6 @@ using namespace Page;
 #define SPECTRUM_MAX_LEVEL_PCT 100
 #define SPECTRUM_FULL_SPEED_KPH 50.0f
 
-static const uint8_t spectrumFrames[][DialplateView::SPECTRUM_BAR_NUM] =
-{
-    { 2, 8, 16 },
-    { 4, 16, 6 },
-    { 12, 3, 15 },
-    { 5, 14, 2 },
-    { 16, 7, 11 },
-    { 3, 10, 16 },
-    { 9, 2, 13 },
-    { 15, 5, 4 }
-};
-
 #define FONT(name)    ResourcePool::GetFont(name)
 #define IMG(name)     ResourcePool::GetImage(name)
 
@@ -78,82 +63,41 @@ static const uint8_t spectrumFrames[][DialplateView::SPECTRUM_BAR_NUM] =
 #define TXT_MAP             "\xE5\x9C\xB0" "\xE5\x9B\xBE"
 #define TXT_MENU            "\xE8\x8F\x9C" "\xE5\x8D\x95"
 
-static const char* const metricNumberFonts[] = { "bahnschrift_17", "agencyb_12", "montserrat_8" };
-static const char* const metricTimeFonts[] = { "bahnschrift_17", "bahnschrift_13", "agencyb_12", "montserrat_8" };
-static const char* const metricCalorieFonts[] = { "bahnschrift_24", "bahnschrift_17", "agencyb_12", "montserrat_8" };
-
-struct DialplateMetricLayout
-{
-    lv_coord_t x;
-    lv_coord_t y;
-    lv_coord_t width;
-    lv_coord_t height;
-    lv_text_align_t align;
-    const char* const* fonts;
-    uint8_t fontCount;
-};
-
-static const DialplateMetricLayout metricLayouts[DialplateView::METRIC_NUM] =
-{
-    { 181, 94, 25, 16, LV_TEXT_ALIGN_RIGHT, metricNumberFonts, 3 },
-    { 180, 137, 54, 20, LV_TEXT_ALIGN_CENTER, metricTimeFonts, 4 },
-    { 181, 184, 26, 16, LV_TEXT_ALIGN_RIGHT, metricNumberFonts, 3 },
-    { 180, 225, 54, 22, LV_TEXT_ALIGN_CENTER, metricCalorieFonts, 4 }
-};
-
 #if DIALPLATE_HW_EFFECTS
-struct DialplateGlowPixel
+typedef struct
 {
     uint32_t index;
     uint8_t r;
     uint8_t g;
     uint8_t b;
-};
+} DialplateGlowPixel;
 
-struct DialplateGlowFrame
+typedef struct
 {
     const DialplateGlowPixel* pixels;
     uint16_t count;
-};
+} DialplateGlowFrame;
 
-struct DialplateGlowSegment
+typedef struct
 {
     lv_area_t area;
-};
+} DialplateGlowSegment;
 
-struct DialplateGlowSegmentFrame
+typedef struct
 {
     const DialplateGlowSegment* segments;
     uint16_t count;
-};
+} DialplateGlowSegmentFrame;
 
 #include "DialplateGlowData.inc"
 
-enum { SPECTRUM_ROWS_PER_BLIT = 2 };
-static lv_color_t effectBuffer[SPECTRUM_W * SPECTRUM_ROWS_PER_BLIT];
-static_assert(DIALPLATE_GLOW_BLIT_MAX_PIXELS <= SPECTRUM_W * SPECTRUM_ROWS_PER_BLIT,
-              "Sparse glow must fit the shared display scratch buffer");
+static lv_color_t effectBuffer[SPECTRUM_W * 2];
+static_assert(DIALPLATE_GLOW_BLIT_MAX_PIXELS <= SPECTRUM_W * 2,
+              "Original glow segments must fit the shared UI transfer buffer");
 
-static void SpectrumLevels(const uint8_t* frame, uint8_t level, uint8_t* lit)
-{
-    for(int bar = 0; bar < DialplateView::SPECTRUM_BAR_NUM; bar++)
-    {
-        lit[bar] = (uint8_t)(((uint16_t)frame[bar] * level + 99U) / 100U);
-        if(lit[bar] == 0) lit[bar] = 1;
-        if(lit[bar] > DialplateView::SPECTRUM_SEG_NUM) lit[bar] = DialplateView::SPECTRUM_SEG_NUM;
-    }
-}
-
-static lv_color_t SpectrumColor(lv_coord_t x, lv_coord_t y, const uint8_t* lit)
-{
-    const lv_coord_t bar = x / 9;
-    const lv_coord_t offset = SPECTRUM_H - 1 - y;
-    const lv_coord_t segment = offset / (SPECTRUM_SEG_H + SPECTRUM_SEG_GAP);
-    const bool isSegment = x % 9 < 7 &&
-        offset % (SPECTRUM_SEG_H + SPECTRUM_SEG_GAP) < SPECTRUM_SEG_H &&
-        bar < DialplateView::SPECTRUM_BAR_NUM && segment < lit[bar];
-    return isSegment ? COL_CYAN : COL_PANEL_BG;
-}
+typedef void (*lv_port_disp_overlay_cb_t)(const lv_area_t* area, lv_color_t* color_p, void* user_data);
+extern void lv_port_disp_set_overlay_cb(lv_port_disp_overlay_cb_t cb, void* user_data);
+extern void lv_port_disp_blit_blocking(const lv_area_t* area, const lv_color_t* color_p);
 #endif
 
 static lv_obj_t* OverlayLabel(lv_obj_t* par, const lv_font_t* font, lv_color_t color,
@@ -297,7 +241,7 @@ void DialplateView::Create(lv_obj_t* root)
     ui.status.labelAltUnit = OverlayLabel(root, FONT("bahnschrift_13"), COL_GRAY, 226, 61, "m");
     ui.status.labelBattery = Value_Create(root, FONT("bahnschrift_13"), COL_WHITE, LV_ALIGN_TOP_LEFT, 212, 8, "100");
     SetFixedLabelBox(ui.status.labelBattery, 24, 14, LV_TEXT_ALIGN_LEFT);
-    ui.status.labelSlope = Value_Create(root, FONT("bahnschrift_13"), COL_YELLOW, LV_ALIGN_TOP_RIGHT,  -9,  30, "3.2%");
+    ui.status.labelSlope = Value_Create(root, FONT("bahnschrift_13"), COL_YELLOW, LV_ALIGN_TOP_RIGHT,  -9,  30, "3.3%");
 
     ui.status.imgGps = OverlayImg(root, "satellite", COL_GREEN, 7, 12);
     ui.status.labelGpsSat = Value_Create(root, FONT("bahnschrift_13"), COL_WHITE, LV_ALIGN_TOP_LEFT, 25, 11, "0");
@@ -313,7 +257,7 @@ void DialplateView::Create(lv_obj_t* root)
     OverlayLabel(root, FONT("iconfont_16"), COL_YELLOW, 184, 29, ICON_CLIMB);
 
     /* —— 导航距离(占位)：大号数字(纯数字字库) + 小号单位 m(全字库) —— */
-    ui.nav.labelDist = Value_Create(root, FONT("bahnschrift_24"), COL_WHITE, LV_ALIGN_TOP_LEFT, 99, 10, "320");
+    ui.nav.labelDist = Value_Create(root, FONT("bahnschrift_24"), COL_WHITE, LV_ALIGN_TOP_LEFT, 99, 10, "2207");
     ui.nav.labelDistUnit = lv_label_create(root);
     if (ui.nav.labelDistUnit)
     {
@@ -341,15 +285,26 @@ void DialplateView::Create(lv_obj_t* root)
                                       LV_ALIGN_TOP_LEFT, MAX_LABEL_X, MAX_VALUE_Y, "0.0");
     SetFixedLabelBox(ui.maxBar.labelMax, MAX_VALUE_W, 11, LV_TEXT_ALIGN_CENTER);
 
-    /* Keep number and unit slots separate; creation and updates share these bounds. */
+    /* —— 右栏 AVG/TIME/TRIP/CAL(真实)：居中于面板列 x≈204 —— */
+    const lv_coord_t  my[METRIC_NUM]   = { 94, 137, 184, 225 };
+    const lv_coord_t  mx[METRIC_NUM]   = { 181, 180, 181, 180 };
+    const lv_coord_t  mw[METRIC_NUM]   = { 25, 54, 26, 54 };
+    const lv_coord_t  mh[METRIC_NUM]   = { 16, 20, 16, 22 };
+    const lv_text_align_t ma[METRIC_NUM] =
+    {
+        LV_TEXT_ALIGN_RIGHT,
+        LV_TEXT_ALIGN_CENTER,
+        LV_TEXT_ALIGN_RIGHT,
+        LV_TEXT_ALIGN_CENTER
+    };
+    const char*       mft[METRIC_NUM]  = { "agencyb_12", "bahnschrift_17", "agencyb_12", "bahnschrift_24" };
     const lv_color_t  mcl[METRIC_NUM]  = { COL_WHITE, COL_WHITE, COL_WHITE, COL_WHITE };
     const char*       miv[METRIC_NUM]  = { "0.0", "0:00:00", "0.0", "0" };
     for (int i = 0; i < METRIC_NUM; i++)
     {
-        const DialplateMetricLayout& layout = metricLayouts[i];
         ui.metrics.item[i].labelValue =
-            Value_Create(root, FONT(layout.fonts[0]), mcl[i], LV_ALIGN_TOP_LEFT, layout.x, layout.y, miv[i]);
-        SetMetricText((uint8_t)i, miv[i]);
+            Value_Create(root, FONT(mft[i]), mcl[i], LV_ALIGN_TOP_LEFT, mx[i], my[i], miv[i]);
+        SetFixedLabelBox(ui.metrics.item[i].labelValue, mw[i], mh[i], ma[i]);
     }
     OverlayOutline(root, 182, 82, 8, 8, COL_BLUE, 1);
     OverlayBox(root, 184, 87, 2, 2, COL_BLUE);
@@ -439,6 +394,7 @@ void DialplateView::Delete()
 #if DIALPLATE_HW_EFFECTS
     BorderGlow_SetActive(false);
 #endif
+
     if(ui.maxBar.spectrumTimer != nullptr)
     {
         lv_timer_del(ui.maxBar.spectrumTimer);
@@ -487,10 +443,6 @@ void DialplateView::SetSpectrumActive(bool active)
 
 void DialplateView::SetSpectrumSpeed(float speedKph)
 {
-    if(!std::isfinite(speedKph))
-    {
-        speedKph = 0.0f;
-    }
     if(speedKph < 0.0f)
     {
         speedKph = -speedKph;
@@ -519,66 +471,37 @@ void DialplateView::SetSpectrumSpeed(float speedKph)
     ui.maxBar.spectrumLevelPct = level;
 }
 
-void DialplateView::SetMetricText(uint8_t index, const char* text)
-{
-    if(index >= METRIC_NUM || text == nullptr || ui.metrics.item[index].labelValue == nullptr)
-    {
-        return;
-    }
-
-    const DialplateMetricLayout& layout = metricLayouts[index];
-    const lv_font_t* font = FONT(layout.fonts[layout.fontCount - 1]);
-    bool fits = false;
-    for(uint8_t i = 0; i < layout.fontCount; i++)
-    {
-        const lv_font_t* candidate = FONT(layout.fonts[i]);
-        if(candidate == nullptr)
-        {
-            continue;
-        }
-        lv_point_t size;
-        lv_txt_get_size(&size, text, candidate, 0, 0, LV_COORD_MAX, LV_TEXT_FLAG_NONE);
-        if(size.x <= layout.width && size.y <= layout.height)
-        {
-            font = candidate;
-            fits = true;
-            break;
-        }
-    }
-    if(font == nullptr)
-    {
-        return;
-    }
-
-    lv_obj_t* label = ui.metrics.item[index].labelValue;
-    lv_obj_set_style_text_font(label, font, 0);
-    lv_label_set_long_mode(label, fits ? LV_LABEL_LONG_CLIP : LV_LABEL_LONG_SCROLL_CIRCULAR);
-    lv_label_set_text(label, text);
-    lv_obj_set_size(label, layout.width, layout.height);
-    lv_obj_set_style_text_align(label, layout.align, 0);
-    lv_obj_align(label, LV_ALIGN_TOP_LEFT, layout.x, layout.y);
-}
-
 void DialplateView::SetArrowAngle(float deg)
 {
-    if(ui.arrow.img == nullptr || !std::isfinite(deg))
+    if(ui.arrow.img == nullptr)
     {
         return;
     }
 
-    deg = std::fmod(deg, 360.0f);
-    if(deg < 0.0f)
+    while(deg < 0.0f)
     {
         deg += 360.0f;
     }
+    while(deg >= 360.0f)
+    {
+        deg -= 360.0f;
+    }
+
     int16_t angle = (int16_t)(deg * 10.0f + 0.5f);
     if(angle >= 3600)
     {
         angle -= 3600;
     }
+
     int16_t diff = angle - ui.arrow.angle;
-    if(diff > 1800) diff -= 3600;
-    else if(diff < -1800) diff += 3600;
+    if(diff > 1800)
+    {
+        diff -= 3600;
+    }
+    else if(diff < -1800)
+    {
+        diff += 3600;
+    }
 
     if(ui.arrow.angle < 0 || diff <= -10 || diff >= 10)
     {
@@ -741,9 +664,19 @@ void DialplateView::Spectrum_Create(lv_obj_t* par)
 
 void DialplateView::Spectrum_Update()
 {
-    const uint8_t frameCount = sizeof(spectrumFrames) / sizeof(spectrumFrames[0]);
-    const uint8_t* frame = spectrumFrames[ui.maxBar.spectrumPhase % frameCount];
-
+    static const uint8_t frames[][SPECTRUM_BAR_NUM] =
+    {
+        { 2, 8, 16 },
+        { 4, 16, 6 },
+        { 12, 3, 15 },
+        { 5, 14, 2 },
+        { 16, 7, 11 },
+        { 3, 10, 16 },
+        { 9, 2, 13 },
+        { 15, 5, 4 },
+    };
+    const uint8_t frameCount = sizeof(frames) / sizeof(frames[0]);
+    const uint8_t* frame = frames[ui.maxBar.spectrumPhase % frameCount];
 #if DIALPLATE_HW_EFFECTS
     if(EffectsCanBlit())
     {
@@ -760,7 +693,8 @@ void DialplateView::Spectrum_Update()
             LV_OPA_COVER, LV_OPA_90, LV_OPA_80, LV_OPA_70
         };
         lv_obj_set_style_text_opa(ui.nav.labelTurnIcon,
-            pulse[ui.maxBar.spectrumPhase % (sizeof(pulse) / sizeof(pulse[0]))], 0);
+                                  pulse[ui.maxBar.spectrumPhase %
+                                        (sizeof(pulse) / sizeof(pulse[0]))], 0);
     }
 
 #if !DIALPLATE_HW_EFFECTS
@@ -850,71 +784,88 @@ void DialplateView::Spectrum_Blit(const uint8_t* frame)
     {
         return;
     }
-    uint8_t lit[SPECTRUM_BAR_NUM];
-    SpectrumLevels(frame, ui.maxBar.spectrumLevelPct, lit);
-    for(lv_coord_t y = 0; y < SPECTRUM_H; y += SPECTRUM_ROWS_PER_BLIT)
+
+    const lv_coord_t segW = 7;
+    const lv_coord_t gap = 2;
+    // Keep the original segment geometry; only split its display transfer.
+    for(lv_coord_t bandY = 0; bandY < SPECTRUM_H; bandY += 2)
     {
-        const lv_coord_t rows = SPECTRUM_H - y < SPECTRUM_ROWS_PER_BLIT ?
-                                SPECTRUM_H - y : SPECTRUM_ROWS_PER_BLIT;
-        for(lv_coord_t row = 0; row < rows; row++)
+        const lv_coord_t rows = SPECTRUM_H - bandY < 2 ? SPECTRUM_H - bandY : 2;
+        for(lv_coord_t i = 0; i < SPECTRUM_W * rows; i++)
         {
-            for(lv_coord_t x = 0; x < SPECTRUM_W; x++)
+            effectBuffer[i] = COL_PANEL_BG;
+        }
+
+        for(int bar = 0; bar < SPECTRUM_BAR_NUM; bar++)
+        {
+            uint8_t lit = (uint8_t)(((uint16_t)frame[bar] * ui.maxBar.spectrumLevelPct + 99U) / 100U);
+            if(lit == 0)
             {
-                effectBuffer[row * SPECTRUM_W + x] = SpectrumColor(x, y + row, lit);
+                lit = 1;
+            }
+            if(lit > SPECTRUM_SEG_NUM)
+            {
+                lit = SPECTRUM_SEG_NUM;
+            }
+
+            for(uint8_t segment = 0; segment < lit; segment++)
+            {
+                const lv_coord_t x = bar * (segW + gap);
+                const lv_coord_t y = SPECTRUM_H - (segment + 1) * SPECTRUM_SEG_H -
+                                     segment * SPECTRUM_SEG_GAP;
+                for(lv_coord_t row = 0; row < SPECTRUM_SEG_H; row++)
+                {
+                    if(y + row < bandY || y + row >= bandY + rows)
+                    {
+                        continue;
+                    }
+                    for(lv_coord_t col = 0; col < segW; col++)
+                    {
+                        effectBuffer[(y + row - bandY) * SPECTRUM_W + x + col] = COL_CYAN;
+                    }
+                }
             }
         }
-        const lv_area_t area = { SPECTRUM_X, (lv_coord_t)(SPECTRUM_Y + y),
-                                SPECTRUM_X + SPECTRUM_W - 1, (lv_coord_t)(SPECTRUM_Y + y + rows - 1) };
+
+        const lv_area_t area =
+        {
+            SPECTRUM_X,
+            (lv_coord_t)(SPECTRUM_Y + bandY),
+            SPECTRUM_X + SPECTRUM_W - 1,
+            (lv_coord_t)(SPECTRUM_Y + bandY + rows - 1)
+        };
         lv_port_disp_blit_blocking(&area, effectBuffer);
     }
 }
+#endif
 
-void DialplateView::Spectrum_Compose(const lv_area_t* area, lv_color_t* colors)
-{
-    const lv_coord_t x1 = area->x1 > SPECTRUM_X ? area->x1 : SPECTRUM_X;
-    const lv_coord_t y1 = area->y1 > SPECTRUM_Y ? area->y1 : SPECTRUM_Y;
-    const lv_coord_t x2 = area->x2 < SPECTRUM_X + SPECTRUM_W - 1 ? area->x2 : SPECTRUM_X + SPECTRUM_W - 1;
-    const lv_coord_t y2 = area->y2 < SPECTRUM_Y + SPECTRUM_H - 1 ? area->y2 : SPECTRUM_Y + SPECTRUM_H - 1;
-    if(x2 < x1 || y2 < y1)
-    {
-        return;
-    }
-    /* Update advances the phase after painting; compose the last displayed frame. */
-    const uint8_t phase = (uint8_t)(ui.maxBar.spectrumPhase - 1U);
-    const uint8_t frameCount = sizeof(spectrumFrames) / sizeof(spectrumFrames[0]);
-    uint8_t lit[SPECTRUM_BAR_NUM];
-    SpectrumLevels(spectrumFrames[phase % frameCount], ui.maxBar.spectrumLevelPct, lit);
-    const lv_coord_t areaWidth = area->x2 - area->x1 + 1;
-    for(lv_coord_t y = y1; y <= y2; y++)
-    {
-        for(lv_coord_t x = x1; x <= x2; x++)
-        {
-            colors[(y - area->y1) * areaWidth + x - area->x1] =
-                SpectrumColor(x - SPECTRUM_X, y - SPECTRUM_Y, lit);
-        }
-    }
-}
-
+#if DIALPLATE_HW_EFFECTS
 void DialplateView::BorderGlow_SetActive(bool active)
 {
-    if(!active && ui.borderGlowActive)
-    {
-        BorderGlow_BlitFrame(ui.borderGlowPhase, false);
-    }
-    if(active && !ui.borderGlowActive)
+    if(active)
     {
         ui.borderGlowPhase = 0;
+        ui.borderGlowActive = true;
+        lv_port_disp_set_overlay_cb(onDisplayOverlay, this);
     }
-    ui.borderGlowActive = active;
-    lv_port_disp_set_overlay_cb(active ? onDisplayOverlay : nullptr, active ? this : nullptr);
+    else
+    {
+        if(ui.skin != nullptr)
+        {
+            BorderGlow_BlitFrame(ui.borderGlowPhase, false);
+        }
+        ui.borderGlowActive = false;
+        lv_port_disp_set_overlay_cb(NULL, NULL);
+    }
 }
 
 void DialplateView::BorderGlow_Advance()
 {
-    const uint8_t oldPhase = ui.borderGlowPhase % DIALPLATE_GLOW_FRAME_COUNT;
+    const uint8_t oldPhase = ui.borderGlowPhase;
+    const uint8_t newPhase = (uint8_t)((oldPhase + 1U) % DIALPLATE_GLOW_FRAME_COUNT);
     BorderGlow_BlitFrame(oldPhase, false);
-    ui.borderGlowPhase = (uint8_t)((oldPhase + 1U) % DIALPLATE_GLOW_FRAME_COUNT);
-    BorderGlow_BlitFrame(ui.borderGlowPhase, true);
+    ui.borderGlowPhase = newPhase;
+    BorderGlow_BlitFrame(newPhase, true);
 }
 
 void DialplateView::BorderGlow_BlitFrame(uint8_t phase, bool glow)
@@ -923,33 +874,30 @@ void DialplateView::BorderGlow_BlitFrame(uint8_t phase, bool glow)
     {
         return;
     }
+
     const lv_img_dsc_t* skin = (const lv_img_dsc_t*)lv_img_get_src(ui.skin);
-    if(skin == nullptr || skin->data == nullptr || skin->header.w != SCR_W ||
-       skin->header.h != SCR_H || skin->header.cf != LV_IMG_CF_TRUE_COLOR ||
-       skin->data_size < SCR_W * SCR_H * sizeof(lv_color_t))
+    if(skin == nullptr || skin->data == nullptr)
     {
         return;
     }
 
     lv_color_t* buffer = effectBuffer;
     const lv_color_t* base = (const lv_color_t*)skin->data;
-    const DialplateGlowFrame& glowFrame = kDialplateGlowFrames[phase % DIALPLATE_GLOW_FRAME_COUNT];
-    const DialplateGlowSegmentFrame& segmentFrame = kDialplateGlowSegmentFrames[phase % DIALPLATE_GLOW_FRAME_COUNT];
+    const DialplateGlowFrame& glowFrame = kDialplateGlowFrames[phase];
+    const DialplateGlowSegmentFrame& segmentFrame = kDialplateGlowSegmentFrames[phase];
+
     for(uint16_t segmentIndex = 0; segmentIndex < segmentFrame.count; segmentIndex++)
     {
         const lv_area_t& area = segmentFrame.segments[segmentIndex].area;
         const lv_coord_t width = area.x2 - area.x1 + 1;
         const lv_coord_t height = area.y2 - area.y1 + 1;
-        if(width <= 0 || height <= 0 || width * height > DIALPLATE_GLOW_BLIT_MAX_PIXELS ||
-           area.x1 < 0 || area.y1 < 0 || area.x2 >= SCR_W || area.y2 >= SCR_H)
-        {
-            continue;
-        }
         for(lv_coord_t row = 0; row < height; row++)
         {
-            memcpy(&buffer[row * width], &base[(area.y1 + row) * SCR_W + area.x1],
+            memcpy(&buffer[row * width],
+                   &base[(area.y1 + row) * SCR_W + area.x1],
                    (size_t)width * sizeof(lv_color_t));
         }
+
         if(glow)
         {
             for(uint16_t pixelIndex = 0; pixelIndex < glowFrame.count; pixelIndex++)
@@ -964,6 +912,7 @@ void DialplateView::BorderGlow_BlitFrame(uint8_t phase, bool glow)
                 }
             }
         }
+
         lv_port_disp_blit_blocking(&area, buffer);
     }
 }
@@ -975,21 +924,21 @@ void DialplateView::onDisplayOverlay(const lv_area_t* area, lv_color_t* color_p,
     {
         return;
     }
-    const DialplateGlowFrame& frame =
-        kDialplateGlowFrames[instance->ui.borderGlowPhase % DIALPLATE_GLOW_FRAME_COUNT];
+
+    const DialplateGlowFrame& frame = kDialplateGlowFrames[instance->ui.borderGlowPhase];
     const lv_coord_t width = area->x2 - area->x1 + 1;
     for(uint16_t i = 0; i < frame.count; i++)
     {
         const DialplateGlowPixel& pixel = frame.pixels[i];
-        const lv_coord_t x = (lv_coord_t)(pixel.index % SCR_W);
-        const lv_coord_t y = (lv_coord_t)(pixel.index / SCR_W);
-        if(x >= area->x1 && x <= area->x2 && y >= area->y1 && y <= area->y2)
+        const lv_coord_t x = (lv_coord_t)(pixel.index % 240U);
+        const lv_coord_t y = (lv_coord_t)(pixel.index / 240U);
+        if(x < area->x1 || x > area->x2 || y < area->y1 || y > area->y2)
         {
-            color_p[(y - area->y1) * width + (x - area->x1)] = lv_color_make(pixel.r, pixel.g, pixel.b);
+            continue;
         }
+
+        color_p[(y - area->y1) * width + (x - area->x1)] = lv_color_make(pixel.r, pixel.g, pixel.b);
     }
-    /* Full and partial LVGL repaints must retain the direct spectrum too. */
-    instance->Spectrum_Compose(area, color_p);
 }
 #endif
 

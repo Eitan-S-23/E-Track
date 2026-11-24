@@ -2,15 +2,18 @@ cmake_minimum_required(VERSION 3.16)
 project(companion_modal_test C CXX)
 
 get_filename_component(ROOT "${CMAKE_CURRENT_LIST_DIR}/../../.." ABSOLUTE)
+set(DIALPLATE_UI_ROOT "${ROOT}" CACHE PATH "Read-only UI source and resource root")
+set(DIALPLATE_VARIANTS "desktop;hardware;fallback" CACHE STRING "Dialplate test variants")
 set(LV_CONF_PATH "${CMAKE_CURRENT_LIST_DIR}/lv_conf.h" CACHE STRING "" FORCE)
 add_subdirectory("${ROOT}/Simulator/LVGL.Simulator/lvgl" lvgl EXCLUDE_FROM_ALL)
 
 add_library(ui_fonts STATIC
-    "${ROOT}/USER/App/Resource/Font/font_cn_16.c"
-    "${ROOT}/USER/App/Resource/Font/font_bahnschrift_13.c"
-    "${ROOT}/USER/App/Resource/Font/font_bahnschrift_24.c"
-    "${ROOT}/USER/App/Resource/Font/font_bahnschrift_48.c"
-    "${ROOT}/USER/App/Resource/Font/font_bahnschrift_17.c")
+    "${DIALPLATE_UI_ROOT}/USER/App/Resource/Font/font_cn_16.c"
+    "${DIALPLATE_UI_ROOT}/USER/App/Resource/Font/font_bahnschrift_13.c"
+    "${DIALPLATE_UI_ROOT}/USER/App/Resource/Font/font_bahnschrift_24.c"
+    "${DIALPLATE_UI_ROOT}/USER/App/Resource/Font/font_bahnschrift_32.c"
+    "${DIALPLATE_UI_ROOT}/USER/App/Resource/Font/font_bahnschrift_48.c"
+    "${DIALPLATE_UI_ROOT}/USER/App/Resource/Font/font_bahnschrift_17.c")
 target_link_libraries(ui_fonts PUBLIC lvgl)
 
 option(DIALPLATE_ONLY "Build the source-bound Dialplate/display tests" OFF)
@@ -29,25 +32,31 @@ endforeach()
 else()
     target_compile_definitions(lvgl PUBLIC LV_FONT_MONTSERRAT_8=1 "LV_CONF_PATH=${LV_CONF_PATH}")
     add_library(dialplate_assets STATIC
-        "${ROOT}/USER/App/Resource/Font/font_agencyb_12.c"
-        "${ROOT}/USER/App/Resource/Font/font_iconfont_16.c"
-        "${ROOT}/USER/App/Resource/Font/font_iconfont_20.c"
-        "${ROOT}/USER/App/Resource/Image/img_src_dialplate_skin.c"
-        "${ROOT}/USER/App/Resource/Image/img_src_gps_arrow_light.c"
-        "${ROOT}/USER/App/Resource/Image/img_src_battery.c"
-        "${ROOT}/USER/App/Resource/Image/img_src_bluetooth.c"
-        "${ROOT}/USER/App/Resource/Image/img_src_satellite.c")
+        "${DIALPLATE_UI_ROOT}/USER/App/Resource/Font/font_agencyb_12.c"
+        "${DIALPLATE_UI_ROOT}/USER/App/Resource/Font/font_iconfont_16.c"
+        "${DIALPLATE_UI_ROOT}/USER/App/Resource/Font/font_iconfont_20.c"
+        "${DIALPLATE_UI_ROOT}/USER/App/Resource/Image/img_src_dialplate_skin.c"
+        "${DIALPLATE_UI_ROOT}/USER/App/Resource/Image/img_src_gps_arrow_light.c"
+        "${DIALPLATE_UI_ROOT}/USER/App/Resource/Image/img_src_battery.c"
+        "${DIALPLATE_UI_ROOT}/USER/App/Resource/Image/img_src_bluetooth.c"
+        "${DIALPLATE_UI_ROOT}/USER/App/Resource/Image/img_src_satellite.c")
     target_link_libraries(dialplate_assets PUBLIC ui_fonts lvgl)
-    foreach(variant desktop hardware fallback)
+    foreach(variant ${DIALPLATE_VARIANTS})
         add_executable(dialplate_${variant}
             "${ROOT}/tests/ota/dialplate_ui_harness.cpp"
-            "${ROOT}/USER/App/Pages/Dialplate/DialplateView.cpp")
+            "${DIALPLATE_UI_ROOT}/USER/App/Pages/Dialplate/DialplateView.cpp")
         target_compile_features(dialplate_${variant} PRIVATE cxx_std_11)
         target_compile_options(dialplate_${variant} PRIVATE -Wall -Wextra -Werror)
         target_include_directories(dialplate_${variant} PRIVATE
-            "${HARNESS_DIR}" "${ROOT}/USER" "${ROOT}/USER/App"
+            "${HARNESS_DIR}" "${DIALPLATE_UI_ROOT}/USER/App"
+            "${ROOT}/USER" "${ROOT}/USER/App"
             "${ROOT}/Simulator/LVGL.Simulator")
         target_link_libraries(dialplate_${variant} PRIVATE dialplate_assets lvgl)
+        if(NOT DIALPLATE_UI_ROOT STREQUAL ROOT)
+            target_compile_definitions(dialplate_${variant} PRIVATE DIALPLATE_REFERENCE=1)
+            target_compile_options(dialplate_${variant} PRIVATE
+                -include "${HARNESS_DIR}/reference_page_dependencies.h")
+        endif()
         if(variant STREQUAL "hardware")
             target_compile_definitions(dialplate_${variant} PRIVATE ARDUINO=111 AT32F435RGT7)
             target_sources(dialplate_${variant} PRIVATE

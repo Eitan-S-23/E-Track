@@ -53,6 +53,7 @@ public:
         uint8_t borderGlowPhase;
         bool borderGlowActive;
 
+        /* Runtime GPS arrow; only the small image is rotated. */
         struct
         {
             lv_obj_t* img;
@@ -125,9 +126,8 @@ public:
     void AppearAnimStart(bool reverse = false);
     void SetSpectrumActive(bool active);
     void SetSpectrumSpeed(float speedKph);
-    void SetMetricText(uint8_t index, const char* text);
 
-    /* Rotate the independent position marker without rotating the skin. */
+    /* 当前位置三角由皮肤提供；接口保留给 Presenter 调用。 */
     void SetArrowAngle(float deg);
     void SetRecRecording(bool active);
     void SetBluetoothConnected(bool connected);
@@ -143,11 +143,12 @@ private:
     lv_obj_t* Btn_Create(lv_obj_t* par, lv_coord_t x, lv_coord_t y, lv_coord_t w, lv_coord_t h);
     void Spectrum_Create(lv_obj_t* par);
     void Spectrum_Update();
-    static void onSpectrumTimer(lv_timer_t* timer);
 #if DIALPLATE_HW_EFFECTS
     bool EffectsCanBlit() const;
     void Spectrum_Blit(const uint8_t* frame);
-    void Spectrum_Compose(const lv_area_t* area, lv_color_t* colors);
+#endif
+    static void onSpectrumTimer(lv_timer_t* timer);
+#if DIALPLATE_HW_EFFECTS
     void BorderGlow_SetActive(bool active);
     void BorderGlow_Advance();
     void BorderGlow_BlitFrame(uint8_t phase, bool glow);
