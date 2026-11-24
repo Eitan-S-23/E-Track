@@ -4,6 +4,51 @@ Read this file before deploying the E-Track backend or asking the owner for
 Cloudflare credentials. It lives at the project root deliberately. Read the
 primary checkout's copy, not only an old task worktree's copy.
 
+## Current State: Independent Update Checks Deployed 2026-11-25
+
+The owner's explicit follow-up authorizes this bounded migration/code rollout,
+superseding the earlier owner-only checkpoint for this feature. Channel/delta,
+credential, signing and general cloud-configuration authority remain unchanged.
+Actions [45476279470](https://github.com/Eitan-S-23/E-Track/actions/runs/45476279470)
+successfully deploys reviewed main source
+`703fea1f8df8621870d802610a9c99d4357ab147`; exact-source backend checks
+45468883658 were already successful and were not rerun.
+
+| Component | Verified deployed identity |
+| --- | --- |
+| Worker version | `028f2f6b-cfae-4290-bc0d-913c34fe1856` |
+| Worker deployment | `947048df-7878-4239-b859-f5afa6e4f555` |
+| Admin deployment | `3464a3cc-48c5-44e9-bd23-4af1dd1f245d` |
+| Public deployment | `f2d3e9aa-e532-4113-9a1d-947da37bf8bd` |
+
+Only pending `0020_update_check_components.sql` is applied, before Worker and
+both Pages components. Original APP automatic/manual limits remain 5/5;
+firmware limits initialize independently to 5/5, including preservation of the
+settings revision 6 and existing registration/mail flags. No manual quota reset,
+credential/configuration mutation, channel publication or delta generation occurs.
+Worker runtime/schedules and both Pages production/preview configurations match
+the pre-deploy baseline. Four channel pointers and 69 delta identities/attempts/
+input hashes are unchanged; historical migrations and check records are retained.
+
+Fresh read-only owner-session verification matches HTML and ten JS/CSS files to
+the committed bytes. The existing account's detail API returns independent
+APP/firmware automatic/manual budgets and compatible flat APP aliases. Public
+Pages and Worker auth status expose all four limits, mail remains available,
+and guest cloud requests remain HTTP 401 / LOGIN_REQUIRED. Current-day legacy
+checks remain unclassified (3 automatic, 5 manual), not assigned to either new
+budget. No synthetic account, phone check, APK/firmware build or device action.
+Bluetooth backoff, firmware cache/dedup and the APP local daily marker are unchanged.
+This is deployment/live verification, not independent acceptance or a new phone test.
+
+Originals: `.cache/update-check-isolation-20261125/rollout-01/`, especially
+`dispatch-01`, `observe-01`, `receipt-01` and `keyring-cloud-live-601/603`.
+Prepare-01's TLS failure and live-602's wrong list/detail harness assumption are
+preserved; only read-only verification was retried, never migration/deployment.
+Worker retains 13 dependency advisories (3 moderate/10 high), Admin/Public four
+high each, install-script and Node DEP0040/DEP0169/Actions deprecation warnings.
+No unreviewed dependency update is mixed into this rollout. Do not redeploy the
+now-source-matched components to improve evidence.
+
 ## Current State: Account Quotas Deployed 2026-11-23
 
 The owner-requested quota display is delivered as product source

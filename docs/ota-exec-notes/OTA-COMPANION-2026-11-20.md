@@ -1,5 +1,48 @@
 # OTA Companion And Admin Scroll Investigation
 
+## Independent Update Check Rollout, 2026-11-25
+
+Status: MAIN_DELIVERED / CI_CHECKS_PASSED / CLOUD_DEPLOYED / LIVE_VERIFIED.
+Owner: Codex root. The owner's explicit follow-up authorizes the pending D1
+migration and code rollout, not channel/delta, credential/configuration work or
+phone/device operations. This supersedes the earlier deployment-pending record.
+
+Reviewed source 703fea1f8df8621870d802610a9c99d4357ab147 is already on main.
+Exact-source checks 45468883658 pass; successful deployment Actions 45476279470
+uses the existing named credential/workflow with Worker and Public included.
+Only migration 0020_update_check_components.sql is pending and applied first.
+Worker version is 028f2f6b-cfae-4290-bc0d-913c34fe1856, deployment
+947048df-7878-4239-b859-f5afa6e4f555. Admin/Public deployments are
+3464a3cc-48c5-44e9-bd23-4af1dd1f245d / f2d3e9aa-e532-4113-9a1d-947da37bf8bd.
+All three report the exact reviewed source and successful deployment.
+
+Read-only original-owner verification matches HTML/ten JS/CSS files to source.
+The existing account's detail API returns components.app/components.firmware,
+each with automatic/manual limits 5 and separately counted usage; old flat
+fields equal the APP budget. Both public origins expose all four limits and
+preserve mail readiness and anonymous HTTP 401 / LOGIN_REQUIRED. Registration
+flags, settings revision 6, Worker runtime/schedules and Pages production/preview
+configuration are unchanged. Four channel pointers and all 69 delta identities,
+attempts and input hashes match the pre-deploy snapshot. Historical rows remain
+classified as legacy until an exact original request identifies its component;
+no history or client reminder state is cleared.
+
+No additional APP/MCU version, package build, installation, OTA, manual check,
+quota reset, channel publication, delta generation or credential change occurs.
+Bluetooth recovery cooldown, firmware cache/dedup and the early APP daily-marker
+write remain unchanged. This does not retroactively prove an older missing-popup
+incident or claim a new real-phone/independent acceptance result.
+
+Original evidence: .cache/update-check-isolation-20261125/rollout-01/.
+dispatch-01/observe-01 bind the one deployment; receipt-01 preserves sanitized
+Worker/Pages receipts and original Actions logs; keyring-cloud-live-601/603 are
+the before/after readbacks. Prepare-01's TLS failure and live-602's wrong
+list-versus-detail expectation are retained; only the harness/read-only route is
+corrected, with no deployment replay. Worker 13 dependency advisories and
+Admin/Public four high each, install-script, DEP0040/DEP0169 and Actions warnings
+remain. Older pending document text/bytes are preserved and excluded from the
+scoped main record delivery. All controlled outputs stay in the project.
+
 ## Bluetooth-On Background Recovery, 2026-11-24
 
 Status at owner-authorized delivery, 2026-11-25:

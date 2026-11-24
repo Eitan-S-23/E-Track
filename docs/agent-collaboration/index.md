@@ -1,5 +1,22 @@
 # Shared Agent Records
 
+Latest update checks, 2026-11-25: UPDATE-CHECK-ISOLATION,
+MAIN_DELIVERED / CI_CHECKS_PASSED / CLOUD_DEPLOYED / LIVE_VERIFIED, Codex root.
+Owner's explicit follow-up authorizes migration 0020 and matching Worker/Admin/
+Public deployment of source 703fea1f8df8621870d802610a9c99d4357ab147; successful
+Actions 45476279470 follows already-successful exact-source checks 45468883658.
+Only the pending migration is applied. Four daily limits are independently 5;
+the existing account detail returns both budgets and installed-client APP aliases.
+Owner/static/auth readback passes, with 11 served files matching the commit and
+original settings, runtime/schedules, four channels and 69 delta records preserved.
+No new App/MCU version/build, phone/device operation, channel/delta or credential
+change. Bluetooth cooldown, firmware cache/dedup and APP daily-marker behavior
+remain unchanged. Original TLS/harness failures and dependency warnings remain.
+Evidence: .cache/update-check-isolation-20261125/rollout-01/receipt-01 and
+keyring-cloud-live-601/603. Self-tests/live checks are not independent acceptance.
+Older pending documents are excluded from this scoped record delivery. See
+[the rollout record](../ota-exec-notes/OTA-COMPANION-2026-11-20.md#independent-update-check-rollout-2026-11-25).
+
 Latest background recovery, 2026-11-25: COMPANION-BACKGROUND-WAKE,
 MAIN_DELIVERED / CANDIDATE_DELIVERED / PHONE_VERIFICATION_NOT_RUN, Codex root.
 Owner confirms Bluetooth ON during the new failure; later OFF was testing.
