@@ -171,6 +171,25 @@ in the original Admin. Source-bound receipt:
 Pre-push candidate-delivery regressions: 65 passed, zero failures or skips.
 No physical device operation, simulator runtime or independent acceptance is claimed.
 
+### Exact Source Follow-Up And Owner-Requested Arrow Removal
+
+The 3.3.56 follow-up delivered the complete original View from reference 37b025b
+on main source `55107641a1580f7c5f7019cca2ceccb99b0a1d60`. GitHub run
+[45477016733](https://github.com/Eitan-S-23/E-Track/actions/runs/45477016733)
+succeeded with 640 warnings and zero errors; full/recovery bytes were verified
+and registered ready/unpublished. The failed 3.3.55 attempt remains preserved.
+Original rendering/buffers were restored; only the approved 120 KiB LVGL pool
+adaptation remains, with the 4096-byte system-heap gate unchanged.
+
+2026-11-25: owner explicitly requests removal of the white Dialplate arrow and
+main push/GitHub build. Codex root owns this bounded follow-up, in progress.
+Only the arrow image-creation block is removed from the UI; source-preservation
+and real-LVGL tests allow exactly that owner-approved omission. Firmware 3.3.57
+requests the new candidate; GitHub build/ingestion are pending. Flowing borders,
+layout, map arrows, HAL, OTA, recording, navigation and the App remain unchanged.
+No local firmware build, channel publication, backend deployment or device
+operation is requested or claimed.
+
 <!-- mcu-ui-original-20261124:end -->
 
 ## 2. PRE 前置修正(来自复审报告,先于一切)

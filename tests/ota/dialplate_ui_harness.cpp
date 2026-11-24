@@ -338,7 +338,8 @@ static void CheckDma()
 
 int main(int argc, char** argv)
 {
-    Require(argc == 3, "test case and checked output directory are required");
+    Require(argc == 3 || argc == 4, "test case and checked output directory are required");
+    if(argc == 4) Require(std::strcmp(argv[3], "--without-arrow") == 0, "known reference-only adjustment");
     const std::string test = argv[1];
 #if DIALPLATE_HW_EFFECTS
     const std::string variant = "hardware";
@@ -351,6 +352,13 @@ int main(int argc, char** argv)
     SetupDisplay();
     Page::DialplateView view;
     lv_obj_t* root = CreateRoot(view);
+    if(argc == 4)
+    {
+        // Compare the original UI minus the single owner-requested overlay.
+        Require(view.ui.arrow.img != nullptr, "unmodified reference creates the white arrow");
+        lv_obj_del(view.ui.arrow.img);
+        view.ui.arrow.img = nullptr;
+    }
 #if DIALPLATE_HW_EFFECTS
     Require(rawTransfers > 0, "the original hardware View initializes its direct frame during creation");
 #else
@@ -393,18 +401,13 @@ int main(int argc, char** argv)
     }
     else if(test == "arrow")
     {
-        Require(view.ui.arrow.img != nullptr, "heading arrow is an independent image");
-        lv_point_t pivot;
-        lv_img_get_pivot(view.ui.arrow.img, &pivot);
-        Require(pivot.x == 8 && pivot.y == 11, "heading pivot matches the baked position");
+        Require(view.ui.arrow.img == nullptr, "Dialplate does not create the white arrow overlay");
+        Require(ResourcePool::GetImage("gps_arrow_light") != nullptr, "shared map arrow resource remains available");
         view.SetArrowAngle(90.0f);
-        Require(lv_img_get_angle(view.ui.arrow.img) == 900, "heading rotates in tenths of degrees");
         view.SetArrowAngle(-1.0f);
-        Require(lv_img_get_angle(view.ui.arrow.img) == 3590, "negative headings normalize");
         view.SetArrowAngle(359.8f);
-        Require(lv_img_get_angle(view.ui.arrow.img) == 3590, "sub-degree noise does not repaint");
         view.SetArrowAngle(720.0f);
-        Require(lv_img_get_angle(view.ui.arrow.img) == 0, "heading wrap takes the shortest angular difference");
+        Require(view.ui.arrow.img == nullptr, "heading updates cannot recreate the removed overlay");
     }
     else if(test == "controls") CheckControls(view);
     else if(test == "spectrum")

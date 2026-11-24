@@ -1,7 +1,7 @@
 {
   "schema": "original-admin-automatic-candidates-v1",
   "firmware": {
-    "versionName": "3.3.56",
-    "releaseNotes": "Deliver the exact AT32F435RGT7_SDIO Dialplate View source from 37b025b, including the original ARDUINO rendering path, full spectrum transfer buffer and all flowing panel borders. Keep CMake comments outside compiler arguments so existing candidate checks parse the unchanged 120 KiB LVGL configuration. Preserve the 4096-byte system-heap gate, OTA workspace, stack and guard. The 3.3.55 attempt stopped before firmware compilation; its evidence is retained. HAL, OTA companion/file management, recorder admission, navigation, factory UID and App 1.0.95+121 remain unchanged. Full/recovery candidate only; owner controls publication and installation. No device operation or backend deployment."
+    "versionName": "3.3.57",
+    "releaseNotes": "Remove only the white gps_arrow_light overlay from the Dialplate as explicitly requested by the owner. Preserve the remaining original AT32F435RGT7_SDIO UI, flowing panel borders, layout, fonts and spectrum rendering. Map arrows, the 120 KiB LVGL pool, 4096-byte system-heap gate, OTA workspace, stack, guard, HAL, OTA companion/file management, recorder admission, navigation, factory UID and App 1.0.95+121 remain unchanged. Build the exact main source through GitHub and register full/recovery candidates only; owner controls publication and installation. No local firmware build, device operation or backend deployment."
   }
 }

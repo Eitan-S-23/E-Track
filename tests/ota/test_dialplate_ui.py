@@ -36,6 +36,25 @@ REFERENCE_UI_HASHES = {
     "void SetNavDistanceLabel": "f728c8bc5dc9ca2379e02806321cd7c1e45054db6f52ec08c70784737a2e9ecc",
     "void Dialplate::Update": "a75bce331c91d046932295a3e9ddc3002dc734c5723ec64a8c91461fa0ee006e",
 }
+ORIGINAL_ARROW_LAYER = """    const void* arrowSrc = IMG("gps_arrow_light");
+    if(arrowSrc != nullptr)
+    {
+        lv_obj_t* arrow = lv_img_create(root);
+        if(arrow != nullptr)
+        {
+            lv_img_set_src(arrow, arrowSrc);
+            lv_obj_set_pos(arrow, ARROW_CENTER_X - ARROW_PIVOT_X,
+                           ARROW_CENTER_Y - ARROW_PIVOT_Y);
+            lv_img_set_pivot(arrow, ARROW_PIVOT_X, ARROW_PIVOT_Y);
+            lv_img_set_angle(arrow, 0);
+            lv_obj_clear_flag(arrow, LV_OBJ_FLAG_CLICKABLE);
+            lv_obj_clear_flag(arrow, LV_OBJ_FLAG_SCROLLABLE);
+            ui.arrow.img = arrow;
+            ui.arrow.angle = 0;
+        }
+    }
+
+"""
 
 
 def checked(path):
@@ -196,8 +215,10 @@ class DialplateUiTests(unittest.TestCase):
         build = self.build if build is None else build
         directory = self.directory if directory is None else directory
         extension = ".exe" if os.name == "nt" else ""
-        result = subprocess.run([str(build / ("dialplate_" + variant + extension)),
-                                 case, str(directory)], cwd=ROOT, env=self.env,
+        command = [str(build / ("dialplate_" + variant + extension)), case, str(directory)]
+        if build == self.reference_build:
+            command.append("--without-arrow")
+        result = subprocess.run(command, cwd=ROOT, env=self.env,
                                 capture_output=True, text=True, timeout=30)
         checked(directory / (variant + "-" + case + ".log")).write_text(
             result.stdout + result.stderr, encoding="utf-8")
@@ -224,7 +245,12 @@ class DialplateUiTests(unittest.TestCase):
         view = (ROOT / "USER/App/Pages/Dialplate/DialplateView.cpp").read_text(encoding="utf-8")
         header = (ROOT / "USER/App/Pages/Dialplate/DialplateView.h").read_text(encoding="utf-8")
         presenter = (ROOT / "USER/App/Pages/Dialplate/Dialplate.cpp").read_text(encoding="utf-8")
-        self.assertEqual(source_digest(view), REFERENCE_UI_HASHES["view"])
+        self.assertNotIn('IMG("gps_arrow_light")', view)
+        anchor = "    ui.skin = skin;\n\n"
+        self.assertEqual(view.count(anchor), 1)
+        # Restoring only the authorized omission must reproduce the original source.
+        restored = view.replace(anchor, anchor + ORIGINAL_ARROW_LAYER, 1)
+        self.assertEqual(source_digest(restored), REFERENCE_UI_HASHES["view"])
         self.assertEqual(source_digest(header), REFERENCE_UI_HASHES["header"])
         for name in (*UI_METHODS, "void Dialplate::Update"):
             self.assertEqual(source_digest(method(presenter, name)), REFERENCE_UI_HASHES[name], name)

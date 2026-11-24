@@ -210,24 +210,6 @@ void DialplateView::Create(lv_obj_t* root)
     lv_obj_clear_flag(skin, LV_OBJ_FLAG_SCROLLABLE);
     ui.skin = skin;
 
-    const void* arrowSrc = IMG("gps_arrow_light");
-    if(arrowSrc != nullptr)
-    {
-        lv_obj_t* arrow = lv_img_create(root);
-        if(arrow != nullptr)
-        {
-            lv_img_set_src(arrow, arrowSrc);
-            lv_obj_set_pos(arrow, ARROW_CENTER_X - ARROW_PIVOT_X,
-                           ARROW_CENTER_Y - ARROW_PIVOT_Y);
-            lv_img_set_pivot(arrow, ARROW_PIVOT_X, ARROW_PIVOT_Y);
-            lv_img_set_angle(arrow, 0);
-            lv_obj_clear_flag(arrow, LV_OBJ_FLAG_CLICKABLE);
-            lv_obj_clear_flag(arrow, LV_OBJ_FLAG_SCROLLABLE);
-            ui.arrow.img = arrow;
-            ui.arrow.angle = 0;
-        }
-    }
-
     /* —— 顶部：GPS / 蓝牙 / 心率 / 电量 / 坡度；海拔移到右侧 AVG 上方 —— */
     ui.status.labelHr    = Value_Create(root, FONT("bahnschrift_13"), COL_WHITE, LV_ALIGN_TOP_LEFT,   24,  52, "95");
     ui.status.labelAlt   = Value_Create(root, FONT("bahnschrift_13"), COL_WHITE, LV_ALIGN_TOP_LEFT,  198,  61, "532");
