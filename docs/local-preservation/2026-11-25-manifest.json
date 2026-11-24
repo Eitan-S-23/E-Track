@@ -2853,6 +2853,15 @@
       "validation": "PYTHON_PARSE_PASS"
     },
     {
+      "path": "Tools/ota/p34_session_backend.py",
+      "bytes": 138986,
+      "sha256": "1b037d397483a8af6c83328a6cb98ad0adea7b1bcab629992b6a80b224e5785a",
+      "blob": "7d46103d8bb8caef4065eeff974ca3278418962a",
+      "origin": "untracked",
+      "validation": "PYTHON_PARSE_PASS",
+      "securityReview": "AUTHORIZATION is a relative JSON receipt filename, not an authentication secret"
+    },
+    {
       "path": "Tools/ota/p34_sha_assets.py",
       "bytes": 5888,
       "sha256": "67887c3691e8d83adff07a975077cb1f12a77196aa7707521ee880e0d1153cfb",
@@ -7931,11 +7940,6 @@
       "path": "Tools/ota/p34_reconnect_timeout.py",
       "reason": "SENSITIVE_PATTERN_REVIEW",
       "bytes": 7454
-    },
-    {
-      "path": "Tools/ota/p34_session_backend.py",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 138986
     },
     {
       "path": "Tools/ota/p34_signing_artifacts.py",
