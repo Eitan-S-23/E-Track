@@ -285,6 +285,17 @@
       "validation": "PYTHON_PARSE_PASS"
     },
     {
+      "path": "Tools/ota/baud_runtime.py",
+      "bytes": 38431,
+      "sha256": "4e98445a93751db5c746cd45b1056d3cc1fe8da655d9a83221e5c4f050dec0d7",
+      "blob": "e13a44fbc502918f4cf342610aa808f908dcc68d",
+      "originalSha256": "754d7459592d362c5e2120725c184ae4d80933abfbd9b98b27f139f790edcce2",
+      "origin": "untracked",
+      "validation": "SYNTAX_CHECKED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 1
+    },
+    {
       "path": "Tools/ota/baud_session_layout.c",
       "bytes": 845,
       "sha256": "5aa5b7af946be20a97359052efceb2bf6a60dd44ddd73fb8ecec2586d26b7a4a",
@@ -299,6 +310,17 @@
       "blob": "12f04b9112fdb6036ee6bd3f7dcfc25a25b6654b",
       "origin": "untracked",
       "validation": "PYTHON_PARSE_PASS"
+    },
+    {
+      "path": "Tools/ota/baud_sweep.py",
+      "bytes": 22632,
+      "sha256": "82f76a946a3e2948742fc1b7ef78868793585e8e75dcd908fa20bf784001ad2c",
+      "blob": "474bb02268e3d4fbb5b9b3094e787f4ad4c0afc2",
+      "originalSha256": "24ac46935f218fba833542e886e51e790ec62b962f0996ec2ccf10fd793b81be",
+      "origin": "untracked",
+      "validation": "SYNTAX_CHECKED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 1
     },
     {
       "path": "Tools/ota/baud_tune.py",
@@ -323,6 +345,17 @@
       "blob": "7da2e8ffa8728375d5396e259ac54a988be70b9f",
       "origin": "untracked",
       "validation": "PYTHON_PARSE_PASS"
+    },
+    {
+      "path": "Tools/ota/durable_retry_validation.py",
+      "bytes": 5546,
+      "sha256": "e1681e32557676c56f4dbb51fadffb58250fde1bc7435dee81fd8c9cd758e0d0",
+      "blob": "9715c98f79a6cda191c7e76883952d36f93f04cd",
+      "originalSha256": "552d77d2ae4de1f44cecd6711b9ad879badf9031af6b8b1f00dd3c39c5d1dc0d",
+      "origin": "untracked",
+      "validation": "SYNTAX_CHECKED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 1
     },
     {
       "path": "Tools/ota/heap_guard_fixture.c",
@@ -469,6 +502,17 @@
       "validation": "PYTHON_PARSE_PASS"
     },
     {
+      "path": "Tools/ota/p34_batch12_trial.py",
+      "bytes": 12829,
+      "sha256": "0e508050c525d6577fd6c4d7732dacc14f13bbfa7cfd9a988ba05c42cdde0ca6",
+      "blob": "2068f31539c2cbae8150be0a2002aa27e4584a49",
+      "originalSha256": "7195c48cf0fc31e441d715837be6f0558ed03e9e300171fa17ebbc8057f8260f",
+      "origin": "untracked",
+      "validation": "SYNTAX_CHECKED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 1
+    },
+    {
       "path": "Tools/ota/p34_batch12_validation.py",
       "bytes": 2813,
       "sha256": "a8825128f768a4e6f0b32b712dc368450a56b92c2ad8b6d84f32df750028186a",
@@ -531,6 +575,17 @@
       "blob": "78b19d61e655b83f8cbc01d612f4e4a4b8cfaa79",
       "origin": "untracked",
       "validation": "PYTHON_PARSE_PASS"
+    },
+    {
+      "path": "Tools/ota/p34_batch_review.py",
+      "bytes": 4901,
+      "sha256": "f7e364eddaa8fce623355065ecc218a4db51dbf8f84f10bd996c8e70516a8899",
+      "blob": "73dfed2420ed41bac2b97fcc01a6a96f1fecd14b",
+      "originalSha256": "a854d170f8b43e2a078b46cc95739d6822c590052bb109e8f93abc7a2f193bbe",
+      "origin": "untracked",
+      "validation": "SYNTAX_CHECKED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 2
     },
     {
       "path": "Tools/ota/p34_batch_screen.py",
@@ -829,6 +884,17 @@
       "validation": "PYTHON_PARSE_PASS"
     },
     {
+      "path": "Tools/ota/p34_connect_artifacts.py",
+      "bytes": 3826,
+      "sha256": "8dd0c7b9ad62f14f485f3756e676505277e353f548793a14a839e42837691eb9",
+      "blob": "dfbebe82ed2a1a3b88cb2de3da5aa859e7c0368c",
+      "originalSha256": "4f026762230c23772ba2d3c78e81e2a50ee68ee3f80e20c3d720b25f44d9de11",
+      "origin": "untracked",
+      "validation": "SYNTAX_CHECKED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 1
+    },
+    {
       "path": "Tools/ota/p34_connect_install.py",
       "bytes": 6804,
       "sha256": "09fc32cdc2d1584041d6dd4e7c96410198911e82af702fed8a5186d36b5e64fc",
@@ -843,6 +909,17 @@
       "blob": "04758fb94941963e1d6cea3a3f7da529d2355082",
       "origin": "untracked",
       "validation": "PYTHON_PARSE_PASS"
+    },
+    {
+      "path": "Tools/ota/p34_connect_query.py",
+      "bytes": 6256,
+      "sha256": "e298ef18013e8e5125c9418dd198bf379ba4dd87a0bd116e4b2ce913529b46b2",
+      "blob": "a3a6cb921141532eb7f56d1356d8cd0c253b2513",
+      "originalSha256": "6e255526ce4d2a320c684f3cf63fdd2a053df9ca0bbbc38d00021f8d243bffc7",
+      "origin": "untracked",
+      "validation": "SYNTAX_CHECKED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 1
     },
     {
       "path": "Tools/ota/p34_connect_validation.py",
@@ -979,6 +1056,28 @@
       "blob": "7e8e5e88b8bf5fa5a04b43c160b342e57ad6a5b2",
       "origin": "untracked",
       "validation": "PYTHON_PARSE_PASS"
+    },
+    {
+      "path": "Tools/ota/p34_discovery_query.py",
+      "bytes": 6667,
+      "sha256": "54a96cb0c5bdc1a994f7ce8fceae247d065841b836b3d4918f6fcefbef7574db",
+      "blob": "8a41b7d6c0fa05e455b89b8757f1fab5ca3057ca",
+      "originalSha256": "3f15e07c8de1c6d6cdb1e432a0bb902318ab1926791e849f8eea449718e3aef9",
+      "origin": "untracked",
+      "validation": "SYNTAX_CHECKED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 2
+    },
+    {
+      "path": "Tools/ota/p34_discovery_trial.py",
+      "bytes": 14981,
+      "sha256": "fa6aa492d3e43cb0cc3daae4e3999b39b096f12fa3591224726c537cd5311606",
+      "blob": "5e2aacdc4f60e552689f729a8d1c3bb7919ae07c",
+      "originalSha256": "47b6cb5d2b655e3e592fcabf1de1b4a6a71d8d1ad5964c398f56439dfea7a53b",
+      "origin": "untracked",
+      "validation": "SYNTAX_CHECKED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 1
     },
     {
       "path": "Tools/ota/p34_discovery_validation.py",
@@ -2637,6 +2736,17 @@
       "validation": "PYTHON_PARSE_PASS"
     },
     {
+      "path": "Tools/ota/p34_reconnect_followup.py",
+      "bytes": 22390,
+      "sha256": "0fdbf96f5fb283ab344bc9b8cbbae4ff8708e48647d6f415b66fa3646adfe690",
+      "blob": "8054718db6178e980f5b7975007b67b0c751e1dd",
+      "originalSha256": "84ef0707cc17751372e161177027a600e4a33c63ee69d003265888d04a332bbd",
+      "origin": "untracked",
+      "validation": "SYNTAX_CHECKED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 2
+    },
+    {
       "path": "Tools/ota/p34_reconnect_orphan.py",
       "bytes": 13173,
       "sha256": "19a7087a4fb85ec81560684d7929d49fccec2f5d0f4f274e1e7d8811a5df3baf",
@@ -2667,6 +2777,17 @@
       "blob": "2a30448c760d075c929cc8bdc4ea8764643f8eb5",
       "origin": "untracked",
       "validation": "PYTHON_PARSE_PASS"
+    },
+    {
+      "path": "Tools/ota/p34_reconnect_timeout.py",
+      "bytes": 7454,
+      "sha256": "72a0da3a43e34a747bbf177beeb3c01b142d63fec4793bbaf1a12da0b153a2fc",
+      "blob": "6e086d8a9ae11d44498d396a7c4cb19d93d99242",
+      "originalSha256": "d5e656ea56463e67d29244d94779802959c72ffb2a16f29cd4c7b6333ea3e9c1",
+      "origin": "untracked",
+      "validation": "SYNTAX_CHECKED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 1
     },
     {
       "path": "Tools/ota/p34_reconnect_validation.py",
@@ -2900,6 +3021,17 @@
       "blob": "c38d5f40e9b3bd7b2af0841e1221e26d5c39a760",
       "origin": "untracked",
       "validation": "PYTHON_PARSE_PASS"
+    },
+    {
+      "path": "Tools/ota/p34_signing_artifacts.py",
+      "bytes": 9396,
+      "sha256": "2fd99edf42d9300ebe43a683d2488ac6ed9236c02c56e53415d996cfbcd53804",
+      "blob": "535d0f055f7766e9504cd0ae12f8e8acf3bc4b66",
+      "originalSha256": "58e6e5bb133faad434f7469ac218fa1a2e5608ea2d587453e55474dd0bc8e510",
+      "origin": "untracked",
+      "validation": "SYNTAX_CHECKED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 1
     },
     {
       "path": "Tools/ota/p34_signing_migration.py",
@@ -3854,6 +3986,17 @@
       "validation": "NOT_EXECUTED_ARCHIVAL_ONLY"
     },
     {
+      "path": "Tools/ota/repeat_cycle.py",
+      "bytes": 34181,
+      "sha256": "b2c4e942d73b43ba5e4182572734cab4e15167cea17e6e3e1317d15e43e5818f",
+      "blob": "3ae9ac92d6f84ed70712761aff3b76a3f4d62fe3",
+      "originalSha256": "cf3cef2613dd5c6bf613516d7b4c2a15422327df9b6649a283bc1bd438d94c52",
+      "origin": "untracked",
+      "validation": "SYNTAX_CHECKED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 1
+    },
+    {
       "path": "Tools/ota/resume_cycle.py",
       "bytes": 11593,
       "sha256": "dd2ebd3f0881ad982bcbc28736ba44b46e05c136bbc477a86870c134a3cd9df0",
@@ -4134,6 +4277,17 @@
       "validation": "NOT_EXECUTED_ARCHIVAL_ONLY"
     },
     {
+      "path": "docs/ota-exec-notes/P3-4-fixed-signing-2026-10-01.md",
+      "bytes": 275758,
+      "sha256": "9239d9dbe848e674e1aed059d26c0dc93781f3a30afc4c5334200e6d3269a32f",
+      "blob": "2f57d03334a1378cae2b65f723096efb8c82acd3",
+      "originalSha256": "f9c726810d730456850e37677f295f7ab4b513f96f8bfeb6161cd2cf913b8265",
+      "origin": "untracked",
+      "validation": "NOT_EXECUTED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 1
+    },
+    {
       "path": "docs/ota-exec-notes/P3-4-install-workload-2026-09-25.md",
       "bytes": 275115,
       "sha256": "b62790decf0a7f11119fc2229efc4bcb583eda74c2e38adef917d5c175e9455a",
@@ -4206,6 +4360,17 @@
       "validation": "NOT_EXECUTED_ARCHIVAL_ONLY"
     },
     {
+      "path": "docs/ota-exec-notes/P3-4-screening-2026-09-22.md",
+      "bytes": 237213,
+      "sha256": "db8b74ccc51bfa527c0fea27ddc361ed9a0476fa8dfba920cf0ccf5d043c91b2",
+      "blob": "9a5e9e54ca604a6e4cd375baea8f0bec1831a4de",
+      "originalSha256": "af6cad6e21c33e3989919f31c8e1fe79b228f8f152d5db139b65d30974c7ab40",
+      "origin": "untracked",
+      "validation": "NOT_EXECUTED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 4
+    },
+    {
       "path": "docs/ota-exec-notes/P3-4-wiring-impl-2026-09-16.md",
       "bytes": 61226,
       "sha256": "569672fa5e1d36fcaae9ee8b3034b64df9bc2a91c1c7050371d6455bfdf78095",
@@ -4268,6 +4433,17 @@
       "blob": "4d150757d3b089d20bd238409b7dea7df1fc9e33",
       "origin": "untracked",
       "validation": "JSON_PARSE_PASS"
+    },
+    {
+      "path": "docs/ota-exec-notes/P3-8-preacceptance-2026-10-22/r04-review-2026-10-23.json",
+      "bytes": 460681,
+      "sha256": "06973f8a1c3431b908896135c19f58225c70b6c8e8d8c2e6c6990a37b3217569",
+      "blob": "066b3e05ac4a715749e5cb80742ba6a31c31dbfa",
+      "originalSha256": "1b4643a78827101a992089b252e0b9fea72b25ff808b3b524e487cef1e06a61f",
+      "origin": "untracked",
+      "validation": "SYNTAX_CHECKED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 3
     },
     {
       "path": "docs/ota-exec-notes/P3-8-preacceptance-2026-10-22/remediation-review-2026-10-23.commands.json",
@@ -5350,6 +5526,17 @@
       "validation": "PYTHON_PARSE_PASS"
     },
     {
+      "path": "tests/ota/test_p34_batch12_trial.py",
+      "bytes": 6685,
+      "sha256": "d3ff851cec8ae5b227c60ffa14e3f9fe97f156070d1b79cac7a41950a5fbc1dd",
+      "blob": "aaa8e29f69b86c16d63109d29e558a88b2a17ce4",
+      "originalSha256": "ccaa01eba1f0d2555980e55e26a98cb093ce187554df9a4c6163a1fd1d8b803e",
+      "origin": "untracked",
+      "validation": "SYNTAX_CHECKED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 3
+    },
+    {
       "path": "tests/ota/test_p34_batch_plan.py",
       "bytes": 3843,
       "sha256": "92d4ddb9c960a16ffd28ecf996a4dc0b738a48bbe561706a993af4c2759b0340",
@@ -5372,6 +5559,17 @@
       "blob": "35b6e2ddf086a4f9bffc54272fd660a9e85c247e",
       "origin": "untracked",
       "validation": "PYTHON_PARSE_PASS"
+    },
+    {
+      "path": "tests/ota/test_p34_batch_trial.py",
+      "bytes": 7981,
+      "sha256": "e8bfad7f1ba422adf3f0137e3fcc1350a7adca3fcebd62389f483699d0b6cc24",
+      "blob": "2050f9df610bada725e32fa14f1965314eaca80e",
+      "originalSha256": "bb2bfbe68436855601ff8d04940caddc88bfdd0d7d7709c627262d32a8db03b1",
+      "origin": "untracked",
+      "validation": "SYNTAX_CHECKED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 1
     },
     {
       "path": "tests/ota/test_p34_batch_wire.py",
@@ -5486,6 +5684,17 @@
       "validation": "PYTHON_PARSE_PASS"
     },
     {
+      "path": "tests/ota/test_p34_full.py",
+      "bytes": 38808,
+      "sha256": "050e4fca5ce903f48e5527de22ff9d6bf8f1897170a87ed8a7d452333243b9ad",
+      "blob": "ddda70c63c0dc1e4717e3246a7200a35a896faad",
+      "originalSha256": "b75d6a34fb75baa3273a700fe0401c2f9232070bfde0664fd58a0cf0b7640fe0",
+      "origin": "untracked",
+      "validation": "SYNTAX_CHECKED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 5
+    },
+    {
       "path": "tests/ota/test_p34_gap_burst.py",
       "bytes": 2442,
       "sha256": "e6e66989d80ed967b11f199d72e21a60c49e772c3b7bfbd9e3fc022d83ac3399",
@@ -5534,6 +5743,17 @@
       "validation": "PYTHON_PARSE_PASS"
     },
     {
+      "path": "tests/ota/test_p34_hci_att.py",
+      "bytes": 4582,
+      "sha256": "608dee6529ca62f9292b2578003fb92bd2e23f7741a9b940231e84c4724c283b",
+      "blob": "25c6f9419ddea6ccbe9eca2e2d6a9c36a2e0dc4a",
+      "originalSha256": "3add25fd9e243a934092961311435d41dc1425a597844386f94cdc682f4842e2",
+      "origin": "untracked",
+      "validation": "SYNTAX_CHECKED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 1
+    },
+    {
       "path": "tests/ota/test_p34_hci_compare.py",
       "bytes": 4962,
       "sha256": "2cef2e0fed3575d1c104b752ba193d4eee2c6cbf29b56f7bd80c4d434549962e",
@@ -5564,6 +5784,17 @@
       "blob": "1d7de78ef1ad3a24ac8ae24e05705757b9528c6c",
       "origin": "untracked",
       "validation": "PYTHON_PARSE_PASS"
+    },
+    {
+      "path": "tests/ota/test_p34_hci_queue.py",
+      "bytes": 4274,
+      "sha256": "9ac554fb1b9882cfc68a0a114282183da85e1e7bff47488867bc8c85e704b2ba",
+      "blob": "8894b6182ce2c77ec73476aaa3b6c6f096be0c16",
+      "originalSha256": "b46f1fc2fe9c503eb3ebdc6aabd01842ed8253a74eef9a68f61d16b140b1fc9e",
+      "origin": "untracked",
+      "validation": "SYNTAX_CHECKED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 1
     },
     {
       "path": "tests/ota/test_p34_hci_retrieve_existing.py",
@@ -5670,6 +5901,17 @@
       "validation": "PYTHON_PARSE_PASS"
     },
     {
+      "path": "tests/ota/test_p34_observation.py",
+      "bytes": 21791,
+      "sha256": "6638c7a118a94faec992664d75681b9aef9f68337130417dd794506603560afa",
+      "blob": "c1ce45ba32c7b3058ac5d6136170768c110954d0",
+      "originalSha256": "e980b272fb52cf974df5eba748271fea2cade1f79a56363634703199de1726eb",
+      "origin": "untracked",
+      "validation": "SYNTAX_CHECKED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 2
+    },
+    {
       "path": "tests/ota/test_p34_patch32.py",
       "bytes": 14756,
       "sha256": "c1915020d08e888c93627e6a0416797f83a29158771e65dda2de2d504756b05c",
@@ -5766,12 +6008,45 @@
       "validation": "PYTHON_PARSE_PASS"
     },
     {
+      "path": "tests/ota/test_p34_phy_trial.py",
+      "bytes": 4174,
+      "sha256": "43e381119c5cd2a7dbc25a7ef278126e6e0eae4b6e496b144c071fc1856cd302",
+      "blob": "58f3fdbd00928bdb9686da05fd62cd724287bd16",
+      "originalSha256": "33f2e24bc755ee8a8ebf0b23890bb972c4b82ec2515317f6182c3ac84e4ceb2a",
+      "origin": "untracked",
+      "validation": "SYNTAX_CHECKED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 1
+    },
+    {
       "path": "tests/ota/test_p34_phy_trial_resume.py",
       "bytes": 1984,
       "sha256": "1e8dc2aa0a85397051e813616a51f2a4a5572ebfa6b2a56038be990fc4f1ad11",
       "blob": "e14bd067969f89dc5708cc8570d30e0cb29213f7",
       "origin": "untracked",
       "validation": "PYTHON_PARSE_PASS"
+    },
+    {
+      "path": "tests/ota/test_p34_probe_cadence.py",
+      "bytes": 4520,
+      "sha256": "7acd24c84f9d81036a20fac6da4415f9d7d6ea24d8208de45244840fe2d29e42",
+      "blob": "13c932f1a1bc2be8ee1d5889f9344fbac7598f04",
+      "originalSha256": "ad6230046652b0b955e29e3cbd23738ae24a8c718bcdab2d7cd8816c66eb88d3",
+      "origin": "untracked",
+      "validation": "SYNTAX_CHECKED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 1
+    },
+    {
+      "path": "tests/ota/test_p34_probe_profile.py",
+      "bytes": 4374,
+      "sha256": "d3702bf0c3898c030d5e266ef41478b19b8390b248c2d50842e9867fec4ecf02",
+      "blob": "56160185f00e8af195a5aabfb3916327575d1c81",
+      "originalSha256": "ac443f3a3d96d77d61d7930a131320c2e6289dbb758eef019434dbac23adaeb9",
+      "origin": "untracked",
+      "validation": "SYNTAX_CHECKED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 1
     },
     {
       "path": "tests/ota/test_p34_probe_trial.py",
@@ -5838,6 +6113,17 @@
       "validation": "PYTHON_PARSE_PASS"
     },
     {
+      "path": "tests/ota/test_p34_radio_trial.py",
+      "bytes": 8317,
+      "sha256": "927679d53c4d98e21e6fab1597b0213110ac9038add306b996b331a45c63623a",
+      "blob": "6a9f6cdaf8ec5f77c7e0ef85c59f20e61c29cca7",
+      "originalSha256": "486136f3a9ec6d75e8b70ed449a97856001b61b29db8008e4f4067a71583c7bb",
+      "origin": "untracked",
+      "validation": "SYNTAX_CHECKED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 1
+    },
+    {
       "path": "tests/ota/test_p34_rate_return.py",
       "bytes": 2484,
       "sha256": "aba5883e1d1a5a1d08e207f4800d7f13483cbaa6ab8d5ec41f45d022a8c7ed27",
@@ -5878,12 +6164,34 @@
       "validation": "PYTHON_PARSE_PASS"
     },
     {
+      "path": "tests/ota/test_p34_reconnect_followup.py",
+      "bytes": 7207,
+      "sha256": "e9b939ba99c5c437bf5dcd81d51ea5c407e14a0e9038a9882a9fc629b4a00fda",
+      "blob": "ddc111151f4d7eaf27bb362a044a043c5aa191f4",
+      "originalSha256": "e8bc1ee43e659627e75664358a675a2b5c3239a9d1d884b6421a6e02dd26cb3d",
+      "origin": "untracked",
+      "validation": "SYNTAX_CHECKED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 1
+    },
+    {
       "path": "tests/ota/test_p34_reconnect_orphan.py",
       "bytes": 3493,
       "sha256": "a96d404e7eb09f76709c9c3fe026df0dec50a07b5d755f6845286b2b62aa2145",
       "blob": "cda079b2ca883c349a95b7696e442e718bad4fdd",
       "origin": "untracked",
       "validation": "PYTHON_PARSE_PASS"
+    },
+    {
+      "path": "tests/ota/test_p34_reconnect_review.py",
+      "bytes": 6650,
+      "sha256": "f4d364f9d534bd2be0f86a331a6fedfb49a5f3526ffd80b53ebb0bb051cf03bf",
+      "blob": "8f85ae1df1931c0d1e4cfd59fb3fdd167b6056e4",
+      "originalSha256": "adcd8c9f535a652f1c2e77388c3667ecb4bbc7479edccc889d64d4c79b19b593",
+      "origin": "untracked",
+      "validation": "SYNTAX_CHECKED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 1
     },
     {
       "path": "tests/ota/test_p34_relaunch.py",
@@ -5940,6 +6248,17 @@
       "blob": "d95a96e5bd3d21ec8d729eabc610ebb34ecfffa9",
       "origin": "untracked",
       "validation": "PYTHON_PARSE_PASS"
+    },
+    {
+      "path": "tests/ota/test_p34_session.py",
+      "bytes": 107873,
+      "sha256": "71a837a9f6b664b67e5cc4848877c7436b957dec651e0e389b48941ef197ce10",
+      "blob": "03f9d6518a90a5cc5e0a9b7e838f4a09488c4821",
+      "originalSha256": "b988a653f956a0dadee6853f50b4f9fe3b2bd6061b2682efad9681c9b75e600d",
+      "origin": "untracked",
+      "validation": "SYNTAX_CHECKED_ARCHIVAL_ONLY",
+      "redaction": "Device addresses replaced by consistent synthetic local addresses",
+      "redactionCount": 1
     },
     {
       "path": "tests/ota/test_p34_sha_results.py",
@@ -7887,71 +8206,6 @@
       "bytes": 0
     },
     {
-      "path": "Tools/ota/baud_runtime.py",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 38431
-    },
-    {
-      "path": "Tools/ota/baud_sweep.py",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 22632
-    },
-    {
-      "path": "Tools/ota/durable_retry_validation.py",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 5546
-    },
-    {
-      "path": "Tools/ota/p34_batch12_trial.py",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 12829
-    },
-    {
-      "path": "Tools/ota/p34_batch_review.py",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 4901
-    },
-    {
-      "path": "Tools/ota/p34_connect_artifacts.py",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 3826
-    },
-    {
-      "path": "Tools/ota/p34_connect_query.py",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 6256
-    },
-    {
-      "path": "Tools/ota/p34_discovery_query.py",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 6667
-    },
-    {
-      "path": "Tools/ota/p34_discovery_trial.py",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 14981
-    },
-    {
-      "path": "Tools/ota/p34_reconnect_followup.py",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 22390
-    },
-    {
-      "path": "Tools/ota/p34_reconnect_timeout.py",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 7454
-    },
-    {
-      "path": "Tools/ota/p34_signing_artifacts.py",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 9396
-    },
-    {
-      "path": "Tools/ota/repeat_cycle.py",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 34181
-    },
-    {
       "path": "app/bluetooth_flutter_Trace/.cache-ci/run34348433721/flutter-dev-ubuntu-latest-34348433721-1/run-fcd19372def14b1b8cfad10cacf7279b/result.json",
       "reason": "CACHE_OR_LOCAL_ARTIFACT",
       "bytes": 9919
@@ -7982,11 +8236,6 @@
       "bytes": 5262
     },
     {
-      "path": "docs/ota-exec-notes/P3-4-fixed-signing-2026-10-01.md",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 275758
-    },
-    {
       "path": "docs/ota-exec-notes/P3-4-pipeline-checkpoint-2026-10-07/evidence.zip",
       "reason": "BINARY_ARCHIVE_REQUIRES_SEPARATE_PRESERVATION",
       "bytes": 1226965
@@ -7997,84 +8246,9 @@
       "bytes": 699291357
     },
     {
-      "path": "docs/ota-exec-notes/P3-4-screening-2026-09-22.md",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 237213
-    },
-    {
-      "path": "docs/ota-exec-notes/P3-8-preacceptance-2026-10-22/r04-review-2026-10-23.json",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 460681
-    },
-    {
       "path": "err.txt",
       "reason": "CACHE_OR_LOCAL_ARTIFACT",
       "bytes": 0
-    },
-    {
-      "path": "tests/ota/test_p34_batch12_trial.py",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 6685
-    },
-    {
-      "path": "tests/ota/test_p34_batch_trial.py",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 7981
-    },
-    {
-      "path": "tests/ota/test_p34_full.py",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 38808
-    },
-    {
-      "path": "tests/ota/test_p34_hci_att.py",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 4582
-    },
-    {
-      "path": "tests/ota/test_p34_hci_queue.py",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 4274
-    },
-    {
-      "path": "tests/ota/test_p34_observation.py",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 21791
-    },
-    {
-      "path": "tests/ota/test_p34_phy_trial.py",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 4174
-    },
-    {
-      "path": "tests/ota/test_p34_probe_cadence.py",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 4520
-    },
-    {
-      "path": "tests/ota/test_p34_probe_profile.py",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 4374
-    },
-    {
-      "path": "tests/ota/test_p34_radio_trial.py",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 8317
-    },
-    {
-      "path": "tests/ota/test_p34_reconnect_followup.py",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 7207
-    },
-    {
-      "path": "tests/ota/test_p34_reconnect_review.py",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 6650
-    },
-    {
-      "path": "tests/ota/test_p34_session.py",
-      "reason": "SENSITIVE_PATTERN_REVIEW",
-      "bytes": 107873
     },
     {
       "path": "{a",
@@ -8088,5 +8262,10 @@
     "Ignored caches/worktrees not inventoried",
     "Original files never executed; syntax checks are not functional acceptance",
     "Large archives and sensitive candidates remain local; no cleanup is authorized by this receipt"
-  ]
+  ],
+  "supplement": {
+    "deviceAddressFiles": 29,
+    "originalsModified": false,
+    "ownerDirection": "Finish uploading all pending archival content"
+  }
 }
