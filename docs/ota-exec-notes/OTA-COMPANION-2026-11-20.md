@@ -1,5 +1,82 @@
 # OTA Companion And Admin Scroll Investigation
 
+## Bluetooth-On Background Recovery, 2026-11-24
+
+Status at owner-authorized delivery, 2026-11-25:
+MAIN_DELIVERED / CANDIDATE_DELIVERED / PHONE_VERIFICATION_NOT_RUN.
+Owner: Codex root. This new report does not reverse or repeat the owner's
+previous 23:00 successful checks. Bluetooth was ON in the original unattended
+failure; OFF in later USB captures was deliberate testing. Cache remediation
+is explicitly deferred.
+
+The original archive records four connection timeouts, deliberate service stop
+at 03:05:20, subsequent LOW_MEMORY exit and no retained recovery until owner
+opening. Recovery jobs were registered but had pending-without-active periods.
+The exact historical OEM/system scheduling delay remains unknown.
+
+Old source returned START_NOT_STICKY and stopped the service during backoff.
+Tested development source 283c65d756e3db434f16c72370e8c222e888fc0b retains its
+foreground service without a wake lock while waiting, schedules local recovery,
+requests guarded sticky recreation and preserves cold-restart cooldown. The
+existing four-attempt/60-second windows and 2-to-60-minute capped cooldown stay.
+Real connection success resets failure state; permission/association/disable/
+terminal/OTA ownership gates remain. Late callbacks cannot stack failures,
+extend backoff or claim readiness. Sticky recreation is an Android request,
+not an OEM guarantee, exact sleep alarm or force-stop bypass.
+
+Development CI 45421424363 / 45421702392 passes on both hosts. Original native
+XML has 149 passed with zero failures/errors/skips, including 16 added service
+tests. Linux Flutter full suite 1059 passed/16 skipped; Windows 1007/68, plus
+eight candidate tests each. Debug APK passes; Flutter 3.47.9 / Dart 3.13.7.
+Development APK/native commands retain 12/17 warning lines and zero error lines.
+
+Owner explicitly authorizes main merge and the existing automatic candidate
+route. Version checks cover 133 Trace Releases/tags, including drafts, before
+1.0.94+120 -> 1.0.95+121. Main merge source is
+629155427508e67be843a8f84d3296b03907e13a, preserving exact tested code blobs and
+the previous main parent f8c1f4b43d6fd16468d60ac76dd6deab640a3f93. Formal parent
+CI 45433637395 / original-signer Trace 45434018855 both complete successfully.
+Original-signed APK/Windows EXE and automatic candidate registration pass;
+registration returns ok=true, releaseId=rel_trace_android_v1_0_95, with no
+Stable/Beta publication. APK and manifest assets are R2-verified. APK SHA256
+487b04f58ac8df6a4802b3e72abbb81838141c7252dd255a6633e15cf937dfe6,
+49636885 bytes. Package com.wen.gaia.gaia, original signer, both ARM libraries,
+original backend, BLE V2 and inventory admission all pass. Android build has
+10 warning lines/zero errors, Windows zero/zero; other whole-job diagnostics
+remain in complete original logs. Firmware skips.
+Phone App last verified as 1.0.94+120 does not contain this repair.
+
+The first 20-minute local observation expires while CI is running; a second
+observer completes against the same source/run, without another push/version/
+build. The interrupted record reconciliation catches concurrent main advancement
+before staging. Separate MCU/UI main commits 258c7051 and 916b9022 are retained;
+the entire App tree is identical to the 62915542 formal source. Reconciliation
+verifies the original pending bytes plus other-task additive board records.
+Only this task's new three record blocks enter the following documentation
+commit; earlier pending contents and the MCU/UI work are neither overwritten
+nor included as new work by this root task.
+
+Implementation/self-tests, main integration, formal candidate ingestion,
+operator publication, phone installation and real-device behavior remain
+separate. Owner controls Stable/Beta publication and phone update. No App UI
+launch, force-stop, permission/data/dedup change, OTA, J-Link, MCU/cache/cloud
+configuration change or new independent acceptance occurred. Original pending
+documents and unrelated Dialplate/test edits are preserved.
+
+The supported version-only entry rejects a dirty main and cannot integrate
+the tested three-file repair. A narrow adapter reuses its contained Host,
+version/draft checks and original candidate observer; an isolated index
+produces only the tested repair plus the version line. No replacement build,
+credential reader or backend publisher was introduced. Existing exact-slot
+owner reader, scoped-record staging and original CI artifacts are reused.
+Evidence: .cache/companion-wake-20261124/implementation.md,
+.cache/companion-wake-20261124/delivery/observe-02/result.json, and
+complete source-bound signer logs/metadata under delivery/records/inspect-06.
+Actual phone verification is NOT_RUN;
+future observation must be ready before owner testing, without opening the
+App or triggering a firmware check from the collector. No repeated 1.5-hour
+wait or successful OTA is requested merely to refresh logs.
+
 ## Owner-Confirmed Functional Closeout And 3.3.52 Delivery, 2026-11-23
 
 Status: OWNER_VERIFIED_PASS / CANDIDATE_DELIVERED.

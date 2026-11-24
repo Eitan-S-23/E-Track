@@ -1,5 +1,29 @@
 # Shared Agent Records
 
+Latest background recovery, 2026-11-25: COMPANION-BACKGROUND-WAKE,
+MAIN_DELIVERED / CANDIDATE_DELIVERED / PHONE_VERIFICATION_NOT_RUN, Codex root.
+Owner confirms Bluetooth ON during the new failure; later OFF was testing.
+Development 283c65d756e3db434f16c72370e8c222e888fc0b is merged to main source
+629155427508e67be843a8f84d3296b03907e13a, App 1.0.95+121. Original-signing
+parent CI 45433637395 / Trace 45434018855 both pass APK/Windows and register
+rel_trace_android_v1_0_95 automatically; two App assets are R2-verified.
+APK SHA256 487b04f58ac8df6a4802b3e72abbb81838141c7252dd255a6633e15cf937dfe6,
+49636885 bytes; original package/signer/backend/BLE V2/inventory checks pass.
+Android build retains 10 warning lines/zero errors, Windows zero/zero; firmware skips.
+Recovery retains the service through existing capped backoff without a wake
+lock and requests guarded sticky recreation. Four-attempt windows and the
+60-minute maximum cooldown remain; cache/dedup/OTA ownership are unchanged.
+Both-host development CI 45421424363 / 45421702392, 149 native tests and debug
+APK pass. Historical OEM queue delay remains unknown; this is not real-phone
+verification. Main merge/push is explicitly owner-authorized; original pending
+documents and unrelated Dialplate/tests are preserved. Later main 258c7051 /
+916b9022 changes the separate MCU task; the entire App tree remains identical.
+First observer timeout is preserved; second observes the same source, no rerun.
+No device/manual cloud
+operation, additional agent, channel publication or whole-card independent PASS.
+Evidence .cache/companion-wake-20261124/delivery/ and the existing
+[companion note](../ota-exec-notes/OTA-COMPANION-2026-11-20.md#bluetooth-on-background-recovery-2026-11-24).
+
 Latest owner closeout, 2026-11-23: OWNER-CLOSEOUT-2300,
 OWNER_VERIFIED_PASS / CANDIDATE_DELIVERED. The owner
 confirms normal Bluetooth operation at 23:00 Shanghai and both follow-up lists:
