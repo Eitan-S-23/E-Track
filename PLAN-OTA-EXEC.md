@@ -162,7 +162,13 @@ requests a new full/recovery candidate; channel publication stays owner-controll
 Self-tests: 88 passed, two non-F435 DMA skips; 46 reference/target renders identical.
 Local GCC App/Boot and Windows simulator build: 395 warning lines, zero errors.
 Evidence: `.cache/mcu-ui-original-20261124`, `.cache/dialplate-ui-tests/run-x9l04xcu`.
-Main integration and exact-source candidate delivery are pending this push.
+Source is integrated on main: `258c70514fd33d60dad34350bd1a438365dea0ea`.
+GitHub candidate run [45438368852](https://github.com/Eitan-S-23/E-Track/actions/runs/45438368852)
+is successful: 639 warning lines, zero errors; the App candidate job was skipped.
+Firmware 3.3.54 full/recovery assets are R2-verified and registered ready/unpublished
+in the original Admin. Source-bound receipt:
+`.cache/candidate-release/ui-original-3354-20261125/result.json`.
+Pre-push candidate-delivery regressions: 65 passed, zero failures or skips.
 No physical device operation, simulator runtime or independent acceptance is claimed.
 
 <!-- mcu-ui-original-20261124:end -->
