@@ -748,6 +748,7 @@ if(P34_OTA_CANDIDATE)
     if(NOT P34_OTA_UART_BAUD MATCHES "^(115200|230400|460800|921600)$")
         message(FATAL_ERROR "Unsupported fixed P34 candidate UART rate")
     endif()
+    # Keep the original UI buffers and reserve at least 4 KiB for newlib.
     target_compile_definitions(X_Track_App_GCC PRIVATE
         P34_OTA_FIXED_CONFIG=1
         P34_OTA_PIPELINE=1 P34_OTA_PIPELINE_SYNC=1
@@ -762,7 +763,6 @@ if(P34_OTA_CANDIDATE)
         CONFIG_OTA_STAGING_BLOCK_ERASE=1
         CONFIG_OTA_UI_CADENCE=1 CONFIG_OTA_ACTIVE_PUMP=1
         OTA_PATCH_COALESCE_WRITES=1 CONFIG_OTA_APP_CRC32_NIBBLE=1
-        # Keep the original UI buffers and reserve at least 4 KiB for newlib.
         LV_MEM_SIZE=122880U
     )
     target_link_options(X_Track_App_GCC PRIVATE "-Wl,--defsym=__p34_heap_min=4096")
