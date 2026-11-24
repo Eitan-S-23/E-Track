@@ -1,0 +1,1 @@
+#define OTA_APP_ORIGIN 0x08010000u

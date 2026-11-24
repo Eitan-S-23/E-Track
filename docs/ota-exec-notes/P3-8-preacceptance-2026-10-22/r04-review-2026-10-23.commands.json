@@ -1,0 +1,361 @@
+{
+  "schema": "p38-r04-review-commands-v1",
+  "cwd": "D:/github/my/E-Track",
+  "formal_acceptance": "NOT_RUN",
+  "route": "Lightweight independent remediation review under acceptance execution contract sections 0 and 7.3; no formal campaign",
+  "commands": [
+    {
+      "id": "R04-SOURCE",
+      "argv": [
+        "git",
+        "--no-optional-locks",
+        "diff",
+        "--no-ext-diff",
+        "--no-textconv",
+        "27048aa1",
+        "8ede0920",
+        "--",
+        "app/bluetooth_flutter_Trace"
+      ],
+      "exit_code": 0,
+      "purpose": "Exact-object source review, not dirty-root source"
+    },
+    {
+      "id": "R04-ORIGINALS-1",
+      "command": "python -I -S -B -X utf8 .cache\\p38-r04-review-20261023\\audit_originals.py --out .cache\\p38-r04-review-20261023\\audit-attempt-1.json",
+      "exit_code": 1,
+      "file": {
+        "path": ".cache/p38-r04-review-20261023/audit-attempt-1.json",
+        "bytes": 379374,
+        "sha256": "f68ca97084876698546e345014c9388c2ce3423b1ee68518dec3c0b6432383e7"
+      },
+      "result": "ORIGINAL_AUDIT_ERROR",
+      "checks": 269,
+      "error": {
+        "type": "ValueError",
+        "message": "seven executed R04 cases: flutter-dev-ubuntu-latest-39827513211-1",
+        "line": 40,
+        "check": "raise ValueError(message)"
+      },
+      "evaluator": {
+        "path": ".cache/p38-r04-review-20261023/audit_originals.py",
+        "bytes": 19003,
+        "sha256": "8baf69f4f3262a004ba706200791c184923f7ea97434d29eb39b3a8cb8e701c1",
+        "source": "\"\"\"One-off R04 original-evidence reader; no App build or device execution.\"\"\"\nimport argparse\nimport datetime\nimport hashlib\nimport json\nimport os\nfrom pathlib import Path\nimport re\nimport runpy\nimport subprocess\nimport traceback\nimport urllib.request\nimport zipfile\n\n\nROOT = Path(\"D:/github/my/E-Track\")\nBASE = ROOT / \".cache/p3-8-implementation-20261021/.cache/p38/r04-20261023\"\nOWN = ROOT / \".cache/p38-r04-review-20261023\"\nIO = runpy.run_path(str(ROOT / \".agents/skills/e-track-flutter-debug/scripts/host_io.py\"))\nCANDIDATE = \"8ede09208a0857b716ee9614c09cb83247c2bc39\"\nDELIVERY = \"6ec6c5ce3189de79794fc0cc437e9b024767ee5d\"\nPRIOR = \"27048aa10079d8dd01d608967e7b5d1b473861ba\"\nAPP = \"app/bluetooth_flutter_Trace\"\nAPI = \"https://api.github.com/repos/Eitan-S-23/E-Track/actions\"\nGROUPS = (\n    (\"red\", 39823659366, \"14e5d15714143f22a10de92930be1bf59578cd98\", (635, 618), 1),\n    (\"red-behavior\", 39824670865, \"1ecabecad51dce141053fe054c87c7301eb03728\", (746, 729), 6),\n    (\"repair-first\", 39826146792, \"596cc08be86ea4d540d938551140f892bbf43bf3\", (748, 731), 5),\n    (\"green\", 39827513211, CANDIDATE, (753, 736), 0),\n)\nOUT = {\"schema\": \"p38-r04-original-review-v1\", \"formal_acceptance\": \"NOT_RUN\",\n       \"checked_utc\": datetime.datetime.now(datetime.timezone.utc).isoformat(),\n       \"candidate\": CANDIDATE, \"delivery\": DELIVERY, \"new_builds\": 0,\n       \"new_test_runs\": 0, \"device_operations\": 0, \"checks\": [],\n       \"git_commands\": [], \"github\": [], \"development\": [], \"archives\": []}\n\n\ndef require(condition, message):\n    if not condition:\n        raise ValueError(message)\n    OUT[\"checks\"].append(message)\n\n\ndef sha(data):\n    return hashlib.sha256(data).hexdigest()\n\n\ndef fingerprint(path):\n    path = path.resolve(strict=True)\n    digest = hashlib.sha256()\n    with path.open(\"rb\") as stream:\n        for block in iter(lambda: stream.read(1024 * 1024), b\"\"):\n            digest.update(block)\n    return {\"path\": path.relative_to(ROOT).as_posix(), \"bytes\": path.stat().st_size,\n            \"sha256\": digest.hexdigest()}\n\n\ndef git(*args):\n    argv = [\"git\", \"--no-optional-locks\", \"--no-pager\", \"-c\", \"core.quotepath=false\", *args]\n    result = subprocess.run(argv, cwd=ROOT, stdout=subprocess.PIPE,\n                            stderr=subprocess.PIPE, timeout=40)\n    require(result.returncode == 0, \"git succeeded: \" + \" \".join(args))\n    OUT[\"git_commands\"].append({\"argv\": argv, \"exit_code\": result.returncode,\n                                \"stdout_sha256\": sha(result.stdout)})\n    return result.stdout.decode(\"utf-8\")\n\n\ndef api(suffix):\n    url = API + suffix\n    with urllib.request.urlopen(url, timeout=25) as response:\n        raw = response.read()\n    data = json.loads(raw)\n    OUT[\"github\"].append({\"url\": url, \"sha256\": sha(raw), \"body\": data})\n    return data\n\n\ndef env_for_gh():\n    env = os.environ.copy()\n    for name in (\"GH_DEBUG\", \"GH_TOKEN\", \"GITHUB_TOKEN\", \"GH_ENTERPRISE_TOKEN\",\n                 \"GITHUB_ENTERPRISE_TOKEN\", \"GH_LOGFILE\", \"GH_FORCE_TTY\"):\n        env.pop(name, None)\n    for name, folder in ((\"TEMP\", \"tmp\"), (\"TMP\", \"tmp\"), (\"GH_CACHE_DIR\", \"gh-cache\")):\n        path = IO[\"checked_output\"](ROOT, OWN / folder)\n        path.mkdir(parents=True, exist_ok=True)\n        env[name] = str(path)\n    env[\"GH_PROMPT_DISABLED\"] = \"1\"\n    env[\"GH_HOST\"] = \"github.com\"\n    return env\n\n\ndef fetch_archive(meta, target, env):\n    require(meta[\"size_in_bytes\"] < 2_000_000, \"bounded development archive size: \" + meta[\"name\"])\n    path = IO[\"checked_output\"](ROOT, target)\n    if path.exists():\n        require(fingerprint(path)[\"sha256\"] == meta[\"digest\"].split(\":\")[1],\n                \"existing owned archive still matches GitHub: \" + path.name)\n        return path\n    auth = subprocess.run([\"gh\", \"auth\", \"token\", \"--hostname\", \"github.com\",\n                           \"--user\", \"Eitan-S-23\"], cwd=ROOT, env=env,\n                          stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=25)\n    require(auth.returncode == 0 and bool(auth.stdout.strip()), \"existing GitHub credential readable\")\n    child_env = dict(env, GH_TOKEN=auth.stdout.decode(\"utf-8\").strip())\n    endpoint = \"repos/Eitan-S-23/E-Track/actions/artifacts/\" + str(meta[\"id\"]) + \"/zip\"\n    result = subprocess.run([\"gh\", \"api\", \"--hostname\", \"github.com\", endpoint],\n                            cwd=ROOT, env=child_env, stdout=subprocess.PIPE,\n                            stderr=subprocess.PIPE, timeout=90)\n    require(result.returncode == 0, \"read-only artifact retrieval succeeded: \" + meta[\"name\"])\n    require(sha(result.stdout) == meta[\"digest\"].split(\":\")[1],\n            \"download matches immutable GitHub digest: \" + meta[\"name\"])\n    require(len(result.stdout) == meta[\"size_in_bytes\"], \"archive exact size: \" + meta[\"name\"])\n    IO[\"checked_output\"](ROOT, path.parent).mkdir(parents=True, exist_ok=True)\n    with IO[\"checked_output\"](ROOT, path).open(\"xb\") as stream:\n        stream.write(result.stdout)\n    return path\n\n\ndef bind_archive(path, meta, members, member_root):\n    record = fingerprint(path)\n    require(\"sha256:\" + record[\"sha256\"] == meta[\"digest\"], \"archive digest bound: \" + meta[\"name\"])\n    record.update({\"artifact_id\": meta[\"id\"], \"name\": meta[\"name\"],\n                   \"published_digest\": meta[\"digest\"], \"members\": []})\n    with zipfile.ZipFile(path) as archive:\n        require(archive.testzip() is None, \"archive CRC: \" + meta[\"name\"])\n        for file in members:\n            member = file.relative_to(member_root).as_posix()\n            matches = [n for n in archive.namelist() if n == member or n.endswith(\"/\" + member)]\n            require(len(matches) == 1, \"unique original member: \" + member)\n            raw = archive.read(matches[0])\n            actual = fingerprint(file)\n            require(len(raw) == actual[\"bytes\"] and sha(raw) == actual[\"sha256\"],\n                    \"extracted original matches archive: \" + member)\n            record[\"members\"].append(actual)\n    OUT[\"archives\"].append(record)\n\n\ndef audit_sources():\n    identities = {}\n    for revision in (PRIOR, CANDIDATE, DELIVERY, \"main\"):\n        identities[revision] = {\"commit\": git(\"rev-parse\", revision).strip(),\n                                \"tree\": git(\"rev-parse\", revision + \"^{tree}\").strip()}\n    for revision in (CANDIDATE, DELIVERY):\n        identities[revision][\"app_tree\"] = git(\"rev-parse\", revision + \":\" + APP).strip()\n        identities[revision][\"profile_blob\"] = git(\"rev-parse\", revision + \":Tools/provenance/manifest_profiles.json\").strip()\n    require(identities[CANDIDATE][\"app_tree\"] == identities[DELIVERY][\"app_tree\"], \"handoff preserves exact App tree\")\n    for earlier in (GROUPS[0][2], GROUPS[1][2]):\n        require(not git(\"diff\", \"--no-ext-diff\", \"--no-textconv\", \"--name-only\", PRIOR, earlier,\n                        \"--\", APP + \"/lib\", APP + \"/android\").strip(), \"red run uses reviewed production: \" + earlier)\n    unchanged = [APP + \"/android\", APP + \"/pubspec.yaml\", APP + \"/pubspec.lock\", \"Tools\", \".github/workflows\"]\n    require(not git(\"diff\", \"--no-ext-diff\", \"--no-textconv\", \"--name-only\", PRIOR, CANDIDATE,\n                    \"--\", *unchanged).strip(), \"Android/dependencies/runners/workflows unchanged\")\n    delta = git(\"diff\", \"--no-ext-diff\", \"--no-textconv\", PRIOR, CANDIDATE, \"--\", APP)\n    source = {}\n    for name, spans in ((\"lib/services/ota_service.dart\", ((174, 184), (1663, 1681), (1780, 1795), (2062, 2094))),\n                        (\"lib/pages/ota_upgrade_page.dart\", ((58, 90), (121, 128), (164, 248))),\n                        (\"test/ota/ota_service_upgrade_test.dart\", ((326, 462),))):\n        text = git(\"show\", CANDIDATE + \":\" + APP + \"/\" + name)\n        lines = text.splitlines()\n        source[name] = {\"blob\": git(\"rev-parse\", CANDIDATE + \":\" + APP + \"/\" + name).strip(),\n                        \"sha256_utf8\": sha(text.encode()),\n                        \"excerpts\": [{\"first_line\": a, \"text\": \"\\n\".join(lines[a-1:b])} for a, b in spans]}\n    OUT[\"source\"] = {\"identities\": identities, \"app_delta\": delta, \"excerpts\": source}\n\n\ndef audit_development(env):\n    for group, run, commit, passed, failed in GROUPS:\n        live = api(\"/runs/\" + str(run))\n        require(live[\"head_sha\"] == commit and live[\"run_attempt\"] == 1, \"exact run/attempt: \" + group)\n        require(live[\"path\"] == \".github/workflows/flutter-dev-checks.yml\", \"development workflow: \" + group)\n        require(live[\"conclusion\"] == (\"success\" if failed == 0 else \"failure\"), \"actual run disposition: \" + group)\n        artifacts = api(\"/runs/\" + str(run) + \"/artifacts?per_page=100\")[\"artifacts\"]\n        for index, host in enumerate((\"ubuntu\", \"windows\")):\n            platform = \"ubuntu-latest\" if host == \"ubuntu\" else \"windows-2022\"\n            name = \"flutter-dev-\" + platform + \"-\" + str(run) + \"-1\"\n            matches = [a for a in artifacts if a[\"name\"] == name]\n            require(len(matches) == 1, \"unique development original: \" + name)\n            artifact_root = BASE / group / name\n            paths = list(artifact_root.glob(\".cache/flutter-dev-checks/runs/*/result.json\"))\n            require(len(paths) == 1, \"unique result JSON: \" + name)\n            path = paths[0]\n            data = json.loads(path.read_text(encoding=\"utf-8\"))\n            require(data[\"source_before\"][\"head\"] == commit and data[\"source_before\"][\"clean\"], \"clean exact source: \" + name)\n            require(data[\"scope\"] == \"all\" and data[\"formal_acceptance\"] == \"NOT_RUN\", \"full development-only scope: \" + name)\n            require(data[\"github_run_url\"].endswith(\"/\" + str(run)) and str(data[\"github_run_attempt\"]) == \"1\", \"result run binding: \" + name)\n            require(data[\"lockfile_unchanged\"] and data[\"source_deltas_bound_toolchain_regen\"], \"recorded toolchain deltas: \" + name)\n            restored = data[\"source_after_restored\"]\n            require(not restored[\"dirty_semantic\"] and not restored[\"dirty_untracked\"], \"restored semantic inputs: \" + name)\n            require(not restored[\"dirty_eol_only\"] or restored[\"dirty_eol_only\"] == [APP + \"/windows/flutter/generated_plugin_registrant.h\"], \"only permitted generated EOL delta: \" + name)\n            item = {\"group\": group, \"host\": host, \"report\": fingerprint(path), \"source_before\": data[\"source_before\"],\n                    \"source_after\": data[\"source_after\"], \"source_after_restored\": restored,\n                    \"toolchain_regen\": data[\"toolchain_regen\"], \"development_result\": data[\"development_result\"], \"commands\": []}\n            members = [path]\n            for command in data[\"commands\"]:\n                log = path.parent / command[\"log\"]\n                members.append(log)\n                record = {k: command.get(k) for k in (\"name\", \"argv\", \"status\", \"exit_code\", \"timed_out\", \"diagnostics\")}\n                record[\"log\"] = fingerprint(log)\n                require(record[\"log\"][\"bytes\"] == command[\"diagnostics\"][\"log_bytes\"], \"full raw log size: \" + name + \"/\" + command[\"name\"])\n                text = log.read_text(encoding=\"utf-8\", errors=\"replace\")\n                lines = text.splitlines()\n                if failed == 0:\n                    require(command[\"status\"] == \"PASS\" and command[\"exit_code\"] == 0 and not command.get(\"timed_out\"), \"green command: \" + name + \"/\" + command[\"name\"])\n                if command[\"name\"] == \"sdk_version\":\n                    item[\"sdk\"] = command[\"diagnostics\"][\"sdk_identity\"]\n                    require(all(item[\"sdk\"][k] in text for k in (\"frameworkVersion\", \"frameworkRevision\", \"dartSdkVersion\", \"engineRevision\")), \"SDK raw identity: \" + name)\n                if command[\"name\"] == \"tests\":\n                    summaries = [line for line in lines if \"All tests passed!\" in line or \"Some tests failed.\" in line]\n                    require(bool(summaries), \"raw test summary exists: \" + name)\n                    summary = summaries[-1]\n                    counts = {key: int(m[1]) if (m := re.search(pattern, summary)) else 0\n                              for key, pattern in ((\"passed\", r\"\\+(\\d+)\"), (\"skipped\", r\"~(\\d+)\"), (\"failed\", r\"-(\\d+)\"))}\n                    expected = {\"passed\": passed[index], \"skipped\": 16 if index == 0 else 33, \"failed\": failed}\n                    require(counts == expected == command[\"diagnostics\"][\"test_counts\"], \"raw exact counts: \" + name)\n                    record.update({\"raw_summary\": summary, \"counts\": counts,\n                                   \"r04_lines\": [{\"line\": i, \"text\": line} for i, line in enumerate(lines, 1) if \"P38-R04\" in line],\n                                   \"failure_details\": [{\"first_line\": max(1, i-3), \"text\": \"\\n\".join(lines[max(0, i-4):i+18])}\n                                                       for i, line in enumerate(lines, 1) if \"P38-R04\" in line and \"[E]\" in line]})\n                    if failed == 0:\n                        names = {line[line.index(\"P38-R04\"):] for line in lines if \"P38-R04\" in line}\n                        require(len(names) == 7 and not any(\"[E]\" in n or \"[S]\" in n for n in names), \"seven executed R04 cases: \" + name)\n                        item[\"r04_cases\"] = sorted(names)\n                elif command[\"name\"] == \"analyze\":\n                    record[\"raw_tail\"] = lines[-12:]\n                item[\"commands\"].append(record)\n            OUT[\"development\"].append(item)\n            zip_path = fetch_archive(matches[0], OWN / \"archives\" / (group + \"-\" + host + \".zip\"), env)\n            bind_archive(zip_path, matches[0], members, artifact_root)\n    jobs = api(\"/runs/39827513211/jobs?per_page=100\")[\"jobs\"]\n    require(len(jobs) == 2 and all(j[\"conclusion\"] == \"success\" for j in jobs), \"both green jobs successful\")\n\n\ndef audit_distribution():\n    live = api(\"/runs/39829695971\")\n    require(live[\"head_sha\"] == CANDIDATE and live[\"conclusion\"] == \"success\" and live[\"run_attempt\"] == 1, \"standard build exact candidate\")\n    jobs = api(\"/runs/39829695971/jobs?per_page=100\")[\"jobs\"]\n    for name in (\"Build Android APK\", \"Build Windows EXE\"):\n        require(any(j[\"name\"] == name and j[\"conclusion\"] == \"success\" for j in jobs), \"standard job success: \" + name)\n    for name in (\"Deploy GitHub Pages\", \"Create GitHub Release\"):\n        require(any(j[\"name\"] == name and j[\"conclusion\"] == \"skipped\" for j in jobs), \"no deployment/release: \" + name)\n    artifacts = api(\"/runs/39829695971/artifacts?per_page=100\")[\"artifacts\"]\n    expected = {\n        \"standard/android/ble-monitor-android.apk\": \"1ef9cd86b35bd175b238a9c6ce542ce5fb991543fd0470684e82836e025b0f8d\",\n        \"standard/windows/ble-monitor-windows.exe\": \"bb111ec40f24d74e971e6291d27e99d54f003993ad00c1cd2b1ad347a9b07be7\",\n        \"standard/windows/ble-monitor-windows.zip\": \"cda4b776e33927fcddf9cb6c2d75c7ce654d3c0eed8366719eb6c06793f2b6ca\",\n        \"standard-logs.zip\": \"3250ea7951e5a7fd91c454d3d2d3675bb3b046e3929c73489006fccb837b1050\",\n    }\n    OUT[\"distribution\"] = []\n    for name, digest in expected.items():\n        record = fingerprint(BASE / name)\n        require(record[\"sha256\"] == digest, \"retained artifact hash: \" + name)\n        OUT[\"distribution\"].append(record)\n    for name, archive, folder in ((\"android-apk\", \"standard-apk.zip\", \"standard/android\"),\n                                  (\"windows-exe\", \"standard-windows.zip\", \"standard/windows\")):\n        matches = [a for a in artifacts if a[\"name\"] == name]\n        require(len(matches) == 1, \"unique standard archive: \" + name)\n        files = [BASE / p for p in expected if p.startswith(folder + \"/\")]\n        bind_archive(BASE / archive, matches[0], files, BASE / folder)\n    for name in (\"standard/android/ble-monitor-android.apk\", \"standard/windows/ble-monitor-windows.zip\"):\n        with zipfile.ZipFile(BASE / name) as archive:\n            require(archive.testzip() is None, \"distribution CRC: \" + name)\n            if \"windows\" in name:\n                require(sha(archive.read(\"ble_monitor.exe\")) == expected[\"standard/windows/ble-monitor-windows.exe\"], \"embedded EXE equals standalone EXE\")\n    OUT[\"standard_logs\"] = []\n    with zipfile.ZipFile(BASE / \"standard-logs.zip\") as archive:\n        require(archive.testzip() is None, \"standard log archive CRC\")\n        for name in archive.namelist():\n            if not any(part in name for part in (\"Run Flutter tests.txt\", \"Build release APK.txt\", \"Build Windows release.txt\", \"Analyze project.txt\", \"Checkout repository.txt\")):\n                continue\n            raw = archive.read(name)\n            lines = raw.decode(\"utf-8\", errors=\"replace\").splitlines()\n            warnings = [line for line in lines if \"warning:\" in line.lower()]\n            record = {\"member\": name, \"bytes\": len(raw), \"sha256\": sha(raw), \"warnings\": warnings,\n                      \"decisive\": [{\"line\": i, \"text\": line} for i, line in enumerate(lines, 1)\n                                   if any(part in line for part in (\"tests passed,\", \"No issues found\", \"Built build\", \"Already watching path\", CANDIDATE, \"P38-R04\"))]}\n            if \"Run Flutter tests.txt\" in name:\n                expected_count = \"753 tests passed, 16 skipped.\" if name.startswith(\"Build Android\") else \"736 tests passed, 33 skipped.\"\n                require(any(expected_count in line for line in lines), \"standard raw counts: \" + name)\n            if name.endswith(\"Build release APK.txt\"):\n                require(len(warnings) == 10 and any(\"Already watching path\" in line for line in lines), \"Android diagnostics retained\")\n            if name.endswith(\"Build Windows release.txt\"):\n                require(not warnings, \"Windows build zero warning lines\")\n            OUT[\"standard_logs\"].append(record)\n    delivery = api(\"/runs/39845776205\")\n    jobs = api(\"/runs/39845776205/jobs?per_page=100\")[\"jobs\"]\n    require(delivery[\"head_sha\"] == DELIVERY and delivery[\"conclusion\"] == \"success\", \"handoff-only run successful\")\n    require(len(jobs) == 2 and all(j[\"conclusion\"] == \"success\" for j in jobs), \"both handoff jobs successful\")\n\n\ndef main():\n    parser = argparse.ArgumentParser()\n    parser.add_argument(\"--out\", required=True)\n    args = parser.parse_args()\n    output = IO[\"checked_output\"](ROOT, args.out)\n    if output.exists():\n        raise ValueError(\"audit output must be new\")\n    try:\n        audit_sources()\n        audit_development(env_for_gh())\n        audit_distribution()\n        OUT[\"result\"] = \"ORIGINALS_VERIFIED_NOT_FORMAL_ACCEPTANCE\"\n        status = 0\n    except Exception as error:\n        frame = traceback.extract_tb(error.__traceback__)[-1]\n        OUT[\"result\"] = \"ORIGINAL_AUDIT_ERROR\"\n        OUT[\"error\"] = {\"type\": type(error).__name__, \"message\": str(error), \"line\": frame.lineno, \"check\": frame.line}\n        status = 1\n    OUT[\"evaluator\"] = fingerprint(Path(__file__))\n    OUT[\"evaluator\"][\"source\"] = Path(__file__).read_text(encoding=\"utf-8\")\n    IO[\"write_json\"](ROOT, output, OUT)\n    print(json.dumps({\"result\": OUT[\"result\"], \"output\": str(output), \"checks\": len(OUT[\"checks\"]), \"error\": OUT.get(\"error\")}))\n    return status\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n"
+      },
+      "classification": "HARNESS_CHECK_SCOPE",
+      "explanation": "First reader counted all full-suite P38-R04 labels, including an existing ota_upgrade_page_test case. Corrected to the exact seven complete names in ota_service_upgrade_test.dart; product tests and criteria unchanged."
+    },
+    {
+      "id": "R04-ORIGINALS-2",
+      "command": "python -I -S -B -X utf8 .cache\\p38-r04-review-20261023\\audit_originals.py --out .cache\\p38-r04-review-20261023\\audit-attempt-2.json",
+      "exit_code": 0,
+      "file": {
+        "path": ".cache/p38-r04-review-20261023/audit-attempt-2.json",
+        "bytes": 539442,
+        "sha256": "26dbe6e4840d28587e86f119e89d649929cd2de16b6bfaab188ee973e555c834"
+      },
+      "result": "ORIGINALS_VERIFIED_NOT_FORMAL_ACCEPTANCE",
+      "checks": 344,
+      "evaluator": {
+        "path": ".cache/p38-r04-review-20261023/audit_originals.py",
+        "sha256": "6e8f5a86df61ca5fc0257b6076bb139325e940e8fb482bba94fb92e36dd2acbc",
+        "source_location": "r04-review-2026-10-23.json:evaluator.source"
+      }
+    },
+    {
+      "id": "R04-FIXTURE-FINAL",
+      "command": "git --no-optional-locks diff --no-ext-diff --no-textconv 596cc08b 8ede0920 -- app/bluetooth_flutter_Trace",
+      "exit_code": 0,
+      "output": "diff --git a/app/bluetooth_flutter_Trace/lib/pages/ota_upgrade_page.dart b/app/bluetooth_flutter_Trace/lib/pages/ota_upgrade_page.dart\nindex 58c7caf6..f4b811ec 100644\n--- a/app/bluetooth_flutter_Trace/lib/pages/ota_upgrade_page.dart\n+++ b/app/bluetooth_flutter_Trace/lib/pages/ota_upgrade_page.dart\n@@ -196,7 +196,9 @@ class _OtaUpgradePageState extends State<OtaUpgradePage>\n \n   void _reconcileFinishedTask() {\n     if (!mounted || _backgrounded || _reconcilingTask ||\n-        !_needsTaskReconcile || otaService.isUpgrading) return;\n+        !_needsTaskReconcile || otaService.isUpgrading) {\n+      return;\n+    }\n     // Cancellation releases its owner before publishing its final phase. A\n     // query must not take over that gap and suppress the cancellation result.\n     switch (otaService.phase) {\ndiff --git a/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart b/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart\nindex 3214ebd6..59b5ae6f 100644\n--- a/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart\n+++ b/app/bluetooth_flutter_Trace/test/ota/ota_service_upgrade_test.dart\n@@ -453,6 +453,9 @@ void main() {\n           if (service.isUpgrading) await service.cancelUpgrade(keepPackage: true);\n           await operation;\n         });\n+        // flutter_animate's delayed entrance callbacks outlive the disposed\n+        // widget briefly; drain them without disabling pending-timer checks.\n+        await tester.pump(const Duration(seconds: 1));\n       }\n     });\n   }\n"
+    }
+  ],
+  "preparation_failures": [
+    {
+      "operation": "System curl public metadata GET",
+      "exit_code": 35,
+      "diagnostic": "schannel AcquireCredentialsHandle / SEC_E_NO_CREDENTIALS",
+      "resolution": "Isolated Python urllib read-only GET succeeds; no credential/configuration change."
+    },
+    {
+      "operation": "Anonymous GitHub artifact ZIP GET",
+      "http_status": 401,
+      "resolution": "Existing gh auth token for Eitan-S-23 used only in child environment with gh api; no token printed, no auth switch, no persisted credential/configuration change."
+    },
+    {
+      "operation": "Read-only Node board excerpt",
+      "exit_code": 1,
+      "diagnostic": "cmd split unquoted JavaScript ||",
+      "resolution": "Read via isolated Python; no filesystem write occurred."
+    }
+  ],
+  "write_preflight": {
+    "initial": {
+      "root": "D:\\github\\my\\E-Track",
+      "outputs": [
+        {
+          "path": "D:\\github\\my\\E-Track\\.cache\\p38-r04-review-20261023\\audit_originals.py",
+          "exists": false
+        },
+        {
+          "path": "D:\\github\\my\\E-Track\\.cache\\p38-r04-review-20261023\\audit-attempt-1.json",
+          "exists": false
+        },
+        {
+          "path": "D:\\github\\my\\E-Track\\docs\\ota-exec-notes\\P3-8-preacceptance-2026-10-22\\r04-review-2026-10-23.json",
+          "exists": false
+        },
+        {
+          "path": "D:\\github\\my\\E-Track\\docs\\ota-exec-notes\\P3-8-preacceptance-2026-10-22\\r04-review-2026-10-23.commands.json",
+          "exists": false
+        },
+        {
+          "path": "D:\\github\\my\\E-Track\\docs\\ota-exec-notes\\P3-8-preacceptance-2026-10-22.md",
+          "exists": true
+        },
+        {
+          "path": "D:\\github\\my\\E-Track\\docs\\agent-collaboration\\index.md",
+          "exists": true
+        },
+        {
+          "path": "D:\\github\\my\\E-Track\\PLAN-OTA-EXEC.md",
+          "exists": true
+        }
+      ],
+      "baseline": [
+        {
+          "path": "docs/ota-exec-notes/P3-8-preacceptance-2026-10-22/commands.json",
+          "bytes": 7601,
+          "sha256": "0e3e2a390cd451151cdd9875cf0396ed637431d100b690655580ba2dba6a3356"
+        },
+        {
+          "path": "docs/ota-exec-notes/P3-8-preacceptance-2026-10-22/device-binding.pending.json",
+          "bytes": 735,
+          "sha256": "7ab1c0190788ddb95079334d9c302b97aabffb4dffc748dd6d73f8d8489445cc"
+        },
+        {
+          "path": "docs/ota-exec-notes/P3-8-preacceptance-2026-10-22/draft-validation.json",
+          "bytes": 5158,
+          "sha256": "29991e172f197ae8dc69cf16c68386d654a46d90b662d57b8ff0f9fdbd392b49"
+        },
+        {
+          "path": "docs/ota-exec-notes/P3-8-preacceptance-2026-10-22/evidence-audit.json",
+          "bytes": 75110,
+          "sha256": "4e971c1f1a858929b721dcaea30f1a23f4268015d9dcc40fc0bce00ddea6abf7"
+        },
+        {
+          "path": "docs/ota-exec-notes/P3-8-preacceptance-2026-10-22/evidence-matrix.draft.json",
+          "bytes": 3825,
+          "sha256": "814735cdf794fc6d9f20f8331df12273e6cb96a70861354fd706002fc2fa4d25"
+        },
+        {
+          "path": "docs/ota-exec-notes/P3-8-preacceptance-2026-10-22/remediation-review-2026-10-23.commands.json",
+          "bytes": 22765,
+          "sha256": "d4797d35ed21699f708c1c428f92ddfde95f2f8d6a75f4d33570e1d7034afc40"
+        },
+        {
+          "path": "docs/ota-exec-notes/P3-8-preacceptance-2026-10-22/remediation-review-2026-10-23.json",
+          "bytes": 90815,
+          "sha256": "68a638d4efc55b1c1dcfde4d6f9b016c634151ff3b0c1018033fac809c2ec4b8"
+        },
+        {
+          "path": "docs/acceptance-contracts/P3-8-v1.draft.contract.json",
+          "bytes": 13623,
+          "sha256": "a5c02d456bcb05c6360a3ecb79f65ca50b913d00f3daddadcfc52be91a889049"
+        },
+        {
+          "path": "docs/ota-exec-notes/P3-8-preacceptance-2026-10-22.md",
+          "bytes": 27941,
+          "sha256": "7f515579c457fd7fa484d24ecf85947481087896fb9fdc3b080d630c84b1d6c1"
+        },
+        {
+          "path": "docs/agent-collaboration/index.md",
+          "bytes": 2600,
+          "sha256": "aa4821cebe1e1542b50759000522c30fe0f87df56dc580b032cde165aefdce2c"
+        },
+        {
+          "path": "PLAN-OTA-EXEC.md",
+          "bytes": 639835,
+          "sha256": "a1480abda2c746d97e1094b1d5ca8332722e70132cef5465e89156dc2b8fe2f8"
+        }
+      ]
+    },
+    "final_outputs": [
+      "D:\\github\\my\\E-Track\\docs\\ota-exec-notes\\P3-8-preacceptance-2026-10-22.md",
+      "D:\\github\\my\\E-Track\\docs\\agent-collaboration\\index.md",
+      "D:\\github\\my\\E-Track\\PLAN-OTA-EXEC.md",
+      "D:\\github\\my\\E-Track\\docs\\ota-exec-notes\\P3-8-preacceptance-2026-10-22\\r04-review-2026-10-23.json",
+      "D:\\github\\my\\E-Track\\docs\\ota-exec-notes\\P3-8-preacceptance-2026-10-22\\r04-review-2026-10-23.commands.json"
+    ],
+    "archive_outputs": [
+      {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p38-r04-review-20261023\\tmp",
+        "exists": false
+      },
+      {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p38-r04-review-20261023\\gh-cache",
+        "exists": false
+      },
+      {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p38-r04-review-20261023\\archives",
+        "exists": false
+      },
+      {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p38-r04-review-20261023\\archives\\red-ubuntu.zip",
+        "exists": false
+      },
+      {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p38-r04-review-20261023\\archives\\red-windows.zip",
+        "exists": false
+      },
+      {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p38-r04-review-20261023\\archives\\red-behavior-ubuntu.zip",
+        "exists": false
+      },
+      {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p38-r04-review-20261023\\archives\\red-behavior-windows.zip",
+        "exists": false
+      },
+      {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p38-r04-review-20261023\\archives\\repair-first-ubuntu.zip",
+        "exists": false
+      },
+      {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p38-r04-review-20261023\\archives\\repair-first-windows.zip",
+        "exists": false
+      },
+      {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p38-r04-review-20261023\\archives\\green-ubuntu.zip",
+        "exists": false
+      },
+      {
+        "path": "D:\\github\\my\\E-Track\\.cache\\p38-r04-review-20261023\\archives\\green-windows.zip",
+        "exists": false
+      }
+    ],
+    "later_attempt_output": "D:/github/my/E-Track/.cache/p38-r04-review-20261023/audit-attempt-2.json",
+    "environment": {
+      "shell": "cmd.exe",
+      "python": "-I -S -B -X utf8",
+      "subprocess_cwd": "D:/github/my/E-Track",
+      "TEMP": "D:/github/my/E-Track/.cache/p38-r04-review-20261023/tmp",
+      "TMP": "D:/github/my/E-Track/.cache/p38-r04-review-20261023/tmp",
+      "GH_CACHE_DIR": "D:/github/my/E-Track/.cache/p38-r04-review-20261023/gh-cache",
+      "GH_DEBUG": "removed",
+      "GH_LOGFILE": "removed"
+    }
+  },
+  "writes": "Only the new reader, owned audit outputs, eight small immutable CI log ZIPs, review records, and P3-8 report/index/board updates. Original implementation/evidence and draft files are read-only.",
+  "closeout_checks": {
+    "command": "python -I -S -B -X utf8 .cache\\p38-r04-review-20261023\\verify_closeout.py",
+    "exit_code": 0,
+    "source": "import ast,hashlib,json,runpy\nfrom pathlib import Path\nroot=Path(\"D:/github/my/E-Track\")\nguard=runpy.run_path(str(root/\".agents/skills/e-track-flutter-debug/scripts/host_io.py\"))[\"checked_output\"]\nexpected=json.loads('[{\"path\":\"docs/ota-exec-notes/P3-8-preacceptance-2026-10-22/commands.json\",\"bytes\":7601,\"sha256\":\"0e3e2a390cd451151cdd9875cf0396ed637431d100b690655580ba2dba6a3356\"},{\"path\":\"docs/ota-exec-notes/P3-8-preacceptance-2026-10-22/device-binding.pending.json\",\"bytes\":735,\"sha256\":\"7ab1c0190788ddb95079334d9c302b97aabffb4dffc748dd6d73f8d8489445cc\"},{\"path\":\"docs/ota-exec-notes/P3-8-preacceptance-2026-10-22/draft-validation.json\",\"bytes\":5158,\"sha256\":\"29991e172f197ae8dc69cf16c68386d654a46d90b662d57b8ff0f9fdbd392b49\"},{\"path\":\"docs/ota-exec-notes/P3-8-preacceptance-2026-10-22/evidence-audit.json\",\"bytes\":75110,\"sha256\":\"4e971c1f1a858929b721dcaea30f1a23f4268015d9dcc40fc0bce00ddea6abf7\"},{\"path\":\"docs/ota-exec-notes/P3-8-preacceptance-2026-10-22/evidence-matrix.draft.json\",\"bytes\":3825,\"sha256\":\"814735cdf794fc6d9f20f8331df12273e6cb96a70861354fd706002fc2fa4d25\"},{\"path\":\"docs/ota-exec-notes/P3-8-preacceptance-2026-10-22/remediation-review-2026-10-23.commands.json\",\"bytes\":22765,\"sha256\":\"d4797d35ed21699f708c1c428f92ddfde95f2f8d6a75f4d33570e1d7034afc40\"},{\"path\":\"docs/ota-exec-notes/P3-8-preacceptance-2026-10-22/remediation-review-2026-10-23.json\",\"bytes\":90815,\"sha256\":\"68a638d4efc55b1c1dcfde4d6f9b016c634151ff3b0c1018033fac809c2ec4b8\"},{\"path\":\"docs/acceptance-contracts/P3-8-v1.draft.contract.json\",\"bytes\":13623,\"sha256\":\"a5c02d456bcb05c6360a3ecb79f65ca50b913d00f3daddadcfc52be91a889049\"}]')\ndef fp(path):\n    path=guard(root,path)\n    b=path.read_bytes()\n    return {\"path\":path.relative_to(root).as_posix(),\"bytes\":len(b),\"sha256\":hashlib.sha256(b).hexdigest()}\nfor item in expected:\n    assert fp(root/item[\"path\"])==item, item[\"path\"]\nevidence=root/\"docs/ota-exec-notes/P3-8-preacceptance-2026-10-22/r04-review-2026-10-23.json\"\nrecord=json.loads(evidence.read_text())\ncommands=root/\"docs/ota-exec-notes/P3-8-preacceptance-2026-10-22/r04-review-2026-10-23.commands.json\"\njson.loads(commands.read_text())\nassert record[\"result\"]==\"ORIGINALS_VERIFIED_NOT_FORMAL_ACCEPTANCE\"\nassert record[\"formal_acceptance\"]==\"NOT_RUN\"\nassert len(record[\"checks\"])==344\nassert record[\"source\"][\"identities\"][record[\"candidate\"]][\"app_tree\"]==record[\"source\"][\"identities\"][record[\"delivery\"]][\"app_tree\"]\nreader=root/record[\"evaluator\"][\"path\"]\nassert fp(reader)=={k:record[\"evaluator\"][k] for k in (\"path\",\"bytes\",\"sha256\")}\nassert reader.read_text(encoding=\"utf-8\")==record[\"evaluator\"][\"source\"]\nast.parse(reader.read_text(encoding=\"utf-8\"),filename=str(reader))\nartifacts=[]\nfor archive in record[\"archives\"]:\n    artifacts.append({k:archive[k] for k in (\"path\",\"bytes\",\"sha256\")})\n    artifacts.extend(archive[\"members\"])\nartifacts.extend(record[\"distribution\"])\nartifacts.append(record[\"unchanged_native_original\"][\"file\"])\nfor item in artifacts:\n    assert fp(root/item[\"path\"])==item, item[\"path\"]\nboard=(root/\"PLAN-OTA-EXEC.md\").read_bytes().splitlines(keepends=True)\nassert len(board)==1288\nprojection=b\"\".join(s for i,s in enumerate(board) if i not in (776,786,1287))\nassert hashlib.sha256(projection).hexdigest()==\"f6b4983ab14241819b75c3fef85839381bfabc52a37ad6da53c3ce10df778a1b\"\nfor path in (evidence,commands,reader):\n    raw=path.read_bytes()\n    assert raw.isascii(),str(path)\n    assert not any(s.rstrip()!=s for s in raw.splitlines()),str(path)\nown=root/\".cache/p38-r04-review-20261023\"\nowned=list(own.rglob(\"*\"))\nfor path in [own,*owned,evidence,commands,root/\"docs/ota-exec-notes/P3-8-preacceptance-2026-10-22.md\",root/\"docs/agent-collaboration/index.md\",root/\"PLAN-OTA-EXEC.md\"]:\n    guard(root,path)\nreport=(root/\"docs/ota-exec-notes/P3-8-preacceptance-2026-10-22.md\").read_text(encoding=\"utf-8\")\nassert report.count(\"## R04 Re-review 2026-10-23\")==1\nassert \"formal acceptance remains NOT_RUN\" in report\nprint(json.dumps({\"result\":\"PASS\",\"checks\":{\"preserved_original_and_draft_files\":len(expected),\"artifact_fingerprints\":len(artifacts),\"board_unrelated_bytes_unchanged\":True,\"json_parse\":True,\"python_ast\":True,\"reader_bytes_and_recorded_source\":True,\"ascii_and_whitespace\":True,\"same_app_tree\":True,\"formal_status_not_run\":True},\"owned_files\":[fp(p) for p in owned if p.is_file()],\"review_record\":fp(evidence),\"output_boundary\":\"D:/github/my/E-Track\",\"new_device_operations\":0,\"new_builds\":0},indent=2))\n",
+    "output": {
+      "result": "PASS",
+      "checks": {
+        "preserved_original_and_draft_files": 8,
+        "artifact_fingerprints": 66,
+        "board_unrelated_bytes_unchanged": true,
+        "json_parse": true,
+        "python_ast": true,
+        "reader_bytes_and_recorded_source": true,
+        "ascii_and_whitespace": true,
+        "same_app_tree": true,
+        "formal_status_not_run": true
+      },
+      "owned_files": [
+        {
+          "path": ".cache/p38-r04-review-20261023/audit-attempt-1.json",
+          "bytes": 379374,
+          "sha256": "f68ca97084876698546e345014c9388c2ce3423b1ee68518dec3c0b6432383e7"
+        },
+        {
+          "path": ".cache/p38-r04-review-20261023/audit-attempt-2.json",
+          "bytes": 539442,
+          "sha256": "26dbe6e4840d28587e86f119e89d649929cd2de16b6bfaab188ee973e555c834"
+        },
+        {
+          "path": ".cache/p38-r04-review-20261023/audit_originals.py",
+          "bytes": 19550,
+          "sha256": "6e8f5a86df61ca5fc0257b6076bb139325e940e8fb482bba94fb92e36dd2acbc"
+        },
+        {
+          "path": ".cache/p38-r04-review-20261023/verify_closeout.py",
+          "bytes": 4442,
+          "sha256": "7a67410bd3805e79a89acc3105897cf22abef4a570a432ea41321650f64925d5"
+        },
+        {
+          "path": ".cache/p38-r04-review-20261023/archives/green-ubuntu.zip",
+          "bytes": 196196,
+          "sha256": "3074ce49d04d4410d3095034cb2cdf4be3af6fe9fe17d2507a4038df57901969"
+        },
+        {
+          "path": ".cache/p38-r04-review-20261023/archives/green-windows.zip",
+          "bytes": 203970,
+          "sha256": "9c2272e899cccc86ecc9cb9689fc18fb9bea7debf610b3438214c10cd0f5226c"
+        },
+        {
+          "path": ".cache/p38-r04-review-20261023/archives/red-behavior-ubuntu.zip",
+          "bytes": 193250,
+          "sha256": "c073cee4283a622151ae0bd01cc8cfa5d164634ed64b541df8af22f13a24d602"
+        },
+        {
+          "path": ".cache/p38-r04-review-20261023/archives/red-behavior-windows.zip",
+          "bytes": 196089,
+          "sha256": "29f5333915b354e3897c2f021b812b24e701b742df84f0ad140fb54705fe7784"
+        },
+        {
+          "path": ".cache/p38-r04-review-20261023/archives/red-ubuntu.zip",
+          "bytes": 117322,
+          "sha256": "385d78477c81f2ae18655fd951f77715b4e4114056b8c41bd6b39028dc4813c1"
+        },
+        {
+          "path": ".cache/p38-r04-review-20261023/archives/red-windows.zip",
+          "bytes": 112362,
+          "sha256": "e3a23cdcc75812ca1c5c53938c577628bd118fe7ce73d0c074f4305235ddb7ac"
+        },
+        {
+          "path": ".cache/p38-r04-review-20261023/archives/repair-first-ubuntu.zip",
+          "bytes": 196670,
+          "sha256": "bcd5461f548bff490cd934a7cc559721446fefce26a4a799b379e4e9ca3a1917"
+        },
+        {
+          "path": ".cache/p38-r04-review-20261023/archives/repair-first-windows.zip",
+          "bytes": 204171,
+          "sha256": "cd86dd154e94e7a234b24210cb3274f568c9bd9c7f8ed689006e84534952ed02"
+        }
+      ],
+      "review_record": {
+        "path": "docs/ota-exec-notes/P3-8-preacceptance-2026-10-22/r04-review-2026-10-23.json",
+        "bytes": 460681,
+        "sha256": "1b4643a78827101a992089b252e0b9fea72b25ff808b3b524e487cef1e06a61f"
+      },
+      "output_boundary": "D:/github/my/E-Track",
+      "new_device_operations": 0,
+      "new_builds": 0
+    },
+    "text_preservation": {
+      "historical_report_body_unchanged": true,
+      "index_other_rows_unchanged": true,
+      "latest_heading_line": 396,
+      "new_report_chars": 37288
+    },
+    "whitespace_check": {
+      "command": "git --no-optional-locks -c core.whitespace=cr-at-eol diff --check -- PLAN-OTA-EXEC.md docs/agent-collaboration/index.md docs/ota-exec-notes/P3-8-preacceptance-2026-10-22.md",
+      "exit_code": 0,
+      "output": "warning: in the working copy of 'docs/agent-collaboration/index.md', LF will be replaced by CRLF the next time Git touches it\n"
+    },
+    "initial_invocation_failure": {
+      "exit_code": 1,
+      "reason": "Windows command-line length limit prevented the long inline read-only verifier from starting. Same source saved under the already-approved project root and executed successfully; no checks removed."
+    },
+    "boundary_note": "The added verifier path was independently preflighted before creation. All child gh TEMP/TMP/cache paths were project-local; no PowerShell, persistent configuration update, cleanup or device process was used."
+  },
+  "non_actions": [
+    "No App/Gradle build or new test execution",
+    "No CI dispatch/rerun",
+    "No device operation or installation",
+    "No product edit, commit, push, main integration or deployment",
+    "No cleanup/deletion or known project-external output"
+  ]
+}

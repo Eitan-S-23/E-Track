@@ -10,6 +10,38 @@ because configuration values exist or the provider accepts a message.
 
 ## Owner-Selected Mailbox Route (Activation Last)
 
+### Preferred Local Input (Owner-Delegated Configuration)
+
+The owner now delegates Cloudflare configuration to the agent. Do not require
+the owner to navigate three dashboards. On the existing Windows host, open
+`configure-account-mail.cmd` at the project root, enter the full sender mailbox,
+then a fresh SMTP authorization code at the hidden prompt. No password/code is
+accepted through chat, command-line arguments or a plaintext input file.
+
+The launcher uses `python -I -S -B Tools/cloudflare/configure_account_mail.py
+--configure`; the agent's preparation uses `--check` without any mailbox input.
+It reuses CF-CI-01 and the existing local proxy, preflights the exact Worker and
+two Pages projects, and writes only the three mail secrets below. Production-only
+Pages PATCH preserves the existing configuration hash and all unrelated/Preview
+settings. No credential values are stored locally; sanitized progress receipts
+are in `.cache/account-mail-activation/`. A provider-only setting from earlier
+dashboard preparation is allowed, but existing mailbox credentials stop an
+initial setup so partial writes can be reconciled rather than blindly repeated.
+
+Configuration is not deployment or email delivery. The launcher deliberately
+does not redeploy, send mail, enable required verification, create an account or
+change a password. After entry, the owner reports only the displayed outcome.
+The agent then activates affected Pages through the existing pinned-source
+deployment route with Worker/migrations excluded, verifies readiness at all
+three targets, and sends one registration-code email to the approved recipient.
+Only actual inbox/spam receipt qualifies delivery; registration/reset tests and
+an owner-approved required-email switch remain separate.
+
+The dashboard instructions below remain an optional manual route, not required
+owner work for the delegated setup.
+
+### Settings And Manual Alternative
+
 The owner selected a mailbox route without purchasing a domain. No mailbox has
 been configured or used for sending. The provided test recipient is not assumed
 to be the sender. Prefer a dedicated project QQ/Foxmail mailbox.
@@ -120,6 +152,24 @@ for future password recovery; the address remains unverified until proved.
 - A successful reset verifies mailbox possession and revokes existing sessions.
 
 ## Live Completion
+
+Subsequent owner feedback confirms actual receipt of the test email. The code was
+not stored or used; see owner-inbox-confirmed.json beside the original send-test
+receipt. This closes delivery, not App registration/reset/session validation.
+Required registration email remains disabled. For an App verification flow,
+request a fresh code inside that flow so it has the matching verificationId;
+the host smoke-test message is not an App-issued challenge.
+
+2026-11-22 live checkpoint: owner entered the mailbox settings through the local
+launcher; all three target settings and unrelated configuration checks passed.
+Pages-only Actions 45028304682 activates existing backend source 95470e8e,
+without Worker/schema operations. Real Admin/Worker/Public checks report mail
+available and required verification disabled. One Public registration-email
+request to the owner-approved test recipient was accepted by the application
+and QQ SMTP at 13:45 UTC. Inbox receipt and controlled registration/reset are
+still unverified. Do not rerun setup, send another test automatically, create a
+test account, or change a real password. See root deployment memory and
+`.cache/account-mail-activation/send-test-01/result.json` for this checkpoint.
 
 After the owner supplies approved inputs, configure only these named settings via
 the existing protected Cloudflare route. Then read auth status through both

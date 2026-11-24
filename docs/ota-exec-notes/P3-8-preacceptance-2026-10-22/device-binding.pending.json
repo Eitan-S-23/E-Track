@@ -1,0 +1,22 @@
+{
+  "schema": "p38-device-binding-pending-v1",
+  "status": "UNBOUND_NOT_AUTHORIZED_NOT_EVIDENCE",
+  "phone_serial": null,
+  "android_build": null,
+  "installed_apk_sha256": null,
+  "installed_signer_sha256": null,
+  "mcu_app_raw_sha256": null,
+  "mcu_boot_sha256": null,
+  "bcb_staging_state": null,
+  "etu_sha256": null,
+  "etu_bytes": null,
+  "source_version": null,
+  "target_version": null,
+  "target_full_raw_sha256": null,
+  "observer_identity": null,
+  "recovery_assets": null,
+  "device_operator": null,
+  "device_authority": null,
+  "execution_allowed": false,
+  "notes": "Planning placeholder only. Replace with observed identities and explicit operating authority before freezing. No device operation has been performed."
+}

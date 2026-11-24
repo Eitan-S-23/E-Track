@@ -215,3 +215,244 @@ remained after the run.
 P1-6 remains `进行中`. Even after all automatic rows pass, the six physical
 rows remain pending until actually executed. Only a different non-implementation
 session may independently accept all 20 rows and mark the card complete.
+
+## 9. Physical power-cut preparation (2026-11-24)
+
+Preparation owner: Codex root / `P16-PHYSICAL-PREP-20261124`.
+Source entry: main `13518dc76200418c7ff7dc143c9b4e4e91d4f4eb`,
+matched to fresh remote main. Existing pending documents are preserved.
+The owner requests starting the preparation and notification when physical
+help is needed. This is not a new formal execution or Boot-replacement grant.
+
+Status: `PREPARATION_ONLY`; no device command, shutdown, reset, flash,
+installation, power cut, CI, commit or push has been performed in this step.
+The six PHYSICAL rows remain unobserved. The earlier 14 AUTO results remain
+historical evidence; a later formal successor must evaluate their dependencies
+and original anchors, not replay them merely because the operator changed.
+The original P1-6-v3 bundle is at Git object
+`362653bb38d6fd1f9fb9bdca0339c1a6d6e77547`,
+`docs/acceptance-contracts/P1-6-v3/final-matrix.json`.
+
+### Source and tool constraints
+
+- The already inspected `PCB/Trace.enet` routes normal USB/battery power
+  through the U21/Q9 latch to U17 and `3V3_MCU`. The MCU, BCB EEPROM and
+  external Flash share that switched rail. A separate bench supply is not
+  a prerequisite and does not remove the need to press the start key.
+- H2 pin 6 is wired directly to `3V3_MCU`. A debugger supply there could
+  bypass the latch; a VTref-only connection is different. Actual cable
+  wiring is unknown. The USB-powered CH340N signal path also needs a
+  residual-voltage check. These are unmeasured possibilities, not defects.
+- `HAL::Power_Shutdown()` sets a request; the App event monitor later
+  drives PD2 low. This is not an established host remote-power API, and
+  that App monitor does not run during Boot apply/rollback.
+- `boot_platform_flash_erase_4k()` calls the blocking vendor erase routine.
+  Calling shutdown after it returns cannot prove power loss during erase.
+  A qualified trigger must account for instruction stalls and rail decay,
+  rather than assume an interrupt or host command hits the required window.
+- `Tools/jlink/test-p1-6-matrix.ps1` only admits AUTO rows and binds the
+  old 138-block assets. It was inspected, not executed. Do not use its
+  reset points or old production restore as a current physical-test route.
+  Reuse applicable control decoding and standard J-Link operations rather
+  than creating a replacement flasher.
+- A host process-name snapshot found no matching debugger/RTT/serial
+  collector. This is not proof of exclusive physical ownership. Actual
+  board identity, storage state, supply and ownership remain unchecked.
+
+### Next actions and stop conditions
+
+1. Ask the owner which USB, battery and J-Link connections are present,
+   whether the debugger has a 3.3 V supply lead, and whether a multimeter
+   or oscilloscope is available. Do not ask for the netlist again or
+   request unplugging anything before resolving the connections.
+2. Identify the actual board/firmware, confirmed BCB and staging state
+   through a qualified bounded route before a mutation. Resolve recording
+   and storage-idle conditions, exact original assets/readbacks and supported
+   recovery first; never assume candidate 3.3.52 is currently installed.
+3. Prepare the first idle power check with an external voltage observation
+   on `3V3_MCU` relative to GND, a known shutdown route and owner key restart.
+   Confirm header orientation before probing. A multimeter can screen
+   residual DC power, not certify millisecond write-window timing. Screen
+   blanking, lost BLE/SWD and RTC backup power are not main-rail evidence.
+4. If the idle check proves true shutdown and repeatable restart, qualify
+   a trigger and synchronized voltage/write-activity capture before the six
+   faults. Use applicable device thresholds and real transaction timing.
+   Do not start erase/write faults without this observation route. A test
+   Boot, if necessary, needs a specifically bounded installation/restoration
+   authorization; otherwise compare the minimum independent cutoff fixture.
+5. Before physical execution, bind the exact inputs, protected regions,
+   finite cells, deadlines, restoration and raw evidence to the existing
+   task and acceptance route. Rows 03/05/07 must end at V1/H1; 15/16/17 at
+   V0/H0, with the required state trajectory and confirmation. Unknown
+   timing, unverified backup, conflicting ownership or unexpected device
+   state stops dependent actions. J-Link rescue restores safety, not PASS.
+
+No voltage trace, actual cutoff latency or new hardware result exists yet.
+Only these preparation notes and the bounded board entry were edited.
+Physical execution and independent acceptance remain separate next stages.
+
+### Owner wiring follow-up (2026-11-24)
+
+`P16-WIRING-20261124`: the owner confirms that both J-Link and USB are
+currently connected and each can independently power the working MCU.
+No multimeter or oscilloscope is available. These facts resolve the broad
+supply/instrument question above; do not ask it again. Battery connection
+and the exact debugger connector/power-versus-reference wiring have not
+been independently established.
+
+With two independent supply paths, cutting only one or issuing the App
+shutdown request does not establish main-rail power loss. The next physical
+prerequisite is identifying the actual J-Link connector and whether its
+supply can be isolated while retaining valid SWD, ground and any required
+reference connection. Request a clear connection/label photograph, not
+another schematic. Do not tell the owner to pull an unidentified VCC/VTref
+wire, change wiring while powered, or try a generic debugger power command.
+No controllable supply capability of this particular probe is established.
+
+The six write-in-flight cases stay NOT_OBSERVED. First qualify the cutoff
+and synchronized rail/transaction observation, using borrowed measurement
+equipment or a separately validated fixture if necessary. A reset, manual
+USB pull, dark screen or lost debugger connection is not a substitute.
+There is still no reason to purchase an additional bench power supply.
+No target connection, power command, shutdown, reset, flash or physical
+experiment was performed while recording this reply.
+
+### USB-powered J-Link read check (2026-11-24)
+
+`P16-JLINK-USB-ONLY-01`: the owner reports removing J-Link's 3V3 wire
+and authorizes checking whether the debugger remains usable with USB power.
+This is a bounded connection/read check, not power-loss fault injection.
+No matching debugger process was present in the host snapshot. Enumerate
+the probe first, require a single identified USB probe, then use the standard
+SEGGER Commander at SWD 1000 kHz with generic CORTEX-M4 and GUI disabled.
+Read CPUID (0xE000ED00), DHCSR (0xE000EDF0, twice) and four App vector words
+(0x08010000). No halt, reset, flash, RAM write, target-power or fault command
+is permitted; do not retry an uncertain target result. Deadlines are 20 s
+for probe enumeration and 30 s for the target read. Fresh logs/settings/temp
+are contained in `.cache/p1-6-power-preflight-20261124/jlink-usb-only-01/`.
+The existing SEGGER native-history exception applies; it is not permission
+to change probe supply configuration. A readable target proves SWD access,
+not absence of signal backfeed, rail discharge or write-in-flight coverage.
+
+Outcome: `TARGET_MEMORY_READ_OK`, one enumeration and one target session,
+both exit 0. The probe identifies as ARM-OB STM32 (2012 firmware); SW-DP is
+0x2BA01477 and CPUID is 0x410FC241. App vectors read as
+`20058000 0801BFAD 0801C037 0801C037`. DHCSR is 0x01010001 in both samples
+250 ms apart: S_HALT/S_LOCKUP clear, instruction-retirement activity present.
+The SDK log contains no reset, halt or power-control call and no debugger
+process remains. Native JLinkDLL.ini contents are unchanged. Commander reports
+VTref=3.300 V, which is not independently validated rail-voltage evidence for
+this probe. No programming or whole-App health test was requested or performed.
+Original console/SDK logs and `result.json` are in the fresh directory above.
+The existing six PHYSICAL rows remain NOT_OBSERVED.
+
+### Idle shutdown route preparation (2026-11-24)
+
+`P16-IDLE-POWER-01`: continue the owner-authorized preparation after the
+successful USB-only J-Link read. The next experiment is a normal idle
+shutdown/restart screen, not any PHYSICAL matrix row. Current source routes
+the long-press through `HAL::Power_Shutdown()`; the event monitor calls
+`App_Uninit()`, which requests configuration/storage save and recorder stop
+before releasing POWER_EN. No ready host shutdown command was found.
+
+Use the ordinary owner key action instead of a guessed RAM request address,
+forced PC/function call, direct GPIO cutoff or new firmware. Existing ELF
+discovery does not bind an artifact to the installed image. Do not infer
+live recording, BCB or staging state from a header or from source alone.
+
+Before asking for the key action, collect one bounded read-only header/core
+baseline in `.cache/p1-6-power-preflight-20261124/idle-power-01/`: CPUID,
+DHCSR and the 96-byte fw_header at 0x08010400. Use the already verified
+single USB probe and standard Commander route, with a 30 s deadline.
+No halt/reset/flash/power or target-memory write command is included.
+Owner action will require no active recording, upgrade or file transfer;
+leave USB and J-Link wiring unchanged, shut down normally, and report the
+screen state before powering back on. Then inspect debugger availability
+once and arrange the normal key restart. If the state is uncertain, stop;
+do not blindly retry or claim lost SWD proves electrical power removal.
+
+The owner has no external measuring instrument. This screen can establish
+normal shutdown/restart behavior and debugger availability only. It cannot
+certify rail decay, lack of backfeed or a write-in-flight fault. The six
+PHYSICAL rows remain NOT_OBSERVED until a qualified observation/trigger route
+exists. No automatic or manual shutdown has yet occurred in this stage.
+
+Before-action result: Commander exits 0 and reads a CRC-valid fw_header with
+version_code=30351 (3.3.51), image_bytes=635860, hardware_rev=1 and layout=1.
+The header-stored image SHA-256 is
+`d5c14bdb028bb598dd15ae51b9629f2db9d950aa378456d15bff320899fc3112`;
+the complete image was not read or verified in this screen. DHCSR=0x01010001
+shows execution activity without halt/lockup. Original result and raw header
+are `idle-power-01/before-result.json` and `idle-power-01/fw-header.bin`.
+No shutdown, reset, halt, program/BCB write or supply command was sent.
+Next owner action: only when no recording, upgrade or file transfer is active,
+long-press the normal power key, release it on the shutdown indication, keep
+USB/debug wiring unchanged, and report the screen state without restarting.
+Releasing the key matters because the key itself can sustain the power latch.
+
+### Automatic idle request qualification (2026-11-24)
+
+`P16-IDLE-AUTO-01` supersedes the manual-shutdown request above, which was
+cancelled in conversation. The owner requested continuing with the existing
+switch circuit, USB supply and J-Link 3V3 lead disconnected, without assuming
+an oscilloscope is necessary. Do not ask for the cancelled manual-shutdown
+experiment again. Physical key restart is still needed after actual shutdown.
+
+The exact 3.3.51 artifacts were retrieved once from CI run `45176505831`,
+artifact `14818886769`, source `ddc0a638ecbe34cb874e15dca51f33ed98360182`.
+Original receipt: `.cache/p1-6-power-preflight-20261124/keyring-artifacts-01/result.json`.
+The finalized App is 635860 bytes, raw SHA-256
+`7d2af1699caaa5887ed6e07cc9a4ca96e079153e7bea602f9f3362ecba18f89a`.
+The matching ELF and map are retained under that receipt's `download/source/app/`.
+No rebuild, release, cloud mutation or repeat download is required.
+
+First collect one 90-second-bounded read-only Commander snapshot in
+`.cache/p1-6-power-preflight-20261124/idle-auto-01/`, with the existing
+single-probe, generic CORTEX-M4, 1000-kHz route. Compare the full installed App
+to the finalized artifact before trusting its RAM layout; preserve the complete
+64-KiB Boot region without changing it. Two live samples cover recording,
+BLE session/ISR activity, companion install-pending/phase, SD import state,
+overlay ownership, cached confirmation, shutdown request/once guard and callback.
+The confirmation sample is the App's startup/confirmation cache, not a new raw
+EEPROM BCB arbitration. Do not mislabel it as a persistent-state readback.
+
+Exact ELF disassembly resolves the shutdown request at `0x2000456B`, one byte,
+and the normal `App_Uninit` Thumb callback at `0x08030C09`. These are qualified
+addresses only after whole-image matching. A possible later one-byte request
+of `1` invokes the existing event monitor and normal save/shutdown path; it
+is not a function call, remote API, GPIO cutoff or Boot fault injection.
+It does not set `Power_Shutdown`'s separate execute-once flag. A host one-shot
+receipt must prevent repeats, and both request and once flag must initially
+be clear. No request write is included in this first snapshot.
+
+The snapshot stops on identity mismatch, a busy/unexpected state, conflicting
+debugger ownership or uncertain result. No halt/reset, EEPROM/BCB/Flash write,
+Boot replacement or recovery command is authorized by this idle qualification.
+Expected later normal shutdown side effects are the existing configuration and
+storage saves, recorder stop and backlight fade before POWER_EN release.
+All six PHYSICAL rows remain NOT_OBSERVED; functional shutdown alone cannot
+prove the required write-in-flight interruption or voltage-decay timing.
+
+Qualification outcome: `TARGET_CONNECT_FAILED_WITH_RESET_FALLBACK`.
+Commander identified the existing USB probe but failed to connect to the MCU
+and exited 1. Its original console and SDK logs contain
+`Connect fallback: Reset via Reset pin & Connect.` This was automatic vendor
+behavior inside `JLINK_Connect`, not an explicit reset in the command file.
+The no-reset assumption did not hold on connection failure. Whether the target
+actually reset is unobserved; this must not be reported as zero reset attempts.
+
+No savebin command ran, so no full App/Boot or live-state sample was obtained.
+No shutdown request, target RAM write or programming command was sent. The
+owned process exited and no debugger remained; native JLinkDLL.ini contents
+were unchanged. `idle-auto-01/result.json` retains the original UNKNOWN result;
+`connection-review.json` records this interpretation without rewriting it.
+
+Stop further target access and retire this connection invocation for the
+no-reset idle check. Do not replay it just to obtain a successful snapshot.
+Before another session, qualify a vendor no-reset-fallback connection route
+and reconcile the actual powered/running state with the owner. Ask only whether
+the screen is currently usable; if off, the owner can start normally with the
+power key while leaving USB and the existing wiring unchanged. There is no
+request to remove power, reconnect J-Link 3V3 or obtain measuring instruments.
+The normal automatic-shutdown experiment and all six PHYSICAL rows remain
+unexecuted. These documentation changes are local only, with no commit/push.

@@ -1,0 +1,99 @@
+{
+  "schema": "etrack-evidence-matrix-v2",
+  "contract_id": "P3-8-v1",
+  "contract_sha256": "A5C02D456BCB05C6360A3ECB79F65CA50B913D00F3DADDADCFC52BE91A889049",
+  "round_id": "P3-8-DRAFT-NOT-EXECUTED",
+  "overall_result": "NOT_RUN",
+  "previous_matrix_sha256": null,
+  "rerun_plan_path": null,
+  "rerun_plan_sha256": null,
+  "criteria": [
+    {
+      "id": "P38-SOFTWARE",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Unexecuted template entry, not an EXECUTED PASS. No formal command has run. Blocked from freezing by the consolidated source findings and explicitly unbound physical/execution inputs."
+    },
+    {
+      "id": "P38-FALLBACK",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Unexecuted template entry, not an EXECUTED PASS. No formal command has run. Blocked from freezing by the consolidated source findings and explicitly unbound physical/execution inputs."
+    },
+    {
+      "id": "P38-BACKGROUND",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Unexecuted template entry, not an EXECUTED PASS. No formal command has run. Blocked from freezing by the consolidated source findings and explicitly unbound physical/execution inputs."
+    },
+    {
+      "id": "P38-NOTIFICATION",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Unexecuted template entry, not an EXECUTED PASS. No formal command has run. Blocked from freezing by the consolidated source findings and explicitly unbound physical/execution inputs."
+    },
+    {
+      "id": "P38-RECOVERY",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Unexecuted template entry, not an EXECUTED PASS. No formal command has run. Blocked from freezing by the consolidated source findings and explicitly unbound physical/execution inputs."
+    },
+    {
+      "id": "P38-FINAL-IDENTITY",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Unexecuted template entry, not an EXECUTED PASS. No formal command has run. Blocked from freezing by the consolidated source findings and explicitly unbound physical/execution inputs."
+    },
+    {
+      "id": "P38-CLEANUP",
+      "result": "NOT_OBSERVED",
+      "failure_owner": null,
+      "execution": "EXECUTED",
+      "reused_from_round": null,
+      "origin_contract_sha256": null,
+      "origin_matrix_sha256": null,
+      "observed": null,
+      "evidence": [],
+      "notes": "Unexecuted template entry, not an EXECUTED PASS. No formal command has run. Blocked from freezing by the consolidated source findings and explicitly unbound physical/execution inputs."
+    }
+  ],
+  "evidence_hashes": {},
+  "commands": [],
+  "artifacts": []
+}

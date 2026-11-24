@@ -1,0 +1,20 @@
+--- a/USER/HAL/HAL.cpp
++++ b/USER/HAL/HAL.cpp
+@@ -3,6 +3,7 @@
+ #include "HAL/HAL_OTA_Staging.h"
+ #include "App/Version.h"
+ #include "MillisTaskManager/MillisTaskManager.h"
++#include "HAL/ota_pump_cadence.h"
+ 
+ #if CONFIG_DEBUG_RTT_ENABLE
+ HAL_RTT_Stream RTTSerial;
+@@ -165,5 +166,9 @@
+ 
+ void HAL::HAL_Update()
+ {
++#if CONFIG_OTA_ACTIVE_PUMP
++    taskManager.SetIntervalTime(BT_OtaPump,
++        ota_pump_period(OTA_OverlayIsBleOwned(), CONFIG_OTA_BLE_PUMP_PERIOD_MS));
++#endif
+     taskManager.Running(millis());
+ }

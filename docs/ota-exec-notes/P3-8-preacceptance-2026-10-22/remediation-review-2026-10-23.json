@@ -1,0 +1,1872 @@
+{
+  "schema": "p38-independent-remediation-review-v1",
+  "reviewed_on": "2026-10-23",
+  "mode": "Independent concentrated remediation pre-review under acceptance execution contract sections 0 and 7.3; not a formal execution round.",
+  "candidate": "27048aa10079d8dd01d608967e7b5d1b473861ba",
+  "candidate_tree": "5b004d20c083abffefa364f62ce6f3f00d79400e",
+  "previous_candidate": "5d2a0fa6fee9d58a608a068a7bff9f3d8e31f3a9",
+  "handoff_commit": "6b7601e79a422fbfb905a5c94241a2bdc5466bf5",
+  "app_subtree_both_commits": "492fb8e35f33012127aa8adf61a22e3d592f483d",
+  "profile_config_blob": "5ef97ae98674373c3cf641676c16ff7baf1b617f",
+  "source_blobs": {
+    "app/bluetooth_flutter_Trace/lib/services/ota_service.dart": "e66ee8f92f8de2d350cc93015835040f9dd8599f",
+    "app/bluetooth_flutter_Trace/lib/pages/ota_upgrade_page.dart": "c16ff1c13720a0493628ec6855bd5bdce3eb1031",
+    "app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart": "0db69bb5a671817c7e004cad7603fd7b09f17972",
+    "app/bluetooth_flutter_Trace/android/app/src/main/kotlin/com/wen/gaia/gaia/MainActivity.kt": "f841811d2a5a6ee916538b876e7ae57fcb1cf6a1",
+    "app/bluetooth_flutter_Trace/android/app/src/main/kotlin/com/wen/gaia/gaia/DeviceOtaBridge.kt": "c1a89e635b39248015e8f696ff493a367c7a3dc5",
+    "app/bluetooth_flutter_Trace/pubspec.lock": "8e3bd33ce99550e110bab40409ad3c541dae4a98"
+  },
+  "disposition": [
+    {
+      "id": "P38-R01",
+      "result": "CLOSED_IN_REMEDIATION_PREVIEW",
+      "basis": "Recovery epoch plus eligibility checks after waits and before unpausing; original full CI exercises held-discovery/INFO second-pause regressions."
+    },
+    {
+      "id": "P38-R02",
+      "result": "CLOSED_IN_REMEDIATION_PREVIEW",
+      "basis": "Both initial and new internal Intents are stripped of URI before the embedding; real MainActivity entry and service-key checks are exercised by five added SDK-34 Robolectric cases."
+    },
+    {
+      "id": "P38-R03",
+      "result": "CLOSED_IN_REMEDIATION_PREVIEW",
+      "basis": "The foreground gate uses the original absolute reboot deadline and has a 400 ms injected-window regression with no new probe and terminal cleanup."
+    },
+    {
+      "id": "P38-R04",
+      "result": "REMAINS_REQUIRED",
+      "priority": "P2",
+      "classification": "Source defect in the first remediation; a static timing finding, not a newly executed PRODUCT_FAIL.",
+      "basis": "The real readDeviceInfo takes _runExclusive, which synchronously emits busy before incrementing the owner epoch. The page sees the old task key and rearms _needsTaskReconcile during its own reconciliation. The matching idle event is ignored by _reconcilingTask, leaving controls disabled.",
+      "runtime_regression": "NOT_RUN"
+    }
+  ],
+  "r04_source_evidence": [
+    {
+      "path": "app/bluetooth_flutter_Trace/lib/services/ota_service.dart",
+      "git_blob": "e66ee8f92f8de2d350cc93015835040f9dd8599f",
+      "excerpts": [
+        {
+          "first_line": 180,
+          "last_line": 183,
+          "text": "  OtaTaskSnapshot? get taskSnapshot => _publishedTaskSnapshot.value;\n  String? get taskDeviceAddress =>\n      _taskKey?.generation == _ownerEpoch ? _taskDeviceAddress : null;\n  Stream<bool> get taskActivity => _isUpgrading.stream;"
+        },
+        {
+          "first_line": 554,
+          "last_line": 562,
+          "text": "  Future<DeviceOtaInfo?> readDeviceInfo(String deviceAddress) async {\n    if (_isUpgrading.value) {\n      // \u5347\u7ea7\u8fdb\u884c\u4e2d\u7981\u6b62\u91cd\u5efa transport\uff1a_bindTransport \u4f1a dispose\n      // \u5728\u9014 transport\uff0c\u6253\u65ad\u4f20\u8f93\uff08RC2-04\uff09\u3002\u8fd4\u56de\u73b0\u6709\u5feb\u7167\u3002\n      return _deviceInfo;\n    }\n    return _runExclusive((generation) async {\n      _deviceInfo = null; // \u5148\u5931\u6548\u65e7\u5feb\u7167\uff0c\u6210\u529f\u624d\u91cd\u5efa\n      _deviceInfoAddress = null;"
+        },
+        {
+          "first_line": 2062,
+          "last_line": 2091,
+          "text": "  Future<T?> _runExclusive<T>(Future<T?> Function(int generation) body) async {\n    if (_isUpgrading.value) {\n      _notify('\u63d0\u793a', '\u64cd\u4f5c\u8fdb\u884c\u4e2d\uff0c\u8bf7\u5148\u53d6\u6d88\u6216\u7b49\u5f85\u5b8c\u6210');\n      return null;\n    }\n    _isUpgrading.value = true;\n    final done = Completer<void>();\n    final previous = _ownerDone;\n    final generation = _cancelGeneration;\n    _ownerEpoch++; // \u767b\u8bb0\u5373\u524d\u8fdb\uff08RC3-04\u2464\uff09\uff1a\u53d6\u6d88\u7a97\u53e3\u7528\u5b83\u8bc6\u522b\u540e\u6765\u8005\n    final epoch = _ownerEpoch;\n    _ownerDone = done.future;\n    try {\n      await previous;\n      // RC3-04\uff1a\u6392\u961f\u7b49\u5f85\u671f\u95f4\u88ab\u53d6\u6d88\uff08\u4ee3\u6b21\u5df2\u53d8\uff09\u5219\u4e0d\u8fdb\u5165 body\u2014\u2014\u7981\u6b62\n      // \u6267\u884c\u5df2\u88ab\u53d6\u6d88\u7684\u64cd\u4f5c\uff08\u5982\u6062\u590d\u4e0b\u8f7d body \u524d\u4e0d\u67e5\u53d6\u6d88\u5bfc\u81f4\u53d6\u6d88\u540e\u53c8\n      // \u53d1\u8d77\u8bf7\u6c42\uff09\u3002\n      if (generation != _cancelGeneration) return null;\n      return await body(generation);\n    } finally {\n      final task = _taskKey;\n      try {\n        if (task != null && task.generation == epoch) await _finishBackgroundTask(task);\n      } finally {\n        if (!done.isCompleted) done.complete();\n        if (identical(_ownerDone, done.future)) {\n          _ownerDone = null;\n          _isUpgrading.value = false;\n        }\n      }"
+        }
+      ]
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/lib/pages/ota_upgrade_page.dart",
+      "git_blob": "c16ff1c13720a0493628ec6855bd5bdce3eb1031",
+      "excerpts": [
+        {
+          "first_line": 63,
+          "last_line": 70,
+          "text": "  /// \u5f53\u524d\u8fde\u63a5\u8bbe\u5907\u5730\u5740\uff08GET_INFO/\u4f20\u8f93\u7684\u5165\u53e3\uff1b\u65e0\u8fde\u63a5\u5219\u4e3a null\uff09\u3002\n  String? get _deviceAddress =>\n      _attachedTaskAddress ??\n      (widget.connectedDevice ?? _resolvedDevice)?.remoteId.str.toLowerCase();\n\n  bool get _deviceReady =>\n      !_needsTaskReconcile && !_reconcilingTask &&\n      _deviceAddress != null && otaService.deviceInfo != null;"
+        },
+        {
+          "first_line": 77,
+          "last_line": 84,
+          "text": "    _taskSub = otaService.taskActivity.listen((busy) {\n      if (!mounted) return;\n      if (busy) {\n        _attachCurrentTask();\n      } else if (_needsTaskReconcile && !_backgrounded) {\n        unawaited(_resolveDeviceAndRead());\n      }\n    });"
+        },
+        {
+          "first_line": 161,
+          "last_line": 191,
+          "text": "  Future<void> _resolveDeviceAndRead() async {\n    // Reattach only: an active owner retains its transport and reboot probe.\n    if (otaService.isUpgrading) {\n      _attachCurrentTask();\n      return;\n    }\n    if (_reconcilingTask || _backgrounded || !mounted) return;\n    if (_needsTaskReconcile) {\n      // Keep the owner's exact target, never the first unrelated connection.\n      _needsTaskReconcile = false;\n      setState(() { _reconcilingTask = true; });\n      try {\n        await _readDeviceInfo();\n      } finally {\n        if (mounted) setState(() { _reconcilingTask = false; });\n      }\n      return;\n    }\n    await _resolveConnectedDevice();\n    await _readDeviceInfo();\n  }\n\n  void _attachCurrentTask() {\n    final address = otaService.taskDeviceAddress;\n    if (address == null) return;\n    setState(() {\n      _attachedTaskAddress = address;\n      _resolvedDevice = BluetoothDevice.fromId(address);\n      _needsTaskReconcile = true;\n    });\n  }"
+        },
+        {
+          "first_line": 215,
+          "last_line": 224,
+          "text": "  Future<void> _readDeviceInfo() async {\n    // \u540e\u53f0\u505c\u5199\uff08RC3-08\u2463\uff09\uff1a\u540e\u53f0\u671f\u95f4\u4e0d\u4e3b\u52a8\u53d1\u8d77 GET_INFO \u7b49 GATT\n    // \u64cd\u4f5c\uff0c\u56de\u524d\u53f0\u65f6\u7531\u751f\u547d\u5468\u671f\u56de\u8c03\u7edf\u4e00\u91cd\u65b0\u8bfb\u53d6\u3002\n    if (_backgrounded) return;\n    await _resolveConnectedDevice();\n    final address = _deviceAddress;\n    if (address == null) return;\n    await otaService.readDeviceInfo(address);\n    if (mounted) setState(() {});\n  }"
+        },
+        {
+          "first_line": 448,
+          "last_line": 458,
+          "text": "  Widget _buildCheckUpdateButton() {\n    // \u7ec8\u6b62\u95ed\u9501\u4e0e service \u5c42 _terminalLocked \u5bf9\u9f50\uff08RC3-12\u2462\uff09\uff1a\u975e\n    // retryableLater \u7684\u7ec8\u6b62\u6001\u4e0b\u7981\u7528\u68c0\u67e5\u5165\u53e3\uff08\u89e3\u9501\u5165\u53e3\u662f\u91cd\u65b0\u8bfb\u53d6\u8bbe\u5907\n    // \u8eab\u4efd\uff0c\u800c\u975e\u76f2\u76ee\u91cd\u67e5\uff09\uff1bretryableLater\uff08\u5982\u91cd\u542f\u91cd\u8fde\u5931\u8d25\uff09\u4ecd\u53ef\u67e5\u3002\n    final terminal = otaService.terminalState;\n    final terminalLocked = terminal != null && !terminal.retryableLater;\n    final canCheck = !_isChecking &&\n        !otaService.isUpgrading &&\n        otaService.isFirmwareServiceConfigured &&\n        _deviceReady &&\n        !terminalLocked;"
+        }
+      ]
+    },
+    {
+      "path": "app/bluetooth_flutter_Trace/test/ota/ota_upgrade_page_test.dart",
+      "git_blob": "0db69bb5a671817c7e004cad7603fd7b09f17972",
+      "excerpts": [
+        {
+          "first_line": 588,
+          "last_line": 610,
+          "text": "    for (final terminal in [OtaPhase.completed, OtaPhase.cancelled, OtaPhase.failed]) {\n      testWidgets('P38-R04 notification page reattaches target after $terminal', (tester) async {\n        final fake = _FakeOtaService()\n          ..taskAddress = 'aa:bb:cc:dd:ee:ff'\n          ..info = deviceInfoOf()\n          ..readResult = deviceInfoOf();\n        fake.isUpgrading$.value = true;\n        fake.phase$.value = OtaPhase.transferring;\n        await pumpPage(tester, fake: fake, settle: false);\n        expect(fake.readCalls, 0, reason: 'a notification page is not a second BLE owner');\n        expect(findButton(tester, '\u68c0\u67e5\u66f4\u65b0').onPressed, isNull);\n        fake.readGate = Completer<void>();\n        fake.phase$.value = terminal;\n        fake.isUpgrading$.value = false;\n        await tester.pump();\n        expect(fake.readCalls, 1);\n        expect(fake.lastReadAddress, 'aa:bb:cc:dd:ee:ff');\n        expect(findButton(tester, '\u68c0\u67e5\u66f4\u65b0').onPressed, isNull,\n            reason: 'cached identity must not enable actions before reconciliation');\n        fake.readGate!.complete();\n        await tester.pumpAndSettle();\n        expect(findButton(tester, '\u68c0\u67e5\u66f4\u65b0').onPressed, isNotNull);\n        expect(fake.readCalls, 1, reason: 'identity read completion must not loop');"
+        },
+        {
+          "first_line": 705,
+          "last_line": 709,
+          "text": "  bool get isUpgrading => isUpgrading$.value;\n  @override\n  Stream<bool> get taskActivity => isUpgrading$.stream;\n  @override\n  String? get taskDeviceAddress => taskAddress;"
+        },
+        {
+          "first_line": 729,
+          "last_line": 742,
+          "text": "  @override\n  Future<DeviceOtaInfo?> readDeviceInfo(String deviceAddress) async {\n    readCalls++;\n    lastReadAddress = deviceAddress;\n    await readGate?.future;\n    // \u9875\u9762\u81ea\u52a8\u8bfb\u53d6\uff1a\u8fd4\u56de\u503c\u540c\u65f6\u9a71\u52a8\u8fde\u63a5\u5361\u72b6\u6001\u3002\n    final result = readResult;\n    if (result != null) {\n      info = result;\n      // \u4e0e\u771f\u5b9e service \u5bf9\u9f50\uff08PR11 \u89e3\u9501\uff09\uff1a\u8bfb\u53d6\u6210\u529f\u6e05\u9664\u7ec8\u6b62\u6001\u3002\n      terminal$.value = null;\n    }\n    return result;\n  }"
+        }
+      ]
+    }
+  ],
+  "r04_dependency_evidence": {
+    "url": "https://pub.dev/api/archives/get-4.7.2.tar.gz",
+    "bytes": 14561823,
+    "sha256": "c79eeb4339f1f3deffd9ec912f8a923834bec55f7b49c9e882b8fef2c139d425",
+    "verification": "Archive SHA-256 matches candidate pubspec.lock; source inspection, not Dart execution.",
+    "sources": [
+      {
+        "path": "lib/get_rx/src/rx_types/rx_core/rx_impl.dart",
+        "sha256": "9e15a1800b2bea128fb77b687897ea032f61349050c0cfdd1f00791882cdf703",
+        "excerpts": [
+          {
+            "line": 98,
+            "text": "  set value(T val) {"
+          },
+          {
+            "line": 99,
+            "text": "    if (subject.isClosed) return;"
+          },
+          {
+            "line": 100,
+            "text": "    sentToStream = false;"
+          },
+          {
+            "line": 101,
+            "text": "    if (_value == val && !firstRebuild) return;"
+          },
+          {
+            "line": 102,
+            "text": "    firstRebuild = false;"
+          },
+          {
+            "line": 103,
+            "text": "    _value = val;"
+          },
+          {
+            "line": 104,
+            "text": "    sentToStream = true;"
+          },
+          {
+            "line": 105,
+            "text": "    subject.add(_value);"
+          },
+          {
+            "line": 114,
+            "text": "  Stream<T> get stream => subject.stream;"
+          },
+          {
+            "line": 147,
+            "text": "mixin NotifyManager<T> {"
+          },
+          {
+            "line": 148,
+            "text": "  GetStream<T> subject = GetStream<T>();"
+          },
+          {
+            "line": 149,
+            "text": "  final _subscriptions = <GetStream, List<StreamSubscription>>{};"
+          }
+        ]
+      },
+      {
+        "path": "lib/get_rx/src/rx_stream/get_stream.dart",
+        "sha256": "825edb615d200318c2d2ba93048dc426546a1ef08ec1b1298b50fb47cd314341",
+        "excerpts": [
+          {
+            "line": 43,
+            "text": "  void _notifyData(T data) {"
+          },
+          {
+            "line": 44,
+            "text": "    _isBusy = true;"
+          },
+          {
+            "line": 45,
+            "text": "    for (final item in _onData!) {"
+          },
+          {
+            "line": 46,
+            "text": "      if (!item.isPaused) {"
+          },
+          {
+            "line": 47,
+            "text": "        item._data?.call(data);"
+          },
+          {
+            "line": 48,
+            "text": "      }"
+          },
+          {
+            "line": 49,
+            "text": "    }"
+          },
+          {
+            "line": 50,
+            "text": "    _isBusy = false;"
+          },
+          {
+            "line": 94,
+            "text": "  void add(T event) {"
+          },
+          {
+            "line": 95,
+            "text": "    assert(!isClosed, 'You cannot add event to closed Stream');"
+          },
+          {
+            "line": 96,
+            "text": "    _value = event;"
+          },
+          {
+            "line": 97,
+            "text": "    _notifyData(event);"
+          },
+          {
+            "line": 98,
+            "text": "  }"
+          },
+          {
+            "line": 132,
+            "text": "  Stream<T> get stream =>"
+          },
+          {
+            "line": 133,
+            "text": "      GetStreamTransformation(addSubscription, removeSubscription);"
+          },
+          {
+            "line": 195,
+            "text": "  LightSubscription<T> listen(void Function(T event)? onData,"
+          },
+          {
+            "line": 196,
+            "text": "      {Function? onError, void Function()? onDone, bool? cancelOnError}) {"
+          },
+          {
+            "line": 197,
+            "text": "    final subs = LightSubscription<T>(_removeSubscription)"
+          },
+          {
+            "line": 198,
+            "text": "      ..onData(onData)"
+          },
+          {
+            "line": 199,
+            "text": "      ..onError(onError)"
+          },
+          {
+            "line": 200,
+            "text": "      ..onDone(onDone);"
+          },
+          {
+            "line": 201,
+            "text": "    _addSubscription(subs);"
+          },
+          {
+            "line": 202,
+            "text": "    return subs;"
+          }
+        ]
+      }
+    ]
+  },
+  "r04_static_trace": [
+    "An attached notification page reaches owner completion with _needsTaskReconcile=true.",
+    "The page sets _needsTaskReconcile=false and _reconcilingTask=true, then calls real readDeviceInfo.",
+    "_runExclusive sets _isUpgrading.value=true before _ownerEpoch++. GetX 4.7.2 delivers the busy event synchronously.",
+    "taskDeviceAddress still matches the old key/epoch; _attachCurrentTask sets _needsTaskReconcile=true again.",
+    "The identity read finishes; its idle notification tries to reconcile but returns because _reconcilingTask is still true.",
+    "The outer finally clears only _reconcilingTask. _needsTaskReconcile remains true and _deviceReady stays false."
+  ],
+  "r04_repair_direction": "Initialize/invalidate the owner generation before publishing observable busy state, and prevent a page's own identity reconciliation from reattaching/rearming a completed task. Retain the synchronous exclusive lock, exact target binding and identity-gated actions.",
+  "r04_next_oracle": "Use real OtaService plus the existing fake BLE, or a fixture preserving actual synchronous busy/epoch transitions. For completed/cancelled/failed tasks, require one exact-target GET_INFO, no extra BEGIN, no stuck/looped reconciliation and enabled actions only after successful identity verification; retain wrong-device and failed-identity negative cases.",
+  "next_owner": "Original P3-8 implementation owner on dev/flutter/p3-8-background-ota-20261021. Return a bounded R04 batch and original development feedback; independent reviewer then rechecks affected scope.",
+  "original_evaluation": {
+    "schema": "p38-remediation-original-review-v1",
+    "checked_utc": "2026-10-22T16:54:54.901315+00:00",
+    "candidate": "27048aa10079d8dd01d608967e7b5d1b473861ba",
+    "formal_acceptance": "NOT_RUN",
+    "new_builds": 0,
+    "device_operations": 0,
+    "development": [
+      {
+        "host": "ubuntu",
+        "run_url": "https://github.com/Eitan-S-23/E-Track/actions/runs/39789686610",
+        "run_attempt": "1",
+        "report": {
+          "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/run-39789686610/ubuntu/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/result.json",
+          "bytes": 22940,
+          "sha256": "3d222ab7ba7cdba55a62661a808b56bfdeac164d41a1ceecb7a41faa6c064121"
+        },
+        "source_before": {
+          "head": "27048aa10079d8dd01d608967e7b5d1b473861ba",
+          "clean": true,
+          "status": "",
+          "dirty_semantic": [],
+          "dirty_semantic_sha": {},
+          "dirty_eol_only": [],
+          "dirty_untracked": []
+        },
+        "source_after": {
+          "head": "27048aa10079d8dd01d608967e7b5d1b473861ba",
+          "clean": false,
+          "status": "M app/bluetooth_flutter_Trace/android/gradle.properties",
+          "dirty_semantic": [
+            "app/bluetooth_flutter_Trace/android/gradle.properties"
+          ],
+          "dirty_semantic_sha": {
+            "app/bluetooth_flutter_Trace/android/gradle.properties": "cd4198da4532c255497fa8c5aaa2430ef6fc9885"
+          },
+          "dirty_eol_only": [],
+          "dirty_untracked": []
+        },
+        "source_after_restored": {
+          "head": "27048aa10079d8dd01d608967e7b5d1b473861ba",
+          "clean": true,
+          "status": "",
+          "dirty_semantic": [],
+          "dirty_semantic_sha": {},
+          "dirty_eol_only": [],
+          "dirty_untracked": []
+        },
+        "semantic_restoration_verified": true,
+        "source_deltas_bound_toolchain_regen": true,
+        "scope": "all",
+        "lock_sha256": "23790b1857fcc603dbd89d1aeb03b3239ab0841cee809cd08b163fc84b95d0b6",
+        "toolchain_regen": [
+          {
+            "stage": "before_apk",
+            "path": "app/bluetooth_flutter_Trace/analysis_options.yaml",
+            "committed_sha256": "b51e122148d477516d45c68eb455a22dd0eacdde9c4979b16c656bb71215c99e",
+            "effective_sha256": "62d5001517860783236e148ad669ce5560998c64f1cabc2de997131225f56129",
+            "effective_bytes": 1536,
+            "effective_blob": "862c9069fb4c3ad6e8b08e5029aefe1fede44a1e",
+            "diff": "diff --git a/app/bluetooth_flutter_Trace/analysis_options.yaml b/app/bluetooth_flutter_Trace/analysis_options.yaml\nindex 61b6c4d..862c906 100644\n--- a/app/bluetooth_flutter_Trace/analysis_options.yaml\n+++ b/app/bluetooth_flutter_Trace/analysis_options.yaml\n@@ -7,6 +7,12 @@\n \n # The following line activates a set of recommended lints for Flutter apps,\n # packages, and plugins designed to encourage good coding practices.\n+analyzer:\n+  exclude:\n+    - build/**\n+    - android/**\n+    - ios/**\n+    - windows/**\n include: package:flutter_lints/flutter.yaml\n \n linter:\n"
+          },
+          {
+            "stage": "before_apk",
+            "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc",
+            "committed_sha256": "4564401de97a1695607fdcd94b127135039d2eaa0b959aeb9c11d1eb3d2c8354",
+            "effective_sha256": "76a4be5a75bf1878c8ad51f8b631261296fce9c7368d70797d3b0645eed86b03",
+            "effective_bytes": 1196,
+            "effective_blob": "78cbc3a6706333e1c35500de87904494c0692f79",
+            "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\nindex e5396e9..78cbc3a 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n@@ -7,14 +7,23 @@\n #include \"generated_plugin_registrant.h\"\n \n #include <audioplayers_windows/audioplayers_windows_plugin.h>\n+#include <geolocator_windows/geolocator_windows.h>\n #include <local_notifier/local_notifier_plugin.h>\n #include <permission_handler_windows/permission_handler_windows_plugin.h>\n+#include <share_plus/share_plus_windows_plugin_c_api.h>\n+#include <url_launcher_windows/url_launcher_windows.h>\n \n void RegisterPlugins(flutter::PluginRegistry* registry) {\n   AudioplayersWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"AudioplayersWindowsPlugin\"));\n+  GeolocatorWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"GeolocatorWindows\"));\n   LocalNotifierPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"LocalNotifierPlugin\"));\n   PermissionHandlerWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"PermissionHandlerWindowsPlugin\"));\n+  SharePlusWindowsPluginCApiRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"SharePlusWindowsPluginCApi\"));\n+  UrlLauncherWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"UrlLauncherWindows\"));\n }\n"
+          },
+          {
+            "stage": "before_apk",
+            "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake",
+            "committed_sha256": "1db11c659b7efc38d10618f7aa3d5050318e0ed1cdbd4cfc1b65d2bb6a926f68",
+            "effective_sha256": "ea84ec97821d13df3a50c1f6fb143c45c74dc1a95b15427b2905e8f1eadef750",
+            "effective_bytes": 869,
+            "effective_blob": "1b07b9cb7555eb75f34d2663449f786927cb5cf6",
+            "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\nindex 843fa68..1b07b9c 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n@@ -4,8 +4,11 @@\n \n list(APPEND FLUTTER_PLUGIN_LIST\n   audioplayers_windows\n+  geolocator_windows\n   local_notifier\n   permission_handler_windows\n+  share_plus\n+  url_launcher_windows\n )\n \n list(APPEND FLUTTER_FFI_PLUGIN_LIST\n"
+          },
+          {
+            "stage": "after_run",
+            "path": "app/bluetooth_flutter_Trace/android/gradle.properties",
+            "committed_sha256": "cc15de2254a2f7a9d830521626418c7d890978ec9127e67af2fba72361a439ae",
+            "effective_sha256": "5dff6e9df6a50c22f8cfd31ac37cdd9a841ac9d089446b44a8402e1d28a70994",
+            "effective_bytes": 265,
+            "effective_blob": "cd4198da4532c255497fa8c5aaa2430ef6fc9885",
+            "diff": "diff --git a/app/bluetooth_flutter_Trace/android/gradle.properties b/app/bluetooth_flutter_Trace/android/gradle.properties\nindex bbd7acc..cd4198d 100644\n--- a/app/bluetooth_flutter_Trace/android/gradle.properties\n+++ b/app/bluetooth_flutter_Trace/android/gradle.properties\n@@ -1,3 +1,7 @@\n org.gradle.jvmargs=-Xmx1536M\n android.useAndroidX=true\n android.enableJetifier=false\n+# This builtInKotlin flag was added automatically by Flutter migrator\n+android.builtInKotlin=false\n+# This newDsl flag was added automatically by Flutter migrator\n+android.newDsl=false\n"
+          }
+        ],
+        "commands": [
+          {
+            "name": "sdk_checkout",
+            "argv": [
+              "git",
+              "clone",
+              "--config",
+              "core.longpaths=true",
+              "--depth",
+              "1",
+              "--branch",
+              "stable",
+              "https://github.com/flutter/flutter.git",
+              "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/sdk"
+            ],
+            "exit_code": 0,
+            "timed_out": false,
+            "log": {
+              "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/run-39789686610/ubuntu/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/sdk_checkout.log",
+              "bytes": 516,
+              "sha256": "df766c88b6953459dc3a35a1138b9f1a3f8c30dc1fd58c19f954d50fc663055f"
+            }
+          },
+          {
+            "name": "sdk_version",
+            "argv": [
+              "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/sdk/bin/flutter",
+              "--version",
+              "--machine"
+            ],
+            "exit_code": 0,
+            "timed_out": false,
+            "log": {
+              "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/run-39789686610/ubuntu/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/sdk_version.log",
+              "bytes": 4449,
+              "sha256": "1650efdc434bbb76c751913bfae0ca8c62df934fd36b9383689c2756de20bec9"
+            }
+          },
+          {
+            "name": "dependencies",
+            "argv": [
+              "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/sdk/bin/flutter",
+              "pub",
+              "get",
+              "--enforce-lockfile"
+            ],
+            "exit_code": 0,
+            "timed_out": false,
+            "log": {
+              "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/run-39789686610/ubuntu/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/dependencies.log",
+              "bytes": 4991,
+              "sha256": "9d2a279aa17c67a42dca937849c5aa9e2b20f28407f986e7bb1985fc579121c9"
+            }
+          },
+          {
+            "name": "analyze",
+            "argv": [
+              "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/sdk/bin/flutter",
+              "analyze",
+              "--no-pub"
+            ],
+            "exit_code": 0,
+            "timed_out": false,
+            "log": {
+              "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/run-39789686610/ubuntu/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/analyze.log",
+              "bytes": 97,
+              "sha256": "56c023387878d97d3b35af8534863ba2cf2e500f72a6d0adc66ecc200b09c226"
+            },
+            "tail": [
+              "Analyzing bluetooth_flutter_Trace...                            ",
+              "No issues found! (ran in 14.6s)"
+            ]
+          },
+          {
+            "name": "tests",
+            "argv": [
+              "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/sdk/bin/flutter",
+              "test",
+              "--no-pub",
+              "--reporter",
+              "expanded",
+              "--timeout",
+              "2m",
+              "test"
+            ],
+            "exit_code": 0,
+            "timed_out": false,
+            "log": {
+              "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/run-39789686610/ubuntu/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/tests.log",
+              "bytes": 2168526,
+              "sha256": "0f4a3c40c9e903022eb2f584010f093c1024305ce3d3243343aab0f053190e90"
+            },
+            "raw_summary": "01:47 +746 ~16: All tests passed!",
+            "counts": {
+              "passed": 746,
+              "skipped": 16,
+              "failed": 0
+            },
+            "remediation_cases": [
+              {
+                "name": "P38-R01 late discovery cannot undo a second pause",
+                "first_line": 221,
+                "last_line": 278,
+                "reporter_mentions": 30
+              },
+              {
+                "name": "P38-R01 late INFO cannot undo a second pause",
+                "first_line": 314,
+                "last_line": 314,
+                "reporter_mentions": 1
+              },
+              {
+                "name": "P38-R03 owner loss cannot hold reboot verification beyond its deadline",
+                "first_line": 508,
+                "last_line": 662,
+                "reporter_mentions": 33
+              }
+            ],
+            "reporter_note": "Repeated expanded-reporter mentions are not per-case counts; totals come only from the terminal summary."
+          },
+          {
+            "name": "apk_prepare",
+            "argv": [
+              "/usr/bin/python",
+              "-B",
+              "/home/runner/work/E-Track/E-Track/Tools/flutter/dev_apk.py",
+              "prepare",
+              "--repo-root",
+              "/home/runner/work/E-Track/E-Track",
+              "--run-dir",
+              "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74"
+            ],
+            "exit_code": 0,
+            "timed_out": false,
+            "log": {
+              "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/run-39789686610/ubuntu/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/apk_prepare.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          {
+            "name": "apk_java",
+            "argv": [
+              "/usr/lib/jvm/temurin-17-jdk-amd64/bin/java",
+              "-version"
+            ],
+            "exit_code": 0,
+            "timed_out": false,
+            "log": {
+              "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/run-39789686610/ubuntu/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/apk_java.log",
+              "bytes": 468,
+              "sha256": "ce6fa3ec42f3724915019ae671480328364a5c6745152f4736ceee819cf14d06"
+            }
+          },
+          {
+            "name": "apk_sdk",
+            "argv": [
+              "/usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager",
+              "--sdk_root=/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/android-sdk",
+              "cmdline-tools;latest",
+              "platform-tools",
+              "platforms;android-35",
+              "build-tools;35.0.0"
+            ],
+            "exit_code": 0,
+            "timed_out": false,
+            "log": {
+              "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/run-39789686610/ubuntu/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/apk_sdk.log",
+              "bytes": 18664,
+              "sha256": "b05012a146c3497818a9fc1476f6c32ff001a0ba8a6f26694855124c05823f7c"
+            }
+          },
+          {
+            "name": "apk_wrapper",
+            "argv": [
+              "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/gradle-dist/gradle-8.14/bin/gradle",
+              "--no-daemon",
+              "-p",
+              "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/wrapper-bootstrap",
+              "wrapper",
+              "--gradle-version",
+              "8.14",
+              "--distribution-type",
+              "all"
+            ],
+            "exit_code": 0,
+            "timed_out": false,
+            "log": {
+              "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/run-39789686610/ubuntu/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/apk_wrapper.log",
+              "bytes": 892,
+              "sha256": "9325581fbcd864edbbd84b40d4b8ab903be89764e3d5828d7a355c6714fb50a0"
+            }
+          },
+          {
+            "name": "apk_install_wrapper",
+            "argv": [
+              "/usr/bin/python",
+              "-B",
+              "/home/runner/work/E-Track/E-Track/Tools/flutter/dev_apk.py",
+              "install-wrapper",
+              "--repo-root",
+              "/home/runner/work/E-Track/E-Track",
+              "--run-dir",
+              "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74"
+            ],
+            "exit_code": 0,
+            "timed_out": false,
+            "log": {
+              "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/run-39789686610/ubuntu/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/apk_install_wrapper.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          {
+            "name": "apk_build",
+            "argv": [
+              "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/sdk/bin/flutter",
+              "build",
+              "apk",
+              "--debug",
+              "--no-pub",
+              "--target-platform=android-arm,android-arm64"
+            ],
+            "exit_code": 0,
+            "timed_out": false,
+            "log": {
+              "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/run-39789686610/ubuntu/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/apk_build.log",
+              "bytes": 13230,
+              "sha256": "4755538805caecf9a5675c2e6b6f0a5d22bfbd065b8ed3d42f46d4db762619db"
+            },
+            "tail": [
+              "Picked up JAVA_TOOL_OPTIONS: -Duser.home=\"/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/home\" -Djava.io.tmpdir=\"/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/tmp\"",
+              "",
+              "Picked up JAVA_TOOL_OPTIONS: -Duser.home=\"/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/home\" -Djava.io.tmpdir=\"/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/tmp\"",
+              "",
+              "Picked up JAVA_TOOL_OPTIONS: -Duser.home=\"/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/home\" -Djava.io.tmpdir=\"/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/tmp\"",
+              "",
+              "Picked up JAVA_TOOL_OPTIONS: -Duser.home=\"/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/home\" -Djava.io.tmpdir=\"/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/tmp\"",
+              "",
+              "Picked up JAVA_TOOL_OPTIONS: -Duser.home=\"/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/home\" -Djava.io.tmpdir=\"/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/tmp\"",
+              "",
+              "Running Gradle task 'assembleDebug'...                            358.2s",
+              "\u2713 Built build/app/outputs/flutter-apk/app-debug.apk"
+            ]
+          },
+          {
+            "name": "apk_device_ota_native",
+            "argv": [
+              "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/gradle-dist/gradle-8.14/bin/gradle",
+              "--no-daemon",
+              "--console=plain",
+              "-p",
+              "/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/android",
+              ":app:testDebugUnitTest",
+              "--tests",
+              "com.wen.gaia.gaia.DeviceOtaServiceTest"
+            ],
+            "exit_code": 0,
+            "timed_out": false,
+            "log": {
+              "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/run-39789686610/ubuntu/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/apk_device_ota_native.log",
+              "bytes": 27603,
+              "sha256": "6909f47dcb2462c6a8274fec100ac8e6498aed1a628719ca7aa672e32c6bced2"
+            },
+            "tail": [
+              "Picked up JAVA_TOOL_OPTIONS: -Duser.home=\"/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/home\" -Djava.io.tmpdir=\"/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/tmp\"",
+              "",
+              "[Incubating] Problems report is available at: file:///home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/build/reports/problems/problems-report.html",
+              "",
+              "Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.",
+              "",
+              "You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.",
+              "",
+              "For more on this, please refer to https://docs.gradle.org/8.14/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.",
+              "",
+              "BUILD SUCCESSFUL in 1m 12s",
+              "252 actionable tasks: 28 executed, 224 up-to-date"
+            ]
+          },
+          {
+            "name": "apk_verify",
+            "argv": [
+              "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/android-sdk/build-tools/35.0.0/apksigner",
+              "verify",
+              "--verbose",
+              "/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/build/app/outputs/flutter-apk/app-debug.apk"
+            ],
+            "exit_code": 0,
+            "timed_out": false,
+            "log": {
+              "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/run-39789686610/ubuntu/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/apk_verify.log",
+              "bytes": 618,
+              "sha256": "fd78bbbc10bac19da0a7baa9b09216c4ffdcd6260d5ca3fa31715c55d286aad3"
+            },
+            "tail": [
+              "Picked up JAVA_TOOL_OPTIONS: -Duser.home=\"/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/home\" -Djava.io.tmpdir=\"/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/tmp\"",
+              "Verifies",
+              "Verified using v1 scheme (JAR signing): false",
+              "Verified using v2 scheme (APK Signature Scheme v2): true",
+              "Verified using v3 scheme (APK Signature Scheme v3): false",
+              "Verified using v3.1 scheme (APK Signature Scheme v3.1): false",
+              "Verified using v4 scheme (APK Signature Scheme v4): false",
+              "Verified for SourceStamp: false",
+              "Number of signers: 1"
+            ]
+          },
+          {
+            "name": "apk_collect",
+            "argv": [
+              "/usr/bin/python",
+              "-B",
+              "/home/runner/work/E-Track/E-Track/Tools/flutter/dev_apk.py",
+              "collect",
+              "--repo-root",
+              "/home/runner/work/E-Track/E-Track",
+              "--run-dir",
+              "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74"
+            ],
+            "exit_code": 0,
+            "timed_out": false,
+            "log": {
+              "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/run-39789686610/ubuntu/.cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/apk_collect.log",
+              "bytes": 323,
+              "sha256": "bc9093165bbe147ca42ed33ef4f3c537059c5c77173c6218e1821d2df7585d41"
+            }
+          }
+        ],
+        "sdk": {
+          "frameworkVersion": "3.47.7",
+          "frameworkRevision": "abaf9c523780a608bd46686fd5e53740a07077f8",
+          "channel": "stable",
+          "dartSdkVersion": "3.13.5",
+          "engineRevision": "deb287481e3ce9468f3434937ced4240a70539ca"
+        }
+      },
+      {
+        "host": "windows",
+        "run_url": "https://github.com/Eitan-S-23/E-Track/actions/runs/39789686610",
+        "run_attempt": "1",
+        "report": {
+          "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/run-39789686610/windows/.cache/flutter-dev-checks/runs/run-200e4ab21d5745d0a39f05df64bee76e/result.json",
+          "bytes": 12147,
+          "sha256": "ba860212b38d748d1b8d0ad05df4da64f173cd3efed2097690f08b1ba93211c4"
+        },
+        "source_before": {
+          "head": "27048aa10079d8dd01d608967e7b5d1b473861ba",
+          "clean": true,
+          "status": "",
+          "dirty_semantic": [],
+          "dirty_semantic_sha": {},
+          "dirty_eol_only": [],
+          "dirty_untracked": []
+        },
+        "source_after": {
+          "head": "27048aa10079d8dd01d608967e7b5d1b473861ba",
+          "clean": false,
+          "status": "M app/bluetooth_flutter_Trace/analysis_options.yaml\n M app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n M app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.h\n M app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake",
+          "dirty_semantic": [
+            "app/bluetooth_flutter_Trace/analysis_options.yaml",
+            "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc",
+            "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake"
+          ],
+          "dirty_semantic_sha": {
+            "app/bluetooth_flutter_Trace/analysis_options.yaml": "06dcbd36d182f74df878861592ef511bcee2103c",
+            "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc": "78cbc3a6706333e1c35500de87904494c0692f79",
+            "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake": "1b07b9cb7555eb75f34d2663449f786927cb5cf6"
+          },
+          "dirty_eol_only": [
+            "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.h"
+          ],
+          "dirty_untracked": []
+        },
+        "source_after_restored": {
+          "head": "27048aa10079d8dd01d608967e7b5d1b473861ba",
+          "clean": false,
+          "status": "M app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.h",
+          "dirty_semantic": [],
+          "dirty_semantic_sha": {},
+          "dirty_eol_only": [
+            "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.h"
+          ],
+          "dirty_untracked": []
+        },
+        "semantic_restoration_verified": true,
+        "source_deltas_bound_toolchain_regen": true,
+        "scope": "all",
+        "lock_sha256": "7c86173daaf327130babd863f5d9f1f435a37e726702cb8abf3a140dc18af9c8",
+        "toolchain_regen": [
+          {
+            "stage": "after_run",
+            "path": "app/bluetooth_flutter_Trace/analysis_options.yaml",
+            "committed_sha256": "b51e122148d477516d45c68eb455a22dd0eacdde9c4979b16c656bb71215c99e",
+            "effective_sha256": "cfe7a312ea0047e4e756a589789adc3f94e3727a4ce503d3506f7c4510a60c87",
+            "effective_bytes": 1571,
+            "effective_blob": "06dcbd36d182f74df878861592ef511bcee2103c",
+            "diff": "diff --git a/app/bluetooth_flutter_Trace/analysis_options.yaml b/app/bluetooth_flutter_Trace/analysis_options.yaml\nindex 61b6c4d..862c906 100644\n--- a/app/bluetooth_flutter_Trace/analysis_options.yaml\n+++ b/app/bluetooth_flutter_Trace/analysis_options.yaml\n@@ -7,6 +7,12 @@\n \n # The following line activates a set of recommended lints for Flutter apps,\n # packages, and plugins designed to encourage good coding practices.\n+analyzer:\n+  exclude:\n+    - build/**\n+    - android/**\n+    - ios/**\n+    - windows/**\n include: package:flutter_lints/flutter.yaml\n \n linter:\n"
+          },
+          {
+            "stage": "after_run",
+            "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc",
+            "committed_sha256": "4564401de97a1695607fdcd94b127135039d2eaa0b959aeb9c11d1eb3d2c8354",
+            "effective_sha256": "76a4be5a75bf1878c8ad51f8b631261296fce9c7368d70797d3b0645eed86b03",
+            "effective_bytes": 1196,
+            "effective_blob": "78cbc3a6706333e1c35500de87904494c0692f79",
+            "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\nindex e5396e9..78cbc3a 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n@@ -7,14 +7,23 @@\n #include \"generated_plugin_registrant.h\"\n \n #include <audioplayers_windows/audioplayers_windows_plugin.h>\n+#include <geolocator_windows/geolocator_windows.h>\n #include <local_notifier/local_notifier_plugin.h>\n #include <permission_handler_windows/permission_handler_windows_plugin.h>\n+#include <share_plus/share_plus_windows_plugin_c_api.h>\n+#include <url_launcher_windows/url_launcher_windows.h>\n \n void RegisterPlugins(flutter::PluginRegistry* registry) {\n   AudioplayersWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"AudioplayersWindowsPlugin\"));\n+  GeolocatorWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"GeolocatorWindows\"));\n   LocalNotifierPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"LocalNotifierPlugin\"));\n   PermissionHandlerWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"PermissionHandlerWindowsPlugin\"));\n+  SharePlusWindowsPluginCApiRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"SharePlusWindowsPluginCApi\"));\n+  UrlLauncherWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"UrlLauncherWindows\"));\n }\n"
+          },
+          {
+            "stage": "after_run",
+            "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake",
+            "committed_sha256": "1db11c659b7efc38d10618f7aa3d5050318e0ed1cdbd4cfc1b65d2bb6a926f68",
+            "effective_sha256": "ea84ec97821d13df3a50c1f6fb143c45c74dc1a95b15427b2905e8f1eadef750",
+            "effective_bytes": 869,
+            "effective_blob": "1b07b9cb7555eb75f34d2663449f786927cb5cf6",
+            "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\nindex 843fa68..1b07b9c 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n@@ -4,8 +4,11 @@\n \n list(APPEND FLUTTER_PLUGIN_LIST\n   audioplayers_windows\n+  geolocator_windows\n   local_notifier\n   permission_handler_windows\n+  share_plus\n+  url_launcher_windows\n )\n \n list(APPEND FLUTTER_FFI_PLUGIN_LIST\n"
+          }
+        ],
+        "commands": [
+          {
+            "name": "sdk_checkout",
+            "argv": [
+              "git",
+              "clone",
+              "--config",
+              "core.longpaths=true",
+              "--depth",
+              "1",
+              "--branch",
+              "stable",
+              "https://github.com/flutter/flutter.git",
+              "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-200e4ab21d5745d0a39f05df64bee76e\\sdk"
+            ],
+            "exit_code": 0,
+            "timed_out": false,
+            "log": {
+              "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/run-39789686610/windows/.cache/flutter-dev-checks/runs/run-200e4ab21d5745d0a39f05df64bee76e/logs/sdk_checkout.log",
+              "bytes": 2742,
+              "sha256": "5501e0c887134d2c7f8889e75f6e1ef7574a26f36a92120b281455baa0e6bcc2"
+            }
+          },
+          {
+            "name": "sdk_version",
+            "argv": [
+              "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-200e4ab21d5745d0a39f05df64bee76e\\sdk\\bin\\flutter.bat",
+              "--version",
+              "--machine"
+            ],
+            "exit_code": 0,
+            "timed_out": false,
+            "log": {
+              "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/run-39789686610/windows/.cache/flutter-dev-checks/runs/run-200e4ab21d5745d0a39f05df64bee76e/logs/sdk_version.log",
+              "bytes": 920,
+              "sha256": "cbd8e617934c5e12e86d232e84867919cf3f744eceb38aca5f3649a0697aff09"
+            }
+          },
+          {
+            "name": "dependencies",
+            "argv": [
+              "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-200e4ab21d5745d0a39f05df64bee76e\\sdk\\bin\\flutter.bat",
+              "pub",
+              "get",
+              "--enforce-lockfile"
+            ],
+            "exit_code": 0,
+            "timed_out": false,
+            "log": {
+              "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/run-39789686610/windows/.cache/flutter-dev-checks/runs/run-200e4ab21d5745d0a39f05df64bee76e/logs/dependencies.log",
+              "bytes": 4991,
+              "sha256": "a8f12602d2cf4a429dd9cb152e0a5f429746fb2b13cfd2896e49ce938ec71c0b"
+            }
+          },
+          {
+            "name": "analyze",
+            "argv": [
+              "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-200e4ab21d5745d0a39f05df64bee76e\\sdk\\bin\\flutter.bat",
+              "analyze",
+              "--no-pub"
+            ],
+            "exit_code": 0,
+            "timed_out": false,
+            "log": {
+              "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/run-39789686610/windows/.cache/flutter-dev-checks/runs/run-200e4ab21d5745d0a39f05df64bee76e/logs/analyze.log",
+              "bytes": 97,
+              "sha256": "212086c8913e5feaa65541cf2133153a3f67272a98250baf8ad8e323b556b672"
+            },
+            "tail": [
+              "Analyzing bluetooth_flutter_Trace...                            ",
+              "No issues found! (ran in 14.8s)"
+            ]
+          },
+          {
+            "name": "tests",
+            "argv": [
+              "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-200e4ab21d5745d0a39f05df64bee76e\\sdk\\bin\\flutter.bat",
+              "test",
+              "--no-pub",
+              "--reporter",
+              "expanded",
+              "--timeout",
+              "2m",
+              "test"
+            ],
+            "exit_code": 0,
+            "timed_out": false,
+            "log": {
+              "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/run-39789686610/windows/.cache/flutter-dev-checks/runs/run-200e4ab21d5745d0a39f05df64bee76e/logs/tests.log",
+              "bytes": 2344074,
+              "sha256": "0bd6645fde829feb5bd55decd75f867841e5b332f2b8e6c9ae6ba6a7171e28c7"
+            },
+            "raw_summary": "01:17 +729 ~33: All tests passed!",
+            "counts": {
+              "passed": 729,
+              "skipped": 33,
+              "failed": 0
+            },
+            "remediation_cases": [
+              {
+                "name": "P38-R01 late discovery cannot undo a second pause",
+                "first_line": 7207,
+                "last_line": 7207,
+                "reporter_mentions": 1
+              },
+              {
+                "name": "P38-R01 late INFO cannot undo a second pause",
+                "first_line": 7272,
+                "last_line": 7272,
+                "reporter_mentions": 1
+              },
+              {
+                "name": "P38-R03 owner loss cannot hold reboot verification beyond its deadline",
+                "first_line": 7470,
+                "last_line": 7689,
+                "reporter_mentions": 2
+              },
+              {
+                "name": "P38-R04 notification page reattaches target after OtaPhase.completed",
+                "first_line": 25343,
+                "last_line": 25343,
+                "reporter_mentions": 1
+              },
+              {
+                "name": "P38-R04 notification page reattaches target after OtaPhase.cancelled",
+                "first_line": 25344,
+                "last_line": 25344,
+                "reporter_mentions": 1
+              },
+              {
+                "name": "P38-R04 notification page reattaches target after OtaPhase.failed",
+                "first_line": 25345,
+                "last_line": 25345,
+                "reporter_mentions": 1
+              },
+              {
+                "name": "P38-R04 current owner wins over an unrelated page device",
+                "first_line": 25346,
+                "last_line": 25346,
+                "reporter_mentions": 1
+              }
+            ],
+            "reporter_note": "Repeated expanded-reporter mentions are not per-case counts; totals come only from the terminal summary."
+          }
+        ],
+        "sdk": {
+          "frameworkVersion": "3.47.7",
+          "frameworkRevision": "abaf9c523780a608bd46686fd5e53740a07077f8",
+          "channel": "stable",
+          "dartSdkVersion": "3.13.5",
+          "engineRevision": "deb287481e3ce9468f3434937ced4240a70539ca"
+        }
+      }
+    ],
+    "native": {
+      "report": {
+        "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/run-39789686610/ubuntu/app/bluetooth_flutter_Trace/build/app/test-results/testDebugUnitTest/TEST-com.wen.gaia.gaia.DeviceOtaServiceTest.xml",
+        "bytes": 2644,
+        "sha256": "b6880580cb2aa95b53d3a5d167ce52fe6af018b6b21fb06d46394fba77e3ae2e"
+      },
+      "attributes": {
+        "name": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+        "tests": "18",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-10-22T13:56:12.732Z",
+        "hostname": "runnervm8k3b6",
+        "time": "7.53"
+      },
+      "cases": [
+        {
+          "name": "recreatedProcessRejectsOldInitialNotificationWithoutRouting",
+          "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+          "time": "6.725"
+        },
+        {
+          "name": "unverifiedCompletionFailsClosed",
+          "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+          "time": "0.136"
+        },
+        {
+          "name": "lateProbeCannotReviveReleasedTask",
+          "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+          "time": "0.041"
+        },
+        {
+          "name": "processRecreationDoesNotTrustNotificationOrCache",
+          "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+          "time": "0.035"
+        },
+        {
+          "name": "oldProgressCannotOverwriteNewRevision",
+          "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+          "time": "0.038"
+        },
+        {
+          "name": "notificationUsesDurableNotSentBytes",
+          "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+          "time": "0.033"
+        },
+        {
+          "name": "engineLossReleasesWakeLockAndService",
+          "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+          "time": "0.033"
+        },
+        {
+          "name": "applyingIsIndeterminateAndCannotCancel",
+          "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+          "time": "0.032"
+        },
+        {
+          "name": "deniedProbeReleasesWakeLockAndService",
+          "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+          "time": "0.047"
+        },
+        {
+          "name": "initialRevisionAlsoFencesLateProgress",
+          "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+          "time": "0.059"
+        },
+        {
+          "name": "staleOrMalformedNotificationNeverReachesEitherRoute",
+          "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+          "time": "0.072"
+        },
+        {
+          "name": "staleActionsAndReleaseDoNotTouchCurrentOwner",
+          "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+          "time": "0.029"
+        },
+        {
+          "name": "internalNewIntentIsSanitizedBeforeEmbeddingAndOpensExactlyOnce",
+          "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+          "time": "0.044"
+        },
+        {
+          "name": "permissionsLostAndEngineLostReleaseResources",
+          "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+          "time": "0.032"
+        },
+        {
+          "name": "externalTraceLinksStillReachEmbeddingUnchanged",
+          "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+          "time": "0.041"
+        },
+        {
+          "name": "recreatedActivitySanitizesInitialIntentBeforeEmbeddingReadsIt",
+          "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+          "time": "0.073"
+        },
+        {
+          "name": "noAcknowledgementUntilOwnerProbe",
+          "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+          "time": "0.029"
+        },
+        {
+          "name": "keysRequireFullPackageAndDeviceBinding",
+          "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+          "time": "0.027"
+        }
+      ]
+    },
+    "artifacts": [
+      {
+        "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/run-39789686610/apk/run-079972b527294600b78a85f9779a1c74/artifacts/trace-dev-debug.apk",
+        "bytes": 131748394,
+        "sha256": "0e89bd52a1b9a4c6bb073c692e7af6c94cdc12b10053aaade4381b44f163f97c",
+        "matches_handoff_sha256": true
+      },
+      {
+        "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/standard-build/android/ble-monitor-android.apk",
+        "bytes": 47272692,
+        "sha256": "366a1e1c898b8729392ce86b159501592f66ee33ac19a243ca92b7117f31a026",
+        "matches_handoff_sha256": true
+      },
+      {
+        "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/standard-build/windows/ble-monitor-windows.exe",
+        "bytes": 93184,
+        "sha256": "30ee419ccc6bd3fb12c5aa3fcb9e9d3b89537ab1dc62467c7460ba5a677c0046",
+        "matches_handoff_sha256": true
+      },
+      {
+        "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/standard-build/windows/ble-monitor-windows.zip",
+        "bytes": 20485199,
+        "sha256": "286526d10b7feba76cbeaeccb13c6e30247d98f70fd6920f81c6bffbf30499c0",
+        "matches_handoff_sha256": true
+      },
+      {
+        "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/standard-logs.zip",
+        "bytes": 1457881,
+        "sha256": "01832f796fd52deafbad5c734a0eaa0a9153c6fe3c5a00eef6d8698b91bccd1c",
+        "matches_handoff_sha256": true
+      }
+    ],
+    "debug_metadata": {
+      "report": {
+        "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/run-39789686610/apk/run-079972b527294600b78a85f9779a1c74/artifacts/trace-dev-debug.json",
+        "bytes": 341,
+        "sha256": "33091136829a958ee63cfc8d4c99e42ffe5ad09f7f2f8f0e38fe1d2a4239dcc1"
+      },
+      "metadata": {
+        "artifact_kind": "development-debug-apk",
+        "formal_acceptance": "NOT_RUN",
+        "commit": "27048aa10079d8dd01d608967e7b5d1b473861ba",
+        "sha256": "0e89bd52a1b9a4c6bb073c692e7af6c94cdc12b10053aaade4381b44f163f97c",
+        "bytes": 131748394,
+        "file": "trace-dev-debug.apk",
+        "release_signing": false,
+        "application_id": "com.wen.gaia.gaia"
+      }
+    },
+    "windows_distribution": {
+      "crc": "PASS",
+      "entry_count": 26,
+      "embedded_exe_sha256": "30ee419ccc6bd3fb12c5aa3fcb9e9d3b89537ab1dc62467c7460ba5a677c0046",
+      "entries": [
+        "data/app.so",
+        "data/icudtl.dat",
+        "data/flutter_assets/assets/",
+        "data/flutter_assets/packages/",
+        "data/flutter_assets/AssetManifest.bin",
+        "data/flutter_assets/FontManifest.json",
+        "data/flutter_assets/NativeAssetsManifest.json",
+        "data/flutter_assets/NOTICES.Z",
+        "data/flutter_assets/assets/audio/gear_rotate.wav",
+        "data/flutter_assets/assets/audio/vault_rotate.wav",
+        "data/flutter_assets/fonts/MaterialIcons-Regular.otf",
+        "data/flutter_assets/packages/cupertino_icons/",
+        "data/flutter_assets/packages/win_ble/",
+        "data/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf",
+        "data/flutter_assets/packages/win_ble/assets/BLEServer.exe",
+        "data/flutter_assets/shaders/ink_sparkle.frag",
+        "data/flutter_assets/shaders/stretch_effect.frag",
+        "audioplayers_windows_plugin.dll",
+        "ble_monitor.exe",
+        "BLEServer.exe",
+        "flutter_windows.dll",
+        "geolocator_windows_plugin.dll",
+        "local_notifier_plugin.dll",
+        "permission_handler_windows_plugin.dll",
+        "share_plus_plugin.dll",
+        "url_launcher_windows_plugin.dll"
+      ]
+    },
+    "standard_logs": [
+      {
+        "entry": "Build Android APK/2_Checkout repository.txt",
+        "bytes": 11979,
+        "sha256": "5f23f77f90cdc9cd45ef6d9666c1c36219cd1ea2a7540fa4a55190100002841c",
+        "decisive": [
+          {
+            "line": 71,
+            "text": "2026-10-22T13:58:17.5253124Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +27048aa10079d8dd01d608967e7b5d1b473861ba:refs/remotes/origin/dev/flutter/p3-8-background-ota-20261021"
+          },
+          {
+            "line": 73,
+            "text": "2026-10-22T13:58:35.7111933Z  * [new ref]         27048aa10079d8dd01d608967e7b5d1b473861ba -> origin/dev/flutter/p3-8-background-ota-20261021"
+          },
+          {
+            "line": 77,
+            "text": "2026-10-22T13:58:35.7205363Z 27048aa10079d8dd01d608967e7b5d1b473861ba"
+          },
+          {
+            "line": 154,
+            "text": "2026-10-22T13:58:40.6026502Z 27048aa10079d8dd01d608967e7b5d1b473861ba"
+          }
+        ],
+        "warning_lines": 0
+      },
+      {
+        "entry": "Build Android APK/9_Analyze project.txt",
+        "bytes": 1600,
+        "sha256": "627f679f710499f522a8b71dbffe8b364020b2bc957ebe1b18d92e25929228e9",
+        "decisive": [
+          {
+            "line": 21,
+            "text": "2026-10-22T14:01:04.9525428Z No issues found! (ran in 14.2s)"
+          }
+        ],
+        "warning_lines": 0
+      },
+      {
+        "entry": "Build Android APK/10_Run Flutter tests.txt",
+        "bytes": 2847397,
+        "sha256": "34e4ce7aab2ed360e371f3c0528acc08447dad1bdbeee08179657b01d2bec7ea",
+        "decisive": [
+          {
+            "line": 24619,
+            "text": "2026-10-22T14:02:50.6083098Z \ud83c\udf89 746 tests passed, 16 skipped."
+          }
+        ],
+        "warning_lines": 0
+      },
+      {
+        "entry": "Build Android APK/12_Build release APK.txt",
+        "bytes": 15393,
+        "sha256": "1551f1970e443c469224fcbd1a84783a853b267c11741fb3e2f9022446ae312b",
+        "decisive": [
+          {
+            "line": 88,
+            "text": "2026-10-22T14:02:52.6709691Z Warning: Flutter support for your project's Gradle version (8.14.0) will soon be dropped. Please upgrade your Gradle version to a version of at least 9.1.0 soon."
+          },
+          {
+            "line": 94,
+            "text": "2026-10-22T14:02:52.6719249Z Warning: Flutter support for your project's Android Gradle Plugin version (Android Gradle Plugin version 8.11.1) will soon be dropped. Please upgrade your Android Gradle Plugin version to a version of at least Android Gradle Plugin version 9.0.1 soon."
+          },
+          {
+            "line": 100,
+            "text": "2026-10-22T14:02:52.6745440Z Warning: Flutter support for your project's Kotlin version (2.2.20) will soon be dropped. Please upgrade your Kotlin version to a version of at least 2.3.20 soon."
+          },
+          {
+            "line": 106,
+            "text": "2026-10-22T14:02:53.5473486Z Warning: The plugin flutter_plugin_android_lifecycle requires Android SDK version 36 or higher."
+          },
+          {
+            "line": 108,
+            "text": "2026-10-22T14:02:53.7463019Z Warning: The plugin geolocator_android requires Android SDK version 36 or higher."
+          },
+          {
+            "line": 110,
+            "text": "2026-10-22T14:02:53.8471210Z Warning: The plugin package_info_plus requires Android SDK version 36 or higher."
+          },
+          {
+            "line": 112,
+            "text": "2026-10-22T14:02:53.9463569Z Warning: The plugin path_provider_android requires Android SDK version 36 or higher."
+          },
+          {
+            "line": 114,
+            "text": "2026-10-22T14:02:54.1493361Z Warning: The plugin share_plus requires Android SDK version 36 or higher."
+          },
+          {
+            "line": 116,
+            "text": "2026-10-22T14:02:54.3477549Z Warning: The plugin shared_preferences_android requires Android SDK version 36 or higher."
+          },
+          {
+            "line": 118,
+            "text": "2026-10-22T14:02:54.4473096Z Warning: The plugin sqflite_android requires Android SDK version 36 or higher."
+          },
+          {
+            "line": 147,
+            "text": "2026-10-22T14:04:09.2467958Z Caught exception: Already watching path: /home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/android"
+          },
+          {
+            "line": 149,
+            "text": "2026-10-22T14:05:40.2659633Z \u2713 Built build/app/outputs/flutter-apk/app-release.apk (47.3MB)"
+          }
+        ],
+        "warning_lines": 10
+      },
+      {
+        "entry": "Build Android APK/28_Post Checkout repository.txt",
+        "bytes": 4080,
+        "sha256": "42451f7d0d311c4216b7f7f546388cf2a2752ecc6102cf413dedca5780fece29",
+        "decisive": [],
+        "warning_lines": 0
+      },
+      {
+        "entry": "Build Windows EXE/2_Checkout repository.txt",
+        "bytes": 12825,
+        "sha256": "2a1b15278b4d7503e799e7aa1a7f1dae16578624a83f99fb4eabb10182d6543e",
+        "decisive": [
+          {
+            "line": 58,
+            "text": "2026-10-22T13:58:18.3021305Z [command]\"C:\\Program Files\\Git\\bin\\git.exe\" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +27048aa10079d8dd01d608967e7b5d1b473861ba:refs/remotes/origin/dev/flutter/p3-8-background-ota-20261021"
+          },
+          {
+            "line": 60,
+            "text": "2026-10-22T13:58:44.0836306Z  * [new ref]         27048aa10079d8dd01d608967e7b5d1b473861ba -> origin/dev/flutter/p3-8-background-ota-20261021"
+          },
+          {
+            "line": 64,
+            "text": "2026-10-22T13:58:44.1495616Z 27048aa10079d8dd01d608967e7b5d1b473861ba"
+          },
+          {
+            "line": 161,
+            "text": "2026-10-22T13:58:53.6608040Z 27048aa10079d8dd01d608967e7b5d1b473861ba"
+          }
+        ],
+        "warning_lines": 0
+      },
+      {
+        "entry": "Build Windows EXE/6_Analyze project.txt",
+        "bytes": 931,
+        "sha256": "021cfba3f328b3d3280457fa6cdf3eabde1be5fd6de1987ce8d78719ff2dc8a9",
+        "decisive": [
+          {
+            "line": 12,
+            "text": "2026-10-22T14:01:16.8123467Z No issues found! (ran in 12.0s)"
+          }
+        ],
+        "warning_lines": 0
+      },
+      {
+        "entry": "Build Windows EXE/7_Run Flutter tests.txt",
+        "bytes": 2852187,
+        "sha256": "6a80922504b984650c06e21339cedc26d190bd433caec295527f3b3e52526e90",
+        "decisive": [
+          {
+            "line": 24552,
+            "text": "2026-10-22T14:02:45.8366048Z \ud83c\udf89 729 tests passed, 33 skipped."
+          }
+        ],
+        "warning_lines": 0
+      },
+      {
+        "entry": "Build Windows EXE/8_Build Windows release.txt",
+        "bytes": 998,
+        "sha256": "695e666f1f63475cf8031ec356f75ce00779cdb0f5dd83a7531774199dafb5a3",
+        "decisive": [
+          {
+            "line": 12,
+            "text": "2026-10-22T14:04:59.6738054Z \u221a Built build\\windows\\x64\\runner\\Release\\ble_monitor.exe"
+          }
+        ],
+        "warning_lines": 0
+      },
+      {
+        "entry": "Build Windows EXE/20_Post Checkout repository.txt",
+        "bytes": 4315,
+        "sha256": "12660acb72082f9ef5690c91a82d2a4e7079ae4f4806b732aa3b4b0c866d85cb",
+        "decisive": [],
+        "warning_lines": 0
+      },
+      {
+        "entry": "Detect changed paths/2_Checkout repository.txt",
+        "bytes": 18439,
+        "sha256": "6da4fe83a02630304cf870bf1137fc9975ccd447436c3b7dbf009fa31f5ac82b",
+        "decisive": [
+          {
+            "line": 133,
+            "text": "2026-10-22T13:58:04.1693526Z 27048aa10079d8dd01d608967e7b5d1b473861ba"
+          },
+          {
+            "line": 200,
+            "text": "2026-10-22T13:58:07.4775851Z 27048aa10079d8dd01d608967e7b5d1b473861ba"
+          }
+        ],
+        "warning_lines": 0
+      },
+      {
+        "entry": "Detect changed paths/6_Post Checkout repository.txt",
+        "bytes": 4080,
+        "sha256": "e0d5c4f42e2c6b97b12600da3c705841f63b6ff64267a655e8a2ae786a91533d",
+        "decisive": [],
+        "warning_lines": 0
+      }
+    ],
+    "github_archive_bindings": [
+      {
+        "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/dev-ubuntu.zip",
+        "bytes": 211154,
+        "sha256": "f6686b81c12785cb514cad269db2fbc706e2b1cec69374dbdf7fa987975e7d5f",
+        "published_sha256": "f6686b81c12785cb514cad269db2fbc706e2b1cec69374dbdf7fa987975e7d5f",
+        "members_checked": [
+          "app/bluetooth_flutter_Trace/build/app/test-results/testDebugUnitTest/TEST-com.wen.gaia.gaia.DeviceOtaServiceTest.xml",
+          ".cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/result.json",
+          ".cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/sdk_checkout.log",
+          ".cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/sdk_version.log",
+          ".cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/dependencies.log",
+          ".cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/analyze.log",
+          ".cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/tests.log",
+          ".cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/apk_prepare.log",
+          ".cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/apk_java.log",
+          ".cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/apk_sdk.log",
+          ".cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/apk_wrapper.log",
+          ".cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/apk_install_wrapper.log",
+          ".cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/apk_build.log",
+          ".cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/apk_device_ota_native.log",
+          ".cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/apk_verify.log",
+          ".cache/flutter-dev-checks/runs/run-079972b527294600b78a85f9779a1c74/logs/apk_collect.log"
+        ]
+      },
+      {
+        "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/dev-windows.zip",
+        "bytes": 205319,
+        "sha256": "85db52dc473ad15ac43ed8f4a925a3dc25eafcb90eb6027dd7ead798394856dd",
+        "published_sha256": "85db52dc473ad15ac43ed8f4a925a3dc25eafcb90eb6027dd7ead798394856dd",
+        "members_checked": [
+          ".cache/flutter-dev-checks/runs/run-200e4ab21d5745d0a39f05df64bee76e/result.json",
+          ".cache/flutter-dev-checks/runs/run-200e4ab21d5745d0a39f05df64bee76e/logs/sdk_checkout.log",
+          ".cache/flutter-dev-checks/runs/run-200e4ab21d5745d0a39f05df64bee76e/logs/sdk_version.log",
+          ".cache/flutter-dev-checks/runs/run-200e4ab21d5745d0a39f05df64bee76e/logs/dependencies.log",
+          ".cache/flutter-dev-checks/runs/run-200e4ab21d5745d0a39f05df64bee76e/logs/analyze.log",
+          ".cache/flutter-dev-checks/runs/run-200e4ab21d5745d0a39f05df64bee76e/logs/tests.log"
+        ]
+      },
+      {
+        "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/dev-apk-resume.zip",
+        "bytes": 75477882,
+        "sha256": "b31bf8e4616d7640d5dd6b822377848c984f6bdbe96f3fc90bcf5f9559a522d5",
+        "published_sha256": "b31bf8e4616d7640d5dd6b822377848c984f6bdbe96f3fc90bcf5f9559a522d5",
+        "members_checked": [
+          "run-079972b527294600b78a85f9779a1c74/artifacts/trace-dev-debug.apk",
+          "run-079972b527294600b78a85f9779a1c74/artifacts/trace-dev-debug.json"
+        ]
+      },
+      {
+        "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/standard-apk-python.zip",
+        "bytes": 25792809,
+        "sha256": "5c5770ded1f2af6d9dc9f358b27cc77421575ae13e0b9b99faf37e01fd9dae44",
+        "published_sha256": "5c5770ded1f2af6d9dc9f358b27cc77421575ae13e0b9b99faf37e01fd9dae44",
+        "members_checked": [
+          "ble-monitor-android.apk"
+        ]
+      },
+      {
+        "path": ".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022/standard-windows.zip",
+        "bytes": 20515496,
+        "sha256": "0981217abe334491faaeee042bdd2f3c8862f97e68cfa3a8fa80336b5267c3a2",
+        "published_sha256": "0981217abe334491faaeee042bdd2f3c8862f97e68cfa3a8fa80336b5267c3a2",
+        "members_checked": [
+          "ble-monitor-windows.exe",
+          "ble-monitor-windows.zip"
+        ]
+      }
+    ],
+    "result": "ORIGINALS_VERIFIED_NOT_FORMAL_ACCEPTANCE"
+  },
+  "github_status": {
+    "runs": [
+      {
+        "id": 39789686610,
+        "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/39789686610",
+        "workflow": ".github/workflows/flutter-dev-checks.yml",
+        "head_sha": "27048aa10079d8dd01d608967e7b5d1b473861ba",
+        "branch": "dev/flutter/p3-8-background-ota-20261021",
+        "status": "completed",
+        "conclusion": "success",
+        "attempt": 1,
+        "created_at": "2026-10-22T13:45:30Z",
+        "updated_at": "2026-10-22T13:56:35Z",
+        "jobs": [
+          {
+            "id": 119862091149,
+            "name": "Flutter self-tests (ubuntu-latest)",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-10-22T13:45:35Z",
+            "completed_at": "2026-10-22T13:56:35Z",
+            "steps": [
+              {
+                "name": "Set up job",
+                "conclusion": "success"
+              },
+              {
+                "name": "Checkout validation commit",
+                "conclusion": "success"
+              },
+              {
+                "name": "Check debug APK disk budget",
+                "conclusion": "success"
+              },
+              {
+                "name": "Verify development runner",
+                "conclusion": "success"
+              },
+              {
+                "name": "Verify debug APK helper",
+                "conclusion": "success"
+              },
+              {
+                "name": "Analyze, test and optionally build a debug APK",
+                "conclusion": "success"
+              },
+              {
+                "name": "Verify PHY native lifecycle",
+                "conclusion": "success"
+              },
+              {
+                "name": "Verify App observation snapshot integrity",
+                "conclusion": "success"
+              },
+              {
+                "name": "Verify batch timing accounting",
+                "conclusion": "success"
+              },
+              {
+                "name": "Verify v2 full-run and stability accounting",
+                "conclusion": "success"
+              },
+              {
+                "name": "Upload development logs (not acceptance evidence)",
+                "conclusion": "success"
+              },
+              {
+                "name": "Report final workspace disk use",
+                "conclusion": "success"
+              },
+              {
+                "name": "Upload debug APK (not a release)",
+                "conclusion": "success"
+              },
+              {
+                "name": "Post Checkout validation commit",
+                "conclusion": "success"
+              },
+              {
+                "name": "Complete job",
+                "conclusion": "success"
+              }
+            ]
+          },
+          {
+            "id": 119862091787,
+            "name": "Flutter self-tests (windows-2022)",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-10-22T13:45:35Z",
+            "completed_at": "2026-10-22T13:48:45Z",
+            "steps": [
+              {
+                "name": "Set up job",
+                "conclusion": "success"
+              },
+              {
+                "name": "Checkout validation commit",
+                "conclusion": "success"
+              },
+              {
+                "name": "Check debug APK disk budget",
+                "conclusion": "skipped"
+              },
+              {
+                "name": "Verify development runner",
+                "conclusion": "success"
+              },
+              {
+                "name": "Verify debug APK helper",
+                "conclusion": "success"
+              },
+              {
+                "name": "Analyze, test and optionally build a debug APK",
+                "conclusion": "success"
+              },
+              {
+                "name": "Verify PHY native lifecycle",
+                "conclusion": "success"
+              },
+              {
+                "name": "Verify App observation snapshot integrity",
+                "conclusion": "success"
+              },
+              {
+                "name": "Verify batch timing accounting",
+                "conclusion": "success"
+              },
+              {
+                "name": "Verify v2 full-run and stability accounting",
+                "conclusion": "success"
+              },
+              {
+                "name": "Upload development logs (not acceptance evidence)",
+                "conclusion": "success"
+              },
+              {
+                "name": "Report final workspace disk use",
+                "conclusion": "skipped"
+              },
+              {
+                "name": "Upload debug APK (not a release)",
+                "conclusion": "skipped"
+              },
+              {
+                "name": "Post Checkout validation commit",
+                "conclusion": "success"
+              },
+              {
+                "name": "Complete job",
+                "conclusion": "success"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": 39791568439,
+        "url": "https://github.com/Eitan-S-23/E-Track/actions/runs/39791568439",
+        "workflow": ".github/workflows/build.yml",
+        "head_sha": "27048aa10079d8dd01d608967e7b5d1b473861ba",
+        "branch": "dev/flutter/p3-8-background-ota-20261021",
+        "status": "completed",
+        "conclusion": "success",
+        "attempt": 1,
+        "created_at": "2026-10-22T13:57:50Z",
+        "updated_at": "2026-10-22T14:07:20Z",
+        "jobs": [
+          {
+            "id": 119868701165,
+            "name": "Detect changed paths",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-10-22T13:57:54Z",
+            "completed_at": "2026-10-22T13:58:09Z",
+            "steps": [
+              {
+                "name": "Set up job",
+                "conclusion": "success"
+              },
+              {
+                "name": "Checkout repository",
+                "conclusion": "success"
+              },
+              {
+                "name": "Detect docs and app build inputs",
+                "conclusion": "success"
+              },
+              {
+                "name": "Post Checkout repository",
+                "conclusion": "success"
+              },
+              {
+                "name": "Complete job",
+                "conclusion": "success"
+              }
+            ]
+          },
+          {
+            "id": 119868855022,
+            "name": "Build Windows EXE",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-10-22T13:58:12Z",
+            "completed_at": "2026-10-22T14:05:10Z",
+            "steps": [
+              {
+                "name": "Set up job",
+                "conclusion": "success"
+              },
+              {
+                "name": "Checkout repository",
+                "conclusion": "success"
+              },
+              {
+                "name": "Set up Flutter",
+                "conclusion": "success"
+              },
+              {
+                "name": "Enable Windows desktop",
+                "conclusion": "success"
+              },
+              {
+                "name": "Install dependencies",
+                "conclusion": "success"
+              },
+              {
+                "name": "Analyze project",
+                "conclusion": "success"
+              },
+              {
+                "name": "Run Flutter tests",
+                "conclusion": "success"
+              },
+              {
+                "name": "Build Windows release",
+                "conclusion": "success"
+              },
+              {
+                "name": "Prepare Windows release assets",
+                "conclusion": "success"
+              },
+              {
+                "name": "Upload Windows EXE",
+                "conclusion": "success"
+              },
+              {
+                "name": "Post Set up Flutter",
+                "conclusion": "success"
+              },
+              {
+                "name": "Post Checkout repository",
+                "conclusion": "success"
+              },
+              {
+                "name": "Complete job",
+                "conclusion": "success"
+              }
+            ]
+          },
+          {
+            "id": 119868855099,
+            "name": "Build Android APK",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-10-22T13:58:13Z",
+            "completed_at": "2026-10-22T14:05:52Z",
+            "steps": [
+              {
+                "name": "Set up job",
+                "conclusion": "success"
+              },
+              {
+                "name": "Checkout repository",
+                "conclusion": "success"
+              },
+              {
+                "name": "Set up Java",
+                "conclusion": "success"
+              },
+              {
+                "name": "Set up Gradle",
+                "conclusion": "success"
+              },
+              {
+                "name": "Set up Flutter",
+                "conclusion": "success"
+              },
+              {
+                "name": "Install dependencies",
+                "conclusion": "success"
+              },
+              {
+                "name": "Restore Android Gradle wrapper",
+                "conclusion": "success"
+              },
+              {
+                "name": "Configure Android release signing",
+                "conclusion": "success"
+              },
+              {
+                "name": "Analyze project",
+                "conclusion": "success"
+              },
+              {
+                "name": "Run Flutter tests",
+                "conclusion": "success"
+              },
+              {
+                "name": "Clear cached Flutter Android artifacts",
+                "conclusion": "success"
+              },
+              {
+                "name": "Build release APK",
+                "conclusion": "success"
+              },
+              {
+                "name": "Prepare Android release asset",
+                "conclusion": "success"
+              },
+              {
+                "name": "Upload Android APK",
+                "conclusion": "success"
+              },
+              {
+                "name": "Post Set up Flutter",
+                "conclusion": "success"
+              },
+              {
+                "name": "Post Set up Gradle",
+                "conclusion": "success"
+              },
+              {
+                "name": "Post Set up Java",
+                "conclusion": "success"
+              },
+              {
+                "name": "Post Checkout repository",
+                "conclusion": "success"
+              },
+              {
+                "name": "Complete job",
+                "conclusion": "success"
+              }
+            ]
+          },
+          {
+            "id": 119868939989,
+            "name": "Deploy GitHub Pages",
+            "status": "completed",
+            "conclusion": "skipped",
+            "started_at": "2026-10-22T13:58:20Z",
+            "completed_at": "2026-10-22T13:58:09Z",
+            "steps": []
+          },
+          {
+            "id": 119874444513,
+            "name": "Create GitHub Release",
+            "status": "completed",
+            "conclusion": "skipped",
+            "started_at": "2026-10-22T14:09:45Z",
+            "completed_at": "2026-10-22T14:05:52Z",
+            "steps": []
+          }
+        ]
+      }
+    ],
+    "handoff_runs": []
+  },
+  "github_artifacts": {
+    "artifacts": [
+      {
+        "run": "39789686610",
+        "artifacts": [
+          {
+            "id": 12431242360,
+            "name": "flutter-dev-debug-apk-27048aa10079d8dd01d608967e7b5d1b473861ba-39789686610-1",
+            "size_in_bytes": 75477882,
+            "digest": "sha256:b31bf8e4616d7640d5dd6b822377848c984f6bdbe96f3fc90bcf5f9559a522d5",
+            "expired": false,
+            "created_at": "2026-10-22T13:56:32Z",
+            "expires_at": "2026-10-25T13:56:27Z"
+          },
+          {
+            "id": 12430697181,
+            "name": "flutter-dev-windows-2022-39789686610-1",
+            "size_in_bytes": 205319,
+            "digest": "sha256:85db52dc473ad15ac43ed8f4a925a3dc25eafcb90eb6027dd7ead798394856dd",
+            "expired": false,
+            "created_at": "2026-10-22T13:48:42Z",
+            "expires_at": "2026-11-05T13:48:41Z"
+          },
+          {
+            "id": 12430199486,
+            "name": "flutter-dev-ubuntu-latest-39789686610-1",
+            "size_in_bytes": 211154,
+            "digest": "sha256:f6686b81c12785cb514cad269db2fbc706e2b1cec69374dbdf7fa987975e7d5f",
+            "expired": false,
+            "created_at": "2026-10-22T13:56:26Z",
+            "expires_at": "2026-11-05T13:56:26Z"
+          }
+        ]
+      },
+      {
+        "run": "39791568439",
+        "artifacts": [
+          {
+            "id": 12432185988,
+            "name": "windows-exe",
+            "size_in_bytes": 20515496,
+            "digest": "sha256:0981217abe334491faaeee042bdd2f3c8862f97e68cfa3a8fa80336b5267c3a2",
+            "expired": false,
+            "created_at": "2026-10-22T14:05:03Z",
+            "expires_at": "2026-11-05T14:05:01Z"
+          },
+          {
+            "id": 12430734821,
+            "name": "android-apk",
+            "size_in_bytes": 25792809,
+            "digest": "sha256:5c5770ded1f2af6d9dc9f358b27cc77421575ae13e0b9b99faf37e01fd9dae44",
+            "expired": false,
+            "created_at": "2026-10-22T14:05:43Z",
+            "expires_at": "2026-11-05T14:05:40Z"
+          }
+        ]
+      }
+    ],
+    "branch_runs": []
+  },
+  "unchanged_drafts": [
+    {
+      "path": "docs\\acceptance-contracts\\P3-8-v1.draft.contract.json",
+      "sha256": "a5c02d456bcb05c6360a3ecb79f65ca50b913d00f3daddadcfc52be91a889049",
+      "schema": "etrack-acceptance-contract-v3",
+      "status": "DRAFT",
+      "freeze_commit": "5d2a0fa6fee9d58a608a068a7bff9f3d8e31f3a9",
+      "criteria_count": 7
+    },
+    {
+      "path": "docs\\ota-exec-notes\\P3-8-preacceptance-2026-10-22\\evidence-matrix.draft.json",
+      "sha256": "814735cdf794fc6d9f20f8331df12273e6cb96a70861354fd706002fc2fa4d25",
+      "schema": "etrack-evidence-matrix-v2",
+      "round_id": "P3-8-DRAFT-NOT-EXECUTED",
+      "overall_result": "NOT_RUN",
+      "criteria_count": 7
+    }
+  ],
+  "formal_acceptance": "NOT_RUN",
+  "device_operations": 0,
+  "new_builds": 0,
+  "remaining_hardware": "Actual retained-engine/BLE background and lockscreen durable progress, notification/fallback interaction, disconnect recovery, new-link full target identity and physical resource cleanup remain unobserved. Existing D0..D3 is a draft, not authority.",
+  "limitations": [
+    "No new Dart/Flutter/Android execution was performed in this reviewer session.",
+    "The old DRAFT still binds 5d2a0fa6; it is not freeze-ready for this candidate.",
+    "Filtered GitHub run-list queries returned no entries; no handoff-only run is relied upon. The code candidate's two exact run IDs and jobs were checked directly.",
+    "Review records remain root-local and uncommitted; no delivery to main or live implementation-agent acknowledgement is claimed."
+  ]
+}

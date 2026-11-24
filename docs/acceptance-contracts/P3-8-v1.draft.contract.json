@@ -1,0 +1,403 @@
+{
+  "schema": "etrack-acceptance-contract-v3",
+  "contract_id": "P3-8-v1",
+  "version": 1,
+  "task_id": "P3-8",
+  "parent_contract_sha256": null,
+  "status": "DRAFT",
+  "approved_by": "",
+  "approved_at": "",
+  "implementation_ref": "Reviewed 5d2a0fa6; NOT ADMITTED. Replace with the repaired committed batch before freezing.",
+  "freeze_commit": "5d2a0fa6fee9d58a608a068a7bff9f3d8e31f3a9",
+  "freeze_tree": "40f881552e9222769c90c76267f5957e39cfd100",
+  "profile_config_blob": "5ef97ae98674373c3cf641676c16ff7baf1b617f",
+  "result_taxonomy": [
+    "PASS",
+    "PRODUCT_FAIL",
+    "HARNESS_FAIL",
+    "EVIDENCE_GAP",
+    "ENV_BLOCKED"
+  ],
+  "invalidation_policy": "docs/acceptance-execution-contract.md",
+  "input_groups": [
+    {
+      "id": "production",
+      "profile": "Production",
+      "category": "production_source"
+    },
+    {
+      "id": "validation",
+      "profile": "Validation",
+      "category": "validation_inputs"
+    },
+    {
+      "id": "governance",
+      "profile": "Governance",
+      "category": "governance_inputs"
+    },
+    {
+      "id": "flutter",
+      "profile": "Flutter",
+      "category": "production_source"
+    }
+  ],
+  "external_inputs": [
+    {
+      "id": "software-originals",
+      "category": "fixture",
+      "description": "Pre-review origin inventory only. Formal evaluation must bind and read original logs/binaries, not merely trust this review summary.",
+      "fingerprint": "P3-8 5d2a0fa6 development 39697643246 and standard 39700401326; pre-review inventory",
+      "evidence_path": "evidence-audit.json",
+      "evidence_sha256": "4e971c1f1a858929b721dcaea30f1a23f4268015d9dcc40fc0bce00ddea6abf7"
+    },
+    {
+      "id": "device-binding",
+      "category": "environment",
+      "description": "Explicit UNBOUND planning placeholder, NOT device evidence or authorization. Replace every missing identity and its fingerprint/evidence before FROZEN.",
+      "fingerprint": "UNBOUND_NOT_AUTHORIZED_NOT_EVIDENCE",
+      "evidence_path": "device-binding.pending.json",
+      "evidence_sha256": "7ab1c0190788ddb95079334d9c302b97aabffb4dffc748dd6d73f8d8489445cc"
+    }
+  ],
+  "commands": [
+    {
+      "id": "CMD-P38-SOFTWARE",
+      "description": "NON-EXECUTABLE DRAFT: Independent evaluation of the applicable original dual-host analyze/tests, Android Service JUnit, actual APK/EXE/ZIP bytes and CI source identities. Do not replay builds or call development evidence REUSED.",
+      "command": "UNBOUND_P38_SOFTWARE_EVALUATOR",
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-P38-PREFLIGHT",
+      "description": "NON-EXECUTABLE DRAFT: Read-only phone, installed APK/signer, board App/Boot/BCB/staging and immutable asset/collector preflight. No programming, uninstall, data clearing or implicit authorization.",
+      "command": "UNBOUND_P38_DEVICE_PREFLIGHT",
+      "input_groups": [
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-P38-D1",
+      "description": "NON-EXECUTABLE DRAFT: Device cell D1: one denial/restoration case with foreground/background recovery and no END. Freeze exact settings, deadlines, restoration and user authority first.",
+      "command": "UNBOUND_P38_DEVICE_CELL_D1",
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-P38-D2",
+      "description": "NON-EXECUTABLE DRAFT: Device cell D2: one acquired partial transfer, normal background/lockscreen, notification return and pre-END cancellation. Timestamp MCU durable growth and close owned resources.",
+      "command": "UNBOUND_P38_DEVICE_CELL_D2",
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    },
+    {
+      "id": "CMD-P38-D3",
+      "description": "NON-EXECUTABLE DRAFT: Device cell D3: verified same-package resume, one planned pre-END disconnect/reconnect, completion and new-link full raw identity. Retain verified target; uncertain outcome is not permission to replay.",
+      "command": "UNBOUND_P38_DEVICE_CELL_D3",
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "runner_paths": [],
+      "expected_exit_codes": [
+        0
+      ],
+      "output_required": true
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ART-P38-SOFTWARE",
+      "description": "Future original result for SOFTWARE; currently NOT_RUN and not fabricated.",
+      "path": "observations/software-evaluation.json"
+    },
+    {
+      "id": "ART-P38-PREFLIGHT",
+      "description": "Future original result for PREFLIGHT; currently NOT_RUN and not fabricated.",
+      "path": "observations/device-preflight.json"
+    },
+    {
+      "id": "ART-P38-D1",
+      "description": "Future original result for D1; currently NOT_RUN and not fabricated.",
+      "path": "observations/d1-fallback.json"
+    },
+    {
+      "id": "ART-P38-D2",
+      "description": "Future original result for D2; currently NOT_RUN and not fabricated.",
+      "path": "observations/d2-background-notification.json"
+    },
+    {
+      "id": "ART-P38-D3",
+      "description": "Future original result for D3; currently NOT_RUN and not fabricated.",
+      "path": "observations/d3-resume-identity.json"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "P38-SOFTWARE",
+      "description": "Existing software originals are valid for the final frozen inputs, including all applicable host/native checks, SDK deltas and actual artifacts.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log",
+        "artifact_hash"
+      ],
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "flutter supplies the OTA implementation/native service/UI and platform test inputs; validation supplies the real collection/evaluation dependencies, which must be pinned and listed before freeze.",
+      "external_inputs": [
+        "software-originals"
+      ],
+      "command_ids": [
+        "CMD-P38-SOFTWARE"
+      ],
+      "artifact_ids": [
+        "ART-P38-SOFTWARE"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P38-FALLBACK",
+      "description": "Acquisition is acknowledged by live service/lock/same engine/task; denial/loss is explicit; unowned background sends remain stopped, including a late foreground-recheck completion.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "raw_log",
+        "artifact_hash"
+      ],
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "flutter supplies the OTA implementation/native service/UI and platform test inputs; validation supplies the real collection/evaluation dependencies, which must be pinned and listed before freeze.",
+      "external_inputs": [
+        "device-binding"
+      ],
+      "command_ids": [
+        "CMD-P38-PREFLIGHT",
+        "CMD-P38-D1"
+      ],
+      "artifact_ids": [
+        "ART-P38-PREFLIGHT",
+        "ART-P38-D1"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P38-BACKGROUND",
+      "description": "During both normal background and lockscreen, the same acknowledged owner advances MCU durable bytes without duplicate BEGIN, UI-induced pauses or frozen progress budgets.",
+      "required": true,
+      "kind": "functional",
+      "evidence_types": [
+        "raw_log",
+        "artifact_hash"
+      ],
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "flutter supplies the OTA implementation/native service/UI and platform test inputs; validation supplies the real collection/evaluation dependencies, which must be pinned and listed before freeze.",
+      "external_inputs": [
+        "device-binding"
+      ],
+      "command_ids": [
+        "CMD-P38-PREFLIGHT",
+        "CMD-P38-D2"
+      ],
+      "artifact_ids": [
+        "ART-P38-PREFLIGHT",
+        "ART-P38-D2"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P38-NOTIFICATION",
+      "description": "UI and notification show the same task/phase/durable progress. Active tap attaches exactly once; stale Intent/cancel cannot navigate or affect a new owner; terminal page remains bound to its exact target.",
+      "required": true,
+      "kind": "visual",
+      "evidence_types": [
+        "raw_log",
+        "artifact_hash"
+      ],
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "flutter supplies the OTA implementation/native service/UI and platform test inputs; validation supplies the real collection/evaluation dependencies, which must be pinned and listed before freeze.",
+      "external_inputs": [
+        "device-binding"
+      ],
+      "command_ids": [
+        "CMD-P38-PREFLIGHT",
+        "CMD-P38-D2"
+      ],
+      "artifact_ids": [
+        "ART-P38-PREFLIGHT",
+        "ART-P38-D2"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P38-RECOVERY",
+      "description": "After the planned disconnect, device/package identity is revalidated and BEGIN durable state drives recovery; cached UI progress cannot authorize writes.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "raw_log",
+        "artifact_hash"
+      ],
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "flutter supplies the OTA implementation/native service/UI and platform test inputs; validation supplies the real collection/evaluation dependencies, which must be pinned and listed before freeze.",
+      "external_inputs": [
+        "device-binding"
+      ],
+      "command_ids": [
+        "CMD-P38-PREFLIGHT",
+        "CMD-P38-D3"
+      ],
+      "artifact_ids": [
+        "ART-P38-PREFLIGHT",
+        "ART-P38-D3"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P38-FINAL-IDENTITY",
+      "description": "END/100 percent is not success. A new post-reboot connection returns the exact target version and full raw image SHA-256; mismatches/unobserved results do not pass.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "raw_log",
+        "artifact_hash"
+      ],
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "flutter supplies the OTA implementation/native service/UI and platform test inputs; validation supplies the real collection/evaluation dependencies, which must be pinned and listed before freeze.",
+      "external_inputs": [
+        "device-binding"
+      ],
+      "command_ids": [
+        "CMD-P38-PREFLIGHT",
+        "CMD-P38-D3"
+      ],
+      "artifact_ids": [
+        "ART-P38-PREFLIGHT",
+        "ART-P38-D3"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    },
+    {
+      "id": "P38-CLEANUP",
+      "description": "Completion, failure, cancellation and verification deadline expiry release service, wake lock, owner/subscriptions/scan lease without affecting a later owner or App self-update. Foreground waiting cannot extend the absolute reboot deadline.",
+      "required": true,
+      "kind": "safety",
+      "evidence_types": [
+        "raw_log",
+        "artifact_hash"
+      ],
+      "input_groups": [
+        "flutter",
+        "validation"
+      ],
+      "dependency_rationale": "flutter supplies the OTA implementation/native service/UI and platform test inputs; validation supplies the real collection/evaluation dependencies, which must be pinned and listed before freeze.",
+      "external_inputs": [
+        "device-binding"
+      ],
+      "command_ids": [
+        "CMD-P38-PREFLIGHT",
+        "CMD-P38-D1",
+        "CMD-P38-D2",
+        "CMD-P38-D3"
+      ],
+      "artifact_ids": [
+        "ART-P38-PREFLIGHT",
+        "ART-P38-D1",
+        "ART-P38-D2",
+        "ART-P38-D3"
+      ],
+      "gate": {
+        "type": "boolean",
+        "basis": "frozen_requirement",
+        "expected": true
+      }
+    }
+  ],
+  "performance_gates": [],
+  "draft_readiness": {
+    "execution_allowed": false,
+    "formal_round_started": false,
+    "source_blockers": [
+      "P38-R01",
+      "P38-R02",
+      "P38-R03",
+      "P38-R04"
+    ],
+    "unbound": [
+      "repaired freeze commit/tree/profile blob",
+      "exact executable commands and complete runner_paths",
+      "actual device/Android/APK signer/App/Boot/BCB/staging identity",
+      "immutable ETU/source/target full raw hashes",
+      "observer/retrieval and safe recovery route",
+      "device operations and freeze approval",
+      "clean admitted execution worktree",
+      "compact original evidence bundle"
+    ],
+    "scope_note": "This is a semantic/structural draft only. UNBOUND commands must never be executed or promoted unchanged. No new profile or hardware authorization is created."
+  }
+}

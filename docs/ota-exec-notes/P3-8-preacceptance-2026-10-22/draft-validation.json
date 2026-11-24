@@ -1,0 +1,55 @@
+{
+  "schema": "p38-draft-validation-v1",
+  "scope": "Structure and non-admission checks only; not formal acceptance or hardware preflight.",
+  "checks": [
+    {
+      "name": "draft_structure",
+      "command": "python -I -S -B -X utf8 .cache\\p3-8-implementation-20261021\\Tools\\acceptance\\validate_bundle.py --contract docs\\acceptance-contracts\\P3-8-v1.draft.contract.json --matrix docs\\ota-exec-notes\\P3-8-preacceptance-2026-10-22\\evidence-matrix.draft.json --repo-root D:\\github\\my\\E-Track\\.cache\\p3-8-implementation-20261021 --allow-draft",
+      "cwd": "D:\\github\\my\\E-Track",
+      "expected_exit_code": 0,
+      "exit_code": 1,
+      "output": "ERROR: matrix.contract_sha256 does not match the contract file\r\nVALIDATION=FAIL errors=1\r\n"
+    },
+    {
+      "name": "reject_unfrozen_execution",
+      "command": "python -I -S -B -X utf8 .cache\\p3-8-implementation-20261021\\Tools\\acceptance\\validate_bundle.py --contract docs\\acceptance-contracts\\P3-8-v1.draft.contract.json --matrix docs\\ota-exec-notes\\P3-8-preacceptance-2026-10-22\\evidence-matrix.draft.json --repo-root D:\\github\\my\\E-Track\\.cache\\p3-8-implementation-20261021",
+      "cwd": "D:\\github\\my\\E-Track",
+      "expected_exit_code": 1,
+      "exit_code": 1,
+      "output": "ERROR: contract must be FROZEN\r\nVALIDATION=FAIL errors=1\r\n"
+    },
+    {
+      "name": "tracked_whitespace",
+      "command": "git --no-optional-locks diff --check -- PLAN-OTA-EXEC.md docs/agent-collaboration/index.md",
+      "cwd": "D:\\github\\my\\E-Track",
+      "expected_exit_code": 0,
+      "exit_code": 2,
+      "output": "warning: in the working copy of 'docs/agent-collaboration/index.md', LF will be replaced by CRLF the next time Git touches it\nPLAN-OTA-EXEC.md:777: trailing whitespace.\n+\u72b6\u6001: \u8fdb\u884c\u4e2d \uff5c \u8ba4\u9886: Codex(P3-8 \u5b9e\u73b0) / 2026-10-21 \uff5c \u66f4\u65b0: 2026-10-22(\u627f\u63a5 2a46ecdf \u5b9e\u73b0\u767b\u8bb0\uff1b\u72ec\u7acb\u9884\u5ba1\u53d1\u73b0 P38-R01 \u81f3 R04\uff0c\u5f85\u6279\u91cf\u6574\u6539\uff0c\u6b63\u5f0f\u9a8c\u6536 NOT_RUN)\r\nPLAN-OTA-EXEC.md:783: trailing whitespace.\n+- \u6d3e\u5de5\u4e66: docs/ota-prompts/prompt-P3-8-implementation.md\uff1b\u5177\u4f53\u8bbe\u5907\u3001\u65f6\u957f\u3001\u64cd\u4f5c/\u6062\u590d\u914d\u989d\u548c\u72ec\u7acb\u9a8c\u6536\u5408\u540c\u987b\u53e6\u884c\u5ba1\u6279\uff0c\u771f\u673a\u89c2\u5bdf\u4e0e\u6b63\u5f0f\u9a8c\u6536 NOT_RUN\u3002\r\nPLAN-OTA-EXEC.md:785: trailing whitespace.\n+- \u8bc1\u636e: \u5b9e\u73b0\u4ea4\u4ed8\u5728 dev/flutter/p3-8-background-ota-20261021 \u7684 2a46ecdf:docs/ota-exec-notes/P3-8-implementation-2026-10-21.md\uff0c\u8f6f\u4ef6\u5019\u9009 5d2a0fa6\uff1b39697643246 \u53cc\u5bbf\u4e3b\u5168\u91cf\u6d4b\u8bd5\u53ca\u539f\u751f 13/13\u300139700401326 \u6807\u51c6 APK/EXE \u539f\u4ef6\u4e0e\u54c8\u5e0c\u5df2\u72ec\u7acb\u79bb\u7ebf\u6838\u5bf9\u3002\u96c6\u4e2d\u9884\u5ba1\u53ca\u4fee\u590d\u5224\u636e\u89c1 docs/ota-exec-notes/P3-8-preacceptance-2026-10-22.md\uff0c\u56db\u9879\u5fc5\u4fee\u95ee\u9898\u4e0e\u8bbe\u5907\u7ed1\u5b9a\u672a\u95ed\u5408\uff0c\u4e0d\u662f\u6b63\u5f0f PASS\u3002\u7acb\u5361/\u5386\u53f2\u5931\u8d25\u8bb0\u5f55\u4e0d\u6539\uff1b\u672c\u6b21 root \u8bb0\u5f55\u5c1a\u672a\u63d0\u4ea4\u3001\u672a\u4ea4\u4ed8 main\u3002\r\n"
+    },
+    {
+      "name": "draft_structure_after_hash_correction",
+      "command": "python -I -S -B -X utf8 .cache\\p3-8-implementation-20261021\\Tools\\acceptance\\validate_bundle.py --contract docs\\acceptance-contracts\\P3-8-v1.draft.contract.json --matrix docs\\ota-exec-notes\\P3-8-preacceptance-2026-10-22\\evidence-matrix.draft.json --repo-root D:\\github\\my\\E-Track\\.cache\\p3-8-implementation-20261021 --allow-draft",
+      "cwd": "D:\\github\\my\\E-Track",
+      "expected_exit_code": 0,
+      "exit_code": 0,
+      "output": "VALIDATION=PASS contract=P3-8-v1 round=P3-8-DRAFT-NOT-EXECUTED overall=NOT_RUN\r\n"
+    },
+    {
+      "name": "reject_unfrozen_execution_after_correction",
+      "command": "python -I -S -B -X utf8 .cache\\p3-8-implementation-20261021\\Tools\\acceptance\\validate_bundle.py --contract docs\\acceptance-contracts\\P3-8-v1.draft.contract.json --matrix docs\\ota-exec-notes\\P3-8-preacceptance-2026-10-22\\evidence-matrix.draft.json --repo-root D:\\github\\my\\E-Track\\.cache\\p3-8-implementation-20261021",
+      "cwd": "D:\\github\\my\\E-Track",
+      "expected_exit_code": 1,
+      "exit_code": 1,
+      "output": "ERROR: contract must be FROZEN\r\nVALIDATION=FAIL errors=1\r\n"
+    },
+    {
+      "name": "tracked_whitespace_after_line_ending_correction",
+      "command": "git --no-optional-locks diff --check -- PLAN-OTA-EXEC.md docs/agent-collaboration/index.md",
+      "cwd": "D:\\github\\my\\E-Track",
+      "expected_exit_code": 0,
+      "exit_code": 0,
+      "output": "warning: in the working copy of 'docs/agent-collaboration/index.md', LF will be replaced by CRLF the next time Git touches it\n"
+    }
+  ],
+  "correction": "Use uppercase contract SHA-256 required by the existing validator; normalize CRLF only on this review's new board lines. No validator/product changes. Preserve initial failures."
+}

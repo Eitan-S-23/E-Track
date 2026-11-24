@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>E-Track Link Capacity</title>
+<style>body{max-width:42rem;margin:2rem auto;padding:0 1rem;background:#f2f0e9;color:#182a28;font:18px Georgia,serif}button{padding:1rem;margin:.5rem 0;background:#164d45;color:white;border:0;font:inherit}pre{white-space:pre-wrap;overflow-wrap:anywhere}</style>
+<h1>Link Capacity Diagnostic</h1>
+<p>No installation. Repeated DATA, zero durable bytes, then ABORT. Keep this page visible.</p>
+<button id="connect">Connect E-Track</button>
+<button id="run" disabled>Run Link Screen</button>
+<pre id="status">Waiting for host admission.</pre>
+<script src="/wire.js"></script><script src="/capacity.js"></script>
+<script>
+"use strict";
+let device, gatt, tx, rx, probe, cfg, busy = false, generation = 0;
+const status = document.querySelector("#status"), run = document.querySelector("#run");
+const visible = () => document.visibilityState === "visible";
+async function get(path) { const r = await fetch(path, {cache:"no-store"}); if (!r.ok) throw Error("Host not ready"); return r.json(); }
+async function post(path, value) {
+  const r = await fetch(path, {method:"POST",headers:{"Content-Type":"application/json","X-Capacity-Token":cfg.token},body:JSON.stringify(value)});
+  if (!r.ok) throw Error("Host rejected result; do not repeat the trial"); return r.json();
+}
+(async () => {
+  try {
+    cfg = await get("/config");
+    await post("/page-ready", {secureContext:window.isSecureContext, webBluetooth:!!navigator.bluetooth});
+    status.textContent = "Host ready. Connect E-Track, then run the link screen.";
+  } catch(error) {status.textContent = String(error);}
+})();
+document.querySelector("#connect").onclick = async () => {
+  try {
+    if (device || busy) throw Error("Connection already attempted; ask the host before retrying");
+    cfg = await get("/config");
+    device = await navigator.bluetooth.requestDevice({acceptAllDevices:true, optionalServices:[0xfff0]});
+    device.addEventListener("gattserverdisconnected", () => {generation++; run.disabled = true; status.textContent = "Disconnected. Do not repeat.";});
+    gatt = await device.gatt.connect();
+    const service = await gatt.getPrimaryService(0xfff0);
+    tx = await service.getCharacteristic(0xfff2); rx = await service.getCharacteristic(0xfff1);
+    if (!tx.properties.writeWithoutResponse || !rx.properties.notify) throw Error("Required write/notify capability missing");
+    await rx.startNotifications();
+    rx.addEventListener("characteristicvaluechanged", (event) => {if (probe) probe.receive(event.target.value);});
+    const epoch = generation;
+    probe = new P34Capacity.CapacityProbe((bytes) => tx.writeValueWithoutResponse(bytes),
+      {active:visible, connected:() => device.gatt.connected && generation === epoch});
+    await probe.query(cfg.expected);
+    await post("/bound", {identity:probe.identity});
+    run.disabled = false; status.textContent = "Bound. Tap Run Link Screen once; remain on this page.";
+  } catch(error) {status.textContent = String(error);}
+};
+run.onclick = async () => {
+  if (busy) return;
+  busy = true; run.disabled = true; document.querySelector("#connect").disabled = true;
+  try {
+    for (const chunkBytes of cfg.chunks) {
+      const epoch = generation;
+      probe = new P34Capacity.CapacityProbe((bytes) => tx.writeValueWithoutResponse(bytes),
+        {active:visible, connected:() => device.gatt.connected && generation === epoch});
+      await probe.query(cfg.expected);
+      await post("/arm", {chunkBytes, identity:probe.identity});
+      status.textContent = "Measuring " + chunkBytes + " byte GATT writes. Keep foreground.";
+      const value = await probe.measure(cfg.input, {chunkBytes, window:cfg.window});
+      await post("/result", value);
+      probe = null;
+      if (value.result !== "ACKED_LINK_SAMPLE" || !value.abortConfirmed) throw Error("Measurement incomplete. Do not retry.");
+    }
+    await post("/done", {});
+    status.textContent = "Screen submitted. This is link capacity, not OTA throughput. Wait for host verification.";
+  } catch(error) {
+    status.textContent = String(error);
+    try {await post("/failed", {error:String(error)});} catch (_) {}
+  } finally { if (device?.gatt.connected) device.gatt.disconnect(); }
+};
+</script></html>

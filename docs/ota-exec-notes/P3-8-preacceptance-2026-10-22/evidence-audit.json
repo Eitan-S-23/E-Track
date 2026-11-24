@@ -1,0 +1,1822 @@
+{
+  "schema": "p38-preacceptance-original-audit-v1",
+  "formal_acceptance": "NOT_RUN",
+  "hardware_operations": 0,
+  "artifacts": [
+    {
+      "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39697643246/apk/run-ded6080d2822445cb9d65d80d398b086/artifacts/trace-dev-debug.apk",
+      "bytes": 131748470,
+      "sha256": "aec3a68e86ebbb7573697a504861b410a4210b89cb9a70c6c8e6c5606e3bf7cd",
+      "expected_sha256": "aec3a68e86ebbb7573697a504861b410a4210b89cb9a70c6c8e6c5606e3bf7cd",
+      "matches": true
+    },
+    {
+      "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39700401326/android-apk/ble-monitor-android.apk",
+      "bytes": 47272692,
+      "sha256": "626ca75be7ea481e8cc2249f7a5811132e95490b456bec1106b5f5b6c6e7abcd",
+      "expected_sha256": "626ca75be7ea481e8cc2249f7a5811132e95490b456bec1106b5f5b6c6e7abcd",
+      "matches": true
+    },
+    {
+      "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39700401326/windows-exe/ble-monitor-windows.exe",
+      "bytes": 93184,
+      "sha256": "6f65b13859b3846801c64543f8363c7d82aa92742987d56571fcf35e28f17cdb",
+      "expected_sha256": "6f65b13859b3846801c64543f8363c7d82aa92742987d56571fcf35e28f17cdb",
+      "matches": true
+    },
+    {
+      "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39700401326/windows-exe/ble-monitor-windows.zip",
+      "bytes": 20482542,
+      "sha256": "5ad8cac64d7baf55b7dbd3bbe09bdafb89ef9cc5f8581cb66d6711000247ed51",
+      "expected_sha256": "5ad8cac64d7baf55b7dbd3bbe09bdafb89ef9cc5f8581cb66d6711000247ed51",
+      "matches": true
+    },
+    {
+      "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39700401326/logs.zip",
+      "bytes": 1430574,
+      "sha256": "33f338f5ea0800d585f077bd637da211021b468ac258647aa69eddfa7b544201",
+      "expected_sha256": "33f338f5ea0800d585f077bd637da211021b468ac258647aa69eddfa7b544201",
+      "matches": true
+    }
+  ],
+  "development": [
+    {
+      "host": "ubuntu",
+      "source_before": {
+        "head": "5d2a0fa6fee9d58a608a068a7bff9f3d8e31f3a9",
+        "clean": true,
+        "status": "",
+        "dirty_semantic": [],
+        "dirty_semantic_sha": {},
+        "dirty_eol_only": [],
+        "dirty_untracked": []
+      },
+      "source_after_restored": {
+        "head": "5d2a0fa6fee9d58a608a068a7bff9f3d8e31f3a9",
+        "clean": true,
+        "status": "",
+        "dirty_semantic": [],
+        "dirty_semantic_sha": {},
+        "dirty_eol_only": [],
+        "dirty_untracked": []
+      },
+      "result_file": {
+        "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39697643246/ubuntu/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/result.json",
+        "bytes": 22939,
+        "sha256": "8e9304638b6e0de17207e70d2aca846825b6dfcb8f016662cd03c5ae392e5de7"
+      },
+      "formal_acceptance": "NOT_RUN",
+      "scope": "all",
+      "commands": [
+        {
+          "name": "sdk_checkout",
+          "argv": [
+            "git",
+            "clone",
+            "--config",
+            "core.longpaths=true",
+            "--depth",
+            "1",
+            "--branch",
+            "stable",
+            "https://github.com/flutter/flutter.git",
+            "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/sdk"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "log": {
+            "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39697643246/ubuntu/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/logs/sdk_checkout.log",
+            "bytes": 124,
+            "sha256": "638690daf5b5f27208962384e7a69f7fe7bbcb71e1a00094467bb6c907595c43"
+          }
+        },
+        {
+          "name": "sdk_version",
+          "argv": [
+            "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/sdk/bin/flutter",
+            "--version",
+            "--machine"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "log": {
+            "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39697643246/ubuntu/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/logs/sdk_version.log",
+            "bytes": 4212,
+            "sha256": "73b59ec795a1a8633cae91f4f2032370ee79f481cfc4824fc085973d654fccfe"
+          }
+        },
+        {
+          "name": "dependencies",
+          "argv": [
+            "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/sdk/bin/flutter",
+            "pub",
+            "get",
+            "--enforce-lockfile"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "log": {
+            "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39697643246/ubuntu/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/logs/dependencies.log",
+            "bytes": 4991,
+            "sha256": "992878f91ceb9d24b05b8d6e92aa45903461cbdc0859b538b9de84f6c6b53034"
+          }
+        },
+        {
+          "name": "analyze",
+          "argv": [
+            "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/sdk/bin/flutter",
+            "analyze",
+            "--no-pub"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "log": {
+            "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39697643246/ubuntu/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/logs/analyze.log",
+            "bytes": 97,
+            "sha256": "668057e25a15f7d4945c82e7dc8959e1b7adbf15e0d24717eacdef0b823370df"
+          },
+          "tail": [
+            "Analyzing bluetooth_flutter_Trace...                            ",
+            "No issues found! (ran in 11.7s)"
+          ]
+        },
+        {
+          "name": "tests",
+          "argv": [
+            "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/sdk/bin/flutter",
+            "test",
+            "--no-pub",
+            "--reporter",
+            "expanded",
+            "--timeout",
+            "2m",
+            "test"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "log": {
+            "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39697643246/ubuntu/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/logs/tests.log",
+            "bytes": 2127034,
+            "sha256": "aeed7a1d4ada0201a9d99b9e3ce486866df9a0a76b13aab8e52a39bb24b2b1dc"
+          },
+          "raw_summary": "01:48 +739 ~16: All tests passed!",
+          "parsed_counts": {
+            "passed": 739,
+            "skipped": 16,
+            "failed": 0
+          }
+        },
+        {
+          "name": "apk_prepare",
+          "argv": [
+            "/usr/bin/python",
+            "-B",
+            "/home/runner/work/E-Track/E-Track/Tools/flutter/dev_apk.py",
+            "prepare",
+            "--repo-root",
+            "/home/runner/work/E-Track/E-Track",
+            "--run-dir",
+            "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "log": {
+            "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39697643246/ubuntu/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/logs/apk_prepare.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        {
+          "name": "apk_java",
+          "argv": [
+            "/usr/lib/jvm/temurin-17-jdk-amd64/bin/java",
+            "-version"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "log": {
+            "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39697643246/ubuntu/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/logs/apk_java.log",
+            "bytes": 468,
+            "sha256": "33f54504457ce728f3c14dc13eb4dd79c797f980bb0c9ae66c8370c39b638a31"
+          }
+        },
+        {
+          "name": "apk_sdk",
+          "argv": [
+            "/usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager",
+            "--sdk_root=/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/android-sdk",
+            "cmdline-tools;latest",
+            "platform-tools",
+            "platforms;android-35",
+            "build-tools;35.0.0"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "log": {
+            "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39697643246/ubuntu/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/logs/apk_sdk.log",
+            "bytes": 18664,
+            "sha256": "010fd881734db02f4c10e945616d31ded3b38708ed8bddd82dbff2445e8628cc"
+          }
+        },
+        {
+          "name": "apk_wrapper",
+          "argv": [
+            "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/gradle-dist/gradle-8.14/bin/gradle",
+            "--no-daemon",
+            "-p",
+            "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/wrapper-bootstrap",
+            "wrapper",
+            "--gradle-version",
+            "8.14",
+            "--distribution-type",
+            "all"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "log": {
+            "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39697643246/ubuntu/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/logs/apk_wrapper.log",
+            "bytes": 892,
+            "sha256": "ee421b57142bf49c7b97d5adcfa5a0a21309182ffbd4583c811a28647bdabca2"
+          }
+        },
+        {
+          "name": "apk_install_wrapper",
+          "argv": [
+            "/usr/bin/python",
+            "-B",
+            "/home/runner/work/E-Track/E-Track/Tools/flutter/dev_apk.py",
+            "install-wrapper",
+            "--repo-root",
+            "/home/runner/work/E-Track/E-Track",
+            "--run-dir",
+            "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "log": {
+            "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39697643246/ubuntu/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/logs/apk_install_wrapper.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        {
+          "name": "apk_build",
+          "argv": [
+            "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/sdk/bin/flutter",
+            "build",
+            "apk",
+            "--debug",
+            "--no-pub",
+            "--target-platform=android-arm,android-arm64"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "log": {
+            "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39697643246/ubuntu/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/logs/apk_build.log",
+            "bytes": 13231,
+            "sha256": "332d9afc0f66fea4800dcd47208a40dd56c95a79f30e28228236c9b5833f3993"
+          }
+        },
+        {
+          "name": "apk_device_ota_native",
+          "argv": [
+            "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/gradle-dist/gradle-8.14/bin/gradle",
+            "--no-daemon",
+            "--console=plain",
+            "-p",
+            "/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/android",
+            ":app:testDebugUnitTest",
+            "--tests",
+            "com.wen.gaia.gaia.DeviceOtaServiceTest"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "log": {
+            "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39697643246/ubuntu/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/logs/apk_device_ota_native.log",
+            "bytes": 27602,
+            "sha256": "f7029b90da93900abc0bb1c0e8271a7380b090d282b5f377739899755356eb45"
+          },
+          "tail": [
+            "[Incubating] Problems report is available at: file:///home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/build/reports/problems/problems-report.html",
+            "",
+            "Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.",
+            "",
+            "You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.",
+            "",
+            "For more on this, please refer to https://docs.gradle.org/8.14/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.",
+            "",
+            "BUILD SUCCESSFUL in 1m 6s",
+            "252 actionable tasks: 28 executed, 224 up-to-date"
+          ]
+        },
+        {
+          "name": "apk_verify",
+          "argv": [
+            "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/android-sdk/build-tools/35.0.0/apksigner",
+            "verify",
+            "--verbose",
+            "/home/runner/work/E-Track/E-Track/app/bluetooth_flutter_Trace/build/app/outputs/flutter-apk/app-debug.apk"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "log": {
+            "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39697643246/ubuntu/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/logs/apk_verify.log",
+            "bytes": 618,
+            "sha256": "2ca465ec29d35756ff7bfb90efeefcf4f1d88ce37ff102445d7b3a917aaeb358"
+          },
+          "tail": [
+            "Picked up JAVA_TOOL_OPTIONS: -Duser.home=\"/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/home\" -Djava.io.tmpdir=\"/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/tmp\"",
+            "Verifies",
+            "Verified using v1 scheme (JAR signing): false",
+            "Verified using v2 scheme (APK Signature Scheme v2): true",
+            "Verified using v3 scheme (APK Signature Scheme v3): false",
+            "Verified using v3.1 scheme (APK Signature Scheme v3.1): false",
+            "Verified using v4 scheme (APK Signature Scheme v4): false",
+            "Verified for SourceStamp: false",
+            "Number of signers: 1"
+          ]
+        },
+        {
+          "name": "apk_collect",
+          "argv": [
+            "/usr/bin/python",
+            "-B",
+            "/home/runner/work/E-Track/E-Track/Tools/flutter/dev_apk.py",
+            "collect",
+            "--repo-root",
+            "/home/runner/work/E-Track/E-Track",
+            "--run-dir",
+            "/home/runner/work/E-Track/E-Track/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "log": {
+            "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39697643246/ubuntu/.cache/flutter-dev-checks/runs/run-ded6080d2822445cb9d65d80d398b086/logs/apk_collect.log",
+            "bytes": 323,
+            "sha256": "69cac889354d9a485bb76c62e220408c13a59a4ee26230fe68d09e5fd71f791e"
+          }
+        }
+      ],
+      "toolchain_regen": [
+        {
+          "stage": "before_apk",
+          "path": "app/bluetooth_flutter_Trace/analysis_options.yaml",
+          "committed_sha256": "b51e122148d477516d45c68eb455a22dd0eacdde9c4979b16c656bb71215c99e",
+          "effective_sha256": "62d5001517860783236e148ad669ce5560998c64f1cabc2de997131225f56129",
+          "effective_bytes": 1536,
+          "effective_blob": "862c9069fb4c3ad6e8b08e5029aefe1fede44a1e",
+          "diff": "diff --git a/app/bluetooth_flutter_Trace/analysis_options.yaml b/app/bluetooth_flutter_Trace/analysis_options.yaml\nindex 61b6c4d..862c906 100644\n--- a/app/bluetooth_flutter_Trace/analysis_options.yaml\n+++ b/app/bluetooth_flutter_Trace/analysis_options.yaml\n@@ -7,6 +7,12 @@\n \n # The following line activates a set of recommended lints for Flutter apps,\n # packages, and plugins designed to encourage good coding practices.\n+analyzer:\n+  exclude:\n+    - build/**\n+    - android/**\n+    - ios/**\n+    - windows/**\n include: package:flutter_lints/flutter.yaml\n \n linter:\n"
+        },
+        {
+          "stage": "before_apk",
+          "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc",
+          "committed_sha256": "4564401de97a1695607fdcd94b127135039d2eaa0b959aeb9c11d1eb3d2c8354",
+          "effective_sha256": "76a4be5a75bf1878c8ad51f8b631261296fce9c7368d70797d3b0645eed86b03",
+          "effective_bytes": 1196,
+          "effective_blob": "78cbc3a6706333e1c35500de87904494c0692f79",
+          "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\nindex e5396e9..78cbc3a 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n@@ -7,14 +7,23 @@\n #include \"generated_plugin_registrant.h\"\n \n #include <audioplayers_windows/audioplayers_windows_plugin.h>\n+#include <geolocator_windows/geolocator_windows.h>\n #include <local_notifier/local_notifier_plugin.h>\n #include <permission_handler_windows/permission_handler_windows_plugin.h>\n+#include <share_plus/share_plus_windows_plugin_c_api.h>\n+#include <url_launcher_windows/url_launcher_windows.h>\n \n void RegisterPlugins(flutter::PluginRegistry* registry) {\n   AudioplayersWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"AudioplayersWindowsPlugin\"));\n+  GeolocatorWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"GeolocatorWindows\"));\n   LocalNotifierPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"LocalNotifierPlugin\"));\n   PermissionHandlerWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"PermissionHandlerWindowsPlugin\"));\n+  SharePlusWindowsPluginCApiRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"SharePlusWindowsPluginCApi\"));\n+  UrlLauncherWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"UrlLauncherWindows\"));\n }\n"
+        },
+        {
+          "stage": "before_apk",
+          "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake",
+          "committed_sha256": "1db11c659b7efc38d10618f7aa3d5050318e0ed1cdbd4cfc1b65d2bb6a926f68",
+          "effective_sha256": "ea84ec97821d13df3a50c1f6fb143c45c74dc1a95b15427b2905e8f1eadef750",
+          "effective_bytes": 869,
+          "effective_blob": "1b07b9cb7555eb75f34d2663449f786927cb5cf6",
+          "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\nindex 843fa68..1b07b9c 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n@@ -4,8 +4,11 @@\n \n list(APPEND FLUTTER_PLUGIN_LIST\n   audioplayers_windows\n+  geolocator_windows\n   local_notifier\n   permission_handler_windows\n+  share_plus\n+  url_launcher_windows\n )\n \n list(APPEND FLUTTER_FFI_PLUGIN_LIST\n"
+        },
+        {
+          "stage": "after_run",
+          "path": "app/bluetooth_flutter_Trace/android/gradle.properties",
+          "committed_sha256": "cc15de2254a2f7a9d830521626418c7d890978ec9127e67af2fba72361a439ae",
+          "effective_sha256": "5dff6e9df6a50c22f8cfd31ac37cdd9a841ac9d089446b44a8402e1d28a70994",
+          "effective_bytes": 265,
+          "effective_blob": "cd4198da4532c255497fa8c5aaa2430ef6fc9885",
+          "diff": "diff --git a/app/bluetooth_flutter_Trace/android/gradle.properties b/app/bluetooth_flutter_Trace/android/gradle.properties\nindex bbd7acc..cd4198d 100644\n--- a/app/bluetooth_flutter_Trace/android/gradle.properties\n+++ b/app/bluetooth_flutter_Trace/android/gradle.properties\n@@ -1,3 +1,7 @@\n org.gradle.jvmargs=-Xmx1536M\n android.useAndroidX=true\n android.enableJetifier=false\n+# This builtInKotlin flag was added automatically by Flutter migrator\n+android.builtInKotlin=false\n+# This newDsl flag was added automatically by Flutter migrator\n+android.newDsl=false\n"
+        }
+      ],
+      "sdk": {
+        "frameworkVersion": "3.47.7",
+        "frameworkRevision": "abaf9c523780a608bd46686fd5e53740a07077f8",
+        "channel": "stable",
+        "dartSdkVersion": "3.13.5",
+        "engineRevision": "deb287481e3ce9468f3434937ced4240a70539ca"
+      }
+    },
+    {
+      "host": "windows",
+      "source_before": {
+        "head": "5d2a0fa6fee9d58a608a068a7bff9f3d8e31f3a9",
+        "clean": true,
+        "status": "",
+        "dirty_semantic": [],
+        "dirty_semantic_sha": {},
+        "dirty_eol_only": [],
+        "dirty_untracked": []
+      },
+      "source_after_restored": {
+        "head": "5d2a0fa6fee9d58a608a068a7bff9f3d8e31f3a9",
+        "clean": false,
+        "status": "M app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.h",
+        "dirty_semantic": [],
+        "dirty_semantic_sha": {},
+        "dirty_eol_only": [
+          "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.h"
+        ],
+        "dirty_untracked": []
+      },
+      "result_file": {
+        "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39697643246/windows/.cache/flutter-dev-checks/runs/run-47769f518d2e400f8dd2f4d3cbba4d03/result.json",
+        "bytes": 12147,
+        "sha256": "53607ca7e1767c1f320b32efc0c584c12e7ee8a5004b5c9bfab2c122c7c77b67"
+      },
+      "formal_acceptance": "NOT_RUN",
+      "scope": "all",
+      "commands": [
+        {
+          "name": "sdk_checkout",
+          "argv": [
+            "git",
+            "clone",
+            "--config",
+            "core.longpaths=true",
+            "--depth",
+            "1",
+            "--branch",
+            "stable",
+            "https://github.com/flutter/flutter.git",
+            "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-47769f518d2e400f8dd2f4d3cbba4d03\\sdk"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "log": {
+            "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39697643246/windows/.cache/flutter-dev-checks/runs/run-47769f518d2e400f8dd2f4d3cbba4d03/logs/sdk_checkout.log",
+            "bytes": 2742,
+            "sha256": "c9f76e0116849394f8bee1249f60d30b71bf6f31726b98302f29361d4ca2efbf"
+          }
+        },
+        {
+          "name": "sdk_version",
+          "argv": [
+            "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-47769f518d2e400f8dd2f4d3cbba4d03\\sdk\\bin\\flutter.bat",
+            "--version",
+            "--machine"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "log": {
+            "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39697643246/windows/.cache/flutter-dev-checks/runs/run-47769f518d2e400f8dd2f4d3cbba4d03/logs/sdk_version.log",
+            "bytes": 920,
+            "sha256": "351aab3279140c0b6e9ef09e444b76b1a7703c9b942ab89bbbeba1671d72fe1d"
+          }
+        },
+        {
+          "name": "dependencies",
+          "argv": [
+            "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-47769f518d2e400f8dd2f4d3cbba4d03\\sdk\\bin\\flutter.bat",
+            "pub",
+            "get",
+            "--enforce-lockfile"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "log": {
+            "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39697643246/windows/.cache/flutter-dev-checks/runs/run-47769f518d2e400f8dd2f4d3cbba4d03/logs/dependencies.log",
+            "bytes": 4991,
+            "sha256": "26ef909ce61e466c62a6e0f1034b98a3abe1ef44c2d224343d39d3ba13b82d10"
+          }
+        },
+        {
+          "name": "analyze",
+          "argv": [
+            "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-47769f518d2e400f8dd2f4d3cbba4d03\\sdk\\bin\\flutter.bat",
+            "analyze",
+            "--no-pub"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "log": {
+            "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39697643246/windows/.cache/flutter-dev-checks/runs/run-47769f518d2e400f8dd2f4d3cbba4d03/logs/analyze.log",
+            "bytes": 97,
+            "sha256": "dd0e4480c2282578c4d2a1dbebaf5eb9fcbef50ed94659c11435c8725bbf2da9"
+          },
+          "tail": [
+            "Analyzing bluetooth_flutter_Trace...                            ",
+            "No issues found! (ran in 15.1s)"
+          ]
+        },
+        {
+          "name": "tests",
+          "argv": [
+            "D:\\a\\E-Track\\E-Track\\.cache\\flutter-dev-checks\\runs\\run-47769f518d2e400f8dd2f4d3cbba4d03\\sdk\\bin\\flutter.bat",
+            "test",
+            "--no-pub",
+            "--reporter",
+            "expanded",
+            "--timeout",
+            "2m",
+            "test"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "log": {
+            "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39697643246/windows/.cache/flutter-dev-checks/runs/run-47769f518d2e400f8dd2f4d3cbba4d03/logs/tests.log",
+            "bytes": 2281405,
+            "sha256": "3a0ff8c0e2c06fbd1b8ef5336cfad66d95f034472fa80c8a37c0a1de140879f6"
+          },
+          "raw_summary": "01:17 +722 ~33: All tests passed!",
+          "parsed_counts": {
+            "passed": 722,
+            "skipped": 33,
+            "failed": 0
+          }
+        }
+      ],
+      "toolchain_regen": [
+        {
+          "stage": "after_run",
+          "path": "app/bluetooth_flutter_Trace/analysis_options.yaml",
+          "committed_sha256": "b51e122148d477516d45c68eb455a22dd0eacdde9c4979b16c656bb71215c99e",
+          "effective_sha256": "cfe7a312ea0047e4e756a589789adc3f94e3727a4ce503d3506f7c4510a60c87",
+          "effective_bytes": 1571,
+          "effective_blob": "06dcbd36d182f74df878861592ef511bcee2103c",
+          "diff": "diff --git a/app/bluetooth_flutter_Trace/analysis_options.yaml b/app/bluetooth_flutter_Trace/analysis_options.yaml\nindex 61b6c4d..862c906 100644\n--- a/app/bluetooth_flutter_Trace/analysis_options.yaml\n+++ b/app/bluetooth_flutter_Trace/analysis_options.yaml\n@@ -7,6 +7,12 @@\n \n # The following line activates a set of recommended lints for Flutter apps,\n # packages, and plugins designed to encourage good coding practices.\n+analyzer:\n+  exclude:\n+    - build/**\n+    - android/**\n+    - ios/**\n+    - windows/**\n include: package:flutter_lints/flutter.yaml\n \n linter:\n"
+        },
+        {
+          "stage": "after_run",
+          "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc",
+          "committed_sha256": "4564401de97a1695607fdcd94b127135039d2eaa0b959aeb9c11d1eb3d2c8354",
+          "effective_sha256": "76a4be5a75bf1878c8ad51f8b631261296fce9c7368d70797d3b0645eed86b03",
+          "effective_bytes": 1196,
+          "effective_blob": "78cbc3a6706333e1c35500de87904494c0692f79",
+          "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\nindex e5396e9..78cbc3a 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.cc\n@@ -7,14 +7,23 @@\n #include \"generated_plugin_registrant.h\"\n \n #include <audioplayers_windows/audioplayers_windows_plugin.h>\n+#include <geolocator_windows/geolocator_windows.h>\n #include <local_notifier/local_notifier_plugin.h>\n #include <permission_handler_windows/permission_handler_windows_plugin.h>\n+#include <share_plus/share_plus_windows_plugin_c_api.h>\n+#include <url_launcher_windows/url_launcher_windows.h>\n \n void RegisterPlugins(flutter::PluginRegistry* registry) {\n   AudioplayersWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"AudioplayersWindowsPlugin\"));\n+  GeolocatorWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"GeolocatorWindows\"));\n   LocalNotifierPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"LocalNotifierPlugin\"));\n   PermissionHandlerWindowsPluginRegisterWithRegistrar(\n       registry->GetRegistrarForPlugin(\"PermissionHandlerWindowsPlugin\"));\n+  SharePlusWindowsPluginCApiRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"SharePlusWindowsPluginCApi\"));\n+  UrlLauncherWindowsRegisterWithRegistrar(\n+      registry->GetRegistrarForPlugin(\"UrlLauncherWindows\"));\n }\n"
+        },
+        {
+          "stage": "after_run",
+          "path": "app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake",
+          "committed_sha256": "1db11c659b7efc38d10618f7aa3d5050318e0ed1cdbd4cfc1b65d2bb6a926f68",
+          "effective_sha256": "ea84ec97821d13df3a50c1f6fb143c45c74dc1a95b15427b2905e8f1eadef750",
+          "effective_bytes": 869,
+          "effective_blob": "1b07b9cb7555eb75f34d2663449f786927cb5cf6",
+          "diff": "diff --git a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\nindex 843fa68..1b07b9c 100644\n--- a/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n+++ b/app/bluetooth_flutter_Trace/windows/flutter/generated_plugins.cmake\n@@ -4,8 +4,11 @@\n \n list(APPEND FLUTTER_PLUGIN_LIST\n   audioplayers_windows\n+  geolocator_windows\n   local_notifier\n   permission_handler_windows\n+  share_plus\n+  url_launcher_windows\n )\n \n list(APPEND FLUTTER_FFI_PLUGIN_LIST\n"
+        }
+      ],
+      "sdk": {
+        "frameworkVersion": "3.47.7",
+        "frameworkRevision": "abaf9c523780a608bd46686fd5e53740a07077f8",
+        "channel": "stable",
+        "dartSdkVersion": "3.13.5",
+        "engineRevision": "deb287481e3ce9468f3434937ced4240a70539ca"
+      }
+    }
+  ],
+  "native_junit": {
+    "file": {
+      "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39697643246/ubuntu/app/bluetooth_flutter_Trace/build/app/test-results/testDebugUnitTest/TEST-com.wen.gaia.gaia.DeviceOtaServiceTest.xml",
+      "bytes": 1932,
+      "sha256": "9694a0791ba15c2535a1356306a72fb3dcb6a3d7cd206adab1b8877f5d42d50c"
+    },
+    "attributes": {
+      "name": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+      "tests": "13",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-22T00:16:25.608Z",
+      "hostname": "runnervm8k3b6",
+      "time": "6.88"
+    },
+    "cases": [
+      {
+        "name": "unverifiedCompletionFailsClosed",
+        "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+        "time": "6.523"
+      },
+      {
+        "name": "lateProbeCannotReviveReleasedTask",
+        "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+        "time": "0.034"
+      },
+      {
+        "name": "processRecreationDoesNotTrustNotificationOrCache",
+        "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+        "time": "0.033"
+      },
+      {
+        "name": "oldProgressCannotOverwriteNewRevision",
+        "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+        "time": "0.03"
+      },
+      {
+        "name": "notificationUsesDurableNotSentBytes",
+        "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+        "time": "0.037"
+      },
+      {
+        "name": "engineLossReleasesWakeLockAndService",
+        "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+        "time": "0.028"
+      },
+      {
+        "name": "applyingIsIndeterminateAndCannotCancel",
+        "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+        "time": "0.029"
+      },
+      {
+        "name": "deniedProbeReleasesWakeLockAndService",
+        "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+        "time": "0.036"
+      },
+      {
+        "name": "initialRevisionAlsoFencesLateProgress",
+        "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+        "time": "0.029"
+      },
+      {
+        "name": "staleActionsAndReleaseDoNotTouchCurrentOwner",
+        "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+        "time": "0.023"
+      },
+      {
+        "name": "permissionsLostAndEngineLostReleaseResources",
+        "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+        "time": "0.02"
+      },
+      {
+        "name": "noAcknowledgementUntilOwnerProbe",
+        "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+        "time": "0.03"
+      },
+      {
+        "name": "keysRequireFullPackageAndDeviceBinding",
+        "classname": "com.wen.gaia.gaia.DeviceOtaServiceTest",
+        "time": "0.025"
+      }
+    ]
+  },
+  "debug_metadata": {
+    "file": {
+      "path": ".cache/p3-8-implementation-20261021/.cache/p38/run-39697643246/apk/run-ded6080d2822445cb9d65d80d398b086/artifacts/trace-dev-debug.json",
+      "bytes": 341,
+      "sha256": "c65726fc5a744569a4558859437cef9e49d84c63bff27f8be3e28c63af35a21e"
+    },
+    "metadata": {
+      "artifact_kind": "development-debug-apk",
+      "formal_acceptance": "NOT_RUN",
+      "commit": "5d2a0fa6fee9d58a608a068a7bff9f3d8e31f3a9",
+      "sha256": "aec3a68e86ebbb7573697a504861b410a4210b89cb9a70c6c8e6c5606e3bf7cd",
+      "bytes": 131748470,
+      "file": "trace-dev-debug.apk",
+      "release_signing": false,
+      "application_id": "com.wen.gaia.gaia"
+    }
+  },
+  "windows_distribution": {
+    "entries": [
+      "data/app.so",
+      "data/icudtl.dat",
+      "data/flutter_assets/assets/",
+      "data/flutter_assets/packages/",
+      "data/flutter_assets/AssetManifest.bin",
+      "data/flutter_assets/FontManifest.json",
+      "data/flutter_assets/NativeAssetsManifest.json",
+      "data/flutter_assets/NOTICES.Z",
+      "data/flutter_assets/assets/audio/gear_rotate.wav",
+      "data/flutter_assets/assets/audio/vault_rotate.wav",
+      "data/flutter_assets/fonts/MaterialIcons-Regular.otf",
+      "data/flutter_assets/packages/cupertino_icons/",
+      "data/flutter_assets/packages/win_ble/",
+      "data/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf",
+      "data/flutter_assets/packages/win_ble/assets/BLEServer.exe",
+      "data/flutter_assets/shaders/ink_sparkle.frag",
+      "data/flutter_assets/shaders/stretch_effect.frag",
+      "audioplayers_windows_plugin.dll",
+      "ble_monitor.exe",
+      "BLEServer.exe",
+      "flutter_windows.dll",
+      "geolocator_windows_plugin.dll",
+      "local_notifier_plugin.dll",
+      "permission_handler_windows_plugin.dll",
+      "share_plus_plugin.dll",
+      "url_launcher_windows_plugin.dll"
+    ],
+    "embedded_main_sha256": "6f65b13859b3846801c64543f8363c7d82aa92742987d56571fcf35e28f17cdb"
+  },
+  "standard_logs": [
+    {
+      "archive_entry": "Build Windows EXE/3_Set up Flutter.txt",
+      "bytes": 7767,
+      "sha256": "de5c41d247c2c9a4ab44ee252fe3503178af7d72ae332a4bcfb9a36a886cff47",
+      "decisive": []
+    },
+    {
+      "archive_entry": "Build Windows EXE/6_Analyze project.txt",
+      "bytes": 931,
+      "sha256": "7a4071326bc1eeaddad94851c509158ee6b922276553af5d9e925840e9e27527",
+      "decisive": [
+        "2026-10-22T00:36:36.6726467Z No issues found! (ran in 11.8s)"
+      ]
+    },
+    {
+      "archive_entry": "Build Windows EXE/7_Run Flutter tests.txt",
+      "bytes": 2821353,
+      "sha256": "c42556e121d61800dc1d1f492855093717365485b553e2ffd92edd4a40f72eb7",
+      "decisive": [
+        "2026-10-22T00:38:00.8884835Z \ud83c\udf89 722 tests passed, 33 skipped."
+      ]
+    },
+    {
+      "archive_entry": "Build Windows EXE/8_Build Windows release.txt",
+      "bytes": 998,
+      "sha256": "44c49804162e07a2bd401bd71a4c19f28e321bd2dbefa7e1c7adbb846e27859f",
+      "decisive": [
+        "2026-10-22T00:39:42.7839532Z \u221a Built build\\windows\\x64\\runner\\Release\\ble_monitor.exe"
+      ]
+    },
+    {
+      "archive_entry": "Build Windows EXE/19_Post Set up Flutter.txt",
+      "bytes": 2116,
+      "sha256": "9ba41122a04fa913239981ac7f8bc43c2adfb96d40a76a4b2aa8d1fd080a83ca",
+      "decisive": []
+    },
+    {
+      "archive_entry": "Build Android APK/5_Set up Flutter.txt",
+      "bytes": 11595,
+      "sha256": "ed2f4618016698883a4f1e41c04c2e2fec2f8d40f10a0d165c8a53c450e5cca5",
+      "decisive": []
+    },
+    {
+      "archive_entry": "Build Android APK/9_Analyze project.txt",
+      "bytes": 1600,
+      "sha256": "a0584a09b8ef586be50a5229e9320ec6fb19f61a8d8379c87088f5fa437ff10b",
+      "decisive": [
+        "2026-10-22T00:39:14.8037719Z No issues found! (ran in 14.3s)"
+      ]
+    },
+    {
+      "archive_entry": "Build Android APK/10_Run Flutter tests.txt",
+      "bytes": 2817956,
+      "sha256": "1d760ecb65c89613db2ceb4a507dae007bda072f84042d23e36790835d560591",
+      "decisive": [
+        "2026-10-22T00:40:57.4273709Z \ud83c\udf89 739 tests passed, 16 skipped."
+      ]
+    },
+    {
+      "archive_entry": "Build Android APK/12_Build release APK.txt",
+      "bytes": 15393,
+      "sha256": "354432c19205698fe32da9f4940345026ac01ee0be72ccb2732222ca61a2884b",
+      "decisive": [
+        "2026-10-22T00:41:03.4589836Z Warning: Flutter support for your project's Gradle version (8.14.0) will soon be dropped. Please upgrade your Gradle version to a version of at least 9.1.0 soon.",
+        "2026-10-22T00:41:03.4604213Z Warning: Flutter support for your project's Android Gradle Plugin version (Android Gradle Plugin version 8.11.1) will soon be dropped. Please upgrade your Android Gradle Plugin version to a version of at least Android Gradle Plugin version 9.0.1 soon.",
+        "2026-10-22T00:41:03.4616815Z Warning: Flutter support for your project's Kotlin version (2.2.20) will soon be dropped. Please upgrade your Kotlin version to a version of at least 2.3.20 soon.",
+        "2026-10-22T00:41:04.5530345Z Warning: The plugin flutter_plugin_android_lifecycle requires Android SDK version 36 or higher.",
+        "2026-10-22T00:41:04.6521961Z Warning: The plugin geolocator_android requires Android SDK version 36 or higher.",
+        "2026-10-22T00:41:04.7517284Z Warning: The plugin package_info_plus requires Android SDK version 36 or higher.",
+        "2026-10-22T00:41:04.9508200Z Warning: The plugin path_provider_android requires Android SDK version 36 or higher.",
+        "2026-10-22T00:41:05.2543698Z Warning: The plugin share_plus requires Android SDK version 36 or higher.",
+        "2026-10-22T00:41:05.3513268Z Warning: The plugin shared_preferences_android requires Android SDK version 36 or higher.",
+        "2026-10-22T00:41:05.4506961Z Warning: The plugin sqflite_android requires Android SDK version 36 or higher.",
+        "2026-10-22T00:44:17.6983863Z \u2713 Built build/app/outputs/flutter-apk/app-release.apk (47.3MB)"
+      ]
+    },
+    {
+      "archive_entry": "Build Android APK/25_Post Set up Flutter.txt",
+      "bytes": 2031,
+      "sha256": "9826445fe6359fb8fdeb12c2744a8612dae8eaaa27124d1bde6a2bbf542ec118",
+      "decisive": []
+    }
+  ],
+  "result": "EXISTING_SOFTWARE_ORIGINALS_VERIFIED_NOT_FORMAL_ACCEPTANCE",
+  "github_jobs_39697643246": [
+    {
+      "check_run_url": "https://api.github.com/repos/Eitan-S-23/E-Track/check-runs/119558824141",
+      "completed_at": "2026-10-22T00:09:38Z",
+      "conclusion": "success",
+      "created_at": "2026-10-22T00:06:27Z",
+      "head_branch": "dev/flutter/p3-8-background-ota-20261021",
+      "head_sha": "5d2a0fa6fee9d58a608a068a7bff9f3d8e31f3a9",
+      "html_url": "https://github.com/Eitan-S-23/E-Track/actions/runs/39697643246/job/119558824141",
+      "id": 119558824141,
+      "labels": [
+        "windows-2022"
+      ],
+      "name": "Flutter self-tests (windows-2022)",
+      "node_id": "CR_kwDOTh7tuM8AAAAb1kLgzQ",
+      "run_attempt": 1,
+      "run_id": 39697643246,
+      "run_url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/runs/39697643246",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions",
+      "runner_id": 1000007798,
+      "runner_name": "GitHub Actions 1000007798",
+      "started_at": "2026-10-22T00:06:28Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completed_at": "2026-10-22T00:06:30Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "started_at": "2026-10-22T00:06:29Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:06:37Z",
+          "conclusion": "success",
+          "name": "Checkout validation commit",
+          "number": 2,
+          "started_at": "2026-10-22T00:06:30Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:06:37Z",
+          "conclusion": "skipped",
+          "name": "Check debug APK disk budget",
+          "number": 3,
+          "started_at": "2026-10-22T00:06:37Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:06:52Z",
+          "conclusion": "success",
+          "name": "Verify development runner",
+          "number": 4,
+          "started_at": "2026-10-22T00:06:37Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:06:53Z",
+          "conclusion": "success",
+          "name": "Verify debug APK helper",
+          "number": 5,
+          "started_at": "2026-10-22T00:06:52Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:09:27Z",
+          "conclusion": "success",
+          "name": "Analyze, test and optionally build a debug APK",
+          "number": 6,
+          "started_at": "2026-10-22T00:06:53Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:09:31Z",
+          "conclusion": "success",
+          "name": "Verify PHY native lifecycle",
+          "number": 7,
+          "started_at": "2026-10-22T00:09:27Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:09:32Z",
+          "conclusion": "success",
+          "name": "Verify App observation snapshot integrity",
+          "number": 8,
+          "started_at": "2026-10-22T00:09:31Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:09:32Z",
+          "conclusion": "success",
+          "name": "Verify batch timing accounting",
+          "number": 9,
+          "started_at": "2026-10-22T00:09:32Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:09:34Z",
+          "conclusion": "success",
+          "name": "Verify v2 full-run and stability accounting",
+          "number": 10,
+          "started_at": "2026-10-22T00:09:32Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:09:35Z",
+          "conclusion": "success",
+          "name": "Upload development logs (not acceptance evidence)",
+          "number": 11,
+          "started_at": "2026-10-22T00:09:34Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:09:35Z",
+          "conclusion": "skipped",
+          "name": "Report final workspace disk use",
+          "number": 12,
+          "started_at": "2026-10-22T00:09:35Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:09:35Z",
+          "conclusion": "skipped",
+          "name": "Upload debug APK (not a release)",
+          "number": 13,
+          "started_at": "2026-10-22T00:09:35Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:09:37Z",
+          "conclusion": "success",
+          "name": "Post Checkout validation commit",
+          "number": 26,
+          "started_at": "2026-10-22T00:09:35Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:09:37Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 27,
+          "started_at": "2026-10-22T00:09:37Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/jobs/119558824141",
+      "workflow_name": "Flutter Development Checks"
+    },
+    {
+      "check_run_url": "https://api.github.com/repos/Eitan-S-23/E-Track/check-runs/119558824178",
+      "completed_at": "2026-10-22T00:16:47Z",
+      "conclusion": "success",
+      "created_at": "2026-10-22T00:06:27Z",
+      "head_branch": "dev/flutter/p3-8-background-ota-20261021",
+      "head_sha": "5d2a0fa6fee9d58a608a068a7bff9f3d8e31f3a9",
+      "html_url": "https://github.com/Eitan-S-23/E-Track/actions/runs/39697643246/job/119558824178",
+      "id": 119558824178,
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "name": "Flutter self-tests (ubuntu-latest)",
+      "node_id": "CR_kwDOTh7tuM8AAAAb1kLg8g",
+      "run_attempt": 1,
+      "run_id": 39697643246,
+      "run_url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/runs/39697643246",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions",
+      "runner_id": 1000007797,
+      "runner_name": "GitHub Actions 1000007797",
+      "started_at": "2026-10-22T00:06:29Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completed_at": "2026-10-22T00:06:31Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "started_at": "2026-10-22T00:06:30Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:06:34Z",
+          "conclusion": "success",
+          "name": "Checkout validation commit",
+          "number": 2,
+          "started_at": "2026-10-22T00:06:31Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:06:34Z",
+          "conclusion": "success",
+          "name": "Check debug APK disk budget",
+          "number": 3,
+          "started_at": "2026-10-22T00:06:34Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:06:45Z",
+          "conclusion": "success",
+          "name": "Verify development runner",
+          "number": 4,
+          "started_at": "2026-10-22T00:06:34Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:06:46Z",
+          "conclusion": "success",
+          "name": "Verify debug APK helper",
+          "number": 5,
+          "started_at": "2026-10-22T00:06:45Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:16:34Z",
+          "conclusion": "success",
+          "name": "Analyze, test and optionally build a debug APK",
+          "number": 6,
+          "started_at": "2026-10-22T00:06:46Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:16:35Z",
+          "conclusion": "success",
+          "name": "Verify PHY native lifecycle",
+          "number": 7,
+          "started_at": "2026-10-22T00:16:34Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:16:36Z",
+          "conclusion": "success",
+          "name": "Verify App observation snapshot integrity",
+          "number": 8,
+          "started_at": "2026-10-22T00:16:35Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:16:36Z",
+          "conclusion": "success",
+          "name": "Verify batch timing accounting",
+          "number": 9,
+          "started_at": "2026-10-22T00:16:36Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:16:37Z",
+          "conclusion": "success",
+          "name": "Verify v2 full-run and stability accounting",
+          "number": 10,
+          "started_at": "2026-10-22T00:16:36Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:16:40Z",
+          "conclusion": "success",
+          "name": "Upload development logs (not acceptance evidence)",
+          "number": 11,
+          "started_at": "2026-10-22T00:16:37Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:16:40Z",
+          "conclusion": "success",
+          "name": "Report final workspace disk use",
+          "number": 12,
+          "started_at": "2026-10-22T00:16:40Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:16:44Z",
+          "conclusion": "success",
+          "name": "Upload debug APK (not a release)",
+          "number": 13,
+          "started_at": "2026-10-22T00:16:40Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:16:44Z",
+          "conclusion": "success",
+          "name": "Post Checkout validation commit",
+          "number": 26,
+          "started_at": "2026-10-22T00:16:44Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:16:45Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 27,
+          "started_at": "2026-10-22T00:16:44Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/jobs/119558824178",
+      "workflow_name": "Flutter Development Checks"
+    }
+  ],
+  "github_jobs_39700401326": [
+    {
+      "check_run_url": "https://api.github.com/repos/Eitan-S-23/E-Track/check-runs/119567960510",
+      "completed_at": "2026-10-22T00:33:47Z",
+      "conclusion": "success",
+      "created_at": "2026-10-22T00:33:28Z",
+      "head_branch": "dev/flutter/p3-8-background-ota-20261021",
+      "head_sha": "5d2a0fa6fee9d58a608a068a7bff9f3d8e31f3a9",
+      "html_url": "https://github.com/Eitan-S-23/E-Track/actions/runs/39700401326/job/119567960510",
+      "id": 119567960510,
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "name": "Detect changed paths",
+      "node_id": "CR_kwDOTh7tuM8AAAAb1s5Jvg",
+      "run_attempt": 1,
+      "run_id": 39700401326,
+      "run_url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/runs/39700401326",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions",
+      "runner_id": 1000007800,
+      "runner_name": "GitHub Actions 1000007800",
+      "started_at": "2026-10-22T00:33:30Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completed_at": "2026-10-22T00:33:31Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "started_at": "2026-10-22T00:33:31Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:33:44Z",
+          "conclusion": "success",
+          "name": "Checkout repository",
+          "number": 2,
+          "started_at": "2026-10-22T00:33:31Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:33:44Z",
+          "conclusion": "success",
+          "name": "Detect docs and app build inputs",
+          "number": 3,
+          "started_at": "2026-10-22T00:33:44Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:33:45Z",
+          "conclusion": "success",
+          "name": "Post Checkout repository",
+          "number": 6,
+          "started_at": "2026-10-22T00:33:44Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:33:45Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 7,
+          "started_at": "2026-10-22T00:33:45Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/jobs/119567960510",
+      "workflow_name": "Build APK and EXE Release"
+    },
+    {
+      "check_run_url": "https://api.github.com/repos/Eitan-S-23/E-Track/check-runs/119568062672",
+      "completed_at": "2026-10-22T00:45:07Z",
+      "conclusion": "success",
+      "created_at": "2026-10-22T00:33:47Z",
+      "head_branch": "dev/flutter/p3-8-background-ota-20261021",
+      "head_sha": "5d2a0fa6fee9d58a608a068a7bff9f3d8e31f3a9",
+      "html_url": "https://github.com/Eitan-S-23/E-Track/actions/runs/39700401326/job/119568062672",
+      "id": 119568062672,
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "name": "Build Android APK",
+      "node_id": "CR_kwDOTh7tuM8AAAAb1s_Y0A",
+      "run_attempt": 1,
+      "run_id": 39700401326,
+      "run_url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/runs/39700401326",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions",
+      "runner_id": 1000007801,
+      "runner_name": "GitHub Actions 1000007801",
+      "started_at": "2026-10-22T00:33:49Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completed_at": "2026-10-22T00:33:54Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "started_at": "2026-10-22T00:33:50Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:34:10Z",
+          "conclusion": "success",
+          "name": "Checkout repository",
+          "number": 2,
+          "started_at": "2026-10-22T00:33:54Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:34:14Z",
+          "conclusion": "success",
+          "name": "Set up Java",
+          "number": 3,
+          "started_at": "2026-10-22T00:34:10Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:34:24Z",
+          "conclusion": "success",
+          "name": "Set up Gradle",
+          "number": 4,
+          "started_at": "2026-10-22T00:34:14Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:35:22Z",
+          "conclusion": "success",
+          "name": "Set up Flutter",
+          "number": 5,
+          "started_at": "2026-10-22T00:34:24Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:35:32Z",
+          "conclusion": "success",
+          "name": "Install dependencies",
+          "number": 6,
+          "started_at": "2026-10-22T00:35:22Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:38:59Z",
+          "conclusion": "success",
+          "name": "Restore Android Gradle wrapper",
+          "number": 7,
+          "started_at": "2026-10-22T00:35:32Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:38:59Z",
+          "conclusion": "success",
+          "name": "Configure Android release signing",
+          "number": 8,
+          "started_at": "2026-10-22T00:38:59Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:39:14Z",
+          "conclusion": "success",
+          "name": "Analyze project",
+          "number": 9,
+          "started_at": "2026-10-22T00:38:59Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:40:57Z",
+          "conclusion": "success",
+          "name": "Run Flutter tests",
+          "number": 10,
+          "started_at": "2026-10-22T00:39:14Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:40:57Z",
+          "conclusion": "success",
+          "name": "Clear cached Flutter Android artifacts",
+          "number": 11,
+          "started_at": "2026-10-22T00:40:57Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:44:17Z",
+          "conclusion": "success",
+          "name": "Build release APK",
+          "number": 12,
+          "started_at": "2026-10-22T00:40:57Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:44:17Z",
+          "conclusion": "success",
+          "name": "Prepare Android release asset",
+          "number": 13,
+          "started_at": "2026-10-22T00:44:17Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:44:21Z",
+          "conclusion": "success",
+          "name": "Upload Android APK",
+          "number": 14,
+          "started_at": "2026-10-22T00:44:17Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:44:43Z",
+          "conclusion": "success",
+          "name": "Post Set up Flutter",
+          "number": 25,
+          "started_at": "2026-10-22T00:44:21Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:44:43Z",
+          "conclusion": "success",
+          "name": "Post Set up Gradle",
+          "number": 26,
+          "started_at": "2026-10-22T00:44:43Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:45:04Z",
+          "conclusion": "success",
+          "name": "Post Set up Java",
+          "number": 27,
+          "started_at": "2026-10-22T00:44:43Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:45:05Z",
+          "conclusion": "success",
+          "name": "Post Checkout repository",
+          "number": 28,
+          "started_at": "2026-10-22T00:45:04Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:45:05Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 29,
+          "started_at": "2026-10-22T00:45:05Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/jobs/119568062672",
+      "workflow_name": "Build APK and EXE Release"
+    },
+    {
+      "check_run_url": "https://api.github.com/repos/Eitan-S-23/E-Track/check-runs/119568062707",
+      "completed_at": "2026-10-22T00:40:15Z",
+      "conclusion": "success",
+      "created_at": "2026-10-22T00:33:47Z",
+      "head_branch": "dev/flutter/p3-8-background-ota-20261021",
+      "head_sha": "5d2a0fa6fee9d58a608a068a7bff9f3d8e31f3a9",
+      "html_url": "https://github.com/Eitan-S-23/E-Track/actions/runs/39700401326/job/119568062707",
+      "id": 119568062707,
+      "labels": [
+        "windows-2022"
+      ],
+      "name": "Build Windows EXE",
+      "node_id": "CR_kwDOTh7tuM8AAAAb1s_Y8w",
+      "run_attempt": 1,
+      "run_id": 39700401326,
+      "run_url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/runs/39700401326",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions",
+      "runner_id": 1000007802,
+      "runner_name": "GitHub Actions 1000007802",
+      "started_at": "2026-10-22T00:33:49Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completed_at": "2026-10-22T00:33:52Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "started_at": "2026-10-22T00:33:50Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:34:14Z",
+          "conclusion": "success",
+          "name": "Checkout repository",
+          "number": 2,
+          "started_at": "2026-10-22T00:33:52Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:35:41Z",
+          "conclusion": "success",
+          "name": "Set up Flutter",
+          "number": 3,
+          "started_at": "2026-10-22T00:34:14Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:36:10Z",
+          "conclusion": "success",
+          "name": "Enable Windows desktop",
+          "number": 4,
+          "started_at": "2026-10-22T00:35:41Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:36:23Z",
+          "conclusion": "success",
+          "name": "Install dependencies",
+          "number": 5,
+          "started_at": "2026-10-22T00:36:10Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:36:36Z",
+          "conclusion": "success",
+          "name": "Analyze project",
+          "number": 6,
+          "started_at": "2026-10-22T00:36:23Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:38:01Z",
+          "conclusion": "success",
+          "name": "Run Flutter tests",
+          "number": 7,
+          "started_at": "2026-10-22T00:36:36Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:39:42Z",
+          "conclusion": "success",
+          "name": "Build Windows release",
+          "number": 8,
+          "started_at": "2026-10-22T00:38:01Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:39:44Z",
+          "conclusion": "success",
+          "name": "Prepare Windows release assets",
+          "number": 9,
+          "started_at": "2026-10-22T00:39:42Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:39:46Z",
+          "conclusion": "success",
+          "name": "Upload Windows EXE",
+          "number": 10,
+          "started_at": "2026-10-22T00:39:44Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:40:12Z",
+          "conclusion": "success",
+          "name": "Post Set up Flutter",
+          "number": 19,
+          "started_at": "2026-10-22T00:39:46Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:40:13Z",
+          "conclusion": "success",
+          "name": "Post Checkout repository",
+          "number": 20,
+          "started_at": "2026-10-22T00:40:12Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T00:40:14Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 21,
+          "started_at": "2026-10-22T00:40:13Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/jobs/119568062707",
+      "workflow_name": "Build APK and EXE Release"
+    },
+    {
+      "check_run_url": "https://api.github.com/repos/Eitan-S-23/E-Track/check-runs/119568064812",
+      "completed_at": "2026-10-22T00:33:47Z",
+      "conclusion": "skipped",
+      "created_at": "2026-10-22T00:33:48Z",
+      "head_branch": "dev/flutter/p3-8-background-ota-20261021",
+      "head_sha": "5d2a0fa6fee9d58a608a068a7bff9f3d8e31f3a9",
+      "html_url": "https://github.com/Eitan-S-23/E-Track/actions/runs/39700401326/job/119568064812",
+      "id": 119568064812,
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "name": "Deploy GitHub Pages",
+      "node_id": "CR_kwDOTh7tuM8AAAAb1s_hLA",
+      "run_attempt": 1,
+      "run_id": 39700401326,
+      "run_url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/runs/39700401326",
+      "runner_group_id": null,
+      "runner_group_name": null,
+      "runner_id": null,
+      "runner_name": null,
+      "started_at": "2026-10-22T00:33:48Z",
+      "status": "completed",
+      "steps": [],
+      "url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/jobs/119568064812",
+      "workflow_name": "Build APK and EXE Release"
+    },
+    {
+      "check_run_url": "https://api.github.com/repos/Eitan-S-23/E-Track/check-runs/119571757647",
+      "completed_at": "2026-10-22T00:45:07Z",
+      "conclusion": "skipped",
+      "created_at": "2026-10-22T00:45:08Z",
+      "head_branch": "dev/flutter/p3-8-background-ota-20261021",
+      "head_sha": "5d2a0fa6fee9d58a608a068a7bff9f3d8e31f3a9",
+      "html_url": "https://github.com/Eitan-S-23/E-Track/actions/runs/39700401326/job/119571757647",
+      "id": 119571757647,
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "name": "Create GitHub Release",
+      "node_id": "CR_kwDOTh7tuM8AAAAb1wg6Tw",
+      "run_attempt": 1,
+      "run_id": 39700401326,
+      "run_url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/runs/39700401326",
+      "runner_group_id": null,
+      "runner_group_name": null,
+      "runner_id": null,
+      "runner_name": null,
+      "started_at": "2026-10-22T00:45:08Z",
+      "status": "completed",
+      "steps": [],
+      "url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/jobs/119571757647",
+      "workflow_name": "Build APK and EXE Release"
+    }
+  ],
+  "github_jobs_39707198784": [
+    {
+      "check_run_url": "https://api.github.com/repos/Eitan-S-23/E-Track/check-runs/119589910779",
+      "completed_at": "2026-10-22T01:45:15Z",
+      "conclusion": "success",
+      "created_at": "2026-10-22T01:42:07Z",
+      "head_branch": "dev/flutter/p3-8-background-ota-20261021",
+      "head_sha": "2a46ecdf50512bdfd8c8540f0f295ca208932a41",
+      "html_url": "https://github.com/Eitan-S-23/E-Track/actions/runs/39707198784/job/119589910779",
+      "id": 119589910779,
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "name": "Flutter self-tests (ubuntu-latest)",
+      "node_id": "CR_kwDOTh7tuM8AAAAb2B04-w",
+      "run_attempt": 1,
+      "run_id": 39707198784,
+      "run_url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/runs/39707198784",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions",
+      "runner_id": 1000007803,
+      "runner_name": "GitHub Actions 1000007803",
+      "started_at": "2026-10-22T01:42:09Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completed_at": "2026-10-22T01:42:11Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "started_at": "2026-10-22T01:42:10Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:42:13Z",
+          "conclusion": "success",
+          "name": "Checkout validation commit",
+          "number": 2,
+          "started_at": "2026-10-22T01:42:11Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:42:13Z",
+          "conclusion": "skipped",
+          "name": "Check debug APK disk budget",
+          "number": 3,
+          "started_at": "2026-10-22T01:42:13Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:42:21Z",
+          "conclusion": "success",
+          "name": "Verify development runner",
+          "number": 4,
+          "started_at": "2026-10-22T01:42:13Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:42:22Z",
+          "conclusion": "success",
+          "name": "Verify debug APK helper",
+          "number": 5,
+          "started_at": "2026-10-22T01:42:21Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:45:07Z",
+          "conclusion": "success",
+          "name": "Analyze, test and optionally build a debug APK",
+          "number": 6,
+          "started_at": "2026-10-22T01:42:22Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:45:10Z",
+          "conclusion": "success",
+          "name": "Verify PHY native lifecycle",
+          "number": 7,
+          "started_at": "2026-10-22T01:45:07Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:45:10Z",
+          "conclusion": "success",
+          "name": "Verify App observation snapshot integrity",
+          "number": 8,
+          "started_at": "2026-10-22T01:45:10Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:45:11Z",
+          "conclusion": "success",
+          "name": "Verify batch timing accounting",
+          "number": 9,
+          "started_at": "2026-10-22T01:45:10Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:45:12Z",
+          "conclusion": "success",
+          "name": "Verify v2 full-run and stability accounting",
+          "number": 10,
+          "started_at": "2026-10-22T01:45:11Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:45:13Z",
+          "conclusion": "success",
+          "name": "Upload development logs (not acceptance evidence)",
+          "number": 11,
+          "started_at": "2026-10-22T01:45:12Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:45:13Z",
+          "conclusion": "success",
+          "name": "Report final workspace disk use",
+          "number": 12,
+          "started_at": "2026-10-22T01:45:13Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:45:13Z",
+          "conclusion": "skipped",
+          "name": "Upload debug APK (not a release)",
+          "number": 13,
+          "started_at": "2026-10-22T01:45:13Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:45:13Z",
+          "conclusion": "success",
+          "name": "Post Checkout validation commit",
+          "number": 26,
+          "started_at": "2026-10-22T01:45:13Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:45:13Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 27,
+          "started_at": "2026-10-22T01:45:13Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/jobs/119589910779",
+      "workflow_name": "Flutter Development Checks"
+    },
+    {
+      "check_run_url": "https://api.github.com/repos/Eitan-S-23/E-Track/check-runs/119589911046",
+      "completed_at": "2026-10-22T01:44:56Z",
+      "conclusion": "success",
+      "created_at": "2026-10-22T01:42:07Z",
+      "head_branch": "dev/flutter/p3-8-background-ota-20261021",
+      "head_sha": "2a46ecdf50512bdfd8c8540f0f295ca208932a41",
+      "html_url": "https://github.com/Eitan-S-23/E-Track/actions/runs/39707198784/job/119589911046",
+      "id": 119589911046,
+      "labels": [
+        "windows-2022"
+      ],
+      "name": "Flutter self-tests (windows-2022)",
+      "node_id": "CR_kwDOTh7tuM8AAAAb2B06Bg",
+      "run_attempt": 1,
+      "run_id": 39707198784,
+      "run_url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/runs/39707198784",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions",
+      "runner_id": 1000007804,
+      "runner_name": "GitHub Actions 1000007804",
+      "started_at": "2026-10-22T01:42:09Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completed_at": "2026-10-22T01:42:10Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "started_at": "2026-10-22T01:42:09Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:42:16Z",
+          "conclusion": "success",
+          "name": "Checkout validation commit",
+          "number": 2,
+          "started_at": "2026-10-22T01:42:10Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:42:16Z",
+          "conclusion": "skipped",
+          "name": "Check debug APK disk budget",
+          "number": 3,
+          "started_at": "2026-10-22T01:42:16Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:42:29Z",
+          "conclusion": "success",
+          "name": "Verify development runner",
+          "number": 4,
+          "started_at": "2026-10-22T01:42:16Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:42:29Z",
+          "conclusion": "success",
+          "name": "Verify debug APK helper",
+          "number": 5,
+          "started_at": "2026-10-22T01:42:29Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:44:48Z",
+          "conclusion": "success",
+          "name": "Analyze, test and optionally build a debug APK",
+          "number": 6,
+          "started_at": "2026-10-22T01:42:29Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:44:51Z",
+          "conclusion": "success",
+          "name": "Verify PHY native lifecycle",
+          "number": 7,
+          "started_at": "2026-10-22T01:44:48Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:44:52Z",
+          "conclusion": "success",
+          "name": "Verify App observation snapshot integrity",
+          "number": 8,
+          "started_at": "2026-10-22T01:44:51Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:44:52Z",
+          "conclusion": "success",
+          "name": "Verify batch timing accounting",
+          "number": 9,
+          "started_at": "2026-10-22T01:44:52Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:44:53Z",
+          "conclusion": "success",
+          "name": "Verify v2 full-run and stability accounting",
+          "number": 10,
+          "started_at": "2026-10-22T01:44:52Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:44:54Z",
+          "conclusion": "success",
+          "name": "Upload development logs (not acceptance evidence)",
+          "number": 11,
+          "started_at": "2026-10-22T01:44:53Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:44:54Z",
+          "conclusion": "skipped",
+          "name": "Report final workspace disk use",
+          "number": 12,
+          "started_at": "2026-10-22T01:44:54Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:44:54Z",
+          "conclusion": "skipped",
+          "name": "Upload debug APK (not a release)",
+          "number": 13,
+          "started_at": "2026-10-22T01:44:54Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:44:55Z",
+          "conclusion": "success",
+          "name": "Post Checkout validation commit",
+          "number": 26,
+          "started_at": "2026-10-22T01:44:54Z",
+          "status": "completed"
+        },
+        {
+          "completed_at": "2026-10-22T01:44:55Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 27,
+          "started_at": "2026-10-22T01:44:55Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://api.github.com/repos/Eitan-S-23/E-Track/actions/jobs/119589911046",
+      "workflow_name": "Flutter Development Checks"
+    }
+  ]
+}

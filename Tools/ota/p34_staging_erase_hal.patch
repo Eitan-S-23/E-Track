@@ -1,0 +1,159 @@
+--- a/USER/HAL/HAL_OTA_Staging.cpp
++++ b/USER/HAL/HAL_OTA_Staging.cpp
+@@ -8,6 +8,13 @@
+ 
+ #ifndef CONFIG_OTA_STAGING_QE_REUSE
+ #define CONFIG_OTA_STAGING_QE_REUSE 0
++#endif
++
++#ifndef CONFIG_OTA_STAGING_BLOCK_ERASE
++#define CONFIG_OTA_STAGING_BLOCK_ERASE 0
++#endif
++#if CONFIG_OTA_STAGING_BLOCK_ERASE
++#include "HAL/ota_staging_erase.h"
+ #endif
+ 
+ typedef struct staging_port_context_t
+@@ -19,9 +26,19 @@
+ #if CONFIG_OTA_STAGING_QE_REUSE
+     uint8_t restore_initialized;
+ #endif
++#if CONFIG_OTA_STAGING_BLOCK_ERASE
++    OtaStagingEraseAhead erased;
++#endif
+ } staging_port_context_t;
+ 
+ static staging_port_context_t g_staging_port;
++
++static void staging_forget_erased(void)
++{
++#if CONFIG_OTA_STAGING_BLOCK_ERASE
++    g_staging_port.erased.reset();
++#endif
++}
+ 
+ static int staging_range_ok(uint32_t address, uint32_t len)
+ {
+@@ -39,10 +56,11 @@
+         ? qspi_xip_restore_checked(HAL::Qspi_GetJedecId(), 0)
+         : en25qh128a_qspi_xip_init();
+     g_staging_port.restore_initialized = result == QSPI_OK ? 1u : 0u;
++#else
++    qspi_status_t result = en25qh128a_qspi_xip_init();
++#endif
++    if (result != QSPI_OK) staging_forget_erased();
+     return result == QSPI_OK ? 0 : -1;
+-#else
+-    return en25qh128a_qspi_xip_init() == QSPI_OK ? 0 : -1;
+-#endif
+ }
+ 
+ static int staging_read(void *ctx, uint32_t address,
+@@ -52,6 +70,7 @@
+     if (dst == 0 || !staging_range_ok(address, len) ||
+         HAL::Qspi_IsOtaDisabled() || staging_restore_xip() != 0)
+     {
++        staging_forget_erased();
+         return -1;
+     }
+     memcpy(dst, (const void *)(QSPI1_MEM_BASE + address), len);
+@@ -66,12 +85,17 @@
+         !staging_range_ok(address, len) || HAL::Qspi_IsOtaDisabled() ||
+         staging_restore_xip() != 0)
+     {
++        staging_forget_erased();
+         return OTA_STAGING_ERR_IO;
+     }
+     /* One synchronous comparison owns the mapped-read interval. No cached
+      * mode survives this call, and the existing RAM block is not duplicated. */
+-    return memcmp((const void *)(QSPI1_MEM_BASE + address), expected, len) == 0
+-               ? OTA_STAGING_OK : OTA_STAGING_ERR_VERIFY;
++    if (memcmp((const void *)(QSPI1_MEM_BASE + address), expected, len) != 0)
++    {
++        staging_forget_erased();
++        return OTA_STAGING_ERR_VERIFY;
++    }
++    return OTA_STAGING_OK;
+ }
+ 
+ static int staging_erase(void *ctx, uint32_t address)
+@@ -79,15 +103,37 @@
+     staging_port_context_t *port = (staging_port_context_t *)ctx;
+     qspi_status_t result;
+     int restore_result;
++    uint32_t erase_size = OTA_STAGING_BLOCK_SIZE;
+ 
+     if (!staging_range_ok(address, OTA_STAGING_BLOCK_SIZE) ||
+         (address & (OTA_STAGING_BLOCK_SIZE - 1u)) != 0u ||
+         HAL::Qspi_IsOtaDisabled())
+     {
+-        return -1;
+-    }
++        staging_forget_erased();
++        return -1;
++    }
++#if CONFIG_OTA_STAGING_BLOCK_ERASE
++    if (address != OTA_EXT_STAGING)
++        erase_size = port->erased.size(address, HAL::Qspi_GetJedecId() == QSPI_JEDEC_W25Q128);
++    if (erase_size == UINT32_MAX)
++    {
++        staging_forget_erased();
++        return -1;
++    }
++    if (erase_size == 0u)
++    {
++        if (staging_restore_xip() != 0) return -1;
++        port->erased.consume(address, 0u);
++        return 0;
++    }
++#endif
++    staging_forget_erased();
+     qspi_xip_enable(QSPI1, FALSE);
++#if CONFIG_OTA_STAGING_BLOCK_ERASE
++    result = erase_size == OTA_ERASE_BLOCK_SIZE ? qspi_erase_64k(address) : qspi_erase(address);
++#else
+     result = qspi_erase(address);
++#endif
+ #if CONFIG_OTA_STAGING_QE_REUSE
+     if (result != QSPI_OK)
+         port->restore_initialized = 0u;
+@@ -107,7 +153,11 @@
+     else
+     {
+         ++port->data_erases;
+-    }
++#if CONFIG_OTA_STAGING_BLOCK_ERASE
++        port->erased.consume(address, erase_size);
++#endif
++    }
++    (void)erase_size;
+     return 0;
+ }
+ 
+@@ -121,10 +171,16 @@
+     if (src == 0 || len == 0u || !staging_range_ok(address, len) ||
+         HAL::Qspi_IsOtaDisabled())
+     {
+-        return -1;
+-    }
++        staging_forget_erased();
++        return -1;
++    }
++#if CONFIG_OTA_STAGING_BLOCK_ERASE
++    if (address < port->erased.end && address + len > port->erased.next)
++        staging_forget_erased();
++#endif
+     qspi_xip_enable(QSPI1, FALSE);
+     result = qspi_data_write(address, len, (uint8_t *)src);
++    if (result != QSPI_OK) staging_forget_erased();
+ #if CONFIG_OTA_STAGING_QE_REUSE
+     if (result != QSPI_OK)
+         port->restore_initialized = 0u;
+@@ -412,6 +468,7 @@
+         return;
+     }
+     io->ctx = &g_staging_port;
++    staging_forget_erased();
+ #if CONFIG_OTA_STAGING_QE_REUSE
+     g_staging_port.restore_initialized = 0u;
+ #endif

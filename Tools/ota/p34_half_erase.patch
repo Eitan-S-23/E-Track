@@ -1,0 +1,244 @@
+--- a/Libraries/OTA/ota_backup.c
++++ b/Libraries/OTA/ota_backup.c
+@@ -14,6 +14,7 @@
+ 
+ #include "OTA/ota_layout.h"
+ #include "OTA/ota_erase_plan.h"
++#include "OTA/ota_half_erase_plan.h"
+ #include "OTA/ota_slot_header.h"
+ #include "boot_crypto.h"
+ #include "boot_fw_header.h"
+@@ -330,7 +331,8 @@
+ 
+ static ota_backup_result_t ota_backup_stage_impl(
+     const ota_backup_io_t *io, const bcb_hal_t *bcb_hal,
+-    ota_backup_info_t *out, ota_backup_erase_64k_fn erase_64k)
++    ota_backup_info_t *out, ota_backup_erase_64k_fn erase_64k,
++    ota_backup_erase_32k_fn erase_32k)
+ {
+     bcb_arbiter_result_t active;
+     bcb_t current;
+@@ -439,8 +441,8 @@
+     {
+         uint32_t remaining = OTA_EXT_BACKUP + OTA_SLOT_HEADER_SIZE +
+                              payload_end - erase_address;
+-        uint32_t step = ota_erase_next_size(erase_address, remaining,
+-                                           erase_64k != 0);
++        uint32_t step = ota_erase_next_size_mixed(erase_address, remaining,
++                                                 erase_64k != 0, erase_32k != 0);
+         int erased;
+ 
+         if (step == 0u)
+@@ -450,7 +452,9 @@
+         }
+         erased = step == OTA_ERASE_BLOCK_SIZE ?
+             erase_64k(io->ctx, erase_address) :
+-            io->flash_erase_4k(io->ctx, erase_address);
++            (step == OTA_ERASE_HALF_BLOCK_SIZE ?
++             erase_32k(io->ctx, erase_address) :
++             io->flash_erase_4k(io->ctx, erase_address));
+         if (erased != 0)
+         {
+             if (out != 0) *out = info;
+@@ -601,14 +605,22 @@
+                                      const bcb_hal_t *bcb_hal,
+                                      ota_backup_info_t *out)
+ {
+-    return ota_backup_stage_impl(io, bcb_hal, out, 0);
++    return ota_backup_stage_impl(io, bcb_hal, out, 0, 0);
+ }
+ 
+ ota_backup_result_t ota_backup_stage_with_block_erase(
+     const ota_backup_io_t *io, const bcb_hal_t *bcb_hal,
+     ota_backup_info_t *out, ota_backup_erase_64k_fn erase_64k)
+ {
+-    return ota_backup_stage_impl(io, bcb_hal, out, erase_64k);
++    return ota_backup_stage_impl(io, bcb_hal, out, erase_64k, 0);
++}
++
++ota_backup_result_t ota_backup_stage_with_mixed_erase(
++    const ota_backup_io_t *io, const bcb_hal_t *bcb_hal,
++    ota_backup_info_t *out, ota_backup_erase_64k_fn erase_64k,
++    ota_backup_erase_32k_fn erase_32k)
++{
++    return ota_backup_stage_impl(io, bcb_hal, out, erase_64k, erase_32k);
+ }
+ 
+ const char *ota_backup_result_name(ota_backup_result_t result)
+--- a/Libraries/OTA/ota_backup.h
++++ b/Libraries/OTA/ota_backup.h
+@@ -112,6 +112,13 @@
+     const ota_backup_io_t *io, const bcb_hal_t *bcb_hal,
+     ota_backup_info_t *out, ota_backup_erase_64k_fn erase_64k);
+ 
++/* Optional 32 KiB payload-only port; old wrappers never invoke it. */
++typedef int (*ota_backup_erase_32k_fn)(void *ctx, uint32_t address);
++ota_backup_result_t ota_backup_stage_with_mixed_erase(
++    const ota_backup_io_t *io, const bcb_hal_t *bcb_hal,
++    ota_backup_info_t *out, ota_backup_erase_64k_fn erase_64k,
++    ota_backup_erase_32k_fn erase_32k);
++
+ const char *ota_backup_result_name(ota_backup_result_t result);
+ 
+ #ifdef __cplusplus
+--- a/Libraries/W25Q128/qspi_cmd_en25qh128a.cpp
++++ b/Libraries/W25Q128/qspi_cmd_en25qh128a.cpp
+@@ -615,6 +615,26 @@
+                           QSPI_BLOCK_ERASE_TIMEOUT_MS);
+ }
+ 
++qspi_status_t qspi_erase_32k(uint32_t block_addr)
++{
++  qspi_status_t st;
++  if((block_addr & 0x7FFFu) != 0u)
++    return QSPI_ERR_PARAM;
++  if(!qspi_range_ok(block_addr, 0x8000u))
++    return QSPI_ERR_REGION;
++  st = qspi_write_enable();
++  if(st != QSPI_OK)
++    return st;
++  en25qh128a_cmd_config = en25qh128a_erase_para;
++  en25qh128a_cmd_config.instruction_code = 0x52u;
++  en25qh128a_cmd_config.address_code = block_addr;
++  st = qspi_cmd_send(&en25qh128a_cmd_config);
++  if(st != QSPI_OK)
++    return st;
++  return qspi_cmd_send_ex((qspi_cmd_type*)&en25qh128a_rdsr_para,
++                          QSPI_BLOCK_ERASE_TIMEOUT_MS);
++}
++
+ /**
+   * @brief  qspi erase data（自检专用，仅允许自检保留区内）
+   * @retval QSPI_OK / QSPI_ERR_REGION / QSPI_ERR_TIMEOUT
+--- a/Libraries/W25Q128/qspi_cmd_en25qh128a.h
++++ b/Libraries/W25Q128/qspi_cmd_en25qh128a.h
+@@ -100,6 +100,8 @@
+ /* Opt-in 64 KiB erase. Requires exact alignment and the entire production
+  * range to be allowed. The caller must first establish chip capability. */
+ qspi_status_t qspi_erase_64k(uint32_t block_addr);
++/* Caller must establish W25Q128 52h support before invoking this raw port. */
++qspi_status_t qspi_erase_32k(uint32_t block_addr);
+ 
+ /**
+   * @brief  qspi erase data（自检专用，仅允许落在自检保留区 0x7F0000..0x7FFFFF 内）
+--- a/USER/HAL/HAL_OTA_Package.cpp
++++ b/USER/HAL/HAL_OTA_Package.cpp
+@@ -14,6 +14,7 @@
+ #endif
+ #include "OTA/ota_staging.h"
+ #include "OTA/ota_erase_plan.h"
++#include "OTA/ota_half_erase_plan.h"
+ #include "W25Q128/qspi_cmd_en25qh128a.h"
+ #if !defined(_WIN32)
+ #include "wdg.h"
+@@ -38,6 +39,10 @@
+ 
+ #ifndef CONFIG_OTA_INSTALL_BLOCK_ERASE
+ #define CONFIG_OTA_INSTALL_BLOCK_ERASE 0
++#endif
++
++#ifndef CONFIG_OTA_INSTALL_HALF_ERASE
++#define CONFIG_OTA_INSTALL_HALF_ERASE 0
+ #endif
+ 
+ #ifndef CONFIG_OTA_INSTALL_COST
+@@ -540,6 +545,15 @@
+ #endif
+ }
+ 
++static bool install_half_erase_enabled(void)
++{
++#if CONFIG_OTA_INSTALL_HALF_ERASE
++    return install_block_erase_enabled();
++#else
++    return false;
++#endif
++}
++
+ static int candidate_prepare(void *ctx, uint32_t image_len)
+ {
+     ota_package_port_context_t *port =
+@@ -549,6 +563,7 @@
+     qspi_status_t result = QSPI_OK;
+     int restore_result;
+     const bool block_erase = install_block_erase_enabled();
++    const bool half_erase = install_half_erase_enabled();
+ 
+     (void)ctx;
+     if (image_len == 0u || image_len > OTA_APP_LENGTH ||
+@@ -569,9 +584,10 @@
+     qspi_xip_enable(QSPI1, FALSE);
+     for (offset = 0u; offset < erase_len;)
+     {
+-        uint32_t step = ota_erase_next_size(OTA_EXT_CANDIDATE + offset,
++        uint32_t step = ota_erase_next_size_mixed(OTA_EXT_CANDIDATE + offset,
+                                             erase_len - offset,
+-                                            offset != 0u && block_erase);
++                                            offset != 0u && block_erase,
++                                            offset != 0u && half_erase);
+         if (step == 0u)
+         {
+             result = QSPI_ERR_PARAM;
+@@ -586,6 +602,13 @@
+         }
+         else
+ #endif
++#if CONFIG_OTA_INSTALL_HALF_ERASE
++        if (step == OTA_ERASE_HALF_BLOCK_SIZE)
++        {
++            result = qspi_erase_32k(OTA_EXT_CANDIDATE + offset);
++        }
++        else
++#endif
+         {
+             result = qspi_erase(OTA_EXT_CANDIDATE + offset);
+         }
+@@ -825,6 +848,31 @@
+ }
+ #endif
+ 
++#if CONFIG_OTA_INSTALL_HALF_ERASE
++static int backup_flash_erase_32k(void *ctx, uint32_t address)
++{
++    qspi_status_t result;
++    int restore_result;
++    (void)ctx;
++    if (!install_half_erase_enabled() ||
++        (address & (OTA_ERASE_HALF_BLOCK_SIZE - 1u)) != 0u ||
++        address < OTA_EXT_BACKUP + OTA_SLOT_HEADER_SIZE ||
++        address >= OTA_EXT_BACKUP + OTA_EXT_SLOT_LENGTH ||
++        !backup_slot_range_ok(address, OTA_ERASE_HALF_BLOCK_SIZE, 0))
++    {
++        return -1;
++    }
++    service_app_watchdog();
++    qspi_xip_enable(QSPI1, FALSE);
++    OTA_COST_START(cost);
++    result = qspi_erase_32k(address);
++    OTA_COST_END(OTA_COST_ERASE, cost, OTA_ERASE_HALF_BLOCK_SIZE, (int)result);
++    service_app_watchdog();
++    restore_result = qspi_restore_xip();
++    return result == QSPI_OK && restore_result == 0 ? 0 : -1;
++}
++#endif
++
+ static int backup_flash_program(void *ctx, uint32_t address,
+                                 const uint8_t *src, uint32_t len)
+ {
+@@ -869,8 +917,16 @@
+     ota_backup_result_t result;
+ #if CONFIG_OTA_INSTALL_BLOCK_ERASE
+     if (install_block_erase_enabled())
++    {
++#if CONFIG_OTA_INSTALL_HALF_ERASE
++        result = ota_backup_stage_with_mixed_erase(
++            &io, HAL::OTA_GetBcbHal(), out, backup_flash_erase_64k,
++            install_half_erase_enabled() ? backup_flash_erase_32k : 0);
++#else
+         result = ota_backup_stage_with_block_erase(
+             &io, HAL::OTA_GetBcbHal(), out, backup_flash_erase_64k);
++#endif
++    }
+     else
+ #endif
+         result = ota_backup_stage(&io, HAL::OTA_GetBcbHal(), out);

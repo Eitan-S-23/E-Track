@@ -172,6 +172,78 @@ state are unchanged. Board/receipt, link, whitespace and byte-preservation check
 cover this documentation closeout; automatic checks may run on the push, but no
 App/MCU rebuild, device test or backend deployment is requested.
 
+## Owner-Requested MCU 3.3.52 Candidate, 2026-11-23
+
+Status: IN_PROGRESS / LOCAL_PENDING, Codex root. Owner requests another MCU-only
+version through the existing one-click script. Current primary/remote main is
+7c9aae6c and metadata is 3.3.51. Reuse the qualified exact-document/credential
+adapter with fresh source/output bindings, not a new release implementation.
+The unchanged Tools/ota/release_candidate.py owns the next-version/draft/tag
+checks, single-file commit, main push and first-attempt formal GCC registration.
+Git push uses the existing proxy route that completed the previous delivery;
+no global network or credential settings change. Existing 24 entry/seven adapter
+self-tests are reused; formal new-source checks/build/registration remain pending.
+
+Only version and notes advance. App 1.0.94+120, firmware functionality, factory
+UID and App reconnect-check policy remain unchanged. The prior successful OTA,
+3.3.51 delivery, original diagnostic ZIP, failures and six pending documents are
+retained. No manual channel/delta action, device/check/OTA operation, extra
+download, backend deployment or extra agent. Owner chooses publication and any
+delta from the device's actual installed version. Fresh evidence:
+.cache/mcu-test-3352-20261123; canonical receipts remain .cache/candidate-release.
+
+## Owner Diagnostic Archive Review, 2026-11-23
+
+Status: LOCAL_PENDING / ORIGINAL_ARCHIVE_REVIEWED, Codex root. The owner's
+companion-diagnostics.zip is read in memory, not extracted or modified. Original:
+.cc-connect/attachments/om_x100b7f77da3dc4a8ce7ec78684227db/companion-diagnostics.zip;
+SHA-256 42b3259accf349e5f3dfb98a8fe5b8945b4dc688a1631e6b57390a6422ca69f4.
+Three ZIP members pass CRC; events.jsonl has 2022 valid sequential rows (1..2022),
+2025 events including merged counts, and readable.txt has 2023 lines including
+its header. Metadata reports no truncation, pruning, malformed lines, dropped
+events, queued events or I/O errors. Process-death queue/buffer loss remains
+unknown; this does not establish a complete process history or APK identity.
+
+The latest symptom is an enforced cooldown, not a missing reconnect trigger.
+At 2026-11-23 20:19:49.853 Shanghai, row 1878 records an automatic periodic check
+while uiState=stopped and the connection is reused; row 1879 returns NO_UPDATE.
+The successful reconnections have CONTROL_READY at rows 1913/1965/2004.
+Rows 1917 (20:51:11.937), 1969 (20:53:25.302) and 2008 (21:01:03.322) then
+record source=reconnect, CHECK_NOT_EXECUTED, reason=minimum_interval. The
+current App has a shared-account one-hour automatic-query cooldown. Earliest
+fresh-query eligibility from that last check is 21:19:49.853, but an eligible
+trigger must still occur; no exact-time automatic retry is proved. Logged
+nextCheckAt=2026-11-24 08:19:49.853 is the ordinary 12-hour schedule, not the
+reconnect cooldown. No new query, offer or upgrade for 3.3.51 is recorded after
+the last successful automatic check. Channel publication is not in this export.
+
+The archive corroborates the owner's successful 3.3.48 -> 3.3.50 full upgrade:
+rows 1836..1847 record preparing, transfer, apply, reboot, reconnect verification
+and identityVerified/success at 20:07:29.805, elapsed 60209 ms. After-version is
+30350 and after/target raw SHA both equal the known formal
+6e763fb66958d4a4db3b9cbf7b02351184c189165d5499faf26986421273762a.
+The first 20:03 attempt failed in transfer with mcu-ack-0xe (ERR_BUSY), not a
+reported SHA/delta error; the specific busy gate cannot be inferred. No replay
+is needed to replace these retained originals. This is App-recorded identity
+verification, not a new full Flash/Boot readback or independent acceptance.
+
+Connection recovery still has separate failures: since 20:03, rows
+1888/1899/1941/1951 show CONNECTING failures (one platform connect error and
+three approximately ten-second timeouts). The 20:48 process-exit record reports
+system_low_memory and subsequent process startup is background_service. Later
+control-ready observations prove eventual recovery, not that connection
+stability is fixed. Older DEVICE_NOT_BOUND/LOGIN_REQUIRED failures are retained
+but are not the latest minimum_interval reason; those codes alone do not prove
+which UID/account gate failed. No quotas, reminder state or data are cleared.
+
+This is analysis only: no product/policy change, App/MCU build, device operation,
+check consumption, backend request or commit/push. If the owner requires every
+real reconnection to obtain fresh metadata, the App reconnect cooldown policy
+needs a bounded change while retaining daily server quotas and burst deduping;
+a new MCU-only version does not change that App policy. Structured findings and
+write audit: .cache/companion-log-20261123-2101. Existing pending documents remain
+preserved; this review record is local, not remote delivery.
+
 ## Owner-Requested MCU Test Candidate, 2026-11-23
 
 Status: CANDIDATE_DELIVERED / OWNER_PUBLICATION_AND_OTA_PENDING, Codex root.
@@ -246,6 +318,43 @@ upgrade/binding is retained without replay; this candidate is not installed
 and does not prove physical or independent OTA acceptance. Only this new
 section/board/index/log record is selected for main; six older pending document
 blocks and their raw snapshots remain preserved.
+
+## Compatibility Delta Selection Diagnosis, 2026-11-23
+
+LEGACY-DELTA-SELECTION: LOCAL_PENDING / EXISTING_FULL_ONLY_LIMIT_CONFIRMED,
+Codex root. Fresh primary/remote main is bd599c2a. The owner reports compatibility
+3.3.48 -> 3.3.50 selects full despite an enabled delta. Three bounded existing
+CF-CI-01 metadata/SELECT requests do not consume an App check, download packages,
+change channels/deltas, operate devices or start another agent.
+
+At 2026-11-23 11:41 UTC, inspect-01 confirms Stable targets formal 3.3.50 source
+91916e11, Public retains cc8039e4, and both runtime delta flags are true. Delta
+delta_938867fa810745e9bd340383266faa51310cfc43ad12488111ebd25ef43975a0 is
+ready/enabled/retained, revision 6, and 9916 bytes versus 304580-byte full. Its
+base raw SHA is 06c26201ac2de4b21669e7eb8ac1d5ac3406c23e154461c2dd9f4d216883d48f;
+target raw SHA is 6e763fb66958d4a4db3b9cbf7b02351184c189165d5499faf26986421273762a.
+Both match the registered formal releases. Two retained complete/manual
+compatibility checks have that source SHA and return full; no new phone check
+or installed App identity is inferred from these pre-existing observations.
+
+Worker index and Public [[path]] both set fullOnly=true for uid-v1 migration.
+The common selector therefore ignores usable matching patches. The server's
+account_legacy.ts additionally restricts target, prepared authorization and
+signed download to full; the App's LegacyOtaMigration.parse/matches rejects
+patch too. The earlier one-time pre-UID migration contract explicitly specifies
+full-only. This is its implementation restriction, not proof that the MCU cannot
+apply delta or that the owner failed to enable it.
+
+A delta-enabled compatibility route needs coordinated backwards-compatible
+App/backend negotiation, retaining exact base version/raw SHA, formal target,
+asset/grant/signature binding, full fallback and reboot identity verification.
+Keep account/expiry/consent and power/recording/storage gates; do not clear
+check/reminder state, loosen global UID admission or invent a UID. No product
+change, new commit/push or admission relaxation is performed by this diagnosis;
+the owner's choice of full-only versus delta support remains open. Metadata and
+selected-output audit are in .cache/legacy-delta-20261123; older pending content
+is preserved. An initial documentation patch used the wrong title, failed
+atomically without writing, and was corrected without rewriting old records.
 
 ## Cloudflare Account Quota Display, 2026-11-23
 
@@ -377,6 +486,52 @@ GitHub transport. Only this task's process-level NO_PROXY for GitHub is adjusted
 no global proxy, credential or cloud configuration changes. Only metadata/record
 delivery is retried, not deployment. Older pending documents/failures remain preserved; no system-wide
 zero-I/O or independent acceptance claim follows from these checks.
+
+## Personal Token Billing Read Confirmed, 2026-11-23
+
+RESOURCE-QUOTA-PERMISSION-01: LOCAL_PENDING / BILLING_READ_CONFIRMED /
+QUOTA_IMPLEMENTATION_PENDING, Codex root. Owner identifies the earlier wrong
+account-owned token and updates the correct personal token. The existing probe
+and CF-CI-01 protected input are reused without modification; only output/host
+bindings change. At 08:32 UTC (16:32 Shanghai), both subscriptions and account
+settings return HTTP 200. R2 Paid and Teams Free Base are returned, with current
+period 2026-10-28T00:00:00Z..2026-11-28T00:00:00Z. Standard usage model is not
+proof of Workers Paid; remaining amounts are not returned or implemented here.
+
+A personal token acts as its user with scoped permissions; an account-owned token
+is a separate account service principal. They have separate lists/credentials,
+so changing one does not update the other. Account-scope Billing Read permission
+can belong to a personal token. No migration to account tokens is required for
+this successful read. No agent token/configuration/channel/device change, CI or
+product edit; old 403/transport/active receipts are preserved, not reclassified.
+Original: .cache/resource-quota-20261123/permission-02/result.json. Audit:
+.cache/resource-quota-20261123/audit-02/result.json. Implementation still needs
+verified product allowances and matching account-wide usage, with estimated and
+unavailable values identified honestly. Source main stays 504a2eaa; records only
+are local pending, not a deployed interface or independent acceptance.
+
+## Resource Quota Permission Probe, 2026-11-23
+
+LOCAL_PENDING / BILLING_READ_NOT_CONFIRMED, Codex root. The owner requested a
+fresh read after reporting an e-track-ci permission update. Primary and remote
+main remain 504a2eaa; the old five pending documents are preserved. This is an
+API capability probe, not implementation, deployment or independent acceptance.
+
+The registered CF-CI-01 input is read using the existing owner/HTTP adapter.
+Only three GETs execute: subscriptions at 08:14 UTC is HTTP 403;
+workers/account-settings fails in transport with unknown HTTP status; the
+separate token verification at 08:15 UTC is HTTP 200/status active. No repeated
+subscription call, cache-writing Admin route, alternative credential, cloud
+configuration, mail, channel, delta or device operation. Response summaries and
+project-local outputs omit token values and complete billing responses.
+
+The credential is active, but saved Billing Read permission, account scope,
+conditions and correspondence to the edited token are not established. Next
+owner action is a redacted saved-permission summary for the existing e-track-ci
+and configured account, not plaintext, regeneration or scope expansion. Current
+allowance/remaining fields are still unimplemented/null; do not call this fixed.
+Originals: .cache/resource-quota-20261123/permission-01/result.json and
+verification-01/result.json. Audit: .cache/resource-quota-20261123/audit-01/result.json.
 
 ## Account Backend Rollout Completed, 2026-11-23
 
@@ -916,6 +1071,157 @@ Historical helper loss remains disclosed and unresolved. Only this batch's
 record blocks are eligible for the scoped main closeout; other local edits stay.
 
 ## Account And Layout Batch, 2026-11-22
+
+### Registration Failure Investigation
+
+Status: LOCAL_PENDING / INVESTIGATED_NOT_FIXED. Owner requests diagnosis, not
+another UI/deployment batch. No production registration, password/code access,
+settings change, new email, phone operation or product-code edit is performed.
+
+Read-only live query at 2026-11-22 14:42 UTC confirms registration and password
+registration enabled, email verification now enabled, revision 2, limits 5/5.
+This supersedes earlier observations where email verification was off; it is not
+silently reverted. There are settings_update audit entries at 14:09:21.255 and
+14:10:08.017 UTC (22:09/22:10 Shanghai), but the audit has no before/after values,
+so it cannot establish which save changed which flag. No account matches the
+owner-provided username or mailbox. The only retained code for that mailbox is
+the earlier host test, created 13:45:21, expired 13:55:21 UTC, unused, zero
+validation attempts. Password/code hashes and plaintext values are not selected.
+
+The existing CF-CI-01 credential successfully runs a dry, two-hour, 50-event-limit
+telemetry query scoped to Worker and Public production plus /api/auth/ triggers;
+it returns no matching projected auth events. This is not a permission failure
+or proof that every historical request was logged. Worker invocation logging is
+off; handled ApiError responses have no dedicated persistent failure log; App
+AccountService discards the response message/requestId and maps INVALID_PARAMETER
+to one generic instruction. The original phone request has not been recovered.
+
+Four focused offline tests through the real Pages handler pass using the existing
+in-memory SQLite/host platform. Provided username/Foxmail and an eight-character
+synthetic password register with verification off. Loading settings off, then
+turning the fixture server requirement on and submitting without a code produces
+HTTP 400 / INVALID_PARAMETER / Invalid code, without creating an account. Empty
+or malformed codes do likewise; a missing verificationId also maps to the generic
+code, whereas a well-formed invalid/expired challenge produces
+EMAIL_VERIFICATION_REQUIRED. App source only loads settings when entering the
+account page and does not refresh them before submission, so stale form settings
+are a reproduced defect and the leading explanation, not proven original traffic.
+Next discriminating owner observation: did the failing form show a code field and
+the Get email code button? No password or code needs to be shared.
+
+Evidence: .cache/registration-investigation-20261122/live-01/result.json and
+diagnosis.json; .cache/ota-followup-20261122/accounts-host-401/run.closed.json,
+run.stdout and run.stderr. Actual runner exit is 0 with four tests passing and
+an existing experimental SQLite warning. The outer Python presenter exits 1 on
+GBK encoding of a checkmark after tests finish; original successful logs/closure
+were inspected rather than rerunning the tests to hide the presentation failure.
+All selected writes are project-local diagnostic harness/results and records;
+not independent acceptance, product repair, commit/push or deployment.
+
+### SMTP Activated, Inbox Confirmation Pending
+
+Subsequent owner confirmation: the real test email was received. Inbox-delivery
+status is OWNER_CONFIRMED; the one-time code is not copied into evidence or used.
+No extra email or account/settings mutation is performed. App registration/reset
+and session revocation remain unverified, independent of successful delivery.
+The current App shows an optional recovery-email field during registration while
+required email is off; a reset needs a fresh code requested inside the App and
+its own verificationId. Do not tell the user to reuse the host test message there.
+Evidence: .cache/account-mail-activation/owner-inbox-confirmed.json. Original send
+receipt and prior pending checkpoint below remain preserved.
+
+Status: REMOTE_ACTIVATED / SMTP_ACCEPTED / OWNER_INBOX_AND_ACCOUNT_FLOW_PENDING;
+support-tool and record changes remain LOCAL_PENDING, not committed/pushed.
+Owner local entry `20261122T132340Z-79a2743b/result.json` completes all three
+targets' mail secrets with unrelated configuration preserved. No supplied secret
+was printed, saved by the host setup, or copied by this continuation.
+
+Worker auth readiness becomes true while Public remains false, establishing the
+need for Pages-only activation rather than another secret write. Actions
+45028304682 succeeds on exact tested backend source 95470e8e, workflow main
+6073f443. Admin 28df0c06-1202-4315-b9e1-cc1b6707a378 and Public
+75e7e0c1-956c-4410-9431-5f76554bac82 are live, with both runtime/preview configs
+unchanged. Worker/migration jobs skip. Secret PUT already created Worker version
+5d5b5d38-8022-437b-a8b9-77020566ad42 and removed its source-tag annotation; live
+verification matches this exact post-secret version/runtime to snapshot 301,
+without pretending a missing tag proves source identity. Schedules, four channels
+and all 60 delta identities remain unchanged. Owner session, exact Admin HTML/ten
+assets, account/list APIs, all mail readiness and anonymous-cloud denial pass in
+keyring-cloud-live-305. Existing required-email setting remains off and limits 5/5.
+
+One Public POST /api/auth/email-code to approved recipient eitan_s@foxmail.com
+with purpose register executes at 2026-11-22 13:45:15..24 UTC. Application and
+real SMTP post-DATA acceptance succeed; inbox receipt is still owner-unconfirmed.
+No retry, test account creation, password reset or mandatory-email switch occurs.
+Next owner action is to confirm inbox/spam receipt only, not return the code.
+Registration/reset/session-revocation live checks require a controlled owner flow
+after that confirmation; mock tests are not being relabeled as that acceptance.
+
+Evidence: .cache/ota-followup-20261122/keyring-cloud-live-301/305,
+keyring-dispatch-302, keyring-read-303 and keyring-logs-306;
+.cache/account-mail-activation/send-test-01/result.json and activation-audit.json.
+Admin/Public each retain four high dependency advisories and existing Node/Actions
+deprecations. No App/MCU build, device operation, channel publication or delta job.
+
+Local preservation incident, reported to owner during execution: Add File was
+incorrectly run before reviewing preflight existence results in the same tool
+batch. Four older untracked files under .cache/ota-followup-20261122 were
+overwritten: mail-cloud.py, mail-cloud.cjs, mail-deploy.py, mail-deploy-ci.cjs.
+The first file's original creation time predates this continuation; none is in
+Git. Original bytes were not captured before replacement and have not been
+restored. No guessed reconstruction/deletion was attempted. Original receipts
+and product code are unchanged. Subsequent adapters use fresh, separately
+preflight-confirmed smtp-activation-* paths. Recovery would require a known
+original backup; the overwritten historical helpers must not be treated as
+their old evidence-bound inputs. Successful deployment does not close this loss.
+
+### Owner-Assisted SMTP Activation Preparation
+
+Status: LOCAL_PENDING / INPUT_READY. The owner now delegates the exact three-target
+mail configuration and asks to enter mailbox inputs only after preparation. No
+channel, account-password, device or mandatory-verification changes are included.
+The earlier chat-disclosed authorization code is not reused or copied. Sender
+identity and a fresh code will be entered locally, not requested in chat.
+
+Reuse decision: installed Wrangler's Pages secret put/bulk uses a narrow PATCH
+of production env_vars while preserving wrangler_config_hash. Worker secret PUT
+and Pages PATCH are the supported Cloudflare APIs. Existing deployment helpers
+only configure Access credentials, so invoking them with secrets enabled would
+touch unrelated settings. A thin, standard-library setup adapter uses those same
+mail-only API operations, the registered CF-CI-01 owner-read route and the existing
+host_io path guard. It adds no SMTP implementation or alternative deployment.
+There is no credential file, external listener, SDK install or automatic resend.
+Read-only preflight, fake-API mutation-scope tests and sanitized receipts qualify
+the input route; real secret writes and inbox delivery remain separate pending steps.
+
+Preparation results: 26 offline tests pass, zero failures/skips/warnings. Current
+CF-CI-01 reads of the existing Worker and both Pages production/preview settings
+pass, as do Worker/Public auth-status GETs. Both Pages already have a provider
+secret name; no username/auth-code slot exists on any target. Its encrypted value
+is not read or inferred. This provider-only preparation is supported, not treated
+as a completed or partial credential installation. Both public origins still
+report mail/reset unavailable, required verification off, and daily limits 5/5.
+No mutation is used as a permission probe; write permission remains to be proved
+by the first authorized real configuration, not claimed from a successful GET.
+
+Entry: root `configure-account-mail.cmd`. Full sender address and a fresh code
+are entered only when the owner opens it; no background input server is left
+running. The code prompt refuses visible fallback. Only sanitized progress and
+settings-preservation outcomes are recorded. Failures stop without retry; if a
+mailbox secret is present on a subsequent run, the agent must reconcile the
+receipt/current metadata before writing again. Pages activation will reuse the
+existing exact-source deployment workflow for backend 95470e8e, including Public
+but excluding Worker/migrations; no repeated App/MCU build is necessary.
+
+Evidence: `.cache/account-mail-activation/selftest-48799673.txt` (26 tests),
+`20261122T125106Z-84216571/result.json` (input-ready preflight), and
+`preparation-audit.json`. The earlier 22-test/preflight results remain preserved.
+Only project-local tools, launcher, documentation and sanitized evidence changed;
+no Cloudflare write, email, account creation, password change, channel/device
+operation, PowerShell, build, SDK install or commit/push in this preparation.
+Local preparation is not remote delivery or real inbox acceptance. No kernel
+I/O tracing was performed; the audit covers selected/controllable outputs, not
+unattributed Windows certificate-cache activity.
 
 ### Account Relationships And Unified Results
 

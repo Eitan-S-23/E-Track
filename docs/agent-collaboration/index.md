@@ -60,6 +60,29 @@ backend/device operation or new independent review is requested.
 This entry supersedes earlier pending labels for the confirmed checks and 3.3.52
 build while preserving older records. See [owner closeout](../ota-exec-notes/OTA-COMPANION-2026-11-20.md#owner-confirmed-functional-closeout-and-3352-delivery-2026-11-23).
 
+Latest owner-directed work, 2026-11-23: MCU-TEST-3352, Codex root,
+IN_PROGRESS / LOCAL_PENDING. Owner requests another version-only MCU candidate
+through the unchanged one-click entry from main 7c9aae6c / metadata 3.3.51.
+Qualified document/credential adapter is rebound to fresh evidence; prior 24/7
+self-tests and successful Git-proxy route reused. Firmware functionality, App
+1.0.94+120/reconnect policy, channels/deltas and device state unchanged. Existing
+diagnostic review and six pending documents preserved. No replay, extra agent,
+backend deployment or manual publication. Evidence .cache/mcu-test-3352-20261123;
+see [new candidate](../ota-exec-notes/OTA-COMPANION-2026-11-20.md#owner-requested-mcu-3352-candidate-2026-11-23).
+
+Latest original-log review, 2026-11-23: COMPANION-ARCHIVE-2101, Codex root,
+LOCAL_PENDING / ORIGINAL_ARCHIVE_REVIEWED. Owner export has 2022 valid contiguous
+rows, CRC/count/metadata checks pass; process-death loss remains unknown. At
+20:19:49 an automatic background check returns NO_UPDATE. Three later real
+reconnections reach CONTROL_READY but source=reconnect is skipped for the
+one-hour minimum_interval; earliest fresh-query eligibility is 21:19:49, not
+the ordinary next-day 08:19 schedule. 3.3.48 -> 3.3.50 full upgrade records
+post-reboot identity success in 60.209 s, preserving an earlier ERR_BUSY failure.
+Four recent CONNECTING failures remain separate; no Bluetooth-stability fix or
+new 3.3.51 query/OTA is inferred. Analysis only, no check/device/backend/code/
+build/commit/push operation. Evidence .cache/companion-log-20261123-2101; see
+[archive review](../ota-exec-notes/OTA-COMPANION-2026-11-20.md#owner-diagnostic-archive-review-2026-11-23).
+
 Latest owner-directed work, 2026-11-23: MCU-TEST-CANDIDATE, Codex root,
 CANDIDATE_DELIVERED / OWNER_PUBLICATION_AND_OTA_PENDING. Owner reports successful 3.3.48 -> 3.3.50
 compatibility upgrade and device binding, and cancels the old delta-policy
@@ -77,6 +100,20 @@ as 24 lowercase hex characters, not a BLE/account/App identifier. Evidence:
 .cache/mcu-test-20261123 and .cache/candidate-release/20261123T124217Z-28d10bbe;
 owner publishes 3.3.51 and generates/enables exact 3.3.50 -> 3.3.51 if testing
 delta. No device operation or actual/independent OTA acceptance. See [test candidate](../ota-exec-notes/OTA-COMPANION-2026-11-20.md#owner-requested-mcu-test-candidate-2026-11-23).
+
+Latest compatibility feedback, 2026-11-23: LEGACY-DELTA-SELECTION, Codex root,
+LOCAL_PENDING / EXISTING_FULL_ONLY_LIMIT_CONFIRMED. Real metadata confirms one
+ready/enabled/retained 3.3.48 -> 3.3.50 delta, matching base/target raw SHA and
+9916 bytes versus 304580-byte full. Stable and both runtime delta flags are
+correct. Two retained manual uid-v1 checks nevertheless select full because
+App, Worker and Public deliberately enforce full-only compatibility migration.
+This is a code-policy limitation, not failed publication or proof of hardware
+delta incompatibility. No product/gate change, account check, channel/delta
+mutation, download or device action. Coordinated backwards-compatible App/
+backend delta migration would retain signed package/base/target and reboot
+identity checks; the owner's policy choice is still pending. New local record
+only, not main delivery. Evidence .cache/legacy-delta-20261123/inspect-01.
+See [selection diagnosis](../ota-exec-notes/OTA-COMPANION-2026-11-20.md#compatibility-delta-selection-diagnosis-2026-11-23).
 
 Latest resource work, 2026-11-23: RESOURCE-QUOTA-DISPLAY, Codex root,
 CODE_ON_MAIN / ADMIN_LIVE_VERIFIED. Product c503165f, exact-source CI
@@ -96,6 +133,27 @@ are retained. These are implementation/live checks, not independent acceptance.
 Evidence .cache/quota-display-20261123; six older pending documents are preserved
 through scoped closeout rather than staged wholesale.
 See [quota implementation](../ota-exec-notes/OTA-COMPANION-2026-11-20.md#cloudflare-account-quota-display-2026-11-23).
+
+Latest resource resolution, 2026-11-23: RESOURCE-QUOTA-PERMISSION-01, Codex root,
+LOCAL_PENDING / BILLING_READ_CONFIRMED / QUOTA_IMPLEMENTATION_PENDING. Owner
+corrects account-owned versus personal-token selection; exact CF-CI-01 reads at
+08:32 UTC now return 200 for subscriptions and account settings. R2 Paid/Teams
+Free Base and 2026-10-28..2026-11-28 UTC period are observed, not a Workers Paid
+or remaining-quota assertion. No token replacement, cloud mutation, deployment,
+App/firmware build or device action. Evidence: .cache/resource-quota-20261123/permission-02/result.json.
+Earlier failure originals and pending content remain; this is capability testing,
+not a completed quota implementation. See [the successful retest](../ota-exec-notes/OTA-COMPANION-2026-11-20.md#personal-token-billing-read-confirmed-2026-11-23).
+
+Latest resource probe, 2026-11-23: RESOURCE-QUOTA-PERMISSION-01, Codex root,
+LOCAL_PENDING / BILLING_READ_NOT_CONFIRMED. Owner-reported e-track-ci permission
+update is tested using the existing CF-CI-01 input: subscriptions GET remains
+403; token verify is 200/active. A separate account-settings read has a transport
+failure and is not classified as denied. Saved Billing Read/account scope/input
+identity need an owner redacted-summary check, not a new token or repeated GET.
+No cloud/configuration/credential/channel/device change or quota repair claim.
+Evidence: .cache/resource-quota-20261123/{permission-01,verification-01}/result.json.
+See [the quota permission probe](../ota-exec-notes/OTA-COMPANION-2026-11-20.md#resource-quota-permission-probe-2026-11-23)
+and [CF-CI-01 capability](credential-registry.md#billing-permission-update-probe-2026-11-23).
 
 Latest rollout, 2026-11-23: ACCOUNT-BACKEND-ROLLOUT, Codex root, CODE_ON_MAIN /
 APP_CANDIDATE_DELIVERED / BACKEND_LIVE_VERIFIED / OWNER_PHONE_DEVICE_PENDING.
@@ -176,6 +234,41 @@ regressions are part of this batch; see Account UI And Legacy Migration Follow-U
 in the existing companion note. Preserve the disclosed four-helper loss and all
 existing evidence. Root owns implementation, tests and authorized delivery; owner
 retains phone actions, channel publication and actual OTA.
+
+Current registration diagnosis: LOCAL_PENDING / INVESTIGATED_NOT_FIXED. Live
+settings now require email verification (revision 2), no matching account exists,
+and only the expired host-test code is retained. Scoped telemetry query succeeds
+but yields no matching auth events; original phone request is unavailable. Four
+offline tests reproduce stale-form/missing-code INVALID_PARAMETER and confirm
+the supplied username/Foxmail/eight-character fixture are otherwise accepted.
+App generic errors discard field details/requestId. Need only the owner's
+observation of whether the form showed a verification-code field; no passwords.
+No live business mutation/product edit/deployment. See Registration Failure
+Investigation in the companion note and .cache/registration-investigation-20261122/.
+
+Latest owner feedback: real SMTP test email received, delivery OWNER_CONFIRMED.
+No code stored/used, no additional send or settings mutation. App registration,
+reset and session-revocation checks remain pending; required email stays off.
+Evidence: .cache/account-mail-activation/owner-inbox-confirmed.json. Local record/
+support-tool changes and the previously disclosed cache-helper loss remain open.
+
+SMTP live follow-up: REMOTE_ACTIVATED / SERVER_ACCEPTED / OWNER_INBOX_PENDING.
+Owner local input succeeded; Pages-only Actions 45028304682 activates backend
+95470e8e, no Worker/schema rebuild. Live owner/source/readiness/preservation checks
+pass and one actual test email is SMTP-accepted. No confirmed inbox, registration/
+reset flow or required-email switch. Local tools/records still pending commit.
+Four old cache helper scripts were mistakenly overwritten and not restored;
+incident paths and mitigation are in the SMTP Activated section of the companion
+note and activation-audit.json. Historical receipts/product code are unchanged.
+
+SMTP activation follow-up: Codex root, LOCAL_PENDING / INPUT_READY. Owner delegates
+three-target mail configuration. Root configure-account-mail.cmd is ready; 26
+offline tests and live read-only target/readiness preflight pass. Existing Pages
+provider-only slots are supported; mailbox/code slots remain absent. Owner enters
+sender/fresh code locally, then agent activates Pages and verifies actual mail.
+No cloud write, send, build or commit/push in this preparation. Existing deployment
+and phone-validation status below remains unchanged. See the current OTA companion
+note, Owner-Assisted SMTP Activation Preparation, and .cache/account-mail-activation/.
 
 Current work: ACCOUNT-RELATIONS-20261122, Codex root, REMOTE_DELIVERED /
 MAIL_ACTIVATION_AND_PHONE_VALIDATION_PENDING. App 1.0.92+118 source 29d619ff is

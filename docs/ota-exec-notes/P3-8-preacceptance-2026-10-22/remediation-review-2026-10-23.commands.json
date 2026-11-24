@@ -1,0 +1,133 @@
+{
+  "schema": "p38-remediation-preview-commands-v1",
+  "cwd": "D:/github/my/E-Track",
+  "formal_acceptance": "NOT_RUN",
+  "evaluator": {
+    "path": ".cache\\p38-review-20261023\\audit_originals.py",
+    "bytes": 9621,
+    "sha256": "ba384aeab5811496a5d9d04735ffaaebc0283dadbc284b44e021e560d82c6ca6",
+    "source": "import datetime,hashlib,json,re,traceback,xml.etree.ElementTree as ET,zipfile\nfrom pathlib import Path\nroot=Path(\"D:/github/my/E-Track\")\nbase=root/\".cache/p3-8-implementation-20261021/.cache/p38/takeover-20261022\"\ncandidate=\"27048aa10079d8dd01d608967e7b5d1b473861ba\"\ndef fingerprint(path):\n    path=path.resolve(strict=True)\n    relative=path.relative_to(root).as_posix()\n    h=hashlib.sha256()\n    with path.open(\"rb\") as stream:\n        for block in iter(lambda:stream.read(1024*1024),b\"\"):\n            h.update(block)\n    return {\"path\":relative,\"bytes\":path.stat().st_size,\"sha256\":h.hexdigest()}\ndef audit():\n    out={\"schema\":\"p38-remediation-original-review-v1\",\"checked_utc\":datetime.datetime.now(datetime.timezone.utc).isoformat(),\"candidate\":candidate,\"formal_acceptance\":\"NOT_RUN\",\"new_builds\":0,\"device_operations\":0,\"development\":[]}\n    for host,counts in ((\"ubuntu\",{\"passed\":746,\"skipped\":16,\"failed\":0}),(\"windows\",{\"passed\":729,\"skipped\":33,\"failed\":0})):\n        paths=list((base/(\"run-39789686610/\"+host+\"/.cache/flutter-dev-checks/runs\")).glob(\"*/result.json\"))\n        assert len(paths)==1,host\n        path=paths[0]\n        data=json.loads(path.read_text(encoding=\"utf-8\"))\n        assert data[\"source_before\"][\"head\"]==candidate and data[\"source_before\"][\"clean\"]\n        restored=data[\"source_after_restored\"]\n        assert restored[\"head\"]==candidate\n        assert not restored[\"dirty_semantic\"] and not restored[\"dirty_untracked\"]\n        if not restored[\"clean\"]:\n            assert restored[\"dirty_eol_only\"]==[\"app/bluetooth_flutter_Trace/windows/flutter/generated_plugin_registrant.h\"]\n        assert data[\"source_deltas_bound_toolchain_regen\"]\n        assert data[\"scope\"]==\"all\" and data[\"development_result\"]==\"PASS\" and data[\"formal_acceptance\"]==\"NOT_RUN\"\n        assert data[\"diagnostics_complete\"] and data[\"lockfile_unchanged\"]\n        item={\"host\":host,\"run_url\":data[\"github_run_url\"],\"run_attempt\":data[\"github_run_attempt\"],\"report\":fingerprint(path),\"source_before\":data[\"source_before\"],\"source_after\":data[\"source_after\"],\"source_after_restored\":restored,\"semantic_restoration_verified\":True,\"source_deltas_bound_toolchain_regen\":data[\"source_deltas_bound_toolchain_regen\"],\"scope\":data[\"scope\"],\"lock_sha256\":data[\"lock_sha256_before\"],\"toolchain_regen\":data[\"toolchain_regen\"],\"commands\":[]}\n        for command in data[\"commands\"]:\n            assert command[\"status\"]==\"PASS\" and command[\"exit_code\"]==0 and not command.get(\"timed_out\",False),command[\"name\"]\n            log=path.parent/command[\"log\"]\n            record={\"name\":command[\"name\"],\"argv\":command[\"argv\"],\"exit_code\":command[\"exit_code\"],\"timed_out\":command.get(\"timed_out\"),\"log\":fingerprint(log)}\n            assert record[\"log\"][\"bytes\"]==command[\"diagnostics\"][\"log_bytes\"],str(log)\n            text=log.read_text(encoding=\"utf-8\",errors=\"replace\")\n            if command[\"name\"]==\"tests\":\n                summary=text.splitlines()[-1]\n                match=re.search(r\"\\+(\\d+)\\s+~(\\d+): All tests passed!\",summary)\n                assert match,summary\n                actual={\"passed\":int(match[1]),\"skipped\":int(match[2]),\"failed\":0}\n                assert actual==counts==command[\"diagnostics\"][\"test_counts\"],actual\n                record.update({\"raw_summary\":summary,\"counts\":actual,\"remediation_cases\":[{\"line\":i,\"text\":line} for i,line in enumerate(text.splitlines(),1) if \"P38-R0\" in line]})\n            elif command[\"name\"]==\"sdk_version\":\n                item[\"sdk\"]=command[\"diagnostics\"][\"sdk_identity\"]\n                for field in (\"frameworkVersion\",\"frameworkRevision\",\"dartSdkVersion\",\"engineRevision\"):\n                    assert item[\"sdk\"][field] in text,field\n            elif command[\"name\"] in (\"analyze\",\"apk_device_ota_native\",\"apk_verify\",\"apk_build\"):\n                record[\"tail\"]=text.splitlines()[-12:]\n            item[\"commands\"].append(record)\n        out[\"development\"].append(item)\n    native=base/\"run-39789686610/ubuntu/app/bluetooth_flutter_Trace/build/app/test-results/testDebugUnitTest/TEST-com.wen.gaia.gaia.DeviceOtaServiceTest.xml\"\n    suite=ET.parse(native).getroot()\n    cases=suite.findall(\"testcase\")\n    assert suite.attrib[\"tests\"]==\"18\" and len(cases)==18\n    assert all(suite.attrib[k]==\"0\" for k in (\"skipped\",\"failures\",\"errors\"))\n    assert not suite.findall(\".//failure\") and not suite.findall(\".//error\") and not suite.findall(\".//skipped\")\n    out[\"native\"]={\"report\":fingerprint(native),\"attributes\":suite.attrib,\"cases\":[case.attrib for case in cases]}\n    meta_path=base/\"run-39789686610/apk/run-079972b527294600b78a85f9779a1c74/artifacts/trace-dev-debug.json\"\n    meta=json.loads(meta_path.read_text(encoding=\"utf-8\"))\n    expected={\n      \"run-39789686610/apk/run-079972b527294600b78a85f9779a1c74/artifacts/trace-dev-debug.apk\":\"0e89bd52a1b9a4c6bb073c692e7af6c94cdc12b10053aaade4381b44f163f97c\",\n      \"standard-build/android/ble-monitor-android.apk\":\"366a1e1c898b8729392ce86b159501592f66ee33ac19a243ca92b7117f31a026\",\n      \"standard-build/windows/ble-monitor-windows.exe\":\"30ee419ccc6bd3fb12c5aa3fcb9e9d3b89537ab1dc62467c7460ba5a677c0046\",\n      \"standard-build/windows/ble-monitor-windows.zip\":\"286526d10b7feba76cbeaeccb13c6e30247d98f70fd6920f81c6bffbf30499c0\",\n      \"standard-logs.zip\":\"01832f796fd52deafbad5c734a0eaa0a9153c6fe3c5a00eef6d8698b91bccd1c\"}\n    out[\"artifacts\"]=[]\n    for name,digest in expected.items():\n        record=fingerprint(base/name)\n        assert record[\"sha256\"]==digest,name\n        record[\"matches_handoff_sha256\"]=True\n        out[\"artifacts\"].append(record)\n    apk=out[\"artifacts\"][0]\n    assert meta[\"commit\"]==candidate and meta[\"sha256\"]==apk[\"sha256\"] and meta[\"bytes\"]==apk[\"bytes\"] and not meta[\"release_signing\"]\n    out[\"debug_metadata\"]={\"report\":fingerprint(meta_path),\"metadata\":meta}\n    with zipfile.ZipFile(base/\"standard-build/windows/ble-monitor-windows.zip\") as archive:\n        assert archive.testzip() is None\n        names=archive.namelist()\n        main_sha=hashlib.sha256(archive.read(\"ble_monitor.exe\")).hexdigest()\n        assert main_sha==expected[\"standard-build/windows/ble-monitor-windows.exe\"]\n        assert \"flutter_windows.dll\" in names and any(n.startswith(\"data/\") for n in names)\n        out[\"windows_distribution\"]={\"crc\":\"PASS\",\"entry_count\":len(names),\"embedded_exe_sha256\":main_sha,\"entries\":names}\n    out[\"standard_logs\"]=[]\n    with zipfile.ZipFile(base/\"standard-logs.zip\") as archive:\n        assert archive.testzip() is None\n        for name in archive.namelist():\n            if not name.endswith(\".txt\") or not any(s in name for s in (\"Build release APK\",\"Build Windows release\",\"Run Flutter tests\",\"Analyze project\",\"Checkout repository\")):\n                continue\n            raw=archive.read(name)\n            text=raw.decode(\"utf-8\",errors=\"replace\")\n            decisive=[{\"line\":i,\"text\":line} for i,line in enumerate(text.splitlines(),1) if any(s in line for s in (\"tests passed,\",\"No issues found\",\"Built build\",\"Warning:\",\"warning:\",\"Already watching path\",candidate))]\n            out[\"standard_logs\"].append({\"entry\":name,\"bytes\":len(raw),\"sha256\":hashlib.sha256(raw).hexdigest(),\"decisive\":decisive,\"warning_lines\":sum(\"warning:\" in line.lower() for line in text.splitlines())})\n    archive_inputs=[\n      (\"dev-ubuntu.zip\",\"f6686b81c12785cb514cad269db2fbc706e2b1cec69374dbdf7fa987975e7d5f\",\"run-39789686610/ubuntu\"),\n      (\"dev-windows.zip\",\"85db52dc473ad15ac43ed8f4a925a3dc25eafcb90eb6027dd7ead798394856dd\",\"run-39789686610/windows\"),\n      (\"dev-apk-resume.zip\",\"b31bf8e4616d7640d5dd6b822377848c984f6bdbe96f3fc90bcf5f9559a522d5\",\"run-39789686610/apk\"),\n      (\"standard-apk-python.zip\",\"5c5770ded1f2af6d9dc9f358b27cc77421575ae13e0b9b99faf37e01fd9dae44\",\"standard-build/android\"),\n      (\"standard-windows.zip\",\"0981217abe334491faaeee042bdd2f3c8862f97e68cfa3a8fa80336b5267c3a2\",\"standard-build/windows\")]\n    retained=[a for a in out[\"artifacts\"] if not a[\"path\"].endswith(\"standard-logs.zip\")]\n    retained += [out[\"native\"][\"report\"],out[\"debug_metadata\"][\"report\"]]\n    for item in out[\"development\"]:\n        retained.append(item[\"report\"])\n        retained.extend(command[\"log\"] for command in item[\"commands\"])\n    out[\"github_archive_bindings\"]=[]\n    for name,digest,destination in archive_inputs:\n        record=fingerprint(base/name)\n        assert record[\"sha256\"]==digest,name\n        record.update({\"published_sha256\":digest,\"members_checked\":[]})\n        with zipfile.ZipFile(base/name) as archive:\n            assert archive.testzip() is None,name\n            for item in retained:\n                path=root/item[\"path\"]\n                if not path.is_relative_to(base/destination):\n                    continue\n                relative=path.relative_to(base/destination).as_posix()\n                matches=[n for n in archive.namelist() if n==relative or n.endswith(\"/\"+relative)]\n                assert len(matches)==1,(name,relative,matches)\n                member=archive.read(matches[0])\n                assert len(member)==item[\"bytes\"] and hashlib.sha256(member).hexdigest()==item[\"sha256\"],(name,relative)\n                record[\"members_checked\"].append(relative)\n        out[\"github_archive_bindings\"].append(record)\n    out[\"result\"]=\"ORIGINALS_VERIFIED_NOT_FORMAL_ACCEPTANCE\"\n    return out\ntry:\n    print(json.dumps(audit(),ensure_ascii=True,indent=2))\nexcept Exception as error:\n    frame=traceback.extract_tb(error.__traceback__)[-1]\n    print(json.dumps({\"result\":\"ORIGINAL_AUDIT_ERROR\",\"error_type\":type(error).__name__,\"message\":str(error),\"line\":frame.lineno,\"check\":frame.line}))\n    raise SystemExit(1)\n",
+    "kind": "One-off read-only adaptation of the prior originals audit. Not an admitted formal runner; full source retained here rather than only in ignored cache."
+  },
+  "commands": [
+    {
+      "id": "REVIEW-SOURCE-DELTA",
+      "command": "git --no-optional-locks --no-pager diff 5d2a0fa6 27048aa1 -- app/bluetooth_flutter_Trace",
+      "exit_code": 0,
+      "kind": "Read-only fixed Git objects; four product files and three test files."
+    },
+    {
+      "id": "REVIEW-ORIGINALS",
+      "command": "python -I -S -B -X utf8 .cache\\p38-review-20261023\\audit_originals.py",
+      "exit_code": 0,
+      "kind": "Independent offline evaluation of original CI/log/XML/artifact bytes; no new tests or build."
+    },
+    {
+      "id": "REVIEW-CI-EXACT-RUNS",
+      "command": "python -I -S -B -X utf8 -c exec(bytes.fromhex('696d706f7274206a736f6e2c75726c6c69622e726571756573740a626173653d2268747470733a2f2f6170692e6769746875622e636f6d2f7265706f732f456974616e2d532d32332f452d547261636b2f616374696f6e73220a6f75743d5b5d0a7472793a0a20202020666f722072756e5f696420696e2028223339373839363836363130222c22333937393135363834333922293a0a2020202020202020776974682075726c6c69622e726571756573742e75726c6f70656e28626173652b222f72756e732f222b72756e5f69642c74696d656f75743d32352920617320726573706f6e73653a0a20202020202020202020202072756e3d6a736f6e2e6c6f616428726573706f6e7365290a2020202020202020776974682075726c6c69622e726571756573742e75726c6f70656e28626173652b222f72756e732f222b72756e5f69642b222f6a6f62733f7065725f706167653d313030222c74696d656f75743d32352920617320726573706f6e73653a0a2020202020202020202020206a6f62733d6a736f6e2e6c6f616428726573706f6e7365290a20202020202020206f75742e617070656e64287b226964223a72756e5b226964225d2c2275726c223a72756e5b2268746d6c5f75726c225d2c22776f726b666c6f77223a72756e5b2270617468225d2c22686561645f736861223a72756e5b22686561645f736861225d2c226272616e6368223a72756e5b22686561645f6272616e6368225d2c22737461747573223a72756e5b22737461747573225d2c22636f6e636c7573696f6e223a72756e5b22636f6e636c7573696f6e225d2c22617474656d7074223a72756e5b2272756e5f617474656d7074225d2c22637265617465645f6174223a72756e5b22637265617465645f6174225d2c22757064617465645f6174223a72756e5b22757064617465645f6174225d2c226a6f6273223a5b7b226964223a6a5b226964225d2c226e616d65223a6a5b226e616d65225d2c22737461747573223a6a5b22737461747573225d2c22636f6e636c7573696f6e223a6a5b22636f6e636c7573696f6e225d2c22737461727465645f6174223a6a5b22737461727465645f6174225d2c22636f6d706c657465645f6174223a6a5b22636f6d706c657465645f6174225d2c227374657073223a5b7b226e616d65223a735b226e616d65225d2c22636f6e636c7573696f6e223a735b22636f6e636c7573696f6e225d7d20666f72207320696e206a2e67657428227374657073222c5b5d295d7d20666f72206a20696e206a6f62735b226a6f6273225d5d7d290a20202020776974682075726c6c69622e726571756573742e75726c6f70656e28626173652b222f72756e733f686561645f7368613d36623736303165373961343232666266623930356135633934323431613262646335343636626635267065725f706167653d3130222c74696d656f75743d32352920617320726573706f6e73653a0a202020202020202068616e646f66663d6a736f6e2e6c6f616428726573706f6e7365290a202020207072696e74286a736f6e2e64756d7073287b2272756e73223a6f75742c2268616e646f66665f72756e73223a5b7b226964223a725b226964225d2c2275726c223a725b2268746d6c5f75726c225d2c22776f726b666c6f77223a725b2270617468225d2c22686561645f736861223a725b22686561645f736861225d2c22737461747573223a725b22737461747573225d2c22636f6e636c7573696f6e223a725b22636f6e636c7573696f6e225d2c22617474656d7074223a725b2272756e5f617474656d7074225d7d20666f72207220696e2068616e646f66665b22776f726b666c6f775f72756e73225d5d7d2c696e64656e743d3229290a65786365707420457863657074696f6e206173206572726f723a0a202020207072696e742874797065286572726f72292e5f5f6e616d655f5f2b223a20222b737472286572726f7229290a2020202072616973652053797374656d457869742831290a'))",
+      "exit_code": 0,
+      "kind": "Public read-only GitHub API requests; no authentication/configuration change or filesystem cache."
+    },
+    {
+      "id": "REVIEW-CI-ARTIFACT-DIGESTS",
+      "command": "python -I -S -B -X utf8 -c exec(bytes.fromhex('696d706f7274206a736f6e2c75726c6c69622e726571756573740a626173653d2268747470733a2f2f6170692e6769746875622e636f6d2f7265706f732f456974616e2d532d32332f452d547261636b2f616374696f6e73220a6f75743d7b22617274696661637473223a5b5d7d0a7472793a0a20202020666f722072756e20696e2028223339373839363836363130222c22333937393135363834333922293a0a2020202020202020776974682075726c6c69622e726571756573742e75726c6f70656e28626173652b222f72756e732f222b72756e2b222f6172746966616374733f7065725f706167653d313030222c74696d656f75743d32352920617320726573706f6e73653a0a202020202020202020202020646174613d6a736f6e2e6c6f616428726573706f6e7365290a20202020202020206f75745b22617274696661637473225d2e617070656e64287b2272756e223a72756e2c22617274696661637473223a5b7b6b3a612e676574286b2920666f72206b20696e2028226964222c226e616d65222c2273697a655f696e5f6279746573222c22646967657374222c2265787069726564222c22637265617465645f6174222c22657870697265735f617422297d20666f72206120696e20646174615b22617274696661637473225d5d7d290a20202020776974682075726c6c69622e726571756573742e75726c6f70656e28626173652b222f72756e733f6272616e63683d646576253246666c757474657225324670332d382d6261636b67726f756e642d6f74612d3230323631303231267065725f706167653d3130222c74696d656f75743d32352920617320726573706f6e73653a0a2020202020202020646174613d6a736f6e2e6c6f616428726573706f6e7365290a202020206f75745b226272616e63685f72756e73225d3d5b7b6b3a722e676574286b2920666f72206b20696e2028226964222c226e616d65222c2270617468222c22686561645f736861222c22636f6e636c7573696f6e222c22737461747573222c2268746d6c5f75726c222c2272756e5f617474656d707422297d20666f72207220696e20646174615b22776f726b666c6f775f72756e73225d5d0a202020207072696e74286a736f6e2e64756d7073286f75742c696e64656e743d3229290a65786365707420457863657074696f6e206173206572726f723a0a202020207072696e742874797065286572726f72292e5f5f6e616d655f5f2b223a20222b737472286572726f7229290a2020202072616973652053797374656d457869742831290a'))",
+      "exit_code": 0,
+      "kind": "Public read-only API metadata; existing ZIP bytes checked, not downloaded again."
+    },
+    {
+      "id": "REVIEW-GETX-LOCKED-SOURCE",
+      "command": "python -I -S -B -X utf8 -c exec(bytes.fromhex('696d706f727420686173686c69622c696f2c6a736f6e2c74617266696c652c75726c6c69622e726571756573740a75726c3d2268747470733a2f2f7075622e6465762f6170692f61726368697665732f6765742d342e372e322e7461722e677a220a7472793a0a20202020776974682075726c6c69622e726571756573742e75726c6f70656e2875726c2c74696d656f75743d33302920617320726573706f6e73653a0a20202020202020207261773d726573706f6e73652e726561642831362a313032342a313032342b31290a202020206966206c656e28726177293e31362a313032342a313032343a0a202020202020202072616973652056616c75654572726f722822617263686976652065786365656473206465636c61726564203136204d69422063617022290a202020206469676573743d686173686c69622e73686132353628726177292e68657864696765737428290a20202020617373657274206469676573743d3d2263373965656234333339663166336465666664396563393132663861393233383334626563353566376234396339653838326238666566326331333964343235222c6469676573740a202020207072696e74286a736f6e2e64756d7073287b2275726c223a75726c2c226279746573223a6c656e28726177292c22736861323536223a6469676573747d29290a20202020776974682074617266696c652e6f70656e2866696c656f626a3d696f2e4279746573494f28726177292c6d6f64653d22723a677a222920617320617263686976653a0a2020202020202020666f72206e616d6520696e20617263686976652e6765746e616d657328293a0a2020202020202020202020206966206e616d652e656e6473776974682828226765745f73747265616d2e64617274222c2272785f696d706c2e646172742229293a0a20202020202020202020202020202020646174613d617263686976652e6578747261637466696c65286e616d65292e7265616428290a202020202020202020202020202020207072696e742822534f5552434520222b6e616d652b22207368613235363d222b686173686c69622e7368613235362864617461292e6865786469676573742829290a20202020202020202020202020202020666f7220692c6c696e6520696e20656e756d657261746528646174612e6465636f646528227574662d3822292e73706c69746c696e657328292c31293a0a20202020202020202020202020202020202020207072696e74287374722869292b223a222b6c696e65290a65786365707420457863657074696f6e206173206572726f723a0a202020207072696e742874797065286572726f72292e5f5f6e616d655f5f2b223a20222b737472286572726f7229290a2020202072616973652053797374656d457869742831290a'))",
+      "exit_code": 0,
+      "kind": "Public package archive read in memory only, pinned SHA-256 check, no extraction/install or Dart execution."
+    },
+    {
+      "id": "REVIEW-WORKTREE-STATUS",
+      "command": "git --no-optional-locks -c core.fsmonitor=false -c safe.directory=D:/github/my/E-Track/.cache/p3-8-implementation-20261021 -C .cache/p3-8-implementation-20261021 status --short --branch",
+      "exit_code": 0,
+      "kind": "Read-only status after checking the worktree .git pointer. No global safe.directory or index write."
+    }
+  ],
+  "preparation_failures": [
+    {
+      "id": "SOURCE-NODE-SPAWN",
+      "exit_code": 1,
+      "reason": "Node child_process spawnSync git returned EPERM; used the existing direct shell Git reader, not a permission override."
+    },
+    {
+      "id": "GETX-INITIAL-READ-CAP",
+      "exit_code": 1,
+      "reason": "The initial in-memory 8 MiB cap was too small. HEAD gave Content-Length 14561823; a bounded 16 MiB read then matched the lockfile archive digest."
+    },
+    {
+      "id": "ORIGINALS-INLINE-LENGTH",
+      "exit_code": 1,
+      "reason": "cmd.exe rejected the overlong inline reader before Python execution. The same bounded reader was placed in the preflighted project cache with apply_patch."
+    },
+    {
+      "id": "ORIGINALS-POST-RESTORE-CLEAN",
+      "exit_code": 1,
+      "reason": "Initial reader incorrectly required source_after_restored.clean on Windows. The existing runner records a pure generated-header EOL difference and no semantic/untracked changes. Corrected the reader against existing semantic-state rules, retained the real false clean flag.",
+      "diagnostic": {
+        "result": "ORIGINAL_AUDIT_ERROR",
+        "error_type": "AssertionError",
+        "message": "",
+        "line": 22,
+        "check": "assert data[\"source_after_restored\"][\"head\"]==candidate and data[\"source_after_restored\"][\"clean\"]"
+      }
+    },
+    {
+      "id": "WORKTREE-OWNERSHIP",
+      "exit_code": 128,
+      "reason": "Default Git rejected the administrator-owned worktree. Its .git pointer was checked, then only a command-local safe.directory was used for read-only status; no global config was written."
+    }
+  ],
+  "write_preflight": [
+    {
+      "path": "D:\\github\\my\\E-Track\\docs\\ota-exec-notes\\P3-8-preacceptance-2026-10-22.md",
+      "sha256": "61ae2bb08b2a1b43e2c1eea5b5254ec41a198fcc8cb7d6d81abe6b2728ae2840",
+      "crlf": 0,
+      "lf": 254
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\docs\\agent-collaboration\\index.md",
+      "sha256": "fc6b10bd0f342a163b8eb75c6c5d1d624e9d21203300ce506fd1befbddddeca9",
+      "crlf": 0,
+      "lf": 20
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\PLAN-OTA-EXEC.md",
+      "sha256": "cdfde8753b121c63eddacb243cffdb3b13658e4118b976f748f7d63851bcb876",
+      "crlf": 710,
+      "lf": 1284
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\docs\\ota-exec-notes\\P3-8-preacceptance-2026-10-22\\remediation-review-2026-10-23.json",
+      "sha256": null,
+      "crlf": 0,
+      "lf": 0
+    },
+    {
+      "path": "D:\\github\\my\\E-Track\\docs\\ota-exec-notes\\P3-8-preacceptance-2026-10-22\\remediation-review-2026-10-23.commands.json",
+      "sha256": null,
+      "crlf": 0,
+      "lf": 0
+    }
+  ],
+  "write_scope": [
+    ".cache/p38-review-20261023/audit_originals.py",
+    "docs/ota-exec-notes/P3-8-preacceptance-2026-10-22.md",
+    "docs/agent-collaboration/index.md",
+    "PLAN-OTA-EXEC.md",
+    "docs/ota-exec-notes/P3-8-preacceptance-2026-10-22/remediation-review-2026-10-23.json",
+    "docs/ota-exec-notes/P3-8-preacceptance-2026-10-22/remediation-review-2026-10-23.commands.json"
+  ],
+  "not_performed": [
+    "product source/test modification",
+    "local Flutter/Gradle build",
+    "CI dispatch/rerun",
+    "device or USB/BLE/J-Link action",
+    "commit/push/merge/release/deploy",
+    "outside-project output or cleanup"
+  ],
+  "successful_output": "remediation-review-2026-10-23.json"
+}
