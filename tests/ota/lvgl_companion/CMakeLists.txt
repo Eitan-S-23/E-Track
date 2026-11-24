@@ -30,7 +30,12 @@ foreach(variant original candidate)
     endif()
 endforeach()
 else()
-    target_compile_definitions(lvgl PUBLIC LV_FONT_MONTSERRAT_8=1 "LV_CONF_PATH=${LV_CONF_PATH}")
+    if(NOT DEFINED DIALPLATE_LV_MEM_SIZE)
+        message(FATAL_ERROR "Dialplate tests require the current GCC candidate LVGL pool size")
+    endif()
+    target_compile_definitions(lvgl PUBLIC LV_FONT_MONTSERRAT_8=1
+        LV_USE_THEME_DEFAULT=0 "LV_MEM_SIZE=${DIALPLATE_LV_MEM_SIZE}U"
+        "LV_CONF_PATH=${LV_CONF_PATH}")
     add_library(dialplate_assets STATIC
         "${DIALPLATE_UI_ROOT}/USER/App/Resource/Font/font_agencyb_12.c"
         "${DIALPLATE_UI_ROOT}/USER/App/Resource/Font/font_iconfont_16.c"
@@ -46,7 +51,8 @@ else()
             "${ROOT}/tests/ota/dialplate_ui_harness.cpp"
             "${DIALPLATE_UI_ROOT}/USER/App/Pages/Dialplate/DialplateView.cpp")
         target_compile_features(dialplate_${variant} PRIVATE cxx_std_11)
-        target_compile_options(dialplate_${variant} PRIVATE -Wall -Wextra -Werror)
+        target_compile_options(dialplate_${variant} PRIVATE -Wall -Wextra -Werror
+            -include "${HARNESS_DIR}/reference_page_dependencies.h")
         target_include_directories(dialplate_${variant} PRIVATE
             "${HARNESS_DIR}" "${DIALPLATE_UI_ROOT}/USER/App"
             "${ROOT}/USER" "${ROOT}/USER/App"
@@ -54,8 +60,6 @@ else()
         target_link_libraries(dialplate_${variant} PRIVATE dialplate_assets lvgl)
         if(NOT DIALPLATE_UI_ROOT STREQUAL ROOT)
             target_compile_definitions(dialplate_${variant} PRIVATE DIALPLATE_REFERENCE=1)
-            target_compile_options(dialplate_${variant} PRIVATE
-                -include "${HARNESS_DIR}/reference_page_dependencies.h")
         endif()
         if(variant STREQUAL "hardware")
             target_compile_definitions(dialplate_${variant} PRIVATE ARDUINO=111 AT32F435RGT7)

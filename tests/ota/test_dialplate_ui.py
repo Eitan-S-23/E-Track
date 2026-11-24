@@ -18,14 +18,16 @@ except ImportError:
 from test_main_menu_encoder import method
 
 ROOT = Path(__file__).resolve().parents[2]
+TIMER_FRAME_CASES = ("timer_frames", "statusbar_frames", "transparent_top_frames")
 CASES = ("layout", "long_values", "populated", "arrow", "controls", "spectrum", "spectrum_frames",
-         "foreground", "transitions", "lifecycle", "dma")
-VARIANTS = ("desktop", "hardware", "fallback")
+         *TIMER_FRAME_CASES, "lifecycle", "dma")
+VARIANTS = ("desktop", "hardware")
 UI_METHODS = ("void SetAdaptiveMetricLabel", "void SetSpeedLabel", "void SetCalorieLabel",
               "void SetMaxSpeedLabel", "void SetNavDistanceLabel")
-REFERENCE_RENDER_CASES = ("layout", "long_values", "populated", "arrow", "controls", "spectrum", "spectrum_frames")
+REFERENCE_RENDER_CASES = ("layout", "long_values", "populated", "arrow", "controls", "spectrum",
+                          "spectrum_frames", *TIMER_FRAME_CASES)
 REFERENCE_UI_HASHES = {
-    "view_without_spectrum_buffer": "626e433a9803de3449e0c8a891b5d463fea16bec0760268e6678772d4e7ba61a",
+    "view": "6a12d37b9fd0c81881fca9a14ca9be8341d134b3bee8a73dbb67ff853d4f7398",
     "header": "17728fe5c4ae7ea0844757d034b787a1200f780787df4e24e5a50456afacb86b",
     "void SetAdaptiveMetricLabel": "0f0c0c891e55cf3729953c352ab6ec2067e51e22a116fa19d9ec827abf88c750",
     "void SetSpeedLabel": "371170125168a27abcd006a5f54c9f52c1c0970e9e543a0ba6dce58960ab4ae8",
@@ -57,6 +59,11 @@ def write_ui_helpers(source_root, directory):
     maximum = re.search(r"^#define MAX_SPEED_TEXT_W[^\n]+", presenter, re.M)[0]
     checked(directory / "dialplate_presenter_ui.inc").write_text(
         maximum + "\n\n" + "\n\n".join(method(presenter, name) for name in UI_METHODS),
+        encoding="utf-8")
+    statusbar = (source_root / "USER/App/Pages/StatusBar/StatusBar.cpp").read_text(encoding="utf-8")
+    checked(directory / "statusbar_ui.inc").write_text(
+        "\n\n".join(method(statusbar, name) for name in
+                     ("static void StatusBar_StyleInit", "static void StatusBar_Appear")),
         encoding="utf-8")
 
 
@@ -99,6 +106,11 @@ class DialplateUiTests(unittest.TestCase):
         stub = checked(cls.directory / "HAL")
         stub.mkdir()
         checked(stub / "HAL.h").write_text(HAL_STUB, encoding="utf-8")
+        checked(cls.directory / "reference_page_dependencies.h").write_text(
+            '#define __PAGE_H\n#include "lvgl/lvgl.h"\n'
+            '#include "Resource/ResourcePool.h"\n', encoding="utf-8")
+        cmake = (ROOT / "MDK-ARM_F435/cmake-generated/CMakeLists.txt").read_text(encoding="utf-8")
+        cls.lvgl_pool = int(re.search(r"P34_OTA_FIXED_CONFIG=1.*?LV_MEM_SIZE=(\d+)U", cmake, re.S)[1])
         hal_path = ROOT / "MDK-ARM_F435/Platform/HAL/HAL_Display.cpp"
         source = hal_path.read_text(encoding="utf-8")
         signatures = ("void DMA1_Channel3_IRQHandler", "void HAL::Display_SendPixels",
@@ -116,6 +128,8 @@ class DialplateUiTests(unittest.TestCase):
             "USER/lv_port/lv_port.h", "USER/App/Common/HAL/HAL.h",
             "MDK-ARM_F435/Platform/HAL/HAL_Display.cpp",
             "MDK-ARM_F435/Platform/lv_port/lv_port_disp.cpp",
+            "MDK-ARM_F435/cmake-generated/CMakeLists.txt",
+            "tests/ota/lvgl_companion/lv_conf.h", "USER/App/Pages/StatusBar/StatusBar.cpp",
             "tests/ota/dialplate_ui_harness.cpp", "tests/ota/lvgl_companion/CMakeLists.txt")
         hashes = {path: hashlib.sha256((ROOT / path).read_bytes()).hexdigest() for path in inputs}
         checked(cls.directory / "source-sha256.json").write_text(
@@ -125,7 +139,8 @@ class DialplateUiTests(unittest.TestCase):
              "-G", "Ninja", "-DCMAKE_BUILD_TYPE=Debug", "-DDIALPLATE_ONLY=ON",
              "-DCMAKE_C_COMPILER=" + shutil.which("gcc"),
              "-DCMAKE_CXX_COMPILER=" + shutil.which("g++"), "-DHARNESS_DIR=" + str(cls.directory),
-             "-DDIALPLATE_UI_ROOT=" + str(ROOT), "-DDIALPLATE_VARIANTS=" + ";".join(VARIANTS)],
+             "-DDIALPLATE_UI_ROOT=" + str(ROOT), "-DDIALPLATE_VARIANTS=" + ";".join(VARIANTS),
+             "-DDIALPLATE_LV_MEM_SIZE=" + str(cls.lvgl_pool)],
             ["cmake", "--build", str(cls.build), "--target",
              *("dialplate_" + name for name in VARIANTS), "--parallel", "8"]]
         for index, command in enumerate(commands):
@@ -165,7 +180,8 @@ class DialplateUiTests(unittest.TestCase):
                  "-DCMAKE_C_COMPILER=" + shutil.which("gcc"),
                  "-DCMAKE_CXX_COMPILER=" + shutil.which("g++"),
                  "-DHARNESS_DIR=" + str(cls.reference_directory),
-                 "-DDIALPLATE_UI_ROOT=" + str(reference_root), "-DDIALPLATE_VARIANTS=desktop;hardware"],
+                 "-DDIALPLATE_UI_ROOT=" + str(reference_root), "-DDIALPLATE_VARIANTS=desktop;hardware",
+                 "-DDIALPLATE_LV_MEM_SIZE=" + str(cls.lvgl_pool)],
                 ["cmake", "--build", str(cls.reference_build), "--target",
                  "dialplate_desktop", "dialplate_hardware", "--parallel", "8"]]
             for index, command in enumerate(reference_commands):
@@ -189,8 +205,8 @@ class DialplateUiTests(unittest.TestCase):
         names = [variant + "-" + case]
         if case == "spectrum_frames":
             names += [variant + "-spectrum_frames-" + str(frame) for frame in range(16)]
-        if case == "foreground":
-            names.append(variant + "-foreground-modal")
+        if case in TIMER_FRAME_CASES:
+            names += [variant + "-" + case + "-" + str(frame) for frame in range(32)]
         for name in names:
             image_path = checked(directory / (name + ".ppm"))
             data = image_path.read_bytes()
@@ -201,43 +217,22 @@ class DialplateUiTests(unittest.TestCase):
                 with Image.open(image_path) as image:
                     image.save(checked(directory / (name + ".png")))
         print(result.stdout.strip())
-        return data
+        # Bind the named snapshot, not the last separately captured animation frame.
+        return (directory / (names[0] + ".ppm")).read_bytes()
 
     def test_original_ui_source_is_preserved(self):
         view = (ROOT / "USER/App/Pages/Dialplate/DialplateView.cpp").read_text(encoding="utf-8")
         header = (ROOT / "USER/App/Pages/Dialplate/DialplateView.h").read_text(encoding="utf-8")
         presenter = (ROOT / "USER/App/Pages/Dialplate/Dialplate.cpp").read_text(encoding="utf-8")
-        # Strip only the existing port/foreground compatibility, not any UI styling.
-        view = view.replace('#include "Resource/ResourcePool.h"\n', "")
-        view = view.replace("#define SCR_H         320\n", "")
-        view = view.replace('static lv_color_t effectBuffer[SPECTRUM_W * 2];\n'
-                            'static_assert(DIALPLATE_GLOW_BLIT_MAX_PIXELS <= SPECTRUM_W * 2,\n'
-                            '              "Original glow segments must fit the shared UI transfer buffer");\n\n', "")
-        # The only buffer adaptation is checked against real reference animation frames.
-        view = view.replace(method(view, "void DialplateView::Spectrum_Blit"), "")
-        view = view.replace("    lv_color_t* buffer = effectBuffer;",
-                            "    static lv_color_t buffer[DIALPLATE_GLOW_BLIT_MAX_PIXELS];")
-        view = view.replace(method(view, "bool DialplateView::EffectsCanBlit") + "\n\n", "")
-        view = view.replace("    if(EffectsCanBlit())\n    {\n        BorderGlow_Advance();\n"
-                            "        Spectrum_Blit(frame);\n    }",
-                            "    BorderGlow_Advance();\n    Spectrum_Blit(frame);")
-        view = view.replace("if(!EffectsCanBlit())", "if(ui.skin == nullptr)")
-        view = view.replace("        ui.borderGlowActive = true;\n", "")
-        view = view.replace("        ui.borderGlowActive = false;\n", "")
-        view = view.replace(" || !instance->EffectsCanBlit()", "")
-        view = view.replace("#if DIALPLATE_HW_EFFECTS", "#if defined(ARDUINO)")
-        view = view.replace("#if !DIALPLATE_HW_EFFECTS", "#if !defined(ARDUINO)")
-        header = header.replace("\n\n#if defined(ARDUINO) && defined(AT32F435RGT7)\n"
-                                "#define DIALPLATE_HW_EFFECTS 1\n#else\n"
-                                "#define DIALPLATE_HW_EFFECTS 0\n#endif", "")
-        header = header.replace('#include "lvgl/lvgl.h"', '#include "../Page.h"')
-        header = header.replace("        bool borderGlowActive;\n", "")
-        header = header.replace("    bool EffectsCanBlit() const;\n", "")
-        header = header.replace("#if DIALPLATE_HW_EFFECTS", "#if defined(ARDUINO)")
-        self.assertEqual(source_digest(view), REFERENCE_UI_HASHES["view_without_spectrum_buffer"])
+        self.assertEqual(source_digest(view), REFERENCE_UI_HASHES["view"])
         self.assertEqual(source_digest(header), REFERENCE_UI_HASHES["header"])
         for name in (*UI_METHODS, "void Dialplate::Update"):
             self.assertEqual(source_digest(method(presenter, name)), REFERENCE_UI_HASHES[name], name)
+
+    def test_candidate_memory_preserves_the_system_heap_gate(self):
+        self.assertEqual(self.lvgl_pool, 120 * 1024)
+        cmake = (ROOT / "MDK-ARM_F435/cmake-generated/CMakeLists.txt").read_text(encoding="utf-8")
+        self.assertIn('"-Wl,--defsym=__p34_heap_min=4096"', cmake)
 
     def test_reference_render_equivalence(self):
         if self.reference_build is None:
@@ -248,14 +243,17 @@ class DialplateUiTests(unittest.TestCase):
                 with self.subTest(variant=variant, case=case):
                     actual = self.run_case(variant, case)
                     original = self.run_case(variant, case, self.reference_build, self.reference_directory)
+                    self.assertEqual(actual, (self.directory / (variant + "-" + case + ".ppm")).read_bytes())
+                    self.assertEqual(original, (self.reference_directory / (variant + "-" + case + ".ppm")).read_bytes())
                     self.assertEqual(actual, original, "UI pixels differ from the reference: " + variant + "-" + case)
                     hashes[variant + "-" + case] = {
                         "targetSha256": hashlib.sha256(actual).hexdigest(),
                         "referenceSha256": hashlib.sha256(original).hexdigest(),
                         "differentPixels": 0}
-                    if case == "spectrum_frames":
-                        for frame in range(16):
-                            name = variant + "-spectrum_frames-" + str(frame)
+                    if case == "spectrum_frames" or case in TIMER_FRAME_CASES:
+                        frame_count = 16 if case == "spectrum_frames" else 32
+                        for frame in range(frame_count):
+                            name = variant + "-" + case + "-" + str(frame)
                             actual_frame = (self.directory / (name + ".ppm")).read_bytes()
                             original_frame = (self.reference_directory / (name + ".ppm")).read_bytes()
                             self.assertEqual(actual_frame, original_frame, "Animation pixels differ: " + name)

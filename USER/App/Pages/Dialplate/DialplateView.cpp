@@ -1,5 +1,4 @@
 #include "DialplateView.h"
-#include "Resource/ResourcePool.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -19,7 +18,6 @@ using namespace Page;
 #define COL_YELLOW    lv_color_hex(0xf6db22)
 
 #define SCR_W         240
-#define SCR_H         320
 #define SCR_CX        120                       /* 屏幕水平中心，供 TOP_MID 居中偏移换算 */
 
 #define ARROW_CENTER_X 119
@@ -63,7 +61,7 @@ using namespace Page;
 #define TXT_MAP             "\xE5\x9C\xB0" "\xE5\x9B\xBE"
 #define TXT_MENU            "\xE8\x8F\x9C" "\xE5\x8D\x95"
 
-#if DIALPLATE_HW_EFFECTS
+#if defined(ARDUINO)
 typedef struct
 {
     uint32_t index;
@@ -90,10 +88,6 @@ typedef struct
 } DialplateGlowSegmentFrame;
 
 #include "DialplateGlowData.inc"
-
-static lv_color_t effectBuffer[SPECTRUM_W * 2];
-static_assert(DIALPLATE_GLOW_BLIT_MAX_PIXELS <= SPECTRUM_W * 2,
-              "Original glow segments must fit the shared UI transfer buffer");
 
 typedef void (*lv_port_disp_overlay_cb_t)(const lv_area_t* area, lv_color_t* color_p, void* user_data);
 extern void lv_port_disp_set_overlay_cb(lv_port_disp_overlay_cb_t cb, void* user_data);
@@ -391,7 +385,7 @@ void DialplateView::Create(lv_obj_t* root)
 
 void DialplateView::Delete()
 {
-#if DIALPLATE_HW_EFFECTS
+#if defined(ARDUINO)
     BorderGlow_SetActive(false);
 #endif
 
@@ -426,7 +420,7 @@ void DialplateView::SetSpectrumActive(bool active)
 
     if(active)
     {
-#if DIALPLATE_HW_EFFECTS
+#if defined(ARDUINO)
         BorderGlow_SetActive(true);
 #endif
         lv_timer_resume(ui.maxBar.spectrumTimer);
@@ -435,7 +429,7 @@ void DialplateView::SetSpectrumActive(bool active)
     else
     {
         lv_timer_pause(ui.maxBar.spectrumTimer);
-#if DIALPLATE_HW_EFFECTS
+#if defined(ARDUINO)
         BorderGlow_SetActive(false);
 #endif
     }
@@ -619,7 +613,7 @@ void DialplateView::Spectrum_Create(lv_obj_t* par)
                                         SPECTRUM_MASK_W, SPECTRUM_MASK_H,
                                         COL_PANEL_BG, LV_OPA_COVER, 0);
 
-#if !DIALPLATE_HW_EFFECTS
+#if !defined(ARDUINO)
     const lv_coord_t segW = 7;
     const lv_coord_t gap = 2;
     const lv_coord_t baseY = SPECTRUM_Y + SPECTRUM_H;
@@ -677,12 +671,9 @@ void DialplateView::Spectrum_Update()
     };
     const uint8_t frameCount = sizeof(frames) / sizeof(frames[0]);
     const uint8_t* frame = frames[ui.maxBar.spectrumPhase % frameCount];
-#if DIALPLATE_HW_EFFECTS
-    if(EffectsCanBlit())
-    {
-        BorderGlow_Advance();
-        Spectrum_Blit(frame);
-    }
+#if defined(ARDUINO)
+    BorderGlow_Advance();
+    Spectrum_Blit(frame);
 #endif
 
     if(ui.nav.labelTurnIcon != nullptr)
@@ -697,7 +688,7 @@ void DialplateView::Spectrum_Update()
                                         (sizeof(pulse) / sizeof(pulse[0]))], 0);
     }
 
-#if !DIALPLATE_HW_EFFECTS
+#if !defined(ARDUINO)
     for(int i = 0; i < SPECTRUM_BAR_NUM; i++)
     {
         uint8_t lit = (uint8_t)(((uint16_t)frame[i] * ui.maxBar.spectrumLevelPct + 99U) / 100U);
@@ -738,46 +729,7 @@ void DialplateView::Spectrum_Update()
     ui.maxBar.spectrumPhase++;
 }
 
-#if DIALPLATE_HW_EFFECTS
-bool DialplateView::EffectsCanBlit() const
-{
-    if(!ui.borderGlowActive || ui.skin == nullptr || !lv_obj_is_visible(ui.skin))
-    {
-        return false;
-    }
-    lv_obj_t* root = lv_obj_get_parent(ui.skin);
-    if(root == nullptr || lv_obj_get_parent(root) != lv_scr_act() ||
-       lv_obj_get_style_opa(root, 0) != LV_OPA_COVER)
-    {
-        return false;
-    }
-    lv_area_t bounds;
-    lv_obj_get_coords(root, &bounds);
-    if(bounds.x1 != 0 || bounds.y1 != 0 || bounds.x2 != SCR_W - 1 || bounds.y2 != SCR_H - 1)
-    {
-        return false;
-    }
-
-    /* Raw DMA bypasses LVGL z-order. Never paint over a modal or a newer page. */
-    lv_obj_t* top = lv_layer_top();
-    for(uint32_t i = 0; i < lv_obj_get_child_cnt(top); i++)
-    {
-        if(lv_obj_is_visible(lv_obj_get_child(top, (int32_t)i)))
-        {
-            return false;
-        }
-    }
-    lv_obj_t* screen = lv_scr_act();
-    for(uint32_t i = lv_obj_get_index(root) + 1; i < lv_obj_get_child_cnt(screen); i++)
-    {
-        if(lv_obj_is_visible(lv_obj_get_child(screen, (int32_t)i)))
-        {
-            return false;
-        }
-    }
-    return true;
-}
-
+#if defined(ARDUINO)
 void DialplateView::Spectrum_Blit(const uint8_t* frame)
 {
     if(frame == nullptr)
@@ -785,67 +737,58 @@ void DialplateView::Spectrum_Blit(const uint8_t* frame)
         return;
     }
 
+    static lv_color_t buffer[SPECTRUM_W * SPECTRUM_H];
+    for(unsigned i = 0; i < sizeof(buffer) / sizeof(buffer[0]); i++)
+    {
+        buffer[i] = COL_PANEL_BG;
+    }
+
     const lv_coord_t segW = 7;
     const lv_coord_t gap = 2;
-    // Keep the original segment geometry; only split its display transfer.
-    for(lv_coord_t bandY = 0; bandY < SPECTRUM_H; bandY += 2)
+    for(int bar = 0; bar < SPECTRUM_BAR_NUM; bar++)
     {
-        const lv_coord_t rows = SPECTRUM_H - bandY < 2 ? SPECTRUM_H - bandY : 2;
-        for(lv_coord_t i = 0; i < SPECTRUM_W * rows; i++)
+        uint8_t lit = (uint8_t)(((uint16_t)frame[bar] * ui.maxBar.spectrumLevelPct + 99U) / 100U);
+        if(lit == 0)
         {
-            effectBuffer[i] = COL_PANEL_BG;
+            lit = 1;
+        }
+        if(lit > SPECTRUM_SEG_NUM)
+        {
+            lit = SPECTRUM_SEG_NUM;
         }
 
-        for(int bar = 0; bar < SPECTRUM_BAR_NUM; bar++)
+        for(uint8_t segment = 0; segment < lit; segment++)
         {
-            uint8_t lit = (uint8_t)(((uint16_t)frame[bar] * ui.maxBar.spectrumLevelPct + 99U) / 100U);
-            if(lit == 0)
+            const lv_coord_t x = bar * (segW + gap);
+            const lv_coord_t y = SPECTRUM_H - (segment + 1) * SPECTRUM_SEG_H -
+                                 segment * SPECTRUM_SEG_GAP;
+            for(lv_coord_t row = 0; row < SPECTRUM_SEG_H; row++)
             {
-                lit = 1;
-            }
-            if(lit > SPECTRUM_SEG_NUM)
-            {
-                lit = SPECTRUM_SEG_NUM;
-            }
-
-            for(uint8_t segment = 0; segment < lit; segment++)
-            {
-                const lv_coord_t x = bar * (segW + gap);
-                const lv_coord_t y = SPECTRUM_H - (segment + 1) * SPECTRUM_SEG_H -
-                                     segment * SPECTRUM_SEG_GAP;
-                for(lv_coord_t row = 0; row < SPECTRUM_SEG_H; row++)
+                for(lv_coord_t col = 0; col < segW; col++)
                 {
-                    if(y + row < bandY || y + row >= bandY + rows)
-                    {
-                        continue;
-                    }
-                    for(lv_coord_t col = 0; col < segW; col++)
-                    {
-                        effectBuffer[(y + row - bandY) * SPECTRUM_W + x + col] = COL_CYAN;
-                    }
+                    buffer[(y + row) * SPECTRUM_W + x + col] = COL_CYAN;
                 }
             }
         }
-
-        const lv_area_t area =
-        {
-            SPECTRUM_X,
-            (lv_coord_t)(SPECTRUM_Y + bandY),
-            SPECTRUM_X + SPECTRUM_W - 1,
-            (lv_coord_t)(SPECTRUM_Y + bandY + rows - 1)
-        };
-        lv_port_disp_blit_blocking(&area, effectBuffer);
     }
+
+    const lv_area_t area =
+    {
+        SPECTRUM_X,
+        SPECTRUM_Y,
+        SPECTRUM_X + SPECTRUM_W - 1,
+        SPECTRUM_Y + SPECTRUM_H - 1
+    };
+    lv_port_disp_blit_blocking(&area, buffer);
 }
 #endif
 
-#if DIALPLATE_HW_EFFECTS
+#if defined(ARDUINO)
 void DialplateView::BorderGlow_SetActive(bool active)
 {
     if(active)
     {
         ui.borderGlowPhase = 0;
-        ui.borderGlowActive = true;
         lv_port_disp_set_overlay_cb(onDisplayOverlay, this);
     }
     else
@@ -854,7 +797,6 @@ void DialplateView::BorderGlow_SetActive(bool active)
         {
             BorderGlow_BlitFrame(ui.borderGlowPhase, false);
         }
-        ui.borderGlowActive = false;
         lv_port_disp_set_overlay_cb(NULL, NULL);
     }
 }
@@ -870,7 +812,7 @@ void DialplateView::BorderGlow_Advance()
 
 void DialplateView::BorderGlow_BlitFrame(uint8_t phase, bool glow)
 {
-    if(!EffectsCanBlit())
+    if(ui.skin == nullptr)
     {
         return;
     }
@@ -881,7 +823,7 @@ void DialplateView::BorderGlow_BlitFrame(uint8_t phase, bool glow)
         return;
     }
 
-    lv_color_t* buffer = effectBuffer;
+    static lv_color_t buffer[DIALPLATE_GLOW_BLIT_MAX_PIXELS];
     const lv_color_t* base = (const lv_color_t*)skin->data;
     const DialplateGlowFrame& glowFrame = kDialplateGlowFrames[phase];
     const DialplateGlowSegmentFrame& segmentFrame = kDialplateGlowSegmentFrames[phase];
@@ -920,7 +862,7 @@ void DialplateView::BorderGlow_BlitFrame(uint8_t phase, bool glow)
 void DialplateView::onDisplayOverlay(const lv_area_t* area, lv_color_t* color_p, void* userData)
 {
     DialplateView* instance = (DialplateView*)userData;
-    if(instance == nullptr || area == nullptr || color_p == nullptr || !instance->EffectsCanBlit())
+    if(instance == nullptr || area == nullptr || color_p == nullptr)
     {
         return;
     }

@@ -762,7 +762,8 @@ if(P34_OTA_CANDIDATE)
         CONFIG_OTA_STAGING_BLOCK_ERASE=1
         CONFIG_OTA_UI_CADENCE=1 CONFIG_OTA_ACTIVE_PUMP=1
         OTA_PATCH_COALESCE_WRITES=1 CONFIG_OTA_APP_CRC32_NIBBLE=1
-        LV_MEM_SIZE=126976U
+        # Keep the original UI buffers and reserve at least 4 KiB for newlib.
+        LV_MEM_SIZE=122880U
     )
     target_link_options(X_Track_App_GCC PRIVATE "-Wl,--defsym=__p34_heap_min=4096")
 endif()

@@ -38,6 +38,30 @@ static std::vector<lv_color_t> framebuffer(width * height);
 static unsigned rawTransfers = 0;
 static unsigned normalCallbacks = 0;
 
+namespace StatusBarProbe
+{
+struct { lv_obj_t* cont; } ui;
+#define STATUS_BAR_HEIGHT 25
+static void SetY(void* object, int32_t value)
+{
+    lv_obj_set_y(static_cast<lv_obj_t*>(object), static_cast<lv_coord_t>(value));
+}
+#define LV_ANIM_EXEC(property) SetY
+#include "statusbar_ui.inc"
+#undef LV_ANIM_EXEC
+
+static lv_obj_t* Create()
+{
+    ui.cont = lv_obj_create(lv_layer_top());
+    lv_obj_remove_style_all(ui.cont);
+    lv_obj_set_size(ui.cont, width, STATUS_BAR_HEIGHT);
+    lv_obj_set_y(ui.cont, -STATUS_BAR_HEIGHT);
+    StatusBar_StyleInit(ui.cont);
+    StatusBar_Appear(false);
+    return ui.cont;
+}
+}
+
 static void Require(bool condition, const char* message)
 {
     if(!condition)
@@ -327,8 +351,10 @@ int main(int argc, char** argv)
     SetupDisplay();
     Page::DialplateView view;
     lv_obj_t* root = CreateRoot(view);
-#ifndef DIALPLATE_REFERENCE
-    Require(rawTransfers == 0, "creation cannot blit before the page owns the display");
+#if DIALPLATE_HW_EFFECTS
+    Require(rawTransfers > 0, "the original hardware View initializes its direct frame during creation");
+#else
+    Require(rawTransfers == 0, "desktop rendering uses LVGL objects only");
 #endif
 
     if(test == "layout") CheckMetrics(view);
@@ -425,65 +451,50 @@ int main(int argc, char** argv)
             Save(argv[2], variant + "-spectrum_frames-" + std::to_string(frame));
         }
     }
-    else if(test == "foreground")
+    else if(test == "timer_frames" || test == "statusbar_frames" || test == "transparent_top_frames")
     {
-        view.SetSpectrumActive(true);
-        Animate(view);
-        lv_obj_t* modal = lv_obj_create(lv_layer_top());
-        lv_obj_remove_style_all(modal);
-        lv_obj_set_pos(modal, 0, 140);
-        lv_obj_set_size(modal, width, 140);
-        lv_obj_set_style_bg_color(modal, lv_color_hex(0x662222), 0);
-        lv_obj_set_style_bg_opa(modal, LV_OPA_COVER, 0);
-        lv_obj_update_layout(modal);
-        unsigned before = rawTransfers;
-        Animate(view);
+        lv_obj_t* top = nullptr;
+        if(test == "statusbar_frames") top = StatusBarProbe::Create();
+        else if(test == "transparent_top_frames")
+        {
+            top = lv_obj_create(lv_layer_top());
+            lv_obj_remove_style_all(top);
+            lv_obj_set_size(top, width, height);
+            lv_obj_set_style_opa(top, LV_OPA_TRANSP, 0);
+        }
+        view.AppearAnimStart();
         Render();
-        Require(rawTransfers == before, "top-layer modal suppresses direct DMA animation");
-        for(int y = 141; y < 279; y++)
-            for(int x = 1; x < 239; x++)
-                Require(framebuffer[y * width + x].full == lv_color_hex(0x662222).full,
-                        "display compositor cannot paint glow over a foreground modal");
-        Save(argv[2], variant + "-foreground-modal");
-        view.SetSpectrumActive(false);
-        Require(rawTransfers == before, "cleanup cannot erase a foreground modal");
-        lv_obj_del(modal);
-        view.SetSpectrumActive(true);
-        Animate(view);
+        for(unsigned frame = 0; frame < 12; frame++)
+        {
+            lv_tick_inc(50);
+            lv_timer_handler();
 #if DIALPLATE_HW_EFFECTS
-        Require(rawTransfers > before, "direct effects resume when the modal is gone");
+            HAL::Display_WaitForSendFinish();
+#endif
+        }
+        view.SetSpectrumActive(true);
         Render();
-        Animate(view);
-        Require(framebuffer[231 * width + 12].full == lv_color_hex(0x1ad0e0).full,
-                "the original spectrum timer restores its direct frame after a repaint");
-#endif
-    }
-    else if(test == "transitions")
-    {
-        view.SetSpectrumActive(true);
-        unsigned before = rawTransfers;
-        lv_obj_set_x(root, 30);
         lv_obj_update_layout(root);
-        Animate(view);
-        Require(rawTransfers == before, "moving pages cannot use absolute screen coordinates");
-        lv_obj_set_x(root, 0);
-        lv_obj_set_style_opa(root, LV_OPA_50, 0);
-        lv_obj_update_layout(root);
-        Animate(view);
-        Require(rawTransfers == before, "fading pages cannot use opaque direct writes");
-        lv_obj_set_style_opa(root, LV_OPA_COVER, 0);
-        lv_obj_t* newer = lv_obj_create(lv_scr_act());
-        lv_obj_set_size(newer, width, height);
-        lv_obj_update_layout(newer);
-        Animate(view);
-        Require(rawTransfers == before, "newer page owns the foreground");
-        lv_obj_add_flag(newer, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_update_layout(root);
-        Animate(view);
+        if(top != nullptr)
+        {
+            lv_obj_update_layout(top);
+            Require(lv_obj_is_visible(top), "regression scene retains the geometrically visible top object");
+        }
+        for(unsigned frame = 0; frame < 32; frame++)
+        {
+            const unsigned before = rawTransfers;
+            lv_tick_inc(50);
+            lv_timer_handler();
 #if DIALPLATE_HW_EFFECTS
-        Require(rawTransfers > before, "hidden cached pages do not block the active display");
+            HAL::Display_WaitForSendFinish();
+            Require(rawTransfers > before, "top objects cannot suppress the original direct animation");
+            Require(view.ui.borderGlowPhase == (frame + 1) % 16, "real timers advance every original glow phase");
+#else
+            Require(rawTransfers == before, "desktop timers remain on the LVGL rendering path");
 #endif
-        lv_obj_del(newer);
+            Save(argv[2], variant + "-" + test + "-" + std::to_string(frame));
+        }
+        if(top != nullptr) lv_obj_del(top);
     }
     else if(test == "lifecycle")
     {
@@ -513,7 +524,13 @@ int main(int argc, char** argv)
     view.Delete();
     lv_obj_del(root);
     Render();
-    std::printf("PASS real-LVGL %s %s; raw=%u normal-completions=%u (host self-test, not device evidence)\n",
-                variant.c_str(), test.c_str(), rawTransfers, normalCallbacks);
+    lv_mem_monitor_t memory = {};
+    lv_mem_monitor(&memory);
+    Require(memory.max_used < memory.total_size && lv_mem_test() == LV_RES_OK,
+            "the production-sized LVGL pool remains valid through the complete lifecycle");
+    std::printf("PASS real-LVGL %s %s; raw=%u normal-completions=%u; lvgl-peak=%u pool=%u "
+                "(host self-test, not device evidence)\n",
+                variant.c_str(), test.c_str(), rawTransfers, normalCallbacks,
+                memory.max_used, memory.total_size);
     return 0;
 }

@@ -1,7 +1,7 @@
 {
   "schema": "original-admin-automatic-candidates-v1",
   "firmware": {
-    "versionName": "3.3.54",
-    "releaseNotes": "Restore the original AT32F435RGT7_SDIO dialplate UI code: original fonts, layout, placeholders, clipping, heading arrow and animations. Preserve existing foreground/modal safeguards and use a small spectrum transfer buffer for the F435 memory budget without changing rendered pixels. UI-only migration; HAL, OTA companion/file management, recorder admission, navigation, factory UID and App 1.0.95+121 remain unchanged. Full/recovery candidate only; owner controls publication and installation. No device operation or backend deployment."
+    "versionName": "3.3.55",
+    "releaseNotes": "Restore the exact AT32F435RGT7_SDIO Dialplate View source from 37b025b, including the original ARDUINO rendering path, full spectrum transfer buffer and all flowing panel borders. Use a 120 KiB LVGL pool to preserve the unchanged 4096-byte system-heap gate, OTA workspace, stack and guard. HAL, OTA companion/file management, recorder admission, navigation, factory UID and App 1.0.95+121 remain unchanged. Full/recovery candidate only; owner controls publication and installation. No device operation or backend deployment."
   }
 }

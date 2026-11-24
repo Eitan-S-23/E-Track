@@ -1,13 +1,7 @@
 #ifndef __DIALPLATE_VIEW_H
 #define __DIALPLATE_VIEW_H
 
-#include "lvgl/lvgl.h"
-
-#if defined(ARDUINO) && defined(AT32F435RGT7)
-#define DIALPLATE_HW_EFFECTS 1
-#else
-#define DIALPLATE_HW_EFFECTS 0
-#endif
+#include "../Page.h"
 
 namespace Page
 {
@@ -51,7 +45,6 @@ public:
     {
         lv_obj_t* skin;       /* 全屏皮肤底图 */
         uint8_t borderGlowPhase;
-        bool borderGlowActive;
 
         /* Runtime GPS arrow; only the small image is rotated. */
         struct
@@ -143,12 +136,11 @@ private:
     lv_obj_t* Btn_Create(lv_obj_t* par, lv_coord_t x, lv_coord_t y, lv_coord_t w, lv_coord_t h);
     void Spectrum_Create(lv_obj_t* par);
     void Spectrum_Update();
-#if DIALPLATE_HW_EFFECTS
-    bool EffectsCanBlit() const;
+#if defined(ARDUINO)
     void Spectrum_Blit(const uint8_t* frame);
 #endif
     static void onSpectrumTimer(lv_timer_t* timer);
-#if DIALPLATE_HW_EFFECTS
+#if defined(ARDUINO)
     void BorderGlow_SetActive(bool active);
     void BorderGlow_Advance();
     void BorderGlow_BlitFrame(uint8_t phase, bool glow);
