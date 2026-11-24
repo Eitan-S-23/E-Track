@@ -38,14 +38,14 @@ describe('account check allowance', () => {
       await accountCheck(request('automatic'), env.DB, a, limits, noUpdate, base + i * automaticSpacingMs);
     }
     const time = base + 5 * automaticSpacingMs;
-    expect((await accountBudget(env.DB, a, limits, time)).manual.used).toBe(5);
-    expect((await accountBudget(env.DB, a, limits, time)).automatic.used).toBe(5);
+    expect((await accountBudget(env.DB, a, limits, time)).components.firmware.manual.used).toBe(5);
+    expect((await accountBudget(env.DB, a, limits, time)).components.firmware.automatic.used).toBe(5);
     for (const kind of ['manual', 'automatic']) {
       await expect(accountCheck(request(kind), env.DB, a, limits, noUpdate, time)).rejects.toMatchObject({ code: 'CHECK_QUOTA_EXCEEDED' });
     }
     await accountCheck(request(), env.DB, a, limits, noUpdate, base + 86400000);
   });
-  it('enforces the automatic minimum interval account-wide, but not on manual checks', async () => {
+  it('enforces the automatic minimum interval account-wide within a component, but not on manual checks', async () => {
     const a = await seed(), now = Date.now();
     await accountCheck(request('automatic'), env.DB, a, limits, noUpdate, now);
     await expect(accountCheck(request('automatic'), env.DB, a, limits, noUpdate, now + 10)).rejects.toMatchObject({ code: 'CHECK_TOO_SOON' });
@@ -56,22 +56,22 @@ describe('account check allowance', () => {
     const a = await seed();
     const results = await Promise.allSettled(Array.from({ length: 12 }, () => accountCheck(request(), env.DB, a, limits, noUpdate)));
     expect(results.filter(r => r.status === 'fulfilled')).toHaveLength(5);
-    expect((await accountBudget(env.DB, a, limits)).manual.used).toBe(5);
+    expect((await accountBudget(env.DB, a, limits)).components.firmware.manual.used).toBe(5);
   });
   it('does not charge failed requests, and can retry the same ID', async () => {
     const a = await seed(), req = request();
     await accountCheck(req, env.DB, a, limits, async () => Response.json({ errorCode: 'CHANNEL_STOPPED' }));
-    expect((await accountBudget(env.DB, a, limits)).manual.used).toBe(0);
+    expect((await accountBudget(env.DB, a, limits)).components.firmware.manual.used).toBe(0);
     await expect(accountCheck(req, env.DB, a, limits, async () => { throw new Error('offline'); })).rejects.toThrow('offline');
     await accountCheck(req, env.DB, a, limits, noUpdate);
-    expect((await accountBudget(env.DB, a, limits)).manual.used).toBe(1);
+    expect((await accountBudget(env.DB, a, limits)).components.firmware.manual.used).toBe(1);
   });
   it('replays without charging, but rejects a changed kind/request', async () => {
     const a = await seed(), id = crypto.randomUUID();
     await accountCheck(request('manual', id), env.DB, a, limits, noUpdate);
     await accountCheck(request('manual', id), env.DB, a, limits, async () => { throw new Error('must not execute'); });
     await expect(accountCheck(request('automatic', id), env.DB, a, limits, noUpdate)).rejects.toMatchObject({ code: 'IDEMPOTENCY_CONFLICT' });
-    expect((await accountBudget(env.DB, a, limits)).manual.used).toBe(1);
+    expect((await accountBudget(env.DB, a, limits)).components.firmware.manual.used).toBe(1);
   });
   it('renews prepared download URLs without charging or changing the payload', async () => {
     const a = await seed(), id = crypto.randomUUID();
@@ -79,13 +79,13 @@ describe('account check allowance', () => {
     const refresh = request('manual', id, { 'X-Update-Refresh': '1' });
     await accountCheck(refresh, env.DB, a, limits, latest('a'.repeat(64), 'renewed'));
     await expect(accountCheck(refresh, env.DB, a, limits, latest('c'.repeat(64)))).rejects.toMatchObject({ code: 'IDEMPOTENCY_CONFLICT' });
-    expect((await accountBudget(env.DB, a, limits)).manual.used).toBe(1);
+    expect((await accountBudget(env.DB, a, limits)).components.firmware.manual.used).toBe(1);
   });
   it('does not share quota between accounts', async () => {
     const a = await seed(), b = await seed();
     for (let i = 0; i < 5; i++) await accountCheck(request(), env.DB, a, limits, noUpdate);
     await accountCheck(request(), env.DB, b, limits, noUpdate);
-    expect((await accountBudget(env.DB, b, limits)).manual.remaining).toBe(4);
+    expect((await accountBudget(env.DB, b, limits)).components.firmware.manual.remaining).toBe(4);
   });
 });
 
@@ -154,12 +154,13 @@ describe('account admission', () => {
       .rejects.toMatchObject({ code: 'DEVICE_NOT_BOUND' });
     expect(calls).toBe(0);
     const other = await requireAccount(otherRequest, env);
-    expect((await accountBudget(env.DB, other.id, limits)).manual.used).toBe(0);
+    expect((await accountBudget(env.DB, other.id, limits)).components.firmware.manual.used).toBe(0);
     headers.set('Authorization', ownerRequest.headers.get('Authorization')!);
     expect((await accountCloudAccess(new Request(otherRequest, { headers }), env, next)).status).toBe(200);
     expect(calls).toBe(1);
     const owner = await requireAccount(ownerRequest, env);
-    expect((await accountBudget(env.DB, owner.id, limits)).manual.used).toBe(1);
+    expect((await accountBudget(env.DB, owner.id, limits)).components.firmware.manual.used).toBe(1);
+    expect((await accountBudget(env.DB, owner.id, limits)).manual.used).toBe(0);
   });
 });
 

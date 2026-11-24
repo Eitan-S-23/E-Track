@@ -3,11 +3,27 @@ import { ApiError, invalidParameter } from './errors';
 import { json } from './http';
 
 export type CheckKind = 'automatic' | 'manual';
-export interface AccountLimits { automatic_daily_limit: number; manual_daily_limit: number }
+export type CheckComponent = 'app' | 'firmware';
+export interface AccountLimits {
+  automatic_daily_limit: number; manual_daily_limit: number;
+  firmware_automatic_daily_limit?: number; firmware_manual_daily_limit?: number;
+}
 export const automaticSpacingMs = 60 * 60 * 1000;
 interface CheckRow {
-  request_hash: string; kind: CheckKind; day: string; state: string; created_at: number;
+  component: CheckComponent | 'legacy'; request_hash: string; kind: CheckKind; day: string; state: string; created_at: number;
   lease_until: number; response_status: number | null; response_json: string | null;
+}
+
+export function checkComponent(path: string): CheckComponent {
+  if (path === '/api/public/latest') return 'app';
+  if (path === '/api/public/firmware/latest') return 'firmware';
+  throw invalidParameter('A supported update check route is required');
+}
+
+function componentLimits(limits: AccountLimits, component: CheckComponent) {
+  return component === 'app' ? { automatic: limits.automatic_daily_limit, manual: limits.manual_daily_limit }
+    : { automatic: limits.firmware_automatic_daily_limit ?? limits.automatic_daily_limit,
+      manual: limits.firmware_manual_daily_limit ?? limits.manual_daily_limit };
 }
 
 export function accountDay(now: number): { day: string; resetsAt: number } {
@@ -19,14 +35,22 @@ export function accountDay(now: number): { day: string; resetsAt: number } {
 
 export async function accountBudget(db: D1Database, account: string, limits: AccountLimits, now = Date.now()) {
   const { day, resetsAt } = accountDay(now);
-  const rows = (await db.prepare(`SELECT kind,COUNT(*) AS used FROM account_update_checks
-    WHERE account_id=? AND day=? AND (state='complete' OR (state='pending' AND lease_until>?)) GROUP BY kind`)
-    .bind(account, day, now).all<{ kind: CheckKind; used: number }>()).results;
-  const used = (kind: CheckKind) => rows.find(r => r.kind === kind)?.used ?? 0;
-  return { day, resetsAt, automatic: { limit: limits.automatic_daily_limit, used: used('automatic'),
-    remaining: Math.max(0, limits.automatic_daily_limit - used('automatic')) },
-    manual: { limit: limits.manual_daily_limit, used: used('manual'),
-      remaining: Math.max(0, limits.manual_daily_limit - used('manual')) } };
+  const rows = (await db.prepare(`SELECT component,kind,COUNT(*) AS used FROM account_update_checks
+    WHERE account_id=? AND day=? AND (state='complete' OR (state='pending' AND lease_until>?)) GROUP BY component,kind`)
+    .bind(account, day, now).all<{ component: CheckComponent | 'legacy'; kind: CheckKind; used: number }>()).results;
+  const used = (component: CheckComponent | 'legacy', kind: CheckKind) =>
+    rows.find(r => r.component === component && r.kind === kind)?.used ?? 0;
+  const budget = (component: CheckComponent) => {
+    const cap = componentLimits(limits, component);
+    return { automatic: { limit: cap.automatic, used: used(component, 'automatic'),
+      remaining: Math.max(0, cap.automatic - used(component, 'automatic')) },
+    manual: { limit: cap.manual, used: used(component, 'manual'),
+      remaining: Math.max(0, cap.manual - used(component, 'manual')) } };
+  };
+  const components = { app: budget('app'), firmware: budget('firmware') };
+  // Installed clients still read these flat fields; they now describe APP checks.
+  return { day, resetsAt, component: 'app' as const, ...components.app, components,
+    unclassifiedLegacyChecks: { automatic: used('legacy', 'automatic'), manual: used('legacy', 'manual') } };
 }
 
 function identity(value: Record<string, unknown>): string {
@@ -47,6 +71,7 @@ export async function accountCheck(request: Request, db: D1Database, account: st
     throw invalidParameter('A check ID and automatic/manual kind are required');
   }
   const url = new URL(request.url);
+  const component = checkComponent(url.pathname);
   url.searchParams.sort();
   const requestHash = await sha256Hex(url.pathname + url.search + '|' + (request.headers.get('X-Device-Uid') ?? ''));
   const { day, resetsAt } = accountDay(now);
@@ -55,6 +80,15 @@ export async function accountCheck(request: Request, db: D1Database, account: st
   let row = await find();
   if (row && (row.request_hash !== requestHash || row.kind !== kind)) {
     throw new ApiError('IDEMPOTENCY_CONFLICT', 'Check ID belongs to a different request', 409);
+  }
+  if (row?.component === 'legacy') {
+    // Only the exact original request identifies an old row's previously unknown route.
+    await db.prepare(`UPDATE account_update_checks SET component=? WHERE account_id=? AND check_id=?
+      AND component='legacy' AND request_hash=? AND kind=?`).bind(component, account, checkId, requestHash, kind).run();
+    row = await find();
+  }
+  if (row && row.component !== component) {
+    throw new ApiError('IDEMPOTENCY_CONFLICT', 'Check ID belongs to a different component', 409);
   }
   const refresh = request.headers.get('X-Update-Refresh') === '1';
   if (refresh) {
@@ -69,54 +103,55 @@ export async function accountCheck(request: Request, db: D1Database, account: st
     if (current.updateAvailable !== true || identity(previous) !== identity(current)) {
       throw new ApiError('IDEMPOTENCY_CONFLICT', 'Prepared update changed; a new check is required', 409);
     }
-    return withBudget(response, db, account, limits, now);
+    return withBudget(response, db, account, limits, component, now);
   }
   if (row?.state === 'complete') {
     if (now - row.created_at > 60000 || !row.response_json || row.response_status === null) {
       throw new ApiError('IDEMPOTENCY_RESULT_EXPIRED', 'Check replay expired', 409);
     }
-    return withBudget(json(JSON.parse(row.response_json), row.response_status), db, account, limits, now);
+    return withBudget(json(JSON.parse(row.response_json), row.response_status), db, account, limits, component, now);
   }
   if (row?.state === 'pending' && row.lease_until > now) {
     throw new ApiError('CHECK_IN_PROGRESS', 'The same check is in progress', 409);
   }
-  const limit = kind === 'automatic' ? limits.automatic_daily_limit : limits.manual_daily_limit;
+  const limit = componentLimits(limits, component)[kind];
   const leaseToken = crypto.randomUUID();
   // A single conditional SQL write serializes reservations across all phones.
   const reserved = await db.prepare(`INSERT INTO account_update_checks
-    (account_id,check_id,day,kind,request_hash,state,created_at,lease_until,lease_token)
-    SELECT ?,?,?,?,?,'pending',?,?,? WHERE
-      (SELECT COUNT(*) FROM account_update_checks WHERE account_id=? AND day=? AND kind=?
+    (account_id,check_id,component,day,kind,request_hash,state,created_at,lease_until,lease_token)
+    SELECT ?,?,?,?,?,?,'pending',?,?,? WHERE
+      (SELECT COUNT(*) FROM account_update_checks WHERE account_id=? AND component=? AND day=? AND kind=?
         AND (state='complete' OR (state='pending' AND lease_until>?))) < ?
       AND (?='manual' OR NOT EXISTS(SELECT 1 FROM account_update_checks
-        WHERE account_id=? AND kind='automatic' AND created_at>?
+        WHERE account_id=? AND component=? AND kind='automatic' AND created_at>?
         AND (state='complete' OR (state='pending' AND lease_until>?))))
     ON CONFLICT(account_id,check_id) DO UPDATE SET state='pending',day=excluded.day,
       created_at=excluded.created_at,lease_until=excluded.lease_until,lease_token=excluded.lease_token
       WHERE account_update_checks.request_hash=excluded.request_hash AND account_update_checks.kind=excluded.kind
+        AND account_update_checks.component=excluded.component
         AND (account_update_checks.state='failed' OR
           (account_update_checks.state='pending' AND account_update_checks.lease_until<=?))
-    RETURNING check_id`).bind(account, checkId, day, kind, requestHash, now, now + 120000, leaseToken,
-      account, day, kind, now, limit, kind, account, now - automaticSpacingMs, now, now).all();
+    RETURNING check_id`).bind(account, checkId, component, day, kind, requestHash, now, now + 120000, leaseToken,
+      account, component, day, kind, now, limit, kind, account, component, now - automaticSpacingMs, now, now).all();
   if (!reserved.results.length) {
     row = await find();
-    if (row && (row.request_hash !== requestHash || row.kind !== kind)) {
+    if (row && (row.request_hash !== requestHash || row.kind !== kind || row.component !== component)) {
       throw new ApiError('IDEMPOTENCY_CONFLICT', 'Check ID belongs to a different request', 409);
     }
     if (row?.state === 'complete') return accountCheck(request, db, account, limits, next, now);
     if (row?.state === 'pending' && row.lease_until > now) throw new ApiError('CHECK_IN_PROGRESS', 'Check in progress', 409);
     const budget = await accountBudget(db, account, limits, now);
-    if (kind === 'automatic' && budget.automatic.remaining > 0) {
+    if (kind === 'automatic' && budget.components[component].automatic.remaining > 0) {
       const previous = await db.prepare(`SELECT MAX(created_at) AS last FROM account_update_checks
-        WHERE account_id=? AND kind='automatic' AND (state='complete' OR (state='pending' AND lease_until>?))`)
-        .bind(account, now).first<{ last: number | null }>();
+        WHERE account_id=? AND component=? AND kind='automatic' AND (state='complete' OR (state='pending' AND lease_until>?))`)
+        .bind(account, component, now).first<{ last: number | null }>();
       if (previous?.last !== null && previous?.last !== undefined && previous.last + automaticSpacingMs > now) {
         throw new ApiError('CHECK_TOO_SOON', 'Automatic check interval has not elapsed', 429,
-          { nextCheckAt: previous.last + automaticSpacingMs });
+          { component, nextCheckAt: previous.last + automaticSpacingMs });
       }
     }
     throw new ApiError('CHECK_QUOTA_EXCEEDED', 'Account daily check allowance exhausted', 429,
-      { kind, limit, remaining: 0, resetsAt });
+      { component, kind, limit, remaining: 0, resetsAt });
   }
   try {
     const response = await next();
@@ -127,24 +162,27 @@ export async function accountCheck(request: Request, db: D1Database, account: st
         (parsed.updateAvailable === false && parsed.errorCode === 'NO_UPDATE'));
     const completedAt = now + Math.max(0, performance.now() - started);
     const completed = await db.prepare(`UPDATE account_update_checks SET state=?,response_status=?,response_json=?
-      WHERE account_id=? AND check_id=? AND state='pending' AND lease_token=? AND lease_until>?
+      WHERE account_id=? AND check_id=? AND component=? AND state='pending' AND lease_token=? AND lease_until>?
       RETURNING check_id`)
       .bind(counted ? 'complete' : 'failed', counted ? response.status : null, counted ? body : null,
-        account, checkId, leaseToken, completedAt).all();
+        account, checkId, component, leaseToken, completedAt).all();
     if (!completed.results.length) throw new ApiError('CHECK_IN_PROGRESS', 'Check lease was replaced; retry the same check ID', 409);
-    return withBudget(response, db, account, limits, completedAt);
+    return withBudget(response, db, account, limits, component, completedAt);
   } catch (error) {
     await db.prepare(`UPDATE account_update_checks SET state='failed' WHERE account_id=? AND check_id=?
-      AND state='pending' AND lease_token=?`).bind(account, checkId, leaseToken).run();
+      AND component=? AND state='pending' AND lease_token=?`).bind(account, checkId, component, leaseToken).run();
     throw error;
   }
 }
 
-async function withBudget(response: Response, db: D1Database, account: string, limits: AccountLimits, now: number) {
+async function withBudget(response: Response, db: D1Database, account: string, limits: AccountLimits,
+  component: CheckComponent, now: number) {
   const budget = await accountBudget(db, account, limits, now);
+  const selected = budget.components[component];
   const headers = new Headers(response.headers);
-  headers.set('X-Update-Automatic-Remaining', String(budget.automatic.remaining));
-  headers.set('X-Update-Manual-Remaining', String(budget.manual.remaining));
+  headers.set('X-Update-Check-Component', component);
+  headers.set('X-Update-Automatic-Remaining', String(selected.automatic.remaining));
+  headers.set('X-Update-Manual-Remaining', String(selected.manual.remaining));
   headers.set('X-Update-Quota-Reset', String(budget.resetsAt));
   headers.set('Cache-Control', 'no-store');
   return new Response(response.body, { status: response.status, headers });

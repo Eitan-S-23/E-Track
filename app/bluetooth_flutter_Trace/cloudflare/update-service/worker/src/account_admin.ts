@@ -79,15 +79,22 @@ export async function accountAdmin(request: Request, env: Env, actor: Actor): Pr
     }
     const flags = ['registration_enabled', 'password_registration_enabled', 'email_verification_enabled'] as const;
     const counts = ['automatic_daily_limit', 'manual_daily_limit'] as const;
+    const firmwareCounts = ['firmware_automatic_daily_limit', 'firmware_manual_daily_limit'] as const;
+    const firmwareLimits = firmwareCounts.map((key, index) => body[key] === undefined
+      ? settings[key] ?? settings[counts[index]] : body[key]);
     for (const key of flags) if (body[key] !== 0 && body[key] !== 1) throw invalidParameter('Invalid ' + key);
     for (const key of counts) if (!Number.isInteger(body[key]) || Number(body[key]) < 0 || Number(body[key]) > 1000) throw invalidParameter('Invalid ' + key);
+    for (const [index, value] of firmwareLimits.entries()) {
+      if (!Number.isInteger(value) || Number(value) < 0 || Number(value) > 1000) throw invalidParameter('Invalid ' + firmwareCounts[index]);
+    }
     if (body.email_verification_enabled === 1 && !emailDeliveryAvailable(env)) {
       throw new ApiError('EMAIL_DELIVERY_UNAVAILABLE', 'Email delivery must be configured before enabling verification', 503);
     }
     const results = await env.DB.batch([
       env.DB.prepare(`UPDATE account_settings SET registration_enabled=?,password_registration_enabled=?,email_verification_enabled=?,
-        automatic_daily_limit=?,manual_daily_limit=?,revision=revision+1 WHERE app_id=? AND revision=? RETURNING revision`)
-        .bind(...flags.map(k => body[k]), ...counts.map(k => body[k]), env.APP_ID, body.revision),
+        automatic_daily_limit=?,manual_daily_limit=?,firmware_automatic_daily_limit=?,firmware_manual_daily_limit=?,
+        revision=revision+1 WHERE app_id=? AND revision=? RETURNING revision`)
+        .bind(...flags.map(k => body[k]), ...counts.map(k => body[k]), ...firmwareLimits, env.APP_ID, body.revision),
       env.DB.prepare(`INSERT INTO account_audit(id,actor,action,occurred_at)
         SELECT ?,?,'settings_update',? WHERE changes()=1`).bind(crypto.randomUUID(), actor.email, now)
     ]);

@@ -2,7 +2,7 @@ import { sha256Hex, timingSafeEqual } from './crypto';
 import { ApiError, invalidParameter } from './errors';
 import { clientIpFrom, json } from './http';
 import { boundedJson } from './version_inventory';
-import { accountBudget, accountCheck, type AccountLimits } from './account_quota';
+import { accountBudget, accountCheck, checkComponent, type AccountLimits } from './account_quota';
 import { authorizeLegacy, legacyDownload, legacyResponse, legacySource } from './account_legacy';
 import type { WorkerEnv } from './types';
 import { scryptSync } from 'node:crypto';
@@ -153,7 +153,9 @@ export async function accountAuthRoute(request: Request, env: WorkerEnv): Promis
       passwordRegistrationEnabled: !!s.password_registration_enabled,
       emailVerificationEnabled: !!s.email_verification_enabled,
       emailDeliveryAvailable: emailDeliveryAvailable(env), passwordResetAvailable: emailDeliveryAvailable(env),
-      automaticDailyLimit: s.automatic_daily_limit, manualDailyLimit: s.manual_daily_limit, timezone: 'Asia/Shanghai' });
+      automaticDailyLimit: s.automatic_daily_limit, manualDailyLimit: s.manual_daily_limit,
+      firmwareAutomaticDailyLimit: s.firmware_automatic_daily_limit ?? s.automatic_daily_limit,
+      firmwareManualDailyLimit: s.firmware_manual_daily_limit ?? s.manual_daily_limit, timezone: 'Asia/Shanghai' });
   }
   if (request.method !== 'POST') throw invalidParameter('Unsupported account operation');
   const body = await boundedJson(request, 8192);
@@ -368,7 +370,8 @@ export async function accountCloudAccess(request: Request, env: WorkerEnv, next:
     else await requireBoundDevice(request, env, account);
   }
   if (path === '/api/public/latest' || path === '/api/public/firmware/latest') {
-    const rate = await env.RATE_LIMITER.getByName('account-check:' + account.id).check('check', 12, 60);
+    const component = checkComponent(path);
+    const rate = await env.RATE_LIMITER.getByName('account-check:' + component + ':' + account.id).check('check', 12, 60);
     if (!rate.allowed) throw new ApiError('RATE_LIMITED', 'Too many check attempts', 429, { retryAfter: rate.retryAfter });
     return accountCheck(request, env.DB, account.id, await accountSettings(env), source
       ? async () => legacyResponse(request, env, account.id, source, await next()) : next);

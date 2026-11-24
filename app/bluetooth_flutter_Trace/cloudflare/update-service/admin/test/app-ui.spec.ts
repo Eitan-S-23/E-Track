@@ -66,12 +66,64 @@ test('account administration lists hardware UID in a modal and saves independent
   await page.locator('[name="registration_enabled"]').uncheck();
   await page.locator('#accountSettings button').click();
   await expect.poll(() => data.writes.length).toBe(1);
-  expect(data.writes[0].body).toMatchObject({ registration_enabled: 0, automatic_daily_limit: 5, manual_daily_limit: 5 });
+  expect(data.writes[0].body).toMatchObject({ registration_enabled: 0, automatic_daily_limit: 5, manual_daily_limit: 5,
+    firmware_automatic_daily_limit: 5, firmware_manual_daily_limit: 5 });
   await expect(page.locator('#confirmDialog')).toBeVisible();
   await expect(page.locator('#confirmMessage')).toContainText('Account settings saved');
   await expect(page.locator('#accountsPanel > [role="status"]')).toBeEmpty();
   await page.locator('#confirmAccept').click();
   expect(errors).toEqual([]);
+});
+
+for (const width of [1440, 320]) test(`account component quotas and settings stay independent with enlarged text at ${width}px`, async ({ page }) => {
+  await page.setViewportSize({ width, height: 540 });
+  const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
+  const data = await mockApp(page);
+  await page.addStyleTag({ content: '#accountsPanel label, #accountDetailContent p {font-size:28px!important;line-height:1.5}' });
+  await openAccounts(page);
+  await page.locator('#accountsPanel [data-user][aria-haspopup="dialog"]').click();
+  await expect(page.locator('[data-check-component="app"]')).toContainText('Automatic remaining: 4 / 5');
+  await expect(page.locator('[data-check-component="firmware"]')).toContainText('Automatic remaining: 1 / 7');
+  await expect(page.locator('[data-check-component="firmware"]')).toContainText('Manual remaining: 2 / 8');
+  await expect(page.locator('#accountDetailClose')).toBeInViewport({ ratio: 1 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.locator('#accountDetailClose').click();
+  await page.locator('[data-account-view="settings"]').click();
+  await expect(page.locator('#accountSettings input[type="number"]')).toHaveCount(4);
+  await page.locator('[name="firmware_automatic_daily_limit"]').fill('2');
+  await page.locator('[name="firmware_manual_daily_limit"]').fill('9');
+  await expect(page.locator('[name="automatic_daily_limit"]')).toHaveValue('5');
+  await expect(page.locator('[name="manual_daily_limit"]')).toHaveValue('5');
+  const save = page.locator('#accountSettings button');
+  await save.scrollIntoViewIfNeeded(); await expect(save).toBeInViewport({ ratio: 1 });
+  await save.click();
+  await expect.poll(() => data.writes.length).toBe(1);
+  expect(data.writes[0].body).toMatchObject({ automatic_daily_limit: 5, manual_daily_limit: 5,
+    firmware_automatic_daily_limit: 2, firmware_manual_daily_limit: 9 });
+  expect(errors).toEqual([]);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test('account legacy quotas are labelled shared instead of claiming component isolation', async ({ page }) => {
+  const data = await mockApp(page); data.accountLegacyQuota = true;
+  data.accountSettings.firmware_automatic_daily_limit = undefined;
+  data.accountSettings.firmware_manual_daily_limit = undefined;
+  await openAccounts(page);
+  await page.locator('#accountsPanel [data-user][aria-haspopup="dialog"]').click();
+  await expect(page.locator('[data-check-component="legacy"]')).toContainText('legacy shared');
+  await expect(page.locator('[data-check-component="firmware"]')).toHaveCount(0);
+  await page.locator('#accountDetailClose').click();
+  await page.locator('[data-account-view="settings"]').click();
+  await expect(page.locator('#accountSettings input[type="number"]')).toHaveCount(2);
+  await expect(page.locator('#accountsPanel')).not.toContainText('NaN');
+});
+
+test('account component quotas preserve unknown remaining values', async ({ page }) => {
+  const data = await mockApp(page); data.accountFirmwareQuota.automatic.remaining = null;
+  await openAccounts(page);
+  await page.locator('#accountsPanel [data-user][aria-haspopup="dialog"]').click();
+  await expect(page.locator('[data-check-component="firmware"]')).toContainText('Automatic remaining: - / 7');
+  await expect(page.locator('[data-check-component="app"]')).toContainText('Automatic remaining: 4 / 5');
 });
 
 test('account read and save failures use standard dialogs without losing the draft or retrying writes', async ({ page }) => {
@@ -247,9 +299,13 @@ async function mockApp(page: Page, language = "en", role = "owner", firmwareFail
     accountReadFailure: false, accountSaveFailure: false, accountMalformed: false,
     accountReadGate: null as Promise<void> | null,
     accountRows: 1, accountDetailRows: 1, accountLongText: false,
+    accountLegacyQuota: false,
+    accountQuota: { automatic: { limit: 5, remaining: 4 }, manual: { limit: 5, remaining: 3 } },
+    accountFirmwareQuota: { automatic: { limit: 7, remaining: 1 as number | null }, manual: { limit: 8, remaining: 2 } },
     accountQueries: [] as Array<{ path: string; query: string }>,
     accountSettings: { registration_enabled: 1, password_registration_enabled: 1, email_verification_enabled: 0,
-      automatic_daily_limit: 5, manual_daily_limit: 5, revision: 0 },
+      automatic_daily_limit: 5, manual_daily_limit: 5, firmware_automatic_daily_limit: 5 as number | undefined,
+      firmware_manual_daily_limit: 5 as number | undefined, revision: 0 },
     announcements: [] as Array<{ id: string; title: string; body: string; published: number; pinned: number; created_at: string; updated_at: string }>,
     releases: [release("app-new", 100), release("app-current", 99), release("app-old", 98)],
     channels: ["stable", "beta"].map((name, index) => ({ name, app_id: "trace", platform: "android",
@@ -306,7 +362,8 @@ async function mockApp(page: Page, language = "en", role = "owner", firmwareFail
         await reply({ rows: [url.pathname.endsWith('/terminals') ? terminal : { ...terminal, uid: '1234567890abcdef12345678', firmwareVersion: 30350 }], total: 1 }); return;
       }
       if (url.pathname === '/api/admin/accounts/' + account.id) {
-        await reply({ account, quota: { automatic: { limit: 5, remaining: 4 }, manual: { limit: 5, remaining: 3 } },
+        await reply({ account, quota: data.accountLegacyQuota ? data.accountQuota : { ...data.accountQuota, component: 'app',
+          components: { app: data.accountQuota, firmware: data.accountFirmwareQuota } },
           devices: Array.from({ length: data.accountDetailRows }, (_, index) => ({
             uid: index === 0 ? '1234567890abcdef12345678' : index.toString(16).padStart(24, '0'),
             name: 'Test cycling computer' + (data.accountLongText ? '-long-device-name'.repeat(8) : ''),

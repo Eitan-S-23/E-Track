@@ -108,7 +108,7 @@ describe('explicit account-owned pre-UID migration', () => {
     const authorize = new Request('https://example.com/api/account/ota/authorize', { method: 'POST',
       headers: { Authorization: headers.get('Authorization')!, 'Content-Type': 'application/json' }, body: '{}' });
     await expect(accountRoute(authorize, env)).rejects.toMatchObject({ code: 'DEVICE_NOT_BOUND' });
-    expect((await accountBudget(env.DB, value.account.id, limits)).manual.used).toBe(0);
+    expect((await accountBudget(env.DB, value.account.id, limits)).components.firmware.manual.used).toBe(0);
   });
   it.each(['automatic', 'unknown'])('never offers the bypass to a %s check', async kind => {
     const value = await client(); value.headers.set('X-Update-Check-Kind', kind);
@@ -136,8 +136,9 @@ describe('explicit account-owned pre-UID migration', () => {
     const value = await prepare();
     expect(value.body.legacyMigration).toMatchObject({ mode: 'uid-v1', accountId: value.account.id,
       checkId: value.headers.get('X-Update-Check-Id'), sourceVersionCode: 30348, targetVersionCode: 30350 });
-    expect((await accountBudget(env.DB, value.account.id, limits)).manual.used).toBe(1);
-    expect((await accountBudget(env.DB, value.account.id, limits)).automatic.used).toBe(0);
+    expect((await accountBudget(env.DB, value.account.id, limits)).components.firmware.manual.used).toBe(1);
+    expect((await accountBudget(env.DB, value.account.id, limits)).components.firmware.automatic.used).toBe(0);
+    expect((await accountBudget(env.DB, value.account.id, limits)).manual.used).toBe(0);
     const response = await worker.fetch(download(value), env);
     expect(response.status).toBe(200); expect(new Uint8Array(await response.arrayBuffer())).toEqual(bytesFor('full'));
     const ack = await accountRoute(authorization(value), env);
@@ -152,7 +153,7 @@ describe('explicit account-owned pre-UID migration', () => {
     const response = await worker.fetch(latest(value.headers), env), body = await response.json() as PreparedBody;
     expect(response.status).toBe(200);
     expect(body.legacyMigration).toEqual(value.body.legacyMigration);
-    expect((await accountBudget(env.DB, value.account.id, limits)).manual.used).toBe(1);
+    expect((await accountBudget(env.DB, value.account.id, limits)).components.firmware.manual.used).toBe(1);
   });
   it('applies the same full-only admission and allowance at Public Pages', async () => {
     const value = await client();
@@ -163,7 +164,7 @@ describe('explicit account-owned pre-UID migration', () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({ versionCode: 30350, asset: { kind: 'full' },
       legacyMigration: { accountId: value.account.id, sourceVersionCode: 30348 } });
-    expect((await accountBudget(env.DB, value.account.id, limits)).manual.used).toBe(1);
+    expect((await accountBudget(env.DB, value.account.id, limits)).components.firmware.manual.used).toBe(1);
   });
   it('rejects cross-account authorization and download proof', async () => {
     const owner = await prepare(), other = await client();
@@ -208,7 +209,7 @@ describe('explicit account-owned pre-UID migration', () => {
     try {
       const value = await client(), response = await worker.fetch(value.request, env);
       expect(response.status).toBe(409); expect(await response.json()).toMatchObject({ errorCode: 'LEGACY_MIGRATION_UNAVAILABLE' });
-      expect((await accountBudget(env.DB, value.account.id, limits)).manual.used).toBe(0);
+      expect((await accountBudget(env.DB, value.account.id, limits)).components.firmware.manual.used).toBe(0);
     } finally { await publish(targetId); }
   });
   it('formal-source guard and missing-object download remain fail closed without changing immutable identity', async () => {
