@@ -182,13 +182,18 @@ Original rendering/buffers were restored; only the approved 120 KiB LVGL pool
 adaptation remains, with the 4096-byte system-heap gate unchanged.
 
 2026-11-25: owner explicitly requests removal of the white Dialplate arrow and
-main push/GitHub build. Codex root owns this bounded follow-up, in progress.
+main push/GitHub build. Codex root completed this bounded software delivery.
 Only the arrow image-creation block is removed from the UI; source-preservation
-and real-LVGL tests allow exactly that owner-approved omission. Firmware 3.3.57
-requests the new candidate; GitHub build/ingestion are pending. Flowing borders,
-layout, map arrows, HAL, OTA, recording, navigation and the App remain unchanged.
-No local firmware build, channel publication, backend deployment or device
-operation is requested or claimed.
+and real-LVGL tests allow exactly that owner-approved omission. Main source
+`c382d25786aa53fd8a075bbbd85d6c78feeecaa2` is delivered; GitHub candidate run
+[45483281096](https://github.com/Eitan-S-23/E-Track/actions/runs/45483281096)
+succeeded. Checks and firmware passed; App was skipped. GCC reported 640
+warnings and zero errors. Firmware 3.3.57 full/recovery assets are R2-byte-verified
+and registered ready/unpublished in the original Admin. Source-bound receipt:
+`.cache/candidate-release/ui-arrow-3357-remote-20261125/result.json`.
+Flowing borders, layout, map arrows, HAL, OTA, recording, navigation and the App
+remain unchanged. No local firmware build, channel publication, backend
+deployment, device operation or independent acceptance is claimed.
 
 <!-- mcu-ui-original-20261124:end -->
 
