@@ -92,6 +92,7 @@ class CompanionService : Service() {
     private var reconnectAttempts = 0
     private var reconnectPending = false
     private var reconnectStatus = "DEVICE_OFFLINE"
+    private var recoveryRetryAt: Long? = null
     private var recoveryProgressAt: Long? = null
     private var recoveryId: String? = null
     private var notificationStatus = "INITIALIZING"
@@ -120,7 +121,7 @@ class CompanionService : Service() {
     private val creationRecovery = Runnable {
         // Some system cleaners recreate the Service without redelivering a start
         // Intent. An old foreground notification is not an initialized runtime.
-        if (!closed && !foregroundStarted) startRuntime("recovery")
+        if (!closed && !foregroundStarted) startRuntime("recovery", restored = true)
     }
     private val reconnect = Runnable {
         reconnectPending = false
@@ -137,11 +138,16 @@ class CompanionService : Service() {
         }
         if (DeviceOtaService.active?.hasTask() == true) return@Runnable
         if (SystemClock.elapsedRealtime() - (reconnectStartedAt ?: 0) >= reconnectWindowMs) {
-            backOffAndStop(reconnectStatus); return@Runnable
+            backOffRecovery(reconnectStatus); return@Runnable
         }
         reason = "recovery"
         Log.i("ETrackCompanion", "Retrying device connection (${reconnectAttempts + 1}/4)")
         dispatch()
+    }
+    private val recoveryRetry = Runnable {
+        if (closed || recoveryRetryAt == null) return@Runnable
+        recoveryRetryAt = null
+        startRuntime("recovery")
     }
     private val startupDeadline = Runnable {
         if (!runtimeAcknowledged) stopCompanion("RUNTIME_START_TIMEOUT")
@@ -154,8 +160,13 @@ class CompanionService : Service() {
     private val heartbeat = object : Runnable {
         override fun run() {
             if (closed) return
-            if (execution.problem(this@CompanionService) != null || !CompanionBridge.enabled(this@CompanionService)) {
+            if (execution.problem(this@CompanionService) != null || !CompanionBridge.enabled(this@CompanionService) ||
+                revision != CompanionBridge.revision(this@CompanionService)) {
                 stopCompanion("PERMISSION_OR_ASSOCIATION_LOST"); return
+            }
+            if (!runtimeAcknowledged && waitingForRecovery()) {
+                handler.postDelayed(this, 30000)
+                return
             }
             var settled = false
             val deadline = Runnable { if (!settled) { settled = true; stopCompanion("RUNTIME_PROBE_TIMEOUT") } }
@@ -189,11 +200,11 @@ class CompanionService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         handler.removeCallbacks(creationRecovery)
-        startRuntime(intent?.getStringExtra("reason") ?: "recovery")
-        return START_NOT_STICKY
+        startRuntime(intent?.getStringExtra("reason") ?: "recovery", restored = intent == null)
+        return if (closed) START_NOT_STICKY else START_STICKY
     }
 
-    private fun startRuntime(requestedReason: String) {
+    private fun startRuntime(requestedReason: String, restored: Boolean = false) {
         if (closed) return
         if (!CompanionBridge.enabled(this) || execution.problem(this) != null) {
             stopCompanion("START_PRECONDITION_FAILED"); return
@@ -202,15 +213,23 @@ class CompanionService : Service() {
         if (reason !in listOf("foreground", "manual", "periodic", "presence", "recovery", "network")) {
             stopCompanion("INVALID_START_REASON"); return
         }
-        // A fresh wake supersedes a pending timer, without extending its retry budget.
-        handler.removeCallbacks(reconnect)
-        reconnectPending = false
         revision = CompanionBridge.revision(this)
         try {
             CompanionDiagnostics.record(this, "SERVICE_START", runtimeId, reason, reconnectAttempts + 1)
             ServiceCompat.startForeground(this, NOTIFICATION_ID, notification(notificationStatus),
                 if (Build.VERSION.SDK_INT >= 29) ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE else 0)
             foregroundStarted = true
+            val next = CompanionBridge.preferences(this).getLong("nextAttempt", 0)
+            if ((restored || recoveryRetryAt != null) && requestedReason !in listOf("foreground", "manual", "presence") &&
+                next > System.currentTimeMillis()) {
+                waitForRecovery(next, "recovery_backoff")
+                return
+            }
+            handler.removeCallbacks(recoveryRetry)
+            recoveryRetryAt = null
+            // A fresh wake supersedes a pending timer, without extending its retry budget.
+            handler.removeCallbacks(reconnect)
+            reconnectPending = false
             if (wakeLock == null) wakeLock = getSystemService(PowerManager::class.java)
                 .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ETrack:companion-start").apply { setReferenceCounted(false) }
             wakeLock?.acquire(120000)
@@ -242,12 +261,13 @@ class CompanionService : Service() {
             "engineLive" to runCatching { execution.live() }.getOrDefault(false),
             "gattConnected" to runCatching { execution.connected(this) }.getOrDefault(false),
             "linkAcknowledged" to (linkedToken != null), "status" to notificationStatus,
+            "recoveryWaiting" to waitingForRecovery(), "nextRecoveryAt" to recoveryRetryAt,
             "diagnostics" to CompanionDiagnostics.snapshot(this)
         )).toString())
     }
 
     fun dispatch() {
-        if (closed || !foregroundStarted) return
+        if (closed || !foregroundStarted || recoveryRetryAt != null) return
         if (dispatching) { redispatch = true; return }
         val target = CompanionBridge.address(this) ?: return
         dispatching = true
@@ -278,6 +298,9 @@ class CompanionService : Service() {
 
     fun linkReady(): Boolean = healthy() && linkedToken != null && execution.connected(this)
 
+    fun waitingForRecovery(): Boolean = !closed && foregroundStarted && recoveryRetryAt != null &&
+        CompanionBridge.enabled(this) && revision == CompanionBridge.revision(this) && execution.problem(this) == null
+
     private fun notification(status: String): android.app.Notification {
         val open = PendingIntent.getActivity(this, NOTIFICATION_ID,
             Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
@@ -288,6 +311,7 @@ class CompanionService : Service() {
             "DISCOVERING", "SUBSCRIBING", "VERIFYING_DEVICE", "NEGOTIATING_CONTROL" -> "\u6b63\u5728\u786e\u8ba4\u8bbe\u5907\u8fde\u63a5"
             "RECOVERY_CLEANUP" -> "\u6b63\u5728\u6e05\u7406\u65e7\u8fde\u63a5"
             "DEVICE_OFFLINE", "DEVICE_IDENTITY_UNAVAILABLE", "CONNECTION_TIMEOUT", "CONNECTION_FAILED" -> "\u8bbe\u5907\u672a\u8fde\u63a5\uff0c\u7a0d\u540e\u91cd\u8bd5"
+            "RECOVERY_BACKOFF" -> "\u8bbe\u5907\u672a\u8fde\u63a5\uff0c\u7b49\u5f85\u4e0b\u6b21\u91cd\u8bd5"
             "CHECKING" -> "\u8bbe\u5907\u5df2\u8fde\u63a5\uff0c\u6b63\u5728\u68c0\u67e5\u56fa\u4ef6\u66f4\u65b0"
             "NO_UPDATE" -> "\u8bbe\u5907\u5df2\u8fde\u63a5\uff0c\u56fa\u4ef6\u5df2\u662f\u6700\u65b0\u7248\u672c"
             "READY_AWAITING_DEVICE_CHOICE", "READY_OPEN_APP" -> "\u8bbe\u5907\u5df2\u8fde\u63a5\uff0c\u6709\u53ef\u7528\u56fa\u4ef6\u66f4\u65b0"
@@ -312,6 +336,7 @@ class CompanionService : Service() {
         if (closed || value?.get("runtimeId") != runtimeId || value["revision"] != revision) return false
         val status = value["status"] as? String ?: return false
         if (!Regex("[A-Z_]{1,64}").matches(status)) return false
+        if (recoveryRetryAt != null && value["connected"] != true) return false
         val sequence = (value["stateSequence"] as? Number)?.toLong()
         if (sequence != null && sequence <= stateSequence) return false
         val connected = value["connected"] == true
@@ -352,13 +377,13 @@ class CompanionService : Service() {
         } else if (!connected && status in listOf("TARGET_IDENTITY_VERIFIED", "UPGRADE_FAILED")) {
             // OTA may close its verification GATT before handing control back.
             // This is a bounded reconnect, not a failed idle service to stop.
-            if (!scheduleReconnect("CONNECTION_FAILED")) backOffAndStop("POST_OTA_RECOVERY_EXHAUSTED")
+            if (!scheduleReconnect("CONNECTION_FAILED")) backOffRecovery("POST_OTA_RECOVERY_EXHAUSTED")
         } else if (recoveryBusy || (status == "CONNECTING" && value["busy"] == true)) {
             handler.removeCallbacks(reconnect)
             reconnectPending = false
             beginReconnectWindow()
         } else if (value["busy"] != true && DeviceOtaService.active?.hasTask() != true) {
-            if (!scheduleReconnect(status)) backOffAndStop(status)
+            if (!scheduleReconnect(status)) backOffRecovery(status)
         }
         return true
     }
@@ -391,17 +416,46 @@ class CompanionService : Service() {
 
     private fun resetReconnect() {
         handler.removeCallbacks(reconnect)
+        handler.removeCallbacks(recoveryRetry)
+        recoveryRetryAt = null
         reconnectPending = false
         reconnectStartedAt = null
         reconnectAttempts = 0
     }
 
-    private fun backOffAndStop(status: String) {
+    private fun backOffRecovery(status: String) {
         val prefs = CompanionBridge.preferences(this)
         val failures = (prefs.getInt("failures", 0) + 1).coerceAtMost(6)
         val delay = (60000L * (1L shl failures)).coerceAtMost(3600000L)
-        prefs.edit().putInt("failures", failures).putLong("nextAttempt", System.currentTimeMillis() + delay).apply()
-        stopCompanion(status)
+        val next = System.currentTimeMillis() + delay
+        prefs.edit().putInt("failures", failures).putLong("nextAttempt", next).apply()
+        if (status in listOf("DEVICE_OFFLINE", "DEVICE_IDENTITY_UNAVAILABLE", "CONNECTION_TIMEOUT", "CONNECTION_FAILED") &&
+            runtimeAcknowledged && execution.live()) {
+            waitForRecovery(next, status)
+        } else stopCompanion(status)
+    }
+
+    private fun waitForRecovery(next: Long, status: String) {
+        resetReconnect()
+        recoveryId = null
+        recoveryProgressAt = null
+        handler.removeCallbacks(connectionDeadline)
+        handler.removeCallbacks(startupDeadline)
+        recoveryRetryAt = next
+        notificationStatus = "RECOVERY_BACKOFF"
+        val prefs = CompanionBridge.preferences(this)
+        prefs.edit().putString("lastResult", notificationStatus).apply()
+        CompanionDiagnostics.record(this, notificationStatus, runtimeId, "recovery",
+            details = mapOf("reason" to status, "nextCheckAt" to next))
+        try { NotificationManagerCompat.from(this).notify(NOTIFICATION_ID, notification(notificationStatus)) }
+        catch (_: Exception) { /* The guarded heartbeat checks notification permission. */ }
+        if (wakeLock?.isHeld == true) wakeLock?.release()
+        // Keep the foreground owner; waiting for a periodic system job can be deferred for hours.
+        handler.postDelayed(recoveryRetry, (next - System.currentTimeMillis()).coerceIn(0L, 3600000L))
+        if (!runtimeAcknowledged) {
+            handler.removeCallbacks(heartbeat)
+            handler.postDelayed(heartbeat, 30000)
+        }
     }
 
     fun stopCompanion(reason: String) {
@@ -456,7 +510,9 @@ class CompanionJobService : JobService() {
         }
         // The short system job hands off to an acknowledged connectedDevice owner.
         // A start request is deliberately not recorded as a completed firmware check.
-        CompanionService.start(this, if (check) "periodic" else "recovery")
+        val trigger = if (check) "periodic" else "recovery"
+        CompanionDiagnostics.record(this, "RECOVERY_JOB_DISPATCHED", trigger = trigger)
+        CompanionService.start(this, trigger)
         return false
     }
     override fun onStopJob(params: JobParameters): Boolean = false
