@@ -178,6 +178,7 @@ class CompanionIntegrationTest {
         associated()
         val stale = scheduledWake()
         val current = scheduledWake(600000)
+        val deadline = prefs.getLong("recoveryWakeElapsed", 0)
         assertNotEquals(stale.data, current.data)
         ShadowSystemClock.simulateDeepSleep(Duration.ofMinutes(2))
         CompanionRecoveryReceiver().onReceive(app, stale)
@@ -185,7 +186,9 @@ class CompanionIntegrationTest {
         val alarms = shadowOf(app.getSystemService(AlarmManager::class.java)).scheduledAlarms
         assertEquals(1, alarms.size)
         assertEquals(current.data, shadowOf(alarms.single().operation!!).savedIntent.data)
-        assertEquals(480000L, CompanionRecoveryWake.remainingMs(app))
+        assertEquals(deadline, alarms.single().triggerAtMs)
+        assertEquals(deadline, prefs.getLong("recoveryWakeElapsed", 0))
+        assertRemainingUsesElapsedDeadline(deadline)
     }
 
     @Test fun changedConfigurationFencesAnAlreadyQueuedAlarm() {

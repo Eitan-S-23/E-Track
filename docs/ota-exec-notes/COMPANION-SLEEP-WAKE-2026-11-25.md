@@ -1,11 +1,59 @@
 # Companion Sleep And Process-Independent Recovery
 
 Task: APP-COMPANION-01 / COMPANION_SLEEP_WAKE. Owner: Codex root.
-Status: IN_PROGRESS; implementation and development checks only. Main,
-shipping version, backend, phone and MCU remain unchanged.
+Initial checkpoint: IN_PROGRESS; implementation and development checks only.
+The later owner request authorizes the combined App fix, a new version and main
+delivery through the existing automatic candidate workflow. Current delivery
+receipts belong in the primary OTA-COMPANION note and main progress board;
+neither this design record nor a development push establishes candidate delivery.
 Base: `1faf82911a241e9dc8280c78855ab9148134de1e`.
 Branch: `dev/flutter/companion-sleep-20261125`.
 Worktree: `.worktrees/companion-sleep-20261125` (sparse App checkout).
+
+## Idle Control Recovery Follow-Up
+
+The owner also reports an established BLE connection that stops serving MCU
+CHECK requests after prolonged idle, until the App firmware page is opened.
+Source review confirms that link-generation/identity reuse did not establish
+live control notifications, notification errors only marked the reader dirty,
+and reader completion had no recovery path. The firmware page happens to run
+GET_INFO and renew notifications. The existing export ends at 19:13:38 and does
+not establish which radio/OS event initially invalidated this later connection.
+MCU PHONE_REQUIRED after a ten-second CHECK timeout is not a physical BLE
+disconnect observation. The separate automatic HTTP cooldown is not its remedy.
+
+The App now uses the existing native heartbeat to request a coalesced, rate-limited
+control health check without delaying the native liveness reply. Foreground and
+explicit manual wake also reconfirm control. Notification error/completion
+requests repair immediately. A new notification owner is acquired before the
+old reader is retired, so old cancellation cannot disable the replacement CCCD.
+
+Repair first leases the existing physical GATT and uses same-session HELLO/CAPS,
+preserving offers, request numbering and explicit consent. A pending device
+CHECK/CHOICE drains after repair; no HTTP query, download, offer replay or upgrade
+is part of a health check. Known control failure retires the captured GATT and
+hands retries to the existing native four-attempt/60-minute policy, with bounded
+cleanup and old-generation fences. Older firmware without control capability
+retains its explicit App fallback rather than entering a reconnect loop.
+Diagnostic health completion does not increment cloud-check/OTA-success totals
+or discard the current user-facing update notification.
+
+Regression coverage includes silent notification loss, error/completion,
+foreground-only recovery, long idle heartbeat/coalescing, checks arriving
+during repair, retained Later consent, existing OTA ownership, failed handshakes
+and old-firmware fallback. Native tests cover the actual Android alarm/service
+boundary. The first native run 45626776225 compiled and ran 189 tests, with eight
+failures caused by fixed-duration assertions ignoring 1-5 ms spent in the real
+test callbacks. The second native run 45632329953 passed 188 of 190 cases,
+exposing the same one-millisecond assumption in two SDK variants of the stale
+alarm test. That last positive-duration equality is also replaced with exact
+persisted-deadline and bracketed elapsed-clock checks. Original XML/logs are
+retained; no arbitrary tolerance, retry budget or test scope is relaxed.
+
+Evidence and operation receipts: `.cache/companion-control-20261125/`.
+No local Flutter/Gradle build, phone/MCU operation or manual Cloudflare action.
+Real long-idle recovery remains a phone observation, not a claim made by these
+host tests. Verification needs no repeated firmware OTA.
 
 ## Original Observation
 
