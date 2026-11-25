@@ -37,7 +37,7 @@ class CompanionRuntime extends GetxService {
   final Duration controlHealthInterval, controlResponseTimeout;
   final int Function()? _controlMillis;
   final _controlClock = Stopwatch()..start();
-  int? _controlVerifiedAt;
+  int? _controlCheckedAt;
   int get _controlNow => _controlMillis?.call() ?? _controlClock.elapsedMilliseconds;
   final void Function()? onShowUi;
   final BluetoothService? _bluetooth;
@@ -297,6 +297,7 @@ class CompanionRuntime extends GetxService {
       final supported = await _handshake(binding, attempt);
       if (!current() || !_bindingCurrent(binding)) throw StateError('LINK_GENERATION_CHANGED');
       _supportsControl = supported;
+      _controlCheckedAt = _controlNow;
       if (supported) await _diagnostic('CONTROL_READY', attempt);
       if (!await attempt.wait(_ble.finishCompanionRecovery(address, attempt.id))) throw StateError('GATT_RETIREMENT_UNCONFIRMED');
       attempt.finish();
@@ -364,7 +365,7 @@ class CompanionRuntime extends GetxService {
 
   void _invalidateLink() {
     _offer = null; _supportsControl = false; _session = null; _link = -1;
-    _controlVerifiedAt = null;
+    _controlCheckedAt = null;
     _decoder.reset(); _controlDirty = true;
     _pendingChoice = null; _pendingDeviceCheck = null;
     final capabilities = _capabilities;
@@ -375,9 +376,9 @@ class CompanionRuntime extends GetxService {
 
   bool get _controlNeedsCheck {
     if (_runtime == null || _session == null || _closed) return false;
-    final verified = _controlVerifiedAt;
-    return !_sameLink() || _text == null || _controlDirty || verified == null ||
-        _controlNow - verified >= controlHealthInterval.inMilliseconds;
+    final checked = _controlCheckedAt;
+    return !_sameLink() || _text == null || _controlDirty || checked == null ||
+        _controlNow - checked >= controlHealthInterval.inMilliseconds;
   }
 
   void _queueControlCheck(String source) {
@@ -405,6 +406,7 @@ class CompanionRuntime extends GetxService {
     final binding = _captureBinding(), runtime = _runtime;
     if (binding == null || runtime == null || !_ota.beginCompanionConnection(runtime)) return false;
     final previousStatus = status.value;
+    final previouslySupported = _supportsControl;
     final attempt = CompanionRecoveryAttempt(_nonce(), recoveryDeadline);
     attempt.stage = 'NEGOTIATING_CONTROL';
     _recovery = attempt;
@@ -415,14 +417,18 @@ class CompanionRuntime extends GetxService {
       if (!await attempt.wait(_ble.beginCompanionRecovery(binding.address, runtime, attempt.id))) throw StateError('LINK_OWNER_BUSY');
       // Same-session HELLO preserves the MCU offer, request sequence and explicit consent.
       _controlDirty = true;
-      if (!await _handshake(binding, attempt)) throw StateError('CONTROL_RESPONSE_TIMEOUT');
+      final supported = await _handshake(binding, attempt);
+      if (!supported && previouslySupported) throw StateError('CONTROL_RESPONSE_TIMEOUT');
       if (!_bindingCurrent(binding)) throw StateError('LINK_GENERATION_CHANGED');
       if (!await attempt.wait(_ble.finishCompanionRecovery(binding.address, attempt.id))) throw StateError('GATT_RETIREMENT_UNCONFIRMED');
-      _supportsControl = true;
+      _supportsControl = supported;
+      _controlCheckedAt = _controlNow;
       attempt.finish();
       if (identical(_recovery, attempt)) _recovery = null;
       releaseAdmission = true;
-      await _diagnostic('CONTROL_CHECK_READY', attempt);
+      await _diagnostic(supported ? 'CONTROL_CHECK_READY' : 'CONTROL_CHECK_UNSUPPORTED', attempt);
+      // Older firmware can still use the explicit App update path without a reconnect loop.
+      if (!supported) return await _state('DEVICE_CONTROL_UNSUPPORTED', busy: false);
       return await _state(previousStatus == 'DEVICE_CONTROL_UNSUPPORTED' ? 'CONNECTED' : previousStatus,
         busy: false, controlOnly: true);
     } catch (error) {
@@ -496,7 +502,7 @@ class CompanionRuntime extends GetxService {
   }
 
   void _controlLost(String reason) {
-    _decoder.reset(); _controlDirty = true; _controlVerifiedAt = null;
+    _decoder.reset(); _controlDirty = true; _controlCheckedAt = null;
     unawaited(_journal('CONTROL_CHANNEL_LOST', {'reason': reason}));
     final capabilities = _capabilities;
     if (capabilities != null && !capabilities.isCompleted) capabilities.complete(false);
@@ -508,7 +514,7 @@ class CompanionRuntime extends GetxService {
     if (message.kind == 'CAPS') {
       final capabilities = _capabilities;
       if (capabilities != null && !capabilities.isCompleted) {
-        _controlVerifiedAt = _controlNow;
+        _controlCheckedAt = _controlNow;
         capabilities.complete(true);
       }
     } else if (message.kind == 'UID') {

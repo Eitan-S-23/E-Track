@@ -282,6 +282,31 @@ void main() {
     expect(ble.connects, 1);
   });
 
+  test('old firmware without companion replies keeps its foreground update fallback', () async {
+    runtime = CompanionRuntime(platform: CompanionPlatform(channel: channel, supported: true),
+      bluetooth: ble, ota: ota, controlClock: () => controlTime,
+      controlResponseTimeout: const Duration(milliseconds: 30));
+    ota.answerHello = false;
+    await start();
+    await until(() => runtime.status.value == 'NO_UPDATE');
+    controlTime = const Duration(minutes: 2).inMilliseconds;
+    expect(await callback('probe', {'runtimeId': runtimeId}), runtimeId);
+    await until(() => runtime.status.value == 'DEVICE_CONTROL_UNSUPPORTED');
+    expect(diagnostics.any((d) => d['status'] == 'CONTROL_CHECK_UNSUPPORTED'), isTrue);
+    expect(ble.connects, 1);
+    expect(ble.disconnects, 0);
+    expect(ota.checks, 1);
+    final hellos = ota.messages.where((m) => m.kind == 'HELLO').length;
+    expect(await callback('probe', {'runtimeId': runtimeId}), runtimeId);
+    await Future<void>.delayed(Duration.zero);
+    expect(ota.messages.where((m) => m.kind == 'HELLO'), hasLength(hellos));
+    ota.answerHello = true;
+    await wake('foreground');
+    await until(() => runtime.status.value == 'CONNECTED');
+    expect(ble.connects, 1);
+    expect(ota.checks, 1);
+  });
+
   test('missing control response retires GATT and leaves retries to native cooldown', () async {
     runtime = CompanionRuntime(platform: CompanionPlatform(channel: channel, supported: true),
       bluetooth: ble, ota: ota, controlClock: () => controlTime,
