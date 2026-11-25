@@ -340,6 +340,57 @@ owned board block is included in the documentation follow-up; no firmware rebuil
 local MCU compilation, device installation, channel publication, delta generation
 or independent acceptance is performed or claimed.
 
+<!-- mcu-test-3361-20261126:start -->
+### Owner-Requested Version-Only MCU Test (3.3.61)
+
+2026-11-26: owner requests a new MCU test version through the one-click entry.
+Fresh local/remote main is `dd319e69cf818608e4a83e577ef41b7ab7724ae9`;
+firmware remains 3.3.60 until the entry performs its version-only edit.
+Reuse unchanged `Tools/ota/release_candidate.py` through the qualified exact-
+document adapter rebound at `.cache/mcu-test-3361-20261126`. Seven pending
+documents are snapshot-bound; no pending product change is admitted or staged.
+The existing SSH/exact-slot credential route is reused without global changes.
+The entry's historical-source guard encounters the preserved failed 3.3.55 run
+`45473767255`: checks failed, firmware/App jobs skipped with no execution steps.
+Only an exact fresh first-attempt/source-bound observation of that terminal state
+admits this known closed failure; other unresolved sources still stop the entry.
+The original failed receipt is never marked delivered or modified. Reconcile
+3.3.58 by reading its existing native receipt only, with no repeated build.
+Adapter allowlist tests: seven passed; six terminal-state oracles correctly admit
+only the closed-before-firmware case and reject rerun, wrong source, running,
+missing jobs and executed-firmware failure. No local firmware compilation.
+The entry will check Release drafts/tags, increment only MCU metadata to 3.3.61,
+commit only that file, push main once and observe its exact first-push candidate.
+Original UI, MAX popup repair, factory UID, MCU/App functionality and App
+1.0.96+122 remain unchanged. Candidate delivery is pending; channel publication,
+deltas, device installation and physical OTA testing remain owner-controlled.
+
+Delivery complete: the unchanged one-click entry committed only MCU version
+metadata as `f24717068330035fd07c223089aa6bcfd348a138` and pushed main once.
+Firmware 3.3.61 / 30361 exact first-attempt run `45667364212` passed checks and
+firmware; App was skipped. Native metadata binds this source/run and verifies
+both full/recovery R2 bytes; two assets are registered ready with
+channelPublished=false and productionApproved=false. Native firmware log counts:
+640 warning occurrences, zero error occurrences; no warning-free build claimed.
+Full package: 341445 bytes, SHA-256
+`68e57219697b1c8e9480437be6179fc7d5a82ae8541533bd6953f84b9ce16c30`.
+Recovery: 747496 bytes, SHA-256
+`d757d8837f54aaef86fdbd4f9035f52be79c01666fd020c84d33b8781facaf7a`.
+Target image SHA-256:
+`451024183c6c2c33a055a1ce2ae33df3ecc8e48d5302ce6f3fff13f4746c8d0d`.
+Original delivery receipt:
+`.cache/candidate-release/20261125T174002Z-6035dcac/result.json`.
+CI: https://github.com/Eitan-S-23/E-Track/actions/runs/45667364212
+The old 3.3.58 native receipt was read without another push/build and is retained
+at `.cache/candidate-release/20261125T173831Z-298fd887/result.json`. Exact 3.3.55
+terminal-state evidence is `.cache/mcu-test-3361-20261126/prior-3355-resolution.json`;
+its original failed receipt remains unchanged. Existing pending-document snapshots,
+App/UI source and failures are preserved. Only this owned board block enters the
+documentation follow-up. All selected local writes remain project-local; no
+local MCU build, backend deployment, channel/delta change, device action or
+physical/independent OTA acceptance was performed or claimed.
+<!-- mcu-test-3361-20261126:end -->
+
 <!-- mcu-ui-original-20261124:end -->
 
 ## 2. PRE 前置修正(来自复审报告,先于一切)
