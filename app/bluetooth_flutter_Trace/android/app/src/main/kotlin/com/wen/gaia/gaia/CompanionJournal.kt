@@ -31,9 +31,11 @@ internal object CompanionJournal {
     private fun safe(value: Any?) = (value as? String)?.takeIf { Regex("[A-Za-z0-9_-]{1,64}").matches(it) }
     private val strings = listOf("stage", "errorType", "errorCode", "taskId", "recoveryId", "deviceKey",
         "source", "outcome", "reason", "uiState", "launchSource", "termination", "reconnection", "processId",
-        "kind", "packageSha", "beforeSha", "targetSha", "afterSha")
+        "kind", "packageSha", "beforeSha", "targetSha", "afterSha", "wakeId", "scheduleMode",
+        "clockSource", "idleState", "batteryPolicy")
     private val numbers = listOf("elapsedMs", "startupWaitMs", "connectionMs", "closeToReadyMs", "lastCheckAt",
-        "nextCheckAt", "executedAt", "retryCount", "beforeVersion", "targetVersion", "afterVersion", "startedAt", "verifiedAt")
+        "nextCheckAt", "executedAt", "retryCount", "beforeVersion", "targetVersion", "afterVersion", "startedAt", "verifiedAt",
+        "deadlineElapsedMs", "wakeDelayMs")
     init { worker.scheduleWithFixedDelay({ runCatching { context?.let { flush(it) } }.onFailure { errors++ } }, 1, 1, TimeUnit.SECONDS) }
     private fun initialize(c: Context) {
         if (context != null) return

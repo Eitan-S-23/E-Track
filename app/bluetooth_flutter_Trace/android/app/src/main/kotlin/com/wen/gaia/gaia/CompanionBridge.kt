@@ -116,6 +116,9 @@ object CompanionBridge {
             "unmetered" to (context.getSystemService(ConnectivityManager::class.java)?.isActiveNetworkMetered == false),
             "networkAvailable" to (context.getSystemService(ConnectivityManager::class.java)?.activeNetwork != null),
             "batteryUnrestricted" to context.getSystemService(PowerManager::class.java).isIgnoringBatteryOptimizations(context.packageName),
+            "recoveryWake" to CompanionRecoveryWake.snapshot(context),
+            "presenceObservation" to prefs.getString("presenceObservation", "NOT_REQUESTED"),
+            "presenceErrorType" to prefs.getString("presenceErrorType", null),
             "vendorAutostart" to "unknown", "lastResult" to prefs.getString("lastResult", "NOT_RUN"))
     }
 
@@ -277,6 +280,7 @@ object CompanionBridge {
     fun restore(context: Context) {
         val scheduler = context.getSystemService(JobScheduler::class.java)
         if (!enabled(context) || !associated(context)) {
+            CompanionRecoveryWake.cancel(context, clearBackoff = true)
             scheduler.cancel(CHECK_JOB); scheduler.cancel(RECOVERY_JOB); scheduler.cancel(STARTUP_JOB)
             if (Build.VERSION.SDK_INT >= 31) address(context)?.let {
                 try { context.getSystemService(CompanionDeviceManager::class.java).stopObservingDevicePresence(it) }
@@ -284,6 +288,10 @@ object CompanionBridge {
             }
             return
         }
+        // Keep these independent from JobScheduler admission: one failed wake
+        // route must not prevent registration of the other supported routes.
+        CompanionRecoveryWake.restore(context)
+        observePresence(context, "restore")
         val prefs = preferences(context)
         val component = ComponentName(context, CompanionJobService::class.java)
         val hours = prefs.getInt("intervalHours", 12).coerceIn(6, 24)
@@ -295,9 +303,22 @@ object CompanionBridge {
         if (scheduler.getPendingJob(RECOVERY_JOB) == null)
             check(scheduler.schedule(JobInfo.Builder(RECOVERY_JOB, component).setPersisted(true)
                 .setPeriodic(15 * 60000L).build()) == JobScheduler.RESULT_SUCCESS) { "SCHEDULING_REJECTED" }
-        if (Build.VERSION.SDK_INT >= 31) {
-            try { context.getSystemService(CompanionDeviceManager::class.java).startObservingDevicePresence(address(context)!!) }
-            catch (_: Exception) { prefs.edit().putString("lastResult", "PRESENCE_UNAVAILABLE_PERIODIC_FALLBACK").apply() }
+    }
+
+    @Suppress("DEPRECATION")
+    internal fun observePresence(context: Context, trigger: String) {
+        if (Build.VERSION.SDK_INT < 31 || !enabled(context) || !associated(context)) return
+        val prefs = preferences(context)
+        try {
+            context.getSystemService(CompanionDeviceManager::class.java)
+                .startObservingDevicePresence(address(context)!!)
+            prefs.edit().putString("presenceObservation", "REQUESTED").remove("presenceErrorType").apply()
+            CompanionDiagnostics.record(context, "PRESENCE_OBSERVATION_REQUESTED", trigger = trigger)
+        } catch (error: Exception) {
+            prefs.edit().putString("lastResult", "PRESENCE_UNAVAILABLE_PERIODIC_FALLBACK")
+                .putString("presenceObservation", "FAILED").putString("presenceErrorType", error.javaClass.simpleName).apply()
+            CompanionDiagnostics.record(context, "PRESENCE_OBSERVATION_FAILED", trigger = trigger,
+                details = mapOf("stage" to "presence_registration", "errorType" to error.javaClass.simpleName))
         }
     }
 
@@ -308,7 +329,7 @@ object CompanionBridge {
 
     internal fun recoverStartup(context: Context, deadlineElapsed: Long) {
         val scheduler = context.getSystemService(JobScheduler::class.java)
-        if (!enabled(context) || !associated(context) || CompanionService.active?.healthy() == true) {
+        if (!enabled(context) || !associated(context) || CompanionService.active?.recoveryHealthy() == true) {
             scheduler.cancel(STARTUP_JOB)
             return
         }
@@ -396,6 +417,7 @@ object CompanionBridge {
             return
         }
         prefs.edit().putString("revision", UUID.randomUUID().toString()).commit()
+        CompanionRecoveryWake.cancel(context, clearBackoff = true)
         result.success(snapshot(context))
     }
 
