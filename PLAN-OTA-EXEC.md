@@ -391,6 +391,48 @@ local MCU build, backend deployment, channel/delta change, device action or
 physical/independent OTA acceptance was performed or claimed.
 <!-- mcu-test-3361-20261126:end -->
 
+<!-- mcu-test-3362-20261126:start -->
+### Additional Version-Only MCU Test (3.3.62)
+
+2026-11-26: owner requests another MCU test version. Fresh local/remote main is
+`41595b9d269e9da8378b24a0645484197538cc7d`, firmware 3.3.61 / 30361.
+Reuse the unchanged one-click entry and the verified document-preserving,
+SSH/exact-slot adapter at `.cache/mcu-test-3362-20261126`. Seven allowlist
+self-tests pass; the seven existing pending documents are snapshot-bound.
+Only MCU version metadata will be committed for 3.3.62 / 30362 after draft/tag
+reservation checks. Prior delivered candidates and the closed failed 3.3.55
+original remain preserved; no old build or version is repeated.
+UI, the MAX popup repair, MCU/App functionality, factory UID and App 1.0.96+122
+remain unchanged. Exact first-push GitHub build and full/recovery candidate
+registration are pending. No local MCU build, backend deployment, automatic
+channel publication, delta generation, device action or physical OTA test.
+
+Delivery complete: source `4d759ddd555185d91c3c17bc59783f1ca648bb8b` is on
+remote main; only MCU version metadata changed. Firmware 3.3.62 / 30362 exact
+first-attempt GitHub run `45670258005` passed checks/firmware and skipped App.
+Native metadata binds this source/run and verifies both full/recovery R2 assets;
+registration is ready with two assets, channelPublished=false and
+productionApproved=false. Firmware log counts: 640 warning occurrences, zero
+error occurrences; no warning-free build is claimed.
+Full package: 341473 bytes, SHA-256
+`ff5e0a645cef2f5fd6fb3d74a676b37cbceee2341375582c53e057e966b4877b`.
+Recovery: 747496 bytes, SHA-256
+`7dbfcce5462200460f26f22f1f711c1df25e7ba367b724ab2bd979802e1a0adf`.
+Target image SHA-256:
+`4576bff6b62aa4a923aa731082f5c92b9c68f077ecd52252c8b96ac4a1fce8ac`.
+The initial status GET hit a TLS handshake timeout after a confirmed main push;
+its original receipt is
+`.cache/candidate-release/20261125T175647Z-5ee7bdd8/result.json`.
+Only observation resumed for that same source: no repeated push, version bump,
+dispatch or build. Completed native receipt:
+`.cache/candidate-release/20261125T180155Z-0d34d899/result.json`.
+CI: https://github.com/Eitan-S-23/E-Track/actions/runs/45670258005
+UI, App, older pending document bytes and prior evidence remain preserved.
+Only this owned board block is committed for bookkeeping. Selected local writes
+stay project-local; no device installation, channel/delta change or physical/
+independent OTA acceptance is performed or claimed.
+<!-- mcu-test-3362-20261126:end -->
+
 <!-- mcu-ui-original-20261124:end -->
 
 ## 2. PRE 前置修正(来自复审报告,先于一切)
