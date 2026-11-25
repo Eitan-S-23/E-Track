@@ -29,7 +29,9 @@ void main() {
   late SharedPreferences preferences;
   late Completer<void> ready;
   late List<Map<dynamic, dynamic>> states;
+  late List<Map<dynamic, dynamic>> diagnostics;
   late Map<String, Object?> settings;
+  var controlTime = 0;
   bool acceptState = true, throwState = false;
   var runtimeId = 'runtime-1';
 
@@ -72,6 +74,8 @@ void main() {
     preferences = await SharedPreferences.getInstance();
     ready = Completer<void>();
     states = [];
+    diagnostics = [];
+    controlTime = 0;
     settings = {'intervalHours': 12, 'wifiOnly': true, 'unmetered': true};
     acceptState = true;
     throwState = false;
@@ -79,13 +83,17 @@ void main() {
     ble = _Ble();
     ota = _Ota(ble);
     runtime = CompanionRuntime(platform: CompanionPlatform(channel: channel, supported: true),
-      bluetooth: ble, ota: ota);
+      bluetooth: ble, ota: ota, controlClock: () => controlTime);
     messenger.setMockMethodCallHandler(channel, (call) async {
       if (call.method == 'ready') {
         ready.complete();
         return settings;
       }
       if (call.method == 'snapshot') return settings;
+      if (call.method == 'diagnostic' || call.method == 'journal') {
+        diagnostics.add(Map<dynamic, dynamic>.from(call.arguments as Map));
+        return true;
+      }
       if (call.method == 'state') {
         states.add(Map<dynamic, dynamic>.from(call.arguments as Map));
         if (throwState) throw PlatformException(code: 'OWNER_LOST');
@@ -159,6 +167,145 @@ void main() {
     expect(ota.checks, 2, reason: 'The same MCU request is not replayed');
     await runtime.manualCheck(_address);
     await until(() => ota.checks == 3 && runtime.status.value == 'NO_UPDATE');
+  });
+
+  test('foreground repairs silent notification loss without opening an OTA page', () async {
+    await start();
+    await until(() => runtime.status.value == 'NO_UPDATE');
+    final session = ota.messages.firstWhere((m) => m.kind == 'HELLO').session;
+    final subscriptions = ble.subscriptions;
+    ble.notifyEnabled = false;
+    await wake('foreground');
+    await until(() => runtime.status.value == 'CONNECTED' && ble.subscriptions > subscriptions);
+    expect(ota.messages.where((m) => m.kind == 'HELLO').last.session, session);
+    expect(ble.connects, 1);
+    expect(ota.reads, 2);
+    expect(ota.checks, 1, reason: 'Control repair must not spend an update query');
+    ble.emit(CompanionMessage('CHECK', session, 1));
+    await until(() => ota.checks == 2 && runtime.status.value == 'NO_UPDATE');
+  });
+
+  test('native heartbeat repairs an idle channel and coalesces overlapping probes', () async {
+    await start();
+    await until(() => runtime.status.value == 'NO_UPDATE');
+    expect(await callback('probe', {'runtimeId': runtimeId}), runtimeId);
+    expect(ota.messages.where((m) => m.kind == 'HELLO'), hasLength(1));
+    controlTime = const Duration(hours: 2).inMilliseconds;
+    ble.notifyEnabled = false;
+    ota.helloGate = Completer<void>();
+    expect(await callback('probe', {'runtimeId': 'obsolete'}), isNull);
+    expect(await callback('probe', {'runtimeId': runtimeId}), runtimeId);
+    await until(() => ota.messages.where((m) => m.kind == 'HELLO').length == 2);
+    for (var i = 0; i < 3; i++) {
+      expect(await callback('probe', {'runtimeId': runtimeId}), runtimeId);
+    }
+    ota.helloGate!.complete();
+    await until(() => diagnostics.any((d) => d['status'] == 'CONTROL_CHECK_READY') && runtime.status.value == 'NO_UPDATE');
+    expect(ble.connects, 1);
+    expect(ota.checks, 1);
+    expect(ota.messages.where((m) => m.kind == 'HELLO'), hasLength(2));
+    final session = ota.messages.lastWhere((m) => m.kind == 'HELLO').session;
+    ble.emit(CompanionMessage('CHECK', session, 1));
+    await until(() => ota.checks == 2 && runtime.status.value == 'NO_UPDATE');
+  });
+
+  for (final closed in [false, true]) {
+    test('notification ${closed ? 'completion' : 'error'} repairs itself while GATT remains connected', () async {
+      await start();
+      await until(() => runtime.status.value == 'NO_UPDATE');
+      if (closed) {
+        await ble.closeReaders();
+      } else {
+        ble.notifications.addError(StateError('fixture notify error'));
+      }
+      await until(() => diagnostics.any((d) => d['status'] == 'CONTROL_CHECK_READY') && runtime.status.value == 'NO_UPDATE');
+      expect(ble.connects, 1);
+      expect(ble.disconnects, 0);
+      expect(ota.checks, 1);
+      expect(diagnostics.any((d) => d['status'] == 'CONTROL_CHANNEL_LOST' &&
+        d['reason'] == (closed ? 'notify_closed' : 'notify_error')), isTrue);
+      final session = ota.messages.lastWhere((m) => m.kind == 'HELLO').session;
+      ble.emit(CompanionMessage('CHECK', session, 1));
+      await until(() => ota.checks == 2 && runtime.status.value == 'NO_UPDATE');
+    });
+  }
+
+  test('a device check arriving during same-session repair is served once', () async {
+    await start();
+    await until(() => runtime.status.value == 'NO_UPDATE');
+    final session = ota.messages.firstWhere((m) => m.kind == 'HELLO').session;
+    ota.helloGate = Completer<void>();
+    await wake('foreground');
+    await until(() => ota.messages.where((m) => m.kind == 'HELLO').length == 2);
+    ble.emit(CompanionMessage('CHECK', session, 1));
+    ble.emit(CompanionMessage('CHECK', session, 1));
+    expect(ota.checks, 1);
+    ota.helloGate!.complete();
+    await until(() => ota.checks == 2 && runtime.status.value == 'NO_UPDATE');
+    expect(ble.connects, 1);
+    expect(ota.maxConcurrent, 1);
+  });
+
+  test('health check preserves an existing offer and its one-time Later choice', () async {
+    ota.latest = _latest();
+    await start();
+    await until(() => runtime.status.value == 'READY_AWAITING_DEVICE_CHOICE');
+    final offer = ota.offers.single;
+    controlTime = const Duration(minutes: 2).inMilliseconds;
+    expect(await callback('probe', {'runtimeId': runtimeId}), runtimeId);
+    await until(() => diagnostics.any((d) => d['status'] == 'CONTROL_CHECK_READY') && runtime.status.value == 'READY_AWAITING_DEVICE_CHOICE');
+    expect(ota.offers, hasLength(1));
+    expect(ota.downloads, 1);
+    expect(ota.checks, 1);
+    expect(ota.messages.lastWhere((m) => m.kind == 'HELLO').session, offer.session);
+    ble.emit(choice(offer, 'LATER'));
+    await until(() => runtime.status.value == 'DEFERRED');
+    ble.emit(choice(offer, 'NOW'));
+    await Future<void>.delayed(Duration.zero);
+    expect(ota.upgrades, 0);
+  });
+
+  test('health recovery waits for the existing OTA owner instead of taking its radio', () async {
+    await start();
+    await until(() => runtime.status.value == 'NO_UPDATE');
+    ota.foreignBusy = true;
+    ota.activity.add(true);
+    controlTime = const Duration(minutes: 2).inMilliseconds;
+    expect(await callback('probe', {'runtimeId': runtimeId}), runtimeId);
+    await Future<void>.delayed(Duration.zero);
+    expect(ota.messages.where((m) => m.kind == 'HELLO'), hasLength(1));
+    expect(ble.disconnects, 0);
+    ota.foreignBusy = false;
+    ota.activity.add(false);
+    await until(() => diagnostics.any((d) => d['status'] == 'CONTROL_CHECK_READY') && runtime.status.value == 'NO_UPDATE');
+    expect(ota.checks, 1);
+    expect(ble.connects, 1);
+  });
+
+  test('missing control response retires GATT and leaves retries to native cooldown', () async {
+    runtime = CompanionRuntime(platform: CompanionPlatform(channel: channel, supported: true),
+      bluetooth: ble, ota: ota, controlClock: () => controlTime,
+      controlResponseTimeout: const Duration(milliseconds: 30));
+    await start();
+    await until(() => runtime.status.value == 'NO_UPDATE');
+    ota.answerHello = false;
+    controlTime = const Duration(minutes: 2).inMilliseconds;
+    expect(await callback('probe', {'runtimeId': runtimeId}), runtimeId);
+    await until(() => runtime.status.value == 'CONNECTION_FAILED');
+    expect(ble.disconnects, 1);
+    expect(states.last['connected'], isFalse);
+    expect(diagnostics.any((d) => d['status'] == 'CONTROL_CHECK_FAILED' && d['errorCode'] == 'CONTROL_RESPONSE_TIMEOUT'), isTrue);
+    for (var i = 0; i < 3; i++) {
+      expect(await callback('probe', {'runtimeId': runtimeId}), runtimeId);
+    }
+    await Future<void>.delayed(Duration.zero);
+    expect(ble.connects, 1, reason: 'Heartbeat must not bypass the native retry window');
+    expect(ota.checks, 1);
+    ota.answerHello = true;
+    await wake('recovery');
+    await until(() => runtime.status.value == 'CONNECTED');
+    expect(ble.connects, 2);
+    expect(ota.checks, 1);
   });
 
   test('manual work arriving during a query is coalesced instead of dropped', () async {
@@ -443,6 +590,9 @@ class _Device extends BluetoothDevice {
 class _Ble extends BluetoothService {
   final device = _Device();
   final notifications = StreamController<List<int>>.broadcast(sync: true);
+  final _readers = <StreamController<List<int>>>{};
+  bool notifyEnabled = true;
+  int subscriptions = 0;
   bool connected = false, failFirstInitialization = false;
   bool reuse = false, completedSubscription = false;
   bool cleanupAccepted = true;
@@ -451,7 +601,23 @@ class _Ble extends BluetoothService {
   final _gates = <_Gate>[];
   int _notifyOwner = 0;
   int connects = 0, disconnects = 0, generation = 0, initializations = 0;
-  void emit(CompanionMessage message) => notifications.add(message.encode());
+  void emit(CompanionMessage message) {
+    if (notifyEnabled) notifications.add(message.encode());
+  }
+  Future<void> closeReaders() async {
+    for (final reader in _readers.toList()) { await reader.close(); }
+  }
+  Stream<List<int>> _notificationStream() {
+    final controller = StreamController<List<int>>(sync: true);
+    _readers.add(controller);
+    final subscription = notifications.stream.listen(controller.add,
+      onError: controller.addError, onDone: controller.close);
+    controller.onCancel = () async {
+      _readers.remove(controller);
+      await subscription.cancel();
+    };
+    return controller.stream;
+  }
   void loseConnection() {
     connected = false;
     generation++;
@@ -514,12 +680,14 @@ class _Ble extends BluetoothService {
   @override
   Future<Stream<List<int>>?> subscribeOtaNotifyByAddress(String address,
       String serviceId, String characteristicId, {OtaLinkStats? stats}) async {
+    subscriptions++;
+    notifyEnabled = true;
     final owner = ++_notifyOwner, gate = subscriptionGate;
     subscriptionGate = null;
     // A stream can already exist when delivery of its Future crosses reconnect.
-    final completed = completedSubscription ? notifications.stream : null;
+    final completed = completedSubscription ? _notificationStream() : null;
     await _wait(gate);
-    return completed ?? (owner == _notifyOwner ? notifications.stream : null);
+    return completed ?? (owner == _notifyOwner ? _notificationStream() : null);
   }
 }
 
@@ -545,11 +713,12 @@ class _Ota extends OtaService {
   String identityAddress = _address;
   bool noUpdate = true, foreignBusy = false, _busy = false, identityAvailable = false;
   bool failIdentity = false, rebootOnUpgrade = false;
+  bool answerHello = true;
   int reads = 0, checks = 0, downloads = 0, upgrades = 0, releases = 0, _concurrent = 0, maxConcurrent = 0;
-  Completer<void>? readGate, checkGate, downloadGate, _done;
+  Completer<void>? readGate, checkGate, downloadGate, helloGate, _done;
   List<CompanionMessage> get offers => messages.where((m) => m.kind == 'OFFER').toList();
   void releaseGates() {
-    for (final gate in [readGate, checkGate, downloadGate]) {
+    for (final gate in [readGate, checkGate, downloadGate, helloGate]) {
       if (gate != null && !gate.isCompleted) gate.complete();
     }
   }
@@ -611,7 +780,10 @@ class _Ota extends OtaService {
   Future<bool> sendCompanionMessage(String address, CompanionMessage message, {String? companionRuntimeId}) async {
     owners.add(companionRuntimeId);
     messages.add(message);
-    if (message.kind == 'HELLO') ble.emit(CompanionMessage('CAPS', message.session, 0, ['1']));
+    if (message.kind == 'HELLO') {
+      await helloGate?.future;
+      if (answerHello) ble.emit(CompanionMessage('CAPS', message.session, 0, ['1']));
+    }
     if (message.kind == 'OFFER') {
       ble.emit(CompanionMessage('SEEN', message.session, message.request,
         [message.fields[0], message.fields[2]]));

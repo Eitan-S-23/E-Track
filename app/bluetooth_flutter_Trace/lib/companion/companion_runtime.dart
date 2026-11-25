@@ -23,13 +23,22 @@ typedef _ControlBinding = ({String address, String session, int generation, int 
 class CompanionRuntime extends GetxService {
   CompanionRuntime({CompanionPlatform? platform, BluetoothService? bluetooth, OtaService? ota,
       Future<bool> Function()? checkBluetoothPermissions, this.onShowUi,
-      this.recoveryDeadline = const Duration(seconds: 25)})
+      this.recoveryDeadline = const Duration(seconds: 25),
+      this.controlHealthInterval = const Duration(minutes: 1),
+      this.controlResponseTimeout = const Duration(seconds: 3),
+      int Function()? controlClock})
       : platform = platform ?? CompanionPlatform(),
         _checkBluetoothPermissions = checkBluetoothPermissions ?? PermissionHelper.checkBluetoothPermissions,
+        _controlMillis = controlClock,
         _bluetooth = bluetooth, _otaService = ota;
 
   final CompanionPlatform platform;
   final Duration recoveryDeadline;
+  final Duration controlHealthInterval, controlResponseTimeout;
+  final int Function()? _controlMillis;
+  final _controlClock = Stopwatch()..start();
+  int? _controlVerifiedAt;
+  int get _controlNow => _controlMillis?.call() ?? _controlClock.elapsedMilliseconds;
   final void Function()? onShowUi;
   final BluetoothService? _bluetooth;
   final OtaService? _otaService;
@@ -115,7 +124,12 @@ class CompanionRuntime extends GetxService {
     if (call.method == 'attachUi') { onShowUi?.call(); return true; }
     final args = call.arguments;
     if (args is! Map) return false;
-    if (call.method == 'probe') return args['runtimeId'] == _runtime ? _runtime : null;
+    if (call.method == 'probe') {
+      if (args['runtimeId'] != _runtime) return null;
+      // The native liveness reply must not wait for BLE or its five-second watchdog.
+      if (_controlNeedsCheck) _queueControlCheck('heartbeat');
+      return _runtime;
+    }
     if (call.method == 'lost') {
       if (args['runtimeId'] == _runtime) await _stop();
       return true;
@@ -192,12 +206,23 @@ class CompanionRuntime extends GetxService {
   Future<void> _wake(Map<String, dynamic> wake) async {
     final epoch = _epoch;
     final address = _address!;
+    final controlOnly = wake['reason'] == 'control';
+    // A failed control probe hands retries to native backoff, never its own queue.
+    if (controlOnly && _session == null) return;
     _preferences ??= await SharedPreferences.getInstance();
     if (!_current(epoch)) return;
     final reconnecting = !_sameLink();
     if (reconnecting && !await _recoverConnection(wake)) return;
-    if (!reconnecting && _sameLink()) await _journal('LINK_REUSED');
+    if (!reconnecting && _sameLink()) {
+      await _journal('LINK_REUSED');
+      if ((_controlNeedsCheck || wake['reason'] == 'foreground' || wake['reason'] == 'manual') &&
+          !await _refreshControl(wake)) return;
+    }
     if (!_current(epoch) || !_sameLink()) return;
+    if (controlOnly) {
+      if (reconnecting) await _state(_supportsControl ? 'CONNECTED' : 'DEVICE_CONTROL_UNSUPPORTED', busy: false);
+      return;
+    }
     final binding = _captureBinding();
     if (binding == null) return;
     final settings = await platform.snapshot();
@@ -267,13 +292,7 @@ class CompanionRuntime extends GetxService {
         if (_ownsBinding(binding)) { _invalidateLink(); _queueWake({...wake, 'reason': 'recovery'}); }
       });
       await stage('NEGOTIATING_CONTROL');
-      await attempt.wait(_attachControl());
-      if (!current() || !_bindingCurrent(binding)) throw StateError('LINK_GENERATION_CHANGED');
-      final capabilities = Completer<bool>();
-      _capabilities = capabilities;
-      await attempt.wait(_send(CompanionMessage('HELLO', binding.session, 0)));
-      final supported = await attempt.wait(capabilities.future.timeout(const Duration(seconds: 3), onTimeout: () => false));
-      if (identical(_capabilities, capabilities)) _capabilities = null;
+      final supported = await _handshake(binding, attempt);
       if (!current() || !_bindingCurrent(binding)) throw StateError('LINK_GENERATION_CHANGED');
       _supportsControl = supported;
       if (supported) await _diagnostic('CONTROL_READY', attempt);
@@ -343,12 +362,85 @@ class CompanionRuntime extends GetxService {
 
   void _invalidateLink() {
     _offer = null; _supportsControl = false; _session = null; _link = -1;
+    _controlVerifiedAt = null;
     _decoder.reset(); _controlDirty = true;
     _pendingChoice = null; _pendingDeviceCheck = null;
     final capabilities = _capabilities;
     if (capabilities != null && !capabilities.isCompleted) capabilities.complete(false);
     final acknowledged = _offerAcknowledged;
     if (acknowledged != null && !acknowledged.isCompleted) acknowledged.complete(false);
+  }
+
+  bool get _controlNeedsCheck {
+    if (_runtime == null || _session == null || _closed) return false;
+    final verified = _controlVerifiedAt;
+    return !_sameLink() || _text == null || _controlDirty || verified == null ||
+        _controlNow - verified >= controlHealthInterval.inMilliseconds;
+  }
+
+  void _queueControlCheck(String source) {
+    if (_closed || _runtime == null || _session == null || _recoveryBlocked) return;
+    _queueWake({'runtimeId': _runtime, 'revision': _revision, 'address': _address,
+      'reason': 'control', 'controlSource': source});
+  }
+
+  Future<bool> _handshake(_ControlBinding binding, CompanionRecoveryAttempt attempt) async {
+    await attempt.wait(_attachControl());
+    if (!_bindingCurrent(binding) || _text == null || _controlDirty) throw StateError('CONTROL_SUBSCRIPTION_FAILED');
+    final capabilities = Completer<bool>();
+    _capabilities = capabilities;
+    try {
+      if (!await attempt.wait(_send(CompanionMessage('HELLO', binding.session, 0)))) {
+        throw StateError('CONTROL_WRITE_FAILED');
+      }
+      return await attempt.wait(capabilities.future.timeout(controlResponseTimeout, onTimeout: () => false));
+    } finally {
+      if (identical(_capabilities, capabilities)) _capabilities = null;
+    }
+  }
+
+  Future<bool> _refreshControl(Map<String, dynamic> wake) async {
+    final binding = _captureBinding(), runtime = _runtime;
+    if (binding == null || runtime == null || !_ota.beginCompanionConnection(runtime)) return false;
+    final previousStatus = status.value;
+    final attempt = CompanionRecoveryAttempt(_nonce(), recoveryDeadline);
+    attempt.stage = 'NEGOTIATING_CONTROL';
+    _recovery = attempt;
+    var releaseAdmission = false;
+    try {
+      await _diagnostic('CONTROL_CHECK_STARTED', attempt, trigger: wake['controlSource'] as String? ?? wake['reason'] as String?);
+      if (!await attempt.wait(_state('NEGOTIATING_CONTROL', busy: true))) return false;
+      if (!await attempt.wait(_ble.beginCompanionRecovery(binding.address, runtime, attempt.id))) throw StateError('LINK_OWNER_BUSY');
+      // Same-session HELLO preserves the MCU offer, request sequence and explicit consent.
+      _controlDirty = true;
+      if (!await _handshake(binding, attempt)) throw StateError('CONTROL_RESPONSE_TIMEOUT');
+      if (!_bindingCurrent(binding)) throw StateError('LINK_GENERATION_CHANGED');
+      if (!await attempt.wait(_ble.finishCompanionRecovery(binding.address, attempt.id))) throw StateError('GATT_RETIREMENT_UNCONFIRMED');
+      _supportsControl = true;
+      attempt.finish();
+      if (identical(_recovery, attempt)) _recovery = null;
+      releaseAdmission = true;
+      await _diagnostic('CONTROL_CHECK_READY', attempt);
+      return await _state(previousStatus == 'DEVICE_CONTROL_UNSUPPORTED' ? 'CONNECTED' : previousStatus, busy: false);
+    } catch (error) {
+      attempt.cancel();
+      _invalidateLink();
+      if (!_current(binding.epoch)) return false;
+      if (_pendingWake?['reason'] == 'control' || _pendingWake?['reason'] == 'recovery') _pendingWake = null;
+      await _diagnostic('CONTROL_CHECK_FAILED', attempt, error: error);
+      await _state('RECOVERY_CLEANUP', busy: true, stage: attempt.stage);
+      var cleaned = false;
+      try { cleaned = await _cleanupRecovery(binding.address, runtime, attempt).timeout(const Duration(seconds: 4)); }
+      catch (_) { cleaned = false; }
+      _recoveryBlocked = !cleaned;
+      releaseAdmission = cleaned;
+      if (_current(binding.epoch)) await _state(cleaned ? 'CONNECTION_FAILED' : 'RECOVERY_CLEANUP_UNCONFIRMED', busy: false, stage: attempt.stage);
+      return false;
+    } finally {
+      attempt.finish();
+      if (identical(_recovery, attempt)) _recovery = null;
+      if (releaseAdmission) _ota.endCompanionConnection(runtime);
+    }
   }
 
   Future<void> _attachControl() {
@@ -373,9 +465,7 @@ class CompanionRuntime extends GetxService {
   Future<void> _attach(_ControlBinding binding) async {
     if (!_bindingCurrent(binding) || _ota.isUpgrading) return;
     if (_text != null && !_controlDirty) return;
-    final old = _text; _text = null;
-    await old?.cancel();
-    if (!_bindingCurrent(binding) || _ota.isUpgrading) return;
+    final old = _text;
     final chars = await _ble.findExactOtaCharacteristicsByAddress(binding.address);
     if (chars == null || !_bindingCurrent(binding) || _ota.isUpgrading) return;
     final stream = await _ble.subscribeOtaNotifyByAddress(binding.address, chars['serviceId']!, chars['notifyCharId']!);
@@ -387,17 +477,37 @@ class CompanionRuntime extends GetxService {
         _message(message);
       }
     }, onError: (Object _) {
-      if (_bindingCurrent(binding) && _text != null && identical(_text, subscription)) { _decoder.reset(); _controlDirty = true; }
+      if (_bindingCurrent(binding) && identical(_text, subscription)) _controlLost('notify_error');
+    }, onDone: () {
+      if (_bindingCurrent(binding) && identical(_text, subscription)) {
+        _text = null;
+        _controlLost('notify_closed');
+      }
     });
     if (!_bindingCurrent(binding) || _ota.isUpgrading) { await subscription.cancel(); }
-    else { _text = subscription; _controlDirty = false; }
+    else {
+      _text = subscription; _controlDirty = false;
+      // Acquire the replacement CCCD owner first; retiring the old reader must not disable it.
+      await old?.cancel();
+    }
+  }
+
+  void _controlLost(String reason) {
+    _decoder.reset(); _controlDirty = true; _controlVerifiedAt = null;
+    unawaited(_journal('CONTROL_CHANNEL_LOST', {'reason': reason}));
+    final capabilities = _capabilities;
+    if (capabilities != null && !capabilities.isCompleted) capabilities.complete(false);
+    _queueControlCheck(reason);
   }
 
   void _message(CompanionMessage message) {
     if (message.session != _session || !_sameLink()) return;
     if (message.kind == 'CAPS') {
       final capabilities = _capabilities;
-      if (capabilities != null && !capabilities.isCompleted) capabilities.complete(true);
+      if (capabilities != null && !capabilities.isCompleted) {
+        _controlVerifiedAt = _controlNow;
+        capabilities.complete(true);
+      }
     } else if (message.kind == 'UID') {
       _ota.acceptHardwareUid(_address!, message.fields[0]);
     } else if (message.kind == 'CHECK' && message.request > _lastDeviceRequest) {
