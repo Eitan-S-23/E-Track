@@ -5,7 +5,10 @@ import android.content.Intent
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.Service
+import android.app.AlarmManager
 import android.os.Looper
+import android.os.SystemClock
+import android.provider.Settings
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
@@ -15,7 +18,9 @@ import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.LooperMode
 import org.robolectric.shadows.ShadowPowerManager
+import org.robolectric.shadows.ShadowSystemClock
 import org.json.JSONObject
 import java.io.FileDescriptor
 import java.io.PrintWriter
@@ -24,6 +29,7 @@ import java.time.Duration
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
+@LooperMode(LooperMode.Mode.PAUSED)
 class CompanionServiceTest {
     private lateinit var service: CompanionService
     private lateinit var runtime: Runtime
@@ -58,6 +64,7 @@ class CompanionServiceTest {
         runtime = Runtime(); service.execution = runtime
         CompanionBridge.preferences(service).edit().clear().putBoolean("enabled", true)
             .putString("revision", revision).putString("address", address).commit()
+        Settings.Global.putInt(service.contentResolver, Settings.Global.BOOT_COUNT, 7)
         service.getSharedPreferences("companion_diagnostics_v1", Context.MODE_PRIVATE).edit().clear().commit()
         service.onCreate()
     }
@@ -68,7 +75,7 @@ class CompanionServiceTest {
             "deviceToken" to CompanionBridge.deviceToken(address), "status" to status,
             "connected" to connected, "busy" to busy)
 
-    private fun enterBackoff(status: String = "DEVICE_OFFLINE") {
+    private fun enterBackoff(status: String = "DEVICE_OFFLINE"): Pair<Long, Long> {
         runtime.gatt = false
         runtime.autoProbe = true
         start(); runtime.reply!!(true)
@@ -77,8 +84,19 @@ class CompanionServiceTest {
             shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(seconds))
             runtime.reply!!(true)
         }
+        val before = SystemClock.elapsedRealtime() to System.currentTimeMillis()
         assertTrue(service.state(state(status, false)))
         assertTrue(service.waitingForRecovery())
+        return before
+    }
+
+    private fun assertWakeDeadline(before: Pair<Long, Long>, next: Long) {
+        val after = SystemClock.elapsedRealtime() to System.currentTimeMillis()
+        val scheduled = shadowOf(service.getSystemService(AlarmManager::class.java)).scheduledAlarms.single().triggerAtMs
+        // Bracket time spent in real preferences/OS calls, rather than assuming they take zero milliseconds.
+        assertTrue(scheduled >= before.first + (next - after.second))
+        assertTrue(scheduled <= after.first + (next - before.second))
+        assertEquals(scheduled, CompanionBridge.preferences(service).getLong("recoveryWakeElapsed", 0))
     }
 
     @Test fun enabledServiceRequestsStickySystemRecreationWithoutOpeningUi() {
@@ -319,6 +337,84 @@ class CompanionServiceTest {
         assertTrue(remaining <= 60 * 60000L)
         assertEquals(6, prefs.getInt("failures", 0))
     }
+    @Test fun cooldownRegistersOneInexactIdleWakeWithoutHoldingTheCpu() {
+        val before = enterBackoff()
+        val manager = shadowOf(service.getSystemService(AlarmManager::class.java))
+        val alarm = manager.scheduledAlarms.single()
+        assertEquals(AlarmManager.ELAPSED_REALTIME_WAKEUP, alarm.type)
+        assertTrue(alarm.allowWhileIdle)
+        assertNotEquals(0L, alarm.windowLengthMs)
+        val next = CompanionBridge.preferences(service).getLong("nextAttempt", 0)
+        assertTrue(next >= before.second + 120000L)
+        assertTrue(next <= System.currentTimeMillis() + 120000L)
+        assertWakeDeadline(before, next)
+        val intent = shadowOf(alarm.operation!!).savedIntent
+        assertEquals(CompanionRecoveryReceiver::class.java.name, intent.component!!.className)
+        assertEquals(CompanionRecoveryWake.ACTION, intent.action)
+        assertFalse(intent.toString().contains(address))
+        service.onStartCommand(Intent().putExtra("reason", "periodic"), 0, 2)
+        assertEquals(alarm.operation, manager.scheduledAlarms.single().operation)
+        assertEquals(alarm.triggerAtMs, manager.scheduledAlarms.single().triggerAtMs)
+        assertFalse(ShadowPowerManager.getLatestWakeLock().isHeld)
+    }
+    @Test fun elapsedSleepExpiresCooldownWithoutRunningTheUptimeTimer() {
+        enterBackoff()
+        val uptime = SystemClock.uptimeMillis()
+        ShadowSystemClock.simulateDeepSleep(Duration.ofMinutes(61))
+        assertEquals(uptime, SystemClock.uptimeMillis())
+        assertEquals(4, runtime.dispatches)
+        assertEquals(0L, CompanionRecoveryWake.remainingMs(service))
+        service.onStartCommand(Intent().putExtra("reason", "recovery"), 0, 2)
+        assertEquals(5, runtime.dispatches)
+        assertFalse(service.waitingForRecovery())
+        assertTrue(shadowOf(service.getSystemService(AlarmManager::class.java)).scheduledAlarms.isEmpty())
+        service.onStartCommand(Intent().putExtra("reason", "presence"), 0, 3)
+        service.onStartCommand(Intent().putExtra("reason", "recovery"), 0, 4)
+        assertEquals(5, runtime.dispatches)
+    }
+    @Test fun explicitColdRecoveryAlsoHonorsThePersistedDeadline() {
+        val before = SystemClock.elapsedRealtime() to System.currentTimeMillis()
+        val next = System.currentTimeMillis() + 60000
+        CompanionBridge.preferences(service).edit().putLong("nextAttempt", next).commit()
+        service.onStartCommand(Intent().putExtra("reason", "recovery"), 0, 1)
+        assertEquals(0, runtime.starts)
+        assertTrue(service.waitingForRecovery())
+        assertWakeDeadline(before, next)
+        assertEquals(1, shadowOf(service.getSystemService(AlarmManager::class.java)).scheduledAlarms.size)
+    }
+    @Test fun destructionPreservesAnEnabledCooldownButDisableCancelsIt() {
+        enterBackoff()
+        val manager = shadowOf(service.getSystemService(AlarmManager::class.java))
+        val alarm = manager.scheduledAlarms.single()
+        service.onDestroy()
+        assertNull(CompanionService.active)
+        assertEquals(alarm.operation, manager.scheduledAlarms.single().operation)
+        assertEquals(true, CompanionRecoveryWake.snapshot(service)["pending"])
+        CompanionBridge.preferences(service).edit().putBoolean("enabled", false).commit()
+        CompanionRecoveryWake.restore(service)
+        assertTrue(manager.scheduledAlarms.isEmpty())
+        assertEquals(false, CompanionRecoveryWake.snapshot(service)["pending"])
+    }
+    @Test fun successfulPresenceRecoveryCancelsTheSystemWakeAsWellAsTheHandler() {
+        enterBackoff()
+        service.onStartCommand(Intent().putExtra("reason", "presence"), 0, 2)
+        runtime.reply!!(true)
+        runtime.gatt = true
+        assertTrue(service.state(state()))
+        assertTrue(shadowOf(service.getSystemService(AlarmManager::class.java)).scheduledAlarms.isEmpty())
+        assertEquals(false, CompanionRecoveryWake.snapshot(service)["pending"])
+        assertEquals(0L, CompanionRecoveryWake.remainingMs(service))
+    }
+    @Test fun simultaneousBackgroundStartsDoNotInitializeOrDispatchTwice() {
+        start()
+        service.onStartCommand(Intent().putExtra("reason", "recovery"), 0, 2)
+        service.onStartCommand(Intent().putExtra("reason", "presence"), 0, 3)
+        assertEquals(1, runtime.starts)
+        assertEquals(1, runtime.dispatches)
+        runtime.reply!!(true)
+        service.onStartCommand(Intent().putExtra("reason", "recovery"), 0, 4)
+        assertEquals(1, runtime.dispatches)
+    }
     @Test fun lateFailureAndProgressCannotStackOrExtendCooldown() {
         enterBackoff()
         val prefs = CompanionBridge.preferences(service)
@@ -533,6 +629,18 @@ class CompanionServiceTest {
         service.state(state("NO_UPDATE"))
         val notification = shadowOf(service.getSystemService(NotificationManager::class.java)).getNotification(CompanionService.NOTIFICATION_ID)
         assertEquals("\u8bbe\u5907\u5df2\u8fde\u63a5\uff0c\u56fa\u4ef6\u5df2\u662f\u6700\u65b0\u7248\u672c", notification.extras.getString(Notification.EXTRA_TEXT))
+    }
+    @Test fun controlHealthDoesNotCountAsAnotherSuccessfulUpdateCheck() {
+        start(); runtime.reply!!(true)
+        assertTrue(service.state(state("READY_AWAITING_DEVICE_CHOICE") + ("checkFinished" to true)))
+        val before = CompanionDiagnostics.snapshot(service)["quality"] as Map<*, *>
+        assertTrue(service.state(state("READY_AWAITING_DEVICE_CHOICE") + ("controlOnly" to true)))
+        val after = CompanionDiagnostics.snapshot(service)["quality"] as Map<*, *>
+        assertEquals(before["checksSucceeded"], after["checksSucceeded"])
+        assertFalse(CompanionBridge.preferences(service).getBoolean("checkPending", false))
+        assertTrue(CompanionDiagnostics.snapshot(service)["history"].toString().contains("CONTROL_CHANNEL_READY"))
+        val notification = shadowOf(service.getSystemService(NotificationManager::class.java)).getNotification(CompanionService.NOTIFICATION_ID)
+        assertEquals("\u8bbe\u5907\u5df2\u8fde\u63a5\uff0c\u6709\u53ef\u7528\u56fa\u4ef6\u66f4\u65b0", notification.extras.getString(Notification.EXTRA_TEXT))
     }
     @Test fun boundedDiagnosticsSurviveStatusChangesWithoutPrivateFields() {
         start(); runtime.reply!!(true)

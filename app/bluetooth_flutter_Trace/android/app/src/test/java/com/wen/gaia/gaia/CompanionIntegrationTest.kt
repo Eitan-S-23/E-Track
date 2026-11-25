@@ -3,6 +3,8 @@ package com.wen.gaia.gaia
 import android.Manifest
 import android.app.Activity
 import android.app.Application
+import android.app.AlarmManager
+import android.app.ForegroundServiceStartNotAllowedException
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -16,6 +18,7 @@ import android.bluetooth.le.ScanFilter
 import android.companion.BluetoothLeDeviceFilter
 import android.companion.CompanionDeviceManager
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.ComponentName
 import android.content.Intent
 import android.content.IntentSender
@@ -23,6 +26,8 @@ import android.graphics.drawable.AdaptiveIconDrawable
 import android.os.Build
 import android.os.Looper
 import android.os.PersistableBundle
+import android.os.SystemClock
+import android.provider.Settings
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.FlutterEngineCache
 import io.flutter.embedding.engine.dart.DartExecutor
@@ -44,9 +49,13 @@ import org.robolectric.android.controller.ActivityController
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.Implementation
 import org.robolectric.annotation.Implements
+import org.robolectric.annotation.LooperMode
 import org.robolectric.shadow.api.Shadow
 import org.robolectric.shadows.ShadowPowerManager
 import org.robolectric.shadows.ShadowBluetoothManager
+import org.robolectric.shadows.ShadowAlarmManager
+import org.robolectric.shadows.ShadowCompanionDeviceManager
+import org.robolectric.shadows.ShadowSystemClock
 import org.robolectric.util.ReflectionHelpers
 import java.lang.ref.WeakReference
 import java.nio.ByteBuffer
@@ -57,6 +66,7 @@ import java.time.Duration
 @Config(sdk = [26, 31, 34], instrumentedPackages = ["io.flutter"], shadows = [
     CompanionEngineBoundary::class, CompanionDartBoundary::class, CompanionLoaderBoundary::class,
     CompanionBluetoothBoundary::class])
+@LooperMode(LooperMode.Mode.PAUSED)
 class CompanionIntegrationTest {
     private lateinit var app: Application
     private var host: ActivityController<CompanionChooserActivity>? = null
@@ -73,6 +83,7 @@ class CompanionIntegrationTest {
     @Before fun setUp() {
         app = RuntimeEnvironment.getApplication()
         prefs.edit().clear().commit()
+        Settings.Global.putInt(app.contentResolver, Settings.Global.BOOT_COUNT, 7)
         CompanionEngineBoundary.created = 0
         // Model a fresh process at the test boundary, not inside any exercised operation.
         ReflectionHelpers.setField(CompanionBridge, "activity", WeakReference<Activity>(null))
@@ -97,6 +108,227 @@ class CompanionIntegrationTest {
         prefs.edit().putString("address", address).putString("revision", revision)
             .putBoolean("enabled", enabled).commit()
         assertTrue(CompanionBridge.associated(app))
+    }
+
+    private fun scheduledWake(delay: Long = 60000): Intent {
+        assertTrue(CompanionRecoveryWake.schedule(app, System.currentTimeMillis() + delay))
+        val alarm = shadowOf(app.getSystemService(AlarmManager::class.java)).scheduledAlarms.single()
+        return Intent(shadowOf(alarm.operation!!).savedIntent)
+    }
+
+    private fun diagnosticHistory() = CompanionDiagnostics.snapshot(app)["history"].toString()
+
+    private fun assertRemainingUsesElapsedDeadline(deadline: Long) {
+        val before = SystemClock.elapsedRealtime()
+        val remaining = CompanionRecoveryWake.remainingMs(app)
+        val after = SystemClock.elapsedRealtime()
+        assertTrue(remaining >= (deadline - after).coerceAtLeast(0))
+        assertTrue(remaining <= (deadline - before).coerceAtLeast(0))
+    }
+
+    @Test fun elapsedAlarmRequestsHeadlessRecoveryEvenWhenTheUptimeTimerNeverRan() {
+        associated()
+        val request = scheduledWake()
+        val uptime = SystemClock.uptimeMillis()
+        ShadowSystemClock.simulateDeepSleep(Duration.ofMinutes(61))
+        assertEquals(uptime, SystemClock.uptimeMillis())
+        assertNull(CompanionService.active)
+        CompanionRecoveryReceiver().onReceive(app, request)
+        val start = checkNotNull(shadowOf(app).nextStartedService)
+        assertEquals("recovery", start.getStringExtra("reason"))
+        assertEquals(0, CompanionEngineBoundary.created)
+        assertNull(shadowOf(app).nextStartedActivity)
+        val service = Robolectric.buildService(CompanionService::class.java).get()
+        service.onCreate()
+        service.onStartCommand(start, 0, 1)
+        assertEquals(1, CompanionEngineBoundary.created)
+        ready(service); linked(service)
+        assertTrue(service.linkReady())
+        assertTrue(shadowOf(app.getSystemService(AlarmManager::class.java)).scheduledAlarms.isEmpty())
+        assertTrue(diagnosticHistory().contains("RECOVERY_WAKE_RECEIVED"))
+        assertNull(shadowOf(app).nextStartedActivity)
+    }
+
+    @Test fun earlyAlarmDoesNotSpendAnAttemptOrMoveTheCooldown() {
+        associated()
+        prefs.edit().putInt("failures", 5).putBoolean("checkPending", true).commit()
+        val request = scheduledWake(3600000)
+        val manager = shadowOf(app.getSystemService(AlarmManager::class.java))
+        val original = manager.scheduledAlarms.single()
+        CompanionRecoveryReceiver().onReceive(app, request)
+        assertNull(shadowOf(app).nextStartedService)
+        assertEquals(original.triggerAtMs, manager.scheduledAlarms.single().triggerAtMs)
+        assertEquals(original.operation, manager.scheduledAlarms.single().operation)
+        assertEquals(5, prefs.getInt("failures", 0))
+        assertTrue(prefs.getBoolean("checkPending", false))
+    }
+
+    @Test fun duplicateAlarmDeliveryOnlyRequestsOneRecovery() {
+        associated()
+        val request = scheduledWake()
+        ShadowSystemClock.simulateDeepSleep(Duration.ofMinutes(2))
+        CompanionRecoveryReceiver().onReceive(app, request)
+        assertNotNull(shadowOf(app).nextStartedService)
+        CompanionRecoveryReceiver().onReceive(app, request)
+        assertNull(shadowOf(app).nextStartedService)
+        assertEquals(0, CompanionEngineBoundary.created)
+    }
+
+    @Test fun staleCooldownCannotCancelOrTriggerItsReplacement() {
+        associated()
+        val stale = scheduledWake()
+        val current = scheduledWake(600000)
+        val deadline = prefs.getLong("recoveryWakeElapsed", 0)
+        assertNotEquals(stale.data, current.data)
+        ShadowSystemClock.simulateDeepSleep(Duration.ofMinutes(2))
+        CompanionRecoveryReceiver().onReceive(app, stale)
+        assertNull(shadowOf(app).nextStartedService)
+        val alarms = shadowOf(app.getSystemService(AlarmManager::class.java)).scheduledAlarms
+        assertEquals(1, alarms.size)
+        assertEquals(current.data, shadowOf(alarms.single().operation!!).savedIntent.data)
+        assertEquals(deadline, alarms.single().triggerAtMs)
+        assertEquals(deadline, prefs.getLong("recoveryWakeElapsed", 0))
+        assertRemainingUsesElapsedDeadline(deadline)
+    }
+
+    @Test fun changedConfigurationFencesAnAlreadyQueuedAlarm() {
+        associated()
+        val stale = scheduledWake()
+        prefs.edit().putString("revision", "replacement").commit()
+        ShadowSystemClock.simulateDeepSleep(Duration.ofMinutes(2))
+        CompanionRecoveryReceiver().onReceive(app, stale)
+        assertNull(shadowOf(app).nextStartedService)
+        assertTrue(shadowOf(app.getSystemService(AlarmManager::class.java)).scheduledAlarms.isEmpty())
+        assertEquals(0L, prefs.getLong("nextAttempt", 0))
+    }
+
+    @Test fun disabledModeCancelsPersistedAlarmAndCannotBeResurrected() {
+        associated()
+        val stale = scheduledWake()
+        prefs.edit().putBoolean("enabled", false).commit()
+        CompanionBridge.restore(app)
+        assertTrue(shadowOf(app.getSystemService(AlarmManager::class.java)).scheduledAlarms.isEmpty())
+        CompanionRecoveryReceiver().onReceive(app, stale)
+        assertNull(shadowOf(app).nextStartedService)
+        assertNull(shadowOf(app).nextStartedActivity)
+    }
+
+    @Test fun lostSystemAssociationCancelsTheAlarmWithoutOpeningAPairingDialog() {
+        associated()
+        val stale = scheduledWake()
+        if (Build.VERSION.SDK_INT >= 33) manager.disassociate(manager.myAssociations.single().id)
+        else manager.disassociate(address)
+        CompanionBridge.restore(app)
+        CompanionRecoveryReceiver().onReceive(app, stale)
+        assertEquals(false, CompanionRecoveryWake.snapshot(app)["pending"])
+        assertNull(shadowOf(app).nextStartedService)
+        assertNull(shadowOf(app).nextStartedActivity)
+    }
+
+    @Test fun rebootRearmsWithANewGenerationAndRetainsTheWallDeadline() {
+        associated()
+        val stale = scheduledWake(600000)
+        val deadline = prefs.getLong("nextAttempt", 0)
+        Settings.Global.putInt(app.contentResolver, Settings.Global.BOOT_COUNT, 8)
+        val beforeElapsed = SystemClock.elapsedRealtime()
+        val beforeWall = System.currentTimeMillis()
+        CompanionRecoveryWake.restore(app)
+        val afterElapsed = SystemClock.elapsedRealtime()
+        val afterWall = System.currentTimeMillis()
+        val alarms = shadowOf(app.getSystemService(AlarmManager::class.java)).scheduledAlarms
+        assertEquals(1, alarms.size)
+        assertNotEquals(stale.data, shadowOf(alarms.single().operation!!).savedIntent.data)
+        assertEquals(deadline, prefs.getLong("nextAttempt", 0))
+        val elapsedDeadline = prefs.getLong("recoveryWakeElapsed", 0)
+        assertTrue(elapsedDeadline >= beforeElapsed + (deadline - afterWall))
+        assertTrue(elapsedDeadline <= afterElapsed + (deadline - beforeWall))
+        assertRemainingUsesElapsedDeadline(elapsedDeadline)
+        CompanionRecoveryReceiver().onReceive(app, stale)
+        assertNull(shadowOf(app).nextStartedService)
+    }
+
+    @Test fun sameBootUsesElapsedDeadlineRatherThanAnAdjustedWallDisplay() {
+        associated()
+        scheduledWake(600000)
+        val elapsedDeadline = prefs.getLong("recoveryWakeElapsed", 0)
+        // Simulate a shifted wall-clock correlation without changing elapsed time.
+        val shifted = prefs.getLong("nextAttempt", 0) + 86400000L
+        prefs.edit().putLong("nextAttempt", shifted).putLong("recoveryWakeAt", shifted).commit()
+        assertRemainingUsesElapsedDeadline(elapsedDeadline)
+        CompanionRecoveryWake.restore(app)
+        assertEquals(elapsedDeadline, prefs.getLong("recoveryWakeElapsed", 0))
+        assertRemainingUsesElapsedDeadline(elapsedDeadline)
+        assertEquals(1, shadowOf(app.getSystemService(AlarmManager::class.java)).scheduledAlarms.size)
+    }
+
+    @Test fun permissionLossAtAlarmDeliveryDoesNotStartTheEngineOrLoop() {
+        associated()
+        val request = scheduledWake()
+        val permission = if (Build.VERSION.SDK_INT >= 31) Manifest.permission.BLUETOOTH_CONNECT else Manifest.permission.BLUETOOTH
+        shadowOf(app).denyPermissions(permission)
+        ShadowSystemClock.simulateDeepSleep(Duration.ofMinutes(2))
+        CompanionRecoveryReceiver().onReceive(app, request)
+        assertNull(shadowOf(app).nextStartedService)
+        assertEquals(0, CompanionEngineBoundary.created)
+        assertTrue(diagnosticHistory().contains("RECOVERY_WAKE_START_FAILED"))
+        assertTrue(shadowOf(app.getSystemService(AlarmManager::class.java)).scheduledAlarms.isEmpty())
+    }
+
+    @Test @Config(sdk = [34]) fun backgroundStartRejectionIsRecordedWithoutItsPrivateMessage() {
+        associated()
+        val request = scheduledWake()
+        ShadowSystemClock.simulateDeepSleep(Duration.ofMinutes(2))
+        val denied = object : ContextWrapper(app) {
+            override fun startForegroundService(service: Intent): ComponentName? {
+                throw ForegroundServiceStartNotAllowedException("private-token-and-address")
+            }
+        }
+        CompanionRecoveryReceiver().onReceive(denied, request)
+        assertEquals("BACKGROUND_START_REJECTED", prefs.getString("lastResult", null))
+        assertTrue(diagnosticHistory().contains("ForegroundServiceStartNotAllowedException"))
+        assertFalse(diagnosticHistory().contains("private-token-and-address"))
+        assertNull(shadowOf(app).nextStartedService)
+        assertEquals(0, CompanionEngineBoundary.created)
+    }
+
+    @Test @Config(sdk = [34], shadows = [CompanionAlarmFailureBoundary::class])
+    fun alarmRejectionIsReportedAndDoesNotPretendToBeScheduled() {
+        associated()
+        assertFalse(CompanionRecoveryWake.schedule(app, System.currentTimeMillis() + 60000))
+        assertEquals(false, CompanionRecoveryWake.snapshot(app)["requested"])
+        assertEquals(true, CompanionRecoveryWake.snapshot(app)["pending"])
+        assertTrue(diagnosticHistory().contains("RECOVERY_WAKE_SCHEDULE_FAILED"))
+        assertFalse(diagnosticHistory().contains("private-token-and-address"))
+        assertNull(shadowOf(app).nextStartedService)
+    }
+
+    @Test @Config(sdk = [34], shadows = [CompanionPresenceFailureBoundary::class])
+    fun presenceRegistrationFailureDoesNotPreventAlarmOrPeriodicFallback() {
+        associated()
+        prefs.edit().putLong("nextAttempt", System.currentTimeMillis() + 60000).commit()
+        CompanionBridge.restore(app)
+        assertEquals("FAILED", prefs.getString("presenceObservation", null))
+        assertEquals("SecurityException", prefs.getString("presenceErrorType", null))
+        assertEquals(2, app.getSystemService(JobScheduler::class.java).allPendingJobs.size)
+        assertEquals(1, shadowOf(app.getSystemService(AlarmManager::class.java)).scheduledAlarms.size)
+        assertTrue(diagnosticHistory().contains("PRESENCE_OBSERVATION_FAILED"))
+        assertFalse(diagnosticHistory().contains("private-token-and-address"))
+    }
+
+    @Test @Config(sdk = [34]) fun modernPresenceCallbackIsRecordedWithoutOpeningUi() {
+        associated()
+        CompanionBridge.observePresence(app, "restore")
+        assertEquals("REQUESTED", prefs.getString("presenceObservation", null))
+        val presence = Robolectric.buildService(TrackCompanionDeviceService::class.java).create().get()
+        presence.onDeviceAppeared(manager.myAssociations.single())
+        assertEquals("presence", checkNotNull(shadowOf(app).nextStartedService).getStringExtra("reason"))
+        presence.onDeviceDisappeared(manager.myAssociations.single())
+        assertNull(shadowOf(app).nextStartedService)
+        assertTrue(diagnosticHistory().contains("PRESENCE_APPEARED"))
+        assertTrue(diagnosticHistory().contains("PRESENCE_DISAPPEARED"))
+        assertFalse(diagnosticHistory().contains(address))
+        assertNull(shadowOf(app).nextStartedActivity)
+        presence.onDestroy()
     }
 
     private fun ui(): CompanionChooserActivity {
@@ -628,6 +860,22 @@ class CompanionIntegrationTest {
         assertTrue(prefs.getBoolean("checkPending", false))
         assertEquals(1, CompanionEngineBoundary.created)
         jobs.onDestroy()
+    }
+}
+
+@Implements(AlarmManager::class)
+class CompanionAlarmFailureBoundary : ShadowAlarmManager() {
+    @Implementation(minSdk = 23)
+    public override fun setAndAllowWhileIdle(type: Int, triggerAtMs: Long, operation: PendingIntent) {
+        throw SecurityException("private-token-and-address")
+    }
+}
+
+@Implements(CompanionDeviceManager::class)
+class CompanionPresenceFailureBoundary : ShadowCompanionDeviceManager() {
+    @Implementation(minSdk = 31)
+    public override fun startObservingDevicePresence(deviceAddress: String) {
+        throw SecurityException("private-token-and-address")
     }
 }
 

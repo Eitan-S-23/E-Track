@@ -62,6 +62,7 @@
                 <action android:name="android.companion.CompanionDeviceService" />
             </intent-filter>
         </service>
+        <receiver android:name=".CompanionRecoveryReceiver" android:exported="false" />
         <receiver android:name=".CompanionBootReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
