@@ -1,5 +1,22 @@
 # Shared Agent Records
 
+Latest App recovery delivery, 2026-11-25: COMPANION_CONTROL_1096,
+MAIN_DELIVERED / CANDIDATE_DELIVERED / PHONE_VERIFICATION_NOT_RUN, Codex root.
+Owner authorizes the combined
+sleep-wake and idle-control fix, version increment and main-push candidate route.
+App 1.0.96+122 is on main 7c90671315e7087e195e039a1606bb710dab2822, preserving
+the separate MCU main 71cf88a8. Development source 34d2a4ab passes both hosts,
+debug APK and all 190 native tests in 45636663879; checks-only 45636316560 passes.
+The existing protected CI credential route is now verified; the earlier owner
+manual-dispatch prerequisite is superseded, with no login/key/configuration change.
+Formal CI 45640056983 / Trace 45640405354 pass original-signed APK, Windows EXE
+and automatic registration as rel_trace_android_v1_0_96; APK/manifest R2 checks
+pass, channelPublished=false. Android build 10 warning lines/zero errors;
+Windows build zero/zero. No device, manual-backend/channel operation or independent
+PASS; real-phone idle recovery is not yet verified. Original failures and
+unrelated edits remain; only this new record is selected for closeout. See
+[combined delivery](../ota-exec-notes/OTA-COMPANION-2026-11-20.md#app-1096-sleep-and-idle-control-delivery).
+
 Latest update checks, 2026-11-25: UPDATE-CHECK-ISOLATION,
 MAIN_DELIVERED / CI_CHECKS_PASSED / CLOUD_DEPLOYED / LIVE_VERIFIED, Codex root.
 Owner's explicit follow-up authorizes migration 0020 and matching Worker/Admin/

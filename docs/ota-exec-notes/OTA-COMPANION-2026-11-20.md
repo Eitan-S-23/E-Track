@@ -1,5 +1,88 @@
 # OTA Companion And Admin Scroll Investigation
 
+## App 1096 Sleep And Idle Control Delivery
+
+2026-11-25 status: MAIN_DELIVERED / CANDIDATE_DELIVERED /
+PHONE_VERIFICATION_NOT_RUN. Owner: Codex root.
+The owner explicitly requests repair, main integration and the automatic
+Cloudflare candidate workflow. This supersedes the development-only and owner
+manual-dispatch checkpoint below; earlier owner-verified OTA batches stay closed.
+
+Combined implementation: `34d2a4ab636922398f411ac3f00ce20714df3a3f` on
+`dev/flutter/companion-sleep-20261125`. Main delivery is
+`7c90671315e7087e195e039a1606bb710dab2822`, App `1.0.96+122`, merged onto the
+other MCU session's `71cf88a8c9e100a5c4ffe26f54a308fe56c0537a`. The MCU source
+and firmware version are unchanged by this App commit. Authenticated reservation
+checks cover all 134 Trace Releases, including drafts, and 134 tags; no immutable
+asset is overwritten. SSH verifies Eitan-S-23 and the exact repository push;
+the existing protected credential reader supplies CI access without new login,
+credential, trust-file, global Git or cloud configuration changes.
+
+The App now repairs idle notification error/completion, checks the control path
+on foreground/manual wake and a rate-limited native heartbeat, and leases the
+existing GATT before same-session HELLO/CAPS. Replacement notifications acquire
+ownership before the old reader closes. Pending checks/choices, offers, Later,
+single OTA ownership and legacy-firmware fallback remain intact. Health probes
+do not query the server or increment successful cloud-check/OTA counters. Failed
+known-control repair retires the captured link and returns to the existing
+four-attempt windows and capped 60-minute backoff. The process-independent idle
+alarm fix from the preceding development branch is included in this delivery.
+
+Exact-source development checks `45636316560` and native/debug run
+[45636663879](https://github.com/Eitan-S-23/E-Track/actions/runs/45636663879) pass
+both hosts. Flutter 3.47.9 / Dart 3.13.7: Linux 1068 passed/16 skipped, Windows
+1016 passed/68 skipped, plus eight candidate tests on each host. Native XML has
+190 tests, zero failures/errors/skips: DeviceOtaService 24, CompanionService 54,
+CompanionIntegration 106 and CompanionGattPlugin 6. Android debug build and
+package verification pass. This does not substitute for formal APK/EXE results
+or prove real-phone long-idle recovery. Native/deprecation warnings are retained.
+
+Formal source-bound run
+[45640056983](https://github.com/Eitan-S-23/E-Track/actions/runs/45640056983)
+and original-signer Trace run
+[45640405354](https://github.com/Eitan-S-23/Trace/actions/runs/45640405354)
+both succeed. Trace executor `12ff41fc11eb4920ab32d69ae0f7e1cc095f996e` admits
+the exact E-Track source above, not its own workflow SHA as App source. Formal
+Android/Windows analyze/tests and original APK/Windows EXE builds pass; Android
+reports 1068 tests passed/16 skipped and Windows 1016 passed/68 skipped.
+
+Automatic registration returns `ok=true`, `releaseId=rel_trace_android_v1_0_96`,
+`idempotent=false`. Release tag is `v1.0.96`; `channelPublished=false` remains.
+APK package/signature/ABI/compiled-configuration verification and full R2
+readback of both APK and manifest pass. APK is 49,636,913 bytes, SHA-256
+`20b83967b98cbf44229dfa4926e27217dbd16e2382ee7d8179b2cd86cfb70fa9`;
+manifest SHA-256 is
+`0b5fc394f853eed42971c833d1d95d55abe06c093ad6efda8fcf8c889ca7d453`.
+These are CI/ingestion receipts, not an installed App or physical idle-recovery
+PASS. Channel publication and phone update stay with the owner.
+
+The actual APK build step retains 10 warning lines and zero error lines:
+three Gradle/AGP/Kotlin support warnings and seven plugin SDK-level warnings.
+The Windows build step has zero warning/error lines. Wrapper/test/deprecation
+diagnostics outside those build steps remain in the original logs; no global
+zero-warning claim is made.
+
+Original evidence: `.cache/companion-control-20261125/`. `main-merge-01` and
+`main-push-01` bind source, version, selected paths and preservation hashes.
+`logs-05` and `artifact-03/artifact.zip` preserve successful native-run originals.
+`deliver-01/result.json` is the completed source-bound receipt;
+`trace-status-01/result.json` and `logs-06/` retain the original signing-run
+status, registration, package metadata and full logs. The read-only
+`observe-18` TLS timeout is retained; `observe-19` and the completed observer
+reconcile the same run without dispatching or rebuilding it.
+The initial eight fixed-duration failures and two later SDK variants of the
+same stale-alarm assumption remain in `logs-01/04` and `artifact-01/02`.
+Tests now compare persisted deadlines and bracket actual elapsed-clock samples,
+not a relaxed timing tolerance. The strict analyze failure in the first control
+batch, local author/sparse-staging failures and their reconciliations also remain.
+
+The merge/push preserves all ten then-modified unrelated paths byte-for-byte,
+including seven pending documents and three live MCU edits. This closeout stages
+only new records in three files (two board entries, one index entry, and this
+note section); prior pending content is not swept into delivery.
+No phone/MCU operation, manual
+Cloudflare deployment/publication, new agent or independent acceptance occurs.
+
 ## Independent Update Check Rollout, 2026-11-25
 
 Status: MAIN_DELIVERED / CI_CHECKS_PASSED / CLOUD_DEPLOYED / LIVE_VERIFIED.
