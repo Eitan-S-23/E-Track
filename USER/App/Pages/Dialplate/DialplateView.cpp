@@ -92,6 +92,34 @@ typedef struct
 typedef void (*lv_port_disp_overlay_cb_t)(const lv_area_t* area, lv_color_t* color_p, void* user_data);
 extern void lv_port_disp_set_overlay_cb(lv_port_disp_overlay_cb_t cb, void* user_data);
 extern void lv_port_disp_blit_blocking(const lv_area_t* area, const lv_color_t* color_p);
+
+static bool DialplatePopup_CoversSpectrum()
+{
+    /* A popup owns these pixels even though the HUD effects bypass LVGL. */
+    const lv_area_t spectrumArea =
+    {
+        SPECTRUM_X,
+        SPECTRUM_Y,
+        SPECTRUM_X + SPECTRUM_W - 1,
+        SPECTRUM_Y + SPECTRUM_H - 1
+    };
+    lv_obj_t* topLayer = lv_layer_top();
+    for(uint32_t i = 0; i < lv_obj_get_child_cnt(topLayer); i++)
+    {
+        lv_obj_t* overlay = lv_obj_get_child(topLayer, i);
+        if(lv_obj_get_style_opa(overlay, 0) == LV_OPA_TRANSP ||
+           lv_obj_get_style_bg_opa(overlay, 0) == LV_OPA_TRANSP)
+        {
+            continue;
+        }
+        lv_area_t visibleArea = spectrumArea;
+        if(lv_obj_area_is_visible(overlay, &visibleArea))
+        {
+            return true;
+        }
+    }
+    return false;
+}
 #endif
 
 static lv_obj_t* OverlayLabel(lv_obj_t* par, const lv_font_t* font, lv_color_t color,
@@ -714,7 +742,7 @@ void DialplateView::Spectrum_Update()
 #if defined(ARDUINO)
 void DialplateView::Spectrum_Blit(const uint8_t* frame)
 {
-    if(frame == nullptr)
+    if(frame == nullptr || DialplatePopup_CoversSpectrum())
     {
         return;
     }
@@ -794,7 +822,7 @@ void DialplateView::BorderGlow_Advance()
 
 void DialplateView::BorderGlow_BlitFrame(uint8_t phase, bool glow)
 {
-    if(ui.skin == nullptr)
+    if(ui.skin == nullptr || DialplatePopup_CoversSpectrum())
     {
         return;
     }
@@ -844,7 +872,7 @@ void DialplateView::BorderGlow_BlitFrame(uint8_t phase, bool glow)
 void DialplateView::onDisplayOverlay(const lv_area_t* area, lv_color_t* color_p, void* userData)
 {
     DialplateView* instance = (DialplateView*)userData;
-    if(instance == nullptr || area == nullptr || color_p == nullptr)
+    if(instance == nullptr || area == nullptr || color_p == nullptr || DialplatePopup_CoversSpectrum())
     {
         return;
     }

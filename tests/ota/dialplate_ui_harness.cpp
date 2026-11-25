@@ -36,6 +36,7 @@ static const int width = 240;
 static const int height = 320;
 static std::vector<lv_color_t> framebuffer(width * height);
 static unsigned rawTransfers = 0;
+static unsigned spectrumTransfers = 0;
 static unsigned normalCallbacks = 0;
 
 namespace StatusBarProbe
@@ -103,6 +104,23 @@ const void* GetImage(const char* name)
 }
 }
 
+namespace FirmwarePopupProbe
+{
+static lv_obj_t* companionModal = nullptr;
+static lv_obj_t* companionPanel = nullptr;
+static void CompanionDismissEvent(lv_event_t*) {}
+
+static lv_obj_t* Create()
+{
+    // Use the current update popup's actual LVGL backdrop and panel setup.
+#include "companion_popup_ui.inc"
+    lv_obj_t* content = lv_label_create(companionPanel);
+    lv_obj_set_pos(content, 8, 170);
+    lv_label_set_text(content, "UPDATE");
+    return companionModal;
+}
+}
+
 // These helpers are extracted from the selected repository's real Presenter.
 #include "dialplate_presenter_ui.inc"
 
@@ -155,7 +173,12 @@ static void Display_SPI_DMA_Send(const void* data, uint32_t bytes)
 {
     Require(!pendingDma, "a transfer cannot overwrite an outstanding DMA");
     Require(Disp_DMA_Busy, "busy is published before starting DMA");
-    if(!Disp_DMA_Notify) rawTransfers++;
+    if(!Disp_DMA_Notify)
+    {
+        rawTransfers++;
+        if(dmaWindow.x1 == 10 && dmaWindow.y1 == 161 && dmaWindow.x2 == 34 && dmaWindow.y2 == 232)
+            spectrumTransfers++;
+    }
     CopyPixels(dmaWindow, static_cast<const uint16_t*>(data), bytes / sizeof(uint16_t));
     pendingDma = true;
 }
@@ -334,6 +357,78 @@ static void CheckDma()
             "valid direct writes do not acknowledge LVGL");
     HAL::Display_SetSendFinishCallback(TrackLvglFinish);
 #endif
+}
+
+static void CheckPopupOcclusion(Page::DialplateView& view, const std::string& directory,
+                                const std::string& variant)
+{
+    view.SetSpectrumSpeed(50.0f);
+    view.SetSpectrumActive(true);
+    Render();
+    Animate(view);
+    lv_obj_t* popup = FirmwarePopupProbe::Create();
+    Render();
+    const std::vector<lv_color_t> shown = framebuffer;
+    const unsigned before = spectrumTransfers;
+#if DIALPLATE_HW_EFFECTS
+    const uint8_t glowPhase = view.ui.borderGlowPhase;
+#endif
+    for(unsigned frame = 0; frame < 32; frame++)
+    {
+        lv_tick_inc(50);
+        lv_timer_handler();
+#if DIALPLATE_HW_EFFECTS
+        HAL::Display_WaitForSendFinish();
+        Require(view.ui.borderGlowPhase == (glowPhase + frame + 1) % 16,
+                "popup occlusion does not stop or reset the existing border animation");
+#endif
+        Require(spectrumTransfers == before, "MAX spectrum cannot write over the update popup");
+        for(int y = 30; y < 290; y++)
+            for(int x = 18; x < width - 18; x++)
+                if(framebuffer[y * width + x].full != shown[y * width + x].full)
+                {
+                    std::fprintf(stderr, "Popup pixel changed at (%d,%d), frame=%u, spectrum-writes=%u\n",
+                                 x, y, frame, spectrumTransfers - before);
+                    Save(directory, variant + "-popup_occlusion-overwritten");
+                    Require(false, "static update popup content stays intact across animation frames");
+                }
+    }
+    Save(directory, variant + "-popup_occlusion-shown");
+
+    lv_obj_add_flag(popup, LV_OBJ_FLAG_HIDDEN);
+    Render();
+    unsigned hidden = spectrumTransfers;
+    Animate(view);
+#if DIALPLATE_HW_EFFECTS
+    Require(spectrumTransfers > hidden, "hidden popup permits the original spectrum to resume");
+#else
+    (void)hidden;
+#endif
+    lv_obj_clear_flag(popup, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_set_style_opa(popup, LV_OPA_TRANSP, 0);
+    Render();
+    unsigned transparent = spectrumTransfers;
+    Animate(view);
+#if DIALPLATE_HW_EFFECTS
+    Require(spectrumTransfers > transparent, "fully transparent popup does not suppress the spectrum");
+#else
+    (void)transparent;
+#endif
+    lv_obj_set_style_opa(popup, LV_OPA_COVER, 0);
+    Render();
+    unsigned reopened = spectrumTransfers;
+    Animate(view);
+    Require(spectrumTransfers == reopened, "showing the popup restores occlusion without changing the timer");
+    lv_obj_del(popup);
+    Render();
+    unsigned closed = spectrumTransfers;
+    Animate(view);
+#if DIALPLATE_HW_EFFECTS
+    Require(spectrumTransfers > closed, "closing the popup restores direct spectrum drawing");
+#else
+    (void)closed;
+#endif
+    Save(directory, variant + "-popup_occlusion-closed");
 }
 
 int main(int argc, char** argv)
@@ -531,6 +626,7 @@ int main(int argc, char** argv)
         lv_mem_monitor(&final);
         Require(final.free_size + 1024 >= initial.free_size, "repeated creation/deletion has bounded retained memory");
     }
+    else if(test == "popup_occlusion") CheckPopupOcclusion(view, argv[2], variant);
     else if(test == "dma") CheckDma();
     else Require(false, "known test case");
 

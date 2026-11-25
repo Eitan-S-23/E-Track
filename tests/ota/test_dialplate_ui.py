@@ -26,7 +26,7 @@ SKIN_OUTSIDE_LOCATOR_SHA256 = "d50f729a1a3ccbb96391d36c978f083ec713fa82741df69f3
 SKIN_ORIGINAL_LOCATOR_SHA256 = "1890a0bac2e0c6c42c8ad9fdba8277975583c256ad27ed6110b99dd943fb8d94"
 TIMER_FRAME_CASES = ("timer_frames", "statusbar_frames", "transparent_top_frames")
 CASES = ("layout", "long_values", "populated", "arrow", "controls", "spectrum", "spectrum_frames",
-         *TIMER_FRAME_CASES, "lifecycle", "dma")
+         *TIMER_FRAME_CASES, "popup_occlusion", "lifecycle", "dma")
 VARIANTS = ("desktop", "hardware")
 UI_METHODS = ("void SetAdaptiveMetricLabel", "void SetSpeedLabel", "void SetCalorieLabel",
               "void SetMaxSpeedLabel", "void SetNavDistanceLabel")
@@ -61,6 +61,39 @@ ORIGINAL_ARROW_LAYER = """    const void* arrowSrc = IMG("gps_arrow_light");
     }
 
 """
+SPECTRUM_OCCLUSION_HELPER = """static bool DialplatePopup_CoversSpectrum()
+{
+    /* A popup owns these pixels even though the HUD effects bypass LVGL. */
+    const lv_area_t spectrumArea =
+    {
+        SPECTRUM_X,
+        SPECTRUM_Y,
+        SPECTRUM_X + SPECTRUM_W - 1,
+        SPECTRUM_Y + SPECTRUM_H - 1
+    };
+    lv_obj_t* topLayer = lv_layer_top();
+    for(uint32_t i = 0; i < lv_obj_get_child_cnt(topLayer); i++)
+    {
+        lv_obj_t* overlay = lv_obj_get_child(topLayer, i);
+        if(lv_obj_get_style_opa(overlay, 0) == LV_OPA_TRANSP ||
+           lv_obj_get_style_bg_opa(overlay, 0) == LV_OPA_TRANSP)
+        {
+            continue;
+        }
+        lv_area_t visibleArea = spectrumArea;
+        if(lv_obj_area_is_visible(overlay, &visibleArea))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+"""
+SPECTRUM_OCCLUSION_CONDITIONS = (
+    "frame == nullptr",
+    "ui.skin == nullptr",
+    "instance == nullptr || area == nullptr || color_p == nullptr",
+)
 
 
 def checked(path):
@@ -118,6 +151,11 @@ def write_ui_helpers(source_root, directory):
         "\n\n".join(method(statusbar, name) for name in
                      ("static void StatusBar_StyleInit", "static void StatusBar_Appear")),
         encoding="utf-8")
+    firmware = (ROOT / "USER/App/Pages/FirmwareUpdate/FirmwareUpdate.cpp").read_text(encoding="utf-8")
+    popup = method(firmware[firmware.index("\nvoid CompanionOpen(void*)\n{"):], "void CompanionOpen")
+    checked(directory / "companion_popup_ui.inc").write_text(
+        popup[popup.index("    companionModal = lv_obj_create(lv_layer_top());"):
+              popup.index("    companionEmblem = lv_obj_create(panel);")], encoding="utf-8")
 
 
 HAL_STUB = """#ifndef DIALPLATE_TEST_HAL_H
@@ -184,7 +222,9 @@ class DialplateUiTests(unittest.TestCase):
             "MDK-ARM_F435/Platform/lv_port/lv_port_disp.cpp",
             "MDK-ARM_F435/cmake-generated/CMakeLists.txt",
             "tests/ota/lvgl_companion/lv_conf.h", "USER/App/Pages/StatusBar/StatusBar.cpp",
-            "tests/ota/dialplate_ui_harness.cpp", "tests/ota/lvgl_companion/CMakeLists.txt")
+            "USER/App/Pages/FirmwareUpdate/FirmwareUpdate.cpp",
+            "tests/ota/dialplate_ui_harness.cpp", "tests/ota/test_dialplate_ui.py",
+            "tests/ota/lvgl_companion/CMakeLists.txt")
         hashes = {path: hashlib.sha256((ROOT / path).read_bytes()).hexdigest() for path in inputs}
         checked(cls.directory / "source-sha256.json").write_text(
             json.dumps(hashes, indent=2) + "\n", encoding="utf-8")
@@ -263,6 +303,8 @@ class DialplateUiTests(unittest.TestCase):
             names += [variant + "-spectrum_frames-" + str(frame) for frame in range(16)]
         if case in TIMER_FRAME_CASES:
             names += [variant + "-" + case + "-" + str(frame) for frame in range(32)]
+        if case == "popup_occlusion":
+            names += [variant + "-popup_occlusion-shown", variant + "-popup_occlusion-closed"]
         for name in names:
             image_path = checked(directory / (name + ".ppm"))
             data = image_path.read_bytes()
@@ -283,8 +325,14 @@ class DialplateUiTests(unittest.TestCase):
         self.assertNotIn('IMG("gps_arrow_light")', view)
         anchor = "    ui.skin = skin;\n\n"
         self.assertEqual(view.count(anchor), 1)
-        # Restoring only the authorized omission must reproduce the original source.
+        # Only the authorized arrow omission and popup guard differ from the reference.
+        self.assertEqual(view.count(SPECTRUM_OCCLUSION_HELPER), 1)
         restored = view.replace(anchor, anchor + ORIGINAL_ARROW_LAYER, 1)
+        restored = restored.replace("\n" + SPECTRUM_OCCLUSION_HELPER, "", 1)
+        for original in SPECTRUM_OCCLUSION_CONDITIONS:
+            guarded = "if(" + original + " || DialplatePopup_CoversSpectrum())"
+            self.assertEqual(restored.count(guarded), 1)
+            restored = restored.replace(guarded, "if(" + original + ")", 1)
         self.assertEqual(source_digest(restored), REFERENCE_UI_HASHES["view"])
         self.assertEqual(source_digest(header), REFERENCE_UI_HASHES["header"])
         for name in (*UI_METHODS, "void Dialplate::Update"):

@@ -274,6 +274,43 @@ Only the owned board block is staged for bookkeeping; unrelated dirty documents
 and board portions remain unchanged by this task. No physical installation or
 channel publication is claimed.
 
+### MAX Spectrum / Update Popup Occlusion Repair
+
+2026-11-25: owner authorizes this UI-only repair. Local, uncommitted source on
+main now prevents spectrum/direct glow writes and the existing flush overlay
+from overwriting a visible popup covering MAX. Hidden/fully transparent top
+objects and the status bar do not suppress the normal animation. Frame cadence,
+phase progression, bitmap, fonts, geometry, HAL and update/recording logic are
+unchanged. The first spectrum-only guard still allowed a glow write at (34,178);
+the final shared UI guard closes that path without resetting either animation.
+Source-bound host LVGL checks: 32 passed / one existing desktop DMA skip;
+24 existing modal lifecycle/layout checks passed. All 244 reference renders
+retain identical pixels outside the already-approved locator restoration.
+Host builds have no warning/error lines; one existing Pillow getdata deprecation
+is reported by the bitmap check. Shown/closed hardware-variant renders inspected.
+Original failure: `.cache/dialplate-ui-tests/run-s02iu1_b`; residual-glow failure:
+`.cache/dialplate-ui-tests/run-kgukrgdl`; final UI/reference evidence:
+`.cache/dialplate-ui-tests/run-44ob7b0l`; modal evidence:
+`.cache/companion-modal-tests/run-z8tlqpmq`. All outputs stay project-local.
+The concurrent main advance to `7c906713` is App-only work, not a change to these
+UI inputs. The owner now authorizes this repair's scoped commit and main push.
+Firmware 3.3.60 requests the existing GitHub full/recovery candidate path; its
+version reservation and exact source-bound delivery are still pending. Reuse
+the qualified scoped Git/SSH adapter and original candidate observer because
+the standard version-only command does not admit this bounded dirty UI change.
+No new GitHub authentication, local firmware build, device operation, channel
+publication, delta generation or independent acceptance is authorized or claimed.
+Firmware 3.3.59 delivery above remains historical and is not rebuilt.
+The initial read-only Release reservation query hit an HTTP EOF before any
+commit/push/build; its preserved receipt is
+`.cache/candidate-release/ui-popup-3360-remote-20261125/result.json`.
+The second attempt stops before staging/commit when concurrent App record
+updates change main/documents. Main `b53e1624` contains only that App bookkeeping;
+the tested MCU/UI inputs are unchanged. Preserve those updates and bind the
+next preflight to this fresh parent and this owned UI block, not stale unrelated
+document hashes. Original stop:
+`.cache/candidate-release/ui-popup-3360-remote-20261125-02/result.json`.
+
 <!-- mcu-ui-original-20261124:end -->
 
 ## 2. PRE 前置修正(来自复审报告,先于一切)

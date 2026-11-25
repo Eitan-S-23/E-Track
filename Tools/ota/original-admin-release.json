@@ -1,7 +1,7 @@
 {
   "schema": "original-admin-automatic-candidates-v1",
   "firmware": {
-    "versionName": "3.3.59",
-    "releaseNotes": "Restore only the owner-identified bitmap locator region using the original UI/dialplate PNG supplied by the owner. Copy its exact corresponding RGB565 pixels inside the existing small locator footprint; no repainting, resizing, blending, new UI element or whole-image replacement. Restore the original green bitmap marker while keeping the separate white arrow overlay absent. Every skin pixel outside this region and the original PNG remain unchanged. Preserve flowing borders, layout, fonts, spectrum, map arrows, the 120 KiB LVGL pool, 4096-byte system-heap gate, HAL, OTA, recording, navigation and App 1.0.95+121. Build this exact main source through GitHub and register full/recovery candidates only; publication and installation remain owner-controlled. No local firmware build, device operation or manual backend deployment."
+    "versionName": "3.3.60",
+    "releaseNotes": "Fix only the MAX spectrum overwriting the firmware-update popup. Spectrum and direct flowing-border writes, including the existing display overlay, respect a visible popup covering MAX. Keep the original animation frames, 50 ms cadence and phase progression; resume the original visible effects after the popup closes. Hidden or fully transparent top objects and the status bar do not suppress the animation. Preserve the restored original bitmap locator, absent separate white arrow, skin, layout, fonts, HAL, OTA, recording, navigation, App inputs, 120 KiB LVGL pool and 4096-byte system-heap gate. Source-bound host UI/modal regressions and 244 normal-state reference renders pass. Build this exact main source through GitHub and register unpublished full/recovery candidates only. No local firmware build, device operation, manual backend deployment, channel publication or delta generation."
   }
 }
