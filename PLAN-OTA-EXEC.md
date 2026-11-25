@@ -250,12 +250,29 @@ historical, not a claim that reconstruction met this later source requirement.
 Local pixel restoration and actual LVGL self-tests pass: 30 passed, one desktop
 DMA skip; 244 reference renders have zero changes outside the locator. The actual
 populated hardware-variant render retains the original green bitmap marker and
-no independent white arrow. Authorized main/GitHub delivery is pending for
+no independent white arrow. Authorized main/GitHub delivery is complete for
 3.3.59. Evidence:
 `.cache/mcu-ui-bitmap-restore-20261125/preview/analysis.json` and
 `preview/locator-comparison.png`, `host-checks/result.json` and
 `host-checks/hardware-populated.png`. No local firmware build, manual backend/device
 operation, channel publication or independent acceptance is claimed.
+
+Main source: `4856e9e93d801830cf132a7be1ab6c8436fe164c`; exact first-push GitHub
+run [45628542562](https://github.com/Eitan-S-23/E-Track/actions/runs/45628542562)
+succeeds with 640 GCC warning lines and zero errors. Checks/firmware pass and
+App is skipped. Native receipts bind that exact source/run/version; full and
+recovery assets are R2-verified and registered ready/unpublished. Receipt:
+`.cache/candidate-release/ui-bitmap-3359-remote-20261125-02/result.json`.
+The initial read-only preflight hit an HTTPS TLS EOF before any commit or CI;
+its receipt is preserved in the sibling `ui-bitmap-3359-remote-20261125` directory.
+Fresh Git reads and the only delivery push reuse the verified existing RSA SSH
+route; native CI observation reuses the existing owner keyring without login,
+new credentials or profile/config changes. A later API TLS handshake timeout is
+preserved in `invocations/6082e4b9/command-029.log`; observing that same source/run
+again completes delivery without a second version bump, push, build or upload.
+Only the owned board block is staged for bookkeeping; unrelated dirty documents
+and board portions remain unchanged by this task. No physical installation or
+channel publication is claimed.
 
 <!-- mcu-ui-original-20261124:end -->
 
