@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -18,6 +19,9 @@ except ImportError:
 from test_main_menu_encoder import method
 
 ROOT = Path(__file__).resolve().parents[2]
+LOCATOR_CX, LOCATOR_CY, LOCATOR_RADIUS = 119, 232, 28
+SKIN_OUTSIDE_LOCATOR_SHA256 = "d50f729a1a3ccbb96391d36c978f083ec713fa82741df69f3ece76cf23ad58ec"
+SKIN_REPAIRED_LOCATOR_SHA256 = "327d63d3f93eec678eeda6fc48c3670023b9f24e159c139789b2c93a6a4a8a2e"
 TIMER_FRAME_CASES = ("timer_frames", "statusbar_frames", "transparent_top_frames")
 CASES = ("layout", "long_values", "populated", "arrow", "controls", "spectrum", "spectrum_frames",
          *TIMER_FRAME_CASES, "lifecycle", "dma")
@@ -71,6 +75,34 @@ def checked(path):
 def source_digest(text):
     canonical = re.sub(r"[ \t]+$", "", text, flags=re.M).strip() + "\n"
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def locator_pixels(data, channels, outside=False):
+    chunks = []
+    for y in range(320):
+        start, end = y * 240 * channels, (y + 1) * 240 * channels
+        distance = abs(y - LOCATOR_CY)
+        if distance > LOCATOR_RADIUS:
+            if outside:
+                chunks.append(data[start:end])
+            continue
+        half_width = math.isqrt(LOCATOR_RADIUS ** 2 - distance ** 2)
+        left = start + (LOCATOR_CX - half_width) * channels
+        right = start + (LOCATOR_CX + half_width + 1) * channels
+        chunks.extend((data[start:left], data[right:end]) if outside else (data[left:right],))
+    return b"".join(chunks)
+
+
+def skin_rgb565(source_root=ROOT):
+    text = (source_root / "USER/App/Resource/Image/img_src_dialplate_skin.c").read_text(encoding="utf-8")
+    match = re.search(r"#if LV_COLOR_DEPTH == 16 && LV_COLOR_16_SWAP != 0\n(.*?)\n#else\n(.*?)\n#endif", text, re.S)
+    if match is None:
+        raise AssertionError("Missing the two original skin byte orders")
+    swapped, little = [bytes(int(value, 16) for value in re.findall(r"0x([0-9a-fA-F]{2})", block))
+                       for block in match.groups()]
+    if len(little) != 240 * 320 * 2 or swapped[::2] != little[1::2] or swapped[1::2] != little[::2]:
+        raise AssertionError("Inconsistent skin RGB565 byte orders")
+    return little
 
 
 def write_ui_helpers(source_root, directory):
@@ -260,6 +292,28 @@ class DialplateUiTests(unittest.TestCase):
         cmake = (ROOT / "MDK-ARM_F435/cmake-generated/CMakeLists.txt").read_text(encoding="utf-8")
         self.assertIn('"-Wl,--defsym=__p34_heap_min=4096"', cmake)
 
+    def test_skin_removes_the_entire_locator_plate_only(self):
+        data = skin_rgb565()
+        self.assertEqual(hashlib.sha256(locator_pixels(data, 2, outside=True)).hexdigest(),
+                         SKIN_OUTSIDE_LOCATOR_SHA256, "Skin pixels outside the owner-requested repair changed")
+        self.assertEqual(hashlib.sha256(locator_pixels(data, 2)).hexdigest(), SKIN_REPAIRED_LOCATOR_SHA256)
+        core = [data[(y * 240 + x) * 2:(y * 240 + x + 1) * 2]
+                for y in range(LOCATOR_CY - 12, LOCATOR_CY + 13)
+                for x in range(LOCATOR_CX - 12, LOCATOR_CX + 13)
+                if (x - LOCATOR_CX) ** 2 + (y - LOCATOR_CY) ** 2 <= 12 ** 2]
+        self.assertLess(core.count(b"\x82\x00"), 30, "The old uniform empty locator plate remains")
+
+    def assert_reference_pixels(self, actual, original, name):
+        header = b"P6\n240 320\n255\n"
+        self.assertEqual(actual[:len(header)], original[:len(header)])
+        actual_pixels, original_pixels = actual[len(header):], original[len(header):]
+        self.assertEqual(locator_pixels(actual_pixels, 3, outside=True),
+                         locator_pixels(original_pixels, 3, outside=True),
+                         "UI pixels outside the authorized background repair differ: " + name)
+        repaired, previous = locator_pixels(actual_pixels, 3), locator_pixels(original_pixels, 3)
+        return sum(repaired[index:index + 3] != previous[index:index + 3]
+                   for index in range(0, len(repaired), 3))
+
     def test_reference_render_equivalence(self):
         if self.reference_build is None:
             self.skipTest("Set E_TRACK_UI_REFERENCE_ROOT for read-only reference rendering")
@@ -271,22 +325,24 @@ class DialplateUiTests(unittest.TestCase):
                     original = self.run_case(variant, case, self.reference_build, self.reference_directory)
                     self.assertEqual(actual, (self.directory / (variant + "-" + case + ".ppm")).read_bytes())
                     self.assertEqual(original, (self.reference_directory / (variant + "-" + case + ".ppm")).read_bytes())
-                    self.assertEqual(actual, original, "UI pixels differ from the reference: " + variant + "-" + case)
+                    different = self.assert_reference_pixels(actual, original, variant + "-" + case)
                     hashes[variant + "-" + case] = {
                         "targetSha256": hashlib.sha256(actual).hexdigest(),
                         "referenceSha256": hashlib.sha256(original).hexdigest(),
-                        "differentPixels": 0}
+                        "differentPixels": different,
+                        "outsideLocatorDifferentPixels": 0}
                     if case == "spectrum_frames" or case in TIMER_FRAME_CASES:
                         frame_count = 16 if case == "spectrum_frames" else 32
                         for frame in range(frame_count):
                             name = variant + "-" + case + "-" + str(frame)
                             actual_frame = (self.directory / (name + ".ppm")).read_bytes()
                             original_frame = (self.reference_directory / (name + ".ppm")).read_bytes()
-                            self.assertEqual(actual_frame, original_frame, "Animation pixels differ: " + name)
+                            different = self.assert_reference_pixels(actual_frame, original_frame, name)
                             hashes[name] = {
                                 "targetSha256": hashlib.sha256(actual_frame).hexdigest(),
                                 "referenceSha256": hashlib.sha256(original_frame).hexdigest(),
-                                "differentPixels": 0}
+                                "differentPixels": different,
+                                "outsideLocatorDifferentPixels": 0}
         checked(self.directory / "reference-comparison.json").write_text(
             json.dumps(hashes, indent=2) + "\n", encoding="utf-8")
         if Image is not None:

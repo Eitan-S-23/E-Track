@@ -408,6 +408,18 @@ int main(int argc, char** argv)
         view.SetArrowAngle(359.8f);
         view.SetArrowAngle(720.0f);
         Require(view.ui.arrow.img == nullptr, "heading updates cannot recreate the removed overlay");
+        Render();
+        unsigned greenPeak = 0;
+        for(int x = 110; x <= 125; x++)
+        {
+            lv_color32_t color;
+            color.full = lv_color_to32(framebuffer[232 * width + x]);
+            if(color.ch.green > greenPeak) greenPeak = color.ch.green;
+        }
+        if(argc == 3)
+            Require(greenPeak > 150, "the original route continues through the removed locator plate");
+        else
+            Require(greenPeak < 50, "the unmodified reference still contains the original empty locator plate");
     }
     else if(test == "controls") CheckControls(view);
     else if(test == "spectrum")

@@ -195,6 +195,24 @@ Flowing borders, layout, map arrows, HAL, OTA, recording, navigation and the App
 remain unchanged. No local firmware build, channel publication, backend
 deployment, device operation or independent acceptance is claimed.
 
+2026-11-25: owner reports the remaining empty locator plate after 3.3.57's arrow
+removal. Codex root owns the bounded background follow-up, in progress. The
+reference skin generator baked a circular plate below the independent arrow;
+the preceding removal omitted that background check. Repair only this small
+circle using the original neighboring path/texture, preserving every pixel
+outside it and all original flowing borders. Prior 3.3.57 delivery evidence is
+retained; no device operation, channel publication or unrelated UI change.
+Local implementation and UI self-tests are complete; main/candidate delivery
+is pending for 3.3.58. Only 2325 skin pixels in the old locator/halo footprint
+changed, with zero changes outside it. Actual LVGL tests: 30 passed, one desktop
+DMA skip; 244 reference renders preserve every pixel outside the repair. The
+original View/Presenter, flowing borders, memory gates, HAL, OTA and App remain
+unchanged. Evidence: `.cache/mcu-ui-arrow-hole-20261125/pass2/analysis.json` and
+`host-checks/collected-result.json`; actual populated screenshot:
+`.cache/mcu-ui-arrow-hole-20261125/host-checks/hardware-populated.png`.
+The initial post-test collector used the wrong log filename; its failure is
+retained. The successful 31-test execution was collected without rerunning it.
+
 <!-- mcu-ui-original-20261124:end -->
 
 ## 2. PRE 前置修正(来自复审报告,先于一切)
