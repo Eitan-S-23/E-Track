@@ -1,7 +1,7 @@
 {
   "schema": "original-admin-automatic-candidates-v1",
   "firmware": {
-    "versionName": "3.3.61",
-    "releaseNotes": "Version-only 3.3.60 to 3.3.61 MCU firmware candidate for owner-controlled upgrade testing. Preserve the delivered original UI and MAX popup occlusion repair, all MCU functionality, factory UID and App 1.0.96+122. Full/recovery candidate only. No local firmware build, device operation, backend deployment, automatic Stable/Beta publication or delta generation."
+    "versionName": "3.3.62",
+    "releaseNotes": "Version-only 3.3.61 to 3.3.62 MCU firmware candidate for owner-controlled upgrade testing. Preserve the delivered original UI and MAX popup occlusion repair, all MCU functionality, factory UID and App 1.0.96+122. Full/recovery candidate only. No local firmware build, device operation, backend deployment, automatic Stable/Beta publication or delta generation."
   }
 }
