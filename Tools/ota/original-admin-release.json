@@ -1,7 +1,7 @@
 {
   "schema": "original-admin-automatic-candidates-v1",
   "firmware": {
-    "versionName": "3.3.60",
-    "releaseNotes": "Fix only the MAX spectrum overwriting the firmware-update popup. Spectrum and direct flowing-border writes, including the existing display overlay, respect a visible popup covering MAX. Keep the original animation frames, 50 ms cadence and phase progression; resume the original visible effects after the popup closes. Hidden or fully transparent top objects and the status bar do not suppress the animation. Preserve the restored original bitmap locator, absent separate white arrow, skin, layout, fonts, HAL, OTA, recording, navigation, App inputs, 120 KiB LVGL pool and 4096-byte system-heap gate. Source-bound host UI/modal regressions and 244 normal-state reference renders pass. Build this exact main source through GitHub and register unpublished full/recovery candidates only. No local firmware build, device operation, manual backend deployment, channel publication or delta generation."
+    "versionName": "3.3.61",
+    "releaseNotes": "Version-only 3.3.60 to 3.3.61 MCU firmware candidate for owner-controlled upgrade testing. Preserve the delivered original UI and MAX popup occlusion repair, all MCU functionality, factory UID and App 1.0.96+122. Full/recovery candidate only. No local firmware build, device operation, backend deployment, automatic Stable/Beta publication or delta generation."
   }
 }
