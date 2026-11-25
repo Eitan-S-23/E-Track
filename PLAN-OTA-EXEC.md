@@ -311,6 +311,35 @@ next preflight to this fresh parent and this owned UI block, not stale unrelated
 document hashes. Original stop:
 `.cache/candidate-release/ui-popup-3360-remote-20261125-02/result.json`.
 
+2026-11-26 delivery complete: the scoped source commit
+`ae339202e920df130c4be38f2f70253ae713b155` is on fresh remote main.
+Exact first-attempt GitHub run `45650365791` succeeded:
+https://github.com/Eitan-S-23/E-Track/actions/runs/45650365791
+The checks and firmware jobs passed; the App job was skipped and App remains
+1.0.96+122. The original native receipt binds firmware 3.3.60 / 30360 to this
+source/run, confirms both full and recovery R2 byte verification, and registers
+two assets in state ready with channelPublished=false and productionApproved=false.
+Full: 343012 bytes, SHA-256
+`94b45ae1a8e8a85350cf30f44eb67c71147741cef81f2a32387dd1243593d949`.
+Recovery: 747496 bytes, SHA-256
+`802962e87a811ee29ff5ab9841080fa03f65536b04761b5bb6c2387330f611d1`.
+Finalized target image SHA-256:
+`fa27222b9011959feda13aa511f8acccc10d5fcd0a40b6c6a5111db97732c2a9`.
+Native firmware log counts are 640 warning occurrences and zero error occurrences;
+warnings are not suppressed or represented as a warning-free build.
+Original delivery receipt:
+`.cache/candidate-release/ui-popup-3360-remote-20261125-03/result.json`.
+Native firmware log:
+`.cache/candidate-release/ui-popup-3360-remote-20261125-03/invocations/b05cf9fd/command-039.log`.
+The preceding redundant actor-query EOF occurred before commit. The thin cache
+adapter now reuses the actor verified for that invocation; recovery verified all
+five owned staged blobs, including HEAD plus only this board block, before
+restaging them. No working file was reverted and unrelated changes remain intact.
+All selected local writes remain inside the authorized project root. Only this
+owned board block is included in the documentation follow-up; no firmware rebuild,
+local MCU compilation, device installation, channel publication, delta generation
+or independent acceptance is performed or claimed.
+
 <!-- mcu-ui-original-20261124:end -->
 
 ## 2. PRE 前置修正(来自复审报告,先于一切)
