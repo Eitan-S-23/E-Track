@@ -385,7 +385,9 @@ class CompanionService : Service() {
         linkedToken = if (connected) CompanionBridge.deviceToken(target) else null
         val prefs = CompanionBridge.preferences(this)
         prefs.edit().putString("lastResult", status).apply()
-        CompanionDiagnostics.record(this, status, runtimeId, reason, reconnectAttempts + 1, value)
+        // Reconfirming control keeps the current notification, but is not another cloud check or OTA success.
+        val diagnosticStatus = if (value["controlOnly"] == true) "CONTROL_CHANNEL_READY" else status
+        CompanionDiagnostics.record(this, diagnosticStatus, runtimeId, reason, reconnectAttempts + 1, value)
         val presentation = if (!connected && status in listOf("TARGET_IDENTITY_VERIFIED", "UPGRADE_FAILED")) "CONNECTING" else status
         if (notificationStatus != presentation) {
             notificationStatus = presentation

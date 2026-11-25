@@ -118,6 +118,14 @@ class CompanionIntegrationTest {
 
     private fun diagnosticHistory() = CompanionDiagnostics.snapshot(app)["history"].toString()
 
+    private fun assertRemainingUsesElapsedDeadline(deadline: Long) {
+        val before = SystemClock.elapsedRealtime()
+        val remaining = CompanionRecoveryWake.remainingMs(app)
+        val after = SystemClock.elapsedRealtime()
+        assertTrue(remaining >= (deadline - after).coerceAtLeast(0))
+        assertTrue(remaining <= (deadline - before).coerceAtLeast(0))
+    }
+
     @Test fun elapsedAlarmRequestsHeadlessRecoveryEvenWhenTheUptimeTimerNeverRan() {
         associated()
         val request = scheduledWake()
@@ -219,12 +227,19 @@ class CompanionIntegrationTest {
         val stale = scheduledWake(600000)
         val deadline = prefs.getLong("nextAttempt", 0)
         Settings.Global.putInt(app.contentResolver, Settings.Global.BOOT_COUNT, 8)
+        val beforeElapsed = SystemClock.elapsedRealtime()
+        val beforeWall = System.currentTimeMillis()
         CompanionRecoveryWake.restore(app)
+        val afterElapsed = SystemClock.elapsedRealtime()
+        val afterWall = System.currentTimeMillis()
         val alarms = shadowOf(app.getSystemService(AlarmManager::class.java)).scheduledAlarms
         assertEquals(1, alarms.size)
         assertNotEquals(stale.data, shadowOf(alarms.single().operation!!).savedIntent.data)
         assertEquals(deadline, prefs.getLong("nextAttempt", 0))
-        assertEquals(600000L, CompanionRecoveryWake.remainingMs(app))
+        val elapsedDeadline = prefs.getLong("recoveryWakeElapsed", 0)
+        assertTrue(elapsedDeadline >= beforeElapsed + (deadline - afterWall))
+        assertTrue(elapsedDeadline <= afterElapsed + (deadline - beforeWall))
+        assertRemainingUsesElapsedDeadline(elapsedDeadline)
         CompanionRecoveryReceiver().onReceive(app, stale)
         assertNull(shadowOf(app).nextStartedService)
     }
@@ -232,12 +247,14 @@ class CompanionIntegrationTest {
     @Test fun sameBootUsesElapsedDeadlineRatherThanAnAdjustedWallDisplay() {
         associated()
         scheduledWake(600000)
+        val elapsedDeadline = prefs.getLong("recoveryWakeElapsed", 0)
         // Simulate a shifted wall-clock correlation without changing elapsed time.
         val shifted = prefs.getLong("nextAttempt", 0) + 86400000L
         prefs.edit().putLong("nextAttempt", shifted).putLong("recoveryWakeAt", shifted).commit()
-        assertEquals(600000L, CompanionRecoveryWake.remainingMs(app))
+        assertRemainingUsesElapsedDeadline(elapsedDeadline)
         CompanionRecoveryWake.restore(app)
-        assertEquals(600000L, CompanionRecoveryWake.remainingMs(app))
+        assertEquals(elapsedDeadline, prefs.getLong("recoveryWakeElapsed", 0))
+        assertRemainingUsesElapsedDeadline(elapsedDeadline)
         assertEquals(1, shadowOf(app.getSystemService(AlarmManager::class.java)).scheduledAlarms.size)
     }
 

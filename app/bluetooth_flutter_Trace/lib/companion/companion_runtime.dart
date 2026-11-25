@@ -216,7 +216,9 @@ class CompanionRuntime extends GetxService {
     if (!reconnecting && _sameLink()) {
       await _journal('LINK_REUSED');
       if ((_controlNeedsCheck || wake['reason'] == 'foreground' || wake['reason'] == 'manual') &&
-          !await _refreshControl(wake)) return;
+          !await _refreshControl(wake)) {
+        return;
+      }
     }
     if (!_current(epoch) || !_sameLink()) return;
     if (controlOnly) {
@@ -421,7 +423,8 @@ class CompanionRuntime extends GetxService {
       if (identical(_recovery, attempt)) _recovery = null;
       releaseAdmission = true;
       await _diagnostic('CONTROL_CHECK_READY', attempt);
-      return await _state(previousStatus == 'DEVICE_CONTROL_UNSUPPORTED' ? 'CONNECTED' : previousStatus, busy: false);
+      return await _state(previousStatus == 'DEVICE_CONTROL_UNSUPPORTED' ? 'CONNECTED' : previousStatus,
+        busy: false, controlOnly: true);
     } catch (error) {
       attempt.cancel();
       _invalidateLink();
@@ -760,7 +763,8 @@ class CompanionRuntime extends GetxService {
     } finally { _drainWake(); }
   }
 
-  Future<bool> _state(String value, {required bool busy, bool checkFinished = false, String? stage}) async {
+  Future<bool> _state(String value, {required bool busy, bool checkFinished = false,
+      bool controlOnly = false, String? stage}) async {
     final runtime = _runtime, address = _address;
     if (runtime == null || address == null) return false;
     final sequence = ++_stateSequence;
@@ -772,7 +776,8 @@ class CompanionRuntime extends GetxService {
         'recoveryBusy': _recovery?.current == true, 'recoveryId': _recovery?.id,
         'stage': stage ?? _recovery?.stage, 'elapsedMs': _recovery?.elapsedMs,
         'deviceKey': sha256.convert(utf8.encode(address.toLowerCase())).toString(),
-        'deviceToken': sha256.convert(utf8.encode(address)).toString(), 'checkFinished': checkFinished}) == true;
+        'deviceToken': sha256.convert(utf8.encode(address)).toString(),
+        'checkFinished': checkFinished, 'controlOnly': controlOnly}) == true;
     } catch (_) { accepted = false; }
     if (_runtime != runtime) return false;
     if (sequence != _stateSequence) return false;
