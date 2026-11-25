@@ -417,7 +417,7 @@ int main(int argc, char** argv)
             if(color.ch.green > greenPeak) greenPeak = color.ch.green;
         }
         if(argc == 3)
-            Require(greenPeak > 150, "the original route continues through the removed locator plate");
+            Require(greenPeak > 150, "the original PNG locator is visible without the white arrow overlay");
         else
             Require(greenPeak < 50, "the unmodified reference still contains the original empty locator plate");
     }

@@ -196,14 +196,14 @@ remain unchanged. No local firmware build, channel publication, backend
 deployment, device operation or independent acceptance is claimed.
 
 2026-11-25: owner reports the remaining empty locator plate after 3.3.57's arrow
-removal. Codex root owns the bounded background follow-up, in progress. The
+removal. Codex root completed the bounded UI/main/GitHub-build follow-up. The
 reference skin generator baked a circular plate below the independent arrow;
 the preceding removal omitted that background check. Repair only this small
 circle using the original neighboring path/texture, preserving every pixel
 outside it and all original flowing borders. Prior 3.3.57 delivery evidence is
 retained; no device operation, channel publication or unrelated UI change.
-Local implementation and UI self-tests are complete; main/candidate delivery
-is pending for 3.3.58. Only 2325 skin pixels in the old locator/halo footprint
+Local implementation and UI self-tests are complete; 3.3.58 is on main and its
+exact-source GitHub build passed. Only 2325 skin pixels in the old locator/halo footprint
 changed, with zero changes outside it. Actual LVGL tests: 30 passed, one desktop
 DMA skip; 244 reference renders preserve every pixel outside the repair. The
 original View/Presenter, flowing borders, memory gates, HAL, OTA and App remain
@@ -212,6 +212,50 @@ unchanged. Evidence: `.cache/mcu-ui-arrow-hole-20261125/pass2/analysis.json` and
 `.cache/mcu-ui-arrow-hole-20261125/host-checks/hardware-populated.png`.
 The initial post-test collector used the wrong log filename; its failure is
 retained. The successful 31-test execution was collected without rerunning it.
+
+Main source: `45aa701b85ad1c0815543ffe04f92c15e30604b1`. First-push GitHub run
+[45620251445](https://github.com/Eitan-S-23/E-Track/actions/runs/45620251445)
+succeeded: checks/firmware passed, App skipped. The exact-source full/recovery
+compile, private-key cleanup, upload/register and native-receipt steps all pass.
+Public HTTP metadata independently identifies that exact source/run/attempt;
+native-log GET is denied with HTTP 403. GCC warning/error counts and native
+candidate-metadata/asset receipts are NOT_VERIFIED, not inferred from old builds.
+Receipt: `.cache/candidate-release/ui-arrow-hole-3358-remote-20261125/result.json`
+(`CI_BUILD_PASSED`, not a claimed native metadata readback). Public Release lists
+do not expose drafts; existing CI/server version and immutable-asset guards are
+unchanged. The existing RSA key authenticates Eitan-S-23 and passes the exact
+repository/main push dry-run without login, new credentials or global changes.
+The initial post-push HTTP ref returned cached pre-push main; its original log
+is preserved. Fresh Git remote, HEAD, origin/main and all source hashes agree;
+no second push, version increment or build was performed to reconcile it.
+Only this owned board block is updated for bookkeeping. No local firmware
+build, manual backend operation, channel publication, device installation or
+independent acceptance is claimed.
+
+### Owner-Provided Original Bitmap Locator Restoration
+
+2026-11-25: owner rejects the neighboring-texture reconstruction and provides
+`UI/仪表盘.png`, requiring restoration of only the identified locator region.
+Codex root now copies the corresponding original PNG pixels, without repainting,
+resizing, blending, whole-image replacement or another UI object. The original
+green bitmap marker is restored; the independent white arrow stays absent.
+Only 2377 pixels inside the existing circle at (119,232), radius 28, change;
+every pixel outside it is identical. Original PNG SHA256 is
+`aa8b11e3ce3799a1e08ceb5e63356c1c3dd276d2d364e1d1ace61645f6b0e750`.
+The PNG itself is read-only and unchanged. The native RGB565 region matches it
+exactly, using the existing reference formatter and installed Windows PNG codec.
+View/Presenter, flowing borders, fonts, layout, HAL, OTA, recording/navigation,
+memory gates and App 1.0.95+121 remain unchanged. Earlier 3.3.58 evidence remains
+historical, not a claim that reconstruction met this later source requirement.
+Local pixel restoration and actual LVGL self-tests pass: 30 passed, one desktop
+DMA skip; 244 reference renders have zero changes outside the locator. The actual
+populated hardware-variant render retains the original green bitmap marker and
+no independent white arrow. Authorized main/GitHub delivery is pending for
+3.3.59. Evidence:
+`.cache/mcu-ui-bitmap-restore-20261125/preview/analysis.json` and
+`preview/locator-comparison.png`, `host-checks/result.json` and
+`host-checks/hardware-populated.png`. No local firmware build, manual backend/device
+operation, channel publication or independent acceptance is claimed.
 
 <!-- mcu-ui-original-20261124:end -->
 

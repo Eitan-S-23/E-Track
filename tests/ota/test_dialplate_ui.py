@@ -19,9 +19,11 @@ except ImportError:
 from test_main_menu_encoder import method
 
 ROOT = Path(__file__).resolve().parents[2]
+ORIGINAL_LOCATOR_PNG = ROOT / "UI" / "\u4eea\u8868\u76d8.png"
+ORIGINAL_LOCATOR_PNG_SHA256 = "aa8b11e3ce3799a1e08ceb5e63356c1c3dd276d2d364e1d1ace61645f6b0e750"
 LOCATOR_CX, LOCATOR_CY, LOCATOR_RADIUS = 119, 232, 28
 SKIN_OUTSIDE_LOCATOR_SHA256 = "d50f729a1a3ccbb96391d36c978f083ec713fa82741df69f3ece76cf23ad58ec"
-SKIN_REPAIRED_LOCATOR_SHA256 = "327d63d3f93eec678eeda6fc48c3670023b9f24e159c139789b2c93a6a4a8a2e"
+SKIN_ORIGINAL_LOCATOR_SHA256 = "1890a0bac2e0c6c42c8ad9fdba8277975583c256ad27ed6110b99dd943fb8d94"
 TIMER_FRAME_CASES = ("timer_frames", "statusbar_frames", "transparent_top_frames")
 CASES = ("layout", "long_values", "populated", "arrow", "controls", "spectrum", "spectrum_frames",
          *TIMER_FRAME_CASES, "lifecycle", "dma")
@@ -171,6 +173,7 @@ class DialplateUiTests(unittest.TestCase):
             "\n\n".join(method(source, signature) for signature in signatures), encoding="utf-8")
         write_ui_helpers(ROOT, cls.directory)
         inputs = (
+            "UI/\u4eea\u8868\u76d8.png",
             "USER/App/Pages/Dialplate/DialplateView.cpp",
             "USER/App/Pages/Dialplate/DialplateView.h",
             "USER/App/Pages/Dialplate/Dialplate.cpp",
@@ -292,16 +295,23 @@ class DialplateUiTests(unittest.TestCase):
         cmake = (ROOT / "MDK-ARM_F435/cmake-generated/CMakeLists.txt").read_text(encoding="utf-8")
         self.assertIn('"-Wl,--defsym=__p34_heap_min=4096"', cmake)
 
-    def test_skin_removes_the_entire_locator_plate_only(self):
+    def test_skin_restores_the_original_png_locator_only(self):
         data = skin_rgb565()
+        self.assertEqual(hashlib.sha256(ORIGINAL_LOCATOR_PNG.read_bytes()).hexdigest(),
+                         ORIGINAL_LOCATOR_PNG_SHA256, "The owner's original PNG changed")
         self.assertEqual(hashlib.sha256(locator_pixels(data, 2, outside=True)).hexdigest(),
                          SKIN_OUTSIDE_LOCATOR_SHA256, "Skin pixels outside the owner-requested repair changed")
-        self.assertEqual(hashlib.sha256(locator_pixels(data, 2)).hexdigest(), SKIN_REPAIRED_LOCATOR_SHA256)
-        core = [data[(y * 240 + x) * 2:(y * 240 + x + 1) * 2]
-                for y in range(LOCATOR_CY - 12, LOCATOR_CY + 13)
-                for x in range(LOCATOR_CX - 12, LOCATOR_CX + 13)
-                if (x - LOCATOR_CX) ** 2 + (y - LOCATOR_CY) ** 2 <= 12 ** 2]
-        self.assertLess(core.count(b"\x82\x00"), 30, "The old uniform empty locator plate remains")
+        self.assertEqual(hashlib.sha256(locator_pixels(data, 2)).hexdigest(), SKIN_ORIGINAL_LOCATOR_SHA256,
+                         "The locator differs from the original PNG's RGB565 pixels")
+        if Image is not None:
+            with Image.open(ORIGINAL_LOCATOR_PNG) as image:
+                self.assertEqual(image.size, (240, 320))
+                original = bytearray()
+                for r, g, b in image.convert("RGB").getdata():
+                    value = ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3)
+                    original.extend((value & 0xFF, value >> 8))
+            self.assertEqual(locator_pixels(data, 2), locator_pixels(original, 2),
+                             "Original PNG pixels were repainted, resized or copied from another location")
 
     def assert_reference_pixels(self, actual, original, name):
         header = b"P6\n240 320\n255\n"

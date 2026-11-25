@@ -1,7 +1,7 @@
 {
   "schema": "original-admin-automatic-candidates-v1",
   "firmware": {
-    "versionName": "3.3.58",
-    "releaseNotes": "Complete the owner-requested Dialplate arrow removal by clearing its remaining baked circular locator plate and halo. Repair only the original skin's small locator footprint with neighboring path and texture pixels; every pixel outside it remains unchanged. The white arrow remains absent. Preserve all original flowing borders, layout, fonts, spectrum rendering, map arrows, the 120 KiB LVGL pool, 4096-byte system-heap gate, OTA workspace, stack, guard, HAL, OTA companion/file management, recorder admission, navigation, factory UID and App 1.0.95+121. GitHub builds the exact main source and registers full/recovery candidates only; owner controls publication and installation. No local firmware build, device operation or backend deployment."
+    "versionName": "3.3.59",
+    "releaseNotes": "Restore only the owner-identified bitmap locator region using the original UI/dialplate PNG supplied by the owner. Copy its exact corresponding RGB565 pixels inside the existing small locator footprint; no repainting, resizing, blending, new UI element or whole-image replacement. Restore the original green bitmap marker while keeping the separate white arrow overlay absent. Every skin pixel outside this region and the original PNG remain unchanged. Preserve flowing borders, layout, fonts, spectrum, map arrows, the 120 KiB LVGL pool, 4096-byte system-heap gate, HAL, OTA, recording, navigation and App 1.0.95+121. Build this exact main source through GitHub and register full/recovery candidates only; publication and installation remain owner-controlled. No local firmware build, device operation or manual backend deployment."
   }
 }
