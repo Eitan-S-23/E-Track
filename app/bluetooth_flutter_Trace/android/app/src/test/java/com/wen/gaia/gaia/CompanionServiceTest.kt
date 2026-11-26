@@ -126,12 +126,22 @@ class CompanionServiceTest {
         start(); runtime.reply!!(true)
         assertTrue(service.state(state()))
         assertTrue(CompanionCheckWake.schedule(service, System.currentTimeMillis() + 60000))
+        val uptime = SystemClock.uptimeMillis()
+        val elapsed = SystemClock.elapsedRealtime()
         ShadowSystemClock.simulateDeepSleep(Duration.ofMinutes(2))
-        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(31))
+        assertEquals(uptime, SystemClock.uptimeMillis())
+        assertEquals(elapsed + 120000L, SystemClock.elapsedRealtime())
+        // Robolectric 4.14.1 idleFor discards deep sleep by resetting elapsed to uptime.
+        // Advance both clocks without losing sleep, then deliver the real due Handler work.
+        SystemClock.sleep(31000)
+        shadowOf(Looper.getMainLooper()).idle()
+        assertEquals(uptime + 31000L, SystemClock.uptimeMillis())
+        assertEquals(elapsed + 151000L, SystemClock.elapsedRealtime())
         assertEquals(2, runtime.dispatches)
         assertEquals(true, runtime.payloads.last()["checkPending"])
         assertEquals("periodic", runtime.payloads.last()["reason"])
         assertEquals(1, runtime.starts)
+        assertEquals(false, CompanionCheckWake.snapshot(service)["pending"])
     }
     @Test fun rejectedStartDoesNotRequestStickyRecreation() {
         runtime.failure = "BLUETOOTH_OFF"
