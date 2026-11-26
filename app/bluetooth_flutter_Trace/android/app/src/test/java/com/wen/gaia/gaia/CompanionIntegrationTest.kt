@@ -304,11 +304,11 @@ class CompanionIntegrationTest {
     @Test @Config(sdk = [31, 34]) fun exactModeRequiresActualSystemCapabilityAndRevocationRetainsTheDeadline() {
         associated()
         val manager = shadowOf(app.getSystemService(AlarmManager::class.java))
-        manager.setCanScheduleExactAlarms(true)
+        ShadowAlarmManager.setCanScheduleExactAlarms(true)
         scheduledCheck(3600000)
         val deadline = prefs.getLong("checkWakeElapsed", 0)
         assertEquals("exact_allow_idle", prefs.getString("checkWakeMode", null))
-        manager.setCanScheduleExactAlarms(false)
+        ShadowAlarmManager.setCanScheduleExactAlarms(false)
         CompanionCheckWake.restore(app)
         assertEquals("inexact_allow_idle", prefs.getString("checkWakeMode", null))
         assertEquals(deadline, prefs.getLong("checkWakeElapsed", 0))
@@ -318,7 +318,7 @@ class CompanionIntegrationTest {
     @Test @Config(sdk = [34], shadows = [CompanionExactRaceBoundary::class])
     fun exactPermissionRaceUsesInexactFallbackWithoutLoggingPrivateErrorText() {
         associated()
-        shadowOf(app.getSystemService(AlarmManager::class.java)).setCanScheduleExactAlarms(true)
+        ShadowAlarmManager.setCanScheduleExactAlarms(true)
         scheduledCheck()
         assertEquals("inexact_allow_idle", prefs.getString("checkWakeMode", null))
         assertTrue(diagnosticHistory().contains("EXACT_WAKE_UNAVAILABLE"))

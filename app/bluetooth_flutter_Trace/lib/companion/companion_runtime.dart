@@ -705,6 +705,7 @@ class CompanionRuntime extends GetxService {
       await _scheduleCheck(binding, now + Duration(hours: settings['intervalHours'] as int? ?? 12).inMilliseconds);
       await _journal('CHECK_EXECUTED', {'executedAt': now, 'source': source});
     } else if (resume) {
+      await _preferences!.remove('account_auto_retry_${_ota.accounts.accountId}');
       await _scheduleOrdinaryCheck(binding, 'prepared_cache');
       if (!_bindingCurrent(binding)) return;
     } else if (_ota.lastCloudError != null) {
@@ -723,6 +724,18 @@ class CompanionRuntime extends GetxService {
         return;
       }
       final noUpdate = _ota.lastCheckWasNoUpdate;
+      if (automatic && !noUpdate) {
+        final now = DateTime.now().millisecondsSinceEpoch;
+        final returned = _ota.lastCloudRetryAt;
+        final retryAt = returned != null && returned > now && returned <= now + const Duration(hours: 24).inMilliseconds
+            ? returned : now + const Duration(hours: 1).inMilliseconds;
+        await _preferences!.setInt('account_auto_retry_${_ota.accounts.accountId}', retryAt);
+        await _scheduleCheck(binding, retryAt);
+        if (!_bindingCurrent(binding)) return;
+        await _journal('CHECK_RETRY_SCHEDULED', {'source': source, 'nextCheckAt': retryAt,
+          'errorCode': _ota.lastCloudError ?? 'CHECK_FAILED',
+          'clockSource': returned == retryAt ? 'server_deadline' : 'retry_backoff'});
+      }
       if (noUpdate) await _preferences!.remove('companion_ready_$address');
       if (!_bindingCurrent(binding)) return;
       await _attachControl();

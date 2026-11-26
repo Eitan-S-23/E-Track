@@ -245,16 +245,56 @@ void main() {
     expect(diagnostics.any((d) => d['status'] == 'CHECK_WAKE_SCHEDULE_FAILED' && d['reason'] == 'native_schedule_rejected'), isTrue);
   });
 
+  test('automatic HTTP failure remains failed and unfinished, but recovery cannot repeatedly spend requests before its deadline', () async {
+    ota.noUpdate = false;
+    await start();
+    await until(() => runtime.status.value == 'CHECK_FAILED');
+    final retryAt = schedules.last['nextCheckAt'];
+    expect(states.last['checkFinished'], isFalse);
+    expect(preferences.getInt('companion_attempt_$_address'), isNull);
+    expect(diagnostics.any((d) => d['status'] == 'CHECK_RETRY_SCHEDULED' && d['clockSource'] == 'retry_backoff'), isTrue);
+    await wake('recovery');
+    await until(() => runtime.status.value == 'CHECK_WAITING');
+    expect(ota.checks, 1);
+    expect(schedules.last['nextCheckAt'], retryAt);
+    expect(diagnostics.where((d) => d['status'] == 'CHECK_EXECUTED'), isEmpty);
+    await preferences.setInt('account_auto_retry_${ota.accounts.accountId}', DateTime.now().millisecondsSinceEpoch - 1);
+    ota.noUpdate = true;
+    await wake('recovery');
+    await until(() => runtime.status.value == 'NO_UPDATE');
+    expect(ota.checks, 2);
+    expect(ota.automaticChecks, [true, true]);
+    expect(preferences.getInt('account_auto_retry_${ota.accounts.accountId}'), isNull);
+    expect(states.last['checkFinished'], isTrue);
+    expect(diagnostics.where((d) => d['status'] == 'CHECK_EXECUTED'), hasLength(1));
+  });
+
+  test('automatic daily quota waits for the server reset without consuming the App or manual budget', () async {
+    ota.noUpdate = false;
+    ota.cloudFailure = 'CHECK_QUOTA_EXCEEDED';
+    ota.cloudRetryAt = DateTime.now().add(const Duration(hours: 6)).millisecondsSinceEpoch;
+    await start();
+    await until(() => runtime.status.value == 'CHECK_FAILED');
+    expect(schedules.last['nextCheckAt'], ota.cloudRetryAt);
+    await wake('recovery');
+    await until(() => runtime.status.value == 'CHECK_WAITING');
+    expect(ota.checks, 1);
+    expect(ota.automaticChecks, [true]);
+    expect(schedules.last['nextCheckAt'], ota.cloudRetryAt);
+  });
+
   test('prepared cache reuse rearms the next check without fabricating a new HTTP success', () async {
     ota.latest = _latest();
     await start();
     await until(() => runtime.status.value == 'READY_AWAITING_DEVICE_CHOICE');
     final checked = preferences.getInt('companion_attempt_$_address');
     final before = schedules.length;
+    await preferences.setInt('account_auto_retry_${ota.accounts.accountId}', DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch);
     await wake('periodic');
     await until(() => schedules.length > before && runtime.status.value == 'READY_AWAITING_DEVICE_CHOICE');
     expect(ota.checks, 1);
     expect(preferences.getInt('companion_attempt_$_address'), checked);
+    expect(preferences.getInt('account_auto_retry_${ota.accounts.accountId}'), isNull);
     expect(diagnostics.where((d) => d['status'] == 'CHECK_EXECUTED'), hasLength(1));
     expect(diagnostics.any((d) => d['status'] == 'CHECK_SCHEDULE' && d['reason'] == 'prepared_cache'), isTrue);
     expect(schedules.last['nextCheckAt'] as int, greaterThan(DateTime.now().millisecondsSinceEpoch));

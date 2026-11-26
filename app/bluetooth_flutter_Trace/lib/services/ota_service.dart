@@ -1217,8 +1217,10 @@ class OtaService extends GetxController with WidgetsBindingObserver {
             code.startsWith('LEGACY_MIGRATION_') || code == 'LOGIN_REQUIRED' || code == 'ACCOUNT_DISABLED')) {
           _clearFirmwareInfo();
           lastCloudError = code;
-          final retryAt = (error.response!.data as Map)['nextCheckAt'];
-          if (code == 'CHECK_TOO_SOON' && retryAt is int && retryAt > 0) lastCloudRetryAt = retryAt;
+          final retryAt = (error.response!.data as Map)[code == 'CHECK_QUOTA_EXCEEDED' ? 'resetsAt' : 'nextCheckAt'];
+          if ((code == 'CHECK_TOO_SOON' || code == 'CHECK_QUOTA_EXCEEDED') && retryAt is int && retryAt > 0) {
+            lastCloudRetryAt = retryAt;
+          }
           _upgradeStatus.value = AccountService.messageFor(code);
           _phase.value = code == 'CHECK_TOO_SOON' ? OtaPhase.idle : OtaPhase.failed;
           return null;

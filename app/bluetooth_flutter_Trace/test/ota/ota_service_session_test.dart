@@ -170,6 +170,23 @@ void main() {
     });
   }
 
+  test('automatic daily quota preserves the server reset timestamp and remains a real failure', () async {
+    Get.put<AppUpdateService>(_FakeAppUpdateService());
+    final reset = DateTime.now().add(const Duration(hours: 6)).millisecondsSinceEpoch;
+    final latest = latestDio([
+      _LatestBehavior.status(429, body: jsonEncode({'errorCode': 'CHECK_QUOTA_EXCEEDED', 'message': 'quota', 'resetsAt': reset})),
+    ]);
+    final service = makeService(ble: _FakeBle(infoPayload), latest: latest,
+      download: downloadDio([]), firmwareDir: tempFirmwareDir());
+    await service.readDeviceInfo('AA:BB');
+    expect(await service.checkFirmwareUpdate(automatic: true), isNull);
+    expect(service.lastCloudError, 'CHECK_QUOTA_EXCEEDED');
+    expect(service.lastCloudRetryAt, reset);
+    expect(service.phase, OtaPhase.failed);
+    expect(service.lastCheckWasNoUpdate, isFalse);
+    expect((latest.httpClientAdapter as _LatestMockAdapter).requestCount, 1);
+  });
+
   test('process recreation refreshes a prepared grant without a second charged check', () async {
     Get.put<AppUpdateService>(_FakeAppUpdateService());
     final dir = tempFirmwareDir(), bytes = assetBytes(1024);
