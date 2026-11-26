@@ -17,6 +17,7 @@ R = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(R)
 A, B = 'a' * 40, 'b' * 40
 CONFIG = dict(schema='original-admin-automatic-candidates-v1', firmware=dict(versionName='3.3.45', releaseNotes='old'))
+ACTOR = dict(login=R.OWNER, id=1)
 
 
 def raw_config():
@@ -30,6 +31,15 @@ def sample_log(source=A, version='3.3.46'):
             registration=dict(state='ready', assetsRegistered=2))}
     return '\n'.join('job step 2026-11-21 ORIGINAL_ADMIN_RECEIPT ' + json.dumps(dict(name=k, value=v))
                      for k, v in values.items())
+
+
+def failed_checks():
+    run = dict(id=123, head_sha=A, run_attempt=1, path=R.WORKFLOW, head_branch='main',
+               event='push', status='completed', conclusion='failure')
+    jobs = dict(total_count=3, jobs=[dict(name=name, head_sha=A, run_id=123, run_attempt=1,
+        status='completed', conclusion='failure' if name == 'checks' else 'skipped', steps=[])
+        for name in ('checks', 'firmware', 'app')])
+    return run, jobs
 
 
 class VersionTests(unittest.TestCase):
@@ -100,12 +110,15 @@ class FakeHost:
     remote_moved = False
     reserved = False
     push_error = False
+    ssh_error = False
+    prior_failure = False
     calls = []
 
     def __init__(self, root, out):
         self.root, self.out, self.head, self.remote = root, out, A, A
         self.staged = ''
-        self.gh = 'gh'
+        self.actor = ACTOR
+        self.api_auth = 'fixture'
 
     def authenticate(self):
         pass
@@ -116,14 +129,28 @@ class FakeHost:
     def releases(self, repo):
         return [dict(tag_name='mcu-e-track-at32f435-v3.3.46', draft=True)] if self.reserved else []
 
+    def prepare_push(self, source):
+        self.calls.append(('push-check', source))
+        if self.ssh_error:
+            raise RuntimeError('SSH push precheck failed')
+        return 'SSH'
+
+    def push_main(self, source):
+        self.calls.append(('push', 'origin', source + ':refs/heads/main'))
+        if self.push_error:
+            raise RuntimeError('network lost after push request')
+        self.remote = B
+
     def api(self, route):
         self.calls.append(('GET', route))
-        if route == 'user':
-            return dict(login='tester', id=1)
         if route.endswith('/git/ref/heads/main'):
             return dict(object=dict(sha=B if self.remote_moved else self.remote))
         if route.endswith('/git/matching-refs/tags/'):
             return []
+        if self.prior_failure and route.endswith('/actions/runs/123'):
+            return failed_checks()[0]
+        if self.prior_failure and route.endswith('/actions/runs/123/attempts/1/jobs?per_page=100'):
+            return failed_checks()[1]
         raise AssertionError(route)
 
     def git(self, *args):
@@ -160,11 +187,6 @@ class FakeHost:
             if ':' in args[-1]:
                 return (self.root / args[-1].split(':', 1)[1]).read_text().strip()
             return self.staged
-        if args[0] == 'push':
-            if self.push_error:
-                raise RuntimeError('network lost after push request')
-            self.remote = B
-            return ''
         raise AssertionError(args)
 
 
@@ -185,6 +207,7 @@ class EntryTests(unittest.TestCase):
             path.write_bytes(raw)
         FakeHost.calls = []
         FakeHost.dirty = FakeHost.remote_moved = FakeHost.reserved = FakeHost.push_error = False
+        FakeHost.ssh_error = FakeHost.prior_failure = False
 
     def execute(self, *args, delivered=True):
         def wait(host, state, save, minutes):
@@ -201,11 +224,13 @@ class EntryTests(unittest.TestCase):
         self.assertEqual(self.execute('mcu', '--dry-run'), 0)
         self.assertEqual((self.root / R.FIRMWARE).read_bytes(), raw_config())
         self.assertFalse(any(c[0] in ('add', 'push') or 'commit' in c for c in FakeHost.calls))
+        self.assertIn(('push-check', A), FakeHost.calls)
 
     def test_real_entry_stages_only_selected_mcu_file(self):
         self.assertEqual(self.execute('mcu'), 0)
         self.assertIn(('add', '--', R.FIRMWARE), FakeHost.calls)
         self.assertIn(('push', 'origin', B + ':refs/heads/main'), FakeHost.calls)
+        self.assertLess(FakeHost.calls.index(('push-check', A)), FakeHost.calls.index(('add', '--', R.FIRMWARE)))
         self.assertEqual((self.root / R.APP).read_bytes(), b'version: 1.0.88+114\n')
         self.assertFalse((self.root / '.cache/candidate-release/active.lock').exists())
 
@@ -216,7 +241,7 @@ class EntryTests(unittest.TestCase):
         self.assertEqual((self.root / R.APP).read_bytes(), b'version: 1.0.89+115\n')
 
     def test_dirty_diverged_and_reserved_stop_before_edits(self):
-        for name in ('dirty', 'remote_moved', 'reserved'):
+        for name in ('dirty', 'remote_moved', 'reserved', 'ssh_error'):
             with self.subTest(name=name):
                 setattr(FakeHost, name, True)
                 self.assertEqual(self.execute('mcu'), 1)
@@ -247,6 +272,18 @@ class EntryTests(unittest.TestCase):
         self.assertEqual(self.execute('mcu'), 1)
         self.assertEqual(lock.read_text(), 'another owner')
 
+    def test_proven_prebuild_failure_does_not_block_a_new_version_or_change_old_receipt(self):
+        FakeHost.prior_failure = True
+        base = self.root / '.cache/candidate-release'
+        old = base / 'old/result.json'
+        old.parent.mkdir(parents=True)
+        original = json.dumps(dict(phase='CI_COMPLETED', source=A, run=123, version='3.3.45'))
+        old.write_text(original)
+        self.assertEqual(self.execute('mcu'), 0)
+        self.assertEqual(old.read_text(), original)
+        new = json.loads(next(path for path in base.glob('*/result.json') if path != old).read_text())
+        self.assertEqual(new['priorPrebuildFailures'][0]['outcome'], 'failed-before-candidate-jobs')
+
     def test_git_and_gh_outputs_are_contained_and_redacted(self):
         out = self.root / '.cache/host-test'
         out.mkdir(parents=True)
@@ -275,6 +312,65 @@ class EntryTests(unittest.TestCase):
                 patch.object(R, 'getproxies', return_value={'https': 'http://127.0.0.1:7897'}):
             host = R.Host(self.root, out)
         self.assertEqual(host.env['HTTPS_PROXY'], 'http://127.0.0.1:9999')
+
+    def test_owner_gh_fallback_after_unavailable_cli_lookup(self):
+        out = self.root / '.cache/auth-test'
+        out.mkdir(parents=True)
+        with patch.object(R.shutil, 'which', return_value='tool'), patch.dict(os.environ, {}, clear=True):
+            host = R.Host(self.root, out)
+            with patch.object(R.subprocess, 'run', return_value=subprocess.CompletedProcess([], 1, b'', b'')) as cli, \
+                    patch.object(R, 'console_owner_credential', return_value='fixture-token') as credential, \
+                    patch.object(host, 'api', return_value=ACTOR):
+                host.authenticate()
+        self.assertEqual(cli.call_args.args[0][-2:], ['--user', R.OWNER])
+        credential.assert_called_once_with()
+        self.assertEqual(host.api_auth, 'existing Windows credential')
+        self.assertNotIn('GH_TOKEN', host.env)
+        with patch.object(host, 'run', return_value='{}') as run:
+            host.api('user')
+        self.assertEqual(run.call_args.kwargs['env']['GH_TOKEN'], 'fixture-token')
+
+    def test_another_api_account_is_rejected(self):
+        host = object.__new__(R.Host)
+        with patch.dict(os.environ, GH_TOKEN='fixture-token'), \
+                patch.object(host, 'api', return_value=dict(login='other', id=1)), \
+                self.assertRaisesRegex(RuntimeError, 'not the E-Track owner'):
+            host.authenticate()
+
+    def test_ssh_uses_known_owner_and_exact_main_without_api_credential(self):
+        host = object.__new__(R.Host)
+        host.env = {}
+        greeting = f"Hi {R.OWNER}! You've successfully authenticated, but GitHub does not provide shell access."
+        with patch.object(R.os, 'name', 'nt'), \
+                patch.object(R, 'existing_ssh_command', return_value=['ssh', '-i', 'owner-key']), \
+                patch.object(host, 'run', return_value=greeting) as run, \
+                patch.object(host, 'git', side_effect=[R.SSH_ORIGIN, '', R.SSH_ORIGIN, '']) as git:
+            self.assertEqual(host.prepare_push(A), 'SSH')
+            host.push_main(B)
+        self.assertEqual(run.call_args.args[0][-4:], ['-p', '443', '-T', 'git@' + R.SSH_HOST])
+        commands = git.call_args_list
+        self.assertIn('--dry-run', commands[1].args)
+        self.assertNotIn('--dry-run', commands[3].args)
+        self.assertEqual(commands[3].args[-2:], ('origin', B + ':refs/heads/main'))
+        self.assertIn('remote.origin.pushurl=' + R.SSH_ORIGIN, commands[3].args)
+        self.assertNotIn('GH_TOKEN', commands[3].kwargs['env'])
+
+    def test_wrong_ssh_account_stops_without_https_retry(self):
+        host = object.__new__(R.Host)
+        with patch.object(R.os, 'name', 'nt'), patch.object(R, 'existing_ssh_command', return_value=['ssh']), \
+                patch.object(host, 'run', return_value='Hi different-account!'), patch.object(host, 'push_main') as push:
+            with self.assertRaisesRegex(RuntimeError, 'SSH key did not authenticate'):
+                host.prepare_push(A)
+        push.assert_not_called()
+
+    def test_effective_push_url_cannot_be_rewritten_or_fan_out(self):
+        host = object.__new__(R.Host)
+        host.push_url, host.env = R.SSH_ORIGIN, {}
+        for urls in ('https://example.invalid/another.git', R.SSH_ORIGIN + '\n' + R.ORIGIN):
+            with patch.object(host, 'git', return_value=urls) as git:
+                with self.assertRaisesRegex(RuntimeError, 'Unexpected effective push destination'):
+                    host.push_main(A)
+            git.assert_called_once()
 
     def test_real_git_accepts_preserved_crlf_version_edits(self):
         executable = R.shutil.which('git')
@@ -312,7 +408,7 @@ class ObserveTests(unittest.TestCase):
                         selected = 'firmware' if component == 'mcu' else 'app'
                         other = 'app' if component == 'mcu' else 'firmware'
                         return dict(jobs=[dict(name=selected, conclusion='success', id=1), dict(name=other, conclusion='skipped')])
-                    def run(self, *args, **kwargs):
+                    def github(self, *args, **kwargs):
                         return sample_log() if component == 'mcu' else json.dumps(dict(source=A, completed=True,
                             channelPublished=False, runId=456))
                 state, phases = dict(source=A, component=component, version='3.3.46'), []
@@ -325,9 +421,9 @@ class ObserveTests(unittest.TestCase):
         host = object.__new__(R.Host)
         page1 = [dict(tag_name='old-' + str(i)) for i in range(100)]
         draft = dict(tag_name='v1.0.89', draft=True)
-        with patch.object(host, 'api', side_effect=[page1, [draft]]) as api:
+        with patch.object(host, 'api', side_effect=[dict(permissions=dict(push=True)), page1, [draft]]) as api:
             rows = host.releases('Eitan-S-23/Trace')
-        self.assertEqual(api.call_count, 2)
+            self.assertEqual(api.call_count, 3)
         with self.assertRaises(RuntimeError):
             R.check_reservations('app', '1.0.89', rows, [])
 
@@ -340,7 +436,7 @@ class ObserveTests(unittest.TestCase):
                 if '/runs?' in route:
                     return dict(workflow_runs=[run])
                 return dict(jobs=[dict(name='firmware', conclusion='success', id=1), dict(name='app', conclusion='skipped')])
-            def run(self, *args, **kwargs):
+            def github(self, *args, **kwargs):
                 return 'Upload accepted only'
         with contextlib.redirect_stdout(io.StringIO()), self.assertRaises(RuntimeError):
             R.wait_for_delivery(Host(), dict(source=A, component='mcu', version='3.3.46'), lambda p: None, 1)
@@ -348,11 +444,43 @@ class ObserveTests(unittest.TestCase):
     def test_github_api_remains_get_only_and_allowlisted(self):
         host = object.__new__(R.Host)
         host.gh = 'gh'
+        host.token, host.env = 'fixture-token', {}
         with patch.object(host, 'run', return_value='{}') as run:
+            host.api('repos/' + R.REPO)
             host.api('repos/' + R.REPO + '/releases')
+            host.api('repos/' + R.APP_REPO)
             self.assertIn('GET', run.call_args.args[0])
             with self.assertRaises(RuntimeError):
                 host.api('https://admin.example/api/publish')
+
+    def test_public_release_view_is_not_enough_to_verify_drafts(self):
+        host = object.__new__(R.Host)
+        with patch.object(host, 'api', return_value=dict(permissions=dict(push=False))) as api:
+            with self.assertRaisesRegex(RuntimeError, 'cannot verify unpublished Release drafts'):
+                host.releases(R.REPO)
+        api.assert_called_once_with('repos/' + R.REPO)
+
+    def test_prebuild_failure_requires_original_exact_run_with_both_candidate_jobs_unexecuted(self):
+        host = object.__new__(R.Host)
+        previous = dict(source=A, run=123, phase='CI_COMPLETED')
+        for case in ('exact', 'source', 'rerun', 'cancelled', 'dispatch', 'missing-job', 'packaging-steps', 'app-success'):
+            run, jobs = failed_checks()
+            if case == 'source':
+                run['head_sha'] = B
+            elif case == 'rerun':
+                run['run_attempt'] = 2
+            elif case == 'cancelled':
+                run['conclusion'] = 'cancelled'
+            elif case == 'dispatch':
+                run['event'] = 'workflow_dispatch'
+            elif case == 'missing-job':
+                jobs['jobs'].pop()
+            elif case == 'packaging-steps':
+                jobs['jobs'][1]['steps'] = [dict(name='Upload')]
+            elif case == 'app-success':
+                jobs['jobs'][2]['conclusion'] = 'success'
+            with self.subTest(case=case), patch.object(host, 'api', side_effect=[run, jobs]):
+                self.assertEqual(R.prebuild_failure(host, previous), case == 'exact')
 
 
 if __name__ == '__main__':

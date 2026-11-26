@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import re
 import runpy
+import shlex
 import shutil
 import subprocess
 import sys
@@ -21,6 +22,13 @@ checked = IO['checked_output']
 FIRMWARE = 'Tools/ota/original-admin-release.json'
 APP = 'app/bluetooth_flutter_Trace/pubspec.yaml'
 REPO = 'Eitan-S-23/E-Track'
+OWNER = REPO.split('/')[0]
+APP_REPO = OWNER + '/Trace'
+ORIGIN = f'https://github.com/{REPO}.git'
+SSH_HOST = 'ssh.github.com'
+SSH_ORIGIN = f'ssh://git@{SSH_HOST}:443/{REPO}.git'
+WINDOWS_SSH = Path('D:/install/Git/usr/bin/ssh.exe')
+WINDOWS_OWNER = Path('C:/Users/SU')
 WORKFLOW = '.github/workflows/original-admin-candidate.yml'
 
 
@@ -100,10 +108,73 @@ def firmware_receipt(log, source, run_id, version):
                 warnings=len(re.findall(r'\bwarning:', log, re.I)), errors=len(re.findall(r'\berror:', log, re.I)))
 
 
+def console_owner_credential():
+    """Read only the existing E-Track owner's gh slot from the Windows console."""
+    if os.name != 'nt':
+        return ''
+    import ctypes as c
+    from ctypes import wintypes as w
+
+    class Credential(c.Structure):
+        _fields_ = [('Flags', w.DWORD), ('Type', w.DWORD), ('TargetName', w.LPWSTR),
+                    ('Comment', w.LPWSTR), ('LastWritten', w.FILETIME), ('BlobSize', w.DWORD),
+                    ('Blob', c.c_void_p), ('Persist', w.DWORD), ('AttributeCount', w.DWORD),
+                    ('Attributes', c.c_void_p), ('TargetAlias', w.LPWSTR), ('UserName', w.LPWSTR)]
+
+    kernel, wts, advapi = (c.WinDLL(name, use_last_error=True) for name in ('kernel32', 'wtsapi32', 'advapi32'))
+    kernel.WTSGetActiveConsoleSessionId.restype = w.DWORD
+    kernel.CloseHandle.argtypes = [w.HANDLE]
+    wts.WTSQuerySessionInformationW.argtypes = [w.HANDLE, w.DWORD, c.c_int, c.POINTER(w.LPWSTR), c.POINTER(w.DWORD)]
+    wts.WTSFreeMemory.argtypes = [c.c_void_p]
+    wts.WTSQueryUserToken.argtypes = [w.ULONG, c.POINTER(w.HANDLE)]
+    advapi.ImpersonateLoggedOnUser.argtypes = [w.HANDLE]
+    advapi.CredReadW.argtypes = [w.LPCWSTR, w.DWORD, w.DWORD, c.POINTER(c.POINTER(Credential))]
+    advapi.CredFree.argtypes = [c.c_void_p]
+
+    session = kernel.WTSGetActiveConsoleSessionId()
+    username, size = w.LPWSTR(), w.DWORD()
+    if not wts.WTSQuerySessionInformationW(None, session, 5, c.byref(username), c.byref(size)):
+        return ''
+    try:
+        if (username.value or '').casefold() != WINDOWS_OWNER.name.casefold():
+            return ''
+    finally:
+        wts.WTSFreeMemory(username)
+
+    handle, credential = w.HANDLE(), c.POINTER(Credential)()
+    if not wts.WTSQueryUserToken(session, c.byref(handle)):
+        return ''
+    try:
+        if not advapi.ImpersonateLoggedOnUser(handle):
+            return ''
+        try:
+            if not advapi.CredReadW(f'gh:github.com:{OWNER}', 1, 0, c.byref(credential)):
+                return ''
+            return c.string_at(credential.contents.Blob, credential.contents.BlobSize).decode('utf-8').strip()
+        finally:
+            if credential:
+                advapi.CredFree(credential)
+            if not advapi.RevertToSelf():
+                raise RuntimeError('Could not exit the Windows credential read context')
+    finally:
+        kernel.CloseHandle(handle)
+
+
+def existing_ssh_command(ssh, profile):
+    key, known_hosts = (profile / '.ssh' / name for name in ('id_rsa', 'known_hosts'))
+    if not all(path.is_file() for path in (ssh, key, known_hosts)):
+        return None
+    return [ssh.as_posix(), '-F', '/dev/null', '-i', key.as_posix(), '-o', 'IdentitiesOnly=yes',
+            '-o', 'IdentityAgent=none', '-o', 'UserKnownHostsFile=' + known_hosts.as_posix(),
+            '-o', 'GlobalKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=yes', '-o', 'UpdateHostKeys=no',
+            '-o', 'BatchMode=yes', '-o', 'ControlMaster=no', '-o', 'ConnectTimeout=15']
+
+
 class Host:
     def __init__(self, root, out):
         self.root, self.out = root, out
         self.sequence, self.token = 0, ''
+        self.push_url = None
         env = dict(os.environ)
         for key in list(env):
             if key.startswith(('GIT_', 'GH_', 'GITHUB_')) or key in (
@@ -127,22 +198,29 @@ class Host:
         require(self.gh and shutil.which('git'), 'Existing Git and GitHub CLI are required; no auto install/login')
 
     def authenticate(self):
-        # Only the existing GitHub credential is read; nothing is logged or persisted.
         self.token = os.environ.get('GH_TOKEN') or os.environ.get('GITHUB_TOKEN') or ''
+        self.api_auth = 'process environment'
         if not self.token:
-            auth_env = dict(os.environ, GH_NO_UPDATE_NOTIFIER='1', GH_NO_EXTENSION_UPDATE_NOTIFIER='1',
-                            GH_PROMPT_DISABLED='1')
-            for key in ('TEMP', 'TMP', 'TMPDIR', 'XDG_CACHE_HOME'):
-                auth_env[key] = self.env[key]
-            result = subprocess.run([self.gh, 'auth', 'token', '--hostname', 'github.com'], cwd=self.root,
+            # The auth lookup reads the existing gh config, but keeps cache/temp writes local.
+            auth_env = dict(self.env)
+            for key in ('HOME', 'USERPROFILE', 'APPDATA', 'XDG_CONFIG_HOME', 'GH_CONFIG_DIR'):
+                auth_env.pop(key, None)
+                if key in os.environ:
+                    auth_env[key] = os.environ[key]
+            result = subprocess.run([self.gh, 'auth', 'token', '--hostname', 'github.com', '--user', OWNER], cwd=self.root,
                 env=auth_env, capture_output=True, timeout=30, creationflags=0x08000000 if os.name == 'nt' else 0)
-            require(result.returncode == 0, 'Existing gh credential unavailable; no login or new token attempted')
-            self.token = result.stdout.decode('utf-8').strip()
-        require(bool(self.token) and not re.search(r'\s', self.token), 'Invalid existing credential')
-        self.env['GH_TOKEN'] = self.token
+            if result.returncode == 0:
+                self.token = result.stdout.decode('utf-8').strip()
+                self.api_auth = 'gh'
+            if not self.token:
+                self.token = console_owner_credential()
+                self.api_auth = 'existing Windows credential'
+        require(self.token, 'Cannot read the existing GitHub login needed to check Release drafts and CI results')
+        require(not re.search(r'\s', self.token), 'Invalid existing credential')
         self.basic = base64.b64encode(('x-access-token:' + self.token).encode()).decode()
-        self.env.update(GIT_CONFIG_COUNT='1', GIT_CONFIG_KEY_0='http.https://github.com/.extraheader',
-                        GIT_CONFIG_VALUE_0='AUTHORIZATION: basic ' + self.basic)
+        self.actor = self.api('user')
+        require(self.actor.get('login') == OWNER and type(self.actor.get('id')) is int and self.actor['id'] > 0,
+                'Existing GitHub API login is not the E-Track owner')
 
     def clean(self, value):
         for secret in (self.token, getattr(self, 'basic', '')):
@@ -150,29 +228,61 @@ class Host:
                 value = value.replace(secret, '[REDACTED]')
         return re.sub(r'(?:gh[opusr]_|github_pat_)[A-Za-z0-9_]+', '[REDACTED]', value)
 
-    def run(self, argv, timeout=120):
+    def run(self, argv, timeout=120, *, env=None, ok=(0,), combined=False):
         self.sequence += 1
-        result = subprocess.run(list(map(str, argv)), cwd=self.root, env=self.env, capture_output=True,
+        result = subprocess.run(list(map(str, argv)), cwd=self.root, env=self.env if env is None else env, capture_output=True,
             timeout=timeout, creationflags=0x08000000 if os.name == 'nt' else 0)
         stdout, stderr = result.stdout.decode('utf-8', 'replace'), result.stderr.decode('utf-8', 'replace')
         checked(self.root, self.out / f'command-{self.sequence:03d}.log').write_text(
             self.clean(stdout + stderr), encoding='utf-8')
-        require(result.returncode == 0, f'Command {self.sequence} failed; inspect contained log, do not repeat release')
-        return stdout.strip()
+        require(result.returncode in ok, f'Command {self.sequence} failed; inspect contained log, do not repeat release')
+        return (stdout + stderr if combined else stdout).strip()
 
-    def git(self, *args):
+    def git(self, *args, env=None):
         return self.run(['git', '-c', 'safe.directory=' + self.root.as_posix(), '-c', 'core.fsmonitor=false',
             '-c', 'core.autocrlf=true',
             '-c', 'core.hooksPath=' + str(checked(self.root, self.out / 'empty-hooks')), '-c', 'gc.auto=0',
             '-c', 'maintenance.auto=false', '-c', 'commit.gpgsign=false', '-c', 'credential.helper=',
-            '-c', 'core.askPass=', '-c', 'http.sslBackend=openssl', '--no-optional-locks', *args])
+            '-c', 'core.askPass=', '-c', 'http.sslBackend=openssl', '--no-optional-locks', *args], env=env)
+
+    def prepare_push(self, source):
+        ssh = existing_ssh_command(WINDOWS_SSH, WINDOWS_OWNER) if os.name == 'nt' else None
+        if ssh:
+            output = self.run([*ssh, '-p', '443', '-T', 'git@' + SSH_HOST], timeout=30, ok=(0, 1), combined=True)
+            require(f"Hi {OWNER}! You've successfully authenticated, but GitHub does not provide shell access."
+                    in output.splitlines(), 'The existing SSH key did not authenticate as the E-Track owner')
+            self.env.update(GIT_SSH_COMMAND=shlex.join(ssh), GIT_SSH_VARIANT='ssh')
+        self.push_url = SSH_ORIGIN if ssh else ORIGIN
+        self.push_main(source, dry_run=True)
+        return 'SSH' if ssh else 'HTTPS'
+
+    def push_main(self, source, *, dry_run=False):
+        require(re.fullmatch(r'[0-9a-f]{40}', source), 'Invalid source for main push')
+        require(self.push_url in (ORIGIN, SSH_ORIGIN), 'Main push route was not checked')
+        config = ('-c', 'remote.origin.mirror=false')
+        env = self.env
+        if self.push_url == SSH_ORIGIN:
+            config += ('-c', 'remote.origin.pushurl=' + SSH_ORIGIN)
+        else:
+            env = dict(env, GIT_CONFIG_COUNT='1', GIT_CONFIG_KEY_0='http.https://github.com/.extraheader',
+                       GIT_CONFIG_VALUE_0='AUTHORIZATION: basic ' + self.basic)
+        require(self.git(*config, 'remote', 'get-url', '--push', '--all', 'origin') == self.push_url,
+                'Unexpected effective push destination; no push attempted')
+        return self.git(*config, 'push', '--no-follow-tags', '--recurse-submodules=no',
+                        *(['--dry-run'] if dry_run else []), 'origin', source + ':refs/heads/main', env=env)
+
+    def github(self, *args, timeout=120):
+        return self.run([self.gh, *args], timeout=timeout, env=dict(self.env, GH_TOKEN=self.token))
 
     def api(self, route):
-        require(route == 'user' or route.startswith(('repos/' + REPO + '/', 'repos/Eitan-S-23/Trace/')),
+        require(route == 'user' or any(route == f'repos/{repo}' or route.startswith(f'repos/{repo}/')
+                                       for repo in (REPO, APP_REPO)),
                 'Only existing GitHub repository reads are allowed')
-        return json.loads(self.run([self.gh, 'api', '--hostname', 'github.com', '--method', 'GET', route]))
+        return json.loads(self.github('api', '--hostname', 'github.com', '--method', 'GET', route))
 
     def releases(self, repo):
+        require(self.api(f'repos/{repo}').get('permissions', {}).get('push') is True,
+                'GitHub API login cannot verify unpublished Release drafts in ' + repo)
         rows = []
         for page in range(1, 101):
             part = self.api(f'repos/{repo}/releases?per_page=100&page={page}')
@@ -188,12 +298,51 @@ def repository_ready(host):
     require(Path(host.git('rev-parse', '--path-format=absolute', '--git-common-dir')).resolve() == host.root / '.git',
             'Use the primary main checkout, not another worktree')
     require(host.git('branch', '--show-current') == 'main', 'Use main')
-    require(host.git('remote', 'get-url', 'origin') == 'https://github.com/' + REPO + '.git', 'Unexpected origin')
+    require(host.git('remote', 'get-url', 'origin') == ORIGIN, 'Unexpected origin')
     require(not host.git('status', '--porcelain=v1', '--untracked-files=no'), 'Tracked/index changes exist; nothing staged')
     local = host.git('rev-parse', 'HEAD')
     require(host.api('repos/' + REPO + '/git/ref/heads/main')['object']['sha'] == local,
             'Local main differs from remote; no automatic merge/reset/push')
     return local
+
+
+def prebuild_failure(host, previous):
+    """Only accept original failed checks with proof that neither candidate job ran."""
+    source, run_id = previous.get('source'), previous.get('run')
+    if (previous.get('phase') != 'CI_COMPLETED' or not re.fullmatch(r'[0-9a-f]{40}', source or '')
+            or type(run_id) is not int or run_id < 1):
+        return False
+    route = f'repos/{REPO}/actions/runs/{run_id}'
+    run = host.api(route)
+    if (run.get('id') != run_id or run.get('head_sha') != source or run.get('run_attempt') != 1
+            or run.get('path') != WORKFLOW or run.get('head_branch') != 'main' or run.get('event') != 'push'
+            or run.get('status') != 'completed' or run.get('conclusion') != 'failure'):
+        return False
+    result = host.api(route + '/attempts/1/jobs?per_page=100')
+    jobs = result.get('jobs', [])
+    if result.get('total_count') != 3 or len(jobs) != 3 or {j.get('name') for j in jobs} != {'checks', 'firmware', 'app'}:
+        return False
+    ordered = {j['name']: j for j in jobs}
+    return (all(j.get('head_sha') == source and j.get('run_id') == run_id and j.get('run_attempt') == 1
+                and j.get('status') == 'completed' for j in jobs)
+            and ordered['checks'].get('conclusion') == 'failure'
+            and all(ordered[name].get('conclusion') == 'skipped' and ordered[name].get('steps') == []
+                    for name in ('firmware', 'app')))
+
+
+def reconcile_prior_sources(host, base):
+    receipts = [(p, json.loads(checked(host.root, p).read_text(encoding='utf-8'))) for p in base.glob('*/result.json')]
+    resolved = {r.get('source') for _, r in receipts if r.get('phase') == 'DELIVERED'}
+    closed = []
+    for path, previous in receipts:
+        source = previous.get('source')
+        if not source or source in resolved:
+            continue
+        require(prebuild_failure(host, previous), 'Unresolved prior source; use --resume ' + str(path))
+        closed.append(dict(source=source, run=previous['run'], receipt=path.relative_to(host.root).as_posix(),
+                           outcome='failed-before-candidate-jobs'))
+        resolved.add(source)
+    return closed
 
 
 def wait_for_delivery(host, state, save, minutes):
@@ -215,8 +364,8 @@ def wait_for_delivery(host, state, save, minutes):
                         and next(j for j in jobs if j['name'] == other)['conclusion'] == 'skipped',
                         'Unexpected component selection')
                 job = next(j for j in jobs if j['name'] == selected)
-                log = host.run([host.gh, 'run', 'view', str(run['id']), '--repo', REPO,
-                                '--job', str(job['id']), '--log'], timeout=180)
+                log = host.github('run', 'view', str(run['id']), '--repo', REPO,
+                                  '--job', str(job['id']), '--log', timeout=180)
                 if component == 'mcu':
                     state['receipt'] = firmware_receipt(log, source, run['id'], state['version'])
                 else:
@@ -232,6 +381,7 @@ def wait_for_delivery(host, state, save, minutes):
                                     and r.get('channelPublished') is False), None)
                     require(receipt is not None, 'Missing completed original-signer delivery receipt')
                     state['receipt'] = receipt
+                state.pop('error', None)
                 save('DELIVERED')
                 print(f"READY {component} {state['version']} (unpublished): {run['html_url']}", flush=True)
                 return
@@ -283,31 +433,32 @@ def main(argv=None):
             require(prior.parent.parent == base and prior.name == 'result.json', 'Expected a contained prior result.json')
             state.update(json.loads(prior.read_text(encoding='utf-8')))
             require(re.fullmatch(r'[0-9a-f]{40}', state.get('source', '')), 'No committed source to observe; inspect local Git state')
+            state['apiAuth'] = host.api_auth
             save('RESUMING')
             wait_for_delivery(host, state, save, args.timeout_minutes)
             return 0
         if not args.dry_run:
-            with lock.open('x', encoding='ascii') as stream:
-                stream.write(str(out))
-            owned = True
-            for receipt in base.glob('*/result.json'):
-                previous = json.loads(checked(ROOT, receipt).read_text(encoding='utf-8'))
-                source = previous.get('source')
-                if source and previous.get('phase') != 'DELIVERED':
-                    require(any(json.loads(p.read_text(encoding='utf-8')).get('source') == source
-                                and json.loads(p.read_text(encoding='utf-8')).get('phase') == 'DELIVERED'
-                                for p in base.glob('*/result.json')), 'Unresolved prior source; use --resume ' + str(receipt))
+            try:
+                with lock.open('x', encoding='ascii') as stream:
+                    stream.write(str(out))
+                owned = True
+            except FileExistsError:
+                raise RuntimeError('Existing candidate lock; reconcile its owner before retrying: ' + str(lock)) from None
+        state['apiAuth'] = host.api_auth
         before = repository_ready(host)
+        state['priorPrebuildFailures'] = reconcile_prior_sources(host, base)
         file = checked(ROOT, FIRMWARE if args.component == 'mcu' else APP)
         raw = file.read_bytes()
         edit, data = version_edit(args.component, raw, args.notes)
         state.update(edit, before=before)
-        repo = REPO if args.component == 'mcu' else 'Eitan-S-23/Trace'
+        repo = REPO if args.component == 'mcu' else APP_REPO
         releases = host.releases(repo)
         refs = host.api(f'repos/{repo}/git/matching-refs/tags/')
         check_reservations(args.component, edit['version'], releases, refs)
+        state['pushTransport'] = host.prepare_push(before)
         save('DRY_RUN' if args.dry_run else 'PREPARED')
-        print(f"{args.component}: {edit['beforeVersion']} -> {edit['version']} ({edit['code']})", flush=True)
+        print(f"{args.component}: {edit['beforeVersion']} -> {edit['version']} ({edit['code']}); "
+              f"{state['pushTransport']} main push check passed", flush=True)
         if args.dry_run:
             return 0
         require(repository_ready(host) == before and file.read_bytes() == raw, 'Source changed during preflight')
@@ -319,7 +470,7 @@ def main(argv=None):
         host.git('diff', '--check')
         host.git('add', '--', edit['file'])
         require(host.git('diff', '--cached', '--name-only') == edit['file'], 'Unexpected index scope; not committed')
-        actor = host.api('user')
+        actor = host.actor
         expected = data.decode('utf-8').replace('\r\n', '\n').strip()
         require(host.git('rev-parse', 'HEAD') == before and
                 host.git('show', ':' + edit['file']).replace('\r\n', '\n') == expected,
@@ -336,7 +487,7 @@ def main(argv=None):
                 'Committed bytes/parent changed; no push')
         require(host.api('repos/' + REPO + '/git/ref/heads/main')['object']['sha'] == before, 'Remote moved; no automatic push')
         save('PUSH_STARTED')
-        host.git('push', 'origin', source + ':refs/heads/main')
+        host.push_main(source)
         require(host.api('repos/' + REPO + '/git/ref/heads/main')['object']['sha'] == source, 'Push result unresolved; use --resume')
         save('PUSHED')
         print('PUSHED ' + source + '; waiting for formal CI and candidate receipt', flush=True)

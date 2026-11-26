@@ -5,7 +5,7 @@
 ### One-Command Version-Only Candidates
 
 From the primary checkout on Windows, with the existing Git, Python and
-authenticated GitHub CLI installed:
+GitHub CLI installed:
 
 ```bat
 release_candidate.bat mcu
@@ -20,10 +20,14 @@ publishes Stable/Beta, generates/enables a delta, touches a device or clears dat
 It is a candidate preparation command, not an automated physical OTA test.
 
 Use `release_candidate.bat mcu --dry-run` (or `app --dry-run`) to check the next
-version without changing either version file or pushing. Existing main must be
-clean and match fresh remote main; unrelated/untracked files are never staged.
+version and push access without changing either version file or updating remote
+refs. Main must be clean and match fresh remote main; unrelated/untracked files
+are never staged.
 Occupied Release drafts/tags, divergence and unresolved prior deliveries stop
 the command rather than overwriting assets or silently trying another version.
+An original main-push failure is closed without a rebuild only when GitHub
+confirms failed checks and that both the firmware and App jobs were skipped
+without any steps. The original failed receipt remains unchanged.
 The firmware registration job retains its existing backend immutability checks.
 
 Receipts and sanitized logs are under `.cache/candidate-release/`. If observation
@@ -39,8 +43,17 @@ reconciliation; do not invoke a new release to repair it. A failed formal build
 or partial upload requires inspecting that original run and retained assets.
 The default finite wait is 120 minutes, adjustable with `--timeout-minutes`.
 An existing `active.lock` is not removed automatically: reconcile its owner first.
-Credentials are reused in memory from GH_TOKEN/GITHUB_TOKEN or standard
-`gh auth token`; no token/login/credential configuration is created or printed.
+On the recorded Windows host, Git prefers the existing `Eitan-S-23` RSA SSH
+route via `ssh.github.com:443` with strict host verification. The entry verifies
+the account and tries an exact `main` dry-run before editing. It does not change
+the remote, keys or Git/SSH configuration. On hosts without that local setup,
+the existing authenticated HTTPS push remains available. A failed SSH check or
+an uncertain push is not retried on another transport.
+
+GitHub API reads of drafts and CI receipts use `GH_TOKEN`/`GITHUB_TOKEN`, the
+owner's `gh auth token`, or the same existing owner CLI credential stored by
+Windows in the active local console session. It is reused in memory, not
+printed, copied to disk, or replaced. SSH does not replace these API checks.
 All controllable child caches/temp/logs and Git outputs stay in the project.
 Existing proxy environment variables take precedence; when absent, the entry
 also passes the already-configured Windows system proxy to gh in memory. It
