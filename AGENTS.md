@@ -27,6 +27,30 @@ project. Keil ARM Compiler 5 remains an auxiliary path for local hardware
 debugging, toolchain comparison, and compatibility checks. Agents must not
 promote AC5 artifacts to OTA or CI release artifacts.
 
+### One-Click MCU Upgrade Test Push
+
+For an authorized request to push MCU firmware for upgrade testing without
+firmware code changes, run this existing entry directly in `cmd.exe` from the
+primary checkout root on `main`:
+
+```bat
+release_candidate.bat mcu
+```
+
+- The script reads the current `firmware.versionName`, increments it, commits
+  only the MCU version file, pushes `main`, and waits for the unpublished
+  full/recovery candidate receipt. Do not enter or edit the version manually.
+- For multiple candidates, run it once per candidate, sequentially. Wait for
+  `READY` before starting the next run.
+- Do not call the internal `Tools/ota/release_candidate.py` directly, write a
+  wrapper, or reproduce the script with manual Git, build, or CI commands.
+  If the entry blocks, report the exact blocker rather than bypassing its checks
+  or disturbing unrelated changes. If observation stops after a successful push,
+  use `release_candidate.bat --resume` with the printed receipt path. If the
+  push outcome is uncertain, reconcile it before starting another candidate.
+- This prepares test candidates only. It does not publish Stable/Beta or run a
+  device OTA. See [the candidate guide](docs/original-admin-candidates.md).
+
 ### Main And Automatic Candidates
 
 - `main` is the authoritative App/MCU source and automatic candidate branch.

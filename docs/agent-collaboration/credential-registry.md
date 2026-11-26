@@ -41,6 +41,36 @@ above. It does not approve every technically available API operation, inherit a
 different task's approvals, authorize permission expansion/rotation, or remove
 production gates. Token values stay in protected inputs, never in chat or evidence.
 
+### Billing Read Confirmed After Personal Token Correction, 2026-11-23
+
+LOCAL_PENDING / BILLING_READ_CONFIRMED / QUOTA_IMPLEMENTATION_PENDING. The owner
+confirms the earlier edit targeted an account-owned token, then edits the correct
+personal token. At 08:32 UTC, the same registered CF-CI-01 input returns HTTP 200
+for subscriptions and workers/account-settings. The returned plans are R2 Paid
+and Teams Free Base, period 2026-10-28 to 2026-11-28 UTC. Neither these records nor
+standard default usage model proves a Workers Paid subscription or any numeric
+remaining allowance. No token change/export, cloud mutation or deployment by
+this agent. Receipt: .cache/resource-quota-20261123/permission-02/result.json;
+the original probe is reused with only new output/host bindings. Previous 403 and
+active-token receipts below remain original. Permission readiness is not UI repair.
+
+### Billing Permission Update Probe, 2026-11-23
+
+LOCAL_PENDING / BILLING_READ_NOT_CONFIRMED. The owner reports editing the
+existing e-track-ci permissions. A fresh GET /accounts/<configured-account>/subscriptions
+at 08:14 UTC still returns HTTP 403; the separate workers/account-settings
+read has a transport failure, not a confirmed permission denial. A bounded
+GET /user/tokens/verify at 08:15 UTC returns HTTP 200/status active. Token
+validity does not verify its saved Billing Read policy, account scope, or that
+the edited token matches the registered protected input. Do not substitute a
+provisioning credential, rotate/export a token, or retry the unchanged denial.
+Next owner action: reconcile the existing token's saved Account > Billing > Read,
+target account and conditions using a redacted permission summary. No secret
+value, cloud mutation, deployment, publication or device operation. Raw scoped
+receipts: .cache/resource-quota-20261123/permission-01/result.json and
+verification-01/result.json. Remaining quota implementation is still absent;
+this probe does not qualify it as repaired. Earlier successes/denials remain.
+
 ### Provenance And Observed Capabilities
 
 - Actions cutover is now executed, not pending: the owner-authorized

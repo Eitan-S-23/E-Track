@@ -132,6 +132,60 @@ now-source-matched components to improve evidence. The remaining owner route is
 
 ## Current State: Account Relationships And SMTP Code Deployed 2026-11-22
 
+### SMTP Activation Follow-Up: Server Accepted, Inbox Pending
+
+Subsequent owner feedback confirms the test email was actually received. Delivery
+is now SMTP_ACCEPTED_AND_OWNER_RECEIPT_CONFIRMED, not merely provider acceptance.
+The supplied one-time code is neither stored nor used. Separate evidence is
+`.cache/account-mail-activation/owner-inbox-confirmed.json`; the original send
+receipt stays unchanged. Actual App registration/reset/session-revocation flows
+remain pending, and required registration email stays off. No additional send or
+cloud-setting change follows from this receipt confirmation alone.
+
+Owner input receipt `.cache/account-mail-activation/20261122T132340Z-79a2743b/result.json`
+confirms all three exact targets received the three encrypted mail settings and
+unrelated settings were preserved. Do not rerun the initial configuration or
+request the authorization code. Worker readiness became true immediately;
+Public Pages remained false until Pages-only activation.
+
+Actions [45028304682](https://github.com/Eitan-S-23/E-Track/actions/runs/45028304682)
+successfully activates the same tested backend source
+`95470e8e3ea0f9245736f7076a8ff86eaa004925` from main workflow `6073f443`.
+Admin deployment is `28df0c06-1202-4315-b9e1-cc1b6707a378`; Public is
+`75e7e0c1-956c-4410-9431-5f76554bac82`. Worker/migration steps are skipped.
+Both production/preview runtime configurations are unchanged after deployment.
+Secret PUT had already created Worker version
+`5d5b5d38-8022-437b-a8b9-77020566ad42`, without a workers/tag source annotation;
+the follow-up verifies this exact post-secret version/runtime remains unchanged,
+not an invented source tag. Schedules and all four channel/60 delta identities
+match the pre-activation snapshot.
+
+Live owner/static-source/API checks in `keyring-cloud-live-305` pass. Worker,
+Public and Admin all expose mail readiness; required email verification remains
+off, daily limits stay 5/5, and anonymous cloud requests remain denied. One
+Public registration-email request at 2026-11-22 13:45:15..24 UTC succeeds through
+the actual QQ SMTP post-DATA acceptance path. Recipient is the owner-approved
+`eitan_s@foxmail.com`; no password/code value was read back or logged. Actual inbox
+receipt, controlled registration/reset and phone validation remain pending.
+No user account was created and no password was changed.
+
+Original evidence: `.cache/ota-followup-20261122/keyring-cloud-live-301/305`,
+`keyring-dispatch-302`, `keyring-read-303`, `keyring-logs-306`, and
+`.cache/account-mail-activation/send-test-01/result.json`. Admin/Public npm each
+still report four high-severity dependency issues, plus existing Node/Actions
+deprecations. Do not resend merely to improve evidence or enable required email
+before the owner confirms receipt and the controlled flows pass.
+
+Local preservation incident: four old untracked cache helper scripts were
+mistakenly overwritten during preparation, not restored; original receipt
+directories and product source were not changed. The user has been informed.
+Exact paths, cause and mitigation are in the existing OTA companion note and
+`.cache/account-mail-activation/activation-audit.json`. New adapters use distinct
+`smtp-activation-*` names. This incident is not hidden by successful activation.
+
+The original pre-activation delivery record follows; its unconfigured-mail
+statements describe that earlier checkpoint, superseded above.
+
 Actions [45016534804](https://github.com/Eitan-S-23/E-Track/actions/runs/45016534804)
 deploys source `95470e8e3ea0f9245736f7076a8ff86eaa004925` after exact-source
 checks 45015301099 (535 Worker/297 browser tests and three typechecks). Only
