@@ -17,7 +17,7 @@ internal object CompanionRecoveryWake {
     private const val REQUEST = 2414
     private const val MAX_DELAY = 3600000L
     private const val PREFIX = "recoveryWake"
-    private val fields = listOf("Id", "Revision", "Device", "At", "Elapsed", "Created", "Boot", "Requested")
+    private val fields = listOf("Id", "Revision", "Device", "At", "Elapsed", "Created", "Boot", "Requested", "Mode")
 
     private data class Ticket(val id: String, val revision: String, val device: String,
                               val at: Long, val elapsed: Long, val created: Long, val boot: Int)
@@ -107,11 +107,10 @@ internal object CompanionRecoveryWake {
                 .putString(PREFIX + "Device", ticket.device).putLong(PREFIX + "At", ticket.at)
                 .putLong(PREFIX + "Elapsed", ticket.elapsed).putLong(PREFIX + "Created", ticket.created)
                 .putInt(PREFIX + "Boot", ticket.boot).putBoolean(PREFIX + "Requested", false).commit())
-            context.getSystemService(AlarmManager::class.java).setAndAllowWhileIdle(
-                AlarmManager.ELAPSED_REALTIME_WAKEUP, ticket.elapsed, pending(context, ticket.id, true)!!)
-            p.edit().putBoolean(PREFIX + "Requested", true).apply()
+            val mode = CompanionAlarm.schedule(context, ticket.elapsed, pending(context, ticket.id, true)!!)
+            p.edit().putBoolean(PREFIX + "Requested", true).putString(PREFIX + "Mode", mode).apply()
             CompanionDiagnostics.record(context, "RECOVERY_WAKE_SCHEDULED", trigger = "alarm",
-                details = details(context, ticket) + ("scheduleMode" to "inexact_allow_idle"))
+                details = details(context, ticket) + ("scheduleMode" to mode))
             return true
         } catch (error: Exception) {
             CompanionDiagnostics.record(context, "RECOVERY_WAKE_SCHEDULE_FAILED", trigger = "alarm",
@@ -152,7 +151,9 @@ internal object CompanionRecoveryWake {
         return mapOf("pending" to (ticket != null && current(context, ticket)),
             "requested" to CompanionBridge.preferences(context).getBoolean(PREFIX + "Requested", false),
             "nextAttemptAt" to ticket?.at, "deadlineElapsedMs" to ticket?.elapsed,
-            "remainingMs" to remainingMs(context))
+            "remainingMs" to remainingMs(context),
+            "scheduleMode" to CompanionBridge.preferences(context).getString(PREFIX + "Mode", null),
+            "exactWakeAllowed" to CompanionAlarm.exactAllowed(context))
     }
 
     fun receive(context: Context, intent: Intent) {
@@ -180,7 +181,8 @@ internal object CompanionRecoveryWake {
         // Claim this generation before handing off. The Handler/job/presence
         // paths share Service ownership and cannot replay this PendingIntent.
         if (!cancel(context, clearBackoff = true)) return
-        if (DeviceOtaService.active?.hasTask() == true || CompanionService.active?.recoveryHealthy() == true) {
+        if (DeviceOtaService.active?.hasTask() == true || (CompanionService.active?.recoveryHealthy() == true &&
+                !CompanionBridge.preferences(context).getBoolean("checkPending", false))) {
             CompanionDiagnostics.record(context, "RECOVERY_WAKE_COALESCED", trigger = "alarm",
                 details = details + ("reason" to "owner_already_active"))
             return

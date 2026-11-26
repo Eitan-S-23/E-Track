@@ -232,7 +232,9 @@ class CompanionRuntime extends GetxService {
     final last = _preferences!.getInt('companion_attempt_$address') ?? 0;
     final interval = Duration(hours: settings['intervalHours'] as int? ?? 12);
     final manual = wake['reason'] == 'manual';
-    final due = DateTime.now().millisecondsSinceEpoch - last >= interval.inMilliseconds;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final retryAt = _preferences!.getInt('account_auto_retry_${_ota.accounts.accountId}') ?? 0;
+    final due = now - last >= interval.inMilliseconds || retryAt > 0 && retryAt <= now;
     await _journal('CHECK_SCHEDULE', {'lastCheckAt': last,
       'nextCheckAt': last + interval.inMilliseconds, 'source': wake['reason']});
     final pendingPackage = reconnecting && _preferences!.containsKey('companion_ready_$address');
@@ -240,8 +242,9 @@ class CompanionRuntime extends GetxService {
         (wake['reason'] == 'network' && _ota.canResumePreparation)) {
       await _check(manual ? 'manual' : reconnecting ? 'reconnect' : 'periodic', 0);
     } else {
+      await _scheduleCheck(binding, retryAt > now ? retryAt : last + interval.inMilliseconds);
       await _journal('CHECK_NOT_EXECUTED', {'reason': 'not_due'});
-      await _state(_supportsControl ? 'CONNECTED' : 'DEVICE_CONTROL_UNSUPPORTED', busy: false);
+      await _state(retryAt > now ? 'CHECK_WAITING' : _supportsControl ? 'CONNECTED' : 'DEVICE_CONTROL_UNSUPPORTED', busy: false);
     }
   }
 
@@ -361,6 +364,32 @@ class CompanionRuntime extends GetxService {
         'deviceKey': _address == null ? null : sha256.convert(utf8.encode(_address!.toLowerCase())).toString(),
         ...details}).timeout(const Duration(seconds: 1));
     } catch (_) { /* Observation failure must not change radio ownership. */ }
+  }
+
+  Future<void> _scheduleCheck(_ControlBinding binding, int at) async {
+    if (!_bindingCurrent(binding)) return;
+    try {
+      final accepted = await platform.channel.invokeMethod<bool>('scheduleCheck', {
+        'runtimeId': _runtime, 'revision': _revision, 'nextCheckAt': at,
+        'deviceToken': sha256.convert(utf8.encode(binding.address)).toString(),
+      }).timeout(const Duration(seconds: 1));
+      if (accepted != true && _bindingCurrent(binding)) {
+        await _journal('CHECK_WAKE_SCHEDULE_FAILED', {'nextCheckAt': at, 'reason': 'native_schedule_rejected'});
+      }
+    } catch (_) {
+      if (_bindingCurrent(binding)) await _journal('CHECK_WAKE_SCHEDULE_FAILED', {'nextCheckAt': at, 'reason': 'native_schedule_unavailable'});
+    }
+  }
+
+  Future<void> _deferCheck(_ControlBinding binding, String source, int request, String reason, int at,
+      {String clockSource = 'local_spacing'}) async {
+    if (!_bindingCurrent(binding)) return;
+    await _preferences!.setInt('account_auto_retry_${_ota.accounts.accountId}', at);
+    await _scheduleCheck(binding, at);
+    if (!_bindingCurrent(binding)) return;
+    await _journal('CHECK_NOT_EXECUTED', {'source': source, 'reason': reason, 'nextCheckAt': at, 'clockSource': clockSource});
+    await _deviceState('BUSY', request, binding: binding);
+    if (_bindingCurrent(binding)) await _state('CHECK_WAITING', busy: false, checkFinished: true);
   }
 
   void _invalidateLink() {
@@ -612,10 +641,18 @@ class CompanionRuntime extends GetxService {
       // Only a request-saving cooldown is local. Daily counts live exclusively on the server.
       final lastAutomatic = _preferences!.getInt('account_auto_last_${_ota.accounts.accountId}') ?? 0;
       final elapsed = DateTime.now().millisecondsSinceEpoch - lastAutomatic;
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final retryAt = _preferences!.getInt('account_auto_retry_${_ota.accounts.accountId}') ?? 0;
+      final localDeadline = lastAutomatic > 0 && elapsed >= 0 ? lastAutomatic + const Duration(hours: 1).inMilliseconds : 0;
+      final deadline = max(retryAt, localDeadline);
       final reason = settings['networkAvailable'] == false ? 'network_unavailable' :
-          lastAutomatic > 0 && elapsed >= 0 && elapsed < const Duration(hours: 1).inMilliseconds && !_ota.canResumePreparation
-            ? 'minimum_interval' : null;
+          deadline > now && !_ota.canResumePreparation ? 'minimum_interval' : null;
       if (reason != null) {
+        if (reason == 'minimum_interval') {
+          await _deferCheck(binding, source, request, reason, deadline,
+            clockSource: retryAt >= localDeadline ? 'persisted_deadline' : 'local_spacing');
+          return;
+        }
         await _journal('CHECK_NOT_EXECUTED', {'source': source, 'reason': reason});
         // Reoffer verified bytes without spending network quota.
         if (_bindingCurrent(binding)) await _state(reason == 'network_unavailable' ? 'NO_NETWORK' : 'CONNECTED', busy: false, checkFinished: true);
@@ -643,12 +680,27 @@ class CompanionRuntime extends GetxService {
     if (!resume && (latest != null || _ota.lastCheckWasNoUpdate)) {
       final now = DateTime.now().millisecondsSinceEpoch;
       await _preferences!.setInt('companion_attempt_$address', now);
-      if (automatic) await _preferences!.setInt('account_auto_last_${_ota.accounts.accountId}', now);
+      if (automatic) {
+        await _preferences!.setInt('account_auto_last_${_ota.accounts.accountId}', now);
+      }
+      await _preferences!.remove('account_auto_retry_${_ota.accounts.accountId}');
+      final settings = await platform.snapshot();
+      if (!_bindingCurrent(binding)) return;
+      await _scheduleCheck(binding, now + Duration(hours: settings['intervalHours'] as int? ?? 12).inMilliseconds);
       await _journal('CHECK_EXECUTED', {'executedAt': now, 'source': source});
     } else if (!resume && _ota.lastCloudError != null) {
       await _journal('CHECK_NOT_EXECUTED', {'source': source, 'reason': _ota.lastCloudError});
     }
     if (latest == null) {
+      if (automatic && _ota.lastCloudError == 'CHECK_TOO_SOON') {
+        final now = DateTime.now().millisecondsSinceEpoch;
+        final returned = _ota.lastCloudRetryAt;
+        final retryAt = returned != null && returned > now && returned <= now + const Duration(hours: 24).inMilliseconds
+            ? returned : now + const Duration(hours: 1).inMilliseconds;
+        if (_bindingCurrent(binding)) await _deferCheck(binding, source, request, 'CHECK_TOO_SOON', retryAt,
+          clockSource: returned == retryAt ? 'server_deadline' : 'fallback_hour');
+        return;
+      }
       final noUpdate = _ota.lastCheckWasNoUpdate;
       if (noUpdate) await _preferences!.remove('companion_ready_$address');
       if (!_bindingCurrent(binding)) return;

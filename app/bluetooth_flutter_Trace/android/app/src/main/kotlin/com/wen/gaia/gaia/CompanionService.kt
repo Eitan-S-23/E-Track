@@ -170,6 +170,11 @@ class CompanionService : Service() {
                 revision != CompanionBridge.revision(this@CompanionService)) {
                 stopCompanion("PERMISSION_OR_ASSOCIATION_LOST"); return
             }
+            if (CompanionCheckWake.claimDue(this@CompanionService, "heartbeat") && recoveryRetryAt == null &&
+                DeviceOtaService.active?.hasTask() != true) {
+                reason = "periodic"
+                dispatch()
+            }
             if (!runtimeAcknowledged && waitingForRecovery()) {
                 handler.postDelayed(this, 30000)
                 return
@@ -193,6 +198,7 @@ class CompanionService : Service() {
         super.onCreate()
         active = this
         CompanionDiagnostics.record(this, "SERVICE_CREATED", runtimeId)
+        CompanionCheckWake.restore(this)
         if (Build.VERSION.SDK_INT >= 24) {
             try {
                 val manager = getSystemService(ConnectivityManager::class.java)
@@ -232,7 +238,13 @@ class CompanionService : Service() {
                     dispatching || awaitingStateAt?.let { SystemClock.elapsedRealtime() - it < 30000 } == true ||
                     recoveryProgressAt?.let { SystemClock.elapsedRealtime() - it < 30000 } == true)) {
                 CompanionDiagnostics.record(this, "RECOVERY_WAKE_COALESCED", runtimeId, requestedReason,
-                    details = mapOf("reason" to "owner_already_active"))
+                    details = mapOf("reason" to if (CompanionBridge.preferences(this).getBoolean("checkPending", false))
+                        "owner_active_check_pending" else "owner_already_active"))
+                if (CompanionBridge.preferences(this).getBoolean("checkPending", false) &&
+                    DeviceOtaService.active?.hasTask() != true) {
+                    reason = "periodic"
+                    dispatch()
+                }
                 return
             }
             reason = requestedReason
@@ -284,6 +296,7 @@ class CompanionService : Service() {
             "linkAcknowledged" to (linkedToken != null), "status" to notificationStatus,
             "recoveryWaiting" to waitingForRecovery(), "nextRecoveryAt" to recoveryRetryAt,
             "recoveryWake" to CompanionRecoveryWake.snapshot(this),
+            "checkWake" to CompanionCheckWake.snapshot(this),
             "diagnostics" to CompanionDiagnostics.snapshot(this)
         )).toString())
     }
@@ -342,6 +355,7 @@ class CompanionService : Service() {
             "LOGIN_REQUIRED" -> "\u8bbe\u5907\u5df2\u8fde\u63a5\uff0c\u767b\u5f55\u540e\u53ef\u68c0\u67e5\u56fa\u4ef6\u66f4\u65b0"
             "TARGET_IDENTITY_VERIFIED" -> "\u56fa\u4ef6\u66f4\u65b0\u6210\u529f\uff0c\u5df2\u786e\u8ba4\u8bbe\u5907\u7248\u672c"
             "CHECK_FAILED", "PACKAGE_PREPARATION_FAILED" -> "\u8bbe\u5907\u5df2\u8fde\u63a5\uff0c\u66f4\u65b0\u68c0\u67e5\u6682\u4e0d\u53ef\u7528"
+            "CHECK_WAITING" -> "\u8bbe\u5907\u5df2\u8fde\u63a5\uff0c\u7b49\u5f85\u81ea\u52a8\u68c0\u67e5\u65f6\u95f4"
             "DEVICE_CONTROL_UNSUPPORTED" -> "\u8bbe\u5907\u5df2\u8fde\u63a5\uff0c\u8bf7\u5728 App \u4e2d\u68c0\u67e5\u66f4\u65b0"
             else -> if (linkedToken != null) "\u8bbe\u5907\u5df2\u8fde\u63a5\uff0c\u540e\u53f0\u670d\u52a1\u8fd0\u884c\u4e2d" else "\u8bbe\u5907\u8fde\u63a5\u670d\u52a1\u8fd0\u884c\u4e2d"
         }
@@ -495,6 +509,7 @@ class CompanionService : Service() {
         if (!CompanionBridge.enabled(this) || (revision.isNotEmpty() && revision != CompanionBridge.revision(this)) ||
             reason in listOf("USER_DISABLED", "PERMISSION_OR_ASSOCIATION_LOST", "START_PRECONDITION_FAILED")) {
             CompanionRecoveryWake.cancel(this, clearBackoff = true)
+            CompanionCheckWake.cancel(this)
         }
         resetReconnect()
         handler.removeCallbacksAndMessages(null)
@@ -535,6 +550,12 @@ class CompanionJobService : JobService() {
         }
         val prefs = CompanionBridge.preferences(this)
         val check = params.jobId == CompanionBridge.CHECK_JOB
+        CompanionCheckWake.claimDue(this, "job")
+        if (check && CompanionCheckWake.waiting(this) && !prefs.getBoolean("checkPending", false)) {
+            CompanionDiagnostics.record(this, "CHECK_NOT_EXECUTED", trigger = "periodic",
+                details = mapOf("reason" to "not_due", "nextCheckAt" to prefs.getLong("nextCheckAt", 0)))
+            return false
+        }
         if (check) prefs.edit().putBoolean("checkPending", true).apply()
         if (!check && !prefs.getBoolean("checkPending", false) && CompanionService.active?.recoveryHealthy() == true) return false
         if (CompanionRecoveryWake.remainingMs(this) > 0) {

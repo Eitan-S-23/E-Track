@@ -45,11 +45,12 @@ class CompanionServiceTest {
         var probeReply: ((Boolean) -> Unit)? = null
         var starts = 0
         var dispatches = 0
+        val payloads = mutableListOf<Map<String, Any>>()
         var autoProbe = false
         val events = mutableListOf<String>()
         override fun problem(context: Context) = failure
         override fun initialize(context: Context) { starts++ }
-        override fun dispatch(payload: Map<String, Any>, done: (Boolean) -> Unit) { dispatches++; reply = done }
+        override fun dispatch(payload: Map<String, Any>, done: (Boolean) -> Unit) { dispatches++; payloads.add(payload); reply = done }
         override fun probe(id: String, done: (Boolean) -> Unit) { probeReply = done; if (autoProbe) done(true) }
         override fun live() = engineLive
         override fun connected(context: Context) = gatt
@@ -105,6 +106,32 @@ class CompanionServiceTest {
         assertEquals(1, runtime.starts)
         assertEquals(1, runtime.dispatches)
         assertNull(shadowOf(service.applicationContext as android.app.Application).nextStartedActivity)
+    }
+
+    @Test fun pendingCheckDuringInitialDispatchIsQueuedWithoutReinitializingOrResettingRecovery() {
+        start()
+        CompanionBridge.preferences(service).edit().putBoolean("checkPending", true).commit()
+        service.onStartCommand(Intent().putExtra("reason", "recovery"), 0, 2)
+        assertEquals(1, runtime.starts)
+        assertEquals(1, runtime.dispatches)
+        runtime.reply!!(true)
+        assertEquals(2, runtime.dispatches)
+        assertEquals(true, runtime.payloads.last()["checkPending"])
+        assertEquals("periodic", runtime.payloads.last()["reason"])
+        assertEquals(1, runtime.starts)
+    }
+
+    @Test fun heartbeatClaimsAnElapsedCheckAfterSleepWithoutItsAlarmOrAJob() {
+        runtime.autoProbe = true
+        start(); runtime.reply!!(true)
+        assertTrue(service.state(state()))
+        assertTrue(CompanionCheckWake.schedule(service, System.currentTimeMillis() + 60000))
+        ShadowSystemClock.simulateDeepSleep(Duration.ofMinutes(2))
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(31))
+        assertEquals(2, runtime.dispatches)
+        assertEquals(true, runtime.payloads.last()["checkPending"])
+        assertEquals("periodic", runtime.payloads.last()["reason"])
+        assertEquals(1, runtime.starts)
     }
     @Test fun rejectedStartDoesNotRequestStickyRecreation() {
         runtime.failure = "BLUETOOTH_OFF"

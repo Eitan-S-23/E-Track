@@ -117,6 +117,7 @@ object CompanionBridge {
             "networkAvailable" to (context.getSystemService(ConnectivityManager::class.java)?.activeNetwork != null),
             "batteryUnrestricted" to context.getSystemService(PowerManager::class.java).isIgnoringBatteryOptimizations(context.packageName),
             "recoveryWake" to CompanionRecoveryWake.snapshot(context),
+            "checkWake" to CompanionCheckWake.snapshot(context),
             "presenceObservation" to prefs.getString("presenceObservation", "NOT_REQUESTED"),
             "presenceErrorType" to prefs.getString("presenceErrorType", null),
             "vendorAutostart" to "unknown", "lastResult" to prefs.getString("lastResult", "NOT_RUN"))
@@ -208,6 +209,16 @@ object CompanionBridge {
                         }
                         "settings" -> result.success(openSettings(app, call.argument<String>("kind")))
                         "state" -> result.success(CompanionService.active?.state(call.arguments as? Map<*, *>) == true)
+                        "scheduleCheck" -> {
+                            val values = call.arguments as? Map<*, *>
+                            val target = address(app)
+                            val at = (values?.get("nextCheckAt") as? Number)?.toLong()
+                            val valid = enabled(app) && values != null && target != null && at != null && at >= 0 &&
+                                at <= System.currentTimeMillis() + 86400000L &&
+                                values["runtimeId"] == CompanionService.active?.runtimeId && values["revision"] == revision(app) &&
+                                values["deviceToken"] == deviceToken(target)
+                            result.success(valid && CompanionCheckWake.schedule(app, at!!))
+                        }
                         "check" -> {
                             requireForeground()
                             if (!enabled(app)) throw IllegalStateException("COMPANION_DISABLED")
@@ -281,6 +292,7 @@ object CompanionBridge {
         val scheduler = context.getSystemService(JobScheduler::class.java)
         if (!enabled(context) || !associated(context)) {
             CompanionRecoveryWake.cancel(context, clearBackoff = true)
+            CompanionCheckWake.cancel(context)
             scheduler.cancel(CHECK_JOB); scheduler.cancel(RECOVERY_JOB); scheduler.cancel(STARTUP_JOB)
             if (Build.VERSION.SDK_INT >= 31) address(context)?.let {
                 try { context.getSystemService(CompanionDeviceManager::class.java).stopObservingDevicePresence(it) }
@@ -291,6 +303,7 @@ object CompanionBridge {
         // Keep these independent from JobScheduler admission: one failed wake
         // route must not prevent registration of the other supported routes.
         CompanionRecoveryWake.restore(context)
+        CompanionCheckWake.restore(context)
         observePresence(context, "restore")
         val prefs = preferences(context)
         val component = ComponentName(context, CompanionJobService::class.java)
@@ -329,7 +342,8 @@ object CompanionBridge {
 
     internal fun recoverStartup(context: Context, deadlineElapsed: Long) {
         val scheduler = context.getSystemService(JobScheduler::class.java)
-        if (!enabled(context) || !associated(context) || CompanionService.active?.recoveryHealthy() == true) {
+        if (!enabled(context) || !associated(context) || (CompanionService.active?.recoveryHealthy() == true &&
+                !preferences(context).getBoolean("checkPending", false))) {
             scheduler.cancel(STARTUP_JOB)
             return
         }

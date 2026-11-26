@@ -133,6 +133,43 @@ void main() {
     return tempDir;
   }
 
+  test('CHECK_TOO_SOON preserves the exact server deadline without transport retries and clears it on the next check', () async {
+    Get.put<AppUpdateService>(_FakeAppUpdateService());
+    final deadline = DateTime.now().add(const Duration(minutes: 42)).millisecondsSinceEpoch;
+    final latest = latestDio([
+      _LatestBehavior.status(429, body: jsonEncode({'errorCode': 'CHECK_TOO_SOON', 'message': 'wait', 'nextCheckAt': deadline})),
+      _LatestBehavior.ok(latestBody(assetBytes(1024))),
+    ]);
+    final service = makeService(ble: _FakeBle(infoPayload), latest: latest,
+      download: downloadDio([]), firmwareDir: tempFirmwareDir());
+    await service.readDeviceInfo('AA:BB');
+    expect(await service.checkFirmwareUpdate(automatic: true), isNull);
+    expect(service.lastCloudError, 'CHECK_TOO_SOON');
+    expect(service.lastCloudRetryAt, deadline);
+    expect(service.phase, OtaPhase.idle);
+    expect(service.lastCheckWasNoUpdate, isFalse);
+    expect((latest.httpClientAdapter as _LatestMockAdapter).requestCount, 1);
+    expect(await service.checkFirmwareUpdate(), isNotNull);
+    expect(service.lastCloudRetryAt, isNull);
+    expect(service.lastCloudError, isNull);
+  });
+
+  for (final invalid in [null, false, '1795700000000', -1]) {
+    test('invalid server retry timestamp $invalid is not treated as an authoritative deadline', () async {
+      Get.put<AppUpdateService>(_FakeAppUpdateService());
+      final latest = latestDio([
+        _LatestBehavior.status(429, body: jsonEncode({'errorCode': 'CHECK_TOO_SOON', 'message': 'wait', 'nextCheckAt': invalid})),
+      ]);
+      final service = makeService(ble: _FakeBle(infoPayload), latest: latest,
+        download: downloadDio([]), firmwareDir: tempFirmwareDir());
+      await service.readDeviceInfo('AA:BB');
+      expect(await service.checkFirmwareUpdate(automatic: true), isNull);
+      expect(service.lastCloudRetryAt, isNull);
+      expect(service.phase, OtaPhase.idle);
+      expect((latest.httpClientAdapter as _LatestMockAdapter).requestCount, 1);
+    });
+  }
+
   test('process recreation refreshes a prepared grant without a second charged check', () async {
     Get.put<AppUpdateService>(_FakeAppUpdateService());
     final dir = tempFirmwareDir(), bytes = assetBytes(1024);

@@ -116,6 +116,14 @@ class CompanionIntegrationTest {
         return Intent(shadowOf(alarm.operation!!).savedIntent)
     }
 
+    private fun scheduledCheck(delay: Long = 60000): Intent {
+        assertTrue(CompanionCheckWake.schedule(app, System.currentTimeMillis() + delay))
+        val alarm = shadowOf(app.getSystemService(AlarmManager::class.java)).scheduledAlarms.single {
+            shadowOf(it.operation!!).savedIntent.action == CompanionCheckWake.ACTION
+        }
+        return Intent(shadowOf(alarm.operation!!).savedIntent)
+    }
+
     private fun diagnosticHistory() = CompanionDiagnostics.snapshot(app)["history"].toString()
 
     private fun assertRemainingUsesElapsedDeadline(deadline: Long) {
@@ -124,6 +132,197 @@ class CompanionIntegrationTest {
         val after = SystemClock.elapsedRealtime()
         assertTrue(remaining >= (deadline - after).coerceAtLeast(0))
         assertTrue(remaining <= (deadline - before).coerceAtLeast(0))
+    }
+
+    @Test fun actualCheckDeadlineWakesADeadProcessAfterDeepSleepWithoutOpeningUi() {
+        associated()
+        prefs.edit().putInt("failures", 5).commit()
+        val request = scheduledCheck()
+        val uptime = SystemClock.uptimeMillis()
+        ShadowSystemClock.simulateDeepSleep(Duration.ofMinutes(2))
+        assertEquals(uptime, SystemClock.uptimeMillis())
+        CompanionCheckReceiver().onReceive(app, request)
+        assertEquals("periodic", shadowOf(app).nextStartedService!!.getStringExtra("reason"))
+        assertTrue(prefs.getBoolean("checkPending", false))
+        assertEquals(5, prefs.getInt("failures", 0))
+        assertEquals(0L, prefs.getLong("nextAttempt", 0))
+        assertEquals(0, CompanionEngineBoundary.created)
+        assertNull(shadowOf(app).nextStartedActivity)
+        CompanionCheckReceiver().onReceive(app, request)
+        assertNull(shadowOf(app).nextStartedService)
+    }
+
+    @Test fun earlyCheckDeliveryRetainsTheSameDeadlineWithoutStartingOrSpendingAnAttempt() {
+        associated()
+        val request = scheduledCheck(3600000)
+        val wall = prefs.getLong("nextCheckAt", 0)
+        val elapsed = prefs.getLong("checkWakeElapsed", 0)
+        val id = prefs.getString("checkWakeId", null)
+        CompanionCheckReceiver().onReceive(app, request)
+        assertEquals(wall, prefs.getLong("nextCheckAt", 0))
+        assertEquals(elapsed, prefs.getLong("checkWakeElapsed", 0))
+        assertEquals(id, prefs.getString("checkWakeId", null))
+        assertFalse(prefs.getBoolean("checkPending", false))
+        assertNull(shadowOf(app).nextStartedService)
+    }
+
+    @Test fun staleCheckCannotConsumeTheReplacementOrCancelBleRecovery() {
+        associated()
+        val recovery = scheduledWake(3600000)
+        val stale = scheduledCheck()
+        val replacement = scheduledCheck(600000)
+        val deadline = prefs.getLong("checkWakeElapsed", 0)
+        ShadowSystemClock.simulateDeepSleep(Duration.ofMinutes(2))
+        CompanionCheckReceiver().onReceive(app, stale)
+        assertEquals(deadline, prefs.getLong("checkWakeElapsed", 0))
+        val requests = shadowOf(app.getSystemService(AlarmManager::class.java)).scheduledAlarms.map {
+            shadowOf(it.operation!!).savedIntent.data
+        }
+        assertEquals(setOf(recovery.data, replacement.data), requests.toSet())
+        assertFalse(prefs.getBoolean("checkPending", false))
+        assertNull(shadowOf(app).nextStartedService)
+    }
+
+    @Test fun nativeCheckSchedulingRejectsStaleOwnersAndHealthyControlDoesNotCancelIt() {
+        associated()
+        val service = start()
+        ready(service); linked(service)
+        val args = mapOf("runtimeId" to service.runtimeId, "revision" to revision,
+            "deviceToken" to key.deviceToken, "nextCheckAt" to System.currentTimeMillis() + 3600000L)
+        for (invalid in listOf(args + ("runtimeId" to "old"), args + ("revision" to "old"),
+            args + ("deviceToken" to "0".repeat(64)), args + ("nextCheckAt" to -1L),
+            args + ("nextCheckAt" to System.currentTimeMillis() + 172800000L))) {
+            assertEquals(false, incoming("scheduleCheck", invalid).requireSuccess())
+        }
+        assertTrue(shadowOf(app.getSystemService(AlarmManager::class.java)).scheduledAlarms.isEmpty())
+        assertEquals(true, incoming("scheduleCheck", args).requireSuccess())
+        val deadline = prefs.getLong("checkWakeElapsed", 0)
+        assertEquals(true, incoming("state", state(service) + ("controlOnly" to true)).requireSuccess())
+        assertEquals(deadline, prefs.getLong("checkWakeElapsed", 0))
+        assertEquals(1, shadowOf(app.getSystemService(AlarmManager::class.java)).scheduledAlarms.size)
+    }
+
+    @Test fun healthyConnectedRecoveryActuallyDispatchesThePendingCheckToTheSameRuntime() {
+        associated()
+        val service = start()
+        ready(service); linked(service)
+        val before = messages.sent.count { it.call.method == "wake" }
+        prefs.edit().putBoolean("checkPending", true).commit()
+        val jobs = Robolectric.buildService(CompanionJobService::class.java).create().get()
+        jobs.onStartJob(job(CompanionBridge.RECOVERY_JOB))
+        val requested = shadowOf(app).nextStartedService!!
+        service.onStartCommand(requested, 0, 2)
+        assertEquals(before + 1, messages.sent.count { it.call.method == "wake" })
+        val payload = messages.sent.last { it.call.method == "wake" }.call.arguments as Map<*, *>
+        assertEquals(service.runtimeId, payload["runtimeId"])
+        assertEquals("periodic", payload["reason"])
+        assertEquals(true, payload["checkPending"])
+        assertEquals(1, CompanionEngineBoundary.created)
+        assertTrue(service.linkReady())
+        assertNull(shadowOf(app).nextStartedActivity)
+        jobs.onDestroy()
+    }
+
+    @Test fun recoveryJobClaimsAnOverdueCheckEvenWhenItsAlarmWasNotDeliveredAndLinkIsHealthy() {
+        associated()
+        val service = start()
+        ready(service); linked(service)
+        scheduledCheck(1000)
+        ShadowSystemClock.simulateDeepSleep(Duration.ofSeconds(2))
+        assertTrue(service.recoveryHealthy())
+        val jobs = Robolectric.buildService(CompanionJobService::class.java).create().get()
+        jobs.onStartJob(job(CompanionBridge.RECOVERY_JOB))
+        assertTrue(prefs.getBoolean("checkPending", false))
+        service.onStartCommand(shadowOf(app).nextStartedService!!, 0, 2)
+        assertEquals(true, (messages.sent.last { it.call.method == "wake" }.call.arguments as Map<*, *>)["checkPending"])
+        assertEquals(1, CompanionEngineBoundary.created)
+        assertNull(shadowOf(app).nextStartedActivity)
+        jobs.onDestroy()
+    }
+
+    @Test fun periodicFallbackDoesNotRunBeforeTheRealDeadlineOrReplaceItsGeneration() {
+        associated()
+        val service = start()
+        ready(service); linked(service)
+        scheduledCheck(12 * 3600000L)
+        val id = prefs.getString("checkWakeId", null)
+        val jobs = Robolectric.buildService(CompanionJobService::class.java).create().get()
+        jobs.onStartJob(job(CompanionBridge.CHECK_JOB))
+        assertEquals(id, prefs.getString("checkWakeId", null))
+        assertFalse(prefs.getBoolean("checkPending", false))
+        assertNull(shadowOf(app).nextStartedService)
+        jobs.onDestroy()
+    }
+
+    @Test fun checkWakeRetainsPendingWorkThroughTheExistingOneHourBleBackoff() {
+        associated()
+        val recovery = scheduledWake(3600000)
+        val recoveryDeadline = prefs.getLong("recoveryWakeElapsed", 0)
+        val check = scheduledCheck(1000)
+        ShadowSystemClock.simulateDeepSleep(Duration.ofSeconds(2))
+        CompanionCheckReceiver().onReceive(app, check)
+        assertTrue(prefs.getBoolean("checkPending", false))
+        assertEquals(recoveryDeadline, prefs.getLong("recoveryWakeElapsed", 0))
+        assertNull(shadowOf(app).nextStartedService)
+        ShadowSystemClock.simulateDeepSleep(Duration.ofMinutes(61))
+        CompanionRecoveryReceiver().onReceive(app, recovery)
+        assertEquals("recovery", shadowOf(app).nextStartedService!!.getStringExtra("reason"))
+        assertTrue(prefs.getBoolean("checkPending", false))
+        assertNull(shadowOf(app).nextStartedActivity)
+    }
+
+    @Test fun processTeardownPreservesTheCheckAndRebootRearmsWithoutReusingTheOldIntent() {
+        associated()
+        val service = start()
+        ready(service); linked(service)
+        val stale = scheduledCheck(3600000)
+        val deadline = prefs.getLong("nextCheckAt", 0)
+        service.onDestroy()
+        assertEquals(deadline, prefs.getLong("nextCheckAt", 0))
+        Settings.Global.putInt(app.contentResolver, Settings.Global.BOOT_COUNT, 8)
+        CompanionCheckWake.restore(app)
+        assertEquals(deadline, prefs.getLong("nextCheckAt", 0))
+        val request = shadowOf(shadowOf(app.getSystemService(AlarmManager::class.java)).scheduledAlarms.single().operation!!).savedIntent
+        assertNotEquals(stale.data, request.data)
+        CompanionCheckReceiver().onReceive(app, stale)
+        assertFalse(prefs.getBoolean("checkPending", false))
+        assertNull(shadowOf(app).nextStartedService)
+    }
+
+    @Test fun userDisableAndLostAssociationCancelTheCheckWithoutOpeningPairingOrUi() {
+        associated()
+        val stale = scheduledCheck()
+        prefs.edit().putBoolean("enabled", false).commit()
+        CompanionBridge.restore(app)
+        CompanionCheckReceiver().onReceive(app, stale)
+        assertFalse(CompanionCheckWake.snapshot(app)["pending"] as Boolean)
+        assertTrue(shadowOf(app.getSystemService(AlarmManager::class.java)).scheduledAlarms.isEmpty())
+        assertNull(shadowOf(app).nextStartedService)
+        assertNull(shadowOf(app).nextStartedActivity)
+    }
+
+    @Test @Config(sdk = [31, 34]) fun exactModeRequiresActualSystemCapabilityAndRevocationRetainsTheDeadline() {
+        associated()
+        val manager = shadowOf(app.getSystemService(AlarmManager::class.java))
+        manager.setCanScheduleExactAlarms(true)
+        scheduledCheck(3600000)
+        val deadline = prefs.getLong("checkWakeElapsed", 0)
+        assertEquals("exact_allow_idle", prefs.getString("checkWakeMode", null))
+        manager.setCanScheduleExactAlarms(false)
+        CompanionCheckWake.restore(app)
+        assertEquals("inexact_allow_idle", prefs.getString("checkWakeMode", null))
+        assertEquals(deadline, prefs.getLong("checkWakeElapsed", 0))
+        assertEquals(AlarmManager.ELAPSED_REALTIME_WAKEUP, manager.scheduledAlarms.single().type)
+    }
+
+    @Test @Config(sdk = [34], shadows = [CompanionExactRaceBoundary::class])
+    fun exactPermissionRaceUsesInexactFallbackWithoutLoggingPrivateErrorText() {
+        associated()
+        shadowOf(app.getSystemService(AlarmManager::class.java)).setCanScheduleExactAlarms(true)
+        scheduledCheck()
+        assertEquals("inexact_allow_idle", prefs.getString("checkWakeMode", null))
+        assertTrue(diagnosticHistory().contains("EXACT_WAKE_UNAVAILABLE"))
+        assertFalse(diagnosticHistory().contains("private-token-and-address"))
     }
 
     @Test fun elapsedAlarmRequestsHeadlessRecoveryEvenWhenTheUptimeTimerNeverRan() {
@@ -867,6 +1066,14 @@ class CompanionIntegrationTest {
 class CompanionAlarmFailureBoundary : ShadowAlarmManager() {
     @Implementation(minSdk = 23)
     public override fun setAndAllowWhileIdle(type: Int, triggerAtMs: Long, operation: PendingIntent) {
+        throw SecurityException("private-token-and-address")
+    }
+}
+
+@Implements(AlarmManager::class)
+class CompanionExactRaceBoundary : ShadowAlarmManager() {
+    @Implementation(minSdk = 23)
+    public override fun setExactAndAllowWhileIdle(type: Int, triggerAtMs: Long, operation: PendingIntent) {
         throw SecurityException("private-token-and-address")
     }
 }

@@ -30,9 +30,11 @@ void main() {
   late Completer<void> ready;
   late List<Map<dynamic, dynamic>> states;
   late List<Map<dynamic, dynamic>> diagnostics;
+  late List<Map<dynamic, dynamic>> schedules;
   late Map<String, Object?> settings;
   var controlTime = 0;
   bool acceptState = true, throwState = false;
+  bool acceptSchedule = true;
   var runtimeId = 'runtime-1';
 
   Future<Object?> callback(String method, Object? arguments) {
@@ -75,9 +77,11 @@ void main() {
     ready = Completer<void>();
     states = [];
     diagnostics = [];
+    schedules = [];
     controlTime = 0;
     settings = {'intervalHours': 12, 'wifiOnly': true, 'unmetered': true};
     acceptState = true;
+    acceptSchedule = true;
     throwState = false;
     runtimeId = 'runtime-1';
     ble = _Ble();
@@ -90,6 +94,10 @@ void main() {
         return settings;
       }
       if (call.method == 'snapshot') return settings;
+      if (call.method == 'scheduleCheck') {
+        schedules.add(Map<dynamic, dynamic>.from(call.arguments as Map));
+        return acceptSchedule;
+      }
       if (call.method == 'diagnostic' || call.method == 'journal') {
         diagnostics.add(Map<dynamic, dynamic>.from(call.arguments as Map));
         return true;
@@ -130,6 +138,111 @@ void main() {
     expect(await callback('wake', {'runtimeId': runtimeId, 'revision': 'wrong',
       'address': _address, 'reason': 'manual'}), isFalse);
     expect(ota.checks, 1);
+  });
+
+  test('successful check persists its actual twelve-hour native deadline; control probes do not replace it', () async {
+    await start();
+    await until(() => runtime.status.value == 'NO_UPDATE');
+    final checked = preferences.getInt('companion_attempt_$_address')!;
+    expect(schedules.single['nextCheckAt'], checked + const Duration(hours: 12).inMilliseconds);
+    expect(schedules.single['runtimeId'], runtimeId);
+    controlTime = const Duration(hours: 2).inMilliseconds;
+    await callback('probe', {'runtimeId': runtimeId});
+    await until(() => diagnostics.any((d) => d['status'] == 'CONTROL_CHECK_READY'));
+    expect(schedules, hasLength(1));
+    expect(ota.checks, 1);
+  });
+
+  test('server cooldown preserves its returned deadline and does not become failure or restart the hour', () async {
+    ota.noUpdate = false;
+    ota.cloudFailure = 'CHECK_TOO_SOON';
+    ota.cloudRetryAt = DateTime.now().add(const Duration(minutes: 32)).millisecondsSinceEpoch;
+    await start();
+    await until(() => runtime.status.value == 'CHECK_WAITING');
+    final retry = ota.cloudRetryAt!;
+    expect(ota.checks, 1);
+    expect(schedules.last['nextCheckAt'], retry);
+    expect(preferences.getInt('account_auto_retry_${ota.accounts.accountId}'), retry);
+    expect(preferences.getInt('companion_attempt_$_address'), isNull);
+    expect(preferences.getInt('account_auto_last_${ota.accounts.accountId}'), isNull);
+    expect(states.last['checkFinished'], isTrue);
+    expect(states.any((s) => s['status'] == 'CHECK_FAILED'), isFalse);
+    expect(diagnostics.any((d) => d['reason'] == 'CHECK_TOO_SOON' && d['clockSource'] == 'server_deadline'), isTrue);
+    final before = schedules.length;
+    await wake('foreground');
+    await until(() => schedules.length > before && runtime.status.value == 'CHECK_WAITING');
+    expect(ota.checks, 1);
+    expect(schedules.last['nextCheckAt'], retry, reason: 'Opening UI must not postpone the pending retry to twelve hours');
+    expect(ota.upgrades, 0);
+    expect(ota.messages.where((m) => m.kind == 'STATE').last.fields, ['BUSY']);
+  });
+
+  test('expired persisted cooldown is retried by recovery without UI and cleared only after a successful query', () async {
+    ota.noUpdate = false;
+    ota.cloudFailure = 'CHECK_TOO_SOON';
+    ota.cloudRetryAt = DateTime.now().add(const Duration(minutes: 20)).millisecondsSinceEpoch;
+    await start();
+    await until(() => runtime.status.value == 'CHECK_WAITING');
+    await preferences.setInt('account_auto_retry_${ota.accounts.accountId}', DateTime.now().millisecondsSinceEpoch - 1);
+    ota.cloudFailure = null;
+    ota.cloudRetryAt = null;
+    ota.noUpdate = true;
+    await wake('recovery');
+    await until(() => ota.checks == 2 && runtime.status.value == 'NO_UPDATE');
+    expect(preferences.getInt('account_auto_retry_${ota.accounts.accountId}'), isNull);
+    expect(ota.automaticChecks, [true, true]);
+    expect(ble.connects, 1);
+  });
+
+  test('local one-hour spacing schedules only the remaining time without advancing successful-check markers', () async {
+    await start();
+    await until(() => runtime.status.value == 'NO_UPDATE');
+    final checked = preferences.getInt('companion_attempt_$_address');
+    final last = DateTime.now().subtract(const Duration(minutes: 50)).millisecondsSinceEpoch;
+    await preferences.setInt('account_auto_last_${ota.accounts.accountId}', last);
+    await wake('periodic');
+    await until(() => runtime.status.value == 'CHECK_WAITING');
+    expect(ota.checks, 1);
+    expect(schedules.last['nextCheckAt'], last + const Duration(hours: 1).inMilliseconds);
+    expect(preferences.getInt('companion_attempt_$_address'), checked);
+    expect(preferences.getInt('account_auto_last_${ota.accounts.accountId}'), last);
+  });
+
+  test('explicit manual check remains available during automatic cooldown without changing the automatic budget marker', () async {
+    ota.noUpdate = false;
+    ota.cloudFailure = 'CHECK_TOO_SOON';
+    ota.cloudRetryAt = DateTime.now().add(const Duration(minutes: 20)).millisecondsSinceEpoch;
+    await start();
+    await until(() => runtime.status.value == 'CHECK_WAITING');
+    ota.cloudFailure = null;
+    ota.noUpdate = true;
+    await runtime.manualCheck(_address);
+    await until(() => ota.checks == 2 && runtime.status.value == 'NO_UPDATE');
+    expect(ota.automaticChecks, [true, false]);
+    expect(preferences.getInt('account_auto_last_${ota.accounts.accountId}'), isNull);
+    expect(preferences.getInt('account_auto_retry_${ota.accounts.accountId}'), isNull);
+  });
+
+  test('missing server deadline uses an explicit bounded fallback rather than a fabricated server timestamp', () async {
+    ota.noUpdate = false;
+    ota.cloudFailure = 'CHECK_TOO_SOON';
+    final before = DateTime.now().millisecondsSinceEpoch;
+    await start();
+    await until(() => runtime.status.value == 'CHECK_WAITING');
+    final after = DateTime.now().millisecondsSinceEpoch;
+    final at = schedules.last['nextCheckAt'] as int;
+    expect(at, greaterThanOrEqualTo(before + const Duration(hours: 1).inMilliseconds));
+    expect(at, lessThanOrEqualTo(after + const Duration(hours: 1).inMilliseconds));
+    expect(diagnostics.any((d) => d['reason'] == 'CHECK_TOO_SOON' && d['clockSource'] == 'fallback_hour'), isTrue);
+  });
+
+  test('native scheduling failure retains a real successful query and link, with an explicit diagnostic gap', () async {
+    acceptSchedule = false;
+    await start();
+    await until(() => runtime.status.value == 'NO_UPDATE');
+    expect(runtime.handles(_address), isTrue);
+    expect(ota.checks, 1);
+    expect(diagnostics.any((d) => d['status'] == 'CHECK_WAKE_SCHEDULE_FAILED' && d['reason'] == 'native_schedule_rejected'), isTrue);
   });
 
   test('temporary initialization failure can retry on the next native wake', () async {
@@ -728,12 +841,15 @@ class _Ota extends OtaService {
   final activity = StreamController<bool>.broadcast(sync: true);
   final messages = <CompanionMessage>[];
   final owners = <String?>[];
+  final automaticChecks = <bool>[];
   final info = DeviceOtaInfo.fromInfoPayload(buildInfoPayload(model: DeviceOtaInfo.wireModelETrack,
     hardwareRevision: 3, layoutId: 5, bootVersion: 2, currentVersionCode: 30327,
     imageSha256: List.filled(32, 0x42)));
   FirmwareLatestInfo? latest;
   OtaUpgradeConsent? lastConsent;
   String? verified, owner;
+  String? cloudFailure;
+  int? cloudRetryAt;
   @override
   String identityAddress = _address;
   bool noUpdate = true, foreignBusy = false, _busy = false, identityAvailable = false;
@@ -789,7 +905,11 @@ class _Ota extends OtaService {
   @override
   Future<FirmwareLatestInfo?> checkFirmwareUpdate({String? channel, String? companionRuntimeId,
       bool automatic = false, bool refreshPrepared = false, bool legacyMigration = false}) =>
-    operation(companionRuntimeId, () async { checks++; await checkGate?.future; return latest; });
+    operation(companionRuntimeId, () async {
+      checks++; automaticChecks.add(automatic);
+      lastCloudError = cloudFailure; lastCloudRetryAt = cloudRetryAt;
+      await checkGate?.future; return latest;
+    });
   @override
   Future<bool> downloadFirmware({String? companionRuntimeId}) => operation(companionRuntimeId, () async {
     downloads++; await downloadGate?.future; verified = latest!.asset!.sha256; return true;

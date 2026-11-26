@@ -179,6 +179,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       _uidGeneration == _ble.otaLinkGeneration(_uidAddress!) ? _hardwareUid : null;
   String? get identityAddress => _deviceInfoAddress;
   String? lastCloudError;
+  int? lastCloudRetryAt;
   bool _cloudDownloadProtected = false;
   DateTime? _preparedAt;
   bool get canResumePreparation => _latestInfo?.updateAvailable == true &&
@@ -1021,6 +1022,7 @@ class OtaService extends GetxController with WidgetsBindingObserver {
       String? companionRuntimeId, bool automatic = false, bool refreshPrepared = false,
       bool legacyMigration = false}) async {
     lastCloudError = null;
+    lastCloudRetryAt = null;
     _lastCheckWasNoUpdate = false;
     if (_isUpgrading.value) {
       _notify('提示', '升级流程进行中，请先取消或等待完成');
@@ -1214,7 +1216,12 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         if (code != null && (code.startsWith('CHECK_') || code.startsWith('DEVICE_') ||
             code.startsWith('LEGACY_MIGRATION_') || code == 'LOGIN_REQUIRED' || code == 'ACCOUNT_DISABLED')) {
           _clearFirmwareInfo();
-          lastCloudError = code; _upgradeStatus.value = AccountService.messageFor(code); _phase.value = OtaPhase.failed; return null;
+          lastCloudError = code;
+          final retryAt = (error.response!.data as Map)['nextCheckAt'];
+          if (code == 'CHECK_TOO_SOON' && retryAt is int && retryAt > 0) lastCloudRetryAt = retryAt;
+          _upgradeStatus.value = AccountService.messageFor(code);
+          _phase.value = code == 'CHECK_TOO_SOON' ? OtaPhase.idle : OtaPhase.failed;
+          return null;
         }
       }
       // retryExhausted=true：到达这里的一定是 _getLatestWithRetry 三次
