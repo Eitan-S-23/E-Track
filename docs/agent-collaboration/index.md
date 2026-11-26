@@ -1,5 +1,23 @@
 # Shared Agent Records
 
+Latest long-idle repair, 2026-11-26: COMPANION_IDLE_20261126,
+MAIN_DELIVERED / CANDIDATE_DELIVERED / PHONE_VERIFICATION_NOT_RUN, updated
+2026-11-27, Codex root. Owner-authorized App `1.0.97+123` is on main source
+`a63c8a5df0154ae17131a76bdc720982b5b3d5fb`, retaining main `5916e314` and validated
+development `0eba2b99`. Full dual-host development `45849693985`, all 225 native
+tests and debug APK pass; originals and previous failures remain. Formal
+`45859072310` / Trace `45859365606` pass original-signed APK and Windows EXE.
+APK/manifest are R2-verified; registration returns `rel_trace_android_v1_0_97`,
+with no channel publication by CI. APK build retains 10 warning-prefixed lines
+and zero errors, Windows build zero/zero; other raw warnings remain in logs.
+Persisted check deadlines, connected pending work and bounded cloud retries retain
+the existing BLE cooldown, independent budgets, deferred cache and consent.
+Only these three scoped records are selected for main; older pending documents
+and MCU work are preserved. No phone/MCU/manual-backend action or independent
+PASS occurs. Owner publication/update and installed long-idle verification are
+separate; bind the formal APK identity before using the prepared passive route.
+USB-triggered recovery is not unattended success. See [current finding and verification route](../ota-exec-notes/COMPANION-SLEEP-WAKE-2026-11-25.md#long-idle-failure-and-deadline-repair-2026-11-26).
+
 Latest App recovery delivery, 2026-11-25: COMPANION_CONTROL_1096,
 MAIN_DELIVERED / CANDIDATE_DELIVERED / PHONE_VERIFICATION_NOT_RUN, Codex root.
 Owner authorizes the combined
