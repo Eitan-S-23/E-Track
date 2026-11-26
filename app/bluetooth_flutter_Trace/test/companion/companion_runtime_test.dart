@@ -441,7 +441,7 @@ void main() {
     expect(ota.checks, 1);
     ota.answerHello = true;
     await wake('recovery');
-    await until(() => runtime.status.value == 'CONNECTED');
+    await until(() => runtime.status.value == 'CHECK_WAITING');
     expect(ble.connects, 2);
     expect(ota.checks, 1);
   });
@@ -468,7 +468,7 @@ void main() {
     final oldSession = ota.messages.firstWhere((m) => m.kind == 'HELLO').session;
     ota.identityAvailable = false;
     ota.activity.add(false); // Foreground GET_INFO has failed and released its owner.
-    await until(() => ota.reads == 3 && runtime.status.value == 'CONNECTED');
+    await until(() => ota.reads == 3 && runtime.status.value == 'CHECK_WAITING');
     expect(ota.checks, 1, reason: 'Identity recovery does not bypass the HTTP interval');
     final newSession = ota.messages.lastWhere((m) => m.kind == 'HELLO').session;
     expect(newSession, isNot(oldSession));
@@ -500,7 +500,7 @@ void main() {
         ota.activity.add(false);
         await gate.entered.future;
         ble.loseConnection();
-        await until(() => ota.messages.where((m) => m.kind == 'HELLO').length == 2 && runtime.status.value == 'CONNECTED');
+        await until(() => ota.messages.where((m) => m.kind == 'HELLO').length == 2 && runtime.status.value == 'CHECK_WAITING');
         expect(gate.release.isCompleted, isFalse, reason: 'S2 must not wait for the stale attachment');
         final session = ota.messages.lastWhere((m) => m.kind == 'HELLO').session;
         expect(session, isNot(oldSession));
@@ -526,7 +526,7 @@ void main() {
     ota.identityAddress = 'bb:cc:dd:ee:ff:00';
     expect(ota.deviceInfo, isNotNull);
     ota.activity.add(false);
-    await until(() => ota.reads == 3 && runtime.status.value == 'CONNECTED');
+    await until(() => ota.reads == 3 && runtime.status.value == 'CHECK_WAITING');
     expect(ota.identityAddress, _address);
     expect(ota.checks, 1);
     final restored = ota.messages.lastWhere((m) => m.kind == 'HELLO').session;
@@ -546,7 +546,7 @@ void main() {
     ble.loseConnection();
     await Future<void>.delayed(const Duration(milliseconds: 10));
     ota.checkGate!.complete();
-    await until(() => ota.messages.where((m) => m.kind == 'HELLO').length == 2 && runtime.status.value == 'CONNECTED');
+    await until(() => ota.messages.where((m) => m.kind == 'HELLO').length == 2 && runtime.status.value == 'CHECK_WAITING');
     expect(ota.offers, isEmpty);
     expect(ota.downloads, 0);
     final restored = ota.messages.lastWhere((m) => m.kind == 'HELLO').session;
@@ -636,7 +636,7 @@ void main() {
     await until(() => runtime.status.value == 'READY_AWAITING_DEVICE_CHOICE');
     final offer = ota.offers.single;
     ble.emit(choice(offer, 'NOW'));
-    await until(() => ble.connects == 2 && runtime.status.value == 'CONNECTED');
+    await until(() => ble.connects == 2 && runtime.status.value == 'CHECK_WAITING');
     final success = states.singleWhere((s) => s['status'] == 'TARGET_IDENTITY_VERIFIED');
     expect(success['connected'], isFalse);
     expect(success['busy'], isTrue, reason: 'No disconnected idle gap before control recovery');
