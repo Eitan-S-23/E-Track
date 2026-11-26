@@ -245,6 +245,22 @@ void main() {
     expect(diagnostics.any((d) => d['status'] == 'CHECK_WAKE_SCHEDULE_FAILED' && d['reason'] == 'native_schedule_rejected'), isTrue);
   });
 
+  test('prepared cache reuse rearms the next check without fabricating a new HTTP success', () async {
+    ota.latest = _latest();
+    await start();
+    await until(() => runtime.status.value == 'READY_AWAITING_DEVICE_CHOICE');
+    final checked = preferences.getInt('companion_attempt_$_address');
+    final before = schedules.length;
+    await wake('periodic');
+    await until(() => schedules.length > before && runtime.status.value == 'READY_AWAITING_DEVICE_CHOICE');
+    expect(ota.checks, 1);
+    expect(preferences.getInt('companion_attempt_$_address'), checked);
+    expect(diagnostics.where((d) => d['status'] == 'CHECK_EXECUTED'), hasLength(1));
+    expect(diagnostics.any((d) => d['status'] == 'CHECK_SCHEDULE' && d['reason'] == 'prepared_cache'), isTrue);
+    expect(schedules.last['nextCheckAt'] as int, greaterThan(DateTime.now().millisecondsSinceEpoch));
+    expect(ota.upgrades, 0);
+  });
+
   test('temporary initialization failure can retry on the next native wake', () async {
     ble.failFirstInitialization = true;
     await start();

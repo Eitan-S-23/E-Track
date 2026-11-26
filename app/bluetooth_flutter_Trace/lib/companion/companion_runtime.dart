@@ -392,6 +392,20 @@ class CompanionRuntime extends GetxService {
     if (_bindingCurrent(binding)) await _state('CHECK_WAITING', busy: false, checkFinished: true);
   }
 
+  Future<void> _scheduleOrdinaryCheck(_ControlBinding binding, String reason) async {
+    if (!_bindingCurrent(binding)) return;
+    final settings = await platform.snapshot();
+    if (!_bindingCurrent(binding)) return;
+    final at = DateTime.now().millisecondsSinceEpoch + Duration(hours: settings['intervalHours'] as int? ?? 12).inMilliseconds;
+    await _scheduleCheck(binding, at);
+    if (_bindingCurrent(binding)) {
+      await _journal('CHECK_SCHEDULE', {
+        'lastCheckAt': _preferences!.getInt('companion_attempt_${binding.address}') ?? 0,
+        'nextCheckAt': at, 'reason': reason,
+      });
+    }
+  }
+
   void _invalidateLink() {
     _offer = null; _supportsControl = false; _session = null; _link = -1;
     _controlCheckedAt = null;
@@ -653,6 +667,8 @@ class CompanionRuntime extends GetxService {
             clockSource: retryAt >= localDeadline ? 'persisted_deadline' : 'local_spacing');
           return;
         }
+        await _scheduleOrdinaryCheck(binding, reason);
+        if (!_bindingCurrent(binding)) return;
         await _journal('CHECK_NOT_EXECUTED', {'source': source, 'reason': reason});
         // Reoffer verified bytes without spending network quota.
         if (_bindingCurrent(binding)) await _state(reason == 'network_unavailable' ? 'NO_NETWORK' : 'CONNECTED', busy: false, checkFinished: true);
@@ -688,7 +704,10 @@ class CompanionRuntime extends GetxService {
       if (!_bindingCurrent(binding)) return;
       await _scheduleCheck(binding, now + Duration(hours: settings['intervalHours'] as int? ?? 12).inMilliseconds);
       await _journal('CHECK_EXECUTED', {'executedAt': now, 'source': source});
-    } else if (!resume && _ota.lastCloudError != null) {
+    } else if (resume) {
+      await _scheduleOrdinaryCheck(binding, 'prepared_cache');
+      if (!_bindingCurrent(binding)) return;
+    } else if (_ota.lastCloudError != null) {
       await _journal('CHECK_NOT_EXECUTED', {'source': source, 'reason': _ota.lastCloudError});
     }
     if (latest == null) {
@@ -697,8 +716,10 @@ class CompanionRuntime extends GetxService {
         final returned = _ota.lastCloudRetryAt;
         final retryAt = returned != null && returned > now && returned <= now + const Duration(hours: 24).inMilliseconds
             ? returned : now + const Duration(hours: 1).inMilliseconds;
-        if (_bindingCurrent(binding)) await _deferCheck(binding, source, request, 'CHECK_TOO_SOON', retryAt,
-          clockSource: returned == retryAt ? 'server_deadline' : 'fallback_hour');
+        if (_bindingCurrent(binding)) {
+          await _deferCheck(binding, source, request, 'CHECK_TOO_SOON', retryAt,
+            clockSource: returned == retryAt ? 'server_deadline' : 'fallback_hour');
+        }
         return;
       }
       final noUpdate = _ota.lastCheckWasNoUpdate;
