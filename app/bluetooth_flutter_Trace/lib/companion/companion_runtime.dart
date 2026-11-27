@@ -628,6 +628,8 @@ class CompanionRuntime extends GetxService {
   Future<void> _prepare(String source, int request, _ControlBinding binding) async {
     final address = binding.address, runtime = _runtime!;
     final automatic = source != 'manual' && source != 'device';
+    int? preparationDeadline, preparedNextCheckAt;
+    var cooldownClockSource = 'local_spacing';
     try { await _ota.accounts.requireLogin(); }
     on AccountException catch (e) {
       await _journal('CHECK_NOT_EXECUTED', {'source': source, 'reason': e.code});
@@ -642,16 +644,6 @@ class CompanionRuntime extends GetxService {
     if (automatic) {
       final settings = await platform.snapshot();
       if (!_bindingCurrent(binding)) return;
-      if (settings['networkAvailable'] != false && !_ota.canResumePreparation) {
-        var retained = false;
-        try { retained = await _ota.restorePreparation(companionRuntimeId: runtime); }
-        catch (_) { await _journal('PREPARATION_RESTORE_FAILED', {'source': source}); }
-        if (!_bindingCurrent(binding)) return;
-        if (retained && !_ota.canResumePreparation) {
-          await _state('PACKAGE_PREPARATION_FAILED', busy: false);
-          return;
-        }
-      }
       // Only a request-saving cooldown is local. Daily counts live exclusively on the server.
       final lastAutomatic = _preferences!.getInt('account_auto_last_${_ota.accounts.accountId}') ?? 0;
       final elapsed = DateTime.now().millisecondsSinceEpoch - lastAutomatic;
@@ -659,24 +651,40 @@ class CompanionRuntime extends GetxService {
       final retryAt = _preferences!.getInt('account_auto_retry_${_ota.accounts.accountId}') ?? 0;
       final localDeadline = lastAutomatic > 0 && elapsed >= 0 ? lastAutomatic + const Duration(hours: 1).inMilliseconds : 0;
       final deadline = max(retryAt, localDeadline);
-      final reason = settings['networkAvailable'] == false ? 'network_unavailable' :
-          deadline > now && !_ota.canResumePreparation ? 'minimum_interval' : null;
-      if (reason != null) {
-        if (reason == 'minimum_interval') {
-          await _deferCheck(binding, source, request, reason, deadline,
-            clockSource: retryAt >= localDeadline ? 'persisted_deadline' : 'local_spacing');
-          return;
+      cooldownClockSource = retryAt >= localDeadline ? 'persisted_deadline' : 'local_spacing';
+      if (settings['networkAvailable'] == false) {
+        if (deadline > now) {
+          await _scheduleCheck(binding, deadline);
+        } else {
+          await _scheduleOrdinaryCheck(binding, 'network_unavailable');
         }
-        await _scheduleOrdinaryCheck(binding, reason);
         if (!_bindingCurrent(binding)) return;
-        await _journal('CHECK_NOT_EXECUTED', {'source': source, 'reason': reason});
+        await _journal('CHECK_NOT_EXECUTED', {'source': source, 'reason': 'network_unavailable'});
         // Reoffer verified bytes without spending network quota.
-        if (_bindingCurrent(binding)) await _state(reason == 'network_unavailable' ? 'NO_NETWORK' : 'CONNECTED', busy: false, checkFinished: true);
+        if (_bindingCurrent(binding)) await _state('NO_NETWORK', busy: false, checkFinished: true);
         if (_bindingCurrent(binding) && _preferences!.containsKey('companion_ready_$address') &&
-            _ota.deviceInfo != null && _ota.verifiedPackageSha256 != null) {
+            _ota.canResumePreparation && _ota.deviceInfo != null && _ota.verifiedPackageSha256 != null) {
           await _presentPrepared(source, request, binding, _ota.deviceInfo!);
         }
         return;
+      }
+      if (deadline > now) {
+        // A prepared grant can save work during cooldown, never replace an eligible latest check.
+        var retained = _ota.canResumePreparation;
+        if (!retained) {
+          try { retained = await _ota.restorePreparation(companionRuntimeId: runtime); }
+          catch (_) { await _journal('PREPARATION_RESTORE_FAILED', {'source': source}); }
+        }
+        if (!_bindingCurrent(binding)) return;
+        if (!retained || !_ota.canResumePreparation) {
+          await _deferCheck(binding, source, request, 'minimum_interval', deadline,
+            clockSource: cooldownClockSource);
+          return;
+        }
+        preparationDeadline = deadline;
+        final lastCheck = _preferences!.getInt('companion_attempt_$address') ?? 0;
+        preparedNextCheckAt = retryAt > 0 ? deadline : max(deadline,
+          lastCheck + Duration(hours: settings['intervalHours'] as int? ?? 12).inMilliseconds);
       }
     }
     _offer = null;
@@ -690,7 +698,12 @@ class CompanionRuntime extends GetxService {
       return;
     }
     if (!_bindingCurrent(binding)) return;
-    final resume = automatic && _ota.canResumePreparation;
+    final resume = preparationDeadline != null;
+    if (preparationDeadline != null && !_ota.canResumePreparation) {
+      await _deferCheck(binding, source, request, 'minimum_interval', preparationDeadline,
+        clockSource: cooldownClockSource);
+      return;
+    }
     final latest = resume ? _ota.latestInfo : await _ota.checkFirmwareUpdate(companionRuntimeId: runtime, automatic: automatic);
     if (!_bindingCurrent(binding)) return;
     if (!resume && (latest != null || _ota.lastCheckWasNoUpdate)) {
@@ -705,9 +718,11 @@ class CompanionRuntime extends GetxService {
       await _scheduleCheck(binding, now + Duration(hours: settings['intervalHours'] as int? ?? 12).inMilliseconds);
       await _journal('CHECK_EXECUTED', {'executedAt': now, 'source': source});
     } else if (resume) {
-      await _preferences!.remove('account_auto_retry_${_ota.accounts.accountId}');
-      await _scheduleOrdinaryCheck(binding, 'prepared_cache');
+      // Reattaching an offer is not a query and must not clear or postpone its deadline.
+      await _scheduleCheck(binding, preparedNextCheckAt!);
       if (!_bindingCurrent(binding)) return;
+      await _journal('CHECK_NOT_EXECUTED', {'source': source, 'reason': 'prepared_cache',
+        'nextCheckAt': preparedNextCheckAt});
     } else if (_ota.lastCloudError != null) {
       await _journal('CHECK_NOT_EXECUTED', {'source': source, 'reason': _ota.lastCloudError});
     }

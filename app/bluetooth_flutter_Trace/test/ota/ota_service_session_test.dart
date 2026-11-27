@@ -81,6 +81,16 @@ void main() {
         '"expiresAt":1780000000}}';
   }
 
+  String newerBody(Uint8List bytes) {
+    final body = jsonDecode(latestBody(bytes)) as Map<String, dynamic>;
+    body.addAll({'releaseId': 'rel-2', 'versionName': '2.10.0', 'versionCode': 21000,
+      'targetImageSha256': '63' * 32});
+    (body['asset'] as Map<String, dynamic>).addAll({'assetId': 'asset-2',
+      'fileName': 'e-track-at32f435-v2.10.0-full.etu',
+      'downloadUrl': 'https://localhost:9/e-track-at32f435-v2.10.0-full.etu'});
+    return jsonEncode(body);
+  }
+
   Dio latestDio(List<_LatestBehavior> behaviors) {
     final dio = Dio();
     dio.httpClientAdapter = _LatestMockAdapter(behaviors);
@@ -226,6 +236,158 @@ void main() {
     expect(await service.downloadFirmware(), isTrue);
     expect(service.phase, OtaPhase.readyToInstall);
     expect((download.httpClientAdapter as _DownloadMockAdapter).requestCount, 0);
+  });
+
+  for (final code in ['IDEMPOTENCY_CONFLICT', 'IDEMPOTENCY_RESULT_EXPIRED']) {
+    test('$code rejects the old grant, and a separate latest check can discover B after identity validation', () async {
+      Get.put<AppUpdateService>(_FakeAppUpdateService());
+      final dir = tempFirmwareDir(), bytes = assetBytes(1024);
+      final firstHttp = latestDio([_LatestBehavior.ok(latestBody(bytes))]);
+      final first = makeService(ble: _FakeBle(infoPayload), latest: firstHttp,
+        download: downloadDio([]), firmwareDir: dir);
+      await first.readDeviceInfo('AA:BB');
+      expect(await first.checkFirmwareUpdate(automatic: true), isNotNull);
+      final oldId = (firstHttp.httpClientAdapter as _LatestMockAdapter).requests.single.headers['X-Update-Check-Id'];
+      await Get.delete<OtaService>();
+      final http = latestDio([
+        _LatestBehavior.status(409, body: jsonEncode({'schemaVersion': 2,
+          'requestId': 'grant-error', 'errorCode': code, 'message': 'A new check is required'})),
+        _LatestBehavior.ok(newerBody(assetBytes(2048))),
+      ]);
+      final download = downloadDio([]);
+      final second = makeService(ble: _FakeBle(infoPayload), latest: http,
+        download: download, firmwareDir: dir);
+      await second.readDeviceInfo('AA:BB');
+      await second.readHardwareUid();
+      expect(await second.restorePreparation(), isFalse);
+      expect(second.canResumePreparation, isFalse);
+      expect(second.latestInfo, isNull);
+      expect(second.verifiedPackageSha256, isNull);
+      final adapter = http.httpClientAdapter as _LatestMockAdapter;
+      expect(adapter.requestCount, 1, reason: 'A rejected grant is not refreshed in a loop or switched to B');
+      expect(adapter.requests.single.headers['X-Update-Check-Id'], oldId);
+      expect(adapter.requests.single.headers['X-Update-Refresh'], '1');
+      expect(await second.downloadFirmware(), isFalse);
+      expect((download.httpClientAdapter as _DownloadMockAdapter).requestCount, 0);
+      await second.readDeviceInfo('AA:BB');
+      final latest = await second.checkFirmwareUpdate(automatic: true);
+      expect(latest?.versionCode, 21000);
+      expect(adapter.requestCount, 2);
+      expect(adapter.requests.last.headers['X-Update-Check-Id'], isNot(oldId));
+      expect(adapter.requests.last.headers['X-Update-Refresh'], isNull);
+      expect(second.canResumePreparation, isTrue);
+    });
+  }
+
+  test('failed preparation transport cannot leave saved metadata marked resumable', () async {
+    Get.put<AppUpdateService>(_FakeAppUpdateService());
+    final dir = tempFirmwareDir(), bytes = assetBytes(1024);
+    final first = makeService(ble: _FakeBle(infoPayload),
+      latest: latestDio([_LatestBehavior.ok(latestBody(bytes))]),
+      download: downloadDio([]), firmwareDir: dir);
+    await first.readDeviceInfo('AA:BB');
+    expect(await first.checkFirmwareUpdate(), isNotNull);
+    await Get.delete<OtaService>();
+    final http = latestDio([]);
+    var requests = 0;
+    http.interceptors.add(InterceptorsWrapper(onRequest: (options, handler) {
+      requests++;
+      handler.reject(DioException(requestOptions: options, error: StateError('fixture transport unavailable')));
+    }));
+    final second = makeService(ble: _FakeBle(infoPayload), latest: http,
+      download: downloadDio([]), firmwareDir: dir);
+    await second.readDeviceInfo('AA:BB');
+    await second.readHardwareUid();
+    expect(await second.restorePreparation(), isFalse);
+    expect(requests, 1);
+    expect(second.canResumePreparation, isFalse);
+    expect(second.latestInfo, isNull);
+  });
+
+  test('expired saved preparation does not replace a new automatic latest request', () async {
+    Get.put<AppUpdateService>(_FakeAppUpdateService());
+    final dir = tempFirmwareDir(), bytes = assetBytes(1024);
+    final first = makeService(ble: _FakeBle(infoPayload),
+      latest: latestDio([_LatestBehavior.ok(latestBody(bytes))]),
+      download: downloadDio([]), firmwareDir: dir);
+    await first.readDeviceInfo('AA:BB');
+    expect(await first.checkFirmwareUpdate(), isNotNull);
+    final accounts = Get.find<AccountService>() as TestAccountService;
+    accounts.preparations.values.single['createdAt'] = DateTime.now().subtract(const Duration(hours: 25)).millisecondsSinceEpoch;
+    await Get.delete<OtaService>();
+    final http = latestDio([_LatestBehavior.ok(newerBody(assetBytes(2048)))]);
+    final second = makeService(ble: _FakeBle(infoPayload), latest: http,
+      download: downloadDio([]), firmwareDir: dir);
+    await second.readDeviceInfo('AA:BB');
+    await second.readHardwareUid();
+    expect(await second.restorePreparation(), isFalse);
+    final adapter = http.httpClientAdapter as _LatestMockAdapter;
+    expect(adapter.requestCount, 0);
+    expect((await second.checkFirmwareUpdate(automatic: true))?.versionCode, 21000);
+    expect(adapter.requestCount, 1);
+    expect(adapter.requests.single.headers['X-Update-Refresh'], isNull);
+  });
+
+  test('cancelled restoration never publishes unvalidated saved metadata', () async {
+    Get.put<AppUpdateService>(_FakeAppUpdateService());
+    final dir = tempFirmwareDir(), bytes = assetBytes(1024);
+    final first = makeService(ble: _FakeBle(infoPayload),
+      latest: latestDio([_LatestBehavior.ok(latestBody(bytes))]),
+      download: downloadDio([]), firmwareDir: dir);
+    await first.readDeviceInfo('AA:BB');
+    expect(await first.checkFirmwareUpdate(), isNotNull);
+    await Get.delete<OtaService>();
+    final gate = Completer<void>();
+    final http = latestDio([_LatestBehavior.gated(gate)]);
+    final second = makeService(ble: _FakeBle(infoPayload), latest: http,
+      download: downloadDio([]), firmwareDir: dir);
+    await second.readDeviceInfo('AA:BB');
+    await second.readHardwareUid();
+    final pending = second.restorePreparation();
+    final adapter = http.httpClientAdapter as _LatestMockAdapter;
+    final deadline = DateTime.now().add(const Duration(seconds: 2));
+    while (adapter.requestCount == 0 && DateTime.now().isBefore(deadline)) {
+      await Future<void>.delayed(const Duration(milliseconds: 1));
+    }
+    expect(adapter.requestCount, 1);
+    expect(second.canResumePreparation, isFalse);
+    expect(second.latestInfo, isNull);
+    await second.cancelUpgrade(keepPackage: true);
+    expect(await pending, isFalse);
+    expect(second.canResumePreparation, isFalse);
+    gate.complete();
+  });
+
+  test('fresh checks reuse verified bytes for A but invalidate them when the server selects B', () async {
+    Get.put<AppUpdateService>(_FakeAppUpdateService());
+    final firstBytes = assetBytes(1024), secondBytes = assetBytes(2048);
+    final http = latestDio([
+      _LatestBehavior.ok(latestBody(firstBytes)),
+      _LatestBehavior.ok(latestBody(firstBytes)),
+      _LatestBehavior.ok(newerBody(secondBytes)),
+    ]);
+    final download = downloadDio([
+      _DownloadBehavior.ok(firstBytes), _DownloadBehavior.ok(secondBytes),
+    ]);
+    final service = makeService(ble: _FakeBle(infoPayload), latest: http,
+      download: download, firmwareDir: tempFirmwareDir());
+    await service.readDeviceInfo('AA:BB');
+    expect(await service.checkFirmwareUpdate(automatic: true), isNotNull);
+    expect(await service.downloadFirmware(), isTrue);
+    final firstSha = service.verifiedPackageSha256;
+    expect(await service.checkFirmwareUpdate(automatic: true), isNotNull);
+    expect(service.verifiedPackageSha256, firstSha);
+    expect(await service.downloadFirmware(), isTrue);
+    expect((download.httpClientAdapter as _DownloadMockAdapter).requestCount, 1);
+    expect((await service.checkFirmwareUpdate(automatic: true))?.versionCode, 21000);
+    expect(service.verifiedPackageSha256, isNull);
+    expect(await service.downloadFirmware(), isTrue);
+    expect(service.verifiedPackageSha256, sha256.convert(secondBytes).toString());
+    expect((download.httpClientAdapter as _DownloadMockAdapter).requestCount, 2);
+    final checks = (http.httpClientAdapter as _LatestMockAdapter).requests;
+    expect(checks, hasLength(3));
+    expect(checks.map((r) => r.headers['X-Update-Check-Id']).toSet(), hasLength(3));
+    expect(checks.every((r) => r.headers['X-Update-Refresh'] == null), isTrue);
   });
 
   test('双击防重入：挂起下载期间 checkFirmwareUpdate 不发新请求', () async {

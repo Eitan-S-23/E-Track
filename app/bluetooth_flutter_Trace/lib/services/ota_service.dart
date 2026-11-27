@@ -197,22 +197,30 @@ class OtaService extends GetxController with WidgetsBindingObserver {
         saved['kind'] is! bool || saved['id'] is! String || !RegExp(r'^[a-zA-Z0-9_-]{16,80}$').hasMatch(saved['id'] as String) ||
         saved['createdAt'] is! int || saved['body'] is! Map ||
         DateTime.now().millisecondsSinceEpoch - (saved['createdAt'] as int) >= const Duration(hours: 24).inMilliseconds) { return false; }
-    await _runExclusive<void>((generation) async {
-      if (accounts.accountId != account || hardwareUid != uid || _deviceInfo == null || _preparationIdentity(_deviceInfo!) != saved['identity']) return;
-      final latest = FirmwareLatestInfo.parse(Map<String, dynamic>.from(saved['body'] as Map),
-        expectedDeviceModel: info.deviceModel, expectedChannel: saved['channel'] as String? ?? ShareLinks.updateChannel);
-      if (!latest.updateAvailable || latest.asset == null) return;
-      _accountCheck = AccountCheck.restored(account!, saved['id'] as String, automatic: saved['kind'] as bool);
-      _preparedAt = DateTime.fromMillisecondsSinceEpoch(saved['createdAt'] as int);
-      _latestInfo = latest; _asset = latest.asset; _releaseId = latest.releaseId;
-      _assetOwnerInfo = info; _assetOwnerAddress = _deviceInfoAddress;
-      _lastCheckedChannel = saved['channel'] as String?;
-      final version = await Get.find<AppUpdateService>().getLocalAppVersionCode();
-      if (generation != _cancelGeneration) return;
-      // Restore the same server grant, then refresh its URLs without another charged check.
-      await _checkLatestLocked(info, version, _lastCheckedChannel, generation: generation, refreshPrepared: true);
-    }, companionRuntimeId: companionRuntimeId);
-    return true;
+    return await _runExclusive<bool>((generation) async {
+      if (accounts.accountId != account || hardwareUid != uid || _deviceInfo == null || _preparationIdentity(_deviceInfo!) != saved['identity']) return false;
+      var restored = false;
+      try {
+        final latest = FirmwareLatestInfo.parse(Map<String, dynamic>.from(saved['body'] as Map),
+          expectedDeviceModel: info.deviceModel, expectedChannel: saved['channel'] as String? ?? ShareLinks.updateChannel);
+        if (!latest.updateAvailable || latest.asset == null) return false;
+        // Saved metadata is not usable until this grant has been revalidated.
+        _clearFirmwareInfo();
+        _accountCheck = AccountCheck.restored(account!, saved['id'] as String, automatic: saved['kind'] as bool);
+        _preparedAt = DateTime.fromMillisecondsSinceEpoch(saved['createdAt'] as int);
+        _lastCheckedChannel = saved['channel'] as String?;
+        final version = await Get.find<AppUpdateService>().getLocalAppVersionCode();
+        if (generation != _cancelGeneration) return false;
+        // Refresh only this grant; a new version must come from a separate latest check.
+        final refreshed = await _checkLatestLocked(info, version, _lastCheckedChannel,
+          generation: generation, refreshPrepared: true);
+        restored = refreshed != null && generation == _cancelGeneration && canResumePreparation;
+        return restored;
+      } finally {
+        // Failed URL/grant refresh must not leave the saved metadata looking usable.
+        if (!restored && generation == _cancelGeneration) _clearFirmwareInfo();
+      }
+    }, companionRuntimeId: companionRuntimeId) ?? false;
   }
 
   void acceptHardwareUid(String address, String uid) {

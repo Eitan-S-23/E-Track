@@ -283,22 +283,210 @@ void main() {
     expect(schedules.last['nextCheckAt'], ota.cloudRetryAt);
   });
 
-  test('prepared cache reuse rearms the next check without fabricating a new HTTP success', () async {
+  test('prepared cache reuse preserves a pending server deadline without fabricating a new HTTP success', () async {
     ota.latest = _latest();
     await start();
     await until(() => runtime.status.value == 'READY_AWAITING_DEVICE_CHOICE');
     final checked = preferences.getInt('companion_attempt_$_address');
     final before = schedules.length;
-    await preferences.setInt('account_auto_retry_${ota.accounts.accountId}', DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch);
+    final retryAt = DateTime.now().add(const Duration(hours: 4)).millisecondsSinceEpoch;
+    await preferences.setInt('account_auto_retry_${ota.accounts.accountId}', retryAt);
     await wake('periodic');
     await until(() => schedules.length > before && runtime.status.value == 'READY_AWAITING_DEVICE_CHOICE');
     expect(ota.checks, 1);
     expect(preferences.getInt('companion_attempt_$_address'), checked);
-    expect(preferences.getInt('account_auto_retry_${ota.accounts.accountId}'), isNull);
+    expect(preferences.getInt('account_auto_retry_${ota.accounts.accountId}'), retryAt);
     expect(diagnostics.where((d) => d['status'] == 'CHECK_EXECUTED'), hasLength(1));
-    expect(diagnostics.any((d) => d['status'] == 'CHECK_SCHEDULE' && d['reason'] == 'prepared_cache'), isTrue);
-    expect(schedules.last['nextCheckAt'] as int, greaterThan(DateTime.now().millisecondsSinceEpoch));
+    expect(diagnostics.any((d) => d['status'] == 'CHECK_NOT_EXECUTED' && d['reason'] == 'prepared_cache'), isTrue);
+    expect(schedules.last['nextCheckAt'], retryAt);
     expect(ota.upgrades, 0);
+  });
+
+  test('cached reoffers keep the ordinary deadline anchored to the real check, not the latest wake', () async {
+    ota.latest = _latest();
+    await start();
+    await until(() => runtime.status.value == 'READY_AWAITING_DEVICE_CHOICE');
+    final checked = DateTime.now().subtract(const Duration(minutes: 40)).millisecondsSinceEpoch;
+    await preferences.setInt('account_auto_last_${ota.accounts.accountId}', checked);
+    await preferences.setInt('companion_attempt_$_address', checked);
+    for (var count = 2; count <= 3; count++) {
+      await wake('periodic');
+      await until(() => ota.offers.length == count && runtime.status.value == 'READY_AWAITING_DEVICE_CHOICE');
+      expect(schedules.last['nextCheckAt'], checked + const Duration(hours: 12).inMilliseconds);
+      expect(preferences.getInt('account_auto_retry_${ota.accounts.accountId}'), isNull);
+    }
+    expect(ota.checks, 1);
+    expect(ota.downloads, 1);
+    expect(preferences.getInt('companion_attempt_$_address'), checked);
+  });
+
+  for (final changed in [false, true]) {
+    test('eligible automatic check queries the server after A was shown; changed=$changed', () async {
+      ota.latest = _latest();
+      await start();
+      await until(() => runtime.status.value == 'READY_AWAITING_DEVICE_CHOICE');
+      final first = ota.offers.single;
+      ble.emit(CompanionMessage('SHOWN', first.session, first.request, [first.fields[0], first.fields[2]]));
+      await until(() => preferences.containsKey('companion_seen_$_address'));
+      final seen = preferences.getString('companion_seen_$_address');
+      final oldCheck = DateTime.now().subtract(const Duration(hours: 13)).millisecondsSinceEpoch;
+      await preferences.setInt('account_auto_last_${ota.accounts.accountId}', oldCheck);
+      await preferences.setInt('companion_attempt_$_address', oldCheck);
+      await preferences.setInt('account_auto_retry_${ota.accounts.accountId}', oldCheck + const Duration(hours: 1).inMilliseconds);
+      final current = _latest(newer: changed);
+      ota.latestResponse = () => current;
+      await wake('periodic');
+      await until(() => ota.offers.length == 2 && runtime.status.value == 'READY_AWAITING_DEVICE_CHOICE');
+      final second = ota.offers.last;
+      expect(ota.checks, 2, reason: 'The 24-hour preparation is not evidence of the currently published version');
+      expect(ota.automaticChecks, [true, true]);
+      expect(ota.restores, 0);
+      expect(ota.downloads, changed ? 2 : 1);
+      expect(second.fields[1], '${current.versionCode}');
+      expect(second.fields[2], current.asset!.sha256);
+      expect(second.fields[4], changed ? '1' : '0');
+      expect(preferences.getString('companion_seen_$_address'), seen);
+      expect(preferences.getInt('account_auto_retry_${ota.accounts.accountId}'), isNull);
+      expect(diagnostics.where((d) => d['status'] == 'CHECK_EXECUTED'), hasLength(2));
+      ble.emit(choice(first, 'NOW'));
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      expect(ota.upgrades, 0, reason: 'The old offer cannot authorize a new package');
+    });
+  }
+
+  test('cold eligible check bypasses an obsolete saved grant and discovers B', () async {
+    ota.savedLatest = _latest();
+    ota.rejectRestore = true;
+    ota.latestResponse = () => _latest(newer: true);
+    await start();
+    await until(() => runtime.status.value == 'READY_AWAITING_DEVICE_CHOICE');
+    expect(ota.restores, 0, reason: 'No old-grant refresh before a due latest query');
+    expect(ota.checks, 1);
+    expect(ota.offers.single.fields[1], '30329');
+    expect(ota.offers.single.fields[4], '1');
+    expect(states.any((s) => s['status'] == 'PACKAGE_PREPARATION_FAILED'), isFalse);
+  });
+
+  for (final throws in [false, true]) {
+    test('failed cold preparation waits only for the existing deadline and then queries B; throws=$throws', () async {
+      final retryAt = DateTime.now().add(const Duration(minutes: 20)).millisecondsSinceEpoch;
+      await preferences.setInt('account_auto_retry_${ota.accounts.accountId}', retryAt);
+      ota.savedLatest = _latest();
+      ota.rejectRestore = !throws;
+      ota.throwRestore = throws;
+      ota.latestResponse = () => _latest(newer: true);
+      await start();
+      await until(() => runtime.status.value == 'CHECK_WAITING');
+      expect(ota.restores, 1);
+      expect(ota.checks, 0);
+      expect(ota.offers, isEmpty);
+      expect(schedules.last['nextCheckAt'], retryAt);
+      expect(preferences.getInt('account_auto_retry_${ota.accounts.accountId}'), retryAt);
+      await preferences.setInt('account_auto_retry_${ota.accounts.accountId}', DateTime.now().millisecondsSinceEpoch - 1);
+      await wake('recovery');
+      await until(() => runtime.status.value == 'READY_AWAITING_DEVICE_CHOICE');
+      expect(ota.restores, 1);
+      expect(ota.checks, 1);
+      expect(ota.offers.single.fields[1], '30329');
+      expect(ota.offers.single.fields[4], '1');
+      expect(ota.upgrades, 0);
+    });
+  }
+
+  test('cold recreation can restore a prepared offer during cooldown without charging another check', () async {
+    final retryAt = DateTime.now().add(const Duration(minutes: 30)).millisecondsSinceEpoch;
+    await preferences.setInt('account_auto_retry_${ota.accounts.accountId}', retryAt);
+    ota.savedLatest = _latest();
+    await start();
+    await until(() => runtime.status.value == 'READY_AWAITING_DEVICE_CHOICE');
+    expect(ota.restores, 1);
+    expect(ota.checks, 0);
+    expect(ota.downloads, 1);
+    expect(schedules.last['nextCheckAt'], retryAt);
+    expect(preferences.getInt('account_auto_retry_${ota.accounts.accountId}'), retryAt);
+    expect(preferences.getInt('companion_attempt_$_address'), isNull);
+    expect(diagnostics.where((d) => d['status'] == 'CHECK_EXECUTED'), isEmpty);
+  });
+
+  for (final source in ['manual', 'device']) {
+    test('$source check fetches B even when A is cached and the automatic query is cooling down', () async {
+      ota.latest = _latest();
+      await start();
+      await until(() => runtime.status.value == 'READY_AWAITING_DEVICE_CHOICE');
+      final checked = preferences.getInt('account_auto_last_${ota.accounts.accountId}');
+      ota.latestResponse = () => _latest(newer: true);
+      if (source == 'manual') {
+        await runtime.manualCheck(_address);
+      } else {
+        ble.emit(CompanionMessage('CHECK', ota.offers.single.session, 1));
+      }
+      await until(() => ota.offers.length == 2 && runtime.status.value == 'READY_AWAITING_DEVICE_CHOICE');
+      expect(ota.checks, 2);
+      expect(ota.automaticChecks, [true, false]);
+      expect(ota.offers.last.fields[1], '30329');
+      expect(ota.offers.last.fields[4], '1');
+      expect(preferences.getInt('account_auto_last_${ota.accounts.accountId}'), checked);
+      expect(ota.upgrades, 0);
+    });
+  }
+
+  test('a due no-update result retires A instead of reoffering its cache', () async {
+    ota.latest = _latest();
+    await start();
+    await until(() => runtime.status.value == 'READY_AWAITING_DEVICE_CHOICE');
+    ota.latestResponse = () => null;
+    await preferences.setInt('account_auto_last_${ota.accounts.accountId}', DateTime.now().subtract(const Duration(hours: 2)).millisecondsSinceEpoch);
+    await wake('periodic');
+    await until(() => runtime.status.value == 'NO_UPDATE');
+    expect(ota.checks, 2);
+    expect(ota.offers, hasLength(1));
+    expect(preferences.containsKey('companion_ready_$_address'), isFalse);
+  });
+
+  test('a cached offer cannot hide a failed due query or erase the next server deadline', () async {
+    ota.latest = _latest();
+    await start();
+    await until(() => runtime.status.value == 'READY_AWAITING_DEVICE_CHOICE');
+    ota.noUpdate = false;
+    ota.cloudFailure = 'CHECK_QUOTA_EXCEEDED';
+    ota.cloudRetryAt = DateTime.now().add(const Duration(hours: 6)).millisecondsSinceEpoch;
+    await preferences.setInt('account_auto_last_${ota.accounts.accountId}', DateTime.now().subtract(const Duration(hours: 2)).millisecondsSinceEpoch);
+    await wake('periodic');
+    await until(() => runtime.status.value == 'CHECK_FAILED');
+    expect(ota.checks, 2);
+    expect(ota.offers, hasLength(1));
+    expect(schedules.last['nextCheckAt'], ota.cloudRetryAt);
+    await wake('periodic');
+    await until(() => runtime.status.value == 'CHECK_WAITING');
+    expect(ota.checks, 2);
+    expect(preferences.getInt('account_auto_retry_${ota.accounts.accountId}'), ota.cloudRetryAt);
+  });
+
+  test('identity invalidation during cached preparation cannot bypass the cooldown', () async {
+    ota.latest = _latest();
+    await start();
+    await until(() => runtime.status.value == 'READY_AWAITING_DEVICE_CHOICE');
+    ota.invalidatePreparationOnRead = true;
+    await wake('periodic');
+    await until(() => runtime.status.value == 'CHECK_WAITING');
+    expect(ota.checks, 1);
+    expect(ota.offers, hasLength(1));
+    expect(ota.upgrades, 0);
+  });
+
+  test('offline cached reoffer preserves a pending retry and performs no grant refresh', () async {
+    ota.latest = _latest();
+    await start();
+    await until(() => runtime.status.value == 'READY_AWAITING_DEVICE_CHOICE');
+    final retryAt = DateTime.now().add(const Duration(hours: 3)).millisecondsSinceEpoch;
+    await preferences.setInt('account_auto_retry_${ota.accounts.accountId}', retryAt);
+    settings['networkAvailable'] = false;
+    await wake('periodic');
+    await until(() => ota.offers.length == 2 && runtime.status.value == 'READY_AWAITING_DEVICE_CHOICE');
+    expect(ota.checks, 1);
+    expect(ota.restores, 0);
+    expect(schedules.last['nextCheckAt'], retryAt);
+    expect(preferences.getInt('account_auto_retry_${ota.accounts.accountId}'), retryAt);
   });
 
   test('temporary initialization failure can retry on the next native wake', () async {
@@ -762,14 +950,14 @@ void main() {
   });
 }
 
-FirmwareLatestInfo _latest() => FirmwareLatestInfo.parse({
+FirmwareLatestInfo _latest({bool newer = false}) => FirmwareLatestInfo.parse({
   'schemaVersion': 2, 'requestId': 'fixture', 'updateAvailable': true,
   'appId': 'trace', 'deviceModel': 'e-track-at32f435', 'channel': 'stable',
-  'releaseId': 'release-1', 'versionName': '3.3.28', 'versionCode': 30328,
-  'releaseTag': 'fixture', 'targetImageSha256': '62' * 32,
+  'releaseId': newer ? 'release-2' : 'release-1', 'versionName': newer ? '3.3.29' : '3.3.28', 'versionCode': newer ? 30329 : 30328,
+  'releaseTag': 'fixture', 'targetImageSha256': (newer ? '63' : '62') * 32,
   'targetHardware': 'AT32F435RGT7', 'transport': 'ble', 'minAppVersionCode': 0,
-  'asset': {'assetId': 'asset-1', 'kind': 'full', 'fileName': 'fixture-full.etu',
-    'sha256': 'ab' * 32, 'sizeBytes': 1024, 'baseVersionCode': 0,
+  'asset': {'assetId': newer ? 'asset-2' : 'asset-1', 'kind': 'full', 'fileName': 'fixture-full.etu',
+    'sha256': (newer ? 'ac' : 'ab') * 32, 'sizeBytes': 1024, 'baseVersionCode': 0,
     'baseImageSha256': null, 'downloadUrl': 'https://localhost:9/fixture-full.etu',
     'expiresAt': 2000000000},
 });
@@ -902,6 +1090,8 @@ class _Ota extends OtaService {
     hardwareRevision: 3, layoutId: 5, bootVersion: 2, currentVersionCode: 30327,
     imageSha256: List.filled(32, 0x42)));
   FirmwareLatestInfo? latest;
+  FirmwareLatestInfo? savedLatest;
+  FirmwareLatestInfo? Function()? latestResponse;
   OtaUpgradeConsent? lastConsent;
   String? verified, owner;
   String? cloudFailure;
@@ -911,6 +1101,8 @@ class _Ota extends OtaService {
   bool noUpdate = true, foreignBusy = false, _busy = false, identityAvailable = false;
   bool failIdentity = false, rebootOnUpgrade = false;
   bool answerHello = true;
+  bool prepared = false, rejectRestore = false, throwRestore = false, invalidatePreparationOnRead = false;
+  int restores = 0;
   int reads = 0, checks = 0, downloads = 0, upgrades = 0, releases = 0, _concurrent = 0, maxConcurrent = 0;
   Completer<void>? readGate, checkGate, downloadGate, helloGate, _done;
   List<CompanionMessage> get offers => messages.where((m) => m.kind == 'OFFER').toList();
@@ -951,11 +1143,21 @@ class _Ota extends OtaService {
   @override
   String? get hardwareUid => identityAvailable ? '1234567890abcdef12345678' : null;
   @override
-  bool get canResumePreparation => latest != null && verified != null && identityAvailable;
+  bool get canResumePreparation => prepared && latest != null && identityAvailable;
+  @override
+  Future<bool> restorePreparation({String? companionRuntimeId}) => operation(companionRuntimeId, () async {
+    restores++;
+    if (throwRestore) throw StateError('Saved preparation unavailable');
+    if (savedLatest == null || rejectRestore) return false;
+    latest = savedLatest;
+    prepared = true;
+    return true;
+  });
   @override
   Future<DeviceOtaInfo?> readDeviceInfo(String address, {String? companionRuntimeId}) =>
     operation(companionRuntimeId, () async {
       reads++; await readGate?.future; identityAvailable = !failIdentity; identityAddress = address;
+      if (invalidatePreparationOnRead) { prepared = false; latest = null; verified = null; }
       return failIdentity ? null : info;
     });
   @override
@@ -964,7 +1166,15 @@ class _Ota extends OtaService {
     operation(companionRuntimeId, () async {
       checks++; automaticChecks.add(automatic);
       lastCloudError = cloudFailure; lastCloudRetryAt = cloudRetryAt;
-      await checkGate?.future; return latest;
+      await checkGate?.future;
+      if (cloudFailure != null) {
+        latest = null;
+      } else if (!refreshPrepared && latestResponse != null) {
+        latest = latestResponse!();
+      }
+      if (verified != latest?.asset?.sha256) verified = null;
+      prepared = latest != null;
+      return latest;
     });
   @override
   Future<bool> downloadFirmware({String? companionRuntimeId}) => operation(companionRuntimeId, () async {
@@ -974,7 +1184,7 @@ class _Ota extends OtaService {
   Future<bool> startOtaUpgrade(String address, {String? companionRuntimeId, OtaUpgradeConsent? consent}) =>
     operation(companionRuntimeId, () async {
       upgrades++; lastConsent = consent;
-      if (rebootOnUpgrade) { ble.generation++; identityAvailable = false; verified = null; }
+      if (rebootOnUpgrade) { ble.generation++; identityAvailable = false; verified = null; prepared = false; }
       return true;
     });
   @override
