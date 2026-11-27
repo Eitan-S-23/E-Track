@@ -2,18 +2,72 @@
 
 ## Firmware Cache Freshness Repair, 2026-11-27
 
-FIRMWARE_CACHE_20261127, Codex root. DEVELOPMENT_SELF_TESTS_PASSED /
-MAIN_INTEGRATION_PENDING / PHONE_VERIFICATION_NOT_RUN. The owner requests the
-cache repair while explicitly preserving the already-repaired background
-restart/recovery. This is not permission to repeat historical device tests,
-clean caches/dedup state, release another firmware, or deploy Cloudflare.
+FIRMWARE_CACHE_20261127, Codex root. MAIN_DELIVERED / CANDIDATE_DELIVERED /
+PHONE_VERIFICATION_NOT_RUN. The owner requests the cache repair while explicitly
+preserving the already-repaired background restart/recovery, then authorizes
+main integration, an App version increment and the existing formal candidate
+pipeline. This does not authorize historical device retests, cache/dedup clearing,
+another firmware, channel publication or Cloudflare deployment.
 
 Base main: `9b3288d654902cb84c4306083ee8b6ff17255d6d`. Implementation commits
 `94e77675ab3289639fb6b719fefd6564e282f7a9` and
 `e5aa3dece7ebae0462e812d27939cb8bb0ea76a4` are on the exclusively owned branch
 `dev/flutter/firmware-cache-20261127`, worktree
-`.worktrees/firmware-cache-20261127`. Primary main is not modified by this repair.
-These branch records remain pending main integration, not published main status.
+`.worktrees/firmware-cache-20261127`. At the development-only checkpoint, main
+integration and these branch records were pending. The authorized delivery below
+supersedes that checkpoint; the development branch and original evidence remain.
+
+### Authorized Main And Candidate Delivery
+
+App `1.0.98+124` is delivered on main source
+`c7865c59ca64a5965a5f20191203523657302646`. The existing reservation check examined
+all 136 Trace releases, including unpublished drafts, and 136 tags before using
+the next version. Main fast-forwards the tested development/documentation head
+`6b4e39881a5f85732b8847f3a87862cdbe8efb1b`; only the App version line changes
+between that head and the formal source. The single versioned main push preserves
+MCU `3.3.65`, native Android/background restart, BLE recovery/backoff, App
+self-update and all Cloudflare inputs. No intermediate unchanged-version main
+push, new development test batch, local App build or duplicate package build occurs.
+
+Formal source workflow [46011780011](https://github.com/Eitan-S-23/E-Track/actions/runs/46011780011)
+and original Trace signer [46012105251](https://github.com/Eitan-S-23/Trace/actions/runs/46012105251)
+both PASS. Admission, Windows EXE/ZIP and original-signed Android APK jobs all
+succeed, bound to that exact source and originating main push. Both hosts pass
+analysis and the full Flutter suite: Linux 1104 passed / 16 skipped / 0 failed;
+Windows 1052 / 68 / 0. The 225 native development cases below remain valid
+same-input evidence, not a newly executed formal native or phone campaign.
+The source firmware job is skipped. Ordinary build `46011779951` skips its
+duplicate Android/Windows/release/deployment jobs, and governance `46011779974`
+passes.
+
+Native APK verification confirms `com.wen.gaia.gaia`, version `1.0.98+124`, both
+ARM libraries, the original backend/signing identity and the V2/inventory profile.
+Original certificate SHA-256 remains
+`3cecee6330a930e020b454b6d4a79568f4494ca324ae7bcf2c1914e51b04ab47`.
+The APK is 49669709 bytes, SHA-256
+`ffc076dc9ebdd2068fbad7084ffe8a0e59fd5407ae1457ab67adaaec7a4e58dc`;
+the 294-byte manifest is
+`a6b15631b013fe7c49dfd553026255dd86e7709c67d8bc596d3de0f1713a0c76`.
+Both assets are `r2Verified=true` in the source-bound metadata. Registration
+returns `ok=true`, `releaseId=rel_trace_android_v1_0_98`, `idempotent=false`.
+The completed parent receipt records `channelPublished=false`; this is an
+unpublished Cloudflare candidate, not Stable/Beta publication or phone installation.
+
+The formal Android build has 10 warning-prefixed lines and zero error-prefixed
+lines; the Windows build has zero/zero. Gradle/AGP/Kotlin support and Android SDK
+compatibility warnings remain visible, together with all other raw diagnostics;
+no toolchain or dependency change is bundled into this cache repair.
+
+Source-bound receipts are under `.cache/firmware-cache-20261127/`:
+`reservations-01/`, `main-merge-01/`, `main-push-01/`, `deliver-01/` and
+`logs-04/`. The latter retains all three original Trace job logs, native inspection,
+R2 metadata and the registration response. The phone ZIP and both development
+archives below retain their original SHA-256 values. Only these three scoped
+records are included in the documentation closeout; unrelated/untracked files
+and historical worktrees are preserved. All controlled local outputs stay in the
+authorized project. No manual backend/device operation or independent PASS is
+claimed. Owner publication/update and real A-to-B phone verification remain
+separate; already-confirmed background-recovery acceptance is not reopened.
 
 ### Original Observation
 
@@ -70,7 +124,7 @@ Android tree `bf4eaa6a733727273b19e287a0df4127be78eb30`, Bluetooth service blob
 alarms/services/background recovery, BLE retry/backoff, connection/control
 repair, separate App/MCU budgets, MCU and Cloudflare source are unchanged.
 
-### Validation And Remaining Delivery
+### Development Validation Checkpoint
 
 Development runs `46004846906` (checks) and `46004986471` (full checks plus
 debug APK/native tests) both PASS on exact source
@@ -89,9 +143,10 @@ Debug APK build/verification/upload PASS: application ID `com.wen.gaia.gaia`,
 It is debug-signed, not an original-signed release and not installed. Its build
 log has 12 warning-prefixed lines and zero error-prefixed lines; wrapper/Java
 and SDK deprecation diagnostics remain in the raw logs, not suppressed.
-Windows EXE and formal original-signed APK builds are NOT_RUN under this
-development-only authorization. Main/candidate delivery and real-phone
-verification remain pending, not inferred from these host tests.
+At this development-only checkpoint, Windows EXE and formal original-signed APK
+builds were NOT_RUN; main/candidate delivery and real-phone verification were
+pending, not inferred from host tests. The authorized formal delivery above
+supersedes the build/integration status, but not the phone-verification boundary.
 
 Original development archives are SHA/CRC-verified at `artifact-03/artifact.zip`
 (Linux, artifact 15202021987, SHA-256
@@ -110,13 +165,13 @@ retrieving the already-successful checks-only run's log is retained at
 Evidence root: `.cache/firmware-cache-20261127/`. Existing RSA SSH and protected
 CI credentials are reused without login, new keys, remote/global-config changes
 or credential export. All controlled checkout, Git, host, logs and artifact
-outputs stay inside `D:/github/my/E-Track`; no device, cleanup, backend/channel,
-main push or shipping-version operation occurs. App remains `1.0.97+123` in
-this development source; debug validation is not a formal original-signed
-APK/Windows EXE delivery or installed-phone verification. Next owner action is
-authorization of bounded main integration/versioned candidate delivery after
-self-tests pass; later publication/update and real A-to-B behavior remain
-separate. Do not reopen already-confirmed background-recovery acceptance.
+outputs stay inside `D:/github/my/E-Track`. The development-only phase performed
+no device, cleanup, backend/channel, main-push or shipping-version operation and
+retains `1.0.97+123` in its source. Its former main-delivery authorization request
+has now been granted and completed as recorded above. Debug validation is not
+formal APK/Windows EXE delivery or installed-phone verification; later publication,
+update and real A-to-B behavior remain separate. Do not reopen already-confirmed
+background-recovery acceptance.
 
 ## Historical Record Closeout, 2026-11-27
 
