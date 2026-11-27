@@ -1115,6 +1115,10 @@ class OtaService extends GetxController with WidgetsBindingObserver {
     _phase.value = OtaPhase.checkingUpdate;
     _terminalState.value = null;
     final gen = generation;
+    final address = _deviceInfoAddress, identityLink = _identityLinkGeneration;
+    bool identityCurrent() => address != null && identityLink != null &&
+        _deviceInfoAddress == address && identical(_deviceInfo, info) &&
+        _identityLinkGeneration == identityLink && _ble.otaLinkGeneration(address) == identityLink;
     try {
       final check = accountCheck ?? _accountCheck;
       if (check == null) throw const AccountException('LOGIN_REQUIRED', '请登录后重新检查');
@@ -1126,7 +1130,8 @@ class OtaService extends GetxController with WidgetsBindingObserver {
           path: uri.path).toString();
       final response = await _getLatestWithRetry(uri, gen, check: check, refreshPrepared: refreshPrepared);
       if (response == null) return null; // 取消：静默退出，不发布状态
-      if (check.accountId != accounts.accountId) return null;
+      // A late query must not seed resumable metadata for a replacement connection.
+      if (!identityCurrent() || check.accountId != accounts.accountId) return null;
       final body = _readJsonObject(response.data);
       final latest = FirmwareLatestInfo.parse(
         body,

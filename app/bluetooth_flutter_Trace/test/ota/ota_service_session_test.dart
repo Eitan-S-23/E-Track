@@ -358,6 +358,35 @@ void main() {
     gate.complete();
   });
 
+  test('latest response from a retired link cannot become a cached offer on its replacement', () async {
+    Get.put<AppUpdateService>(_FakeAppUpdateService());
+    final gate = Completer<void>();
+    final ble = _FakeBle(infoPayload);
+    final http = latestDio([
+      _LatestBehavior.gated(gate, body: latestBody(assetBytes(1024))),
+      _LatestBehavior.ok(newerBody(assetBytes(2048))),
+    ]);
+    final service = makeService(ble: ble, latest: http,
+      download: downloadDio([]), firmwareDir: tempFirmwareDir());
+    await service.readDeviceInfo('AA:BB');
+    final pending = service.checkFirmwareUpdate(automatic: true);
+    final adapter = http.httpClientAdapter as _LatestMockAdapter;
+    final deadline = DateTime.now().add(const Duration(seconds: 2));
+    while (adapter.requestCount == 0 && DateTime.now().isBefore(deadline)) {
+      await Future<void>.delayed(const Duration(milliseconds: 1));
+    }
+    expect(adapter.requestCount, 1);
+    ble.linkGeneration++;
+    gate.complete();
+    expect(await pending, isNull);
+    expect(service.latestInfo, isNull);
+    expect(service.canResumePreparation, isFalse);
+    expect((Get.find<AccountService>() as TestAccountService).preparations, isEmpty);
+    await service.readDeviceInfo('AA:BB');
+    expect((await service.checkFirmwareUpdate(automatic: true))?.versionCode, 21000);
+    expect(service.canResumePreparation, isTrue);
+  });
+
   test('fresh checks reuse verified bytes for A but invalidate them when the server selects B', () async {
     Get.put<AppUpdateService>(_FakeAppUpdateService());
     final firstBytes = assetBytes(1024), secondBytes = assetBytes(2048);
@@ -791,6 +820,10 @@ class _FakeBle extends BluetoothService {
   _FakeBle(this.infoPayload);
 
   final List<int> infoPayload;
+  int linkGeneration = 0;
+
+  @override
+  int otaLinkGeneration(String deviceAddress) => linkGeneration;
 
   final _notifyController = StreamController<List<int>>.broadcast();
 
@@ -879,8 +912,8 @@ class _LatestBehavior {
       _LatestBehavior._(status, body, null);
 
   /// 挂起直到 gate 完成（刷新时取消用例的在途窗口）。
-  factory _LatestBehavior.gated(Completer<void> gate) =>
-      _LatestBehavior._(200, '', gate);
+  factory _LatestBehavior.gated(Completer<void> gate, {String body = ''}) =>
+      _LatestBehavior._(200, body, gate);
 
   final int status;
   final String body;

@@ -786,7 +786,7 @@ void main() {
     ota.checkGate = Completer<void>();
     ble.emit(CompanionMessage('CHECK', session, 1));
     await until(() => ota.checks == 2);
-    ota.latest = _latest();
+    ota.latestResponse = () => _latest();
     ble.loseConnection();
     await Future<void>.delayed(const Duration(milliseconds: 10));
     ota.checkGate!.complete();
@@ -1166,7 +1166,9 @@ class _Ota extends OtaService {
     operation(companionRuntimeId, () async {
       checks++; automaticChecks.add(automatic);
       lastCloudError = cloudFailure; lastCloudRetryAt = cloudRetryAt;
+      final link = ble.generation;
       await checkGate?.future;
+      if (ble.generation != link) return null;
       if (cloudFailure != null) {
         latest = null;
       } else if (!refreshPrepared && latestResponse != null) {
