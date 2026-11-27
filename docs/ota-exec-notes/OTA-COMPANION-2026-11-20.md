@@ -1,5 +1,123 @@
 # OTA Companion And Admin Scroll Investigation
 
+## Firmware Cache Freshness Repair, 2026-11-27
+
+FIRMWARE_CACHE_20261127, Codex root. DEVELOPMENT_SELF_TESTS_PASSED /
+MAIN_INTEGRATION_PENDING / PHONE_VERIFICATION_NOT_RUN. The owner requests the
+cache repair while explicitly preserving the already-repaired background
+restart/recovery. This is not permission to repeat historical device tests,
+clean caches/dedup state, release another firmware, or deploy Cloudflare.
+
+Base main: `9b3288d654902cb84c4306083ee8b6ff17255d6d`. Implementation commits
+`94e77675ab3289639fb6b719fefd6564e282f7a9` and
+`e5aa3dece7ebae0462e812d27939cb8bb0ea76a4` are on the exclusively owned branch
+`dev/flutter/firmware-cache-20261127`, worktree
+`.worktrees/firmware-cache-20261127`. Primary main is not modified by this repair.
+These branch records remain pending main integration, not published main status.
+
+### Original Observation
+
+The owner-provided ZIP remains unchanged at
+`.cc-connect/attachments/om_x100b7fa2b6cf1444ce879829db1681b/companion-diagnostics.zip`,
+SHA-256 `5151a1b0986f6cb66491970f9c3b012f6be35d11bc093b07b1d400edac33954f`.
+The prior in-memory review found 7485 contiguous rows / 7489 merged events,
+valid ZIP CRCs, and no reported export truncation, dropped events or I/O errors.
+Process-death buffer loss remains unknown. At 01:21 local time a manual check
+was followed by MCU_OFFER_SHOWN; the evening attempts reused `prepared_cache`
+and explicitly suppressed the popup as `same_package_seen`, despite receipt
+ACKs. The last attempts recorded PACKAGE_PREPARATION_FAILED. The export does
+not identify the target package for those offers or the HTTP cause of the
+preparation failures. Do not assign actual A/B version numbers or claim a
+confirmed HTTP 409 from these records.
+
+### Narrow Repair Contract
+
+- Eligible automatic checks obtain current server metadata using a new check,
+  even when a 24-hour preparation exists. Manual and MCU checks remain fresh.
+- During the existing one-hour/account-server cooldown, a valid preparation
+  can still be restored and reoffered without a new charged check. Cached reuse
+  never advances the successful-check marker, clears a pending retry/reset,
+  or slides the ordinary deadline forward from the last real query.
+- Invalid preparation waits for the already-applicable deadline; it cannot
+  intercept the next eligible fresh query. Restoring a saved grant returns true
+  only after successful revalidation and never exposes saved metadata while
+  that refresh is pending, cancelled or failed.
+- Metadata responses are bound to the identity/link that issued the request.
+  A late old-link result cannot seed a cache used by its replacement connection.
+- Same-asset verified bytes are reused. A different release/asset invalidates
+  the old in-memory package and uses the existing hash-verifying downloader.
+  Same-package SHOWN dedup, manual popup behavior, offer/session binding,
+  Later, explicit consent and reboot/identity success checks remain unchanged.
+- A grant/URL refresh is not a latest-version query. Backend grant identity is
+  intentionally immutable; the fix does not switch an in-flight download or
+  already-consented installation from A to B, weaken quota/authentication gates,
+  clear popup history, or force a query on every wake.
+
+Only two product files change: `lib/companion/companion_runtime.dart` (firmware
+preparation/check selection) and `lib/services/ota_service.dart` (restoration
+and metadata publication guards), under `app/bluetooth_flutter_Trace/`. Two
+test files cover A-to-B discovery, unchanged A reuse/dedup, cold/failed/expired
+restoration, original deadlines, manual/device checks, no-update/quota/offline
+paths, cancellation, identity invalidation and retired-link responses.
+The first development run exposed an old-session regression with the more
+faithful metadata-ready test fixture. The original assertion is retained;
+real service coverage now verifies discard before caching, rather than relying
+on the former fixture's incorrect equivalence of metadata and verified bytes.
+
+Android tree `bf4eaa6a733727273b19e287a0df4127be78eb30`, Bluetooth service blob
+`119bd0a68fb28f9c6d6790b04bdc21c4a19a701c`, and App self-update service blob
+`2ea77358b83d796c4655e1f06e6be1675a7835cb` match the base exactly. Native
+alarms/services/background recovery, BLE retry/backoff, connection/control
+repair, separate App/MCU budgets, MCU and Cloudflare source are unchanged.
+
+### Validation And Remaining Delivery
+
+Development runs `46004846906` (checks) and `46004986471` (full checks plus
+debug APK/native tests) both PASS on exact source
+`e5aa3dece7ebae0462e812d27939cb8bb0ea76a4`. In the latter run, Linux has
+1104 passed / 16 skipped / 0 failed, Windows 1052 / 68 / 0, and each host's
+eight candidate-profile cases also pass. All 225 Android native cases pass
+(24 DeviceOtaService, 56 CompanionService, 139 CompanionIntegration and six
+CompanionGattPlugin), with no errors, failures or skipped native cases.
+Flutter `3.47.9` / Dart `3.13.7` is recorded by the existing runner; permitted
+toolchain regeneration is bound in its result. Semantic source is restored;
+the Windows generated header's EOL-only difference remains explicitly reported.
+
+Debug APK build/verification/upload PASS: application ID `com.wen.gaia.gaia`,
+133669563 bytes, SHA-256
+`3350ee9e174195818740648297d4f09d3e204e8392e2aef5c820f101dcc06370`.
+It is debug-signed, not an original-signed release and not installed. Its build
+log has 12 warning-prefixed lines and zero error-prefixed lines; wrapper/Java
+and SDK deprecation diagnostics remain in the raw logs, not suppressed.
+Windows EXE and formal original-signed APK builds are NOT_RUN under this
+development-only authorization. Main/candidate delivery and real-phone
+verification remain pending, not inferred from these host tests.
+
+Original development archives are SHA/CRC-verified at `artifact-03/artifact.zip`
+(Linux, artifact 15202021987, SHA-256
+`1341d675c57e1a1bc232c0fd8a044bb143654429b495be131978556f2960d386`) and
+`artifact-04/artifact.zip` (Windows, artifact 15201515865, SHA-256
+`3b8c2f7d005e0106cff0271fbf174aa80bfc27c0c243390ac723c292002d045d`),
+under the evidence root below. Full final job logs are retained at `logs-03/`.
+The first-source failed runs
+`46002786874` / `46002954533` and original dual-host logs are retained; no
+unchanged failing run was blindly restarted. Local diff/whitespace checks pass.
+Host setup/CI adapter incompatibilities were diagnosed and corrected in owned
+task-local helpers, with their failed receipts preserved. A TLS timeout while
+retrieving the already-successful checks-only run's log is retained at
+`logs-02/`; original final archives/logs were retrieved without repeating CI.
+
+Evidence root: `.cache/firmware-cache-20261127/`. Existing RSA SSH and protected
+CI credentials are reused without login, new keys, remote/global-config changes
+or credential export. All controlled checkout, Git, host, logs and artifact
+outputs stay inside `D:/github/my/E-Track`; no device, cleanup, backend/channel,
+main push or shipping-version operation occurs. App remains `1.0.97+123` in
+this development source; debug validation is not a formal original-signed
+APK/Windows EXE delivery or installed-phone verification. Next owner action is
+authorization of bounded main integration/versioned candidate delivery after
+self-tests pass; later publication/update and real A-to-B behavior remain
+separate. Do not reopen already-confirmed background-recovery acceptance.
+
 ## Historical Record Closeout, 2026-11-27
 
 RECORDS-CLOSEOUT-20261127, Codex root. The owner authorizes committing the eight

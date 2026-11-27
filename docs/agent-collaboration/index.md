@@ -1,5 +1,18 @@
 # Shared Agent Records
 
+Firmware cache repair, 2026-11-27: FIRMWARE_CACHE_20261127,
+DEVELOPMENT_SELF_TESTS_PASSED / MAIN_INTEGRATION_PENDING, Codex root.
+Branch `dev/flutter/firmware-cache-20261127`, source `e5aa3dece7ebae0462e812d27939cb8bb0ea76a4`,
+separates eligible latest queries from 24-hour preparation/file reuse, preserves
+real deadlines and same-package dedup, rejects invalid/late-link metadata, and
+leaves Android background restart, BLE recovery/backoff and App updates unchanged.
+Runs `46004846906` / `46004986471` PASS: Linux 1104/16/0, Windows 1052/68/0,
+eight candidate cases per host, all 225 native cases and debug APK. Original
+failed runs/logs remain; the APK build has 12 warning-prefixed lines/zero errors.
+Formal APK/Windows EXE and phone verification are NOT_RUN. No main/version/candidate,
+backend or device operation is included. These branch records await main
+integration; see [the bounded repair](../ota-exec-notes/OTA-COMPANION-2026-11-20.md#firmware-cache-freshness-repair-2026-11-27).
+
 Record closeout, 2026-11-27: RECORDS-CLOSEOUT-20261127, Codex root. The owner
 authorizes a local commit of the eight previously modified Markdown documents,
 not untracked tools, tests or evidence. Older LOCAL_PENDING, input-ready and
