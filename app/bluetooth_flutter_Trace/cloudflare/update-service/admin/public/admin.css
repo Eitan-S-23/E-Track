@@ -346,6 +346,8 @@ body.delta-open .resource-float { visibility: hidden; pointer-events: none; }
 .firmware-filters { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-end; padding: 0; border: 0; }
 .firmware-field { display: grid; gap: 7px; font-size: 11px; color: var(--muted); min-width: 0; }
 .firmware-field select { width: 100%; font-size: 12px; color: var(--ink); padding-right: 28px; min-height: 40px; }
+.firmware-retract-target { margin-top: 16px; }
+.firmware-retract-target select { min-width: 0; max-width: 100%; }
 .firmware-filters .firmware-field { flex: 1 1 170px; }
 .firmware-filters > .pill-button { background: transparent; border-color: transparent; color: var(--muted); margin-bottom: 0; }
 .firmware-workspace { border-top: 1px solid var(--line); }

@@ -275,8 +275,16 @@ requirements, build provenance and complete wrapping image/package hashes.
 Versions, Channels and History are peer tabs, pinned below the common toolbar.
 The version rail renders six compact rows per page within a bounded height;
 filters and sorting reset the page, and Up/Down selection crosses page boundaries.
-Channel controls start expanded in their own tab, with a persistent selected-target
-summary and a return-to-versions action. Tab navigation never changes that target.
+Channel controls start expanded in their own tab. Each channel has its own
+"Return to version" selector, independent of the version list and the other
+channel. Only ready, unarchived releases with available assets, a full package
+and nonblank notes are listed; the channel's current version is excluded.
+The operator must explicitly select a target before retracting. This changes
+the channel to the selected version; it does not delete that version or downgrade
+devices. Reasons, stable confirmation, roles, CSRF and revision checks are unchanged.
+Selections survive list filters, pagination and language/tab changes. Refresh
+clears a target that became unavailable or current; a different actor cannot
+inherit it. Selection alone never sends a write, and conflicts are not replayed.
 Version, channel and loaded-history searches are independent; a channel/history
 search cannot silently select a different release. The history list is bounded
 and still uses the existing cursor-based load-more route. History is first read

@@ -134,10 +134,11 @@ test("mcu interaction tabs preserve draft and target while searches remain indep
   await page.keyboard.press("ArrowRight");
   await expect(page.locator("#firmwareChannelsTab")).toBeFocused();
   await expect(page.locator("#searchInput")).toHaveValue("");
-  await expect(page.locator("#firmwareChannelTarget")).toContainText(data.releases[0].releaseTag);
+  await selectRetraction(page, "stable", "fw-old");
+  await expect(retractSelect(page, "stable")).toHaveValue("fw-old");
   await page.locator("#searchInput").fill("stable");
   await expect(page.locator("#firmwareChannelList .firmware-channel-card")).toHaveCount(1);
-  await expect(page.locator("#firmwareChannelTarget")).toContainText(data.releases[0].releaseTag);
+  await expect(retractSelect(page, "stable")).toHaveValue("fw-old");
   await page.locator("#firmwareChannelsTab").focus();
   await page.keyboard.press("ArrowRight");
   await expect(page.locator("#firmwareHistoryTab")).toBeFocused();
@@ -156,7 +157,8 @@ test("mcu interaction tabs preserve draft and target while searches remain indep
   await expect(page.locator("#firmwareNotesEditor")).toHaveValue("Unsaved MCU notes");
   await firmwareTab(page, "channels");
   await expect(page.locator("#searchInput")).toHaveValue("stable");
-  await page.locator('[data-firmware-action="choose-version"]').click();
+  await expect(retractSelect(page, "stable")).toHaveValue("fw-old");
+  await firmwareTab(page, "releases");
   await expect(page.locator("#firmwareVersionsPanel")).toBeVisible();
   await expect(page.locator("#firmwareNotesEditor")).toHaveValue("Unsaved MCU notes");
   expect(data.writes).toHaveLength(0);
@@ -368,6 +370,12 @@ async function mockAdmin(page: Page, language = "en", role = "owner") {
 
 const channelButton = (page: Page, channel: string, action: string) => page.locator(
   `.firmware-channel-card[data-channel="${channel}"] [data-firmware-action="${action}"]`);
+const retractSelect = (page: Page, channel: string) => page.locator(`[data-firmware-retract-target="${channel}"]`);
+async function selectRetraction(page: Page, channel: string, releaseId: string) {
+  await firmwareTab(page, "channels");
+  await retractSelect(page, channel).selectOption(releaseId);
+  await expect(retractSelect(page, channel)).toHaveValue(releaseId);
+}
 const releaseButton = (page: Page, id: string, action: string) => page.locator(action === "select"
   ? `#firmwareReleaseList .firmware-release-card[data-release-id="${id}"] [data-firmware-action="select"]`
   : `#firmwareDetail[data-release-id="${id}"] [data-firmware-action="${action}"]`);
@@ -420,6 +428,163 @@ async function closeResult(page: Page) {
   await page.locator("#confirmAccept").click();
   await expect(page.locator("#confirmDialog")).toBeHidden();
   await expect(page.locator("#refreshButton")).toBeEnabled();
+}
+
+for (const language of ["en", "zh"]) {
+  test(`${language}: retraction selectors are explicit and independent of catalogue selection`, async ({ page }) => {
+    const data = await mockAdmin(page, language);
+    data.releases.push(...manyFirmware(12));
+    await refreshMcu(page);
+    const catalogueSelection = await page.locator("#firmwareDetail").getAttribute("data-release-id");
+    await firmwareTab(page, "channels");
+    for (const channel of ["stable", "beta"]) {
+      await expect(retractSelect(page, channel)).toHaveValue("");
+      await expect(channelButton(page, channel, "retract")).toBeDisabled();
+    }
+    await selectRetraction(page, "stable", "fw-old");
+    await expect(retractSelect(page, "stable")).toBeFocused();
+    await selectRetraction(page, "beta", "fw-new");
+    await expect(page.locator("#firmwareDetail")).toHaveAttribute("data-release-id", catalogueSelection!);
+    await firmwareTab(page, "releases");
+    await page.locator("#firmwarePageNext").click();
+    await page.locator("#searchInput").fill("fw-current");
+    await expect(page.locator("#firmwareDetail")).toHaveAttribute("data-release-id", "fw-current");
+    await firmwareTab(page, "channels");
+    await page.locator("#searchInput").fill("stable");
+    await page.locator("#languageToggle").click();
+    await expect(retractSelect(page, "stable")).toHaveValue("fw-old");
+    await expect(retractSelect(page, "stable").locator('option[value="fw-new"]')).toHaveCount(1);
+    await page.locator("#searchInput").fill("");
+    await expect(retractSelect(page, "beta")).toHaveValue("fw-new");
+    await refreshMcu(page);
+    await expect(retractSelect(page, "stable")).toHaveValue("fw-old");
+    await expect(retractSelect(page, "beta")).toHaveValue("fw-new");
+    await selectRetraction(page, "stable", "");
+    await expect(channelButton(page, "stable", "retract")).toBeDisabled();
+    await expect(channelButton(page, "beta", "retract")).toBeEnabled();
+    expect(data.writes).toHaveLength(0);
+    await clickChannel(page, "beta", "retract");
+    await fillConfirmation(page);
+    await expect(page.locator("#confirmTitle")).toHaveText(language === "en" ? "固件操作已确认" : "Firmware operation confirmed");
+    expect(data.writes).toHaveLength(1);
+    expect(data.writes[0]).toMatchObject({ path: "/api/admin/firmware/channels/beta/retract",
+      body: { releaseId: "fw-new", expectedRevision: 8 } });
+  });
+}
+
+test("retraction selectors exclude unusable versions and show an empty state without defaults", async ({ page }) => {
+  const data = await mockAdmin(page);
+  const draft = release("draft", 20810); draft.state = "draft";
+  const disabled = release("disabled", 20811); disabled.state = "disabled";
+  const archived = release("archived", 20812); archived.archived = true;
+  const unavailable = release("unavailable", 20813); unavailable.assets[0].r2State = "not_uploaded";
+  const noFull = release("no-full", 20814); noFull.assets = noFull.assets.filter(asset => asset.kind !== "full");
+  const duplicateFull = release("duplicate-full", 20815); duplicateFull.assets.push({ ...duplicateFull.assets[0] });
+  const noNotes = release("no-notes", 20816); noNotes.releaseNotes = "   ";
+  data.releases.push(draft, disabled, archived, unavailable, noFull, duplicateFull, noNotes);
+  await refreshMcu(page);
+  await firmwareTab(page, "channels");
+  for (const channel of ["stable", "beta"]) {
+    expect(await retractSelect(page, channel).locator("option").evaluateAll(options =>
+      options.map(option => (option as HTMLOptionElement).value))).toEqual(["", "fw-new", "fw-old"]);
+    await expect(channelButton(page, channel, "retract")).toBeDisabled();
+  }
+  data.releases[0].state = "draft";
+  data.releases[2].state = "disabled";
+  await refreshMcu(page);
+  for (const channel of ["stable", "beta"]) {
+    await expect(retractSelect(page, channel)).toBeDisabled();
+    await expect(retractSelect(page, channel)).toHaveValue("");
+    await expect(retractSelect(page, channel)).toContainText("No available return versions");
+    await expect(channelButton(page, channel, "retract")).toBeDisabled();
+  }
+  expect(data.writes).toHaveLength(0);
+});
+
+for (const change of ["unavailable", "current", "removed", "actor"]) {
+  test(`retraction selectors discard stale targets after ${change} changes`, async ({ page }) => {
+    const data = await mockAdmin(page);
+    await selectRetraction(page, "stable", "fw-old");
+    await selectRetraction(page, "beta", "fw-old");
+    if (change === "unavailable") data.releases[2].assets[0].r2State = "archived";
+    if (change === "current") data.channels[0].currentReleaseId = "fw-old";
+    if (change === "removed") data.releases = data.releases.filter(row => row.releaseId !== "fw-old");
+    if (change === "actor") data.actor = "another-owner@example.test";
+    await refreshMcu(page);
+    await expect(retractSelect(page, "stable")).toHaveValue("");
+    await expect(channelButton(page, "stable", "retract")).toBeDisabled();
+    await expect(retractSelect(page, "beta")).toHaveValue(change === "current" ? "fw-old" : "");
+    expect(data.writes).toHaveLength(0);
+  });
+}
+
+test("retraction selectors preserve role gates and lock on failed reconciliation", async ({ page }) => {
+  const data = await mockAdmin(page, "en", "viewer");
+  await firmwareTab(page, "channels");
+  await expect(retractSelect(page, "stable")).toBeDisabled();
+  await expect(retractSelect(page, "beta")).toBeDisabled();
+  data.actor = "publisher@example.test"; data.role = "publisher";
+  await refreshMcu(page);
+  await expect(retractSelect(page, "stable")).toBeDisabled();
+  await selectRetraction(page, "beta", "fw-old");
+  await expect(channelButton(page, "stable", "retract")).toBeDisabled();
+  await expect(channelButton(page, "beta", "retract")).toBeEnabled();
+  data.failReads = true;
+  await refreshMcu(page);
+  await expect(retractSelect(page, "beta")).toBeDisabled();
+  await expect(channelButton(page, "beta", "retract")).toBeDisabled();
+  await page.getByRole("alertdialog").getByRole("button", { name: "OK", exact: true }).click();
+  data.failReads = false;
+  await refreshMcu(page);
+  await expect(retractSelect(page, "beta")).toHaveValue("fw-old");
+  await expect(channelButton(page, "beta", "retract")).toBeEnabled();
+  expect(data.writes).toHaveLength(0);
+});
+
+test("retraction confirmation cannot carry a selection across an actor change", async ({ page }) => {
+  const data = await mockAdmin(page);
+  await selectRetraction(page, "stable", "fw-old");
+  await clickChannel(page, "stable", "retract");
+  data.actor = "another-owner@example.test";
+  await fillConfirmation(page);
+  await expect(page.locator("#confirmTitle")).toHaveText("Firmware operation not confirmed");
+  await closeResult(page);
+  await expect(retractSelect(page, "stable")).toHaveValue("");
+  await expect(channelButton(page, "stable", "retract")).toBeDisabled();
+  expect(data.writes).toHaveLength(0);
+});
+
+for (const language of ["en", "zh"]) for (const width of [320, 390]) {
+  test(`${language}: retraction selectors fit ${width}px with long labels and enlarged text`, async ({ page }, info) => {
+    await page.setViewportSize({ width, height: 640 });
+    const errors: string[] = [];
+    page.on("pageerror", error => errors.push(error.message));
+    const data = await mockAdmin(page, language);
+    data.releases[2].versionName += "-" + "LongVersionLabel".repeat(12);
+    data.releases[2].releaseTag += "-" + "LongReleaseTag".repeat(12);
+    await refreshMcu(page);
+    await selectRetraction(page, "stable", "fw-old");
+    await page.locator("#firmwareChannelList").evaluate(root => {
+      for (const element of root.querySelectorAll<HTMLElement>("select, label > span, button")) {
+        element.style.fontSize = `${parseFloat(getComputedStyle(element).fontSize) * 2}px`;
+      }
+    });
+    for (const channel of ["stable", "beta"]) {
+      const select = retractSelect(page, channel);
+      await select.scrollIntoViewIfNeeded();
+      await expect(select).toBeInViewport();
+      const box = (await select.boundingBox())!;
+      expect(box.x).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width).toBeLessThanOrEqual(width);
+      await channelButton(page, channel, "retract").scrollIntoViewIfNeeded();
+      await expect(channelButton(page, channel, "retract")).toBeInViewport();
+    }
+    await expect(retractSelect(page, "stable")).toHaveAttribute("title", data.releases[2].releaseTag);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: info.outputPath(`retraction-${language}-${width}-enlarged-mock.png`), fullPage: true });
+    expect(errors).toEqual([]);
+    expect(data.writes).toHaveLength(0);
+  });
 }
 
 for (const language of ["en", "zh"]) for (const width of [1440, 1024, 390, 320]) {
@@ -741,7 +906,7 @@ for (const language of ["en", "zh"]) {
   test(`${language}: retract boundary, reason, cancel and fresh confirmation`, async ({ page }, info) => {
     const data = await mockAdmin(page, language);
     await expect(page.locator("#firmwareView")).not.toContainText("undefined");
-    await clickRelease(page, "fw-old", "select");
+    await selectRetraction(page, "stable", "fw-old");
     await page.screenshot({ path: info.outputPath(`${language}-mock-overview.png`), fullPage: true });
     await clickChannel(page, "stable", "retract");
     await expect(page.locator("#confirmDetail")).toContainText(language === "zh" ? "已升级设备不会降级" : "Upgraded devices will not downgrade");
@@ -765,10 +930,13 @@ for (const language of ["en", "zh"]) {
     await closeResult(page);
     expect(data.channels[0].currentReleaseId).toBe("fw-old");
     expect(data.releases.find(r => r.releaseId === "fw-old")!.state).toBe("ready");
+    await expect(retractSelect(page, "stable")).toHaveValue("");
+    await expect(channelButton(page, "stable", "retract")).toBeDisabled();
+    await expect(page.locator("#firmwareDetail")).toHaveAttribute("data-release-id", "fw-new");
   });
   test(`${language}: CAS refresh never replays an old intent`, async ({ page }, info) => {
     const data = await mockAdmin(page, language); data.mode = "conflict";
-    await clickRelease(page, "fw-old", "select");
+    await selectRetraction(page, "stable", "fw-old");
     await clickChannel(page, "stable", "retract"); await fillConfirmation(page);
     await expect(page.locator("#confirmMessage")).toContainText(language === "zh" ? "再次确认" : "confirm again");
     await page.screenshot({ path: info.outputPath(`${language}-mock-conflict.png`), fullPage: true });
@@ -1012,7 +1180,7 @@ test("failed state refresh keeps writes locked until a successful manual read", 
 test("mobile firmware controls and confirmation fit the viewport", async ({ page }, info) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await mockAdmin(page, "zh");
-  await clickRelease(page, "fw-old", "select");
+  await selectRetraction(page, "stable", "fw-old");
   await clickChannel(page, "stable", "retract");
   await expect(page.locator("#confirmReason")).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -1023,7 +1191,7 @@ test("mobile firmware controls and confirmation fit the viewport", async ({ page
 
 test("design firmware reason Enter adds a newline and Cancel Enter never submits", async ({ page }) => {
   const data = await mockAdmin(page);
-  await clickRelease(page, "fw-old", "select");
+  await selectRetraction(page, "beta", "fw-old");
   await clickChannel(page, "beta", "retract");
   await expect(page.locator("body")).toHaveClass(/\bconfirm-open\b/);
   await page.locator("#confirmReason").fill("First line");
@@ -1037,7 +1205,7 @@ test("design firmware reason Enter adds a newline and Cancel Enter never submits
   await page.keyboard.press("Enter");
   await expect(page.locator("#confirmDialog")).toBeHidden();
   expect(data.writes).toHaveLength(0);
-  await expect(page.locator("#firmwareChannelsTab")).toBeFocused();
+  await expect(channelButton(page, "beta", "retract")).toBeFocused();
   await clickChannel(page, "beta", "retract");
   await fillConfirmation(page, "First line\nSecond line");
   await expect(page.locator("#confirmTitle")).toHaveText("Firmware operation confirmed");
@@ -1048,6 +1216,7 @@ test("design firmware reason Enter adds a newline and Cancel Enter never submits
 test("design firmware confirmation traps Tab and Escape does not alter selection", async ({ page }) => {
   const data = await mockAdmin(page);
   await clickRelease(page, "fw-old", "select");
+  await selectRetraction(page, "stable", "fw-old");
   await clickChannel(page, "stable", "retract");
   await expect(page.locator("body")).toHaveClass(/\bconfirm-open\b/);
   await page.locator("#confirmInput").fill("stable");

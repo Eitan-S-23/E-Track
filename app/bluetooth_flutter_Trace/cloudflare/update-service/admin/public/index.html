@@ -469,10 +469,6 @@
           </div>
           <section class="panel inventory-panel" id="firmwareInventoryPanel" data-firmware-panel="inventory" role="tabpanel" aria-labelledby="firmwareInventoryTab" hidden></section>
           <section class="firmware-tab-panel" id="firmwareChannelsPanel" role="tabpanel" data-firmware-panel="channels" aria-labelledby="firmwareChannelsTab" hidden>
-          <div class="firmware-toolbar firmware-channel-target">
-            <p class="firmware-hint" id="firmwareChannelTarget"></p>
-            <button type="button" class="secondary-button" data-firmware-action="choose-version" data-i18n="catalog.chooseVersion">Choose a version</button>
-          </div>
           <details class="panel firmware-panel firmware-channel-panel" id="firmwareChannelPanel" open>
             <summary class="firmware-channel-summary">
               <span data-i18n="firmware.channelsTitle">Firmware Channels</span>
@@ -616,6 +612,7 @@
         announcementsError: null,
         firmwareChannels: [],
         firmwareReleases: [],
+        firmwareRetractTargets: new Map(),
         firmwareCapabilities: {},
         firmwareError: null,
         firmwareReconcileRequired: false,
@@ -825,7 +822,9 @@
           "firmware.stopped": "Stopped",
           "firmware.assets": "Assets",
           "firmware.rawSha": "Target raw image SHA-256",
-          "firmware.selectedTarget": "Selected retraction target",
+          "firmware.selectedTarget": "Return to version",
+          "firmware.chooseRetractTarget": "Choose a return version",
+          "firmware.noRetractTargets": "No available return versions",
           "firmware.state.ready": "Ready",
           "firmware.state.draft": "Draft",
           "firmware.state.disabled": "Disabled",
@@ -1188,7 +1187,9 @@
           "firmware.stopped": "已停发",
           "firmware.assets": "资产",
           "firmware.rawSha": "目标原始镜像 SHA-256",
-          "firmware.selectedTarget": "当前选择的撤回目标",
+          "firmware.selectedTarget": "退回目标版本",
+          "firmware.chooseRetractTarget": "请选择退回版本",
+          "firmware.noRetractTargets": "暂无可退回的版本",
           "firmware.state.ready": "就绪",
           "firmware.state.draft": "草稿",
           "firmware.state.disabled": "已禁用",
@@ -1428,8 +1429,7 @@
         "search.firmwareChannels": "Search channels or their offered versions...",
         "search.firmwareHistory": "Search loaded operations, operators or reasons...",
         "catalog.navigation": "Firmware management", "catalog.versionsTab": "Versions",
-        "catalog.channelsTab": "Channels", "catalog.historyTab": "History", "catalog.chooseVersion": "Choose a version",
-        "catalog.channelTarget": "Selected action target: {tag}", "catalog.noTarget": "No version selected",
+        "catalog.channelsTab": "Channels", "catalog.historyTab": "History",
         "catalog.emptyTitle": "No firmware versions registered",
         "catalog.emptyDescription": "This catalogue only shows firmware registered with this service. Local builds and separate benchmark packages are not added automatically.",
         "catalog.setupBuild": "Build a normal GCC candidate from the intended source, including the current BLE V2 implementation.",
@@ -1497,8 +1497,7 @@
         "search.firmwareChannels": "搜索渠道或当前提供的版本...",
         "search.firmwareHistory": "搜索已载入记录、操作人或原因...",
         "catalog.navigation": "单片机固件管理", "catalog.versionsTab": "固件版本",
-        "catalog.channelsTab": "发布渠道", "catalog.historyTab": "操作记录", "catalog.chooseVersion": "选择版本",
-        "catalog.channelTarget": "当前操作目标：{tag}", "catalog.noTarget": "尚未选择版本",
+        "catalog.channelsTab": "发布渠道", "catalog.historyTab": "操作记录",
         "catalog.emptyTitle": "尚未接入固件版本",
         "catalog.emptyDescription": "这里只显示已登记到当前后台的固件，本地构建或独立测速包不会自动出现在这里。",
         "catalog.setupBuild": "从目标源码构建正常 GCC 候选固件，包含当前 BLE V2 实现。",
@@ -1661,7 +1660,6 @@
         firmwareReleaseList: document.querySelector("#firmwareReleaseList"),
         firmwareChannelList: document.querySelector("#firmwareChannelList"),
         firmwareChannelSummary: document.querySelector("#firmwareChannelSummary"),
-        firmwareChannelTarget: document.querySelector("#firmwareChannelTarget"),
         firmwareStatusFilter: document.querySelector("#firmwareStatusFilter"),
         firmwareChannelFilter: document.querySelector("#firmwareChannelFilter"),
         firmwareSort: document.querySelector("#firmwareSort"),
@@ -1782,6 +1780,18 @@
         render(); await loadAll();
       });
       document.addEventListener("change", event => {
+        if (event.target.matches("[data-firmware-retract-target]")) {
+          const select = event.target;
+          const channel = state.firmwareChannels.find(row => row.channel === select.dataset.firmwareRetractTarget);
+          if (!channel || select.disabled || state.busy || state.firmwareReconcileRequired || state.firmwarePendingAction
+              || !canRole(channel.channel === "stable" ? "owner" : "publisher")) return;
+          if (select.value && !firmwareRetractCandidates(channel).some(row => row.releaseId === select.value)) return;
+          if (select.value) state.firmwareRetractTargets.set(channel.channel, { releaseId: select.value, actor: state.session.actor });
+          else state.firmwareRetractTargets.delete(channel.channel);
+          renderFirmware();
+          els.firmwareChannelList.querySelector(`[data-firmware-retract-target="${channel.channel}"]`)?.focus({ preventScroll: true });
+          return;
+        }
         if (event.target.matches("[data-select-version]")) {
           const kind = event.target.dataset.selectKind === "firmware" ? "firmware" : "app";
           if (state.busy || !canRole("owner") || !state.deleteModes[kind] || event.target.disabled) return;
@@ -2160,7 +2170,6 @@
             const firmwareId = firmwareButton.dataset.firmwareId ?? state.selectedFirmwareId;
             const action = firmwareButton.dataset.firmwareAction;
             if (action === "delta") { openDelta("firmware", firmwareId); return; }
-            if (action === "choose-version") { switchFirmwareSection("releases"); return; }
             if (action === "history-refresh") { clearFeedbackError("history-read"); loadFirmwareHistory(); return; }
             if (action === "history-more") { loadFirmwareHistory(false); return; }
             if (action === "clear-filters") {
@@ -2170,7 +2179,7 @@
               render(); return;
             }
             if (action.startsWith("notes-")) { handleFirmwareNotes(action, firmwareId); return; }
-            if (firmwareId) selectFirmware(firmwareId, { openDetails: action === "select" });
+            if (firmwareId && action !== "retract") selectFirmware(firmwareId, { openDetails: action === "select" });
             if (action === "select") return;
             if (action === "refresh") { refreshFirmwareState(); return; }
             if (action === "retry-release") { runFirmwareReleaseAction(null, null, true); return; }
@@ -2590,6 +2599,7 @@
             els.body.classList.remove("inventory-details-open");
             els.inventoryDetailSheet.hidden = true; els.inventoryDetailBackdrop.hidden = true;
             state.selectedVersions.clear(); state.selectedFirmwareVersions.clear();
+            state.firmwareRetractTargets.clear();
             state.selectedAnnouncements.clear(); state.deleteModes = { app:false, firmware:false, announcements:false };
             state.appNoteDrafts.clear();
             state.announcementDrafts.clear();
@@ -2749,6 +2759,13 @@
         }
         state.firmwareReleases = releases.firmwareReleases;
         state.firmwareChannels = channels.firmwareChannels;
+        for (const [name, target] of state.firmwareRetractTargets) {
+          const channel = state.firmwareChannels.find(row => row.channel === name);
+          if (target.actor !== state.session?.actor || !channel
+              || !firmwareRetractCandidates(channel).some(row => row.releaseId === target.releaseId)) {
+            state.firmwareRetractTargets.delete(name);
+          }
+        }
         state.firmwareCapabilities = releases.capabilities ?? {};
         invalidateFirmwareHistory();
         if (!state.firmwareReleases.some((r) => r.releaseId === state.selectedFirmwareId)) {
@@ -2801,6 +2818,11 @@
         if (!["publish", "retract", "stop-latest", "resume-latest", "stop-downloads", "resume-downloads"].includes(action)) return;
         const row = state.firmwareChannels.find((c) => c.channel === channel);
         if (!row || !canRole(channel === "stable" ? "owner" : "publisher")) return;
+        if (action === "retract") {
+          const target = state.firmwareRetractTargets.get(channel);
+          if (target?.actor !== state.session?.actor || target?.releaseId !== firmwareId
+              || !firmwareRetractCandidates(row).some(release => release.releaseId === firmwareId)) return;
+        }
         const pointer = action === "publish" || action === "retract";
         const release = state.firmwareReleases.find((r) => r.releaseId === (pointer ? firmwareId : row.currentReleaseId));
         if (pointer && !firmwareReady(release)) return;
@@ -4233,7 +4255,6 @@
         els.firmwareDetail.dataset.releaseId = selected?.releaseId ?? "";
         els.firmwareDetailTitle.textContent = selected?.versionName ?? t("catalog.details");
         els.firmwareDetailSubtitle.textContent = selected?.releaseTag ?? "";
-        els.firmwareChannelTarget.textContent = t("catalog.channelTarget", { tag: selected?.releaseTag ?? t("catalog.noTarget") });
         els.firmwareChannelSummary.innerHTML = state.firmwareChannels.map(channel => {
           const release = state.firmwareReleases.find(row => row.releaseId === channel.currentReleaseId);
           const status = t(channel.disableLatest || channel.disableDownloads ? "firmware.stopped" : "firmware.enabled");
@@ -4615,12 +4636,22 @@
         document.querySelector('[data-firmware-action="history-refresh"]').disabled = state.firmwareHistoryLoading;
       }
 
+      function firmwareRetractCandidates(channel) {
+        return state.firmwareReleases.filter(release => release.appId === channel.appId
+          && release.deviceModel === channel.deviceModel && release.releaseId !== channel.currentReleaseId
+          && firmwareReady(release) && release.releaseNotes.trim())
+          .sort((left, right) => right.versionCode - left.versionCode || left.releaseId.localeCompare(right.releaseId));
+      }
+
       function firmwareChannelCard(channel) {
         const release = state.firmwareReleases.find((r) => r.releaseId === channel.currentReleaseId);
-        const selected = state.firmwareReleases.find((r) => r.releaseId === state.selectedFirmwareId);
+        const candidates = firmwareRetractCandidates(channel);
+        const target = state.firmwareRetractTargets.get(channel.channel);
+        const selected = target?.actor === state.session?.actor
+          ? candidates.find(row => row.releaseId === target?.releaseId) : null;
         const unlocked = !state.busy && !state.firmwareReconcileRequired && !state.firmwarePendingAction
           && canRole(channel.channel === "stable" ? "owner" : "publisher");
-        const canRetract = unlocked && firmwareReady(selected) && selected.releaseId !== channel.currentReleaseId;
+        const canRetract = unlocked && Boolean(selected);
         const latestAction = channel.disableLatest ? "resume-latest" : "stop-latest";
         const downloadsAction = channel.disableDownloads ? "resume-downloads" : "stop-downloads";
         return `
@@ -4637,9 +4668,16 @@
               ${firmwareMeta(t("firmware.versionCode"), release?.versionCode ?? "--")}
               ${firmwareMeta(t("firmware.latestSwitch"), t(channel.disableLatest ? "firmware.stopped" : "firmware.enabled"))}
               ${firmwareMeta(t("firmware.downloadsSwitch"), t(channel.disableDownloads ? "firmware.stopped" : "firmware.enabled"))}
-              ${firmwareMeta(t("firmware.selectedTarget"), selected?.releaseTag ?? "--")}
             </div>
             ${channel.maintenanceMessage ? `<p>${escapeHtml(channel.maintenanceMessage)}</p>` : ""}
+            <label class="firmware-field firmware-retract-target" for="firmwareRetract-${escapeHtml(channel.channel)}">
+              <span>${escapeHtml(t("firmware.selectedTarget"))}</span>
+              <select id="firmwareRetract-${escapeHtml(channel.channel)}" data-firmware-retract-target="${escapeHtml(channel.channel)}"
+                title="${escapeHtml(selected?.releaseTag ?? t("firmware.selectedTarget"))}" ${unlocked && candidates.length ? "" : "disabled"}>
+                <option value="">${escapeHtml(t(candidates.length ? "firmware.chooseRetractTarget" : "firmware.noRetractTargets"))}</option>
+                ${candidates.map(row => `<option value="${escapeHtml(row.releaseId)}" ${row.releaseId === selected?.releaseId ? "selected" : ""}>${escapeHtml(row.versionName)} / versionCode ${escapeHtml(row.versionCode)}</option>`).join("")}
+              </select>
+            </label>
             <div class="firmware-actions">
               <button type="button" class="pill-button" data-firmware-action="retract" data-channel="${escapeHtml(channel.channel)}" data-firmware-id="${escapeHtml(selected?.releaseId ?? "")}" ${canRetract ? "" : "disabled"}>${escapeHtml(t(channel.channel === "stable" ? "firmware.retractStable" : "firmware.retractBeta"))}</button>
               <button type="button" class="pill-button" data-firmware-action="${latestAction}" data-channel="${escapeHtml(channel.channel)}" ${unlocked && (!channel.disableLatest || firmwareReady(release)) ? "" : "disabled"}>${escapeHtml(t(`firmware.action.${latestAction}`))}</button>
