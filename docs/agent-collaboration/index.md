@@ -1,5 +1,19 @@
 # Shared Agent Records
 
+Admin retraction selector, 2026-11-28: ADMIN_RETRACT_TARGET_20261128,
+MAIN_DELIVERED / ADMIN_DEPLOYED / AUTHENTICATED_UI_NOT_RUN, Codex root.
+Source `23a8bfd6c06ed752b773adf69380d755b181ad2f` gives Stable/Beta independent
+return-version selectors in Channels, retaining roles, explicit confirmation,
+CSRF and conflict reconciliation. CI `46122643183` passes 629 Worker and 331
+browser cases, all three typechecks and existing contracts. Admin-only rollout
+`46123516503` reports deployment `732e1bad-c3a3-40c5-8ff9-f99924d2cb48` and the
+exact source; management readbacks confirm unchanged configuration and unchanged
+Worker/Public deployments. No channel/delta, App/MCU or device operation.
+The named SSO expired at 2026-11-28 10:43:53 Shanghai; protected static reads
+redirect to Access, so no authenticated live UI/static-byte PASS is claimed.
+Do not repeat the successful deployment to fill that separate observation gap.
+See [deployment and original receipts](../../CLOUDFLARE-DEPLOYMENT.md#current-state-channel-retraction-selector-deployed-2026-11-28).
+
 Firmware cache repair, 2026-11-27: FIRMWARE_CACHE_20261127,
 MAIN_DELIVERED / CANDIDATE_DELIVERED / PHONE_VERIFICATION_NOT_RUN, Codex root.
 Owner-authorized App `1.0.98+124` is on main source

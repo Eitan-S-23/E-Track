@@ -1,5 +1,7 @@
 # PLAN-OTA-EXEC.md — OTA 执行看板（全项目唯一状态源）
 
+**后台退回版本选择已上线（2026-11-28，ADMIN_RETRACT_TARGET_20261128）**：用户授权的源码 `23a8bfd6c06ed752b773adf69380d755b181ad2f` 已推送 main。发布渠道内 Stable/Beta 各自使用独立下拉框明确选择退回版本，不再依赖版本列表。CI `46122643183` 的 331 项浏览器、629 项 Worker、三端类型检查及既有契约通过；Admin-only 部署 `46123516503` 成功，规范部署 `732e1bad-c3a3-40c5-8ff9-f99924d2cb48` 和源码已回读，Worker/Public 与运行配置未变。没有操作实际发布渠道、差分或设备，也未改 App/固件。现有后台 SSO 在今天 10:43:53 过期，受保护页面返回 302，真实登录后的界面/字节核验未完成，不冒充独立验收。详见[交付与核验限制](CLOUDFLARE-DEPLOYMENT.md#current-state-channel-retraction-selector-deployed-2026-11-28)。
+
 **记录收尾（2026-11-27，RECORDS-CLOSEOUT-20261127）**：本批次按用户要求提交八份已跟踪 Markdown 记录，不加入未跟踪的旧工具、测试或缓存。下方旧条目中的 `LOCAL_PENDING`、待入库、待收件等是原检查点状态，以后续带来源的交付和用户确认记录为准，不重新执行已完成工作。此批次不推送、不构建、不部署、不操作设备，也不把未执行的 P1-6 物理测试或新版 APP 长时间后台恢复标为通过。详情见[记录收尾](docs/ota-exec-notes/OTA-COMPANION-2026-11-20.md#historical-record-closeout-2026-11-27)。
 
 > 版本:v1.0(2026-07-23 创建)。本文档是 OTA 项目执行期**唯一**的任务与状态源,执行 agent 必须先读 `AGENTS.md` 的"OTA 执行规约"再操作本文档。

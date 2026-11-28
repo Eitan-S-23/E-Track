@@ -4,6 +4,46 @@ Read this file before deploying the E-Track backend or asking the owner for
 Cloudflare credentials. It lives at the project root deliberately. Read the
 primary checkout's copy, not only an old task worktree's copy.
 
+## Current State: Channel Retraction Selector Deployed 2026-11-28
+
+Owner-authorized Admin-only source `23a8bfd6c06ed752b773adf69380d755b181ad2f`
+is pushed to main. Stable and Beta now have independent, explicitly selected
+return-version dropdowns in Channels; catalogue selection, filters and pagination
+do not choose the retraction target. Existing role, reason, stable confirmation,
+CSRF and revision gates remain. Unavailable/current targets and cross-actor
+selections are cleared without sending a write. No API/schema change is included.
+
+Exact-source [backend CI 46122643183](https://github.com/Eitan-S-23/E-Track/actions/runs/46122643183)
+passes all three typechecks, 629 Worker cases, 331 browser cases and the existing
+Public/deployment/codec contracts. Local full UI initially has 330/331 passing:
+the old cancellation assertion expected the tab rather than the now-retained
+retract button. The final 16 targeted cases pass after updating that assertion
+and fixing test waiting/reporting issues. Initial test receipts are retained.
+Local typecheck lacks cached Node type definitions; the clean CI typecheck,
+not an invented local pass or dependency change, supplies the final verification.
+
+[Deployment 46123516503](https://github.com/Eitan-S-23/E-Track/actions/runs/46123516503)
+uses the existing workflow with both include flags false. Canonical Admin
+deployment `732e1bad-c3a3-40c5-8ff9-f99924d2cb48` is successful and reports the
+exact source above. Workflow and fresh management readbacks confirm unchanged
+production/preview runtime configuration. Public deployment `f2d3e9aa-e532-4113-9a1d-947da37bf8bd`
+and Worker deployment `947048df-7878-4239-b859-f5afa6e4f555` remain unchanged.
+No migration, signing/credential/configuration change, channel/delta action,
+App/MCU package build or device operation was initiated for this UI change.
+
+Authenticated live UI/static-byte verification is **NOT_RUN**: the named existing
+organization SSO expired at `2026-11-28T02:43:53Z` (10:43:53 Shanghai). The original
+Admin HTML and CSS reads return Access HTTP 302, not verified page bytes. This
+does not invalidate the successful source-bound deployment, but it is not a real
+owner UI exercise or independent acceptance. No login, token renewal, access
+policy change or repeat deployment was attempted to conceal that limit.
+
+Originals: `.cache/admin-retract-20261128/`, especially `source.json`, `ci-01`,
+`observe-01/deployment-result/result.json`, `keyring-cloud-live-701/702` and
+`ui-retract-final-02` / `ui-focus-final-02`. Dependency advisories remain Worker
+13 (3 moderate/10 high), Admin/Public four high each, plus existing Node/Actions
+deprecation and workerd fixture diagnostics. Lockfiles are unchanged.
+
 ## Current State: Independent Update Checks Deployed 2026-11-25
 
 The owner's explicit follow-up authorizes this bounded migration/code rollout,
