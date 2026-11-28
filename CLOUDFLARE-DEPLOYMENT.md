@@ -4,6 +4,45 @@ Read this file before deploying the E-Track backend or asking the owner for
 Cloudflare credentials. It lives at the project root deliberately. Read the
 primary checkout's copy, not only an old task worktree's copy.
 
+## Current State: App Channel Retraction Deployed 2026-11-28
+
+Owner-requested App management retraction is deployed from main source
+`a239ce9c778f52285cbfbe5760c93529d008dd58`. A visible Channels tab now contains
+independent Stable/Beta return-version selectors, scoped to Android or Windows.
+Only eligible older versions from the existing latest-50 catalogue are offered;
+iOS remains unconfigured. Selection does not write or depend on the version list.
+Existing rollback API, roles, Stable typed confirmation, CSRF renewal and CAS
+are reused. Failed reads/conflicts/unconfirmed writes require a refresh and new
+confirmation, never an automatic mutation retry. This changes channel offers,
+not already-installed clients; phone App and MCU code are unchanged.
+
+Local targeted checks pass all 47 cases. Exact-source
+[CI 46127380303](https://github.com/Eitan-S-23/E-Track/actions/runs/46127380303)
+passes 357 browser cases, 629 Worker cases, all three typechecks and existing
+Public/deployment/codec contracts. Retained dependencies were reused locally;
+no local package build or dependency upgrade was performed. Existing advisories
+remain Worker 13 (3 moderate/10 high), Admin/Public four high each, plus existing
+Node/Actions deprecation and workerd fixture diagnostics.
+
+[Admin-only deployment 46128232112](https://github.com/Eitan-S-23/E-Track/actions/runs/46128232112)
+succeeds with both include flags false. Canonical deployment
+`211f6f18-bd55-438b-8c4d-fea130413512` reports the exact source and successful
+status. Workflow and fresh management readbacks confirm unchanged production/
+preview runtime configuration. Public deployment `f2d3e9aa-e532-4113-9a1d-947da37bf8bd`
+and Worker deployment `947048df-7878-4239-b859-f5afa6e4f555` are unchanged.
+No real channel retraction/publication, migration, delta operation, credential
+change, App/MCU package request or device operation was executed.
+
+Authenticated live UI/static-byte verification remains **NOT_RUN**: the named
+existing Access SSO expired at `2026-11-28T02:43:53Z` (10:43:53 Shanghai).
+This round does not retry that expired login or claim a protected-page test.
+Deployment/configuration verification and mocked browser tests are separate from
+authenticated operator exercise and independent acceptance.
+
+Originals: `.cache/app-retract-20261128/`, especially `source.json`,
+`ui-retraction-01`, `ui-regression-01`, `ui-tabs-01`, `ci-01`,
+`observe-01/deployment-result/result.json` and `keyring-cloud-live-801/802`.
+
 ## Current State: Channel Retraction Selector Deployed 2026-11-28
 
 Owner-authorized Admin-only source `23a8bfd6c06ed752b773adf69380d755b181ad2f`

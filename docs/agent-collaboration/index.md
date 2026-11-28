@@ -1,5 +1,20 @@
 # Shared Agent Records
 
+App channel retraction, 2026-11-28: APP_CHANNEL_RETRACT_20261128,
+MAIN_DELIVERED / ADMIN_DEPLOYED / AUTHENTICATED_UI_NOT_RUN, Codex root.
+Source `a239ce9c778f52285cbfbe5760c93529d008dd58` adds a visible App Channels
+tab with independent Android/Windows Stable/Beta return-version selectors.
+Existing rollback/role/confirmation/CSRF/CAS contracts remain; selections are
+actor/platform scoped, and failed reads or uncertain writes require refresh.
+All 47 local targeted cases and exact-source CI `46127380303` pass (357 browser,
+629 Worker, three typechecks and existing contracts). Admin-only deployment
+`46128232112` and fresh management reads confirm canonical deployment
+`211f6f18-bd55-438b-8c4d-fea130413512`, exact source and unchanged configuration.
+Worker/Public are unchanged. No actual channel/delta, App/MCU package or device
+operation. Existing SSO expiry keeps authenticated UI/static-byte checks NOT_RUN;
+do not repeat successful deployment to replace that separate observation.
+See [App entry delivery and original receipts](../../CLOUDFLARE-DEPLOYMENT.md#current-state-app-channel-retraction-deployed-2026-11-28).
+
 Admin retraction selector, 2026-11-28: ADMIN_RETRACT_TARGET_20261128,
 MAIN_DELIVERED / ADMIN_DEPLOYED / AUTHENTICATED_UI_NOT_RUN, Codex root.
 Source `23a8bfd6c06ed752b773adf69380d755b181ad2f` gives Stable/Beta independent
